@@ -26,7 +26,6 @@ struct TmxObject : TmxElement
    std::optional<std::string> _gid;
 
    std::shared_ptr<TmxPolygon> _polygon;
-   std::shared_ptr<TmxPolyLine> _polyline ;
+   std::shared_ptr<TmxPolyLine> _polyline;
    std::shared_ptr<TmxProperties> _properties;
 };
-

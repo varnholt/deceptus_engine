@@ -17,13 +17,9 @@ struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
 
-
-
 class Portal : public GameMechanism, public GameNode
 {
-
 public:
-
    Portal(GameNode* parent = nullptr);
 
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
@@ -49,9 +45,7 @@ public:
    static void unlock();
    static bool isLocked();
 
-
 protected:
-
    sf::FloatRect _bounding_box;
    sf::Vector2u _tile_size;
    std::shared_ptr<sf::Texture> _texture;
@@ -63,4 +57,3 @@ protected:
 
    static std::atomic<bool> _portal_lock;
 };
-

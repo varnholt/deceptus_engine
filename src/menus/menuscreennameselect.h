@@ -29,7 +29,6 @@ public:
    void back();
 
 private:
-
    void chop();
    void appendChar(char enteredChar);
    void updateText();
@@ -48,4 +47,3 @@ private:
 
    int32_t _shift = 0;
 };
-

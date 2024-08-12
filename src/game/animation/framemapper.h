@@ -42,4 +42,4 @@ public:
    int32_t _offset{};
 };
 
-#endif // FRAMEMAPPER_H
+#endif  // FRAMEMAPPER_H

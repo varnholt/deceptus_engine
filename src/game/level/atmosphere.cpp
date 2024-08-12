@@ -6,13 +6,11 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
 
-
 //-----------------------------------------------------------------------------
 Atmosphere::~Atmosphere()
 {
    _map.clear();
 }
-
 
 //-----------------------------------------------------------------------------
 void Atmosphere::parse(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset)
@@ -49,7 +47,7 @@ void Atmosphere::parse(const std::shared_ptr<TmxLayer>& layer, const std::shared
             tile_relative = tile_number - tileset->_first_gid;
          }
 
-          _map[y_tl * width_tl + x_tl] = tile_relative;
+         _map[y_tl * width_tl + x_tl] = tile_relative;
       }
    }
 }

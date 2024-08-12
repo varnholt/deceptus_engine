@@ -8,11 +8,9 @@
 #include <list>
 #include <optional>
 
-
 class ProjectileHitAnimation : public Animation
 {
 public:
-
    ProjectileHitAnimation() = default;
 
    // active animations
@@ -36,11 +34,7 @@ public:
    static void setupDefaultAnimation();
    static AnimationFrameData getDefaultAnimation();
 
-
 protected:
-
    static std::vector<ProjectileHitAnimation*> __active_animations;
    static std::map<std::string, AnimationFrameData> __reference_animations;
-
 };
-

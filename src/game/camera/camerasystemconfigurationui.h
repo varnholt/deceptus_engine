@@ -17,4 +17,4 @@ public:
    sf::Clock _clock;
 };
 
-#endif // CAMERASYSTEMCONFIGURATIONUI_H
+#endif  // CAMERASYSTEMCONFIGURATIONUI_H

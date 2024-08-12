@@ -8,11 +8,11 @@
 #include "game/config/gameconfiguration.h"
 #include "game/debug/console.h"
 #include "game/ingamemenu/menuconfig.h"
+#include "game/io/texturepool.h"
 #include "game/mechanisms/door.h"
 #include "game/mechanisms/portal.h"
 #include "game/player/extratable.h"
 #include "game/player/player.h"
-#include "game/io/texturepool.h"
 
 #include <iostream>
 #include <sstream>
@@ -149,7 +149,8 @@ void IngameMenuMap::update(const sf::Time& /*dt*/)
    {
       updateShowHide();
    }
-   else if (_animation == Animation::MoveInFromLeft || _animation == Animation::MoveInFromRight || _animation == Animation::MoveOutToLeft || _animation == Animation::MoveOutToRight)
+   else if (_animation == Animation::MoveInFromLeft || _animation == Animation::MoveInFromRight || _animation == Animation::MoveOutToLeft ||
+            _animation == Animation::MoveOutToRight)
    {
       updateMove();
    }

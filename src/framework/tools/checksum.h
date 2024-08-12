@@ -15,4 +15,3 @@ public:
    static void writeChecksum(std::ofstream& path, uint32_t sum);
    static void writeChecksum(const std::filesystem::path& path, uint32_t sum);
 };
-

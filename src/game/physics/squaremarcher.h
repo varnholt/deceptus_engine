@@ -1,16 +1,14 @@
 #ifndef SQUAREMARCHER_H
 #define SQUAREMARCHER_H
 
+#include <SFML/Graphics.hpp>
 #include <filesystem>
 #include <map>
 #include <vector>
-#include <SFML/Graphics.hpp>
 
 class SquareMarcher
 {
-
 public:
-
    SquareMarcher(
       uint32_t w,
       uint32_t h,
@@ -26,7 +24,8 @@ public:
    void writeGridToImage(const std::filesystem::path& imagePath);
    void writePathToImage(const std::filesystem::path& imagePath);
 
-   enum class Direction {
+   enum class Direction
+   {
       None,
       Up,
       Down,
@@ -34,11 +33,12 @@ public:
       Right
    };
 
-   enum class PixelLocation {
-      None        = 0x00,
-      TopLeft     = 0x01,
-      TopRight    = 0x02,
-      BottomLeft  = 0x04,
+   enum class PixelLocation
+   {
+      None = 0x00,
+      TopLeft = 0x01,
+      TopRight = 0x02,
+      BottomLeft = 0x04,
       BottomRight = 0x08
    };
 
@@ -54,9 +54,7 @@ public:
 
    std::vector<Path> _paths;
 
-
 private:
-
    void scan();
    Path march(uint32_t startX, uint32_t startY);
    void updateDirection();
@@ -68,9 +66,7 @@ private:
    void optimize();
    void scale();
 
-
 private:
-
    std::map<int, Direction> _map;
    uint32_t _width = 0u;
    uint32_t _height = 0u;
@@ -86,4 +82,4 @@ private:
    float _scale = 1.0f;
 };
 
-#endif // SQUAREMARCHER_H
+#endif  // SQUAREMARCHER_H

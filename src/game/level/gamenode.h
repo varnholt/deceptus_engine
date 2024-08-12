@@ -7,7 +7,6 @@
 class GameNode
 {
 public:
-
    GameNode(GameNode* parent = nullptr);
    virtual ~GameNode();
 
@@ -27,4 +26,3 @@ protected:
    std::vector<GameNode*> _children;
    GameNode* _parent = nullptr;
 };
-

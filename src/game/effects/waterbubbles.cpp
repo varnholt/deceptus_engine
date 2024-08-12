@@ -1,8 +1,8 @@
 #include "waterbubbles.h"
 
+#include "game/io/texturepool.h"
 #include "game/level/atmosphere.h"
 #include "game/level/level.h"
-#include "game/io/texturepool.h"
 
 #include <iostream>
 

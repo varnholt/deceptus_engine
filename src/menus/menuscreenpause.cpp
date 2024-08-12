@@ -11,12 +11,9 @@ MenuScreenPause::MenuScreenPause()
    setFilename("data/menus/pause.psd");
 }
 
-
 void MenuScreenPause::update(const sf::Time& /*dt*/)
 {
-
 }
-
 
 void MenuScreenPause::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -38,12 +35,10 @@ void MenuScreenPause::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-
 void MenuScreenPause::loadingFinished()
 {
    updateLayers();
 }
-
 
 void MenuScreenPause::up()
 {
@@ -90,7 +85,6 @@ void MenuScreenPause::resume()
    GameAudio::getInstance().play(GameAudio::SoundEffect::GameStateResume);
 }
 
-
 void MenuScreenPause::select()
 {
    switch (_selection)
@@ -105,7 +99,8 @@ void MenuScreenPause::select()
       case Selection::Quit:
          MessageBox::question(
             "Do you want to end the game?",
-            [](MessageBox::Button button) {
+            [](MessageBox::Button button)
+            {
                if (button == MessageBox::Button::Yes)
                {
                   GameState::getInstance().enqueuePause();
@@ -117,14 +112,12 @@ void MenuScreenPause::select()
    }
 }
 
-
 void MenuScreenPause::showEvent()
 {
    // initial selection after coming from pause state should always be 'resume'
    _selection = Selection::Resume;
    updateLayers();
 }
-
 
 void MenuScreenPause::updateLayers()
 {
@@ -145,4 +138,3 @@ void MenuScreenPause::updateLayers()
    _layers["accept_pc_0"]->_visible = !isControllerUsed();
    _layers["accept_pc_1"]->_visible = false;
 }
-

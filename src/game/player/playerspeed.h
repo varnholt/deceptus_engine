@@ -11,10 +11,7 @@ struct PlayerSpeed
    }
 
    PlayerSpeed(const b2Vec2& current_velocity, float velocity_max, float acceleration, float deceleration)
-    : _current_velocity(current_velocity),
-      _velocity_max(velocity_max),
-      _acceleration(acceleration),
-      _deceleration(deceleration)
+       : _current_velocity(current_velocity), _velocity_max(velocity_max), _acceleration(acceleration), _deceleration(deceleration)
    {
    }
 
@@ -24,4 +21,4 @@ struct PlayerSpeed
    float _deceleration = 0.0f;
 };
 
-#endif // PLAYERSPEED_H
+#endif  // PLAYERSPEED_H

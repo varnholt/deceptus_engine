@@ -41,7 +41,8 @@ std::string CameraSystemConfiguration::serialize()
         {"back_in_bounds_tolerance_y", _back_in_bounds_tolerance_y},
         {"player_offset_y", _player_offset_y},
         {"panic_acceleration_factor_y", _panic_acceleration_factor_y},
-        {"camera_shaking_enabled", _camera_shaking_enabled}}}};
+        {"camera_shaking_enabled", _camera_shaking_enabled}}}
+   };
 
    std::stringstream sstream;
    sstream << std::setw(4) << config << "\n\n";

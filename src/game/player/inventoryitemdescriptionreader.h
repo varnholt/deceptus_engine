@@ -22,6 +22,6 @@ void to_json(nlohmann::json& j, const InventoryItemDescription& d);
 void from_json(const nlohmann::json& j, InventoryItemDescription& d);
 
 std::vector<InventoryItemDescription> readItemDescriptions();
-}  // namespace InventoryImages
+}  // namespace InventoryItemDescriptionReader
 
 #endif  // INVENTORYITEMDESCRIPTIONREADER_H

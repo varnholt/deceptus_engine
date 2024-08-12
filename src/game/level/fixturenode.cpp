@@ -1,32 +1,25 @@
 // base
 #include "fixturenode.h"
 
-
-
-FixtureNode::FixtureNode(GameNode* parent)
- : GameNode(parent)
+FixtureNode::FixtureNode(GameNode* parent) : GameNode(parent)
 {
-    setClassName(typeid(FixtureNode).name());
+   setClassName(typeid(FixtureNode).name());
 }
-
 
 ObjectType FixtureNode::getType() const
 {
    return _type;
 }
 
-
 void FixtureNode::setType(const ObjectType& type)
 {
    _type = type;
 }
 
-
 void FixtureNode::setFlag(const std::string& flag, bool value)
 {
-   _flags[flag]=value;
+   _flags[flag] = value;
 }
-
 
 bool FixtureNode::hasFlag(const std::string& flag)
 {
@@ -34,21 +27,19 @@ bool FixtureNode::hasFlag(const std::string& flag)
    return value;
 }
 
-
 void FixtureNode::setProperty(const std::string& key, const Variant& value)
 {
-    _properties[key] = value;
+   _properties[key] = value;
 }
-
 
 FixtureNode::Variant FixtureNode::getProperty(const std::string& key) const
 {
-    return _properties.find(key)->second;
+   return _properties.find(key)->second;
 }
 
 bool FixtureNode::hasProperty(const std::string& key) const
 {
-    return _properties.contains(key);
+   return _properties.contains(key);
 }
 
 void FixtureNode::collisionWithPlayer()
@@ -60,4 +51,3 @@ void FixtureNode::setCollisionCallback(const CollisionCallback& collisionCallbac
 {
    _collision_callback = collisionCallback;
 }
-

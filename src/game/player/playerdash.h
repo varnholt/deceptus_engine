@@ -34,4 +34,4 @@ struct PlayerDash
    HighResTimePoint _last_dash_time_point;
 };
 
-#endif // PLAYERDASH_H
+#endif  // PLAYERDASH_H

@@ -2,22 +2,17 @@
 
 #include "framework/joystick/gamecontrollerinfo.h"
 
-
 class GameControllerData
 {
 public:
+   static GameControllerData& getInstance();
 
-    static GameControllerData& getInstance();
+   const GameControllerInfo& getJoystickInfo() const;
 
-    const GameControllerInfo& getJoystickInfo() const;
-
-    void setJoystickInfo(const GameControllerInfo &joystickInfo);
-    bool isControllerUsed() const;
-
+   void setJoystickInfo(const GameControllerInfo& joystickInfo);
+   bool isControllerUsed() const;
 
 private:
-
-    GameControllerData() = default;
-    GameControllerInfo _joystick_info;
+   GameControllerData() = default;
+   GameControllerInfo _joystick_info;
 };
-

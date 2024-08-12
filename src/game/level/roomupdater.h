@@ -23,4 +23,4 @@ void setSynced(bool synced);
 bool isSynced();
 };  // namespace RoomUpdater
 
-#endif // ROOMUPDATER_H
+#endif  // ROOMUPDATER_H

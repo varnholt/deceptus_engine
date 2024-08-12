@@ -30,4 +30,4 @@ struct WeaponProperties
    mutable std::unique_ptr<b2Shape> _shape;
 };
 
-#endif // WEAPONPROPERTIES_H
+#endif  // WEAPONPROPERTIES_H

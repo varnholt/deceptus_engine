@@ -10,8 +10,7 @@
 
 */
 
-
-void TmxProperty::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<TmxParseData>& parse_data)
+void TmxProperty::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
    TmxElement::deserialize(element, parse_data);
 
@@ -40,26 +39,25 @@ void TmxProperty::deserialize(tinyxml2::XMLElement *element, const std::shared_p
    }
 }
 
-
 std::string TmxProperty::toString() const
 {
-   if (_value_type == "string" )
+   if (_value_type == "string")
    {
       return _value_string.value();
    }
-   else if (_value_type == "float")
+   if (_value_type == "float")
    {
       std::ostringstream stream;
       stream << _value_float.value();
       return stream.str();
    }
-   else if (_value_type == "int")
+   if (_value_type == "int")
    {
       std::ostringstream stream;
       stream << _value_int.value();
       return stream.str();
    }
-   else if (_value_type == "bool")
+   if (_value_type == "bool")
    {
       std::ostringstream stream;
       stream << _value_bool.value();
@@ -68,4 +66,3 @@ std::string TmxProperty::toString() const
 
    return {};
 }
-

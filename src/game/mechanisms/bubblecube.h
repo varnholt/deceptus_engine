@@ -7,7 +7,6 @@
 // - Cube reappears after n seconds.
 // - Basically is a 1-jump-platform before vanishes.
 
-
 class GameNode;
 struct TmxObject;
 
@@ -17,15 +16,11 @@ struct TmxObject;
 
 #include <box2d/box2d.h>
 
-
 #include <filesystem>
-
 
 class BubbleCube : public FixtureNode, public GameMechanism
 {
-
 public:
-
    BubbleCube(GameNode* parent, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
@@ -35,9 +30,7 @@ public:
    void beginContact(b2Contact* contact, FixtureNode* other);
    void endContact(FixtureNode* other);
 
-
 private:
-
    void updatePosition();
    void updateRespawnCondition();
    void updatePoppedCondition();

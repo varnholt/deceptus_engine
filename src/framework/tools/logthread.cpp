@@ -7,18 +7,16 @@
 
 #if defined __GNUC__ && __linux__
 #define FMT_HEADER_ONLY
-#include <ctime>
 #include <fmt/core.h>
+#include <ctime>
 #else
 namespace fmt = std;
 #endif
-
 
 namespace
 {
 int32_t flush_counter = 0;
 }
-
 
 LogThread::LogThread()
 {
@@ -33,7 +31,6 @@ LogThread::LogThread()
    _out = std::make_unique<std::ofstream>(filename);
 }
 
-
 LogThread::~LogThread()
 {
    _stopped = true;
@@ -41,24 +38,11 @@ LogThread::~LogThread()
    flush();
 }
 
-
-void LogThread::log(
-   const SysClockTimePoint& time_point,
-   Log::Level level,
-   const std::string& message,
-   const std::source_location& location
-)
+void LogThread::log(const SysClockTimePoint& time_point, Log::Level level, const std::string& message, const std::source_location& location)
 {
    std::lock_guard<std::mutex> guard(_mutex);
-   _log_items.push_back(LogItem{
-         time_point,
-         level,
-         message,
-         location
-      }
-   );
+   _log_items.push_back(LogItem{time_point, level, message, location});
 }
-
 
 void LogThread::run()
 {
@@ -74,7 +58,6 @@ void LogThread::run()
       }
    }
 }
-
 
 void LogThread::flush()
 {
@@ -110,20 +93,17 @@ void LogThread::flush()
       const auto now_local = std::chrono::zoned_time{std::chrono::current_zone(), timepoint};
 #endif
 
-      *_out
-         << fmt::format(
+      *_out << fmt::format(
 #ifdef __GNUC__
-            "[{0}] {1} | {2}: {3}",
+                  "[{0}] {1} | {2}: {3}",
 #else
-            "[{0}] {1:%T} | {2}: {3}",
+                  "[{0}] {1:%T} | {2}: {3}",
 #endif
-            static_cast<char>(level),
-            now_local,
-            source_tag,
-            message
-         )
-         << std::endl;
+                  static_cast<char>(level),
+                  now_local,
+                  source_tag,
+                  message
+               )
+            << std::endl;
    }
 }
-
-

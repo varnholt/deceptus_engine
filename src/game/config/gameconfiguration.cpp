@@ -34,7 +34,8 @@ std::string GameConfiguration::serialize()
           {"text_speed", _text_speed},
           {"rumble", _rumble_enabled},
           {"pause_mode", _pause_mode},
-       }}};
+       }}
+   };
 
    std::stringstream sstream;
    sstream << std::setw(4) << config << "\n\n";

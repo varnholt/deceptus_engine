@@ -64,7 +64,8 @@ void InGameMenuArchives::update(const sf::Time& /*dt*/)
    {
       updateShowHide();
    }
-   else if (_animation == Animation::MoveInFromLeft || _animation == Animation::MoveInFromRight || _animation == Animation::MoveOutToLeft || _animation == Animation::MoveOutToRight)
+   else if (_animation == Animation::MoveInFromLeft || _animation == Animation::MoveInFromRight || _animation == Animation::MoveOutToLeft ||
+            _animation == Animation::MoveOutToRight)
    {
       updateMove();
    }

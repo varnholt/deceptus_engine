@@ -1,11 +1,9 @@
 #include "globalclock.h"
 
-
 GlobalClock::GlobalClock()
 {
    _clock.restart();
 }
-
 
 GlobalClock& GlobalClock::getInstance()
 {
@@ -13,18 +11,15 @@ GlobalClock& GlobalClock::getInstance()
    return __instance;
 }
 
-
 int GlobalClock::getElapsedTimeInMs()
 {
    return _clock.getElapsedTime().asMilliseconds();
 }
 
-
 float GlobalClock::getElapsedTimeInS()
 {
    return _clock.getElapsedTime().asMilliseconds() * 0.001f;
 }
-
 
 sf::Time GlobalClock::getElapsedTime()
 {

@@ -151,7 +151,8 @@ void Room::RoomEnterArea::deserializeEnterArea(const GameDeserializeData& data)
    {
       const auto start_position_x_it = data._tmx_object->_properties->_map.find("start_position_x_px");
       const auto start_position_y_it = data._tmx_object->_properties->_map.find("start_position_y_px");
-      if (start_position_x_it != data._tmx_object->_properties->_map.end() && start_position_y_it != data._tmx_object->_properties->_map.end())
+      if (start_position_x_it != data._tmx_object->_properties->_map.end() &&
+          start_position_y_it != data._tmx_object->_properties->_map.end())
       {
          _start_position = {start_position_x_it->second->_value_int.value(), start_position_y_it->second->_value_int.value()};
       }
@@ -358,7 +359,8 @@ void Room::startTransition()
       case TransitionEffect::FadeOutFadeIn:
       {
          auto screen_transition = makeFadeTransition();
-         screen_transition->_callbacks_effect_1_ended.emplace_back([this]()
+         screen_transition->_callbacks_effect_1_ended.emplace_back(
+            [this]()
             {
                if (_camera_sync_after_fade_out)
                {
@@ -438,7 +440,8 @@ void Room::SubRoom::deserialize(const GameDeserializeData& data)
       if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
       {
          area_right._start_position = {
-            start_position_r_x_it->second->_value_int.value(), start_position_r_y_it->second->_value_int.value()};
+            start_position_r_x_it->second->_value_int.value(), start_position_r_y_it->second->_value_int.value()
+         };
       }
 
       if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
@@ -449,7 +452,8 @@ void Room::SubRoom::deserialize(const GameDeserializeData& data)
       if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
       {
          area_bottom._start_position = {
-            start_position_b_x_it->second->_value_int.value(), start_position_b_y_it->second->_value_int.value()};
+            start_position_b_x_it->second->_value_int.value(), start_position_b_y_it->second->_value_int.value()
+         };
       }
 
       if (start_offset_l_x_it != data._tmx_object->_properties->_map.end())

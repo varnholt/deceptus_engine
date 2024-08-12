@@ -1,8 +1,8 @@
 #pragma once
 
-#include "game/mechanisms/gamemechanism.h"
 #include "game/layers/parallaxsettings.h"
 #include "game/level/gamenode.h"
+#include "game/mechanisms/gamemechanism.h"
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>

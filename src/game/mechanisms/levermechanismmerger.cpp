@@ -191,7 +191,8 @@ void LeverMechanismMerger::merge(
 
                if (mechanism->getPixelRect().intersects(search_rect))
                {
-                  callbacks.emplace_back([mechanism](int32_t state)
+                  callbacks.emplace_back(
+                     [mechanism](int32_t state)
                      {
                         if (state == -1)
                         {

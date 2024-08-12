@@ -25,8 +25,9 @@ public:
    bool _looped{true};
    std::string _filename;
    std::optional<int32_t> _thread_id;
+
 private:
    void stopPlaying();
 };
 
-#endif // SOUNDEMITTER_H
+#endif  // SOUNDEMITTER_H

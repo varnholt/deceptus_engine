@@ -5,8 +5,7 @@
 
 #include <iostream>
 
-
-void TmxProperties::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<TmxParseData>& parse_data)
+void TmxProperties::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
    TmxElement::deserialize(element, parse_data);
 
@@ -46,4 +45,3 @@ void TmxProperties::deserialize(tinyxml2::XMLElement *element, const std::shared
       node = node->NextSibling();
    }
 }
-

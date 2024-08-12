@@ -5,7 +5,6 @@
 class GlobalClock
 {
 public:
-
    GlobalClock();
 
    static GlobalClock& getInstance();
@@ -14,9 +13,6 @@ public:
    float getElapsedTimeInS();
    sf::Time getElapsedTime();
 
-
 private:
-
    sf::Clock _clock;
 };
-

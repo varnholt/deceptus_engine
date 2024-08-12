@@ -13,4 +13,3 @@ void from_json(const nlohmann::json& j, Skill& d)
 {
    d._skills = j.at("skills").get<int32_t>();
 }
-

@@ -23,4 +23,3 @@ struct TmxLayer : TmxElement
 
    std::vector<int32_t> _data;
 };
-

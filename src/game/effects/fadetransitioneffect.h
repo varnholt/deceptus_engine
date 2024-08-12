@@ -6,7 +6,8 @@
 
 struct FadeTransitionEffect : public ScreenTransitionEffect
 {
-   enum class Direction {
+   enum class Direction
+   {
       FadeIn,
       FadeOut
    };
@@ -22,4 +23,3 @@ struct FadeTransitionEffect : public ScreenTransitionEffect
    float _speed = 1.0f;
    std::array<sf::Vertex, 4> _vertices;
 };
-

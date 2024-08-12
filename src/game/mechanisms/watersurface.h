@@ -81,4 +81,4 @@ private:
    std::vector<SplashEmitter> _emitters;
 };
 
-#endif // WATERSURFACE_H
+#endif  // WATERSURFACE_H

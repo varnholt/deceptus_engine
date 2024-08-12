@@ -71,9 +71,13 @@ void MenuScreenVideo::select(int32_t step)
 
             auto index = it - _video_modes.begin();
             if (step < 0)
+            {
                index--;
+            }
             else
+            {
                index++;
+            }
 
             if (index < 0)
             {

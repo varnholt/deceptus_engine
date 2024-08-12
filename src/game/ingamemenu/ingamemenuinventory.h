@@ -13,7 +13,6 @@
 class InGameMenuInventory : public InGameMenuPage
 {
 public:
-
    struct ItemSprite
    {
       sf::Sprite _sprite;

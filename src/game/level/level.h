@@ -103,7 +103,6 @@ public:
    void setLoadingMode(LoadingMode loading_mode);
 
 protected:
-
    void parsePhysicsTiles(
       const std::shared_ptr<TmxLayer>& layer,
       const std::shared_ptr<TmxTileSet>& tileSet,

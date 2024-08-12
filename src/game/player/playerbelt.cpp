@@ -1,6 +1,5 @@
 #include "playerbelt.h"
 
-
 void PlayerBelt::applyBeltVelocity(float& desired_velocity, float max_velocity, const std::shared_ptr<PlayerControls>& controls)
 {
    if (!isOnBelt())

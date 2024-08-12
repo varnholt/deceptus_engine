@@ -36,10 +36,10 @@ public:
 
    virtual void fullyHidden();
 
-   virtual void left(){};
-   virtual void right(){};
-   virtual void up(){};
-   virtual void down(){};
+   virtual void left() {};
+   virtual void right() {};
+   virtual void up() {};
+   virtual void down() {};
 
    void moveOutToLeft();
    void moveInFromLeft();
@@ -71,4 +71,4 @@ protected:
 
 std::ostream& operator<<(std::ostream& os, InGameMenuPage::Animation animation);
 
-#endif // INGAMEMENUPAGE_H
+#endif  // INGAMEMENUPAGE_H

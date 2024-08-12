@@ -5,11 +5,9 @@
 #include <cmath>
 #include <iostream>
 
-
 //----------------------------------------------------------------------------------------------------------------------
 std::vector<ProjectileHitAnimation*> ProjectileHitAnimation::__active_animations;
 std::map<std::string, AnimationFrameData> ProjectileHitAnimation::__reference_animations;
-
 
 namespace
 {
@@ -17,8 +15,7 @@ constexpr auto width = 33;
 constexpr auto height = 32;
 constexpr auto sprites = 6;
 constexpr auto frame_time = 0.075f;
-}
-
+}  // namespace
 
 //----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, const AnimationFrameData& frames)
@@ -45,7 +42,6 @@ void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, con
    __active_animations.push_back(anim);
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::updateHitAnimations(const sf::Time& dt)
 {
@@ -69,23 +65,17 @@ void ProjectileHitAnimation::updateHitAnimations(const sf::Time& dt)
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 std::vector<ProjectileHitAnimation*>& ProjectileHitAnimation::getHitAnimations()
 {
    return __active_animations;
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
-void ProjectileHitAnimation::addReferenceAnimation(
-   const std::string& id,
-   const AnimationFrameData& animation
-)
+void ProjectileHitAnimation::addReferenceAnimation(const std::string& id, const AnimationFrameData& animation)
 {
    __reference_animations.emplace(id, animation);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::addReferenceAnimation(
@@ -106,26 +96,13 @@ void ProjectileHitAnimation::addReferenceAnimation(
       frame_times.push_back(sf::seconds(time_per_frame.count()));
    }
 
-   sf::Vector2f origin(
-      static_cast<float_t>(frame_width / 2),
-      static_cast<float_t>(frame_height / 2)
-   );
+   sf::Vector2f origin(static_cast<float_t>(frame_width / 2), static_cast<float_t>(frame_height / 2));
 
    addReferenceAnimation(
       texture_path.string(),
-      AnimationFrameData{
-         texture,
-         origin,
-         frame_width,
-         frame_height,
-         frame_count,
-         frames_per_row,
-         frame_times,
-         start_frame
-      }
+      AnimationFrameData{texture, origin, frame_width, frame_height, frame_count, frames_per_row, frame_times, start_frame}
    );
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 AnimationFrameData ProjectileHitAnimation::getDefaultAnimation()
@@ -143,13 +120,11 @@ AnimationFrameData ProjectileHitAnimation::getDefaultAnimation()
    return AnimationFrameData{texture, origin, width, height, sprites, sprites, frame_times};
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 std::map<std::string, AnimationFrameData>::const_iterator ProjectileHitAnimation::getReferenceAnimation(const std::string& id)
 {
    return __reference_animations.find(id);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::setupDefaultAnimation()
@@ -161,5 +136,3 @@ void ProjectileHitAnimation::setupDefaultAnimation()
       __reference_animations.emplace("default", getDefaultAnimation());
    }
 }
-
-

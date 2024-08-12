@@ -108,7 +108,9 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
             // do not draw lights that are too far away
             const auto center = shape_circle->m_p + body->GetTransform().p;
             if ((light_pos_m - center).LengthSquared() > max_distance_m2)
+            {
                continue;
+            }
 
             std::array<b2Vec2, segments> circle_positions;
             for (auto i = 0u; i < segments; i++)

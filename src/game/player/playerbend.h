@@ -21,4 +21,4 @@ struct PlayerBend
    }
 };
 
-#endif // PLAYERBEND_H
+#endif  // PLAYERBEND_H

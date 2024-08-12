@@ -6,7 +6,6 @@
 
 #include <cstdint>
 
-
 struct EnemyDescription
 {
    EnemyDescription() = default;
@@ -21,7 +20,5 @@ struct EnemyDescription
    bool _generate_path = false;
 };
 
-
 void to_json(nlohmann::json& j, const EnemyDescription& d);
 void from_json(const nlohmann::json& j, EnemyDescription& d);
-

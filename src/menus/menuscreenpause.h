@@ -6,34 +6,31 @@
 
 class MenuScreenPause : public MenuScreen
 {
-   public:
+public:
+   enum class Selection
+   {
+      Resume,
+      Options,
+      Quit
+   };
 
-      enum class Selection {
-         Resume,
-         Options,
-         Quit
-      };
+   MenuScreenPause();
 
-      MenuScreenPause();
+   void update(const sf::Time& dt) override;
 
-      void update(const sf::Time& dt) override;
+   void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
-      void keyboardKeyPressed(sf::Keyboard::Key key) override;
+   void loadingFinished() override;
+   void updateLayers();
 
-      void loadingFinished() override;
-      void updateLayers();
+   void up();
+   void down();
+   void select();
 
-      void up();
-      void down();
-      void select();
+   void showEvent() override;
 
-      void showEvent() override;
+   Selection _selection = Selection::Resume;
 
-      Selection _selection = Selection::Resume;
-
-
-   private:
-
-      void resume();
+private:
+   void resume();
 };
-

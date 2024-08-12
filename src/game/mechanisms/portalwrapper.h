@@ -10,4 +10,4 @@ namespace PortalWrapper
 std::shared_ptr<Portal> getNearbyPortal();
 };
 
-#endif // PORTALWRAPPER_H
+#endif  // PORTALWRAPPER_H

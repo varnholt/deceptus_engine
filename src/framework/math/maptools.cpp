@@ -4,14 +4,7 @@
 #include <cmath>
 #include <utility>
 
-
-bool MapTools::lineCollide(
-   int32_t x0,
-   int32_t y0,
-   int32_t x1,
-   int32_t y1,
-   std::function<bool(int32_t x, int32_t y)> f
-)
+bool MapTools::lineCollide(int32_t x0, int32_t y0, int32_t x1, int32_t y1, std::function<bool(int32_t x, int32_t y)> f)
 {
    const auto dx = abs(x1 - x0);
    const auto dy = abs(y1 - y0);
@@ -28,7 +21,9 @@ bool MapTools::lineCollide(
       }
 
       if (x0 == x1 && y0 == y1)
+      {
          break;
+      }
 
       e2 = err;
 
@@ -47,4 +42,3 @@ bool MapTools::lineCollide(
 
    return false;
 }
-

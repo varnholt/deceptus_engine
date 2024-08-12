@@ -5,8 +5,8 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
 #include "game/debug/debugdraw.h"
-#include "game/player/player.h"
 #include "game/io/texturepool.h"
+#include "game/player/player.h"
 
 #include <iostream>
 

@@ -14,7 +14,8 @@ void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*nor
       sf::Vertex(sf::Vector2f(_rect.left, _rect.top), col),
       sf::Vertex(sf::Vector2f(_rect.left, _rect.top + _rect.height), col),
       sf::Vertex(sf::Vector2f(_rect.left + _rect.width, _rect.top + _rect.height), col),
-      sf::Vertex(sf::Vector2f(_rect.left + _rect.width, _rect.top), col)};
+      sf::Vertex(sf::Vector2f(_rect.left + _rect.width, _rect.top), col)
+   };
 
    sf::RenderStates states;
    states.blendMode = sf::BlendAlpha;

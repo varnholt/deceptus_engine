@@ -10,4 +10,4 @@ sf::Vector2f getPixelPositionFloat();
 
 };
 
-#endif // PLAYERUTILS_H
+#endif  // PLAYERUTILS_H

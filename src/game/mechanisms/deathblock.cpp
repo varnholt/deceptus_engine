@@ -3,19 +3,16 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxpolyline.h"
 #include "game/constants.h"
+#include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
 #include "game/player/player.h"
-#include "game/io/texturepool.h"
 
 #include <iostream>
 
-
-DeathBlock::DeathBlock(GameNode* parent)
- : GameNode(parent)
+DeathBlock::DeathBlock(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(DeathBlock).name());
 }
-
 
 void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
@@ -24,7 +21,6 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       color.draw(sprite);
    }
 }
-
 
 // enemy_deathblock
 // 14 animation cycles
@@ -49,7 +45,6 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 //    3: 2, 1
 //    4: 1, 2
 
-
 //-----------------------------------------------------------------------------
 void DeathBlock::setupTransform()
 {
@@ -57,7 +52,6 @@ void DeathBlock::setupTransform()
    auto y = _pixel_positions.y / PPM;
    _body->SetTransform(b2Vec2(x, y), 0);
 }
-
 
 //-----------------------------------------------------------------------------
 void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
@@ -68,8 +62,8 @@ void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
    auto size_y = PIXELS_PER_TILE / PPM;
 
    b2Vec2 vertices[4];
-   vertices[0] = b2Vec2(0,      0);
-   vertices[1] = b2Vec2(0,      size_y);
+   vertices[0] = b2Vec2(0, 0);
+   vertices[1] = b2Vec2(0, size_y);
    vertices[2] = b2Vec2(size_x, size_y);
    vertices[3] = b2Vec2(size_x, 0);
 
@@ -86,7 +80,6 @@ void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
    object_data->setType(ObjectTypeDeathBlock);
    fixture->SetUserData(static_cast<void*>(object_data));
 }
-
 
 void DeathBlock::updateLeverLag(const sf::Time& dt)
 {
@@ -114,28 +107,26 @@ void DeathBlock::updateLeverLag(const sf::Time& dt)
    }
 }
 
-
 void DeathBlock::updateCollision()
 {
-    // check for intersection with player
-    auto player_rect = Player::getCurrent()->getPixelRectInt();
+   // check for intersection with player
+   auto player_rect = Player::getCurrent()->getPixelRectInt();
 
-    auto x = static_cast<int32_t>(_body->GetPosition().x * PPM - PIXELS_PER_TILE);
-    auto y = static_cast<int32_t>(_body->GetPosition().y * PPM - PIXELS_PER_TILE);
+   auto x = static_cast<int32_t>(_body->GetPosition().x * PPM - PIXELS_PER_TILE);
+   auto y = static_cast<int32_t>(_body->GetPosition().y * PPM - PIXELS_PER_TILE);
 
-    // want a copy of the original rect
-    for (auto rect : _collision_rects)
-    {
-        rect.left += x;
-        rect.top += y;
+   // want a copy of the original rect
+   for (auto rect : _collision_rects)
+   {
+      rect.left += x;
+      rect.top += y;
 
-        if (player_rect.intersects(rect))
-        {
-           Player::getCurrent()->damage(100);
-        }
-    }
+      if (player_rect.intersects(rect))
+      {
+         Player::getCurrent()->damage(100);
+      }
+   }
 }
-
 
 void DeathBlock::update(const sf::Time& dt)
 {
@@ -148,14 +139,12 @@ void DeathBlock::update(const sf::Time& dt)
 
    for (auto i = 0u; i < _sprites.size(); i++)
    {
-      _sprites[i].setTextureRect(
-         sf::IntRect(
-            _offsets[i].x * PIXELS_PER_TILE + _states[i] * PIXELS_PER_TILE,
-            _offsets[i].y * PIXELS_PER_TILE + _states[i] * PIXELS_PER_TILE,
-            PIXELS_PER_TILE,
-            PIXELS_PER_TILE
-         )
-      );
+      _sprites[i].setTextureRect(sf::IntRect(
+         _offsets[i].x * PIXELS_PER_TILE + _states[i] * PIXELS_PER_TILE,
+         _offsets[i].y * PIXELS_PER_TILE + _states[i] * PIXELS_PER_TILE,
+         PIXELS_PER_TILE,
+         PIXELS_PER_TILE
+      ));
 
       // need to move by one tile because the center is not 0, 0 but -24, -24
       auto x = _body->GetPosition().x * PPM + _offsets[i].x * PIXELS_PER_TILE - PIXELS_PER_TILE;

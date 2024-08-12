@@ -6,12 +6,10 @@
 #include "game/io/valuereader.h"
 #include "game/level/level.h"
 
-RopeWithLight::RopeWithLight(GameNode* parent)
- : Rope(parent)
+RopeWithLight::RopeWithLight(GameNode* parent) : Rope(parent)
 {
    setClassName(typeid(RopeWithLight).name());
 }
-
 
 void RopeWithLight::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
@@ -19,7 +17,6 @@ void RopeWithLight::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
    color.draw(_lamp_sprite);
 }
-
 
 void RopeWithLight::update(const sf::Time& dt)
 {
@@ -36,11 +33,10 @@ void RopeWithLight::update(const sf::Time& dt)
 
    _lamp_sprite.setRotation(90 + FACTOR_RAD_TO_DEG * angle_rad);
    _lamp_sprite.setPosition(
-      _light->_pos_m.x * PPM, // - _lamp_sprite_rect.width / 2,
-      _light->_pos_m.y * PPM  // - _lamp_sprite_rect.height / 2
+      _light->_pos_m.x * PPM,  // - _lamp_sprite_rect.width / 2,
+      _light->_pos_m.y * PPM   // - _lamp_sprite_rect.height / 2
    );
 }
-
 
 void RopeWithLight::setup(const GameDeserializeData& data)
 {

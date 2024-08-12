@@ -5,11 +5,9 @@
 
 #include "constants.h"
 
-
 class CameraPanorama
 {
 public:
-
    static CameraPanorama& getInstance();
 
    void update();
@@ -21,7 +19,6 @@ public:
 
    bool isLookActive() const;
    const sf::Vector2f& getLookVector() const;
-
 
 private:
    CameraPanorama() = default;
@@ -44,4 +41,3 @@ private:
    int32_t _look_state = static_cast<int32_t>(Look::Inactive);
    sf::Vector2f _look_vector;
 };
-

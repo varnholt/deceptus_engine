@@ -9,8 +9,8 @@
 class Menu
 {
 public:
-
-   enum class MenuType {
+   enum class MenuType
+   {
       None,
       FileSelect,
       NameSelect,
@@ -24,7 +24,6 @@ public:
       Credits,
       Pause
    };
-
 
    Menu();
 
@@ -52,9 +51,7 @@ public:
 
    static std::shared_ptr<Menu>& getInstance();
 
-
 private:
-
    MenuType _current_type = MenuType::None;
    MenuType _previous_type = MenuType::None;
 
@@ -79,4 +76,3 @@ private:
 
    static std::shared_ptr<Menu> __instance;
 };
-

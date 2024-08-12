@@ -1,7 +1,6 @@
 #ifndef INGAMEMENUAUDIO_H
 #define INGAMEMENUAUDIO_H
 
-
 class InGameMenuAudio
 {
 public:
@@ -19,4 +18,4 @@ public:
    void play(SoundEffect effect);
 };
 
-#endif // INGAMEMENUAUDIO_H
+#endif  // INGAMEMENUAUDIO_H

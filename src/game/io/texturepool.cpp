@@ -8,7 +8,6 @@ TexturePool& TexturePool::getInstance()
    return __instance;
 }
 
-
 std::shared_ptr<sf::Texture> TexturePool::get(const std::filesystem::path& path)
 {
    std::lock_guard<std::mutex> hold(_mutex);
@@ -27,7 +26,6 @@ std::shared_ptr<sf::Texture> TexturePool::get(const std::filesystem::path& path)
    return sp;
 }
 
-
 size_t TexturePool::computeSize() const
 {
    size_t size = 0;
@@ -43,4 +41,3 @@ size_t TexturePool::computeSize() const
 
    return size;
 }
-

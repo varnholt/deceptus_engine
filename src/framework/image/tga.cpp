@@ -2,18 +2,18 @@
 
 #include "tga.h"
 
-#include <iostream>
 #include <fstream>
-#include <string>
+#include <iostream>
 #include <ostream>
+#include <string>
 
+namespace
+{
 
-namespace {
-
-   void write(uint8_t val, std::ostream& out)
-   {
-      out.write(reinterpret_cast<char*>(&val), sizeof(val));
-   }
+void write(uint8_t val, std::ostream& out)
+{
+   out.write(reinterpret_cast<char*>(&val), sizeof(val));
+}
 
 //   void write(int32_t val, std::ostream& out)
 //   {
@@ -25,26 +25,24 @@ namespace {
 //      out.write(reinterpret_cast<char*>(&val), sizeof(val));
 //   }
 
-   void write(int16_t val, std::ostream& out)
-   {
-      out.write(reinterpret_cast<char*>(&val), sizeof(val));
-   }
-
-   void write(uint16_t val, std::ostream& out)
-   {
-      out.write(reinterpret_cast<char*>(&val), sizeof(val));
-   }
+void write(int16_t val, std::ostream& out)
+{
+   out.write(reinterpret_cast<char*>(&val), sizeof(val));
 }
 
+void write(uint16_t val, std::ostream& out)
+{
+   out.write(reinterpret_cast<char*>(&val), sizeof(val));
+}
+}  // namespace
 
 TGAHeader::TGAHeader(uint16_t w, uint16_t h, uint8_t bits)
 {
-   _image_type = 2; // rgb + no rle
+   _image_type = 2;  // rgb + no rle
    _width = w;
    _height = h;
    _bpp = bits;
 }
-
 
 void TGAHeader::save(std::ostream& stream)
 {
@@ -61,7 +59,7 @@ void TGAHeader::save(std::ostream& stream)
    write(_bpp, stream);
    write(_descr, stream);
 
-   for (auto i=0; i < _ident_size; i++)
+   for (auto i = 0; i < _ident_size; i++)
    {
       write(uint8_t(0), stream);
    }
@@ -94,4 +92,3 @@ int savetga(const std::string& filename, uint32_t* data, int16_t width, int16_t 
    stream.close();
    return 32;
 }
-

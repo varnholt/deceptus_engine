@@ -6,7 +6,6 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
 
-
 //-----------------------------------------------------------------------------
 ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 {

@@ -41,10 +41,8 @@ void ConveyorBelt::update(const sf::Time& dt)
       {
          return;
       }
-      else
-      {
-         _lever_lag -= dt.asSeconds();
-      }
+
+      _lever_lag -= dt.asSeconds();
    }
    else
    {

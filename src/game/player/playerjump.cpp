@@ -89,11 +89,10 @@ void PlayerJump::updateJump()
          _jump_clock.restart();
       }
    }
-   else if (
-      (_jump_frame_count > 0 && _controls->isButtonAPressed())  // still jumping (button pressed)
-      || (_jump_frame_count > 0 && (physics._player_jump_frame_count - _jump_frame_count < physics._player_jump_frame_count_minimum)
-         )                                                                                         // still jumping (minimum jump frames)
-      || _jump_clock.getElapsedTime().asMilliseconds() < physics._player_jump_minimal_duration_ms  // fresh jump
+   else if ((_jump_frame_count > 0 && _controls->isButtonAPressed())  // still jumping (button pressed)
+            || (_jump_frame_count > 0 && (physics._player_jump_frame_count - _jump_frame_count < physics._player_jump_frame_count_minimum)
+               )  // still jumping (minimum jump frames)
+            || _jump_clock.getElapsedTime().asMilliseconds() < physics._player_jump_minimal_duration_ms  // fresh jump
    )
    {
       // jump higher if faster than regular walk speed

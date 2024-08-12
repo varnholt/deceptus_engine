@@ -11,7 +11,6 @@
 #include <print>
 #include <sstream>
 
-
 SquareMarcher::SquareMarcher(
    uint32_t w,
    uint32_t h,
@@ -20,12 +19,7 @@ SquareMarcher::SquareMarcher(
    const std::filesystem::path& cache_path,
    float scaleFactor
 )
- : _width(w),
-   _height(h),
-   _tiles(tiles),
-   _colliding_tiles(colliding_tiles),
-   _cache_path(cache_path),
-   _scale(scaleFactor)
+    : _width(w), _height(h), _tiles(tiles), _colliding_tiles(colliding_tiles), _cache_path(cache_path), _scale(scaleFactor)
 {
    _visited.resize(_width * _height);
 
@@ -34,7 +28,6 @@ SquareMarcher::SquareMarcher(
    optimize();
    scale();
 }
-
 
 void SquareMarcher::printMap()
 {
@@ -47,7 +40,6 @@ void SquareMarcher::printMap()
       std::println("");
    }
 }
-
 
 void SquareMarcher::dumpMap()
 {
@@ -62,7 +54,6 @@ void SquareMarcher::dumpMap()
    }
    fileOut.close();
 }
-
 
 void SquareMarcher::serialize()
 {
@@ -81,7 +72,6 @@ void SquareMarcher::serialize()
    }
    file_out.close();
 }
-
 
 void SquareMarcher::deserialize()
 {
@@ -112,7 +102,6 @@ void SquareMarcher::deserialize()
       _paths.push_back(path);
    }
 }
-
 
 void SquareMarcher::scan()
 {
@@ -145,8 +134,6 @@ void SquareMarcher::scan()
       deserialize();
    }
 }
-
-
 
 void SquareMarcher::writeGridToImage(const std::filesystem::path& image_path)
 {
@@ -195,7 +182,6 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& image_path)
    texture.copyToImage().saveToFile(image_path.string());
 }
 
-
 void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
 {
    std::ifstream file_in(image_path);
@@ -236,7 +222,6 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
    const sf::Texture& texture = render_texture.getTexture();
    texture.copyToImage().saveToFile(image_path.string());
 }
-
 
 void SquareMarcher::optimize()
 {
@@ -279,7 +264,7 @@ void SquareMarcher::optimize()
             else
             {
                auto prevDir = path._dirs[i - 1];
-               auto currDir = path._dirs[i    ];
+               auto currDir = path._dirs[i];
                auto nextDir = path._dirs[i + 1];
 
                if (!(prevDir == currDir && prevDir == nextDir))
@@ -296,21 +281,16 @@ void SquareMarcher::optimize()
    _paths = optimized_paths;
 }
 
-
 void SquareMarcher::scale()
 {
    for (auto& path : _paths)
    {
       for (const auto& pos : path._polygon)
       {
-         path._scaled.emplace_back(
-            pos.x * _scale,
-            pos.y * _scale
-         );
+         path._scaled.emplace_back(pos.x * _scale, pos.y * _scale);
       }
    }
 }
-
 
 void SquareMarcher::updateDirection()
 {
@@ -430,7 +410,6 @@ void SquareMarcher::updateDirection()
    }
 }
 
-
 bool SquareMarcher::isColliding(uint32_t x, uint32_t y)
 {
    if (x >= _width)
@@ -447,7 +426,6 @@ bool SquareMarcher::isColliding(uint32_t x, uint32_t y)
    return std::find(_colliding_tiles.begin(), _colliding_tiles.end(), val) != _colliding_tiles.end();
 }
 
-
 bool SquareMarcher::isVisited(uint32_t x, uint32_t y)
 {
    if (x >= _width)
@@ -463,7 +441,6 @@ bool SquareMarcher::isVisited(uint32_t x, uint32_t y)
    auto key = y * _width + x;
    return _visited[key];
 }
-
 
 void SquareMarcher::updatePosition()
 {
@@ -490,7 +467,6 @@ void SquareMarcher::updatePosition()
    }
 }
 
-
 SquareMarcher::Path SquareMarcher::march(uint32_t start_x, uint32_t start_y)
 {
    _dir_previous = Direction::None;
@@ -511,9 +487,8 @@ SquareMarcher::Path SquareMarcher::march(uint32_t start_x, uint32_t start_y)
       {
          path._dirs.push_back(_dir_current);
          path._polygon.emplace_back(
-               static_cast<int32_t>(_x),
-               static_cast<int32_t>(_y)
-            
+            static_cast<int32_t>(_x), static_cast<int32_t>(_y)
+
          );
       }
 
@@ -526,7 +501,6 @@ SquareMarcher::Path SquareMarcher::march(uint32_t start_x, uint32_t start_y)
    return path;
 }
 
-
 void SquareMarcher::Path::printPoly()
 {
    std::print("{{ ");
@@ -536,7 +510,6 @@ void SquareMarcher::Path::printPoly()
    }
    std::println("}}");
 }
-
 
 void SquareMarcher::Path::printDirs()
 {

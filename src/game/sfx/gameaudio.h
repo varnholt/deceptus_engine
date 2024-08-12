@@ -1,7 +1,6 @@
 #ifndef GAMEAUDIO_H
 #define GAMEAUDIO_H
 
-
 class GameAudio
 {
 public:
@@ -20,4 +19,4 @@ private:
    GameAudio() = default;
 };
 
-#endif // GAMEAUDIO_H
+#endif  // GAMEAUDIO_H

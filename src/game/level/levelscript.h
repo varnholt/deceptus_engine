@@ -3,8 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <filesystem>
 #include <string>
-#include "game/mechanisms/gamemechanism.h"
 #include "game/level/scriptproperty.h"
+#include "game/mechanisms/gamemechanism.h"
 #include "lua.hpp"
 
 struct LuaNode;

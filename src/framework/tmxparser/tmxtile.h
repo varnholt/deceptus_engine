@@ -16,4 +16,3 @@ struct TmxTile : TmxElement
    std::shared_ptr<TmxAnimation> _animation = nullptr;
    std::shared_ptr<TmxObjectGroup> _object_group = nullptr;
 };
-

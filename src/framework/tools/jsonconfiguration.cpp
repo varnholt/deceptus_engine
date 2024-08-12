@@ -5,10 +5,9 @@
 #include <iostream>
 #include <sstream>
 
-
 void JsonConfiguration::deserializeFromFile(const std::string& filename)
 {
-   std::ifstream ifs (filename, std::ifstream::in);
+   std::ifstream ifs(filename, std::ifstream::in);
 
    char c = static_cast<char>(ifs.get());
    std::string data;
@@ -24,14 +23,12 @@ void JsonConfiguration::deserializeFromFile(const std::string& filename)
    deserialize(data);
 }
 
-
 void JsonConfiguration::serializeToFile(const std::string& filename)
 {
    std::string data = serialize();
    std::ofstream file(filename);
    file << data;
 }
-
 
 nlohmann::json JsonConfiguration::toJson(const std::string& data)
 {
@@ -49,7 +46,6 @@ nlohmann::json JsonConfiguration::toJson(const std::string& data)
    return config;
 }
 
-
 std::string JsonConfiguration::toString(const nlohmann::json config)
 {
    std::stringstream sstream;
@@ -57,14 +53,11 @@ std::string JsonConfiguration::toString(const nlohmann::json config)
    return sstream.str();
 }
 
-
 std::string JsonConfiguration::serialize()
 {
    return {};
 }
 
-
 void JsonConfiguration::deserialize(const std::string& /*data*/)
 {
 }
-

@@ -10,7 +10,6 @@
 
 #include <memory>
 
-
 class InfoLayer
 {
 public:

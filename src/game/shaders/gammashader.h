@@ -4,15 +4,15 @@
 
 class GammaShader
 {
-   public:
-      GammaShader() = default;
+public:
+   GammaShader() = default;
 
-      void initialize();
-      void update();
-      void setTexture(const sf::Texture& texture);
+   void initialize();
+   void update();
+   void setTexture(const sf::Texture& texture);
 
-      const sf::Shader& getGammaShader() const;
+   const sf::Shader& getGammaShader() const;
 
-   private:
-      sf::Shader _gamma_shader;
+private:
+   sf::Shader _gamma_shader;
 };

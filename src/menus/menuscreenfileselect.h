@@ -6,8 +6,8 @@
 class MenuScreenFileSelect : public MenuScreen
 {
 public:
-
-   enum class Slot{
+   enum class Slot
+   {
       A = 0,
       B = 1,
       C = 2
@@ -22,9 +22,7 @@ public:
 
    void showEvent() override;
 
-
 private:
-
    void updateLayers();
 
    void up();
@@ -39,4 +37,3 @@ private:
 
    Slot _slot = Slot::A;
 };
-

@@ -11,9 +11,9 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
 #include "game/constants.h"
+#include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
 #include "game/player/player.h"
-#include "game/io/texturepool.h"
 
 #include <atomic>
 #include <iostream>

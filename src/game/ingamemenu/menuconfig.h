@@ -13,4 +13,4 @@ struct MenuConfig
    FloatSeconds _duration_hide;
 };
 
-#endif // MENUCONFIG_H
+#endif  // MENUCONFIG_H

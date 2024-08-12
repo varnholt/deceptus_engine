@@ -17,7 +17,6 @@ struct TmxLayer;
 struct TmxTile;
 struct TmxTileSet;
 
-
 /*! \brief A tile map implementation that loads its data from TMX structures.
  *         A tile map is an array of tiles.
  *
@@ -27,11 +26,11 @@ struct TmxTileSet;
 class TileMap : public sf::Drawable, public sf::Transformable
 {
 public:
-
    TileMap() = default;
    ~TileMap() override;
 
-   virtual bool load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileSet, const std::filesystem::path& basePath);
+   virtual bool
+   load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileSet, const std::filesystem::path& basePath);
    virtual void update(const sf::Time& dt);
    virtual void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const;
    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -46,14 +45,10 @@ public:
 
    const std::string& getLayerName() const;
 
-
 protected:
-
    void drawVertices(sf::RenderTarget& target, sf::RenderStates states) const;
 
-
 private:
-
    struct AnimatedTileFrame
    {
       int32_t _x_px = 0;
@@ -92,4 +87,3 @@ private:
    std::string _tileset_name;
    std::optional<sf::BlendMode> _blend_mode;
 };
-

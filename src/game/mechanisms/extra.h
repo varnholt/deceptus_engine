@@ -7,8 +7,8 @@
 #include <SFML/Graphics.hpp>
 
 #include "game/animation/animationpool.h"
-#include "game/mechanisms/gamemechanism.h"
 #include "game/level/gamenode.h"
+#include "game/mechanisms/gamemechanism.h"
 
 struct ExtraItem;
 class GameNode;

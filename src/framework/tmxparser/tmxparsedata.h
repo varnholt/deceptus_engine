@@ -6,4 +6,3 @@ struct TmxParseData
 {
    std::string _filename;
 };
-

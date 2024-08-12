@@ -10,8 +10,8 @@ void ScreenTransition::startEffect1()
 
    _active_effect = _effect_1;
 
-   _effect_1->_effect_ended = [&](){effect1Done();};
-   _effect_2->_effect_ended = [&](){effect2Done();};
+   _effect_1->_effect_ended = [&]() { effect1Done(); };
+   _effect_2->_effect_ended = [&]() { effect2Done(); };
 
    _effect_1->start();
 
@@ -22,7 +22,6 @@ void ScreenTransition::startEffect1()
    }
 }
 
-
 void ScreenTransition::update(const sf::Time& dt)
 {
    if (_active_effect)
@@ -31,7 +30,6 @@ void ScreenTransition::update(const sf::Time& dt)
    }
 }
 
-
 void ScreenTransition::draw(const std::shared_ptr<sf::RenderTexture>& window)
 {
    if (_active_effect)
@@ -39,7 +37,6 @@ void ScreenTransition::draw(const std::shared_ptr<sf::RenderTexture>& window)
       _active_effect->draw(window);
    }
 }
-
 
 void ScreenTransition::startEffect2()
 {
@@ -53,7 +50,6 @@ void ScreenTransition::startEffect2()
       cb();
    }
 }
-
 
 void ScreenTransition::effect1Done()
 {
@@ -72,14 +68,13 @@ void ScreenTransition::effect1Done()
 
    if (_delay_between_effects_ms > std::chrono::milliseconds(0))
    {
-      Timer::add(_delay_between_effects_ms, [this](){startEffect2();});
+      Timer::add(_delay_between_effects_ms, [this]() { startEffect2(); });
    }
    else
    {
       startEffect2();
    }
 }
-
 
 void ScreenTransition::effect2Done()
 {
@@ -94,12 +89,10 @@ void ScreenTransition::effect2Done()
    }
 }
 
-
 void ScreenTransitionHandler::push(std::unique_ptr<ScreenTransition> transition)
 {
    _transitions.push_back(std::move(transition));
 }
-
 
 void ScreenTransitionHandler::pop()
 {
@@ -111,12 +104,10 @@ void ScreenTransitionHandler::pop()
    _transitions.pop_front();
 }
 
-
 void ScreenTransitionHandler::clear()
 {
    _transitions.clear();
 }
-
 
 void ScreenTransitionHandler::startEffect2()
 {
@@ -128,13 +119,10 @@ void ScreenTransitionHandler::startEffect2()
    _transitions.front()->startEffect2();
 }
 
-
-
 bool ScreenTransitionHandler::active() const
 {
    return !_transitions.empty();
 }
-
 
 void ScreenTransitionHandler::draw(const std::shared_ptr<sf::RenderTexture>& window)
 {
@@ -146,7 +134,6 @@ void ScreenTransitionHandler::draw(const std::shared_ptr<sf::RenderTexture>& win
    _transitions.front()->draw(window);
 }
 
-
 void ScreenTransitionHandler::update(const sf::Time& dt)
 {
    if (!active())
@@ -156,7 +143,6 @@ void ScreenTransitionHandler::update(const sf::Time& dt)
 
    _transitions.front()->update(dt);
 }
-
 
 ScreenTransitionHandler& ScreenTransitionHandler::getInstance()
 {

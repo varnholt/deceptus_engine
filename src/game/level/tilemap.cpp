@@ -14,9 +14,9 @@
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "game/io/texturepool.h"
 #include "game/level/blendmodedeserializer.h"
 #include "game/player/player.h"
-#include "game/io/texturepool.h"
 
 namespace
 {
@@ -360,7 +360,8 @@ void TileMap::hideTile(int32_t x, int32_t y)
             auto& vertices = x_it->second;
             for (auto i = 0u; i < vertices.getVertexCount(); i += 4)
             {
-               if (static_cast<int32_t>(vertices[i].position.x) / PIXELS_PER_TILE == x && static_cast<int32_t>(vertices[i].position.y) / PIXELS_PER_TILE == y)
+               if (static_cast<int32_t>(vertices[i].position.x) / PIXELS_PER_TILE == x &&
+                   static_cast<int32_t>(vertices[i].position.y) / PIXELS_PER_TILE == y)
                {
                   vertices[i].color.a = 0;
                   vertices[i + 1].color.a = 0;

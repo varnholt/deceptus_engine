@@ -107,7 +107,8 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const
       sf::Vertex(p + sf::Vector2f{-pointSize, 0}, DebugDraw::glColorToSfml(color)),
       sf::Vertex(p + sf::Vector2f{pointSize, 0}, DebugDraw::glColorToSfml(color)),
       sf::Vertex(p + sf::Vector2f{0, -pointSize}, DebugDraw::glColorToSfml(color)),
-      sf::Vertex(p + sf::Vector2f{0, pointSize}, DebugDraw::glColorToSfml(color))};
+      sf::Vertex(p + sf::Vector2f{0, pointSize}, DebugDraw::glColorToSfml(color))
+   };
 
    target.draw(line, 4, sf::Lines);
 }
@@ -120,7 +121,8 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Col
       sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{-pointSize, 0}, DebugDraw::glColorToSfml(color)),
       sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{pointSize, 0}, DebugDraw::glColorToSfml(color)),
       sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{0, -pointSize}, DebugDraw::glColorToSfml(color)),
-      sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{0, pointSize}, DebugDraw::glColorToSfml(color))};
+      sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{0, pointSize}, DebugDraw::glColorToSfml(color))
+   };
 
    target.draw(line, 4, sf::Lines);
 }
@@ -128,8 +130,8 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Col
 void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
 {
    sf::Vertex line[] = {
-      sf::Vertex(DebugDraw::vecB2S(p1), DebugDraw::glColorToSfml(color)),
-      sf::Vertex(DebugDraw::vecB2S(p2), DebugDraw::glColorToSfml(color))};
+      sf::Vertex(DebugDraw::vecB2S(p1), DebugDraw::glColorToSfml(color)), sf::Vertex(DebugDraw::vecB2S(p2), DebugDraw::glColorToSfml(color))
+   };
 
    target.draw(line, 2, sf::Lines);
 }
@@ -200,10 +202,12 @@ void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
    const auto y_axis = xf.p + line_length * xf.q.GetYAxis();
 
    const sf::Vertex line_red[] = {
-      sf::Vertex(DebugDraw::vecB2S(xf.p), sf::Color::Red), sf::Vertex(DebugDraw::vecB2S(x_axis), sf::Color::Red)};
+      sf::Vertex(DebugDraw::vecB2S(xf.p), sf::Color::Red), sf::Vertex(DebugDraw::vecB2S(x_axis), sf::Color::Red)
+   };
 
    const sf::Vertex line_green[] = {
-      sf::Vertex(DebugDraw::vecB2S(xf.p), sf::Color::Green), sf::Vertex(DebugDraw::vecB2S(y_axis), sf::Color::Green)};
+      sf::Vertex(DebugDraw::vecB2S(xf.p), sf::Color::Green), sf::Vertex(DebugDraw::vecB2S(y_axis), sf::Color::Green)
+   };
 
    target.draw(line_red, 2, sf::Lines);
    target.draw(line_green, 2, sf::Lines);
@@ -249,7 +253,8 @@ sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
       screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
       screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
       screen_view.getSize().x,
-      screen_view.getSize().y};
+      screen_view.getSize().y
+   };
 
    return screen;
 }
@@ -350,19 +355,23 @@ void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
 
    sf::Vertex f0[] = {
       sf::Vertex{sf::Vector2f{camera_system.getFocusZoneX0(), 0.0f}, sf::Color{255, 0, 0, 100}},
-      sf::Vertex{sf::Vector2f{camera_system.getFocusZoneX0(), static_cast<float>(target.getSize().y)}, sf::Color{255, 0, 0, 100}}};
+      sf::Vertex{sf::Vector2f{camera_system.getFocusZoneX0(), static_cast<float>(target.getSize().y)}, sf::Color{255, 0, 0, 100}}
+   };
 
    sf::Vertex f1[] = {
       sf::Vertex{sf::Vector2f{camera_system.getFocusZoneX1(), 0.0f}, sf::Color{255, 0, 0, 100}},
-      sf::Vertex{sf::Vector2f{camera_system.getFocusZoneX1(), static_cast<float>(target.getSize().y)}, sf::Color{255, 0, 0, 100}}};
+      sf::Vertex{sf::Vector2f{camera_system.getFocusZoneX1(), static_cast<float>(target.getSize().y)}, sf::Color{255, 0, 0, 100}}
+   };
 
    sf::Vertex p0[] = {
       sf::Vertex{sf::Vector2f{0.0f, camera_system.getPanicLineY0()}, sf::Color{0, 50, 255, 100}},
-      sf::Vertex{sf::Vector2f{static_cast<float>(target.getSize().x), camera_system.getPanicLineY0()}, sf::Color{0, 50, 255, 100}}};
+      sf::Vertex{sf::Vector2f{static_cast<float>(target.getSize().x), camera_system.getPanicLineY0()}, sf::Color{0, 50, 255, 100}}
+   };
 
    sf::Vertex p1[] = {
       sf::Vertex{sf::Vector2f{0.0f, camera_system.getPanicLineY1()}, sf::Color{0, 50, 255, 100}},
-      sf::Vertex{sf::Vector2f{static_cast<float>(target.getSize().x), camera_system.getPanicLineY1()}, sf::Color{0, 50, 255, 100}}};
+      sf::Vertex{sf::Vector2f{static_cast<float>(target.getSize().x), camera_system.getPanicLineY1()}, sf::Color{0, 50, 255, 100}}
+   };
 
    target.draw(f0, 2, sf::Lines);
    target.draw(f1, 2, sf::Lines);

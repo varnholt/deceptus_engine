@@ -2,36 +2,27 @@
 
 #include "menu.h"
 
-
 MenuScreenAchievements::MenuScreenAchievements()
 {
    setFilename("data/menus/achievements.psd");
 }
 
-
 void MenuScreenAchievements::up()
 {
-
 }
-
 
 void MenuScreenAchievements::down()
 {
-
 }
-
 
 void MenuScreenAchievements::select()
 {
-
 }
-
 
 void MenuScreenAchievements::back()
 {
    Menu::getInstance()->show(Menu::MenuType::Options);
 }
-
 
 void MenuScreenAchievements::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -56,12 +47,10 @@ void MenuScreenAchievements::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-
 void MenuScreenAchievements::loadingFinished()
 {
    updateLayers();
 }
-
 
 void MenuScreenAchievements::updateLayers()
 {
@@ -70,9 +59,7 @@ void MenuScreenAchievements::updateLayers()
 
    _layers["back_pc_0"]->_visible = !isControllerUsed();
    _layers["back_pc_1"]->_visible = false;
-
 }
-
 
 /*
 data/menus/achievements.psd
@@ -83,4 +70,3 @@ data/menus/achievements.psd
     back_pc_1
     title
 */
-
