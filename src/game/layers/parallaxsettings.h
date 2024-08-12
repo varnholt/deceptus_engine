@@ -14,4 +14,4 @@ struct ParallaxSettings
    void deserialize(const std::shared_ptr<TmxProperties>& properties);
 };
 
-#endif // PARALLAXSETTINGS_H
+#endif  // PARALLAXSETTINGS_H

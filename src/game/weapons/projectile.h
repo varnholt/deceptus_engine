@@ -18,7 +18,6 @@ class b2Body;
 class Projectile : public FixtureNode
 {
 public:
-
    using DestroyedCallback = std::function<void(void)>;
 
    Projectile();

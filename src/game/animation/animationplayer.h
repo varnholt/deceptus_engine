@@ -6,10 +6,8 @@
 
 #include <SFML/Graphics.hpp>
 
-
 class AnimationPlayer
 {
-
 public:
    AnimationPlayer() = default;
 
@@ -21,7 +19,5 @@ public:
    static AnimationPlayer& getInstance();
 
 private:
-
    std::vector<std::shared_ptr<Animation>> _animations;
-
 };

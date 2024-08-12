@@ -14,4 +14,4 @@ struct BoomSettings
    ShakeType _shake_type = ShakeType::Random;
 };
 
-#endif // BOOMSETTINGS_H
+#endif  // BOOMSETTINGS_H

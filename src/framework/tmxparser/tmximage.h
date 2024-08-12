@@ -12,4 +12,3 @@ struct TmxImage : TmxElement
    int _width_px = 0;
    int _height_px = 0;
 };
-

@@ -20,5 +20,4 @@ private:
    bool _is_on_belt = false;
 };
 
-
-#endif // PLAYERBELT_H
+#endif  // PLAYERBELT_H

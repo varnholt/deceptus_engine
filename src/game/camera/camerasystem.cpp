@@ -96,10 +96,8 @@ void CameraSystem::updateX(const sf::Time& delta_time)
    {
       _focus_x_triggered = true;
    }
-   else if (
-         (test > _x_px - _focus_zone_center_px - camera_config.getBackInBoundsToleranceX())
-      && (test < _x_px - _focus_zone_center_px + camera_config.getBackInBoundsToleranceX())
-   )
+   else if ((test > _x_px - _focus_zone_center_px - camera_config.getBackInBoundsToleranceX()) &&
+            (test < _x_px - _focus_zone_center_px + camera_config.getBackInBoundsToleranceX()))
    {
       // back within close boundaries
       _focus_x_triggered = false;
@@ -148,7 +146,8 @@ void CameraSystem::updateY(const sf::Time& delta_time)
    }
 
    // test if back within close boundaries
-   if ((test > _y_px - view_center - camera_config.getBackInBoundsToleranceY()) && (test < _y_px - view_center + camera_config.getBackInBoundsToleranceY()))
+   if ((test > _y_px - view_center - camera_config.getBackInBoundsToleranceY()) &&
+       (test < _y_px - view_center + camera_config.getBackInBoundsToleranceY()))
    {
       _focus_y_triggered = false;
    }

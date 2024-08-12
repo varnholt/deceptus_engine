@@ -15,4 +15,4 @@ public:
    fbm::vec2 _st;
 };
 
-#endif // BOOMEFFECTENVELOPERANDOM_H
+#endif  // BOOMEFFECTENVELOPERANDOM_H

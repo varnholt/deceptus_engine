@@ -3,9 +3,8 @@
 #include <iostream>
 
 #include "framework/tools/globalclock.h"
-#include "game/weapons/projectilehitaudio.h"
 #include "game/io/texturepool.h"
-
+#include "game/weapons/projectilehitaudio.h"
 
 const auto sprite_width = PIXELS_PER_TILE;
 const auto sprite_height = PIXELS_PER_TILE;
@@ -37,8 +36,8 @@ Arrow::Arrow()
 
       ProjectileHitAudio::addReferenceSamples(
          default_bow_projectile_identifier,
-         {ProjectileHitAudio::ProjectileHitSample{"arrow_hit_1.wav", 0.3f},
-          ProjectileHitAudio::ProjectileHitSample{"arrow_hit_2.wav", 0.3f}}
+         {ProjectileHitAudio::ProjectileHitSample{"arrow_hit_1.wav", 0.3f}, ProjectileHitAudio::ProjectileHitSample{"arrow_hit_2.wav", 0.3f}
+         }
       );
 
       ProjectileHitAnimation::addReferenceAnimation(

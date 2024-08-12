@@ -16,4 +16,3 @@ struct GameDeserializeData
    std::shared_ptr<TmxLayer> _tmx_layer;
    std::shared_ptr<TmxTileSet> _tmx_tileset;
 };
-

@@ -2,31 +2,26 @@
 
 class GameControllerBallVector
 {
-   public:
+public:
+   GameControllerBallVector(float x, float y) : _x(x), _y(y)
+   {
+   }
 
-      GameControllerBallVector(float x, float y)
-         : _x(x),
-           _y(y)
-      {
-      }
+   GameControllerBallVector()
+   {
+   }
 
-      GameControllerBallVector()
-      {
-      }
+   float* getXPtr()
+   {
+      return &_x;
+   }
 
-      float* getXPtr()
-      {
-         return &_x;
-      }
+   float* getYPtr()
+   {
+      return &_y;
+   }
 
-      float* getYPtr()
-      {
-         return &_y;
-      }
-
-   protected:
-
-      float _x = 0.0f;
-      float _y = 0.0f;
+protected:
+   float _x = 0.0f;
+   float _y = 0.0f;
 };
-

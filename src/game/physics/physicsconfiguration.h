@@ -7,7 +7,7 @@ struct PhysicsConfiguration
 {
    PhysicsConfiguration() = default;
 
-   float _time_step = 1.0f/60.0f;
+   float _time_step = 1.0f / 60.0f;
    float _gravity = 8.5f;
 
    float _player_speed_max_walk = 2.5f;
@@ -32,8 +32,8 @@ struct PhysicsConfiguration
    int32_t _player_jump_minimal_duration_ms = 80;
    float _player_jump_falloff = 6.5f;
    float _player_jump_speed_factor = 0.1f;
-   float _player_jump_impulse_factor = 6.0f;     // not in json
-   float _player_minimum_jump_interval_ms = 150; // not in json
+   float _player_jump_impulse_factor = 6.0f;      // not in json
+   float _player_minimum_jump_interval_ms = 150;  // not in json
 
    // dash
    int32_t _player_dash_frame_count = 20;
@@ -71,20 +71,16 @@ struct PhysicsConfiguration
    float _in_water_buoyancy_force = 0.03f;
 
    // gravity
-   float _gravity_scale_default = 1.0f;          // not in json
-   float _gravity_scale_water = 0.5f;            // not in json
-   float _gravity_scale_jump_downward = 1.35f;   // not in json
+   float _gravity_scale_default = 1.0f;         // not in json
+   float _gravity_scale_water = 0.5f;           // not in json
+   float _gravity_scale_jump_downward = 1.35f;  // not in json
 
    void deserializeFromFile(const std::string& filename = "data/config/physics.json");
    void serializeToFile(const std::string& filename = "data/config/physics.json");
 
    static PhysicsConfiguration& getInstance();
 
-
 private:
-
    std::string serialize();
    void deserialize(const std::string& data);
-
 };
-

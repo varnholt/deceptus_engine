@@ -36,7 +36,8 @@ std::string Tweaks::serialize()
           {"player_light_enabled", _player_light_enabled},
           {"player_light_alpha", _player_light_alpha},
           {"player_stencil_alpha", _player_stencil_alpha},
-       }}};
+       }}
+   };
 
    return toString(config);
 }

@@ -8,7 +8,6 @@ class StopWatch
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
 
 public:
-
    static StopWatch& getInstance();
 
    void reset();
@@ -20,8 +19,6 @@ public:
    static HighResTimePoint now();
 
 private:
-
    StopWatch() = default;
    HighResTimePoint _start_time;
 };
-

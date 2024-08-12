@@ -1,9 +1,9 @@
 #include "chainshapeanalyzer.h"
 
+#include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <iostream>
 #include <set>
-#include <SFML/Graphics.hpp>
 
 #include "game/constants.h"
 #include "game/level/fixturenode.h"

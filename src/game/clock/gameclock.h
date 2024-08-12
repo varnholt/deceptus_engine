@@ -13,10 +13,7 @@ public:
    void reset();
    HighResDuration durationSinceSpawn() const;
 
-
 private:
-
    GameClock() = default;
    HighResTimePoint _start_time;
 };
-

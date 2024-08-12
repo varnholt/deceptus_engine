@@ -84,5 +84,6 @@ void to_json(nlohmann::json& j, const AnimationSettings& settings)
       {"frame_offset", settings._frame_offset},
       {"origin", settings._origin},
       {"texture", settings._texture_path.string()},
-      {"frame_durations", durations}};
+      {"frame_durations", durations}
+   };
 }

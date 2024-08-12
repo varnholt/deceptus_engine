@@ -37,7 +37,8 @@ void StaticLight::update(const sf::Time& /*time*/)
    const auto time = GlobalClock::getInstance().getElapsedTime();
    _flicker_amount = _flicker_intensity * fbm::fbm(fbm::vec2{
                                              _instance_number + time.asSeconds() * _flicker_speed,
-                                             _time_offset + _instance_number / static_cast<float>(instance_count)});
+                                             _time_offset + _instance_number / static_cast<float>(instance_count)
+                                          });
 }
 
 std::optional<sf::FloatRect> StaticLight::getBoundingBoxPx()

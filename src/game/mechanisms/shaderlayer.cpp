@@ -26,7 +26,8 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       sf::Vertex(sf::Vector2f(x, y), sf::Vector2f(0.0f, _uv_height)),
       sf::Vertex(sf::Vector2f(x, y + h), sf::Vector2f(0.0f, 0.0f)),
       sf::Vertex(sf::Vector2f(x + w, y + h), sf::Vector2f(_uv_width, 0.0f)),
-      sf::Vertex(sf::Vector2f(x + w, y), sf::Vector2f(_uv_width, _uv_height))};
+      sf::Vertex(sf::Vector2f(x + w, y), sf::Vector2f(_uv_width, _uv_height))
+   };
 
    sf::RenderStates states;
    states.shader = &_shader;

@@ -5,8 +5,8 @@
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "game/player/player.h"
 #include "game/io/texturepool.h"
+#include "game/player/player.h"
 
 #include <array>
 #include <iostream>

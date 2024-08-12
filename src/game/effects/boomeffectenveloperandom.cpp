@@ -22,4 +22,3 @@ float BoomEffectEnvelopeRandom::shakeFunction(float t)
 
    return y;
 }
-

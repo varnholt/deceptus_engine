@@ -10,4 +10,4 @@ namespace BouncerWrapper
 std::shared_ptr<Bouncer> getNearbyBouncer();
 };
 
-#endif // BOUNCERWRAPPER_H
+#endif  // BOUNCERWRAPPER_H

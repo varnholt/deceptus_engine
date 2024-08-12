@@ -236,9 +236,13 @@ bool PSD::Layer::isVisible() const
 void PSD::Layer::setVisible(bool visible)
 {
    if (visible)
+   {
       _flags &= ~VISIBILITY_FLAG;
+   }
    else
+   {
       _flags |= VISIBILITY_FLAG;
+   }
 }
 
 const PSD::Layer::Channel& PSD::Layer::getChannel(int32_t id) const

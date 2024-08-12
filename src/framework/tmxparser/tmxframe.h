@@ -11,4 +11,3 @@ struct TmxFrame : TmxElement
    int32_t _tile_id = 0;
    int32_t _duration_ms = 0;
 };
-

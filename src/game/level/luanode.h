@@ -14,10 +14,10 @@
 
 // game
 #include "game/animation/detonationanimation.h"
-#include "game/mechanisms/gamemechanism.h"
 #include "game/level/enemydescription.h"
 #include "game/level/gamenode.h"
 #include "game/level/hitbox.h"
+#include "game/mechanisms/gamemechanism.h"
 #include "game/weapons/weapon.h"
 
 struct lua_State;

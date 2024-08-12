@@ -123,11 +123,17 @@ void Physics::parse(
                const auto row3 = ((y + yi + 2) * _grid_width) + (x * 3);
 
                for (auto xi = 0u; xi < 3; xi++)
+               {
                   _physics_map[row1 + xi] = arr[xi + 0];
+               }
                for (auto xi = 0u; xi < 3; xi++)
+               {
                   _physics_map[row2 + xi] = arr[xi + 3];
+               }
                for (auto xi = 0u; xi < 3; xi++)
+               {
                   _physics_map[row3 + xi] = arr[xi + 6];
+               }
             }
          }
       }

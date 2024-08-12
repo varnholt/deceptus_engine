@@ -7,19 +7,12 @@
 
 using json = nlohmann::json;
 
-
-void to_json(json &j, const EnemyDescription &d)
+void to_json(json& j, const EnemyDescription& d)
 {
-   j = json{
-      {"script", d._script},
-      {"startposition", d._start_position},
-      {"path", d._path},
-      {"properties", d._properties}
-   };
+   j = json{{"script", d._script}, {"startposition", d._start_position}, {"path", d._path}, {"properties", d._properties}};
 }
 
-
-void from_json(const json &j, EnemyDescription &d)
+void from_json(const json& j, EnemyDescription& d)
 {
    d._script = j.at("script").get<std::string>();
 
@@ -56,4 +49,3 @@ void from_json(const json &j, EnemyDescription &d)
       d._properties = j.at("properties").get<std::vector<ScriptProperty>>();
    }
 }
-

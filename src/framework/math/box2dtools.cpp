@@ -27,7 +27,8 @@ b2PolygonShape Box2DTools::createBeveledBox(const float width, const float heigh
       b2Vec2(width - bevel_offset, height),
       b2Vec2(bevel_offset, height),
       b2Vec2(0, height - bevel_offset),
-      b2Vec2(0, bevel_offset)};
+      b2Vec2(0, bevel_offset)
+   };
 
    box_shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
 

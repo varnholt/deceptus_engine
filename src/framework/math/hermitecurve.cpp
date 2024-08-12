@@ -5,12 +5,10 @@
 #include <cmath>
 #include <cstdint>
 
-
 namespace
 {
 static const auto clamp = true;
 }
-
 
 //-----------------------------------------------------------------------------
 void HermiteCurve::setPositionKeys(const std::vector<HermiteCurveKey>& keys)
@@ -18,13 +16,11 @@ void HermiteCurve::setPositionKeys(const std::vector<HermiteCurveKey>& keys)
    _position_keys = keys;
 }
 
-
 //-----------------------------------------------------------------------------
 void HermiteCurve::setOrientationKeys(const std::vector<HermiteCurveKey>& keys)
 {
    _orientation_keys = keys;
 }
-
 
 //-----------------------------------------------------------------------------
 void HermiteCurve::setPosition(const sf::Vector2f& position)
@@ -32,13 +28,11 @@ void HermiteCurve::setPosition(const sf::Vector2f& position)
    _position = position;
 }
 
-
 //-----------------------------------------------------------------------------
 void HermiteCurve::setOrientation(const sf::Vector2f& orientation)
 {
    _orientation = orientation;
 }
-
 
 //-----------------------------------------------------------------------------
 const std::vector<HermiteCurveKey>& HermiteCurve::getPositionKeys() const
@@ -46,13 +40,11 @@ const std::vector<HermiteCurveKey>& HermiteCurve::getPositionKeys() const
    return _position_keys;
 }
 
-
 //-----------------------------------------------------------------------------
 const std::vector<HermiteCurveKey>& HermiteCurve::getOrientationKeys() const
 {
    return _orientation_keys;
 }
-
 
 //-----------------------------------------------------------------------------
 void HermiteCurve::compute()
@@ -64,7 +56,7 @@ void HermiteCurve::compute()
    {
       if (source.empty())
       {
-          return;
+         return;
       }
 
       sf::Vector2f p1;
@@ -73,13 +65,13 @@ void HermiteCurve::compute()
       {
          if (i == 0)
          {
-            p1 = source[        0                      ]._position;
+            p1 = source[0]._position;
             p2 = source[clamp ? 0 : (source.size() - 1)]._position;
          }
          else if (i == source.size() - 1)
          {
             p1 = source[clamp ? (i - 1) : 0]._position;
-            p2 = source[         i - 1     ]._position;
+            p2 = source[i - 1]._position;
          }
          else
          {
@@ -101,7 +93,6 @@ void HermiteCurve::compute()
    comp(_position_keys, _position_tangents);
    comp(_orientation_keys, _orientation_tangents);
 }
-
 
 //-----------------------------------------------------------------------------
 sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
@@ -190,16 +181,13 @@ sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
    const auto t2 = tangents[index + 1];
 
    // calculate base functions 1-4
-   h1 =  2.0f * s3 - 3.0f * s2 + 1.0f;
+   h1 = 2.0f * s3 - 3.0f * s2 + 1.0f;
    h2 = -2.0f * s3 + 3.0f * s2;
-   h3 =         s3 - 2.0f * s2 + s;
-   h4 =         s3 -        s2;
+   h3 = s3 - 2.0f * s2 + s;
+   h4 = s3 - s2;
 
    p.x = p1.x * h1 + p2.x * h2 + t1.x * h3 + t2.x * h4;
    p.y = p1.y * h1 + p2.y * h2 + t1.y * h3 + t2.y * h4;
 
    return p;
 }
-
-
-

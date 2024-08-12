@@ -74,4 +74,3 @@ void from_json(const nlohmann::json& j, Health& d)
    d._health = j.at("health").get<int32_t>();
    d._health_max = j.at("health_max").get<int32_t>();
 }
-

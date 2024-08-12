@@ -12,4 +12,4 @@ struct AudioRange
    float _volume_near{1.0f};
 };
 
-#endif // AUDIORANGE_H
+#endif  // AUDIORANGE_H

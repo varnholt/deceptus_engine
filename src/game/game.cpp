@@ -349,9 +349,7 @@ void Game::initialize()
 
    showMainMenu();
 
-   Timer::add(
-      std::chrono::milliseconds(1000), [this]() { updateWindowTitle(); }, Timer::Type::Repeated, Timer::Scope::UpdateAlways
-   );
+   Timer::add(std::chrono::milliseconds(1000), [this]() { updateWindowTitle(); }, Timer::Type::Repeated, Timer::Scope::UpdateAlways);
 
    GameState::getInstance().addCallback(
       [this](ExecutionMode current, ExecutionMode previous)
@@ -763,9 +761,8 @@ void Game::processEvent(const sf::Event& event)
    {
       if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
       {
-         if (
-            !DisplayMode::getInstance().isSet(Display::IngameMenu)  // the in-game menu is save to leave open when losing the window focus
-            && !Console::getInstance().isActive()                   // while the console is open, don't disturb
+         if (!DisplayMode::getInstance().isSet(Display::IngameMenu)  // the in-game menu is save to leave open when losing the window focus
+             && !Console::getInstance().isActive()                   // while the console is open, don't disturb
          )
          {
             showPauseMenu();
@@ -804,10 +801,8 @@ void Game::processEvent(const sf::Event& event)
             Menu::getInstance()->keyboardKeyPressed(event.key.code);
             return;
          }
-         else
-         {
-            _player->getControls()->keyboardKeyPressed(event.key.code);
-         }
+
+         _player->getControls()->keyboardKeyPressed(event.key.code);
       }
 
       // this is the handling of the actual in-game keypress events
@@ -820,10 +815,8 @@ void Game::processEvent(const sf::Event& event)
          Menu::getInstance()->keyboardKeyReleased(event.key.code);
          return;
       }
-      else
-      {
-         _player->getControls()->keyboardKeyReleased(event.key.code);
-      }
+
+      _player->getControls()->keyboardKeyReleased(event.key.code);
 
       processKeyReleasedEvents(event);
    }

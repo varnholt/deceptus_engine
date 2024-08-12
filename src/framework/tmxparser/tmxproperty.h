@@ -20,4 +20,3 @@ struct TmxProperty : TmxElement
    std::optional<int32_t> _value_int = 0;
    std::optional<bool> _value_bool = false;
 };
-

@@ -9,4 +9,4 @@ void clean(const LevelDescription& level_description);
 
 };
 
-#endif // LEVELFILES_H
+#endif  // LEVELFILES_H

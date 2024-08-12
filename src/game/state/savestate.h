@@ -42,14 +42,12 @@ struct SaveState
    static void serializeToFile(const std::string& filename = "data/config/savestate.json");
 
 private:
-
    static std::string serialize();
    static void deserialize(const std::string& data);
 
    static uint32_t __slot;
    static std::array<SaveState, 3> __save_states;
 };
-
 
 void to_json(nlohmann::json& j, const SaveState& d);
 void from_json(const nlohmann::json& j, SaveState& d);

@@ -1,8 +1,8 @@
 #pragma once
 
 // base
-#include "tmxelement.h"
 #include <map>
+#include "tmxelement.h"
 
 struct TmxObject;
 
@@ -15,4 +15,3 @@ struct TmxObjectGroup : TmxElement
 
    void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>&) override;
 };
-

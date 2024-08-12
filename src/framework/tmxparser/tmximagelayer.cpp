@@ -4,15 +4,12 @@
 #include "tmximage.h"
 #include "tmxproperties.h"
 
-
 #include <iostream>
-
 
 TmxImageLayer::TmxImageLayer()
 {
    _type = Type::TypeImageLayer;
 }
-
 
 void TmxImageLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {

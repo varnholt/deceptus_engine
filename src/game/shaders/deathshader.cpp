@@ -6,9 +6,7 @@
 
 #include <iostream>
 
-
-DeathShader::DeathShader(uint32_t width, uint32_t height)
- : _render_texture(std::make_shared<sf::RenderTexture>())
+DeathShader::DeathShader(uint32_t width, uint32_t height) : _render_texture(std::make_shared<sf::RenderTexture>())
 {
    if (!_render_texture->create(width, height))
    {
@@ -16,21 +14,14 @@ DeathShader::DeathShader(uint32_t width, uint32_t height)
    }
 }
 
-
 DeathShader::~DeathShader()
 {
    _render_texture.reset();
 }
 
-
-
 void DeathShader::initialize()
 {
-   if (!_shader.loadFromFile(
-         "data/shaders/death.vert",
-         "data/shaders/death.frag"
-      )
-   )
+   if (!_shader.loadFromFile("data/shaders/death.vert", "data/shaders/death.frag"))
    {
       Log::Error() << "error loading shader";
       return;
@@ -49,13 +40,11 @@ void DeathShader::initialize()
    _shader.setUniform("flowfield_2", *_flow_field_2);
 }
 
-
 void DeathShader::reset()
 {
    _elapsed = 0.0f;
    _shader.setUniform("time", _elapsed);
 }
-
 
 void DeathShader::update(const sf::Time& dt)
 {
@@ -72,22 +61,17 @@ void DeathShader::update(const sf::Time& dt)
    _shader.setUniform("time", _elapsed);
    _shader.setUniform(
       "flowfield_offset",
-      Player::getCurrent()->isPointingLeft()
-         ? sf::Glsl::Vec2(0.5f, -0.32f) // picked randomly
-         : sf::Glsl::Vec2(0.8f, 0.8f)
+      Player::getCurrent()->isPointingLeft() ? sf::Glsl::Vec2(0.5f, -0.32f)  // picked randomly
+                                             : sf::Glsl::Vec2(0.8f, 0.8f)
    );
 }
-
 
 const sf::Shader& DeathShader::getShader() const
 {
    return _shader;
 }
 
-
 const std::shared_ptr<sf::RenderTexture>& DeathShader::getRenderTexture() const
 {
    return _render_texture;
 }
-
-

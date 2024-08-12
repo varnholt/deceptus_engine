@@ -33,4 +33,4 @@ private:
    b2PolygonShape _shape_bounds;
 };
 
-#endif // BLOCKINGRECT_H
+#endif  // BLOCKINGRECT_H

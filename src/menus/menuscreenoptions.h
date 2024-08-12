@@ -7,7 +7,8 @@ class MenuScreenOptions : public MenuScreen
 public:
    MenuScreenOptions();
 
-   enum class Selection {
+   enum class Selection
+   {
       Controls = 0,
       Video = 1,
       Audio = 2,
@@ -29,4 +30,3 @@ public:
 
    Selection _selection = Selection::Controls;
 };
-

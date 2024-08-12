@@ -33,4 +33,4 @@ private:
    FloatSeconds _duration_hide;
 };
 
-#endif // INGAMEMENUARCHIVES_H
+#endif  // INGAMEMENUARCHIVES_H

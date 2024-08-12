@@ -18,4 +18,3 @@ struct TmxImageLayer : public TmxElement
 
    void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>&) override;
 };
-

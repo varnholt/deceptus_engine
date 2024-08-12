@@ -87,7 +87,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    std::chrono::milliseconds _delay_between_effects_ms{250};
    bool _camera_sync_after_fade_out = true;
    bool _camera_locked = false;
-   
+
 private:
    void readEntracePositions(Room::SubRoom sub_room, const GameDeserializeData& data);
    void deserializeEnterArea(const GameDeserializeData& data);

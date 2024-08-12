@@ -17,7 +17,6 @@
 #include <optional>
 #include <vector>
 
-
 struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
@@ -25,7 +24,6 @@ struct TmxTileSet;
 class Laser : public GameMechanism, public GameNode
 {
 public:
-
    struct Signal
    {
       uint32_t _duration_ms = 0u;
@@ -60,9 +58,7 @@ public:
 
    void setEnabled(bool enabled) override;
 
-
 protected:
-
    std::vector<Signal> _signal_plot;
 
    int32_t _tu = 0;
@@ -85,8 +81,7 @@ protected:
    int32_t _animation_offset = 0;
    uint32_t _signal_index = 0;
    uint32_t _time = 0u;
-   int32_t _group_id = 0; // only for debugging purposes
+   int32_t _group_id = 0;  // only for debugging purposes
 
    Settings _settings;
 };
-

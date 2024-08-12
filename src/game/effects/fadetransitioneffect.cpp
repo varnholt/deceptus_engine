@@ -2,8 +2,7 @@
 
 #include "game/config/gameconfiguration.h"
 
-FadeTransitionEffect::FadeTransitionEffect(const sf::Color color)
- : _fade_color(color)
+FadeTransitionEffect::FadeTransitionEffect(const sf::Color color) : _fade_color(color)
 {
    const auto w = static_cast<float>(GameConfiguration::getInstance()._view_width);
    const auto h = static_cast<float>(GameConfiguration::getInstance()._view_height);
@@ -15,7 +14,6 @@ FadeTransitionEffect::FadeTransitionEffect(const sf::Color color)
       sf::Vertex{sf::Vector2f{w, 0}, _fade_color}
    };
 }
-
 
 void FadeTransitionEffect::update(const sf::Time& dt)
 {
@@ -60,7 +58,6 @@ void FadeTransitionEffect::update(const sf::Time& dt)
       }
    }
 }
-
 
 void FadeTransitionEffect::draw(const std::shared_ptr<sf::RenderTexture>& window)
 {

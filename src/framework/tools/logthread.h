@@ -14,18 +14,14 @@
 
 class LogThread
 {
-
 public:
-
    LogThread();
    virtual ~LogThread();
 
    using SysClockTimePoint = std::chrono::time_point<std::chrono::system_clock>;
    void log(const SysClockTimePoint&, Log::Level, const std::string&, const std::source_location&);
 
-
 private:
-
    struct LogItem
    {
       SysClockTimePoint _timepoint;
@@ -44,4 +40,3 @@ private:
    std::unique_ptr<std::ofstream> _out;
    bool _stopped = false;
 };
-

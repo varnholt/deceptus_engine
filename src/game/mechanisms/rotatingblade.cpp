@@ -8,8 +8,8 @@
 #include "framework/tools/log.h"
 #include "game/audio/audio.h"
 #include "game/debug/debugdraw.h"
-#include "game/player/player.h"
 #include "game/io/texturepool.h"
+#include "game/player/player.h"
 
 // #define DEBUG_INTERSECTION
 
@@ -61,9 +61,7 @@ void RotatingBlade::setup(const GameDeserializeData& data)
       _path.begin(),
       _path.end(),
       _path.begin(),
-      [data](const auto& vec) {
-         return vec + sf::Vector2f{data._tmx_object->_x_px, data._tmx_object->_y_px};
-      }
+      [data](const auto& vec) { return vec + sf::Vector2f{data._tmx_object->_x_px, data._tmx_object->_y_px}; }
    );
 
    _path_interpolation.addKeys(_path);

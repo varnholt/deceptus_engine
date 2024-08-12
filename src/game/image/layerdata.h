@@ -12,5 +12,4 @@ struct LayerData
    float _alpha{1.0f};
 };
 
-
-#endif // LAYERDATA_H
+#endif  // LAYERDATA_H

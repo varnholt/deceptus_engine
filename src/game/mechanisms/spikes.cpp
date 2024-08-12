@@ -1,8 +1,8 @@
 #include "spikes.h"
 
 #include "constants.h"
-#include "game/player/player.h"
 #include "game/io/texturepool.h"
+#include "game/player/player.h"
 
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxproperties.h"
@@ -270,7 +270,8 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
       data._tmx_object->_x_px + TOLERANCE_PIXELS,
       data._tmx_object->_y_px + TOLERANCE_PIXELS,
       data._tmx_object->_width_px - (2 * TOLERANCE_PIXELS),
-      data._tmx_object->_height_px - (2 * TOLERANCE_PIXELS)};
+      data._tmx_object->_height_px - (2 * TOLERANCE_PIXELS)
+   };
 
    // deserialize range data
    if (data._tmx_object->_properties)
@@ -452,7 +453,8 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
                static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
                static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
                PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS),
-               PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)};
+               PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)
+            };
 
             sf::Sprite sprite;
             sprite.setTexture(*spikes->_texture);

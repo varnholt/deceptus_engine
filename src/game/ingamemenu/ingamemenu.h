@@ -51,7 +51,6 @@ public:
    void setAudioCallback(const AudioCallback&);
 
 private:
-
    void initializeController();
    void updateController();
 

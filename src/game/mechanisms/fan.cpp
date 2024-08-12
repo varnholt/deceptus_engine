@@ -131,10 +131,8 @@ void Fan::update(const sf::Time& dt)
       {
          return;
       }
-      else
-      {
-         _lever_lag -= dt.asSeconds();
-      }
+
+      _lever_lag -= dt.asSeconds();
    }
    else
    {
@@ -293,10 +291,8 @@ std::optional<sf::Vector2f> Fan::collide(const sf::FloatRect& player_rect)
    {
       return dir;
    }
-   else
-   {
-      return {};
-   }
+
+   return {};
 }
 
 void Fan::collide(const sf::FloatRect& player_rect, b2Body* body)

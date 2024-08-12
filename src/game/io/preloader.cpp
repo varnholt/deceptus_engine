@@ -11,7 +11,6 @@ void preloadDetonationAnimations()
    DetonationAnimation::getFrameData(DetonationAnimation::DetonationType::Big);
 }
 
-
 void Preloader::preload()
 {
    preloadDetonationAnimations();

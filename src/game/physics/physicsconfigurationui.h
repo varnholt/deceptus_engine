@@ -17,4 +17,4 @@ public:
    sf::Clock _clock;
 };
 
-#endif // PHYSICSCONFIGURATIONUI_H
+#endif  // PHYSICSCONFIGURATIONUI_H

@@ -6,7 +6,6 @@
 #include <locale>
 #include <sstream>
 
-
 std::vector<std::string> TmxTools::split(const std::string& points, char splitChar)
 {
    std::vector<std::string> elements;
@@ -20,22 +19,15 @@ std::vector<std::string> TmxTools::split(const std::string& points, char splitCh
    return elements;
 }
 
-
 void TmxTools::ltrim(std::string& s)
 {
-   s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
-      return !std::isspace(ch);
-   }));
+   s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) { return !std::isspace(ch); }));
 }
-
 
 void TmxTools::rtrim(std::string& s)
 {
-   s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
-      return !std::isspace(ch);
-   }).base(), s.end());
+   s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) { return !std::isspace(ch); }).base(), s.end());
 }
-
 
 void TmxTools::trim(std::string& s)
 {
@@ -43,13 +35,11 @@ void TmxTools::trim(std::string& s)
    rtrim(s);
 }
 
-
 std::string TmxTools::ltrim_copy(std::string s)
 {
    ltrim(s);
    return s;
 }
-
 
 std::string TmxTools::rtrim_copy(std::string s)
 {
@@ -57,13 +47,11 @@ std::string TmxTools::rtrim_copy(std::string s)
    return s;
 }
 
-
 std::string TmxTools::trim_copy(std::string s)
 {
    trim(s);
    return s;
 }
-
 
 std::array<uint8_t, 4> TmxTools::color(const std::string& c)
 {
@@ -75,9 +63,8 @@ std::array<uint8_t, 4> TmxTools::color(const std::string& c)
    g = (value >> 8) & 0xff;
    b = (value >> 0) & 0xff;
 
-   return {r,g,b,a};
+   return {r, g, b, a};
 }
-
 
 std::array<std::string, 2> TmxTools::splitPair(const std::string& points, char splitChar)
 {

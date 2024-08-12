@@ -2,7 +2,6 @@
 
 using json = nlohmann::json;
 
-
 void to_json(nlohmann::json& j, const PlayerInfo& data)
 {
    j = json{
@@ -13,7 +12,6 @@ void to_json(nlohmann::json& j, const PlayerInfo& data)
       {"weapons", data._weapons}
    };
 }
-
 
 void from_json(const nlohmann::json& j, PlayerInfo& data)
 {

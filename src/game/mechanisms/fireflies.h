@@ -43,4 +43,4 @@ private:
    int32_t _instance_counter = 0;
 };
 
-#endif // FIREFLIES_H
+#endif  // FIREFLIES_H

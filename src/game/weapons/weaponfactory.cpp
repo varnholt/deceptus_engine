@@ -69,4 +69,3 @@ std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type, const WeaponPrope
 
    return weapon;
 }
-

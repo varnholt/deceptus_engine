@@ -113,7 +113,9 @@ void MenuScreenMain::select()
             [this](MessageBox::Button button)
             {
                if (button == MessageBox::Button::Yes)
+               {
                   _exit_callback();
+               }
             }
          );
          break;

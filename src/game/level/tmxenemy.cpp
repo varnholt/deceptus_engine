@@ -78,10 +78,10 @@ void TmxEnemy::parse(const std::shared_ptr<TmxObject>& object)
    _vertices[0].y = top;
 
    _vertices[1].x = left;
-   _vertices[1].y = top  + h;
+   _vertices[1].y = top + h;
 
    _vertices[2].x = left + w;
-   _vertices[2].y = top  + h;
+   _vertices[2].y = top + h;
 
    _vertices[3].x = left + w;
    _vertices[3].y = top;
@@ -101,10 +101,7 @@ void TmxEnemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
    {
       for (auto i0 = 0u; i0 < path.size(); i0++)
       {
-         sf::Vector2i v0{
-            static_cast<int32_t>(path[i0].x * PPM),
-            static_cast<int32_t>(path[i0].y * PPM)
-         };
+         sf::Vector2i v0{static_cast<int32_t>(path[i0].x * PPM), static_cast<int32_t>(path[i0].y * PPM)};
 
          // check if rect contains point, then we have a match
          if (_pixel_rect.contains(v0))
@@ -116,24 +113,16 @@ void TmxEnemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
          else
          {
             // otherwise check if the line intersects with the rect
-            const auto i1 = (i0 == path.size() -1) ? 0u : (i0 + 1);
+            const auto i1 = (i0 == path.size() - 1) ? 0u : (i0 + 1);
 
-            sf::Vector2i v1{
-               static_cast<int32_t>(path[i1].x * PPM),
-               static_cast<int32_t>(path[i1].y * PPM)
-            };
+            sf::Vector2i v1{static_cast<int32_t>(path[i1].x * PPM), static_cast<int32_t>(path[i1].y * PPM)};
 
-            const auto intersects_left   = SfmlMath::intersect(v0, v1, _vertices[0], _vertices[1]);
+            const auto intersects_left = SfmlMath::intersect(v0, v1, _vertices[0], _vertices[1]);
             const auto intersects_bottom = SfmlMath::intersect(v0, v1, _vertices[1], _vertices[2]);
-            const auto intersects_right  = SfmlMath::intersect(v0, v1, _vertices[2], _vertices[3]);
-            const auto intersects_top    = SfmlMath::intersect(v0, v1, _vertices[3], _vertices[0]);
+            const auto intersects_right = SfmlMath::intersect(v0, v1, _vertices[2], _vertices[3]);
+            const auto intersects_top = SfmlMath::intersect(v0, v1, _vertices[3], _vertices[0]);
 
-            if (
-                  intersects_left.has_value()
-               || intersects_bottom.has_value()
-               || intersects_right.has_value()
-               || intersects_top.has_value()
-            )
+            if (intersects_left.has_value() || intersects_bottom.has_value() || intersects_right.has_value() || intersects_top.has_value())
             {
                // Log::Info() << "assigned chain to: " << mId;
                _path = path;
@@ -175,9 +164,7 @@ std::optional<ScriptProperty> TmxEnemy::findProperty(const std::string& key)
 {
    std::optional<ScriptProperty> property;
 
-   auto prop_it = std::find_if(_properties.begin(), _properties.end(), [key](const auto& property){
-      return property._name == key;}
-   );
+   auto prop_it = std::find_if(_properties.begin(), _properties.end(), [key](const auto& property) { return property._name == key; });
 
    if (prop_it != _properties.end())
    {
@@ -186,4 +173,3 @@ std::optional<ScriptProperty> TmxEnemy::findProperty(const std::string& key)
 
    return property;
 }
-

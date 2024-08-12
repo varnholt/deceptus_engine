@@ -15,7 +15,9 @@ int32_t atoi2(char* text)
 {
    int32_t num = 0;
    while (*text == ' ')
+   {
       text++;  // skip spaces
+   }
    while (*text >= '0' && *text <= '9')
    {
       num = num * 10 + (*text - '0');
@@ -90,7 +92,9 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
                {
                   TmxTools::trim(line);
                   if (line.empty())
+                  {
                      continue;
+                  }
 
                   int32_t x = 0;
 

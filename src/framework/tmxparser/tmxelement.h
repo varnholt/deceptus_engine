@@ -9,7 +9,8 @@ struct TmxParseData;
 
 struct TmxElement
 {
-   enum class Type {
+   enum class Type
+   {
       TypeInvalid = 0,
       TypeTileSet = 1,
       TypeLayer = 2,
@@ -17,7 +18,6 @@ struct TmxElement
       TypeImageLayer = 4,
       TypeTemplate = 5
    };
-
 
    TmxElement() = default;
    virtual ~TmxElement() = default;

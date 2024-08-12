@@ -36,4 +36,4 @@ struct Chunk
    int32_t _y{0};
 };
 
-#endif // CHUNK_H
+#endif  // CHUNK_H

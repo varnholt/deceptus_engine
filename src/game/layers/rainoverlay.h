@@ -10,12 +10,9 @@
 
 #include <SFML/Graphics.hpp>
 
-
 class RainOverlay : public WeatherOverlay
 {
-
 public:
-
    struct RainSettings
    {
       bool _collide = true;
@@ -49,7 +46,6 @@ public:
       sf::Vector2f _p2_px;
    };
 
-
    RainOverlay();
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
@@ -58,7 +54,6 @@ public:
    void setSettings(const RainSettings& newSettings);
 
 private:
-
    void determineRainSurfaces();
 
    bool _initialized = false;
@@ -76,4 +71,3 @@ private:
 
    RainSettings _settings;
 };
-

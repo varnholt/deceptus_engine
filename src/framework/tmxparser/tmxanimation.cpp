@@ -2,8 +2,7 @@
 
 #include "tmxframe.h"
 
-
-void TmxAnimation::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<TmxParseData>& parse_data)
+void TmxAnimation::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
    auto* node = element->FirstChild();
    while (node)

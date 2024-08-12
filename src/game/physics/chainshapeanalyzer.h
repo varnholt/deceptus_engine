@@ -27,6 +27,6 @@ void analyze(const std::shared_ptr<b2World>& world);
 std::optional<b2Vec2> checkPlayerAtCollisionPosition();
 bool checkPlayerHiccup();
 b2Vec2 lastGoodPosition();
-};
+};  // namespace ChainShapeAnalyzer
 
-#endif // CHAINSHAPEANALYZER_H
+#endif  // CHAINSHAPEANALYZER_H

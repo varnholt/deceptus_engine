@@ -910,7 +910,8 @@ void Player::updateVelocity()
 
    // block movement while spawning
    // spawn is only played if player has died before in current level
-   if (GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealDuration() && SaveState::getPlayerInfo()._stats._death_count_current_level > 0)
+   if (GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealDuration() &&
+       SaveState::getPlayerInfo()._stats._death_count_current_level > 0)
    {
       _body->SetLinearVelocity({0.0, 0.0});
       return;
@@ -1291,7 +1292,9 @@ void Player::updateFootsteps()
       if (vel > 0.1f)
       {
          if (vel < 3.0f)
+         {
             vel = 3.0f;
+         }
 
          if (_time.asSeconds() > _next_footstep_time)
          {

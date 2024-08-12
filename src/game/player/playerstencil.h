@@ -7,7 +7,7 @@ namespace sf
 {
 class RenderTarget;
 class RenderTexture;
-}
+}  // namespace sf
 
 namespace PlayerStencil
 {

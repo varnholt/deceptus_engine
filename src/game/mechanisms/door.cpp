@@ -276,9 +276,7 @@ void Door::open()
 
    if (_automatic_close)
    {
-      Timer::add(
-         std::chrono::milliseconds(10000), [this]() { close(); }, Timer::Type::Singleshot, Timer::Scope::UpdateIngame
-      );
+      Timer::add(std::chrono::milliseconds(10000), [this]() { close(); }, Timer::Type::Singleshot, Timer::Scope::UpdateIngame);
    }
 }
 

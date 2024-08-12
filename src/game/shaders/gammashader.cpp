@@ -5,7 +5,6 @@
 
 #include <iostream>
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void GammaShader::initialize()
 {
@@ -16,7 +15,6 @@ void GammaShader::initialize()
    }
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void GammaShader::update()
 {
@@ -24,13 +22,11 @@ void GammaShader::update()
    _gamma_shader.setUniform("gamma", gamma);
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 void GammaShader::setTexture(const sf::Texture& texture)
 {
    _gamma_shader.setUniform("texture", texture);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 const sf::Shader& GammaShader::getGammaShader() const

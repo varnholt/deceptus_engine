@@ -261,13 +261,21 @@ void Image::minimum(const Image& image)
          unsigned char b2 = (c2 & 0xff);
 
          if (a2 < a1)
+         {
             a1 = a2;
+         }
          if (r2 < r1)
+         {
             r1 = r2;
+         }
          if (g2 < g1)
+         {
             g1 = g2;
+         }
          if (b2 < b1)
+         {
             b1 = b2;
+         }
 
          dst[x] = (a1 << 24) + (r1 << 16) + (g1 << 8) + b1;
       }
@@ -341,19 +349,31 @@ uint32_t calcNormal(int32_t z, uint32_t x0, uint32_t x1, uint32_t y0, uint32_t y
 
    x = static_cast<int32_t>(128 + x * t);
    if (x < 0)
+   {
       x = 0;
+   }
    if (x > 255)
+   {
       x = 255;
+   }
    y = static_cast<int32_t>(128 - y * t);
    if (y < 0)
+   {
       y = 0;
+   }
    if (y > 255)
+   {
       y = 255;
+   }
    z = static_cast<int32_t>(128 + z * t);
    if (z < 0)
+   {
       z = 0;
+   }
    if (z > 255)
+   {
       z = 255;
+   }
 
    return (255 << 24) | (x << 16) | (y << 8) | z;
 }
