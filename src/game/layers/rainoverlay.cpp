@@ -10,9 +10,8 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <iostream>
 #include <ctime>
-
+#include <iostream>
 
 namespace
 {
@@ -21,18 +20,15 @@ static const auto max_age_s = 1.0f;            // time for raindrop to move thro
 static const auto randomize_factor_y = 0.02f;  // randomized to 0..2
 static const auto fixed_direction_y = 1000.0f;
 
-
-sf::Vector2f vecB2S(const b2Vec2 &vector)
+sf::Vector2f vecB2S(const b2Vec2& vector)
 {
-   return{vector.x * PPM, vector.y * PPM};
+   return {vector.x * PPM, vector.y * PPM};
 }
-
 
 b2Vec2 vecS2B(const sf::Vector2f& vector)
 {
-   return{vector.x * MPP, vector.y * MPP};
+   return {vector.x * MPP, vector.y * MPP};
 }
-
 
 std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& world, const sf::FloatRect& screen)
 {
@@ -49,13 +45,11 @@ std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& worl
    return WorldQuery::queryBodies(world, aabb);
 }
 
-}
+}  // namespace
 
-
-RainOverlay::RainOverlay()
- : _texture(TexturePool::getInstance().get("data/sprites/rain.png"))
+RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprites/rain.png"))
 {
-   std::srand(static_cast<uint32_t>(std::time(nullptr))); // use current time as seed for random generator
+   std::srand(static_cast<uint32_t>(std::time(nullptr)));  // use current time as seed for random generator
 
    for (auto a = 0; a < _settings._drop_count; a++)
    {
@@ -64,7 +58,6 @@ RainOverlay::RainOverlay()
       _drops.push_back(drop);
    }
 }
-
 
 void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
@@ -81,12 +74,12 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    // dest:   background
 
    static sf::BlendMode blend_mode(
-         sf::BlendMode::SrcAlpha,         // colorSourceFactor
-         sf::BlendMode::OneMinusSrcAlpha, // colorDestinationFactor
-         sf::BlendMode::Add,              // colorBlendEquation
-         sf::BlendMode::SrcAlpha,         // alphaSourceFactor
-         sf::BlendMode::OneMinusSrcAlpha, // alphaDestinationFactor
-         sf::BlendMode::Add               // alphaBlendEquation
+      sf::BlendMode::SrcAlpha,          // colorSourceFactor
+      sf::BlendMode::OneMinusSrcAlpha,  // colorDestinationFactor
+      sf::BlendMode::Add,               // colorBlendEquation
+      sf::BlendMode::SrcAlpha,          // alphaSourceFactor
+      sf::BlendMode::OneMinusSrcAlpha,  // alphaDestinationFactor
+      sf::BlendMode::Add                // alphaBlendEquation
    );
 
    for (auto& d : _drops)
@@ -107,7 +100,6 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       }
    }
 }
-
 
 // rain tileset
 //    11px x 12px
@@ -131,18 +123,13 @@ void RainOverlay::update(const sf::Time& dt)
    }
 
    // go through all edges and find the closest intersection; this way we know when the rain drop will hit the floor
-   auto update_colliding_edge = [this](RainDrop& p) {
-
+   auto update_colliding_edge = [this](RainDrop& p)
+   {
       p._intersections.clear();
 
       for (const auto& edge : _edges)
       {
-         auto intersection = SfmlMath::intersect(
-            p._origin_px,
-            p._pos_px + sf::Vector2f{0.0f, 1000.0f},
-            edge._p1_px,
-            edge._p2_px
-         );
+         auto intersection = SfmlMath::intersect(p._origin_px, p._pos_px + sf::Vector2f{0.0f, 1000.0f}, edge._p1_px, edge._p2_px);
 
          if (intersection.has_value())
          {
@@ -169,10 +156,10 @@ void RainOverlay::update(const sf::Time& dt)
    //   :        :                      :        :
    //   +- - - - +----------------------+- - - - +
    auto player_position = Player::getCurrent()->getPixelPositionFloat();
-   _clip_rect.left   = player_position.x - _screen.width;
-   _clip_rect.top    = player_position.y - _screen.height;
+   _clip_rect.left = player_position.x - _screen.width;
+   _clip_rect.top = player_position.y - _screen.height;
    _clip_rect.height = _screen.height * 2;
-   _clip_rect.width  = _screen.width * 2;
+   _clip_rect.width = _screen.width * 2;
 
    // initialize all drops if that hasn't been done yet
    if (!_initialized)
@@ -256,16 +243,11 @@ void RainOverlay::update(const sf::Time& dt)
          std::remove_if(
             _hits.begin(),
             _hits.end(),
-            [dt](auto& hit) {
-               hit._age_s +=  dt.asSeconds();
+            [dt](auto& hit)
+            {
+               hit._age_s += dt.asSeconds();
                hit._sprite.setOrigin(5, 11);
-               hit._sprite.setTextureRect({
-                     11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f)),
-                     96,
-                     11,
-                     12
-                  }
-               );
+               hit._sprite.setTextureRect({11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f)), 96, 11, 12});
                return hit._age_s > 1.0f;
             }
          ),
@@ -274,10 +256,9 @@ void RainOverlay::update(const sf::Time& dt)
    }
 }
 
-
 void RainOverlay::RainDrop::reset(const sf::FloatRect& rect)
 {
-   _age_s = - (std::rand() % 10000) * 0.0001f;
+   _age_s = -(std::rand() % 10000) * 0.0001f;
 
    const auto x = std::rand() % static_cast<int32_t>(rect.width);
 
@@ -286,7 +267,6 @@ void RainOverlay::RainDrop::reset(const sf::FloatRect& rect)
 
    _origin_px = _pos_px;
 }
-
 
 void RainOverlay::determineRainSurfaces()
 {
@@ -298,11 +278,7 @@ void RainOverlay::determineRainSurfaces()
 
    for (auto body : bodies)
    {
-      if (
-            body->GetType() == b2_dynamicBody
-         || body->GetType() == b2_kinematicBody
-         || body->GetType() == b2_staticBody
-      )
+      if (body->GetType() == b2_dynamicBody || body->GetType() == b2_kinematicBody || body->GetType() == b2_staticBody)
       {
          auto f = body->GetFixtureList();
          while (f)
@@ -317,7 +293,7 @@ void RainOverlay::determineRainSurfaces()
                   const auto offset = body->GetPosition();
                   auto chain = dynamic_cast<b2ChainShape*>(shape);
 
-                  for (auto i = 0; i< chain->m_count - 1; i++)
+                  for (auto i = 0; i < chain->m_count - 1; i++)
                   {
                      auto v1_m = offset + chain->m_vertices[i];
                      auto v2_m = offset + chain->m_vertices[i + 1];
@@ -352,7 +328,6 @@ void RainOverlay::determineRainSurfaces()
       }
    }
 }
-
 
 void RainOverlay::setSettings(const RainSettings& settings)
 {

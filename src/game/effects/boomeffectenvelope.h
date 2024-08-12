@@ -15,4 +15,4 @@ public:
    BoomSettings _settings;
 };
 
-#endif // BOOMEFFECTENVELOPE_H
+#endif  // BOOMEFFECTENVELOPE_H

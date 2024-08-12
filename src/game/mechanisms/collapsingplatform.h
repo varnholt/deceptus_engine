@@ -12,11 +12,9 @@ struct TmxObject;
 #include <filesystem>
 #include <vector>
 
-
 class CollapsingPlatform : public FixtureNode, public GameMechanism
 {
 public:
-
    struct Settings
    {
       float time_to_collapse_s = 1.0f;
@@ -64,7 +62,6 @@ public:
    void updateRespawnAnimation();
 
 private:
-
    void updateBlockSprites();
    void updateBlockDestruction(const sf::Time& dt);
    void updateRespawn(const sf::Time& dt);
@@ -97,4 +94,3 @@ private:
    b2PolygonShape _shape;
    void resetAllBlocks();
 };
-

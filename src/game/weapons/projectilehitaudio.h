@@ -17,4 +17,4 @@ std::vector<ProjectileHitSample> getReferenceSamples(const std::string& id);
 void addReferenceSamples(const std::string& id, const std::vector<ProjectileHitSample>& reference);
 };  // namespace ProjectileHitAudio
 
-#endif // PROJECTILEHITAUDIO_H
+#endif  // PROJECTILEHITAUDIO_H

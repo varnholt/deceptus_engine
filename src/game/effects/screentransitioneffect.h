@@ -5,7 +5,6 @@
 #include <functional>
 #include <memory>
 
-
 struct ScreenTransitionEffect
 {
    std::shared_ptr<sf::RenderTexture> _frame_buffer;
@@ -22,4 +21,3 @@ struct ScreenTransitionEffect
 protected:
    virtual void done();
 };
-

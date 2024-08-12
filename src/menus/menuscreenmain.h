@@ -4,13 +4,11 @@
 
 #include <functional>
 
-
 class MenuScreenMain : public MenuScreen
 {
-
 public:
-
-   enum class Selection {
+   enum class Selection
+   {
       Start,
       Options,
       Quit
@@ -36,8 +34,5 @@ public:
    Selection _selection = Selection::Start;
 
 private:
-
    ExitCallback _exit_callback;
-
 };
-

@@ -16,4 +16,3 @@ public:
    void back();
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
 };
-

@@ -43,7 +43,8 @@ void InfoOverlay::update(const sf::Time& delta_time)
       // wait
       alpha = 1.0f;
    }
-   else if (_elapsed < _settings._start_delay_duration + _settings._fade_in_duration + _settings._show_duration + _settings._fade_out_duration)
+   else if (_elapsed <
+            _settings._start_delay_duration + _settings._fade_in_duration + _settings._show_duration + _settings._fade_out_duration)
    {
       // fade out
       const auto fade_out_start = _settings._start_delay_duration + _settings._fade_in_duration + _settings._show_duration;

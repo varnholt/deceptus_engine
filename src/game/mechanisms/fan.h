@@ -4,8 +4,8 @@
 #include <SFML/Graphics.hpp>
 
 #include <filesystem>
-#include <optional>
 #include <memory>
+#include <optional>
 
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
@@ -15,18 +15,16 @@ struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
 
-
-   class Fan : public GameMechanism, public GameNode
+class Fan : public GameMechanism, public GameNode
 {
 public:
-
-      enum class TileDirection
+   enum class TileDirection
    {
-      Up    =  0,
-      Right =  8,
-      Left  = 16,
-      Down  = 24,
-      };
+      Up = 0,
+      Right = 8,
+      Left = 16,
+      Down = 24,
+   };
 
    struct FanTile
    {
@@ -58,9 +56,7 @@ public:
 
    static std::vector<std::shared_ptr<GameMechanism>>& getFans();
 
-
 private:
-
    void updateSprite();
 
    static void createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& item);
@@ -82,4 +78,3 @@ private:
 
    std::shared_ptr<sf::Texture> _texture;
 };
-

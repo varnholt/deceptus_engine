@@ -33,4 +33,3 @@ struct TmxEnemy
    std::vector<ScriptProperty> _properties;
    Winding _winding = Winding::Clockwise;
 };
-

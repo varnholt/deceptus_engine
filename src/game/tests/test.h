@@ -1,10 +1,8 @@
 #pragma once
 
-
 class Test
 {
-   public:
-      Test();
-       void testInterpolation();
+public:
+   Test();
+   void testInterpolation();
 };
-

@@ -31,4 +31,3 @@ struct Atmosphere
    std::vector<std::vector<sf::Vertex>> _outlines;
    std::shared_ptr<TileMap> _tile_map;
 };
-

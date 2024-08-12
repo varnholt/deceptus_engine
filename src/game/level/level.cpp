@@ -1045,7 +1045,8 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
 bool Level::isPhysicsPathClear(const sf::Vector2i& a_tl, const sf::Vector2i& b_tl) const
 {
-   if (a_tl.x < 0 || a_tl.y < 0 || b_tl.x < 0 || b_tl.y < 0 || a_tl.x > _physics._grid_width || b_tl.x > _physics._grid_width || a_tl.y > _physics._grid_height || b_tl.y > _physics._grid_height)
+   if (a_tl.x < 0 || a_tl.y < 0 || b_tl.x < 0 || b_tl.y < 0 || a_tl.x > _physics._grid_width || b_tl.x > _physics._grid_width ||
+       a_tl.y > _physics._grid_height || b_tl.y > _physics._grid_height)
    {
       return false;
    }
@@ -1484,7 +1485,8 @@ void Level::regenerateLevelPaths(
 #ifdef __linux__
       auto cmd = std::string("tools/path_merge/path_merge") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
 #elif defined __APPLE__
-      auto cmd = std::string("tools/path_merge/path_merge_macos") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
+      auto cmd =
+         std::string("tools/path_merge/path_merge_macos") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
 #else
       auto cmd =
          std::string("tools\\path_merge\\path_merge.exe") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();

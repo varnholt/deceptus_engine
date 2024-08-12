@@ -1,8 +1,7 @@
 #pragma once
 
-
-#include <optional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -17,9 +16,7 @@ struct TmxObject;
 
 class Dialogue : public GameMechanism, public GameNode
 {
-
 public:
-
    struct DialogueItem
    {
       std::string _title;
@@ -43,7 +40,6 @@ public:
    void showNext();
 
 private:
-
    void replaceTags(std::string& str);
    void replace(std::string& str, const std::string& what, const std::string& with);
 
@@ -59,5 +55,3 @@ private:
    std::optional<int32_t> _consumed_counter;
    sf::Time _elapsed;
 };
-
-

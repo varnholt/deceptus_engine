@@ -484,14 +484,12 @@ PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_c
                _auxiliary_cycle = data._points_left ? _sword_attack_jump_l : _sword_attack_jump_r;
                return sword_attack_cycle_it->second;
             }
-            else
-            {
-               // jump animation is over, clear auxiliary cycle
-               //
-               // this is not a solid implementation since the attack cycle should be played until it's
-               // actually over... but for that, more jump/idle cycles, just showing the pants are needed.
-               _auxiliary_cycle = nullptr;
-            }
+
+            // jump animation is over, clear auxiliary cycle
+            //
+            // this is not a solid implementation since the attack cycle should be played until it's
+            // actually over... but for that, more jump/idle cycles, just showing the pants are needed.
+            _auxiliary_cycle = nullptr;
          }
          else
          {
@@ -755,7 +753,8 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processRunAnimation(c
    const auto look_active = CameraPanorama::getInstance().isLookActive();
 
    // run
-   if (!data._dash_dir.has_value() && passes_sanity_check && !data._in_air && !data._in_water && !look_active && !data._crouching && !data._bending_down)
+   if (!data._dash_dir.has_value() && passes_sanity_check && !data._in_air && !data._in_water && !look_active && !data._crouching &&
+       !data._bending_down)
    {
       return data._moving_right ? _run_r : _run_l;
    }

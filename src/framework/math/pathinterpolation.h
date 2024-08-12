@@ -10,9 +10,7 @@
 template <typename T>
 class PathInterpolation
 {
-
 public:
-
    enum class Mode
    {
       Linear
@@ -49,53 +47,51 @@ public:
       }
    }
 
-
    T lerp(const T& pos1, const T& pos2, float weight_pos_2)
    {
-       return pos1 + weight_pos_2 * (pos2 - pos1);
+      return pos1 + weight_pos_2 * (pos2 - pos1);
    };
-
 
    // adds interpolation for each single edge
    void addKeys(const std::vector<T>& positions, int32_t subdivision_count, Easings::Type easing_type)
    {
-       auto func = Easings::getFunction<float>(easing_type);
+      auto func = Easings::getFunction<float>(easing_type);
 
-       // determine length of each edge
-       auto length_sum = 0.0f;
-       for (auto index = 0; index < static_cast<int32_t>(positions.size()); index++)
-       {
-           const auto length = (index == 0) ? 0.0f : SfmlMath::length(positions[index] - positions[index - 1]);
-           length_sum += length;
-       }
+      // determine length of each edge
+      auto length_sum = 0.0f;
+      for (auto index = 0; index < static_cast<int32_t>(positions.size()); index++)
+      {
+         const auto length = (index == 0) ? 0.0f : SfmlMath::length(positions[index] - positions[index - 1]);
+         length_sum += length;
+      }
 
-       auto length_to_this_point = 0.0f;
-       for (auto index = 0; index < static_cast<int32_t>(positions.size()) - 1; index++)
-       {
-           auto& pos_1 = positions.at(index);
-           auto& pos_2 = positions.at(index + 1);
+      auto length_to_this_point = 0.0f;
+      for (auto index = 0; index < static_cast<int32_t>(positions.size()) - 1; index++)
+      {
+         auto& pos_1 = positions.at(index);
+         auto& pos_2 = positions.at(index + 1);
 
-           const auto length = SfmlMath::length(positions[index + 1] - positions[index]);
+         const auto length = SfmlMath::length(positions[index + 1] - positions[index]);
 
-           auto subdiv_dist = length_to_this_point;
-           const auto subdiv_step = length / subdivision_count;
+         auto subdiv_dist = length_to_this_point;
+         const auto subdiv_step = length / subdivision_count;
 
-           for (auto subdivision = 0; subdivision < subdivision_count; subdivision++)
-           {
-               const auto weight = static_cast<float>(subdivision) / static_cast<float>(subdivision_count);
-               const auto pos_lerp = lerp(pos_1, pos_2, func(weight));
-               addKey(pos_lerp, subdiv_dist / length_sum);
+         for (auto subdivision = 0; subdivision < subdivision_count; subdivision++)
+         {
+            const auto weight = static_cast<float>(subdivision) / static_cast<float>(subdivision_count);
+            const auto pos_lerp = lerp(pos_1, pos_2, func(weight));
+            addKey(pos_lerp, subdiv_dist / length_sum);
 
-               subdiv_dist += subdiv_step;
-           }
+            subdiv_dist += subdiv_step;
+         }
 
-           length_to_this_point += length;
-       }
+         length_to_this_point += length;
+      }
 
-       addKey(positions.at(positions.size()-1), 1.0f);
+      addKey(positions.at(positions.size() - 1), 1.0f);
    }
 
-   void addKey(const T &pos, float time_value)
+   void addKey(const T& pos, float time_value)
    {
       Key key;
       key._pos = pos;
@@ -163,14 +159,14 @@ public:
 
    void updateTime(float delta)
    {
-       _time += delta;
+      _time += delta;
    }
 
    bool update(const T& current_pos)
    {
       if (_track.empty())
       {
-          return false;
+         return false;
       }
 
       auto reached = false;
@@ -199,7 +195,7 @@ public:
 
    float getTime() const
    {
-       return _time;
+      return _time;
    }
 
    void setTime(float time)
@@ -207,9 +203,7 @@ public:
       _time = time;
    }
 
-
 private:
-
    void computeVelocity()
    {
       const T& a = _track[_current_key_index]._pos;
@@ -224,7 +218,7 @@ private:
       auto next_index = _current_key_index + 1;
       if (next_index == _track.size())
       {
-        next_index = 0;
+         next_index = 0;
       }
 
       return next_index;
@@ -232,19 +226,19 @@ private:
 
    bool checkKeyReached(const T& current_pos)
    {
-     if (_track.empty())
-     {
-        return false;
-     }
+      if (_track.empty())
+      {
+         return false;
+      }
 
-     auto reached = false;
+      auto reached = false;
 
-     if ((current_pos - _track[_current_key_index]._pos).LengthSquared() < 0.1f)
-     {
-        reached = true;
-     }
+      if ((current_pos - _track[_current_key_index]._pos).LengthSquared() < 0.1f)
+      {
+         reached = true;
+      }
 
-     return reached;
+      return reached;
    }
 
    std::vector<Key> _track;
@@ -256,4 +250,3 @@ private:
 
    Easings::Type _easing_type = Easings::Type::None;
 };
-

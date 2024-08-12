@@ -4,14 +4,12 @@
 #include <sstream>
 #include "tmxtools.h"
 
-
 TmxChunk::~TmxChunk()
 {
    delete _data;
 }
 
-
-void TmxChunk::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<TmxParseData>& parse_data)
+void TmxChunk::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
    TmxElement::deserialize(element, parse_data);
 
@@ -34,7 +32,9 @@ void TmxChunk::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<
       TmxTools::trim(line);
 
       if (line.empty())
+      {
          continue;
+      }
 
       auto x = 0;
       const auto row_content = TmxTools::split(line, ',');
@@ -49,5 +49,3 @@ void TmxChunk::deserialize(tinyxml2::XMLElement *element, const std::shared_ptr<
       y++;
    }
 }
-
-

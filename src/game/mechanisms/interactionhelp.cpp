@@ -174,8 +174,12 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
    const auto pos_index_keyboard = ControllerKeyMap::getArrayPosition(button_names_keyboard_controller.first);
    const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_names_keyboard_controller.second);
 
-   _button_rect_keyboard = {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
-   _button_rect_controller = {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
+   _button_rect_keyboard = {
+      pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE
+   };
+   _button_rect_controller = {
+      pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE
+   };
    _button_sprite.setTextureRect(_button_rect_keyboard);
    _button_sprite.setPosition(550, 335);
 

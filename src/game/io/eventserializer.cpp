@@ -3,11 +3,10 @@
 #include "framework/tools/log.h"
 #include "game/state/gamestate.h"
 
+#include <fstream>
 #include <iostream>
 #include <ostream>
-#include <fstream>
 #include <thread>
-
 
 namespace
 {
@@ -15,9 +14,9 @@ using HighResDuration = std::chrono::high_resolution_clock::duration;
 using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
 using HighResClockRep = std::chrono::high_resolution_clock::rep;
 using HighResClock = std::chrono::high_resolution_clock;
-}
+}  // namespace
 
-template<typename R>
+template <typename R>
 static bool is_ready(std::future<R> const& f)
 {
    return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
@@ -28,7 +27,6 @@ void writeInt32(std::ostream& stream, int32_t value)
    stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 }
 
-
 int32_t readInt32(std::istream& stream)
 {
    int32_t value = 0;
@@ -36,12 +34,10 @@ int32_t readInt32(std::istream& stream)
    return value;
 }
 
-
 void writeUInt8(std::ostream& stream, uint8_t value)
 {
    stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 }
-
 
 uint8_t readUint8(std::istream& stream)
 {
@@ -50,7 +46,6 @@ uint8_t readUint8(std::istream& stream)
    return value;
 }
 
-
 void writeTimePoint(std::ostream& stream, const HighResTimePoint& time_point)
 {
    using namespace std::chrono_literals;
@@ -58,13 +53,11 @@ void writeTimePoint(std::ostream& stream, const HighResTimePoint& time_point)
    stream.write(reinterpret_cast<char const*>(&time_point_raw), sizeof time_point_raw);
 }
 
-
 void writeDuration(std::ostream& stream, const HighResDuration& duration)
 {
    auto const duration_raw = duration.count();
    stream.write(reinterpret_cast<char const*>(&duration_raw), sizeof duration_raw);
 }
-
 
 HighResTimePoint readTimePoint(std::istream& stream)
 {
@@ -73,7 +66,6 @@ HighResTimePoint readTimePoint(std::istream& stream)
    HighResTimePoint time_point{HighResDuration{file_time_rep}};
    return time_point;
 }
-
 
 HighResDuration readDuration(std::istream& stream)
 {
@@ -114,12 +106,10 @@ void EventSerializer::add(const sf::Event& event)
    _events.emplace_back(now, event);
 }
 
-
 void EventSerializer::clear()
 {
    _events.clear();
 }
-
 
 void writeEvent(std::ostream& stream, const sf::Event& event)
 {
@@ -130,11 +120,7 @@ void writeEvent(std::ostream& stream, const sf::Event& event)
       {
          const auto key_event = event.key;
 
-         const uint8_t flags =
-              (key_event.alt     << 3)
-            | (key_event.control << 2)
-            | (key_event.shift   << 1)
-            | (key_event.system  << 0);
+         const uint8_t flags = (key_event.alt << 3) | (key_event.control << 2) | (key_event.shift << 1) | (key_event.system << 0);
 
          writeUInt8(stream, static_cast<uint8_t>(event.type));
          writeUInt8(stream, static_cast<uint8_t>(key_event.code));
@@ -148,7 +134,6 @@ void writeEvent(std::ostream& stream, const sf::Event& event)
       }
    }
 }
-
 
 sf::Event readEvent(std::istream& stream)
 {
@@ -165,10 +150,10 @@ sf::Event readEvent(std::istream& stream)
          auto flags = readUint8(stream);
 
          event.key.code = static_cast<sf::Keyboard::Key>(key_code);
-         event.key.alt     = (flags & 0x08);
+         event.key.alt = (flags & 0x08);
          event.key.control = (flags & 0x04);
-         event.key.shift   = (flags & 0x02);
-         event.key.system  = (flags & 0x01);
+         event.key.shift = (flags & 0x02);
+         event.key.system = (flags & 0x01);
          break;
       }
 
@@ -182,12 +167,11 @@ sf::Event readEvent(std::istream& stream)
    return event;
 }
 
-
 void EventSerializer::serialize()
 {
    if (_events.empty())
    {
-       return;
+      return;
    }
 
    Log::Info() << "serializing " << _events.size() << " events";
@@ -203,7 +187,6 @@ void EventSerializer::serialize()
       writeEvent(out, event._event);
    }
 }
-
 
 void EventSerializer::deserialize()
 {
@@ -222,7 +205,6 @@ void EventSerializer::deserialize()
    }
 }
 
-
 void EventSerializer::debug()
 {
    const auto start = _events.at(0)._time_point;
@@ -235,7 +217,6 @@ void EventSerializer::debug()
       Log::Info() << dt.count();
    }
 }
-
 
 void EventSerializer::play()
 {
@@ -251,9 +232,8 @@ void EventSerializer::play()
    }
 
    _play_start_time = HighResClock::now();
-   _play_result = std::async(std::launch::async, [this]{playThread();});
+   _play_result = std::async(std::launch::async, [this] { playThread(); });
 }
-
 
 void EventSerializer::playThread()
 {
@@ -266,7 +246,7 @@ void EventSerializer::playThread()
    while (!done)
    {
       const auto now = HighResClock::now();
-      const auto elapsed =  now - _play_start_time;
+      const auto elapsed = now - _play_start_time;
 
       if (elapsed > _events[recorded_index]._duration)
       {
@@ -280,7 +260,6 @@ void EventSerializer::playThread()
       std::this_thread::sleep_for(1ms);
    }
 }
-
 
 bool EventSerializer::filterMovementEvents(const sf::Event& event)
 {
@@ -311,12 +290,10 @@ bool EventSerializer::filterMovementEvents(const sf::Event& event)
    return false;
 }
 
-
 void EventSerializer::setEnabled(bool enabled)
 {
    _enabled = enabled;
 }
-
 
 EventSerializer& EventSerializer::getInstance()
 {
@@ -324,24 +301,20 @@ EventSerializer& EventSerializer::getInstance()
    return _instance;
 }
 
-
 bool EventSerializer::isEnabled() const
 {
    return _enabled;
 }
-
 
 std::optional<size_t> EventSerializer::getMaxSize() const
 {
    return _max_size;
 }
 
-
 void EventSerializer::setMaxSize(size_t max_size)
 {
    _max_size = max_size;
 }
-
 
 void EventSerializer::setCallback(const EventCallback& callback)
 {

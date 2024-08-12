@@ -21,6 +21,5 @@ struct PlayerInfo
    std::string _name;
 };
 
-
 void to_json(nlohmann::json& j, const PlayerInfo& d);
 void from_json(const nlohmann::json& j, PlayerInfo& d);

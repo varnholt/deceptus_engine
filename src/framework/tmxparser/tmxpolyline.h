@@ -12,4 +12,3 @@ struct TmxPolyLine : TmxElement
 
    std::vector<sf::Vector2f> _polyline;
 };
-

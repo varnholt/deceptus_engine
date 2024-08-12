@@ -10,4 +10,4 @@ public:
    float shakeFunction(float t) override;
 };
 
-#endif // BOOMEFFECTENVELOPESINE_H
+#endif  // BOOMEFFECTENVELOPESINE_H

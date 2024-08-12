@@ -21,7 +21,6 @@ public:
    bool isActive() const;
 
 private:
-
    struct Particle
    {
       sf::Vector2f _pos_norm;

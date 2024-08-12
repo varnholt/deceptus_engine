@@ -48,4 +48,4 @@ private:
    int32_t _dive_frames_left = 0;
 };
 
-#endif // WATERBUBBLES_H
+#endif  // WATERBUBBLES_H

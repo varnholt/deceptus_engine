@@ -13,8 +13,7 @@
 using json = nlohmann::json;
 
 //----------------------------------------------------------------------------------------------------------------------
-AnimationPool::AnimationPool(const std::string& file_path)
- : _file_path(file_path)
+AnimationPool::AnimationPool(const std::string& file_path) : _file_path(file_path)
 {
 }
 

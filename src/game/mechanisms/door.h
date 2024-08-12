@@ -12,7 +12,6 @@
 
 #include <box2d/box2d.h>
 
-
 struct TmxLayer;
 struct TmxTileSet;
 

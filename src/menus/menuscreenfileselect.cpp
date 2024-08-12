@@ -13,11 +13,10 @@
 #include <ostream>
 #include <sstream>
 
-
-namespace {
-   int32_t nameOffsetY = -2;
+namespace
+{
+int32_t nameOffsetY = -2;
 }
-
 
 MenuScreenFileSelect::MenuScreenFileSelect()
 {
@@ -34,7 +33,6 @@ MenuScreenFileSelect::MenuScreenFileSelect()
    }
 }
 
-
 void MenuScreenFileSelect::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    MenuScreen::draw(window, states);
@@ -44,7 +42,6 @@ void MenuScreenFileSelect::draw(sf::RenderTarget& window, sf::RenderStates state
       window.draw(_names[i], states);
    }
 }
-
 
 void MenuScreenFileSelect::up()
 {
@@ -59,7 +56,6 @@ void MenuScreenFileSelect::up()
 
    MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
-
 
 void MenuScreenFileSelect::down()
 {
@@ -117,7 +113,8 @@ void MenuScreenFileSelect::remove()
 {
    MessageBox::question(
       "Are you sure you want to delete this file?",
-      [this](MessageBox::Button button) {
+      [this](MessageBox::Button button)
+      {
          if (button == MessageBox::Button::Yes)
          {
             SaveState::getSaveState(static_cast<uint32_t>(_slot)).invalidate();
@@ -127,7 +124,6 @@ void MenuScreenFileSelect::remove()
       }
    );
 }
-
 
 void MenuScreenFileSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 {
@@ -157,19 +153,16 @@ void MenuScreenFileSelect::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
-
 void MenuScreenFileSelect::controllerButtonX()
 {
    remove();
 }
-
 
 void MenuScreenFileSelect::loadingFinished()
 {
    SaveState::deserializeFromFile();
    updateLayers();
 }
-
 
 void MenuScreenFileSelect::showEvent()
 {
@@ -178,7 +171,6 @@ void MenuScreenFileSelect::showEvent()
    // layers become outdated.
    updateLayers();
 }
-
 
 void MenuScreenFileSelect::updateLayers()
 {
@@ -224,10 +216,7 @@ void MenuScreenFileSelect::updateLayers()
       // update names
       auto layer_name = _layers["slot_" + slot_name + "_name"];
       _names[index].setString(save_state._player_info._name);
-      _names[index].setPosition(
-         layer_name->_sprite->getPosition().x,
-         layer_name->_sprite->getPosition().y + nameOffsetY
-      );
+      _names[index].setPosition(layer_name->_sprite->getPosition().x, layer_name->_sprite->getPosition().y + nameOffsetY);
 
       index++;
    }
@@ -247,5 +236,3 @@ void MenuScreenFileSelect::updateLayers()
    _layers["back_pc_0"]->_visible = !isControllerUsed();
    _layers["back_pc_1"]->_visible = false;
 }
-
-

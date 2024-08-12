@@ -12,4 +12,4 @@ struct PlayerJumpTrace
    float _jump_prev_y = 0.0f;
 };
 
-#endif // PLAYERJUMPTRACE_H
+#endif  // PLAYERJUMPTRACE_H

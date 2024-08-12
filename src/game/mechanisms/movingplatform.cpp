@@ -12,10 +12,10 @@
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "game/constants.h"
+#include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/player/player.h"
-#include "game/io/texturepool.h"
 
 #include <cmath>
 #include <iostream>
@@ -270,7 +270,8 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
             const auto q0 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i];
             const auto q1 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i + 1];
 
-            if (SfmlMath::intersect(p0, p1, q0, q1).has_value() || SfmlMath::intersect(p1, p2, q0, q1).has_value() || SfmlMath::intersect(p2, p3, q0, q1).has_value() || SfmlMath::intersect(p3, p0, q0, q1).has_value())
+            if (SfmlMath::intersect(p0, p1, q0, q1).has_value() || SfmlMath::intersect(p1, p2, q0, q1).has_value() ||
+                SfmlMath::intersect(p2, p3, q0, q1).has_value() || SfmlMath::intersect(p3, p0, q0, q1).has_value())
             {
                box_path_pairs.emplace_back(box, path);
                break;

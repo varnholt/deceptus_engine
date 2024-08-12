@@ -8,7 +8,7 @@ struct TmxParseData;
 
 struct TmxTemplate
 {
-    TmxTemplate(const std::string& filename, const std::shared_ptr<TmxParseData>&);
+   TmxTemplate(const std::string& filename, const std::shared_ptr<TmxParseData>&);
 
-    std::shared_ptr<TmxObject> _object;
+   std::shared_ptr<TmxObject> _object;
 };

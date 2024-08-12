@@ -1,11 +1,10 @@
 #include "tilemapfactory.h"
 
-#include "stenciltilemap.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
-
+#include "stenciltilemap.h"
 
 std::shared_ptr<TileMap> TileMapFactory::makeTileMap(const std::shared_ptr<TmxLayer>& layer)
 {
@@ -29,7 +28,6 @@ std::shared_ptr<TileMap> TileMapFactory::makeTileMap(const std::shared_ptr<TmxLa
 
    return tile_map;
 }
-
 
 void TileMapFactory::merge(const std::vector<std::shared_ptr<TileMap>>& tile_maps)
 {

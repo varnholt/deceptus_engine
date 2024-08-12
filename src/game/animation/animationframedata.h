@@ -5,7 +5,6 @@
 
 #include <SFML/Graphics.hpp>
 
-
 struct AnimationFrameData
 {
    AnimationFrameData() = default;
@@ -25,5 +24,3 @@ struct AnimationFrameData
    std::vector<sf::IntRect> _frames;
    std::vector<sf::Time> _frame_times;
 };
-
-

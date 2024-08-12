@@ -7,7 +7,6 @@
 #include <functional>
 #include <memory>
 
-
 struct ScreenTransitionEffect;
 
 /*! \brief A ScreenTransition is an animated effect transitioning from one screen to aother.
@@ -44,7 +43,6 @@ private:
    std::shared_ptr<ScreenTransitionEffect> _active_effect;
 };
 
-
 struct ScreenTransitionHandler
 {
    void push(std::unique_ptr<ScreenTransition>);
@@ -60,4 +58,3 @@ struct ScreenTransitionHandler
 
    static ScreenTransitionHandler& getInstance();
 };
-

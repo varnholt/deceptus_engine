@@ -18,4 +18,4 @@ private:
    int32_t _damage{100};
 };
 
-#endif // DAMAGERECT_H
+#endif  // DAMAGERECT_H

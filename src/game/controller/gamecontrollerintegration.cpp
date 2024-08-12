@@ -52,7 +52,8 @@ void GameControllerIntegration::update()
 void GameControllerIntegration::add(int32_t id)
 {
    const std::lock_guard<std::mutex> lock(_device_changed_mutex);
-   _device_changed_callbacks.emplace_back([this, id]()
+   _device_changed_callbacks.emplace_back(
+      [this, id]()
       {
          auto controller = std::make_shared<GameController>();
          controller->activate(id);
@@ -71,7 +72,8 @@ void GameControllerIntegration::add(int32_t id)
 void GameControllerIntegration::remove(int32_t id)
 {
    const std::lock_guard<std::mutex> lock(_device_changed_mutex);
-   _device_changed_callbacks.emplace_back([this, id]()
+   _device_changed_callbacks.emplace_back(
+      [this, id]()
       {
          _controllers.erase(id);
 

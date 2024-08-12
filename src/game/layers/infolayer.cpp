@@ -61,7 +61,6 @@ constexpr auto skull_pos_x_px = 32.0f;
 constexpr auto skull_pos_y_px = 0.0f;
 }  // namespace
 
-
 InfoLayer::InfoLayer()
 {
    _font.load("data/game/font.png", "data/game/font.map");

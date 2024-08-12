@@ -10,7 +10,6 @@
 
 #include "SFML/Graphics.hpp"
 
-
 class Bouncer : public FixtureNode, public GameMechanism
 {
 public:
@@ -24,11 +23,9 @@ public:
    bool isPlayerAtBouncer();
 
    void activate();
-   b2Body *getBody() const;
-
+   b2Body* getBody() const;
 
 private:
-
    void updatePlayerAtBouncer();
 
    Alignment _alignment = Alignment::PointsUp;

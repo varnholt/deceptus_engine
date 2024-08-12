@@ -9,7 +9,6 @@ class ElapsedTimer
    using FloatSeconds = std::chrono::duration<float>;
 
 public:
-
    ElapsedTimer();
    ElapsedTimer(const std::string& name);
    ~ElapsedTimer();
@@ -17,4 +16,3 @@ public:
    HighResTimePoint _start_time;
    std::string _name{"timer"};
 };
-

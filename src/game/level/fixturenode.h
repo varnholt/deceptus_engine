@@ -9,35 +9,30 @@
 #include <string>
 #include <variant>
 
-
 class FixtureNode : public GameNode
 {
-   public:
+public:
+   using CollisionCallback = std::function<void(void)>;
+   using Variant = std::variant<std::string, int32_t, double>;
 
-      using CollisionCallback = std::function<void(void)>;
-      using Variant = std::variant<std::string, int32_t, double>;
+   FixtureNode(GameNode* parent);
 
-      FixtureNode(GameNode *parent);
+   ObjectType getType() const;
+   void setType(const ObjectType& type);
 
-      ObjectType getType() const;
-      void setType(const ObjectType &type);
+   void setFlag(const std::string& flag, bool value);
+   bool hasFlag(const std::string& flag);
 
-      void setFlag(const std::string& flag, bool value);
-      bool hasFlag(const std::string& flag);
+   void setProperty(const std::string& key, const Variant& value);
+   Variant getProperty(const std::string& key) const;
+   bool hasProperty(const std::string& key) const;
 
-      void setProperty(const std::string& key, const Variant& value);
-      Variant getProperty(const std::string& key) const;
-      bool hasProperty(const std::string& key) const;
+   virtual void collisionWithPlayer();
+   void setCollisionCallback(const CollisionCallback& collisionCallback);
 
-      virtual void collisionWithPlayer();
-      void setCollisionCallback(const CollisionCallback& collisionCallback);
-
-
-   protected:
-
-      ObjectType _type = ObjectTypeInvalid;
-      std::map<std::string, bool> _flags;
-      std::map<std::string, Variant> _properties;
-      CollisionCallback _collision_callback;
+protected:
+   ObjectType _type = ObjectTypeInvalid;
+   std::map<std::string, bool> _flags;
+   std::map<std::string, Variant> _properties;
+   CollisionCallback _collision_callback;
 };
-

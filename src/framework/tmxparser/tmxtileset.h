@@ -30,4 +30,3 @@ struct TmxTileSet : TmxElement
    std::map<int, std::shared_ptr<TmxTile>> _tile_map;
    std::filesystem::path _path;
 };
-

@@ -1,8 +1,8 @@
 #ifndef KEYBOARDEVENTDISTRIBUTOR_H
 #define KEYBOARDEVENTDISTRIBUTOR_H
 
-#include <functional>
 #include <SFML/Graphics.hpp>
+#include <functional>
 
 namespace EventDistributor
 {

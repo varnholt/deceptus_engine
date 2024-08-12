@@ -156,9 +156,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
 
          if (_show_delay_ms.has_value())
          {
-            Timer::add(
-               _show_delay_ms.value(), [this]() { showNext(); }, Timer::Type::Singleshot, Timer::Scope::UpdateIngame
-            );
+            Timer::add(_show_delay_ms.value(), [this]() { showNext(); }, Timer::Type::Singleshot, Timer::Scope::UpdateIngame);
          }
          else
          {

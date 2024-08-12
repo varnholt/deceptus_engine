@@ -14,7 +14,7 @@ struct PlayerClimb
    void update(b2Body* body, bool in_air);
    void removeClimbJoint();
    bool isClimbableEdge(b2ChainShape* shape, int currIndex);
-   bool edgeMatchesMovement(const b2Vec2 &edgeDir);
+   bool edgeMatchesMovement(const b2Vec2& edgeDir);
    bool isClimbing() const;
 
    b2Joint* _climb_joint = nullptr;
@@ -22,7 +22,6 @@ struct PlayerClimb
 
    std::shared_ptr<PlayerControls> _controls;
 
-   public:
+public:
    void setControls(const std::shared_ptr<PlayerControls>& newControls);
 };
-

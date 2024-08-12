@@ -3,17 +3,17 @@
 
 namespace MenuAudio
 {
-enum class SoundEffect
-{
-   Apply,
-   ItemTick,
-   ItemNavigate,
-   ItemSelect,
-   MenuBack,
-};
+   enum class SoundEffect
+   {
+      Apply,
+      ItemTick,
+      ItemNavigate,
+      ItemSelect,
+      MenuBack,
+   };
 
-void initialize();
-void play(SoundEffect effect);
+   void initialize();
+   void play(SoundEffect effect);
 };  // namespace MenuAudio
 
-#endif // MENUAUDIO_H
+#endif  // MENUAUDIO_H

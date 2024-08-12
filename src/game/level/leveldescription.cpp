@@ -8,21 +8,14 @@
 #include <ostream>
 #include <sstream>
 
-
 using json = nlohmann::json;
 
-
-void to_json(json &j, const LevelDescription &d)
+void to_json(json& j, const LevelDescription& d)
 {
-   j = json{
-      {"filename", d._filename},
-      {"startposition", d._start_position},
-      {"enemies", d._enemies}
-   };
+   j = json{{"filename", d._filename}, {"startposition", d._start_position}, {"enemies", d._enemies}};
 }
 
-
-void from_json(const json &j, LevelDescription &d)
+void from_json(const json& j, LevelDescription& d)
 {
    d._filename = j.at("filename").get<std::string>();
    d._start_position = j.at("startposition").get<std::vector<int>>();
@@ -33,7 +26,6 @@ void from_json(const json &j, LevelDescription &d)
    }
 }
 
-
 std::shared_ptr<LevelDescription> LevelDescription::load(const std::string& path)
 {
    if (!std::filesystem::exists(path))
@@ -42,7 +34,7 @@ std::shared_ptr<LevelDescription> LevelDescription::load(const std::string& path
       return nullptr;
    }
 
-   std::ifstream ifs (path, std::ifstream::in);
+   std::ifstream ifs(path, std::ifstream::in);
 
    auto c = ifs.get();
    std::string data;
@@ -69,5 +61,3 @@ std::shared_ptr<LevelDescription> LevelDescription::load(const std::string& path
 
    return description;
 }
-
-

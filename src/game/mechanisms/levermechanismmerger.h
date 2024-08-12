@@ -24,6 +24,6 @@ void merge(
    const std::vector<std::shared_ptr<GameMechanism>>& rotating_blades,
    const std::vector<std::shared_ptr<GameMechanism>>& doors
 );
-};
+};  // namespace LeverMechanismMerger
 
 #endif  // LEVERMECHANISMMERGER_H
