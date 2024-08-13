@@ -56,6 +56,10 @@ private:
    sf::Time _idle_time;
    sf::Time _extraction_time;
    sf::Time _retraction_time;
+   sf::Time _idle_time_max;
+   sf::Time _extraction_time_max;
+   sf::Time _retraction_time_max;
+   sf::Time _time_offset;
 
    sf::Sprite _sprite_spike;
    sf::Sprite _sprite_pusher;

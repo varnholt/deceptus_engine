@@ -23,6 +23,7 @@ constexpr auto BLADE_SIZE_Y = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
 
 constexpr auto BLADE_SHARPNESS = 0.1f;
 constexpr auto BLADE_TOLERANCE = 0.06f;
+
 }  // namespace
 
 Crusher::Crusher(GameNode* parent) : GameNode(parent)
@@ -164,9 +165,9 @@ void Crusher::updateState()
             case State::Idle:
             {
                // go to extract when idle time is elapsed
-               if (_idle_time.asSeconds() > 3.0f)
+               if (_idle_time + _time_offset > _idle_time_max)
                {
-                  _idle_time = {};
+                  _idle_time = -_time_offset;
 
                   if (_state_previous == State::Retract || _state_previous == State::Idle)
                   {
@@ -185,7 +186,7 @@ void Crusher::updateState()
                startBoomEffect();
 
                // extract until normalised extraction time is 1
-               if (_extraction_time.asSeconds() >= 1.0f)
+               if (_extraction_time >= _extraction_time_max)
                {
                   _state = State::Idle;
                   _state_previous = State::Extract;
@@ -199,7 +200,7 @@ void Crusher::updateState()
                stopBoomEffect();
 
                // retract until normalised retraction time is 1
-               if (_retraction_time.asSeconds() >= 1.0f)
+               if (_retraction_time >= _retraction_time_max)
                {
                   _state = State::Idle;
                   _state_previous = State::Retract;
@@ -251,6 +252,9 @@ void Crusher::setup(const GameDeserializeData& data)
       }
 
       _shake = ValueReader::readValue<bool>("shake", map).value_or(true);
+      _z_index = ValueReader::readValue<int32_t>("z", map).value_or(0);
+      const auto time_offset_s = ValueReader::readValue<float>("time_offset_s", map).value_or(0.0f);
+      _time_offset = sf::seconds(time_offset_s);
    }
 
    _pixel_position.x = data._tmx_object->_x_px;
@@ -259,6 +263,10 @@ void Crusher::setup(const GameDeserializeData& data)
    _sprite_mount.setTexture(*_texture);
    _sprite_pusher.setTexture(*_texture);
    _sprite_spike.setTexture(*_texture);
+
+   _idle_time_max = sf::seconds(3.0f);
+   _extraction_time_max = sf::seconds(1.0f);
+   _retraction_time_max = sf::seconds(1.0f);
 
    switch (_alignment)
    {
