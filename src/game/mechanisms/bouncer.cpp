@@ -3,6 +3,7 @@
 #include "framework/tools/globalclock.h"
 #include "game/audio/audio.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/player/player.h"
 
@@ -35,6 +36,11 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
    setObjectId(data._tmx_object->_name);
    setZ(data._tmx_object_group->_z_index);
 
+   if (data._tmx_object->_properties)
+   {
+      _force_value = ValueReader::readValue<float>("force", data._tmx_object->_properties->_map).value_or(0.6f);
+   }
+
    const auto x = data._tmx_object->_x_px;
    const auto y = data._tmx_object->_y_px;
    const auto width = data._tmx_object->_width_px;
@@ -58,8 +64,8 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
 
    _body = data._world->CreateBody(&bodyDef);
 
-   auto half_physics_width = width * MPP * 0.5f;
-   auto half_physics_height = height * MPP * 0.5f;
+   const auto half_physics_width = width * MPP * 0.5f;
+   const auto half_physics_height = height * MPP * 0.5f;
 
    // create fixture for physical boundaries of the bouncer object
    _shape_bounds.SetAsBox(half_physics_width, half_physics_height, b2Vec2(half_physics_width, half_physics_height), 0.0f);
@@ -145,22 +151,20 @@ void Bouncer::activate()
 
    _activation_time = now;
 
-   constexpr auto force_value = 0.6f;
-
    b2Vec2 force(0.0f, 0.0f);
    switch (_alignment)
    {
       case Alignment::PointsUp:
-         force = b2Vec2{0.0f, -force_value};
+         force = b2Vec2{0.0f, -_force_value};
          break;
       case Alignment::PointsDown:
-         force = b2Vec2{0.0f, force_value};
+         force = b2Vec2{0.0f, _force_value};
          break;
       case Alignment::PointsLeft:
-         force = b2Vec2{-force_value, 0};
+         force = b2Vec2{-_force_value, 0};
          break;
       case Alignment::PointsRight:
-         force = b2Vec2{force_value, 0};
+         force = b2Vec2{_force_value, 0};
          break;
       case Alignment::PointsNowhere:
          break;
