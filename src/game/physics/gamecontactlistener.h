@@ -80,6 +80,5 @@ private:
    int32_t _count_arm_right_contacts = 0;
    int32_t _count_deadly_contacts = 0;
    int32_t _count_moving_platform_contacts = 0;
-   int32_t _count_bouncer_cycles = 5;
    bool _smashed = false;
 };

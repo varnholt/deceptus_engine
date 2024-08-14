@@ -220,6 +220,13 @@ void Crusher::updateState()
    }
 }
 
+namespace
+{
+constexpr auto idle_time_max_s = 3.0f;
+constexpr auto extraction_time_max_s = 1.0f;
+constexpr auto retraction_time_max_s = 1.0f;
+}  // namespace
+
 void Crusher::setup(const GameDeserializeData& data)
 {
    _rect.left = data._tmx_object->_x_px;
@@ -228,6 +235,10 @@ void Crusher::setup(const GameDeserializeData& data)
    _rect.height = data._tmx_object->_height_px;
 
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "crushers.png");
+
+   _idle_time_max = sf::seconds(idle_time_max_s);
+   _extraction_time_max = sf::seconds(extraction_time_max_s);
+   _retraction_time_max = sf::seconds(retraction_time_max_s);
 
    if (data._tmx_object->_properties)
    {
@@ -255,6 +266,8 @@ void Crusher::setup(const GameDeserializeData& data)
       _z_index = ValueReader::readValue<int32_t>("z", map).value_or(0);
       const auto time_offset_s = ValueReader::readValue<float>("time_offset_s", map).value_or(0.0f);
       _time_offset = sf::seconds(time_offset_s);
+      const auto idle_time_s = ValueReader::readValue<float>("idle_time_s", map).value_or(idle_time_max_s);
+      _idle_time_max = sf::seconds(idle_time_s);
    }
 
    _pixel_position.x = data._tmx_object->_x_px;
@@ -263,10 +276,6 @@ void Crusher::setup(const GameDeserializeData& data)
    _sprite_mount.setTexture(*_texture);
    _sprite_pusher.setTexture(*_texture);
    _sprite_spike.setTexture(*_texture);
-
-   _idle_time_max = sf::seconds(3.0f);
-   _extraction_time_max = sf::seconds(1.0f);
-   _retraction_time_max = sf::seconds(1.0f);
 
    switch (_alignment)
    {
