@@ -5,9 +5,8 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
+#include "game/mechanisms/bouncerwrapper.h"
 #include "game/player/player.h"
-
-#include <iostream>
 
 const auto SPRITE_WIDTH = 24;
 const auto SPRITE_HEIGHT = 24;
@@ -180,4 +179,5 @@ void Bouncer::activate()
    const auto& pos = body->GetWorldCenter();
    body->ApplyLinearImpulse(force, pos, true);
    Audio::getInstance().playSample({"mechanism_bouncer.wav"});
+   BouncerWrapper::bumpLastBouncerTime();
 }
