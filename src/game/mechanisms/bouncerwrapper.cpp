@@ -22,3 +22,24 @@ std::shared_ptr<Bouncer> BouncerWrapper::getNearbyBouncer()
 
    return nearby_bouncer;
 }
+
+namespace
+{
+using HighResDuration = std::chrono::high_resolution_clock::duration;
+using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+
+HighResTimePoint last_use_timepoint;
+HighResDuration threshold_duration = std::chrono::milliseconds(2000);
+}  // namespace
+
+void BouncerWrapper::bumpLastBouncerTime()
+{
+   last_use_timepoint = std::chrono::high_resolution_clock::now();
+}
+
+bool BouncerWrapper::isSpeedCapped()
+{
+   const auto now = std::chrono::high_resolution_clock::now();
+   const auto ignored = (now - last_use_timepoint > threshold_duration);
+   return ignored;
+}
