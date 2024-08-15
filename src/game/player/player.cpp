@@ -1007,14 +1007,17 @@ void Player::updateVelocity()
    // cap speed
    const auto& physics_config = PhysicsConfiguration::getInstance();
    const auto max_velocity_horizontal = physics_config._player_max_velocity_horizontal;
-   const auto max_velocity_up = physics_config._player_max_velocity_up;
-   const auto max_velocity_down = physics_config._player_max_velocity_down;
    const auto linear_velocity = _body->GetLinearVelocity();
+   auto max_velocity_up = physics_config._player_max_velocity_up;
+   auto max_velocity_down = physics_config._player_max_velocity_down;
 
-   _body->SetLinearVelocity(
-      {std::clamp(linear_velocity.x, -max_velocity_horizontal, max_velocity_horizontal),
-       std::clamp(linear_velocity.y, -max_velocity_up, max_velocity_down)}
-   );
+   auto linear_velocity_y = linear_velocity.y;
+   if (BouncerWrapper::isSpeedCapped())
+   {
+      linear_velocity_y = std::clamp(linear_velocity.y, -max_velocity_up, max_velocity_down);
+   }
+
+   _body->SetLinearVelocity({std::clamp(linear_velocity.x, -max_velocity_horizontal, max_velocity_horizontal), linear_velocity_y});
 }
 
 std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
