@@ -281,6 +281,8 @@ void Crusher::setup(const GameDeserializeData& data)
    {
       case Alignment::PointsDown:
       {
+         // mount is the socket that attaches the pusher to the wall
+         // pusher is the pipe that extracts in length
          // pusher gets only 1px in height as i only want this to be one pixel in height so scaling is easy
          _sprite_mount.setTextureRect({9 * PIXELS_PER_TILE, 6 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE});
          _sprite_pusher.setTextureRect({7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE, 1});
@@ -308,8 +310,8 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsLeft:
       {
-         _sprite_pusher.setTextureRect({3 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 1, 5 * PIXELS_PER_TILE});
-         _sprite_mount.setTextureRect({4 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
+         _sprite_mount.setTextureRect({4 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE});
+         _sprite_pusher.setTextureRect({2 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE, 1, 5 * PIXELS_PER_TILE});
          _sprite_spike.setTextureRect({0 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
 
          _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
@@ -323,8 +325,8 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsRight:
       {
-         _sprite_mount.setTextureRect({7 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
-         _sprite_pusher.setTextureRect({9 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 1, 5 * PIXELS_PER_TILE});
+         _sprite_mount.setTextureRect({8 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE});
+         _sprite_pusher.setTextureRect({10 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE, 1, 5 * PIXELS_PER_TILE});
          _sprite_spike.setTextureRect({10 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE});
 
          _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
