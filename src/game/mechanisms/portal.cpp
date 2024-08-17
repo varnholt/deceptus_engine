@@ -20,13 +20,11 @@
 
 std::atomic<bool> Portal::_portal_lock = false;
 
-//-----------------------------------------------------------------------------
 Portal::Portal(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Portal).name());
 }
 
-//-----------------------------------------------------------------------------
 void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& /*normal*/)
 {
    // bump maps are not supported for now
@@ -36,7 +34,6 @@ void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& /*normal*/)
    }
 }
 
-//-----------------------------------------------------------------------------
 sf::Vector2f Portal::getPortalPosition()
 {
    auto portal_pos = _sprites.at(_sprites.size() - 1).getPosition();
@@ -44,43 +41,36 @@ sf::Vector2f Portal::getPortalPosition()
    return portal_pos;
 }
 
-//-----------------------------------------------------------------------------
 const sf::Vector2f& Portal::getTilePosition() const
 {
    return _tile_positions;
 }
 
-//-----------------------------------------------------------------------------
 void Portal::lock()
 {
    _portal_lock = true;
 }
 
-//-----------------------------------------------------------------------------
 void Portal::unlock()
 {
    _portal_lock = false;
 }
 
-//-----------------------------------------------------------------------------
 bool Portal::isLocked()
 {
    return _portal_lock;
 }
 
-//-----------------------------------------------------------------------------
 std::shared_ptr<Portal> Portal::getDestination() const
 {
    return _destination;
 }
 
-//-----------------------------------------------------------------------------
 void Portal::setDestination(const std::shared_ptr<Portal>& dst)
 {
    _destination = dst;
 }
 
-//-----------------------------------------------------------------------------
 void Portal::update(const sf::Time& /*dt*/)
 {
    sf::Vector2f player_pos = Player::getCurrent()->getPixelPositionFloat();
@@ -117,7 +107,6 @@ std::optional<sf::FloatRect> Portal::getBoundingBoxPx()
    return _bounding_box;
 }
 
-//-----------------------------------------------------------------------------
 void Portal::link(std::vector<std::shared_ptr<GameMechanism>>& portals, const GameDeserializeData& data)
 {
    if (!data._tmx_object->_polyline)
@@ -184,25 +173,21 @@ void Portal::link(std::vector<std::shared_ptr<GameMechanism>>& portals, const Ga
    // Log::Info() << "src: " << srcPortal << " dst: " << dstPortal << " (" << tmxObject->mName << ")";
 }
 
-//-----------------------------------------------------------------------------
 void Portal::addSprite(const sf::Sprite& sprite)
 {
    _sprites.push_back(sprite);
 }
 
-//-----------------------------------------------------------------------------
 bool Portal::isPlayerAtPortal() const
 {
    return _player_at_portal;
 }
 
-//-----------------------------------------------------------------------------
 void Portal::setPlayerAtPortal(bool playerAtPortal)
 {
    _player_at_portal = playerAtPortal;
 }
 
-//-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const GameDeserializeData& data)
 {
    // Log::Info() << "load portal layer";

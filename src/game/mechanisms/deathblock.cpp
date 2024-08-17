@@ -1,13 +1,12 @@
 #include "game/mechanisms/deathblock.h"
 
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
 #include "game/player/player.h"
-
-#include <iostream>
 
 DeathBlock::DeathBlock(GameNode* parent) : GameNode(parent)
 {
@@ -45,7 +44,6 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 //    3: 2, 1
 //    4: 1, 2
 
-//-----------------------------------------------------------------------------
 void DeathBlock::setupTransform()
 {
    auto x = _pixel_positions.x / PPM - (PIXELS_PER_TILE / (2 * PPM));
@@ -53,7 +51,6 @@ void DeathBlock::setupTransform()
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 
-//-----------------------------------------------------------------------------
 void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygon_shape;
@@ -133,9 +130,7 @@ void DeathBlock::update(const sf::Time& dt)
    updateLeverLag(dt);
 
    _interpolation.update(_body->GetPosition());
-   {
-      _body->SetLinearVelocity(_lever_lag * TIMESTEP_ERROR * (PPM / 60.0f) * _interpolation.getVelocity());
-   }
+   _body->SetLinearVelocity(_lever_lag * TIMESTEP_ERROR * (PPM / 60.0f) * _interpolation.getVelocity());
 
    for (auto i = 0u; i < _sprites.size(); i++)
    {
@@ -147,8 +142,8 @@ void DeathBlock::update(const sf::Time& dt)
       ));
 
       // need to move by one tile because the center is not 0, 0 but -24, -24
-      auto x = _body->GetPosition().x * PPM + _offsets[i].x * PIXELS_PER_TILE - PIXELS_PER_TILE;
-      auto y = _body->GetPosition().y * PPM + _offsets[i].y * PIXELS_PER_TILE - PIXELS_PER_TILE;
+      const auto x = _body->GetPosition().x * PPM + _offsets[i].x * PIXELS_PER_TILE - PIXELS_PER_TILE;
+      const auto y = _body->GetPosition().y * PPM + _offsets[i].y * PIXELS_PER_TILE - PIXELS_PER_TILE;
 
       _sprites[i].setPosition(x, y);
    }
@@ -183,26 +178,26 @@ void DeathBlock::setup(const GameDeserializeData& data)
 
    setupBody(data._world);
 
-   std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_polyline;
-   auto pos = pixel_path.at(0);
+   const auto pixel_path = data._tmx_object->_polyline ? data._tmx_object->_polyline->_polyline : data._tmx_object->_polygon->_polyline;
+   const auto start_pos = pixel_path.at(0);
 
-   auto i = 0;
+   auto pos_index = 0;
    for (const auto& poly_pos : pixel_path)
    {
       b2Vec2 world_pos;
-      auto time = i / static_cast<float>(pixel_path.size() - 1);
+      const auto time = pos_index / static_cast<float>(pixel_path.size() - 1);
 
-      auto x = (data._tmx_object->_x_px + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
-      auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      const auto x = (data._tmx_object->_x_px + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      const auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
 
       world_pos.x = x;
       world_pos.y = y;
 
       _interpolation.addKey(world_pos, time);
-      _pixel_paths.emplace_back((pos.x + data._tmx_object->_x_px), (pos.y + data._tmx_object->_y_px));
+      _pixel_paths.emplace_back((start_pos.x + data._tmx_object->_x_px), (start_pos.y + data._tmx_object->_y_px));
 
       // Log::Info() << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY;
 
-      i++;
+      pos_index++;
    }
 }

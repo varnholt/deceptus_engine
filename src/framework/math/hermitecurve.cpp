@@ -10,43 +10,36 @@ namespace
 static const auto clamp = true;
 }
 
-//-----------------------------------------------------------------------------
 void HermiteCurve::setPositionKeys(const std::vector<HermiteCurveKey>& keys)
 {
    _position_keys = keys;
 }
 
-//-----------------------------------------------------------------------------
 void HermiteCurve::setOrientationKeys(const std::vector<HermiteCurveKey>& keys)
 {
    _orientation_keys = keys;
 }
 
-//-----------------------------------------------------------------------------
 void HermiteCurve::setPosition(const sf::Vector2f& position)
 {
    _position = position;
 }
 
-//-----------------------------------------------------------------------------
 void HermiteCurve::setOrientation(const sf::Vector2f& orientation)
 {
    _orientation = orientation;
 }
 
-//-----------------------------------------------------------------------------
 const std::vector<HermiteCurveKey>& HermiteCurve::getPositionKeys() const
 {
    return _position_keys;
 }
 
-//-----------------------------------------------------------------------------
 const std::vector<HermiteCurveKey>& HermiteCurve::getOrientationKeys() const
 {
    return _orientation_keys;
 }
 
-//-----------------------------------------------------------------------------
 void HermiteCurve::compute()
 {
    // calculate the tangents (catmull-rom splines)
@@ -94,7 +87,6 @@ void HermiteCurve::compute()
    comp(_orientation_keys, _orientation_tangents);
 }
 
-//-----------------------------------------------------------------------------
 sf::Vector2f HermiteCurve::computePoint(float time, Mode mode)
 {
    if (clamp)

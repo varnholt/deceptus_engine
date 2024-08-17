@@ -6,7 +6,6 @@
 
 #include <iostream>
 
-//----------------------------------------------------------------------------------------------------------------------
 AtmosphereShader::AtmosphereShader(uint32_t texture_width, uint32_t texture_height) : _render_texture(std::make_shared<sf::RenderTexture>())
 {
    if (!_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
@@ -15,13 +14,11 @@ AtmosphereShader::AtmosphereShader(uint32_t texture_width, uint32_t texture_heig
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 AtmosphereShader::~AtmosphereShader()
 {
    _render_texture.reset();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void AtmosphereShader::initialize()
 {
    if (!_shader.loadFromFile("data/shaders/water.frag", sf::Shader::Fragment))
@@ -40,7 +37,6 @@ void AtmosphereShader::initialize()
    _shader.setUniform("physicsTexture", _render_texture->getTexture());
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void AtmosphereShader::update()
 {
    constexpr auto distortion_factor = 0.02f;
@@ -49,13 +45,11 @@ void AtmosphereShader::update()
    _shader.setUniform("distortionFactor", distortion_factor);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const std::shared_ptr<sf::RenderTexture>& AtmosphereShader::getRenderTexture() const
 {
    return _render_texture;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const sf::Shader& AtmosphereShader::getShader() const
 {
    return _shader;
