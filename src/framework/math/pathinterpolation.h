@@ -2,20 +2,15 @@
 
 #include <box2d/box2d.h>
 #include <functional>
-#include <iostream>
 #include <vector>
 #include "framework/easings/easings.h"
 #include "framework/math/sfmlmath.h"
+#include "framework/tools/log.h"
 
 template <typename T>
 class PathInterpolation
 {
 public:
-   enum class Mode
-   {
-      Linear
-   };
-
    struct Key
    {
       T _pos;
@@ -50,7 +45,7 @@ public:
    T lerp(const T& pos1, const T& pos2, float weight_pos_2)
    {
       return pos1 + weight_pos_2 * (pos2 - pos1);
-   };
+   }
 
    // adds interpolation for each single edge
    void addKeys(const std::vector<T>& positions, int32_t subdivision_count, Easings::Type easing_type)
@@ -68,13 +63,11 @@ public:
       auto length_to_this_point = 0.0f;
       for (auto index = 0; index < static_cast<int32_t>(positions.size()) - 1; index++)
       {
-         auto& pos_1 = positions.at(index);
-         auto& pos_2 = positions.at(index + 1);
-
+         const auto& pos_1 = positions.at(index);
+         const auto& pos_2 = positions.at(index + 1);
          const auto length = SfmlMath::length(positions[index + 1] - positions[index]);
-
-         auto subdiv_dist = length_to_this_point;
          const auto subdiv_step = length / subdivision_count;
+         auto subdiv_dist = length_to_this_point;
 
          for (auto subdivision = 0; subdivision < subdivision_count; subdivision++)
          {
@@ -129,8 +122,6 @@ public:
 
    T computePosition(float time_value)
    {
-      // time_value = std::clamp(time_value, 0.0f, 1.0f);
-
       time_value = fmod(time_value, 1.0f);
 
       for (auto index_current = 0u; index_current < _track.size(); index_current++)
@@ -148,8 +139,14 @@ public:
          {
             const auto time_value_offset = time_value - key_a._time_value;
             const auto distance = key_b._time_value - key_a._time_value;
-            const auto time_value_relative = time_value_offset / distance;
 
+            constexpr auto epsilon = 0.0001f;
+            if (distance < epsilon)
+            {
+               return key_a._pos;
+            }
+
+            const auto time_value_relative = time_value_offset / distance;
             return key_a._pos + time_value_relative * (key_b._pos - key_a._pos);
          }
       }
@@ -213,7 +210,7 @@ private:
       _velocity.Normalize();
    }
 
-   size_t nextKeyIndex()
+   size_t nextKeyIndex() const
    {
       auto next_index = _current_key_index + 1;
       if (next_index == _track.size())
@@ -224,29 +221,21 @@ private:
       return next_index;
    }
 
-   bool checkKeyReached(const T& current_pos)
+   bool checkKeyReached(const T& current_pos) const
    {
       if (_track.empty())
       {
          return false;
       }
 
-      auto reached = false;
-
-      if ((current_pos - _track[_current_key_index]._pos).LengthSquared() < 0.1f)
-      {
-         reached = true;
-      }
-
-      return reached;
+      const auto dist_length_squared = (current_pos - _track[_current_key_index]._pos).LengthSquared();
+      return (dist_length_squared < 0.1f);
    }
 
    std::vector<Key> _track;
    float _time = 0.0f;
    bool _initialized = false;
-
    T _velocity;
    size_t _current_key_index = 0;
-
    Easings::Type _easing_type = Easings::Type::None;
 };

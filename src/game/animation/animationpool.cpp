@@ -12,12 +12,10 @@
 
 using json = nlohmann::json;
 
-//----------------------------------------------------------------------------------------------------------------------
 AnimationPool::AnimationPool(const std::string& file_path) : _file_path(file_path)
 {
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::initialize()
 {
    if (!_initialized)
@@ -27,14 +25,12 @@ void AnimationPool::initialize()
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::reload()
 {
    _initialized = false;
    initialize();
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 std::shared_ptr<Animation> AnimationPool::create(const std::string& name, float x, float y, bool auto_play, bool managed_by_pool)
 {
    if (!_initialized)
@@ -77,7 +73,6 @@ std::shared_ptr<Animation> AnimationPool::create(const std::string& name, float 
    return animation;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::drawAnimations(sf::RenderTarget& target, const std::vector<std::string>& animations)
 {
    if (animations.empty())
@@ -101,7 +96,6 @@ void AnimationPool::drawAnimations(sf::RenderTarget& target, const std::vector<s
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::drawAnimations(sf::RenderTarget& color, sf::RenderTarget& normal, const std::vector<std::string>& animations)
 {
    if (animations.empty())
@@ -125,7 +119,6 @@ void AnimationPool::drawAnimations(sf::RenderTarget& color, sf::RenderTarget& no
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::updateAnimations(const sf::Time& dt)
 {
    if (_settings.empty())
@@ -154,13 +147,11 @@ void AnimationPool::updateAnimations(const sf::Time& dt)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 const std::map<std::string, std::shared_ptr<Animation>>& AnimationPool::getAnimations()
 {
    return _animations;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::deserialize(const std::string& data)
 {
    try
@@ -199,7 +190,6 @@ void AnimationPool::deserialize(const std::string& data)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::deserializeFromFile(const std::string& filename)
 {
    std::ifstream ifs(filename, std::ifstream::in);
@@ -223,7 +213,6 @@ void AnimationPool::deserializeFromFile(const std::string& filename)
    deserialize(data);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void AnimationPool::setGarbageCollectorEnabled(bool enabled)
 {
    _garbage_collector_enabled = enabled;
