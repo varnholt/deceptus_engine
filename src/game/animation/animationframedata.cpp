@@ -12,7 +12,6 @@
 // +---+---+---+---+---+---+---+---+
 //
 
-//----------------------------------------------------------------------------------------------------------------------
 AnimationFrameData::AnimationFrameData(
    const std::shared_ptr<sf::Texture>& texture,
    const sf::Vector2f& origin,

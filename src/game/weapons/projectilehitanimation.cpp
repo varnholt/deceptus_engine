@@ -5,7 +5,6 @@
 #include <cmath>
 #include <iostream>
 
-//----------------------------------------------------------------------------------------------------------------------
 std::vector<ProjectileHitAnimation*> ProjectileHitAnimation::__active_animations;
 std::map<std::string, AnimationFrameData> ProjectileHitAnimation::__reference_animations;
 
@@ -17,7 +16,6 @@ constexpr auto sprites = 6;
 constexpr auto frame_time = 0.075f;
 }  // namespace
 
-//----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, const AnimationFrameData& frames)
 {
    auto anim = new ProjectileHitAnimation();
@@ -42,7 +40,6 @@ void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, con
    __active_animations.push_back(anim);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::updateHitAnimations(const sf::Time& dt)
 {
    std::vector<ProjectileHitAnimation*>::iterator it;
@@ -65,19 +62,16 @@ void ProjectileHitAnimation::updateHitAnimations(const sf::Time& dt)
    }
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 std::vector<ProjectileHitAnimation*>& ProjectileHitAnimation::getHitAnimations()
 {
    return __active_animations;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::addReferenceAnimation(const std::string& id, const AnimationFrameData& animation)
 {
    __reference_animations.emplace(id, animation);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::addReferenceAnimation(
    const std::filesystem::path& texture_path,
    uint32_t frame_width,
@@ -104,7 +98,6 @@ void ProjectileHitAnimation::addReferenceAnimation(
    );
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 AnimationFrameData ProjectileHitAnimation::getDefaultAnimation()
 {
    const auto& texture = TexturePool::getInstance().get("data/weapons/detonation_big.png");
@@ -120,13 +113,11 @@ AnimationFrameData ProjectileHitAnimation::getDefaultAnimation()
    return AnimationFrameData{texture, origin, width, height, sprites, sprites, frame_times};
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 std::map<std::string, AnimationFrameData>::const_iterator ProjectileHitAnimation::getReferenceAnimation(const std::string& id)
 {
    return __reference_animations.find(id);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void ProjectileHitAnimation::setupDefaultAnimation()
 {
    // have a default animation in case there are none yet

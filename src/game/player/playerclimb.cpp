@@ -24,7 +24,6 @@ public:
 
 }  // namespace
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerClimb::update(b2Body* /*player_body*/, bool /*in_air*/)
 {
    // disable wallclimb entirely for now - nobody seems to want it.
@@ -238,7 +237,6 @@ void PlayerClimb::update(b2Body* /*player_body*/, bool /*in_air*/)
    // // mDistanceJoint->SetLength(distanceJoint.GetLength() * 0.99f);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerClimb::removeClimbJoint()
 {
    if (!_climb_joint)
@@ -250,7 +248,6 @@ void PlayerClimb::removeClimbJoint()
    _climb_joint = nullptr;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::isClimbableEdge(b2ChainShape* shape, int i)
 {
    /*
@@ -355,7 +352,6 @@ bool PlayerClimb::isClimbableEdge(b2ChainShape* shape, int i)
    return climbable;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::edgeMatchesMovement(const b2Vec2& edgeDir)
 {
    bool right_pressed = _keys_pressed & KeyPressedRight;
@@ -378,13 +374,11 @@ bool PlayerClimb::edgeMatchesMovement(const b2Vec2& edgeDir)
    return matches_movement;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 bool PlayerClimb::isClimbing() const
 {
    return _climb_joint;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
 void PlayerClimb::setControls(const std::shared_ptr<PlayerControls>& newControls)
 {
    _controls = newControls;
