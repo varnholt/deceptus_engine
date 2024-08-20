@@ -34,3 +34,16 @@ sf::Color mixColors(const sf::Color& color_1, const sf::Color& color_2, float ra
 
    return sf::Color(red, green, blue, alpha);
 }
+
+float SfmlMath::length(const std::vector<sf::Vector2f>& points)
+{
+   auto totalLength = 0.0f;
+
+   for (size_t i = 1; i < points.size(); ++i)
+   {
+      sf::Vector2f diff = points[i] - points[i - 1];
+      totalLength += std::sqrt(diff.x * diff.x + diff.y * diff.y);
+   }
+
+   return totalLength;
+}
