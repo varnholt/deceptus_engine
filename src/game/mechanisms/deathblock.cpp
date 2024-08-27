@@ -270,6 +270,12 @@ void DeathBlock::updatePosition(const sf::Time& dt)
    constexpr auto timestep = TIMESTEP_ERROR * (PPM / 60.0f);
    _body->SetTransform(target_position, 0.0f);
    _body->SetLinearVelocity(timestep * direction);
+
+   const auto dx = target_position - current_position;
+   if (Player::getCurrent()->getPlatform().getPlatformBody() == _body)
+   {
+      Player::getCurrent()->getPlatform().setPlatformDx(dx.x);
+   }
 }
 
 void DeathBlock::update(const sf::Time& dt)

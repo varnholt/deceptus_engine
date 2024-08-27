@@ -15,6 +15,7 @@ public:
    int32_t getPlayerContactCount() const;
    int32_t getDeadlyContactCount() const;
    int32_t getMovingPlatformContactCount() const;
+   int32_t getDeathBlockContactCount() const;
 
    bool isPlayerSmashed() const;
 
@@ -48,6 +49,7 @@ private:
    void processCrusherContactBegin(FixtureNode* fixture_node);
    void processDeadlyContactBegin(FixtureNode* fixture_node);
    void processEnemyContactBegin(FixtureNode* fixture_node_a, FixtureNode* fixture_node_b);
+   void processDeathBlockContactBegin(b2Fixture* fixture, void* fixture_user_data);
    void processMovingPlatformContactBegin(b2Fixture* fixture, void* fixture_user_data);
    void processOneWayWallContactBegin(b2Contact* contact, b2Fixture* fixture);
    void processPlayerContactBegin();
@@ -61,6 +63,7 @@ private:
    void processCollapsingPlatformContactEnd(FixtureNode* fixture_node_platform, FixtureNode* fixture_node_other);
    void processCrusherContactEnd(FixtureNode* fixture_node);
    void processDeadlyContactEnd(FixtureNode* fixture_node);
+   void processDeathBlockContactEnd(FixtureNode* fixture_node);
    void processMovingPlatformContactEnd(FixtureNode* fixture_node);
    void processOneWayWallContactEnd(b2Contact* contact);
    void processPlayerContactEnd();
@@ -80,5 +83,6 @@ private:
    int32_t _count_arm_right_contacts = 0;
    int32_t _count_deadly_contacts = 0;
    int32_t _count_moving_platform_contacts = 0;
+   int32_t _count_death_block_contacts = 0;
    bool _smashed = false;
 };
