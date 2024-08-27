@@ -61,7 +61,10 @@ void PlayerPlatform::setPlatformDx(float dx)
 
 bool PlayerPlatform::isOnPlatform() const
 {
-   const auto on_platform = GameContactListener::getInstance().getMovingPlatformContactCount() > 0 && isOnGround();
+   const auto contact_listener = GameContactListener::getInstance();
+   const auto has_moving_platform_contacts = contact_listener.getMovingPlatformContactCount() > 0;
+   const auto has_death_block_contacts = contact_listener.getDeathBlockContactCount() > 0;
+   const auto on_platform = (has_moving_platform_contacts || has_death_block_contacts) && isOnGround();
    return on_platform;
 }
 
