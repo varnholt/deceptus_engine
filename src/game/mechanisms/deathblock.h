@@ -100,7 +100,6 @@ private:
 
    sf::Vector2f _pixel_positions;
    sf::FloatRect _rect;
-   std::vector<sf::Vector2f> _pixel_paths;
    b2Body* _body = nullptr;
    std::vector<b2Vec2> _path;
    PathInterpolation<b2Vec2> _interpolation;
@@ -114,4 +113,5 @@ private:
    int32_t _center_sprite_index{0};
    Mode _mode{Mode::Interval};
    std::shared_ptr<sf::Texture> _texture;
+   int32_t _damage{100};
 };
