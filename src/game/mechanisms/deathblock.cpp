@@ -6,6 +6,7 @@
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/player/player.h"
 
@@ -22,6 +23,7 @@ namespace
 
 constexpr auto sprite_extracted = 12;
 constexpr auto sprite_retracted = 19;
+constexpr auto center_sprite_animation_speed = 10.0f;
 }  // namespace
 
 // #define DEBUG_DRAW 1
@@ -122,7 +124,7 @@ void DeathBlock::updateCollision()
 
       if (player_rect.intersects(spike._collision_rect_absolute) && deadly)
       {
-         Player::getCurrent()->damage(1);
+         Player::getCurrent()->damage(_damage);
       }
 
       ++index;
@@ -219,7 +221,7 @@ void DeathBlock::updateStates(const sf::Time& dt)
    }
 
    // update center
-   _center_sprite_time_s += dt.asSeconds();
+   _center_sprite_time_s += dt.asSeconds() * center_sprite_animation_speed;
    _center_sprite_index = static_cast<int32_t>(_center_sprite_time_s) % sprite_retracted;
 
    // update resulting spriteset offsets
@@ -295,6 +297,9 @@ std::optional<sf::FloatRect> DeathBlock::getBoundingBoxPx()
 
 void DeathBlock::setup(const GameDeserializeData& data)
 {
+   std::map<std::string, std::shared_ptr<TmxProperty>> default_property_map;
+   const auto& map = data._tmx_object->_properties ? data._tmx_object->_properties->_map : default_property_map;
+
    _texture = TexturePool::getInstance().get("data/sprites/enemy_deathblock.png");
 
    for (auto& spike : _spikes)
@@ -325,22 +330,20 @@ void DeathBlock::setup(const GameDeserializeData& data)
    _pixel_positions.x = data._tmx_object->_x_px;
    _pixel_positions.y = data._tmx_object->_y_px;
 
-   _time_off = sf::seconds(2.0f);
-   _time_on = sf::seconds(0.2f);
-
-   // constexpr auto delta_time = 2.0f / 3.0f;
-   // _wait_offsets[0] = sf::seconds(delta_time * 0);
-   // _wait_offsets[1] = sf::seconds(delta_time * 1);
-   // _wait_offsets[2] = sf::seconds(delta_time * 2);
-   // _wait_offsets[3] = sf::seconds(delta_time * 3);
+   _time_off = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(2.0f));
+   _time_on = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(0.2f));
+   _damage = ValueReader::readValue<int32_t>("damage", map).value_or(100);
 
    setupBody(data._world);
 
+   // setup velocity
+   const auto velocity = ValueReader::readValue<float>("velocity", map).value_or(50.0f);
    auto pixel_path = data._tmx_object->_polyline ? data._tmx_object->_polyline->_polyline : data._tmx_object->_polygon->_polyline;
    const auto start_pos = pixel_path.at(0);
    pixel_path.push_back(start_pos);
    _velocity = 50.0f / SfmlMath::length(pixel_path);
 
+   // setup path
    auto pos_index = 0;
    for (const auto& poly_pos : pixel_path)
    {
@@ -354,9 +357,6 @@ void DeathBlock::setup(const GameDeserializeData& data)
       world_pos.y = y;
 
       _interpolation.addKey(world_pos, time);
-      _pixel_paths.emplace_back((start_pos.x + data._tmx_object->_x_px), (start_pos.y + data._tmx_object->_y_px));
-
-      // Log::Info() << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY;
 
       pos_index++;
    }
