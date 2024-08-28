@@ -94,11 +94,10 @@ void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_nod
    }
 }
 
-void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, void* fixture_user_data)
+void GameContactListener::processDeathBlockContactBegin(b2Fixture* fixture, void* fixture_user_data)
 {
    // check if platform smashes the player
    auto* fixture_node = static_cast<FixtureNode*>(fixture_user_data);
-
    if (!isPlayer(fixture_node))
    {
       return;
@@ -112,9 +111,30 @@ void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, 
       }
    }
 
-   auto platform_body = fixture->GetBody();
+   auto* platform_body = fixture->GetBody();
+   Player::getCurrent()->getPlatform().setPlatformBody(platform_body);
 
-   // player should have a separate namespace for this stuff
+   _count_death_block_contacts++;
+}
+
+void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, void* fixture_user_data)
+{
+   // check if platform smashes the player
+   auto* fixture_node = static_cast<FixtureNode*>(fixture_user_data);
+   if (!isPlayer(fixture_node))
+   {
+      return;
+   }
+
+   if (fixture_node && fixture_node->getType() == ObjectType::ObjectTypePlayerHeadSensor)
+   {
+      if (Player::getCurrent()->isOnGround())
+      {
+         _smashed = true;
+      }
+   }
+
+   auto* platform_body = fixture->GetBody();
    Player::getCurrent()->getPlatform().setPlatformBody(platform_body);
 
    _count_moving_platform_contacts++;
@@ -343,10 +363,14 @@ void GameContactListener::processBeginContact(
          processCollapsingPlatformContactBegin(contact, fixture_node_a, fixture_node_b);
          break;
       }
+      case ObjectTypeDeathBlock:
+      {
+         processDeathBlockContactBegin(contact_fixture_a, fixture_user_data_b);
+         break;
+      }
       case ObjectTypeDoor:
       case ObjectTypeConveyorBelt:
       case ObjectTypeMoveableBox:
-      case ObjectTypeDeathBlock:
       case ObjectTypeSolid:
       case ObjectTypeInvalid:
       {
@@ -474,6 +498,17 @@ void GameContactListener::processDeadlyContactEnd(FixtureNode* fixture_node)
    _count_deadly_contacts--;
 }
 
+void GameContactListener::processDeathBlockContactEnd(FixtureNode* fixture_node)
+{
+   if (!isPlayer(fixture_node))
+   {
+      return;
+   }
+
+   _count_death_block_contacts--;
+   Player::getCurrent()->getPlatform().setPlatformBody(nullptr);
+}
+
 void GameContactListener::processMovingPlatformContactEnd(FixtureNode* fixture_node)
 {
    if (!isPlayer(fixture_node))
@@ -542,6 +577,11 @@ void GameContactListener::processEndContact(
       case ObjectTypeDeadly:
       {
          processDeadlyContactEnd(fixture_node_b);
+         break;
+      }
+      case ObjectTypeDeathBlock:
+      {
+         processDeathBlockContactEnd(fixture_node_b);
          break;
       }
       case ObjectTypeMovingPlatform:
@@ -748,15 +788,18 @@ int32_t GameContactListener::getPlayerHeadContactCollidingCount() const
 
 void GameContactListener::reset()
 {
-   _count_head_contacts = 0;
-   _count_head_contacts_colliding = 0;
-   _count_foot_contacts = 0;
-   _count_player_contacts = 0;
    _count_arm_left_contacts = 0;
    _count_arm_right_contacts = 0;
    _count_deadly_contacts = 0;
+   _count_death_block_contacts = 0;
+   _count_foot_contacts = 0;
+   _count_head_contacts = 0;
+   _count_head_contacts_colliding = 0;
    _count_moving_platform_contacts = 0;
+   _count_player_contacts = 0;
+
    _smashed = false;
+
    OneWayWall::instance().clear();
 }
 
@@ -774,4 +817,9 @@ int32_t GameContactListener::getPlayerContactCount() const
 int32_t GameContactListener::getMovingPlatformContactCount() const
 {
    return _count_moving_platform_contacts;
+}
+
+int32_t GameContactListener::getDeathBlockContactCount() const
+{
+   return _count_death_block_contacts;
 }

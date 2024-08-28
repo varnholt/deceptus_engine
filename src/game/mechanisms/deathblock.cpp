@@ -4,9 +4,29 @@
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
 #include "game/constants.h"
+#include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/player/player.h"
+
+// state         frames
+// spikes-open : 0,1,2,3,4,5,6,7,8,9,10,11 (speed 50)
+// idle        : 12 (no speed)
+// close       : 13,14,15,16,17,18,19 (speed 50)
+
+namespace
+{
+//      0: retracted (spikes in)
+//  1..12: extract..fully extracted (spikes out)
+// 13..19: retract..almost retracted (spikes in), requires change to 0 afterwards
+
+constexpr auto sprite_extracted = 12;
+constexpr auto sprite_retracted = 19;
+constexpr auto center_sprite_animation_speed = 10.0f;
+}  // namespace
+
+// #define DEBUG_DRAW 1
 
 DeathBlock::DeathBlock(GameNode* parent) : GameNode(parent)
 {
@@ -15,34 +35,17 @@ DeathBlock::DeathBlock(GameNode* parent) : GameNode(parent)
 
 void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   for (auto& sprite : _sprites)
+   for (auto& spike : _spikes)
    {
-      color.draw(sprite);
-   }
-}
+      color.draw(spike._sprite);
 
-// enemy_deathblock
-// 14 animation cycles
-// 0: spikes out
-// 13: spikes in
-//
-// sprite setup:
-//
-//           +---+
-//           | 0 |
-//       +---+---+---+
-//       | 1 | 2 | 3 |
-//       +---+---+---+
-//           | 4 |
-//           +---+
-//
-// offsets:
-//
-//    0: 1, 0
-//    1: 0, 1
-//    2: 1, 1
-//    3: 2, 1
-//    4: 1, 2
+#ifdef DEBUG_DRAW
+      DebugDraw::drawRect(color, spike._collision_rect_absolute);
+#endif
+   }
+
+   color.draw(_center_sprite);
+}
 
 void DeathBlock::setupTransform()
 {
@@ -53,17 +56,16 @@ void DeathBlock::setupTransform()
 
 void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
 {
-   b2PolygonShape polygon_shape;
-
-   auto size_x = PIXELS_PER_TILE / PPM;
-   auto size_y = PIXELS_PER_TILE / PPM;
+   const auto size_x_m = PIXELS_PER_TILE / PPM;
+   const auto size_y_m = PIXELS_PER_TILE / PPM;
 
    b2Vec2 vertices[4];
    vertices[0] = b2Vec2(0, 0);
-   vertices[1] = b2Vec2(0, size_y);
-   vertices[2] = b2Vec2(size_x, size_y);
-   vertices[3] = b2Vec2(size_x, 0);
+   vertices[1] = b2Vec2(0, size_y_m);
+   vertices[2] = b2Vec2(size_x_m, size_y_m);
+   vertices[3] = b2Vec2(size_x_m, 0);
 
+   b2PolygonShape polygon_shape;
    polygon_shape.Set(vertices, 4);
 
    b2BodyDef body_def;
@@ -107,53 +109,184 @@ void DeathBlock::updateLeverLag(const sf::Time& dt)
 void DeathBlock::updateCollision()
 {
    // check for intersection with player
-   auto player_rect = Player::getCurrent()->getPixelRectInt();
-
-   auto x = static_cast<int32_t>(_body->GetPosition().x * PPM - PIXELS_PER_TILE);
-   auto y = static_cast<int32_t>(_body->GetPosition().y * PPM - PIXELS_PER_TILE);
+   const auto& player_rect = Player::getCurrent()->getPixelRectInt();
+   const auto x_px = static_cast<int32_t>(_body->GetPosition().x * PPM - PIXELS_PER_TILE);
+   const auto y_px = static_cast<int32_t>(_body->GetPosition().y * PPM - PIXELS_PER_TILE);
 
    // want a copy of the original rect
-   for (auto rect : _collision_rects)
+   int32_t index = 0;
+   for (auto& spike : _spikes)
    {
-      rect.left += x;
-      rect.top += y;
+      spike._collision_rect_absolute.left = spike._collision_rect_relative.left + x_px;
+      spike._collision_rect_absolute.top = spike._collision_rect_relative.top + y_px;
 
-      if (player_rect.intersects(rect))
+      const auto deadly = (spike._state == Spike::State::Extracted);
+
+      if (player_rect.intersects(spike._collision_rect_absolute) && deadly)
       {
-         Player::getCurrent()->damage(100);
+         Player::getCurrent()->damage(_damage);
       }
+
+      ++index;
+   }
+}
+
+void DeathBlock::updateStatesInterval(const sf::Time& dt)
+{
+   constexpr auto animation_speed_factor = 40.0f;
+
+   for (auto& spike : _spikes)
+   {
+      auto& time = spike._wait_offset;
+      if (time.asSeconds() > 0.0f)
+      {
+         time -= dt;
+         continue;
+      }
+
+      switch (spike._state)
+      {
+         case Spike::State::Extracting:
+         {
+            spike._state_time_s += animation_speed_factor * dt.asSeconds();
+
+            if (spike._state_time_s >= sprite_extracted)
+            {
+               spike._wait_time = sf::seconds(0);
+               spike._state = Spike::State::Extracted;
+            }
+
+            break;
+         }
+         case Spike::State::Retracting:
+         {
+            spike._state_time_s += animation_speed_factor * dt.asSeconds();
+
+            if (spike._state_time_s >= sprite_retracted)
+            {
+               spike._state_time_s = 0;  // reset after one cycle
+               spike._wait_time = sf::seconds(0);
+               spike._state = Spike::State::Retracted;
+            }
+
+            break;
+         }
+         case Spike::State::Extracted:
+         {
+            spike._wait_time += dt;
+            if (spike._wait_time > _time_on)
+            {
+               spike._state = Spike::State::Retracting;
+            };
+
+            break;
+         }
+         case Spike::State::Retracted:
+         {
+            spike._wait_time += dt;
+            if (spike._wait_time > _time_off)
+            {
+               spike._state = Spike::State::Extracting;
+            };
+
+            break;
+         }
+      }
+   }
+}
+
+void DeathBlock::updateStates(const sf::Time& dt)
+{
+   switch (_mode)
+   {
+      case Mode::AlwaysOn:
+      {
+         for (auto& spike : _spikes)
+         {
+            spike._sprite_index = sprite_extracted;
+         }
+         break;
+      }
+      case Mode::Interval:
+      {
+         updateStatesInterval(dt);
+         break;
+      }
+      case Mode::Invalid:
+      case Mode::OnContact:
+      {
+         // not implemented
+         break;
+      }
+   }
+
+   // update center
+   _center_sprite_time_s += dt.asSeconds() * center_sprite_animation_speed;
+   _center_sprite_index = static_cast<int32_t>(_center_sprite_time_s) % sprite_retracted;
+
+   // update resulting spriteset offsets
+   for (auto& spike : _spikes)
+   {
+      spike.updateIndex();
+   }
+}
+
+void DeathBlock::updateBoundingBox()
+{
+   _rect.left = _body->GetPosition().x * PPM - PIXELS_PER_TILE;
+   _rect.top = _body->GetPosition().x * PPM - PIXELS_PER_TILE;
+   _rect.width = 3 * PIXELS_PER_TILE;
+   _rect.height = 3 * PIXELS_PER_TILE;
+}
+
+void DeathBlock::updateSprites()
+{
+   const auto x = _body->GetPosition().x * PPM - PIXELS_PER_TILE;
+   const auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE;
+   const auto tl_px = PIXELS_PER_TILE * 3;
+
+   int32_t row = 1;  // first row is reserved for center
+   for (auto& spike : _spikes)
+   {
+      if (spike.hasChanged())
+      {
+         spike._sprite.setTextureRect(sf::IntRect(spike._sprite_index * tl_px, tl_px * row, tl_px, tl_px));
+      }
+
+      spike._sprite.setPosition(x, y);
+      row++;
+   }
+
+   _center_sprite.setTextureRect(sf::IntRect(_center_sprite_index * tl_px, 0, tl_px, tl_px));
+   _center_sprite.setPosition(x, y);
+}
+
+void DeathBlock::updatePosition(const sf::Time& dt)
+{
+   const auto _movement_speed = 1.0f;
+   const auto movement_delta = dt.asSeconds() * _velocity * _movement_speed;
+   _interpolation.updateTime(movement_delta);
+   const auto current_position = _body->GetPosition();
+   const auto target_position = _interpolation.computePosition(_interpolation.getTime());
+   const auto direction = target_position - current_position;
+   constexpr auto timestep = TIMESTEP_ERROR * (PPM / 60.0f);
+   _body->SetTransform(target_position, 0.0f);
+   _body->SetLinearVelocity(timestep * direction);
+
+   const auto dx = target_position - current_position;
+   if (Player::getCurrent()->getPlatform().getPlatformBody() == _body)
+   {
+      Player::getCurrent()->getPlatform().setPlatformDx(dx.x);
    }
 }
 
 void DeathBlock::update(const sf::Time& dt)
 {
    updateLeverLag(dt);
-
-   _interpolation.update(_body->GetPosition());
-   _body->SetLinearVelocity(_lever_lag * TIMESTEP_ERROR * (PPM / 60.0f) * _interpolation.getVelocity());
-
-   for (auto i = 0u; i < _sprites.size(); i++)
-   {
-      _sprites[i].setTextureRect(sf::IntRect(
-         _offsets[i].x * PIXELS_PER_TILE + _states[i] * PIXELS_PER_TILE,
-         _offsets[i].y * PIXELS_PER_TILE + _states[i] * PIXELS_PER_TILE,
-         PIXELS_PER_TILE,
-         PIXELS_PER_TILE
-      ));
-
-      // need to move by one tile because the center is not 0, 0 but -24, -24
-      const auto x = _body->GetPosition().x * PPM + _offsets[i].x * PIXELS_PER_TILE - PIXELS_PER_TILE;
-      const auto y = _body->GetPosition().y * PPM + _offsets[i].y * PIXELS_PER_TILE - PIXELS_PER_TILE;
-
-      _sprites[i].setPosition(x, y);
-   }
-
-   // update bounding box
-   _rect.left = _body->GetPosition().x * PPM + _offsets[1].x * PIXELS_PER_TILE - PIXELS_PER_TILE;
-   _rect.top = _body->GetPosition().x * PPM + _offsets[0].y * PIXELS_PER_TILE - PIXELS_PER_TILE;
-   _rect.width = 3 * PIXELS_PER_TILE;
-   _rect.height = 3 * PIXELS_PER_TILE;
-
+   updateStates(dt);
+   updatePosition(dt);
+   updateSprites();
+   updateBoundingBox();
    updateCollision();
 }
 
@@ -164,23 +297,53 @@ std::optional<sf::FloatRect> DeathBlock::getBoundingBoxPx()
 
 void DeathBlock::setup(const GameDeserializeData& data)
 {
+   std::map<std::string, std::shared_ptr<TmxProperty>> default_property_map;
+   const auto& map = data._tmx_object->_properties ? data._tmx_object->_properties->_map : default_property_map;
+
    _texture = TexturePool::getInstance().get("data/sprites/enemy_deathblock.png");
 
-   for (auto& sprite : _sprites)
+   for (auto& spike : _spikes)
    {
-      sprite.setTexture(*_texture);
+      spike._sprite.setTexture(*_texture);
    }
+
+   // offsets:
+   //
+   //    up: 1, 0
+   //    right: 2, 1
+   //    down: 1, 2
+   //    left: 0, 1
+
+   _spikes[Spike::Orientation::Up]._collision_rect_relative =
+      sf::IntRect{1 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
+   _spikes[Spike::Orientation::Right]._collision_rect_relative =
+      sf::IntRect{2 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
+   _spikes[Spike::Orientation::Down]._collision_rect_relative =
+      sf::IntRect{1 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
+   _spikes[Spike::Orientation::Left]._collision_rect_relative =
+      sf::IntRect{0 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
+
+   _center_sprite.setTexture(*_texture);
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
    _pixel_positions.x = data._tmx_object->_x_px;
    _pixel_positions.y = data._tmx_object->_y_px;
 
+   _time_off = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(2.0f));
+   _time_on = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(0.2f));
+   _damage = ValueReader::readValue<int32_t>("damage", map).value_or(100);
+
    setupBody(data._world);
 
-   const auto pixel_path = data._tmx_object->_polyline ? data._tmx_object->_polyline->_polyline : data._tmx_object->_polygon->_polyline;
+   // setup velocity
+   const auto velocity = ValueReader::readValue<float>("velocity", map).value_or(50.0f);
+   auto pixel_path = data._tmx_object->_polyline ? data._tmx_object->_polyline->_polyline : data._tmx_object->_polygon->_polyline;
    const auto start_pos = pixel_path.at(0);
+   pixel_path.push_back(start_pos);
+   _velocity = 50.0f / SfmlMath::length(pixel_path);
 
+   // setup path
    auto pos_index = 0;
    for (const auto& poly_pos : pixel_path)
    {
@@ -194,10 +357,9 @@ void DeathBlock::setup(const GameDeserializeData& data)
       world_pos.y = y;
 
       _interpolation.addKey(world_pos, time);
-      _pixel_paths.emplace_back((start_pos.x + data._tmx_object->_x_px), (start_pos.y + data._tmx_object->_y_px));
-
-      // Log::Info() << "world: " << x << ", " << y << " pixel: " << tmxObject->mX << ", " << tmxObject->mY;
 
       pos_index++;
    }
+
+   updateSprites();
 }
