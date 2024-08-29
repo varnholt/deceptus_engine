@@ -19,13 +19,11 @@ std::vector<std::shared_ptr<TmxObject>> __rectangles;
 
 }
 
-//-----------------------------------------------------------------------------
 void LeverMechanismMerger::addSearchRect(const std::shared_ptr<TmxObject>& rect)
 {
    __rectangles.push_back(rect);
 }
 
-//-----------------------------------------------------------------------------
 void LeverMechanismMerger::merge(
    const std::vector<std::shared_ptr<GameMechanism>>& levers,
    const std::vector<std::shared_ptr<GameMechanism>>& lasers,
@@ -72,7 +70,11 @@ void LeverMechanismMerger::merge(
          if (target_it != all_mechanism.end())
          {
             auto mechanism = (*target_it);
-            auto callback = [mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); };
+            auto callback = [mechanism](int32_t state)
+            {
+               auto enabled = (state != -1);
+               mechanism->setEnabled(enabled);
+            };
             lever->addCallback(callback);
             lever->updateReceivers();
          }
