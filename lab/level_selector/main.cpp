@@ -42,7 +42,7 @@ std::vector<std::shared_ptr<LevelInfo>> findLevelPaths()
          for (const auto& file : std::filesystem::directory_iterator(potential_dir))
          {
             const auto path = file.path().string();
-            if (path.find(".json") != std::string::npos)
+            if (path.find("level.json") != std::string::npos)
             {
                auto result = std::make_shared<LevelInfo>();
                result->_dir = potential_dir;
