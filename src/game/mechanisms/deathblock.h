@@ -32,6 +32,7 @@ private:
       AlwaysOn,
       OnContact,
       Interval,
+      Rotate
    };
 
    struct Spike
@@ -69,6 +70,11 @@ private:
          _sprite_index = static_cast<int32_t>(_state_time_s);
       }
 
+      void extract(const sf::Time& dt);
+      void extracted(const sf::Time& dt, const sf::Time& time_on);
+      void retract(const sf::Time& dt);
+      void retracted(const sf::Time& dt, const sf::Time& time_off);
+
       State _state{State::Retracted};
       sf::Time _wait_time;
       sf::Time _wait_offset;
@@ -78,6 +84,7 @@ private:
       int32_t _sprite_index_prev{-1};
       sf::IntRect _collision_rect_relative;
       sf::IntRect _collision_rect_absolute;
+      bool _active{true};
    };
 
    void setupTransform();

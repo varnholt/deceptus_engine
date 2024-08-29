@@ -131,9 +131,53 @@ void DeathBlock::updateCollision()
    }
 }
 
-void DeathBlock::updateStatesInterval(const sf::Time& dt)
+void DeathBlock::Spike::extract(const sf::Time& dt)
 {
    constexpr auto animation_speed_factor = 40.0f;
+
+   _state_time_s += animation_speed_factor * dt.asSeconds();
+
+   if (_state_time_s >= sprite_extracted)
+   {
+      _wait_time = sf::seconds(0);
+      _state = Spike::State::Extracted;
+   }
+}
+
+void DeathBlock::Spike::extracted(const sf::Time& dt, const sf::Time& time_on)
+{
+   _wait_time += dt;
+   if (_wait_time > time_on)
+   {
+      _state = Spike::State::Retracting;
+   };
+}
+
+void DeathBlock::Spike::retract(const sf::Time& dt)
+{
+   constexpr auto animation_speed_factor = 40.0f;
+
+   _state_time_s += animation_speed_factor * dt.asSeconds();
+
+   if (_state_time_s >= sprite_retracted)
+   {
+      _state_time_s = 0;  // reset after one cycle
+      _wait_time = sf::seconds(0);
+      _state = Spike::State::Retracted;
+   }
+}
+
+void DeathBlock::Spike::retracted(const sf::Time& dt, const sf::Time& time_off)
+{
+   _wait_time += dt;
+   if (_wait_time > time_off)
+   {
+      _state = Spike::State::Extracting;
+   };
+}
+
+void DeathBlock::updateStatesInterval(const sf::Time& dt)
+{
 
    for (auto& spike : _spikes)
    {
@@ -148,47 +192,22 @@ void DeathBlock::updateStatesInterval(const sf::Time& dt)
       {
          case Spike::State::Extracting:
          {
-            spike._state_time_s += animation_speed_factor * dt.asSeconds();
-
-            if (spike._state_time_s >= sprite_extracted)
-            {
-               spike._wait_time = sf::seconds(0);
-               spike._state = Spike::State::Extracted;
-            }
-
+            spike.extract(dt);
             break;
          }
          case Spike::State::Retracting:
          {
-            spike._state_time_s += animation_speed_factor * dt.asSeconds();
-
-            if (spike._state_time_s >= sprite_retracted)
-            {
-               spike._state_time_s = 0;  // reset after one cycle
-               spike._wait_time = sf::seconds(0);
-               spike._state = Spike::State::Retracted;
-            }
-
+            spike.retract(dt);
             break;
          }
          case Spike::State::Extracted:
          {
-            spike._wait_time += dt;
-            if (spike._wait_time > _time_on)
-            {
-               spike._state = Spike::State::Retracting;
-            };
-
+            spike.extracted(dt, _time_on);
             break;
          }
          case Spike::State::Retracted:
          {
-            spike._wait_time += dt;
-            if (spike._wait_time > _time_off)
-            {
-               spike._state = Spike::State::Extracting;
-            };
-
+            spike.retracted(dt, _time_off);
             break;
          }
       }
@@ -203,7 +222,9 @@ void DeathBlock::updateStates(const sf::Time& dt)
       {
          for (auto& spike : _spikes)
          {
-            spike._sprite_index = sprite_extracted;
+            // spike._sprite_index = sprite_extracted;
+            spike._state_time_s = sprite_extracted;
+            spike._state = Spike::State::Extracted;
          }
          break;
       }
@@ -307,13 +328,6 @@ void DeathBlock::setup(const GameDeserializeData& data)
       spike._sprite.setTexture(*_texture);
    }
 
-   // offsets:
-   //
-   //    up: 1, 0
-   //    right: 2, 1
-   //    down: 1, 2
-   //    left: 0, 1
-
    _spikes[Spike::Orientation::Up]._collision_rect_relative =
       sf::IntRect{1 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
    _spikes[Spike::Orientation::Right]._collision_rect_relative =
@@ -333,6 +347,24 @@ void DeathBlock::setup(const GameDeserializeData& data)
    _time_off = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(2.0f));
    _time_on = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(0.2f));
    _damage = ValueReader::readValue<int32_t>("damage", map).value_or(100);
+   const auto mode = ValueReader::readValue<std::string>("mode", map).value_or("always_on");
+
+   if (mode == "always_on")
+   {
+      _mode = Mode::AlwaysOn;
+   }
+   else if (mode == "interval")
+   {
+      _mode = Mode::Interval;
+   }
+   else if (mode == "rotate")
+   {
+      _mode = Mode::Rotate;
+      _spikes[0]._active = true;
+      _spikes[1]._active = false;
+      _spikes[2]._active = false;
+      _spikes[3]._active = false;
+   }
 
    setupBody(data._world);
 
