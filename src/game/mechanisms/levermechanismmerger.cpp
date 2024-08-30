@@ -81,6 +81,7 @@ void LeverMechanismMerger::merge(
       }
    }
 
+   // old rectangle approach
    for (const auto& rect : __rectangles)
    {
       sf::FloatRect search_rect;

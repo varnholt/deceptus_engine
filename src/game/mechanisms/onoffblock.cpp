@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 
 /*
 
@@ -49,22 +50,24 @@ void OnOffBlock::setup(const GameDeserializeData& data)
 
    if (data._tmx_object->_properties)
    {
-      const auto z_it = data._tmx_object->_properties->_map.find("z");
-      if (z_it != data._tmx_object->_properties->_map.end())
+      const auto map = data._tmx_object->_properties->_map;
+
+      const auto z_it = map.find("z");
+      if (z_it != map.end())
       {
          const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
          setZ(z_index);
       }
 
-      const auto enabled_it = data._tmx_object->_properties->_map.find("enabled");
-      if (enabled_it != data._tmx_object->_properties->_map.end())
+      const auto enabled_it = map.find("enabled");
+      if (enabled_it != map.end())
       {
          const auto enabled = static_cast<bool>(enabled_it->second->_value_bool.value());
          setEnabled(enabled);
       }
 
-      const auto mode_it = data._tmx_object->_properties->_map.find("mode");
-      if (mode_it != data._tmx_object->_properties->_map.end())
+      const auto mode_it = map.find("mode");
+      if (mode_it != map.end())
       {
          auto mode_str = static_cast<std::string>(mode_it->second->_value_string.value());
          if (mode_str == "interval")
@@ -73,17 +76,19 @@ void OnOffBlock::setup(const GameDeserializeData& data)
          }
       }
 
-      const auto time_on_it = data._tmx_object->_properties->_map.find("time_on_ms");
-      if (time_on_it != data._tmx_object->_properties->_map.end())
+      const auto time_on_it = map.find("time_on_ms");
+      if (time_on_it != map.end())
       {
          _time_on_ms = static_cast<int32_t>(time_on_it->second->_value_int.value());
       }
 
-      const auto time_off_it = data._tmx_object->_properties->_map.find("time_off_ms");
-      if (time_on_it != data._tmx_object->_properties->_map.end())
+      const auto time_off_it = map.find("time_off_ms");
+      if (time_on_it != map.end())
       {
          _time_off_ms = static_cast<int32_t>(time_off_it->second->_value_int.value());
       }
+
+      _inverted = ValueReader::readValue<bool>("inverted", map).value_or(false);
    }
 
    // set up shape
@@ -204,6 +209,11 @@ void OnOffBlock::update(const sf::Time& dt)
 
 void OnOffBlock::setEnabled(bool enabled)
 {
+   if (_inverted)
+   {
+      enabled = !enabled;
+   }
+
    // a queue is used here because the player might be hammering the lever
    _target_states.push_back(enabled);
 }
