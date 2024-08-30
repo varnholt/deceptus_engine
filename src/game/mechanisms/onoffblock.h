@@ -51,6 +51,7 @@ private:
    sf::Time _elapsed;
    int32_t _time_on_ms = 4000;
    int32_t _time_off_ms = 3000;
+   bool _inverted{false};
 
    // b2d
    b2Body* _body = nullptr;
