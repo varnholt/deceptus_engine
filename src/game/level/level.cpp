@@ -1369,7 +1369,7 @@ void Level::update(const sf::Time& dt)
             );
          }
 
-         if (update_mechanism)
+         // if (update_mechanism)
          {
             mechanism->update(dt);
          }
