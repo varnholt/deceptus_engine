@@ -112,11 +112,14 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
 
    std::vector<std::string> buttons_unmapped;
 
+   if (!data._tmx_object->_properties)
+   {
+      return;
+   }
+
    auto keys_it = data._tmx_object->_properties->_map.find("keys");
    if (keys_it != data._tmx_object->_properties->_map.end())
    {
-      _texture = TexturePool::getInstance().get("data/game/ui_icons.png");
-
       std::istringstream text_line(keys_it->second->_value_string.value());
       std::string key;
       while (getline(text_line, key, ';'))
@@ -124,6 +127,8 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
          buttons_unmapped.emplace_back(key);
       }
    }
+
+   _texture = TexturePool::getInstance().get("data/game/ui_icons.png");
 
    for (const auto& unmapped_button_key : buttons_unmapped)
    {
@@ -155,7 +160,7 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
    }
    else if (_sprites.size() == 2)
    {
-      _background.setTextureRect({9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE, PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 3});
+      _background.setTextureRect({9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE, PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3});
    }
 }
 
