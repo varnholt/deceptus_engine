@@ -547,9 +547,11 @@ void MovingPlatform::update(const sf::Time& dt)
    _pos.x = _body->GetPosition().x;
    _pos.y = _body->GetPosition().y;
 
-   if (Player::getCurrent()->getPlatform().getPlatformBody() == _body)
+   auto& platform = Player::getCurrent()->getPlatform();
+   if (platform.getPlatformBody() == _body)
    {
-      Player::getCurrent()->getPlatform().setPlatformDx(getDx());
+      platform.setPlatformDx(getDx());
+      platform.setGravityScale(10.0f);
    }
 
    // update sprite animation

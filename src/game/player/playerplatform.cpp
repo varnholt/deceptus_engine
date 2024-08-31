@@ -25,7 +25,7 @@ void PlayerPlatform::update(b2Body* body, bool jumping)
       const auto x = body->GetPosition().x + _platform_dx;
       const auto y = body->GetPosition().y;
       body->SetTransform(b2Vec2(x, y), 0.0f);
-      body->SetGravityScale(10.0f);
+      body->SetGravityScale(_gravity_scale);
 
       // printf("standing on platform, x: %f, y: %f, dx: %f \n", x, y, dx);
    }
@@ -42,6 +42,11 @@ void PlayerPlatform::reset()
    _platform_body = nullptr;
 
    _platform_gravity_scale.reset();
+}
+
+void PlayerPlatform::setGravityScale(float scale)
+{
+   _gravity_scale = scale;
 }
 
 void PlayerPlatform::setPlatformBody(b2Body* body)
