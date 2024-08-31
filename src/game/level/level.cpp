@@ -1350,11 +1350,29 @@ void Level::update(const sf::Time& dt)
       tile_map->update(dt);
    }
 
+   // TODO: unify this code with the chunk optimization used in the draw call
+   const auto& player_chunk = Player::getCurrent()->getChunk();
    for (auto* mechanism_vector : _mechanisms_list)
    {
       for (const auto& mechanism : *mechanism_vector)
       {
-         mechanism->update(dt);
+         auto update_mechanism = true;
+         if (mechanism->hasChunks())
+         {
+            const auto& chunks = mechanism->getChunks();
+            update_mechanism = std::any_of(
+               chunks.cbegin(),
+               chunks.cend(),
+               [player_chunk](const Chunk& other) {
+                  return abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X && abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y;
+               }
+            );
+         }
+
+         if (update_mechanism)
+         {
+            mechanism->update(dt);
+         }
       }
    }
 
