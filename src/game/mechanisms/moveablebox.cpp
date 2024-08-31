@@ -11,25 +11,21 @@
 
 #include <iostream>
 
-//--------------------------------------------------------------------------------------------------
 MoveableBox::MoveableBox(GameNode* node) : GameNode(node)
 {
    setClassName(typeid(MoveableBox).name());
 }
 
-//--------------------------------------------------------------------------------------------------
 void MoveableBox::preload()
 {
    Audio::getInstance().addSample("mechanism_moveable_object_01.wav");
 }
 
-//--------------------------------------------------------------------------------------------------
 void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(_sprite);
 }
 
-//--------------------------------------------------------------------------------------------------
 void MoveableBox::update(const sf::Time& /*dt*/)
 {
    const auto x = _body->GetPosition().x * PPM;
@@ -54,7 +50,6 @@ void MoveableBox::update(const sf::Time& /*dt*/)
    }
 }
 
-//--------------------------------------------------------------------------------------------------
 std::optional<sf::FloatRect> MoveableBox::getBoundingBoxPx()
 {
    return _sprite.getGlobalBounds();
@@ -87,7 +82,6 @@ std::optional<sf::FloatRect> MoveableBox::getBoundingBoxPx()
 
 */
 
-//--------------------------------------------------------------------------------------------------
 void MoveableBox::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
@@ -134,7 +128,6 @@ void MoveableBox::setup(const GameDeserializeData& data)
    setupTransform();
 }
 
-//-----------------------------------------------------------------------------
 void MoveableBox::setupTransform()
 {
    auto x = _sprite.getPosition().x / PPM;
@@ -142,7 +135,6 @@ void MoveableBox::setupTransform()
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 
-//--------------------------------------------------------------------------------------------------
 void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
 {
    const auto size_x = _size.x / PPM;

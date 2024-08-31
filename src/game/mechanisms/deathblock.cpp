@@ -65,8 +65,24 @@ void DeathBlock::setupBody(const std::shared_ptr<b2World>& world)
    vertices[2] = b2Vec2(size_x_m, size_y_m);
    vertices[3] = b2Vec2(size_x_m, 0);
 
+   // constexpr auto bevel_px = 8;
+   // constexpr auto bevel_m = bevel_px * MPP;
+   //
+   // std::array<b2Vec2, 8> vertices{
+   //    b2Vec2{bevel_m, 0.0f},
+   //    b2Vec2{0.0f, bevel_m},
+   //    b2Vec2{0.0f, size_y_m - bevel_m},
+   //    b2Vec2{bevel_m, size_y_m},
+   //    b2Vec2{size_x_m - bevel_m, size_y_m},
+   //    b2Vec2{size_x_m, size_y_m - bevel_m},
+   //    b2Vec2{size_x_m, bevel_m},
+   //    b2Vec2{size_x_m - bevel_m, 0.0f},
+   // };
+
    b2PolygonShape polygon_shape;
    polygon_shape.Set(vertices, 4);
+
+   // polygon_shape.Set(vertices.data(), static_cast<int32_t>(vertices.size()));
 
    b2BodyDef body_def;
    body_def.type = b2_kinematicBody;
@@ -295,9 +311,11 @@ void DeathBlock::updatePosition(const sf::Time& dt)
    _body->SetLinearVelocity(timestep * direction);
 
    const auto dx = target_position - current_position;
-   if (Player::getCurrent()->getPlatform().getPlatformBody() == _body)
+   auto& platform = Player::getCurrent()->getPlatform();
+   if (platform.getPlatformBody() == _body)
    {
-      Player::getCurrent()->getPlatform().setPlatformDx(dx.x);
+      platform.setPlatformDx(dx.x);
+      platform.setGravityScale(1.0f);
    }
 }
 
