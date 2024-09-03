@@ -26,7 +26,7 @@ constexpr auto sprite_retracted = 19;
 constexpr auto center_sprite_animation_speed = 10.0f;
 }  // namespace
 
-// #define DEBUG_DRAW 1
+#define DEBUG_DRAW 1
 
 DeathBlock::DeathBlock(GameNode* parent) : GameNode(parent)
 {
@@ -40,7 +40,9 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       color.draw(spike._sprite);
 
 #ifdef DEBUG_DRAW
-      DebugDraw::drawRect(color, spike._collision_rect_absolute);
+      const auto& player_rect = Player::getCurrent()->getPixelRectInt();
+      const auto fill_color = player_rect.intersects(spike._collision_rect_absolute) ? sf::Color::Red : sf::Color::Green;
+      DebugDraw::drawRect(color, spike._collision_rect_absolute, fill_color);
 #endif
    }
 
@@ -194,7 +196,6 @@ void DeathBlock::Spike::retracted(const sf::Time& dt, const sf::Time& time_off)
 
 void DeathBlock::updateStatesInterval(const sf::Time& dt)
 {
-
    for (auto& spike : _spikes)
    {
       auto& time = spike._wait_offset;
@@ -230,8 +231,54 @@ void DeathBlock::updateStatesInterval(const sf::Time& dt)
    }
 }
 
+#include <iostream>
+
+void DeathBlock::updateStatesRotate(const sf::Time& dt)
+{
+   const auto spike_index = _rotation[_spike_rotation_counter % 4];
+   auto& spike = _spikes[spike_index];
+
+   std::cout << spike_index << std::endl;
+
+   switch (spike._state)
+   {
+      case Spike::State::Extracting:
+      {
+         spike.extract(dt);
+         break;
+      }
+      case Spike::State::Retracting:
+      {
+         spike.retract(dt);
+         break;
+      }
+      case Spike::State::Extracted:
+      {
+         spike.extracted(dt, _time_on);
+         break;
+      }
+      case Spike::State::Retracted:
+      {
+         spike.retracted(dt, _time_off);
+
+         if (spike._state == Spike::State::Extracting)
+         {
+            _spike_rotation_counter++;
+         }
+
+         break;
+      }
+   }
+}
+
 void DeathBlock::updateStates(const sf::Time& dt)
 {
+   if (_time_offset.asSeconds() > 0.0f)
+   {
+      _time_offset -= dt;
+      return;
+   }
+
    switch (_mode)
    {
       case Mode::AlwaysOn:
@@ -247,6 +294,11 @@ void DeathBlock::updateStates(const sf::Time& dt)
       case Mode::Interval:
       {
          updateStatesInterval(dt);
+         break;
+      }
+      case Mode::Rotate:
+      {
+         updateStatesRotate(dt);
          break;
       }
       case Mode::Invalid:
@@ -362,8 +414,9 @@ void DeathBlock::setup(const GameDeserializeData& data)
    _pixel_positions.x = data._tmx_object->_x_px;
    _pixel_positions.y = data._tmx_object->_y_px;
 
-   _time_off = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(2.0f));
+   _time_off = sf::seconds(ValueReader::readValue<float>("time_off", map).value_or(2.0f));
    _time_on = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(0.2f));
+   _time_offset = sf::seconds(ValueReader::readValue<float>("time_offset", map).value_or(0.0f));
    _damage = ValueReader::readValue<int32_t>("damage", map).value_or(100);
    const auto mode = ValueReader::readValue<std::string>("mode", map).value_or("always_on");
 
