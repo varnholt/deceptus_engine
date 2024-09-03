@@ -96,6 +96,7 @@ private:
    void updateSprites();
    void updatePosition(const sf::Time& dt);
    void updateStatesInterval(const sf::Time& dt);
+   void updateStatesRotate(const sf::Time& dt);
 
    //     +---+
    //     | 0 |
@@ -114,6 +115,7 @@ private:
    float _velocity = 1.0f;
    sf::Time _time_on;
    sf::Time _time_off;
+   sf::Time _time_offset;
    std::array<Spike, 4> _spikes;
    sf::Sprite _center_sprite;
    float _center_sprite_time_s{0.0f};
@@ -121,4 +123,13 @@ private:
    Mode _mode{Mode::Interval};
    std::shared_ptr<sf::Texture> _texture;
    int32_t _damage{100};
+
+   // rotation mode
+   int32_t _spike_rotation_counter{0};
+   std::array<Spike::Orientation, 4> _rotation{
+      Spike::Orientation::Up,
+      Spike::Orientation::Right,
+      Spike::Orientation::Down,
+      Spike::Orientation::Left
+   };
 };
