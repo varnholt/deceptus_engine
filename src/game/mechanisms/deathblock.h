@@ -53,22 +53,11 @@ private:
          Right = 3,
       };
 
-      Spike()
-      {
-         _collision_rect_absolute.width = PIXELS_PER_TILE;
-         _collision_rect_absolute.height = PIXELS_PER_TILE;
-      }
+      Spike();
 
-      bool hasChanged() const
-      {
-         return _sprite_index != _sprite_index_prev;
-      }
+      bool hasChanged() const;
 
-      void updateIndex()
-      {
-         _sprite_index_prev = _sprite_index;
-         _sprite_index = static_cast<int32_t>(_state_time_s);
-      }
+      void updateIndex();
 
       void extract(const sf::Time& dt);
       void extracted(const sf::Time& dt, const sf::Time& time_on);

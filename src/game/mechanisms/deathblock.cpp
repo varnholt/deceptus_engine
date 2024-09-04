@@ -4,11 +4,15 @@
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
 #include "game/constants.h"
-#include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/player/player.h"
+
+// #define DEBUG_DRAW 1
+#ifdef DEBUG_DRAW
+#include "game/debug/debugdraw.h"
+#endif
 
 // state         frames
 // spikes-open : 0,1,2,3,4,5,6,7,8,9,10,11 (speed 50)
@@ -24,9 +28,10 @@ namespace
 constexpr auto sprite_extracted = 12;
 constexpr auto sprite_retracted = 19;
 constexpr auto center_sprite_animation_speed = 10.0f;
-}  // namespace
 
-#define DEBUG_DRAW 1
+constexpr auto tolerance_px = 4;
+constexpr auto tolerance_px_2 = tolerance_px * 2;
+}  // namespace
 
 DeathBlock::DeathBlock(GameNode* parent) : GameNode(parent)
 {
@@ -149,6 +154,23 @@ void DeathBlock::updateCollision()
    }
 }
 
+DeathBlock::Spike::Spike()
+{
+   _collision_rect_absolute.width = PIXELS_PER_TILE - tolerance_px_2;
+   _collision_rect_absolute.height = PIXELS_PER_TILE - tolerance_px_2;
+}
+
+bool DeathBlock::Spike::hasChanged() const
+{
+   return _sprite_index != _sprite_index_prev;
+}
+
+void DeathBlock::Spike::updateIndex()
+{
+   _sprite_index_prev = _sprite_index;
+   _sprite_index = static_cast<int32_t>(_state_time_s);
+}
+
 void DeathBlock::Spike::extract(const sf::Time& dt)
 {
    constexpr auto animation_speed_factor = 40.0f;
@@ -231,14 +253,10 @@ void DeathBlock::updateStatesInterval(const sf::Time& dt)
    }
 }
 
-#include <iostream>
-
 void DeathBlock::updateStatesRotate(const sf::Time& dt)
 {
    const auto spike_index = _rotation[_spike_rotation_counter % 4];
    auto& spike = _spikes[spike_index];
-
-   std::cout << spike_index << std::endl;
 
    switch (spike._state)
    {
@@ -398,14 +416,33 @@ void DeathBlock::setup(const GameDeserializeData& data)
       spike._sprite.setTexture(*_texture);
    }
 
-   _spikes[Spike::Orientation::Up]._collision_rect_relative =
-      sf::IntRect{1 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
-   _spikes[Spike::Orientation::Right]._collision_rect_relative =
-      sf::IntRect{2 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
-   _spikes[Spike::Orientation::Down]._collision_rect_relative =
-      sf::IntRect{1 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
-   _spikes[Spike::Orientation::Left]._collision_rect_relative =
-      sf::IntRect{0 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE};
+   _spikes[Spike::Orientation::Up]._collision_rect_relative = sf::IntRect{
+      1 * PIXELS_PER_TILE + tolerance_px,
+      0 * PIXELS_PER_TILE + tolerance_px,
+      PIXELS_PER_TILE - tolerance_px_2,
+      PIXELS_PER_TILE - tolerance_px_2
+   };
+
+   _spikes[Spike::Orientation::Right]._collision_rect_relative = sf::IntRect{
+      2 * PIXELS_PER_TILE + tolerance_px,
+      1 * PIXELS_PER_TILE + tolerance_px,
+      PIXELS_PER_TILE - tolerance_px_2,
+      PIXELS_PER_TILE - tolerance_px_2
+   };
+
+   _spikes[Spike::Orientation::Down]._collision_rect_relative = sf::IntRect{
+      1 * PIXELS_PER_TILE + tolerance_px,
+      2 * PIXELS_PER_TILE + tolerance_px,
+      PIXELS_PER_TILE - tolerance_px_2,
+      PIXELS_PER_TILE - tolerance_px_2
+   };
+
+   _spikes[Spike::Orientation::Left]._collision_rect_relative = sf::IntRect{
+      0 * PIXELS_PER_TILE + tolerance_px,
+      1 * PIXELS_PER_TILE + tolerance_px,
+      PIXELS_PER_TILE - tolerance_px_2,
+      PIXELS_PER_TILE - tolerance_px_2
+   };
 
    _center_sprite.setTexture(*_texture);
 
