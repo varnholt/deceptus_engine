@@ -39,6 +39,7 @@ public:
    void luaUpdate(const sf::Time& dt);
    void luaWriteProperty(const std::string& key, const std::string& value);
    void luaPlayerReceivedExtra(const std::string& extra_name);
+   void luaPlayerReceivedItem(const std::string& item);
    void luaPlayerCollidesWithRect(int32_t rect_id);
    void luaPlayerCollidesWithSensorRect(const std::string& sensor_rect_id);
 
@@ -46,6 +47,7 @@ public:
       std::function<std::vector<std::shared_ptr<GameMechanism>>(const std::string& regexp, const std::optional<std::string>&)>;
 
    void setSearchMechanismCallback(const SearchMechanismCallback& callback);
+   void createExtraCallbacks(const std::vector<std::shared_ptr<GameMechanism>>& extras);
 
 private:
    std::vector<std::shared_ptr<LuaNode>> findLuaNodes(const std::string& search_pattern);
@@ -56,5 +58,9 @@ private:
    std::string _script_name;
    lua_State* _lua_state = nullptr;
    bool _initialized{false};
+
    SearchMechanismCallback _search_mechanism_callback{nullptr};
+
+   using ItemAddedCallback = std::function<void(const std::string&)>;
+   ItemAddedCallback _added_callback;
 };

@@ -56,6 +56,9 @@ void GameConfiguration::deserialize(const std::string& data)
       _brightness = config["GameConfiguration"]["brightness"].get<float>();
       _vsync_enabled = config["GameConfiguration"]["vsync"].get<bool>();
 
+      _video_mode_width = std::max(_video_mode_width, 640);
+      _video_mode_height = std::max(_video_mode_height, 360);
+
       _view_scale_width = static_cast<float>(_view_width) / static_cast<float>(_video_mode_width);
       _view_scale_height = static_cast<float>(_view_height) / static_cast<float>(_video_mode_height);
 
