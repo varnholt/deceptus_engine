@@ -5,6 +5,7 @@
 #include "game/level/luainterface.h"
 #include "game/level/luanode.h"
 #include "game/mechanisms/dialogue.h"
+#include "game/mechanisms/extra.h"
 #include "game/mechanisms/sensorrect.h"
 #include "game/player/player.h"
 #include "game/player/playercontrols.h"
@@ -392,11 +393,20 @@ LevelScript::LevelScript()
 {
    // lua is really c style
    setInstance(this);
+
+   // add 'item added' callback
+   auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
+   _added_callback = [this](const std::string& item) { luaPlayerReceivedItem(item); };
+   inventory._added_callbacks.push_back(_added_callback);
 }
 
 LevelScript::~LevelScript()
 {
    resetInstance();
+
+   // remove 'item added' callback
+   auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
+   inventory.removeAddedCallback(_added_callback);
 }
 
 void LevelScript::setup(const std::filesystem::path& path)
@@ -527,9 +537,39 @@ void LevelScript::luaPlayerReceivedExtra(const std::string& extra_name)
    }
 }
 
+///
+/// \brief LevelScript::luaPlayerReceivedItem
+/// \param item item that was received
+///
+void LevelScript::luaPlayerReceivedItem(const std::string& item)
+{
+   lua_getglobal(_lua_state, FUNCTION_PLAYER_RECEIVED_ITEM);
+   if (lua_isfunction(_lua_state, -1))
+   {
+      lua_pushstring(_lua_state, item.c_str());
+
+      const auto result = lua_pcall(_lua_state, 1, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(_lua_state, FUNCTION_PLAYER_RECEIVED_ITEM);
+      }
+   }
+}
+
 void LevelScript::setSearchMechanismCallback(const SearchMechanismCallback& callback)
 {
    _search_mechanism_callback = callback;
+}
+
+void LevelScript::createExtraCallbacks(const std::vector<std::shared_ptr<GameMechanism>>& extras)
+{
+   // handshake between extra mechanism and level script
+   for (const auto& extra_mechanism : extras)
+   {
+      auto extra = std::dynamic_pointer_cast<Extra>(extra_mechanism);
+      extra->_callbacks.emplace_back([this](const std::string& extra) { luaPlayerReceivedExtra(extra); });
+   }
 }
 
 int32_t LevelScript::addCollisionRect(const sf::IntRect& rect)
@@ -547,7 +587,6 @@ void LevelScript::setMechanismEnabled(const std::string& search_pattern, bool en
    }
 
    auto mechanisms = _search_mechanism_callback(search_pattern, group);
-
    for (auto& mechanism : mechanisms)
    {
       mechanism->setEnabled(enabled);

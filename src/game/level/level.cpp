@@ -547,12 +547,7 @@ void Level::loadLevelScript()
    _level_script.setSearchMechanismCallback([this](const std::string& regexPattern, const std::optional<std::string>& group)
                                             { return searchMechanisms(regexPattern, group); });
 
-   // handshake between extra mechanism and level script
-   for (const auto& extra_mechanism : _mechanism_extras)
-   {
-      auto extra = std::dynamic_pointer_cast<Extra>(extra_mechanism);
-      extra->_callbacks.emplace_back([this](const std::string& extra) { _level_script.luaPlayerReceivedExtra(extra); });
-   }
+   _level_script.createExtraCallbacks(_mechanism_extras);
 }
 
 void Level::initialize()
