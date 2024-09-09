@@ -13,6 +13,7 @@ void Inventory::add(const std::string& item)
 {
    _items.push_back(item);
    std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
+   std::ranges::for_each(_added_callbacks, [&item](const auto& cb) { cb(item); });
 
    // fill empty slots with new items
    autoPopulate(item);
@@ -101,13 +102,25 @@ void Inventory::use(int32_t slot)
    );
 }
 
+void Inventory::removeAddedCallback(const AddedCallback& callback_to_remove)
+{
+   _added_callbacks.erase(
+      std::remove_if(
+         _added_callbacks.begin(),
+         _added_callbacks.end(),
+         [&callback_to_remove](const auto& callback) { return &callback == &callback_to_remove; }
+      ),
+      _added_callbacks.end()
+   );
+}
+
 void Inventory::removeUsedCallback(const UsedCallback& callback_to_remove)
 {
    _used_callbacks.erase(
       std::remove_if(
          _used_callbacks.begin(),
          _used_callbacks.end(),
-         [&callback_to_remove](const UsedCallback& callback) { return &callback == &callback_to_remove; }
+         [&callback_to_remove](const auto& callback) { return &callback == &callback_to_remove; }
       ),
       _used_callbacks.end()
    );

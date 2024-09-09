@@ -10,7 +10,8 @@ struct Inventory
 {
    Inventory();
 
-   using UpdateddCallback = std::function<void()>;
+   using AddedCallback = std::function<void(const std::string&)>;
+   using UpdatedCallback = std::function<void()>;
    using UsedCallback = std::function<bool(const std::string&)>;
 
    void add(const std::string&);
@@ -23,9 +24,12 @@ struct Inventory
    void selectItem(int32_t slot, const std::string& item);
    void autoPopulate(const std::string& item);
    void use(int32_t);
+
+   void removeAddedCallback(const AddedCallback& callbackToRemove);
    void removeUsedCallback(const UsedCallback& callbackToRemove);
 
-   std::vector<UpdateddCallback> _updated_callbacks;
+   std::vector<AddedCallback> _added_callbacks;
+   std::vector<UpdatedCallback> _updated_callbacks;
    std::vector<UsedCallback> _used_callbacks;
 
    // serialized data
