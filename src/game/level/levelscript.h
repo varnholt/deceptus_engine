@@ -5,6 +5,7 @@
 #include <string>
 #include "game/level/scriptproperty.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "lua.hpp"
 
 struct LuaNode;
@@ -63,4 +64,9 @@ private:
 
    using ItemAddedCallback = std::function<void(const std::string&)>;
    ItemAddedCallback _added_callback;
+
+   std::unique_ptr<
+      GameMechanismObserver::Reference<GameMechanismObserver::EnabledCallback>,
+      std::function<void(GameMechanismObserver::Reference<GameMechanismObserver::EnabledCallback>*)>>
+      _observer_reference;
 };

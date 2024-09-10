@@ -7,7 +7,7 @@
 class GameNode
 {
 public:
-   GameNode(GameNode* parent = nullptr);
+   GameNode(GameNode* parent = nullptr);  // should become a weakptr
    virtual ~GameNode();
 
    GameNode* getParent() const;
@@ -24,5 +24,5 @@ protected:
    std::string _class_name;
    std::string _object_id;
    std::vector<GameNode*> _children;
-   GameNode* _parent = nullptr;
+   GameNode* _parent = nullptr;  // should become a weakptr
 };

@@ -13,6 +13,7 @@
 #include "game/audio/audio.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
 #include "game/player/player.h"
@@ -358,9 +359,11 @@ void Door::setup(const GameDeserializeData& data)
 
    if (data._tmx_object->_properties)
    {
+      const auto& map = data._tmx_object->_properties->_map;
+
       // read door version
-      const auto type_it = data._tmx_object->_properties->_map.find("version");
-      if (type_it != data._tmx_object->_properties->_map.end())
+      const auto type_it = map.find("version");
+      if (type_it != map.end())
       {
          const auto type_identifier = type_it->second->_value_string.value();
          if (type_identifier == "version")
@@ -370,16 +373,18 @@ void Door::setup(const GameDeserializeData& data)
          }
       }
 
+      _observed = ValueReader::readValue<bool>("observed", map).value_or(false);
+
       // read z index
-      const auto z_it = data._tmx_object->_properties->_map.find("z");
-      if (z_it != data._tmx_object->_properties->_map.end())
+      const auto z_it = map.find("z");
+      if (z_it != map.end())
       {
          const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
          setZ(z_index);
       }
 
-      const auto texture_it = data._tmx_object->_properties->_map.find("texture");
-      if (texture_it != data._tmx_object->_properties->_map.end())
+      const auto texture_it = map.find("texture");
+      if (texture_it != map.end())
       {
          const auto texture_path = texture_it->second->_value_string.value();
          _texture = TexturePool::getInstance().get(texture_path);
@@ -387,22 +392,22 @@ void Door::setup(const GameDeserializeData& data)
          _sprite.setPosition(x_px, y_px);
       }
 
-      const auto sample_open_it = data._tmx_object->_properties->_map.find("sample_open");
-      if (sample_open_it != data._tmx_object->_properties->_map.end())
+      const auto sample_open_it = map.find("sample_open");
+      if (sample_open_it != map.end())
       {
          _sample_open = sample_open_it->second->_value_string.value();
          Audio::getInstance().addSample(_sample_open.value());
       }
 
-      const auto sample_close_it = data._tmx_object->_properties->_map.find("sample_close");
-      if (sample_close_it != data._tmx_object->_properties->_map.end())
+      const auto sample_close_it = map.find("sample_close");
+      if (sample_close_it != map.end())
       {
          _sample_close = sample_close_it->second->_value_string.value();
          Audio::getInstance().addSample(_sample_close.value());
       }
 
-      const auto open_it = data._tmx_object->_properties->_map.find("open");
-      if (open_it != data._tmx_object->_properties->_map.end())
+      const auto open_it = map.find("open");
+      if (open_it != map.end())
       {
          const auto open = open_it->second->_value_bool.value();
          setEnabled(open);
@@ -413,8 +418,8 @@ void Door::setup(const GameDeserializeData& data)
       }
 
       // read required key to open door
-      const auto key_it = data._tmx_object->_properties->_map.find("key");
-      if (key_it != data._tmx_object->_properties->_map.end())
+      const auto key_it = map.find("key");
+      if (key_it != map.end())
       {
          const auto key = key_it->second->_value_string.value();
          _required_item = key;
@@ -424,24 +429,24 @@ void Door::setup(const GameDeserializeData& data)
       const auto offset_x = width_px * 0.5f;
       const auto offset_y = height_px * 0.5f;
       AnimationPool animation_pool{"data/sprites/door_animations.json"};
-      const auto key_animation = data._tmx_object->_properties->_map.find("key_animation");
-      if (key_animation != data._tmx_object->_properties->_map.end())
+      const auto key_animation = map.find("key_animation");
+      if (key_animation != map.end())
       {
          const auto key = key_animation->second->_value_string.value();
          _animation_key = animation_pool.create(key, x_px + offset_x, y_px + offset_y, false, false);
       }
 
       // read open animation
-      const auto animation_open = data._tmx_object->_properties->_map.find("animation_open");
-      if (animation_open != data._tmx_object->_properties->_map.end())
+      const auto animation_open = map.find("animation_open");
+      if (animation_open != map.end())
       {
          const auto key = animation_open->second->_value_string.value();
          _animation_open = animation_pool.create(key, x_px + offset_x, y_px + offset_y, false, false);
       }
 
       // read close animation
-      const auto animation_close = data._tmx_object->_properties->_map.find("animation_close");
-      if (animation_close != data._tmx_object->_properties->_map.end())
+      const auto animation_close = map.find("animation_close");
+      if (animation_close != map.end())
       {
          const auto key = animation_close->second->_value_string.value();
          _animation_close = animation_pool.create(key, x_px + offset_x, y_px + offset_y, false, false);
