@@ -60,6 +60,7 @@ protected:
    int32_t _z_index{0};
    bool _enabled{true};
    bool _serialized{false};
+   bool _observed{false};
 
    // audio related
    bool _has_audio{false};

@@ -389,6 +389,8 @@ void LevelScript::update(const sf::Time& dt)
    }
 }
 
+#include <iostream>
+
 LevelScript::LevelScript()
 {
    // lua is really c style
@@ -398,6 +400,10 @@ LevelScript::LevelScript()
    auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
    _added_callback = [this](const std::string& item) { luaPlayerReceivedItem(item); };
    inventory._added_callbacks.push_back(_added_callback);
+
+   _observer_reference =
+      GameMechanismObserver::addListener<GameMechanismObserver::EnabledCallback>([](bool enabled)
+                                                                                 { std::cout << enabled ? "enabled" : "disabled"; });
 }
 
 LevelScript::~LevelScript()

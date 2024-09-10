@@ -1,4 +1,5 @@
 #include "gamemechanism.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 
 int32_t GameMechanism::getZ() const
 {
@@ -106,7 +107,13 @@ bool GameMechanism::isEnabled() const
 
 void GameMechanism::setEnabled(bool enabled)
 {
+   const auto changed = _enabled != enabled;
    _enabled = enabled;
+
+   if (_observed && changed)
+   {
+      GameMechanismObserver::onEnabled(enabled);
+   }
 }
 
 void GameMechanism::toggle()
