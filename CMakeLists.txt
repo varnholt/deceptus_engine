@@ -392,6 +392,7 @@ add_executable(deceptus ${GAME_FILES}
    data/scripts/enemies/vector2.lua
    data/scripts/enemies/vectorial2.lua
    data/scripts/enemies/watermine.lua
+   src/game/mechanisms/gamemechanismobserver.h src/game/mechanisms/gamemechanismobserver.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
