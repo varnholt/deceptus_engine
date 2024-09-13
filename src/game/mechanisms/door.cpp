@@ -262,6 +262,11 @@ void Door::open()
 
    _state = State::Opening;
 
+   if (_observed)
+   {
+      GameMechanismObserver::onEvent(getObjectId(), "doors", "state", "opening");
+   }
+
    // play open sample
    if (_player_at_door && _sample_open)
    {
@@ -294,6 +299,11 @@ void Door::close()
    }
 
    _state = State::Closing;
+
+   if (_observed)
+   {
+      GameMechanismObserver::onEvent(getObjectId(), "doors", "state", "closing");
+   }
 
    // play close sample
    if (_player_at_door && _sample_close)
