@@ -464,6 +464,8 @@ void Door::setup(const GameDeserializeData& data)
          // a property can be added if needed
          _can_be_closed = true;
       }
+
+      _can_be_closed = ValueReader::readValue<bool>("can_be_closed", map).value_or(_can_be_closed);
    }
 
    // set up the old version
