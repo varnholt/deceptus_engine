@@ -112,7 +112,7 @@ void GameMechanism::setEnabled(bool enabled)
 
    if (_observed && changed)
    {
-      GameMechanismObserver::onEnabled(enabled);
+      GameMechanismObserver::onEnabled("todo", "todo", enabled);
    }
 }
 
