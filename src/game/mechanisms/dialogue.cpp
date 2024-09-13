@@ -94,6 +94,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
       dialogue->_consumed_counter = 1;
    }
 
+   dialogue->_enabled = ValueReader::readValue<bool>("enabled", properties->_map).value_or(dialogue->_enabled);
    dialogue->_pause_game = ValueReader::readValue<bool>("pause_game", properties->_map).value_or(true);
    dialogue->_open_on_intersect = ValueReader::readValue<bool>("open_on_intersect", properties->_map).value_or(true);
    const auto show_delay = ValueReader::readValue<int32_t>("show_delay_ms", properties->_map);
@@ -187,6 +188,10 @@ bool Dialogue::isActive() const
 
 void Dialogue::setActive(bool active)
 {
+   if (active)
+   {
+      std::cout << "active" << std::endl;
+   }
    _active = active;
 }
 
