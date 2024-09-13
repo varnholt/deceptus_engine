@@ -389,8 +389,6 @@ void LevelScript::update(const sf::Time& dt)
    }
 }
 
-#include <iostream>
-
 LevelScript::LevelScript()
 {
    // lua is really c style
@@ -401,9 +399,14 @@ LevelScript::LevelScript()
    _added_callback = [this](const std::string& item) { luaPlayerReceivedItem(item); };
    inventory._added_callbacks.push_back(_added_callback);
 
-   _observer_reference =
-      GameMechanismObserver::addListener<GameMechanismObserver::EnabledCallback>([](bool enabled)
-                                                                                 { std::cout << enabled ? "enabled" : "disabled"; });
+   _enabled_observer_reference = GameMechanismObserver::addListener<GameMechanismObserver::EnabledCallback>(
+      [this](const std::string& object_id, const std::string& group_id, bool enabled) { luaMechanismEnabled(object_id, group_id, enabled); }
+   );
+
+   _event_observer_reference = GameMechanismObserver::addListener<GameMechanismObserver::EventCallback>(
+      [this](const std::string& object_id, const std::string& group_id, const std::string& event_name, const LuaVariant& value)
+      { luaMechanismEvent(object_id, group_id, event_name, value); }
+   );
 }
 
 LevelScript::~LevelScript()
@@ -559,6 +562,94 @@ void LevelScript::luaPlayerReceivedItem(const std::string& item)
       if (result != LUA_OK)
       {
          error(_lua_state, FUNCTION_PLAYER_RECEIVED_ITEM);
+      }
+   }
+}
+
+///
+/// \brief LevelScript::luaMechanismEnabled
+/// \param object_id object identifier
+/// \param group object group
+/// \param enabled mechanism enabled flag
+///
+void LevelScript::luaMechanismEnabled(const std::string& object_id, const std::string& group, bool enabled)
+{
+   if (_lua_state == nullptr)
+   {
+      return;
+   }
+
+   lua_getglobal(_lua_state, FUNCTION_MECHANISM_ENABLED);
+   if (lua_isfunction(_lua_state, -1))
+   {
+      lua_pushstring(_lua_state, object_id.c_str());
+      lua_pushstring(_lua_state, group.c_str());
+      lua_pushboolean(_lua_state, enabled);
+
+      const auto result = lua_pcall(_lua_state, 3, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(_lua_state, FUNCTION_MECHANISM_ENABLED);
+      }
+   }
+}
+
+///
+/// \brief LevelScript::luaMechanismEvent
+/// \param object_id object identifier
+/// \param group object group
+/// \param event_name event name
+/// \param value value that's part of the event
+///
+void LevelScript::luaMechanismEvent(
+   const std::string& object_id,
+   const std::string& group,
+   const std::string& event_name,
+   const LuaVariant& value
+)
+{
+   if (_lua_state == nullptr)
+   {
+      return;
+   }
+
+   lua_getglobal(_lua_state, FUNCTION_MECHANISM_EVENT);
+   if (lua_isfunction(_lua_state, -1))
+   {
+      lua_pushstring(_lua_state, object_id.c_str());
+      lua_pushstring(_lua_state, group.c_str());
+      lua_pushstring(_lua_state, event_name.c_str());
+
+      std::visit(
+         [this](auto&& arg)
+         {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, std::string>)
+            {
+               lua_pushstring(_lua_state, arg.c_str());
+            }
+            else if constexpr (std::is_same_v<T, int64_t>)
+            {
+               lua_pushinteger(_lua_state, static_cast<lua_Integer>(arg));
+            }
+            else if constexpr (std::is_same_v<T, double>)
+            {
+               lua_pushnumber(_lua_state, static_cast<lua_Number>(arg));
+            }
+            else if constexpr (std::is_same_v<T, bool>)
+            {
+               lua_pushboolean(_lua_state, arg);
+            }
+         },
+         value
+      );
+
+      const auto result = lua_pcall(_lua_state, 4, 0, 0);
+
+      if (result != LUA_OK)
+      {
+         error(_lua_state, FUNCTION_WRITE_PROPERTY);
       }
    }
 }

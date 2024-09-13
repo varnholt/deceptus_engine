@@ -3,6 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <filesystem>
 #include <string>
+#include <variant>
+
 #include "game/level/scriptproperty.h"
 #include "game/mechanisms/gamemechanism.h"
 #include "game/mechanisms/gamemechanismobserver.h"
@@ -43,6 +45,9 @@ public:
    void luaPlayerReceivedItem(const std::string& item);
    void luaPlayerCollidesWithRect(int32_t rect_id);
    void luaPlayerCollidesWithSensorRect(const std::string& sensor_rect_id);
+   void luaMechanismEnabled(const std::string& object_id, const std::string& group, bool enabled);
+   using LuaVariant = std::variant<std::string, int64_t, double, bool>;
+   void luaMechanismEvent(const std::string& object_id, const std::string& group, const std::string& event_name, const LuaVariant& value);
 
    using SearchMechanismCallback =
       std::function<std::vector<std::shared_ptr<GameMechanism>>(const std::string& regexp, const std::optional<std::string>&)>;
@@ -68,5 +73,10 @@ private:
    std::unique_ptr<
       GameMechanismObserver::Reference<GameMechanismObserver::EnabledCallback>,
       std::function<void(GameMechanismObserver::Reference<GameMechanismObserver::EnabledCallback>*)>>
-      _observer_reference;
+      _enabled_observer_reference;
+
+   std::unique_ptr<
+      GameMechanismObserver::Reference<GameMechanismObserver::EventCallback>,
+      std::function<void(GameMechanismObserver::Reference<GameMechanismObserver::EventCallback>*)>>
+      _event_observer_reference;
 };
