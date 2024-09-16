@@ -393,6 +393,7 @@ add_executable(deceptus ${GAME_FILES}
    data/scripts/enemies/vectorial2.lua
    data/scripts/enemies/watermine.lua
    src/game/mechanisms/gamemechanismobserver.h src/game/mechanisms/gamemechanismobserver.cpp
+   data/shaders/blur.frag data/shaders/brightness.frag data/shaders/death.frag data/shaders/death.vert data/shaders/flash.frag data/shaders/light.frag data/shaders/pixelate.frag data/shaders/raycast.frag data/shaders/raycast.vert data/shaders/water.frag data/shaders/waterfall.frag data/shaders/waterfall.vert data/shaders/wave.vert
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})

@@ -445,6 +445,13 @@ void Player::setMaskBitsCrouching(bool enabled)
    _body_fixture->SetFilterData(filter);
 }
 
+float Player::getVelocityNormalized() const
+{
+   const auto max = getMaxVelocity();
+   const auto velocity = _body->GetLinearVelocity();
+   return velocity.x / max;
+}
+
 void Player::createFeet()
 {
    // feet

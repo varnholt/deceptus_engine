@@ -88,6 +88,7 @@ public:
    void updateChunk();
    void setBodyViaPixelPosition(float x, float y);
    void setFriction(float f);
+   float getVelocityNormalized() const;
 
    bool getVisible() const;
    void setVisible(bool visible);

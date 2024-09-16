@@ -4,8 +4,6 @@
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 
-#include <iostream>
-
 AtmosphereShader::AtmosphereShader(uint32_t texture_width, uint32_t texture_height) : _render_texture(std::make_shared<sf::RenderTexture>())
 {
    if (!_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
@@ -28,21 +26,21 @@ void AtmosphereShader::initialize()
    }
 
    _distortion_map = TexturePool::getInstance().get("data/effects/distortion_map.png");
-
    _distortion_map->setRepeated(true);
    _distortion_map->setSmooth(true);
 
-   _shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
-   _shader.setUniform("distortionMapTexture", *_distortion_map);
-   _shader.setUniform("physicsTexture", _render_texture->getTexture());
+   _shader.setUniform("current_texture", sf::Shader::CurrentTexture);
+   _shader.setUniform("distortion_map_texture", *_distortion_map);
+   _shader.setUniform("physics_texture", _render_texture->getTexture());
 }
 
 void AtmosphereShader::update()
 {
-   constexpr auto distortion_factor = 0.02f;
+   constexpr auto distortion_amplitude = 0.04f;
+   constexpr auto time_factor = 1.0f;
 
-   _shader.setUniform("time", GlobalClock::getInstance().getElapsedTimeInS() * 0.2f);
-   _shader.setUniform("distortionFactor", distortion_factor);
+   _shader.setUniform("time", GlobalClock::getInstance().getElapsedTimeInS() * time_factor);
+   _shader.setUniform("distortion_amplitude", distortion_amplitude);
 }
 
 const std::shared_ptr<sf::RenderTexture>& AtmosphereShader::getRenderTexture() const
