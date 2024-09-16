@@ -7,7 +7,6 @@ class AtmosphereShader
 {
 public:
    AtmosphereShader(uint32_t texture_width, uint32_t texture_height);
-
    ~AtmosphereShader();
 
    void initialize();
@@ -18,7 +17,6 @@ public:
 
 private:
    std::shared_ptr<sf::RenderTexture> _render_texture;
-
-   sf::Shader _shader;
    std::shared_ptr<sf::Texture> _distortion_map;
+   sf::Shader _shader;
 };
