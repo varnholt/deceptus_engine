@@ -227,6 +227,7 @@ void InGameMenu::processEvent(const sf::Event& event)
          goToRightSubMenu();
          break;
       }
+      case sf::Keyboard::I:
       case sf::Keyboard::Return:
       case sf::Keyboard::Tab:
       {
