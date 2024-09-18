@@ -1345,7 +1345,6 @@ void Level::update(const sf::Time& dt)
       tile_map->update(dt);
    }
 
-   // TODO: unify this code with the chunk optimization used in the draw call
    const auto& player_chunk = Player::getCurrent()->getChunk();
    for (auto* mechanism_vector : _mechanisms_list)
    {
@@ -1364,7 +1363,7 @@ void Level::update(const sf::Time& dt)
             );
          }
 
-         // if (update_mechanism)
+         if (update_mechanism)
          {
             mechanism->update(dt);
          }
