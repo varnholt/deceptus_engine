@@ -121,10 +121,12 @@ void PhysicsConfigurationUi::draw()
       drawFloatElement("speed max air", &config._player_speed_max_air, 0.1f, 20.0f);
       drawFloatElement("friction", &config._player_friction, 0.0f, 1.0f);
       drawFloatElement("jump strength", &config._player_jump_strength, 0.1f, 20.0f);
-      drawFloatElement("acceleration ground", &config._player_acceleration_ground, 0.01f, 2.0f);
-      drawFloatElement("acceleration air", &config._player_acceleration_air, 0.01f, 2.0f);
-      drawFloatElement("deceleration ground", &config._player_deceleration_ground, 0.01f, 2.0f);
-      drawFloatElement("deceleration air", &config._player_deceleration_air, 0.01f, 2.0f);
+      drawFloatElement("acceleration ground", &config._player_acceleration_ground, 0.01f, 1.0f);
+      drawFloatElement("deceleration ground", &config._player_deceleration_ground, 0.01f, 1.0f);
+      drawFloatElement("acceleration air", &config._player_acceleration_air, 0.01f, 1.0f);
+      drawFloatElement("deceleration air", &config._player_deceleration_air, 0.01f, 1.0f);
+      drawFloatElement("acceleration water", &config._player_acceleration_water, 0.01f, 1.0f);
+      drawFloatElement("deceleration water", &config._player_deceleration_water, 0.01f, 1.0f);
       drawFloatElement("cap velocity horizontal", &config._player_max_velocity_horizontal, 0.1f, 30.0f);
       drawFloatElement("cap velocity up", &config._player_max_velocity_up, 0.1f, 30.0f);
       drawFloatElement("cap velocity down", &config._player_max_velocity_down, 0.1f, 30.0f);
