@@ -18,8 +18,10 @@ struct PhysicsConfiguration
    float _player_jump_strength = 3.3f;
    float _player_acceleration_ground = 0.1f;
    float _player_acceleration_air = 0.05f;
+   float _player_acceleration_water = 0.02f;
    float _player_deceleration_ground = 0.6f;
    float _player_deceleration_air = 0.65f;
+   float _player_deceleration_water = 0.95f;
    float _player_max_velocity_horizontal = 10.0f;
    float _player_max_velocity_up = 5.0f;
    float _player_max_velocity_down = 10.0f;

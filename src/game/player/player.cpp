@@ -762,18 +762,32 @@ float Player::readVelocityFromKeyboard(const PlayerSpeed& speed) const
 
 float Player::getDeceleration() const
 {
-   auto deceleration = (isInAir()) ? PhysicsConfiguration::getInstance()._player_deceleration_air
-                                   : PhysicsConfiguration::getInstance()._player_deceleration_ground;
+   if (isInAir())
+   {
+      return PhysicsConfiguration::getInstance()._player_deceleration_air;
+   }
 
-   return deceleration;
+   if (isInWater())
+   {
+      return PhysicsConfiguration::getInstance()._player_deceleration_water;
+   }
+
+   return PhysicsConfiguration::getInstance()._player_deceleration_ground;
 }
 
 float Player::getAcceleration() const
 {
-   auto acceleration = (isInAir()) ? PhysicsConfiguration::getInstance()._player_acceleration_air
-                                   : PhysicsConfiguration::getInstance()._player_acceleration_ground;
+   if (isInAir())
+   {
+      return PhysicsConfiguration::getInstance()._player_acceleration_air;
+   }
 
-   return acceleration;
+   if (isInWater())
+   {
+      return PhysicsConfiguration::getInstance()._player_acceleration_water;
+   }
+
+   return PhysicsConfiguration::getInstance()._player_acceleration_ground;
 }
 
 bool Player::isDead() const
