@@ -78,7 +78,7 @@ end
 function hide()
    _elapsed = 0
    _current_cycle = ROW_APPEAR
-   sprite_index = 0
+   sprite_index = SPRITE_COUNTS[_current_cycle] - 1
    _animation_dir_forward = false
 end
 

@@ -7,6 +7,7 @@
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "game/player/player.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
@@ -38,6 +39,8 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
       return nullptr;
    }
 
+   const auto map = data._tmx_object->_properties->_map;
+
    // parse dialogue items
    std::optional<sf::Vector2f> pos;
    std::optional<sf::Color> text_color;
@@ -48,28 +51,27 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
       std::ostringstream oss;
       oss << std::setw(2) << std::setfill('0') << i;
       const auto item_id = oss.str();
-
       const auto& it_dialogue_items = properties->_map.find(item_id);
 
       // check if dialogue has an exact pixel position defined
-      auto pos_x_it = data._tmx_object->_properties->_map.find(item_id + "_x_px");
-      auto pos_y_it = data._tmx_object->_properties->_map.find(item_id + "_y_px");
-      if (pos_x_it != data._tmx_object->_properties->_map.end() && pos_y_it != data._tmx_object->_properties->_map.end())
+      auto pos_x_it = map.find(item_id + "_x_px");
+      auto pos_y_it = map.find(item_id + "_y_px");
+      if (pos_x_it != map.end() && pos_y_it != map.end())
       {
          pos = {static_cast<float>(pos_x_it->second->_value_int.value()), static_cast<float>(pos_y_it->second->_value_int.value())};
       }
 
       // read text color
-      auto text_color_it = data._tmx_object->_properties->_map.find(item_id + "_text_color");
-      if (text_color_it != data._tmx_object->_properties->_map.end())
+      auto text_color_it = map.find(item_id + "_text_color");
+      if (text_color_it != map.end())
       {
          const auto rgba = TmxTools::color(text_color_it->second->_value_string.value());
          text_color = {rgba[0], rgba[1], rgba[2]};
       }
 
       // read background color
-      auto background_color_it = data._tmx_object->_properties->_map.find(item_id + "_background_color");
-      if (background_color_it != data._tmx_object->_properties->_map.end())
+      auto background_color_it = map.find(item_id + "_background_color");
+      if (background_color_it != map.end())
       {
          const auto rgba = TmxTools::color(background_color_it->second->_value_string.value());
          background_color = {rgba[0], rgba[1], rgba[2]};
@@ -94,6 +96,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
       dialogue->_consumed_counter = 1;
    }
 
+   dialogue->_observed = ValueReader::readValue<bool>("observed", map).value_or(false);
    dialogue->_enabled = ValueReader::readValue<bool>("enabled", properties->_map).value_or(dialogue->_enabled);
    dialogue->_pause_game = ValueReader::readValue<bool>("pause_game", properties->_map).value_or(true);
    dialogue->_open_on_intersect = ValueReader::readValue<bool>("open_on_intersect", properties->_map).value_or(true);
@@ -224,6 +227,11 @@ void Dialogue::showNext()
       if (_pause_game)
       {
          GameState::getInstance().enqueueResume();
+      }
+
+      if (_observed)
+      {
+         GameMechanismObserver::onEvent(getObjectId(), "dialogues", "state", "hide");
       }
 
       return;
