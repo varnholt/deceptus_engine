@@ -124,11 +124,11 @@ void TreasureChest::update(const sf::Time& dt)
 
          if (Player::getCurrent()->getControls()->isButtonBPressed())
          {
-            _spawn_effect->activate();
-
             const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
             if (player_rect_px.intersects(_rect))
             {
+               _spawn_effect->activate();
+
                _state = State::Opening;
                _animation_opening->seekToStart();
                _animation_opening->play();
