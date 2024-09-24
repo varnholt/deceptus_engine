@@ -84,17 +84,17 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
 
 void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
-   if (_animation_idle_closed && !_animation_idle_closed->_paused)
+   if (_animation_idle_closed && _state == State::Closed)
    {
       _animation_idle_closed->draw(target);
    }
 
-   if (_animation_opening && !_animation_opening->_paused)
+   if (_animation_opening && _state == State::Opening)
    {
       _animation_opening->draw(target);
    }
 
-   if (_animation_idle_open && !_animation_idle_open->_paused)
+   if (_animation_idle_open && _state == State::Open)
    {
       _animation_idle_open->draw(target);
    }
