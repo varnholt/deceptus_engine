@@ -77,6 +77,7 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
 
    _animation_idle_closed->_looped = true;
    _animation_idle_open->_looped = true;
+   _animation_opening->_reset_to_first_frame = false;
 
    _spawn_effect = std::make_unique<SpawnEffect>(sf::Vector2f{_rect.left + _rect.width / 2, _rect.top - _rect.height / 2});
    _spawn_effect->deserialize(data);
@@ -88,13 +89,11 @@ void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&)
    {
       _animation_idle_closed->draw(target);
    }
-
-   if (_animation_opening && _state == State::Opening)
+   else if (_animation_opening && _state == State::Opening)
    {
       _animation_opening->draw(target);
    }
-
-   if (_animation_idle_open && _state == State::Open)
+   else if (_animation_idle_open && _state == State::Open)
    {
       _animation_idle_open->draw(target);
    }
