@@ -10,6 +10,7 @@
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/player/player.h"
 
 namespace
@@ -31,15 +32,18 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    setType(ObjectTypeCollapsingPlatform);
    setObjectId(data._tmx_object->_name);
 
-   // read properties
-   auto readFloatProperty = [data](float& value, const std::string& id)
+   if (!data._tmx_object->_properties)
    {
-      if (!data._tmx_object->_properties)
-      {
-         return;
-      }
-      const auto it = data._tmx_object->_properties->_map.find(id);
-      if (it != data._tmx_object->_properties->_map.end())
+      return;
+   }
+
+   const auto& map = data._tmx_object->_properties->_map;
+
+   // read properties
+   auto readFloatProperty = [&map](float& value, const std::string& id)
+   {
+      const auto it = map.find(id);
+      if (it != map.end())
       {
          value = it->second->_value_float.value();
       }
@@ -50,6 +54,7 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    readFloatProperty(_settings.fall_speed, "fall_speed");
    readFloatProperty(_settings.time_to_respawn_s, "time_to_respawn_s");
    readFloatProperty(_settings.fade_in_duration_s, "fade_in_duration_s");
+   setZ(ValueReader::readValue<int32_t>("z", map).value_or(0));
 
    // set up shape
    //
