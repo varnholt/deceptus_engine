@@ -8,6 +8,7 @@ namespace PlayerControlState
 /// \return true if all is good
 ///
 bool checkState();
+bool checkStateCpanOkay();
 
 };  // namespace PlayerControlState
 

@@ -27,6 +27,7 @@
 #include "game/player/playercontrolstate.h"
 #include "game/player/playerinfo.h"
 #include "game/player/weaponsystem.h"
+#include "game/state/displaymode.h"
 #include "game/state/savestate.h"
 #include "game/weapons/weapon.h"
 
@@ -1097,7 +1098,7 @@ void Player::goToPortal(auto portal)
 
 void Player::updatePortal()
 {
-   if (CameraPanorama::getInstance().isLookActive())
+   if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
    {
       return;
    }
@@ -1363,7 +1364,8 @@ void Player::updateBendDown()
       return;
    }
 
-   if (!_bend._bending_down && CameraPanorama::getInstance().isLookActive())
+   // this is to avoid that each time the player wants to look down, it starts bending down
+   if (!_bend._bending_down && CameraPanorama::getInstance().isKeyboardLookActive())
    {
       return;
    }

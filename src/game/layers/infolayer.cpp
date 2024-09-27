@@ -224,7 +224,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 
    // support cpan
-   if (CameraPanorama::getInstance().isLookActive())
+   if (CameraPanorama::getInstance().isKeyboardLookActive())
    {
       auto layer_cpan_up = _layers["cpan_up"];
       auto layer_cpan_down = _layers["cpan_down"];
