@@ -4,9 +4,9 @@
 #include "framework/tools/scopeexit.h"
 #include "framework/tools/stopwatch.h"
 #include "game/audio/audio.h"
-#include "game/camera/camerapanorama.h"
 #include "game/physics/gamecontactlistener.h"
 #include "game/physics/physicsconfiguration.h"
+#include "game/state/displaymode.h"
 #include "game/state/savestate.h"
 
 #include <box2d/box2d.h>
@@ -253,7 +253,7 @@ void PlayerJump::jump()
       return;
    }
 
-   if (CameraPanorama::getInstance().isLookActive())
+   if (DisplayMode::getInstance().isSet(Display::CameraPanorama))  // redundant, can be removed
    {
       return;
    }

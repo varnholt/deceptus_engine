@@ -155,6 +155,18 @@ void CameraPanorama::update()
 
          updateLookVector(desired_look_vector);
          changed = true;
+
+         if (!DisplayMode::getInstance().isSet(Display::CameraPanorama))
+         {
+            DisplayMode::getInstance().enqueueSet(Display::CameraPanorama);
+         }
+      }
+      else
+      {
+         if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
+         {
+            DisplayMode::getInstance().enqueueUnset(Display::CameraPanorama);
+         }
       }
    }
 
@@ -255,7 +267,7 @@ void CameraPanorama::updateLookVector(const sf::Vector2f& desired)
    _look_vector = desired;
 }
 
-bool CameraPanorama::isLookActive() const
+bool CameraPanorama::isKeyboardLookActive() const
 {
    return (_look_state & static_cast<int32_t>(Look::Active));
 }

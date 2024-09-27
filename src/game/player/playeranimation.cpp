@@ -596,11 +596,13 @@ std::optional<PlayerAnimation::HighResDuration> PlayerAnimation::getActiveAttack
    {
       return getSwordAttackDurationBendingDown1();
    }
-   else if (_current_cycle == _sword_attack_bend_down_2_l || _current_cycle == _sword_attack_bend_down_2_r)
+
+   if (_current_cycle == _sword_attack_bend_down_2_l || _current_cycle == _sword_attack_bend_down_2_r)
    {
       return getSwordAttackDurationBendingDown2();
    }
-   else if (_current_cycle == _sword_attack_standing_l[0] || _current_cycle == _sword_attack_standing_r[0])
+
+   if (_current_cycle == _sword_attack_standing_l[0] || _current_cycle == _sword_attack_standing_r[0])
    {
       return getSwordAttackDurationStanding();
    }
@@ -645,7 +647,7 @@ bool PlayerAnimation::isBendingUp(const PlayerAnimationData& data) const
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processIdleAnimation(const PlayerAnimationData& data)
 {
-   const auto look_active = CameraPanorama::getInstance().isLookActive();
+   const auto look_active = DisplayMode::getInstance().isSet(Display::CameraPanorama);
    const auto move_active = (data._moving_left || data._moving_right) && !look_active;
 
    if (data._in_water || data._dash_dir.has_value() || data._bending_down || move_active)
@@ -730,7 +732,7 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processBendDownAnimat
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processCrouchAnimation(const PlayerAnimationData& data)
 {
    const auto passes_sanity_check = !(data._moving_right && data._moving_left);
-   const auto look_active = CameraPanorama::getInstance().isLookActive();
+   const auto look_active = DisplayMode::getInstance().isSet(Display::CameraPanorama);
 
    // crouch
    if (data._moving_right && passes_sanity_check && !data._in_air && !data._in_water && !look_active && data._crouching)
@@ -750,11 +752,16 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processCrouchAnimatio
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processRunAnimation(const PlayerAnimationData& data)
 {
    const auto passes_sanity_check = !(data._moving_right && data._moving_left);
-   const auto look_active = CameraPanorama::getInstance().isLookActive();
+   const auto look_active = DisplayMode::getInstance().isSet(Display::CameraPanorama);
 
    // run
-   if (!data._dash_dir.has_value() && passes_sanity_check && !data._in_air && !data._in_water && !look_active && !data._crouching &&
-       !data._bending_down)
+   if (!data._dash_dir.has_value()  //
+       && passes_sanity_check       //
+       && !data._in_air             //
+       && !data._in_water           //
+       && !look_active              //
+       && !data._crouching          //
+       && !data._bending_down)
    {
       return data._moving_right ? _run_r : _run_l;
    }
@@ -782,7 +789,8 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processDashAnimation(
    {
       return (data._dash_dir == Dash::Left) ? _dash_init_l : _dash_init_r;
    }
-   else if (data._dash_frame_count < dash_count_stop)
+
+   if (data._dash_frame_count < dash_count_stop)
    {
       return (data._dash_dir == Dash::Left) ? _dash_stop_l : _dash_stop_r;
    }
@@ -818,10 +826,8 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processWallSlideAnima
    {
       return data._points_right ? _wallslide_impact_l : _wallslide_impact_r;
    }
-   else
-   {
-      return data._points_right ? _wallslide_l : _wallslide_r;
-   }
+
+   return data._points_right ? _wallslide_l : _wallslide_r;
 }
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processWallJumpAnimation(const PlayerAnimationData& data)
@@ -878,7 +884,7 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
    // jump is active when either
    // - in the air
    // - jumping through a one-sided wall (in that case player may have ground contacts)
-   else if ((data._in_air || data._jumping_through_one_way_wall) && !data._in_water)
+   if ((data._in_air || data._jumping_through_one_way_wall) && !data._in_water)
    {
       const auto velocity = data._linear_velocity;
 
@@ -888,25 +894,24 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
          _jump_animation_reference = 1;
          return data._points_right ? _jump_up_r : _jump_up_l;
       }
+
       // jump movement goes down
-      else if (velocity.y > JUMP_DOWN_VELOCITY_THRESHOLD)
+      if (velocity.y > JUMP_DOWN_VELOCITY_THRESHOLD)
       {
          _jump_animation_reference = 2;
          return data._points_right ? _jump_down_r : _jump_down_l;
       }
-      else
-      {
-         // jump midair
-         if (_jump_animation_reference == 1)
-         {
-            return data._points_right ? _jump_midair_r : _jump_midair_l;
-         }
 
-         // still in-air but linear velocity is ~0 for whatever reason
-         else if (_jump_animation_reference == 2)
-         {
-            return data._points_right ? _jump_down_r : _jump_down_l;
-         }
+      // jump midair
+      if (_jump_animation_reference == 1)
+      {
+         return data._points_right ? _jump_midair_r : _jump_midair_l;
+      }
+
+      // still in-air but linear velocity is ~0 for whatever reason
+      if (_jump_animation_reference == 2)
+      {
+         return data._points_right ? _jump_down_r : _jump_down_l;
       }
    }
 

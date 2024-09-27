@@ -430,7 +430,7 @@ void IngameMenuMap::updateShowHide()
 // {
 // }
 //
-// if (CameraPanorama::getInstance().isLookActive())
+// if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
 // {
 // }
 //
