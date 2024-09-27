@@ -675,7 +675,7 @@ PlayerControls::Orientation PlayerControls::updateOrientation()
 
 bool PlayerControls::isBendDownActive() const
 {
-   if (!PlayerControlState::checkState())
+   if (!PlayerControlState::checkStateCpanOkay())
    {
       return false;
    }

@@ -17,7 +17,7 @@ public:
    void processKeyPressedEvents(const sf::Event& event);
    void processKeyReleasedEvents(const sf::Event& event);
 
-   bool isLookActive() const;
+   bool isKeyboardLookActive() const;
    const sf::Vector2f& getLookVector() const;
 
 private:
