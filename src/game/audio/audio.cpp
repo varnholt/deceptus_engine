@@ -170,7 +170,13 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
 
    if (play_info._pos.has_value())
    {
-      thread_it->_sound.setPosition(play_info._pos->x, play_info._pos->y, 0.0f);
+      thread_it->_sound.setPosition(play_info._pos->x, play_info._pos->y, 0.1f);
+   }
+   else
+   {
+      // https://github.com/SFML/SFML/issues/2319
+      // for mono sounds, the listener position must be != (0, 0, 0)
+      thread_it->_sound.setPosition(0.0f, 0.0f, 0.1f);
    }
 
    thread_it->_sound.play();
