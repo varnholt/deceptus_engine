@@ -226,6 +226,32 @@ int32_t setAudioUpdateBehavior(lua_State* state)
 }
 
 /**
+ * @brief setReferenceVolume the volume to use when no audio range is used
+ * @param state lua state
+ *    param 1: update behavior
+ * @return error code
+ */
+int32_t setReferenceVolume(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto reference_volume = static_cast<float>(lua_tonumber(state, 1));
+   node->setReferenceVolume(reference_volume);
+
+   return 0;
+}
+
+/**
  * @brief updateSpriteRect update node's sprite rect
  * @param state lua state
  *    param 1: id of sprite
@@ -1822,6 +1848,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "setDamage", ::setDamageToPlayer);
    lua_register(_lua_state, "setGravityScale", ::setGravityScale);
    lua_register(_lua_state, "setLinearVelocity", ::setLinearVelocity);
+   lua_register(_lua_state, "setReferenceVolume", ::setReferenceVolume);
    lua_register(_lua_state, "setSpriteColor", ::setSpriteColor);
    lua_register(_lua_state, "setSpriteOffset", ::setSpriteOffset);
    lua_register(_lua_state, "setSpriteOrigin", ::setSpriteOrigin);

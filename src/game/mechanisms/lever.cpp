@@ -80,6 +80,7 @@ void Lever::setup(const GameDeserializeData& data)
                if (_player_at_lever && !_handle_available && item == "handle")
                {
                   setHandleAvailable(true);
+                  Audio::getInstance().playSample(Audio::PlayInfo{"mechanism_switch_lever_insert.wav"});
                   return true;
                }
                return false;
@@ -151,6 +152,7 @@ void Lever::preload()
 {
    Audio::getInstance().addSample("mechanism_switch_off.wav");
    Audio::getInstance().addSample("mechanism_switch_on.wav");
+   Audio::getInstance().addSample("mechanism_switch_lever_insert.wav");
 }
 
 void Lever::updateDirection()
