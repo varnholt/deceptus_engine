@@ -294,10 +294,12 @@ void CollapsingPlatform::update(const sf::Time& dt)
          _played_shake_sample = false;
       }
 
+      // keep resetting collapse time while there are no feet on the platform
+      _collapse_elapsed_s = 0.0f;
+
       if (!_collapsed)
       {
          // player left the platform before it collapsed
-         _collapse_elapsed_s = 0.0f;
          resetAllBlocks();
       }
       else
