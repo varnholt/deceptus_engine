@@ -6,7 +6,7 @@ using json = nlohmann::json;
 
 void Health::reset()
 {
-   _health = 12;
+   _health = 4;
    _stamina = 1.0f;
 }
 
