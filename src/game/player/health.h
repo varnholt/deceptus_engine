@@ -26,7 +26,7 @@ struct Health
 
    int32_t _life_count = 1;
 
-   int32_t _health = 12;
+   int32_t _health = 4;
    int32_t _health_max = 12;
 
    float _stamina{1.0f};
