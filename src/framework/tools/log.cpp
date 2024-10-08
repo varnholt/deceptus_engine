@@ -1,22 +1,21 @@
 #include "log.h"
 
+#include <chrono>
 #include <filesystem>
+#include <iomanip>
 #include <iostream>
-
-#if defined __GNUC__ && __linux__
-#define FMT_HEADER_ONLY
-#include <fmt/core.h>
-#include <ctime>
-#else
-namespace fmt = std;
-#endif
-
-// https://en.cppreference.com/w/cpp/utility/source_location
-// https://en.cppreference.com/w/cpp/chrono/zoned_time/formatter
+#include <source_location>
+#include <sstream>
 
 namespace
 {
 Log::ListenerCallback _log_callback;
+
+std::string formatTime(const std::chrono::system_clock::time_point& now)
+{
+   const auto zoned_time = std::chrono::zoned_time{std::chrono::current_zone(), now};
+   return std::format("{:%Y-%m-%d %H:%M:%S}", zoned_time);
+}
 
 void log(Log::Level level, const std::string_view& message, const std::source_location& source_location)
 {
@@ -24,44 +23,16 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
    function_name = function_name.substr(0, function_name.find('('));
 
    const auto now = std::chrono::system_clock::now();
-   const auto source_tag = fmt::format(
-      "{0}:{1}:{2}", std::filesystem::path{source_location.file_name()}.filename().string(), function_name, source_location.line()
-   );
+   const auto source_tag = std::filesystem::path{source_location.file_name()}.filename().string() + ":" + function_name + ":" +
+                           std::to_string(source_location.line());
 
-#if defined __GNUC__ && __linux__
-   const auto now_time = std::chrono::system_clock::to_time_t(now);
+   const auto now_local = formatTime(now);
 
-   std::stringstream ss;
-   ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %X");
-   const auto now_local = ss.str();
-#elif !defined __APPLE__
-   const auto now_local = std::chrono::zoned_time{std::chrono::current_zone(), now};
-#endif
-
-   std::cout << fmt::format(
-#if defined __GNUC__ && __linux__
-                   "[{0}] {1} | {2}: {3}",
-#else
-                   "[{0}] {1:%T} | {2}: {3}",
-#endif
-                   static_cast<char>(level),
-#ifdef __APPLE__
-                   now,
-#else
-                   now_local,
-#endif
-                   source_tag,
-                   message
-                )
-             << std::endl;
+   std::cout << "[" << static_cast<char>(level) << "] " << now_local << " | " << source_tag << ": " << message << std::endl;
 
    if (_log_callback)
    {
-#ifdef __APPLE__
       _log_callback(now, level, std::string{message}, source_location);
-#else
-      _log_callback(now_local, level, std::string{message}, source_location);
-#endif
    }
 }
 

@@ -158,7 +158,6 @@ InfoLayer::InfoLayer()
    loadInventoryItems();
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InfoLayer::loadInventoryItems()
 {
    const auto& inventory = SaveState::getPlayerInfo()._inventory;
@@ -186,7 +185,6 @@ void InfoLayer::loadInventoryItems()
    _inventory_sprites[1].setPosition(frame_1_pos_x_px, frame_1_pos_y_px);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InfoLayer::updateInventoryItems()
 {
    const auto& inventory = SaveState::getPlayerInfo()._inventory;
@@ -204,7 +202,6 @@ void InfoLayer::updateInventoryItems()
    }
 }
 
-//---------------------------------------------------------------------------------------------------------------------
 void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto now = GlobalClock::getInstance().getElapsedTime();
