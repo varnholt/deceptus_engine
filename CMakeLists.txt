@@ -452,7 +452,6 @@ endif()
 if((UNIX OR win32-g++) AND NOT APPLE)
     target_compile_options(deceptus
         -lc++fs
-        -lfmt
     )
 endif()
 

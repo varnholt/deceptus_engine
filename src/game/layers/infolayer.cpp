@@ -14,14 +14,6 @@
 #include "game/player/playerinfo.h"
 #include "game/state/savestate.h"
 
-#if defined __GNUC__ && __linux__
-#define FMT_HEADER_ONLY
-#include <fmt/core.h>
-#else
-#include <format>
-namespace fmt = std;
-#endif
-
 #include <iostream>
 #include <sstream>
 
@@ -105,13 +97,13 @@ InfoLayer::InfoLayer()
    _heart_layers.reserve(heart_quarter_layer_count);
    for (auto i = 1u; i <= heart_quarter_layer_count; i++)
    {
-      _heart_layers.push_back(_layers[fmt::format("{}", i)]);
+      _heart_layers.push_back(_layers[std::format("{}", i)]);
    }
 
    _stamina_layers.reserve(6);
    for (auto i = 1u; i <= 6; i++)
    {
-      _stamina_layers.push_back(_layers[fmt::format("energy_{}", i)]);
+      _stamina_layers.push_back(_layers[std::format("energy_{}", i)]);
    }
 
    _character_window_layer = _layers["character_window"];
