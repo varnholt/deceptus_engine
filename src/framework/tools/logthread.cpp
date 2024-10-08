@@ -5,13 +5,6 @@
 #include <iomanip>
 #include <iostream>
 
-#if defined __GNUC__ && __linux__
-#define FMT_HEADER_ONLY
-#include <fmt/core.h>
-#include <ctime>
-#else
-namespace fmt = std;
-#endif
 
 namespace
 {
@@ -28,7 +21,12 @@ LogThread::LogThread()
    const auto filename = ss.str();
 
    _thread = std::make_unique<std::thread>(&LogThread::run, this);
-   _out = std::make_unique<std::ofstream>(filename);
+   _out = std::make_unique<std::ofstream>(filename, std::ios::out | std::ios::app);
+   if (!_out->is_open())
+   {
+      std::cerr << "failed to create log file: " << filename << std::endl;
+      return;
+   }
 }
 
 LogThread::~LogThread()
@@ -68,42 +66,26 @@ void LogThread::flush()
       _log_items.clear();
    }
 
-   for (auto& item : copy)
+   for (const auto& item : copy)
    {
       const auto& timepoint = item._timepoint;
       const auto level = item._level;
       const auto& message = item._message;
       const auto& source_location = item._source_location;
 
-      const auto source_tag = fmt::format(
-         "{0}:{1}:{2}",
-         std::filesystem::path{source_location.file_name()}.filename().string(),
-         source_location.function_name(),
-         source_location.line()
-      );
+      std::stringstream source_tag_ss;
+      source_tag_ss << std::filesystem::path{source_location.file_name()}.filename().string() << ":" << source_location.function_name()
+                    << ":" << source_location.line();
+      const auto source_tag = source_tag_ss.str();
 
-#ifdef __GNUC__
-      const auto now = std::chrono::system_clock::now();
-      const auto now_time = std::chrono::system_clock::to_time_t(now);
+      const auto now_time = std::chrono::system_clock::to_time_t(timepoint);
+      std::stringstream time_ss;
+      time_ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %H:%M:%S");
+      const auto now_local = time_ss.str();
 
-      std::stringstream ss;
-      ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %X");
-      const auto now_local = ss.str();
-#else
-      const auto now_local = std::chrono::zoned_time{std::chrono::current_zone(), timepoint};
-#endif
+      std::stringstream log_ss;
+      log_ss << "[" << static_cast<char>(level) << "] " << now_local << " | " << source_tag << ": " << message;
 
-      *_out << fmt::format(
-#ifdef __GNUC__
-                  "[{0}] {1} | {2}: {3}",
-#else
-                  "[{0}] {1:%T} | {2}: {3}",
-#endif
-                  static_cast<char>(level),
-                  now_local,
-                  source_tag,
-                  message
-               )
-            << std::endl;
+      *_out << log_ss.str() << std::endl;
    }
 }

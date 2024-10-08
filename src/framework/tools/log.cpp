@@ -2,10 +2,8 @@
 
 #include <chrono>
 #include <filesystem>
-#include <iomanip>
 #include <iostream>
 #include <source_location>
-#include <sstream>
 
 namespace
 {
@@ -21,6 +19,14 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
 {
    std::string function_name = source_location.function_name();
    function_name = function_name.substr(0, function_name.find('('));
+
+   // remove '__cdecl' if it exists
+   const std::string cdecl_str = "__cdecl ";
+   size_t cdecl_pos = function_name.find(cdecl_str);
+   if (cdecl_pos != std::string::npos)
+   {
+      function_name.erase(cdecl_pos, cdecl_str.length());
+   }
 
    const auto now = std::chrono::system_clock::now();
    const auto source_tag = std::filesystem::path{source_location.file_name()}.filename().string() + ":" + function_name + ":" +

@@ -38,9 +38,8 @@ int main(int /*argc*/, char** /*argv*/)
 #ifndef DEBUG
    // setup logging to file
    LogThread log_thread;
-   Log::registerListenerCallback(
-      std::bind(&LogThread::log, &log_thread, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)
-   );
+   Log::registerListenerCallback([&log_thread](const auto& time_point, auto level, const auto& message, const auto& location)
+                                 { log_thread.log(time_point, level, message, location); });
 #endif
 
 #ifdef __linux__

@@ -1,9 +1,7 @@
 #pragma once
 
 #include <chrono>
-#include <deque>
 #include <fstream>
-#include <functional>
 #include <memory>
 #include <mutex>
 #include <source_location>
