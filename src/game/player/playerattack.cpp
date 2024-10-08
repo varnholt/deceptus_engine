@@ -10,14 +10,6 @@
 #include "game/weapons/gun.h"
 #include "game/weapons/sword.h"
 
-#if defined __GNUC__ && __linux__
-#define FMT_HEADER_ONLY
-#include <fmt/core.h>
-#include <ctime>
-#else
-namespace fmt = std;
-#endif
-
 void PlayerAttack::attack(
    const std::shared_ptr<b2World>& world,
    const std::shared_ptr<PlayerControls>& controls,
@@ -107,18 +99,18 @@ void PlayerAttack::attack(
          if (in_air)
          {
             _timepoint_attack_jumping_start = now;
-            Audio::getInstance().playSample({fmt::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
+            Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
          }
          else if (controls->isBendDownActive())
          {
             _timepoint_attack_bend_down_start = now;
-            Audio::getInstance().playSample({fmt::format("player_sword_kneeling_{:02}.wav", (std::rand() % 4) + 1)});
+            Audio::getInstance().playSample({std::format("player_sword_kneeling_{:02}.wav", (std::rand() % 4) + 1)});
          }
          else
          {
             _timepoint_attack_standing_start = now;
             controls->lockOrientation(std::chrono::duration_cast<std::chrono::milliseconds>(animation->getSwordAttackDurationStanding()));
-            Audio::getInstance().playSample({fmt::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
+            Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
          }
 
          dynamic_pointer_cast<Sword>(weapon_system._selected)->use(world, dir);

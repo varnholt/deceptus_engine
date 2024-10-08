@@ -59,14 +59,6 @@
 #include <string>
 #include <thread>
 
-#if defined __GNUC__ && __linux__
-#define FMT_HEADER_ONLY
-#include <fmt/core.h>
-#else
-#include <format>
-namespace fmt = std;
-#endif
-
 Level* Level::__current_level = nullptr;
 
 std::string Level::getDescriptionFilename() const
@@ -1413,7 +1405,7 @@ void Level::addChainToWorld(const std::vector<b2Vec2>& chain, ObjectType object_
    auto body = _world->CreateBody(&body_def);
    auto fixture = body->CreateFixture(&fixture_def);
    auto object_data = new FixtureNode(this);
-   object_data->setObjectId(fmt::format("world_chain_{}", _world_chains.size() - 1));
+   object_data->setObjectId(std::format("world_chain_{}", _world_chains.size() - 1));
    object_data->setType(object_type);
    fixture->SetUserData(static_cast<void*>(object_data));
 }
