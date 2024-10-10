@@ -1,5 +1,7 @@
 #include "weaponfactory.h"
 
+#include <utility>
+
 #include "bow.h"
 #include "gun.h"
 #include "sword.h"
