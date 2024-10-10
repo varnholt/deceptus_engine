@@ -3,6 +3,7 @@ project(deceptus VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(GNUInstallDirs)
 
@@ -439,22 +440,6 @@ if(win32-msvc)
         /wd5045
     )
 endif()
-
-
-if((UNIX OR win32-clang++) AND NOT APPLE)
-    target_compile_options(deceptus
-        -Wno-backslash-newline-escape
-        -Wno-deprecated-declarations
-        /std:c++20
-    )
-endif()
-    
-if((UNIX OR win32-g++) AND NOT APPLE)
-    target_compile_options(deceptus
-        -lc++fs
-    )
-endif()
-
 
 if(WIN32)
     set(SDL_PATH ${CMAKE_SOURCE_DIR}/thirdparty/sdl/lib/x64)
