@@ -4,11 +4,11 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <ostream>
-#include <print>
 #include <sstream>
 
 SquareMarcher::SquareMarcher(
@@ -35,9 +35,9 @@ void SquareMarcher::printMap()
    {
       for (auto x = 0u; x < _width; x++)
       {
-         std::print("{:d}", isColliding(x, y));
+         std::cout << std::format("{:d}", isColliding(x, y));
       }
-      std::println("");
+      std::cout << '\n';
    }
 }
 
@@ -503,12 +503,12 @@ SquareMarcher::Path SquareMarcher::march(uint32_t start_x, uint32_t start_y)
 
 void SquareMarcher::Path::printPoly()
 {
-   std::print("{{ ");
+   std::cout << "{ ";
    for (const auto& pos : _polygon)
    {
-      std::print("{{{}, {}}}; ", pos.x, pos.y);
+      std::cout << std::format("{{{}, {}}}; ", pos.x, pos.y);
    }
-   std::println("}}");
+   std::cout << "}}\n";
 }
 
 void SquareMarcher::Path::printDirs()
@@ -518,19 +518,20 @@ void SquareMarcher::Path::printDirs()
       switch (dir)
       {
          case SquareMarcher::Direction::Up:
-            std::print("u;");
+            std::cout << "u;";
             break;
          case SquareMarcher::Direction::Down:
-            std::print("d;");
+            std::cout << "d;";
             break;
          case SquareMarcher::Direction::Left:
-            std::print("l;");
+            std::cout << "l;";
             break;
          case SquareMarcher::Direction::Right:
-            std::print("r;");
+            std::cout << "r;";
             break;
          default:
             break;
       }
    }
+   std::cout << '\n';
 }
