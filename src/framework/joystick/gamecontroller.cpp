@@ -347,17 +347,20 @@ void GameController::addButtonPressedCallback(SDL_GameControllerButton button, c
 void GameController::removeButtonPressedCallback(SDL_GameControllerButton button, const ControllerCallback& callback)
 {
    auto& vec = _button_pressed_callbacks[button];
-   vec.erase(std::remove_if(
-      vec.begin(),
-      vec.end(),
-      [&](const ControllerCallback& c)
-      {
-         const auto match =
-            c.target_type() == callback.target_type() && c.target<ControllerCallback>() == callback.target<ControllerCallback>();
+   vec.erase(
+      std::remove_if(
+         vec.begin(),
+         vec.end(),
+         [&](const ControllerCallback& c)
+         {
+            const auto match =
+               c.target_type() == callback.target_type() && c.target<ControllerCallback>() == callback.target<ControllerCallback>();
 
-         return match;
-      }
-   ));
+            return match;
+         }
+      ),
+      vec.end()
+   );
 }
 
 void GameController::addButtonReleasedCallback(SDL_GameControllerButton button, const ControllerCallback& callback)
