@@ -34,3 +34,19 @@ bool PlayerControlState::checkStateCpanOkay()
 
    return true;
 }
+
+bool PlayerControlState::checkStateUseInventory()
+{
+   const auto& display_mode = DisplayMode::getInstance();
+   if (display_mode.isSet(Display::Modal) || display_mode.isSet(Display::IngameMenu))
+   {
+      return false;
+   }
+
+   if (GameState::getInstance().getMode() != ExecutionMode::Running)
+   {
+      return false;
+   }
+
+   return true;
+}
