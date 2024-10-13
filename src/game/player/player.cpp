@@ -217,11 +217,6 @@ void Player::initializeController()
             SDL_CONTROLLER_BUTTON_X,
             [&]()
             {
-               if (!PlayerControlState::checkState())
-               {
-                  return;
-               }
-
                useInventory(0);
             }
          );
@@ -230,11 +225,6 @@ void Player::initializeController()
             SDL_CONTROLLER_BUTTON_Y,
             [&]()
             {
-               if (!PlayerControlState::checkState())
-               {
-                  return;
-               }
-
                useInventory(1);
             }
          );
@@ -293,6 +283,11 @@ void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
 
 void Player::useInventory(int32_t slot)
 {
+   if (!PlayerControlState::checkStateUseInventory())
+   {
+      return;
+   }
+
    auto& inventory = SaveState::getPlayerInfo()._inventory;
    inventory.use(slot);
 }

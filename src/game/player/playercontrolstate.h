@@ -9,6 +9,7 @@ namespace PlayerControlState
 ///
 bool checkState();
 bool checkStateCpanOkay();
+bool checkStateUseInventory();
 
 };  // namespace PlayerControlState
 
