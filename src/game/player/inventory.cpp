@@ -108,7 +108,13 @@ void Inventory::removeAddedCallback(const AddedCallback& callback_to_remove)
       std::remove_if(
          _added_callbacks.begin(),
          _added_callbacks.end(),
-         [&callback_to_remove](const auto& callback) { return &callback == &callback_to_remove; }
+         [&callback_to_remove](const auto& callback)
+         {
+            const auto match = callback.target_type() == callback_to_remove.target_type() &&
+                               callback.target<AddedCallback>() == callback_to_remove.target<AddedCallback>();
+
+            return match;
+         }
       ),
       _added_callbacks.end()
    );
@@ -120,7 +126,14 @@ void Inventory::removeUsedCallback(const UsedCallback& callback_to_remove)
       std::remove_if(
          _used_callbacks.begin(),
          _used_callbacks.end(),
-         [&callback_to_remove](const auto& callback) { return &callback == &callback_to_remove; }
+         [&callback_to_remove](const auto& callback)
+         {
+            const auto match = callback.target_type() == callback_to_remove.target_type() &&
+                               callback.target<UsedCallback>() == callback_to_remove.target<UsedCallback>();
+
+            return match;
+         }
+
       ),
       _used_callbacks.end()
    );
