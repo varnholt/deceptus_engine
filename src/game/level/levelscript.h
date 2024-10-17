@@ -28,6 +28,8 @@ public:
    void toggle(const std::string& search_pattern, const std::optional<std::string>& group = std::nullopt);
    void addPlayerSkill(int32_t skill);
    void removePlayerSkill(int32_t skill);
+   void addPlayerHealth(int32_t health_points_to_add);
+   void addPlayerHealthMax(int32_t health_points_to_add);
    void giveWeaponBow();
    void giveWeaponGun();
    void giveWeaponSword();
