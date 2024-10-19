@@ -398,6 +398,7 @@ add_executable(deceptus ${GAME_FILES}
    data/scripts/enemies/arrowtrap.lua data/scripts/enemies/arrowtrap_2.lua data/scripts/enemies/bat_2.lua data/scripts/enemies/bat_oneway.lua data/scripts/enemies/blob_2.lua data/scripts/enemies/bonefish.lua data/scripts/enemies/cannon_2.lua data/scripts/enemies/constants.lua data/scripts/enemies/critter.lua data/scripts/enemies/deprecated_bat.lua data/scripts/enemies/deprecated_blob.lua data/scripts/enemies/deprecated_cannon.lua data/scripts/enemies/deprecated_dumb.lua data/scripts/enemies/deprecated_endboss_1.lua data/scripts/enemies/deprecated_klonk.lua data/scripts/enemies/deprecated_skeleton.lua data/scripts/enemies/ghost.lua data/scripts/enemies/helpers.lua data/scripts/enemies/interpolation.lua data/scripts/enemies/klonk_2.lua data/scripts/enemies/landmine.lua data/scripts/enemies/minik_bomber.lua data/scripts/enemies/nukumaru.lua data/scripts/enemies/rat.lua data/scripts/enemies/shadow_monk.lua data/scripts/enemies/spiky.lua data/scripts/enemies/vector2.lua data/scripts/enemies/vectorial2.lua data/scripts/enemies/watermine.lua
    doc/level_design/advanced_topics.md doc/level_design/designing_a_level.md doc/level_design/enemies.md doc/level_design/mechanisms.md doc/level_design/visual_effects.md
    doc/lua_interface/readme.md
+   src/game/ui/richtextparser.h src/game/ui/richtextparser.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
