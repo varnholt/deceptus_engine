@@ -10,6 +10,7 @@
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/state/displaymode.h"
+#include "game/ui/richtextparser.h"
 
 #include <algorithm>
 #include <iostream>
@@ -173,6 +174,33 @@ MessageBox::MessageBox(
    _text.setCharacterSize(12);
    _text.setFillColor(_properties._text_color);
    _text.setString("");
+
+   // NEW SEGMENT APPROACH
+
+   // text alignment
+   const auto pos =
+      pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f}) + sf::Vector2f{text_margin_x_px, 0.0f};
+   // auto x = 0.0f;
+   // if (_properties._centered)
+   // {
+   //    const auto rect = _text.getGlobalBounds();
+   //    const auto left = pos.x;
+   //    x = left + (textbox_width_px - rect.width) * 0.5f;
+   // }
+   // else
+   // {
+   //    x = pos.x + text_margin_x_px;
+   // }
+
+   _segments = RichTextParser::parseRichText(
+      message,
+      __font,
+      _properties._text_color,
+      properties._centered ? RichTextParser::Alignment::Centered : RichTextParser::Alignment::Left,
+      textbox_width_px,
+      pos,
+      12
+   );
 
    showAnimation();
 }
@@ -350,34 +378,39 @@ void MessageBox::drawLayers(sf::RenderTarget& window, sf::RenderStates states)
 
 void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
 {
-   _message = replaceAll(_message, "[br]", "\n");
-
-   if (_properties._animate_text)
+   for (const auto& segment : _segments)
    {
-      animateText();
-   }
-   else
-   {
-      _text.setString(_message);
+      window.draw(segment, states);
    }
 
-   // text alignment
-   const auto pos = pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
-   auto x = 0.0f;
-   if (_properties._centered)
-   {
-      const auto rect = _text.getGlobalBounds();
-      const auto left = pos.x;
-      x = left + (textbox_width_px - rect.width) * 0.5f;
-   }
-   else
-   {
-      x = pos.x + text_margin_x_px;
-   }
+   // _message = replaceAll(_message, "[br]", "\n");
 
-   _text.setPosition(static_cast<float>(x), static_cast<float>(pos.y));
+   // if (_properties._animate_text)
+   // {
+   //    animateText();
+   // }
+   // else
+   // {
+   //    _text.setString(_message);
+   // }
 
-   window.draw(_text, states);
+   // // text alignment
+   // const auto pos = pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+   // auto x = 0.0f;
+   // if (_properties._centered)
+   // {
+   //    const auto rect = _text.getGlobalBounds();
+   //    const auto left = pos.x;
+   //    x = left + (textbox_width_px - rect.width) * 0.5f;
+   // }
+   // else
+   // {
+   //    x = pos.x + text_margin_x_px;
+   // }
+
+   // _text.setPosition(static_cast<float>(x), static_cast<float>(pos.y));
+
+   // window.draw(_text, states);
 }
 
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
