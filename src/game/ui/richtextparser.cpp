@@ -1,0 +1,272 @@
+#include "richtextparser.h"
+
+#include <SFML/Graphics.hpp>
+#include <charconv>
+#include <iostream>
+#include <numeric>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <vector>
+
+namespace RichTextParser
+{
+
+// Reads a color from a [color:#RRGGBBAA] tag.
+sf::Color readColorTag(std::string_view current_view, size_t tag_pos)
+{
+   const auto color_code = current_view.substr(tag_pos + 8, 8);  // Extract 'RRGGBBAA'
+   uint32_t color_value;
+   auto [ptr, ec] = std::from_chars(color_code.data(), color_code.data() + 8, color_value, 16);
+   if (ec == std::errc{})
+   {
+      return sf::Color(
+         (color_value >> 24) & 0xFF,  // Red
+         (color_value >> 16) & 0xFF,  // Green
+         (color_value >> 8) & 0xFF,   // Blue
+         color_value & 0xFF
+      );  // Alpha
+   }
+
+   // If parsing fails, return a fallback color.
+   return sf::Color::Magenta;
+}
+
+std::vector<sf::Text> parseRichText(
+   const std::string& message,
+   const sf::Font& font,
+   sf::Color text_color,
+   Alignment alignment,
+   float window_width_px,
+   const sf::Vector2f& position_px,
+   unsigned int character_size
+)
+{
+   std::vector<sf::Text> segments;
+
+   if (message.empty() || character_size == 0 || window_width_px <= 0)
+   {
+      return segments;
+   }
+
+   struct TagPattern
+   {
+      std::string_view name;
+      std::string_view pattern;
+   };
+
+   const std::vector<TagPattern> tag_patterns{
+      {"color_open", "[color:#"},
+      {"color_close", "[/color]"},
+      {"italic_open", "[i]"},
+      {"italic_close", "[/i]"},
+      {"bold_open", "[b]"},
+      {"bold_close", "[/b]"},
+      {"br", "[br]"}
+   };
+
+   sf::Text segment;
+   segment.setFont(font);
+   segment.setCharacterSize(character_size);
+
+   auto current_text_color = text_color;
+   bool is_italic = false;
+   bool is_bold = false;
+
+   auto offset_x_px = position_px.x;
+   auto offset_y_px = position_px.y;
+
+   std::string_view remaining_message = message;
+   size_t index = 0;
+
+   while (index < remaining_message.size())
+   {
+      auto current_view = remaining_message.substr(index);
+      std::optional<size_t> closest_tag_pos = std::nullopt;
+      std::string_view closest_tag_name;
+      size_t tag_length = 0;
+
+      // find the closest tag.
+      for (const auto& [name, pattern] : tag_patterns)
+      {
+         const auto tag_pos = current_view.find(pattern);
+         if (tag_pos != std::string_view::npos && (!closest_tag_pos || tag_pos < *closest_tag_pos))
+         {
+            closest_tag_pos = tag_pos;
+            closest_tag_name = name;
+
+            // dynamically calculate the length of the tag if it's a color tag.
+            if (closest_tag_name == "color_open")
+            {
+               auto end_pos = current_view.find(']', tag_pos);
+               if (end_pos != std::string_view::npos)
+               {
+                  tag_length = end_pos - tag_pos + 1;  // Include the ']' in the length.
+               }
+               else
+               {
+                  // invalid tag without a closing bracket; treat it as plain text.
+                  continue;
+               }
+            }
+            else
+            {
+               tag_length = pattern.size();
+            }
+         }
+      }
+
+      if (closest_tag_pos)
+      {
+         const auto tag_pos = *closest_tag_pos;
+
+         // Add text before the tag as a segment if there's any.
+         if (tag_pos > 0)
+         {
+            const auto text_before_tag = current_view.substr(0, tag_pos);
+            segment.setString(std::string{text_before_tag});
+            segment.setFillColor(current_text_color);
+            segment.setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
+            segment.setPosition(0, offset_y_px);
+            segments.push_back(segment);
+         }
+
+         // Move the index past the tag.
+         index += tag_pos + tag_length;
+
+         // Handle the tag itself.
+         if (closest_tag_name == "color_open")
+         {
+            current_text_color = readColorTag(current_view, tag_pos);
+         }
+         else if (closest_tag_name == "color_close")
+         {
+            current_text_color = text_color;
+         }
+         else if (closest_tag_name == "italic_open")
+         {
+            is_italic = true;
+         }
+         else if (closest_tag_name == "italic_close")
+         {
+            is_italic = false;
+         }
+         else if (closest_tag_name == "bold_open")
+         {
+            is_bold = true;
+         }
+         else if (closest_tag_name == "bold_close")
+         {
+            is_bold = false;
+         }
+         else if (closest_tag_name == "br")
+         {
+            // insert newline segment
+            segment.setString("\n");
+            segment.setPosition(0, offset_y_px);
+            segments.push_back(segment);
+
+            offset_y_px += segment.getLocalBounds().height;
+         }
+      }
+      else
+      {
+         // no more tags; add the rest of the text as a single segment.
+         segment.setString(std::string{current_view});
+         segment.setFillColor(current_text_color);
+         segment.setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
+         segment.setPosition(0, offset_y_px);
+         segments.push_back(segment);
+         break;
+      }
+   }
+
+   // center the segments if necessary.
+   if (alignment == Alignment::Centered)
+   {
+      for (auto& segment : segments)
+      {
+         const auto text_width_px = segment.getLocalBounds().width;
+         const auto offset_x_centered_px = offset_x_px + (window_width_px - text_width_px) / 2.0f;
+         segment.setPosition(offset_x_centered_px, segment.getPosition().y);
+      }
+   }
+   else
+   {
+      // adjust positions for left-aligned text.
+      auto segment_offset_x_px = 0.0f;
+      for (auto& segment : segments)
+      {
+         if (segment.getString() == "\n")
+         {
+            segment_offset_x_px = 0.0f;
+            offset_y_px += segment.getLocalBounds().height;
+            segment.setPosition(offset_x_px + segment_offset_x_px, offset_y_px);
+         }
+         else
+         {
+            segment.setPosition(offset_x_px + segment_offset_x_px, offset_y_px);
+            segment_offset_x_px += segment.getLocalBounds().width;
+         }
+      }
+   }
+
+   return segments;
+}
+
+std::string toString(const std::vector<sf::Text>& segments)
+{
+   std::string result;
+
+   for (const auto& seg : segments)
+   {
+      const auto segment_text = seg.getString();
+
+      if (segment_text == "\n")
+      {
+         result += '\n';
+      }
+      else
+      {
+         result += segment_text;
+      }
+
+      // after each segment, if it ends with a newline, add one.
+      if (!result.empty() && result.back() != '\n')
+      {
+         result += '\n';
+      }
+   }
+
+   // trim any extra newlines at the end.
+   while (!result.empty() && result.back() == '\n')
+   {
+      result.pop_back();
+   }
+
+   return result;
+}
+
+void testParseRichText()
+{
+   sf::Font font;
+   if (!font.loadFromFile("arial.ttf"))
+   {
+      std::cerr << "Failed to load font!" << std::endl;
+      return;
+   }
+
+   std::string message = "[b]Hello[/b] [color:#FF0000FF]Red[/color] World[br]This is a test in [color:#00FF00FF]green[/color].";
+
+   const auto text_color = sf::Color::White;
+   constexpr auto window_width = 800.0f;
+   constexpr auto character_size = 24;
+
+   const auto segments = parseRichText(message, font, text_color, Alignment::Centered, window_width, sf::Vector2f{}, character_size);
+   const auto plain_text = toString(segments);
+
+   std::cout << "Original Message: " << message << std::endl;
+   std::cout << "Extracted Plain Text: " << std::endl << plain_text << std::endl;
+}
+
+}  // namespace RichTextParser

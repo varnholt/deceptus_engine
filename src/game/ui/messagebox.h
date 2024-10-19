@@ -97,7 +97,11 @@ struct MessageBox
    void updateTextAndButtonColor(float contents_alpha);
 
    Type _type;
+
    std::string _message;
+   sf::Text _text;
+   std::vector<sf::Text> _segments;
+
    MessageBoxCallback _callback;
    LayoutProperties _properties;
    int32_t _buttons = 0;
@@ -110,7 +114,6 @@ struct MessageBox
    sf::Time _show_time;
    sf::Time _hide_time;
    DisplayState _state{DisplayState::Hidden};
-   sf::Text _text;
    sf::Time _elapsed;
 
    sf::Vector2f _window_position_px;
