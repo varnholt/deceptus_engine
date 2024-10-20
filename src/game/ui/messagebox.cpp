@@ -10,7 +10,6 @@
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/state/displaymode.h"
-#include "game/ui/richtextparser.h"
 
 #include <algorithm>
 #include <iostream>
@@ -180,17 +179,6 @@ MessageBox::MessageBox(
    // text alignment
    const auto pos =
       pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f}) + sf::Vector2f{text_margin_x_px, 0.0f};
-   // auto x = 0.0f;
-   // if (_properties._centered)
-   // {
-   //    const auto rect = _text.getGlobalBounds();
-   //    const auto left = pos.x;
-   //    x = left + (textbox_width_px - rect.width) * 0.5f;
-   // }
-   // else
-   // {
-   //    x = pos.x + text_margin_x_px;
-   // }
 
    _segments = RichTextParser::parseRichText(
       message,
@@ -201,6 +189,8 @@ MessageBox::MessageBox(
       pos,
       12
    );
+
+   std::cout << "---\n" << RichTextParser::toString(_segments) << "\n---";
 
    showAnimation();
 }
@@ -380,10 +370,8 @@ void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
 {
    for (const auto& segment : _segments)
    {
-      window.draw(segment, states);
+      window.draw(segment.text, states);
    }
-
-   // _message = replaceAll(_message, "[br]", "\n");
 
    // if (_properties._animate_text)
    // {

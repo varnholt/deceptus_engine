@@ -15,17 +15,23 @@ enum class Alignment
    Centered
 };
 
-std::vector<sf::Text> parseRichText(
+struct Segment
+{
+   sf::Text text;
+   sf::Color color;
+};
+
+std::vector<Segment> parseRichText(
    const std::string& message,
    const sf::Font& font,
    sf::Color defaultColor,
    Alignment alignment,
-   float windowWidth,
+   float window_width_px,
    const sf::Vector2f& position_px,
-   unsigned int characterSize = 12
+   unsigned int character_size = 12
 );
 
-std::string toString(const std::vector<sf::Text>& segments);
+std::string toString(const std::vector<Segment>& segments);
 
 }  // namespace RichTextParser
 
