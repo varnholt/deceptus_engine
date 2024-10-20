@@ -6,7 +6,8 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "constants.h"
+#include "game/constants.h"
+#include "game/ui/richtextparser.h"
 
 struct Layer;
 
@@ -100,7 +101,7 @@ struct MessageBox
 
    std::string _message;
    sf::Text _text;
-   std::vector<sf::Text> _segments;
+   std::vector<RichTextParser::Segment> _segments;
 
    MessageBoxCallback _callback;
    LayoutProperties _properties;
