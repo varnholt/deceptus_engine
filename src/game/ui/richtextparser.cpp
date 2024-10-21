@@ -12,23 +12,22 @@
 namespace RichTextParser
 {
 
-// Reads a color from a [color:#RRGGBBAA] tag.
 sf::Color readColorTag(std::string_view current_view, size_t tag_pos)
 {
-   const auto color_code = current_view.substr(tag_pos + 8, 8);  // Extract 'RRGGBBAA'
+   const auto color_code = current_view.substr(tag_pos + 8, 8);  // extract 'RRGGBBAA'
    uint32_t color_value;
    auto [ptr, ec] = std::from_chars(color_code.data(), color_code.data() + 8, color_value, 16);
    if (ec == std::errc{})
    {
       return sf::Color(
-         (color_value >> 24) & 0xFF,  // Red
-         (color_value >> 16) & 0xFF,  // Green
-         (color_value >> 8) & 0xFF,   // Blue
-         color_value & 0xFF
-      );  // Alpha
+         (color_value >> 24) & 0xFF,  // r
+         (color_value >> 16) & 0xFF,  // g
+         (color_value >> 8) & 0xFF,   // b
+         color_value & 0xFF           // a
+      );
    }
 
-   // If parsing fails, return a fallback color.
+   // torture designer when badly formatted text is provided
    return sf::Color::Magenta;
 }
 
@@ -39,7 +38,7 @@ std::vector<Segment> parseRichText(
    Alignment alignment,
    float window_width_px,
    const sf::Vector2f& position_px,
-   unsigned int character_size
+   uint32_t character_size
 )
 {
    if (message.empty() || character_size == 0 || window_width_px <= 0)
@@ -181,9 +180,17 @@ std::vector<Segment> parseRichText(
    {
       for (auto& segment : segments)
       {
-         const auto text_width_px = segment.text.getLocalBounds().width;
-         const auto offset_x_centered_px = offset_x_px + (window_width_px - text_width_px) / 2.0f;
-         segment.text.setPosition(offset_x_centered_px, segment.text.getPosition().y);
+         if (segment.text.getString() == "\n")
+         {
+            offset_y_px += segment.text.getLocalBounds().height;
+            segment.text.setPosition(offset_x_px, offset_y_px);
+         }
+         else
+         {
+            const auto text_width_px = segment.text.getLocalBounds().width;
+            const auto offset_x_centered_px = offset_x_px + (window_width_px - text_width_px) / 2.0f;
+            segment.text.setPosition(offset_x_centered_px, offset_y_px);
+         }
       }
    }
    else

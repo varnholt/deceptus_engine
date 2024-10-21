@@ -15,10 +15,13 @@ enum class Alignment
    Centered
 };
 
+///
+/// \brief The Segment class stores parsed text segments;
+/// stored in a separate struct so it can be extended if needed
+///
 struct Segment
 {
    sf::Text text;
-   sf::Color color;
 };
 
 std::vector<Segment> parseRichText(
@@ -28,7 +31,7 @@ std::vector<Segment> parseRichText(
    Alignment alignment,
    float window_width_px,
    const sf::Vector2f& position_px,
-   unsigned int character_size = 12
+   uint32_t character_size = 12
 );
 
 std::string toString(const std::vector<Segment>& segments);
