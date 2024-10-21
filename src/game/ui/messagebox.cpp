@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 namespace
 {
@@ -161,7 +162,7 @@ MessageBox::MessageBox(
    const LayoutProperties& properties,
    int32_t buttons
 )
-    : _type(type), _message(message), _callback(cb), _properties(properties), _buttons(buttons)
+    : _type(type), _callback(cb), _properties(properties), _buttons(buttons)
 {
    initializeLayers();
    initializeControllerCallbacks();
@@ -169,18 +170,11 @@ MessageBox::MessageBox(
 
    DisplayMode::getInstance().enqueueSet(Display::Modal);
 
-   _text.setFont(__font);
-   _text.setCharacterSize(12);
-   _text.setFillColor(_properties._text_color);
-   _text.setString("");
-
-   // NEW SEGMENT APPROACH
-
    // text alignment
-   const auto pos =
-      pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f}) + sf::Vector2f{text_margin_x_px, 0.0f};
+   const auto pos = pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f}) +
+                    sf::Vector2f{properties._centered ? 0.0f : text_margin_x_px, 0.0f};
 
-   _segments = RichTextParser::parseRichText(
+   const auto segments = RichTextParser::parseRichText(
       message,
       __font,
       _properties._text_color,
@@ -190,7 +184,24 @@ MessageBox::MessageBox(
       12
    );
 
-   std::cout << "---\n" << RichTextParser::toString(_segments) << "\n---";
+   _plain_text = RichTextParser::toString(segments);
+
+   std::transform(
+      segments.begin(),
+      segments.end(),
+      std::back_inserter(_segments),
+      [](const RichTextParser::Segment& segment)
+      { return TextSegment{segment.text, segment.text.getFillColor(), segment.text.getString()}; }
+   );
+
+   // can maybe be removed
+   if (properties._animate_text)
+   {
+      for (auto& segment : _segments)
+      {
+         segment.text.setString("");
+      }
+   }
 
    showAnimation();
 }
@@ -305,7 +316,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
       if (__active->_properties._animate_text)
       {
-         if (__active->_chars_shown < __active->_message.length())
+         if (__active->_char_animate_index < __active->_plain_text.length())
          {
             __active->_properties._animate_text = false;
             return true;
@@ -368,37 +379,12 @@ void MessageBox::drawLayers(sf::RenderTarget& window, sf::RenderStates states)
 
 void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
 {
+   updateTextAnimation();
+
    for (const auto& segment : _segments)
    {
       window.draw(segment.text, states);
    }
-
-   // if (_properties._animate_text)
-   // {
-   //    animateText();
-   // }
-   // else
-   // {
-   //    _text.setString(_message);
-   // }
-
-   // // text alignment
-   // const auto pos = pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
-   // auto x = 0.0f;
-   // if (_properties._centered)
-   // {
-   //    const auto rect = _text.getGlobalBounds();
-   //    const auto left = pos.x;
-   //    x = left + (textbox_width_px - rect.width) * 0.5f;
-   // }
-   // else
-   // {
-   //    x = pos.x + text_margin_x_px;
-   // }
-
-   // _text.setPosition(static_cast<float>(x), static_cast<float>(pos.y));
-
-   // window.draw(_text, states);
 }
 
 void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -431,7 +417,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
-void MessageBox::animateText()
+void MessageBox::updateTextAnimation()
 {
    static const std::array<float, 5> text_speeds = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
 
@@ -446,12 +432,28 @@ void MessageBox::animateText()
    // so x might go into negative for that duration.
    x = std::max(0.0f, x);
 
-   auto to = std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_message.size()));
+   const auto to =
+      !_properties._animate_text ? _plain_text.size() : std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_plain_text.size()));
 
-   if (_chars_shown != to)
+   int32_t accumulated_chars_from_segments = 0;
+   if (_char_animate_index != to)
    {
-      _chars_shown = to;
-      _text.setString(_message.substr(0, to));
+      _char_animate_index = to;
+      for (auto& segment : _segments)
+      {
+         accumulated_chars_from_segments += segment.plain_text.size();
+         if (to < accumulated_chars_from_segments)
+         {
+            // draw only subset of segment
+            const auto chars_to_draw = segment.plain_text.size() - (accumulated_chars_from_segments - to);
+            segment.text.setString(segment.plain_text.substr(0, chars_to_draw));
+            break;
+         }
+         else
+         {
+            segment.text.setString(segment.plain_text);
+         }
+      }
    }
 }
 
@@ -558,15 +560,18 @@ void MessageBox::updateTextAndButtonColor(float contents_alpha)
    const auto contents_alpha_scaled = contents_alpha * 255;
    const auto alpha = static_cast<uint8_t>(contents_alpha_scaled);
    const auto color = sf::Color{255, 255, 255, alpha};
-   auto text_color = _properties._text_color;
-   text_color.a = alpha;
+
+   for (auto& segment : _segments)
+   {
+      auto text_color = segment.color;
+      text_color.a = alpha;
+      segment.text.setFillColor(text_color);
+   }
 
    for (const auto& layer : _box_content_layers)
    {
       layer->_sprite->setColor(color);
    }
-
-   _text.setFillColor(text_color);
 }
 
 void MessageBox::showAnimation()
@@ -649,11 +654,7 @@ void MessageBox::hideAnimation()
    else
    {
       const auto window_color = sf::Color{255, 255, 255, contents_alpha_scaled};
-
       auto background_color = _properties._background_color;
-      auto text_color = _properties._text_color;
-
-      text_color.a = contents_alpha_scaled;
       background_color.a = contents_alpha_scaled;
 
       _layers["window"]->_sprite->setColor(window_color);
@@ -664,7 +665,12 @@ void MessageBox::hideAnimation()
          layer->_sprite->setColor(window_color);
       }
 
-      _text.setFillColor(text_color);
+      for (auto& segment : _segments)
+      {
+         auto text_color = segment.color;
+         text_color.a = contents_alpha_scaled;
+         segment.text.setFillColor(text_color);
+      }
    }
 
    // update state

@@ -93,20 +93,26 @@ struct MessageBox
 
    void noAnimation();
    void updateBoxContentLayers();
-   void animateText();
+   void updateTextAnimation();
    void updateNextPageIcon();
    void updateTextAndButtonColor(float contents_alpha);
 
    Type _type;
 
-   std::string _message;
-   sf::Text _text;
-   std::vector<RichTextParser::Segment> _segments;
+   struct TextSegment
+   {
+      sf::Text text;
+      sf::Color color;
+      std::string plain_text;
+   };
+
+   std::vector<TextSegment> _segments;
+   std::string _plain_text;
+   uint32_t _char_animate_index = 0;
 
    MessageBoxCallback _callback;
    LayoutProperties _properties;
    int32_t _buttons = 0;
-   uint32_t _chars_shown = 0;
    bool _closed = false;
    bool _reset_instance = false;
    std::function<void(void)> _button_callback_a;
