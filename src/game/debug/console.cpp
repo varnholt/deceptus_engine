@@ -16,6 +16,45 @@
 #include <ostream>
 #include <sstream>
 
+Console::Console()
+{
+   _help_messages = {
+      "help:",
+      "",
+      "cp <n>: jump to checkpoint",
+      "   example: cp 0",
+      "",
+      "cpanlimitoff: disable cpan maximum radius",
+      "   example: cpanlimitoff",
+      "",
+      "damage <n>: cause damage to player",
+      "   example: damage 100",
+      "",
+      "extra <name>: give extra to player",
+      "   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all, none",
+      "",
+      "give <item name>: give item to player",
+      "   example: give key_skull",
+      "",
+      "pgravity <gravity>: set player gravity scale",
+      "   example: pgravity 0.1",
+      "",
+      "playback <command>: game playback",
+      "   commands: enable, disable, load, save, replay, reset",
+      "",
+      "take <item name>: take item from player",
+      "   example: take key_skull",
+      "",
+      "tp <x>,<y>: teleport to position",
+      "   example: tp 100, 330",
+      "",
+      "start: go to start position",
+      "",
+      "weapon <weapon>: give weapon to player",
+      "   available weapons: bow, gun, sword"
+   };
+}
+
 bool Console::isActive() const
 {
    return _active;
@@ -48,39 +87,10 @@ void Console::chop()
 
 void Console::showHelp()
 {
-   _log.emplace_back("help:");
-   _log.emplace_back("");
-   _log.emplace_back("cp <n>: jump to checkpoint");
-   _log.emplace_back("   example: cp 0");
-   _log.emplace_back("");
-   _log.emplace_back("cpanlimitoff: disable cpan maximum radius");
-   _log.emplace_back("   example: cpanlimitoff");
-   _log.emplace_back("");
-   _log.emplace_back("damage <n>: cause damage to player");
-   _log.emplace_back("   example: damage 100");
-   _log.emplace_back("");
-   _log.emplace_back("extra <name>: give extra to player");
-   _log.emplace_back("   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all, none");
-   _log.emplace_back("");
-   _log.emplace_back("give <item name>: give item to player");
-   _log.emplace_back("   example: give key_skull");
-   _log.emplace_back("");
-   _log.emplace_back("pgravity <gravity>: set player gravity scale");
-   _log.emplace_back("   example: pgravity 0.1");
-   _log.emplace_back("");
-   _log.emplace_back("playback <command>: game playback");
-   _log.emplace_back("   commands: enable, disable, load, save, replay, reset");
-   _log.emplace_back("");
-   _log.emplace_back("take <item name>: take item from player");
-   _log.emplace_back("   example: take key_skull");
-   _log.emplace_back("");
-   _log.emplace_back("tp <x>,<y>: teleport to position");
-   _log.emplace_back("   example: tp 100, 330");
-   _log.emplace_back("");
-   _log.emplace_back("start: go to start position");
-   _log.emplace_back("");
-   _log.emplace_back("weapon <weapon>: give weapon to player");
-   _log.emplace_back("   available weapons: bow, gun, sword");
+   for (const auto& help_line : _help_messages)
+   {
+      _log.emplace_back(help_line);
+   }
 }
 
 namespace
@@ -377,10 +387,17 @@ void Console::nextCommand()
    _command = _history[static_cast<size_t>(_history_index)];
 }
 
-void Console::registerCallback(const std::string& command, const std::string& description, CommandFunction callback)
+void Console::registerCallback(
+   const std::string& command,
+   const std::string& description,
+   CommandFunction callback,
+   const std::vector<std::string>& help
+)
 {
    _registered_commands[command] = callback;
    _registered_command_help.emplace_back(command, description);
+   _help_messages.push_back("");
+   std::ranges::copy(help, std::back_inserter(_help_messages));
 }
 
 Console& Console::getInstance()
