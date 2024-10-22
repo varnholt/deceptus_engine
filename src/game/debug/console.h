@@ -1,6 +1,7 @@
 #include <deque>
 #include <functional>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -17,7 +18,12 @@ public:
    void execute();
    void previousCommand();
    void nextCommand();
-   void registerCallback(const std::string& command, const std::string& description, CommandFunction callback);
+   void registerCallback(
+      const std::string& command,
+      const std::string& description,
+      CommandFunction callback,
+      const std::vector<std::string>& help
+   );
 
    const std::string& getCommand() const;
    const std::deque<std::string>& getLog() const;
@@ -25,7 +31,7 @@ public:
    static Console& getInstance();
 
 private:
-   Console() = default;
+   Console();
    void showHelp();
 
    void giveWeaponBow();
@@ -43,6 +49,7 @@ private:
    int32_t _history_index = 0;
 
    std::deque<std::string> _log;
+   std::vector<std::string> _help_messages;
 
    // support for generic commands registered from the outside
    std::map<std::string, CommandFunction> _registered_commands;

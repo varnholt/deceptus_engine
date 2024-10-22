@@ -449,10 +449,8 @@ void MessageBox::updateTextAnimation()
             segment.text.setString(segment.plain_text.substr(0, chars_to_draw));
             break;
          }
-         else
-         {
-            segment.text.setString(segment.plain_text);
-         }
+
+         segment.text.setString(segment.plain_text);
       }
    }
 }
