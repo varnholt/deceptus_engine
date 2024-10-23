@@ -95,13 +95,20 @@ std::vector<std::shared_ptr<sf::IntRect>> BitmapFont::getCoords(const std::strin
    return coords;
 }
 
-void BitmapFont::draw(sf::RenderTarget& window, const std::vector<std::shared_ptr<sf::IntRect>>& coords, int32_t x, int32_t y)
+void BitmapFont::draw(
+   sf::RenderTarget& window,
+   const std::vector<std::shared_ptr<sf::IntRect>>& coords,
+   int32_t x,
+   int32_t y,
+   const std::optional<sf::Color>& color
+)
 {
    auto x_offset = 0;
-   for (auto& coord : coords)
+   for (const auto& coord : coords)
    {
       _sprite.setTextureRect(sf::IntRect(coord->left, coord->top, coord->width, coord->height));
       _sprite.setPosition(static_cast<float>(x + x_offset), static_cast<float>(y));
+      _sprite.setColor(color.value_or(sf::Color::White));
 
       window.draw(_sprite);
       x_offset += _char_width;

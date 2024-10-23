@@ -378,7 +378,7 @@ void Game::initialize()
 
    // registering generic callback functions for the game console
    Console::getInstance().registerCallback(
-      "ra", "reload animations", [] { Player::getCurrent()->reloadAnimationPool(); }, {"ra: reload animations"}
+      "ra", [] { Player::getCurrent()->reloadAnimationPool(); }, "leveldesign", {"ra: reload animations"}
    );
 
    GameAudio::getInstance().initialize();
