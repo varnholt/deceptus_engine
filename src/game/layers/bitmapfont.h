@@ -28,7 +28,13 @@ struct BitmapFont
    void load(const std::string& texture, const std::string& map);
    std::vector<std::shared_ptr<sf::IntRect>> getCoords(const std::string& text);
 
-   void draw(sf::RenderTarget& window, const std::vector<std::shared_ptr<sf::IntRect>>& coords, int32_t x = 0, int32_t y = 0);
+   void draw(
+      sf::RenderTarget& window,
+      const std::vector<std::shared_ptr<sf::IntRect>>& coords,
+      int32_t x = 0,
+      int32_t y = 0,
+      const std::optional<sf::Color>& color = std::nullopt
+   );
 
    std::shared_ptr<sf::Texture> _texture;
    sf::Sprite _sprite;
