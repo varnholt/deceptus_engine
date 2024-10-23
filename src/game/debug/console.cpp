@@ -18,51 +18,25 @@
 
 Console::Console()
 {
-   _help_messages = {
-      "playback <command>: game playback",
-      "   commands: enable, disable, load, save, replay, reset",
-      "",
-      "teleportation:",
-      "   tpp <x>,<y>: teleport to tile position",
-      "      example: tpp 100, 330",
-      "",
-      "   tps: teleport to start position",
-      "",
-      "   tpc <n>: teleport to checkpoint",
-      "      example: tpc 0",
-      "",
-      "inventory and skills:",
-      "   extra <add/clear>: add/clear extras",
-      "      available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all, none",
-      "      examples: ",
-      "           extra add doublejump",
-      "           extra clear",
-      "",
-      "   item <add/remove/clear> <item name>: add/remove/list/clear items",
-      "      examples:",
-      "           item add key_skull",
-      "           item remove key_skull",
-      "           item list",
-      "           item clear",
-      "",
-      "   weapon <add/clear> <weapon>: add/clear weapons",
-      "      available weapons: bow, gun, sword",
-      "      examples:",
-      "         weapon add bow",
-      "         weapon clear",
-      "",
-      "tweaks:",
-      "   cpanlimitoff: disable cpan maximum radius",
-      "      example: cpanlimitoff",
-      "",
-      "   damage <n>: cause damage to player",
-      "      example: damage 100",
-      "",
-      "   iddqd: make player invulnerable",
-      "",
-      "   pgravity <gravity>: set player gravity scale",
-      "      example: pgravity 0.1",
-   };
+   _help.registerCommand("leveldesign", "playback <enable/disable/load/save/replay/reset>: use game playback", {"playback enable"});
+   _help.registerCommand("leveldesign", "cpanlimitoff: disable cpan maximum radius");
+   _help.registerCommand("teleportation", "tpp <x>,<y>: teleport to tile position", {"tpp 100, 330"});
+   _help.registerCommand("teleportation", "tps: teleport to start position");
+   _help.registerCommand("teleportation", "tpc <n>: teleport to checkpoint", {"tpc 0"});
+   _help.registerCommand(
+      "inventory",
+      "extra <add/clear> <climb/dash/wallslide/walljump/doublejump/invulnerable/crouch/all>: toggle extras",
+      {"extra add doublejump", "extra clear"}
+   );
+   _help.registerCommand(
+      "inventory",
+      "item <add/clear/list/remove> <item name>: add/clear/list/remove items",
+      {"item add key_skull", "item remove key_skull", "item list", "item clear"}
+   );
+   _help.registerCommand("inventory", "weapon <add/clear> <sword/bow/gun>: add/clear weapons", {"weapon add sword", "weapon clear"});
+   _help.registerCommand("cheats", "damage <n>: cause damage to player", {"damage 100"});
+   _help.registerCommand("cheats", "iddqd: make player invulnerable");
+   _help.registerCommand("cheats", "pgravity <gravity>: set player gravity scale", {"pgravity 0.1"});
 }
 
 bool Console::isActive() const
@@ -73,11 +47,6 @@ bool Console::isActive() const
 void Console::setActive(bool active)
 {
    _active = active;
-
-   if (_active && _log.empty())
-   {
-      showHelp();
-   }
 }
 
 void Console::append(char c)
@@ -93,14 +62,6 @@ void Console::chop()
    }
 
    _command.pop_back();
-}
-
-void Console::showHelp()
-{
-   for (const auto& help_line : _help_messages)
-   {
-      _log.emplace_back(help_line);
-   }
 }
 
 namespace
@@ -167,6 +128,11 @@ void Console::teleportToTile(int32_t x_tl, int32_t y_tl)
    Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x_tl * PIXELS_PER_TILE), static_cast<float>(y_tl * PIXELS_PER_TILE));
 }
 
+const Console::Help& Console::help() const
+{
+   return _help;
+}
+
 void Console::execute()
 {
    Log::Info() << "process command: " << _command;
@@ -182,13 +148,8 @@ void Console::execute()
 
    _log.push_back(_command);
 
-   if (results.at(0) == "help")
-   {
-      showHelp();
-   }
-
    // weapon system
-   else if (results.at(0) == "weapon" && results.size() >= 2)
+   if (results.at(0) == "weapon" && results.size() >= 2)
    {
       if (results.at(1) == "add" && results.size() == 3)
       {
@@ -444,15 +405,14 @@ void Console::nextCommand()
 
 void Console::registerCallback(
    const std::string& command,
-   const std::string& description,
    CommandFunction callback,
-   const std::vector<std::string>& help
+   const std::string& topic,
+   const std::string& description,
+   const std::vector<std::string>& examples
 )
 {
    _registered_commands[command] = callback;
-   _registered_command_help.emplace_back(command, description);
-   _help_messages.push_back("");
-   std::ranges::copy(help, std::back_inserter(_help_messages));
+   _help.registerCommand(topic, description, examples);
 }
 
 Console& Console::getInstance()
@@ -469,4 +429,39 @@ const std::string& Console::getCommand() const
 const std::deque<std::string>& Console::getLog() const
 {
    return _log;
+}
+
+void Console::Help::registerCommand(const std::string& topic, const std::string& description, const std::vector<std::string>& examples)
+{
+   _help_messages[topic].emplace_back(HelpCommand{description, examples});
+}
+
+std::string Console::Help::getFormattedHelp() const
+{
+   std::ostringstream oss;
+
+   std::vector<std::string> sorted_topics;
+   for (const auto& entry : _help_messages)
+   {
+      sorted_topics.push_back(entry.first);
+   }
+   std::sort(sorted_topics.begin(), sorted_topics.end());
+
+   for (const auto& topic : sorted_topics)
+   {
+      oss << topic << ":\n";
+      const auto& commands = _help_messages.at(topic);
+      for (const auto& command : commands)
+      {
+         oss << "   " << command.description << "\n";
+
+         for (const auto& example : command.examples)
+         {
+            oss << "      example: " << example << "\n";
+         }
+      }
+      oss << "\n";
+   }
+
+   return oss.str();
 }
