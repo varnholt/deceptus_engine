@@ -1,14 +1,11 @@
 #include "playeranimation.h"
 
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <sstream>
 
 #include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
 #include "game/animation/animationpool.h"
-#include "game/camera/camerapanorama.h"
 #include "game/clock/gameclock.h"
 #include "game/mechanisms/portal.h"
 #include "game/physics/physicsconfiguration.h"
@@ -277,70 +274,6 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _dash_stop_r->_name = "player_dash_stop_r";
    _dash_stop_l->_name = "player_dash_stop_l";
 
-   _looped_animations.push_back(_idle_r);
-   _looped_animations.push_back(_idle_l);
-   _looped_animations.push_back(_sword_idle_l);
-   _looped_animations.push_back(_sword_idle_r);
-
-   _looped_animations.push_back(_idle_blink_r);
-   _looped_animations.push_back(_idle_blink_l);
-   _looped_animations.push_back(_sword_idle_blink_l);
-   _looped_animations.push_back(_sword_idle_blink_r);
-
-   _looped_animations.push_back(_swim_r);
-   _looped_animations.push_back(_swim_l);
-   _looped_animations.push_back(_sword_swim_r);
-   _looped_animations.push_back(_sword_swim_l);
-
-   _looped_animations.push_back(_run_r);
-   _looped_animations.push_back(_run_l);
-   _looped_animations.push_back(_sword_run_r);
-   _looped_animations.push_back(_sword_run_l);
-
-   _looped_animations.push_back(_dash_r);
-   _looped_animations.push_back(_dash_l);
-   _looped_animations.push_back(_dash_init_l);
-   _looped_animations.push_back(_dash_init_r);
-   _looped_animations.push_back(_dash_stop_r);
-   _looped_animations.push_back(_dash_stop_l);
-   _looped_animations.push_back(_sword_dash_r);
-   _looped_animations.push_back(_sword_dash_l);
-   _looped_animations.push_back(_sword_dash_init_l);
-   _looped_animations.push_back(_sword_dash_init_r);
-   _looped_animations.push_back(_sword_dash_stop_r);
-   _looped_animations.push_back(_sword_dash_stop_l);
-
-   _looped_animations.push_back(_jump_init_r);
-   _looped_animations.push_back(_jump_up_r);
-   _looped_animations.push_back(_jump_down_r);
-   _looped_animations.push_back(_jump_landing_r);
-   _looped_animations.push_back(_jump_midair_r);
-
-   _looped_animations.push_back(_jump_init_l);
-   _looped_animations.push_back(_jump_up_l);
-   _looped_animations.push_back(_jump_down_l);
-   _looped_animations.push_back(_jump_landing_l);
-   _looped_animations.push_back(_jump_midair_l);
-
-   _looped_animations.push_back(_double_jump_r);
-   _looped_animations.push_back(_double_jump_l);
-   _looped_animations.push_back(_sword_double_jump_r);
-   _looped_animations.push_back(_sword_double_jump_l);
-
-   _looped_animations.push_back(_wallslide_impact_r);
-   _looped_animations.push_back(_wallslide_impact_l);
-   _looped_animations.push_back(_wallslide_r);
-   _looped_animations.push_back(_wallslide_l);
-   _looped_animations.push_back(_wall_jump_r);
-   _looped_animations.push_back(_wall_jump_l);
-
-   _looped_animations.push_back(_wallslide_animation);
-
-   for (auto& i : _looped_animations)
-   {
-      i->_looped = true;
-   }
-
    // fill lut to map sword cycles onto regular move cycles
    _sword_lut[_appear_l] = _sword_appear_l;
    _sword_lut[_appear_r] = _sword_appear_r;
@@ -390,6 +323,51 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _sword_attack_lut[_jump_down_l] = _sword_attack_jump_legs_down_l;
    _sword_attack_lut[_jump_landing_r] = _sword_attack_jump_legs_landing_r;
    _sword_attack_lut[_jump_landing_l] = _sword_attack_jump_legs_landing_l;
+
+   // set up looped animations
+   _looped_animations.push_back(_idle_r);
+   _looped_animations.push_back(_idle_l);
+   _looped_animations.push_back(_idle_blink_r);
+   _looped_animations.push_back(_idle_blink_l);
+   _looped_animations.push_back(_swim_r);
+   _looped_animations.push_back(_swim_l);
+   _looped_animations.push_back(_run_r);
+   _looped_animations.push_back(_run_l);
+   _looped_animations.push_back(_dash_r);
+   _looped_animations.push_back(_dash_l);
+   _looped_animations.push_back(_dash_init_l);
+   _looped_animations.push_back(_dash_init_r);
+   _looped_animations.push_back(_dash_stop_r);
+   _looped_animations.push_back(_dash_stop_l);
+   _looped_animations.push_back(_jump_init_r);
+   _looped_animations.push_back(_jump_init_l);
+   _looped_animations.push_back(_jump_up_r);
+   _looped_animations.push_back(_jump_up_l);
+   _looped_animations.push_back(_jump_down_r);
+   _looped_animations.push_back(_jump_down_l);
+   _looped_animations.push_back(_jump_landing_r);
+   _looped_animations.push_back(_jump_landing_l);
+   _looped_animations.push_back(_double_jump_r);
+   _looped_animations.push_back(_double_jump_l);
+   _looped_animations.push_back(_wallslide_impact_r);
+   _looped_animations.push_back(_wallslide_impact_l);
+   _looped_animations.push_back(_wallslide_r);
+   _looped_animations.push_back(_wallslide_l);
+   _looped_animations.push_back(_wall_jump_r);
+   _looped_animations.push_back(_wall_jump_l);
+   _looped_animations.push_back(_wallslide_animation);
+
+   for (auto& loop_animation : _looped_animations)
+   {
+      loop_animation->_looped = true;
+
+      // also update those in the lut
+      const auto sword_animation_it = _sword_attack_lut.find(loop_animation);
+      if (sword_animation_it != _sword_attack_lut.end())
+      {
+         (*sword_animation_it).second->_looped = true;
+      }
+   }
 }
 
 int32_t PlayerAnimation::getJumpAnimationReference() const
@@ -874,9 +852,9 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
       return std::nullopt;
    }
 
+   // jump ignition
    if (data._jump_frame_count > PhysicsConfiguration::getInstance()._player_jump_frame_count - FRAMES_COUNT_JUMP_INIT)
    {
-      // jump ignition
       _jump_animation_reference = 0;
       return data._points_right ? _jump_init_r : _jump_init_l;
    }
