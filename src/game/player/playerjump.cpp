@@ -371,8 +371,8 @@ void PlayerJump::updateWallSlide()
       return;
    }
 
-   const auto touching_left = (GameContactListener::getInstance().getPlayerArmLeftContactCount() > 0);
-   const auto touching_right = (GameContactListener::getInstance().getPlayerArmRightContactCount() > 0);
+   const auto touching_left = (GameContactListener::getInstance().getPlayerArmLeftContactCollidingCount() > 0);
+   const auto touching_right = (GameContactListener::getInstance().getPlayerArmRightContactCollidingCount() > 0);
 
    if (!(touching_left && _controls->isMovingLeft()) && !(touching_right && _controls->isMovingRight()))
    {

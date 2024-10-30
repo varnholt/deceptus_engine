@@ -12,6 +12,8 @@ public:
    int32_t getPlayerFootContactCount() const;
    int32_t getPlayerArmLeftContactCount() const;
    int32_t getPlayerArmRightContactCount() const;
+   int32_t getPlayerArmLeftContactCollidingCount() const;
+   int32_t getPlayerArmRightContactCollidingCount() const;
    int32_t getPlayerContactCount() const;
    int32_t getDeadlyContactCount() const;
    int32_t getMovingPlatformContactCount() const;
@@ -80,7 +82,9 @@ private:
    int32_t _count_head_contacts_colliding = 0;
    int32_t _count_player_contacts = 0;
    int32_t _count_arm_left_contacts = 0;
+   int32_t _count_arm_left_contacts_colliding = 0;
    int32_t _count_arm_right_contacts = 0;
+   int32_t _count_arm_right_contacts_colliding = 0;
    int32_t _count_deadly_contacts = 0;
    int32_t _count_moving_platform_contacts = 0;
    int32_t _count_death_block_contacts = 0;

@@ -202,6 +202,13 @@ void GameContactListener::processPlayerLeftArmSensorContactBegin(b2Fixture* fixt
    }
 
    _count_arm_left_contacts++;
+
+   const auto category_friendly = (fixture->GetFilterData().categoryBits & CategoryFriendly);
+   const auto walk_through = (fixture->GetFilterData().categoryBits & CategoryEnemyWalkThrough);
+   if (!category_friendly && !walk_through)
+   {
+      _count_arm_left_contacts_colliding++;
+   }
 }
 
 void GameContactListener::processPlayerRightArmSensorContactBegin(b2Fixture* fixture)
@@ -212,6 +219,13 @@ void GameContactListener::processPlayerRightArmSensorContactBegin(b2Fixture* fix
    }
 
    _count_arm_right_contacts++;
+
+   const auto category_friendly = (fixture->GetFilterData().categoryBits & CategoryFriendly);
+   const auto walk_through = (fixture->GetFilterData().categoryBits & CategoryEnemyWalkThrough);
+   if (!category_friendly && !walk_through)
+   {
+      _count_arm_right_contacts_colliding++;
+   }
 }
 
 void GameContactListener::processOneWayWallContactBegin(b2Contact* contact, b2Fixture* fixture)
@@ -458,24 +472,38 @@ void GameContactListener::processPlayerHeadSensorContactEnd(b2Fixture* fixture)
    }
 }
 
-void GameContactListener::processPlayerLeftArmSensorContactEnd(b2Fixture* contact_fixture)
+void GameContactListener::processPlayerLeftArmSensorContactEnd(b2Fixture* fixture)
 {
-   if (contact_fixture->IsSensor())
+   if (fixture->IsSensor())
    {
       return;
    }
 
    _count_arm_left_contacts--;
+
+   const auto category_friendly = (fixture->GetFilterData().categoryBits & CategoryFriendly);
+   const auto walk_through = (fixture->GetFilterData().categoryBits & CategoryEnemyWalkThrough);
+   if (!category_friendly && !walk_through)
+   {
+      _count_arm_left_contacts_colliding--;
+   }
 }
 
-void GameContactListener::processPlayerRightArmSensorContactEnd(b2Fixture* contact_fixture)
+void GameContactListener::processPlayerRightArmSensorContactEnd(b2Fixture* fixture)
 {
-   if (contact_fixture->IsSensor())
+   if (fixture->IsSensor())
    {
       return;
    }
 
    _count_arm_right_contacts--;
+
+   const auto category_friendly = (fixture->GetFilterData().categoryBits & CategoryFriendly);
+   const auto walk_through = (fixture->GetFilterData().categoryBits & CategoryEnemyWalkThrough);
+   if (!category_friendly && !walk_through)
+   {
+      _count_arm_right_contacts_colliding--;
+   }
 }
 
 void GameContactListener::processPlayerContactEnd()
@@ -766,6 +794,16 @@ int32_t GameContactListener::getPlayerArmRightContactCount() const
    return _count_arm_right_contacts;
 }
 
+int32_t GameContactListener::getPlayerArmLeftContactCollidingCount() const
+{
+   return _count_arm_left_contacts_colliding;
+}
+
+int32_t GameContactListener::getPlayerArmRightContactCollidingCount() const
+{
+   return _count_arm_right_contacts_colliding;
+}
+
 bool GameContactListener::isPlayerSmashed() const
 {
    return _smashed;
@@ -789,7 +827,9 @@ int32_t GameContactListener::getPlayerHeadContactCollidingCount() const
 void GameContactListener::reset()
 {
    _count_arm_left_contacts = 0;
+   _count_arm_left_contacts_colliding = 0;
    _count_arm_right_contacts = 0;
+   _count_arm_right_contacts_colliding = 0;
    _count_deadly_contacts = 0;
    _count_death_block_contacts = 0;
    _count_foot_contacts = 0;
