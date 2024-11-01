@@ -64,8 +64,10 @@ public:
    const std::shared_ptr<Animation>& getAuxiliaryCycle() const;
    const std::shared_ptr<Animation>& getWallslideAnimation() const;
 
+   HighResDuration getCurrentAnimationDuration() const;
    HighResDuration getRevealDuration() const;
    HighResDuration getSwordAttackDurationStanding() const;
+   HighResDuration getSwordAttackDurationStandingMax() const;
    HighResDuration getSwordAttackDurationBendingDown1() const;
    HighResDuration getSwordAttackDurationBendingDown2() const;
    HighResDuration getSwordAttackDurationJumping() const;
