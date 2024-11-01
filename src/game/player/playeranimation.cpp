@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <ranges>
 
 #include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
@@ -471,8 +472,9 @@ PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_c
          }
          else
          {
-            const auto standing_attack_elapsed =
-               StopWatch::duration(data._timepoint_attack_standing_start, now) >= _sword_attack_standing_tmp_l->_overall_time_chrono;
+            const auto standing_attack_elapsed = StopWatch::duration(data._timepoint_attack_standing_start, now) >=
+                                                 (data._points_left ? _sword_attack_standing_tmp_l->_overall_time_chrono
+                                                                    : _sword_attack_standing_tmp_r->_overall_time_chrono);
 
             if (!standing_attack_elapsed)
             {
@@ -542,6 +544,11 @@ const std::shared_ptr<Animation>& PlayerAnimation::getWallslideAnimation() const
    return _wallslide_animation;
 }
 
+PlayerAnimation::HighResDuration PlayerAnimation::getCurrentAnimationDuration() const
+{
+   return _current_cycle->_overall_time_chrono;
+}
+
 PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
 {
    using namespace std::chrono_literals;
@@ -551,6 +558,13 @@ PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
 PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStanding() const
 {
    return _sword_attack_standing_l[0]->_overall_time_chrono;
+}
+
+PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStandingMax() const
+{
+   return std::ranges::max(
+      _sword_attack_standing_l | std::views::transform([](const auto& animation) { return animation->_overall_time_chrono; })
+   );
 }
 
 PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingDown1() const
@@ -572,17 +586,22 @@ std::optional<PlayerAnimation::HighResDuration> PlayerAnimation::getActiveAttack
 {
    if (_current_cycle == _sword_attack_bend_down_1_l || _current_cycle == _sword_attack_bend_down_1_r)
    {
-      return getSwordAttackDurationBendingDown1();
+      return _sword_attack_bend_down_1_l->_overall_time_chrono;
    }
 
    if (_current_cycle == _sword_attack_bend_down_2_l || _current_cycle == _sword_attack_bend_down_2_r)
    {
-      return getSwordAttackDurationBendingDown2();
+      return _sword_attack_bend_down_2_l->_overall_time_chrono;
    }
 
    if (_current_cycle == _sword_attack_standing_l[0] || _current_cycle == _sword_attack_standing_r[0])
    {
-      return getSwordAttackDurationStanding();
+      return _sword_attack_standing_l[0]->_overall_time_chrono;
+   }
+
+   if (_current_cycle == _sword_attack_standing_l[1] || _current_cycle == _sword_attack_standing_r[1])
+   {
+      return _sword_attack_standing_l[1]->_overall_time_chrono;
    }
 
    return std::nullopt;
