@@ -66,12 +66,10 @@ public:
 
    HighResDuration getCurrentAnimationDuration() const;
    HighResDuration getRevealDuration() const;
-   HighResDuration getSwordAttackDurationStanding() const;
-   HighResDuration getSwordAttackDurationStandingMax() const;
-   HighResDuration getSwordAttackDurationBendingDown1() const;
-   HighResDuration getSwordAttackDurationBendingDown2() const;
-   HighResDuration getSwordAttackDurationJumping() const;
+   HighResDuration getSwordAttackDurationStanding(bool points_left) const;
    std::optional<HighResDuration> getActiveAttackCycleDuration();
+   bool isStandingSwordAttackPlayed() const;
+   void prepareNextSwordStandingAttack();
 
    void resetAlpha();
 

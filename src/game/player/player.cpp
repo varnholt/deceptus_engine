@@ -934,7 +934,7 @@ void Player::updateVelocity()
       return;
    }
 
-   if (StopWatch::getInstance().now() < _attack._timepoint_attack_standing_start + _player_animation->getSwordAttackDurationStandingMax())
+   if (_player_animation->isStandingSwordAttackPlayed())
    {
       _body->SetLinearVelocity({0.0, 0.0});
       return;

@@ -409,6 +409,40 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processDeathAnimation
    return next_cycle;
 }
 
+void PlayerAnimation::prepareNextSwordStandingAttack()
+{
+   // issue that was circumentved here:
+   //
+   // when animation is reset to a slightly longer duration, it instantly exceeds elapsed_since_attack_start.
+   // that'll cause extra frames to be played. for that reason the next sword animation is configured right from
+   // the playerattack class.
+   //
+   //                                     time
+   //                                     <------------->
+   // +-------------------------------------------------------------------------------------
+   //         |                           |             |
+   //         attack                                    now
+   //         start
+   //
+   //         animation                  animation
+   //         start                      end
+   //
+   //                                    next animation
+   //                                    prepared (rand)
+
+   if (_sword_attack_standing_l_reset && _sword_attack_standing_tmp_l->_finished)
+   {
+      _sword_attack_standing_tmp_l = _sword_attack_standing_l[(std::rand() % _sword_attack_standing_l.size())];
+      _sword_attack_standing_l_reset = false;
+   }
+
+   if (_sword_attack_standing_r_reset && _sword_attack_standing_tmp_r->_finished)
+   {
+      _sword_attack_standing_tmp_r = _sword_attack_standing_r[(std::rand() % _sword_attack_standing_r.size())];
+      _sword_attack_standing_r_reset = false;
+   }
+}
+
 std::optional<std::shared_ptr<Animation>>
 PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_cycle, const PlayerAnimationData& data)
 {
@@ -472,40 +506,24 @@ PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_c
          }
          else
          {
-            const auto standing_attack_elapsed = StopWatch::duration(data._timepoint_attack_standing_start, now) >=
-                                                 (data._points_left ? _sword_attack_standing_tmp_l->_overall_time_chrono
-                                                                    : _sword_attack_standing_tmp_r->_overall_time_chrono);
+            const auto duration_left = _sword_attack_standing_tmp_l->_overall_time_chrono;
+            const auto duration_right = _sword_attack_standing_tmp_r->_overall_time_chrono;
+            const auto duration_since_attack = StopWatch::duration(data._timepoint_attack_standing_start, now);
 
-            if (!standing_attack_elapsed)
+            if (data._points_left && duration_since_attack < duration_left)
             {
-               if (data._points_left)
-               {
-                  attack_cycle = _sword_attack_standing_tmp_l;
-                  _sword_attack_standing_l_reset = true;
-               }
-               else
-               {
-                  attack_cycle = _sword_attack_standing_tmp_r;
-                  _sword_attack_standing_r_reset = true;
-               }
+               attack_cycle = _sword_attack_standing_tmp_l;
+               _sword_attack_standing_l_reset = true;
+            }
+            else if (data._points_right && duration_since_attack < duration_right)
+            {
+               attack_cycle = _sword_attack_standing_tmp_r;
+               _sword_attack_standing_r_reset = true;
             }
             else
             {
                _sword_attack_standing_tmp_l->_finished = true;
                _sword_attack_standing_tmp_r->_finished = true;
-            }
-
-            // pick a different attack cycle
-            if (_sword_attack_standing_l_reset && _sword_attack_standing_tmp_l->_finished)
-            {
-               _sword_attack_standing_tmp_l = _sword_attack_standing_l[(std::rand() % _sword_attack_standing_l.size())];
-               _sword_attack_standing_l_reset = false;
-            }
-
-            if (_sword_attack_standing_r_reset && _sword_attack_standing_tmp_r->_finished)
-            {
-               _sword_attack_standing_tmp_r = _sword_attack_standing_r[(std::rand() % _sword_attack_standing_r.size())];
-               _sword_attack_standing_r_reset = false;
             }
          }
 
@@ -555,56 +573,60 @@ PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
    return 1000ms + _appear_l->_overall_time_chrono + 20ms;
 }
 
-PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStanding() const
+PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStanding(bool points_left) const
 {
-   return _sword_attack_standing_l[0]->_overall_time_chrono;
-}
-
-PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStandingMax() const
-{
-   return std::ranges::max(
-      _sword_attack_standing_l | std::views::transform([](const auto& animation) { return animation->_overall_time_chrono; })
-   );
-}
-
-PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingDown1() const
-{
-   return _sword_attack_bend_down_1_l->_overall_time_chrono;
-}
-
-PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingDown2() const
-{
-   return _sword_attack_bend_down_2_l->_overall_time_chrono;
-}
-
-PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationJumping() const
-{
-   return _sword_attack_jump_l->_overall_time_chrono;
+   return points_left ? _sword_attack_standing_tmp_l->_overall_time_chrono : _sword_attack_standing_tmp_r->_overall_time_chrono;
 }
 
 std::optional<PlayerAnimation::HighResDuration> PlayerAnimation::getActiveAttackCycleDuration()
 {
-   if (_current_cycle == _sword_attack_bend_down_1_l || _current_cycle == _sword_attack_bend_down_1_r)
+   if (_current_cycle == _sword_attack_bend_down_1_l)
    {
       return _sword_attack_bend_down_1_l->_overall_time_chrono;
    }
 
-   if (_current_cycle == _sword_attack_bend_down_2_l || _current_cycle == _sword_attack_bend_down_2_r)
+   if (_current_cycle == _sword_attack_bend_down_1_r)
+   {
+      return _sword_attack_bend_down_1_r->_overall_time_chrono;
+   }
+
+   if (_current_cycle == _sword_attack_bend_down_2_l)
    {
       return _sword_attack_bend_down_2_l->_overall_time_chrono;
    }
 
-   if (_current_cycle == _sword_attack_standing_l[0] || _current_cycle == _sword_attack_standing_r[0])
+   if (_current_cycle == _sword_attack_bend_down_2_r)
+   {
+      return _sword_attack_bend_down_2_r->_overall_time_chrono;
+   }
+
+   if (_current_cycle == _sword_attack_standing_l[0])
    {
       return _sword_attack_standing_l[0]->_overall_time_chrono;
    }
 
-   if (_current_cycle == _sword_attack_standing_l[1] || _current_cycle == _sword_attack_standing_r[1])
+   if (_current_cycle == _sword_attack_standing_r[0])
+   {
+      return _sword_attack_standing_r[0]->_overall_time_chrono;
+   }
+
+   if (_current_cycle == _sword_attack_standing_l[1])
    {
       return _sword_attack_standing_l[1]->_overall_time_chrono;
    }
 
+   if (_current_cycle == _sword_attack_standing_r[1])
+   {
+      return _sword_attack_standing_r[1]->_overall_time_chrono;
+   }
+
    return std::nullopt;
+}
+
+bool PlayerAnimation::isStandingSwordAttackPlayed() const
+{
+   return _current_cycle == _sword_attack_standing_l[0] || _current_cycle == _sword_attack_standing_r[0] ||
+          _current_cycle == _sword_attack_standing_l[1] || _current_cycle == _sword_attack_standing_r[1];
 }
 
 const std::shared_ptr<Animation>&
