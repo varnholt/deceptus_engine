@@ -109,7 +109,9 @@ void PlayerAttack::attack(
          else
          {
             _timepoint_attack_standing_start = now;
-            controls->lockOrientation(std::chrono::duration_cast<std::chrono::milliseconds>(animation->getSwordAttackDurationStandingMax())
+            animation->prepareNextSwordStandingAttack();
+            controls->lockOrientation(
+               std::chrono::duration_cast<std::chrono::milliseconds>(animation->getSwordAttackDurationStanding(points_to_left))
             );
             Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
          }
