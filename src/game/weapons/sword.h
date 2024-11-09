@@ -12,7 +12,7 @@ public:
    Sword();
 
    void draw(sf::RenderTarget& target) override;
-   void update(const sf::Time& time) override;
+   void update(const WeaponUpdateData& data) override;
    int32_t getDamage() const override;
    std::string getName() const override;
 
@@ -20,6 +20,7 @@ public:
 
 private:
    bool checkHitWindowActive() const;
+   void checkBodyCollisions(const std::shared_ptr<b2World>& world);
    void updateHitbox();
 
    b2Vec2 _pos_m;
@@ -34,4 +35,5 @@ private:
 
    bool _cleared_to_attack{true};
    sf::FloatRect _hit_rect_px;
+   void cameraShake();
 };
