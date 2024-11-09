@@ -13,7 +13,7 @@ public:
 
    void load(b2World* world);
    void use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2Vec2& dir) override;
-   void update(const sf::Time& /*time*/) override;
+   void update(const WeaponUpdateData& data) override;
    int32_t getDamage() const override;
    std::string getName() const override;
 

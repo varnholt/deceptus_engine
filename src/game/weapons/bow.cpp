@@ -171,9 +171,9 @@ void Bow::updateRotation(Arrow* arrow)
    }
 }
 
-void Bow::update(const sf::Time& time)
+void Bow::update(const WeaponUpdateData& data)
 {
-   Gun::update(time);
+   Gun::update(data);
 
    // position the loaded arrow
    if (_loaded_arrow != nullptr)

@@ -1718,9 +1718,9 @@ bool Player::isInAir() const
 
 void Player::updateWeapons(const sf::Time& dt)
 {
-   for (auto& w : SaveState::getPlayerInfo()._weapons._weapons)
+   for (const auto& weapon : SaveState::getPlayerInfo()._weapons._weapons)
    {
-      w->update(dt);
+      weapon->update({dt, _world});
    }
 }
 
