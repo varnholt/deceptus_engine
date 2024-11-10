@@ -21,7 +21,6 @@ public:
 
 private:
    bool checkHitWindowActive() const;
-   void checkBodyCollisions(const std::shared_ptr<b2World>& world);
    void updateHitbox();
    void cameraShake();
 
@@ -37,5 +36,7 @@ private:
 
    bool _cleared_to_attack{true};
    sf::FloatRect _hit_rect_px;
+
    std::vector<sf::FloatRect> _octree_rects;
+   std::vector<sf::Vector2f> _hit_positions;
 };

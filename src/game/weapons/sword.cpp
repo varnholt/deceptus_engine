@@ -40,54 +40,18 @@ void Sword::draw(sf::RenderTarget& target [[maybe_unused]])
    }
 }
 
-void Sword::checkBodyCollisions(const std::shared_ptr<b2World>& world)
-{
-   const auto remaining_bodies = WorldQuery::retrieveBodiesInsideRect(world, _hit_rect_px);
-   for (auto* body : remaining_bodies)
-   {
-      auto* fixture = body->GetFixtureList();
-      while (fixture)
-      {
-         auto* next = fixture->GetNext();
-
-         // fixture doesn't have valid user data
-         auto* fixture_node = static_cast<FixtureNode*>(fixture->GetUserData().pointer);
-         if (!fixture_node)
-         {
-            continue;
-         }
-
-         // fixture belongs to player
-         const auto is_player = (fixture_node->getParent() == Player::getCurrent());
-         if (is_player)
-         {
-            break;
-         }
-
-         // std::cout << fixture_node->getType() << std::endl;
-         //
-         // if (fixture_node->getType() == ObjectTypeSolid)
-         // {
-         //    cameraShake();
-         // }
-
-         // std::cout << fixture->GetFilterData().maskBits << std::endl;
-
-         fixture = next;
-      }
-   }
-}
-
 void Sword::cameraShake()
 {
    const auto x = 0.05f;
    const auto y = 0.3f;
    const auto intensity = 0.2f;
-   Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 0.3f, BoomSettings::ShakeType::Random});
+   Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 0.5f, BoomSettings::ShakeType::Random});
 }
 
 void Sword::update(const WeaponUpdateData& data)
 {
+   _hit_positions.clear();
+
    if (!_cleared_to_attack)
    {
       return;
@@ -99,21 +63,25 @@ void Sword::update(const WeaponUpdateData& data)
 
       updateHitbox();
 
+      std::unordered_set<b2Body*> ignored_bodies{{Player::getCurrent()->getBody()}};
       const auto collided_nodes = WorldQuery::findNodes(_hit_rect_px);
       for (auto& collided_node : collided_nodes)
       {
          collided_node._node->luaHit(sword_damage);
+
+         const auto& rect = collided_node._hitbox;
+         _hit_positions.push_back({rect.left + rect.width * 0.5f, rect.top + rect.height * 0.5f});
+
+         if (collided_node._node->_body != nullptr)
+         {
+            ignored_bodies.insert(collided_node._node->_body);
+         }
       }
 
-      // checkBodyCollisions(data._world);
-      //
-      // if (!collided_nodes.empty())
-      // {
-      //    cameraShake();
-      // }
-
-      WorldQuery::OctreeNode octree(_hit_rect_px, data._world, 0, 3, {Player::getCurrent()->getBody()});
-      _octree_rects = octree.collectLeafBounds(0, 3);
+      // those are mostly collisions with walls
+      constexpr auto octree_depth{3};
+      WorldQuery::OctreeNode octree(_hit_rect_px, data._world, 0, octree_depth, ignored_bodies);
+      _octree_rects = octree.collectLeafBounds(0, octree_depth);
    }
    else
    {
