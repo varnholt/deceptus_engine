@@ -23,16 +23,26 @@ bool WorldQuery::FixtureQueryCallback::ReportFixture(b2Fixture* fixture)
    return true;
 }
 
-std::vector<b2Body*> WorldQuery::queryBodies(const std::shared_ptr<b2World>& world, const b2AABB& aabb)
+std::vector<b2Body*>
+WorldQuery::queryBodies(const std::shared_ptr<b2World>& world, const b2AABB& aabb, const std::unordered_set<b2Body*>& ignore_list)
 {
-   BodyQueryCallback query_callback;
+   BodyQueryCallback query_callback(ignore_list);
    world->QueryAABB(&query_callback, aabb);
    return query_callback._bodies;
 }
 
+WorldQuery::BodyQueryCallback::BodyQueryCallback(const std::unordered_set<b2Body*>& ignore_list) : _ignore_list(ignore_list)
+{
+}
+
 bool WorldQuery::BodyQueryCallback::ReportFixture(b2Fixture* fixture)
 {
-   _bodies.push_back(fixture->GetBody());
+   auto* body = fixture->GetBody();
+   if (!_ignore_list.contains(body))
+   {
+      _bodies.push_back(body);
+   }
+
    return true;
 }
 
@@ -82,7 +92,11 @@ std::vector<WorldQuery::CollidedNode> WorldQuery::findNodes(const std::vector<sf
    return hit_nodes;
 }
 
-std::vector<b2Body*> WorldQuery::retrieveBodiesInsideRect(const std::shared_ptr<b2World>& world, const sf::FloatRect& rect)
+std::vector<b2Body*> WorldQuery::retrieveBodiesInsideRect(
+   const std::shared_ptr<b2World>& world,
+   const sf::FloatRect& rect,
+   const std::unordered_set<b2Body*>& ignore_list
+)
 {
    b2AABB aabb;
 
@@ -94,13 +108,19 @@ std::vector<b2Body*> WorldQuery::retrieveBodiesInsideRect(const std::shared_ptr<
    aabb.upperBound = vecS2B({std::max(l, r), std::max(b, t)});
    aabb.lowerBound = vecS2B({std::min(l, r), std::min(b, t)});
 
-   return WorldQuery::queryBodies(world, aabb);
+   return WorldQuery::queryBodies(world, aabb, ignore_list);
 }
 
-WorldQuery::OctreeNode::OctreeNode(const sf::FloatRect& bounds, const std::shared_ptr<b2World>& world, int32_t depth, int32_t max_depth)
-    : _boundaries(bounds)
+WorldQuery::OctreeNode::OctreeNode(
+   const sf::FloatRect& bounds,
+   const std::shared_ptr<b2World>& world,
+   int32_t depth,
+   int32_t max_depth,
+   const std::unordered_set<b2Body*>& ignore_list
+)
+    : _boundaries(bounds), _ignore_list(ignore_list)
 {
-   _bodies = WorldQuery::retrieveBodiesInsideRect(world, bounds);
+   _bodies = WorldQuery::retrieveBodiesInsideRect(world, bounds, ignore_list);
 
    if (!_bodies.empty() && depth < max_depth)
    {
@@ -109,7 +129,7 @@ WorldQuery::OctreeNode::OctreeNode(const sf::FloatRect& bounds, const std::share
    }
 }
 
-void WorldQuery::OctreeNode::countBodiesInLeaves(std::vector<int32_t>& leaf_body_counts, int32_t max_depth, int32_t depth, int32_t index)
+void WorldQuery::OctreeNode::countBodiesInLeaves(std::vector<int32_t>& leaf_body_counts, int32_t depth, int32_t max_depth, int32_t index)
    const
 {
    if (depth == max_depth)
@@ -127,7 +147,7 @@ void WorldQuery::OctreeNode::countBodiesInLeaves(std::vector<int32_t>& leaf_body
       {
          if (_children[i])
          {
-            _children[i]->countBodiesInLeaves(leaf_body_counts, max_depth, depth + 1, index + i * child_offset);
+            _children[i]->countBodiesInLeaves(leaf_body_counts, depth + 1, max_depth, index + i * child_offset);
          }
       }
    }
@@ -149,6 +169,35 @@ void WorldQuery::OctreeNode::debugBodyCounts(int32_t max_depth) const
       }
       std::cout << "\n";
    }
+}
+
+std::vector<sf::FloatRect> WorldQuery::OctreeNode::collectLeafBounds(int32_t depth, int32_t max_depth) const
+{
+   std::vector<sf::FloatRect> leaf_bounds;
+
+   if (depth == max_depth)
+   {
+      // at max depth, add the bounds of this leaf node
+      if (_is_leaf)
+      {
+         leaf_bounds.push_back(_boundaries);
+      }
+   }
+   else
+   {
+      // recurse into each child node and collect their bounds
+      for (const auto& child : _children)
+      {
+         if (child)
+         {
+            // collect bounds from child and append to the main vector
+            const auto child_boundaries = child->collectLeafBounds(depth + 1, max_depth);
+            leaf_bounds.insert(leaf_bounds.end(), child_boundaries.begin(), child_boundaries.end());
+         }
+      }
+   }
+
+   return leaf_bounds;
 }
 
 void WorldQuery::OctreeNode::subdivide(const std::shared_ptr<b2World>& world, int32_t depth, int32_t max_depth)
@@ -173,6 +222,6 @@ void WorldQuery::OctreeNode::subdivide(const std::shared_ptr<b2World>& world, in
          half_height                       // height of the child rectangle
       );
 
-      _children[i] = std::make_unique<OctreeNode>(child_bounds, world, depth, max_depth);
+      _children[i] = std::make_unique<OctreeNode>(child_bounds, world, depth, max_depth, _ignore_list);
    }
 }
