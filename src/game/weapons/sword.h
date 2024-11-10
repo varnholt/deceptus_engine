@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <vector>
 
 #include <box2d/box2d.h>
 
@@ -22,6 +23,7 @@ private:
    bool checkHitWindowActive() const;
    void checkBodyCollisions(const std::shared_ptr<b2World>& world);
    void updateHitbox();
+   void cameraShake();
 
    b2Vec2 _pos_m;
    b2Vec2 _dir_m;
@@ -35,5 +37,5 @@ private:
 
    bool _cleared_to_attack{true};
    sf::FloatRect _hit_rect_px;
-   void cameraShake();
+   std::vector<sf::FloatRect> _octree_rects;
 };

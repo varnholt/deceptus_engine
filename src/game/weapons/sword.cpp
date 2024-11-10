@@ -32,6 +32,11 @@ void Sword::draw(sf::RenderTarget& target [[maybe_unused]])
    if (DrawStates::_draw_debug_info)
    {
       DebugDraw::drawRect(target, _hit_rect_px, sf::Color{255, 0, 0});
+
+      for (auto& rect : _octree_rects)
+      {
+         DebugDraw::drawRect(target, rect, sf::Color::Cyan);
+      }
    }
 }
 
@@ -100,12 +105,19 @@ void Sword::update(const WeaponUpdateData& data)
          collided_node._node->luaHit(sword_damage);
       }
 
-      checkBodyCollisions(data._world);
+      // checkBodyCollisions(data._world);
+      //
+      // if (!collided_nodes.empty())
+      // {
+      //    cameraShake();
+      // }
 
-      if (!collided_nodes.empty())
-      {
-         cameraShake();
-      }
+      WorldQuery::OctreeNode octree(_hit_rect_px, data._world, 0, 3, {Player::getCurrent()->getBody()});
+      _octree_rects = octree.collectLeafBounds(0, 3);
+   }
+   else
+   {
+      _octree_rects.clear();
    }
 }
 
