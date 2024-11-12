@@ -5,7 +5,10 @@
 
 #include <box2d/box2d.h>
 
+#include "game/animation/animationpool.h"
 #include "weapon.h"
+
+class Animation;
 
 class Sword : public Weapon
 {
@@ -38,5 +41,8 @@ private:
    sf::FloatRect _hit_rect_px;
 
    std::vector<sf::FloatRect> _octree_rects;
-   std::vector<sf::Vector2f> _hit_positions;
+
+   AnimationPool _animation_pool{"data/sprites/weapon_animations.json"};
+   std::vector<std::shared_ptr<Animation>> _animations;
+   int32_t _attack_frame{0};
 };

@@ -19,11 +19,17 @@ using namespace std::chrono_literals;
 
 Sword::Sword() : _duration_from_swing_start_to_hit(200ms), _duration_from_hit_start_to_end(120ms)
 {
+   _animation_pool.setGarbageCollectorEnabled(true);
    _type = WeaponType::Sword;
 }
 
-void Sword::draw(sf::RenderTarget& target [[maybe_unused]])
+void Sword::draw(sf::RenderTarget& target)
 {
+   for (auto& animation : _animations)
+   {
+      animation->draw(target);
+   }
+
    if (!checkHitWindowActive())
    {
       return;
@@ -50,7 +56,10 @@ void Sword::cameraShake()
 
 void Sword::update(const WeaponUpdateData& data)
 {
-   _hit_positions.clear();
+   for (auto& animation : _animations)
+   {
+      animation->update(data._time);
+   }
 
    if (!_cleared_to_attack)
    {
@@ -69,13 +78,27 @@ void Sword::update(const WeaponUpdateData& data)
       {
          collided_node._node->luaHit(sword_damage);
 
-         const auto& rect = collided_node._hitbox;
-         _hit_positions.push_back({rect.left + rect.width * 0.5f, rect.top + rect.height * 0.5f});
-
          if (collided_node._node->_body != nullptr)
          {
             ignored_bodies.insert(collided_node._node->_body);
          }
+
+         const auto& rect = collided_node._hitbox;
+         const auto pos = sf::Vector2f{rect.left + rect.width * 0.5f, rect.top + rect.height * 0.5f};
+
+         // try avoid spamming new animations
+         if (_attack_frame == 0)
+         {
+            cameraShake();
+
+            auto animation = _animation_pool.create("impact_hit_l", pos.x, pos.y, true, true);
+            _animations.push_back(animation);
+         }
+      }
+
+      if (!collided_nodes.empty())
+      {
+         _attack_frame++;
       }
 
       // those are mostly collisions with walls
@@ -103,6 +126,7 @@ std::string Sword::getName() const
 void Sword::use(const std::shared_ptr<b2World>& world, const b2Vec2& dir)
 {
    _cleared_to_attack = true;
+   _attack_frame = 0;
    _timepoint_swing_start = StopWatch::getInstance().now();
    _dir_m = dir;
 }
