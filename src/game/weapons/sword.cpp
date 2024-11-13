@@ -13,6 +13,36 @@
 namespace
 {
 constexpr auto sword_damage = 10;
+
+std::optional<sf::Vector2f> closestCenterToPoint(const sf::Vector2f& point, const std::vector<sf::FloatRect>& rects)
+{
+   if (rects.empty())
+   {
+      return std::nullopt;
+   }
+
+   const auto get_center = [](const sf::FloatRect& rect) -> sf::Vector2f
+   { return {rect.left + rect.width / 2.0f, rect.top + rect.height / 2.0f}; };
+
+   std::optional<sf::Vector2f> closest_center;
+   auto min_distance_squared = std::numeric_limits<float>::max();
+
+   for (const auto& rect : rects)
+   {
+      const auto center = get_center(rect);
+      const auto dx = center.x - point.x;
+      const auto dy = center.y - point.y;
+      const auto distance_squared = dx * dx + dy * dy;
+
+      if (distance_squared < min_distance_squared)
+      {
+         min_distance_squared = distance_squared;
+         closest_center = center;
+      }
+   }
+
+   return closest_center;
+}
 }
 
 using namespace std::chrono_literals;
@@ -56,9 +86,18 @@ void Sword::cameraShake()
 
 void Sword::update(const WeaponUpdateData& data)
 {
-   for (auto& animation : _animations)
+   for (auto it = _animations.begin(); it != _animations.end();)
    {
-      animation->update(data._time);
+      (*it)->update(data._time);
+
+      if ((*it)->_paused && !(*it)->_looped)
+      {
+         it = _animations.erase(it);
+      }
+      else
+      {
+         ++it;
+      }
    }
 
    if (!_cleared_to_attack)
@@ -84,27 +123,45 @@ void Sword::update(const WeaponUpdateData& data)
          }
 
          const auto& rect = collided_node._hitbox;
-         const auto pos = sf::Vector2f{rect.left + rect.width * 0.5f, rect.top + rect.height * 0.5f};
+         const auto hitbox_center_pos = sf::Vector2f{rect.left + rect.width * 0.5f, rect.top + rect.height * 0.5f};
 
          // try avoid spamming new animations
          if (_attack_frame == 0)
          {
             cameraShake();
 
-            auto animation = _animation_pool.create("impact_hit_l", pos.x, pos.y, true, true);
+            auto animation = _animation_pool.create(
+               _points_left ? "impact_hit_l" : "impact_hit_r", hitbox_center_pos.x, hitbox_center_pos.y, true, false
+            );
+
             _animations.push_back(animation);
          }
-      }
-
-      if (!collided_nodes.empty())
-      {
-         _attack_frame++;
       }
 
       // those are mostly collisions with walls
       constexpr auto octree_depth{3};
       WorldQuery::OctreeNode octree(_hit_rect_px, data._world, 0, octree_depth, ignored_bodies);
       _octree_rects = octree.collectLeafBounds(0, octree_depth);
+      const auto solid_object_hit_pos = closestCenterToPoint(Player::getCurrent()->getPixelPositionFloat(), _octree_rects);
+
+      if (solid_object_hit_pos.has_value())
+      {
+         if (_attack_frame == 0)
+         {
+            cameraShake();
+
+            auto animation = _animation_pool.create(
+               _points_left ? "impact_hit_l" : "impact_hit_r", (*solid_object_hit_pos).x, (*solid_object_hit_pos).y, true, false
+            );
+
+            _animations.push_back(animation);
+         }
+      }
+
+      if (!collided_nodes.empty() || solid_object_hit_pos.has_value())
+      {
+         _attack_frame++;
+      }
    }
    else
    {
@@ -129,6 +186,7 @@ void Sword::use(const std::shared_ptr<b2World>& world, const b2Vec2& dir)
    _attack_frame = 0;
    _timepoint_swing_start = StopWatch::getInstance().now();
    _dir_m = dir;
+   _points_left = (dir.x < 0.0f);
 }
 
 bool Sword::checkHitWindowActive() const
@@ -142,15 +200,17 @@ bool Sword::checkHitWindowActive() const
 
 void Sword::updateHitbox()
 {
-   constexpr auto hitbox_width_px = 60.0f;
-   constexpr auto hitbox_height_px = 40.0f;
    auto* player = Player::getCurrent();
-   const auto center = player->getPixelPositionFloat();
    const auto crouching = player->getBend().isCrouching();
+   constexpr auto hitbox_width_px = 60.0f;
+   auto hitbox_height_px = crouching ? 20.0f : 40.0f;
+
+   const auto offset = crouching ? sf::Vector2f{0, -15} : sf::Vector2f{0, -10};
+   const auto center = player->getPixelPositionFloat();
 
    const auto hitbox_pos = sf::Vector2f{
-      center.x + 0.1f * PPM * _dir_m.x + ((_dir_m.x < 0.0f) ? -hitbox_width_px : 0.0f),
-      center.y + (crouching ? -0.1f * PPM : -0.6f * PPM),
+      offset.x + center.x + 0.1f * PPM * _dir_m.x + ((_dir_m.x < 0.0f) ? -hitbox_width_px : 0.0f),
+      offset.y + center.y + (crouching ? (-0.1f * PPM) : (-0.6f * PPM)),
    };
 
    _hit_rect_px = sf::FloatRect(hitbox_pos, sf::Vector2f(hitbox_width_px, hitbox_height_px));
