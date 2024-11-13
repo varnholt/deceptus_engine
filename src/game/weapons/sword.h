@@ -29,6 +29,7 @@ private:
 
    b2Vec2 _pos_m;
    b2Vec2 _dir_m;
+   bool _points_left{false};
 
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    using HighResDuration = std::chrono::high_resolution_clock::duration;
