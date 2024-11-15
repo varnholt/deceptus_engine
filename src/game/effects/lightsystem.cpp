@@ -5,7 +5,6 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
-#include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
@@ -13,7 +12,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
+#include <numbers>
 #include <ranges>
 
 #include <SFML/OpenGL.hpp>
@@ -28,7 +27,7 @@ LightSystem::LightSystem()
    // prepare unit circle for circle shapes
    for (auto i = 0u; i < segments; i++)
    {
-      auto angle = (2.0 * M_PI) * (i / static_cast<double>(segments));
+      auto angle = (2.0 * std::numbers::pi) * (i / static_cast<double>(segments));
 
       auto x = static_cast<float>(cos(angle));
       auto y = static_cast<float>(sin(angle));

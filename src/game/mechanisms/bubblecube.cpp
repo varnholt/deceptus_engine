@@ -338,7 +338,7 @@ void BubbleCube::updateMotorSpeed(const sf::Time& dt)
       }
 
       const auto motor_time_scaled = _motor_time_s * motor_speed_factor;
-      if (motor_time_scaled < 2.0f * M_PI)
+      if (motor_time_scaled < 2.0f * std::numbers::pi)
       {
          // when player just landed, show rotation
          _motor_speed = sin(motor_time_scaled);
