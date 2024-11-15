@@ -46,4 +46,6 @@ private:
    AnimationPool _animation_pool{"data/sprites/weapon_animations.json"};
    std::vector<std::shared_ptr<Animation>> _animations;
    int32_t _attack_frame{0};
+
+   std::vector<std::pair<sf::Vector2f, sf::Vector2f>> _rays;
 };

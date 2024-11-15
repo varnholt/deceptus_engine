@@ -102,7 +102,7 @@ DetonationAnimation::DetonationAnimation(const std::vector<DetonationAnimation::
       auto detonation_type = (ring_index == 0) ? DetonationType::Big : DetonationType::Small;
 
       auto angle = 0.0f;
-      const auto angle_increment = static_cast<float>(2.0f * std::numbers::pi) / static_cast<float>(ring._detonation_count);
+      const auto angle_increment = static_cast<float>(2.0f * std::numbers::pi_v<float>) / static_cast<float>(ring._detonation_count);
 
       for (auto i = 0; i < ring._detonation_count; i++)
       {

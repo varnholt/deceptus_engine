@@ -1,6 +1,7 @@
 #include "sword.h"
 
 #include <iostream>
+#include <numbers>
 
 #include "framework/tools/stopwatch.h"
 #include "game/constants.h"
@@ -43,6 +44,30 @@ std::optional<sf::Vector2f> closestCenterToPoint(const sf::Vector2f& point, cons
 
    return closest_center;
 }
+
+class SwordRayCastCallback : public b2RayCastCallback
+{
+public:
+   SwordRayCastCallback(const std::unordered_set<b2Body*>& ignored_bodies) : _ignored_bodies(ignored_bodies)
+   {
+   }
+
+   float ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float fraction) override
+   {
+      if (_ignored_bodies.contains(fixture->GetBody()))
+      {
+         return -1.0f;
+      }
+
+      impact_point = point;
+      impact_normal = normal;
+      return fraction;
+   }
+
+   b2Vec2 impact_point;
+   b2Vec2 impact_normal;
+   std::unordered_set<b2Body*> _ignored_bodies;
+};
 }
 
 using namespace std::chrono_literals;
@@ -73,7 +98,14 @@ void Sword::draw(sf::RenderTarget& target)
       {
          DebugDraw::drawRect(target, rect, sf::Color::Cyan);
       }
+
+      for (auto& ray : _rays)
+      {
+         DebugDraw::drawLine(target, ray.first, ray.second, b2Color(0, 1, 0, 1));
+      }
    }
+
+   _rays.clear();
 }
 
 void Sword::cameraShake()
@@ -138,27 +170,75 @@ void Sword::update(const WeaponUpdateData& data)
          }
       }
 
+      // shoot rays
+      SwordRayCastCallback raycast_callback(ignored_bodies);
+      const auto ray_position_source_px = Player::getCurrent()->getPixelPositionFloat() - sf::Vector2f(0, 24);
+      const auto ray_position_source_m = DebugDraw::vecS2B(ray_position_source_px);
+
+#ifdef SHOOT_RAYS
+      constexpr auto ray_count = 5;
+      constexpr auto sword_fov = 60.0f * FACTOR_DEG_TO_RAD;
+      constexpr auto sword_fov_half = sword_fov / 2.0f;
+      const auto base_angle = (_points_left) ? std::numbers::pi : 0;
+      const auto start_angle = base_angle - sword_fov_half;
+      const auto angle_step = sword_fov / ray_count;
+
+      for (auto i = 0; i < ray_count; ++i)
+      {
+         const auto ray_angle = start_angle + i * angle_step;
+         b2Vec2 ray_direction = b2Vec2(cos(ray_angle), sin(ray_angle));
+         b2Vec2 ray_position_target_m = DebugDraw::vecS2B(ray_position_source_px) + (72.0f * MPP) * ray_direction;
+
+         data._world->RayCast(&raycast_callback, ray_position_source_m, ray_position_target_m);
+
+         if (raycast_callback.impact_point.IsValid())
+         {
+         }
+
+         _rays.push_back({DebugDraw::vecB2S(ray_position_source_m), DebugDraw::vecB2S(ray_position_target_m)});
+      }
+#endif
+
       // those are mostly collisions with walls
       constexpr auto octree_depth{3};
       WorldQuery::OctreeNode octree(_hit_rect_px, data._world, 0, octree_depth, ignored_bodies);
       _octree_rects = octree.collectLeafBounds(0, octree_depth);
-      const auto solid_object_hit_pos = closestCenterToPoint(Player::getCurrent()->getPixelPositionFloat(), _octree_rects);
 
-      if (solid_object_hit_pos.has_value())
+      const auto player_rect_px = Player::getCurrent()->getPixelRectFloat();
+      const auto player_center_px =
+         sf::Vector2f{player_rect_px.left + player_rect_px.width / 2.0f, player_rect_px.top + player_rect_px.height / 2.0f};
+
+      auto solid_object_hit_pos_px = closestCenterToPoint(player_center_px, _octree_rects);
+
+      if (solid_object_hit_pos_px.has_value())
       {
+         // correct hit position with raycast
+         const auto solid_object_hit_pos_m = DebugDraw::vecS2B(solid_object_hit_pos_px.value());
+         const auto extended_hit_ray_m = 1.5f * (solid_object_hit_pos_m - ray_position_source_m);
+         const auto extended_hit_pos_m = solid_object_hit_pos_m + extended_hit_ray_m;
+         data._world->RayCast(&raycast_callback, ray_position_source_m, extended_hit_pos_m);
+
+         _rays.push_back({DebugDraw::vecB2S(ray_position_source_m), DebugDraw::vecB2S(extended_hit_pos_m)});
+
+         if (raycast_callback.impact_point.IsValid())
+         {
+            solid_object_hit_pos_px = DebugDraw::vecB2S(raycast_callback.impact_point);
+         }
+
+         // shake camera and draw animation at detected point
          if (_attack_frame == 0)
          {
             cameraShake();
 
             auto animation = _animation_pool.create(
-               _points_left ? "impact_hit_l" : "impact_hit_r", (*solid_object_hit_pos).x, (*solid_object_hit_pos).y, true, false
+               _points_left ? "impact_hit_l" : "impact_hit_r", (*solid_object_hit_pos_px).x, (*solid_object_hit_pos_px).y, true, false
             );
 
             _animations.push_back(animation);
          }
       }
 
-      if (!collided_nodes.empty() || solid_object_hit_pos.has_value())
+      if (!collided_nodes.empty() || solid_object_hit_pos_px.has_value())
       {
          _attack_frame++;
       }
