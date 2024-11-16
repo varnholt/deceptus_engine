@@ -1,8 +1,11 @@
 #include "game/physics/worldquery.h"
+
 #include <iostream>
 #include <memory>
 #include <ranges>
 #include <vector>
+
+#include "game/level/fixturenode.h"
 #include "game/level/luainterface.h"
 
 b2Vec2 vecS2B(const sf::Vector2f& vector)
@@ -46,7 +49,7 @@ bool WorldQuery::BodyQueryCallback::ReportFixture(b2Fixture* fixture)
    return true;
 }
 
-std::vector<WorldQuery::CollidedNode> WorldQuery::findNodes(const sf::FloatRect& search_rect)
+std::vector<WorldQuery::CollidedNode> WorldQuery::findNodesByHitbox(const sf::FloatRect& search_rect)
 {
    const auto& nodes = LuaInterface::instance().getObjectList();
 
@@ -66,7 +69,7 @@ std::vector<WorldQuery::CollidedNode> WorldQuery::findNodes(const sf::FloatRect&
    return hit_nodes;
 }
 
-std::vector<WorldQuery::CollidedNode> WorldQuery::findNodes(const std::vector<sf::FloatRect>& attack_rects)
+std::vector<WorldQuery::CollidedNode> WorldQuery::findNodesByHitbox(const std::vector<sf::FloatRect>& attack_rects)
 {
    const auto& nodes = LuaInterface::instance().getObjectList();
 
@@ -109,6 +112,37 @@ std::vector<b2Body*> WorldQuery::retrieveBodiesInsideRect(
    aabb.lowerBound = vecS2B({std::min(l, r), std::min(b, t)});
 
    return WorldQuery::queryBodies(world, aabb, ignore_list);
+}
+
+std::vector<b2Body*> WorldQuery::retrieveEnemyBodiesInsideRect(
+   const std::shared_ptr<b2World>& world,
+   const sf::FloatRect& rect,
+   const std::unordered_set<b2Body*>& ignore_list
+)
+{
+   // retrieve all bodies inside the rectangle
+   auto all_bodies = WorldQuery::retrieveBodiesInsideRect(world, rect, ignore_list);
+
+   // filter bodies of type ObjectTypeEnemy
+   auto filtered_bodies = all_bodies | std::views::filter(
+                                          [](b2Body* body)
+                                          {
+                                             for (auto fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+                                             {
+                                                auto user_data = fixture->GetUserData().pointer;
+                                                if (!user_data)
+                                                   continue;
+
+                                                auto fixture_node = static_cast<FixtureNode*>(user_data);
+                                                if (fixture_node->getType() == ObjectTypeEnemy)
+                                                   return true;  // found at least one enemy fixture
+                                             }
+                                             return false;  // no enemy fixtures found
+                                          }
+                                       );
+
+   // convert the view to a vector
+   return std::vector<b2Body*>{filtered_bodies.begin(), filtered_bodies.end()};
 }
 
 WorldQuery::OctreeNode::OctreeNode(

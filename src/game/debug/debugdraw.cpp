@@ -384,7 +384,7 @@ void DebugDraw::debugHitboxes(sf::RenderTarget& target)
    using namespace std::chrono_literals;
 
    const auto screen = getScreenRect(target);
-   const auto collided_nodes = WorldQuery::findNodes(screen);
+   const auto collided_nodes = WorldQuery::findNodesByHitbox(screen);
 
    const auto now = std::chrono::high_resolution_clock::now();
 
