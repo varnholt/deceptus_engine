@@ -72,7 +72,13 @@ std::vector<b2Body*> retrieveBodiesInsideRect(
    const std::unordered_set<b2Body*>& ignore_list = {}
 );
 
-std::vector<WorldQuery::CollidedNode> findNodes(const sf::FloatRect& attack_rect);
-std::vector<WorldQuery::CollidedNode> findNodes(const std::vector<sf::FloatRect>& attack_rects);
+std::vector<b2Body*> retrieveEnemyBodiesInsideRect(
+   const std::shared_ptr<b2World>& world,
+   const sf::FloatRect& rect,
+   const std::unordered_set<b2Body*>& ignore_list
+);
+
+std::vector<WorldQuery::CollidedNode> findNodesByHitbox(const sf::FloatRect& attack_rect);
+std::vector<WorldQuery::CollidedNode> findNodesByHitbox(const std::vector<sf::FloatRect>& attack_rects);
 
 }  // namespace WorldQuery
