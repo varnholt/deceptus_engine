@@ -125,6 +125,7 @@ void PhysicsConfigurationUi::draw()
       drawFloatElement("deceleration ground", &config._player_deceleration_ground, 0.01f, 1.0f);
       drawFloatElement("acceleration air", &config._player_acceleration_air, 0.01f, 1.0f);
       drawFloatElement("deceleration air", &config._player_deceleration_air, 0.01f, 1.0f);
+      drawFloatElement("deceleration sword attack", &config._player_deceleration_sword_attack, 0.5f, 1.0f);
       drawFloatElement("acceleration water", &config._player_acceleration_water, 0.01f, 1.0f);
       drawFloatElement("deceleration water", &config._player_deceleration_water, 0.01f, 1.0f);
       drawFloatElement("cap velocity horizontal", &config._player_max_velocity_horizontal, 0.1f, 30.0f);

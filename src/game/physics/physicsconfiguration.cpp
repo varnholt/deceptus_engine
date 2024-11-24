@@ -30,7 +30,7 @@ std::string PhysicsConfiguration::serialize()
           {"player_acceleration_air", _player_acceleration_air},
           {"player_deceleration_air", _player_deceleration_air},
           {"player_acceleration_water", _player_acceleration_water},
-          {"player_deceleration_water", _player_deceleration_water},
+          {"player_deceleration_sword_attack", _player_deceleration_sword_attack},
 
           {"player_max_velocity_horizontal", _player_max_velocity_horizontal},
           {"player_max_velocity_up", _player_max_velocity_up},
@@ -121,6 +121,7 @@ void PhysicsConfiguration::deserialize(const std::string& data)
 
    get_value_if_exists(physics_config, "player_deceleration_ground", _player_deceleration_ground);
    get_value_if_exists(physics_config, "player_deceleration_air", _player_deceleration_air);
+   get_value_if_exists(physics_config, "player_deceleration_sword_attack", _player_deceleration_sword_attack);
 
    get_value_if_exists(physics_config, "player_max_velocity_horizontal", _player_max_velocity_horizontal);
    get_value_if_exists(physics_config, "player_max_velocity_up", _player_max_velocity_up);
