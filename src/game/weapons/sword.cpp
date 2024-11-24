@@ -114,29 +114,8 @@ void Sword::cameraShake()
    Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 0.5f, BoomSettings::ShakeType::Random});
 }
 
-void Sword::update(const WeaponUpdateData& data)
+void Sword::updateImpact(const WeaponUpdateData& data)
 {
-   _rays.clear();
-
-   for (auto it = _animations.begin(); it != _animations.end();)
-   {
-      (*it)->update(data._time);
-
-      if ((*it)->_paused && !(*it)->_looped)
-      {
-         it = _animations.erase(it);
-      }
-      else
-      {
-         ++it;
-      }
-   }
-
-   if (!_cleared_to_attack)
-   {
-      return;
-   }
-
    if (checkHitWindowActive())
    {
       _cleared_to_attack = false;
@@ -224,6 +203,35 @@ void Sword::update(const WeaponUpdateData& data)
    else
    {
       _octree_rects.clear();
+   }
+}
+
+void Sword::updateAnimations(const WeaponUpdateData& data)
+{
+   for (auto it = _animations.begin(); it != _animations.end();)
+   {
+      (*it)->update(data._time);
+
+      if ((*it)->_paused && !(*it)->_looped)
+      {
+         it = _animations.erase(it);
+      }
+      else
+      {
+         ++it;
+      }
+   }
+}
+
+void Sword::update(const WeaponUpdateData& data)
+{
+   _rays.clear();
+
+   updateAnimations(data);
+
+   if (_cleared_to_attack)
+   {
+      updateImpact(data);
    }
 }
 

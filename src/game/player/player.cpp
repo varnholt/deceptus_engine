@@ -936,7 +936,8 @@ void Player::updateVelocity()
 
    if (_player_animation->isStandingSwordAttackPlayed())
    {
-      _body->SetLinearVelocity({0.0, 0.0});
+      const auto& vel = _body->GetLinearVelocity();
+      _body->SetLinearVelocity({vel.x * PhysicsConfiguration::getInstance()._player_deceleration_sword_attack, vel.y});
       return;
    }
 

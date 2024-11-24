@@ -22,6 +22,7 @@ struct PhysicsConfiguration
    float _player_deceleration_ground = 0.6f;
    float _player_deceleration_air = 0.65f;
    float _player_deceleration_water = 0.95f;
+   float _player_deceleration_sword_attack = 0.95;
    float _player_max_velocity_horizontal = 10.0f;
    float _player_max_velocity_up = 5.0f;
    float _player_max_velocity_down = 10.0f;
