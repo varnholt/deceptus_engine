@@ -24,6 +24,8 @@ public:
 
 private:
    bool checkHitWindowActive() const;
+   void updateAnimations(const WeaponUpdateData& data);
+   void updateImpact(const WeaponUpdateData& data);
    void updateHitbox();
    void cameraShake();
 
