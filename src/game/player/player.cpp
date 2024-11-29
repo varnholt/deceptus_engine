@@ -35,6 +35,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
+#include <limits>
 
 namespace
 {
@@ -979,15 +980,13 @@ void Player::updateVelocity()
    }
 
    // we need friction to walk up diagonales
+   if (isOnGround() && fabs(_ground_normal.x) > 0.05f)
    {
-      if (isOnGround() && fabs(_ground_normal.x) > 0.05f)
-      {
-         setFriction(2.0f);
-      }
-      else
-      {
-         setFriction(0.0f);
-      }
+      setFriction(2.0f);
+   }
+   else
+   {
+      setFriction(0.0f);
    }
 
    auto desired_velocity = readDesiredVelocity();
@@ -1291,8 +1290,29 @@ void Player::updateAttack()
    // require a fresh button press each time the sword should be swung
    if (_attack._attack_button_pressed)
    {
-      _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
+      const auto result = _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
+
+      // sword attack is combined with a small impulse move forward
+      auto uses_sword = []()
+      {
+         const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+         if (weapon_system._selected)
+         {
+            return weapon_system._selected->getWeaponType() == WeaponType::Sword;
+         }
+         return false;
+      };
+
+      if (result == PlayerAttack::AttackResult::Executed && uses_sword())
+      {
+         _attack_dash.reset({_points_to_left ? Dash::Left : Dash::Right, _body});
+      }
    }
+}
+
+void Player::updateAttackDash(const sf::Time& dt)
+{
+   _attack_dash.update(dt);
 }
 
 bool Player::isInWater() const
@@ -1593,6 +1613,7 @@ void Player::update(const sf::Time& dt)
    updatePixelCollisions();
    updateAtmosphere();
    updateAttack();
+   updateAttackDash(dt);
    updateVelocity();
    updateOrientation();
    updateOneWayWallDrop();

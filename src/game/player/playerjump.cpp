@@ -399,7 +399,8 @@ void PlayerJump::updateWallJump()
 
    const auto& physics = PhysicsConfiguration::getInstance();
 
-   _walljump_multiplier *= physics._player_wall_jump_multiplier_scale_per_frame;
+   _walljump_multiplier *=
+      physics._player_wall_jump_multiplier_scale_per_frame;  // seems wrong if this is per frame, should not be applied to member
    _walljump_multiplier += physics._player_wall_jump_multiplier_increment_per_frame;
 
    _body->ApplyForceToCenter(_walljump_multiplier * _walljump_direction, true);

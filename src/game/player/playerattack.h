@@ -21,7 +21,13 @@ struct PlayerAttack
    HighResTimePoint _timepoint_attack_standing_start;
    HighResTimePoint _timepoint_attack_jumping_start;
 
-   void attack(
+   enum class AttackResult
+   {
+      Executed,
+      Discarded
+   };
+
+   AttackResult attack(
       const std::shared_ptr<b2World>& world,
       const std::shared_ptr<PlayerControls>& controls,
       const std::shared_ptr<PlayerAnimation>& animation,
