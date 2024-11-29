@@ -10,10 +10,13 @@
 
 class Animation;
 
-class Sword : public Weapon
+///
+/// \brief The PlayerSword class implements a sword for the player, and is meant to only be passed to the player instance
+///
+class PlayerSword : public Weapon
 {
 public:
-   Sword();
+   PlayerSword();
 
    void draw(sf::RenderTarget& target) override;
    void update(const WeaponUpdateData& data) override;
@@ -27,11 +30,13 @@ private:
    void updateAnimations(const WeaponUpdateData& data);
    void updateImpact(const WeaponUpdateData& data);
    void updateHitbox();
+   void updateAttackDash(const sf::Time& dt);
    void cameraShake();
 
    b2Vec2 _pos_m;
    b2Vec2 _dir_m;
    bool _points_left{false};
+
 
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    using HighResDuration = std::chrono::high_resolution_clock::duration;

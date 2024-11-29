@@ -7,6 +7,7 @@
 #include "game/level/gamenode.h"
 #include "game/player/playeranimation.h"
 #include "game/player/playerattack.h"
+#include "game/player/playerattackdash.h"
 #include "game/player/playerbelt.h"
 #include "game/player/playerbend.h"
 #include "game/player/playerclimb.h"
@@ -25,7 +26,6 @@
 #include <deque>
 #include <functional>
 #include <memory>
-#include <set>
 
 class Animation;
 class GameContactListener;
@@ -133,6 +133,7 @@ private:
    void updateBendDown();
    void updateDash(Dash dir = Dash::None);
    void updateAttack();
+   void updateAttackDash(const sf::Time& dt);
    void updateFootsteps();
    void updateGroundAngle();
    void updateHardLanding();
@@ -223,14 +224,15 @@ private:
    HighResTimePoint _timepoint_hard_landing;
 
    std::shared_ptr<PlayerControls> _controls;
+   PlayerAttack _attack;
+   PlayerAttackDash _attack_dash;
+   PlayerBelt _belt;
    PlayerBend _bend;
    PlayerClimb _climb;
-   PlayerPlatform _platform;
-   PlayerJump _jump;
    PlayerDash _dash;
-   PlayerAttack _attack;
-   PlayerBelt _belt;
+   PlayerJump _jump;
    PlayerJumpTrace _jump_trace;
+   PlayerPlatform _platform;
    WaterBubbles _water_bubbles;
 
    std::shared_ptr<PlayerAnimation> _player_animation;

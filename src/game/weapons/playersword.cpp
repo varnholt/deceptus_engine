@@ -1,4 +1,4 @@
-#include "sword.h"
+#include "playersword.h"
 
 #include <iostream>
 #include <numbers>
@@ -7,7 +7,6 @@
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
 #include "game/debug/drawstates.h"
-#include "game/level/fixturenode.h"
 #include "game/physics/worldquery.h"
 #include "game/player/player.h"
 
@@ -72,13 +71,13 @@ public:
 
 using namespace std::chrono_literals;
 
-Sword::Sword() : _duration_from_swing_start_to_hit(200ms), _duration_from_hit_start_to_end(120ms)
+PlayerSword::PlayerSword() : _duration_from_swing_start_to_hit(200ms), _duration_from_hit_start_to_end(120ms)
 {
    _animation_pool.setGarbageCollectorEnabled(true);
    _type = WeaponType::Sword;
 }
 
-void Sword::draw(sf::RenderTarget& target)
+void PlayerSword::draw(sf::RenderTarget& target)
 {
    for (auto& animation : _animations)
    {
@@ -106,7 +105,7 @@ void Sword::draw(sf::RenderTarget& target)
    }
 }
 
-void Sword::cameraShake()
+void PlayerSword::cameraShake()
 {
    const auto x = 0.05f;
    const auto y = 0.3f;
@@ -114,7 +113,7 @@ void Sword::cameraShake()
    Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 0.5f, BoomSettings::ShakeType::Random});
 }
 
-void Sword::updateImpact(const WeaponUpdateData& data)
+void PlayerSword::updateImpact(const WeaponUpdateData& data)
 {
    if (checkHitWindowActive())
    {
@@ -206,7 +205,7 @@ void Sword::updateImpact(const WeaponUpdateData& data)
    }
 }
 
-void Sword::updateAnimations(const WeaponUpdateData& data)
+void PlayerSword::updateAnimations(const WeaponUpdateData& data)
 {
    for (auto it = _animations.begin(); it != _animations.end();)
    {
@@ -223,7 +222,7 @@ void Sword::updateAnimations(const WeaponUpdateData& data)
    }
 }
 
-void Sword::update(const WeaponUpdateData& data)
+void PlayerSword::update(const WeaponUpdateData& data)
 {
    _rays.clear();
 
@@ -235,18 +234,17 @@ void Sword::update(const WeaponUpdateData& data)
    }
 }
 
-int32_t Sword::getDamage() const
+int32_t PlayerSword::getDamage() const
 {
    return 20;
 }
 
-std::string Sword::getName() const
+std::string PlayerSword::getName() const
 {
    return "sword";
 }
 
-
-void Sword::use(const std::shared_ptr<b2World>& world, const b2Vec2& dir)
+void PlayerSword::use(const std::shared_ptr<b2World>& world, const b2Vec2& dir)
 {
    _cleared_to_attack = true;
    _attack_frame = 0;
@@ -255,7 +253,7 @@ void Sword::use(const std::shared_ptr<b2World>& world, const b2Vec2& dir)
    _points_left = (dir.x < 0.0f);
 }
 
-bool Sword::checkHitWindowActive() const
+bool PlayerSword::checkHitWindowActive() const
 {
    const auto now = StopWatch::getInstance().now();
    const auto start = _timepoint_swing_start + _duration_from_swing_start_to_hit;
@@ -264,7 +262,7 @@ bool Sword::checkHitWindowActive() const
    return within_active_time_window;
 }
 
-void Sword::updateHitbox()
+void PlayerSword::updateHitbox()
 {
    auto* player = Player::getCurrent();
    const auto crouching = player->getBend().isCrouching();
