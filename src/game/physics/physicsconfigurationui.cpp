@@ -158,6 +158,14 @@ void PhysicsConfigurationUi::draw()
       drawFloatElement("minimum jump interval [ms]", &config._player_minimum_jump_interval_ms, 100.0f, 200.0f);
    }
 
+   if (ImGui::CollapsingHeader("player attack dash", header_flags))
+   {
+      drawIntElement("attack dash frame count", &config._player_attack_dash_frame_count, 1, 100);
+      drawFloatElement("attack dash multiplier", &config._player_attack_dash_multiplier, 1.0f, 100.0f);
+      drawFloatElement("attack dash multiplier dec. per frame", &config._player_attack_dash_multiplier_decrement_per_frame, 0.1f, 10.0f);
+      drawFloatElement("attack dash multiplier scale per frame", &config._player_attack_dash_multiplier_scale_per_frame, 0.1f, 5.0f);
+   }
+
    if (ImGui::CollapsingHeader("player dash", header_flags))
    {
       drawIntElement("dash frame count", &config._player_dash_frame_count, 1, 100);

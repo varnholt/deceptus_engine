@@ -45,6 +45,11 @@ std::string PhysicsConfiguration::serialize()
           {"player_jump_falloff", _player_jump_falloff},
           {"player_jump_speed_factor", _player_jump_speed_factor},
 
+          {"player_attack_dash_frame_count", _player_attack_dash_frame_count},
+          {"player_attack_dash_multiplier", _player_attack_dash_multiplier},
+          {"player_attack_dash_multiplier_decrement_per_frame", _player_attack_dash_multiplier_decrement_per_frame},
+          {"player_attack_dash_multiplier_scale_per_frame", _player_attack_dash_multiplier_scale_per_frame},
+
           {"player_dash_frame_count", _player_dash_frame_count},
           {"player_dash_multiplier", _player_dash_multiplier},
           {"player_dash_multiplier_increment_per_frame", _player_dash_multiplier_increment_per_frame},
@@ -136,6 +141,13 @@ void PhysicsConfiguration::deserialize(const std::string& data)
    get_value_if_exists(physics_config, "player_jump_minimal_duration_in_ms", _player_jump_minimal_duration_ms);
    get_value_if_exists(physics_config, "player_jump_falloff", _player_jump_falloff);
    get_value_if_exists(physics_config, "player_jump_speed_factor", _player_jump_speed_factor);
+
+   get_value_if_exists(physics_config, "player_attack_dash_frame_count", _player_attack_dash_frame_count);
+   get_value_if_exists(physics_config, "player_attack_dash_multiplier", _player_attack_dash_multiplier);
+   get_value_if_exists(
+      physics_config, "player_attack_dash_multiplier_decrement_per_frame", _player_attack_dash_multiplier_decrement_per_frame
+   );
+   get_value_if_exists(physics_config, "player_attack_dash_multiplier_scale_per_frame", _player_attack_dash_multiplier_scale_per_frame);
 
    get_value_if_exists(physics_config, "player_dash_frame_count", _player_dash_frame_count);
    get_value_if_exists(physics_config, "player_dash_multiplier", _player_dash_multiplier);

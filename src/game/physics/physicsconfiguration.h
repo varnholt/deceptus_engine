@@ -78,6 +78,12 @@ struct PhysicsConfiguration
    float _gravity_scale_water = 0.5f;           // not in json
    float _gravity_scale_jump_downward = 1.35f;  // not in json
 
+   // sword attack
+   int32_t _player_attack_dash_frame_count = 5;
+   float _player_attack_dash_multiplier = 5.0f;
+   float _player_attack_dash_multiplier_decrement_per_frame = 1.0f;
+   float _player_attack_dash_multiplier_scale_per_frame = 1.0f;
+
    void deserializeFromFile(const std::string& filename = "data/config/physics.json");
    void serializeToFile(const std::string& filename = "data/config/physics.json");
 

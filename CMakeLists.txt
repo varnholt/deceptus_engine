@@ -228,7 +228,7 @@ set(GAME_FILES
     src/game/player/skill.cpp src/game/player/skill.h
     src/game/physics/squaremarcher.cpp src/game/physics/squaremarcher.h
     src/game/level/stenciltilemap.cpp src/game/level/stenciltilemap.h
-    src/game/weapons/sword.cpp src/game/weapons/sword.h
+    src/game/weapons/playersword.cpp src/game/weapons/playersword.h
     src/game/tests/test.cpp src/game/tests/test.h
     src/game/io/texturepool.cpp src/game/io/texturepool.h
     src/game/level/tilemap.cpp src/game/level/tilemap.h
@@ -399,6 +399,7 @@ add_executable(deceptus ${GAME_FILES}
    doc/level_design/advanced_topics.md doc/level_design/designing_a_level.md doc/level_design/enemies.md doc/level_design/mechanisms.md doc/level_design/visual_effects.md
    doc/lua_interface/readme.md
    src/game/ui/richtextparser.h src/game/ui/richtextparser.cpp
+   src/game/player/playerattackdash.h src/game/player/playerattackdash.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
