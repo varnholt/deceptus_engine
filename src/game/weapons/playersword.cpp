@@ -266,15 +266,16 @@ void PlayerSword::updateHitbox()
 {
    auto* player = Player::getCurrent();
    const auto crouching = player->getBend().isCrouching();
-   constexpr auto hitbox_width_px = 60.0f;
-   auto hitbox_height_px = crouching ? 20.0f : 40.0f;
 
-   const auto offset = crouching ? sf::Vector2f{0, -15} : sf::Vector2f{0, -10};
-   const auto center = player->getPixelPositionFloat();
+   const auto hitbox_width_px = crouching ? 40.0f : 60.0f;
+   const auto hitbox_height_px = crouching ? 20.0f : 40.0f;
+
+   const auto offset_px = crouching ? sf::Vector2f{0, -15} : sf::Vector2f{0, -10};
+   const auto center_px = player->getPixelPositionFloat();
 
    const auto hitbox_pos = sf::Vector2f{
-      offset.x + center.x + 0.1f * PPM * _dir_m.x + ((_dir_m.x < 0.0f) ? -hitbox_width_px : 0.0f),
-      offset.y + center.y + (crouching ? (-0.1f * PPM) : (-0.6f * PPM)),
+      offset_px.x + center_px.x + 0.1f * PPM * _dir_m.x + ((_dir_m.x < 0.0f) ? -hitbox_width_px : 0.0f),
+      offset_px.y + center_px.y + (crouching ? (-0.1f * PPM) : (-0.6f * PPM)),
    };
 
    _hit_rect_px = sf::FloatRect(hitbox_pos, sf::Vector2f(hitbox_width_px, hitbox_height_px));
