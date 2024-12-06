@@ -403,10 +403,28 @@ Anyway, you should select a 'good' grid size (32x32 is good in most cases) that 
 ![](images/packtexture.png)
 
 
-### Last step: Copy AO tiles and UV map to your level
+### Last step: Add AO tiles and UV map to your level
 
-The last step is just to copy the `<level_name>_ao_tiles.png` and `<level_name>_ao_tiles.uv` to your level directory.
+Now copy the `<level_name>_ao_tiles.png` and `<level_name>_ao_tiles.uv` to your level directory.
 
+Then create a JSON file `ambient_occlusion.json` with the properties below:
+
+|Property|Type|Description|
+|-|-|-|
+|`texture_filename`|`string`|Filename of the texture|
+|`uv_filename`|`string`|Filename of the UV file|
+|`z_index`|`int`|The z index of the layer, the default is the player's z depth.|
+|`offset_x_px`|`int`|Layer offset in x in px, default is 0.|
+|`offset_y_px`|`int`|Layer offset in y in px, default is 0.|
+
+Here's an example:
+```json
+{
+  "texture_filename": "level_ao_tiles.png",
+  "uv_filename": "level_ao_tiles.uv",
+  "z_index": 16
+}
+```
 
 ### Gosh, I wanna automate all this!
 
