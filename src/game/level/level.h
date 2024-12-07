@@ -4,6 +4,7 @@
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "game/audio/volumeupdater.h"
 #include "game/camera/camerasystem.h"
+#include "game/camera/camerazoom.h"
 #include "game/constants.h"
 #include "game/effects/boomeffect.h"
 #include "game/effects/lightsystem.h"
@@ -68,6 +69,10 @@ public:
    void updateViews();
    void updateMechanismVolumes();
    void updateCameraSystem(const sf::Time& dt);
+
+   void zoomIn();
+   void zoomOut();
+   void zoomReset();
 
    void spawnEnemies();
 
@@ -166,6 +171,7 @@ protected:
    std::map<std::string, int32_t> _screenshot_counters;
    float _view_width = 0.0f;
    float _view_height = 0.0f;
+   float _zoom_factor = 1.0f;
 
    std::shared_ptr<LevelDescription> _description;
    std::string _description_filename;
