@@ -1,6 +1,7 @@
 #include "levelscript.h"
 
 #include "framework/tools/log.h"
+#include "game/camera/camerazoom.h"
 #include "game/level/luaconstants.h"
 #include "game/level/luainterface.h"
 #include "game/level/luanode.h"
@@ -390,6 +391,26 @@ int32_t lockPlayerControls(lua_State* state)
    return 0;
 }
 
+/**
+ * @brief setZoomFactor sets the zoom factor for the camera
+ * @param state lua state
+ *    param 1: zoom factor
+ * @return error code
+ */
+int32_t setZoomFactor(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto zoom_factor = static_cast<float>(lua_tonumber(state, 1));
+   getInstance()->setZoomFactor(zoom_factor);
+
+   return 0;
+}
+
 [[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
 {
    // the error message is on top of the stack.
@@ -479,6 +500,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setLuaNodeActive", ::setLuaNodeActive);
    lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
    lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
+   lua_register(_lua_state, "setZoomFactor", ::setZoomFactor);
    lua_register(_lua_state, "showDialogue", ::showDialogue);
    lua_register(_lua_state, "toggle", ::toggle);
    lua_register(_lua_state, "writeLuaNodeProperty", ::writeLuaNodeProperty);
@@ -775,6 +797,11 @@ void LevelScript::addPlayerHealth(int32_t health_points_to_add)
 void LevelScript::addPlayerHealthMax(int32_t health_points_to_add)
 {
    SaveState::getPlayerInfo()._extra_table._health._health_max += health_points_to_add;
+}
+
+void LevelScript::setZoomFactor(float zoom_factor)
+{
+   CameraZoom::getInstance().setZoomFactor(zoom_factor);
 }
 
 namespace

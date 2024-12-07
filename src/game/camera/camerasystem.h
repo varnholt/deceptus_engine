@@ -60,6 +60,4 @@ private:
 
    bool _no_y_update_triggered = false;
    sf::Time _y_update_start_time;
-
-   static CameraSystem sInstance;
 };
