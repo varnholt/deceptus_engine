@@ -774,7 +774,10 @@ void Level::updateViews()
    const auto& camera_system = CameraSystem::getInstance();
    const auto level_view_x = camera_system.getX() + look_vector.x;
    const auto level_view_y = camera_system.getY() + look_vector.y;
-   const auto view_rect = sf::FloatRect{level_view_x, level_view_y, _view_width, _view_height};
+
+   auto& zoom = CameraZoom::getInstance();
+   auto view_rect = sf::FloatRect{level_view_x, level_view_y, _view_width, _view_height};
+   zoom.adjust(view_rect);
 
    CameraRoomLock::setViewRect(view_rect);
 
@@ -782,12 +785,12 @@ void Level::updateViews()
 
    for (const auto& parallax : _parallax_layers)
    {
-      parallax->updateView(level_view_x, level_view_y, _view_width, _view_height);
+      parallax->updateView(view_rect.left, view_rect.top, view_rect.width, view_rect.height);
    }
 
    for (const auto& image_layer : _image_layers)
    {
-      image_layer->updateView(level_view_x, level_view_y, _view_width, _view_height);
+      image_layer->updateView(view_rect.left, view_rect.top, view_rect.width, view_rect.height);
    }
 }
 
@@ -863,6 +866,26 @@ void Level::updateCameraSystem(const sf::Time& dt)
    }
 
    RoomUpdater::setSynced(true);
+
+   CameraZoom::getInstance().update(dt);
+}
+
+void Level::zoomIn()
+{
+   auto& zoom = CameraZoom::getInstance();
+   zoom.setZoomFactor(zoom.getZoomFactor() * 0.95);
+}
+
+void Level::zoomOut()
+{
+   auto& zoom = CameraZoom::getInstance();
+   zoom.setZoomFactor(zoom.getZoomFactor() * 1.05);
+}
+
+void Level::zoomReset()
+{
+   auto& zoom = CameraZoom::getInstance();
+   zoom.setZoomFactor(1.0f);
 }
 
 void Level::drawLightMap()

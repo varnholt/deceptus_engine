@@ -38,6 +38,7 @@ public:
    void setLuaNodeActive(const std::string& search_pattern, bool active);
    void showDialogue(const std::string& search_pattern);
    void lockPlayerControls(const std::chrono::milliseconds& duration);
+   void setZoomFactor(float zoom_factor);
 
    // functions on the lua end
    void luaInitialize();

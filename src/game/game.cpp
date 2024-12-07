@@ -1050,6 +1050,21 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          _player->setVisible(!_player->getVisible());
          break;
       }
+      case sf::Keyboard::Num1:
+      {
+         Level::getCurrentLevel()->zoomIn();
+         break;
+      }
+      case sf::Keyboard::Num2:
+      {
+         Level::getCurrentLevel()->zoomOut();
+         break;
+      }
+      case sf::Keyboard::Num3:
+      {
+         Level::getCurrentLevel()->zoomReset();
+         break;
+      }
 #endif
 
       default:
