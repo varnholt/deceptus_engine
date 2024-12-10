@@ -142,7 +142,6 @@ void Physics::parse(
    }
 }
 
-//-----------------------------------------------------------------------------
 bool Physics::dumpObj(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset, const std::filesystem::path& path)
 {
    if (!tileset)
