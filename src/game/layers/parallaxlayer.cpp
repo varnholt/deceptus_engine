@@ -3,7 +3,6 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 
-//-----------------------------------------------------------------------------
 void ParallaxLayer::updateView(float level_view_x, float level_view_y, float view_width, float view_height)
 {
    _view.reset(sf::FloatRect(
@@ -14,14 +13,12 @@ void ParallaxLayer::updateView(float level_view_x, float level_view_y, float vie
    ));
 }
 
-//-----------------------------------------------------------------------------
 void ParallaxLayer::resetView(float view_width, float view_height)
 {
    _view.reset(sf::FloatRect(0.0f, 0.0f, view_width, view_height));
    _view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
 }
 
-//-----------------------------------------------------------------------------
 std::unique_ptr<ParallaxLayer> ParallaxLayer::deserialize(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TileMap>& tile_map)
 {
    if (!layer->_properties)

@@ -34,13 +34,11 @@ std::vector<std::array<int32_t, 9>> __tiles_version_1;
 std::vector<std::array<int32_t, 9>> __tiles_version_2;
 }  // namespace
 
-//-----------------------------------------------------------------------------
 Laser::Laser(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Laser).name());
 }
 
-//-----------------------------------------------------------------------------
 void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    _sprite.setTextureRect(
@@ -50,19 +48,16 @@ void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    color.draw(_sprite);
 }
 
-//-----------------------------------------------------------------------------
 void Laser::setEnabled(bool enabled)
 {
    GameMechanism::setEnabled(enabled);
 }
 
-//-----------------------------------------------------------------------------
 const sf::FloatRect& Laser::getPixelRect() const
 {
    return _pixel_rect;
 }
 
-//-----------------------------------------------------------------------------
 void Laser::update(const sf::Time& dt)
 {
    _time += dt.asMilliseconds();
@@ -201,7 +196,6 @@ std::optional<sf::FloatRect> Laser::getBoundingBoxPx()
    return _pixel_rect;
 }
 
-//-----------------------------------------------------------------------------
 void Laser::reset()
 {
    _on = true;
@@ -211,7 +205,6 @@ void Laser::reset()
    _time = 0u;
 }
 
-//-----------------------------------------------------------------------------
 void Laser::resetAll()
 {
    __objects.clear();
@@ -220,19 +213,16 @@ void Laser::resetAll()
    __tiles_version_2.clear();
 }
 
-//-----------------------------------------------------------------------------
 const sf::Vector2f& Laser::getTilePosition() const
 {
    return _tile_position;
 }
 
-//-----------------------------------------------------------------------------
 const sf::Vector2f& Laser::getPixelPosition() const
 {
    return _position_px;
 }
 
-//-----------------------------------------------------------------------------
 std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const GameDeserializeData& data)
 {
    const auto version = (data._tmx_layer->_name == "lasers") ? MechanismVersion::Version1 : MechanismVersion::Version2;
