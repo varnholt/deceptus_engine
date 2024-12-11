@@ -1750,8 +1750,13 @@ void Player::die()
 {
    _dead = true;
    Audio::getInstance().playSample({"death.wav"});
-   SaveState::getPlayerInfo()._stats._death_count_overall++;
-   SaveState::getPlayerInfo()._stats._death_count_current_level++;
+
+   auto& stats = SaveState::getPlayerInfo()._stats;
+   stats._death_count_overall++;
+   stats._death_count_current_level++;
+
+   // need to write the stats to JSON now because they will be re-loaded when the player restarts at the last checkpoint
+   SaveState::getCurrent().updatePlayerStatsToFile();
 }
 
 void Player::reset()
