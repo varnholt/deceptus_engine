@@ -146,3 +146,32 @@ void from_json(const nlohmann::json& j, SaveState& data)
       data._level_state = j.at("levelstate");
    }
 }
+
+void SaveState::updatePlayerStatsToFile(const std::string& filename) const
+{
+   // open the file and read its current contents
+   std::ifstream input_file(filename);
+   if (!input_file.is_open())
+   {
+      Log::Error() << "could not open file for reading: " + filename;
+      return;
+   }
+
+   nlohmann::json save_states_json;
+   input_file >> save_states_json;
+   input_file.close();
+
+   // update only the stats field in the current SaveState's playerinfo
+   save_states_json[__slot]["playerinfo"]["stats"] = _player_info._stats;
+
+   // write updated JSON back to file
+   std::ofstream output_file(filename);
+   if (!output_file.is_open())
+   {
+      Log::Error() << "could not open file for writing: " + filename;
+      return;
+   }
+
+   output_file << save_states_json.dump(4);
+   output_file.close();
+}
