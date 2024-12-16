@@ -230,11 +230,9 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _sword_attack_standing_tmp_l = _sword_attack_standing_l[0];
    _sword_attack_standing_tmp_r = _sword_attack_standing_r[0];
 
-   // we don't want these to jump back to the first frame
+   // we don't want these to jump back to the first frame (only needed for the unmapped animations)
    _appear_r->_reset_to_first_frame = false;
    _appear_l->_reset_to_first_frame = false;
-   _sword_appear_r->_reset_to_first_frame = false;
-   _sword_appear_l->_reset_to_first_frame = false;
 
    _death_default->_reset_to_first_frame = false;
    _death_electrocuted_l->_reset_to_first_frame = false;
@@ -242,22 +240,16 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
 
    _bend_down_r->_reset_to_first_frame = false;
    _bend_down_l->_reset_to_first_frame = false;
-   _sword_bend_down_r->_reset_to_first_frame = false;
-   _sword_bend_down_l->_reset_to_first_frame = false;
-
    _bend_up_r->_reset_to_first_frame = false;
    _bend_up_l->_reset_to_first_frame = false;
-   _sword_bend_up_r->_reset_to_first_frame = false;
-   _sword_bend_up_l->_reset_to_first_frame = false;
 
    _dash_init_r->_reset_to_first_frame = false;
    _dash_init_l->_reset_to_first_frame = false;
    _dash_stop_r->_reset_to_first_frame = false;
    _dash_stop_l->_reset_to_first_frame = false;
-   _sword_dash_init_r->_reset_to_first_frame = false;
-   _sword_dash_init_l->_reset_to_first_frame = false;
-   _sword_dash_stop_r->_reset_to_first_frame = false;
-   _sword_dash_stop_l->_reset_to_first_frame = false;
+
+   _jump_landing_r->_reset_to_first_frame = false;
+   _jump_landing_l->_reset_to_first_frame = false;
 
    // we just reverse the bend down animation
    _bend_up_r->reverse();
@@ -361,13 +353,19 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    for (auto& loop_animation : _looped_animations)
    {
       loop_animation->_looped = true;
+   }
 
-      // also update those in the lut
-      const auto sword_animation_it = _sword_attack_lut.find(loop_animation);
-      if (sword_animation_it != _sword_attack_lut.end())
-      {
-         (*sword_animation_it).second->_looped = true;
-      }
+   // copy all properties such as looped and reset to first frame from regular to lut
+   for (auto& [key, value] : _sword_lut)
+   {
+      value->_looped = key->_looped;
+      value->_reset_to_first_frame = key->_reset_to_first_frame;
+   }
+
+   for (auto& [key, value] : _sword_attack_lut)
+   {
+      value->_looped = key->_looped;
+      value->_reset_to_first_frame = key->_reset_to_first_frame;
    }
 }
 
@@ -1041,12 +1039,11 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
 
    // i keep this here
    // might not be the last time to debug an impossible sequence of animation cycles
-   //
-   //   if (_current_cycle && next_cycle && _current_cycle->_name == "player_idle_blink_r" && next_cycle->_name == "player_jump_down_r")
-   //   {
-   //      std::cout << "we're fucked." << std::endl;
-   //      std::cout << data << std::endl;
-   //   }
+   // && _current_cycle->_name == "player_idle_blink_r" && next_cycle->_name == "player_jump_down_r"
+   // if (_current_cycle && next_cycle && (_current_cycle != next_cycle))
+   // {
+   //    Log::Info() << _current_cycle->_name << " -> " << next_cycle->_name << std::endl;
+   // }
 
    _current_cycle = next_cycle;
    _current_cycle->update(dt);
