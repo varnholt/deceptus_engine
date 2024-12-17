@@ -30,6 +30,7 @@ private:
    sf::Vector2f _center_px;
    float _radius_px{0.0};
    std::vector<ZoomFactor> _zoom_factors;
+   bool _within_rect_in_previous_frame{false};
 };
 
 #endif  // ZOOMRECT_H
