@@ -3,56 +3,16 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/player/player.h"
 
-ZoomRect::ZoomRect(GameNode* parent) : GameNode(parent)
-{
-}
-
-void ZoomRect::update(const sf::Time& dt)
-{
-   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-   const auto within_rect = (player_rect.intersects(_rect_px));
-
-   if (!within_rect)
-   {
-      // maybe if the last frame was within the rect, then now set the zoom factor to 1.0
-      return;
-   }
-
-   // get distance of player to rect center
-
-   //
-   // +-------------------------------------------------------------
-   // |
-   // |
-   // |
-   // |
-   // |
-   // |                                          x
-   // |                              x----------------------+
-   // |                              |---___
-   // |                              |      ---___ hyp
-   // |                             y|            ---___    O
-   // |                              |                  ---/|\
-   // |                              +                     \ \
-   // |
-   // +------------------------------+-----------------------------
-   //
-
-   // normalize
-
-   // find most applicable inner radius
-
-   // apply according zoom factor
-}
-
 namespace
 {
+
 struct ZoomCircle
 {
    sf::Vector2f center;                                // Center of the circle
    float radius;                                       // Total radius of the circle
    std::vector<std::pair<float, float>> zoom_factors;  // (percentage, zoom factor)
 };
+
 float getNormalizedDistance(const ZoomCircle& circle, const sf::Vector2f& player_position)
 {
    float distance = std::hypot(player_position.x - circle.center.x, player_position.y - circle.center.y);
@@ -80,6 +40,74 @@ std::vector<ZoomRect::ZoomFactor> parseZoomFactors(const std::string& zoom_facto
 
 }  // namespace
 
+ZoomRect::ZoomRect(GameNode* parent) : GameNode(parent)
+{
+}
+
+void ZoomRect::update(const sf::Time& dt)
+{
+   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto player_position_px = Player::getCurrent()->getPixelPositionFloat();
+   const auto within_rect = (player_rect.intersects(_rect_px));
+
+   if (!within_rect)
+   {
+      if (_within_rect_in_previous_frame)
+      {
+         _within_rect_in_previous_frame = false;
+
+         // TODO: reset zoom factor here to 1.0
+      }
+      return;
+   }
+
+   _within_rect_in_previous_frame = true;
+
+   // get distance of player to rect center
+   const auto radius_px = std::hypot(_center_px.x - player_position_px.x, _center_px.y - player_position_px.y);
+
+   //
+   // +-------------------------------------------------------------
+   // |
+   // |
+   // |
+   // |
+   // |
+   // |                                          x
+   // |                              x----------------------+
+   // |                              |---___
+   // |                              |      ---___ hyp
+   // |                             y|            ---___    O
+   // |                              |                  ---/|\
+   // |                              +                     \ \
+   // |
+   // +------------------------------+-----------------------------
+   //
+
+   // normalize
+   const auto radius_normalized = std::clamp(radius_px / _radius_px, 0.0f, 1.0f);
+
+   // find most applicable inner radius
+   auto factor = 0.0f;
+
+   if (radius_normalized <= _zoom_factors.front()._radius)
+   {
+      factor = _zoom_factors.front()._factor;
+   }
+
+   if (radius_normalized >= _zoom_factors.back()._radius)
+   {
+      factor = _zoom_factors.back()._factor;
+   }
+
+   const auto upper = std::ranges::upper_bound(_zoom_factors, radius_normalized, {}, &ZoomFactor::_radius);
+   const auto lower = upper - 1;
+   const auto a = (radius_normalized - lower->_radius) / (upper->_radius - lower->_radius);
+   factor = std::lerp(lower->_factor, upper->_factor, a);
+
+   // apply factor
+}
+
 void ZoomRect::setup(const GameDeserializeData& data)
 {
    const auto x_px = data._tmx_object->_x_px;
@@ -89,7 +117,9 @@ void ZoomRect::setup(const GameDeserializeData& data)
 
    _rect_px = sf::FloatRect{x_px, y_px, width_px, height_px};
    _center_px = sf::Vector2f{x_px + width_px * 0.5f, y_px + height_px * 0.5f};
-   _radius_px = std::max(width_px * 0.5f, height_px * 0.5f);
-
+   _radius_px = std::hypot(_rect_px.width / 2.0f, _rect_px.height / 2.0f);
    data._tmx_object->_properties;
+
+   // sort zoom factors
+   std::ranges::sort(_zoom_factors, [](const ZoomFactor& a, const ZoomFactor& b) { return a._radius < b._radius; });
 }
