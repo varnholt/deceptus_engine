@@ -24,6 +24,8 @@ public:
    void update(const sf::Time& dt) override;
    void setup(const GameDeserializeData& data);
 
+   std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
 private:
    Normalization _normalization{Normalization::Linear};
    sf::FloatRect _rect_px;

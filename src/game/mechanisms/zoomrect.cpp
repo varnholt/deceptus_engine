@@ -1,6 +1,8 @@
 #include "zoomrect.h"
 
 #include "framework/tmxparser/tmxproperties.h"
+#include "game/io/valuereader.h"
+#include "game/level/level.h"
 #include "game/player/player.h"
 
 namespace
@@ -19,13 +21,14 @@ float getNormalizedDistance(const ZoomCircle& circle, const sf::Vector2f& player
    return std::clamp(distance / circle.radius, 0.0f, 1.0f);  // Normalize to [0, 1]
 }
 
+// read "percentage1:zoom1;percentage2:zoom2;percentage3:zoom3;..."
 std::vector<ZoomRect::ZoomFactor> parseZoomFactors(const std::string& zoom_factors)
 {
    std::vector<ZoomRect::ZoomFactor> result;
    std::istringstream stream(zoom_factors);
    std::string pair;
 
-   while (std::getline(stream, pair, ','))
+   while (std::getline(stream, pair, ';'))
    {
       std::istringstream pair_stream(pair);
       std::string percentage, zoom;
@@ -55,8 +58,7 @@ void ZoomRect::update(const sf::Time& dt)
       if (_within_rect_in_previous_frame)
       {
          _within_rect_in_previous_frame = false;
-
-         // TODO: reset zoom factor here to 1.0
+         CameraZoom::getInstance().setZoomFactor(1.0f);
       }
       return;
    }
@@ -105,7 +107,7 @@ void ZoomRect::update(const sf::Time& dt)
    const auto a = (radius_normalized - lower->_radius) / (upper->_radius - lower->_radius);
    factor = std::lerp(lower->_factor, upper->_factor, a);
 
-   // apply factor
+   CameraZoom::getInstance().setZoomFactor(factor);
 }
 
 void ZoomRect::setup(const GameDeserializeData& data)
@@ -118,8 +120,17 @@ void ZoomRect::setup(const GameDeserializeData& data)
    _rect_px = sf::FloatRect{x_px, y_px, width_px, height_px};
    _center_px = sf::Vector2f{x_px + width_px * 0.5f, y_px + height_px * 0.5f};
    _radius_px = std::hypot(_rect_px.width / 2.0f, _rect_px.height / 2.0f);
-   data._tmx_object->_properties;
 
-   // sort zoom factors
-   std::ranges::sort(_zoom_factors, [](const ZoomFactor& a, const ZoomFactor& b) { return a._radius < b._radius; });
+   if (data._tmx_object->_properties)
+   {
+      const auto& map = data._tmx_object->_properties->_map;
+      const auto values = ValueReader::readValue<std::string>("values", map).value_or("1.0:1.0;1.0:1.0");
+      _zoom_factors = parseZoomFactors(values);
+      std::ranges::sort(_zoom_factors, [](const ZoomFactor& a, const ZoomFactor& b) { return a._radius < b._radius; });
+   }
+}
+
+std::optional<sf::FloatRect> ZoomRect::getBoundingBoxPx()
+{
+   return _rect_px;
 }
