@@ -401,6 +401,7 @@ add_executable(deceptus ${GAME_FILES}
    src/game/ui/richtextparser.h src/game/ui/richtextparser.cpp
    src/game/player/playerattackdash.h src/game/player/playerattackdash.cpp
    src/game/camera/camerazoom.h src/game/camera/camerazoom.cpp
+   src/game/mechanisms/zoomrect.h src/game/mechanisms/zoomrect.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})

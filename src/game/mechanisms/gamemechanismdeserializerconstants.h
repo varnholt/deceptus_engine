@@ -52,6 +52,7 @@ constexpr std::string_view layer_name_water_damage{"water_damage"};
 constexpr std::string_view layer_name_water_surface{"water_surface"};
 constexpr std::string_view layer_name_water_surface_emitter{"water_surface_emitter"};
 constexpr std::string_view layer_name_weather{"weather"};
+constexpr std::string_view layer_name_zoom_rects{"zoom_rects"};
 
 constexpr std::string_view type_name_blocking_rect{"BlockingRect"};
 constexpr std::string_view type_name_bouncer{"Bouncer"};
@@ -97,5 +98,6 @@ constexpr std::string_view type_name_water_damage{"WaterDamage"};
 constexpr std::string_view type_name_water_surface{"WaterSurface"};
 constexpr std::string_view type_name_water_surface_emitter{"WaterSurfaceEmitter"};
 constexpr std::string_view type_name_weather{"Weather"};
+constexpr std::string_view type_name_zoom_rect{"ZoomRect"};
 
 #endif  // GAMEMECHANISMDESERIALIZERCONSTANTS_H
