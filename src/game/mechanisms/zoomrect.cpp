@@ -1,5 +1,6 @@
 #include "zoomrect.h"
 
+#include <iostream>
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/io/valuereader.h"
 #include "game/level/level.h"
@@ -45,6 +46,8 @@ std::vector<ZoomRect::ZoomFactor> parseZoomFactors(const std::string& zoom_facto
 
 ZoomRect::ZoomRect(GameNode* parent) : GameNode(parent)
 {
+   static int32_t instance_counter{0};
+   _instance_id = instance_counter++;
 }
 
 void ZoomRect::update(const sf::Time& dt)
@@ -104,10 +107,12 @@ void ZoomRect::update(const sf::Time& dt)
 
    const auto upper = std::ranges::upper_bound(_zoom_factors, radius_normalized, {}, &ZoomFactor::_radius);
    const auto lower = upper - 1;
-   const auto a = (radius_normalized - lower->_radius) / (upper->_radius - lower->_radius);
+   const auto a = 1.0f - (radius_normalized - lower->_radius) / (upper->_radius - lower->_radius);
    factor = std::lerp(lower->_factor, upper->_factor, a);
 
    CameraZoom::getInstance().setZoomFactor(factor);
+
+   // std::cout << a << " " << factor << std::endl;
 }
 
 void ZoomRect::setup(const GameDeserializeData& data)
@@ -124,9 +129,13 @@ void ZoomRect::setup(const GameDeserializeData& data)
    if (data._tmx_object->_properties)
    {
       const auto& map = data._tmx_object->_properties->_map;
-      const auto values = ValueReader::readValue<std::string>("values", map).value_or("1.0:1.0;1.0:1.0");
+      const auto values = ValueReader::readValue<std::string>("values", map).value_or("0.0:1.0;1.0:1.0");
       _zoom_factors = parseZoomFactors(values);
       std::ranges::sort(_zoom_factors, [](const ZoomFactor& a, const ZoomFactor& b) { return a._radius < b._radius; });
+   }
+   else
+   {
+      _zoom_factors = {{0.0f, 1.0f}, {1.0, 1.0}};
    }
 }
 
