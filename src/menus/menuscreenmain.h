@@ -19,6 +19,7 @@ public:
    MenuScreenMain();
 
    void update(const sf::Time& dt) override;
+   void draw(sf::RenderTarget& window, sf::RenderStates states) override;
 
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
@@ -35,4 +36,8 @@ public:
 
 private:
    ExitCallback _exit_callback;
+
+   sf::Font _font;
+   sf::Text _text_build;
+   sf::Text _text_year;
 };
