@@ -33,6 +33,7 @@ private:
    float _radius_px{0.0};
    std::vector<ZoomFactor> _zoom_factors;
    bool _within_rect_in_previous_frame{false};
+   int32_t _instance_id{0};
 };
 
 #endif  // ZOOMRECT_H
