@@ -14,11 +14,7 @@ namespace
 
 std::string getBuildNumber()
 {
-#ifdef APPVEYOR_BUILD_NUMBER
-   return APPVEYOR_BUILD_NUMBER;
-#else
-   return "custom";
-#endif
+   return std::format("{}", BUILD_NUMBER);
 }
 
 }  // namespace
