@@ -324,7 +324,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       return;
    }
 
-   if (_jump._wallsliding && _jump._walljump_frame_count == 0)
+   if (_jump.isWallSliding())
    {
       _player_animation->getWallslideAnimation()->draw(color);
    }
@@ -1275,6 +1275,12 @@ void Player::updateAttack()
 {
    // at the moment the game doesn't have any in-water attacks
    if (isInWater())
+   {
+      return;
+   }
+
+   // attacks while wallsliding are also not possible
+   if (_jump.isWallSliding())
    {
       return;
    }
