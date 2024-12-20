@@ -52,6 +52,7 @@ struct PlayerJump
    void updateWallJump();
 
    bool isJumping() const;
+   bool isWallSliding() const;
 
    PlayerJumpInfo _jump_info;
    std::shared_ptr<PlayerControls> _controls;

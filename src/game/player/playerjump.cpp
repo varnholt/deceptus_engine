@@ -413,6 +413,11 @@ bool PlayerJump::isJumping() const
    return (_jump_frame_count > 0);
 }
 
+bool PlayerJump::isWallSliding() const
+{
+   return _wallsliding && _walljump_frame_count == 0;
+}
+
 void PlayerJump::setControls(const std::shared_ptr<PlayerControls>& controls)
 {
    _controls = controls;
