@@ -189,8 +189,13 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
 
    _wallslide_impact_r = pool.create("player_wallslide_impact_r", 0.0f, 0.0f, true, false);
    _wallslide_impact_l = pool.create("player_wallslide_impact_l", 0.0f, 0.0f, true, false);
+   _sword_wallslide_impact_r = pool.create("player_wallslide_impact_sword_r", 0.0f, 0.0f, true, false);
+   _sword_wallslide_impact_l = pool.create("player_wallslide_impact_sword_l", 0.0f, 0.0f, true, false);
+
    _wallslide_r = pool.create("player_wallslide_r", 0.0f, 0.0f, true, false);
    _wallslide_l = pool.create("player_wallslide_l", 0.0f, 0.0f, true, false);
+   _sword_wallslide_r = pool.create("player_wallslide_sword_r", 0.0f, 0.0f, true, false);
+   _sword_wallslide_l = pool.create("player_wallslide_sword_l", 0.0f, 0.0f, true, false);
 
    _wall_jump_r = pool.create("player_wall_jump_r", 0.0f, 0.0f, true, false);
    _wall_jump_l = pool.create("player_wall_jump_l", 0.0f, 0.0f, true, false);
@@ -304,6 +309,10 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _sword_lut[_jump_down_l] = _sword_jump_down_l;
    _sword_lut[_jump_landing_r] = _sword_jump_landing_r;
    _sword_lut[_jump_landing_l] = _sword_jump_landing_l;
+   _sword_lut[_wallslide_impact_r] = _sword_wallslide_impact_r;
+   _sword_lut[_wallslide_impact_l] = _sword_wallslide_impact_l;
+   _sword_lut[_wallslide_r] = _sword_wallslide_r;
+   _sword_lut[_wallslide_l] = _sword_wallslide_l;
 
    // map cycles for in-air attack with sword
    _sword_attack_lut[_jump_init_r] = _sword_attack_jump_legs_init_r;
