@@ -556,7 +556,7 @@
       "frame_offset": [1320, 768],
       "frame_size": [120, 48],
       "origin": [48.0, 48.0],
-      "sprite_count": 12 ,
+      "sprite_count": 13 ,
       "texture": "data/sprites/player.png"
    },
    "player_standing_attack_sword_3_r": {
