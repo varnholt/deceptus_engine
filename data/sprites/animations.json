@@ -663,6 +663,22 @@
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
+   "player_wall_jump_sword_l": {
+      "frame_durations": [80, 80],
+      "frame_offset": [432, 1056],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 2,
+      "texture": "data/sprites/player.png"
+   },
+   "player_wall_jump_sword_r": {
+      "frame_durations": [80, 80],
+      "frame_offset": [432, 1104],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
+      "sprite_count": 2,
+      "texture": "data/sprites/player.png"
+   },
    "player_wallslide_impact_l": {
       "frame_durations": [50, 50, 50, 50, 50],
       "frame_offset": [0, 1104],
