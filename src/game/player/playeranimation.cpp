@@ -199,6 +199,8 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
 
    _wall_jump_r = pool.create("player_wall_jump_r", 0.0f, 0.0f, true, false);
    _wall_jump_l = pool.create("player_wall_jump_l", 0.0f, 0.0f, true, false);
+   _sword_wall_jump_r = pool.create("player_wall_jump_sword_r", 0.0f, 0.0f, true, false);
+   _sword_wall_jump_l = pool.create("player_wall_jump_sword_l", 0.0f, 0.0f, true, false);
 
    _appear_r = pool.create("player_appear_r", 0.0f, 0.0f, true, false);
    _appear_l = pool.create("player_appear_l", 0.0f, 0.0f, true, false);
@@ -291,28 +293,30 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _sword_lut[_dash_stop_r] = _sword_dash_stop_r;
    _sword_lut[_double_jump_l] = _sword_double_jump_l;
    _sword_lut[_double_jump_r] = _sword_double_jump_r;
-   _sword_lut[_idle_l] = _sword_idle_l;
-   _sword_lut[_idle_r] = _sword_idle_r;
    _sword_lut[_idle_blink_l] = _sword_idle_blink_l;
    _sword_lut[_idle_blink_r] = _sword_idle_blink_r;
+   _sword_lut[_idle_l] = _sword_idle_l;
+   _sword_lut[_idle_r] = _sword_idle_r;
+   _sword_lut[_jump_down_l] = _sword_jump_down_l;
+   _sword_lut[_jump_down_r] = _sword_jump_down_r;
+   _sword_lut[_jump_init_l] = _sword_jump_init_l;
+   _sword_lut[_jump_init_r] = _sword_jump_init_r;
+   _sword_lut[_jump_landing_l] = _sword_jump_landing_l;
+   _sword_lut[_jump_landing_r] = _sword_jump_landing_r;
+   _sword_lut[_jump_midair_l] = _sword_jump_midair_l;
+   _sword_lut[_jump_midair_r] = _sword_jump_midair_r;
+   _sword_lut[_jump_up_l] = _sword_jump_up_l;
+   _sword_lut[_jump_up_r] = _sword_jump_up_r;
    _sword_lut[_run_l] = _sword_run_l;
    _sword_lut[_run_r] = _sword_run_r;
    _sword_lut[_swim_l] = _sword_swim_l;
    _sword_lut[_swim_r] = _sword_swim_r;
-   _sword_lut[_jump_init_r] = _sword_jump_init_r;
-   _sword_lut[_jump_init_l] = _sword_jump_init_l;
-   _sword_lut[_jump_up_r] = _sword_jump_up_r;
-   _sword_lut[_jump_up_l] = _sword_jump_up_l;
-   _sword_lut[_jump_midair_r] = _sword_jump_midair_r;
-   _sword_lut[_jump_midair_l] = _sword_jump_midair_l;
-   _sword_lut[_jump_down_r] = _sword_jump_down_r;
-   _sword_lut[_jump_down_l] = _sword_jump_down_l;
-   _sword_lut[_jump_landing_r] = _sword_jump_landing_r;
-   _sword_lut[_jump_landing_l] = _sword_jump_landing_l;
-   _sword_lut[_wallslide_impact_r] = _sword_wallslide_impact_r;
+   _sword_lut[_wall_jump_l] = _sword_wall_jump_l;
+   _sword_lut[_wall_jump_r] = _sword_wall_jump_r;
    _sword_lut[_wallslide_impact_l] = _sword_wallslide_impact_l;
-   _sword_lut[_wallslide_r] = _sword_wallslide_r;
+   _sword_lut[_wallslide_impact_r] = _sword_wallslide_impact_r;
    _sword_lut[_wallslide_l] = _sword_wallslide_l;
+   _sword_lut[_wallslide_r] = _sword_wallslide_r;
 
    // map cycles for in-air attack with sword
    _sword_attack_lut[_jump_init_r] = _sword_attack_jump_legs_init_r;

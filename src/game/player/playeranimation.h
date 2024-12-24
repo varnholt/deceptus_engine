@@ -214,6 +214,8 @@ private:
 
    std::shared_ptr<Animation> _wall_jump_r;
    std::shared_ptr<Animation> _wall_jump_l;
+   std::shared_ptr<Animation> _sword_wall_jump_r;
+   std::shared_ptr<Animation> _sword_wall_jump_l;
 
    std::shared_ptr<Animation> _appear_r;
    std::shared_ptr<Animation> _appear_l;
