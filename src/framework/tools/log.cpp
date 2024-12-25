@@ -7,7 +7,7 @@
 
 namespace
 {
-Log::ListenerCallback _log_callback;
+std::vector<Log::ListenerCallback> _log_callbacks;
 
 std::string formatTime(const std::chrono::system_clock::time_point& now)
 {
@@ -36,9 +36,9 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
 
    std::cout << "[" << static_cast<char>(level) << "] " << now_local << " | " << source_tag << ": " << message << std::endl;
 
-   if (_log_callback)
+   for (const auto& callback : _log_callbacks)
    {
-      _log_callback(now, level, std::string{message}, source_location);
+      callback(now, level, std::string{message}, source_location);
    }
 }
 
@@ -46,7 +46,7 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
 
 void Log::registerListenerCallback(const ListenerCallback& cb)
 {
-   _log_callback = cb;
+   _log_callbacks.push_back(cb);
 }
 
 void Log::info(const std::string_view& message, const std::source_location& source_location)
