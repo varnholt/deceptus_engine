@@ -696,19 +696,19 @@
       "texture": "data/sprites/player.png"
    },
    "player_wallslide_impact_sword_l": {
-      "frame_durations": [50, 50, 50, 50, 50],
-      "frame_offset": [0, 1104],
+      "frame_durations": [50],
+      "frame_offset": [2448, 240],
       "frame_size": [72, 48],
       "origin": [36.0, 48.0],
-      "sprite_count": 5,
+      "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_wallslide_impact_sword_r": {
-      "frame_durations": [50, 50, 50, 50, 50],
-      "frame_offset": [0, 1056],
+      "frame_durations": [50],
+      "frame_offset": [2448, 192],
       "frame_size": [72, 48],
       "origin": [36.0, 48.0],
-      "sprite_count": 5,
+      "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_wallslide_l": {
@@ -729,7 +729,7 @@
    },
    "player_wallslide_sword_l": {
       "frame_durations": [120, 120],
-      "frame_offset": [288, 1104],
+      "frame_offset": [2448, 240],
       "frame_size": [72, 48],
       "origin": [36.0, 48.0],
       "sprite_count": 2,
@@ -737,7 +737,7 @@
    },
    "player_wallslide_sword_r": {
       "frame_durations": [120, 120],
-      "frame_offset": [288, 1056],
+      "frame_offset": [2448, 192],
       "frame_size": [72, 48],
       "origin": [36.0, 48.0],
       "sprite_count": 2,
