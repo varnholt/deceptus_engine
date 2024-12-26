@@ -497,6 +497,11 @@ void Game::draw()
    {
       _camera_ui->draw();
    }
+
+   if (DrawStates::_draw_log)
+   {
+      _log_ui->draw();
+   }
 }
 
 void Game::updateGameController()
@@ -858,6 +863,11 @@ void Game::shutdown()
       _camera_ui->close();
    }
 
+   if (_log_ui)
+   {
+      _log_ui->close();
+   }
+
    std::exit(0);
 }
 
@@ -956,7 +966,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::F3:
       {
          DrawStates::_draw_camera_system = !DrawStates::_draw_camera_system;
-
          if (DrawStates::_draw_camera_system && !_camera_ui)
          {
             _camera_ui = std::make_unique<CameraSystemConfigurationUi>();
@@ -978,6 +987,21 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          DrawStates::_draw_debug_info = !DrawStates::_draw_debug_info;
          break;
       }
+      case sf::Keyboard::F5:
+      {
+         DrawStates::_draw_log = !DrawStates::_draw_log;
+         if (DrawStates::_draw_log && !_log_ui)
+         {
+            _log_ui = std::make_unique<LogUi>();
+         }
+         else if (_log_ui)
+         {
+            _log_ui->close();
+            _log_ui.reset();
+         }
+
+         break;
+      }
       case sf::Keyboard::F6:
       {
          DrawStates::_draw_test_scene = !DrawStates::_draw_test_scene;
@@ -986,7 +1010,6 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       case sf::Keyboard::F7:
       {
          DrawStates::_draw_physics_config = !DrawStates::_draw_physics_config;
-
          if (DrawStates::_draw_physics_config && !_physics_ui)
          {
             _physics_ui = std::make_unique<PhysicsConfigurationUi>();
@@ -1096,5 +1119,10 @@ void Game::processEvents()
    if (DrawStates::_draw_camera_system)
    {
       _camera_ui->processEvents();
+   }
+
+   if (DrawStates::_draw_log)
+   {
+      _log_ui->processEvents();
    }
 }

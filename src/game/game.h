@@ -4,6 +4,7 @@
 #include "game/camera/camerasystemconfigurationui.h"
 #include "game/constants.h"
 #include "game/debug/console.h"
+#include "game/debug/logui.h"
 #include "game/ingamemenu/ingamemenu.h"
 #include "game/layers/controlleroverlay.h"
 #include "game/layers/infolayer.h"
@@ -77,6 +78,7 @@ private:
    std::unique_ptr<ControllerOverlay> _controller_overlay;
    std::unique_ptr<CameraSystemConfigurationUi> _camera_ui;
    std::unique_ptr<PhysicsConfigurationUi> _physics_ui;
+   std::unique_ptr<LogUi> _log_ui;
 
    // temporarily here for debugging only
    std::unique_ptr<ForestScene> _test_scene;
