@@ -34,8 +34,6 @@ public:
 
    std::unique_ptr<sf::RenderWindow> _render_window;
    sf::Clock _clock;
-
-   bool _auto_scroll{true};
 };
 
 #endif  // LOGUI_H
