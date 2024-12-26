@@ -5,6 +5,9 @@
 #include "imgui/imgui.h"
 #pragma warning(pop)
 
+#include <ctime>
+#include <filesystem>
+#include <iomanip>
 #include <iostream>
 #include <mutex>
 
@@ -12,6 +15,29 @@ namespace
 {
 std::mutex _mutex;
 std::vector<LogUiBuffer::LogItem> _log_items;
+
+ImVec4 getLogLevelColor(Log::Level level)
+{
+   switch (level)
+   {
+      case Log::Level::Info:
+      {
+         return ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+      }
+      case Log::Level::Warning:
+      {
+         return ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+      }
+      case Log::Level::Error:
+      {
+         return ImVec4(1.0f, 0.5f, 0.0f, 1.0f);
+      }
+      case Log::Level::Fatal:
+      {
+         return ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+      }
+   }
+}
 }  // namespace
 
 void LogUiBuffer::log(
@@ -25,7 +51,7 @@ void LogUiBuffer::log(
    _log_items.push_back(LogItem{time_point, level, message, location});
 }
 
-LogUi::LogUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 800), "deceptus log viewer"))
+LogUi::LogUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode(1200, 800), "deceptus log viewer"))
 {
    if (!ImGui::SFML::Init(*_render_window.get()))
    {
@@ -56,20 +82,30 @@ void LogUi::draw()
    ImGui::PushItemWidth(ImGui::GetWindowWidth());
    ImGuiTreeNodeFlags header_flags = ImGuiTreeNodeFlags_DefaultOpen;
 
-   ImGui::Checkbox("auto scroll", &_auto_scroll);
-
-   ImGui::Separator();
-
    ImGui::BeginChild("log_scrollbar", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
    const auto& logs = _log_items;
    for (const auto& item : logs)
    {
-      ImGui::TextUnformatted(item._message.c_str());
+      ImVec4 color = getLogLevelColor(item._level);
+      ImGui::PushStyleColor(ImGuiCol_Text, color);
+
+      const auto now_time = std::chrono::system_clock::to_time_t(item._timepoint);
+      std::stringstream time_ss;
+      time_ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %H:%M:%S");
+      const auto now_local = time_ss.str();
+
+      std::stringstream log_ss;
+      log_ss << now_local << Log::parseSourceTag(item._source_location) << ": " << item._message;
+
+      const auto log_string = log_ss.str();
+      ImGui::TextUnformatted(log_string.c_str());
+
+      ImGui::PopStyleColor();
    }
 
-   // Scroll to bottom if auto-scroll is enabled
-   if (_auto_scroll /*&& gLoggerBuffer.shouldScrollToBottom()*/)
+   // autoscroll
+   if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY() * 0.95f)
    {
       ImGui::SetScrollHereY(1.0f);
    }

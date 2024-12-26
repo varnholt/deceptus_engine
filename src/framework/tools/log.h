@@ -60,4 +60,6 @@ struct Fatal : public Message
 using SysClockTimePoint = std::chrono::time_point<std::chrono::system_clock>;
 using ListenerCallback = std::function<void(const SysClockTimePoint&, Level, const std::string&, const std::source_location&)>;
 void registerListenerCallback(const ListenerCallback& cb);
+
+std::string parseSourceTag(const std::source_location& source_location);
 }  // namespace Log
