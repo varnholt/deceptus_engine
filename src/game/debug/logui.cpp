@@ -6,6 +6,7 @@
 #pragma warning(pop)
 
 #include <ctime>
+#include <deque>
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
@@ -14,7 +15,7 @@
 namespace
 {
 std::mutex _mutex;
-std::vector<LogUiBuffer::LogItem> _log_items;
+std::deque<LogUiBuffer::LogItem> _log_items;
 
 ImVec4 getLogLevelColor(Log::Level level)
 {
@@ -49,6 +50,12 @@ void LogUiBuffer::log(
 {
    std::lock_guard<std::mutex> guard(_mutex);
    _log_items.push_back(LogItem{time_point, level, message, location});
+
+   constexpr auto log_items_max_size = 1000;
+   while (_log_items.size() > log_items_max_size)
+   {
+      _log_items.pop_front();
+   }
 }
 
 LogUi::LogUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode(1200, 800), "deceptus log viewer"))
@@ -96,7 +103,7 @@ void LogUi::draw()
       const auto now_local = time_ss.str();
 
       std::stringstream log_ss;
-      log_ss << now_local << Log::parseSourceTag(item._source_location) << ": " << item._message;
+      log_ss << now_local << " " << Log::parseSourceTag(item._source_location) << ": " << item._message;
 
       const auto log_string = log_ss.str();
       ImGui::TextUnformatted(log_string.c_str());
