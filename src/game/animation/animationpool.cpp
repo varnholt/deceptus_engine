@@ -218,6 +218,35 @@ const std::map<std::string, std::shared_ptr<AnimationSettings>>& AnimationPool::
    return _settings;
 }
 
+void AnimationPool::saveToJson()
+{
+   nlohmann::json json_settings;
+   for (const auto& [name, settings] : _settings)
+   {
+      json_settings[name] = *settings;
+   }
+
+   std::ofstream ofs(_file_path);
+   ofs << json_settings.dump(4);
+   ofs.close();
+}
+
+void AnimationPool::reloadFromJson()
+{
+   try
+   {
+      _settings.clear();
+      _animations.clear();
+
+      deserializeFromFile(_file_path);
+      initialize();
+   }
+   catch (const std::exception& e)
+   {
+      Log::Error() << "error reloading JSON: " << e.what() << std::endl;
+   }
+}
+
 void AnimationPool::setGarbageCollectorEnabled(bool enabled)
 {
    _garbage_collector_enabled = enabled;
