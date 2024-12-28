@@ -761,6 +761,10 @@ void Game::processEvent(const sf::Event& event)
    }
    else if (event.type == sf::Event::Resized)
    {
+#ifdef __linux__
+      return;
+#endif
+
       // avoid bad aspect ratios for windowed mode
       changeResolution(_window->getSize().x, _window->getSize().y);
    }
