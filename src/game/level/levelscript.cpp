@@ -1,6 +1,7 @@
 #include "levelscript.h"
 
 #include "framework/tools/log.h"
+#include "game/camera/camerazoom.h"
 #include "game/level/luaconstants.h"
 #include "game/level/luainterface.h"
 #include "game/level/luanode.h"
@@ -281,6 +282,46 @@ int32_t addPlayerSkill(lua_State* state)
 }
 
 /**
+ * @brief addPlayerHealth add health points to the player
+ * @param state lua state
+ *    param 1: health points to add
+ * @return error code
+ */
+int32_t addPlayerHealth(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto health_points = static_cast<int32_t>(lua_tointeger(state, 1));
+
+   getInstance()->addPlayerHealth(health_points);
+   return 0;
+}
+
+/**
+ * @brief addPlayerHealthMax add health points to the player's max health
+ * @param state lua state
+ *    param 1: health points to add
+ * @return error code
+ */
+int32_t addPlayerHealthMax(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto health_points = static_cast<int32_t>(lua_tointeger(state, 1));
+
+   getInstance()->addPlayerHealthMax(health_points);
+   return 0;
+}
+
+/**
  * @brief removePlayerSkill add a skill to the player
  * @param state lua state
  *    param 1: skill to add
@@ -347,6 +388,26 @@ int32_t lockPlayerControls(lua_State* state)
    const auto duration = static_cast<int32_t>(lua_tointeger(state, 1));
 
    getInstance()->lockPlayerControls(std::chrono::milliseconds{duration});
+   return 0;
+}
+
+/**
+ * @brief setZoomFactor sets the zoom factor for the camera
+ * @param state lua state
+ *    param 1: zoom factor
+ * @return error code
+ */
+int32_t setZoomFactor(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto zoom_factor = static_cast<float>(lua_tonumber(state, 1));
+   getInstance()->setZoomFactor(zoom_factor);
+
    return 0;
 }
 
@@ -427,6 +488,8 @@ void LevelScript::setup(const std::filesystem::path& path)
    // register callbacks
    lua_register(_lua_state, "addCollisionRect", ::addCollisionRect);
    lua_register(_lua_state, "addPlayerSkill", ::addPlayerSkill);
+   lua_register(_lua_state, "addPlayerHealth", ::addPlayerHealth);
+   lua_register(_lua_state, "addPlayerHealthMax", ::addPlayerHealthMax);
    lua_register(_lua_state, "addSensorRectCallback", ::addSensorRectCallback);
    lua_register(_lua_state, "giveWeaponBow", ::giveWeaponBow);
    lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
@@ -437,6 +500,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setLuaNodeActive", ::setLuaNodeActive);
    lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
    lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
+   lua_register(_lua_state, "setZoomFactor", ::setZoomFactor);
    lua_register(_lua_state, "showDialogue", ::showDialogue);
    lua_register(_lua_state, "toggle", ::toggle);
    lua_register(_lua_state, "writeLuaNodeProperty", ::writeLuaNodeProperty);
@@ -723,6 +787,21 @@ void LevelScript::addPlayerSkill(int32_t skill)
 void LevelScript::removePlayerSkill(int32_t skill)
 {
    SaveState::getPlayerInfo()._extra_table._skills._skills &= ~skill;
+}
+
+void LevelScript::addPlayerHealth(int32_t health_points_to_add)
+{
+   SaveState::getPlayerInfo()._extra_table._health.addHealth(health_points_to_add);
+}
+
+void LevelScript::addPlayerHealthMax(int32_t health_points_to_add)
+{
+   SaveState::getPlayerInfo()._extra_table._health._health_max += health_points_to_add;
+}
+
+void LevelScript::setZoomFactor(float zoom_factor)
+{
+   CameraZoom::getInstance().setZoomFactor(zoom_factor);
 }
 
 namespace

@@ -35,7 +35,7 @@ public:
    virtual void use(const std::shared_ptr<b2World>& world, const b2Vec2& pos, const b2Vec2& dir);
 
    void draw(sf::RenderTarget& target) override;
-   void update(const sf::Time& time) override;
+   void update(const WeaponUpdateData& time) override;
    int32_t getDamage() const override;
    std::string getName() const override;
 

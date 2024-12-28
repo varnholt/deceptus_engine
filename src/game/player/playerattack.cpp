@@ -8,9 +8,9 @@
 #include "game/state/savestate.h"
 #include "game/weapons/bow.h"
 #include "game/weapons/gun.h"
-#include "game/weapons/sword.h"
+#include "game/weapons/playersword.h"
 
-void PlayerAttack::attack(
+PlayerAttack::AttackResult PlayerAttack::attack(
    const std::shared_ptr<b2World>& world,
    const std::shared_ptr<PlayerControls>& controls,
    const std::shared_ptr<PlayerAnimation>& animation,
@@ -23,7 +23,7 @@ void PlayerAttack::attack(
 
    if (!weapon_system._selected)
    {
-      return;
+      return AttackResult::Discarded;
    }
 
    b2Vec2 pos;
@@ -50,8 +50,9 @@ void PlayerAttack::attack(
          }
 
          dynamic_pointer_cast<Bow>(weapon_system._selected)->useInIntervals(world, pos, force * dir);
-         break;
+         return AttackResult::Executed;
       }
+
       case WeaponType::Gun:
       {
          constexpr auto force = 10.0f;
@@ -67,14 +68,15 @@ void PlayerAttack::attack(
          }
 
          dynamic_pointer_cast<Gun>(weapon_system._selected)->useInIntervals(world, pos, force * dir);
-         break;
+         return AttackResult::Executed;
       }
+
       case WeaponType::Sword:
       {
          // no 2nd strike without new button press
          if (_attack_button_pressed && _attack_button_was_pressed)
          {
-            return;
+            return AttackResult::Discarded;
          }
 
          // no 2nd strike when previous animation is not elapsed
@@ -86,7 +88,7 @@ void PlayerAttack::attack(
 
             if (!attack_elapsed)
             {
-               return;
+               return AttackResult::Discarded;
             }
          }
 
@@ -109,18 +111,24 @@ void PlayerAttack::attack(
          else
          {
             _timepoint_attack_standing_start = now;
-            controls->lockOrientation(std::chrono::duration_cast<std::chrono::milliseconds>(animation->getSwordAttackDurationStanding()));
+            animation->prepareNextSwordStandingAttack();
+            controls->lockOrientation(
+               std::chrono::duration_cast<std::chrono::milliseconds>(animation->getSwordAttackDurationStanding(points_to_left))
+            );
             Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
          }
 
-         dynamic_pointer_cast<Sword>(weapon_system._selected)->use(world, dir);
-         break;
+         dynamic_pointer_cast<PlayerSword>(weapon_system._selected)->use(world, dir);
+         return AttackResult::Executed;
       }
+
       case WeaponType::None:
       {
-         break;
+         return AttackResult::Discarded;
       }
    }
+
+   std::unreachable();
 }
 
 bool PlayerAttack::isAttacking() const

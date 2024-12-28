@@ -9,6 +9,8 @@
 #include "game/player/playerinfo.h"
 #include "game/state/savestate.h"
 
+#include <numbers>
+
 // ---------------------------------------------------------------
 //               <LT>   MAP   INVENTORY   VAULT   <RT>
 // ---------------------------------------------------------------
@@ -317,7 +319,7 @@ void InGameMenuInventory::updateShowHide()
    if (_animation == Animation::Show && duration_since_show_s.count() < _duration_show.count())
    {
       const auto elapsed_s_normalized = duration_since_show_s.count() / _duration_show.count();
-      const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
+      const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * std::numbers::pi))) * 0.5f;
 
       _panel_left_offset_px.x = -200 * val;
       _panel_center_offset_px.y = 250 * val;
@@ -342,7 +344,7 @@ void InGameMenuInventory::updateShowHide()
    if (_animation == Animation::Hide && duration_since_hide_s.count() < _duration_hide.count())
    {
       const auto elapsed_s_normalized = duration_since_hide_s.count() / _duration_hide.count();
-      const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
+      const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * std::numbers::pi))) * 0.5f);
 
       _panel_left_offset_px.x = -200 * val;
       _panel_center_offset_px.y = 300 * val;

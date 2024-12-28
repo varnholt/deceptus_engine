@@ -213,6 +213,11 @@ void AnimationPool::deserializeFromFile(const std::string& filename)
    deserialize(data);
 }
 
+const std::map<std::string, std::shared_ptr<AnimationSettings>>& AnimationPool::settings() const
+{
+   return _settings;
+}
+
 void AnimationPool::setGarbageCollectorEnabled(bool enabled)
 {
    _garbage_collector_enabled = enabled;

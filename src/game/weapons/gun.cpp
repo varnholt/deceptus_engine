@@ -162,10 +162,10 @@ void Gun::draw(sf::RenderTarget& target)
    drawProjectiles(target);
 }
 
-void Gun::update(const sf::Time& time)
+void Gun::update(const WeaponUpdateData& data)
 {
    // update all projectile animations
-   updateProjectiles(time);
+   updateProjectiles(data._time);
 
    // can't set the bodies inactive in the postsolve step because the world is still locked
    for (auto* projectile : _projectiles)

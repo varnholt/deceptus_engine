@@ -28,6 +28,8 @@ public:
    void toggle(const std::string& search_pattern, const std::optional<std::string>& group = std::nullopt);
    void addPlayerSkill(int32_t skill);
    void removePlayerSkill(int32_t skill);
+   void addPlayerHealth(int32_t health_points_to_add);
+   void addPlayerHealthMax(int32_t health_points_to_add);
    void giveWeaponBow();
    void giveWeaponGun();
    void giveWeaponSword();
@@ -36,6 +38,7 @@ public:
    void setLuaNodeActive(const std::string& search_pattern, bool active);
    void showDialogue(const std::string& search_pattern);
    void lockPlayerControls(const std::chrono::milliseconds& duration);
+   void setZoomFactor(float zoom_factor);
 
    // functions on the lua end
    void luaInitialize();

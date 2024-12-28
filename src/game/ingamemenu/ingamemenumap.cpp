@@ -1,21 +1,15 @@
 #include "ingamemenumap.h"
 
 #include "framework/easings/easings.h"
-#include "framework/image/psd.h"
-#include "framework/tools/globalclock.h"
-#include "framework/tools/log.h"
 #include "game/camera/camerapanorama.h"
-#include "game/config/gameconfiguration.h"
 #include "game/debug/console.h"
 #include "game/ingamemenu/menuconfig.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/door.h"
 #include "game/mechanisms/portal.h"
-#include "game/player/extratable.h"
 #include "game/player/player.h"
 
-#include <iostream>
-#include <sstream>
+#include <numbers>
 
 IngameMenuMap::IngameMenuMap()
 {
@@ -350,7 +344,7 @@ void IngameMenuMap::updateShowHide()
    if (_animation == Animation::Show && duration_since_show_s.count() < _duration_show.count())
    {
       const auto elapsed_s_normalized = duration_since_show_s.count() / _duration_show.count();
-      const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f;
+      const auto val = (1.0f + static_cast<float>(std::cos(elapsed_s_normalized * std::numbers::pi))) * 0.5f;
 
       panel_left_offset_px.x = -200 * val;
       panel_center_offset_px.y = -150 * val;
@@ -376,7 +370,7 @@ void IngameMenuMap::updateShowHide()
    if (_animation == Animation::Hide && duration_since_hide_s.count() < _duration_hide.count())
    {
       const auto elapsed_s_normalized = duration_since_hide_s.count() / _duration_hide.count();
-      const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * M_PI))) * 0.5f);
+      const auto val = 1.0f - ((1.0f + static_cast<float>(std::cos(elapsed_s_normalized * std::numbers::pi))) * 0.5f);
 
       panel_left_offset_px.x = -200 * val;
       panel_center_offset_px.y = -150 * val;

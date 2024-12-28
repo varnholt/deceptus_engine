@@ -105,7 +105,8 @@ void PlayerDash::update(const DashInput& input)
    input._points_to_left = left;
 
    _multiplier += PhysicsConfiguration::getInstance()._player_dash_multiplier_increment_per_frame;
-   _multiplier *= PhysicsConfiguration::getInstance()._player_dash_multiplier_scale_per_frame;
+   _multiplier *= PhysicsConfiguration::getInstance()
+                     ._player_dash_multiplier_scale_per_frame;  // seems wrong if this is per frame, should not be applied to member
 
    const auto dash_vector = _multiplier * input.player_body->GetMass() * PhysicsConfiguration::getInstance()._player_dash_vector;
    const auto impulse = (left) ? -dash_vector : dash_vector;
