@@ -371,8 +371,8 @@ void PlayerJump::updateWallSlide()
       return;
    }
 
-   const auto touching_left = (GameContactListener::getInstance().getPlayerArmLeftContactCount() > 0);
-   const auto touching_right = (GameContactListener::getInstance().getPlayerArmRightContactCount() > 0);
+   const auto touching_left = (GameContactListener::getInstance().getPlayerArmLeftContactCollidingCount() > 0);
+   const auto touching_right = (GameContactListener::getInstance().getPlayerArmRightContactCollidingCount() > 0);
 
    if (!(touching_left && _controls->isMovingLeft()) && !(touching_right && _controls->isMovingRight()))
    {
@@ -399,7 +399,8 @@ void PlayerJump::updateWallJump()
 
    const auto& physics = PhysicsConfiguration::getInstance();
 
-   _walljump_multiplier *= physics._player_wall_jump_multiplier_scale_per_frame;
+   _walljump_multiplier *=
+      physics._player_wall_jump_multiplier_scale_per_frame;  // seems wrong if this is per frame, should not be applied to member
    _walljump_multiplier += physics._player_wall_jump_multiplier_increment_per_frame;
 
    _body->ApplyForceToCenter(_walljump_multiplier * _walljump_direction, true);
@@ -410,6 +411,11 @@ void PlayerJump::updateWallJump()
 bool PlayerJump::isJumping() const
 {
    return (_jump_frame_count > 0);
+}
+
+bool PlayerJump::isWallSliding() const
+{
+   return _wallsliding && _walljump_frame_count == 0;
 }
 
 void PlayerJump::setControls(const std::shared_ptr<PlayerControls>& controls)

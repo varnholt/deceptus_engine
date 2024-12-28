@@ -16,6 +16,29 @@
 #include <ostream>
 #include <sstream>
 
+Console::Console()
+{
+   _help.registerCommand("leveldesign", "playback <enable/disable/load/save/replay/reset>: use game playback", {"playback enable"});
+   _help.registerCommand("leveldesign", "cpanlimitoff: disable cpan maximum radius");
+   _help.registerCommand("teleportation", "tpp <x>,<y>: teleport to tile position", {"tpp 100, 330"});
+   _help.registerCommand("teleportation", "tps: teleport to start position");
+   _help.registerCommand("teleportation", "tpc <n>: teleport to checkpoint", {"tpc 0"});
+   _help.registerCommand(
+      "inventory",
+      "extra <add/clear> <climb/dash/wallslide/walljump/doublejump/invulnerable/crouch/all>: toggle extras",
+      {"extra add doublejump", "extra clear"}
+   );
+   _help.registerCommand(
+      "inventory",
+      "item <add/clear/list/remove> <item name>: add/clear/list/remove items",
+      {"item add key_skull", "item remove key_skull", "item list", "item clear"}
+   );
+   _help.registerCommand("inventory", "weapon <add/clear> <sword/bow/gun>: add/clear weapons", {"weapon add sword", "weapon clear"});
+   _help.registerCommand("cheats", "damage <n>: cause damage to player", {"damage 100"});
+   _help.registerCommand("cheats", "iddqd: make player invulnerable");
+   _help.registerCommand("cheats", "pgravity <gravity>: set player gravity scale", {"pgravity 0.1"});
+}
+
 bool Console::isActive() const
 {
    return _active;
@@ -24,11 +47,6 @@ bool Console::isActive() const
 void Console::setActive(bool active)
 {
    _active = active;
-
-   if (_active && _log.empty())
-   {
-      showHelp();
-   }
 }
 
 void Console::append(char c)
@@ -46,43 +64,6 @@ void Console::chop()
    _command.pop_back();
 }
 
-void Console::showHelp()
-{
-   _log.emplace_back("help:");
-   _log.emplace_back("");
-   _log.emplace_back("cp <n>: jump to checkpoint");
-   _log.emplace_back("   example: cp 0");
-   _log.emplace_back("");
-   _log.emplace_back("cpanlimitoff: disable cpan maximum radius");
-   _log.emplace_back("   example: cpanlimitoff");
-   _log.emplace_back("");
-   _log.emplace_back("damage <n>: cause damage to player");
-   _log.emplace_back("   example: damage 100");
-   _log.emplace_back("");
-   _log.emplace_back("extra <name>: give extra to player");
-   _log.emplace_back("   available extras: climb, dash, wallslide, walljump, doublejump, invulnerable, crouch, all, none");
-   _log.emplace_back("");
-   _log.emplace_back("give <item name>: give item to player");
-   _log.emplace_back("   example: give key_skull");
-   _log.emplace_back("");
-   _log.emplace_back("pgravity <gravity>: set player gravity scale");
-   _log.emplace_back("   example: pgravity 0.1");
-   _log.emplace_back("");
-   _log.emplace_back("playback <command>: game playback");
-   _log.emplace_back("   commands: enable, disable, load, save, replay, reset");
-   _log.emplace_back("");
-   _log.emplace_back("take <item name>: take item from player");
-   _log.emplace_back("   example: take key_skull");
-   _log.emplace_back("");
-   _log.emplace_back("tp <x>,<y>: teleport to position");
-   _log.emplace_back("   example: tp 100, 330");
-   _log.emplace_back("");
-   _log.emplace_back("start: go to start position");
-   _log.emplace_back("");
-   _log.emplace_back("weapon <weapon>: give weapon to player");
-   _log.emplace_back("   available weapons: bow, gun, sword");
-}
-
 namespace
 {
 void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
@@ -98,19 +79,16 @@ void Console::giveWeaponBow()
    auto bow = WeaponFactory::create(WeaponType::Bow);
    std::dynamic_pointer_cast<Bow>(bow)->setLauncherBody(Player::getCurrent()->getBody());
    giveWeaponToPlayer(bow);
-   _log.emplace_back("given bow to player");
 }
 
 void Console::giveWeaponGun()
 {
    giveWeaponToPlayer(WeaponFactory::create(WeaponType::Gun));
-   _log.emplace_back("given gun to player");
 }
 
 void Console::giveWeaponSword()
 {
    giveWeaponToPlayer(WeaponFactory::create(WeaponType::Sword));
-   _log.emplace_back("given sword to player");
 }
 
 void Console::teleportToStartPosition()
@@ -150,6 +128,11 @@ void Console::teleportToTile(int32_t x_tl, int32_t y_tl)
    Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x_tl * PIXELS_PER_TILE), static_cast<float>(y_tl * PIXELS_PER_TILE));
 }
 
+const Console::Help& Console::help() const
+{
+   return _help;
+}
+
 void Console::execute()
 {
    Log::Info() << "process command: " << _command;
@@ -165,103 +148,141 @@ void Console::execute()
 
    _log.push_back(_command);
 
-   if (results.at(0) == "help")
+   // weapon system
+   if (results.at(0) == "weapon" && results.size() >= 2)
    {
-      showHelp();
+      if (results.at(1) == "add" && results.size() == 3)
+      {
+         if (results.at(2) == "gun")
+         {
+            giveWeaponGun();
+            _log.emplace_back("given gun to player");
+         }
+         else if (results.at(2) == "bow")
+         {
+            giveWeaponBow();
+            _log.emplace_back("given bow to player");
+         }
+         else if (results.at(2) == "sword")
+         {
+            giveWeaponSword();
+            _log.emplace_back("given sword to player");
+         }
+         else
+         {
+            _log.emplace_back("unknown weapon");
+         }
+      }
+      else if (results.at(1) == "clear")
+      {
+         SaveState::getPlayerInfo()._weapons._weapons.clear();
+         SaveState::getPlayerInfo()._weapons._selected.reset();
+         _log.emplace_back("cleared all weapons");
+      }
    }
-   else if (results.at(0) == "weapon" && results.size() == 2)
+
+   // extras
+   else if (results.at(0) == "extra" && results.size() >= 2)
    {
-      if (results.at(1) == "gun")
+      if (results.at(1) == "add" && results.size() == 3)
       {
-         giveWeaponGun();
+         auto& skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
+         if (results.at(2) == "climb")
+         {
+            skills |= static_cast<int32_t>(Skill::SkillType::WallClimb);
+            _log.emplace_back("given climb extra to player");
+         }
+         if (results.at(2) == "crouch")
+         {
+            skills |= static_cast<int32_t>(Skill::SkillType::Crouch);
+            _log.emplace_back("given crouch extra to player");
+         }
+         else if (results.at(2) == "dash")
+         {
+            skills |= static_cast<int32_t>(Skill::SkillType::Dash);
+            _log.emplace_back("given dash extra to player");
+         }
+         else if (results.at(2) == "wallslide")
+         {
+            skills |= static_cast<int32_t>(Skill::SkillType::WallSlide);
+            _log.emplace_back("given wallslide extra to player");
+         }
+         else if (results.at(2) == "walljump")
+         {
+            skills |= static_cast<int32_t>(Skill::SkillType::WallJump);
+            _log.emplace_back("given walljump extra to player");
+         }
+         else if (results.at(2) == "doublejump")
+         {
+            skills |= static_cast<int32_t>(Skill::SkillType::DoubleJump);
+            _log.emplace_back("given doublejump extra to player");
+         }
+         else if (results.at(2) == "invulnerable")
+         {
+            skills |= static_cast<int32_t>(Skill::SkillType::Invulnerable);
+            _log.emplace_back("given invulnerable extra to player");
+         }
+         else if (results.at(2) == "all")
+         {
+            skills = 0xffffffff;
+            _log.emplace_back("given all extras to player");
+         }
       }
-      else if (results.at(1) == "bow")
+      else if (results.at(1) == "clear")
       {
-         giveWeaponBow();
-      }
-      else if (results.at(1) == "sword")
-      {
-         giveWeaponSword();
-      }
-   }
-   else if (results.at(0) == "extra" && results.size() == 2)
-   {
-      auto& skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
-      if (results.at(1) == "climb")
-      {
-         skills |= static_cast<int32_t>(Skill::SkillType::WallClimb);
-         _log.emplace_back("given climb extra to player");
-      }
-      if (results.at(1) == "crouch")
-      {
-         skills |= static_cast<int32_t>(Skill::SkillType::Crouch);
-         _log.emplace_back("given crouch extra to player");
-      }
-      else if (results.at(1) == "dash")
-      {
-         skills |= static_cast<int32_t>(Skill::SkillType::Dash);
-         _log.emplace_back("given dash extra to player");
-      }
-      else if (results.at(1) == "wallslide")
-      {
-         skills |= static_cast<int32_t>(Skill::SkillType::WallSlide);
-         _log.emplace_back("given wallslide extra to player");
-      }
-      else if (results.at(1) == "walljump")
-      {
-         skills |= static_cast<int32_t>(Skill::SkillType::WallJump);
-         _log.emplace_back("given walljump extra to player");
-      }
-      else if (results.at(1) == "doublejump")
-      {
-         skills |= static_cast<int32_t>(Skill::SkillType::DoubleJump);
-         _log.emplace_back("given doublejump extra to player");
-      }
-      else if (results.at(1) == "invulnerable")
-      {
-         skills |= static_cast<int32_t>(Skill::SkillType::Invulnerable);
-         _log.emplace_back("given invulnerable extra to player");
-      }
-      else if (results.at(1) == "all")
-      {
-         skills = 0xffffffff;
-         _log.emplace_back("given all extras to player");
-      }
-      else if (results.at(1) == "none")
-      {
+         auto& skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
          skills = 0;
-         _log.emplace_back("reset all player extras");
+         _log.emplace_back("cleared all player extras");
       }
    }
-   else if (results.at(0) == "give" && results.size() == 2)
+
+   // inventory
+   else if (results.at(0) == "item" && results.size() >= 2)
    {
-      const auto item = results.at(1);
-      SaveState::getPlayerInfo()._inventory.add(item);
-      _log.emplace_back("given item to player");
+      if (results.at(1) == "add" && results.size() == 3)
+      {
+         const auto item = results.at(2);
+         SaveState::getPlayerInfo()._inventory.add(item);
+         _log.emplace_back("added item to player");
+      }
+      else if (results.at(1) == "remove" && results.size() == 3)
+      {
+         const auto item = results.at(2);
+         SaveState::getPlayerInfo()._inventory.remove(item);
+         _log.emplace_back("removed item from player");
+      }
+      else if (results.at(1) == "list")
+      {
+         for (const auto& item : SaveState::getPlayerInfo()._inventory._items)
+         {
+            _log.emplace_back(item);
+         }
+      }
+      else if (results.at(1) == "clear")
+      {
+         SaveState::getPlayerInfo()._inventory._items.clear();
+         _log.emplace_back("removed all items");
+      }
    }
-   else if (results.at(0) == "take" && results.size() == 2)
-   {
-      const auto item = results.at(1);
-      SaveState::getPlayerInfo()._inventory.remove(item);
-      _log.emplace_back("removed item from player");
-   }
-   else if (results.at(0) == "tp" && results.size() == 3)
+
+   // teleportation
+   else if (results.at(0) == "tpp" && results.size() == 3)
    {
       const auto x_tl = std::atoi(results.at(1).c_str());
       const auto y_tl = std::atoi(results.at(2).c_str());
-
       teleportToTile(x_tl, y_tl);
    }
-   else if (results.at(0) == "cp" && results.size() == 2)
+   else if (results.at(0) == "tpc" && results.size() == 2)
    {
       const auto checkpoint_index = std::atoi(results.at(1).c_str());
       teleportToCheckpoint(checkpoint_index);
    }
-   else if (results.at(0) == "cpanlimitoff")
+   else if (results[0] == "tps")
    {
-      Tweaks::instance()._cpan_unlimited = true;
-      _log.emplace_back("disabled cpan limit");
+      teleportToStartPosition();
    }
+
+   // playback
    else if (results.at(0) == "playback" && results.size() == 2)
    {
       if (results[1] == "enable")
@@ -295,6 +316,8 @@ void Console::execute()
          _log.emplace_back("playback reset");
       }
    }
+
+   // tweaks
    else if (results.at(0) == "iddqd")
    {
       SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Invulnerable);
@@ -309,10 +332,6 @@ void Console::execute()
       os << "damage player " << damage << std::endl;
       _log.push_back(os.str());
    }
-   else if (results[0] == "start")
-   {
-      teleportToStartPosition();
-   }
    else if (results[0] == "pgravity" && results.size() == 2)
    {
       const auto scale = std::atof(results.at(1).c_str());
@@ -321,6 +340,13 @@ void Console::execute()
       os << "player gravity " << scale << std::endl;
       _log.push_back(os.str());
    }
+   else if (results.at(0) == "cpanlimitoff")
+   {
+      Tweaks::instance()._cpan_unlimited = true;
+      _log.emplace_back("disabled cpan limit");
+   }
+
+   // generic
    else
    {
       const auto command_it = _registered_commands.find(results.at(0));
@@ -377,10 +403,16 @@ void Console::nextCommand()
    _command = _history[static_cast<size_t>(_history_index)];
 }
 
-void Console::registerCallback(const std::string& command, const std::string& description, CommandFunction callback)
+void Console::registerCallback(
+   const std::string& command,
+   CommandFunction callback,
+   const std::string& topic,
+   const std::string& description,
+   const std::vector<std::string>& examples
+)
 {
    _registered_commands[command] = callback;
-   _registered_command_help.emplace_back(command, description);
+   _help.registerCommand(topic, description, examples);
 }
 
 Console& Console::getInstance()
@@ -397,4 +429,39 @@ const std::string& Console::getCommand() const
 const std::deque<std::string>& Console::getLog() const
 {
    return _log;
+}
+
+void Console::Help::registerCommand(const std::string& topic, const std::string& description, const std::vector<std::string>& examples)
+{
+   _help_messages[topic].emplace_back(HelpCommand{description, examples});
+}
+
+std::string Console::Help::getFormattedHelp() const
+{
+   std::ostringstream oss;
+
+   std::vector<std::string> sorted_topics;
+   for (const auto& entry : _help_messages)
+   {
+      sorted_topics.push_back(entry.first);
+   }
+   std::sort(sorted_topics.begin(), sorted_topics.end());
+
+   for (const auto& topic : sorted_topics)
+   {
+      oss << topic << ":\n";
+      const auto& commands = _help_messages.at(topic);
+      for (const auto& command : commands)
+      {
+         oss << "   " << command.description << "\n";
+
+         for (const auto& example : command.examples)
+         {
+            oss << "      example: " << example << "\n";
+         }
+      }
+      oss << "\n";
+   }
+
+   return oss.str();
 }

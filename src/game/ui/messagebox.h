@@ -6,7 +6,8 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "constants.h"
+#include "game/constants.h"
+#include "game/ui/richtextparser.h"
 
 struct Layer;
 
@@ -92,16 +93,26 @@ struct MessageBox
 
    void noAnimation();
    void updateBoxContentLayers();
-   void animateText();
+   void updateTextAnimation();
    void updateNextPageIcon();
    void updateTextAndButtonColor(float contents_alpha);
 
    Type _type;
-   std::string _message;
+
+   struct TextSegment
+   {
+      sf::Text text;
+      sf::Color color;
+      std::string plain_text;
+   };
+
+   std::vector<TextSegment> _segments;
+   std::string _plain_text;
+   uint32_t _char_animate_index = 0;
+
    MessageBoxCallback _callback;
    LayoutProperties _properties;
    int32_t _buttons = 0;
-   uint32_t _chars_shown = 0;
    bool _closed = false;
    bool _reset_instance = false;
    std::function<void(void)> _button_callback_a;
@@ -110,7 +121,6 @@ struct MessageBox
    sf::Time _show_time;
    sf::Time _hide_time;
    DisplayState _state{DisplayState::Hidden};
-   sf::Text _text;
    sf::Time _elapsed;
 
    sf::Vector2f _window_position_px;

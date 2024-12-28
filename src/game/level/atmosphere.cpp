@@ -6,13 +6,11 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
 
-//-----------------------------------------------------------------------------
 Atmosphere::~Atmosphere()
 {
    _map.clear();
 }
 
-//-----------------------------------------------------------------------------
 void Atmosphere::parse(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset)
 {
    if (!layer)
@@ -52,7 +50,6 @@ void Atmosphere::parse(const std::shared_ptr<TmxLayer>& layer, const std::shared
    }
 }
 
-//-----------------------------------------------------------------------------
 AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos_m) const
 {
    const auto x_px = pos_m.x * PPM;
@@ -61,7 +58,6 @@ AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos_m) const
    return getTileForPosition(sf::Vector2f{x_px, y_px});
 }
 
-//-----------------------------------------------------------------------------
 AtmosphereTile Atmosphere::getTileForPosition(const sf::Vector2f& pos_px) const
 {
    const auto x_tl = static_cast<int32_t>(pos_px.x / PIXELS_PER_TILE);

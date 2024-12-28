@@ -6,12 +6,10 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
 
-//-----------------------------------------------------------------------------
 ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 {
 }
 
-//-----------------------------------------------------------------------------
 void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    const auto& level_view = target.getView();
@@ -29,7 +27,6 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    }
 }
 
-//-----------------------------------------------------------------------------
 void ImageLayer::updateView(float level_view_x, float level_view_y, float view_width, float view_height)
 {
    if (!_parallax_settings.has_value())
@@ -45,20 +42,17 @@ void ImageLayer::updateView(float level_view_x, float level_view_y, float view_w
    ));
 }
 
-//-----------------------------------------------------------------------------
 void ImageLayer::resetView(float view_width, float view_height)
 {
    _parallax_view.reset(sf::FloatRect(0.0f, 0.0f, view_width, view_height));
    _parallax_view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
 }
 
-//-----------------------------------------------------------------------------
 std::optional<sf::FloatRect> ImageLayer::getBoundingBoxPx()
 {
    return std::nullopt;
 }
 
-//-----------------------------------------------------------------------------
 std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxElement>& element, const std::filesystem::path& level_path)
 {
    std::shared_ptr<ImageLayer> image = std::make_shared<ImageLayer>();

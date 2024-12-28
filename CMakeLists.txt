@@ -3,6 +3,13 @@ project(deceptus VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(DEFINED ENV{APPVEYOR_BUILD_NUMBER})
+    add_definitions(-DBUILD_NUMBER=$ENV{APPVEYOR_BUILD_NUMBER})
+else()
+    add_definitions(-DBUILD_NUMBER=0)
+endif()
 
 include(GNUInstallDirs)
 
@@ -227,7 +234,7 @@ set(GAME_FILES
     src/game/player/skill.cpp src/game/player/skill.h
     src/game/physics/squaremarcher.cpp src/game/physics/squaremarcher.h
     src/game/level/stenciltilemap.cpp src/game/level/stenciltilemap.h
-    src/game/weapons/sword.cpp src/game/weapons/sword.h
+    src/game/weapons/playersword.cpp src/game/weapons/playersword.h
     src/game/tests/test.cpp src/game/tests/test.h
     src/game/io/texturepool.cpp src/game/io/texturepool.h
     src/game/level/tilemap.cpp src/game/level/tilemap.h
@@ -397,6 +404,11 @@ add_executable(deceptus ${GAME_FILES}
    data/scripts/enemies/arrowtrap.lua data/scripts/enemies/arrowtrap_2.lua data/scripts/enemies/bat_2.lua data/scripts/enemies/bat_oneway.lua data/scripts/enemies/blob_2.lua data/scripts/enemies/bonefish.lua data/scripts/enemies/cannon_2.lua data/scripts/enemies/constants.lua data/scripts/enemies/critter.lua data/scripts/enemies/deprecated_bat.lua data/scripts/enemies/deprecated_blob.lua data/scripts/enemies/deprecated_cannon.lua data/scripts/enemies/deprecated_dumb.lua data/scripts/enemies/deprecated_endboss_1.lua data/scripts/enemies/deprecated_klonk.lua data/scripts/enemies/deprecated_skeleton.lua data/scripts/enemies/ghost.lua data/scripts/enemies/helpers.lua data/scripts/enemies/interpolation.lua data/scripts/enemies/klonk_2.lua data/scripts/enemies/landmine.lua data/scripts/enemies/minik_bomber.lua data/scripts/enemies/nukumaru.lua data/scripts/enemies/rat.lua data/scripts/enemies/shadow_monk.lua data/scripts/enemies/spiky.lua data/scripts/enemies/vector2.lua data/scripts/enemies/vectorial2.lua data/scripts/enemies/watermine.lua
    doc/level_design/advanced_topics.md doc/level_design/designing_a_level.md doc/level_design/enemies.md doc/level_design/mechanisms.md doc/level_design/visual_effects.md
    doc/lua_interface/readme.md
+   src/game/ui/richtextparser.h src/game/ui/richtextparser.cpp
+   src/game/player/playerattackdash.h src/game/player/playerattackdash.cpp
+   src/game/camera/camerazoom.h src/game/camera/camerazoom.cpp
+   src/game/mechanisms/zoomrect.h src/game/mechanisms/zoomrect.cpp
+   src/game/debug/logui.h src/game/debug/logui.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
@@ -439,22 +451,6 @@ if(win32-msvc)
         /wd5045
     )
 endif()
-
-
-if((UNIX OR win32-clang++) AND NOT APPLE)
-    target_compile_options(deceptus
-        -Wno-backslash-newline-escape
-        -Wno-deprecated-declarations
-        /std:c++20
-    )
-endif()
-    
-if((UNIX OR win32-g++) AND NOT APPLE)
-    target_compile_options(deceptus
-        -lc++fs
-    )
-endif()
-
 
 if(WIN32)
     set(SDL_PATH ${CMAKE_SOURCE_DIR}/thirdparty/sdl/lib/x64)

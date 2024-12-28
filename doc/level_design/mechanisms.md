@@ -64,6 +64,8 @@ Bouncers use the `tilesets/bumper.png` texture inside your level directory.
 |width|float|The width of the bouncer should be set to `24.0` for horizontally aligned bouncers.|
 |height|float|The height of the bouncer should be set to `5.0` for horizontally aligned bouncers.|
 |z|int|The object's z index|
+|force|float|The force value used to bounce the player, default is 0.6f|
+
 
 ---
 
@@ -262,6 +264,9 @@ As the name promises, Crushers can crush Adam. They consist of a bunch of spikes
 |-|-|-|
 |alignment|string|Direction of the Crusher (valid values are '`up`', '`down`', '`left`', '`right`')|
 |z|int|The object's z index|
+|idle_time_s|float|Amount of seconds to sleep between cycles, default is 3s|
+|shake|bool|Whether or not the crusher should make the camera shake, default is true|
+|time_offset_s|float|Time offset in seconds to have a time delta between two crushers, default is 0|
 
 ---
 

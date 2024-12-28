@@ -27,6 +27,8 @@ public:
 
    void setGarbageCollectorEnabled(bool newGarbage_collector_enabled);
 
+   const std::map<std::string, std::shared_ptr<AnimationSettings>>& settings() const;
+
 private:
    void deserialize(const std::string& data);
    void deserializeFromFile(const std::string& filename);

@@ -25,5 +25,5 @@ build_script:
 
 artifacts:
 - path: artifacts
-  name: deceptus
+  name: deceptus-%APPVEYOR_BUILD_NUMBER%
   type: zip

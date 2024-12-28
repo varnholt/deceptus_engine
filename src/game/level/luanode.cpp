@@ -2045,6 +2045,127 @@ void LuaNode::die()
    _body = nullptr;
 }
 
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxparser.h"
+
+/*
+<map version="1.9" tiledversion="1.9.1" orientation="orthogonal" renderorder="right-down" width="2" height="2" tilewidth="24"
+tileheight="24" infinite="0" nextlayerid="4" nextobjectid="11"> <tileset firstgid="1" source="enemy_spiky.tsx"/> <layer id="1" name="Tile
+Layer 1" width="2" height="2"> <data encoding="csv"> 1,2, 25,26
+</data>
+ </layer>
+ <objectgroup id="2" name="shapes">
+  <object id="1" name="spikes" x="12" y="35.7205">
+   <polygon points="0,0 1.11372,-5.05742
+-1.91447,-12.4563 8.22697,-14.7191 12.5569,-19.9376 16.4601,-15.1081 25.9507,-13.4288 22.7777,-6.19701 24.1353,0.166728"/>
+  </object>
+  <object id="9" name="bottom_2" x="6" y="36" width="12" height="12">
+   <ellipse/>
+  </object>
+  <object id="10" name="bottom_1" x="28" y="36" width="12" height="12">
+   <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup id="3" name="hitboxes">
+  <object id="6" name="hitbox_3" x="10.1504" y="16.4098" width="28.2556" height="21.6053"/>
+  <object id="7" name="hitbox_2" x="4.87596" y="35.2406" width="16.1879" height="12.5827"/>
+  <object id="8" name="hitbox_1" x="26.079" y="35.3816" width="16.1879" height="12.5827"/>
+ </objectgroup>
+</map>
+
+ */
+
+#include "framework/tmxparser/tmxpolygon.h"
+#include "framework/tmxparser/tmxpolyline.h"
+
+void LuaNode::loadShapesFromTmx(const std::string& tmxFile)
+{
+   TmxParser tmx_parser;
+   tmx_parser.parse(tmxFile);
+
+   const auto& elements = tmx_parser.getElements();
+   for (const auto& element : elements)
+   {
+      if (element->_type == TmxElement::Type::TypeObjectGroup)
+      {
+         auto objectGroup = std::dynamic_pointer_cast<TmxObjectGroup>(element);
+         for (const auto& object_pair : objectGroup->_objects)
+         {
+            const auto& object = object_pair.second;
+
+            // if (object->getShape() == TmxObject::Shape::Rectangle)
+            // {
+            //    // Convert rectangle to Box2D rectangle
+            //    addShapeRect(
+            //       object->getAABB().width * MPP, object->getAABB().height * MPP, object->getAABB().left * MPP, object->getAABB().top *
+            //       MPP
+            //    );
+            // }
+            // else if (object->getShape() == TmxObject::Shape::Ellipse)
+            // {
+            //    // Convert ellipse to Box2D circle
+            //    addShapeCircle(
+            //       object->getAABB().width / 2 * MPP,
+            //       (object->getAABB().left + object->getAABB().width / 2) * MPP,
+            //       (object->getAABB().top + object->getAABB().height / 2) * MPP
+            //    );
+            // }
+            /*else*/ if (object->_polygon != nullptr)
+            {
+               const auto& points = object->_polygon->_polyline;
+               std::vector<b2Vec2> b2Points;
+               for (const auto& point : points)
+               {
+                  b2Points.emplace_back(point.x * MPP, point.y * MPP);
+               }
+               addShapePoly(b2Points.data(), static_cast<int32_t>(b2Points.size()));
+            }
+            else if (object->_polyline != nullptr)
+            {
+               const auto& points = object->_polyline->_polyline;
+               std::vector<b2Vec2> b2Points;
+               for (const auto& point : points)
+               {
+                  b2Points.emplace_back(point.x * MPP, point.y * MPP);
+               }
+               addShapePoly(b2Points.data(), static_cast<int32_t>(b2Points.size()));
+            }
+         }
+      }
+   }
+}
+
+void LuaNode::loadHitboxesFromTmx(const std::string& tmxFile)
+{
+   TmxParser tmx_parser;
+   tmx_parser.parse(tmxFile);
+
+   const auto& elements = tmx_parser.getElements();
+   for (const auto& element : elements)
+   {
+      if (element->_type == TmxElement::Type::TypeObjectGroup)
+      {
+         auto objectGroup = std::dynamic_pointer_cast<TmxObjectGroup>(element);
+         if (objectGroup->_name == "Hitboxes")
+         {
+            for (const auto& object_pair : objectGroup->_objects)
+            {
+               const auto& object = object_pair.second;
+               // if (object->getShape() == TmxObject::Shape::Rectangle)
+               // {
+               //    addHitbox(
+               //       static_cast<int32_t>(object->getAABB().left),
+               //       static_cast<int32_t>(object->getAABB().top),
+               //       static_cast<int32_t>(object->getAABB().width),
+               //       static_cast<int32_t>(object->getAABB().height)
+               //    );
+               // }
+            }
+         }
+      }
+   }
+}
+
 /**
  * @brief LuaNode::luaMovedTo tell lua script where the engine moved it to
  * callback name: movedTo
@@ -2583,7 +2704,7 @@ void LuaNode::updateWeapons(const sf::Time& dt)
 {
    for (auto& w : _weapons)
    {
-      w->update(dt);
+      w->update({dt, Level::getCurrentLevel()->getWorld()});
    }
 }
 

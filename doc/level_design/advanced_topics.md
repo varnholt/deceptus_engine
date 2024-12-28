@@ -114,6 +114,19 @@ In order to control the range-based update behavior, you have to set the attribu
 |`volume_near`|`float`|The maximum sound for the sound interpolation.|
 
 
+## Sound Emitters
+
+A Sound Emitter is a mechanism that does not have drawing code. Its only purpose is to emit sounds when the player enters its boundary rectangle. The sound can either be looped or just played a single time. Most common usages would be to create atmospheric effects using, i.e. using sounds that go along well with the level's environment.
+
+|Custom Property|Type|Description|
+|-|-|-|
+|`filename`|`string`|The sound's filename.|
+|`looped`|`bool`|Whether or not the sound is played in a loop. The default is `true`.|
+|`radius_far_px`|`float`|The maximum radius around the mechanism. When the player is within that radius, sounds will be interpolated between volume_far and volume_near. The default is `0.0`.|
+|`radius_near_px`|`float`|The minimum radius around the mechanism. When the player is closer to the mechanism that this radius, sounds are at maximum. The default is `0.0`.|
+|`volume_far`|`float`|The minimum sound for when volume interpolation starts. The default is `0.0`.|
+|`volume_near`|`float`|The maximum sound for the sound interpolation. The default is `1.0`.|
+
 
 # Addendum
 
