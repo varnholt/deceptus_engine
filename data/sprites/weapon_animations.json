@@ -1,0 +1,18 @@
+{
+   "impact_hit_l": {
+      "frame_durations": [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+      "frame_offset": [0, 48],
+      "frame_size": [48, 48],
+      "origin": [24.0, 24.0],
+      "sprite_count": 12,
+      "texture": "data/sprites/impact_hits.png"
+   },
+   "impact_hit_r": {
+      "frame_durations": [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+      "frame_offset": [0, 96],
+      "frame_size": [48, 48],
+      "origin": [24.0, 24.0],
+      "sprite_count": 12,
+      "texture": "data/sprites/impact_hits.png"
+   }
+}

@@ -282,7 +282,7 @@ void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
    // )
    //
 
-   auto bodies = WorldQuery::retrieveBodiesOnScreen(level->getWorld(), screen);
+   auto bodies = WorldQuery::retrieveBodiesInsideRect(level->getWorld(), screen);
 
    for (auto* body : bodies)
    {
@@ -384,14 +384,14 @@ void DebugDraw::debugHitboxes(sf::RenderTarget& target)
    using namespace std::chrono_literals;
 
    const auto screen = getScreenRect(target);
-   const auto nodes = WorldQuery::findNodes(screen);
+   const auto collided_nodes = WorldQuery::findNodesByHitbox(screen);
 
    const auto now = std::chrono::high_resolution_clock::now();
 
-   for (const auto& node : nodes)
+   for (const auto& collided_node : collided_nodes)
    {
       auto just_hit = false;
-      const auto hit_time = node->getHitTime();
+      const auto hit_time = collided_node._node->getHitTime();
       if (hit_time.has_value())
       {
          just_hit = (now - hit_time.value() < 500ms);
@@ -399,7 +399,7 @@ void DebugDraw::debugHitboxes(sf::RenderTarget& target)
 
       const auto fill_color = just_hit ? sf::Color{255, 0, 0, 50} : sf::Color{255, 255, 255, 50};
 
-      for (const auto& hitbox : node->_hitboxes)
+      for (const auto& hitbox : collided_node._node->_hitboxes)
       {
          drawRect(target, hitbox.getRectTranslated(), sf::Color::Magenta, fill_color);
       }

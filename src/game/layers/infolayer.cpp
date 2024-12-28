@@ -306,6 +306,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view_screen(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_screen), static_cast<float>(h_screen)));
    window.setView(view_screen);
 
+   // draw command history
    auto y = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
    {
@@ -321,6 +322,34 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    if (static_cast<int32_t>(elapsed.asSeconds()) % 2 == 0)
    {
       _font.draw(window, _font.getCoords("_"), _font._text_width + offset_x, h_screen - 28);
+   }
+
+   // draw console help
+   y = 0;
+   const auto indent = w_screen / 40;
+   const auto& help = console.help();
+   std::ostringstream oss;
+
+   std::vector<std::string> sorted_topics;
+   for (const auto& entry : help._help_messages)
+   {
+      sorted_topics.push_back(entry.first);
+   }
+   std::sort(sorted_topics.begin(), sorted_topics.end());
+   for (const auto& topic : sorted_topics)
+   {
+      _font.draw(window, _font.getCoords(topic), w_screen / 2, (++y) * 14, sf::Color::Green);
+
+      const auto& commands = help._help_messages.at(topic);
+      for (const auto& command : commands)
+      {
+         _font.draw(window, _font.getCoords(command.description), w_screen / 2 + indent, (++y) * 14, sf::Color::White);
+
+         for (const auto& example : command.examples)
+         {
+            _font.draw(window, _font.getCoords(example), w_screen / 2 + indent * 2, (++y) * 14, sf::Color::Red);
+         }
+      }
    }
 }
 

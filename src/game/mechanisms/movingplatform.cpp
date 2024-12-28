@@ -9,16 +9,14 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
-#include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
-#include "game/physics/physicsconfiguration.h"
 #include "game/player/player.h"
 
 #include <cmath>
-#include <iostream>
+#include <numbers>
 
 #include <box2d/box2d.h>
 
@@ -58,7 +56,7 @@ void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
 double MovingPlatform::cosineInterpolate(double y1, double y2, double mu)
 {
-   const auto mu2 = (1.0 - cos(mu * M_PI)) * 0.5;
+   const auto mu2 = (1.0 - cos(mu * std::numbers::pi)) * 0.5;
    return (y1 * (1.0 - mu2) + y2 * mu2);
 }
 

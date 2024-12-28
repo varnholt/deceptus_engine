@@ -46,6 +46,7 @@
 #include "game/mechanisms/waterdamage.h"
 #include "game/mechanisms/watersurface.h"
 #include "game/mechanisms/weather.h"
+#include "game/mechanisms/zoomrect.h"
 
 #include <ranges>
 
@@ -102,6 +103,7 @@ void GameMechanismDeserializer::deserialize(
    auto* mechanism_water_damage = mechanisms[std::string{layer_name_water_damage}];
    auto* mechanism_weather = mechanisms[std::string{layer_name_weather}];
    auto* mechanism_water_surface = mechanisms[std::string{layer_name_weather}];
+   auto* mechanism_zoom_rects = mechanisms[std::string{layer_name_zoom_rects}];
 
    for (const auto& element : tmx_parser.getElements())
    {
@@ -403,6 +405,12 @@ void GameMechanismDeserializer::deserialize(
                      tmx_object->_template_type == type_name_water_surface_emitter)
             {
                WaterSurface::addEmitter(parent, data);
+            }
+            else if (object_group->_name == layer_name_zoom_rects || tmx_object->_template_type == type_name_zoom_rect)
+            {
+               auto mechanism = std::make_shared<ZoomRect>(parent);
+               mechanism->setup(data);
+               mechanism_zoom_rects->push_back(mechanism);
             }
          }
       }

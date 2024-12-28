@@ -125,6 +125,7 @@ void PhysicsConfigurationUi::draw()
       drawFloatElement("deceleration ground", &config._player_deceleration_ground, 0.01f, 1.0f);
       drawFloatElement("acceleration air", &config._player_acceleration_air, 0.01f, 1.0f);
       drawFloatElement("deceleration air", &config._player_deceleration_air, 0.01f, 1.0f);
+      drawFloatElement("deceleration sword attack", &config._player_deceleration_sword_attack, 0.5f, 1.0f);
       drawFloatElement("acceleration water", &config._player_acceleration_water, 0.01f, 1.0f);
       drawFloatElement("deceleration water", &config._player_deceleration_water, 0.01f, 1.0f);
       drawFloatElement("cap velocity horizontal", &config._player_max_velocity_horizontal, 0.1f, 30.0f);
@@ -155,6 +156,14 @@ void PhysicsConfigurationUi::draw()
       drawFloatElement("jump speed factor", &config._player_jump_speed_factor, 0.0f, 0.5f);
       drawFloatElement("jump impulse factor", &config._player_jump_impulse_factor, 1.0f, 20.0f);
       drawFloatElement("minimum jump interval [ms]", &config._player_minimum_jump_interval_ms, 100.0f, 200.0f);
+   }
+
+   if (ImGui::CollapsingHeader("player attack dash", header_flags))
+   {
+      drawIntElement("attack dash frame count", &config._player_attack_dash_frame_count, 1, 100);
+      drawFloatElement("attack dash multiplier", &config._player_attack_dash_multiplier, 1.0f, 100.0f);
+      drawFloatElement("attack dash multiplier dec. per frame", &config._player_attack_dash_multiplier_decrement_per_frame, 0.1f, 10.0f);
+      drawFloatElement("attack dash multiplier scale per frame", &config._player_attack_dash_multiplier_scale_per_frame, 0.1f, 5.0f);
    }
 
    if (ImGui::CollapsingHeader("player dash", header_flags))

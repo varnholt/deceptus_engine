@@ -159,6 +159,9 @@ struct LuaNode : public GameMechanism, public GameNode
    //! node is dead, reset its body, set dead flag
    void die();
 
+   void loadShapesFromTmx(const std::string& tmxFile);
+   void loadHitboxesFromTmx(const std::string& tmxFile);
+
    const std::optional<HighResTimePoint> getHitTime() const;
 
    int32_t getDamageFromPlayer() const;

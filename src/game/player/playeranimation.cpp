@@ -1,14 +1,12 @@
 #include "playeranimation.h"
 
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <sstream>
+#include <ranges>
 
 #include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
 #include "game/animation/animationpool.h"
-#include "game/camera/camerapanorama.h"
 #include "game/clock/gameclock.h"
 #include "game/mechanisms/portal.h"
 #include "game/physics/physicsconfiguration.h"
@@ -232,11 +230,9 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _sword_attack_standing_tmp_l = _sword_attack_standing_l[0];
    _sword_attack_standing_tmp_r = _sword_attack_standing_r[0];
 
-   // we don't want these to jump back to the first frame
+   // we don't want these to jump back to the first frame (only needed for the unmapped animations)
    _appear_r->_reset_to_first_frame = false;
    _appear_l->_reset_to_first_frame = false;
-   _sword_appear_r->_reset_to_first_frame = false;
-   _sword_appear_l->_reset_to_first_frame = false;
 
    _death_default->_reset_to_first_frame = false;
    _death_electrocuted_l->_reset_to_first_frame = false;
@@ -244,22 +240,16 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
 
    _bend_down_r->_reset_to_first_frame = false;
    _bend_down_l->_reset_to_first_frame = false;
-   _sword_bend_down_r->_reset_to_first_frame = false;
-   _sword_bend_down_l->_reset_to_first_frame = false;
-
    _bend_up_r->_reset_to_first_frame = false;
    _bend_up_l->_reset_to_first_frame = false;
-   _sword_bend_up_r->_reset_to_first_frame = false;
-   _sword_bend_up_l->_reset_to_first_frame = false;
 
    _dash_init_r->_reset_to_first_frame = false;
    _dash_init_l->_reset_to_first_frame = false;
    _dash_stop_r->_reset_to_first_frame = false;
    _dash_stop_l->_reset_to_first_frame = false;
-   _sword_dash_init_r->_reset_to_first_frame = false;
-   _sword_dash_init_l->_reset_to_first_frame = false;
-   _sword_dash_stop_r->_reset_to_first_frame = false;
-   _sword_dash_stop_l->_reset_to_first_frame = false;
+
+   _jump_landing_r->_reset_to_first_frame = false;
+   _jump_landing_l->_reset_to_first_frame = false;
 
    // we just reverse the bend down animation
    _bend_up_r->reverse();
@@ -276,70 +266,6 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _dash_stop_l->reverse();
    _dash_stop_r->_name = "player_dash_stop_r";
    _dash_stop_l->_name = "player_dash_stop_l";
-
-   _looped_animations.push_back(_idle_r);
-   _looped_animations.push_back(_idle_l);
-   _looped_animations.push_back(_sword_idle_l);
-   _looped_animations.push_back(_sword_idle_r);
-
-   _looped_animations.push_back(_idle_blink_r);
-   _looped_animations.push_back(_idle_blink_l);
-   _looped_animations.push_back(_sword_idle_blink_l);
-   _looped_animations.push_back(_sword_idle_blink_r);
-
-   _looped_animations.push_back(_swim_r);
-   _looped_animations.push_back(_swim_l);
-   _looped_animations.push_back(_sword_swim_r);
-   _looped_animations.push_back(_sword_swim_l);
-
-   _looped_animations.push_back(_run_r);
-   _looped_animations.push_back(_run_l);
-   _looped_animations.push_back(_sword_run_r);
-   _looped_animations.push_back(_sword_run_l);
-
-   _looped_animations.push_back(_dash_r);
-   _looped_animations.push_back(_dash_l);
-   _looped_animations.push_back(_dash_init_l);
-   _looped_animations.push_back(_dash_init_r);
-   _looped_animations.push_back(_dash_stop_r);
-   _looped_animations.push_back(_dash_stop_l);
-   _looped_animations.push_back(_sword_dash_r);
-   _looped_animations.push_back(_sword_dash_l);
-   _looped_animations.push_back(_sword_dash_init_l);
-   _looped_animations.push_back(_sword_dash_init_r);
-   _looped_animations.push_back(_sword_dash_stop_r);
-   _looped_animations.push_back(_sword_dash_stop_l);
-
-   _looped_animations.push_back(_jump_init_r);
-   _looped_animations.push_back(_jump_up_r);
-   _looped_animations.push_back(_jump_down_r);
-   _looped_animations.push_back(_jump_landing_r);
-   _looped_animations.push_back(_jump_midair_r);
-
-   _looped_animations.push_back(_jump_init_l);
-   _looped_animations.push_back(_jump_up_l);
-   _looped_animations.push_back(_jump_down_l);
-   _looped_animations.push_back(_jump_landing_l);
-   _looped_animations.push_back(_jump_midair_l);
-
-   _looped_animations.push_back(_double_jump_r);
-   _looped_animations.push_back(_double_jump_l);
-   _looped_animations.push_back(_sword_double_jump_r);
-   _looped_animations.push_back(_sword_double_jump_l);
-
-   _looped_animations.push_back(_wallslide_impact_r);
-   _looped_animations.push_back(_wallslide_impact_l);
-   _looped_animations.push_back(_wallslide_r);
-   _looped_animations.push_back(_wallslide_l);
-   _looped_animations.push_back(_wall_jump_r);
-   _looped_animations.push_back(_wall_jump_l);
-
-   _looped_animations.push_back(_wallslide_animation);
-
-   for (auto& i : _looped_animations)
-   {
-      i->_looped = true;
-   }
 
    // fill lut to map sword cycles onto regular move cycles
    _sword_lut[_appear_l] = _sword_appear_l;
@@ -390,6 +316,57 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _sword_attack_lut[_jump_down_l] = _sword_attack_jump_legs_down_l;
    _sword_attack_lut[_jump_landing_r] = _sword_attack_jump_legs_landing_r;
    _sword_attack_lut[_jump_landing_l] = _sword_attack_jump_legs_landing_l;
+
+   // set up looped animations
+   _looped_animations.push_back(_idle_r);
+   _looped_animations.push_back(_idle_l);
+   _looped_animations.push_back(_idle_blink_r);
+   _looped_animations.push_back(_idle_blink_l);
+   _looped_animations.push_back(_swim_r);
+   _looped_animations.push_back(_swim_l);
+   _looped_animations.push_back(_run_r);
+   _looped_animations.push_back(_run_l);
+   _looped_animations.push_back(_dash_r);
+   _looped_animations.push_back(_dash_l);
+   _looped_animations.push_back(_dash_init_l);
+   _looped_animations.push_back(_dash_init_r);
+   _looped_animations.push_back(_dash_stop_r);
+   _looped_animations.push_back(_dash_stop_l);
+   _looped_animations.push_back(_jump_init_r);
+   _looped_animations.push_back(_jump_init_l);
+   _looped_animations.push_back(_jump_up_r);
+   _looped_animations.push_back(_jump_up_l);
+   _looped_animations.push_back(_jump_down_r);
+   _looped_animations.push_back(_jump_down_l);
+   _looped_animations.push_back(_jump_landing_r);
+   _looped_animations.push_back(_jump_landing_l);
+   _looped_animations.push_back(_double_jump_r);
+   _looped_animations.push_back(_double_jump_l);
+   _looped_animations.push_back(_wallslide_impact_r);
+   _looped_animations.push_back(_wallslide_impact_l);
+   _looped_animations.push_back(_wallslide_r);
+   _looped_animations.push_back(_wallslide_l);
+   _looped_animations.push_back(_wall_jump_r);
+   _looped_animations.push_back(_wall_jump_l);
+   _looped_animations.push_back(_wallslide_animation);
+
+   for (auto& loop_animation : _looped_animations)
+   {
+      loop_animation->_looped = true;
+   }
+
+   // copy all properties such as looped and reset to first frame from regular to lut
+   for (auto& [key, value] : _sword_lut)
+   {
+      value->_looped = key->_looped;
+      value->_reset_to_first_frame = key->_reset_to_first_frame;
+   }
+
+   for (auto& [key, value] : _sword_attack_lut)
+   {
+      value->_looped = key->_looped;
+      value->_reset_to_first_frame = key->_reset_to_first_frame;
+   }
 }
 
 int32_t PlayerAnimation::getJumpAnimationReference() const
@@ -428,6 +405,40 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processDeathAnimation
    }
 
    return next_cycle;
+}
+
+void PlayerAnimation::prepareNextSwordStandingAttack()
+{
+   // issue that was circumentved here:
+   //
+   // when animation is reset to a slightly longer duration, it instantly exceeds elapsed_since_attack_start.
+   // that'll cause extra frames to be played. for that reason the next sword animation is configured right from
+   // the playerattack class.
+   //
+   //                                     time
+   //                                     <------------->
+   // +-------------------------------------------------------------------------------------
+   //         |                           |             |
+   //         attack                                    now
+   //         start
+   //
+   //         animation                  animation
+   //         start                      end
+   //
+   //                                    next animation
+   //                                    prepared (rand)
+
+   if (_sword_attack_standing_l_reset && _sword_attack_standing_tmp_l->_finished)
+   {
+      _sword_attack_standing_tmp_l = _sword_attack_standing_l[(std::rand() % _sword_attack_standing_l.size())];
+      _sword_attack_standing_l_reset = false;
+   }
+
+   if (_sword_attack_standing_r_reset && _sword_attack_standing_tmp_r->_finished)
+   {
+      _sword_attack_standing_tmp_r = _sword_attack_standing_r[(std::rand() % _sword_attack_standing_r.size())];
+      _sword_attack_standing_r_reset = false;
+   }
 }
 
 std::optional<std::shared_ptr<Animation>>
@@ -493,39 +504,24 @@ PlayerAnimation::processAttackAnimation(const std::shared_ptr<Animation>& next_c
          }
          else
          {
-            const auto standing_attack_elapsed =
-               StopWatch::duration(data._timepoint_attack_standing_start, now) >= _sword_attack_standing_tmp_l->_overall_time_chrono;
+            const auto duration_left = _sword_attack_standing_tmp_l->_overall_time_chrono;
+            const auto duration_right = _sword_attack_standing_tmp_r->_overall_time_chrono;
+            const auto duration_since_attack = StopWatch::duration(data._timepoint_attack_standing_start, now);
 
-            if (!standing_attack_elapsed)
+            if (data._points_left && duration_since_attack < duration_left)
             {
-               if (data._points_left)
-               {
-                  attack_cycle = _sword_attack_standing_tmp_l;
-                  _sword_attack_standing_l_reset = true;
-               }
-               else
-               {
-                  attack_cycle = _sword_attack_standing_tmp_r;
-                  _sword_attack_standing_r_reset = true;
-               }
+               attack_cycle = _sword_attack_standing_tmp_l;
+               _sword_attack_standing_l_reset = true;
+            }
+            else if (data._points_right && duration_since_attack < duration_right)
+            {
+               attack_cycle = _sword_attack_standing_tmp_r;
+               _sword_attack_standing_r_reset = true;
             }
             else
             {
                _sword_attack_standing_tmp_l->_finished = true;
                _sword_attack_standing_tmp_r->_finished = true;
-            }
-
-            // pick a different attack cycle
-            if (_sword_attack_standing_l_reset && _sword_attack_standing_tmp_l->_finished)
-            {
-               _sword_attack_standing_tmp_l = _sword_attack_standing_l[(std::rand() % _sword_attack_standing_l.size())];
-               _sword_attack_standing_l_reset = false;
-            }
-
-            if (_sword_attack_standing_r_reset && _sword_attack_standing_tmp_r->_finished)
-            {
-               _sword_attack_standing_tmp_r = _sword_attack_standing_r[(std::rand() % _sword_attack_standing_r.size())];
-               _sword_attack_standing_r_reset = false;
             }
          }
 
@@ -564,50 +560,71 @@ const std::shared_ptr<Animation>& PlayerAnimation::getWallslideAnimation() const
    return _wallslide_animation;
 }
 
+PlayerAnimation::HighResDuration PlayerAnimation::getCurrentAnimationDuration() const
+{
+   return _current_cycle->_overall_time_chrono;
+}
+
 PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
 {
    using namespace std::chrono_literals;
    return 1000ms + _appear_l->_overall_time_chrono + 20ms;
 }
 
-PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStanding() const
+PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStanding(bool points_left) const
 {
-   return _sword_attack_standing_l[0]->_overall_time_chrono;
-}
-
-PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingDown1() const
-{
-   return _sword_attack_bend_down_1_l->_overall_time_chrono;
-}
-
-PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationBendingDown2() const
-{
-   return _sword_attack_bend_down_2_l->_overall_time_chrono;
-}
-
-PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationJumping() const
-{
-   return _sword_attack_jump_l->_overall_time_chrono;
+   return points_left ? _sword_attack_standing_tmp_l->_overall_time_chrono : _sword_attack_standing_tmp_r->_overall_time_chrono;
 }
 
 std::optional<PlayerAnimation::HighResDuration> PlayerAnimation::getActiveAttackCycleDuration()
 {
-   if (_current_cycle == _sword_attack_bend_down_1_l || _current_cycle == _sword_attack_bend_down_1_r)
+   if (_current_cycle == _sword_attack_bend_down_1_l)
    {
-      return getSwordAttackDurationBendingDown1();
+      return _sword_attack_bend_down_1_l->_overall_time_chrono;
    }
 
-   if (_current_cycle == _sword_attack_bend_down_2_l || _current_cycle == _sword_attack_bend_down_2_r)
+   if (_current_cycle == _sword_attack_bend_down_1_r)
    {
-      return getSwordAttackDurationBendingDown2();
+      return _sword_attack_bend_down_1_r->_overall_time_chrono;
    }
 
-   if (_current_cycle == _sword_attack_standing_l[0] || _current_cycle == _sword_attack_standing_r[0])
+   if (_current_cycle == _sword_attack_bend_down_2_l)
    {
-      return getSwordAttackDurationStanding();
+      return _sword_attack_bend_down_2_l->_overall_time_chrono;
+   }
+
+   if (_current_cycle == _sword_attack_bend_down_2_r)
+   {
+      return _sword_attack_bend_down_2_r->_overall_time_chrono;
+   }
+
+   if (_current_cycle == _sword_attack_standing_l[0])
+   {
+      return _sword_attack_standing_l[0]->_overall_time_chrono;
+   }
+
+   if (_current_cycle == _sword_attack_standing_r[0])
+   {
+      return _sword_attack_standing_r[0]->_overall_time_chrono;
+   }
+
+   if (_current_cycle == _sword_attack_standing_l[1])
+   {
+      return _sword_attack_standing_l[1]->_overall_time_chrono;
+   }
+
+   if (_current_cycle == _sword_attack_standing_r[1])
+   {
+      return _sword_attack_standing_r[1]->_overall_time_chrono;
    }
 
    return std::nullopt;
+}
+
+bool PlayerAnimation::isStandingSwordAttackPlayed() const
+{
+   return _current_cycle == _sword_attack_standing_l[0] || _current_cycle == _sword_attack_standing_r[0] ||
+          _current_cycle == _sword_attack_standing_l[1] || _current_cycle == _sword_attack_standing_r[1];
 }
 
 const std::shared_ptr<Animation>&
@@ -874,9 +891,9 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
       return std::nullopt;
    }
 
+   // jump ignition
    if (data._jump_frame_count > PhysicsConfiguration::getInstance()._player_jump_frame_count - FRAMES_COUNT_JUMP_INIT)
    {
-      // jump ignition
       _jump_animation_reference = 0;
       return data._points_right ? _jump_init_r : _jump_init_l;
    }
@@ -1022,12 +1039,11 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
 
    // i keep this here
    // might not be the last time to debug an impossible sequence of animation cycles
-   //
-   //   if (_current_cycle && next_cycle && _current_cycle->_name == "player_idle_blink_r" && next_cycle->_name == "player_jump_down_r")
-   //   {
-   //      std::cout << "we're fucked." << std::endl;
-   //      std::cout << data << std::endl;
-   //   }
+   // && _current_cycle->_name == "player_idle_blink_r" && next_cycle->_name == "player_jump_down_r"
+   // if (_current_cycle && next_cycle && (_current_cycle != next_cycle))
+   // {
+   //    Log::Info() << _current_cycle->_name << " -> " << next_cycle->_name << std::endl;
+   // }
 
    _current_cycle = next_cycle;
    _current_cycle->update(dt);

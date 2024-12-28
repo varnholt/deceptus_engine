@@ -4,7 +4,7 @@
 
 #include "bow.h"
 #include "gun.h"
-#include "sword.h"
+#include "playersword.h"
 
 std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type)
 {
@@ -24,7 +24,7 @@ std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type)
       }
       case WeaponType::Sword:
       {
-         weapon = std::make_shared<Sword>();
+         weapon = std::make_shared<PlayerSword>();
          break;
       }
       case WeaponType::None:
@@ -57,7 +57,7 @@ std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type, const WeaponPrope
       }
       case WeaponType::Sword:
       {
-         weapon = std::make_shared<Sword>();
+         weapon = std::make_shared<PlayerSword>();
          break;
       }
       case WeaponType::None:
