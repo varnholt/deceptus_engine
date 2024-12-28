@@ -29,6 +29,9 @@ public:
 
    const std::map<std::string, std::shared_ptr<AnimationSettings>>& settings() const;
 
+   void saveToJson();
+   void reloadFromJson();
+
 private:
    void deserialize(const std::string& data);
    void deserializeFromFile(const std::string& filename);
