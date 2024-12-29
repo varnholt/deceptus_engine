@@ -19,6 +19,7 @@ add_executable(animation_viewer
     ${SRC_DIR}/game/animation/animationpool.cpp
     ${SRC_DIR}/game/io/texturepool.cpp
     ${SRC_DIR}/framework/tools/log.cpp
+    editor.h editor.cpp
 )
 
 # Include directories
