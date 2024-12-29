@@ -1,0 +1,336 @@
+#include "editor.h"
+
+#include <imgui-SFML.h>
+#include <imgui.h>
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <memory>
+#include "game/animation/animation.h"
+#include "game/animation/animationpool.h"
+
+namespace
+{
+constexpr auto scale = 5.0f;
+}
+
+void Editor::drawAnimation(sf::RenderTarget& window)
+{
+   sf::FloatRect rect{0, 0, _current_animation->_frames[0].width * scale, _current_animation->_frames[0].height * scale};
+
+   // Draw the background rectangle
+   sf::RectangleShape rs;
+   rs.setSize({rect.width, rect.height});
+   rs.setPosition(rect.left, rect.top);
+   rs.setFillColor(sf::Color(0, 0, 0, 100));
+   window.draw(rs);
+
+   sf::Vector2f origin = _current_animation->getOrigin();
+   _current_animation->setPosition(rect.left + origin.x * scale, rect.top + origin.y * scale);
+   _current_animation->setScale(scale, scale);
+
+   // Draw the animation
+   _current_animation->draw(window);
+
+   ImGui::Separator();
+   ImGui::Text("Current Animation: %s", _animation_names[_selected_index.value()].c_str());
+}
+
+void Editor::selectAnimByCursorKey()
+{
+   if (!_selected_index.has_value())
+   {
+      _selected_index = 0;
+   }
+
+   const auto selected_index_prev = _selected_index;
+
+   if (ImGui::IsKeyPressed(ImGuiKey_UpArrow))
+   {
+      (*_selected_index)--;
+   }
+
+   if (ImGui::IsKeyPressed(ImGuiKey_DownArrow))
+   {
+      (*_selected_index)++;
+   }
+
+   _selected_index = std::clamp(_selected_index.value(), 0, static_cast<int32_t>(_animation_names.size() - 1));
+
+   if (_selected_index != selected_index_prev)
+   {
+      selectAnimation(_selected_index.value());
+   }
+}
+
+void Editor::populateComboBox()
+{
+   const auto& animations = _animation_pool->getAnimations();
+
+   for (int i = 0; i < static_cast<int>(_animation_names.size()); ++i)
+   {
+      bool is_selected = (i == _selected_index);
+      if (ImGui::Selectable(_animation_names[i].c_str(), is_selected))
+      {
+         _selected_index = i;
+         const auto it = animations.find(_animation_names[i]);
+         if (it != animations.end())
+         {
+            assignCurrentAnimation(it->second);
+            _current_animation->play();
+            _playing = true;
+         }
+      }
+
+      if (is_selected)
+      {
+         ImGui::SetItemDefaultFocus();
+      }
+   }
+}
+
+void Editor::drawControls()
+{
+   ImGui::Begin("Animation Controls");
+
+   if (ImGui::Button("|>"))
+   {
+      if (_current_animation)
+      {
+         _current_animation->play();
+         _playing = true;
+      }
+   }
+
+   ImGui::SameLine();
+
+   if (ImGui::Button("||"))
+   {
+      if (_current_animation)
+      {
+         _current_animation->pause();
+         _playing = false;
+      }
+   }
+
+   ImGui::SameLine();
+
+   if (ImGui::Button("[]"))
+   {
+      if (_current_animation)
+      {
+         _current_animation->stop();
+         _playing = false;
+      }
+   }
+
+   ImGui::SameLine();
+
+   if (ImGui::Button("<<"))
+   {
+      if (_current_animation && _current_animation->_current_frame > 0)
+      {
+         _current_animation->_current_frame--;
+         _current_animation->_elapsed = _current_animation->getFrameTimes()[_current_animation->_current_frame];
+         _current_animation->updateVertices();
+      }
+   }
+
+   ImGui::SameLine();
+
+   if (ImGui::Button(">>"))
+   {
+      if (_current_animation && _current_animation->_current_frame < static_cast<int32_t>(_current_animation->_frames.size()) - 1)
+      {
+         _current_animation->_current_frame++;
+         _current_animation->_elapsed = _current_animation->getFrameTimes()[_current_animation->_current_frame];
+         _current_animation->updateVertices();
+      }
+   }
+
+   if (ImGui::Button("Save"))
+   {
+      _animation_pool->saveToJson();
+   }
+
+   ImGui::SameLine();
+
+   if (ImGui::Button("Reload"))
+   {
+      _animation_pool->reloadFromJson();
+   }
+
+   ImGui::Separator();
+
+   if (ImGui::BeginCombo(
+          "Available Animations", (_selected_index.has_value()) ? _animation_names[_selected_index.value()].c_str() : "Select animation"
+       ))
+   {
+      populateComboBox();
+      ImGui::EndCombo();
+   }
+
+   // handle keyboard input on combobox
+   if (ImGui::IsItemFocused())
+   {
+      selectAnimByCursorKey();
+   }
+
+   ImGui::End();
+}
+
+void Editor::update(const sf::Time& delta_time)
+{
+   if (_current_animation && _playing)
+   {
+      _current_animation->update(delta_time);
+   }
+}
+
+void Editor::draw(sf::RenderTarget& window)
+{
+   drawControls();
+
+   // draw animation and settings
+   drawCheckerboardGrid(window);
+
+   if (_current_animation)
+   {
+      drawAnimation(window);
+      drawAnimationSettings();
+   }
+}
+
+bool Editor::init()
+{
+   // Load animations from the animation pool
+   _animation_pool = std::make_unique<AnimationPool>("animations.json");
+   try
+   {
+      _animation_pool->initialize();
+   }
+   catch (const std::exception& e)
+   {
+      std::cerr << "Failed to initialize AnimationPool: " << e.what() << std::endl;
+      return false;
+   }
+
+   for (auto& [k, v] : _animation_pool->settings())
+   {
+      _animation_pool->create(k /*, 0.0f, 0.0f, true, true*/);
+   }
+
+   const auto& animations = _animation_pool->getAnimations();
+   _animation_names.reserve(animations.size());
+
+   for (const auto& [name, animation] : animations)
+   {
+      _animation_names.push_back(name);
+   }
+
+   return true;
+}
+
+void Editor::drawCheckerboardGrid(sf::RenderTarget& window, float cell_size)
+{
+   const sf::Vector2u window_size = window.getSize();
+   const sf::Color grey(128, 128, 128, 255);
+   const sf::Color dark_grey(96, 96, 96, 255);
+
+   const auto rows = static_cast<int>(window_size.y / cell_size) + 1;
+   const auto cols = static_cast<int>(window_size.x / cell_size) + 1;
+
+   sf::RectangleShape cell(sf::Vector2f(cell_size, cell_size));
+
+   for (auto y = 0; y < rows; ++y)
+   {
+      for (auto x = 0; x < cols; ++x)
+      {
+         cell.setFillColor(((x + y) % 2 == 0) ? grey : dark_grey);
+         cell.setPosition(x * cell_size, y * cell_size);
+         window.draw(cell);
+      }
+   }
+}
+
+void Editor::drawAnimationSettings()
+{
+   ImGui::Separator();
+   ImGui::Text("Edit Animation Settings");
+
+   if (ImGui::InputInt2("Frame Size", _current_settings->_frame_size.data()))
+   {
+      std::cout << "frame size updated" << std::endl;
+   }
+
+   if (ImGui::InputInt2("Frame Offset", _current_settings->_frame_offset.data()))
+   {
+      std::cout << "frame offset updated" << std::endl;
+   }
+
+   if (ImGui::InputFloat2("Origin", _current_settings->_origin.data()))
+   {
+      std::cout << "origin updated" << std::endl;
+   }
+
+   if (ImGui::InputInt("Sprite Count", &_current_settings->_sprite_count))
+   {
+      std::cout << "sprite count updated" << std::endl;
+   }
+
+   char texture_path[1024] = {};
+   std::strncpy(texture_path, _current_settings->_texture_path.string().c_str(), sizeof(texture_path) - 1);
+   if (ImGui::InputText("Texture Path", texture_path, sizeof(texture_path)))
+   {
+      _current_settings->_texture_path = std::filesystem::path(texture_path);
+   }
+
+   if (ImGui::TreeNode("Frame Durations"))
+   {
+      for (size_t i = 0; i < _current_settings->_frame_durations.size(); ++i)
+      {
+         float duration = _current_settings->_frame_durations[i].asSeconds();
+         if (ImGui::InputFloat(("Duration " + std::to_string(i)).c_str(), &duration))
+         {
+            _current_settings->_frame_durations[i] = sf::seconds(duration);
+         }
+      }
+
+      if (ImGui::Button("[+]"))
+      {
+         _current_settings->_frame_durations.emplace_back(sf::seconds(0.1f));
+      }
+
+      ImGui::SameLine();
+
+      if (!_current_settings->_frame_durations.empty() && ImGui::Button("[-]"))
+      {
+         _current_settings->_frame_durations.pop_back();
+      }
+
+      ImGui::TreePop();
+   }
+}
+
+void Editor::assignCurrentAnimation(const std::shared_ptr<Animation>& animation)
+{
+   _current_animation = animation;
+
+   auto settings_it = _animation_pool->settings().find(_current_animation->_name);
+   if (settings_it != _animation_pool->settings().end())
+   {
+      _current_settings = settings_it->second;
+   }
+}
+
+void Editor::selectAnimation(int32_t index)
+{
+   _selected_index = index;
+   const auto& animations = _animation_pool->getAnimations();
+   auto it = animations.find(_animation_names[_selected_index.value()]);
+   if (it != animations.end())
+   {
+      assignCurrentAnimation(it->second);
+      _current_animation->play();
+      _playing = true;
+   }
+}
