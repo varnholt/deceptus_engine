@@ -17,7 +17,7 @@ public:
    void update(const sf::Time& delta_time);
 
 private:
-   void drawCheckerboardGrid(sf::RenderTarget& window, float cell_size = 16.0f);
+   void drawCheckerboardGrid(sf::RenderTarget& window, float cell_size);
    void drawAnimationSettings();
    void selectAnimation(int32_t index);
    void drawAnimation(sf::RenderTarget& window);
@@ -33,6 +33,7 @@ private:
    std::unique_ptr<AnimationPool> _animation_pool;
    std::optional<int32_t> _selected_index;
    void drawControls();
+   void loadAnimationNames();
 };
 
 #endif  // EDITOR_H

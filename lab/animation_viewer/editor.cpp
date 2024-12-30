@@ -191,12 +191,23 @@ void Editor::draw(sf::RenderTarget& window)
    drawControls();
 
    // draw animation and settings
-   drawCheckerboardGrid(window);
+   drawCheckerboardGrid(window, 16.0f * scale);
 
    if (_current_animation)
    {
       drawAnimation(window);
       drawAnimationSettings();
+   }
+}
+
+void Editor::loadAnimationNames()
+{
+   const auto& animations = _animation_pool->getAnimations();
+   _animation_names.clear();
+   _animation_names.reserve(animations.size());
+   for (const auto& [name, animation] : animations)
+   {
+      _animation_names.push_back(name);
    }
 }
 
@@ -216,16 +227,10 @@ bool Editor::init()
 
    for (auto& [k, v] : _animation_pool->settings())
    {
-      _animation_pool->create(k /*, 0.0f, 0.0f, true, true*/);
+      _animation_pool->create(k);
    }
 
-   const auto& animations = _animation_pool->getAnimations();
-   _animation_names.reserve(animations.size());
-
-   for (const auto& [name, animation] : animations)
-   {
-      _animation_names.push_back(name);
-   }
+   loadAnimationNames();
 
    return true;
 }
@@ -257,24 +262,21 @@ void Editor::drawAnimationSettings()
    ImGui::Separator();
    ImGui::Text("Edit Animation Settings");
 
+   std::optional<AnimationPool::UpdateFlag> update_flag;
+
    if (ImGui::InputInt2("Frame Size", _current_settings->_frame_size.data()))
    {
-      std::cout << "frame size updated" << std::endl;
+      update_flag = AnimationPool::UpdateFlag::Settings;
    }
 
    if (ImGui::InputInt2("Frame Offset", _current_settings->_frame_offset.data()))
    {
-      std::cout << "frame offset updated" << std::endl;
+      update_flag = AnimationPool::UpdateFlag::Settings;
    }
 
    if (ImGui::InputFloat2("Origin", _current_settings->_origin.data()))
    {
-      std::cout << "origin updated" << std::endl;
-   }
-
-   if (ImGui::InputInt("Sprite Count", &_current_settings->_sprite_count))
-   {
-      std::cout << "sprite count updated" << std::endl;
+      update_flag = AnimationPool::UpdateFlag::Settings;
    }
 
    char texture_path[1024] = {};
@@ -282,6 +284,7 @@ void Editor::drawAnimationSettings()
    if (ImGui::InputText("Texture Path", texture_path, sizeof(texture_path)))
    {
       _current_settings->_texture_path = std::filesystem::path(texture_path);
+      update_flag = AnimationPool::UpdateFlag::All;
    }
 
    if (ImGui::TreeNode("Frame Durations"))
@@ -292,12 +295,14 @@ void Editor::drawAnimationSettings()
          if (ImGui::InputFloat(("Duration " + std::to_string(i)).c_str(), &duration))
          {
             _current_settings->_frame_durations[i] = sf::seconds(duration);
+            update_flag = AnimationPool::UpdateFlag::Settings;
          }
       }
 
       if (ImGui::Button("[+]"))
       {
          _current_settings->_frame_durations.emplace_back(sf::seconds(0.1f));
+         update_flag = AnimationPool::UpdateFlag::Settings;
       }
 
       ImGui::SameLine();
@@ -305,9 +310,16 @@ void Editor::drawAnimationSettings()
       if (!_current_settings->_frame_durations.empty() && ImGui::Button("[-]"))
       {
          _current_settings->_frame_durations.pop_back();
+         update_flag = AnimationPool::UpdateFlag::Settings;
       }
 
       ImGui::TreePop();
+   }
+
+   if (update_flag.has_value())
+   {
+      _animation_pool->recreateAnimationsFromSettings(update_flag.value());
+      loadAnimationNames();
    }
 }
 
