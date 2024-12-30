@@ -32,6 +32,16 @@ public:
    void saveToJson();
    void reloadFromJson();
 
+   enum class UpdateFlag
+   {
+      Settings,
+      Texture,
+      NormalMap,
+      All
+   };
+
+   void recreateAnimationsFromSettings(UpdateFlag flag = UpdateFlag::Settings);
+
 private:
    void deserialize(const std::string& data);
    void deserializeFromFile(const std::string& filename);
