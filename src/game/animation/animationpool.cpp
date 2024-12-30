@@ -164,12 +164,6 @@ void AnimationPool::deserialize(const std::string& data)
          const auto settings = std::make_shared<AnimationSettings>(item.second.get<AnimationSettings>());
          _settings[name] = settings;
 
-         if (!settings->_valid)
-         {
-            Log::Error() << name << " frame durations vs. sprite count mismatch (" << settings->_frame_durations.size()
-                         << " != " << settings->_sprite_count << ")";
-         }
-
          auto texture = TexturePool::getInstance().get(settings->_texture_path);
          settings->_texture = texture;
 
@@ -187,6 +181,75 @@ void AnimationPool::deserialize(const std::string& data)
    catch (const std::exception& e)
    {
       Log::Error() << e.what();
+   }
+}
+
+void AnimationPool::recreateAnimationsFromSettings(UpdateFlag flag)
+{
+   for (const auto& [name, settings] : _settings)
+   {
+      if (!settings)
+      {
+         continue;
+      }
+
+      // find existing animation or create a new one
+      auto it = _animations.find(name);
+      std::shared_ptr<Animation> animation;
+
+      if (it != _animations.end())
+      {
+         animation = it->second;
+      }
+      else
+      {
+         animation = std::make_shared<Animation>();
+         _animations[name] = animation;
+      }
+
+      // update textures based on editor activity
+      if (flag == UpdateFlag::Texture || flag == UpdateFlag::All)
+      {
+         auto color_texture = TexturePool::getInstance().get(settings->_texture_path);
+         settings->_texture = color_texture;
+         animation->_color_texture = color_texture;
+      }
+
+      if (flag == UpdateFlag::NormalMap || flag == UpdateFlag::All)
+      {
+         const auto normal_map_filename =
+            (settings->_texture_path.stem().string() + "_normals" + settings->_texture_path.extension().string());
+         const auto normal_map_path = (settings->_texture_path.parent_path() / normal_map_filename);
+
+         if (std::filesystem::exists(normal_map_path))
+         {
+            auto normal_map = TexturePool::getInstance().get(normal_map_path);
+            settings->_normal_map = normal_map;
+            animation->_normal_texture = normal_map;
+         }
+         else
+         {
+            settings->_normal_map.reset();
+            animation->_normal_texture.reset();
+         }
+      }
+
+      animation->setOrigin(settings->_origin[0], settings->_origin[1]);
+      animation->_frames = settings->_frames;
+      animation->setFrameTimes(settings->_frame_durations);
+   }
+
+   // remove any animations that no longer have corresponding settings
+   for (auto it = _animations.begin(); it != _animations.end();)
+   {
+      if (_settings.find(it->first) == _settings.end())
+      {
+         it = _animations.erase(it);
+      }
+      else
+      {
+         ++it;
+      }
    }
 }
 
