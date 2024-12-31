@@ -8,22 +8,12 @@ void from_json(const nlohmann::json& j, AnimationSettings& settings)
    settings._texture_path = j.at("texture").get<std::string>();
 
    const auto frame_durations = j.at("frame_durations").get<std::vector<int32_t>>();
-
-   // otherwise have one frame duration for each frame
    for (const auto duration : frame_durations)
    {
       settings._frame_durations.push_back(sf::milliseconds(duration));
    }
 
-   for (auto i = 0; i < settings._frame_durations.size(); i++)
-   {
-      settings._frames.emplace_back(
-         settings._frame_offset[0] + (i * settings._frame_size[0]),
-         settings._frame_offset[1],
-         settings._frame_size[0],
-         settings._frame_size[1]
-      );
-   }
+   settings.createFrames();
 }
 
 AnimationSettings::AnimationSettings(
@@ -35,6 +25,15 @@ AnimationSettings::AnimationSettings(
 )
     : _frame_size(frameSize), _frame_offset(frameOffset), _origin(origin), _frame_durations(frameDurations), _texture_path(texturePath)
 {
+}
+
+void AnimationSettings::createFrames()
+{
+   _frames.clear();
+   for (auto i = 0; i < _frame_durations.size(); i++)
+   {
+      _frames.emplace_back(_frame_offset[0] + (i * _frame_size[0]), _frame_offset[1], _frame_size[0], _frame_size[1]);
+   }
 }
 
 AnimationSettings::AnimationSettings(const AnimationSettings& other)

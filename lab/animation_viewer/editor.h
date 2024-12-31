@@ -34,6 +34,8 @@ private:
    std::optional<int32_t> _selected_index;
    void drawControls();
    void loadAnimationNames();
+
+   bool _reloaded{false};
 };
 
 #endif  // EDITOR_H

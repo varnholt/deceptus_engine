@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(AnimationViewer)
+project(animation_editor)
 
 # Set the directories for dependencies and source files
 set(SRC_DIR "../../src")
