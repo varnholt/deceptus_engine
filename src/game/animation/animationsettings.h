@@ -21,6 +21,8 @@ struct AnimationSettings
    std::vector<sf::IntRect> _frames;
    bool _valid{true};
 
+   void createFrames();
+
    AnimationSettings() = default;
 
    AnimationSettings(const AnimationSettings&);
