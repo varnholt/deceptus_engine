@@ -234,8 +234,9 @@ void AnimationPool::recreateAnimationsFromSettings(UpdateFlag flag)
          }
       }
 
-      animation->setOrigin(settings->_origin[0], settings->_origin[1]);
+      settings->createFrames();
       animation->_frames = settings->_frames;
+      animation->setOrigin(settings->_origin[0], settings->_origin[1]);
       animation->setFrameTimes(settings->_frame_durations);
    }
 

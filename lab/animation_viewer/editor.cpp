@@ -15,9 +15,12 @@ constexpr auto scale = 5.0f;
 
 void Editor::drawAnimation(sf::RenderTarget& window)
 {
-   sf::FloatRect rect{0, 0, _current_animation->_frames[0].width * scale, _current_animation->_frames[0].height * scale};
+   // scale to maintain aspect ratio
+   const auto& frame = _current_animation->_frames[0];
+   const auto target_width = frame.width * scale;
+   const auto target_height = frame.height * scale;
 
-   // Draw the background rectangle
+   sf::FloatRect rect{0, 0, target_width, target_height};
    sf::RectangleShape rs;
    rs.setSize({rect.width, rect.height});
    rs.setPosition(rect.left, rect.top);
@@ -27,8 +30,6 @@ void Editor::drawAnimation(sf::RenderTarget& window)
    sf::Vector2f origin = _current_animation->getOrigin();
    _current_animation->setPosition(rect.left + origin.x * scale, rect.top + origin.y * scale);
    _current_animation->setScale(scale, scale);
-
-   // Draw the animation
    _current_animation->draw(window);
 
    ImGui::Separator();
@@ -66,9 +67,9 @@ void Editor::populateComboBox()
 {
    const auto& animations = _animation_pool->getAnimations();
 
-   for (int i = 0; i < static_cast<int>(_animation_names.size()); ++i)
+   for (auto i = 0; i < static_cast<int32_t>(_animation_names.size()); ++i)
    {
-      bool is_selected = (i == _selected_index);
+      const auto is_selected = (i == _selected_index);
       if (ImGui::Selectable(_animation_names[i].c_str(), is_selected))
       {
          _selected_index = i;
@@ -235,23 +236,34 @@ bool Editor::init()
    return true;
 }
 
-void Editor::drawCheckerboardGrid(sf::RenderTarget& window, float cell_size)
+void Editor::drawCheckerboardGrid(sf::RenderTarget& window, float base_cell_size)
 {
+   if (_current_animation == nullptr)
+   {
+      return;
+   }
+
    const sf::Vector2u window_size = window.getSize();
+
+   // adjust cell dimensions to match the frame's aspect ratio
+   const auto& frame = _current_animation->_frames[0];
+   const auto cell_width = base_cell_size;
+   const auto cell_height = base_cell_size;
+
    const sf::Color grey(128, 128, 128, 255);
    const sf::Color dark_grey(96, 96, 96, 255);
 
-   const auto rows = static_cast<int>(window_size.y / cell_size) + 1;
-   const auto cols = static_cast<int>(window_size.x / cell_size) + 1;
+   const auto rows = static_cast<int32_t>(window_size.y / cell_height) + 1;
+   const auto cols = static_cast<int32_t>(window_size.x / cell_width) + 1;
 
-   sf::RectangleShape cell(sf::Vector2f(cell_size, cell_size));
+   sf::RectangleShape cell(sf::Vector2f(cell_width, cell_height));
 
    for (auto y = 0; y < rows; ++y)
    {
       for (auto x = 0; x < cols; ++x)
       {
          cell.setFillColor(((x + y) % 2 == 0) ? grey : dark_grey);
-         cell.setPosition(x * cell_size, y * cell_size);
+         cell.setPosition(x * cell_width, y * cell_height);
          window.draw(cell);
       }
    }
@@ -316,10 +328,15 @@ void Editor::drawAnimationSettings()
       ImGui::TreePop();
    }
 
-   if (update_flag.has_value())
+   if (update_flag.has_value() && !_reloaded)
    {
+      _reloaded = true;
       _animation_pool->recreateAnimationsFromSettings(update_flag.value());
       loadAnimationNames();
+   }
+   else
+   {
+      _reloaded = false;
    }
 }
 
@@ -338,7 +355,7 @@ void Editor::selectAnimation(int32_t index)
 {
    _selected_index = index;
    const auto& animations = _animation_pool->getAnimations();
-   auto it = animations.find(_animation_names[_selected_index.value()]);
+   const auto it = animations.find(_animation_names[_selected_index.value()]);
    if (it != animations.end())
    {
       assignCurrentAnimation(it->second);
