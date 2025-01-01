@@ -2,8 +2,10 @@
 
 #include <imgui-SFML.h>
 #include <imgui.h>
+#include <windows.h>
 
-int main()
+// int main()
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
    sf::RenderWindow window(sf::VideoMode(1600, 900), "deceptus animation editor");
    window.setFramerateLimit(60);
