@@ -1,4 +1,5 @@
 #include "editor.h"
+// #include "imgui_internal.h"
 
 #include <imgui-SFML.h>
 #include <imgui.h>
@@ -93,7 +94,7 @@ void Editor::drawControls()
 {
    ImGui::Begin("Animation Controls");
 
-   if (ImGui::Button("|>"))
+   if (ImGui::Button("▶"))
    {
       if (_current_animation)
       {
@@ -104,7 +105,7 @@ void Editor::drawControls()
 
    ImGui::SameLine();
 
-   if (ImGui::Button("||"))
+   if (ImGui::Button("⏸"))
    {
       if (_current_animation)
       {
@@ -115,7 +116,7 @@ void Editor::drawControls()
 
    ImGui::SameLine();
 
-   if (ImGui::Button("[]"))
+   if (ImGui::Button("⏹"))
    {
       if (_current_animation)
       {
@@ -126,7 +127,7 @@ void Editor::drawControls()
 
    ImGui::SameLine();
 
-   if (ImGui::Button("<<"))
+   if (ImGui::Button("⏮"))
    {
       if (_current_animation && _current_animation->_current_frame > 0)
       {
@@ -138,7 +139,7 @@ void Editor::drawControls()
 
    ImGui::SameLine();
 
-   if (ImGui::Button(">>"))
+   if (ImGui::Button("⏭"))
    {
       if (_current_animation && _current_animation->_current_frame < static_cast<int32_t>(_current_animation->_frames.size()) - 1)
       {
@@ -146,6 +147,12 @@ void Editor::drawControls()
          _current_animation->_elapsed = _current_animation->getFrameTimes()[_current_animation->_current_frame];
          _current_animation->updateVertices();
       }
+   }
+
+   ImGui::SameLine();
+
+   if (ImGui::Checkbox("loop", &_loop))
+   {
    }
 
    if (ImGui::Button("Save"))
@@ -184,6 +191,12 @@ void Editor::update(const sf::Time& delta_time)
    if (_current_animation && _playing)
    {
       _current_animation->update(delta_time);
+
+      if (_loop && _current_animation->_paused)
+      {
+         _current_animation->seekToStart();
+         _current_animation->play();
+      }
    }
 }
 
@@ -233,7 +246,23 @@ bool Editor::init()
 
    loadAnimationNames();
 
-   return true;
+   // add support for player icons
+   static const ImWchar audio_icon_ranges[] = {
+      0x23ED,
+      0x23EE,  // ⏭, ⏮
+      0x23F8,
+      0x23F9,  // ⏸, ⏹
+      0x25B6,
+      0x25B6,  // ▶
+      0
+   };
+   ImGuiIO& io = ImGui::GetIO();
+   ImFontConfig fontConfig;
+   fontConfig.MergeMode = true;  // merge with default font
+   fontConfig.PixelSnapH = true;
+   io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/seguisym.ttf", 16.0f, &fontConfig, audio_icon_ranges);
+   io.Fonts->Build();
+   return ImGui::SFML::UpdateFontTexture();
 }
 
 void Editor::drawCheckerboardGrid(sf::RenderTarget& window, float base_cell_size)

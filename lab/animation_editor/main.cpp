@@ -5,7 +5,7 @@
 
 int main()
 {
-   sf::RenderWindow window(sf::VideoMode(800, 600), "Animation Viewer");
+   sf::RenderWindow window(sf::VideoMode(1600, 900), "deceptus animation editor");
    window.setFramerateLimit(60);
 
    if (!ImGui::SFML::Init(window))
@@ -14,16 +14,18 @@ int main()
    }
 
    Editor editor;
-
    if (!editor.init())
    {
       return 1;
    }
 
+   ImGui::LoadIniSettingsFromDisk("settings.ini");
+
    sf::Clock delta_clock;
 
    while (window.isOpen())
    {
+      // process events
       sf::Event event;
       while (window.pollEvent(event))
       {
@@ -34,19 +36,19 @@ int main()
          }
       }
 
+      // update
       const auto delta_time = delta_clock.restart();
       editor.update(delta_time);
       ImGui::SFML::Update(window, delta_time);
 
-      // draw animation and settings
+      // draw
       window.clear();
       editor.draw(window);
       ImGui::SFML::Render(window);
       window.display();
    }
 
+   ImGui::SaveIniSettingsToDisk("settings.ini");
    ImGui::SFML::Shutdown();
-
-   // editor.loop();
    return 0;
 }

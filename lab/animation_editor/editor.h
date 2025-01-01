@@ -6,6 +6,8 @@
 #include "game/animation/animationpool.h"
 #include "game/animation/animationsettings.h"
 
+class ImFont;
+
 class Editor
 {
 public:
@@ -24,6 +26,8 @@ private:
    void selectAnimByCursorKey();
    void populateComboBox();
    void assignCurrentAnimation(const std::shared_ptr<Animation>& animation);
+   void drawControls();
+   void loadAnimationNames();
 
    std::shared_ptr<Animation> _current_animation = nullptr;
    std::shared_ptr<AnimationSettings> _current_settings = nullptr;
@@ -32,10 +36,9 @@ private:
    std::vector<std::string> _animation_names;
    std::unique_ptr<AnimationPool> _animation_pool;
    std::optional<int32_t> _selected_index;
-   void drawControls();
-   void loadAnimationNames();
 
    bool _reloaded{false};
+   bool _loop{false};
 };
 
 #endif  // EDITOR_H
