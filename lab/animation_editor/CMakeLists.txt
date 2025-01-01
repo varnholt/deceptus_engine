@@ -11,7 +11,7 @@ set(THIRDPARTY_DIR "../../thirdparty")
 
 
 # Add the executable
-add_executable(animation_viewer
+add_executable(animation_editor WIN32
     ${LAB_DIR}/main.cpp
 
     ${SRC_DIR}/game/animation/animation.cpp
@@ -30,7 +30,7 @@ include_directories(
     ${THIRDPARTY_DIR}
 )
 
-target_link_libraries(animation_viewer PRIVATE
+target_link_libraries(animation_editor PRIVATE
      glu32
      opengl32
  )
@@ -38,7 +38,7 @@ target_link_libraries(animation_viewer PRIVATE
 # Link SFML libraries
 set(SFML_LIB_DIR ${SFML_DIR}/lib)
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    target_link_libraries(animation_viewer PRIVATE
+    target_link_libraries(animation_editor PRIVATE
         ${SFML_LIB_DIR}/sfml-audio.lib
         ${SFML_LIB_DIR}/sfml-graphics.lib
         ${SFML_LIB_DIR}/sfml-network.lib
@@ -46,7 +46,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
         ${SFML_LIB_DIR}/sfml-window.lib
     )
 else()
-    target_link_libraries(animation_viewer PRIVATE
+    target_link_libraries(animation_editor PRIVATE
         ${SFML_LIB_DIR}/sfml-audio-d.lib
         ${SFML_LIB_DIR}/sfml-graphics-d.lib
         ${SFML_LIB_DIR}/sfml-network-d.lib
@@ -66,24 +66,24 @@ set(IMGUI_SOURCES
 
 
 # Add ImGui sources to the target
-target_sources(animation_viewer PRIVATE ${IMGUI_SOURCES})
+target_sources(animation_editor PRIVATE ${IMGUI_SOURCES})
 
 # Link libraries to the target
-target_link_libraries(animation_viewer PRIVATE ${SFML_LIBS})
+target_link_libraries(animation_editor PRIVATE ${SFML_LIBS})
 
 # Set the executable's output directory
-set_target_properties(animation_viewer PROPERTIES
+set_target_properties(animation_editor PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
 )
 
 # Enable C++23
-set_property(TARGET animation_viewer PROPERTY CXX_STANDARD 23)
+set_property(TARGET animation_editor PROPERTY CXX_STANDARD 23)
 
 # Add post-build commands to copy required SFML DLLs to the output directory
-add_custom_command(TARGET animation_viewer POST_BUILD
+add_custom_command(TARGET animation_editor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${SFML_DIR}/bin/sfml-graphics-2.dll
     ${SFML_DIR}/bin/sfml-window-2.dll
     ${SFML_DIR}/bin/sfml-system-2.dll
-    $<TARGET_FILE_DIR:animation_viewer>
+    $<TARGET_FILE_DIR:animation_editor>
 )
