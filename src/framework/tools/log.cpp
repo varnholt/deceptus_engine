@@ -7,7 +7,7 @@
 
 namespace
 {
-Log::ListenerCallback _log_callback;
+std::vector<Log::ListenerCallback> _log_callbacks;
 
 std::string formatTime(const std::chrono::system_clock::time_point& now)
 {
@@ -17,28 +17,15 @@ std::string formatTime(const std::chrono::system_clock::time_point& now)
 
 void log(Log::Level level, const std::string_view& message, const std::source_location& source_location)
 {
-   std::string function_name = source_location.function_name();
-   function_name = function_name.substr(0, function_name.find('('));
-
-   // remove '__cdecl' if it exists
-   const std::string cdecl_str = "__cdecl ";
-   size_t cdecl_pos = function_name.find(cdecl_str);
-   if (cdecl_pos != std::string::npos)
-   {
-      function_name.erase(cdecl_pos, cdecl_str.length());
-   }
-
    const auto now = std::chrono::system_clock::now();
-   const auto source_tag = std::filesystem::path{source_location.file_name()}.filename().string() + ":" + function_name + ":" +
-                           std::to_string(source_location.line());
-
+   const auto source_tag = Log::parseSourceTag(source_location);
    const auto now_local = formatTime(now);
 
    std::cout << "[" << static_cast<char>(level) << "] " << now_local << " | " << source_tag << ": " << message << std::endl;
 
-   if (_log_callback)
+   for (const auto& callback : _log_callbacks)
    {
-      _log_callback(now, level, std::string{message}, source_location);
+      callback(now, level, std::string{message}, source_location);
    }
 }
 
@@ -46,7 +33,7 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
 
 void Log::registerListenerCallback(const ListenerCallback& cb)
 {
-   _log_callback = cb;
+   _log_callbacks.push_back(cb);
 }
 
 void Log::info(const std::string_view& message, const std::source_location& source_location)
@@ -94,4 +81,23 @@ Log::Error::Error(const std::source_location& source_location) : Message(source_
 
 Log::Fatal::Fatal(const std::source_location& source_location) : Message(source_location, fatal)
 {
+}
+
+std::string Log::parseSourceTag(const std::source_location& source_location)
+{
+   std::string function_name = source_location.function_name();
+   function_name = function_name.substr(0, function_name.find('('));
+
+   // remove '__cdecl' if it exists
+   const std::string cdecl_str = "__cdecl ";
+   size_t cdecl_pos = function_name.find(cdecl_str);
+   if (cdecl_pos != std::string::npos)
+   {
+      function_name.erase(cdecl_pos, cdecl_str.length());
+   }
+
+   const auto source_tag = std::filesystem::path{source_location.file_name()}.filename().string() + ":" + function_name + ":" +
+                           std::to_string(source_location.line());
+
+   return source_tag;
 }

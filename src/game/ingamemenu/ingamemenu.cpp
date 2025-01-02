@@ -254,6 +254,12 @@ void InGameMenu::open()
       return;
    }
 
+   // when there's a dialogue open, opening the ingame menu does not make any sense
+   if (DisplayMode::getInstance().isSet(Display::Modal))
+   {
+      return;
+   }
+
    GameState::getInstance().enqueuePause();
    DisplayMode::getInstance().enqueueSet(Display::IngameMenu);
 
