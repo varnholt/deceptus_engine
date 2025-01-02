@@ -111,7 +111,7 @@ void Inventory::removeAddedCallback(const AddedCallback& callback_to_remove)
          [&callback_to_remove](const auto& callback)
          {
             const auto match = callback.target_type() == callback_to_remove.target_type() &&
-                               callback.target<AddedCallback>() == callback_to_remove.target<AddedCallback>();
+                               callback.template target<AddedCallback>() == callback_to_remove.target<AddedCallback>();
 
             return match;
          }
@@ -129,7 +129,7 @@ void Inventory::removeUsedCallback(const UsedCallback& callback_to_remove)
          [&callback_to_remove](const auto& callback)
          {
             const auto match = callback.target_type() == callback_to_remove.target_type() &&
-                               callback.target<UsedCallback>() == callback_to_remove.target<UsedCallback>();
+                               callback.template target<UsedCallback>() == callback_to_remove.target<UsedCallback>();
 
             return match;
          }

@@ -181,7 +181,7 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
 
    thread_it->_sound.play();
 
-   return std::distance(_sound_threads.begin(), thread_it);
+   return static_cast<int32_t>(std::distance(_sound_threads.begin(), thread_it));
 }
 
 void Audio::stopSample(const std::string& name)

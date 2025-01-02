@@ -107,6 +107,11 @@ void Animation::addChild(const std::shared_ptr<Animation>& child)
    _children.push_back(child);
 }
 
+const std::vector<sf::Time>& Animation::getFrameTimes() const
+{
+   return _frame_times;
+}
+
 bool Animation::isVisible() const
 {
    return _visible;

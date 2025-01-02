@@ -11,6 +11,7 @@
 
 #include "framework/tools/logthread.h"
 #include "game/constants.h"
+#include "game/debug/logui.h"
 #include "game/io/preloader.h"
 #include "game/tests/test.h"
 
@@ -52,6 +53,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
    LogThread log_thread;
    Log::registerListenerCallback([&log_thread](const auto& time_point, auto level, const auto& message, const auto& location)
                                  { log_thread.log(time_point, level, message, location); });
+
+   Log::registerListenerCallback([](const auto& time_point, auto level, const auto& message, const auto& location)
+                                 { LogUiBuffer::log(time_point, level, message, location); });
+
 #endif
 
 #ifdef __linux__

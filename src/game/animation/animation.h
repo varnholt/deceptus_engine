@@ -73,6 +73,8 @@ public:
 
    std::vector<std::shared_ptr<Animation>> _children;
 
+   const std::vector<sf::Time>& getFrameTimes() const;
+
 private:
    std::vector<sf::Time> _frame_times;
 };

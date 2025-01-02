@@ -19,8 +19,9 @@ struct AnimationSettings
    std::shared_ptr<sf::Texture> _texture;
    std::shared_ptr<sf::Texture> _normal_map;
    std::vector<sf::IntRect> _frames;
-   int32_t _sprite_count{0};
    bool _valid{true};
+
+   void createFrames();
 
    AnimationSettings() = default;
 

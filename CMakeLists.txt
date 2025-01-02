@@ -408,6 +408,7 @@ add_executable(deceptus ${GAME_FILES}
    src/game/player/playerattackdash.h src/game/player/playerattackdash.cpp
    src/game/camera/camerazoom.h src/game/camera/camerazoom.cpp
    src/game/mechanisms/zoomrect.h src/game/mechanisms/zoomrect.cpp
+   src/game/debug/logui.h src/game/debug/logui.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
