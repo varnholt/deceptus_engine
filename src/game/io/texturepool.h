@@ -1,28 +1,28 @@
 #pragma once
 
-#include <filesystem>
-#include <map>
-#include <memory>
-#include <mutex>
-
 #include <SFML/Graphics.hpp>
+#include "framework/tools/resourcepool.h"
 
-/*! \brief A texture cache implementation
- *         It holds weak pointers to textures so they get deleted once no longer needed.
- *
- *  A shared_ptr is retrieved by just passing in a path to the texture.
+/*! \brief specialized resource pool for sf::Texture.
  */
-class TexturePool
+class TexturePool : public ResourcePool<sf::Texture>
 {
 public:
-   static TexturePool& getInstance();
-   std::shared_ptr<sf::Texture> get(const std::filesystem::path&);
+   static TexturePool& getInstance()
+   {
+      static TexturePool instance;
+      return instance;
+   }
 
-   size_t computeSize() const;
+protected:
+   bool loadResource(sf::Texture& texture, const std::filesystem::path& path) const override
+   {
+      return texture.loadFromFile(path.string());
+   }
 
-private:
-   TexturePool() = default;
-
-   std::mutex _mutex;
-   std::map<std::string, std::weak_ptr<sf::Texture>> _pool;
+   size_t computeResourceSize(const sf::Texture& texture) const override
+   {
+      const auto size = texture.getSize();
+      return size.x * size.y * 4;  // rgba
+   }
 };
