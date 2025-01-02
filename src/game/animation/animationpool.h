@@ -27,6 +27,21 @@ public:
 
    void setGarbageCollectorEnabled(bool newGarbage_collector_enabled);
 
+   const std::map<std::string, std::shared_ptr<AnimationSettings>>& settings() const;
+
+   void saveToJson();
+   void reloadFromJson();
+
+   enum class UpdateFlag
+   {
+      Settings,
+      Texture,
+      NormalMap,
+      All
+   };
+
+   void recreateAnimationsFromSettings(UpdateFlag flag = UpdateFlag::Settings);
+
 private:
    void deserialize(const std::string& data);
    void deserializeFromFile(const std::string& filename);
