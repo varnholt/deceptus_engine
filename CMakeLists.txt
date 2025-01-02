@@ -236,7 +236,7 @@ set(GAME_FILES
     src/game/level/stenciltilemap.cpp src/game/level/stenciltilemap.h
     src/game/weapons/playersword.cpp src/game/weapons/playersword.h
     src/game/tests/test.cpp src/game/tests/test.h
-    src/game/io/texturepool.cpp src/game/io/texturepool.h
+    src/game/io/texturepool.h
     src/game/level/tilemap.cpp src/game/level/tilemap.h
     src/game/level/tilemapfactory.cpp src/game/level/tilemapfactory.h
     src/game/level/tmxenemy.cpp src/game/level/tmxenemy.h
@@ -409,6 +409,7 @@ add_executable(deceptus ${GAME_FILES}
    src/game/camera/camerazoom.h src/game/camera/camerazoom.cpp
    src/game/mechanisms/zoomrect.h src/game/mechanisms/zoomrect.cpp
    src/game/debug/logui.h src/game/debug/logui.cpp
+   src/framework/tools/resourcepool.h
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
