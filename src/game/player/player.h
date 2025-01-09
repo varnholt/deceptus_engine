@@ -238,7 +238,7 @@ private:
    std::shared_ptr<PlayerAnimation> _player_animation;
    std::deque<PositionedAnimation> _last_animations;
 
-   Chunk _chunk;
+   Chunk _chunk{0, 0};
    AnimationPool _animation_pool{"data/sprites/animations.json"};
 
    static Player* __current;

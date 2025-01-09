@@ -6,6 +6,7 @@
 #include "framework/tools/timer.h"
 #include "game/audio/audio.h"
 #include "game/camera/camerapanorama.h"
+#include "game/camera/camerasystem.h"
 #include "game/clock/gameclock.h"
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerdata.h"
@@ -831,6 +832,8 @@ void Game::processEvent(const sf::Event& event)
 
       processKeyReleasedEvents(event);
    }
+
+#ifdef DEVELOPMENT_MODE
    else if (event.type == sf::Event::TextEntered)
    {
       if (Console::getInstance().isActive())
@@ -851,6 +854,12 @@ void Game::processEvent(const sf::Event& event)
          Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
       }
    }
+   else if (event.type == sf::Event::MouseWheelScrolled)
+   {
+      const auto delta = event.mouseWheelScroll.delta;
+      Level::getCurrentLevel()->zoomBy(delta);
+   }
+#endif
 
    EventDistributor::event(event);
 }

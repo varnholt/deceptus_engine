@@ -107,6 +107,9 @@ void StaticLight::deserialize(const GameDeserializeData& data)
    _sprite.setTexture(*_texture);
    _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
 
+   _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   addChunks(_rect);
+
    auto scale_x_px = data._tmx_object->_width_px / _texture->getSize().x;
    auto scale_y_px = data._tmx_object->_height_px / _texture->getSize().y;
    _sprite.scale(scale_x_px, scale_y_px);

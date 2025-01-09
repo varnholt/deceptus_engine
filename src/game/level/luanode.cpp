@@ -2790,6 +2790,10 @@ void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32
    bounding_box.height = bottom - top;
 
    _bounding_box = bounding_box;
+
+   // even though the node might probably be moving, it's safe to used a fixed chunk with the current bounding box
+   _chunks.clear();
+   addChunks(bounding_box);
 }
 
 void LuaNode::addAudioRange(float far_distance, float far_volume, float near_distance, float near_volume)

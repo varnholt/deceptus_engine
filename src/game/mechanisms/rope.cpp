@@ -237,6 +237,8 @@ void Rope::setup(const GameDeserializeData& data)
    };
    // clang-format on
 
+   addChunks(_bounding_box);
+
    // pin the rope to the starting point (anchor)
    const auto pos_m = b2Vec2{static_cast<float>(_position_px.x * MPP), static_cast<float>(_position_px.y * MPP)};
    _anchor_a_body = data._world->CreateBody(&_anchor_a_def);

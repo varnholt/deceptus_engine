@@ -13,6 +13,8 @@
 #include "game/animation/animationplayer.h"
 #include "game/camera/camerapanorama.h"
 #include "game/camera/cameraroomlock.h"
+#include "game/camera/camerasystem.h"
+#include "game/camera/camerazoom.h"
 #include "game/config/gameconfiguration.h"
 #include "game/config/tweaks.h"
 #include "game/constants.h"
@@ -49,15 +51,66 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdlib>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <ranges>
 #include <regex>
 #include <sstream>
 #include <string>
 #include <thread>
+
+// #define MECHANISM_TIMING_ENABLED 1
+
+#ifdef MECHANISM_TIMING_ENABLED
+namespace
+{
+struct MechanismTiming
+{
+   using HighResDuration = std::chrono::high_resolution_clock::duration;
+
+   HighResDuration update_duration;
+   int32_t update_count{0};
+
+   void addUpdateTime(HighResDuration duration)
+   {
+      update_duration += duration;
+      update_count++;
+   }
+
+   auto getAverageUpdateTime() const
+   {
+      return (update_count > 0) ? (update_duration / update_count) : HighResDuration{0};
+   }
+};
+
+std::unordered_map<std::string, MechanismTiming> timing_data;
+
+void logUpdateTimes(const std::unordered_map<std::string, MechanismTiming>& timing_data, int32_t n)
+{
+   std::vector<std::pair<std::string, MechanismTiming::HighResDuration>> timings;
+   for (const auto& [name, timing] : timing_data)
+   {
+      timings.emplace_back(name, timing.getAverageUpdateTime());
+   }
+
+   std::ranges::sort(timings, [](const auto& a, const auto& b) { return a.second > b.second; });
+   const auto top_n = timings | std::views::take(n);
+
+   Log::Info() << "update times";
+
+   for (const auto& [name, avg_update_time] : top_n)
+   {
+      Log::Info() << "- mechanism: " << name << " avg: " << avg_update_time << " sum:" << timing_data.at(name).update_duration
+                  << " count:" << timing_data.at(name).update_count;
+   }
+}
+
+}  // namespace
+#endif
 
 Level* Level::__current_level = nullptr;
 
@@ -884,6 +937,12 @@ void Level::zoomOut()
    zoom.setZoomFactor(zoom.getZoomFactor() * 1.05);
 }
 
+void Level::zoomBy(float delta)
+{
+   auto& zoom = CameraZoom::getInstance();
+   zoom.setZoomFactor(std::clamp(zoom.getZoomFactor() + delta * 0.2f, 0.1f, 20.0f));
+}
+
 void Level::zoomReset()
 {
    auto& zoom = CameraZoom::getInstance();
@@ -928,10 +987,12 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 
 void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32_t from, int32_t to)
 {
+
    const auto& player_chunk = Player::getCurrent()->getChunk();
 
    target.setView(*_level_view);
    normal.setView(*_level_view);
+
 
    for (auto z_index = from; z_index <= to; z_index++)
    {
@@ -952,33 +1013,38 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          for (const auto& mechanism : *mechanism_vector)
          {
-            if (mechanism->getZ() == z_index)
+            if (mechanism->getZ() != z_index)
             {
-               auto draw_mechanism = true;
-               if (mechanism->hasChunks())
-               {
-                  const auto& chunks = mechanism->getChunks();
-                  draw_mechanism = std::any_of(
-                     chunks.cbegin(),
-                     chunks.cend(),
-                     [player_chunk](const Chunk& other) {
-                        return abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X &&
-                               abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y;
-                     }
-                  );
-               }
+               continue;
+            }
 
-               // static auto chunk_debug_counter = 0;
-               // if (chunk_debug_counter % 600 == 0)
-               // {
-               //    std::cout << "player chunk: " << player_chunk._x << " " << player_chunk._y << std::endl;
-               // }
-               // chunk_debug_counter++;
+            auto draw_mechanism = true;
+            if (mechanism->hasChunks())
+            {
+               const auto& chunks = mechanism->getChunks();
+               draw_mechanism = std::any_of(
+                  chunks.cbegin(),
+                  chunks.cend(),
+                  [player_chunk](const Chunk& other)
+                  {
+                     return abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X &&
+                            abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y;
+                  }
+               );
+            }
 
-               if (draw_mechanism)
-               {
-                  mechanism->draw(target, normal);
-               }
+            // static auto chunk_debug_counter = 0;
+            // if (chunk_debug_counter % 60000 == 0)
+            // {
+            //    Log::Info() << "player chunk: " << player_chunk._x << " " << player_chunk._y << ", filtered: " << filtered_counter
+            //                << std::endl;
+            //    filtered_counter = 0;
+            // }
+            // chunk_debug_counter++;
+
+            if (draw_mechanism)
+            {
+               mechanism->draw(target, normal);
             }
          }
       }
@@ -1382,10 +1448,31 @@ void Level::update(const sf::Time& dt)
 
          if (update_mechanism)
          {
+#ifdef MECHANISM_TIMING_ENABLED
+            auto game_node = dynamic_cast<GameNode*>(mechanism.get());
+            const auto class_name = game_node ? game_node->getClassName() : "unknown";
+            const auto time_start = std::chrono::high_resolution_clock::now();
+#endif
             mechanism->update(dt);
+
+#ifdef MECHANISM_TIMING_ENABLED
+            const auto time_end = std::chrono::high_resolution_clock::now();
+            timing_data[class_name].addUpdateTime(time_end - time_start);
+#endif
          }
       }
    }
+
+#ifdef MECHANISM_TIMING_ENABLED
+   static auto timing_debug_counter = 0;
+   if (timing_debug_counter % 1000 == 0)
+   {
+      logUpdateTimes(timing_data, 5);
+      timing_data.clear();
+   }
+
+   timing_debug_counter++;
+#endif
 
    _level_script.update(dt);
 

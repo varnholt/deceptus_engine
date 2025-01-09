@@ -6,6 +6,7 @@
 #include "framework/tools/stopwatch.h"
 #include "game/audio/audio.h"
 #include "game/camera/camerapanorama.h"
+#include "game/camera/camerasystem.h"
 #include "game/clock/gameclock.h"
 #include "game/config/gameconfiguration.h"
 #include "game/config/tweaks.h"
