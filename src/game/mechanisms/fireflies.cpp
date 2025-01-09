@@ -52,6 +52,8 @@ void Fireflies::deserialize(const GameDeserializeData& data)
    _rect_px.width = data._tmx_object->_width_px;
    _rect_px.height = data._tmx_object->_height_px;
 
+   addChunks(_rect_px);
+
    auto animation_speed = ANIMATION_SPEED;
    float scale_vertical[2]{1.0f, 1.0f};
    float scale_horizontal[2]{1.0f, 1.0f};

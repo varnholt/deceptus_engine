@@ -1,10 +1,7 @@
 #pragma once
 
 // game
-#include "framework/joystick/gamecontrollerinfo.h"
 #include "game/audio/volumeupdater.h"
-#include "game/camera/camerasystem.h"
-#include "game/camera/camerazoom.h"
 #include "game/constants.h"
 #include "game/effects/boomeffect.h"
 #include "game/effects/lightsystem.h"
@@ -18,7 +15,6 @@
 #include "game/level/tmxenemy.h"
 #include "game/mechanisms/imagelayer.h"
 #include "game/mechanisms/portal.h"
-#include "game/mechanisms/staticlight.h"
 #include "game/physics/physics.h"
 #include "game/physics/squaremarcher.h"
 #include "game/shaders/atmosphereshader.h"
@@ -72,6 +68,7 @@ public:
 
    void zoomIn();
    void zoomOut();
+   void zoomBy(float delta);
    void zoomReset();
 
    void spawnEnemies();

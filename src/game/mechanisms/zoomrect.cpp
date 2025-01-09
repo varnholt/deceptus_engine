@@ -2,8 +2,8 @@
 
 #include <iostream>
 #include "framework/tmxparser/tmxproperties.h"
+#include "game/camera/camerazoom.h"
 #include "game/io/valuereader.h"
-#include "game/level/level.h"
 #include "game/player/player.h"
 
 namespace

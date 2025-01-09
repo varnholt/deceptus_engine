@@ -115,5 +115,17 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
 
    image->_blend_mode = blend_mode;
 
+   if (!image->_parallax_settings.has_value())
+   {
+      const auto rect = sf::FloatRect{
+         image_layer->_offset_x_px,
+         image_layer->_offset_y_px,
+         static_cast<float>(image_layer->_image->_width_px),
+         static_cast<float>(image_layer->_image->_height_px)
+      };
+
+      image->addChunks(rect);
+   }
+
    return image;
 }

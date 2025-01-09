@@ -18,6 +18,7 @@ public:
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& color) override;
    void update(const sf::Time& time) override;
+
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    void deserialize(const GameDeserializeData& data);
@@ -32,4 +33,5 @@ public:
    float _flicker_alpha_amount = 1.0f;
    float _time_offset = 0.0f;
    int32_t _instance_number = 0;
+   sf::FloatRect _rect;
 };
