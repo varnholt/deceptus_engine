@@ -43,6 +43,7 @@ public:
    virtual void setRoomIds(const std::vector<int32_t>& room_ids);
    virtual void addRoomId(int32_t room_id);
 
+   // use when mechanism update/draw calls are expensive
    virtual bool hasChunks() const;
    virtual const std::vector<Chunk>& getChunks() const;
    virtual void addChunks(const sf::FloatRect& bounding_box);

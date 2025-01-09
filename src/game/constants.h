@@ -35,7 +35,7 @@ constexpr auto PLAYER_ACTUAL_HEIGHT = 32;  // the actual height can be smaller t
 constexpr auto FACTOR_DEG_TO_RAD = 0.0174532925199432957f;
 constexpr auto FACTOR_RAD_TO_DEG = 57.295779513082320876f;
 
-constexpr auto CHUNK_SHIFT_X{9};  // for px position to chunk position division
+constexpr auto CHUNK_SHIFT_X{9};  // for px position to chunk position division (/ 512)
 constexpr auto CHUNK_SHIFT_Y{9};
 constexpr auto CHUNK_ALLOWED_DELTA_X{3};
 constexpr auto CHUNK_ALLOWED_DELTA_Y{3};

@@ -107,6 +107,8 @@ void Lever::setup(const GameDeserializeData& data)
    setObjectId(data._tmx_object->_name);
 
    updateSprite();
+
+   addChunks(_rect);
 }
 
 void Lever::updateSprite()

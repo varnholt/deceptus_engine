@@ -25,7 +25,7 @@
 
 struct Chunk
 {
-   Chunk() = default;
+   Chunk() = delete;
    Chunk(int32_t x_px, int32_t y_px);
    Chunk(float x_px, float y_px);
 
