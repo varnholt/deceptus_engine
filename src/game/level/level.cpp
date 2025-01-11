@@ -987,12 +987,28 @@ void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 
 void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32_t from, int32_t to)
 {
-
    const auto& player_chunk = Player::getCurrent()->getChunk();
 
    target.setView(*_level_view);
    normal.setView(*_level_view);
 
+   const auto check_draw_mechanism = [&player_chunk](const auto& mechanism) -> bool
+   {
+      if (!mechanism->hasChunks())
+      {
+         return true;
+      }
+
+      const auto& chunks = mechanism->getChunks();
+      const auto draw_mechanism = std::any_of(
+         chunks.cbegin(),
+         chunks.cend(),
+         [player_chunk](const Chunk& other)
+         { return abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X && abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y; }
+      );
+
+      return draw_mechanism;
+   };
 
    for (auto z_index = from; z_index <= to; z_index++)
    {
@@ -1018,31 +1034,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
                continue;
             }
 
-            auto draw_mechanism = true;
-            if (mechanism->hasChunks())
-            {
-               const auto& chunks = mechanism->getChunks();
-               draw_mechanism = std::any_of(
-                  chunks.cbegin(),
-                  chunks.cend(),
-                  [player_chunk](const Chunk& other)
-                  {
-                     return abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X &&
-                            abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y;
-                  }
-               );
-            }
-
-            // static auto chunk_debug_counter = 0;
-            // if (chunk_debug_counter % 60000 == 0)
-            // {
-            //    Log::Info() << "player chunk: " << player_chunk._x << " " << player_chunk._y << ", filtered: " << filtered_counter
-            //                << std::endl;
-            //    filtered_counter = 0;
-            // }
-            // chunk_debug_counter++;
-
-            if (draw_mechanism)
+            if (check_draw_mechanism(mechanism))
             {
                mechanism->draw(target, normal);
             }
@@ -1060,7 +1052,10 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          if (enemy->getZ() == z_index)
          {
-            enemy->draw(target, normal);
+            if (check_draw_mechanism(enemy))
+            {
+               enemy->draw(target, normal);
+            }
          }
       }
 
@@ -1429,24 +1424,29 @@ void Level::update(const sf::Time& dt)
    }
 
    const auto& player_chunk = Player::getCurrent()->getChunk();
+
+   const auto check_update_mechanism = [&player_chunk](const auto& mechanism)
+   {
+      auto update_mechanism = true;
+      if (mechanism->hasChunks())
+      {
+         const auto& chunks = mechanism->getChunks();
+         update_mechanism = std::any_of(
+            chunks.cbegin(),
+            chunks.cend(),
+            [player_chunk](const Chunk& other)
+            { return abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X && abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y; }
+         );
+      }
+
+      return update_mechanism;
+   };
+
    for (auto* mechanism_vector : _mechanisms_list)
    {
       for (const auto& mechanism : *mechanism_vector)
       {
-         auto update_mechanism = true;
-         if (mechanism->hasChunks())
-         {
-            const auto& chunks = mechanism->getChunks();
-            update_mechanism = std::any_of(
-               chunks.cbegin(),
-               chunks.cend(),
-               [player_chunk](const Chunk& other) {
-                  return abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X && abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y;
-               }
-            );
-         }
-
-         if (update_mechanism)
+         if (check_update_mechanism(mechanism))
          {
 #ifdef MECHANISM_TIMING_ENABLED
             auto game_node = dynamic_cast<GameNode*>(mechanism.get());
@@ -1476,7 +1476,7 @@ void Level::update(const sf::Time& dt)
 
    _level_script.update(dt);
 
-   LuaInterface::instance().update(dt);
+   LuaInterface::instance().update(dt, check_update_mechanism);
 
    updatePlayerLight();
 

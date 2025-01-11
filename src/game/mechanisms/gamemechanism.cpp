@@ -74,12 +74,23 @@ const std::vector<Chunk>& GameMechanism::getChunks() const
    return _chunks;
 }
 
-void GameMechanism::addChunks(const sf::FloatRect& bouding_box)
+void GameMechanism::addChunks(const sf::FloatRect& bounding_box)
 {
-   _chunks.emplace_back(bouding_box.left, bouding_box.top);
-   _chunks.emplace_back(bouding_box.left, bouding_box.top + bouding_box.height);
-   _chunks.emplace_back(bouding_box.left + bouding_box.width, bouding_box.top + bouding_box.height);
-   _chunks.emplace_back(bouding_box.left + bouding_box.width, bouding_box.top);
+   std::vector<Chunk> chunks = {
+      Chunk(bounding_box.left, bounding_box.top),
+      Chunk(bounding_box.left, bounding_box.top + bounding_box.height),
+      Chunk(bounding_box.left + bounding_box.width, bounding_box.top + bounding_box.height),
+      Chunk(bounding_box.left + bounding_box.width, bounding_box.top)
+   };
+
+   // filter out duplicates
+   for (const auto& chunk : chunks)
+   {
+      if (!std::ranges::any_of(_chunks, [&](const Chunk& existing_chunk) { return existing_chunk == chunk; }))
+      {
+         _chunks.push_back(chunk);
+      }
+   }
 }
 
 bool GameMechanism::isAudioEnabled() const

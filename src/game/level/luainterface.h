@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -13,8 +14,10 @@ class LuaInterface
 public:
    static LuaInterface& instance();
 
+   using ChunkFilter = std::function<bool(const std::shared_ptr<GameMechanism>&)>;
+
    void initialize();
-   void update(const sf::Time& dt);
+   void update(const sf::Time& dt, const ChunkFilter& filter);
    void reset();
 
    std::shared_ptr<LuaNode> addObject(GameNode* parent, const std::string& filename);
