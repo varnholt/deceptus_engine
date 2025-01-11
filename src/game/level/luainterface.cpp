@@ -41,12 +41,19 @@ std::shared_ptr<LuaNode> LuaInterface::addObject(GameNode* parent, const std::st
    return object;
 }
 
-void LuaInterface::update(const sf::Time& dt)
+void LuaInterface::update(const sf::Time& dt, const ChunkFilter& filter)
 {
    for (auto it = _object_list.begin(); it != _object_list.end();)
    {
       {
          const auto& object = *it;
+
+         if (!filter(object))
+         {
+            ++it;
+            continue;
+         }
+
          object->luaMovedTo();
          object->luaPlayerMovedTo();
          object->luaUpdate(dt);
