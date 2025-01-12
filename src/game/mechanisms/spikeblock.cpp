@@ -45,6 +45,8 @@ void SpikeBlock::setup(const GameDeserializeData& data)
 
    _rectangle = {data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
+   addChunks(_rectangle);
+
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
    if (data._tmx_object->_properties)

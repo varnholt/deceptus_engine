@@ -76,19 +76,19 @@ const std::vector<Chunk>& GameMechanism::getChunks() const
 
 void GameMechanism::addChunks(const sf::FloatRect& bounding_box)
 {
-   std::vector<Chunk> chunks = {
-      Chunk(bounding_box.left, bounding_box.top),
-      Chunk(bounding_box.left, bounding_box.top + bounding_box.height),
-      Chunk(bounding_box.left + bounding_box.width, bounding_box.top + bounding_box.height),
-      Chunk(bounding_box.left + bounding_box.width, bounding_box.top)
-   };
-
-   // filter out duplicates
-   for (const auto& chunk : chunks)
+   constexpr int32_t chunk_size_x = 1 << CHUNK_SHIFT_X;  // 512
+   constexpr int32_t chunk_size_y = 1 << CHUNK_SHIFT_Y;  // 512
+   for (auto y = static_cast<int32_t>(bounding_box.top); y <= static_cast<int32_t>(bounding_box.top + bounding_box.height);
+        y += chunk_size_y)
    {
-      if (!std::ranges::any_of(_chunks, [&](const Chunk& existing_chunk) { return existing_chunk == chunk; }))
+      for (auto x = static_cast<int32_t>(bounding_box.left); x <= static_cast<int32_t>(bounding_box.left + bounding_box.width);
+           x += chunk_size_x)
       {
-         _chunks.push_back(chunk);
+         Chunk chunk(x, y);
+         if (!std::ranges::any_of(_chunks, [&chunk](const Chunk& existing_chunk) { return existing_chunk == chunk; }))
+         {
+            _chunks.push_back(chunk);
+         }
       }
    }
 }

@@ -273,6 +273,11 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
       data._tmx_object->_height_px - (2 * TOLERANCE_PIXELS)
    };
 
+   const auto rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
+   instance->addChunks(rect);
+
    // deserialize range data
    if (data._tmx_object->_properties)
    {
@@ -425,44 +430,52 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
    {
       for (auto j = 0u; j < height; ++j)
       {
-         auto tile_number = tiles[i + j * width];
+         const auto tile_number = tiles[i + j * width];
 
-         if (tile_number != 0)
+         if (tile_number == 0)
          {
-            const auto id = (tile_number - first_id);
-
-            auto spikes = std::make_shared<Spikes>(parent);
-            spikes->_texture = texture;
-            spikes->_tu = static_cast<float>(id % tiles_per_row);
-            spikes->_tv = static_cast<int32_t>(id / tiles_per_row);
-            spikes->_mode = mode;
-
-            all_spikes.push_back(spikes);
-
-            if (mode == Mode::Trap)
-            {
-               spikes->_tu = SPIKES_TILE_INDEX_TRAP_START;
-            }
-
-            if (data._tmx_layer->_properties)
-            {
-               spikes->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
-            }
-
-            spikes->_player_collision_rect_px = {
-               static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
-               static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
-               PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS),
-               PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)
-            };
-
-            sf::Sprite sprite;
-            sprite.setTexture(*spikes->_texture);
-            sprite.setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
-
-            spikes->_sprite.push_back(sprite);
-            spikes->updateSpriteRect();
+            continue;
          }
+
+         const auto id = (tile_number - first_id);
+
+         auto spikes = std::make_shared<Spikes>(parent);
+         spikes->_texture = texture;
+         spikes->_tu = static_cast<float>(id % tiles_per_row);
+         spikes->_tv = static_cast<int32_t>(id / tiles_per_row);
+         spikes->_mode = mode;
+
+         all_spikes.push_back(spikes);
+
+         if (mode == Mode::Trap)
+         {
+            spikes->_tu = SPIKES_TILE_INDEX_TRAP_START;
+         }
+
+         if (data._tmx_layer->_properties)
+         {
+            spikes->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
+         }
+
+         spikes->_player_collision_rect_px = {
+            static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
+            static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
+            PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS),
+            PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)
+         };
+
+         const auto rect = sf::FloatRect{
+            static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE), PIXELS_PER_TILE, PIXELS_PER_TILE
+         };
+
+         sf::Sprite sprite;
+         sprite.setTexture(*spikes->_texture);
+         sprite.setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
+
+         spikes->_sprite.push_back(sprite);
+         spikes->updateSpriteRect();
+
+         spikes->addChunks(rect);
       }
    }
 

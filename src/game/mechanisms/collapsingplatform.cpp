@@ -97,6 +97,8 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    _position_px = sf::Vector2f(x, y);
    _rect_px = sf::FloatRect{x, y, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
+   addChunks(_rect_px);
+
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
    body_def.position = _position_m;
