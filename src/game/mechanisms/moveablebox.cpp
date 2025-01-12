@@ -94,6 +94,11 @@ void MoveableBox::setup(const GameDeserializeData& data)
 
    _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px - 24);
 
+   const auto rect =
+      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+
+   addChunks(rect);
+
    if (data._tmx_object->_properties)
    {
       const auto z_it = data._tmx_object->_properties->_map.find("z");
