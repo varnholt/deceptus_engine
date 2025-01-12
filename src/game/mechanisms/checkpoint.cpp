@@ -83,6 +83,7 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    checkpoint->_rect = rect;
    checkpoint->_name = data._tmx_object->_name;
    checkpoint->updateSpriteRect();
+   checkpoint->addChunks(rect);
 
    if (data._tmx_object->_properties)
    {

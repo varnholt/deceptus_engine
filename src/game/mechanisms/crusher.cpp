@@ -234,6 +234,8 @@ void Crusher::setup(const GameDeserializeData& data)
    _rect.width = data._tmx_object->_width_px;
    _rect.height = data._tmx_object->_height_px;
 
+   addChunks(_rect);
+
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "crushers.png");
 
    _idle_time_max = sf::seconds(idle_time_max_s);

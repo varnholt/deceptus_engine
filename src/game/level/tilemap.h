@@ -49,6 +49,9 @@ protected:
    void drawVertices(sf::RenderTarget& target, sf::RenderStates states) const;
 
 private:
+   void storeAnimation(const std::array<sf::Vertex, 4>& quad, int32_t tx, int32_t ty, const std::shared_ptr<TmxAnimation>& animation);
+   void storeStaticVertices(const std::array<sf::Vertex, 4>& quad, const int32_t tx, const int32_t ty, float parallax_scale);
+
    struct AnimatedTileFrame
    {
       int32_t _x_px = 0;
