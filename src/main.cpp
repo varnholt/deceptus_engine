@@ -1,5 +1,9 @@
 #include "game/game.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <chrono>
 #include <cstdint>
 #include <iostream>
@@ -34,7 +38,15 @@ void debugAuthors()
    std::cout << std::endl;
 }
 
+#ifdef __linux__
 int main(int /*argc*/, char** /*argv*/)
+#else
+#ifdef DEBUG
+int main(int /*argc*/, char** /*argv*/)
+#else
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+#endif
+#endif
 {
 #ifndef DEBUG
    // setup logging to file
