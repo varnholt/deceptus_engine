@@ -414,6 +414,73 @@ add_executable(deceptus ${GAME_FILES}
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
 
+
+# set up third party libraries
+include(FetchContent)
+
+set(SFML_BUILD_AUDIO ON CACHE BOOL "" FORCE)
+set(SFML_BUILD_GRAPHICS ON CACHE BOOL "" FORCE)
+set(SFML_BUILD_WINDOW ON CACHE BOOL "" FORCE)
+set(SFML_BUILD_SYSTEM ON CACHE BOOL "" FORCE)
+set(SFML_BUILD_NETWORK ON CACHE BOOL "" FORCE)
+set(SFML_USE_STATIC_STD_LIBS OFF CACHE BOOL "" FORCE) # Avoid static linking issues
+set(SFML_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE) # Enable shared library build
+
+set(SDL_STATIC OFF CACHE BOOL "" FORCE)
+set(SDL_SHARED ON CACHE BOOL "" FORCE)
+#set(LUA_BUILD_AS_DLL OFF CACHE BOOL "" FORCE) # Prevent Lua from attempting DLL export issues
+
+
+FetchContent_Declare(
+    SFML
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG 2.6.x
+)
+
+FetchContent_Declare(
+    SDL2
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG release-2.28.x
+)
+
+FetchContent_Declare(
+    LUA
+    GIT_REPOSITORY https://github.com/lua/lua.git
+    GIT_TAG v5.4.7
+)
+
+FetchContent_MakeAvailable(SFML SDL2 LUA)
+
+if(NOT lua_POPULATED)
+    FetchContent_Populate(lua)
+
+    # Create lua.hpp manually in the build directory
+    file(WRITE ${CMAKE_BINARY_DIR}/lua.hpp
+    "#ifndef LUA_HPP\n#define LUA_HPP\n\n#include \"lua.h\"\n#include \"lauxlib.h\"\n#include \"lualib.h\"\n\n#endif // LUA_HPP"
+    )
+
+    # Manually create a CMakeLists.txt for Lua inside the build directory
+    file(WRITE ${lua_SOURCE_DIR}/CMakeLists.txt "
+        cmake_minimum_required(VERSION 3.16)
+        project(lua LANGUAGES C)
+
+        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+        set(LUA_SOURCES
+            lapi.c lcode.c lctype.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c lobject.c
+            lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c lundump.c lvm.c lzio.c lauxlib.c
+            lbaselib.c lcorolib.c ldblib.c liolib.c lmathlib.c loslib.c lstrlib.c ltablib.c lutf8lib.c
+            loadlib.c linit.c
+        )
+
+        add_library(lua STATIC \${LUA_SOURCES})
+        target_include_directories(lua PUBLIC \${CMAKE_CURRENT_SOURCE_DIR})
+    ")
+
+    # Add Lua as a subdirectory
+    add_subdirectory(${lua_SOURCE_DIR} ${lua_BINARY_DIR})
+endif()
+
 # disable warnings for third party
 set(THIRD_PARTY_FILES_OPTIONS -w)
 target_compile_options(deceptus PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${THIRD_PARTY_FILES_OPTIONS}>)
@@ -424,8 +491,9 @@ target_include_directories(deceptus PRIVATE
     src/game
     thirdparty
     thirdparty/box2d/include
-    thirdparty/lua/include
-    thirdparty/sfml/include
+    ${SFML_INCLUDE_DIR}
+    ${SDL2_INCLUDE_DIRS}
+    ${LUA_INCLUDE_DIRS} ${lua_SOURCE_DIR}
 )
 
 target_compile_definitions(deceptus PRIVATE
@@ -464,36 +532,13 @@ if(WIN32)
        )
    endif()
 
-    set(SDL_PATH ${CMAKE_SOURCE_DIR}/thirdparty/sdl/lib/x64)
-    set(LUA_PATH ${CMAKE_SOURCE_DIR}/thirdparty/lua/lib64)
-    set(SFML_PATH ${CMAKE_SOURCE_DIR}/thirdparty/sfml/lib)
-
-    link_directories(${LUA_PATH} ${SDL_PATH} ${SFML_PATH})
-    
-    target_link_libraries(deceptus PRIVATE
-        ${SDL_PATH}/SDL2.lib
-        ${LUA_PATH}/lua53.lib
-        glu32
-        opengl32
-    )
-
-    if(CMAKE_BUILD_TYPE STREQUAL Release)
-        target_link_libraries(deceptus PRIVATE
-            ${SFML_PATH}/sfml-audio.lib
-            ${SFML_PATH}/sfml-graphics.lib
-            ${SFML_PATH}/sfml-network.lib
-            ${SFML_PATH}/sfml-system.lib
-            ${SFML_PATH}/sfml-window.lib
-        )
-    else()
-        target_link_libraries(deceptus PRIVATE
-            ${SFML_PATH}/sfml-audio-d.lib
-            ${SFML_PATH}/sfml-graphics-d.lib
-            ${SFML_PATH}/sfml-network-d.lib
-            ${SFML_PATH}/sfml-system-d.lib
-            ${SFML_PATH}/sfml-window-d.lib
-        )
-    endif()
+   target_link_libraries(deceptus PRIVATE
+       sfml-system sfml-audio sfml-graphics sfml-window
+       SDL2::SDL2
+       ${CMAKE_BINARY_DIR}/_deps/lua-build/lua.lib
+       glu32
+       opengl32
+   )
 endif()
 
 
@@ -524,6 +569,7 @@ if(UNIX AND NOT APPLE)
     
 endif()
 
+
 if (APPLE)
 
     include(GNUInstallDirs)
@@ -548,6 +594,8 @@ if (APPLE)
         ${SDL2_LIBRARIES}
     )
 endif()
+
+
 
 install(TARGETS deceptus
     BUNDLE DESTINATION .
