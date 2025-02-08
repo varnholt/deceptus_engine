@@ -745,6 +745,13 @@ endif()
 # platform-specific configurations
 # ----------------------------------------------------------------------------------------------------
 
+target_link_libraries(deceptus PRIVATE
+    sfml-system sfml-audio sfml-graphics sfml-window
+    SDL2::SDL2
+    lua
+)
+
+
 if(WIN32)
 
    if(debug)
@@ -758,67 +765,23 @@ if(WIN32)
        target_compile_options(deceptus PRIVATE /wd5045)
    endif()
 
-   target_link_libraries(deceptus PRIVATE
-       sfml-system sfml-audio sfml-graphics sfml-window
-       SDL2::SDL2
-       lua
-       glu32
-       opengl32
-   )
+   target_link_libraries(deceptus PRIVATE glu32 opengl32)
+
 endif()
 
 
 if(UNIX AND NOT APPLE)
 
-    find_package(PkgConfig)
-    
-    PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
-    PKG_SEARCH_MODULE(LUA REQUIRED lua)
-    PKG_SEARCH_MODULE(SFML-AUDIO REQUIRED sfml-audio)
-    PKG_SEARCH_MODULE(SFML-GRAPHICS REQUIRED sfml-graphics)
-    PKG_SEARCH_MODULE(SFML-NETWORK REQUIRED sfml-network)
-    PKG_SEARCH_MODULE(SFML-SYSTEM REQUIRED sfml-system)
-    PKG_SEARCH_MODULE(SFML-WINDOW REQUIRED sfml-window)
-    
-    target_link_libraries(deceptus PRIVATE
-    	${SDL2_LIBRARIES}	 
-      ${LUA_LIBRARIES}
-      ${SFML-AUDIO_LIBRARIES}
-    	${SFML-GRAPHICS_LIBRARIES} 
-    	${SFML-NETWORK_LIBRARIES} 
-    	${SFML-SYSTEM_LIBRARIES} 
-    	${SFML-WINDOW_LIBRARIES} 
-        GL
-        X11
-        stdc++fs
-    )
+   target_link_libraries(deceptus PRIVATE GL X11 stdc++fs)
     
 endif()
 
 
 if (APPLE)
 
-    include(GNUInstallDirs)
-    list(APPEND CMAKE_PREFIX_PATH "/usr/local" "/opt/homebrew")
+   find_library(OPENGL_LIBRARY OpenGL)
+   target_link_libraries(deceptus PRIVATE ${OPENGL_LIBRARY} "-framework Cocoa")
 
-    find_package(SFML 2.5 COMPONENTS system window graphics audio REQUIRED)
-    find_package(Lua REQUIRED)
-    find_package(OpenGL REQUIRED)
-    find_package(SDL2 REQUIRED)
-
-    include_directories(
-        ${SFML_INCLUDE_DIR}
-        ${LUA_INCLUDE_DIR}
-        ${OPENGL_INCLUDE_DIR}
-        ${SDL2_INCLUDE_DIRS}
-    )
-
-    target_link_libraries(${PROJECT_NAME}
-        sfml-system sfml-audio sfml-graphics sfml-window
-        ${LUA_LIBRARIES}
-        ${OPENGL_LIBRARIES}
-        ${SDL2_LIBRARIES}
-    )
 endif()
 
 
