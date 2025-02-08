@@ -708,37 +708,12 @@ FetchContent_MakeAvailable(SFML SDL2 LUA)
 
 
 # ----------------------------------------------------------------------------------------------------
-#  lua configuration
+#  lua configuration (lua is not a cmake project)
 # ----------------------------------------------------------------------------------------------------
 
-if(NOT lua_POPULATED)
-    FetchContent_Populate(lua)
-
-    # create lua.hpp
-    file(WRITE ${CMAKE_BINARY_DIR}/lua.hpp
-    "#ifndef LUA_HPP\n#define LUA_HPP\n\n#include \"lua.h\"\n#include \"lauxlib.h\"\n#include \"lualib.h\"\n\n#endif // LUA_HPP"
-    )
-
-    # create CMakeLists.txt
-    file(WRITE ${lua_SOURCE_DIR}/CMakeLists.txt "
-        cmake_minimum_required(VERSION 3.16)
-        project(lua LANGUAGES C)
-
-        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-        set(LUA_SOURCES
-            lapi.c lcode.c lctype.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c lobject.c
-            lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c lundump.c lvm.c lzio.c lauxlib.c
-            lbaselib.c lcorolib.c ldblib.c liolib.c lmathlib.c loslib.c lstrlib.c ltablib.c lutf8lib.c
-            loadlib.c linit.c
-        )
-
-        add_library(lua STATIC \${LUA_SOURCES})
-        target_include_directories(lua PUBLIC \${CMAKE_CURRENT_SOURCE_DIR})
-    ")
-
-    add_subdirectory(${lua_SOURCE_DIR} ${lua_BINARY_DIR})
-endif()
+add_subdirectory(thirdparty/lua)
+include_directories(${CMAKE_SOURCE_DIR}/thirdparty/lua)
+target_link_libraries(deceptus PRIVATE lua)
 
 
 # ----------------------------------------------------------------------------------------------------
@@ -754,9 +729,9 @@ target_include_directories(deceptus PRIVATE
     src/game
     thirdparty
     thirdparty/box2d/include
+    thirdparty/lua
     ${SFML_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIRS}
-    ${LUA_INCLUDE_DIRS} ${lua_SOURCE_DIR}
 )
 
 target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
@@ -786,7 +761,7 @@ if(WIN32)
    target_link_libraries(deceptus PRIVATE
        sfml-system sfml-audio sfml-graphics sfml-window
        SDL2::SDL2
-       ${CMAKE_BINARY_DIR}/_deps/lua-build/lua.lib
+       lua
        glu32
        opengl32
    )
@@ -807,8 +782,8 @@ if(UNIX AND NOT APPLE)
     
     target_link_libraries(deceptus PRIVATE
     	${SDL2_LIBRARIES}	 
-    	${LUA_LIBRARIES}	 
-    	${SFML-AUDIO_LIBRARIES}	 
+      ${LUA_LIBRARIES}
+      ${SFML-AUDIO_LIBRARIES}
     	${SFML-GRAPHICS_LIBRARIES} 
     	${SFML-NETWORK_LIBRARIES} 
     	${SFML-SYSTEM_LIBRARIES} 
