@@ -2,13 +2,13 @@
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>
+#include <lua.hpp>
 #include <string>
 #include <variant>
 
 #include "game/level/scriptproperty.h"
 #include "game/mechanisms/gamemechanism.h"
 #include "game/mechanisms/gamemechanismobserver.h"
-#include "lua.hpp"
 
 struct LuaNode;
 
