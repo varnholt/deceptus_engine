@@ -1,11 +1,8 @@
 // base
 #include "luanode.h"
 
-// lua
-#include "lua.hpp"
-
-// stl
 #include <iostream>
+#include <lua.hpp>
 #include <sstream>
 #include <thread>
 
