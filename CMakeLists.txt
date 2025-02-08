@@ -434,26 +434,36 @@ target_compile_definitions(deceptus PRIVATE
     _USE_MATH_DEFINES
 )
 
+
 if(debug)
-    set_target_properties(deceptus PROPERTIES
-        WIN32_EXECUTABLE FALSE
-    )
     target_compile_definitions(deceptus PRIVATE
         DEBUG
     )
 endif()
 
-if(win32-msvc)
-    target_compile_definitions(deceptus PRIVATE
-        _CRT_SECURE_NO_WARNINGS
-    )
-
-    target_compile_options(deceptus
-        /wd5045
-    )
-endif()
 
 if(WIN32)
+
+   if(debug)
+       set_target_properties(deceptus PROPERTIES
+          WIN32_EXECUTABLE FALSE
+       )
+   else()
+      set_target_properties(deceptus PROPERTIES
+         WIN32_EXECUTABLE TRUE
+      )
+   endif()
+
+   if(win32-msvc)
+       target_compile_definitions(deceptus PRIVATE
+           _CRT_SECURE_NO_WARNINGS
+       )
+
+       target_compile_options(deceptus
+           /wd5045
+       )
+   endif()
+
     set(SDL_PATH ${CMAKE_SOURCE_DIR}/thirdparty/sdl/lib/x64)
     set(LUA_PATH ${CMAKE_SOURCE_DIR}/thirdparty/lua/lib64)
     set(SFML_PATH ${CMAKE_SOURCE_DIR}/thirdparty/sfml/lib)

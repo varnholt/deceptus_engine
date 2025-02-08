@@ -204,11 +204,18 @@ private:
 
    std::shared_ptr<Animation> _wallslide_impact_r;
    std::shared_ptr<Animation> _wallslide_impact_l;
+   std::shared_ptr<Animation> _sword_wallslide_impact_r;
+   std::shared_ptr<Animation> _sword_wallslide_impact_l;
+
    std::shared_ptr<Animation> _wallslide_r;
    std::shared_ptr<Animation> _wallslide_l;
+   std::shared_ptr<Animation> _sword_wallslide_r;
+   std::shared_ptr<Animation> _sword_wallslide_l;
 
    std::shared_ptr<Animation> _wall_jump_r;
    std::shared_ptr<Animation> _wall_jump_l;
+   std::shared_ptr<Animation> _sword_wall_jump_r;
+   std::shared_ptr<Animation> _sword_wall_jump_l;
 
    std::shared_ptr<Animation> _appear_r;
    std::shared_ptr<Animation> _appear_l;
