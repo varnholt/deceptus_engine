@@ -1,6 +1,10 @@
 if(WIN32)
     message(STATUS "Running post-install script to find and install SDL2 DLL...")
 
+    if(NOT DEFINED CMAKE_INSTALL_BINDIR)
+        set(CMAKE_INSTALL_BINDIR "bin")
+    endif()
+
     file(GLOB_RECURSE SDL2_DLL_FILES "${CMAKE_BINARY_DIR}/_deps/sdl2-build/sdl2*.dll")
 
     list(LENGTH SDL2_DLL_FILES SDL2_DLL_COUNT)
