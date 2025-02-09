@@ -20,6 +20,7 @@ before_build:
 
 build_script:
 - cmake --build . --config Release --parallel
+- dir /s
 - cmake --install . --config Release
 - cd /D "%APPVEYOR_BUILD_FOLDER%"
 - call "deploy_appveyor.bat"
