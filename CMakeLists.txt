@@ -799,9 +799,11 @@ function(install_sdl2_dll)
 
         find_file(SDL2_DLL_PATH
             NAMES ${SDL2_DLL_NAME}
-            PATHS "${CMAKE_BINARY_DIR}/_deps/sdl2-build"
+            PATHS
+                "${CMAKE_BINARY_DIR}/_deps/sdl2-build"
+                "${CMAKE_BINARY_DIR}/_deps/sdl2-build/Release"
+                "${CMAKE_BINARY_DIR}/_deps/sdl2-build/Debug"
             NO_DEFAULT_PATH
-            CMAKE_FIND_ROOT_PATH_BOTH
         )
 
         if(SDL2_DLL_PATH)
