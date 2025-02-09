@@ -14,12 +14,14 @@ before_build:
     mkdir build
     cd build
     cmake --version
-    cmake -DCMAKE_BUILD_TYPE=Release ..
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install ..
     dir
     dir ..
 
 build_script:
 - cmake --build . --config Release --parallel
+- dir /s
+- cmake --install . --config Release
 - cd /D "%APPVEYOR_BUILD_FOLDER%"
 - call "deploy_appveyor.bat"
 
