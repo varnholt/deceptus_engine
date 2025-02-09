@@ -789,35 +789,9 @@ endif()
 # installation
 # ----------------------------------------------------------------------------------------------------
 
-# for whatever reason that one is left out
-function(install_sdl2_dll)
-    if(WIN32)
-        set(SDL2_DLL_NAME "SDL2.dll")
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(SDL2_DLL_NAME "SDL2d.dll")
-        endif()
-
-        find_file(SDL2_DLL_PATH
-            NAMES ${SDL2_DLL_NAME}
-            PATHS
-                "${CMAKE_BINARY_DIR}/_deps/sdl2-build"
-                "${CMAKE_BINARY_DIR}/_deps/sdl2-build/Release"
-                "${CMAKE_BINARY_DIR}/_deps/sdl2-build/Debug"
-            NO_DEFAULT_PATH
-        )
-
-        if(SDL2_DLL_PATH)
-            message(STATUS "Found SDL2 DLL: ${SDL2_DLL_PATH}")
-            install(FILES "${SDL2_DLL_PATH}" DESTINATION ${CMAKE_INSTALL_BINDIR})
-        else()
-            message(WARNING "SDL2.dll not found! Ensure SDL2 is built correctly.")
-        endif()
-    endif()
-endfunction()
-
 install(TARGETS deceptus
     BUNDLE DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install_sdl2_dll()
+install(SCRIPT "${CMAKE_SOURCE_DIR}/thirdparty/sdl2/copy_sdl2_dll.cmake")
