@@ -3,7 +3,7 @@
       "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
       "frame_offset": [0, 1368],
       "frame_size": [120, 72],
-      "origin": [24, 72],
+      "origin": [67, 72],
       "sprite_count": 20,
       "texture": "data/sprites/player.png"
    },
