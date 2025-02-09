@@ -797,13 +797,18 @@ function(install_sdl2_dll)
             set(SDL2_DLL_NAME "SDL2d.dll")
         endif()
 
-        file(GLOB_RECURSE SDL2_DLL_PATH "${CMAKE_BINARY_DIR}/_deps/sdl2-build/${SDL2_DLL_NAME}")
+        find_file(SDL2_DLL_PATH
+            NAMES ${SDL2_DLL_NAME}
+            PATHS "${CMAKE_BINARY_DIR}/_deps/sdl2-build"
+            NO_DEFAULT_PATH
+            CMAKE_FIND_ROOT_PATH_BOTH
+        )
 
         if(SDL2_DLL_PATH)
             message(STATUS "Found SDL2 DLL: ${SDL2_DLL_PATH}")
             install(FILES "${SDL2_DLL_PATH}" DESTINATION ${CMAKE_INSTALL_BINDIR})
         else()
-            message(WARNING "SDL2.dll not found in _deps/sdl2-build! Ensure SDL2 is built correctly.")
+            message(WARNING "SDL2.dll not found! Ensure SDL2 is built correctly.")
         endif()
     endif()
 endfunction()
