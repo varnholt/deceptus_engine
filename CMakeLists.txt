@@ -796,5 +796,10 @@ install(TARGETS deceptus
 
 # for whatever reason that one is left out
 if(WIN32)
-   install(FILES "${CMAKE_BINARY_DIR}/_deps/sdl2-build/SDL2d.dll" DESTINATION ${CMAKE_INSTALL_BINDIR})
+   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+       install(FILES "${CMAKE_BINARY_DIR}/_deps/sdl2-build/SDL2d.dll" DESTINATION ${CMAKE_INSTALL_BINDIR})
+   else()
+       install(FILES "${CMAKE_BINARY_DIR}/_deps/sdl2-build/SDL2.dll" DESTINATION ${CMAKE_INSTALL_BINDIR})
+   endif()
 endif()
+
