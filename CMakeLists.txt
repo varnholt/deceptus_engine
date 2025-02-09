@@ -740,6 +740,10 @@ if(debug)
     target_compile_definitions(deceptus PRIVATE DEBUG)
 endif()
 
+if (MSVC)
+    add_compile_options(/MP)
+endif()
+
 
 # ----------------------------------------------------------------------------------------------------
 # platform-specific configurations
