@@ -557,14 +557,14 @@ void Game::menuLoadRequest()
 std::unique_ptr<ScreenTransition> Game::makeFadeOutFadeIn()
 {
    auto screen_transition = std::make_unique<ScreenTransition>();
-   const sf::Color fade_color{60, 0, 0};
+   const sf::Color fade_color{30, 30, 40};
    auto fade_out = std::make_shared<FadeTransitionEffect>(fade_color);
    auto fade_in = std::make_shared<FadeTransitionEffect>(fade_color);
    fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
    fade_out->_speed = 1.0f;
    fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
    fade_in->_value = 1.0f;
-   fade_in->_speed = 2.0f;
+   fade_in->_speed = 0.5f;
    screen_transition->_effect_1 = fade_out;
    screen_transition->_effect_2 = fade_in;
    screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
