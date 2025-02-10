@@ -25,12 +25,12 @@ void InGameMenu::initializeController()
       [this](int32_t /*id*/)
       {
          const auto& gji = GameControllerIntegration::getInstance();
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_BACK, [this]() { open(); });
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_BACK, [this]() { close(); });
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, [this]() { close(); });
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, [this]() { close(); });
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_LEFTSHOULDER, [this]() { goToLeftSubMenu(); });
-         gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, [this]() { goToRightSubMenu(); });
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_BACK, [this]() { open(); });
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_BACK, [this]() { close(); });
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_SOUTH, [this]() { close(); });
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_EAST, [this]() { close(); });
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, [this]() { goToLeftSubMenu(); });
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, [this]() { goToRightSubMenu(); });
       }
    );
 }
@@ -58,8 +58,8 @@ void InGameMenu::updateControllerActions()
    }
 
    const auto axis_values = _joystick_info.getAxisValues();
-   const auto axis_left_x = gci.getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTX);
-   const auto axis_left_y = gci.getController()->getAxisIndex(SDL_CONTROLLER_AXIS_LEFTY);
+   const auto axis_left_x = gci.getController()->getAxisIndex(SDL_GAMEPAD_AXIS_LEFTX);
+   const auto axis_left_y = gci.getController()->getAxisIndex(SDL_GAMEPAD_AXIS_LEFTY);
    const auto hat_values = _joystick_info.getHatValues().at(0);
 
    auto xl = axis_values[axis_left_x] / 32767.0f;
