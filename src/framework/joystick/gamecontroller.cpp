@@ -8,7 +8,7 @@
 
 GameController::~GameController()
 {
-   SDL_GameControllerClose(_controller);
+   SDL_CloseGamepad(_controller);
 }
 
 bool GameController::validId(int32_t id) const
@@ -26,7 +26,7 @@ std::string GameController::getName(int32_t id) const
 
    if (validId(id))
    {
-      name = SDL_JoystickNameForIndex(id);
+      name = SDL_GetJoystickNameForID(id);
    }
 
    return name;
@@ -37,7 +37,7 @@ std::string GameController::getName(int32_t id) const
 */
 int32_t GameController::getAxisCount()
 {
-   return SDL_JoystickNumAxes(_joystick);
+   return SDL_GetNumJoystickAxes(_joystick);
 }
 
 /*!
@@ -45,7 +45,7 @@ int32_t GameController::getAxisCount()
 */
 int32_t GameController::getBallCount()
 {
-   return SDL_JoystickNumBalls(_joystick);
+   return SDL_GetNumJoystickBalls(_joystick);
 }
 
 /*!
@@ -53,7 +53,7 @@ int32_t GameController::getBallCount()
 */
 int32_t GameController::getHatCount()
 {
-   return SDL_JoystickNumHats(_joystick);
+   return SDL_GetNumJoystickHats(_joystick);
 }
 
 /*!
@@ -66,18 +66,18 @@ void GameController::activate(int32_t id)
       return;
    }
 
-   if (SDL_IsGameController(id))
+   if (SDL_IsGamepad(id))
    {
       // store controller data
-      _controller = SDL_GameControllerOpen(id);
-      _joystick = SDL_GameControllerGetJoystick(_controller);
+      _controller = SDL_OpenGamepad(id);
+      _joystick = SDL_GetGamepadJoystick(_controller);
 
       // create dpad bindings
       bindDpadButtons();
    }
    else
    {
-      _joystick = SDL_JoystickOpen(id);
+      _joystick = SDL_OpenJoystick(id);
    }
 }
 
@@ -86,7 +86,7 @@ void GameController::activate(int32_t id)
 */
 int32_t GameController::getActiveJoystickId()
 {
-   return SDL_JoystickInstanceID(_joystick);
+   return SDL_GetJoystickID(_joystick);
 }
 
 /*!
@@ -94,10 +94,12 @@ int32_t GameController::getActiveJoystickId()
 */
 int32_t GameController::getJoystickCount() const
 {
-   return SDL_NumJoysticks();
+   int32_t count = 0;
+   SDL_GetJoysticks(&count);
+   return count;
 }
 
-void GameController::callPressedCallbacks(const SDL_GameControllerButton button)
+void GameController::callPressedCallbacks(const SDL_GamepadButton button)
 {
    auto it = _button_pressed_callbacks.find(button);
    if (it != _button_pressed_callbacks.end())
@@ -109,7 +111,7 @@ void GameController::callPressedCallbacks(const SDL_GameControllerButton button)
    }
 }
 
-void GameController::callReleasedCallbacks(const SDL_GameControllerButton button)
+void GameController::callReleasedCallbacks(const SDL_GamepadButton button)
 {
    auto it = _button_released_callbacks.find(button);
    if (it != _button_released_callbacks.end())
@@ -128,12 +130,12 @@ void GameController::update()
 {
    GameControllerInfo info;
 
-   SDL_JoystickUpdate();
+   SDL_UpdateJoysticks();
 
    // read axis values
-   for (auto axis = 0; axis < SDL_JoystickNumAxes(_joystick); axis++)
+   for (auto axis = 0; axis < SDL_GetNumJoystickAxes(_joystick); axis++)
    {
-      auto value = SDL_JoystickGetAxis(_joystick, axis);
+      auto value = SDL_GetJoystickAxis(_joystick, axis);
       info.addAxisValue(value);
    }
 
@@ -189,7 +191,7 @@ void GameController::update()
    }
 
    // read button values
-   for (auto i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
+   for (auto i = 0; i < SDL_GAMEPAD_BUTTON_COUNT; i++)
    {
       // do not place bombs on dpad pressed, but also do not screw up the
       // button id order
@@ -199,7 +201,7 @@ void GameController::update()
       }
       else
       {
-         const auto pressed = SDL_GameControllerGetButton(_controller, static_cast<SDL_GameControllerButton>(i));
+         const auto pressed = SDL_GetGamepadButton(_controller, static_cast<SDL_GamepadButton>(i));
          info.addButtonState(pressed);
       }
    }
@@ -207,15 +209,15 @@ void GameController::update()
    // emulate hat by evaluating the dpad buttons. some drivers do not register
    // the controller's dpad as hat so they just show up as ordinary buttons.
    // we don't want that.
-   auto hat_count = SDL_JoystickNumHats(_joystick);
+   auto hat_count = SDL_GetNumJoystickHats(_joystick);
    if (hat_count == 0)
    {
       auto hat = SDL_HAT_CENTERED;
 
-      const auto up = static_cast<bool>(SDL_GameControllerGetButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_UP));
-      const auto down = static_cast<bool>(SDL_GameControllerGetButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN));
-      const auto left = static_cast<bool>(SDL_GameControllerGetButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT));
-      const auto right = static_cast<bool>(SDL_GameControllerGetButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT));
+      const auto up = static_cast<bool>(SDL_GetGamepadButton(_controller, SDL_GAMEPAD_BUTTON_DPAD_UP));
+      const auto down = static_cast<bool>(SDL_GetGamepadButton(_controller, SDL_GAMEPAD_BUTTON_DPAD_DOWN));
+      const auto left = static_cast<bool>(SDL_GetGamepadButton(_controller, SDL_GAMEPAD_BUTTON_DPAD_LEFT));
+      const auto right = static_cast<bool>(SDL_GetGamepadButton(_controller, SDL_GAMEPAD_BUTTON_DPAD_RIGHT));
 
       if (left && up)
       {
@@ -256,25 +258,25 @@ void GameController::update()
    // read hat values
    for (auto i = 0; i < hat_count; i++)
    {
-      auto hat_value = SDL_JoystickGetHat(_joystick, i);
+      auto hat_value = SDL_GetJoystickHat(_joystick, i);
       info.addHatValue(hat_value);
    }
 
    if (!_info.getButtonValues().empty() && _info.getButtonValues().size() == info.getButtonValues().size())
    {
-      for (auto button = 0u; button < SDL_CONTROLLER_BUTTON_MAX; button++)
+      for (auto button = 0u; button < SDL_GAMEPAD_BUTTON_COUNT; button++)
       {
          const auto previous = _info.getButtonValues().at(button);
          const auto current = info.getButtonValues().at(button);
 
          if (!previous && current)
          {
-            callPressedCallbacks(static_cast<SDL_GameControllerButton>(button));
+            callPressedCallbacks(static_cast<SDL_GamepadButton>(button));
          }
 
          if (previous && !current)
          {
-            callReleasedCallbacks(static_cast<SDL_GameControllerButton>(button));
+            callReleasedCallbacks(static_cast<SDL_GamepadButton>(button));
          }
       }
    }
@@ -294,44 +296,45 @@ void GameController::rumble(float intensity, int32_t rumble_duration_ms)
       return;
    }
 
-   SDL_GameControllerRumble(
-      _controller, static_cast<uint16_t>(0xffff * intensity), static_cast<uint16_t>(0xffff * intensity), rumble_duration_ms
-   );
+   SDL_RumbleGamepad(_controller, static_cast<uint16_t>(0xffff * intensity), static_cast<uint16_t>(0xffff * intensity), rumble_duration_ms);
 }
 
-SDL_GameControllerButton GameController::getButtonType(int32_t button_id) const
+SDL_GamepadButton GameController::getButtonType(int32_t button_id) const
 {
-   SDL_GameControllerButton button_type = SDL_CONTROLLER_BUTTON_INVALID;
-   SDL_GameControllerButton tmp_type = SDL_CONTROLLER_BUTTON_INVALID;
+   int32_t count = 0;
+   SDL_GamepadBinding** bindings = SDL_GetGamepadBindings(_controller, &count);
+   SDL_GamepadButton button_type = SDL_GAMEPAD_BUTTON_INVALID;
 
-   SDL_GameControllerButtonBind binding;
-
-   for (auto i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
+   for (int i = 0; i < count; ++i)
    {
-      tmp_type = static_cast<SDL_GameControllerButton>(i);
-
-      binding = SDL_GameControllerGetBindForButton(_controller, tmp_type);
-
-      if (binding.value.button == button_id)
+      if (bindings[i]->input_type == SDL_GAMEPAD_BINDTYPE_BUTTON && bindings[i]->input.button == button_id)
       {
-         button_type = tmp_type;
+         button_type = static_cast<SDL_GamepadButton>(bindings[i]->output.button);
          break;
       }
    }
 
+   SDL_free(bindings);
    return button_type;
 }
 
-int32_t GameController::getButtonId(SDL_GameControllerButton button) const
+int32_t GameController::getAxisIndex(SDL_GamepadAxis axis) const
 {
-   SDL_GameControllerButtonBind bind = SDL_GameControllerGetBindForButton(_controller, button);
-   return bind.value.button;
-}
+   int32_t count = 0;
+   SDL_GamepadBinding** bindings = SDL_GetGamepadBindings(_controller, &count);
 
-int32_t GameController::getAxisIndex(SDL_GameControllerAxis axis) const
-{
-   SDL_GameControllerButtonBind bind = SDL_GameControllerGetBindForAxis(_controller, axis);
-   return bind.value.axis;
+   for (auto i = 0; i < count; ++i)
+   {
+      if (bindings[i]->output_type == SDL_GAMEPAD_BINDTYPE_AXIS && bindings[i]->output.axis.axis == axis)
+      {
+         int32_t axis_index = bindings[i]->input.axis.axis;
+         SDL_free(bindings);
+         return axis_index;
+      }
+   }
+
+   SDL_free(bindings);
+   return -1;
 }
 
 const GameControllerInfo& GameController::getInfo() const
@@ -339,12 +342,12 @@ const GameControllerInfo& GameController::getInfo() const
    return _info;
 }
 
-void GameController::addButtonPressedCallback(SDL_GameControllerButton button, const ControllerCallback& callback)
+void GameController::addButtonPressedCallback(SDL_GamepadButton button, const ControllerCallback& callback)
 {
    _button_pressed_callbacks[button].push_back(callback);
 }
 
-void GameController::removeButtonPressedCallback(SDL_GameControllerButton button, const ControllerCallback& callback)
+void GameController::removeButtonPressedCallback(SDL_GamepadButton button, const ControllerCallback& callback)
 {
    auto& vec = _button_pressed_callbacks[button];
    vec.erase(
@@ -363,7 +366,7 @@ void GameController::removeButtonPressedCallback(SDL_GameControllerButton button
    );
 }
 
-void GameController::addButtonReleasedCallback(SDL_GameControllerButton button, const ControllerCallback& callback)
+void GameController::addButtonReleasedCallback(SDL_GamepadButton button, const ControllerCallback& callback)
 {
    _button_released_callbacks[button].push_back(callback);
 }
@@ -375,42 +378,43 @@ void GameController::addAxisThresholdExceedCallback(const ThresholdCallback& thr
 
 void GameController::bindDpadButtons()
 {
-   _dpad_bind_up = SDL_GameControllerGetBindForButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_UP);
-   _dpad_bind_down = SDL_GameControllerGetBindForButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-   _dpad_bind_left = SDL_GameControllerGetBindForButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-   _dpad_bind_right = SDL_GameControllerGetBindForButton(_controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+   int32_t count = 0;
+   SDL_GamepadBinding** bindings = SDL_GetGamepadBindings(_controller, &count);
 
-   if (_dpad_bind_up.bindType == SDL_CONTROLLER_BINDTYPE_NONE)
+   auto find_binding = [&](SDL_GamepadButton button) -> SDL_GamepadBinding
    {
-      _dpad_bind_up.value.axis = -1;
-      _dpad_bind_up.value.button = -1;
-      _dpad_bind_up.value.hat.hat = -1;
-      _dpad_bind_up.value.hat.hat_mask = -1;
-   }
+      for (int i = 0; i < count; ++i)
+      {
+         if (bindings[i]->output_type == SDL_GAMEPAD_BINDTYPE_BUTTON && bindings[i]->output.button == button)
+         {
+            return *bindings[i];
+         }
+      }
+      return {};
+   };
 
-   if (_dpad_bind_down.bindType == SDL_CONTROLLER_BINDTYPE_NONE)
-   {
-      _dpad_bind_down.value.axis = -1;
-      _dpad_bind_down.value.button = -1;
-      _dpad_bind_down.value.hat.hat = -1;
-      _dpad_bind_down.value.hat.hat_mask = -1;
-   }
+   _dpad_bind_up = find_binding(SDL_GAMEPAD_BUTTON_DPAD_UP);
+   _dpad_bind_down = find_binding(SDL_GAMEPAD_BUTTON_DPAD_DOWN);
+   _dpad_bind_left = find_binding(SDL_GAMEPAD_BUTTON_DPAD_LEFT);
+   _dpad_bind_right = find_binding(SDL_GAMEPAD_BUTTON_DPAD_RIGHT);
 
-   if (_dpad_bind_left.bindType == SDL_CONTROLLER_BINDTYPE_NONE)
+   auto reset_binding = [](SDL_GamepadBinding& bind)
    {
-      _dpad_bind_left.value.axis = -1;
-      _dpad_bind_left.value.button = -1;
-      _dpad_bind_left.value.hat.hat = -1;
-      _dpad_bind_left.value.hat.hat_mask = -1;
-   }
+      if (bind.input_type == SDL_GAMEPAD_BINDTYPE_NONE)
+      {
+         bind.input.button = -1;
+         bind.input.axis.axis = -1;
+         bind.input.axis.axis_min = -1;
+         bind.input.axis.axis_max = -1;
+         bind.input.hat.hat = -1;
+         bind.input.hat.hat_mask = -1;
+      }
+   };
 
-   if (_dpad_bind_right.bindType == SDL_CONTROLLER_BINDTYPE_NONE)
-   {
-      _dpad_bind_right.value.axis = -1;
-      _dpad_bind_right.value.button = -1;
-      _dpad_bind_right.value.hat.hat = -1;
-      _dpad_bind_right.value.hat.hat_mask = -1;
-   }
+   reset_binding(_dpad_bind_up);
+   reset_binding(_dpad_bind_down);
+   reset_binding(_dpad_bind_left);
+   reset_binding(_dpad_bind_right);
 }
 
 /*!
@@ -418,11 +422,10 @@ void GameController::bindDpadButtons()
 */
 bool GameController::isDpadButton(int32_t button) const
 {
-   bool dpad_button =
-      ((button == _dpad_bind_up.value.button && _dpad_bind_up.bindType == SDL_CONTROLLER_BINDTYPE_BUTTON) ||
-       (button == _dpad_bind_down.value.button && _dpad_bind_down.bindType == SDL_CONTROLLER_BINDTYPE_BUTTON) ||
-       (button == _dpad_bind_left.value.button && _dpad_bind_left.bindType == SDL_CONTROLLER_BINDTYPE_BUTTON) ||
-       (button == _dpad_bind_right.value.button && _dpad_bind_right.bindType == SDL_CONTROLLER_BINDTYPE_BUTTON));
-
-   return dpad_button;
+   return (
+      (button == _dpad_bind_up.input.button && _dpad_bind_up.input_type == SDL_GAMEPAD_BINDTYPE_BUTTON) ||
+      (button == _dpad_bind_down.input.button && _dpad_bind_down.input_type == SDL_GAMEPAD_BINDTYPE_BUTTON) ||
+      (button == _dpad_bind_left.input.button && _dpad_bind_left.input_type == SDL_GAMEPAD_BINDTYPE_BUTTON) ||
+      (button == _dpad_bind_right.input.button && _dpad_bind_right.input_type == SDL_GAMEPAD_BINDTYPE_BUTTON)
+   );
 }

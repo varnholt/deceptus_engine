@@ -211,8 +211,8 @@ MessageBox::~MessageBox()
    auto& gci = GameControllerIntegration::getInstance();
    if (gci.isControllerConnected())
    {
-      gci.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
-      gci.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
+      gci.getController()->removeButtonPressedCallback(SDL_GAMEPAD_BUTTON_SOUTH, _button_callback_a);
+      gci.getController()->removeButtonPressedCallback(SDL_GAMEPAD_BUTTON_EAST, _button_callback_b);
    }
 
    DisplayMode::getInstance().enqueueUnset(Display::Modal);
@@ -361,8 +361,8 @@ void MessageBox::initializeControllerCallbacks()
       _button_callback_a = [this]() { _button_callback_key = sf::Keyboard::Return; };
       _button_callback_b = [this]() { _button_callback_key = sf::Keyboard::Escape; };
 
-      gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_A, _button_callback_a);
-      gci.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_B, _button_callback_b);
+      gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_SOUTH, _button_callback_a);
+      gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_EAST, _button_callback_b);
    }
 }
 
