@@ -581,7 +581,7 @@ PlayerAnimation::HighResDuration PlayerAnimation::getCurrentAnimationDuration() 
 PlayerAnimation::HighResDuration PlayerAnimation::getRevealDuration() const
 {
    using namespace std::chrono_literals;
-   return 1000ms + _appear_l->_overall_time_chrono + 20ms;
+   return 3000ms + _appear_l->_overall_time_chrono + 20ms;
 }
 
 PlayerAnimation::HighResDuration PlayerAnimation::getSwordAttackDurationStanding(bool points_left) const
@@ -982,7 +982,7 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processAppearAnimatio
    {
       next_cycle = data._points_right ? _appear_r : _appear_l;
 
-      if (GameClock::getInstance().durationSinceSpawn() < 1.0s)
+      if (GameClock::getInstance().durationSinceSpawn() < 3.0s)
       {
          // invisibility: 0 .. 1.0s (wait until player is focused)
          for (auto& appear_animation : _appear_animations)
