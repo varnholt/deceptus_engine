@@ -177,7 +177,7 @@ void Player::initializeController()
       [&](int32_t /*id*/)
       {
          gji.getController()->addButtonPressedCallback(
-            SDL_CONTROLLER_BUTTON_A,
+            SDL_GAMEPAD_BUTTON_SOUTH,
             [&]()
             {
                if (!PlayerControlState::checkState())
@@ -190,7 +190,7 @@ void Player::initializeController()
          );
 
          gji.getController()->addButtonPressedCallback(
-            SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+            SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,
             [&]()
             {
                if (!PlayerControlState::checkState())
@@ -203,7 +203,7 @@ void Player::initializeController()
          );
 
          gji.getController()->addButtonPressedCallback(
-            SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+            SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
             [&]()
             {
                if (!PlayerControlState::checkState())
@@ -215,21 +215,9 @@ void Player::initializeController()
             }
          );
 
-         gji.getController()->addButtonPressedCallback(
-            SDL_CONTROLLER_BUTTON_X,
-            [&]()
-            {
-               useInventory(0);
-            }
-         );
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_WEST, [&]() { useInventory(0); });
 
-         gji.getController()->addButtonPressedCallback(
-            SDL_CONTROLLER_BUTTON_Y,
-            [&]()
-            {
-               useInventory(1);
-            }
-         );
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_NORTH, [&]() { useInventory(1); });
       }
    );
 }

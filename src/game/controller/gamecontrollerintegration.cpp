@@ -20,7 +20,7 @@ void GameControllerIntegration::initialize()
 {
    SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
 
-   auto res = SDL_GameControllerAddMappingsFromFile("data/joystick/gamecontrollerdb.txt");
+   auto res = SDL_AddGamepadMappingsFromFile("data/joystick/gamecontrollerdb.txt");
    if (res == -1)
    {
       Log::Error() << "error loading game controller database";
@@ -57,7 +57,8 @@ void GameControllerIntegration::add(int32_t id)
       {
          auto controller = std::make_shared<GameController>();
          controller->activate(id);
-         const auto controller_id = SDL_JoystickGetDeviceInstanceID(id);
+         SDL_Joystick* joystick = SDL_OpenJoystick(id);
+         const auto controller_id = SDL_GetJoystickID(joystick);
          _controllers[controller_id] = controller;
          _selected_controller_id = controller_id;
 
