@@ -194,25 +194,57 @@ void InfoLayer::updateInventoryItems()
    }
 }
 
-void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
+void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto now = GlobalClock::getInstance().getElapsedTime();
+   constexpr auto x_offset_hidden = -200;
+   constexpr auto duration_show_s = 1.0f;
+   constexpr auto duration_hide_s = 1.0f;
+   auto x_offset = 0;
 
-   const auto w = GameConfiguration::getInstance()._view_width;
-   const auto h = GameConfiguration::getInstance()._view_height;
-
-   const sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-   window.setView(view);
-
-   auto autosave = _layers["autosave"];
-   if (autosave->_visible)
+   if (_loading)
    {
-      const auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
-      autosave->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
-      autosave->draw(window, states);
+   }
+   else
+   {
    }
 
-   // support cpan
+   const auto& extra_table = SaveState::getPlayerInfo()._extra_table;
+   const auto heart_quarters = extra_table._health._health;
+
+   _character_window_layer->draw(window, states);
+
+   const auto stamina = static_cast<int32_t>(extra_table._health._stamina * 6.0f);
+   for (auto i = 0; i < stamina; i++)
+   {
+      _stamina_layers[i]->draw(window, states);
+   }
+
+   for (auto i = 0; i < heart_quarters; i++)
+   {
+      _heart_layers[i]->draw(window, states);
+   }
+
+   drawInventoryItem(window, states);
+
+   if (_animation_duration_heart < _next_animation_duration_heart)
+   {
+      _animation_heart->draw(window, states);
+   }
+
+   if (_animation_duration_stamina < _next_animation_duration_stamina)
+   {
+      _animation_stamina->draw(window, states);
+   }
+
+   if (_animation_duration_skull_blink < _next_animation_duration_skull_blink)
+   {
+      _animation_skull_blink->draw(window, states);
+   }
+}
+
+void InfoLayer::drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates states)
+{
    if (CameraPanorama::getInstance().isKeyboardLookActive())
    {
       auto layer_cpan_up = _layers["cpan_up"];
@@ -225,42 +257,31 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
       layer_cpan_left->draw(window, states);
       layer_cpan_right->draw(window, states);
    }
+}
 
-   if (!_loading)
+void InfoLayer::drawAutoSave(sf::RenderTarget& window, sf::RenderStates states)
+{
+   const auto now = GlobalClock::getInstance().getElapsedTime();
+
+   auto autosave = _layers["autosave"];
+   if (autosave->_visible)
    {
-      const auto& extra_table = SaveState::getPlayerInfo()._extra_table;
-      const auto heart_quarters = extra_table._health._health;
-
-      _character_window_layer->draw(window, states);
-
-      const auto stamina = static_cast<int32_t>(extra_table._health._stamina * 6.0f);
-      for (auto i = 0; i < stamina; i++)
-      {
-         _stamina_layers[i]->draw(window, states);
-      }
-
-      for (auto i = 0; i < heart_quarters; i++)
-      {
-         _heart_layers[i]->draw(window, states);
-      }
-
-      drawInventoryItem(window, states);
-
-      if (_animation_duration_heart < _next_animation_duration_heart)
-      {
-         _animation_heart->draw(window, states);
-      }
-
-      if (_animation_duration_stamina < _next_animation_duration_stamina)
-      {
-         _animation_stamina->draw(window, states);
-      }
-
-      if (_animation_duration_skull_blink < _next_animation_duration_skull_blink)
-      {
-         _animation_skull_blink->draw(window, states);
-      }
+      const auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
+      autosave->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
+      autosave->draw(window, states);
    }
+}
+
+void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   const auto w = GameConfiguration::getInstance()._view_width;
+   const auto h = GameConfiguration::getInstance()._view_height;
+   const sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   window.setView(view);
+
+   drawAutoSave(window, states);
+   drawCameraPanorama(window, states);
+   drawHealth(window, states);
 }
 
 void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
@@ -335,6 +356,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    {
       sorted_topics.push_back(entry.first);
    }
+
    std::sort(sorted_topics.begin(), sorted_topics.end());
    for (const auto& topic : sorted_topics)
    {
@@ -357,9 +379,13 @@ void InfoLayer::setLoading(bool loading)
 {
    _layers["autosave"]->_visible = loading;
 
-   if (!loading && loading != _loading)
+   if (_loading && !loading)
    {
       _show_time = GlobalClock::getInstance().getElapsedTime();
+   }
+   else if (!_loading && loading)
+   {
+      _hide_time = GlobalClock::getInstance().getElapsedTime();
    }
 
    _loading = loading;
