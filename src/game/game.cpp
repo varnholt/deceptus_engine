@@ -177,7 +177,41 @@ void Game::initializeWindow()
 
    if (!_window_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
    {
-      Log::Fatal() << "failed to create texture: window render texture";
+      auto showErrorMessage = [](const std::string& message)
+      {
+         sf::RenderWindow window(sf::VideoMode(240, 80), "Error", sf::Style::Titlebar | sf::Style::Close);
+
+         sf::Font font;
+         font.loadFromFile("data/fonts/deceptum.ttf");
+         const_cast<sf::Texture&>(font.getTexture(12)).setSmooth(false);
+
+         sf::Text text;
+         text.setFont(font);
+         text.setString(message);
+         text.setCharacterSize(12);
+         text.setFillColor(sf::Color::Black);
+         text.setPosition(30.0f, 30.0f);
+
+         while (window.isOpen())
+         {
+            sf::Event event;
+            while (window.pollEvent(event))
+            {
+               if (event.type == sf::Event::Closed)
+               {
+                  window.close();
+               }
+            }
+
+            window.clear(sf::Color::White);
+            window.draw(text);
+            window.display();
+         }
+      };
+
+      std::string error = "Failed to create window render texture.";
+      showErrorMessage(error);
+      Log::Fatal() << error;
    }
 
    Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;

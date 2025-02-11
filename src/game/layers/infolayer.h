@@ -30,12 +30,16 @@ private:
    void loadInventoryItems();
    void drawHeartAnimation(sf::RenderTarget& window, sf::RenderStates states);
    void drawInventoryItem(sf::RenderTarget& window, sf::RenderStates states);
+   void drawHealth(sf::RenderTarget& window, sf::RenderStates states);
+   void drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates states);
+   void drawAutoSave(sf::RenderTarget& window, sf::RenderStates states);
    void updateInventoryItems();
 
    BitmapFont _font;
 
    bool _loading = false;
    sf::Time _show_time;
+   sf::Time _hide_time;
 
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
