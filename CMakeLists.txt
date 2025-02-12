@@ -736,12 +736,8 @@ target_include_directories(deceptus PRIVATE
 
 target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
 
-if(debug)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(deceptus PRIVATE DEBUG)
-endif()
-
-if (MSVC)
-    add_compile_options(/MP)
 endif()
 
 
@@ -758,7 +754,7 @@ target_link_libraries(deceptus PRIVATE
 
 if(WIN32)
 
-   if(debug)
+   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
        set_target_properties(deceptus PROPERTIES WIN32_EXECUTABLE FALSE)
    else()
        set_target_properties(deceptus PROPERTIES WIN32_EXECUTABLE TRUE)
@@ -767,6 +763,10 @@ if(WIN32)
    if(win32-msvc)
        target_compile_definitions(deceptus PRIVATE _CRT_SECURE_NO_WARNINGS)
        target_compile_options(deceptus PRIVATE /wd5045)
+   endif()
+
+   if (MSVC)
+       add_compile_options(/MP)
    endif()
 
    target_link_libraries(deceptus PRIVATE glu32 opengl32)
