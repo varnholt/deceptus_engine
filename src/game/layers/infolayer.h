@@ -3,6 +3,7 @@
 #include "framework/image/layer.h"
 #include "game/animation/animation.h"
 #include "game/animation/animationpool.h"
+#include "game/image/layerdata.h"
 #include "game/layers/bitmapfont.h"
 
 #include <SFML/Graphics.hpp>
@@ -41,8 +42,7 @@ private:
    sf::Time _show_time;
    sf::Time _hide_time;
 
-   std::vector<std::shared_ptr<Layer>> _layer_stack;
-   std::map<std::string, std::shared_ptr<Layer>> _layers;
+   std::map<std::string, std::shared_ptr<LayerData>> _layers;
 
    std::vector<std::shared_ptr<Layer>> _heart_layers;
    std::vector<std::shared_ptr<Layer>> _stamina_layers;

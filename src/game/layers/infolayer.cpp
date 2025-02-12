@@ -1,5 +1,6 @@
 #include "infolayer.h"
 
+#include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
@@ -62,54 +63,54 @@ InfoLayer::InfoLayer()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/game/ingame_ui.psd");
 
-   for (const auto& layer : psd.getLayers())
+   for (const auto& psd_layer : psd.getLayers())
    {
       // skip groups
-      if (!layer.isImageLayer())
+      if (!psd_layer.isImageLayer())
       {
          continue;
       }
 
-      auto tmp = std::make_shared<Layer>();
-      tmp->_visible = layer.isVisible();
-
+      auto layer = std::make_shared<Layer>();
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
 
-      if (!texture->create(layer.getWidth(), layer.getHeight()))
+      if (!texture->create(psd_layer.getWidth(), psd_layer.getHeight()))
       {
-         Log::Fatal() << "failed to create texture: " << layer.getName();
+         Log::Fatal() << "failed to create texture: " << psd_layer.getName();
       }
 
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
+      texture->update(reinterpret_cast<const sf::Uint8*>(psd_layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+      sprite->setPosition(static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop()));
 
-      tmp->_texture = texture;
-      tmp->_sprite = sprite;
+      layer->_visible = psd_layer.isVisible();
+      layer->_texture = texture;
+      layer->_sprite = sprite;
 
-      _layer_stack.push_back(tmp);
-      _layers[layer.getName()] = tmp;
+      auto layer_data = std::make_shared<LayerData>(layer);
+      layer_data->_pos = sprite->getPosition();
+      _layers[psd_layer.getName()] = layer_data;
    }
 
    // init heart layers
    _heart_layers.reserve(heart_quarter_layer_count);
    for (auto i = 1u; i <= heart_quarter_layer_count; i++)
    {
-      _heart_layers.push_back(_layers[std::format("{}", i)]);
+      _heart_layers.push_back(_layers[std::format("{}", i)]->_layer);
    }
 
    _stamina_layers.reserve(6);
    for (auto i = 1u; i <= 6; i++)
    {
-      _stamina_layers.push_back(_layers[std::format("energy_{}", i)]);
+      _stamina_layers.push_back(_layers[std::format("energy_{}", i)]->_layer);
    }
 
-   _character_window_layer = _layers["character_window"];
+   _character_window_layer = _layers["character_window"]->_layer;
 
-   _slot_item_layers[0] = _layers["item_slot_X"];
-   _slot_item_layers[1] = _layers["item_slot_Y"];
+   _slot_item_layers[0] = _layers["item_slot_X"]->_layer;
+   _slot_item_layers[1] = _layers["item_slot_Y"]->_layer;
 
    // load heart animation
    const auto t = sf::milliseconds(100);
@@ -197,17 +198,37 @@ void InfoLayer::updateInventoryItems()
 void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto now = GlobalClock::getInstance().getElapsedTime();
-   constexpr auto x_offset_hidden = -200;
+   constexpr auto x_offset_hidden = -210;
    constexpr auto duration_show_s = 1.0f;
    constexpr auto duration_hide_s = 1.0f;
+
    auto x_offset = 0;
 
    if (_loading)
    {
+      // evaluate hide time
+      const auto time_diff_s = (now - _hide_time).asSeconds();
+      const auto time_diff_norm = time_diff_s / duration_hide_s;
+      const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
+      const auto time_diff_eased = Easings::easeInQuad<float>(time_diff_norm_clamped);
+      x_offset = time_diff_eased * x_offset_hidden;
+
+      // std::cout << time_diff_norm_clamped << "\n";
    }
    else
    {
+      // evaluate show time
+      const auto time_diff_s = (now - _show_time).asSeconds();
+      const auto time_diff_norm = time_diff_s / duration_hide_s;
+      const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
+      const auto time_diff_eased = Easings::easeOutCubic<float>(time_diff_norm_clamped);  // OutElastic
+      x_offset = (1.0f - time_diff_eased) * x_offset_hidden;
+
+      // std::cout << time_diff_norm_clamped << "\n";
    }
+
+   auto player_health_layer_data = _layers["character_window"];
+   player_health_layer_data->_layer->_sprite->setPosition(player_health_layer_data->_pos + sf::Vector2f(x_offset, 0.0f));
 
    const auto& extra_table = SaveState::getPlayerInfo()._extra_table;
    const auto heart_quarters = extra_table._health._health;
@@ -247,10 +268,10 @@ void InfoLayer::drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates st
 {
    if (CameraPanorama::getInstance().isKeyboardLookActive())
    {
-      auto layer_cpan_up = _layers["cpan_up"];
-      auto layer_cpan_down = _layers["cpan_down"];
-      auto layer_cpan_left = _layers["cpan_left"];
-      auto layer_cpan_right = _layers["cpan_right"];
+      auto layer_cpan_up = _layers["cpan_up"]->_layer;
+      auto layer_cpan_down = _layers["cpan_down"]->_layer;
+      auto layer_cpan_left = _layers["cpan_left"]->_layer;
+      auto layer_cpan_right = _layers["cpan_right"]->_layer;
 
       layer_cpan_up->draw(window, states);
       layer_cpan_down->draw(window, states);
@@ -263,7 +284,7 @@ void InfoLayer::drawAutoSave(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto now = GlobalClock::getInstance().getElapsedTime();
 
-   auto autosave = _layers["autosave"];
+   auto autosave = _layers["autosave"]->_layer;
    if (autosave->_visible)
    {
       const auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
@@ -321,7 +342,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_view), static_cast<float>(h_view)));
    window.setView(view);
 
-   const auto& layer_health = _layers["console"];
+   const auto& layer_health = _layers["console"]->_layer;
    layer_health->draw(window, states);
 
    sf::View view_screen(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_screen), static_cast<float>(h_screen)));
@@ -377,7 +398,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 
 void InfoLayer::setLoading(bool loading)
 {
-   _layers["autosave"]->_visible = loading;
+   _layers["autosave"]->_layer->_visible = loading;
 
    if (_loading && !loading)
    {
