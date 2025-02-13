@@ -43,6 +43,7 @@ private:
    sf::Time _hide_time;
 
    std::map<std::string, std::shared_ptr<LayerData>> _layers;
+   std::vector<std::shared_ptr<LayerData>> _player_health_layers;
 
    std::vector<std::shared_ptr<Layer>> _heart_layers;
    std::vector<std::shared_ptr<Layer>> _stamina_layers;

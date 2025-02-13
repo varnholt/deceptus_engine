@@ -58,6 +58,71 @@ InfoLayer::InfoLayer()
 {
    _font.load("data/game/font.png", "data/game/font.map");
 
+   const auto player_health_layers = {
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "hp_slot_01",
+      "hp_slot_02",
+      "hp_slot_03",
+      "hp_slot_04",
+      "hp_slot_05",
+      "hp_slot_06",
+      "hp_slot_07",
+      "hp_slot_08",
+      "hp_slot_09",
+      "hp_slot_10",
+      "hp_slot_11",
+      "hp_slot_12",
+      "hp_slot_13",
+      "hp_slot_03 #1",
+      "energy_1",
+      "energy_2",
+      "energy_3",
+      "energy_4",
+      "energy_5",
+      "energy_6",
+      "character_window",
+      "weapon_none_icon"
+   };
+
    // load ingame psd
    PSD psd;
    psd.setColorFormat(PSD::ColorFormat::ABGR);
@@ -92,6 +157,12 @@ InfoLayer::InfoLayer()
       auto layer_data = std::make_shared<LayerData>(layer);
       layer_data->_pos = sprite->getPosition();
       _layers[psd_layer.getName()] = layer_data;
+
+      // store all player health related layers
+      if (std::ranges::contains(player_health_layers, psd_layer.getName()))
+      {
+         _player_health_layers.push_back(layer_data);
+      }
    }
 
    // init heart layers
@@ -227,8 +298,20 @@ void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
       // std::cout << time_diff_norm_clamped << "\n";
    }
 
-   auto player_health_layer_data = _layers["character_window"];
-   player_health_layer_data->_layer->_sprite->setPosition(player_health_layer_data->_pos + sf::Vector2f(x_offset, 0.0f));
+   std::ranges::for_each(
+      _player_health_layers,
+      [x_offset](const std::shared_ptr<LayerData>& layer_data)
+      {
+         auto layer = layer_data->_layer;
+         layer->_sprite->setPosition(layer_data->_pos.x + x_offset, layer_data->_pos.y);
+      }
+   );
+
+   _animation_heart->setPosition(heart_pos_x_px + x_offset, heart_pos_y_px);
+   _animation_stamina->setPosition(stamina_pos_x_px + x_offset, stamina_pos_y_px);
+   _animation_skull_blink->setPosition(skull_pos_x_px + x_offset, skull_pos_y_px);
+   _animation_hp_unlock_left->setPosition(x_offset, 0.0f);
+   _animation_hp_unlock_right->setPosition(x_offset, 0.0f);
 
    const auto& extra_table = SaveState::getPlayerInfo()._extra_table;
    const auto heart_quarters = extra_table._health._health;

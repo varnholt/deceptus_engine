@@ -87,6 +87,7 @@ private:
    std::atomic<bool> _level_loading_finished = false;
    std::atomic<bool> _level_loading_finished_previous = false;  // keep track of level loading in an async manner
    std::future<void> _level_loading_thread;
+   std::vector<std::function<void()>> _level_loaded_callbacks;
    bool _restore_previous_position = false;
    sf::Vector2f _stored_position;
 
