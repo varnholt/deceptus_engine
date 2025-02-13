@@ -316,6 +316,13 @@ void Game::loadLevel(LoadingMode loading_mode)
          CameraSystem::getInstance().syncNow();
 
          GameClock::getInstance().reset();
+
+         // notify listeners
+         for (const auto& callback : _level_loaded_callbacks)
+         {
+            callback();
+         }
+         _level_loaded_callbacks.clear();
       }
    );
 }
@@ -586,12 +593,17 @@ void Game::menuLoadRequest()
    ScreenTransitionHandler::getInstance().clear();
    _player->reset();
    loadLevel();
+
+   // fade out/fade in
+   auto screen_transition = makeFadeOutFadeIn();
+   ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
+   _level_loaded_callbacks.push_back([] { ScreenTransitionHandler::getInstance().startEffect2(); });
 }
 
 std::unique_ptr<ScreenTransition> Game::makeFadeOutFadeIn()
 {
    auto screen_transition = std::make_unique<ScreenTransition>();
-   const sf::Color fade_color{30, 30, 40};
+   const sf::Color fade_color{0, 0, 0};
    auto fade_out = std::make_shared<FadeTransitionEffect>(fade_color);
    auto fade_in = std::make_shared<FadeTransitionEffect>(fade_color);
    fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
@@ -610,9 +622,8 @@ std::unique_ptr<ScreenTransition> Game::makeFadeOutFadeIn()
 
 void Game::resetAfterDeath(const sf::Time& dt)
 {
-   // not 100% if the screen transitions should actually drive the
-   // level loading and game workflow. it should rather be the other
-   // way round. on the other hand this approach allows very simple
+   // not great. the screen transitions drive the level loading and game workflow.
+   // it should rather be the other way round. on the other hand this approach allows very simple
    // timing and the fading is very unlikely to fail anyway.
    if (_player->isDead())
    {
