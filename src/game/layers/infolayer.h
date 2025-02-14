@@ -35,15 +35,18 @@ private:
    void drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates states);
    void drawAutoSave(sf::RenderTarget& window, sf::RenderStates states);
    void updateInventoryItems();
+   void updateHealthLayerOffsets();
 
    BitmapFont _font;
 
-   bool _loading = false;
-   sf::Time _show_time;
-   sf::Time _hide_time;
+   bool _loading;
+   std::optional<sf::Time> _show_time;
+   std::optional<sf::Time> _hide_time;
 
    std::map<std::string, std::shared_ptr<LayerData>> _layers;
    std::vector<std::shared_ptr<LayerData>> _player_health_layers;
+   static constexpr float x_offset_hidden = -220.0f;
+   float _player_health_x_offset{x_offset_hidden};
 
    std::vector<std::shared_ptr<Layer>> _heart_layers;
    std::vector<std::shared_ptr<Layer>> _stamina_layers;
