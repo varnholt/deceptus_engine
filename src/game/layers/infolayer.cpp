@@ -13,6 +13,7 @@
 #include "game/player/extratable.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
+#include "game/state/displaymode.h"
 #include "game/state/savestate.h"
 
 #include <iostream>
@@ -220,6 +221,7 @@ InfoLayer::InfoLayer()
    _animation_hp_unlock_right->_reset_to_first_frame = false;
 
    loadInventoryItems();
+   updateHealthLayerOffsets();
 }
 
 void InfoLayer::loadInventoryItems()
@@ -266,53 +268,83 @@ void InfoLayer::updateInventoryItems()
    }
 }
 
-void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
+void InfoLayer::updateHealthLayerOffsets()
 {
+   // loading
+   // -> move in health bar
+   // not loading
+   // -> move out health bar
+   // if game state menu detected
+   // -> reset
+   if (DisplayMode::getInstance().isSet(Display::MainMenu))
+   {
+      _hide_time.reset();
+      _show_time.reset();
+      _player_health_x_offset = x_offset_hidden;
+   }
+
    const auto now = GlobalClock::getInstance().getElapsedTime();
-   constexpr auto x_offset_hidden = -210;
    constexpr auto duration_show_s = 1.0f;
    constexpr auto duration_hide_s = 1.0f;
 
-   auto x_offset = 0;
+   auto effect_elapsed = false;
 
-   if (_loading)
+   if (_hide_time.has_value())
    {
       // evaluate hide time
-      const auto time_diff_s = (now - _hide_time).asSeconds();
+      const auto time_diff_s = (now - _hide_time.value()).asSeconds();
       const auto time_diff_norm = time_diff_s / duration_hide_s;
-      const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
-      const auto time_diff_eased = Easings::easeInQuad<float>(time_diff_norm_clamped);
-      x_offset = time_diff_eased * x_offset_hidden;
-
-      // std::cout << time_diff_norm_clamped << "\n";
+      effect_elapsed = time_diff_norm > 1.0f;
+      if (!effect_elapsed)
+      {
+         const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
+         const auto time_diff_eased = Easings::easeInQuad<float>(time_diff_norm_clamped);
+         _player_health_x_offset = std::min(_player_health_x_offset, time_diff_eased * x_offset_hidden);
+      }
+      else
+      {
+         _hide_time.reset();
+      }
    }
-   else
+   else if (_show_time.has_value())
    {
       // evaluate show time
-      const auto time_diff_s = (now - _show_time).asSeconds();
+      const auto time_diff_s = (now - _show_time.value()).asSeconds();
       const auto time_diff_norm = time_diff_s / duration_hide_s;
-      const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
-      const auto time_diff_eased = Easings::easeOutCubic<float>(time_diff_norm_clamped);  // OutElastic
-      x_offset = (1.0f - time_diff_eased) * x_offset_hidden;
-
-      // std::cout << time_diff_norm_clamped << "\n";
+      effect_elapsed = time_diff_norm > 1.0f;
+      if (!effect_elapsed)
+      {
+         const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
+         const auto time_diff_eased = Easings::easeOutCubic<float>(time_diff_norm_clamped);
+         _player_health_x_offset = (1.0f - time_diff_eased) * x_offset_hidden;
+      }
+      else
+      {
+         _show_time.reset();
+      }
    }
 
-   std::ranges::for_each(
-      _player_health_layers,
-      [x_offset](const std::shared_ptr<LayerData>& layer_data)
-      {
-         auto layer = layer_data->_layer;
-         layer->_sprite->setPosition(layer_data->_pos.x + x_offset, layer_data->_pos.y);
-      }
-   );
+   if (!effect_elapsed)
+   {
+      std::ranges::for_each(
+         _player_health_layers,
+         [this](const std::shared_ptr<LayerData>& layer_data)
+         {
+            auto layer = layer_data->_layer;
+            layer->_sprite->setPosition(layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y);
+         }
+      );
 
-   _animation_heart->setPosition(heart_pos_x_px + x_offset, heart_pos_y_px);
-   _animation_stamina->setPosition(stamina_pos_x_px + x_offset, stamina_pos_y_px);
-   _animation_skull_blink->setPosition(skull_pos_x_px + x_offset, skull_pos_y_px);
-   _animation_hp_unlock_left->setPosition(x_offset, 0.0f);
-   _animation_hp_unlock_right->setPosition(x_offset, 0.0f);
+      _animation_heart->setPosition(heart_pos_x_px + _player_health_x_offset, heart_pos_y_px);
+      _animation_stamina->setPosition(stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px);
+      _animation_skull_blink->setPosition(skull_pos_x_px + _player_health_x_offset, skull_pos_y_px);
+      _animation_hp_unlock_left->setPosition(_player_health_x_offset, 0.0f);
+      _animation_hp_unlock_right->setPosition(_player_health_x_offset, 0.0f);
+   }
+}
 
+void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
+{
    const auto& extra_table = SaveState::getPlayerInfo()._extra_table;
    const auto heart_quarters = extra_table._health._health;
 
@@ -497,6 +529,7 @@ void InfoLayer::setLoading(bool loading)
 
 void InfoLayer::update(const sf::Time& dt)
 {
+   updateHealthLayerOffsets();
    updateInventoryItems();
    updateAnimations(dt);
 
