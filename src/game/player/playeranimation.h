@@ -66,6 +66,7 @@ public:
 
    HighResDuration getCurrentAnimationDuration() const;
    HighResDuration getRevealDuration() const;
+   HighResDuration getRevealStartDelay() const;
    HighResDuration getSwordAttackDurationStanding(bool points_left) const;
    std::optional<HighResDuration> getActiveAttackCycleDuration();
    bool isStandingSwordAttackPlayed() const;

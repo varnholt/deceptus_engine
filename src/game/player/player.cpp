@@ -1566,7 +1566,7 @@ void Player::updateSpawn()
 {
    using namespace std::chrono_literals;
 
-   if (GameClock::getInstance().durationSinceSpawn() < 1.0s)
+   if (GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealStartDelay())
    {
       if (!_spawn_orientation_locked)
       {
