@@ -3,6 +3,7 @@
 #include "framework/image/layer.h"
 #include "game/animation/animation.h"
 #include "game/animation/animationpool.h"
+#include "game/image/layerdata.h"
 #include "game/layers/bitmapfont.h"
 
 #include <SFML/Graphics.hpp>
@@ -30,15 +31,22 @@ private:
    void loadInventoryItems();
    void drawHeartAnimation(sf::RenderTarget& window, sf::RenderStates states);
    void drawInventoryItem(sf::RenderTarget& window, sf::RenderStates states);
+   void drawHealth(sf::RenderTarget& window, sf::RenderStates states);
+   void drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates states);
+   void drawAutoSave(sf::RenderTarget& window, sf::RenderStates states);
    void updateInventoryItems();
+   void updateHealthLayerOffsets();
 
    BitmapFont _font;
 
-   bool _loading = false;
-   sf::Time _show_time;
+   std::atomic<bool> _loading;
+   std::optional<sf::Time> _show_time;
+   std::optional<sf::Time> _hide_time;
 
-   std::vector<std::shared_ptr<Layer>> _layer_stack;
-   std::map<std::string, std::shared_ptr<Layer>> _layers;
+   std::map<std::string, std::shared_ptr<LayerData>> _layers;
+   std::vector<std::shared_ptr<LayerData>> _player_health_layers;
+   static constexpr float x_offset_hidden = -220.0f;
+   float _player_health_x_offset{x_offset_hidden};
 
    std::vector<std::shared_ptr<Layer>> _heart_layers;
    std::vector<std::shared_ptr<Layer>> _stamina_layers;
