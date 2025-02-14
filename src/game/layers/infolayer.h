@@ -39,7 +39,7 @@ private:
 
    BitmapFont _font;
 
-   bool _loading;
+   std::atomic<bool> _loading;
    std::optional<sf::Time> _show_time;
    std::optional<sf::Time> _hide_time;
 
