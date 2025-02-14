@@ -65,6 +65,75 @@ void showGpu()
       Log::Warning() << "failed to retrieve GPU information";
    }
 }
+
+void showErrorMessage(const std::string& message)
+{
+   sf::RenderWindow window(sf::VideoMode(240, 80), "Error", sf::Style::Titlebar | sf::Style::Close);
+
+   sf::Font font;
+   font.loadFromFile("data/fonts/deceptum.ttf");
+   const_cast<sf::Texture&>(font.getTexture(12)).setSmooth(false);
+
+   sf::Text text;
+   text.setFont(font);
+   text.setString(message);
+   text.setCharacterSize(12);
+   text.setFillColor(sf::Color::Black);
+   text.setPosition(30.0f, 30.0f);
+
+   while (window.isOpen())
+   {
+      sf::Event event;
+      while (window.pollEvent(event))
+      {
+         if (event.type == sf::Event::Closed)
+         {
+            window.close();
+         }
+      }
+
+      window.clear(sf::Color::White);
+      window.draw(text);
+      window.display();
+   }
+};
+
+std::unique_ptr<ScreenTransition> makeFadeOutFadeInDeath()
+{
+   auto screen_transition = std::make_unique<ScreenTransition>();
+   const sf::Color fade_color{0, 0, 0};
+   auto fade_out = std::make_shared<FadeTransitionEffect>(fade_color);
+   auto fade_in = std::make_shared<FadeTransitionEffect>(fade_color);
+   fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
+   fade_out->_speed = 1.0f;
+   fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+   fade_in->_value = 1.0f;
+   fade_in->_speed = 0.5f;
+   screen_transition->_effect_1 = fade_out;
+   screen_transition->_effect_2 = fade_in;
+   screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
+   screen_transition->_autostart_effect_2 = false;
+   screen_transition->startEffect1();
+   return screen_transition;
+}
+
+std::unique_ptr<ScreenTransition> makeFadeInAfterLoadGame()
+{
+   auto screen_transition = std::make_unique<ScreenTransition>();
+   const sf::Color fade_color{0, 0, 0};
+   auto null_effect = std::make_shared<ScreenTransitionEffect>();
+   auto fade_in = std::make_shared<FadeTransitionEffect>(fade_color);
+   fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+   fade_in->_value = 1.0f;
+   fade_in->_speed = 1.0f;
+   screen_transition->_effect_1 = null_effect;
+   screen_transition->_effect_2 = fade_in;
+   screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{0};
+   screen_transition->_autostart_effect_2 = true;
+   screen_transition->startEffect1();
+   return screen_transition;
+}
+
 }  // namespace
 
 // screen concept
@@ -177,38 +246,6 @@ void Game::initializeWindow()
 
    if (!_window_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
    {
-      auto showErrorMessage = [](const std::string& message)
-      {
-         sf::RenderWindow window(sf::VideoMode(240, 80), "Error", sf::Style::Titlebar | sf::Style::Close);
-
-         sf::Font font;
-         font.loadFromFile("data/fonts/deceptum.ttf");
-         const_cast<sf::Texture&>(font.getTexture(12)).setSmooth(false);
-
-         sf::Text text;
-         text.setFont(font);
-         text.setString(message);
-         text.setCharacterSize(12);
-         text.setFillColor(sf::Color::Black);
-         text.setPosition(30.0f, 30.0f);
-
-         while (window.isOpen())
-         {
-            sf::Event event;
-            while (window.pollEvent(event))
-            {
-               if (event.type == sf::Event::Closed)
-               {
-                  window.close();
-               }
-            }
-
-            window.clear(sf::Color::White);
-            window.draw(text);
-            window.display();
-         }
-      };
-
       std::string error = "Failed to create window render texture.";
       showErrorMessage(error);
       Log::Fatal() << error;
@@ -322,12 +359,12 @@ void Game::loadLevel(LoadingMode loading_mode)
          _info_layer->setLoading(!_level_loading_finished);
 
          // notify listeners
-         // for (const auto& callback : _level_loaded_callbacks)
-         // {
-         //    callback();
-         // }
-         //
-         // _level_loaded_callbacks.clear();
+         for (const auto& callback : _level_loaded_callbacks)
+         {
+            callback();
+         }
+
+         _level_loaded_callbacks.clear();
       }
    );
 }
@@ -590,51 +627,6 @@ void Game::goToLastCheckpoint()
    loadLevel();
 }
 
-namespace
-{
-
-std::unique_ptr<ScreenTransition> makeFadeOutFadeInDeath()
-{
-   auto screen_transition = std::make_unique<ScreenTransition>();
-   const sf::Color fade_color{0, 0, 0};
-   auto fade_out = std::make_shared<FadeTransitionEffect>(fade_color);
-   auto fade_in = std::make_shared<FadeTransitionEffect>(fade_color);
-   fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
-   fade_out->_speed = 1.0f;
-   fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
-   fade_in->_value = 1.0f;
-   fade_in->_speed = 0.5f;
-   screen_transition->_effect_1 = fade_out;
-   screen_transition->_effect_2 = fade_in;
-   screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
-   screen_transition->_autostart_effect_2 = false;
-   screen_transition->startEffect1();
-
-   return screen_transition;
-}
-
-std::unique_ptr<ScreenTransition> makeFadeOutFadeInLoadGame()
-{
-   auto screen_transition = std::make_unique<ScreenTransition>();
-   const sf::Color fade_color{0, 0, 0};
-   auto fade_out = std::make_shared<FadeTransitionEffect>(fade_color);
-   auto fade_in = std::make_shared<FadeTransitionEffect>(fade_color);
-   fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
-   fade_out->_speed = 1.0f;
-   fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
-   fade_in->_value = 2.0f;
-   fade_in->_speed = 0.5f;
-   screen_transition->_effect_1 = fade_out;
-   screen_transition->_effect_2 = fade_in;
-   screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{0};
-   screen_transition->_autostart_effect_2 = false;
-   screen_transition->startEffect1();
-
-   return screen_transition;
-}
-
-}  // namespace
-
 void Game::menuLoadRequest()
 {
    // the code below is mostly identical to 'goToLastCheckpoint'
@@ -643,11 +635,16 @@ void Game::menuLoadRequest()
    _player->reset();
    loadLevel();
 
-   // fade out/fade in
-   // auto screen_transition = makeFadeOutFadeInLoadGame();
-   // screen_transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
-   // ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
-   // _level_loaded_callbacks.push_back([] { ScreenTransitionHandler::getInstance().startEffect2(); });
+   // fade in after level loading is done
+   _level_loaded_callbacks.push_back(
+      []
+      {
+         auto screen_transition = makeFadeInAfterLoadGame();
+         screen_transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
+         ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
+         ScreenTransitionHandler::getInstance().startEffect2();
+      }
+   );
 }
 
 
