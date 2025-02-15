@@ -55,9 +55,6 @@ public:
 
    // information about the current joystick
 
-   //! check if given joystick id is valid
-   bool validId(int32_t id) const;
-
    //! getter for the joystick's name
    virtual std::string getName(int32_t id) const;
 
@@ -107,7 +104,7 @@ private:
    GameControllerInfo _info;
 
    SDL_Joystick* _joystick = nullptr;
-   SDL_Gamepad* _controller = nullptr;
+   SDL_Gamepad* _gamepad = nullptr;
 
    SDL_GamepadBinding _dpad_bind_up;
    SDL_GamepadBinding _dpad_bind_down;
