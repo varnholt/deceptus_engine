@@ -7,6 +7,7 @@
 #include "game/audio/audio.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 
 #include <iostream>
@@ -101,12 +102,12 @@ void MoveableBox::setup(const GameDeserializeData& data)
 
    if (data._tmx_object->_properties)
    {
-      const auto z_it = data._tmx_object->_properties->_map.find("z");
-      if (z_it != data._tmx_object->_properties->_map.end())
-      {
-         const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
-         setZ(z_index);
-      }
+      const auto& map = data._tmx_object->_properties->_map;
+
+      _settings._density = ValueReader::readValue<float>("density", map).value_or(_settings._density);
+      _settings._friction = ValueReader::readValue<float>("friction", map).value_or(_settings._friction);
+      _settings._gravity_scale = ValueReader::readValue<float>("gravity_scale", map).value_or(_settings._gravity_scale);
+      setZ(ValueReader::readValue<int32_t>("z", map).value_or(0));
    }
 
    switch (static_cast<int32_t>(_size.x))
@@ -146,13 +147,21 @@ void MoveableBox::setupBody(const std::shared_ptr<b2World>& world)
    const auto size_y = _size.y / PPM;
    b2PolygonShape polygon_shape = Box2DTools::createBeveledBox(size_x, size_y, 0.1f);
 
+   b2FixtureDef fixture_def;
+   fixture_def.shape = &polygon_shape;
+   fixture_def.density = _settings._density;
+   fixture_def.friction = _settings._friction;
+   fixture_def.filter.categoryBits = CategoryMoveableBox;                                    // I am a
+   fixture_def.filter.maskBits = CategoryBoundary | CategoryMoveableBox | CategoryFriendly;  // I collide with
+
    b2BodyDef body_def;
    body_def.type = b2_dynamicBody;
    _body = world->CreateBody(&body_def);
+   _body->SetGravityScale(_settings._gravity_scale);
 
    setupTransform();
 
-   auto* fixture = _body->CreateFixture(&polygon_shape, 1.0);
+   auto* fixture = _body->CreateFixture(&fixture_def);
    auto* object_data = new FixtureNode(this);
    object_data->setType(ObjectTypeMoveableBox);
    fixture->SetUserData(static_cast<void*>(object_data));

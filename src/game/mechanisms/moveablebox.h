@@ -22,6 +22,13 @@ public:
 
    void setup(const GameDeserializeData& data);
 
+   struct Settings
+   {
+      float _density = 1.0f;
+      float _friction = 0.0f;
+      float _gravity_scale = 1.0f;
+   };
+
 private:
    void setupBody(const std::shared_ptr<b2World>& world);
    void setupTransform();
@@ -31,4 +38,5 @@ private:
    sf::Vector2f _size;
    b2Body* _body = nullptr;
    std::optional<int32_t> _pushing_sample;
+   Settings _settings;
 };

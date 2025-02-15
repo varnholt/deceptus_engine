@@ -212,6 +212,7 @@ enum ObjectType
    ObjectTypeProjectile,            // 17
    ObjectTypeSolid,                 // 18
    ObjectTypeSolidOneWay,           // 19
+   ObjectTypeObstacle,              // 20
 };
 
 enum EntityCategory
@@ -220,6 +221,7 @@ enum EntityCategory
    CategoryFriendly = 0x02,
    CategoryEnemyWalkThrough = 0x04,
    CategoryEnemyCollideWith = 0x08,
+   CategoryMoveableBox = 0x10,
 };
 
 enum class MessageBoxLocation
