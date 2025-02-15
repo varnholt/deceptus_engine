@@ -706,8 +706,37 @@ The way to create a moveable object, create a rectangle as usual. So far the spr
 
 |Property|Type|Description|
 |-|-|-|
+|friction|float|Friction of the moveable object, default is 0.0f.|
+|density|float|Density of the moveable object, default is 1.0f.|
+|gravity_scale|float|Gravity scale of the moveable object, default is 1.0f.|
 |z|int|The layer's z index|
 
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+## Box Collider
+
+If you need to stop your Moveable Objects at some location in your level, e.g. to avoid gameplay deadlocks, you can place a 'Box Collider'. 
+
+This is a box Moveable Objects will collide with, the player doesn't.
+
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`BoxCollider`|
+|Object Group|`box_colliders`|
+
+### Object Properties
+
+This object does not have any properties. It does not contain any draw or update code. It is just a static (invisible) box.
 
 ---
 
