@@ -6,6 +6,7 @@
 
 #include "game/mechanisms/blockingrect.h"
 #include "game/mechanisms/bouncer.h"
+#include "game/mechanisms/boxcollider.h"
 #include "game/mechanisms/bubblecube.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/mechanisms/collapsingplatform.h"
@@ -65,6 +66,7 @@ void GameMechanismDeserializer::deserialize(
 
    auto* mechanism_blocking_rects = mechanisms[std::string{layer_name_blocking_rects}];
    auto* mechanism_bouncers = mechanisms[std::string{layer_name_bouncers}];
+   auto* mechanism_box_colliders = mechanisms[std::string{layer_name_box_colliders}];
    auto* mechanism_bubble_cubes = mechanisms[std::string{layer_name_bubble_cube}];
    auto* mechanism_checkpoints = mechanisms[std::string{layer_name_checkpoints}];
    auto* mechanism_collapsing_platforms = mechanisms[std::string{layer_name_collapsing_platforms}];
@@ -267,6 +269,12 @@ void GameMechanismDeserializer::deserialize(
             else if (object_group->_name == layer_name_moveable_objects || tmx_object->_template_type == type_name_moveable_object)
             {
                auto mechanism = std::make_shared<MoveableBox>(parent);
+               mechanism->setup(data);
+               mechanism_moveable_objects->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_box_colliders || tmx_object->_template_type == type_name_box_collider)
+            {
+               auto mechanism = std::make_shared<BoxCollider>(parent);
                mechanism->setup(data);
                mechanism_moveable_objects->push_back(mechanism);
             }
