@@ -23,12 +23,13 @@ As the engine uses some C++23 code, you need a recent compiler, i.e.
 
 ## Linux
 ```
-qmake && make
+mkdir deceptus_engine-build
+cd deceptus_engine-build
+cmake -DCMAKE_BUILD_TYPE=Release ../deceptus_engine
+cmake --build .
 ```
 
 ## Windows
-
-### cmake
 ```bash
 mkdir deceptus_engine-build
 cd deceptus_engine-build
@@ -46,7 +47,7 @@ brew install sdl2
 brew install lua
 mkdir deceptus_engine-build
 cd deceptus_engine-build
-cmake -DCMAKE_BUILD_TYPE=Release ..\deceptus_engine
+cmake -DCMAKE_BUILD_TYPE=Release ../deceptus_engine
 cmake --build .
 ```
 
