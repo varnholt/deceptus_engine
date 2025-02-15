@@ -36,11 +36,6 @@ cmake -DCMAKE_BUILD_TYPE=Release ..\deceptus_engine
 cmake --build .
 ```
 
-### qmake
-```bash
-qmake && nmake
-```
-
 ## MacOS
 
 ### Building
@@ -49,7 +44,10 @@ brew install fmt
 brew install sfml
 brew install sdl2
 brew install lua
-qmake && make
+mkdir deceptus_engine-build
+cd deceptus_engine-build
+cmake -DCMAKE_BUILD_TYPE=Release ..\deceptus_engine
+cmake --build .
 ```
 
 ### Running
