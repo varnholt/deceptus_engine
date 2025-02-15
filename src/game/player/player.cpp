@@ -41,7 +41,7 @@
 namespace
 {
 constexpr uint16_t category_bits = CategoryFriendly;
-constexpr uint16_t mask_bits_standing = CategoryBoundary | CategoryEnemyCollideWith;
+constexpr uint16_t mask_bits_standing = CategoryBoundary | CategoryEnemyCollideWith | CategoryMoveableBox;
 constexpr uint16_t mask_bits_crouching = CategoryEnemyCollideWith;
 constexpr int16_t group_index = 0;
 constexpr auto impulse_epsilon = 0.0000001f;
