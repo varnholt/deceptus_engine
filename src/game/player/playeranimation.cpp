@@ -382,11 +382,6 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    }
 }
 
-int32_t PlayerAnimation::getJumpAnimationReference() const
-{
-   return _jump_animation_reference;
-}
-
 const std::shared_ptr<Animation>& PlayerAnimation::getCurrentCycle() const
 {
    return _current_cycle;
@@ -904,6 +899,21 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processScreenTransiti
 
 std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(const PlayerAnimationData& data)
 {
+   // jump references
+   //
+   // y |                   _....._
+   //   |                ,="       "=.
+   //   |              ,"  |       |  ".
+   //   |            ,"    |       |    ".
+   //   |          ."      |       |      ".
+   //   |        ."        |       |        ".
+   //   |      ,"          |       |          ".
+   //   | ...-"            |       |            "-...
+   //   |-----+------------+-------+------------+-------------->
+   //   | #### ############ ####### ############ ####          t
+   //   | |    |            |       |            |
+   //   | ign. up           midair  down         landing
+
    // jump init
    if (data._dash_dir.has_value())
    {
@@ -913,7 +923,7 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
    // jump ignition
    if (data._jump_frame_count > PhysicsConfiguration::getInstance()._player_jump_frame_count - FRAMES_COUNT_JUMP_INIT)
    {
-      _jump_animation_reference = 0;
+      _jump_animation_reference = JumpReference::Ignition;
       return data._points_right ? _jump_init_r : _jump_init_l;
    }
 
@@ -925,41 +935,41 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
       const auto velocity = data._linear_velocity;
 
       // jump movement goes up
-      if (velocity.y < JUMP_UP_VELOCITY_THRESHOLD)
+      if (velocity.y < JUMP_UP_VELOCITY_THRESHOLD && _jump_animation_reference < JumpReference::Down)
       {
-         _jump_animation_reference = 1;
+         _jump_animation_reference = JumpReference::Up;
          return data._points_right ? _jump_up_r : _jump_up_l;
       }
 
       // jump movement goes down
       if (velocity.y > JUMP_DOWN_VELOCITY_THRESHOLD)
       {
-         _jump_animation_reference = 2;
+         _jump_animation_reference = JumpReference::Down;
          return data._points_right ? _jump_down_r : _jump_down_l;
       }
 
       // jump midair
-      if (_jump_animation_reference == 1)
+      if (_jump_animation_reference == JumpReference::Up)
       {
          return data._points_right ? _jump_midair_r : _jump_midair_l;
       }
 
       // still in-air but linear velocity is ~0 for whatever reason
-      if (_jump_animation_reference == 2)
+      if (_jump_animation_reference == JumpReference::Down)
       {
          return data._points_right ? _jump_down_r : _jump_down_l;
       }
    }
 
    // hard landing
-   else if (_jump_animation_reference == 2 && data._hard_landing)
+   else if (_jump_animation_reference == JumpReference::Down && data._hard_landing)
    {
       std::optional<std::shared_ptr<Animation>> next_cycle;
       next_cycle = data._points_right ? _jump_landing_r : _jump_landing_l;
 
       if (next_cycle.value()->_current_frame == static_cast<int32_t>(next_cycle.value()->_frames.size()) - 1)
       {
-         _jump_animation_reference = 3;
+         _jump_animation_reference = JumpReference::Landing;
          next_cycle.value()->seekToStart();
       }
 

@@ -58,8 +58,6 @@ public:
 
    void update(const sf::Time& dt, const PlayerAnimationData& data);
 
-   int32_t getJumpAnimationReference() const;
-
    const std::shared_ptr<Animation>& getCurrentCycle() const;
    const std::shared_ptr<Animation>& getAuxiliaryCycle() const;
    const std::shared_ptr<Animation>& getWallslideAnimation() const;
@@ -75,6 +73,14 @@ public:
    void resetAlpha();
 
 private:
+   enum class JumpReference : int32_t
+   {
+      Ignition = 0,
+      Up = 1,
+      Down = 2,
+      Landing = 3
+   };
+
    const std::shared_ptr<Animation>&
    getMappedArmedAnimation(const std::shared_ptr<Animation>& animation, const PlayerAnimationData& animation_data) const;
 
@@ -240,7 +246,7 @@ private:
 
    std::shared_ptr<Animation> _wallslide_animation;
 
-   int32_t _jump_animation_reference = 0;
+   JumpReference _jump_animation_reference = JumpReference::Ignition;
 
    std::shared_ptr<Animation> _current_cycle;
    std::shared_ptr<Animation> _auxiliary_cycle;
