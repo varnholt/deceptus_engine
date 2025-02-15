@@ -1,5 +1,6 @@
 #include "infolayer.h"
 
+#include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
@@ -12,6 +13,7 @@
 #include "game/player/extratable.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
+#include "game/state/displaymode.h"
 #include "game/state/savestate.h"
 
 #include <iostream>
@@ -57,59 +59,130 @@ InfoLayer::InfoLayer()
 {
    _font.load("data/game/font.png", "data/game/font.map");
 
+   const auto player_health_layers = {
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "hp_slot_01",
+      "hp_slot_02",
+      "hp_slot_03",
+      "hp_slot_04",
+      "hp_slot_05",
+      "hp_slot_06",
+      "hp_slot_07",
+      "hp_slot_08",
+      "hp_slot_09",
+      "hp_slot_10",
+      "hp_slot_11",
+      "hp_slot_12",
+      "hp_slot_13",
+      "hp_slot_03 #1",
+      "energy_1",
+      "energy_2",
+      "energy_3",
+      "energy_4",
+      "energy_5",
+      "energy_6",
+      "character_window",
+      "weapon_none_icon"
+   };
+
    // load ingame psd
    PSD psd;
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load("data/game/ingame_ui.psd");
 
-   for (const auto& layer : psd.getLayers())
+   for (const auto& psd_layer : psd.getLayers())
    {
       // skip groups
-      if (!layer.isImageLayer())
+      if (!psd_layer.isImageLayer())
       {
          continue;
       }
 
-      auto tmp = std::make_shared<Layer>();
-      tmp->_visible = layer.isVisible();
-
+      auto layer = std::make_shared<Layer>();
       auto texture = std::make_shared<sf::Texture>();
       auto sprite = std::make_shared<sf::Sprite>();
 
-      if (!texture->create(layer.getWidth(), layer.getHeight()))
+      if (!texture->create(psd_layer.getWidth(), psd_layer.getHeight()))
       {
-         Log::Fatal() << "failed to create texture: " << layer.getName();
+         Log::Fatal() << "failed to create texture: " << psd_layer.getName();
       }
 
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
+      texture->update(reinterpret_cast<const sf::Uint8*>(psd_layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+      sprite->setPosition(static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop()));
 
-      tmp->_texture = texture;
-      tmp->_sprite = sprite;
+      layer->_visible = psd_layer.isVisible();
+      layer->_texture = texture;
+      layer->_sprite = sprite;
 
-      _layer_stack.push_back(tmp);
-      _layers[layer.getName()] = tmp;
+      auto layer_data = std::make_shared<LayerData>(layer);
+      layer_data->_pos = sprite->getPosition();
+      _layers[psd_layer.getName()] = layer_data;
+
+      // store all player health related layers
+      if (std::ranges::contains(player_health_layers, psd_layer.getName()))
+      {
+         _player_health_layers.push_back(layer_data);
+      }
    }
 
    // init heart layers
    _heart_layers.reserve(heart_quarter_layer_count);
    for (auto i = 1u; i <= heart_quarter_layer_count; i++)
    {
-      _heart_layers.push_back(_layers[std::format("{}", i)]);
+      _heart_layers.push_back(_layers[std::format("{}", i)]->_layer);
    }
 
    _stamina_layers.reserve(6);
    for (auto i = 1u; i <= 6; i++)
    {
-      _stamina_layers.push_back(_layers[std::format("energy_{}", i)]);
+      _stamina_layers.push_back(_layers[std::format("energy_{}", i)]->_layer);
    }
 
-   _character_window_layer = _layers["character_window"];
+   _character_window_layer = _layers["character_window"]->_layer;
 
-   _slot_item_layers[0] = _layers["item_slot_X"];
-   _slot_item_layers[1] = _layers["item_slot_Y"];
+   _slot_item_layers[0] = _layers["item_slot_X"]->_layer;
+   _slot_item_layers[1] = _layers["item_slot_Y"]->_layer;
 
    // load heart animation
    const auto t = sf::milliseconds(100);
@@ -148,6 +221,7 @@ InfoLayer::InfoLayer()
    _animation_hp_unlock_right->_reset_to_first_frame = false;
 
    loadInventoryItems();
+   updateHealthLayerOffsets();
 }
 
 void InfoLayer::loadInventoryItems()
@@ -194,73 +268,156 @@ void InfoLayer::updateInventoryItems()
    }
 }
 
-void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
+void InfoLayer::updateHealthLayerOffsets()
 {
-   const auto now = GlobalClock::getInstance().getElapsedTime();
-
-   const auto w = GameConfiguration::getInstance()._view_width;
-   const auto h = GameConfiguration::getInstance()._view_height;
-
-   const sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-   window.setView(view);
-
-   auto autosave = _layers["autosave"];
-   if (autosave->_visible)
+   // loading
+   // -> move in health bar
+   // not loading
+   // -> move out health bar
+   // if game state menu detected
+   // -> reset
+   if (DisplayMode::getInstance().isSet(Display::MainMenu))
    {
-      const auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
-      autosave->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
-      autosave->draw(window, states);
+      _hide_time.reset();
+      _show_time.reset();
+      _player_health_x_offset = x_offset_hidden;
    }
 
-   // support cpan
+   const auto now = GlobalClock::getInstance().getElapsedTime();
+   constexpr auto duration_show_s = 1.0f;
+   constexpr auto duration_hide_s = 1.0f;
+
+   auto effect_elapsed = false;
+
+   if (_hide_time.has_value())
+   {
+      // evaluate hide time
+      const auto time_diff_s = (now - _hide_time.value()).asSeconds();
+      const auto time_diff_norm = time_diff_s / duration_hide_s;
+      effect_elapsed = time_diff_norm > 1.0f;
+      if (!effect_elapsed)
+      {
+         const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
+         const auto time_diff_eased = Easings::easeInQuad<float>(time_diff_norm_clamped);
+         _player_health_x_offset = std::min(_player_health_x_offset, time_diff_eased * x_offset_hidden);
+      }
+      else
+      {
+         _hide_time.reset();
+      }
+   }
+   else if (_show_time.has_value())
+   {
+      // evaluate show time
+      const auto time_diff_s = (now - _show_time.value()).asSeconds();
+      const auto time_diff_norm = time_diff_s / duration_hide_s;
+      effect_elapsed = time_diff_norm > 1.0f;
+      if (!effect_elapsed)
+      {
+         const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
+         const auto time_diff_eased = Easings::easeOutCubic<float>(time_diff_norm_clamped);
+         _player_health_x_offset = (1.0f - time_diff_eased) * x_offset_hidden;
+      }
+      else
+      {
+         _show_time.reset();
+      }
+   }
+
+   if (!effect_elapsed)
+   {
+      std::ranges::for_each(
+         _player_health_layers,
+         [this](const std::shared_ptr<LayerData>& layer_data)
+         {
+            auto layer = layer_data->_layer;
+            layer->_sprite->setPosition(layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y);
+         }
+      );
+
+      _animation_heart->setPosition(heart_pos_x_px + _player_health_x_offset, heart_pos_y_px);
+      _animation_stamina->setPosition(stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px);
+      _animation_skull_blink->setPosition(skull_pos_x_px + _player_health_x_offset, skull_pos_y_px);
+      _animation_hp_unlock_left->setPosition(_player_health_x_offset, 0.0f);
+      _animation_hp_unlock_right->setPosition(_player_health_x_offset, 0.0f);
+   }
+}
+
+void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
+{
+   const auto& extra_table = SaveState::getPlayerInfo()._extra_table;
+   const auto heart_quarters = extra_table._health._health;
+
+   _character_window_layer->draw(window, states);
+
+   const auto stamina = static_cast<int32_t>(extra_table._health._stamina * 6.0f);
+   for (auto i = 0; i < stamina; i++)
+   {
+      _stamina_layers[i]->draw(window, states);
+   }
+
+   for (auto i = 0; i < heart_quarters; i++)
+   {
+      _heart_layers[i]->draw(window, states);
+   }
+
+   drawInventoryItem(window, states);
+
+   if (_animation_duration_heart < _next_animation_duration_heart)
+   {
+      _animation_heart->draw(window, states);
+   }
+
+   if (_animation_duration_stamina < _next_animation_duration_stamina)
+   {
+      _animation_stamina->draw(window, states);
+   }
+
+   if (_animation_duration_skull_blink < _next_animation_duration_skull_blink)
+   {
+      _animation_skull_blink->draw(window, states);
+   }
+}
+
+void InfoLayer::drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates states)
+{
    if (CameraPanorama::getInstance().isKeyboardLookActive())
    {
-      auto layer_cpan_up = _layers["cpan_up"];
-      auto layer_cpan_down = _layers["cpan_down"];
-      auto layer_cpan_left = _layers["cpan_left"];
-      auto layer_cpan_right = _layers["cpan_right"];
+      auto layer_cpan_up = _layers["cpan_up"]->_layer;
+      auto layer_cpan_down = _layers["cpan_down"]->_layer;
+      auto layer_cpan_left = _layers["cpan_left"]->_layer;
+      auto layer_cpan_right = _layers["cpan_right"]->_layer;
 
       layer_cpan_up->draw(window, states);
       layer_cpan_down->draw(window, states);
       layer_cpan_left->draw(window, states);
       layer_cpan_right->draw(window, states);
    }
+}
 
-   if (!_loading)
+void InfoLayer::drawAutoSave(sf::RenderTarget& window, sf::RenderStates states)
+{
+   const auto now = GlobalClock::getInstance().getElapsedTime();
+
+   auto autosave = _layers["autosave"]->_layer;
+   if (autosave->_visible)
    {
-      const auto& extra_table = SaveState::getPlayerInfo()._extra_table;
-      const auto heart_quarters = extra_table._health._health;
-
-      _character_window_layer->draw(window, states);
-
-      const auto stamina = static_cast<int32_t>(extra_table._health._stamina * 6.0f);
-      for (auto i = 0; i < stamina; i++)
-      {
-         _stamina_layers[i]->draw(window, states);
-      }
-
-      for (auto i = 0; i < heart_quarters; i++)
-      {
-         _heart_layers[i]->draw(window, states);
-      }
-
-      drawInventoryItem(window, states);
-
-      if (_animation_duration_heart < _next_animation_duration_heart)
-      {
-         _animation_heart->draw(window, states);
-      }
-
-      if (_animation_duration_stamina < _next_animation_duration_stamina)
-      {
-         _animation_stamina->draw(window, states);
-      }
-
-      if (_animation_duration_skull_blink < _next_animation_duration_skull_blink)
-      {
-         _animation_skull_blink->draw(window, states);
-      }
+      const auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
+      autosave->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
+      autosave->draw(window, states);
    }
+}
+
+void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   const auto w = GameConfiguration::getInstance()._view_width;
+   const auto h = GameConfiguration::getInstance()._view_height;
+   const sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   window.setView(view);
+
+   drawAutoSave(window, states);
+   drawCameraPanorama(window, states);
+   drawHealth(window, states);
 }
 
 void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
@@ -300,7 +457,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_view), static_cast<float>(h_view)));
    window.setView(view);
 
-   const auto& layer_health = _layers["console"];
+   const auto& layer_health = _layers["console"]->_layer;
    layer_health->draw(window, states);
 
    sf::View view_screen(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_screen), static_cast<float>(h_screen)));
@@ -335,6 +492,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    {
       sorted_topics.push_back(entry.first);
    }
+
    std::sort(sorted_topics.begin(), sorted_topics.end());
    for (const auto& topic : sorted_topics)
    {
@@ -355,11 +513,15 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 
 void InfoLayer::setLoading(bool loading)
 {
-   _layers["autosave"]->_visible = loading;
+   _layers["autosave"]->_layer->_visible = loading;
 
-   if (!loading && loading != _loading)
+   if (_loading && !loading)
    {
       _show_time = GlobalClock::getInstance().getElapsedTime();
+   }
+   else if (!_loading && loading)
+   {
+      _hide_time = GlobalClock::getInstance().getElapsedTime();
    }
 
    _loading = loading;
@@ -367,6 +529,7 @@ void InfoLayer::setLoading(bool loading)
 
 void InfoLayer::update(const sf::Time& dt)
 {
+   updateHealthLayerOffsets();
    updateInventoryItems();
    updateAnimations(dt);
 

@@ -41,7 +41,7 @@
 namespace
 {
 constexpr uint16_t category_bits = CategoryFriendly;
-constexpr uint16_t mask_bits_standing = CategoryBoundary | CategoryEnemyCollideWith;
+constexpr uint16_t mask_bits_standing = CategoryBoundary | CategoryEnemyCollideWith | CategoryMoveableBox;
 constexpr uint16_t mask_bits_crouching = CategoryEnemyCollideWith;
 constexpr int16_t group_index = 0;
 constexpr auto impulse_epsilon = 0.0000001f;
@@ -804,6 +804,7 @@ void Player::updateAnimation(const sf::Time& dt)
 
    data._dead = isDead();
    data._death_count_current_level = SaveState::getPlayerInfo()._stats._death_count_current_level;
+   data._death_reason = _death_reason.value_or(DeathReason::Invalid);
    data._checkpoint_index = SaveState::getCurrent()._checkpoint;
    data._in_air = isInAir();
    data._in_water = isInWater();
@@ -1554,7 +1555,7 @@ void Player::updateSpawn()
 {
    using namespace std::chrono_literals;
 
-   if (GameClock::getInstance().durationSinceSpawn() < 1.0s)
+   if (GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealStartDelay())
    {
       if (!_spawn_orientation_locked)
       {
