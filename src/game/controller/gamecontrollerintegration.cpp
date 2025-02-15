@@ -49,38 +49,37 @@ void GameControllerIntegration::update()
    _device_changed_callbacks.clear();
 }
 
-void GameControllerIntegration::add(int32_t id)
+void GameControllerIntegration::add(int32_t joystick_id)
 {
    const std::lock_guard<std::mutex> lock(_device_changed_mutex);
    _device_changed_callbacks.emplace_back(
-      [this, id]()
+      [this, joystick_id]()
       {
-         auto controller = std::make_shared<GameController>();
-         controller->activate(id);
-         SDL_Joystick* joystick = SDL_OpenJoystick(id);
-         const auto controller_id = SDL_GetJoystickID(joystick);
-         _controllers[controller_id] = controller;
-         _selected_controller_id = controller_id;
+         auto game_controller = std::make_shared<GameController>();
+         game_controller->activate(joystick_id);
+
+         _game_controllers[joystick_id] = game_controller;
+         _selected_controller_id = joystick_id;
 
          for (const auto& cb : _device_added_callbacks)
          {
-            cb(controller_id);
+            cb(joystick_id);
          }
       }
    );
 }
 
-void GameControllerIntegration::remove(int32_t id)
+void GameControllerIntegration::remove(int32_t joystick_id)
 {
    const std::lock_guard<std::mutex> lock(_device_changed_mutex);
    _device_changed_callbacks.emplace_back(
-      [this, id]()
+      [this, joystick_id]()
       {
-         _controllers.erase(id);
+         _game_controllers.erase(joystick_id);
 
          for (const auto& cb : _device_removed_callbacks)
          {
-            cb(id);
+            cb(joystick_id);
          }
       }
    );
@@ -88,7 +87,7 @@ void GameControllerIntegration::remove(int32_t id)
 
 const std::shared_ptr<GameController>& GameControllerIntegration::getController(int32_t controller_id) const
 {
-   return _controllers.at(controller_id);
+   return _game_controllers.at(controller_id);
 }
 
 void GameControllerIntegration::addDeviceAddedCallback(const DeviceAddedCallback& callback)
@@ -96,7 +95,7 @@ void GameControllerIntegration::addDeviceAddedCallback(const DeviceAddedCallback
    _device_added_callbacks.push_back(callback);
 
    // call added for all devices we already have
-   for (auto& [k, v] : _controllers)
+   for (auto& [k, v] : _game_controllers)
    {
       callback(k);
    }
@@ -109,12 +108,12 @@ void GameControllerIntegration::addDeviceRemovedCallback(const DeviceAddedCallba
 
 size_t GameControllerIntegration::getCount() const
 {
-   return _controllers.size();
+   return _game_controllers.size();
 }
 
 bool GameControllerIntegration::isControllerConnected() const
 {
-   return !_controllers.empty();
+   return !_game_controllers.empty();
 }
 
 GameControllerIntegration& GameControllerIntegration::getInstance()
