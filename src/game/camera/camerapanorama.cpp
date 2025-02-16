@@ -115,8 +115,8 @@ void CameraPanorama::update()
    else if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       const auto& axis_values = GameControllerData::getInstance().getJoystickInfo().getAxisValues();
-      const auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTX);
-      const auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_CONTROLLER_AXIS_RIGHTY);
+      const auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_RIGHTX);
+      const auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_RIGHTY);
       const auto x_normalized = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
       const auto y_normalized = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
       const auto tolerance_x = tweaks._cpan_tolerance_x;

@@ -33,29 +33,29 @@ int32_t GameControllerDetection::processEvent(const SDL_Event& event)
 {
    switch (event.type)
    {
-      case SDL_JOYDEVICEADDED:
+      case SDL_EVENT_JOYSTICK_ADDED:
       {
          Log::Info() << "joystick added, device index: " << event.jdevice.which;
          _callback_added(event.jdevice.which);
          break;
       }
-      case SDL_JOYDEVICEREMOVED:
+      case SDL_EVENT_JOYSTICK_REMOVED:
       {
          Log::Info() << "joystick removed, device instance id: " << event.jdevice.which;
          _callback_removed(event.jdevice.which);
          break;
       }
-      case SDL_CONTROLLERDEVICEADDED:
+      case SDL_EVENT_GAMEPAD_ADDED:
       {
          Log::Info() << "controller device added: " << event.cdevice.which;
          break;
       }
-      case SDL_CONTROLLERDEVICEREMOVED:
+      case SDL_EVENT_GAMEPAD_REMOVED:
       {
          Log::Info() << "controller device removed: " << event.cdevice.which;
          break;
       }
-      case SDL_CONTROLLERDEVICEREMAPPED:
+      case SDL_EVENT_GAMEPAD_REMAPPED:
       {
          Log::Info() << "controller device remapped: " << event.cdevice.which;
          break;
