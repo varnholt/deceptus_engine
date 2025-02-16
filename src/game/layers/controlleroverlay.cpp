@@ -86,14 +86,14 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
       auto controller = GameControllerIntegration::getInstance().getController();
       auto joystick_info = GameControllerData::getInstance().getJoystickInfo();
 
-      auto pressed = [&](SDL_GameControllerButton button) -> bool
+      auto pressed = [&](SDL_GamepadButton button) -> bool
       {
          const auto button_values = joystick_info.getButtonValues();
          const auto button_pressed = button_values[static_cast<size_t>(button /*Id*/)];
          return button_pressed;
       };
 
-      auto axis = [&](SDL_GameControllerAxis axis) -> float
+      auto axis = [&](SDL_GamepadAxis axis) -> float
       {
          const auto axis_values = joystick_info.getAxisValues();
          const auto axis_id = controller->getAxisIndex(axis);
@@ -109,16 +109,16 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
 
       // draw analog axes
       static const float analogFactor = 3.0f;
-      const auto x0 = axis(SDL_CONTROLLER_AXIS_LEFTX);
-      const auto y0 = axis(SDL_CONTROLLER_AXIS_LEFTY);
-      const auto x1 = axis(SDL_CONTROLLER_AXIS_RIGHTX);
-      const auto y1 = axis(SDL_CONTROLLER_AXIS_RIGHTY);
-      const auto tl = axis(SDL_CONTROLLER_AXIS_TRIGGERLEFT);
-      const auto tr = axis(SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+      const auto x0 = axis(SDL_GAMEPAD_AXIS_LEFTX);
+      const auto y0 = axis(SDL_GAMEPAD_AXIS_LEFTY);
+      const auto x1 = axis(SDL_GAMEPAD_AXIS_RIGHTX);
+      const auto y1 = axis(SDL_GAMEPAD_AXIS_RIGHTY);
+      const auto tl = axis(SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
+      const auto tr = axis(SDL_GAMEPAD_AXIS_RIGHT_TRIGGER);
       analog_l->_sprite->setOrigin(-x0 * analogFactor, -y0 * analogFactor);
       analog_r->_sprite->setOrigin(-x1 * analogFactor, -y1 * analogFactor);
-      analog_l->_sprite->setColor(pressed(SDL_CONTROLLER_BUTTON_LEFTSTICK) ? sf::Color::Red : sf::Color::White);
-      analog_r->_sprite->setColor(pressed(SDL_CONTROLLER_BUTTON_RIGHTSTICK) ? sf::Color::Red : sf::Color::White);
+      analog_l->_sprite->setColor(pressed(SDL_GAMEPAD_BUTTON_LEFT_STICK) ? sf::Color::Red : sf::Color::White);
+      analog_r->_sprite->setColor(pressed(SDL_GAMEPAD_BUTTON_RIGHT_STICK) ? sf::Color::Red : sf::Color::White);
       analog_l->draw(window, states);
       analog_r->draw(window, states);
       if (tr > -0.8f)
@@ -127,23 +127,23 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
          lt->draw(window, states);
 
       // draw buttons
-      if (pressed(SDL_CONTROLLER_BUTTON_A))
+      if (pressed(SDL_GAMEPAD_BUTTON_SOUTH))
          button_a->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_X))
+      if (pressed(SDL_GAMEPAD_BUTTON_WEST))
          button_x->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_B))
+      if (pressed(SDL_GAMEPAD_BUTTON_EAST))
          button_b->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_Y))
+      if (pressed(SDL_GAMEPAD_BUTTON_NORTH))
          button_y->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_LEFTSHOULDER))
+      if (pressed(SDL_GAMEPAD_BUTTON_LEFT_SHOULDER))
          lb->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER))
+      if (pressed(SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER))
          rb->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_BACK))
+      if (pressed(SDL_GAMEPAD_BUTTON_BACK))
          view->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_GUIDE))
+      if (pressed(SDL_GAMEPAD_BUTTON_GUIDE))
          xbox->draw(window, states);
-      if (pressed(SDL_CONTROLLER_BUTTON_START))
+      if (pressed(SDL_GAMEPAD_BUTTON_START))
          menu->draw(window, states);
 
       // draw dpad

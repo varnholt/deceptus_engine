@@ -692,8 +692,8 @@ void InGameMenuInventory::show()
       _controller_button_x_pressed_callback = [this]() { assignSelectedItemToSlot(0); };
       _controller_button_y_pressed_callback = [this]() { assignSelectedItemToSlot(1); };
 
-      gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_X, _controller_button_x_pressed_callback);
-      gji.getController()->addButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, _controller_button_y_pressed_callback);
+      gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_WEST, _controller_button_x_pressed_callback);
+      gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_NORTH, _controller_button_y_pressed_callback);
    }
 
    InGameMenuPage::show();
@@ -706,8 +706,8 @@ void InGameMenuInventory::hide()
    const auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())
    {
-      gji.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_X, _controller_button_x_pressed_callback);
-      gji.getController()->removeButtonPressedCallback(SDL_CONTROLLER_BUTTON_Y, _controller_button_y_pressed_callback);
+      gji.getController()->removeButtonPressedCallback(SDL_GAMEPAD_BUTTON_WEST, _controller_button_x_pressed_callback);
+      gji.getController()->removeButtonPressedCallback(SDL_GAMEPAD_BUTTON_NORTH, _controller_button_y_pressed_callback);
    }
 
    InGameMenuPage::hide();
