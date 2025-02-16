@@ -381,10 +381,10 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
       b2Vec2 platform_pos_m;
       auto i = 0;
 
-      auto platform_x_min = std::numeric_limits<float>::max();
-      auto platform_y_min = std::numeric_limits<float>::max();
-      auto platform_x_max = std::numeric_limits<float>::min();
-      auto platform_y_max = std::numeric_limits<float>::min();
+      auto platform_x_min_m = std::numeric_limits<float>::max();
+      auto platform_y_min_m = std::numeric_limits<float>::max();
+      auto platform_x_max_m = std::numeric_limits<float>::min();
+      auto platform_y_max_m = std::numeric_limits<float>::min();
 
       for (const auto& poly_pos_px : path->_polyline->_polyline)
       {
@@ -392,8 +392,9 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
 
          // we don't want to position the platform right on the path, we only
          // want to move its center there
-         const auto x_px = (path->_x_px + poly_pos_px.x) - (moving_platform->_element_count * PIXELS_PER_TILE / 2.0f);
-         const auto y_px = (path->_y_px + poly_pos_px.y);  // -     (moving_platform->_height_tl * PIXELS_PER_TILE) / 2.0f) * MPP;
+         const auto half_width_px = (moving_platform->_element_count * PIXELS_PER_TILE / 2.0f);
+         const auto x_px = (path->_x_px + poly_pos_px.x) - half_width_px;
+         const auto y_px = (path->_y_px + poly_pos_px.y);
 
          platform_pos_m.x = x_px * MPP;
          platform_pos_m.y = y_px * MPP;
@@ -401,10 +402,10 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
          moving_platform->_interpolation.addKey(platform_pos_m, time);
          moving_platform->_pixel_path.emplace_back((path->_x_px + poly_pos_px.x), (path->_y_px + poly_pos_px.y));
 
-         platform_x_min = std::min(platform_pos_m.x, platform_x_min);
-         platform_y_min = std::min(platform_pos_m.y, platform_y_min);
-         platform_x_max = std::max(platform_pos_m.x, platform_x_min);
-         platform_y_max = std::max(platform_pos_m.y, platform_y_min);
+         platform_x_min_m = std::min(platform_pos_m.x, platform_x_min_m);
+         platform_y_min_m = std::min(platform_pos_m.y, platform_y_min_m);
+         platform_x_max_m = std::max(platform_pos_m.x, platform_x_max_m);
+         platform_y_max_m = std::max(platform_pos_m.y, platform_y_max_m);
 
          i++;
       }
@@ -413,12 +414,11 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
       moving_platform->_body->SetTransform(platform_pos_m, 0.0f);
 
       // set up bounding rect
-      moving_platform->_rect.left = platform_x_min;
-      moving_platform->_rect.top = platform_y_min;
-      moving_platform->_rect.width = platform_x_max - platform_x_min;
-      moving_platform->_rect.height = platform_y_max - platform_y_min;
-
-      // moving_platform->addChunks(moving_platform->_rect);
+      moving_platform->_rect.left = platform_x_min_m * PPM;
+      moving_platform->_rect.top = platform_y_min_m * PPM;
+      moving_platform->_rect.width = moving_platform->_element_count * PIXELS_PER_TILE;
+      moving_platform->_rect.height = (platform_y_max_m - platform_y_min_m) * PPM;
+      moving_platform->addChunks(moving_platform->_rect);
    }
 
    // clean up
