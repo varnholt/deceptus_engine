@@ -13,7 +13,7 @@
 #endif
 #define MAC_OS_X_VERSION_MIN_REQUIRED MAC_OS_X_VERSION_10_9
 #endif
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 class GameController
 {
@@ -28,7 +28,7 @@ public:
          Lower
       };
 
-      SDL_GameControllerAxis _axis = SDL_CONTROLLER_AXIS_INVALID;
+      SDL_GamepadAxis _axis = SDL_GAMEPAD_AXIS_INVALID;
       Boundary _boundary = Boundary::Upper;
       float _threshold = 0.3f;
       float _value = 0.0f;
@@ -55,9 +55,6 @@ public:
 
    // information about the current joystick
 
-   //! check if given joystick id is valid
-   bool validId(int32_t id) const;
-
    //! getter for the joystick's name
    virtual std::string getName(int32_t id) const;
 
@@ -80,20 +77,17 @@ public:
    virtual void rumble(float intensity, int32_t rumble_duration_ms);
 
    //! get button type by button id
-   SDL_GameControllerButton getButtonType(int32_t buttonId) const;
-
-   //! get button id by button type
-   int32_t getButtonId(SDL_GameControllerButton) const;
+   SDL_GamepadButton getButtonType(int32_t buttonId) const;
 
    //! getter for axis id by axis type
-   int32_t getAxisIndex(SDL_GameControllerAxis) const;
+   int32_t getAxisIndex(SDL_GamepadAxis) const;
 
    //! getter for joystick info object
    const GameControllerInfo& getInfo() const;
 
-   void addButtonPressedCallback(SDL_GameControllerButton, const ControllerCallback&);
-   void removeButtonPressedCallback(SDL_GameControllerButton, const ControllerCallback&);
-   void addButtonReleasedCallback(SDL_GameControllerButton, const ControllerCallback&);
+   void addButtonPressedCallback(SDL_GamepadButton, const ControllerCallback&);
+   void removeButtonPressedCallback(SDL_GamepadButton, const ControllerCallback&);
+   void addButtonReleasedCallback(SDL_GamepadButton, const ControllerCallback&);
    void addAxisThresholdExceedCallback(const ThresholdCallback& threshold);
 
 protected:
@@ -104,20 +98,20 @@ protected:
    bool isDpadButton(int32_t button) const;
 
 private:
-   void callPressedCallbacks(const SDL_GameControllerButton button);
-   void callReleasedCallbacks(const SDL_GameControllerButton button);
+   void callPressedCallbacks(const SDL_GamepadButton button);
+   void callReleasedCallbacks(const SDL_GamepadButton button);
 
    GameControllerInfo _info;
 
    SDL_Joystick* _joystick = nullptr;
-   SDL_GameController* _controller = nullptr;
+   SDL_Gamepad* _gamepad = nullptr;
 
-   SDL_GameControllerButtonBind _dpad_bind_up;
-   SDL_GameControllerButtonBind _dpad_bind_down;
-   SDL_GameControllerButtonBind _dpad_bind_left;
-   SDL_GameControllerButtonBind _dpad_bind_right;
+   SDL_GamepadBinding _dpad_bind_up;
+   SDL_GamepadBinding _dpad_bind_down;
+   SDL_GamepadBinding _dpad_bind_left;
+   SDL_GamepadBinding _dpad_bind_right;
 
-   std::map<SDL_GameControllerAxis, std::vector<ThresholdCallback>> _threshold_callbacks;
-   std::map<SDL_GameControllerButton, std::vector<ControllerCallback>> _button_pressed_callbacks;
-   std::map<SDL_GameControllerButton, std::vector<ControllerCallback>> _button_released_callbacks;
+   std::map<SDL_GamepadAxis, std::vector<ThresholdCallback>> _threshold_callbacks;
+   std::map<SDL_GamepadButton, std::vector<ControllerCallback>> _button_pressed_callbacks;
+   std::map<SDL_GamepadButton, std::vector<ControllerCallback>> _button_released_callbacks;
 };

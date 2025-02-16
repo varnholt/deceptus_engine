@@ -696,16 +696,12 @@ set(SFML_BUILD_NETWORK ON CACHE BOOL "" FORCE)
 set(SFML_USE_STATIC_STD_LIBS OFF CACHE BOOL "" FORCE)
 set(SFML_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 
-# SDL configuration
-set(SDL_STATIC OFF CACHE BOOL "" FORCE)
-set(SDL_SHARED ON CACHE BOOL "" FORCE)
-
 # fetch dependencies
 FetchContent_Declare(SFML GIT_REPOSITORY https://github.com/SFML/SFML.git GIT_TAG 2.6.x)
-FetchContent_Declare(SDL2 GIT_REPOSITORY https://github.com/libsdl-org/SDL.git GIT_TAG release-2.28.x)
+FetchContent_Declare(SDL3 GIT_REPOSITORY https://github.com/libsdl-org/SDL.git GIT_TAG release-3.2.4)
 FetchContent_Declare(LUA GIT_REPOSITORY https://github.com/lua/lua.git GIT_TAG v5.4.7)
 
-FetchContent_MakeAvailable(SFML SDL2 LUA)
+FetchContent_MakeAvailable(SFML SDL3 LUA)
 
 
 # ----------------------------------------------------------------------------------------------------
@@ -732,7 +728,7 @@ target_include_directories(deceptus PRIVATE
     thirdparty/box2d/include
     thirdparty/lua
     ${SFML_INCLUDE_DIR}
-    ${SDL2_INCLUDE_DIRS}
+    ${SDL3_INCLUDE_DIRS}
 )
 
 target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
@@ -748,7 +744,7 @@ endif()
 
 target_link_libraries(deceptus PRIVATE
     sfml-system sfml-audio sfml-graphics sfml-window
-    SDL2::SDL2
+    SDL3::SDL3
     lua
 )
 

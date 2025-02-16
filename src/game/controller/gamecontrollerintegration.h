@@ -39,7 +39,7 @@ private:
    void remove(int32_t id);
 
    std::unique_ptr<GameControllerDetection> _device_detection;
-   std::map<int32_t, std::shared_ptr<GameController>> _controllers;
+   std::map<int32_t, std::shared_ptr<GameController>> _game_controllers;
 
    std::vector<DeviceAddedCallback> _device_added_callbacks;
    std::vector<DeviceRemovedCallback> _device_removed_callbacks;
