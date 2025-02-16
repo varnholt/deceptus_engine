@@ -418,7 +418,7 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
       moving_platform->_rect.width = platform_x_max - platform_x_min;
       moving_platform->_rect.height = platform_y_max - platform_y_min;
 
-      moving_platform->addChunks(moving_platform->_rect);
+      // moving_platform->addChunks(moving_platform->_rect);
    }
 
    // clean up
