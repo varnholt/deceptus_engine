@@ -121,7 +121,9 @@ InfoLayer::InfoLayer()
       "energy_5",
       "energy_6",
       "character_window",
-      "weapon_none_icon"
+      "weapon_none_icon",
+      "item_slot_X",
+      "item_slot_Y",
    };
 
    // load ingame psd
@@ -324,23 +326,28 @@ void InfoLayer::updateHealthLayerOffsets()
       }
    }
 
-   if (!effect_elapsed)
+   if (effect_elapsed)
    {
-      std::ranges::for_each(
-         _player_health_layers,
-         [this](const std::shared_ptr<LayerData>& layer_data)
-         {
-            auto layer = layer_data->_layer;
-            layer->_sprite->setPosition(layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y);
-         }
-      );
-
-      _animation_heart->setPosition(heart_pos_x_px + _player_health_x_offset, heart_pos_y_px);
-      _animation_stamina->setPosition(stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px);
-      _animation_skull_blink->setPosition(skull_pos_x_px + _player_health_x_offset, skull_pos_y_px);
-      _animation_hp_unlock_left->setPosition(_player_health_x_offset, 0.0f);
-      _animation_hp_unlock_right->setPosition(_player_health_x_offset, 0.0f);
+      return;
    }
+
+   std::ranges::for_each(
+      _player_health_layers,
+      [this](const std::shared_ptr<LayerData>& layer_data)
+      {
+         auto layer = layer_data->_layer;
+         layer->_sprite->setPosition(layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y);
+      }
+   );
+
+   _animation_heart->setPosition(heart_pos_x_px + _player_health_x_offset, heart_pos_y_px);
+   _animation_stamina->setPosition(stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px);
+   _animation_skull_blink->setPosition(skull_pos_x_px + _player_health_x_offset, skull_pos_y_px);
+   _animation_hp_unlock_left->setPosition(_player_health_x_offset, 0.0f);
+   _animation_hp_unlock_right->setPosition(_player_health_x_offset, 0.0f);
+
+   _inventory_sprites[0].setPosition(frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px);
+   _inventory_sprites[1].setPosition(frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px);
 }
 
 void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
