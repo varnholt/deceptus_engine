@@ -983,25 +983,32 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 #ifdef DEVELOPMENT_MODE
    if (Console::getInstance().isActive())
    {
+      const auto* key_event = event.getIf<sf::Event::KeyPressed>();
+
+      if (key_event == nullptr)
+      {
+         return;
+      }
+
       // these should be moved to the console itself
-      if (event.key.code == sf::Keyboard::Return)
+      if (key_event->code == sf::Keyboard::Key::Enter)
       {
          Console::getInstance().execute();
       }
-      if (event.key.code == sf::Keyboard::F11)
+      if (key_event->code == sf::Keyboard::Key::F11)
       {
          DrawStates::_draw_console = !DrawStates::_draw_console;
          Console::getInstance().setActive(DrawStates::_draw_console);
       }
-      else if (event.key.code == sf::Keyboard::Backspace)
+      else if (key_event->code == sf::Keyboard::Key::Backspace)
       {
          Console::getInstance().chop();
       }
-      else if (event.key.code == sf::Keyboard::Up)
+      else if (key_event->code == sf::Keyboard::Key::Up)
       {
          Console::getInstance().previousCommand();
       }
-      else if (event.key.code == sf::Keyboard::Down)
+      else if (key_event->code == sf::Keyboard::Key::Down)
       {
          Console::getInstance().nextCommand();
       }
@@ -1020,36 +1027,36 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
    switch (event.key.code)
    {
-      case sf::Keyboard::F:
+      case sf::Keyboard::Key::F:
       {
          toggleFullScreen();
          break;
       }
-      case sf::Keyboard::I:
-      case sf::Keyboard::Tab:
+      case sf::Keyboard::Key::I:
+      case sf::Keyboard::Key::Tab:
       {
          _ingame_menu->open();
          break;
       }
-      case sf::Keyboard::P:
-      case sf::Keyboard::Escape:
+      case sf::Keyboard::Key::P:
+      case sf::Keyboard::Key::Escape:
       {
          showPauseMenu();
          break;
       }
 
 #ifdef DEVELOPMENT_MODE
-      case sf::Keyboard::F1:
+      case sf::Keyboard::Key::F1:
       {
          DisplayMode::getInstance().enqueueToggle(Display::Debug);
          break;
       }
-      case sf::Keyboard::F2:
+      case sf::Keyboard::Key::F2:
       {
          DrawStates::_draw_controller_overlay = !DrawStates::_draw_controller_overlay;
          break;
       }
-      case sf::Keyboard::F3:
+      case sf::Keyboard::Key::F3:
       {
          DrawStates::_draw_camera_system = !DrawStates::_draw_camera_system;
          if (DrawStates::_draw_camera_system && !_camera_ui)
@@ -1064,7 +1071,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
          break;
       }
-      case sf::Keyboard::F4:
+      case sf::Keyboard::Key::F4:
       {
          if (event.key.alt)
          {
@@ -1073,7 +1080,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
          DrawStates::_draw_debug_info = !DrawStates::_draw_debug_info;
          break;
       }
-      case sf::Keyboard::F5:
+      case sf::Keyboard::Key::F5:
       {
          DrawStates::_draw_log = !DrawStates::_draw_log;
          if (DrawStates::_draw_log && !_log_ui)
@@ -1088,12 +1095,12 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
          break;
       }
-      case sf::Keyboard::F6:
+      case sf::Keyboard::Key::F6:
       {
          DrawStates::_draw_test_scene = !DrawStates::_draw_test_scene;
          break;
       }
-      case sf::Keyboard::F7:
+      case sf::Keyboard::Key::F7:
       {
          DrawStates::_draw_physics_config = !DrawStates::_draw_physics_config;
          if (DrawStates::_draw_physics_config && !_physics_ui)
@@ -1108,68 +1115,68 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
          break;
       }
-      case sf::Keyboard::F11:
+      case sf::Keyboard::Key::F11:
       {
          DrawStates::_draw_console = !DrawStates::_draw_console;
          Console::getInstance().setActive(DrawStates::_draw_console);
          break;
       }
-      case sf::Keyboard::PageUp:
+      case sf::Keyboard::Key::PageUp:
       {
          Level::getCurrentLevel()->getLightSystem()->increaseAmbient(0.1f);
          break;
       }
-      case sf::Keyboard::PageDown:
+      case sf::Keyboard::Key::PageDown:
       {
          Level::getCurrentLevel()->getLightSystem()->decreaseAmbient(0.1f);
          break;
       }
-      case sf::Keyboard::L:
+      case sf::Keyboard::Key::L:
       {
          reloadLevel();
          break;
       }
-      case sf::Keyboard::M:
+      case sf::Keyboard::Key::M:
       {
          _recording = !_recording;
          break;
       }
-      case sf::Keyboard::N:
+      case sf::Keyboard::Key::N:
       {
          nextLevel();
          break;
       }
-      case sf::Keyboard::Q:
+      case sf::Keyboard::Key::Q:
       {
          shutdown();
          break;
       }
-      case sf::Keyboard::R:
+      case sf::Keyboard::Key::R:
       {
          reset();
          break;
       }
-      case sf::Keyboard::S:
+      case sf::Keyboard::Key::S:
       {
          takeScreenshot();
          break;
       }
-      case sf::Keyboard::V:
+      case sf::Keyboard::Key::V:
       {
          _player->setVisible(!_player->getVisible());
          break;
       }
-      case sf::Keyboard::Num1:
+      case sf::Keyboard::Key::Num1:
       {
          Level::getCurrentLevel()->zoomIn();
          break;
       }
-      case sf::Keyboard::Num2:
+      case sf::Keyboard::Key::Num2:
       {
          Level::getCurrentLevel()->zoomOut();
          break;
       }
-      case sf::Keyboard::Num3:
+      case sf::Keyboard::Key::Num3:
       {
          Level::getCurrentLevel()->zoomReset();
          break;
