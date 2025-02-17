@@ -1,5 +1,7 @@
 #include "globalclock.h"
 
+#include <SFML/System/Time.hpp>
+
 GlobalClock::GlobalClock()
 {
    _clock.restart();

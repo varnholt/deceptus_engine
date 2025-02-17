@@ -37,16 +37,16 @@ void CameraZoom::adjust(sf::FloatRect& rect)
       return;
    }
 
-   const auto width = rect.width * _current_zoom_factor;
-   const auto height = rect.height * _current_zoom_factor;
+   const auto width = rect.size.x * _current_zoom_factor;
+   const auto height = rect.size.y * _current_zoom_factor;
 
-   const auto center_x = rect.left + rect.width * 0.5f;
-   const auto center_y = rect.top + rect.height * 0.5f;
+   const auto center_x = rect.position.x + rect.size.x * 0.5f;
+   const auto center_y = rect.position.y + rect.size.y * 0.5f;
 
-   rect.width = width;
-   rect.height = height;
-   rect.left = center_x - rect.width * 0.5f;
-   rect.top = center_y - rect.height * 0.5f;
+   rect.size.x = width;
+   rect.size.y = height;
+   rect.position.x = center_x - rect.size.x * 0.5f;
+   rect.position.y = center_y - rect.size.y * 0.5f;
 }
 
 CameraZoom& CameraZoom::getInstance()

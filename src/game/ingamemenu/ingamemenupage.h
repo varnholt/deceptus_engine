@@ -5,6 +5,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <chrono>
+#include <map>
 #include <optional>
 #include <ostream>
 #include <sstream>

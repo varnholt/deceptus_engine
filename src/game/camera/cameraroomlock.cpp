@@ -21,7 +21,7 @@ std::array<bool, 4> CameraRoomLock::checkRoomBoundaries()
    }
 
    // fetch current room rectangle from view rectangle's center
-   const auto view_center = sf::Vector2f{_view_rect.left + _view_rect.width / 2, _view_rect.top + _view_rect.height / 2};
+   const auto view_center = sf::Vector2f{_view_rect.position.x + _view_rect.size.x / 2, _view_rect.position.y + _view_rect.size.y / 2};
    const auto sub_room_it = _room->findSubRoom(view_center);
    if (sub_room_it == _room->_sub_rooms.end())
    {
@@ -30,10 +30,12 @@ std::array<bool, 4> CameraRoomLock::checkRoomBoundaries()
 
    const auto test_dist_px = 3.0f;
    const auto sub_room = *sub_room_it;
-   const auto point_l = sf::Vector2f(_view_rect.left - test_dist_px, _view_rect.top + _view_rect.height / 2);
-   const auto point_r = sf::Vector2f(_view_rect.left + _view_rect.width + test_dist_px, _view_rect.top + _view_rect.height / 2);
-   const auto point_u = sf::Vector2f(_view_rect.left + _view_rect.width / 2, _view_rect.top - test_dist_px);
-   const auto point_d = sf::Vector2f(_view_rect.left + _view_rect.width / 2, _view_rect.top + _view_rect.height + test_dist_px);
+   const auto point_l = sf::Vector2f(_view_rect.position.x - test_dist_px, _view_rect.position.y + _view_rect.size.y / 2);
+   const auto point_r =
+      sf::Vector2f(_view_rect.position.x + _view_rect.size.x + test_dist_px, _view_rect.position.y + _view_rect.size.y / 2);
+   const auto point_u = sf::Vector2f(_view_rect.position.x + _view_rect.size.x / 2, _view_rect.position.y - test_dist_px);
+   const auto point_d =
+      sf::Vector2f(_view_rect.position.x + _view_rect.size.x / 2, _view_rect.position.y + _view_rect.size.y + test_dist_px);
 
    const auto out_l = !sub_room._rect.contains(point_l);
    const auto out_r = !sub_room._rect.contains(point_r);
@@ -125,23 +127,23 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset)
    if (_locked_left)
    {
       // camera center is out of left boundary
-      x = sub_room._rect.left + half_width + focus_offset;
+      x = sub_room._rect.position.x + half_width + focus_offset;
    }
    else if (_locked_right)
    {
       // camera center is out of right boundary
-      x = sub_room._rect.left + sub_room._rect.width - half_width + focus_offset;
+      x = sub_room._rect.position.x + sub_room._rect.size.x - half_width + focus_offset;
    }
 
    if (_locked_top)
    {
       // camera center is out of upper boundary
-      y = sub_room._rect.top + height_bottom;
+      y = sub_room._rect.position.y + height_bottom;
    }
    else if (_locked_bottom)
    {
       // camera center is out of lower boundary
-      y = sub_room._rect.top + sub_room._rect.height - height_top;
+      y = sub_room._rect.position.y + sub_room._rect.size.y - height_top;
    }
 
    return _locked_left || _locked_right || _locked_top || _locked_bottom;
