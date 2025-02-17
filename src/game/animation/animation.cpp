@@ -267,15 +267,15 @@ void Animation::updateVertices(bool reset_time)
 {
    const auto& rect_px = _frames[static_cast<size_t>(_current_frame)];
 
-   const auto l = static_cast<float>(rect_px.left) + 0.0001f;
-   const auto r = l + static_cast<float>(rect_px.width);
-   const auto t = static_cast<float>(rect_px.top);
-   const auto b = t + static_cast<float>(rect_px.height);
+   const auto l = static_cast<float>(rect_px.position.x) + 0.0001f;
+   const auto r = l + static_cast<float>(rect_px.size.x);
+   const auto t = static_cast<float>(rect_px.position.y);
+   const auto b = t + static_cast<float>(rect_px.size.y);
 
    _vertices[0].position = sf::Vector2f(0.f, 0.f);
-   _vertices[1].position = sf::Vector2f(0.f, static_cast<float>(rect_px.height));
-   _vertices[2].position = sf::Vector2f(static_cast<float>(rect_px.width), static_cast<float>(rect_px.height));
-   _vertices[3].position = sf::Vector2f(static_cast<float>(rect_px.width), 0.f);
+   _vertices[1].position = sf::Vector2f(0.f, static_cast<float>(rect_px.size.y));
+   _vertices[2].position = sf::Vector2f(static_cast<float>(rect_px.size.x), static_cast<float>(rect_px.size.y));
+   _vertices[3].position = sf::Vector2f(static_cast<float>(rect_px.size.x), 0.f);
 
    _vertices[0].texCoords = sf::Vector2f(l, t);
    _vertices[1].texCoords = sf::Vector2f(l, b);
@@ -308,7 +308,7 @@ void Animation::setColorTree(const sf::Color& color)
 sf::FloatRect Animation::getLocalBounds() const
 {
    const sf::IntRect rect = _frames[static_cast<size_t>(_current_frame)];
-   return sf::FloatRect(0.f, 0.f, static_cast<float>(std::abs(rect.width)), static_cast<float>(std::abs(rect.height)));
+   return sf::FloatRect(0.f, 0.f, static_cast<float>(std::abs(rect.size.x)), static_cast<float>(std::abs(rect.size.y)));
 }
 
 sf::FloatRect Animation::getGlobalBounds() const

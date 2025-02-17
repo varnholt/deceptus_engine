@@ -364,21 +364,21 @@ void InGameMenuInventory::updateShowHide()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + _panel_left_offset_px.x;
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    // move in y
    for (const auto& layer : _panel_center)
    {
       const auto y = layer._pos.y + _panel_center_offset_px.y;
-      layer._layer->_sprite->setPosition(layer._pos.x, y);
+      layer._layer->_sprite->setPosition({layer._pos.x, y});
    }
 
    // move in x
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + _panel_right_offset_px.x;
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    // fade in/out
@@ -400,25 +400,25 @@ void InGameMenuInventory::updateMove()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_center)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    if (!move_offset.has_value())
