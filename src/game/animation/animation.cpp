@@ -308,7 +308,7 @@ void Animation::setColorTree(const sf::Color& color)
 sf::FloatRect Animation::getLocalBounds() const
 {
    const sf::IntRect rect = _frames[static_cast<size_t>(_current_frame)];
-   return sf::FloatRect(0.f, 0.f, static_cast<float>(std::abs(rect.size.x)), static_cast<float>(std::abs(rect.size.y)));
+   return sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(std::abs(rect.size.x)), static_cast<float>(std::abs(rect.size.y))});
 }
 
 sf::FloatRect Animation::getGlobalBounds() const

@@ -980,16 +980,15 @@ void Game::reloadLevel(LoadingMode loading_mode)
 
 void Game::processKeyPressedEvents(const sf::Event& event)
 {
+   const auto* key_event = event.getIf<sf::Event::KeyPressed>();
+   if (key_event == nullptr)
+   {
+      return;
+   }
+
 #ifdef DEVELOPMENT_MODE
    if (Console::getInstance().isActive())
    {
-      const auto* key_event = event.getIf<sf::Event::KeyPressed>();
-
-      if (key_event == nullptr)
-      {
-         return;
-      }
-
       // these should be moved to the console itself
       if (key_event->code == sf::Keyboard::Key::Enter)
       {
@@ -1025,7 +1024,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
    CameraPanorama::getInstance().processKeyPressedEvents(event);
 
-   switch (event.key.code)
+   switch (key_event->code)
    {
       case sf::Keyboard::Key::F:
       {

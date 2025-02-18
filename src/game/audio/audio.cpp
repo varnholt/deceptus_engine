@@ -111,7 +111,9 @@ void Audio::initializeMusic()
 void Audio::debug()
 {
    const auto stopped_thread_count = std::count_if(
-      _sound_threads.begin(), _sound_threads.end(), [](const auto& thread) { return thread._sound.getStatus() == sf::Sound::Stopped; }
+      _sound_threads.begin(),
+      _sound_threads.end(),
+      [](const auto& thread) { return thread._sound.getStatus() == sf::Sound::Status::Stopped; }
    );
 
    std::cout << stopped_thread_count << "/" << _sound_threads.size() << " are free" << std::endl;
@@ -129,7 +131,8 @@ void Audio::adjustActiveSampleVolume()
 {
    std::lock_guard<std::mutex> guard(_mutex);
 
-   auto threads = _sound_threads | std::views::filter([](const auto& thread) { return thread._sound.getStatus() != sf::Sound::Stopped; });
+   auto threads =
+      _sound_threads | std::views::filter([](const auto& thread) { return thread._sound.getStatus() != sf::Sound::Status::Stopped; });
    for (auto& thread : threads)
    {
       std::cout << thread._play_info._volume << std::endl;
@@ -145,7 +148,9 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
 
    // find a free sample thread
    const auto& thread_it = std::find_if(
-      _sound_threads.begin(), _sound_threads.end(), [](const auto& thread) { return thread._sound.getStatus() == sf::Sound::Stopped; }
+      _sound_threads.begin(),
+      _sound_threads.end(),
+      [](const auto& thread) { return thread._sound.getStatus() == sf::Sound::Status::Stopped; }
    );
 
    if (thread_it == _sound_threads.cend())
@@ -221,7 +226,7 @@ void Audio::updateMusic()
       return;
    }
 
-   if (_music.getStatus() == sf::Music::Playing)
+   if (_music.getStatus() == sf::Music::Status::Playing)
    {
       return;
    }

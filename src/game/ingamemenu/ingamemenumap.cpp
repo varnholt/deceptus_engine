@@ -157,25 +157,25 @@ void IngameMenuMap::updateMove()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_center)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    if (!move_offset.has_value())
