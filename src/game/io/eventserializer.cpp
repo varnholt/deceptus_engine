@@ -7,6 +7,7 @@
 #include <iostream>
 #include <ostream>
 #include <thread>
+#include <unordered_set>
 
 namespace
 {
@@ -263,28 +264,23 @@ void EventSerializer::playThread()
 
 bool EventSerializer::filterMovementEvents(const sf::Event& event)
 {
-   if (event.type != sf::Event::EventType::KeyPressed && event.type != sf::Event::EventType::KeyReleased)
+   static const std::unordered_set<sf::Keyboard::Key> movementKeys = {
+      sf::Keyboard::Key::LShift,
+      sf::Keyboard::Key::Left,
+      sf::Keyboard::Key::Right,
+      sf::Keyboard::Key::Up,
+      sf::Keyboard::Key::Down,
+      sf::Keyboard::Key::Enter,  // SFML 3 renamed Return to Enter
+      sf::Keyboard::Key::Space
+   };
+
+   if (auto key_event = event.getIf<sf::Event::KeyPressed>())
    {
-      return false;
+      return movementKeys.contains(key_event->code);
    }
-
-   switch (event.key.code)
+   else if (auto key_event = event.getIf<sf::Event::KeyReleased>())
    {
-      case sf::Keyboard::LShift:
-      case sf::Keyboard::Left:
-      case sf::Keyboard::Right:
-      case sf::Keyboard::Up:
-      case sf::Keyboard::Down:
-      case sf::Keyboard::Return:
-      case sf::Keyboard::Space:
-      {
-         return true;
-      }
-
-      default:
-      {
-         break;
-      }
+      return movementKeys.contains(key_event->code);
    }
 
    return false;

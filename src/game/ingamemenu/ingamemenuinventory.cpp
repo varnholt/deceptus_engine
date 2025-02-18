@@ -61,8 +61,7 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
 {
    std::string wrapped_text;
    std::string line;
-   sf::Text temp_text;
-   temp_text.setFont(font);
+   sf::Text temp_text(font);
    temp_text.setCharacterSize(character_size);
 
    // get words from original text
@@ -76,7 +75,7 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
       std::string test_line = line + word + " ";
       temp_text.setString(test_line);
 
-      if (temp_text.getLocalBounds().width <= rect.width)  // text fits into boundary
+      if (temp_text.getLocalBounds().size.x <= rect.size.x)  // text fits into boundary
       {
          line = test_line;
       }
@@ -94,7 +93,7 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
 
 float getHorizontallyCenteredX(const sf::Text& text, const sf::FloatRect& rect)
 {
-   const auto x_pos = rect.left + (rect.width - text.getLocalBounds().width) * 0.5f;
+   const auto x_pos = rect.position.x + (rect.size.x - text.getLocalBounds().size.x) * 0.5f;
    return x_pos;
 }
 
@@ -227,7 +226,7 @@ InGameMenuInventory::InGameMenuInventory()
    _duration_show = config._duration_show;
 
    // load fonts
-   if (_font_title.loadFromFile("data/fonts/deceptum.ttf"))
+   if (_font_title.openFromFile("data/fonts/deceptum.ttf"))
    {
       const_cast<sf::Texture&>(_font_title.getTexture(inventory_title_font_size)).setSmooth(false);
       _text_title.setFont(_font_title);
@@ -235,7 +234,7 @@ InGameMenuInventory::InGameMenuInventory()
       _text_title.setFillColor(sf::Color{232, 219, 243});
    }
 
-   if (_font_description.loadFromFile("data/fonts/deceptum.ttf"))
+   if (_font_description.openFromFile("data/fonts/deceptum.ttf"))
    {
       const_cast<sf::Texture&>(_font_description.getTexture(inventory_text_font_size)).setSmooth(false);
       _text_description.setFont(_font_description);
@@ -592,10 +591,10 @@ void InGameMenuInventory::updateInventoryItems()
       const auto title_x_px = getHorizontallyCenteredX(_text_title, rect);
       _text_description.setString(text._description_wrapped);
       _text_description.setPosition(
-         _panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px
+         {_panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px}
       );
       _text_title.setString(text._title);
-      _text_title.setPosition(_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px);
+      _text_title.setPosition({_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px});
    }
 
    // update frames
@@ -735,11 +734,11 @@ void InGameMenuInventory::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    std::optional<int32_t> slot;
 
-   if (key == sf::Keyboard::LControl)
+   if (key == sf::Keyboard::Key::LControl)
    {
       slot = 0;
    }
-   else if (key == sf::Keyboard::LAlt)
+   else if (key == sf::Keyboard::Key::LAlt)
    {
       slot = 1;
    }
