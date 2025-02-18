@@ -192,7 +192,7 @@ void InGameMenuPage::load()
       texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+      sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
       sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
 
       tmp->_texture = texture;

@@ -151,7 +151,7 @@ InfoLayer::InfoLayer()
       texture->update(reinterpret_cast<const sf::Uint8*>(psd_layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop()));
+      sprite->setPosition({static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop())});
 
       layer->_visible = psd_layer.isVisible();
       layer->_texture = texture;
