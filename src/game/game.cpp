@@ -207,9 +207,9 @@ void Game::initializeWindow()
 
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
    _window = std::make_shared<sf::RenderWindow>(
-      sf::VideoMode(static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)),
+      sf::VideoMode({static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)}),
       GAME_NAME,
-      game_config._fullscreen ? sf::Style::Fullscreen : sf::Style::Default,
+      game_config._fullscreen ? sf::Style::State::Fullscreen : sf::Style::Default,
       context_settings
    );
 
@@ -543,12 +543,12 @@ void Game::draw()
       const auto scale_minimum = std::min(static_cast<int32_t>(scale_x), static_cast<int32_t>(scale_y));
       const auto dx = (scale_x - scale_minimum) * 0.5f;
       const auto dy = (scale_y - scale_minimum) * 0.5f;
-      window_texture_sprite.setPosition(_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy);
-      window_texture_sprite.scale(static_cast<float>(scale_minimum), static_cast<float>(scale_minimum));
+      window_texture_sprite.setPosition({_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy});
+      window_texture_sprite.scale({static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)});
    }
    else
    {
-      window_texture_sprite.setPosition(static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y));
+      window_texture_sprite.setPosition({static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y)});
    }
 
    _window->draw(window_texture_sprite);
@@ -557,7 +557,7 @@ void Game::draw()
 
    if (_recording)
    {
-      const auto image = window_texture_sprite.getTexture()->copyToImage();
+      const auto image = window_texture_sprite.getTexture().copyToImage();
 
       std::thread record(
          [this, image]()
