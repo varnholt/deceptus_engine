@@ -250,10 +250,8 @@ sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
    const auto& screen_view = target.getView();
 
    sf::FloatRect screen = {
-      screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
-      screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
-      screen_view.getSize().x,
-      screen_view.getSize().y
+      {screen_view.getCenter().x - screen_view.getSize().x / 2.0f, screen_view.getCenter().y - screen_view.getSize().y / 2.0f},
+      {screen_view.getSize().x, screen_view.getSize().y}
    };
 
    return screen;
