@@ -205,16 +205,25 @@ void Game::initializeWindow()
       _window.reset();
    }
 
+   const auto video_mode =
+      game_config._fullscreen
+         ? sf::VideoMode::getDesktopMode()
+         : sf::VideoMode(static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height));
+
+   Log::Info() << "setting video mode: " << video_mode.width << "x" << video_mode.height;
+
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
    _window = std::make_shared<sf::RenderWindow>(
-      sf::VideoMode(static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)),
-      GAME_NAME,
-      game_config._fullscreen ? sf::Style::Fullscreen : sf::Style::Default,
-      context_settings
+      video_mode, GAME_NAME, game_config._fullscreen ? sf::Style::None : sf::Style::Default, context_settings
    );
 
+   if (game_config._fullscreen)
+   {
+      _window->setPosition(sf::Vector2i(0, 0));
+   }
+
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
-   _window->setFramerateLimit(60);
+   _window->setFramerateLimit(game_config._vsync_enabled ? 0 : 60);
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!game_config._fullscreen);
 
@@ -835,9 +844,9 @@ void Game::processEvent(const sf::Event& event)
    }
    else if (event.type == sf::Event::Resized)
    {
-#ifdef __linux__
+      // #ifdef __linux__
       return;
-#endif
+      // #endif
 
       // avoid bad aspect ratios for windowed mode
       changeResolution(_window->getSize().x, _window->getSize().y);
