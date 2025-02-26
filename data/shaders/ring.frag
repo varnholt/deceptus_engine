@@ -41,7 +41,6 @@ float fbm(vec2 p)
     return dot(rz, tr) * 0.25;
 }
 
-
 float circularEffect(vec2 p) 
 {
     float angle = atan(p.y, p.x);
@@ -55,20 +54,36 @@ float circularEffect(vec2 p)
 
 void main() 
 {
-    vec2 uv = gl_TexCoord[0].xy;
-    vec2 uv_pixel = floor(uv * u_resolution * 4.0) / (u_resolution * 4.0);
-
-    vec2 p = uv_pixel - 0.5; 
+    // without pixelate
+    // vec2 uv = gl_TexCoord[0].xy;
+    // vec2 p = uv - 0.5; 
     
+    // pixelate
+    vec2 uv = gl_TexCoord[0].xy;
+    
+    // convert world-space to screen-space
+    vec2 screen_uv = uv * u_resolution;
+    
+    // pixelate in screen space
+    float pixel_size = 1.0;
+    screen_uv = floor(screen_uv / pixel_size) * pixel_size;
+    
+    // convert back to UV space
+    vec2 uv_pixel = screen_uv / u_resolution;
+    vec2 quad_scale = (fwidth(gl_TexCoord[0].xy) * u_resolution) / 2.0; // use half of the quad size for effect
+    vec2 p = (uv_pixel - 0.5) / quad_scale;
+
+    
+    float aspect = u_resolution.x / u_resolution.y;
     vec2 center_offset = vec2(sin(TIME * 15.0) * 0.01, 0.0);
     p += center_offset;
-    p.x *= u_resolution.x / u_resolution.y;
-    p *= 5.0;
+    p.x *= aspect;
+    p *= 1.0;
 
     float fbm_value = fbm(p);    
     vec2 offset = vec2(p.x / 14.0, p.y / 14.0);
     float effect = abs(-circularEffect(offset));
-    fbm_value *= effect * effect * 2.0 ;
+    fbm_value *= effect * effect * 2.0;
 
     vec3 col = vec3(0.2, 0.1, 0.4) / fbm_value;
     
