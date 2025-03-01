@@ -1,42 +1,72 @@
 #include "eventdistributor.h"
-
 #include <algorithm>
-#include <functional>
-#include <map>
+#include <typeindex>
+#include <unordered_map>
 
 namespace
 {
-std::map<sf::Event::EventType, std::vector<EventDistributor::CallbackWrapper>> _callback_mapping;
+using event_variant = sf::Event;
+std::unordered_map<std::type_index, std::vector<std::function<void(const sf::Event&)>>> callback_mapping;
+}  // namespace
+
+void event_distributor::event(const sf::Event& event)
+{
+   std::visit(
+      [](auto&& e)
+      {
+         using event_t = std::decay_t<decltype(e)>;
+         auto type_id = std::type_index(typeid(event_t));
+
+         auto it = callback_mapping.find(type_id);
+         if (it != callback_mapping.end())
+         {
+            for (const auto& callback : it->second)
+            {
+               callback(e);
+            }
+         }
+      },
+      event
+   );
 }
 
-void EventDistributor::event(const sf::Event& event)
+template <typename EventT>
+void event_distributor::register_event(const EventCallback<EventT>& callback)
 {
-   const auto& callbacks = _callback_mapping.find(event.type);
+   auto type_id = std::type_index(typeid(EventT));
+   callback_mapping[type_id].emplace_back(callback);
+}
 
-   if (callbacks != _callback_mapping.end())
+template <typename EventT>
+void event_distributor::unregister_event(const EventCallback<EventT>& callback)
+{
+   auto type_id = std::type_index(typeid(EventT));
+
+   auto it = callback_mapping.find(type_id);
+   if (it != callback_mapping.end())
    {
-      std::for_each(callbacks->second.begin(), callbacks->second.end(), [event](const auto& callback) { callback.get()(event); });
+      auto& callback_list = it->second;
+      callback_list.erase(
+         std::remove_if(
+            callback_list.begin(),
+            callback_list.end(),
+            [&callback](const std::function<void(const sf::Event&)>& cb)
+            { return cb.target<void(const EventT&)>() == callback.target<void(const EventT&)>(); }
+         ),
+         callback_list.end()
+      );
+
+      if (callback_list.empty())
+      {
+         callback_mapping.erase(it);
+      }
    }
 }
 
-void EventDistributor::registerEvent(sf::Event::EventType event_type, const EventCallback& callback)
-{
-   _callback_mapping[event_type].emplace_back(std::cref(callback));
-}
+template void event_distributor::register_event<sf::Event::KeyPressed>(const EventCallback<sf::Event::KeyPressed>&);
+template void event_distributor::register_event<sf::Event::MouseButtonPressed>(const EventCallback<sf::Event::MouseButtonPressed>&);
+template void event_distributor::register_event<sf::Event::MouseWheelScrolled>(const EventCallback<sf::Event::MouseWheelScrolled>&);
 
-void EventDistributor::unregisterEvent(sf::Event::EventType event_type, const EventCallback& callback)
-{
-   auto& callbacks = _callback_mapping[event_type];
-   callbacks.erase(
-      std::remove_if(
-         callbacks.begin(),
-         callbacks.end(),
-         [&callback](const CallbackWrapper& cb)
-         {
-            // compare reference pointers
-            return &cb.get() == &callback;
-         }
-      ),
-      callbacks.end()
-   );
-}
+template void event_distributor::unregister_event<sf::Event::KeyPressed>(const EventCallback<sf::Event::KeyPressed>&);
+template void event_distributor::unregister_event<sf::Event::MouseButtonPressed>(const EventCallback<sf::Event::MouseButtonPressed>&);
+template void event_distributor::unregister_event<sf::Event::MouseWheelScrolled>(const EventCallback<sf::Event::MouseWheelScrolled>&);

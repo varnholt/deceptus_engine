@@ -199,10 +199,10 @@ bool TileMap::load(
          quad[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>(tv * _tile_size.y) + tile_eps_y);
          quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
          quad[3].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size.x) + tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
-         quad[0].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
-         quad[1].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
-         quad[2].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
-         quad[3].color = sf::Color(255, 255, 255, static_cast<sf::Uint8>(layer->_opacity * 255.0f));
+         quad[0].color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer->_opacity * 255.0f));
+         quad[1].color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer->_opacity * 255.0f));
+         quad[2].color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer->_opacity * 255.0f));
+         quad[3].color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer->_opacity * 255.0f));
          // clang-format on
 
          auto it = tile_map.find(tile_number - tileset->_first_gid);

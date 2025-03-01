@@ -48,7 +48,7 @@ BlurShader::~BlurShader()
 
 void BlurShader::initialize()
 {
-   if (!_shader.loadFromFile("data/shaders/blur.frag", sf::Shader::Fragment))
+   if (!_shader.loadFromFile("data/shaders/blur.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading blur shader";
       return;
