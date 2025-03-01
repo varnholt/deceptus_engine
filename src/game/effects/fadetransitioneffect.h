@@ -21,5 +21,5 @@ struct FadeTransitionEffect : public ScreenTransitionEffect
    sf::Color _fade_color = sf::Color::Black;
    float _value = 0.0f;
    float _speed = 1.0f;
-   std::array<sf::Vertex, 4> _vertices;
+   std::array<sf::Vertex, 6> _vertices;
 };
