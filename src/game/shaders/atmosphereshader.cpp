@@ -19,7 +19,7 @@ AtmosphereShader::~AtmosphereShader()
 
 void AtmosphereShader::initialize()
 {
-   if (!_shader.loadFromFile("data/shaders/water.frag", sf::Shader::Fragment))
+   if (!_shader.loadFromFile("data/shaders/water.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading water shader";
       return;

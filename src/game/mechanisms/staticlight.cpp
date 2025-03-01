@@ -26,7 +26,7 @@ void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/)
 {
    auto lumen = fbm::mix(_color.a, _flicker_amount * 255.0f, 1.0f - _flicker_alpha_amount);
 
-   sf::Color color{_color.r, _color.g, _color.b, static_cast<sf::Uint8>(lumen)};
+   sf::Color color{_color.r, _color.g, _color.b, static_cast<uint8_t>(lumen)};
 
    _sprite.setColor(color);
    target.draw(_sprite, _blend_mode);

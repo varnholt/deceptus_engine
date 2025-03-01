@@ -148,7 +148,7 @@ InfoLayer::InfoLayer()
          Log::Fatal() << "failed to create texture: " << psd_layer.getName();
       }
 
-      texture->update(reinterpret_cast<const sf::Uint8*>(psd_layer.getImage().getData().data()));
+      texture->update(reinterpret_cast<const uint8_t*>(psd_layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
       sprite->setPosition({static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop())});
@@ -237,20 +237,19 @@ void InfoLayer::loadInventoryItems()
       [this](const auto& image)
       {
          // store sprites
-         sf::Sprite sprite;
-         sprite.setTexture(*_inventory_texture);
-         sprite.setTextureRect({image._x_px, image._y_px, icon_width, icon_height});
-         _sprites[image._name] = sprite;
+         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*_inventory_texture);
+         sprite->setTextureRect(sf::IntRect({image._x_px, image._y_px}, {icon_width, icon_height}));
+         _sprites[image._name] = std::move(sprite);
       }
    );
 
    _inventory_sprites[0].setTexture(*_inventory_texture);
    _inventory_sprites[0].setTextureRect({});
-   _inventory_sprites[0].setPosition(frame_0_pos_x_px, frame_0_pos_y_px);
+   _inventory_sprites[0].setPosition({frame_0_pos_x_px, frame_0_pos_y_px});
 
    _inventory_sprites[1].setTexture(*_inventory_texture);
    _inventory_sprites[1].setTextureRect({});
-   _inventory_sprites[1].setPosition(frame_1_pos_x_px, frame_1_pos_y_px);
+   _inventory_sprites[1].setPosition({frame_1_pos_x_px, frame_1_pos_y_px});
 }
 
 void InfoLayer::updateInventoryItems()
@@ -266,7 +265,7 @@ void InfoLayer::updateInventoryItems()
       }
 
       const auto& sprite = _sprites[slot];
-      _inventory_sprites[i].setTextureRect(sprite.getTextureRect());
+      _inventory_sprites[i].setTextureRect(sprite->getTextureRect());
    }
 }
 
@@ -336,18 +335,18 @@ void InfoLayer::updateHealthLayerOffsets()
       [this](const std::shared_ptr<LayerData>& layer_data)
       {
          auto layer = layer_data->_layer;
-         layer->_sprite->setPosition(layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y);
+         layer->_sprite->setPosition({layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y});
       }
    );
 
-   _animation_heart->setPosition(heart_pos_x_px + _player_health_x_offset, heart_pos_y_px);
-   _animation_stamina->setPosition(stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px);
-   _animation_skull_blink->setPosition(skull_pos_x_px + _player_health_x_offset, skull_pos_y_px);
-   _animation_hp_unlock_left->setPosition(_player_health_x_offset, 0.0f);
-   _animation_hp_unlock_right->setPosition(_player_health_x_offset, 0.0f);
+   _animation_heart->setPosition({heart_pos_x_px + _player_health_x_offset, heart_pos_y_px});
+   _animation_stamina->setPosition({stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px});
+   _animation_skull_blink->setPosition({skull_pos_x_px + _player_health_x_offset, skull_pos_y_px});
+   _animation_hp_unlock_left->setPosition({_player_health_x_offset, 0.0f});
+   _animation_hp_unlock_right->setPosition({_player_health_x_offset, 0.0f});
 
-   _inventory_sprites[0].setPosition(frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px);
-   _inventory_sprites[1].setPosition(frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px);
+   _inventory_sprites[0].setPosition({frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px});
+   _inventory_sprites[1].setPosition({frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px});
 }
 
 void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
@@ -419,7 +418,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
-   const sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   const sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
 
    drawAutoSave(window, states);
@@ -432,7 +431,7 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    auto w = GameConfiguration::getInstance()._view_width;
    auto h = GameConfiguration::getInstance()._view_height;
 
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
 
    std::stringstream stream_tl;
@@ -461,13 +460,13 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    constexpr auto offset_x = 16;
    static const auto offset_y = h_screen - 48;
 
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_view), static_cast<float>(h_view)));
+   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w_view), static_cast<float>(h_view)}));
    window.setView(view);
 
    const auto& layer_health = _layers["console"]->_layer;
    layer_health->draw(window, states);
 
-   sf::View view_screen(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w_screen), static_cast<float>(h_screen)));
+   sf::View view_screen(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w_screen), static_cast<float>(h_screen)}));
    window.setView(view_screen);
 
    // draw command history

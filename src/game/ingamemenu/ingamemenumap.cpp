@@ -103,14 +103,14 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       sf::Vector2f center;
       center += Player::getCurrent()->getPixelPositionFloat() * 0.125f;
       center += CameraPanorama::getInstance().getLookVector();
-      center.x += _level_grid_sprite.getTexture()->getSize().x / 2.0f;
-      center.y += _level_grid_sprite.getTexture()->getSize().y / 2.0f;
+      center.x += _level_grid_sprite.getTexture().getSize().x / 2.0f;
+      center.y += _level_grid_sprite.getTexture().getSize().y / 2.0f;
       center.x -= 220.0f;
       center.y -= 80.0f;
 
       sf::View level_view;
       level_view.setSize(
-         static_cast<float>(_level_grid_sprite.getTexture()->getSize().x), static_cast<float>(_level_grid_sprite.getTexture()->getSize().y)
+         static_cast<float>(_level_grid_sprite.getTexture().getSize().x), static_cast<float>(_level_grid_sprite.getTexture().getSize().y)
       );
 
       level_view.setCenter(center);
@@ -224,49 +224,57 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    }
 
    // draw doors
-   float doorWidth = 2.0f;
-   float doorHeight = 9.0f;
+   float door_width = 2.0f;
+   float door_height = 9.0f;
 
    for (auto& d : _doors)
    {
       auto door = std::dynamic_pointer_cast<Door>(d);
 
-      sf::VertexArray quad(sf::Quads, 4);
-      quad[0].color = sf::Color::White;
-      quad[1].color = sf::Color::White;
-      quad[2].color = sf::Color::White;
-      quad[3].color = sf::Color::White;
+      sf::VertexArray quad(sf::PrimitiveType::Triangles, 6);
 
-      auto pos = sf::Vector2f(static_cast<float>(door->getTilePosition().x), static_cast<float>(door->getTilePosition().y));
+      const auto pos = sf::Vector2f(static_cast<float>(door->getTilePosition().x), static_cast<float>(door->getTilePosition().y));
 
-      quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale));
-      quad[1].position = sf::Vector2f(static_cast<float>(pos.x * scale + doorWidth), static_cast<float>(pos.y * scale));
-      quad[2].position = sf::Vector2f(static_cast<float>(pos.x * scale + doorWidth), static_cast<float>(pos.y * scale + doorHeight));
-      quad[3].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale + doorHeight));
+      sf::Vector2f top_left = sf::Vector2f(pos.x * scale, pos.y * scale);
+      sf::Vector2f top_right = sf::Vector2f(pos.x * scale + door_width, pos.y * scale);
+      sf::Vector2f bottom_right = sf::Vector2f(pos.x * scale + door_width, pos.y * scale + door_height);
+      sf::Vector2f bottom_left = sf::Vector2f(pos.x * scale, pos.y * scale + door_height);
 
-      target.draw(&quad[0], 4, sf::Quads);
+      quad[0] = sf::Vertex(top_left, sf::Color::White);
+      quad[1] = sf::Vertex(top_right, sf::Color::White);
+      quad[2] = sf::Vertex(bottom_right, sf::Color::White);
+
+      quad[3] = sf::Vertex(top_left, sf::Color::White);
+      quad[4] = sf::Vertex(bottom_right, sf::Color::White);
+      quad[5] = sf::Vertex(bottom_left, sf::Color::White);
+
+      target.draw(quad);
    }
 
    // draw portals
-   float portalWidth = 3.0f;
-   float portalHeight = 6.0f;
+   float portal_width = 3.0f;
+   float portal_height = 6.0f;
    for (auto& p : _portals)
    {
-      sf::VertexArray quad(sf::Quads, 4);
-      quad[0].color = sf::Color::Red;
-      quad[1].color = sf::Color::Red;
-      quad[2].color = sf::Color::Red;
-      quad[3].color = sf::Color::Red;
+      sf::VertexArray quad(sf::PrimitiveType::Triangles, 6);
 
       auto portal = std::dynamic_pointer_cast<Portal>(p);
       auto pos = sf::Vector2f(portal->getTilePosition().x, portal->getTilePosition().y);
 
-      quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale));
-      quad[1].position = sf::Vector2f(static_cast<float>(pos.x * scale + portalWidth), static_cast<float>(pos.y * scale));
-      quad[2].position = sf::Vector2f(static_cast<float>(pos.x * scale + portalWidth), static_cast<float>(pos.y * scale + portalHeight));
-      quad[3].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale + portalHeight));
+      sf::Vector2f top_left = {static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale)};
+      sf::Vector2f top_right = {static_cast<float>(pos.x * scale + portal_width), static_cast<float>(pos.y * scale)};
+      sf::Vector2f bottom_right = {static_cast<float>(pos.x * scale + portal_width), static_cast<float>(pos.y * scale + portal_height)};
+      sf::Vector2f bottom_left = {static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale + portal_height)};
 
-      target.draw(&quad[0], 4, sf::Quads);
+      quad[0] = sf::Vertex(top_left, sf::Color::Red);
+      quad[1] = sf::Vertex(top_right, sf::Color::Red);
+      quad[2] = sf::Vertex(bottom_right, sf::Color::Red);
+
+      quad[3] = sf::Vertex(top_left, sf::Color::Red);
+      quad[4] = sf::Vertex(bottom_right, sf::Color::Red);
+      quad[5] = sf::Vertex(bottom_left, sf::Color::Red);
+
+      target.draw(quad);
    }
 
    // draw player
@@ -274,7 +282,7 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    auto playerHeight = 4;
    sf::CircleShape square(playerWidth, static_cast<uint32_t>(playerHeight));
    square.setPosition(Player::getCurrent()->getPixelPositionFloat() * 0.125f);
-   square.move(-playerWidth, -playerHeight * 2.0f);
+   square.move({-playerWidth, -playerHeight * 2.0f});
    square.setFillColor(sf::Color::White);
    target.draw(square);
 }

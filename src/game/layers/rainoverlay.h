@@ -37,7 +37,7 @@ public:
    {
       sf::Vector2f _pos_px;
       float _age_s = 0.0f;
-      sf::Sprite _sprite;
+      std::unique_ptr<sf::Sprite> _sprite;
    };
 
    struct Edge

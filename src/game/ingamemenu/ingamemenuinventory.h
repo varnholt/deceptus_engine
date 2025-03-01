@@ -15,7 +15,7 @@ class InGameMenuInventory : public InGameMenuPage
 public:
    struct ItemSprite
    {
-      sf::Sprite _sprite;
+      std::unique_ptr<sf::Sprite> _sprite;
    };
 
    enum class Filter
@@ -79,7 +79,7 @@ private:
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
    std::array<Filter, 5> _filters;
 
-   sf::Sprite _cursor_sprite;
+   std::unique_ptr<sf::Sprite> _cursor_sprite;
    sf::Vector2f _cursor_position;
    std::shared_ptr<sf::Texture> _inventory_texture;
    std::unique_ptr<LayerData> _frame_selection;

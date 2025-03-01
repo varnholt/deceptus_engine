@@ -55,15 +55,15 @@ void WaterBubbles::spawnBubble(const sf::Vector2f pos_px, const sf::Vector2f vel
 {
    static const auto sprite_rects = std::array<sf::IntRect, 3>{
       // sf::IntRect{576, 936, 24, 24},
-      sf::IntRect{600, 936, 24, 24},
-      sf::IntRect{624, 936, 24, 24},
-      sf::IntRect{648, 936, 24, 24},
+      sf::IntRect{{600, 936}, {24, 24}},
+      sf::IntRect{{624, 936}, {24, 24}},
+      sf::IntRect{{648, 936}, {24, 24}},
    };
 
    auto bubble = std::make_shared<Bubble>(pos_px, vel_px, _texture);
 
    bubble->_sprite.setTextureRect(sprite_rects[std::rand() % sprite_rects.size()]);
-   bubble->_sprite.setOrigin(12.0f, 12.0f);
+   bubble->_sprite.setOrigin({12.0f, 12.0f});
    bubble->_delay_s = frand(0.0f, 0.3f);
 
    _bubbles.push_back(bubble);
@@ -145,7 +145,7 @@ void WaterBubbles::update(const sf::Time& dt, const WaterBubbleInput& input)
       }
 
       bubble->_position += dt.asSeconds() * bubble->_velocity;
-      bubble->_sprite.setPosition(bubble->_position);
+      bubble->_sprite->setPosition(bubble->_position);
 
       const auto atmosphere = Level::getCurrentLevel()->getAtmosphere().getTileForPosition(bubble->_position);
       if (atmosphere != AtmosphereTileWaterFull)
@@ -163,5 +163,5 @@ void WaterBubbles::update(const sf::Time& dt, const WaterBubbleInput& input)
 WaterBubbles::Bubble::Bubble(const sf::Vector2f& pos, const sf::Vector2f& vel, const std::shared_ptr<sf::Texture>& texture)
     : _position(pos), _velocity(vel)
 {
-   _sprite.setTexture(*texture);
+   _sprite = std::make_unique<sf::Sprite>(*texture);
 }

@@ -32,7 +32,7 @@ public:
       bool _enabled = true;
 
       std::shared_ptr<sf::Texture> _texture;
-      sf::Sprite _sprite;
+      std::unique_ptr<sf::Sprite> _sprite;
 
       int32_t _width_px = 256;
       int32_t _height_px = 256;

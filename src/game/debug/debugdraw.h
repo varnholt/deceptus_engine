@@ -12,7 +12,7 @@
 namespace DebugDraw
 {
 
-sf::Color glColorToSfml(const b2Color& color, sf::Uint8 alpha = 255);
+sf::Color glColorToSfml(const b2Color& color, uint8_t alpha = 255);
 
 sf::Vector2f vecB2S(const b2Vec2& vector);
 b2Vec2 vecS2B(const sf::Vector2f& vector);

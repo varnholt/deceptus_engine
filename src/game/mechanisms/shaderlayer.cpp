@@ -102,7 +102,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
       if (fragment_shader_it != data._tmx_object->_properties->_map.end())
       {
          const auto frag_file = fragment_shader_it->second->_value_string.value();
-         if (!instance->_shader.loadFromFile(frag_file, sf::Shader::Fragment))
+         if (!instance->_shader.loadFromFile(frag_file, sf::Shader::Type::Fragment))
          {
             Log::Error() << "error compiling " << frag_file;
          }

@@ -68,10 +68,10 @@ void showGpu()
 
 void showErrorMessage(const std::string& message)
 {
-   sf::RenderWindow window(sf::VideoMode(240, 80), "Error", sf::Style::Titlebar | sf::Style::Close);
+   sf::RenderWindow window(sf::VideoMode({240, 80}), "Error", sf::Style::Titlebar | sf::Style::Close);
 
    sf::Font font;
-   font.loadFromFile("data/fonts/deceptum.ttf");
+   font.openFromFile("data/fonts/deceptum.ttf");
    const_cast<sf::Texture&>(font.getTexture(12)).setSmooth(false);
 
    sf::Text text;
@@ -79,12 +79,11 @@ void showErrorMessage(const std::string& message)
    text.setString(message);
    text.setCharacterSize(12);
    text.setFillColor(sf::Color::Black);
-   text.setPosition(30.0f, 30.0f);
+   text.setPosition({30.0f, 30.0f});
 
    while (window.isOpen())
    {
-      sf::Event event;
-      while (window.pollEvent(event))
+      while (const auto event = window.pollEvent())
       {
          if (event.type == sf::Event::Closed)
          {
@@ -242,14 +241,8 @@ void Game::initializeWindow()
    _render_texture_offset.x = static_cast<uint32_t>((game_config._video_mode_width - texture_width) / 2);
    _render_texture_offset.y = static_cast<uint32_t>((game_config._video_mode_height - texture_height) / 2);
 
-   _window_render_texture = std::make_shared<sf::RenderTexture>();
-
-   if (!_window_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
-   {
-      std::string error = "Failed to create window render texture.";
-      showErrorMessage(error);
-      Log::Fatal() << error;
-   }
+   _window_render_texture =
+      std::make_shared<sf::RenderTexture>(sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)});
 
    Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;
 
@@ -830,7 +823,7 @@ void Game::takeScreenshot()
 void Game::processEvent(const sf::Event& event)
 {
    std::visit(
-      [this](auto&& e)
+      [this, &event](auto&& e)
       {
          using T = std::decay_t<decltype(e)>;
 
@@ -890,7 +883,7 @@ void Game::processEvent(const sf::Event& event)
                _player->getControls()->keyboardKeyPressed(e.key);
             }
 
-           // this is the handling of the actual in-game keypress events
+            // this is the handling of the actual in-game keypress events
             processKeyPressedEvents(event);
          }
          else if constexpr (std::is_same_v<T, sf::Event::KeyReleased>)
@@ -1193,11 +1186,15 @@ void Game::processKeyReleasedEvents(const sf::Event& event)
 
 void Game::processEvents()
 {
-   sf::Event event;
-   while (_window->pollEvent(event))
+   while (const auto event = _window->pollEvent())
    {
-      processEvent(event);
-      EventSerializer::getInstance().add(event);
+      if (!event.has_value())
+      {
+         break;
+      }
+
+      processEvent(event.value());
+      EventSerializer::getInstance().add(event.value());
    }
 
    if (DrawStates::_draw_physics_config)

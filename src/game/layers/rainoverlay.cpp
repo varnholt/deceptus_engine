@@ -64,10 +64,8 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    const auto& screen_view = target.getView();
 
    _screen = {
-      screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
-      screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
-      screen_view.getSize().x,
-      screen_view.getSize().y
+      {screen_view.getCenter().x - screen_view.getSize().x / 2.0f, screen_view.getCenter().y - screen_view.getSize().y / 2.0f},
+      {screen_view.getSize().x, screen_view.getSize().y}
    };
 
    // source: foreground
@@ -168,8 +166,8 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto sprite_index = std::rand() % 4;
 
-         p._sprite.setTextureRect({static_cast<int32_t>(sprite_index) * 11, 0, 11, 96});
-         p._sprite.setOrigin(6, 0);
+         p._sprite.setTextureRect(sf::IntRect({static_cast<int32_t>(sprite_index) * 11, 0}, {11, 96}));
+         p._sprite.setOrigin({6, 0});
          p._pos_px.x = _clip_rect.position.x + std::rand() % static_cast<int32_t>(_clip_rect.size.x);
          p._pos_px.y = _clip_rect.position.y + std::rand() % static_cast<int32_t>(_clip_rect.size.y);
          p._age_s = (std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;
@@ -210,8 +208,8 @@ void RainOverlay::update(const sf::Time& dt)
                      const sf::Vector2f hit_position{p._pos_px.x, closest_point};
 
                      DropHit hit;
-                     hit._sprite.setTexture(*_texture);
-                     hit._sprite.setPosition(hit_position);
+                     hit._sprite = std::make_unique<sf::Sprite>(*_texture);
+                     hit._sprite->setPosition(hit_position);
                      hit._pos_px = hit_position;
                      _hits.push_back(hit);
 
@@ -246,8 +244,8 @@ void RainOverlay::update(const sf::Time& dt)
             [dt](auto& hit)
             {
                hit._age_s += dt.asSeconds();
-               hit._sprite.setOrigin(5, 11);
-               hit._sprite.setTextureRect({11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f)), 96, 11, 12});
+               hit._sprite->setOrigin({5, 11});
+               hit._sprite->setTextureRect(sf::IntRect({11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f)), 96}, {11, 12}));
                return hit._age_s > 1.0f;
             }
          ),
