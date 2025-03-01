@@ -47,10 +47,10 @@ void Fireflies::deserialize(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
 
-   _rect_px.left = data._tmx_object->_x_px;
-   _rect_px.top = data._tmx_object->_y_px;
-   _rect_px.width = data._tmx_object->_width_px;
-   _rect_px.height = data._tmx_object->_height_px;
+   _rect_px.position.x = data._tmx_object->_x_px;
+   _rect_px.position.y = data._tmx_object->_y_px;
+   _rect_px.size.x = data._tmx_object->_width_px;
+   _rect_px.size.y = data._tmx_object->_height_px;
 
    addChunks(_rect_px);
 
@@ -175,12 +175,12 @@ void Fireflies::Firefly::update(const sf::Time& dt)
 
    // scale x and y based on z depth?
 
-   const auto x_scaled_px = x * _rect_px.width * 0.5f * _scale_horizontal;
-   const auto y_scaled_px = y * _rect_px.height * 0.5f * _scale_vertical;
+   const auto x_scaled_px = x * _rect_px.size.x * 0.5f * _scale_horizontal;
+   const auto y_scaled_px = y * _rect_px.size.y * 0.5f * _scale_vertical;
 
    // the above should be rotated around x, y, z axes
-   _position.x = _rect_px.left + (_rect_px.width * 0.5f) + x_scaled_px;
-   _position.y = _rect_px.top + (_rect_px.height * 0.5f) + y_scaled_px;
+   _position.x = _rect_px.position.x + (_rect_px.size.x * 0.5f) + x_scaled_px;
+   _position.y = _rect_px.position.y + (_rect_px.size.y * 0.5f) + y_scaled_px;
 
    _sprite.setPosition(_position);
    _sprite.setOrigin({PIXELS_PER_TILE / 2, PIXELS_PER_TILE / 2});

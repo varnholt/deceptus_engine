@@ -282,11 +282,11 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
          laser->_position_px.x = laser->_tile_position.x * PIXELS_PER_TILE;
          laser->_position_px.y = laser->_tile_position.y * PIXELS_PER_TILE;
 
-         laser->_pixel_rect.left = laser->_position_px.x;
-         laser->_pixel_rect.top = laser->_position_px.y;
+         laser->_pixel_rect.position.x = laser->_position_px.x;
+         laser->_pixel_rect.position.y = laser->_position_px.y;
 
-         laser->_pixel_rect.width = PIXELS_PER_TILE;
-         laser->_pixel_rect.height = PIXELS_PER_TILE;
+         laser->_pixel_rect.size.x = PIXELS_PER_TILE;
+         laser->_pixel_rect.size.y = PIXELS_PER_TILE;
 
          laser->_texture = TexturePool::getInstance().get(data._base_path / data._tmx_tileset->_image->_source);
 
@@ -372,8 +372,8 @@ void Laser::collide(const sf::FloatRect& player_rect)
 
          if (laser->_path.has_value())
          {
-            pixel_rect.left += static_cast<int32_t>(laser->_move_offset_px.x);
-            pixel_rect.top += static_cast<int32_t>(laser->_move_offset_px.y);
+            pixel_rect.position.x += static_cast<int32_t>(laser->_move_offset_px.x);
+            pixel_rect.position.y += static_cast<int32_t>(laser->_move_offset_px.y);
          }
 
          const auto rough_intersection = player_rect.intersects(pixel_rect);
@@ -405,17 +405,17 @@ void Laser::collide(const sf::FloatRect& player_rect)
                {
                   sf::FloatRect rect;
 
-                  rect.left = laser->_position_px.x + (x * PIXELS_PER_PHYSICS_TILE);
-                  rect.top = laser->_position_px.y + (y * PIXELS_PER_PHYSICS_TILE);
+                  rect.position.x = laser->_position_px.x + (x * PIXELS_PER_PHYSICS_TILE);
+                  rect.position.y = laser->_position_px.y + (y * PIXELS_PER_PHYSICS_TILE);
 
                   if (laser->_path.has_value())
                   {
-                     rect.left += laser->_move_offset_px.x;
-                     rect.top += laser->_move_offset_px.y;
+                     rect.position.x += laser->_move_offset_px.x;
+                     rect.position.y += laser->_move_offset_px.y;
                   }
 
-                  rect.width = PIXELS_PER_PHYSICS_TILE;
-                  rect.height = PIXELS_PER_PHYSICS_TILE;
+                  rect.size.x = PIXELS_PER_PHYSICS_TILE;
+                  rect.size.y = PIXELS_PER_PHYSICS_TILE;
 
                   const auto fine_intersection = player_rect.intersects(rect);
 

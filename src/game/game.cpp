@@ -829,110 +829,107 @@ void Game::takeScreenshot()
 
 void Game::processEvent(const sf::Event& event)
 {
-   if (event.type == sf::Event::Closed)
-   {
-      _window->close();
-   }
-   else if (event.type == sf::Event::Resized)
-   {
+   std::visit(
+      [this](auto&& e)
+      {
+         using T = std::decay_t<decltype(e)>;
+
+         if constexpr (std::is_same_v<T, sf::Event::Closed>)
+         {
+            _window->close();
+         }
+         else if constexpr (std::is_same_v<T, sf::Event::Resized>)
+         {
 #ifdef __linux__
-      return;
-#endif
-
-      // avoid bad aspect ratios for windowed mode
-      changeResolution(_window->getSize().x, _window->getSize().y);
-   }
-   else if (event.type == sf::Event::LostFocus)
-   {
-      if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
-      {
-         if (!DisplayMode::getInstance().isSet(Display::IngameMenu)  // the in-game menu is save to leave open when losing the window focus
-             && !Console::getInstance().isActive()                   // while the console is open, don't disturb
-         )
-         {
-            showPauseMenu();
-         }
-      }
-      else
-      {
-         if (_player)
-         {
-            CameraPanorama::getInstance().updateLookState(Look::Active, false);
-            _player->getControls()->setKeysPressed(0);
-         }
-      }
-   }
-   else if (event.type == sf::Event::GainedFocus)
-   {
-      if (_player)
-      {
-         _player->getControls()->forceSync();
-      }
-   }
-   else if (event.type == sf::Event::KeyPressed)
-   {
-      if (MessageBox::keyboardKeyPressed(event.key.code))
-      {
-         // nom nom nom
-         return;
-      }
-
-      // todo: process keyboard events in the console class, just like done in the message box
-      if (!Console::getInstance().isActive())
-      {
-         // handle keypress events for the menu
-         if (Menu::getInstance()->isVisible())
-         {
-            Menu::getInstance()->keyboardKeyPressed(event.key.code);
             return;
+#endif
+            // avoid bad aspect ratios for windowed mode
+            changeResolution(e.size.x, e.size.y);
          }
+         else if constexpr (std::is_same_v<T, sf::Event::FocusLost>)
+         {
+            if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
+            {
+               // the in-game menu is save to leave open when losing the window focus
+               // while the console is open, don't disturb
+               if (!DisplayMode::getInstance().isSet(Display::IngameMenu) && !Console::getInstance().isActive())
+               {
+                  showPauseMenu();
+               }
+            }
+            else if (_player)
+            {
+               CameraPanorama::getInstance().updateLookState(Look::Active, false);
+               _player->getControls()->setKeysPressed(0);
+            }
+         }
+         else if constexpr (std::is_same_v<T, sf::Event::FocusGained>)
+         {
+            if (_player)
+            {
+               _player->getControls()->forceSync();
+            }
+         }
+         else if constexpr (std::is_same_v<T, sf::Event::KeyPressed>)
+         {
+            if (MessageBox::keyboardKeyPressed(e.key))
+            {
+               // nom nom nom
+               return;
+            }
 
-         _player->getControls()->keyboardKeyPressed(event.key.code);
-      }
+            // todo: process keyboard events in the console class, just like done in the message box
+            if (!Console::getInstance().isActive())
+            {
+               if (Menu::getInstance()->isVisible())
+               {
+                  Menu::getInstance()->keyboardKeyPressed(e.key);
+                  return;
+               }
 
-      // this is the handling of the actual in-game keypress events
-      processKeyPressedEvents(event);
-   }
-   else if (event.type == sf::Event::KeyReleased)
-   {
-      if (Menu::getInstance()->isVisible())
-      {
-         Menu::getInstance()->keyboardKeyReleased(event.key.code);
-         return;
-      }
+               _player->getControls()->keyboardKeyPressed(e.key);
+            }
 
-      _player->getControls()->keyboardKeyReleased(event.key.code);
+           // this is the handling of the actual in-game keypress events
+            processKeyPressedEvents(event);
+         }
+         else if constexpr (std::is_same_v<T, sf::Event::KeyReleased>)
+         {
+            if (Menu::getInstance()->isVisible())
+            {
+               Menu::getInstance()->keyboardKeyReleased(e.key);
+               return;
+            }
 
-      processKeyReleasedEvents(event);
-   }
+            _player->getControls()->keyboardKeyReleased(e.key);
+            processKeyReleasedEvents(event);
+         }
 
 #ifdef DEVELOPMENT_MODE
-   else if (event.type == sf::Event::TextEntered)
-   {
-      if (Console::getInstance().isActive())
-      {
-         const auto unicode = event.text.unicode;
-         if (unicode > 0x1F && unicode < 0x80)
+         else if constexpr (std::is_same_v<T, sf::Event::TextEntered>)
          {
-            Console::getInstance().append(static_cast<char>(unicode));
+            if (Console::getInstance().isActive() && e.unicode > 0x1F && e.unicode < 0x80)
+            {
+               Console::getInstance().append(static_cast<char>(e.unicode));
+            }
          }
-      }
-   }
-   else if (event.type == sf::Event::MouseButtonPressed)
-   {
-      if (event.mouseButton.button == sf::Mouse::Right)
-      {
-         const auto mouse_pos_spx = sf::Mouse::getPosition(*_window);
-         const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_spx, *Level::getCurrentLevel()->getLevelView());
-         Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
-      }
-   }
-   else if (event.type == sf::Event::MouseWheelScrolled)
-   {
-      const auto delta = event.mouseWheelScroll.delta;
-      Level::getCurrentLevel()->zoomBy(delta);
-   }
+         else if constexpr (std::is_same_v<T, sf::Event::MouseButtonPressed>)
+         {
+            if (e.button == sf::Mouse::Right)
+            {
+               const auto mouse_pos_spx = sf::Mouse::getPosition(*_window);
+               const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_spx, Level::getCurrentLevel()->getLevelView());
+               Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
+            }
+         }
+         else if constexpr (std::is_same_v<T, sf::Event::MouseWheelScrolled>)
+         {
+            Level::getCurrentLevel()->zoomBy(e.wheelDelta);
+         }
 #endif
+      },
+      event
+   );
 
    EventDistributor::event(event);
 }

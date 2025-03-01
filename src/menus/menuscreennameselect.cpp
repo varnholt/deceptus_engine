@@ -86,9 +86,9 @@ void MenuScreenNameSelect::updateText()
    // draw text
    _text.setString(_name);
    const auto text_rect = _text.getLocalBounds();
-   const auto x_offset_px = (_name_rect.width - text_rect.width) * 0.5f;
-   const auto x_px = _name_rect.left + x_offset_px;
-   _text.setPosition(x_px, _name_rect.top);
+   const auto x_offset_px = (_name_rect.size.x - text_rect.size.x) * 0.5f;
+   const auto x_px = _name_rect.position.x + x_offset_px;
+   _text.setPosition(x_px, _name_rect.position.y);
 }
 
 void MenuScreenNameSelect::chop()
@@ -200,9 +200,9 @@ void MenuScreenNameSelect::loadingFinished()
    _char_origin.y = cursor->_sprite->getPosition().y;
 
    const auto player_name = _layers["players-name"];
-   _name_rect.left = player_name->_sprite->getPosition().x;
-   _name_rect.top = player_name->_sprite->getPosition().y;
-   _name_rect.width = static_cast<float>(player_name->_texture->getSize().x);
+   _name_rect.position.x = player_name->_sprite->getPosition().x;
+   _name_rect.position.y = player_name->_sprite->getPosition().y;
+   _name_rect.size.x = static_cast<float>(player_name->_texture->getSize().x);
 
    retrieveUsername();
    updateLayers();

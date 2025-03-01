@@ -66,10 +66,10 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
 #ifdef DEBUG_WATERSURFACE
    auto index = 0;
-   const auto segment_width = _bounding_box.width / (_segments.size() - 1);
+   const auto segment_width = _bounding_box.size.x / (_segments.size() - 1);
    std::vector<sf::Vertex> sf_lines;
-   const auto x_offset = _bounding_box.left;
-   const auto y_offset = _bounding_box.top;
+   const auto x_offset = _bounding_box.position.x;
+   const auto y_offset = _bounding_box.position.y;
 
    for (const auto& segment : _segments)
    {
@@ -79,7 +79,7 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       index++;
    }
 
-   color.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
+   color.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
 #endif
 }
 
@@ -125,7 +125,7 @@ void WaterSurface::update(const sf::Time& dt)
       {
          const auto velocity = splash_velocity_factor * player->getBody()->GetLinearVelocity().y * _config._splash_factor;
          const auto normalized_intersection =
-            (intersection.left + (player->getPixelRectFloat().width / 2.0f) - _bounding_box.left) / _bounding_box.width;
+            (intersection.position.x + (player->getPixelRectFloat().size.x / 2.0f) - _bounding_box.position.x) / _bounding_box.size.x;
          const auto index = static_cast<int32_t>(normalized_intersection * _segments.size());
 
          splash(index, velocity);
@@ -215,10 +215,10 @@ void WaterSurface::addEmitter(GameNode* /*parent*/, const GameDeserializeData& d
 {
    SplashEmitter emitter;
 
-   emitter._bounding_box.left = data._tmx_object->_x_px;
-   emitter._bounding_box.top = data._tmx_object->_y_px;
-   emitter._bounding_box.width = data._tmx_object->_width_px;
-   emitter._bounding_box.height = data._tmx_object->_height_px;
+   emitter._bounding_box.position.x = data._tmx_object->_x_px;
+   emitter._bounding_box.position.y = data._tmx_object->_y_px;
+   emitter._bounding_box.size.x = data._tmx_object->_width_px;
+   emitter._bounding_box.size.y = data._tmx_object->_height_px;
 
    if (data._tmx_object->_properties)
    {
@@ -268,7 +268,7 @@ void WaterSurface::merge()
       if (it != surfaces.end())
       {
          auto* surface = *it;
-         emitter._x_offset_to_parent_px = emitter._bounding_box.left - surface->_bounding_box.left;
+         emitter._x_offset_to_parent_px = emitter._bounding_box.position.x - surface->_bounding_box.position.x;
          surface->_emitters.push_back(emitter);
       }
       else
@@ -291,18 +291,18 @@ void WaterSurface::updateVertices(int32_t start_index)
    auto y_offset = 0.0f;
    if (!_pixel_ratio.has_value())
    {
-      x_offset = _bounding_box.left;
-      y_offset = _bounding_box.top;
+      x_offset = _bounding_box.position.x;
+      y_offset = _bounding_box.position.y;
    }
    else
    {
-      y_offset = _bounding_box.height / _pixel_ratio.value();
+      y_offset = _bounding_box.size.y / _pixel_ratio.value();
    }
 
    for (const auto& segment : _segments)
    {
       const auto x = x_offset + static_cast<float>(width_index * _segment_width);
-      const auto y = (index & 1) ? (y_offset + _bounding_box.height) : (y_offset + segment._height * segment._clamp_scale);
+      const auto y = (index & 1) ? (y_offset + _bounding_box.size.y) : (y_offset + segment._height * segment._clamp_scale);
 
       _vertices[index].position.x = x;
       _vertices[index].position.y = y;
@@ -323,17 +323,17 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
 
    surfaces.push_back(this);
 
-   _bounding_box.left = data._tmx_object->_x_px;
-   _bounding_box.top = data._tmx_object->_y_px;
-   _bounding_box.width = data._tmx_object->_width_px;
-   _bounding_box.height = data._tmx_object->_height_px;
+   _bounding_box.position.x = data._tmx_object->_x_px;
+   _bounding_box.position.y = data._tmx_object->_y_px;
+   _bounding_box.size.x = data._tmx_object->_width_px;
+   _bounding_box.size.y = data._tmx_object->_height_px;
 
-   _chunks.emplace_back(_bounding_box.left, _bounding_box.top);
-   _chunks.emplace_back(_bounding_box.left, _bounding_box.top + _bounding_box.height);
-   _chunks.emplace_back(_bounding_box.left + _bounding_box.width, _bounding_box.top + _bounding_box.height);
-   _chunks.emplace_back(_bounding_box.left + _bounding_box.width, _bounding_box.top);
+   _chunks.emplace_back(_bounding_box.position.x, _bounding_box.position.y);
+   _chunks.emplace_back(_bounding_box.position.x, _bounding_box.position.y + _bounding_box.size.y);
+   _chunks.emplace_back(_bounding_box.position.x + _bounding_box.size.x, _bounding_box.position.y + _bounding_box.size.y);
+   _chunks.emplace_back(_bounding_box.position.x + _bounding_box.size.x, _bounding_box.position.y);
 
-   auto segment_count = static_cast<int32_t>(_bounding_box.width / 2);
+   auto segment_count = static_cast<int32_t>(_bounding_box.size.x / 2);
    std::optional<int32_t> clamp_segment_count;
 
    std::string gradient_texture = "data/sprites/water_surface_gradient.png";
@@ -352,9 +352,9 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
       {
          segment_count = static_cast<int32_t>(segment_it->second->_value_int.value());
 
-         if (segment_count > _bounding_box.width)
+         if (segment_count > _bounding_box.size.x)
          {
-            Log::Error() << "segment_count " << segment_count << " exceeds bounding box width " << _bounding_box.width;
+            Log::Error() << "segment_count " << segment_count << " exceeds bounding box width " << _bounding_box.size.x;
          }
       }
 
@@ -443,11 +443,11 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
    _vertices.resize(segment_count * 2);
 
    // segment size - 1 has been chosen here to cover the entire range of the bounding box
-   _segment_width = (_bounding_box.width / (_segments.size() - 1)) / _pixel_ratio.value_or(1.0f);
+   _segment_width = (_bounding_box.size.x / (_segments.size() - 1)) / _pixel_ratio.value_or(1.0f);
    updateVertices(0);
    updateVertices(1);
 
-   const auto box_width = static_cast<int32_t>(_bounding_box.width);
+   const auto box_width = static_cast<int32_t>(_bounding_box.size.x);
    if (box_width % segment_count != 0)
    {
       Log::Error() << "box with width " << box_width << "px cannot be divided into " << segment_count << " segments";
@@ -455,15 +455,15 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
 
    _gradient = TexturePool::getInstance().get(gradient_texture);
 
-   Log::Info() << "deserialize water surface at: " << _bounding_box.left << ", " << _bounding_box.top << " w: " << _bounding_box.width
-               << ", h:" << _bounding_box.height;
+   Log::Info() << "deserialize water surface at: " << _bounding_box.position.x << ", " << _bounding_box.position.y << " w: " << _bounding_box.size.x
+               << ", h:" << _bounding_box.size.y;
 
    // if a pixel ratio is configured, we gotta render to texture
    if (_pixel_ratio.has_value())
    {
       if (!_render_texture.create(
-             static_cast<int32_t>(_bounding_box.width / _pixel_ratio.value()),
-             static_cast<int32_t>((_bounding_box.height * 2.0f) / _pixel_ratio.value())
+             static_cast<int32_t>(_bounding_box.size.x / _pixel_ratio.value()),
+             static_cast<int32_t>((_bounding_box.size.y * 2.0f) / _pixel_ratio.value())
           ))
       {
          Log::Error() << "could not create render texture";
@@ -471,7 +471,7 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
 
       _render_texture.setSmooth(false);
       render_texture_sprite.setTexture(_render_texture.getTexture());
-      render_texture_sprite.setPosition({_bounding_box.left, _bounding_box.top - _bounding_box.height});
+      render_texture_sprite.setPosition({_bounding_box.position.x, _bounding_box.position.y - _bounding_box.size.y});
       render_texture_sprite.scale(_pixel_ratio.value(), _pixel_ratio.value());
    }
 }
@@ -495,8 +495,8 @@ void WaterSurface::updateEmitters(float elapsed_s)
             const auto left_with_offset_px = emitter._x_offset_to_parent_px + left_px;
             const auto right_with_offset_px = emitter._x_offset_to_parent_px + left_px + emitter._width_px;
 
-            const auto left_normalized = left_with_offset_px / _bounding_box.width;
-            const auto right_normalized = right_with_offset_px / _bounding_box.width;
+            const auto left_normalized = left_with_offset_px / _bounding_box.size.x;
+            const auto right_normalized = right_with_offset_px / _bounding_box.size.x;
 
             const auto left_index = static_cast<int32_t>(left_normalized * _segments.size());
             const auto right_index = static_cast<int32_t>(right_normalized * _segments.size());

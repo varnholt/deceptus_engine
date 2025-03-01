@@ -414,10 +414,10 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
       moving_platform->_body->SetTransform(platform_pos_m, 0.0f);
 
       // set up bounding rect
-      moving_platform->_rect.left = platform_x_min_m * PPM;
-      moving_platform->_rect.top = platform_y_min_m * PPM;
-      moving_platform->_rect.width = moving_platform->_element_count * PIXELS_PER_TILE;
-      moving_platform->_rect.height = (platform_y_max_m - platform_y_min_m) * PPM;
+      moving_platform->_rect.position.x = platform_x_min_m * PPM;
+      moving_platform->_rect.position.y = platform_y_min_m * PPM;
+      moving_platform->_rect.size.x = moving_platform->_element_count * PIXELS_PER_TILE;
+      moving_platform->_rect.size.y = (platform_y_max_m - platform_y_min_m) * PPM;
       moving_platform->addChunks(moving_platform->_rect);
    }
 

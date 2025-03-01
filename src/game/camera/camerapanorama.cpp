@@ -178,7 +178,13 @@ void CameraPanorama::update()
 
 void CameraPanorama::processKeyPressedEvents(const sf::Event& event)
 {
-   switch (event.key.code)
+   const auto* key_event = event.getIf<sf::Event::KeyPressed>();
+   if (key_event == nullptr)
+   {
+      return;
+   }
+
+   switch (key_event->code)
    {
       case sf::Keyboard::Key::LShift:
       {
@@ -215,7 +221,13 @@ void CameraPanorama::processKeyPressedEvents(const sf::Event& event)
 
 void CameraPanorama::processKeyReleasedEvents(const sf::Event& event)
 {
-   switch (event.key.code)
+   const auto* key_event = event.getIf<sf::Event::KeyPressed>();
+   if (key_event == nullptr)
+   {
+      return;
+   }
+
+   switch (key_event->code)
    {
       case sf::Keyboard::Key::LShift:
       {

@@ -130,7 +130,7 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    // that y offset is a litte dodgy, could have something cleaner in the future
    constexpr auto player_placement_offset_px = -10;
    checkpoint->_spawn_point =
-      sf::Vector2f{rect.left + rect.width / 2, rect.top + rect.height - PIXELS_PER_TILE + player_placement_offset_px};
+      sf::Vector2f{rect.position.x + rect.size.x / 2, rect.position.y + rect.size.y - PIXELS_PER_TILE + player_placement_offset_px};
 
    return checkpoint;
 }

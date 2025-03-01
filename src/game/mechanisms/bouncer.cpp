@@ -45,10 +45,10 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
    const auto width = data._tmx_object->_width_px;
    const auto height = data._tmx_object->_height_px;
 
-   _rect.left = x;
-   _rect.top = y;
-   _rect.width = width;
-   _rect.height = height;
+   _rect.position.x = x;
+   _rect.position.y = y;
+   _rect.size.x = width;
+   _rect.size.y = height;
 
    setType(ObjectTypeBouncer);
    _activation_time = GlobalClock::getInstance().getElapsedTime();
@@ -106,7 +106,7 @@ void Bouncer::updatePlayerAtBouncer()
 {
    auto* player = Player::getCurrent();
    auto rect = player->getPixelRectFloat();
-   rect.height *= 3;
+   rect.size.y *= 3;
 
    _player_at_bouncer = rect.intersects(_rect);
 }

@@ -508,10 +508,10 @@ void Door::setup(const GameDeserializeData& data)
    // +///+///+///+///+
    //
 
-   _player_at_door_rect.left = x_px - PIXELS_PER_TILE;
-   _player_at_door_rect.top = y_px - 0.5f * PIXELS_PER_TILE;
-   _player_at_door_rect.width = width_px + 2 * PIXELS_PER_TILE;
-   _player_at_door_rect.height = height_px + PIXELS_PER_TILE;
+   _player_at_door_rect.position.x = x_px - PIXELS_PER_TILE;
+   _player_at_door_rect.position.y = y_px - 0.5f * PIXELS_PER_TILE;
+   _player_at_door_rect.size.x = width_px + 2 * PIXELS_PER_TILE;
+   _player_at_door_rect.size.y = height_px + PIXELS_PER_TILE;
 
    setupBody(data._world);
 }

@@ -18,7 +18,7 @@ void TextLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    if (_mode == Mode::Bitmap)
    {
-      _bitmap_font.draw(target, _bitmap_coords, static_cast<int32_t>(_rect.left), static_cast<int32_t>(_rect.top));
+      _bitmap_font.draw(target, _bitmap_coords, static_cast<int32_t>(_rect.position.x), static_cast<int32_t>(_rect.position.y));
    }
    else if (_mode == Mode::TrueType)
    {

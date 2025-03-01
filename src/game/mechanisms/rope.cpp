@@ -63,24 +63,24 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
       const auto v1 = sf::Vertex(
          sf::Vector2f(q1.x * PPM, q1.y * PPM),
-         sf::Vector2f(static_cast<float>(_texture_rect_px.left), static_cast<float>(_texture_rect_px.top + u0 * _texture_rect_px.height))
+         sf::Vector2f(static_cast<float>(_texture_rect_px.position.x), static_cast<float>(_texture_rect_px.position.y + u0 * _texture_rect_px.size.y))
       );
       const auto v2 = sf::Vertex(
          sf::Vector2f(q2.x * PPM, q2.y * PPM),
-         sf::Vector2f(static_cast<float>(_texture_rect_px.left), static_cast<float>(_texture_rect_px.top + u1 * _texture_rect_px.height))
+         sf::Vector2f(static_cast<float>(_texture_rect_px.position.x), static_cast<float>(_texture_rect_px.position.y + u1 * _texture_rect_px.size.y))
       );
       const auto v3 = sf::Vertex(
          sf::Vector2f(q3.x * PPM, q3.y * PPM),
          sf::Vector2f(
-            static_cast<float>(_texture_rect_px.left + _texture_rect_px.width),
-            static_cast<float>(_texture_rect_px.top + u1 * _texture_rect_px.height)
+            static_cast<float>(_texture_rect_px.position.x + _texture_rect_px.size.x),
+            static_cast<float>(_texture_rect_px.position.y + u1 * _texture_rect_px.size.y)
          )
       );
       const auto v4 = sf::Vertex(
          sf::Vector2f(q4.x * PPM, q4.y * PPM),
          sf::Vector2f(
-            static_cast<float>(_texture_rect_px.left + _texture_rect_px.width),
-            static_cast<float>(_texture_rect_px.top + u0 * _texture_rect_px.height)
+            static_cast<float>(_texture_rect_px.position.x + _texture_rect_px.size.x),
+            static_cast<float>(_texture_rect_px.position.y + u0 * _texture_rect_px.size.y)
          )
       );
 
@@ -160,19 +160,19 @@ void Rope::setup(const GameDeserializeData& data)
    // rope 1
    // 971,  73 .. 973,  73
    // 971, 211 .. 973, 211
-   _texture_rect_px.left = 971;
-   _texture_rect_px.top = 73;
-   _texture_rect_px.width = 3;
-   _texture_rect_px.height = 138;
+   _texture_rect_px.position.x = 971;
+   _texture_rect_px.position.y = 73;
+   _texture_rect_px.size.x = 3;
+   _texture_rect_px.size.y = 138;
 
    // rope 2
    // 1019,  72 .. 1021,  72
    // 1019, 153 .. 1021, 153
    //
-   // _texture_rect_px.left = 1019;
-   // _texture_rect_px.top = 72;
-   // _texture_rect_px.width = 3;
-   // _texture_rect_px.height = 81;
+   // _texture_rect_px.position.x = 1019;
+   // _texture_rect_px.position.y = 72;
+   // _texture_rect_px.size.x = 3;
+   // _texture_rect_px.size.y = 81;
 
    // read properties
    const auto push_interval_it = data._tmx_object->_properties->_map.find("push_interval_s");

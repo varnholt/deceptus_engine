@@ -199,10 +199,10 @@ std::string Gun::getName() const
 void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, const sf::Rect<int32_t>& texture_rect_px)
 {
    sf::Rect<int32_t> tmp_rect_px = texture_rect_px;
-   if (tmp_rect_px.width == 0)
+   if (tmp_rect_px.size.x == 0)
    {
-      tmp_rect_px.width = texture->getSize().x;
-      tmp_rect_px.height = texture->getSize().y;
+      tmp_rect_px.size.x = texture->getSize().x;
+      tmp_rect_px.size.y = texture->getSize().y;
    }
 
    _projectile_reference_animation._animation.setTextureRect(tmp_rect_px);
@@ -219,8 +219,8 @@ void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, co
    }
    else if (_shape->GetType() == b2Shape::e_circle)
    {
-      const auto origin_x_px = static_cast<float>(tmp_rect_px.width / 2);
-      const auto origin_y_px = static_cast<float>(tmp_rect_px.height / 2);
+      const auto origin_x_px = static_cast<float>(tmp_rect_px.size.x / 2);
+      const auto origin_y_px = static_cast<float>(tmp_rect_px.size.y / 2);
       _projectile_reference_animation._animation.setOrigin(origin_x_px, origin_y_px);
    }
 }

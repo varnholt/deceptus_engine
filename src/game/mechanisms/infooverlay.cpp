@@ -156,28 +156,28 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
       const auto texture_rect_x = data._tmx_object->_properties->_map.find("texture_rect_x");
       if (texture_rect_x != data._tmx_object->_properties->_map.end())
       {
-         rect.left = texture_rect_x->second->_value_int.value();
+         rect.position.x = texture_rect_x->second->_value_int.value();
       }
 
       const auto texture_rect_y = data._tmx_object->_properties->_map.find("texture_rect_y");
       if (texture_rect_y != data._tmx_object->_properties->_map.end())
       {
-         rect.top = texture_rect_y->second->_value_int.value();
+         rect.position.y = texture_rect_y->second->_value_int.value();
       }
 
       const auto texture_rect_width = data._tmx_object->_properties->_map.find("texture_rect_width");
       if (texture_rect_width != data._tmx_object->_properties->_map.end())
       {
-         rect.width = texture_rect_width->second->_value_int.value();
+         rect.size.x = texture_rect_width->second->_value_int.value();
       }
 
       const auto texture_rect_height = data._tmx_object->_properties->_map.find("texture_rect_height");
       if (texture_rect_height != data._tmx_object->_properties->_map.end())
       {
-         rect.height = texture_rect_height->second->_value_int.value();
+         rect.size.y = texture_rect_height->second->_value_int.value();
       }
 
-      if (rect.width > 0 && rect.height > 0)
+      if (rect.size.x > 0 && rect.size.y > 0)
       {
          instance->_sprite.setTextureRect(rect);
       }
