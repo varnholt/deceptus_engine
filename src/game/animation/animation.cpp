@@ -208,7 +208,7 @@ void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
    states.transform *= getTransform();
    states.texture = _color_texture.get();
 
-   target.draw(_vertices, 4, sf::Quads, states);
+   target.draw(_vertices, 6, sf::PrimitiveType::Triangles, states);
 
    for (const auto& child : _children)
    {
@@ -226,12 +226,12 @@ void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Rend
    states.transform *= getTransform();
 
    states.texture = _color_texture.get();
-   color.draw(_vertices, 4, sf::Quads, states);
+   color.draw(_vertices, 6, sf::PrimitiveType::Triangles, states);
 
    if (_normal_texture)
    {
       states.texture = _normal_texture.get();
-      normal.draw(_vertices, 4, sf::Quads, states);
+      normal.draw(_vertices, 6, sf::PrimitiveType::Triangles, states);
    }
 }
 
@@ -267,20 +267,36 @@ void Animation::updateVertices(bool reset_time)
 {
    const auto& rect_px = _frames[static_cast<size_t>(_current_frame)];
 
-   const auto l = static_cast<float>(rect_px.position.x) + 0.0001f;
-   const auto r = l + static_cast<float>(rect_px.size.x);
-   const auto t = static_cast<float>(rect_px.position.y);
-   const auto b = t + static_cast<float>(rect_px.size.y);
+   const auto left = static_cast<float>(rect_px.position.x) + 0.0001f;
+   const auto right = left + static_cast<float>(rect_px.size.x);
+   const auto top = static_cast<float>(rect_px.position.y);
+   const auto bottom = top + static_cast<float>(rect_px.size.y);
 
-   _vertices[0].position = sf::Vector2f(0.f, 0.f);
-   _vertices[1].position = sf::Vector2f(0.f, static_cast<float>(rect_px.size.y));
-   _vertices[2].position = sf::Vector2f(static_cast<float>(rect_px.size.x), static_cast<float>(rect_px.size.y));
-   _vertices[3].position = sf::Vector2f(static_cast<float>(rect_px.size.x), 0.f);
+   sf::Vector2f top_left = {0.f, 0.f};
+   sf::Vector2f bottom_left = {0.f, static_cast<float>(rect_px.size.y)};
+   sf::Vector2f bottom_right = {static_cast<float>(rect_px.size.x), static_cast<float>(rect_px.size.y)};
+   sf::Vector2f top_right = {static_cast<float>(rect_px.size.x), 0.f};
 
-   _vertices[0].texCoords = sf::Vector2f(l, t);
-   _vertices[1].texCoords = sf::Vector2f(l, b);
-   _vertices[2].texCoords = sf::Vector2f(r, b);
-   _vertices[3].texCoords = sf::Vector2f(r, t);
+   _vertices[0] = sf::Vertex(top_left, sf::Color::White);
+   _vertices[1] = sf::Vertex(bottom_left, sf::Color::White);
+   _vertices[2] = sf::Vertex(bottom_right, sf::Color::White);
+
+   _vertices[3] = sf::Vertex(top_left, sf::Color::White);
+   _vertices[4] = sf::Vertex(bottom_right, sf::Color::White);
+   _vertices[5] = sf::Vertex(top_right, sf::Color::White);
+
+   sf::Vector2f tex_top_left = {left, top};
+   sf::Vector2f tex_bottom_left = {left, bottom};
+   sf::Vector2f tex_bottom_right = {right, bottom};
+   sf::Vector2f tex_top_right = {right, top};
+
+   _vertices[0].texCoords = tex_top_left;
+   _vertices[1].texCoords = tex_bottom_left;
+   _vertices[2].texCoords = tex_bottom_right;
+
+   _vertices[3].texCoords = tex_top_left;
+   _vertices[4].texCoords = tex_bottom_right;
+   _vertices[5].texCoords = tex_top_right;
 
    if (reset_time)
    {

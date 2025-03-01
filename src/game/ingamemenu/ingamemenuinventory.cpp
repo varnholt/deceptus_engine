@@ -255,17 +255,16 @@ void InGameMenuInventory::loadInventoryItems()
       [this](const auto& image)
       {
          // store sprites
-         sf::Sprite sprite;
-         sprite.setTexture(*_inventory_texture);
-         sprite.setTextureRect({image._x_px, image._y_px, icon_width, icon_height});
-         _sprites[image._name]._sprite = sprite;
+         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*_inventory_texture);
+         sprite->setTextureRect(sf::IntRect({image._x_px, image._y_px}, {icon_width, icon_height}));
+         _sprites[image._name]._sprite = std::move(sprite);
 
          // store texts
          _texts[image._name]._title = image._title;
          _texts[image._name]._description = image._description;
 
          // wrap text
-         sf::FloatRect rect{0.0f, 0.0f, description_rect_width, description_rect_height};
+         sf::FloatRect rect{{0.0f, 0.0f}, {description_rect_width, description_rect_height}};
          const auto wrapped_text = wrapTextWithinRect(image._description, rect, _font_description, inventory_text_font_size);
          _texts[image._name]._description_wrapped = wrapped_text;
       }
@@ -444,7 +443,7 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
 
    for (const auto& item_key : inventory._items)
    {
-      window.draw(_sprites[item_key]._sprite, states);
+      window.draw(*_sprites[item_key]._sprite, states);
    }
 
    int32_t index = 0;
@@ -456,7 +455,7 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
          continue;
       }
 
-      window.draw(_slot_sprites[index]._sprite, states);
+      window.draw(*_slot_sprites[index]._sprite, states);
       index++;
    }
 }
@@ -532,7 +531,7 @@ void InGameMenuInventory::updateInventoryItems()
       const auto x_px = static_cast<float>(offset_x_px + (index % count_columns) * frame_width);
       const auto y_px = static_cast<float>(offset_y_px + (index / count_columns) * frame_height);
 
-      _sprites[item_key]._sprite.setPosition(x_px, y_px);
+      _sprites[item_key]._sprite->setPosition(x_px, y_px);
 
       // also determine the indices for the selected slots
       if (item_key == inventory._slots[0])
@@ -561,13 +560,13 @@ void InGameMenuInventory::updateInventoryItems()
       const auto& reference_sprite = _sprites[slot]._sprite;
 
       auto& sprite = _slot_sprites[index];
-      sprite._sprite.setTextureRect(reference_sprite.getTextureRect());
-      sprite._sprite.setTexture(*reference_sprite.getTexture());
+      sprite._sprite->setTextureRect(reference_sprite->getTextureRect());
+      sprite._sprite->setTexture(reference_sprite->getTexture());
 
       constexpr auto frame_width_slots = 47;
       const auto pos_x_px = 61 + _panel_left_offset_px.x + move_offset.value_or(0.0f) + index * frame_width_slots;
       constexpr auto pos_y_px = 110;
-      sprite._sprite.setPosition(pos_x_px, pos_y_px);
+      sprite._sprite->setPosition({pos_x_px, pos_y_px});
       index++;
    };
 
@@ -587,7 +586,7 @@ void InGameMenuInventory::updateInventoryItems()
       constexpr auto text_title_width_px = 115;
 
       const auto& text = _texts[selected_item.value()];
-      const sf::FloatRect rect{text_title_x_offset_px, 0, text_title_width_px, 16};
+      const sf::FloatRect rect{{text_title_x_offset_px, 0}, {text_title_width_px, 16}};
       const auto title_x_px = getHorizontallyCenteredX(_text_title, rect);
       _text_description.setString(text._description_wrapped);
       _text_description.setPosition(

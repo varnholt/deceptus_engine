@@ -181,13 +181,8 @@ void InGameMenuPage::load()
       tmp->_visible = true;
       tmp->_name = layer.getName();
 
-      auto texture = std::make_shared<sf::Texture>();
+      auto texture = std::make_shared<sf::Texture>(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
       auto sprite = std::make_shared<sf::Sprite>();
-
-      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
-      {
-         Log::Fatal() << "failed to create texture: " << layer.getName();
-      }
 
       texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 

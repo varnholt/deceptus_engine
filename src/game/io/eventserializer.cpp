@@ -15,6 +15,11 @@ using HighResDuration = std::chrono::high_resolution_clock::duration;
 using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
 using HighResClockRep = std::chrono::high_resolution_clock::rep;
 using HighResClock = std::chrono::high_resolution_clock;
+
+constexpr uint8_t EVENT_KEY_PRESSED = 1;
+constexpr uint8_t EVENT_KEY_RELEASED = 2;
+constexpr uint8_t EVENT_UNKNOWN = 255;
+
 }  // namespace
 
 template <typename R>
@@ -114,58 +119,71 @@ void EventSerializer::clear()
 
 void writeEvent(std::ostream& stream, const sf::Event& event)
 {
-   switch (event.type)
-   {
-      case sf::Event::KeyPressed:
-      case sf::Event::KeyReleased:
+   std::visit(
+      [&](auto&& e)
       {
-         const auto key_event = event.key;
+         using event_t = std::decay_t<decltype(e)>;
 
-         const uint8_t flags = (key_event.alt << 3) | (key_event.control << 2) | (key_event.shift << 1) | (key_event.system << 0);
+         constexpr uint8_t event_id = []
+         {
+            if constexpr (std::is_same_v<event_t, sf::Event::KeyPressed>)
+               return EVENT_KEY_PRESSED;
+            if constexpr (std::is_same_v<event_t, sf::Event::KeyReleased>)
+               return EVENT_KEY_RELEASED;
+            return EVENT_UNKNOWN;
+         }();
 
-         writeUInt8(stream, static_cast<uint8_t>(event.type));
-         writeUInt8(stream, static_cast<uint8_t>(key_event.code));
-         writeUInt8(stream, flags);
-         break;
-      }
-      default:
-      {
-         Log::Warning() << "writing unhandled event";
-         break;
-      }
-   }
+         write_uint8(stream, event_id);  // Store event type as uint8_t
+
+         if constexpr (event_id == EVENT_KEY_PRESSED || event_id == EVENT_KEY_RELEASED)  // Key events
+         {
+            write_uint8(stream, static_cast<uint8_t>(e.code));
+            uint8_t flags = (e.alt << 3) | (e.control << 2) | (e.shift << 1) | (e.system << 0);
+            write_uint8(stream, flags);
+         }
+         else
+         {
+            Log::Warning() << "writing unhandled event";
+         }
+      },
+      event
+   );
 }
 
 sf::Event readEvent(std::istream& stream)
 {
-   sf::Event event;
+   uint8_t event_id = readUint8(stream);
 
-   event.type = static_cast<sf::Event::EventType>(readUint8(stream));
-
-   switch (event.type)
+   switch (event_id)
    {
-      case sf::Event::KeyPressed:
-      case sf::Event::KeyReleased:
+      case EVENT_KEY_PRESSED:
       {
-         auto key_code = readUint8(stream);
-         auto flags = readUint8(stream);
-
-         event.key.code = static_cast<sf::Keyboard::Key>(key_code);
-         event.key.alt = (flags & 0x08);
-         event.key.control = (flags & 0x04);
-         event.key.shift = (flags & 0x02);
-         event.key.system = (flags & 0x01);
-         break;
+         sf::Event::KeyPressed key_event;
+         key_event.code = static_cast<sf::Keyboard::Key>(readUint8(stream));
+         uint8_t flags = readUint8(stream);
+         key_event.alt = (flags & 0x08);
+         key_event.control = (flags & 0x04);
+         key_event.shift = (flags & 0x02);
+         key_event.system = (flags & 0x01);
+         return key_event;
       }
-
+      case EVENT_KEY_RELEASED:
+      {
+         sf::Event::KeyReleased key_event;
+         key_event.code = static_cast<sf::Keyboard::Key>(readUint8(stream));
+         uint8_t flags = readUint8(stream);
+         key_event.alt = (flags & 0x08);
+         key_event.control = (flags & 0x04);
+         key_event.shift = (flags & 0x02);
+         key_event.system = (flags & 0x01);
+         return key_event;
+      }
       default:
       {
          Log::Warning() << "reading unhandled event";
-         break;
+         return sf::Event{};  // Return empty event
       }
    }
-
-   return event;
 }
 
 void EventSerializer::serialize()

@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <cstdint>
+#include <map>
 #include <memory>
 
 /*! \brief Implements font rendering based on a bitmap.

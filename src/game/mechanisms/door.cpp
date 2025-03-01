@@ -76,7 +76,10 @@ void Door::updateBars(const sf::Time& dt)
    _door_quad[0].texCoords = sf::Vector2f(left, top);
    _door_quad[1].texCoords = sf::Vector2f(left, bottom);
    _door_quad[2].texCoords = sf::Vector2f(right, bottom);
-   _door_quad[3].texCoords = sf::Vector2f(right, top);
+
+   _door_quad[3].texCoords = sf::Vector2f(left, top);
+   _door_quad[4].texCoords = sf::Vector2f(right, bottom);
+   _door_quad[5].texCoords = sf::Vector2f(right, top);
 
    constexpr auto open_speed = 50.0f;
    constexpr auto close_speed = 200.0f;
@@ -398,8 +401,8 @@ void Door::setup(const GameDeserializeData& data)
       {
          const auto texture_path = texture_it->second->_value_string.value();
          _texture = TexturePool::getInstance().get(texture_path);
-         _sprite.setTexture(*_texture);
-         _sprite.setPosition(x_px, y_px);
+         _sprite = std::make_unique<sf::Sprite>(_texture);
+         _sprite->setPosition({x_px, y_px});
       }
 
       const auto sample_open_it = map.find("sample_open");
@@ -482,14 +485,14 @@ void Door::setup(const GameDeserializeData& data)
       _door_quad[3].position.x = x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE;
       _door_quad[3].position.y = y_px;
 
-      _pixel_rect = sf::FloatRect{x_px, y_px, PIXELS_PER_TILE, PIXELS_PER_TILE * 3};
+      _pixel_rect = sf::FloatRect({x_px, y_px}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3});
    }
    else
    {
       // the first frame of the open animation should be the texture rect used for drawing
       if (_animation_open)
       {
-         _sprite.setTextureRect(_animation_open->_frames.at(0));
+         _sprite->setTextureRect(_animation_open->_frames.at(0));
       }
    }
 

@@ -1,18 +1,24 @@
-#ifndef KEYBOARDEVENTDISTRIBUTOR_H
-#define KEYBOARDEVENTDISTRIBUTOR_H
+#ifndef KEYBOARD_EVENT_DISTRIBUTOR_H
+#define KEYBOARD_EVENT_DISTRIBUTOR_H
 
 #include <SFML/Graphics.hpp>
 #include <functional>
+#include <typeindex>
+#include <unordered_map>
+#include <vector>
 
-namespace EventDistributor
+namespace event_distributor
 {
-using EventCallbackType = void(const sf::Event&);
-using EventCallback = std::function<EventCallbackType>;
-using CallbackWrapper = std::reference_wrapper<const EventCallback>;
+template <typename EventT>
+using EventCallback = std::function<void(const EventT&)>;
 
 void event(const sf::Event& event);
-void registerEvent(sf::Event::EventType event_type, const EventCallback& callback);
-void unregisterEvent(sf::Event::EventType event_type, const EventCallback& callback);
-};  // namespace EventDistributor
 
-#endif  // KEYBOARDEVENTDISTRIBUTOR_H
+template <typename EventT>
+void register_event(const EventCallback<EventT>& callback);
+
+template <typename EventT>
+void unregister_event(const EventCallback<EventT>& callback);
+};  // namespace event_distributor
+
+#endif  // KEYBOARD_EVENT_DISTRIBUTOR_H

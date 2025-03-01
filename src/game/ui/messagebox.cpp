@@ -254,7 +254,7 @@ void MessageBox::initializeLayers()
          Log::Fatal() << "failed to create texture: " << layer.getName();
       }
 
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
+      texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
       sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));

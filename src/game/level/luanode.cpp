@@ -1795,7 +1795,7 @@ void LuaNode::initialize()
    setupLua();
    setupBody();
 
-   if (!_flash_shader.loadFromFile("data/shaders/flash.frag", sf::Shader::Fragment))
+   if (!_flash_shader.loadFromFile("data/shaders/flash.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading flash shader";
    }
