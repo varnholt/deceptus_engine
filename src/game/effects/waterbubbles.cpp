@@ -62,8 +62,8 @@ void WaterBubbles::spawnBubble(const sf::Vector2f pos_px, const sf::Vector2f vel
 
    auto bubble = std::make_shared<Bubble>(pos_px, vel_px, _texture);
 
-   bubble->_sprite.setTextureRect(sprite_rects[std::rand() % sprite_rects.size()]);
-   bubble->_sprite.setOrigin({12.0f, 12.0f});
+   bubble->_sprite->setTextureRect(sprite_rects[std::rand() % sprite_rects.size()]);
+   bubble->_sprite->setOrigin({12.0f, 12.0f});
    bubble->_delay_s = frand(0.0f, 0.3f);
 
    _bubbles.push_back(bubble);

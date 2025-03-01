@@ -9,7 +9,7 @@ using event_variant = sf::Event;
 std::unordered_map<std::type_index, std::vector<std::function<void(const sf::Event&)>>> callback_mapping;
 }  // namespace
 
-void event_distributor::event(const sf::Event& event)
+void EventDistributor::event(const sf::Event& event)
 {
    std::visit(
       [](auto&& e)
@@ -31,14 +31,14 @@ void event_distributor::event(const sf::Event& event)
 }
 
 template <typename EventT>
-void event_distributor::register_event(const EventCallback<EventT>& callback)
+void EventDistributor::registerEvent(const EventCallback<EventT>& callback)
 {
    auto type_id = std::type_index(typeid(EventT));
    callback_mapping[type_id].emplace_back(callback);
 }
 
 template <typename EventT>
-void event_distributor::unregister_event(const EventCallback<EventT>& callback)
+void EventDistributor::unregisterEvent(const EventCallback<EventT>& callback)
 {
    auto type_id = std::type_index(typeid(EventT));
 
@@ -63,10 +63,10 @@ void event_distributor::unregister_event(const EventCallback<EventT>& callback)
    }
 }
 
-template void event_distributor::register_event<sf::Event::KeyPressed>(const EventCallback<sf::Event::KeyPressed>&);
-template void event_distributor::register_event<sf::Event::MouseButtonPressed>(const EventCallback<sf::Event::MouseButtonPressed>&);
-template void event_distributor::register_event<sf::Event::MouseWheelScrolled>(const EventCallback<sf::Event::MouseWheelScrolled>&);
+template void EventDistributor::registerEvent<sf::Event::KeyPressed>(const EventCallback<sf::Event::KeyPressed>&);
+template void EventDistributor::registerEvent<sf::Event::MouseButtonPressed>(const EventCallback<sf::Event::MouseButtonPressed>&);
+template void EventDistributor::registerEvent<sf::Event::MouseWheelScrolled>(const EventCallback<sf::Event::MouseWheelScrolled>&);
 
-template void event_distributor::unregister_event<sf::Event::KeyPressed>(const EventCallback<sf::Event::KeyPressed>&);
-template void event_distributor::unregister_event<sf::Event::MouseButtonPressed>(const EventCallback<sf::Event::MouseButtonPressed>&);
-template void event_distributor::unregister_event<sf::Event::MouseWheelScrolled>(const EventCallback<sf::Event::MouseWheelScrolled>&);
+template void EventDistributor::unregisterEvent<sf::Event::KeyPressed>(const EventCallback<sf::Event::KeyPressed>&);
+template void EventDistributor::unregisterEvent<sf::Event::MouseButtonPressed>(const EventCallback<sf::Event::MouseButtonPressed>&);
+template void EventDistributor::unregisterEvent<sf::Event::MouseWheelScrolled>(const EventCallback<sf::Event::MouseWheelScrolled>&);

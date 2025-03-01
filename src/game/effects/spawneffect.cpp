@@ -115,7 +115,7 @@ SpawnEffect::ParticleEffect::ParticleEffect(
       particle._particle_velocity_min = particle_velocity_min;
       particle._particle_velocity_max = particle_velocity_max;
       particle._sprite.setTexture(*_texture);
-      particle._sprite.setOrigin(5, 5);
+      particle._sprite.setOrigin({5, 5});
       particle.spawn();
       particle.setupPosition(frand(0.0f, 1.0f));  // at the start spawn from everywhere
 

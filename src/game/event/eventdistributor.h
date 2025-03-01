@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace event_distributor
+namespace EventDistributor
 {
 template <typename EventT>
 using EventCallback = std::function<void(const EventT&)>;
@@ -15,10 +15,10 @@ using EventCallback = std::function<void(const EventT&)>;
 void event(const sf::Event& event);
 
 template <typename EventT>
-void register_event(const EventCallback<EventT>& callback);
+void registerEvent(const EventCallback<EventT>& callback);
 
 template <typename EventT>
-void unregister_event(const EventCallback<EventT>& callback);
+void unregisterEvent(const EventCallback<EventT>& callback);
 };  // namespace event_distributor
 
 #endif  // KEYBOARD_EVENT_DISTRIBUTOR_H
