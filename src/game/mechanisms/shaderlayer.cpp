@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 
 ShaderLayer::ShaderLayer(GameNode* parent) : GameNode(parent)
 {
@@ -90,13 +91,21 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
       auto vertex_shader_it = data._tmx_object->_properties->_map.find("vertex_shader");
       if (vertex_shader_it != data._tmx_object->_properties->_map.end())
       {
-         instance->_shader.loadFromFile(vertex_shader_it->second->_value_string.value(), sf::Shader::Vertex);
+         const auto vert_file = vertex_shader_it->second->_value_string.value();
+         if (!instance->_shader.loadFromFile(vert_file, sf::Shader::Vertex))
+         {
+            Log::Error() << "error compiling " << vert_file;
+         }
       }
 
       auto fragment_shader_it = data._tmx_object->_properties->_map.find("fragment_shader");
       if (fragment_shader_it != data._tmx_object->_properties->_map.end())
       {
-         instance->_shader.loadFromFile(fragment_shader_it->second->_value_string.value(), sf::Shader::Fragment);
+         const auto frag_file = fragment_shader_it->second->_value_string.value();
+         if (!instance->_shader.loadFromFile(frag_file, sf::Shader::Fragment))
+         {
+            Log::Error() << "error compiling " << frag_file;
+         }
       }
 
       auto texture_id = data._tmx_object->_properties->_map.find("texture");
@@ -104,6 +113,10 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
       {
          instance->_texture = TexturePool::getInstance().get(texture_id->second->_value_string.value());
          instance->_texture->setRepeated(true);
+
+         const auto& map = data._tmx_object->_properties->_map;
+         const auto smooth_texture = ValueReader::readValue<bool>("smooth_texture", map).value_or(false);
+         instance->_texture->setSmooth(smooth_texture);
       }
    }
 
