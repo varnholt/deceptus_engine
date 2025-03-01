@@ -72,7 +72,7 @@ void LogUi::processEvents()
    {
       ImGui::SFML::ProcessEvent(*_render_window.get(), event);
 
-      if (event.type == sf::Event::Closed)
+      if (event->is<sf::Event::Closed>())
       {
          _render_window->close();
       }

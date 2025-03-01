@@ -53,10 +53,9 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
          y_index_px += height_px;
       }
 
-      sf::Sprite sprite;
-      sprite.setPosition(static_cast<float>(x_px - _config._offset_x_px), static_cast<float>(y_px - _config._offset_y_px));
-      sprite.setTexture(*_texture);
-      sprite.setTextureRect({x_index_px, y_index_px, width_px, height_px});
+      sf::Sprite sprite(*_texture);
+      sprite.setPosition({static_cast<float>(x_px - _config._offset_x_px), static_cast<float>(y_px - _config._offset_y_px)});
+      sprite.setTextureRect({{x_index_px, y_index_px}, {width_px, height_px}});
 
       group_x = (x_px >> 8);
       group_y = (y_px >> 8);

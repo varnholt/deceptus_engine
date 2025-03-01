@@ -154,50 +154,31 @@ void Level::initializeTextures()
    const auto texture_width = static_cast<int32_t>(size_ratio * game_config._view_width);
    const auto texture_height = static_cast<int32_t>(size_ratio * game_config._view_height);
 
-   _render_texture_level_background = std::make_shared<sf::RenderTexture>();
-   if (!_render_texture_level_background->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
+   try
    {
-      Log::Fatal() << "failed to create level background texture";
+      _render_texture_level_background =
+         std::make_shared<sf::RenderTexture>(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
+
+      _render_texture_level = std::make_shared<sf::RenderTexture>(
+         static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height), stencil_context_settings
+      );
+
+      _render_texture_lighting = std::make_shared<sf::RenderTexture>(
+         static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height), stencil_context_settings
+      );
+
+      _render_texture_normal =
+         std::make_shared<sf::RenderTexture>(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
+
+      _render_texture_normal_tmp =
+         std::make_shared<sf::RenderTexture>(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
+
+      _render_texture_deferred =
+         std::make_shared<sf::RenderTexture>(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
    }
-
-   _render_texture_level = std::make_shared<sf::RenderTexture>();
-   if (!_render_texture_level->create(
-          static_cast<uint32_t>(texture_width),
-          static_cast<uint32_t>(texture_height),
-          stencil_context_settings  // the lights require stencils
-       ))
+   catch (const std::exception& e)
    {
-      Log::Fatal() << "failed to create level render texture";
-   }
-
-   _render_texture_lighting = std::make_shared<sf::RenderTexture>();
-
-   if (!_render_texture_lighting->create(
-          static_cast<uint32_t>(texture_width),
-          static_cast<uint32_t>(texture_height),
-          stencil_context_settings  // the lights require stencils
-       ))
-   {
-      Log::Fatal() << "failed to create lighting texture";
-   }
-
-   _render_texture_normal = std::make_shared<sf::RenderTexture>();
-   if (!_render_texture_normal->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
-   {
-      Log::Fatal() << "failed to create normal render texture";
-   }
-
-   _render_texture_normal_tmp = std::make_shared<sf::RenderTexture>();
-   if (!_render_texture_normal_tmp->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
-   {
-      Log::Fatal() << "failed to create tmp normal render texture";
-   }
-
-   _render_texture_deferred = std::make_shared<sf::RenderTexture>();
-
-   if (!_render_texture_deferred->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
-   {
-      Log::Fatal() << "failed to create deferred texture";
+      Log::Fatal() << "failed to create render textures: " << e.what();
    }
 
    _atmosphere_shader = std::make_unique<AtmosphereShader>(texture_width, texture_height);
@@ -808,9 +789,8 @@ void Level::createViews()
    _view_height = static_cast<float>(game_config._view_height);
 
    _level_view.reset();
-   _level_view = std::make_shared<sf::View>();
-   _level_view->reset(sf::FloatRect(0.0f, 0.0f, _view_width, _view_height));
-   _level_view->setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+   _level_view = std::make_shared<sf::View>(sf::FloatRect({0.0f, 0.0f}, {_view_width, _view_height}));
+   _level_view->setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 
    for (auto& parallax_layer : _parallax_layers)
    {
@@ -833,7 +813,7 @@ void Level::updateViews()
    const auto level_view_y = camera_system.getY() + look_vector.y;
 
    auto& zoom = CameraZoom::getInstance();
-   auto view_rect = sf::FloatRect{level_view_x, level_view_y, _view_width, _view_height};
+   auto view_rect = sf::FloatRect{{level_view_x, level_view_y}, {_view_width, _view_height}};
    zoom.adjust(view_rect);
 
    CameraRoomLock::setViewRect(view_rect);
@@ -1168,10 +1148,10 @@ void Level::displayFinalTextures()
 {
    // display the whole texture
    sf::View view(sf::FloatRect(
-      0.0f, 0.0f, static_cast<float>(_render_texture_level->getSize().x), static_cast<float>(_render_texture_level->getSize().y)
+      {0.0f, 0.0f}, {static_cast<float>(_render_texture_level->getSize().x), static_cast<float>(_render_texture_level->getSize().y)}
    ));
 
-   view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+   view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 
    _render_texture_level->setView(view);
    _render_texture_level->display();
@@ -1374,8 +1354,8 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    auto level_texture_sprite = sf::Sprite(_render_texture_deferred->getTexture());
    _gamma_shader->setTexture(_render_texture_deferred->getTexture());
 
-   level_texture_sprite.setPosition(_boom_effect._boom_offset_x, _boom_effect._boom_offset_y);
-   level_texture_sprite.scale(_view_to_texture_scale, _view_to_texture_scale);
+   level_texture_sprite.setPosition({_boom_effect._boom_offset_x, _boom_effect._boom_offset_y});
+   level_texture_sprite.scale({_view_to_texture_scale, _view_to_texture_scale});
 
    _gamma_shader->update();
    window->draw(level_texture_sprite, &_gamma_shader->getGammaShader());

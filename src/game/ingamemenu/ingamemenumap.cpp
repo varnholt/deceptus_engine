@@ -110,7 +110,7 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 
       sf::View level_view;
       level_view.setSize(
-         static_cast<float>(_level_grid_sprite.getTexture().getSize().x), static_cast<float>(_level_grid_sprite.getTexture().getSize().y)
+         {static_cast<float>(_level_grid_sprite.getTexture().getSize().x), static_cast<float>(_level_grid_sprite.getTexture().getSize().y)}
       );
 
       level_view.setCenter(center);
@@ -129,7 +129,7 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       _level_render_texture.display();
 
       auto level_texture_sprite = sf::Sprite(_level_render_texture.getTexture());
-      level_texture_sprite.move(10.0f, 48.0f);
+      level_texture_sprite.move({10.0f, 48.0f});
    }
 
    InGameMenuPage::draw(window, states);
