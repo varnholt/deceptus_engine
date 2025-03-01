@@ -52,7 +52,7 @@ void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
 
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
 
    for (auto& layer : _layer_stack)

@@ -346,11 +346,11 @@ int32_t intersectsWithPlayer(lua_State* state)
    const auto width = static_cast<float>(lua_tonumber(state, 3));
    const auto height = static_cast<float>(lua_tonumber(state, 4));
 
-   sf::FloatRect rect{x, y, width, height};
+   sf::FloatRect rect{{x, y}, {width, height}};
    const auto player_rect = Player::getCurrent()->getPixelRectFloat();
 
-   const auto intersects = player_rect.intersects(rect);
-   lua_pushboolean(state, intersects);
+   const auto intersection = player_rect.findIntersection(rect);
+   lua_pushboolean(state, intersection.has_value());
 
    return 1;
 }
@@ -2395,7 +2395,7 @@ void LuaNode::addSprite()
 
 void LuaNode::setSpriteOrigin(int32_t id, float x, float y)
 {
-   _sprites[id].setOrigin(x, y);
+   _sprites[id].setOrigin({x, y});
 }
 
 void LuaNode::setSpriteOffset(int32_t id, float x, float y)

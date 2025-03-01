@@ -229,17 +229,17 @@ InGameMenuInventory::InGameMenuInventory()
    if (_font_title.openFromFile("data/fonts/deceptum.ttf"))
    {
       const_cast<sf::Texture&>(_font_title.getTexture(inventory_title_font_size)).setSmooth(false);
-      _text_title.setFont(_font_title);
-      _text_title.setCharacterSize(inventory_title_font_size);
-      _text_title.setFillColor(sf::Color{232, 219, 243});
+      _text_title = std::make_unique<sf::Text>(_font_title);
+      _text_title->setCharacterSize(inventory_title_font_size);
+      _text_title->setFillColor(sf::Color{232, 219, 243});
    }
 
    if (_font_description.openFromFile("data/fonts/deceptum.ttf"))
    {
       const_cast<sf::Texture&>(_font_description.getTexture(inventory_text_font_size)).setSmooth(false);
-      _text_description.setFont(_font_description);
-      _text_description.setCharacterSize(inventory_text_font_size);
-      _text_description.setFillColor(sf::Color{232, 219, 243});
+      _text_description = std::make_unique<sf::Text>(_font_description);
+      _text_description->setCharacterSize(inventory_text_font_size);
+      _text_description->setFillColor(sf::Color{232, 219, 243});
    }
 
    loadInventoryItems();
@@ -462,8 +462,8 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
 
 void InGameMenuInventory::drawInventoryTexts(sf::RenderTarget& window, sf::RenderStates states)
 {
-   window.draw(_text_title, states);
-   window.draw(_text_description, states);
+   window.draw(*_text_title, states);
+   window.draw(*_text_description, states);
 }
 
 std::optional<std::string> InGameMenuInventory::getSelectedItem() const
@@ -531,7 +531,7 @@ void InGameMenuInventory::updateInventoryItems()
       const auto x_px = static_cast<float>(offset_x_px + (index % count_columns) * frame_width);
       const auto y_px = static_cast<float>(offset_y_px + (index / count_columns) * frame_height);
 
-      _sprites[item_key]._sprite->setPosition(x_px, y_px);
+      _sprites[item_key]._sprite->setPosition({x_px, y_px});
 
       // also determine the indices for the selected slots
       if (item_key == inventory._slots[0])
@@ -574,8 +574,8 @@ void InGameMenuInventory::updateInventoryItems()
    const auto selected_item = getSelectedItem();
    if (!selected_item.has_value())
    {
-      _text_description.setString("");
-      _text_title.setString("");
+      _text_description->setString("");
+      _text_title->setString("");
    }
    else
    {
@@ -587,13 +587,13 @@ void InGameMenuInventory::updateInventoryItems()
 
       const auto& text = _texts[selected_item.value()];
       const sf::FloatRect rect{{text_title_x_offset_px, 0}, {text_title_width_px, 16}};
-      const auto title_x_px = getHorizontallyCenteredX(_text_title, rect);
-      _text_description.setString(text._description_wrapped);
-      _text_description.setPosition(
+      const auto title_x_px = getHorizontallyCenteredX(*_text_title, rect);
+      _text_description->setString(text._description_wrapped);
+      _text_description->setPosition(
          {_panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px}
       );
-      _text_title.setString(text._title);
-      _text_title.setPosition({_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px});
+      _text_title->setString(text._title);
+      _text_title->setPosition({_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px});
    }
 
    // update frames
@@ -681,8 +681,15 @@ void InGameMenuInventory::show()
    }
 #endif
 
-   _keyboard_event_handler = [this](const auto& event) { keyboardKeyPressed(event.key.code); };
-   EventDistributor::registerEvent(sf::Event::KeyPressed, _keyboard_event_handler);
+   _keyboard_event_handler = [this](const sf::Event& event)
+   {
+      if (const auto* key_event = event.getIf<sf::Event::KeyPressed>())
+      {
+         keyboardKeyPressed(key_event->code);
+      }
+   };
+
+   EventDistributor::registerEvent(_keyboard_event_handler);
 
    const auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())
@@ -699,7 +706,7 @@ void InGameMenuInventory::show()
 
 void InGameMenuInventory::hide()
 {
-   EventDistributor::unregisterEvent(sf::Event::KeyPressed, _keyboard_event_handler);
+   EventDistributor::unregisterEvent(_keyboard_event_handler);
 
    const auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())
