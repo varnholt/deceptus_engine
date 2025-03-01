@@ -232,8 +232,8 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
    // then convert to viewport coordinates
    sf::Vector2f pixel;
    const auto viewport = target.getViewport(view);
-   pixel.x = (normalized.x + 1.0f) / 2.0f * static_cast<float>(viewport.width) + static_cast<float>(viewport.left);
-   pixel.y = (-normalized.y + 1.0f) / 2.0f * static_cast<float>(viewport.height) + static_cast<float>(viewport.top);
+   pixel.x = (normalized.x + 1.0f) / 2.0f * static_cast<float>(viewport.size.x) + static_cast<float>(viewport.position.x);
+   pixel.y = (-normalized.y + 1.0f) / 2.0f * static_cast<float>(viewport.size.y) + static_cast<float>(viewport.position.y);
 
    return pixel;
 }

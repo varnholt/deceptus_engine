@@ -50,12 +50,12 @@ void Extra::deserialize(const GameDeserializeData& data)
 
          // read texture rect
          sf::IntRect rect;
-         rect.left = ValueReader::readValue<int32_t>("texture_rect_x", map).value_or(0);
-         rect.top = ValueReader::readValue<int32_t>("texture_rect_y", map).value_or(0);
-         rect.width = ValueReader::readValue<int32_t>("texture_rect_width", map).value_or(0);
-         rect.height = ValueReader::readValue<int32_t>("texture_rect_height", map).value_or(0);
+         rect.position.x = ValueReader::readValue<int32_t>("texture_rect_x", map).value_or(0);
+         rect.position.y = ValueReader::readValue<int32_t>("texture_rect_y", map).value_or(0);
+         rect.size.x = ValueReader::readValue<int32_t>("texture_rect_width", map).value_or(0);
+         rect.size.y = ValueReader::readValue<int32_t>("texture_rect_height", map).value_or(0);
 
-         if (rect.width > 0 && rect.height > 0)
+         if (rect.size.x > 0 && rect.size.y > 0)
          {
             _sprite.setTextureRect(rect);
          }

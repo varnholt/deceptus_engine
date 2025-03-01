@@ -208,7 +208,7 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 
       sf::Vertex line[] = {a, b};
 
-      target.draw(line, 2, sf::Lines);
+      target.draw(line, 2, sf::PrimitiveType::Lines);
    }
 
    for (auto x = 0u; x < target.getSize().x; x += 16)
@@ -220,7 +220,7 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 
       sf::Vertex line[] = {a, b};
 
-      target.draw(line, 2, sf::Lines);
+      target.draw(line, 2, sf::PrimitiveType::Lines);
    }
 
    // draw doors
@@ -390,20 +390,20 @@ void IngameMenuMap::updateShowHide()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + panel_left_offset_px.x;
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + panel_right_offset_px.x;
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    // move in y
    for (const auto& layer : _panel_center)
    {
       const auto y = layer._pos.y + panel_center_offset_px.y;
-      layer._layer->_sprite->setPosition(layer._pos.x, y);
+      layer._layer->_sprite->setPosition({layer._pos.x, y});
    }
 
    // fade in/out

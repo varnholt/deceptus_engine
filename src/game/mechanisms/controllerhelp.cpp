@@ -57,7 +57,7 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    const auto tile_offset_y = sin(_time.asSeconds() * 5.0f) * 8.0f;
 
    // draw background
-   _background.setPosition(_rect_center.x - _background.getTextureRect().width / 2, _rect_center.y + tile_offset_y - 11);
+   _background.setPosition(_rect_center.x - _background.getTextureRect().size.x / 2, _rect_center.y + tile_offset_y - 11);
    _background.setColor(color);
    target.draw(_background);
 

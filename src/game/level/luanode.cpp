@@ -1322,10 +1322,10 @@ int32_t updateProjectileTexture(lua_State* state)
       const auto width = static_cast<int32_t>(lua_tointeger(state, 5));
       const auto height = static_cast<int32_t>(lua_tointeger(state, 6));
 
-      rect.left = x1;
-      rect.top = y1;
-      rect.width = width;
-      rect.height = height;
+      rect.position.x = x1;
+      rect.position.y = y1;
+      rect.size.x = width;
+      rect.size.y = height;
    }
 
    if (valid)
@@ -2094,7 +2094,7 @@ void LuaNode::loadShapesFromTmx(const std::string& tmxFile)
             // {
             //    // Convert rectangle to Box2D rectangle
             //    addShapeRect(
-            //       object->getAABB().width * MPP, object->getAABB().height * MPP, object->getAABB().left * MPP, object->getAABB().top *
+            //       object->getAABB().size.x * MPP, object->getAABB().size.y * MPP, object->getAABB().position.x * MPP, object->getAABB().position.y *
             //       MPP
             //    );
             // }
@@ -2102,9 +2102,9 @@ void LuaNode::loadShapesFromTmx(const std::string& tmxFile)
             // {
             //    // Convert ellipse to Box2D circle
             //    addShapeCircle(
-            //       object->getAABB().width / 2 * MPP,
-            //       (object->getAABB().left + object->getAABB().width / 2) * MPP,
-            //       (object->getAABB().top + object->getAABB().height / 2) * MPP
+            //       object->getAABB().size.x / 2 * MPP,
+            //       (object->getAABB().position.x + object->getAABB().size.x / 2) * MPP,
+            //       (object->getAABB().position.y + object->getAABB().size.y / 2) * MPP
             //    );
             // }
             /*else*/ if (object->_polygon != nullptr)
@@ -2151,10 +2151,10 @@ void LuaNode::loadHitboxesFromTmx(const std::string& tmxFile)
                // if (object->getShape() == TmxObject::Shape::Rectangle)
                // {
                //    addHitbox(
-               //       static_cast<int32_t>(object->getAABB().left),
-               //       static_cast<int32_t>(object->getAABB().top),
-               //       static_cast<int32_t>(object->getAABB().width),
-               //       static_cast<int32_t>(object->getAABB().height)
+               //       static_cast<int32_t>(object->getAABB().position.x),
+               //       static_cast<int32_t>(object->getAABB().position.y),
+               //       static_cast<int32_t>(object->getAABB().size.x),
+               //       static_cast<int32_t>(object->getAABB().size.y)
                //    );
                // }
             }
@@ -2709,8 +2709,8 @@ void LuaNode::updateHitboxOffsets()
 {
    for (auto& hitbox : _hitboxes)
    {
-      hitbox._rect_px.left = _position_px.x;
-      hitbox._rect_px.top = _position_px.y;
+      hitbox._rect_px.position.x = _position_px.x;
+      hitbox._rect_px.position.y = _position_px.y;
    }
 }
 
@@ -2748,10 +2748,10 @@ void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_
 void LuaNode::updateDebugRect(int32_t index, float left_px, float top_px, float width_px, float height_px)
 {
    auto& rect = _debug_rects[index];
-   rect.left = left_px;
-   rect.top = top_px;
-   rect.width = width_px;
-   rect.height = height_px;
+   rect.position.x = left_px;
+   rect.position.y = top_px;
+   rect.size.x = width_px;
+   rect.size.y = height_px;
 }
 
 void LuaNode::addDebugRect()
@@ -2767,24 +2767,24 @@ void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32
    _hitboxes.push_back(box);
 
    // re-calculate bounding box
-   auto left = box.getRectTranslated().left;
-   auto right = box.getRectTranslated().left + box.getRectTranslated().width;
-   auto top = box.getRectTranslated().top;
-   auto bottom = box.getRectTranslated().top + box.getRectTranslated().height;
+   auto left = box.getRectTranslated().position.x;
+   auto right = box.getRectTranslated().position.x + box.getRectTranslated().size.x;
+   auto top = box.getRectTranslated().position.y;
+   auto bottom = box.getRectTranslated().position.y + box.getRectTranslated().size.y;
    for (const auto& hitbox : _hitboxes)
    {
       const auto other = hitbox.getRectTranslated();
-      left = std::min(left, other.left);
-      top = std::min(top, other.top);
-      right = std::max(right, other.left + other.width);
-      bottom = std::max(bottom, other.top + other.height);
+      left = std::min(left, other.position.x);
+      top = std::min(top, other.position.y);
+      right = std::max(right, other.position.x + other.size.x);
+      bottom = std::max(bottom, other.position.y + other.size.y);
    }
 
    sf::FloatRect bounding_box;
-   bounding_box.left = left;
-   bounding_box.top = top;
-   bounding_box.width = right - left;
-   bounding_box.height = bottom - top;
+   bounding_box.position.x = left;
+   bounding_box.position.y = top;
+   bounding_box.size.x = right - left;
+   bounding_box.size.y = bottom - top;
 
    _bounding_box = bounding_box;
 
@@ -2859,7 +2859,7 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    {
       auto& sprite = _sprites[i];
       const auto& offset = _sprite_offsets_px[i];
-      const auto center = sf::Vector2f(sprite.getTextureRect().width / 2.0f, sprite.getTextureRect().height / 2.0f);
+      const auto center = sf::Vector2f(sprite.getTextureRect().size.x / 2.0f, sprite.getTextureRect().size.y / 2.0f);
       sprite.setPosition(_position_px - center + offset);
       target.draw(sprite, &_flash_shader);
    }

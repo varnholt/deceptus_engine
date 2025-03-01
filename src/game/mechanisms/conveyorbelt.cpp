@@ -156,10 +156,10 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
    auto* boundary_fixture = _body->CreateFixture(&boundary_fixture_def);
    boundary_fixture->SetUserData(static_cast<void*>(this));
 
-   _belt_pixel_rect.left = x;
-   _belt_pixel_rect.top = y;
-   _belt_pixel_rect.height = height_px;
-   _belt_pixel_rect.width = width_px;
+   _belt_pixel_rect.position.x = x;
+   _belt_pixel_rect.position.y = y;
+   _belt_pixel_rect.size.y = height_px;
+   _belt_pixel_rect.size.x = width_px;
 
    static auto ROUND_EPSILON = 0.5f;
    auto tile_count = static_cast<uint32_t>((width_px / PIXELS_PER_TILE) + ROUND_EPSILON);

@@ -85,16 +85,16 @@ void LeverMechanismMerger::merge(
    for (const auto& rect : __rectangles)
    {
       sf::FloatRect search_rect;
-      search_rect.left = rect->_x_px;
-      search_rect.top = rect->_y_px;
-      search_rect.width = rect->_width_px;
-      search_rect.height = rect->_height_px;
+      search_rect.position.x = rect->_x_px;
+      search_rect.position.y = rect->_y_px;
+      search_rect.size.x = rect->_width_px;
+      search_rect.size.y = rect->_height_px;
 
       // Log::Info()
-      //    << "x: " << searchRect.left << " "
-      //    << "y: " << searchRect.top << " "
-      //    << "w: " << searchRect.width << " "
-      //    << "h: " << searchRect.height << " ";
+      //    << "x: " << searchRect.position.x << " "
+      //    << "y: " << searchRect.position.y << " "
+      //    << "w: " << searchRect.size.x << " "
+      //    << "h: " << searchRect.size.y << " ";
 
       for (const auto& tmp : levers)
       {
