@@ -74,7 +74,7 @@ void showErrorMessage(const std::string& message)
    font.openFromFile("data/fonts/deceptum.ttf");
    const_cast<sf::Texture&>(font.getTexture(12)).setSmooth(false);
 
-   sf::Text text;
+   sf::Text text(font);
    text.setFont(font);
    text.setString(message);
    text.setCharacterSize(12);
@@ -85,7 +85,7 @@ void showErrorMessage(const std::string& message)
    {
       while (const auto event = window.pollEvent())
       {
-         if (event.type == sf::Event::Closed)
+         if (event->is<sf::Event::Closed>())
          {
             window.close();
          }
@@ -208,7 +208,7 @@ void Game::initializeWindow()
    _window = std::make_shared<sf::RenderWindow>(
       sf::VideoMode({static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)}),
       GAME_NAME,
-      game_config._fullscreen ? sf::Style::State::Fullscreen : sf::Style::Default,
+      game_config._fullscreen ? sf::State::Fullscreen : sf::State::Windowed,
       context_settings
    );
 

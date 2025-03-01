@@ -176,7 +176,7 @@ void SpawnEffect::Particle::spawn()
    _delay = sf::seconds(frand(0.0f, _show_duration_s));
 
    // each texture rect is 10x10px, 5 particles in 1 row
-   _sprite.setTextureRect({(std::rand() % 5) * 10, 0, 10, 10});
+   _sprite.setTextureRect({{(std::rand() % 5) * 10, 0}, {10, 10}});
 }
 
 void SpawnEffect::Particle::update(const sf::Time& dt)

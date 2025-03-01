@@ -110,8 +110,8 @@ private:
 
    sf::Font _font_title;
    sf::Font _font_description;
-   sf::Text _text_title;
-   sf::Text _text_description;
+   std::unique_ptr<sf::Text> _text_title;
+   std::unique_ptr<sf::Text> _text_description;
 
    std::function<void(void)> _controller_button_x_pressed_callback;
    std::function<void(void)> _controller_button_y_pressed_callback;
