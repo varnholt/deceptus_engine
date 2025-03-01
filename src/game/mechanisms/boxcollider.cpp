@@ -37,7 +37,7 @@ void BoxCollider::setupBody(const std::shared_ptr<b2World>& world)
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
    _body = world->CreateBody(&body_def);
-   _body->SetTransform(b2Vec2((_rect.left + _size.x / 2) / PPM, (_rect.top + _size.y / 2) / PPM), 0);
+   _body->SetTransform(b2Vec2((_rect.position.x + _size.x / 2) / PPM, (_rect.position.y + _size.y / 2) / PPM), 0);
 
    b2FixtureDef fixture_def;
    fixture_def.shape = &shape;

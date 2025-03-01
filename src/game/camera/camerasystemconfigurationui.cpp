@@ -20,8 +20,7 @@ CameraSystemConfigurationUi::CameraSystemConfigurationUi()
 
 void CameraSystemConfigurationUi::processEvents()
 {
-   sf::Event event;
-   while (_render_window->pollEvent(event))
+   while (auto event = _render_window->pollEvent())
    {
       ImGui::SFML::ProcessEvent(*_render_window.get(), event);
 

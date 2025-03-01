@@ -94,10 +94,10 @@ void Lever::setup(const GameDeserializeData& data)
    const auto x = data._tmx_object->_x_px;
    const auto y = data._tmx_object->_y_px;
 
-   _rect.left = x;
-   _rect.top = y;
-   _rect.width = PIXELS_PER_TILE * 3;
-   _rect.height = PIXELS_PER_TILE * 2;
+   _rect.position.x = x;
+   _rect.position.y = y;
+   _rect.size.x = PIXELS_PER_TILE * 3;
+   _rect.size.y = PIXELS_PER_TILE * 2;
 
    _sprite.setPosition(x, y);
    // _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
@@ -267,7 +267,7 @@ void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
 std::optional<sf::FloatRect> Lever::getBoundingBoxPx()
 {
-   return sf::FloatRect(_rect.left, _rect.top, _rect.width, _rect.height);
+   return sf::FloatRect(_rect.position.x, _rect.position.y, _rect.size.x, _rect.size.y);
 }
 
 void Lever::setEnabled(bool enabled)

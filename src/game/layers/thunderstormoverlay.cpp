@@ -11,10 +11,10 @@ void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*nor
    const auto col = sf::Color{val, val, val, val};
 
    sf::Vertex quad[] = {
-      sf::Vertex(sf::Vector2f(_rect.left, _rect.top), col),
-      sf::Vertex(sf::Vector2f(_rect.left, _rect.top + _rect.height), col),
-      sf::Vertex(sf::Vector2f(_rect.left + _rect.width, _rect.top + _rect.height), col),
-      sf::Vertex(sf::Vector2f(_rect.left + _rect.width, _rect.top), col)
+      sf::Vertex(sf::Vector2f(_rect.position.x, _rect.position.y), col),
+      sf::Vertex(sf::Vector2f(_rect.position.x, _rect.position.y + _rect.size.y), col),
+      sf::Vertex(sf::Vector2f(_rect.position.x + _rect.size.x, _rect.position.y + _rect.size.y), col),
+      sf::Vertex(sf::Vector2f(_rect.position.x + _rect.size.x, _rect.position.y), col)
    };
 
    sf::RenderStates states;

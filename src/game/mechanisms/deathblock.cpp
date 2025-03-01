@@ -140,8 +140,8 @@ void DeathBlock::updateCollision()
    int32_t index = 0;
    for (auto& spike : _spikes)
    {
-      spike._collision_rect_absolute.left = spike._collision_rect_relative.left + x_px;
-      spike._collision_rect_absolute.top = spike._collision_rect_relative.top + y_px;
+      spike._collision_rect_absolute.position.x = spike._collision_rect_relative.position.x + x_px;
+      spike._collision_rect_absolute.position.y = spike._collision_rect_relative.position.y + y_px;
 
       const auto deadly = (spike._state == Spike::State::Extracted);
 
@@ -156,8 +156,8 @@ void DeathBlock::updateCollision()
 
 DeathBlock::Spike::Spike()
 {
-   _collision_rect_absolute.width = PIXELS_PER_TILE - tolerance_px_2;
-   _collision_rect_absolute.height = PIXELS_PER_TILE - tolerance_px_2;
+   _collision_rect_absolute.size.x = PIXELS_PER_TILE - tolerance_px_2;
+   _collision_rect_absolute.size.y = PIXELS_PER_TILE - tolerance_px_2;
 }
 
 bool DeathBlock::Spike::hasChanged() const
@@ -340,10 +340,10 @@ void DeathBlock::updateStates(const sf::Time& dt)
 
 void DeathBlock::updateBoundingBox()
 {
-   _rect.left = _body->GetPosition().x * PPM - PIXELS_PER_TILE;
-   _rect.top = _body->GetPosition().x * PPM - PIXELS_PER_TILE;
-   _rect.width = 3 * PIXELS_PER_TILE;
-   _rect.height = 3 * PIXELS_PER_TILE;
+   _rect.position.x = _body->GetPosition().x * PPM - PIXELS_PER_TILE;
+   _rect.position.y = _body->GetPosition().x * PPM - PIXELS_PER_TILE;
+   _rect.size.x = 3 * PIXELS_PER_TILE;
+   _rect.size.y = 3 * PIXELS_PER_TILE;
 }
 
 void DeathBlock::updateSprites()

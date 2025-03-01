@@ -790,7 +790,7 @@ void Level::drawStaticChains(sf::RenderTarget& target)
 {
    for (auto& path : _atmosphere._outlines)
    {
-      target.draw(&path.at(0), path.size(), sf::LineStrip);
+      target.draw(&path.at(0), path.size(), sf::PrimitiveType::LineStrip);
    }
 }
 
@@ -842,12 +842,12 @@ void Level::updateViews()
 
    for (const auto& parallax : _parallax_layers)
    {
-      parallax->updateView(view_rect.left, view_rect.top, view_rect.width, view_rect.height);
+      parallax->updateView(view_rect.position.x, view_rect.position.y, view_rect.size.x, view_rect.size.y);
    }
 
    for (const auto& image_layer : _image_layers)
    {
-      image_layer->updateView(view_rect.left, view_rect.top, view_rect.width, view_rect.height);
+      image_layer->updateView(view_rect.position.x, view_rect.position.y, view_rect.size.x, view_rect.size.y);
    }
 }
 

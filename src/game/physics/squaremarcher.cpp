@@ -213,7 +213,7 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
       }
 
       vertices.push_back(vertices.at(0));
-      render_texture.draw(&vertices[0], vertices.size(), sf::LineStrip);
+      render_texture.draw(&vertices[0], vertices.size(), sf::PrimitiveType::LineStrip);
    }
 
    render_texture.display();

@@ -77,8 +77,8 @@ void WaterBubbles::spawnSplashBubbles(const WaterBubbleInput& input)
       // not really correct:
       // the player rect does not change when the player is in the water, it should actually be rotated
       const sf::Vector2f pos_px = {
-         input._player_rect.left + frand(0.0f, input._player_rect.height) + error_offset_x_px,
-         input._player_rect.top + frand(0.0f, input._player_rect.width * 1.5f)
+         input._player_rect.position.x + frand(0.0f, input._player_rect.size.y) + error_offset_x_px,
+         input._player_rect.position.y + frand(0.0f, input._player_rect.size.x * 1.5f)
       };
 
       const sf::Vector2f vel_px = {0.0f, -velocity_scale * frand(0.5f, 1.0f)};
@@ -97,12 +97,12 @@ void WaterBubbles::spawnBubblesFromHead(const WaterBubbleInput& input)
 
    for (auto i = 0; i < spawn_bubble_count; i++)
    {
-      const auto range_right_px = head_offset_percent * input._player_rect.width +
-                                  frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) + center_offset_px;
-      const auto range_left_px = frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) - center_offset_px;
-      const auto bubble_pos_x_px = input._player_rect.left + (input._player_pointing_right ? range_right_px : range_left_px);
+      const auto range_right_px = head_offset_percent * input._player_rect.size.x +
+                                  frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.size.x) + center_offset_px;
+      const auto range_left_px = frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.size.x) - center_offset_px;
+      const auto bubble_pos_x_px = input._player_rect.position.x + (input._player_pointing_right ? range_right_px : range_left_px);
 
-      const sf::Vector2f pos_px = {bubble_pos_x_px, input._player_rect.top};
+      const sf::Vector2f pos_px = {bubble_pos_x_px, input._player_rect.position.y};
       const sf::Vector2f vel_px = {0.0f, -velocity_scale * frand(0.5f, 1.0f)};
 
       // std::cout << "spawn " << pos_px.x << ", " << pos_px.y << std::endl;

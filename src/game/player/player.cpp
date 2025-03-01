@@ -70,10 +70,10 @@ sf::IntRect Player::computeFootSensorPixelIntRect() const
 
    _foot_sensor_fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
 
-   rect_px.left = static_cast<int32_t>(aabb.lowerBound.x * PPM);
-   rect_px.top = static_cast<int32_t>(aabb.lowerBound.y * PPM);
-   rect_px.width = static_cast<int32_t>(abs(aabb.upperBound.x - aabb.lowerBound.x) * PPM);
-   rect_px.height = static_cast<int32_t>(abs(aabb.upperBound.y - aabb.lowerBound.y) * PPM);
+   rect_px.position.x = static_cast<int32_t>(aabb.lowerBound.x * PPM);
+   rect_px.position.y = static_cast<int32_t>(aabb.lowerBound.y * PPM);
+   rect_px.size.x = static_cast<int32_t>(abs(aabb.upperBound.x - aabb.lowerBound.x) * PPM);
+   rect_px.size.y = static_cast<int32_t>(abs(aabb.upperBound.y - aabb.lowerBound.y) * PPM);
 
    // std::cout
    //    << "ux: " << aabb.upperBound.x << " "
@@ -92,10 +92,10 @@ sf::FloatRect Player::computeFootSensorPixelFloatRect() const
 
    _foot_sensor_fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
 
-   rect_px.left = aabb.lowerBound.x * PPM;
-   rect_px.top = aabb.lowerBound.y * PPM;
-   rect_px.width = abs(aabb.upperBound.x - aabb.lowerBound.x) * PPM;
-   rect_px.height = abs(aabb.upperBound.y - aabb.lowerBound.y) * PPM;
+   rect_px.position.x = aabb.lowerBound.x * PPM;
+   rect_px.position.y = aabb.lowerBound.y * PPM;
+   rect_px.size.x = abs(aabb.upperBound.x - aabb.lowerBound.x) * PPM;
+   rect_px.size.y = abs(aabb.upperBound.y - aabb.lowerBound.y) * PPM;
 
    // std::cout
    //    << "ux: " << aabb.upperBound.x << " "
@@ -403,15 +403,15 @@ void Player::updatePixelRect()
 {
    constexpr auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
 
-   _pixel_rect_f.left = _pixel_position_f.x - PLAYER_ACTUAL_WIDTH * 0.5f;
-   _pixel_rect_f.top = _pixel_position_f.y - height_diff_px - (height_diff_px * 0.5f);
-   _pixel_rect_f.width = PLAYER_ACTUAL_WIDTH;
-   _pixel_rect_f.height = PLAYER_ACTUAL_HEIGHT;
+   _pixel_rect_f.position.x = _pixel_position_f.x - PLAYER_ACTUAL_WIDTH * 0.5f;
+   _pixel_rect_f.position.y = _pixel_position_f.y - height_diff_px - (height_diff_px * 0.5f);
+   _pixel_rect_f.size.x = PLAYER_ACTUAL_WIDTH;
+   _pixel_rect_f.size.y = PLAYER_ACTUAL_HEIGHT;
 
-   _pixel_rect_i.left = static_cast<int32_t>(_pixel_rect_f.left);
-   _pixel_rect_i.top = static_cast<int32_t>(_pixel_rect_f.top);
-   _pixel_rect_i.width = PLAYER_ACTUAL_WIDTH;
-   _pixel_rect_i.height = PLAYER_ACTUAL_HEIGHT;
+   _pixel_rect_i.position.x = static_cast<int32_t>(_pixel_rect_f.position.x);
+   _pixel_rect_i.position.y = static_cast<int32_t>(_pixel_rect_f.position.y);
+   _pixel_rect_i.size.x = PLAYER_ACTUAL_WIDTH;
+   _pixel_rect_i.size.y = PLAYER_ACTUAL_HEIGHT;
 }
 
 void Player::updateChunk()

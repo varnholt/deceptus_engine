@@ -70,7 +70,7 @@ void SmokeEffect::update(const sf::Time& dt)
       // moved here from deserialize code
       // origin should always depend on rotation
       const auto bounds = particle._sprite.getGlobalBounds();
-      particle._sprite.setOrigin(bounds.width / 2, bounds.height / 2);
+      particle._sprite.setOrigin(bounds.size.x / 2, bounds.size.y / 2);
    }
 }
 
@@ -195,10 +195,10 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
    smoke_effect->_size_px.x = rect_width_px;
    smoke_effect->_size_px.y = rect_height_px;
 
-   smoke_effect->_bounding_box_px.left = data._tmx_object->_x_px;
-   smoke_effect->_bounding_box_px.top = data._tmx_object->_y_px;
-   smoke_effect->_bounding_box_px.width = data._tmx_object->_width_px;
-   smoke_effect->_bounding_box_px.height = data._tmx_object->_height_px;
+   smoke_effect->_bounding_box_px.position.x = data._tmx_object->_x_px;
+   smoke_effect->_bounding_box_px.position.y = data._tmx_object->_y_px;
+   smoke_effect->_bounding_box_px.size.x = data._tmx_object->_width_px;
+   smoke_effect->_bounding_box_px.size.y = data._tmx_object->_height_px;
 
    // also use the bounding box to compute the effect's chunks
    smoke_effect->addChunks(smoke_effect->_bounding_box_px);

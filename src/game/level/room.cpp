@@ -406,10 +406,10 @@ void Room::SubRoom::deserialize(const GameDeserializeData& data)
    _name = data._tmx_object->_name;
    _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
 
-   sf::FloatRect rect_l{_rect.left, _rect.top, eps_px, _rect.height};
-   sf::FloatRect rect_r{_rect.left + _rect.width - eps_px, _rect.top, eps_px, _rect.height};
-   sf::FloatRect rect_t{_rect.left, _rect.top, _rect.width, eps_px};
-   sf::FloatRect rect_b{_rect.left, _rect.top + _rect.height - eps_px, _rect.width, eps_px};
+   sf::FloatRect rect_l{_rect.position.x, _rect.position.y, eps_px, _rect.size.y};
+   sf::FloatRect rect_r{_rect.position.x + _rect.size.x - eps_px, _rect.position.y, eps_px, _rect.size.y};
+   sf::FloatRect rect_t{_rect.position.x, _rect.position.y, _rect.size.x, eps_px};
+   sf::FloatRect rect_b{_rect.position.x, _rect.position.y + _rect.size.y - eps_px, _rect.size.x, eps_px};
 
    auto area_left = RoomEnterArea{"left", rect_l, std::nullopt, std::nullopt};
    auto area_right = RoomEnterArea{"right", rect_r, std::nullopt, std::nullopt};

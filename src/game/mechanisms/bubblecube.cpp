@@ -243,7 +243,7 @@ void BubbleCube::updatePosition()
    _sprite.setPosition(pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px);
 
    // move translated rect along body position
-   _translated_rect_px.top = _body->GetPosition().y * PPM;
+   _translated_rect_px.position.y = _body->GetPosition().y * PPM;
 }
 
 void BubbleCube::updateRespawnCondition()
@@ -310,9 +310,9 @@ void BubbleCube::updateFootSensorContact()
 void BubbleCube::updateJumpedOffPlatformCondition()
 {
    _jump_off_collision_rect_px = _translated_rect_px;
-   _jump_off_collision_rect_px.top -= 12;
-   _jump_off_collision_rect_px.left -= 8;
-   _jump_off_collision_rect_px.width += 8 * 2;
+   _jump_off_collision_rect_px.position.y -= 12;
+   _jump_off_collision_rect_px.position.x -= 8;
+   _jump_off_collision_rect_px.size.x += 8 * 2;
 
    const auto first_jump_frame = (Player::getCurrent()->getJump()._jump_frame_count == 9);
    const auto intersects = _jump_off_collision_rect_px.intersects(Player::getCurrent()->computeFootSensorPixelFloatRect());

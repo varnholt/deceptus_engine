@@ -33,8 +33,8 @@ void RopeWithLight::update(const sf::Time& dt)
 
    _lamp_sprite.setRotation(90 + FACTOR_RAD_TO_DEG * angle_rad);
    _lamp_sprite.setPosition(
-      _light->_pos_m.x * PPM,  // - _lamp_sprite_rect.width / 2,
-      _light->_pos_m.y * PPM   // - _lamp_sprite_rect.height / 2
+      _light->_pos_m.x * PPM,  // - _lamp_sprite_rect.size.x / 2,
+      _light->_pos_m.y * PPM   // - _lamp_sprite_rect.size.y / 2
    );
 }
 
@@ -63,7 +63,7 @@ void RopeWithLight::setup(const GameDeserializeData& data)
    auto sprite_index = std::clamp(ValueReader::readValue<int32_t>("sprite", map).value_or(1) - 1, 0, 3);
    _lamp_sprite.setTextureRect(_lamp_sprite_rects[sprite_index]);
    _lamp_sprite.setOrigin(
-      static_cast<float>(_lamp_sprite_rects[sprite_index].width / 2), static_cast<float>(_lamp_sprite_rects[sprite_index].height / 2)
+      static_cast<float>(_lamp_sprite_rects[sprite_index].size.x / 2), static_cast<float>(_lamp_sprite_rects[sprite_index].size.y / 2)
    );
 
    // add raycast light

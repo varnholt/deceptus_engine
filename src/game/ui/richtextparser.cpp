@@ -182,12 +182,12 @@ std::vector<Segment> parseRichText(
       {
          if (segment.text.getString() == "\n")
          {
-            offset_y_px += segment.text.getLocalBounds().height;
+            offset_y_px += segment.text.getLocalBounds().size.y;
             segment.text.setPosition(offset_x_px, offset_y_px);
          }
          else
          {
-            const auto text_width_px = segment.text.getLocalBounds().width;
+            const auto text_width_px = segment.text.getLocalBounds().size.x;
             const auto offset_x_centered_px = offset_x_px + (window_width_px - text_width_px) / 2.0f;
             segment.text.setPosition(offset_x_centered_px, offset_y_px);
          }
@@ -202,13 +202,13 @@ std::vector<Segment> parseRichText(
          if (segment.text.getString() == "\n")
          {
             segment_offset_x_px = 0.0f;
-            offset_y_px += segment.text.getLocalBounds().height;
+            offset_y_px += segment.text.getLocalBounds().size.y;
             segment.text.setPosition(offset_x_px, offset_y_px);
          }
          else
          {
             segment.text.setPosition(offset_x_px + segment_offset_x_px, offset_y_px);
-            segment_offset_x_px += segment.text.getLocalBounds().width;
+            segment_offset_x_px += segment.text.getLocalBounds().size.x;
          }
       }
    }
