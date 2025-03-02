@@ -2389,7 +2389,7 @@ void LuaNode::setTransform(const b2Vec2& position, float angle)
 
 void LuaNode::addSprite()
 {
-   _sprites.emplace_back();
+   _sprites.emplace_back(*_texture);
    _sprite_offsets_px.emplace_back();
 }
 
@@ -2732,12 +2732,7 @@ void LuaNode::updatePosition()
 
 void LuaNode::updateSpriteRect(int32_t id, int32_t x_px, int32_t y_px, int32_t w_px, int32_t h_px)
 {
-   if (!_sprites[id].getTexture() && _texture)
-   {
-      _sprites[id].setTexture(*_texture);
-   }
-
-   _sprites[id].setTextureRect(sf::IntRect(x_px, y_px, w_px, h_px));
+   _sprites[id].setTextureRect(sf::IntRect({x_px, y_px}, {w_px, h_px}));
 }
 
 void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
@@ -2761,7 +2756,7 @@ void LuaNode::addDebugRect()
 
 void LuaNode::addHitbox(int32_t left_px, int32_t top_px, int32_t width_px, int32_t height_px)
 {
-   sf::FloatRect rect{_position_px.x, _position_px.y, static_cast<float>(width_px), static_cast<float>(height_px)};
+   sf::FloatRect rect{{_position_px.x, _position_px.y}, {static_cast<float>(width_px), static_cast<float>(height_px)}};
    sf::Vector2f offset{static_cast<float>(left_px), static_cast<float>(top_px)};
    Hitbox box{rect, offset};
    _hitboxes.push_back(box);

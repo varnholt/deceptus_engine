@@ -109,7 +109,7 @@ void Fan::updateSprite()
    for (auto& sprite : _sprites)
    {
       auto x_offset_tl = static_cast<int32_t>(_x_offsets_px[index]) % 8;
-      sprite.setTextureRect({x_offset_tl * PIXELS_PER_TILE, y_offset_tl * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
+      sprite.setTextureRect({{x_offset_tl * PIXELS_PER_TILE, y_offset_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
 
       index++;
    }
@@ -158,7 +158,7 @@ void Fan::update(const sf::Time& dt)
 
 std::optional<sf::FloatRect> Fan::getBoundingBoxPx()
 {
-   return sf::FloatRect(_pixel_rect.position.x, _pixel_rect.position.y, _pixel_rect.size.x, _pixel_rect.size.y);
+   return sf::FloatRect({_pixel_rect.position.x, _pixel_rect.position.y}, {_pixel_rect.size.x, _pixel_rect.size.y});
 }
 
 void Fan::load(const GameDeserializeData& data)
@@ -280,7 +280,7 @@ std::optional<sf::Vector2f> Fan::collide(const sf::FloatRect& player_rect)
          continue;
       }
 
-      if (player_rect.intersects(fan->_pixel_rect))
+      if (player_rect.findIntersection(fan->_pixel_rect).has_value())
       {
          dir += fan->_direction;
          valid = true;
@@ -312,11 +312,10 @@ void Fan::merge()
       for (auto& f : __fan_instances)
       {
          auto fan = std::dynamic_pointer_cast<Fan>(f);
-         if (tile->_rect.intersects(fan->_pixel_rect))
+         if (tile->_rect.findIntersection(fan->_pixel_rect).has_value())
          {
-            sf::Sprite sprite;
-            sprite.setTexture(*fan->_texture);
-            sprite.setPosition(static_cast<float>(tile->_position.x), static_cast<float>(tile->_position.y));
+            sf::Sprite sprite(*fan->_texture);
+            sprite.setPosition({static_cast<float>(tile->_position.x), static_cast<float>(tile->_position.y)});
 
             fan->_tiles.push_back(tile);
             fan->_direction = tile->_direction * fan->_speed;

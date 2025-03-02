@@ -108,8 +108,7 @@ SpawnEffect::ParticleEffect::ParticleEffect(
    _particles.reserve(count);
    for (auto i = 0; i < count; i++)
    {
-      Particle particle;
-      particle._sprite = std::make_unique<sf::Sprite>(*_texture);
+      Particle particle(*_texture);
       particle._sprite->setOrigin({5, 5});
       particle._offset_px = offset_px;
       particle._radius_px = radius_px;
@@ -167,6 +166,11 @@ void SpawnEffect::Particle::setupPosition(float random_scale)
    _pos_norm.y = y;
 
    _scale_px = random_scale * _radius_px;
+}
+
+SpawnEffect::Particle::Particle(const sf::Texture& texture)
+{
+   _sprite = std::make_unique<sf::Sprite>(texture);
 }
 
 void SpawnEffect::Particle::spawn()

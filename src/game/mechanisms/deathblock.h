@@ -68,7 +68,7 @@ private:
       sf::Time _wait_time;
       sf::Time _wait_offset;
       float _state_time_s{0.0f};
-      sf::Sprite _sprite;
+      std::unique_ptr<sf::Sprite> _sprite;
       int32_t _sprite_index{0};
       int32_t _sprite_index_prev{-1};
       sf::IntRect _collision_rect_relative;
@@ -106,7 +106,7 @@ private:
    sf::Time _time_off;
    sf::Time _time_offset;
    std::array<Spike, 4> _spikes;
-   sf::Sprite _center_sprite;
+   std::unique_ptr<sf::Sprite> _center_sprite;
    float _center_sprite_time_s{0.0f};
    int32_t _center_sprite_index{0};
    Mode _mode{Mode::Interval};

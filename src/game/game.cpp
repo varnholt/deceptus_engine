@@ -1062,7 +1062,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
       }
       case sf::Keyboard::Key::F4:
       {
-         if (event.key.alt)
+         if (key_event->alt)
          {
             shutdown();
          }

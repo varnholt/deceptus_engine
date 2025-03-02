@@ -23,6 +23,8 @@ public:
 private:
    struct Particle
    {
+      Particle(const sf::Texture& texture);
+
       sf::Vector2f _pos_norm;
       sf::Vector2f _pos_px;
       sf::Time _delay;
