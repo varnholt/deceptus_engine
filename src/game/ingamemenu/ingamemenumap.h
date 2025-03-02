@@ -35,13 +35,13 @@ private:
 
    BitmapFont _font;
 
-   sf::RenderTexture _level_render_texture;
+   std::unique_ptr<sf::RenderTexture> _level_render_texture;
 
    std::shared_ptr<sf::Texture> _level_grid_texture;
-   sf::Sprite _level_grid_sprite;
+   std::unique_ptr<sf::Sprite> _level_grid_sprite;
 
    std::shared_ptr<sf::Texture> _level_outline_texture;
-   sf::Sprite _level_outline_sprite;
+   std::unique_ptr<sf::Sprite> _level_outline_sprite;
 
    std::vector<std::shared_ptr<GameMechanism>> _doors;
    std::vector<std::shared_ptr<GameMechanism>> _portals;

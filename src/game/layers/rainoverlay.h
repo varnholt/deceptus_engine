@@ -29,7 +29,7 @@ public:
       sf::Vector2f _dir_px;
       float _length = 0.0f;
       float _age_s = 0.0f;
-      sf::Sprite _sprite;
+      std::unique_ptr<sf::Sprite> _sprite;
       std::vector<float> _intersections;
    };
 

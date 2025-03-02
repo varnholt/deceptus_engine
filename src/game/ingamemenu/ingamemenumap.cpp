@@ -87,13 +87,20 @@ IngameMenuMap::IngameMenuMap()
 void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const std::filesystem::path& outlines)
 {
    _level_grid_texture = TexturePool::getInstance().get(grid.string());
-   _level_grid_sprite.setTexture(*_level_grid_texture);
-
    _level_outline_texture = TexturePool::getInstance().get(outlines.string());
-   _level_outline_sprite.setTexture(*_level_outline_texture);
+
+   _level_grid_sprite = std::make_unique<sf::Sprite>(*_level_grid_texture);
+   _level_outline_sprite = std::make_unique<sf::Sprite>(*_level_outline_texture);
 
    // that render texture should have the same size as our level textures
-   _level_render_texture.create(_level_grid_texture->getSize().x, _level_grid_texture->getSize().y);
+   try
+   {
+      _level_render_texture = std::make_unique<sf::RenderTexture>(_level_grid_texture->getSize().x, _level_grid_texture->getSize().y);
+   }
+   catch (const std::exception& e)
+   {
+      Log::Fatal() << "failed to created render texture: " << e.what();
+   }
 }
 
 void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -103,32 +110,33 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       sf::Vector2f center;
       center += Player::getCurrent()->getPixelPositionFloat() * 0.125f;
       center += CameraPanorama::getInstance().getLookVector();
-      center.x += _level_grid_sprite.getTexture().getSize().x / 2.0f;
-      center.y += _level_grid_sprite.getTexture().getSize().y / 2.0f;
+      center.x += _level_grid_sprite->getTexture().getSize().x / 2.0f;
+      center.y += _level_grid_sprite->getTexture().getSize().y / 2.0f;
       center.x -= 220.0f;
       center.y -= 80.0f;
 
       sf::View level_view;
       level_view.setSize(
-         {static_cast<float>(_level_grid_sprite.getTexture().getSize().x), static_cast<float>(_level_grid_sprite.getTexture().getSize().y)}
+         {static_cast<float>(_level_grid_sprite->getTexture().getSize().x), static_cast<float>(_level_grid_sprite->getTexture().getSize().y)
+         }
       );
 
       level_view.setCenter(center);
       level_view.zoom(_zoom);  // 1.5f works well, too
 
-      _level_grid_sprite.setColor(sf::Color{70, 70, 140, 255});
-      _level_outline_sprite.setColor(sf::Color{255, 255, 255, 80});
+      _level_grid_sprite->setColor(sf::Color{70, 70, 140, 255});
+      _level_outline_sprite->setColor(sf::Color{255, 255, 255, 80});
 
-      _level_render_texture.clear();
-      _level_render_texture.draw(_level_grid_sprite, sf::BlendMode{sf::BlendAdd});
-      _level_render_texture.draw(_level_outline_sprite, sf::BlendMode{sf::BlendAdd});
+      _level_render_texture->clear();
+      _level_render_texture->draw(*_level_grid_sprite, sf::BlendMode{sf::BlendAdd});
+      _level_render_texture->draw(*_level_outline_sprite, sf::BlendMode{sf::BlendAdd});
 
-      drawLevelItems(_level_render_texture);
+      drawLevelItems(*_level_render_texture);
 
-      _level_render_texture.setView(level_view);
-      _level_render_texture.display();
+      _level_render_texture->setView(level_view);
+      _level_render_texture->display();
 
-      auto level_texture_sprite = sf::Sprite(_level_render_texture.getTexture());
+      auto level_texture_sprite = sf::Sprite(_level_render_texture->getTexture());
       level_texture_sprite.move({10.0f, 48.0f});
    }
 

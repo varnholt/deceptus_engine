@@ -38,7 +38,7 @@ struct BitmapFont
    );
 
    std::shared_ptr<sf::Texture> _texture;
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    std::map<char, std::shared_ptr<sf::IntRect>> _map;
 
    int32_t _char_width = 0;

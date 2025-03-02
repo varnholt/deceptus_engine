@@ -54,7 +54,7 @@ RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprit
    for (auto a = 0; a < _settings._drop_count; a++)
    {
       RainDrop drop;
-      drop._sprite.setTexture(*_texture);
+      drop._sprite = std::make_unique<sf::Sprite>(*_texture);
       _drops.push_back(drop);
    }
 }
@@ -94,7 +94,7 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       for (auto& hit : _hits)
       {
          // DebugDraw::drawPoint(target, hit._pos_px, {1, 0, 0});
-         target.draw(hit._sprite);
+         target.draw(*hit._sprite);
       }
    }
 }
@@ -166,8 +166,8 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto sprite_index = std::rand() % 4;
 
-         p._sprite.setTextureRect(sf::IntRect({static_cast<int32_t>(sprite_index) * 11, 0}, {11, 96}));
-         p._sprite.setOrigin({6, 0});
+         p._sprit->setTextureRect(sf::IntRect({static_cast<int32_t>(sprite_index) * 11, 0}, {11, 96}));
+         p._sprit->setOrigin({6, 0});
          p._pos_px.x = _clip_rect.position.x + std::rand() % static_cast<int32_t>(_clip_rect.size.x);
          p._pos_px.y = _clip_rect.position.y + std::rand() % static_cast<int32_t>(_clip_rect.size.y);
          p._age_s = (std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;
@@ -187,7 +187,7 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto step_width_px = p._dir_px * dt.asSeconds();
          p._pos_px += step_width_px;
-         p._sprite.setPosition(p._pos_px);
+         p._sprite->setPosition(p._pos_px);
 
          if (p._age_s > max_age_s)
          {

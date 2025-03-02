@@ -102,12 +102,15 @@ void TileMap::storeStaticVertices(const std::array<sf::Vertex, 4>& quad, const i
    const auto x_it = _vertices_static_blocks[by].find(bx);
    if (x_it == _vertices_static_blocks[by].end())
    {
-      _vertices_static_blocks[by][bx].setPrimitiveType(sf::Quads);
+      _vertices_static_blocks[by][bx].setPrimitiveType(sf::PrimitiveType::Triangles);
    }
 
    sf::VertexArray& vertex_array = _vertices_static_blocks[by][bx];
    vertex_array.append(quad[0]);
    vertex_array.append(quad[1]);
+   vertex_array.append(quad[2]);
+
+   vertex_array.append(quad[0]);
    vertex_array.append(quad[2]);
    vertex_array.append(quad[3]);
 }
@@ -159,7 +162,7 @@ bool TileMap::load(
    _visible = layer->_visible;
    _z_index = layer->_z;
 
-   _vertices_animated.setPrimitiveType(sf::Quads);
+   _vertices_animated.setPrimitiveType(sf::PrimitiveType::Triangles);
 
    auto& tile_map = tileset->_tile_map;
 
@@ -273,6 +276,9 @@ void TileMap::update(const sf::Time& dt)
 
       _vertices_animated.append(anim->_vertices[0]);
       _vertices_animated.append(anim->_vertices[1]);
+      _vertices_animated.append(anim->_vertices[2]);
+
+      _vertices_animated.append(anim->_vertices[0]);
       _vertices_animated.append(anim->_vertices[2]);
       _vertices_animated.append(anim->_vertices[3]);
    }
