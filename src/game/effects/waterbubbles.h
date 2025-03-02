@@ -14,7 +14,7 @@ public:
    struct Bubble
    {
       Bubble(const sf::Vector2f& pos, const sf::Vector2f& vel, const std::shared_ptr<sf::Texture>& texture);
-      sf::Sprite _sprite;
+      std::unique_ptr<sf::Sprite> _sprite;
       sf::Vector2f _position;
       sf::Vector2f _velocity;
       bool _pop = false;

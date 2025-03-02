@@ -64,7 +64,7 @@ int32_t addCollisionRect(lua_State* state)
    const auto w_px = static_cast<int32_t>(lua_tointeger(state, 3));
    const auto h_px = static_cast<int32_t>(lua_tointeger(state, 4));
 
-   const auto rect_id = getInstance()->addCollisionRect({x_px, y_px, w_px, h_px});
+   const auto rect_id = getInstance()->addCollisionRect({{x_px, y_px}, {w_px, h_px}});
    lua_pushinteger(state, rect_id);
    return 1;
 }
@@ -441,7 +441,7 @@ void LevelScript::update(const sf::Time& dt)
    auto id = 0;
    for (const auto& rect : _collision_rects)
    {
-      if (player_rect.intersects(rect))
+      if (player_rect.findIntersection(rect))
       {
          luaPlayerCollidesWithRect(id);
       };

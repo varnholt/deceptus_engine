@@ -13,7 +13,7 @@
 void BitmapFont::load(const std::string& texturePath, const std::string& mapPath)
 {
    _texture = TexturePool::getInstance().get(texturePath);
-   _sprite.setTexture(*_texture);
+   _sprite = std::make_unique<sf::Sprite>(*_texture);
 
    std::ifstream file(mapPath);
 
@@ -60,10 +60,10 @@ void BitmapFont::load(const std::string& texturePath, const std::string& mapPath
    for (auto c : font)
    {
       std::shared_ptr<sf::IntRect> rect = std::make_shared<sf::IntRect>();
-      rect->left = x;
-      rect->top = y;
-      rect->width = _char_width;
-      rect->height = _char_height;
+      rect->position.x = x;
+      rect->position.y = y;
+      rect->size.x = _char_width;
+      rect->size.y = _char_height;
       _map.insert(std::pair<char, std::shared_ptr<sf::IntRect>>(c, rect));
 
       x += _char_width;
@@ -106,11 +106,11 @@ void BitmapFont::draw(
    auto x_offset = 0;
    for (const auto& coord : coords)
    {
-      _sprite.setTextureRect(sf::IntRect(coord->left, coord->top, coord->width, coord->height));
-      _sprite.setPosition(static_cast<float>(x + x_offset), static_cast<float>(y));
-      _sprite.setColor(color.value_or(sf::Color::White));
+      _sprite->setTextureRect(sf::IntRect({coord->position.x, coord->position.y}, {coord->size.x, coord->size.y}));
+      _sprite->setPosition({static_cast<float>(x + x_offset), static_cast<float>(y)});
+      _sprite->setColor(color.value_or(sf::Color::White));
 
-      window.draw(_sprite);
+      window.draw(*_sprite);
       x_offset += _char_width;
    }
 

@@ -229,10 +229,10 @@ constexpr auto retraction_time_max_s = 1.0f;
 
 void Crusher::setup(const GameDeserializeData& data)
 {
-   _rect.left = data._tmx_object->_x_px;
-   _rect.top = data._tmx_object->_y_px;
-   _rect.width = data._tmx_object->_width_px;
-   _rect.height = data._tmx_object->_height_px;
+   _rect.position.x = data._tmx_object->_x_px;
+   _rect.position.y = data._tmx_object->_y_px;
+   _rect.size.x = data._tmx_object->_width_px;
+   _rect.size.y = data._tmx_object->_height_px;
 
    addChunks(_rect);
 

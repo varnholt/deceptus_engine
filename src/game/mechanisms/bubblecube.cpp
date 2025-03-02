@@ -243,7 +243,7 @@ void BubbleCube::updatePosition()
    _sprite.setPosition(pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px);
 
    // move translated rect along body position
-   _translated_rect_px.top = _body->GetPosition().y * PPM;
+   _translated_rect_px.position.y = _body->GetPosition().y * PPM;
 }
 
 void BubbleCube::updateRespawnCondition()
@@ -300,7 +300,7 @@ void BubbleCube::updateFootSensorContact()
 
    const auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelFloatRect();
    _foot_sensor_rect_intersects_previous = _foot_sensor_rect_intersects;
-   _foot_sensor_rect_intersects = foot_sensor_rect.intersects(_foot_collision_rect_px);
+   _foot_sensor_rect_intersects = foot_sensor_rect.findIntersection(_foot_collision_rect_px).has_value();
 
 #ifdef DEBUG_COLLISION_RECTS
    _sprite.setColor(sf::Color(255, _foot_sensor_rect_intersects ? 0 : 255, _foot_sensor_rect_intersects ? 0 : 255, _alpha * 255));
@@ -310,12 +310,13 @@ void BubbleCube::updateFootSensorContact()
 void BubbleCube::updateJumpedOffPlatformCondition()
 {
    _jump_off_collision_rect_px = _translated_rect_px;
-   _jump_off_collision_rect_px.top -= 12;
-   _jump_off_collision_rect_px.left -= 8;
-   _jump_off_collision_rect_px.width += 8 * 2;
+   _jump_off_collision_rect_px.position.y -= 12;
+   _jump_off_collision_rect_px.position.x -= 8;
+   _jump_off_collision_rect_px.size.x += 8 * 2;
 
    const auto first_jump_frame = (Player::getCurrent()->getJump()._jump_frame_count == 9);
-   const auto intersects = _jump_off_collision_rect_px.intersects(Player::getCurrent()->computeFootSensorPixelFloatRect());
+   const auto intersects =
+      _jump_off_collision_rect_px.findIntersection(Player::getCurrent()->computeFootSensorPixelFloatRect()).has_value();
 
    if (first_jump_frame && intersects)
    {

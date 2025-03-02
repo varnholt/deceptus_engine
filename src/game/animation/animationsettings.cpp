@@ -32,7 +32,7 @@ void AnimationSettings::createFrames()
    _frames.clear();
    for (auto i = 0; i < _frame_durations.size(); i++)
    {
-      _frames.emplace_back(_frame_offset[0] + (i * _frame_size[0]), _frame_offset[1], _frame_size[0], _frame_size[1]);
+      _frames.emplace_back(sf::IntRect{{_frame_offset[0] + (i * _frame_size[0]), _frame_offset[1]}, {_frame_size[0], _frame_size[1]}});
    }
 }
 

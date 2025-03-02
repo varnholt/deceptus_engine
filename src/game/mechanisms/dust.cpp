@@ -18,10 +18,10 @@ void Dust::update(const sf::Time& dt)
 
    for (auto& p : _particles)
    {
-      const auto x_px = p._position.x - _clip_rect.left;
-      const auto y_px = p._position.y - _clip_rect.top;
+      const auto x_px = p._position.x - _clip_rect.position.x;
+      const auto y_px = p._position.y - _clip_rect.position.y;
 
-      if (x_px < 0 || x_px >= _clip_rect.width || y_px < 0 || y_px >= _clip_rect.height)
+      if (x_px < 0 || x_px >= _clip_rect.size.x || y_px < 0 || y_px >= _clip_rect.size.y)
       {
          p.spawn(_clip_rect);
          continue;
@@ -177,8 +177,8 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
 
 void Dust::Particle::spawn(sf::FloatRect& rect)
 {
-   _position.x = rect.left + std::rand() % static_cast<int32_t>(rect.width);
-   _position.y = rect.top + std::rand() % static_cast<int32_t>(rect.height);
+   _position.x = rect.position.x + std::rand() % static_cast<int32_t>(rect.size.x);
+   _position.y = rect.position.y + std::rand() % static_cast<int32_t>(rect.size.y);
    _age = 0.0f;
    _lifetime = 5.0f + (std::rand() % 100) * 0.1f;
 }

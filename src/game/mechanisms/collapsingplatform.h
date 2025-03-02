@@ -36,7 +36,7 @@ public:
       float _destruction_speed = 0.0f;
       int32_t _sprite_row = 0;
       int32_t _sprite_column = 0;
-      sf::Sprite _sprite;
+      std::unique_ptr<sf::Sprite> _sprite;
       uint8_t _alpha = 255;
 
       void reset()
