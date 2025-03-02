@@ -100,7 +100,7 @@ void LeverMechanismMerger::merge(
       {
          auto lever = std::dynamic_pointer_cast<Lever>(tmp);
 
-         if (lever->getPixelRect().intersects(search_rect))
+         if (lever->getPixelRect().findIntersection(search_rect).has_value())
          {
             std::vector<Callback> callbacks;
 
@@ -108,7 +108,7 @@ void LeverMechanismMerger::merge(
             {
                auto mechanism = std::dynamic_pointer_cast<Laser>(l);
 
-               if (mechanism->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().findIntersection(search_rect).has_value())
                {
                   callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
@@ -118,7 +118,7 @@ void LeverMechanismMerger::merge(
             {
                auto mechanism = std::dynamic_pointer_cast<ConveyorBelt>(b);
 
-               if (mechanism->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().findIntersection(search_rect).has_value())
                {
                   callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
@@ -128,7 +128,7 @@ void LeverMechanismMerger::merge(
             {
                auto mechanism = std::dynamic_pointer_cast<Fan>(f);
 
-               if (mechanism->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().findIntersection(search_rect).has_value())
                {
                   callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
@@ -141,7 +141,7 @@ void LeverMechanismMerger::merge(
                const auto& pixel_path = mechanism->getPixelPath();
 
                if (std::any_of(
-                      pixel_path.begin(), pixel_path.end(), [&](const auto& pixel) { return (search_rect.contains(pixel.x, pixel.y)); }
+                      pixel_path.begin(), pixel_path.end(), [&](const auto& pixel) { return (search_rect.contains({pixel.x, pixel.y})); }
                    ))
                {
                   callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
@@ -152,7 +152,7 @@ void LeverMechanismMerger::merge(
             {
                auto mechanism = std::dynamic_pointer_cast<Spikes>(s);
 
-               if (mechanism->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().findIntersection(search_rect).has_value())
                {
                   callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
@@ -162,7 +162,7 @@ void LeverMechanismMerger::merge(
             {
                auto mechanism = std::dynamic_pointer_cast<SpikeBlock>(s);
 
-               if (mechanism->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().findIntersection(search_rect).has_value())
                {
                   callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
@@ -172,7 +172,7 @@ void LeverMechanismMerger::merge(
             {
                auto mechanism = std::dynamic_pointer_cast<OnOffBlock>(instance);
 
-               if (mechanism->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().findIntersection(search_rect).has_value())
                {
                   callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
@@ -182,7 +182,7 @@ void LeverMechanismMerger::merge(
             {
                auto mechanism = std::dynamic_pointer_cast<RotatingBlade>(instance);
 
-               if (mechanism->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().findIntersection(search_rect).has_value())
                {
                   callbacks.emplace_back([mechanism](int32_t state) { mechanism->setEnabled(state == -1 ? false : true); });
                }
@@ -192,7 +192,7 @@ void LeverMechanismMerger::merge(
             {
                auto mechanism = std::dynamic_pointer_cast<Door>(instance);
 
-               if (mechanism->getPixelRect().intersects(search_rect))
+               if (mechanism->getPixelRect().findIntersection(search_rect).has_value())
                {
                   callbacks.emplace_back(
                      [mechanism](int32_t state)

@@ -74,12 +74,12 @@ std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(int32_t index, const std::
 std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    const auto rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    auto checkpoint = std::make_shared<Checkpoint>(parent);
    checkpoint->setObjectId(data._tmx_object->_name);
    checkpoint->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
-   checkpoint->_sprite.setTexture(*checkpoint->_texture);
+   checkpoint->_sprite = std::make_unique<sf::Sprite>(*checkpoint->_texture);
    checkpoint->_rect = rect;
    checkpoint->_name = data._tmx_object->_name;
    checkpoint->updateSpriteRect();
@@ -112,11 +112,11 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
          sf::Vector2f pos{
             static_cast<float>(sprite_pos_x_it->second->_value_int.value()), static_cast<float>(sprite_pos_y_it->second->_value_int.value())
          };
-         checkpoint->_sprite.setPosition(pos);
+         checkpoint->_sprite->setPosition(pos);
       }
       else
       {
-         checkpoint->_sprite.setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+         checkpoint->_sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
       }
    }
 
@@ -137,7 +137,7 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
 
 void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   target.draw(_sprite);
+   target.draw(*_sprite);
 
    //   DebugDraw::drawRect(target, _rect);
 }
@@ -146,7 +146,7 @@ void Checkpoint::update(const sf::Time& dt)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
 
-   if (player_rect.intersects(_rect))
+   if (player_rect.findIntersection(_rect).has_value())
    {
       reached();
    }
@@ -264,5 +264,5 @@ void Checkpoint::updateSpriteRect(float dt_s)
          break;
    }
 
-   _sprite.setTextureRect({x, y, w, h});
+   _sprite->setTextureRect({{x, y}, {w, h}});
 }

@@ -27,7 +27,7 @@ private:
    std::vector<sf::IntRect> _sprite_rects_keyboard;
    std::vector<sf::IntRect> _sprite_rects_controller;
 
-   sf::Sprite _background;
+   std::unique_ptr<sf::Sprite> _background;
    bool _visible = false;
    float _alpha = 0.0f;
    sf::Time _time;

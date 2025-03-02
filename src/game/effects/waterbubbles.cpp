@@ -38,7 +38,7 @@ void WaterBubbles::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
          continue;
       }
 
-      target.draw(bubble->_sprite);
+      target.draw(*bubble->_sprite);
    }
 }
 

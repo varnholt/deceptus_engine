@@ -26,7 +26,7 @@ void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
    for (const auto& firefly : _fireflies)
    {
-      target.draw(firefly._sprite);
+      target.draw(*firefly._sprite);
    }
 }
 
@@ -120,7 +120,7 @@ void Fireflies::deserialize(const GameDeserializeData& data)
 
    for (auto i = 0; i < count; i++)
    {
-      _fireflies.push_back({});
+      _fireflies.push_back({*_texture});
    }
 
    auto frand = [](float min, float max)
@@ -133,9 +133,7 @@ void Fireflies::deserialize(const GameDeserializeData& data)
    {
       firefly._instance_number = _instance_counter++;
       firefly._rect_px = _rect_px;
-      firefly._sprite.setTexture(*_texture);
-      firefly._sprite.setTextureRect({0, 0, PIXELS_PER_TILE, PIXELS_PER_TILE});
-
+      firefly._sprite->setTextureRect({{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
       firefly._elapsed += sf::seconds(static_cast<float>(std::rand() % 999));
       firefly._angle_x = (std::rand() % 360) * FACTOR_DEG_TO_RAD;
       firefly._angle_y = (std::rand() % 360) * FACTOR_DEG_TO_RAD;
@@ -162,6 +160,11 @@ void rotate(float& x, float& y, float& z, float angle_x, float angle_y)
    z = -temp_x * sin(angle_y) + temp_z * cos(angle_y);
 }
 
+Fireflies::Firefly::Firefly(const sf::Texture& texture)
+{
+   _sprite = std::make_unique<sf::Sprite>(texture);
+}
+
 void Fireflies::Firefly::update(const sf::Time& dt)
 {
    _elapsed += dt;
@@ -182,8 +185,8 @@ void Fireflies::Firefly::update(const sf::Time& dt)
    _position.x = _rect_px.position.x + (_rect_px.size.x * 0.5f) + x_scaled_px;
    _position.y = _rect_px.position.y + (_rect_px.size.y * 0.5f) + y_scaled_px;
 
-   _sprite.setPosition(_position);
-   _sprite.setOrigin({PIXELS_PER_TILE / 2, PIXELS_PER_TILE / 2});
+   _sprite->setPosition(_position);
+   _sprite->setOrigin({PIXELS_PER_TILE / 2, PIXELS_PER_TILE / 2});
 
    updateTextureRect();
 }
@@ -196,6 +199,6 @@ void Fireflies::Firefly::updateTextureRect()
    if (frame != _current_frame)
    {
       _current_frame = frame;
-      _sprite.setTextureRect({_current_frame * PIXELS_PER_TILE, 0, PIXELS_PER_TILE, PIXELS_PER_TILE});
+      _sprite->setTextureRect({{_current_frame * PIXELS_PER_TILE, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
    }
 }

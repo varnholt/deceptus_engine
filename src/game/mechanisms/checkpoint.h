@@ -44,7 +44,7 @@ private:
    std::string _name;
    sf::FloatRect _rect;
    bool _reached = false;
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    std::shared_ptr<sf::Texture> _texture;
    State _state{State::Inactive};
    float _sprite_index{0.0f};

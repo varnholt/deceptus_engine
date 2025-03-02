@@ -95,7 +95,9 @@ void ConveyorBelt::updateSprite()
          offset_y_px = PIXELS_PER_TILE;
       }
 
-      _belt_sprites[i].setTextureRect({offset_x_px * PIXELS_PER_TILE, static_cast<int32_t>(offset_y_px), PIXELS_PER_TILE, PIXELS_PER_TILE});
+      _belt_sprites[i].setTextureRect(
+         {{offset_x_px * PIXELS_PER_TILE, static_cast<int32_t>(offset_y_px)}, {PIXELS_PER_TILE, PIXELS_PER_TILE}}
+      );
    }
 }
 
@@ -167,24 +169,20 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
 
    for (auto i = 0u; i < tile_count; i++)
    {
-      sf::Sprite belt_sprite;
-      belt_sprite.setTexture(*_texture);
-      belt_sprite.setPosition(x + i * PIXELS_PER_TILE, y + Y_OFFSET);
+      sf::Sprite belt_sprite(*_texture);
+      belt_sprite.setPosition({x + i * PIXELS_PER_TILE, y + Y_OFFSET});
 
       _belt_sprites.push_back(belt_sprite);
    }
 
    for (auto i = 0u; i < tile_count - 1; i++)
    {
-      sf::Sprite arrow_sprite;
-      arrow_sprite.setTexture(*_texture);
-      arrow_sprite.setPosition(x + i * PIXELS_PER_TILE + 12, y - 12);
+      sf::Sprite arrow_sprite(*_texture);
+      arrow_sprite.setPosition({x + i * PIXELS_PER_TILE + 12, y - 12});
 
       arrow_sprite.setTextureRect(
-         {ARROW_INDEX_X * PIXELS_PER_TILE,
-          (velocity < -0.0001 ? ARROW_INDEX_LEFT_Y : ARROW_INDEX_RIGHT_Y) * PIXELS_PER_TILE,
-          PIXELS_PER_TILE,
-          PIXELS_PER_TILE}
+         {{ARROW_INDEX_X * PIXELS_PER_TILE, (velocity < -0.0001 ? ARROW_INDEX_LEFT_Y : ARROW_INDEX_RIGHT_Y) * PIXELS_PER_TILE},
+          {PIXELS_PER_TILE, PIXELS_PER_TILE}}
       );
 
       _arrow_sprites.push_back(arrow_sprite);

@@ -24,14 +24,14 @@ void MoveableBox::preload()
 
 void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   color.draw(_sprite);
+   color.draw(*_sprite);
 }
 
 void MoveableBox::update(const sf::Time& /*dt*/)
 {
    const auto x = _body->GetPosition().x * PPM;
    const auto y = _body->GetPosition().y * PPM;
-   _sprite.setPosition(x, y - 24);
+   _sprite->setPosition({x, y - 24});
 
    // if the thing is moving, start playing a scratching sound
    if (fabs(_body->GetLinearVelocity().x) > 0.01)
@@ -53,7 +53,7 @@ void MoveableBox::update(const sf::Time& /*dt*/)
 
 std::optional<sf::FloatRect> MoveableBox::getBoundingBoxPx()
 {
-   return _sprite.getGlobalBounds();
+   return _sprite->getGlobalBounds();
 }
 
 // box: pos: 5160 x 1056 size: 48 x 48
@@ -88,15 +88,15 @@ void MoveableBox::setup(const GameDeserializeData& data)
    setObjectId(data._tmx_object->_name);
 
    _texture = TexturePool::getInstance().get("data/sprites/moveable_box.png");
-   _sprite.setTexture(*_texture.get());
+   _sprite = std::make_unique<sf::Sprite>(*_texture.get());
 
    _size.x = data._tmx_object->_width_px;
    _size.y = data._tmx_object->_height_px;
 
-   _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px - 24);
+   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px - 24});
 
    const auto rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    addChunks(rect);
 
@@ -114,13 +114,13 @@ void MoveableBox::setup(const GameDeserializeData& data)
    {
       case 24:
       {
-         _sprite.setTextureRect(sf::IntRect(168, 0, 24, 2 * 24));
+         _sprite->setTextureRect(sf::IntRect({168, 0}, {24, 2 * 24}));
          break;
       }
 
       case 48:
       {
-         _sprite.setTextureRect(sf::IntRect(72, 24, 2 * 24, 3 * 24));
+         _sprite->setTextureRect(sf::IntRect({72, 24}, {2 * 24, 3 * 24}));
          break;
       }
 
@@ -136,8 +136,8 @@ void MoveableBox::setup(const GameDeserializeData& data)
 
 void MoveableBox::setupTransform()
 {
-   auto x = _sprite.getPosition().x / PPM;
-   auto y = _sprite.getPosition().y / PPM;
+   auto x = _sprite->getPosition().x / PPM;
+   auto y = _sprite->getPosition().y / PPM;
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 
