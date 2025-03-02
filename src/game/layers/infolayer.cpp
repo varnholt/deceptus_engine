@@ -140,31 +140,32 @@ InfoLayer::InfoLayer()
       }
 
       auto layer = std::make_shared<Layer>();
-      auto texture = std::make_shared<sf::Texture>();
-      auto sprite = std::make_shared<sf::Sprite>();
 
-      if (!texture->create(psd_layer.getWidth(), psd_layer.getHeight()))
+      try
+      {
+         auto texture = std::make_shared<sf::Texture>(psd_layer.getWidth(), psd_layer.getHeight());
+         texture->update(reinterpret_cast<const uint8_t*>(psd_layer.getImage().getData().data()));
+
+         auto sprite = std::make_shared<sf::Sprite>(*texture, true);
+         sprite->setPosition({static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop())});
+
+         layer->_visible = psd_layer.isVisible();
+         layer->_texture = texture;
+         layer->_sprite = sprite;
+
+         auto layer_data = std::make_shared<LayerData>(layer);
+         layer_data->_pos = sprite->getPosition();
+         _layers[psd_layer.getName()] = layer_data;
+
+         // store all player health related layers
+         if (std::ranges::contains(player_health_layers, psd_layer.getName()))
+         {
+            _player_health_layers.push_back(layer_data);
+         }
+      }
+      catch (...)
       {
          Log::Fatal() << "failed to create texture: " << psd_layer.getName();
-      }
-
-      texture->update(reinterpret_cast<const uint8_t*>(psd_layer.getImage().getData().data()));
-
-      sprite->setTexture(*texture, true);
-      sprite->setPosition({static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop())});
-
-      layer->_visible = psd_layer.isVisible();
-      layer->_texture = texture;
-      layer->_sprite = sprite;
-
-      auto layer_data = std::make_shared<LayerData>(layer);
-      layer_data->_pos = sprite->getPosition();
-      _layers[psd_layer.getName()] = layer_data;
-
-      // store all player health related layers
-      if (std::ranges::contains(player_health_layers, psd_layer.getName()))
-      {
-         _player_health_layers.push_back(layer_data);
       }
    }
 
@@ -243,13 +244,14 @@ void InfoLayer::loadInventoryItems()
       }
    );
 
-   _inventory_sprites[0].setTexture(*_inventory_texture);
-   _inventory_sprites[0].setTextureRect({});
-   _inventory_sprites[0].setPosition({frame_0_pos_x_px, frame_0_pos_y_px});
-
-   _inventory_sprites[1].setTexture(*_inventory_texture);
-   _inventory_sprites[1].setTextureRect({});
-   _inventory_sprites[1].setPosition({frame_1_pos_x_px, frame_1_pos_y_px});
+   auto inventory_item_1 = std::make_unique<sf::Sprite>(*_inventory_texture);
+   auto inventory_item_2 = std::make_unique<sf::Sprite>(*_inventory_texture);
+   inventory_item_1->setTextureRect({});
+   inventory_item_2->setTextureRect({});
+   inventory_item_1->setPosition({frame_0_pos_x_px, frame_0_pos_y_px});
+   inventory_item_2->setPosition({frame_1_pos_x_px, frame_1_pos_y_px});
+   _inventory_sprites[0] = std::move(inventory_item_1);
+   _inventory_sprites[1] = std::move(inventory_item_2);
 }
 
 void InfoLayer::updateInventoryItems()
@@ -265,7 +267,7 @@ void InfoLayer::updateInventoryItems()
       }
 
       const auto& sprite = _sprites[slot];
-      _inventory_sprites[i].setTextureRect(sprite->getTextureRect());
+      _inventory_sprites[i]->setTextureRect(sprite->getTextureRect());
    }
 }
 
@@ -345,8 +347,8 @@ void InfoLayer::updateHealthLayerOffsets()
    _animation_hp_unlock_left->setPosition({_player_health_x_offset, 0.0f});
    _animation_hp_unlock_right->setPosition({_player_health_x_offset, 0.0f});
 
-   _inventory_sprites[0].setPosition({frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px});
-   _inventory_sprites[1].setPosition({frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px});
+   _inventory_sprites[0]->setPosition({frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px});
+   _inventory_sprites[1]->setPosition({frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px});
 }
 
 void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
@@ -639,7 +641,7 @@ void InfoLayer::drawInventoryItem(sf::RenderTarget& window, sf::RenderStates sta
          continue;
       }
 
-      window.draw(_inventory_sprites[i]);
+      window.draw(*_inventory_sprites[i]);
       _slot_item_layers[i]->draw(window, states);
    }
 }

@@ -35,11 +35,11 @@ private:
    std::shared_ptr<Animation> _animation_hide;
 
    std::optional<float> _button_alpha;
-   sf::Sprite _button_sprite;
+   std::unique_ptr<sf::Sprite> _button_sprite;
    std::shared_ptr<sf::Texture> _button_texture;
 
    sf::Font _font;
-   sf::Text _text;
+   std::unique_ptr<sf::Text> _text;
 
    sf::IntRect _button_rect_keyboard;
    sf::IntRect _button_rect_controller;

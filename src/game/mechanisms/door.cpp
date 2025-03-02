@@ -49,7 +49,7 @@ void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    }
    else if (_state == State::Closed)
    {
-      color.draw(_sprite);
+      color.draw(*_sprite);
    }
 
    if (_player_at_door)

@@ -159,9 +159,9 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
 
    // set up visualization
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");
-   _sprite.setTexture(*_texture);
+   _sprite = std::make_unique<sf::Sprite>(*_texture);
 
-   _original_rect_px = {data._tmx_object->_x_px, data._tmx_object->_y_px, width_px, height_px};
+   _original_rect_px = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {width_px, height_px}};
    _translated_rect_px = _original_rect_px;
 }
 
@@ -189,14 +189,12 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       sprite_index = static_cast<int32_t>(_mapped_value_normalized * columns + 6) % columns;
    }
 
-   _sprite.setTextureRect(
-      {sprite_index * PIXELS_PER_TILE * tiles_per_box_width,
-       (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height,
-       PIXELS_PER_TILE * tiles_per_box_width,
-       PIXELS_PER_TILE * tiles_per_box_height}
+   _sprite->setTextureRect(
+      {{sprite_index * PIXELS_PER_TILE * tiles_per_box_width, (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height},
+       {PIXELS_PER_TILE * tiles_per_box_width, PIXELS_PER_TILE * tiles_per_box_height}}
    );
 
-   color.draw(_sprite);
+   color.draw(*_sprite);
 
 #ifdef DEBUG_COLLISION_RECTS
    DebugDraw::drawRect(color, _foot_collision_rect_px, sf::Color::Magenta);
@@ -240,7 +238,7 @@ void BubbleCube::updateSpriteIndex()
 void BubbleCube::updatePosition()
 {
    const auto pos_px = PPM * _body->GetPosition();
-   _sprite.setPosition(pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px);
+   _sprite->setPosition({pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px});
 
    // move translated rect along body position
    _translated_rect_px.position.y = _body->GetPosition().y * PPM;
@@ -253,7 +251,7 @@ void BubbleCube::updateRespawnCondition()
    if (_popped && (now - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
       // don't respawn while player blocks the area
-      if (!Player::getCurrent()->getPixelRectFloat().intersects(_original_rect_px))
+      if (!Player::getCurrent()->getPixelRectFloat().findIntersection(_original_rect_px).has_value())
       {
          _popped = false;
          _body->SetEnabled(true);
@@ -266,9 +264,9 @@ void BubbleCube::updateRespawnCondition()
 
    // update alpha
    _alpha = std::min((now - _respawn_time).asSeconds() * respawn_speed, 1.0f);
-   auto color = _sprite.getColor();
+   auto color = _sprite->getColor();
    color.a = static_cast<uint8_t>(_alpha * 255);
-   _sprite.setColor(color);
+   _sprite->setColor(color);
 }
 
 void BubbleCube::updateFootSensorContact()
@@ -292,10 +290,8 @@ void BubbleCube::updateFootSensorContact()
    const auto pos_px = PPM * _body->GetPosition();
    constexpr auto bevel_range_increase_px = 2;
    _foot_collision_rect_px = {
-      pos_px.x + bevel_px - bevel_range_increase_px,
-      pos_px.y,
-      width_px - (2 * bevel_px) + (2 * bevel_range_increase_px),
-      collision_rect_height
+      {pos_px.x + bevel_px - bevel_range_increase_px, pos_px.y},
+      {width_px - (2 * bevel_px) + (2 * bevel_range_increase_px), collision_rect_height}
    };
 
    const auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelFloatRect();

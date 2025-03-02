@@ -85,7 +85,7 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       if (d._age_s >= 0.0f)
       {
          // DebugDraw::drawLine(target, d._origin_px, d._pos_px + sf::Vector2f{0.0f, 96.0f}, {0, 0, 1});
-         target.draw(d._sprite, blend_mode);
+         target.draw(*d._sprite, blend_mode);
       }
    }
 
@@ -166,8 +166,8 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto sprite_index = std::rand() % 4;
 
-         p._sprit->setTextureRect(sf::IntRect({static_cast<int32_t>(sprite_index) * 11, 0}, {11, 96}));
-         p._sprit->setOrigin({6, 0});
+         p._sprite->setTextureRect(sf::IntRect({static_cast<int32_t>(sprite_index) * 11, 0}, {11, 96}));
+         p._sprite->setOrigin({6, 0});
          p._pos_px.x = _clip_rect.position.x + std::rand() % static_cast<int32_t>(_clip_rect.size.x);
          p._pos_px.y = _clip_rect.position.y + std::rand() % static_cast<int32_t>(_clip_rect.size.y);
          p._age_s = (std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;

@@ -63,7 +63,7 @@ private:
    State _state_previous = State::Left;
 
    sf::FloatRect _rect;
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    std::shared_ptr<sf::Texture> _texture;
    int32_t _offset = 0;
    int32_t _dir = 0;

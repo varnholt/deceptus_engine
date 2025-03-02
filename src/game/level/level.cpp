@@ -818,7 +818,7 @@ void Level::updateViews()
 
    CameraRoomLock::setViewRect(view_rect);
 
-   _level_view->reset(view_rect);
+   _level_view = std::make_shared<sf::View>(view_rect);
 
    for (const auto& parallax : _parallax_layers)
    {
@@ -1311,8 +1311,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    takeScreenshot("texture_level_background_normal", *_render_texture_normal_tmp.get());
 
    // draw the atmospheric parts into the level texture using the atmosphere shader
-   sf::Sprite tmp_sprite;
-   tmp_sprite.setTexture(_render_texture_level_background->getTexture());
+   sf::Sprite tmp_sprite(_render_texture_level_background->getTexture());
    _atmosphere_shader->update();
    _render_texture_level->draw(tmp_sprite, &_atmosphere_shader->getShader());
    takeScreenshot("texture_level_level_dist", *_render_texture_level.get());

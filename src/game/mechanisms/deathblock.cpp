@@ -42,7 +42,7 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    for (auto& spike : _spikes)
    {
-      color.draw(spike._sprite);
+      color.draw(*spike._sprite);
 
 #ifdef DEBUG_DRAW
       const auto& player_rect = Player::getCurrent()->getPixelRectInt();
@@ -51,7 +51,7 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 #endif
    }
 
-   color.draw(_center_sprite);
+   color.draw(*_center_sprite);
 }
 
 void DeathBlock::setupTransform()
@@ -145,7 +145,7 @@ void DeathBlock::updateCollision()
 
       const auto deadly = (spike._state == Spike::State::Extracted);
 
-      if (player_rect.intersects(spike._collision_rect_absolute) && deadly)
+      if (player_rect.findIntersection(spike._collision_rect_absolute).has_value() && deadly)
       {
          Player::getCurrent()->damage(_damage);
       }
@@ -357,15 +357,15 @@ void DeathBlock::updateSprites()
    {
       if (spike.hasChanged())
       {
-         spike._sprite.setTextureRect(sf::IntRect(spike._sprite_index * tl_px, tl_px * row, tl_px, tl_px));
+         spike._sprite->setTextureRect(sf::IntRect({spike._sprite_index * tl_px, tl_px * row}, {tl_px, tl_px}));
       }
 
-      spike._sprite.setPosition(x, y);
+      spike._sprite->setPosition({x, y});
       row++;
    }
 
-   _center_sprite.setTextureRect(sf::IntRect(_center_sprite_index * tl_px, 0, tl_px, tl_px));
-   _center_sprite.setPosition(x, y);
+   _center_sprite->setTextureRect(sf::IntRect({_center_sprite_index * tl_px, 0}, {tl_px, tl_px}));
+   _center_sprite->setPosition({x, y});
 }
 
 void DeathBlock::updatePosition(const sf::Time& dt)
@@ -413,38 +413,30 @@ void DeathBlock::setup(const GameDeserializeData& data)
 
    for (auto& spike : _spikes)
    {
-      spike._sprite.setTexture(*_texture);
+      spike._sprite = std::make_unique<sf::Sprite>(*_texture);
    }
 
    _spikes[Spike::Orientation::Up]._collision_rect_relative = sf::IntRect{
-      1 * PIXELS_PER_TILE + tolerance_px,
-      0 * PIXELS_PER_TILE + tolerance_px,
-      PIXELS_PER_TILE - tolerance_px_2,
-      PIXELS_PER_TILE - tolerance_px_2
+      {1 * PIXELS_PER_TILE + tolerance_px, 0 * PIXELS_PER_TILE + tolerance_px},
+      {PIXELS_PER_TILE - tolerance_px_2, PIXELS_PER_TILE - tolerance_px_2}
    };
 
    _spikes[Spike::Orientation::Right]._collision_rect_relative = sf::IntRect{
-      2 * PIXELS_PER_TILE + tolerance_px,
-      1 * PIXELS_PER_TILE + tolerance_px,
-      PIXELS_PER_TILE - tolerance_px_2,
-      PIXELS_PER_TILE - tolerance_px_2
+      {2 * PIXELS_PER_TILE + tolerance_px, 1 * PIXELS_PER_TILE + tolerance_px},
+      {PIXELS_PER_TILE - tolerance_px_2, PIXELS_PER_TILE - tolerance_px_2}
    };
 
    _spikes[Spike::Orientation::Down]._collision_rect_relative = sf::IntRect{
-      1 * PIXELS_PER_TILE + tolerance_px,
-      2 * PIXELS_PER_TILE + tolerance_px,
-      PIXELS_PER_TILE - tolerance_px_2,
-      PIXELS_PER_TILE - tolerance_px_2
+      {1 * PIXELS_PER_TILE + tolerance_px, 2 * PIXELS_PER_TILE + tolerance_px},
+      {PIXELS_PER_TILE - tolerance_px_2, PIXELS_PER_TILE - tolerance_px_2}
    };
 
    _spikes[Spike::Orientation::Left]._collision_rect_relative = sf::IntRect{
-      0 * PIXELS_PER_TILE + tolerance_px,
-      1 * PIXELS_PER_TILE + tolerance_px,
-      PIXELS_PER_TILE - tolerance_px_2,
-      PIXELS_PER_TILE - tolerance_px_2
+      {0 * PIXELS_PER_TILE + tolerance_px, 1 * PIXELS_PER_TILE + tolerance_px},
+      {PIXELS_PER_TILE - tolerance_px_2, PIXELS_PER_TILE - tolerance_px_2}
    };
 
-   _center_sprite.setTexture(*_texture);
+   _center_sprite = std::make_unique<sf::Sprite>(*_texture);
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 

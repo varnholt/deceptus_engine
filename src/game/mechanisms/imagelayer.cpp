@@ -19,7 +19,7 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       target.setView(_parallax_view);
    }
 
-   target.draw(_sprite, {_blend_mode});
+   target.draw(*_sprite, {_blend_mode});
 
    if (_parallax_settings.has_value())
    {
@@ -34,18 +34,17 @@ void ImageLayer::updateView(float level_view_x, float level_view_y, float view_w
       return;
    }
 
-   _parallax_view.reset(sf::FloatRect(
-      level_view_x * (*_parallax_settings)._factor.x + (*_parallax_settings)._error.x,
-      level_view_y * (*_parallax_settings)._factor.y + (*_parallax_settings)._error.y,
-      view_width,
-      view_height
-   ));
+   _parallax_view = sf::View{
+      {level_view_x * (*_parallax_settings)._factor.x + (*_parallax_settings)._error.x,
+       level_view_y * (*_parallax_settings)._factor.y + (*_parallax_settings)._error.y},
+      {view_width, view_height}
+   };
 }
 
 void ImageLayer::resetView(float view_width, float view_height)
 {
-   _parallax_view.reset(sf::FloatRect(0.0f, 0.0f, view_width, view_height));
-   _parallax_view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+   _parallax_view = sf::View{sf::FloatRect({0.0f, 0.0f}, {view_width, view_height})};
+   _parallax_view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 }
 
 std::optional<sf::FloatRect> ImageLayer::getBoundingBoxPx()
@@ -60,9 +59,9 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
 
    image->_z_index = image_layer->_z;
    image->_texture = TexturePool::getInstance().get((level_path / image_layer->_image->_source).string());
-   image->_sprite.setPosition(image_layer->_offset_x_px, image_layer->_offset_y_px);
-   image->_sprite.setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(image_layer->_opacity * 255.0f)));
-   image->_sprite.setTexture(*image->_texture);
+   image->_sprite = std::make_unique<sf::Sprite>(*image->_texture);
+   image->_sprite->setPosition({image_layer->_offset_x_px, image_layer->_offset_y_px});
+   image->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(image_layer->_opacity * 255.0f)));
 
    sf::BlendMode blend_mode = sf::BlendAlpha;
    if (image_layer->_properties)
@@ -118,10 +117,8 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
    if (!image->_parallax_settings.has_value())
    {
       const auto rect = sf::FloatRect{
-         image_layer->_offset_x_px,
-         image_layer->_offset_y_px,
-         static_cast<float>(image_layer->_image->_width_px),
-         static_cast<float>(image_layer->_image->_height_px)
+         {image_layer->_offset_x_px, image_layer->_offset_y_px},
+         {static_cast<float>(image_layer->_image->_width_px), static_cast<float>(image_layer->_image->_height_px)}
       };
 
       image->addChunks(rect);

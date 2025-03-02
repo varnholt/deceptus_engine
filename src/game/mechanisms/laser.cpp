@@ -41,11 +41,11 @@ Laser::Laser(GameNode* parent) : GameNode(parent)
 
 void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   _sprite.setTextureRect(
-      sf::IntRect(_tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE)
+   _sprite->setTextureRect(
+      sf::IntRect({_tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE})
    );
 
-   color.draw(_sprite);
+   color.draw(*_sprite);
 }
 
 void Laser::setEnabled(bool enabled)
@@ -186,7 +186,7 @@ void Laser::update(const sf::Time& dt)
       {
          _path_interpolation.updateTime(_settings._movement_speed * dt.asSeconds());
          _move_offset_px = _path_interpolation.computePosition(_path_interpolation.getTime());
-         _sprite.setPosition(_position_px + _move_offset_px);
+         _sprite->setPosition(_position_px + _move_offset_px);
       }
    }
 }
@@ -303,8 +303,8 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
             laser->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
          }
 
-         laser->_sprite.setTexture(*laser->_texture);
-         laser->_sprite.setPosition(laser->_position_px);
+         laser->_sprite = std::make_unique<sf::Sprite>(*laser->_texture);
+         laser->_sprite->setPosition(laser->_position_px);
 
          __lasers.push_back(laser);
       }
@@ -376,7 +376,7 @@ void Laser::collide(const sf::FloatRect& player_rect)
             pixel_rect.position.y += static_cast<int32_t>(laser->_move_offset_px.y);
          }
 
-         const auto rough_intersection = player_rect.intersects(pixel_rect);
+         const auto rough_intersection = player_rect.findIntersection(pixel_rect).has_value();
 
          auto active = false;
 
@@ -417,7 +417,7 @@ void Laser::collide(const sf::FloatRect& player_rect)
                   rect.size.x = PIXELS_PER_PHYSICS_TILE;
                   rect.size.y = PIXELS_PER_PHYSICS_TILE;
 
-                  const auto fine_intersection = player_rect.intersects(rect);
+                  const auto fine_intersection = player_rect.findIntersection(rect).has_value();
 
                   if (fine_intersection)
                   {

@@ -41,10 +41,10 @@ void OnOffBlock::setup(const GameDeserializeData& data)
    setObjectId(data._tmx_object->_name);
 
    _texture_map = TexturePool::getInstance().get("data/sprites/on_off_block.png");
-   _sprite.setTexture(*_texture_map);
-   _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
+   _sprite = std::make_unique<sf::Sprite>(*_texture_map);
+   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
 
-   _rectangle = {data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rectangle = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    addChunks(_rectangle);
 
@@ -142,7 +142,7 @@ void OnOffBlock::updateSpriteRect()
    _tu_tl = _sprite_index_current % count_columns;
    _tv_tl = _sprite_index_current / count_columns;
 
-   _sprite.setTextureRect({_tu_tl * PIXELS_PER_TILE, _tv_tl * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
+   _sprite->setTextureRect({{_tu_tl * PIXELS_PER_TILE, _tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
 }
 
 const sf::FloatRect& OnOffBlock::getPixelRect() const
@@ -152,7 +152,7 @@ const sf::FloatRect& OnOffBlock::getPixelRect() const
 
 void OnOffBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   target.draw(_sprite);
+   target.draw(*_sprite);
 }
 
 void OnOffBlock::update(const sf::Time& dt)
