@@ -14,7 +14,7 @@ void BlockingRect::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
 
-   _rectangle = {data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rectangle = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
@@ -39,8 +39,8 @@ void BlockingRect::setup(const GameDeserializeData& data)
       {
          const auto texture = texture_it->second->_value_string.value();
          _texture_map = TexturePool::getInstance().get(texture);
-         _sprite.setTexture(*_texture_map);
-         _sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
+         _sprite = std::make_unique<sf::Sprite>(*_texture_map);
+         _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
       }
 
       const auto normal_it = data._tmx_object->_properties->_map.find("normal");
@@ -89,17 +89,17 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
    if (_normal_map)
    {
-      _sprite.setTexture(*_texture_map);
+      _sprite->setTexture(*_texture_map);
    }
 
-   target.draw(_sprite);
+   target.draw(*_sprite);
 
    if (_normal_map)
    {
-      _sprite.setTexture(*_normal_map);
+      _sprite->setTexture(*_normal_map);
    }
 
-   normal.draw(_sprite);
+   normal.draw(*_sprite);
 }
 
 void BlockingRect::update(const sf::Time& /*dt*/)

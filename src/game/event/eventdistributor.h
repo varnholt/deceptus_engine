@@ -1,5 +1,5 @@
-#ifndef KEYBOARD_EVENT_DISTRIBUTOR_H
-#define KEYBOARD_EVENT_DISTRIBUTOR_H
+#ifndef EVENTDISTRIBUTOR_H
+#define EVENTDISTRIBUTOR_H
 
 #include <SFML/Graphics.hpp>
 #include <functional>
@@ -12,13 +12,14 @@ namespace EventDistributor
 template <typename EventT>
 using EventCallback = std::function<void(const EventT&)>;
 
-void event(const sf::Event& event);
+template <typename EventT>
+void event(const EventT& event);
 
 template <typename EventT>
-void registerEvent(const EventCallback<EventT>& callback);
+void registerEvent(EventCallback<EventT> callback);
 
 template <typename EventT>
-void unregisterEvent(const EventCallback<EventT>& callback);
-};  // namespace event_distributor
+void unregisterEvent(EventCallback<EventT> callback);
+}  // namespace EventDistributor
 
-#endif  // KEYBOARD_EVENT_DISTRIBUTOR_H
+#endif  // EVENTDISTRIBUTOR_H
