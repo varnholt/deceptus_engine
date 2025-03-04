@@ -63,14 +63,21 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
       const auto v1 = sf::Vertex(
          sf::Vector2f(q1.x * PPM, q1.y * PPM),
-         sf::Vector2f(static_cast<float>(_texture_rect_px.position.x), static_cast<float>(_texture_rect_px.position.y + u0 * _texture_rect_px.size.y))
+         sf::Color::White,
+         sf::Vector2f(
+            static_cast<float>(_texture_rect_px.position.x), static_cast<float>(_texture_rect_px.position.y + u0 * _texture_rect_px.size.y)
+         )
       );
       const auto v2 = sf::Vertex(
          sf::Vector2f(q2.x * PPM, q2.y * PPM),
-         sf::Vector2f(static_cast<float>(_texture_rect_px.position.x), static_cast<float>(_texture_rect_px.position.y + u1 * _texture_rect_px.size.y))
+         sf::Color::White,
+         sf::Vector2f(
+            static_cast<float>(_texture_rect_px.position.x), static_cast<float>(_texture_rect_px.position.y + u1 * _texture_rect_px.size.y)
+         )
       );
       const auto v3 = sf::Vertex(
          sf::Vector2f(q3.x * PPM, q3.y * PPM),
+         sf::Color::White,
          sf::Vector2f(
             static_cast<float>(_texture_rect_px.position.x + _texture_rect_px.size.x),
             static_cast<float>(_texture_rect_px.position.y + u1 * _texture_rect_px.size.y)
@@ -78,6 +85,7 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       );
       const auto v4 = sf::Vertex(
          sf::Vector2f(q4.x * PPM, q4.y * PPM),
+         sf::Color::White,
          sf::Vector2f(
             static_cast<float>(_texture_rect_px.position.x + _texture_rect_px.size.x),
             static_cast<float>(_texture_rect_px.position.y + u0 * _texture_rect_px.size.y)
@@ -119,7 +127,7 @@ void Rope::update(const sf::Time& dt)
       return;
    }
 
-   if (_player_impulse.has_value() && Player::getCurrent()->getPixelRectFloat().intersects(_bounding_box))
+   if (_player_impulse.has_value() && Player::getCurrent()->getPixelRectFloat().findIntersection(_bounding_box).has_value())
    {
       // using a fix timestep for now, everything else lets box2d go nuts
       const auto impulse = Player::getCurrent()->getBody()->GetLinearVelocity().x * _player_impulse.value() * dt.asSeconds();
