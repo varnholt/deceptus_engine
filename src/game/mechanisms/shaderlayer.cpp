@@ -20,11 +20,6 @@ ShaderLayer::ShaderLayer(GameNode* parent) : GameNode(parent)
 
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   if (!isEnabled())
-   {
-      return;
-   }
-
    const auto x = _position.x;
    const auto y = _position.y;
    const auto w = _size.x;
