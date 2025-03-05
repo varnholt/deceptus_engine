@@ -6,6 +6,13 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 
+std::map<std::string, std::function<ShaderLayer::FactoryFunction>> ShaderLayer::__customizations;
+
+void ShaderLayer::registerCustomization(const std::string& id, const std::function<FactoryFunction>& factory_function)
+{
+   __customizations[id] = factory_function;
+}
+
 ShaderLayer::ShaderLayer(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(ShaderLayer).name());
@@ -49,7 +56,25 @@ std::optional<sf::FloatRect> ShaderLayer::getBoundingBoxPx()
 
 std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
-   std::shared_ptr<ShaderLayer> instance = std::make_shared<ShaderLayer>(parent);
+   if (!data._tmx_object->_properties)
+   {
+      Log::Error() << "shader layer does not have any properties, id: " << data._tmx_object->_name;
+      return nullptr;
+   }
+
+   const auto& map = data._tmx_object->_properties->_map;
+
+   // shader layers can have customization implementations in cpp that drive the shader uniforms
+   std::shared_ptr<ShaderLayer> instance;
+   const auto customization = ValueReader::readValue<std::string>("customization", map);
+   if (customization.has_value())
+   {
+      instance = __customizations[customization.value()](parent);
+   }
+   else
+   {
+      instance = std::make_shared<ShaderLayer>(parent);
+   }
 
    const auto bounding_rect =
       sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
@@ -61,63 +86,37 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    instance->setObjectId(data._tmx_object->_name);
    instance->_rect = bounding_rect;
    instance->addChunks(bounding_rect);
+   instance->_z_index = ValueReader::readValue<int32_t>("z", map).value_or(instance->_z_index);
+   instance->_uv_width = ValueReader::readValue<float>("uv_width", map).value_or(instance->_uv_width);
+   instance->_uv_height = ValueReader::readValue<float>("uv_height", map).value_or(instance->_uv_height);
+   instance->_time_offset = ValueReader::readValue<float>("time_offset_s", map).value_or(instance->_time_offset);
 
-   if (data._tmx_object->_properties)
+   const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
+   if (vert_file.has_value())
    {
-      auto z = data._tmx_object->_properties->_map.find("z");
-      if (z != data._tmx_object->_properties->_map.end())
+      if (!instance->_shader.loadFromFile(vert_file.value(), sf::Shader::Vertex))
       {
-         instance->_z_index = z->second->_value_int.value();
+         Log::Error() << "error compiling " << vert_file.value();
       }
+   }
 
-      auto uv_width_it = data._tmx_object->_properties->_map.find("uv_width");
-      if (uv_width_it != data._tmx_object->_properties->_map.end())
+   const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
+   if (frag_file.has_value())
+   {
+      if (!instance->_shader.loadFromFile(frag_file.value(), sf::Shader::Fragment))
       {
-         instance->_uv_width = uv_width_it->second->_value_float.value();
+         Log::Error() << "error compiling " << frag_file.value();
       }
+   }
 
-      auto uv_height_it = data._tmx_object->_properties->_map.find("uv_height");
-      if (uv_height_it != data._tmx_object->_properties->_map.end())
-      {
-         instance->_uv_height = uv_height_it->second->_value_float.value();
-      }
+   const auto texture_id = ValueReader::readValue<std::string>("texture", map);
+   if (texture_id.has_value())
+   {
+      instance->_texture = TexturePool::getInstance().get(texture_id.value());
+      instance->_texture->setRepeated(true);
 
-      auto time_offset_it = data._tmx_object->_properties->_map.find("time_offset_s");
-      if (time_offset_it != data._tmx_object->_properties->_map.end())
-      {
-         instance->_time_offset = time_offset_it->second->_value_float.value();
-      }
-
-      auto vertex_shader_it = data._tmx_object->_properties->_map.find("vertex_shader");
-      if (vertex_shader_it != data._tmx_object->_properties->_map.end())
-      {
-         const auto vert_file = vertex_shader_it->second->_value_string.value();
-         if (!instance->_shader.loadFromFile(vert_file, sf::Shader::Vertex))
-         {
-            Log::Error() << "error compiling " << vert_file;
-         }
-      }
-
-      auto fragment_shader_it = data._tmx_object->_properties->_map.find("fragment_shader");
-      if (fragment_shader_it != data._tmx_object->_properties->_map.end())
-      {
-         const auto frag_file = fragment_shader_it->second->_value_string.value();
-         if (!instance->_shader.loadFromFile(frag_file, sf::Shader::Type::Fragment))
-         {
-            Log::Error() << "error compiling " << frag_file;
-         }
-      }
-
-      auto texture_id = data._tmx_object->_properties->_map.find("texture");
-      if (texture_id != data._tmx_object->_properties->_map.end())
-      {
-         instance->_texture = TexturePool::getInstance().get(texture_id->second->_value_string.value());
-         instance->_texture->setRepeated(true);
-
-         const auto& map = data._tmx_object->_properties->_map;
-         const auto smooth_texture = ValueReader::readValue<bool>("smooth_texture", map).value_or(false);
-         instance->_texture->setSmooth(smooth_texture);
-      }
+      const auto smooth_texture = ValueReader::readValue<bool>("smooth_texture", map).value_or(false);
+      instance->_texture->setSmooth(smooth_texture);
    }
 
    return instance;
