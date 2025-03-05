@@ -679,6 +679,7 @@ add_executable(deceptus ${GAME_FILES}
    doc/level_design/visual_effects.md
    doc/lua_interface/readme.md
    src/game/mechanisms/boxcollider.h src/game/mechanisms/boxcollider.cpp
+   src/game/mechanisms/ringshaderlayer.h src/game/mechanisms/ringshaderlayer.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})

@@ -28,4 +28,9 @@ struct ShaderLayer : public GameMechanism, public GameNode
    sf::Time _elapsed;
 
    static std::shared_ptr<ShaderLayer> deserialize(GameNode* parent, const GameDeserializeData& data);
+
+   // customization factory
+   using FactoryFunction = std::shared_ptr<ShaderLayer>(GameNode* parent);
+   static std::map<std::string, std::function<FactoryFunction>> __customizations;
+   static void registerCustomization(const std::string& id, const std::function<FactoryFunction>&);
 };
