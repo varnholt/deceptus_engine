@@ -25,7 +25,7 @@ public:
    static std::shared_ptr<ImageLayer> deserialize(const std::shared_ptr<TmxElement>& element, const std::filesystem::path& level_path);
 
 private:
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    std::shared_ptr<sf::Texture> _texture;
    sf::BlendMode _blend_mode = sf::BlendAlpha;
 

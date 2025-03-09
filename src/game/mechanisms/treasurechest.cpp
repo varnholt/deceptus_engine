@@ -79,7 +79,7 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
    _animation_idle_open->_looped = true;
    _animation_opening->_reset_to_first_frame = false;
 
-   _spawn_effect = std::make_unique<SpawnEffect>(sf::Vector2f{_rect.left + _rect.width / 2, _rect.top - _rect.height / 2});
+   _spawn_effect = std::make_unique<SpawnEffect>(sf::Vector2f{_rect.position.x + _rect.size.x / 2, _rect.position.y - _rect.size.y / 2});
    _spawn_effect->deserialize(data);
 }
 
@@ -124,7 +124,7 @@ void TreasureChest::update(const sf::Time& dt)
          if (Player::getCurrent()->getControls()->isButtonBPressed())
          {
             const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
-            if (player_rect_px.intersects(_rect))
+            if (player_rect_px.findIntersection(_rect).has_value())
             {
                _spawn_effect->activate();
 

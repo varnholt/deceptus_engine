@@ -108,18 +108,17 @@ SpawnEffect::ParticleEffect::ParticleEffect(
    _particles.reserve(count);
    for (auto i = 0; i < count; i++)
    {
-      Particle particle;
+      Particle particle(*_texture);
+      particle._sprite->setOrigin({5, 5});
       particle._offset_px = offset_px;
       particle._radius_px = radius_px;
       particle._show_duration_s = show_duration_s;
       particle._particle_velocity_min = particle_velocity_min;
       particle._particle_velocity_max = particle_velocity_max;
-      particle._sprite.setTexture(*_texture);
-      particle._sprite.setOrigin(5, 5);
       particle.spawn();
       particle.setupPosition(frand(0.0f, 1.0f));  // at the start spawn from everywhere
 
-      _particles.push_back(particle);
+      _particles.push_back(std::move(particle));
    }
 }
 
@@ -132,7 +131,7 @@ void SpawnEffect::ParticleEffect::draw(sf::RenderTarget& target)
       {
          if (particle._delay.asMilliseconds() <= 0 && !particle._dead)
          {
-            target.draw(particle._sprite, render_states);
+            target.draw(*particle._sprite, render_states);
          }
       }
    );
@@ -169,6 +168,11 @@ void SpawnEffect::Particle::setupPosition(float random_scale)
    _scale_px = random_scale * _radius_px;
 }
 
+SpawnEffect::Particle::Particle(const sf::Texture& texture)
+{
+   _sprite = std::make_unique<sf::Sprite>(texture);
+}
+
 void SpawnEffect::Particle::spawn()
 {
    setupPosition(frand(0.7f, 1.0f));
@@ -176,7 +180,7 @@ void SpawnEffect::Particle::spawn()
    _delay = sf::seconds(frand(0.0f, _show_duration_s));
 
    // each texture rect is 10x10px, 5 particles in 1 row
-   _sprite.setTextureRect({(std::rand() % 5) * 10, 0, 10, 10});
+   _sprite->setTextureRect({{(std::rand() % 5) * 10, 0}, {10, 10}});
 }
 
 void SpawnEffect::Particle::update(const sf::Time& dt)
@@ -206,7 +210,7 @@ void SpawnEffect::Particle::update(const sf::Time& dt)
    const auto alpha_norm_squared = alpha_norm * alpha_norm;
    const auto alpha_squared_and_scaled = 255 - (alpha_norm_squared * 255);
    const auto alpha = static_cast<uint8_t>(alpha_squared_and_scaled * _alpha_all_particles);
-   _sprite.setColor({255, 255, 255, alpha});
+   _sprite->setColor({255, 255, 255, alpha});
 
    // compute sprite position
    float speed_factor = 1.0f;
@@ -217,7 +221,7 @@ void SpawnEffect::Particle::update(const sf::Time& dt)
 
    _pos_norm = _pos_norm * (1.0f - speed_factor * _velocity * dt.asMilliseconds());
    _pos_px = _pos_norm * _scale_px;
-   _sprite.setPosition(_pos_px + _offset_px);
+   _sprite->setPosition(_pos_px + _offset_px);
 }
 
 SpawnEffect::Orb::Orb(const sf::Vector2f& pos_px, int32_t idle_cycle_count) : _idle_cycle_count(idle_cycle_count)

@@ -115,7 +115,7 @@ void Spikes::updateTrap()
    {
       // trap trigger is done via intersection
       const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-      if (player_rect.intersects(_player_collision_rect_px))
+      if (player_rect.findIntersection(_player_collision_rect_px).has_value())
       {
          // start extracting once player has intersected
          _elapsed_since_collision_ms = 0;
@@ -235,7 +235,7 @@ void Spikes::update(const sf::Time& dt)
    {
       // check for intersection with player
       const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-      if (player_rect.intersects(_player_collision_rect_px))
+      if (player_rect.findIntersection(_player_collision_rect_px).has_value())
       {
          Player::getCurrent()->damage(100);
       }

@@ -47,10 +47,10 @@ ForestScene::ForestScene()
          Log::Fatal() << "failed to create texture: " << layer.getName();
       }
 
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
+      texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+      sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
       sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
 
       tmp->_texture = texture;
@@ -77,7 +77,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    // draw text
    const auto rect = _text.getGlobalBounds();
-   const auto left = w / 2 - rect.width / 2;
+   const auto left = w / 2 - rect.size.x / 2;
    _text.setPosition(floor(left), 82);
    window.draw(_text, states);
 }
@@ -93,7 +93,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    +--------------------------------------------------------+
                       |                   |                 720px
                       |                   |
-                      rect.width = 200px
+                      rect.size.x = 200px
 */
 
 /*

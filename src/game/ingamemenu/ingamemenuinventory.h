@@ -15,7 +15,7 @@ class InGameMenuInventory : public InGameMenuPage
 public:
    struct ItemSprite
    {
-      sf::Sprite _sprite;
+      std::unique_ptr<sf::Sprite> _sprite;
    };
 
    enum class Filter
@@ -79,7 +79,7 @@ private:
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
    std::array<Filter, 5> _filters;
 
-   sf::Sprite _cursor_sprite;
+   std::unique_ptr<sf::Sprite> _cursor_sprite;
    sf::Vector2f _cursor_position;
    std::shared_ptr<sf::Texture> _inventory_texture;
    std::unique_ptr<LayerData> _frame_selection;
@@ -110,8 +110,8 @@ private:
 
    sf::Font _font_title;
    sf::Font _font_description;
-   sf::Text _text_title;
-   sf::Text _text_description;
+   std::unique_ptr<sf::Text> _text_title;
+   std::unique_ptr<sf::Text> _text_description;
 
    std::function<void(void)> _controller_button_x_pressed_callback;
    std::function<void(void)> _controller_button_y_pressed_callback;
