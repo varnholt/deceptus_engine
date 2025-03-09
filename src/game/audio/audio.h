@@ -50,7 +50,7 @@ public:
    struct SoundThread
    {
       std::string _filename;
-      sf::Sound _sound;
+      std::unique_ptr<sf::Sound> _sound;
       PlayInfo _play_info;
 
       void setVolume(float volume);

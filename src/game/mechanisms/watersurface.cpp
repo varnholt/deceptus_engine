@@ -120,12 +120,13 @@ void WaterSurface::update(const sf::Time& dt)
 
    if (splash_needed)
    {
-      sf::FloatRect intersection;
-      if (player->getPixelRectFloat().intersects(_bounding_box, intersection))
+      const auto intersection = player->getPixelRectFloat().findIntersection(_bounding_box);
+      if (intersection.has_value())
       {
          const auto velocity = splash_velocity_factor * player->getBody()->GetLinearVelocity().y * _config._splash_factor;
          const auto normalized_intersection =
-            (intersection.position.x + (player->getPixelRectFloat().size.x / 2.0f) - _bounding_box.position.x) / _bounding_box.size.x;
+            (intersection.value().position.x + (player->getPixelRectFloat().size.x / 2.0f) - _bounding_box.position.x) /
+            _bounding_box.size.x;
          const auto index = static_cast<int32_t>(normalized_intersection * _segments.size());
 
          splash(index, velocity);

@@ -22,7 +22,7 @@ void TextLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    }
    else if (_mode == Mode::TrueType)
    {
-      target.draw(_truetype_text);
+      target.draw(*_truetype_text);
    }
 }
 
@@ -42,7 +42,7 @@ std::shared_ptr<TextLayer> TextLayer::deserialize(GameNode* parent, const GameDe
    const auto& map = data._tmx_object->_properties->_map;
 
    const auto bounding_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    instance->setObjectId(data._tmx_object->_name);
    instance->_rect = bounding_rect;
@@ -77,23 +77,22 @@ std::shared_ptr<TextLayer> TextLayer::deserialize(GameNode* parent, const GameDe
    if (font_truetype.has_value())
    {
       instance->_mode = Mode::TrueType;
-      if (!instance->_truetype_font.loadFromFile(font_truetype.value()))
+      if (!instance->_truetype_font.openFromFile(font_truetype.value()))
       {
          Log::Error() << "failed to load font";
       }
       else
       {
-         instance->_truetype_font.setSmooth(false);
-         instance->_truetype_text.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
-         instance->_truetype_text.setString(instance->_text);
-
          const auto font_size = ValueReader::readValue<int32_t>("truetype_font_size", map).value_or(12);
-         instance->_truetype_text.setCharacterSize(font_size);
-         instance->_truetype_text.setFont(instance->_truetype_font);
-
          const auto color = ValueReader::readValue<std::string>("truetype_font_color", map).value_or("#ffffffff");
          const auto rgba = TmxTools::color(color);
-         instance->_truetype_text.setFillColor({rgba[0], rgba[1], rgba[2], rgba[3]});
+
+         instance->_truetype_font.setSmooth(false);
+         instance->_truetype_text = std::make_unique<sf::Text>(instance->_truetype_font);
+         instance->_truetype_text->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+         instance->_truetype_text->setString(instance->_text);
+         instance->_truetype_text->setCharacterSize(font_size);
+         instance->_truetype_text->setFillColor({rgba[0], rgba[1], rgba[2], rgba[3]});
       }
    }
 

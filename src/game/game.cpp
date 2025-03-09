@@ -910,8 +910,8 @@ void Game::processEvent(const sf::Event& event)
          {
             if (e.button == sf::Mouse::Right)
             {
-               const auto mouse_pos_spx = sf::Mouse::getPosition(*_window);
-               const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_spx, Level::getCurrentLevel()->getLevelView());
+               const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
+               const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, Level::getCurrentLevel()->getLevelView());
                Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
             }
          }
