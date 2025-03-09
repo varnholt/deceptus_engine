@@ -54,7 +54,7 @@ void ZoomRect::update(const sf::Time& dt)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
    const auto player_position_px = Player::getCurrent()->getPixelPositionFloat();
-   const auto within_rect = (player_rect.intersects(_rect_px));
+   const auto within_rect = (player_rect.findIntersection(_rect_px).has_value());
 
    if (!within_rect)
    {

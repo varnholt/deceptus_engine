@@ -71,13 +71,14 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    // source: foreground
    // dest:   background
 
+   // BlendMode(Factor sourceFactor, Factor destinationFactor, Equation blendEquation = Equation::Add);
    static sf::BlendMode blend_mode(
-      sf::BlendMode::SrcAlpha,          // colorSourceFactor
-      sf::BlendMode::OneMinusSrcAlpha,  // colorDestinationFactor
-      sf::BlendMode::Add,               // colorBlendEquation
-      sf::BlendMode::SrcAlpha,          // alphaSourceFactor
-      sf::BlendMode::OneMinusSrcAlpha,  // alphaDestinationFactor
-      sf::BlendMode::Add                // alphaBlendEquation
+      sf::BlendMode::Factor::SrcAlpha,          // colorSourceFactor
+      sf::BlendMode::Factor::OneMinusSrcAlpha,  // colorDestinationFactor
+      sf::BlendMode::Equation::Add,             // colorBlendEquation
+      sf::BlendMode::Factor::SrcAlpha,          // alphaSourceFactor
+      sf::BlendMode::Factor::OneMinusSrcAlpha,  // alphaDestinationFactor
+      sf::BlendMode::Equation::Add              // alphaBlendEquation
    );
 
    for (auto& d : _drops)

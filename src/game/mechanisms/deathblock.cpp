@@ -46,7 +46,7 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
 #ifdef DEBUG_DRAW
       const auto& player_rect = Player::getCurrent()->getPixelRectInt();
-      const auto fill_color = player_rect.intersects(spike._collision_rect_absolute) ? sf::Color::Red : sf::Color::Green;
+      const auto fill_color = player_rect.findIntersection(spike._collision_rect_absolute).has_value() ? sf::Color::Red : sf::Color::Green;
       DebugDraw::drawRect(color, spike._collision_rect_absolute, fill_color);
 #endif
    }

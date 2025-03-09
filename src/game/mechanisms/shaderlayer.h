@@ -17,7 +17,6 @@ struct ShaderLayer : public GameMechanism, public GameNode
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    sf::Shader _shader;
-   sf::Sprite _sprite;
    sf::Vector2f _position;
    sf::Vector2f _size;
    sf::FloatRect _rect;
