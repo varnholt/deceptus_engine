@@ -36,7 +36,7 @@ void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
    sf::Sprite rt_sprite(_render_texture.getTexture());
    rt_sprite.setPosition(_offset_px);
-   rt_sprite.scale(_pixel_ratio, _pixel_ratio);
+   rt_sprite.scale({_pixel_ratio, _pixel_ratio});
    rt_sprite.setColor(_layer_color);
 
    color.draw(rt_sprite);
@@ -50,7 +50,7 @@ void SmokeEffect::update(const sf::Time& dt)
    for (auto& particle : _particles)
    {
       particle._rot += dt_scaled * 10.0f * particle._rot_dir;
-      particle._sprite.setRotation(particle._rot);
+      particle._sprite.setRotation(sf::degrees(particle._rot));
 
       // fake z rotation
       const auto x_normalized = 0.5f * (1.0f + sin(particle._time_offset + _elapsed.asSeconds() * _velocity));
@@ -58,7 +58,7 @@ void SmokeEffect::update(const sf::Time& dt)
       const auto x = x_normalized * particle._offset.x;
       const auto y = y_normalized * particle._offset.y;
 
-      particle._sprite.setPosition(particle._center.x + x, particle._center.y + y);
+      particle._sprite.setPosition({particle._center.x + x, particle._center.y + y});
 
       if (_mode == Mode::Fog)
       {
@@ -70,7 +70,7 @@ void SmokeEffect::update(const sf::Time& dt)
       // moved here from deserialize code
       // origin should always depend on rotation
       const auto bounds = particle._sprite.getGlobalBounds();
-      particle._sprite.setOrigin(bounds.size.x / 2, bounds.size.y / 2);
+      particle._sprite.setOrigin({bounds.size.x / 2, bounds.size.y / 2});
    }
 }
 
@@ -212,7 +212,7 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
 
    for (auto i = 0; i < particle_count; i++)
    {
-      SmokeParticle particle;
+      SmokeParticle particle(*smoke_effect->_texture);
 
       const auto offset_x_px = static_cast<float>((std::rand() % range_x) - range_x / 2);  // normalize from (-range / 2) to (range / 2)
       const auto offset_y_px = static_cast<float>((std::rand() % range_y) - range_y / 2);
@@ -225,21 +225,23 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
       particle._offset = sf::Vector2f{offset_x_px, offset_y_px};
       particle._time_offset = static_cast<float>(std::rand() % 100) * 0.02f * std::numbers::pi_v<float>;  // 0 .. 2_PI
 
-      particle._sprite.setScale(sprite_scale_x, sprite_scale_y);
-      particle._sprite.setRotation(static_cast<float>(std::rand() % 360));
-      particle._sprite.setTexture(*smoke_effect->_texture);
-      particle._sprite.setColor(smoke_effect->_particle_color);
+      particle._sprite->setScale({sprite_scale_x, sprite_scale_y});
+      particle._sprite->setRotation(sf::degrees(static_cast<float>(std::rand() % 360)));
+      particle._sprite->setColor(smoke_effect->_particle_color);
 
-      smoke_effect->_particles.push_back(particle);
+      smoke_effect->_particles.push_back(std::move(particle));
    }
 
-   if (!smoke_effect->_render_texture.create(
-          static_cast<int32_t>(rect_width_px / smoke_effect->_pixel_ratio),
-          static_cast<int32_t>(rect_height_px / smoke_effect->_pixel_ratio)
-       ))
+   try
+   {
+      smoke_effect->_render_texture = std::make_unique<sf::RenderTexture>(
+         {static_cast<uint32_t>(rect_width_px / smoke_effect->_pixel_ratio),
+          static_cast<uint32_t>(rect_height_px / smoke_effect->_pixel_ratio)}
+      );
+   }
+   catch (const std::exception& e)
    {
       Log::Error() << "could not create render texture for smoke effect";
-      return nullptr;
    }
 
    return smoke_effect;

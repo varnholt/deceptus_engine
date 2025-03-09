@@ -58,7 +58,8 @@ std::vector<WorldQuery::CollidedNode> WorldQuery::findNodesByHitbox(const sf::Fl
    for (const auto& node : nodes)
    {
       if (auto intersecting_hitbox = std::ranges::find_if(
-             node->_hitboxes, [&search_rect](const auto& hit_box) { return hit_box.getRectTranslated().intersects(search_rect); }
+             node->_hitboxes,
+             [&search_rect](const auto& hit_box) { return hit_box.getRectTranslated().findIntersection(search_rect).has_value(); }
           );
           intersecting_hitbox != node->_hitboxes.end())
       {
@@ -82,7 +83,8 @@ std::vector<WorldQuery::CollidedNode> WorldQuery::findNodesByHitbox(const std::v
              [&attack_rects](const auto& hit_box)
              {
                 return std::ranges::any_of(
-                   attack_rects, [&hit_box](const auto& attack_rect) { return hit_box.getRectTranslated().intersects(attack_rect); }
+                   attack_rects,
+                   [&hit_box](const auto& attack_rect) { return hit_box.getRectTranslated().findIntersection(attack_rect).has_value(); }
                 );
              }
           );

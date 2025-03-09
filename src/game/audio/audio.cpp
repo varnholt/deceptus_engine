@@ -113,7 +113,7 @@ void Audio::debug()
    const auto stopped_thread_count = std::count_if(
       _sound_threads.begin(),
       _sound_threads.end(),
-      [](const auto& thread) { return thread._sound.getStatus() == sf::Sound::Status::Stopped; }
+      [](const auto& thread) { return thread._sound->getStatus() == sf::Sound::Status::Stopped; }
    );
 
    std::cout << stopped_thread_count << "/" << _sound_threads.size() << " are free" << std::endl;
@@ -132,7 +132,7 @@ void Audio::adjustActiveSampleVolume()
    std::lock_guard<std::mutex> guard(_mutex);
 
    auto threads =
-      _sound_threads | std::views::filter([](const auto& thread) { return thread._sound.getStatus() != sf::Sound::Status::Stopped; });
+      _sound_threads | std::views::filter([](const auto& thread) { return thread._sound->getStatus() != sf::Sound::Status::Stopped; });
    for (auto& thread : threads)
    {
       std::cout << thread._play_info._volume << std::endl;
@@ -150,7 +150,7 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
    const auto& thread_it = std::find_if(
       _sound_threads.begin(),
       _sound_threads.end(),
-      [](const auto& thread) { return thread._sound.getStatus() == sf::Sound::Status::Stopped; }
+      [](const auto& thread) { return thread._sound->getStatus() == sf::Sound::Status::Stopped; }
    );
 
    if (thread_it == _sound_threads.cend())
@@ -167,24 +167,24 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
       return std::nullopt;
    }
 
-   thread_it->_sound.setBuffer(*it->second);
+   thread_it->_sound->setBuffer(*it->second);
    thread_it->_filename = play_info._sample_name;
    thread_it->setVolume(play_info._volume);
-   thread_it->_sound.setLooping(play_info._looped);
+   thread_it->_sound->setLooping(play_info._looped);
    thread_it->_play_info = play_info;
 
    if (play_info._pos.has_value())
    {
-      thread_it->_sound.setPosition({play_info._pos->x, play_info._pos->y, 0.1f});
+      thread_it->_sound->setPosition({play_info._pos->x, play_info._pos->y, 0.1f});
    }
    else
    {
       // https://github.com/SFML/SFML/issues/2319
       // for mono sounds, the listener position must be != (0, 0, 0)
-      thread_it->_sound.setPosition({0.0f, 0.0f, 0.1f});
+      thread_it->_sound->setPosition({0.0f, 0.0f, 0.1f});
    }
 
-   thread_it->_sound.play();
+   thread_it->_sound->play();
 
    return static_cast<int32_t>(std::distance(_sound_threads.begin(), thread_it));
 }
@@ -196,7 +196,7 @@ void Audio::stopSample(const std::string& name)
    auto threads = _sound_threads | std::views::filter([name](const auto& thread) { return thread._filename == name; });
    for (auto& thread : threads)
    {
-      thread._sound.stop();
+      thread._sound->stop();
    }
 }
 
@@ -204,7 +204,7 @@ void Audio::stopSample(int32_t thread)
 {
    std::lock_guard<std::mutex> guard(_mutex);
 
-   _sound_threads[thread]._sound.stop();
+   _sound_threads[thread]._sound->stop();
 }
 
 void Audio::setVolume(int32_t thread, float volume)
@@ -251,10 +251,10 @@ void Audio::SoundThread::setVolume(float volume)
 {
    const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
    const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx) * 0.01f;
-   _sound.setVolume(master * sfx * volume * 100.0f);
+   _sound->setVolume(master * sfx * volume * 100.0f);
 }
 
 void Audio::SoundThread::setPosition(const sf::Vector2f& pos)
 {
-   _sound.setPosition({pos.x, pos.y, 0.0f});
+   _sound->setPosition({pos.x, pos.y, 0.0f});
 }

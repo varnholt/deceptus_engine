@@ -119,34 +119,37 @@ void EventSerializer::clear()
 
 void writeEvent(std::ostream& stream, const sf::Event& event)
 {
-   std::visit(
-      [&](auto&& e)
+   event.visit(
+      [&](const auto& e)
       {
          using event_t = std::decay_t<decltype(e)>;
 
          constexpr uint8_t event_id = []
          {
             if constexpr (std::is_same_v<event_t, sf::Event::KeyPressed>)
+            {
                return EVENT_KEY_PRESSED;
+            }
             if constexpr (std::is_same_v<event_t, sf::Event::KeyReleased>)
+            {
                return EVENT_KEY_RELEASED;
+            }
             return EVENT_UNKNOWN;
          }();
 
-         write_uint8(stream, event_id);  // Store event type as uint8_t
+         writeUInt8(stream, event_id);
 
-         if constexpr (event_id == EVENT_KEY_PRESSED || event_id == EVENT_KEY_RELEASED)  // Key events
+         if constexpr (event_id == EVENT_KEY_PRESSED || event_id == EVENT_KEY_RELEASED)
          {
-            write_uint8(stream, static_cast<uint8_t>(e.code));
+            writeUInt8(stream, static_cast<uint8_t>(e.code));
             uint8_t flags = (e.alt << 3) | (e.control << 2) | (e.shift << 1) | (e.system << 0);
-            write_uint8(stream, flags);
+            writeUInt8(stream, flags);
          }
          else
          {
             Log::Warning() << "writing unhandled event";
          }
-      },
-      event
+      }
    );
 }
 
@@ -181,7 +184,6 @@ sf::Event readEvent(std::istream& stream)
       default:
       {
          Log::Warning() << "reading unhandled event";
-         return sf::Event{};  // Return empty event
       }
    }
 }

@@ -34,7 +34,7 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    std::optional<b2Vec2> q1_prev;
    std::optional<b2Vec2> q4_prev;
 
-   std::vector<sf::Vertex> quads;
+   std::vector<sf::Vertex> strip;
 
    for (auto i = 0u; i < _chain_elements.size() - 1; i++)
    {
@@ -92,16 +92,17 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
          )
       );
 
-      quads.push_back(v1);
-      quads.push_back(v2);
-      quads.push_back(v3);
-      quads.push_back(v4);
+      // use TriangleStrip ordering
+      strip.push_back(v1);
+      strip.push_back(v2);
+      strip.push_back(v4);
+      strip.push_back(v3);
    }
 
    // render out those quads
    sf::RenderStates states;
    states.texture = _texture.get();
-   color.draw(quads.data(), quads.size(), sf::Quads, states);
+   color.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
 }
 
 void Rope::pushChain(float impulse)
@@ -226,7 +227,6 @@ void Rope::setup(const GameDeserializeData& data)
       static_cast<int32_t>(data._tmx_object->_y_px + path_1_px.y)  // the 2nd y coord of the polyline contains the line length
    });
 
-   // clang-format off
    //      p0
    //   +---+---+
    //   |   |   |
@@ -236,14 +236,7 @@ void Rope::setup(const GameDeserializeData& data)
    //   |   |   |
    //   +---+---+
    //      p1
-   _bounding_box =
-      sf::FloatRect{
-         data._tmx_object->_x_px - 10,
-         data._tmx_object->_y_px,
-         20,
-         std::fabs(rope_length_px.y)
-   };
-   // clang-format on
+   _bounding_box = sf::FloatRect{{data._tmx_object->_x_px - 10, data._tmx_object->_y_px}, {20, std::fabs(rope_length_px.y)}};
 
    addChunks(_bounding_box);
 

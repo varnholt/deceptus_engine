@@ -124,7 +124,7 @@ void TreasureChest::update(const sf::Time& dt)
          if (Player::getCurrent()->getControls()->isButtonBPressed())
          {
             const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
-            if (player_rect_px.intersects(_rect))
+            if (player_rect_px.findIntersection(_rect).has_value())
             {
                _spawn_effect->activate();
 

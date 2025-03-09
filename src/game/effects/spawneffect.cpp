@@ -118,7 +118,7 @@ SpawnEffect::ParticleEffect::ParticleEffect(
       particle.spawn();
       particle.setupPosition(frand(0.0f, 1.0f));  // at the start spawn from everywhere
 
-      _particles.push_back(particle);
+      _particles.push_back(std::move(particle));
    }
 }
 
