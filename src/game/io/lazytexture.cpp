@@ -22,7 +22,7 @@ void LazyTexture::update(const Chunk& player_chunk)
       { return std::abs(player_chunk._x - chunk._x) < chunk_load_threshold && std::abs(player_chunk._y - chunk._y) < chunk_load_threshold; }
    );
 
-   if (should_be_loaded)
+   if (should_be_loaded || _texture_chunks.empty())
    {
       if (!_loaded && !_loading.test_and_set())
       {
