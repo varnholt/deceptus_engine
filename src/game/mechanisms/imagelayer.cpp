@@ -38,9 +38,7 @@ void ImageLayer::update(const sf::Time& dt)
    const auto& player_chunk = Player::getCurrent()->getChunk();
    _texture->update(player_chunk);
 
-   auto texture = _texture->getTexture();
-
-   if (texture.has_value())
+   if (auto texture = _texture->getTexture(); texture.has_value())
    {
       if (_sprite == nullptr)
       {

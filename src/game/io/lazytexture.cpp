@@ -15,8 +15,6 @@ LazyTexture::LazyTexture(const std::filesystem::path& texture_path, std::vector<
 
 void LazyTexture::update(const Chunk& player_chunk)
 {
-   std::lock_guard lock(_mutex);
-
    // check if the texture should be loaded
    const auto should_be_loaded = std::ranges::any_of(
       _texture_chunks,
@@ -24,13 +22,19 @@ void LazyTexture::update(const Chunk& player_chunk)
       { return std::abs(player_chunk._x - chunk._x) < chunk_load_threshold && std::abs(player_chunk._y - chunk._y) < chunk_load_threshold; }
    );
 
-   if (should_be_loaded && !_loaded && !_loading.test_and_set())
+   if (should_be_loaded)
    {
-      loadTexture();
+      if (!_loaded && !_loading.test_and_set())
+      {
+         loadTexture();
+      }
    }
-   else if (!should_be_loaded && _loaded)
+   else
    {
-      unloadTexture();
+      if (_loaded)
+      {
+         unloadTexture();
+      }
    }
 }
 
