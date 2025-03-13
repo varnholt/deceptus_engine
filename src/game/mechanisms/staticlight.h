@@ -24,7 +24,7 @@ public:
    void deserialize(const GameDeserializeData& data);
 
    std::shared_ptr<sf::Texture> _texture;
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    sf::BlendMode _blend_mode = sf::BlendAdd;
    sf::Color _color = {255, 255, 255, 255};
    float _flicker_amount = 1.0f;

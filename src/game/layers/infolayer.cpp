@@ -143,10 +143,11 @@ InfoLayer::InfoLayer()
 
       try
       {
-         auto texture = std::make_shared<sf::Texture>(psd_layer.getWidth(), psd_layer.getHeight());
+         const auto texture_size = sf::Vector2u(psd_layer.getWidth(), psd_layer.getHeight());
+         auto texture = std::make_shared<sf::Texture>(texture_size);
          texture->update(reinterpret_cast<const uint8_t*>(psd_layer.getImage().getData().data()));
 
-         auto sprite = std::make_shared<sf::Sprite>(*texture, true);
+         auto sprite = std::make_shared<sf::Sprite>(*texture);
          sprite->setPosition({static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop())});
 
          layer->_visible = psd_layer.isVisible();

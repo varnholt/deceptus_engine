@@ -4,7 +4,7 @@
 #include <numeric>
 
 Animation::Animation(const Animation& anim)
-    : sf::Sprite(anim),
+    : sf::Drawable(anim),
       _name(anim._name),
       _frames(anim._frames),
       _color_texture(anim._color_texture),

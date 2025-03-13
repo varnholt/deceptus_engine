@@ -44,7 +44,7 @@ void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    for (const auto& sprite : _sprite)
    {
-      color.draw(sprite);
+      color.draw(*sprite);
    }
 }
 
@@ -190,7 +190,7 @@ void Spikes::updateSpriteRect()
    const auto tu = static_cast<int32_t>(std::floor(_tu));
    for (auto& sprite : _sprite)
    {
-      sprite.setTextureRect({(tu * PIXELS_PER_TILE) + _tu_offset, _tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
+      sprite->setTextureRect({{(tu * PIXELS_PER_TILE) + _tu_offset, _tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
    }
 }
 
@@ -267,14 +267,12 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
 
    // make the collision rectangle a bit smaller so it's a little more lax
    instance->_player_collision_rect_px = {
-      data._tmx_object->_x_px + TOLERANCE_PIXELS,
-      data._tmx_object->_y_px + TOLERANCE_PIXELS,
-      data._tmx_object->_width_px - (2 * TOLERANCE_PIXELS),
-      data._tmx_object->_height_px - (2 * TOLERANCE_PIXELS)
+      {data._tmx_object->_x_px + TOLERANCE_PIXELS, data._tmx_object->_y_px + TOLERANCE_PIXELS},
+      {data._tmx_object->_width_px - (2 * TOLERANCE_PIXELS), data._tmx_object->_height_px - (2 * TOLERANCE_PIXELS)}
    };
 
    const auto rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    instance->addChunks(rect);
 
@@ -386,15 +384,13 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
       auto texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "spikes.png");
       for (auto i = 0; i < sprite_count; i++)
       {
-         sf::Sprite sprite;
-         sprite.setTexture(*texture);
-
-         sprite.setPosition(sf::Vector2f(
+         auto sprite = std::make_unique<sf::Sprite>(*texture);
+         sprite->setPosition(sf::Vector2f(
             data._tmx_object->_x_px + static_cast<float>(i * x_increment_px),
             data._tmx_object->_y_px + static_cast<float>(i * y_increment_px)
          ));
 
-         instance->_sprite.push_back(sprite);
+         instance->_sprite.push_back(std::move(sprite));
       }
    }
 
@@ -458,21 +454,17 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
          }
 
          spikes->_player_collision_rect_px = {
-            static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
-            static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS,
-            PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS),
-            PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)
+            {static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS, static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS},
+            {PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS), PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)}
          };
 
          const auto rect = sf::FloatRect{
-            static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE), PIXELS_PER_TILE, PIXELS_PER_TILE
+            {static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
          };
 
-         sf::Sprite sprite;
-         sprite.setTexture(*spikes->_texture);
-         sprite.setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
-
-         spikes->_sprite.push_back(sprite);
+         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*spikes->_texture);
+         sprite->setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
+         spikes->_sprite.push_back(std::move(sprite));
          spikes->updateSpriteRect();
 
          spikes->addChunks(rect);
