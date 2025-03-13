@@ -10,7 +10,7 @@
 #include <sstream>
 
 PhysicsConfigurationUi::PhysicsConfigurationUi()
-    : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 800), "deceptus physics configuration"))
+    : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode({800, 800}), "deceptus physics configuration"))
 {
    if (!ImGui::SFML::Init(*_render_window.get()))
    {

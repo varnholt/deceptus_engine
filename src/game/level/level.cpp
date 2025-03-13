@@ -156,25 +156,13 @@ void Level::initializeTextures()
 
    try
    {
-      _render_texture_level_background =
-         std::make_shared<sf::RenderTexture>(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
-
-      _render_texture_level = std::make_shared<sf::RenderTexture>(
-         static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height), stencil_context_settings
-      );
-
-      _render_texture_lighting = std::make_shared<sf::RenderTexture>(
-         static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height), stencil_context_settings
-      );
-
-      _render_texture_normal =
-         std::make_shared<sf::RenderTexture>(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
-
-      _render_texture_normal_tmp =
-         std::make_shared<sf::RenderTexture>(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
-
-      _render_texture_deferred =
-         std::make_shared<sf::RenderTexture>(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height));
+      const auto texture_size = sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)};
+      _render_texture_level_background = std::make_shared<sf::RenderTexture>(texture_size);
+      _render_texture_level = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
+      _render_texture_lighting = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
+      _render_texture_normal = std::make_shared<sf::RenderTexture>(texture_size);
+      _render_texture_normal_tmp = std::make_shared<sf::RenderTexture>(texture_size);
+      _render_texture_deferred = std::make_shared<sf::RenderTexture>(texture_size);
    }
    catch (const std::exception& e)
    {
