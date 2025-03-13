@@ -680,6 +680,7 @@ add_executable(deceptus ${GAME_FILES}
    doc/lua_interface/readme.md
    src/game/mechanisms/boxcollider.h src/game/mechanisms/boxcollider.cpp
    src/game/mechanisms/ringshaderlayer.h src/game/mechanisms/ringshaderlayer.cpp
+   src/game/io/lazytexture.h src/game/io/lazytexture.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})

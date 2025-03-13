@@ -1444,6 +1444,11 @@ void Level::update(const sf::Time& dt)
       }
    }
 
+   for (auto& layer : _image_layers)
+   {
+      layer->update(dt);
+   }
+
 #ifdef MECHANISM_TIMING_ENABLED
    static auto timing_debug_counter = 0;
    if (timing_debug_counter % 1000 == 0)
