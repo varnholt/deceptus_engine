@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
+#include "player/player.h"
 
 ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 {
@@ -12,6 +13,11 @@ ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 
 void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
+   if (!_sprite)
+   {
+      return;
+   }
+
    const auto& level_view = target.getView();
 
    if (_parallax_settings.has_value())
@@ -24,6 +30,26 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    if (_parallax_settings.has_value())
    {
       target.setView(level_view);
+   }
+}
+
+void ImageLayer::update(const sf::Time& dt)
+{
+   const auto& player_chunk = Player::getCurrent()->getChunk();
+   _texture->update(player_chunk);
+
+   if (auto texture = _texture->getTexture(); texture.has_value())
+   {
+      if (_sprite == nullptr)
+      {
+         _sprite = std::make_unique<sf::Sprite>(texture->get());
+         _sprite->setPosition(_position);
+         _sprite->setColor(_color);
+      }
+   }
+   else
+   {
+      _sprite.reset();
    }
 }
 
@@ -123,6 +149,11 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
 
       image->addChunks(rect);
    }
+
+   const auto texture_path = level_path / image_layer->_image->_source;
+   image->_texture = std::make_unique<LazyTexture>(texture_path, image->_chunks);
+   image->_position = {image_layer->_offset_x_px, image_layer->_offset_y_px};
+   image->_color = {255, 255, 255, static_cast<uint8_t>(image_layer->_opacity * 255.0f)};
 
    return image;
 }
