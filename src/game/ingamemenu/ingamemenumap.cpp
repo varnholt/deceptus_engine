@@ -95,7 +95,7 @@ void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const s
    // that render texture should have the same size as our level textures
    try
    {
-      _level_render_texture = std::make_unique<sf::RenderTexture>(_level_grid_texture->getSize().x, _level_grid_texture->getSize().y);
+      _level_render_texture = std::make_unique<sf::RenderTexture>(_level_grid_texture->getSize());
    }
    catch (const std::exception& e)
    {

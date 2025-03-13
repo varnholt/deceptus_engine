@@ -28,8 +28,8 @@ void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/)
 
    sf::Color color{_color.r, _color.g, _color.b, static_cast<uint8_t>(lumen)};
 
-   _sprite.setColor(color);
-   target.draw(_sprite, _blend_mode);
+   _sprite->setColor(color);
+   target.draw(*_sprite, _blend_mode);
 }
 
 void StaticLight::update(const sf::Time& /*time*/)
@@ -102,17 +102,17 @@ void StaticLight::deserialize(const GameDeserializeData& data)
    _flicker_intensity = flicker_intensity;
    _flicker_alpha_amount = flicker_alpha_amount;
    _flicker_speed = flicker_speed;
-   _sprite.setColor(_color);
    _texture = TexturePool::getInstance().get(texture);
-   _sprite.setTexture(*_texture);
-   _sprite.setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+   _sprite = std::make_unique<sf::Sprite>(*_texture);
+   _sprite->setColor(_color);
+   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
 
    _rect = sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
    addChunks(_rect);
 
    auto scale_x_px = data._tmx_object->_width_px / _texture->getSize().x;
    auto scale_y_px = data._tmx_object->_height_px / _texture->getSize().y;
-   _sprite.scale({scale_x_px, scale_y_px});
+   _sprite->scale({scale_x_px, scale_y_px});
 
    // init each light with a different time offset
    // probably passing the position itself to FBM would be enough

@@ -186,7 +186,7 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
       }
 
       const auto rect =
-         sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+         sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
       auto thunderstorm = std::dynamic_pointer_cast<ThunderstormOverlay>(weather->_overlay);
       thunderstorm->setRect(rect);

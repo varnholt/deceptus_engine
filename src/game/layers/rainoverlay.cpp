@@ -55,7 +55,7 @@ RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprit
    {
       RainDrop drop;
       drop._sprite = std::make_unique<sf::Sprite>(*_texture);
-      _drops.push_back(drop);
+      _drops.push_back(std::move(drop));
    }
 }
 
@@ -212,7 +212,7 @@ void RainOverlay::update(const sf::Time& dt)
                      hit._sprite = std::make_unique<sf::Sprite>(*_texture);
                      hit._sprite->setPosition(hit_position);
                      hit._pos_px = hit_position;
-                     _hits.push_back(hit);
+                     _hits.push_back(std::move(hit));
 
                      p.reset(_clip_rect);
 

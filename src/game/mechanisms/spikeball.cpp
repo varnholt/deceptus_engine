@@ -55,20 +55,22 @@ SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance
    _chain_element_fixture_def.friction = 0.2f;
 
    _texture = TexturePool::getInstance().get("data/sprites/enemy_spikeball.png");
-   _spike_sprite.setTexture(*_texture);
-   _spike_sprite.setTextureRect(sf::IntRect(118, 24, 51, 50));
-   _spike_sprite.setOrigin(25, 25);
 
-   _box_sprite.setTexture(*_texture);
-   _box_sprite.setTextureRect(sf::IntRect(168, 93, 24, 27));
+   _spike_sprite = std::make_unique<sf::Sprite>(*_texture);
+   _box_sprite = std::make_unique<sf::Sprite>(*_texture);
+   _chain_element_a = std::make_unique<sf::Sprite>(*_texture);
+   _chain_element_b = std::make_unique<sf::Sprite>(*_texture);
 
-   _chain_element_a.setTexture(*_texture);
-   _chain_element_a.setTextureRect(sf::IntRect(297, 56, 8, 8));
-   _chain_element_a.setOrigin(4, 4);
+   _spike_sprite->setTextureRect(sf::IntRect({118, 24}, {51, 50}));
+   _spike_sprite->setOrigin({25, 25});
 
-   _chain_element_b.setTexture(*_texture);
-   _chain_element_b.setTextureRect(sf::IntRect(320, 56, 8, 8));
-   _chain_element_b.setOrigin(4, 4);
+   _box_sprite->setTextureRect(sf::IntRect({168, 93}, {24, 27}));
+
+   _chain_element_a->setTextureRect(sf::IntRect({297, 56}, {8, 8}));
+   _chain_element_a->setOrigin({4, 4});
+
+   _chain_element_b->setTextureRect(sf::IntRect({320, 56}, {8, 8}));
+   _chain_element_b->setOrigin({4, 4});
 }
 
 void SpikeBall::preload()
@@ -147,7 +149,7 @@ void SpikeBall::update(const sf::Time& dt)
       return;
    }
 
-   _spike_sprite.setPosition(_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM);
+   _spike_sprite->setPosition(_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM);
 
    static const b2Vec2 up{0.0, 1.0};
 
@@ -165,7 +167,7 @@ void SpikeBall::update(const sf::Time& dt)
    }
 
    const auto angle_deg = _angle * FACTOR_RAD_TO_DEG;
-   _spike_sprite.setRotation(angle_deg);
+   _spike_sprite->setRotation(angle_deg);
 
    // play swoosh sound on every direction change
    if (_audio_enabled)
@@ -314,7 +316,7 @@ void SpikeBall::setup(const GameDeserializeData& data)
    ball_fixture->SetUserData(static_cast<void*>(object_data));
 
    // that box only needs to be set up once
-   _box_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px);
+   _box_sprite->setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px);
 }
 
 sf::Vector2i SpikeBall::getPixelPosition() const
