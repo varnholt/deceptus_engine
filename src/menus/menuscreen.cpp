@@ -64,10 +64,10 @@ void MenuScreen::load()
          Log::Fatal() << "failed to create texture: " << layer.getName();
       }
 
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
+      texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+      sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
       sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
 
       tmp->_texture = texture;
@@ -95,7 +95,7 @@ void MenuScreen::keyboardKeyReleased(sf::Keyboard::Key /*key*/)
 void MenuScreen::controllerButtonX()
 {
    // that's default behavior for most screens
-   keyboardKeyPressed(sf::Keyboard::D);
+   keyboardKeyPressed(sf::Keyboard::Key::D);
 }
 
 void MenuScreen::controllerButtonY()

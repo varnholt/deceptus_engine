@@ -178,30 +178,36 @@ void CameraPanorama::update()
 
 void CameraPanorama::processKeyPressedEvents(const sf::Event& event)
 {
-   switch (event.key.code)
+   const auto* key_event = event.getIf<sf::Event::KeyPressed>();
+   if (key_event == nullptr)
    {
-      case sf::Keyboard::LShift:
+      return;
+   }
+
+   switch (key_event->code)
+   {
+      case sf::Keyboard::Key::LShift:
       {
          updateLookState(Look::Active, true);
          DisplayMode::getInstance().enqueueSet(Display::CameraPanorama);
          break;
       }
-      case sf::Keyboard::Left:
+      case sf::Keyboard::Key::Left:
       {
          updateLookState(Look::Left, true);
          break;
       }
-      case sf::Keyboard::Right:
+      case sf::Keyboard::Key::Right:
       {
          updateLookState(Look::Right, true);
          break;
       }
-      case sf::Keyboard::Up:
+      case sf::Keyboard::Key::Up:
       {
          updateLookState(Look::Up, true);
          break;
       }
-      case sf::Keyboard::Down:
+      case sf::Keyboard::Key::Down:
       {
          updateLookState(Look::Down, true);
          break;
@@ -215,30 +221,36 @@ void CameraPanorama::processKeyPressedEvents(const sf::Event& event)
 
 void CameraPanorama::processKeyReleasedEvents(const sf::Event& event)
 {
-   switch (event.key.code)
+   const auto* key_event = event.getIf<sf::Event::KeyPressed>();
+   if (key_event == nullptr)
    {
-      case sf::Keyboard::LShift:
+      return;
+   }
+
+   switch (key_event->code)
+   {
+      case sf::Keyboard::Key::LShift:
       {
          updateLookState(Look::Active, false);
          DisplayMode::getInstance().enqueueUnset(Display::CameraPanorama);
          break;
       }
-      case sf::Keyboard::Left:
+      case sf::Keyboard::Key::Left:
       {
          updateLookState(Look::Left, false);
          break;
       }
-      case sf::Keyboard::Right:
+      case sf::Keyboard::Key::Right:
       {
          updateLookState(Look::Right, false);
          break;
       }
-      case sf::Keyboard::Up:
+      case sf::Keyboard::Key::Up:
       {
          updateLookState(Look::Up, false);
          break;
       }
-      case sf::Keyboard::Down:
+      case sf::Keyboard::Key::Down:
       {
          updateLookState(Look::Down, false);
          break;

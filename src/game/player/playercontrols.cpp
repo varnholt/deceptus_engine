@@ -37,47 +37,47 @@ bool PlayerControls::hasFlag(KeyPressed flag) const
 
 void PlayerControls::forceSync()
 {
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
    {
       _keys_pressed |= KeyPressedJump;
    }
 
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
    {
       _keys_pressed |= KeyPressedLook;
    }
 
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
    {
       _keys_pressed |= KeyPressedUp;
    }
 
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
    {
       _keys_pressed |= KeyPressedDown;
    }
 
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
    {
       _keys_pressed |= KeyPressedLeft;
    }
 
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
    {
       _keys_pressed |= KeyPressedRight;
    }
 
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl))
    {
       _keys_pressed |= KeyPressedSlot1;
    }
 
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LAlt))
    {
       _keys_pressed |= KeyPressedSlot2;
    }
 
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter))
    {
       _keys_pressed |= KeyPressedAction;
    }
@@ -87,39 +87,39 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    _player_input.update(PlayerInput::InputType::Keyboard);
 
-   if (key == sf::Keyboard::Space)
+   if (key == sf::Keyboard::Key::Space)
    {
       _keys_pressed |= KeyPressedJump;
    }
-   else if (key == sf::Keyboard::LShift)
+   else if (key == sf::Keyboard::Key::LShift)
    {
       _keys_pressed |= KeyPressedLook;
    }
-   else if (key == sf::Keyboard::Up)
+   else if (key == sf::Keyboard::Key::Up)
    {
       _keys_pressed |= KeyPressedUp;
    }
-   else if (key == sf::Keyboard::Down)
+   else if (key == sf::Keyboard::Key::Down)
    {
       _keys_pressed |= KeyPressedDown;
    }
-   else if (key == sf::Keyboard::Left)
+   else if (key == sf::Keyboard::Key::Left)
    {
       _keys_pressed |= KeyPressedLeft;
    }
-   else if (key == sf::Keyboard::Right)
+   else if (key == sf::Keyboard::Key::Right)
    {
       _keys_pressed |= KeyPressedRight;
    }
-   else if (key == sf::Keyboard::LControl)
+   else if (key == sf::Keyboard::Key::LControl)
    {
       _keys_pressed |= KeyPressedSlot1;
    }
-   else if (key == sf::Keyboard::LAlt)
+   else if (key == sf::Keyboard::Key::LAlt)
    {
       _keys_pressed |= KeyPressedSlot2;
    }
-   else if (key == sf::Keyboard::Return)
+   else if (key == sf::Keyboard::Key::Enter)
    {
       _keys_pressed |= KeyPressedAction;
    }
@@ -134,39 +134,39 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 {
    _player_input.update(PlayerInput::InputType::Keyboard);
 
-   if (key == sf::Keyboard::LShift)
+   if (key == sf::Keyboard::Key::LShift)
    {
       _keys_pressed &= ~KeyPressedLook;
    }
-   else if (key == sf::Keyboard::Up)
+   else if (key == sf::Keyboard::Key::Up)
    {
       _keys_pressed &= ~KeyPressedUp;
    }
-   else if (key == sf::Keyboard::Down)
+   else if (key == sf::Keyboard::Key::Down)
    {
       _keys_pressed &= ~KeyPressedDown;
    }
-   else if (key == sf::Keyboard::Left)
+   else if (key == sf::Keyboard::Key::Left)
    {
       _keys_pressed &= ~KeyPressedLeft;
    }
-   else if (key == sf::Keyboard::Right)
+   else if (key == sf::Keyboard::Key::Right)
    {
       _keys_pressed &= ~KeyPressedRight;
    }
-   else if (key == sf::Keyboard::Space)
+   else if (key == sf::Keyboard::Key::Space)
    {
       _keys_pressed &= ~KeyPressedJump;
    }
-   else if (key == sf::Keyboard::LControl)
+   else if (key == sf::Keyboard::Key::LControl)
    {
       _keys_pressed &= ~KeyPressedSlot1;
    }
-   else if (key == sf::Keyboard::LAlt)
+   else if (key == sf::Keyboard::Key::LAlt)
    {
       _keys_pressed &= ~KeyPressedSlot2;
    }
-   else if (key == sf::Keyboard::Return)
+   else if (key == sf::Keyboard::Key::Enter)
    {
       _keys_pressed &= ~KeyPressedAction;
    }

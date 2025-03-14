@@ -30,7 +30,7 @@ void Extra::deserialize(const GameDeserializeData& data)
    const auto height_px = data._tmx_object->_height_px;
 
    _name = data._tmx_object->_name;
-   _rect = {pos_x_px, pos_y_px, width_px, height_px};
+   _rect = {{pos_x_px, pos_y_px}, {width_px, height_px}};
 
    if (data._tmx_object->_properties)
    {
@@ -45,19 +45,19 @@ void Extra::deserialize(const GameDeserializeData& data)
       if (!texture_path.empty())
       {
          _texture = TexturePool::getInstance().get(texture_path);
-         _sprite.setTexture(*_texture);
-         _sprite.setPosition(pos_x_px, pos_y_px);
+         _sprite = std::make_unique<sf::Sprite>(*_texture);
+         _sprite->setPosition({pos_x_px, pos_y_px});
 
          // read texture rect
          sf::IntRect rect;
-         rect.left = ValueReader::readValue<int32_t>("texture_rect_x", map).value_or(0);
-         rect.top = ValueReader::readValue<int32_t>("texture_rect_y", map).value_or(0);
-         rect.width = ValueReader::readValue<int32_t>("texture_rect_width", map).value_or(0);
-         rect.height = ValueReader::readValue<int32_t>("texture_rect_height", map).value_or(0);
+         rect.position.x = ValueReader::readValue<int32_t>("texture_rect_x", map).value_or(0);
+         rect.position.y = ValueReader::readValue<int32_t>("texture_rect_y", map).value_or(0);
+         rect.size.x = ValueReader::readValue<int32_t>("texture_rect_width", map).value_or(0);
+         rect.size.y = ValueReader::readValue<int32_t>("texture_rect_height", map).value_or(0);
 
-         if (rect.width > 0 && rect.height > 0)
+         if (rect.size.x > 0 && rect.size.y > 0)
          {
-            _sprite.setTextureRect(rect);
+            _sprite->setTextureRect(rect);
          }
       }
 
@@ -145,7 +145,7 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
    // or show static extra texture
    else
    {
-      target.draw(_sprite);
+      target.draw(*_sprite);
    }
 
 #ifdef DRAW_DEBUG
@@ -208,7 +208,7 @@ void Extra::update(const sf::Time& delta_time)
    }
 
    const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
-   if (player_rect_px.intersects(_rect))
+   if (player_rect_px.findIntersection(_rect).has_value())
    {
       _active = false;
 
