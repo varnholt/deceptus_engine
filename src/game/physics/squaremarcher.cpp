@@ -159,7 +159,7 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& image_path)
 
    render_texture->clear();
 
-   sf::VertexArray quad(sf::Quads, 4);
+   sf::VertexArray quad(sf::PrimitiveType::TriangleStrip, 4);
    quad[0].color = sf::Color::Red;
    quad[1].color = sf::Color::Red;
    quad[2].color = sf::Color::Red;
@@ -171,12 +171,12 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& image_path)
       {
          if (isColliding(x, y))
          {
-            quad[0].position = sf::Vector2f(static_cast<float>(x * factor), static_cast<float>(y * factor));
-            quad[1].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor));
-            quad[2].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor + factor));
-            quad[3].position = sf::Vector2f(static_cast<float>(x * factor), static_cast<float>(y * factor + factor));
+            quad[0].position = sf::Vector2f(static_cast<float>(x * factor), static_cast<float>(y * factor));           // bottom-left
+            quad[1].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor));  // bottom-right
+            quad[2].position = sf::Vector2f(static_cast<float>(x * factor), static_cast<float>(y * factor + factor));  // top-left
+            quad[3].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor + factor));  // top-right
 
-            render_texture->draw(&quad[0], 4, sf::Quads);
+            render_texture->draw(quad);
          }
       }
    }
@@ -197,11 +197,16 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
    }
 
    const uint32_t factor = 1;
-   sf::RenderTexture render_texture;
-   if (!render_texture->create(_width * factor, _height * factor))
+
+   std::unique_ptr<sf::RenderTexture> render_texture;
+
+   try
+   {
+      render_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u{_width * factor, _height * factor});
+   }
+   catch (...)
    {
       Log::Error() << "failed to create render texture";
-      return;
    }
 
    render_texture->clear();

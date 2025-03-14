@@ -122,7 +122,7 @@ void ZoomRect::setup(const GameDeserializeData& data)
    const auto width_px = data._tmx_object->_width_px;
    const auto height_px = data._tmx_object->_height_px;
 
-   _rect_px = sf::FloatRect{x_px, y_px, width_px, height_px};
+   _rect_px = sf::FloatRect{{x_px, y_px}, {width_px, height_px}};
    _center_px = sf::Vector2f{x_px + width_px * 0.5f, y_px + height_px * 0.5f};
    _radius_px = std::hypot(_rect_px.size.x / 2.0f, _rect_px.size.y / 2.0f);
 

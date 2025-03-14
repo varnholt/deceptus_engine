@@ -45,15 +45,15 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
    if (_pixel_ratio.has_value())
    {
-      states.blendMode = sf::BlendMode{sf::BlendMode::One, sf::BlendMode::OneMinusSrcAlpha};
-      _render_texture.clear({0, 0, 0, 0});
+      states.blendMode = sf::BlendMode{sf::BlendMode::Factor::One, sf::BlendMode::Factor::OneMinusSrcAlpha};
+      _render_texture->clear({0, 0, 0, 0});
 #ifdef DEBUG_WATERSURFACE
-      _render_texture.clear({255, 0, 0, 200});
+      _render_texture->clear({255, 0, 0, 200});
 #endif
-      _render_texture.draw(_vertices, states);
-      _render_texture.display();
+      _render_texture->draw(_vertices, states);
+      _render_texture->display();
       states.blendMode = sf::BlendAlpha;
-      color.draw(render_texture_sprite, states);
+      color.draw(*render_texture_sprite, states);
    }
    else
    {
@@ -462,18 +462,22 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
    // if a pixel ratio is configured, we gotta render to texture
    if (_pixel_ratio.has_value())
    {
-      if (!_render_texture.create(
-             static_cast<int32_t>(_bounding_box.size.x / _pixel_ratio.value()),
-             static_cast<int32_t>((_bounding_box.size.y * 2.0f) / _pixel_ratio.value())
-          ))
+      try
+      {
+         _render_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u(
+            static_cast<int32_t>(_bounding_box.size.x / _pixel_ratio.value()),
+            static_cast<int32_t>((_bounding_box.size.y * 2.0f) / _pixel_ratio.value())
+         ));
+      }
+      catch (...)
       {
          Log::Error() << "could not create render texture";
       }
 
-      _render_texture.setSmooth(false);
-      render_texture_sprite.setTexture(_render_texture.getTexture());
-      render_texture_sprite.setPosition({_bounding_box.position.x, _bounding_box.position.y - _bounding_box.size.y});
-      render_texture_sprite.scale(_pixel_ratio.value(), _pixel_ratio.value());
+      _render_texture->setSmooth(false);
+      render_texture_sprite = std::make_unique<sf::Sprite>(_render_texture->getTexture());
+      render_texture_sprite->setPosition({_bounding_box.position.x, _bounding_box.position.y - _bounding_box.size.y});
+      render_texture_sprite->scale({_pixel_ratio.value(), _pixel_ratio.value()});
    }
 }
 

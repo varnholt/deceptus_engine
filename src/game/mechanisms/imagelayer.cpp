@@ -84,10 +84,6 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
    auto image_layer = std::dynamic_pointer_cast<TmxImageLayer>(element);
 
    image->_z_index = image_layer->_z;
-   image->_texture = TexturePool::getInstance().get((level_path / image_layer->_image->_source).string());
-   image->_sprite = std::make_unique<sf::Sprite>(*image->_texture);
-   image->_sprite->setPosition({image_layer->_offset_x_px, image_layer->_offset_y_px});
-   image->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(image_layer->_opacity * 255.0f)));
 
    sf::BlendMode blend_mode = sf::BlendAlpha;
    if (image_layer->_properties)

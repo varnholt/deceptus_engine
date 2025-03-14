@@ -11,12 +11,12 @@ struct AnimationFrameData
    AnimationFrameData(
       const std::shared_ptr<sf::Texture>& texture,
       const sf::Vector2f& origin,
-      uint32_t frame_width,
-      uint32_t frame_height,
-      uint32_t frame_count,
-      uint32_t frames_per_row,
+      int32_t frame_width,
+      int32_t frame_height,
+      int32_t frame_count,
+      int32_t frames_per_row,
       const std::vector<sf::Time>& frame_times,
-      uint32_t start_frame = 0
+      int32_t start_frame = 0
    );
 
    std::shared_ptr<sf::Texture> _texture;

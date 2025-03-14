@@ -21,7 +21,8 @@ enum class Alignment
 ///
 struct Segment
 {
-   sf::Text text;
+   Segment(const sf::Font& font);
+   std::unique_ptr<sf::Text> text;
 };
 
 std::vector<Segment> parseRichText(

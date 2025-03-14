@@ -21,7 +21,7 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
    const auto width_px = data._tmx_object->_width_px;
    const auto height_px = data._tmx_object->_height_px;
 
-   _rect = {pos_x_px, pos_y_px, width_px, height_px};
+   _rect = {{pos_x_px, pos_y_px}, {width_px, height_px}};
 
    if (!data._tmx_object->_properties)
    {
@@ -33,8 +33,9 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
 
    const auto texture_path = ValueReader::readValue<std::string>("texture", map).value_or("data/sprites/treasure_chest.png");
    _texture = TexturePool::getInstance().get(texture_path);
-   _sprite.setTexture(*_texture);
-   _sprite.setPosition(pos_x_px, pos_y_px);
+
+   _sprite = std::make_unique<sf::Sprite>(*_texture);
+   _sprite->setPosition({pos_x_px, pos_y_px});
 
    _sample_open = ValueReader::readValue<std::string>("sample", map).value_or("treasure_chest_open.wav");
    Audio::getInstance().addSample(_sample_open);

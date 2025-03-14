@@ -6,6 +6,7 @@
 #include <chrono>
 #include <filesystem>
 #include <list>
+#include <map>
 #include <optional>
 
 class ProjectileHitAnimation : public Animation
@@ -22,12 +23,12 @@ public:
    static void addReferenceAnimation(const std::string& id, const AnimationFrameData& animation);
    static void addReferenceAnimation(
       const std::filesystem::path& texture_path,
-      uint32_t frame_width,
-      uint32_t frame_height,
+      int32_t frame_width,
+      int32_t frame_height,
       const std::chrono::duration<float, std::chrono::seconds::period>& time_per_frame,
-      uint32_t frame_count,
-      uint32_t frames_per_row,
-      uint32_t start_frame
+      int32_t frame_count,
+      int32_t frames_per_row,
+      int32_t start_frame
    );
 
    static std::map<std::string, AnimationFrameData>::const_iterator getReferenceAnimation(const std::string& id);
