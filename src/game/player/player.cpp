@@ -1537,7 +1537,7 @@ void Player::updateWallslide(const sf::Time& dt)
 {
    const auto wallslide_animation = _player_animation->getWallslideAnimation();
    const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
-   wallslide_animation->setPosition(_pixel_position_f.x + offset_x_px, _pixel_position_f.y);
+   wallslide_animation->setPosition({_pixel_position_f.x + offset_x_px, _pixel_position_f.y});
    wallslide_animation->play();
    wallslide_animation->update(dt);
 }
@@ -1866,27 +1866,27 @@ void Player::keyPressed(sf::Keyboard::Key key)
 {
    switch (key)
    {
-      case sf::Keyboard::Space:
+      case sf::Keyboard::Key::Space:
       {
          _jump.jump();
          break;
       }
-      case sf::Keyboard::Z:
+      case sf::Keyboard::Key::Z:
       {
          updateDash(Dash::Left);
          break;
       }
-      case sf::Keyboard::X:
+      case sf::Keyboard::Key::X:
       {
          updateDash(Dash::Right);
          break;
       }
-      case sf::Keyboard::LControl:
+      case sf::Keyboard::Key::LControl:
       {
          useInventory(0);
          break;
       }
-      case sf::Keyboard::LAlt:
+      case sf::Keyboard::Key::LAlt:
       {
          useInventory(1);
          break;

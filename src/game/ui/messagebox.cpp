@@ -191,7 +191,7 @@ MessageBox::MessageBox(
       segments.end(),
       std::back_inserter(_segments),
       [](const RichTextParser::Segment& segment)
-      { return TextSegment{segment.text, segment.text.getFillColor(), segment.text.getString()}; }
+      { return TextSegment{*segment.text, segment.text->getFillColor(), segment.text->getString()}; }
    );
 
    // can maybe be removed
@@ -229,7 +229,7 @@ void MessageBox::initializeLayers()
       psd.setColorFormat(PSD::ColorFormat::ABGR);
       psd.load("data/game/messagebox.psd");
 
-      if (!__font.loadFromFile("data/fonts/deceptum.ttf"))
+      if (!__font.openFromFile("data/fonts/deceptum.ttf"))
       {
          Log::Error() << "font load fuckup";
       }
@@ -257,7 +257,7 @@ void MessageBox::initializeLayers()
       texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+      sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
 
       tmp->_texture = texture;
       tmp->_sprite = sprite;
@@ -301,7 +301,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
    MessageBox::Button button = MessageBox::Button::Invalid;
 
    // yay
-   if (key == sf::Keyboard::Return)
+   if (key == sf::Keyboard::Key::Enter)
    {
       Audio::getInstance().playSample({"messagebox_confirm.wav"});
 
@@ -325,7 +325,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 
    // nay
-   if (key == sf::Keyboard::Escape)
+   if (key == sf::Keyboard::Key::Escape)
    {
       Audio::getInstance().playSample({"messagebox_cancel.wav"});
 
@@ -358,8 +358,8 @@ void MessageBox::initializeControllerCallbacks()
    auto& gci = GameControllerIntegration::getInstance();
    if (gci.isControllerConnected())
    {
-      _button_callback_a = [this]() { _button_callback_key = sf::Keyboard::Return; };
-      _button_callback_b = [this]() { _button_callback_key = sf::Keyboard::Escape; };
+      _button_callback_a = [this]() { _button_callback_key = sf::Keyboard::Key::Enter; };
+      _button_callback_b = [this]() { _button_callback_key = sf::Keyboard::Key::Escape; };
 
       gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_SOUTH, _button_callback_a);
       gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_EAST, _button_callback_b);
@@ -542,11 +542,11 @@ void MessageBox::noAnimation()
    const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
    window_layer->_sprite->setColor(sf::Color::White);
-   window_layer->_sprite->setScale(1.0f, 1.0f);
+   window_layer->_sprite->setScale({1.0f, 1.0f});
    window_layer->_sprite->setPosition(_window_position_px + offset_px);
 
    background_layer->_sprite->setColor(background_color);
-   background_layer->_sprite->setScale(1.0f, 1.0f);
+   background_layer->_sprite->setScale({1.0f, 1.0f});
    background_layer->_sprite->setPosition(_background_position_px + offset_px);
 
    updateNextPageIcon();
@@ -604,21 +604,21 @@ void MessageBox::showAnimation()
       const auto window_color = sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)};
 
       window_layer->_sprite->setColor(window_color);
-      window_layer->_sprite->setScale(scale_x, scale_y);
-      window_layer->_sprite->setPosition(window_pos_x_px, window_pos_y_px);
+      window_layer->_sprite->setScale({scale_x, scale_y});
+      window_layer->_sprite->setPosition({window_pos_x_px, window_pos_y_px});
 
       background_layer->_sprite->setColor(background_color);
-      background_layer->_sprite->setScale(scale_x, scale_y);
-      background_layer->_sprite->setPosition(background_pos_x_px, background_pos_y_px);
+      background_layer->_sprite->setScale({scale_x, scale_y});
+      background_layer->_sprite->setPosition({background_pos_x_px, background_pos_y_px});
    }
    else  // fade in
    {
       window_layer->_sprite->setColor(sf::Color::White);
-      window_layer->_sprite->setScale(1.0f, 1.0f);
+      window_layer->_sprite->setScale({1.0f, 1.0f});
       window_layer->_sprite->setPosition(_window_position_px + offset);
 
       background_layer->_sprite->setColor(background_color);
-      background_layer->_sprite->setScale(1.0f, 1.0f);
+      background_layer->_sprite->setScale({1.0f, 1.0f});
       background_layer->_sprite->setPosition(_background_position_px + offset);
 
       if (visible_time < animation_scale_time_show + animation_fade_time_show)

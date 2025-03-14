@@ -20,12 +20,11 @@ PhysicsConfigurationUi::PhysicsConfigurationUi()
 
 void PhysicsConfigurationUi::processEvents()
 {
-   sf::Event event;
-   while (_render_window->pollEvent(event))
+   while (const auto event = _render_window->pollEvent())
    {
       ImGui::SFML::ProcessEvent(*_render_window.get(), event);
 
-      if (event.type == sf::Event::Closed)
+      if (event.value().type == sf::Event::Closed)
       {
          _render_window->close();
       }

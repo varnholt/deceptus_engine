@@ -95,7 +95,7 @@ void MenuScreen::keyboardKeyReleased(sf::Keyboard::Key /*key*/)
 void MenuScreen::controllerButtonX()
 {
    // that's default behavior for most screens
-   keyboardKeyPressed(sf::Keyboard::D);
+   keyboardKeyPressed(sf::Keyboard::Key::D);
 }
 
 void MenuScreen::controllerButtonY()

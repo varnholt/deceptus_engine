@@ -401,7 +401,7 @@ void Door::setup(const GameDeserializeData& data)
       {
          const auto texture_path = texture_it->second->_value_string.value();
          _texture = TexturePool::getInstance().get(texture_path);
-         _sprite = std::make_unique<sf::Sprite>(_texture);
+         _sprite = std::make_unique<sf::Sprite>(*_texture);
          _sprite->setPosition({x_px, y_px});
       }
 
