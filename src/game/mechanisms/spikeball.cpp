@@ -104,9 +104,9 @@ void SpikeBall::drawChain(sf::RenderTarget& window)
       auto point = curve.computePoint(val += increment);
 
       auto& element = (i % 2 == 0) ? _chain_element_a : _chain_element_b;
-      element.setPosition(point);
+      element->setPosition(point);
 
-      window.draw(element);
+      window.draw(*element);
    }
 }
 
@@ -139,7 +139,7 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    // color.draw(_box_sprite);
 
    drawChain(color);
-   color.draw(_spike_sprite);
+   color.draw(*_spike_sprite);
 }
 
 void SpikeBall::update(const sf::Time& dt)
@@ -149,7 +149,7 @@ void SpikeBall::update(const sf::Time& dt)
       return;
    }
 
-   _spike_sprite->setPosition(_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM);
+   _spike_sprite->setPosition({_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM});
 
    static const b2Vec2 up{0.0, 1.0};
 
@@ -166,8 +166,8 @@ void SpikeBall::update(const sf::Time& dt)
       _angle = -_angle;
    }
 
-   const auto angle_deg = _angle * FACTOR_RAD_TO_DEG;
-   _spike_sprite->setRotation(angle_deg);
+   const auto angle = sf::radians(_angle);
+   _spike_sprite->setRotation(angle);
 
    // play swoosh sound on every direction change
    if (_audio_enabled)

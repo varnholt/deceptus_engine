@@ -130,10 +130,10 @@ void Gun::updateProjectiles(const sf::Time& time)
 
       if (projectile->isRotating())
       {
-         projectile_animation.setRotation(FACTOR_RAD_TO_DEG * projectile->getRotation());
+         projectile_animation.setRotation(sf::radians(projectile->getRotation()));
       }
 
-      projectile_animation.setPosition(projectile->getBody()->GetPosition().x * PPM, projectile->getBody()->GetPosition().y * PPM);
+      projectile_animation.setPosition({projectile->getBody()->GetPosition().x * PPM, projectile->getBody()->GetPosition().y * PPM});
 
       projectile_animation.update(time);
    }
@@ -215,13 +215,13 @@ void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, co
    // this should move into the luanode; the engine should not 'guess' the origin
    if (_shape->GetType() == b2Shape::e_polygon)
    {
-      _projectile_reference_animation._animation.setOrigin(0, 0);
+      _projectile_reference_animation._animation.setOrigin({0, 0});
    }
    else if (_shape->GetType() == b2Shape::e_circle)
    {
       const auto origin_x_px = static_cast<float>(tmp_rect_px.size.x / 2);
       const auto origin_y_px = static_cast<float>(tmp_rect_px.size.y / 2);
-      _projectile_reference_animation._animation.setOrigin(origin_x_px, origin_y_px);
+      _projectile_reference_animation._animation.setOrigin({origin_x_px, origin_y_px});
    }
 }
 

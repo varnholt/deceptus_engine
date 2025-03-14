@@ -823,7 +823,7 @@ void Game::takeScreenshot()
 void Game::processEvent(const sf::Event& event)
 {
    std::visit(
-      [this, &event](auto&& e)
+      [this, &event](auto&& e) -> void
       {
          using T = std::decay_t<decltype(e)>;
 
@@ -908,10 +908,10 @@ void Game::processEvent(const sf::Event& event)
          }
          else if constexpr (std::is_same_v<T, sf::Event::MouseButtonPressed>)
          {
-            if (e.button == sf::Mouse::Right)
+            if (e.button == sf::Mouse::Button::Right)
             {
                const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
-               const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, Level::getCurrentLevel()->getLevelView());
+               const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *Level::getCurrentLevel()->getLevelView());
                Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
             }
          }
