@@ -74,7 +74,7 @@ void Menu::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto h = game_config._view_height;
 
    // set up an ortho view with screen dimensions
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
 
    window.setView(view);
 

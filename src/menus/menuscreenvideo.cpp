@@ -154,27 +154,27 @@ void MenuScreenVideo::setVSyncCallback(VSyncCallback callback)
 
 void MenuScreenVideo::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (key == sf::Keyboard::Up)
+   if (key == sf::Keyboard::Key::Up)
    {
       up();
    }
 
-   else if (key == sf::Keyboard::Down)
+   else if (key == sf::Keyboard::Key::Down)
    {
       down();
    }
 
-   else if (key == sf::Keyboard::Left)
+   else if (key == sf::Keyboard::Key::Left)
    {
       select(-STEP_SIZE);
    }
 
-   else if (key == sf::Keyboard::Right)
+   else if (key == sf::Keyboard::Key::Right)
    {
       select(STEP_SIZE);
    }
 
-   else if (key == sf::Keyboard::Escape)
+   else if (key == sf::Keyboard::Key::Escape)
    {
       back();
    }
@@ -255,8 +255,8 @@ void MenuScreenVideo::updateLayers()
    _layers["brightness_h_0"]->_visible = !brightness;
    _layers["brightness_h_1"]->_visible = brightness;
 
-   _layers["brightness_h_0"]->_sprite->setOrigin(50 - (brightness_value * 100.0f), 0);
-   _layers["brightness_h_1"]->_sprite->setOrigin(50 - (brightness_value * 100.0f), 0);
+   _layers["brightness_h_0"]->_sprite->setOrigin({50 - (brightness_value * 100.0f), 0});
+   _layers["brightness_h_1"]->_sprite->setOrigin({50 - (brightness_value * 100.0f), 0});
 
    _layers["displayMode_text_0"]->_visible = !displayMode;
    _layers["displayMode_text_1"]->_visible = displayMode;

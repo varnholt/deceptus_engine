@@ -181,12 +181,12 @@ void InGameMenuPage::load()
       tmp->_visible = true;
       tmp->_name = layer.getName();
 
-      auto texture = std::make_shared<sf::Texture>(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
-      auto sprite = std::make_shared<sf::Sprite>();
+      auto texture =
+         std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
 
       texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
-      sprite->setTexture(*texture, true);
+      auto sprite = std::make_shared<sf::Sprite>(*texture);
       sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
       sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
 
