@@ -822,107 +822,99 @@ void Game::takeScreenshot()
 
 void Game::processEvent(const sf::Event& event)
 {
-   std::visit(
-      [this, &event](auto&& e) -> void
-      {
-         using T = std::decay_t<decltype(e)>;
-
-         if constexpr (std::is_same_v<T, sf::Event::Closed>)
-         {
-            _window->close();
-         }
-         else if constexpr (std::is_same_v<T, sf::Event::Resized>)
-         {
+   if (event.is<sf::Event::Closed>())
+   {
+      _window->close();
+   }
+   else if (auto* resized_event = event.getIf<sf::Event::Resized>())
+   {
 #ifdef __linux__
-            return;
+      return;
 #endif
-            // avoid bad aspect ratios for windowed mode
-            changeResolution(e.size.x, e.size.y);
-         }
-         else if constexpr (std::is_same_v<T, sf::Event::FocusLost>)
+      // avoid bad aspect ratios for windowed mode
+      changeResolution(resized_event->size.x, resized_event->size.y);
+   }
+   else if (event.is<sf::Event::FocusLost>())
+   {
+      if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
+      {
+         // the in-game menu is save to leave open when losing the window focus
+         // while the console is open, don't disturb
+         if (!DisplayMode::getInstance().isSet(Display::IngameMenu) && !Console::getInstance().isActive())
          {
-            if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
-            {
-               // the in-game menu is save to leave open when losing the window focus
-               // while the console is open, don't disturb
-               if (!DisplayMode::getInstance().isSet(Display::IngameMenu) && !Console::getInstance().isActive())
-               {
-                  showPauseMenu();
-               }
-            }
-            else if (_player)
-            {
-               CameraPanorama::getInstance().updateLookState(Look::Active, false);
-               _player->getControls()->setKeysPressed(0);
-            }
+            showPauseMenu();
          }
-         else if constexpr (std::is_same_v<T, sf::Event::FocusGained>)
+      }
+      else if (_player)
+      {
+         CameraPanorama::getInstance().updateLookState(Look::Active, false);
+         _player->getControls()->setKeysPressed(0);
+      }
+   }
+   else if (event.is<sf::Event::FocusGained>())
+   {
+      if (_player)
+      {
+         _player->getControls()->forceSync();
+      }
+   }
+   else if (auto* key_pressed_event = event.getIf<sf::Event::KeyPressed>())
+   {
+      if (MessageBox::keyboardKeyPressed(key_pressed_event->code))
+      {
+         // nom nom nom
+         return;
+      }
+
+      // todo: process keyboard events in the console class, just like done in the message box
+      if (!Console::getInstance().isActive())
+      {
+         if (Menu::getInstance()->isVisible())
          {
-            if (_player)
-            {
-               _player->getControls()->forceSync();
-            }
+            Menu::getInstance()->keyboardKeyPressed(key_pressed_event->code);
+            return;
          }
-         else if constexpr (std::is_same_v<T, sf::Event::KeyPressed>)
-         {
-            if (MessageBox::keyboardKeyPressed(e.key))
-            {
-               // nom nom nom
-               return;
-            }
 
-            // todo: process keyboard events in the console class, just like done in the message box
-            if (!Console::getInstance().isActive())
-            {
-               if (Menu::getInstance()->isVisible())
-               {
-                  Menu::getInstance()->keyboardKeyPressed(e.key);
-                  return;
-               }
+         _player->getControls()->keyboardKeyPressed(key_pressed_event->code);
+      }
 
-               _player->getControls()->keyboardKeyPressed(e.key);
-            }
+      // this is the handling of the actual in-game keypress events
+      processKeyPressedEvents(event);
+   }
+   else if (auto* key_released_event = event.getIf<sf::Event::KeyReleased>())
+   {
+      if (Menu::getInstance()->isVisible())
+      {
+         Menu::getInstance()->keyboardKeyReleased(key_released_event->code);
+         return;
+      }
 
-            // this is the handling of the actual in-game keypress events
-            processKeyPressedEvents(event);
-         }
-         else if constexpr (std::is_same_v<T, sf::Event::KeyReleased>)
-         {
-            if (Menu::getInstance()->isVisible())
-            {
-               Menu::getInstance()->keyboardKeyReleased(e.key);
-               return;
-            }
-
-            _player->getControls()->keyboardKeyReleased(e.key);
-            processKeyReleasedEvents(event);
-         }
+      _player->getControls()->keyboardKeyReleased(key_released_event->code);
+      processKeyReleasedEvents(event);
+   }
 
 #ifdef DEVELOPMENT_MODE
-         else if constexpr (std::is_same_v<T, sf::Event::TextEntered>)
-         {
-            if (Console::getInstance().isActive() && e.unicode > 0x1F && e.unicode < 0x80)
-            {
-               Console::getInstance().append(static_cast<char>(e.unicode));
-            }
-         }
-         else if constexpr (std::is_same_v<T, sf::Event::MouseButtonPressed>)
-         {
-            if (e.button == sf::Mouse::Button::Right)
-            {
-               const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
-               const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *Level::getCurrentLevel()->getLevelView());
-               Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
-            }
-         }
-         else if constexpr (std::is_same_v<T, sf::Event::MouseWheelScrolled>)
-         {
-            Level::getCurrentLevel()->zoomBy(e.wheelDelta);
-         }
+   else if (auto* text_entered_event = event.getIf<sf::Event::TextEntered>())
+   {
+      if (Console::getInstance().isActive() && text_entered_event->unicode > 0x1F && text_entered_event->unicode < 0x80)
+      {
+         Console::getInstance().append(static_cast<char>(text_entered_event->unicode));
+      }
+   }
+   else if (auto* mouse_button_pressed_event = event.getIf<sf::Event::MouseButtonPressed>())
+   {
+      if (mouse_button_pressed_event->button == sf::Mouse::Button::Right)
+      {
+         const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
+         const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *Level::getCurrentLevel()->getLevelView());
+         Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
+      }
+   }
+   else if (auto* mouse_wheel_scrolled_event = event.getIf<sf::Event::MouseWheelScrolled>())
+   {
+      Level::getCurrentLevel()->zoomBy(mouse_wheel_scrolled_event->delta);
+   }
 #endif
-      },
-      event
-   );
 
    EventDistributor::event(event);
 }
@@ -1188,11 +1180,6 @@ void Game::processEvents()
 {
    while (const auto event = _window->pollEvent())
    {
-      if (!event.has_value())
-      {
-         break;
-      }
-
       processEvent(event.value());
       EventSerializer::getInstance().add(event.value());
    }

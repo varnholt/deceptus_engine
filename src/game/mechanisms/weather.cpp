@@ -98,7 +98,7 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
    weather->setObjectId(data._tmx_object->_name);
 
    weather->_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    weather->setZ(static_cast<int32_t>(ZDepth::ForegroundMax));
 

@@ -22,14 +22,14 @@ MenuScreenFileSelect::MenuScreenFileSelect()
 {
    setFilename("data/menus/fileselect.psd");
 
-   _font.loadFromFile("data/fonts/deceptum.ttf");
+   _font.openFromFile("data/fonts/deceptum.ttf");
    const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
 
    for (auto i = 0u; i < 3; i++)
    {
-      _names[i].setFont(_font);
-      _names[i].setCharacterSize(12);
-      _names[i].setFillColor(sf::Color{232, 219, 243});
+      _names[i] = std::make_unique<sf::Text>(_font);
+      _names[i]->setCharacterSize(12);
+      _names[i]->setFillColor(sf::Color{232, 219, 243});
    }
 }
 
@@ -39,7 +39,7 @@ void MenuScreenFileSelect::draw(sf::RenderTarget& window, sf::RenderStates state
 
    for (auto i = 0u; i < 3; i++)
    {
-      window.draw(_names[i], states);
+      window.draw(*_names[i], states);
    }
 }
 
@@ -215,8 +215,8 @@ void MenuScreenFileSelect::updateLayers()
 
       // update names
       auto layer_name = _layers["slot_" + slot_name + "_name"];
-      _names[index].setString(save_state._player_info._name);
-      _names[index].setPosition({layer_name->_sprite->getPosition().x, layer_name->_sprite->getPosition().y + nameOffsetY});
+      _names[index]->setString(save_state._player_info._name);
+      _names[index]->setPosition({layer_name->_sprite->getPosition().x, layer_name->_sprite->getPosition().y + nameOffsetY});
 
       index++;
    }

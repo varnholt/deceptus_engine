@@ -125,7 +125,7 @@ std::vector<Segment> parseRichText(
             segment.text->setString(std::string{text_before_tag});
             segment.text->setFillColor(current_text_color);
             segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
-            segments.push_back(segment);
+            segments.push_back(std::move(segment));
          }
 
          // Move the index past the tag.
@@ -160,7 +160,7 @@ std::vector<Segment> parseRichText(
          {
             // insert newline segment
             segment.text->setString("\n");
-            segments.push_back(segment);
+            segments.push_back(std::move(segment));
          }
       }
       else
@@ -169,7 +169,7 @@ std::vector<Segment> parseRichText(
          segment.text->setString(std::string{current_view});
          segment.text->setFillColor(current_text_color);
          segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
-         segments.push_back(segment);
+         segments.push_back(std::move(segment));
          break;
       }
    }

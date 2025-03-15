@@ -252,10 +252,10 @@ void WorldQuery::OctreeNode::subdivide(const std::shared_ptr<b2World>& world, in
    for (int32_t i = 0; i < 4; ++i)
    {
       sf::FloatRect child_bounds(
-         _boundaries.position.x + offsets[i].x,  // x-coordinate of top-left corner
-         _boundaries.position.y + offsets[i].y,  // y-coordinate of top-left corner
-         half_width,                             // width of the child rectangle
-         half_height                             // height of the child rectangle
+         {_boundaries.position.x + offsets[i].x,   // x-coordinate of top-left corner
+          _boundaries.position.y + offsets[i].y},  // y-coordinate of top-left corner
+         {half_width,                              // width of the child rectangle
+          half_height}                             // height of the child rectangle
       );
 
       _children[i] = std::make_unique<OctreeNode>(child_bounds, world, depth, max_depth, _ignore_list);

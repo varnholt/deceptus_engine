@@ -246,21 +246,24 @@ void MessageBox::initializeLayers()
       }
 
       auto tmp = std::make_shared<Layer>();
-      auto texture = std::make_shared<sf::Texture>();
-      auto sprite = std::make_shared<sf::Sprite>();
 
-      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
+      try
+      {
+         auto texture =
+            std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
+         texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
+
+         auto sprite = std::make_shared<sf::Sprite>(*texture);
+
+         sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
+
+         tmp->_texture = texture;
+         tmp->_sprite = sprite;
+      }
+      catch (...)
       {
          Log::Fatal() << "failed to create texture: " << layer.getName();
       }
-
-      texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
-
-      sprite->setTexture(*texture, true);
-      sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
-
-      tmp->_texture = texture;
-      tmp->_sprite = sprite;
 
       _layer_stack.push_back(tmp);
       _layers[layer.getName()] = tmp;
@@ -399,10 +402,8 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    // set up an ortho view with screen dimensions
    sf::View pixel_ortho(sf::FloatRect(
-      0.0f,
-      0.0f,
-      static_cast<float>(GameConfiguration::getInstance()._view_width),
-      static_cast<float>(GameConfiguration::getInstance()._view_height)
+      {0.0f, 0.0f},
+      {static_cast<float>(GameConfiguration::getInstance()._view_width), static_cast<float>(GameConfiguration::getInstance()._view_height)}
    ));
 
    window.setView(pixel_ortho);

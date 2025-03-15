@@ -198,7 +198,7 @@ std::optional<sf::FloatRect> SpikeBall::getBoundingBoxPx()
 
 void SpikeBall::setup(const GameDeserializeData& data)
 {
-   _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rect = sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    addChunks(_rect);
 
@@ -316,7 +316,7 @@ void SpikeBall::setup(const GameDeserializeData& data)
    ball_fixture->SetUserData(static_cast<void*>(object_data));
 
    // that box only needs to be set up once
-   _box_sprite->setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px);
+   _box_sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px});
 }
 
 sf::Vector2i SpikeBall::getPixelPosition() const

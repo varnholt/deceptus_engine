@@ -22,7 +22,7 @@ void CameraSystemConfigurationUi::processEvents()
 {
    while (auto event = _render_window->pollEvent())
    {
-      ImGui::SFML::ProcessEvent(*_render_window.get(), event);
+      ImGui::SFML::ProcessEvent(*_render_window.get(), event.value());
 
       if (event->is<sf::Event::Closed>())
       {

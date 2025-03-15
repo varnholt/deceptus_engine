@@ -29,7 +29,9 @@ ControllerOverlay::ControllerOverlay()
       auto tmp = std::make_shared<Layer>();
       tmp->_visible = layer.isVisible();
 
-      auto texture = std::make_shared<sf::Texture>(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
+      auto texture =
+         std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
+
       auto sprite = std::make_shared<sf::Sprite>(*texture);
 
       texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
