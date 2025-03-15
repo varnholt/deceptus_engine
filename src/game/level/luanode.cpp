@@ -1715,11 +1715,7 @@ void LuaNode::setupTexture()
    std::string spriteName = std::get<std::string>(_properties["sprite"]);
 
    _texture = TexturePool::getInstance().get(spriteName);
-
-   for (auto& sprite : _sprites)
-   {
-      sprite.setTexture(*_texture);
-   }
+   addSprite();
 }
 
 LuaNode::LuaNode(GameNode* parent, const std::string& filename) : GameNode(parent), _script_name(filename)
@@ -1879,8 +1875,8 @@ void LuaNode::setupLua()
       {
          luaSetStartPosition();
          luaMovedTo();
-         luaInitialize();
          luaRetrieveProperties();
+         luaInitialize();
          luaSendPatrolPath();
       }
    }
@@ -2389,13 +2385,14 @@ void LuaNode::setTransform(const b2Vec2& position, float angle)
 
 void LuaNode::addSprite()
 {
-   _sprites.emplace_back(*_texture);
+   auto sprite = std::make_unique<sf::Sprite>(*_texture);
+   _sprites.emplace_back(std::move(sprite));
    _sprite_offsets_px.emplace_back();
 }
 
 void LuaNode::setSpriteOrigin(int32_t id, float x, float y)
 {
-   _sprites[id].setOrigin({x, y});
+   _sprites[id]->setOrigin({x, y});
 }
 
 void LuaNode::setSpriteOffset(int32_t id, float x, float y)
@@ -2732,12 +2729,12 @@ void LuaNode::updatePosition()
 
 void LuaNode::updateSpriteRect(int32_t id, int32_t x_px, int32_t y_px, int32_t w_px, int32_t h_px)
 {
-   _sprites[id].setTextureRect(sf::IntRect({x_px, y_px}, {w_px, h_px}));
+   _sprites[id]->setTextureRect(sf::IntRect({x_px, y_px}, {w_px, h_px}));
 }
 
 void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
-   _sprites[id].setColor({r, g, b, a});
+   _sprites[id]->setColor({r, g, b, a});
 }
 
 void LuaNode::updateDebugRect(int32_t index, float left_px, float top_px, float width_px, float height_px)
@@ -2854,9 +2851,9 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    {
       auto& sprite = _sprites[i];
       const auto& offset = _sprite_offsets_px[i];
-      const auto center = sf::Vector2f(sprite.getTextureRect().size.x / 2.0f, sprite.getTextureRect().size.y / 2.0f);
-      sprite.setPosition(_position_px - center + offset);
-      target.draw(sprite, &_flash_shader);
+      const auto center = sf::Vector2f(sprite->getTextureRect().size.x / 2.0f, sprite->getTextureRect().size.y / 2.0f);
+      sprite->setPosition(_position_px - center + offset);
+      target.draw(*sprite, &_flash_shader);
    }
 
    // draw debug rectangles if they were added
