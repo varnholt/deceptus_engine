@@ -33,7 +33,7 @@ private:
    void remove();
 
    sf::Font _font;
-   std::array<sf::Text, 3> _names;
+   std::array<std::unique_ptr<sf::Text>, 3> _names;
 
    Slot _slot = Slot::A;
 };

@@ -689,7 +689,7 @@ void InGameMenuInventory::show()
       }
    };
 
-   EventDistributor::registerEvent(_keyboard_event_handler);
+   EventDistributor::registerEvent<sf::Event::KeyPressed>(_keyboard_event_handler);
 
    const auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())

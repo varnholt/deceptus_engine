@@ -17,19 +17,19 @@ void MenuScreenPause::update(const sf::Time& /*dt*/)
 
 void MenuScreenPause::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (key == sf::Keyboard::Up)
+   if (key == sf::Keyboard::Key::Up)
    {
       up();
    }
-   else if (key == sf::Keyboard::Down)
+   else if (key == sf::Keyboard::Key::Down)
    {
       down();
    }
-   else if (key == sf::Keyboard::Return)
+   else if (key == sf::Keyboard::Key::Enter)
    {
       select();
    }
-   else if (key == sf::Keyboard::Escape)
+   else if (key == sf::Keyboard::Key::Escape)
    {
       resume();
    }

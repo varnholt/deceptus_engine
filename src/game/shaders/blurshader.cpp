@@ -4,39 +4,29 @@
 
 #include <iostream>
 
-#define SUPPORT_STENCIL_BITS 1
-
 BlurShader::BlurShader(uint32_t width, uint32_t height)
-    : _render_texture(std::make_shared<sf::RenderTexture>()), _render_texture_scaled(std::make_shared<sf::RenderTexture>())
 {
-#ifdef SUPPORT_STENCIL_BITS
    sf::ContextSettings contextSettings;
    contextSettings.stencilBits = 8;
-#endif
 
-#ifdef SUPPORT_STENCIL_BITS
-   if (!_render_texture->create(width, height, contextSettings))
+   try
+   {
+      _render_texture = std::make_shared<sf::RenderTexture>(sf::Vector2u{width, height}, contextSettings);
+   }
+   catch (...)
    {
       Log::Fatal() << "failed to create render texture";
    }
-#else
-   if (!_render_texture->create(width, height))
-   {
-      Log::Fatal() << "failed to create render texture";
-   }
-#endif
 
-#ifdef SUPPORT_STENCIL_BITS
-   if (!_render_texture_scaled->create(960, 540, contextSettings))
+   try
+   {
+      _render_texture_scaled = std::make_shared<sf::RenderTexture>(sf::Vector2u{960, 540}, contextSettings);
+   }
+   catch (...)
    {
       Log::Fatal() << "failed to create scaled texture";
    }
-#else
-   if (!_render_texture_scaled->create(960, 540))
-   {
-      Log::Fatal() << "failed to create texture";
-   }
-#endif
+
    _render_texture_scaled->setSmooth(true);
 }
 

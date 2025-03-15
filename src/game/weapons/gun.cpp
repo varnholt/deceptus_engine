@@ -205,7 +205,8 @@ void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, co
       tmp_rect_px.size.y = texture->getSize().y;
    }
 
-   _projectile_reference_animation._animation.setTextureRect(tmp_rect_px);
+   // TODO, SFML3, is the below line really needed?
+   // _projectile_reference_animation._animation.setTextureRect(tmp_rect_px);
    _projectile_reference_animation._animation._color_texture = texture;
    _projectile_reference_animation._animation._frames.clear();
    _projectile_reference_animation._animation._frames.push_back(tmp_rect_px);
