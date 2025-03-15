@@ -150,7 +150,7 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
    const auto& thread_it = std::find_if(
       _sound_threads.begin(),
       _sound_threads.end(),
-      [](const auto& thread) { return thread._sound->getStatus() == sf::Sound::Status::Stopped; }
+      [](const auto& thread) { return thread._sound == nullptr || thread._sound->getStatus() == sf::Sound::Status::Stopped; }
    );
 
    if (thread_it == _sound_threads.cend())
@@ -167,7 +167,7 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
       return std::nullopt;
    }
 
-   thread_it->_sound->setBuffer(*it->second);
+   thread_it->_sound = std::make_unique<sf::Sound>(*it->second);
    thread_it->_filename = play_info._sample_name;
    thread_it->setVolume(play_info._volume);
    thread_it->_sound->setLooping(play_info._looped);
