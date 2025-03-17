@@ -73,7 +73,7 @@ private:
    State _state = State::Closed;
 
    // for 'version 1'
-   sf::VertexArray _door_quad{sf::PrimitiveType::Triangles, 6};
+   sf::VertexArray _door_quad{sf::PrimitiveType::Triangles, 4};
    sf::Vector2i _tile_position_tl;
    sf::FloatRect _pixel_rect;
    float _bar_offset = 0.0f;
