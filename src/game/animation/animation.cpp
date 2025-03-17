@@ -208,7 +208,7 @@ void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
    states.transform *= getTransform();
    states.texture = _color_texture.get();
 
-   target.draw(_vertices, 6, sf::PrimitiveType::Triangles, states);
+   target.draw(_vertices, 4, sf::PrimitiveType::TriangleStrip, states);
 
    for (const auto& child : _children)
    {
@@ -226,12 +226,12 @@ void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Rend
    states.transform *= getTransform();
 
    states.texture = _color_texture.get();
-   color.draw(_vertices, 6, sf::PrimitiveType::Triangles, states);
+   color.draw(_vertices, 4, sf::PrimitiveType::TriangleStrip, states);
 
    if (_normal_texture)
    {
       states.texture = _normal_texture.get();
-      normal.draw(_vertices, 6, sf::PrimitiveType::Triangles, states);
+      normal.draw(_vertices, 4, sf::PrimitiveType::TriangleStrip, states);
    }
 }
 
@@ -279,11 +279,8 @@ void Animation::updateVertices(bool reset_time)
 
    _vertices[0] = sf::Vertex(top_left, sf::Color::White);
    _vertices[1] = sf::Vertex(bottom_left, sf::Color::White);
-   _vertices[2] = sf::Vertex(bottom_right, sf::Color::White);
-
-   _vertices[3] = sf::Vertex(top_left, sf::Color::White);
-   _vertices[4] = sf::Vertex(bottom_right, sf::Color::White);
-   _vertices[5] = sf::Vertex(top_right, sf::Color::White);
+   _vertices[2] = sf::Vertex(top_right, sf::Color::White);
+   _vertices[3] = sf::Vertex(bottom_right, sf::Color::White);
 
    sf::Vector2f tex_top_left = {left, top};
    sf::Vector2f tex_bottom_left = {left, bottom};
@@ -292,11 +289,8 @@ void Animation::updateVertices(bool reset_time)
 
    _vertices[0].texCoords = tex_top_left;
    _vertices[1].texCoords = tex_bottom_left;
-   _vertices[2].texCoords = tex_bottom_right;
-
-   _vertices[3].texCoords = tex_top_left;
-   _vertices[4].texCoords = tex_bottom_right;
-   _vertices[5].texCoords = tex_top_right;
+   _vertices[2].texCoords = tex_top_right;
+   _vertices[3].texCoords = tex_bottom_right;
 
    if (reset_time)
    {
