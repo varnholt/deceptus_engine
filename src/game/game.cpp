@@ -879,7 +879,7 @@ void Game::processEvent(const sf::Event& event)
       }
 
       // this is the handling of the actual in-game keypress events
-      processKeyPressedEvents(event);
+      processKeyPressedEvents(key_pressed_event);
    }
    else if (auto* key_released_event = event.getIf<sf::Event::KeyReleased>())
    {
@@ -890,7 +890,7 @@ void Game::processEvent(const sf::Event& event)
       }
 
       _player->getControls()->keyboardKeyReleased(key_released_event->code);
-      processKeyReleasedEvents(event);
+      processKeyReleasedEvents(key_released_event);
    }
 
 #ifdef DEVELOPMENT_MODE
@@ -960,14 +960,8 @@ void Game::reloadLevel(LoadingMode loading_mode)
    loadLevel(loading_mode);
 }
 
-void Game::processKeyPressedEvents(const sf::Event& event)
+void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
 {
-   const auto* key_event = event.getIf<sf::Event::KeyPressed>();
-   if (key_event == nullptr)
-   {
-      return;
-   }
-
 #ifdef DEVELOPMENT_MODE
    if (Console::getInstance().isActive())
    {
@@ -1000,11 +994,11 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
    if (DisplayMode::getInstance().isSet(Display::IngameMenu))
    {
-      _ingame_menu->processEvent(event);
+      _ingame_menu->processEvent(key_event);
       return;
    }
 
-   CameraPanorama::getInstance().processKeyPressedEvents(event);
+   CameraPanorama::getInstance().processKeyPressedEvents(key_event);
 
    switch (key_event->code)
    {
@@ -1171,7 +1165,7 @@ void Game::processKeyPressedEvents(const sf::Event& event)
    }
 }
 
-void Game::processKeyReleasedEvents(const sf::Event& event)
+void Game::processKeyReleasedEvents(const sf::Event::KeyReleased* event)
 {
    CameraPanorama::getInstance().processKeyReleasedEvents(event);
 }

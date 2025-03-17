@@ -81,6 +81,12 @@ const sf::FloatRect& BlockingRect::getPixelRect() const
 
 void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
+   // nothing to paint
+   if (_sprite == nullptr)
+   {
+      return;
+   }
+
    // later might need something like fading when not visible
    if (!isEnabled())
    {

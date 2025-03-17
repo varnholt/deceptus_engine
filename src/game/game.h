@@ -60,8 +60,8 @@ private:
    void showMainMenu();
    void showPauseMenu();
 
-   void processKeyPressedEvents(const sf::Event& event);
-   void processKeyReleasedEvents(const sf::Event& event);
+   void processKeyPressedEvents(const sf::Event::KeyPressed* event);
+   void processKeyReleasedEvents(const sf::Event::KeyReleased* event);
 
    void toggleFullScreen();
    void changeResolution(int32_t w, int32_t h);
