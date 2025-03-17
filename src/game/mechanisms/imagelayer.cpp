@@ -60,11 +60,11 @@ void ImageLayer::updateView(float level_view_x, float level_view_y, float view_w
       return;
    }
 
-   _parallax_view = sf::View{
+   _parallax_view = sf::View{sf::FloatRect{
       {level_view_x * (*_parallax_settings)._factor.x + (*_parallax_settings)._error.x,
        level_view_y * (*_parallax_settings)._factor.y + (*_parallax_settings)._error.y},
       {view_width, view_height}
-   };
+   }};
 }
 
 void ImageLayer::resetView(float view_width, float view_height)

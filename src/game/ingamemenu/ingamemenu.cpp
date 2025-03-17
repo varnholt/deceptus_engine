@@ -191,14 +191,8 @@ void InGameMenu::update(const sf::Time& delta_time)
    }
 }
 
-void InGameMenu::processEvent(const sf::Event& event)
+void InGameMenu::processEvent(const sf::Event::KeyPressed* key_event)
 {
-   const auto* key_event = event.getIf<sf::Event::KeyPressed>();
-   if (key_event == nullptr)
-   {
-      return;
-   }
-
    switch (key_event->code)
    {
       case sf::Keyboard::Key::Left:

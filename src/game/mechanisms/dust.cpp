@@ -16,6 +16,9 @@ void Dust::update(const sf::Time& dt)
 {
    const auto dt_s = dt.asSeconds();
 
+   const auto scale_factor_x = static_cast<float>(_flow_field_image.getSize().x) / _clip_rect.size.x;
+   const auto scale_factor_y = static_cast<float>(_flow_field_image.getSize().y) / _clip_rect.size.y;
+
    for (auto& p : _particles)
    {
       const auto x_px = p._position.x - _clip_rect.position.x;
@@ -27,7 +30,8 @@ void Dust::update(const sf::Time& dt)
          continue;
       }
 
-      const auto col = _flow_field_image.getPixel({static_cast<uint32_t>(x_px), static_cast<uint32_t>(y_px)});
+      const auto col =
+         _flow_field_image.getPixel({static_cast<uint32_t>(x_px * scale_factor_x), static_cast<uint32_t>(y_px * scale_factor_y)});
       const auto col_x = (static_cast<float>(col.r) / 255.0f) - 0.5f;
       const auto col_y = (static_cast<float>(col.g) / 255.0f) - 0.5f;
       const auto col_z = (static_cast<float>(col.b) / 255.0f) - 0.5f;
