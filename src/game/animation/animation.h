@@ -55,7 +55,7 @@ public:
    std::vector<sf::IntRect> _frames;
    std::shared_ptr<sf::Texture> _color_texture;
    std::shared_ptr<sf::Texture> _normal_texture;
-   sf::Vertex _vertices[6];
+   sf::Vertex _vertices[4];
 
    sf::Time _current_time;
    sf::Time _elapsed;

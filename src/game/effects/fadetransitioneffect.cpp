@@ -15,11 +15,8 @@ FadeTransitionEffect::FadeTransitionEffect(const sf::Color color) : _fade_color(
    _vertices = {
       sf::Vertex{top_left, _fade_color},
       sf::Vertex{bottom_left, _fade_color},
-      sf::Vertex{bottom_right, _fade_color},
-
-      sf::Vertex{top_left, _fade_color},
-      sf::Vertex{bottom_right, _fade_color},
-      sf::Vertex{top_right, _fade_color}
+      sf::Vertex{top_right, _fade_color},
+      sf::Vertex{bottom_right, _fade_color}
    };
 }
 
@@ -81,5 +78,5 @@ void FadeTransitionEffect::draw(const std::shared_ptr<sf::RenderTexture>& window
       vertex.color.a = alpha_value;
    }
 
-   window->draw(_vertices.data(), _vertices.size(), sf::PrimitiveType::Triangles);
+   window->draw(_vertices.data(), _vertices.size(), sf::PrimitiveType::TriangleStrip);
 }

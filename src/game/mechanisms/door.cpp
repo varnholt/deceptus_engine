@@ -73,13 +73,10 @@ void Door::updateBars(const sf::Time& dt)
    const auto top = 3.0f * PIXELS_PER_TILE - _bar_offset;
    const auto bottom = top + 3.0f * PIXELS_PER_TILE;
 
-   _door_quad[0].texCoords = sf::Vector2f(left, top);
-   _door_quad[1].texCoords = sf::Vector2f(left, bottom);
-   _door_quad[2].texCoords = sf::Vector2f(right, bottom);
-
-   _door_quad[3].texCoords = sf::Vector2f(left, top);
-   _door_quad[4].texCoords = sf::Vector2f(right, bottom);
-   _door_quad[5].texCoords = sf::Vector2f(right, top);
+   _door_quad[0].texCoords = sf::Vector2f(left, top);      // bottom-left
+   _door_quad[1].texCoords = sf::Vector2f(left, bottom);   // top-left
+   _door_quad[2].texCoords = sf::Vector2f(right, top);     // bottom-right
+   _door_quad[3].texCoords = sf::Vector2f(right, bottom);  // top-right
 
    constexpr auto open_speed = 50.0f;
    constexpr auto close_speed = 200.0f;
@@ -476,14 +473,10 @@ void Door::setup(const GameDeserializeData& data)
    {
       _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "doors.png");
 
-      _door_quad[0].position.x = x_px - PIXELS_PER_TILE;
-      _door_quad[0].position.y = y_px;
-      _door_quad[1].position.x = x_px - PIXELS_PER_TILE;
-      _door_quad[1].position.y = y_px + 3 * PIXELS_PER_TILE;
-      _door_quad[2].position.x = x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE;
-      _door_quad[2].position.y = y_px + 3 * PIXELS_PER_TILE;
-      _door_quad[3].position.x = x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE;
-      _door_quad[3].position.y = y_px;
+      _door_quad[0].position = {x_px - PIXELS_PER_TILE, y_px};                                              // bottom-left
+      _door_quad[1].position = {x_px - PIXELS_PER_TILE, y_px + 3 * PIXELS_PER_TILE};                        // top-left
+      _door_quad[2].position = {x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE, y_px};                        // bottom-right
+      _door_quad[3].position = {x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE, y_px + 3 * PIXELS_PER_TILE};  // top-right
 
       _pixel_rect = sf::FloatRect({x_px, y_px}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3});
    }

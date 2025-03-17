@@ -55,7 +55,7 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    sf::RenderStates states;
    states.blendMode = sf::BlendAlpha;
 
-   sf::Vertex quad[6];
+   sf::Vertex quad[4];
    for (const auto& p : _particles)
    {
       const auto pos = p._position;
@@ -76,20 +76,17 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
       const auto color = sf::Color{_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(alpha)};
 
-      quad[0].position = {pos.x, pos.y};
-      quad[1].position = {pos.x, pos.y + _particle_size_px};
-      quad[2].position = {pos.x + _particle_size_px, pos.y + _particle_size_px};
-
-      quad[3].position = {pos.x, pos.y};
-      quad[4].position = {pos.x + _particle_size_px, pos.y + _particle_size_px};
-      quad[5].position = {pos.x + _particle_size_px, pos.y};
+      quad[0].position = {pos.x, pos.y};                                          // bottom-left
+      quad[1].position = {pos.x, pos.y + _particle_size_px};                      // top-left
+      quad[2].position = {pos.x + _particle_size_px, pos.y};                      // bottom-right
+      quad[3].position = {pos.x + _particle_size_px, pos.y + _particle_size_px};  // top-right
 
       for (auto& v : quad)
       {
          v.color = color;
       }
 
-      target.draw(quad, 4, sf::PrimitiveType::Triangles, states);
+      target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
    }
 }
 
