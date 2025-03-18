@@ -92,7 +92,6 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
          )
       );
 
-      // use TriangleStrip ordering
       strip.push_back(v1);
       strip.push_back(v2);
       strip.push_back(v4);
