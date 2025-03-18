@@ -94,15 +94,15 @@ void Lever::setup(const GameDeserializeData& data)
    const auto x = data._tmx_object->_x_px;
    const auto y = data._tmx_object->_y_px;
 
-   _rect.left = x;
-   _rect.top = y;
-   _rect.width = PIXELS_PER_TILE * 3;
-   _rect.height = PIXELS_PER_TILE * 2;
+   _rect.position.x = x;
+   _rect.position.y = y;
+   _rect.size.x = PIXELS_PER_TILE * 3;
+   _rect.size.y = PIXELS_PER_TILE * 2;
 
-   _sprite.setPosition(x, y);
-   // _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
    _texture = TexturePool::getInstance().get("data/sprites/levers.png");
-   _sprite.setTexture(*_texture);
+   _sprite = std::make_unique<sf::Sprite>(*_texture);
+   _sprite->setPosition({x, y});
+   // _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
 
    setObjectId(data._tmx_object->_name);
 
@@ -115,22 +115,18 @@ void Lever::updateSprite()
 {
    if (_reached && (_target_state == State::Right))
    {
-      _sprite.setTextureRect(
-         {(static_cast<int32_t>(_idle_time_s * idle_animation_speed) % 6) * PIXELS_PER_TILE * 3,
-          PIXELS_PER_TILE * 3 * 2,
-          PIXELS_PER_TILE * 3,
-          PIXELS_PER_TILE * 3}
+      _sprite->setTextureRect(
+         {{(static_cast<int32_t>(_idle_time_s * idle_animation_speed) % 6) * PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3 * 2},
+          {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}}
       );
    }
    else
    {
       const auto left = _dir == -1;
 
-      _sprite.setTextureRect(
-         {left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE),
-          left ? (3 * PIXELS_PER_TILE) : 0,
-          PIXELS_PER_TILE * 3,
-          PIXELS_PER_TILE * 3}
+      _sprite->setTextureRect(
+         {{left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE), left ? (3 * PIXELS_PER_TILE) : 0},
+          {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}}
       );
    }
 }
@@ -202,22 +198,17 @@ const std::vector<std::string>& Lever::getTargetIds() const
 void Lever::update(const sf::Time& dt)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-   _player_at_lever = _rect.intersects(player_rect);
+   _player_at_lever = _rect.findIntersection(player_rect).has_value();
 
    if (!_handle_available)
    {
-      // clang-format off
       constexpr auto no_handle_col = 10;
       constexpr auto no_handle_row = 2;
       const auto rect = sf::IntRect{
-         PIXELS_PER_TILE * 3 * no_handle_col,
-         PIXELS_PER_TILE * 3 * no_handle_row,
-         PIXELS_PER_TILE * 3,
-         PIXELS_PER_TILE * 3
+         {PIXELS_PER_TILE * 3 * no_handle_col, PIXELS_PER_TILE * 3 * no_handle_row}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}
       };
-      // clang-format on
 
-      _sprite.setTextureRect(rect);
+      _sprite->setTextureRect(rect);
       return;
    }
 
@@ -262,12 +253,12 @@ void Lever::update(const sf::Time& dt)
 
 void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   color.draw(_sprite);
+   color.draw(*_sprite);
 }
 
 std::optional<sf::FloatRect> Lever::getBoundingBoxPx()
 {
-   return sf::FloatRect(_rect.left, _rect.top, _rect.width, _rect.height);
+   return sf::FloatRect({_rect.position.x, _rect.position.y}, {_rect.size.x, _rect.size.y});
 }
 
 void Lever::setEnabled(bool enabled)

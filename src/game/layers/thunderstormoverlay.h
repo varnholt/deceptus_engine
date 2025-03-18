@@ -29,7 +29,6 @@ private:
       Silence
    };
 
-   sf::Sprite _sprite;
    sf::FloatRect _rect;
    float _value = 0.0f;
    float _factor = 0.0f;

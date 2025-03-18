@@ -61,8 +61,7 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
 {
    std::string wrapped_text;
    std::string line;
-   sf::Text temp_text;
-   temp_text.setFont(font);
+   sf::Text temp_text(font);
    temp_text.setCharacterSize(character_size);
 
    // get words from original text
@@ -76,7 +75,7 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
       std::string test_line = line + word + " ";
       temp_text.setString(test_line);
 
-      if (temp_text.getLocalBounds().width <= rect.width)  // text fits into boundary
+      if (temp_text.getLocalBounds().size.x <= rect.size.x)  // text fits into boundary
       {
          line = test_line;
       }
@@ -94,7 +93,7 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
 
 float getHorizontallyCenteredX(const sf::Text& text, const sf::FloatRect& rect)
 {
-   const auto x_pos = rect.left + (rect.width - text.getLocalBounds().width) * 0.5f;
+   const auto x_pos = rect.position.x + (rect.size.x - text.getLocalBounds().size.x) * 0.5f;
    return x_pos;
 }
 
@@ -227,20 +226,20 @@ InGameMenuInventory::InGameMenuInventory()
    _duration_show = config._duration_show;
 
    // load fonts
-   if (_font_title.loadFromFile("data/fonts/deceptum.ttf"))
+   if (_font_title.openFromFile("data/fonts/deceptum.ttf"))
    {
       const_cast<sf::Texture&>(_font_title.getTexture(inventory_title_font_size)).setSmooth(false);
-      _text_title.setFont(_font_title);
-      _text_title.setCharacterSize(inventory_title_font_size);
-      _text_title.setFillColor(sf::Color{232, 219, 243});
+      _text_title = std::make_unique<sf::Text>(_font_title);
+      _text_title->setCharacterSize(inventory_title_font_size);
+      _text_title->setFillColor(sf::Color{232, 219, 243});
    }
 
-   if (_font_description.loadFromFile("data/fonts/deceptum.ttf"))
+   if (_font_description.openFromFile("data/fonts/deceptum.ttf"))
    {
       const_cast<sf::Texture&>(_font_description.getTexture(inventory_text_font_size)).setSmooth(false);
-      _text_description.setFont(_font_description);
-      _text_description.setCharacterSize(inventory_text_font_size);
-      _text_description.setFillColor(sf::Color{232, 219, 243});
+      _text_description = std::make_unique<sf::Text>(_font_description);
+      _text_description->setCharacterSize(inventory_text_font_size);
+      _text_description->setFillColor(sf::Color{232, 219, 243});
    }
 
    loadInventoryItems();
@@ -256,17 +255,16 @@ void InGameMenuInventory::loadInventoryItems()
       [this](const auto& image)
       {
          // store sprites
-         sf::Sprite sprite;
-         sprite.setTexture(*_inventory_texture);
-         sprite.setTextureRect({image._x_px, image._y_px, icon_width, icon_height});
-         _sprites[image._name]._sprite = sprite;
+         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*_inventory_texture);
+         sprite->setTextureRect(sf::IntRect({image._x_px, image._y_px}, {icon_width, icon_height}));
+         _sprites[image._name]._sprite = std::move(sprite);
 
          // store texts
          _texts[image._name]._title = image._title;
          _texts[image._name]._description = image._description;
 
          // wrap text
-         sf::FloatRect rect{0.0f, 0.0f, description_rect_width, description_rect_height};
+         sf::FloatRect rect{{0.0f, 0.0f}, {description_rect_width, description_rect_height}};
          const auto wrapped_text = wrapTextWithinRect(image._description, rect, _font_description, inventory_text_font_size);
          _texts[image._name]._description_wrapped = wrapped_text;
       }
@@ -364,21 +362,21 @@ void InGameMenuInventory::updateShowHide()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + _panel_left_offset_px.x;
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    // move in y
    for (const auto& layer : _panel_center)
    {
       const auto y = layer._pos.y + _panel_center_offset_px.y;
-      layer._layer->_sprite->setPosition(layer._pos.x, y);
+      layer._layer->_sprite->setPosition({layer._pos.x, y});
    }
 
    // move in x
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + _panel_right_offset_px.x;
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    // fade in/out
@@ -400,25 +398,25 @@ void InGameMenuInventory::updateMove()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_center)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    if (!move_offset.has_value())
@@ -445,7 +443,7 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
 
    for (const auto& item_key : inventory._items)
    {
-      window.draw(_sprites[item_key]._sprite, states);
+      window.draw(*_sprites[item_key]._sprite, states);
    }
 
    int32_t index = 0;
@@ -457,15 +455,15 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
          continue;
       }
 
-      window.draw(_slot_sprites[index]._sprite, states);
+      window.draw(*_slot_sprites[index]._sprite, states);
       index++;
    }
 }
 
 void InGameMenuInventory::drawInventoryTexts(sf::RenderTarget& window, sf::RenderStates states)
 {
-   window.draw(_text_title, states);
-   window.draw(_text_description, states);
+   window.draw(*_text_title, states);
+   window.draw(*_text_description, states);
 }
 
 std::optional<std::string> InGameMenuInventory::getSelectedItem() const
@@ -533,7 +531,7 @@ void InGameMenuInventory::updateInventoryItems()
       const auto x_px = static_cast<float>(offset_x_px + (index % count_columns) * frame_width);
       const auto y_px = static_cast<float>(offset_y_px + (index / count_columns) * frame_height);
 
-      _sprites[item_key]._sprite.setPosition(x_px, y_px);
+      _sprites[item_key]._sprite->setPosition({x_px, y_px});
 
       // also determine the indices for the selected slots
       if (item_key == inventory._slots[0])
@@ -562,13 +560,13 @@ void InGameMenuInventory::updateInventoryItems()
       const auto& reference_sprite = _sprites[slot]._sprite;
 
       auto& sprite = _slot_sprites[index];
-      sprite._sprite.setTextureRect(reference_sprite.getTextureRect());
-      sprite._sprite.setTexture(*reference_sprite.getTexture());
+      sprite._sprite->setTextureRect(reference_sprite->getTextureRect());
+      sprite._sprite->setTexture(reference_sprite->getTexture());
 
       constexpr auto frame_width_slots = 47;
       const auto pos_x_px = 61 + _panel_left_offset_px.x + move_offset.value_or(0.0f) + index * frame_width_slots;
       constexpr auto pos_y_px = 110;
-      sprite._sprite.setPosition(pos_x_px, pos_y_px);
+      sprite._sprite->setPosition({pos_x_px, pos_y_px});
       index++;
    };
 
@@ -576,8 +574,8 @@ void InGameMenuInventory::updateInventoryItems()
    const auto selected_item = getSelectedItem();
    if (!selected_item.has_value())
    {
-      _text_description.setString("");
-      _text_title.setString("");
+      _text_description->setString("");
+      _text_title->setString("");
    }
    else
    {
@@ -588,14 +586,14 @@ void InGameMenuInventory::updateInventoryItems()
       constexpr auto text_title_width_px = 115;
 
       const auto& text = _texts[selected_item.value()];
-      const sf::FloatRect rect{text_title_x_offset_px, 0, text_title_width_px, 16};
-      const auto title_x_px = getHorizontallyCenteredX(_text_title, rect);
-      _text_description.setString(text._description_wrapped);
-      _text_description.setPosition(
-         _panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px
+      const sf::FloatRect rect{{text_title_x_offset_px, 0}, {text_title_width_px, 16}};
+      const auto title_x_px = getHorizontallyCenteredX(*_text_title, rect);
+      _text_description->setString(text._description_wrapped);
+      _text_description->setPosition(
+         {_panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px}
       );
-      _text_title.setString(text._title);
-      _text_title.setPosition(_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px);
+      _text_title->setString(text._title);
+      _text_title->setPosition({_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px});
    }
 
    // update frames
@@ -683,8 +681,15 @@ void InGameMenuInventory::show()
    }
 #endif
 
-   _keyboard_event_handler = [this](const auto& event) { keyboardKeyPressed(event.key.code); };
-   EventDistributor::registerEvent(sf::Event::KeyPressed, _keyboard_event_handler);
+   _keyboard_event_handler = [this](const sf::Event& event)
+   {
+      if (const auto* key_event = event.getIf<sf::Event::KeyPressed>())
+      {
+         keyboardKeyPressed(key_event->code);
+      }
+   };
+
+   EventDistributor::registerEvent<sf::Event::KeyPressed>(_keyboard_event_handler);
 
    const auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())
@@ -701,7 +706,7 @@ void InGameMenuInventory::show()
 
 void InGameMenuInventory::hide()
 {
-   EventDistributor::unregisterEvent(sf::Event::KeyPressed, _keyboard_event_handler);
+   EventDistributor::unregisterEvent(_keyboard_event_handler);
 
    const auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())
@@ -735,11 +740,11 @@ void InGameMenuInventory::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    std::optional<int32_t> slot;
 
-   if (key == sf::Keyboard::LControl)
+   if (key == sf::Keyboard::Key::LControl)
    {
       slot = 0;
    }
-   else if (key == sf::Keyboard::LAlt)
+   else if (key == sf::Keyboard::Key::LAlt)
    {
       slot = 1;
    }

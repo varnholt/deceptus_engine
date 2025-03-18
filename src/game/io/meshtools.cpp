@@ -238,23 +238,17 @@ void Mesh::readObj(const std::string& filename, std::vector<b2Vec2>& points, std
 void Mesh::writeVerticesToImage(
    const std::vector<b2Vec2>& points,
    const std::vector<std::vector<uint32_t>>& faces,
-   const sf::Vector2i& textureSize,
-   const std::filesystem::path& imagePath,
+   const sf::Vector2i& texture_size,
+   const std::filesystem::path& image_path,
    float scale
 )
 {
-   sf::RenderTexture render_texture;
-   if (!render_texture.create(static_cast<uint32_t>(textureSize.x), static_cast<uint32_t>(textureSize.y)))
-   {
-      std::cout << "failed to create render texture" << std::endl;
-      return;
-   }
-
+   sf::RenderTexture render_texture({static_cast<uint32_t>(texture_size.x), static_cast<uint32_t>(texture_size.y)});
    render_texture.clear();
 
    for (const auto& face : faces)
    {
-      sf::VertexArray poly(sf::LineStrip, face.size() + 1);
+      sf::VertexArray poly(sf::PrimitiveType::LineStrip, face.size() + 1);
 
       auto i = 0u;
       for (const auto vertex_index : face)
@@ -271,12 +265,12 @@ void Mesh::writeVerticesToImage(
       poly[face.size()].color = sf::Color::Red;
       poly[face.size()].position = sf::Vector2f{pos.x * scale, pos.y * scale};
 
-      render_texture.draw(&poly[0], face.size() + 1, sf::LineStrip);
+      render_texture.draw(&poly[0], face.size() + 1, sf::PrimitiveType::LineStrip);
    }
 
    render_texture.display();
 
    // get the target texture (where the stuff has been drawn)
    const sf::Texture& texture = render_texture.getTexture();
-   texture.copyToImage().saveToFile(imagePath.string());
+   texture.copyToImage().saveToFile(image_path.string());
 }
