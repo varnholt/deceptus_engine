@@ -43,14 +43,17 @@ void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       color.draw(sprite);
    }
 
-   for (auto& sprite : _sprites)
+   if (_normal_map != nullptr)
    {
-      sprite.setTexture(*_normal_map.get());
-   }
+      for (auto& sprite : _sprites)
+      {
+         sprite.setTexture(*_normal_map.get());
+      }
 
-   for (const auto& sprite : _sprites)
-   {
-      normal.draw(sprite);
+      for (const auto& sprite : _sprites)
+      {
+         normal.draw(sprite);
+      }
    }
 }
 
