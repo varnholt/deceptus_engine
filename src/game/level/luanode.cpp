@@ -1712,9 +1712,14 @@ int32_t removePlayerSkill(lua_State* state)
 
 void LuaNode::setupTexture()
 {
-   std::string spriteName = std::get<std::string>(_properties["sprite"]);
+   // assume the texture is only configured once
+   if (_texture)
+   {
+      return;
+   }
 
-   _texture = TexturePool::getInstance().get(spriteName);
+   const auto sprite_name = std::get<std::string>(_properties["sprite"]);
+   _texture = TexturePool::getInstance().get(sprite_name);
    addSprite();
 }
 
