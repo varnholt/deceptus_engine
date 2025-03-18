@@ -351,8 +351,6 @@ void PlayerAnimation::loadAnimations(AnimationPool& pool)
    _looped_animations.push_back(_jump_up_l);
    _looped_animations.push_back(_jump_down_r);
    _looped_animations.push_back(_jump_down_l);
-   _looped_animations.push_back(_jump_landing_r);
-   _looped_animations.push_back(_jump_landing_l);
    _looped_animations.push_back(_double_jump_r);
    _looped_animations.push_back(_double_jump_l);
    _looped_animations.push_back(_wallslide_impact_r);
@@ -681,7 +679,7 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processIdleAnimation(
    const auto look_active = DisplayMode::getInstance().isSet(Display::CameraPanorama);
    const auto move_active = (data._moving_left || data._moving_right) && !look_active;
 
-   if (data._in_water || data._dash_dir.has_value() || data._bending_down || move_active)
+   if (data._in_air || data._in_water || data._dash_dir.has_value() || data._bending_down || move_active)
    {
       return std::nullopt;
    }
@@ -969,8 +967,10 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
 
       if (next_cycle.value()->_current_frame == static_cast<int32_t>(next_cycle.value()->_frames.size()) - 1)
       {
+         // reset last landing frame and stop playing the landing frames
          _jump_animation_reference = JumpReference::Landing;
          next_cycle.value()->seekToStart();
+         return std::nullopt;
       }
 
       return next_cycle;
