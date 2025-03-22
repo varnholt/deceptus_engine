@@ -69,10 +69,11 @@ void LazyTexture::unloadTexture()
 
 std::optional<std::reference_wrapper<const sf::Texture>> LazyTexture::getTexture() const
 {
-   std::lock_guard lock(_mutex);
-   if (!_texture)
+   if (!_loaded)
    {
       return std::nullopt;
    }
+
+   std::lock_guard lock(_mutex);
    return std::cref(*_texture);
 }
