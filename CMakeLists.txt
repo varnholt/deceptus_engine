@@ -681,6 +681,7 @@ add_executable(deceptus ${GAME_FILES}
    src/game/mechanisms/boxcollider.h src/game/mechanisms/boxcollider.cpp
    src/game/mechanisms/ringshaderlayer.h src/game/mechanisms/ringshaderlayer.cpp
    src/game/io/lazytexture.h src/game/io/lazytexture.cpp
+   src/game/mechanisms/buttonrect.h src/game/mechanisms/buttonrect.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})

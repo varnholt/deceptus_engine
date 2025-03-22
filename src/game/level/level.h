@@ -191,6 +191,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bouncers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_box_colliders;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_bubble_cubes;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_button_rects;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_checkpoints;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_collapsing_platforms;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_controller_help;

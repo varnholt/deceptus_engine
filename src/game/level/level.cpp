@@ -229,6 +229,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_bouncers,
       &_mechanism_box_colliders,
       &_mechanism_bubble_cubes,
+      &_mechanism_button_rects,
       &_mechanism_checkpoints,
       &_mechanism_collapsing_platforms,
       &_mechanism_controller_help,
@@ -273,6 +274,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_bouncers}] = &_mechanism_bouncers;
    _mechanisms_map[std::string{layer_name_box_colliders}] = &_mechanism_box_colliders;
    _mechanisms_map[std::string{layer_name_bubble_cube}] = &_mechanism_bubble_cubes;
+   _mechanisms_map[std::string{layer_name_button_rects}] = &_mechanism_button_rects;
    _mechanisms_map[std::string{layer_name_checkpoints}] = &_mechanism_checkpoints;
    _mechanisms_map[std::string{layer_name_collapsing_platforms}] = &_mechanism_collapsing_platforms;
    _mechanisms_map[std::string{layer_name_controller_help}] = &_mechanism_controller_help;
