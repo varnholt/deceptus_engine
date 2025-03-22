@@ -111,6 +111,34 @@ The rectangle object's dimensions (including margin) are 3 x 2 tiles so it makes
 ---
 
 
+## Button Rects
+
+A button rectangle is an invisible rectangle that emits a button press event which a button is pressed. The event name is "pressed".
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`ButtonRect`|
+|Object Group|`button_rects`|
+
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The object's z index|
+|button|string|The name of the button (`a`, `b`, `x`, `y`). The default is `b`.
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
 
 ## Collapsing Platforms
 

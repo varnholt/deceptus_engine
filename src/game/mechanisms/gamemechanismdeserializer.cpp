@@ -8,6 +8,7 @@
 #include "game/mechanisms/bouncer.h"
 #include "game/mechanisms/boxcollider.h"
 #include "game/mechanisms/bubblecube.h"
+#include "game/mechanisms/buttonrect.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/mechanisms/collapsingplatform.h"
 #include "game/mechanisms/controllerhelp.h"
@@ -68,6 +69,7 @@ void GameMechanismDeserializer::deserialize(
    auto* mechanism_bouncers = mechanisms[std::string{layer_name_bouncers}];
    auto* mechanism_box_colliders = mechanisms[std::string{layer_name_box_colliders}];
    auto* mechanism_bubble_cubes = mechanisms[std::string{layer_name_bubble_cube}];
+   auto* mechanism_button_rects = mechanisms[std::string{layer_name_button_rects}];
    auto* mechanism_checkpoints = mechanisms[std::string{layer_name_checkpoints}];
    auto* mechanism_collapsing_platforms = mechanisms[std::string{layer_name_collapsing_platforms}];
    auto* mechanism_controller_help = mechanisms[std::string{layer_name_controller_help}];
@@ -181,6 +183,12 @@ void GameMechanismDeserializer::deserialize(
             {
                auto mechanism = std::make_shared<BubbleCube>(parent, data);
                mechanism_bubble_cubes->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_button_rects || tmx_object->_template_type == type_name_button_rect)
+            {
+               auto mechanism = std::make_shared<ButtonRect>(parent);
+               mechanism->setup(data);
+               mechanism_button_rects->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_lasers_v1 || object_group->_name == layer_name_lasers ||
                      object_group->_name == layer_name_lasers_v2 || tmx_object->_template_type == type_name_laser)
