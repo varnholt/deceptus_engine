@@ -1,7 +1,5 @@
 #include "buttonrect.h"
 #include "framework/tmxparser/tmxproperties.h"
-#include "framework/tmxparser/tmxproperty.h"
-#include "framework/tools/log.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismobserver.h"
 #include "game/player/player.h"
@@ -41,7 +39,7 @@ void ButtonRect::setup(const GameDeserializeData& data)
 
    if (data._tmx_object->_properties)
    {
-      static std::unordered_map<std::string, Button> button_map{{"a", Button::A}, {"b", Button::B}, {"x", Button::X}, {"y", Button::X}};
+      static std::unordered_map<std::string, Button> button_map{{"a", Button::A}, {"b", Button::B}, {"x", Button::X}, {"y", Button::Y}};
 
       const auto& map = data._tmx_object->_properties->_map;
       const auto button_id_str = ValueReader::readValue<std::string>("button", map).value_or("b");

@@ -4,9 +4,6 @@
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
-#include <functional>
-#include "SFML/Graphics.hpp"
-
 class ButtonRect : public GameMechanism, public GameNode
 {
 public:

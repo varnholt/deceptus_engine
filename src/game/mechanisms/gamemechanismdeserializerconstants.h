@@ -6,6 +6,7 @@
 constexpr std::string_view layer_name_blocking_rects{"blocking_rects"};
 constexpr std::string_view layer_name_bouncers{"bouncers"};
 constexpr std::string_view layer_name_bubble_cube{"bubble_cubes"};
+constexpr std::string_view layer_name_button_rects{"button_rects"};
 constexpr std::string_view layer_name_checkpoints{"checkpoints"};
 constexpr std::string_view layer_name_collapsing_platforms{"collapsing_platforms"};
 constexpr std::string_view layer_name_controller_help{"controller_help"};
@@ -58,6 +59,7 @@ constexpr std::string_view layer_name_zoom_rects{"zoom_rects"};
 constexpr std::string_view type_name_blocking_rect{"BlockingRect"};
 constexpr std::string_view type_name_bouncer{"Bouncer"};
 constexpr std::string_view type_name_bubble_cube{"BubbleCube"};
+constexpr std::string_view type_name_button_rect{"ButtonRect"};
 constexpr std::string_view type_name_checkpoint{"CheckPoint"};
 constexpr std::string_view type_name_collapsing_platform{"CollapsingPlatform"};
 constexpr std::string_view type_name_controller_help{"ControllerHelp"};
