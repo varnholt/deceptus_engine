@@ -23,23 +23,27 @@ MenuScreenMain::MenuScreenMain()
 {
    setFilename("data/menus/titlescreen.psd");
 
-   _font.loadFromFile("data/fonts/deceptum.ttf");
+   _font.openFromFile("data/fonts/deceptum.ttf");
    const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
 
-   _text_build.setFont(_font);
-   _text_build.setString(getBuildNumber());
-   _text_build.setCharacterSize(12);
-   _text_build.setPosition({70, 338});
-   _text_build.setFillColor(sf::Color{50, 50, 50});
+   _text_build = std::make_unique<sf::Text>(_font);
+
+   _text_build->setFont(_font);
+   _text_build->setString(getBuildNumber());
+   _text_build->setCharacterSize(12);
+   _text_build->setPosition({70, 338});
+   _text_build->setFillColor(sf::Color{50, 50, 50});
 
    const auto current_year =
       static_cast<int32_t>(std::chrono::year_month_day{std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now())}.year());
 
-   _text_year.setFont(_font);
-   _text_year.setString(std::to_string(current_year));
-   _text_year.setCharacterSize(12);
-   _text_year.setPosition({344, 338});
-   _text_year.setFillColor(sf::Color{127, 171, 253});
+   _text_year = std::make_unique<sf::Text>(_font);
+
+   _text_year->setFont(_font);
+   _text_year->setString(std::to_string(current_year));
+   _text_year->setCharacterSize(12);
+   _text_year->setPosition({344, 338});
+   _text_year->setFillColor(sf::Color{127, 171, 253});
 }
 
 void MenuScreenMain::update(const sf::Time& /*dt*/)
@@ -49,23 +53,23 @@ void MenuScreenMain::update(const sf::Time& /*dt*/)
 void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    MenuScreen::draw(window, states);
-   window.draw(_text_build);
-   window.draw(_text_year);
+   window.draw(*_text_build);
+   window.draw(*_text_year);
 }
 
 void MenuScreenMain::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (key == sf::Keyboard::Up)
+   if (key == sf::Keyboard::Key::Up)
    {
       up();
    }
 
-   else if (key == sf::Keyboard::Down)
+   else if (key == sf::Keyboard::Key::Down)
    {
       down();
    }
 
-   else if (key == sf::Keyboard::Return)
+   else if (key == sf::Keyboard::Key::Enter)
    {
       select();
    }

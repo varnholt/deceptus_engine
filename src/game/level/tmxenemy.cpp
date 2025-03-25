@@ -69,10 +69,10 @@ void TmxEnemy::parse(const std::shared_ptr<TmxObject>& object)
    top -= PIXELS_PER_TILE / 2;
    left -= PIXELS_PER_TILE / 2;
 
-   _pixel_rect.top = top;
-   _pixel_rect.left = left;
-   _pixel_rect.width = w;
-   _pixel_rect.height = h;
+   _pixel_rect.position.y = top;
+   _pixel_rect.position.x = left;
+   _pixel_rect.size.x = w;
+   _pixel_rect.size.y = h;
 
    _vertices[0].x = left;
    _vertices[0].y = top;

@@ -45,10 +45,10 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
    const auto width = data._tmx_object->_width_px;
    const auto height = data._tmx_object->_height_px;
 
-   _rect.left = x;
-   _rect.top = y;
-   _rect.width = width;
-   _rect.height = height;
+   _rect.position.x = x;
+   _rect.position.y = y;
+   _rect.size.x = width;
+   _rect.size.y = height;
 
    setType(ObjectTypeBouncer);
    _activation_time = GlobalClock::getInstance().getElapsedTime();
@@ -88,8 +88,8 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
 
    // load texture
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bumper.png");
-   _sprite.setTexture(*_texture);
-   _sprite.setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
+   _sprite = std::make_unique<sf::Sprite>(*_texture);
+   _sprite->setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
 }
 
 void Bouncer::preload()
@@ -99,16 +99,16 @@ void Bouncer::preload()
 
 void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   color.draw(_sprite);
+   color.draw(*_sprite);
 }
 
 void Bouncer::updatePlayerAtBouncer()
 {
    auto* player = Player::getCurrent();
    auto rect = player->getPixelRectFloat();
-   rect.height *= 3;
+   rect.size.y *= 3;
 
-   _player_at_bouncer = rect.intersects(_rect);
+   _player_at_bouncer = rect.findIntersection(_rect).has_value();
 }
 
 void Bouncer::update(const sf::Time& /*dt*/)
@@ -124,7 +124,7 @@ void Bouncer::update(const sf::Time& /*dt*/)
       step = 0;
    }
 
-   _sprite.setTextureRect(sf::IntRect(step * SPRITE_WIDTH, 0, SPRITE_WIDTH, SPRITE_HEIGHT));
+   _sprite->setTextureRect(sf::IntRect({step * SPRITE_WIDTH, 0}, {SPRITE_WIDTH, SPRITE_HEIGHT}));
 }
 
 std::optional<sf::FloatRect> Bouncer::getBoundingBoxPx()

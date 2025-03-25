@@ -95,7 +95,7 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    const auto y = data._tmx_object->_y_px;
    _position_m = MPP * b2Vec2{x, y};
    _position_px = sf::Vector2f(x, y);
-   _rect_px = sf::FloatRect{x, y, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rect_px = {{x, y}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    addChunks(_rect_px);
 
@@ -120,7 +120,7 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    auto row_index = 0;
    for (auto& block : _blocks)
    {
-      block._sprite.setTexture(*_texture);
+      block._sprite = std::make_unique<sf::Sprite>(*_texture);
       block._x_px = x + sprite_offset_x_px;
       block._y_px = y + sprite_offset_y_px;
       block._sprite_row = row_index % 4;
@@ -146,7 +146,7 @@ void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*norma
 
    for (auto& block : _blocks)
    {
-      color.draw(block._sprite);
+      color.draw(*block._sprite);
    }
 }
 
@@ -161,7 +161,7 @@ void CollapsingPlatform::updateRespawnAnimation()
    {
       for (auto& block : _blocks)
       {
-         block._sprite.setColor(sf::Color{255, 255, 255, 255});
+         block._sprite->setColor(sf::Color{255, 255, 255, 255});
       }
 
       _respawning = false;
@@ -178,7 +178,7 @@ void CollapsingPlatform::updateRespawnAnimation()
       for (auto& block : _blocks)
       {
          block._alpha = static_cast<uint8_t>(255.0f * alpha_normalized);
-         block._sprite.setColor(sf::Color{255, 255, 255, block._alpha});
+         block._sprite->setColor(sf::Color{255, 255, 255, block._alpha});
       }
    }
 }
@@ -190,7 +190,7 @@ void CollapsingPlatform::updateRespawn(const sf::Time& dt)
    // bring collapsed blocks back after some time
    if (!_respawning && _time_since_collapse.asSeconds() > _settings.time_to_respawn_s)
    {
-      if (Player::getCurrent()->getPixelRectFloat().intersects(_rect_px))
+      if (Player::getCurrent()->getPixelRectFloat().findIntersection(_rect_px).has_value())
       {
          // shift respawn time while player intersects
          _time_since_collapse = sf::seconds(_settings.time_to_respawn_s);
@@ -345,10 +345,9 @@ void CollapsingPlatform::updateBlockSprites()
 {
    for (auto& block : _blocks)
    {
-      block._sprite.setPosition(block._x_px + block._shake_x_px, block._y_px + block._shake_y_px + block._fall_offset_y_px);
-
-      block._sprite.setTextureRect(
-         {block._sprite_column * PIXELS_PER_TILE, block._sprite_row * PIXELS_PER_TILE * 3, PIXELS_PER_TILE, PIXELS_PER_TILE * 3}
+      block._sprite->setPosition({block._x_px + block._shake_x_px, block._y_px + block._shake_y_px + block._fall_offset_y_px});
+      block._sprite->setTextureRect(
+         {{block._sprite_column * PIXELS_PER_TILE, block._sprite_row * PIXELS_PER_TILE * 3}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3}}
       );
    }
 }

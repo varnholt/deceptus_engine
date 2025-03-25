@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-class Animation : public sf::Sprite
+class Animation : public sf::Drawable, public sf::Transformable
 {
 public:
    using HighResDuration = std::chrono::high_resolution_clock::duration;

@@ -1,5 +1,6 @@
 #include "playerclimb.h"
 
+#include <set>
 #include "game/audio/audio.h"
 #include "game/state/savestate.h"
 

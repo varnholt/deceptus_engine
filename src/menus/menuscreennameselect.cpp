@@ -16,12 +16,13 @@ static const size_t max_length = 11;
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
-   _font.loadFromFile("data/fonts/deceptum.ttf");
+   _font.openFromFile("data/fonts/deceptum.ttf");
    const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
 
-   _text.setFont(_font);
-   _text.setCharacterSize(12);
-   _text.setFillColor(sf::Color{232, 219, 243});
+   _text = std::make_unique<sf::Text>(_font);
+   _text->setFont(_font);
+   _text->setCharacterSize(12);
+   _text->setFillColor(sf::Color{232, 219, 243});
 
    setFilename("data/menus/nameselect.psd");
 
@@ -84,11 +85,11 @@ void MenuScreenNameSelect::back()
 void MenuScreenNameSelect::updateText()
 {
    // draw text
-   _text.setString(_name);
-   const auto text_rect = _text.getLocalBounds();
-   const auto x_offset_px = (_name_rect.width - text_rect.width) * 0.5f;
-   const auto x_px = _name_rect.left + x_offset_px;
-   _text.setPosition(x_px, _name_rect.top);
+   _text->setString(_name);
+   const auto text_rect = _text->getLocalBounds();
+   const auto x_offset_px = (_name_rect.size.x - text_rect.size.x) * 0.5f;
+   const auto x_px = _name_rect.position.x + x_offset_px;
+   _text->setPosition({x_px, _name_rect.position.y});
 }
 
 void MenuScreenNameSelect::chop()
@@ -112,51 +113,51 @@ void MenuScreenNameSelect::appendChar(char c)
 
 void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   _shift += static_cast<int32_t>(key == sf::Keyboard::LShift);
-   _shift += static_cast<int32_t>(key == sf::Keyboard::RShift);
+   _shift += static_cast<int32_t>(key == sf::Keyboard::Key::LShift);
+   _shift += static_cast<int32_t>(key == sf::Keyboard::Key::RShift);
 
-   if (key >= sf::Keyboard::A && key <= sf::Keyboard::Z)
+   if (key >= sf::Keyboard::Key::A && key <= sf::Keyboard::Key::Z)
    {
       if (_name.size() >= max_length)
       {
          return;
       }
 
-      const auto c = _chars[static_cast<uint32_t>(key + (_shift ? 0 : 26))];
+      const auto c = _chars[static_cast<uint32_t>(key) + (_shift ? 0 : 26)];
       appendChar(c);
    }
 
-   if (key == sf::Keyboard::Delete || key == sf::Keyboard::Backspace)
+   if (key == sf::Keyboard::Key::Delete || key == sf::Keyboard::Key::Backspace)
    {
       chop();
    }
 
-   if (key == sf::Keyboard::Up)
+   if (key == sf::Keyboard::Key::Up)
    {
       up();
    }
 
-   else if (key == sf::Keyboard::Down)
+   else if (key == sf::Keyboard::Key::Down)
    {
       down();
    }
 
-   if (key == sf::Keyboard::Left)
+   if (key == sf::Keyboard::Key::Left)
    {
       left();
    }
 
-   else if (key == sf::Keyboard::Right)
+   else if (key == sf::Keyboard::Key::Right)
    {
       right();
    }
 
-   else if (key == sf::Keyboard::Return)
+   else if (key == sf::Keyboard::Key::Enter)
    {
       select();
    }
 
-   else if (key == sf::Keyboard::Escape)
+   else if (key == sf::Keyboard::Key::Escape)
    {
       back();
    }
@@ -164,8 +165,8 @@ void MenuScreenNameSelect::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenNameSelect::keyboardKeyReleased(sf::Keyboard::Key key)
 {
-   _shift -= static_cast<int32_t>(key == sf::Keyboard::LShift);
-   _shift -= static_cast<int32_t>(key == sf::Keyboard::RShift);
+   _shift -= static_cast<int32_t>(key == sf::Keyboard::Key::LShift);
+   _shift -= static_cast<int32_t>(key == sf::Keyboard::Key::RShift);
 }
 
 void MenuScreenNameSelect::controllerButtonX()
@@ -200,9 +201,9 @@ void MenuScreenNameSelect::loadingFinished()
    _char_origin.y = cursor->_sprite->getPosition().y;
 
    const auto player_name = _layers["players-name"];
-   _name_rect.left = player_name->_sprite->getPosition().x;
-   _name_rect.top = player_name->_sprite->getPosition().y;
-   _name_rect.width = static_cast<float>(player_name->_texture->getSize().x);
+   _name_rect.position.x = player_name->_sprite->getPosition().x;
+   _name_rect.position.y = player_name->_sprite->getPosition().y;
+   _name_rect.size.x = static_cast<float>(player_name->_texture->getSize().x);
 
    retrieveUsername();
    updateLayers();
@@ -212,7 +213,7 @@ void MenuScreenNameSelect::updateLayers()
 {
    auto cursor = _layers["cursor"];
    cursor->_sprite->setPosition(
-      static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)
+      {static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)}
    );
 
    _layers["header-bg"]->_visible = true;
@@ -243,5 +244,5 @@ void MenuScreenNameSelect::updateLayers()
 void MenuScreenNameSelect::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    MenuScreen::draw(window, states);
-   window.draw(_text, states);
+   window.draw(*_text, states);
 }
