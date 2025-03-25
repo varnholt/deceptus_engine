@@ -64,9 +64,6 @@ std::vector<Segment> parseRichText(
 
    std::vector<Segment> segments;
 
-   Segment segment(font);
-   segment.text->setCharacterSize(character_size);
-
    auto current_text_color = text_color;
    bool is_italic = false;
    bool is_bold = false;
@@ -122,6 +119,8 @@ std::vector<Segment> parseRichText(
          if (tag_pos > 0)
          {
             const auto text_before_tag = current_view.substr(0, tag_pos);
+            Segment segment(font);
+            segment.text->setCharacterSize(character_size);
             segment.text->setString(std::string{text_before_tag});
             segment.text->setFillColor(current_text_color);
             segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
@@ -159,6 +158,8 @@ std::vector<Segment> parseRichText(
          else if (closest_tag_name == "br")
          {
             // insert newline segment
+            Segment segment(font);
+            segment.text->setCharacterSize(character_size);
             segment.text->setString("\n");
             segments.push_back(std::move(segment));
          }
@@ -166,6 +167,8 @@ std::vector<Segment> parseRichText(
       else
       {
          // no more tags; add the rest of the text as a single segment.
+         Segment segment(font);
+         segment.text->setCharacterSize(character_size);
          segment.text->setString(std::string{current_view});
          segment.text->setFillColor(current_text_color);
          segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
