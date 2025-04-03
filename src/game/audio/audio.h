@@ -57,9 +57,46 @@ public:
       void setPosition(const sf::Vector2f& pos);
    };
 
+   enum class TransitionType
+   {
+      LetCurrentFinish,
+      Crossfade,
+      ImmediateSwitch,
+      FadeOutThenNew
+   };
+
+   struct TrackRequest
+   {
+      std::string filename;
+      TransitionType transition;
+      std::chrono::milliseconds duration{2000};  // for crossfade or fadeout
+   };
+
+   class MusicPlayer
+   {
+   public:
+      void update(const sf::Time& dt);
+      void queueTrack(const TrackRequest& request);
+      void stop();
+
+   private:
+      void beginTransition(const TrackRequest& request);
+      float volume() const;
+
+      sf::Music _music_a;
+      sf::Music _music_b;
+      sf::Music* _current = nullptr;
+      sf::Music* _next = nullptr;
+      bool _using_a = true;
+
+      std::optional<TrackRequest> _pending_request;
+      bool _is_crossfading = false;
+      std::chrono::milliseconds _crossfade_duration{};
+      std::chrono::milliseconds _crossfade_elapsed{};
+   };
+
    static Audio& getInstance();
 
-   void initializeMusicVolume();
    void adjustActiveSampleVolume();
 
    void addSample(const std::string& sample);
@@ -69,21 +106,15 @@ public:
    void setVolume(int32_t thread, float volume);
    void setPosition(int32_t thread, const sf::Vector2f pos);
 
-   void updateMusic();
-
-   sf::Music& getMusic() const;
+   MusicPlayer& getMusicPlayer();
 
 private:
    void initializeSamples();
-   void initializeMusic();
    std::shared_ptr<sf::SoundBuffer> loadFile(const std::string& filename);
    void debug();
 
    std::mutex _mutex;
    std::unordered_map<std::string, std::shared_ptr<sf::SoundBuffer>> _sound_buffers;
    std::array<SoundThread, 50> _sound_threads;
-
-   mutable sf::Music _music;
-   std::vector<Track> _tracks;
-   uint32_t _current_index = 999;
+   MusicPlayer _music_player;
 };

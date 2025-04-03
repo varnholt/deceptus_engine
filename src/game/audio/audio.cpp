@@ -20,9 +20,7 @@ const std::string music_path = "data/music";
  */
 Audio::Audio()
 {
-   initializeMusicVolume();
    initializeSamples();
-   initializeMusic();
 }
 
 /*!
@@ -79,35 +77,6 @@ void Audio::initializeSamples()
    addSample("impact.wav");
 }
 
-void Audio::initializeMusic()
-{
-   if (!std::filesystem::exists(music_path))
-   {
-      return;
-   }
-
-   try
-   {
-      for (const auto& entry : std::filesystem::directory_iterator(music_path))
-      {
-         const auto path = entry.path().string();
-
-         if (path.find(".ogg") != std::string::npos)
-         {
-            Track track;
-            track._filename = path;
-            _tracks.push_back(track);
-         }
-
-         // Log::Info() << entry.path();
-      }
-   }
-   catch (const std::exception& e)
-   {
-      Log::Error() << e.what();
-   }
-}
-
 void Audio::debug()
 {
    const auto stopped_thread_count = std::count_if(
@@ -117,12 +86,9 @@ void Audio::debug()
    std::cout << stopped_thread_count << "/" << _sound_threads.size() << " are free" << std::endl;
 }
 
-void Audio::initializeMusicVolume()
+Audio::MusicPlayer& Audio::getMusicPlayer()
 {
-   const auto& config = GameConfiguration::getInstance();
-   const auto master = config._audio_volume_master * 0.01f;
-   const auto music = config._audio_volume_music;
-   _music.setVolume(master * music);
+   return _music_player;
 }
 
 void Audio::adjustActiveSampleVolume()
@@ -214,33 +180,6 @@ void Audio::setPosition(int32_t thread, const sf::Vector2f pos)
    _sound_threads[thread].setPosition(pos);
 }
 
-void Audio::updateMusic()
-{
-   if (_tracks.empty())
-   {
-      return;
-   }
-
-   if (_music.getStatus() == sf::Music::Playing)
-   {
-      return;
-   }
-
-   _current_index++;
-
-   if (_current_index >= _tracks.size())
-   {
-      _current_index = 0;
-   }
-
-   _music.openFromFile(_tracks[_current_index]._filename);
-   _music.play();
-}
-
-sf::Music& Audio::getMusic() const
-{
-   return _music;
-}
 
 void Audio::SoundThread::setVolume(float volume)
 {
@@ -252,4 +191,106 @@ void Audio::SoundThread::setVolume(float volume)
 void Audio::SoundThread::setPosition(const sf::Vector2f& pos)
 {
    _sound.setPosition(pos.x, pos.y, 0.0f);
+}
+
+void Audio::MusicPlayer::update(const sf::Time& dt)
+{
+   const auto dt_ms = std::chrono::milliseconds(dt.asMilliseconds());
+
+   if (_is_crossfading)
+   {
+      _crossfade_elapsed += dt_ms;
+      const auto& total = _crossfade_duration;
+
+      const double t = std::min(1.0, static_cast<double>(_crossfade_elapsed.count()) / total.count());
+
+      _next->setVolume(static_cast<float>(volume() * t));
+      _current->setVolume(static_cast<float>(volume() * (1.0 - t)));
+
+      if (_crossfade_elapsed >= total)
+      {
+         _current->stop();
+         _current->setVolume(volume());
+         _current = _next;
+         _is_crossfading = false;
+         _pending_request.reset();
+      }
+
+      return;
+   }
+
+   if (!_pending_request.has_value())
+   {
+      return;
+   }
+
+   const auto& request = _pending_request.value();
+
+   switch (request.transition)
+   {
+      case TransitionType::ImmediateSwitch:
+      {
+         beginTransition(request);
+         _pending_request.reset();
+         break;
+      }
+      case TransitionType::LetCurrentFinish:
+      {
+         if (!_current || _current->getStatus() != sf::Music::Playing)
+         {
+            beginTransition(request);
+            _pending_request.reset();
+         }
+         break;
+      }
+      case TransitionType::Crossfade:
+      {
+         beginTransition(request);
+         _is_crossfading = true;
+         _crossfade_elapsed = std::chrono::milliseconds{0};
+         _crossfade_duration = request.duration;
+         break;
+      }
+      case TransitionType::FadeOutThenNew:
+      {
+         // not implemented yet
+         break;
+      }
+   }
+}
+
+void Audio::MusicPlayer::beginTransition(const TrackRequest& request)
+{
+   _using_a = !_using_a;
+   _next = _using_a ? &_music_a : &_music_b;
+   _current = _using_a ? &_music_b : &_music_a;
+
+   if (!_next->openFromFile(request.filename))
+   {
+      // optionally handle error
+      return;
+   }
+
+   if (request.transition == TransitionType::Crossfade)
+   {
+      _next->setVolume(0.f);
+   }
+   else
+   {
+      _next->setVolume(100.f);
+      if (_current)
+      {
+         _current->stop();
+      }
+   }
+
+   _next->play();
+}
+
+float Audio::MusicPlayer::volume() const
+{
+   const auto& config = GameConfiguration::getInstance();
+   const auto master = config._audio_volume_master * 0.01f;
+   const auto music = config._audio_volume_music;
+   return master * music;
 }
