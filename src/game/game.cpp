@@ -729,7 +729,7 @@ void Game::update()
    _delta_clock.restart();
 
    Timer::update(Timer::Scope::UpdateAlways);
-   Audio::getInstance().updateMusic();
+   Audio::getInstance().getMusicPlayer().update(dt);
    MessageBox::update(dt);
 
    // update screen transitions here
