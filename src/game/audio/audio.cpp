@@ -201,11 +201,10 @@ void Audio::MusicPlayer::update(const sf::Time& dt)
    {
       _crossfade_elapsed += dt_ms;
       const auto& total = _crossfade_duration;
+      const auto normalized_time = std::min(1.0f, static_cast<float>(_crossfade_elapsed.count()) / total.count());
 
-      const double t = std::min(1.0, static_cast<double>(_crossfade_elapsed.count()) / total.count());
-
-      _next->setVolume(static_cast<float>(volume() * t));
-      _current->setVolume(static_cast<float>(volume() * (1.0 - t)));
+      _next->setVolume(volume() * normalized_time);
+      _current->setVolume(volume() * (1.0f - normalized_time));
 
       if (_crossfade_elapsed >= total)
       {
@@ -251,12 +250,105 @@ void Audio::MusicPlayer::update(const sf::Time& dt)
          _crossfade_duration = request.duration;
          break;
       }
+
       case TransitionType::FadeOutThenNew:
       {
-         // not implemented yet
+         if (!_is_fading_out)
+         {
+            _is_fading_out = true;
+            _fade_out_elapsed = std::chrono::milliseconds{0};
+            _fade_out_duration = _pending_request->duration;
+         }
+
+         if (_is_fading_out)
+         {
+            _fade_out_elapsed += dt_ms;
+            const auto& total = _fade_out_duration;
+            const auto normalized_time = std::min(1.0f, static_cast<float>(_fade_out_elapsed.count()) / total.count());
+            if (_current)
+            {
+               _current->setVolume(100.0f * (1.0f - normalized_time));
+            }
+
+            if (_fade_out_elapsed >= total)
+            {
+               if (_current)
+               {
+                  _current->stop();
+               }
+
+               if (_pending_request.has_value())
+               {
+                  TrackRequest new_request = _pending_request.value();
+                  new_request.transition = TransitionType::ImmediateSwitch;
+                  beginTransition(new_request);
+               }
+
+               _pending_request.reset();
+               _is_fading_out = false;
+            }
+         }
+
          break;
       }
    }
+
+   if (_current && _current->getStatus() == sf::SoundSource::Stopped)
+   {
+      switch (_post_action)
+      {
+         case PostPlaybackAction::None:
+         {
+            // do nothing
+            break;
+         }
+
+         case PostPlaybackAction::Loop:
+         {
+            if (_current)
+            {
+               _current->play();
+            }
+            break;
+         }
+
+         case PostPlaybackAction::PlayNext:
+         {
+            if (!_playlist.empty())
+            {
+               _playlist_index = (_playlist_index + 1) % _playlist.size();
+               TrackRequest next_track{
+                  .filename = _playlist[_playlist_index],
+                  .transition = TransitionType::ImmediateSwitch,
+                  .duration = std::chrono::milliseconds{0},
+                  .post_action = PostPlaybackAction::PlayNext
+               };
+               queueTrack(next_track);
+            }
+            break;
+         }
+      }
+   }
+}
+
+void Audio::MusicPlayer::queueTrack(const TrackRequest& request)
+{
+   _pending_request = request;
+}
+
+void Audio::MusicPlayer::stop()
+{
+   _music_a.stop();
+   _music_b.stop();
+   _pending_request.reset();
+   _is_crossfading = false;
+   _is_fading_out = false;
+}
+
+void Audio::MusicPlayer::setPlaylist(const std::vector<std::string>& playlist)
+{
+   _playlist = playlist;
+   _playlist_index = 0;
 }
 
 void Audio::MusicPlayer::beginTransition(const TrackRequest& request)
@@ -285,6 +377,7 @@ void Audio::MusicPlayer::beginTransition(const TrackRequest& request)
    }
 
    _next->play();
+   _post_action = request.post_action;
 }
 
 float Audio::MusicPlayer::volume() const
@@ -294,3 +387,41 @@ float Audio::MusicPlayer::volume() const
    const auto music = config._audio_volume_music;
    return master * music;
 }
+
+/*
+
+
+// simple usage
+{
+   musicPlayer.queueTrack({
+    .filename = "level1.ogg",
+    .transition = TransitionType::Crossfade,
+    .duration = std::chrono::milliseconds(3000),
+    .post_action = PostPlaybackAction::Loop
+   });
+}
+
+// playlist mode
+{
+   musicPlayer._playlist = {"level1.ogg", "level2.ogg", "boss_battle.ogg"};
+   musicPlayer._playlist_index = 0;
+
+   musicPlayer.queueTrack({
+    .filename = musicPlayer._playlist[0],
+    .transition = TransitionType::ImmediateSwitch,
+    .duration = std::chrono::milliseconds(0),
+    .post_action = PostPlaybackAction::PlayNext
+   });
+}
+
+// fade out then new
+{
+   musicPlayer.queueTrack({
+    .filename = "next_song.ogg",
+    .transition = TransitionType::FadeOutThenNew,
+    .duration = std::chrono::milliseconds(2000),
+    .post_action = PostPlaybackAction::None
+   });
+}
+
+ */

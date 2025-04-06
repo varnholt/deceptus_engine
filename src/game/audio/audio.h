@@ -65,11 +65,19 @@ public:
       FadeOutThenNew
    };
 
+   enum class PostPlaybackAction
+   {
+      None,      // do nothing when the track ends
+      Loop,      // restart the same track
+      PlayNext,  // play next track in a list
+   };
+
    struct TrackRequest
    {
       std::string filename;
       TransitionType transition;
       std::chrono::milliseconds duration{2000};  // for crossfade or fadeout
+      PostPlaybackAction post_action = PostPlaybackAction::None;
    };
 
    class MusicPlayer
@@ -78,6 +86,7 @@ public:
       void update(const sf::Time& dt);
       void queueTrack(const TrackRequest& request);
       void stop();
+      void setPlaylist(const std::vector<std::string>& playlist);
 
    private:
       void beginTransition(const TrackRequest& request);
@@ -89,7 +98,16 @@ public:
       sf::Music* _next = nullptr;
       bool _using_a = true;
 
+      std::vector<std::string> _playlist;
+      std::size_t _playlist_index = 0;
+      PostPlaybackAction _post_action = PostPlaybackAction::None;
+
+      bool _is_fading_out = false;
+      std::chrono::milliseconds _fade_out_elapsed{};
+      std::chrono::milliseconds _fade_out_duration{};
+
       std::optional<TrackRequest> _pending_request;
+
       bool _is_crossfading = false;
       std::chrono::milliseconds _crossfade_duration{};
       std::chrono::milliseconds _crossfade_elapsed{};
