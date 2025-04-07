@@ -72,6 +72,13 @@ public:
       PlayNext,  // play next track in a list
    };
 
+   enum class MusicTransitionState
+   {
+      None,
+      Crossfading,
+      FadingOut,
+   };
+
    struct TrackRequest
    {
       std::string filename;
@@ -91,26 +98,30 @@ public:
    private:
       void beginTransition(const TrackRequest& request);
       float volume() const;
+      void updateCrossfade(std::chrono::milliseconds dt);
+      void updateFadeOut(std::chrono::milliseconds dt);
+      void processPendingRequest();
+      void handleTrackFinished();
 
-      sf::Music _music_a;
-      sf::Music _music_b;
-      sf::Music* _current = nullptr;
-      sf::Music* _next = nullptr;
-      bool _using_a = true;
+      sf::Music& current();
+      sf::Music& next();
 
-      std::vector<std::string> _playlist;
-      std::size_t _playlist_index = 0;
-      PostPlaybackAction _post_action = PostPlaybackAction::None;
+      std::array<sf::Music, 2> _music;
+      int32_t _current_index = 0;  // 0 or 1
 
-      bool _is_fading_out = false;
+      MusicTransitionState _transition_state = MusicTransitionState::None;
+
+      std::chrono::milliseconds _crossfade_elapsed{};
+      std::chrono::milliseconds _crossfade_duration{};
+
       std::chrono::milliseconds _fade_out_elapsed{};
       std::chrono::milliseconds _fade_out_duration{};
 
+      PostPlaybackAction _post_action = PostPlaybackAction::None;
       std::optional<TrackRequest> _pending_request;
 
-      bool _is_crossfading = false;
-      std::chrono::milliseconds _crossfade_duration{};
-      std::chrono::milliseconds _crossfade_elapsed{};
+      std::vector<std::string> _playlist;
+      std::size_t _playlist_index = 0;
    };
 
    static Audio& getInstance();
