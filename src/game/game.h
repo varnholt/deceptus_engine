@@ -67,6 +67,8 @@ private:
    void changeResolution(int32_t w, int32_t h);
    void goToLastCheckpoint();
    void menuLoadRequest();
+   void playMenuMusic();
+   void playLevelMusic();
 
    std::shared_ptr<sf::RenderWindow> _window;
    std::shared_ptr<sf::RenderTexture> _window_render_texture;
