@@ -103,6 +103,8 @@ public:
       void processPendingRequest();
       void handleTrackFinished();
 
+      mutable std::mutex _mutex;
+
       sf::Music& current();
       sf::Music& next();
 
