@@ -195,6 +195,8 @@ void Audio::SoundThread::setPosition(const sf::Vector2f& pos)
 
 void Audio::MusicPlayer::update(const sf::Time& dt)
 {
+   std::scoped_lock lock(_mutex);
+
    const auto dt_ms = std::chrono::milliseconds(dt.asMilliseconds());
 
    switch (_transition_state)
@@ -360,11 +362,14 @@ sf::Music& Audio::MusicPlayer::next()
 
 void Audio::MusicPlayer::queueTrack(const TrackRequest& request)
 {
+   std::scoped_lock lock(_mutex);
    _pending_request = request;
 }
 
 void Audio::MusicPlayer::stop()
 {
+   std::scoped_lock lock(_mutex);
+
    for (auto& music : _music)
    {
       music.stop();
@@ -376,6 +381,8 @@ void Audio::MusicPlayer::stop()
 
 void Audio::MusicPlayer::setPlaylist(const std::vector<std::string>& playlist)
 {
+   std::scoped_lock lock(_mutex);
+
    _playlist = playlist;
    _playlist_index = 0;
 }
