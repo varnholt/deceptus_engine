@@ -269,10 +269,32 @@ void Game::initializeController()
    gji.initialize();
 }
 
+void Game::playMenuMusic()
+{
+   Audio::getInstance().getMusicPlayer().queueTrack(
+      {.filename = "data/music/menu_test_track_muffler_callisto.ogg",
+       .transition = Audio::TransitionType::Crossfade,
+       .duration = std::chrono::milliseconds(1000),
+       .post_action = Audio::PostPlaybackAction::Loop}
+   );
+}
+
+void Game::playLevelMusic()
+{
+   Audio::getInstance().getMusicPlayer().queueTrack(
+      {.filename = "data/music/level_test_track_muffler_awakening.ogg",
+       .transition = Audio::TransitionType::Crossfade,
+       .duration = std::chrono::milliseconds(1000),
+       .post_action = Audio::PostPlaybackAction::Loop}
+   );
+}
+
 void Game::showMainMenu()
 {
    Menu::getInstance()->show(Menu::MenuType::Main);
    GameState::getInstance().enqueuePause();
+
+   playMenuMusic();
 }
 
 void Game::showPauseMenu()
@@ -301,6 +323,7 @@ void Game::showPauseMenu()
       Menu::getInstance()->show(Menu::MenuType::Pause);
       GameState::getInstance().enqueuePause();
       _audio_callback(GameAudio::SoundEffect::GameStatePause);
+      playMenuMusic();
    }
 }
 
@@ -342,6 +365,8 @@ void Game::loadLevel(LoadingMode loading_mode)
          Log::Info() << "level loading finished: " << level_item._level_name;
 
          _level_loading_finished = true;
+
+         playLevelMusic();
 
          // before synchronizing the camera with the player position, the camera needs to know its room limitations
          _level->syncRoom();
@@ -722,7 +747,7 @@ void Game::update()
    _delta_clock.restart();
 
    Timer::update(Timer::Scope::UpdateAlways);
-   Audio::getInstance().updateMusic();
+   Audio::getInstance().getMusicPlayer().update(dt);
    MessageBox::update(dt);
 
    // update screen transitions here

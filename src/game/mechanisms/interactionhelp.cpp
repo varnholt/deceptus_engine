@@ -181,11 +181,13 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
    };
    _button_sprite->setTextureRect(_button_rect_keyboard);
-   _button_sprite->setPosition({550, 335});
+   //_button_sprite.setPosition(550, 335);
 
    const auto text = ValueReader::readValue<std::string>("text", map).value_or("");
    _text->setString(text.c_str());
-   _text->setPosition({574, 339});
+   _text->setPosition({580, 339});
+   const auto text_bounds = _text->getLocalBounds();
+   _button_sprite->setPosition({_text->getPosition().x + text_bounds.position.x + text_bounds.size.x, 335});
 }
 
 std::optional<sf::FloatRect> InteractionHelp::getBoundingBoxPx()
