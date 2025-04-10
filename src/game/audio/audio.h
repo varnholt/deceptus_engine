@@ -57,9 +57,78 @@ public:
       void setPosition(const sf::Vector2f& pos);
    };
 
+   enum class TransitionType
+   {
+      LetCurrentFinish,
+      Crossfade,
+      ImmediateSwitch,
+      FadeOutThenNew
+   };
+
+   enum class PostPlaybackAction
+   {
+      None,      // do nothing when the track ends
+      Loop,      // restart the same track
+      PlayNext,  // play next track in a list
+   };
+
+   enum class MusicTransitionState
+   {
+      None,
+      Crossfading,
+      FadingOut,
+   };
+
+   struct TrackRequest
+   {
+      std::string filename;
+      TransitionType transition;
+      std::chrono::milliseconds duration{2000};  // for crossfade or fadeout
+      PostPlaybackAction post_action = PostPlaybackAction::None;
+   };
+
+   class MusicPlayer
+   {
+   public:
+      MusicPlayer();
+      void update(const sf::Time& dt);
+      void queueTrack(const TrackRequest& request);
+      void stop();
+      void setPlaylist(const std::vector<std::string>& playlist);
+
+   private:
+      void beginTransition(const TrackRequest& request);
+      float volume() const;
+      void updateCrossfade(std::chrono::milliseconds dt);
+      void updateFadeOut(std::chrono::milliseconds dt);
+      void processPendingRequest();
+      void handleTrackFinished();
+
+      mutable std::mutex _mutex;
+
+      sf::Music& current();
+      sf::Music& next();
+
+      std::array<sf::Music, 2> _music;
+      int32_t _current_index = 0;  // 0 or 1
+
+      MusicTransitionState _transition_state = MusicTransitionState::None;
+
+      std::chrono::milliseconds _crossfade_elapsed{};
+      std::chrono::milliseconds _crossfade_duration{};
+
+      std::chrono::milliseconds _fade_out_elapsed{};
+      std::chrono::milliseconds _fade_out_duration{};
+
+      PostPlaybackAction _post_action = PostPlaybackAction::None;
+      std::optional<TrackRequest> _pending_request;
+
+      std::vector<std::string> _playlist;
+      std::size_t _playlist_index = 0;
+   };
+
    static Audio& getInstance();
 
-   void initializeMusicVolume();
    void adjustActiveSampleVolume();
 
    void addSample(const std::string& sample);
@@ -69,21 +138,15 @@ public:
    void setVolume(int32_t thread, float volume);
    void setPosition(int32_t thread, const sf::Vector2f pos);
 
-   void updateMusic();
-
-   sf::Music& getMusic() const;
+   MusicPlayer& getMusicPlayer();
 
 private:
    void initializeSamples();
-   void initializeMusic();
    std::shared_ptr<sf::SoundBuffer> loadFile(const std::string& filename);
    void debug();
 
    std::mutex _mutex;
    std::unordered_map<std::string, std::shared_ptr<sf::SoundBuffer>> _sound_buffers;
    std::array<SoundThread, 50> _sound_threads;
-
-   mutable sf::Music _music;
-   std::vector<Track> _tracks;
-   uint32_t _current_index = 999;
+   MusicPlayer _music_player;
 };
