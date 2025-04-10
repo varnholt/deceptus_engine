@@ -16,18 +16,22 @@ void Dust::update(const sf::Time& dt)
 {
    const auto dt_s = dt.asSeconds();
 
+   const auto scale_factor_x = static_cast<float>(_flow_field_image.getSize().x) / _clip_rect.size.x;
+   const auto scale_factor_y = static_cast<float>(_flow_field_image.getSize().y) / _clip_rect.size.y;
+
    for (auto& p : _particles)
    {
-      const auto x_px = p._position.x - _clip_rect.left;
-      const auto y_px = p._position.y - _clip_rect.top;
+      const auto x_px = p._position.x - _clip_rect.position.x;
+      const auto y_px = p._position.y - _clip_rect.position.y;
 
-      if (x_px < 0 || x_px >= _clip_rect.width || y_px < 0 || y_px >= _clip_rect.height)
+      if (x_px < 0 || x_px >= _clip_rect.size.x || y_px < 0 || y_px >= _clip_rect.size.y)
       {
          p.spawn(_clip_rect);
          continue;
       }
 
-      const auto col = _flow_field_image.getPixel(static_cast<int32_t>(x_px), static_cast<int32_t>(y_px));
+      const auto col =
+         _flow_field_image.getPixel({static_cast<uint32_t>(x_px * scale_factor_x), static_cast<uint32_t>(y_px * scale_factor_y)});
       const auto col_x = (static_cast<float>(col.r) / 255.0f) - 0.5f;
       const auto col_y = (static_cast<float>(col.g) / 255.0f) - 0.5f;
       const auto col_z = (static_cast<float>(col.b) / 255.0f) - 0.5f;
@@ -70,22 +74,19 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
          alpha = alpha_default + p._z * 50.0f;
       }
 
-      const auto col = sf::Color{_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(alpha)};
+      const auto color = sf::Color{_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(alpha)};
 
-      quad[0].position.x = pos.x;
-      quad[0].position.y = pos.y;
-      quad[1].position.x = pos.x;
-      quad[1].position.y = pos.y + _particle_size_px;
-      quad[2].position.x = pos.x + _particle_size_px;
-      quad[2].position.y = pos.y + _particle_size_px;
-      quad[3].position.x = pos.x + _particle_size_px;
-      quad[3].position.y = pos.y;
-      quad[0].color = col;
-      quad[1].color = col;
-      quad[2].color = col;
-      quad[3].color = col;
+      quad[0].position = {pos.x, pos.y};                                          // bottom-left
+      quad[1].position = {pos.x, pos.y + _particle_size_px};                      // top-left
+      quad[2].position = {pos.x + _particle_size_px, pos.y};                      // bottom-right
+      quad[3].position = {pos.x + _particle_size_px, pos.y + _particle_size_px};  // top-right
 
-      target.draw(quad, 4, sf::Quads, states);
+      for (auto& v : quad)
+      {
+         v.color = color;
+      }
+
+      target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
    }
 }
 
@@ -102,7 +103,7 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
    std::string flowfield_texture = "data/effects/flowfield_3.png";
 
    const auto clip_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    dust->_clip_rect = clip_rect;
    dust->addChunks(clip_rect);
@@ -177,8 +178,8 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
 
 void Dust::Particle::spawn(sf::FloatRect& rect)
 {
-   _position.x = rect.left + std::rand() % static_cast<int32_t>(rect.width);
-   _position.y = rect.top + std::rand() % static_cast<int32_t>(rect.height);
+   _position.x = rect.position.x + std::rand() % static_cast<int32_t>(rect.size.x);
+   _position.y = rect.position.y + std::rand() % static_cast<int32_t>(rect.size.y);
    _age = 0.0f;
    _lifetime = 5.0f + (std::rand() % 100) * 0.1f;
 }

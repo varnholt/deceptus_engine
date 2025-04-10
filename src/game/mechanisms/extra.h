@@ -37,7 +37,7 @@ public:
    bool _spawned{false};
    std::string _name;
    std::optional<std::string> _sample;
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    std::shared_ptr<sf::Texture> _texture;
    sf::FloatRect _rect;
    std::vector<ExtraCallback> _callbacks;

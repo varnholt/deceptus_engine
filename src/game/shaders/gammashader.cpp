@@ -7,7 +7,7 @@
 
 void GammaShader::initialize()
 {
-   if (!_gamma_shader.loadFromFile("data/shaders/brightness.frag", sf::Shader::Fragment))
+   if (!_gamma_shader.loadFromFile("data/shaders/brightness.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading gamma shader";
       return;

@@ -87,13 +87,20 @@ IngameMenuMap::IngameMenuMap()
 void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const std::filesystem::path& outlines)
 {
    _level_grid_texture = TexturePool::getInstance().get(grid.string());
-   _level_grid_sprite.setTexture(*_level_grid_texture);
-
    _level_outline_texture = TexturePool::getInstance().get(outlines.string());
-   _level_outline_sprite.setTexture(*_level_outline_texture);
+
+   _level_grid_sprite = std::make_unique<sf::Sprite>(*_level_grid_texture);
+   _level_outline_sprite = std::make_unique<sf::Sprite>(*_level_outline_texture);
 
    // that render texture should have the same size as our level textures
-   _level_render_texture.create(_level_grid_texture->getSize().x, _level_grid_texture->getSize().y);
+   try
+   {
+      _level_render_texture = std::make_unique<sf::RenderTexture>(_level_grid_texture->getSize());
+   }
+   catch (const std::exception& e)
+   {
+      Log::Fatal() << "failed to created render texture: " << e.what();
+   }
 }
 
 void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -103,33 +110,34 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       sf::Vector2f center;
       center += Player::getCurrent()->getPixelPositionFloat() * 0.125f;
       center += CameraPanorama::getInstance().getLookVector();
-      center.x += _level_grid_sprite.getTexture()->getSize().x / 2.0f;
-      center.y += _level_grid_sprite.getTexture()->getSize().y / 2.0f;
+      center.x += _level_grid_sprite->getTexture().getSize().x / 2.0f;
+      center.y += _level_grid_sprite->getTexture().getSize().y / 2.0f;
       center.x -= 220.0f;
       center.y -= 80.0f;
 
       sf::View level_view;
       level_view.setSize(
-         static_cast<float>(_level_grid_sprite.getTexture()->getSize().x), static_cast<float>(_level_grid_sprite.getTexture()->getSize().y)
+         {static_cast<float>(_level_grid_sprite->getTexture().getSize().x), static_cast<float>(_level_grid_sprite->getTexture().getSize().y)
+         }
       );
 
       level_view.setCenter(center);
       level_view.zoom(_zoom);  // 1.5f works well, too
 
-      _level_grid_sprite.setColor(sf::Color{70, 70, 140, 255});
-      _level_outline_sprite.setColor(sf::Color{255, 255, 255, 80});
+      _level_grid_sprite->setColor(sf::Color{70, 70, 140, 255});
+      _level_outline_sprite->setColor(sf::Color{255, 255, 255, 80});
 
-      _level_render_texture.clear();
-      _level_render_texture.draw(_level_grid_sprite, sf::BlendMode{sf::BlendAdd});
-      _level_render_texture.draw(_level_outline_sprite, sf::BlendMode{sf::BlendAdd});
+      _level_render_texture->clear();
+      _level_render_texture->draw(*_level_grid_sprite, sf::BlendMode{sf::BlendAdd});
+      _level_render_texture->draw(*_level_outline_sprite, sf::BlendMode{sf::BlendAdd});
 
-      drawLevelItems(_level_render_texture);
+      drawLevelItems(*_level_render_texture);
 
-      _level_render_texture.setView(level_view);
-      _level_render_texture.display();
+      _level_render_texture->setView(level_view);
+      _level_render_texture->display();
 
-      auto level_texture_sprite = sf::Sprite(_level_render_texture.getTexture());
-      level_texture_sprite.move(10.0f, 48.0f);
+      auto level_texture_sprite = sf::Sprite(_level_render_texture->getTexture());
+      level_texture_sprite.move({10.0f, 48.0f});
    }
 
    InGameMenuPage::draw(window, states);
@@ -157,25 +165,25 @@ void IngameMenuMap::updateMove()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_center)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    if (!move_offset.has_value())
@@ -208,7 +216,7 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 
       sf::Vertex line[] = {a, b};
 
-      target.draw(line, 2, sf::Lines);
+      target.draw(line, 2, sf::PrimitiveType::Lines);
    }
 
    for (auto x = 0u; x < target.getSize().x; x += 16)
@@ -220,53 +228,61 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 
       sf::Vertex line[] = {a, b};
 
-      target.draw(line, 2, sf::Lines);
+      target.draw(line, 2, sf::PrimitiveType::Lines);
    }
 
    // draw doors
-   float doorWidth = 2.0f;
-   float doorHeight = 9.0f;
+   float door_width = 2.0f;
+   float door_height = 9.0f;
 
    for (auto& d : _doors)
    {
       auto door = std::dynamic_pointer_cast<Door>(d);
 
-      sf::VertexArray quad(sf::Quads, 4);
-      quad[0].color = sf::Color::White;
-      quad[1].color = sf::Color::White;
-      quad[2].color = sf::Color::White;
-      quad[3].color = sf::Color::White;
+      sf::VertexArray quad(sf::PrimitiveType::Triangles, 6);
 
-      auto pos = sf::Vector2f(static_cast<float>(door->getTilePosition().x), static_cast<float>(door->getTilePosition().y));
+      const auto pos = sf::Vector2f(static_cast<float>(door->getTilePosition().x), static_cast<float>(door->getTilePosition().y));
 
-      quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale));
-      quad[1].position = sf::Vector2f(static_cast<float>(pos.x * scale + doorWidth), static_cast<float>(pos.y * scale));
-      quad[2].position = sf::Vector2f(static_cast<float>(pos.x * scale + doorWidth), static_cast<float>(pos.y * scale + doorHeight));
-      quad[3].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale + doorHeight));
+      sf::Vector2f top_left = sf::Vector2f(pos.x * scale, pos.y * scale);
+      sf::Vector2f top_right = sf::Vector2f(pos.x * scale + door_width, pos.y * scale);
+      sf::Vector2f bottom_right = sf::Vector2f(pos.x * scale + door_width, pos.y * scale + door_height);
+      sf::Vector2f bottom_left = sf::Vector2f(pos.x * scale, pos.y * scale + door_height);
 
-      target.draw(&quad[0], 4, sf::Quads);
+      quad[0] = sf::Vertex(top_left, sf::Color::White);
+      quad[1] = sf::Vertex(top_right, sf::Color::White);
+      quad[2] = sf::Vertex(bottom_right, sf::Color::White);
+
+      quad[3] = sf::Vertex(top_left, sf::Color::White);
+      quad[4] = sf::Vertex(bottom_right, sf::Color::White);
+      quad[5] = sf::Vertex(bottom_left, sf::Color::White);
+
+      target.draw(quad);
    }
 
    // draw portals
-   float portalWidth = 3.0f;
-   float portalHeight = 6.0f;
+   float portal_width = 3.0f;
+   float portal_height = 6.0f;
    for (auto& p : _portals)
    {
-      sf::VertexArray quad(sf::Quads, 4);
-      quad[0].color = sf::Color::Red;
-      quad[1].color = sf::Color::Red;
-      quad[2].color = sf::Color::Red;
-      quad[3].color = sf::Color::Red;
+      sf::VertexArray quad(sf::PrimitiveType::Triangles, 6);
 
       auto portal = std::dynamic_pointer_cast<Portal>(p);
       auto pos = sf::Vector2f(portal->getTilePosition().x, portal->getTilePosition().y);
 
-      quad[0].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale));
-      quad[1].position = sf::Vector2f(static_cast<float>(pos.x * scale + portalWidth), static_cast<float>(pos.y * scale));
-      quad[2].position = sf::Vector2f(static_cast<float>(pos.x * scale + portalWidth), static_cast<float>(pos.y * scale + portalHeight));
-      quad[3].position = sf::Vector2f(static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale + portalHeight));
+      sf::Vector2f top_left = {static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale)};
+      sf::Vector2f top_right = {static_cast<float>(pos.x * scale + portal_width), static_cast<float>(pos.y * scale)};
+      sf::Vector2f bottom_right = {static_cast<float>(pos.x * scale + portal_width), static_cast<float>(pos.y * scale + portal_height)};
+      sf::Vector2f bottom_left = {static_cast<float>(pos.x * scale), static_cast<float>(pos.y * scale + portal_height)};
 
-      target.draw(&quad[0], 4, sf::Quads);
+      quad[0] = sf::Vertex(top_left, sf::Color::Red);
+      quad[1] = sf::Vertex(top_right, sf::Color::Red);
+      quad[2] = sf::Vertex(bottom_right, sf::Color::Red);
+
+      quad[3] = sf::Vertex(top_left, sf::Color::Red);
+      quad[4] = sf::Vertex(bottom_right, sf::Color::Red);
+      quad[5] = sf::Vertex(bottom_left, sf::Color::Red);
+
+      target.draw(quad);
    }
 
    // draw player
@@ -274,7 +290,7 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    auto playerHeight = 4;
    sf::CircleShape square(playerWidth, static_cast<uint32_t>(playerHeight));
    square.setPosition(Player::getCurrent()->getPixelPositionFloat() * 0.125f);
-   square.move(-playerWidth, -playerHeight * 2.0f);
+   square.move({-playerWidth, -playerHeight * 2.0f});
    square.setFillColor(sf::Color::White);
    target.draw(square);
 }
@@ -390,20 +406,20 @@ void IngameMenuMap::updateShowHide()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + panel_left_offset_px.x;
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + panel_right_offset_px.x;
-      layer._layer->_sprite->setPosition(x, layer._pos.y);
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
    }
 
    // move in y
    for (const auto& layer : _panel_center)
    {
       const auto y = layer._pos.y + panel_center_offset_px.y;
-      layer._layer->_sprite->setPosition(layer._pos.x, y);
+      layer._layer->_sprite->setPosition({layer._pos.x, y});
    }
 
    // fade in/out

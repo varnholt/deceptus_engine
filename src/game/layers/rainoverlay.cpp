@@ -34,10 +34,10 @@ std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& worl
 {
    b2AABB aabb;
 
-   const auto l = screen.left;
-   const auto r = screen.left + screen.width;
-   const auto t = screen.top;
-   const auto b = screen.top + screen.height;
+   const auto l = screen.position.x;
+   const auto r = screen.position.x + screen.size.x;
+   const auto t = screen.position.y;
+   const auto b = screen.position.y + screen.size.y;
 
    aabb.upperBound = vecS2B({std::max(l, r), std::max(b, t)});
    aabb.lowerBound = vecS2B({std::min(l, r), std::min(b, t)});
@@ -54,8 +54,8 @@ RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprit
    for (auto a = 0; a < _settings._drop_count; a++)
    {
       RainDrop drop;
-      drop._sprite.setTexture(*_texture);
-      _drops.push_back(drop);
+      drop._sprite = std::make_unique<sf::Sprite>(*_texture);
+      _drops.push_back(std::move(drop));
    }
 }
 
@@ -64,22 +64,21 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    const auto& screen_view = target.getView();
 
    _screen = {
-      screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
-      screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
-      screen_view.getSize().x,
-      screen_view.getSize().y
+      {screen_view.getCenter().x - screen_view.getSize().x / 2.0f, screen_view.getCenter().y - screen_view.getSize().y / 2.0f},
+      {screen_view.getSize().x, screen_view.getSize().y}
    };
 
    // source: foreground
    // dest:   background
 
+   // BlendMode(Factor sourceFactor, Factor destinationFactor, Equation blendEquation = Equation::Add);
    static sf::BlendMode blend_mode(
-      sf::BlendMode::SrcAlpha,          // colorSourceFactor
-      sf::BlendMode::OneMinusSrcAlpha,  // colorDestinationFactor
-      sf::BlendMode::Add,               // colorBlendEquation
-      sf::BlendMode::SrcAlpha,          // alphaSourceFactor
-      sf::BlendMode::OneMinusSrcAlpha,  // alphaDestinationFactor
-      sf::BlendMode::Add                // alphaBlendEquation
+      sf::BlendMode::Factor::SrcAlpha,          // colorSourceFactor
+      sf::BlendMode::Factor::OneMinusSrcAlpha,  // colorDestinationFactor
+      sf::BlendMode::Equation::Add,             // colorBlendEquation
+      sf::BlendMode::Factor::SrcAlpha,          // alphaSourceFactor
+      sf::BlendMode::Factor::OneMinusSrcAlpha,  // alphaDestinationFactor
+      sf::BlendMode::Equation::Add              // alphaBlendEquation
    );
 
    for (auto& d : _drops)
@@ -87,7 +86,7 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       if (d._age_s >= 0.0f)
       {
          // DebugDraw::drawLine(target, d._origin_px, d._pos_px + sf::Vector2f{0.0f, 96.0f}, {0, 0, 1});
-         target.draw(d._sprite, blend_mode);
+         target.draw(*d._sprite, blend_mode);
       }
    }
 
@@ -96,7 +95,7 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       for (auto& hit : _hits)
       {
          // DebugDraw::drawPoint(target, hit._pos_px, {1, 0, 0});
-         target.draw(hit._sprite);
+         target.draw(*hit._sprite);
       }
    }
 }
@@ -117,7 +116,7 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 void RainOverlay::update(const sf::Time& dt)
 {
    // screen not initialized yet
-   if (_screen.width == 0)
+   if (_screen.size.x == 0)
    {
       return;
    }
@@ -156,10 +155,10 @@ void RainOverlay::update(const sf::Time& dt)
    //   :        :                      :        :
    //   +- - - - +----------------------+- - - - +
    auto player_position = Player::getCurrent()->getPixelPositionFloat();
-   _clip_rect.left = player_position.x - _screen.width;
-   _clip_rect.top = player_position.y - _screen.height;
-   _clip_rect.height = _screen.height * 2;
-   _clip_rect.width = _screen.width * 2;
+   _clip_rect.position.x = player_position.x - _screen.size.x;
+   _clip_rect.position.y = player_position.y - _screen.size.y;
+   _clip_rect.size.y = _screen.size.y * 2;
+   _clip_rect.size.x = _screen.size.x * 2;
 
    // initialize all drops if that hasn't been done yet
    if (!_initialized)
@@ -168,10 +167,10 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto sprite_index = std::rand() % 4;
 
-         p._sprite.setTextureRect({static_cast<int32_t>(sprite_index) * 11, 0, 11, 96});
-         p._sprite.setOrigin(6, 0);
-         p._pos_px.x = _clip_rect.left + std::rand() % static_cast<int32_t>(_clip_rect.width);
-         p._pos_px.y = _clip_rect.top + std::rand() % static_cast<int32_t>(_clip_rect.height);
+         p._sprite->setTextureRect(sf::IntRect({static_cast<int32_t>(sprite_index) * 11, 0}, {11, 96}));
+         p._sprite->setOrigin({6, 0});
+         p._pos_px.x = _clip_rect.position.x + std::rand() % static_cast<int32_t>(_clip_rect.size.x);
+         p._pos_px.y = _clip_rect.position.y + std::rand() % static_cast<int32_t>(_clip_rect.size.y);
          p._age_s = (std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;
          p._dir_px.y = (std::rand() % 100) * randomize_factor_y + fixed_direction_y;
          update_colliding_edge(p);
@@ -189,7 +188,7 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto step_width_px = p._dir_px * dt.asSeconds();
          p._pos_px += step_width_px;
-         p._sprite.setPosition(p._pos_px);
+         p._sprite->setPosition(p._pos_px);
 
          if (p._age_s > max_age_s)
          {
@@ -210,10 +209,10 @@ void RainOverlay::update(const sf::Time& dt)
                      const sf::Vector2f hit_position{p._pos_px.x, closest_point};
 
                      DropHit hit;
-                     hit._sprite.setTexture(*_texture);
-                     hit._sprite.setPosition(hit_position);
+                     hit._sprite = std::make_unique<sf::Sprite>(*_texture);
+                     hit._sprite->setPosition(hit_position);
                      hit._pos_px = hit_position;
-                     _hits.push_back(hit);
+                     _hits.push_back(std::move(hit));
 
                      p.reset(_clip_rect);
 
@@ -246,8 +245,8 @@ void RainOverlay::update(const sf::Time& dt)
             [dt](auto& hit)
             {
                hit._age_s += dt.asSeconds();
-               hit._sprite.setOrigin(5, 11);
-               hit._sprite.setTextureRect({11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f)), 96, 11, 12});
+               hit._sprite->setOrigin({5, 11});
+               hit._sprite->setTextureRect(sf::IntRect({11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f)), 96}, {11, 12}));
                return hit._age_s > 1.0f;
             }
          ),
@@ -260,10 +259,10 @@ void RainOverlay::RainDrop::reset(const sf::FloatRect& rect)
 {
    _age_s = -(std::rand() % 10000) * 0.0001f;
 
-   const auto x = std::rand() % static_cast<int32_t>(rect.width);
+   const auto x = std::rand() % static_cast<int32_t>(rect.size.x);
 
-   _pos_px.x = static_cast<float>(rect.left + x);
-   _pos_px.y = rect.top;
+   _pos_px.x = static_cast<float>(rect.position.x + x);
+   _pos_px.y = rect.position.y;
 
    _origin_px = _pos_px;
 }

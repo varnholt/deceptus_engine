@@ -61,9 +61,9 @@ private:
    sf::Time _retraction_time_max;
    sf::Time _time_offset;
 
-   sf::Sprite _sprite_spike;
-   sf::Sprite _sprite_pusher;
-   sf::Sprite _sprite_mount;
+   std::unique_ptr<sf::Sprite> _sprite_spike;
+   std::unique_ptr<sf::Sprite> _sprite_pusher;
+   std::unique_ptr<sf::Sprite> _sprite_mount;
    sf::Vector2f _pixel_offset_mount;
    sf::Vector2f _pixel_offset_pusher;
    sf::Vector2f _pixel_offset_spike;

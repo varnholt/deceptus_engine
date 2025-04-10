@@ -58,7 +58,7 @@ void LogUiBuffer::log(
    }
 }
 
-LogUi::LogUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode(1200, 800), "deceptus log viewer"))
+LogUi::LogUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode({1200, 800}), "deceptus log viewer"))
 {
    if (!ImGui::SFML::Init(*_render_window.get()))
    {
@@ -68,12 +68,11 @@ LogUi::LogUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode
 
 void LogUi::processEvents()
 {
-   sf::Event event;
-   while (_render_window->pollEvent(event))
+   while (const auto event = _render_window->pollEvent())
    {
-      ImGui::SFML::ProcessEvent(*_render_window.get(), event);
+      ImGui::SFML::ProcessEvent(*_render_window.get(), event.value());
 
-      if (event.type == sf::Event::Closed)
+      if (event->is<sf::Event::Closed>())
       {
          _render_window->close();
       }
