@@ -98,10 +98,10 @@ void Audio::adjustActiveSampleVolume()
    std::lock_guard<std::mutex> guard(_mutex);
 
    auto threads =
-      _sound_threads | std::views::filter([](const auto& thread) { return thread._sound->getStatus() != sf::Sound::Status::Stopped; });
+      _sound_threads | std::views::filter([](const auto& thread)
+                                          { return thread._sound != nullptr && thread._sound->getStatus() != sf::Sound::Status::Stopped; });
    for (auto& thread : threads)
    {
-      std::cout << thread._play_info._volume << std::endl;
       thread.setVolume(thread._play_info._volume);
    }
 }
