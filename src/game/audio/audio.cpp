@@ -169,7 +169,6 @@ void Audio::stopSample(const std::string& name)
 void Audio::stopSample(int32_t thread)
 {
    std::lock_guard<std::mutex> guard(_mutex);
-
    _sound_threads[thread]._sound->stop();
 }
 
@@ -242,7 +241,7 @@ void Audio::MusicPlayer::update(const sf::Time& dt)
 void Audio::MusicPlayer::updateCrossfade(std::chrono::milliseconds dt)
 {
    _crossfade_elapsed += dt;
-   const float normalized_time = std::min(1.0f, static_cast<float>(_crossfade_elapsed.count()) / _crossfade_duration.count());
+   const auto normalized_time = std::min(1.0f, static_cast<float>(_crossfade_elapsed.count()) / _crossfade_duration.count());
 
    next().setVolume(100.0f * normalized_time);
    current().setVolume(100.0f * (1.0f - normalized_time));
@@ -260,7 +259,7 @@ void Audio::MusicPlayer::updateCrossfade(std::chrono::milliseconds dt)
 void Audio::MusicPlayer::updateFadeOut(std::chrono::milliseconds dt)
 {
    _fade_out_elapsed += dt;
-   const float normalized_time = std::min(1.0f, static_cast<float>(_fade_out_elapsed.count()) / _fade_out_duration.count());
+   const auto normalized_time = std::min(1.0f, static_cast<float>(_fade_out_elapsed.count()) / _fade_out_duration.count());
 
    current().setVolume(100.0f * (1.0f - normalized_time));
 
