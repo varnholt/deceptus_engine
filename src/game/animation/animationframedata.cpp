@@ -15,12 +15,12 @@
 AnimationFrameData::AnimationFrameData(
    const std::shared_ptr<sf::Texture>& texture,
    const sf::Vector2f& origin,
-   uint32_t frame_width,
-   uint32_t frame_height,
-   uint32_t frame_count,
-   uint32_t frames_per_row,
+   int32_t frame_width,
+   int32_t frame_height,
+   int32_t frame_count,
+   int32_t frames_per_row,
    const std::vector<sf::Time>& frame_times,
-   uint32_t start_frame
+   int32_t start_frame
 )
     : _texture(texture), _origin(origin), _frame_times(frame_times)
 {
@@ -31,6 +31,6 @@ AnimationFrameData::AnimationFrameData(
 
       // Log::Info() << this << " x: " << x << " y: " << y;
 
-      _frames.emplace_back(x * frame_width, y * frame_height, frame_width, frame_height);
+      _frames.emplace_back(sf::IntRect({x * frame_width, y * frame_height}, {frame_width, frame_height}));
    }
 }

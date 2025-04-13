@@ -201,8 +201,8 @@ struct LuaNode : public GameMechanism, public GameNode
    // visualization
    sf::Vector2f _start_position_px;
    std::shared_ptr<sf::Texture> _texture;
-   std::vector<sf::Sprite> _sprites = {{}};                  // have 1 base sprite
-   std::vector<sf::Vector2f> _sprite_offsets_px = {{0, 0}};  // have 1 base sprite offset
+   std::vector<std::unique_ptr<sf::Sprite>> _sprites;
+   std::vector<sf::Vector2f> _sprite_offsets_px;
    sf::Vector2f _position_px;
    std::vector<sf::Vector2f> _movement_path_px;
    sf::Shader _flash_shader;

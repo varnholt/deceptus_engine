@@ -15,11 +15,11 @@ InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(InteractionHelp).name());
 
-   if (_font.loadFromFile("data/fonts/deceptum.ttf"))
+   if (_font.openFromFile("data/fonts/deceptum.ttf"))
    {
       const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-      _text.setFont(_font);
-      _text.setCharacterSize(12);
+      _text = std::make_unique<sf::Text>(_font);
+      _text->setCharacterSize(12);
    }
 }
 
@@ -38,15 +38,14 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*
       const auto level_view = target.getView();
 
       const sf::View ortho(sf::FloatRect(
-         0.0f,
-         0.0f,
-         static_cast<float>(GameConfiguration::getInstance()._view_width),
-         static_cast<float>(GameConfiguration::getInstance()._view_height)
+         {0.0f, 0.0f},
+         {static_cast<float>(GameConfiguration::getInstance()._view_width),
+          static_cast<float>(GameConfiguration::getInstance()._view_height)}
       ));
 
       target.setView(ortho);
-      target.draw(_button_sprite);
-      target.draw(_text);
+      target.draw(*_button_sprite);
+      target.draw(*_text);
       target.setView(level_view);
    }
 }
@@ -68,7 +67,7 @@ void InteractionHelp::update(const sf::Time& dt)
    }
 
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-   const auto intersects = player_rect.intersects(_rect_px);
+   const auto intersects = player_rect.findIntersection(_rect_px).has_value();
 
    if (intersects && !_player_intersected_in_last_frame && _animation_hide->_paused)
    {
@@ -115,17 +114,17 @@ void InteractionHelp::update(const sf::Time& dt)
    if (alpha.has_value())
    {
       const auto alpha_byte = static_cast<uint8_t>(alpha.value() * 255);
-      _text.setFillColor(sf::Color{232, 219, 243, alpha_byte});
-      _button_sprite.setColor({255, 255, 255, alpha_byte});
+      _text->setFillColor(sf::Color{232, 219, 243, alpha_byte});
+      _button_sprite->setColor({255, 255, 255, alpha_byte});
    }
 
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      _button_sprite.setTextureRect(_button_rect_controller);
+      _button_sprite->setTextureRect(_button_rect_controller);
    }
    else
    {
-      _button_sprite.setTextureRect(_button_rect_keyboard);
+      _button_sprite->setTextureRect(_button_rect_keyboard);
    }
 
    _player_intersected_in_last_frame = intersects;
@@ -135,7 +134,8 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
 
-   _rect_px = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rect_px =
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    const auto& map = data._tmx_object->_properties->_map;
    setZ(ValueReader::readValue<int32_t>("z", map).value_or(static_cast<int32_t>(ZDepth::ForegroundMax)));
@@ -166,7 +166,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
    }
 
    _button_texture = TexturePool::getInstance().get("data/game/ui_icons.png");
-   _button_sprite.setTexture(*_button_texture);
+   _button_sprite = std::make_unique<sf::Sprite>(*_button_texture);
 
    // read button icon
    const auto button_name = ValueReader::readValue<std::string>("button", map).value_or("key_cursor_u");
@@ -175,19 +175,19 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
    const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_names_keyboard_controller.second);
 
    _button_rect_keyboard = {
-      pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE
+      {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
    };
    _button_rect_controller = {
-      pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE
+      {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
    };
-   _button_sprite.setTextureRect(_button_rect_keyboard);
+   _button_sprite->setTextureRect(_button_rect_keyboard);
    //_button_sprite.setPosition(550, 335);
 
    const auto text = ValueReader::readValue<std::string>("text", map).value_or("");
-   _text.setString(text.c_str());
-   _text.setPosition(580, 339);
-   const auto text_bounds = _text.getLocalBounds();
-   _button_sprite.setPosition(_text.getPosition().x + text_bounds.left + text_bounds.width, 335);
+   _text->setString(text.c_str());
+   _text->setPosition({580, 339});
+   const auto text_bounds = _text->getLocalBounds();
+   _button_sprite->setPosition({_text->getPosition().x + text_bounds.position.x + text_bounds.size.x, 335});
 }
 
 std::optional<sf::FloatRect> InteractionHelp::getBoundingBoxPx()

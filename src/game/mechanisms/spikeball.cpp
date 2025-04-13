@@ -55,20 +55,22 @@ SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance
    _chain_element_fixture_def.friction = 0.2f;
 
    _texture = TexturePool::getInstance().get("data/sprites/enemy_spikeball.png");
-   _spike_sprite.setTexture(*_texture);
-   _spike_sprite.setTextureRect(sf::IntRect(118, 24, 51, 50));
-   _spike_sprite.setOrigin(25, 25);
 
-   _box_sprite.setTexture(*_texture);
-   _box_sprite.setTextureRect(sf::IntRect(168, 93, 24, 27));
+   _spike_sprite = std::make_unique<sf::Sprite>(*_texture);
+   _box_sprite = std::make_unique<sf::Sprite>(*_texture);
+   _chain_element_a = std::make_unique<sf::Sprite>(*_texture);
+   _chain_element_b = std::make_unique<sf::Sprite>(*_texture);
 
-   _chain_element_a.setTexture(*_texture);
-   _chain_element_a.setTextureRect(sf::IntRect(297, 56, 8, 8));
-   _chain_element_a.setOrigin(4, 4);
+   _spike_sprite->setTextureRect(sf::IntRect({118, 24}, {51, 50}));
+   _spike_sprite->setOrigin({25, 25});
 
-   _chain_element_b.setTexture(*_texture);
-   _chain_element_b.setTextureRect(sf::IntRect(320, 56, 8, 8));
-   _chain_element_b.setOrigin(4, 4);
+   _box_sprite->setTextureRect(sf::IntRect({168, 93}, {24, 27}));
+
+   _chain_element_a->setTextureRect(sf::IntRect({297, 56}, {8, 8}));
+   _chain_element_a->setOrigin({4, 4});
+
+   _chain_element_b->setTextureRect(sf::IntRect({320, 56}, {8, 8}));
+   _chain_element_b->setOrigin({4, 4});
 }
 
 void SpikeBall::preload()
@@ -102,9 +104,9 @@ void SpikeBall::drawChain(sf::RenderTarget& window)
       auto point = curve.computePoint(val += increment);
 
       auto& element = (i % 2 == 0) ? _chain_element_a : _chain_element_b;
-      element.setPosition(point);
+      element->setPosition(point);
 
-      window.draw(element);
+      window.draw(*element);
    }
 }
 
@@ -127,7 +129,7 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
             sf::Vertex(sf::Vector2f(c2_pos_m.x * PPM, c2_pos_m.y * PPM), vertex_color),
          };
 
-         color.draw(line, 2, sf::Lines);
+         color.draw(line, 2, sf::PrimitiveType::Lines);
 
          // printf("draw %d: %f, %f -> %f, %f\n", i, c1Pos.x * PPM, c1Pos.y * PPM, c2Pos.x * PPM, c2Pos.y * PPM);
       }
@@ -137,7 +139,7 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    // color.draw(_box_sprite);
 
    drawChain(color);
-   color.draw(_spike_sprite);
+   color.draw(*_spike_sprite);
 }
 
 void SpikeBall::update(const sf::Time& dt)
@@ -147,7 +149,7 @@ void SpikeBall::update(const sf::Time& dt)
       return;
    }
 
-   _spike_sprite.setPosition(_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM);
+   _spike_sprite->setPosition({_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM});
 
    static const b2Vec2 up{0.0, 1.0};
 
@@ -164,8 +166,8 @@ void SpikeBall::update(const sf::Time& dt)
       _angle = -_angle;
    }
 
-   const auto angle_deg = _angle * FACTOR_RAD_TO_DEG;
-   _spike_sprite.setRotation(angle_deg);
+   const auto angle = sf::radians(_angle);
+   _spike_sprite->setRotation(angle);
 
    // play swoosh sound on every direction change
    if (_audio_enabled)
@@ -196,7 +198,7 @@ std::optional<sf::FloatRect> SpikeBall::getBoundingBoxPx()
 
 void SpikeBall::setup(const GameDeserializeData& data)
 {
-   _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rect = sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    addChunks(_rect);
 
@@ -314,7 +316,7 @@ void SpikeBall::setup(const GameDeserializeData& data)
    ball_fixture->SetUserData(static_cast<void*>(object_data));
 
    // that box only needs to be set up once
-   _box_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px);
+   _box_sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px});
 }
 
 sf::Vector2i SpikeBall::getPixelPosition() const

@@ -494,14 +494,12 @@ int main(int arg, char **argv)
    #endif
 #endif
 
-#pragma warning(disable : 5219)  // deceptus
-
-   ///////////////////////////////////////////////////////////////////////////////
-   ///////////////////////////////////////////////////////////////////////////////
-   ////
-   ////   INTERFACE
-   ////
-   ////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+////
+////   INTERFACE
+////
+////
 
 #ifndef __STB_INCLUDE_STB_TRUETYPE_H__
 #define __STB_INCLUDE_STB_TRUETYPE_H__
@@ -513,381 +511,331 @@ int main(int arg, char **argv)
 #endif
 
 #ifdef __cplusplus
-   extern "C"
-   {
+extern "C" {
 #endif
 
-      // private structure
-      typedef struct
-      {
-         unsigned char* data;
-         int cursor;
-         int size;
-      } stbtt__buf;
+// private structure
+typedef struct
+{
+   unsigned char *data;
+   int cursor;
+   int size;
+} stbtt__buf;
 
-      //////////////////////////////////////////////////////////////////////////////
-      //
-      // TEXTURE BAKING API
-      //
-      // If you use this API, you only have to call two functions ever.
-      //
+//////////////////////////////////////////////////////////////////////////////
+//
+// TEXTURE BAKING API
+//
+// If you use this API, you only have to call two functions ever.
+//
 
-      typedef struct
-      {
-         unsigned short x0, y0, x1, y1;  // coordinates of bbox in bitmap
-         float xoff, yoff, xadvance;
-      } stbtt_bakedchar;
+typedef struct
+{
+   unsigned short x0,y0,x1,y1; // coordinates of bbox in bitmap
+   float xoff,yoff,xadvance;
+} stbtt_bakedchar;
 
-      STBTT_DEF int stbtt_BakeFontBitmap(
-         const unsigned char* data,
-         int offset,          // font location (use offset=0 for plain .ttf)
-         float pixel_height,  // height of font in pixels
-         unsigned char* pixels,
-         int pw,
-         int ph,  // bitmap to be filled in
-         int first_char,
-         int num_chars,  // characters to bake
-         stbtt_bakedchar* chardata
-      );  // you allocate this, it's num_chars long
-      // if return is positive, the first unused row of the bitmap
-      // if return is negative, returns the negative of the number of characters that fit
-      // if return is 0, no characters fit and no rows were used
-      // This uses a very crappy packing.
+STBTT_DEF int stbtt_BakeFontBitmap(const unsigned char *data, int offset,  // font location (use offset=0 for plain .ttf)
+                                float pixel_height,                     // height of font in pixels
+                                unsigned char *pixels, int pw, int ph,  // bitmap to be filled in
+                                int first_char, int num_chars,          // characters to bake
+                                stbtt_bakedchar *chardata);             // you allocate this, it's num_chars long
+// if return is positive, the first unused row of the bitmap
+// if return is negative, returns the negative of the number of characters that fit
+// if return is 0, no characters fit and no rows were used
+// This uses a very crappy packing.
 
-      typedef struct
-      {
-         float x0, y0, s0, t0;  // top-left
-         float x1, y1, s1, t1;  // bottom-right
-      } stbtt_aligned_quad;
+typedef struct
+{
+   float x0,y0,s0,t0; // top-left
+   float x1,y1,s1,t1; // bottom-right
+} stbtt_aligned_quad;
 
-      STBTT_DEF void stbtt_GetBakedQuad(
-         const stbtt_bakedchar* chardata,
-         int pw,
-         int ph,          // same data as above
-         int char_index,  // character to display
-         float* xpos,
-         float* ypos,            // pointers to current position in screen pixel space
-         stbtt_aligned_quad* q,  // output: quad to draw
-         int opengl_fillrule
-      );  // true if opengl fill rule; false if DX9 or earlier
-      // Call GetBakedQuad with char_index = 'character - first_char', and it
-      // creates the quad you need to draw and advances the current position.
-      //
-      // The coordinate system used assumes y increases downwards.
-      //
-      // Characters will extend both above and below the current position;
-      // see discussion of "BASELINE" above.
-      //
-      // It's inefficient; you might want to c&p it and optimize it.
+STBTT_DEF void stbtt_GetBakedQuad(const stbtt_bakedchar *chardata, int pw, int ph,  // same data as above
+                               int char_index,             // character to display
+                               float *xpos, float *ypos,   // pointers to current position in screen pixel space
+                               stbtt_aligned_quad *q,      // output: quad to draw
+                               int opengl_fillrule);       // true if opengl fill rule; false if DX9 or earlier
+// Call GetBakedQuad with char_index = 'character - first_char', and it
+// creates the quad you need to draw and advances the current position.
+//
+// The coordinate system used assumes y increases downwards.
+//
+// Characters will extend both above and below the current position;
+// see discussion of "BASELINE" above.
+//
+// It's inefficient; you might want to c&p it and optimize it.
 
-      STBTT_DEF void
-      stbtt_GetScaledFontVMetrics(const unsigned char* fontdata, int index, float size, float* ascent, float* descent, float* lineGap);
-      // Query the font vertical metrics without having to create a font first.
+STBTT_DEF void stbtt_GetScaledFontVMetrics(const unsigned char *fontdata, int index, float size, float *ascent, float *descent, float *lineGap);
+// Query the font vertical metrics without having to create a font first.
 
-      //////////////////////////////////////////////////////////////////////////////
-      //
-      // NEW TEXTURE BAKING API
-      //
-      // This provides options for packing multiple fonts into one atlas, not
-      // perfectly but better than nothing.
 
-      typedef struct
-      {
-         unsigned short x0, y0, x1, y1;  // coordinates of bbox in bitmap
-         float xoff, yoff, xadvance;
-         float xoff2, yoff2;
-      } stbtt_packedchar;
+//////////////////////////////////////////////////////////////////////////////
+//
+// NEW TEXTURE BAKING API
+//
+// This provides options for packing multiple fonts into one atlas, not
+// perfectly but better than nothing.
 
-      typedef struct stbtt_pack_context stbtt_pack_context;
-      typedef struct stbtt_fontinfo stbtt_fontinfo;
+typedef struct
+{
+   unsigned short x0,y0,x1,y1; // coordinates of bbox in bitmap
+   float xoff,yoff,xadvance;
+   float xoff2,yoff2;
+} stbtt_packedchar;
+
+typedef struct stbtt_pack_context stbtt_pack_context;
+typedef struct stbtt_fontinfo stbtt_fontinfo;
 #ifndef STB_RECT_PACK_VERSION
-      typedef struct stbrp_rect stbrp_rect;
+typedef struct stbrp_rect stbrp_rect;
 #endif
 
-      STBTT_DEF int stbtt_PackBegin(
-         stbtt_pack_context* spc,
-         unsigned char* pixels,
-         int width,
-         int height,
-         int stride_in_bytes,
-         int padding,
-         void* alloc_context
-      );
-      // Initializes a packing context stored in the passed-in stbtt_pack_context.
-      // Future calls using this context will pack characters into the bitmap passed
-      // in here: a 1-channel bitmap that is width * height. stride_in_bytes is
-      // the distance from one row to the next (or 0 to mean they are packed tightly
-      // together). "padding" is the amount of padding to leave between each
-      // character (normally you want '1' for bitmaps you'll use as textures with
-      // bilinear filtering).
-      //
-      // Returns 0 on failure, 1 on success.
+STBTT_DEF int  stbtt_PackBegin(stbtt_pack_context *spc, unsigned char *pixels, int width, int height, int stride_in_bytes, int padding, void *alloc_context);
+// Initializes a packing context stored in the passed-in stbtt_pack_context.
+// Future calls using this context will pack characters into the bitmap passed
+// in here: a 1-channel bitmap that is width * height. stride_in_bytes is
+// the distance from one row to the next (or 0 to mean they are packed tightly
+// together). "padding" is the amount of padding to leave between each
+// character (normally you want '1' for bitmaps you'll use as textures with
+// bilinear filtering).
+//
+// Returns 0 on failure, 1 on success.
 
-      STBTT_DEF void stbtt_PackEnd(stbtt_pack_context* spc);
-      // Cleans up the packing context and frees all memory.
+STBTT_DEF void stbtt_PackEnd  (stbtt_pack_context *spc);
+// Cleans up the packing context and frees all memory.
 
-#define STBTT_POINT_SIZE(x) (-(x))
+#define STBTT_POINT_SIZE(x)   (-(x))
 
-      STBTT_DEF int stbtt_PackFontRange(
-         stbtt_pack_context* spc,
-         const unsigned char* fontdata,
-         int font_index,
-         float font_size,
-         int first_unicode_char_in_range,
-         int num_chars_in_range,
-         stbtt_packedchar* chardata_for_range
-      );
-      // Creates character bitmaps from the font_index'th font found in fontdata (use
-      // font_index=0 if you don't know what that is). It creates num_chars_in_range
-      // bitmaps for characters with unicode values starting at first_unicode_char_in_range
-      // and increasing. Data for how to render them is stored in chardata_for_range;
-      // pass these to stbtt_GetPackedQuad to get back renderable quads.
-      //
-      // font_size is the full height of the character from ascender to descender,
-      // as computed by stbtt_ScaleForPixelHeight. To use a point size as computed
-      // by stbtt_ScaleForMappingEmToPixels, wrap the point size in STBTT_POINT_SIZE()
-      // and pass that result as 'font_size':
-      //       ...,                  20 , ... // font max minus min y is 20 pixels tall
-      //       ..., STBTT_POINT_SIZE(20), ... // 'M' is 20 pixels tall
+STBTT_DEF int  stbtt_PackFontRange(stbtt_pack_context *spc, const unsigned char *fontdata, int font_index, float font_size,
+                                int first_unicode_char_in_range, int num_chars_in_range, stbtt_packedchar *chardata_for_range);
+// Creates character bitmaps from the font_index'th font found in fontdata (use
+// font_index=0 if you don't know what that is). It creates num_chars_in_range
+// bitmaps for characters with unicode values starting at first_unicode_char_in_range
+// and increasing. Data for how to render them is stored in chardata_for_range;
+// pass these to stbtt_GetPackedQuad to get back renderable quads.
+//
+// font_size is the full height of the character from ascender to descender,
+// as computed by stbtt_ScaleForPixelHeight. To use a point size as computed
+// by stbtt_ScaleForMappingEmToPixels, wrap the point size in STBTT_POINT_SIZE()
+// and pass that result as 'font_size':
+//       ...,                  20 , ... // font max minus min y is 20 pixels tall
+//       ..., STBTT_POINT_SIZE(20), ... // 'M' is 20 pixels tall
 
-      typedef struct
-      {
-         float font_size;
-         int first_unicode_codepoint_in_range;  // if non-zero, then the chars are continuous, and this is the first codepoint
-         int* array_of_unicode_codepoints;      // if non-zero, then this is an array of unicode codepoints
-         int num_chars;
-         stbtt_packedchar* chardata_for_range;      // output
-         unsigned char h_oversample, v_oversample;  // don't set these, they're used internally
-      } stbtt_pack_range;
+typedef struct
+{
+   float font_size;
+   int first_unicode_codepoint_in_range;  // if non-zero, then the chars are continuous, and this is the first codepoint
+   int *array_of_unicode_codepoints;       // if non-zero, then this is an array of unicode codepoints
+   int num_chars;
+   stbtt_packedchar *chardata_for_range; // output
+   unsigned char h_oversample, v_oversample; // don't set these, they're used internally
+} stbtt_pack_range;
 
-      STBTT_DEF int stbtt_PackFontRanges(
-         stbtt_pack_context* spc,
-         const unsigned char* fontdata,
-         int font_index,
-         stbtt_pack_range* ranges,
-         int num_ranges
-      );
-      // Creates character bitmaps from multiple ranges of characters stored in
-      // ranges. This will usually create a better-packed bitmap than multiple
-      // calls to stbtt_PackFontRange. Note that you can call this multiple
-      // times within a single PackBegin/PackEnd.
+STBTT_DEF int  stbtt_PackFontRanges(stbtt_pack_context *spc, const unsigned char *fontdata, int font_index, stbtt_pack_range *ranges, int num_ranges);
+// Creates character bitmaps from multiple ranges of characters stored in
+// ranges. This will usually create a better-packed bitmap than multiple
+// calls to stbtt_PackFontRange. Note that you can call this multiple
+// times within a single PackBegin/PackEnd.
 
-      STBTT_DEF void stbtt_PackSetOversampling(stbtt_pack_context* spc, unsigned int h_oversample, unsigned int v_oversample);
-      // Oversampling a font increases the quality by allowing higher-quality subpixel
-      // positioning, and is especially valuable at smaller text sizes.
-      //
-      // This function sets the amount of oversampling for all following calls to
-      // stbtt_PackFontRange(s) or stbtt_PackFontRangesGatherRects for a given
-      // pack context. The default (no oversampling) is achieved by h_oversample=1
-      // and v_oversample=1. The total number of pixels required is
-      // h_oversample*v_oversample larger than the default; for example, 2x2
-      // oversampling requires 4x the storage of 1x1. For best results, render
-      // oversampled textures with bilinear filtering. Look at the readme in
-      // stb/tests/oversample for information about oversampled fonts
-      //
-      // To use with PackFontRangesGather etc., you must set it before calls
-      // call to PackFontRangesGatherRects.
+STBTT_DEF void stbtt_PackSetOversampling(stbtt_pack_context *spc, unsigned int h_oversample, unsigned int v_oversample);
+// Oversampling a font increases the quality by allowing higher-quality subpixel
+// positioning, and is especially valuable at smaller text sizes.
+//
+// This function sets the amount of oversampling for all following calls to
+// stbtt_PackFontRange(s) or stbtt_PackFontRangesGatherRects for a given
+// pack context. The default (no oversampling) is achieved by h_oversample=1
+// and v_oversample=1. The total number of pixels required is
+// h_oversample*v_oversample larger than the default; for example, 2x2
+// oversampling requires 4x the storage of 1x1. For best results, render
+// oversampled textures with bilinear filtering. Look at the readme in
+// stb/tests/oversample for information about oversampled fonts
+//
+// To use with PackFontRangesGather etc., you must set it before calls
+// call to PackFontRangesGatherRects.
 
-      STBTT_DEF void stbtt_PackSetSkipMissingCodepoints(stbtt_pack_context* spc, int skip);
-      // If skip != 0, this tells stb_truetype to skip any codepoints for which
-      // there is no corresponding glyph. If skip=0, which is the default, then
-      // codepoints without a glyph recived the font's "missing character" glyph,
-      // typically an empty box by convention.
+STBTT_DEF void stbtt_PackSetSkipMissingCodepoints(stbtt_pack_context *spc, int skip);
+// If skip != 0, this tells stb_truetype to skip any codepoints for which
+// there is no corresponding glyph. If skip=0, which is the default, then
+// codepoints without a glyph received the font's "missing character" glyph,
+// typically an empty box by convention.
 
-      STBTT_DEF void stbtt_GetPackedQuad(
-         const stbtt_packedchar* chardata,
-         int pw,
-         int ph,          // same data as above
-         int char_index,  // character to display
-         float* xpos,
-         float* ypos,            // pointers to current position in screen pixel space
-         stbtt_aligned_quad* q,  // output: quad to draw
-         int align_to_integer
-      );
+STBTT_DEF void stbtt_GetPackedQuad(const stbtt_packedchar *chardata, int pw, int ph,  // same data as above
+                               int char_index,             // character to display
+                               float *xpos, float *ypos,   // pointers to current position in screen pixel space
+                               stbtt_aligned_quad *q,      // output: quad to draw
+                               int align_to_integer);
 
-      STBTT_DEF int stbtt_PackFontRangesGatherRects(
-         stbtt_pack_context* spc,
-         const stbtt_fontinfo* info,
-         stbtt_pack_range* ranges,
-         int num_ranges,
-         stbrp_rect* rects
-      );
-      STBTT_DEF void stbtt_PackFontRangesPackRects(stbtt_pack_context* spc, stbrp_rect* rects, int num_rects);
-      STBTT_DEF int stbtt_PackFontRangesRenderIntoRects(
-         stbtt_pack_context* spc,
-         const stbtt_fontinfo* info,
-         stbtt_pack_range* ranges,
-         int num_ranges,
-         stbrp_rect* rects
-      );
-      // Calling these functions in sequence is roughly equivalent to calling
-      // stbtt_PackFontRanges(). If you more control over the packing of multiple
-      // fonts, or if you want to pack custom data into a font texture, take a look
-      // at the source to of stbtt_PackFontRanges() and create a custom version
-      // using these functions, e.g. call GatherRects multiple times,
-      // building up a single array of rects, then call PackRects once,
-      // then call RenderIntoRects repeatedly. This may result in a
-      // better packing than calling PackFontRanges multiple times
-      // (or it may not).
+STBTT_DEF int  stbtt_PackFontRangesGatherRects(stbtt_pack_context *spc, const stbtt_fontinfo *info, stbtt_pack_range *ranges, int num_ranges, stbrp_rect *rects);
+STBTT_DEF void stbtt_PackFontRangesPackRects(stbtt_pack_context *spc, stbrp_rect *rects, int num_rects);
+STBTT_DEF int  stbtt_PackFontRangesRenderIntoRects(stbtt_pack_context *spc, const stbtt_fontinfo *info, stbtt_pack_range *ranges, int num_ranges, stbrp_rect *rects);
+// Calling these functions in sequence is roughly equivalent to calling
+// stbtt_PackFontRanges(). If you more control over the packing of multiple
+// fonts, or if you want to pack custom data into a font texture, take a look
+// at the source to of stbtt_PackFontRanges() and create a custom version
+// using these functions, e.g. call GatherRects multiple times,
+// building up a single array of rects, then call PackRects once,
+// then call RenderIntoRects repeatedly. This may result in a
+// better packing than calling PackFontRanges multiple times
+// (or it may not).
 
-      // this is an opaque structure that you shouldn't mess with which holds
-      // all the context needed from PackBegin to PackEnd.
-      struct stbtt_pack_context
-      {
-         void* user_allocator_context;
-         void* pack_info;
-         int width;
-         int height;
-         int stride_in_bytes;
-         int padding;
-         int skip_missing;
-         unsigned int h_oversample, v_oversample;
-         unsigned char* pixels;
-         void* nodes;
-      };
+// this is an opaque structure that you shouldn't mess with which holds
+// all the context needed from PackBegin to PackEnd.
+struct stbtt_pack_context {
+   void *user_allocator_context;
+   void *pack_info;
+   int   width;
+   int   height;
+   int   stride_in_bytes;
+   int   padding;
+   int   skip_missing;
+   unsigned int   h_oversample, v_oversample;
+   unsigned char *pixels;
+   void  *nodes;
+};
 
-      //////////////////////////////////////////////////////////////////////////////
-      //
-      // FONT LOADING
-      //
-      //
+//////////////////////////////////////////////////////////////////////////////
+//
+// FONT LOADING
+//
+//
 
-      STBTT_DEF int stbtt_GetNumberOfFonts(const unsigned char* data);
-      // This function will determine the number of fonts in a font file.  TrueType
-      // collection (.ttc) files may contain multiple fonts, while TrueType font
-      // (.ttf) files only contain one font. The number of fonts can be used for
-      // indexing with the previous function where the index is between zero and one
-      // less than the total fonts. If an error occurs, -1 is returned.
+STBTT_DEF int stbtt_GetNumberOfFonts(const unsigned char *data);
+// This function will determine the number of fonts in a font file.  TrueType
+// collection (.ttc) files may contain multiple fonts, while TrueType font
+// (.ttf) files only contain one font. The number of fonts can be used for
+// indexing with the previous function where the index is between zero and one
+// less than the total fonts. If an error occurs, -1 is returned.
 
-      STBTT_DEF int stbtt_GetFontOffsetForIndex(const unsigned char* data, int index);
-      // Each .ttf/.ttc file may have more than one font. Each font has a sequential
-      // index number starting from 0. Call this function to get the font offset for
-      // a given index; it returns -1 if the index is out of range. A regular .ttf
-      // file will only define one font and it always be at offset 0, so it will
-      // return '0' for index 0, and -1 for all other indices.
+STBTT_DEF int stbtt_GetFontOffsetForIndex(const unsigned char *data, int index);
+// Each .ttf/.ttc file may have more than one font. Each font has a sequential
+// index number starting from 0. Call this function to get the font offset for
+// a given index; it returns -1 if the index is out of range. A regular .ttf
+// file will only define one font and it always be at offset 0, so it will
+// return '0' for index 0, and -1 for all other indices.
 
-      // The following structure is defined publicly so you can declare one on
-      // the stack or as a global or etc, but you should treat it as opaque.
-      struct stbtt_fontinfo
-      {
-         void* userdata;
-         unsigned char* data;  // pointer to .ttf file
-         int fontstart;        // offset of start of font
+// The following structure is defined publicly so you can declare one on
+// the stack or as a global or etc, but you should treat it as opaque.
+struct stbtt_fontinfo
+{
+   void           * userdata;
+   unsigned char  * data;              // pointer to .ttf file
+   int              fontstart;         // offset of start of font
 
-         int numGlyphs;  // number of glyphs, needed for range checking
+   int numGlyphs;                     // number of glyphs, needed for range checking
 
-         int loca, head, glyf, hhea, hmtx, kern, gpos, svg;  // table locations as offset from start of .ttf
-         int index_map;                                      // a cmap mapping for our chosen character encoding
-         int indexToLocFormat;                               // format needed to map from glyph index to glyph
+   int loca,head,glyf,hhea,hmtx,kern,gpos,svg; // table locations as offset from start of .ttf
+   int index_map;                     // a cmap mapping for our chosen character encoding
+   int indexToLocFormat;              // format needed to map from glyph index to glyph
 
-         stbtt__buf cff;          // cff font data
-         stbtt__buf charstrings;  // the charstring index
-         stbtt__buf gsubrs;       // global charstring subroutines index
-         stbtt__buf subrs;        // private charstring subroutines index
-         stbtt__buf fontdicts;    // array of font dicts
-         stbtt__buf fdselect;     // map from glyph to fontdict
-      };
+   stbtt__buf cff;                    // cff font data
+   stbtt__buf charstrings;            // the charstring index
+   stbtt__buf gsubrs;                 // global charstring subroutines index
+   stbtt__buf subrs;                  // private charstring subroutines index
+   stbtt__buf fontdicts;              // array of font dicts
+   stbtt__buf fdselect;               // map from glyph to fontdict
+};
 
-      STBTT_DEF int stbtt_InitFont(stbtt_fontinfo* info, const unsigned char* data, int offset);
-      // Given an offset into the file that defines a font, this function builds
-      // the necessary cached info for the rest of the system. You must allocate
-      // the stbtt_fontinfo yourself, and stbtt_InitFont will fill it out. You don't
-      // need to do anything special to free it, because the contents are pure
-      // value data with no additional data structures. Returns 0 on failure.
+STBTT_DEF int stbtt_InitFont(stbtt_fontinfo *info, const unsigned char *data, int offset);
+// Given an offset into the file that defines a font, this function builds
+// the necessary cached info for the rest of the system. You must allocate
+// the stbtt_fontinfo yourself, and stbtt_InitFont will fill it out. You don't
+// need to do anything special to free it, because the contents are pure
+// value data with no additional data structures. Returns 0 on failure.
 
-      //////////////////////////////////////////////////////////////////////////////
-      //
-      // CHARACTER TO GLYPH-INDEX CONVERSIOn
 
-      STBTT_DEF int stbtt_FindGlyphIndex(const stbtt_fontinfo* info, int unicode_codepoint);
-      // If you're going to perform multiple operations on the same character
-      // and you want a speed-up, call this function with the character you're
-      // going to process, then use glyph-based functions instead of the
-      // codepoint-based functions.
-      // Returns 0 if the character codepoint is not defined in the font.
+//////////////////////////////////////////////////////////////////////////////
+//
+// CHARACTER TO GLYPH-INDEX CONVERSIOn
 
-      //////////////////////////////////////////////////////////////////////////////
-      //
-      // CHARACTER PROPERTIES
-      //
+STBTT_DEF int stbtt_FindGlyphIndex(const stbtt_fontinfo *info, int unicode_codepoint);
+// If you're going to perform multiple operations on the same character
+// and you want a speed-up, call this function with the character you're
+// going to process, then use glyph-based functions instead of the
+// codepoint-based functions.
+// Returns 0 if the character codepoint is not defined in the font.
 
-      STBTT_DEF float stbtt_ScaleForPixelHeight(const stbtt_fontinfo* info, float pixels);
-      // computes a scale factor to produce a font whose "height" is 'pixels' tall.
-      // Height is measured as the distance from the highest ascender to the lowest
-      // descender; in other words, it's equivalent to calling stbtt_GetFontVMetrics
-      // and computing:
-      //       scale = pixels / (ascent - descent)
-      // so if you prefer to measure height by the ascent only, use a similar calculation.
 
-      STBTT_DEF float stbtt_ScaleForMappingEmToPixels(const stbtt_fontinfo* info, float pixels);
-      // computes a scale factor to produce a font whose EM size is mapped to
-      // 'pixels' tall. This is probably what traditional APIs compute, but
-      // I'm not positive.
+//////////////////////////////////////////////////////////////////////////////
+//
+// CHARACTER PROPERTIES
+//
 
-      STBTT_DEF void stbtt_GetFontVMetrics(const stbtt_fontinfo* info, int* ascent, int* descent, int* lineGap);
-      // ascent is the coordinate above the baseline the font extends; descent
-      // is the coordinate below the baseline the font extends (i.e. it is typically negative)
-      // lineGap is the spacing between one row's descent and the next row's ascent...
-      // so you should advance the vertical position by "*ascent - *descent + *lineGap"
-      //   these are expressed in unscaled coordinates, so you must multiply by
-      //   the scale factor for a given size
+STBTT_DEF float stbtt_ScaleForPixelHeight(const stbtt_fontinfo *info, float pixels);
+// computes a scale factor to produce a font whose "height" is 'pixels' tall.
+// Height is measured as the distance from the highest ascender to the lowest
+// descender; in other words, it's equivalent to calling stbtt_GetFontVMetrics
+// and computing:
+//       scale = pixels / (ascent - descent)
+// so if you prefer to measure height by the ascent only, use a similar calculation.
 
-      STBTT_DEF int stbtt_GetFontVMetricsOS2(const stbtt_fontinfo* info, int* typoAscent, int* typoDescent, int* typoLineGap);
-      // analogous to GetFontVMetrics, but returns the "typographic" values from the OS/2
-      // table (specific to MS/Windows TTF files).
-      //
-      // Returns 1 on success (table present), 0 on failure.
+STBTT_DEF float stbtt_ScaleForMappingEmToPixels(const stbtt_fontinfo *info, float pixels);
+// computes a scale factor to produce a font whose EM size is mapped to
+// 'pixels' tall. This is probably what traditional APIs compute, but
+// I'm not positive.
 
-      STBTT_DEF void stbtt_GetFontBoundingBox(const stbtt_fontinfo* info, int* x0, int* y0, int* x1, int* y1);
-      // the bounding box around all possible characters
+STBTT_DEF void stbtt_GetFontVMetrics(const stbtt_fontinfo *info, int *ascent, int *descent, int *lineGap);
+// ascent is the coordinate above the baseline the font extends; descent
+// is the coordinate below the baseline the font extends (i.e. it is typically negative)
+// lineGap is the spacing between one row's descent and the next row's ascent...
+// so you should advance the vertical position by "*ascent - *descent + *lineGap"
+//   these are expressed in unscaled coordinates, so you must multiply by
+//   the scale factor for a given size
 
-      STBTT_DEF void stbtt_GetCodepointHMetrics(const stbtt_fontinfo* info, int codepoint, int* advanceWidth, int* leftSideBearing);
-      // leftSideBearing is the offset from the current horizontal position to the left edge of the character
-      // advanceWidth is the offset from the current horizontal position to the next horizontal position
-      //   these are expressed in unscaled coordinates
+STBTT_DEF int  stbtt_GetFontVMetricsOS2(const stbtt_fontinfo *info, int *typoAscent, int *typoDescent, int *typoLineGap);
+// analogous to GetFontVMetrics, but returns the "typographic" values from the OS/2
+// table (specific to MS/Windows TTF files).
+//
+// Returns 1 on success (table present), 0 on failure.
 
-      STBTT_DEF int stbtt_GetCodepointKernAdvance(const stbtt_fontinfo* info, int ch1, int ch2);
-      // an additional amount to add to the 'advance' value between ch1 and ch2
+STBTT_DEF void stbtt_GetFontBoundingBox(const stbtt_fontinfo *info, int *x0, int *y0, int *x1, int *y1);
+// the bounding box around all possible characters
 
-      STBTT_DEF int stbtt_GetCodepointBox(const stbtt_fontinfo* info, int codepoint, int* x0, int* y0, int* x1, int* y1);
-      // Gets the bounding box of the visible part of the glyph, in unscaled coordinates
+STBTT_DEF void stbtt_GetCodepointHMetrics(const stbtt_fontinfo *info, int codepoint, int *advanceWidth, int *leftSideBearing);
+// leftSideBearing is the offset from the current horizontal position to the left edge of the character
+// advanceWidth is the offset from the current horizontal position to the next horizontal position
+//   these are expressed in unscaled coordinates
 
-      STBTT_DEF void stbtt_GetGlyphHMetrics(const stbtt_fontinfo* info, int glyph_index, int* advanceWidth, int* leftSideBearing);
-      STBTT_DEF int stbtt_GetGlyphKernAdvance(const stbtt_fontinfo* info, int glyph1, int glyph2);
-      STBTT_DEF int stbtt_GetGlyphBox(const stbtt_fontinfo* info, int glyph_index, int* x0, int* y0, int* x1, int* y1);
-      // as above, but takes one or more glyph indices for greater efficiency
+STBTT_DEF int  stbtt_GetCodepointKernAdvance(const stbtt_fontinfo *info, int ch1, int ch2);
+// an additional amount to add to the 'advance' value between ch1 and ch2
 
-      typedef struct stbtt_kerningentry
-      {
-         int glyph1;  // use stbtt_FindGlyphIndex
-         int glyph2;
-         int advance;
-      } stbtt_kerningentry;
+STBTT_DEF int stbtt_GetCodepointBox(const stbtt_fontinfo *info, int codepoint, int *x0, int *y0, int *x1, int *y1);
+// Gets the bounding box of the visible part of the glyph, in unscaled coordinates
 
-      STBTT_DEF int stbtt_GetKerningTableLength(const stbtt_fontinfo* info);
-      STBTT_DEF int stbtt_GetKerningTable(const stbtt_fontinfo* info, stbtt_kerningentry* table, int table_length);
-      // Retrieves a complete list of all of the kerning pairs provided by the font
-      // stbtt_GetKerningTable never writes more than table_length entries and returns how many entries it did write.
-      // The table will be sorted by (a.glyph1 == b.glyph1)?(a.glyph2 < b.glyph2):(a.glyph1 < b.glyph1)
+STBTT_DEF void stbtt_GetGlyphHMetrics(const stbtt_fontinfo *info, int glyph_index, int *advanceWidth, int *leftSideBearing);
+STBTT_DEF int  stbtt_GetGlyphKernAdvance(const stbtt_fontinfo *info, int glyph1, int glyph2);
+STBTT_DEF int  stbtt_GetGlyphBox(const stbtt_fontinfo *info, int glyph_index, int *x0, int *y0, int *x1, int *y1);
+// as above, but takes one or more glyph indices for greater efficiency
 
-      //////////////////////////////////////////////////////////////////////////////
-      //
-      // GLYPH SHAPES (you probably don't need these, but they have to go before
-      // the bitmaps for C declaration-order reasons)
-      //
+typedef struct stbtt_kerningentry
+{
+   int glyph1; // use stbtt_FindGlyphIndex
+   int glyph2;
+   int advance;
+} stbtt_kerningentry;
 
-#ifndef STBTT_vmove  // you can predefine these to use different values (but why?)
-      enum
-      {
-         STBTT_vmove = 1,
-         STBTT_vline,
-         STBTT_vcurve,
-         STBTT_vcubic
-      };
+STBTT_DEF int  stbtt_GetKerningTableLength(const stbtt_fontinfo *info);
+STBTT_DEF int  stbtt_GetKerningTable(const stbtt_fontinfo *info, stbtt_kerningentry* table, int table_length);
+// Retrieves a complete list of all of the kerning pairs provided by the font
+// stbtt_GetKerningTable never writes more than table_length entries and returns how many entries it did write.
+// The table will be sorted by (a.glyph1 == b.glyph1)?(a.glyph2 < b.glyph2):(a.glyph1 < b.glyph1)
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// GLYPH SHAPES (you probably don't need these, but they have to go before
+// the bitmaps for C declaration-order reasons)
+//
+
+#ifndef STBTT_vmove // you can predefine these to use different values (but why?)
+   enum {
+      STBTT_vmove=1,
+      STBTT_vline,
+      STBTT_vcurve,
+      STBTT_vcubic
+   };
 #endif
 
-#ifndef stbtt_vertex            // you can predefine this to use different values
-                                   // (we share this with other code at RAD)
+#ifndef stbtt_vertex // you can predefine this to use different values
+                   // (we share this with other code at RAD)
    #define stbtt_vertex_type short // can't use stbtt_int16 because that's not visible in the header file
    typedef struct
    {

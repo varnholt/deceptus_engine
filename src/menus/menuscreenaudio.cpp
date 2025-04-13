@@ -130,37 +130,37 @@ void MenuScreenAudio::setDefaults()
 
 void MenuScreenAudio::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (key == sf::Keyboard::Up)
+   if (key == sf::Keyboard::Key::Up)
    {
       up();
    }
 
-   else if (key == sf::Keyboard::Down)
+   else if (key == sf::Keyboard::Key::Down)
    {
       down();
    }
 
-   else if (key == sf::Keyboard::Return)
+   else if (key == sf::Keyboard::Key::Enter)
    {
       select();
    }
 
-   else if (key == sf::Keyboard::Left)
+   else if (key == sf::Keyboard::Key::Left)
    {
       set(-STEP_SIZE);
    }
 
-   else if (key == sf::Keyboard::Right)
+   else if (key == sf::Keyboard::Key::Right)
    {
       set(STEP_SIZE);
    }
 
-   else if (key == sf::Keyboard::Escape)
+   else if (key == sf::Keyboard::Key::Escape)
    {
       back();
    }
 
-   else if (key == sf::Keyboard::D)
+   else if (key == sf::Keyboard::Key::D)
    {
       setDefaults();
    }
@@ -247,13 +247,13 @@ void MenuScreenAudio::updateLayers()
       _volume_layers_music[i]->_visible = (i == music_volume_layer_index);
    }
 
-   _layers["master_h_0"]->_sprite->setOrigin(50.0f - master_volume, 0.0f);
-   _layers["sfxVolume_h_0"]->_sprite->setOrigin(50.0f - sfx_volume, 0.0f);
-   _layers["mscVolume_h_0"]->_sprite->setOrigin(50.0f - music_volume, 0.0f);
+   _layers["master_h_0"]->_sprite->setOrigin({50.0f - master_volume, 0.0f});
+   _layers["sfxVolume_h_0"]->_sprite->setOrigin({50.0f - sfx_volume, 0.0f});
+   _layers["mscVolume_h_0"]->_sprite->setOrigin({50.0f - music_volume, 0.0f});
 
-   _layers["master_h_1"]->_sprite->setOrigin(50.0f - master_volume, 0.0f);
-   _layers["sfxVolume_h_1"]->_sprite->setOrigin(50.0f - sfx_volume, 0.0f);
-   _layers["mscVolume_h_1"]->_sprite->setOrigin(50.0f - music_volume, 0.0f);
+   _layers["master_h_1"]->_sprite->setOrigin({50.0f - master_volume, 0.0f});
+   _layers["sfxVolume_h_1"]->_sprite->setOrigin({50.0f - sfx_volume, 0.0f});
+   _layers["mscVolume_h_1"]->_sprite->setOrigin({50.0f - music_volume, 0.0f});
 }
 
 /*

@@ -50,7 +50,7 @@ public:
    struct SoundThread
    {
       std::string _filename;
-      sf::Sound _sound;
+      std::unique_ptr<sf::Sound> _sound;
       PlayInfo _play_info;
 
       void setVolume(float volume);
@@ -90,6 +90,7 @@ public:
    class MusicPlayer
    {
    public:
+      MusicPlayer();
       void update(const sf::Time& dt);
       void queueTrack(const TrackRequest& request);
       void stop();

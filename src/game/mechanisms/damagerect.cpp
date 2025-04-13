@@ -12,7 +12,7 @@ DamageRect::DamageRect(GameNode* /*parent*/)
 void DamageRect::update(const sf::Time& /*dt*/)
 {
    auto* player = Player::getCurrent();
-   const auto player_intersects = player->getPixelRectFloat().intersects(_rect);
+   const auto player_intersects = player->getPixelRectFloat().findIntersection(_rect).has_value();
 
    if (player_intersects)
    {
@@ -27,7 +27,7 @@ std::optional<sf::FloatRect> DamageRect::getBoundingBoxPx()
 
 void DamageRect::setup(const GameDeserializeData& data)
 {
-   _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rect = sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    if (data._tmx_object->_properties)
    {
