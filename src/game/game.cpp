@@ -5,6 +5,7 @@
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/audio/audio.h"
+#include "game/audio/musicplayer.h"
 #include "game/camera/camerapanorama.h"
 #include "game/camera/camerasystem.h"
 #include "game/clock/gameclock.h"
@@ -271,21 +272,21 @@ void Game::initializeController()
 
 void Game::playMenuMusic()
 {
-   Audio::getInstance().getMusicPlayer().queueTrack(
+   MusicPlayer::getInstance().queueTrack(
       {.filename = "data/music/menu_test_track_muffler_callisto.ogg",
-       .transition = Audio::TransitionType::Crossfade,
+       .transition = MusicPlayer::TransitionType::Crossfade,
        .duration = std::chrono::milliseconds(1000),
-       .post_action = Audio::PostPlaybackAction::Loop}
+       .post_action = MusicPlayer::PostPlaybackAction::Loop}
    );
 }
 
 void Game::playLevelMusic()
 {
-   Audio::getInstance().getMusicPlayer().queueTrack(
+   MusicPlayer::getInstance().queueTrack(
       {.filename = "data/music/level_test_track_muffler_awakening.ogg",
-       .transition = Audio::TransitionType::Crossfade,
+       .transition = MusicPlayer::TransitionType::Crossfade,
        .duration = std::chrono::milliseconds(1000),
-       .post_action = Audio::PostPlaybackAction::Loop}
+       .post_action = MusicPlayer::PostPlaybackAction::Loop}
    );
 }
 
@@ -334,57 +335,57 @@ void Game::loadLevel(LoadingMode loading_mode)
 
    _info_layer->setLoading(!_level_loading_finished);
 
-   _level_loading_thread = std::async(
-      std::launch::async,
-      [this, loading_mode]()
+   const auto loadLevelFunc = [this, loading_mode]()
+   {
+      _player->resetWorld();  // free the pointer that's shared with the player
+      _level.reset();
+
+      // load level
+      const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
+      _level = std::make_shared<Level>();
+      _level->setDescriptionFilename(level_item._level_name);
+      _level->setLoadingMode(loading_mode);
+      _level->initialize();
+      _level->initializeTextures();
+
+      // put the player in there
+      _player->setWorld(_level->getWorld());
+      _player->initializeLevel();
+
+      // jump back to stored position, that's only for debugging purposes, not for checkpoints
+      if (_restore_previous_position)
       {
-         _player->resetWorld();  // free the pointer that's shared with the player
-         _level.reset();
-
-         // load level
-         const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
-         _level = std::make_shared<Level>();
-         _level->setDescriptionFilename(level_item._level_name);
-         _level->setLoadingMode(loading_mode);
-         _level->initialize();
-         _level->initializeTextures();
-
-         // put the player in there
-         _player->setWorld(_level->getWorld());
-         _player->initializeLevel();
-
-         // jump back to stored position, that's only for debugging purposes, not for checkpoints
-         if (_restore_previous_position)
-         {
-            _restore_previous_position = false;
-            _player->setBodyViaPixelPosition(_stored_position.x, _stored_position.y);
-         }
-
-         _player->updatePixelRect();
-
-         Log::Info() << "level loading finished: " << level_item._level_name;
-
-         _level_loading_finished = true;
-
-         playLevelMusic();
-
-         // before synchronizing the camera with the player position, the camera needs to know its room limitations
-         _level->syncRoom();
-         CameraSystem::getInstance().syncNow();
-
-         GameClock::getInstance().reset();
-
-         _info_layer->setLoading(!_level_loading_finished);
-
-         // notify listeners
-         for (const auto& callback : _level_loaded_callbacks)
-         {
-            callback();
-         }
-
-         _level_loaded_callbacks.clear();
+         _restore_previous_position = false;
+         _player->setBodyViaPixelPosition(_stored_position.x, _stored_position.y);
       }
-   );
+
+      _player->updatePixelRect();
+
+      Log::Info() << "level loading finished: " << level_item._level_name;
+
+      _level_loading_finished = true;
+
+      playLevelMusic();
+
+      // before synchronizing the camera with the player position, the camera needs to know its room limitations
+      _level->syncRoom();
+      CameraSystem::getInstance().syncNow();
+
+      GameClock::getInstance().reset();
+
+      _info_layer->setLoading(!_level_loading_finished);
+
+      // notify listeners
+      for (const auto& callback : _level_loaded_callbacks)
+      {
+         callback();
+      }
+
+      _level_loaded_callbacks.clear();
+   };
+
+   // loadLevelFunc();
+   _level_loading_thread = std::async(std::launch::async, loadLevelFunc);
 }
 
 void Game::nextLevel()
@@ -747,7 +748,7 @@ void Game::update()
    _delta_clock.restart();
 
    Timer::update(Timer::Scope::UpdateAlways);
-   Audio::getInstance().getMusicPlayer().update(dt);
+   MusicPlayer::getInstance().update(dt);
    MessageBox::update(dt);
 
    // update screen transitions here
