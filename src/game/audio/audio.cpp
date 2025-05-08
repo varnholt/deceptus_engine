@@ -128,8 +128,6 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
       return std::nullopt;
    }
 
-   // https://github.com/SFML/SFML/issues/2319
-   // for mono sounds, the listener position must be != (0, 0, 0)
    const auto position = play_info._pos.value_or(sf::Vector3f{0.0f, 0.0f, 0.1f});
 
    if (thread_it->_sound == nullptr)
@@ -143,6 +141,8 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
 
    thread_it->_sound->setLooping(play_info._looped);
    thread_it->_sound->setPosition(position);
+   thread_it->_sound->setMinDistance(10000.0f);
+   thread_it->_sound->setAttenuation(0.0f);
    thread_it->_filename = play_info._sample_name;
    thread_it->_play_info = play_info;
    thread_it->setVolume(play_info._volume);
