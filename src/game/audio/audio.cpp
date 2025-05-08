@@ -128,23 +128,24 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
       return std::nullopt;
    }
 
-   thread_it->_sound = std::make_unique<sf::Sound>(*it->second);
-   thread_it->_filename = play_info._sample_name;
-   thread_it->setVolume(play_info._volume);
-   thread_it->_sound->setLooping(play_info._looped);
-   thread_it->_play_info = play_info;
+   // https://github.com/SFML/SFML/issues/2319
+   // for mono sounds, the listener position must be != (0, 0, 0)
+   const auto position = play_info._pos.value_or(sf::Vector3f{0.0f, 0.0f, 0.1f});
 
-   if (play_info._pos.has_value())
+   if (thread_it->_sound == nullptr)
    {
-      thread_it->_sound->setPosition({play_info._pos->x, play_info._pos->y, 0.1f});
+      thread_it->_sound = std::make_unique<sf::Sound>(*it->second);
    }
    else
    {
-      // https://github.com/SFML/SFML/issues/2319
-      // for mono sounds, the listener position must be != (0, 0, 0)
-      thread_it->_sound->setPosition({0.0f, 0.0f, 0.1f});
+      thread_it->_sound->setBuffer(*it->second);
    }
 
+   thread_it->_sound->setLooping(play_info._looped);
+   thread_it->_sound->setPosition(position);
+   thread_it->_filename = play_info._sample_name;
+   thread_it->_play_info = play_info;
+   thread_it->setVolume(play_info._volume);
    thread_it->_sound->play();
 
    return static_cast<int32_t>(std::distance(_sound_threads.begin(), thread_it));
@@ -178,7 +179,6 @@ void Audio::setPosition(int32_t thread, const sf::Vector2f pos)
    std::lock_guard<std::mutex> guard(_mutex);
    _sound_threads[thread].setPosition(pos);
 }
-
 
 void Audio::SoundThread::setVolume(float volume)
 {

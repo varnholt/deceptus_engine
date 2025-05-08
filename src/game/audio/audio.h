@@ -44,7 +44,7 @@ public:
       std::string _sample_name;
       float _volume = 1.0f;
       bool _looped = false;
-      std::optional<sf::Vector2f> _pos;
+      std::optional<sf::Vector3f> _pos;
    };
 
    struct SoundThread
