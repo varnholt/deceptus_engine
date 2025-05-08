@@ -17,6 +17,9 @@ MusicPlayer::MusicPlayer()
    if (!_music[1].openFromFile("data/music/empty.ogg"))
    {
    }
+
+   _music[0].setRelativeToListener(true);
+   _music[1].setRelativeToListener(true);
 }
 
 void MusicPlayer::update(const sf::Time& dt)

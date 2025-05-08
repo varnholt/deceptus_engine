@@ -369,8 +369,8 @@ void Game::loadLevel(LoadingMode loading_mode)
 
       // before synchronizing the camera with the player position, the camera needs to know its room limitations
       _level->syncRoom();
-      CameraSystem::getInstance().syncNow();
 
+      CameraSystem::getInstance().syncNow();
       GameClock::getInstance().reset();
 
       _info_layer->setLoading(!_level_loading_finished);
@@ -665,7 +665,6 @@ void Game::menuLoadRequest()
       }
    );
 }
-
 
 void Game::resetAfterDeath(const sf::Time& dt)
 {
