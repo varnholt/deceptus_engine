@@ -542,11 +542,8 @@ bool Level::load()
       return false;
    }
 
-   // load tmx
    loadTmx();
 
-   // loading ao
-   Log::Info() << "loading ao... ";
    _ambient_occlusion->load(level_json_path.parent_path(), std::filesystem::path(_description->_filename).stem().string());
 
    Log::Info() << "level loading complete";
