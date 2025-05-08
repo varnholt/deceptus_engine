@@ -21,7 +21,7 @@ void EnemyWall::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
 
-   _rectangle = {data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rectangle = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    if (data._tmx_object->_properties)
    {

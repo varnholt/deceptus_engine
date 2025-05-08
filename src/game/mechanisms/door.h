@@ -59,7 +59,7 @@ private:
    void updateBars(const sf::Time& dt);
    bool checkPlayerAtDoor() const;
 
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    std::shared_ptr<sf::Texture> _texture;
    std::optional<std::string> _sample_open;
    std::optional<std::string> _sample_close;
@@ -73,7 +73,7 @@ private:
    State _state = State::Closed;
 
    // for 'version 1'
-   sf::VertexArray _door_quad{sf::Quads, 4};
+   sf::VertexArray _door_quad{sf::PrimitiveType::Triangles, 4};
    sf::Vector2i _tile_position_tl;
    sf::FloatRect _pixel_rect;
    float _bar_offset = 0.0f;

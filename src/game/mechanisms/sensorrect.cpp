@@ -11,7 +11,7 @@ SensorRect::SensorRect(GameNode* parent) : GameNode(parent)
 
 void SensorRect::update(const sf::Time& /*dt*/)
 {
-   const auto player_intersects = Player::getCurrent()->getPixelRectFloat().intersects(_rect);
+   const auto player_intersects = Player::getCurrent()->getPixelRectFloat().findIntersection(_rect).has_value();
 
    if (player_intersects)
    {
@@ -47,7 +47,7 @@ std::optional<sf::FloatRect> SensorRect::getBoundingBoxPx()
 void SensorRect::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
-   _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rect = sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    if (data._tmx_object->_properties)
    {

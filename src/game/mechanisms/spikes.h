@@ -70,7 +70,7 @@ private:
    int32_t _tv{0};
    int32_t _tu_offset{0};
 
-   std::vector<sf::Sprite> _sprite;
+   std::vector<std::unique_ptr<sf::Sprite>> _sprite;
    int32_t _elapsed_ms{0};
    float _dt_s{0.0f};
    int32_t _dt_ms{0};

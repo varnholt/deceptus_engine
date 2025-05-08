@@ -131,7 +131,7 @@ DetonationAnimation::DetonationAnimation(const std::vector<DetonationAnimation::
          frame_data._frame_times[0] = sf::seconds(ring_index * rand_normalized * ring._variance_animation_speed);
 
          auto animation = std::make_shared<Animation>();
-         animation->setPosition(x, y);
+         animation->setPosition({x, y});
          animation->_frames = frame_data._frames;
          animation->_color_texture = frame_data._texture;
          animation->setFrameTimes(frame_data._frame_times);

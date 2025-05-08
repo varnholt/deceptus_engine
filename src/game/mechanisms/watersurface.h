@@ -74,8 +74,8 @@ private:
    std::shared_ptr<sf::Texture> _gradient;
    uint8_t _opacity{200};
 
-   sf::RenderTexture _render_texture;
-   sf::Sprite render_texture_sprite;
+   std::unique_ptr<sf::RenderTexture> _render_texture;
+   std::unique_ptr<sf::Sprite> render_texture_sprite;
    std::optional<float> _pixel_ratio;
    Config _config;
    std::vector<SplashEmitter> _emitters;

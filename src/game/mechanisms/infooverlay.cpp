@@ -65,7 +65,7 @@ void InfoOverlay::update(const sf::Time& delta_time)
 
    // std::cout << alpha << std::endl;
 
-   _sprite.setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(255 * alpha)));
+   _sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(255 * alpha)));
 }
 
 void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
@@ -79,16 +79,15 @@ void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    if (_settings._fullscreen)
    {
       const sf::View ortho(sf::FloatRect(
-         0.0f,
-         0.0f,
-         static_cast<float>(GameConfiguration::getInstance()._view_width),
-         static_cast<float>(GameConfiguration::getInstance()._view_height)
+         {0.0f, 0.0f},
+         {static_cast<float>(GameConfiguration::getInstance()._view_width),
+          static_cast<float>(GameConfiguration::getInstance()._view_height)}
       ));
 
       color.setView(ortho);
    }
 
-   color.draw(_sprite);
+   color.draw(*_sprite);
 
    if (_settings._fullscreen)
    {
@@ -148,7 +147,7 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
       if (texture_id != data._tmx_object->_properties->_map.end())
       {
          instance->_texture = TexturePool::getInstance().get(texture_id->second->_value_string.value());
-         instance->_sprite.setTexture(*instance->_texture);
+         instance->_sprite = std::make_unique<sf::Sprite>(*instance->_texture);
       }
 
       // read texture rect
@@ -156,44 +155,44 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
       const auto texture_rect_x = data._tmx_object->_properties->_map.find("texture_rect_x");
       if (texture_rect_x != data._tmx_object->_properties->_map.end())
       {
-         rect.left = texture_rect_x->second->_value_int.value();
+         rect.position.x = texture_rect_x->second->_value_int.value();
       }
 
       const auto texture_rect_y = data._tmx_object->_properties->_map.find("texture_rect_y");
       if (texture_rect_y != data._tmx_object->_properties->_map.end())
       {
-         rect.top = texture_rect_y->second->_value_int.value();
+         rect.position.y = texture_rect_y->second->_value_int.value();
       }
 
       const auto texture_rect_width = data._tmx_object->_properties->_map.find("texture_rect_width");
       if (texture_rect_width != data._tmx_object->_properties->_map.end())
       {
-         rect.width = texture_rect_width->second->_value_int.value();
+         rect.size.x = texture_rect_width->second->_value_int.value();
       }
 
       const auto texture_rect_height = data._tmx_object->_properties->_map.find("texture_rect_height");
       if (texture_rect_height != data._tmx_object->_properties->_map.end())
       {
-         rect.height = texture_rect_height->second->_value_int.value();
+         rect.size.y = texture_rect_height->second->_value_int.value();
       }
 
-      if (rect.width > 0 && rect.height > 0)
+      if (rect.size.x > 0 && rect.size.y > 0)
       {
-         instance->_sprite.setTextureRect(rect);
+         instance->_sprite->setTextureRect(rect);
       }
    }
 
    const auto bounding_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    instance->setObjectId(data._tmx_object->_name);
    instance->_rect = bounding_rect;
-   instance->_sprite.setColor(sf::Color(255, 255, 255, 0));
+   instance->_sprite->setColor(sf::Color(255, 255, 255, 0));
    instance->addChunks(bounding_rect);
 
    if (!instance->_settings._fullscreen)
    {
-      instance->_sprite.setPosition(data._tmx_object->_x_px, data._tmx_object->_y_px);
+      instance->_sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
    }
 
    return instance;

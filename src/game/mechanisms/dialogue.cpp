@@ -107,7 +107,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
    }
 
    dialogue->_pixel_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    return dialogue;
 }
@@ -147,7 +147,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
    }
 
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-   if (_open_on_intersect && player_rect.intersects(_pixel_rect))
+   if (_open_on_intersect && player_rect.findIntersection(_pixel_rect).has_value())
    {
       // message boxes might already be marked as inactive, however
       // they might still be fading out. the display mode 'modal', however

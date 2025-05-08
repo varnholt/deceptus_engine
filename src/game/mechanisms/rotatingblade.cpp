@@ -20,8 +20,9 @@ RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
    setZ(30);
 
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_rotating_blade.png");
-   _sprite.setTexture(*_texture_map.get());
-   _sprite.setOrigin(_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f);
+
+   _sprite = std::make_unique<sf::Sprite>(*_texture_map);
+   _sprite->setOrigin({_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f});
 
    _audio_update_data._range = AudioRange{600.0f, 0.0f, 100.0f, 1.0f};
    _has_audio = true;
@@ -67,7 +68,7 @@ void RotatingBlade::setup(const GameDeserializeData& data)
    _path_interpolation.addKeys(_path);
 
    // collision rect for lever
-   _rectangle = {data._tmx_object->_x_px, data._tmx_object->_y_px, 64, 64};
+   _rectangle = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {64, 64}};
 
    if (data._tmx_object->_properties)
    {
@@ -230,13 +231,13 @@ void RotatingBlade::update(const sf::Time& dt)
    _path_interpolation.updateTime(movement_delta);
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
    _pos = _path_interpolation.computePosition(_path_interpolation.getTime());
-   _sprite.setRotation(_angle);
-   _sprite.setPosition(_pos);
+   _sprite->setRotation(sf::degrees(_angle));
+   _sprite->setPosition(_pos);
 
    updateAudio();
 
    // kill player if he moves into the blade's radius
-   sf::Vector2i blade_position{_sprite.getPosition()};
+   sf::Vector2i blade_position{_sprite->getPosition()};
    const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
    if (SfmlMath::intersectCircleRect(blade_position, blade_radius, Player::getCurrent()->getPixelRectInt()))
    {
@@ -249,10 +250,10 @@ void RotatingBlade::update(const sf::Time& dt)
 
 void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   target.draw(_sprite);
+   target.draw(*_sprite);
 
 #ifdef DEBUG_INTERSECTION
-   sf::Vector2i sprite_center{_sprite.getPosition()};
+   sf::Vector2i sprite_center{_sprite->getPosition()};
    const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
 
    b2Color color{1.0f, 1.0f, 1.0f};
@@ -261,7 +262,7 @@ void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       color = b2Color{1.0f, 0.0f, 0.0f};
    }
 
-   DebugDraw::drawCircle(target, _sprite.getPosition(), _sprite.getOrigin().x, color);
+   DebugDraw::drawCircle(target, _sprite->getPosition(), _sprite->getOrigin().x, color);
 #endif
 }
 

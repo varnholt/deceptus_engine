@@ -45,7 +45,7 @@ private:
 
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    sf::FloatRect _rectangle;
 
    static constexpr int32_t _sprite_index_enabled = 32;

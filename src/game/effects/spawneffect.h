@@ -23,6 +23,8 @@ public:
 private:
    struct Particle
    {
+      Particle(const sf::Texture& texture);
+
       sf::Vector2f _pos_norm;
       sf::Vector2f _pos_px;
       sf::Time _delay;
@@ -38,7 +40,7 @@ private:
       bool _respawn{true};
       bool _dead{false};
 
-      sf::Sprite _sprite;
+      std::unique_ptr<sf::Sprite> _sprite;
 
       void spawn();
       void update(const sf::Time& dt);

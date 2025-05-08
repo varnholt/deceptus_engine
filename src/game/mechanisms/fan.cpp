@@ -109,7 +109,7 @@ void Fan::updateSprite()
    for (auto& sprite : _sprites)
    {
       auto x_offset_tl = static_cast<int32_t>(_x_offsets_px[index]) % 8;
-      sprite.setTextureRect({x_offset_tl * PIXELS_PER_TILE, y_offset_tl * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE});
+      sprite.setTextureRect({{x_offset_tl * PIXELS_PER_TILE, y_offset_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
 
       index++;
    }
@@ -158,7 +158,7 @@ void Fan::update(const sf::Time& dt)
 
 std::optional<sf::FloatRect> Fan::getBoundingBoxPx()
 {
-   return sf::FloatRect(_pixel_rect.left, _pixel_rect.top, _pixel_rect.width, _pixel_rect.height);
+   return sf::FloatRect({_pixel_rect.position.x, _pixel_rect.position.y}, {_pixel_rect.size.x, _pixel_rect.size.y});
 }
 
 void Fan::load(const GameDeserializeData& data)
@@ -220,10 +220,10 @@ void Fan::load(const GameDeserializeData& data)
             const auto y = j * PIXELS_PER_TILE;
 
             tile->_position = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
-            tile->_rect.left = static_cast<float>(x);
-            tile->_rect.top = static_cast<float>(y);
-            tile->_rect.width = PIXELS_PER_TILE;
-            tile->_rect.height = PIXELS_PER_TILE;
+            tile->_rect.position.x = static_cast<float>(x);
+            tile->_rect.position.y = static_cast<float>(y);
+            tile->_rect.size.x = PIXELS_PER_TILE;
+            tile->_rect.size.y = PIXELS_PER_TILE;
             tile->_tile_dir = direction;
             tile->_direction = direction_vector;
             __tile_instances.push_back(tile);
@@ -253,10 +253,10 @@ void Fan::addObject(GameNode* parent, const GameDeserializeData& data)
    const auto h = data._tmx_object->_height_px;
 
    fan->_texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "fan.png");
-   fan->_pixel_rect.left = data._tmx_object->_x_px;
-   fan->_pixel_rect.top = data._tmx_object->_y_px;
-   fan->_pixel_rect.width = w;
-   fan->_pixel_rect.height = h;
+   fan->_pixel_rect.position.x = data._tmx_object->_x_px;
+   fan->_pixel_rect.position.y = data._tmx_object->_y_px;
+   fan->_pixel_rect.size.x = w;
+   fan->_pixel_rect.size.y = h;
 
    if (data._tmx_object->_properties)
    {
@@ -280,7 +280,7 @@ std::optional<sf::Vector2f> Fan::collide(const sf::FloatRect& player_rect)
          continue;
       }
 
-      if (player_rect.intersects(fan->_pixel_rect))
+      if (player_rect.findIntersection(fan->_pixel_rect).has_value())
       {
          dir += fan->_direction;
          valid = true;
@@ -312,11 +312,10 @@ void Fan::merge()
       for (auto& f : __fan_instances)
       {
          auto fan = std::dynamic_pointer_cast<Fan>(f);
-         if (tile->_rect.intersects(fan->_pixel_rect))
+         if (tile->_rect.findIntersection(fan->_pixel_rect).has_value())
          {
-            sf::Sprite sprite;
-            sprite.setTexture(*fan->_texture);
-            sprite.setPosition(static_cast<float>(tile->_position.x), static_cast<float>(tile->_position.y));
+            sf::Sprite sprite(*fan->_texture);
+            sprite.setPosition({static_cast<float>(tile->_position.x), static_cast<float>(tile->_position.y)});
 
             fan->_tiles.push_back(tile);
             fan->_direction = tile->_direction * fan->_speed;

@@ -29,18 +29,15 @@ ControllerOverlay::ControllerOverlay()
       auto tmp = std::make_shared<Layer>();
       tmp->_visible = layer.isVisible();
 
-      auto texture = std::make_shared<sf::Texture>();
-      auto sprite = std::make_shared<sf::Sprite>();
+      auto texture =
+         std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
 
-      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
-      {
-         Log::Fatal() << "failed to create texture: " << layer.getName();
-      }
+      auto sprite = std::make_shared<sf::Sprite>(*texture);
 
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
+      texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
       sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
+      sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
       sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
 
       tmp->_texture = texture;
@@ -56,8 +53,8 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto h = GameConfiguration::getInstance()._view_height;
 
    // draw layers
-   auto windowView = sf::View(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
-   windowView.move(-w + _texture_size.x + 10.0f, -h + _texture_size.y + 10.0f);
+   auto windowView = sf::View(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
+   windowView.move({-w + _texture_size.x + 10.0f, -h + _texture_size.y + 10.0f});
    window.setView(windowView);
 
    auto controller_bg = _layers["controller_bg"];
@@ -115,8 +112,8 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
       const auto y1 = axis(SDL_GAMEPAD_AXIS_RIGHTY);
       const auto tl = axis(SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
       const auto tr = axis(SDL_GAMEPAD_AXIS_RIGHT_TRIGGER);
-      analog_l->_sprite->setOrigin(-x0 * analogFactor, -y0 * analogFactor);
-      analog_r->_sprite->setOrigin(-x1 * analogFactor, -y1 * analogFactor);
+      analog_l->_sprite->setOrigin({-x0 * analogFactor, -y0 * analogFactor});
+      analog_r->_sprite->setOrigin({-x1 * analogFactor, -y1 * analogFactor});
       analog_l->_sprite->setColor(pressed(SDL_GAMEPAD_BUTTON_LEFT_STICK) ? sf::Color::Red : sf::Color::White);
       analog_r->_sprite->setColor(pressed(SDL_GAMEPAD_BUTTON_RIGHT_STICK) ? sf::Color::Red : sf::Color::White);
       analog_l->draw(window, states);

@@ -6,9 +6,13 @@
 
 #include <iostream>
 
-DeathShader::DeathShader(uint32_t width, uint32_t height) : _render_texture(std::make_shared<sf::RenderTexture>())
+DeathShader::DeathShader(uint32_t width, uint32_t height)
 {
-   if (!_render_texture->create(width, height))
+   try
+   {
+      _render_texture = std::make_shared<sf::RenderTexture>(sf::Vector2u{width, height});
+   }
+   catch (...)
    {
       Log::Fatal() << "failed to create death shader texture" << std::endl;
    }
@@ -54,9 +58,6 @@ void DeathShader::update(const sf::Time& dt)
    {
       _elapsed = 1.0f;
    }
-
-   // for testing
-   // mElapsed = fmod(mElapsed, 1.0f);
 
    _shader.setUniform("time", _elapsed);
    _shader.setUniform(

@@ -56,8 +56,7 @@ void PlayerStencil::dump(const std::shared_ptr<sf::RenderTexture>& texture)
    // Read the stencil data from the current rendering context
    glReadPixels(0, 0, w, h, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &stencilBuffer[0]);
 
-   sf::Image image;
-   image.create(w, h);
+   sf::Image image(sf::Vector2u{w, h});
    for (auto y = 0u; y < h; ++y)
    {
       for (auto x = 0u; x < w; ++x)
@@ -65,7 +64,7 @@ void PlayerStencil::dump(const std::shared_ptr<sf::RenderTexture>& texture)
          auto index = y * w + x;
          auto stencil_value = stencilBuffer[index];
          const auto color = (stencil_value > 0) ? sf::Color::White : sf::Color::Black;
-         image.setPixel(x, h - y - 1, color);
+         image.setPixel({x, h - y - 1}, color);
       }
    }
 

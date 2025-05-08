@@ -57,9 +57,9 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    const auto tile_offset_y = sin(_time.asSeconds() * 5.0f) * 8.0f;
 
    // draw background
-   _background.setPosition(_rect_center.x - _background.getTextureRect().width / 2, _rect_center.y + tile_offset_y - 11);
-   _background.setColor(color);
-   target.draw(_background);
+   _background->setPosition({_rect_center.x - _background->getTextureRect().size.x / 2, _rect_center.y + tile_offset_y - 11});
+   _background->setColor(color);
+   target.draw(*_background);
 
    const auto is_controller_connected = GameControllerIntegration::getInstance().isControllerConnected();
 
@@ -69,7 +69,7 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    {
       sprite.setColor(color);
       const auto tile_offset_x = -width_of_tiles_px / 2.0f + index * PIXELS_PER_TILE * 1.5f;
-      sprite.setPosition(_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y);
+      sprite.setPosition({_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y});
       sprite.setTextureRect(is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index]);
       target.draw(sprite);
       index++;
@@ -79,7 +79,7 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
 void ControllerHelp::update(const sf::Time& delta_time)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-   _visible = (player_rect.intersects(_rect_px));
+   _visible = (player_rect.findIntersection(_rect_px)).has_value();
 
    if (!_visible)
    {
@@ -103,7 +103,8 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
    setObjectId(data._tmx_object->_name);
    setZ(static_cast<int32_t>(ZDepth::Player) - 1);
 
-   _rect_px = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rect_px =
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    _rect_center = sf::Vector2f{
       data._tmx_object->_x_px + data._tmx_object->_width_px / 2.0f,
@@ -137,30 +138,29 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
       const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_key_pair.second);
 
       const auto sprite_rect_keyboard = sf::IntRect{
-         pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE
+         {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
 
       const auto sprite_rect_controller = sf::IntRect{
-         pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE
+         {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
 
-      sf::Sprite sprite;
-      sprite.setTexture(*_texture);
+      sf::Sprite sprite(*_texture);
       sprite.setTextureRect(sprite_rect_keyboard);
       _sprites.emplace_back(sprite);
       _sprite_rects_controller.emplace_back(sprite_rect_controller);
       _sprite_rects_keyboard.emplace_back(sprite_rect_keyboard);
    }
 
-   _background.setTexture(*_texture);
+   _background = std::make_unique<sf::Sprite>(*_texture);
 
    if (_sprites.size() == 1)
    {
-      _background.setTextureRect({6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE, PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2});
+      _background->setTextureRect({{6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2}});
    }
    else if (_sprites.size() == 2)
    {
-      _background.setTextureRect({9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE, PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3});
+      _background->setTextureRect({{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}});
    }
 }
 

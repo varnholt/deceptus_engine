@@ -47,8 +47,8 @@ std::shared_ptr<Animation> AnimationPool::create(const std::string& name, float 
 
    auto animation = std::make_shared<Animation>();
 
-   animation->setOrigin(settings->_origin[0], settings->_origin[1]);
-   animation->setPosition(x, y);
+   animation->setOrigin({settings->_origin[0], settings->_origin[1]});
+   animation->setPosition({x, y});
 
    animation->_name = name;
    animation->_frames = settings->_frames;
@@ -236,7 +236,7 @@ void AnimationPool::recreateAnimationsFromSettings(UpdateFlag flag)
 
       settings->createFrames();
       animation->_frames = settings->_frames;
-      animation->setOrigin(settings->_origin[0], settings->_origin[1]);
+      animation->setOrigin({settings->_origin[0], settings->_origin[1]});
       animation->setFrameTimes(settings->_frame_durations);
    }
 

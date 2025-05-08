@@ -144,16 +144,22 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& image_path)
    }
 
    float factor = 1.0f;
-   sf::RenderTexture render_texture;
-   if (!render_texture.create(static_cast<uint32_t>(_width * factor), static_cast<uint32_t>(_height * factor)))
+
+   std::unique_ptr<sf::RenderTexture> render_texture;
+
+   try
+   {
+      const auto texture_size = sf::Vector2u({static_cast<uint32_t>(_width * factor), static_cast<uint32_t>(_height * factor)});
+      render_texture = std::make_unique<sf::RenderTexture>(texture_size);
+   }
+   catch (...)
    {
       Log::Error() << "failed to create render texture";
-      return;
    }
 
-   render_texture.clear();
+   render_texture->clear();
 
-   sf::VertexArray quad(sf::Quads, 4);
+   sf::VertexArray quad(sf::PrimitiveType::TriangleStrip, 4);
    quad[0].color = sf::Color::Red;
    quad[1].color = sf::Color::Red;
    quad[2].color = sf::Color::Red;
@@ -165,20 +171,20 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& image_path)
       {
          if (isColliding(x, y))
          {
-            quad[0].position = sf::Vector2f(static_cast<float>(x * factor), static_cast<float>(y * factor));
-            quad[1].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor));
-            quad[2].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor + factor));
-            quad[3].position = sf::Vector2f(static_cast<float>(x * factor), static_cast<float>(y * factor + factor));
+            quad[0].position = sf::Vector2f(static_cast<float>(x * factor), static_cast<float>(y * factor));           // bottom-left
+            quad[1].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor));  // bottom-right
+            quad[2].position = sf::Vector2f(static_cast<float>(x * factor), static_cast<float>(y * factor + factor));  // top-left
+            quad[3].position = sf::Vector2f(static_cast<float>(x * factor + factor), static_cast<float>(y * factor + factor));  // top-right
 
-            render_texture.draw(&quad[0], 4, sf::Quads);
+            render_texture->draw(quad);
          }
       }
    }
 
-   render_texture.display();
+   render_texture->display();
 
    // get the target texture (where the stuff has been drawn)
-   const sf::Texture& texture = render_texture.getTexture();
+   const sf::Texture& texture = render_texture->getTexture();
    texture.copyToImage().saveToFile(image_path.string());
 }
 
@@ -191,14 +197,19 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
    }
 
    const uint32_t factor = 1;
-   sf::RenderTexture render_texture;
-   if (!render_texture.create(_width * factor, _height * factor))
+
+   std::unique_ptr<sf::RenderTexture> render_texture;
+
+   try
+   {
+      render_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u{_width * factor, _height * factor});
+   }
+   catch (...)
    {
       Log::Error() << "failed to create render texture";
-      return;
    }
 
-   render_texture.clear();
+   render_texture->clear();
 
    for (const auto& path : _paths)
    {
@@ -213,13 +224,13 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
       }
 
       vertices.push_back(vertices.at(0));
-      render_texture.draw(&vertices[0], vertices.size(), sf::LineStrip);
+      render_texture->draw(&vertices[0], vertices.size(), sf::PrimitiveType::LineStrip);
    }
 
-   render_texture.display();
+   render_texture->display();
 
    // get the target texture (where the stuff has been drawn)
-   const sf::Texture& texture = render_texture.getTexture();
+   const sf::Texture& texture = render_texture->getTexture();
    texture.copyToImage().saveToFile(image_path.string());
 }
 

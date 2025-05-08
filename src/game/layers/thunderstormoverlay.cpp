@@ -10,16 +10,24 @@ void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*nor
    const auto val = static_cast<uint8_t>(_value * 255);
    const auto col = sf::Color{val, val, val, val};
 
-   sf::Vertex quad[] = {
-      sf::Vertex(sf::Vector2f(_rect.left, _rect.top), col),
-      sf::Vertex(sf::Vector2f(_rect.left, _rect.top + _rect.height), col),
-      sf::Vertex(sf::Vector2f(_rect.left + _rect.width, _rect.top + _rect.height), col),
-      sf::Vertex(sf::Vector2f(_rect.left + _rect.width, _rect.top), col)
+   const sf::Vector2f top_left = {_rect.position.x, _rect.position.y};
+   const sf::Vector2f bottom_left = {_rect.position.x, _rect.position.y + _rect.size.y};
+   const sf::Vector2f bottom_right = {_rect.position.x + _rect.size.x, _rect.position.y + _rect.size.y};
+   const sf::Vector2f top_right = {_rect.position.x + _rect.size.x, _rect.position.y};
+
+   sf::Vertex quad[6] = {
+      sf::Vertex(top_left, col),
+      sf::Vertex(bottom_left, col),
+      sf::Vertex(bottom_right, col),
+
+      sf::Vertex(top_left, col),
+      sf::Vertex(bottom_right, col),
+      sf::Vertex(top_right, col)
    };
 
    sf::RenderStates states;
    states.blendMode = sf::BlendAlpha;
-   target.draw(quad, 4, sf::Quads, states);
+   target.draw(quad, 6, sf::PrimitiveType::Triangles, states);
 }
 
 void ThunderstormOverlay::update(const sf::Time& dt)

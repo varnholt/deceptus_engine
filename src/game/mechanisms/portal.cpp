@@ -234,7 +234,8 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
                portal->_tile_positions.x = static_cast<float>(i);
                portal->_tile_positions.y = static_cast<float>(j);
                portal->_texture = TexturePool::getInstance().get((data._base_path / data._tmx_tileset->_image->_source).string());
-               portal->_bounding_box = sf::FloatRect{static_cast<float>(i), static_cast<float>(j), PIXELS_PER_TILE, PIXELS_PER_TILE * 2};
+               portal->_bounding_box =
+                  sf::FloatRect{{static_cast<float>(i), static_cast<float>(j)}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}};
 
                if (data._tmx_layer->_properties)
                {
@@ -244,12 +245,11 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
 
             portal->_height++;
 
-            const auto tu = (tile_number - firstId) % (portal->_texture->getSize().x / tilesize.x);
-            const auto tv = (tile_number - firstId) / (portal->_texture->getSize().x / tilesize.x);
+            const int32_t tu = (tile_number - firstId) % (portal->_texture->getSize().x / tilesize.x);
+            const int32_t tv = (tile_number - firstId) / (portal->_texture->getSize().x / tilesize.x);
 
-            sf::Sprite sprite;
-            sprite.setTexture(*portal->_texture);
-            sprite.setTextureRect(sf::IntRect(tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
+            sf::Sprite sprite(*portal->_texture);
+            sprite.setTextureRect(sf::IntRect({tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}));
 
             sprite.setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
 

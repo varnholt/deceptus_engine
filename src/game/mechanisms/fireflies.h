@@ -11,12 +11,14 @@ class Fireflies : public GameMechanism, public GameNode
 public:
    struct Firefly
    {
+      Firefly(const sf::Texture& texture);
+
       void update(const sf::Time& dt);
       void updateTextureRect();
 
       sf::Vector3f _position_3d;
       sf::Vector2f _position;
-      sf::Sprite _sprite;
+      std::unique_ptr<sf::Sprite> _sprite;
       sf::Time _elapsed;
       sf::FloatRect _rect_px;
       int32_t _current_frame{0};

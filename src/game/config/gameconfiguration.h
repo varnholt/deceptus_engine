@@ -16,7 +16,7 @@ struct GameConfiguration
    bool _vsync_enabled = false;
    bool _rumble_enabled = true;
 
-   int32_t _audio_volume_master = 50;
+   int32_t _audio_volume_master = 100;
    int32_t _audio_volume_sfx = 100;
    int32_t _audio_volume_music = 100;
 

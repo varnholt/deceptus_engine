@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
+#include <map>
 #include <memory>
 
 class ForestScene
@@ -20,5 +21,5 @@ private:
    std::map<std::string, std::shared_ptr<Layer>> _layers;
 
    sf::Font _font;
-   sf::Text _text;
+   std::unique_ptr<sf::Text> _text;
 };
