@@ -191,45 +191,45 @@ void InGameMenu::update(const sf::Time& delta_time)
    }
 }
 
-void InGameMenu::processEvent(const sf::Event& event)
+void InGameMenu::processEvent(const sf::Event::KeyPressed* key_event)
 {
-   switch (event.key.code)
+   switch (key_event->code)
    {
-      case sf::Keyboard::Left:
+      case sf::Keyboard::Key::Left:
       {
          left();
          break;
       }
-      case sf::Keyboard::Right:
+      case sf::Keyboard::Key::Right:
       {
          right();
          break;
       }
-      case sf::Keyboard::Up:
+      case sf::Keyboard::Key::Up:
       {
          up();
          break;
       }
-      case sf::Keyboard::Down:
+      case sf::Keyboard::Key::Down:
       {
          down();
          break;
       }
-      case sf::Keyboard::LShift:
-      case sf::Keyboard::Q:
+      case sf::Keyboard::Key::LShift:
+      case sf::Keyboard::Key::Q:
       {
          goToLeftSubMenu();
          break;
       }
-      case sf::Keyboard::RShift:
-      case sf::Keyboard::W:
+      case sf::Keyboard::Key::RShift:
+      case sf::Keyboard::Key::W:
       {
          goToRightSubMenu();
          break;
       }
-      case sf::Keyboard::I:
-      case sf::Keyboard::Return:
-      case sf::Keyboard::Tab:
+      case sf::Keyboard::Key::I:
+      case sf::Keyboard::Key::Enter:
+      case sf::Keyboard::Key::Tab:
       {
          close();
          break;

@@ -14,8 +14,8 @@ public:
    void updateLookState(Look look, bool enable);
    void updateLookVector(const sf::Vector2f& desired);
 
-   void processKeyPressedEvents(const sf::Event& event);
-   void processKeyReleasedEvents(const sf::Event& event);
+   void processKeyPressedEvents(const sf::Event::KeyPressed* event);
+   void processKeyReleasedEvents(const sf::Event::KeyReleased* event);
 
    bool isKeyboardLookActive() const;
    const sf::Vector2f& getLookVector() const;

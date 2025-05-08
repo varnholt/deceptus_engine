@@ -73,7 +73,7 @@ private:
 
    // inventory
    std::array<std::shared_ptr<Layer>, 2> _slot_item_layers;
-   std::array<sf::Sprite, 2> _inventory_sprites;
-   std::map<std::string, sf::Sprite> _sprites;
+   std::array<std::unique_ptr<sf::Sprite>, 2> _inventory_sprites;
+   std::map<std::string, std::unique_ptr<sf::Sprite>> _sprites;
    std::shared_ptr<sf::Texture> _inventory_texture;
 };

@@ -9,14 +9,14 @@
 
 ForestScene::ForestScene()
 {
-   if (_font.loadFromFile("data/fonts/deceptum.ttf"))
+   if (_font.openFromFile("data/fonts/deceptum.ttf"))
    {
       const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-      _text.setFont(_font);
-      _text.setCharacterSize(12);
+      _text = std::make_unique<sf::Text>(_font);
+      _text->setCharacterSize(12);
       // mText.setString("Congratulations!\nYou completed the game!");
-      _text.setString("Geschafft!\nAlles Gute zum Geburtstag, Malte!");
-      _text.setFillColor(sf::Color{232, 219, 243});
+      _text->setString("Geschafft!\nAlles Gute zum Geburtstag, Malte!");
+      _text->setFillColor(sf::Color{232, 219, 243});
    }
    else
    {
@@ -39,25 +39,27 @@ ForestScene::ForestScene()
       auto tmp = std::make_shared<Layer>();
       tmp->_visible = true;  // layer.isVisible();
 
-      auto texture = std::make_shared<sf::Texture>();
-      auto sprite = std::make_shared<sf::Sprite>();
+      try
+      {
+         auto texture =
+            std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
 
-      if (!texture->create(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())))
+         auto sprite = std::make_shared<sf::Sprite>(*texture);
+         texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
+
+         sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
+         sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
+
+         tmp->_texture = texture;
+         tmp->_sprite = sprite;
+
+         _layers[layer.getName()] = tmp;
+         _layer_stack.push_back(tmp);
+      }
+      catch (...)
       {
          Log::Fatal() << "failed to create texture: " << layer.getName();
       }
-
-      texture->update(reinterpret_cast<const sf::Uint8*>(layer.getImage().getData().data()));
-
-      sprite->setTexture(*texture, true);
-      sprite->setPosition(static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop()));
-      sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
-
-      tmp->_texture = texture;
-      tmp->_sprite = sprite;
-
-      _layers[layer.getName()] = tmp;
-      _layer_stack.push_back(tmp);
    }
 }
 
@@ -67,7 +69,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto h = GameConfiguration::getInstance()._view_height;
 
    // draw layers
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
 
    for (auto& layer : _layer_stack)
@@ -76,10 +78,10 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
 
    // draw text
-   const auto rect = _text.getGlobalBounds();
-   const auto left = w / 2 - rect.width / 2;
-   _text.setPosition(floor(left), 82);
-   window.draw(_text, states);
+   const auto rect = _text->getGlobalBounds();
+   const auto left = w / 2 - rect.size.x / 2;
+   _text->setPosition({floor(left), 82});
+   window.draw(*_text, states);
 }
 
 /*
@@ -93,7 +95,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    +--------------------------------------------------------+
                       |                   |                 720px
                       |                   |
-                      rect.width = 200px
+                      rect.size.x = 200px
 */
 
 /*
@@ -121,7 +123,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void ForestScene::update(const sf::Time& time)
 {
-   _layers["mfog_1"]->_sprite->move(3.0f * time.asSeconds(), 0.0f);
-   _layers["mfog_2"]->_sprite->move(2.0f * time.asSeconds(), 0.0f);
-   _layers["mfog_3"]->_sprite->move(time.asSeconds(), 0.0f);
+   _layers["mfog_1"]->_sprite->move({3.0f * time.asSeconds(), 0.0f});
+   _layers["mfog_2"]->_sprite->move({2.0f * time.asSeconds(), 0.0f});
+   _layers["mfog_3"]->_sprite->move({time.asSeconds(), 0.0f});
 }

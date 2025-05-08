@@ -38,7 +38,7 @@ void WaterBubbles::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
          continue;
       }
 
-      target.draw(bubble->_sprite);
+      target.draw(*bubble->_sprite);
    }
 }
 
@@ -55,15 +55,15 @@ void WaterBubbles::spawnBubble(const sf::Vector2f pos_px, const sf::Vector2f vel
 {
    static const auto sprite_rects = std::array<sf::IntRect, 3>{
       // sf::IntRect{576, 936, 24, 24},
-      sf::IntRect{600, 936, 24, 24},
-      sf::IntRect{624, 936, 24, 24},
-      sf::IntRect{648, 936, 24, 24},
+      sf::IntRect{{600, 936}, {24, 24}},
+      sf::IntRect{{624, 936}, {24, 24}},
+      sf::IntRect{{648, 936}, {24, 24}},
    };
 
    auto bubble = std::make_shared<Bubble>(pos_px, vel_px, _texture);
 
-   bubble->_sprite.setTextureRect(sprite_rects[std::rand() % sprite_rects.size()]);
-   bubble->_sprite.setOrigin(12.0f, 12.0f);
+   bubble->_sprite->setTextureRect(sprite_rects[std::rand() % sprite_rects.size()]);
+   bubble->_sprite->setOrigin({12.0f, 12.0f});
    bubble->_delay_s = frand(0.0f, 0.3f);
 
    _bubbles.push_back(bubble);
@@ -77,8 +77,8 @@ void WaterBubbles::spawnSplashBubbles(const WaterBubbleInput& input)
       // not really correct:
       // the player rect does not change when the player is in the water, it should actually be rotated
       const sf::Vector2f pos_px = {
-         input._player_rect.left + frand(0.0f, input._player_rect.height) + error_offset_x_px,
-         input._player_rect.top + frand(0.0f, input._player_rect.width * 1.5f)
+         input._player_rect.position.x + frand(0.0f, input._player_rect.size.y) + error_offset_x_px,
+         input._player_rect.position.y + frand(0.0f, input._player_rect.size.x * 1.5f)
       };
 
       const sf::Vector2f vel_px = {0.0f, -velocity_scale * frand(0.5f, 1.0f)};
@@ -97,12 +97,12 @@ void WaterBubbles::spawnBubblesFromHead(const WaterBubbleInput& input)
 
    for (auto i = 0; i < spawn_bubble_count; i++)
    {
-      const auto range_right_px = head_offset_percent * input._player_rect.width +
-                                  frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) + center_offset_px;
-      const auto range_left_px = frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.width) - center_offset_px;
-      const auto bubble_pos_x_px = input._player_rect.left + (input._player_pointing_right ? range_right_px : range_left_px);
+      const auto range_right_px = head_offset_percent * input._player_rect.size.x +
+                                  frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.size.x) + center_offset_px;
+      const auto range_left_px = frand(0.0f, (1.0f - head_offset_percent) * input._player_rect.size.x) - center_offset_px;
+      const auto bubble_pos_x_px = input._player_rect.position.x + (input._player_pointing_right ? range_right_px : range_left_px);
 
-      const sf::Vector2f pos_px = {bubble_pos_x_px, input._player_rect.top};
+      const sf::Vector2f pos_px = {bubble_pos_x_px, input._player_rect.position.y};
       const sf::Vector2f vel_px = {0.0f, -velocity_scale * frand(0.5f, 1.0f)};
 
       // std::cout << "spawn " << pos_px.x << ", " << pos_px.y << std::endl;
@@ -145,7 +145,7 @@ void WaterBubbles::update(const sf::Time& dt, const WaterBubbleInput& input)
       }
 
       bubble->_position += dt.asSeconds() * bubble->_velocity;
-      bubble->_sprite.setPosition(bubble->_position);
+      bubble->_sprite->setPosition(bubble->_position);
 
       const auto atmosphere = Level::getCurrentLevel()->getAtmosphere().getTileForPosition(bubble->_position);
       if (atmosphere != AtmosphereTileWaterFull)
@@ -163,5 +163,5 @@ void WaterBubbles::update(const sf::Time& dt, const WaterBubbleInput& input)
 WaterBubbles::Bubble::Bubble(const sf::Vector2f& pos, const sf::Vector2f& vel, const std::shared_ptr<sf::Texture>& texture)
     : _position(pos), _velocity(vel)
 {
-   _sprite.setTexture(*texture);
+   _sprite = std::make_unique<sf::Sprite>(*texture);
 }

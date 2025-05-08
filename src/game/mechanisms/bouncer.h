@@ -36,7 +36,7 @@ private:
    b2PolygonShape _shape_sensor;
 
    std::shared_ptr<sf::Texture> _texture;
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    sf::FloatRect _rect;
    sf::Time _activation_time;
    bool _player_at_bouncer = false;

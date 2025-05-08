@@ -34,7 +34,7 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    std::optional<b2Vec2> q1_prev;
    std::optional<b2Vec2> q4_prev;
 
-   std::vector<sf::Vertex> quads;
+   std::vector<sf::Vertex> strip;
 
    for (auto i = 0u; i < _chain_elements.size() - 1; i++)
    {
@@ -63,37 +63,45 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
       const auto v1 = sf::Vertex(
          sf::Vector2f(q1.x * PPM, q1.y * PPM),
-         sf::Vector2f(static_cast<float>(_texture_rect_px.left), static_cast<float>(_texture_rect_px.top + u0 * _texture_rect_px.height))
+         sf::Color::White,
+         sf::Vector2f(
+            static_cast<float>(_texture_rect_px.position.x), static_cast<float>(_texture_rect_px.position.y + u0 * _texture_rect_px.size.y)
+         )
       );
       const auto v2 = sf::Vertex(
          sf::Vector2f(q2.x * PPM, q2.y * PPM),
-         sf::Vector2f(static_cast<float>(_texture_rect_px.left), static_cast<float>(_texture_rect_px.top + u1 * _texture_rect_px.height))
+         sf::Color::White,
+         sf::Vector2f(
+            static_cast<float>(_texture_rect_px.position.x), static_cast<float>(_texture_rect_px.position.y + u1 * _texture_rect_px.size.y)
+         )
       );
       const auto v3 = sf::Vertex(
          sf::Vector2f(q3.x * PPM, q3.y * PPM),
+         sf::Color::White,
          sf::Vector2f(
-            static_cast<float>(_texture_rect_px.left + _texture_rect_px.width),
-            static_cast<float>(_texture_rect_px.top + u1 * _texture_rect_px.height)
+            static_cast<float>(_texture_rect_px.position.x + _texture_rect_px.size.x),
+            static_cast<float>(_texture_rect_px.position.y + u1 * _texture_rect_px.size.y)
          )
       );
       const auto v4 = sf::Vertex(
          sf::Vector2f(q4.x * PPM, q4.y * PPM),
+         sf::Color::White,
          sf::Vector2f(
-            static_cast<float>(_texture_rect_px.left + _texture_rect_px.width),
-            static_cast<float>(_texture_rect_px.top + u0 * _texture_rect_px.height)
+            static_cast<float>(_texture_rect_px.position.x + _texture_rect_px.size.x),
+            static_cast<float>(_texture_rect_px.position.y + u0 * _texture_rect_px.size.y)
          )
       );
 
-      quads.push_back(v1);
-      quads.push_back(v2);
-      quads.push_back(v3);
-      quads.push_back(v4);
+      strip.push_back(v1);
+      strip.push_back(v2);
+      strip.push_back(v4);
+      strip.push_back(v3);
    }
 
    // render out those quads
    sf::RenderStates states;
    states.texture = _texture.get();
-   color.draw(quads.data(), quads.size(), sf::Quads, states);
+   color.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
 }
 
 void Rope::pushChain(float impulse)
@@ -119,7 +127,7 @@ void Rope::update(const sf::Time& dt)
       return;
    }
 
-   if (_player_impulse.has_value() && Player::getCurrent()->getPixelRectFloat().intersects(_bounding_box))
+   if (_player_impulse.has_value() && Player::getCurrent()->getPixelRectFloat().findIntersection(_bounding_box).has_value())
    {
       // using a fix timestep for now, everything else lets box2d go nuts
       const auto impulse = Player::getCurrent()->getBody()->GetLinearVelocity().x * _player_impulse.value() * dt.asSeconds();
@@ -160,19 +168,19 @@ void Rope::setup(const GameDeserializeData& data)
    // rope 1
    // 971,  73 .. 973,  73
    // 971, 211 .. 973, 211
-   _texture_rect_px.left = 971;
-   _texture_rect_px.top = 73;
-   _texture_rect_px.width = 3;
-   _texture_rect_px.height = 138;
+   _texture_rect_px.position.x = 971;
+   _texture_rect_px.position.y = 73;
+   _texture_rect_px.size.x = 3;
+   _texture_rect_px.size.y = 138;
 
    // rope 2
    // 1019,  72 .. 1021,  72
    // 1019, 153 .. 1021, 153
    //
-   // _texture_rect_px.left = 1019;
-   // _texture_rect_px.top = 72;
-   // _texture_rect_px.width = 3;
-   // _texture_rect_px.height = 81;
+   // _texture_rect_px.position.x = 1019;
+   // _texture_rect_px.position.y = 72;
+   // _texture_rect_px.size.x = 3;
+   // _texture_rect_px.size.y = 81;
 
    // read properties
    const auto push_interval_it = data._tmx_object->_properties->_map.find("push_interval_s");
@@ -218,7 +226,6 @@ void Rope::setup(const GameDeserializeData& data)
       static_cast<int32_t>(data._tmx_object->_y_px + path_1_px.y)  // the 2nd y coord of the polyline contains the line length
    });
 
-   // clang-format off
    //      p0
    //   +---+---+
    //   |   |   |
@@ -228,14 +235,7 @@ void Rope::setup(const GameDeserializeData& data)
    //   |   |   |
    //   +---+---+
    //      p1
-   _bounding_box =
-      sf::FloatRect{
-         data._tmx_object->_x_px - 10,
-         data._tmx_object->_y_px,
-         20,
-         std::fabs(rope_length_px.y)
-   };
-   // clang-format on
+   _bounding_box = sf::FloatRect{{data._tmx_object->_x_px - 10, data._tmx_object->_y_px}, {20, std::fabs(rope_length_px.y)}};
 
    addChunks(_bounding_box);
 

@@ -43,7 +43,7 @@ private:
    sf::Rect<float> _name_rect;
 
    sf::Font _font;
-   sf::Text _text;
+   std::unique_ptr<sf::Text> _text;
 
    int32_t _shift = 0;
 };

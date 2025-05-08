@@ -142,7 +142,7 @@ void CameraSystem::updateY(const sf::Time& delta_time)
    }
    else
    {
-      _panic = (test < p0 || test + player->getPixelRectInt().height > p1);
+      _panic = (test < p0 || test + player->getPixelRectInt().size.y > p1);
    }
 
    // test if back within close boundaries

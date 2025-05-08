@@ -46,22 +46,22 @@ bool intersectCircleRect(const sf::Vector2<T>& circle_pos, T radius, const sf::R
    auto test_x = circle_pos.x;
    auto test_y = circle_pos.y;
 
-   if (circle_pos.x < rect.left)
+   if (circle_pos.x < rect.position.x)
    {
-      test_x = rect.left;
+      test_x = rect.position.x;
    }
-   else if (circle_pos.x > rect.left + rect.width)
+   else if (circle_pos.x > rect.position.x + rect.size.x)
    {
-      test_x = rect.left + rect.width;
+      test_x = rect.position.x + rect.size.x;
    }
 
-   if (circle_pos.y < rect.top)
+   if (circle_pos.y < rect.position.y)
    {
-      test_y = rect.top;
+      test_y = rect.position.y;
    }
-   else if (circle_pos.y > rect.top + rect.height)
+   else if (circle_pos.y > rect.position.y + rect.size.y)
    {
-      test_y = rect.top + rect.height;
+      test_y = rect.position.y + rect.size.y;
    }
 
    const auto distance_x = circle_pos.x - test_x;

@@ -33,7 +33,7 @@ private:
 
    sf::FloatRect _rect;
    sf::IntRect _texture_rect;
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    std::shared_ptr<sf::Texture> _texture;
    FloatSeconds _elapsed{0.0f};
    Settings _settings;

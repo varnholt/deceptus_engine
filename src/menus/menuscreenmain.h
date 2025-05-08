@@ -38,6 +38,6 @@ private:
    ExitCallback _exit_callback;
 
    sf::Font _font;
-   sf::Text _text_build;
-   sf::Text _text_year;
+   std::unique_ptr<sf::Text> _text_build;
+   std::unique_ptr<sf::Text> _text_year;
 };

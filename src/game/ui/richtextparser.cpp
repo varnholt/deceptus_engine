@@ -64,10 +64,6 @@ std::vector<Segment> parseRichText(
 
    std::vector<Segment> segments;
 
-   Segment segment;
-   segment.text.setFont(font);
-   segment.text.setCharacterSize(character_size);
-
    auto current_text_color = text_color;
    bool is_italic = false;
    bool is_bold = false;
@@ -123,10 +119,12 @@ std::vector<Segment> parseRichText(
          if (tag_pos > 0)
          {
             const auto text_before_tag = current_view.substr(0, tag_pos);
-            segment.text.setString(std::string{text_before_tag});
-            segment.text.setFillColor(current_text_color);
-            segment.text.setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
-            segments.push_back(segment);
+            Segment segment(font);
+            segment.text->setCharacterSize(character_size);
+            segment.text->setString(std::string{text_before_tag});
+            segment.text->setFillColor(current_text_color);
+            segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
+            segments.push_back(std::move(segment));
          }
 
          // Move the index past the tag.
@@ -160,17 +158,21 @@ std::vector<Segment> parseRichText(
          else if (closest_tag_name == "br")
          {
             // insert newline segment
-            segment.text.setString("\n");
-            segments.push_back(segment);
+            Segment segment(font);
+            segment.text->setCharacterSize(character_size);
+            segment.text->setString("\n");
+            segments.push_back(std::move(segment));
          }
       }
       else
       {
          // no more tags; add the rest of the text as a single segment.
-         segment.text.setString(std::string{current_view});
-         segment.text.setFillColor(current_text_color);
-         segment.text.setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
-         segments.push_back(segment);
+         Segment segment(font);
+         segment.text->setCharacterSize(character_size);
+         segment.text->setString(std::string{current_view});
+         segment.text->setFillColor(current_text_color);
+         segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
+         segments.push_back(std::move(segment));
          break;
       }
    }
@@ -180,16 +182,16 @@ std::vector<Segment> parseRichText(
    {
       for (auto& segment : segments)
       {
-         if (segment.text.getString() == "\n")
+         if (segment.text->getString() == "\n")
          {
-            offset_y_px += segment.text.getLocalBounds().height;
-            segment.text.setPosition(offset_x_px, offset_y_px);
+            offset_y_px += segment.text->getLocalBounds().size.y;
+            segment.text->setPosition({offset_x_px, offset_y_px});
          }
          else
          {
-            const auto text_width_px = segment.text.getLocalBounds().width;
+            const auto text_width_px = segment.text->getLocalBounds().size.x;
             const auto offset_x_centered_px = offset_x_px + (window_width_px - text_width_px) / 2.0f;
-            segment.text.setPosition(offset_x_centered_px, offset_y_px);
+            segment.text->setPosition({offset_x_centered_px, offset_y_px});
          }
       }
    }
@@ -199,16 +201,16 @@ std::vector<Segment> parseRichText(
       auto segment_offset_x_px = 0.0f;
       for (auto& segment : segments)
       {
-         if (segment.text.getString() == "\n")
+         if (segment.text->getString() == "\n")
          {
             segment_offset_x_px = 0.0f;
-            offset_y_px += segment.text.getLocalBounds().height;
-            segment.text.setPosition(offset_x_px, offset_y_px);
+            offset_y_px += segment.text->getLocalBounds().size.y;
+            segment.text->setPosition({offset_x_px, offset_y_px});
          }
          else
          {
-            segment.text.setPosition(offset_x_px + segment_offset_x_px, offset_y_px);
-            segment_offset_x_px += segment.text.getLocalBounds().width;
+            segment.text->setPosition({offset_x_px + segment_offset_x_px, offset_y_px});
+            segment_offset_x_px += segment.text->getLocalBounds().size.x;
          }
       }
    }
@@ -222,7 +224,7 @@ std::string toString(const std::vector<Segment>& segments)
 
    for (const auto& seg : segments)
    {
-      result += seg.text.getString();
+      result += seg.text->getString();
    }
 
    return result;
@@ -231,7 +233,7 @@ std::string toString(const std::vector<Segment>& segments)
 void testParseRichText()
 {
    sf::Font font;
-   if (!font.loadFromFile("arial.ttf"))
+   if (!font.openFromFile("arial.ttf"))
    {
       std::cerr << "Failed to load font!" << std::endl;
       return;
@@ -248,6 +250,11 @@ void testParseRichText()
 
    std::cout << "Original Message: " << message << std::endl;
    std::cout << "Extracted Plain Text: " << std::endl << plain_text << std::endl;
+}
+
+Segment::Segment(const sf::Font& font)
+{
+   text = std::make_unique<sf::Text>(font);
 }
 
 }  // namespace RichTextParser

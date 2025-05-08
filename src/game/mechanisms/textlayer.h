@@ -29,7 +29,6 @@ private:
 
    Mode _mode = Mode::Invalid;
 
-   sf::Sprite _sprite;
    sf::FloatRect _rect;
    std::shared_ptr<sf::Texture> _texture;
 
@@ -38,7 +37,7 @@ private:
 
    std::string _text;
    sf::Font _truetype_font;
-   sf::Text _truetype_text;
+   std::unique_ptr<sf::Text> _truetype_text;
 };
 
 #endif  // TEXTLAYER_H

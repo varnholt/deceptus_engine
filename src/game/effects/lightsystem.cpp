@@ -35,7 +35,7 @@ LightSystem::LightSystem()
       _unit_circle[i] = b2Vec2{x, y};
    }
 
-   if (!_light_shader.loadFromFile("data/shaders/light.frag", sf::Shader::Fragment))
+   if (!_light_shader.loadFromFile("data/shaders/light.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading bump mapping shader";
    }
@@ -127,6 +127,14 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   pos_next = 0;
                }
 
+               // v0      v0_far
+               //  x------x
+               //  |    / |
+               //  |   /  |
+               //  |  /   |
+               //  x------x
+               // v1      v1_far
+
                const auto& v0 = circle_positions[pos_current];
                const auto& v1 = circle_positions[pos_next];
                const auto v0far = 10000.0f * (v0 - light_pos_m);
@@ -136,10 +144,13 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
+
+                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad, 4, sf::Quads);
+               target.draw(quad, 6, sf::PrimitiveType::Triangles);
             }
          }
          else if (shape_chain)
@@ -169,10 +180,13 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0_far.x, v0_far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1_far.x, v1_far.y) * PPM, sf::Color::Black),
+
+                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v1_far.x, v1_far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad, 4, sf::Quads);
+               target.draw(quad, 6, sf::PrimitiveType::Triangles);
             }
          }
          else if (shape_polygon)
@@ -200,10 +214,13 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
+
+                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad, 4, sf::Quads);
+               target.draw(quad, 6, sf::PrimitiveType::Triangles);
             }
          }
       }
@@ -232,8 +249,8 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
    // then convert to viewport coordinates
    sf::Vector2f pixel;
    const auto viewport = target.getViewport(view);
-   pixel.x = (normalized.x + 1.0f) / 2.0f * static_cast<float>(viewport.width) + static_cast<float>(viewport.left);
-   pixel.y = (-normalized.y + 1.0f) / 2.0f * static_cast<float>(viewport.height) + static_cast<float>(viewport.top);
+   pixel.x = (normalized.x + 1.0f) / 2.0f * static_cast<float>(viewport.size.x) + static_cast<float>(viewport.position.x);
+   pixel.y = (-normalized.y + 1.0f) / 2.0f * static_cast<float>(viewport.size.y) + static_cast<float>(viewport.position.y);
 
    return pixel;
 }
@@ -322,7 +339,7 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
       glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
       sf::RenderStates render_states{sf::BlendAdd};
-      target.draw(light->_sprite, render_states);
+      target.draw(*light->_sprite, render_states);
    }
 
    glDisable(GL_STENCIL_TEST);
@@ -345,14 +362,13 @@ void LightSystem::draw(
    // update shader uniforms
    updateLightShader(target);
 
-   sf::Sprite sprite;
-   sprite.setTexture(color_map->getTexture());
+   sf::Sprite sprite(color_map->getTexture());
    target.draw(sprite, &_light_shader);
 }
 
 void LightSystem::LightInstance::updateSpritePosition()
 {
-   _sprite.setPosition(sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
+   _sprite->setPosition(sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
 }
 
 std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(GameNode* parent, const GameDeserializeData& data)
@@ -465,15 +481,15 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    // light->_sprite.setColor(light->_color);
 
    light->_texture = TexturePool::getInstance().get(texture);
-   light->_sprite.setTexture(*light->_texture);
-   light->_sprite.setTextureRect(
-      sf::IntRect(0, 0, static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y))
+   light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
+   light->_sprite->setTextureRect(
+      sf::IntRect({0, 0}, {static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y)})
    );
 
    light->updateSpritePosition();
 
    auto scale = static_cast<float>(light->_width_px) / light->_texture->getSize().x;
-   light->_sprite.setScale(scale, scale);
+   light->_sprite->setScale({scale, scale});
 
    return light;
 }

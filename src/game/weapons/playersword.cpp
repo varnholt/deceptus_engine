@@ -22,7 +22,7 @@ std::optional<sf::Vector2f> closestCenterToPoint(const sf::Vector2f& point, cons
    }
 
    const auto get_center = [](const sf::FloatRect& rect) -> sf::Vector2f
-   { return {rect.left + rect.width / 2.0f, rect.top + rect.height / 2.0f}; };
+   { return {rect.position.x + rect.size.x / 2.0f, rect.position.y + rect.size.y / 2.0f}; };
 
    std::optional<sf::Vector2f> closest_center;
    auto min_distance_squared = std::numeric_limits<float>::max();
@@ -133,7 +133,7 @@ void PlayerSword::updateImpact(const WeaponUpdateData& data)
          }
 
          const auto& rect = collided_node._hitbox;
-         const auto hitbox_center_pos = sf::Vector2f{rect.left + rect.width * 0.5f, rect.top + rect.height * 0.5f};
+         const auto hitbox_center_pos = sf::Vector2f{rect.position.x + rect.size.x * 0.5f, rect.position.y + rect.size.y * 0.5f};
 
          // try avoid spamming new animations
          if (_attack_frame == 0)
@@ -159,7 +159,7 @@ void PlayerSword::updateImpact(const WeaponUpdateData& data)
 
       const auto player_rect_px = Player::getCurrent()->getPixelRectFloat();
       const auto player_center_px =
-         sf::Vector2f{player_rect_px.left + player_rect_px.width / 2.0f, player_rect_px.top + player_rect_px.height / 2.0f};
+         sf::Vector2f{player_rect_px.position.x + player_rect_px.size.x / 2.0f, player_rect_px.position.y + player_rect_px.size.y / 2.0f};
 
       auto solid_object_hit_pos_px = closestCenterToPoint(player_center_px, _octree_rects);
 

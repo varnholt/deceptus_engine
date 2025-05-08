@@ -71,7 +71,7 @@ std::vector<Room::SubRoom>::const_iterator Room::findSubRoom(const sf::Vector2f&
 std::vector<Room::SubRoom>::const_iterator Room::findSubRoom(const sf::FloatRect& rect) const
 {
    const auto it =
-      std::find_if(_sub_rooms.begin(), _sub_rooms.end(), [rect](const auto& sub_room) { return sub_room._rect.intersects(rect); });
+      std::find_if(_sub_rooms.begin(), _sub_rooms.end(), [rect](const auto& sub_room) { return sub_room._rect.findIntersection(rect); });
    return it;
 }
 
@@ -130,7 +130,9 @@ void Room::mergeEnterAreas(const std::vector<std::shared_ptr<Room>>& rooms)
       for (auto& room : rooms)
       {
          auto it = std::find_if(
-            room->_sub_rooms.begin(), room->_sub_rooms.end(), [area](const auto& sub_room) { return sub_room._rect.intersects(area._rect); }
+            room->_sub_rooms.begin(),
+            room->_sub_rooms.end(),
+            [area](const auto& sub_room) { return sub_room._rect.findIntersection(area._rect); }
          );
 
          if (it != room->_sub_rooms.end())
@@ -145,7 +147,7 @@ void Room::mergeEnterAreas(const std::vector<std::shared_ptr<Room>>& rooms)
 void Room::RoomEnterArea::deserializeEnterArea(const GameDeserializeData& data)
 {
    _name = data._tmx_object->_name;
-   _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rect = sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    if (data._tmx_object->_properties)
    {
@@ -275,7 +277,9 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
 
    // test for overlaps
    if (!std::any_of(
-          room->_sub_rooms.begin(), room->_sub_rooms.end(), [sub_room](const auto& room) { return room._rect.intersects(sub_room._rect); }
+          room->_sub_rooms.begin(),
+          room->_sub_rooms.end(),
+          [sub_room](const auto& room) { return room._rect.findIntersection(sub_room._rect); }
        ))
    {
       room->_sub_rooms.push_back(sub_room);
@@ -404,12 +408,12 @@ void Room::lockCamera()
 void Room::SubRoom::deserialize(const GameDeserializeData& data)
 {
    _name = data._tmx_object->_name;
-   _rect = sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+   _rect = sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
-   sf::FloatRect rect_l{_rect.left, _rect.top, eps_px, _rect.height};
-   sf::FloatRect rect_r{_rect.left + _rect.width - eps_px, _rect.top, eps_px, _rect.height};
-   sf::FloatRect rect_t{_rect.left, _rect.top, _rect.width, eps_px};
-   sf::FloatRect rect_b{_rect.left, _rect.top + _rect.height - eps_px, _rect.width, eps_px};
+   sf::FloatRect rect_l{{_rect.position.x, _rect.position.y}, {eps_px, _rect.size.y}};
+   sf::FloatRect rect_r{{_rect.position.x + _rect.size.x - eps_px, _rect.position.y}, {eps_px, _rect.size.y}};
+   sf::FloatRect rect_t{{_rect.position.x, _rect.position.y}, {_rect.size.x, eps_px}};
+   sf::FloatRect rect_b{{_rect.position.x, _rect.position.y + _rect.size.y - eps_px}, {_rect.size.x, eps_px}};
 
    auto area_left = RoomEnterArea{"left", rect_l, std::nullopt, std::nullopt};
    auto area_right = RoomEnterArea{"right", rect_r, std::nullopt, std::nullopt};

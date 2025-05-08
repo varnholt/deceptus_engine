@@ -16,7 +16,7 @@ public:
    void setup(const GameDeserializeData& data) override;
 
 private:
-   sf::Sprite _lamp_sprite;
+   std::unique_ptr<sf::Sprite> _lamp_sprite;
    std::array<sf::IntRect, 3> _lamp_sprite_rects;
    // sf::IntRect _lamp_sprite_rect_1;
    // sf::IntRect _lamp_sprite_rect_2;

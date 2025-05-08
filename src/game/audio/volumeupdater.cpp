@@ -10,10 +10,10 @@
 float VolumeUpdater::computeDistanceToPlayerPx(const std::shared_ptr<GameMechanism>& mechanism)
 {
    const auto rect = mechanism->getBoundingBoxPx().value();
-   const auto mechanism_left_px = rect.left;
-   const auto mechanism_top_px = rect.top;
-   const auto mechanism_height_px = rect.height;
-   const auto mechanism_width_px = rect.width;
+   const auto mechanism_left_px = rect.position.x;
+   const auto mechanism_top_px = rect.position.y;
+   const auto mechanism_height_px = rect.size.y;
+   const auto mechanism_width_px = rect.size.x;
    const auto pos = sf::Vector2f{mechanism_left_px + mechanism_width_px / 2, mechanism_top_px + mechanism_height_px / 2};
    const auto distance_px = SfmlMath::length(_player_position - pos);
 

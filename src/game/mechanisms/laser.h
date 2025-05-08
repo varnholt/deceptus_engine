@@ -65,7 +65,7 @@ protected:
    int32_t _tv = 0;
 
    std::shared_ptr<sf::Texture> _texture;
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
 
    sf::Vector2f _tile_position;
    sf::Vector2f _position_px;

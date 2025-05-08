@@ -7,11 +7,9 @@
 
 constexpr auto outline_thickness = 0.5f;
 
-sf::Color DebugDraw::glColorToSfml(const b2Color& color, sf::Uint8 alpha)
+sf::Color DebugDraw::glColorToSfml(const b2Color& color, uint8_t alpha)
 {
-   return sf::Color(
-      static_cast<sf::Uint8>(color.r * 255), static_cast<sf::Uint8>(color.g * 255), static_cast<sf::Uint8>(color.b * 255), alpha
-   );
+   return sf::Color(static_cast<uint8_t>(color.r * 255), static_cast<uint8_t>(color.g * 255), static_cast<uint8_t>(color.b * 255), alpha);
 }
 
 sf::Vector2f DebugDraw::vecB2S(const b2Vec2& vector)
@@ -59,7 +57,7 @@ void DebugDraw::drawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertice
 void DebugDraw::drawCircle(sf::RenderTarget& target, const b2Vec2& center, float radius, const b2Color& color)
 {
    sf::CircleShape circle(radius * PPM);
-   circle.setOrigin(radius * PPM, radius * PPM);
+   circle.setOrigin({radius * PPM, radius * PPM});
    circle.setPosition(DebugDraw::vecB2S(center));
    circle.setFillColor(sf::Color::Transparent);
    circle.setOutlineThickness(outline_thickness);
@@ -71,7 +69,7 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const b2Vec2& center, float
 void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center, float radius, const b2Color& color)
 {
    sf::CircleShape circle(radius);
-   circle.setOrigin(radius, radius);
+   circle.setOrigin({radius, radius});
    circle.setPosition(center);
    circle.setFillColor(sf::Color::Transparent);
    circle.setOutlineThickness(outline_thickness);
@@ -83,7 +81,7 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center,
 void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float radius, const b2Vec2& axis, const b2Color& color)
 {
    sf::CircleShape circle(radius * PPM);
-   circle.setOrigin(radius * PPM, radius * PPM);
+   circle.setOrigin({radius * PPM, radius * PPM});
    circle.setPosition(DebugDraw::vecB2S(center));
    circle.setFillColor(DebugDraw::glColorToSfml(color, 255));
    circle.setOutlineThickness(1.f);
@@ -96,7 +94,7 @@ void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, 
    };
 
    target.draw(circle);
-   target.draw(line, 2, sf::Lines);
+   target.draw(line, 2, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const b2Color& color)
@@ -110,7 +108,7 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const
       sf::Vertex(p + sf::Vector2f{0, pointSize}, DebugDraw::glColorToSfml(color))
    };
 
-   target.draw(line, 4, sf::Lines);
+   target.draw(line, 4, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color)
@@ -124,7 +122,7 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Col
       sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{0, pointSize}, DebugDraw::glColorToSfml(color))
    };
 
-   target.draw(line, 4, sf::Lines);
+   target.draw(line, 4, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
@@ -133,14 +131,14 @@ void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec
       sf::Vertex(DebugDraw::vecB2S(p1), DebugDraw::glColorToSfml(color)), sf::Vertex(DebugDraw::vecB2S(p2), DebugDraw::glColorToSfml(color))
    };
 
-   target.draw(line, 2, sf::Lines);
+   target.draw(line, 2, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawLine(sf::RenderTarget& target, const sf::Vector2f& p1, const sf::Vector2f& p2, const b2Color& color)
 {
    sf::Vertex line[] = {sf::Vertex(p1, DebugDraw::glColorToSfml(color)), sf::Vertex(p2, DebugDraw::glColorToSfml(color))};
 
-   target.draw(line, 2, sf::Lines);
+   target.draw(line, 2, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& lines, const b2Color& color)
@@ -150,7 +148,7 @@ void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& l
 
    std::transform(lines.begin(), lines.end(), sf_lines.begin(), [sf_color](const auto& val) { return sf::Vertex(vecB2S(val), sf_color); });
 
-   target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
+   target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
 }
 
 void DebugDraw::drawLines(
@@ -169,7 +167,7 @@ void DebugDraw::drawLines(
       sf_lines.emplace_back(vecB2S(vertices[i] + offset), sf_color);
    }
 
-   target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
+   target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
 }
 
 void DebugDraw::drawLineLoop(
@@ -191,7 +189,7 @@ void DebugDraw::drawLineLoop(
    // close loop
    sf_lines.emplace_back(vecB2S(vertices[0] + offset), sf_color);
 
-   target.draw(sf_lines.data(), sf_lines.size(), sf::LineStrip);
+   target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
 }
 
 void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
@@ -209,8 +207,8 @@ void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
       sf::Vertex(DebugDraw::vecB2S(xf.p), sf::Color::Green), sf::Vertex(DebugDraw::vecB2S(y_axis), sf::Color::Green)
    };
 
-   target.draw(line_red, 2, sf::Lines);
-   target.draw(line_green, 2, sf::Lines);
+   target.draw(line_red, 2, sf::PrimitiveType::Lines);
+   target.draw(line_green, 2, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::Color& color, const sf::Color& fill_color)
@@ -223,8 +221,8 @@ void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::
 
 void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, const sf::Color& color, const sf::Color& fill_color)
 {
-   const auto pos = sf::Vector2{static_cast<float>(rect.left), static_cast<float>(rect.top)};
-   const auto size = sf::Vector2f{static_cast<float>(rect.width), static_cast<float>(rect.height)};
+   const auto pos = sf::Vector2{static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)};
+   const auto size = sf::Vector2f{static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)};
 
    sf::RectangleShape rs;
    rs.setSize(size);
@@ -235,8 +233,8 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, cons
 
 void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, const sf::Color& color, const sf::Color& fill_color)
 {
-   const auto pos = sf::Vector2{static_cast<float>(rect.left), static_cast<float>(rect.top)};
-   const auto size = sf::Vector2f{static_cast<float>(rect.width), static_cast<float>(rect.height)};
+   const auto pos = sf::Vector2{static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)};
+   const auto size = sf::Vector2f{static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)};
 
    sf::RectangleShape rs;
    rs.setSize(size);
@@ -250,10 +248,8 @@ sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
    const auto& screen_view = target.getView();
 
    sf::FloatRect screen = {
-      screen_view.getCenter().x - screen_view.getSize().x / 2.0f,
-      screen_view.getCenter().y - screen_view.getSize().y / 2.0f,
-      screen_view.getSize().x,
-      screen_view.getSize().y
+      {screen_view.getCenter().x - screen_view.getSize().x / 2.0f, screen_view.getCenter().y - screen_view.getSize().y / 2.0f},
+      {screen_view.getSize().x, screen_view.getSize().y}
    };
 
    return screen;
@@ -373,10 +369,10 @@ void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
       sf::Vertex{sf::Vector2f{static_cast<float>(target.getSize().x), camera_system.getPanicLineY1()}, sf::Color{0, 50, 255, 100}}
    };
 
-   target.draw(f0, 2, sf::Lines);
-   target.draw(f1, 2, sf::Lines);
-   target.draw(p0, 2, sf::Lines);
-   target.draw(p1, 2, sf::Lines);
+   target.draw(f0, 2, sf::PrimitiveType::Lines);
+   target.draw(f1, 2, sf::PrimitiveType::Lines);
+   target.draw(p0, 2, sf::PrimitiveType::Lines);
+   target.draw(p1, 2, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::debugHitboxes(sf::RenderTarget& target)

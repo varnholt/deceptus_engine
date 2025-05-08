@@ -54,7 +54,7 @@ void ZoomRect::update(const sf::Time& dt)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
    const auto player_position_px = Player::getCurrent()->getPixelPositionFloat();
-   const auto within_rect = (player_rect.intersects(_rect_px));
+   const auto within_rect = (player_rect.findIntersection(_rect_px).has_value());
 
    if (!within_rect)
    {
@@ -122,9 +122,9 @@ void ZoomRect::setup(const GameDeserializeData& data)
    const auto width_px = data._tmx_object->_width_px;
    const auto height_px = data._tmx_object->_height_px;
 
-   _rect_px = sf::FloatRect{x_px, y_px, width_px, height_px};
+   _rect_px = sf::FloatRect{{x_px, y_px}, {width_px, height_px}};
    _center_px = sf::Vector2f{x_px + width_px * 0.5f, y_px + height_px * 0.5f};
-   _radius_px = std::hypot(_rect_px.width / 2.0f, _rect_px.height / 2.0f);
+   _radius_px = std::hypot(_rect_px.size.x / 2.0f, _rect_px.size.y / 2.0f);
 
    if (data._tmx_object->_properties)
    {

@@ -24,8 +24,8 @@ void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, con
    anim->_color_texture = frames._texture;
    anim->setFrameTimes(frames._frame_times);
    anim->setOrigin(frames._origin);
-   anim->setPosition(x, y);
-   anim->setRotation(FACTOR_RAD_TO_DEG * angle);
+   anim->setPosition({x, y});
+   anim->setRotation(sf::radians(angle));
 
    // stay at the last frame when animation is elapsed
    anim->_reset_to_first_frame = false;
@@ -74,12 +74,12 @@ void ProjectileHitAnimation::addReferenceAnimation(const std::string& id, const 
 
 void ProjectileHitAnimation::addReferenceAnimation(
    const std::filesystem::path& texture_path,
-   uint32_t frame_width,
-   uint32_t frame_height,
+   int32_t frame_width,
+   int32_t frame_height,
    const std::chrono::duration<float, std::chrono::seconds::period>& time_per_frame,
-   uint32_t frame_count,
-   uint32_t frames_per_row,
-   uint32_t start_frame
+   int32_t frame_count,
+   int32_t frames_per_row,
+   int32_t start_frame
 )
 {
    auto texture = TexturePool::getInstance().get(texture_path);

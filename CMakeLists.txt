@@ -682,6 +682,7 @@ add_executable(deceptus ${GAME_FILES}
    src/game/mechanisms/ringshaderlayer.h src/game/mechanisms/ringshaderlayer.cpp
    src/game/io/lazytexture.h src/game/io/lazytexture.cpp
    src/game/mechanisms/buttonrect.h src/game/mechanisms/buttonrect.cpp
+   src/game/audio/musicplayer.h src/game/audio/musicplayer.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
@@ -700,7 +701,7 @@ set(SFML_USE_STATIC_STD_LIBS OFF CACHE BOOL "" FORCE)
 set(SFML_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 
 # fetch dependencies
-FetchContent_Declare(SFML GIT_REPOSITORY https://github.com/SFML/SFML.git GIT_TAG 2.6.x)
+FetchContent_Declare(SFML GIT_REPOSITORY https://github.com/SFML/SFML.git GIT_TAG 3.0.x)
 FetchContent_Declare(SDL3 GIT_REPOSITORY https://github.com/libsdl-org/SDL.git GIT_TAG release-3.2.4)
 FetchContent_Declare(LUA GIT_REPOSITORY https://github.com/lua/lua.git GIT_TAG v5.4.7)
 

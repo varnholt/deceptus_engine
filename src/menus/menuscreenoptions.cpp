@@ -10,22 +10,22 @@ MenuScreenOptions::MenuScreenOptions()
 
 void MenuScreenOptions::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (key == sf::Keyboard::Up)
+   if (key == sf::Keyboard::Key::Up)
    {
       up();
    }
 
-   if (key == sf::Keyboard::Down)
+   if (key == sf::Keyboard::Key::Down)
    {
       down();
    }
 
-   if (key == sf::Keyboard::Return)
+   if (key == sf::Keyboard::Key::Enter)
    {
       select();
    }
 
-   if (key == sf::Keyboard::Escape)
+   if (key == sf::Keyboard::Key::Escape)
    {
       back();
    }

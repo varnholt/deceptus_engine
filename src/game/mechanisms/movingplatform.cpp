@@ -43,14 +43,17 @@ void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       color.draw(sprite);
    }
 
-   for (auto& sprite : _sprites)
+   if (_normal_map != nullptr)
    {
-      sprite.setTexture(*_normal_map.get());
-   }
+      for (auto& sprite : _sprites)
+      {
+         sprite.setTexture(*_normal_map.get());
+      }
 
-   for (const auto& sprite : _sprites)
-   {
-      normal.draw(sprite);
+      for (const auto& sprite : _sprites)
+      {
+         normal.draw(sprite);
+      }
    }
 }
 
@@ -180,14 +183,12 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* paren
             while (tile_number != 0)
             {
                const auto tile_id = tile_number - first_id;
-               const auto tu = (tile_id) % (moving_platform->_texture_map->getSize().x / tilesize.x);
-               const auto tv = (tile_id) / (moving_platform->_texture_map->getSize().x / tilesize.x);
+               const int32_t tu = (tile_id) % (moving_platform->_texture_map->getSize().x / tilesize.x);
+               const int32_t tv = (tile_id) / (moving_platform->_texture_map->getSize().x / tilesize.x);
 
-               sf::Sprite sprite;
-               sprite.setTexture(*moving_platform->_texture_map);
-               sprite.setTextureRect(sf::IntRect(tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE, PIXELS_PER_TILE, PIXELS_PER_TILE));
-
-               sprite.setPosition(sf::Vector2f(static_cast<float_t>(x * PIXELS_PER_TILE), static_cast<float_t>(y * PIXELS_PER_TILE)));
+               sf::Sprite sprite(*moving_platform->_texture_map);
+               sprite.setTextureRect({{tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+               sprite.setPosition({static_cast<float_t>(x * PIXELS_PER_TILE), static_cast<float_t>(y * PIXELS_PER_TILE)});
 
                moving_platform->addSprite(sprite);
                moving_platform->_element_count++;
@@ -366,13 +367,10 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
             }
          }
 
-         sf::Sprite sprite;
-         sprite.setTexture(*moving_platform->_texture_map);
+         sf::Sprite sprite(*moving_platform->_texture_map);
          sprite.setTextureRect(sf::IntRect(
-            tu_tl * PIXELS_PER_TILE,
-            tv_tl * PIXELS_PER_TILE,
-            PIXELS_PER_TILE,
-            PIXELS_PER_TILE * 2  // 1 platform tile and one background tile for perspective
+            {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
+            // 1 platform tile and one background tile for perspective
          ));
 
          moving_platform->addSprite(sprite);
@@ -414,10 +412,10 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
       moving_platform->_body->SetTransform(platform_pos_m, 0.0f);
 
       // set up bounding rect
-      moving_platform->_rect.left = platform_x_min_m * PPM;
-      moving_platform->_rect.top = platform_y_min_m * PPM;
-      moving_platform->_rect.width = moving_platform->_element_count * PIXELS_PER_TILE;
-      moving_platform->_rect.height = (platform_y_max_m - platform_y_min_m) * PPM;
+      moving_platform->_rect.position.x = platform_x_min_m * PPM;
+      moving_platform->_rect.position.y = platform_y_min_m * PPM;
+      moving_platform->_rect.size.x = moving_platform->_element_count * PIXELS_PER_TILE;
+      moving_platform->_rect.size.y = (platform_y_max_m - platform_y_min_m) * PPM;
       moving_platform->addChunks(moving_platform->_rect);
    }
 
@@ -576,7 +574,7 @@ void MovingPlatform::update(const sf::Time& dt)
       const auto x = _body->GetPosition().x * PPM + horizontal * sprite_index * PIXELS_PER_TILE;
       const auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
 
-      sprite.setPosition(x, y);
+      sprite.setPosition({x, y});
       auto update_sprite_rect = false;
       auto u = 0;
       auto v = 0;
@@ -617,7 +615,7 @@ void MovingPlatform::update(const sf::Time& dt)
 
       if (update_sprite_rect)
       {
-         sprite.setTextureRect({u, v, PIXELS_PER_TILE, PIXELS_PER_TILE * 2});
+         sprite.setTextureRect({{u, v}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}});
       }
 
       sprite_index++;

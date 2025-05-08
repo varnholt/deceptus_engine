@@ -31,17 +31,17 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    _shader.setUniform("u_resolution", sf::Vector2f(w, h));
 
    sf::Vertex quad[] = {
-      sf::Vertex(sf::Vector2f(x, y), sf::Vector2f(0.0f, _uv_height)),
-      sf::Vertex(sf::Vector2f(x, y + h), sf::Vector2f(0.0f, 0.0f)),
-      sf::Vertex(sf::Vector2f(x + w, y + h), sf::Vector2f(_uv_width, 0.0f)),
-      sf::Vertex(sf::Vector2f(x + w, y), sf::Vector2f(_uv_width, _uv_height))
+      sf::Vertex(sf::Vector2f(x, y), sf::Color::White, sf::Vector2f(0.0f, _uv_height)),
+      sf::Vertex(sf::Vector2f(x, y + h), sf::Color::White, sf::Vector2f(0.0f, 0.0f)),
+      sf::Vertex(sf::Vector2f(x + w, y), sf::Color::White, sf::Vector2f(_uv_width, _uv_height)),
+      sf::Vertex(sf::Vector2f(x + w, y + h), sf::Color::White, sf::Vector2f(_uv_width, 0.0f))
    };
 
    sf::RenderStates states;
    states.shader = &_shader;
    states.blendMode = sf::BlendAlpha;
 
-   target.draw(quad, 4, sf::Quads, states);
+   target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
 }
 
 void ShaderLayer::update(const sf::Time& dt)
@@ -77,7 +77,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    }
 
    const auto bounding_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    instance->_position.x = data._tmx_object->_x_px;
    instance->_position.y = data._tmx_object->_y_px;
@@ -94,7 +94,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
    if (vert_file.has_value())
    {
-      if (!instance->_shader.loadFromFile(vert_file.value(), sf::Shader::Vertex))
+      if (!instance->_shader.loadFromFile(vert_file.value(), sf::Shader::Type::Vertex))
       {
          Log::Error() << "error compiling " << vert_file.value();
       }
@@ -103,7 +103,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
    if (frag_file.has_value())
    {
-      if (!instance->_shader.loadFromFile(frag_file.value(), sf::Shader::Fragment))
+      if (!instance->_shader.loadFromFile(frag_file.value(), sf::Shader::Type::Fragment))
       {
          Log::Error() << "error compiling " << frag_file.value();
       }

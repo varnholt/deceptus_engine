@@ -112,6 +112,28 @@ void logUpdateTimes(const std::unordered_map<std::string, MechanismTiming>& timi
 }  // namespace
 #endif
 
+namespace
+{
+
+bool checkUpdateMechanism(const auto& player_chunk, const auto& mechanism)
+{
+   auto update_mechanism = true;
+   if (mechanism->hasChunks())
+   {
+      const auto& chunks = mechanism->getChunks();
+      update_mechanism = std::any_of(
+         chunks.cbegin(),
+         chunks.cend(),
+         [player_chunk](const Chunk& other)
+         { return (abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X) && (abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y); }
+      );
+   }
+
+   return update_mechanism;
+};
+
+}  // namespace
+
 Level* Level::__current_level = nullptr;
 
 std::string Level::getDescriptionFilename() const
@@ -154,50 +176,19 @@ void Level::initializeTextures()
    const auto texture_width = static_cast<int32_t>(size_ratio * game_config._view_width);
    const auto texture_height = static_cast<int32_t>(size_ratio * game_config._view_height);
 
-   _render_texture_level_background = std::make_shared<sf::RenderTexture>();
-   if (!_render_texture_level_background->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
+   try
    {
-      Log::Fatal() << "failed to create level background texture";
+      const auto texture_size = sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)};
+      _render_texture_level_background = std::make_shared<sf::RenderTexture>(texture_size);
+      _render_texture_level = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
+      _render_texture_lighting = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
+      _render_texture_normal = std::make_shared<sf::RenderTexture>(texture_size);
+      _render_texture_normal_tmp = std::make_shared<sf::RenderTexture>(texture_size);
+      _render_texture_deferred = std::make_shared<sf::RenderTexture>(texture_size);
    }
-
-   _render_texture_level = std::make_shared<sf::RenderTexture>();
-   if (!_render_texture_level->create(
-          static_cast<uint32_t>(texture_width),
-          static_cast<uint32_t>(texture_height),
-          stencil_context_settings  // the lights require stencils
-       ))
+   catch (const std::exception& e)
    {
-      Log::Fatal() << "failed to create level render texture";
-   }
-
-   _render_texture_lighting = std::make_shared<sf::RenderTexture>();
-
-   if (!_render_texture_lighting->create(
-          static_cast<uint32_t>(texture_width),
-          static_cast<uint32_t>(texture_height),
-          stencil_context_settings  // the lights require stencils
-       ))
-   {
-      Log::Fatal() << "failed to create lighting texture";
-   }
-
-   _render_texture_normal = std::make_shared<sf::RenderTexture>();
-   if (!_render_texture_normal->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
-   {
-      Log::Fatal() << "failed to create normal render texture";
-   }
-
-   _render_texture_normal_tmp = std::make_shared<sf::RenderTexture>();
-   if (!_render_texture_normal_tmp->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
-   {
-      Log::Fatal() << "failed to create tmp normal render texture";
-   }
-
-   _render_texture_deferred = std::make_shared<sf::RenderTexture>();
-
-   if (!_render_texture_deferred->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
-   {
-      Log::Fatal() << "failed to create deferred texture";
+      Log::Fatal() << "failed to create render textures: " << e.what();
    }
 
    _atmosphere_shader = std::make_unique<AtmosphereShader>(texture_width, texture_height);
@@ -551,11 +542,8 @@ bool Level::load()
       return false;
    }
 
-   // load tmx
    loadTmx();
 
-   // loading ao
-   Log::Info() << "loading ao... ";
    _ambient_occlusion->load(level_json_path.parent_path(), std::filesystem::path(_description->_filename).stem().string());
 
    Log::Info() << "level loading complete";
@@ -649,16 +637,6 @@ void Level::loadSaveState()
    {
       Log::Error() << "level doesn't have a start check point set up";
    }
-
-   // deserialize mechanisms
-   //
-   //      "levelstate": {
-   //          "data/catacombs/catacombs.tmx": {
-   //              "lever_lever_spike_01": {
-   //                  "state": -1
-   //              }
-   //          }
-   //      },
 
    if (save_state._level_state.is_null())
    {
@@ -792,7 +770,7 @@ void Level::drawStaticChains(sf::RenderTarget& target)
 {
    for (auto& path : _atmosphere._outlines)
    {
-      target.draw(&path.at(0), path.size(), sf::LineStrip);
+      target.draw(&path.at(0), path.size(), sf::PrimitiveType::LineStrip);
    }
 }
 
@@ -810,9 +788,8 @@ void Level::createViews()
    _view_height = static_cast<float>(game_config._view_height);
 
    _level_view.reset();
-   _level_view = std::make_shared<sf::View>();
-   _level_view->reset(sf::FloatRect(0.0f, 0.0f, _view_width, _view_height));
-   _level_view->setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+   _level_view = std::make_shared<sf::View>(sf::FloatRect({0.0f, 0.0f}, {_view_width, _view_height}));
+   _level_view->setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 
    for (auto& parallax_layer : _parallax_layers)
    {
@@ -835,21 +812,21 @@ void Level::updateViews()
    const auto level_view_y = camera_system.getY() + look_vector.y;
 
    auto& zoom = CameraZoom::getInstance();
-   auto view_rect = sf::FloatRect{level_view_x, level_view_y, _view_width, _view_height};
+   auto view_rect = sf::FloatRect{{level_view_x, level_view_y}, {_view_width, _view_height}};
    zoom.adjust(view_rect);
 
    CameraRoomLock::setViewRect(view_rect);
 
-   _level_view->reset(view_rect);
+   _level_view = std::make_shared<sf::View>(view_rect);
 
    for (const auto& parallax : _parallax_layers)
    {
-      parallax->updateView(view_rect.left, view_rect.top, view_rect.width, view_rect.height);
+      parallax->updateView(view_rect.position.x, view_rect.position.y, view_rect.size.x, view_rect.size.y);
    }
 
    for (const auto& image_layer : _image_layers)
    {
-      image_layer->updateView(view_rect.left, view_rect.top, view_rect.width, view_rect.height);
+      image_layer->updateView(view_rect.position.x, view_rect.position.y, view_rect.size.x, view_rect.size.y);
    }
 }
 
@@ -996,24 +973,6 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
    target.setView(*_level_view);
    normal.setView(*_level_view);
 
-   const auto check_draw_mechanism = [&player_chunk](const auto& mechanism) -> bool
-   {
-      if (!mechanism->hasChunks())
-      {
-         return true;
-      }
-
-      const auto& chunks = mechanism->getChunks();
-      const auto draw_mechanism = std::any_of(
-         chunks.cbegin(),
-         chunks.cend(),
-         [player_chunk](const Chunk& other)
-         { return abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X && abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y; }
-      );
-
-      return draw_mechanism;
-   };
-
    for (auto z_index = from; z_index <= to; z_index++)
    {
       PlayerStencil::draw(target, z_index);
@@ -1038,7 +997,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
                continue;
             }
 
-            if (check_draw_mechanism(mechanism))
+            if (checkUpdateMechanism(player_chunk, mechanism))
             {
                mechanism->draw(target, normal);
             }
@@ -1056,7 +1015,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          if (enemy->getZ() == z_index)
          {
-            if (check_draw_mechanism(enemy))
+            if (checkUpdateMechanism(player_chunk, enemy))
             {
                enemy->draw(target, normal);
             }
@@ -1170,10 +1129,10 @@ void Level::displayFinalTextures()
 {
    // display the whole texture
    sf::View view(sf::FloatRect(
-      0.0f, 0.0f, static_cast<float>(_render_texture_level->getSize().x), static_cast<float>(_render_texture_level->getSize().y)
+      {0.0f, 0.0f}, {static_cast<float>(_render_texture_level->getSize().x), static_cast<float>(_render_texture_level->getSize().y)}
    ));
 
-   view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+   view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 
    _render_texture_level->setView(view);
    _render_texture_level->display();
@@ -1333,8 +1292,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    takeScreenshot("texture_level_background_normal", *_render_texture_normal_tmp.get());
 
    // draw the atmospheric parts into the level texture using the atmosphere shader
-   sf::Sprite tmp_sprite;
-   tmp_sprite.setTexture(_render_texture_level_background->getTexture());
+   sf::Sprite tmp_sprite(_render_texture_level_background->getTexture());
    _atmosphere_shader->update();
    _render_texture_level->draw(tmp_sprite, &_atmosphere_shader->getShader());
    takeScreenshot("texture_level_level_dist", *_render_texture_level.get());
@@ -1376,8 +1334,8 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    auto level_texture_sprite = sf::Sprite(_render_texture_deferred->getTexture());
    _gamma_shader->setTexture(_render_texture_deferred->getTexture());
 
-   level_texture_sprite.setPosition(_boom_effect._boom_offset_x, _boom_effect._boom_offset_y);
-   level_texture_sprite.scale(_view_to_texture_scale, _view_to_texture_scale);
+   level_texture_sprite.setPosition({_boom_effect._boom_offset_x, _boom_effect._boom_offset_y});
+   level_texture_sprite.scale({_view_to_texture_scale, _view_to_texture_scale});
 
    _gamma_shader->update();
    window->draw(level_texture_sprite, &_gamma_shader->getGammaShader());
@@ -1429,28 +1387,11 @@ void Level::update(const sf::Time& dt)
 
    const auto& player_chunk = Player::getCurrent()->getChunk();
 
-   const auto check_update_mechanism = [&player_chunk](const auto& mechanism)
-   {
-      auto update_mechanism = true;
-      if (mechanism->hasChunks())
-      {
-         const auto& chunks = mechanism->getChunks();
-         update_mechanism = std::any_of(
-            chunks.cbegin(),
-            chunks.cend(),
-            [player_chunk](const Chunk& other)
-            { return abs(player_chunk._x - other._x) < CHUNK_ALLOWED_DELTA_X && abs(player_chunk._y - other._y) < CHUNK_ALLOWED_DELTA_Y; }
-         );
-      }
-
-      return update_mechanism;
-   };
-
    for (auto* mechanism_vector : _mechanisms_list)
    {
       for (const auto& mechanism : *mechanism_vector)
       {
-         if (check_update_mechanism(mechanism))
+         if (checkUpdateMechanism(player_chunk, mechanism))
          {
 #ifdef MECHANISM_TIMING_ENABLED
             auto game_node = dynamic_cast<GameNode*>(mechanism.get());
@@ -1485,7 +1426,9 @@ void Level::update(const sf::Time& dt)
 
    _level_script.update(dt);
 
-   LuaInterface::instance().update(dt, check_update_mechanism);
+   LuaInterface::instance().update(
+      dt, [&player_chunk](const std::shared_ptr<GameMechanism>& mechanism) { return checkUpdateMechanism(player_chunk, mechanism); }
+   );
 
    updatePlayerLight();
 
@@ -1679,24 +1622,6 @@ void Level::parsePhysicsTiles(
    auto path_solid_optimized = base_path / std::filesystem::path(parse_data->filename_obj_optimized);
 
    Log::Info() << "loading: " << path_solid_optimized.make_preferred().generic_string();
-
-   // no longer needed?
-   // _physics.parse(layer, tileset, base_path);
-
-   // constexpr float scale = 1.0f / 3.0f;
-   // this whole block should be generated by an external tool
-   // right now the squaremarcher output is still used for the in-game map visualization
-   //
-   // SquareMarcher square_marcher(
-   //    _physics._grid_width,
-   //    _physics._grid_height,
-   //    _physics._physics_map,
-   //    parse_data->colliding_tiles,
-   //    base_path / std::filesystem::path(parse_data->filename_physics_path_csv),
-   //    scale
-   // );
-   // square_marcher.writeGridToImage(base_path / std::filesystem::path(parse_data->filename_grid_image));  // not needed
-   // square_marcher.writePathToImage(base_path / std::filesystem::path(parse_data->filename_path_image));  // needed from obj as well
 
    if (std::filesystem::exists(path_solid_optimized))
    {

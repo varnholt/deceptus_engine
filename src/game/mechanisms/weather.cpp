@@ -24,7 +24,7 @@ void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
    }
 
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-   const auto intersects = _rect.intersects(player_rect);
+   const auto intersects = _rect.findIntersection(player_rect).has_value();
    if (intersects)
    {
       _overlay->draw(target, normal);
@@ -78,7 +78,7 @@ bool Weather::matchesRoom() const
 void Weather::update(const sf::Time& dt)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-   const auto intersects = _rect.intersects(player_rect);
+   const auto intersects = _rect.findIntersection(player_rect).has_value();
    updateWaitDelay(dt, intersects);
 
    if (intersects && matchesRoom() && !_wait_until_start_delay_elapsed)
@@ -98,7 +98,7 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
    weather->setObjectId(data._tmx_object->_name);
 
    weather->_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    weather->setZ(static_cast<int32_t>(ZDepth::ForegroundMax));
 
@@ -186,7 +186,7 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
       }
 
       const auto rect =
-         sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+         sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
       auto thunderstorm = std::dynamic_pointer_cast<ThunderstormOverlay>(weather->_overlay);
       thunderstorm->setRect(rect);
