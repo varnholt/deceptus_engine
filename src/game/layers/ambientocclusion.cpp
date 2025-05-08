@@ -20,8 +20,14 @@ constexpr int32_t chunk_range_y_right = 3;
 
 void AmbientOcclusion::load(const std::filesystem::path& path, const std::string& base_filename)
 {
+   Log::Info() << "loading ao: " << path.string() << "/" << base_filename;
+
    _config = Config(path, base_filename);
-   _texture = TexturePool::getInstance().get(_config._texture_filename);
+
+   if (_config._valid)
+   {
+      _texture = TexturePool::getInstance().get(_config._texture_filename);
+   }
 
    if (_texture == nullptr || _texture->getSize().x == 0 || _texture->getSize().y == 0)
    {
@@ -42,6 +48,7 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
 
    std::string line;
    std::ifstream uv_file(_config._uv_filename);
+
    if (!uv_file.is_open())
    {
       return;
@@ -126,6 +133,11 @@ AmbientOcclusion::Config::Config(const std::filesystem::path& path, const std::s
 
    ifs.close();
 
+   if (data.empty())
+   {
+      return;
+   }
+
    // parse json
    nlohmann::json j;
    try
@@ -174,13 +186,18 @@ AmbientOcclusion::Config::Config(const std::filesystem::path& path, const std::s
       _offset_y_px = j.at("offset_y_px").get<int32_t>();
    }
 
-   if (!std::filesystem::exists(_texture_filename))
+   const auto texture_filename_valid = std::filesystem::exists(_texture_filename);
+   const auto uv_filename_valid = std::filesystem::exists(_uv_filename);
+
+   if (!texture_filename_valid)
    {
       Log::Error() << "ambient occlusion texture not found (" << _texture_filename << ")";
    }
 
-   if (!std::filesystem::exists(_uv_filename))
+   if (!uv_filename_valid)
    {
       Log::Error() << "ambient occlusion UV file not found (" << _uv_filename << ")";
    }
+
+   _valid = texture_filename_valid && uv_filename_valid;
 }

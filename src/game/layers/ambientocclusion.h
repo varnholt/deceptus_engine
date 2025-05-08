@@ -27,6 +27,7 @@ public:
       int32_t _z_index{};
       int32_t _offset_x_px{};
       int32_t _offset_y_px{};
+      bool _valid{false};
    };
 
 private:
