@@ -5,6 +5,7 @@
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/audio/audio.h"
+#include "game/audio/musicplayer.h"
 #include "game/camera/camerapanorama.h"
 #include "game/camera/camerasystem.h"
 #include "game/clock/gameclock.h"
@@ -68,25 +69,24 @@ void showGpu()
 
 void showErrorMessage(const std::string& message)
 {
-   sf::RenderWindow window(sf::VideoMode(240, 80), "Error", sf::Style::Titlebar | sf::Style::Close);
+   sf::RenderWindow window(sf::VideoMode({240, 80}), "Error", sf::Style::Titlebar | sf::Style::Close);
 
    sf::Font font;
-   font.loadFromFile("data/fonts/deceptum.ttf");
+   font.openFromFile("data/fonts/deceptum.ttf");
    const_cast<sf::Texture&>(font.getTexture(12)).setSmooth(false);
 
-   sf::Text text;
+   sf::Text text(font);
    text.setFont(font);
    text.setString(message);
    text.setCharacterSize(12);
    text.setFillColor(sf::Color::Black);
-   text.setPosition(30.0f, 30.0f);
+   text.setPosition({30.0f, 30.0f});
 
    while (window.isOpen())
    {
-      sf::Event event;
-      while (window.pollEvent(event))
+      while (const auto event = window.pollEvent())
       {
-         if (event.type == sf::Event::Closed)
+         if (event->is<sf::Event::Closed>())
          {
             window.close();
          }
@@ -207,9 +207,9 @@ void Game::initializeWindow()
 
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
    _window = std::make_shared<sf::RenderWindow>(
-      sf::VideoMode(static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)),
+      sf::VideoMode({static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)}),
       GAME_NAME,
-      game_config._fullscreen ? sf::Style::Fullscreen : sf::Style::Default,
+      game_config._fullscreen ? sf::State::Fullscreen : sf::State::Windowed,
       context_settings
    );
 
@@ -242,14 +242,8 @@ void Game::initializeWindow()
    _render_texture_offset.x = static_cast<uint32_t>((game_config._video_mode_width - texture_width) / 2);
    _render_texture_offset.y = static_cast<uint32_t>((game_config._video_mode_height - texture_height) / 2);
 
-   _window_render_texture = std::make_shared<sf::RenderTexture>();
-
-   if (!_window_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
-   {
-      std::string error = "Failed to create window render texture.";
-      showErrorMessage(error);
-      Log::Fatal() << error;
-   }
+   _window_render_texture =
+      std::make_shared<sf::RenderTexture>(sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)});
 
    Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;
 
@@ -278,21 +272,21 @@ void Game::initializeController()
 
 void Game::playMenuMusic()
 {
-   Audio::getInstance().getMusicPlayer().queueTrack(
+   MusicPlayer::getInstance().queueTrack(
       {.filename = "data/music/menu_test_track_muffler_callisto.ogg",
-       .transition = Audio::TransitionType::Crossfade,
+       .transition = MusicPlayer::TransitionType::Crossfade,
        .duration = std::chrono::milliseconds(1000),
-       .post_action = Audio::PostPlaybackAction::Loop}
+       .post_action = MusicPlayer::PostPlaybackAction::Loop}
    );
 }
 
 void Game::playLevelMusic()
 {
-   Audio::getInstance().getMusicPlayer().queueTrack(
+   MusicPlayer::getInstance().queueTrack(
       {.filename = "data/music/level_test_track_muffler_awakening.ogg",
-       .transition = Audio::TransitionType::Crossfade,
+       .transition = MusicPlayer::TransitionType::Crossfade,
        .duration = std::chrono::milliseconds(1000),
-       .post_action = Audio::PostPlaybackAction::Loop}
+       .post_action = MusicPlayer::PostPlaybackAction::Loop}
    );
 }
 
@@ -341,57 +335,57 @@ void Game::loadLevel(LoadingMode loading_mode)
 
    _info_layer->setLoading(!_level_loading_finished);
 
-   _level_loading_thread = std::async(
-      std::launch::async,
-      [this, loading_mode]()
+   const auto loadLevelFunc = [this, loading_mode]()
+   {
+      _player->resetWorld();  // free the pointer that's shared with the player
+      _level.reset();
+
+      // load level
+      const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
+      _level = std::make_shared<Level>();
+      _level->setDescriptionFilename(level_item._level_name);
+      _level->setLoadingMode(loading_mode);
+      _level->initialize();
+      _level->initializeTextures();
+
+      // put the player in there
+      _player->setWorld(_level->getWorld());
+      _player->initializeLevel();
+
+      // jump back to stored position, that's only for debugging purposes, not for checkpoints
+      if (_restore_previous_position)
       {
-         _player->resetWorld();  // free the pointer that's shared with the player
-         _level.reset();
-
-         // load level
-         const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
-         _level = std::make_shared<Level>();
-         _level->setDescriptionFilename(level_item._level_name);
-         _level->setLoadingMode(loading_mode);
-         _level->initialize();
-         _level->initializeTextures();
-
-         // put the player in there
-         _player->setWorld(_level->getWorld());
-         _player->initializeLevel();
-
-         // jump back to stored position, that's only for debugging purposes, not for checkpoints
-         if (_restore_previous_position)
-         {
-            _restore_previous_position = false;
-            _player->setBodyViaPixelPosition(_stored_position.x, _stored_position.y);
-         }
-
-         _player->updatePixelRect();
-
-         Log::Info() << "level loading finished: " << level_item._level_name;
-
-         _level_loading_finished = true;
-
-         playLevelMusic();
-
-         // before synchronizing the camera with the player position, the camera needs to know its room limitations
-         _level->syncRoom();
-         CameraSystem::getInstance().syncNow();
-
-         GameClock::getInstance().reset();
-
-         _info_layer->setLoading(!_level_loading_finished);
-
-         // notify listeners
-         for (const auto& callback : _level_loaded_callbacks)
-         {
-            callback();
-         }
-
-         _level_loaded_callbacks.clear();
+         _restore_previous_position = false;
+         _player->setBodyViaPixelPosition(_stored_position.x, _stored_position.y);
       }
-   );
+
+      _player->updatePixelRect();
+
+      Log::Info() << "level loading finished: " << level_item._level_name;
+
+      _level_loading_finished = true;
+
+      playLevelMusic();
+
+      // before synchronizing the camera with the player position, the camera needs to know its room limitations
+      _level->syncRoom();
+
+      CameraSystem::getInstance().syncNow();
+      GameClock::getInstance().reset();
+
+      _info_layer->setLoading(!_level_loading_finished);
+
+      // notify listeners
+      for (const auto& callback : _level_loaded_callbacks)
+      {
+         callback();
+      }
+
+      _level_loaded_callbacks.clear();
+   };
+
+   // loadLevelFunc();
+   _level_loading_thread = std::async(std::launch::async, loadLevelFunc);
 }
 
 void Game::nextLevel()
@@ -568,12 +562,12 @@ void Game::draw()
       const auto scale_minimum = std::min(static_cast<int32_t>(scale_x), static_cast<int32_t>(scale_y));
       const auto dx = (scale_x - scale_minimum) * 0.5f;
       const auto dy = (scale_y - scale_minimum) * 0.5f;
-      window_texture_sprite.setPosition(_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy);
-      window_texture_sprite.scale(static_cast<float>(scale_minimum), static_cast<float>(scale_minimum));
+      window_texture_sprite.setPosition({_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy});
+      window_texture_sprite.scale({static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)});
    }
    else
    {
-      window_texture_sprite.setPosition(static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y));
+      window_texture_sprite.setPosition({static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y)});
    }
 
    _window->draw(window_texture_sprite);
@@ -582,7 +576,7 @@ void Game::draw()
 
    if (_recording)
    {
-      const auto image = window_texture_sprite.getTexture()->copyToImage();
+      const auto image = window_texture_sprite.getTexture().copyToImage();
 
       std::thread record(
          [this, image]()
@@ -672,7 +666,6 @@ void Game::menuLoadRequest()
    );
 }
 
-
 void Game::resetAfterDeath(const sf::Time& dt)
 {
    // not great. the screen transitions drive the level loading and game workflow.
@@ -754,7 +747,7 @@ void Game::update()
    _delta_clock.restart();
 
    Timer::update(Timer::Scope::UpdateAlways);
-   Audio::getInstance().getMusicPlayer().update(dt);
+   MusicPlayer::getInstance().update(dt);
    MessageBox::update(dt);
 
    // update screen transitions here
@@ -854,49 +847,45 @@ void Game::takeScreenshot()
 
 void Game::processEvent(const sf::Event& event)
 {
-   if (event.type == sf::Event::Closed)
+   if (event.is<sf::Event::Closed>())
    {
       _window->close();
    }
-   else if (event.type == sf::Event::Resized)
+   else if (auto* resized_event = event.getIf<sf::Event::Resized>())
    {
 #ifdef __linux__
       return;
 #endif
-
       // avoid bad aspect ratios for windowed mode
-      changeResolution(_window->getSize().x, _window->getSize().y);
+      changeResolution(resized_event->size.x, resized_event->size.y);
    }
-   else if (event.type == sf::Event::LostFocus)
+   else if (event.is<sf::Event::FocusLost>())
    {
       if (GameConfiguration::getInstance()._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
       {
-         if (!DisplayMode::getInstance().isSet(Display::IngameMenu)  // the in-game menu is save to leave open when losing the window focus
-             && !Console::getInstance().isActive()                   // while the console is open, don't disturb
-         )
+         // the in-game menu is save to leave open when losing the window focus
+         // while the console is open, don't disturb
+         if (!DisplayMode::getInstance().isSet(Display::IngameMenu) && !Console::getInstance().isActive())
          {
             showPauseMenu();
          }
       }
-      else
+      else if (_player)
       {
-         if (_player)
-         {
-            CameraPanorama::getInstance().updateLookState(Look::Active, false);
-            _player->getControls()->setKeysPressed(0);
-         }
+         CameraPanorama::getInstance().updateLookState(Look::Active, false);
+         _player->getControls()->setKeysPressed(0);
       }
    }
-   else if (event.type == sf::Event::GainedFocus)
+   else if (event.is<sf::Event::FocusGained>())
    {
       if (_player)
       {
          _player->getControls()->forceSync();
       }
    }
-   else if (event.type == sf::Event::KeyPressed)
+   else if (auto* key_pressed_event = event.getIf<sf::Event::KeyPressed>())
    {
-      if (MessageBox::keyboardKeyPressed(event.key.code))
+      if (MessageBox::keyboardKeyPressed(key_pressed_event->code))
       {
          // nom nom nom
          return;
@@ -905,57 +894,50 @@ void Game::processEvent(const sf::Event& event)
       // todo: process keyboard events in the console class, just like done in the message box
       if (!Console::getInstance().isActive())
       {
-         // handle keypress events for the menu
          if (Menu::getInstance()->isVisible())
          {
-            Menu::getInstance()->keyboardKeyPressed(event.key.code);
+            Menu::getInstance()->keyboardKeyPressed(key_pressed_event->code);
             return;
          }
 
-         _player->getControls()->keyboardKeyPressed(event.key.code);
+         _player->getControls()->keyboardKeyPressed(key_pressed_event->code);
       }
 
       // this is the handling of the actual in-game keypress events
-      processKeyPressedEvents(event);
+      processKeyPressedEvents(key_pressed_event);
    }
-   else if (event.type == sf::Event::KeyReleased)
+   else if (auto* key_released_event = event.getIf<sf::Event::KeyReleased>())
    {
       if (Menu::getInstance()->isVisible())
       {
-         Menu::getInstance()->keyboardKeyReleased(event.key.code);
+         Menu::getInstance()->keyboardKeyReleased(key_released_event->code);
          return;
       }
 
-      _player->getControls()->keyboardKeyReleased(event.key.code);
-
-      processKeyReleasedEvents(event);
+      _player->getControls()->keyboardKeyReleased(key_released_event->code);
+      processKeyReleasedEvents(key_released_event);
    }
 
 #ifdef DEVELOPMENT_MODE
-   else if (event.type == sf::Event::TextEntered)
+   else if (auto* text_entered_event = event.getIf<sf::Event::TextEntered>())
    {
-      if (Console::getInstance().isActive())
+      if (Console::getInstance().isActive() && text_entered_event->unicode > 0x1F && text_entered_event->unicode < 0x80)
       {
-         const auto unicode = event.text.unicode;
-         if (unicode > 0x1F && unicode < 0x80)
-         {
-            Console::getInstance().append(static_cast<char>(unicode));
-         }
+         Console::getInstance().append(static_cast<char>(text_entered_event->unicode));
       }
    }
-   else if (event.type == sf::Event::MouseButtonPressed)
+   else if (auto* mouse_button_pressed_event = event.getIf<sf::Event::MouseButtonPressed>())
    {
-      if (event.mouseButton.button == sf::Mouse::Right)
+      if (mouse_button_pressed_event->button == sf::Mouse::Button::Right)
       {
-         const auto mouse_pos_spx = sf::Mouse::getPosition(*_window);
-         const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_spx, *Level::getCurrentLevel()->getLevelView());
+         const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
+         const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *Level::getCurrentLevel()->getLevelView());
          Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
       }
    }
-   else if (event.type == sf::Event::MouseWheelScrolled)
+   else if (auto* mouse_wheel_scrolled_event = event.getIf<sf::Event::MouseWheelScrolled>())
    {
-      const auto delta = event.mouseWheelScroll.delta;
-      Level::getCurrentLevel()->zoomBy(delta);
+      Level::getCurrentLevel()->zoomBy(mouse_wheel_scrolled_event->delta);
    }
 #endif
 
@@ -1003,30 +985,30 @@ void Game::reloadLevel(LoadingMode loading_mode)
    loadLevel(loading_mode);
 }
 
-void Game::processKeyPressedEvents(const sf::Event& event)
+void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
 {
 #ifdef DEVELOPMENT_MODE
    if (Console::getInstance().isActive())
    {
       // these should be moved to the console itself
-      if (event.key.code == sf::Keyboard::Return)
+      if (key_event->code == sf::Keyboard::Key::Enter)
       {
          Console::getInstance().execute();
       }
-      if (event.key.code == sf::Keyboard::F11)
+      if (key_event->code == sf::Keyboard::Key::F11)
       {
          DrawStates::_draw_console = !DrawStates::_draw_console;
          Console::getInstance().setActive(DrawStates::_draw_console);
       }
-      else if (event.key.code == sf::Keyboard::Backspace)
+      else if (key_event->code == sf::Keyboard::Key::Backspace)
       {
          Console::getInstance().chop();
       }
-      else if (event.key.code == sf::Keyboard::Up)
+      else if (key_event->code == sf::Keyboard::Key::Up)
       {
          Console::getInstance().previousCommand();
       }
-      else if (event.key.code == sf::Keyboard::Down)
+      else if (key_event->code == sf::Keyboard::Key::Down)
       {
          Console::getInstance().nextCommand();
       }
@@ -1037,44 +1019,44 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
    if (DisplayMode::getInstance().isSet(Display::IngameMenu))
    {
-      _ingame_menu->processEvent(event);
+      _ingame_menu->processEvent(key_event);
       return;
    }
 
-   CameraPanorama::getInstance().processKeyPressedEvents(event);
+   CameraPanorama::getInstance().processKeyPressedEvents(key_event);
 
-   switch (event.key.code)
+   switch (key_event->code)
    {
-      case sf::Keyboard::F:
+      case sf::Keyboard::Key::F:
       {
          toggleFullScreen();
          break;
       }
-      case sf::Keyboard::I:
-      case sf::Keyboard::Tab:
+      case sf::Keyboard::Key::I:
+      case sf::Keyboard::Key::Tab:
       {
          _ingame_menu->open();
          break;
       }
-      case sf::Keyboard::P:
-      case sf::Keyboard::Escape:
+      case sf::Keyboard::Key::P:
+      case sf::Keyboard::Key::Escape:
       {
          showPauseMenu();
          break;
       }
 
 #ifdef DEVELOPMENT_MODE
-      case sf::Keyboard::F1:
+      case sf::Keyboard::Key::F1:
       {
          DisplayMode::getInstance().enqueueToggle(Display::Debug);
          break;
       }
-      case sf::Keyboard::F2:
+      case sf::Keyboard::Key::F2:
       {
          DrawStates::_draw_controller_overlay = !DrawStates::_draw_controller_overlay;
          break;
       }
-      case sf::Keyboard::F3:
+      case sf::Keyboard::Key::F3:
       {
          DrawStates::_draw_camera_system = !DrawStates::_draw_camera_system;
          if (DrawStates::_draw_camera_system && !_camera_ui)
@@ -1089,16 +1071,16 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
          break;
       }
-      case sf::Keyboard::F4:
+      case sf::Keyboard::Key::F4:
       {
-         if (event.key.alt)
+         if (key_event->alt)
          {
             shutdown();
          }
          DrawStates::_draw_debug_info = !DrawStates::_draw_debug_info;
          break;
       }
-      case sf::Keyboard::F5:
+      case sf::Keyboard::Key::F5:
       {
          DrawStates::_draw_log = !DrawStates::_draw_log;
          if (DrawStates::_draw_log && !_log_ui)
@@ -1113,12 +1095,12 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
          break;
       }
-      case sf::Keyboard::F6:
+      case sf::Keyboard::Key::F6:
       {
          DrawStates::_draw_test_scene = !DrawStates::_draw_test_scene;
          break;
       }
-      case sf::Keyboard::F7:
+      case sf::Keyboard::Key::F7:
       {
          DrawStates::_draw_physics_config = !DrawStates::_draw_physics_config;
          if (DrawStates::_draw_physics_config && !_physics_ui)
@@ -1133,68 +1115,68 @@ void Game::processKeyPressedEvents(const sf::Event& event)
 
          break;
       }
-      case sf::Keyboard::F11:
+      case sf::Keyboard::Key::F11:
       {
          DrawStates::_draw_console = !DrawStates::_draw_console;
          Console::getInstance().setActive(DrawStates::_draw_console);
          break;
       }
-      case sf::Keyboard::PageUp:
+      case sf::Keyboard::Key::PageUp:
       {
          Level::getCurrentLevel()->getLightSystem()->increaseAmbient(0.1f);
          break;
       }
-      case sf::Keyboard::PageDown:
+      case sf::Keyboard::Key::PageDown:
       {
          Level::getCurrentLevel()->getLightSystem()->decreaseAmbient(0.1f);
          break;
       }
-      case sf::Keyboard::L:
+      case sf::Keyboard::Key::L:
       {
          reloadLevel();
          break;
       }
-      case sf::Keyboard::M:
+      case sf::Keyboard::Key::M:
       {
          _recording = !_recording;
          break;
       }
-      case sf::Keyboard::N:
+      case sf::Keyboard::Key::N:
       {
          nextLevel();
          break;
       }
-      case sf::Keyboard::Q:
+      case sf::Keyboard::Key::Q:
       {
          shutdown();
          break;
       }
-      case sf::Keyboard::R:
+      case sf::Keyboard::Key::R:
       {
          reset();
          break;
       }
-      case sf::Keyboard::S:
+      case sf::Keyboard::Key::S:
       {
          takeScreenshot();
          break;
       }
-      case sf::Keyboard::V:
+      case sf::Keyboard::Key::V:
       {
          _player->setVisible(!_player->getVisible());
          break;
       }
-      case sf::Keyboard::Num1:
+      case sf::Keyboard::Key::Num1:
       {
          Level::getCurrentLevel()->zoomIn();
          break;
       }
-      case sf::Keyboard::Num2:
+      case sf::Keyboard::Key::Num2:
       {
          Level::getCurrentLevel()->zoomOut();
          break;
       }
-      case sf::Keyboard::Num3:
+      case sf::Keyboard::Key::Num3:
       {
          Level::getCurrentLevel()->zoomReset();
          break;
@@ -1208,18 +1190,17 @@ void Game::processKeyPressedEvents(const sf::Event& event)
    }
 }
 
-void Game::processKeyReleasedEvents(const sf::Event& event)
+void Game::processKeyReleasedEvents(const sf::Event::KeyReleased* event)
 {
    CameraPanorama::getInstance().processKeyReleasedEvents(event);
 }
 
 void Game::processEvents()
 {
-   sf::Event event;
-   while (_window->pollEvent(event))
+   while (const auto event = _window->pollEvent())
    {
-      processEvent(event);
-      EventSerializer::getInstance().add(event);
+      processEvent(event.value());
+      EventSerializer::getInstance().add(event.value());
    }
 
    if (DrawStates::_draw_physics_config)

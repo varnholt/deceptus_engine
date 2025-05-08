@@ -23,7 +23,7 @@ private:
    // rendering
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
-   sf::Sprite _sprite;
+   std::unique_ptr<sf::Sprite> _sprite;
    sf::FloatRect _rectangle;
 
    // physics

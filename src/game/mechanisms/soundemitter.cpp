@@ -68,7 +68,7 @@ std::shared_ptr<SoundEmitter> SoundEmitter::deserialize(GameNode* parent, const 
    instance->_size.y = data._tmx_object->_height_px;
    instance->setObjectId(data._tmx_object->_name);
    instance->_rect =
-      sf::FloatRect{data._tmx_object->_x_px, data._tmx_object->_y_px, data._tmx_object->_width_px, data._tmx_object->_height_px};
+      sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    // deserialize range data
    if (data._tmx_object->_properties)

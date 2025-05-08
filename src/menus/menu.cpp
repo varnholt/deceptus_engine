@@ -74,7 +74,7 @@ void Menu::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto h = game_config._view_height;
 
    // set up an ortho view with screen dimensions
-   sf::View view(sf::FloatRect(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)));
+   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
 
    window.setView(view);
 
@@ -264,19 +264,19 @@ void Menu::initialize()
          up._axis = SDL_GAMEPAD_AXIS_LEFTY;
          up._boundary = GameController::ThresholdCallback::Boundary::Lower;
          up._threshold = -0.3f;
-         up._callback = [this]() { keyboardKeyPressed(sf::Keyboard::Up); };
+         up._callback = [this]() { keyboardKeyPressed(sf::Keyboard::Key::Up); };
          gci.getController()->addAxisThresholdExceedCallback(up);
 
          GameController::ThresholdCallback down;
          down._axis = SDL_GAMEPAD_AXIS_LEFTY;
-         down._callback = [this]() { keyboardKeyPressed(sf::Keyboard::Down); };
+         down._callback = [this]() { keyboardKeyPressed(sf::Keyboard::Key::Down); };
          down._boundary = GameController::ThresholdCallback::Boundary::Upper;
          down._threshold = 0.3f;
          gci.getController()->addAxisThresholdExceedCallback(down);
 
          GameController::ThresholdCallback left;
          left._axis = SDL_GAMEPAD_AXIS_LEFTX;
-         left._callback = [this]() { keyboardKeyPressed(sf::Keyboard::Left); };
+         left._callback = [this]() { keyboardKeyPressed(sf::Keyboard::Key::Left); };
          left._boundary = GameController::ThresholdCallback::Boundary::Lower;
          left._threshold = -0.3f;
          gci.getController()->addAxisThresholdExceedCallback(left);
@@ -285,17 +285,25 @@ void Menu::initialize()
          right._axis = SDL_GAMEPAD_AXIS_LEFTX;
          right._boundary = GameController::ThresholdCallback::Boundary::Upper;
          right._threshold = 0.3f;
-         right._callback = [this]() { keyboardKeyPressed(sf::Keyboard::Right); };
+         right._callback = [this]() { keyboardKeyPressed(sf::Keyboard::Key::Right); };
          gci.getController()->addAxisThresholdExceedCallback(right);
 
-         gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_DPAD_UP, [this]() { keyboardKeyPressed(sf::Keyboard::Up); });
-         gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_DPAD_DOWN, [this]() { keyboardKeyPressed(sf::Keyboard::Down); });
-         gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_DPAD_LEFT, [this]() { keyboardKeyPressed(sf::Keyboard::Left); });
+         gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_DPAD_UP, [this]() { keyboardKeyPressed(sf::Keyboard::Key::Up); });
          gci.getController()->addButtonPressedCallback(
-            SDL_GAMEPAD_BUTTON_DPAD_RIGHT, [this]() { keyboardKeyPressed(sf::Keyboard::Right); }
+            SDL_GAMEPAD_BUTTON_DPAD_DOWN, [this]() { keyboardKeyPressed(sf::Keyboard::Key::Down); }
          );
-         gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_SOUTH, [this]() { keyboardKeyPressed(sf::Keyboard::Return); });
-         gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_EAST, [this]() { keyboardKeyPressed(sf::Keyboard::Escape); });
+         gci.getController()->addButtonPressedCallback(
+            SDL_GAMEPAD_BUTTON_DPAD_LEFT, [this]() { keyboardKeyPressed(sf::Keyboard::Key::Left); }
+         );
+         gci.getController()->addButtonPressedCallback(
+            SDL_GAMEPAD_BUTTON_DPAD_RIGHT, [this]() { keyboardKeyPressed(sf::Keyboard::Key::Right); }
+         );
+         gci.getController()->addButtonPressedCallback(
+            SDL_GAMEPAD_BUTTON_SOUTH, [this]() { keyboardKeyPressed(sf::Keyboard::Key::Enter); }
+         );
+         gci.getController()->addButtonPressedCallback(
+            SDL_GAMEPAD_BUTTON_EAST, [this]() { keyboardKeyPressed(sf::Keyboard::Key::Escape); }
+         );
          gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_WEST, [this]() { controllerButtonX(); });
          gci.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_NORTH, [this]() { controllerButtonY(); });
       }

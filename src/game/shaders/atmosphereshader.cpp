@@ -6,7 +6,12 @@
 
 AtmosphereShader::AtmosphereShader(uint32_t texture_width, uint32_t texture_height) : _render_texture(std::make_shared<sf::RenderTexture>())
 {
-   if (!_render_texture->create(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)))
+   try
+   {
+      _render_texture =
+         std::make_unique<sf::RenderTexture>(sf::Vector2u(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)));
+   }
+   catch (...)
    {
       Log::Fatal() << "failed to create texture";
    }
@@ -19,7 +24,7 @@ AtmosphereShader::~AtmosphereShader()
 
 void AtmosphereShader::initialize()
 {
-   if (!_shader.loadFromFile("data/shaders/water.frag", sf::Shader::Fragment))
+   if (!_shader.loadFromFile("data/shaders/water.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading water shader";
       return;

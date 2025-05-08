@@ -45,10 +45,10 @@ private:
    void drawChain(sf::RenderTarget& window);
 
    std::shared_ptr<sf::Texture> _texture;
-   sf::Sprite _spike_sprite;
-   sf::Sprite _box_sprite;
-   sf::Sprite _chain_element_a;
-   sf::Sprite _chain_element_b;
+   std::unique_ptr<sf::Sprite> _spike_sprite;
+   std::unique_ptr<sf::Sprite> _box_sprite;
+   std::unique_ptr<sf::Sprite> _chain_element_a;
+   std::unique_ptr<sf::Sprite> _chain_element_b;
 
    sf::Vector2i _pixel_position;
    sf::FloatRect _rect;

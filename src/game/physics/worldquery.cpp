@@ -58,7 +58,8 @@ std::vector<WorldQuery::CollidedNode> WorldQuery::findNodesByHitbox(const sf::Fl
    for (const auto& node : nodes)
    {
       if (auto intersecting_hitbox = std::ranges::find_if(
-             node->_hitboxes, [&search_rect](const auto& hit_box) { return hit_box.getRectTranslated().intersects(search_rect); }
+             node->_hitboxes,
+             [&search_rect](const auto& hit_box) { return hit_box.getRectTranslated().findIntersection(search_rect).has_value(); }
           );
           intersecting_hitbox != node->_hitboxes.end())
       {
@@ -82,7 +83,8 @@ std::vector<WorldQuery::CollidedNode> WorldQuery::findNodesByHitbox(const std::v
              [&attack_rects](const auto& hit_box)
              {
                 return std::ranges::any_of(
-                   attack_rects, [&hit_box](const auto& attack_rect) { return hit_box.getRectTranslated().intersects(attack_rect); }
+                   attack_rects,
+                   [&hit_box](const auto& attack_rect) { return hit_box.getRectTranslated().findIntersection(attack_rect).has_value(); }
                 );
              }
           );
@@ -103,10 +105,10 @@ std::vector<b2Body*> WorldQuery::retrieveBodiesInsideRect(
 {
    b2AABB aabb;
 
-   const auto l = rect.left;
-   const auto r = rect.left + rect.width;
-   const auto t = rect.top;
-   const auto b = rect.top + rect.height;
+   const auto l = rect.position.x;
+   const auto r = rect.position.x + rect.size.x;
+   const auto t = rect.position.y;
+   const auto b = rect.position.y + rect.size.y;
 
    aabb.upperBound = vecS2B({std::max(l, r), std::max(b, t)});
    aabb.lowerBound = vecS2B({std::min(l, r), std::min(b, t)});
@@ -237,8 +239,8 @@ std::vector<sf::FloatRect> WorldQuery::OctreeNode::collectLeafBounds(int32_t dep
 void WorldQuery::OctreeNode::subdivide(const std::shared_ptr<b2World>& world, int32_t depth, int32_t max_depth)
 {
    // use half sizes
-   const auto half_width = _boundaries.width / 2.0f;
-   const auto half_height = _boundaries.height / 2.0f;
+   const auto half_width = _boundaries.size.x / 2.0f;
+   const auto half_height = _boundaries.size.y / 2.0f;
 
    std::array<sf::Vector2f, 4> offsets = {
       sf::Vector2f(0, 0),                    // top-left
@@ -250,10 +252,10 @@ void WorldQuery::OctreeNode::subdivide(const std::shared_ptr<b2World>& world, in
    for (int32_t i = 0; i < 4; ++i)
    {
       sf::FloatRect child_bounds(
-         _boundaries.left + offsets[i].x,  // x-coordinate of top-left corner
-         _boundaries.top + offsets[i].y,   // y-coordinate of top-left corner
-         half_width,                       // width of the child rectangle
-         half_height                       // height of the child rectangle
+         {_boundaries.position.x + offsets[i].x,   // x-coordinate of top-left corner
+          _boundaries.position.y + offsets[i].y},  // y-coordinate of top-left corner
+         {half_width,                              // width of the child rectangle
+          half_height}                             // height of the child rectangle
       );
 
       _children[i] = std::make_unique<OctreeNode>(child_bounds, world, depth, max_depth, _ignore_list);
