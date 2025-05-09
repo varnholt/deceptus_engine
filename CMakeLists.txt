@@ -683,6 +683,7 @@ add_executable(deceptus ${GAME_FILES}
    src/game/io/lazytexture.h src/game/io/lazytexture.cpp
    src/game/mechanisms/buttonrect.h src/game/mechanisms/buttonrect.cpp
    src/game/audio/musicplayer.h src/game/audio/musicplayer.cpp
+   src/game/mechanisms/gamemechanismdeserializerregistry.h src/game/mechanisms/gamemechanismdeserializerregistry.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
