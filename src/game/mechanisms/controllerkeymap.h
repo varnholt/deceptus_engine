@@ -2,6 +2,7 @@
 #define CONTROLLERKEYMAP_H
 
 #include <array>
+#include <cstdint>
 #include <map>
 #include <string>
 #include <utility>
