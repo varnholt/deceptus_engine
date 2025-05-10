@@ -1,4 +1,6 @@
 #include "lazytexture.h"
+
+#include <algorithm>
 #include <ranges>
 #include <stop_token>
 #include "framework/tools/log.h"

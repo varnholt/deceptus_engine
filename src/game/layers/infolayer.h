@@ -9,6 +9,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
+#include <atomic>
 #include <memory>
 
 class InfoLayer
