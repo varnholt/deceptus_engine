@@ -689,7 +689,7 @@ void InGameMenuInventory::show()
       }
    };
 
-   EventDistributor::registerEvent<sf::Event::KeyPressed>(_keyboard_event_handler);
+   _keyboard_event_handler_id = EventDistributor::registerEvent<sf::Event::KeyPressed>(_keyboard_event_handler);
 
    const auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())
@@ -706,7 +706,11 @@ void InGameMenuInventory::show()
 
 void InGameMenuInventory::hide()
 {
-   EventDistributor::unregisterEvent(_keyboard_event_handler);
+   if (_keyboard_event_handler_id.has_value())
+   {
+      EventDistributor::unregisterEvent<sf::Event::KeyPressed>(_keyboard_event_handler_id.value());
+      _keyboard_event_handler_id.reset();
+   }
 
    const auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())

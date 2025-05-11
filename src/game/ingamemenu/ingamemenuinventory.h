@@ -118,6 +118,7 @@ private:
 
    using EventCallback = std::function<void(const sf::Event&)>;
    EventCallback _keyboard_event_handler;
+   std::optional<int32_t> _keyboard_event_handler_id;
 };
 
 #endif  // INGAMEMENUINVENTORY_H
