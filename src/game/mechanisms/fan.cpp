@@ -7,10 +7,25 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 #include <algorithm>
 #include <array>
 #include <iostream>
+
+namespace
+{
+const auto registered = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "fans", [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms) { Fan::addObject(parent, data); }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "fan", [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms) { Fan::addObject(parent, data); }
+   );
+   return true;
+}();
+}  // namespace
 
 std::vector<std::shared_ptr<GameMechanism>> Fan::__fan_instances;
 std::vector<std::shared_ptr<Fan::FanTile>> Fan::__tile_instances;

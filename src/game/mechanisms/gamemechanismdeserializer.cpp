@@ -23,6 +23,7 @@
 #include "game/mechanisms/extra.h"
 #include "game/mechanisms/fan.h"
 #include "game/mechanisms/fireflies.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/infooverlay.h"
 #include "game/mechanisms/interactionhelp.h"
 #include "game/mechanisms/laser.h"
@@ -109,6 +110,55 @@ void GameMechanismDeserializer::deserialize(
    auto* mechanism_water_surface = mechanisms[std::string{layer_name_weather}];
    auto* mechanism_zoom_rects = mechanisms[std::string{layer_name_zoom_rects}];
 
+   // suggested approach to deserialize mechanisms
+   const auto& elements = tmx_parser.getElements();
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   std::ranges::for_each(
+      elements,
+      [&](const auto& element)
+      {
+         data._tmx_layer = nullptr;
+         data._tmx_tileset = nullptr;
+         data._tmx_object = nullptr;
+         data._tmx_object_group = nullptr;
+
+         if (element->_type == TmxElement::Type::TypeLayer)
+         {
+            auto layer = std::dynamic_pointer_cast<TmxLayer>(element);
+            data._tmx_layer = layer;
+            data._tmx_tileset = tmx_parser.getTileSet(layer);
+
+            if (auto initializer_function = registry.getForLayer(layer->_name))
+            {
+               std::invoke(*initializer_function, parent, data, mechanisms);
+            }
+         }
+         else if (element->_type == TmxElement::Type::TypeObjectGroup)
+         {
+            auto group = std::dynamic_pointer_cast<TmxObjectGroup>(element);
+
+            std::ranges::for_each(
+               group->_objects,
+               [&](const auto& pair)
+               {
+                  const auto& obj = pair.second;
+                  data._tmx_object = obj;
+                  data._tmx_object_group = group;
+
+                  const auto& key = obj->_template_type.value_or(group->_name);
+
+                  if (auto initializer_function = registry.getForTemplateType(key))
+                  {
+                     std::invoke(*initializer_function, parent, data, mechanisms);
+                  }
+               }
+            );
+         }
+      }
+   );
+
+   // deprecated approach to deserialize mechanisms
    for (const auto& element : tmx_parser.getElements())
    {
       data._tmx_layer = nullptr;
