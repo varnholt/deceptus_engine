@@ -110,6 +110,7 @@ void GameMechanismDeserializer::deserialize(
    auto* mechanism_water_surface = mechanisms[std::string{layer_name_weather}];
    auto* mechanism_zoom_rects = mechanisms[std::string{layer_name_zoom_rects}];
 
+   // suggested approach to deserialize mechanisms
    const auto& elements = tmx_parser.getElements();
    auto& registry = GameMechanismDeserializerRegistry::instance();
 
@@ -157,6 +158,7 @@ void GameMechanismDeserializer::deserialize(
       }
    );
 
+   // deprecated approach to deserialize mechanisms
    for (const auto& element : tmx_parser.getElements())
    {
       data._tmx_layer = nullptr;
