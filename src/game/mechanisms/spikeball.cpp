@@ -10,7 +10,34 @@
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
+
+namespace
+{
+const auto registered_spikeball = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "spike_balls",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<SpikeBall>(parent);
+         mechanism->setup(data);
+         mechanisms["spike_balls"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "SpikeBall",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<SpikeBall>(parent);
+         mechanism->setup(data);
+         mechanisms["spike_balls"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

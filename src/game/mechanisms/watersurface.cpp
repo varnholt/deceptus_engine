@@ -6,9 +6,34 @@
 #include "framework/tools/log.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
 #include <iostream>
+
+namespace
+{
+const auto registered_watersurface = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "water_surface",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<WaterSurface>(parent, data);
+         mechanisms["water_surface"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "WaterSurface",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<WaterSurface>(parent, data);
+         mechanisms["water_surface"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

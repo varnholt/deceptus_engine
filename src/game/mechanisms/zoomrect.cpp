@@ -4,7 +4,34 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/camera/camerazoom.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
+
+namespace
+{
+const auto registered_zoomrect = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "zoom_rects",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<ZoomRect>(parent);
+         mechanism->setup(data);
+         mechanisms["zoom_rects"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "ZoomRect",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<ZoomRect>(parent);
+         mechanism->setup(data);
+         mechanisms["zoom_rects"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

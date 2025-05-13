@@ -7,6 +7,7 @@
 #include "framework/tools/globalclock.h"
 #include "game/io/texturepool.h"
 #include "game/level/level.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
 #include <iostream>
@@ -17,6 +18,30 @@
 #ifdef DEBUG_COLLISION_RECTS
 #include "debugdraw.h"
 #endif
+
+namespace
+{
+const auto registered_bubblecube = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "bubble_cubes",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<BubbleCube>(parent, data);
+         mechanisms["bubble_cubes"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "BubbleCube",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<BubbleCube>(parent, data);
+         mechanisms["bubble_cubes"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

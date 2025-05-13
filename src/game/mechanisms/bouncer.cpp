@@ -6,6 +6,7 @@
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/bouncerwrapper.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
 const auto SPRITE_WIDTH = 24;
@@ -23,6 +24,30 @@ const auto SPRITE_HEIGHT = 24;
 //        |                                                  |
 //        +--------------------------------------------------+
 //
+
+namespace
+{
+const auto registered_bouncer = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "bouncers",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Bouncer>(parent, data);
+         mechanisms["bouncers"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "Bouncer",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Bouncer>(parent, data);
+         mechanisms["bouncers"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 b2Body* Bouncer::getBody() const
 {

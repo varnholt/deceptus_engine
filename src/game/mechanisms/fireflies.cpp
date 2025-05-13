@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 namespace
 {
@@ -13,6 +14,32 @@ constexpr auto ANIMATION_SPEED = 3.0f;
 }  // namespace
 
 // #define DEBUG_RECT 1
+
+namespace
+{
+const auto registered_fireflies = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "fireflies",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Fireflies>(parent);
+         mechanism->deserialize(data);
+         mechanisms["fireflies"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "Fireflies",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Fireflies>(parent);
+         mechanism->deserialize(data);
+         mechanisms["fireflies"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 Fireflies::Fireflies(GameNode* parent) : GameNode(parent)
 {

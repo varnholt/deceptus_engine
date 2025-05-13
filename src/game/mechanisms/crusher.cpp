@@ -10,8 +10,35 @@
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
 #include "game/level/roomupdater.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 int32_t Crusher::__instance_counter = 0;
+
+namespace
+{
+const auto registered_crusher = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "crushers",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Crusher>(parent);
+         mechanism->setup(data);
+         mechanisms["crushers"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "Crusher",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Crusher>(parent);
+         mechanism->setup(data);
+         mechanisms["crushers"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {
