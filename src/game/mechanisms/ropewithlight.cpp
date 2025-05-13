@@ -5,6 +5,33 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "game/io/valuereader.h"
 #include "game/level/level.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+namespace
+{
+const auto registered_ropewithlight = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "ropes_with_light",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<RopeWithLight>(parent);
+         mechanism->setup(data);
+         mechanisms["ropes_with_light"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "RopeWithLight",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<RopeWithLight>(parent);
+         mechanism->setup(data);
+         mechanisms["ropes_with_light"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 RopeWithLight::RopeWithLight(GameNode* parent) : Rope(parent)
 {

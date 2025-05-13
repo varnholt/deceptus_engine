@@ -9,7 +9,34 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/controllerkeymap.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
+
+namespace
+{
+const auto registered_interactionhelp = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "interaction_help",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<InteractionHelp>(parent);
+         mechanism->deserialize(data);
+         mechanisms["interaction_help"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "InteractionHelp",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<InteractionHelp>(parent);
+         mechanism->deserialize(data);
+         mechanisms["interaction_help"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
 {

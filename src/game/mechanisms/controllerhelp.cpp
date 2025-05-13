@@ -10,6 +10,7 @@
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/controllerkeymap.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
 // clang-format off
@@ -27,6 +28,32 @@
 // 8 |bt_l_u   |bt_l_d |bt_l_l |bt_l_r   |bt_l_u_d|bt_l_l_r|key_door  |     |     |            |             |              |             |     |      |     |
 //   +---------+-------+-------+---------+--------+--------+----------+-----+-----+------------+-------------+--------------+-------------+-----+------+-----+
 // clang-format on
+
+namespace
+{
+const auto registered_controllerhelp = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "controller_help",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<ControllerHelp>(parent);
+         mechanism->deserialize(data);
+         mechanisms["controller_help"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "ControllerHelp",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<ControllerHelp>(parent);
+         mechanism->deserialize(data);
+         mechanisms["controller_help"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

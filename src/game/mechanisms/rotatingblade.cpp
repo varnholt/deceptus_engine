@@ -9,9 +9,36 @@
 #include "game/audio/audio.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
 // #define DEBUG_INTERSECTION
+
+namespace
+{
+const auto registered_rotatingblade = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "rotating_blades",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<RotatingBlade>(parent);
+         mechanism->setup(data);
+         mechanisms["rotating_blades"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "RotatingBlade",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<RotatingBlade>(parent);
+         mechanism->setup(data);
+         mechanisms["rotating_blades"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
 {

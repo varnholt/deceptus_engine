@@ -7,7 +7,34 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/extrawrapper.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
+
+namespace
+{
+const auto registered_treasurechest = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "treasure_chests",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<TreasureChest>(parent);
+         mechanism->deserialize(data);
+         mechanisms["treasure_chests"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "TreasureChest",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<TreasureChest>(parent);
+         mechanism->deserialize(data);
+         mechanisms["treasure_chests"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 TreasureChest::TreasureChest(GameNode* parent) : GameNode(parent)
 {

@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 /*
 
@@ -18,6 +19,32 @@
    |024|025|026|027|028|029|030|031| invisible again
    +---+---+---+---+---+---+---+---+
 */
+
+namespace
+{
+const auto registered_onoffblock = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "on_off_blocks",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<OnOffBlock>(parent);
+         mechanism->setup(data);
+         mechanisms["on_off_blocks"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "OnOffBlock",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<OnOffBlock>(parent);
+         mechanism->setup(data);
+         mechanisms["on_off_blocks"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

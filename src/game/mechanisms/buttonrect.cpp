@@ -1,8 +1,35 @@
 #include "buttonrect.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/gamemechanismobserver.h"
 #include "game/player/player.h"
+
+namespace
+{
+const auto registered_buttonrect = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "button_rects",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<ButtonRect>(parent);
+         mechanism->setup(data);
+         mechanisms["button_rects"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "ButtonRect",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<ButtonRect>(parent);
+         mechanism->setup(data);
+         mechanisms["button_rects"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 ButtonRect::ButtonRect(GameNode* parent) : GameNode(parent)
 {

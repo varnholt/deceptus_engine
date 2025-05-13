@@ -9,6 +9,7 @@
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
 #include "game/level/level.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 #include "game/state/savestate.h"
 
@@ -37,6 +38,30 @@
    tic is column 3 (left)
    toc is column 9 (right)
 */
+
+namespace
+{
+const auto registered_checkpoint = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "checkpoints",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = Checkpoint::deserialize(parent, data);
+         mechanisms["checkpoints"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "CheckPoint",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = Checkpoint::deserialize(parent, data);
+         mechanisms["checkpoints"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {
