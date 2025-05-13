@@ -2,7 +2,34 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
+
+namespace
+{
+const auto registered_sensorrect = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "sensor_rects",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<SensorRect>(parent);
+         mechanism->setup(data);
+         mechanisms["sensor_rects"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "SensorRect",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<SensorRect>(parent);
+         mechanism->setup(data);
+         mechanisms["sensor_rects"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 SensorRect::SensorRect(GameNode* parent) : GameNode(parent)
 {

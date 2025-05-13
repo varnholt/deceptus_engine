@@ -6,8 +6,33 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/config/gameconfiguration.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 // #include <iostream>
+
+namespace
+{
+const auto registered_infooverlay = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "info_overlays",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = InfoOverlay::setup(parent, data);
+         mechanisms["info_overlays"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "InfoOverlay",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = InfoOverlay::setup(parent, data);
+         mechanisms["info_overlays"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 InfoOverlay::InfoOverlay(GameNode* parent) : GameNode(parent)
 {

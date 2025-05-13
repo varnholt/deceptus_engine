@@ -11,7 +11,32 @@
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
+
+namespace
+{
+const auto registered_collapsingplatform = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "collapsing_platforms",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<CollapsingPlatform>(parent, data);
+         mechanisms["collapsing_platforms"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "CollapsingPlatform",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<CollapsingPlatform>(parent, data);
+         mechanisms["collapsing_platforms"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

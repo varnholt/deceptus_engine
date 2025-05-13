@@ -5,8 +5,33 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 #include <iostream>
+
+namespace
+{
+const auto registered_conveyorbelt = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "conveyorbelts",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<ConveyorBelt>(parent, data);
+         mechanisms["conveyorbelts"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "ConveyorBelt",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<ConveyorBelt>(parent, data);
+         mechanisms["conveyorbelts"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

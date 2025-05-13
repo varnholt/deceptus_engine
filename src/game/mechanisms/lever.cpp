@@ -7,8 +7,35 @@
 #include "game/audio/audio.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 #include "game/state/savestate.h"
+
+namespace
+{
+const auto registered_lever = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "levers",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Lever>(parent);
+         mechanism->setup(data);
+         mechanisms["levers"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "Lever",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Lever>(parent);
+         mechanism->setup(data);
+         mechanisms["levers"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

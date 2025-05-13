@@ -6,6 +6,31 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+namespace
+{
+const auto registered_dust = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "dust",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = Dust::deserialize(parent, data);
+         mechanisms["dust"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "Dust",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = Dust::deserialize(parent, data);
+         mechanisms["dust"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 Dust::Dust(GameNode* parent) : GameNode(parent)
 {

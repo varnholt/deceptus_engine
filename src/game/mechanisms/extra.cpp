@@ -7,6 +7,7 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 #include "game/player/playercontrols.h"
 #include "game/player/playerinfo.h"
@@ -16,6 +17,32 @@
 #ifdef DRAW_DEBUG
 #include "game/debugdraw.h"
 #endif
+
+namespace
+{
+const auto registered_extra = []
+{
+   GameMechanismDeserializerRegistry::instance().registerLayer(
+      "extras",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Extra>(parent);
+         mechanism->deserialize(data);
+         mechanisms["extras"]->push_back(mechanism);
+      }
+   );
+   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+      "Extra",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Extra>(parent);
+         mechanism->deserialize(data);
+         mechanisms["extras"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 Extra::Extra(GameNode* parent) : GameNode(parent)
 {
