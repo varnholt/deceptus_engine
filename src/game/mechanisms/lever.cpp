@@ -15,15 +15,15 @@ namespace
 {
 const auto registered_lever = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
-      "levers",
-      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
-      {
-         auto mechanism = std::make_shared<Lever>(parent);
-         mechanism->setup(data);
-         mechanisms["levers"]->push_back(mechanism);
-      }
-   );
+   // GameMechanismDeserializerRegistry::instance().registerLayer(
+   //    "levers",
+   //    [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+   //    {
+   //       auto mechanism = std::make_shared<Lever>(parent);
+   //       mechanism->setup(data);
+   //       mechanisms["levers"]->push_back(mechanism);
+   //    }
+   // );
    GameMechanismDeserializerRegistry::instance().registerTemplateType(
       "Lever",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
@@ -47,6 +47,11 @@ constexpr auto idle_animation_speed = 10.0f;
 
 void Lever::setup(const GameDeserializeData& data)
 {
+   if (data._tmx_object == nullptr)
+   {
+      return;
+   }
+
    if (data._tmx_object->_properties)
    {
       const auto z_it = data._tmx_object->_properties->_map.find("z");
