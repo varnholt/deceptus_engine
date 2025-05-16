@@ -14,7 +14,10 @@ namespace
 {
 const auto registered_infooverlay = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("InfoOverlay", "info_overlays");
+
+   registry.registerLayerName(
       "info_overlays",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -22,7 +25,7 @@ const auto registered_infooverlay = []
          mechanisms["info_overlays"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "InfoOverlay",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

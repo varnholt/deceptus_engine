@@ -22,7 +22,10 @@ namespace
 {
 const auto registered_extra = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Extra", "extras");
+
+   registry.registerLayerName(
       "extras",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -31,7 +34,7 @@ const auto registered_extra = []
          mechanisms["extras"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "Extra",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

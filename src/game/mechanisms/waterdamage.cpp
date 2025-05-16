@@ -8,7 +8,10 @@ namespace
 {
 const auto registered_waterdamage = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("WaterDamage", "water_damage");
+
+   registry.registerLayerName(
       "water_damage",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -17,7 +20,7 @@ const auto registered_waterdamage = []
          mechanisms["water_damage"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "WaterDamage",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

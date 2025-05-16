@@ -9,7 +9,10 @@ namespace
 {
 const auto registered_enemywall = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("EnemyWall", "enemy_walls");
+
+   registry.registerLayerName(
       "enemy_walls",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -18,7 +21,7 @@ const auto registered_enemywall = []
          mechanisms["enemy_walls"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "EnemyWall",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

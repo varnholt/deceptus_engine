@@ -18,7 +18,11 @@ namespace
 {
 const auto registered_crusher = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   registry.mapGroupToLayer("Crusher", "crushers");
+
+   registry.registerLayerName(
       "crushers",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -27,7 +31,8 @@ const auto registered_crusher = []
          mechanisms["crushers"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "Crusher",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

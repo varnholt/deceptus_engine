@@ -26,7 +26,10 @@ namespace
 {
 const auto registered_door = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Door", "doors");
+
+   registry.registerLayerName(
       "doors",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -35,7 +38,7 @@ const auto registered_door = []
          mechanisms["doors"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "Door",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

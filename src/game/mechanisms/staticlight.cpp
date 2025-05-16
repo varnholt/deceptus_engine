@@ -17,7 +17,10 @@ namespace
 {
 const auto registered_staticlight = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("StaticLight", "static_lights");
+
+   registry.registerLayerName(
       "static_lights",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -26,7 +29,7 @@ const auto registered_staticlight = []
          mechanisms["static_lights"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "StaticLight",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

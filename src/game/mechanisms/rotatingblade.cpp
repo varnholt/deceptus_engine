@@ -18,7 +18,10 @@ namespace
 {
 const auto registered_rotatingblade = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("RotatingBlade", "rotating_blades");
+
+   registry.registerLayerName(
       "rotating_blades",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -27,7 +30,7 @@ const auto registered_rotatingblade = []
          mechanisms["rotating_blades"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "RotatingBlade",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

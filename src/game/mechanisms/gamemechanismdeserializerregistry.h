@@ -19,15 +19,24 @@ public:
 
    static GameMechanismDeserializerRegistry& instance();
 
-   void registerLayer(const std::string& key, DeserializerFunction fn);
-   void registerTemplateType(const std::string& key, DeserializerFunction fn);
+   void registerLayerName(const std::string& key, DeserializerFunction fn);
+   void registerObjectGroup(const std::string& key, DeserializerFunction fn);
+   void mapGroupToLayer(const std::string& group_name, const std::string& layer_name);
+   std::optional<std::string> getLayerName(const std::string& group_name);
+   std::optional<std::string> getObjectGroupName(const std::string& layer_name);
 
-   std::optional<DeserializerFunction> getForLayer(const std::string& key) const;
-   std::optional<DeserializerFunction> getForTemplateType(const std::string& key) const;
+   std::optional<DeserializerFunction> getForLayerName(const std::string& key) const;
+   std::optional<DeserializerFunction> getForObjectGroup(const std::string& key) const;
+
+   const std::unordered_map<std::string, DeserializerFunction>& getLayerNameMap() const;
+   const std::unordered_map<std::string, DeserializerFunction>& getObjectGroupMap() const;
 
 private:
-   std::unordered_map<std::string, DeserializerFunction> _layer_map;
-   std::unordered_map<std::string, DeserializerFunction> _template_map;
+   std::unordered_map<std::string, DeserializerFunction> _layer_name_map;
+   std::unordered_map<std::string, DeserializerFunction> _object_group_map;
+
+   std::map<std::string, std::string> _group_to_layer_name;
+   std::map<std::string, std::string> _layer_to_group_name;
 };
 
 #endif  // GAMEMECHANISMDESERIALIZERREGISTRY_H

@@ -24,7 +24,11 @@ namespace
 {
 const auto registered_deathblock = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   registry.mapGroupToLayer("DeathBlock", "death_blocks");
+
+   registry.registerLayerName(
       "death_blocks",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -33,7 +37,8 @@ const auto registered_deathblock = []
          mechanisms["death_blocks"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "DeathBlock",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

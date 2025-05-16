@@ -28,7 +28,10 @@ namespace
 {
 const auto registered_spikeblock = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("SpikeBlock", "spike_blocks");
+
+   registry.registerLayerName(
       "spike_blocks",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -37,7 +40,7 @@ const auto registered_spikeblock = []
          mechanisms["spike_blocks"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "SpikeBlock",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

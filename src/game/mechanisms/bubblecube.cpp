@@ -23,7 +23,11 @@ namespace
 {
 const auto registered_bubblecube = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   registry.mapGroupToLayer("BubbleCube", "bubble_cubes");
+
+   registry.registerLayerName(
       "bubble_cubes",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -31,7 +35,8 @@ const auto registered_bubblecube = []
          mechanisms["bubble_cubes"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "BubbleCube",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

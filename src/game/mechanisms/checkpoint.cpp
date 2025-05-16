@@ -43,7 +43,10 @@ namespace
 {
 const auto registered_checkpoint = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("CheckPoint", "checkpoints");
+
+   registry.registerLayerName(
       "checkpoints",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -51,7 +54,8 @@ const auto registered_checkpoint = []
          mechanisms["checkpoints"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "CheckPoint",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

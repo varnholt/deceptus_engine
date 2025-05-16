@@ -11,7 +11,10 @@ namespace
 {
 const auto registered_zoomrect = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("ZoomRect", "zoom_rects");
+
+   registry.registerLayerName(
       "zoom_rects",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -20,7 +23,7 @@ const auto registered_zoomrect = []
          mechanisms["zoom_rects"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "ZoomRect",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

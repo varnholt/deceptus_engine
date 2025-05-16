@@ -15,16 +15,10 @@ namespace
 {
 const auto registered_lever = []
 {
-   // GameMechanismDeserializerRegistry::instance().registerLayer(
-   //    "levers",
-   //    [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
-   //    {
-   //       auto mechanism = std::make_shared<Lever>(parent);
-   //       mechanism->setup(data);
-   //       mechanisms["levers"]->push_back(mechanism);
-   //    }
-   // );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Lever", "levers");
+
+   registry.registerObjectGroup(
       "Lever",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

@@ -15,7 +15,10 @@ namespace
 {
 const auto registered_watersurface = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("WaterSurface", "water_surface");
+
+   registry.registerLayerName(
       "water_surface",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -23,7 +26,7 @@ const auto registered_watersurface = []
          mechanisms["water_surface"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "WaterSurface",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

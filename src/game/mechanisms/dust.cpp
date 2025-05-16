@@ -12,7 +12,10 @@ namespace
 {
 const auto registered_dust = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Dust", "dust");
+
+   registry.registerLayerName(
       "dust",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -20,7 +23,7 @@ const auto registered_dust = []
          mechanisms["dust"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "Dust",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
