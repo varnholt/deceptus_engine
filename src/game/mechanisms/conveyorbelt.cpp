@@ -13,7 +13,10 @@ namespace
 {
 const auto registered_conveyorbelt = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("ConveyorBelt", "conveyorbelts");
+
+   registry.registerLayerName(
       "conveyorbelts",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -21,7 +24,8 @@ const auto registered_conveyorbelt = []
          mechanisms["conveyorbelts"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "ConveyorBelt",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

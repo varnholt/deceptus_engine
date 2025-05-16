@@ -17,10 +17,13 @@ namespace
 {
 const auto registered = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Fan", "fans");
+
+   registry.registerLayerName(
       "fans", [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms) { Fan::addObject(parent, data); }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "fan", [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms) { Fan::addObject(parent, data); }
    );
    return true;

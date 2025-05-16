@@ -10,7 +10,11 @@ namespace
 {
 const auto registered_blockingrect = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   registry.mapGroupToLayer("BlockingRect", "blocking_rects");
+
+   registry.registerLayerName(
       "blocking_rects",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -19,7 +23,8 @@ const auto registered_blockingrect = []
          mechanisms["blocking_rects"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "BlockingRect",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

@@ -29,7 +29,10 @@ namespace
 {
 const auto registered_bouncer = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Bouncer", "bouncers");
+
+   registry.registerLayerName(
       "bouncers",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -37,7 +40,8 @@ const auto registered_bouncer = []
          mechanisms["bouncers"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "Bouncer",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

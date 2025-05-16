@@ -14,7 +14,10 @@ namespace
 {
 const auto registered_treasurechest = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("TreasureChest", "treasure_chests");
+
+   registry.registerLayerName(
       "treasure_chests",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -23,7 +26,7 @@ const auto registered_treasurechest = []
          mechanisms["treasure_chests"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "TreasureChest",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

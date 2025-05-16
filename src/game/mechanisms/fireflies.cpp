@@ -19,7 +19,10 @@ namespace
 {
 const auto registered_fireflies = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Fireflies", "fireflies");
+
+   registry.registerLayerName(
       "fireflies",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -28,7 +31,7 @@ const auto registered_fireflies = []
          mechanisms["fireflies"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "Fireflies",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

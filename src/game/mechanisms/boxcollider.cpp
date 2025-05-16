@@ -8,7 +8,10 @@ namespace
 {
 const auto registered_boxcollider = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("BoxCollider", "box_colliders");
+
+   registry.registerLayerName(
       "box_colliders",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -17,7 +20,7 @@ const auto registered_boxcollider = []
          mechanisms["box_colliders"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "BoxCollider",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

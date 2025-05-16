@@ -9,7 +9,10 @@ namespace
 {
 const auto registered_sensorrect = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("SensorRect", "sensor_rects");
+
+   registry.registerLayerName(
       "sensor_rects",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -18,7 +21,7 @@ const auto registered_sensorrect = []
          mechanisms["sensor_rects"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "SensorRect",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

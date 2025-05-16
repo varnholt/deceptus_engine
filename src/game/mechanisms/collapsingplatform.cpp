@@ -18,7 +18,10 @@ namespace
 {
 const auto registered_collapsingplatform = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("CollapsingPlatform", "collapsing_platforms");
+
+   registry.registerLayerName(
       "collapsing_platforms",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -26,7 +29,8 @@ const auto registered_collapsingplatform = []
          mechanisms["collapsing_platforms"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "CollapsingPlatform",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

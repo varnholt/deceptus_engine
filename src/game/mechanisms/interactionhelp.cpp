@@ -16,7 +16,10 @@ namespace
 {
 const auto registered_interactionhelp = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("InteractionHelp", "interaction_help");
+
+   registry.registerLayerName(
       "interaction_help",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -25,7 +28,7 @@ const auto registered_interactionhelp = []
          mechanisms["interaction_help"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "InteractionHelp",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
