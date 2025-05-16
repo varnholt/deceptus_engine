@@ -11,22 +11,25 @@ namespace
 {
 const auto registered_ropewithlight = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("RopeWithLight", "ropes_with_light");
+
+   registry.registerLayerName(
       "ropes_with_light",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
          auto mechanism = std::make_shared<RopeWithLight>(parent);
          mechanism->setup(data);
-         mechanisms["ropes_with_light"]->push_back(mechanism);
+         mechanisms["ropes"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "RopeWithLight",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
          auto mechanism = std::make_shared<RopeWithLight>(parent);
          mechanism->setup(data);
-         mechanisms["ropes_with_light"]->push_back(mechanism);
+         mechanisms["ropes"]->push_back(mechanism);
       }
    );
    return true;

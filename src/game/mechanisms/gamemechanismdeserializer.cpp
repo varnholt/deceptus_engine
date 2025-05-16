@@ -40,6 +40,39 @@
 
 #include <ranges>
 
+namespace
+{
+void debugOutputMechanisms(const std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms)
+{
+   Log::Info() << "[Mechanisms content]";
+   for (const auto& [key, vec] : mechanisms)
+   {
+      Log::Info() << "  " << key << ": " << (vec ? vec->size() : 0) << " elements";
+   }
+}
+
+void debugOutputRegisteredCallbacks()
+{
+   Log::Info() << "[Registered deserializer callbacks]";
+   const auto& registry = GameMechanismDeserializerRegistry::instance();
+   const auto& layers = registry.getLayerNameMap();
+   const auto& templates = registry.getObjectGroupMap();
+
+   Log::Info() << "  Layers:";
+   for (const auto& [name, _] : layers)
+   {
+      Log::Info() << "    " << name;
+   }
+
+   Log::Info() << "  TemplateTypes:";
+   for (const auto& [name, _] : templates)
+   {
+      Log::Info() << "    " << name;
+   }
+}
+
+}  // namespace
+
 void GameMechanismDeserializer::deserialize(
    const TmxParser& tmx_parser,
    GameNode* parent,
@@ -116,7 +149,7 @@ void GameMechanismDeserializer::deserialize(
             data._tmx_layer = layer;
             data._tmx_tileset = tmx_parser.getTileSet(layer);
 
-            if (auto initializer_function = registry.getForLayer(layer->_name))
+            if (auto initializer_function = registry.getForLayerName(layer->_name))
             {
                std::invoke(*initializer_function, parent, data, mechanisms);
             }
@@ -129,21 +162,78 @@ void GameMechanismDeserializer::deserialize(
                group->_objects,
                [&](const auto& pair)
                {
-                  const auto& obj = pair.second;
-                  data._tmx_object = obj;
+                  const auto& object = pair.second;
+                  data._tmx_object = object;
                   data._tmx_object_group = group;
 
-                  const auto& key = obj->_template_type.value_or(group->_name);
+                  Log::Info() << "obj template name: " << object->_template_name.value_or("");
+                  Log::Info() << "obj template type: " << object->_template_type.value_or("");
+                  Log::Info() << "obj gid: " << object->_gid.value_or("");
+                  Log::Info() << "obj name: " << object->_name;
+                  Log::Info() << "group name: " << group->_name;
 
-                  if (auto initializer_function = registry.getForTemplateType(key))
+                  // attempt to fetch template key from group name
+                  const auto group_key = group->_name;
+                  auto layer_key = registry.getObjectGroupName(group_key);
+
+                  // if that fails, attempt to fetch template key from tmx object template type
+                  if (!layer_key.has_value())
+                  {
+                     layer_key = object->_template_type;
+                  }
+
+                  if (auto initializer_function = registry.getForObjectGroup(layer_key.value_or(group_key)))
                   {
                      std::invoke(*initializer_function, parent, data, mechanisms);
+                  }
+                  else
+                  {
+                     Log::Error() << "no initializer found for " << group_key;
                   }
                }
             );
          }
       }
    );
+
+   debugOutputRegisteredCallbacks();
+   debugOutputMechanisms(mechanisms);
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("Laser", "lasers");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("Platform", "platforms");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("PlatformPath", "platform_paths");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("Portal", "portals");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("ShaderQuad", "shader_quads");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("Smoke", "smoke");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("SoundEmitter", "sound_emitters");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("Spikes", "spikes");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("TextLayer", "text_layers");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("SwitchableObject", "switchable_objects");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("WaterSurfaceEmitter", "water_surface_emitter");
+
+   // auto& registry = GameMechanismDeserializerRegistry::instance();
+   // registry.mapGroupToLayer("Weather", "weather");
 
    // deprecated approach to deserialize mechanisms
    for (const auto& element : tmx_parser.getElements())

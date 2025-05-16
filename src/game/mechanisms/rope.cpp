@@ -18,7 +18,10 @@ namespace
 {
 const auto registered_rope = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Rope", "ropes");
+
+   registry.registerLayerName(
       "ropes",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -27,7 +30,7 @@ const auto registered_rope = []
          mechanisms["ropes"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "Rope",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

@@ -9,7 +9,11 @@ namespace
 {
 const auto registered_damagerect = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   registry.mapGroupToLayer("DamageRect", "damage_rects");
+
+   registry.registerLayerName(
       "damage_rects",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -18,7 +22,8 @@ const auto registered_damagerect = []
          mechanisms["damage_rects"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "damage_rect",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

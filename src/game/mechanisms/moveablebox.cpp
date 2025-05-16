@@ -17,7 +17,10 @@ namespace
 {
 const auto registered_moveablebox = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("MoveableObject", "moveable_objects");
+
+   registry.registerLayerName(
       "moveable_objects",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -26,7 +29,7 @@ const auto registered_moveablebox = []
          mechanisms["moveable_objects"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "MoveableObject",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

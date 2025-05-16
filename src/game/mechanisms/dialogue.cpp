@@ -25,7 +25,11 @@ namespace
 {
 const auto registered_dialogue = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   registry.mapGroupToLayer("Dialogue", "dialogues");
+
+   registry.registerLayerName(
       "dialogues",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -33,7 +37,8 @@ const auto registered_dialogue = []
          mechanisms["dialogues"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "Dialogue",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

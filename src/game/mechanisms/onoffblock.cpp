@@ -24,7 +24,10 @@ namespace
 {
 const auto registered_onoffblock = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("OnOffBlock", "on_off_blocks");
+
+   registry.registerLayerName(
       "on_off_blocks",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -33,7 +36,7 @@ const auto registered_onoffblock = []
          mechanisms["on_off_blocks"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+   registry.registerObjectGroup(
       "OnOffBlock",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {

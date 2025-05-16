@@ -33,7 +33,11 @@ namespace
 {
 const auto registered_controllerhelp = []
 {
-   GameMechanismDeserializerRegistry::instance().registerLayer(
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   registry.mapGroupToLayer("ControllerHelp", "controller_help");
+
+   registry.registerLayerName(
       "controller_help",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
@@ -42,7 +46,8 @@ const auto registered_controllerhelp = []
          mechanisms["controller_help"]->push_back(mechanism);
       }
    );
-   GameMechanismDeserializerRegistry::instance().registerTemplateType(
+
+   registry.registerObjectGroup(
       "ControllerHelp",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
