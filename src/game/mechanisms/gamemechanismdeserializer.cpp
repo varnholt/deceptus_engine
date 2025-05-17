@@ -1,44 +1,23 @@
 #include "gamemechanismdeserializer.h"
-#include "gamemechanismdeserializerconstants.h"
 
+#include <ranges>
 #include "framework/tmxparser/tmxparser.h"
 #include "framework/tools/log.h"
-
-#include "game/mechanisms/bubblecube.h"
-#include "game/mechanisms/checkpoint.h"
-#include "game/mechanisms/collapsingplatform.h"
-#include "game/mechanisms/controllerhelp.h"
-#include "game/mechanisms/conveyorbelt.h"
-#include "game/mechanisms/crusher.h"
-#include "game/mechanisms/deathblock.h"
-#include "game/mechanisms/dialogue.h"
-#include "game/mechanisms/door.h"
-#include "game/mechanisms/dust.h"
-#include "game/mechanisms/extra.h"
 #include "game/mechanisms/fan.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/mechanisms/interactionhelp.h"
 #include "game/mechanisms/laser.h"
-#include "game/mechanisms/lever.h"
 #include "game/mechanisms/levermechanismmerger.h"
-#include "game/mechanisms/moveablebox.h"
 #include "game/mechanisms/movingplatform.h"
-#include "game/mechanisms/onoffblock.h"
 #include "game/mechanisms/portal.h"
-#include "game/mechanisms/rope.h"
 #include "game/mechanisms/sensorrect.h"
 #include "game/mechanisms/shaderlayer.h"
 #include "game/mechanisms/smokeeffect.h"
 #include "game/mechanisms/soundemitter.h"
-#include "game/mechanisms/spikeball.h"
-#include "game/mechanisms/spikeblock.h"
 #include "game/mechanisms/spikes.h"
-#include "game/mechanisms/staticlight.h"
 #include "game/mechanisms/textlayer.h"
 #include "game/mechanisms/watersurface.h"
 #include "game/mechanisms/weather.h"
-
-#include <ranges>
+#include "gamemechanismdeserializerconstants.h"
 
 namespace
 {
@@ -86,49 +65,23 @@ void GameMechanismDeserializer::deserialize(
 
    GameDeserializeData data(data_ref);
 
-   auto* mechanism_blocking_rects = mechanisms[std::string{layer_name_blocking_rects}];
-   auto* mechanism_bouncers = mechanisms[std::string{layer_name_bouncers}];
-   auto* mechanism_box_colliders = mechanisms[std::string{layer_name_box_colliders}];
-   auto* mechanism_bubble_cubes = mechanisms[std::string{layer_name_bubble_cube}];
-   auto* mechanism_button_rects = mechanisms[std::string{layer_name_button_rects}];
-   auto* mechanism_checkpoints = mechanisms[std::string{layer_name_checkpoints}];
-   auto* mechanism_collapsing_platforms = mechanisms[std::string{layer_name_collapsing_platforms}];
-   auto* mechanism_controller_help = mechanisms[std::string{layer_name_controller_help}];
    auto* mechanism_conveyor_belts = mechanisms[std::string{layer_name_conveyorbelts}];
-   auto* mechanism_crushers = mechanisms[std::string{layer_name_crushers}];
-   auto* mechanism_damage_rects = mechanisms[std::string{layer_name_damage_rects}];
-   auto* mechanism_death_blocks = mechanisms[std::string{layer_name_death_blocks}];
-   auto* mechanism_dialogues = mechanisms[std::string{layer_name_dialogues}];
    auto* mechanism_doors = mechanisms[std::string{layer_name_doors}];
-   auto* mechanism_dust = mechanisms[std::string{layer_name_dust}];
-   auto* mechanism_extras = mechanisms[std::string{layer_name_extras}];
-   auto* mechanism_enemy_walls = mechanisms[std::string{layer_name_enemy_walls}];
    auto* mechanism_fans = mechanisms[std::string{layer_name_fans}];
-   auto* mechanism_fireflies = mechanisms[std::string{layer_name_fireflies}];
-   auto* mechanism_info_overlays = mechanisms[std::string{layer_name_info_overlays}];
-   auto* mechanism_interaction_help = mechanisms[std::string{layer_name_interaction_help}];
    auto* mechanism_lasers = mechanisms[std::string{layer_name_lasers}];
    auto* mechanism_levers = mechanisms[std::string{layer_name_levers}];
-   auto* mechanism_moveable_objects = mechanisms[std::string{layer_name_moveable_objects}];
    auto* mechanism_on_off_blocks = mechanisms[std::string{layer_name_on_off_blocks}];
    auto* mechanism_platforms = mechanisms[std::string{layer_name_platforms}];
    auto* mechanism_portals = mechanisms[std::string{layer_name_portals}];
-   auto* mechanism_ropes = mechanisms[std::string{layer_name_ropes}];
    auto* mechanism_rotating_blades = mechanisms[std::string{layer_name_rotating_blades}];
    auto* mechanism_sensor_rects = mechanisms[std::string{layer_name_sensor_rects}];
    auto* mechanism_shader_quads = mechanisms[std::string{layer_name_shader_quads}];
    auto* mechanism_smoke_effect = mechanisms[std::string{layer_name_smoke_effect}];
    auto* mechanism_sound_emitters = mechanisms[std::string{layer_name_sound_emitters}];
-   auto* mechanism_spike_balls = mechanisms[std::string{layer_name_spike_balls}];
    auto* mechanism_spike_blocks = mechanisms[std::string{layer_name_spike_blocks}];
    auto* mechanism_spikes = mechanisms[std::string{layer_name_interval_spikes}];
-   auto* mechanism_static_lights = mechanisms[std::string{layer_name_static_lights}];
    auto* mechanism_text_layers = mechanisms[std::string{layer_name_text_layer}];
-   auto* mechanism_treasure_chests = mechanisms[std::string{layer_name_treasure_chests}];
-   auto* mechanism_water_damage = mechanisms[std::string{layer_name_water_damage}];
    auto* mechanism_weather = mechanisms[std::string{layer_name_weather}];
-   auto* mechanism_water_surface = mechanisms[std::string{layer_name_weather}];
-   auto* mechanism_zoom_rects = mechanisms[std::string{layer_name_zoom_rects}];
 
    // suggested approach to deserialize mechanisms
    const auto& elements = tmx_parser.getElements();
@@ -166,11 +119,11 @@ void GameMechanismDeserializer::deserialize(
                   data._tmx_object = object;
                   data._tmx_object_group = group;
 
-                  Log::Info() << "obj template name: " << object->_template_name.value_or("");
-                  Log::Info() << "obj template type: " << object->_template_type.value_or("");
-                  Log::Info() << "obj gid: " << object->_gid.value_or("");
-                  Log::Info() << "obj name: " << object->_name;
-                  Log::Info() << "group name: " << group->_name;
+                  // Log::Info() << "obj template name: " << object->_template_name.value_or("");
+                  // Log::Info() << "obj template type: " << object->_template_type.value_or("");
+                  // Log::Info() << "obj gid: " << object->_gid.value_or("");
+                  // Log::Info() << "obj name: " << object->_name;
+                  // Log::Info() << "group name: " << group->_name;
 
                   // attempt to fetch template key from group name
                   const auto group_key = group->_name;
@@ -196,8 +149,10 @@ void GameMechanismDeserializer::deserialize(
       }
    );
 
-   debugOutputRegisteredCallbacks();
-   debugOutputMechanisms(mechanisms);
+   // debugOutputRegisteredCallbacks();
+   // debugOutputMechanisms(mechanisms);
+
+   // not ported yet
 
    // auto& registry = GameMechanismDeserializerRegistry::instance();
    // registry.mapGroupToLayer("Laser", "lasers");
