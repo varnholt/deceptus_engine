@@ -42,7 +42,7 @@ void ImageLayer::update(const sf::Time& dt)
    {
       if (_sprite == nullptr)
       {
-         _sprite = std::make_unique<sf::Sprite>(texture->get());
+         _sprite = std::make_unique<sf::Sprite>(*texture->get());
          _sprite->setPosition(_position);
          _sprite->setColor(_color);
       }
@@ -147,7 +147,7 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
    }
 
    const auto texture_path = level_path / image_layer->_image->_source;
-   image->_texture = std::make_unique<LazyTexture>(texture_path, image->_chunks);
+   image->_texture = std::make_shared<LazyTexture>(texture_path, image->_chunks);
    image->_position = {image_layer->_offset_x_px, image_layer->_offset_y_px};
    image->_color = {255, 255, 255, static_cast<uint8_t>(image_layer->_opacity * 255.0f)};
 

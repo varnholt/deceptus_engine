@@ -28,7 +28,7 @@ public:
 
 private:
    std::unique_ptr<sf::Sprite> _sprite;
-   std::unique_ptr<LazyTexture> _texture;
+   std::shared_ptr<LazyTexture> _texture;
    sf::BlendMode _blend_mode = sf::BlendAlpha;
    sf::Vector2f _position;
    sf::Color _color;
