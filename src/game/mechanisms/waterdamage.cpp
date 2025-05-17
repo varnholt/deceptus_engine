@@ -1,7 +1,37 @@
 #include "waterdamage.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
+
+namespace
+{
+const auto registered_waterdamage = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("WaterDamage", "water_damage");
+
+   registry.registerLayerName(
+      "water_damage",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<WaterDamage>(parent);
+         mechanism->setup(data);
+         mechanisms["water_damage"]->push_back(mechanism);
+      }
+   );
+   registry.registerObjectGroup(
+      "WaterDamage",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<WaterDamage>(parent);
+         mechanism->setup(data);
+         mechanisms["water_damage"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 WaterDamage::WaterDamage(GameNode* parent) : GameNode(parent)
 {

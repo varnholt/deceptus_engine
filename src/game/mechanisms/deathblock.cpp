@@ -7,6 +7,7 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
 // #define DEBUG_DRAW 1
@@ -18,6 +19,37 @@
 // spikes-open : 0,1,2,3,4,5,6,7,8,9,10,11 (speed 50)
 // idle        : 12 (no speed)
 // close       : 13,14,15,16,17,18,19 (speed 50)
+
+namespace
+{
+const auto registered_deathblock = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   registry.mapGroupToLayer("DeathBlock", "death_blocks");
+
+   registry.registerLayerName(
+      "death_blocks",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<DeathBlock>(parent);
+         mechanism->setup(data);
+         mechanisms["death_blocks"]->push_back(mechanism);
+      }
+   );
+
+   registry.registerObjectGroup(
+      "DeathBlock",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<DeathBlock>(parent);
+         mechanism->setup(data);
+         mechanisms["death_blocks"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

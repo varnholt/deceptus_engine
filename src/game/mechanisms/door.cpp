@@ -16,10 +16,40 @@
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 #include "game/state/savestate.h"
 
 #include <iostream>
+
+namespace
+{
+const auto registered_door = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Door", "doors");
+
+   registry.registerLayerName(
+      "doors",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Door>(parent);
+         mechanism->setup(data);
+         mechanisms["doors"]->push_back(mechanism);
+      }
+   );
+   registry.registerObjectGroup(
+      "Door",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Door>(parent);
+         mechanism->setup(data);
+         mechanisms["doors"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {
