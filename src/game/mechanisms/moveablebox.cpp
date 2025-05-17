@@ -9,8 +9,38 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 #include <iostream>
+
+namespace
+{
+const auto registered_moveablebox = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("MoveableObject", "moveable_objects");
+
+   registry.registerLayerName(
+      "moveable_objects",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<MoveableBox>(parent);
+         mechanism->setup(data);
+         mechanisms["moveable_objects"]->push_back(mechanism);
+      }
+   );
+   registry.registerObjectGroup(
+      "MoveableObject",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<MoveableBox>(parent);
+         mechanism->setup(data);
+         mechanisms["moveable_objects"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 MoveableBox::MoveableBox(GameNode* node) : GameNode(node)
 {

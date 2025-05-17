@@ -4,6 +4,38 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+namespace
+{
+const auto registered_blockingrect = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   registry.mapGroupToLayer("BlockingRect", "blocking_rects");
+
+   registry.registerLayerName(
+      "blocking_rects",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<BlockingRect>(parent);
+         mechanism->setup(data);
+         mechanisms["blocking_rects"]->push_back(mechanism);
+      }
+   );
+
+   registry.registerObjectGroup(
+      "BlockingRect",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<BlockingRect>(parent);
+         mechanism->setup(data);
+         mechanisms["blocking_rects"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 BlockingRect::BlockingRect(GameNode* parent) : GameNode(parent)
 {

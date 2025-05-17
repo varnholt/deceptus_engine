@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
 /*
@@ -22,6 +23,35 @@
                                039
 
 */
+
+namespace
+{
+const auto registered_spikeblock = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("SpikeBlock", "spike_blocks");
+
+   registry.registerLayerName(
+      "spike_blocks",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<SpikeBlock>(parent);
+         mechanism->setup(data);
+         mechanisms["spike_blocks"]->push_back(mechanism);
+      }
+   );
+   registry.registerObjectGroup(
+      "SpikeBlock",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<SpikeBlock>(parent);
+         mechanism->setup(data);
+         mechanisms["spike_blocks"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

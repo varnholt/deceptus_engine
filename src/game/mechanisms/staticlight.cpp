@@ -8,9 +8,39 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/globalclock.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 #include <array>
 #include <filesystem>
+
+namespace
+{
+const auto registered_staticlight = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("StaticLight", "static_lights");
+
+   registry.registerLayerName(
+      "static_lights",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<StaticLight>(parent);
+         mechanism->deserialize(data);
+         mechanisms["static_lights"]->push_back(mechanism);
+      }
+   );
+   registry.registerObjectGroup(
+      "StaticLight",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<StaticLight>(parent);
+         mechanism->deserialize(data);
+         mechanisms["static_lights"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {

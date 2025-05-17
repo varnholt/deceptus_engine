@@ -7,8 +7,29 @@
 #include "game/audio/audio.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 #include "game/state/savestate.h"
+
+namespace
+{
+const auto registered_lever = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Lever", "levers");
+
+   registry.registerObjectGroup(
+      "Lever",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Lever>(parent);
+         mechanism->setup(data);
+         mechanisms["levers"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {
@@ -20,6 +41,11 @@ constexpr auto idle_animation_speed = 10.0f;
 
 void Lever::setup(const GameDeserializeData& data)
 {
+   if (data._tmx_object == nullptr)
+   {
+      return;
+   }
+
    if (data._tmx_object->_properties)
    {
       const auto z_it = data._tmx_object->_properties->_map.find("z");
