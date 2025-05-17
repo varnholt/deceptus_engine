@@ -1,81 +1,102 @@
 #include "lazytexture.h"
-
-#include <algorithm>
-#include <ranges>
-#include <stop_token>
 #include "framework/tools/log.h"
+
+#include <ranges>
 
 namespace
 {
-constexpr int chunk_load_threshold = 2;  // load texture if player is within this many chunks
+constexpr int chunk_load_threshold = 2;
 }
 
-LazyTexture::LazyTexture(const std::filesystem::path& texture_path, std::vector<Chunk>& _texture_chunks)
-    : _texture_path(texture_path), _texture_chunks(_texture_chunks), _loaded(false)
+LazyTexture::LazyTexture(const std::filesystem::path& texture_path, std::vector<Chunk> texture_chunks)
+    : _texture_path(texture_path), _texture_chunks(std::move(texture_chunks))
 {
 }
 
 void LazyTexture::update(const Chunk& player_chunk)
 {
-   // check if the texture should be loaded
-   const auto should_be_loaded = std::ranges::any_of(
+   const bool should_be_loaded = std::ranges::any_of(
       _texture_chunks,
       [&](const auto& chunk)
       { return std::abs(player_chunk._x - chunk._x) < chunk_load_threshold && std::abs(player_chunk._y - chunk._y) < chunk_load_threshold; }
    );
 
-   if (should_be_loaded || _texture_chunks.empty())
+   if (should_be_loaded && !_loaded && !_loading.exchange(true))
    {
-      if (!_loaded && !_loading.test_and_set())
-      {
-         loadTexture();
-      }
+      requestLoad();
    }
-   else
+
+   // Process pending upload tasks (must be on main thread)
    {
-      if (_loaded)
+      std::lock_guard lock(_upload_mutex);
+      while (!_upload_tasks.empty())
       {
-         unloadTexture();
+         auto task = std::move(_upload_tasks.front());
+         _upload_tasks.pop();
+         task();
       }
    }
 }
 
-void LazyTexture::loadTexture()
+void LazyTexture::requestLoad()
 {
-   Log::Info() << "loading " << _texture_path;
-   _loading_thread = std::jthread(
-      [this](std::stop_token token)
+   Log::Info() << "loading image " << _texture_path;
+
+   // Capture a weak_ptr so the lambda doesn't outlive the object
+   std::weak_ptr<LazyTexture> self = shared_from_this();
+   auto texture_path = _texture_path;
+
+   _loader_thread = std::jthread(
+      [self, texture_path](std::stop_token stop)
       {
-         auto texture_to_load = std::make_unique<sf::Texture>();
-         if (texture_to_load->loadFromFile(_texture_path.string()))
+         if (stop.stop_requested())
+            return;
+
+         sf::Image img;
+         if (!img.loadFromFile(texture_path.string()))
          {
-            std::lock_guard lock(_mutex);
-            _texture = std::move(texture_to_load);
-            _loaded = true;
+            Log::Warning() << "failed to load image " << texture_path;
+            if (auto strong = self.lock())
+            {
+               strong->_loading = false;
+            }
+            return;
          }
 
-         // loading is complete
-         _loading.clear();
+         if (auto strong = self.lock())
+         {
+            std::lock_guard lock(strong->_upload_mutex);
+            strong->_upload_tasks.push([strong, img = std::move(img)]() mutable { strong->finishUpload(std::move(img)); });
+         }
       }
    );
 }
 
-void LazyTexture::unloadTexture()
+void LazyTexture::finishUpload(sf::Image image)
 {
-   Log::Info() << "unloading " << _texture_path;
+   Log::Info() << "uploading texture " << _texture_path;
 
-   std::lock_guard lock(_mutex);
-   _texture.reset();
-   _loaded = false;
-}
-
-std::optional<std::reference_wrapper<const sf::Texture>> LazyTexture::getTexture() const
-{
-   if (!_loaded)
+   try
    {
-      return std::nullopt;
+      auto tex = std::make_shared<sf::Texture>(image);
+      _texture.store(tex);
+      _loaded = true;
+   }
+   catch (const std::exception& e)
+   {
+      Log::Warning() << "failed to construct texture from image: " << e.what();
    }
 
-   std::lock_guard lock(_mutex);
-   return std::cref(*_texture);
+   _loading = false;
+}
+
+std::optional<std::shared_ptr<const sf::Texture>> LazyTexture::getTexture() const
+{
+   auto ptr = _texture.load();
+   if (ptr && !ptr.get())
+   {
+      Log::Error() << "shared_ptr is set but null!";
+      return std::nullopt;
+   }
+   return ptr ? std::optional(ptr) : std::nullopt;
 }
