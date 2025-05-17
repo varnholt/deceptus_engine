@@ -134,6 +134,7 @@ void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 void Bouncer::updatePlayerAtBouncer()
 {
    auto* player = Player::getCurrent();
+
    auto rect = player->getPixelRectFloat();
    rect.size.y *= 3;
 
@@ -153,7 +154,11 @@ void Bouncer::update(const sf::Time& /*dt*/)
       step = 0;
    }
 
-   _sprite->setTextureRect(sf::IntRect({step * SPRITE_WIDTH, 0}, {SPRITE_WIDTH, SPRITE_HEIGHT}));
+   if (!_previous_step.has_value() || step != _previous_step)
+   {
+      _previous_step = step;
+      _sprite->setTextureRect(sf::IntRect({step * SPRITE_WIDTH, 0}, {SPRITE_WIDTH, SPRITE_HEIGHT}));
+   }
 }
 
 std::optional<sf::FloatRect> Bouncer::getBoundingBoxPx()
