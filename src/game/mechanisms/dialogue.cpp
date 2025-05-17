@@ -7,6 +7,7 @@
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/gamemechanismobserver.h"
 #include "game/player/player.h"
 #include "game/state/displaymode.h"
@@ -19,6 +20,35 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
+namespace
+{
+const auto registered_dialogue = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   registry.mapGroupToLayer("Dialogue", "dialogues");
+
+   registry.registerLayerName(
+      "dialogues",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = Dialogue::deserialize(parent, data);
+         mechanisms["dialogues"]->push_back(mechanism);
+      }
+   );
+
+   registry.registerObjectGroup(
+      "Dialogue",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = Dialogue::deserialize(parent, data);
+         mechanisms["dialogues"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 Dialogue::Dialogue(GameNode* parent) : GameNode(parent)
 {

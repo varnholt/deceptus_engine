@@ -3,7 +3,6 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
-
 #include "framework/tmxparser/tmxparser.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"

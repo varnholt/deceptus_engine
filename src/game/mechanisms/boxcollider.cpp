@@ -2,6 +2,36 @@
 
 #include "framework/tmxparser/tmxobject.h"
 #include "game/level/fixturenode.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+namespace
+{
+const auto registered_boxcollider = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("BoxCollider", "box_colliders");
+
+   registry.registerLayerName(
+      "box_colliders",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<BoxCollider>(parent);
+         mechanism->setup(data);
+         mechanisms["box_colliders"]->push_back(mechanism);
+      }
+   );
+   registry.registerObjectGroup(
+      "BoxCollider",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<BoxCollider>(parent);
+         mechanism->setup(data);
+         mechanisms["box_colliders"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 BoxCollider::BoxCollider(GameNode* node) : GameNode(node)
 {

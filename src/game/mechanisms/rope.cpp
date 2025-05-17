@@ -6,12 +6,42 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
 #include <array>
 #include <iostream>
 
 int32_t Rope::_instance_counter = 0;
+
+namespace
+{
+const auto registered_rope = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("Rope", "ropes");
+
+   registry.registerLayerName(
+      "ropes",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Rope>(parent);
+         mechanism->setup(data);
+         mechanisms["ropes"]->push_back(mechanism);
+      }
+   );
+   registry.registerObjectGroup(
+      "Rope",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<Rope>(parent);
+         mechanism->setup(data);
+         mechanisms["ropes"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 Rope::Rope(GameNode* parent) : GameNode(parent)
 {
