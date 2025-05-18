@@ -41,4 +41,5 @@ private:
    sf::Time _activation_time;
    bool _player_at_bouncer = false;
    float _force_value = 0.6f;
+   std::optional<int32_t> _previous_step;
 };

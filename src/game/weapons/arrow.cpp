@@ -57,6 +57,8 @@ Arrow::Arrow()
 Arrow::~Arrow()
 {
    deleted_count++;
-
-   // std::cout << "created: " << created_count << " deleted: " << deleted_count << std::endl;
+   if (created_count - deleted_count > 50)
+   {
+      Log::Error() << "your level is leaking arrows";
+   }
 }

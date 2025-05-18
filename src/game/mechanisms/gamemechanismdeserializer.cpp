@@ -150,7 +150,6 @@ void GameMechanismDeserializer::deserialize(
    );
 
    // debugOutputRegisteredCallbacks();
-   // debugOutputMechanisms(mechanisms);
 
    // not ported yet
 
@@ -356,6 +355,8 @@ void GameMechanismDeserializer::deserialize(
          }
       }
    }
+
+   debugOutputMechanisms(mechanisms);
 }
 
 bool GameMechanismDeserializer::isLayerNameReserved(const std::string& layer_name)
