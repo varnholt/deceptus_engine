@@ -17,7 +17,7 @@ public:
    ImageLayer(GameNode* parent = nullptr);
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
-   void update(const sf::Time& dt);
+   void update(const sf::Time& dt) override;
 
    void updateView(float level_view_x, float level_view_y, float view_width, float view_height);
    void resetView(float view_width, float view_height);
@@ -28,7 +28,7 @@ public:
 
 private:
    std::unique_ptr<sf::Sprite> _sprite;
-   std::unique_ptr<LazyTexture> _texture;
+   std::shared_ptr<LazyTexture> _texture;
    sf::BlendMode _blend_mode = sf::BlendAlpha;
    sf::Vector2f _position;
    sf::Color _color;
