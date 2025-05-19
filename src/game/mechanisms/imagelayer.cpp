@@ -38,11 +38,16 @@ void ImageLayer::update(const sf::Time& dt)
    const auto& player_chunk = Player::getCurrent()->getChunk();
    _texture->update(player_chunk);
 
-   if (auto texture = _texture->getTexture(); texture.has_value())
+   if (_texture->getTexture())
    {
       if (_sprite == nullptr)
       {
-         _sprite = std::make_unique<sf::Sprite>(*texture->get());
+         if (_texture->getTexture()->getNativeHandle() > 5000)
+         {
+            Log::Error() << "fuck" << std::endl;
+         }
+
+         _sprite = std::make_unique<sf::Sprite>(*_texture->getTexture());
          _sprite->setPosition(_position);
          _sprite->setColor(_color);
       }
@@ -150,6 +155,8 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
    image->_texture = std::make_shared<LazyTexture>(texture_path, image->_chunks);
    image->_position = {image_layer->_offset_x_px, image_layer->_offset_y_px};
    image->_color = {255, 255, 255, static_cast<uint8_t>(image_layer->_opacity * 255.0f)};
+
+   image->setObjectId(texture_path.string());
 
    return image;
 }

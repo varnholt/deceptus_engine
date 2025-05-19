@@ -1,102 +1,107 @@
 #include "lazytexture.h"
-#include "framework/tools/log.h"
 
+#include <algorithm>
 #include <ranges>
+#include <stop_token>
+#include "framework/tools/log.h"
 
 namespace
 {
 constexpr int chunk_load_threshold = 2;
 }
 
-LazyTexture::LazyTexture(const std::filesystem::path& texture_path, std::vector<Chunk> texture_chunks)
-    : _texture_path(texture_path), _texture_chunks(std::move(texture_chunks))
+LazyTexture::LazyTexture(const std::filesystem::path& texture_path, std::vector<Chunk>& texture_chunks)
+    : _texture_path(texture_path), _texture_chunks(texture_chunks)
 {
+}
+
+LazyTexture::~LazyTexture()
+{
+   Log::Info() << "destructor";
 }
 
 void LazyTexture::update(const Chunk& player_chunk)
 {
-   const bool should_be_loaded = std::ranges::any_of(
+   const auto should_be_loaded = std::ranges::any_of(
       _texture_chunks,
       [&](const auto& chunk)
       { return std::abs(player_chunk._x - chunk._x) < chunk_load_threshold && std::abs(player_chunk._y - chunk._y) < chunk_load_threshold; }
    );
 
-   if (should_be_loaded && !_loaded && !_loading.exchange(true))
+   if (should_be_loaded || _texture_chunks.empty())
    {
-      requestLoad();
-   }
-
-   // Process pending upload tasks (must be on main thread)
-   {
-      std::lock_guard lock(_upload_mutex);
-      while (!_upload_tasks.empty())
+      if (!_texture && !_loading.test_and_set())
       {
-         auto task = std::move(_upload_tasks.front());
-         _upload_tasks.pop();
-         task();
+         loadTexture();
+      }
+
+      uploadIfReady();
+   }
+   else
+   {
+      if (_texture)
+      {
+         unloadTexture();
       }
    }
 }
 
-void LazyTexture::requestLoad()
+void LazyTexture::loadTexture()
 {
-   Log::Info() << "loading image " << _texture_path;
+   Log::Info() << "loading " << _texture_path;
 
-   // Capture a weak_ptr so the lambda doesn't outlive the object
-   std::weak_ptr<LazyTexture> self = shared_from_this();
-   auto texture_path = _texture_path;
-
-   _loader_thread = std::jthread(
-      [self, texture_path](std::stop_token stop)
+   _loading_thread = std::jthread(
+      [this](std::stop_token)
       {
-         if (stop.stop_requested())
-            return;
-
-         sf::Image img;
-         if (!img.loadFromFile(texture_path.string()))
+         auto image = std::make_unique<sf::Image>();
+         if (image->loadFromFile(_texture_path.string()))
          {
-            Log::Warning() << "failed to load image " << texture_path;
-            if (auto strong = self.lock())
-            {
-               strong->_loading = false;
-            }
-            return;
+            std::lock_guard lock(_mutex);
+            _pending_image = std::move(image);
+            _image_ready = true;
          }
 
-         if (auto strong = self.lock())
-         {
-            std::lock_guard lock(strong->_upload_mutex);
-            strong->_upload_tasks.push([strong, img = std::move(img)]() mutable { strong->finishUpload(std::move(img)); });
-         }
+         _loading.clear();
       }
    );
 }
 
-void LazyTexture::finishUpload(sf::Image image)
+void LazyTexture::uploadIfReady()
 {
-   Log::Info() << "uploading texture " << _texture_path;
+   if (!_image_ready.load())
+      return;
 
-   try
+   std::lock_guard lock(_mutex);
+   if (_pending_image)
    {
-      auto tex = std::make_shared<sf::Texture>(image);
-      _texture.store(tex);
-      _loaded = true;
-   }
-   catch (const std::exception& e)
-   {
-      Log::Warning() << "failed to construct texture from image: " << e.what();
-   }
+      _texture = std::make_shared<sf::Texture>();
+      if (_texture->loadFromImage(*_pending_image))
+      {
+         _pending_image.reset();
+         _image_ready = false;
 
-   _loading = false;
+         Log::Info() << "uploaded texture " << _texture_path;
+      }
+      else
+      {
+         _texture.reset();
+         Log::Info() << "failed to upload texture " << _texture_path;
+      }
+   }
 }
 
-std::optional<std::shared_ptr<const sf::Texture>> LazyTexture::getTexture() const
+void LazyTexture::unloadTexture()
 {
-   auto ptr = _texture.load();
-   if (ptr && !ptr.get())
-   {
-      Log::Error() << "shared_ptr is set but null!";
-      return std::nullopt;
-   }
-   return ptr ? std::optional(ptr) : std::nullopt;
+   Log::Info() << "unloading " << _texture_path;
+
+   std::lock_guard lock(_mutex);
+   _texture.reset();
+   _pending_image.reset();
+   _image_ready = false;
+}
+
+std::shared_ptr<const sf::Texture> LazyTexture::getTexture() const
+{
+   // std::lock_guard lock(_mutex);
+   return _texture;
 }

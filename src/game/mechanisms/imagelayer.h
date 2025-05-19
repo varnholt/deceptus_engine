@@ -17,7 +17,7 @@ public:
    ImageLayer(GameNode* parent = nullptr);
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
-   void update(const sf::Time& dt);
+   void update(const sf::Time& dt) override;
 
    void updateView(float level_view_x, float level_view_y, float view_width, float view_height);
    void resetView(float view_width, float view_height);
