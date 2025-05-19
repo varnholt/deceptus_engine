@@ -17,18 +17,18 @@ public:
    virtual ~LazyTexture();
 
    void update(const Chunk& player_chunk);
-   std::shared_ptr<const sf::Texture> getTexture() const;
+   const std::shared_ptr<sf::Texture>& getTexture() const;
 
 private:
    void loadTexture();
    void unloadTexture();
-   void uploadIfReady();  // called from main thread in update()
+   void uploadTexture();
 
    std::filesystem::path _texture_path;
    std::shared_ptr<sf::Texture> _texture;
    std::vector<Chunk> _texture_chunks;
 
-   std::unique_ptr<sf::Image> _pending_image;  // loaded in background
+   std::unique_ptr<sf::Image> _pending_image;
    std::atomic<bool> _image_ready = false;
 
    mutable std::mutex _mutex;
