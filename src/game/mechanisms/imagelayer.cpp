@@ -42,11 +42,6 @@ void ImageLayer::update(const sf::Time& dt)
    {
       if (_sprite == nullptr)
       {
-         if (_texture->getTexture()->getNativeHandle() > 5000)
-         {
-            Log::Error() << "fuck" << std::endl;
-         }
-
          _sprite = std::make_unique<sf::Sprite>(*_texture->getTexture());
          _sprite->setPosition(_position);
          _sprite->setColor(_color);

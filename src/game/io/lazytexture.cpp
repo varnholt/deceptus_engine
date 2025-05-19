@@ -28,17 +28,25 @@ void LazyTexture::update(const Chunk& player_chunk)
       { return std::abs(player_chunk._x - chunk._x) < chunk_load_threshold && std::abs(player_chunk._y - chunk._y) < chunk_load_threshold; }
    );
 
+   // if the texture does not define any chunks, we always need to load the texture.
+   // this defeats the point of the lazy texture a bit but that's what it is.
    if (should_be_loaded || _texture_chunks.empty())
    {
+      // texture is only touched in the main thread, safe to keep unmutexed
       if (!_texture && !_loading.test_and_set())
       {
+         // load texture from disk (jthread)
          loadTexture();
       }
-
-      uploadIfReady();
+      else
+      {
+         // shove texture into gpu (main thread)
+         uploadTexture();
+      }
    }
    else
    {
+      // texture is no longer needed, throw it out
       if (_texture)
       {
          unloadTexture();
@@ -60,16 +68,16 @@ void LazyTexture::loadTexture()
             _pending_image = std::move(image);
             _image_ready = true;
          }
-
-         _loading.clear();
       }
    );
 }
 
-void LazyTexture::uploadIfReady()
+void LazyTexture::uploadTexture()
 {
    if (!_image_ready.load())
+   {
       return;
+   }
 
    std::lock_guard lock(_mutex);
    if (_pending_image)
@@ -79,14 +87,15 @@ void LazyTexture::uploadIfReady()
       {
          _pending_image.reset();
          _image_ready = false;
-
-         Log::Info() << "uploaded texture " << _texture_path;
+         Log::Info() << "uploaded texture " << _texture_path << " (" << _texture->getSize().x << ", " << _texture->getSize().y << ")";
       }
       else
       {
          _texture.reset();
          Log::Info() << "failed to upload texture " << _texture_path;
       }
+
+      _loading.clear();
    }
 }
 
@@ -94,14 +103,13 @@ void LazyTexture::unloadTexture()
 {
    Log::Info() << "unloading " << _texture_path;
 
-   std::lock_guard lock(_mutex);
+   // safe to go without mutex since it'll only unload once the texture was uploaded to gpu
    _texture.reset();
    _pending_image.reset();
    _image_ready = false;
 }
 
-std::shared_ptr<const sf::Texture> LazyTexture::getTexture() const
+const std::shared_ptr<sf::Texture>& LazyTexture::getTexture() const
 {
-   // std::lock_guard lock(_mutex);
    return _texture;
 }
