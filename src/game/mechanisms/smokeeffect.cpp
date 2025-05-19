@@ -26,10 +26,55 @@ void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    _render_texture->clear();
 
-   for (auto& particle : _particles)
+   // for (auto& particle : _particles)
+   // {
+   //    _render_texture->draw(*particle._sprite, _blend_mode);
+   // }
+
+   if (!_particles.empty())
    {
-      _render_texture->draw(*particle._sprite, _blend_mode);
+      _batched_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
+      _batched_vertices.resize(_particles.size() * 6);
+
+      const sf::Vector2u tex_size = _texture->getSize();
+      const sf::Vector2f tex_size_f(static_cast<float>(tex_size.x), static_cast<float>(tex_size.y));
+
+      for (std::size_t i = 0; i < _particles.size(); ++i)
+      {
+         const auto& sprite = *(_particles[i]._sprite);
+         const sf::Transform transform = sprite.getTransform();
+         const sf::Color color = sprite.getColor();
+
+         const sf::Vector2f corners[4] = {
+            transform.transformPoint({0.f, 0.f}),
+            transform.transformPoint({tex_size_f.x, 0.f}),
+            transform.transformPoint({tex_size_f.x, tex_size_f.y}),
+            transform.transformPoint({0.f, tex_size_f.y})
+         };
+
+         const sf::Vector2f tex_coords[4] = {{0.f, 0.f}, {tex_size_f.x, 0.f}, {tex_size_f.x, tex_size_f.y}, {0.f, tex_size_f.y}};
+
+         std::size_t v = i * 6;
+
+         // First triangle: 0, 1, 2
+         _batched_vertices[v + 0] = sf::Vertex(corners[0], color, tex_coords[0]);
+         _batched_vertices[v + 1] = sf::Vertex(corners[1], color, tex_coords[1]);
+         _batched_vertices[v + 2] = sf::Vertex(corners[2], color, tex_coords[2]);
+
+         // Second triangle: 0, 2, 3
+         _batched_vertices[v + 3] = sf::Vertex(corners[0], color, tex_coords[0]);
+         _batched_vertices[v + 4] = sf::Vertex(corners[2], color, tex_coords[2]);
+         _batched_vertices[v + 5] = sf::Vertex(corners[3], color, tex_coords[3]);
+      }
+
+      sf::RenderStates states;
+      states.texture = _texture.get();
+      states.blendMode = _blend_mode;
+
+      _render_texture->draw(_batched_vertices, states);
    }
+   //
+   //
 
    _render_texture->setSmooth(false);
    _render_texture->display();
