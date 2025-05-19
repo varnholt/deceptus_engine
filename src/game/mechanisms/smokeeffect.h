@@ -61,4 +61,5 @@ private:
    sf::Color _particle_color = {255, 255, 255, 25};
    Mode _mode = Mode::Smoke;
    std::unique_ptr<sf::RenderTexture> _render_texture;
+   sf::VertexArray _batched_vertices;
 };
