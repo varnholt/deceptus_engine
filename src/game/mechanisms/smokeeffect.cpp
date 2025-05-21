@@ -26,6 +26,13 @@ void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    _render_texture->clear();
 
+   // old expensive approach, instead all particles are now drawn as one huge triangle list
+   //
+   // for (auto& particle : _particles)
+   // {
+   //    _render_texture->draw(*particle._sprite, _blend_mode);
+   // }
+
    if (!_particles.empty())
    {
       sf::RenderStates states;
