@@ -83,10 +83,12 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    sf::RenderStates states;
    states.blendMode = sf::BlendAlpha;
 
+   std::size_t vertex_index = 0;
+
    sf::Vertex quad[4];
    for (const auto& p : _particles)
    {
-      const auto pos = p._position;
+      const auto pos_px = p._position;
       auto alpha = 0.0f;
 
       if (p._age > p._lifetime - 1.0f)
@@ -102,20 +104,40 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
          alpha = alpha_default + p._z * 50.0f;
       }
 
-      const auto color = sf::Color{_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(alpha)};
+      const auto color =
+         sf::Color{_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(std::clamp(alpha, 0.0f, 255.0f))};
 
-      quad[0].position = {pos.x, pos.y};                                          // bottom-left
-      quad[1].position = {pos.x, pos.y + _particle_size_px};                      // top-left
-      quad[2].position = {pos.x + _particle_size_px, pos.y};                      // bottom-right
-      quad[3].position = {pos.x + _particle_size_px, pos.y + _particle_size_px};  // top-right
-
-      for (auto& v : quad)
+      if (vertex_index + 6 > _vertices.getVertexCount())
       {
-         v.color = color;
+         break;
       }
 
-      target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
+      // triangle 1: top-left, top-right, bottom-right
+      _vertices[vertex_index + 0] = sf::Vertex({pos_px.x, pos_px.y}, color);
+      _vertices[vertex_index + 1] = sf::Vertex({pos_px.x + _particle_size_px, pos_px.y}, color);
+      _vertices[vertex_index + 2] = sf::Vertex({pos_px.x + _particle_size_px, pos_px.y + _particle_size_px}, color);
+
+      // triangle 2: top-left, bottom-right, bottom-left
+      _vertices[vertex_index + 3] = sf::Vertex({pos_px.x, pos_px.y}, color);
+      _vertices[vertex_index + 4] = sf::Vertex({pos_px.x + _particle_size_px, pos_px.y + _particle_size_px}, color);
+      _vertices[vertex_index + 5] = sf::Vertex({pos_px.x, pos_px.y + _particle_size_px}, color);
+
+      vertex_index += 6;
+
+      // quad[0].position = {pos.x, pos.y};                                          // bottom-left
+      // quad[1].position = {pos.x, pos.y + _particle_size_px};                      // top-left
+      // quad[2].position = {pos.x + _particle_size_px, pos.y};                      // bottom-right
+      // quad[3].position = {pos.x + _particle_size_px, pos.y + _particle_size_px};  // top-right
+      //
+      // for (auto& v : quad)
+      // {
+      //    v.color = color;
+      // }
+      //
+      // target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
    }
+
+   target.draw(&_vertices[0], vertex_index, sf::PrimitiveType::Triangles, states);
 }
 
 std::optional<sf::FloatRect> Dust::getBoundingBoxPx()
@@ -166,6 +188,9 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
             p.spawn(dust->_clip_rect);
             dust->_particles.push_back(p);
          }
+
+         dust->_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
+         dust->_vertices.resize(6 * particle_count);
       }
 
       if (wind_dir_x_it != data._tmx_object->_properties->_map.end())
