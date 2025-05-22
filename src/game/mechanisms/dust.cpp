@@ -38,6 +38,7 @@ const auto registered_dust = []
 Dust::Dust(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Dust).name());
+   _vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
 }
 
 void Dust::update(const sf::Time& dt)
@@ -124,6 +125,8 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
       vertex_index += 6;
 
+      // old approach where each dust particle was drawn individually
+      //
       // quad[0].position = {pos.x, pos.y};                                          // bottom-left
       // quad[1].position = {pos.x, pos.y + _particle_size_px};                      // top-left
       // quad[2].position = {pos.x + _particle_size_px, pos.y};                      // bottom-right
@@ -189,7 +192,6 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
             dust->_particles.push_back(p);
          }
 
-         dust->_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
          dust->_vertices.resize(6 * particle_count);
       }
 
