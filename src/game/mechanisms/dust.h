@@ -41,4 +41,5 @@ private:
    sf::Color _particle_color = {255, 255, 255, 255};
    float _particle_velocity = 100.0f;
    uint8_t _particle_size_px = 2;
+   sf::VertexArray _vertices;
 };
