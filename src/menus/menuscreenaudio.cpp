@@ -1,6 +1,7 @@
 #include "menuscreenaudio.h"
 
 #include "game/audio/audio.h"
+#include "game/audio/musicplayer.h"
 #include "game/config/gameconfiguration.h"
 #include "menu.h"
 #include "menuaudio.h"
@@ -114,6 +115,7 @@ void MenuScreenAudio::set(int32_t x)
 
    // update the volume of active threads
    Audio::getInstance().adjustActiveSampleVolume();
+   MusicPlayer::getInstance().adjustActiveMusicVolume();
 
    updateLayers();
 

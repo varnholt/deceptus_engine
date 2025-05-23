@@ -45,6 +45,7 @@ public:
    void queueTrack(const TrackRequest& request);
    void stop();
    void setPlaylist(const std::vector<std::string>& playlist);
+   void adjustActiveMusicVolume();
 
 private:
    MusicPlayer();
