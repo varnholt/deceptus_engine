@@ -38,5 +38,21 @@
       "origin": [24, 24],
       "sprite_count": 24,
       "texture": "data/sprites/extra_heart.png"
+   },
+   "locker_key_regular": {
+      "frame_durations": [2000],
+      "frame_offset": [0, 0],
+      "frame_size": [24, 24],
+      "origin": [12, 12],
+      "sprite_count": 1,
+      "texture": "data/sprites/locker_key.png"
+   },
+   "locker_key_flash": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 0],
+      "frame_size": [24, 24],
+      "origin": [12, 12],
+      "sprite_count": 12,
+      "texture": "data/sprites/locker_key.png"
    }
 }

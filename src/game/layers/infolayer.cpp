@@ -268,6 +268,12 @@ void InfoLayer::updateInventoryItems()
       }
 
       const auto& sprite = _sprites[slot];
+
+      if (sprite == nullptr)
+      {
+         Log::Fatal() << "could not find matching item description for '" << slot << "'. please edit inventory_items.json";
+      }
+
       _inventory_sprites[i]->setTextureRect(sprite->getTextureRect());
    }
 }
