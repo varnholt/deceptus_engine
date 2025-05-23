@@ -49,5 +49,14 @@
         "height_px": 38,
         "title": "Temporal Grimoire",
         "description": "Penned by a Chrono-Scribe, this grimoire unravels time's threads, revealing lost spells. Its pages hold the key to manipulating reality, a coveted tome for seekers of forgotten wisdom."
+    },
+    "locker_key": {
+        "x_px": 38,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38,
+        "title": "Locker Key",
+        "description": "I shiny key."
     }
+    
 }

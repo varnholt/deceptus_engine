@@ -269,6 +269,8 @@ void InGameMenuInventory::loadInventoryItems()
          _texts[image._name]._description_wrapped = wrapped_text;
       }
    );
+
+   std::ranges::for_each(_slot_sprites, [this](auto& sprite) { sprite._sprite = std::make_unique<sf::Sprite>(*_inventory_texture); });
 }
 
 Inventory& InGameMenuInventory::getInventory()
@@ -561,7 +563,6 @@ void InGameMenuInventory::updateInventoryItems()
 
       auto& sprite = _slot_sprites[index];
       sprite._sprite->setTextureRect(reference_sprite->getTextureRect());
-      sprite._sprite->setTexture(reference_sprite->getTexture());
 
       constexpr auto frame_width_slots = 47;
       const auto pos_x_px = 61 + _panel_left_offset_px.x + move_offset.value_or(0.0f) + index * frame_width_slots;
