@@ -57,13 +57,13 @@ void MusicPlayer::updateCrossfade(std::chrono::milliseconds dt)
    _crossfade_elapsed += dt;
    const auto normalized_time = std::min(1.0f, static_cast<float>(_crossfade_elapsed.count()) / _crossfade_duration.count());
 
-   next().setVolume(100.0f * normalized_time);
-   current().setVolume(100.0f * (1.0f - normalized_time));
+   next().setVolume(volume() * normalized_time);
+   current().setVolume(volume() * (1.0f - normalized_time));
 
    if (_crossfade_elapsed >= _crossfade_duration)
    {
       current().stop();
-      current().setVolume(100.0f);
+      current().setVolume(volume());
       _current_index = 1 - _current_index;  // swap
       _transition_state = MusicTransitionState::None;
       _pending_request.reset();
@@ -75,7 +75,7 @@ void MusicPlayer::updateFadeOut(std::chrono::milliseconds dt)
    _fade_out_elapsed += dt;
    const auto normalized_time = std::min(1.0f, static_cast<float>(_fade_out_elapsed.count()) / _fade_out_duration.count());
 
-   current().setVolume(100.0f * (1.0f - normalized_time));
+   current().setVolume(volume() * (1.0f - normalized_time));
 
    if (_fade_out_elapsed >= _fade_out_duration)
    {
@@ -214,6 +214,11 @@ void MusicPlayer::setPlaylist(const std::vector<std::string>& playlist)
 
    _playlist = playlist;
    _playlist_index = 0;
+}
+
+void MusicPlayer::adjustActiveMusicVolume()
+{
+   current().setVolume(volume());
 }
 
 void MusicPlayer::beginTransition(const TrackRequest& request)
