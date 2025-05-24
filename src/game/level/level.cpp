@@ -1204,6 +1204,20 @@ Level::searchMechanisms(const std::string& regex_pattern, const std::optional<st
          }
       }
    }
+
+   // also scan image layers since those are separate at the moment
+   if (!group.has_value() || group.value() == "imagelayers")
+   {
+      for (const auto& image_layer : _image_layers)
+      {
+         auto node = std::dynamic_pointer_cast<GameNode>(image_layer);
+         if (std::regex_match(node->getObjectId(), pattern))
+         {
+            results.push_back(image_layer);
+         }
+      }
+   }
+
    return results;
 }
 

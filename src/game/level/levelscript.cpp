@@ -89,6 +89,64 @@ int32_t addSensorRectCallback(lua_State* state)
 }
 
 /**
+ * @brief isMechanismVisible check if a given mechanism is visible
+ * @param state lua state
+ *    param 1: mechanism search pattern
+ *    param 2: mechanism group (optional)
+ *    return \c true if mechanism is visible
+ * @return error code
+ */
+int32_t isMechanismVisible(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc < 1 || argc > 2)
+   {
+      return 0;
+   }
+
+   const auto search_pattern = lua_tostring(state, 1);
+
+   std::optional<std::string> group;
+   if (argc == 2)
+   {
+      group = lua_tostring(state, 2);
+   }
+
+   const auto visible = getInstance()->isMechanismVisible(search_pattern, group);
+   lua_pushboolean(state, visible);
+   return 1;
+}
+
+/**
+ * @brief setMechanismVisible set a mechanism node to visible/invisible
+ * @param state lua state
+ *    param 1: search pattern
+ *    param 2: visible flag
+ *    param 3: group (optional)
+ * @return error code
+ */
+int32_t setMechanismVisible(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc < 2 || argc > 3)
+   {
+      return 0;
+   }
+
+   const auto search_pattern = lua_tostring(state, 1);
+   const auto visible = lua_toboolean(state, 2);
+
+   std::optional<std::string> group;
+   if (argc == 3)
+   {
+      group = lua_tostring(state, 3);
+   }
+
+   getInstance()->setMechanismVisible(search_pattern, visible, group);
+   return 0;
+}
+
+/**
  * @brief isMechanismEnabled check if a given mechanism is enabled
  * @param state lua state
  *    param 1: mechanism search pattern
@@ -495,11 +553,13 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
    lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
    lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
+   lua_register(_lua_state, "isMechanismVisible", ::isMechanismVisible);
    lua_register(_lua_state, "lockPlayerControls", ::lockPlayerControls);
    lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
    lua_register(_lua_state, "setLuaNodeActive", ::setLuaNodeActive);
    lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
    lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
+   lua_register(_lua_state, "setMechanismVisible", ::setMechanismVisible);
    lua_register(_lua_state, "setZoomFactor", ::setZoomFactor);
    lua_register(_lua_state, "showDialogue", ::showDialogue);
    lua_register(_lua_state, "toggle", ::toggle);
@@ -768,6 +828,37 @@ bool LevelScript::isMechanismEnabled(const std::string& search_pattern, const st
       return false;
    }
    return mechanisms.front()->isEnabled();
+}
+
+void LevelScript::setMechanismVisible(const std::string& search_pattern, bool visible, const std::optional<std::string>& group)
+{
+   if (!_search_mechanism_callback)
+   {
+      Log::Error() << "search mechanism callback not initialized yet";
+      return;
+   }
+
+   auto mechanisms = _search_mechanism_callback(search_pattern, group);
+   for (auto& mechanism : mechanisms)
+   {
+      mechanism->setVisible(visible);
+   }
+}
+
+bool LevelScript::isMechanismVisible(const std::string& search_pattern, const std::optional<std::string>& group) const
+{
+   if (!_search_mechanism_callback)
+   {
+      Log::Error() << "search mechanism callback not initialized yet";
+      return false;
+   }
+
+   auto mechanisms = _search_mechanism_callback(search_pattern, group);
+   if (mechanisms.empty())
+   {
+      return false;
+   }
+   return mechanisms.front()->isVisible();
 }
 
 void LevelScript::toggle(const std::string& search_pattern, const std::optional<std::string>& group)

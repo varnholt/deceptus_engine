@@ -13,7 +13,12 @@ ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 
 void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   if (!_sprite)
+   if (_sprite == nullptr)
+   {
+      return;
+   }
+
+   if (!_visible)
    {
       return;
    }
@@ -150,8 +155,8 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
    image->_texture = std::make_shared<LazyTexture>(texture_path, image->_chunks);
    image->_position = {image_layer->_offset_x_px, image_layer->_offset_y_px};
    image->_color = {255, 255, 255, static_cast<uint8_t>(image_layer->_opacity * 255.0f)};
-
-   image->setObjectId(texture_path.string());
+   image->_texture_path = texture_path;
+   image->setObjectId(element->_name);
 
    return image;
 }
