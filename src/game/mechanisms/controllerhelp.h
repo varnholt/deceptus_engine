@@ -28,7 +28,6 @@ private:
    std::vector<sf::IntRect> _sprite_rects_controller;
 
    std::unique_ptr<sf::Sprite> _background;
-   bool _visible = false;
    float _alpha = 0.0f;
    sf::Time _time;
 };

@@ -132,6 +132,16 @@ void GameMechanism::toggle()
    setEnabled(!isEnabled());
 }
 
+bool GameMechanism::isVisible() const
+{
+   return _visible;
+}
+
+void GameMechanism::setVisible(bool visible)
+{
+   _visible = visible;
+}
+
 void GameMechanism::preload()
 {
 }
