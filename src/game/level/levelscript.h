@@ -25,6 +25,8 @@ public:
    void addSensorRectCallback(const std::string& sensor_rect_id);
    void setMechanismEnabled(const std::string& search_pattern, bool enabled, const std::optional<std::string>& group = std::nullopt);
    bool isMechanismEnabled(const std::string& mechanism_id, const std::optional<std::string>& group) const;
+   void setMechanismVisible(const std::string& search_pattern, bool visible, const std::optional<std::string>& group = std::nullopt);
+   bool isMechanismVisible(const std::string& mechanism_id, const std::optional<std::string>& group) const;
    void toggle(const std::string& search_pattern, const std::optional<std::string>& group = std::nullopt);
    void addPlayerSkill(int32_t skill);
    void removePlayerSkill(int32_t skill);

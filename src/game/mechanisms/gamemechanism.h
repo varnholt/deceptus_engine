@@ -27,6 +27,9 @@ public:
    virtual void setEnabled(bool enabled);
    virtual void toggle();
 
+   virtual bool isVisible() const;
+   virtual void setVisible(bool visible);
+
    virtual void preload();
 
    // audio related
@@ -60,6 +63,7 @@ public:
 protected:
    int32_t _z_index{0};
    bool _enabled{true};
+   bool _visible{true};
    bool _serialized{false};
    bool _observed{false};
 

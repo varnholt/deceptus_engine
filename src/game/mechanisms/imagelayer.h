@@ -36,4 +36,5 @@ private:
    sf::View _parallax_view;
    std::optional<ParallaxSettings> _parallax_settings;
    std::vector<std::string> _restrict_to_rooms;
+   std::filesystem::path _texture_path;
 };
