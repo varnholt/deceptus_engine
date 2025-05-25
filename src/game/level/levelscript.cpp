@@ -400,6 +400,26 @@ int32_t removePlayerSkill(lua_State* state)
 }
 
 /**
+ * @brief debug output a debug message to stdout
+ * @param state lua state
+ *    param 1: debug message
+ * @return error code
+ */
+int32_t debug(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto message = lua_tostring(state, 1);
+   Log::Info() << message;
+
+   return 0;
+}
+
+/**
  * @brief giveWeaponBow give bow to player
  * @return error code
  */
@@ -549,6 +569,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "addPlayerHealth", ::addPlayerHealth);
    lua_register(_lua_state, "addPlayerHealthMax", ::addPlayerHealthMax);
    lua_register(_lua_state, "addSensorRectCallback", ::addSensorRectCallback);
+   lua_register(_lua_state, "debug", ::debug);
    lua_register(_lua_state, "giveWeaponBow", ::giveWeaponBow);
    lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
    lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
@@ -589,6 +610,12 @@ void LevelScript::setup(const std::filesystem::path& path)
             luaWriteProperty(prop._name, prop._value);
          }
       }
+   }
+   else
+   {
+      auto* error_message = lua_tostring(_lua_state, -1);
+      Log::Error() << "Failed loading " << _script_name << ": " << (error_message ? error_message : "unknown error");
+      lua_pop(_lua_state, 1);
    }
 }
 

@@ -15,11 +15,6 @@ LazyTexture::LazyTexture(const std::filesystem::path& texture_path, std::vector<
 {
 }
 
-LazyTexture::~LazyTexture()
-{
-   Log::Info() << "destructor";
-}
-
 void LazyTexture::update(const Chunk& player_chunk)
 {
    const auto should_be_loaded = std::ranges::any_of(
@@ -56,7 +51,7 @@ void LazyTexture::update(const Chunk& player_chunk)
 
 void LazyTexture::loadTexture()
 {
-   Log::Info() << "loading " << _texture_path;
+   // Log::Info() << "loading " << _texture_path;
 
    _loading_thread = std::jthread(
       [this](std::stop_token)
@@ -87,12 +82,12 @@ void LazyTexture::uploadTexture()
       {
          _pending_image.reset();
          _image_ready = false;
-         Log::Info() << "uploaded texture " << _texture_path << " (" << _texture->getSize().x << ", " << _texture->getSize().y << ")";
+         // Log::Info() << "uploaded texture " << _texture_path << " (" << _texture->getSize().x << ", " << _texture->getSize().y << ")";
       }
       else
       {
          _texture.reset();
-         Log::Info() << "failed to upload texture " << _texture_path;
+         Log::Warning() << "failed to upload texture " << _texture_path;
       }
 
       _loading.clear();
@@ -101,7 +96,7 @@ void LazyTexture::uploadTexture()
 
 void LazyTexture::unloadTexture()
 {
-   Log::Info() << "unloading " << _texture_path;
+   // Log::Info() << "unloading " << _texture_path;
 
    // safe to go without mutex since it'll only unload once the texture was uploaded to gpu
    _texture.reset();
