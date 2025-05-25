@@ -14,7 +14,7 @@ class LazyTexture
 {
 public:
    explicit LazyTexture(const std::filesystem::path& texture_path, std::vector<Chunk>& texture_chunks);
-   virtual ~LazyTexture();
+   virtual ~LazyTexture() = default;
 
    void update(const Chunk& player_chunk);
    const std::shared_ptr<sf::Texture>& getTexture() const;

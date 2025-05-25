@@ -141,7 +141,8 @@ void GameMechanismDeserializer::deserialize(
                   }
                   else
                   {
-                     Log::Error() << "no initializer found for " << group_key;
+                     // while not all mechanisms are ported, "this is fine"
+                     // Log::Error() << "no initializer found for " << group_key;
                   }
                }
             );
@@ -356,7 +357,7 @@ void GameMechanismDeserializer::deserialize(
       }
    }
 
-   debugOutputMechanisms(mechanisms);
+   // debugOutputMechanisms(mechanisms);
 }
 
 bool GameMechanismDeserializer::isLayerNameReserved(const std::string& layer_name)
