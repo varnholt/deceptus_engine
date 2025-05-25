@@ -163,12 +163,7 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
       _animation_pickup->draw(target);
    }
 
-   if (!_active)
-   {
-      return;
-   }
-
-   if (!_visible)
+   if (!_active || !_visible)
    {
       return;
    }
@@ -212,7 +207,7 @@ void Extra::update(const sf::Time& delta_time)
       _animation_pickup->update(delta_time);
    }
 
-   if (!_active)
+   if (!_active || !_enabled)
    {
       return;
    }
