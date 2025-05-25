@@ -569,13 +569,13 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "addPlayerHealth", ::addPlayerHealth);
    lua_register(_lua_state, "addPlayerHealthMax", ::addPlayerHealthMax);
    lua_register(_lua_state, "addSensorRectCallback", ::addSensorRectCallback);
-   lua_register(_lua_state, "debug", ::debug);
    lua_register(_lua_state, "giveWeaponBow", ::giveWeaponBow);
    lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
    lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
    lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
    lua_register(_lua_state, "isMechanismVisible", ::isMechanismVisible);
    lua_register(_lua_state, "lockPlayerControls", ::lockPlayerControls);
+   lua_register(_lua_state, "log", ::debug);
    lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
    lua_register(_lua_state, "setLuaNodeActive", ::setLuaNodeActive);
    lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
