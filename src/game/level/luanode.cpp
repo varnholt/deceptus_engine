@@ -1498,7 +1498,7 @@ int32_t debug(lua_State* state)
    }
 
    const auto message = lua_tostring(state, 1);
-   puts(message);
+   Log::Info() << message;
 
    return 0;
 }
