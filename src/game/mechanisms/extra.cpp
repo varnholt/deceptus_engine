@@ -54,6 +54,8 @@ Extra::Extra(GameNode* parent) : GameNode(parent)
 
 void Extra::deserialize(const GameDeserializeData& data)
 {
+   setObjectId(data._tmx_object->_name);
+
    const auto pos_x_px = data._tmx_object->_x_px;
    const auto pos_y_px = data._tmx_object->_y_px;
    const auto width_px = data._tmx_object->_width_px;
@@ -166,6 +168,11 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
       return;
    }
 
+   if (!_visible)
+   {
+      return;
+   }
+
    // draw animations
    if (!_animations_main.empty())
    {
@@ -229,6 +236,7 @@ void Extra::update(const sf::Time& delta_time)
       }
    }
 
+   // if the extra requires a button press, only proceed if the button is down
    if (_requires_button_press)
    {
       if (!Player::getCurrent()->getControls()->isButtonBPressed())

@@ -1826,12 +1826,12 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "boom", ::boom);
    lua_register(_lua_state, "damage", ::damage);
    lua_register(_lua_state, "damageRadius", ::damageRadius);
-   lua_register(_lua_state, "debug", ::debug);
    lua_register(_lua_state, "die", ::die);
    lua_register(_lua_state, "getLinearVelocity", ::getLinearVelocity);
    lua_register(_lua_state, "getGravity", ::getGravity);
    lua_register(_lua_state, "intersectsWithPlayer", ::intersectsWithPlayer);
    lua_register(_lua_state, "isPhsyicsPathClear", ::isPhsyicsPathClear);
+   lua_register(_lua_state, "log", ::debug);
    lua_register(_lua_state, "makeDynamic", ::makeDynamic);
    lua_register(_lua_state, "makeStatic", ::makeStatic);
    lua_register(_lua_state, "playDetonationAnimation", ::playDetonationAnimation);
