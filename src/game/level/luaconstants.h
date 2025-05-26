@@ -12,6 +12,7 @@
 #define FUNCTION_PLAYER_MOVED_TO "playerMovedTo"
 #define FUNCTION_PLAYER_RECEIVED_EXTRA "playerReceivedExtra"
 #define FUNCTION_PLAYER_RECEIVED_ITEM "playerReceivedItem"
+#define FUNCTION_PLAYER_USED_ITEM "playerUsedItem"
 #define FUNCTION_RETRIEVE_PROPERTIES "retrieveProperties"
 #define FUNCTION_SET_PATH "setPath"
 #define FUNCTION_SET_START_POSITION "setStartPosition"

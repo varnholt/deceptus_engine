@@ -203,6 +203,65 @@ int32_t setMechanismEnabled(lua_State* state)
    return 0;
 }
 
+/**
+ * @brief inventory_add adds an item to the inventory
+ * @param state lua state
+ *    param 1: item key (string)
+ * @return error code
+ */
+int32_t inventoryAdd(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto item_key = lua_tostring(state, 1);
+   getInstance()->inventoryAdd(item_key);
+   return 0;
+}
+
+/**
+ * @brief inventory_remove removes an item from the inventory
+ * @param state lua state
+ *    param 1: item key (string)
+ * @return error code
+ */
+int32_t inventoryRemove(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto item_key = lua_tostring(state, 1);
+   getInstance()->inventoryRemove(item_key);
+   return 0;
+}
+
+/**
+ * @brief inventory_has checks if the inventory contains the given item
+ * @param state lua state
+ *    param 1: item key (string)
+ *    return true if item is in inventory
+ * @return number of return values (1)
+ */
+int32_t inventoryHas(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const auto item_key = lua_tostring(state, 1);
+   const auto has_item = getInstance()->inventoryHas(item_key);
+   lua_pushboolean(state, has_item);
+   return 1;
+}
+
 // todo: document
 /**
  * @brief showDialogue show a dialogue
@@ -535,8 +594,10 @@ LevelScript::LevelScript()
 
    // add 'item added' callback
    auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
-   _added_callback = [this](const std::string& item) { luaPlayerReceivedItem(item); };
-   inventory._added_callbacks.push_back(_added_callback);
+   _inventory_added_callback = [this](const std::string& item) { luaPlayerReceivedItem(item); };
+   _inventory_used_callback = [this](const std::string& item) { return luaPlayerUsedItem(item); };
+   inventory._added_callbacks.push_back(_inventory_added_callback);
+   inventory._used_callbacks.push_back(_inventory_used_callback);
 
    _enabled_observer_reference = GameMechanismObserver::addListener<GameMechanismObserver::EnabledCallback>(
       [this](const std::string& object_id, const std::string& group_id, bool enabled) { luaMechanismEnabled(object_id, group_id, enabled); }
@@ -554,7 +615,7 @@ LevelScript::~LevelScript()
 
    // remove 'item added' callback
    auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
-   inventory.removeAddedCallback(_added_callback);
+   inventory.removeAddedCallback(_inventory_added_callback);
 }
 
 void LevelScript::setup(const std::filesystem::path& path)
@@ -572,6 +633,9 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "giveWeaponBow", ::giveWeaponBow);
    lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
    lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
+   lua_register(_lua_state, "inventoryAdd", ::inventoryAdd);
+   lua_register(_lua_state, "inventoryRemove", ::inventoryRemove);
+   lua_register(_lua_state, "inventoryHas", ::inventoryHas);
    lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
    lua_register(_lua_state, "isMechanismVisible", ::isMechanismVisible);
    lua_register(_lua_state, "lockPlayerControls", ::lockPlayerControls);
@@ -715,6 +779,36 @@ void LevelScript::luaPlayerReceivedItem(const std::string& item)
          error(_lua_state, FUNCTION_PLAYER_RECEIVED_ITEM);
       }
    }
+}
+
+///
+/// \brief LevelScript::luaPlayerUsedItem
+/// \param item item that was used
+/// \return bool result from Lua function (false if function not defined or error)
+///
+bool LevelScript::luaPlayerUsedItem(const std::string& item)
+{
+   lua_getglobal(_lua_state, FUNCTION_PLAYER_USED_ITEM);
+   if (!lua_isfunction(_lua_state, -1))
+   {
+      lua_pop(_lua_state, 1);
+      return false;
+   }
+
+   lua_pushstring(_lua_state, item.c_str());
+
+   const auto result = lua_pcall(_lua_state, 1, 1, 0);
+   if (result != LUA_OK)
+   {
+      error(_lua_state, FUNCTION_PLAYER_USED_ITEM);
+      lua_pop(_lua_state, 1);
+      return false;
+   }
+
+   const bool return_value = lua_toboolean(_lua_state, -1);
+   lua_pop(_lua_state, 1);
+
+   return return_value;
 }
 
 ///
@@ -920,6 +1014,24 @@ void LevelScript::addPlayerHealthMax(int32_t health_points_to_add)
 void LevelScript::setZoomFactor(float zoom_factor)
 {
    CameraZoom::getInstance().setZoomFactor(zoom_factor);
+}
+
+void LevelScript::inventoryAdd(const std::string& item)
+{
+   auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
+   inventory.add(item);
+}
+
+void LevelScript::inventoryRemove(const std::string& item)
+{
+   auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
+   inventory.remove(item);
+}
+
+bool LevelScript::inventoryHas(const std::string& item)
+{
+   auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
+   return inventory.has(item);
 }
 
 namespace
