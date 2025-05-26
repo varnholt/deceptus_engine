@@ -41,6 +41,9 @@ public:
    void showDialogue(const std::string& search_pattern);
    void lockPlayerControls(const std::chrono::milliseconds& duration);
    void setZoomFactor(float zoom_factor);
+   void inventoryAdd(const std::string& item);
+   void inventoryRemove(const std::string& item);
+   bool inventoryHas(const std::string& item);
 
    // functions on the lua end
    void luaInitialize();
@@ -48,6 +51,7 @@ public:
    void luaWriteProperty(const std::string& key, const std::string& value);
    void luaPlayerReceivedExtra(const std::string& extra_name);
    void luaPlayerReceivedItem(const std::string& item);
+   bool luaPlayerUsedItem(const std::string& item);
    void luaPlayerCollidesWithRect(int32_t rect_id);
    void luaPlayerCollidesWithSensorRect(const std::string& sensor_rect_id);
    void luaMechanismEnabled(const std::string& object_id, const std::string& group, bool enabled);
@@ -73,7 +77,9 @@ private:
    SearchMechanismCallback _search_mechanism_callback{nullptr};
 
    using ItemAddedCallback = std::function<void(const std::string&)>;
-   ItemAddedCallback _added_callback;
+   using ItemUsedCallback = std::function<bool(const std::string&)>;
+   ItemAddedCallback _inventory_added_callback;
+   ItemUsedCallback _inventory_used_callback;
 
    std::unique_ptr<
       GameMechanismObserver::Reference<GameMechanismObserver::EnabledCallback>,
