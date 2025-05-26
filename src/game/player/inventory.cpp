@@ -139,7 +139,7 @@ void Inventory::removeUsedCallback(const UsedCallback& callback_to_remove)
    );
 }
 
-bool Inventory::hasInventoryItem(const std::string& item_key) const
+bool Inventory::has(const std::string& item_key) const
 {
    const auto it = std::find(_items.cbegin(), _items.cend(), item_key);
    return it != _items.end();

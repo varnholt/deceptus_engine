@@ -204,7 +204,7 @@ void Door::update(const sf::Time& dt)
          return;
       }
 
-      if (_required_item.has_value() && !SaveState::getPlayerInfo()._inventory.hasInventoryItem(*_required_item))
+      if (_required_item.has_value() && !SaveState::getPlayerInfo()._inventory.has(*_required_item))
       {
          Log::Info() << "player doesn't have key: " << *_required_item;
          return;

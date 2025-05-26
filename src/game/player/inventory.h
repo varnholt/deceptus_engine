@@ -16,7 +16,7 @@ struct Inventory
 
    void add(const std::string&);
    void remove(const std::string&);
-   bool hasInventoryItem(const std::string& item_key) const;
+   bool has(const std::string& item_key) const;
    const std::vector<std::string>& getItems() const;
    void clear();
    void resetKeys();
