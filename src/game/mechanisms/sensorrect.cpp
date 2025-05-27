@@ -142,6 +142,11 @@ void SensorRect::addSensorCallback(const SensorCallback& callback)
    _callbacks.push_back(callback);
 }
 
+bool SensorRect::playerIntersects() const
+{
+   return _player_intersects;
+}
+
 void SensorRect::processAction()
 {
    switch (_action)
