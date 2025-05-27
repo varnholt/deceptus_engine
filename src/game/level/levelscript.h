@@ -27,6 +27,7 @@ public:
    bool isMechanismEnabled(const std::string& mechanism_id, const std::optional<std::string>& group) const;
    void setMechanismVisible(const std::string& search_pattern, bool visible, const std::optional<std::string>& group = std::nullopt);
    bool isMechanismVisible(const std::string& mechanism_id, const std::optional<std::string>& group) const;
+   bool isPlayerIntersectingSensorRect(const std::string& mechanism_id) const;
    void toggle(const std::string& search_pattern, const std::optional<std::string>& group = std::nullopt);
    void addPlayerSkill(int32_t skill);
    void removePlayerSkill(int32_t skill);

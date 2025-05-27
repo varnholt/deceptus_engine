@@ -118,6 +118,28 @@ int32_t isMechanismVisible(lua_State* state)
 }
 
 /**
+ * @brief isPlayerIntersectingSensorRect check if the player intersects with a sensor rect
+ * @param state lua state
+ *    param 1: mechanism search pattern
+ *    return \c true if the player intersects a given sensor rect
+ * @return error code
+ */
+int32_t isPlayerIntersectingSensorRect(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc < 1)
+   {
+      return 0;
+   }
+
+   const auto search_pattern = lua_tostring(state, 1);
+
+   const auto intersects = getInstance()->isPlayerIntersectingSensorRect(search_pattern);
+   lua_pushboolean(state, intersects);
+   return 1;
+}
+
+/**
  * @brief setMechanismVisible set a mechanism node to visible/invisible
  * @param state lua state
  *    param 1: search pattern
@@ -638,6 +660,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "inventoryHas", ::inventoryHas);
    lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
    lua_register(_lua_state, "isMechanismVisible", ::isMechanismVisible);
+   lua_register(_lua_state, "isPlayerIntersectingSensorRect", ::isPlayerIntersectingSensorRect);
    lua_register(_lua_state, "lockPlayerControls", ::lockPlayerControls);
    lua_register(_lua_state, "log", ::debug);
    lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
@@ -980,6 +1003,22 @@ bool LevelScript::isMechanismVisible(const std::string& search_pattern, const st
       return false;
    }
    return mechanisms.front()->isVisible();
+}
+
+bool LevelScript::isPlayerIntersectingSensorRect(const std::string& mechanism_id) const
+{
+   auto mechanisms = _search_mechanism_callback(mechanism_id, "sensor_rects");
+
+   auto mechanism_it = std::ranges::find_if(
+      mechanisms,
+      [&mechanism_id](const auto& mechanism)
+      {
+         auto* game_node = dynamic_cast<GameNode*>(mechanism.get());
+         return (game_node && game_node->getObjectId() == mechanism_id);
+      }
+   );
+
+   return mechanism_it != mechanisms.end();
 }
 
 void LevelScript::toggle(const std::string& search_pattern, const std::optional<std::string>& group)

@@ -34,6 +34,8 @@ public:
    using SensorCallback = std::function<void(const std::string& id)>;
    void addSensorCallback(const SensorCallback& callback);
 
+   bool playerIntersects() const;
+
 private:
    void processAction();
 
