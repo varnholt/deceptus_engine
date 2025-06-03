@@ -34,8 +34,10 @@ const auto registered_door = []
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
          auto mechanism = std::make_shared<Door>(parent);
-         mechanism->setup(data);
-         mechanisms["doors"]->push_back(mechanism);
+         if (mechanism->setup(data))
+         {
+            mechanisms["doors"]->push_back(mechanism);
+         }
       }
    );
    registry.registerObjectGroup(
@@ -386,8 +388,13 @@ void Door::setPlayerAtDoor(bool player_at_door)
    _player_at_door = player_at_door;
 }
 
-void Door::setup(const GameDeserializeData& data)
+bool Door::setup(const GameDeserializeData& data)
 {
+   if (data._tmx_object == nullptr)
+   {
+      return false;
+   }
+
    setObjectId(data._tmx_object->_name);
 
    const auto x_px = data._tmx_object->_x_px;
@@ -540,4 +547,6 @@ void Door::setup(const GameDeserializeData& data)
    _player_at_door_rect.size.y = height_px + PIXELS_PER_TILE;
 
    setupBody(data._world);
+
+   return true;
 }
