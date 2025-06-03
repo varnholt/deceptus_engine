@@ -44,7 +44,7 @@ public:
    void close();
    void toggle() override;
 
-   void setup(const GameDeserializeData& data);
+   bool setup(const GameDeserializeData& data);
 
    bool isPlayerAtDoor() const;
    void setPlayerAtDoor(bool isPlayerAtDoor);

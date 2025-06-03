@@ -30,8 +30,10 @@ const auto registered_extra = []
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
          auto mechanism = std::make_shared<Extra>(parent);
-         mechanism->deserialize(data);
-         mechanisms["extras"]->push_back(mechanism);
+         if (mechanism->deserialize(data))
+         {
+            mechanisms["extras"]->push_back(mechanism);
+         }
       }
    );
    registry.registerObjectGroup(
@@ -52,8 +54,13 @@ Extra::Extra(GameNode* parent) : GameNode(parent)
    setClassName(typeid(Extra).name());
 }
 
-void Extra::deserialize(const GameDeserializeData& data)
+bool Extra::deserialize(const GameDeserializeData& data)
 {
+   if (data._tmx_object == nullptr)
+   {
+      return false;
+   }
+
    setObjectId(data._tmx_object->_name);
 
    const auto pos_x_px = data._tmx_object->_x_px;
@@ -139,6 +146,8 @@ void Extra::deserialize(const GameDeserializeData& data)
    // add
    // - enable/disable mechanism function to level
    // - add enable/disable mechanism code to levelscript
+
+   return true;
 }
 
 void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)

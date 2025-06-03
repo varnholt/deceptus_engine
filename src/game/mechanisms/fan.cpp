@@ -20,9 +20,7 @@ const auto registered = []
    auto& registry = GameMechanismDeserializerRegistry::instance();
    registry.mapGroupToLayer("Fan", "fans");
 
-   registry.registerLayerName(
-      "fans", [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms) { Fan::addObject(parent, data); }
-   );
+   registry.registerLayerName("fans", [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms) { Fan::load(data); });
    registry.registerObjectGroup(
       "fan", [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms) { Fan::addObject(parent, data); }
    );
