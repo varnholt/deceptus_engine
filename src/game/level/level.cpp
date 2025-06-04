@@ -360,7 +360,6 @@ void Level::assignMechanismsToRooms()
 {
    auto update_room = [this](const std::shared_ptr<GameMechanism>& mechanism)
    {
-      auto game_node = std::dynamic_pointer_cast<GameNode>(mechanism);
       if (mechanism->getBoundingBoxPx().has_value())
       {
          auto rooms = Room::findAll(mechanism->getBoundingBoxPx().value(), _rooms);
@@ -1210,8 +1209,7 @@ Level::searchMechanisms(const std::string& regex_pattern, const std::optional<st
    {
       for (const auto& image_layer : _image_layers)
       {
-         auto node = std::dynamic_pointer_cast<GameNode>(image_layer);
-         if (std::regex_match(node->getObjectId(), pattern))
+         if (std::regex_match(image_layer->getObjectId(), pattern))
          {
             results.push_back(image_layer);
          }
