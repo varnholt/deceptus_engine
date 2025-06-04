@@ -12,6 +12,27 @@ namespace
 static const int32_t char_width = 19;
 static const int32_t char_height = 24;
 static const size_t max_length = 11;
+
+std::string extractFirstName(std::string_view username)
+{
+   // heuristic 1: split CamelCase
+   for (std::size_t i = 1; i < username.size(); ++i)
+   {
+      if (std::isupper(static_cast<unsigned char>(username[i])))
+      {
+         return std::string(username.substr(0, i));
+      }
+   }
+
+   // heuristic 2: try underscores or dots
+   if (auto pos = username.find_first_of("._"); pos != std::string_view::npos)
+   {
+      return std::string(username.substr(0, pos));
+   }
+
+   // fallback: return full username
+   return std::string(username);
+}
 }  // namespace
 
 MenuScreenNameSelect::MenuScreenNameSelect()
@@ -185,7 +206,8 @@ void MenuScreenNameSelect::retrieveUsername()
    // probably requires a regular expression to filter out the unicode crap
    auto* u1 = std::getenv("USERNAME");
    auto* u2 = std::getenv("USER");
-   _name = u1 ? u1 : (u2 ? u2 : "");
+   std::string raw_name = u1 ? u1 : (u2 ? u2 : "");
+   _name = extractFirstName(raw_name);
 
    if (!_name.empty())
    {
