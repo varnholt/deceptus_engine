@@ -274,9 +274,9 @@ void Game::playMenuMusic()
 {
    MusicPlayer::getInstance().queueTrack(
       {.filename = "data/music/menu_test_track_muffler_callisto.ogg",
-       .transition = MusicPlayer::TransitionType::Crossfade,
+       .transition = MusicPlayerTypes::TransitionType::Crossfade,
        .duration = std::chrono::milliseconds(1000),
-       .post_action = MusicPlayer::PostPlaybackAction::Loop}
+       .post_action = MusicPlayerTypes::PostPlaybackAction::Loop}
    );
 }
 
@@ -284,9 +284,9 @@ void Game::playLevelMusic()
 {
    MusicPlayer::getInstance().queueTrack(
       {.filename = "data/music/level_test_track_muffler_awakening.ogg",
-       .transition = MusicPlayer::TransitionType::Crossfade,
+       .transition = MusicPlayerTypes::TransitionType::Crossfade,
        .duration = std::chrono::milliseconds(1000),
-       .post_action = MusicPlayer::PostPlaybackAction::Loop}
+       .post_action = MusicPlayerTypes::PostPlaybackAction::Loop}
    );
 }
 
