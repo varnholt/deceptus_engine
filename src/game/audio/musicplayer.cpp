@@ -30,19 +30,19 @@ void MusicPlayer::update(const sf::Time& dt)
 
    switch (_transition_state)
    {
-      case MusicTransitionState::Crossfading:
+      case MusicPlayerTypes::MusicTransitionState::Crossfading:
       {
          updateCrossfade(dt_ms);
          return;
       }
 
-      case MusicTransitionState::FadingOut:
+      case MusicPlayerTypes::MusicTransitionState::FadingOut:
       {
          updateFadeOut(dt_ms);
          return;
       }
 
-      case MusicTransitionState::None:
+      case MusicPlayerTypes::MusicTransitionState::None:
       {
          break;
       }
@@ -65,7 +65,7 @@ void MusicPlayer::updateCrossfade(std::chrono::milliseconds dt)
       current().stop();
       current().setVolume(volume());
       _current_index = 1 - _current_index;  // swap
-      _transition_state = MusicTransitionState::None;
+      _transition_state = MusicPlayerTypes::MusicTransitionState::None;
       _pending_request.reset();
    }
 }
@@ -84,12 +84,12 @@ void MusicPlayer::updateFadeOut(std::chrono::milliseconds dt)
       if (_pending_request.has_value())
       {
          TrackRequest new_request = _pending_request.value();
-         new_request.transition = TransitionType::ImmediateSwitch;
+         new_request.transition = MusicPlayerTypes::TransitionType::ImmediateSwitch;
          beginTransition(new_request);
       }
 
       _pending_request.reset();
-      _transition_state = MusicTransitionState::None;
+      _transition_state = MusicPlayerTypes::MusicTransitionState::None;
    }
 }
 
@@ -104,14 +104,14 @@ void MusicPlayer::processPendingRequest()
 
    switch (request.transition)
    {
-      case TransitionType::ImmediateSwitch:
+      case MusicPlayerTypes::TransitionType::ImmediateSwitch:
       {
          beginTransition(request);
          _pending_request.reset();
          break;
       }
 
-      case TransitionType::LetCurrentFinish:
+      case MusicPlayerTypes::TransitionType::LetCurrentFinish:
       {
          if (current().getStatus() != sf::SoundStream::Status::Playing)
          {
@@ -121,20 +121,20 @@ void MusicPlayer::processPendingRequest()
          break;
       }
 
-      case TransitionType::Crossfade:
+      case MusicPlayerTypes::TransitionType::Crossfade:
       {
          beginTransition(request);
-         _transition_state = MusicTransitionState::Crossfading;
+         _transition_state = MusicPlayerTypes::MusicTransitionState::Crossfading;
          _crossfade_elapsed = std::chrono::milliseconds{0};
          _crossfade_duration = request.duration;
          break;
       }
 
-      case TransitionType::FadeOutThenNew:
+      case MusicPlayerTypes::TransitionType::FadeOutThenNew:
       {
-         if (_transition_state == MusicTransitionState::None)
+         if (_transition_state == MusicPlayerTypes::MusicTransitionState::None)
          {
-            _transition_state = MusicTransitionState::FadingOut;
+            _transition_state = MusicPlayerTypes::MusicTransitionState::FadingOut;
             _fade_out_elapsed = std::chrono::milliseconds{0};
             _fade_out_duration = request.duration;
          }
@@ -152,27 +152,27 @@ void MusicPlayer::handleTrackFinished()
 
    switch (_post_action)
    {
-      case PostPlaybackAction::None:
+      case MusicPlayerTypes::PostPlaybackAction::None:
       {
          break;
       }
 
-      case PostPlaybackAction::Loop:
+      case MusicPlayerTypes::PostPlaybackAction::Loop:
       {
          current().play();
          break;
       }
 
-      case PostPlaybackAction::PlayNext:
+      case MusicPlayerTypes::PostPlaybackAction::PlayNext:
       {
          if (!_playlist.empty())
          {
             _playlist_index = (_playlist_index + 1) % _playlist.size();
             queueTrack(
                {.filename = _playlist[_playlist_index],
-                .transition = TransitionType::ImmediateSwitch,
+                .transition = MusicPlayerTypes::TransitionType::ImmediateSwitch,
                 .duration = std::chrono::milliseconds{0},
-                .post_action = PostPlaybackAction::PlayNext}
+                .post_action = MusicPlayerTypes::PostPlaybackAction::PlayNext}
             );
          }
          break;
@@ -205,7 +205,7 @@ void MusicPlayer::stop()
    }
 
    _pending_request.reset();
-   _transition_state = MusicTransitionState::None;
+   _transition_state = MusicPlayerTypes::MusicTransitionState::None;
 }
 
 void MusicPlayer::setPlaylist(const std::vector<std::string>& playlist)
@@ -232,7 +232,7 @@ void MusicPlayer::beginTransition(const TrackRequest& request)
       return;
    }
 
-   if (request.transition == TransitionType::Crossfade)
+   if (request.transition == MusicPlayerTypes::TransitionType::Crossfade)
    {
       next_track.setVolume(0.f);
    }
@@ -245,7 +245,8 @@ void MusicPlayer::beginTransition(const TrackRequest& request)
    next_track.play();
    _post_action = request.post_action;
 
-   if (request.transition == TransitionType::ImmediateSwitch || request.transition == TransitionType::LetCurrentFinish)
+   if (request.transition == MusicPlayerTypes::TransitionType::ImmediateSwitch ||
+       request.transition == MusicPlayerTypes::TransitionType::LetCurrentFinish)
    {
       _current_index = 1 - _current_index;
    }

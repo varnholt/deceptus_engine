@@ -6,6 +6,7 @@
 #include <string>
 #include <variant>
 
+#include "game/audio/musicplayertypes.h"
 #include "game/level/scriptproperty.h"
 #include "game/mechanisms/gamemechanism.h"
 #include "game/mechanisms/gamemechanismobserver.h"
@@ -45,6 +46,12 @@ public:
    void inventoryAdd(const std::string& item);
    void inventoryRemove(const std::string& item);
    bool inventoryHas(const std::string& item);
+   void playMusic(
+      const std::string& filename,
+      MusicPlayerTypes::TransitionType transition_type,
+      std::chrono::milliseconds transition_duration,
+      MusicPlayerTypes::PostPlaybackAction post_action
+   );
 
    // functions on the lua end
    void luaInitialize();

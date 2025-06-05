@@ -6,37 +6,17 @@
 #include <mutex>
 #include <optional>
 
+#include "game/audio/musicplayertypes.h"
+
 class MusicPlayer
 {
 public:
-   enum class TransitionType
-   {
-      LetCurrentFinish,
-      Crossfade,
-      ImmediateSwitch,
-      FadeOutThenNew
-   };
-
-   enum class PostPlaybackAction
-   {
-      None,      // do nothing when the track ends
-      Loop,      // restart the same track
-      PlayNext,  // play next track in a list
-   };
-
-   enum class MusicTransitionState
-   {
-      None,
-      Crossfading,
-      FadingOut,
-   };
-
    struct TrackRequest
    {
       std::string filename;
-      TransitionType transition;
+      MusicPlayerTypes::TransitionType transition;
       std::chrono::milliseconds duration{2000};  // for crossfade or fadeout
-      PostPlaybackAction post_action = PostPlaybackAction::None;
+      MusicPlayerTypes::PostPlaybackAction post_action = MusicPlayerTypes::PostPlaybackAction::None;
    };
 
    static MusicPlayer& getInstance();
@@ -64,7 +44,7 @@ private:
    std::array<sf::Music, 2> _music;
    int32_t _current_index = 0;  // 0 or 1
 
-   MusicTransitionState _transition_state = MusicTransitionState::None;
+   MusicPlayerTypes::MusicTransitionState _transition_state = MusicPlayerTypes::MusicTransitionState::None;
 
    std::chrono::milliseconds _crossfade_elapsed{};
    std::chrono::milliseconds _crossfade_duration{};
@@ -72,7 +52,7 @@ private:
    std::chrono::milliseconds _fade_out_elapsed{};
    std::chrono::milliseconds _fade_out_duration{};
 
-   PostPlaybackAction _post_action = PostPlaybackAction::None;
+   MusicPlayerTypes::PostPlaybackAction _post_action = MusicPlayerTypes::PostPlaybackAction::None;
    std::optional<TrackRequest> _pending_request;
 
    std::vector<std::string> _playlist;
