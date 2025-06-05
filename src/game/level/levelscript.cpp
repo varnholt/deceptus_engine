@@ -1,6 +1,7 @@
 #include "levelscript.h"
 
 #include "framework/tools/log.h"
+#include "game/audio/musicplayer.h"
 #include "game/camera/camerazoom.h"
 #include "game/level/luaconstants.h"
 #include "game/level/luainterface.h"
@@ -67,6 +68,33 @@ int32_t addCollisionRect(lua_State* state)
    const auto rect_id = getInstance()->addCollisionRect({{x_px, y_px}, {w_px, h_px}});
    lua_pushinteger(state, rect_id);
    return 1;
+}
+
+/**
+ * @brief playMusic binds music playback to Lua
+ * @param state lua state
+ *    param 1: filename (string)
+ *    param 2: transition type (integer, enum value)
+ *    param 3: transition duration in ms (integer)
+ *    param 4: post playback action (integer, enum value)
+ * @return nothing
+ */
+int32_t playMusic(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
+   {
+      return 0;
+   }
+
+   const auto filename = std::string(lua_tostring(state, 1));
+   const auto transition_type = static_cast<MusicPlayerTypes::TransitionType>(lua_tointeger(state, 2));
+   const auto transition_duration = std::chrono::milliseconds(lua_tointeger(state, 3));
+   const auto post_action = static_cast<MusicPlayerTypes::PostPlaybackAction>(lua_tointeger(state, 4));
+
+   getInstance()->playMusic(filename, transition_type, transition_duration, post_action);
+
+   return 0;
 }
 
 /**
@@ -663,6 +691,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "isPlayerIntersectingSensorRect", ::isPlayerIntersectingSensorRect);
    lua_register(_lua_state, "lockPlayerControls", ::lockPlayerControls);
    lua_register(_lua_state, "log", ::debug);
+   lua_register(_lua_state, "playMusic", ::playMusic);
    lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
    lua_register(_lua_state, "setLuaNodeActive", ::setLuaNodeActive);
    lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
@@ -1071,6 +1100,16 @@ bool LevelScript::inventoryHas(const std::string& item)
 {
    auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
    return inventory.has(item);
+}
+
+void LevelScript::playMusic(
+   const std::string& filename,
+   MusicPlayerTypes::TransitionType transition_type,
+   std::chrono::milliseconds transition_duration,
+   MusicPlayerTypes::PostPlaybackAction post_action
+)
+{
+   MusicPlayer::getInstance().queueTrack({filename, transition_type, transition_duration, post_action});
 }
 
 namespace
