@@ -78,6 +78,11 @@ void Inventory::autoPopulate(const std::string& item)
 void Inventory::use(int32_t slot)
 {
    const auto& item_name = _slots[slot];
+   if (item_name.empty())
+   {
+      return;
+   }
+
    std::ranges::for_each(
       _used_callbacks,
       [&item_name, this](const auto& cb)
