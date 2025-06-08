@@ -213,6 +213,22 @@ void Game::initializeWindow()
       context_settings
    );
 
+   _window->clear(sf::Color(30, 30, 30));
+   sf::Texture loading_texture;
+   if (loading_texture.loadFromFile("data/game/loading.png"))
+   {
+      sf::Sprite loading_sprite(loading_texture);
+      sf::Vector2u window_size = _window->getSize();
+      sf::Vector2u texture_size = loading_texture.getSize();
+      const auto scale_y = static_cast<float>(window_size.y) / texture_size.y;
+      const auto scaled_width = texture_size.x * scale_y;
+      loading_sprite.setScale({scale_y, scale_y});
+      const auto position_x = (window_size.x - scaled_width) / 2.0f;
+      loading_sprite.setPosition({position_x, 0.0f});
+      _window->draw(loading_sprite);
+      _window->display();
+   }
+
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
    _window->setFramerateLimit(60);
    _window->setKeyRepeatEnabled(false);
