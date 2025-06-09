@@ -10,6 +10,9 @@ TestMechanism::TestMechanism()
    _rectangle_.setFillColor(sf::Color::Red);
    _rectangle_.setPosition({540.f, 310.f});
 
+   _origin_shape.setRadius(1.0f);
+   _origin_shape.setFillColor(sf::Color::Red);
+
    _filename = "data/portal-test.psd";
 
    load();
@@ -21,6 +24,7 @@ void TestMechanism::load()
    psd.setColorFormat(PSD::ColorFormat::ABGR);
    psd.load(_filename);
 
+   int32_t pa_index = 0;
    for (const auto& layer : psd.getLayers())
    {
       // skip groups
@@ -40,14 +44,26 @@ void TestMechanism::load()
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
          auto sprite = std::make_shared<sf::Sprite>(*texture);
 
-         sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
+         const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
+         sprite->setPosition(pos);
          sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;
+         tmp->_visible = layer.isVisible();
 
          _layer_stack.push_back(tmp);
          _layers[layer.getName()] = tmp;
+
+         if (layer.getName().starts_with("pa_"))
+         {
+            std::cout << layer.getName() << std::endl;
+            const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
+            tmp->_sprite->setOrigin(origin);
+            sprite->setPosition(origin + pos);
+            _pa[pa_index++] = tmp;
+            _origin = origin + pos;
+         }
       }
       catch (...)
       {
@@ -63,6 +79,7 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
    sf::RenderStates states;
 
+   // draw all layers
    for (auto& layer : _layer_stack)
    {
       if (layer->_visible)
@@ -70,9 +87,33 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
          layer->draw(target, states);
       }
    }
+
+   // draw pa
+   std::ranges::for_each(
+      _pa,
+      [&target, states](const auto& pa)
+      {
+         //
+         pa->draw(target, states);
+      }
+   );
+
+   target.draw(_origin_shape);
 }
 
-void TestMechanism::update(const sf::Time&)
+void TestMechanism::update(const sf::Time& dt)
 {
    // No-op for now
+   _elapsed += dt.asSeconds();
+
+   _origin_shape.setPosition(_origin);
+
+   std::ranges::for_each(
+      _pa,
+      [this](const auto& pa)
+      {
+         //
+         pa->_sprite->setRotation(sf::radians(_elapsed));
+      }
+   );
 }
