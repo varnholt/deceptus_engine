@@ -609,11 +609,13 @@ In there, just place a rectangle where you'd like to position and scale the effe
 |Property|Type|Description|
 |-|-|-|
 |z|int|The object's z index|
-|animation|string|Animation cycle to show. The hide animation will be the same animation, just reversed.|
-|text|string|Text to show next to the controller button.|
+|text_0|string|Text to show next to the 1st controller button.|
+|text_1|string|Text to show next to the 2nd controller button (optional).|
+|button_0|string|1st button icon to show (same identifiers as used in 'Controller Help' mechanism). The default is 'dpad_u'.|
+|button_1|string|2nd button icon to show (optional).|
 |offset_x_px|int|An offset in x (in px) for where the animation will be shown. The default is 0.|
 |offset_y_px|int|An offset in y (in px) for where the animation will be shown. The default is 0.|
-|button|string|Button icon to show (same identifiers as used in 'Controller Help' mechanism). The default is 'dpad_u'.|
+|animation|string|Animation cycle to show. The hide animation will be the same animation, just reversed.|
 
 ---
 
