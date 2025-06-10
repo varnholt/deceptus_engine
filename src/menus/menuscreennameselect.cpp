@@ -238,7 +238,6 @@ void MenuScreenNameSelect::updateLayers()
       {static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)}
    );
 
-   _layers["header-bg"]->_visible = true;
    _layers["players-name"]->_visible = false;
    _layers["temp_bg"]->_visible = true;
    _layers["title"]->_visible = true;
