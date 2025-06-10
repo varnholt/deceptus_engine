@@ -27,20 +27,22 @@ private:
       Use
    };
 
+   struct HelpElement
+   {
+      std::unique_ptr<sf::Sprite> _button_sprite;
+      std::unique_ptr<sf::Text> _text;
+      sf::IntRect _button_rect_keyboard;
+      sf::IntRect _button_rect_controller;
+   };
+
    sf::FloatRect _rect_px;
    bool _player_intersected_in_last_frame{false};
    bool _active{false};
-
    std::shared_ptr<Animation> _animation_show;
    std::shared_ptr<Animation> _animation_hide;
-
    std::optional<float> _button_alpha;
-   std::unique_ptr<sf::Sprite> _button_sprite;
+   static constexpr int32_t button_max_count = 2;
    std::shared_ptr<sf::Texture> _button_texture;
-
+   std::vector<HelpElement> _help_elements;
    sf::Font _font;
-   std::unique_ptr<sf::Text> _text;
-
-   sf::IntRect _button_rect_keyboard;
-   sf::IntRect _button_rect_controller;
 };

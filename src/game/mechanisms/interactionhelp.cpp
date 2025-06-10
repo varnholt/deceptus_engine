@@ -48,8 +48,6 @@ InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
    if (_font.openFromFile("data/fonts/deceptum.ttf"))
    {
       const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-      _text = std::make_unique<sf::Text>(_font);
-      _text->setCharacterSize(12);
    }
 }
 
@@ -74,8 +72,16 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*
       ));
 
       target.setView(ortho);
-      target.draw(*_button_sprite);
-      target.draw(*_text);
+
+      std::ranges::for_each(
+         _help_elements,
+         [&target](const auto& help)
+         {
+            target.draw(*help._button_sprite);
+            target.draw(*help._text);
+         }
+      );
+
       target.setView(level_view);
    }
 }
@@ -141,21 +147,28 @@ void InteractionHelp::update(const sf::Time& dt)
    }
 
    _button_alpha = alpha;
-   if (alpha.has_value())
-   {
-      const auto alpha_byte = static_cast<uint8_t>(alpha.value() * 255);
-      _text->setFillColor(sf::Color{232, 219, 243, alpha_byte});
-      _button_sprite->setColor({255, 255, 255, alpha_byte});
-   }
 
-   if (GameControllerIntegration::getInstance().isControllerConnected())
-   {
-      _button_sprite->setTextureRect(_button_rect_controller);
-   }
-   else
-   {
-      _button_sprite->setTextureRect(_button_rect_keyboard);
-   }
+   std::ranges::for_each(
+      _help_elements,
+      [&alpha](auto& element)
+      {
+         if (alpha.has_value())
+         {
+            const auto alpha_byte = static_cast<uint8_t>(alpha.value() * 255);
+            element._text->setFillColor(sf::Color{232, 219, 243, alpha_byte});
+            element._button_sprite->setColor({255, 255, 255, alpha_byte});
+         }
+
+         if (GameControllerIntegration::getInstance().isControllerConnected())
+         {
+            element._button_sprite->setTextureRect(element._button_rect_controller);
+         }
+         else
+         {
+            element._button_sprite->setTextureRect(element._button_rect_keyboard);
+         }
+      }
+   );
 
    _player_intersected_in_last_frame = intersects;
 }
@@ -196,28 +209,69 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
    }
 
    _button_texture = TexturePool::getInstance().get("data/game/ui_icons.png");
-   _button_sprite = std::make_unique<sf::Sprite>(*_button_texture);
 
-   // read button icon
-   const auto button_name = ValueReader::readValue<std::string>("button", map).value_or("key_cursor_u");
-   const auto button_names_keyboard_controller = ControllerKeyMap::retrieveMappedKey(button_name);
-   const auto pos_index_keyboard = ControllerKeyMap::getArrayPosition(button_names_keyboard_controller.first);
-   const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_names_keyboard_controller.second);
+   // read button icons
+   constexpr auto new_approach = true;
+   for (auto row = 0; row < button_max_count; row++)
+   {
+      const auto button_id = std::format("button_{}", row);
+      const auto text_id = std::format("text_{}", row);
 
-   _button_rect_keyboard = {
-      {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
-   };
-   _button_rect_controller = {
-      {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
-   };
-   _button_sprite->setTextureRect(_button_rect_keyboard);
-   //_button_sprite.setPosition(550, 335);
+      auto text_value = ValueReader::readValue<std::string>(text_id, map);
+      auto button_value = ValueReader::readValue<std::string>(button_id, map);
 
-   const auto text = ValueReader::readValue<std::string>("text", map).value_or("");
-   _text->setString(text.c_str());
-   _text->setPosition({580, 339});
-   const auto text_bounds = _text->getLocalBounds();
-   _button_sprite->setPosition({_text->getPosition().x + text_bounds.position.x + text_bounds.size.x, 335});
+      // fallback support for old identifier
+      if (!text_value.has_value() && row == 0)
+      {
+         text_value = ValueReader::readValue<std::string>("text", map);
+      }
+
+      if (!button_value.has_value() && row == 0)
+      {
+         button_value = ValueReader::readValue<std::string>("button", map);
+      }
+
+      if (!text_value.has_value())
+      {
+         break;
+      }
+
+      HelpElement help;
+
+      help._button_sprite = std::make_unique<sf::Sprite>(*_button_texture);
+      help._text = std::make_unique<sf::Text>(_font);
+      help._text->setCharacterSize(12);
+
+      const auto button_name = button_value.value_or("key_cursor_u");
+      const auto button_names = ControllerKeyMap::retrieveMappedKey(button_name);
+      const auto pos_index_keyboard = ControllerKeyMap::getArrayPosition(button_names.first);
+      const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_names.second);
+
+      help._button_rect_keyboard = {
+         {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
+      };
+      help._button_rect_controller = {
+         {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
+      };
+
+      help._button_sprite->setTextureRect(help._button_rect_keyboard);
+      help._button_sprite->setTexture(*_button_texture);
+
+      // row 0 at bottom, row 1 above
+      const auto text_x_px = 580.0f;
+      const auto base_y_px = 339.0f;
+      const auto row_spacing_px = 24.0f;
+      const auto text_y_px = base_y_px - row_spacing_px * row;
+      const auto icon_y_px = text_y_px - 4.0f;
+      help._text->setString(text_value.value());
+      help._text->setPosition({text_x_px, text_y_px});
+
+      const auto local_bounds = help._text->getLocalBounds();
+      const auto icon_x_px = text_x_px + local_bounds.position.x + local_bounds.size.x;
+      help._button_sprite->setPosition({icon_x_px, icon_y_px});
+
+      _help_elements.push_back(std::move(help));
+   }
 }
 
 std::optional<sf::FloatRect> InteractionHelp::getBoundingBoxPx()
