@@ -162,8 +162,11 @@ void MenuScreenGame::updateLayers()
    _layers["textSpeed_4"]->_visible = (text_speed_selection == 3);
    _layers["textSpeed_5"]->_visible = (text_speed_selection == 4);
 
+   _layers["rumble_text_0"]->_visible = !rumble;
+   _layers["rumble_text_1"]->_visible = rumble;
    _layers["rumble_highlight"]->_visible = rumble;
    _layers["rumble_help"]->_visible = rumble;
+
    _layers["Off"]->_visible = !isRumbleEnabled();
    _layers["On"]->_visible = isRumbleEnabled();
 }
