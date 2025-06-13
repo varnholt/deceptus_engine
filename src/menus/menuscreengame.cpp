@@ -126,12 +126,12 @@ bool MenuScreenGame::isRumbleEnabled() const
 
 void MenuScreenGame::updateLayers()
 {
-   auto auto_pause = _selection == Selection::AutomaticPause;
-   auto text_speed = _selection == Selection::TextSpeed;
-   auto rumble = _selection == Selection::Rumble;
+   const auto auto_pause = _selection == Selection::AutomaticPause;
+   const auto text_speed = _selection == Selection::TextSpeed;
+   const auto rumble = _selection == Selection::Rumble;
 
-   auto auto_pause_selection = GameConfiguration::getInstance()._pause_mode;
-   auto text_speed_selection = GameConfiguration::getInstance()._text_speed;
+   const auto auto_pause_selection = GameConfiguration::getInstance()._pause_mode;
+   const auto text_speed_selection = GameConfiguration::getInstance()._text_speed;
 
    _layers["defaults_xbox_0"]->_visible = isControllerUsed();
    _layers["defaults_xbox_1"]->_visible = false;
@@ -164,6 +164,7 @@ void MenuScreenGame::updateLayers()
 
    _layers["rumble_text_0"]->_visible = !rumble;
    _layers["rumble_text_1"]->_visible = rumble;
+   _layers["rumble_arrows"]->_visible = rumble;
    _layers["rumble_highlight"]->_visible = rumble;
    _layers["rumble_help"]->_visible = rumble;
 
