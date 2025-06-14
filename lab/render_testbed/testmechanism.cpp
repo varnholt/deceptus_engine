@@ -18,6 +18,45 @@ TestMechanism::TestMechanism()
    load();
 }
 
+namespace
+{
+sf::Vector2f screen_offset{100, 100};
+
+}
+
+//                              D
+//                       *** ####### ***
+//                   *##       /|\       ##*
+//               *##            |            ##*
+//            *##               |               ##*
+//          *##                 |                 ##*
+//        *##                   |                   ##*
+//       *##                    |                    ##*
+//      *##                     |                     ##*
+//     *##                      |                      ##*
+//     *##                      |                      ##*
+//   C *##<---------------------x--------------------->##* A
+//     *##                      |                      ##*
+//     *##                      |                      ##*
+//      *##                     |                     ##*
+//       *##                    |                    ##*
+//        *##                   |                   ##*
+//          *##                 |                 ##*
+//            *#                |               ##*
+//               *##            |            ##*
+//                   *##       \|/       ##*
+//                       *** ####### ***
+//                              B
+//
+// idea: have only 1 rotation angle, the other 3 are relative to that
+// A -> angle + 0deg
+// B -> angle + 90deg
+// C -> angle + 180deg
+// D -> angle + 270deg
+//
+// 1) use sfml rotation first
+// 2) calculate corresponding direction vector based on the angle
+
 void TestMechanism::load()
 {
    PSD psd;
@@ -44,7 +83,7 @@ void TestMechanism::load()
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
          auto sprite = std::make_shared<sf::Sprite>(*texture);
 
-         const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
+         const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())} + screen_offset;
          sprite->setPosition(pos);
          sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
 
@@ -57,12 +96,9 @@ void TestMechanism::load()
 
          if (layer.getName().starts_with("pa_"))
          {
-            std::cout << layer.getName() << std::endl;
             const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
-            tmp->_sprite->setOrigin(origin);
-            sprite->setPosition(origin + pos);
-            _pa[pa_index++] = tmp;
-            _origin = origin + pos;
+            sprite->setOrigin(origin);
+            sprite->setPosition(origin + pos + sf::Vector2f{0, -30});
          }
       }
       catch (...)
@@ -70,6 +106,25 @@ void TestMechanism::load()
          std::cerr << "failed to create texture: " << layer.getName();
       }
    }
+
+   _pa[0]._layer = _layers["pa_0"];
+   _pa[1]._layer = _layers["pa_1"];
+   _pa[2]._layer = _layers["pa_2"];
+   _pa[3]._layer = _layers["pa_3"];
+
+   _pa[0]._pos = _pa[0]._layer->_sprite->getPosition();
+   _pa[1]._pos = _pa[1]._layer->_sprite->getPosition();
+   _pa[2]._pos = _pa[2]._layer->_sprite->getPosition();
+   _pa[3]._pos = _pa[3]._layer->_sprite->getPosition();
+
+   _pa[0]._angle_offset = sf::degrees(0);
+   _pa[1]._angle_offset = sf::degrees(90);
+   _pa[2]._angle_offset = sf::degrees(180);
+   _pa[3]._angle_offset = sf::degrees(270);
+
+   _socket_sprite = _layers["base"]->_sprite;
+
+   _origin = _pa[0]._layer->_sprite->getOrigin();
 }
 
 void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
@@ -79,26 +134,24 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
    sf::RenderStates states;
 
-   // draw all layers
-   for (auto& layer : _layer_stack)
-   {
-      if (layer->_visible)
-      {
-         layer->draw(target, states);
-      }
-   }
-
    // draw pa
-   std::ranges::for_each(
-      _pa,
-      [&target, states](const auto& pa)
-      {
-         //
-         pa->draw(target, states);
-      }
-   );
+   // std::ranges::for_each(
+   //    _pa,
+   //    [&target, states](const auto& pa)
+   //    {
+   //       //
+   //       pa._layer->draw(target, states);
+   //    }
+   // );
 
-   target.draw(_origin_shape);
+   _pa[0]._layer->draw(target, states);
+   _pa[1]._layer->draw(target, states);
+   _pa[2]._layer->draw(target, states);
+   _pa[3]._layer->draw(target, states);
+
+   // target.draw(_origin_shape);
+
+   target.draw(*_socket_sprite);
 }
 
 void TestMechanism::update(const sf::Time& dt)
@@ -108,12 +161,70 @@ void TestMechanism::update(const sf::Time& dt)
 
    _origin_shape.setPosition(_origin);
 
-   std::ranges::for_each(
-      _pa,
-      [this](const auto& pa)
+   switch (_state)
+   {
+      case State::Disabled:
       {
-         //
-         pa->_sprite->setRotation(sf::radians(_elapsed));
+         break;
       }
-   );
+      case State::Enabling:
+      {
+         break;
+      }
+      case State::Enabled:
+      {
+         const auto t = 0.5f * (1.0f + std::sin(_elapsed * 4.0f));
+
+         // rotate
+         auto index = 0;
+         std::ranges::for_each(
+            _pa,
+            [this, &index, &t](auto& pa)
+            {
+               //
+               pa._distance_factor = 1.0f + t * 8.0f;
+
+               const auto full_angle_sf = pa._angle_offset;
+
+               pa._offset.x = std::cos(full_angle_sf.asRadians()) * pa._distance_factor;
+               pa._offset.y = std::sin(full_angle_sf.asRadians()) * pa._distance_factor;
+
+               pa._layer->_sprite->setRotation(full_angle_sf);
+               pa._layer->_sprite->setPosition(pa._pos + pa._offset + sf::Vector2f{0, 2.0f * pa._distance_factor});
+
+               ++index;
+            }
+         );
+         break;
+      }
+      case State::Activated:
+      {
+         const auto t = 0.5f * (1.0f + std::sin(_elapsed));
+         const auto angle_rad = std::sin(_elapsed) * 5;
+
+         // rotate
+         auto index = 0;
+         std::ranges::for_each(
+            _pa,
+            [this, &index, &t, &angle_rad](auto& pa)
+            {
+               //
+               pa._angle = sf::radians(angle_rad);
+               pa._distance_factor = 1.0f + t * 50;
+
+               const auto full_angle_sf = pa._angle + pa._angle_offset;
+
+               pa._offset.x = std::cos(full_angle_sf.asRadians()) * pa._distance_factor;
+               pa._offset.y = std::sin(full_angle_sf.asRadians()) * pa._distance_factor;
+
+               pa._layer->_sprite->setRotation(full_angle_sf);
+               pa._layer->_sprite->setPosition(pa._pos + pa._offset);
+
+               ++index;
+            }
+         );
+
+         break;
+      }
+   }
 }

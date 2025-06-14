@@ -14,16 +14,40 @@ public:
    virtual void update(const sf::Time& dt);
 
 private:
+   struct Side
+   {
+      std::shared_ptr<Layer> _layer;
+      sf::Vector2f _pos;
+      sf::Vector2f _offset;
+      sf::Angle _angle;
+      sf::Angle _angle_offset;
+      float _distance_factor{1.0f};
+   };
+
+   enum class State
+   {
+      Disabled,
+      Enabling,
+      Enabled,
+      Activated
+   };
+
    void load();
+
+   State _state{State::Enabled};
+
+   std::shared_ptr<sf::Sprite> _socket_sprite;
 
    sf::RectangleShape _rectangle_;
    sf::CircleShape _origin_shape;
+
 
    std::string _filename;
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
 
-   std::array<std::shared_ptr<Layer>, 4> _pa;
+   std::array<Side, 4> _pa;
+
    // std::array<float, 4> _angles;
    float _elapsed{0.0f};
    sf::Vector2f _origin;
