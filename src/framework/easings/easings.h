@@ -3,10 +3,8 @@
 #include <math.h>
 #include <cmath>
 #include <functional>
-#include <limits>
+#include <numbers>
 #include <string>
-#include <type_traits>
-#include <utility>
 
 namespace Easings
 {
@@ -22,7 +20,7 @@ constexpr T linear(T x)
 template <class T>
 constexpr T easeInSine(T x)
 {
-   return static_cast<T>(1 - std::cos((x * M_PI) * 0.5));
+   return static_cast<T>(1 - std::cos((x * std::numbers::pi) * 0.5));
 }
 
 template <class T>
@@ -46,7 +44,7 @@ constexpr T easeInCirc(T x)
 template <class T>
 constexpr T easeInElastic(T x)
 {
-   constexpr auto c4 = (2 * M_PI) / 3;
+   constexpr auto c4 = (2 * std::numbers::pi) / 3;
    return static_cast<T>((-std::pow(2, 10 * x - 10) * std::sin((x * 10 - 10.75) * c4)));
 }
 
@@ -54,7 +52,7 @@ constexpr T easeInElastic(T x)
 template <class T>
 constexpr T easeOutSine(T x)
 {
-   return static_cast<T>(std::sin((x * M_PI) * 0.5));
+   return static_cast<T>(std::sin((x * std::numbers::pi) * 0.5));
 }
 
 template <class T>
@@ -84,7 +82,7 @@ constexpr T easeOutCirc(T x)
 template <class T>
 constexpr T easeOutElastic(T x)
 {
-   constexpr auto c4 = (2 * M_PI) / 3;
+   constexpr auto c4 = (2 * std::numbers::pi) / 3;
    return static_cast<T>(std::pow(2, -10 * x) * std::sin((x * 10 - 0.75) * c4) + 1);
 }
 
@@ -92,7 +90,7 @@ constexpr T easeOutElastic(T x)
 template <class T>
 constexpr T easeInOutSine(T x)
 {
-   return static_cast<T>(-(std::cos(M_PI * x) - 1) * 0.5);
+   return static_cast<T>(-(std::cos(std::numbers::pi * x) - 1) * 0.5);
 }
 
 template <class T>
@@ -135,7 +133,7 @@ constexpr T easeInOutCirc(T x)
 template <class T>
 constexpr T easeInOutElastic(T x)
 {
-   constexpr auto c5 = (2 * M_PI) / 4.5;
+   constexpr auto c5 = (2 * std::numbers::pi) / 4.5;
 
    if (x < 0.5)
    {
@@ -182,21 +180,21 @@ constexpr T easeOutBounce(T x)
    {
       return n1 * x * x;
    }
-   else if (x < 2.0 / d1)
+
+   if (x < 2.0 / d1)
    {
       const auto temp = x - T{1.5} / d1;
       return n1 * temp * temp + T{0.75};
    }
-   else if (x < 2.5 / d1)
+
+   if (x < 2.5 / d1)
    {
       const auto temp = x - T{2.25} / d1;
       return n1 * temp * temp + T{0.9375};
    }
-   else
-   {
-      const auto temp = x - T{2.625} / d1;
-      return n1 * temp * temp + T{0.984375};
-   }
+
+   const auto temp = x - T{2.625} / d1;
+   return n1 * temp * temp + T{0.984375};
 }
 
 template <class T>
