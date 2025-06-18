@@ -37,6 +37,7 @@ add_executable(RenderTestbed
     ../../src/framework/image/image.cpp
     ../../src/framework/image/tga.h
     ../../src/framework/image/tga.cpp
+    ../../src/framework/easings/easings.h
 )
 
 target_include_directories(RenderTestbed PRIVATE ${sfml_SOURCE_DIR}/include)
