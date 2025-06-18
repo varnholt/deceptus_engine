@@ -1,5 +1,6 @@
 #include "testmechanism.h"
 
+#include "../../src/framework/easings/easings.h"
 #include "../../src/framework/image/psd.h"
 
 #include <iostream>
@@ -90,6 +91,7 @@ void TestMechanism::load()
          tmp->_texture = texture;
          tmp->_sprite = sprite;
          tmp->_visible = layer.isVisible();
+         tmp->_texture->setSmooth(true);
 
          _layer_stack.push_back(tmp);
          _layers[layer.getName()] = tmp;
@@ -154,6 +156,27 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    target.draw(*_socket_sprite);
 }
 
+namespace
+{
+#include <cmath>
+
+#include <cmath>
+
+float f(double x, double sigma = 0.8)
+{
+   double x_mod = std::fmod(x, 5.0);  // Repeat every 5 units
+   return std::exp(-std::pow(x_mod, 2) / (2.0 * sigma * sigma));
+}
+
+}  // namespace
+
+// tanh(sin((x-0.5)*PI)*4-2.5)*0.5+ 6
+// smoothstep(-0.5, 0.5, sin(x+t))
+// sin(x) + sin(x*3)/4
+// const auto t = 0.5f * (1.0f + std::sin(x));
+// const auto t = f(x);
+// const float t = std::tanh(std::sin((x - 0.5) * std::numbers::pi) * 4 - 2.5) * 0.5 + 0.5;
+
 void TestMechanism::update(const sf::Time& dt)
 {
    // No-op for now
@@ -173,22 +196,22 @@ void TestMechanism::update(const sf::Time& dt)
       }
       case State::Enabled:
       {
-         const auto t = 0.5f * (1.0f + std::sin(_elapsed * 4.0f));
+         _enabled_state._elapsed_time += dt;
+         constexpr auto scale_factor = 0.2f;
+         constexpr auto animation_speed = 1.0f;
+         const auto scaled_time = _enabled_state._elapsed_time.asSeconds() * animation_speed;
+         const auto value = 0.7f * (1.0f + (std::sin(scaled_time) + std::sin(scaled_time * 3.0f) / 3.0f));
 
-         // rotate
          auto index = 0;
          std::ranges::for_each(
             _pa,
-            [this, &index, &t](auto& pa)
+            [this, &index, &value](auto& pa)
             {
-               //
-               pa._distance_factor = 1.0f + t * 8.0f;
+               const auto full_angle_sf = pa._angle_offset; /*+ 0.1f * sf::radians(t - 0.5f)*/
 
-               const auto full_angle_sf = pa._angle_offset;
-
+               pa._distance_factor = 1.0f + value * 4.0f;
                pa._offset.x = std::cos(full_angle_sf.asRadians()) * pa._distance_factor;
                pa._offset.y = std::sin(full_angle_sf.asRadians()) * pa._distance_factor;
-
                pa._layer->_sprite->setRotation(full_angle_sf);
                pa._layer->_sprite->setPosition(pa._pos + pa._offset + sf::Vector2f{0, 2.0f * pa._distance_factor});
 
@@ -202,7 +225,6 @@ void TestMechanism::update(const sf::Time& dt)
          const auto t = 0.5f * (1.0f + std::sin(_elapsed));
          const auto angle_rad = std::sin(_elapsed) * 5;
 
-         // rotate
          auto index = 0;
          std::ranges::for_each(
             _pa,

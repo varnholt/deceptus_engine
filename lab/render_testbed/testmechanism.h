@@ -34,6 +34,13 @@ private:
 
    void load();
 
+   struct EnabledState
+   {
+      sf::Time _elapsed_time;
+      // bool _idle{false};
+      // sf::Time _idle_time;
+   };
+
    State _state{State::Enabled};
 
    std::shared_ptr<sf::Sprite> _socket_sprite;
@@ -51,4 +58,6 @@ private:
    // std::array<float, 4> _angles;
    float _elapsed{0.0f};
    sf::Vector2f _origin;
+
+   EnabledState _enabled_state;
 };
