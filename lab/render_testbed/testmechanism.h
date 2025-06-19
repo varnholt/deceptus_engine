@@ -37,11 +37,23 @@ private:
    struct EnabledState
    {
       sf::Time _elapsed_time;
-      // bool _idle{false};
-      // sf::Time _idle_time;
    };
 
-   State _state{State::Enabled};
+   struct ActivatedState
+   {
+      void resetTime()
+      {
+         _elapsed_time = sf::seconds(0);
+      }
+      sf::Time _elapsed_time;
+      int32_t _step{0};
+
+      float _speed{0.0f};
+      float _acceleration{0.001f};
+      float _friction{0.999f};
+   };
+
+   State _state{State::Activated};
 
    std::shared_ptr<sf::Sprite> _socket_sprite;
 
@@ -59,5 +71,6 @@ private:
    float _elapsed{0.0f};
    sf::Vector2f _origin;
 
+   ActivatedState _activated_state;
    EnabledState _enabled_state;
 };
