@@ -222,29 +222,112 @@ void TestMechanism::update(const sf::Time& dt)
       }
       case State::Activated:
       {
-         const auto t = 0.5f * (1.0f + std::sin(_elapsed));
-         const auto angle_rad = std::sin(_elapsed) * 5;
+         _activated_state._elapsed_time += dt;
 
-         auto index = 0;
-         std::ranges::for_each(
-            _pa,
-            [this, &index, &t, &angle_rad](auto& pa)
+         // 1: extend extend extend
+         // 2: rotate right
+         // 3: rotate left
+         // 4: rotate right A LOT
+         // 5: retract retract retract and slow down at the same time
+         // 6: stop
+
+         if (_activated_state._step == 0)
+         {
+            // skip, not done
+            _activated_state._step++;
+         }
+         else if (_activated_state._step == 1)
+         {
+            if (_activated_state._elapsed_time.asSeconds() < 2.0f)
             {
-               //
-               pa._angle = sf::radians(angle_rad);
-               pa._distance_factor = 1.0f + t * 50;
-
-               const auto full_angle_sf = pa._angle + pa._angle_offset;
-
-               pa._offset.x = std::cos(full_angle_sf.asRadians()) * pa._distance_factor;
-               pa._offset.y = std::sin(full_angle_sf.asRadians()) * pa._distance_factor;
-
-               pa._layer->_sprite->setRotation(full_angle_sf);
-               pa._layer->_sprite->setPosition(pa._pos + pa._offset);
-
-               ++index;
+               _activated_state._speed += _activated_state._acceleration * dt.asSeconds();
             }
-         );
+            else
+            {
+               _activated_state._speed *= _activated_state._friction;
+
+               if (_activated_state._speed < 0.0001f)
+               {
+                  _activated_state._step++;
+                  _activated_state._speed = 0;
+                  _activated_state._acceleration = -_activated_state._acceleration;
+                  _activated_state.resetTime();
+               }
+            }
+
+            auto index = 0;
+            std::ranges::for_each(
+               _pa,
+               [this, &index](auto& pa)
+               {
+                  pa._angle += sf::radians(_activated_state._speed);
+                  const auto full_angle_sf = pa._angle + pa._angle_offset;
+
+                  pa._layer->_sprite->setRotation(full_angle_sf);
+
+                  ++index;
+               }
+            );
+         }
+         else if (_activated_state._step == 2)
+         {
+            if (_activated_state._elapsed_time.asSeconds() < 2.0f)
+            {
+               _activated_state._speed += _activated_state._acceleration * dt.asSeconds();
+            }
+            else
+            {
+               _activated_state._speed *= _activated_state._friction;
+
+               if (_activated_state._speed > -0.0001f)
+               {
+                  _activated_state._step++;
+               }
+            }
+
+            auto index = 0;
+            std::ranges::for_each(
+               _pa,
+               [this, &index](auto& pa)
+               {
+                  pa._angle += sf::radians(_activated_state._speed);
+                  const auto full_angle_sf = pa._angle + pa._angle_offset;
+
+                  pa._layer->_sprite->setRotation(full_angle_sf);
+
+                  ++index;
+               }
+            );
+         }
+         else if (_activated_state._step == 3)
+         {
+         }
+         else if (_activated_state._step == 4)
+         {
+            const auto t = 0.5f * (1.0f + std::sin(_elapsed));
+            const auto angle_rad = std::sin(_elapsed) * 5;
+
+            auto index = 0;
+            std::ranges::for_each(
+               _pa,
+               [this, &index, &t, &angle_rad](auto& pa)
+               {
+                  //
+                  pa._angle = sf::radians(angle_rad);
+                  pa._distance_factor = 1.0f + t * 50;
+
+                  const auto full_angle_sf = pa._angle + pa._angle_offset;
+
+                  pa._offset.x = std::cos(full_angle_sf.asRadians()) * pa._distance_factor;
+                  pa._offset.y = std::sin(full_angle_sf.asRadians()) * pa._distance_factor;
+
+                  pa._layer->_sprite->setRotation(full_angle_sf);
+                  pa._layer->_sprite->setPosition(pa._pos + pa._offset);
+
+                  ++index;
+               }
+            );
+         }
 
          break;
       }
