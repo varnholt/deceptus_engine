@@ -16,9 +16,19 @@ public:
 private:
    struct Side
    {
+      void update()
+      {
+         const auto full_angle_sf = _angle + _angle_offset;
+         sf::Vector2f pos_from_angle_and_distance_px;
+         pos_from_angle_and_distance_px.x = std::cos(full_angle_sf.asRadians()) * _distance_factor;
+         pos_from_angle_and_distance_px.y = std::sin(full_angle_sf.asRadians()) * _distance_factor;
+         _layer->_sprite->setRotation(full_angle_sf);
+         _layer->_sprite->setPosition(_pos_px + pos_from_angle_and_distance_px + _offset_px);
+      }
+
       std::shared_ptr<Layer> _layer;
-      sf::Vector2f _pos;
-      sf::Vector2f _offset;
+      sf::Vector2f _pos_px;
+      sf::Vector2f _offset_px;
       sf::Angle _angle;
       sf::Angle _angle_offset;
       float _distance_factor{1.0f};
@@ -51,6 +61,10 @@ private:
       float _speed{0.0f};
       float _acceleration{0.001f};
       float _friction{0.999f};
+
+      sf::Angle _angle_start{};
+      sf::Angle _angle_target{};
+      bool _has_target_angle = false;
    };
 
    State _state{State::Activated};
