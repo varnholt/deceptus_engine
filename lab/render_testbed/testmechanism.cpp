@@ -25,30 +25,6 @@ sf::Vector2f screen_offset{100, 100};
 
 }
 
-//                              D
-//                       *** ####### ***
-//                   *##       /|\       ##*
-//               *##            |            ##*
-//            *##               |               ##*
-//          *##                 |                 ##*
-//        *##                   |                   ##*
-//       *##                    |                    ##*
-//      *##                     |                     ##*
-//     *##                      |                      ##*
-//     *##                      |                      ##*
-//   C *##<---------------------x--------------------->##* A
-//     *##                      |                      ##*
-//     *##                      |                      ##*
-//      *##                     |                     ##*
-//       *##                    |                    ##*
-//        *##                   |                   ##*
-//          *##                 |                 ##*
-//            *#                |               ##*
-//               *##            |            ##*
-//                   *##       \|/       ##*
-//                       *** ####### ***
-//                              B
-//
 // idea: have only 1 rotation angle, the other 3 are relative to that
 // A -> angle + 0deg
 // B -> angle + 90deg
@@ -114,10 +90,10 @@ void TestMechanism::load()
    _pa[2]._layer = _layers["pa_2"];
    _pa[3]._layer = _layers["pa_3"];
 
-   _pa[0]._pos = _pa[0]._layer->_sprite->getPosition();
-   _pa[1]._pos = _pa[1]._layer->_sprite->getPosition();
-   _pa[2]._pos = _pa[2]._layer->_sprite->getPosition();
-   _pa[3]._pos = _pa[3]._layer->_sprite->getPosition();
+   _pa[0]._pos_px = _pa[0]._layer->_sprite->getPosition();
+   _pa[1]._pos_px = _pa[1]._layer->_sprite->getPosition();
+   _pa[2]._pos_px = _pa[2]._layer->_sprite->getPosition();
+   _pa[3]._pos_px = _pa[3]._layer->_sprite->getPosition();
 
    _pa[0]._angle_offset = sf::degrees(0);
    _pa[1]._angle_offset = sf::degrees(90);
@@ -210,10 +186,10 @@ void TestMechanism::update(const sf::Time& dt)
                const auto full_angle_sf = pa._angle_offset; /*+ 0.1f * sf::radians(t - 0.5f)*/
 
                pa._distance_factor = 1.0f + value * 4.0f;
-               pa._offset.x = std::cos(full_angle_sf.asRadians()) * pa._distance_factor;
-               pa._offset.y = std::sin(full_angle_sf.asRadians()) * pa._distance_factor;
-               pa._layer->_sprite->setRotation(full_angle_sf);
-               pa._layer->_sprite->setPosition(pa._pos + pa._offset + sf::Vector2f{0, 2.0f * pa._distance_factor});
+               // pa._offset.x = std::cos(full_angle_sf.asRadians()) * pa._distance_factor;
+               // pa._offset.y = std::sin(full_angle_sf.asRadians()) * pa._distance_factor;
+               // pa._layer->_sprite->setRotation(full_angle_sf);
+               // pa._layer->_sprite->setPosition(pa._pos + pa._offset + sf::Vector2f{0, 2.0f * pa._distance_factor});
 
                ++index;
             }
@@ -224,18 +200,36 @@ void TestMechanism::update(const sf::Time& dt)
       {
          _activated_state._elapsed_time += dt;
 
-         // 1: extend extend extend
-         // 2: rotate right
-         // 3: rotate left
-         // 4: rotate right A LOT
-         // 5: retract retract retract and slow down at the same time
-         // 6: stop
+         // 0: lift
+         // 1: rotate
+         // 2: extract
+         // 3: rotate a lot
+         // 4: rotate to clean 90 deg (alignment with base)
+         // 5: retract
 
+         // lift
          if (_activated_state._step == 0)
          {
-            // skip, not done
-            _activated_state._step++;
+            float value = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
+
+            auto index = 0;
+            std::ranges::for_each(
+               _pa,
+               [this, &index, &value](auto& pa)
+               {
+                  //
+                  pa._offset_px = sf::Vector2f{0, -value * 40};
+                  pa.update();
+               }
+            );
+
+            if (_activated_state._elapsed_time.asSeconds() > 1.0f)
+            {
+               _activated_state._step++;
+            }
          }
+
+         // rotate right
          else if (_activated_state._step == 1)
          {
             if (_activated_state._elapsed_time.asSeconds() < 2.0f)
@@ -261,17 +255,37 @@ void TestMechanism::update(const sf::Time& dt)
                [this, &index](auto& pa)
                {
                   pa._angle += sf::radians(_activated_state._speed);
-                  const auto full_angle_sf = pa._angle + pa._angle_offset;
-
-                  pa._layer->_sprite->setRotation(full_angle_sf);
-
+                  pa.update();
                   ++index;
                }
             );
          }
+
+         // extract
          else if (_activated_state._step == 2)
          {
-            if (_activated_state._elapsed_time.asSeconds() < 2.0f)
+            float value = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
+
+            auto index = 0;
+            std::ranges::for_each(
+               _pa,
+               [this, &index, &value](auto& pa)
+               {
+                  pa._distance_factor = 1.0f + value * 50;
+                  pa.update();
+                  ++index;
+               }
+            );
+            if (_activated_state._elapsed_time.asSeconds() > 1.0f)
+            {
+               _activated_state._step++;
+               _activated_state.resetTime();
+            }
+         }
+
+         else if (_activated_state._step == 3)
+         {
+            if (_activated_state._elapsed_time.asSeconds() < 3.0f)
             {
                _activated_state._speed += _activated_state._acceleration * dt.asSeconds();
             }
@@ -282,6 +296,8 @@ void TestMechanism::update(const sf::Time& dt)
                if (_activated_state._speed > -0.0001f)
                {
                   _activated_state._step++;
+                  _activated_state._speed = 0;
+                  _activated_state.resetTime();
                }
             }
 
@@ -291,42 +307,96 @@ void TestMechanism::update(const sf::Time& dt)
                [this, &index](auto& pa)
                {
                   pa._angle += sf::radians(_activated_state._speed);
-                  const auto full_angle_sf = pa._angle + pa._angle_offset;
-
-                  pa._layer->_sprite->setRotation(full_angle_sf);
-
+                  pa.update();
                   ++index;
                }
             );
          }
-         else if (_activated_state._step == 3)
+
+         // rotate a lot
+         else if (_activated_state._step == 999)
          {
-         }
-         else if (_activated_state._step == 4)
-         {
-            const auto t = 0.5f * (1.0f + std::sin(_elapsed));
-            const auto angle_rad = std::sin(_elapsed) * 5;
+            if (_activated_state._elapsed_time.asSeconds() < 10.0f)
+            {
+               _activated_state._speed += _activated_state._acceleration * dt.asSeconds();
+            }
+            else
+            {
+               _activated_state._speed *= _activated_state._friction;
+
+               if (_activated_state._speed > -0.0001f)
+               {
+                  _activated_state._step++;
+                  _activated_state.resetTime();
+               }
+            }
 
             auto index = 0;
             std::ranges::for_each(
                _pa,
-               [this, &index, &t, &angle_rad](auto& pa)
+               [this, &index](auto& pa)
                {
-                  //
-                  pa._angle = sf::radians(angle_rad);
-                  pa._distance_factor = 1.0f + t * 50;
-
-                  const auto full_angle_sf = pa._angle + pa._angle_offset;
-
-                  pa._offset.x = std::cos(full_angle_sf.asRadians()) * pa._distance_factor;
-                  pa._offset.y = std::sin(full_angle_sf.asRadians()) * pa._distance_factor;
-
-                  pa._layer->_sprite->setRotation(full_angle_sf);
-                  pa._layer->_sprite->setPosition(pa._pos + pa._offset);
-
+                  pa._angle += sf::radians(_activated_state._speed);
+                  pa.update();
                   ++index;
                }
             );
+         }
+         else if (_activated_state._step == 4)
+         {
+            float duration = 1.0f;
+
+            if (!_activated_state._has_target_angle)
+            {
+               float current = _pa.front()._angle.asRadians();  // assume all are the same
+               float quarter_turn = std::numbers::pi_v<float> / 2.0f;
+               float snapped = std::round(current / quarter_turn) * quarter_turn;
+
+               _activated_state._angle_start = sf::radians(current);
+               _activated_state._angle_target = sf::radians(snapped);
+               _activated_state._has_target_angle = true;
+            }
+
+            float t = std::clamp(_activated_state._elapsed_time.asSeconds() / duration, 0.0f, 1.0f);
+            float eased = Easings::easeOutCubic(t);
+            sf::Angle angle = _activated_state._angle_start + (_activated_state._angle_target - _activated_state._angle_start) * eased;
+
+            for (auto& pa : _pa)
+            {
+               pa._angle = angle;
+               pa.update();
+            }
+
+            if (t >= 1.0f)
+            {
+               _activated_state._step++;
+               _activated_state._has_target_angle = false;
+               _activated_state.resetTime();
+            }
+
+            break;
+         }
+
+         else if (_activated_state._step == 5)
+         {
+            float duration = 1.0f;
+            float t = std::clamp(_activated_state._elapsed_time.asSeconds() / duration, 0.0f, 1.0f);
+            float eased = Easings::easeInOutQuad(1.0f - t);  // reverse easing for smooth return
+
+            for (auto& pa : _pa)
+            {
+               pa._offset_px = sf::Vector2f{0.0f, -eased * 40.0f};
+               pa._distance_factor = 1.0f + eased * 50.0f;
+               pa.update();
+            }
+
+            if (t >= 1.0f)
+            {
+               _activated_state._step++;
+               _activated_state.resetTime();
+            }
+
+            break;
          }
 
          break;
