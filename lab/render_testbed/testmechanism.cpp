@@ -185,11 +185,8 @@ void TestMechanism::update(const sf::Time& dt)
             {
                const auto full_angle_sf = pa._angle_offset; /*+ 0.1f * sf::radians(t - 0.5f)*/
 
-               pa._distance_factor = 1.0f + value * 4.0f;
-               // pa._offset.x = std::cos(full_angle_sf.asRadians()) * pa._distance_factor;
-               // pa._offset.y = std::sin(full_angle_sf.asRadians()) * pa._distance_factor;
-               // pa._layer->_sprite->setRotation(full_angle_sf);
-               // pa._layer->_sprite->setPosition(pa._pos + pa._offset + sf::Vector2f{0, 2.0f * pa._distance_factor});
+               pa._distance_factor = 2.0f * (1.0f + value * 4.0f);
+               pa.update();
 
                ++index;
             }
@@ -392,7 +389,7 @@ void TestMechanism::update(const sf::Time& dt)
 
             if (t >= 1.0f)
             {
-               _activated_state._step++;
+               _activated_state._step = 0;
                _activated_state.resetTime();
             }
 
