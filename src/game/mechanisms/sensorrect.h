@@ -43,7 +43,7 @@ private:
    bool _player_intersects = false;
    Event _event = Event::OnEnter;
    Action _action = Action::Enable;
-   std::string _reference_id;
+   std::optional<std::string> _reference_id;
    std::vector<std::shared_ptr<GameMechanism>> _references;
    std::vector<SensorCallback> _callbacks;
 };

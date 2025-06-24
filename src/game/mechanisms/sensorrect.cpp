@@ -1,4 +1,5 @@
 #include "sensorrect.h"
+#include <ranges>
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
@@ -125,16 +126,20 @@ void SensorRect::setup(const GameDeserializeData& data)
 
 void SensorRect::findReference(const std::vector<std::shared_ptr<GameMechanism>>& mechanisms)
 {
-   std::copy_if(
-      mechanisms.begin(),
-      mechanisms.end(),
-      std::back_inserter(_references),
-      [this](const auto& object)
-      {
-         auto* game_node = dynamic_cast<GameNode*>(object.get());
-         return (game_node && game_node->getObjectId() == _reference_id);
-      }
-   );
+   if (!_reference_id.has_value())
+   {
+      return;
+   }
+
+   auto filtered_view = mechanisms | std::views::filter(
+                                        [this](const auto& object)
+                                        {
+                                           auto* game_node = dynamic_cast<GameNode*>(object.get());
+                                           return (game_node && game_node->getObjectId() == _reference_id);
+                                        }
+                                     );
+
+   _references.insert(_references.end(), filtered_view.begin(), filtered_view.end());
 }
 
 void SensorRect::addSensorCallback(const SensorCallback& callback)

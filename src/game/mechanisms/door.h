@@ -69,7 +69,6 @@ private:
    sf::FloatRect _player_at_door_rect;
 
    Version _version = Version::Version2;
-   State _initial_state = State::Closed;
    State _state = State::Closed;
 
    // for 'version 1'
