@@ -24,9 +24,20 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SFML)
 
+set(IMGUI_SOURCES
+    ${CMAKE_SOURCE_DIR}/../../thirdparty/imgui/imgui.cpp
+    ${CMAKE_SOURCE_DIR}/../../thirdparty/imgui/imgui_draw.cpp
+    ${CMAKE_SOURCE_DIR}/../../thirdparty/imgui/imgui_tables.cpp
+    ${CMAKE_SOURCE_DIR}/../../thirdparty/imgui/imgui_widgets.cpp
+    ${CMAKE_SOURCE_DIR}/../../thirdparty/imgui/imgui-SFML.cpp
+)
+
 add_executable(RenderTestbed
     main.cpp
     testmechanism.cpp
+
+    # ImGui sources
+    ${IMGUI_SOURCES}
 
     # framework
     ../../src/framework/image/layer.h
@@ -41,4 +52,10 @@ add_executable(RenderTestbed
 )
 
 target_include_directories(RenderTestbed PRIVATE ${sfml_SOURCE_DIR}/include)
+
+target_include_directories(RenderTestbed PRIVATE
+    ${sfml_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/../../thirdparty/imgui
+)
+
 target_link_libraries(RenderTestbed PRIVATE sfml-graphics sfml-window sfml-system)

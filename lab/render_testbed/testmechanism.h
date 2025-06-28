@@ -13,6 +13,8 @@ public:
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
    virtual void update(const sf::Time& dt);
 
+   void chooseNextState();
+
 private:
    struct Side
    {
@@ -38,8 +40,7 @@ private:
    {
       Disabled,
       Enabling,
-      Enabled,
-      Activated
+      Enabled
    };
 
    void load();
@@ -67,7 +68,7 @@ private:
       bool _has_target_angle = false;
    };
 
-   State _state{State::Activated};
+   State _state{State::Enabling};
 
    std::shared_ptr<sf::Sprite> _socket_sprite;
 

@@ -1,5 +1,7 @@
 #include "testmechanism.h"
 
+#include <imgui-SFML.h>
+#include <imgui.h>
 #include "../../src/framework/easings/easings.h"
 #include "../../src/framework/image/psd.h"
 
@@ -107,6 +109,12 @@ void TestMechanism::load()
 
 void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
+   ImGui::Begin("Activated State Debug");
+   ImGui::SliderFloat("Speed", &_activated_state._speed, -5.f, 5.f);
+   ImGui::SliderFloat("Acceleration", &_activated_state._acceleration, -0.01f, 0.01f);
+   ImGui::SliderFloat("Friction", &_activated_state._friction, 0.9f, 1.0f);
+   ImGui::End();
+
    // debug rect
    // target.draw(_rectangle_);
 
@@ -166,10 +174,6 @@ void TestMechanism::update(const sf::Time& dt)
       {
          break;
       }
-      case State::Enabling:
-      {
-         break;
-      }
       case State::Enabled:
       {
          _enabled_state._elapsed_time += dt;
@@ -193,7 +197,7 @@ void TestMechanism::update(const sf::Time& dt)
          );
          break;
       }
-      case State::Activated:
+      case State::Enabling:
       {
          _activated_state._elapsed_time += dt;
 
@@ -399,4 +403,28 @@ void TestMechanism::update(const sf::Time& dt)
          break;
       }
    }
+}
+
+void TestMechanism::chooseNextState()
+{
+   switch (_state)
+   {
+      case State::Disabled:
+      {
+         _state = State::Enabling;
+         break;
+      }
+      case State::Enabling:
+      {
+         _state = State::Enabled;
+         break;
+      }
+      case State::Enabled:
+      {
+         _state = State::Disabled;
+         break;
+      }
+   }
+
+   _activated_state._step = 0;
 }
