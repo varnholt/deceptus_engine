@@ -68,7 +68,7 @@ private:
       bool _has_target_angle = false;
    };
 
-   State _state{State::Enabling};
+   State _state{State::Disabled};
 
    std::shared_ptr<sf::Sprite> _socket_sprite;
 
