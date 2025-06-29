@@ -78,7 +78,7 @@ void TestMechanism::load()
          {
             const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
             sprite->setOrigin(origin);
-            sprite->setPosition(origin + pos + sf::Vector2f{0, -30});
+            sprite->setPosition(origin + pos + sf::Vector2f{0, 0});
          }
       }
       catch (...)
@@ -121,19 +121,7 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    sf::RenderStates states;
 
    // draw pa
-   // std::ranges::for_each(
-   //    _pa,
-   //    [&target, states](const auto& pa)
-   //    {
-   //       //
-   //       pa._layer->draw(target, states);
-   //    }
-   // );
-
-   _pa[0]._layer->draw(target, states);
-   _pa[1]._layer->draw(target, states);
-   _pa[2]._layer->draw(target, states);
-   _pa[3]._layer->draw(target, states);
+   std::ranges::for_each(_pa, [&target, states](const auto& pa) { pa._layer->draw(target, states); });
 
    // target.draw(_origin_shape);
 
@@ -142,8 +130,6 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
 namespace
 {
-#include <cmath>
-
 #include <cmath>
 
 float f(double x, double sigma = 0.8)
@@ -172,6 +158,7 @@ void TestMechanism::update(const sf::Time& dt)
    {
       case State::Disabled:
       {
+         std::ranges::for_each(_pa, [this](auto& pa) { pa.update(); });
          break;
       }
       case State::Enabled:
@@ -187,8 +174,7 @@ void TestMechanism::update(const sf::Time& dt)
             _pa,
             [this, &index, &value](auto& pa)
             {
-               const auto full_angle_sf = pa._angle_offset; /*+ 0.1f * sf::radians(t - 0.5f)*/
-
+               const auto full_angle_sf = pa._angle_offset;
                pa._distance_factor = 2.0f * (1.0f + value * 4.0f);
                pa.update();
 
@@ -211,15 +197,16 @@ void TestMechanism::update(const sf::Time& dt)
          // lift
          if (_activated_state._step == 0)
          {
-            float value = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
+            float lift_factor = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
+            float distance_factor = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
 
             auto index = 0;
             std::ranges::for_each(
                _pa,
-               [this, &index, &value](auto& pa)
+               [this, &index, &lift_factor, &distance_factor](auto& pa)
                {
-                  //
-                  pa._offset_px = sf::Vector2f{0, -value * 40};
+                  pa._distance_factor = 1.0f + distance_factor * 50;
+                  pa._offset_px = sf::Vector2f{0, -lift_factor * 60};
                   pa.update();
                }
             );
@@ -314,35 +301,6 @@ void TestMechanism::update(const sf::Time& dt)
             );
          }
 
-         // rotate a lot
-         else if (_activated_state._step == 999)
-         {
-            if (_activated_state._elapsed_time.asSeconds() < 10.0f)
-            {
-               _activated_state._speed += _activated_state._acceleration * dt.asSeconds();
-            }
-            else
-            {
-               _activated_state._speed *= _activated_state._friction;
-
-               if (_activated_state._speed > -0.0001f)
-               {
-                  _activated_state._step++;
-                  _activated_state.resetTime();
-               }
-            }
-
-            auto index = 0;
-            std::ranges::for_each(
-               _pa,
-               [this, &index](auto& pa)
-               {
-                  pa._angle += sf::radians(_activated_state._speed);
-                  pa.update();
-                  ++index;
-               }
-            );
-         }
          else if (_activated_state._step == 4)
          {
             float duration = 1.0f;
