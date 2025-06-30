@@ -28,6 +28,13 @@ private:
          _layer->_sprite->setPosition(_pos_px + pos_from_angle_and_distance_px + _offset_px);
       }
 
+      void reset()
+      {
+         _angle = sf::degrees(0.0f);
+         _distance_factor = 1.0f;
+         update();
+      }
+
       std::shared_ptr<Layer> _layer;
       sf::Vector2f _pos_px;
       sf::Vector2f _offset_px;
