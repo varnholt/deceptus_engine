@@ -23,8 +23,7 @@ TestMechanism::TestMechanism()
 
 namespace
 {
-sf::Vector2f screen_offset{100, 100};
-
+sf::Vector2f screen_offset{200, 400};
 }
 
 // idea: have only 1 rotation angle, the other 3 are relative to that
@@ -109,10 +108,27 @@ void TestMechanism::load()
 
 void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
-   ImGui::Begin("Activated State Debug");
-   ImGui::SliderFloat("Speed", &_activated_state._speed, -5.f, 5.f);
-   ImGui::SliderFloat("Acceleration", &_activated_state._acceleration, -0.01f, 0.01f);
-   ImGui::SliderFloat("Friction", &_activated_state._friction, 0.9f, 1.0f);
+   ImGui::Begin("Settings");
+
+   ImGui::Text("Activating State");
+   ImGui::SliderFloat("acceleration", &_activated_state._acceleration, -0.01f, 0.01f);
+   ImGui::SliderFloat("friction", &_activated_state._friction, 0.9f, 1.0f);
+   ImGui::SliderInt("rise_height_px", &_activated_state._rise_height_px, 0, 255);
+   ImGui::SliderInt("extend_distance_px", &_activated_state._extend_distance_px, 0, 255);
+   ImGui::SliderFloat("spinback_duration_s", &_activated_state._spinback_duration_s, 0.1f, 10.0f);
+   ImGui::SliderFloat("retract_duration_s", &_activated_state._retract_duration_s, 0.1f, 10.0f);
+   ImGui::SliderFloat("rotate_right_duration_s", &_activated_state._rotate_right_duration_s, 0.1f, 10.0f);
+   ImGui::SliderFloat("rotate_left_duration_s", &_activated_state._rotate_left_duration_s, 0.1f, 10.0f);
+   ImGui::SliderFloat("rotate_speed_max", &_activated_state._rotate_speed_max, 0.0002f, 0.02f);
+
+   ImGui::Separator();
+
+   ImGui::Text("Enabled State");
+   ImGui::SliderFloat("frequency", &_enabled_state._frequency, 0.1f, 10.0f);
+   ImGui::SliderFloat("amplitude", &_enabled_state._amplitude, 0.0f, 10.0f);
+   ImGui::SliderFloat("offset", &_enabled_state._offset, 0.0f, 5.0f);
+   ImGui::SliderFloat("irregularity", &_enabled_state._irregularity, 0.0f, 10.0f);
+
    ImGui::End();
 
    // debug rect
@@ -161,58 +177,56 @@ void TestMechanism::update(const sf::Time& dt)
          std::ranges::for_each(_pa, [this](auto& pa) { pa.update(); });
          break;
       }
+
       case State::Enabled:
       {
          _enabled_state._elapsed_time += dt;
-         constexpr auto scale_factor = 0.2f;
          constexpr auto animation_speed = 1.0f;
          const auto scaled_time = _enabled_state._elapsed_time.asSeconds() * animation_speed;
-         const auto value = 0.7f * (1.0f + (std::sin(scaled_time) + std::sin(scaled_time * 3.0f) / 3.0f));
+         const auto value =
+            2.0f * (_enabled_state._offset +
+                    _enabled_state._amplitude * (1.0f + (std::sin(scaled_time) + std::sin(scaled_time * _enabled_state._irregularity) /
+                                                                                    _enabled_state._irregularity)));
 
-         auto index = 0;
          std::ranges::for_each(
             _pa,
-            [this, &index, &value](auto& pa)
+            [this, &value](auto& pa)
             {
-               const auto full_angle_sf = pa._angle_offset;
-               pa._distance_factor = 2.0f * (1.0f + value * 4.0f);
+               pa._distance_factor = value;
                pa.update();
-
-               ++index;
             }
          );
          break;
       }
+
       case State::Enabling:
       {
          _activated_state._elapsed_time += dt;
 
-         // 0: lift
+         // 0: lift and extract
          // 1: rotate
-         // 2: extract
-         // 3: rotate a lot
-         // 4: rotate to clean 90 deg (alignment with base)
-         // 5: retract
+         // 2: rotate to clean 90 deg (alignment with base)
+         // 3: retract
 
          // lift
          if (_activated_state._step == 0)
          {
-            float lift_factor = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
-            float distance_factor = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
+            const auto lift_factor = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
+            const auto distance_factor = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
 
-            auto index = 0;
             std::ranges::for_each(
                _pa,
-               [this, &index, &lift_factor, &distance_factor](auto& pa)
+               [this, &lift_factor, &distance_factor](auto& pa)
                {
-                  pa._distance_factor = 1.0f + distance_factor * 50;
-                  pa._offset_px = sf::Vector2f{0, -lift_factor * 60};
+                  pa._distance_factor = 1.0f + distance_factor * _activated_state._extend_distance_px;
+                  pa._offset_px = sf::Vector2f{0, -lift_factor * _activated_state._rise_height_px};
                   pa.update();
                }
             );
 
             if (_activated_state._elapsed_time.asSeconds() > 1.0f)
             {
+               _activated_state.resetTime();
                _activated_state._step++;
             }
          }
@@ -220,9 +234,10 @@ void TestMechanism::update(const sf::Time& dt)
          // rotate right
          else if (_activated_state._step == 1)
          {
-            if (_activated_state._elapsed_time.asSeconds() < 2.0f)
+            if (_activated_state._elapsed_time.asSeconds() < _activated_state._rotate_right_duration_s)
             {
                _activated_state._speed += _activated_state._acceleration * dt.asSeconds();
+               _activated_state._speed = std::clamp(_activated_state._speed, 0.0f, _activated_state._rotate_speed_max);
             }
             else
             {
@@ -230,9 +245,9 @@ void TestMechanism::update(const sf::Time& dt)
 
                if (_activated_state._speed < 0.0001f)
                {
-                  _activated_state._step++;
                   _activated_state._speed = 0;
-                  _activated_state._acceleration = -_activated_state._acceleration;
+
+                  _activated_state._step++;
                   _activated_state.resetTime();
                }
             }
@@ -249,33 +264,13 @@ void TestMechanism::update(const sf::Time& dt)
             );
          }
 
-         // extract
+         // rotate left
          else if (_activated_state._step == 2)
          {
-            // float value = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
-
-            // auto index = 0;
-            // std::ranges::for_each(
-            //    _pa,
-            //    [this, &index, &value](auto& pa)
-            //    {
-            //       pa._distance_factor = 1.0f + value * 50;
-            //       pa.update();
-            //       ++index;
-            //    }
-            // );
-            // if (_activated_state._elapsed_time.asSeconds() > 1.0f)
+            if (_activated_state._elapsed_time.asSeconds() < _activated_state._rotate_left_duration_s)
             {
-               _activated_state._step++;
-               _activated_state.resetTime();
-            }
-         }
-
-         else if (_activated_state._step == 3)
-         {
-            if (_activated_state._elapsed_time.asSeconds() < 3.0f)
-            {
-               _activated_state._speed += _activated_state._acceleration * dt.asSeconds();
+               _activated_state._speed -= _activated_state._acceleration * dt.asSeconds();
+               _activated_state._speed = std::clamp(_activated_state._speed, -_activated_state._rotate_speed_max, 0.0f);
             }
             else
             {
@@ -283,8 +278,9 @@ void TestMechanism::update(const sf::Time& dt)
 
                if (_activated_state._speed > -0.0001f)
                {
-                  _activated_state._step++;
                   _activated_state._speed = 0;
+
+                  _activated_state._step++;
                   _activated_state.resetTime();
                }
             }
@@ -301,24 +297,25 @@ void TestMechanism::update(const sf::Time& dt)
             );
          }
 
-         else if (_activated_state._step == 4)
+         else if (_activated_state._step == 3)
          {
-            float duration = 1.0f;
-
             if (!_activated_state._has_target_angle)
             {
-               float current = _pa.front()._angle.asRadians();  // assume all are the same
-               float quarter_turn = std::numbers::pi_v<float> / 2.0f;
-               float snapped = std::round(current / quarter_turn) * quarter_turn;
+               const auto current_angle = _pa.front()._angle.asRadians();  // assume all are the same
+               const auto quarter_turn = std::numbers::pi_v<float> / 2.0f;
+               const auto snapped_angle = std::round(current_angle / quarter_turn) * quarter_turn;
 
-               _activated_state._angle_start = sf::radians(current);
-               _activated_state._angle_target = sf::radians(snapped);
+               _activated_state._angle_start = sf::radians(current_angle);
+               _activated_state._angle_target = sf::radians(snapped_angle);
                _activated_state._has_target_angle = true;
             }
 
-            float t = std::clamp(_activated_state._elapsed_time.asSeconds() / duration, 0.0f, 1.0f);
-            float eased = Easings::easeOutCubic(t);
-            sf::Angle angle = _activated_state._angle_start + (_activated_state._angle_target - _activated_state._angle_start) * eased;
+            const auto normalized_time =
+               std::clamp(_activated_state._elapsed_time.asSeconds() / _activated_state._spinback_duration_s, 0.0f, 1.0f);
+
+            const auto eased = Easings::easeOutCubic(normalized_time);
+
+            const auto angle = _activated_state._angle_start + (_activated_state._angle_target - _activated_state._angle_start) * eased;
 
             for (auto& pa : _pa)
             {
@@ -326,7 +323,7 @@ void TestMechanism::update(const sf::Time& dt)
                pa.update();
             }
 
-            if (t >= 1.0f)
+            if (normalized_time >= 1.0f)
             {
                _activated_state._step++;
                _activated_state._has_target_angle = false;
@@ -336,23 +333,28 @@ void TestMechanism::update(const sf::Time& dt)
             break;
          }
 
-         else if (_activated_state._step == 5)
+         else if (_activated_state._step == 4)
          {
-            float duration = 1.0f;
-            float t = std::clamp(_activated_state._elapsed_time.asSeconds() / duration, 0.0f, 1.0f);
-            float eased = Easings::easeInOutQuad(1.0f - t);  // reverse easing for smooth return
+            float time_normalized =
+               std::clamp(_activated_state._elapsed_time.asSeconds() / _activated_state._retract_duration_s, 0.0f, 1.0f);
+            float eased = Easings::easeInOutQuad(1.0f - time_normalized);  // reverse easing
 
             for (auto& pa : _pa)
             {
-               pa._offset_px = sf::Vector2f{0.0f, -eased * 60.0f};
-               pa._distance_factor = 1.0f + eased * 50.0f;
+               pa._offset_px = sf::Vector2f{0.0f, -eased * _activated_state._rise_height_px};
+               pa._distance_factor = 1.0f + eased * _activated_state._extend_distance_px;
                pa.update();
             }
 
-            if (t >= 1.0f)
+            if (time_normalized >= 1.0f)
             {
-               _activated_state._step = 999;
+               _activated_state._step = 0;
                _activated_state.resetTime();
+
+               for (auto& pa : _pa)
+               {
+                  pa.reset();
+               }
             }
 
             break;
