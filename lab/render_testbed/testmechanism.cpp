@@ -252,19 +252,19 @@ void TestMechanism::update(const sf::Time& dt)
          // extract
          else if (_activated_state._step == 2)
          {
-            float value = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
+            // float value = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
 
-            auto index = 0;
-            std::ranges::for_each(
-               _pa,
-               [this, &index, &value](auto& pa)
-               {
-                  pa._distance_factor = 1.0f + value * 50;
-                  pa.update();
-                  ++index;
-               }
-            );
-            if (_activated_state._elapsed_time.asSeconds() > 1.0f)
+            // auto index = 0;
+            // std::ranges::for_each(
+            //    _pa,
+            //    [this, &index, &value](auto& pa)
+            //    {
+            //       pa._distance_factor = 1.0f + value * 50;
+            //       pa.update();
+            //       ++index;
+            //    }
+            // );
+            // if (_activated_state._elapsed_time.asSeconds() > 1.0f)
             {
                _activated_state._step++;
                _activated_state.resetTime();
@@ -344,14 +344,14 @@ void TestMechanism::update(const sf::Time& dt)
 
             for (auto& pa : _pa)
             {
-               pa._offset_px = sf::Vector2f{0.0f, -eased * 40.0f};
+               pa._offset_px = sf::Vector2f{0.0f, -eased * 60.0f};
                pa._distance_factor = 1.0f + eased * 50.0f;
                pa.update();
             }
 
             if (t >= 1.0f)
             {
-               _activated_state._step = 0;
+               _activated_state._step = 999;
                _activated_state.resetTime();
             }
 
@@ -385,4 +385,9 @@ void TestMechanism::chooseNextState()
    }
 
    _activated_state._step = 0;
+
+   for (auto& pa : _pa)
+   {
+      pa.reset();
+   }
 }
