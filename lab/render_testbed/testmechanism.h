@@ -55,6 +55,10 @@ private:
    struct EnabledState
    {
       sf::Time _elapsed_time;
+      float _frequency{1.0f};
+      float _amplitude{2.8f};
+      float _offset{1.0f};
+      float _irregularity{3.0f};
    };
 
    struct ActivatedState
@@ -63,16 +67,24 @@ private:
       {
          _elapsed_time = sf::seconds(0);
       }
+
       sf::Time _elapsed_time;
       int32_t _step{0};
-
-      float _speed{0.0f};
-      float _acceleration{0.001f};
-      float _friction{0.999f};
-
       sf::Angle _angle_start{};
       sf::Angle _angle_target{};
       bool _has_target_angle = false;
+      float _speed{0.0f};
+
+      // settings
+      float _acceleration{0.001f};
+      float _friction{0.999f};
+      int32_t _rise_height_px{60};
+      int32_t _extend_distance_px{50};
+      float _spinback_duration_s{1.0f};
+      float _retract_duration_s{1.0};
+      float _rotate_right_duration_s{2.0f};
+      float _rotate_left_duration_s{3.0f};
+      float _rotate_speed_max{0.002f};
    };
 
    State _state{State::Disabled};

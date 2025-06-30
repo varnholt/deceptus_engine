@@ -13,7 +13,10 @@ int main()
    sf::VideoMode mode({1280, 720});
    window.create(mode, title);
 
-   ImGui::SFML::Init(window);  // ImGui init
+   if (!ImGui::SFML::Init(window))
+   {
+      return 1;
+   }
 
    TestMechanism mechanism;
    sf::Clock clock;
@@ -41,16 +44,16 @@ int main()
       }
 
       sf::Time dt = clock.restart();
-      ImGui::SFML::Update(window, dt);  // ImGui update
+      ImGui::SFML::Update(window, dt);
 
       mechanism.update(dt);
 
       window.clear();
       mechanism.draw(window, window);
-      ImGui::SFML::Render(window);  // ImGui render
+      ImGui::SFML::Render(window);
       window.display();
    }
 
-   ImGui::SFML::Shutdown();  // ImGui shutdown
+   ImGui::SFML::Shutdown();
    return 0;
 }
