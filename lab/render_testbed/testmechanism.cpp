@@ -24,6 +24,31 @@ TestMechanism::TestMechanism()
 namespace
 {
 sf::Vector2f screen_offset{200, 400};
+
+std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, float angle_deg)
+{
+   const auto size = original.getSize();
+   const float width = static_cast<float>(size.x);
+   const float height = static_cast<float>(size.y);
+
+   sf::RenderTexture render_texture(size);
+   render_texture.clear(sf::Color::Transparent);
+
+   sf::Sprite sprite(original);
+   sprite.setOrigin({width / 2.f, height / 2.f});
+   sprite.setRotation(sf::degrees(angle_deg)); // Use negative for CCW
+   sprite.setPosition({width / 2.f, height / 2.f});  // Center in new texture
+
+   // render_texture.setSmooth(true);
+   render_texture.draw(sprite);
+   render_texture.display();
+
+   // Copy the result into a new sf::Texture
+   auto rotated = std::make_shared<sf::Texture>(render_texture.getTexture());
+   rotated->setSmooth(true);
+   return rotated;
+}
+
 }
 
 // idea: have only 1 rotation angle, the other 3 are relative to that
@@ -55,11 +80,21 @@ void TestMechanism::load()
       try
       {
          const auto texture_size = sf::Vector2u(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
-         auto texture = std::make_shared<sf::Texture>(texture_size);
+         //auto texture = std::make_shared<sf::Texture>(texture_size);
          auto opacity = layer.getOpacity();
 
+         auto texture = std::make_shared<sf::Texture>(texture_size);
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
-         auto sprite = std::make_shared<sf::Sprite>(*texture);
+
+         std::shared_ptr<sf::Sprite> sprite;
+
+         // Rotate texture if this is a pa_ layer
+         if (layer.getName().starts_with("pa_"))
+         {
+            texture->setSmooth(true);
+            texture = createRotatedTexture(*texture, -45.f);  // rotate CCW
+         }
+         sprite = std::make_shared<sf::Sprite>(*texture);
 
          const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())} + screen_offset;
          sprite->setPosition(pos);
