@@ -13,23 +13,22 @@ sf::Vector2f screen_offset{400, 300};
 
 std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, const sf::Angle& angle)
 {
-   const auto size = original.getSize();
-   const float width = static_cast<float>(size.x);
-   const float height = static_cast<float>(size.y);
+   const auto size_px = original.getSize();
+   const auto width_px = static_cast<float>(size_px.x);
+   const auto height_px = static_cast<float>(size_px.y);
 
-   sf::RenderTexture render_texture(size);
+   sf::RenderTexture render_texture(size_px);
    render_texture.clear(sf::Color::Transparent);
 
    sf::Sprite sprite(original);
-   sprite.setOrigin({width / 2.f, height / 2.f});
+   sprite.setOrigin({width_px / 2.0f, height_px / 2.0f});
    sprite.setRotation(angle);
-   sprite.setPosition({width / 2.f, height / 2.f});
+   sprite.setPosition({width_px / 2.0f, height_px / 2.0f});
 
    render_texture.draw(sprite);
    render_texture.display();
 
    auto rotated = std::make_shared<sf::Texture>(render_texture.getTexture());
-   rotated->setSmooth(true);
    return rotated;
 }
 
@@ -100,7 +99,6 @@ void TestMechanism::load()
          tmp->_texture = texture;
          tmp->_sprite = sprite;
          tmp->_visible = layer.isVisible();
-         tmp->_texture->setSmooth(true);
 
          _layer_stack.push_back(tmp);
          _layers[layer.getName()] = tmp;
