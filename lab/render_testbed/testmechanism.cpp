@@ -7,25 +7,11 @@
 
 #include <iostream>
 
-TestMechanism::TestMechanism()
-{
-   _rectangle_.setSize({200.f, 100.f});
-   _rectangle_.setFillColor(sf::Color::Red);
-   _rectangle_.setPosition({540.f, 310.f});
-
-   _origin_shape.setRadius(1.0f);
-   _origin_shape.setFillColor(sf::Color::Red);
-
-   _filename = "data/portal-test.psd";
-
-   load();
-}
-
 namespace
 {
-sf::Vector2f screen_offset{200, 400};
+sf::Vector2f screen_offset{400, 300};
 
-std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, float angle_deg)
+std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, const sf::Angle& angle)
 {
    const auto size = original.getSize();
    const float width = static_cast<float>(size.x);
@@ -36,19 +22,31 @@ std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, f
 
    sf::Sprite sprite(original);
    sprite.setOrigin({width / 2.f, height / 2.f});
-   sprite.setRotation(sf::degrees(angle_deg)); // Use negative for CCW
-   sprite.setPosition({width / 2.f, height / 2.f});  // Center in new texture
+   sprite.setRotation(angle);
+   sprite.setPosition({width / 2.f, height / 2.f});
 
-   // render_texture.setSmooth(true);
    render_texture.draw(sprite);
    render_texture.display();
 
-   // Copy the result into a new sf::Texture
    auto rotated = std::make_shared<sf::Texture>(render_texture.getTexture());
    rotated->setSmooth(true);
    return rotated;
 }
 
+}  // namespace
+
+TestMechanism::TestMechanism()
+{
+   _rectangle_.setSize({200.f, 200.f});
+   _rectangle_.setFillColor(sf::Color(255, 255, 255, 25));
+   _rectangle_.setPosition(screen_offset);
+
+   _origin_shape.setRadius(1.0f);
+   _origin_shape.setFillColor(sf::Color::Red);
+
+   _filename = "data/portal-test.psd";
+
+   load();
 }
 
 // idea: have only 1 rotation angle, the other 3 are relative to that
@@ -69,7 +67,6 @@ void TestMechanism::load()
    int32_t pa_index = 0;
    for (const auto& layer : psd.getLayers())
    {
-      // skip groups
       if (!layer.isImageLayer())
       {
          continue;
@@ -80,7 +77,6 @@ void TestMechanism::load()
       try
       {
          const auto texture_size = sf::Vector2u(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
-         //auto texture = std::make_shared<sf::Texture>(texture_size);
          auto opacity = layer.getOpacity();
 
          auto texture = std::make_shared<sf::Texture>(texture_size);
@@ -88,12 +84,13 @@ void TestMechanism::load()
 
          std::shared_ptr<sf::Sprite> sprite;
 
-         // Rotate texture if this is a pa_ layer
-         if (layer.getName().starts_with("pa_"))
+         // rotate texture if this is a pa_ or pi_ layer
+         if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
          {
             texture->setSmooth(true);
-            texture = createRotatedTexture(*texture, -45.f);  // rotate CCW
+            texture = createRotatedTexture(*texture, -_base_angle);  // rotate ccw
          }
+
          sprite = std::make_shared<sf::Sprite>(*texture);
 
          const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())} + screen_offset;
@@ -108,7 +105,7 @@ void TestMechanism::load()
          _layer_stack.push_back(tmp);
          _layers[layer.getName()] = tmp;
 
-         if (layer.getName().starts_with("pa_"))
+         if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
          {
             const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
             sprite->setOrigin(origin);
@@ -121,27 +118,25 @@ void TestMechanism::load()
       }
    }
 
-   _pa[0]._layer = _layers["pa_0"];
-   _pa[1]._layer = _layers["pa_1"];
-   _pa[2]._layer = _layers["pa_2"];
-   _pa[3]._layer = _layers["pa_3"];
+   for (int i = 0; i < 4; ++i)
+   {
+      _pa[i]._layer = _layers[std::format("pa_{}", i)];
+      _pa[i]._pos_px = _pa[i]._layer->_sprite->getPosition();
+      _pa[i]._angle_offset = sf::degrees(90 * i);
 
-   _pa[0]._pos_px = _pa[0]._layer->_sprite->getPosition();
-   _pa[1]._pos_px = _pa[1]._layer->_sprite->getPosition();
-   _pa[2]._pos_px = _pa[2]._layer->_sprite->getPosition();
-   _pa[3]._pos_px = _pa[3]._layer->_sprite->getPosition();
+      _pi[i]._layer = _layers[std::format("pi_{}", i)];
+      _pi[i]._pos_px = _pi[i]._layer->_sprite->getPosition();
+      _pi[i]._angle_offset = sf::degrees(90 * i);
+   }
 
-   _pa[0]._angle_offset = sf::degrees(0);
-   _pa[1]._angle_offset = sf::degrees(90);
-   _pa[2]._angle_offset = sf::degrees(180);
-   _pa[3]._angle_offset = sf::degrees(270);
-
-   _socket_sprite = _layers["base"]->_sprite;
+   _sprite_socket = _layers["base"]->_sprite;
+   _layer_background_inactive = _layers["background_inactive"];
+   _layer_background_active = _layers["background_active"];
 
    _origin = _pa[0]._layer->_sprite->getOrigin();
 }
 
-void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
+void TestMechanism::drawEditor()
 {
    ImGui::Begin("Settings");
 
@@ -165,18 +160,58 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    ImGui::SliderFloat("irregularity", &_enabled_state._irregularity, 0.0f, 10.0f);
 
    ImGui::End();
+}
+
+void TestMechanism::setSidesVisible(std::array<Side, 4>& sides, bool visible)
+{
+   for (auto& side : sides)
+   {
+      side._layer->_visible = visible;
+   }
+}
+
+void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
+{
+   sf::RenderStates states;
+   drawEditor();
+
+   // Save current view (likely the default or GUI-compatible)
+   const sf::View original_view = target.getView();
+   sf::View pixel_view = original_view;
+   pixel_view.zoom(0.5f);
+
+   target.setView(pixel_view);
+
+   // draw sides
+   auto draw_visible = [&target, states](const auto& side)
+   {
+      if (side._layer->_visible)
+      {
+         side._layer->draw(target, states);
+      }
+   };
+
+   target.draw(_rectangle_);
+
+   if (_layer_background_inactive->_visible)
+   {
+      target.draw(*_layer_background_inactive);
+   }
+
+   if (_layer_background_active->_visible)
+   {
+      target.draw(*_layer_background_active);
+   }
+
+   target.draw(*_sprite_socket);
+
+   std::ranges::for_each(_pa, draw_visible);
+   std::ranges::for_each(_pi, draw_visible);
 
    // debug rect
-   // target.draw(_rectangle_);
-
-   sf::RenderStates states;
-
-   // draw pa
-   std::ranges::for_each(_pa, [&target, states](const auto& pa) { pa._layer->draw(target, states); });
-
    // target.draw(_origin_shape);
 
-   target.draw(*_socket_sprite);
+   target.setView(original_view);
 }
 
 namespace
@@ -200,7 +235,6 @@ float f(double x, double sigma = 0.8)
 
 void TestMechanism::update(const sf::Time& dt)
 {
-   // No-op for now
    _elapsed += dt.asSeconds();
 
    _origin_shape.setPosition(_origin);
@@ -209,25 +243,49 @@ void TestMechanism::update(const sf::Time& dt)
    {
       case State::Disabled:
       {
-         std::ranges::for_each(_pa, [this](auto& pa) { pa.update(); });
+         setSidesVisible(_pa, false);
+         setSidesVisible(_pi, true);
+         _layer_background_active->hide();
+         _layer_background_inactive->show();
+
+         std::ranges::for_each(
+            _pi,
+            [this](auto& side)
+            {
+               side.reset();
+               side.update();
+            }
+         );
          break;
       }
 
       case State::Enabled:
       {
+         setSidesVisible(_pa, true);
+         setSidesVisible(_pi, false);
+         _layer_background_active->show();
+         _layer_background_inactive->hide();
+
          _enabled_state._elapsed_time += dt;
          constexpr auto animation_speed = 1.0f;
          const auto scaled_time = _enabled_state._elapsed_time.asSeconds() * animation_speed;
-         const auto value =
+         const auto target_distance =
             2.0f * (_enabled_state._offset +
                     _enabled_state._amplitude * (1.0f + (std::sin(scaled_time) + std::sin(scaled_time * _enabled_state._irregularity) /
                                                                                     _enabled_state._irregularity)));
 
+         // interpolate from last position given in activation
+         constexpr auto interpolation_duration = 2.0f;
+         const auto interpolating = _enabled_state._elapsed_time.asSeconds() < interpolation_duration;
+         const auto normalized_time = std::clamp(_enabled_state._elapsed_time.asSeconds() / interpolation_duration, 0.0f, 1.0f);
+
          std::ranges::for_each(
             _pa,
-            [this, &value](auto& pa)
+            [this, &target_distance, interpolating, normalized_time](auto& pa)
             {
-               pa._distance_factor = value;
+               pa._distance_factor =
+                  interpolating ? std::lerp(_enabled_state._distances_when_activated, target_distance, normalized_time) : target_distance;
+
                pa.update();
             }
          );
@@ -236,6 +294,9 @@ void TestMechanism::update(const sf::Time& dt)
 
       case State::Enabling:
       {
+         _layer_background_active->hide();
+         _layer_background_inactive->hide();
+
          _activated_state._elapsed_time += dt;
 
          // 0: lift and extract
@@ -246,16 +307,19 @@ void TestMechanism::update(const sf::Time& dt)
          // lift
          if (_activated_state._step == 0)
          {
+            setSidesVisible(_pa, false);
+            setSidesVisible(_pi, true);
+
             const auto lift_factor = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
             const auto distance_factor = Easings::easeOutBounce<float>(_activated_state._elapsed_time.asSeconds());
 
             std::ranges::for_each(
-               _pa,
-               [this, &lift_factor, &distance_factor](auto& pa)
+               _pi,
+               [this, &lift_factor, &distance_factor](auto& side)
                {
-                  pa._distance_factor = 1.0f + distance_factor * _activated_state._extend_distance_px;
-                  pa._offset_px = sf::Vector2f{0, -lift_factor * _activated_state._rise_height_px};
-                  pa.update();
+                  side._distance_factor = 1.0f + distance_factor * _activated_state._extend_distance_px;
+                  side._offset_px = sf::Vector2f{0, -lift_factor * _activated_state._rise_height_px};
+                  side.update();
                }
             );
 
@@ -289,11 +353,11 @@ void TestMechanism::update(const sf::Time& dt)
 
             auto index = 0;
             std::ranges::for_each(
-               _pa,
-               [this, &index](auto& pa)
+               _pi,
+               [this, &index](auto& side)
                {
-                  pa._angle += sf::radians(_activated_state._speed);
-                  pa.update();
+                  side._angle += sf::radians(_activated_state._speed);
+                  side.update();
                   ++index;
                }
             );
@@ -322,11 +386,11 @@ void TestMechanism::update(const sf::Time& dt)
 
             auto index = 0;
             std::ranges::for_each(
-               _pa,
-               [this, &index](auto& pa)
+               _pi,
+               [this, &index](auto& side)
                {
-                  pa._angle += sf::radians(_activated_state._speed);
-                  pa.update();
+                  side._angle += sf::radians(_activated_state._speed);
+                  side.update();
                   ++index;
                }
             );
@@ -338,7 +402,7 @@ void TestMechanism::update(const sf::Time& dt)
             {
                const auto current_angle = _pa.front()._angle.asRadians();  // assume all are the same
                const auto quarter_turn = std::numbers::pi_v<float> / 2.0f;
-               const auto snapped_angle = std::round(current_angle / quarter_turn) * quarter_turn;
+               const auto snapped_angle = _base_angle.asRadians() + std::round(current_angle / quarter_turn) * quarter_turn;
 
                _activated_state._angle_start = sf::radians(current_angle);
                _activated_state._angle_target = sf::radians(snapped_angle);
@@ -352,10 +416,10 @@ void TestMechanism::update(const sf::Time& dt)
 
             const auto angle = _activated_state._angle_start + (_activated_state._angle_target - _activated_state._angle_start) * eased;
 
-            for (auto& pa : _pa)
+            for (auto& side : _pi)
             {
-               pa._angle = angle;
-               pa.update();
+               side._angle = angle;
+               side.update();
             }
 
             if (normalized_time >= 1.0f)
@@ -374,25 +438,75 @@ void TestMechanism::update(const sf::Time& dt)
                std::clamp(_activated_state._elapsed_time.asSeconds() / _activated_state._retract_duration_s, 0.0f, 1.0f);
             float eased = Easings::easeInOutQuad(1.0f - time_normalized);  // reverse easing
 
-            for (auto& pa : _pa)
+            for (auto& side : _pi)
             {
-               pa._offset_px = sf::Vector2f{0.0f, -eased * _activated_state._rise_height_px};
-               pa._distance_factor = 1.0f + eased * _activated_state._extend_distance_px;
-               pa.update();
+               side._offset_px = sf::Vector2f{0.0f, -eased * _activated_state._rise_height_px};
+               side._distance_factor = 1.0f + eased * _activated_state._extend_distance_px;
+               side.update();
             }
 
             if (time_normalized >= 1.0f)
             {
-               _activated_state._step = 0;
+               _activated_state._step = 5;
                _activated_state.resetTime();
-
-               for (auto& pa : _pa)
-               {
-                  pa.reset();
-               }
             }
 
             break;
+         }
+
+         else if (_activated_state._step == 5)
+         {
+            float time_normalized = std::clamp(_activated_state._elapsed_time.asSeconds() / _activated_state._fade_duration_s, 0.0f, 1.0f);
+            float fade_out_alpha = 1.0f - time_normalized;  // pi: visible → invisible
+            float fade_in_alpha = time_normalized;          // pa: invisible → visible
+
+            setSidesVisible(_pa, true);
+            setSidesVisible(_pi, true);
+
+            _layer_background_active->show();
+            _layer_background_inactive->show();
+
+            for (int i = 0; i < 4; ++i)
+            {
+               auto& pi_layer = _pi[i]._layer->_sprite;
+               auto& pa_layer = _pa[i]._layer->_sprite;
+
+               auto pi_color = pi_layer->getColor();
+               auto pa_color = pa_layer->getColor();
+
+               pi_color.a = static_cast<uint8_t>(255 * fade_out_alpha);
+               pa_color.a = static_cast<uint8_t>(255 * fade_in_alpha);
+
+               pi_layer->setColor(pi_color);
+               pa_layer->setColor(pa_color);
+               _layer_background_active->_sprite->setColor(pa_color);
+               _layer_background_inactive->_sprite->setColor(pi_color);
+            }
+
+            std::ranges::for_each(_pi, [](auto& s) { s.update(); });
+            std::ranges::for_each(_pa, [](auto& s) { s.update(); });
+
+            if (time_normalized >= 1.0f)
+            {
+               for (auto& side : _pi)
+               {
+                  side.reset();
+                  side._layer->_sprite->setColor(sf::Color(255, 255, 255, 255));
+               }
+
+               for (auto& side : _pa)
+               {
+                  side._layer->_sprite->setColor(sf::Color(255, 255, 255, 255));
+               }
+
+               _activated_state._step = 0;
+               _activated_state.resetTime();
+
+               // go to enabled state after activation
+               _state = State::Enabled;
+               _enabled_state.resetTime();
+               _enabled_state._distances_when_activated = _pa[0]._distance_factor;
+            }
          }
 
          break;
