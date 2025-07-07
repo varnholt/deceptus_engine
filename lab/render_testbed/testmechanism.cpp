@@ -400,7 +400,7 @@ void TestMechanism::update(const sf::Time& dt)
          {
             if (!_activated_state._has_target_angle)
             {
-               const auto current_angle = _pa.front()._angle.asRadians();  // assume all are the same
+               const auto current_angle = _pi.front()._angle.asRadians();  // assume all are the same
                const auto quarter_turn = std::numbers::pi_v<float> / 2.0f;
                const auto snapped_angle = _base_angle.asRadians() + std::round(current_angle / quarter_turn) * quarter_turn;
 
