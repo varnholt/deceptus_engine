@@ -2,6 +2,9 @@
 
 #include "framework/easings/easings.h"
 #include "framework/image/psd.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 #include <iostream>
@@ -37,7 +40,6 @@ const auto registered_onoffblock = []
 
 namespace
 {
-sf::Vector2f screen_offset{400, 300};
 
 std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, const sf::Angle& angle)
 {
@@ -64,16 +66,7 @@ std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, c
 
 Gateway::Gateway(GameNode* parent) : GameNode(parent)
 {
-   _rectangle_.setSize({200.f, 200.f});
-   _rectangle_.setFillColor(sf::Color(255, 255, 255, 25));
-   _rectangle_.setPosition(screen_offset);
-
-   _origin_shape.setRadius(1.0f);
-   _origin_shape.setFillColor(sf::Color::Red);
-
-   _filename = "data/portal-test.psd";
-
-   load();
+   _filename = "data/sprites/gateway.psd";
 }
 
 // idea: have only 1 rotation angle, the other 3 are relative to that
@@ -84,83 +77,6 @@ Gateway::Gateway(GameNode* parent) : GameNode(parent)
 //
 // 1) use sfml rotation first
 // 2) calculate corresponding direction vector based on the angle
-
-void Gateway::load()
-{
-   PSD psd;
-   psd.setColorFormat(PSD::ColorFormat::ABGR);
-   psd.load(_filename);
-
-   int32_t pa_index = 0;
-   for (const auto& layer : psd.getLayers())
-   {
-      if (!layer.isImageLayer())
-      {
-         continue;
-      }
-
-      auto tmp = std::make_shared<Layer>();
-
-      try
-      {
-         const auto texture_size = sf::Vector2u(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
-         auto opacity = layer.getOpacity();
-
-         auto texture = std::make_shared<sf::Texture>(texture_size);
-         texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
-
-         std::shared_ptr<sf::Sprite> sprite;
-
-         // rotate texture if this is a pa_ or pi_ layer
-         if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
-         {
-            texture->setSmooth(true);
-            texture = createRotatedTexture(*texture, -_base_angle);  // rotate ccw
-         }
-
-         sprite = std::make_shared<sf::Sprite>(*texture);
-
-         const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())} + screen_offset;
-         sprite->setPosition(pos);
-         sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
-
-         tmp->_texture = texture;
-         tmp->_sprite = sprite;
-         tmp->_visible = layer.isVisible();
-
-         _layer_stack.push_back(tmp);
-         _layers[layer.getName()] = tmp;
-
-         if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
-         {
-            const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
-            sprite->setOrigin(origin);
-            sprite->setPosition(origin + pos + sf::Vector2f{0, 0});
-         }
-      }
-      catch (...)
-      {
-         std::cerr << "failed to create texture: " << layer.getName();
-      }
-   }
-
-   for (int i = 0; i < 4; ++i)
-   {
-      _pa[i]._layer = _layers[std::format("pa_{}", i)];
-      _pa[i]._pos_px = _pa[i]._layer->_sprite->getPosition();
-      _pa[i]._angle_offset = sf::degrees(90 * i);
-
-      _pi[i]._layer = _layers[std::format("pi_{}", i)];
-      _pi[i]._pos_px = _pi[i]._layer->_sprite->getPosition();
-      _pi[i]._angle_offset = sf::degrees(90 * i);
-   }
-
-   _sprite_socket = _layers["base"]->_sprite;
-   _layer_background_inactive = _layers["background_inactive"];
-   _layer_background_active = _layers["background_active"];
-
-   _origin = _pa[0]._layer->_sprite->getOrigin();
-}
 
 void Gateway::setSidesVisible(std::array<Side, 4>& sides, bool visible)
 {
@@ -174,13 +90,6 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
    sf::RenderStates states;
 
-   // Save current view (likely the default or GUI-compatible)
-   const sf::View original_view = target.getView();
-   sf::View pixel_view = original_view;
-   pixel_view.zoom(0.5f);
-
-   target.setView(pixel_view);
-
    // draw sides
    auto draw_visible = [&target, states](const auto& side)
    {
@@ -190,7 +99,7 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
       }
    };
 
-   target.draw(_rectangle_);
+   target.draw(_rect_shape);
 
    if (_layer_background_inactive->_visible)
    {
@@ -206,8 +115,6 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
    std::ranges::for_each(_pa, draw_visible);
    std::ranges::for_each(_pi, draw_visible);
-
-   target.setView(original_view);
 }
 
 void Gateway::update(const sf::Time& dt)
@@ -494,6 +401,113 @@ void Gateway::update(const sf::Time& dt)
 
 void Gateway::setup(const GameDeserializeData& data)
 {
+   setObjectId(data._tmx_object->_name);
+
+   _rect = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
+
+   addChunks(_rect);
+
+   setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
+
+   if (data._tmx_object->_properties)
+   {
+      const auto map = data._tmx_object->_properties->_map;
+
+      const auto z_it = map.find("z");
+      if (z_it != map.end())
+      {
+         const auto z_index = static_cast<uint32_t>(z_it->second->_value_int.value());
+         setZ(z_index);
+      }
+
+      const auto enabled_it = map.find("enabled");
+      if (enabled_it != map.end())
+      {
+         const auto enabled = static_cast<bool>(enabled_it->second->_value_bool.value());
+         setEnabled(enabled);
+      }
+   }
+
+   _rect_shape.setFillColor(sf::Color(255, 255, 255, 25));
+   _rect_shape.setSize(_rect.size);
+   _rect_shape.setPosition(_rect.position);
+
+   _origin_shape.setRadius(1.0f);
+   _origin_shape.setFillColor(sf::Color::Red);
+
+   PSD psd;
+   psd.setColorFormat(PSD::ColorFormat::ABGR);
+   psd.load(_filename);
+
+   int32_t pa_index = 0;
+   for (const auto& layer : psd.getLayers())
+   {
+      if (!layer.isImageLayer())
+      {
+         continue;
+      }
+
+      auto tmp = std::make_shared<Layer>();
+
+      try
+      {
+         const auto texture_size = sf::Vector2u(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
+         auto opacity = layer.getOpacity();
+
+         auto texture = std::make_shared<sf::Texture>(texture_size);
+         texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
+
+         std::shared_ptr<sf::Sprite> sprite;
+
+         // rotate texture if this is a pa_ or pi_ layer
+         if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
+         {
+            texture->setSmooth(true);
+            texture = createRotatedTexture(*texture, -_base_angle);  // rotate ccw
+         }
+
+         sprite = std::make_shared<sf::Sprite>(*texture);
+
+         const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())} + _rect.position;
+         sprite->setPosition(pos);
+         sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
+
+         tmp->_texture = texture;
+         tmp->_sprite = sprite;
+         tmp->_visible = layer.isVisible();
+
+         _layer_stack.push_back(tmp);
+         _layers[layer.getName()] = tmp;
+
+         if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
+         {
+            const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
+            sprite->setOrigin(origin);
+            sprite->setPosition(origin + pos + sf::Vector2f{0, 0});
+         }
+      }
+      catch (...)
+      {
+         std::cerr << "failed to create texture: " << layer.getName();
+      }
+   }
+
+   for (int i = 0; i < 4; ++i)
+   {
+      _pa[i]._layer = _layers[std::format("pa_{}", i)];
+      _pa[i]._pos_px = _pa[i]._layer->_sprite->getPosition();
+      _pa[i]._angle_offset = sf::degrees(90 * i);
+
+      _pi[i]._layer = _layers[std::format("pi_{}", i)];
+      _pi[i]._pos_px = _pi[i]._layer->_sprite->getPosition();
+      _pi[i]._angle_offset = sf::degrees(90 * i);
+   }
+
+   _sprite_socket = _layers["base"]->_sprite;
+   _layer_background_inactive = _layers["background_inactive"];
+   _layer_background_active = _layers["background_active"];
+
+   _origin = _pa[0]._layer->_sprite->getOrigin();
 }
 
 std::optional<sf::FloatRect> Gateway::getBoundingBoxPx()
@@ -528,4 +542,27 @@ void Gateway::chooseNextState()
    {
       pa.reset();
    }
+}
+
+void Gateway::Side::update()
+{
+   const auto full_angle_sf = _angle + _angle_offset;
+   sf::Vector2f pos_from_angle_and_distance_px;
+   pos_from_angle_and_distance_px.x = std::cos(full_angle_sf.asRadians()) * _distance_factor;
+   pos_from_angle_and_distance_px.y = std::sin(full_angle_sf.asRadians()) * _distance_factor;
+   _layer->_sprite->setRotation(full_angle_sf);
+   _layer->_sprite->setPosition(_pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f});
+}
+
+void Gateway::Side::reset()
+{
+   _angle = _base_angle;
+   _distance_factor = 1.0f;
+   _offset_px = {};
+   update();
+}
+
+void Gateway::PortalState::resetTime()
+{
+   _elapsed_time = sf::seconds(0);
 }
