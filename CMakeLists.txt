@@ -685,7 +685,8 @@ add_executable(deceptus ${GAME_FILES}
    src/game/audio/musicplayer.h src/game/audio/musicplayer.cpp
    src/game/mechanisms/gamemechanismdeserializerregistry.h src/game/mechanisms/gamemechanismdeserializerregistry.cpp
    src/game/audio/musicplayertypes.h
-   src/game/mechanisms/mapportal.h src/game/mechanisms/mapportal.cpp
+
+   src/game/mechanisms/gateway.h src/game/mechanisms/gateway.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
