@@ -24,23 +24,8 @@ public:
 private:
    struct Side
    {
-      void update()
-      {
-         const auto full_angle_sf = _angle + _angle_offset;
-         sf::Vector2f pos_from_angle_and_distance_px;
-         pos_from_angle_and_distance_px.x = std::cos(full_angle_sf.asRadians()) * _distance_factor;
-         pos_from_angle_and_distance_px.y = std::sin(full_angle_sf.asRadians()) * _distance_factor;
-         _layer->_sprite->setRotation(full_angle_sf);
-         _layer->_sprite->setPosition(_pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f});
-      }
-
-      void reset()
-      {
-         _angle = _base_angle;
-         _distance_factor = 1.0f;
-         _offset_px = {};
-         update();
-      }
+      void update();
+      void reset();
 
       std::shared_ptr<Layer> _layer;
       sf::Vector2f _pos_px;
@@ -57,15 +42,10 @@ private:
       Enabled
    };
 
-   void load();
-
    struct PortalState
    {
       sf::Time _elapsed_time;
-      void resetTime()
-      {
-         _elapsed_time = sf::seconds(0);
-      }
+      void resetTime();
    };
 
    struct EnabledState : PortalState
@@ -106,7 +86,7 @@ private:
    std::shared_ptr<Layer> _layer_background_inactive;
    std::shared_ptr<Layer> _layer_background_active;
 
-   sf::RectangleShape _rectangle_;
+   sf::RectangleShape _rect_shape;
    sf::CircleShape _origin_shape;
 
    std::string _filename;
@@ -117,9 +97,9 @@ private:
    std::array<Side, 4> _pi;
    static constexpr sf::Angle _base_angle{sf::degrees(45.0f)};
 
-   // std::array<float, 4> _angles;
    float _elapsed{0.0f};
    sf::Vector2f _origin;
+   sf::FloatRect _rect;
 
    ActivatedState _activated_state;
    EnabledState _enabled_state;
