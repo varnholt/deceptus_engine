@@ -19,8 +19,6 @@ public:
    void setup(const GameDeserializeData& data);
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-   void chooseNextState();
-
 private:
    struct Side
    {
@@ -66,15 +64,15 @@ private:
       float _speed{0.0f};
 
       // settings
-      float _acceleration{0.001f};
-      float _friction{0.999f};
+      float _acceleration{0.1f};
+      float _friction{0.9f};
       int32_t _rise_height_px{60};
       int32_t _extend_distance_px{50};
       float _spinback_duration_s{1.0f};
       float _retract_duration_s{1.0};
       float _rotate_right_duration_s{2.0f};
       float _rotate_left_duration_s{3.0f};
-      float _rotate_speed_max{0.002f};
+      float _rotate_speed_max{0.05f};
       float _fade_duration_s{2.0f};
    };
 
@@ -103,4 +101,5 @@ private:
 
    ActivatedState _activated_state;
    EnabledState _enabled_state;
+   bool _player_intersects{false};
 };
