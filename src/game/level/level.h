@@ -206,6 +206,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_extras;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_fans;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_fireflies;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_gateways;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_info_overlay;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_interaction_help;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_lasers;

@@ -266,6 +266,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_extras,
       &_mechanism_fans,
       &_mechanism_fireflies,
+      &_mechanism_gateways,
       &_mechanism_info_overlay,
       &_mechanism_interaction_help,
       &_mechanism_lasers,
@@ -311,6 +312,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_extras}] = &_mechanism_extras;
    _mechanisms_map[std::string{layer_name_fans}] = &_mechanism_fans;
    _mechanisms_map[std::string{layer_name_fireflies}] = &_mechanism_fireflies;
+   _mechanisms_map[std::string{layer_name_gateways}] = &_mechanism_gateways;
    _mechanisms_map[std::string{layer_name_info_overlays}] = &_mechanism_info_overlay;
    _mechanisms_map[std::string{layer_name_interaction_help}] = &_mechanism_interaction_help;
    _mechanisms_map[std::string{layer_name_interval_spikes}] = &_mechanism_spikes;
