@@ -6,6 +6,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
+#include "game/player/player.h"
 
 #include <iostream>
 
@@ -99,7 +100,7 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
       }
    };
 
-   target.draw(_rect_shape);
+   // target.draw(_rect_shape);
 
    if (_layer_background_inactive->_visible)
    {
@@ -119,6 +120,23 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
 void Gateway::update(const sf::Time& dt)
 {
+   const auto player_intersects = Player::getCurrent()->getPixelRectFloat().findIntersection(_rect).has_value();
+
+   // activate portal when player intersects
+   if (!_player_intersects && player_intersects)
+   {
+      _player_intersects = player_intersects;
+      _state = State::Enabling;
+
+      _activated_state._step = 0;
+
+      for (auto& pa : _pa)
+      {
+         pa.reset();
+      }
+      return;
+   }
+
    _elapsed += dt.asSeconds();
 
    _origin_shape.setPosition(_origin);
@@ -513,35 +531,6 @@ void Gateway::setup(const GameDeserializeData& data)
 std::optional<sf::FloatRect> Gateway::getBoundingBoxPx()
 {
    return std::nullopt;
-}
-
-void Gateway::chooseNextState()
-{
-   switch (_state)
-   {
-      case State::Disabled:
-      {
-         _state = State::Enabling;
-         break;
-      }
-      case State::Enabling:
-      {
-         _state = State::Enabled;
-         break;
-      }
-      case State::Enabled:
-      {
-         _state = State::Disabled;
-         break;
-      }
-   }
-
-   _activated_state._step = 0;
-
-   for (auto& pa : _pa)
-   {
-      pa.reset();
-   }
 }
 
 void Gateway::Side::update()
