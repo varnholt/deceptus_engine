@@ -35,17 +35,19 @@ Audio& Audio::getInstance()
 
 std::shared_ptr<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
 {
-   auto buf = std::make_shared<sf::SoundBuffer>();
-   if (!buf->loadFromFile(sfx_path + filename))
+   auto buffer = std::make_shared<sf::SoundBuffer>();
+   if (!buffer->loadFromFile(sfx_path + filename))
    {
       Log::Error() << "unable to load file: " << filename;
+      return nullptr;
    }
 
-   if (buf->getChannelCount() < 2)
+   if (buffer->getChannelCount() < 2)
    {
       Log::Warning() << filename << " seems to be mono :(";
    }
-   return buf;
+
+   return buffer;
 };
 
 void Audio::addSample(const std::string& sample)
