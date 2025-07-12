@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "game/audio/audio.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
@@ -68,6 +69,10 @@ std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, c
 Gateway::Gateway(GameNode* parent) : GameNode(parent)
 {
    _filename = "data/sprites/gateway.psd";
+
+   Audio::getInstance().addSample("mechanism_gateway_rotate_01.wav");
+   Audio::getInstance().addSample("mechanism_gateway_extract_01.wav");
+   Audio::getInstance().addSample("mechanism_gateway_warp_01.wav");
 }
 
 // idea: have only 1 rotation angle, the other 3 are relative to that
@@ -129,6 +134,8 @@ void Gateway::update(const sf::Time& dt)
       _state = State::Enabling;
 
       _activated_state._step = 0;
+
+      Audio::getInstance().playSample({"mechanism_gateway_extract_01.wav"});
 
       for (auto& pa : _pa)
       {
@@ -229,6 +236,7 @@ void Gateway::update(const sf::Time& dt)
             {
                _activated_state.resetTime();
                _activated_state._step++;
+               Audio::getInstance().playSample({"mechanism_gateway_rotate_01.wav"});
             }
          }
 
@@ -250,6 +258,7 @@ void Gateway::update(const sf::Time& dt)
 
                   _activated_state._step++;
                   _activated_state.resetTime();
+                  Audio::getInstance().playSample({"mechanism_gateway_rotate_01.wav"});
                }
             }
 
@@ -283,6 +292,7 @@ void Gateway::update(const sf::Time& dt)
 
                   _activated_state._step++;
                   _activated_state.resetTime();
+                  Audio::getInstance().playSample({"mechanism_gateway_extract_01.wav"});
                }
             }
 
@@ -298,6 +308,7 @@ void Gateway::update(const sf::Time& dt)
             );
          }
 
+         // get back to original angle
          else if (_activated_state._step == 3)
          {
             if (!_activated_state._has_target_angle)
@@ -329,6 +340,7 @@ void Gateway::update(const sf::Time& dt)
                _activated_state._step++;
                _activated_state._has_target_angle = false;
                _activated_state.resetTime();
+               Audio::getInstance().playSample({"mechanism_gateway_warp_01.wav"});
             }
 
             break;
