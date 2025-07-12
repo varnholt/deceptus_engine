@@ -6,14 +6,102 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/audio/audio.h"
+#include "game/camera/camerasystem.h"
+#include "game/effects/fadetransitioneffect.h"
+#include "game/effects/screentransition.h"
+#include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
 #include <iostream>
 
+#include "gateway.h"
+
+#include <algorithm>
+#include <memory>
+#include <random>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 namespace
 {
-const auto registered_onoffblock = []
+using WeakGateway = std::weak_ptr<Gateway>;
+using Registry = std::unordered_multimap<std::string, WeakGateway>;
+
+Registry gateway_registry;
+
+void registerGateway(const std::string& id, const std::shared_ptr<Gateway>& gateway)
+{
+   gateway_registry.emplace(id, gateway);
+}
+
+void unregisterGateway(const std::string& id, const Gateway* raw)
+{
+   auto range = gateway_registry.equal_range(id);
+   for (auto it = range.first; it != range.second;)
+   {
+      auto should_erase = false;
+
+      if (it->second.expired())
+      {
+         should_erase = true;
+      }
+      else if (auto locked = it->second.lock(); locked.get() == raw)
+      {
+         should_erase = true;
+      }
+
+      if (should_erase)
+      {
+         it = gateway_registry.erase(it);
+      }
+      else
+      {
+         ++it;
+      }
+   }
+}
+
+std::vector<std::shared_ptr<Gateway>> findGatewaysById(const std::string& id)
+{
+   std::vector<std::shared_ptr<Gateway>> result_it;
+   auto range = gateway_registry.equal_range(id);
+   for (auto it = range.first; it != range.second; ++it)
+   {
+      if (auto ptr = it->second.lock())
+      {
+         result_it.push_back(ptr);
+      }
+   }
+   return result_it;
+}
+}  // namespace
+
+namespace
+{
+std::unique_ptr<ScreenTransition> makeFadeTransition()
+{
+   auto screen_transition = std::make_unique<ScreenTransition>();
+   auto fade_out = std::make_shared<FadeTransitionEffect>();
+   auto fade_in = std::make_shared<FadeTransitionEffect>();
+   fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
+   fade_out->_speed = 2.0f;
+   fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+   fade_in->_value = 1.0f;
+   fade_in->_speed = 2.0f;
+   screen_transition->_effect_1 = fade_out;
+   screen_transition->_effect_2 = fade_in;
+   screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
+   screen_transition->startEffect1();
+
+   return screen_transition;
+}
+}  // namespace
+
+namespace
+{
+const auto registered_gateway = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
    registry.mapGroupToLayer("Gateway", "gateways");
@@ -27,6 +115,7 @@ const auto registered_onoffblock = []
          mechanisms["gateways"]->push_back(mechanism);
       }
    );
+
    registry.registerObjectGroup(
       "Gateway",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
@@ -36,6 +125,7 @@ const auto registered_onoffblock = []
          mechanisms["gateways"]->push_back(mechanism);
       }
    );
+
    return true;
 }();
 }  // namespace
@@ -73,6 +163,11 @@ Gateway::Gateway(GameNode* parent) : GameNode(parent)
    Audio::getInstance().addSample("mechanism_gateway_rotate_01.wav");
    Audio::getInstance().addSample("mechanism_gateway_extract_01.wav");
    Audio::getInstance().addSample("mechanism_gateway_warp_01.wav");
+}
+
+Gateway::~Gateway()
+{
+   unregisterGateway(getObjectId(), this);
 }
 
 // idea: have only 1 rotation angle, the other 3 are relative to that
@@ -142,6 +237,15 @@ void Gateway::update(const sf::Time& dt)
          pa.reset();
       }
       return;
+   }
+
+   // player uses gateway
+   if (_player_intersects)
+   {
+      if (Player::getCurrent()->getControls()->isButtonBPressed() && checkPlayerAtGateway())
+      {
+         use();
+      }
    }
 
    _elapsed += dt.asSeconds();
@@ -433,6 +537,11 @@ void Gateway::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
 
+   if (auto shared = shared_from_this())
+   {
+      registerGateway(getObjectId(), shared);
+   }
+
    _rect = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    addChunks(_rect);
@@ -456,6 +565,8 @@ void Gateway::setup(const GameDeserializeData& data)
          const auto enabled = static_cast<bool>(enabled_it->second->_value_bool.value());
          setEnabled(enabled);
       }
+
+      _target_id = ValueReader::readValue<std::string>("target_id", map).value_or(std::format("{:08x}", std::random_device{}()));
    }
 
    _rect_shape.setFillColor(sf::Color(255, 255, 255, 25));
@@ -543,6 +654,72 @@ void Gateway::setup(const GameDeserializeData& data)
 std::optional<sf::FloatRect> Gateway::getBoundingBoxPx()
 {
    return std::nullopt;
+}
+
+bool Gateway::checkPlayerAtGateway() const
+{
+   const auto player_pos = Player::getCurrent()->getPixelPositionFloat();
+   const auto at_door = _rect.contains(player_pos);
+   return at_door;
+}
+
+void Gateway::use()
+{
+   if (_in_use)
+   {
+      return;
+   }
+
+   if (_target_id.empty())
+   {
+      return;
+   }
+
+   _in_use = true;
+
+   const auto target_gateway = findOtherInstance(_target_id);
+   const auto target_pos_px = target_gateway->_rect.getCenter();
+
+   auto teleport = [&]()
+   {
+      {
+         Player::getCurrent()->setBodyViaPixelPosition(
+            target_pos_px.x + PLAYER_ACTUAL_WIDTH / 2, target_pos_px.y + DIFF_PLAYER_TILE_TO_PHYSICS
+         );
+
+         // update the camera system to point to the player position immediately
+         CameraSystem::getInstance().syncNow();
+      }
+   };
+
+   auto screen_transition = makeFadeTransition();
+   screen_transition->_callbacks_effect_1_ended.emplace_back(teleport);
+   screen_transition->_callbacks_effect_2_ended.emplace_back(
+      [this]()
+      {
+         ScreenTransitionHandler::getInstance().pop();
+         _in_use = false;
+      }
+   );
+   ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
+}
+
+std::shared_ptr<Gateway> Gateway::findOtherInstance(const std::string& gateway_id) const
+{
+   for (const auto& gateway : findGatewaysById(gateway_id))
+   {
+      if (gateway.get() != this)
+      {
+         return gateway;
+      }
+   }
+
+   return nullptr;
+}
+
+void Gateway::setTargetId(const std::string& destination_gateway_id)
+{
+   _target_id = destination_gateway_id;
 }
 
 void Gateway::Side::update()
