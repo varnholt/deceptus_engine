@@ -8,16 +8,18 @@
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
-class Gateway : public GameMechanism, public GameNode
+class Gateway : public GameMechanism, public GameNode, public std::enable_shared_from_this<Gateway>
 {
 public:
    Gateway(GameNode* parent = nullptr);
-   virtual ~Gateway() = default;
+   virtual ~Gateway();
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
    virtual void update(const sf::Time& dt);
 
    void setup(const GameDeserializeData& data);
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
+   void setTargetId(const std::string& destination_gateway_id);
 
 private:
    struct Side
@@ -64,7 +66,7 @@ private:
       float _speed{0.0f};
 
       // settings
-      float _acceleration{0.1f};
+      float _acceleration{0.02f};
       float _friction{0.9f};
       int32_t _rise_height_px{60};
       int32_t _extend_distance_px{50};
@@ -72,11 +74,17 @@ private:
       float _retract_duration_s{1.0};
       float _rotate_right_duration_s{2.0f};
       float _rotate_left_duration_s{3.0f};
-      float _rotate_speed_max{0.05f};
+      float _rotate_speed_max{1.0f};
       float _fade_duration_s{2.0f};
    };
 
    void setSidesVisible(std::array<Side, 4>& sides, bool visible);
+
+   bool checkPlayerAtGateway() const;
+
+   void use();
+
+   std::shared_ptr<Gateway> findOtherInstance(const std::string& id) const;
 
    State _state{State::Disabled};
 
@@ -102,4 +110,6 @@ private:
    ActivatedState _activated_state;
    EnabledState _enabled_state;
    bool _player_intersects{false};
+   bool _in_use{false};
+   std::string _target_id;
 };
