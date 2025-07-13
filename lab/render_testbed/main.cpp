@@ -12,6 +12,7 @@ int main()
    sf::RenderWindow window;
    sf::VideoMode mode({1280, 720});
    window.create(mode, title);
+   window.setVerticalSyncEnabled(true);
 
    if (!ImGui::SFML::Init(window))
    {
