@@ -21,9 +21,10 @@ private:
       void update()
       {
          const auto full_angle_sf = _angle + _angle_offset;
-         sf::Vector2f pos_from_angle_and_distance_px;
-         pos_from_angle_and_distance_px.x = std::cos(full_angle_sf.asRadians()) * _distance_factor;
-         pos_from_angle_and_distance_px.y = std::sin(full_angle_sf.asRadians()) * _distance_factor;
+         sf::Vector2f pos_from_angle_and_distance_px{
+            std::cos(full_angle_sf.asRadians()) * _distance_factor,  //
+            std::sin(full_angle_sf.asRadians()) * _distance_factor
+         };
          _layer->_sprite->setRotation(full_angle_sf);
          _layer->_sprite->setPosition(_pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f});
       }
@@ -123,5 +124,5 @@ private:
    sf::Shader _shader;
    sf::RectangleShape _shader_rect;
    float _radius = 50.0f;
-   float _alpha = 0.75f;
+   float _alpha = 0.5f;
 };
