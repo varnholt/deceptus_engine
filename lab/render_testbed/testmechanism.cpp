@@ -196,24 +196,51 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    target.setView(pixel_view);
 
    // render shader
-   const auto local_center = _shader_rect.getPosition() + _shader_rect.getSize() * 0.5f - sf::Vector2f{0, 50};
-   const auto frag_center_i = target.mapCoordsToPixel(local_center);
+   Side* reference_side = nullptr;
+   switch (_state)
+   {
+      case State::Disabled:
+      case State::Enabling:
+      {
+         reference_side = &_pi.at(0);
+      }
+      case State::Enabled:
+      {
+         reference_side = &_pa.at(0);
+      }
+   }
+
+   const auto r = std::max(_pi.at(0)._distance_factor, _pa.at(0)._distance_factor);
+   const auto d = std::max(abs(_pi.at(0)._offset_px.y), abs(_pa.at(0)._offset_px.y));
+   const auto pos = screen_offset + sf::Vector2f{-5, -50} - sf::Vector2f{0, d * 0.6f};
+
+   const auto radius = _radius + 2.0f * r;  // reference_side->_distance_factor;
+   _shader_rect.setPosition(pos);
+   const auto local_center = _shader_rect.getPosition() + _shader_rect.getSize() * 0.5f;
+   const auto frag_center_i = target.mapCoordsToPixel(local_center - -sf::Vector2f{0, d * 1.4f});
    _shader.setUniform("time", _elapsed);
    _shader.setUniform("alpha", _alpha);                                        // 0.0 – 1.0
-   _shader.setUniform("radius", _radius + 5.0f * _pa.at(0)._distance_factor);  // in pixels
+   _shader.setUniform("radius", radius);                                       // in pixels
    _shader.setUniform("resolution", _shader_rect.getSize());
    _shader.setUniform("center", sf::Vector2f(frag_center_i.x, frag_center_i.y));
    sf::RenderStates shader_state;
    shader_state.shader = &_shader;
-   target.draw(_shader_rect, shader_state);
 
-   // static int counter = 0;
-   //
-   // counter++;
-   // if (counter % 100 == 0)
-   // {
-   //    std::cout << _pa.at(0)._distance_factor << std::endl;
-   // }
+   if (_state != State::Disabled)
+   {
+      target.draw(_shader_rect, shader_state);
+   }
+
+   static int counter = 0;
+   counter++;
+   if (counter % 10 == 0)
+   {
+      std::cout << d << std::endl;
+      // std::cout << reference_side->_offset_px.y << " | " << reference_side->_distance_factor << std::endl;
+
+      // std::cout << _pa.at(0)._offset_px.y << " | " << _pa.at(0)._distance_factor << std::endl;
+      // std::cout << _pi.at(0)._offset_px.y << " | " << _pi.at(0)._distance_factor << std::endl;
+   }
 
    // draw sides
    auto draw_visible = [&target, states](const auto& side)
@@ -337,7 +364,7 @@ void TestMechanism::update(const sf::Time& dt)
          // 2: rotate to clean 90 deg (alignment with base)
          // 3: retract
 
-         // lift
+         // lift and extract
          if (_activated_state._step == 0)
          {
             setSidesVisible(_pa, false);
