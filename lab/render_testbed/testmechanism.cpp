@@ -57,7 +57,7 @@ TestMechanism::TestMechanism()
    }
 
    noise_texture.setRepeated(true);
-   noise_texture.setSmooth(false);  // optional, depending on style
+   noise_texture.setSmooth(true);  // optional, depending on style
 
    _shader.setUniform("iChannel0", noise_texture);
 
