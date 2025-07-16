@@ -122,7 +122,9 @@ private:
 
    // shader
    sf::Shader _shader;
-   sf::RectangleShape _shader_rect;
+   std::unique_ptr<sf::RenderTexture> _shader_texture;
+   std::unique_ptr<sf::Sprite> _shader_sprite;
    float _radius = 50.0f;
    float _alpha = 0.5f;
+   sf::Texture noise_texture;
 };
