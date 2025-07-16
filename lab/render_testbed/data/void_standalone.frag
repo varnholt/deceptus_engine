@@ -28,7 +28,7 @@ void main()
 
     // Animated time offset
     float t = time * 0.2;
-    float noise_scale = 10.0;
+    float noise_scale = 15.0;
 
     // Generate layered sample positions for noise
     vec3 sample_pos_1 = vec3(sin(angle), cos(angle), pow(radius, 0.3) + t * 0.1);
