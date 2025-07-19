@@ -5,7 +5,7 @@ precision mediump float;
 // === Uniforms ===
 uniform vec2 resolution;       // screen resolution in pixels
 uniform float time;            // time in seconds
- float pixel_size = 2.0;      // size of pixel blocks for pixelation
+ float pixel_size = 1.0;      // size of pixel blocks for pixelation
 uniform sampler2D iChannel0;   // noise texture
 uniform float alpha;
 uniform float radius_factor;
@@ -21,14 +21,14 @@ void main()
     vec2 normalized_coords = (pixelated_coord - 0.5 * resolution.xy) / resolution.y;
 
     // Convert to polar coordinates
-    float radius = length(normalized_coords) * 1.5 + radius_factor* 0.000001;
+    float radius = length(normalized_coords) * 1.7 + radius_factor;
     float angle = atan(normalized_coords.y, normalized_coords.x);
     angle += radius * 1.1; // swirl twist
     vec2 polar_coords = vec2(radius, angle);
 
     // Animated time offset
     float t = time * 0.2;
-    float noise_scale = 15.0;
+    float noise_scale = 10.0;
 
     // Generate layered sample positions for noise
     vec3 sample_pos_1 = vec3(sin(angle), cos(angle), pow(radius, 0.3) + t * 0.1);
