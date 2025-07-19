@@ -51,7 +51,7 @@ TestMechanism::TestMechanism()
       std::cout << "failed to load shader" << std::endl;
    }
 
-   if (!noise_texture.loadFromFile("data/noise.png"))
+   if (!noise_texture.loadFromFile("data/colored_low_freq_noise.png"))
    {
       std::cerr << "Failed to load noise texture" << std::endl;
    }
@@ -180,7 +180,7 @@ void TestMechanism::drawEditor()
    ImGui::Separator();
    ImGui::Text("Plasma Shader");
    ImGui::SliderFloat("Plasma Radius", &_radius, 0.0f, 500.0f);
-   ImGui::SliderFloat("Plasma Alpha", &_alpha, 0.0f, 1.0f);
+   ImGui::SliderFloat("Plasma Alpha", &_shader_alpha, 0.0f, 1.0f);
    ImGui::End();
 }
 
@@ -209,17 +209,20 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    // render shader
    const auto r = std::max(_pi.at(0)._distance_factor, _pa.at(0)._distance_factor);
    const auto d = std::max(abs(_pi.at(0)._offset_px.y), abs(_pa.at(0)._offset_px.y));
-   const auto pos = screen_offset + sf::Vector2f{-5, -50} - sf::Vector2f{0, d * 0.6f};
+   const auto pos = screen_offset - sf::Vector2f{5, 25} - sf::Vector2f{0, d};
 
-   const auto radius = _radius + 2.0f * r;
+   // const auto radius = _radius + 2.0f * r;
+   const auto radius = 0.5f - 0.5f * (r / static_cast<float>(_activated_state._extend_distance_px));
+
+   // std::cout << radius << std::endl;
 
    if (_state != State::Disabled)
    {
       _shader_texture->clear(sf::Color::Transparent);
 
       _shader.setUniform("time", _elapsed);
-      _shader.setUniform("alpha", _alpha);
-      _shader.setUniform("radius_factor", _radius);
+      _shader.setUniform("alpha", _shader_alpha * _void_alpha);
+      _shader.setUniform("radius_factor", radius);
       _shader.setUniform("resolution", sf::Vector2f{200, 200});
 
       sf::RenderStates shader_state;
@@ -390,6 +393,8 @@ void TestMechanism::update(const sf::Time& dt)
             {
                _activated_state._speed += _activated_state._acceleration * dt.asSeconds();
                _activated_state._speed = std::clamp(_activated_state._speed, 0.0f, _activated_state._rotate_speed_max);
+
+               _void_alpha = _activated_state._elapsed_time.asSeconds() / _activated_state._rotate_right_duration_s;
             }
             else
             {
