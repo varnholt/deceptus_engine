@@ -125,6 +125,7 @@ private:
    std::unique_ptr<sf::RenderTexture> _shader_texture;
    std::unique_ptr<sf::Sprite> _shader_sprite;
    float _radius = 50.0f;
-   float _alpha = 0.5f;
+   float _shader_alpha = 0.4f;
+   float _void_alpha = 0.0f;
    sf::Texture noise_texture;
 };
