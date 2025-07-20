@@ -57,7 +57,12 @@ void Audio::addSample(const std::string& sample)
       return;
    }
 
-   _sound_buffers[sample] = loadFile(sample);
+   auto buffer = loadFile(sample);
+
+   if (buffer != nullptr)
+   {
+      _sound_buffers[sample] = buffer;
+   }
 }
 
 void Audio::initializeSamples()
