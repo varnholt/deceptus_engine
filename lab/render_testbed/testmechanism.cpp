@@ -51,17 +51,8 @@ TestMechanism::TestMechanism()
       std::cout << "failed to load shader" << std::endl;
    }
 
-   if (!noise_texture.loadFromFile("data/colored_low_freq_noise.png"))
-   {
-      std::cerr << "Failed to load noise texture" << std::endl;
-   }
-
-   noise_texture.setRepeated(true);
-   noise_texture.setSmooth(true);  // optional, depending on style
-
-   _shader.setUniform("iChannel0", noise_texture);
-
    _shader_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u(200u, 200u));
+   _shader_texture->setSmooth(true);
    _shader_sprite = std::make_unique<sf::Sprite>(_shader_texture->getTexture());
    _shader_sprite->setPosition(screen_offset);  // same as your old rect
 
@@ -154,6 +145,22 @@ void TestMechanism::load()
    _origin = _pa[0]._layer->_sprite->getOrigin();
 }
 
+void TestMechanism::loadNoiseTexture(const std::string& filename)
+{
+   sf::Texture noise_texture;
+   if (!noise_texture.loadFromFile(filename))
+   {
+      std::cerr << "Failed to load noise texture: " << filename << "\n";
+      return;
+   }
+
+   noise_texture.setRepeated(true);
+   noise_texture.setSmooth(true);
+
+   _noise_texture = std::move(noise_texture);
+   _shader.setUniform("iChannel0", _noise_texture);
+}
+
 void TestMechanism::drawEditor()
 {
    ImGui::Begin("Settings");
@@ -165,8 +172,8 @@ void TestMechanism::drawEditor()
    ImGui::SliderInt("extend_distance_px", &_activated_state._extend_distance_px, 0, 255);
    ImGui::SliderFloat("spinback_duration_s", &_activated_state._spinback_duration_s, 0.1f, 10.0f);
    ImGui::SliderFloat("retract_duration_s", &_activated_state._retract_duration_s, 0.1f, 10.0f);
-   ImGui::SliderFloat("rotate_right_duration_s", &_activated_state._rotate_right_duration_s, 0.1f, 10.0f);
-   ImGui::SliderFloat("rotate_left_duration_s", &_activated_state._rotate_left_duration_s, 0.1f, 10.0f);
+   ImGui::SliderFloat("rotate_right_duration_s", &_activated_state._rotate_right_duration_s, 0.1f, 100.0f);
+   ImGui::SliderFloat("rotate_left_duration_s", &_activated_state._rotate_left_duration_s, 0.1f, 100.0f);
    ImGui::SliderFloat("rotate_speed_max", &_activated_state._rotate_speed_max, 0.0002f, 0.02f);
 
    ImGui::Separator();
@@ -179,8 +186,62 @@ void TestMechanism::drawEditor()
 
    ImGui::Separator();
    ImGui::Text("Plasma Shader");
-   ImGui::SliderFloat("Plasma Radius", &_radius, 0.0f, 500.0f);
-   ImGui::SliderFloat("Plasma Alpha", &_shader_alpha, 0.0f, 1.0f);
+   ImGui::SliderFloat("Radius Factor", &_radius_factor, 0.001f, 2.0f);
+   ImGui::SliderFloat("Alpha", &_shader_alpha, 0.0f, 1.0f);
+   ImGui::ColorEdit3("Swirl Color", &_swirl_color.x);
+   ImGui::SliderFloat("Time Factor", &_time_factor, 0.0f, 10.0f);
+   ImGui::SliderFloat("Noise Scale", &_noise_scale, 1.0f, 100.0f);
+
+   static std::vector<std::string> texture_paths;
+   static std::vector<const char*> texture_labels;
+   static int selected_texture_index = 0;
+   static bool initialized = false;
+
+   if (!initialized)
+   {
+      texture_paths.clear();
+      texture_labels.clear();
+
+      auto scanTextures = []()
+      {
+         namespace fs = std::filesystem;
+         for (const auto& entry : fs::directory_iterator("data"))
+         {
+            if (entry.is_regular_file() && entry.path().extension() == ".png")
+            {
+               texture_paths.emplace_back(entry.path().string());
+            }
+         }
+         std::ranges::sort(texture_paths);
+         for (const auto& path : texture_paths)
+         {
+            texture_labels.push_back(path.c_str());
+         }
+      };
+
+      scanTextures();
+
+      // Auto-load the first texture
+      if (!texture_paths.empty())
+      {
+         loadNoiseTexture(_default_texture_path);
+      }
+
+      initialized = true;
+   }
+
+   if (!texture_paths.empty())
+   {
+      if (ImGui::Combo("Texture", &selected_texture_index, texture_labels.data(), static_cast<int>(texture_labels.size())))
+      {
+         loadNoiseTexture(texture_paths[selected_texture_index]);
+      }
+   }
+   else
+   {
+      ImGui::Text("No PNGs in /data");
+   }
+
    ImGui::End();
 }
 
@@ -192,9 +253,46 @@ void TestMechanism::setSidesVisible(std::array<Side, 4>& sides, bool visible)
    }
 }
 
+void TestMechanism::drawVoid(sf::RenderTarget& target)
+{
+   if (_state == State::Disabled)
+   {
+      return;
+   }
+
+   const auto r = std::max(_pi.at(0)._distance_factor, _pa.at(0)._distance_factor);
+   const auto d = std::max(abs(_pi.at(0)._offset_px.y), abs(_pa.at(0)._offset_px.y));
+   const auto pos = screen_offset - sf::Vector2f{5, 25} - sf::Vector2f{0, d};
+   const auto radius = 0.5f - 0.5f * (r / static_cast<float>(_activated_state._extend_distance_px));
+
+   _shader_texture->clear(sf::Color::Transparent);
+
+   _shader.setUniform("time", _elapsed * _time_factor);
+   _shader.setUniform("alpha", _shader_alpha * _void_alpha);
+   _shader.setUniform("radius_factor", radius * _radius_factor);
+   _shader.setUniform("resolution", sf::Vector2f{200, 200});
+   _shader.setUniform("noise_scale", _noise_scale);
+   _shader.setUniform("swirl_color", _swirl_color);
+
+   sf::RenderStates shader_state;
+   shader_state.blendMode = sf::BlendNone;
+   shader_state.shader = &_shader;
+
+   sf::RectangleShape quad(sf::Vector2f{200.f, 200.f});
+   quad.setFillColor(sf::Color::White);
+
+   _shader_texture->draw(quad, shader_state);
+   _shader_texture->display();
+   _shader_sprite->setPosition(pos);
+
+   sf::RenderStates sprite_state(sf::BlendAdd);
+   target.draw(*_shader_sprite, sprite_state);
+}
+
 void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
    sf::RenderStates states;
+
    drawEditor();
 
    // Save current view (likely the default or GUI-compatible)
@@ -206,38 +304,6 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    pixel_view.zoom(zoom);
    target.setView(pixel_view);
 
-   // render shader
-   const auto r = std::max(_pi.at(0)._distance_factor, _pa.at(0)._distance_factor);
-   const auto d = std::max(abs(_pi.at(0)._offset_px.y), abs(_pa.at(0)._offset_px.y));
-   const auto pos = screen_offset - sf::Vector2f{5, 25} - sf::Vector2f{0, d};
-
-   // const auto radius = _radius + 2.0f * r;
-   const auto radius = 0.5f - 0.5f * (r / static_cast<float>(_activated_state._extend_distance_px));
-
-   // std::cout << radius << std::endl;
-
-   if (_state != State::Disabled)
-   {
-      _shader_texture->clear(sf::Color::Transparent);
-
-      _shader.setUniform("time", _elapsed);
-      _shader.setUniform("alpha", _shader_alpha * _void_alpha);
-      _shader.setUniform("radius_factor", radius);
-      _shader.setUniform("resolution", sf::Vector2f{200, 200});
-
-      sf::RenderStates shader_state;
-      shader_state.shader = &_shader;
-
-      sf::RectangleShape quad(sf::Vector2f{200.f, 200.f});
-      quad.setFillColor(sf::Color::White);  // needed to apply the shader
-      _shader_texture->draw(quad, shader_state);
-
-      _shader_texture->display();
-
-      _shader_sprite->setPosition(pos);
-      target.draw(*_shader_sprite);  // draw final result onto main target
-   }
-
    // draw sides
    auto draw_visible = [&target, states](const auto& side)
    {
@@ -246,8 +312,6 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
          side._layer->draw(target, states);
       }
    };
-
-   // target.draw(_rectangle_);
 
    if (_layer_background_inactive->_visible)
    {
@@ -264,8 +328,7 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    std::ranges::for_each(_pa, draw_visible);
    std::ranges::for_each(_pi, draw_visible);
 
-   // debug rect
-   // target.draw(_origin_shape);
+   drawVoid(target);
 
    target.setView(original_view);
 }

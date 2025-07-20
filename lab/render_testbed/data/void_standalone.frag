@@ -1,19 +1,16 @@
-#ifdef GL_ES
-precision mediump float;
-#endif
-
-// === Uniforms ===
 uniform vec2 resolution;       // screen resolution in pixels
 uniform float time;            // time in seconds
- float pixel_size = 1.0;      // size of pixel blocks for pixelation
 uniform sampler2D iChannel0;   // noise texture
 uniform float alpha;
 uniform float radius_factor;
+uniform float noise_scale;
+uniform vec3 swirl_color;  
 
-// === Main Entry Point ===
+float pixel_size = 1.0;      
+
 void main()
 {
-    // Pixelate the screen coordinates
+    // pixelate
     vec2 frag_coord = gl_FragCoord.xy;
     vec2 pixelated_coord = floor(frag_coord / pixel_size) * pixel_size;
 
@@ -21,14 +18,13 @@ void main()
     vec2 normalized_coords = (pixelated_coord - 0.5 * resolution.xy) / resolution.y;
 
     // Convert to polar coordinates
-    float radius = length(normalized_coords) * 1.7 + radius_factor;
+    float radius = length(normalized_coords) * 1.8 + radius_factor;
     float angle = atan(normalized_coords.y, normalized_coords.x);
     angle += radius * 1.1; // swirl twist
     vec2 polar_coords = vec2(radius, angle);
 
     // Animated time offset
     float t = time * 0.2;
-    float noise_scale = 10.0;
 
     // Generate layered sample positions for noise
     vec3 sample_pos_1 = vec3(sin(angle), cos(angle), pow(radius, 0.3) + t * 0.1);
@@ -52,20 +48,14 @@ void main()
     float brightness = (refined_noise + radius * 5.0) / 6.0;
     brightness = clamp(brightness, 0.0, 1.0);
 
- // gl_FragColor = vec4(vec3(brightness), 1.0);
-
     // Ring alpha based on brightness band
     float fade_in  = smoothstep(0.3, 0.5, brightness);
     float fade_out = 1.0 - smoothstep(0.5, 0.7, brightness);
     float ring_alpha = clamp(fade_in * fade_out, 0.0, 1.0);
 
     // Final color: cyan/petrol swirl ring
-    vec3 swirl_color = vec3(0.0, 0.9, 0.8);
     vec3 effect_color = swirl_color;
     vec3 final_color = mix(vec3(0.0), effect_color, ring_alpha);
 
-    // Output final color
-   gl_FragColor = vec4(final_color, alpha); // Alpha ignored in SFML target
-    //gl_FragColor = vec4(1,0,0,1);
-
+    gl_FragColor = vec4(final_color * alpha, 1.0);
 }
