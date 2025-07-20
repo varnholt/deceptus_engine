@@ -121,11 +121,18 @@ private:
    EnabledState _enabled_state;
 
    // shader
+   void loadNoiseTexture(const std::string& filename);
+   void drawVoid(sf::RenderTarget& target);
+
    sf::Shader _shader;
    std::unique_ptr<sf::RenderTexture> _shader_texture;
    std::unique_ptr<sf::Sprite> _shader_sprite;
-   float _radius = 50.0f;
-   float _shader_alpha = 0.4f;
+   float _radius_factor = 1.0f;
+   float _shader_alpha = 0.7f;
    float _void_alpha = 0.0f;
-   sf::Texture noise_texture;
+   float _time_factor = 4.0f;
+   float _noise_scale = 10.0;
+   sf::Vector3f _swirl_color{0.0f, 0.5f, 0.8f};
+   sf::Texture _noise_texture;
+   std::string _default_texture_path{"data/Gabor 6 - 128x128.png"};
 };
