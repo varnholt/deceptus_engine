@@ -9,8 +9,9 @@
 compile_commands.json
 Makefile
 build/*
+build_*/*
 **/CMakeFiles/
 **/.cmake/
 **/.qtc/
 **/build/
-
+.idea/*
