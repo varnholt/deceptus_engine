@@ -179,12 +179,64 @@ Gateway::~Gateway()
 // 1) use sfml rotation first
 // 2) calculate corresponding direction vector based on the angle
 
+void Gateway::loadNoiseTexture(const std::string& filename)
+{
+   sf::Texture noise_texture;
+   if (!noise_texture.loadFromFile(filename))
+   {
+      std::cerr << "Failed to load noise texture: " << filename << "\n";
+      return;
+   }
+
+   noise_texture.setRepeated(true);
+   noise_texture.setSmooth(true);
+
+   _noise_texture = std::move(noise_texture);
+   _shader.setUniform("iChannel0", _noise_texture);
+}
+
 void Gateway::setSidesVisible(std::array<Side, 4>& sides, bool visible)
 {
    for (auto& side : sides)
    {
       side._layer->_visible = visible;
    }
+}
+
+void Gateway::drawVoid(sf::RenderTarget& target)
+{
+   if (_state == State::Disabled)
+   {
+      return;
+   }
+
+   const auto r = std::max(_pi.at(0)._distance_factor, _pa.at(0)._distance_factor);
+   const auto d = std::max(abs(_pi.at(0)._offset_px.y), abs(_pa.at(0)._offset_px.y));
+   const auto pos = _rect.position - sf::Vector2f{5, 25} - sf::Vector2f{0, d};
+   const auto radius = 0.5f - 0.5f * (r / static_cast<float>(_activated_state._extend_distance_px));
+
+   _shader_texture->clear(sf::Color::Transparent);
+
+   _shader.setUniform("time", _elapsed * _time_factor);
+   _shader.setUniform("alpha", _shader_alpha * _void_alpha);
+   _shader.setUniform("radius_factor", radius * _radius_factor);
+   _shader.setUniform("resolution", sf::Vector2f{200, 200});
+   _shader.setUniform("noise_scale", _noise_scale);
+   _shader.setUniform("swirl_color", _swirl_color);
+
+   sf::RenderStates shader_state;
+   shader_state.blendMode = sf::BlendNone;
+   shader_state.shader = &_shader;
+
+   sf::RectangleShape quad(sf::Vector2f{200.f, 200.f});
+   quad.setFillColor(sf::Color::White);
+
+   _shader_texture->draw(quad, shader_state);
+   _shader_texture->display();
+   _shader_sprite->setPosition(pos);
+
+   sf::RenderStates sprite_state(sf::BlendAdd);
+   target.draw(*_shader_sprite, sprite_state);
 }
 
 void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
@@ -216,6 +268,8 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
    std::ranges::for_each(_pa, draw_visible);
    std::ranges::for_each(_pi, draw_visible);
+
+   drawVoid(target);
 }
 
 void Gateway::update(const sf::Time& dt)
@@ -351,6 +405,8 @@ void Gateway::update(const sf::Time& dt)
             {
                _activated_state._speed += _activated_state._acceleration * dt.asSeconds();
                _activated_state._speed = std::clamp(_activated_state._speed, 0.0f, _activated_state._rotate_speed_max);
+
+               _void_alpha = _activated_state._elapsed_time.asSeconds() / _activated_state._rotate_right_duration_s;
             }
             else
             {
@@ -649,6 +705,18 @@ void Gateway::setup(const GameDeserializeData& data)
    _layer_background_active = _layers["background_active"];
 
    _origin = _pa[0]._layer->_sprite->getOrigin();
+
+   // load shader
+   if (!_shader.loadFromFile("data/shaders/void_standalone.frag", sf::Shader::Type::Fragment))
+   {
+      std::cout << "failed to load shader" << std::endl;
+   }
+
+   _shader_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u(200u, 200u));
+   _shader_texture->setSmooth(true);
+   _shader_sprite = std::make_unique<sf::Sprite>(_shader_texture->getTexture());
+   _shader_sprite->setPosition(_rect.position);
+   loadNoiseTexture(_default_texture_path);
 }
 
 std::optional<sf::FloatRect> Gateway::getBoundingBoxPx()
