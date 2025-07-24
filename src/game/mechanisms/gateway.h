@@ -4,6 +4,7 @@
 #include <map>
 
 #include "framework/image/layer.h"
+#include "game/animation/animation.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
@@ -22,6 +23,13 @@ public:
    void setTargetId(const std::string& destination_gateway_id);
 
 private:
+   enum class State
+   {
+      Disabled,
+      Enabling,
+      Enabled
+   };
+
    struct Side
    {
       void update();
@@ -35,11 +43,21 @@ private:
       float _distance_factor{1.0f};
    };
 
-   enum class State
+   struct Eye
    {
-      Disabled,
-      Enabling,
-      Enabled
+      Eye(const sf::Vector2f& center);
+
+      void draw(sf::RenderTarget& target);
+      void update(const sf::Time& dt, State state);
+
+      sf::Vector2f _eye_pos_px;
+      sf::Vector2f _center_pos_px;
+
+      std::shared_ptr<sf::Texture> _texture;
+      std::unique_ptr<sf::Sprite> _sprite;
+
+      std::shared_ptr<Animation> _eye;
+      State _state = State::Disabled;
    };
 
    struct PortalState
@@ -126,4 +144,7 @@ private:
    sf::Vector3f _swirl_color{0.0f, 0.5f, 0.8f};
    sf::Texture _noise_texture;
    std::string _default_texture_path{"data/effects/gabor_6.png"};
+
+   // eye
+   std::unique_ptr<Eye> _eye;
 };
