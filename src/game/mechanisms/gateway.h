@@ -8,7 +8,7 @@
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
-class Gateway : public GameMechanism, public GameNode, public std::enable_shared_from_this<Gateway>
+class Gateway : public GameMechanism, public GameNode
 {
 public:
    Gateway(GameNode* parent = nullptr);
@@ -83,8 +83,6 @@ private:
    bool checkPlayerAtGateway() const;
 
    void use();
-
-   std::shared_ptr<Gateway> findOtherInstance(const std::string& id) const;
 
    State _state{State::Disabled};
 
