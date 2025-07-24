@@ -9,6 +9,7 @@
 #include "game/camera/camerasystem.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
+#include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
@@ -248,6 +249,7 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
    std::ranges::for_each(_pi, draw_visible);
 
    drawVoid(target);
+   _eye->draw(target);
 }
 
 void Gateway::update(const sf::Time& dt)
@@ -565,6 +567,8 @@ void Gateway::update(const sf::Time& dt)
          break;
       }
    }
+
+   _eye->update(dt, _state);
 }
 
 void Gateway::setup(const GameDeserializeData& data)
@@ -690,6 +694,8 @@ void Gateway::setup(const GameDeserializeData& data)
    _shader_sprite = std::make_unique<sf::Sprite>(_shader_texture->getTexture());
    _shader_sprite->setPosition(_rect.position);
    loadNoiseTexture(_default_texture_path);
+
+   _eye = std::make_unique<Eye>(_rect.getCenter());
 }
 
 std::optional<sf::FloatRect> Gateway::getBoundingBoxPx()
@@ -779,4 +785,33 @@ void Gateway::Side::reset()
 void Gateway::PortalState::resetTime()
 {
    _elapsed_time = sf::seconds(0);
+}
+
+Gateway::Eye::Eye(const sf::Vector2f& center)
+{
+   _center_pos_px = center;
+
+   _texture = TexturePool::getInstance().get("data/sprites/gateway_eye.png");
+   _sprite = std::make_unique<sf::Sprite>(*_texture);
+   _sprite->setTextureRect({{3547, 93}, {12, 12}});
+}
+
+void Gateway::Eye::draw(sf::RenderTarget& target)
+{
+   if (_state == State::Enabled)
+   {
+      target.draw(*_sprite);
+   }
+}
+
+void Gateway::Eye::update(const sf::Time& dt, State state)
+{
+   _state = state;
+   const auto player_pos_px = Player::getCurrent()->getPixelPositionFloat();
+   const auto dir_to_player = player_pos_px - _center_pos_px;
+   const auto dir_to_player_normalized = dir_to_player.normalized();
+   _eye_pos_px = {dir_to_player_normalized.x * 12.0f, dir_to_player_normalized.y * 6};
+
+   const auto sprite_pos_px = _center_pos_px + _eye_pos_px + sf::Vector2f{14, 0};
+   _sprite->setPosition(sprite_pos_px);
 }
