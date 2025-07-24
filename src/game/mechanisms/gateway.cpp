@@ -26,56 +26,31 @@
 
 namespace
 {
-using WeakGateway = std::weak_ptr<Gateway>;
-using Registry = std::unordered_multimap<std::string, WeakGateway>;
 
+using Registry = std::unordered_map<std::string, std::weak_ptr<Gateway>>;
 Registry gateway_registry;
 
-void registerGateway(const std::string& id, const std::shared_ptr<Gateway>& gateway)
+void registerGateway(const std::string& id, const std::weak_ptr<Gateway>& gateway)
 {
    gateway_registry.emplace(id, gateway);
 }
 
-void unregisterGateway(const std::string& id, const Gateway* raw)
+void unregisterGateway(const std::string& id)
 {
-   auto range = gateway_registry.equal_range(id);
-   for (auto it = range.first; it != range.second;)
-   {
-      auto should_erase = false;
-
-      if (it->second.expired())
-      {
-         should_erase = true;
-      }
-      else if (auto locked = it->second.lock(); locked.get() == raw)
-      {
-         should_erase = true;
-      }
-
-      if (should_erase)
-      {
-         it = gateway_registry.erase(it);
-      }
-      else
-      {
-         ++it;
-      }
-   }
+   gateway_registry.erase(id);
 }
 
-std::vector<std::shared_ptr<Gateway>> findGatewaysById(const std::string& id)
+std::shared_ptr<Gateway> findGatewayById(const std::string& id)
 {
-   std::vector<std::shared_ptr<Gateway>> result_it;
-   auto range = gateway_registry.equal_range(id);
-   for (auto it = range.first; it != range.second; ++it)
+   const auto it = gateway_registry.find(id);
+   if (it == gateway_registry.end())
    {
-      if (auto ptr = it->second.lock())
-      {
-         result_it.push_back(ptr);
-      }
+      return nullptr;
    }
-   return result_it;
+
+   return it->second.lock();
 }
+
 }  // namespace
 
 namespace
@@ -113,6 +88,7 @@ const auto registered_gateway = []
          auto mechanism = std::make_shared<Gateway>(parent);
          mechanism->setup(data);
          mechanisms["gateways"]->push_back(mechanism);
+         registerGateway(mechanism->getObjectId(), mechanism);
       }
    );
 
@@ -123,6 +99,7 @@ const auto registered_gateway = []
          auto mechanism = std::make_shared<Gateway>(parent);
          mechanism->setup(data);
          mechanisms["gateways"]->push_back(mechanism);
+         registerGateway(mechanism->getObjectId(), mechanism);
       }
    );
 
@@ -167,7 +144,8 @@ Gateway::Gateway(GameNode* parent) : GameNode(parent)
 
 Gateway::~Gateway()
 {
-   unregisterGateway(getObjectId(), this);
+   std::cerr << "gateway destuctor, this = " << static_cast<const void*>(this) << std::endl;
+   unregisterGateway(getObjectId());
 }
 
 // idea: have only 1 rotation angle, the other 3 are relative to that
@@ -593,11 +571,6 @@ void Gateway::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);
 
-   if (auto shared = shared_from_this())
-   {
-      registerGateway(getObjectId(), shared);
-   }
-
    _rect = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    addChunks(_rect);
@@ -745,10 +718,18 @@ void Gateway::use()
 
    _in_use = true;
 
-   const auto target_gateway = findOtherInstance(_target_id);
+   const auto target_gateway = findGatewayById(_target_id);
    const auto target_pos_px = target_gateway->_rect.getCenter();
 
-   auto teleport = [&]()
+   // gateway_1
+   // 994.33
+   // 2914.00
+   //
+   // gateway_2
+   // 2665.00
+   // 1573.00
+
+   auto teleport = [target_pos_px]()
    {
       {
          Player::getCurrent()->setBodyViaPixelPosition(
@@ -765,24 +746,11 @@ void Gateway::use()
    screen_transition->_callbacks_effect_2_ended.emplace_back(
       [this]()
       {
-         ScreenTransitionHandler::getInstance().pop();
          _in_use = false;
+         ScreenTransitionHandler::getInstance().pop();
       }
    );
    ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
-}
-
-std::shared_ptr<Gateway> Gateway::findOtherInstance(const std::string& gateway_id) const
-{
-   for (const auto& gateway : findGatewaysById(gateway_id))
-   {
-      if (gateway.get() != this)
-      {
-         return gateway;
-      }
-   }
-
-   return nullptr;
 }
 
 void Gateway::setTargetId(const std::string& destination_gateway_id)
