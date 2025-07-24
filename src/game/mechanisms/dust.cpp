@@ -1,11 +1,11 @@
 #include "dust.h"
 
-#include "framework/math/fbm.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 namespace
@@ -66,6 +66,7 @@ void Dust::update(const sf::Time& dt)
       const auto col_z = (static_cast<float>(col.b) / 255.0f) - 0.5f;
       const auto dir = sf::Vector3f{col_x, col_y, col_z};
 
+      const auto position_prev = p._position;
       p._position = p._position + dir * dt_s * _particle_velocity + _wind_direction * dt_s * _particle_velocity;
       p._z = col_z;
       p._age += dt_s;
@@ -73,6 +74,23 @@ void Dust::update(const sf::Time& dt)
       if (p._age > p._lifetime)
       {
          p.spawn(_clip_rect);
+         continue;
+      }
+
+      // remove particles that are too close to the center
+      if (_respawn_when_center_reached)
+      {
+         const sf::Vector2f center = _clip_rect.getCenter();
+         const auto dx = p._position.x - center.x;
+         const auto dy = p._position.y - center.y;
+         const auto dist_sq = dx * dx + dy * dy;
+         const auto too_close_to_center = dist_sq < p._center_reset_radius_sq;
+
+         if (too_close_to_center)
+         {
+            p.spawn(_clip_rect);
+            continue;
+         }
       }
    }
 }
@@ -161,67 +179,74 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
    dust->_clip_rect = clip_rect;
    dust->addChunks(clip_rect);
 
+   auto particle_count = 100;
+
    if (data._tmx_object->_properties)
    {
-      const auto z_it = data._tmx_object->_properties->_map.find("z");
-      const auto particle_size_it = data._tmx_object->_properties->_map.find("particle_size_px");
-      const auto particle_count_it = data._tmx_object->_properties->_map.find("particle_count");
-      const auto color_it = data._tmx_object->_properties->_map.find("particle_color");
-      const auto velocity_it = data._tmx_object->_properties->_map.find("particle_velocity");
-      const auto wind_dir_x_it = data._tmx_object->_properties->_map.find("wind_dir_x");
-      const auto wind_dir_y_it = data._tmx_object->_properties->_map.find("wind_dir_y");
-      const auto flowfield_texture_it = data._tmx_object->_properties->_map.find("flowfield_texture");
+      const auto& map = data._tmx_object->_properties->_map;
 
-      if (z_it != data._tmx_object->_properties->_map.end())
+      const auto z_it = map.find("z");
+      const auto particle_size_it = map.find("particle_size_px");
+      const auto particle_count_it = map.find("particle_count");
+      const auto color_it = map.find("particle_color");
+      const auto velocity_it = map.find("particle_velocity");
+      const auto wind_dir_x_it = map.find("wind_dir_x");
+      const auto wind_dir_y_it = map.find("wind_dir_y");
+      const auto flowfield_texture_it = map.find("flowfield_texture");
+
+      dust->_respawn_when_center_reached = ValueReader::readValue<bool>("respawn_when_center_reached", map).value_or(false);
+
+      if (z_it != map.end())
       {
          dust->setZ(z_it->second->_value_int.value());
       }
 
-      if (particle_size_it != data._tmx_object->_properties->_map.end())
+      if (particle_size_it != map.end())
       {
          dust->_particle_size_px = static_cast<uint8_t>(particle_size_it->second->_value_int.value());
       }
 
-      if (particle_count_it != data._tmx_object->_properties->_map.end())
+      if (particle_count_it != map.end())
       {
-         const auto particle_count = particle_count_it->second->_value_int.value();
-         for (auto i = 0; i < particle_count; i++)
-         {
-            Particle p;
-            p.spawn(dust->_clip_rect);
-            dust->_particles.push_back(p);
-         }
-
-         dust->_vertices.resize(6 * particle_count);
+         particle_count = particle_count_it->second->_value_int.value();
       }
 
-      if (wind_dir_x_it != data._tmx_object->_properties->_map.end())
+      if (wind_dir_x_it != map.end())
       {
          dust->_wind_direction.x = wind_dir_x_it->second->_value_float.value();
       }
 
-      if (wind_dir_y_it != data._tmx_object->_properties->_map.end())
+      if (wind_dir_y_it != map.end())
       {
          dust->_wind_direction.y = wind_dir_y_it->second->_value_float.value();
       }
 
-      if (color_it != data._tmx_object->_properties->_map.end())
+      if (color_it != map.end())
       {
          const auto rgba = TmxTools::color(color_it->second->_value_string.value());
-         ;
          dust->_particle_color = {rgba[0], rgba[1], rgba[2]};
       }
 
-      if (velocity_it != data._tmx_object->_properties->_map.end())
+      if (velocity_it != map.end())
       {
          dust->_particle_velocity = velocity_it->second->_value_float.value();
       }
 
-      if (flowfield_texture_it != data._tmx_object->_properties->_map.end())
+      if (flowfield_texture_it != map.end())
       {
          flowfield_texture = flowfield_texture_it->second->_value_string.value();
       }
    }
+
+   // generate dust vertices
+   for (auto i = 0; i < particle_count; i++)
+   {
+      Particle p;
+      p.spawn(dust->_clip_rect);
+      dust->_particles.push_back(p);
+   }
+
+   dust->_vertices.resize(6 * particle_count);
 
    // remember the instance so it's not instantly removed from the cache and each
    // dust instance has to reload the texture
@@ -237,4 +262,9 @@ void Dust::Particle::spawn(sf::FloatRect& rect)
    _position.y = rect.position.y + std::rand() % static_cast<int32_t>(rect.size.y);
    _age = 0.0f;
    _lifetime = 5.0f + (std::rand() % 100) * 0.1f;
+
+   constexpr auto radius_min = 1.0f;
+   constexpr auto radius_max = 4.0f;
+   const auto radius = radius_min + (std::rand() % 1000 / 1000.0f) * (radius_max - radius_min);
+   _center_reset_radius_sq = radius * radius;
 }

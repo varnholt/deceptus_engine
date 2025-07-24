@@ -5,8 +5,6 @@
 #include "game/mechanisms/gamemechanism.h"
 
 #include <SFML/Graphics.hpp>
-#include <array>
-#include <deque>
 #include <memory>
 
 struct TmxObject;
@@ -21,6 +19,7 @@ class Dust : public GameMechanism, public GameNode
       float _age = 0.0f;
       float _lifetime = 0.0f;
       float _z = 0.0f;
+      float _center_reset_radius_sq = 0.0f;
    };
 
 public:
@@ -42,4 +41,5 @@ private:
    float _particle_velocity = 100.0f;
    uint8_t _particle_size_px = 2;
    sf::VertexArray _vertices;
+   bool _respawn_when_center_reached{false};
 };
