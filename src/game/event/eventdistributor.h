@@ -88,12 +88,12 @@ template <typename EventT>
 void event(const EventT& event)
 {
    auto& list = getCallbackList<EventT>();
-   auto& mtx = getCallbackMutex<EventT>();
-   std::lock_guard lock(mtx);
+   auto& mutex = getCallbackMutex<EventT>();
+   std::lock_guard lock(mutex);
 
-   for (auto& [id, cb] : list)
+   for (auto& [id, callback] : list)
    {
-      cb(event);
+      callback(event);
    }
 }
 
@@ -111,8 +111,8 @@ template <typename EventT>
 int32_t registerEvent(EventCallback<EventT> callback)
 {
    auto& list = getCallbackList<EventT>();
-   auto& mtx = getCallbackMutex<EventT>();
-   std::lock_guard lock(mtx);
+   auto& mutex = getCallbackMutex<EventT>();
+   std::lock_guard lock(mutex);
 
    int32_t id = getNextCallbackId();
    list.emplace_back(id, std::move(callback));
@@ -131,8 +131,8 @@ template <typename EventT>
 void unregisterEvent(int32_t id)
 {
    auto& list = getCallbackList<EventT>();
-   auto& mtx = getCallbackMutex<EventT>();
-   std::lock_guard lock(mtx);
+   auto& mutex = getCallbackMutex<EventT>();
+   std::lock_guard lock(mutex);
 
    list.erase(std::remove_if(list.begin(), list.end(), [id](const CallbackEntry<EventT>& entry) { return entry.first == id; }), list.end());
 }

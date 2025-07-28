@@ -4,8 +4,10 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
+#include "game/event/eventdistributor.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/flowfieldtexturechangeevent.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 namespace
@@ -39,6 +41,14 @@ Dust::Dust(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Dust).name());
    _vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
+}
+
+Dust::~Dust()
+{
+   if (_flowfield_listener_id.has_value())
+   {
+      EventDistributor::unregisterEvent<FlowFieldTextureChangeEvent>(_flowfield_listener_id.value());
+   }
 }
 
 void Dust::update(const sf::Time& dt)
@@ -195,6 +205,7 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
       const auto flowfield_texture_it = map.find("flowfield_texture");
 
       dust->_respawn_when_center_reached = ValueReader::readValue<bool>("respawn_when_center_reached", map).value_or(false);
+      const auto allow_texture_updates = ValueReader::readValue<bool>("allow_texture_updates", map).value_or(false);
 
       if (z_it != map.end())
       {
@@ -235,6 +246,20 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
       if (flowfield_texture_it != map.end())
       {
          flowfield_texture = flowfield_texture_it->second->_value_string.value();
+      }
+
+      if (allow_texture_updates)
+      {
+         dust->_flowfield_listener_id = EventDistributor::registerEvent<FlowFieldTextureChangeEvent>(
+            [dust](const FlowFieldTextureChangeEvent& event)
+            {
+               if (event._object_id == dust->_object_id)
+               {
+                  dust->_flow_field_texture = TexturePool::getInstance().get(event._texture_id);
+                  dust->_flow_field_image = dust->_flow_field_texture->copyToImage();
+               }
+            }
+         );
       }
    }
 
