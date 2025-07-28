@@ -754,9 +754,8 @@ void Gateway::use()
    auto teleport = [target_pos_px]()
    {
       {
-         Player::getCurrent()->setBodyViaPixelPosition(
-            target_pos_px.x + PLAYER_ACTUAL_WIDTH / 2, target_pos_px.y + DIFF_PLAYER_TILE_TO_PHYSICS
-         );
+         const auto y_tl_to_px = static_cast<int32_t>(target_pos_px.y / PIXELS_PER_TILE) * PIXELS_PER_TILE;
+         Player::getCurrent()->setBodyViaPixelPosition(target_pos_px.x + PLAYER_ACTUAL_WIDTH / 2, y_tl_to_px + PIXELS_PER_TILE * 3 - 8);
 
          // update the camera system to point to the player position immediately
          CameraSystem::getInstance().syncNow();
