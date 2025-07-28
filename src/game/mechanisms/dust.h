@@ -24,6 +24,7 @@ class Dust : public GameMechanism, public GameNode
 
 public:
    Dust(GameNode* parent = nullptr);
+   virtual ~Dust() override;
 
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
@@ -42,4 +43,5 @@ private:
    uint8_t _particle_size_px = 2;
    sf::VertexArray _vertices;
    bool _respawn_when_center_reached{false};
+   std::optional<int32_t> _flowfield_listener_id;
 };
