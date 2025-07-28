@@ -59,7 +59,6 @@ void to_json(nlohmann::json& j, const AnimationSettings& settings)
    );
 
    j = nlohmann::json{
-      {"sprite_count", durations.size()},
       {"frame_size", settings._frame_size},
       {"frame_offset", settings._frame_offset},
       {"origin", settings._origin},
