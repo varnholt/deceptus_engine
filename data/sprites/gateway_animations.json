@@ -1,0 +1,47 @@
+{
+	"eye_spawn": {
+		"frame_durations": [
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20
+        ],
+		"frame_offset": [0, 0],
+		"frame_size": [64, 64],
+		"origin": [32, 32],
+		"texture": "data/sprites/gateway_eye.png"
+	},
+	"eye_iris_spawn": {
+		"frame_durations": [
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20
+        ],
+		"frame_offset": [0, 64],
+		"frame_size": [64, 64],
+		"origin": [32, 32],
+		"texture": "data/sprites/gateway_eye.png"
+	},
+	"eye_iris_idle": {
+		"frame_durations": [1000],
+		"frame_offset": [0, 128],
+		"frame_size": [64, 64],
+		"origin": [32, 32],
+		"texture": "data/sprites/gateway_eye.png"
+	},	
+    "eye_iris_idle_blink": {
+		"frame_durations": [
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 
+            20, 20, 20, 20, 20, 20, 20, 20
+        ],
+		"frame_offset": [0, 128],
+		"frame_size": [64, 64],
+		"origin": [32, 32],
+		"texture": "data/sprites/gateway_eye.png"
+	}
+}
