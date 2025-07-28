@@ -133,11 +133,15 @@ std::vector<b2Body*> WorldQuery::retrieveEnemyBodiesInsideRect(
                                              {
                                                 auto user_data = fixture->GetUserData().pointer;
                                                 if (!user_data)
+                                                {
                                                    continue;
+                                                }
 
                                                 auto fixture_node = static_cast<FixtureNode*>(user_data);
                                                 if (fixture_node->getType() == ObjectTypeEnemy)
+                                                {
                                                    return true;  // found at least one enemy fixture
+                                                }
                                              }
                                              return false;  // no enemy fixtures found
                                           }
