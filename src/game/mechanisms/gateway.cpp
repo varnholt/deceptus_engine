@@ -9,8 +9,10 @@
 #include "game/camera/camerasystem.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
+#include "game/event/eventdistributor.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/flowfieldtexturechangeevent.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
@@ -561,6 +563,17 @@ void Gateway::update(const sf::Time& dt)
                _state = State::Enabled;
                _enabled_state.resetTime();
                _enabled_state._distances_when_activated = _pa[0]._distance_factor;
+
+               // update flow field
+               if (_flowfield_reference_id.has_value() && _flowfield_texture.has_value())
+               {
+                  EventDistributor::event(
+                     FlowFieldTextureChangeEvent{
+                        ._object_id = _flowfield_reference_id.value(),  // update flow field
+                        ._texture_id = _flowfield_texture.value()
+                     }
+                  );
+               }
             }
          }
 
@@ -600,6 +613,9 @@ void Gateway::setup(const GameDeserializeData& data)
       }
 
       _target_id = ValueReader::readValue<std::string>("target_id", map).value_or(std::format("{:08x}", std::random_device{}()));
+
+      _flowfield_reference_id = ValueReader::readValue<std::string>("flowfield_reference_id", map);
+      _flowfield_texture = ValueReader::readValue<std::string>("flowfield_texture", map);
    }
 
    _rect_shape.setFillColor(sf::Color(255, 255, 255, 25));
@@ -794,19 +810,43 @@ Gateway::Eye::Eye(const sf::Vector2f& center)
    _texture = TexturePool::getInstance().get("data/sprites/gateway_eye.png");
    _sprite = std::make_unique<sf::Sprite>(*_texture);
    _sprite->setTextureRect({{3547, 93}, {12, 12}});
+
+   // load animations
+   AnimationPool animation_pool{"data/sprites/gateway_animations.json"};
+   _eye_spawn = animation_pool.create("eye_spawn", 0, 0, false, false);
+   _eye_iris_spawn = animation_pool.create("eye_iris_spawn", 0, 0, false, false);
+   _eye_iris_idle = animation_pool.create("eye_iris_idle", 0, 0, false, false);
+   _eye_iris_idle_blink = animation_pool.create("eye_iris_idle_blink", 0, 0, false, false);
+
+   _animations = {_eye_spawn, _eye_iris_spawn, _eye_iris_idle, _eye_iris_idle_blink};
 }
 
 void Gateway::Eye::draw(sf::RenderTarget& target)
 {
    if (_state == State::Enabled)
    {
+      // _eye_spawn->draw(target);
+      // _eye_iris_spawn->draw(target);
+      // _eye_iris_idle->draw(target);
+
       target.draw(*_sprite);
    }
 }
 
 void Gateway::Eye::update(const sf::Time& dt, State state)
 {
+   const auto previous_state = _state;
    _state = state;
+
+   // if (previous_state == State::Enabling && _state == State::Enabled)
+   // {
+   //    _eye_iris_spawn->play();
+   // }
+   //
+   // _eye_spawn->play();
+   // _eye_iris_spawn->play();
+   // _eye_iris_idle->play();
+
    const auto player_pos_px = Player::getCurrent()->getPixelPositionFloat();
    const auto dir_to_player = player_pos_px - _center_pos_px;
    const auto dir_to_player_normalized = dir_to_player.normalized();
@@ -814,4 +854,14 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
 
    const auto sprite_pos_px = _center_pos_px + _eye_pos_px + sf::Vector2f{14, 0};
    _sprite->setPosition(sprite_pos_px);
+
+   _eye_spawn->setPosition(sprite_pos_px);
+   _eye_iris_spawn->setPosition(sprite_pos_px);
+   _eye_iris_idle->setPosition(sprite_pos_px);
+   _eye_iris_idle_blink->setPosition(sprite_pos_px);
+
+   for (const auto& animation : _animations)
+   {
+      animation->update(dt);
+   }
 }

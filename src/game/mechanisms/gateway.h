@@ -56,7 +56,13 @@ private:
       std::shared_ptr<sf::Texture> _texture;
       std::unique_ptr<sf::Sprite> _sprite;
 
-      std::shared_ptr<Animation> _eye;
+      std::shared_ptr<Animation> _eye_spawn;
+      std::shared_ptr<Animation> _eye_iris_spawn;
+      std::shared_ptr<Animation> _eye_iris_idle;
+      std::shared_ptr<Animation> _eye_iris_idle_blink;
+
+      std::array<std::shared_ptr<Animation>, 4> _animations;
+
       State _state = State::Disabled;
    };
 
@@ -144,6 +150,10 @@ private:
    sf::Vector3f _swirl_color{0.0f, 0.5f, 0.8f};
    sf::Texture _noise_texture;
    std::string _default_texture_path{"data/effects/gabor_6.png"};
+
+   // flowfield
+   std::optional<std::string> _flowfield_reference_id;
+   std::optional<std::string> _flowfield_texture;
 
    // eye
    std::unique_ptr<Eye> _eye;
