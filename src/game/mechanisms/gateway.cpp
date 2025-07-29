@@ -233,8 +233,6 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
       }
    };
 
-   // target.draw(_rect_shape);
-
    if (_layer_background_inactive->_visible)
    {
       target.draw(*_layer_background_inactive);
@@ -564,6 +562,8 @@ void Gateway::update(const sf::Time& dt)
                _enabled_state.resetTime();
                _enabled_state._distances_when_activated = _pa[0]._distance_factor;
 
+               _eye->wakeUp();
+
                // update flow field
                if (_flowfield_reference_id.has_value() && _flowfield_texture.has_value())
                {
@@ -743,14 +743,6 @@ void Gateway::use()
    const auto target_gateway = findGatewayById(_target_id);
    const auto target_pos_px = target_gateway->_rect.getCenter();
 
-   // gateway_1
-   // 994.33
-   // 2914.00
-   //
-   // gateway_2
-   // 2665.00
-   // 1573.00
-
    auto teleport = [target_pos_px]()
    {
       {
@@ -812,23 +804,40 @@ Gateway::Eye::Eye(const sf::Vector2f& center)
 
    // load animations
    AnimationPool animation_pool{"data/sprites/gateway_animations.json"};
+
    _eye_spawn = animation_pool.create("eye_spawn", 0, 0, false, false);
    _eye_iris_spawn = animation_pool.create("eye_iris_spawn", 0, 0, false, false);
    _eye_iris_idle = animation_pool.create("eye_iris_idle", 0, 0, false, false);
    _eye_iris_idle_blink = animation_pool.create("eye_iris_idle_blink", 0, 0, false, false);
+   _eye_iris_idle_ref = _eye_iris_idle;
 
    _animations = {_eye_spawn, _eye_iris_spawn, _eye_iris_idle, _eye_iris_idle_blink};
+
+   for (auto& animation : _animations)
+   {
+      animation->_reset_to_first_frame = false;
+   }
 }
 
 void Gateway::Eye::draw(sf::RenderTarget& target)
 {
-   if (_state == State::Enabled)
+   switch (_iris_state)
    {
-      // _eye_spawn->draw(target);
-      // _eye_iris_spawn->draw(target);
-      // _eye_iris_idle->draw(target);
-
-      target.draw(*_sprite);
+      case IrisState::Awake:
+      {
+         _eye_iris_spawn->draw(target);
+         // target.draw(*_sprite);
+         break;
+      }
+      case IrisState::Idle:
+      {
+         _eye_iris_idle_ref->draw(target);
+         break;
+      }
+      case IrisState::Asleep:
+      {
+         break;
+      }
    }
 }
 
@@ -837,30 +846,61 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
    const auto previous_state = _state;
    _state = state;
 
-   // if (previous_state == State::Enabling && _state == State::Enabled)
-   // {
-   //    _eye_iris_spawn->play();
-   // }
-   //
-   // _eye_spawn->play();
-   // _eye_iris_spawn->play();
-   // _eye_iris_idle->play();
+   if (_iris_state == IrisState::Awake)
+   {
+      _wake_time += dt;
+      const auto wake_value_normalized = _wake_time.asSeconds() / _wake_duration_s;
 
-   const auto player_pos_px = Player::getCurrent()->getPixelPositionFloat();
+      if (wake_value_normalized > 1.0f)
+      {
+         _iris_state = IrisState::Idle;
+         _eye_iris_idle_ref->seekToStart();
+         _eye_iris_idle_ref->play();
+      }
+
+      _eye_iris_spawn->update(dt);
+
+      // no longer needed
+      // _sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(std::clamp(wake_value_normalized * 255.0f, 0.0f, 255.0f))));
+   }
+
+   if (_iris_state == IrisState::Idle)
+   {
+      if (_eye_iris_idle_ref->_paused)
+      {
+         if (std::rand() % 5 == 0)
+         {
+            _eye_iris_idle_ref = _eye_iris_idle_blink;
+         }
+         else
+         {
+            _eye_iris_idle_ref = _eye_iris_idle;
+         }
+
+         _eye_iris_idle_ref->seekToStart();
+         _eye_iris_idle_ref->play();
+      }
+
+      _eye_iris_idle_ref->update(dt);
+   }
+
+   const auto error_gaze_px = sf::Vector2f(-PLAYER_ACTUAL_WIDTH / 2, 0);
+   const auto player_pos_px = Player::getCurrent()->getPixelPositionFloat() + error_gaze_px;
    const auto dir_to_player = player_pos_px - _center_pos_px;
    const auto dir_to_player_normalized = dir_to_player.normalized();
    _eye_pos_px = {dir_to_player_normalized.x * 12.0f, dir_to_player_normalized.y * 6};
 
-   const auto sprite_pos_px = _center_pos_px + _eye_pos_px + sf::Vector2f{14, 0};
+   const auto eye_pos_error_px = sf::Vector2f{19, 5};
+   const auto sprite_pos_px = _center_pos_px + _eye_pos_px + eye_pos_error_px;
    _sprite->setPosition(sprite_pos_px);
-
    _eye_spawn->setPosition(sprite_pos_px);
    _eye_iris_spawn->setPosition(sprite_pos_px);
    _eye_iris_idle->setPosition(sprite_pos_px);
    _eye_iris_idle_blink->setPosition(sprite_pos_px);
+}
 
-   for (const auto& animation : _animations)
-   {
-      animation->update(dt);
-   }
+void Gateway::Eye::wakeUp()
+{
+   _iris_state = IrisState::Awake;
+   _eye_iris_spawn->play();
 }

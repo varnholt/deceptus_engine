@@ -45,10 +45,19 @@ private:
 
    struct Eye
    {
+      enum class IrisState
+      {
+         Asleep,
+         Awake,
+         Idle
+      };
+
       Eye(const sf::Vector2f& center);
 
       void draw(sf::RenderTarget& target);
       void update(const sf::Time& dt, State state);
+
+      void wakeUp();
 
       sf::Vector2f _eye_pos_px;
       sf::Vector2f _center_pos_px;
@@ -60,8 +69,13 @@ private:
       std::shared_ptr<Animation> _eye_iris_spawn;
       std::shared_ptr<Animation> _eye_iris_idle;
       std::shared_ptr<Animation> _eye_iris_idle_blink;
+      std::shared_ptr<Animation> _eye_iris_idle_ref;
 
       std::array<std::shared_ptr<Animation>, 4> _animations;
+
+      IrisState _iris_state{IrisState::Asleep};
+      sf::Time _wake_time;
+      static constexpr auto _wake_duration_s{2.0f};
 
       State _state = State::Disabled;
    };
