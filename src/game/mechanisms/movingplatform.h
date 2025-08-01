@@ -19,6 +19,7 @@ class MovingPlatform : public GameMechanism, public GameNode
 {
 public:
    MovingPlatform(GameNode* parent);
+   std::string_view objectName() const override;
 
    static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
    static void deserialize(const std::shared_ptr<TmxObject>& tmx_object);

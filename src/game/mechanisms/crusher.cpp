@@ -66,6 +66,11 @@ Crusher::Crusher(GameNode* parent) : GameNode(parent)
    __instance_counter++;
 }
 
+std::string_view Crusher::objectName() const
+{
+   return "Crusher";
+}
+
 void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    color.draw(*_sprite_spike);

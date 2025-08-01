@@ -37,6 +37,11 @@ WaterDamage::WaterDamage(GameNode* parent) : GameNode(parent)
 {
 }
 
+std::string_view WaterDamage::objectName() const
+{
+   return "WaterDamage";
+}
+
 void WaterDamage::update(const sf::Time& /*dt*/)
 {
    if (!isEnabled())

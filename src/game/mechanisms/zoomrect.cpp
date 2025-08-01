@@ -80,6 +80,11 @@ ZoomRect::ZoomRect(GameNode* parent) : GameNode(parent)
    _instance_id = instance_counter++;
 }
 
+std::string_view ZoomRect::objectName() const
+{
+   return "ZoomRect";
+}
+
 void ZoomRect::update(const sf::Time& dt)
 {
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();

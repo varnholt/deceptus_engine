@@ -30,6 +30,7 @@ public:
    };
 
    SpikeBall(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    void preload() override;
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;

@@ -151,6 +151,11 @@ Gateway::~Gateway()
    unregisterGateway(getObjectId());
 }
 
+std::string_view Gateway::objectName() const
+{
+   return "Gateway";
+}
+
 // idea: have only 1 rotation angle, the other 3 are relative to that
 // A -> angle + 0deg
 // B -> angle + 90deg

@@ -9,6 +9,7 @@ class EnemyWall : public GameMechanism, public GameNode
 {
 public:
    EnemyWall(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    void setup(const GameDeserializeData& data);
    void update(const sf::Time& dt) override;

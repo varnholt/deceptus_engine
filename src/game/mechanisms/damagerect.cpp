@@ -41,6 +41,11 @@ DamageRect::DamageRect(GameNode* /*parent*/)
    setClassName(typeid(GameNode).name());
 }
 
+std::string_view DamageRect::objectName() const
+{
+   return "DamageRect";
+}
+
 void DamageRect::update(const sf::Time& /*dt*/)
 {
    auto* player = Player::getCurrent();

@@ -25,6 +25,7 @@ class Dust : public GameMechanism, public GameNode
 public:
    Dust(GameNode* parent = nullptr);
    virtual ~Dust() override;
+   std::string_view objectName() const override;
 
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;

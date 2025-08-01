@@ -48,6 +48,11 @@ Fireflies::Fireflies(GameNode* parent) : GameNode(parent)
 {
 }
 
+std::string_view Fireflies::objectName() const
+{
+   return "Fireflies";
+}
+
 void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
 #ifdef DEBUG_RECT

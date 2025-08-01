@@ -11,6 +11,7 @@ class BoxCollider : public GameMechanism, public GameNode
 {
 public:
    BoxCollider(GameNode* node);
+   std::string_view objectName() const override;
    void setup(const GameDeserializeData& data);
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 

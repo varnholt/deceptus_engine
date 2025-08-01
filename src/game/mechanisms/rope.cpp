@@ -59,6 +59,11 @@ Rope::Rope(GameNode* parent) : GameNode(parent)
    _push_time_s = static_cast<float>(_instance_counter);
 }
 
+std::string_view Rope::objectName() const
+{
+   return "Rope";
+}
+
 void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    std::optional<b2Vec2> q1_prev;

@@ -34,6 +34,7 @@ public:
 
    Lever(GameNode* parent = nullptr);
    ~Lever();
+   std::string_view objectName() const override;
 
    void preload() override;
    void update(const sf::Time& dt) override;

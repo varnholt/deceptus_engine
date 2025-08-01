@@ -42,6 +42,11 @@ BlockingRect::BlockingRect(GameNode* parent) : GameNode(parent)
    setClassName(typeid(BlockingRect).name());
 }
 
+std::string_view BlockingRect::objectName() const
+{
+   return "BlockingRect";
+}
+
 void BlockingRect::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);

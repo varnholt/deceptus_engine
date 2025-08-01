@@ -47,6 +47,11 @@ MoveableBox::MoveableBox(GameNode* node) : GameNode(node)
    setClassName(typeid(MoveableBox).name());
 }
 
+std::string_view MoveableBox::objectName() const
+{
+   return "MoveableBox";
+}
+
 void MoveableBox::preload()
 {
    Audio::getInstance().addSample("mechanism_moveable_object_01.wav");

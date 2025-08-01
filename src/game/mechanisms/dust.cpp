@@ -51,6 +51,11 @@ Dust::~Dust()
    }
 }
 
+std::string_view Dust::objectName() const
+{
+   return "Dust";
+}
+
 void Dust::update(const sf::Time& dt)
 {
    const auto dt_s = dt.asSeconds();

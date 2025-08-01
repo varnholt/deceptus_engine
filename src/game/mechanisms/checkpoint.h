@@ -25,6 +25,7 @@ public:
    using CheckpointCallback = std::function<void(void)>;
 
    Checkpoint(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    static std::shared_ptr<Checkpoint> getCheckpoint(int32_t index, const std::vector<std::shared_ptr<GameMechanism>>& checkpoints);
    static std::shared_ptr<Checkpoint> deserialize(GameNode* parent, const GameDeserializeData& data);

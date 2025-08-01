@@ -15,6 +15,7 @@ class ConveyorBelt : public FixtureNode, public GameMechanism
 {
 public:
    ConveyorBelt(GameNode* parent, const GameDeserializeData& data);
+   std::string_view objectName() const override;
 
    b2Body* getBody() const;
    float getVelocity() const;

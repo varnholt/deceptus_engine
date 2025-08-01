@@ -72,6 +72,11 @@ ControllerHelp::ControllerHelp(GameNode* parent) : GameNode(parent)
    setClassName(typeid(ControllerHelp).name());
 }
 
+std::string_view ControllerHelp::objectName() const
+{
+   return "ControllerHelp";
+}
+
 void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    if (!_visible && _alpha <= alpha_min_threshold)

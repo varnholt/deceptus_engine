@@ -27,6 +27,7 @@ public:
 
    RotatingBlade(GameNode* parent = nullptr);
    ~RotatingBlade();
+   std::string_view objectName() const override;
 
    void setup(const GameDeserializeData& data);
    void preload() override;

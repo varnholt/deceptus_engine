@@ -14,6 +14,7 @@ class Gateway : public GameMechanism, public GameNode
 public:
    Gateway(GameNode* parent = nullptr);
    virtual ~Gateway();
+   std::string_view objectName() const override;
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
    virtual void update(const sf::Time& dt);
 

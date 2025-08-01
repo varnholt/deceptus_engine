@@ -21,6 +21,8 @@ public:
    };
 
    ZoomRect(GameNode* parent);
+   std::string_view objectName() const override;
+
    void update(const sf::Time& dt) override;
    void setup(const GameDeserializeData& data);
 

@@ -222,6 +222,11 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin));
 }
 
+std::string_view ConveyorBelt::objectName() const
+{
+   return "ConveyorBelt";
+}
+
 b2Body* ConveyorBelt::getBody() const
 {
    return _body;

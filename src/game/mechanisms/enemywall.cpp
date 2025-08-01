@@ -47,6 +47,11 @@ EnemyWall::EnemyWall(GameNode* parent) : GameNode(parent)
    setZ(1);  // bogus z
 }
 
+std::string_view EnemyWall::objectName() const
+{
+   return "EnemyWall";
+}
+
 void EnemyWall::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);

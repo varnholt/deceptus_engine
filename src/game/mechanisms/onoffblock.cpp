@@ -66,6 +66,11 @@ OnOffBlock::OnOffBlock(GameNode* parent) : GameNode(parent)
    setClassName(typeid(OnOffBlock).name());
 }
 
+std::string_view OnOffBlock::objectName() const
+{
+   return "OnOffBlock";
+}
+
 void OnOffBlock::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);

@@ -11,6 +11,7 @@ class TreasureChest : public GameMechanism, public GameNode
 {
 public:
    TreasureChest(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    void deserialize(const GameDeserializeData& data);
 

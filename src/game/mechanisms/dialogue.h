@@ -30,6 +30,9 @@ public:
    };
 
    Dialogue(GameNode* parent = nullptr);
+
+   std::string_view objectName() const override;
+
    static std::shared_ptr<Dialogue> deserialize(GameNode* parent, const GameDeserializeData& data);
 
    void update(const sf::Time& dt) override;

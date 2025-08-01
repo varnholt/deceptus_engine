@@ -10,6 +10,7 @@ class SoundEmitter : public GameMechanism, public GameNode
 public:
    SoundEmitter(GameNode* parent);
    ~SoundEmitter() override;
+   std::string_view objectName() const override;
 
    void setAudioEnabled(bool enabled) override;
    void setReferenceVolume(float volume) override;

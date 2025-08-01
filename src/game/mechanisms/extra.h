@@ -22,6 +22,7 @@ class Extra : public GameMechanism, public GameNode
 {
 public:
    Extra(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    bool deserialize(const GameDeserializeData& data);
 
