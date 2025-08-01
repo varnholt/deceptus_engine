@@ -25,6 +25,11 @@ Portal::Portal(GameNode* parent) : GameNode(parent)
    setClassName(typeid(Portal).name());
 }
 
+std::string_view Portal::objectName() const
+{
+   return "Portal";
+}
+
 void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& /*normal*/)
 {
    // bump maps are not supported for now

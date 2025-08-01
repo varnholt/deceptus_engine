@@ -41,6 +41,11 @@ RopeWithLight::RopeWithLight(GameNode* parent) : Rope(parent)
    setClassName(typeid(RopeWithLight).name());
 }
 
+std::string_view RopeWithLight::objectName() const
+{
+   return "RopeWithLight";
+}
+
 void RopeWithLight::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    Rope::draw(color, normal);

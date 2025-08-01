@@ -195,6 +195,11 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
    _translated_rect_px = _original_rect_px;
 }
 
+std::string_view BubbleCube::objectName() const
+{
+   return "BubbleCube";
+}
+
 // 12 x 4 boxes per row
 //
 // regular animation is in row 0

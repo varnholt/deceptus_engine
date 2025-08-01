@@ -51,6 +51,11 @@ InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
    }
 }
 
+std::string_view InteractionHelp::objectName() const
+{
+   return "InteractionHelp";
+}
+
 void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    if (!isEnabled())

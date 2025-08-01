@@ -38,6 +38,11 @@ Fan::Fan(GameNode* parent) : GameNode(parent)
    setClassName(typeid(Fan).name());
 }
 
+std::string_view Fan::objectName() const
+{
+   return "Fan";
+}
+
 void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& tile)
 {
    auto possf = tile->_position;

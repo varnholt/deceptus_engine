@@ -14,6 +14,11 @@ TextLayer::TextLayer(GameNode* parent) : GameNode(parent)
    setClassName(typeid(TextLayer).name());
 }
 
+std::string_view TextLayer::objectName() const
+{
+   return "TextLayer";
+}
+
 void TextLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    if (_mode == Mode::Bitmap)

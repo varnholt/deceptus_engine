@@ -13,6 +13,7 @@ class ControllerHelp : public GameMechanism, public GameNode
 {
 public:
    ControllerHelp(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
    void deserialize(const GameDeserializeData& data);

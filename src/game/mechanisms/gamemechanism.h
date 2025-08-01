@@ -20,6 +20,8 @@ public:
    GameMechanism() = default;
    virtual ~GameMechanism() = default;
 
+   virtual std::string_view objectName() const = 0;
+
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
    virtual void update(const sf::Time& dt);
 

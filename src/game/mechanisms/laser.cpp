@@ -39,6 +39,11 @@ Laser::Laser(GameNode* parent) : GameNode(parent)
    setClassName(typeid(Laser).name());
 }
 
+std::string_view Laser::objectName() const
+{
+   return "Laser";
+}
+
 void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    _sprite->setTextureRect(

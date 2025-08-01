@@ -38,6 +38,11 @@ BoxCollider::BoxCollider(GameNode* node) : GameNode(node)
    setClassName(typeid(BoxCollider).name());
 }
 
+std::string_view BoxCollider::objectName() const
+{
+   return "BoxCollider";
+}
+
 void BoxCollider::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);

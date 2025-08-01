@@ -12,6 +12,7 @@ class Wind : public GameMechanism, public GameNode
 public:
    explicit Wind(GameNode* parent = nullptr);
    ~Wind() override = default;
+   std::string_view objectName() const override;
 
    void update(const sf::Time& dt) override;
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;

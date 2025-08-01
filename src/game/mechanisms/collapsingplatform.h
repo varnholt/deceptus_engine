@@ -50,6 +50,7 @@ public:
    };
 
    CollapsingPlatform(GameNode* parent, const GameDeserializeData& data);
+   std::string_view objectName() const override;
 
    void preload() override;
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;

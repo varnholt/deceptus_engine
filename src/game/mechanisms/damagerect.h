@@ -9,6 +9,8 @@ class DamageRect : public GameMechanism, public GameNode
 {
 public:
    DamageRect(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
+
    void update(const sf::Time& dt) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
    void setup(const GameDeserializeData& data);

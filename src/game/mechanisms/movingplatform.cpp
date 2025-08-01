@@ -31,6 +31,11 @@ MovingPlatform::MovingPlatform(GameNode* parent) : GameNode(parent)
    setClassName(typeid(MovingPlatform).name());
 }
 
+std::string_view MovingPlatform::objectName() const
+{
+   return "MovingPlatform";
+}
+
 void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    for (auto& sprite : _sprites)

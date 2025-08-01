@@ -36,6 +36,7 @@ public:
    };
 
    Laser(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;

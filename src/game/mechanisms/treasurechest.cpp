@@ -44,6 +44,11 @@ TreasureChest::TreasureChest(GameNode* parent) : GameNode(parent)
    setClassName(typeid(TreasureChest).name());
 }
 
+std::string_view TreasureChest::objectName() const
+{
+   return "TreasureChest";
+}
+
 void TreasureChest::deserialize(const GameDeserializeData& data)
 {
    const auto pos_x_px = data._tmx_object->_x_px;

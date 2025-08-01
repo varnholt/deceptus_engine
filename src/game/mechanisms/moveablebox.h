@@ -14,6 +14,7 @@ class MoveableBox : public GameMechanism, public GameNode
 {
 public:
    MoveableBox(GameNode* node);
+   std::string_view objectName() const override;
 
    void preload() override;
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;

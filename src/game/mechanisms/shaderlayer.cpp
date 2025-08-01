@@ -18,6 +18,11 @@ ShaderLayer::ShaderLayer(GameNode* parent) : GameNode(parent)
    setClassName(typeid(ShaderLayer).name());
 }
 
+std::string_view ShaderLayer::objectName() const
+{
+   return "ShaderLayer";
+}
+
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    const auto x = _position.x;

@@ -1740,6 +1740,11 @@ LuaNode::~LuaNode()
    stopScript();
 }
 
+std::string_view LuaNode::objectName() const
+{
+   return "LuaNode";
+}
+
 void LuaNode::deserializeEnemyDescription()
 {
    _object_id = _enemy_description._id;

@@ -30,6 +30,7 @@ public:
    };
 
    SpikeBlock(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    void setup(const GameDeserializeData& data);
 

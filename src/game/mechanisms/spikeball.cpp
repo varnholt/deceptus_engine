@@ -103,6 +103,11 @@ SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance
    _chain_element_b->setOrigin({4, 4});
 }
 
+std::string_view SpikeBall::objectName() const
+{
+   return "SpikeBall";
+}
+
 void SpikeBall::preload()
 {
    Audio::getInstance().addSample("mechanism_spikeball_01.wav");

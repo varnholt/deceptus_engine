@@ -11,6 +11,8 @@ class BlockingRect : public GameMechanism, public GameNode
 public:
    BlockingRect(GameNode* parent = nullptr);
 
+   std::string_view objectName() const override;
+
    void setup(const GameDeserializeData& data);
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;

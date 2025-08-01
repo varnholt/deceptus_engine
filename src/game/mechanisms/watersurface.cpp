@@ -509,6 +509,11 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
    }
 }
 
+std::string_view WaterSurface::objectName() const
+{
+   return "WaterSurface";
+}
+
 void WaterSurface::updateEmitters(float elapsed_s)
 {
    for (auto& emitter : _emitters)

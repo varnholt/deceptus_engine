@@ -52,6 +52,11 @@ StaticLight::StaticLight(GameNode* parent) : GameNode(parent), _instance_number(
    setClassName(typeid(StaticLight).name());
 }
 
+std::string_view StaticLight::objectName() const
+{
+   return "StaticLight";
+}
+
 void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/)
 {
    auto lumen = fbm::mix(_color.a, _flicker_amount * 255.0f, 1.0f - _flicker_alpha_amount);

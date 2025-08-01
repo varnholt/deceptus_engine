@@ -84,6 +84,11 @@ Checkpoint::Checkpoint(GameNode* parent) : GameNode(parent)
    _audio_update_data._range = AudioRange{12 * PIXELS_PER_TILE, 0.0f, 2 * PIXELS_PER_TILE, 1.0f};
 }
 
+std::string_view Checkpoint::objectName() const
+{
+   return "Checkpoint";
+}
+
 std::shared_ptr<Checkpoint> Checkpoint::getCheckpoint(int32_t index, const std::vector<std::shared_ptr<GameMechanism>>& checkpoints)
 {
    const auto& it = std::find_if(
