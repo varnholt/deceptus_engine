@@ -16,6 +16,11 @@ SoundEmitter::~SoundEmitter()
    stopPlaying();
 }
 
+std::string_view SoundEmitter::objectName() const
+{
+   return "SoundEmitter";
+}
+
 void SoundEmitter::stopPlaying()
 {
    if (_thread_id.has_value())

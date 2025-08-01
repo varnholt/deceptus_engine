@@ -21,6 +21,7 @@ class Portal : public GameMechanism, public GameNode
 {
 public:
    Portal(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;

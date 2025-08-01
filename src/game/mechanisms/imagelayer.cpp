@@ -11,6 +11,11 @@ ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 {
 }
 
+std::string_view ImageLayer::objectName() const
+{
+   return "ImageLayer";
+}
+
 void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    if (_sprite == nullptr)

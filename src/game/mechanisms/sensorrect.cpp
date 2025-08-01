@@ -40,6 +40,11 @@ SensorRect::SensorRect(GameNode* parent) : GameNode(parent)
    setClassName(typeid(GameNode).name());
 }
 
+std::string_view SensorRect::objectName() const
+{
+   return "SensorRect";
+}
+
 void SensorRect::update(const sf::Time& /*dt*/)
 {
    const auto player_intersects = Player::getCurrent()->getPixelRectFloat().findIntersection(_rect).has_value();

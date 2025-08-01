@@ -76,6 +76,11 @@ RotatingBlade::~RotatingBlade()
    }
 }
 
+std::string_view RotatingBlade::objectName() const
+{
+   return "RotatingBlade";
+}
+
 void RotatingBlade::setup(const GameDeserializeData& data)
 {
    if (!data._tmx_object->_polygon && !data._tmx_object->_polyline)

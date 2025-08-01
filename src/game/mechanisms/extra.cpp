@@ -54,6 +54,11 @@ Extra::Extra(GameNode* parent) : GameNode(parent)
    setClassName(typeid(Extra).name());
 }
 
+std::string_view Extra::objectName() const
+{
+   return "Extra";
+}
+
 bool Extra::deserialize(const GameDeserializeData& data)
 {
    if (data._tmx_object == nullptr)

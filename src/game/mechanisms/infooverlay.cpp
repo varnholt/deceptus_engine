@@ -44,6 +44,11 @@ InfoOverlay::InfoOverlay(GameNode* parent) : GameNode(parent)
    setZ(static_cast<int32_t>(ZDepth::ForegroundMax));
 }
 
+std::string_view InfoOverlay::objectName() const
+{
+   return "InfoOverlay";
+}
+
 void InfoOverlay::update(const sf::Time& delta_time)
 {
    if (!isEnabled())

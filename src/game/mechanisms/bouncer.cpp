@@ -121,6 +121,11 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
    _sprite->setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
 }
 
+std::string_view Bouncer::objectName() const
+{
+   return "Bouncer";
+}
+
 void Bouncer::preload()
 {
    Audio::getInstance().addSample("mechanism_bouncer.wav");

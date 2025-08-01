@@ -8,6 +8,7 @@ class ButtonRect : public GameMechanism, public GameNode
 {
 public:
    ButtonRect(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    enum class Action
    {

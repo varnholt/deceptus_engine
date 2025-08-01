@@ -65,6 +65,11 @@ SpikeBlock::SpikeBlock(GameNode* parent) : GameNode(parent)
    setClassName(typeid(SpikeBlock).name());
 }
 
+std::string_view SpikeBlock::objectName() const
+{
+   return "SpikeBlock";
+}
+
 void SpikeBlock::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);

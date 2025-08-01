@@ -69,6 +69,11 @@ Door::~Door()
    // std::cout << "door destroyed" << std::endl;
 }
 
+std::string_view Door::objectName() const
+{
+   return "Door";
+}
+
 void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    if (_animation_open && !_animation_open->_paused)

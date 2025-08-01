@@ -40,6 +40,11 @@ ButtonRect::ButtonRect(GameNode* parent) : GameNode(parent)
    setClassName(typeid(GameNode).name());
 }
 
+std::string_view ButtonRect::objectName() const
+{
+   return "ButtonRect";
+}
+
 void ButtonRect::update(const sf::Time& /*dt*/)
 {
    _player_intersects = Player::getCurrent()->getPixelRectFloat().findIntersection(_rect).has_value();

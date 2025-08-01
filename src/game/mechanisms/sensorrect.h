@@ -11,6 +11,7 @@ class SensorRect : public GameMechanism, public GameNode
 {
 public:
    SensorRect(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    enum class Action
    {

@@ -11,6 +11,11 @@ Weather::Weather(GameNode* parent) : GameNode(parent)
    setClassName(typeid(Weather).name());
 }
 
+std::string_view Weather::objectName() const
+{
+   return "Weather";
+}
+
 void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    if (_wait_until_start_delay_elapsed)

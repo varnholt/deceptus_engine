@@ -35,6 +35,8 @@ struct LuaNode : public GameMechanism, public GameNode
    LuaNode(GameNode* parent, const std::string& filename);
    ~LuaNode();
 
+   std::string_view objectName() const override;
+
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 

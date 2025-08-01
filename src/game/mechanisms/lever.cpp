@@ -172,6 +172,11 @@ Lever::~Lever()
    SaveState::getPlayerInfo()._inventory.removeUsedCallback(_handle_callback);
 }
 
+std::string_view Lever::objectName() const
+{
+   return "Lever";
+}
+
 void Lever::preload()
 {
    Audio::getInstance().addSample("mechanism_switch_off.wav");

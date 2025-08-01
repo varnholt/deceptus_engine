@@ -42,6 +42,11 @@ Wind::Wind(GameNode* parent) : GameNode(parent)
    setClassName(typeid(Wind).name());
 }
 
+std::string_view Wind::objectName() const
+{
+   return "Wind";
+}
+
 std::shared_ptr<Wind> Wind::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto wind = std::make_shared<Wind>(parent);

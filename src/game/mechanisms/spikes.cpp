@@ -40,6 +40,11 @@ Spikes::Spikes(GameNode* parent) : GameNode(parent)
    _instance_id = instance_counter++;
 }
 
+std::string_view Spikes::objectName() const
+{
+   return "Spikes";
+}
+
 void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    for (const auto& sprite : _sprite)

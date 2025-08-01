@@ -12,6 +12,7 @@ class WaterDamage : public GameNode, public GameMechanism
 {
 public:
    WaterDamage(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    void update(const sf::Time& dt) override;
    void setup(const GameDeserializeData& data);

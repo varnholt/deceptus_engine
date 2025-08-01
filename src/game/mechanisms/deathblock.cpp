@@ -70,6 +70,11 @@ DeathBlock::DeathBlock(GameNode* parent) : GameNode(parent)
    setClassName(typeid(DeathBlock).name());
 }
 
+std::string_view DeathBlock::objectName() const
+{
+   return "DeathBlock";
+}
+
 void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    for (auto& spike : _spikes)

@@ -15,6 +15,7 @@ class StaticLight : public GameMechanism, public GameNode
 {
 public:
    StaticLight(GameNode* parent = nullptr);
+   std::string_view objectName() const override;
 
    void draw(sf::RenderTarget& target, sf::RenderTarget& color) override;
    void update(const sf::Time& time) override;

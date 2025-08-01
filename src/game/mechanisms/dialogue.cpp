@@ -56,6 +56,11 @@ Dialogue::Dialogue(GameNode* parent) : GameNode(parent)
    setZ(1);  // bogus z
 }
 
+std::string_view Dialogue::objectName() const
+{
+   return "Dialogue";
+}
+
 std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto dialogue = std::make_shared<Dialogue>(parent);

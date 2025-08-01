@@ -161,6 +161,11 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    }
 }
 
+std::string_view CollapsingPlatform::objectName() const
+{
+   return "CollapsingPlatform";
+}
+
 void CollapsingPlatform::preload()
 {
    Audio::getInstance().addSample("mechanism_collapsing_platform_crumble.wav");
