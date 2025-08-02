@@ -194,6 +194,8 @@ void Laser::update(const sf::Time& dt)
          _sprite->setPosition(_position_px + _move_offset_px);
       }
    }
+
+   collide();
 }
 
 std::optional<sf::FloatRect> Laser::getBoundingBoxPx()
@@ -366,87 +368,84 @@ void Laser::addTilesVersion2()
    __tiles_version_2.push_back({0, 0, 0, 1, 1, 0, 0, 0, 0});
 }
 
-void Laser::collide(const sf::FloatRect& player_rect)
+void Laser::collide()
 {
-   const auto it = std::find_if(
-      std::begin(__lasers),
-      std::end(__lasers),
-      [player_rect](auto laser)
+   auto checkCollision = [this]()
+   {
+      const sf::FloatRect& player_rect = Player::getCurrent()->getPixelRectFloat();
+      auto pixel_rect = _pixel_rect;
+
+      if (_path.has_value())
       {
-         auto pixel_rect = laser->_pixel_rect;
+         pixel_rect.position.x += static_cast<int32_t>(_move_offset_px.x);
+         pixel_rect.position.y += static_cast<int32_t>(_move_offset_px.y);
+      }
 
-         if (laser->_path.has_value())
+      const auto rough_intersection = player_rect.findIntersection(pixel_rect).has_value();
+
+      auto active = false;
+
+      if (_version == MechanismVersion::Version1)
+      {
+         active = (_tile_index == 0);
+      }
+      else if (_version == MechanismVersion::Version2)
+      {
+         active = (_tile_index >= range_enabled.first) && (_tile_index <= range_enabled.second);
+      }
+
+      // tile index at 0 is an active laser
+      if (active && rough_intersection)
+      {
+         const auto tile_id = static_cast<uint32_t>(_tv);
+
+         const auto tile = (_version == MechanismVersion::Version1) ? __tiles_version_1[tile_id] : __tiles_version_2[tile_id];
+
+         auto x = 0u;
+         auto y = 0u;
+
+         for (auto i = 0u; i < 9; i++)
          {
-            pixel_rect.position.x += static_cast<int32_t>(laser->_move_offset_px.x);
-            pixel_rect.position.y += static_cast<int32_t>(laser->_move_offset_px.y);
-         }
-
-         const auto rough_intersection = player_rect.findIntersection(pixel_rect).has_value();
-
-         auto active = false;
-
-         if (laser->_version == MechanismVersion::Version1)
-         {
-            active = (laser->_tile_index == 0);
-         }
-         else if (laser->_version == MechanismVersion::Version2)
-         {
-            active = (laser->_tile_index >= range_enabled.first) && (laser->_tile_index <= range_enabled.second);
-         }
-
-         // tile index at 0 is an active laser
-         if (active && rough_intersection)
-         {
-            const auto tile_id = static_cast<uint32_t>(laser->_tv);
-
-            const auto tile = (laser->_version == MechanismVersion::Version1) ? __tiles_version_1[tile_id] : __tiles_version_2[tile_id];
-
-            auto x = 0u;
-            auto y = 0u;
-
-            for (auto i = 0u; i < 9; i++)
+            if (tile[i] == 1)
             {
-               if (tile[i] == 1)
+               sf::FloatRect rect;
+
+               rect.position.x = _position_px.x + (x * PIXELS_PER_PHYSICS_TILE);
+               rect.position.y = _position_px.y + (y * PIXELS_PER_PHYSICS_TILE);
+
+               if (_path.has_value())
                {
-                  sf::FloatRect rect;
-
-                  rect.position.x = laser->_position_px.x + (x * PIXELS_PER_PHYSICS_TILE);
-                  rect.position.y = laser->_position_px.y + (y * PIXELS_PER_PHYSICS_TILE);
-
-                  if (laser->_path.has_value())
-                  {
-                     rect.position.x += laser->_move_offset_px.x;
-                     rect.position.y += laser->_move_offset_px.y;
-                  }
-
-                  rect.size.x = PIXELS_PER_PHYSICS_TILE;
-                  rect.size.y = PIXELS_PER_PHYSICS_TILE;
-
-                  const auto fine_intersection = player_rect.findIntersection(rect).has_value();
-
-                  if (fine_intersection)
-                  {
-                     return true;
-                  }
+                  rect.position.x += _move_offset_px.x;
+                  rect.position.y += _move_offset_px.y;
                }
 
-               x++;
+               rect.size.x = PIXELS_PER_PHYSICS_TILE;
+               rect.size.y = PIXELS_PER_PHYSICS_TILE;
 
-               if (i > 0 && ((i + 1) % 3 == 0))
+               const auto fine_intersection = player_rect.findIntersection(rect).has_value();
+
+               if (fine_intersection)
                {
-                  x = 0;
-                  y++;
+                  return true;
                }
             }
 
-            return false;
+            x++;
+
+            if (i > 0 && ((i + 1) % 3 == 0))
+            {
+               x = 0;
+               y++;
+            }
          }
 
          return false;
       }
-   );
 
-   if (it != __lasers.end())
+      return false;
+   };
+
+   if (checkCollision())
    {
       // player is dead
       Player::getCurrent()->kill(DeathReason::Laser);
