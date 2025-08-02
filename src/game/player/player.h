@@ -139,7 +139,6 @@ private:
    void updateImpulse();
    void updateOneWayWallDrop();
    void updateChainShapeCollisions();
-   void updatePixelCollisions();
    void updateOrientation();
    void updatePortal();
    void updateVelocity();

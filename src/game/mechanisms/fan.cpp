@@ -8,6 +8,7 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
+#include "game/player/player.h"
 
 #include <algorithm>
 #include <array>
@@ -175,6 +176,8 @@ void Fan::update(const sf::Time& dt)
    );
 
    updateSprite();
+
+   collide();
 }
 
 std::optional<sf::FloatRect> Fan::getBoundingBoxPx()
@@ -286,42 +289,17 @@ void Fan::addObject(GameNode* parent, const GameDeserializeData& data)
    }
 }
 
-std::optional<sf::Vector2f> Fan::collide(const sf::FloatRect& player_rect)
+void Fan::collide()
 {
-   // need to find all intersections since there can be more than one
-   auto valid = false;
-   sf::Vector2f dir;
-
-   for (const auto& f : __fan_instances)
+   if (!isEnabled())
    {
-      auto fan = std::dynamic_pointer_cast<Fan>(f);
-
-      if (!fan->isEnabled())
-      {
-         continue;
-      }
-
-      if (player_rect.findIntersection(fan->_pixel_rect).has_value())
-      {
-         dir += fan->_direction;
-         valid = true;
-      }
+      return;
    }
 
-   if (valid)
+   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   if (player_rect.findIntersection(_pixel_rect).has_value())
    {
-      return dir;
-   }
-
-   return {};
-}
-
-void Fan::collide(const sf::FloatRect& player_rect, b2Body* body)
-{
-   auto dir = collide(player_rect);
-   if (dir.has_value())
-   {
-      body->ApplyForceToCenter(b2Vec2(2.0f * dir->x, -dir->y), true);
+      Player::getCurrent()->getBody()->ApplyForceToCenter(b2Vec2(2.0f * _direction.x, -_direction.y), true);
    }
 }
 

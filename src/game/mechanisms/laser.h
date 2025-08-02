@@ -48,7 +48,6 @@ public:
    static void addTilesVersion1();
    static void addTilesVersion2();
    static void merge();
-   static void collide(const sf::FloatRect& playerRect);
 
    void reset();
    static void resetAll();
@@ -60,6 +59,8 @@ public:
    void setEnabled(bool enabled) override;
 
 protected:
+   void collide();
+
    std::vector<Signal> _signal_plot;
 
    int32_t _tu = 0;
