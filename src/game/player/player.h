@@ -113,7 +113,6 @@ public:
    void impulse(float intensity);
    void damage(int32_t damage, const sf::Vector2f& force = sf::Vector2f{0.0f, 0.0f});
    void kill(std::optional<DeathReason> death_reason = std::nullopt);
-   void goToPortal(auto portal);
 
    const std::shared_ptr<PlayerControls>& getControls() const;
    const PlayerJump& getJump() const;
@@ -168,7 +167,6 @@ private:
 
    void traceJumpCurve();
    void keyPressed(sf::Keyboard::Key key);
-   std::unique_ptr<ScreenTransition> makeFadeTransition();
 
    void drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>& current_cycle, const sf::Vector2f& draw_position_px);
    bool checkDamageDrawSkip() const;
@@ -196,7 +194,6 @@ private:
 
    sf::Time _time;
    sf::Clock _clock;
-   sf::Clock _portal_clock;
    sf::Clock _damage_clock;
    bool _damage_initialized{false};
 

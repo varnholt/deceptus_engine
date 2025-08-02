@@ -334,8 +334,6 @@ set(GAME_FILES
    src/game/mechanisms/onoffblock.h
    src/game/mechanisms/portal.cpp
    src/game/mechanisms/portal.h
-   src/game/mechanisms/portalwrapper.cpp
-   src/game/mechanisms/portalwrapper.h
    src/game/mechanisms/rope.cpp
    src/game/mechanisms/rope.h
    src/game/mechanisms/ropewithlight.cpp
@@ -510,7 +508,6 @@ set(GAME_FILES
    src/menus/menuscreenpause.h
    src/menus/menuscreenvideo.cpp
    src/menus/menuscreenvideo.h
-
    src/main.cpp
    deceptus_resource.rc
 )
@@ -685,7 +682,6 @@ add_executable(deceptus ${GAME_FILES}
    src/game/audio/musicplayer.h src/game/audio/musicplayer.cpp
    src/game/mechanisms/gamemechanismdeserializerregistry.h src/game/mechanisms/gamemechanismdeserializerregistry.cpp
    src/game/audio/musicplayertypes.h
-
    src/game/mechanisms/gateway.h src/game/mechanisms/gateway.cpp
    src/game/mechanisms/flowfieldtexturechangeevent.h src/game/mechanisms/flowfieldtexturechangeevent.cpp
    src/game/mechanisms/wind.h src/game/mechanisms/wind.cpp
