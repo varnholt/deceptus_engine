@@ -6,19 +6,15 @@
 #include "framework/tools/stopwatch.h"
 #include "game/audio/audio.h"
 #include "game/camera/camerapanorama.h"
-#include "game/camera/camerasystem.h"
 #include "game/clock/gameclock.h"
 #include "game/config/gameconfiguration.h"
-#include "game/config/tweaks.h"
 #include "game/controller/gamecontrollerintegration.h"
-#include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
 #include "game/mechanisms/bouncerwrapper.h"
 #include "game/mechanisms/fan.h"
 #include "game/mechanisms/laser.h"
-#include "game/mechanisms/portalwrapper.h"
 #include "game/physics/chainshapeanalyzer.h"
 #include "game/physics/gamecontactlistener.h"
 #include "game/physics/onewaywall.h"
@@ -133,7 +129,6 @@ Player* Player::getCurrent()
 
 void Player::initialize()
 {
-   _portal_clock.restart();
    _damage_clock.restart();
 
    _jump._jump_dust_animation_callback = [this](PlayerJump::DustAnimationType animation_type)
@@ -904,12 +899,6 @@ void Player::updateVelocity()
       return;
    }
 
-   if (Portal::isLocked())
-   {
-      _body->SetLinearVelocity({0.0, 0.0});
-      return;
-   }
-
    if (_hard_landing)
    {
       _body->SetLinearVelocity({0.0, 0.0});
@@ -1027,24 +1016,6 @@ void Player::updateVelocity()
    _body->SetLinearVelocity({std::clamp(linear_velocity.x, -max_velocity_horizontal, max_velocity_horizontal), linear_velocity_y});
 }
 
-std::unique_ptr<ScreenTransition> Player::makeFadeTransition()
-{
-   auto screen_transition = std::make_unique<ScreenTransition>();
-   auto fade_out = std::make_shared<FadeTransitionEffect>();
-   auto fade_in = std::make_shared<FadeTransitionEffect>();
-   fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
-   fade_out->_speed = 2.0f;
-   fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
-   fade_in->_value = 1.0f;
-   fade_in->_speed = 2.0f;
-   screen_transition->_effect_1 = fade_out;
-   screen_transition->_effect_2 = fade_in;
-   screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
-   screen_transition->startEffect1();
-
-   return screen_transition;
-}
-
 const Chunk& Player::getChunk() const
 {
    return _chunk;
@@ -1068,59 +1039,6 @@ PlayerBelt& Player::getBelt()
 PlayerPlatform& Player::getPlatform()
 {
    return _platform;
-}
-
-void Player::goToPortal(auto portal)
-{
-   auto dst_position_px = portal->getDestination()->getPortalPosition();
-
-   setBodyViaPixelPosition(dst_position_px.x + PLAYER_ACTUAL_WIDTH / 2, dst_position_px.y + DIFF_PLAYER_TILE_TO_PHYSICS);
-
-   // update the camera system to point to the player position immediately
-   CameraSystem::getInstance().syncNow();
-   Portal::unlock();
-}
-
-void Player::updatePortal()
-{
-   if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
-   {
-      return;
-   }
-
-   if (_portal_clock.getElapsedTime().asSeconds() > 1.0f)
-   {
-      const auto& joystick_info = _controls->getJoystickInfo();
-      const auto& axis_values = joystick_info.getAxisValues();
-      auto joystick_points_up = false;
-
-      if (!axis_values.empty())
-      {
-         auto dpad_up_pressed = false;
-         if (!joystick_info.getHatValues().empty())
-         {
-            dpad_up_pressed = joystick_info.getHatValues().at(0) & SDL_HAT_UP;
-         }
-
-         auto y1 = axis_values[1] / 32767.0f;
-         joystick_points_up = (y1 < Tweaks::instance()._enter_portal_threshold) || dpad_up_pressed;
-      }
-
-      if (_controls->hasFlag(KeyPressedUp) || joystick_points_up)
-      {
-         auto portal = PortalWrapper::getNearbyPortal();
-         if (portal && portal->getDestination())
-         {
-            Portal::lock();
-            _portal_clock.restart();
-
-            auto screen_transition = makeFadeTransition();
-            screen_transition->_callbacks_effect_1_ended.emplace_back([this, portal]() { goToPortal(portal); });
-            screen_transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
-            ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
-         }
-      }
-   }
 }
 
 void Player::impulse(float intensity)
@@ -1619,7 +1537,6 @@ void Player::update(const sf::Time& dt)
    _platform.update(_body, _jump.isJumping());
    PlayerAudio::updateListenerPosition(_pixel_position_f);
    updateFootsteps();
-   updatePortal();
    updatePreviousBodyState();
    updateWeapons(dt);
    updateWallslide(dt);

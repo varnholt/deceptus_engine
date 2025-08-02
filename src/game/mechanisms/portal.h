@@ -31,9 +31,6 @@ public:
 
    static void link(std::vector<std::shared_ptr<GameMechanism>>& portals, const GameDeserializeData& data);
 
-   bool isPlayerAtPortal() const;
-   void setPlayerAtPortal(bool isPlayerAtPortal);
-
    void addSprite(const sf::Sprite&);
 
    std::shared_ptr<Portal> getDestination() const;
@@ -47,7 +44,10 @@ public:
    static bool isLocked();
 
 protected:
-   sf::FloatRect _bounding_box;
+   void use();
+
+   sf::Clock _portal_clock;
+   sf::FloatRect _rect;
    sf::Vector2u _tile_size;
    std::shared_ptr<sf::Texture> _texture;
    std::vector<sf::Sprite> _sprites;
@@ -55,6 +55,7 @@ protected:
    int32_t _height = 0;
    bool _player_at_portal = false;
    std::shared_ptr<Portal> _destination;
+   bool _player_intersects{false};
 
    static std::atomic<bool> _portal_lock;
 };
