@@ -1,7 +1,6 @@
 #include "portal.h"
 
 // game
-#include "framework/math/sfmlmath.h"
 #include "framework/tmxparser/tmximage.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
@@ -10,10 +9,13 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "game/camera/camerasystem.h"
 #include "game/constants.h"
+#include "game/effects/fadetransitioneffect.h"
+#include "game/effects/screentransition.h"
 #include "game/io/texturepool.h"
-#include "game/level/fixturenode.h"
 #include "game/player/player.h"
+#include "game/state/displaymode.h"
 
 #include <atomic>
 #include <iostream>
@@ -66,6 +68,66 @@ bool Portal::isLocked()
    return _portal_lock;
 }
 
+namespace
+{
+std::unique_ptr<ScreenTransition> makeFadeTransition()
+{
+   auto screen_transition = std::make_unique<ScreenTransition>();
+   auto fade_out = std::make_shared<FadeTransitionEffect>();
+   auto fade_in = std::make_shared<FadeTransitionEffect>();
+   fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
+   fade_out->_speed = 2.0f;
+   fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+   fade_in->_value = 1.0f;
+   fade_in->_speed = 2.0f;
+   screen_transition->_effect_1 = fade_out;
+   screen_transition->_effect_2 = fade_in;
+   screen_transition->_delay_between_effects_ms = std::chrono::milliseconds{500};
+   screen_transition->startEffect1();
+
+   return screen_transition;
+}
+
+void goToPortal(auto portal)
+{
+   auto dst_position_px = portal->getDestination()->getPortalPosition();
+
+   Player::getCurrent()->setBodyViaPixelPosition(
+      dst_position_px.x + PLAYER_ACTUAL_WIDTH / 2, dst_position_px.y + DIFF_PLAYER_TILE_TO_PHYSICS
+   );
+
+   // update the camera system to point to the player position immediately
+   CameraSystem::getInstance().syncNow();
+   Portal::unlock();
+}
+
+}  // namespace
+
+void Portal::use()
+{
+   if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
+   {
+      return;
+   }
+
+   if (_portal_clock.getElapsedTime().asSeconds() > 1.0f)
+   {
+      if (Player::getCurrent()->getControls()->isButtonBPressed())
+      {
+         if (getDestination())
+         {
+            Portal::lock();
+            _portal_clock.restart();
+
+            auto screen_transition = makeFadeTransition();
+            screen_transition->_callbacks_effect_1_ended.emplace_back([this]() { goToPortal(_destination); });
+            screen_transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
+            ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
+         }
+      }
+   }
+}
+
 std::shared_ptr<Portal> Portal::getDestination() const
 {
    return _destination;
@@ -78,16 +140,29 @@ void Portal::setDestination(const std::shared_ptr<Portal>& dst)
 
 void Portal::update(const sf::Time& /*dt*/)
 {
+   const auto player_intersects = Player::getCurrent()->getPixelRectFloat().findIntersection(_rect).has_value();
+
+   // activate portal when player intersects
+   if (!_player_intersects && player_intersects)
+   {
+      _player_intersects = player_intersects;
+      return;
+   }
+
+   // player uses gateway
+   if (_player_intersects)
+   {
+      if (Player::getCurrent()->getControls()->isButtonBPressed())
+      {
+         use();
+      }
+   }
+
    sf::Vector2f player_pos = Player::getCurrent()->getPixelPositionFloat();
    sf::Vector2f portal_pos = getPortalPosition();
 
    sf::Vector2f a(player_pos.x, player_pos.y);
    sf::Vector2f b(portal_pos.x + PIXELS_PER_TILE * 0.5f, portal_pos.y);
-
-   const auto distance = SfmlMath::length(a - b);
-   const auto at_portal = (distance < PIXELS_PER_TILE * 1.0f);
-
-   setPlayerAtPortal(at_portal);
 
    int32_t i = 0;
    for (auto& sprite : _sprites)
@@ -109,7 +184,7 @@ void Portal::update(const sf::Time& /*dt*/)
 
 std::optional<sf::FloatRect> Portal::getBoundingBoxPx()
 {
-   return _bounding_box;
+   return _rect;
 }
 
 void Portal::link(std::vector<std::shared_ptr<GameMechanism>>& portals, const GameDeserializeData& data)
@@ -183,16 +258,6 @@ void Portal::addSprite(const sf::Sprite& sprite)
    _sprites.push_back(sprite);
 }
 
-bool Portal::isPlayerAtPortal() const
-{
-   return _player_at_portal;
-}
-
-void Portal::setPlayerAtPortal(bool playerAtPortal)
-{
-   _player_at_portal = playerAtPortal;
-}
-
 std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const GameDeserializeData& data)
 {
    // Log::Info() << "load portal layer";
@@ -239,8 +304,7 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
                portal->_tile_positions.x = static_cast<float>(i);
                portal->_tile_positions.y = static_cast<float>(j);
                portal->_texture = TexturePool::getInstance().get((data._base_path / data._tmx_tileset->_image->_source).string());
-               portal->_bounding_box =
-                  sf::FloatRect{{static_cast<float>(i), static_cast<float>(j)}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}};
+               portal->_rect = sf::FloatRect{{static_cast<float>(i), static_cast<float>(j)}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}};
 
                if (data._tmx_layer->_properties)
                {
