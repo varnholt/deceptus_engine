@@ -51,14 +51,13 @@ public:
 
    static void resetAll();
    static void addObject(GameNode* parent, const GameDeserializeData& data);
-   static std::optional<sf::Vector2f> collide(const sf::FloatRect& player_rect);
-   static void collide(const sf::FloatRect& playerRect, b2Body* body);
    static void merge();
 
    static std::vector<std::shared_ptr<GameMechanism>>& getFans();
 
 private:
    void updateSprite();
+   void collide();
 
    static void createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& item);
 

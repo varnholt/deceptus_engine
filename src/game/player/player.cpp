@@ -13,8 +13,6 @@
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
 #include "game/mechanisms/bouncerwrapper.h"
-#include "game/mechanisms/fan.h"
-#include "game/mechanisms/laser.h"
 #include "game/physics/chainshapeanalyzer.h"
 #include "game/physics/gamecontactlistener.h"
 #include "game/physics/onewaywall.h"
@@ -1524,7 +1522,6 @@ void Player::update(const sf::Time& dt)
    updateHardLanding();
    updateBendDown();
    updateAnimation(dt);
-   updatePixelCollisions();
    updateAtmosphere();
    updateAttack();
    updateAttackDash(dt);
@@ -1562,13 +1559,6 @@ void Player::updateDash(Dash dir)
 {
    PlayerDash::DashInput input{dir, _jump._wallsliding, _hard_landing, isInWater(), _points_to_left, _body};
    _dash.update(input);
-}
-
-void Player::updatePixelCollisions()
-{
-   const auto& rect = getPixelRectFloat();
-   Laser::collide(rect);
-   Fan::collide(rect, _body);
 }
 
 void Player::updateAtmosphere()
