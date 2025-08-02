@@ -290,6 +290,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_water_damage,
       &_mechanism_water_surface,
       &_mechanism_weather,
+      &_mechanism_wind,
       &_mechanism_zoomrects,
    };
 
@@ -336,6 +337,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_water_damage}] = &_mechanism_water_damage;
    _mechanisms_map[std::string{layer_name_water_surface}] = &_mechanism_water_surface;
    _mechanisms_map[std::string{layer_name_weather}] = &_mechanism_weather;
+   _mechanisms_map[std::string{layer_name_wind}] = &_mechanism_wind;
    _mechanisms_map[std::string{layer_name_zoom_rects}] = &_mechanism_zoomrects;
 }
 

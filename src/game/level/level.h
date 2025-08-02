@@ -230,6 +230,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_damage;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_surface;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_weather;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_wind;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_zoomrects;
 
    // graphic effects
