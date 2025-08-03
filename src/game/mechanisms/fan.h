@@ -3,40 +3,17 @@
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 
-#include <filesystem>
 #include <memory>
 #include <optional>
+#include <vector>
 
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
-struct TmxLayer;
-struct TmxObject;
-struct TmxTileSet;
-
 class Fan : public GameMechanism, public GameNode
 {
 public:
-   enum class TileDirection
-   {
-      Up = 0,
-      Right = 8,
-      Left = 16,
-      Down = 24,
-   };
-
-   struct FanTile
-   {
-      sf::Vector2i _position;
-      sf::Vector2f _direction;
-      sf::FloatRect _rect;
-      b2Body* _body = nullptr;
-      TileDirection _tile_dir;
-
-      ~FanTile() = default;
-   };
-
    Fan(GameNode* parent = nullptr);
    std::string_view objectName() const override;
 
@@ -47,34 +24,36 @@ public:
 
    const sf::FloatRect& getPixelRect() const;
 
-   static void load(const GameDeserializeData& data);
-
-   static void resetAll();
-   static void addObject(GameNode* parent, const GameDeserializeData& data);
-   static void merge();
-
-   static std::vector<std::shared_ptr<GameMechanism>>& getFans();
+   static std::shared_ptr<Fan> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 private:
+   struct FanSection
+   {
+      sf::Vector2i tile_position_px;
+      sf::Vector2f direction;
+      sf::FloatRect rect;
+      b2Body* body = nullptr;
+      std::unique_ptr<sf::Sprite> sprite;
+      float scroll_offset = 0.0f;
+
+      FanSection(const std::shared_ptr<sf::Texture>& tex)
+      {
+         sprite = std::make_unique<sf::Sprite>(*tex);
+         sprite->setTexture(*tex);
+      }
+   };
+
    void updateSprite();
    void collide();
 
-   static void createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& item);
+   static void placeTile(const std::shared_ptr<Fan>& fan, const GameDeserializeData& data, int i, int j);
 
-   static std::vector<std::shared_ptr<GameMechanism>> __fan_instances;
-   static std::vector<std::shared_ptr<FanTile>> __tile_instances;
-   static std::vector<std::shared_ptr<TmxObject>> __object_instances;
-   static std::vector<sf::Vector2f> __weight_instances;
-
-   std::vector<std::shared_ptr<FanTile>> _tiles;
-
+   std::vector<FanSection> _tiles;
    sf::Vector2f _direction;
+   std::string _direction_string;
    sf::FloatRect _pixel_rect;
    float _speed = 1.0f;
    float _lever_lag = 1.0f;
-
-   std::vector<sf::Sprite> _sprites;
-   std::vector<float> _x_offsets_px;
 
    std::shared_ptr<sf::Texture> _texture;
 };
