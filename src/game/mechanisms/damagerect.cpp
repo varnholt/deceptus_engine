@@ -24,7 +24,7 @@ const auto registered_damagerect = []
    );
 
    registry.registerObjectGroup(
-      "damage_rect",
+      "DamageRect",
       [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
       {
          auto mechanism = std::make_shared<DamageRect>(parent);
