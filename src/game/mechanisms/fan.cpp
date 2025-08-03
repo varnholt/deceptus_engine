@@ -1,38 +1,42 @@
 #include "fan.h"
 
 #include "constants.h"
-#include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "framework/tmxparser/tmxtileset.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
-#include <algorithm>
-#include <array>
 #include <iostream>
+#include <map>
 
 namespace
 {
-const auto registered = []
+const auto registered_fan = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
    registry.mapGroupToLayer("Fan", "fans");
 
-   registry.registerLayerName("fans", [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms) { Fan::load(data); });
+   // registry.registerLayerName(
+   //    "fans",
+   //    [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+   //    {
+   //       auto mechanism = Fan::deserialize(parent, data);
+   //       mechanisms["fans"]->push_back(mechanism);
+   //    }
+   // );
    registry.registerObjectGroup(
-      "fan", [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms) { Fan::addObject(parent, data); }
+      "Fan",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = Fan::deserialize(parent, data);
+         // mechanisms["fans"]->push_back(mechanism);
+      }
    );
    return true;
 }();
 }  // namespace
-
-std::vector<std::shared_ptr<GameMechanism>> Fan::__fan_instances;
-std::vector<std::shared_ptr<Fan::FanTile>> Fan::__tile_instances;
-std::vector<std::shared_ptr<TmxObject>> Fan::__object_instances;
-std::vector<sf::Vector2f> Fan::__weight_instances;
 
 Fan::Fan(GameNode* parent) : GameNode(parent)
 {
@@ -44,51 +48,10 @@ std::string_view Fan::objectName() const
    return "Fan";
 }
 
-void Fan::createPhysics(const std::shared_ptr<b2World>& world, const std::shared_ptr<FanTile>& tile)
+void Fan::setEnabled(bool enabled)
 {
-   auto possf = tile->_position;
-   auto posb2d = b2Vec2(possf.x * MPP, possf.y * MPP);
-
-   b2BodyDef body_def;
-   body_def.type = b2_staticBody;
-   body_def.position = posb2d;
-   tile->_body = world->CreateBody(&body_def);
-
-   // create fixture for physical boundaries of the fan object
-   b2PolygonShape shape;
-
-   // a rounded box prevents the player of getting stuck between the gaps
-   //
-   //      h        g
-   //      _________
-   //     /         \
-   //   a |         | f
-   //     |         |
-   //   b |         | e
-   //     \________/
-   //
-   //      c      d
-
-   constexpr float w = 0.5f;
-   constexpr float e = 0.1f;  // 219, 194
-   std::array<b2Vec2, 8> rounded_box{
-      b2Vec2{0, e},      // a
-      b2Vec2{0, w - e},  // b
-      b2Vec2{e, w},      // c
-      b2Vec2{w - e, w},  // d
-      b2Vec2{w, w - e},  // e
-      b2Vec2{w, e},      // f
-      b2Vec2{w - e, 0},  // g
-      b2Vec2{e, 0},      // h
-   };
-
-   shape.Set(rounded_box.data(), static_cast<int32_t>(rounded_box.size()));
-
-   b2FixtureDef boundary_fixture_def;
-   boundary_fixture_def.shape = &shape;
-   boundary_fixture_def.density = 1.0f;
-   boundary_fixture_def.isSensor = false;
-   tile->_body->CreateFixture(&boundary_fixture_def);
+   GameMechanism::setEnabled(enabled);
+   _lever_lag = enabled ? 0.0f : 1.0f;
 }
 
 const sf::FloatRect& Fan::getPixelRect() const
@@ -96,53 +59,118 @@ const sf::FloatRect& Fan::getPixelRect() const
    return _pixel_rect;
 }
 
-void Fan::setEnabled(bool enabled)
+std::optional<sf::FloatRect> Fan::getBoundingBoxPx()
 {
-   GameMechanism::setEnabled(enabled);
-   _lever_lag = enabled ? 0.0f : 1.0f;
+   return _pixel_rect;
 }
 
-std::vector<std::shared_ptr<GameMechanism>>& Fan::getFans()
+std::shared_ptr<Fan> Fan::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
-   return __fan_instances;
+   auto fan = std::make_shared<Fan>(parent);
+
+   const auto& obj = data._tmx_object;
+   fan->_texture = TexturePool::getInstance().get("data/sprites/fan.png");
+
+   fan->_pixel_rect = {{obj->_x_px, obj->_y_px}, {obj->_width_px, obj->_height_px}};
+
+   std::string dir_str = "up";
+   if (obj->_properties)
+   {
+      const auto& map = obj->_properties->_map;
+
+      if (auto dir_prop = map.find("direction"); dir_prop != map.end())
+      {
+         dir_str = dir_prop->second->_value_string.value_or("up");
+      }
+
+      if (auto speed_prop = map.find("speed"); speed_prop != map.end())
+      {
+         fan->_speed = speed_prop->second->_value_float.value_or(1.0f);
+      }
+   }
+
+   static const std::map<std::string, sf::Vector2f> directions = {
+      {"up", {0.f, -1.f}}, {"down", {0.f, 1.f}}, {"left", {-1.f, 0.f}}, {"right", {1.f, 0.f}}
+   };
+
+   fan->_direction = directions.contains(dir_str) ? directions.at(dir_str) : sf::Vector2f{0.f, -1.f};
+
+   fan->_direction_string = dir_str;  // Store the string form too
+
+   const int tiles_x = static_cast<int>(fan->_pixel_rect.size.x) / PIXELS_PER_TILE;
+   const int tiles_y = static_cast<int>(fan->_pixel_rect.size.y) / PIXELS_PER_TILE;
+
+   if (dir_str == "up")
+   {
+      int j = tiles_y - 1;
+      for (int i = 0; i < tiles_x; ++i)
+      {
+         placeTile(fan, data, i, j);
+      }
+   }
+   else if (dir_str == "down")
+   {
+      int j = 0;
+      for (int i = 0; i < tiles_x; ++i)
+      {
+         placeTile(fan, data, i, j);
+      }
+   }
+   else if (dir_str == "left")
+   {
+      int i = tiles_x - 1;
+      for (int j = 0; j < tiles_y; ++j)
+      {
+         placeTile(fan, data, i, j);
+      }
+   }
+   else if (dir_str == "right")
+   {
+      int i = 0;
+      for (int j = 0; j < tiles_y; ++j)
+      {
+         placeTile(fan, data, i, j);
+      }
+   }
+   else
+   {
+      std::cerr << "Warning: Fan direction '" << dir_str << "' not recognized. No tiles placed.\n";
+   }
+
+   return fan;
 }
 
-void Fan::updateSprite()
+void Fan::placeTile(const std::shared_ptr<Fan>& fan, const GameDeserializeData& data, int i, int j)
 {
-   auto y_offset_tl = 0;
-   const auto dir = _tiles.at(0)->_tile_dir;
-   switch (dir)
-   {
-      case TileDirection::Up:
-         y_offset_tl = 0;
-         break;
-      case TileDirection::Right:
-         y_offset_tl = 1;
-         break;
-      case TileDirection::Left:
-         y_offset_tl = 2;
-         break;
-      case TileDirection::Down:
-         y_offset_tl = 3;
-         break;
-   }
+   FanSection section(fan->_texture);
 
-   auto index = 0u;
-   for (auto& sprite : _sprites)
-   {
-      auto x_offset_tl = static_cast<int32_t>(_x_offsets_px[index]) % 8;
-      sprite.setTextureRect({{x_offset_tl * PIXELS_PER_TILE, y_offset_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+   section.tile_position_px = {
+      static_cast<int>(fan->_pixel_rect.position.x) + i * PIXELS_PER_TILE,
+      static_cast<int>(fan->_pixel_rect.position.y) + j * PIXELS_PER_TILE
+   };
+   section.direction = fan->_direction;
+   section.rect = {
+      {static_cast<float>(section.tile_position_px.x), static_cast<float>(section.tile_position_px.y)},
+      {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+   };
 
-      index++;
-   }
-}
+   b2BodyDef body_def;
+   body_def.type = b2_staticBody;
+   body_def.position = b2Vec2(section.tile_position_px.x * MPP, section.tile_position_px.y * MPP);
+   section.body = data._world->CreateBody(&body_def);
 
-void Fan::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
-{
-   for (auto& sprite : _sprites)
-   {
-      color.draw(sprite);
-   }
+   b2PolygonShape shape;
+   shape.SetAsBox(0.5f, 0.5f);
+
+   b2FixtureDef fixture_def;
+   fixture_def.shape = &shape;
+   fixture_def.density = 1.0f;
+   fixture_def.isSensor = false;
+   section.body->CreateFixture(&fixture_def);
+
+   section.sprite->setPosition({static_cast<float>(section.tile_position_px.x), static_cast<float>(section.tile_position_px.y)});
+
+   fan->_tiles.push_back(std::move(section));
 }
 
 void Fan::update(const sf::Time& dt)
@@ -150,142 +178,37 @@ void Fan::update(const sf::Time& dt)
    if (!isEnabled())
    {
       if (_lever_lag <= 0.0f)
-      {
          return;
-      }
-
       _lever_lag -= dt.asSeconds();
    }
    else
    {
-      if (_lever_lag < 1.0f)
-      {
-         _lever_lag += dt.asSeconds();
-      }
-      else
-      {
-         _lever_lag = 1.0f;
-      }
+      _lever_lag = std::min(_lever_lag + dt.asSeconds(), 1.0f);
    }
 
-   std::transform(
-      _x_offsets_px.begin(),
-      _x_offsets_px.end(),
-      _x_offsets_px.begin(),
-      [this, &dt](auto val) { return val + dt.asSeconds() * 25.0f * _speed * _lever_lag; }
-   );
+   for (auto& section : _tiles)
+   {
+      section.scroll_offset += dt.asSeconds() * 25.0f * _speed * _lever_lag;
+   }
 
    updateSprite();
-
    collide();
 }
 
-std::optional<sf::FloatRect> Fan::getBoundingBoxPx()
+void Fan::updateSprite()
 {
-   return sf::FloatRect({_pixel_rect.position.x, _pixel_rect.position.y}, {_pixel_rect.size.x, _pixel_rect.size.y});
-}
-
-void Fan::load(const GameDeserializeData& data)
-{
-   static const sf::Vector2f vector_up{0.0f, 1.0f};
-   static const sf::Vector2f vector_down{0.0f, -1.0f};
-   static const sf::Vector2f vector_left{-1.0f, 0.0f};
-   static const sf::Vector2f vector_right{1.0f, 0.0f};
-
-   if (data._tmx_layer == nullptr)
+   for (auto& section : _tiles)
    {
-      return;
-   }
-
-   if (data._tmx_tileset == nullptr)
-   {
-      return;
-   }
-
-   resetAll();
-
-   const auto tiles = data._tmx_layer->_data;
-   const auto width = data._tmx_layer->_width_tl;
-   const auto height = data._tmx_layer->_height_tl;
-   const auto firstId = data._tmx_tileset->_first_gid;
-
-   // populate the vertex array, with one quad per tile
-   for (auto i = 0u; i < width; ++i)
-   {
-      for (auto j = 0u; j < height; ++j)
-      {
-         // get the current tile number
-         const auto tile_number = tiles[i + j * width];
-
-         if (tile_number != 0)
-         {
-            const auto direction = static_cast<TileDirection>(tile_number - firstId);
-            sf::Vector2f direction_vector;
-
-            switch (direction)
-            {
-               case TileDirection::Up:
-                  direction_vector = vector_up;
-                  break;
-               case TileDirection::Left:
-                  direction_vector = vector_left;
-                  break;
-               case TileDirection::Right:
-                  direction_vector = vector_right;
-                  break;
-               case TileDirection::Down:
-                  direction_vector = vector_down;
-                  break;
-            }
-
-            auto tile = std::make_shared<FanTile>();
-
-            const auto x = i * PIXELS_PER_TILE;
-            const auto y = j * PIXELS_PER_TILE;
-
-            tile->_position = sf::Vector2i(i * PIXELS_PER_TILE, j * PIXELS_PER_TILE);
-            tile->_rect.position.x = static_cast<float>(x);
-            tile->_rect.position.y = static_cast<float>(y);
-            tile->_rect.size.x = PIXELS_PER_TILE;
-            tile->_rect.size.y = PIXELS_PER_TILE;
-            tile->_tile_dir = direction;
-            tile->_direction = direction_vector;
-            __tile_instances.push_back(tile);
-
-            createPhysics(data._world, tile);
-         }
-      }
+      int x_offset = static_cast<int>(section.scroll_offset) % 8;
+      section.sprite->setTextureRect({{x_offset * PIXELS_PER_TILE, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
    }
 }
 
-void Fan::resetAll()
+void Fan::draw(sf::RenderTarget& color, sf::RenderTarget&)
 {
-   __fan_instances.clear();
-   __tile_instances.clear();
-   __object_instances.clear();
-   __weight_instances.clear();
-}
-
-void Fan::addObject(GameNode* parent, const GameDeserializeData& data)
-{
-   __object_instances.push_back(data._tmx_object);
-
-   auto fan = std::make_shared<Fan>(parent);
-   __fan_instances.push_back(fan);
-
-   const auto w = data._tmx_object->_width_px;
-   const auto h = data._tmx_object->_height_px;
-
-   fan->_texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "fan.png");
-   fan->_pixel_rect.position.x = data._tmx_object->_x_px;
-   fan->_pixel_rect.position.y = data._tmx_object->_y_px;
-   fan->_pixel_rect.size.x = w;
-   fan->_pixel_rect.size.y = h;
-
-   if (data._tmx_object->_properties)
+   for (const auto& section : _tiles)
    {
-      auto speed_property = data._tmx_object->_properties->_map["speed"];
-      fan->_speed = speed_property ? speed_property->_value_float.value() : 1.0f;
+      color.draw(*section.sprite);
    }
 }
 
@@ -301,31 +224,4 @@ void Fan::collide()
    {
       Player::getCurrent()->getBody()->ApplyForceToCenter(b2Vec2(2.0f * _direction.x, -_direction.y), true);
    }
-}
-
-void Fan::merge()
-{
-   auto x_offset_px = 0.0f;
-   for (auto& tile : __tile_instances)
-   {
-      for (auto& f : __fan_instances)
-      {
-         auto fan = std::dynamic_pointer_cast<Fan>(f);
-         if (tile->_rect.findIntersection(fan->_pixel_rect).has_value())
-         {
-            sf::Sprite sprite(*fan->_texture);
-            sprite.setPosition({static_cast<float>(tile->_position.x), static_cast<float>(tile->_position.y)});
-
-            fan->_tiles.push_back(tile);
-            fan->_direction = tile->_direction * fan->_speed;
-            fan->_sprites.push_back(sprite);
-            fan->_x_offsets_px.push_back(x_offset_px);
-            fan->updateSprite();
-
-            x_offset_px += 1.0f;
-         }
-      }
-   }
-
-   __tile_instances.clear();
 }
