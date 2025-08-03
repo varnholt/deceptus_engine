@@ -36,21 +36,88 @@ bool StencilTileMap::load(
       return false;
    }
 
+   _alphaDiscardShader.loadFromFile("alpha_discard.frag", sf::Shader::Type::Fragment);
+
    return true;
+}
+
+void StencilTileMap::draw2(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
+{
+   // 1. Clear stencil buffer (must use raw GL unless SFML exposes a helper)
+   glClear(GL_STENCIL_BUFFER_BIT);  // Still needed until SFML wraps this
+
+   // 2. Draw stencil tilemap to stencil buffer only
+   sf::RenderStates stencilWriteStates = states;
+   stencilWriteStates.shader = &_alphaDiscardShader;
+   stencilWriteStates.stencilMode.stencilComparison = sf::StencilComparison::Always;
+   stencilWriteStates.stencilMode.stencilUpdateOperation = sf::StencilUpdateOperation::Replace;
+   stencilWriteStates.stencilMode.stencilReference = 1;
+   stencilWriteStates.stencilMode.stencilMask = 0xFF;
+   stencilWriteStates.stencilMode.stencilOnly = true;
+
+   const bool wasVisible = _stencil_tilemap->isVisible();
+   _stencil_tilemap->setVisible(true);
+   _stencil_tilemap->draw(color, stencilWriteStates);
+   _stencil_tilemap->setVisible(wasVisible);
+
+   // 3. Draw this tilemap where stencil == 1
+   sf::RenderStates drawStates = states;
+   drawStates.stencilMode.stencilComparison = sf::StencilComparison::Equal;
+   drawStates.stencilMode.stencilUpdateOperation = sf::StencilUpdateOperation::Keep;
+   drawStates.stencilMode.stencilReference = 1;
+   drawStates.stencilMode.stencilMask = 0xFF;
+   drawStates.stencilMode.stencilOnly = false;
+
+   TileMap::draw(color, normal, drawStates);
+}
+
+void StencilTileMap::saveStencilBufferDebugImage(const std::string& filename, const sf::RenderTarget& target) const
+{
+   const auto size = target.getSize();
+   std::vector<uint8_t> buffer(size.x * size.y);
+
+   // SFML 3 does not expose stencil readback, so we use OpenGL directly.
+   glReadPixels(0, 0, size.x, size.y, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, buffer.data());
+
+   sf::Image image(sf::Vector2u{size.x, size.y});
+
+   for (unsigned int y = 0; y < size.y; ++y)
+   {
+      for (unsigned int x = 0; x < size.x; ++x)
+      {
+         std::size_t i = (size.y - 1 - y) * size.x + x;
+         uint8_t stencilValue = buffer[i];
+
+         // visualize: white if stencil is 1, black if 0
+         sf::Color color = stencilValue > 0 ? sf::Color::White : sf::Color::Black;
+         image.setPixel({x, y}, color);
+      }
+   }
+
+   if (!image.saveToFile(filename))
+   {
+      Log::Error() << "Failed to save stencil debug image: " << filename;
+   }
+   else
+   {
+      Log::Info() << "Saved stencil debug image to: " << filename;
+   }
 }
 
 void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
-   prepareWriteToStencilBuffer();
-   const auto visible = _stencil_tilemap->isVisible();
-   _stencil_tilemap->setVisible(true);
-   _stencil_tilemap->draw(color, states);
-   _stencil_tilemap->setVisible(visible);
+   draw2(color, normal, states);
 
-   prepareWriteColor();
-   TileMap::draw(color, normal, states);
+   // prepareWriteToStencilBuffer();
+   // const auto visible = _stencil_tilemap->isVisible();
+   // _stencil_tilemap->setVisible(true);
+   // _stencil_tilemap->draw(color, states);
+   // _stencil_tilemap->setVisible(visible);
 
-   disableStencilTest();
+   // prepareWriteColor();
+   // TileMap::draw(color, normal, states);
+
+   // disableStencilTest();
 }
 
 void StencilTileMap::prepareWriteToStencilBuffer() const
