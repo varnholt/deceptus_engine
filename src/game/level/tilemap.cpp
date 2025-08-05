@@ -204,10 +204,11 @@ bool TileMap::load(
          quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
          quad[3].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size.x) + tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
 
-         quad[0].color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer->_opacity * 255.0f));
-         quad[1].color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer->_opacity * 255.0f));
-         quad[2].color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer->_opacity * 255.0f));
-         quad[3].color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer->_opacity * 255.0f));
+         const auto alpha = std::clamp(static_cast<int32_t>(layer->_opacity * 255.0f), 0, 255);
+         quad[0].color = sf::Color(255, 255, 255, alpha);
+         quad[1].color = sf::Color(255, 255, 255, alpha);
+         quad[2].color = sf::Color(255, 255, 255, alpha);
+         quad[3].color = sf::Color(255, 255, 255, alpha);
          // clang-format on
 
          auto it = tile_map.find(tile_number - tileset->_first_gid);
@@ -321,6 +322,11 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
    if (!_visible)
    {
       return;
+   }
+
+   if (_blend_mode.has_value())
+   {
+      states.blendMode = _blend_mode.value();
    }
 
    states.texture = _texture_map.get();
