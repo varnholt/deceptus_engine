@@ -333,6 +333,92 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
    drawVertices(target, states);
 }
 
+bool TileMap::dumpToPng(const std::filesystem::path& output_path) const
+{
+   if (!_texture_map || _vertices_static_blocks.empty())
+   {
+      std::cerr << "TileMap::dumpToPng - no texture or vertex data.\n";
+      return false;
+   }
+
+   // determine bounds in pixels
+   sf::FloatRect bounds;
+   bool first = true;
+
+   for (const auto& [by, row] : _vertices_static_blocks)
+   {
+      for (const auto& [bx, vertex_array] : row)
+      {
+         for (std::size_t i = 0; i < vertex_array.getVertexCount(); ++i)
+         {
+            const auto& pos = vertex_array[i].position;
+            if (first)
+            {
+               bounds.position = pos;
+               bounds.size = {pos.x, pos.y};
+               first = false;
+            }
+            else
+            {
+               bounds.position.x = std::min(bounds.position.x, pos.x);
+               bounds.position.y = std::min(bounds.position.y, pos.y);
+               bounds.size.x = std::max(bounds.size.x, pos.x);
+               bounds.size.y = std::max(bounds.size.y, pos.y);
+            }
+         }
+      }
+   }
+
+   if (first)
+   {
+      std::cerr << "TileMap::dumpToPng - no vertices found.\n";
+      return false;
+   }
+
+   // convert bottom-right max extents to actual size
+   bounds.size.x -= bounds.position.x;
+   bounds.size.y -= bounds.position.y;
+
+   const sf::Vector2u render_size = {static_cast<uint32_t>(std::ceil(bounds.size.x)), static_cast<uint32_t>(std::ceil(bounds.size.y))};
+
+   // create rendertexture
+   sf::RenderTexture render_texture(render_size);
+
+   render_texture.clear(sf::Color::Transparent);
+
+   sf::RenderStates states;
+   states.texture = _texture_map.get();
+   states.transform.translate(-bounds.position);  // align top-left to (0, 0)
+
+   // draw static tiles
+   for (const auto& [by, row] : _vertices_static_blocks)
+   {
+      for (const auto& [bx, vertex_array] : row)
+      {
+         render_texture.draw(vertex_array, states);
+      }
+   }
+
+   // draw animated tiles
+   if (_vertices_animated.getVertexCount() > 0)
+   {
+      render_texture.draw(_vertices_animated, states);
+   }
+
+   render_texture.display();
+
+   // write to png
+   const auto image = render_texture.getTexture().copyToImage();
+   if (!image.saveToFile(output_path.string()))
+   {
+      std::cerr << "TileMap::dumpToPng - failed to save to file.\n";
+      return false;
+   }
+
+   std::cout << "TileMap::dumpToPng - saved to " << output_path << "\n";
+   return true;
+}
+
 void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
    if (!_visible)
