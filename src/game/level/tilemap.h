@@ -35,6 +35,7 @@ public:
    virtual void update(const sf::Time& dt);
    virtual void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const;
    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+   bool dumpToPng(const std::filesystem::path& output_path) const;
 
    int32_t getZ() const;
    void setZ(int32_t getZ);
