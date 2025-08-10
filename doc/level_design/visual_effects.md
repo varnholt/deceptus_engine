@@ -66,8 +66,8 @@ They have the properties below:
 |-|-|-|
 |factor_x|float|The horizontal scrolling pace in relation to the foreground [`0..1`]|
 |factor_y|float|The vertical scrolling pace in relation to the foreground [`0..1`]|
-|offset_x|int|Imagine the contents of your tile layer are located somewhere in the middle of your level. In that case the parallax factor would be applied and your contents would not end up at that location where you placed them in Tiled but shifted much further to the top/left. That's because every tile position is multiplied with the parallax factor. To compensate that, you can define an offset (given in pixels) to where your actual contents begin, e.g. at `2640, 2880`. The same goes for the vertical error (offset_y).|
-|offset_y|int|Please see `offset_x`|
+|offset_x_px|int|An x‑offset in pixels used to compensate for the parallax displacement (e.g. `2640`). It defines where your contents begin on the horizontal axis.|
+|offset_y_px|int|A y‑offset in pixels used to compensate for the parallax displacement. See `offset_x_px` for details.|
 |z|int|As you might want to place something _behind_ your parallax layers, configuring the z index might be useful, too. The default value is `0`.|
 
 
@@ -81,7 +81,9 @@ Deceptus supports different blend modes for Image Layers.
 They have the properties below:
 |Custom Property|Type|Description|
 |-|-|-|
-|blendmode|string|Valid blend modes are: '`alpha`', '`multiply`', '`add`', '`none`'|
+|blendmode|string|Valid blend modes are: `alpha`, `multiply`, `add` or `none`.|
+|z|int|The z depth of the image layer (default is `0`).|
+|use_parallax|bool|When set to `true`, the image layer will scroll with parallax factors as defined in your level’s parallax settings (default is `false`).|
 
 
 ## Info Overlays
@@ -94,6 +96,7 @@ Usually this mechanism should be activated through a lua script or by setting up
 
 |Custom Property|Type|Description|
 |-|-|-|
+|z|int|The z depth of your overlay (optional, default is `0`).|
 |start_delay_duration|float|The time to wait before starting the fade-in (default is 1.5s).|
 |fade_in_duration|float|The fade-in duration (default is 1.5s).|
 |show_duration|float|The duration elapsed when the the image is fully visible (default is 3.0s).|
@@ -128,6 +131,8 @@ The individual lights are created as rectangle objects with the parameters below
 |Custom Property|Type|Description|
 |-|-|-|
 |color|color|Color of the light (optional, the default is white)|
+|texture|string|Optional texture used for the light sprite (leave empty to use the default light texture).|
+|z|int|The z depth of the light (controls draw order, default is `0`).|
 |flicker_intensity|float|If the light should flicker a bit, this controls the flicker intensity (optional, from `0..1`, a good value is `0.5`)|
 |flicker_alpha_amount|float|The opacity of your light source (optional, from `0..1`, a good value is `0.7`)|
 |flicker_speed|float|How fast to step through the flicker noise function (optional, from `0..100`, a good value is `5`|
@@ -170,8 +175,8 @@ So on top of the Rope properties, there are a few additional ones:
 |push_duration_s|float|The duration for how long the rope is pushed (in seconds), a good value is `1.0`|
 |push_strength|float|The amount of force to be applied for each frame during the push duration (`0.01` is a good value)|
 |segments|int|The amount of segments your rope should have (less is better, `7` is a good value)|
-|_color_|color|The color of the dynamic light (the default is white)|
-|_sprite_|int|At the moment the mechanism just supports two different light types, so it's either just `1` or `2`|
+|color|color|The color of the dynamic light (the default is white)|
+|sprite|int|Selects which light sprite to use. At the moment only `1` and `2` are supported.|
 
 
 ## Atmosphere layers
@@ -248,6 +253,8 @@ To create a Shader Quad, create an object group starting with `shader_quads`. Th
 |vertex_shader|string|the relative path to your vertex shader (optional)|
 |fragment_shader|string|the relative path to your fragment shader (optional)|
 |texture|string|a path to a texture used by the shader|
+|smooth_texture|bool|Whether the shader texture should be smoothed (default is `true`).|
+|customization|string|Optional customization parameters passed to the shader; use this to send arbitrary values into the shader program.|
 |time_offset_s|float|Time offset in seconds; it is used to avoid that shader quads next to each other won't look identical.|
 |uv_width|float|UV x coordinate goes from `0` .. `uv_width`; the default value is `1.0`.|
 |uv_height|float|UV y coordinate goes from `0` .. `uv_height`; the default value is `1.0`.|
@@ -313,11 +320,11 @@ Smoke has been added to the Engine to be able to create foggy / smoky atmosphere
 |-|-|-|
 |z|int|The z depth of your layer|
 |particle_count|int|The number of particles used for the smoke/fog effect|
-|spread_factor|float|The smoke particles are rotating around the center of the smoke rectangle. If the spread factor is `1.0`, particles will be randomly placed all over the rectangle's area. If you reduce it to `0.5`, only half of the width and height around the center will be used and so on. This can be helpful when you want to use larger particles that should, however, not exceed your rectangle's boundaries. The default is `1.0`.|
+|spread_factor|float|The smoke particles rotate around the center of the smoke rectangle. A factor of `1.0` will distribute particles randomly over the entire rectangle. Smaller values reduce the effective area, which is useful for larger particles. The default is `0.66`.|
 |velocity|float|A factor for the particle movement/rotation velocity. The default is `1.0`.|
 |sprite_scale|float|If you want large particles, you can bump the particle scale to `2.0`, `4.0`, etc. The default value is `1.0`.|
 |pixel_ratio|int|If your smoke / fog effect shall show up in a rather pixelated way, you can set the pixel ratio to `2.0`. The default is `1.0` and will make the effect show up in level pixel size.|
-|particle_color|color|The particle color; mostly used to control the particle transparency. The default is `255, 255, 255, 255`.|
+|particle_color|color|The particle color; mostly used to control particle transparency. The default is `255, 255, 255, 25` (a light, semi‑transparent white).|
 |layer_color|color|The layer color; mostly used to control the overall layer transparency. The default is `255, 255, 255, 255`.|
 |center_offset_x_px|int|This will move the center of your smoke effect by the given x offset, given in `px`. The default is `0`.|
 |center_offset_y_px|int|This will move the center of your smoke effect by the given y offset, given in `px`. The default is `0`.|
@@ -349,6 +356,8 @@ The Dust mechanism supports the custom properties below:
 |wind_dir_x|float|Wind direction x vector (`-1.0 .. 1.0`); default is `0.0f`|
 |wind_dir_y|float|Wind direction y vector (`-1.0 .. 1.0`); default is `0.0f`|
 |flowfield_texture|string|A relative path to a flowfield texture, the default is `data/effects/flowfield_3.png`|
+|respawn_when_center_reached|bool|Determines whether particles that reach the rectangle’s center are respawned at its borders (default is `true`).|
+|allow_texture_updates|bool|When set to `true`, the flow field texture may be updated at runtime (default is `false`).|
 
 
 ## Ambient Occlusion

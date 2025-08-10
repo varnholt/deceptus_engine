@@ -35,6 +35,7 @@ The dimensions and position of the blocking area are controlled by the size of t
 |z|int|The object's z index|
 |texture|string|Path to the color texture to draw (the default is empty/invisible).|
 |normal|string|Path to the normal texture to draw (the default is empty/invisible).|
+|enabled|bool|Whether or not the blocking rect is currently active. Disabled blocking rects do not impede the player. Defaults to `true`.|
 
 &nbsp;
 
@@ -351,7 +352,12 @@ Since you draw the 'rails' of the Death Blocks just to a background layer, this 
 
 |Property|Type|Description|
 |-|-|-|
-|z|int|The object's z index|
+|mode|string|Defines how the death block behaves.  `always_on` keeps the spikes extended, `interval` alternates between extended and retracted states, and `rotate` moves the block along its rails.  Default is `always_on`.|
+|time_on|float|Duration in seconds that the spikes stay extended when the block is in `interval` mode (default is `0.2`).|
+|time_off|float|Duration in seconds that the spikes stay retracted when the block is in `interval` mode (default is `2.0`).|
+|time_offset|float|Offset in seconds to start the on/off cycle relative to other death blocks (default is `0.0`).|
+|damage|int|Amount of damage inflicted on the player on contact (default is `100`).|
+|velocity|float|Movement speed factor for death blocks that move along rails (default is `50.0`).|
 
 ---
 
@@ -395,7 +401,7 @@ In order to introduce a message box, you create a rectangle object that defines 
 |nn_x_px|int|The x offset of the message box on the screen (optional). `nn` is the number of the message the offset refers to. The screen dimensions are `640` x `360`.|
 |nn_y_px|int|The y offset of the message box on the screen (optional). `nn` is the number of the message the offset refers to. The screen dimensions are `640` x `360`.|
 |nn_text_color|color|The text color of the message box; if not set, the color previously set will be used. `nn` is the number of the message the text color refers to.|
-|nn_background_color|color|The text color of the message box; if not set, the color previously set will be used. `nn` is the number of the message the background color refers to.|
+|nn_background_color|color|The background color of the message box; if not set, the previously set background color will be reused. `nn` is the number of the message the background color refers to.|
 |open_automatically|bool|The dialogue open just on collision with the player, no button needs to be pressed. Default is `false`.|
 |show_delay_ms|int|An optional activation delay for the message box a (in milliseconds, undefined by default).|
 |pause_game|bool|Whether or not to pause the game when the dialogue is shown. Default is `true`.|
@@ -446,6 +452,8 @@ Doors can have keys assigned the player has to find inside your level (in form o
 |sample_close|string|A filenname of a sample that is played when the door is closed.|
 |animation_open|string|Name of the 'door open animation' that is configured inside the file `door_animations.json`.|
 |animation_close|string|Name of the 'close open animation' that is configured inside the file `door_animations.json`.|
+|key_animation|string|Name of the key insertion animation defined in `door_animations.json` (optional).|
+|can_be_closed|bool|Whether or not the door can be closed after being opened. If not specified, the door will only open and stay open.|
 ---
 
 &nbsp;
@@ -510,10 +518,17 @@ end
 |Property|Type|Description|
 |-|-|-|
 |z|int|The layer's z index|
-|texture|string|Path to a static texture that represents the extra. If an 'animation_main_0' is defined as described below, the same texture dimensions are applied as used by the animation.|
-|sample|string|Name of an audio file that is played on collision with the extra|
+|active|bool|Whether or not the extra is active when the level starts (default is `true`). Inactive extras do not show up until activated via script.|
+|spawn_required|bool|When set to `true` the extra will not appear until a spawn effect is triggered (default is `false`).|
+|requires_button_press|bool|If `true` the player must press the action button to collect the extra; otherwise the extra is picked up automatically when touched (default is `false`).|
+|texture|string|Path to a static texture that represents the extra. If an `animation_main_0` is defined as described below, the same texture dimensions are applied as used by the animation.|
+|texture_rect_x|int|X offset of the sub‑rectangle within the texture, if only part of the texture should be drawn (default is `0`).|
+|texture_rect_y|int|Y offset of the sub‑rectangle within the texture (default is `0`).|
+|texture_rect_width|int|Width of the sub‑rectangle within the texture (default is `0`, meaning the full width).|
+|texture_rect_height|int|Height of the sub‑rectangle within the texture (default is `0`, meaning the full height).|
+|sample|string|Name of an audio file that is played when the extra is picked up (optional).|
 |animation_pickup|string|Name of the animation shown when the extra is picked up. The animation cycle is defined inside the file `extra_animations.json`.|
-|animation_main_0 to animation_main_99|string|Names of the animation cycles shown when the extra is not picked up yet. The animation cycles are defined inside the file `extra_animations.json`. By allowing multiple cycles here, you can introduce a bit of variety instead of cycling the same dull idle animation over and over again.|
+|animation_main_0 to animation_main_99|string|Names of the animation cycles shown when the extra is not picked up yet. The animation cycles are defined inside the file `extra_animations.json`. By allowing multiple cycles here, you can introduce a bit of variety instead of cycling the same idle animation over and over again.|
 
 
 &nbsp;
@@ -644,8 +659,8 @@ So the first thing you do is to place all your laser tiles inside a tile layer c
 |Property|Type|Description|
 |-|-|-|
 |z|int|The object's z index|
-|off_time|int|The duration the laser is in 'off' state (in ms)|
-|on_time|int|The duration the laser is sin 'on' state (in ms)|
+|off_time|int|The duration in milliseconds that the laser remains in its 'off' state (default is `0`).|
+|on_time|int|The duration in milliseconds that the laser remains in its 'on' state (default is `0`).|
 
 ![](images/mechanism_lasers.png)
 
@@ -656,8 +671,11 @@ All you need to do is to give your laser object a name, and then reference that 
 
 |Property|Type|Description|
 |-|-|-|
-|reference_id|string|The object name of the rectangle that groups your laser tiles|
-|movement_speed|float|A velocity factor for the laser movement, the default is `0.2`.|
+|reference_id|string|The object name of the rectangle that groups your laser tiles.|
+|movement_speed|float|A speed factor applied to the laser’s movement along its path (default is `0.2`).|
+|move_offset_s|float|Optional time offset in seconds before the laser starts moving along its path.|
+|easing_function|string|Optional name of an easing function applied to the movement interpolation (e.g. `linear`, `easeInOutQuad`). If unspecified, linear interpolation is used.|
+|easing_subdivision_count|int|When an easing function is specified, the number of subdivisions used to approximate the easing curve (default is `10`).|
 |z|int|The object's z index|
 
 ---
@@ -705,6 +723,8 @@ The properties below apply for the object inside the `levers` object group.
 |z|int|The object's z index|
 |target_id|string|An optional name of the object controlled by this lever. This can be used if you don't to use the 'switchable_objects' approach.|
 |target_ids|string|An semicolon separated list of object names for objects that are controlled by this lever. This can be used if you don't to use the 'switchable_objects' approach.|
+|serialized|bool|If set to `true`, the lever’s state is saved and restored when the level is reloaded (default is `false`).|
+|handle_available|bool|Whether the lever’s handle is initially available (default is `true`). When set to `false`, the player must bring a 'handle' item to attach before the lever can be used.|
 
 ---
 
@@ -835,6 +855,7 @@ To create an On/Off Block, just create a rectangle object of 1x1 tiles for each 
 |mode|string|The Spike Block's mode, either '`interval`' or '`lever`' (default is '`lever`')|
 |time_on_ms|int|When mode is '`interval`', the time the Spike Block is extracted, given in ms (default is 4000ms)|
 |time_off_ms|int|When mode is '`interval`', the time the Spike Block is retracted, given in ms (default is 3000ms)|
+|inverted|bool|If set to `true`, the block’s on/off behavior is inverted so that the block is transparent during the on phase and solid during the off phase (default is `false`).|
 
 ---
 
@@ -922,11 +943,11 @@ Moreover, ropes have a number of properties to simulate 'wind behavior'. So you 
 
 |Property|Type|Description|
 |-|-|-|
-|push_interval_s|float|The interval how often the rope is pushed (in seconds, a good value is `5.0`)|
-|push_duration_s|float|The duration for how long the rope is pushed (in seconds), a good value is `1.0`|
-|push_strength|float|The amount of force to be applied for each frame during the push duration (`0.01` is a good value)|
-|player_impulse|float|The amount the player influences the rope by passing it (`0.018` is a good value, `0.0` is the default)|
-|segments|int|The amount of segments your rope should have (less is better, `7` is a good value)|
+|push_interval_s|float|The interval in seconds between wind gusts that push the rope (a good value is `5.0`).|
+|push_duration_s|float|The duration in seconds for which the rope is being pushed by wind (a good value is `1.0`).|
+|push_strength|float|The amount of force applied to the rope for each frame during the push duration (a good value is `0.01`).|
+|player_impulse|float|The amount the player influences the rope when passing by (`0.018` is a good value; the default is `0.0`).|
+|segments|int|The number of segments that make up the rope (fewer segments improve performance; `7` is a good value).|
 |z|int|The object's z index|
 
 Read more about Ropes in the paragraph 'Ropes with Lights'.
@@ -961,6 +982,15 @@ To create a rotating blade object, just create a polyline for its path.
 |Property|Type|Description|
 |-|-|-|
 |z|int|The layer's z index|
+|mode|string|Specifies the spike behavior: `interval` makes the spikes extend and retract in cycles, `trap` makes them extend shortly after the player steps on them, and `toggled` lets them be controlled via levers (default is `interval`).|
+|orientation|string|The direction the spikes point: `up`, `down`, `left`, or `right` (default is `up`).|
+|down_time_ms|int|In interval mode, the time in milliseconds that the spikes remain retracted (default is `2000`).|
+|up_time_ms|int|In interval mode, the time in milliseconds that the spikes remain extended (default is `2000`).|
+|trap_time_ms|int|In trap mode, the delay in milliseconds between the player touching the spikes and the spikes extending (default is `250`).|
+|speed_up|float|Speed factor applied when the spikes extend (default is `1.0`).|
+|speed_down|float|Speed factor applied when the spikes retract (default is `1.0`).|
+|time_offset_ms|int|An optional time offset in milliseconds to desynchronize multiple spike objects (default is `0`).|
+|under_water|bool|If set to `true`, an alternative underwater spike sprite is used (default is `false`).|
 |enabled|bool|The default enabled state (default is `true`)|
 |blade_acceleration|float|The acceleration used for the blade to gain speed (both in rotation and vertical/horizontal movement) when enabled (the default is `0.006`).|
 |blade_deceleration|float|The deceleration used for the blade to drop speed (both in rotation and vertical/horizontal movement) when disabled (the default is `0.009`).|
@@ -1037,6 +1067,7 @@ It is very important to place that mount high enough, otherwise the ball will cr
 |chain_element_distance_m|float|The distance between chain elements, given in metres. The default is `0.3m`.|
 |chain_element_width_m|float|The height of a chain element in metres, the default is `0.06m`.|
 |chain_element_height_m|float|The width of a chain element in metres, the default is `0.0125m`.|
+|audio_update_behavior|string|Determines how often the spike ball’s audio is updated. Valid values are `room_based` (update sound only when the player is in the same room) or `range_based` (update based on distance). The default is `range_based`.|
 
 ---
 
@@ -1195,5 +1226,25 @@ The spawn effect consists of an orb animation in the center and particles that m
 &nbsp;
 
 ---
+
+## Wind
+
+Wind zones apply a continuous force to the player whenever they are inside the rectangle.  This mechanism can be used to simulate gusts of wind or air currents that push the player along a path.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Wind`|
+|Object Group|`wind`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|direction_x|float|Horizontal component of the wind force. Positive values push to the right, negative values push to the left (default is `0.0`).|
+|direction_y|float|Vertical component of the wind force. Positive values push upward, negative values push downward (default is `0.0`).|
+
+The size and position of the wind zone are defined by the rectangle you draw.  Wind has no visible representation, so there is no z‑index to configure.
 
 
