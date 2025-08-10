@@ -138,7 +138,7 @@ void Fireflies::deserialize(const GameDeserializeData& data)
          speed[0] = it->second->_value_float.value();
       }
 
-      it = data._tmx_object->_properties->_map.find("speed_min");
+      it = data._tmx_object->_properties->_map.find("speed_max");
       if (it != data._tmx_object->_properties->_map.end())
       {
          speed[1] = it->second->_value_float.value();
