@@ -37,7 +37,7 @@ void SpawnEffect::deserialize(const GameDeserializeData& data)
 
    const auto& map = data._tmx_object->_properties->_map;
 
-   _hide_duration_s = ValueReader::readValue<float>("hide_duration", map).value_or(_default_hide_duration_s);
+   _hide_duration_s = ValueReader::readValue<float>("hide_duration_s", map).value_or(_default_hide_duration_s);
    _show_duration_s = ValueReader::readValue<float>("show_duration_s", map).value_or(_default_show_duration_s);
    _particle_count = ValueReader::readValue<int32_t>("particle_count", map).value_or(_default_particle_count);
    _particle_radius = ValueReader::readValue<float>("particle_radius", map).value_or(_default_particle_radius);
