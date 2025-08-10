@@ -740,12 +740,20 @@ void Gateway::use()
 
    if (_target_id.empty())
    {
+      Log::Error() << "target id is not set";
       return;
    }
 
    _in_use = true;
 
    const auto target_gateway = findGatewayById(_target_id);
+
+   if (!target_gateway)
+   {
+      Log::Error() << getObjectId() << " has invalid target: " << _target_id;
+      return;
+   }
+
    const auto target_pos_px = target_gateway->_rect.getCenter();
 
    auto teleport = [target_pos_px]()
