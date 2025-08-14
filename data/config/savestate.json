@@ -1,0 +1,67 @@
+[
+    {
+        "checkpoint": -1,
+        "levelindex": 2,
+        "playerinfo": {
+            "extras": {
+                "health": {
+                    "health": 12,
+                    "health_max": 12,
+                    "lives": 5
+                },
+                "skills": {
+                    "skills": 0
+                }
+            },
+            "inventory": {
+                "items": []
+            },
+            "name": "Catacombs"
+        }
+    },
+    {
+        "checkpoint": 0,
+        "levelindex": 1,
+        "playerinfo": {
+            "extras": {
+                "health": {
+                    "health": 12,
+                    "health_max": 12,
+                    "lives": 5
+                },
+                "skills": {
+                    "skills": 0
+                }
+            },
+            "inventory": {
+                "items": []
+            },
+            "name": "Deprecated Gameplay Demo"
+        }
+    },
+    {
+        "checkpoint": 0,
+        "levelindex": 0,
+        "playerinfo": {
+            "extras": {
+                "health": {
+                    "health": 12,
+                    "health_max": 12,
+                    "lives": 5
+                },
+                "skills": {
+                    "skills": 0
+                }
+            },
+            "inventory": {
+                "items": [
+                    {
+                        "item": 2
+                    }
+                ]
+            },
+            "name": "Deprecated Engine Test"
+        }
+    }
+]
+

@@ -1,0 +1,12 @@
+{
+    "Tweaks": {
+        "bend_down_threshold": 0.6000000238418579,
+        "cpan_tolerance_x": 0.20000000298023224,
+        "cpan_tolerance_y": 0.20000000298023224,
+        "cpan_max_distance_px" : 100.0,
+        "cpan_look_speed_x" : 4.0,
+        "cpan_look_speed_y" : 3.0,
+        "cpan_snap_back_factor" : 0.85,
+        "enter_portal_threshold": -0.6000000238418579
+    }
+}
