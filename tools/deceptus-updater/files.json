@@ -1,5 +1,23 @@
 {
-  "files": [
-    "deceptus.exe"
+  "entries": [
+    "deceptus.exe",
+    "SDL2.dll",
+    "SDL3.dll",
+
+    "data/catacombs/tilesets",
+    "data/effects",
+    "data/fonts",
+    "data/game",
+    "data/joystick",
+    "data/light",
+    "data/menus",
+    "data/music",
+    "data/scenes",
+    "data/scripts",
+    "data/scripts/enemies",
+    "data/shaders",
+    "data/sounds",
+    "data/sprites",
+    "data/weapons"
   ]
 }
