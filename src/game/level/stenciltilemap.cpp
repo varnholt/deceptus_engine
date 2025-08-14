@@ -47,6 +47,11 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    _stencil_tilemap->draw(color, states);
    _stencil_tilemap->setVisible(visible);
 
+   // static int print_counter = 0;
+   // print_counter++;
+   // if (print_counter % 600 == 0 && _stencil_tilemap->getLayerName() == "decoration-f1")
+   //    _stencil_tilemap->dumpToPng("deco.png");
+
    prepareWriteColor();
    TileMap::draw(color, normal, states);
 
