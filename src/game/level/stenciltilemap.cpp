@@ -44,15 +44,10 @@ bool StencilTileMap::load(
 void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
    // draw the masking geometry (stencil_tilemap) first
-
-   // glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);  // write to the color buffers
-   // glStencilFunc(GL_EQUAL, 1, 0xFF);                 // where a 1 was put into the buffer
-   // glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);           // keep the contents
-
    _stencil_shader.setUniform("u_tex", states.texture);
    _stencil_shader.setUniform("u_alphaThreshold", 0.5f);
 
-   auto stencilRenderState = sf::RenderStates(
+   auto stencil_render_state = sf::RenderStates(
       states.blendMode,  
       sf::StencilMode( // set up stencil
          {sf::StencilComparison::Always},  
@@ -70,17 +65,11 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    color.clearStencil(0);
    const auto visible = _stencil_tilemap->isVisible();
    _stencil_tilemap->setVisible(true);
-   _stencil_tilemap->draw(color, stencilRenderState);
+   _stencil_tilemap->draw(color, stencil_render_state);
    _stencil_tilemap->setVisible(visible);
 
-   // prepareWriteColor();
-
    // then the masked content (the tilemap)
-
-   // glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);  // write to the color buffers
-   // glStencilFunc(GL_EQUAL, 1, 0xFF);                 // where a 1 was put into the buffer
-   // glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);           // keep the contents
-   auto colorRenderState = sf::RenderStates(
+   auto color_render_state = sf::RenderStates(
       states.blendMode,
       sf::StencilMode(  // set up stencil
          {sf::StencilComparison::Equal},  
@@ -95,9 +84,7 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
       states.shader
    );
 
-   TileMap::draw(color, normal, colorRenderState);
-
-   // disableStencilTest();
+   TileMap::draw(color, normal, color_render_state);
 }
 
 void StencilTileMap::prepareWriteToStencilBuffer() const
