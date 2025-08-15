@@ -41,16 +41,56 @@ bool StencilTileMap::load(
 
 void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
 {
-   prepareWriteToStencilBuffer();
+   // draw the masking geometry (stencil_tilemap) first
+
+   // glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);  // write to the color buffers
+   // glStencilFunc(GL_EQUAL, 1, 0xFF);                 // where a 1 was put into the buffer
+   // glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);           // keep the contents
+   auto stencilRenderState = sf::RenderStates(
+      states.blendMode,  
+      sf::StencilMode( // set up stencil
+         {sf::StencilComparison::Always},  
+         {sf::StencilUpdateOperation::Replace},
+         1,
+         0xff,
+         true
+      ),
+      states.transform,
+      states.coordinateType,
+      states.texture,
+      states.shader
+   );
+
    const auto visible = _stencil_tilemap->isVisible();
    _stencil_tilemap->setVisible(true);
-   _stencil_tilemap->draw(color, states);
+   _stencil_tilemap->draw(color, stencilRenderState);
    _stencil_tilemap->setVisible(visible);
 
-   prepareWriteColor();
-   TileMap::draw(color, normal, states);
+   // prepareWriteColor();
 
-   disableStencilTest();
+   // then the masked content (the tilemap)
+
+   // glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);  // write to the color buffers
+   // glStencilFunc(GL_EQUAL, 1, 0xFF);                 // where a 1 was put into the buffer
+   // glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);           // keep the contents
+   auto colorRenderState = sf::RenderStates(
+      states.blendMode,
+      sf::StencilMode(  // set up stencil
+         {sf::StencilComparison::Equal},  
+         {sf::StencilUpdateOperation::Keep},
+         1,
+         0xff,
+         false
+      ),
+      states.transform,
+      states.coordinateType,
+      states.texture,
+      states.shader
+   );
+
+   TileMap::draw(color, normal, colorRenderState);
+
+   // disableStencilTest();
 }
 
 void StencilTileMap::prepareWriteToStencilBuffer() const
