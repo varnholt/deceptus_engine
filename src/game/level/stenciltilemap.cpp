@@ -36,6 +36,8 @@ bool StencilTileMap::load(
       return false;
    }
 
+   _stencil_shader.loadFromFile("data/shaders/stencil_write.frag", sf::Shader::Type::Fragment);
+
    return true;
 }
 
@@ -46,6 +48,10 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    // glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);  // write to the color buffers
    // glStencilFunc(GL_EQUAL, 1, 0xFF);                 // where a 1 was put into the buffer
    // glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);           // keep the contents
+
+   _stencil_shader.setUniform("u_tex", states.texture);
+   _stencil_shader.setUniform("u_alphaThreshold", 0.5f);
+
    auto stencilRenderState = sf::RenderStates(
       states.blendMode,  
       sf::StencilMode( // set up stencil
@@ -58,9 +64,10 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
       states.transform,
       states.coordinateType,
       states.texture,
-      states.shader
+      &_stencil_shader
    );
 
+   color.clearStencil(0);
    const auto visible = _stencil_tilemap->isVisible();
    _stencil_tilemap->setVisible(true);
    _stencil_tilemap->draw(color, stencilRenderState);

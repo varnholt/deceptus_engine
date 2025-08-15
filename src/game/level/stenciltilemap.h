@@ -24,4 +24,5 @@ private:
 
    std::string _stencil_reference;
    std::shared_ptr<TileMap> _stencil_tilemap = nullptr;
+   mutable sf::Shader _stencil_shader;
 };
