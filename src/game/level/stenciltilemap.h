@@ -25,4 +25,10 @@ private:
    std::string _stencil_reference;
    std::shared_ptr<TileMap> _stencil_tilemap = nullptr;
    mutable sf::Shader _stencil_shader;
+   float _alpha_threshold{0.5f};
+
+   // debugging
+   void dump_both_tilemaps_png() const;
+   void dump_color_target_png(sf::RenderTarget& color, const std::string& prefix) const;
+   void dump_composite_view_png(sf::RenderTarget& color, const sf::RenderStates& states) const;
 };
