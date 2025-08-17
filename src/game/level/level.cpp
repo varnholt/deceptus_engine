@@ -158,6 +158,7 @@ void Level::initializeTextures()
    // since stencil buffers are used, it is required to enable them explicitly
    sf::ContextSettings stencil_context_settings;
    stencil_context_settings.stencilBits = 8;
+   stencil_context_settings.depthBits = 24;
    // stencil_context_settings.antialiasingLevel = 8; // makes texture tearing much more reproducable
 
    _render_texture_level_background.reset();
