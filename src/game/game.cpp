@@ -198,6 +198,7 @@ void Game::initializeWindow()
    // since stencil buffers are used, it is required to enable them explicitly
    sf::ContextSettings context_settings;
    context_settings.stencilBits = 8;
+   context_settings.depthBits = 24;
 
    if (_window)
    {
