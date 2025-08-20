@@ -53,10 +53,10 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
 
    // draw the masking geometry (stencil_tilemap) first
    _stencil_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
-   auto use_shader = [this]() { return _alpha_threshold < 0.99f; };
+   const auto use_shader = _alpha_threshold < 0.99f;
 
    auto stencil_render_state = states;
-   stencil_render_state.shader = use_shader() ? &_stencil_shader : nullptr;
+   stencil_render_state.shader = use_shader ? &_stencil_shader : nullptr;
    stencil_render_state.stencilMode =  
          sf::StencilMode( // set up stencil
             {sf::StencilComparison::Always},  
@@ -66,7 +66,6 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
             true
          );
 
-   // clear stencil buffer
    color.clearStencil(0);
 
    const auto visible = _stencil_tilemap->isVisible();
@@ -74,7 +73,7 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    _stencil_tilemap->draw(color, stencil_render_state);
    _stencil_tilemap->setVisible(visible);
 
-   // then the masked content (the tilemap)
+   // then draw the masked content
    auto color_render_state = states;
    color_render_state.stencilMode =
          sf::StencilMode(  // set up stencil
@@ -87,41 +86,7 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
 
    TileMap::draw(color, normal, color_render_state);
 
-   // debug dump
-   static int32_t _frame_counter{0};
-   _frame_counter += 1;
-   if ((_frame_counter % 1000) == 0)
-   {
-      dump_composite_view_png(color, states);
-   }
-}
-
-void StencilTileMap::prepareWriteToStencilBuffer() const
-{
-   glClear(GL_STENCIL_BUFFER_BIT);
-   glEnable(GL_STENCIL_TEST);
-
-   glAlphaFunc(GL_GREATER, 0.5f);                      // SFML renders every alpha value by default
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  // so we configure alpha testing to kick out
-   glEnable(GL_ALPHA_TEST);                            // all lower alpha values
-
-   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);  // don't render to the color buffers
-   glStencilFunc(GL_ALWAYS, 1, 0xFF);                    // place a 1 wherever we render stuff
-   glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);      // replace where rendered
-}
-
-void StencilTileMap::prepareWriteColor() const
-{
-   glAlphaFunc(GL_ALWAYS, 0.0f);
-
-   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);  // write to the color buffers
-   glStencilFunc(GL_EQUAL, 1, 0xFF);                 // where a 1 was put into the buffer
-   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);           // keep the contents
-}
-
-void StencilTileMap::disableStencilTest() const
-{
-   glDisable(GL_STENCIL_TEST);
+   // dumpStencilAndColorToPng(color, states);
 }
 
 void StencilTileMap::setStencilTilemap(const std::shared_ptr<TileMap>& stencil_tilemap)
@@ -134,23 +99,15 @@ const std::string& StencilTileMap::getStencilReference() const
    return _stencil_reference;
 }
 
-std::string iso8601_timestamp_seconds()
+void StencilTileMap::dumpStencilAndColorToPng(sf::RenderTarget& color, const sf::RenderStates& states) const
 {
-   const auto now = std::chrono::system_clock::now();
-   const std::time_t tt = std::chrono::system_clock::to_time_t(now);
-   std::tm tm{};
-#if defined(_WIN32)
-   localtime_s(&tm, &tt);
-#else
-   localtime_r(&tt, &tm);
-#endif
-   std::ostringstream oss;
-   oss << std::put_time(&tm, "%Y-%m-%dT%H-%M-%S");
-   return oss.str();
-}
+   static int32_t _frame_counter{0};
+   _frame_counter += 1;
+   if ((_frame_counter % 1000) != 0)
+   {
+      return;
+   }
 
-void StencilTileMap::dump_composite_view_png(sf::RenderTarget& color, const sf::RenderStates& states) const
-{
    sf::ContextSettings settings;
    settings.stencilBits = 8;
    sf::RenderTexture debug_texture(color.getSize(), settings);
@@ -172,7 +129,7 @@ void StencilTileMap::dump_composite_view_png(sf::RenderTarget& color, const sf::
    {
       _stencil_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
 
-      const bool enable_alpha_test = (_alpha_threshold < 0.999f);
+      const bool enable_alpha_test = (_alpha_threshold < 0.99f);
       sf::RenderStates stencil_state = states;
       stencil_state.shader = enable_alpha_test ? &_stencil_shader : nullptr;
       stencil_state.stencilMode = sf::StencilMode(
@@ -205,10 +162,16 @@ void StencilTileMap::dump_composite_view_png(sf::RenderTarget& color, const sf::
    }
 
    // save png
+   const auto iso8601Date = []()
+   {
+      using namespace std::chrono;
+      const auto now_utc = floor<seconds>(system_clock::now());
+      return std::format("{:%Y-%m-%dT%H-%M-%SZ}", now_utc);
+   };
+
    debug_texture.display();
    std::filesystem::create_directories("debug");
-   const std::string filename = "debug/composite__" + getLayerName() + "__" + iso8601_timestamp_seconds() + ".png";
+   const std::string filename = "debug/composite__" + getLayerName() + "__" + iso8601Date() + ".png";
    sf::Image image = debug_texture.getTexture().copyToImage();
-   // image.flipVertically();
    (void)image.saveToFile(filename);
 }
