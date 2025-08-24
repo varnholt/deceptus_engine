@@ -291,6 +291,8 @@ set(GAME_FILES
    src/game/mechanisms/damagerect.h
    src/game/mechanisms/deathblock.cpp
    src/game/mechanisms/deathblock.h
+   src/game/mechanisms/destructibleblockingrect.cpp
+   src/game/mechanisms/destructibleblockingrect.h
    src/game/mechanisms/dialogue.cpp
    src/game/mechanisms/dialogue.h
    src/game/mechanisms/door.cpp
