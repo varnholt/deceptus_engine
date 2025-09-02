@@ -63,8 +63,6 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
    }
 
    _state.hits_left = _config.max_hits;
-   _state.current_frame = 0;
-   _state.dead = false;
 
    setupBody(data);
    setupSprite(data);
@@ -94,10 +92,6 @@ std::optional<sf::FloatRect> DestructibleBlockingRect::getBoundingBoxPx()
 
 void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   if (_state.dead || !_sprite)
-   {
-      return;
-   }
 
    color.draw(*_sprite);
 
@@ -193,29 +187,21 @@ void DestructibleBlockingRect::setupSprite(const GameDeserializeData& data)
    const auto x_px = data._tmx_object->_x_px;
    const auto y_px = data._tmx_object->_y_px;
 
-   // load texture and optional normal map.  Use the base path provided by the
-   // deserialize data to resolve relative paths.
-   // If the texture path is relative (starts without slash) we append it to the
-   // base path.  Otherwise we treat it as absolute.
-   const auto resolved_texture_path = data._base_path / _config.texture_path;
-   _texture = TexturePool::getInstance().get(resolved_texture_path);
+   _texture = TexturePool::getInstance().get(_config.texture_path);
 
-   // attempt to load a normal map by inserting "_normals" before the file
-   // extension.  Skip if the file does not exist.
-   const auto stem = resolved_texture_path.stem().string();
-   const auto ext = resolved_texture_path.extension().string();
-   std::filesystem::path normal_map_path = resolved_texture_path.parent_path() / (stem + "_normals" + ext);
-   if (std::filesystem::exists(normal_map_path))
-   {
-      _normal_map = TexturePool::getInstance().get(normal_map_path);
-   }
-
-   // set up sprite anchored to the bottom left of the blocking area. Since
-   // sprites may be larger than the blocking area (for overhanging graphics),
-   // shift the sprite up by its frame height.
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition(sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px) - static_cast<float>(_config.frame_height)});
+   _sprite->setPosition(sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)});
    _sprite->setTextureRect(sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}});
+
+   // // attempt to load a normal map by inserting "_normals" before the file
+   // // extension.  Skip if the file does not exist.
+   // const auto stem = resolved_texture_path.stem().string();
+   // const auto ext = resolved_texture_path.extension().string();
+   // std::filesystem::path normal_map_path = resolved_texture_path.parent_path() / (stem + "_normals" + ext);
+   // if (std::filesystem::exists(normal_map_path))
+   // {
+   //    _normal_map = TexturePool::getInstance().get(normal_map_path);
+   // }
 }
 
 void DestructibleBlockingRect::destroy()
