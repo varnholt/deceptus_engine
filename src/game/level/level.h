@@ -199,6 +199,7 @@ protected:
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_crushers;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_damage_rects;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_death_blocks;
+   std::vector<std::shared_ptr<GameMechanism>> _mechanism_destructible_blocking_rects;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_dialogues;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_doors;
    std::vector<std::shared_ptr<GameMechanism>> _mechanism_dust;

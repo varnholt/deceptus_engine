@@ -259,6 +259,7 @@ Level::Level() : GameNode(nullptr)
       &_mechanism_crushers,
       &_mechanism_damage_rects,
       &_mechanism_death_blocks,
+      &_mechanism_destructible_blocking_rects,
       &_mechanism_dialogues,
       &_mechanism_doors,
       &_mechanism_dust,
@@ -306,6 +307,7 @@ Level::Level() : GameNode(nullptr)
    _mechanisms_map[std::string{layer_name_crushers}] = &_mechanism_crushers;
    _mechanisms_map[std::string{layer_name_damage_rects}] = &_mechanism_damage_rects;
    _mechanisms_map[std::string{layer_name_death_blocks}] = &_mechanism_death_blocks;
+   _mechanisms_map[std::string{layer_name_destructible_blocking_rects}] = &_mechanism_destructible_blocking_rects;
    _mechanisms_map[std::string{layer_name_dialogues}] = &_mechanism_dialogues;
    _mechanisms_map[std::string{layer_name_doors}] = &_mechanism_doors;
    _mechanisms_map[std::string{layer_name_dust}] = &_mechanism_dust;
