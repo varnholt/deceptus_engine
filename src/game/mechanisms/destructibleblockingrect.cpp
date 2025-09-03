@@ -62,6 +62,12 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
       _config.z_index = ValueReader::readValue<int32_t>("z", map).value_or(_config.z_index);
    }
 
+   // check alignment
+   if (_config.row == 1)
+   {
+      _config.alignment = Alignment::Right;
+   }
+
    _state.hits_left = _config.max_hits;
 
    setupBody(data);
@@ -146,31 +152,23 @@ void DestructibleBlockingRect::onHit(int32_t damage)
 
 void DestructibleBlockingRect::setupBody(const GameDeserializeData& data)
 {
-   const auto x_px = data._tmx_object->_x_px;
+   constexpr auto blocking_width_px = 48.0f;
+   constexpr auto blocking_height_px = 96.0f;
+   constexpr auto half_width_m = 0.5f * blocking_width_px * MPP;
+   constexpr auto half_height_m = 0.5f * blocking_height_px * MPP;
+
+   const auto alignment_offset_px = (_config.alignment == Alignment::Right ? (_config.frame_width - blocking_width_px) : 0);
+   const auto x_px = data._tmx_object->_x_px + alignment_offset_px;
    const auto y_px = data._tmx_object->_y_px;
 
-   // the physical blocking area is fixed at 48x96 pixels; convert to Box2D meters.
-   // box2D's SetAsBox method expects half-extents. compute half widths and
-   // heights in metres and keep the full extents for the bounding box.
-   constexpr float blocking_width_px = 48.0f;
-   constexpr float blocking_height_px = 96.0f;
-   const float half_width_m = 0.5f * blocking_width_px * MPP;
-   const float half_height_m = 0.5f * blocking_height_px * MPP;
-
-   // Set up bounding box for chunking/culling
    _rect_px = sf::FloatRect{{static_cast<float>(x_px), static_cast<float>(y_px)}, {blocking_width_px, blocking_height_px}};
    addChunks(_rect_px);
 
-   // Create Box2D body; position at the TMX object's coordinate, scaled to meters
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
    body_def.position = MPP * b2Vec2{static_cast<float>(x_px), static_cast<float>(y_px)};
    _body = data._world->CreateBody(&body_def);
 
-   // Define a rectangle shape; Box2D boxes are defined by half-extents and an offset.
-   // Provide the half-width and half-height computed above and shift the shape by
-   // the same amount so the rectangle's bottom-left corner matches the TMX
-   // object's position.
    _shape.SetAsBox(half_width_m, half_height_m, b2Vec2(half_width_m, half_height_m), 0.0f);
    b2FixtureDef fixture_def;
    fixture_def.shape = &_shape;
@@ -178,6 +176,7 @@ void DestructibleBlockingRect::setupBody(const GameDeserializeData& data)
    fixture_def.friction = 0.0f;
    fixture_def.restitution = 0.0f;
    auto* fixture = _body->CreateFixture(&fixture_def);
+
    // set user data so we can identify this object during collisions
    fixture->SetUserData(static_cast<void*>(this));
 }
