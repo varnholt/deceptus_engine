@@ -22,6 +22,12 @@ public:
    void onHit(int32_t damage = 1);
 
 private:
+   enum class Alignment
+   {
+      Left,
+      Right,
+   };
+
    struct Config
    {
       int32_t frame_width{150};
@@ -33,6 +39,7 @@ private:
       std::string hit_sound;
       std::string destroy_sound;
       int32_t z_index{0};
+      Alignment alignment{Alignment::Left};
    };
 
    struct State
