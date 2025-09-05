@@ -24,6 +24,17 @@ bool GameMechanism::isSerialized() const
    return _serialized;
 }
 
+bool GameMechanism::isDestructible() const
+{
+   return false;
+}
+
+const std::vector<Hitbox>& GameMechanism::getHitboxes()
+{
+   static std::vector<Hitbox> empty;
+   return empty;
+}
+
 float GameMechanism::getReferenceVolume() const
 {
    return _reference_volume;

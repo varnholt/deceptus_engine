@@ -291,6 +291,8 @@ set(GAME_FILES
    src/game/mechanisms/damagerect.h
    src/game/mechanisms/deathblock.cpp
    src/game/mechanisms/deathblock.h
+   src/game/mechanisms/destructibleblockingrect.cpp
+   src/game/mechanisms/destructibleblockingrect.h
    src/game/mechanisms/dialogue.cpp
    src/game/mechanisms/dialogue.h
    src/game/mechanisms/door.cpp
@@ -685,6 +687,7 @@ add_executable(deceptus ${GAME_FILES}
    src/game/mechanisms/gateway.h src/game/mechanisms/gateway.cpp
    src/game/mechanisms/flowfieldtexturechangeevent.h src/game/mechanisms/flowfieldtexturechangeevent.cpp
    src/game/mechanisms/wind.h src/game/mechanisms/wind.cpp
+   src/game/level/gamemechanismregistry.h src/game/level/gamemechanismregistry.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
