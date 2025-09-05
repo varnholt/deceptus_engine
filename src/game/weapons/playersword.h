@@ -1,11 +1,13 @@
 #pragma once
 
 #include <chrono>
+#include <unordered_set>
 #include <vector>
 
 #include <box2d/box2d.h>
 
 #include "game/animation/animationpool.h"
+#include "game/physics/worldquery.h"
 #include "weapon.h"
 
 class Animation;
@@ -33,10 +35,13 @@ private:
    void updateAttackDash(const sf::Time& dt);
    void cameraShake();
 
+   std::vector<WorldQuery::CollidedNode> impactLuaNode(std::unordered_set<b2Body*>& ignored_bodies);
+   std::vector<WorldQuery::CollidedNode> impactMechanisms(std::unordered_set<b2Body*>& ignored_bodies);
+   std::optional<sf::Vector2f> impactSolidObjects(const WeaponUpdateData& data, std::unordered_set<b2Body*>& ignored_bodies);
+
    b2Vec2 _pos_m;
    b2Vec2 _dir_m;
    bool _points_left{false};
-
 
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    using HighResDuration = std::chrono::high_resolution_clock::duration;

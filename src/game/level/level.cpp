@@ -246,99 +246,6 @@ Level::Level() : GameNode(nullptr)
       _light_system->_lights.push_back(_player_light);
    }
 
-   _mechanisms_list = {
-      &_mechanism_blocking_rects,
-      &_mechanism_bouncers,
-      &_mechanism_box_colliders,
-      &_mechanism_bubble_cubes,
-      &_mechanism_button_rects,
-      &_mechanism_checkpoints,
-      &_mechanism_collapsing_platforms,
-      &_mechanism_controller_help,
-      &_mechanism_conveyor_belts,
-      &_mechanism_crushers,
-      &_mechanism_damage_rects,
-      &_mechanism_death_blocks,
-      &_mechanism_dialogues,
-      &_mechanism_doors,
-      &_mechanism_dust,
-      &_mechanism_enemy_walls,
-      &_mechanism_extras,
-      &_mechanism_fans,
-      &_mechanism_fireflies,
-      &_mechanism_gateways,
-      &_mechanism_info_overlay,
-      &_mechanism_interaction_help,
-      &_mechanism_lasers,
-      &_mechanism_levers,
-      &_mechanism_moveable_boxes,
-      &_mechanism_on_off_blocks,
-      &_mechanism_platforms,
-      &_mechanism_portals,
-      &_mechanism_ropes,
-      &_mechanism_rotating_blades,
-      &_mechanism_sensor_rects,
-      &_mechanism_shader_layers,
-      &_mechanism_sound_emitters,
-      &_mechanism_smoke_effect,
-      &_mechanism_spike_balls,
-      &_mechanism_spike_blocks,
-      &_mechanism_spikes,
-      &_mechanism_static_lights,
-      &_mechanism_text_layers,
-      &_mechanism_treasure_chests,
-      &_mechanism_water_damage,
-      &_mechanism_water_surface,
-      &_mechanism_weather,
-      &_mechanism_wind,
-      &_mechanism_zoomrects,
-   };
-
-   _mechanisms_map[std::string{layer_name_blocking_rects}] = &_mechanism_blocking_rects;
-   _mechanisms_map[std::string{layer_name_bouncers}] = &_mechanism_bouncers;
-   _mechanisms_map[std::string{layer_name_box_colliders}] = &_mechanism_box_colliders;
-   _mechanisms_map[std::string{layer_name_bubble_cube}] = &_mechanism_bubble_cubes;
-   _mechanisms_map[std::string{layer_name_button_rects}] = &_mechanism_button_rects;
-   _mechanisms_map[std::string{layer_name_checkpoints}] = &_mechanism_checkpoints;
-   _mechanisms_map[std::string{layer_name_collapsing_platforms}] = &_mechanism_collapsing_platforms;
-   _mechanisms_map[std::string{layer_name_controller_help}] = &_mechanism_controller_help;
-   _mechanisms_map[std::string{layer_name_conveyorbelts}] = &_mechanism_conveyor_belts;
-   _mechanisms_map[std::string{layer_name_crushers}] = &_mechanism_crushers;
-   _mechanisms_map[std::string{layer_name_damage_rects}] = &_mechanism_damage_rects;
-   _mechanisms_map[std::string{layer_name_death_blocks}] = &_mechanism_death_blocks;
-   _mechanisms_map[std::string{layer_name_dialogues}] = &_mechanism_dialogues;
-   _mechanisms_map[std::string{layer_name_doors}] = &_mechanism_doors;
-   _mechanisms_map[std::string{layer_name_dust}] = &_mechanism_dust;
-   _mechanisms_map[std::string{layer_name_enemy_walls}] = &_mechanism_enemy_walls;
-   _mechanisms_map[std::string{layer_name_extras}] = &_mechanism_extras;
-   _mechanisms_map[std::string{layer_name_fans}] = &_mechanism_fans;
-   _mechanisms_map[std::string{layer_name_fireflies}] = &_mechanism_fireflies;
-   _mechanisms_map[std::string{layer_name_gateways}] = &_mechanism_gateways;
-   _mechanisms_map[std::string{layer_name_info_overlays}] = &_mechanism_info_overlay;
-   _mechanisms_map[std::string{layer_name_interaction_help}] = &_mechanism_interaction_help;
-   _mechanisms_map[std::string{layer_name_interval_spikes}] = &_mechanism_spikes;
-   _mechanisms_map[std::string{layer_name_lasers}] = &_mechanism_lasers;
-   _mechanisms_map[std::string{layer_name_levers}] = &_mechanism_levers;
-   _mechanisms_map[std::string{layer_name_moveable_objects}] = &_mechanism_moveable_boxes;
-   _mechanisms_map[std::string{layer_name_on_off_blocks}] = &_mechanism_on_off_blocks;
-   _mechanisms_map[std::string{layer_name_platforms}] = &_mechanism_platforms;
-   _mechanisms_map[std::string{layer_name_portals}] = &_mechanism_portals;
-   _mechanisms_map[std::string{layer_name_ropes}] = &_mechanism_ropes;
-   _mechanisms_map[std::string{layer_name_rotating_blades}] = &_mechanism_rotating_blades;
-   _mechanisms_map[std::string{layer_name_sensor_rects}] = &_mechanism_sensor_rects;
-   _mechanisms_map[std::string{layer_name_shader_quads}] = &_mechanism_shader_layers;
-   _mechanisms_map[std::string{layer_name_smoke_effect}] = &_mechanism_smoke_effect;
-   _mechanisms_map[std::string{layer_name_sound_emitters}] = &_mechanism_sound_emitters;
-   _mechanisms_map[std::string{layer_name_spike_balls}] = &_mechanism_spike_balls;
-   _mechanisms_map[std::string{layer_name_spike_blocks}] = &_mechanism_spike_blocks;
-   _mechanisms_map[std::string{layer_name_static_lights}] = &_mechanism_static_lights;
-   _mechanisms_map[std::string{layer_name_text_layer}] = &_mechanism_text_layers;
-   _mechanisms_map[std::string{layer_name_treasure_chests}] = &_mechanism_treasure_chests;
-   _mechanisms_map[std::string{layer_name_water_damage}] = &_mechanism_water_damage;
-   _mechanisms_map[std::string{layer_name_water_surface}] = &_mechanism_water_surface;
-   _mechanisms_map[std::string{layer_name_weather}] = &_mechanism_weather;
-   _mechanisms_map[std::string{layer_name_wind}] = &_mechanism_wind;
-   _mechanisms_map[std::string{layer_name_zoom_rects}] = &_mechanism_zoomrects;
 }
 
 Level::~Level()
@@ -374,7 +281,7 @@ void Level::assignMechanismsToRooms()
       }
    };
 
-   for (auto& mechanism_vector : _mechanisms_list)
+   for (auto& mechanism_vector : _mechanism_registry.getList())
    {
       for (auto& mechanism : *mechanism_vector)
       {
@@ -421,10 +328,10 @@ void Level::loadTmx()
    data._world = _world;
    data._base_path = path;
 
-   GameMechanismDeserializer::deserialize(tmx_parser, this, data, _mechanisms_map);
+   GameMechanismDeserializer::deserialize(tmx_parser, this, data, _mechanism_registry.getMap());
 
    // preload mechanism data
-   for (auto& [vec_key, vec_values] : _mechanisms_map)
+   for (auto& [vec_key, vec_values] : _mechanism_registry.getMap())
    {
       for (auto& val : *vec_values)
       {
@@ -514,7 +421,7 @@ void Level::loadTmx()
       else if (element->_type == TmxElement::Type::TypeImageLayer)
       {
          const auto image = ImageLayer::deserialize(element, path);
-         _image_layers.push_back(image);
+         _mechanism_registry.addImageLayer(image);
       }
    }
 
@@ -587,9 +494,9 @@ void Level::loadLevelScript()
    const auto path = std::filesystem::path(_description->_filename).parent_path();
    _level_script.setup(path / "level.lua");
    _level_script.setSearchMechanismCallback([this](const std::string& regexPattern, const std::optional<std::string>& group)
-                                            { return searchMechanisms(regexPattern, group); });
+                                            { return _mechanism_registry.searchMechanisms(regexPattern, group); });
 
-   _level_script.createExtraCallbacks(_mechanism_extras);
+   _level_script.createExtraCallbacks(_mechanism_registry.getExtras());
 }
 
 void Level::initialize()
@@ -616,7 +523,7 @@ void Level::initialize()
    spawnEnemies();
 
    assignMechanismsToRooms();
-   _volume_updater->setMechanisms(_mechanisms_list);
+   _volume_updater->setMechanisms(_mechanism_registry.getList());
 
    loadLevelScript();
 
@@ -627,7 +534,7 @@ void Level::loadSaveState()
 {
    const auto& save_state = SaveState::getCurrent();
    auto checkpoint_index = save_state._checkpoint;
-   auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, _mechanism_checkpoints);
+   auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, _mechanism_registry.getCheckpoints());
 
    if (checkpoint)
    {
@@ -652,10 +559,11 @@ void Level::loadSaveState()
       return;
    }
 
+   const auto& mechanism_map = _mechanism_registry.getMap();
    for (auto& [mechanism_key, mechanism_values] : level_json.items())
    {
-      const auto& mechanism_it = _mechanisms_map.find(mechanism_key);
-      if (mechanism_it == _mechanisms_map.end())
+      const auto& mechanism_it = mechanism_map.find(mechanism_key);
+      if (mechanism_it == mechanism_map.end())
       {
          continue;
       }
@@ -688,7 +596,8 @@ void Level::saveState()
    nlohmann::json mechanisms_json;
 
    // serialize the states of all mechanisms
-   for (auto& [key, mechanisms] : _mechanisms_map)
+   const auto& mechanism_map = _mechanism_registry.getMap();
+   for (auto& [key, mechanisms] : mechanism_map)
    {
       nlohmann::json mechanism_json;
       for (auto& mechanism : *mechanisms)
@@ -707,10 +616,7 @@ void Level::saveState()
 
 void Level::reset()
 {
-   for (auto& door : _mechanism_doors)
-   {
-      door.reset();
-   }
+   _mechanism_registry.resetDoors();
 }
 
 void Level::spawnEnemies()
@@ -799,7 +705,7 @@ void Level::createViews()
       parallax_layer->resetView(_view_width, _view_height);
    }
 
-   for (auto& image_layer : _image_layers)
+   for (auto& image_layer : _mechanism_registry.getImageLayers())
    {
       image_layer->resetView(_view_width, _view_height);
    }
@@ -827,7 +733,7 @@ void Level::updateViews()
       parallax->updateView(view_rect.position.x, view_rect.position.y, view_rect.size.x, view_rect.size.y);
    }
 
-   for (const auto& image_layer : _image_layers)
+   for (const auto& image_layer : _mechanism_registry.getImageLayers())
    {
       image_layer->updateView(view_rect.position.x, view_rect.position.y, view_rect.size.x, view_rect.size.y);
    }
@@ -991,7 +897,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       }
 
       // draw mechanisms
-      for (auto* mechanism_vector : _mechanisms_list)
+      for (auto* mechanism_vector : _mechanism_registry.getList())
       {
          for (const auto& mechanism : *mechanism_vector)
          {
@@ -1032,7 +938,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       }
 
       // draw image layers
-      for (auto& layer : _image_layers)
+      for (auto& layer : _mechanism_registry.getImageLayers())
       {
          if (layer->getZ() == z_index)
          {
@@ -1184,43 +1090,9 @@ void Level::drawGlowSprite()
 #endif
 }
 
-std::vector<std::shared_ptr<GameMechanism>>
-Level::searchMechanisms(const std::string& regex_pattern, const std::optional<std::string>& group)
+const GameMechanismRegistry& Level::getMechanismRegistry() const
 {
-   std::vector<std::shared_ptr<GameMechanism>> results;
-
-   std::regex pattern(regex_pattern);
-   for (const auto& [key, mechanism_vector] : _mechanisms_map)
-   {
-      // filter by mechanism group if requested
-      if (group.has_value() && group.value() != key)
-      {
-         continue;
-      }
-
-      for (const auto& mechanism : *mechanism_vector)
-      {
-         auto node = std::dynamic_pointer_cast<GameNode>(mechanism);
-         if (std::regex_match(node->getObjectId(), pattern))
-         {
-            results.push_back(mechanism);
-         }
-      }
-   }
-
-   // also scan image layers since those are separate at the moment
-   if (!group.has_value() || group.value() == "imagelayers")
-   {
-      for (const auto& image_layer : _image_layers)
-      {
-         if (std::regex_match(image_layer->getObjectId(), pattern))
-         {
-            results.push_back(image_layer);
-         }
-      }
-   }
-
-   return results;
+   return _mechanism_registry;
 }
 
 void Level::setLoadingMode(LoadingMode loading_mode)
@@ -1231,21 +1103,6 @@ void Level::setLoadingMode(LoadingMode loading_mode)
 bool Level::isDirty() const
 {
    return _dirty;
-}
-
-const std::vector<std::shared_ptr<GameMechanism>>& Level::getBouncers() const
-{
-   return _mechanism_bouncers;
-}
-
-const std::vector<std::shared_ptr<GameMechanism>>& Level::getPortals() const
-{
-   return _mechanism_portals;
-}
-
-const std::vector<std::shared_ptr<GameMechanism>>& Level::getExtras() const
-{
-   return _mechanism_extras;
 }
 
 // Level Rendering Flow
@@ -1403,7 +1260,7 @@ void Level::update(const sf::Time& dt)
 
    const auto& player_chunk = Player::getCurrent()->getChunk();
 
-   for (auto* mechanism_vector : _mechanisms_list)
+   for (auto* mechanism_vector : _mechanism_registry.getList())
    {
       for (const auto& mechanism : *mechanism_vector)
       {
@@ -1424,7 +1281,7 @@ void Level::update(const sf::Time& dt)
       }
    }
 
-   for (auto& layer : _image_layers)
+   for (auto& layer : _mechanism_registry.getImageLayers())
    {
       layer->update(dt);
    }
@@ -1661,7 +1518,3 @@ Level* Level::getCurrentLevel()
    return __current_level;
 }
 
-const std::vector<std::shared_ptr<GameMechanism>>& Level::getCheckpoints() const
-{
-   return _mechanism_checkpoints;
-}

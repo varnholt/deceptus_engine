@@ -126,29 +126,63 @@ std::vector<b2Body*> WorldQuery::retrieveEnemyBodiesInsideRect(
    auto all_bodies = WorldQuery::retrieveBodiesInsideRect(world, rect, ignore_list);
 
    // filter bodies of type ObjectTypeEnemy
-   auto filtered_bodies = all_bodies | std::views::filter(
-                                          [](b2Body* body)
-                                          {
-                                             for (auto fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
-                                             {
-                                                auto user_data = fixture->GetUserData().pointer;
-                                                if (!user_data)
-                                                {
-                                                   continue;
-                                                }
+   return all_bodies |
+          std::views::filter(
+             [](b2Body* body)
+             {
+                for (auto fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+                {
+                   auto user_data = fixture->GetUserData().pointer;
+                   if (!user_data)
+                   {
+                      continue;
+                   }
 
-                                                auto fixture_node = static_cast<FixtureNode*>(user_data);
-                                                if (fixture_node->getType() == ObjectTypeEnemy)
-                                                {
-                                                   return true;  // found at least one enemy fixture
-                                                }
-                                             }
-                                             return false;  // no enemy fixtures found
-                                          }
-                                       );
+                   auto fixture_node = static_cast<FixtureNode*>(user_data);
+                   if (fixture_node->getType() == ObjectTypeEnemy)
+                   {
+                      return true;  // found at least one enemy fixture
+                   }
+                }
+                return false;  // no enemy fixtures found
+             }
+          ) |
+          std::ranges::to<std::vector<b2Body*>>();
+}
 
-   // convert the view to a vector
-   return std::vector<b2Body*>{filtered_bodies.begin(), filtered_bodies.end()};
+std::vector<b2Body*> WorldQuery::retrieveBodiesInsideRectOfTypes(
+   const std::shared_ptr<b2World>& world,
+   const sf::FloatRect& rect,
+   const std::unordered_set<b2Body*>& ignore_list,
+   const std::unordered_set<ObjectType>& types
+)
+{
+   // retrieve all bodies inside the rectangle
+   auto all_bodies = WorldQuery::retrieveBodiesInsideRect(world, rect, ignore_list);
+
+   // filter bodies that have at least one fixture of a matching type
+   return all_bodies |
+          std::views::filter(
+             [&types](b2Body* body)
+             {
+                for (auto fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+                {
+                   auto user_data = fixture->GetUserData().pointer;
+                   if (!user_data)
+                   {
+                      continue;
+                   }
+
+                   auto fixture_node = static_cast<FixtureNode*>(user_data);
+                   if (types.contains(fixture_node->getType()))
+                   {
+                      return true;  // found a matching fixture type
+                   }
+                }
+                return false;  // no matching fixtures
+             }
+          ) |
+          std::ranges::to<std::vector<b2Body*>>();
 }
 
 WorldQuery::OctreeNode::OctreeNode(
@@ -265,3 +299,4 @@ void WorldQuery::OctreeNode::subdivide(const std::shared_ptr<b2World>& world, in
       _children[i] = std::make_unique<OctreeNode>(child_bounds, world, depth, max_depth, _ignore_list);
    }
 }
+

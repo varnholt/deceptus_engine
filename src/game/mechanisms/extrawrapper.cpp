@@ -5,8 +5,7 @@
 
 void ExtraWrapper::spawnExtra(const std::string& id)
 {
-   auto* level = Level::getCurrentLevel();
-   const auto extras = level->getExtras();
+   const auto extras = Level::getCurrentLevel()->getMechanismRegistry().getExtras();
 
    std::shared_ptr<Portal> nearby_portal;
 
