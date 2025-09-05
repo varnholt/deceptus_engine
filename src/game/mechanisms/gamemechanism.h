@@ -62,6 +62,8 @@ public:
    virtual void deserializeState(const nlohmann::json&);
    virtual bool isSerialized() const;
 
+   virtual bool isDestructible() const;
+
 protected:
    int32_t _z_index{0};
    bool _enabled{true};

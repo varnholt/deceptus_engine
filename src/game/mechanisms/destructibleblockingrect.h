@@ -18,6 +18,7 @@ public:
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+   bool isDestructible() const override;
 
    void onHit(int32_t damage = 1);
 

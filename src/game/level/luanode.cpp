@@ -2100,8 +2100,8 @@ void LuaNode::loadShapesFromTmx(const std::string& tmxFile)
             // {
             //    // Convert rectangle to Box2D rectangle
             //    addShapeRect(
-            //       object->getAABB().size.x * MPP, object->getAABB().size.y * MPP, object->getAABB().position.x * MPP, object->getAABB().position.y *
-            //       MPP
+            //       object->getAABB().size.x * MPP, object->getAABB().size.y * MPP, object->getAABB().position.x * MPP,
+            //       object->getAABB().position.y * MPP
             //    );
             // }
             // else if (object->getShape() == TmxObject::Shape::Ellipse)
@@ -2876,4 +2876,9 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 std::optional<sf::FloatRect> LuaNode::getBoundingBoxPx()
 {
    return _bounding_box;
+}
+
+bool LuaNode::isDestructible() const
+{
+   return true;
 }
