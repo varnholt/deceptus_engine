@@ -117,11 +117,27 @@ void PlayerSword::updateImpact(const WeaponUpdateData& data)
 {
    if (checkHitWindowActive())
    {
+      std::unordered_set<b2Body*> ignored_bodies{{Player::getCurrent()->getBody()}};
       _cleared_to_attack = false;
 
       updateHitbox();
 
-      std::unordered_set<b2Body*> ignored_bodies{{Player::getCurrent()->getBody()}};
+      // this can be refactored to return mechanisms that are 'hittable'
+      // luahit should then go to the base class and be renamed.
+      // only from group "props"
+      auto& registry = Level::getCurrentLevel()->getMechanismRegistry();
+      auto destructible_props = registry.searchMechanismsIf(
+         [](const std::shared_ptr<GameMechanism>& mech, std::string_view group_key)
+         {
+            if (group_key != "props")
+            {
+               return false;
+            }
+            const bool is_destructible = mech->isDestructible();
+            return is_destructible;
+         }
+      );
+
       const auto collided_nodes = WorldQuery::findNodesByHitbox(_hit_rect_px);
       for (auto& collided_node : collided_nodes)
       {
@@ -147,6 +163,9 @@ void PlayerSword::updateImpact(const WeaponUpdateData& data)
             _animations.push_back(animation);
          }
       }
+
+      // could be okay to just go over all destructible mechanisms here
+      // read the hitbox, then call hit
 
       // since we drew already all impacts on enemies via hitboxes, ignore all enemy bodies for further impact animations
       const auto enemy_bodies = WorldQuery::retrieveEnemyBodiesInsideRect(data._world, _hit_rect_px, ignored_bodies);

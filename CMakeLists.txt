@@ -687,6 +687,7 @@ add_executable(deceptus ${GAME_FILES}
    src/game/mechanisms/gateway.h src/game/mechanisms/gateway.cpp
    src/game/mechanisms/flowfieldtexturechangeevent.h src/game/mechanisms/flowfieldtexturechangeevent.cpp
    src/game/mechanisms/wind.h src/game/mechanisms/wind.cpp
+   src/game/level/gamemechanismregistry.h src/game/level/gamemechanismregistry.cpp
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})

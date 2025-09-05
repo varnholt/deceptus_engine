@@ -103,7 +103,7 @@ void Console::teleportToCheckpoint(int32_t checkpoint_index)
 {
    std::ostringstream os;
 
-   auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, Level::getCurrentLevel()->getCheckpoints());
+   auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, Level::getCurrentLevel()->getMechanismRegistry().getCheckpoints());
    if (checkpoint)
    {
       const auto pos = checkpoint->spawnPoint();

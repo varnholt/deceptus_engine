@@ -96,9 +96,13 @@ std::optional<sf::FloatRect> DestructibleBlockingRect::getBoundingBoxPx()
    return _state.dead ? std::nullopt : std::optional<sf::FloatRect>(_rect_px);
 }
 
+bool DestructibleBlockingRect::isDestructible() const
+{
+   return true;
+}
+
 void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-
    color.draw(*_sprite);
 
    // if (_normal_map)
