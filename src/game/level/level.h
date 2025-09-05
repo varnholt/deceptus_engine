@@ -8,6 +8,7 @@
 #include "game/layers/ambientocclusion.h"
 #include "game/layers/parallaxlayer.h"
 #include "game/level/atmosphere.h"
+#include "game/level/gamemechanismregistry.h"
 #include "game/level/gamenode.h"
 #include "game/level/leveldescription.h"
 #include "game/level/levelscript.h"
@@ -78,10 +79,6 @@ public:
    const std::shared_ptr<b2World>& getWorld() const;
    const sf::Vector2f& getStartPosition() const;
 
-   const std::vector<std::shared_ptr<GameMechanism>>& getCheckpoints() const;
-
-   void toggleMechanisms();
-
    std::string getDescriptionFilename() const;
    void setDescriptionFilename(const std::string& description_filename);
 
@@ -97,12 +94,10 @@ public:
    static Level* getCurrentLevel();
    void syncRoom();
 
-   const std::vector<std::shared_ptr<GameMechanism>>& getBouncers() const;
-   const std::vector<std::shared_ptr<GameMechanism>>& getPortals() const;
-   const std::vector<std::shared_ptr<GameMechanism>>& getExtras() const;
-
    bool isDirty() const;
    void setLoadingMode(LoadingMode loading_mode);
+
+   const GameMechanismRegistry& getMechanismRegistry() const;
 
 protected:
    void parsePhysicsTiles(
@@ -148,9 +143,6 @@ protected:
    void drawGlowLayer();
    void drawGlowSprite();
 
-   std::vector<std::shared_ptr<GameMechanism>>
-   searchMechanisms(const std::string& regexp, const std::optional<std::string>& group = std::nullopt);
-
    std::vector<std::shared_ptr<Room>> _rooms;
    LevelScript _level_script;
 
@@ -183,64 +175,14 @@ protected:
 
    std::vector<std::unique_ptr<ParallaxLayer>> _parallax_layers;
 
-   // mechanisms
+   GameMechanismRegistry _mechanism_registry;
    std::unique_ptr<VolumeUpdater> _volume_updater;
-   std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_map;
-   std::vector<std::vector<std::shared_ptr<GameMechanism>>*> _mechanisms_list;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_blocking_rects;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_bouncers;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_box_colliders;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_bubble_cubes;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_button_rects;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_checkpoints;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_collapsing_platforms;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_controller_help;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_conveyor_belts;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_crushers;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_damage_rects;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_death_blocks;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_dialogues;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_doors;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_dust;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_enemy_walls;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_extras;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_fans;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_fireflies;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_gateways;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_info_overlay;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_interaction_help;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_lasers;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_levers;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_moveable_boxes;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_on_off_blocks;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_platforms;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_portals;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_ropes;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_rotating_blades;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_sensor_rects;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_shader_layers;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_smoke_effect;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_sound_emitters;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_balls;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_spike_blocks;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_spikes;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_text_layers;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_treasure_chests;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_static_lights;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_damage;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_water_surface;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_weather;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_wind;
-   std::vector<std::shared_ptr<GameMechanism>> _mechanism_zoomrects;
 
    // graphic effects
    BoomEffect _boom_effect;
    std::shared_ptr<LightSystem> _light_system;
    std::shared_ptr<LightSystem::LightInstance> _player_light;
-
    std::unique_ptr<AmbientOcclusion> _ambient_occlusion;
-   std::vector<std::shared_ptr<ImageLayer>> _image_layers;
-
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
    std::unique_ptr<BlurShader> _blur_shader;
    std::unique_ptr<GammaShader> _gamma_shader;
