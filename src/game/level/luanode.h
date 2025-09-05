@@ -41,6 +41,7 @@ struct LuaNode : public GameMechanism, public GameNode
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
    bool isDestructible() const override;
+   const std::vector<Hitbox>& getHitboxes() override;
 
    void initialize();
    void deserializeEnemyDescription();

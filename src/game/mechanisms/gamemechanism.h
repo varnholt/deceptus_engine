@@ -4,6 +4,7 @@
 #include "game/audio/audioupdatedata.h"
 #include "game/constants.h"
 #include "game/level/chunk.h"
+#include "game/level/hitbox.h"
 
 #include "SFML/Graphics.hpp"
 
@@ -63,6 +64,7 @@ public:
    virtual bool isSerialized() const;
 
    virtual bool isDestructible() const;
+   virtual const std::vector<Hitbox>& getHitboxes();
 
 protected:
    int32_t _z_index{0};

@@ -2882,3 +2882,8 @@ bool LuaNode::isDestructible() const
 {
    return true;
 }
+
+const std::vector<Hitbox>& LuaNode::getHitboxes()
+{
+   return _hitboxes;
+}
