@@ -24,6 +24,11 @@ bool GameMechanism::isSerialized() const
    return _serialized;
 }
 
+bool GameMechanism::isDestructible() const
+{
+   return false;
+}
+
 float GameMechanism::getReferenceVolume() const
 {
    return _reference_volume;

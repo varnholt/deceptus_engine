@@ -40,6 +40,8 @@ struct LuaNode : public GameMechanism, public GameNode
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   bool isDestructible() const override;
+
    void initialize();
    void deserializeEnemyDescription();
 
