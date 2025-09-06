@@ -84,6 +84,14 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
    }
 
    setZ(_config.z_index);
+
+   if (!_flash_shader.loadFromFile("data/shaders/flash.frag", sf::Shader::Type::Fragment))
+   {
+      Log::Error() << "error loading flash shader";
+   }
+
+   _flash_shader.setUniform("texture", sf::Shader::CurrentTexture);
+   _flash_shader.setUniform("flash", _hit_flash);
 }
 
 std::string_view DestructibleBlockingRect::objectName() const
@@ -96,6 +104,11 @@ std::optional<sf::FloatRect> DestructibleBlockingRect::getBoundingBoxPx()
    return _state.dead ? std::nullopt : std::optional<sf::FloatRect>(_rect_px);
 }
 
+const std::vector<Hitbox>& DestructibleBlockingRect::getHitboxes()
+{
+   return _hitboxes;
+}
+
 bool DestructibleBlockingRect::isDestructible() const
 {
    return true;
@@ -103,19 +116,28 @@ bool DestructibleBlockingRect::isDestructible() const
 
 void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   color.draw(*_sprite);
-
-   // if (_normal_map)
-   // {
-   //    auto old_texture = _sprite->getTexture();
-   //    _sprite->setTexture(*_normal_map);
-   //    normal.draw(*_sprite);
-   //    _sprite->setTexture(old_texture);
-   // }
+   color.draw(*_sprite, &_flash_shader);
 }
 
 void DestructibleBlockingRect::update(const sf::Time& /*dt*/)
 {
+   if (_hit_time.has_value())
+   {
+      std::chrono::duration<float> hit_duration_s = (std::chrono::high_resolution_clock::now() - _hit_time.value());
+      constexpr auto hit_duration_max_s = 0.3f;
+      if (hit_duration_s.count() > hit_duration_max_s)
+      {
+         _hit_time.reset();
+         _hit_flash = 0.0f;
+      }
+      else
+      {
+         _hit_flash = 1.0f - (hit_duration_s.count() / hit_duration_max_s);
+      }
+
+      _flash_shader.setUniform("flash", _hit_flash);
+   }
+
    // // Advance the animation frame up to the maximum number of configured frames
    // ++_state.current_frame;
    // if (_state.current_frame >= _config.frame_count)
@@ -134,13 +156,14 @@ void DestructibleBlockingRect::update(const sf::Time& /*dt*/)
    // }
 }
 
-void DestructibleBlockingRect::onHit(int32_t damage)
+void DestructibleBlockingRect::hit(int32_t damage)
 {
    if (_state.dead)
    {
       return;
    }
 
+   _hit_time = std::chrono::high_resolution_clock::now();
    _state.hits_left -= damage;
 
    if (!_config.hit_sound.empty())
@@ -167,6 +190,7 @@ void DestructibleBlockingRect::setupBody(const GameDeserializeData& data)
 
    _rect_px = sf::FloatRect{{static_cast<float>(x_px), static_cast<float>(y_px)}, {blocking_width_px, blocking_height_px}};
    addChunks(_rect_px);
+   _hitboxes.push_back({_rect_px, {}});
 
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
@@ -195,16 +219,6 @@ void DestructibleBlockingRect::setupSprite(const GameDeserializeData& data)
    _sprite = std::make_unique<sf::Sprite>(*_texture);
    _sprite->setPosition(sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)});
    _sprite->setTextureRect(sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}});
-
-   // // attempt to load a normal map by inserting "_normals" before the file
-   // // extension.  Skip if the file does not exist.
-   // const auto stem = resolved_texture_path.stem().string();
-   // const auto ext = resolved_texture_path.extension().string();
-   // std::filesystem::path normal_map_path = resolved_texture_path.parent_path() / (stem + "_normals" + ext);
-   // if (std::filesystem::exists(normal_map_path))
-   // {
-   //    _normal_map = TexturePool::getInstance().get(normal_map_path);
-   // }
 }
 
 void DestructibleBlockingRect::destroy()

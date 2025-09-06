@@ -151,11 +151,25 @@ std::vector<WorldQuery::CollidedNode> PlayerSword::impactMechanisms(std::unorder
    // luahit should then go to the base class and be renamed.
    // only from group "props"
    auto& registry = Level::getCurrentLevel()->getMechanismRegistry();
-   auto destructible_props = registry.searchMechanismsIf(
+   auto destructible_mechanisms = registry.searchMechanismsIf(
       [](const std::shared_ptr<GameMechanism>& mechanism, std::string_view /*group_key*/)
       {
          const bool is_destructible = mechanism->isDestructible();
          return is_destructible;
+      }
+   );
+
+   std::ranges::for_each(
+      destructible_mechanisms,
+      [&](const auto& mechanism)
+      {
+         if (std::ranges::any_of(
+                mechanism->getHitboxes(),
+                [&](const auto& hitbox) { return hitbox.getRectTranslated().findIntersection(_hit_rect_px).has_value(); }
+             ))
+         {
+            mechanism->hit(sword_damage);
+         }
       }
    );
 

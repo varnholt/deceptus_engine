@@ -65,6 +65,7 @@ public:
 
    virtual bool isDestructible() const;
    virtual const std::vector<Hitbox>& getHitboxes();
+   virtual void hit(int32_t damage);
 
 protected:
    int32_t _z_index{0};
