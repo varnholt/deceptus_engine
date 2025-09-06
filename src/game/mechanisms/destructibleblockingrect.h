@@ -18,9 +18,10 @@ public:
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
-   bool isDestructible() const override;
+   const std::vector<Hitbox>& getHitboxes() override;
 
-   void onHit(int32_t damage = 1);
+   bool isDestructible() const override;
+   void hit(int32_t damage = 1) override;
 
 private:
    enum class Alignment
@@ -64,4 +65,10 @@ private:
 
    b2Body* _body{nullptr};
    b2PolygonShape _shape;
+
+   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+   std::optional<HighResTimePoint> _hit_time;
+   sf::Shader _flash_shader;
+   float _hit_flash{0.0f};
+   std::vector<Hitbox> _hitboxes;
 };

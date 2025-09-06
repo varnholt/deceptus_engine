@@ -35,6 +35,10 @@ const std::vector<Hitbox>& GameMechanism::getHitboxes()
    return empty;
 }
 
+void GameMechanism::hit(int32_t damage)
+{
+}
+
 float GameMechanism::getReferenceVolume() const
 {
    return _reference_volume;
