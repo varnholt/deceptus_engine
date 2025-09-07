@@ -22,6 +22,7 @@ public:
 
    bool isDestructible() const override;
    void hit(int32_t damage = 1) override;
+   b2Body* getBody() const;
 
 private:
    enum class Alignment
@@ -34,20 +35,21 @@ private:
    {
       int32_t frame_width{150};
       int32_t frame_height{163};
-      int32_t frame_count{4};
+      int32_t frame_count{50};
       int32_t row{0};
-      int32_t max_hits{4};
+      int32_t max_damage{30};
       std::string texture_path{"data/sprites/wooden_planks.png"};
-      std::string hit_sound;
-      std::string destroy_sound;
+      std::string hit_sound{"mechanism_destructible_blocking_rect_damage_1.wav"};
+      std::string destroy_sound{"mechanism_destructible_blocking_rect_destroyed_1.wav"};
       int32_t z_index{0};
       Alignment alignment{Alignment::Left};
+      float animation_speed{40.0f};
    };
 
    struct State
    {
-      int32_t hits_left{0};
-      int32_t current_frame{0};
+      int32_t damage_left{0};
+      float current_frame{0};
       bool dead{false};
    };
 

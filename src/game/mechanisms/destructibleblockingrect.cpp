@@ -11,6 +11,7 @@
 #include "game/player/player.h"
 
 #include <filesystem>
+#include <iostream>
 
 namespace
 {
@@ -53,14 +54,18 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
       _config.frame_height = ValueReader::readValue<int32_t>("frame_height", map).value_or(_config.frame_height);
       _config.frame_count = ValueReader::readValue<int32_t>("frame_count", map).value_or(_config.frame_count);
       _config.row = ValueReader::readValue<int32_t>("row", map).value_or(_config.row);
-      _config.max_hits = ValueReader::readValue<int32_t>("hits", map).value_or(_config.max_hits);
+      _config.max_damage = ValueReader::readValue<int32_t>("max_damage", map).value_or(_config.max_damage);
 
       _config.hit_sound = ValueReader::readValue<std::string>("hit_sound", map).value_or(_config.hit_sound);
       _config.destroy_sound = ValueReader::readValue<std::string>("destroy_sound", map).value_or(_config.destroy_sound);
       _config.texture_path = ValueReader::readValue<std::string>("texture", map).value_or(_config.texture_path);
+      _config.animation_speed = ValueReader::readValue<float>("animation_speed", map).value_or(_config.animation_speed);
 
       _config.z_index = ValueReader::readValue<int32_t>("z", map).value_or(_config.z_index);
    }
+
+   Audio::getInstance().addSample(_config.hit_sound);
+   Audio::getInstance().addSample(_config.destroy_sound);
 
    // check alignment
    if (_config.row == 1)
@@ -68,7 +73,7 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
       _config.alignment = Alignment::Right;
    }
 
-   _state.hits_left = _config.max_hits;
+   _state.damage_left = _config.max_damage;
 
    setupBody(data);
    setupSprite(data);
@@ -119,7 +124,7 @@ void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& n
    color.draw(*_sprite, &_flash_shader);
 }
 
-void DestructibleBlockingRect::update(const sf::Time& /*dt*/)
+void DestructibleBlockingRect::update(const sf::Time& dt)
 {
    if (_hit_time.has_value())
    {
@@ -138,22 +143,22 @@ void DestructibleBlockingRect::update(const sf::Time& /*dt*/)
       _flash_shader.setUniform("flash", _hit_flash);
    }
 
-   // // Advance the animation frame up to the maximum number of configured frames
-   // ++_state.current_frame;
-   // if (_state.current_frame >= _config.frame_count)
-   // {
-   //    _state.current_frame = _config.frame_count - 1;
-   // }
+   if (_state.dead)
+   {
+      _state.current_frame += dt.asSeconds() * _config.animation_speed;
 
-   // // Update sprite rect accordingly
-   // if (_sprite)
-   // {
-   //    _sprite->setTextureRect(
-   //       sf::IntRect{
-   //          {_state.current_frame * _config.frame_width, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}
-   //       }
-   //    );
-   // }
+      if (_state.current_frame >= _config.frame_count)
+      {
+         _state.current_frame = _config.frame_count - 1;
+      }
+
+      _sprite->setTextureRect(
+         sf::IntRect{
+            {static_cast<int32_t>(_state.current_frame) * _config.frame_width, _config.row * _config.frame_height},
+            {_config.frame_width, _config.frame_height}
+         }
+      );
+   }
 }
 
 void DestructibleBlockingRect::hit(int32_t damage)
@@ -164,14 +169,14 @@ void DestructibleBlockingRect::hit(int32_t damage)
    }
 
    _hit_time = std::chrono::high_resolution_clock::now();
-   _state.hits_left -= damage;
+   _state.damage_left -= damage;
 
    if (!_config.hit_sound.empty())
    {
       Audio::getInstance().playSample({_config.hit_sound});
    }
 
-   if (_state.hits_left <= 0)
+   if (_state.damage_left <= 0)
    {
       destroy();
    }
@@ -241,4 +246,9 @@ void DestructibleBlockingRect::destroy()
    }
 
    setEnabled(false);
+}
+
+b2Body* DestructibleBlockingRect::getBody() const
+{
+   return _body;
 }
