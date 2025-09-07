@@ -143,7 +143,7 @@ std::vector<WorldQuery::CollidedNode> PlayerSword::impactLuaNode(std::unordered_
    return collided_nodes;
 }
 
-std::vector<WorldQuery::CollidedNode> PlayerSword::impactMechanisms(std::unordered_set<b2Body*>& ignored_bodies)
+std::vector<std::shared_ptr<GameMechanism>> PlayerSword::impactMechanisms(std::unordered_set<b2Body*>& ignored_bodies)
 {
    // could be okay to just go over all destructible mechanisms here
    // read the hitbox, then call hit
