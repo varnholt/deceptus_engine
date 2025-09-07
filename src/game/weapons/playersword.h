@@ -36,7 +36,7 @@ private:
    void cameraShake();
 
    std::vector<WorldQuery::CollidedNode> impactLuaNode(std::unordered_set<b2Body*>& ignored_bodies);
-   std::vector<WorldQuery::CollidedNode> impactMechanisms(std::unordered_set<b2Body*>& ignored_bodies);
+   std::vector<std::shared_ptr<GameMechanism>> impactMechanisms(std::unordered_set<b2Body*>& ignored_bodies);
    std::optional<sf::Vector2f> impactSolidObjects(const WeaponUpdateData& data, std::unordered_set<b2Body*>& ignored_bodies);
 
    b2Vec2 _pos_m;
