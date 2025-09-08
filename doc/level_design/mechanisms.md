@@ -367,6 +367,40 @@ Since you draw the 'rails' of the Death Blocks just to a background layer, this 
 
 ---
 
+## Destructible Blocking Rects
+
+Destructible Blocking Rects work like ordinary blocking rectangles but can be broken after taking enough damage.  Initially the rect acts as a solid barrier that prevents the player from passing.  Each time the rect is hit by the player’s weapon (or another damage source) it plays a flashing "hit" effect and its remaining hit‑points are reduced.  Once its hit‑points drop to zero, the rect plays a destruction animation and disappears, allowing the player to move through.
+
+To place a destructible blocking rect in your level, draw a rectangle in an object layer called `destructible_blocking_rects` or assign the `DestructibleBlockingRect` object type to your rectangle.  Internally the collision area is fixed at 48×96 pixels, whereas the destruction animation may be larger.  The `row` property selects which row of the sprite sheet to use and also determines whether the collision area is aligned to the left (`0`) or right (`1`) of the texture.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`DestructibleBlockingRect`|
+|Object Group|`destructible_blocking_rects`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The object’s z‑index.|
+|texture|string|Path to the sprite sheet used for the block. The default is `data/sprites/wooden_planks.png`.|
+|frame_width|int|Width (in pixels) of a single animation frame. Defaults to `150`.|
+|frame_height|int|Height (in pixels) of a single animation frame. Defaults to `163`.|
+|frame_count|int|Number of frames in the destruction animation. Defaults to `50`.|
+|right_aligned|bool|Set to `true` if the mechanism should be right-aligned. For right-aligned mechanisms, the 2nd row in the sprite sheet is used. Defaults to `false`.|
+|max_damage|int|How much damage the block can withstand before being destroyed. Defaults to `30`.|
+|animation_speed|float|Speed of the destruction animation in frames per second. Defaults to `40.0`.|
+|hit_sound|string|Filename of the sound sample played when the block is hit. Defaults to `mechanism_destructible_blocking_rect_damage_1.wav`.|
+|destroy_sound|string|Filename of the sound sample played when the block is destroyed. Defaults to `mechanism_destructible_blocking_rect_destroyed_1.wav`.|
+
+&nbsp;
+
+&nbsp;
+
+---
+
 
 ## Dialogues
 

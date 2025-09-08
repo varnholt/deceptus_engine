@@ -36,8 +36,8 @@ private:
       int32_t frame_width{150};
       int32_t frame_height{163};
       int32_t frame_count{50};
-      int32_t row{0};
       int32_t max_damage{30};
+      int32_t row{0};
       std::string texture_path{"data/sprites/wooden_planks.png"};
       std::string hit_sound{"mechanism_destructible_blocking_rect_damage_1.wav"};
       std::string destroy_sound{"mechanism_destructible_blocking_rect_destroyed_1.wav"};

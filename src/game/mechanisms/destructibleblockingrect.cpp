@@ -53,7 +53,7 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
       _config.frame_width = ValueReader::readValue<int32_t>("frame_width", map).value_or(_config.frame_width);
       _config.frame_height = ValueReader::readValue<int32_t>("frame_height", map).value_or(_config.frame_height);
       _config.frame_count = ValueReader::readValue<int32_t>("frame_count", map).value_or(_config.frame_count);
-      _config.row = ValueReader::readValue<int32_t>("row", map).value_or(_config.row);
+      _config.alignment = ValueReader::readValue<bool>("right_aligned", map).value_or(false) ? Alignment::Right : _config.alignment;
       _config.max_damage = ValueReader::readValue<int32_t>("max_damage", map).value_or(_config.max_damage);
 
       _config.hit_sound = ValueReader::readValue<std::string>("hit_sound", map).value_or(_config.hit_sound);
@@ -64,14 +64,10 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
       _config.z_index = ValueReader::readValue<int32_t>("z", map).value_or(_config.z_index);
    }
 
+   _config.row = (_config.alignment == Alignment::Right) ? 1 : 0;
+
    Audio::getInstance().addSample(_config.hit_sound);
    Audio::getInstance().addSample(_config.destroy_sound);
-
-   // check alignment
-   if (_config.row == 1)
-   {
-      _config.alignment = Alignment::Right;
-   }
 
    _state.damage_left = _config.max_damage;
 
