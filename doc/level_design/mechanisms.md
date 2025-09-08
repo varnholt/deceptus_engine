@@ -371,7 +371,7 @@ Since you draw the 'rails' of the Death Blocks just to a background layer, this 
 
 Destructible Blocking Rects work like ordinary blocking rectangles but can be broken after taking enough damage.  Initially the rect acts as a solid barrier that prevents the player from passing.  Each time the rect is hit by the player’s weapon (or another damage source) it plays a flashing "hit" effect and its remaining hit‑points are reduced.  Once its hit‑points drop to zero, the rect plays a destruction animation and disappears, allowing the player to move through.
 
-To place a destructible blocking rect in your level, draw a rectangle in an object layer called `destructible_blocking_rects` or assign the `DestructibleBlockingRect` object type to your rectangle.  Internally the collision area is fixed at 48×96 pixels, whereas the destruction animation may be larger.  The `row` property selects which row of the sprite sheet to use and also determines whether the collision area is aligned to the left (`0`) or right (`1`) of the texture.
+To place a destructible blocking rect in your level, draw a rectangle in an object layer called `destructible_blocking_rects` or assign the `DestructibleBlockingRect` object type to your rectangle.  Internally the collision area is fixed at 48×96 pixels, whereas the destruction animation may be larger.  The `right_aligned` property selects whether the collision area is aligned to the left or right of the texture and also determines which row of the sprite sheet to use.
 
 ### Object Type / Object Group
 
