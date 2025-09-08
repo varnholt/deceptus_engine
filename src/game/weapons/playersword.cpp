@@ -173,6 +173,8 @@ std::vector<std::shared_ptr<GameMechanism>> PlayerSword::impactMechanisms(std::u
       }
    );
 
+   // no animation is added here; it is probably sufficient to let impactSolidObjects handle that
+
    return {};
 }
 
