@@ -1,9 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
-project(deceptus VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(APPLE)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
+
+project(deceptus VERSION 1.0 LANGUAGES C CXX)
 
 if(DEFINED ENV{APPVEYOR_BUILD_NUMBER})
     add_definitions(-DBUILD_NUMBER=$ENV{APPVEYOR_BUILD_NUMBER})
@@ -792,6 +797,14 @@ if (APPLE)
    find_library(OPENGL_LIBRARY OpenGL)
    target_link_libraries(deceptus PRIVATE ${OPENGL_LIBRARY} "-framework Cocoa")
 
+  # force use of brew clang (intel)
+  set(HOMEBREW_LLVM "/usr/local/opt/llvm")
+  set(CMAKE_CXX_COMPILER "${HOMEBREW_LLVM}/bin/clang++")
+  set(CMAKE_C_COMPILER "${HOMEBREW_LLVM}/bin/clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I${HOMEBREW_LLVM}/include/c++/v1")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${HOMEBREW_LLVM}/lib -Wl,-rpath,${HOMEBREW_LLVM}/lib")  
+  set(SDKROOT $ENV{SDKROOT})
 endif()
 
 
