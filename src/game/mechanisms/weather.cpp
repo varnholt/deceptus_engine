@@ -3,6 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "game/io/valuereader.h"
 #include "game/level/roomupdater.h"
 #include "game/player/player.h"
 
@@ -18,6 +19,11 @@ std::string_view Weather::objectName() const
 
 void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
+   if (!_enabled)
+   {
+      return;
+   }
+
    if (_wait_until_start_delay_elapsed)
    {
       return;
@@ -82,6 +88,11 @@ bool Weather::matchesRoom() const
 
 void Weather::update(const sf::Time& dt)
 {
+   if (!_enabled)
+   {
+      return;
+   }
+
    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
    const auto intersects = _rect.findIntersection(player_rect).has_value();
    updateWaitDelay(dt, intersects);
@@ -110,15 +121,18 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
    // generic settings
    if (data._tmx_object->_properties)
    {
-      const auto limit_effect_to_room_it = data._tmx_object->_properties->_map.find("limit_effect_to_room");
-      const auto effect_start_delay_s_it = data._tmx_object->_properties->_map.find("effect_start_delay_s");
+      const auto& map = data._tmx_object->_properties->_map;
+      const auto limit_effect_to_room_it = map.find("limit_effect_to_room");
+      const auto effect_start_delay_s_it = map.find("effect_start_delay_s");
+      const auto enabled = ValueReader::readValue<bool>("enabled", map).value_or(true);
+      weather->setEnabled(enabled);
 
-      if (limit_effect_to_room_it != data._tmx_object->_properties->_map.end())
+      if (limit_effect_to_room_it != map.end())
       {
          weather->_limit_effect_to_room = limit_effect_to_room_it->second->_value_bool.value();
       }
 
-      if (effect_start_delay_s_it != data._tmx_object->_properties->_map.end())
+      if (effect_start_delay_s_it != map.end())
       {
          weather->_effect_start_delay = FloatSeconds(effect_start_delay_s_it->second->_value_float.value());
       }
@@ -131,28 +145,29 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
 
       if (data._tmx_object->_properties)
       {
-         const auto z_it = data._tmx_object->_properties->_map.find("z");
-         const auto collide_it = data._tmx_object->_properties->_map.find("collide");
-         const auto drop_count_it = data._tmx_object->_properties->_map.find("drop_count");
-         const auto fall_through_rate_it = data._tmx_object->_properties->_map.find("fall_through_rate");
+         const auto& map = data._tmx_object->_properties->_map;
+         const auto z_it = map.find("z");
+         const auto collide_it = map.find("collide");
+         const auto drop_count_it = map.find("drop_count");
+         const auto fall_through_rate_it = map.find("fall_through_rate");
 
-         if (z_it != data._tmx_object->_properties->_map.end())
+         if (z_it != map.end())
          {
             weather->setZ(z_it->second->_value_int.value());
          }
 
          RainOverlay::RainSettings settings;
-         if (collide_it != data._tmx_object->_properties->_map.end())
+         if (collide_it != map.end())
          {
             settings._collide = collide_it->second->_value_bool.value();
          }
 
-         if (drop_count_it != data._tmx_object->_properties->_map.end())
+         if (drop_count_it != map.end())
          {
             settings._drop_count = drop_count_it->second->_value_int.value();
          }
 
-         if (fall_through_rate_it != data._tmx_object->_properties->_map.end())
+         if (fall_through_rate_it != map.end())
          {
             settings._fall_through_rate = fall_through_rate_it->second->_value_int.value();
          }
@@ -170,21 +185,22 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
 
       if (data._tmx_object->_properties)
       {
-         const auto z_it = data._tmx_object->_properties->_map.find("z");
-         const auto thunderstorm_time_min_it = data._tmx_object->_properties->_map.find("thunderstorm_time_s");
-         const auto silence_time_it = data._tmx_object->_properties->_map.find("silence_time_s");
+         const auto& map = data._tmx_object->_properties->_map;
+         const auto z_it = map.find("z");
+         const auto thunderstorm_time_min_it = map.find("thunderstorm_time_s");
+         const auto silence_time_it = map.find("silence_time_s");
 
-         if (z_it != data._tmx_object->_properties->_map.end())
+         if (z_it != map.end())
          {
             weather->setZ(z_it->second->_value_int.value());
          }
 
-         if (thunderstorm_time_min_it != data._tmx_object->_properties->_map.end())
+         if (thunderstorm_time_min_it != map.end())
          {
             settings._thunderstorm_time_s = thunderstorm_time_min_it->second->_value_float.value();
          }
 
-         if (silence_time_it != data._tmx_object->_properties->_map.end())
+         if (silence_time_it != map.end())
          {
             settings._silence_time_s = silence_time_it->second->_value_float.value();
          }
