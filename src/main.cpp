@@ -1,6 +1,6 @@
 #include "game/game.h"
 
-#ifdef _WIN32
+#ifdef _WIN32 && !defined(DEBUG)
 #include <windows.h>
 #endif
 
@@ -38,14 +38,10 @@ void debugAuthors()
    std::cout << std::endl;
 }
 
-#ifdef __linux__
-int main(int /*argc*/, char** /*argv*/)
+#if defined(_WIN32) && !defined(DEBUG)
+int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/)
 #else
-#ifdef DEBUG
 int main(int /*argc*/, char** /*argv*/)
-#else
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-#endif
 #endif
 {
 #ifndef DEBUG
