@@ -11,8 +11,7 @@ std::vector<Log::ListenerCallback> _log_callbacks;
 
 std::string formatTime(const std::chrono::system_clock::time_point& now)
 {
-   const auto zoned_time = std::chrono::zoned_time{std::chrono::current_zone(), now};
-   return std::format("{:%Y-%m-%d %H:%M:%S}", zoned_time);
+   return std::format("{:%Y-%m-%d %H:%M:%S}", std::chrono::system_clock::now());
 }
 
 void log(Log::Level level, const std::string_view& message, const std::source_location& source_location)
