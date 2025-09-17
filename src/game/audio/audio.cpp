@@ -3,6 +3,7 @@
 #include "framework/tools/log.h"
 #include "game/config/gameconfiguration.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 #include <ranges>
