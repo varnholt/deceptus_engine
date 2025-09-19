@@ -202,7 +202,7 @@ function throw()
 
    -- print(string.format("throw velocity: %f %f", velocity:getX(), velocity:getY()))
 
-   useGun(
+   useWeapon(
       0,
       _pos:getX() + _throw_dir_x * (_points_to_left and 32 or 64),
       _pos:getY(),
