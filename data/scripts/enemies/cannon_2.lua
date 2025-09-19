@@ -129,7 +129,7 @@ end
 function fire()
    playSample(string.format("mechanism_cannon_%d.wav", math.random(1, 4)), 0.5)
 
-   useGun(
+   useWeapon(
       0,
       mPosition:getX() + mX * 32,
       mPosition:getY() + 24,

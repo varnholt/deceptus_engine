@@ -92,7 +92,7 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function attack()
+function shoot()
    _attack = true
 
    _attack_time = _elapsed
@@ -160,7 +160,7 @@ function update(dt)
             yDiff = _position_px:getY() // 24 - _player_position_px:getY() // 24
             if (yDiff < 0 and yDiff > -7 and not idle) then
 
-               attack()
+               shoot()
             end
          end
 

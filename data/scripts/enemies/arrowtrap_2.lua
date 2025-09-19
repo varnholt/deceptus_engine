@@ -229,7 +229,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function fire(muzzle_index)
    playSample("arrow_release_1.wav", 1.0)
-   useGun(
+   useWeapon(
       0,
       _position:getX() + _fire_offset[muzzle_index]:getX(),
       _position:getY() + _fire_offset[muzzle_index]:getY(),

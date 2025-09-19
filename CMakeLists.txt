@@ -632,6 +632,7 @@ set(THIRD_PARTY_FILES
 )
 
 add_executable(deceptus ${GAME_FILES}
+   data/scripts/enemies/archer.lua
    data/scripts/enemies/arrowtrap.lua
    data/scripts/enemies/arrowtrap.lua
    data/scripts/enemies/arrowtrap_2.lua
