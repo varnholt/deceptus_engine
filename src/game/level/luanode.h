@@ -96,7 +96,7 @@ struct LuaNode : public GameMechanism, public GameNode
    void applyForce(const b2Vec2& force);
 
    //! fire a gun
-   void useGun(size_t index, b2Vec2 from, b2Vec2 to);
+   void useWeapon(size_t index, b2Vec2 from, b2Vec2 to);
 
    //! add a skill to the player
    void addPlayerSkill(int32_t);

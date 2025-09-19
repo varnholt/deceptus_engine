@@ -164,7 +164,7 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function walk()
+function updateWalk()
 
    if (isPlayerInReach()) then
       followPlayer()
@@ -183,9 +183,9 @@ function act()
    elseif (mCurrentAction == Action["Die"]) then
       updateDead()
    elseif (mCurrentAction == Action["Walk"]) then
-      walk()
+      updateWalk()
    elseif (mCurrentAction == Action["Attack"]) then
-      attack()
+      shoot()
    end
 
 end
@@ -204,7 +204,7 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function attack()
+function shoot()
 
    -- print(mTime)
 
@@ -215,7 +215,7 @@ function attack()
       if (not mAttackLaunched) then
          mAttackLaunched = true
 
-         if (checkAttackDistance()) then
+         if (checkShootDistance()) then
             damage(2, mPointsLeft and -5000.0 or 5000.0, 0.0)
          end
       end
@@ -311,7 +311,7 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function checkAttackDistance()
+function checkShootDistance()
 
    -- check if player is within range
    distanceToPlayerX = (mPosition:getX() - mPlayerPosition:getX()) / 24.0
@@ -331,14 +331,14 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function canAttack()
+function canShoot()
 
    -- if an attack has started, finish the attack
    if (mAttackStarted) then
       return true
    end
 
-   return checkAttackDistance()
+   return checkShootDistance()
 end
 
 
@@ -353,7 +353,7 @@ function think()
       nextAction = Action["Die"]
    elseif (isHit()) then
       nextAction = Action["Hit"]
-   elseif (canAttack()) then
+   elseif (canShoot()) then
       nextAction = Action["Attack"]
    elseif (not isWaiting()) then
       nextAction = Action["Walk"]
