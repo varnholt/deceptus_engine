@@ -1,15 +1,18 @@
+------------------------------------------------------------------------------------------------------------------------
 -- row 1-2 idle
 -- row 3-4 walking
--- row 5, shoot, archer shoots only when he stops, he cannot shoot an arrow and walk at the same time
+-- row 5-6 aim (13 frames)
+-- row 7-8 shoot (8 frames)
+-- archer shoots only when he stops, he cannot shoot an arrow and walk at the same time
 -- so shooting animation splits in two parts, frame 1-13 he gets an arrow from his quiver
--- then we show the 13th frame for a second in order to be fair with the player and has some time to react with the enemy action
--- frame 14-22 is the shoot animation and back to idle position
--- the 7th row was an experiment to shoot back to back arrows without getting back to idle state, but it needs 4-5 frames to look natural
+-- then we show the 13th frame for a second in order to be fair with the player and has
+-- some time to react with the enemy action frame 14-22 is the shoot animation and back to idle position
 
 require "data/scripts/enemies/constants"
 require "data/scripts/enemies/helpers"
 local v2d = require "data/scripts/enemies/vectorial2"
 
+------------------------------------------------------------------------------------------------------------------------
 -- enemy configuration (constants as locals in lower_case)
 local properties = {
    sprite = "data/sprites/enemy_archer.png", -- each frame is 72x72px
@@ -42,14 +45,20 @@ local arrow_speed             = 1.0
 local position        = v2d.Vector2D(0, 0)
 local player_position = v2d.Vector2D(0, 0)
 
--- single runtime state container (local to module)
+-- various
+local frame_counter = 0
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- state
 local state = {
    action           = action.idle,
+   action_prev      = action.idle,
 
    -- transient flags
    dead             = false,
    waiting          = false,   -- derived from patrol, kept for compatibility via isWaiting()
-   can_shoot        = false,   -- aim finished, allowed to shoot
+   can_use_weapon   = false,   -- aim finished, allowed to shoot
    used_weapon      = false,
 
    -- inputs/orientation
@@ -66,7 +75,8 @@ local state = {
    energy           = 20,
 }
 
--- lightweight patrol component (local)
+------------------------------------------------------------------------------------------------------------------------
+-- patrol
 local patrol = {
    waypoints     = {},   -- { Vector2D, ... }
    index         = 0,    -- 0-based for easier modulo
@@ -171,21 +181,59 @@ end
 
 -- change action & reset per-action transients
 local function change_action(next_action)
-   if next_action == state.action then return false end
 
-   state.action       = next_action
+   if next_action == state.action then
+      return false
+   end
+
+   state.action_prev = state.action
+   state.action = next_action
    state.sprite_index = 0
    state.sprite_time  = 0
    state.used_weapon  = false
-   if next_action ~= action.aim  then state.can_shoot = false end
-   if next_action ~= action.walk then state.key_pressed = 0 end
 
-   log(action_names[next_action] or tostring(next_action))
    return true
 end
 
--- === engine callbacks below must stay global ===
 
+------------------------------------------------------------------------------------------------------------------------
+-- pretty-log all fields of the 'state' table
+function log_state(prefix)
+   prefix = prefix or "state"
+
+   -- collect & sort keys for stable output
+   local keys = {}
+   for k in pairs(state) do
+      keys[#keys + 1] = k
+   end
+   table.sort(keys)
+
+   for _, k in ipairs(keys) do
+      local v = state[k]
+      local t = type(v)
+
+      -- special case for action: print id and name
+      if k == "action" and (t == "number" or t == "string") then
+         local name = action_names[v] or tostring(v)
+         log(prefix .. "." .. k .. " = " .. tostring(v) .. " (" .. name .. ")")
+      else
+         local out
+         if t == "boolean" then
+            out = v and "true" or "false"
+         elseif t == "number" then
+            out = string.format("%.6g", v)
+         elseif t == "string" then
+            out = string.format("%q", v)
+         else
+            out = tostring(v)
+         end
+         log(prefix .. "." .. k .. " = " .. out)
+      end
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
 function initialize()
    patrol:reset()
 
@@ -195,7 +243,7 @@ function initialize()
    addHitbox(-18, -18, 36, 48)
 
    -- weapon: type, interval (ms), damage, gravity, scale, radius
-   addWeapon(WeaponType["Bow"], 1000, 60, 0.0, 0.1)
+   addWeapon(WeaponType["Bow"], 1, 60, 0.0, 0.1)
 end
 
 function retrieveProperties()
@@ -233,8 +281,7 @@ end
 -- true if our facing matches the player's relative position
 function isPointingTowardsPlayer()
    local player_is_left = player_position:getX() < position:getX()
-   return (player_is_left and state.points_left)
-      or ((not player_is_left) and (not state.points_left))
+   return player_is_left == state.points_left
 end
 
 function followPlayer()
@@ -250,7 +297,6 @@ function followPlayer()
    end
 end
 
--- ai queries use patrol
 function isWaiting()
    return patrol:is_waiting()
 end
@@ -296,12 +342,6 @@ function updateShoot(dt)
 
       state.used_weapon = true
    end
-
-   -- reset state when the animation has finished
-   if state.sprite_index == sprite_counts[action.shoot + 1] - 1 then
-      state.used_weapon = false
-      state.can_shoot = false
-   end
 end
 
 function isPlayerInReach()
@@ -315,8 +355,12 @@ function hit(damage_value)
 end
 
 function updateAim(dt)
-   if state.sprite_index == sprite_counts[action.aim + 1] - 1 then
-      state.can_shoot = true
+
+   -- allow transition to shoot when last sprite has been reached
+   state.can_use_weapon = (state.sprite_index == sprite_counts[action.aim + 1] - 1)
+
+   -- actually 1s of wait is needed here still!
+   if (state.can_use_weapon) then
       log("good to shoot")
    end
 end
@@ -342,7 +386,7 @@ end
 
 function isShootPossible()
    if isPointingTowardsPlayer() then
-      if state.can_shoot and isInShootingDistance() then
+      if state.can_use_weapon and isInShootingDistance() then
          return true
       end
    end
@@ -381,7 +425,7 @@ function act(dt)
 end
 
 function updateSprite(action_changed)
-   local count  = sprite_counts[state.action + 1]
+   local count = sprite_counts[state.action + 1]
    local offset = sprite_offsets[state.action + 1]
    local update_required = false
 
@@ -425,6 +469,9 @@ function update(dt)
    act(dt)
 
    updateKeysPressed(state.key_pressed)
+
+   frame_counter = frame_counter + 1
+   if frame_counter % 60 == 0 then log_state() end
 end
 
 function setPath(name, tbl)
