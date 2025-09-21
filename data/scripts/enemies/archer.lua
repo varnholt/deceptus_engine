@@ -1,486 +1,434 @@
--- The sprite sheet enemy_archer.png has 72x72px tiles laid out in pairs of
--- rows for each animation (facing right and facing left). The sprite_counts
--- and sprite_offsets tables below describe how many frames each action
--- contains and where in the sprite sheet those animations begin.
--- animations use a longer sequence of frames to draw and release the bow.
-
 -- row 1-2 idle
 -- row 3-4 walking
 -- row 5, shoot, archer shoots only when he stops, he cannot shoot an arrow and walk at the same time
 -- so shooting animation splits in two parts, frame 1-13 he gets an arrow from his quiver
 -- then we show the 13th frame for a second in order to be fair with the player and has some time to react with the enemy action
--- frame 14-22 is the shoot animation and back to idle possition
--- the 7th row was an experiment to shoot back to back arrows without getting back to idle state, but i am not sure
--- it needs 4-5 frames to look natural
+-- frame 14-22 is the shoot animation and back to idle position
+-- the 7th row was an experiment to shoot back to back arrows without getting back to idle state, but it needs 4-5 frames to look natural
 
 require "data/scripts/enemies/constants"
 require "data/scripts/enemies/helpers"
-v2d = require "data/scripts/enemies/vectorial2"
+local v2d = require "data/scripts/enemies/vectorial2"
 
--- enemy configuration
-properties = {
-   -- use the supplied archer sprite sheet.  Each frame is 72x72px
-   sprite = "data/sprites/enemy_archer.png",
+-- enemy configuration (constants as locals in lower_case)
+local properties = {
+   sprite = "data/sprites/enemy_archer.png", -- each frame is 72x72px
    velocity_walk_max = 1.0,
-   acceleration_ground = 0.1
+   acceleration_ground = 0.1,
 }
 
--- enumeration for the different action states.  These map directly to
--- indices in the sprite_counts/sprite_offsets tables below.
-ACTION = {
-   idle   = 0,
-   walk   = 1,
-   aim    = 2,
-   shoot  = 3,
-   die    = 4,
+local action = {
+   idle  = 0,
+   walk  = 1,
+   aim   = 2,
+   shoot = 3,
+   die   = 4,
 }
 
-SPRITE_COUNTS  = {12, 12, 13, 8, 1}
-SPRITE_OFFSETS = {0, 144, 288, 432, 576}
+-- reverse map (number -> name) for nicer logs
+local action_names = {}
+for name, id in pairs(action) do
+   action_names[id] = name
+end
 
+local sprite_counts  = {12, 12, 13, 8, 1}
+local sprite_offsets = {0, 144, 288, 432, 576}
 
-------------------------------------------------------------------------------------------------------------------------
--- internal state variables
+local tile_distance_to_follow = 15
+local tile_distance_to_aim    = 10
+local arrow_speed             = 1.0
 
-TILE_DISTANCE_TO_FOLLOW = 15
-TILE_DISTANCE_TO_AIM = 10
+-- world-space references
+local position        = v2d.Vector2D(0, 0)
+local player_position = v2d.Vector2D(0, 0)
 
-patrol_timer    = 1
-key_pressed     = 0
-position        = v2d.Vector2D(0, 0)
-player_position = v2d.Vector2D(0, 0)
-points_left     = false
-sprite_time     = math.random(0, 3)
-sprite_index    = 0
-current_action  = ACTION["idle"]
-energy          = 20
-dead            = false
-waiting         = false
-aiming          = false
-_started  = false
-_launched = false
-is_hit          = false
+-- single runtime state container (local to module)
+local state = {
+   action           = action.idle,
 
--- Arrow speed used when firing from the bow.  Positive values shoot to
--- the right, negative values shoot to the left.
-ARROW_SPEED = 1.0
+   -- transient flags
+   dead             = false,
+   waiting          = false,   -- derived from patrol, kept for compatibility via isWaiting()
+   can_shoot        = false,   -- aim finished, allowed to shoot
+   used_weapon      = false,
 
+   -- inputs/orientation
+   key_pressed      = 0,
+   points_left      = false,   -- facing left?
+   last_points_left = false,   -- for sprite refresh on flip
 
-------------------------------------------------------------------------------------------------------------------------
+   -- animation timing
+   sprite_time      = math.random(0, 3),
+   sprite_index     = 0,
+
+   -- misc
+   wait_time        = 0,       -- not used by patrol anymore
+   energy           = 20,
+}
+
+-- lightweight patrol component (local)
+local patrol = {
+   waypoints     = {},   -- { Vector2D, ... }
+   index         = 0,    -- 0-based for easier modulo
+   epsilon       = 1.0,  -- snap distance on x
+   waiting       = false,
+   wait_time     = 0.0,
+   wait_duration = 3.0,  -- seconds to wait at each point
+}
+
+function patrol:reset()
+   self.waypoints = {}
+   self.index = 0
+   self.waiting = false
+   self.wait_time = 0.0
+   self.epsilon = 1.0
+end
+
+function patrol:load_waypoints(list_vec2d)
+   self.waypoints = list_vec2d or {}
+   self.index = 0
+   self.waiting = false
+   self.wait_time = 0.0
+end
+
+-- helper for setPath(name, table) input
+function patrol:load_from_kv_table(tbl)
+   local v, i, x = {}, 0, 0.0
+   for _, value in pairs(tbl) do
+      if (i % 2) == 0 then
+         x = value
+      else
+         v[#v + 1] = v2d.Vector2D(x, value)
+      end
+      i = i + 1
+   end
+   self:load_waypoints(v)
+end
+
+function patrol:is_waiting()
+   return self.waiting
+end
+
+function patrol:advance()
+   local count = #self.waypoints
+   if count == 0 then return end
+   self.index = (self.index + 1) % count
+end
+
+function patrol:begin_wait()
+   self.waiting = true
+   self.wait_time = 0.0
+end
+
+function patrol:update_wait(dt)
+   if not self.waiting then return end
+   self.wait_time = self.wait_time + dt
+   if self.wait_time >= self.wait_duration then
+      self.waiting = false
+      self:advance()
+   end
+end
+
+-- drive movement toward current waypoint; returns true if it handled movement
+function patrol:update(dt, self_pos, goLeft, goRight)
+   local count = #self.waypoints
+   if count == 0 then
+      return false
+   end
+
+   if self.waiting then
+      self:update_wait(dt)
+      return true
+   end
+
+   local target = self.waypoints[self.index + 1] -- lua arrays are 1-based
+   local tx = target:getX()
+   local px = self_pos:getX()
+
+   if px > tx + self.epsilon then
+      goLeft()
+      return true
+   elseif px < tx - self.epsilon then
+      goRight()
+      return true
+   else
+      -- arrived: begin wait phase
+      self:begin_wait()
+      -- stop moving while waiting
+      state.key_pressed = 0
+      return true
+   end
+end
+
+-- helpers
+local function press(key)
+   state.key_pressed = (state.key_pressed | key)
+end
+
+local function release(key)
+   state.key_pressed = (state.key_pressed & (~key))
+end
+
+-- change action & reset per-action transients
+local function change_action(next_action)
+   if next_action == state.action then return false end
+
+   state.action       = next_action
+   state.sprite_index = 0
+   state.sprite_time  = 0
+   state.used_weapon  = false
+   if next_action ~= action.aim  then state.can_shoot = false end
+   if next_action ~= action.walk then state.key_pressed = 0 end
+
+   log(action_names[next_action] or tostring(next_action))
+   return true
+end
+
+-- === engine callbacks below must stay global ===
+
 function initialize()
-   -- reset patrol state
-   patrol_path     = {}
-   patrol_index    = 0
-   patrol_epsilon  = 1.0
+   patrol:reset()
 
    -- collision and sprite setup (same as skeleton)
    addShapeRect(0.2, 0.5, 0.0, 0.23)
    updateSpriteRect(0, 0, 0, 72, 72)
    addHitbox(-18, -18, 36, 48)
 
-   -- equip the bow weapon.  The parameters are:
-   -- - type,
-   -- - interval (ms),
-   -- - damage,
-   -- - gravity
-   -- - scale and
-   -- - radius
-   addWeapon(WeaponType["Bow"], 50, 60, 0.0, 0.1)
+   -- weapon: type, interval (ms), damage, gravity, scale, radius
+   addWeapon(WeaponType["Bow"], 1000, 60, 0.0, 0.1)
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
-function timeout(id)
-   -- simply reset waiting when the patrol timer fires
-   if (id == patrol_timer) then
-      waiting = false
-   end
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
 function retrieveProperties()
    updateProperties(properties)
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
 function keyPressed(key)
-   key_pressed = (key_pressed | key)
+   press(key)
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
 function keyReleased(key)
-   key_pressed = key_pressed & (~key)
+   release(key)
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
 function goLeft()
-   points_left = true
-   keyReleased(Key["KeyRight"])
-   keyPressed(Key["KeyLeft"])
+   state.points_left = true
+   release(Key["KeyRight"])
+   press(Key["KeyLeft"])
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
 function goRight()
-   points_left = false
-   keyReleased(Key["KeyLeft"])
-   keyPressed(Key["KeyRight"])
+   state.points_left = false
+   release(Key["KeyLeft"])
+   press(Key["KeyRight"])
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
    position = v2d.Vector2D(x, y)
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
    player_position = v2d.Vector2D(x, y)
 end
 
+-- true if our facing matches the player's relative position
+function isPointingTowardsPlayer()
+   local player_is_left = player_position:getX() < position:getX()
+   return (player_is_left and state.points_left)
+      or ((not player_is_left) and (not state.points_left))
+end
 
-------------------------------------------------------------------------------------------------------------------------
--- follow the player horizontally if within reach
 function followPlayer()
-
    -- bring player into aim range
-   local epsilon = TILE_DISTANCE_TO_AIM * 24
+   local epsilon = tile_distance_to_aim * 24
 
-   if (player_position:getX() > position:getX() + epsilon) then
+   if player_position:getX() > position:getX() + epsilon then
       goRight()
-   elseif (player_position:getX() < position:getX() - epsilon) then
+   elseif player_position:getX() < position:getX() - epsilon then
       goLeft()
    else
-      key_pressed = 0
-   end
-
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
-function wait()
-
-   if (waiting) then
-      return
-   end
-
-   -- count entries explicitly (0-based array -> # is unreliable)
-   local count = 0
-   for _ in pairs(patrol_path) do
-      count = count + 1
-   end
-
-   -- no path -> nothing to wait/patrol for
-   if (count == 0) then
-      key_pressed = 0
-      return
-   end
-
-   waiting = true
-   key_pressed = 0
-   timer(3000, patrol_timer)
-
-   patrol_index = patrol_index + 1
-   if (patrol_index >= count) then   -- wrap for 0..count-1
-      patrol_index = 0
+      state.key_pressed = 0
    end
 end
 
+-- ai queries use patrol
+function isWaiting()
+   return patrol:is_waiting()
+end
 
-------------------------------------------------------------------------------------------------------------------------
-function patrol()
-   local key = patrol_path[patrol_index]
-   if not key then
-      -- path not set yet or index out of bounds -> idle this tick
-      key_pressed = 0
-      return
-   end
-
-   local key_vec = v2d.Vector2D(key:getX(), key:getY())
-   if     (position:getX() > key_vec:getX() + patrol_epsilon) then
-      goLeft()
-   elseif (position:getX() < key_vec:getX() - patrol_epsilon) then
-      goRight()
-   else
-      wait()
+function patrol_update(dt)
+   local handled = patrol:update(dt, position, goLeft, goRight)
+   if not handled then
+      state.key_pressed = 0
    end
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
-function updateWalk()
-   if (isPlayerInReach()) then
+function updateWalk(dt)
+   if isPlayerInReach() then
       followPlayer()
    else
-      patrol()
+      patrol_update(dt)
    end
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
-function act()
-   if (current_action == ACTION["aim"]) then
-      updateAim()
-   elseif (current_action == ACTION["die"]) then
-      updateDead()
-   elseif (current_action == ACTION["walk"]) then
-      updateWalk()
-   elseif (current_action == ACTION["shoot"]) then
-      updateShoot()
-   end
-
-   -- updateHit()
-end
-
-------------------------------------------------------------------------------------------------------------------------
--- when dying just wait for the last death frame then remove
-function updateDead()
-   if (sprite_index == SPRITE_COUNTS[ACTION["die"] + 1] - 1) then
+function updateDead(dt)
+   if state.sprite_index == sprite_counts[action.die + 1] - 1 then
       die()
    end
 end
 
-------------------------------------------------------------------------------------------------------------------------
--- attack behaviour for the archer.  During the attack animation the
--- archer draws the bow and releases an arrow.  When sprite_index
--- reaches a particular frame we spawn an arrow using useWeapon().  After the
--- animation finishes the attack flag is reset.
-function updateShoot()
-
+function updateShoot(dt)
    -- stop moving during an attack
-   key_pressed = 0
-   attack_started = true
+   state.key_pressed = 0
 
-   -- choose a frame roughly half way through the animation to release
-   -- the arrow.  For a 20 frame attack sequence frame 10 is a good
-   -- compromise between draw and release.
-   if (sprite_index == 10) then
-      if (not attack_launched) then
-         attack_launched = true
-         -- compute initial projectile velocity based on facing direction
-         local vx = points_left and -ARROW_SPEED or ARROW_SPEED
-         local vy = 0.0
-         useWeapon(
-            0,
-            position:getX(),
-            position:getY(),
-            vx,
-            vy
-         )
-      end
-   else
-      -- reset state when the animation has finished
-      if (sprite_index == SPRITE_COUNTS[ACTION["shoot"] + 1] - 1) then
-         attack_started = false
-      end
-      attack_launched = false
+   -- fire once at a specific frame
+   if state.sprite_index == 10 and not state.used_weapon then
+      local vx = state.points_left and -arrow_speed or arrow_speed
+
+      log("shoot")
+
+      useWeapon(
+         0,
+         position:getX(),
+         position:getY(),
+         vx,
+         0.0
+      )
+
+      state.used_weapon = true
+   end
+
+   -- reset state when the animation has finished
+   if state.sprite_index == sprite_counts[action.shoot + 1] - 1 then
+      state.used_weapon = false
+      state.can_shoot = false
    end
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
--- determine whether the player is close enough to follow
 function isPlayerInReach()
-
-   local in_reach = false
-
    -- check if player is within range in x direction
    local distance_to_player_x = position:getX() // 24 - player_position:getX() // 24
-   if (math.abs(distance_to_player_x) < TILE_DISTANCE_TO_FOLLOW) then
-      -- y direction check can be expanded if needed
-      in_reach = true
-   end
-
-   return in_reach
+   return math.abs(distance_to_player_x) < tile_distance_to_follow
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
--- called when this enemy takes damage
 function hit(damage_value)
-   if (not is_hit) then
-      is_hit = true
-      key_pressed = 0
-      energy = energy - damage_value
-      if (energy <= 0) then
-         dead = true
-      end
+   -- todo: apply damage and possibly set state.dead = true
+end
+
+function updateAim(dt)
+   if state.sprite_index == sprite_counts[action.aim + 1] - 1 then
+      state.can_shoot = true
+      log("good to shoot")
    end
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
--- update aim animation
-function updateAim()
-   -- TODO.
-end
-
-
-
-------------------------------------------------------------------------------------------------------------------------
--- update the hit animation and reset the hit flag when finished
-function updateHit()
-   if (is_hit) then
-      if (sprite_index >= SPRITE_COUNTS[ACTION["aim"] + 1] - 1) then
-         is_hit = false
+function isInShootingDistance()
+   if isPointingTowardsPlayer() then
+      -- check x distance
+      local distance_to_player_x = (position:getX() - player_position:getX()) / 24.0
+      if math.abs(distance_to_player_x) <= tile_distance_to_aim then
+         -- check y distance
+         local distance_to_player_y = position:getY() // 24 - player_position:getY() // 24
+         if math.abs(distance_to_player_y) <= 1 then
+            return true
+         end
       end
    end
+   return false
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
-function isHit()
-   return is_hit
+function isDead()
+   return state.dead
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
-function isWaiting()
-   return waiting
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
--- Determine whether the enemy can attack.  For ranged enemies we keep the
--- same conditions as the skeleton: we only attack if the player is close
--- enough horizontally or if an attack is currently in progress.  This
--- prevents the archer from firing repeatedly after starting an attack.
-function checkShootDistance()
-   local distance_to_player_x = (position:getX() - player_position:getX()) / 24.0
-   if (math.abs(distance_to_player_x) <= TILE_DISTANCE_TO_AIM) then
-      local distance_to_player_y = position:getY() // 24 - player_position:getY() // 24
-      if (math.abs(distance_to_player_y) <= 1) then
+function isShootPossible()
+   if isPointingTowardsPlayer() then
+      if state.can_shoot and isInShootingDistance() then
          return true
       end
    end
    return false
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
-function canAim()
-   if (aiming) then
-      return true
-   end
-   return checkShootDistance()
-end
-
-
-------------------------------------------------------------------------------------------------------------------------
-function canShoot()
---   if (aiming) then
---      return true
---   end
---   return checkDistance()
-   return false
-end
-
-
--- workflow
--- 1) patrol/idle or walk towards player
--- 2) walk towards player until in  range
--- 3) aim (if player is in range)
--- 4) shoot (if player is in range)
-
-
---------------------------------------------------------------------------------------------------------------------
--- decide which animation state we should be in for this frame
 function think()
-   local next_action = current_action
-   if (dead) then
-      next_action = ACTION["die"]
-   elseif (canAim()) then
-      next_action = ACTION["aim"]
-   elseif (canShoot()) then
-      next_action = ACTION["shoot"]
-   elseif (not isWaiting()) then
-      next_action = ACTION["walk"]
+   local next_action
+
+   if isDead() then
+      next_action = action.die
+   elseif isShootPossible() then
+      next_action = action.shoot
+   elseif isInShootingDistance() then
+      next_action = action.aim
+   elseif not isWaiting() then
+      next_action = action.walk
    else
-      next_action = ACTION["idle"]
+      next_action = action.idle
    end
-   local changed = (next_action ~= current_action)
+
+   local changed = change_action(next_action)
    updateSprite(changed)
-   current_action = next_action
 end
 
+function act(dt)
+   if state.action == action.aim then
+      updateAim(dt)
+   elseif state.action == action.die then
+      updateDead(dt)
+   elseif state.action == action.walk then
+      updateWalk(dt)
+   elseif state.action == action.shoot then
+      updateShoot(dt)
+   end
+end
 
-------------------------------------------------------------------------------------------------------------------------
--- update sprite indices based on current action, facing direction and time
-function updateSprite(changed)
-   local sprite_count = SPRITE_COUNTS[current_action + 1]
-   local sprite_offset = SPRITE_OFFSETS[current_action + 1]
+function updateSprite(action_changed)
+   local count  = sprite_counts[state.action + 1]
+   local offset = sprite_offsets[state.action + 1]
    local update_required = false
-   local points_left_prev = points_left
 
    -- reset sprite index when the action changes
-   local sprite_index_local
-   if (changed) then
-      sprite_index_local = 0
+   local next_index
+   if action_changed then
+      next_index = 0
       update_required = true
-      sprite_time = 0
    else
-      sprite_index_local = math.floor(math.fmod(sprite_time * 15.0, sprite_count))
+      next_index = math.floor(math.fmod(state.sprite_time * 15.0, count))
    end
 
    -- update sprite index on change
-   if (sprite_index_local ~= sprite_index) then
-      sprite_index = sprite_index_local
+   if next_index ~= state.sprite_index then
+      state.sprite_index = next_index
       update_required = true
    end
 
-   -- update when direction changes
-   if (points_left_prev ~= points_left) then
+   -- update when orientation changes (compare with last frame)
+   if state.last_points_left ~= state.points_left then
       update_required = true
+      state.last_points_left = state.points_left
    end
 
    -- perform the actual sprite sheet update
-   if (update_required) then
+   if update_required then
       updateSpriteRect(
          0,
-         sprite_index * 72,
-         sprite_offset + (points_left and 72 or 0),
+         state.sprite_index * 72,
+         offset + (state.points_left and 72 or 0),
          72,
          72
       )
    end
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
 function update(dt)
-   sprite_time = sprite_time + dt
+   state.sprite_time = state.sprite_time + dt
+
    think()
-   act()
-   updateKeysPressed(key_pressed)
+   act(dt)
+
+   updateKeysPressed(state.key_pressed)
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
--- parse patrol path definitions passed from the level editor
-function setPath(name, table)
-
-   local i = 0
-   local x = 0.0
-   local y = 0.0
-   local v = {}
-
-   for key, value in pairs(table) do
-      if ((i % 2) == 0) then
-         x = value
-      else
-         y = value
-         v[(i - 1) / 2] = v2d.Vector2D(x, y)
-      end
-      i = i + 1
+function setPath(name, tbl)
+   if name == "path" then
+      patrol:load_from_kv_table(tbl)
    end
-
-   if (name == "path") then
-      patrol_path = v
-   end
-
 end
