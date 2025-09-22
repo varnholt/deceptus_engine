@@ -8,6 +8,9 @@
 -- then we show the 13th frame for a second in order to be fair with the player and has
 -- some time to react with the enemy action frame 14-22 is the shoot animation and back to idle position
 
+-- TODO
+-- once aim is started, it should not be cancelled when player moves out of scope
+
 require "data/scripts/enemies/constants"
 require "data/scripts/enemies/helpers"
 local v2d = require "data/scripts/enemies/vectorial2"
@@ -58,7 +61,7 @@ local state = {
    -- transient flags
    dead             = false,
    waiting          = false,   -- derived from patrol, kept for compatibility via isWaiting()
-   can_use_weapon   = false,   -- aim finished, allowed to shoot
+   aiming_done      = false,   -- aim finished, allowed to shoot
    used_weapon      = false,
 
    -- inputs/orientation
@@ -288,11 +291,23 @@ function followPlayer()
    -- bring player into aim range
    local epsilon = tile_distance_to_aim * 24
 
+   -- |
+   -- |
+   -- |
+   -- |
+   -- |            P       < allowed_distance >  E
+   -- +-----------------------------------------------------
+
+-- local distance_to_player_y = math.abs(position:getY() // 24 - player_position:getY() // 24)
+   -- if distance_to_player_y <= 1 then
+   --   end
    if player_position:getX() > position:getX() + epsilon then
       goRight()
    elseif player_position:getX() < position:getX() - epsilon then
       goLeft()
    else
+      -- align orientation with player
+      state.points_left = player_position:getX() < position:getX()
       state.key_pressed = 0
    end
 end
@@ -323,31 +338,40 @@ function updateDead(dt)
 end
 
 function updateShoot(dt)
-   -- stop moving during an attack
    state.key_pressed = 0
 
-   -- fire once at a specific frame
-   if state.sprite_index == 10 and not state.used_weapon then
-      local vx = state.points_left and -arrow_speed or arrow_speed
+   if (isShootPossible()) then
 
-      log("shoot")
+      -- fire once at a specific frame
+      if state.sprite_index == 10 and not state.used_weapon then
+         local vx = state.points_left and -arrow_speed or arrow_speed
 
-      useWeapon(
-         0,
-         position:getX(),
-         position:getY(),
-         vx,
-         0.0
-      )
+         log("shoot")
 
-      state.used_weapon = true
+         useWeapon(
+            0,
+            position:getX(),
+            position:getY(),
+            vx,
+            0.0
+         )
+
+         state.used_weapon = true
+      end
+   else
+      -- new aiming required if shot is no longer possible
+      state.aiming_done = false
    end
+end
+
+function updateIdle(dt)
+   state.key_pressed = 0
 end
 
 function isPlayerInReach()
    -- check if player is within range in x direction
-   local distance_to_player_x = position:getX() // 24 - player_position:getX() // 24
-   return math.abs(distance_to_player_x) < tile_distance_to_follow
+   local distance_to_player_x = math.abs(position:getX() // 24 - player_position:getX() // 24)
+   return distance_to_player_x < tile_distance_to_follow
 end
 
 function hit(damage_value)
@@ -355,13 +379,13 @@ function hit(damage_value)
 end
 
 function updateAim(dt)
+   state.key_pressed = 0
 
-   -- allow transition to shoot when last sprite has been reached
-   state.can_use_weapon = (state.sprite_index == sprite_counts[action.aim + 1] - 1)
-
-   -- actually 1s of wait is needed here still!
-   if (state.can_use_weapon) then
-      log("good to shoot")
+   if (isShootPossible()) then
+      -- allow transition to shoot when last sprite has been reached
+      state.aiming_done = (state.sprite_index == sprite_counts[action.aim + 1] - 1)
+   else
+      state.aiming_done = false
    end
 end
 
@@ -371,8 +395,8 @@ function isInShootingDistance()
       local distance_to_player_x = (position:getX() - player_position:getX()) / 24.0
       if math.abs(distance_to_player_x) <= tile_distance_to_aim then
          -- check y distance
-         local distance_to_player_y = position:getY() // 24 - player_position:getY() // 24
-         if math.abs(distance_to_player_y) <= 1 then
+         local distance_to_player_y = math.abs(position:getY() // 24 - player_position:getY() // 24)
+         if distance_to_player_y <= 1 then
             return true
          end
       end
@@ -385,12 +409,7 @@ function isDead()
 end
 
 function isShootPossible()
-   if isPointingTowardsPlayer() then
-      if state.can_use_weapon and isInShootingDistance() then
-         return true
-      end
-   end
-   return false
+   return isPointingTowardsPlayer() and isInShootingDistance() and state.aiming_done
 end
 
 function think()
@@ -421,6 +440,8 @@ function act(dt)
       updateWalk(dt)
    elseif state.action == action.shoot then
       updateShoot(dt)
+   elseif state.action == action.idle then
+      updateIdle(dt)
    end
 end
 
@@ -470,8 +491,8 @@ function update(dt)
 
    updateKeysPressed(state.key_pressed)
 
-   frame_counter = frame_counter + 1
-   if frame_counter % 60 == 0 then log_state() end
+   -- frame_counter = frame_counter + 1
+   -- if frame_counter % 60 == 0 then log_state() end
 end
 
 function setPath(name, tbl)
