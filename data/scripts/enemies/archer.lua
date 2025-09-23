@@ -235,7 +235,6 @@ function log_state(prefix)
    end
 end
 
-
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
    patrol:reset()
@@ -340,10 +339,14 @@ end
 function updateShoot(dt)
    state.key_pressed = 0
 
+   log("SHOOT!")
+
    if (isShootPossible()) then
 
+      log(state.sprite_index)
+
       -- fire once at a specific frame
-      if state.sprite_index == 10 and not state.used_weapon then
+      if state.sprite_index == sprite_counts[action.shoot + 1] - 1 and not state.used_weapon then
          local vx = state.points_left and -arrow_speed or arrow_speed
 
          log("shoot")
@@ -381,7 +384,7 @@ end
 function updateAim(dt)
    state.key_pressed = 0
 
-   if (isShootPossible()) then
+   if (isPointingTowardsPlayer() and isInShootingDistance()) then
       -- allow transition to shoot when last sprite has been reached
       state.aiming_done = (state.sprite_index == sprite_counts[action.aim + 1] - 1)
    else
@@ -409,7 +412,18 @@ function isDead()
 end
 
 function isShootPossible()
-   return isPointingTowardsPlayer() and isInShootingDistance() and state.aiming_done
+   local pointing_towards_player = isPointingTowardsPlayer()
+   local in_shooting_distance    = isInShootingDistance()
+   local aiming_done             = state.aiming_done
+
+   --   log(string.format(
+   --      "shoot check: pointing_towards_player=%s, in_shooting_distance=%s, aiming_done=%s",
+   --      tostring(pointing_towards_player),
+   --      tostring(in_shooting_distance),
+   --      tostring(aiming_done)
+   --   ))
+
+   return pointing_towards_player and in_shooting_distance and aim_ready
 end
 
 function think()
@@ -491,8 +505,8 @@ function update(dt)
 
    updateKeysPressed(state.key_pressed)
 
-   -- frame_counter = frame_counter + 1
-   -- if frame_counter % 60 == 0 then log_state() end
+   frame_counter = frame_counter + 1
+   if frame_counter % 60 == 0 then log_state() end
 end
 
 function setPath(name, tbl)
