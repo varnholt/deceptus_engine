@@ -7,9 +7,13 @@
 -- so shooting animation splits in two parts, frame 1-13 he gets an arrow from his quiver
 -- then we show the 13th frame for a second in order to be fair with the player and has
 -- some time to react with the enemy action frame 14-22 is the shoot animation and back to idle position
-
--- TODO
+--
+-- aiming and shooting
 -- once aim is started, it should not be cancelled when player moves out of scope
+--
+-- after shooting
+-- player should go into idle for a certain period
+
 
 require "data/scripts/enemies/constants"
 require "data/scripts/enemies/helpers"
@@ -60,7 +64,6 @@ local state = {
 
    -- transient flags
    dead             = false,
-   waiting          = false,   -- derived from patrol, kept for compatibility via isWaiting()
    aiming_done      = false,   -- aim finished, allowed to shoot
    used_weapon      = false,
 
@@ -73,10 +76,21 @@ local state = {
    sprite_time      = math.random(0, 3),
    sprite_index     = 0,
 
+   -- after shooting
+   recovery_elapsed = 0.0,
+   recovery_duration = 2.0,
+
    -- misc
-   wait_time        = 0,       -- not used by patrol anymore
    energy           = 20,
 }
+
+-- TODO: increase recovery_elapsed when recovering
+-- right after shooting
+function state:is_recovered()
+   -- return self.waiting
+   return false
+end
+
 
 ------------------------------------------------------------------------------------------------------------------------
 -- patrol
@@ -312,7 +326,7 @@ function followPlayer()
 end
 
 function isWaiting()
-   return patrol:is_waiting()
+   return patrol:is_waiting() -- or not state:is_recovered()
 end
 
 function patrol_update(dt)
@@ -339,31 +353,24 @@ end
 function updateShoot(dt)
    state.key_pressed = 0
 
-   log("SHOOT!")
 
-   if (isShootPossible()) then
+   log(state.sprite_index)
 
-      log(state.sprite_index)
+   -- fire once at a specific frame
+   if state.sprite_index == sprite_counts[action.shoot + 1] - 1 and not state.used_weapon then
+      local vx = state.points_left and -arrow_speed or arrow_speed
 
-      -- fire once at a specific frame
-      if state.sprite_index == sprite_counts[action.shoot + 1] - 1 and not state.used_weapon then
-         local vx = state.points_left and -arrow_speed or arrow_speed
+      log("shoot")
 
-         log("shoot")
+      useWeapon(
+         0,
+         position:getX(),
+         position:getY(),
+         vx,
+         0.0
+      )
 
-         useWeapon(
-            0,
-            position:getX(),
-            position:getY(),
-            vx,
-            0.0
-         )
-
-         state.used_weapon = true
-      end
-   else
-      -- new aiming required if shot is no longer possible
-      state.aiming_done = false
+      state.used_weapon = true
    end
 end
 
@@ -384,12 +391,8 @@ end
 function updateAim(dt)
    state.key_pressed = 0
 
-   if (isPointingTowardsPlayer() and isInShootingDistance()) then
-      -- allow transition to shoot when last sprite has been reached
-      state.aiming_done = (state.sprite_index == sprite_counts[action.aim + 1] - 1)
-   else
-      state.aiming_done = false
-   end
+   -- transition to shoot when last sprite has been reached
+   state.aiming_done = (state.sprite_index == sprite_counts[action.aim + 1] - 1)
 end
 
 function isInShootingDistance()
@@ -412,18 +415,7 @@ function isDead()
 end
 
 function isShootPossible()
-   local pointing_towards_player = isPointingTowardsPlayer()
-   local in_shooting_distance    = isInShootingDistance()
-   local aiming_done             = state.aiming_done
-
-   --   log(string.format(
-   --      "shoot check: pointing_towards_player=%s, in_shooting_distance=%s, aiming_done=%s",
-   --      tostring(pointing_towards_player),
-   --      tostring(in_shooting_distance),
-   --      tostring(aiming_done)
-   --   ))
-
-   return pointing_towards_player and in_shooting_distance and aim_ready
+   return state.aiming_done and not state.used_weapon
 end
 
 function think()
