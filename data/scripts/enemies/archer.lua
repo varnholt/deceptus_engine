@@ -76,7 +76,13 @@ local state = {
    sprite_time      = math.random(0, 3),
    sprite_index     = 0,
 
+   -- before shooting
+   wait_after_aim_started = false,
+   wait_after_aim_elapsed = 0.0,
+   wait_after_aim_duration = 1.0,
+
    -- after shooting
+   recovery_started = false,
    recovery_elapsed = 0.0,
    recovery_duration = 2.0,
 
@@ -84,12 +90,32 @@ local state = {
    energy           = 20,
 }
 
--- TODO: increase recovery_elapsed when recovering
--- right after shooting
-function state:is_recovered()
-   -- return self.waiting
-   return false
+function state:reset_recovering()
+   self.recovery_elapsed = 0.0
+   self.recovery_started = false
 end
+
+function state:is_recovering()
+   return self.recovery_elapsed < self.recovery_duration
+end
+
+function state:recover(dt)
+   self.recovery_elapsed = self.recovery_elapsed + dt
+end
+
+function state:reset_waiting_after_aim()
+   self.wait_after_aim_elapsed = 0.0
+   self.wait_after_aim_started = false
+end
+
+function state:is_waiting_after_aim()
+   return self.wait_after_aim_elapsed < self.wait_after_aim_duration
+end
+
+function state:wait_after_aim(dt)
+   self.wait_after_aim_elapsed = self.wait_after_aim_elapsed + dt
+end
+
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -326,7 +352,7 @@ function followPlayer()
 end
 
 function isWaiting()
-   return patrol:is_waiting() -- or not state:is_recovered()
+   return patrol:is_waiting() -- or state:is_recovering()
 end
 
 function patrol_update(dt)
@@ -350,11 +376,25 @@ function updateDead(dt)
    end
 end
 
+
+-- shooting consists of the steps below
+-- 1) after aiming, wait a second
+-- 2) shoot
+-- 3) after shooting, wait another second
 function updateShoot(dt)
    state.key_pressed = 0
 
-
    log(state.sprite_index)
+
+   -- wait before shooting
+   if (not state.wait_after_aim_started) then
+      if (state:is_waiting_after_aim()) then
+         state:wait_after_aim(dt)
+         print("waiting after aim")
+      else
+         print("waiting after aim done")
+      end
+   end
 
    -- fire once at a specific frame
    if state.sprite_index == sprite_counts[action.shoot + 1] - 1 and not state.used_weapon then
@@ -371,6 +411,16 @@ function updateShoot(dt)
       )
 
       state.used_weapon = true
+   end
+
+   -- recover after shoot
+   if (state.used_weapon) then
+      if (state:is_recovering()) then
+         print("recovery")
+         state:recover(dt)
+      else
+         print("recovery done")
+      end
    end
 end
 
