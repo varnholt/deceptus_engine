@@ -13,546 +13,522 @@
 --
 -- after shooting
 -- player should go into idle for a certain period
+------------------------------------------------------------------------------------------------------------------------
 
+-- ---------------------------------------------------------------------------------------------------------------------
+-- state machine (archer)
+--
+--           +-------------------------+
+--           |                         v
+--   patrol  +----->  patrol_wait  ->  aim  ->  aim_wait  ->  shoot  ->  recover
+--     ^  \                      ^                         ^                |
+--     |   \                     |                         |                |
+--     |    \--------------------+-------------------------+----------------+
+--     |                                (no interrupt during aim)
+--     |  (walk a<->b; if no path -> idle pose)
+--     +--------------------------------------------------------------------+
+--                                          after recover: either aim (if still valid)
+--                                          or continue patrolling
+-- ---------------------------------------------------------------------------------------------------------------------
+-- we explicitly show the flow here so design intent is obvious without reading code.
+-- “aim is never interrupted” is enforced by transitions, not flags.
 
 require "data/scripts/enemies/constants"
 require "data/scripts/enemies/helpers"
-local v2d = require "data/scripts/enemies/vectorial2"
+local vector2       = require "data/scripts/enemies/vectorial2"
+local StateMachine  = require "data/scripts/enemies/state_machine" -- dedicated reusable state machine
 
 ------------------------------------------------------------------------------------------------------------------------
--- enemy configuration (constants as locals in lower_case)
-local properties = {
-   sprite = "data/sprites/enemy_archer.png", -- each frame is 72x72px
-   velocity_walk_max = 1.0,
-   acceleration_ground = 0.1,
+-- enemy configuration (constants as locals)
+-- bundling constants in one place makes balancing and tuning easier.
+local archer_properties = {
+   sprite_path         = "data/sprites/enemy_archer.png", -- each frame is 72x72px
+   maximum_walk_speed  = 1.0,
+   ground_acceleration = 0.1,
 }
 
-local action = {
-   idle  = 0,
-   walk  = 1,
-   aim   = 2,
-   shoot = 3,
-   die   = 4,
+-- state ids: sprite-backed + logical states (the last three reuse sprite rows via aliasing)
+local state_id = {
+   idle        = 0,
+   walk        = 1,
+   aim         = 2,
+   shoot       = 3,
+   die         = 4,
+   patrol_wait = 5,
+   aim_wait    = 6,
+   recover     = 7,
 }
 
--- reverse map (number -> name) for nicer logs
-local action_names = {}
-for name, id in pairs(action) do
-   action_names[id] = name
-end
+-- id->name map for readable logging
+local state_names = {}
+for name, id in pairs(state_id) do state_names[id] = name end
 
-local sprite_counts  = {12, 12, 13, 8, 1}
-local sprite_offsets = {0, 144, 288, 432, 576}
+-- sprite meta (first 5 are real rows; logical states are drawn via aliases below)
+-- we prefer not to duplicate sprite rows for timing-only states like aim_wait/recover.
+local sprite_frame_counts  = {12, 12, 13, 8, 1, 1, 1, 12}
+local sprite_row_offsets   = {0, 144, 288, 432, 576, 0, 0, 0}
 
-local tile_distance_to_follow = 15
-local tile_distance_to_aim    = 10
-local arrow_speed             = 1.0
+-- how logical states map to real rows
+-- “aim_wait” keeps the final aim frame visible; “recover” idles but with a timed lockout.
+local sprite_alias = {
+   [state_id.patrol_wait] = { base = state_id.idle,  index = 0,   loop = false }, -- hold idle frame
+   [state_id.aim_wait]    = { base = state_id.aim,   index = 12,  loop = false }, -- hold last aim frame (0-based 12)
+   [state_id.recover]     = { base = state_id.idle,  index = nil, loop = true  }, -- idle loop during recovery
+}
 
--- world-space references
-local position        = v2d.Vector2D(0, 0)
-local player_position = v2d.Vector2D(0, 0)
+-- tuning knobs (units are tiles/seconds where possible)
+-- these are easy to surface for designers later without touching logic.
+local follow_distance_tiles   = 15
+local aim_distance_tiles      = 10
+local arrow_speed_units       = 1.0
+local aim_hold_duration_s     = 1.0
+local recover_duration_s      = 2.0
 
--- various
-local frame_counter = 0
+-- world-space references (kept here to avoid global lookups and simplify testing)
+local archer_position         = vector2.Vector2D(0, 0)
+local player_position         = vector2.Vector2D(0, 0)
 
+-- visual state (sprite, input, orientation)
+-- we keep rendering and input intent here, separate from ai logic in the state machine.
+local archer_visual_state = {
+   action_id        = state_id.idle,
+   previous_action  = state_id.idle,
 
-------------------------------------------------------------------------------------------------------------------------
--- state
-local state = {
-   action           = action.idle,
-   action_prev      = action.idle,
+   key_pressed_mask = 0,
+   facing_left      = false,
+   last_facing_left = false,
 
-   -- transient flags
-   dead             = false,
-   aiming_done      = false,   -- aim finished, allowed to shoot
-   used_weapon      = false,
-
-   -- inputs/orientation
-   key_pressed      = 0,
-   points_left      = false,   -- facing left?
-   last_points_left = false,   -- for sprite refresh on flip
-
-   -- animation timing
-   sprite_time      = math.random(0, 3),
+   sprite_time_s    = math.random(0, 3),
    sprite_index     = 0,
 
-   -- before shooting
-   wait_after_aim_started = false,
-   wait_after_aim_elapsed = 0.0,
-   wait_after_aim_duration = 1.0,
-
-   -- after shooting
-   recovery_started = false,
-   recovery_elapsed = 0.0,
-   recovery_duration = 2.0,
-
-   -- misc
-   energy           = 20,
+   energy           = 20,   -- placeholder for future combat logic
 }
-
-function state:reset_recovering()
-   self.recovery_elapsed = 0.0
-   self.recovery_started = false
-end
-
-function state:is_recovering()
-   return self.recovery_elapsed < self.recovery_duration
-end
-
-function state:recover(dt)
-   self.recovery_elapsed = self.recovery_elapsed + dt
-end
-
-function state:reset_waiting_after_aim()
-   self.wait_after_aim_elapsed = 0.0
-   self.wait_after_aim_started = false
-end
-
-function state:is_waiting_after_aim()
-   return self.wait_after_aim_elapsed < self.wait_after_aim_duration
-end
-
-function state:wait_after_aim(dt)
-   self.wait_after_aim_elapsed = self.wait_after_aim_elapsed + dt
-end
-
-
 
 ------------------------------------------------------------------------------------------------------------------------
--- patrol
-local patrol = {
-   waypoints     = {},   -- { Vector2D, ... }
-   index         = 0,    -- 0-based for easier modulo
-   epsilon       = 1.0,  -- snap distance on x
-   waiting       = false,
-   wait_time     = 0.0,
-   wait_duration = 3.0,  -- seconds to wait at each point
+-- patrol behavior
+-- we isolate waypoint logic so the state machine only decides “walk vs wait”, not how to walk.
+local patrol_behavior = {
+   waypoints     = {},
+   index_zero    = 0,    -- 0-based index to make modulo wrap easier
+   epsilon_x     = 1.0,  -- positional tolerance before we declare arrival
+   is_waiting    = false,
+   waited_s      = 0.0,
+   wait_duration = 3.0,  -- time to pause at a waypoint
 }
 
-function patrol:reset()
-   self.waypoints = {}
-   self.index = 0
-   self.waiting = false
-   self.wait_time = 0.0
-   self.epsilon = 1.0
+function patrol_behavior:reset()
+   self.waypoints  = {}
+   self.index_zero = 0
+   self.is_waiting = false
+   self.waited_s   = 0.0
+   self.epsilon_x  = 1.0
 end
 
-function patrol:load_waypoints(list_vec2d)
-   self.waypoints = list_vec2d or {}
-   self.index = 0
-   self.waiting = false
-   self.wait_time = 0.0
+function patrol_behavior:load_waypoints(list_vec2d)
+   self.waypoints  = list_vec2d or {}
+   self.index_zero = 0
+   self.is_waiting = false
+   self.waited_s   = 0.0
 end
 
--- helper for setPath(name, table) input
-function patrol:load_from_kv_table(tbl)
-   local v, i, x = {}, 0, 0.0
-   for _, value in pairs(tbl) do
-      if (i % 2) == 0 then
-         x = value
+-- helper for setPath(name, table)
+function patrol_behavior:load_from_kv_table(table_kv)
+   -- the engine gives us a flat kv array: x1,y1,x2,y2,... so we rebuild points here.
+   local points, index, pending_x = {}, 0, 0.0
+   for _, value in pairs(table_kv) do
+      if (index % 2) == 0 then
+         pending_x = value
       else
-         v[#v + 1] = v2d.Vector2D(x, value)
+         points[#points + 1] = vector2.Vector2D(pending_x, value)
       end
-      i = i + 1
+      index = index + 1
    end
-   self:load_waypoints(v)
+   self:load_waypoints(points)
 end
 
-function patrol:is_waiting()
-   return self.waiting
+function patrol_behavior:start_wait()
+   -- we centralize wait bookkeeping to keep state code lean.
+   self.is_waiting = true
+   self.waited_s   = 0.0
 end
 
-function patrol:advance()
-   local count = #self.waypoints
-   if count == 0 then return end
-   self.index = (self.index + 1) % count
-end
-
-function patrol:begin_wait()
-   self.waiting = true
-   self.wait_time = 0.0
-end
-
-function patrol:update_wait(dt)
-   if not self.waiting then return end
-   self.wait_time = self.wait_time + dt
-   if self.wait_time >= self.wait_duration then
-      self.waiting = false
-      self:advance()
+function patrol_behavior:update_wait(delta_time)
+   if not self.is_waiting then return end
+   self.waited_s = self.waited_s + delta_time
+   if self.waited_s >= self.wait_duration then
+      self.is_waiting = false
+      local count = #self.waypoints
+      if count > 0 then
+         self.index_zero = (self.index_zero + 1) % count
+      end
    end
 end
 
--- drive movement toward current waypoint; returns true if it handled movement
-function patrol:update(dt, self_pos, goLeft, goRight)
+-- returns true if it handled movement; false means no path configured
+function patrol_behavior:update_move(delta_time, self_position, move_left, move_right)
    local count = #self.waypoints
    if count == 0 then
-      return false
+      return false  -- no path -> let the state machine decide between idle/aim
    end
 
-   if self.waiting then
-      self:update_wait(dt)
+   if self.is_waiting then
+      self:update_wait(delta_time)
       return true
    end
 
-   local target = self.waypoints[self.index + 1] -- lua arrays are 1-based
-   local tx = target:getX()
-   local px = self_pos:getX()
+   local target      = self.waypoints[self.index_zero + 1] -- lua arrays are 1-based
+   local target_x    = target:getX()
+   local position_x  = self_position:getX()
 
-   if px > tx + self.epsilon then
-      goLeft()
-      return true
-   elseif px < tx - self.epsilon then
-      goRight()
-      return true
+   if position_x > target_x + self.epsilon_x then
+      move_left();  return true
+   elseif position_x < target_x - self.epsilon_x then
+      move_right(); return true
    else
-      -- arrived: begin wait phase
-      self:begin_wait()
-      -- stop moving while waiting
-      state.key_pressed = 0
+      self:start_wait()
+      archer_visual_state.key_pressed_mask = 0
       return true
    end
 end
 
--- helpers
-local function press(key)
-   state.key_pressed = (state.key_pressed | key)
-end
-
-local function release(key)
-   state.key_pressed = (state.key_pressed & (~key))
-end
-
--- change action & reset per-action transients
-local function change_action(next_action)
-
-   if next_action == state.action then
-      return false
-   end
-
-   state.action_prev = state.action
-   state.action = next_action
-   state.sprite_index = 0
-   state.sprite_time  = 0
-   state.used_weapon  = false
-
-   return true
-end
-
-
 ------------------------------------------------------------------------------------------------------------------------
--- pretty-log all fields of the 'state' table
-function log_state(prefix)
-   prefix = prefix or "state"
-
-   -- collect & sort keys for stable output
-   local keys = {}
-   for k in pairs(state) do
-      keys[#keys + 1] = k
-   end
-   table.sort(keys)
-
-   for _, k in ipairs(keys) do
-      local v = state[k]
-      local t = type(v)
-
-      -- special case for action: print id and name
-      if k == "action" and (t == "number" or t == "string") then
-         local name = action_names[v] or tostring(v)
-         log(prefix .. "." .. k .. " = " .. tostring(v) .. " (" .. name .. ")")
-      else
-         local out
-         if t == "boolean" then
-            out = v and "true" or "false"
-         elseif t == "number" then
-            out = string.format("%.6g", v)
-         elseif t == "string" then
-            out = string.format("%q", v)
-         else
-            out = tostring(v)
-         end
-         log(prefix .. "." .. k .. " = " .. out)
-      end
-   end
+-- input helpers (kept tiny on purpose)
+local function press_key(key)
+   archer_visual_state.key_pressed_mask = (archer_visual_state.key_pressed_mask | key)
 end
 
-------------------------------------------------------------------------------------------------------------------------
-function initialize()
-   patrol:reset()
-
-   -- collision and sprite setup (same as skeleton)
-   addShapeRect(0.2, 0.5, 0.0, 0.23)
-   updateSpriteRect(0, 0, 0, 72, 72)
-   addHitbox(-18, -18, 36, 48)
-
-   -- weapon: type, interval (ms), damage, gravity, scale, radius
-   addWeapon(WeaponType["Bow"], 1, 60, 0.0, 0.1)
+local function release_key(key)
+   archer_visual_state.key_pressed_mask = (archer_visual_state.key_pressed_mask & (~key))
 end
 
-function retrieveProperties()
-   updateProperties(properties)
+function keyPressed(key)  press_key(key)   end
+function keyReleased(key) release_key(key) end
+
+function move_left()
+   archer_visual_state.facing_left = true
+   release_key(Key["KeyRight"])
+   press_key(Key["KeyLeft"])
 end
 
-function keyPressed(key)
-   press(key)
-end
-
-function keyReleased(key)
-   release(key)
-end
-
-function goLeft()
-   state.points_left = true
-   release(Key["KeyRight"])
-   press(Key["KeyLeft"])
-end
-
-function goRight()
-   state.points_left = false
-   release(Key["KeyLeft"])
-   press(Key["KeyRight"])
+function move_right()
+   archer_visual_state.facing_left = false
+   release_key(Key["KeyLeft"])
+   press_key(Key["KeyRight"])
 end
 
 function movedTo(x, y)
-   position = v2d.Vector2D(x, y)
+   archer_position = vector2.Vector2D(x, y)
 end
 
 function playerMovedTo(x, y)
-   player_position = v2d.Vector2D(x, y)
+   player_position = vector2.Vector2D(x, y)
 end
 
--- true if our facing matches the player's relative position
-function isPointingTowardsPlayer()
-   local player_is_left = player_position:getX() < position:getX()
-   return player_is_left == state.points_left
+------------------------------------------------------------------------------------------------------------------------
+-- sensing and small decision helpers
+-- we keep these pure and reusable so transition rules stay readable.
+
+local function is_facing_player()
+   local player_is_left = player_position:getX() < archer_position:getX()
+   return player_is_left == archer_visual_state.facing_left
 end
 
-function followPlayer()
-   -- bring player into aim range
-   local epsilon = tile_distance_to_aim * 24
-
-   -- |
-   -- |
-   -- |
-   -- |
-   -- |            P       < allowed_distance >  E
-   -- +-----------------------------------------------------
-
--- local distance_to_player_y = math.abs(position:getY() // 24 - player_position:getY() // 24)
-   -- if distance_to_player_y <= 1 then
-   --   end
-   if player_position:getX() > position:getX() + epsilon then
-      goRight()
-   elseif player_position:getX() < position:getX() - epsilon then
-      goLeft()
+local function follow_player()
+   -- move just enough to bring player into aim range, then stop and face them.
+   local epsilon_pixels = aim_distance_tiles * 24
+   if player_position:getX() > archer_position:getX() + epsilon_pixels then
+      move_right()
+   elseif player_position:getX() < archer_position:getX() - epsilon_pixels then
+      move_left()
    else
-      -- align orientation with player
-      state.points_left = player_position:getX() < position:getX()
-      state.key_pressed = 0
+      archer_visual_state.facing_left = player_position:getX() < archer_position:getX()
+      archer_visual_state.key_pressed_mask = 0
    end
 end
 
-function isWaiting()
-   return patrol:is_waiting() -- or state:is_recovering()
+local function is_player_in_follow_range()
+   local dx_tiles = math.abs(archer_position:getX() // 24 - player_position:getX() // 24)
+   return dx_tiles < follow_distance_tiles
 end
 
-function patrol_update(dt)
-   local handled = patrol:update(dt, position, goLeft, goRight)
-   if not handled then
-      state.key_pressed = 0
-   end
+local function is_player_in_shoot_range()
+   if not is_facing_player() then return false end
+   local dx_tiles = (archer_position:getX() - player_position:getX()) / 24.0
+   if math.abs(dx_tiles) > aim_distance_tiles then return false end
+   local dy_tiles = math.abs(archer_position:getY() // 24 - player_position:getY() // 24)
+   return dy_tiles <= 1
 end
 
-function updateWalk(dt)
-   if isPlayerInReach() then
-      followPlayer()
-   else
-      patrol_update(dt)
-   end
-end
-
-function updateDead(dt)
-   if state.sprite_index == sprite_counts[action.die + 1] - 1 then
-      die()
-   end
-end
-
-
--- shooting consists of the steps below
--- 1) after aiming, wait a second
--- 2) shoot
--- 3) after shooting, wait another second
-function updateShoot(dt)
-   state.key_pressed = 0
-
-   log(state.sprite_index)
-
-   -- wait before shooting
-   if (not state.wait_after_aim_started) then
-      if (state:is_waiting_after_aim()) then
-         state:wait_after_aim(dt)
-         print("waiting after aim")
-      else
-         print("waiting after aim done")
-      end
-   end
-
-   -- fire once at a specific frame
-   if state.sprite_index == sprite_counts[action.shoot + 1] - 1 and not state.used_weapon then
-      local vx = state.points_left and -arrow_speed or arrow_speed
-
-      log("shoot")
-
-      useWeapon(
-         0,
-         position:getX(),
-         position:getY(),
-         vx,
-         0.0
-      )
-
-      state.used_weapon = true
-   end
-
-   -- recover after shoot
-   if (state.used_weapon) then
-      if (state:is_recovering()) then
-         print("recovery")
-         state:recover(dt)
-      else
-         print("recovery done")
-      end
-   end
-end
-
-function updateIdle(dt)
-   state.key_pressed = 0
-end
-
-function isPlayerInReach()
-   -- check if player is within range in x direction
-   local distance_to_player_x = math.abs(position:getX() // 24 - player_position:getX() // 24)
-   return distance_to_player_x < tile_distance_to_follow
-end
-
-function hit(damage_value)
-   -- todo: apply damage and possibly set state.dead = true
-end
-
-function updateAim(dt)
-   state.key_pressed = 0
-
-   -- transition to shoot when last sprite has been reached
-   state.aiming_done = (state.sprite_index == sprite_counts[action.aim + 1] - 1)
-end
-
-function isInShootingDistance()
-   if isPointingTowardsPlayer() then
-      -- check x distance
-      local distance_to_player_x = (position:getX() - player_position:getX()) / 24.0
-      if math.abs(distance_to_player_x) <= tile_distance_to_aim then
-         -- check y distance
-         local distance_to_player_y = math.abs(position:getY() // 24 - player_position:getY() // 24)
-         if distance_to_player_y <= 1 then
-            return true
-         end
-      end
-   end
+local function is_archer_dead()
+   -- todo: connect to health/damage; this stays here so we can also reuse the state machine for other enemies
    return false
 end
 
-function isDead()
-   return state.dead
-end
-
-function isShootPossible()
-   return state.aiming_done and not state.used_weapon
-end
-
-function think()
-   local next_action
-
-   if isDead() then
-      next_action = action.die
-   elseif isShootPossible() then
-      next_action = action.shoot
-   elseif isInShootingDistance() then
-      next_action = action.aim
-   elseif not isWaiting() then
-      next_action = action.walk
-   else
-      next_action = action.idle
-   end
-
-   local changed = change_action(next_action)
-   updateSprite(changed)
-end
-
-function act(dt)
-   if state.action == action.aim then
-      updateAim(dt)
-   elseif state.action == action.die then
-      updateDead(dt)
-   elseif state.action == action.walk then
-      updateWalk(dt)
-   elseif state.action == action.shoot then
-      updateShoot(dt)
-   elseif state.action == action.idle then
-      updateIdle(dt)
+------------------------------------------------------------------------------------------------------------------------
+-- optional logging
+-- stable sorted output makes diffs readable and debugging predictable.
+function log_state(prefix)
+   prefix = prefix or "archer"
+   local keys = {}
+   for key in pairs(archer_visual_state) do keys[#keys + 1] = key end
+   table.sort(keys)
+   for _, key in ipairs(keys) do
+      local value = archer_visual_state[key]
+      local kind  = type(value)
+      if key == "action_id" and (kind == "number" or kind == "string") then
+         local name = state_names[value] or tostring(value)
+         log(prefix .. "." .. key .. " = " .. tostring(value) .. " (" .. name .. ")")
+      else
+         local out
+         if kind == "boolean" then
+            out = value and "true" or "false"
+         elseif kind == "number" then
+            out = string.format("%.6g", value)
+         elseif kind == "string" then
+            out = string.format("%q", value)
+         else
+            out = tostring(value)
+         end
+         log(prefix .. "." .. key .. " = " .. out)
+      end
    end
 end
 
-function updateSprite(action_changed)
-   local count = sprite_counts[state.action + 1]
-   local offset = sprite_offsets[state.action + 1]
-   local update_required = false
+------------------------------------------------------------------------------------------------------------------------
+-- build the state machine
+-- states do side effects; transitions encode the “story” and constraints declaratively.
 
-   -- reset sprite index when the action changes
+local archer_state_machine = StateMachine.new(state_id.idle)
+
+-- small shoot-state flag
+-- “shoot” needs a one-shot side effect (firing an arrow) on the first frame only.
+local shot_fired_in_this_cycle = false
+
+-- state registrations (lightweight: effect-only; most branching is in transition rules)
+archer_state_machine
+:add_state(state_id.walk, {
+   on_update = function(delta_time, sm)
+      if is_player_in_follow_range() then
+         follow_player()
+      else
+         local handled = patrol_behavior:update_move(delta_time, archer_position, move_left, move_right)
+         if not handled then
+            archer_visual_state.key_pressed_mask = 0
+         end
+      end
+   end,
+})
+:add_state(state_id.patrol_wait, {
+   on_enter  = function()
+      patrol_behavior:start_wait()
+      archer_visual_state.key_pressed_mask = 0
+   end,
+   on_update = function(delta_time, sm)
+      archer_visual_state.key_pressed_mask = 0
+      patrol_behavior:update_wait(delta_time)
+   end,
+})
+:add_state(state_id.aim, {
+   on_enter  = function()
+      -- “aim” cannot be interrupted; we rely on animation completion to move on.
+      archer_visual_state.key_pressed_mask = 0
+      shot_fired_in_this_cycle = false
+   end,
+   on_update = function(delta_time, sm)
+      archer_visual_state.key_pressed_mask = 0
+   end,
+})
+:add_state(state_id.aim_wait, {
+   on_enter  = function() archer_visual_state.key_pressed_mask = 0 end,
+   on_update = function(delta_time, sm) archer_visual_state.key_pressed_mask = 0 end,
+})
+:add_state(state_id.shoot, {
+   on_enter  = function()
+      archer_visual_state.key_pressed_mask = 0
+      shot_fired_in_this_cycle = false
+   end,
+   on_update = function(delta_time, sm)
+      -- we only spawn the arrow once at the start of the shoot row for deterministic gameplay.
+      archer_visual_state.key_pressed_mask = 0
+      if not shot_fired_in_this_cycle and archer_visual_state.sprite_index == 0 then
+         local velocity_x = archer_visual_state.facing_left and -arrow_speed_units or arrow_speed_units
+         useWeapon(0, archer_position:getX(), archer_position:getY(), velocity_x, 0.0)
+         shot_fired_in_this_cycle = true
+      end
+   end,
+})
+:add_state(state_id.recover, {
+   on_enter  = function()
+      -- recovery intentionally locks actions for a short time to telegraph vulnerability.
+      archer_visual_state.key_pressed_mask = 0
+   end,
+   on_update = function(delta_time, sm)
+      archer_visual_state.key_pressed_mask = 0
+   end,
+})
+:add_state(state_id.idle, {
+   on_update = function(delta_time, sm)
+      -- idle still updates patrol wait so newly assigned paths kick in without a state bounce.
+      archer_visual_state.key_pressed_mask = 0
+      patrol_behavior:update_wait(delta_time)
+   end,
+})
+:add_state(state_id.die, {
+   on_update = function(delta_time, sm)
+      -- wait until the death row is finished to remove the entity for a clean visual exit.
+      if archer_visual_state.sprite_index == sprite_frame_counts[state_id.die + 1] - 1 then
+         die()
+      end
+   end,
+})
+
+-- tiny helpers used by guards
+local function has_finished_aim_row()
+   return archer_visual_state.sprite_index >= (sprite_frame_counts[state_id.aim + 1] - 1)
+end
+
+local function has_finished_shoot_row()
+   return archer_visual_state.sprite_index >= (sprite_frame_counts[state_id.shoot + 1] - 1)
+end
+
+-- transition rules (priority order matters within each list)
+-- these read like english rules and can be tweaked without touching state code.
+
+archer_state_machine
+:add_transition_rules(state_id.walk, {
+   { to = state_id.aim,        when = function(_) return is_player_in_follow_range() and is_player_in_shoot_range() end },
+   { to = state_id.patrol_wait,when = function(_) return patrol_behavior.is_waiting end },
+   { to = state_id.idle,       when = function(_) return #patrol_behavior.waypoints == 0 end },
+})
+:add_transition_rules(state_id.patrol_wait, {
+   { to = state_id.aim,  when = function(_) return is_player_in_shoot_range() end },
+   { to = state_id.walk, when = function(_) return not patrol_behavior.is_waiting end },
+})
+:add_transition_rule(state_id.aim,      state_id.aim_wait,  function(_) return has_finished_aim_row() end)
+:add_transition_rule(state_id.aim_wait, state_id.shoot,     function(sm) return sm.elapsed_time_in_state >= aim_hold_duration_s end)
+:add_transition_rule(state_id.shoot,    state_id.recover,   function(_)  return has_finished_shoot_row() end)
+:add_transition_rules(state_id.recover, {
+   { to = state_id.aim,  when = function(sm) return sm.elapsed_time_in_state >= recover_duration_s and is_player_in_shoot_range() end },
+   { to = state_id.walk, when = function(sm) return sm.elapsed_time_in_state >= recover_duration_s and not is_player_in_shoot_range() and #patrol_behavior.waypoints > 0 end },
+   { to = state_id.idle, when = function(sm) return sm.elapsed_time_in_state >= recover_duration_s and not is_player_in_shoot_range() and #patrol_behavior.waypoints == 0 end },
+})
+:add_transition_rules(state_id.idle, {
+   { to = state_id.aim,  when = function(_) return is_player_in_shoot_range() end },
+   { to = state_id.walk, when = function(_) return #patrol_behavior.waypoints > 0 and not patrol_behavior.is_waiting end },
+})
+
+-- global rule (checked for all states)
+archer_state_machine:add_global_rule(state_id.die, function(_) return is_archer_dead() end)
+
+------------------------------------------------------------------------------------------------------------------------
+-- sprite update with alias support
+-- rendering concerns stay separate from state logic; aliasing avoids duplicate sprite rows.
+
+local function update_sprite_frame(action_changed)
+   archer_visual_state.previous_action = archer_visual_state.action_id
+   archer_visual_state.action_id       = archer_state_machine.current_state_id
+
+   local current_id   = archer_visual_state.action_id
+   local alias        = sprite_alias[current_id]
+   local draw_row_id  = current_id
+   local forced_index = nil
+   local is_non_loop  = (current_id == state_id.aim) or (current_id == state_id.shoot)
+
+   if alias then
+      draw_row_id  = alias.base
+      is_non_loop  = not alias.loop
+      forced_index = alias.index
+   end
+
+   local frame_count  = sprite_frame_counts[draw_row_id + 1]
+   local row_offset   = sprite_row_offsets[draw_row_id + 1]
+   local needs_update = false
+
    local next_index
    if action_changed then
-      next_index = 0
-      update_required = true
+      next_index   = forced_index or 0
+      needs_update = true
    else
-      next_index = math.floor(math.fmod(state.sprite_time * 15.0, count))
+      if forced_index ~= nil then
+         next_index = forced_index
+      else
+         -- sprites run at 15 fps; we derive frame from time to avoid manual counters.
+         local frame_candidate = math.floor(archer_visual_state.sprite_time_s * 15.0)
+         if is_non_loop then
+            next_index = math.min(frame_candidate, frame_count - 1)
+         else
+            next_index = math.floor(math.fmod(frame_candidate, frame_count))
+         end
+      end
    end
 
-   -- update sprite index on change
-   if next_index ~= state.sprite_index then
-      state.sprite_index = next_index
-      update_required = true
+   if next_index ~= archer_visual_state.sprite_index then
+      archer_visual_state.sprite_index = next_index
+      needs_update = true
    end
 
-   -- update when orientation changes (compare with last frame)
-   if state.last_points_left ~= state.points_left then
-      update_required = true
-      state.last_points_left = state.points_left
+   if archer_visual_state.last_facing_left ~= archer_visual_state.facing_left then
+      needs_update = true
+      archer_visual_state.last_facing_left = archer_visual_state.facing_left
    end
 
-   -- perform the actual sprite sheet update
-   if update_required then
+   if needs_update then
       updateSpriteRect(
          0,
-         state.sprite_index * 72,
-         offset + (state.points_left and 72 or 0),
+         archer_visual_state.sprite_index * 72,
+         row_offset + (archer_visual_state.facing_left and 72 or 0),
          72,
          72
       )
    end
 end
 
-function update(dt)
-   state.sprite_time = state.sprite_time + dt
+------------------------------------------------------------------------------------------------------------------------
+-- engine entry points
+-- these match the engine expectations and keep setup/update pathways obvious.
 
-   think()
-   act(dt)
+function initialize()
+   patrol_behavior:reset()
 
-   updateKeysPressed(state.key_pressed)
+   addShapeRect(0.2, 0.5, 0.0, 0.23)
+   updateSpriteRect(0, 0, 0, 72, 72)
+   addHitbox(-18, -18, 36, 48)
 
-   frame_counter = frame_counter + 1
-   if frame_counter % 60 == 0 then log_state() end
+   -- weapon: type, interval (ms), damage, gravity, scale, radius
+   -- the bow is configured once here; shot velocity is decided at fire time.
+   addWeapon(WeaponType["Bow"], 1, 60, 0.0, 0.1)
+
+   update_sprite_frame(true)
 end
 
-function setPath(name, tbl)
+function retrieveProperties()
+   -- the engine reads properties from here; we translate our named config to the expected keys.
+   updateProperties({
+      sprite              = archer_properties.sprite_path,
+      velocity_walk_max   = archer_properties.maximum_walk_speed,
+      acceleration_ground = archer_properties.ground_acceleration,
+   })
+end
+
+function update(delta_time)
+   -- sprite_time_s drives frame selection; state machine time drives timing guards.
+   archer_visual_state.sprite_time_s = archer_visual_state.sprite_time_s + delta_time
+
+   local previous_state = archer_state_machine.current_state_id
+   archer_state_machine:advance_time(delta_time)
+   local changed = (previous_state ~= archer_state_machine.current_state_id)
+
+   update_sprite_frame(changed)
+   updateKeysPressed(archer_visual_state.key_pressed_mask)
+end
+
+function setPath(name, table_kv)
+   -- this hot-plugs patrol paths; if we were idle and a path appears, start walking immediately.
    if name == "path" then
-      patrol:load_from_kv_table(tbl)
+      patrol_behavior:load_from_kv_table(table_kv)
+      if archer_state_machine.current_state_id == state_id.idle and #patrol_behavior.waypoints > 0 then
+         archer_state_machine:enter_state(state_id.walk)
+         update_sprite_frame(true)
+      end
    end
 end
