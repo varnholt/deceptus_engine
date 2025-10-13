@@ -153,4 +153,64 @@ function StateMachine:advance_time(delta_time)
    end
 end
 
+-- -------------------------------------------------------------------------------------------------
+-- embedded “hello world” demo (opt-in)
+-- why: having a tiny demo next to the class makes it easy to remember the api after a long break.
+-- it does not run automatically; call StateMachine.run_hello_world_demo() explicitly.
+function StateMachine.run_hello_world_demo(print_fn)
+   -- allow caller to inject a printer (useful for unit tests); default to print()
+   print_fn = print_fn or print
+
+   local states = { start = "start", say_hello = "say_hello", done = "done" }
+   local demo = StateMachine.new(states.start)
+
+   demo
+   :add_state(states.start, {
+      on_enter = function(sm) print_fn("[enter] start") end,
+      on_update = function(delta_time, sm)
+         -- immediately propose the next state; rules still gate it
+         return states.say_hello
+      end,
+      on_exit = function(sm)  print_fn("[exit ] start") end,
+   })
+   :add_state(states.say_hello, {
+      on_enter = function(sm) print_fn("[enter] say_hello") end,
+      on_update = function(delta_time, sm)
+         print_fn(string.format("hello world (t=%.2fs)", sm.elapsed_time_in_state))
+         if sm.elapsed_time_in_state >= 1.0 then
+            return states.done
+         end
+      end,
+      on_exit = function(sm)  print_fn("[exit ] say_hello") end,
+   })
+   :add_state(states.done, {
+      on_enter = function(sm) print_fn("[enter] done") end,
+      on_update = function(delta_time, sm) end,
+   })
+
+   demo
+   :add_transition_rule(states.start,     states.say_hello)                 -- allow start -> say_hello
+   :add_transition_rule(states.say_hello, states.done, function(sm)         -- allow say_hello -> done
+      return sm.elapsed_time_in_state >= 1.0
+   end)
+
+   -- small driver: fixed 0.25s steps for predictable output
+   print_fn("----- demo begin -----")
+   local total_time, step, steps = 0.0, 0.25, 12 -- 3 seconds total
+   for _ = 1, steps do
+      local previous = demo.current_state_id
+      demo:advance_time(step)
+      local changed = (previous ~= demo.current_state_id)
+      if changed then
+         print_fn(string.format("transition: %s -> %s @ t=%.2fs",
+            tostring(previous), tostring(demo.current_state_id), total_time + step))
+      end
+      total_time = total_time + step
+   end
+   print_fn("----- demo end -----")
+
+   -- return the demo machine in case callers want to inspect it in tests
+   return demo
+end
+
 return StateMachine
