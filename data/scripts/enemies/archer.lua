@@ -20,13 +20,13 @@
 --
 --           +-------------------------+
 --           |                         v
---   patrol  +----->  patrol_wait  ->  aim  ->  aim_wait  ->  shoot  ->  recover
---     ^  \                      ^                         ^                |
---     |   \                     |                         |                |
---     |    \--------------------+-------------------------+----------------+
---     |                                (no interrupt during aim)
---     |  (walk a<->b; if no path -> idle pose)
---     +--------------------------------------------------------------------+
+--         patrol  +----->  patrol_wait  ->  aim  ->  aim_wait  ->  shoot  ->  recover
+--           ^  \                      ^                         ^                |
+--           |   \                     |                         |                |
+--           |    \--------------------+-------------------------+----------------+
+--           |                                (no interrupt during aim)
+--           |  (walk a<->b; if no path -> idle pose)
+--           +--------------------------------------------------------------------+
 --                                          after recover: either aim (if still valid)
 --                                          or continue patrolling
 -- ---------------------------------------------------------------------------------------------------------------------
@@ -224,6 +224,11 @@ function playerMovedTo(x, y)
    player_position = vector2.Vector2D(x, y)
 end
 
+-- align sprite orientation to the player's side (no movement)
+local function align_orientation_towards_player()
+   archer_visual_state.facing_left = (player_position:getX() < archer_position:getX())
+end
+
 ------------------------------------------------------------------------------------------------------------------------
 -- sensing and small decision helpers
 -- we keep these pure and reusable so transition rules stay readable.
@@ -323,7 +328,13 @@ archer_state_machine
       patrol_behavior:start_wait()
       archer_visual_state.key_pressed_mask = 0
    end,
-   on_update = function(delta_time, sm)
+
+on_update = function(delta_time, sm)
+
+      if is_player_in_follow_range() then
+         align_orientation_towards_player()
+      end
+
       archer_visual_state.key_pressed_mask = 0
       patrol_behavior:update_wait(delta_time)
    end,
@@ -368,6 +379,12 @@ archer_state_machine
 })
 :add_state(state_id.idle, {
    on_update = function(delta_time, sm)
+
+      -- keep idle responsive: if player is nearby, at least face them
+      if is_player_in_follow_range() then
+         align_orientation_towards_player()
+      end
+
       -- idle still updates patrol wait so newly assigned paths kick in without a state bounce.
       archer_visual_state.key_pressed_mask = 0
       patrol_behavior:update_wait(delta_time)
