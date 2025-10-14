@@ -59,7 +59,7 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function attack()
+function shoot()
    mAttack = true
 
    mAttackTime = mElapsed
@@ -104,7 +104,7 @@ function update(dt)
          yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
 
          if (yDiff < 0 and yDiff > -10 and not idle) then
-            attack()
+            shoot()
          end
       end
 

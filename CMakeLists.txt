@@ -632,6 +632,7 @@ set(THIRD_PARTY_FILES
 )
 
 add_executable(deceptus ${GAME_FILES}
+   data/scripts/enemies/archer.lua
    data/scripts/enemies/arrowtrap.lua
    data/scripts/enemies/arrowtrap.lua
    data/scripts/enemies/arrowtrap_2.lua
@@ -693,6 +694,7 @@ add_executable(deceptus ${GAME_FILES}
    src/game/mechanisms/flowfieldtexturechangeevent.h src/game/mechanisms/flowfieldtexturechangeevent.cpp
    src/game/mechanisms/wind.h src/game/mechanisms/wind.cpp
    src/game/level/gamemechanismregistry.h src/game/level/gamemechanismregistry.cpp
+   data/scripts/enemies/state_machine.lua
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})

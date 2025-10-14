@@ -1250,7 +1250,7 @@ int32_t addWeapon(lua_State* state)
 }
 
 /**
- * @brief useGun fire a weapon
+ * @brief useWeapon fire a weapon
  * @param state lua state
  *    param 1: index of the weapon
  *    param 2: x position where the shot comes from
@@ -1259,7 +1259,7 @@ int32_t addWeapon(lua_State* state)
  *    param 5: y direction
  * @return error code
  */
-int32_t useGun(lua_State* state)
+int32_t useWeapon(lua_State* state)
 {
    const auto argc = lua_gettop(state);
    if (argc != 5)
@@ -1278,7 +1278,7 @@ int32_t useGun(lua_State* state)
    const auto pos_y = static_cast<float>(lua_tonumber(state, 3)) * MPP;
    const auto dir_x = static_cast<float>(lua_tonumber(state, 4));
    const auto dir_y = static_cast<float>(lua_tonumber(state, 5));
-   node->useGun(index, {pos_x, pos_y}, {dir_x, dir_y});
+   node->useWeapon(index, {pos_x, pos_y}, {dir_x, dir_y});
 
    return 0;
 }
@@ -1865,7 +1865,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "updateProjectileTexture", ::updateProjectileTexture);
    lua_register(_lua_state, "updateProperties", ::updateProperties);
    lua_register(_lua_state, "updateSpriteRect", ::updateSpriteRect);
-   lua_register(_lua_state, "useGun", ::useGun);
+   lua_register(_lua_state, "useWeapon", ::useWeapon);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -2616,7 +2616,7 @@ void LuaNode::addWeapon(const std::shared_ptr<Weapon>& weapon)
    _weapons.push_back(weapon);
 }
 
-void LuaNode::useGun(size_t index, b2Vec2 from, b2Vec2 to)
+void LuaNode::useWeapon(size_t index, b2Vec2 from, b2Vec2 to)
 {
    auto& gun = dynamic_cast<Gun&>(*_weapons[index]);
    gun.setParentAudioUpdateData(_audio_update_data);

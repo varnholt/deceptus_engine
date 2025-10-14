@@ -188,7 +188,7 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-function attack()
+function shoot()
    time = (mElapsed - mAttackTime) * mAttackSpeed * mAttackDistanceFactor
    p = getValueCos(mAttackPath, time)
 
@@ -258,7 +258,7 @@ function update(dt)
    elseif (mMoveHome) then     -- if player is out of sight after idle, go home
       moveHome()
    elseif (mAttack) then       -- if player is in sight after idle, attack
-      attack()
+      shoot()
    else
       patrol()                 -- moved home, just patrol and locate player
    end
