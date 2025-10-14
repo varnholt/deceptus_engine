@@ -98,6 +98,7 @@ local archer_visual_state = {
    facing_left      = false,
    last_facing_left = false,
 
+   animation_time_s = 0.0,
    sprite_time_s    = math.random(0, 3),
    sprite_index     = 0,
 
@@ -445,6 +446,10 @@ local function update_sprite_frame(action_changed)
    archer_visual_state.previous_action = archer_visual_state.action_id
    archer_visual_state.action_id       = archer_state_machine.current_state_id
 
+   if action_changed then
+      archer_visual_state.animation_time_s = 0.0
+   end
+
    local current_id   = archer_visual_state.action_id
    local alias        = sprite_alias[current_id]
    local draw_row_id  = current_id
@@ -470,7 +475,7 @@ local function update_sprite_frame(action_changed)
          next_index = forced_index
       else
          -- sprites run at 15 fps; we derive frame from time to avoid manual counters.
-         local frame_candidate = math.floor(archer_visual_state.sprite_time_s * 15.0)
+         local frame_candidate = math.floor(archer_visual_state.animation_time_s * 15.0)
          if is_non_loop then
             next_index = math.min(frame_candidate, frame_count - 1)
          else
@@ -530,6 +535,7 @@ end
 function update(delta_time)
    -- sprite_time_s drives frame selection; state machine time drives timing guards.
    archer_visual_state.sprite_time_s = archer_visual_state.sprite_time_s + delta_time
+   archer_visual_state.animation_time_s = archer_visual_state.animation_time_s + delta_time
 
    local previous_state = archer_state_machine.current_state_id
    archer_state_machine:advance_time(delta_time)
