@@ -1471,17 +1471,18 @@ void Player::updateSpawn()
 {
    using namespace std::chrono_literals;
 
-   if (GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealStartDelay())
-   {
-      if (!_spawn_orientation_locked)
-      {
-         _spawn_orientation_locked = true;
-         const auto lock_duration = std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation->getRevealDuration());
+   const auto checkpoint_valid = SaveState::getCurrent()._checkpoint > 0;
+   const auto first_death = SaveState::getPlayerInfo()._stats._death_count_current_level == 0;
+   const auto spawning = GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealStartDelay();
 
-         // appear animation is shown after spawn is complete
-         // for that duration of time, lock the player orientation
-         _controls->lockOrientation(lock_duration);
-      }
+   if (spawning && checkpoint_valid && first_death && !_spawn_orientation_locked)
+   {
+      _spawn_orientation_locked = true;
+      const auto lock_duration = std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation->getRevealDuration());
+
+      // appear animation is shown after spawn is complete
+      // for that duration of time, lock the player orientation
+      _controls->lockOrientation(lock_duration);
 
       return;
    }
@@ -1494,7 +1495,7 @@ void Player::updateSpawn()
    _spawn_complete = true;
 
    // play reveal sound (but only if player died earlier)
-   if (SaveState::getPlayerInfo()._stats._death_count_current_level > 0)
+   if (!first_death)
    {
       Audio::getInstance().playSample({"player_spawn_01.wav"});
    }
