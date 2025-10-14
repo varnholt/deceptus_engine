@@ -70,7 +70,7 @@ function fire()
    mElapsed = 0.0
    mSpriteIndex = 1
 
-   useGun(
+   useWeapon(
       0,
       mPosition:getX() + mX * 16,
       mPosition:getY() - 3,

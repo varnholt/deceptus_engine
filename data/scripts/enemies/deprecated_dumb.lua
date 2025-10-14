@@ -158,7 +158,7 @@ function updateShootCondition()
          )
          then
             if (openFire) then
-               useGun(
+               useWeapon(
                   0,
                   mPosition:getX() + (fireDir * 32),
                   mPosition:getY(),
