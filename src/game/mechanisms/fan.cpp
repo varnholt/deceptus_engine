@@ -84,39 +84,47 @@ std::shared_ptr<Fan> Fan::deserialize(GameNode* parent, const GameDeserializeDat
 
     fan->_direction_string = dir_str; // Store the string form too
 
-    const int tiles_x = static_cast<int>(fan->_pixel_rect.size.x) / PIXELS_PER_TILE;
-    const int tiles_y = static_cast<int>(fan->_pixel_rect.size.y) / PIXELS_PER_TILE;
+    const auto tiles_x = static_cast<int>(fan->_pixel_rect.size.x) / PIXELS_PER_TILE;
+    const auto tiles_y = static_cast<int>(fan->_pixel_rect.size.y) / PIXELS_PER_TILE;
 
     if (dir_str == "up")
     {
-        const auto y_tl = tiles_y - 1;
+        fan->_direction_enum = TileDirection::Up;
+        fan->_y_offset_tl = 0;
+        const auto y_tl = tiles_y - 1; // bottom of rect
         for (int x_tl = 0; x_tl < tiles_x; ++x_tl)
         {
-            placeTile(fan, data, x_tl, y_tl);
+            insertInstance(fan, data, x_tl, y_tl);
         }
     }
     else if (dir_str == "down")
     {
-        const auto y_tl = 0;
+        fan->_direction_enum = TileDirection::Down;
+        fan->_y_offset_tl = 3;
+        const auto y_tl = 0; // top of rect
         for (int x_tl = 0; x_tl < tiles_x; ++x_tl)
         {
-            placeTile(fan, data, x_tl, y_tl);
+            insertInstance(fan, data, x_tl, y_tl);
         }
     }
     else if (dir_str == "left")
     {
-        const auto x_tl = tiles_x - 1;
+        fan->_direction_enum = TileDirection::Left;
+        fan->_y_offset_tl = 2;
+        const auto x_tl = tiles_x - 1; // right of rect
         for (int y_tl = 0; y_tl < tiles_y; ++y_tl)
         {
-            placeTile(fan, data, x_tl, y_tl);
+            insertInstance(fan, data, x_tl, y_tl);
         }
     }
     else if (dir_str == "right")
     {
-        const auto x_tl = 0;
+        fan->_direction_enum = TileDirection::Right;
+        fan->_y_offset_tl = 1;
+        const auto x_tl = 0; // left of rect
         for (int y_tl = 0; y_tl < tiles_y; ++y_tl)
         {
-            placeTile(fan, data, x_tl, y_tl);
+            insertInstance(fan, data, x_tl, y_tl);
         }
     }
     else
@@ -127,34 +135,63 @@ std::shared_ptr<Fan> Fan::deserialize(GameNode* parent, const GameDeserializeDat
     return fan;
 }
 
-void Fan::placeTile(const std::shared_ptr<Fan>& fan, const GameDeserializeData& data, int x_tl, int y_tl)
+void Fan::insertInstance(const std::shared_ptr<Fan>& fan, const GameDeserializeData& data, int32_t x_tl, int32_t y_tl)
 {
-    FanSection section(fan->_texture);
+    FanInstance instance(fan->_texture);
 
-    section.tile_position_px = {static_cast<int>(fan->_pixel_rect.position.x) + (x_tl * PIXELS_PER_TILE),
-                                static_cast<int>(fan->_pixel_rect.position.y) + (y_tl * PIXELS_PER_TILE)};
+    instance.sprite_offset = std::rand() % 8;
+    instance.tile_position_px = {static_cast<int>(fan->_pixel_rect.position.x) + (x_tl * PIXELS_PER_TILE),
+                                 static_cast<int>(fan->_pixel_rect.position.y) + (y_tl * PIXELS_PER_TILE)};
 
-    section.direction = fan->_direction;
-    section.rect = {{static_cast<float>(section.tile_position_px.x), static_cast<float>(section.tile_position_px.y)},
-                    {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}};
+    instance.direction = fan->_direction;
+    instance.rect = {{static_cast<float>(instance.tile_position_px.x), static_cast<float>(instance.tile_position_px.y)},
+                     {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}};
 
     b2BodyDef body_def;
     body_def.type = b2_staticBody;
-    body_def.position = b2Vec2(static_cast<float>(section.tile_position_px.x) * MPP, static_cast<float>(section.tile_position_px.y) * MPP);
-    section.body = data._world->CreateBody(&body_def);
+    body_def.position = b2Vec2(static_cast<float>(instance.tile_position_px.x) * MPP, static_cast<float>(instance.tile_position_px.y) * MPP);
+    instance.body = data._world->CreateBody(&body_def);
 
     b2PolygonShape shape;
-    shape.SetAsBox(0.5F, 0.5F);
+
+    // a rounded box prevents the player of getting stuck between the gaps
+    //
+    //      h       g
+    //      _________
+    //     /         \
+    //   a |         | f
+    //     |         |
+    //   b |         | e
+    //     \_________/
+    //
+    //      c       d
+
+    // clang-format off
+    constexpr float w = 0.5f;
+    constexpr float e = 0.1f;
+    std::array<b2Vec2, 8> rounded_box{
+        b2Vec2{0, e},     // a
+        b2Vec2{0, w - e}, // b
+        b2Vec2{e, w},     // c
+        b2Vec2{w - e, w}, // d
+        b2Vec2{w, w - e}, // e
+        b2Vec2{w, e},     // f
+        b2Vec2{w - e, 0}, // g
+        b2Vec2{e, 0},     // h
+    };
+    // clang-format on
+
+    shape.Set(rounded_box.data(), static_cast<int32_t>(rounded_box.size()));
 
     b2FixtureDef fixture_def;
     fixture_def.shape = &shape;
     fixture_def.density = 1.0F;
     fixture_def.isSensor = false;
-    section.body->CreateFixture(&fixture_def);
+    instance.body->CreateFixture(&fixture_def);
 
-    section.sprite->setPosition({static_cast<float>(section.tile_position_px.x), static_cast<float>(section.tile_position_px.y)});
+    instance.sprite->setPosition({static_cast<float>(instance.tile_position_px.x), static_cast<float>(instance.tile_position_px.y)});
 
-    fan->_tiles.push_back(std::move(section));
+    fan->_instances.push_back(std::move(instance));
 }
 
 void Fan::update(const sf::Time& dt)
@@ -172,27 +209,19 @@ void Fan::update(const sf::Time& dt)
         _lever_lag = std::min(_lever_lag + dt.asSeconds(), 1.0F);
     }
 
-    for (auto& section : _tiles)
+    for (auto& instance : _instances)
     {
-        section.scroll_offset += dt.asSeconds() * 25.0F * _speed * _lever_lag;
+        instance.sprite_offset += dt.asSeconds() * 25.0F * _speed * _lever_lag;
+        const auto x_offset = static_cast<int32_t>(instance.sprite_offset) % 8;
+        instance.sprite->setTextureRect({{x_offset * PIXELS_PER_TILE, _y_offset_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
     }
 
-    updateSprite();
     collide();
-}
-
-void Fan::updateSprite()
-{
-    for (auto& section : _tiles)
-    {
-        int x_offset = static_cast<int>(section.scroll_offset) % 8;
-        section.sprite->setTextureRect({{x_offset * PIXELS_PER_TILE, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
-    }
 }
 
 void Fan::draw(sf::RenderTarget& color, sf::RenderTarget&)
 {
-    for (const auto& section : _tiles)
+    for (const auto& section : _instances)
     {
         color.draw(*section.sprite);
     }
@@ -208,6 +237,6 @@ void Fan::collide()
     const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
     if (player_rect.findIntersection(_pixel_rect).has_value())
     {
-        Player::getCurrent()->getBody()->ApplyForceToCenter(b2Vec2(2.0F * _direction.x, -_direction.y), true);
+        Player::getCurrent()->getBody()->ApplyForceToCenter(b2Vec2(2.0F * _direction.x, _direction.y), true);
     }
 }
