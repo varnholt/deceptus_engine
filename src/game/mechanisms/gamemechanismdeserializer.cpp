@@ -61,7 +61,6 @@ void GameMechanismDeserializer::deserialize(
 {
    // clear all previously created internal data it's not cleaned up, even if all instances are deleted
    Laser::resetAll();
-   Fan::resetAll();
 
    GameDeserializeData data(data_ref);
 
@@ -206,11 +205,7 @@ void GameMechanismDeserializer::deserialize(
          data._tmx_layer = layer;
          data._tmx_tileset = tileset;
 
-         if (layer->_name == layer_name_fans)
-         {
-            Fan::load(data);
-         }
-         else if (layer->_name == layer_name_lasers_v1)
+         if (layer->_name == layer_name_lasers_v1)
          {
             const auto mechanism = Laser::load(parent, data);
             mechanism_lasers->insert(mechanism_lasers->end(), mechanism.begin(), mechanism.end());
@@ -316,9 +311,7 @@ void GameMechanismDeserializer::deserialize(
    }
 
    Laser::merge();
-   Fan::merge();
    WaterSurface::merge();
-   *mechanism_fans = Fan::getFans();
    *mechanism_platforms = MovingPlatform::merge(parent, data);
 
    // get a flat vector of all values
