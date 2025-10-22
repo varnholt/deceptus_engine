@@ -574,10 +574,20 @@ end
 
 ## Fans
 
-Fans work just like fans from the real world, however they are _slightly_ stronger than in the real world. So, depending on where they are pointing to, they can make Adam fly or serve as an impassable obstacle.
+Fans work just like fans from the real world, however they are _slightly_
+stronger than in the real world. So, depending on where they are pointing to,
+they can make Adam fly or serve as an impassable obstacle.
 
-This mechanism uses a mix of layers and objects. While the fans inside the tile layer called `fans` determine the direction of the air flow, rectangles in the object layer `fans` or using the object type `Fan` determine the active area of the fans. The idea is that all fans within one rectangle work together as one unit. So when defining the rectangles make sure they nicely overlap with the fan tiles. You can achieve that by using the `ALT`-key inside Tiled.
-
+Fans are defined solely by rectangle objects. To create a fan, draw a
+rectangle in an object layer named `fans` or assign the object type `Fan`.
+The dimensions of the rectangle define the active area of the fan. Unlike
+the previous implementation, there is no tile layer for the direction of the
+air flow; instead, each fan rectangle has a `direction` property indicating
+which way the air flows. Valid values are `up`, `down`, `left` or `right`
+(the default is `up`). All fans within one rectangle work together as one
+unit. So when defining the rectangles make sure they nicely overlap with
+the area where you want the airflow. You can achieve that by using the
+`ALT`‑key inside Tiled.
 
 ### Object Type / Object Group
 
@@ -591,7 +601,8 @@ This mechanism uses a mix of layers and objects. While the fans inside the tile 
 |Property|Type|Description|
 |-|-|-|
 |z|int|The object's z index|
-|speed|float|The speed value typically ranges from [`0..1`], `0.9` turned out to be a suitable value.|
+|speed|float|The speed value typically ranges from [`0..1`]; `1.0` is the default.|
+|direction|string|The direction of the airflow. Valid values are `up`, `down`, `left`, or `right`; the default is `up`.|
 
 ![](images/mechanism_fans.png)
 
