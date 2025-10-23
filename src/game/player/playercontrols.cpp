@@ -42,10 +42,10 @@ void PlayerControls::forceSync()
       _keys_pressed |= KeyPressedJump;
    }
 
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
-   {
-      _keys_pressed |= KeyPressedLook;
-   }
+   // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
+   // {
+   //    _keys_pressed |= KeyPressedLook;
+   // }
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
    {
@@ -91,10 +91,10 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
    {
       _keys_pressed |= KeyPressedJump;
    }
-   else if (key == sf::Keyboard::Key::LShift)
-   {
-      _keys_pressed |= KeyPressedLook;
-   }
+   // else if (key == sf::Keyboard::Key::LShift)
+   // {
+   //    _keys_pressed |= KeyPressedLook;
+   // }
    else if (key == sf::Keyboard::Key::Up)
    {
       _keys_pressed |= KeyPressedUp;
@@ -134,11 +134,11 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 {
    _player_input.update(PlayerInput::InputType::Keyboard);
 
-   if (key == sf::Keyboard::Key::LShift)
-   {
-      _keys_pressed &= ~KeyPressedLook;
-   }
-   else if (key == sf::Keyboard::Key::Up)
+   // if (key == sf::Keyboard::Key::LShift)
+   // {
+   //    _keys_pressed &= ~KeyPressedLook;
+   // }
+   /*else */ if (key == sf::Keyboard::Key::Up)
    {
       _keys_pressed &= ~KeyPressedUp;
    }
@@ -172,26 +172,27 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
    }
 }
 
+#include "game/state/displaymode.h"
 bool PlayerControls::isLookingAround() const
 {
-   if (_keys_pressed & KeyPressedLook)
-   {
-      return true;
-   }
+    if (DisplayMode::getInstance().isSet(Display::CameraPanorama) /*_keys_pressed & KeyPressedLook*/)
+    {
+        return true;
+    }
 
-   if (GameControllerIntegration::getInstance().isControllerConnected())
-   {
-      const auto& axis_values = _joystick_info.getAxisValues();
-      const auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_RIGHTX);
-      const auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_RIGHTY);
-      const auto x_normalized = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
-      const auto y_normalized = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
-      const auto tolerance_x = Tweaks::instance()._cpan_tolerance_x;
-      const auto tolerance_y = Tweaks::instance()._cpan_tolerance_y;
-      return (fabs(x_normalized) > tolerance_x || fabs(y_normalized) > tolerance_y);
-   }
+    // if (GameControllerIntegration::getInstance().isControllerConnected())
+    // {
+    //    const auto& axis_values = _joystick_info.getAxisValues();
+    //    const auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_RIGHTX);
+    //    const auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_RIGHTY);
+    //    const auto x_normalized = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
+    //    const auto y_normalized = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
+    //    const auto tolerance_x = Tweaks::instance()._cpan_tolerance_x;
+    //    const auto tolerance_y = Tweaks::instance()._cpan_tolerance_y;
+    //    return (fabs(x_normalized) > tolerance_x || fabs(y_normalized) > tolerance_y);
+    // }
 
-   return false;
+    return false;
 }
 
 bool PlayerControls::isControllerButtonPressed(int32_t button_enum) const

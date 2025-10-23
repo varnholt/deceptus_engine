@@ -176,15 +176,22 @@ void CameraPanorama::update()
    }
 }
 
+#include "game/player/player.h"
 void CameraPanorama::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
 {
    switch (key_event->code)
    {
       case sf::Keyboard::Key::LShift:
       {
-         updateLookState(Look::Active, true);
-         DisplayMode::getInstance().enqueueSet(Display::CameraPanorama);
-         break;
+          auto* player = Player::getCurrent();
+          if (player->isInAir())
+          {
+              return;
+          }
+
+          updateLookState(Look::Active, true);
+          DisplayMode::getInstance().enqueueSet(Display::CameraPanorama);
+          break;
       }
       case sf::Keyboard::Key::Left:
       {
