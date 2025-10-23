@@ -627,7 +627,8 @@ float Player::getMaxVelocity() const
 
 float Player::readVelocityFromController(const PlayerSpeed& speed) const
 {
-   if (_controls->isLookingAround())
+   // movement is disabled while the camera panorama is active
+   if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
    {
       return 0.0f;
    }
@@ -694,7 +695,8 @@ void Player::updateOrientation()
 
 float Player::readVelocityFromKeyboard(const PlayerSpeed& speed) const
 {
-   if (_controls->isLookingAround())
+   // movement is disabled while the camera panorama is active
+   if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
    {
       return 0.0f;
    }
