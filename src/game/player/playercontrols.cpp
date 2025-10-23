@@ -172,25 +172,26 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
    }
 }
 
-#include "game/state/displaymode.h"
-bool PlayerControls::isLookingAround() const
+bool PlayerControls::isCpanControlActive() const
 {
-    if (DisplayMode::getInstance().isSet(Display::CameraPanorama) /*_keys_pressed & KeyPressedLook*/)
+    // Return true if the look key is pressed.
+    if (_keys_pressed & KeyPressedLook)
     {
         return true;
     }
 
-    // if (GameControllerIntegration::getInstance().isControllerConnected())
-    // {
-    //    const auto& axis_values = _joystick_info.getAxisValues();
-    //    const auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_RIGHTX);
-    //    const auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_RIGHTY);
-    //    const auto x_normalized = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
-    //    const auto y_normalized = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
-    //    const auto tolerance_x = Tweaks::instance()._cpan_tolerance_x;
-    //    const auto tolerance_y = Tweaks::instance()._cpan_tolerance_y;
-    //    return (fabs(x_normalized) > tolerance_x || fabs(y_normalized) > tolerance_y);
-    // }
+    // Return true if the right analogue stick is beyond the configured tolerance.
+    if (GameControllerIntegration::getInstance().isControllerConnected())
+    {
+        const auto& axis_values = _joystick_info.getAxisValues();
+        const auto x_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_RIGHTX);
+        const auto y_axis = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_RIGHTY);
+        const auto x_normalized = axis_values[static_cast<uint32_t>(x_axis)] / 32767.0f;
+        const auto y_normalized = axis_values[static_cast<uint32_t>(y_axis)] / 32767.0f;
+        const auto tolerance_x = Tweaks::instance()._cpan_tolerance_x;
+        const auto tolerance_y = Tweaks::instance()._cpan_tolerance_y;
+        return (fabs(x_normalized) > tolerance_x || fabs(y_normalized) > tolerance_y);
+    }
 
     return false;
 }
