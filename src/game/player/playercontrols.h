@@ -28,7 +28,7 @@ public:
    int getKeysPressed() const;
    void setKeysPressed(int32_t keys);
 
-   bool isLookingAround() const;
+   bool isCpanControlActive() const;
    bool isControllerButtonPressed(int32_t button_enum) const;
    bool isButtonAPressed() const;
    bool isButtonBPressed() const;
