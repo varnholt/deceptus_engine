@@ -172,13 +172,15 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
    }
 }
 
-bool PlayerControls::isLookingAround() const
+bool PlayerControls::isCpanControlActive() const
 {
+   // check if look key is pressed
    if (_keys_pressed & KeyPressedLook)
    {
       return true;
    }
 
+   // check if right analogue stick is beyond the configured tolerance
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
       const auto& axis_values = _joystick_info.getAxisValues();
