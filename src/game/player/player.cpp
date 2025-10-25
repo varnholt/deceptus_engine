@@ -34,1791 +34,1801 @@
 
 namespace
 {
-    constexpr uint16_t category_bits = CategoryFriendly;
-    constexpr uint16_t mask_bits_standing = CategoryBoundary | CategoryEnemyCollideWith | CategoryMoveableBox;
-    constexpr uint16_t mask_bits_crouching = CategoryEnemyCollideWith;
-    constexpr int16_t group_index = 0;
-    constexpr auto impulse_epsilon = 0.0000001f;
+constexpr uint16_t category_bits = CategoryFriendly;
+constexpr uint16_t mask_bits_standing = CategoryBoundary | CategoryEnemyCollideWith | CategoryMoveableBox;
+constexpr uint16_t mask_bits_crouching = CategoryEnemyCollideWith;
+constexpr int16_t group_index = 0;
+constexpr auto impulse_epsilon = 0.0000001f;
 
-    constexpr auto wall_slide_sensor_width = 8.0f;
-    constexpr auto wall_slide_sensor_height = 0.75f;
-    constexpr auto wall_slide_sensor_distance = 0.21f;
-} // namespace
+constexpr auto wall_slide_sensor_width = 8.0f;
+constexpr auto wall_slide_sensor_height = 0.75f;
+constexpr auto wall_slide_sensor_distance = 0.21f;
+}  // namespace
 
 Player* Player::__current = nullptr;
 
 b2Body* Player::getBody() const
 {
-    return _body;
+   return _body;
 }
 
 b2Fixture* Player::getFootSensorFixture() const
 {
-    return _foot_sensor_fixture;
+   return _foot_sensor_fixture;
 }
 
 sf::IntRect Player::computeFootSensorPixelIntRect() const
 {
-    sf::IntRect rect_px;
-    b2AABB aabb;
+   sf::IntRect rect_px;
+   b2AABB aabb;
 
-    _foot_sensor_fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
+   _foot_sensor_fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
 
-    rect_px.position.x = static_cast<int32_t>(aabb.lowerBound.x * PPM);
-    rect_px.position.y = static_cast<int32_t>(aabb.lowerBound.y * PPM);
-    rect_px.size.x = static_cast<int32_t>(abs(aabb.upperBound.x - aabb.lowerBound.x) * PPM);
-    rect_px.size.y = static_cast<int32_t>(abs(aabb.upperBound.y - aabb.lowerBound.y) * PPM);
+   rect_px.position.x = static_cast<int32_t>(aabb.lowerBound.x * PPM);
+   rect_px.position.y = static_cast<int32_t>(aabb.lowerBound.y * PPM);
+   rect_px.size.x = static_cast<int32_t>(abs(aabb.upperBound.x - aabb.lowerBound.x) * PPM);
+   rect_px.size.y = static_cast<int32_t>(abs(aabb.upperBound.y - aabb.lowerBound.y) * PPM);
 
-    // std::cout
-    //    << "ux: " << aabb.upperBound.x << " "
-    //    << "uy: " << aabb.upperBound.y << " "
-    //    << "lx: " << aabb.lowerBound.x << " "
-    //    << "ly: " << aabb.lowerBound.y << " "
-    //    << std::endl;
+   // std::cout
+   //    << "ux: " << aabb.upperBound.x << " "
+   //    << "uy: " << aabb.upperBound.y << " "
+   //    << "lx: " << aabb.lowerBound.x << " "
+   //    << "ly: " << aabb.lowerBound.y << " "
+   //    << std::endl;
 
-    return rect_px;
+   return rect_px;
 }
 
 sf::FloatRect Player::computeFootSensorPixelFloatRect() const
 {
-    sf::FloatRect rect_px;
-    b2AABB aabb;
+   sf::FloatRect rect_px;
+   b2AABB aabb;
 
-    _foot_sensor_fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
+   _foot_sensor_fixture->GetShape()->ComputeAABB(&aabb, _body->GetTransform(), 0);
 
-    rect_px.position.x = aabb.lowerBound.x * PPM;
-    rect_px.position.y = aabb.lowerBound.y * PPM;
-    rect_px.size.x = abs(aabb.upperBound.x - aabb.lowerBound.x) * PPM;
-    rect_px.size.y = abs(aabb.upperBound.y - aabb.lowerBound.y) * PPM;
+   rect_px.position.x = aabb.lowerBound.x * PPM;
+   rect_px.position.y = aabb.lowerBound.y * PPM;
+   rect_px.size.x = abs(aabb.upperBound.x - aabb.lowerBound.x) * PPM;
+   rect_px.size.y = abs(aabb.upperBound.y - aabb.lowerBound.y) * PPM;
 
-    // std::cout
-    //    << "ux: " << aabb.upperBound.x << " "
-    //    << "uy: " << aabb.upperBound.y << " "
-    //    << "lx: " << aabb.lowerBound.x << " "
-    //    << "ly: " << aabb.lowerBound.y << " "
-    //    << std::endl;
+   // std::cout
+   //    << "ux: " << aabb.upperBound.x << " "
+   //    << "uy: " << aabb.upperBound.y << " "
+   //    << "lx: " << aabb.lowerBound.x << " "
+   //    << "ly: " << aabb.lowerBound.y << " "
+   //    << std::endl;
 
-    return rect_px;
+   return rect_px;
 }
 
 Player::Player(GameNode* parent) : GameNode(parent)
 {
-    setClassName(typeid(Player).name());
+   setClassName(typeid(Player).name());
 
-    __current = this;
+   __current = this;
 
-    PlayerAudio::addSamples();
+   PlayerAudio::addSamples();
 
-    _controls = std::make_shared<PlayerControls>();
-    _player_animation = std::make_shared<PlayerAnimation>();
+   _controls = std::make_shared<PlayerControls>();
+   _player_animation = std::make_shared<PlayerAnimation>();
 
-    _climb.setControls(_controls);
-    _jump.setControls(_controls);
+   _climb.setControls(_controls);
+   _jump.setControls(_controls);
 
-    _dash._reset_dash_callback = [this]() {
-        resetMotionBlur();
-    };
+   _dash._reset_dash_callback = [this]() { resetMotionBlur(); };
 
-    _player_animation->loadAnimations(_animation_pool);
+   _player_animation->loadAnimations(_animation_pool);
 }
 
 Player* Player::getCurrent()
 {
-    return __current;
+   return __current;
 }
 
 void Player::initialize()
 {
-    _damage_clock.restart();
+   _damage_clock.restart();
 
-    _jump._jump_dust_animation_callback = [this](PlayerJump::DustAnimationType animation_type) {
-        switch (animation_type)
-        {
-        case PlayerJump::DustAnimationType::Ground:
-        {
+   _jump._jump_dust_animation_callback = [this](PlayerJump::DustAnimationType animation_type)
+   {
+      switch (animation_type)
+      {
+         case PlayerJump::DustAnimationType::Ground:
+         {
             _animation_pool.create(_points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _pixel_position_f.x, _pixel_position_f.y);
             break;
-        }
-        case PlayerJump::DustAnimationType::InAir:
-        {
-            _animation_pool.create(_points_to_left ? "player_jump_dust_inair_l" : "player_jump_dust_inair_r",
-                                   _pixel_position_f.x,
-                                   _pixel_position_f.y);
+         }
+         case PlayerJump::DustAnimationType::InAir:
+         {
+            _animation_pool.create(
+               _points_to_left ? "player_jump_dust_inair_l" : "player_jump_dust_inair_r", _pixel_position_f.x, _pixel_position_f.y
+            );
             break;
-        }
-        }
-    };
+         }
+      }
+   };
 
-    _jump._remove_climb_joint_callback = [this]() {
-        _climb.removeClimbJoint();
-    };
+   _jump._remove_climb_joint_callback = [this]() { _climb.removeClimbJoint(); };
 
-    _controls->addKeypressedCallback([this](sf::Keyboard::Key key) {
-        keyPressed(key);
-    });
+   _controls->addKeypressedCallback([this](sf::Keyboard::Key key) { keyPressed(key); });
 
-    initializeController();
+   initializeController();
 }
 
 void Player::initializeLevel()
 {
-    createPlayerBody();
+   createPlayerBody();
 
-    setBodyViaPixelPosition(Level::getCurrentLevel()->getStartPosition().x, Level::getCurrentLevel()->getStartPosition().y);
+   setBodyViaPixelPosition(Level::getCurrentLevel()->getStartPosition().x, Level::getCurrentLevel()->getStartPosition().y);
 }
 
 void Player::initializeController()
 {
-    auto& gji = GameControllerIntegration::getInstance();
+   auto& gji = GameControllerIntegration::getInstance();
 
-    gji.addDeviceAddedCallback([&](int32_t /*id*/) {
-        gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_SOUTH, [&]() {
-            if (!PlayerControlState::checkState())
+   gji.addDeviceAddedCallback(
+      [&](int32_t /*id*/)
+      {
+         gji.getController()->addButtonPressedCallback(
+            SDL_GAMEPAD_BUTTON_SOUTH,
+            [&]()
             {
-                return;
+               if (!PlayerControlState::checkState())
+               {
+                  return;
+               }
+
+               _jump.jump();
             }
+         );
 
-            _jump.jump();
-        });
-
-        gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, [&]() {
-            if (!PlayerControlState::checkState())
+         gji.getController()->addButtonPressedCallback(
+            SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,
+            [&]()
             {
-                return;
+               if (!PlayerControlState::checkState())
+               {
+                  return;
+               }
+
+               updateDash(Dash::Left);
             }
+         );
 
-            updateDash(Dash::Left);
-        });
-
-        gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, [&]() {
-            if (!PlayerControlState::checkState())
+         gji.getController()->addButtonPressedCallback(
+            SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
+            [&]()
             {
-                return;
+               if (!PlayerControlState::checkState())
+               {
+                  return;
+               }
+
+               updateDash(Dash::Right);
             }
+         );
 
-            updateDash(Dash::Right);
-        });
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_WEST, [&]() { useInventory(0); });
 
-        gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_WEST, [&]() {
-            useInventory(0);
-        });
-
-        gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_NORTH, [&]() {
-            useInventory(1);
-        });
-    });
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_NORTH, [&]() { useInventory(1); });
+      }
+   );
 }
 
 void Player::setBodyViaPixelPosition(float x, float y)
 {
-    setPixelPosition(x, y);
+   setPixelPosition(x, y);
 
-    if (_body)
-    {
-        _body->SetTransform(b2Vec2(x * MPP, y * MPP), 0.0f);
-    }
+   if (_body)
+   {
+      _body->SetTransform(b2Vec2(x * MPP, y * MPP), 0.0f);
+   }
 }
 
 bool Player::checkDamageDrawSkip() const
 {
-    if (isDead())
-    {
-        // dead players shouldn't flash
-        return false;
-    }
+   if (isDead())
+   {
+      // dead players shouldn't flash
+      return false;
+   }
 
-    auto skip_render = false;
-    const auto time = GlobalClock::getInstance().getElapsedTimeInMs();
-    const auto damage_time = _damage_clock.getElapsedTime().asMilliseconds();
-    if (_damage_initialized && time > 3000 && damage_time < 3000)
-    {
-        if ((damage_time / 100) % 2 == 0)
-        {
-            skip_render = true;
-        }
-    }
+   auto skip_render = false;
+   const auto time = GlobalClock::getInstance().getElapsedTimeInMs();
+   const auto damage_time = _damage_clock.getElapsedTime().asMilliseconds();
+   if (_damage_initialized && time > 3000 && damage_time < 3000)
+   {
+      if ((damage_time / 100) % 2 == 0)
+      {
+         skip_render = true;
+      }
+   }
 
-    return skip_render;
+   return skip_render;
 }
 
 void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
 {
-    if (isDead())
-    {
-        return;
-    }
+   if (isDead())
+   {
+      return;
+   }
 
-    // update color if player is hurt
-    constexpr auto red_intensity = 200;
-    const auto damage_color_value = static_cast<uint8_t>(red_intensity * std::max(0.0f, 1.0f - _damage_clock.getElapsedTime().asSeconds()));
-    if (damage_color_value > 0)
-    {
-        const auto damage_color = sf::Color(255, 255 - damage_color_value, 255 - damage_color_value);
-        current_cycle->setColor(damage_color);
-    }
+   // update color if player is hurt
+   constexpr auto red_intensity = 200;
+   const auto damage_color_value = static_cast<uint8_t>(red_intensity * std::max(0.0f, 1.0f - _damage_clock.getElapsedTime().asSeconds()));
+   if (damage_color_value > 0)
+   {
+      const auto damage_color = sf::Color(255, 255 - damage_color_value, 255 - damage_color_value);
+      current_cycle->setColor(damage_color);
+   }
 }
 
 void Player::useInventory(int32_t slot)
 {
-    if (!PlayerControlState::checkStateUseInventory())
-    {
-        return;
-    }
+   if (!PlayerControlState::checkStateUseInventory())
+   {
+      return;
+   }
 
-    auto& inventory = SaveState::getPlayerInfo()._inventory;
-    inventory.use(slot);
+   auto& inventory = SaveState::getPlayerInfo()._inventory;
+   inventory.use(slot);
 }
 
 void Player::drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>& current_cycle, const sf::Vector2f& draw_position_px)
 {
-    // draw dash with motion blur
-    for (auto i = 0u; i < _last_animations.size(); i++)
-    {
-        auto& anim = _last_animations[i];
-        anim._animation->setPosition(anim._position);
-        anim._animation->setAlpha(static_cast<uint8_t>(255 / (2 * (_last_animations.size() - i))));
-        anim._animation->draw(color);
-    }
+   // draw dash with motion blur
+   for (auto i = 0u; i < _last_animations.size(); i++)
+   {
+      auto& anim = _last_animations[i];
+      anim._animation->setPosition(anim._position);
+      anim._animation->setAlpha(static_cast<uint8_t>(255 / (2 * (_last_animations.size() - i))));
+      anim._animation->draw(color);
+   }
 
-    if (_dash.hasMoreFrames())
-    {
-        _last_animations.push_back({draw_position_px, current_cycle});
-    }
+   if (_dash.hasMoreFrames())
+   {
+      _last_animations.push_back({draw_position_px, current_cycle});
+   }
 }
 
 void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-    _water_bubbles.draw(color, normal);
+   _water_bubbles.draw(color, normal);
 
-    if (!_visible)
-    {
-        return;
-    }
+   if (!_visible)
+   {
+      return;
+   }
 
-    if (checkDamageDrawSkip())
-    {
-        return;
-    }
+   if (checkDamageDrawSkip())
+   {
+      return;
+   }
 
-    if (_jump.isWallSliding())
-    {
-        _player_animation->getWallslideAnimation()->draw(color);
-    }
+   if (_jump.isWallSliding())
+   {
+      _player_animation->getWallslideAnimation()->draw(color);
+   }
 
-    const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
-    if (weapon_system._selected)
-    {
-        weapon_system._selected->draw(color);
-    }
+   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+   if (weapon_system._selected)
+   {
+      weapon_system._selected->draw(color);
+   }
 
-    // that y offset is to compensate the wonky box2d origin
-    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
+   // that y offset is to compensate the wonky box2d origin
+   const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
 
-    const auto& current_cycle = _player_animation->getCurrentCycle();
-    if (current_cycle)
-    {
-        current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
-        current_cycle->setPosition(draw_position_px);
-        drawDash(color, current_cycle, draw_position_px);
-        updateHurtColor(current_cycle);
-        current_cycle->draw(color, normal);
-    }
+   const auto& current_cycle = _player_animation->getCurrentCycle();
+   if (current_cycle)
+   {
+      current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
+      current_cycle->setPosition(draw_position_px);
+      drawDash(color, current_cycle, draw_position_px);
+      updateHurtColor(current_cycle);
+      current_cycle->draw(color, normal);
+   }
 
-    const auto& auxiliary_cycle = _player_animation->getAuxiliaryCycle();
-    if (auxiliary_cycle)
-    {
-        auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
-        auxiliary_cycle->setPosition(draw_position_px);
-        auxiliary_cycle->draw(color, normal);
-    }
+   const auto& auxiliary_cycle = _player_animation->getAuxiliaryCycle();
+   if (auxiliary_cycle)
+   {
+      auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
+      auxiliary_cycle->setPosition(draw_position_px);
+      auxiliary_cycle->draw(color, normal);
+   }
 
-    // draw additional effects such as dust, water splash
-    _animation_pool.drawAnimations(color,
-                                   normal,
-                                   {"player_jump_dust_l",
-                                    "player_jump_dust_r",
-                                    "player_jump_dust_inair_l",
-                                    "player_jump_dust_inair_r",
-                                    "player_water_splash"});
+   // draw additional effects such as dust, water splash
+   _animation_pool.drawAnimations(
+      color,
+      normal,
+      {"player_jump_dust_l", "player_jump_dust_r", "player_jump_dust_inair_l", "player_jump_dust_inair_r", "player_water_splash"}
+   );
 }
 
 void Player::drawStencil(sf::RenderTarget& color)
 {
-    const auto stencil_color = sf::Color{255, 255, 255, 40};
-    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
+   const auto stencil_color = sf::Color{255, 255, 255, 40};
+   const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
 
-    auto current_cycle = _player_animation->getCurrentCycle();
-    if (current_cycle)
-    {
-        current_cycle->setColor(stencil_color);
-        current_cycle->setPosition(draw_position_px);
-        current_cycle->draw(color);
-    }
+   auto current_cycle = _player_animation->getCurrentCycle();
+   if (current_cycle)
+   {
+      current_cycle->setColor(stencil_color);
+      current_cycle->setPosition(draw_position_px);
+      current_cycle->draw(color);
+   }
 
-    auto auxiliary_cycle = _player_animation->getAuxiliaryCycle();
-    if (auxiliary_cycle)
-    {
-        auxiliary_cycle->setColor(stencil_color);
-        auxiliary_cycle->setPosition(draw_position_px);
-        auxiliary_cycle->draw(color);
-    }
+   auto auxiliary_cycle = _player_animation->getAuxiliaryCycle();
+   if (auxiliary_cycle)
+   {
+      auxiliary_cycle->setColor(stencil_color);
+      auxiliary_cycle->setPosition(draw_position_px);
+      auxiliary_cycle->draw(color);
+   }
 }
 
 const sf::Vector2f& Player::getPixelPositionFloat() const
 {
-    return _pixel_position_f;
+   return _pixel_position_f;
 }
 
 const sf::Vector2i& Player::getPixelPositionInt() const
 {
-    return _pixel_position_i;
+   return _pixel_position_i;
 }
 
 void Player::setPixelPosition(float x, float y)
 {
-    _pixel_position_f.x = x;
-    _pixel_position_f.y = y;
+   _pixel_position_f.x = x;
+   _pixel_position_f.y = y;
 
-    _pixel_position_i.x = static_cast<int32_t>(x);
-    _pixel_position_i.y = static_cast<int32_t>(y);
+   _pixel_position_i.x = static_cast<int32_t>(x);
+   _pixel_position_i.y = static_cast<int32_t>(y);
 }
 
 const sf::FloatRect& Player::getPixelRectFloat() const
 {
-    return _pixel_rect_f;
+   return _pixel_rect_f;
 }
 
 void Player::updatePixelRect()
 {
-    constexpr auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
+   constexpr auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
 
-    _pixel_rect_f.position.x = _pixel_position_f.x - PLAYER_ACTUAL_WIDTH * 0.5f;
-    _pixel_rect_f.position.y = _pixel_position_f.y - height_diff_px - (height_diff_px * 0.5f);
-    _pixel_rect_f.size.x = PLAYER_ACTUAL_WIDTH;
-    _pixel_rect_f.size.y = PLAYER_ACTUAL_HEIGHT;
+   _pixel_rect_f.position.x = _pixel_position_f.x - PLAYER_ACTUAL_WIDTH * 0.5f;
+   _pixel_rect_f.position.y = _pixel_position_f.y - height_diff_px - (height_diff_px * 0.5f);
+   _pixel_rect_f.size.x = PLAYER_ACTUAL_WIDTH;
+   _pixel_rect_f.size.y = PLAYER_ACTUAL_HEIGHT;
 
-    _pixel_rect_i.position.x = static_cast<int32_t>(_pixel_rect_f.position.x);
-    _pixel_rect_i.position.y = static_cast<int32_t>(_pixel_rect_f.position.y);
-    _pixel_rect_i.size.x = PLAYER_ACTUAL_WIDTH;
-    _pixel_rect_i.size.y = PLAYER_ACTUAL_HEIGHT;
+   _pixel_rect_i.position.x = static_cast<int32_t>(_pixel_rect_f.position.x);
+   _pixel_rect_i.position.y = static_cast<int32_t>(_pixel_rect_f.position.y);
+   _pixel_rect_i.size.x = PLAYER_ACTUAL_WIDTH;
+   _pixel_rect_i.size.y = PLAYER_ACTUAL_HEIGHT;
 }
 
 void Player::updateChunk()
 {
-    _chunk.update(_pixel_position_i.x, _pixel_position_i.y);
+   _chunk.update(_pixel_position_i.x, _pixel_position_i.y);
 }
 
 const sf::IntRect& Player::getPixelRectInt() const
 {
-    return _pixel_rect_i;
+   return _pixel_rect_i;
 }
 
 void Player::setMaskBitsCrouching(bool enabled)
 {
-    b2Filter filter = _body_fixture->GetFilterData();
-    filter.maskBits = enabled ? mask_bits_crouching : mask_bits_standing;
-    _body_fixture->SetFilterData(filter);
+   b2Filter filter = _body_fixture->GetFilterData();
+   filter.maskBits = enabled ? mask_bits_crouching : mask_bits_standing;
+   _body_fixture->SetFilterData(filter);
 }
 
 float Player::getVelocityNormalized() const
 {
-    const auto max = getMaxVelocity();
-    const auto velocity = _body->GetLinearVelocity();
-    return velocity.x / max;
+   const auto max = getMaxVelocity();
+   const auto velocity = _body->GetLinearVelocity();
+   return velocity.x / max;
 }
 
 void Player::createFeet()
 {
-    // feet
-    //  (   )  (   )  (   )  (   )
-    //      ____      _____
-    //      ^  ^      ^   ^
-    //      dist      radius * 2
-    //  __________________________
-    //  ^                        ^
-    //  count * (dist + radius)
+   // feet
+   //  (   )  (   )  (   )  (   )
+   //      ____      _____
+   //      ^  ^      ^   ^
+   //      dist      radius * 2
+   //  __________________________
+   //  ^                        ^
+   //  count * (dist + radius)
 
-    const auto width_px = PLAYER_ACTUAL_WIDTH;
-    const auto height_px = PLAYER_ACTUAL_HEIGHT;
-    const auto feet_radius_m = 0.16f / static_cast<float>(__foot_count);
-    const auto feet_distance_m = 0.0f;
-    const auto feet_offset_m = static_cast<float>(__foot_count) * (feet_radius_m * 2.0f + feet_distance_m) * 0.5f - feet_radius_m;
+   const auto width_px = PLAYER_ACTUAL_WIDTH;
+   const auto height_px = PLAYER_ACTUAL_HEIGHT;
+   const auto feet_radius_m = 0.16f / static_cast<float>(__foot_count);
+   const auto feet_distance_m = 0.0f;
+   const auto feet_offset_m = static_cast<float>(__foot_count) * (feet_radius_m * 2.0f + feet_distance_m) * 0.5f - feet_radius_m;
 
-    for (auto i = 0u; i < __foot_count; i++)
-    {
-        b2FixtureDef fixture_def_feet;
-        fixture_def_feet.density = 1.f;
-        fixture_def_feet.friction = PhysicsConfiguration::getInstance()._player_friction;
-        fixture_def_feet.restitution = 0.0f;
-        fixture_def_feet.filter.categoryBits = category_bits;
-        fixture_def_feet.filter.maskBits = mask_bits_standing;
-        fixture_def_feet.filter.groupIndex = group_index;
+   for (auto i = 0u; i < __foot_count; i++)
+   {
+      b2FixtureDef fixture_def_feet;
+      fixture_def_feet.density = 1.f;
+      fixture_def_feet.friction = PhysicsConfiguration::getInstance()._player_friction;
+      fixture_def_feet.restitution = 0.0f;
+      fixture_def_feet.filter.categoryBits = category_bits;
+      fixture_def_feet.filter.maskBits = mask_bits_standing;
+      fixture_def_feet.filter.groupIndex = group_index;
 
-        b2CircleShape feet_shape;
-        feet_shape.m_p.Set(i * (feet_radius_m * 2.0f + feet_distance_m) - feet_offset_m, 0.12f);
-        feet_shape.m_radius = feet_radius_m;
-        fixture_def_feet.shape = &feet_shape;
+      b2CircleShape feet_shape;
+      feet_shape.m_p.Set(i * (feet_radius_m * 2.0f + feet_distance_m) - feet_offset_m, 0.12f);
+      feet_shape.m_radius = feet_radius_m;
+      fixture_def_feet.shape = &feet_shape;
 
-        auto* foot = _body->CreateFixture(&fixture_def_feet);
-        _foot_fixture[i] = foot;
+      auto* foot = _body->CreateFixture(&fixture_def_feet);
+      _foot_fixture[i] = foot;
 
-        auto* object_data_feet = new FixtureNode(this);
-        object_data_feet->setType(ObjectTypePlayer);
-        object_data_feet->setFlag("foot", true);
-        foot->SetUserData(static_cast<void*>(object_data_feet));
-    }
+      auto* object_data_feet = new FixtureNode(this);
+      object_data_feet->setType(ObjectTypePlayer);
+      object_data_feet->setFlag("foot", true);
+      foot->SetUserData(static_cast<void*>(object_data_feet));
+   }
 
-    // attach foot sensor shape
-    b2PolygonShape foot_sensor_shape;
-    foot_sensor_shape.SetAsBox((width_px / 2.0f) / (PPM * 2.0f),
-                               (height_px / 4.0f) / (PPM * 2.0f),
-                               b2Vec2(0.0f, (height_px * 0.5f) / (PPM * 2.0f)),
-                               0.0f);
+   // attach foot sensor shape
+   b2PolygonShape foot_sensor_shape;
+   foot_sensor_shape.SetAsBox(
+      (width_px / 2.0f) / (PPM * 2.0f), (height_px / 4.0f) / (PPM * 2.0f), b2Vec2(0.0f, (height_px * 0.5f) / (PPM * 2.0f)), 0.0f
+   );
 
-    b2FixtureDef foot_sensor_fixture_def;
-    foot_sensor_fixture_def.isSensor = true;
-    foot_sensor_fixture_def.shape = &foot_sensor_shape;
+   b2FixtureDef foot_sensor_fixture_def;
+   foot_sensor_fixture_def.isSensor = true;
+   foot_sensor_fixture_def.shape = &foot_sensor_shape;
 
-    _foot_sensor_fixture = _body->CreateFixture(&foot_sensor_fixture_def);
-    auto* foot_object_data = new FixtureNode(this);
-    foot_object_data->setType(ObjectTypePlayerFootSensor);
-    _foot_sensor_fixture->SetUserData(static_cast<void*>(foot_object_data));
+   _foot_sensor_fixture = _body->CreateFixture(&foot_sensor_fixture_def);
+   auto* foot_object_data = new FixtureNode(this);
+   foot_object_data->setType(ObjectTypePlayerFootSensor);
+   _foot_sensor_fixture->SetUserData(static_cast<void*>(foot_object_data));
 
-    // attach head sensor shape
-    b2PolygonShape head_polygon_shape;
-    head_polygon_shape.SetAsBox((width_px / 2.0f) / (PPM * 2.0f),
-                                (height_px / 4.0f) / (PPM * 2.0f),
-                                b2Vec2(0.0f, -height_px / (PPM * 2.0f)),
-                                0.0f);
+   // attach head sensor shape
+   b2PolygonShape head_polygon_shape;
+   head_polygon_shape.SetAsBox(
+      (width_px / 2.0f) / (PPM * 2.0f), (height_px / 4.0f) / (PPM * 2.0f), b2Vec2(0.0f, -height_px / (PPM * 2.0f)), 0.0f
+   );
 
-    b2FixtureDef head_sensor_fixture_def;
-    head_sensor_fixture_def.isSensor = true;
-    head_sensor_fixture_def.shape = &head_polygon_shape;
+   b2FixtureDef head_sensor_fixture_def;
+   head_sensor_fixture_def.isSensor = true;
+   head_sensor_fixture_def.shape = &head_polygon_shape;
 
-    auto* head_sensor_fixture = _body->CreateFixture(&head_sensor_fixture_def);
-    auto* head_object_data = new FixtureNode(this);
-    head_object_data->setType(ObjectTypePlayerHeadSensor);
-    head_sensor_fixture->SetUserData(static_cast<void*>(head_object_data));
+   auto* head_sensor_fixture = _body->CreateFixture(&head_sensor_fixture_def);
+   auto* head_object_data = new FixtureNode(this);
+   head_object_data->setType(ObjectTypePlayerHeadSensor);
+   head_sensor_fixture->SetUserData(static_cast<void*>(head_object_data));
 
-    // wallslide sensors
-    b2PolygonShape left_arm_polygon_shape;
-    left_arm_polygon_shape.SetAsBox(wall_slide_sensor_width / (PPM * 2.0f),
-                                    wall_slide_sensor_height / (PPM * 2.0f),
-                                    b2Vec2(-wall_slide_sensor_distance, -height_px / (PPM * 2.0f)),
-                                    0.0f);
+   // wallslide sensors
+   b2PolygonShape left_arm_polygon_shape;
+   left_arm_polygon_shape.SetAsBox(
+      wall_slide_sensor_width / (PPM * 2.0f),
+      wall_slide_sensor_height / (PPM * 2.0f),
+      b2Vec2(-wall_slide_sensor_distance, -height_px / (PPM * 2.0f)),
+      0.0f
+   );
 
-    b2FixtureDef left_arm_sensor_fixture_def;
-    left_arm_sensor_fixture_def.isSensor = true;
-    left_arm_sensor_fixture_def.shape = &left_arm_polygon_shape;
+   b2FixtureDef left_arm_sensor_fixture_def;
+   left_arm_sensor_fixture_def.isSensor = true;
+   left_arm_sensor_fixture_def.shape = &left_arm_polygon_shape;
 
-    auto* left_arm_sensor_fixture = _body->CreateFixture(&left_arm_sensor_fixture_def);
-    auto* left_arm_object_data = new FixtureNode(this);
-    left_arm_object_data->setType(ObjectTypePlayerLeftArmSensor);
-    left_arm_sensor_fixture->SetUserData(static_cast<void*>(left_arm_object_data));
+   auto* left_arm_sensor_fixture = _body->CreateFixture(&left_arm_sensor_fixture_def);
+   auto* left_arm_object_data = new FixtureNode(this);
+   left_arm_object_data->setType(ObjectTypePlayerLeftArmSensor);
+   left_arm_sensor_fixture->SetUserData(static_cast<void*>(left_arm_object_data));
 
-    b2PolygonShape right_arm_polygon_shape;
-    right_arm_polygon_shape.SetAsBox(wall_slide_sensor_width / (PPM * 2.0f),
-                                     wall_slide_sensor_height / (PPM * 2.0f),
-                                     b2Vec2(wall_slide_sensor_distance, -height_px / (PPM * 2.0f)),
-                                     0.0f);
+   b2PolygonShape right_arm_polygon_shape;
+   right_arm_polygon_shape.SetAsBox(
+      wall_slide_sensor_width / (PPM * 2.0f),
+      wall_slide_sensor_height / (PPM * 2.0f),
+      b2Vec2(wall_slide_sensor_distance, -height_px / (PPM * 2.0f)),
+      0.0f
+   );
 
-    b2FixtureDef right_arm_sensor_fixture_def;
-    right_arm_sensor_fixture_def.isSensor = true;
-    right_arm_sensor_fixture_def.shape = &right_arm_polygon_shape;
+   b2FixtureDef right_arm_sensor_fixture_def;
+   right_arm_sensor_fixture_def.isSensor = true;
+   right_arm_sensor_fixture_def.shape = &right_arm_polygon_shape;
 
-    auto* right_arm_sensor_fixture = _body->CreateFixture(&right_arm_sensor_fixture_def);
-    auto* right_arm_object_data = new FixtureNode(this);
-    right_arm_object_data->setType(ObjectTypePlayerRightArmSensor);
-    right_arm_sensor_fixture->SetUserData(static_cast<void*>(right_arm_object_data));
+   auto* right_arm_sensor_fixture = _body->CreateFixture(&right_arm_sensor_fixture_def);
+   auto* right_arm_object_data = new FixtureNode(this);
+   right_arm_object_data->setType(ObjectTypePlayerRightArmSensor);
+   right_arm_sensor_fixture->SetUserData(static_cast<void*>(right_arm_object_data));
 }
 
 void Player::createBody()
 {
-    // create player body
-    auto* body_def = new b2BodyDef();
-    body_def->position.Set(getPixelPositionFloat().x * MPP, getPixelPositionFloat().y * MPP);
+   // create player body
+   auto* body_def = new b2BodyDef();
+   body_def->position.Set(getPixelPositionFloat().x * MPP, getPixelPositionFloat().y * MPP);
 
-    body_def->type = b2_dynamicBody;
+   body_def->type = b2_dynamicBody;
 
-    _body = _world->CreateBody(body_def);
-    _body->SetFixedRotation(true);
+   _body = _world->CreateBody(body_def);
+   _body->SetFixedRotation(true);
 
-    // add body shape
-    b2FixtureDef body_fixture_def;
-    body_fixture_def.density = 0.45f;
-    body_fixture_def.friction = PhysicsConfiguration::getInstance()._player_friction;
-    body_fixture_def.restitution = 0.0f;
+   // add body shape
+   b2FixtureDef body_fixture_def;
+   body_fixture_def.density = 0.45f;
+   body_fixture_def.friction = PhysicsConfiguration::getInstance()._player_friction;
+   body_fixture_def.restitution = 0.0f;
 
-    body_fixture_def.filter.categoryBits = category_bits;
-    body_fixture_def.filter.maskBits = mask_bits_standing;
-    body_fixture_def.filter.groupIndex = group_index;
+   body_fixture_def.filter.categoryBits = category_bits;
+   body_fixture_def.filter.maskBits = mask_bits_standing;
+   body_fixture_def.filter.groupIndex = group_index;
 
-    b2PolygonShape body_shape;
-    body_shape.SetAsBox(0.16f, 0.3f, {0.0f, -0.2f}, 0.0f);
-    body_fixture_def.shape = &body_shape;
+   b2PolygonShape body_shape;
+   body_shape.SetAsBox(0.16f, 0.3f, {0.0f, -0.2f}, 0.0f);
+   body_fixture_def.shape = &body_shape;
 
-    _body_fixture = _body->CreateFixture(&body_fixture_def);
+   _body_fixture = _body->CreateFixture(&body_fixture_def);
 
-    auto* object_data_head = new FixtureNode(this);
-    object_data_head->setType(ObjectTypePlayer);
-    object_data_head->setFlag("head", true);
-    _body_fixture->SetUserData(static_cast<void*>(object_data_head));
+   auto* object_data_head = new FixtureNode(this);
+   object_data_head->setType(ObjectTypePlayer);
+   object_data_head->setFlag("head", true);
+   _body_fixture->SetUserData(static_cast<void*>(object_data_head));
 
-    // mBody->Dump();
+   // mBody->Dump();
 
-    // store body inside player jump
-    _jump._body = _body;
+   // store body inside player jump
+   _jump._body = _body;
 }
 
 void Player::createPlayerBody()
 {
-    createBody();
-    createFeet();
+   createBody();
+   createFeet();
 }
 
 void Player::updateFadeOut(const sf::Time& dt)
 {
-    if (!_fade_out)
-    {
-        return;
-    }
+   if (!_fade_out)
+   {
+      return;
+   }
 
-    _fade_out_alpha = std::max(_fade_out_alpha - dt.asSeconds() * _fade_out_speed_factor, 0.0f);
+   _fade_out_alpha = std::max(_fade_out_alpha - dt.asSeconds() * _fade_out_speed_factor, 0.0f);
 }
 
 void Player::setWorld(const std::shared_ptr<b2World>& world)
 {
-    _world = world;
+   _world = world;
 }
 
 void Player::resetWorld()
 {
-    _world.reset();
+   _world.reset();
 }
 
 float Player::getMaxVelocity() const
 {
-    if (isInWater())
-    {
-        return PhysicsConfiguration::getInstance()._player_speed_max_water;
-    }
+   if (isInWater())
+   {
+      return PhysicsConfiguration::getInstance()._player_speed_max_water;
+   }
 
-    // running is actually not supported
-    // do we need an extra for higher speeds?
-    //
-    // if (mKeysPressed & KeyPressedRun)
-    // {
-    //    return PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
-    // }
+   // running is actually not supported
+   // do we need an extra for higher speeds?
+   //
+   // if (mKeysPressed & KeyPressedRun)
+   // {
+   //    return PhysicsConfiguration::getInstance().mPlayerSpeedMaxRun;
+   // }
 
-    if (isInAir())
-    {
-        return PhysicsConfiguration::getInstance()._player_speed_max_air;
-    }
+   if (isInAir())
+   {
+      return PhysicsConfiguration::getInstance()._player_speed_max_air;
+   }
 
-    return PhysicsConfiguration::getInstance()._player_speed_max_walk;
+   return PhysicsConfiguration::getInstance()._player_speed_max_walk;
 }
 
 float Player::readVelocityFromController(const PlayerSpeed& speed) const
 {
-    // movement is disabled while the camera panorama is active
-    if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
-    {
-        return 0.0f;
-    }
+   // movement is disabled while the camera panorama is active
+   if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
+   {
+      return 0.0f;
+   }
 
-    auto axis_value_normalized = _controls->readControllerNormalizedHorizontal();
+   auto axis_value_normalized = _controls->readControllerNormalizedHorizontal();
 
-    // controller is not used, so slow down
-    if (fabs(axis_value_normalized) <= 0.3f)
-    {
-        return speed._current_velocity.x * speed._deceleration;
-    }
+   // controller is not used, so slow down
+   if (fabs(axis_value_normalized) <= 0.3f)
+   {
+      return speed._current_velocity.x * speed._deceleration;
+   }
 
-    axis_value_normalized *= speed._acceleration;
+   axis_value_normalized *= speed._acceleration;
 
-    // checking for the current speed here because even if the player pushes a controller axis
-    // to the left side, he might still dash to the other side with quite a strong impulse.
-    // that would confuse the speed capping and accelerate to infinity. true story.
-    auto desired_velocity = 0.0f;
-    if (speed._current_velocity.x < 0.0f)
-    {
-        desired_velocity = b2Max(speed._current_velocity.x + axis_value_normalized, -speed._velocity_max);
-    }
-    else
-    {
-        desired_velocity = b2Min(speed._current_velocity.x + axis_value_normalized, speed._velocity_max);
-    }
+   // checking for the current speed here because even if the player pushes a controller axis
+   // to the left side, he might still dash to the other side with quite a strong impulse.
+   // that would confuse the speed capping and accelerate to infinity. true story.
+   auto desired_velocity = 0.0f;
+   if (speed._current_velocity.x < 0.0f)
+   {
+      desired_velocity = b2Max(speed._current_velocity.x + axis_value_normalized, -speed._velocity_max);
+   }
+   else
+   {
+      desired_velocity = b2Min(speed._current_velocity.x + axis_value_normalized, speed._velocity_max);
+   }
 
-    // Log::Info()
-    //    << "desired: " << desiredVel << " "
-    //    << "current: " << speed.currentVelocity.x << " "
-    //    << "axis value: " << axisValueNormalized << " "
-    //    << "max: " << speed.velocityMax;
+   // Log::Info()
+   //    << "desired: " << desiredVel << " "
+   //    << "current: " << speed.currentVelocity.x << " "
+   //    << "axis value: " << axisValueNormalized << " "
+   //    << "max: " << speed.velocityMax;
 
-    return desired_velocity;
+   return desired_velocity;
 }
 
 bool Player::isPointingRight() const
 {
-    return !_points_to_left;
+   return !_points_to_left;
 }
 
 bool Player::isPointingLeft() const
 {
-    return _points_to_left;
+   return _points_to_left;
 }
 
 void Player::updateOrientation()
 {
-    if (isDead())
-    {
-        return;
-    }
+   if (isDead())
+   {
+      return;
+   }
 
-    const auto orientation = _controls->updateOrientation();
-    if (orientation == PlayerControls::Orientation::Left)
-    {
-        _points_to_left = true;
-    }
-    else if (orientation == PlayerControls::Orientation::Right)
-    {
-        _points_to_left = false;
-    }
+   const auto orientation = _controls->updateOrientation();
+   if (orientation == PlayerControls::Orientation::Left)
+   {
+      _points_to_left = true;
+   }
+   else if (orientation == PlayerControls::Orientation::Right)
+   {
+      _points_to_left = false;
+   }
 }
 
 float Player::readVelocityFromKeyboard(const PlayerSpeed& speed) const
 {
-    // movement is disabled while the camera panorama is active
-    if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
-    {
-        return 0.0f;
-    }
+   // movement is disabled while the camera panorama is active
+   if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
+   {
+      return 0.0f;
+   }
 
-    const auto attempt_move_left = _controls->isMovingLeft();
-    const auto attempt_move_right = _controls->isMovingRight();
+   const auto attempt_move_left = _controls->isMovingLeft();
+   const auto attempt_move_right = _controls->isMovingRight();
 
-    // sanity check to avoid moonwalking
-    if (attempt_move_left && attempt_move_right)
-    {
-        return 0.0f;
-    }
+   // sanity check to avoid moonwalking
+   if (attempt_move_left && attempt_move_right)
+   {
+      return 0.0f;
+   }
 
-    auto desired_velocity = 0.0f;
+   auto desired_velocity = 0.0f;
 
-    if (attempt_move_left)
-    {
-        desired_velocity = b2Max(speed._current_velocity.x - speed._acceleration, -speed._velocity_max);
-    }
+   if (attempt_move_left)
+   {
+      desired_velocity = b2Max(speed._current_velocity.x - speed._acceleration, -speed._velocity_max);
+   }
 
-    if (attempt_move_right)
-    {
-        desired_velocity = b2Min(speed._current_velocity.x + speed._acceleration, speed._velocity_max);
-    }
+   if (attempt_move_right)
+   {
+      desired_velocity = b2Min(speed._current_velocity.x + speed._acceleration, speed._velocity_max);
+   }
 
-    // slowdown as soon as
-    // a) no movement to left or right
-    // b) movement is opposite to given direction
-    // c) no movement at all
-    const auto no_movement_to_left_or_right = !attempt_move_left && !attempt_move_right;
+   // slowdown as soon as
+   // a) no movement to left or right
+   // b) movement is opposite to given direction
+   // c) no movement at all
+   const auto no_movement_to_left_or_right = !attempt_move_left && !attempt_move_right;
 
-    const auto velocity_opposite_to_given_dir = (speed._current_velocity.x < -0.01f && attempt_move_right)
-                                                || (speed._current_velocity.x > 0.01f && attempt_move_left);
+   const auto velocity_opposite_to_given_dir =
+      (speed._current_velocity.x < -0.01f && attempt_move_right) || (speed._current_velocity.x > 0.01f && attempt_move_left);
 
-    const auto no_movement = (fabs(desired_velocity) < 0.0001f);
+   const auto no_movement = (fabs(desired_velocity) < 0.0001f);
 
-    if (no_movement_to_left_or_right || velocity_opposite_to_given_dir || no_movement)
-    {
-        desired_velocity = speed._current_velocity.x * speed._deceleration;
-    }
+   if (no_movement_to_left_or_right || velocity_opposite_to_given_dir || no_movement)
+   {
+      desired_velocity = speed._current_velocity.x * speed._deceleration;
+   }
 
-    return desired_velocity;
+   return desired_velocity;
 }
 
 float Player::getDeceleration() const
 {
-    if (isInAir())
-    {
-        return PhysicsConfiguration::getInstance()._player_deceleration_air;
-    }
+   if (isInAir())
+   {
+      return PhysicsConfiguration::getInstance()._player_deceleration_air;
+   }
 
-    if (isInWater())
-    {
-        return PhysicsConfiguration::getInstance()._player_deceleration_water;
-    }
+   if (isInWater())
+   {
+      return PhysicsConfiguration::getInstance()._player_deceleration_water;
+   }
 
-    return PhysicsConfiguration::getInstance()._player_deceleration_ground;
+   return PhysicsConfiguration::getInstance()._player_deceleration_ground;
 }
 
 float Player::getAcceleration() const
 {
-    if (isInAir())
-    {
-        return PhysicsConfiguration::getInstance()._player_acceleration_air;
-    }
+   if (isInAir())
+   {
+      return PhysicsConfiguration::getInstance()._player_acceleration_air;
+   }
 
-    if (isInWater())
-    {
-        return PhysicsConfiguration::getInstance()._player_acceleration_water;
-    }
+   if (isInWater())
+   {
+      return PhysicsConfiguration::getInstance()._player_acceleration_water;
+   }
 
-    return PhysicsConfiguration::getInstance()._player_acceleration_ground;
+   return PhysicsConfiguration::getInstance()._player_acceleration_ground;
 }
 
 bool Player::isDead() const
 {
-    return _dead;
+   return _dead;
 }
 
 bool Player::isJumpingThroughOneWayWall()
 {
-    // a player is considered jumping through a one-way wall when
-    // - the y velocity goes up
-    // - there are active contacts with a one-way wall
-    constexpr auto epsilon = 0.00001f;
-    if (_body->GetLinearVelocity().y < -epsilon)
-    {
-        if (OneWayWall::instance().hasContacts())
-        {
-            return true;
-        }
-    }
+   // a player is considered jumping through a one-way wall when
+   // - the y velocity goes up
+   // - there are active contacts with a one-way wall
+   constexpr auto epsilon = 0.00001f;
+   if (_body->GetLinearVelocity().y < -epsilon)
+   {
+      if (OneWayWall::instance().hasContacts())
+      {
+         return true;
+      }
+   }
 
-    return false;
+   return false;
 }
 
 void Player::updateAnimation(const sf::Time& dt)
 {
-    PlayerAnimation::PlayerAnimationData data;
+   PlayerAnimation::PlayerAnimationData data;
 
-    data._dead = isDead();
-    data._death_count_current_level = SaveState::getPlayerInfo()._stats._death_count_current_level;
-    data._death_reason = _death_reason.value_or(DeathReason::Invalid);
-    data._checkpoint_index = SaveState::getCurrent()._checkpoint;
-    data._in_air = isInAir();
-    data._in_water = isInWater();
-    data._linear_velocity = _body->GetLinearVelocity();
-    data._hard_landing = _hard_landing;
-    data._bending_down = _bend._bending_down;
-    data._crouching = _bend._crouching;
-    data._points_left = _points_to_left;
-    data._points_right = !_points_to_left;
-    data._climb_joint_present = _climb._climb_joint;
-    data._jump_frame_count = _jump._jump_frame_count;
-    data._dash_frame_count = _dash._frame_count;
-    data._moving_left = _controls->isMovingLeft();
-    data._moving_right = _controls->isMovingRight();
-    data._wall_sliding = _jump._wallsliding;
-    data._wall_jump_points_right = _jump._walljump_points_right;
-    data._jumping_through_one_way_wall = isJumpingThroughOneWayWall();
-    data._timepoint_doublejump = _jump._timepoint_doublejump;
-    data._timepoint_wallslide = _jump._timepoint_wallslide;
-    data._timepoint_walljump = _jump._timepoint_walljump;
-    data._timepoint_bend_down_start = _bend._timepoint_bend_down_start;
-    data._timepoint_bend_down_end = _bend._timepoint_bend_down_end;
-    data._timepoint_attack_start = _attack._timepoint_attack_start;
-    data._timepoint_attack_standing_start = _attack._timepoint_attack_standing_start;
-    data._timepoint_attack_bend_down_start = _attack._timepoint_attack_bend_down_start;
-    data._timepoint_attack_jumping_start = _attack._timepoint_attack_jumping_start;
-    data._attacking = _attack.isAttacking();
+   data._dead = isDead();
+   data._death_count_current_level = SaveState::getPlayerInfo()._stats._death_count_current_level;
+   data._death_reason = _death_reason.value_or(DeathReason::Invalid);
+   data._checkpoint_index = SaveState::getCurrent()._checkpoint;
+   data._in_air = isInAir();
+   data._in_water = isInWater();
+   data._linear_velocity = _body->GetLinearVelocity();
+   data._hard_landing = _hard_landing;
+   data._bending_down = _bend._bending_down;
+   data._crouching = _bend._crouching;
+   data._points_left = _points_to_left;
+   data._points_right = !_points_to_left;
+   data._climb_joint_present = _climb._climb_joint;
+   data._jump_frame_count = _jump._jump_frame_count;
+   data._dash_frame_count = _dash._frame_count;
+   data._moving_left = _controls->isMovingLeft();
+   data._moving_right = _controls->isMovingRight();
+   data._wall_sliding = _jump._wallsliding;
+   data._wall_jump_points_right = _jump._walljump_points_right;
+   data._jumping_through_one_way_wall = isJumpingThroughOneWayWall();
+   data._timepoint_doublejump = _jump._timepoint_doublejump;
+   data._timepoint_wallslide = _jump._timepoint_wallslide;
+   data._timepoint_walljump = _jump._timepoint_walljump;
+   data._timepoint_bend_down_start = _bend._timepoint_bend_down_start;
+   data._timepoint_bend_down_end = _bend._timepoint_bend_down_end;
+   data._timepoint_attack_start = _attack._timepoint_attack_start;
+   data._timepoint_attack_standing_start = _attack._timepoint_attack_standing_start;
+   data._timepoint_attack_bend_down_start = _attack._timepoint_attack_bend_down_start;
+   data._timepoint_attack_jumping_start = _attack._timepoint_attack_jumping_start;
+   data._attacking = _attack.isAttacking();
 
-    const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
-    data._weapon_type = (!weapon_system._selected) ? WeaponType::None : weapon_system._selected->getWeaponType();
+   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+   data._weapon_type = (!weapon_system._selected) ? WeaponType::None : weapon_system._selected->getWeaponType();
 
-    if (_dash.hasMoreFrames())
-    {
-        data._dash_dir = _dash._direction;
-    }
+   if (_dash.hasMoreFrames())
+   {
+      data._dash_dir = _dash._direction;
+   }
 
-    // pick latest left/right input to avoid conflicts
-    if (data._moving_right && data._moving_left)
-    {
-        if (_controls->wasMovingLeft())
-        {
-            data._moving_left = false;
-        }
+   // pick latest left/right input to avoid conflicts
+   if (data._moving_right && data._moving_left)
+   {
+      if (_controls->wasMovingLeft())
+      {
+         data._moving_left = false;
+      }
 
-        if (_controls->wasMovingRight())
-        {
-            data._moving_right = false;
-        }
-    }
+      if (_controls->wasMovingRight())
+      {
+         data._moving_right = false;
+      }
+   }
 
-    _player_animation->update(dt, data);
+   _player_animation->update(dt, data);
 }
 
 float Player::readDesiredVelocity() const
 {
-    const auto acceleration = getAcceleration();
-    const auto deceleration = getDeceleration();
-    const auto current_velocity = _body->GetLinearVelocity();
-    const auto velocity_max = getMaxVelocity();
+   const auto acceleration = getAcceleration();
+   const auto deceleration = getDeceleration();
+   const auto current_velocity = _body->GetLinearVelocity();
+   const auto velocity_max = getMaxVelocity();
 
-    PlayerSpeed speed{current_velocity, velocity_max, acceleration, deceleration};
+   PlayerSpeed speed{current_velocity, velocity_max, acceleration, deceleration};
 
-    const auto desired_velocity = readDesiredVelocity(speed);
-    return desired_velocity;
+   const auto desired_velocity = readDesiredVelocity(speed);
+   return desired_velocity;
 }
 
 float Player::readDesiredVelocity(const PlayerSpeed& speed) const
 {
-    auto desired_velocity = 0.0f;
+   auto desired_velocity = 0.0f;
 
-    if (GameControllerIntegration::getInstance().isControllerConnected())
-    {
-        if (_controls->isControllerUsedLast())
-        {
-            desired_velocity = readVelocityFromController(speed);
-        }
-        else
-        {
-            desired_velocity = readVelocityFromKeyboard(speed);
-        }
-    }
-    else
-    {
-        desired_velocity = readVelocityFromKeyboard(speed);
-    }
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      if (_controls->isControllerUsedLast())
+      {
+         desired_velocity = readVelocityFromController(speed);
+      }
+      else
+      {
+         desired_velocity = readVelocityFromKeyboard(speed);
+      }
+   }
+   else
+   {
+      desired_velocity = readVelocityFromKeyboard(speed);
+   }
 
-    return desired_velocity;
+   return desired_velocity;
 }
 
 void Player::updateVelocity()
 {
-    using namespace std::chrono_literals;
+   using namespace std::chrono_literals;
 
-    if (isDead())
-    {
-        _body->SetLinearVelocity({0.0, 0.0});
-        return;
-    }
+   if (isDead())
+   {
+      _body->SetLinearVelocity({0.0, 0.0});
+      return;
+   }
 
-    if (_hard_landing)
-    {
-        _body->SetLinearVelocity({0.0, 0.0});
-        return;
-    }
+   if (_hard_landing)
+   {
+      _body->SetLinearVelocity({0.0, 0.0});
+      return;
+   }
 
-    // block movement while spawning
-    // spawn is only played if player has died before in current level
-    if (GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealDuration()
-        && SaveState::getPlayerInfo()._stats._death_count_current_level > 0)
-    {
-        _body->SetLinearVelocity({0.0, 0.0});
-        return;
-    }
+   // block movement while spawning
+   // spawn is only played if player has died before in current level
+   if (GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealDuration() &&
+       SaveState::getPlayerInfo()._stats._death_count_current_level > 0)
+   {
+      _body->SetLinearVelocity({0.0, 0.0});
+      return;
+   }
 
-    if (_player_animation->isStandingSwordAttackPlayed())
-    {
-        const auto& vel = _body->GetLinearVelocity();
-        _body->SetLinearVelocity({vel.x * PhysicsConfiguration::getInstance()._player_deceleration_sword_attack, vel.y});
-        return;
-    }
+   if (_player_animation->isStandingSwordAttackPlayed())
+   {
+      const auto& vel = _body->GetLinearVelocity();
+      _body->SetLinearVelocity({vel.x * PhysicsConfiguration::getInstance()._player_deceleration_sword_attack, vel.y});
+      return;
+   }
 
-    if (ScreenTransitionHandler::getInstance().active())
-    {
-        const auto velocity = _body->GetLinearVelocity();
-        _body->SetLinearVelocity({0.0, velocity.y});
-        return;
-    }
+   if (ScreenTransitionHandler::getInstance().active())
+   {
+      const auto velocity = _body->GetLinearVelocity();
+      _body->SetLinearVelocity({0.0, velocity.y});
+      return;
+   }
 
-    if (_bend._bending_down)
-    {
-        if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Crouch)))
-        {
-            if (getControls()->isDroppingDown() && OneWayWall::instance().hasContacts())
-            {
-                // usually just stop the player from movement when bending down while he has no crouching ability
-                // however, when dropping from a platform, we don't want to mess with the velocity,
-                // just let the player fall
-            }
-            else
-            {
-                // while the player is standing on a platform, he is allowed to be to bend down
-                // however, he is not capable of changing his velocity by pressing left or right
-                const auto velocity = _body->GetLinearVelocity();
-                _body->SetLinearVelocity({_belt.isOnBelt() ? _belt.getBeltVelocity() : 0.0f, velocity.y});
-                return;
-            }
-        }
+   if (_bend._bending_down)
+   {
+      if (!(SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Crouch)))
+      {
+         if (getControls()->isDroppingDown() && OneWayWall::instance().hasContacts())
+         {
+            // usually just stop the player from movement when bending down while he has no crouching ability
+            // however, when dropping from a platform, we don't want to mess with the velocity,
+            // just let the player fall
+         }
+         else
+         {
+            // while the player is standing on a platform, he is allowed to be to bend down
+            // however, he is not capable of changing his velocity by pressing left or right
+            const auto velocity = _body->GetLinearVelocity();
+            _body->SetLinearVelocity({_belt.isOnBelt() ? _belt.getBeltVelocity() : 0.0f, velocity.y});
+            return;
+         }
+      }
 
-        // from here the player is crouching
-        _bend._was_crouching = _bend._crouching;
-        _bend._crouching = true;
-    }
-    else
-    {
-        _bend._was_crouching = _bend._crouching;
-        _bend._crouching = false;
-    }
+      // from here the player is crouching
+      _bend._was_crouching = _bend._crouching;
+      _bend._crouching = true;
+   }
+   else
+   {
+      _bend._was_crouching = _bend._crouching;
+      _bend._crouching = false;
+   }
 
-    // we need friction to walk up diagonales
-    if (isOnGround() && fabs(_ground_normal.x) > 0.05f)
-    {
-        setFriction(2.0f);
-    }
-    else
-    {
-        setFriction(0.0f);
-    }
+   // we need friction to walk up diagonales
+   if (isOnGround() && fabs(_ground_normal.x) > 0.05f)
+   {
+      setFriction(2.0f);
+   }
+   else
+   {
+      setFriction(0.0f);
+   }
 
-    auto desired_velocity = readDesiredVelocity();
-    auto current_velocity = _body->GetLinearVelocity();
+   auto desired_velocity = readDesiredVelocity();
+   auto current_velocity = _body->GetLinearVelocity();
 
-    // physically so wrong but gameplay-wise the best choice :)
-    _belt.applyBeltVelocity(desired_velocity, getMaxVelocity(), _controls);
+   // physically so wrong but gameplay-wise the best choice :)
+   _belt.applyBeltVelocity(desired_velocity, getMaxVelocity(), _controls);
 
-    // calc impulse, disregard time factor
-    auto velocity_change_x = desired_velocity - current_velocity.x;
-    auto impulse_x = _body->GetMass() * velocity_change_x;
+   // calc impulse, disregard time factor
+   auto velocity_change_x = desired_velocity - current_velocity.x;
+   auto impulse_x = _body->GetMass() * velocity_change_x;
 
-    _body->ApplyLinearImpulse(b2Vec2(impulse_x, 0.0f), _body->GetWorldCenter(), true);
+   _body->ApplyLinearImpulse(b2Vec2(impulse_x, 0.0f), _body->GetWorldCenter(), true);
 
-    // simulate some friction when moving underwater, also apply some buoyancy
-    if (isInWater())
-    {
-        const auto buoyancy_force = PhysicsConfiguration::getInstance()._in_water_buoyancy_force * -_world->GetGravity();
-        _body->ApplyForce(buoyancy_force, _body->GetWorldCenter(), true);
+   // simulate some friction when moving underwater, also apply some buoyancy
+   if (isInWater())
+   {
+      const auto buoyancy_force = PhysicsConfiguration::getInstance()._in_water_buoyancy_force * -_world->GetGravity();
+      _body->ApplyForce(buoyancy_force, _body->GetWorldCenter(), true);
 
-        auto linear_velocity = _body->GetLinearVelocity();
+      auto linear_velocity = _body->GetLinearVelocity();
 
-        linear_velocity.Set(linear_velocity.x,
-                            std::clamp(linear_velocity.y,
-                                       PhysicsConfiguration::getInstance()._player_in_water_linear_velocity_y_clamp_min,
-                                       PhysicsConfiguration::getInstance()._player_in_water_linear_velocity_y_clamp_max));
+      linear_velocity.Set(
+         linear_velocity.x,
+         std::clamp(
+            linear_velocity.y,
+            PhysicsConfiguration::getInstance()._player_in_water_linear_velocity_y_clamp_min,
+            PhysicsConfiguration::getInstance()._player_in_water_linear_velocity_y_clamp_max
+         )
+      );
 
-        _body->SetLinearVelocity(linear_velocity);
-    }
+      _body->SetLinearVelocity(linear_velocity);
+   }
 
-    // cap speed
-    const auto& physics_config = PhysicsConfiguration::getInstance();
-    const auto max_velocity_horizontal = physics_config._player_max_velocity_horizontal;
-    const auto linear_velocity = _body->GetLinearVelocity();
-    auto max_velocity_up = physics_config._player_max_velocity_up;
-    auto max_velocity_down = physics_config._player_max_velocity_down;
+   // cap speed
+   const auto& physics_config = PhysicsConfiguration::getInstance();
+   const auto max_velocity_horizontal = physics_config._player_max_velocity_horizontal;
+   const auto linear_velocity = _body->GetLinearVelocity();
+   auto max_velocity_up = physics_config._player_max_velocity_up;
+   auto max_velocity_down = physics_config._player_max_velocity_down;
 
-    auto linear_velocity_y = linear_velocity.y;
-    if (BouncerWrapper::isSpeedCapped())
-    {
-        linear_velocity_y = std::clamp(linear_velocity.y, -max_velocity_up, max_velocity_down);
-    }
+   auto linear_velocity_y = linear_velocity.y;
+   if (BouncerWrapper::isSpeedCapped())
+   {
+      linear_velocity_y = std::clamp(linear_velocity.y, -max_velocity_up, max_velocity_down);
+   }
 
-    _body->SetLinearVelocity({std::clamp(linear_velocity.x, -max_velocity_horizontal, max_velocity_horizontal), linear_velocity_y});
+   _body->SetLinearVelocity({std::clamp(linear_velocity.x, -max_velocity_horizontal, max_velocity_horizontal), linear_velocity_y});
 }
 
 const Chunk& Player::getChunk() const
 {
-    return _chunk;
+   return _chunk;
 }
 
 const PlayerBend& Player::getBend() const
 {
-    return _bend;
+   return _bend;
 }
 
 const PlayerJump& Player::getJump() const
 {
-    return _jump;
+   return _jump;
 }
 
 PlayerBelt& Player::getBelt()
 {
-    return _belt;
+   return _belt;
 }
 
 PlayerPlatform& Player::getPlatform()
 {
-    return _platform;
+   return _platform;
 }
 
 void Player::impulse(float intensity)
 {
-    // just store the information we get from the post solve call for now.
-    // other evaluation from BeginContact / EndContact might make the impulse irrelevant
-    _impulse = intensity;
+   // just store the information we get from the post solve call for now.
+   // other evaluation from BeginContact / EndContact might make the impulse irrelevant
+   _impulse = intensity;
 }
 
 void Player::startHardLanding()
 {
-    _controls->lockOrientation(std::chrono::milliseconds(1000));
-    Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f, BoomSettings{0.5, 0.5f});
+   _controls->lockOrientation(std::chrono::milliseconds(1000));
+   Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f, BoomSettings{0.5, 0.5f});
 
-    _timepoint_hard_landing = StopWatch::getInstance().now();
-    _hard_landing = true;
-    _hard_landing_cycles = 0;
+   _timepoint_hard_landing = StopWatch::getInstance().now();
+   _hard_landing = true;
+   _hard_landing_cycles = 0;
 
-    auto& gji = GameControllerIntegration::getInstance();
-    if (gji.isControllerConnected())
-    {
-        if (GameConfiguration::getInstance()._rumble_enabled)
-        {
-            gji.getController()->rumble(0.5f, 300);
-        }
-    }
+   auto& gji = GameControllerIntegration::getInstance();
+   if (gji.isControllerConnected())
+   {
+      if (GameConfiguration::getInstance()._rumble_enabled)
+      {
+         gji.getController()->rumble(0.5f, 300);
+      }
+   }
 
-    Audio::getInstance().playSample({"player_grunt_01.wav"});
+   Audio::getInstance().playSample({"player_grunt_01.wav"});
 }
 
 void Player::updateImpulse()
 {
-    if (_impulse < impulse_epsilon)
-    {
-        return;
-    }
+   if (_impulse < impulse_epsilon)
+   {
+      return;
+   }
 
-    auto impulse_value = _impulse;
-    _impulse = 0.0f;
+   auto impulse_value = _impulse;
+   _impulse = 0.0f;
 
-    if (GameContactListener::getInstance().isPlayerSmashed())
-    {
-        return;
-    }
+   if (GameContactListener::getInstance().isPlayerSmashed())
+   {
+      return;
+   }
 
-    // const auto dx = _velocity_previous.x - _body->GetLinearVelocity().x;
-    // const auto dy = _velocity_previous.y - _body->GetLinearVelocity().y;
-    //
-    // Log::Info()
-    //    << "intensity: " << intensity
-    //    << " dx: " << dx
-    //    << " dy: " << dy
-    //    << " dir: " << (horizontal ? "x" : "y");
-    //
-    // const auto horizontal = (fabs(dx) > fabs(dy));
-    // if (horizontal)
-    // {
-    //    if (impulse > 0.4f)
-    //    {
-    //       Level::getCurrentLevel()->getBoomEffect().boom(0.2f, 0.0f);
-    //    }
-    // }
+   // const auto dx = _velocity_previous.x - _body->GetLinearVelocity().x;
+   // const auto dy = _velocity_previous.y - _body->GetLinearVelocity().y;
+   //
+   // Log::Info()
+   //    << "intensity: " << intensity
+   //    << " dx: " << dx
+   //    << " dy: " << dy
+   //    << " dir: " << (horizontal ? "x" : "y");
+   //
+   // const auto horizontal = (fabs(dx) > fabs(dy));
+   // if (horizontal)
+   // {
+   //    if (impulse > 0.4f)
+   //    {
+   //       Level::getCurrentLevel()->getBoomEffect().boom(0.2f, 0.0f);
+   //    }
+   // }
 
-    if (impulse_value > 1.0f)
-    {
-        if (BouncerWrapper::getNearbyBouncer())
-        {
-            return;
-        }
+   if (impulse_value > 1.0f)
+   {
+      if (BouncerWrapper::getNearbyBouncer())
+      {
+         return;
+      }
 
-        startHardLanding();
+      startHardLanding();
 
-        if (PhysicsConfiguration::getInstance()._player_hard_landing_damage_enabled)
-        {
-            damage(static_cast<int32_t>((impulse_value - 1.0f) * PhysicsConfiguration::getInstance()._player_hard_landing_damage_factor));
-        }
-    }
+      if (PhysicsConfiguration::getInstance()._player_hard_landing_damage_enabled)
+      {
+         damage(static_cast<int32_t>((impulse_value - 1.0f) * PhysicsConfiguration::getInstance()._player_hard_landing_damage_factor));
+      }
+   }
 }
 
 void Player::damage(int32_t damage, const sf::Vector2f& force)
 {
-    if (isDead())
-    {
-        return;
-    }
+   if (isDead())
+   {
+      return;
+   }
 
-    if (damage == 0)
-    {
-        return;
-    }
+   if (damage == 0)
+   {
+      return;
+   }
 
-    if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Invulnerable))
-    {
-        return;
-    }
+   if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Invulnerable))
+   {
+      return;
+   }
 
-    if (_damage_clock.getElapsedTime().asMilliseconds() > 3000)
-    {
-        _damage_initialized = true;
+   if (_damage_clock.getElapsedTime().asMilliseconds() > 3000)
+   {
+      _damage_initialized = true;
 
-        Audio::getInstance().playSample({"hurt.wav"});
+      Audio::getInstance().playSample({"hurt.wav"});
 
-        // not converting this to PPM to make the effect of the applied force more visible
-        auto* body = getBody();
-        body->ApplyLinearImpulse(b2Vec2(force.x / PPM, force.y / PPM), body->GetWorldCenter(), true);
+      // not converting this to PPM to make the effect of the applied force more visible
+      auto* body = getBody();
+      body->ApplyLinearImpulse(b2Vec2(force.x / PPM, force.y / PPM), body->GetWorldCenter(), true);
 
-        SaveState::getPlayerInfo()._extra_table._health._health -= damage;
-        _damage_clock.restart();
+      SaveState::getPlayerInfo()._extra_table._health._health -= damage;
+      _damage_clock.restart();
 
-        if (SaveState::getPlayerInfo()._extra_table._health._health < 0)
-        {
-            // the function below is not called since 'damage(...)' is evaluated
-            // within the box2d step function; no further box2d related adjustments
-            // can be made until step() is finished
-            //
-            // mPlayerDiedCallback();
-        }
-    }
+      if (SaveState::getPlayerInfo()._extra_table._health._health < 0)
+      {
+         // the function below is not called since 'damage(...)' is evaluated
+         // within the box2d step function; no further box2d related adjustments
+         // can be made until step() is finished
+         //
+         // mPlayerDiedCallback();
+      }
+   }
 }
 
 void Player::kill(std::optional<DeathReason> death_reason)
 {
-    if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Invulnerable))
-    {
-        return;
-    }
+   if (SaveState::getPlayerInfo()._extra_table._skills._skills & static_cast<int32_t>(Skill::SkillType::Invulnerable))
+   {
+      return;
+   }
 
-    damage(1000);
+   damage(1000);
 
-    if (death_reason.has_value())
-    {
-        _death_reason = death_reason;
-    }
+   if (death_reason.has_value())
+   {
+      _death_reason = death_reason;
+   }
 }
 
 bool Player::isOnGround() const
 {
-    return GameContactListener::getInstance().getPlayerFootContactCount() > 0;
+   return GameContactListener::getInstance().getPlayerFootContactCount() > 0;
 }
 
 void Player::updateAttack()
 {
-    // at the moment the game doesn't have any in-water attacks
-    if (isInWater())
-    {
-        return;
-    }
+   // at the moment the game doesn't have any in-water attacks
+   if (isInWater())
+   {
+      return;
+   }
 
-    // attacks while wallsliding are also not possible
-    if (_jump.isWallSliding())
-    {
-        return;
-    }
+   // attacks while wallsliding are also not possible
+   if (_jump.isWallSliding())
+   {
+      return;
+   }
 
-    const auto& inventory = SaveState::getPlayerInfo()._inventory;
+   const auto& inventory = SaveState::getPlayerInfo()._inventory;
 
-    const auto x_button_pressed = _controls->isButtonXPressed();
-    const auto y_button_pressed = _controls->isButtonYPressed();
-    _attack._attack_button_was_pressed = _attack._attack_button_pressed;
-    _attack._attack_button_pressed = InventoryBasedControls::isAttackButtonPressed(inventory, x_button_pressed, y_button_pressed);
+   const auto x_button_pressed = _controls->isButtonXPressed();
+   const auto y_button_pressed = _controls->isButtonYPressed();
+   _attack._attack_button_was_pressed = _attack._attack_button_pressed;
+   _attack._attack_button_pressed = InventoryBasedControls::isAttackButtonPressed(inventory, x_button_pressed, y_button_pressed);
 
-    // there are weapons that support continous attacks while the button is down, others like the sword
-    // require a fresh button press each time the sword should be swung
-    if (_attack._attack_button_pressed)
-    {
-        const auto result = _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
+   // there are weapons that support continous attacks while the button is down, others like the sword
+   // require a fresh button press each time the sword should be swung
+   if (_attack._attack_button_pressed)
+   {
+      const auto result = _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
 
-        // sword attack is combined with a small impulse move forward
-        auto uses_sword = []() {
-            const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
-            if (weapon_system._selected)
-            {
-                return weapon_system._selected->getWeaponType() == WeaponType::Sword;
-            }
-            return false;
-        };
+      // sword attack is combined with a small impulse move forward
+      auto uses_sword = []()
+      {
+         const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+         if (weapon_system._selected)
+         {
+            return weapon_system._selected->getWeaponType() == WeaponType::Sword;
+         }
+         return false;
+      };
 
-        if (result == PlayerAttack::AttackResult::Executed && uses_sword())
-        {
-            _attack_dash.reset({_points_to_left ? Dash::Left : Dash::Right, _body});
-        }
-    }
+      if (result == PlayerAttack::AttackResult::Executed && uses_sword())
+      {
+         _attack_dash.reset({_points_to_left ? Dash::Left : Dash::Right, _body});
+      }
+   }
 }
 
 void Player::updateAttackDash(const sf::Time& dt)
 {
-    _attack_dash.update(dt);
+   _attack_dash.update(dt);
 }
 
 bool Player::isInWater() const
 {
-    return _in_water;
+   return _in_water;
 }
 
 void Player::setInWater(bool in_water)
 {
-    _in_water = in_water;
+   _in_water = in_water;
 }
 
 void Player::updateFootsteps()
 {
-    if (GameContactListener::getInstance().getPlayerFootContactCount() > 0 && !isInWater())
-    {
-        auto vel = fabs(_body->GetLinearVelocity().x);
-        if (vel > 0.1f)
-        {
-            if (vel < 3.0f)
-            {
-                vel = 3.0f;
-            }
+   if (GameContactListener::getInstance().getPlayerFootContactCount() > 0 && !isInWater())
+   {
+      auto vel = fabs(_body->GetLinearVelocity().x);
+      if (vel > 0.1f)
+      {
+         if (vel < 3.0f)
+         {
+            vel = 3.0f;
+         }
 
-            if (_time.asSeconds() > _next_footstep_time)
-            {
-                // play footstep
-                Audio::getInstance().playSample(
-                    {(_step_counter++ & 1) ? "player_footstep_stone_l.wav" : "player_footstep_stone_r.wav", 0.3f});
-                _next_footstep_time = _time.asSeconds() + 1.0f / vel;
-            }
-        }
-    }
+         if (_time.asSeconds() > _next_footstep_time)
+         {
+            // play footstep
+            Audio::getInstance().playSample({(_step_counter++ & 1) ? "player_footstep_stone_l.wav" : "player_footstep_stone_r.wav", 0.3f});
+            _next_footstep_time = _time.asSeconds() + 1.0f / vel;
+         }
+      }
+   }
 }
 
 int Player::getId() const
 {
-    return _id;
+   return _id;
 }
 
 int Player::getZIndex() const
 {
-    return _z_index;
+   return _z_index;
 }
 
 void Player::setZIndex(int32_t z)
 {
-    _z_index = z;
+   _z_index = z;
 }
 
 void Player::updateBendDown()
 {
-    // disable bend down states when player hit dash button
-    if (_dash.hasMoreFrames())
-    {
-        _bend._was_bending_down = false;
-        _bend._bending_down = false;
-        return;
-    }
+   // disable bend down states when player hit dash button
+   if (_dash.hasMoreFrames())
+   {
+      _bend._was_bending_down = false;
+      _bend._bending_down = false;
+      return;
+   }
 
-    auto down_pressed = _controls->isBendDownActive();
+   auto down_pressed = _controls->isBendDownActive();
 
-    // if the head touches something while crouches, keep crouching
-    if (_bend._bending_down && !down_pressed && (GameContactListener::getInstance().getPlayerHeadContactCollidingCount() > 0))
-    {
-        return;
-    }
+   // if the head touches something while crouches, keep crouching
+   if (_bend._bending_down && !down_pressed && (GameContactListener::getInstance().getPlayerHeadContactCollidingCount() > 0))
+   {
+      return;
+   }
 
-    // this is to avoid that each time the player wants to look down, it starts bending down
-    if (!_bend._bending_down && CameraPanorama::getInstance().isKeyboardLookActive())
-    {
-        return;
-    }
+   // this is to avoid that each time the player wants to look down, it starts bending down
+   if (!_bend._bending_down && CameraPanorama::getInstance().isKeyboardLookActive())
+   {
+      return;
+   }
 
-    const auto bending_down = down_pressed && !isInAir() && !isInWater();
+   const auto bending_down = down_pressed && !isInAir() && !isInWater();
 
-    _bend._was_bending_down = _bend._bending_down;
-    _bend._bending_down = bending_down;
+   _bend._was_bending_down = _bend._bending_down;
+   _bend._bending_down = bending_down;
 
-    if (!_bend._was_bending_down && _bend._bending_down)
-    {
-        _bend._timepoint_bend_down_start = StopWatch::getInstance().now();
-        Audio::getInstance().playSample({"player_kneel_01.wav"});
-    }
+   if (!_bend._was_bending_down && _bend._bending_down)
+   {
+      _bend._timepoint_bend_down_start = StopWatch::getInstance().now();
+      Audio::getInstance().playSample({"player_kneel_01.wav"});
+   }
 
-    // when the player transitions from "was bending down" to "no longer bending down", we want to
-    // store the timepoint that's used for the "bending up" animation. however, that is actually only
-    // relevant when the player is not in the air right now. that is because the player can also hit
-    // down + jump on one way walls to drop through. in that case we don't want any bend up frames
-    // to mess up any of the subsequent animation frames.
-    if (_bend._was_bending_down && !_bend._bending_down && !isInAir())
-    {
-        _bend._timepoint_bend_down_end = StopWatch::getInstance().now();
-    }
+   // when the player transitions from "was bending down" to "no longer bending down", we want to
+   // store the timepoint that's used for the "bending up" animation. however, that is actually only
+   // relevant when the player is not in the air right now. that is because the player can also hit
+   // down + jump on one way walls to drop through. in that case we don't want any bend up frames
+   // to mess up any of the subsequent animation frames.
+   if (_bend._was_bending_down && !_bend._bending_down && !isInAir())
+   {
+      _bend._timepoint_bend_down_end = StopWatch::getInstance().now();
+   }
 
-    setMaskBitsCrouching(bending_down);
+   setMaskBitsCrouching(bending_down);
 }
 
 void Player::updateHardLanding()
 {
-    using namespace std::chrono_literals;
+   using namespace std::chrono_literals;
 
-    if (_hard_landing)
-    {
-        _hard_landing_cycles++;
+   if (_hard_landing)
+   {
+      _hard_landing_cycles++;
 
-        const auto hard_landing_time_elapsed_s = std::chrono::duration<double>(StopWatch::getInstance().now() - _timepoint_hard_landing)
-                                                     .count();
+      const auto hard_landing_time_elapsed_s =
+         std::chrono::duration<double>(StopWatch::getInstance().now() - _timepoint_hard_landing).count();
 
-        if (hard_landing_time_elapsed_s > PhysicsConfiguration::getInstance()._player_hard_landing_delay_s)
-        {
-            _hard_landing = false;
-            _hard_landing_cycles = 0;
-        }
-    }
+      if (hard_landing_time_elapsed_s > PhysicsConfiguration::getInstance()._player_hard_landing_delay_s)
+      {
+         _hard_landing = false;
+         _hard_landing_cycles = 0;
+      }
+   }
 
-    if (_hard_landing_cycles > 1)
-    {
-        // if player does a hard landing on a moving platform, we don't want to reset the linear velocity.
-        // maybe come up with a nice concept for this one day.
-        if (_platform.isOnPlatform())
-        {
-            _hard_landing = false;
-        }
+   if (_hard_landing_cycles > 1)
+   {
+      // if player does a hard landing on a moving platform, we don't want to reset the linear velocity.
+      // maybe come up with a nice concept for this one day.
+      if (_platform.isOnPlatform())
+      {
+         _hard_landing = false;
+      }
 
-        if (!isOnGround())
-        {
-            _hard_landing = false;
-        }
+      if (!isOnGround())
+      {
+         _hard_landing = false;
+      }
 
-        // Log::Info() << "hard landing: " << mHardLanding << " on ground: " << isOnGround() << " on platform: "<< isOnPlatform();
-    }
+      // Log::Info() << "hard landing: " << mHardLanding << " on ground: " << isOnGround() << " on platform: "<< isOnPlatform();
+   }
 }
 
 void Player::updateGroundAngle()
 {
-    if (!isOnGround())
-    {
-        _ground_normal.Set(0.0f, -1.0f);
-        return;
-    }
+   if (!isOnGround())
+   {
+      _ground_normal.Set(0.0f, -1.0f);
+      return;
+   }
 
-    // raycast down to determine terrain slope
-    b2RayCastInput input;
-    input.p1 = _body->GetPosition();
-    input.p2 = _body->GetPosition() + b2Vec2(0.0f, 1.0f);
-    input.maxFraction = 1.0f;
+   // raycast down to determine terrain slope
+   b2RayCastInput input;
+   input.p1 = _body->GetPosition();
+   input.p2 = _body->GetPosition() + b2Vec2(0.0f, 1.0f);
+   input.maxFraction = 1.0f;
 
-    float closest_fraction = 1.0f;
-    b2Vec2 intersection_normal(0.0f, -1.0f);
+   float closest_fraction = 1.0f;
+   b2Vec2 intersection_normal(0.0f, -1.0f);
 
-    if (!_ground_body)
-    {
-        _ground_normal.Set(0.0f, -1.0f);
-        return;
-    }
+   if (!_ground_body)
+   {
+      _ground_normal.Set(0.0f, -1.0f);
+      return;
+   }
 
-    for (auto* f = _ground_body->GetFixtureList(); f; f = f->GetNext())
-    {
-        // terrain is made out of chains, so only process those
-        if (f->GetShape()->GetType() != b2Shape::e_chain)
-        {
+   for (auto* f = _ground_body->GetFixtureList(); f; f = f->GetNext())
+   {
+      // terrain is made out of chains, so only process those
+      if (f->GetShape()->GetType() != b2Shape::e_chain)
+      {
+         continue;
+      }
+
+      b2RayCastOutput output;
+      for (auto child_index = 0; child_index < f->GetShape()->GetChildCount(); child_index++)
+      {
+         if (!f->RayCast(&output, input, child_index))
+         {
             continue;
-        }
+         }
 
-        b2RayCastOutput output;
-        for (auto child_index = 0; child_index < f->GetShape()->GetChildCount(); child_index++)
-        {
-            if (!f->RayCast(&output, input, child_index))
-            {
-                continue;
-            }
+         if (output.fraction < closest_fraction)
+         {
+            closest_fraction = output.fraction;
+            intersection_normal = output.normal;
+         }
+      }
+   }
 
-            if (output.fraction < closest_fraction)
-            {
-                closest_fraction = output.fraction;
-                intersection_normal = output.normal;
-            }
-        }
-    }
-
-    _ground_normal = intersection_normal;
+   _ground_normal = intersection_normal;
 }
 
 void Player::updateOneWayWallDrop()
 {
-    if (getControls()->isDroppingDown())
-    {
-        OneWayWall::instance().drop();
-    }
+   if (getControls()->isDroppingDown())
+   {
+      OneWayWall::instance().drop();
+   }
 }
 
 void Player::updateChainShapeCollisions()
 {
-    if (_jump.isJumping())
-    {
-        return;
-    }
+   if (_jump.isJumping())
+   {
+      return;
+   }
 
-    const auto hiccup_pos = ChainShapeAnalyzer::checkPlayerAtCollisionPosition();
-    if (!hiccup_pos.has_value())
-    {
-        return;
-    }
+   const auto hiccup_pos = ChainShapeAnalyzer::checkPlayerAtCollisionPosition();
+   if (!hiccup_pos.has_value())
+   {
+      return;
+   }
 
-    const auto velocity = _body->GetLinearVelocity();
-    const auto pos = _body->GetPosition();
-    _body->SetLinearVelocity({velocity.x, 0.0f});
-    _body->SetTransform({pos.x, hiccup_pos->y - 0.18f}, 0.0f);
+   const auto velocity = _body->GetLinearVelocity();
+   const auto pos = _body->GetPosition();
+   _body->SetLinearVelocity({velocity.x, 0.0f});
+   _body->SetTransform({pos.x, hiccup_pos->y - 0.18f}, 0.0f);
 }
 
 void Player::updateJump()
 {
-    PlayerJump::PlayerJumpInfo info;
+   PlayerJump::PlayerJumpInfo info;
 
-    info._in_air = isInAir();
-    info._in_water = isInWater();
-    info._water_entered_timepoint = _water_entered_time;
-    info._crouching = _bend.isCrouching();
-    info._climbing = _climb.isClimbing();
-    info._dashing = _dash.hasMoreFrames();
+   info._in_air = isInAir();
+   info._in_water = isInWater();
+   info._water_entered_timepoint = _water_entered_time;
+   info._crouching = _bend.isCrouching();
+   info._climbing = _climb.isClimbing();
+   info._dashing = _dash.hasMoreFrames();
 
-    _jump.update(info);
+   _jump.update(info);
 }
 
 void Player::updateWallslide(const sf::Time& dt)
 {
-    const auto wallslide_animation = _player_animation->getWallslideAnimation();
-    const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
-    wallslide_animation->setPosition({_pixel_position_f.x + offset_x_px, _pixel_position_f.y});
-    wallslide_animation->play();
-    wallslide_animation->update(dt);
+   const auto wallslide_animation = _player_animation->getWallslideAnimation();
+   const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
+   wallslide_animation->setPosition({_pixel_position_f.x + offset_x_px, _pixel_position_f.y});
+   wallslide_animation->play();
+   wallslide_animation->update(dt);
 }
 
 void Player::updateWaterBubbles(const sf::Time& dt)
 {
-    WaterBubbles::WaterBubbleInput input;
-    input._player_in_water = isInWater();
-    input._player_rect = getPixelRectFloat();
-    input._player_pointing_right = isPointingRight();
-    _water_bubbles.update(dt, input);
+   WaterBubbles::WaterBubbleInput input;
+   input._player_in_water = isInWater();
+   input._player_rect = getPixelRectFloat();
+   input._player_pointing_right = isPointingRight();
+   _water_bubbles.update(dt, input);
 }
 
 void Player::updateSpawn()
 {
-    using namespace std::chrono_literals;
+   using namespace std::chrono_literals;
 
-    const auto checkpoint_valid = SaveState::getCurrent()._checkpoint > 0;
-    const auto first_death = SaveState::getPlayerInfo()._stats._death_count_current_level == 0;
-    const auto spawning = GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealStartDelay();
+   const auto checkpoint_valid = SaveState::getCurrent()._checkpoint > 0;
+   const auto first_death = SaveState::getPlayerInfo()._stats._death_count_current_level == 0;
+   const auto spawning = GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealStartDelay();
 
-    if (spawning && checkpoint_valid && first_death && !_spawn_orientation_locked)
-    {
-        _spawn_orientation_locked = true;
-        const auto lock_duration = std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation->getRevealDuration());
+   if (spawning && checkpoint_valid && first_death && !_spawn_orientation_locked)
+   {
+      _spawn_orientation_locked = true;
+      const auto lock_duration = std::chrono::duration_cast<std::chrono::milliseconds>(_player_animation->getRevealDuration());
 
-        // appear animation is shown after spawn is complete
-        // for that duration of time, lock the player orientation
-        _controls->lockOrientation(lock_duration);
+      // appear animation is shown after spawn is complete
+      // for that duration of time, lock the player orientation
+      _controls->lockOrientation(lock_duration);
 
-        return;
-    }
+      return;
+   }
 
-    if (_spawn_complete)
-    {
-        return;
-    }
+   if (_spawn_complete)
+   {
+      return;
+   }
 
-    _spawn_complete = true;
+   _spawn_complete = true;
 
-    // play reveal sound (but only if player died earlier)
-    if (!first_death)
-    {
-        Audio::getInstance().playSample({"player_spawn_01.wav"});
-    }
+   // play reveal sound (but only if player died earlier)
+   if (!first_death)
+   {
+      Audio::getInstance().playSample({"player_spawn_01.wav"});
+   }
 }
 
 void Player::updateHealth(const sf::Time& dt)
 {
-    SaveState::getPlayerInfo()._extra_table._health.update(dt);
+   SaveState::getPlayerInfo()._extra_table._health.update(dt);
 }
 
 void Player::update(const sf::Time& dt)
 {
-    _time += dt;
+   _time += dt;
 
-    // a lot depends on an up-to-date pixel position and the hitbox that's generated out of it
-    updatePixelPosition();
-    updatePixelRect();
-    updateChunk();
-    _animation_pool.updateAnimations(dt);
-    updateFadeOut(dt);
-    updateHealth(dt);
-    updateChainShapeCollisions();
-    updateImpulse();
-    updateGroundAngle();
-    updateHardLanding();
-    updateBendDown();
-    updateAnimation(dt);
-    updateAtmosphere();
-    updateAttack();
-    updateAttackDash(dt);
-    updateVelocity();
-    updateOrientation();
-    updateOneWayWallDrop();
-    updateJump();
-    updateDash();
-    _climb.update(_body, isInAir());
-    _platform.update(_body, _jump.isJumping());
-    PlayerAudio::updateListenerPosition(_pixel_position_f);
-    updateFootsteps();
-    updatePreviousBodyState();
-    updateWeapons(dt);
-    updateWallslide(dt);
-    updateWaterBubbles(dt);
-    updateSpawn();
+   // a lot depends on an up-to-date pixel position and the hitbox that's generated out of it
+   updatePixelPosition();
+   updatePixelRect();
+   updateChunk();
+   _animation_pool.updateAnimations(dt);
+   updateFadeOut(dt);
+   updateHealth(dt);
+   updateChainShapeCollisions();
+   updateImpulse();
+   updateGroundAngle();
+   updateHardLanding();
+   updateBendDown();
+   updateAnimation(dt);
+   updateAtmosphere();
+   updateAttack();
+   updateAttackDash(dt);
+   updateVelocity();
+   updateOrientation();
+   updateOneWayWallDrop();
+   updateJump();
+   updateDash();
+   _climb.update(_body, isInAir());
+   _platform.update(_body, _jump.isJumping());
+   PlayerAudio::updateListenerPosition(_pixel_position_f);
+   updateFootsteps();
+   updatePreviousBodyState();
+   updateWeapons(dt);
+   updateWallslide(dt);
+   updateWaterBubbles(dt);
+   updateSpawn();
 
-    _controls->update(dt); // called at last just to backup previous controls
+   _controls->update(dt);  // called at last just to backup previous controls
 }
 
 void Player::reloadAnimationPool()
 {
-    _animation_pool.reload();
-    _player_animation->loadAnimations(_animation_pool);
+   _animation_pool.reload();
+   _player_animation->loadAnimations(_animation_pool);
 }
 
 void Player::resetMotionBlur()
 {
-    _last_animations.clear();
-    _player_animation->resetAlpha();
+   _last_animations.clear();
+   _player_animation->resetAlpha();
 }
 
 void Player::updateDash(Dash dir)
 {
-    PlayerDash::DashInput input{dir, _jump._wallsliding, _hard_landing, isInWater(), _points_to_left, _body};
-    _dash.update(input);
+   PlayerDash::DashInput input{dir, _jump._wallsliding, _hard_landing, isInWater(), _points_to_left, _body};
+   _dash.update(input);
 }
 
 void Player::updateAtmosphere()
 {
-    const auto was_inside_water = isInWater();
+   const auto was_inside_water = isInWater();
 
-    const auto& pos = _body->GetPosition();
-    auto tile = Level::getCurrentLevel()->getAtmosphere().getTileForPosition(pos);
+   const auto& pos = _body->GetPosition();
+   auto tile = Level::getCurrentLevel()->getAtmosphere().getTileForPosition(pos);
 
-    const auto inside_water = (tile >= AtmosphereTileWaterFull && tile <= AtmosphereTileWaterCornerTopLeft);
-    setInWater(inside_water);
+   const auto inside_water = (tile >= AtmosphereTileWaterFull && tile <= AtmosphereTileWaterCornerTopLeft);
+   setInWater(inside_water);
 
-    // entering water
-    if (inside_water && !was_inside_water)
-    {
-        _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_water);
-        _body->SetTransform(_body->GetPosition() + b2Vec2{0.0, 0.4f}, 0.0f);
-        _water_entered_time = StopWatch::getInstance().now();
-        Audio::getInstance().playSample({"splash.wav"});
-        _animation_pool.create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
-    }
+   // entering water
+   if (inside_water && !was_inside_water)
+   {
+      _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_water);
+      _body->SetTransform(_body->GetPosition() + b2Vec2{0.0, 0.4f}, 0.0f);
+      _water_entered_time = StopWatch::getInstance().now();
+      Audio::getInstance().playSample({"splash.wav"});
+      _animation_pool.create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
+   }
 
-    // leaving water
-    if (!inside_water && was_inside_water)
-    {
-        _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_default);
-        _animation_pool.create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
-    }
+   // leaving water
+   if (!inside_water && was_inside_water)
+   {
+      _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_default);
+      _animation_pool.create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
+   }
 
-    // not sure if this is just another ugly hack
-    // when we leave the water we want to take out the current swimming velocity
-    if (was_inside_water && !isInWater())
-    {
-        _body->SetLinearVelocity(b2Vec2(0, 0));
-    }
+   // not sure if this is just another ugly hack
+   // when we leave the water we want to take out the current swimming velocity
+   if (was_inside_water && !isInWater())
+   {
+      _body->SetLinearVelocity(b2Vec2(0, 0));
+   }
 }
 
 void Player::setGroundBody(b2Body* body)
 {
-    _ground_body = body;
+   _ground_body = body;
 }
 
 bool Player::getVisible() const
 {
-    return _visible;
+   return _visible;
 }
 
 void Player::setVisible(bool visible)
 {
-    _visible = visible;
+   _visible = visible;
 }
 
 void Player::fadeOut(float fade_out_speed_factor)
 {
-    _fade_out = true;
-    _fade_out_speed_factor = fade_out_speed_factor;
+   _fade_out = true;
+   _fade_out_speed_factor = fade_out_speed_factor;
 }
 
 void Player::fadeOutReset()
 {
-    _fade_out = false;
-    _fade_out_alpha = 1.0f;
+   _fade_out = false;
+   _fade_out_alpha = 1.0f;
 }
 
 void Player::setFriction(float friction)
 {
-    for (auto* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
-    {
-        fixture->SetFriction(friction);
-    }
+   for (auto* fixture = _body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+   {
+      fixture->SetFriction(friction);
+   }
 
-    for (auto* contact = _body->GetContactList(); contact; contact = contact->next)
-    {
-        contact->contact->ResetFriction();
-    }
+   for (auto* contact = _body->GetContactList(); contact; contact = contact->next)
+   {
+      contact->contact->ResetFriction();
+   }
 }
 
 bool Player::isInAir() const
 {
-    return (GameContactListener::getInstance().getPlayerFootContactCount() == 0) && !isInWater();
+   return (GameContactListener::getInstance().getPlayerFootContactCount() == 0) && !isInWater();
 }
 
 void Player::updateWeapons(const sf::Time& dt)
 {
-    for (const auto& weapon : SaveState::getPlayerInfo()._weapons._weapons)
-    {
-        weapon->update({dt, _world});
-    }
+   for (const auto& weapon : SaveState::getPlayerInfo()._weapons._weapons)
+   {
+      weapon->update({dt, _world});
+   }
 }
 
 void Player::die()
 {
-    _dead = true;
-    Audio::getInstance().playSample({"death.wav"});
+   _dead = true;
+   Audio::getInstance().playSample({"death.wav"});
 
-    auto& stats = SaveState::getPlayerInfo()._stats;
-    stats._death_count_overall++;
-    stats._death_count_current_level++;
+   auto& stats = SaveState::getPlayerInfo()._stats;
+   stats._death_count_overall++;
+   stats._death_count_current_level++;
 
-    // need to write the stats to JSON now because they will be re-loaded when the player restarts at the last checkpoint
-    SaveState::getCurrent().updatePlayerStatsToFile();
+   // need to write the stats to JSON now because they will be re-loaded when the player restarts at the last checkpoint
+   SaveState::getCurrent().updatePlayerStatsToFile();
 }
 
 void Player::reset()
 {
-    // check for checkpoints
-    // so start position could vary here
-    _hard_landing = false;
-    _hard_landing_cycles = 0;
+   // check for checkpoints
+   // so start position could vary here
+   _hard_landing = false;
+   _hard_landing_cycles = 0;
 
-    if (_body)
-    {
-        _body->SetLinearVelocity(b2Vec2(0, 0));
-        _body->SetGravityScale(1.0);
-    }
+   if (_body)
+   {
+      _body->SetLinearVelocity(b2Vec2(0, 0));
+      _body->SetGravityScale(1.0);
+   }
 
-    _climb.removeClimbJoint();
+   _climb.removeClimbJoint();
 
-    if (Level::getCurrentLevel())
-    {
-        setBodyViaPixelPosition(Level::getCurrentLevel()->getStartPosition().x, Level::getCurrentLevel()->getStartPosition().y);
-    }
+   if (Level::getCurrentLevel())
+   {
+      setBodyViaPixelPosition(Level::getCurrentLevel()->getStartPosition().x, Level::getCurrentLevel()->getStartPosition().y);
+   }
 
-    SaveState::getPlayerInfo()._extra_table._health.reset();
+   SaveState::getPlayerInfo()._extra_table._health.reset();
 
-    // resetting any player info apart from the health doesn't make sense since it's loaded from disk when the player dies
-    // SaveState::getPlayerInfo().mInventory.resetKeys();
+   // resetting any player info apart from the health doesn't make sense since it's loaded from disk when the player dies
+   // SaveState::getPlayerInfo().mInventory.resetKeys();
 
-    // reset bodies passed from the contact listener
-    _ground_body = nullptr;
+   // reset bodies passed from the contact listener
+   _ground_body = nullptr;
 
-    // reset dash
-    _dash._frame_count = 0;
-    resetMotionBlur();
-    _dead = false;
-    _death_reason.reset();
-    _spawn_complete = false;
-    _spawn_orientation_locked = false;
-    _in_water = false;
+   // reset dash
+   _dash._frame_count = 0;
+   resetMotionBlur();
+   _dead = false;
+   _death_reason.reset();
+   _spawn_complete = false;
+   _spawn_orientation_locked = false;
+   _in_water = false;
 
-    fadeOutReset();
+   fadeOutReset();
 }
 
 DeathReason Player::checkDead() const
 {
-    DeathReason reason = DeathReason::Invalid;
+   DeathReason reason = DeathReason::Invalid;
 
-    const auto touches_something_deadly = (GameContactListener::getInstance().getDeadlyContactCount() > 0);
-    const auto too_fast = fabs(_body->GetLinearVelocity().y) > 40;
-    const auto out_of_health = SaveState::getPlayerInfo()._extra_table._health._health <= 0;
-    const auto smashed = GameContactListener::getInstance().isPlayerSmashed();
+   const auto touches_something_deadly = (GameContactListener::getInstance().getDeadlyContactCount() > 0);
+   const auto too_fast = fabs(_body->GetLinearVelocity().y) > 40;
+   const auto out_of_health = SaveState::getPlayerInfo()._extra_table._health._health <= 0;
+   const auto smashed = GameContactListener::getInstance().isPlayerSmashed();
 
-    if (touches_something_deadly)
-    {
-        reason = DeathReason::TouchesDeadly;
-    }
-    else if (smashed)
-    {
-        reason = DeathReason::Smashed;
-    }
-    else if (too_fast)
-    {
-        reason = DeathReason::TooFast;
-    }
-    else if (out_of_health)
-    {
-        reason = DeathReason::OutOfHealth;
-    }
+   if (touches_something_deadly)
+   {
+      reason = DeathReason::TouchesDeadly;
+   }
+   else if (smashed)
+   {
+      reason = DeathReason::Smashed;
+   }
+   else if (too_fast)
+   {
+      reason = DeathReason::TooFast;
+   }
+   else if (out_of_health)
+   {
+      reason = DeathReason::OutOfHealth;
+   }
 
-    // death reason can also be set externally, and then should overrule the internal detection
-    if (_death_reason.has_value())
-    {
-        reason = _death_reason.value();
-    }
+   // death reason can also be set externally, and then should overrule the internal detection
+   if (_death_reason.has_value())
+   {
+      reason = _death_reason.value();
+   }
 
-    return reason;
+   return reason;
 }
 
 void Player::setStartPixelPosition(float x, float y)
 {
-    setPixelPosition(x, y);
+   setPixelPosition(x, y);
 }
 
 void Player::traceJumpCurve()
 {
-    if (_controls->isButtonAPressed())
-    {
-        if (!_jump_trace._jump_started)
-        {
-            _jump_trace._jump_start_time = _time;
-            _jump_trace._jump_start_y = _body->GetPosition().y;
-            _jump_trace._jump_started = true;
+   if (_controls->isButtonAPressed())
+   {
+      if (!_jump_trace._jump_started)
+      {
+         _jump_trace._jump_start_time = _time;
+         _jump_trace._jump_start_y = _body->GetPosition().y;
+         _jump_trace._jump_started = true;
 
-            std::cout << std::endl << "time; y" << std::endl;
-        }
+         std::cout << std::endl << "time; y" << std::endl;
+      }
 
-        const auto jumpNextY = -(_body->GetPosition().y - _jump_trace._jump_start_y);
-        if (fabs(jumpNextY - _jump_trace._jump_prev_y) > _jump_trace._jump_epsilon)
-        {
-            std::cout << _time.asSeconds() - _jump_trace._jump_start_time.asSeconds() << "; " << jumpNextY << std::endl;
-        }
+      const auto jumpNextY = -(_body->GetPosition().y - _jump_trace._jump_start_y);
+      if (fabs(jumpNextY - _jump_trace._jump_prev_y) > _jump_trace._jump_epsilon)
+      {
+         std::cout << _time.asSeconds() - _jump_trace._jump_start_time.asSeconds() << "; " << jumpNextY << std::endl;
+      }
 
-        _jump_trace._jump_prev_y = jumpNextY;
-    }
-    else
-    {
-        _jump_trace._jump_started = false;
-    }
+      _jump_trace._jump_prev_y = jumpNextY;
+   }
+   else
+   {
+      _jump_trace._jump_started = false;
+   }
 }
 
 void Player::keyPressed(sf::Keyboard::Key key)
 {
-    switch (key)
-    {
-    case sf::Keyboard::Key::Space:
-    {
-        _jump.jump();
-        break;
-    }
-    case sf::Keyboard::Key::Z:
-    {
-        updateDash(Dash::Left);
-        break;
-    }
-    case sf::Keyboard::Key::X:
-    {
-        updateDash(Dash::Right);
-        break;
-    }
-    case sf::Keyboard::Key::LControl:
-    {
-        useInventory(0);
-        break;
-    }
-    case sf::Keyboard::Key::LAlt:
-    {
-        useInventory(1);
-        break;
-    }
-    default:
-    {
-        break;
-    }
-    }
+   switch (key)
+   {
+      case sf::Keyboard::Key::Space:
+      {
+         _jump.jump();
+         break;
+      }
+      case sf::Keyboard::Key::Z:
+      {
+         updateDash(Dash::Left);
+         break;
+      }
+      case sf::Keyboard::Key::X:
+      {
+         updateDash(Dash::Right);
+         break;
+      }
+      case sf::Keyboard::Key::LControl:
+      {
+         useInventory(0);
+         break;
+      }
+      case sf::Keyboard::Key::LAlt:
+      {
+         useInventory(1);
+         break;
+      }
+      default:
+      {
+         break;
+      }
+   }
 }
 
 const std::shared_ptr<PlayerControls>& Player::getControls() const
 {
-    return _controls;
+   return _controls;
 }
 
 void Player::updatePixelPosition()
 {
-    if (isDead())
-    {
-        return;
-    }
+   if (isDead())
+   {
+      return;
+   }
 
-    // sync player sprite with with box2d data
-    const auto x = _body->GetPosition().x * PPM;
-    const auto y = _body->GetPosition().y * PPM;
+   // sync player sprite with with box2d data
+   const auto x = _body->GetPosition().x * PPM;
+   const auto y = _body->GetPosition().y * PPM;
 
-    setPixelPosition(x, y);
+   setPixelPosition(x, y);
 }
 
 void Player::updatePreviousBodyState()
 {
-    _position_previous = _body->GetPosition();
-    _velocity_previous = _body->GetLinearVelocity();
+   _position_previous = _body->GetPosition();
+   _velocity_previous = _body->GetLinearVelocity();
 }
