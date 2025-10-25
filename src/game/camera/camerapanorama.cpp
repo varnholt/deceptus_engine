@@ -6,6 +6,7 @@
 #include "game/config/tweaks.h"
 #include "game/controller/gamecontrollerdata.h"
 #include "game/controller/gamecontrollerintegration.h"
+#include "game/player/player.h"
 #include "game/state/displaymode.h"
 
 CameraPanorama& CameraPanorama::getInstance()
@@ -124,6 +125,12 @@ void CameraPanorama::update()
 
       if (fabs(x_normalized) > tolerance_x || fabs(y_normalized) > tolerance_y)
       {
+         // don't enable cpan when airborne
+         if (Player::getCurrent()->isInAir())
+         {
+            return;
+         }
+
          // compute values from 0..1 removing the tolerance gap at the beginning
          const auto x_relative = (fabs(x_normalized) - tolerance_x) / (1.0f - tolerance_x);
          const auto y_relative = (fabs(y_normalized) - tolerance_y) / (1.0f - tolerance_y);
@@ -176,22 +183,21 @@ void CameraPanorama::update()
    }
 }
 
-#include "game/player/player.h"
 void CameraPanorama::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
 {
    switch (key_event->code)
    {
       case sf::Keyboard::Key::LShift:
       {
-          auto* player = Player::getCurrent();
-          if (player->isInAir())
-          {
-              return;
-          }
+         // don't enable cpan when airborne
+         if (Player::getCurrent()->isInAir())
+         {
+            return;
+         }
 
-          updateLookState(Look::Active, true);
-          DisplayMode::getInstance().enqueueSet(Display::CameraPanorama);
-          break;
+         updateLookState(Look::Active, true);
+         DisplayMode::getInstance().enqueueSet(Display::CameraPanorama);
+         break;
       }
       case sf::Keyboard::Key::Left:
       {

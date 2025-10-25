@@ -12,103 +12,103 @@
 class PlayerControls
 {
 public:
-    PlayerControls() = default;
+   PlayerControls() = default;
 
-    void update(const sf::Time& dt);
+   void update(const sf::Time& dt);
 
-    using KeypressedCallback = std::function<void(sf::Keyboard::Key)>;
-    void addKeypressedCallback(const KeypressedCallback& callback);
+   using KeypressedCallback = std::function<void(sf::Keyboard::Key)>;
+   void addKeypressedCallback(const KeypressedCallback& callback);
 
-    bool hasFlag(KeyPressed flag) const;
+   bool hasFlag(KeyPressed flag) const;
 
-    void keyboardKeyPressed(sf::Keyboard::Key key);
-    void keyboardKeyReleased(sf::Keyboard::Key key);
-    void forceSync();
+   void keyboardKeyPressed(sf::Keyboard::Key key);
+   void keyboardKeyReleased(sf::Keyboard::Key key);
+   void forceSync();
 
-    int getKeysPressed() const;
-    void setKeysPressed(int32_t keys);
+   int getKeysPressed() const;
+   void setKeysPressed(int32_t keys);
 
-    bool isCpanControlActive() const;
-    bool isControllerButtonPressed(int32_t button_enum) const;
-    bool isButtonAPressed() const;
-    bool isButtonBPressed() const;
-    bool isButtonXPressed() const; // slot 1
-    bool isButtonYPressed() const; // slot 2
-    bool isUpButtonPressed() const;
-    bool isDownButtonPressed() const;
-    bool isDroppingDown() const;
+   bool isCpanControlActive() const;
+   bool isControllerButtonPressed(int32_t button_enum) const;
+   bool isButtonAPressed() const;
+   bool isButtonBPressed() const;
+   bool isButtonXPressed() const;  // slot 1
+   bool isButtonYPressed() const;  // slot 2
+   bool isUpButtonPressed() const;
+   bool isDownButtonPressed() const;
+   bool isDroppingDown() const;
 
-    bool isMovingRight() const;
-    bool isMovingLeft() const;
-    bool isMovingDown(float analog_threshold = 0.3f) const;
-    bool isMovingUp(float analog_threshold = 0.3f) const;
-    bool isMovingHorizontally() const;
+   bool isMovingRight() const;
+   bool isMovingLeft() const;
+   bool isMovingDown(float analog_threshold = 0.3f) const;
+   bool isMovingUp(float analog_threshold = 0.3f) const;
+   bool isMovingHorizontally() const;
 
-    const GameControllerInfo& getJoystickInfo() const;
-    void setJoystickInfo(const GameControllerInfo& joystickInfo);
+   const GameControllerInfo& getJoystickInfo() const;
+   void setJoystickInfo(const GameControllerInfo& joystickInfo);
 
-    bool wasMoving() const;
-    void setWasMoving(bool was_moving);
+   bool wasMoving() const;
+   void setWasMoving(bool was_moving);
 
-    bool wasMovingLeft() const;
-    void setWasMovingLeft(bool was_moving_left);
+   bool wasMovingLeft() const;
+   void setWasMovingLeft(bool was_moving_left);
 
-    bool wasMovingRight() const;
-    void setWasMovingRight(bool was_moving_right);
+   bool wasMovingRight() const;
+   void setWasMovingRight(bool was_moving_right);
 
-    bool changedToIdle() const;
-    bool changedToMoving() const;
+   bool changedToIdle() const;
+   bool changedToMoving() const;
 
-    enum class LockedState
-    {
-        Pressed,
-        Released,
-    };
+   enum class LockedState
+   {
+      Pressed,
+      Released,
+   };
 
-    enum class Orientation
-    {
-        Undefined,
-        Left,
-        Right
-    };
+   enum class Orientation
+   {
+      Undefined,
+      Left,
+      Right
+   };
 
-    Orientation updateOrientation();
-    bool isBendDownActive() const;
-    bool isControllerUsedLast() const;
-    void lockOrientation(std::chrono::milliseconds duration, Orientation = Orientation::Undefined);
-    void lockState(KeyPressed key, LockedState state, const std::chrono::milliseconds& duration);
-    void lockAll(LockedState state, const std::chrono::milliseconds& duration);
+   Orientation updateOrientation();
+   bool isBendDownActive() const;
+   bool isControllerUsedLast() const;
+   void lockOrientation(std::chrono::milliseconds duration, Orientation = Orientation::Undefined);
+   void lockState(KeyPressed key, LockedState state, const std::chrono::milliseconds& duration);
+   void lockAll(LockedState state, const std::chrono::milliseconds& duration);
 
-    float readControllerNormalizedHorizontal() const;
+   float readControllerNormalizedHorizontal() const;
 
 private:
-    struct LockedKey
-    {
-        std::chrono::milliseconds _locked_duration;
-        LockedState _state{LockedState::Pressed};
-        std::chrono::milliseconds _elapsed;
-        bool asBool() const;
-    };
+   struct LockedKey
+   {
+      std::chrono::milliseconds _locked_duration;
+      LockedState _state{LockedState::Pressed};
+      std::chrono::milliseconds _elapsed;
+      bool asBool() const;
+   };
 
-    void updatePlayerInput();
-    void updateLockedKeys(const sf::Time& dt);
-    std::unordered_map<KeyPressed, LockedKey>::const_iterator readLockedState(KeyPressed) const;
+   void updatePlayerInput();
+   void updateLockedKeys(const sf::Time& dt);
+   std::unordered_map<KeyPressed, LockedKey>::const_iterator readLockedState(KeyPressed) const;
 
-    GameControllerInfo _joystick_info;
+   GameControllerInfo _joystick_info;
 
-    int32_t _keys_pressed = 0;
+   int32_t _keys_pressed = 0;
 
-    bool _was_moving = false;
-    bool _was_moving_left = false;
-    bool _was_moving_right = false;
+   bool _was_moving = false;
+   bool _was_moving_left = false;
+   bool _was_moving_right = false;
 
-    std::vector<KeypressedCallback> _keypressed_callbacks;
-    PlayerInput _player_input;
+   std::vector<KeypressedCallback> _keypressed_callbacks;
+   PlayerInput _player_input;
 
-    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+   using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
 
-    HighResTimePoint _unlock_orientation_time_point;
-    Orientation _locked_orientation = Orientation::Undefined;
-    Orientation _last_requested_orientation = Orientation::Undefined;
-    std::unordered_map<KeyPressed, LockedKey> _locked_keys;
+   HighResTimePoint _unlock_orientation_time_point;
+   Orientation _locked_orientation = Orientation::Undefined;
+   Orientation _last_requested_orientation = Orientation::Undefined;
+   std::unordered_map<KeyPressed, LockedKey> _locked_keys;
 };
