@@ -42,10 +42,10 @@ void PlayerControls::forceSync()
       _keys_pressed |= KeyPressedJump;
    }
 
-   // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
-   // {
-   //    _keys_pressed |= KeyPressedLook;
-   // }
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
+   {
+      _keys_pressed |= KeyPressedLook;
+   }
 
    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
    {
@@ -91,10 +91,10 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
    {
       _keys_pressed |= KeyPressedJump;
    }
-   // else if (key == sf::Keyboard::Key::LShift)
-   // {
-   //    _keys_pressed |= KeyPressedLook;
-   // }
+   else if (key == sf::Keyboard::Key::LShift)
+   {
+      _keys_pressed |= KeyPressedLook;
+   }
    else if (key == sf::Keyboard::Key::Up)
    {
       _keys_pressed |= KeyPressedUp;
@@ -134,11 +134,11 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 {
    _player_input.update(PlayerInput::InputType::Keyboard);
 
-   // if (key == sf::Keyboard::Key::LShift)
-   // {
-   //    _keys_pressed &= ~KeyPressedLook;
-   // }
-   /*else */ if (key == sf::Keyboard::Key::Up)
+   if (key == sf::Keyboard::Key::LShift)
+   {
+      _keys_pressed &= ~KeyPressedLook;
+   }
+   else if (key == sf::Keyboard::Key::Up)
    {
       _keys_pressed &= ~KeyPressedUp;
    }
