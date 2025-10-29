@@ -32,6 +32,33 @@ constexpr auto SPIKES_TILE_INDEX_RETRACT_END = SPRITES_PER_CYCLE - 1;
 namespace
 {
 auto instance_counter = 0;
+
+constexpr auto frame_count = 13;
+constexpr std::array<int32_t, frame_count> _frame_times{50, 50, 50, 100, 100, 120, 30, 30, 30, 30, 30, 30, 30};
+constexpr auto normalize(const std::array<int32_t, frame_count>& arr)
+{
+   std::array<float, frame_count> result{};
+   int32_t max_value = *std::ranges::max_element(arr.begin(), arr.end());
+   for (std::size_t index = 0; index < arr.size(); ++index)
+   {
+      result[index] = static_cast<float>(arr[index]) / static_cast<float>(max_value);
+   }
+   return result;
+}
+
+constexpr auto invert(const std::array<float, frame_count>& arr)
+{
+   std::array<float, frame_count> result{};
+   for (std::size_t index = 0; index < arr.size(); ++index)
+   {
+      result[index] = 1.0f / static_cast<float>(arr[index]);
+   }
+
+   return result;
+}
+
+constexpr auto _frame_times_normalized = normalize(_frame_times);
+constexpr auto _frame_animation_factors = invert(_frame_times_normalized);
 }
 
 Spikes::Spikes(GameNode* parent) : GameNode(parent)
