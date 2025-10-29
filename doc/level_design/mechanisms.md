@@ -1122,27 +1122,55 @@ It is very important to place that mount high enough, otherwise the ball will cr
 
 ---
 
-
 ## Spikes
 
-Sharp spikes moving out of the ground are making Adam's life even harder. There are three types of spikes:
-- Interval Spikes: They extend and retract in 2 second intervals.
-- Trap Spikes: They extend upon contact after 250ms.
-- Toggle Spikes: Those are enabled or disabled using a lever.
+Sharp spikes moving out of the ground are making Adam's life even harder.  
 
-In order to create any of the spike types above, create a tile layer named `toggle_spikes`, `trap_spikes`, or `interval_spikes`. Then draw your spike tiles into any of these layers as needed.
+There are three types of spikes:
+- Interval Spikes: extend and retract in 2‑second intervals.
+- Trap Spikes: extend upon contact after 250 ms.
+- Toggle Spikes: are enabled or disabled using a lever.
 
-If you do not know how levers work, you can read more about that in the description of the 'Lever' mechanism.
+In order to place spikes in your level, create an object layer called
+`spikes` and draw a rectangle for each spike mechanism.  Each rectangle works like any
+other mechanism: you can assign it a `mode` property (`interval`, `trap` or `toggled`)
+and configure the timing and speed values via object properties.  
 
-As a side-note. If you want spikes that are extended, just put them into your `toggle_spikes` layer and don't create a connection to any lever.
+The older workflow of drawing spikes into tile layers (called `toggle_spikes`, `trap_spikes` or
+`interval_spikes`) is still supported for legacy levels but is deprecated and will be
+removed in a future update.
+
+By default, spikes point upwards.  Use the `orientation` property to point them `up`, `down`, `left` or `right`.
+
+To fine‑tune how long they stay extended or retracted, how quickly they move and how trap spikes behave, adjust the timing and speed properties
+- `down_time_ms`, 
+- `up_time_ms`, 
+- `trap_time_ms`, 
+- `speed_up`, 
+- `speed_down`, and
+- `time_offset_ms` 
+
+If you do not know how levers work, you can read more about that in the description of the
+"Lever" mechanism.
 
 ![](images/mechanism_spikes.png)
 
-### Object Properties
+### Object Properties
 
 |Property|Type|Description|
 |-|-|-|
-|z|int|The layer's z index|
+|z|int|The layer’s z‑index.|
+|mode|string|Specifies the spike behaviour: `interval` makes the spikes extend and retract in cycles, `trap` makes them extend shortly after the player steps on them, and `toggled` lets them be controlled via levers (default is `interval`).|
+|orientation|string|Direction the spikes point: `up`, `down`, `left` or `right` (default is `up`).|
+|down_time_ms|int|In interval mode, the time in milliseconds that the spikes remain retracted (default is `2000`).|
+|up_time_ms|int|In interval mode, the time in milliseconds that the spikes remain extended (default is `2000`).|
+|trap_time_ms|int|In trap mode, the delay in milliseconds between the player touching the spikes and the spikes extending (default is `250`).|
+|speed_up|float|Speed factor applied when the spikes extend (default is `35.0`).|
+|speed_down|float|Speed factor applied when the spikes retract (default is `35.0`).|
+|time_offset_ms|int|Optional time offset in milliseconds to de‑synchronise multiple spike objects (default is `0`).|
+|under_water|bool|If set to `true`, an alternative underwater spike sprite is used (default is `false`).|
+|enabled|bool|Whether the spikes are initially enabled (default is `true`).|
+
 
 ---
 
