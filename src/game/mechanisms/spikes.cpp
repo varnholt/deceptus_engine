@@ -61,10 +61,9 @@ constexpr auto _frame_times_normalized = normalize(_frame_times);
 constexpr auto _frame_animation_factors = invert(_frame_times_normalized);
 }
 
-Spikes::Spikes(GameNode* parent) : GameNode(parent)
+Spikes::Spikes(GameNode* parent) : GameNode(parent), _instance_id(instance_counter++)
 {
    setClassName(typeid(Spikes).name());
-   _instance_id = instance_counter++;
 }
 
 std::string_view Spikes::objectName() const
@@ -80,9 +79,15 @@ void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    }
 }
 
-void Spikes::updateInterval()
+int32_t Spikes::computeTuIndex()
 {
    const auto tu_index = static_cast<int32_t>(std::floor(_tu));
+   return tu_index;
+}
+
+void Spikes::updateInterval()
+{
+   const auto tu_index = computeTuIndex();
 
    if (tu_index == SPIKES_TILE_INDEX_EXTRACT_END && _extracting)
    {
@@ -126,18 +131,20 @@ void Spikes::updateInterval()
    // regular update
    if (_extracting)
    {
-      _tu += _config._speed_up * _dt_s;
+      _tu += _config._speed_up * _dt_s * _frame_animation_factors[tu_index];
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_EXTRACT_END));
    }
    else
    {
-      _tu += _config._speed_down * _dt_s;
+      _tu += _config._speed_down * _dt_s * _frame_animation_factors[tu_index];
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_RETRACT_END));
    }
 }
 
 void Spikes::updateTrap()
 {
+   const auto tu_index = computeTuIndex();
+
    // if already activated, start counting time
    if (_elapsed_since_collision_ms.has_value())
    {
@@ -167,7 +174,7 @@ void Spikes::updateTrap()
 
       if (_extracting)
       {
-         _tu += _config._speed_up * _dt_s;
+         _tu += _config._speed_up * _dt_s * _frame_animation_factors[tu_index];
          _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_EXTRACT_END));
       }
 
@@ -183,21 +190,23 @@ void Spikes::updateTrap()
    else
    {
       // always retract to trap start position if there's no intersection
-      _tu += _config._speed_down * _dt_s;
+      _tu += _config._speed_down * _dt_s * _frame_animation_factors[tu_index];
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_TRAP_START));
    }
 }
 
 void Spikes::updateToggled()
 {
+   const auto tu_index = computeTuIndex();
+
    if (isEnabled())
    {
-      _tu += _config._speed_up * _dt_s;
+      _tu += _config._speed_up * _dt_s * _frame_animation_factors[tu_index];
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_EXTRACT_END));
    }
    else
    {
-      _tu += _config._speed_down * _dt_s;
+      _tu += _config._speed_down * _dt_s * _frame_animation_factors[tu_index];
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_RETRACT_END));
    }
 }
@@ -458,7 +467,7 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
    {
       for (auto j = 0u; j < height; ++j)
       {
-         const auto tile_number = tiles[i + j * width];
+         const auto tile_number = tiles[i + (j * width)];
 
          if (tile_number == 0)
          {
