@@ -1160,7 +1160,10 @@ If you do not know how levers work, you can read more about that in the descript
 |Property|Type|Description|
 |-|-|-|
 |z|int|The layer’s z‑index.|
-|mode|string|Specifies the spike behaviour: `interval` makes the spikes extend and retract in cycles, `trap` makes them extend shortly after the player steps on them, and `toggled` lets them be controlled via levers (default is `interval`).|
+|mode|string|Specifies the spike behaviour|
+| | |`interval` makes the spikes extend and retract in cycles (default is `interval`).|
+| | |`trap` makes them extend shortly after the player steps on them.|
+| | |`toggled` lets them be controlled via levers.|
 |orientation|string|Direction the spikes point: `up`, `down`, `left` or `right` (default is `up`).|
 |down_time_ms|int|In interval mode, the time in milliseconds that the spikes remain retracted (default is `2000`).|
 |up_time_ms|int|In interval mode, the time in milliseconds that the spikes remain extended (default is `2000`).|
