@@ -12,12 +12,15 @@
 
 #include <iostream>
 
-// -> 24 - 2 * 4 = 16px rect
+namespace
+{
 
+// -> 24 - 2 * 4 = 16px rect
+//
 //    #  #  #  #  #  #  #  #  #  #  #  #  #  #  #
 //    00 01 02 03 04 05 06 07 08 09 10 11 12 13 14
-//     | |         |  |                          |
-//     | +---------+  +--------------------------+
+//     | |           |  |                        |
+//     | +-----------+  +------------------------+
 //     | < extract >  <          retract         >
 //     |
 //     + unused
@@ -25,19 +28,61 @@ constexpr auto SPRITES_PER_CYCLE = 15;
 constexpr auto TOLERANCE_PIXELS = 5;
 constexpr auto SPIKES_TILE_INDEX_TRAP_START = (SPRITES_PER_CYCLE - 4);
 constexpr auto SPIKES_TILE_INDEX_EXTRACT_START = 1;
-constexpr auto SPIKES_TILE_INDEX_EXTRACT_END = 4;
+constexpr auto SPIKES_TILE_INDEX_EXTRACT_END = 5;
 constexpr auto SPIKES_TILE_INDEX_RETRACT_START = 6;
 constexpr auto SPIKES_TILE_INDEX_RETRACT_END = SPRITES_PER_CYCLE - 1;
 
-namespace
-{
 auto instance_counter = 0;
+
+constexpr auto frame_count = SPRITES_PER_CYCLE;
+
+constexpr std::array<int32_t, frame_count> _frame_times{
+   1,    // unused
+   50,   // extract
+   50,   // extract
+   50,   // extract
+   100,  // extract
+   100,  // extract
+   120,  // retract
+   30,   // retract
+   30,   // retract
+   30,   // retract
+   30,   // retract
+   30,   // retract
+   30,   // retract
+   30,   // retract
+   30    // retract
+};
+
+constexpr auto normalize(const std::array<int32_t, frame_count>& arr)
+{
+   std::array<float, frame_count> result{};
+   int32_t max_value = *std::ranges::max_element(arr.begin(), arr.end());
+   for (std::size_t index = 0; index < arr.size(); ++index)
+   {
+      result[index] = static_cast<float>(arr[index]) / static_cast<float>(max_value);
+   }
+   return result;
 }
 
-Spikes::Spikes(GameNode* parent) : GameNode(parent)
+constexpr auto invert(const std::array<float, frame_count>& arr)
+{
+   std::array<float, frame_count> result{};
+   for (std::size_t index = 0; index < arr.size(); ++index)
+   {
+      result[index] = 1.0f / static_cast<float>(arr[index]);
+   }
+
+   return result;
+}
+
+constexpr auto _frame_times_normalized = normalize(_frame_times);
+constexpr auto _frame_animation_factors = invert(_frame_times_normalized);
+}  // namespace
+
+Spikes::Spikes(GameNode* parent) : GameNode(parent), _instance_id(instance_counter++)
 {
    setClassName(typeid(Spikes).name());
-   _instance_id = instance_counter++;
 }
 
 std::string_view Spikes::objectName() const
@@ -53,9 +98,15 @@ void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    }
 }
 
-void Spikes::updateInterval()
+int32_t Spikes::computeTuIndex()
 {
    const auto tu_index = static_cast<int32_t>(std::floor(_tu));
+   return std::clamp(tu_index, 0, frame_count);
+}
+
+void Spikes::updateInterval()
+{
+   const auto tu_index = computeTuIndex();
 
    if (tu_index == SPIKES_TILE_INDEX_EXTRACT_END && _extracting)
    {
@@ -99,18 +150,20 @@ void Spikes::updateInterval()
    // regular update
    if (_extracting)
    {
-      _tu += _config._speed_up * _dt_s;
+      _tu += _config._speed_up * _dt_s * _frame_animation_factors[tu_index];
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_EXTRACT_END));
    }
    else
    {
-      _tu += _config._speed_down * _dt_s;
+      _tu += _config._speed_down * _dt_s * _frame_animation_factors[tu_index];
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_RETRACT_END));
    }
 }
 
 void Spikes::updateTrap()
 {
+   const auto tu_index = computeTuIndex();
+
    // if already activated, start counting time
    if (_elapsed_since_collision_ms.has_value())
    {
@@ -140,7 +193,7 @@ void Spikes::updateTrap()
 
       if (_extracting)
       {
-         _tu += _config._speed_up * _dt_s;
+         _tu += _config._speed_up * _dt_s * _frame_animation_factors[tu_index];
          _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_EXTRACT_END));
       }
 
@@ -156,21 +209,23 @@ void Spikes::updateTrap()
    else
    {
       // always retract to trap start position if there's no intersection
-      _tu += _config._speed_down * _dt_s;
+      _tu += _config._speed_down * _dt_s * _frame_animation_factors[tu_index];
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_TRAP_START));
    }
 }
 
 void Spikes::updateToggled()
 {
+   const auto tu_index = computeTuIndex();
+
    if (isEnabled())
    {
-      _tu += _config._speed_up * _dt_s;
+      _tu += _config._speed_up * _dt_s * _frame_animation_factors[tu_index];
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_EXTRACT_END));
    }
    else
    {
-      _tu += _config._speed_down * _dt_s;
+      _tu += _config._speed_down * _dt_s * _frame_animation_factors[tu_index];
       _tu = std::min(_tu, static_cast<float>(SPIKES_TILE_INDEX_RETRACT_END));
    }
 }
@@ -431,7 +486,7 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
    {
       for (auto j = 0u; j < height; ++j)
       {
-         const auto tile_number = tiles[i + j * width];
+         const auto tile_number = tiles[i + (j * width)];
 
          if (tile_number == 0)
          {
