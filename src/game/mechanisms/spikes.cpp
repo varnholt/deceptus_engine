@@ -12,12 +12,15 @@
 
 #include <iostream>
 
-// -> 24 - 2 * 4 = 16px rect
+namespace
+{
 
+// -> 24 - 2 * 4 = 16px rect
+//
 //    #  #  #  #  #  #  #  #  #  #  #  #  #  #  #
 //    00 01 02 03 04 05 06 07 08 09 10 11 12 13 14
-//     | |         |  |                          |
-//     | +---------+  +--------------------------+
+//     | |           |  |                        |
+//     | +-----------+  +------------------------+
 //     | < extract >  <          retract         >
 //     |
 //     + unused
@@ -25,16 +28,32 @@ constexpr auto SPRITES_PER_CYCLE = 15;
 constexpr auto TOLERANCE_PIXELS = 5;
 constexpr auto SPIKES_TILE_INDEX_TRAP_START = (SPRITES_PER_CYCLE - 4);
 constexpr auto SPIKES_TILE_INDEX_EXTRACT_START = 1;
-constexpr auto SPIKES_TILE_INDEX_EXTRACT_END = 4;
+constexpr auto SPIKES_TILE_INDEX_EXTRACT_END = 5;
 constexpr auto SPIKES_TILE_INDEX_RETRACT_START = 6;
 constexpr auto SPIKES_TILE_INDEX_RETRACT_END = SPRITES_PER_CYCLE - 1;
 
-namespace
-{
 auto instance_counter = 0;
 
-constexpr auto frame_count = 13;
-constexpr std::array<int32_t, frame_count> _frame_times{50, 50, 50, 100, 100, 120, 30, 30, 30, 30, 30, 30, 30};
+constexpr auto frame_count = SPRITES_PER_CYCLE;
+
+constexpr std::array<int32_t, frame_count> _frame_times{
+   1,    // unused
+   50,   // extract
+   50,   // extract
+   50,   // extract
+   100,  // extract
+   100,  // extract
+   120,  // retract
+   30,   // retract
+   30,   // retract
+   30,   // retract
+   30,   // retract
+   30,   // retract
+   30,   // retract
+   30,   // retract
+   30    // retract
+};
+
 constexpr auto normalize(const std::array<int32_t, frame_count>& arr)
 {
    std::array<float, frame_count> result{};
@@ -59,7 +78,7 @@ constexpr auto invert(const std::array<float, frame_count>& arr)
 
 constexpr auto _frame_times_normalized = normalize(_frame_times);
 constexpr auto _frame_animation_factors = invert(_frame_times_normalized);
-}
+}  // namespace
 
 Spikes::Spikes(GameNode* parent) : GameNode(parent), _instance_id(instance_counter++)
 {
@@ -82,7 +101,7 @@ void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 int32_t Spikes::computeTuIndex()
 {
    const auto tu_index = static_cast<int32_t>(std::floor(_tu));
-   return tu_index;
+   return std::clamp(tu_index, 0, frame_count);
 }
 
 void Spikes::updateInterval()
