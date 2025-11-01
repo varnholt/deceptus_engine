@@ -64,6 +64,7 @@ private:
    void updateToggled();
    void updateSpriteRect();
    void updateDeadly();
+   int32_t computeTuIndex();
 
    std::shared_ptr<sf::Texture> _texture;
 
