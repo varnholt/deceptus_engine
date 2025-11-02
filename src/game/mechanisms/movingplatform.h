@@ -21,11 +21,11 @@ public:
    MovingPlatform(GameNode* parent);
    std::string_view objectName() const override;
 
-   static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
-   static void deserialize(const std::shared_ptr<TmxObject>& tmx_object);
-   static std::vector<std::shared_ptr<GameMechanism>> merge(GameNode* parent, const GameDeserializeData& data);
+   static std::vector<std::shared_ptr<GameMechanism>> deserialize(GameNode* parent, const GameDeserializeData& data);
 
-   static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data);
+   // static void deserialize(const std::shared_ptr<TmxObject>& tmx_object);
+   // static std::vector<std::shared_ptr<GameMechanism>> merge(GameNode* parent, const GameDeserializeData& data);
+   // static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;

@@ -12,6 +12,7 @@
 #include "framework/tools/log.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/player/player.h"
 
@@ -131,163 +132,18 @@ void MovingPlatform::addSprite(const sf::Sprite& sprite)
    _sprites.push_back(sprite);
 }
 
-std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* parent, const GameDeserializeData& data)
-{
-   if (!data._tmx_layer)
-   {
-      Log::Error() << "tmx layer is empty, please fix your level design";
-      return {};
-   }
-
-   if (!data._tmx_tileset)
-   {
-      Log::Error() << "tmx tileset is empty, please fix your level design";
-      return {};
-   }
-
-   std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
-   const auto tilesize = sf::Vector2u(data._tmx_tileset->_tile_width_px, data._tmx_tileset->_tile_height_px);
-   const auto tiles = data._tmx_layer->_data;
-   const auto width = data._tmx_layer->_width_tl;
-   const auto height = data._tmx_layer->_height_tl;
-   const auto first_id = data._tmx_tileset->_first_gid;
-
-   for (auto y = 0u; y < height; y++)
-   {
-      for (auto x = 0u; x < width; x++)
-      {
-         // get the current tile number
-         auto tile_number = tiles[x + y * width];
-
-         if (tile_number != 0)
-         {
-            // find matching platform
-            auto moving_platform = std::make_shared<MovingPlatform>(parent);
-            moving_platform->setObjectId(data._tmx_layer->_name);
-
-            const auto texture_path = data._base_path / data._tmx_tileset->_image->_source;
-            const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
-            const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
-
-            if (std::filesystem::exists(normal_map_path))
-            {
-               moving_platform->_normal_map = TexturePool::getInstance().get(normal_map_path);
-            }
-
-            moving_platform->_texture_map = TexturePool::getInstance().get(texture_path);
-            moving_platform->_tile_positions.x = x;
-            moving_platform->_tile_positions.y = y;
-
-            if (data._tmx_layer->_properties)
-            {
-               moving_platform->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
-            }
-
-            moving_platforms.push_back(moving_platform);
-
-            while (tile_number != 0)
-            {
-               const auto tile_id = tile_number - first_id;
-               const int32_t tu = (tile_id) % (moving_platform->_texture_map->getSize().x / tilesize.x);
-               const int32_t tv = (tile_id) / (moving_platform->_texture_map->getSize().x / tilesize.x);
-
-               sf::Sprite sprite(*moving_platform->_texture_map);
-               sprite.setTextureRect({{tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
-               sprite.setPosition({static_cast<float_t>(x * PIXELS_PER_TILE), static_cast<float_t>(y * PIXELS_PER_TILE)});
-
-               moving_platform->addSprite(sprite);
-               moving_platform->_element_count++;
-
-               // jump to next tile
-               x++;
-               tile_number = tiles[x + y * width];
-            }
-
-            moving_platform->setupBody(data._world);
-            moving_platform->setupTransform();
-         }
-      }
-   }
-
-   return moving_platforms;
-}
-
-namespace
-{
-std::vector<std::shared_ptr<TmxObject>> boxes;
-std::vector<std::shared_ptr<TmxObject>> paths;
-}  // namespace
-
-void MovingPlatform::deserialize(const std::shared_ptr<TmxObject>& tmx_object)
-{
-   // just collect all the tmx objects
-   if (tmx_object->_polyline)
-   {
-      paths.push_back(tmx_object);
-   }
-   else
-   {
-      boxes.push_back(tmx_object);
-   }
-}
-
-std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* parent, const GameDeserializeData& data)
+std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
-
-   if (boxes.empty() || paths.empty())
-   {
-      return moving_platforms;
-   }
-
-   // generate pairs of matching box and poly tmx objects
-   std::vector<std::pair<std::shared_ptr<TmxObject>, std::shared_ptr<TmxObject>>> box_path_pairs;
-
-   for (const auto& box : boxes)
-   {
-      //      platform path
-      //
-      //           q1
-      //           |
-      // p0        |         p3
-      //  +--------+--------+
-      //  |        |        |
-      //  |        |        | platform rect
-      //  |        |        |
-      //  +--------|--------+
-      // p1        |        p2
-      //           |
-      //           |
-      //           q0
-
-      const auto p0 = sf::Vector2f{box->_x_px, box->_y_px};
-      const auto p1 = sf::Vector2f{box->_x_px, box->_y_px + box->_height_px};
-      const auto p2 = sf::Vector2f{box->_x_px + box->_width_px, box->_y_px + box->_height_px};
-      const auto p3 = sf::Vector2f{box->_x_px + box->_width_px, box->_y_px};
-
-      for (const auto& path : paths)
-      {
-         const auto& poly = path->_polyline;
-
-         for (auto i = 0; i < poly->_polyline.size() - 1; i++)
-         {
-            const auto q0 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i];
-            const auto q1 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i + 1];
-
-            if (SfmlMath::intersect(p0, p1, q0, q1).has_value() || SfmlMath::intersect(p1, p2, q0, q1).has_value() ||
-                SfmlMath::intersect(p2, p3, q0, q1).has_value() || SfmlMath::intersect(p3, p0, q0, q1).has_value())
-            {
-               box_path_pairs.emplace_back(box, path);
-               break;
-            }
-         }
-      }
-   }
 
    // set up platforms
    const auto texture_path = data._base_path / "tilesets" / "platforms.png";
    const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
    const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
+
+   const auto platform_width_tl = ValueReader::readValue<int32_t>("platform_width_tl", data._tmx_object->_properties->_map).value_or(4);
+
+   std::vector<std::pair<std::shared_ptr<TmxObject>, std::shared_ptr<TmxObject>>> box_path_pairs;
 
    for (const auto& pair : box_path_pairs)
    {
@@ -373,10 +229,12 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
          }
 
          sf::Sprite sprite(*moving_platform->_texture_map);
-         sprite.setTextureRect(sf::IntRect(
-            {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
-            // 1 platform tile and one background tile for perspective
-         ));
+         sprite.setTextureRect(
+            sf::IntRect(
+               {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
+               // 1 platform tile and one background tile for perspective
+            )
+         );
 
          moving_platform->addSprite(sprite);
       }
@@ -424,73 +282,226 @@ std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* pare
       moving_platform->addChunks(moving_platform->_rect);
    }
 
-   // clean up
-   paths.clear();
-   boxes.clear();
+   // // clean up
+   // paths.clear();
+   // boxes.clear();
 
    return moving_platforms;
 }
 
-void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data)
-{
-   if (!data._tmx_object->_polyline)
-   {
-      return;
-   }
+//    if (!data._tmx_layer)
+//    {
+//       Log::Error() << "tmx layer is empty, please fix your level design";
+//       return {};
+//    }
+//
+//    if (!data._tmx_tileset)
+//    {
+//       Log::Error() << "tmx tileset is empty, please fix your level design";
+//       return {};
+//    }
+//
+//    std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
+//    const auto tilesize = sf::Vector2u(data._tmx_tileset->_tile_width_px, data._tmx_tileset->_tile_height_px);
+//    const auto tiles = data._tmx_layer->_data;
+//    const auto width = data._tmx_layer->_width_tl;
+//    const auto height = data._tmx_layer->_height_tl;
+//    const auto first_id = data._tmx_tileset->_first_gid;
+//
+//    for (auto y = 0u; y < height; y++)
+//    {
+//       for (auto x = 0u; x < width; x++)
+//       {
+//          // get the current tile number
+//          auto tile_number = tiles[x + y * width];
+//
+//          if (tile_number != 0)
+//          {
+//             // find matching platform
+//             auto moving_platform = std::make_shared<MovingPlatform>(parent);
+//             moving_platform->setObjectId(data._tmx_layer->_name);
+//
+//             const auto texture_path = data._base_path / data._tmx_tileset->_image->_source;
+//             const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
+//             const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
+//
+//             if (std::filesystem::exists(normal_map_path))
+//             {
+//                moving_platform->_normal_map = TexturePool::getInstance().get(normal_map_path);
+//             }
+//
+//             moving_platform->_texture_map = TexturePool::getInstance().get(texture_path);
+//             moving_platform->_tile_positions.x = x;
+//             moving_platform->_tile_positions.y = y;
+//
+//             if (data._tmx_layer->_properties)
+//             {
+//                moving_platform->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
+//             }
+//
+//             moving_platforms.push_back(moving_platform);
+//
+//             while (tile_number != 0)
+//             {
+//                const auto tile_id = tile_number - first_id;
+//                const int32_t tu = (tile_id) % (moving_platform->_texture_map->getSize().x / tilesize.x);
+//                const int32_t tv = (tile_id) / (moving_platform->_texture_map->getSize().x / tilesize.x);
+//
+//                sf::Sprite sprite(*moving_platform->_texture_map);
+//                sprite.setTextureRect({{tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+//                sprite.setPosition({static_cast<float_t>(x * PIXELS_PER_TILE), static_cast<float_t>(y * PIXELS_PER_TILE)});
+//
+//                moving_platform->addSprite(sprite);
+//                moving_platform->_element_count++;
+//
+//                // jump to next tile
+//                x++;
+//                tile_number = tiles[x + y * width];
+//             }
+//
+//             moving_platform->setupBody(data._world);
+//             moving_platform->setupTransform();
+//          }
+//       }
+//    }
+//
+//    return moving_platforms;
+// }
+//
 
-   std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_polyline;
+// namespace
+// {
+// std::vector<std::shared_ptr<TmxObject>> boxes;
+// }  // namespace
 
-   const auto pos = pixel_path.at(0);
-   const auto x_tl = static_cast<int>((pos.x + data._tmx_object->_x_px) / PIXELS_PER_TILE);
-   const auto y_tl = static_cast<int>((pos.y + data._tmx_object->_y_px) / PIXELS_PER_TILE);
+// void MovingPlatform::deserialize(const std::shared_ptr<TmxObject>& tmx_object)
+// {
+//    // just collect all the tmx objects
+//    if (tmx_object->_polyline)
+//    {
+//       paths.push_back(tmx_object);
+//    }
+//    else
+//    {
+//       boxes.push_back(tmx_object);
+//    }
+// }
 
-   std::shared_ptr<MovingPlatform> platform;
+// std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* parent, const GameDeserializeData& data)
+// {
+// std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
 
-   for (const auto& p : platforms)
-   {
-      auto tmp = std::dynamic_pointer_cast<MovingPlatform>(p);
-      if (tmp->_tile_positions.y == y_tl)
-      {
-         for (auto xi = 0; xi < tmp->_element_count; xi++)
-         {
-            if (tmp->_tile_positions.x + xi == x_tl)
-            {
-               platform = tmp;
-               // printf("linking tmx poly to platform at %d, %d\n", x, y);
-               break;
-            }
-         }
-      }
+// if (boxes.empty() || paths.empty())
+// {
+//    return moving_platforms;
+// }
 
-      // we're done when we found a matching platform
-      if (platform)
-      {
-         break;
-      }
-   }
+// generate pairs of matching box and poly tmx objects
+// std::vector<std::pair<std::shared_ptr<TmxObject>, std::shared_ptr<TmxObject>>> box_path_pairs;
 
-   if (platform)
-   {
-      auto i = 0;
-      for (const auto& poly_pos : pixel_path)
-      {
-         b2Vec2 platform_pos;
-         const auto time = i / static_cast<float>(pixel_path.size() - 1);
+// for (const auto& box : boxes)
+// {
+//    //      platform path
+//    //
+//    //           q1
+//    //           |
+//    // p0        |         p3
+//    //  +--------+--------+
+//    //  |        |        |
+//    //  |        |        | platform rect
+//    //  |        |        |
+//    //  +--------|--------+
+//    // p1        |        p2
+//    //           |
+//    //           |
+//    //           q0
+//
+//    const auto p0 = sf::Vector2f{box->_x_px, box->_y_px};
+//    const auto p1 = sf::Vector2f{box->_x_px, box->_y_px + box->_height_px};
+//    const auto p2 = sf::Vector2f{box->_x_px + box->_width_px, box->_y_px + box->_height_px};
+//    const auto p3 = sf::Vector2f{box->_x_px + box->_width_px, box->_y_px};
+//
+//    for (const auto& path : paths)
+//    {
+//       const auto& poly = path->_polyline;
+//
+//       for (auto i = 0; i < poly->_polyline.size() - 1; i++)
+//       {
+//          const auto q0 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i];
+//          const auto q1 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i + 1];
+//
+//          if (SfmlMath::intersect(p0, p1, q0, q1).has_value() || SfmlMath::intersect(p1, p2, q0, q1).has_value() ||
+//              SfmlMath::intersect(p2, p3, q0, q1).has_value() || SfmlMath::intersect(p3, p0, q0, q1).has_value())
+//          {
+//             box_path_pairs.emplace_back(box, path);
+//             break;
+//          }
+//       }
+//    }
+// }
 
-         // where do those 4px error come from?!
-         const auto x = (data._tmx_object->_x_px + poly_pos.x - 4 - (platform->_element_count * PIXELS_PER_TILE) / 2.0f) * MPP;
-         const auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
+//}
 
-         platform_pos.x = x;
-         platform_pos.y = y;
+// void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data)
+// {
+//    if (!data._tmx_object->_polyline)
+//    {
+//       return;
+//    }
 
-         platform->_interpolation.addKey(platform_pos, time);
-         platform->_pixel_path.emplace_back((pos.x + data._tmx_object->_x_px), (pos.y + data._tmx_object->_y_px));
+//    std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_polyline;
 
-         i++;
-      }
-   }
-}
+//    const auto pos = pixel_path.at(0);
+//    const auto x_tl = static_cast<int>((pos.x + data._tmx_object->_x_px) / PIXELS_PER_TILE);
+//    const auto y_tl = static_cast<int>((pos.y + data._tmx_object->_y_px) / PIXELS_PER_TILE);
+
+//    std::shared_ptr<MovingPlatform> platform;
+
+//    for (const auto& p : platforms)
+//    {
+//       auto tmp = std::dynamic_pointer_cast<MovingPlatform>(p);
+//       if (tmp->_tile_positions.y == y_tl)
+//       {
+//          for (auto xi = 0; xi < tmp->_element_count; xi++)
+//          {
+//             if (tmp->_tile_positions.x + xi == x_tl)
+//             {
+//                platform = tmp;
+//                // printf("linking tmx poly to platform at %d, %d\n", x, y);
+//                break;
+//             }
+//          }
+//       }
+
+//       // we're done when we found a matching platform
+//       if (platform)
+//       {
+//          break;
+//       }
+//    }
+
+//    if (platform)
+//    {
+//       auto i = 0;
+//       for (const auto& poly_pos : pixel_path)
+//       {
+//          b2Vec2 platform_pos;
+//          const auto time = i / static_cast<float>(pixel_path.size() - 1);
+
+//          // where do those 4px error come from?!
+//          const auto x = (data._tmx_object->_x_px + poly_pos.x - 4 - (platform->_element_count * PIXELS_PER_TILE) / 2.0f) * MPP;
+//          const auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
+
+//          platform_pos.x = x;
+//          platform_pos.y = y;
+
+//          platform->_interpolation.addKey(platform_pos, time);
+//          platform->_pixel_path.emplace_back((pos.x + data._tmx_object->_x_px), (pos.y + data._tmx_object->_y_px));
+
+//          i++;
+//       }
+//    }
+// }
 
 //  |                 |
 //  |              ____
