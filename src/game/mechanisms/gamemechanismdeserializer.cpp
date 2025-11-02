@@ -177,10 +177,6 @@ void GameMechanismDeserializer::deserialize(
             const auto mechanism = Laser::load(parent, data);
             mechanism_lasers->insert(mechanism_lasers->end(), mechanism.begin(), mechanism.end());
          }
-         else if (layer->_name == layer_name_platforms)
-         {
-            *mechanism_platforms = MovingPlatform::load(parent, data);
-         }
          else if (layer->_name == layer_name_portals)
          {
             *mechanism_portals = Portal::load(parent, data);
@@ -221,14 +217,6 @@ void GameMechanismDeserializer::deserialize(
             {
                Portal::link(*mechanism_portals, data);
             }
-            // else if (object_group->_name == layer_name_platform_paths || tmx_object->_template_type == type_name_platform_path)
-            // {
-            //    MovingPlatform::link(*mechanism_platforms, data);
-            // }
-            // else if (object_group->_name == layer_name_platforms || tmx_object->_template_type == type_name_platform)
-            // {
-            //    MovingPlatform::deserialize(tmx_object);
-            // }
             else if (object_group->_name == layer_name_weather || tmx_object->_template_type == type_name_weather)
             {
                auto mechanism = Weather::deserialize(parent, data);
@@ -274,7 +262,6 @@ void GameMechanismDeserializer::deserialize(
 
    Laser::merge();
    WaterSurface::merge();
-   // *mechanism_platforms = MovingPlatform::merge(parent, data);
 
    // get a flat vector of all values
    std::vector<std::shared_ptr<GameMechanism>> all_mechanisms;
