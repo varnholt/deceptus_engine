@@ -194,7 +194,7 @@ void Portal::link(std::vector<std::shared_ptr<GameMechanism>>& portals, const Ga
       return;
    }
 
-   auto src_dst = data._tmx_object->_polyline->_polyline;
+   auto src_dst = data._tmx_object->_polyline->_path;
 
    sf::Vector2f src_f = src_dst.at(0);
    sf::Vector2f dst_f = src_dst.at(1);

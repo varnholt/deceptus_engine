@@ -19,7 +19,7 @@ void TmxPolyLine::deserialize(tinyxml2::XMLElement* element, const std::shared_p
          const auto x = std::stof(two_points.at(0));
          const auto y = std::stof(two_points.at(1));
 
-         _polyline.emplace_back(x, y);
+         _path.emplace_back(x, y);
       }
       else
       {
