@@ -588,7 +588,7 @@ void Laser::merge()
       }
 
       // fetch path from object and close it
-      auto path = tmx_object->_polygon ? tmx_object->_polygon->_polyline : tmx_object->_polyline->_polyline;
+      auto path = tmx_object->_polygon ? tmx_object->_polygon->_polyline : tmx_object->_polyline->_path;
       path.push_back(path.at(0));
 
       const auto& lasers = laser_groups[*reference_id];
