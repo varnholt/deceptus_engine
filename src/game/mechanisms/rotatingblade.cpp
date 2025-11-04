@@ -89,7 +89,7 @@ void RotatingBlade::setup(const GameDeserializeData& data)
       return;
    }
 
-   _path = data._tmx_object->_polygon ? data._tmx_object->_polygon->_polyline : data._tmx_object->_polyline->_polyline;
+   _path = data._tmx_object->_polygon ? data._tmx_object->_polygon->_polyline : data._tmx_object->_polyline->_path;
    _path.push_back(_path.at(0));  // close path
    _path_type = data._tmx_object->_polygon ? PathType::Polygon : PathType::Polyline;
 
