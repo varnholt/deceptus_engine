@@ -43,8 +43,6 @@ private:
    void setupTransform();
    void updateLeverLag(const sf::Time& dt);
 
-   double cosineInterpolate(double y1, double y2, double mu);
-
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
 
@@ -58,7 +56,7 @@ private:
    float _lever_lag = 0.0f;
    bool _initialized = false;
    PathInterpolation<b2Vec2> _interpolation;
-   b2Vec2 _velocity;
+   b2Vec2 _velocity{};
    std::vector<sf::Vector2f> _pixel_path;
    sf::FloatRect _rect;
    sf::Vector2f _pos;
