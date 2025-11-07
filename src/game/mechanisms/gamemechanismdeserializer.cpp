@@ -151,44 +151,6 @@ void GameMechanismDeserializer::deserialize(
 
    // debugOutputRegisteredCallbacks();
 
-   // not ported yet
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("Laser", "lasers");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("Platform", "platforms");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("PlatformPath", "platform_paths");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("Portal", "portals");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("ShaderQuad", "shader_quads");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("Smoke", "smoke");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("SoundEmitter", "sound_emitters");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("Spikes", "spikes");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("TextLayer", "text_layers");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("SwitchableObject", "switchable_objects");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("WaterSurfaceEmitter", "water_surface_emitter");
-
-   // auto& registry = GameMechanismDeserializerRegistry::instance();
-   // registry.mapGroupToLayer("Weather", "weather");
-
    // deprecated approach to deserialize mechanisms
    for (const auto& element : tmx_parser.getElements())
    {
@@ -214,10 +176,6 @@ void GameMechanismDeserializer::deserialize(
          {
             const auto mechanism = Laser::load(parent, data);
             mechanism_lasers->insert(mechanism_lasers->end(), mechanism.begin(), mechanism.end());
-         }
-         else if (layer->_name == layer_name_platforms)
-         {
-            *mechanism_platforms = MovingPlatform::load(parent, data);
          }
          else if (layer->_name == layer_name_portals)
          {
@@ -258,14 +216,6 @@ void GameMechanismDeserializer::deserialize(
             else if (object_group->_name == layer_name_portals || tmx_object->_template_type == type_name_portal)
             {
                Portal::link(*mechanism_portals, data);
-            }
-            else if (object_group->_name == layer_name_platform_paths || tmx_object->_template_type == type_name_platform_path)
-            {
-               MovingPlatform::link(*mechanism_platforms, data);
-            }
-            else if (object_group->_name == layer_name_platforms || tmx_object->_template_type == type_name_platform)
-            {
-               MovingPlatform::deserialize(tmx_object);
             }
             else if (object_group->_name == layer_name_weather || tmx_object->_template_type == type_name_weather)
             {
@@ -312,7 +262,6 @@ void GameMechanismDeserializer::deserialize(
 
    Laser::merge();
    WaterSurface::merge();
-   *mechanism_platforms = MovingPlatform::merge(parent, data);
 
    // get a flat vector of all values
    std::vector<std::shared_ptr<GameMechanism>> all_mechanisms;
