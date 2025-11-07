@@ -841,29 +841,34 @@ This object does not have any properties. It does not contain any draw or update
 
 ---
 
-
 ## Moving Platform
 
-Moving Platforms are platforms that follow a certain path inside your level. They can be used just like an elevator or for any other purpose, like moving over a couple of deadly spikes, etc.
+Moving platforms follow a path inside your level. They can act as elevators or transport the player across hazards. The platform uses textures from `tilesets/platforms.png` and is animated for visual variety. Each platform’s width is given in tiles (`platform_width_tl`), and the height is fixed at half a tile (12 px).
 
-![](images/mechanism_moving_platforms.png)
+![Moving platforms screenshot](images/mechanism_moving_platforms.png)
 
-To create moving platforms, the first thing to do is to draw your platform rail tiles into any background tile layer so know which path the platform is supposed to follow. This is only an optical change to your level since the actual path your platform will follow is defined in an object group called `platforms`. Therefore the next step is to create this object group and to draw a polyline from start to end. The last thing to do is to create the actual platform. That's done by simply placing a rectangle into the same layer which overlaps the path you defined in the previous step. The width should be a multiple of `24px` and the height should be `12px`.
+To set up a moving platform:
 
-![](images/mechanism_moving_platforms_settings.png)
+1. Draw the rail graphics in any background tile layer as decoration.
+2. Create an object layer named `moving_platforms`. On this layer, add a polyline object that traces the path the platform should follow. Set its type to `MovingPlatform` or leave it in the `moving_platforms` layer.
+3. In the object’s properties, set `platform_width_tl` to the number of tiles that define the platform’s width (each tile is 24 px). The default is 4 tiles. You can also specify `interpolation_time` (a value between 0 and 1) to choose where along the path the platform starts. A `z` property controls the drawing order and defaults to 10.
+
+When the level loads, the engine registers the `MovingPlatform` type to the `moving_platforms` layer. It reads the polyline path and spawns a kinematic body that moves along this path according to the specified width and height. You can link the platform’s enabled state to other mechanisms via the event system.
 
 ### Object Type / Object Group
 
-|Method|Value|
-|-|-|
-|Object Type|`Platform`|
-|Object Group|`platforms`|
+| Method      | Value                 |
+|------------|-----------------------|
+| Object Type| `MovingPlatform`      |
+| Object Group | `moving_platforms` |
 
 ### Object Properties
 
-|Property|Type|Description|
-|-|-|-|
-|z|int|The object's z index|
+| Property            | Type  | Description |
+|--------------------|------|-------------|
+| `platform_width_tl` | int  | Width of the platform in tiles (24 px per tile). Default is 4 tiles. |
+| `interpolation_time`| float | Optional value between 0 and 1 that sets the starting position along the path. |
+| `z`                 | int   | Z‑index for rendering order. Defaults to 10. |
 
 ---
 
@@ -1322,5 +1327,3 @@ Wind zones apply a continuous force to the player whenever they are inside the r
 |direction_y|float|Vertical component of the wind force. Positive values push upward, negative values push downward (default is `0.0`).|
 
 The size and position of the wind zone are defined by the rectangle you draw.  Wind has no visible representation, so there is no z‑index to configure.
-
-
