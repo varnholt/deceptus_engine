@@ -507,7 +507,7 @@ void DeathBlock::setup(const GameDeserializeData& data)
 
    // setup velocity
    const auto velocity = ValueReader::readValue<float>("velocity", map).value_or(50.0f);
-   auto pixel_path = data._tmx_object->_polyline ? data._tmx_object->_polyline->_polyline : data._tmx_object->_polygon->_polyline;
+   auto pixel_path = data._tmx_object->_polyline ? data._tmx_object->_polyline->_path : data._tmx_object->_polygon->_polyline;
    const auto start_pos = pixel_path.at(0);
    pixel_path.push_back(start_pos);
    _velocity = 50.0f / SfmlMath::length(pixel_path);

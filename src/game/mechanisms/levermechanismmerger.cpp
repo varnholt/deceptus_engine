@@ -69,7 +69,7 @@ void LeverMechanismMerger::merge(
 
          if (target_it != all_mechanism.end())
          {
-            auto mechanism = (*target_it);
+            const auto& mechanism = (*target_it);
             auto callback = [mechanism](int32_t state)
             {
                auto enabled = (state != -1);

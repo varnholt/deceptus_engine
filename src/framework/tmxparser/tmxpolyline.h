@@ -10,5 +10,5 @@ struct TmxPolyLine : TmxElement
 
    void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>&) override;
 
-   std::vector<sf::Vector2f> _polyline;
+   std::vector<sf::Vector2f> _path;
 };
