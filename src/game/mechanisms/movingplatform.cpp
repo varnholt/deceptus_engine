@@ -12,13 +12,51 @@
 #include "framework/tools/log.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h" 0
 #include "game/player/player.h"
 
 #include <cmath>
 #include <numbers>
 
 #include <box2d/box2d.h>
+
+namespace
+{
+
+double cosineInterpolate(double y1, double y2, double mu)
+{
+   const auto mu2 = (1.0 - cos(mu * std::numbers::pi)) * 0.5;
+   return ((y1 * (1.0 - mu2)) + (y2 * mu2));
+}
+
+const auto registered_moving_platform = []
+{
+   auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.mapGroupToLayer("MovingPlatform", "moving_platforms");
+
+   registry.registerLayerName(
+      "moving_platforms",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<MovingPlatform>(parent);
+         mechanism->setup(data);
+         mechanisms["moving_platforms"]->push_back(mechanism);
+      }
+   );
+   registry.registerObjectGroup(
+      "MovingPlatform",
+      [](GameNode* parent, const GameDeserializeData& data, auto& mechanisms)
+      {
+         auto mechanism = std::make_shared<MovingPlatform>(parent);
+         mechanism->setup(data);
+         mechanisms["moving_platforms"]->push_back(mechanism);
+      }
+   );
+   return true;
+}();
+}  // namespace
 
 namespace
 {
@@ -40,7 +78,7 @@ void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    for (auto& sprite : _sprites)
    {
-      sprite.setTexture(*_texture_map.get());
+      sprite.setTexture(*_texture_map);
    }
 
    for (const auto& sprite : _sprites)
@@ -48,11 +86,11 @@ void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       color.draw(sprite);
    }
 
-   if (_normal_map != nullptr)
+   if (_normal_map)
    {
       for (auto& sprite : _sprites)
       {
-         sprite.setTexture(*_normal_map.get());
+         sprite.setTexture(*_normal_map);
       }
 
       for (const auto& sprite : _sprites)
@@ -60,12 +98,6 @@ void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
          normal.draw(sprite);
       }
    }
-}
-
-double MovingPlatform::cosineInterpolate(double y1, double y2, double mu)
-{
-   const auto mu2 = (1.0 - cos(mu * std::numbers::pi)) * 0.5;
-   return (y1 * (1.0 - mu2) + y2 * mu2);
 }
 
 const std::vector<sf::Vector2f>& MovingPlatform::getPixelPath() const
@@ -99,22 +131,23 @@ void MovingPlatform::setEnabled(bool enabled)
 
 void MovingPlatform::setupTransform()
 {
-   auto x = _tile_positions.x * PIXELS_PER_TILE / PPM;
-   auto y = _tile_positions.y * PIXELS_PER_TILE / PPM;
-   _body->SetTransform(b2Vec2(x, y), 0);
+   auto pos_x_m = static_cast<float>(_tile_positions.x) * PIXELS_PER_TILE / PPM;
+   auto pos_y_m = static_cast<float>(_tile_positions.y) * PIXELS_PER_TILE / PPM;
+   _body->SetTransform(b2Vec2(pos_x_m, pos_y_m), 0);
 }
 
 void MovingPlatform::setupBody(const std::shared_ptr<b2World>& world)
 {
    b2PolygonShape polygon_shape;
 
-   b2Vec2 vertices[4];
-   vertices[0] = b2Vec2(0, 0);
-   vertices[1] = b2Vec2(0, element_height_m);
-   vertices[2] = b2Vec2(element_width_m * _element_count, element_height_m);
-   vertices[3] = b2Vec2(element_width_m * _element_count, 0);
+   std::array<b2Vec2, 4> vertices{
+      b2Vec2(0, 0),
+      b2Vec2(0, element_height_m),
+      b2Vec2(element_width_m * static_cast<float>(_platform_width_tl), element_height_m),
+      b2Vec2(element_width_m * static_cast<float>(_platform_width_tl), 0)
+   };
 
-   polygon_shape.Set(vertices, 4);
+   polygon_shape.Set(vertices.data(), 4);
 
    b2BodyDef body_def;
    body_def.type = b2_kinematicBody;
@@ -131,365 +164,166 @@ void MovingPlatform::addSprite(const sf::Sprite& sprite)
    _sprites.push_back(sprite);
 }
 
-std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::load(GameNode* parent, const GameDeserializeData& data)
+void MovingPlatform::setup(const GameDeserializeData& data)
 {
-   if (!data._tmx_layer)
+   // need properties to load the platform
+   if (!data._tmx_object || !data._tmx_object->_properties)
    {
-      Log::Error() << "tmx layer is empty, please fix your level design";
-      return {};
+      return;
    }
 
-   if (!data._tmx_tileset)
-   {
-      Log::Error() << "tmx tileset is empty, please fix your level design";
-      return {};
-   }
-
-   std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
-   const auto tilesize = sf::Vector2u(data._tmx_tileset->_tile_width_px, data._tmx_tileset->_tile_height_px);
-   const auto tiles = data._tmx_layer->_data;
-   const auto width = data._tmx_layer->_width_tl;
-   const auto height = data._tmx_layer->_height_tl;
-   const auto first_id = data._tmx_tileset->_first_gid;
-
-   for (auto y = 0u; y < height; y++)
-   {
-      for (auto x = 0u; x < width; x++)
-      {
-         // get the current tile number
-         auto tile_number = tiles[x + y * width];
-
-         if (tile_number != 0)
-         {
-            // find matching platform
-            auto moving_platform = std::make_shared<MovingPlatform>(parent);
-            moving_platform->setObjectId(data._tmx_layer->_name);
-
-            const auto texture_path = data._base_path / data._tmx_tileset->_image->_source;
-            const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
-            const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
-
-            if (std::filesystem::exists(normal_map_path))
-            {
-               moving_platform->_normal_map = TexturePool::getInstance().get(normal_map_path);
-            }
-
-            moving_platform->_texture_map = TexturePool::getInstance().get(texture_path);
-            moving_platform->_tile_positions.x = x;
-            moving_platform->_tile_positions.y = y;
-
-            if (data._tmx_layer->_properties)
-            {
-               moving_platform->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
-            }
-
-            moving_platforms.push_back(moving_platform);
-
-            while (tile_number != 0)
-            {
-               const auto tile_id = tile_number - first_id;
-               const int32_t tu = (tile_id) % (moving_platform->_texture_map->getSize().x / tilesize.x);
-               const int32_t tv = (tile_id) / (moving_platform->_texture_map->getSize().x / tilesize.x);
-
-               sf::Sprite sprite(*moving_platform->_texture_map);
-               sprite.setTextureRect({{tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
-               sprite.setPosition({static_cast<float_t>(x * PIXELS_PER_TILE), static_cast<float_t>(y * PIXELS_PER_TILE)});
-
-               moving_platform->addSprite(sprite);
-               moving_platform->_element_count++;
-
-               // jump to next tile
-               x++;
-               tile_number = tiles[x + y * width];
-            }
-
-            moving_platform->setupBody(data._world);
-            moving_platform->setupTransform();
-         }
-      }
-   }
-
-   return moving_platforms;
-}
-
-namespace
-{
-std::vector<std::shared_ptr<TmxObject>> boxes;
-std::vector<std::shared_ptr<TmxObject>> paths;
-}  // namespace
-
-void MovingPlatform::deserialize(const std::shared_ptr<TmxObject>& tmx_object)
-{
-   // just collect all the tmx objects
-   if (tmx_object->_polyline)
-   {
-      paths.push_back(tmx_object);
-   }
-   else
-   {
-      boxes.push_back(tmx_object);
-   }
-}
-
-std::vector<std::shared_ptr<GameMechanism>> MovingPlatform::merge(GameNode* parent, const GameDeserializeData& data)
-{
-   std::vector<std::shared_ptr<GameMechanism>> moving_platforms;
-
-   if (boxes.empty() || paths.empty())
-   {
-      return moving_platforms;
-   }
-
-   // generate pairs of matching box and poly tmx objects
-   std::vector<std::pair<std::shared_ptr<TmxObject>, std::shared_ptr<TmxObject>>> box_path_pairs;
-
-   for (const auto& box : boxes)
-   {
-      //      platform path
-      //
-      //           q1
-      //           |
-      // p0        |         p3
-      //  +--------+--------+
-      //  |        |        |
-      //  |        |        | platform rect
-      //  |        |        |
-      //  +--------|--------+
-      // p1        |        p2
-      //           |
-      //           |
-      //           q0
-
-      const auto p0 = sf::Vector2f{box->_x_px, box->_y_px};
-      const auto p1 = sf::Vector2f{box->_x_px, box->_y_px + box->_height_px};
-      const auto p2 = sf::Vector2f{box->_x_px + box->_width_px, box->_y_px + box->_height_px};
-      const auto p3 = sf::Vector2f{box->_x_px + box->_width_px, box->_y_px};
-
-      for (const auto& path : paths)
-      {
-         const auto& poly = path->_polyline;
-
-         for (auto i = 0; i < poly->_polyline.size() - 1; i++)
-         {
-            const auto q0 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i];
-            const auto q1 = sf::Vector2f{path->_x_px, path->_y_px} + poly->_polyline[i + 1];
-
-            if (SfmlMath::intersect(p0, p1, q0, q1).has_value() || SfmlMath::intersect(p1, p2, q0, q1).has_value() ||
-                SfmlMath::intersect(p2, p3, q0, q1).has_value() || SfmlMath::intersect(p3, p0, q0, q1).has_value())
-            {
-               box_path_pairs.emplace_back(box, path);
-               break;
-            }
-         }
-      }
-   }
-
-   // set up platforms
-   const auto texture_path = data._base_path / "tilesets" / "platforms.png";
-   const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
-   const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
-
-   for (const auto& pair : box_path_pairs)
-   {
-      const auto& box = pair.first;
-      const auto& path = pair.second;
-
-      auto moving_platform = std::make_shared<MovingPlatform>(parent);
-      moving_platforms.push_back(moving_platform);
-
-      moving_platform->_element_count = static_cast<int32_t>(box->_width_px / PIXELS_PER_TILE);
-      moving_platform->_z_index = 10;
-
-      // load textures
-      if (std::filesystem::exists(normal_map_path))
-      {
-         moving_platform->_normal_map = TexturePool::getInstance().get(normal_map_path);
-      }
-
-      moving_platform->_texture_map = TexturePool::getInstance().get(texture_path);
-
-      const auto width_px = static_cast<int32_t>(box->_width_px);
-      const auto width_tl = static_cast<int32_t>(width_px / PIXELS_PER_TILE);
-
-      // animation
-      //
-      // uneven tile count
-      //
-      //    +-----+-----+-----+-----+-----+
-      //    |     |     |#####|     |     |
-      //    |     |     |#####|     |     |
-      //    +-----+-----+-----+-----+-----+
-      //                   ^ animate this guy
-      //
-      //
-      // even tile count
-      //
-      //    +-----+-----+-----+-----+-----+-----+
-      //    |     |     |#####|#####|     |     |
-      //    |     |     |#####|#####|     |     |
-      //    +-----+-----+-----+-----+-----+-----+
-      //                   ^     ^ animate these guys
-
-      if (width_tl % 2 != 0)
-      {
-         moving_platform->_animated_tile_index_0 = ((width_tl + 1) / 2) - 1;
-      }
-      else
-      {
-         moving_platform->_animated_tile_index_0 = (width_tl / 2) - 1;
-         moving_platform->_animated_tile_index_1 = (width_tl / 2);
-      }
-
-      for (auto i = 0; i < width_tl; i++)
-      {
-         auto tu_tl = 0;
-         constexpr auto tv_tl = 0;
-
-         if (width_tl > 2)
-         {
-            if (i == 0)  // first tile
-            {
-               tu_tl = 4;
-            }
-            else if (i == width_tl - 1)  // last tile
-            {
-               tu_tl = 7;
-            }
-            else  // other tiles
-            {
-               tu_tl = 5 + std::rand() % 1;  // or 6
-            }
-         }
-         else if (width_tl == 2)
-         {
-            if (i == 0)
-            {
-               tu_tl = 0;
-            }
-            else if (i == 1)
-            {
-               tu_tl = 1;
-            }
-         }
-
-         sf::Sprite sprite(*moving_platform->_texture_map);
-         sprite.setTextureRect(sf::IntRect(
-            {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
-            // 1 platform tile and one background tile for perspective
-         ));
-
-         moving_platform->addSprite(sprite);
-      }
-
-      b2Vec2 platform_pos_m;
-      auto i = 0;
-
-      auto platform_x_min_m = std::numeric_limits<float>::max();
-      auto platform_y_min_m = std::numeric_limits<float>::max();
-      auto platform_x_max_m = std::numeric_limits<float>::min();
-      auto platform_y_max_m = std::numeric_limits<float>::min();
-
-      for (const auto& poly_pos_px : path->_polyline->_polyline)
-      {
-         auto time = i / static_cast<float>(path->_polyline->_polyline.size() - 1);
-
-         // we don't want to position the platform right on the path, we only
-         // want to move its center there
-         const auto half_width_px = (moving_platform->_element_count * PIXELS_PER_TILE / 2.0f);
-         const auto x_px = (path->_x_px + poly_pos_px.x) - half_width_px;
-         const auto y_px = (path->_y_px + poly_pos_px.y);
-
-         platform_pos_m.x = x_px * MPP;
-         platform_pos_m.y = y_px * MPP;
-
-         moving_platform->_interpolation.addKey(platform_pos_m, time);
-         moving_platform->_pixel_path.emplace_back((path->_x_px + poly_pos_px.x), (path->_y_px + poly_pos_px.y));
-
-         platform_x_min_m = std::min(platform_pos_m.x, platform_x_min_m);
-         platform_y_min_m = std::min(platform_pos_m.y, platform_y_min_m);
-         platform_x_max_m = std::max(platform_pos_m.x, platform_x_max_m);
-         platform_y_max_m = std::max(platform_pos_m.y, platform_y_max_m);
-
-         i++;
-      }
-
-      moving_platform->setupBody(data._world);
-      moving_platform->_body->SetTransform(platform_pos_m, 0.0f);
-
-      // set up bounding rect
-      moving_platform->_rect.position.x = platform_x_min_m * PPM;
-      moving_platform->_rect.position.y = platform_y_min_m * PPM;
-      moving_platform->_rect.size.x = moving_platform->_element_count * PIXELS_PER_TILE;
-      moving_platform->_rect.size.y = (platform_y_max_m - platform_y_min_m) * PPM;
-      moving_platform->addChunks(moving_platform->_rect);
-   }
-
-   // clean up
-   paths.clear();
-   boxes.clear();
-
-   return moving_platforms;
-}
-
-void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data)
-{
    if (!data._tmx_object->_polyline)
    {
       return;
    }
 
-   std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_polyline;
+   setObjectId(data._tmx_object->_name);
 
-   const auto pos = pixel_path.at(0);
-   const auto x_tl = static_cast<int>((pos.x + data._tmx_object->_x_px) / PIXELS_PER_TILE);
-   const auto y_tl = static_cast<int>((pos.y + data._tmx_object->_y_px) / PIXELS_PER_TILE);
+   const auto& path = data._tmx_object->_polyline->_path;
 
-   std::shared_ptr<MovingPlatform> platform;
-
-   for (const auto& p : platforms)
+   // load textures
+   const auto texture_path = data._base_path / "tilesets" / "platforms.png";
+   const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
+   const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
+   if (std::filesystem::exists(normal_map_path))
    {
-      auto tmp = std::dynamic_pointer_cast<MovingPlatform>(p);
-      if (tmp->_tile_positions.y == y_tl)
+      _normal_map = TexturePool::getInstance().get(normal_map_path);
+   }
+
+   _texture_map = TexturePool::getInstance().get(texture_path);
+
+   // read properties
+   const auto& map = data._tmx_object->_properties->_map;
+   _z_index = ValueReader::readValue<int32_t>("z", map).value_or(10);
+   _platform_width_tl = ValueReader::readValue<int32_t>("platform_width_tl", map).value_or(4);
+   const auto interpolation_time = ValueReader::readValue<float>("interpolation_time", map);
+
+   // animation
+   //
+   // uneven tile count
+   //
+   //    +-----+-----+-----+-----+-----+
+   //    |     |     |#####|     |     |
+   //    |     |     |#####|     |     |
+   //    +-----+-----+-----+-----+-----+
+   //                   ^ animate this guy
+   //
+   //
+   // even tile count
+   //
+   //    +-----+-----+-----+-----+-----+-----+
+   //    |     |     |#####|#####|     |     |
+   //    |     |     |#####|#####|     |     |
+   //    +-----+-----+-----+-----+-----+-----+
+   //                   ^     ^ animate these guys
+
+   if (_platform_width_tl % 2 != 0)
+   {
+      _animated_tile_index_0 = ((_platform_width_tl + 1) / 2) - 1;
+   }
+   else
+   {
+      _animated_tile_index_0 = (_platform_width_tl / 2) - 1;
+      _animated_tile_index_1 = (_platform_width_tl / 2);
+   }
+
+   for (auto i = 0; i < _platform_width_tl; i++)
+   {
+      auto tu_tl = 0;
+      constexpr auto tv_tl = 0;
+
+      if (_platform_width_tl > 2)
       {
-         for (auto xi = 0; xi < tmp->_element_count; xi++)
+         if (i == 0)  // first tile
          {
-            if (tmp->_tile_positions.x + xi == x_tl)
-            {
-               platform = tmp;
-               // printf("linking tmx poly to platform at %d, %d\n", x, y);
-               break;
-            }
+            tu_tl = 4;
+         }
+         else if (i == _platform_width_tl - 1)  // last tile
+         {
+            tu_tl = 7;
+         }
+         else  // other tiles
+         {
+            tu_tl = 5 + std::rand() % 1;  // or 6
+         }
+      }
+      else if (_platform_width_tl == 2)
+      {
+         if (i == 0)
+         {
+            tu_tl = 0;
+         }
+         else if (i == 1)
+         {
+            tu_tl = 1;
          }
       }
 
-      // we're done when we found a matching platform
-      if (platform)
-      {
-         break;
-      }
+      sf::Sprite sprite(*_texture_map);
+      sprite.setTextureRect(
+         sf::IntRect(
+            {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
+            // 1 platform tile and one background tile for perspective
+         )
+      );
+
+      addSprite(sprite);
    }
 
-   if (platform)
+   b2Vec2 platform_pos_m{};
+   auto path_index = 0.0f;
+
+   auto platform_x_min_m = std::numeric_limits<float>::max();
+   auto platform_y_min_m = std::numeric_limits<float>::max();
+   auto platform_x_max_m = std::numeric_limits<float>::min();
+   auto platform_y_max_m = std::numeric_limits<float>::min();
+
+   const auto path_size = static_cast<float>(path.size() - 1);
+   for (const auto& poly_pos_px : path)
    {
-      auto i = 0;
-      for (const auto& poly_pos : pixel_path)
-      {
-         b2Vec2 platform_pos;
-         const auto time = i / static_cast<float>(pixel_path.size() - 1);
+      const auto time = path_index / path_size;
 
-         // where do those 4px error come from?!
-         const auto x = (data._tmx_object->_x_px + poly_pos.x - 4 - (platform->_element_count * PIXELS_PER_TILE) / 2.0f) * MPP;
-         const auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;
+      // we don't want to position the platform right on the path, we only
+      // want to move its center there
+      const auto half_width_px = (static_cast<float>(_platform_width_tl) * PIXELS_PER_TILE / 2.0f);
+      const auto x_px = (data._tmx_object->_x_px + poly_pos_px.x) - half_width_px;
+      const auto y_px = (data._tmx_object->_y_px + poly_pos_px.y);
 
-         platform_pos.x = x;
-         platform_pos.y = y;
+      platform_pos_m.x = x_px * MPP;
+      platform_pos_m.y = y_px * MPP;
 
-         platform->_interpolation.addKey(platform_pos, time);
-         platform->_pixel_path.emplace_back((pos.x + data._tmx_object->_x_px), (pos.y + data._tmx_object->_y_px));
+      _interpolation.addKey(platform_pos_m, time);
+      _pixel_path.emplace_back((data._tmx_object->_x_px + poly_pos_px.x), (data._tmx_object->_y_px + poly_pos_px.y));
 
-         i++;
-      }
+      platform_x_min_m = std::min(platform_pos_m.x, platform_x_min_m);
+      platform_y_min_m = std::min(platform_pos_m.y, platform_y_min_m);
+      platform_x_max_m = std::max(platform_pos_m.x, platform_x_max_m);
+      platform_y_max_m = std::max(platform_pos_m.y, platform_y_max_m);
+
+      path_index += 1.0f;
    }
+
+   setupBody(data._world);
+
+   if (interpolation_time.has_value())
+   {
+      const auto interpolated_transform = _interpolation.computePosition(interpolation_time.value());
+      _body->SetTransform(interpolated_transform, 0.0f);
+   }
+   else
+   {
+      _body->SetTransform(platform_pos_m, 0.0f);
+   }
+
+   // set up bounding rect
+   _rect.position.x = platform_x_min_m * PPM;
+   _rect.position.y = platform_y_min_m * PPM;
+   _rect.size.x = static_cast<float>(_platform_width_tl) * PIXELS_PER_TILE;
+   _rect.size.y = (platform_y_max_m - platform_y_min_m) * PPM;
+
+   // chunks are not used on purpose; once the engine stops updating the velocity,
+   // box2d would just keep moving them out of the level entirely.
+   // addChunks(_rect);
 }
 
 //  |                 |
@@ -502,7 +336,7 @@ void MovingPlatform::link(const std::vector<std::shared_ptr<GameMechanism>>& pla
 //
 //  p0                pn
 
-void MovingPlatform::updateLeverLag(const sf::Time& dt)
+void MovingPlatform::updateLeverLag(const sf::Time& delta_time)
 {
    if (!isEnabled())
    {
@@ -512,14 +346,14 @@ void MovingPlatform::updateLeverLag(const sf::Time& dt)
       }
       else
       {
-         _lever_lag -= dt.asSeconds();
+         _lever_lag -= delta_time.asSeconds();
       }
    }
    else
    {
       if (_lever_lag < 1.0f)
       {
-         _lever_lag += dt.asSeconds();
+         _lever_lag += delta_time.asSeconds();
       }
       else
       {
@@ -528,9 +362,9 @@ void MovingPlatform::updateLeverLag(const sf::Time& dt)
    }
 }
 
-void MovingPlatform::update(const sf::Time& dt)
+void MovingPlatform::update(const sf::Time& delta_time)
 {
-   updateLeverLag(dt);
+   updateLeverLag(delta_time);
    _interpolation.update(_body->GetPosition());
    const auto previous_velocity = _velocity;
    _velocity = _lever_lag * TIMESTEP_ERROR * (PPM / 60.0f) * _interpolation.getVelocity();
@@ -567,28 +401,28 @@ void MovingPlatform::update(const sf::Time& dt)
    // 4 aaaa aaaa    wheel animation for 2 pair tile count
    // 5
    auto sprite_index = 0;
-   auto horizontal = (_element_count > 1) ? 1 : 0;
+   auto horizontal = (_platform_width_tl > 1) ? 1 : 0;
 
    constexpr auto animation_tile_count = 4;
    constexpr auto animation_speed_factor = 10.0f;
-   _animation_elapsed += _lever_lag * dt.asSeconds() * animation_speed_factor;
+   _animation_elapsed += _lever_lag * delta_time.asSeconds() * animation_speed_factor;
    const auto animation_tile_index = static_cast<int32_t>(_animation_elapsed) % animation_tile_count;
 
    for (auto& sprite : _sprites)
    {
-      const auto x = _body->GetPosition().x * PPM + horizontal * sprite_index * PIXELS_PER_TILE;
-      const auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
+      const auto pos_body_x_px = (_body->GetPosition().x * PPM) + (horizontal * sprite_index * PIXELS_PER_TILE);
+      const auto pos_body_y_px = (_body->GetPosition().y * PPM) - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
 
-      sprite.setPosition({x, y});
+      sprite.setPosition({pos_body_x_px, pos_body_y_px});
       auto update_sprite_rect = false;
-      auto u = 0;
-      auto v = 0;
+      auto texture_u = 0;
+      auto texture_v = 0;
 
       if (_sprites.size() == 2)
       {
          update_sprite_rect = true;
-         u = (animation_tile_index * 2 + sprite_index) * PIXELS_PER_TILE;
-         v = PIXELS_PER_TILE * 4;
+         texture_u = (animation_tile_index * 2 + sprite_index) * PIXELS_PER_TILE;
+         texture_v = PIXELS_PER_TILE * 4;
       }
       else if (_sprites.size() > 2)
       {
@@ -597,14 +431,14 @@ void MovingPlatform::update(const sf::Time& dt)
             if (sprite_index == ((_sprites.size() + 1) / 2) - 1)
             {
                update_sprite_rect = true;
-               u = (animation_tile_index * 2) * PIXELS_PER_TILE;
-               v = PIXELS_PER_TILE * 2;
+               texture_u = (animation_tile_index * 2) * PIXELS_PER_TILE;
+               texture_v = PIXELS_PER_TILE * 2;
             }
             else if (sprite_index == ((_sprites.size() + 1) / 2))
             {
                update_sprite_rect = true;
-               u = (animation_tile_index * 2 + 1) * PIXELS_PER_TILE;
-               v = PIXELS_PER_TILE * 2;
+               texture_u = (animation_tile_index * 2 + 1) * PIXELS_PER_TILE;
+               texture_v = PIXELS_PER_TILE * 2;
             }
          }
          else  // handle uneven tile counts
@@ -612,15 +446,15 @@ void MovingPlatform::update(const sf::Time& dt)
             if (sprite_index == ((_sprites.size() + 1) / 2) - 1)
             {
                update_sprite_rect = true;
-               u = animation_tile_index * PIXELS_PER_TILE;
-               v = 0;
+               texture_u = animation_tile_index * PIXELS_PER_TILE;
+               texture_v = 0;
             }
          }
       }
 
       if (update_sprite_rect)
       {
-         sprite.setTextureRect({{u, v}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}});
+         sprite.setTextureRect({{texture_u, texture_v}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}});
       }
 
       sprite_index++;

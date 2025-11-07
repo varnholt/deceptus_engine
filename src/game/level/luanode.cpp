@@ -2125,7 +2125,7 @@ void LuaNode::loadShapesFromTmx(const std::string& tmxFile)
             }
             else if (object->_polyline != nullptr)
             {
-               const auto& points = object->_polyline->_polyline;
+               const auto& points = object->_polyline->_path;
                std::vector<b2Vec2> b2Points;
                for (const auto& point : points)
                {

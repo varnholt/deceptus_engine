@@ -204,7 +204,7 @@ bool Physics::dumpObj(const std::shared_ptr<TmxLayer>& layer, const std::shared_
                }
                else if (line)
                {
-                  points = line->_polyline;
+                  points = line->_path;
                }
                else
                {

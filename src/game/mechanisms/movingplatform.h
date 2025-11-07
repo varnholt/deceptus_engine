@@ -21,11 +21,11 @@ public:
    MovingPlatform(GameNode* parent);
    std::string_view objectName() const override;
 
-   static std::vector<std::shared_ptr<GameMechanism>> load(GameNode* parent, const GameDeserializeData& data);
-   static void deserialize(const std::shared_ptr<TmxObject>& tmx_object);
-   static std::vector<std::shared_ptr<GameMechanism>> merge(GameNode* parent, const GameDeserializeData& data);
+   void setup(const GameDeserializeData& data);
 
-   static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data);
+   // static void deserialize(const std::shared_ptr<TmxObject>& tmx_object);
+   // static std::vector<std::shared_ptr<GameMechanism>> merge(GameNode* parent, const GameDeserializeData& data);
+   // static void link(const std::vector<std::shared_ptr<GameMechanism>>& platforms, const GameDeserializeData& data);
 
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
@@ -43,8 +43,6 @@ private:
    void setupTransform();
    void updateLeverLag(const sf::Time& dt);
 
-   double cosineInterpolate(double y1, double y2, double mu);
-
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
 
@@ -54,11 +52,11 @@ private:
    float _animation_elapsed = 0.0f;
    b2Body* _body = nullptr;
    sf::Vector2i _tile_positions;
-   int32_t _element_count = 0;
+   int32_t _platform_width_tl = 0;
    float _lever_lag = 0.0f;
    bool _initialized = false;
    PathInterpolation<b2Vec2> _interpolation;
-   b2Vec2 _velocity;
+   b2Vec2 _velocity{};
    std::vector<sf::Vector2f> _pixel_path;
    sf::FloatRect _rect;
    sf::Vector2f _pos;
