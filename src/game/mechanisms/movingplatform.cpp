@@ -177,6 +177,8 @@ void MovingPlatform::setup(const GameDeserializeData& data)
       return;
    }
 
+   setObjectId(data._tmx_object->_name);
+
    const auto& path = data._tmx_object->_polyline->_path;
 
    // load textures
@@ -194,6 +196,7 @@ void MovingPlatform::setup(const GameDeserializeData& data)
    const auto& map = data._tmx_object->_properties->_map;
    _z_index = ValueReader::readValue<int32_t>("z", map).value_or(10);
    _platform_width_tl = ValueReader::readValue<int32_t>("platform_width_tl", map).value_or(4);
+   const auto interpolation_time = ValueReader::readValue<float>("interpolation_time", map);
 
    // animation
    //
@@ -301,7 +304,16 @@ void MovingPlatform::setup(const GameDeserializeData& data)
    }
 
    setupBody(data._world);
-   _body->SetTransform(platform_pos_m, 0.0f);
+
+   if (interpolation_time.has_value())
+   {
+      const auto interpolated_transform = _interpolation.computePosition(interpolation_time.value());
+      _body->SetTransform(interpolated_transform, 0.0f);
+   }
+   else
+   {
+      _body->SetTransform(platform_pos_m, 0.0f);
+   }
 
    // set up bounding rect
    _rect.position.x = platform_x_min_m * PPM;
@@ -309,7 +321,8 @@ void MovingPlatform::setup(const GameDeserializeData& data)
    _rect.size.x = static_cast<float>(_platform_width_tl) * PIXELS_PER_TILE;
    _rect.size.y = (platform_y_max_m - platform_y_min_m) * PPM;
 
-   // TODO: disabled for now
+   // chunks are not used on purpose; once the engine stops updating the velocity,
+   // box2d would just keep moving them out of the level entirely.
    // addChunks(_rect);
 }
 
