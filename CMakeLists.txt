@@ -515,6 +515,29 @@ set(GAME_FILES
    src/menus/menuscreenpause.h
    src/menus/menuscreenvideo.cpp
    src/menus/menuscreenvideo.h
+   src/game/mechanisms/boxcollider.h
+   src/game/mechanisms/boxcollider.cpp
+   src/game/mechanisms/ringshaderlayer.h
+   src/game/mechanisms/ringshaderlayer.cpp
+   src/game/io/lazytexture.h
+   src/game/io/lazytexture.cpp
+   src/game/mechanisms/buttonrect.h
+   src/game/mechanisms/buttonrect.cpp
+   src/game/audio/musicplayer.h
+   src/game/audio/musicplayer.cpp
+   src/game/mechanisms/gamemechanismdeserializerregistry.h
+   src/game/mechanisms/gamemechanismdeserializerregistry.cpp
+   src/game/audio/musicplayertypes.h
+   src/game/mechanisms/gateway.h
+   src/game/mechanisms/gateway.cpp
+   src/game/mechanisms/flowfieldtexturechangeevent.h
+   src/game/mechanisms/flowfieldtexturechangeevent.cpp
+   src/game/mechanisms/wind.h
+   src/game/mechanisms/wind.cpp
+   src/game/level/gamemechanismregistry.h
+   src/game/level/gamemechanismregistry.cpp
+   src/game/audio/musicfilenames.h
+   src/game/audio/musicfilenames.cpp
    src/main.cpp
    deceptus_resource.rc
 )
@@ -683,18 +706,22 @@ add_executable(deceptus ${GAME_FILES}
    doc/level_design/mechanisms.md
    doc/level_design/visual_effects.md
    doc/lua_interface/readme.md
-   src/game/mechanisms/boxcollider.h src/game/mechanisms/boxcollider.cpp
-   src/game/mechanisms/ringshaderlayer.h src/game/mechanisms/ringshaderlayer.cpp
-   src/game/io/lazytexture.h src/game/io/lazytexture.cpp
-   src/game/mechanisms/buttonrect.h src/game/mechanisms/buttonrect.cpp
-   src/game/audio/musicplayer.h src/game/audio/musicplayer.cpp
-   src/game/mechanisms/gamemechanismdeserializerregistry.h src/game/mechanisms/gamemechanismdeserializerregistry.cpp
-   src/game/audio/musicplayertypes.h
-   src/game/mechanisms/gateway.h src/game/mechanisms/gateway.cpp
-   src/game/mechanisms/flowfieldtexturechangeevent.h src/game/mechanisms/flowfieldtexturechangeevent.cpp
-   src/game/mechanisms/wind.h src/game/mechanisms/wind.cpp
-   src/game/level/gamemechanismregistry.h src/game/level/gamemechanismregistry.cpp
    data/scripts/enemies/state_machine.lua
+   data/scripts/enemies/archer.lua
+   data/scripts/enemies/arrowtrap.lua
+   data/scripts/enemies/arrowtrap_2.lua
+   data/scripts/enemies/bat_2.lua
+   data/scripts/enemies/bat_oneway.lua
+   data/scripts/enemies/blob_2.lua
+   data/scripts/enemies/bonefish.lua
+   data/scripts/enemies/cannon_2.lua
+   data/scripts/enemies/constants.lua
+   data/scripts/enemies/critter.lua
+   data/scripts/enemies/deprecated_bat.lua
+   data/scripts/enemies/deprecated_blob.lua
+   data/scripts/enemies/deprecated_cannon.lua
+   data/scripts/enemies/deprecated_dumb.lua
+   data/scripts/enemies/deprecated_endboss_1.lua data/scripts/enemies/deprecated_klonk.lua data/scripts/enemies/deprecated_skeleton.lua data/scripts/enemies/ghost.lua data/scripts/enemies/helpers.lua data/scripts/enemies/interpolation.lua data/scripts/enemies/klonk_2.lua data/scripts/enemies/landmine.lua data/scripts/enemies/minik_bomber.lua data/scripts/enemies/nukumaru.lua data/scripts/enemies/rat.lua data/scripts/enemies/shadow_monk.lua data/scripts/enemies/spiky.lua data/scripts/enemies/state_machine.lua data/scripts/enemies/vector2.lua data/scripts/enemies/vectorial2.lua data/scripts/enemies/watermine.lua
 )
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
