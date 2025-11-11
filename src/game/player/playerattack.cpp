@@ -59,8 +59,8 @@ PlayerAttack::AttackResult PlayerAttack::attack(
          const auto x_offset = dir.x * 1.0f;
          const auto y_offset = -0.1f;
 
-         pos.x = x_offset + player_pos_px.x * MPP;
-         pos.y = y_offset + player_pos_px.y * MPP;
+         pos.x = x_offset + (player_pos_px.x * MPP);
+         pos.y = y_offset + (player_pos_px.y * MPP);
 
          if (_attack_button_pressed && !_attack_button_was_pressed)
          {
@@ -83,7 +83,7 @@ PlayerAttack::AttackResult PlayerAttack::attack(
          const auto attack_duration = animation->getActiveAttackCycleDuration();
          if (attack_duration.has_value())
          {
-            const auto duration_since_attack = StopWatch::getInstance().now() - _timepoint_attack_start;
+            const auto duration_since_attack = StopWatch::now() - _timepoint_attack_start;
             const auto attack_elapsed = (duration_since_attack > attack_duration.value());
 
             if (!attack_elapsed)
@@ -95,7 +95,7 @@ PlayerAttack::AttackResult PlayerAttack::attack(
          // for the sword weapon we also have to store the times when the player attacks while
          // bending down, in-air or while standing; they need to be distinguished so the player animation
          // knows which animation to play (even if bend down or jump is no longer pressed)
-         const auto now = StopWatch::getInstance().now();
+         const auto now = StopWatch::now();
          _timepoint_attack_start = now;
 
          if (in_air)
