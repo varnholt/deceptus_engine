@@ -289,7 +289,7 @@ void Game::initializeController()
 void Game::playMenuMusic()
 {
    MusicPlayer::getInstance().queueTrack(
-      {.filename = "data/music/menu_test_track_muffler_callisto.ogg",
+      {.filename = MusicFilenames::getMenuMusic().string(),
        .transition = MusicPlayerTypes::TransitionType::Crossfade,
        .duration = std::chrono::milliseconds(1000),
        .post_action = MusicPlayerTypes::PostPlaybackAction::Loop}
@@ -299,7 +299,7 @@ void Game::playMenuMusic()
 void Game::playLevelMusic()
 {
    MusicPlayer::getInstance().queueTrack(
-      {.filename = "data/music/level_test_track_muffler_awakening.ogg",
+      {.filename = MusicFilenames::getLevelMusic().string(),
        .transition = MusicPlayerTypes::TransitionType::Crossfade,
        .duration = std::chrono::milliseconds(1000),
        .post_action = MusicPlayerTypes::PostPlaybackAction::Loop}

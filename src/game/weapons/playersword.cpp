@@ -22,7 +22,7 @@ std::optional<sf::Vector2f> closestCenterToPoint(const sf::Vector2f& point, cons
    }
 
    const auto get_center = [](const sf::FloatRect& rect) -> sf::Vector2f
-   { return {rect.position.x + rect.size.x / 2.0f, rect.position.y + rect.size.y / 2.0f}; };
+   { return {rect.position.x + (rect.size.x / 2.0f), rect.position.y + (rect.size.y / 2.0f)}; };
 
    std::optional<sf::Vector2f> closest_center;
    auto min_distance_squared = std::numeric_limits<float>::max();
@@ -30,9 +30,9 @@ std::optional<sf::Vector2f> closestCenterToPoint(const sf::Vector2f& point, cons
    for (const auto& rect : rects)
    {
       const auto center = get_center(rect);
-      const auto dx = center.x - point.x;
-      const auto dy = center.y - point.y;
-      const auto distance_squared = dx * dx + dy * dy;
+      const auto delta_x_px = center.x - point.x;
+      const auto delta_y_px = center.y - point.y;
+      const auto distance_squared = (delta_x_px * delta_x_px) + (delta_y_px * delta_y_px);
 
       if (distance_squared < min_distance_squared)
       {
@@ -63,8 +63,8 @@ public:
       return fraction;
    }
 
-   b2Vec2 impact_point;
-   b2Vec2 impact_normal;
+   b2Vec2 impact_point{};
+   b2Vec2 impact_normal{};
    std::unordered_set<b2Body*> _ignored_bodies;
 };
 }
@@ -107,16 +107,18 @@ void PlayerSword::draw(sf::RenderTarget& target)
 
 void PlayerSword::cameraShake()
 {
-   const auto x = 0.05f;
-   const auto y = 0.3f;
+   const auto boom_factor_x = 0.05f;
+   const auto boom_factor_y = 0.3f;
    const auto intensity = 0.2f;
-   Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 0.5f, BoomSettings::ShakeType::Random});
+   Level::getCurrentLevel()->getBoomEffect().boom(
+      boom_factor_x, boom_factor_y, BoomSettings{intensity, 0.5f, BoomSettings::ShakeType::Random}
+   );
 }
 
 std::vector<WorldQuery::CollidedNode> PlayerSword::impactLuaNode(std::unordered_set<b2Body*>& ignored_bodies)
 {
    const auto collided_nodes = WorldQuery::findNodesByHitbox(_hit_rect_px);
-   for (auto& collided_node : collided_nodes)
+   for (const auto& collided_node : collided_nodes)
    {
       collided_node._node->luaHit(sword_damage);
 
@@ -126,7 +128,7 @@ std::vector<WorldQuery::CollidedNode> PlayerSword::impactLuaNode(std::unordered_
       }
 
       const auto& rect = collided_node._hitbox;
-      const auto hitbox_center_pos = sf::Vector2f{rect.position.x + rect.size.x * 0.5f, rect.position.y + rect.size.y * 0.5f};
+      const auto hitbox_center_pos = sf::Vector2f{rect.position.x + (rect.size.x * 0.5f), rect.position.y + (rect.size.y * 0.5f)};
 
       // try avoid spamming new animations
       if (_attack_frame == 0)
@@ -150,7 +152,7 @@ std::vector<std::shared_ptr<GameMechanism>> PlayerSword::impactMechanisms(std::u
    // this can be refactored to return mechanisms that are 'hittable'
    // luahit should then go to the base class and be renamed.
    // only from group "props"
-   auto& registry = Level::getCurrentLevel()->getMechanismRegistry();
+   const auto& registry = Level::getCurrentLevel()->getMechanismRegistry();
    auto destructible_mechanisms = registry.searchMechanismsIf(
       [](const std::shared_ptr<GameMechanism>& mechanism, std::string_view /*group_key*/)
       {
@@ -191,7 +193,7 @@ std::optional<sf::Vector2f> PlayerSword::impactSolidObjects(const WeaponUpdateDa
 
    const auto player_rect_px = Player::getCurrent()->getPixelRectFloat();
    const auto player_center_px =
-      sf::Vector2f{player_rect_px.position.x + player_rect_px.size.x / 2.0f, player_rect_px.position.y + player_rect_px.size.y / 2.0f};
+      sf::Vector2f{player_rect_px.position.x + (player_rect_px.size.x / 2.0f), player_rect_px.position.y + (player_rect_px.size.y / 2.0f)};
 
    auto solid_object_hit_pos_px = closestCenterToPoint(player_center_px, _octree_rects);
    if (solid_object_hit_pos_px.has_value())
@@ -300,14 +302,14 @@ void PlayerSword::use(const std::shared_ptr<b2World>& world, const b2Vec2& dir)
 {
    _cleared_to_attack = true;
    _attack_frame = 0;
-   _timepoint_swing_start = StopWatch::getInstance().now();
+   _timepoint_swing_start = StopWatch::now();
    _dir_m = dir;
    _points_left = (dir.x < 0.0f);
 }
 
 bool PlayerSword::checkHitWindowActive() const
 {
-   const auto now = StopWatch::getInstance().now();
+   const auto now = StopWatch::now();
    const auto start = _timepoint_swing_start + _duration_from_swing_start_to_hit;
    const auto end = _timepoint_swing_start + _duration_from_swing_start_to_hit + _duration_from_hit_start_to_end;
    const auto within_active_time_window = (now >= start && now <= end);
@@ -326,7 +328,7 @@ void PlayerSword::updateHitbox()
    const auto center_px = player->getPixelPositionFloat();
 
    const auto hitbox_pos = sf::Vector2f{
-      offset_px.x + center_px.x + 0.1f * PPM * _dir_m.x + ((_dir_m.x < 0.0f) ? -hitbox_width_px : 0.0f),
+      offset_px.x + center_px.x + ((0.1f * PPM) * _dir_m.x) + ((_dir_m.x < 0.0f) ? -hitbox_width_px : 0.0f),
       offset_px.y + center_px.y + (crouching ? (-0.1f * PPM) : (-0.6f * PPM)),
    };
 
