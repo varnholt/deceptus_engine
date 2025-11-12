@@ -33,14 +33,14 @@ private:
    void updateImpact(const WeaponUpdateData& data);
    void updateHitbox();
    void updateAttackDash(const sf::Time& dt);
-   void cameraShake();
+   static void cameraShake();
 
    std::vector<WorldQuery::CollidedNode> impactLuaNode(std::unordered_set<b2Body*>& ignored_bodies);
    std::vector<std::shared_ptr<GameMechanism>> impactMechanisms(std::unordered_set<b2Body*>& ignored_bodies);
    std::optional<sf::Vector2f> impactSolidObjects(const WeaponUpdateData& data, std::unordered_set<b2Body*>& ignored_bodies);
 
-   b2Vec2 _pos_m;
-   b2Vec2 _dir_m;
+   b2Vec2 _pos_m{};
+   b2Vec2 _dir_m{};
    bool _points_left{false};
 
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
