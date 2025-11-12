@@ -1,6 +1,7 @@
 #include "levelscript.h"
 
 #include "framework/tools/log.h"
+#include "game/audio/musicfilenames.h"
 #include "game/audio/musicplayer.h"
 #include "game/camera/camerazoom.h"
 #include "game/level/luaconstants.h"
@@ -1109,6 +1110,7 @@ void LevelScript::playMusic(
    MusicPlayerTypes::PostPlaybackAction post_action
 )
 {
+   MusicFilenames::setLevelMusic(filename);
    MusicPlayer::getInstance().queueTrack({filename, transition_type, transition_duration, post_action});
 }
 
