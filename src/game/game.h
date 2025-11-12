@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game/audio/audio.h"
+#include "game/audio/musicfilenames.h"
 #include "game/camera/camerasystemconfigurationui.h"
 #include "game/constants.h"
 #include "game/debug/console.h"

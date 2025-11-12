@@ -1,6 +1,7 @@
 #include "menuscreenpause.h"
 
 #include "game/audio/audio.h"
+#include "game/audio/musicfilenames.h"
 #include "game/audio/musicplayer.h"
 #include "game/sfx/gameaudio.h"
 #include "game/state/gamestate.h"
@@ -87,7 +88,7 @@ void MenuScreenPause::resume()
    GameAudio::getInstance().play(GameAudio::SoundEffect::GameStateResume);
 
    MusicPlayer::getInstance().queueTrack(
-      {.filename = "data/music/level_test_track_muffler_awakening.ogg",
+      {.filename = MusicFilenames::getLevelMusic().string(),
        .transition = MusicPlayerTypes::TransitionType::Crossfade,
        .duration = std::chrono::milliseconds(1000),
        .post_action = MusicPlayerTypes::PostPlaybackAction::Loop}
