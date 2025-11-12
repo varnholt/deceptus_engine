@@ -1,0 +1,11 @@
+[project]
+name = "cmake-tools"
+version = "0.0.0"
+requires-python = ">=3.9"
+dependencies = [
+    "cmakelang==0.6.13",
+    "PyYAML>=6.0.1",
+]
+
+[tool.uv]
+managed = true
