@@ -52,6 +52,7 @@ public:
       std::chrono::milliseconds transition_duration,
       MusicPlayerTypes::PostPlaybackAction post_action
    );
+   void playEventRecording(const std::string& filename);
 
    // functions on the lua end
    void luaInitialize();
