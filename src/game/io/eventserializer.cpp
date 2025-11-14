@@ -196,31 +196,31 @@ void EventSerializer::serialize()
    }
 
    Log::Info() << "serializing " << _events.size() << " events";
-   std::ofstream out("events.dat", std::ios::out | std::ios::binary);
+   std::ofstream output_stream("events.dat", std::ios::out | std::ios::binary);
 
-   writeInt32(out, static_cast<int32_t>(_events.size()));
+   writeInt32(output_stream, static_cast<int32_t>(_events.size()));
 
    auto start_time = _events.front()._time_point;
 
    for (const auto& event : _events)
    {
-      writeDuration(out, event._time_point - start_time);
-      writeEvent(out, event._event);
+      writeDuration(output_stream, event._time_point - start_time);
+      writeEvent(output_stream, event._event);
    }
 }
 
-void EventSerializer::deserialize()
+void EventSerializer::deserialize(const std::filesystem::path& path)
 {
    _events.clear();
 
-   std::ifstream in("events.dat", std::ios::in | std::ios::binary);
+   std::ifstream input_stream(path, std::ios::in | std::ios::binary);
 
-   int32_t size = readInt32(in);
+   const auto size = readInt32(input_stream);
 
    for (auto i = 0; i < size; i++)
    {
-      const auto duration = readDuration(in);
-      const auto event = readEvent(in);
+      const auto duration = readDuration(input_stream);
+      const auto event = readEvent(input_stream);
 
       _events.emplace_back(duration, event);
    }
@@ -233,9 +233,9 @@ void EventSerializer::debug()
    for (const auto& event : _events)
    {
       const auto& time_point = event._time_point;
-      const auto dt = time_point - start;
+      const auto delta_time = time_point - start;
 
-      Log::Info() << dt.count();
+      Log::Info() << delta_time.count();
    }
 }
 
@@ -284,23 +284,24 @@ void EventSerializer::playThread()
 
 bool EventSerializer::filterMovementEvents(const sf::Event& event)
 {
-   static const std::unordered_set<sf::Keyboard::Key> movementKeys = {
+   static const std::unordered_set<sf::Keyboard::Key> movement_keys = {
       sf::Keyboard::Key::LShift,
       sf::Keyboard::Key::Left,
       sf::Keyboard::Key::Right,
       sf::Keyboard::Key::Up,
       sf::Keyboard::Key::Down,
-      sf::Keyboard::Key::Enter,  // SFML 3 renamed Return to Enter
+      sf::Keyboard::Key::Enter,
       sf::Keyboard::Key::Space
    };
 
-   if (auto key_event = event.getIf<sf::Event::KeyPressed>())
+   if (const auto* key_event = event.getIf<sf::Event::KeyPressed>())
    {
-      return movementKeys.contains(key_event->code);
+      return movement_keys.contains(key_event->code);
    }
-   else if (auto key_event = event.getIf<sf::Event::KeyReleased>())
+
+   if (const auto* key_event = event.getIf<sf::Event::KeyReleased>())
    {
-      return movementKeys.contains(key_event->code);
+      return movement_keys.contains(key_event->code);
    }
 
    return false;
