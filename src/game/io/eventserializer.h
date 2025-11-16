@@ -53,6 +53,9 @@ public:
 
    static EventSerializer& getInstance();
 
+   void start();       //!< convenience helper function
+   void stop();        //!< convenience helper function
+
 private:
    EventSerializer() = default;
 

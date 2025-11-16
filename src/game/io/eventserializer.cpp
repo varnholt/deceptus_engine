@@ -163,7 +163,7 @@ sf::Event readEvent(std::istream& stream)
       {
          sf::Event::KeyPressed key_event;
          key_event.code = static_cast<sf::Keyboard::Key>(readUint8(stream));
-         uint8_t flags = readUint8(stream);
+         const auto flags = readUint8(stream);
          key_event.alt = (flags & 0x08);
          key_event.control = (flags & 0x04);
          key_event.shift = (flags & 0x02);
@@ -174,7 +174,7 @@ sf::Event readEvent(std::istream& stream)
       {
          sf::Event::KeyReleased key_event;
          key_event.code = static_cast<sf::Keyboard::Key>(readUint8(stream));
-         uint8_t flags = readUint8(stream);
+         const auto flags = readUint8(stream);
          key_event.alt = (flags & 0x08);
          key_event.control = (flags & 0x04);
          key_event.shift = (flags & 0x02);
@@ -269,10 +269,11 @@ void EventSerializer::playThread()
       const auto now = HighResClock::now();
       const auto elapsed = now - _play_start_time;
 
-      if (elapsed > _events[recorded_index]._duration)
+      const auto& event = _events[recorded_index];
+      if (elapsed > event._duration)
       {
          // pass event to given event loop
-         _callback(_events[recorded_index]._event);
+         _callback(event._event);
 
          recorded_index++;
          done = (recorded_index == static_cast<int32_t>(_events.size() - 1));
@@ -316,6 +317,18 @@ EventSerializer& EventSerializer::getInstance()
 {
    static EventSerializer _instance;
    return _instance;
+}
+
+void EventSerializer::start()
+{
+   clear();
+   setEnabled(true);
+}
+
+void EventSerializer::stop()
+{
+   setEnabled(false);
+   serialize();
 }
 
 bool EventSerializer::isEnabled() const
