@@ -839,7 +839,11 @@ void Game::toggleFullScreen()
 {
    GameConfiguration::getInstance()._fullscreen = !GameConfiguration::getInstance()._fullscreen;
    initializeWindow();
-   _level->createViews();
+
+   if (_level)
+   {
+      _level->createViews();
+   }
 }
 
 void Game::changeResolution(int32_t w, int32_t h)
@@ -1129,6 +1133,24 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
             _physics_ui.reset();
          }
 
+         break;
+      }
+      case sf::Keyboard::Key::F8:
+      {
+         auto& serializer = EventSerializer::getInstance();
+         if (serializer.isEnabled())
+         {
+            serializer.stop();
+         }
+         else
+         {
+            serializer.start();
+         }
+         break;
+      }
+      case sf::Keyboard::Key::F9:
+      {
+         EventSerializer::getInstance().play();
          break;
       }
       case sf::Keyboard::Key::F11:

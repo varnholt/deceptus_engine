@@ -6,11 +6,18 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 
-std::map<std::string, std::function<ShaderLayer::FactoryFunction>> ShaderLayer::__customizations;
+namespace
+{
+    std::map<std::string, std::function<ShaderLayer::FactoryFunction>>& getCustomizations()
+    {
+        static std::map<std::string, std::function<ShaderLayer::FactoryFunction>> __customizations;
+        return __customizations;
+    }
+}
 
 void ShaderLayer::registerCustomization(const std::string& id, const std::function<FactoryFunction>& factory_function)
 {
-   __customizations[id] = factory_function;
+   getCustomizations()[id] = factory_function;
 }
 
 ShaderLayer::ShaderLayer(GameNode* parent) : GameNode(parent)
@@ -74,7 +81,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto customization = ValueReader::readValue<std::string>("customization", map);
    if (customization.has_value())
    {
-      instance = __customizations[customization.value()](parent);
+      instance = getCustomizations()[customization.value()](parent);
    }
    else
    {

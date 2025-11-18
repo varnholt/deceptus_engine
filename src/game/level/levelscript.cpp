@@ -4,6 +4,7 @@
 #include "game/audio/musicfilenames.h"
 #include "game/audio/musicplayer.h"
 #include "game/camera/camerazoom.h"
+#include "game/io/eventserializer.h"
 #include "game/level/luaconstants.h"
 #include "game/level/luainterface.h"
 #include "game/level/luanode.h"
@@ -112,7 +113,7 @@ int32_t addSensorRectCallback(lua_State* state)
       return 0;
    }
 
-   const auto rect_id = lua_tostring(state, 1);
+   const auto* rect_id = lua_tostring(state, 1);
    getInstance()->addSensorRectCallback(rect_id);
    return 0;
 }
@@ -133,7 +134,7 @@ int32_t isMechanismVisible(lua_State* state)
       return 0;
    }
 
-   const auto search_pattern = lua_tostring(state, 1);
+   const auto* search_pattern = lua_tostring(state, 1);
 
    std::optional<std::string> group;
    if (argc == 2)
@@ -161,7 +162,7 @@ int32_t isPlayerIntersectingSensorRect(lua_State* state)
       return 0;
    }
 
-   const auto search_pattern = lua_tostring(state, 1);
+   const auto* search_pattern = lua_tostring(state, 1);
 
    const auto intersects = getInstance()->isPlayerIntersectingSensorRect(search_pattern);
    lua_pushboolean(state, intersects);
@@ -184,7 +185,7 @@ int32_t setMechanismVisible(lua_State* state)
       return 0;
    }
 
-   const auto search_pattern = lua_tostring(state, 1);
+   const auto* search_pattern = lua_tostring(state, 1);
    const auto visible = lua_toboolean(state, 2);
 
    std::optional<std::string> group;
@@ -213,7 +214,7 @@ int32_t isMechanismEnabled(lua_State* state)
       return 0;
    }
 
-   const auto search_pattern = lua_tostring(state, 1);
+   const auto* search_pattern = lua_tostring(state, 1);
 
    std::optional<std::string> group;
    if (argc == 2)
@@ -241,7 +242,7 @@ int32_t setMechanismEnabled(lua_State* state)
       return 0;
    }
 
-   const auto search_pattern = lua_tostring(state, 1);
+   const auto* search_pattern = lua_tostring(state, 1);
    const auto enabled = lua_toboolean(state, 2);
 
    std::optional<std::string> group;
@@ -268,7 +269,7 @@ int32_t inventoryAdd(lua_State* state)
       return 0;
    }
 
-   const auto item_key = lua_tostring(state, 1);
+   const auto* item_key = lua_tostring(state, 1);
    getInstance()->inventoryAdd(item_key);
    return 0;
 }
@@ -287,7 +288,7 @@ int32_t inventoryRemove(lua_State* state)
       return 0;
    }
 
-   const auto item_key = lua_tostring(state, 1);
+   const auto* item_key = lua_tostring(state, 1);
    getInstance()->inventoryRemove(item_key);
    return 0;
 }
@@ -307,7 +308,7 @@ int32_t inventoryHas(lua_State* state)
       return 0;
    }
 
-   const auto item_key = lua_tostring(state, 1);
+   const auto* item_key = lua_tostring(state, 1);
    const auto has_item = getInstance()->inventoryHas(item_key);
    lua_pushboolean(state, has_item);
    return 1;
@@ -328,7 +329,7 @@ int32_t showDialogue(lua_State* state)
       return 0;
    }
 
-   const auto search_pattern = lua_tostring(state, 1);
+   const auto* search_pattern = lua_tostring(state, 1);
 
    getInstance()->showDialogue(search_pattern);
    return 0;
@@ -349,7 +350,7 @@ int32_t toggle(lua_State* state)
       return 0;
    }
 
-   const auto search_pattern = lua_tostring(state, 1);
+   const auto* search_pattern = lua_tostring(state, 1);
 
    std::optional<std::string> group;
    if (argc == 2)
@@ -400,7 +401,7 @@ int32_t setLuaNodeVisible(lua_State* state)
       return 0;
    }
 
-   const auto search_pattern = lua_tostring(state, 1);
+   const auto* search_pattern = lua_tostring(state, 1);
    const auto visible = lua_toboolean(state, 2);
 
    getInstance()->setLuaNodeVisible(search_pattern, visible);
@@ -422,7 +423,7 @@ int32_t setLuaNodeActive(lua_State* state)
       return 0;
    }
 
-   const auto search_pattern = lua_tostring(state, 1);
+   const auto* search_pattern = lua_tostring(state, 1);
    const auto active = lua_toboolean(state, 2);
 
    getInstance()->setLuaNodeActive(search_pattern, active);
@@ -466,6 +467,30 @@ int32_t addPlayerHealth(lua_State* state)
    const auto health_points = static_cast<int32_t>(lua_tointeger(state, 1));
 
    getInstance()->addPlayerHealth(health_points);
+   return 0;
+}
+
+/**
+ * @brief playEventRecording plays back a specific event recording file
+ * @param state lua state
+ *    param 1: filename of the recording to play (without .dat extension)
+ * @return error code
+ */
+int32_t playEventRecording(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 1)
+   {
+      return 0;
+   }
+
+   const char* filename = lua_tostring(state, 1);
+   if (filename == nullptr)
+   {
+      return 0;
+   }
+
+   getInstance()->playEventRecording(std::string(filename));
    return 0;
 }
 
@@ -523,7 +548,7 @@ int32_t debug(lua_State* state)
       return 0;
    }
 
-   const auto message = lua_tostring(state, 1);
+   const auto* message = lua_tostring(state, 1);
    Log::Info() << message;
 
    return 0;
@@ -603,10 +628,10 @@ int32_t setZoomFactor(lua_State* state)
 {
    // the error message is on top of the stack.
    // fetch it, print32_t it and then pop it off the stack.
-   std::stringstream os;
-   os << lua_tostring(state, -1);
+   std::stringstream output_stream;
+   output_stream << lua_tostring(state, -1);
 
-   Log::Error() << os.str();
+   Log::Error() << output_stream.str();
 
    lua_pop(state, 1);
 
@@ -615,7 +640,7 @@ int32_t setZoomFactor(lua_State* state)
 
 }  // namespace
 
-void LevelScript::update(const sf::Time& dt)
+void LevelScript::update(const sf::Time& delta_time)
 {
    // this might be a valid scenario. not every level needs a script to drive its logic.
    if (!_initialized)
@@ -623,7 +648,7 @@ void LevelScript::update(const sf::Time& dt)
       return;
    }
 
-   luaUpdate(dt);
+   luaUpdate(delta_time);
 
    const auto player_rect = Player::getCurrent()->getPixelRectInt();
    auto id = 0;
@@ -644,7 +669,7 @@ LevelScript::LevelScript()
    setInstance(this);
 
    // add 'item added' callback
-   auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
+   auto& inventory = SaveState::getPlayerInfo()._inventory;
    _inventory_added_callback = [this](const std::string& item) { luaPlayerReceivedItem(item); };
    _inventory_used_callback = [this](const std::string& item) { return luaPlayerUsedItem(item); };
    inventory._added_callbacks.push_back(_inventory_added_callback);
@@ -665,7 +690,7 @@ LevelScript::~LevelScript()
    resetInstance();
 
    // remove 'item added' callback
-   auto& inventory = SaveState::getCurrent().getPlayerInfo()._inventory;
+   auto& inventory = SaveState::getPlayerInfo()._inventory;
    inventory.removeAddedCallback(_inventory_added_callback);
 }
 
@@ -702,6 +727,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "showDialogue", ::showDialogue);
    lua_register(_lua_state, "toggle", ::toggle);
    lua_register(_lua_state, "writeLuaNodeProperty", ::writeLuaNodeProperty);
+   lua_register(_lua_state, "playEventRecording", ::playEventRecording);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -730,10 +756,23 @@ void LevelScript::setup(const std::filesystem::path& path)
    }
    else
    {
-      auto* error_message = lua_tostring(_lua_state, -1);
+      const auto* error_message = lua_tostring(_lua_state, -1);
       Log::Error() << "Failed loading " << _script_name << ": " << (error_message ? error_message : "unknown error");
       lua_pop(_lua_state, 1);
    }
+}
+
+void LevelScript::playEventRecording(const std::string& filename)
+{
+   // load and play a specific event recording file
+   std::string filepath = filename;
+   if (filepath.find(".dat") == std::string::npos)
+   {
+      filepath += ".dat";
+   }
+
+   EventSerializer::getInstance().deserialize(filepath);
+   EventSerializer::getInstance().play();
 }
 
 /**
@@ -755,13 +794,13 @@ void LevelScript::luaInitialize()
 
 /**
  * @brief LevelScript::luaUpdate update the lua node
- * @param dt delta time, passed to luanode in seconds
+ * @param delta_time delta time, passed to luanode in seconds
  * callback name: update
  */
-void LevelScript::luaUpdate(const sf::Time& dt)
+void LevelScript::luaUpdate(const sf::Time& delta_time)
 {
    lua_getglobal(_lua_state, FUNCTION_UPDATE);
-   lua_pushnumber(_lua_state, dt.asSeconds());
+   lua_pushnumber(_lua_state, delta_time.asSeconds());
 
    auto result = lua_pcall(_lua_state, 1, 0, 0);
 

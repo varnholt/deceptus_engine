@@ -163,7 +163,7 @@ sf::Event readEvent(std::istream& stream)
       {
          sf::Event::KeyPressed key_event;
          key_event.code = static_cast<sf::Keyboard::Key>(readUint8(stream));
-         uint8_t flags = readUint8(stream);
+         const auto flags = readUint8(stream);
          key_event.alt = (flags & 0x08);
          key_event.control = (flags & 0x04);
          key_event.shift = (flags & 0x02);
@@ -174,7 +174,7 @@ sf::Event readEvent(std::istream& stream)
       {
          sf::Event::KeyReleased key_event;
          key_event.code = static_cast<sf::Keyboard::Key>(readUint8(stream));
-         uint8_t flags = readUint8(stream);
+         const auto flags = readUint8(stream);
          key_event.alt = (flags & 0x08);
          key_event.control = (flags & 0x04);
          key_event.shift = (flags & 0x02);
@@ -196,31 +196,31 @@ void EventSerializer::serialize()
    }
 
    Log::Info() << "serializing " << _events.size() << " events";
-   std::ofstream out("events.dat", std::ios::out | std::ios::binary);
+   std::ofstream output_stream("events.dat", std::ios::out | std::ios::binary);
 
-   writeInt32(out, static_cast<int32_t>(_events.size()));
+   writeInt32(output_stream, static_cast<int32_t>(_events.size()));
 
    auto start_time = _events.front()._time_point;
 
    for (const auto& event : _events)
    {
-      writeDuration(out, event._time_point - start_time);
-      writeEvent(out, event._event);
+      writeDuration(output_stream, event._time_point - start_time);
+      writeEvent(output_stream, event._event);
    }
 }
 
-void EventSerializer::deserialize()
+void EventSerializer::deserialize(const std::filesystem::path& path)
 {
    _events.clear();
 
-   std::ifstream in("events.dat", std::ios::in | std::ios::binary);
+   std::ifstream input_stream(path, std::ios::in | std::ios::binary);
 
-   int32_t size = readInt32(in);
+   const auto size = readInt32(input_stream);
 
    for (auto i = 0; i < size; i++)
    {
-      const auto duration = readDuration(in);
-      const auto event = readEvent(in);
+      const auto duration = readDuration(input_stream);
+      const auto event = readEvent(input_stream);
 
       _events.emplace_back(duration, event);
    }
@@ -233,9 +233,9 @@ void EventSerializer::debug()
    for (const auto& event : _events)
    {
       const auto& time_point = event._time_point;
-      const auto dt = time_point - start;
+      const auto delta_time = time_point - start;
 
-      Log::Info() << dt.count();
+      Log::Info() << delta_time.count();
    }
 }
 
@@ -269,10 +269,11 @@ void EventSerializer::playThread()
       const auto now = HighResClock::now();
       const auto elapsed = now - _play_start_time;
 
-      if (elapsed > _events[recorded_index]._duration)
+      const auto& event = _events[recorded_index];
+      if (elapsed > event._duration)
       {
          // pass event to given event loop
-         _callback(_events[recorded_index]._event);
+         _callback(event._event);
 
          recorded_index++;
          done = (recorded_index == static_cast<int32_t>(_events.size() - 1));
@@ -284,23 +285,24 @@ void EventSerializer::playThread()
 
 bool EventSerializer::filterMovementEvents(const sf::Event& event)
 {
-   static const std::unordered_set<sf::Keyboard::Key> movementKeys = {
+   static const std::unordered_set<sf::Keyboard::Key> movement_keys = {
       sf::Keyboard::Key::LShift,
       sf::Keyboard::Key::Left,
       sf::Keyboard::Key::Right,
       sf::Keyboard::Key::Up,
       sf::Keyboard::Key::Down,
-      sf::Keyboard::Key::Enter,  // SFML 3 renamed Return to Enter
+      sf::Keyboard::Key::Enter,
       sf::Keyboard::Key::Space
    };
 
-   if (auto key_event = event.getIf<sf::Event::KeyPressed>())
+   if (const auto* key_event = event.getIf<sf::Event::KeyPressed>())
    {
-      return movementKeys.contains(key_event->code);
+      return movement_keys.contains(key_event->code);
    }
-   else if (auto key_event = event.getIf<sf::Event::KeyReleased>())
+
+   if (const auto* key_event = event.getIf<sf::Event::KeyReleased>())
    {
-      return movementKeys.contains(key_event->code);
+      return movement_keys.contains(key_event->code);
    }
 
    return false;
@@ -315,6 +317,18 @@ EventSerializer& EventSerializer::getInstance()
 {
    static EventSerializer _instance;
    return _instance;
+}
+
+void EventSerializer::start()
+{
+   clear();
+   setEnabled(true);
+}
+
+void EventSerializer::stop()
+{
+   setEnabled(false);
+   serialize();
 }
 
 bool EventSerializer::isEnabled() const
