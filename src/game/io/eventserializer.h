@@ -38,7 +38,7 @@ public:
    void clear();
 
    void serialize();
-   void deserialize();
+   void deserialize(const std::filesystem::path& path = "events.dat");
 
    void debug();
    void play();
@@ -53,11 +53,14 @@ public:
 
    static EventSerializer& getInstance();
 
+   void start();       //!< convenience helper function
+   void stop();        //!< convenience helper function
+
 private:
    EventSerializer() = default;
 
    void playThread();
-   bool filterMovementEvents(const sf::Event& event);
+   static bool filterMovementEvents(const sf::Event& event);
 
    std::optional<size_t> _max_size;
    std::vector<ChronoEvent> _events;

@@ -31,6 +31,5 @@ struct ShaderLayer : public GameMechanism, public GameNode
 
    // customization factory
    using FactoryFunction = std::shared_ptr<ShaderLayer>(GameNode* parent);
-   static std::map<std::string, std::function<FactoryFunction>> __customizations;
    static void registerCustomization(const std::string& id, const std::function<FactoryFunction>&);
 };
