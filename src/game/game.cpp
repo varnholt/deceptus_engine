@@ -839,7 +839,11 @@ void Game::toggleFullScreen()
 {
    GameConfiguration::getInstance()._fullscreen = !GameConfiguration::getInstance()._fullscreen;
    initializeWindow();
-   _level->createViews();
+
+   if (_level)
+   {
+      _level->createViews();
+   }
 }
 
 void Game::changeResolution(int32_t w, int32_t h)
