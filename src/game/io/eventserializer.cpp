@@ -1,6 +1,7 @@
 #include "eventserializer.h"
 
 #include "framework/tools/log.h"
+#include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 
 #include <fstream>
@@ -254,6 +255,8 @@ void EventSerializer::play()
 
    _play_start_time = HighResClock::now();
    _play_result = std::async(std::launch::async, [this] { playThread(); });
+
+   DisplayMode::getInstance().enqueueSet(Display::ReplayPlaying);
 }
 
 void EventSerializer::playThread()
@@ -281,6 +284,9 @@ void EventSerializer::playThread()
 
       std::this_thread::sleep_for(1ms);
    }
+
+   // not thread safe but also only for dev purposes
+   DisplayMode::getInstance().enqueueUnset(Display::ReplayPlaying);
 }
 
 bool EventSerializer::filterMovementEvents(const sf::Event& event)
@@ -321,12 +327,16 @@ EventSerializer& EventSerializer::getInstance()
 
 void EventSerializer::start()
 {
+   DisplayMode::getInstance().enqueueSet(Display::ReplayRecording);
+
    clear();
    setEnabled(true);
 }
 
 void EventSerializer::stop()
 {
+   DisplayMode::getInstance().enqueueUnset(Display::ReplayRecording);
+
    setEnabled(false);
    serialize();
 }
