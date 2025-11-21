@@ -2,6 +2,7 @@
 
 #include "menuscreen.h"
 
+#include <cstdint>
 #include <functional>
 
 class MenuScreenMain : public MenuScreen
@@ -47,4 +48,5 @@ private:
    bool _first_time_shown = true;  //<! track if this is the first time the menu is shown
    sf::Clock _fade_in_clock;
    static constexpr float _fade_in_duration = 1000.0f;  // 1 second fade in
+   uint8_t _fade_alpha{0};
 };
