@@ -197,6 +197,8 @@ set(GAME_FILES
     src/game/event/eventdistributor.h
     src/game/game.cpp
     src/game/game.h
+    src/game/splashscreen.cpp
+    src/game/splashscreen.h
     src/game/image/layerdata.cpp
     src/game/image/layerdata.h
     src/game/ingamemenu/ingamemenu.cpp

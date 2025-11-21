@@ -35,8 +35,10 @@ private:
    void drawHealth(sf::RenderTarget& window, sf::RenderStates states);
    void drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates states);
    void drawAutoSave(sf::RenderTarget& window, sf::RenderStates states);
+   void drawEventReplay(sf::RenderStates states, sf::RenderTarget& window);
    void updateInventoryItems();
    void updateHealthLayerOffsets();
+   void updateEventReplayIcons();
 
    BitmapFont _font;
 
@@ -77,4 +79,8 @@ private:
    std::array<std::unique_ptr<sf::Sprite>, 2> _inventory_sprites;
    std::map<std::string, std::unique_ptr<sf::Sprite>> _sprites;
    std::shared_ptr<sf::Texture> _inventory_texture;
+
+   // event replay
+   std::shared_ptr<Layer> _event_replay_recording;
+   std::shared_ptr<Layer> _event_replay_playing;
 };
