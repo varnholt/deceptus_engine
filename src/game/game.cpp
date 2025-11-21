@@ -227,6 +227,8 @@ void Game::initializeWindow()
       loading_sprite.setPosition({position_x, 0.0f});
       _window->draw(loading_sprite);
       _window->display();
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for(2s);
    }
 
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
