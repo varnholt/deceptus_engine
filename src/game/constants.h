@@ -114,6 +114,8 @@ enum class Display
    Modal = 0x10,
    ScreenTransition = 0x20,
    CameraPanorama = 0x40,
+   ReplayRecording = 0x80,
+   ReplayPlaying = 0x100,
 };
 
 enum class ExecutionMode

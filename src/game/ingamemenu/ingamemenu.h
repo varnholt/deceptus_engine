@@ -31,7 +31,7 @@ public:
 
    InGameMenu();
 
-   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+   void draw(sf::RenderTarget& window, const sf::RenderStates& = sf::RenderStates::Default);
    void update(const sf::Time& dt);
 
    void processEvent(const sf::Event::KeyPressed* event);
