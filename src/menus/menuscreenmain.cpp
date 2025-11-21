@@ -1,6 +1,7 @@
 #include "menuscreenmain.h"
 
 #include <chrono>
+#include "framework/easings/easings.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/ui/messagebox.h"
@@ -48,14 +49,24 @@ MenuScreenMain::MenuScreenMain()
 
 void MenuScreenMain::update(const sf::Time& /*dt*/)
 {
+   // only do fade-in the first time the menu is shown
+   if (_first_time_shown)
+   {
+      _first_time_shown = false;
+      _fade_in_active = true;
+      _fade_in_clock.restart();
+   }
+
    // check if fade-in is still active and should be completed
    if (_fade_in_active)
    {
+      constexpr float fade_in_duration_ms = 1000.0f;
       const auto elapsed = _fade_in_clock.getElapsedTime().asMilliseconds();
-      const auto alpha_ratio = std::min(elapsed / _fade_in_duration, 1.0f);
-      _fade_alpha = static_cast<std::uint8_t>(255 * alpha_ratio);
+      const auto ratio_normalized = std::min(elapsed / fade_in_duration_ms, 1.0f);
+      const auto eased_ratio = Easings::easeInOutQuad(ratio_normalized);
+      _fade_alpha = static_cast<std::uint8_t>(255 * eased_ratio);
 
-      if (_fade_in_clock.getElapsedTime().asMilliseconds() >= _fade_in_duration)
+      if (_fade_in_clock.getElapsedTime().asMilliseconds() >= fade_in_duration_ms)
       {
          _fade_in_active = false;
       }
@@ -108,17 +119,6 @@ void MenuScreenMain::keyboardKeyPressed(sf::Keyboard::Key key)
    else if (key == sf::Keyboard::Key::Enter)
    {
       select();
-   }
-}
-
-void MenuScreenMain::showEvent()
-{
-   // Only do fade-in the first time the menu is shown
-   if (_first_time_shown)
-   {
-      _first_time_shown = false;
-      _fade_in_active = true;
-      _fade_in_clock.restart();
    }
 }
 
