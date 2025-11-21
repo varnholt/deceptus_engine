@@ -26,7 +26,6 @@ public:
 
    void loadingFinished() override;
    void updateLayers();
-   void showEvent() override;  //<! reset fade when menu is shown
 
    void up();
    void down();
@@ -47,6 +46,5 @@ private:
    bool _fade_in_active = false;   //<! set to true only when first shown
    bool _first_time_shown = true;  //<! track if this is the first time the menu is shown
    sf::Clock _fade_in_clock;
-   static constexpr float _fade_in_duration = 1000.0f;  // 1 second fade in
    uint8_t _fade_alpha{0};
 };
