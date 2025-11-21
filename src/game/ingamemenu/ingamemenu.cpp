@@ -154,7 +154,7 @@ InGameMenu::InGameMenu()
    }
 }
 
-void InGameMenu::draw(sf::RenderTarget& window, sf::RenderStates states)
+void InGameMenu::draw(sf::RenderTarget& window, const sf::RenderStates& states)
 {
    if (_previous_submenu.has_value())
    {

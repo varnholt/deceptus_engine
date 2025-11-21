@@ -2,6 +2,7 @@
 
 #include "menuscreen.h"
 
+#include <cstdint>
 #include <functional>
 
 class MenuScreenMain : public MenuScreen
@@ -40,4 +41,10 @@ private:
    sf::Font _font;
    std::unique_ptr<sf::Text> _text_build;
    std::unique_ptr<sf::Text> _text_year;
+
+   // fade-in
+   bool _fade_in_active = false;   //<! set to true only when first shown
+   bool _first_time_shown = true;  //<! track if this is the first time the menu is shown
+   sf::Clock _fade_in_clock;
+   uint8_t _fade_alpha{0};
 };

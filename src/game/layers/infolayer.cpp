@@ -224,6 +224,9 @@ InfoLayer::InfoLayer()
    _animation_hp_unlock_left->_reset_to_first_frame = false;
    _animation_hp_unlock_right->_reset_to_first_frame = false;
 
+   _event_replay_playing = _layers["icon_playing"]->_layer;
+   _event_replay_recording = _layers["icon_recording"]->_layer;
+
    loadInventoryItems();
    updateHealthLayerOffsets();
 }
@@ -423,6 +426,19 @@ void InfoLayer::drawAutoSave(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
+void InfoLayer::drawEventReplay(sf::RenderStates states, sf::RenderTarget& window)
+{
+   if (_event_replay_recording->_visible)
+   {
+      _event_replay_recording->draw(window, states);
+   }
+
+   if (_event_replay_playing->_visible)
+   {
+      _event_replay_playing->draw(window, states);
+   }
+}
+
 void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto w = GameConfiguration::getInstance()._view_width;
@@ -433,6 +449,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    drawAutoSave(window, states);
    drawCameraPanorama(window, states);
    drawHealth(window, states);
+   drawEventReplay(states, window);
 }
 
 void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
@@ -542,11 +559,18 @@ void InfoLayer::setLoading(bool loading)
    _loading = loading;
 }
 
+void InfoLayer::updateEventReplayIcons()
+{
+   _event_replay_recording->_visible = DisplayMode::getInstance().isSet(Display::ReplayRecording);
+   _event_replay_playing->_visible = DisplayMode::getInstance().isSet(Display::ReplayPlaying);
+}
+
 void InfoLayer::update(const sf::Time& dt)
 {
    updateHealthLayerOffsets();
    updateInventoryItems();
    updateAnimations(dt);
+   updateEventReplayIcons();
 
    if (_heart_animation._paused)
    {
