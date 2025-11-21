@@ -1,7 +1,6 @@
 #include "menuscreenmain.h"
 
 #include <chrono>
-#include <cstdint>
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/ui/messagebox.h"
@@ -50,9 +49,16 @@ MenuScreenMain::MenuScreenMain()
 void MenuScreenMain::update(const sf::Time& /*dt*/)
 {
    // check if fade-in is still active and should be completed
-   if (_fade_in_active && _fade_in_clock.getElapsedTime().asMilliseconds() >= _fade_in_duration)
+   if (_fade_in_active)
    {
-      _fade_in_active = false;
+      const auto elapsed = _fade_in_clock.getElapsedTime().asMilliseconds();
+      const auto alpha_ratio = std::min(elapsed / _fade_in_duration, 1.0f);
+      _fade_alpha = static_cast<std::uint8_t>(255 * alpha_ratio);
+
+      if (_fade_in_clock.getElapsedTime().asMilliseconds() >= _fade_in_duration)
+      {
+         _fade_in_active = false;
+      }
    }
 }
 
@@ -61,10 +67,6 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
    // fade-in
    if (_fade_in_active)
    {
-      const auto elapsed = _fade_in_clock.getElapsedTime().asMilliseconds();
-      const auto alpha_ratio = std::min(elapsed / _fade_in_duration, 1.0f);
-      const auto alpha = static_cast<std::uint8_t>(255 * alpha_ratio);
-
       // create a temporary render texture to apply alpha to the entire menu
       sf::RenderTexture temp_texture(sf::Vector2u{window.getSize()});
       temp_texture.clear(sf::Color::Transparent);
@@ -77,7 +79,7 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
 
       // create a sprite and apply alpha
       sf::Sprite temp_sprite(temp_texture.getTexture());
-      temp_sprite.setColor(sf::Color(255, 255, 255, alpha));
+      temp_sprite.setColor(sf::Color(255, 255, 255, _fade_alpha));
 
       // draw the faded sprite to the main window
       window.draw(temp_sprite, states);

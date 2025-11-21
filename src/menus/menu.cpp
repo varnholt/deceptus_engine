@@ -86,6 +86,11 @@ void Menu::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void Menu::update(const sf::Time& dt)
 {
+   if (!_current_menu)
+   {
+      return;
+   }
+
    _current_menu->update(dt);
 }
 
