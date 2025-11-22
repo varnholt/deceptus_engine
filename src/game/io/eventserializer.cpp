@@ -203,9 +203,10 @@ void EventSerializer::serialize()
 
    auto start_time = _events.front()._time_point;
 
-   for (const auto& event : _events)
+   for (auto& event : _events)
    {
-      writeDuration(output_stream, event._time_point - start_time);
+      event._duration = event._time_point - start_time;
+      writeDuration(output_stream, event._duration);
       writeEvent(output_stream, event._event);
    }
 }
@@ -253,6 +254,8 @@ void EventSerializer::play()
       return;
    }
 
+   Log::Info() << "re-playing " << _events.size() << " events";
+
    _play_start_time = HighResClock::now();
    _play_result = std::async(std::launch::async, [this] { playThread(); });
 
@@ -275,11 +278,13 @@ void EventSerializer::playThread()
       const auto& event = _events[recorded_index];
       if (elapsed > event._duration)
       {
+         Log::Info() << "play event " << recorded_index << " duration: " << event._duration;
+
          // pass event to given event loop
          _callback(event._event);
 
-         recorded_index++;
          done = (recorded_index == static_cast<int32_t>(_events.size() - 1));
+         recorded_index++;
       }
 
       std::this_thread::sleep_for(1ms);
