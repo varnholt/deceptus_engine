@@ -2,10 +2,22 @@
 #include <cstdint>
 #include "framework/easings/easings.h"
 
+namespace
+{
+bool shown = false;
+}
+
 namespace SplashScreen
 {
 void show(sf::RenderWindow& window)
 {
+   if (shown)
+   {
+      return;
+   }
+
+   shown = true;
+
    sf::Texture loading_texture;
    window.clear(sf::Color(30, 30, 30));
    if (loading_texture.loadFromFile("data/game/loading.png"))
