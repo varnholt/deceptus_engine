@@ -36,12 +36,9 @@ void TestMechanism::load()
    auto& shaderPool = ShaderPool::getInstance();
 
    // Check if the simple shader already exists, if not, add it
-   if (!shaderPool.get("simple")) {
-      shaderPool.add(
-         "simple",
-         "data/shaders/simple.vs",
-         "data/shaders/simple.fs"
-      );
+   if (!shaderPool.get("simple"))
+   {
+      shaderPool.add("simple", "data/shaders/simple.vs", "data/shaders/simple.fs");
    }
 
    _initialized = true;
@@ -77,7 +74,8 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
    // Get the simple shader from the shader pool
    const auto& shader = ShaderPool::getInstance().get("simple");
-   if (!shader) {
+   if (!shader)
+   {
       // If shader doesn't exist, return early
       return;
    }
@@ -123,7 +121,8 @@ void TestMechanism::update(const sf::Time& dt)
 
 void TestMechanism::resize(int width, int height)
 {
-   if (_camera) {
+   if (_camera)
+   {
       _camera->initialize(width, height);  // This updates the projection matrix with new aspect ratio
    }
    glViewport(0, 0, width, height);
