@@ -4,6 +4,11 @@ project(RenderTestbedProject LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# GLM configuration to resolve version conflicts
+add_compile_definitions(GLM_FORCE_DEPTH_ZERO_TO_ONE)
+add_compile_definitions(GLM_FORCE_MESSAGES)
+add_compile_definitions(GLM_FORCE_SWIZZLE)
+
 include(FetchContent)
 
 # SFML configuration
@@ -69,6 +74,11 @@ set(STRUCTURES_SOURCES
     structures/voxelgrid.cpp
 )
 
+set(OBJECT_SOURCES
+    sphereobject.cpp
+    texturedobject.cpp
+)
+
 add_executable(RenderTestbed
     main.cpp
     testmechanism.cpp
@@ -93,13 +103,15 @@ add_executable(RenderTestbed
 
     # Image sources
     ${IMAGE_SOURCES}
+
+    # Object sources
+    ${OBJECT_SOURCES}
 )
 
 target_include_directories(RenderTestbed PRIVATE
     ${SFML_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/../../thirdparty/imgui
-    ${CMAKE_SOURCE_DIR}/glm
-    ${CMAKE_SOURCE_DIR}/shmup/thirdparty/glm
+    ${CMAKE_SOURCE_DIR}/glm  # Use the root GLM version
     ${CMAKE_SOURCE_DIR}/shmup/thirdparty/glew/include  # Add GLEW include directory
     ${CMAKE_SOURCE_DIR}  # Add project root for relative includes like interfaces/drawable.h
     vbos
