@@ -58,6 +58,12 @@ set(INTERFACE_SOURCES
     interfaces/transformable.cpp
 )
 
+set(IMAGE_SOURCES
+    image/tgaio.cpp
+    image/bmpreader.cpp
+    image/png.cpp
+)
+
 set(STRUCTURES_SOURCES
     structures/voxel.cpp
     structures/voxelgrid.cpp
@@ -84,6 +90,9 @@ add_executable(RenderTestbed
 
     # Structures sources
     ${STRUCTURES_SOURCES}
+
+    # Image sources
+    ${IMAGE_SOURCES}
 )
 
 target_include_directories(RenderTestbed PRIVATE
@@ -97,6 +106,7 @@ target_include_directories(RenderTestbed PRIVATE
     opengl
     game
     structures
+    image
 )
 
 # Find and link OpenGL
