@@ -4,11 +4,7 @@
 #include <SFML/OpenGL.hpp>
 #include "glm/gtc/matrix_transform.hpp"
 #include "opengl/gl_current.h"
-
-// Include the shader system from shmup
 #include "game/shaderpool.h"
-// Include the image loading system
-#include "image/tgaio.h"
 
 TestMechanism::TestMechanism()
 {
@@ -31,38 +27,27 @@ void TestMechanism::load()
    );
    _camera->setViewMatrix(view_matrix);
 
-   // Create a sphere VBO - radius 1.0, 50 slices, 50 stacks for smooth appearance
-   _sphere = std::make_unique<VBOSphere>(1.0f, 50, 50);
+   // Create a sphere object
+   auto sphere = std::make_unique<SphereObject>(1.0f, 50, 50);
+   sphere->setPosition(glm::vec3(-1.5f, 0.0f, 0.0f));  // Position to the left
+   sphere->setRotationSpeed(0.5f);
+   _objects.push_back(std::move(sphere));
 
-   // Create the starmap mesh VBO from the OBJ file
-   _starmapMesh = std::make_unique<VBOMesh>("data/objects/starmap.obj", 1.0f, true, true);
-
-   // Load the starmap texture
-   GLint w, h;
-   GLubyte* textureData = nullptr;
-
-   textureData = TGAIO::read("data/textures/starmap_color.tga", w, h);
-   if (textureData) {
-      glGenTextures(1, &_starmapTextureId);
-      glBindTexture(GL_TEXTURE_2D, _starmapTextureId);
-      glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, w, h);
-      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      glGenerateMipmap(GL_TEXTURE_2D);
-
-      // Clean up the loaded data
-      delete[] textureData;
-   }
+   // Create a textured starmap object
+   auto starmap = std::make_unique<TexturedObject>(
+      "data/objects/starmap.obj",
+      "data/textures/starmap_color.tga",
+      1.0f,
+      true,
+      true
+   );
+   starmap->setPosition(glm::vec3(1.5f, 0.0f, 0.0f));  // Position to the right
+   starmap->setScale(glm::vec3(0.5f, 0.5f, 0.5f));     // Scale down
+   starmap->setRotationSpeed(0.35f);
+   _objects.push_back(std::move(starmap));
 
    // Initialize the required shaders if not already done
    auto& shaderPool = ShaderPool::getInstance();
-
-   // Check if the simple shader already exists, if not, add it
-   if (!shaderPool.get("simple"))
-   {
-      shaderPool.add("simple", "data/shaders/simple.vs", "data/shaders/simple.fs");
-   }
 
    // Check if the texture shader already exists, if not, add it
    if (!shaderPool.get("texture"))
@@ -75,10 +60,26 @@ void TestMechanism::load()
 
 void TestMechanism::drawEditor()
 {
-   ImGui::Begin("3D Sphere Settings");
+   ImGui::Begin("3D Objects Settings");
 
-   ImGui::Text("Rotation Control");
-   ImGui::SliderFloat("Rotation Speed", &_rotationSpeed, 0.0f, 5.0f, "%.2f rad/s");
+   if (_objects.size() >= 2) {
+      auto* sphere = dynamic_cast<SphereObject*>(_objects[0].get());
+      auto* starmap = dynamic_cast<TexturedObject*>(_objects[1].get());
+      
+      if (sphere) {
+         float sphereSpeed = sphere->getRotationSpeed();
+         if (ImGui::SliderFloat("Sphere Rotation Speed", &sphereSpeed, 0.0f, 2.0f, "%.2f")) {
+            sphere->setRotationSpeed(sphereSpeed);
+         }
+      }
+      
+      if (starmap) {
+         float starmapSpeed = starmap->getRotationSpeed();
+         if (ImGui::SliderFloat("Starmap Rotation Speed", &starmapSpeed, 0.0f, 2.0f, "%.2f")) {
+            starmap->setRotationSpeed(starmapSpeed);
+         }
+      }
+   }
 
    ImGui::End();
 }
@@ -112,42 +113,9 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    // Use the shader
    shader->use();
 
-   // Apply rotation to model matrix
-   glm::mat4 model_matrix = glm::rotate(
-      glm::mat4(1.0f),             // Identity matrix
-      _currentRotation,            // Rotation angle
-      glm::vec3(0.0f, 1.0f, 0.0f)  // Rotation axis (Y-axis)
-   );
-
-   // Get view and projection matrices from camera
-   glm::mat4 view_matrix = _camera->getViewMatrixCopy();
-   glm::mat4 projection_matrix = _camera->getProjectionMatrix();
-
-   // Calculate MVP matrix - this is what ensures correct aspect ratio rendering
-   glm::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
-
-   // Calculate model-view matrix
-   glm::mat4 mv_matrix = view_matrix * model_matrix;
-
-   // Calculate normal matrix (upper 3x3 of model-view matrix)
-   glm::mat3 normal_matrix = glm::mat3(glm::vec3(mv_matrix[0]), glm::vec3(mv_matrix[1]), glm::vec3(mv_matrix[2]));
-
-   // Set the required uniforms for the texture shader
-   shader->setUniform("MVP", mvp_matrix);
-   shader->setUniform("ModelViewMatrix", mv_matrix);
-   shader->setUniform("ModelMatrix", model_matrix);
-   shader->setUniform("NormalMatrix", normal_matrix);
-   shader->setUniform("ProjectionMatrix", projection_matrix);
-
    // Set lighting uniforms (use similar values as in the renderer)
    shader->setUniform("Light.Position", glm::vec4(100.0f, 100.0f, 100.0f, 1.0f));
    shader->setUniform("Light.Intensity", glm::vec3(1.0f, 1.0f, 1.0f));
-
-   // Set material properties
-   shader->setUniform("Material.Kd", 0.9f, 0.5f, 0.3f);  // Diffuse
-   shader->setUniform("Material.Ks", 0.8f, 0.8f, 0.8f);  // Specular
-   shader->setUniform("Material.Ka", 0.9f, 0.5f, 0.3f);  // Ambient
-   shader->setUniform("Material.Shininess", 1.0f);
 
    // Set other required uniforms
    shader->setUniform("useAO", false);
@@ -156,77 +124,14 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    shader->setUniform("ReflectFactor", 0.3f);
    shader->setUniform("WorldCameraPosition", _camera->getCameraPosition());
 
-   // Render the sphere using the VBO
-   if (_sphere)
+   // Get view and projection matrices from camera
+   glm::mat4 view_matrix = _camera->getViewMatrixCopy();
+   glm::mat4 projection_matrix = _camera->getProjectionMatrix();
+
+   // Render all objects
+   for (auto& obj : _objects)
    {
-      // Use the same shader properties for the sphere
-      shader->setUniform("MVP", mvp_matrix);
-      shader->setUniform("ModelViewMatrix", mv_matrix);
-      shader->setUniform("ModelMatrix", model_matrix);
-      shader->setUniform("NormalMatrix", normal_matrix);
-      shader->setUniform("ProjectionMatrix", projection_matrix);
-
-      // Use different material properties for the sphere to distinguish it
-      shader->setUniform("Material.Kd", 0.6f, 0.8f, 1.0f);  // Blueish diffuse for sphere
-      shader->setUniform("Material.Ks", 0.8f, 0.8f, 0.8f);
-      shader->setUniform("Material.Ka", 0.6f, 0.8f, 1.0f);
-      shader->setUniform("Material.Shininess", 50.0f);
-
-      // Set other required uniforms
-      shader->setUniform("useAO", false);
-      shader->setUniform("useSpecular", false);
-      shader->setUniform("DrawSkyBox", false);
-      shader->setUniform("ReflectFactor", 0.3f);
-      shader->setUniform("WorldCameraPosition", _camera->getCameraPosition());
-
-      _sphere->render();
-   }
-
-   // Render the starmap textured mesh
-   if (_starmapMesh && _starmapTextureId != 0)
-   {
-      // Calculate model matrix for starmap (positioned next to the sphere)
-      glm::mat4 starmap_model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 0.0f, 0.0f)); // Position to the right
-      starmap_model_matrix = glm::rotate(starmap_model_matrix, _starmapRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Add rotation
-      starmap_model_matrix = glm::scale(starmap_model_matrix, glm::vec3(0.5f, 0.5f, 0.5f)); // Scale down
-
-      // Calculate MVP matrices for starmap
-      glm::mat4 starmap_mv_matrix = view_matrix * starmap_model_matrix;
-      glm::mat4 starmap_mvp_matrix = projection_matrix * starmap_mv_matrix;
-      glm::mat3 starmap_normal_matrix = glm::mat3(
-         glm::vec3(starmap_mv_matrix[0]),
-         glm::vec3(starmap_mv_matrix[1]),
-         glm::vec3(starmap_mv_matrix[2])
-      );
-
-      // Set the uniforms for the starmap mesh
-      shader->setUniform("MVP", starmap_mvp_matrix);
-      shader->setUniform("ModelViewMatrix", starmap_mv_matrix);
-      shader->setUniform("ModelMatrix", starmap_model_matrix);
-      shader->setUniform("NormalMatrix", starmap_normal_matrix);
-      shader->setUniform("ProjectionMatrix", projection_matrix);
-
-      // Set material properties for textured mesh
-      shader->setUniform("Material.Kd", 1.0f, 1.0f, 1.0f);  // Use texture for diffuse
-      shader->setUniform("Material.Ks", 0.5f, 0.5f, 0.5f);
-      shader->setUniform("Material.Ka", 0.3f, 0.3f, 0.3f);
-      shader->setUniform("Material.Shininess", 32.0f);
-
-      // Set other uniforms
-      shader->setUniform("useAO", false);
-      shader->setUniform("useSpecular", false);
-      shader->setUniform("DrawSkyBox", false);
-      shader->setUniform("ReflectFactor", 0.3f);
-      shader->setUniform("WorldCameraPosition", _camera->getCameraPosition());
-
-      // Bind the starmap texture to texture unit 0
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, _starmapTextureId);
-
-      // Tell the shader which texture unit we're using
-      shader->setUniform("Tex1", 0);
-
-      _starmapMesh->render();
+      obj->render(shader, view_matrix, projection_matrix);
    }
 
    // Disable depth testing so ImGui renders correctly on top
@@ -235,15 +140,18 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
 void TestMechanism::update(const sf::Time& dt)
 {
-   // Update rotation based on rotation speed and time delta
-   _currentRotation += _rotationSpeed * dt.asSeconds();
-   _starmapRotation += _rotationSpeed * 0.7f * dt.asSeconds(); // Slightly different rotation speed for variety
+   float deltaTime = dt.asSeconds();
+   
+   // Update all objects
+   for (auto& obj : _objects)
+   {
+      obj->update(deltaTime);
+   }
 }
 
 void TestMechanism::resize(int width, int height)
 {
-   if (_camera)
-   {
+   if (_camera) {
       _camera->initialize(width, height);  // This updates the projection matrix with new aspect ratio
    }
    glViewport(0, 0, width, height);
@@ -251,9 +159,6 @@ void TestMechanism::resize(int width, int height)
 
 TestMechanism::~TestMechanism()
 {
-   // Clean up the texture if it was created
-   if (_starmapTextureId != 0) {
-      glDeleteTextures(1, &_starmapTextureId);
-      _starmapTextureId = 0;
-   }
+   // Objects are automatically cleaned up via unique_ptr
+   _objects.clear();
 }
