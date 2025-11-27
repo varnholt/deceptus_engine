@@ -32,13 +32,19 @@ void TestMechanism::load()
    // Create a sphere VBO - radius 1.0, 50 slices, 50 stacks for smooth appearance
    _sphere = std::make_unique<VBOSphere>(1.0f, 50, 50);
 
-   // Initialize the simple shader if not already done
+   // Initialize the required shaders if not already done
    auto& shaderPool = ShaderPool::getInstance();
 
    // Check if the simple shader already exists, if not, add it
    if (!shaderPool.get("simple"))
    {
       shaderPool.add("simple", "data/shaders/simple.vs", "data/shaders/simple.fs");
+   }
+
+   // Check if the texture shader already exists, if not, add it
+   if (!shaderPool.get("texture"))
+   {
+      shaderPool.add("texture", "data/shaders/texture.vs", "data/shaders/texture.fs");
    }
 
    _initialized = true;
@@ -72,8 +78,8 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   // Get the simple shader from the shader pool
-   const auto& shader = ShaderPool::getInstance().get("simple");
+   // Get the texture shader from the shader pool
+   const auto& shader = ShaderPool::getInstance().get("texture");
    if (!shader)
    {
       // If shader doesn't exist, return early
@@ -97,11 +103,35 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    // Calculate MVP matrix - this is what ensures correct aspect ratio rendering
    glm::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
 
-   // Set the MVP matrix uniform
-   shader->setUniform("MVP", mvp_matrix);
+   // Calculate model-view matrix
+   glm::mat4 mv_matrix = view_matrix * model_matrix;
 
-   // Set color uniform
-   shader->setUniform("u_color", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+   // Calculate normal matrix (upper 3x3 of model-view matrix)
+   glm::mat3 normal_matrix = glm::mat3(glm::vec3(mv_matrix[0]), glm::vec3(mv_matrix[1]), glm::vec3(mv_matrix[2]));
+
+   // Set the required uniforms for the texture shader
+   shader->setUniform("MVP", mvp_matrix);
+   shader->setUniform("ModelViewMatrix", mv_matrix);
+   shader->setUniform("ModelMatrix", model_matrix);
+   shader->setUniform("NormalMatrix", normal_matrix);
+   shader->setUniform("ProjectionMatrix", projection_matrix);
+
+   // Set lighting uniforms (use similar values as in the renderer)
+   shader->setUniform("Light.Position", glm::vec4(100.0f, 100.0f, 100.0f, 1.0f));
+   shader->setUniform("Light.Intensity", glm::vec3(1.0f, 1.0f, 1.0f));
+
+   // Set material properties
+   shader->setUniform("Material.Kd", 0.9f, 0.5f, 0.3f);  // Diffuse
+   shader->setUniform("Material.Ks", 0.8f, 0.8f, 0.8f);  // Specular
+   shader->setUniform("Material.Ka", 0.9f, 0.5f, 0.3f);  // Ambient
+   shader->setUniform("Material.Shininess", 1.0f);
+
+   // Set other required uniforms
+   shader->setUniform("useAO", false);
+   shader->setUniform("useSpecular", false);
+   shader->setUniform("DrawSkyBox", false);
+   shader->setUniform("ReflectFactor", 0.3f);
+   shader->setUniform("WorldCameraPosition", _camera->getCameraPosition());
 
    // Render the sphere using the VBO
    if (_sphere)
