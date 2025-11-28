@@ -33,6 +33,8 @@ struct MaterialInfo {
 };
 uniform MaterialInfo Material;
 
+uniform bool useLighting;  // When false, just return texture color without lighting
+
 layout( location = 0 ) out vec4 FragColor;
 
 void phongModel( vec3 pos, vec3 norm, out vec3 ambAndDiff, out vec3 spec )
@@ -80,10 +82,19 @@ void main()
    }
    else
    {
-      vec3 ambAndDiff, spec;
       vec4 texColor = texture( Tex1, TexCoord );
-      phongModel( Position, Normal, ambAndDiff, spec );
-      FragColor = (vec4( ambAndDiff, 1.0 ) * texColor) + vec4(spec,1.0);
+
+      if (useLighting)
+      {
+         vec3 ambAndDiff, spec;
+         phongModel( Position, Normal, ambAndDiff, spec );
+         FragColor = (vec4( ambAndDiff, 1.0 ) * texColor) + vec4(spec,1.0);
+      }
+      else
+      {
+         // Just return the texture color without any lighting
+         FragColor = texColor;
+      }
    }
 }
 

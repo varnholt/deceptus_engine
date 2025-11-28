@@ -31,4 +31,6 @@ private:
 
    // For proper cleanup of OpenGL resources
    bool _initialized{false};
+
+   sf::Time _elapsed;
 };
