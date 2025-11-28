@@ -3,7 +3,6 @@
 SphereObject::SphereObject(float radius, int slices, int stacks)
     : _sphere(std::make_unique<VBOSphere>(radius, slices, stacks))
 {
-    _scale = glm::vec3(1.0f, 1.0f, 1.0f);
 }
 
 void SphereObject::update(float deltaTime)
