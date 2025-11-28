@@ -8,6 +8,7 @@ class Camera
    public:
       static Camera& getInstance();
       void initialize(int32_t w, int32_t h);
+      void initialize(int32_t w, int32_t h, float nearPlane, float farPlane);
 
       const glm::mat4& getProjectionMatrix() const;
       void setProjectionMatrix(const glm::mat4& projection_matrix);

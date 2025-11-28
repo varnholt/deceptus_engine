@@ -15,11 +15,16 @@ Camera& Camera::getInstance()
 
 void Camera::initialize(int32_t w, int32_t h)
 {
+   initialize(w, h, 0.3f, 1000.0f);  // Use default values
+}
+
+void Camera::initialize(int32_t w, int32_t h, float nearPlane, float farPlane)
+{
    _projection_matrix = glm::perspective(
       glm::radians(70.0f),
       static_cast<float>(w) / static_cast<float>(h),
-      0.3f,
-      1000.0f
+      nearPlane,
+      farPlane
    );
 
    _screen_dimensions[0] = w;
