@@ -17,21 +17,22 @@ void TestMechanism::load()
    _camera = &Camera::getInstance();
    _camera->initialize(1280, 720);  // Initialize with window size - aspect ratio will be handled
 
-   // Set initial camera position and look at origin
-   _camera->setCameraPosition(glm::vec3(0.0f, 0.0f, 5.0f));
+   // Set initial camera position
+   glm::vec3 cameraPos(0.0f, 0.0f, 5.0f);
+   _camera->setCameraPosition(cameraPos);
 
    glm::mat4 view_matrix = glm::lookAt(
-      glm::vec3(0.0f, 0.0f, 5.0f),  // Camera position
+      cameraPos,                     // Camera position
       glm::vec3(0.0f, 0.0f, 0.0f),  // Look at point
       glm::vec3(0.0f, 1.0f, 0.0f)   // Up vector
    );
    _camera->setViewMatrix(view_matrix);
 
-   // Create a sphere object
-   auto sphere = std::make_unique<SphereObject>(1.0f, 50, 50);
-   sphere->setPosition(glm::vec3(-1.5f, 0.0f, 0.0f));  // Position to the left
-   sphere->setRotationSpeed(0.5f);
-   _objects.push_back(std::move(sphere));
+   // // Create a sphere object
+   // auto sphere = std::make_unique<SphereObject>(1.0f, 50, 50);
+   // sphere->setPosition(glm::vec3(-1.5f, 0.0f, 0.0f));  // Position to the left
+   // sphere->setRotationSpeed(0.5f);
+   // _objects.push_back(std::move(sphere));
 
    // Create a textured starmap object
    auto starmap = std::make_unique<TexturedObject>(
@@ -39,10 +40,13 @@ void TestMechanism::load()
       "data/textures/starmap_color.tga",
       1.0f,
       true,
-      true
+      true,
+      false  // Disable lighting for starmap to use texture-only color
    );
-   starmap->setPosition(glm::vec3(1.5f, 0.0f, 0.0f));  // Position to the right
-   starmap->setScale(glm::vec3(0.5f, 0.5f, 0.5f));     // Scale down
+
+   const auto a = _elapsed.asSeconds();
+   starmap->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));  // Position to the right
+   starmap->setScale(glm::vec3(0.1f, 0.1f, 0.1f));  // Scale down
    starmap->setRotationSpeed(0.35f);
    _objects.push_back(std::move(starmap));
 
@@ -65,15 +69,17 @@ void TestMechanism::drawEditor()
    if (_objects.size() >= 2) {
       auto* sphere = dynamic_cast<SphereObject*>(_objects[0].get());
       auto* starmap = dynamic_cast<TexturedObject*>(_objects[1].get());
-      
-      if (sphere) {
+
+      if (sphere)
+      {
          float sphereSpeed = sphere->getRotationSpeed();
          if (ImGui::SliderFloat("Sphere Rotation Speed", &sphereSpeed, 0.0f, 2.0f, "%.2f")) {
             sphere->setRotationSpeed(sphereSpeed);
          }
       }
-      
-      if (starmap) {
+
+      if (starmap)
+      {
          float starmapSpeed = starmap->getRotationSpeed();
          if (ImGui::SliderFloat("Starmap Rotation Speed", &starmapSpeed, 0.0f, 2.0f, "%.2f")) {
             starmap->setRotationSpeed(starmapSpeed);
@@ -147,6 +153,8 @@ void TestMechanism::update(const sf::Time& dt)
    {
       obj->update(deltaTime);
    }
+
+   _elapsed += dt;
 }
 
 void TestMechanism::resize(int width, int height)

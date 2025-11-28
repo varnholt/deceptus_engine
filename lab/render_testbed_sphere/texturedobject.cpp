@@ -6,8 +6,10 @@ TexturedObject::TexturedObject(const std::string& objFile,
                                const std::string& textureFile,
                                float scale,
                                bool reCenterMesh,
-                               bool loadTc)
-    : _mesh(std::make_unique<VBOMesh>(objFile.c_str(), scale, reCenterMesh, loadTc))
+                               bool loadTc,
+                               bool useLighting)
+    : _mesh(std::make_unique<VBOMesh>(objFile.c_str(), scale, reCenterMesh, loadTc)),
+      _useLighting(useLighting)
 {
     _scale = glm::vec3(1.0f, 1.0f, 1.0f);
     loadTexture(textureFile);
@@ -59,6 +61,9 @@ void TexturedObject::render(const std::shared_ptr<GLSLProgram>& shader,
     shader->setUniform("Material.Ks", 0.5f, 0.5f, 0.5f);
     shader->setUniform("Material.Ka", 0.3f, 0.3f, 0.3f);
     shader->setUniform("Material.Shininess", 32.0f);
+
+    // Set the lighting uniform
+    shader->setUniform("useLighting", _useLighting);
 
     // Bind the texture to texture unit 0
     glActiveTexture(GL_TEXTURE0);
