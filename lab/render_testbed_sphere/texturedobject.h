@@ -20,11 +20,11 @@ public:
    void update(float deltaTime) override;
    void render(const std::shared_ptr<GLSLProgram>& shader, const glm::mat4& view_matrix, const glm::mat4& projection_matrix) override;
 
-   void setRotationSpeed(float speed)
+   void setRotationSpeed(const glm::vec3& speed)
    {
       _rotationSpeed = speed;
    }
-   float getRotationSpeed() const
+   glm::vec3 getRotationSpeed() const
    {
       return _rotationSpeed;
    }
@@ -39,8 +39,8 @@ public:
 
 private:
    std::unique_ptr<VBOMesh> _mesh;
-   float _rotationSpeed{0.5f};
-   float _currentRotation{0.0f};
+   glm::vec3 _rotationSpeed{0.0f, 0.5f, 0.0f};  // Default rotation around Y-axis
+   glm::vec3 _currentRotation{0.0f, 0.0f, 0.0f};
    GLuint _textureId{0};
    bool _useLighting{true};  // Default to true to maintain existing behavior
 

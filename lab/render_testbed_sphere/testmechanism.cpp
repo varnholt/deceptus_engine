@@ -47,7 +47,7 @@ void TestMechanism::load()
 
    starmap->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));  // Position to the right
    starmap->setScale(glm::vec3(1.0f, 1.0f, 1.0f));     // Scale down
-   starmap->setRotationSpeed(0.35f);
+   starmap->setRotationSpeed(glm::vec3(0.2f, 0.35f, 0.4f));
    _objects.push_back(std::move(starmap));
 
    // Initialize the required shaders if not already done
@@ -80,9 +80,13 @@ void TestMechanism::drawEditor()
 
       if (starmap)
       {
-         float starmapSpeed = starmap->getRotationSpeed();
+         // For now, just handle Y-axis rotation in the UI for simplicity
+         float starmapSpeed = starmap->getRotationSpeed().y;
          if (ImGui::SliderFloat("Starmap Rotation Speed", &starmapSpeed, 0.0f, 2.0f, "%.2f")) {
-            starmap->setRotationSpeed(starmapSpeed);
+            // Keep X and Z rotation at 0, only change Y
+            glm::vec3 newRotationSpeed = starmap->getRotationSpeed();
+            newRotationSpeed.y = starmapSpeed;
+            starmap->setRotationSpeed(newRotationSpeed);
          }
       }
    }
@@ -154,13 +158,14 @@ void TestMechanism::update(const sf::Time& dt)
       obj->update(deltaTime);
    }
 
-   // auto* starmap = dynamic_cast<TexturedObject*>(_objects[0].get());
-   // if (starmap)
-   // {
-   //    const auto a = _elapsed.asSeconds();
-   //    std::cout << a << std::endl;
-   //    starmap->setScale(glm::vec3(a, a, a));  // Scale down
-   // }
+   auto* starmap = dynamic_cast<TexturedObject*>(_objects[0].get());
+   if (starmap)
+   {
+      // const auto a = 1000;  //_elapsed.asSeconds();
+      // std::cout << a << std::endl;
+      // starmap->setScale({a, a, a});
+      // starmap->setPosition(glm::vec3(0, 0, a));  // Scale down
+   }
 
    _elapsed += dt;
 }
