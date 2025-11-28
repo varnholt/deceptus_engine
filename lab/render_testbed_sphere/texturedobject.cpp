@@ -38,7 +38,12 @@ void TexturedObject::render(const std::shared_ptr<GLSLProgram>& shader, const gl
 
    // Create model matrix with position, rotation, and scale
    glm::mat4 model_matrix = glm::translate(glm::mat4(1.0f), _position);
-   model_matrix = glm::rotate(model_matrix, _currentRotation + _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+
+   // Apply rotations around X, Y, and Z axes
+   model_matrix = glm::rotate(model_matrix, _currentRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));  // X-axis
+   model_matrix = glm::rotate(model_matrix, _currentRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));  // Y-axis
+   model_matrix = glm::rotate(model_matrix, _currentRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));  // Z-axis
+
    model_matrix = glm::scale(model_matrix, _scale);
 
    // Calculate MVP matrices
