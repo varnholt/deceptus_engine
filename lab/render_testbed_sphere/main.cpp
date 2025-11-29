@@ -130,13 +130,14 @@ int main()
       // draw 3d scene
       if (renderWindow.setActive(true))
       {
+         glEnable(GL_DEPTH_TEST);
+         glDepthFunc(GL_LESS);
+         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
          mechanism.update(dt);
          mechanism.draw(renderWindow, renderWindow);
-      }
 
-      // render test menu
-      if (renderWindow.setActive(true))
-      {
          glDisable(GL_DEPTH_TEST);
          glEnable(GL_BLEND);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -35,7 +35,7 @@ void TestMechanism::load()
 
    starmap->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));  // Position to the right
    starmap->setScale(glm::vec3(1.0f, 1.0f, 1.0f));     // Scale down
-   starmap->setRotationSpeed(glm::vec3(0.2f, 0.35f, 0.4f));
+   starmap->setRotationSpeed(glm::vec3(0.02f, 0.035f, 0.04f));
    _objects.push_back(std::move(starmap));
 
    // Initialize the required shaders if not already done
@@ -127,14 +127,6 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    {
       return;
    }
-
-   // Enable depth testing for 3D rendering
-   glEnable(GL_DEPTH_TEST);
-   glDepthFunc(GL_LESS);
-
-   // Set the clear color and clear both color and depth buffers
-   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    // Get the texture shader from the shader pool
    const auto& shader = ShaderPool::getInstance().get("texture");
