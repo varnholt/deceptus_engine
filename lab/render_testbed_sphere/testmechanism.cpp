@@ -18,16 +18,10 @@ void TestMechanism::load()
    _camera = &Camera::getInstance();
    _camera->initialize(1280, 720, -10, 10);  // Initialize with window size - aspect ratio will be handled
 
-   // Set initial camera position
-   glm::vec3 cameraPos(0.0f, 0.0f, 0.0f);
+   // Set initial camera position and look-at point
+   glm::vec3 cameraPos(0.0f, 0.0f, 5.0f);  // Move camera back so we can see the object
    _camera->setCameraPosition(cameraPos);
-
-   glm::mat4 view_matrix = glm::lookAt(
-      cameraPos,                    // Camera position
-      glm::vec3(0.0f, 0.0f, 1.0f),  // Look at point
-      glm::vec3(0.0f, 1.0f, 0.0f)   // Up vector
-   );
-   _camera->setViewMatrix(view_matrix);
+   _camera->setLookAtPoint(glm::vec3(0.0f, 0.0f, 0.0f));  // Look at origin where the starmap is
 
    // // Create a sphere object
    // auto sphere = std::make_unique<SphereObject>(1.0f, 50, 50);
@@ -66,28 +60,58 @@ void TestMechanism::drawEditor()
 {
    ImGui::Begin("3D Objects Settings");
 
-   if (_objects.size() >= 2) {
-      auto* sphere = dynamic_cast<SphereObject*>(_objects[0].get());
-      auto* starmap = dynamic_cast<TexturedObject*>(_objects[1].get());
-
-      // if (sphere)
-      // {
-      //    float sphereSpeed = sphere->getRotationSpeed();
-      //    if (ImGui::SliderFloat("Sphere Rotation Speed", &sphereSpeed, 0.0f, 2.0f, "%.2f")) {
-      //       sphere->setRotationSpeed(sphereSpeed);
-      //    }
-      // }
+   if (_objects.size() >= 1) {
+      // Assuming the starmap is the first object
+      auto* starmap = dynamic_cast<TexturedObject*>(_objects[0].get());
 
       if (starmap)
       {
-         // For now, just handle Y-axis rotation in the UI for simplicity
-         float starmapSpeed = starmap->getRotationSpeed().y;
-         if (ImGui::SliderFloat("Starmap Rotation Speed", &starmapSpeed, 0.0f, 2.0f, "%.2f")) {
-            // Keep X and Z rotation at 0, only change Y
-            glm::vec3 newRotationSpeed = starmap->getRotationSpeed();
-            newRotationSpeed.y = starmapSpeed;
-            starmap->setRotationSpeed(newRotationSpeed);
+         // Starmap controls in a separate group
+         ImGui::Text("Starmap Settings");
+         ImGui::Separator();
+
+         // Position controls
+         glm::vec3 starmapPos = starmap->getPosition();
+         float pos[3] = { starmapPos.x, starmapPos.y, starmapPos.z };
+         if (ImGui::SliderFloat3("Position", pos, -10.0f, 10.0f)) {
+            starmap->setPosition(glm::vec3(pos[0], pos[1], pos[2]));
          }
+
+         // Scale controls
+         glm::vec3 starmapScale = starmap->getScale();
+         float scale[3] = { starmapScale.x, starmapScale.y, starmapScale.z };
+         if (ImGui::SliderFloat3("Scale", scale, 0.1f, 5.0f)) {
+            starmap->setScale(glm::vec3(scale[0], scale[1], scale[2]));
+         }
+
+         // Rotation speed controls
+         glm::vec3 starmapRotationSpeed = starmap->getRotationSpeed();
+         float rotationSpeed[3] = { starmapRotationSpeed.x, starmapRotationSpeed.y, starmapRotationSpeed.z };
+         if (ImGui::SliderFloat3("Rotation Speed", rotationSpeed, 0.0f, 2.0f, "%.2f")) {
+            starmap->setRotationSpeed(glm::vec3(rotationSpeed[0], rotationSpeed[1], rotationSpeed[2]));
+         }
+      }
+   }
+
+   // Camera controls
+   if (_camera)
+   {
+      ImGui::Separator();
+      ImGui::Text("Camera Settings");
+      ImGui::Separator();
+
+      // Camera position
+      glm::vec3 cameraPos = _camera->getCameraPosition();
+      float camPos[3] = { cameraPos.x, cameraPos.y, cameraPos.z };
+      if (ImGui::SliderFloat3("Camera Position", camPos, -20.0f, 20.0f)) {
+         _camera->setCameraPosition(glm::vec3(camPos[0], camPos[1], camPos[2]));
+      }
+
+      // Camera look-at point
+      glm::vec3 lookAtPoint = _camera->getLookAtPoint();
+      float lookAt[3] = { lookAtPoint.x, lookAtPoint.y, lookAtPoint.z };
+      if (ImGui::SliderFloat3("Look At Point", lookAt, -20.0f, 20.0f)) {
+         _camera->setLookAtPoint(glm::vec3(lookAt[0], lookAt[1], lookAt[2]));
       }
    }
 
