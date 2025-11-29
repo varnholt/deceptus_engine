@@ -4,6 +4,7 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 #include <cstdint>
+#include <iostream>
 #include "testmechanism.h"
 
 // Include OpenGL headers for glViewport, VAOs, etc.
@@ -69,14 +70,29 @@ int main()
    TestMechanism mechanism;
    sf::Clock clock;
 
+   // Load the test_menu texture and create a sprite
+   sf::Texture testMenuTexture;
+   if (!testMenuTexture.loadFromFile("data/textures/test_menu.png"))
+   {
+      std::cout << "Could not load test_menu.png texture" << std::endl;
+      return 1;
+   }
+
+   sf::Sprite testMenuSprite(testMenuTexture);
+
+   // Set the sprite to cover the entire render window
+   sf::Vector2u textureSize = testMenuTexture.getSize();
+   testMenuSprite.setScale(
+      {static_cast<float>(renderMode.size.x) / static_cast<float>(textureSize.x),
+       static_cast<float>(renderMode.size.y) / static_cast<float>(textureSize.y)}
+   );
+
    // Initial viewport for 3D window
    glViewport(0, 0, static_cast<GLsizei>(renderMode.size.x), static_cast<GLsizei>(renderMode.size.y));
 
    while (renderWindow.isOpen() && editorWindow.isOpen())
    {
-      // --------------------------------------------------------------------
-      // Event loop for 3D rendering window
-      // --------------------------------------------------------------------
+      // event loop for renderer
       while (auto event = renderWindow.pollEvent())
       {
          if (event->is<sf::Event::Closed>())
@@ -87,16 +103,16 @@ int main()
          {
             glViewport(0, 0, static_cast<GLsizei>(resize->size.x), static_cast<GLsizei>(resize->size.y));
 
-            renderWindow.setView(sf::View(sf::FloatRect({0.f, 0.f}, {static_cast<float>(resize->size.x), static_cast<float>(resize->size.y)})));
+            renderWindow.setView(
+               sf::View(sf::FloatRect({0.f, 0.f}, {static_cast<float>(resize->size.x), static_cast<float>(resize->size.y)}))
+            );
 
             // Notify the mechanism about the resize so it can update the camera's aspect ratio
             mechanism.resize(static_cast<int>(resize->size.x), static_cast<int>(resize->size.y));
          }
       }
 
-      // --------------------------------------------------------------------
-      // Event loop for editor window
-      // --------------------------------------------------------------------
+      // event loop for editor
       while (auto event = editorWindow.pollEvent())
       {
          ImGui::SFML::ProcessEvent(editorWindow, *event);
@@ -109,52 +125,43 @@ int main()
 
       sf::Time dt = clock.restart();
 
-      // Update ImGui with the editor window's delta time
       ImGui::SFML::Update(editorWindow, dt);
 
-      // Your own logic
-      mechanism.update(dt);
-
-      // --------------------------------------------------------------------
-      // OpenGL state reset BEFORE ImGui draws
-      // This avoids imgui-sfml crashing when a VAO / buffers are still bound
-      // --------------------------------------------------------------------
-      glBindVertexArray(0);
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-      glUseProgram(0);
-
-      // Make sure the rendering context is active for 3D rendering
-      if (!renderWindow.setActive(true))
+      // draw 3d scene
+      if (renderWindow.setActive(true))
       {
-         return 1;
+         mechanism.update(dt);
+         mechanism.draw(renderWindow, renderWindow);
       }
 
-      // Now draw your 3D stuff in the render window. It should fully set up whatever state it needs.
-      mechanism.draw(renderWindow, renderWindow);
-
-      // Switch to the editor window context to draw the UI
-      if (!editorWindow.setActive(true))
+      // render test menu
+      if (renderWindow.setActive(true))
       {
-         return 1;
+         glDisable(GL_DEPTH_TEST);
+         glEnable(GL_BLEND);
+         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+         renderWindow.pushGLStates();
+         renderWindow.resetGLStates();  // Reset SFML states to defaults
+         renderWindow.draw(testMenuSprite);
+         renderWindow.popGLStates();
+         renderWindow.display();
       }
 
-      // Clear the editor window for proper rendering
-      editorWindow.clear(sf::Color(50, 50, 50));  // Dark gray background
-
-      // Build ImGui UI in the editor window
-      mechanism.drawEditor();  // assumes this only calls ImGui::XXX
-
-      // Let ImGui-SFML render its draw lists in the editor window
-      ImGui::SFML::Render(editorWindow);
-      editorWindow.display();
-
-      // Switch back to render window and display
-      if (!renderWindow.setActive(true))
+      // draw editor
+      if (editorWindow.setActive(true))
       {
-         return 1;
+         // glBindVertexArray(0);
+         // glBindBuffer(GL_ARRAY_BUFFER, 0);
+         // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+         // glUseProgram(0);
+
+         glDisable(GL_DEPTH_TEST);
+         editorWindow.clear(sf::Color(50, 50, 50));
+         mechanism.drawEditor();
+         ImGui::SFML::Render(editorWindow);
+         editorWindow.display();
       }
-      renderWindow.display();
    }
 
    ImGui::SFML::Shutdown();
