@@ -142,6 +142,10 @@ int main()
          glEnable(GL_BLEND);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+         glBindVertexArray(0);
+         glBindBuffer(GL_ARRAY_BUFFER, 0);
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+         glUseProgram(0);
          renderWindow.pushGLStates();
          renderWindow.resetGLStates();  // Reset SFML states to defaults
          renderWindow.draw(testMenuSprite);
