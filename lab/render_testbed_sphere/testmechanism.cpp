@@ -167,9 +167,6 @@ void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
    {
       obj->render(shader, view_matrix, projection_matrix);
    }
-
-   // Disable depth testing so ImGui renders correctly on top
-   glDisable(GL_DEPTH_TEST);
 }
 
 void TestMechanism::update(const sf::Time& dt)
