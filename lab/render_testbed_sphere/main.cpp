@@ -139,6 +139,9 @@ int main()
          return 1;
       }
 
+      // Clear the editor window for proper rendering
+      editorWindow.clear(sf::Color(50, 50, 50));  // Dark gray background
+
       // Build ImGui UI in the editor window
       mechanism.drawEditor();  // assumes this only calls ImGui::XXX
 
