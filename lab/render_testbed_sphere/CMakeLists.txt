@@ -112,7 +112,7 @@ target_include_directories(RenderTestbed PRIVATE
     ${SFML_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/../../thirdparty/imgui
     ${CMAKE_SOURCE_DIR}/glm  # Use the root GLM version
-    ${CMAKE_SOURCE_DIR}/shmup/thirdparty/glew/include  # Add GLEW include directory
+    ${CMAKE_SOURCE_DIR}/thirdparty/glew/include  # Add GLEW include directory
     ${CMAKE_SOURCE_DIR}  # Add project root for relative includes like interfaces/drawable.h
     vbos
     opengl
@@ -126,15 +126,15 @@ find_package(OpenGL REQUIRED)
 
 # Add GLEW include directory (for the header files that VBOs use)
 target_include_directories(RenderTestbed PRIVATE
-    ${CMAKE_SOURCE_DIR}/shmup/thirdparty/glew/include
+    ${CMAKE_SOURCE_DIR}/thirdparty/glew/include
 )
 
 # For Windows, we can use the shared library (DLL) approach with import library
 # The glew32.lib is actually the import library for the DLL
 add_library(glew32 SHARED IMPORTED)
 set_target_properties(glew32 PROPERTIES
-    IMPORTED_IMPLIB "${CMAKE_SOURCE_DIR}/shmup/thirdparty/glew/lib/Release/x64/glew32.lib"
-    IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/shmup/thirdparty/glew/bin/Release/x64/glew32.dll"
+    IMPORTED_IMPLIB "${CMAKE_SOURCE_DIR}/thirdparty/glew/lib/Release/x64/glew32.lib"
+    IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/thirdparty/glew/bin/Release/x64/glew32.dll"
 )
 
 target_link_libraries(RenderTestbed PRIVATE
@@ -148,6 +148,7 @@ target_link_libraries(RenderTestbed PRIVATE
 # Copy the DLL to the output directory
 add_custom_command(TARGET RenderTestbed POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_SOURCE_DIR}/shmup/thirdparty/glew/bin/Release/x64/glew32.dll"
+    "${CMAKE_SOURCE_DIR}/thirdparty/glew/bin/Release/x64/glew32.dll"
     $<TARGET_FILE_DIR:RenderTestbed>
 )
+

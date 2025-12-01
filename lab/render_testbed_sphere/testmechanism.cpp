@@ -14,38 +14,32 @@ TestMechanism::TestMechanism()
 
 void TestMechanism::load()
 {
-   // Initialize the camera with perspective projection (aspect ratio handled properly)
    _camera = &Camera::getInstance();
-   _camera->initialize(1280, 720, -10, 10);  // Initialize with window size - aspect ratio will be handled
+   _camera->initialize(1280, 720, -10, 10);
 
-   // Set initial camera position and look-at point
-   glm::vec3 cameraPos(0.0f, 0.0f, 5.0f);  // Move camera back so we can see the object
-   _camera->setCameraPosition(cameraPos);
-   _camera->setLookAtPoint(glm::vec3(0.0f, 0.0f, 0.0f));  // Look at origin where the starmap is
+   // move camera back so we can see the starmap
+   glm::vec3 camera_pos(0.0f, 0.0f, 5.0f);
+   _camera->setCameraPosition(camera_pos);
 
-   // Create a textured starmap object
-   auto starmap = std::make_unique<TexturedObject>(
+   // look at origin where the starmap is
+   _camera->setLookAtPoint(glm::vec3(0.0f, 0.0f, 0.0f));
+
+   // create textured starmap
+   _starmap = std::make_shared<TexturedObject>(
       "data/objects/starmap.obj",
       "data/textures/starmap_color.tga",
       1.0f,
       true,
       true,
-      false  // Disable lighting for starmap to use texture-only color
+      false  // disable lighting for starmap to use texture-only color
    );
 
-   starmap->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));  // Position to the right
-   starmap->setScale(glm::vec3(1.0f, 1.0f, 1.0f));     // Scale down
-   starmap->setRotationSpeed(glm::vec3(0.02f, 0.035f, 0.04f));
-   _objects.push_back(std::move(starmap));
+   _starmap->setRotationSpeed(glm::vec3(0.02f, 0.035f, 0.04f));
+   _objects.push_back(_starmap);
 
-   // Initialize the required shaders if not already done
-   auto& shaderPool = ShaderPool::getInstance();
-
-   // Check if the texture shader already exists, if not, add it
-   if (!shaderPool.get("texture"))
-   {
-      shaderPool.add("texture", "data/shaders/texture.vs", "data/shaders/texture.fs");
-   }
+   // initialize required shaders
+   auto& shader_pool = ShaderPool::getInstance();
+   shader_pool.add("texture", "data/shaders/texture.vs", "data/shaders/texture.fs");
 
    _initialized = true;
 }
@@ -54,65 +48,52 @@ void TestMechanism::drawEditor()
 {
    ImGui::Begin("3D Objects Settings");
 
-   if (_objects.size() >= 1)
+   // starmap controls
+   ImGui::Text("Starmap Settings");
+   ImGui::Separator();
+
+   const auto starmap_position = _starmap->getPosition();
+   const auto starmap_scale = _starmap->getScale();
+   const auto starmap_rotation_speed = _starmap->getRotationSpeed();
+
+   float starmap_position_arr[3] = {starmap_position.x, starmap_position.y, starmap_position.z};
+   float starmap_scale_arr[3] = {starmap_scale.x, starmap_scale.y, starmap_scale.z};
+   float starmap_rotation_speed_arr[3] = {starmap_rotation_speed.x, starmap_rotation_speed.y, starmap_rotation_speed.z};
+
+   if (ImGui::SliderFloat3("Position", starmap_position_arr, -10.0f, 10.0f))
    {
-      // Assuming the starmap is the first object
-      auto* starmap = dynamic_cast<TexturedObject*>(_objects[0].get());
-
-      if (starmap)
-      {
-         // Starmap controls in a separate group
-         ImGui::Text("Starmap Settings");
-         ImGui::Separator();
-
-         // Position controls
-         glm::vec3 starmapPos = starmap->getPosition();
-         float pos[3] = {starmapPos.x, starmapPos.y, starmapPos.z};
-         if (ImGui::SliderFloat3("Position", pos, -10.0f, 10.0f))
-         {
-            starmap->setPosition(glm::vec3(pos[0], pos[1], pos[2]));
-         }
-
-         // Scale controls
-         glm::vec3 starmapScale = starmap->getScale();
-         float scale[3] = {starmapScale.x, starmapScale.y, starmapScale.z};
-         if (ImGui::SliderFloat3("Scale", scale, 0.1f, 5.0f))
-         {
-            starmap->setScale(glm::vec3(scale[0], scale[1], scale[2]));
-         }
-
-         // Rotation speed controls
-         glm::vec3 starmapRotationSpeed = starmap->getRotationSpeed();
-         float rotationSpeed[3] = {starmapRotationSpeed.x, starmapRotationSpeed.y, starmapRotationSpeed.z};
-         if (ImGui::SliderFloat3("Rotation Speed", rotationSpeed, 0.0f, 2.0f, "%.2f"))
-         {
-            starmap->setRotationSpeed(glm::vec3(rotationSpeed[0], rotationSpeed[1], rotationSpeed[2]));
-         }
-      }
+      _starmap->setPosition(glm::vec3(starmap_position_arr[0], starmap_position_arr[1], starmap_position_arr[2]));
    }
 
-   // Camera controls
-   if (_camera)
+   if (ImGui::SliderFloat3("Scale", starmap_scale_arr, 0.1f, 5.0f))
    {
-      ImGui::Separator();
-      ImGui::Text("Camera Settings");
-      ImGui::Separator();
+      _starmap->setScale(glm::vec3(starmap_scale_arr[0], starmap_scale_arr[1], starmap_scale_arr[2]));
+   }
 
-      // Camera position
-      glm::vec3 cameraPos = _camera->getCameraPosition();
-      float camPos[3] = {cameraPos.x, cameraPos.y, cameraPos.z};
-      if (ImGui::SliderFloat3("Camera Position", camPos, -20.0f, 20.0f))
-      {
-         _camera->setCameraPosition(glm::vec3(camPos[0], camPos[1], camPos[2]));
-      }
+   if (ImGui::SliderFloat3("Rotation Speed", starmap_rotation_speed_arr, 0.0f, 2.0f, "%.2f"))
+   {
+      _starmap->setRotationSpeed(glm::vec3(starmap_rotation_speed_arr[0], starmap_rotation_speed_arr[1], starmap_rotation_speed_arr[2]));
+   }
 
-      // Camera look-at point
-      glm::vec3 lookAtPoint = _camera->getLookAtPoint();
-      float lookAt[3] = {lookAtPoint.x, lookAtPoint.y, lookAtPoint.z};
-      if (ImGui::SliderFloat3("Look At Point", lookAt, -20.0f, 20.0f))
-      {
-         _camera->setLookAtPoint(glm::vec3(lookAt[0], lookAt[1], lookAt[2]));
-      }
+   // camera controls
+   ImGui::Separator();
+   ImGui::Text("Camera Settings");
+   ImGui::Separator();
+
+   const auto camera_position = _camera->getCameraPosition();
+   const auto look_at_position = _camera->getLookAtPoint();
+
+   float camera_position_arr[3] = {camera_position.x, camera_position.y, camera_position.z};
+   float look_at_position_arr[3] = {look_at_position.x, look_at_position.y, look_at_position.z};
+
+   if (ImGui::SliderFloat3("Position", camera_position_arr, -20.0f, 20.0f))
+   {
+      _camera->setCameraPosition(glm::vec3(camera_position_arr[0], camera_position_arr[1], camera_position_arr[2]));
+   }
+
+   if (ImGui::SliderFloat3("Target", look_at_position_arr, -20.0f, 20.0f))
+   {
+      _camera->setLookAtPoint(glm::vec3(look_at_position_arr[0], look_at_position_arr[1], look_at_position_arr[2]));
    }
 
    ImGui::End();
@@ -120,71 +101,55 @@ void TestMechanism::drawEditor()
 
 void TestMechanism::draw(sf::RenderTarget& target, sf::RenderTarget&)
 {
-   // First, draw the ImGui editor
-   // drawEditor();
-
    if (!_initialized)
    {
       return;
    }
 
-   // Get the texture shader from the shader pool
    const auto& shader = ShaderPool::getInstance().get("texture");
    if (!shader)
    {
-      // If shader doesn't exist, return early
       return;
    }
 
-   // Use the shader
    shader->use();
 
-   // Set lighting uniforms (use similar values as in the renderer)
    shader->setUniform("Light.Position", glm::vec4(100.0f, 100.0f, 100.0f, 1.0f));
    shader->setUniform("Light.Intensity", glm::vec3(1.0f, 1.0f, 1.0f));
-
-   // Set other required uniforms
    shader->setUniform("useAO", false);
    shader->setUniform("useSpecular", false);
    shader->setUniform("DrawSkyBox", false);
    shader->setUniform("ReflectFactor", 0.3f);
    shader->setUniform("WorldCameraPosition", _camera->getCameraPosition());
 
-   // Get view and projection matrices from camera
    glm::mat4 view_matrix = _camera->getViewMatrixCopy();
    glm::mat4 projection_matrix = _camera->getProjectionMatrix();
 
-   // Render all objects
    for (auto& obj : _objects)
    {
       obj->render(shader, view_matrix, projection_matrix);
    }
 }
 
-void TestMechanism::update(const sf::Time& dt)
+void TestMechanism::update(const sf::Time& delta_time)
 {
-   float deltaTime = dt.asSeconds();
+   const auto delta_time_s = delta_time.asSeconds();
 
-   // Update all objects
    for (auto& obj : _objects)
    {
-      obj->update(deltaTime);
+      obj->update(delta_time_s);
    }
 
-   _elapsed += dt;
+   _elapsed += delta_time;
 }
 
 void TestMechanism::resize(int width, int height)
 {
-   if (_camera)
-   {
-      _camera->initialize(width, height);  // This updates the projection matrix with new aspect ratio
-   }
+   _camera->initialize(width, height);
    glViewport(0, 0, width, height);
 }
 
 TestMechanism::~TestMechanism()
 {
-   // Objects are automatically cleaned up via unique_ptr
    _objects.clear();
 }
