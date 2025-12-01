@@ -82,6 +82,7 @@ void TestMechanism::drawEditor()
 
    const auto camera_position = _camera->getCameraPosition();
    const auto look_at_position = _camera->getLookAtPoint();
+   float fov = _camera->getFOV();
 
    float camera_position_arr[3] = {camera_position.x, camera_position.y, camera_position.z};
    float look_at_position_arr[3] = {look_at_position.x, look_at_position.y, look_at_position.z};
@@ -94,6 +95,11 @@ void TestMechanism::drawEditor()
    if (ImGui::SliderFloat3("Target", look_at_position_arr, -20.0f, 20.0f))
    {
       _camera->setLookAtPoint(glm::vec3(look_at_position_arr[0], look_at_position_arr[1], look_at_position_arr[2]));
+   }
+
+   if (ImGui::SliderFloat("FOV", &fov, 30.0f, 120.0f, "%.1f"))
+   {
+      _camera->setFOV(fov);
    }
 
    ImGui::End();
@@ -146,7 +152,6 @@ void TestMechanism::update(const sf::Time& delta_time)
 void TestMechanism::resize(int width, int height)
 {
    _camera->initialize(width, height);
-   glViewport(0, 0, width, height);
 }
 
 TestMechanism::~TestMechanism()
