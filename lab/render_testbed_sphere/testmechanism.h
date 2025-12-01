@@ -24,7 +24,8 @@ private:
    void load();
 
    // 3D objects
-   std::vector<std::unique_ptr<Object3D>> _objects;
+   std::vector<std::shared_ptr<Object3D>> _objects;
+   std::shared_ptr<TexturedObject> _starmap;
 
    // Camera
    Camera* _camera;
