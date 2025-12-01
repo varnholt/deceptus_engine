@@ -33,6 +33,10 @@ void drawScene(const sf::Time& delta_time)
       return;
    }
 
+   // Get the current render window size and set viewport before any 3D rendering
+   sf::Vector2u window_size = _render_window.getSize();
+   glViewport(0, 0, static_cast<GLsizei>(window_size.x), static_cast<GLsizei>(window_size.y));
+
    glEnable(GL_DEPTH_TEST);
    glDepthFunc(GL_LESS);
    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);

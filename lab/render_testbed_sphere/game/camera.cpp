@@ -18,19 +18,21 @@ void Camera::initialize(int32_t w, int32_t h)
    initialize(w, h, 0.3f, 1000.0f);  // Use default values
 }
 
-void Camera::initialize(int32_t w, int32_t h, float nearPlane, float farPlane)
+void Camera::updateProjectionMatrix()
 {
    _projection_matrix = glm::perspective(
-      glm::radians(70.0f),
-      static_cast<float>(w) / static_cast<float>(h),
-      nearPlane,
-      farPlane
+      glm::radians(_fov), static_cast<float>(_screen_dimensions[0]) / static_cast<float>(_screen_dimensions[1]), _near_plane, _far_plane
    );
+}
 
+void Camera::initialize(int32_t w, int32_t h, float nearPlane, float farPlane)
+{
+   _near_plane = nearPlane;
+   _far_plane = farPlane;
    _screen_dimensions[0] = w;
    _screen_dimensions[1] = h;
 
-   // Initialize the view matrix with default values
+   updateProjectionMatrix();
    updateViewMatrix();
 }
 
@@ -101,7 +103,17 @@ void Camera::setViewMatrix(const glm::mat4& view_matrix)
 }
 
 
+float Camera::getFOV() const
+{
+   return _fov;
+}
 
+
+void Camera::setFOV(float fov)
+{
+   _fov = fov;
+   updateProjectionMatrix();
+}
 
 const std::array<int32_t, 2>& Camera::getScreenDimensions() const
 {
