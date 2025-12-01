@@ -2,295 +2,49 @@
 
 #include "opengl/glutils.h"
 
+#include <algorithm>
 #include <cstdlib>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
-
-VBOMesh::VBOMesh(const char * fileName, float scale, bool center, bool loadTc, bool genTangents)
- : _scale(scale),
-   _recenter_mesh(center),
-   _load_texture(loadTc),
-   _generate_tangents(genTangents)
+namespace
 {
-   loadObj(fileName);
-}
-
-
-void VBOMesh::render() const
+void generateAveragedNormals(const std::vector<glm::vec3>& points, std::vector<glm::vec3>& normals, const std::vector<GLuint>& faces)
 {
-    glBindVertexArray(_vao_handle);
-    glDrawElements(GL_TRIANGLES, 3 * _faces, GL_UNSIGNED_INT, ((GLubyte *)NULL + (0)));
-}
-
-
-void VBOMesh::loadObj(const char * fileName)
-{
-    std::vector <glm::vec3> points;
-    std::vector <glm::vec3> normals;
-    std::vector <glm::vec2> texCoords;
-    std::vector <GLuint> faces;
-    std::vector<Vertex> vertices;
-
-    int nFaces = 0;
-
-    std::ifstream objStream(fileName, std::ios::in);
-
-    if (!objStream) {
-        std::cerr << "Unable to open OBJ file: " << fileName << std::endl;
-        exit(1);
-    }
-
-    std::string line, token;
-    std::vector<int> face;
-    std::vector<Vertex> faceVertices;
-
-    getline(objStream, line);
-    while(!objStream.eof())
-    {
-        trimString(line);
-        if (line.length() > 0 && line.at(0) != '#')
-        {
-            std::istringstream lineStream(line);
-
-            lineStream >> token;
-
-            if (token == "v")
-            {
-                float x, y, z;
-                lineStream >> x >> y >> z;
-                points.push_back(glm::vec3(x,y,z) * _scale);
-            }
-            else if (token == "vt" && _load_texture)
-            {
-                // Process texture coordinate
-                float s,t;
-                lineStream >> s >> t;
-                texCoords.push_back(glm::vec2(s,t));
-
-            } else if (token == "vn")
-            {
-                float x, y, z;
-                lineStream >> x >> y >> z;
-                normals.push_back(glm::vec3(x,y,z));
-            }
-            else if (token == "f")
-            {
-                nFaces++;
-
-                // Process face
-                face.clear();
-                faceVertices.clear();
-
-                size_t slash1, slash2;
-
-                //int point, texCoord, normal;
-                while(lineStream.good())
-                {
-                    std::string vertString;
-                    lineStream >> vertString;
-                    int pIndex = -1, nIndex = -1 , tcIndex = -1;
-
-                    slash1 = vertString.find("/");
-
-                    if (slash1 == std::string::npos)
-                    {
-                        pIndex = atoi(vertString.c_str()) - 1;
-                    }
-                    else
-                    {
-                        slash2 = vertString.find("/", slash1 + 1);
-                        pIndex = atoi(vertString.substr(0,slash1).c_str())
-                                        - 1;
-                        if (slash2 > slash1 + 1)
-                        {
-                          tcIndex =
-                                  atoi(vertString.substr(slash1 + 1, slash2).c_str())
-                                  - 1;
-                        }
-                        nIndex =
-                                atoi(vertString.substr(slash2 + 1,vertString.length()).c_str())
-                                - 1;
-                    }
-
-                    if (pIndex == -1)
-                    {
-                        printf("Missing point index!!!");
-                    }
-                    else
-                    {
-                       Vertex vertex;
-                       vertex.pIndex = pIndex;
-                       vertex.nIndex = nIndex;
-                       vertex.tcIndex = tcIndex;
-
-                       face.push_back(pIndex);
-                       faceVertices.push_back(vertex);
-                    }
-                }
-
-                // obj: f pos/tex/norm  pos/tex/norm  pos/tex/norm
-
-                // If number of edges in face is greater than 3,
-                // decompose into triangles as a triangle fan.
-                if (face.size() > 3)
-                {
-                    int v0 = face[0];
-                    int v1 = face[1];
-                    int v2 = face[2];
-
-                    Vertex vt0 = faceVertices[0];
-                    Vertex vt1 = faceVertices[1];
-                    Vertex vt2 = faceVertices[2];
-
-                    // First face
-                    faces.push_back(v0);
-                    faces.push_back(v1);
-                    faces.push_back(v2);
-
-                    vertices.push_back(vt0);
-                    vertices.push_back(vt1);
-                    vertices.push_back(vt2);
-
-                    for (GLuint i = 3; i < face.size(); i++)
-                    {
-                        v1 = v2;
-                        v2 = face[i];
-
-                        vt1 = vt2;
-                        vt2 = faceVertices[i];
-
-                        faces.push_back(v0);
-                        faces.push_back(v1);
-                        faces.push_back(v2);
-
-                        vertices.push_back(vt0);
-                        vertices.push_back(vt1);
-                        vertices.push_back(vt2);
-                    }
-                }
-                else
-                {
-                    faces.push_back(face[0]);
-                    faces.push_back(face[1]);
-                    faces.push_back(face[2]);
-
-                    vertices.push_back(faceVertices[0]);
-                    vertices.push_back(faceVertices[1]);
-                    vertices.push_back(faceVertices[2]);
-
-                }
-            }
-        }
-        getline(objStream, line);
-    }
-
-    objStream.close();
-
-//    normals.clear();
-//    if (normals.size() == 0) {
-//        generateAveragedNormals(points,normals,faces);
-//    }
-
-    std::vector<glm::vec4> tangents;
-    if (_generate_tangents && texCoords.size() > 0) {
-        generateTangents(points,normals,faces,texCoords,tangents);
-    }
-
-    if (_recenter_mesh) {
-        center(points);
-    }
-
-    // storeVBO(points, normals, texCoords, tangents, faces);
-    storeVBO2(points, normals, texCoords, tangents, faces, vertices);
-
-    std::cout << "Loaded mesh from: " << fileName << std::endl;
-    std::cout << " " << points.size() << " points" << std::endl;
-    std::cout << " " << nFaces << " faces" << std::endl;
-    std::cout << " " << faces.size() / 3 << " triangles." << std::endl;
-    std::cout << " " << normals.size() << " normals" << std::endl;
-    std::cout << " " << tangents.size() << " tangents " << std::endl;
-    std::cout << " " << texCoords.size() << " texture coordinates." << std::endl;
-}
-
-
-void VBOMesh::center(std::vector<glm::vec3>& points)
-{
-    if (points.size() < 1)
-    {
-       return;
-    }
-
-    glm::vec3 maxPoint = points[0];
-    glm::vec3 minPoint = points[0];
-
-    // Find the AABB
-   for (GLuint i = 0; i < points.size(); ++i)
-   {
-      glm::vec3 & point = points[i];
-
-      if (point.x > maxPoint.x) maxPoint.x = point.x;
-      if (point.y > maxPoint.y) maxPoint.y = point.y;
-      if (point.z > maxPoint.z) maxPoint.z = point.z;
-      if (point.x < minPoint.x) minPoint.x = point.x;
-      if (point.y < minPoint.y) minPoint.y = point.y;
-      if (point.z < minPoint.z) minPoint.z = point.z;
-   }
-
-   // Center of the AABB
-   glm::vec3 center =
-         glm::vec3((maxPoint.x + minPoint.x) / 2.0f,
-         (maxPoint.y + minPoint.y) / 2.0f,
-         (maxPoint.z + minPoint.z) / 2.0f
-      );
-
-   // Translate center of the AABB to the origin
-   for (GLuint i = 0; i < points.size(); ++i)
-   {
-      glm::vec3 & point = points[i];
-      point = point - center;
-   }
-}
-
-
-void VBOMesh::generateAveragedNormals(
-   const std::vector<glm::vec3>& points,
-   std::vector<glm::vec3>& normals,
-   const std::vector<GLuint>& faces)
-{
-   for (GLuint i = 0; i < points.size(); i++)
+   for (auto i = 0; i < points.size(); i++)
    {
       normals.push_back(glm::vec3(0.0f));
    }
 
-   for (GLuint i = 0; i < faces.size(); i += 3)
+   for (auto i = 0; i < faces.size(); i += 3)
    {
-      const glm::vec3 & p1 = points[faces[i]];
-      const glm::vec3 & p2 = points[faces[i + 1]];
-      const glm::vec3 & p3 = points[faces[i + 2]];
+      const glm::vec3& point_1 = points[faces[i]];
+      const glm::vec3& point_2 = points[faces[i + 1]];
+      const glm::vec3& point_3 = points[faces[i + 2]];
 
-      glm::vec3 a = p2 - p1;
-      glm::vec3 b = p3 - p1;
-      glm::vec3 n = glm::normalize(glm::cross(a,b));
+      glm::vec3 side_a = point_2 - point_1;
+      glm::vec3 side_b = point_3 - point_1;
+      glm::vec3 normalized_normal = glm::normalize(glm::cross(side_a, side_b));
 
-      normals[faces[i]] += n;
-      normals[faces[i + 1]] += n;
-      normals[faces[i + 2]] += n;
+      normals[faces[i]] += normalized_normal;
+      normals[faces[i + 1]] += normalized_normal;
+      normals[faces[i + 2]] += normalized_normal;
    }
 
-   for (GLuint i = 0; i < normals.size(); i++) {
+   for (auto i = 0; i < normals.size(); i++)
+   {
       normals[i] = glm::normalize(normals[i]);
    }
 }
 
-
-void VBOMesh::generateTangents(
+void generateTangents(
    const std::vector<glm::vec3>& points,
    const std::vector<glm::vec3>& normals,
    const std::vector<GLuint>& faces,
    const std::vector<glm::vec2>& texCoords,
-   std::vector<glm::vec4>& tangents)
+   std::vector<glm::vec4>& tangents
+)
 {
    std::vector<glm::vec3> tan1Accum;
    std::vector<glm::vec3> tan2Accum;
@@ -305,165 +59,412 @@ void VBOMesh::generateTangents(
    // Compute the tangent std::vector
    for (GLuint i = 0; i < faces.size(); i += 3)
    {
-      const glm::vec3 &p1 = points[faces[i]];
-      const glm::vec3 &p2 = points[faces[i+1]];
-      const glm::vec3 &p3 = points[faces[i+2]];
+      const glm::vec3& point_1 = points[faces[i]];
+      const glm::vec3& point_2 = points[faces[i + 1]];
+      const glm::vec3& point_3 = points[faces[i + 2]];
 
-      const glm::vec2 &tc1 = texCoords[faces[i]];
-      const glm::vec2 &tc2 = texCoords[faces[i+1]];
-      const glm::vec2 &tc3 = texCoords[faces[i+2]];
+      const glm::vec2& tc1 = texCoords[faces[i]];
+      const glm::vec2& tc2 = texCoords[faces[i + 1]];
+      const glm::vec2& tc3 = texCoords[faces[i + 2]];
 
-      glm::vec3 q1 = p2 - p1;
-      glm::vec3 q2 = p3 - p1;
+      glm::vec3 q1 = point_2 - point_1;
+      glm::vec3 q2 = point_3 - point_1;
       float s1 = tc2.x - tc1.x, s2 = tc3.x - tc1.x;
       float t1 = tc2.y - tc1.y, t2 = tc3.y - tc1.y;
       float r = 1.0f / (s1 * t2 - s2 * t1);
 
-      glm::vec3 tan1(
-         (t2*q1.x - t1*q2.x) * r,
-         (t2*q1.y - t1*q2.y) * r,
-         (t2*q1.z - t1*q2.z) * r
-      );
+      glm::vec3 tan1((t2 * q1.x - t1 * q2.x) * r, (t2 * q1.y - t1 * q2.y) * r, (t2 * q1.z - t1 * q2.z) * r);
 
-      glm::vec3 tan2(
-         (s1*q2.x - s2*q1.x) * r,
-         (s1*q2.y - s2*q1.y) * r,
-         (s1*q2.z - s2*q1.z) * r
-      );
+      glm::vec3 tan2((s1 * q2.x - s2 * q1.x) * r, (s1 * q2.y - s2 * q1.y) * r, (s1 * q2.z - s2 * q1.z) * r);
 
       tan1Accum[faces[i]] += tan1;
-      tan1Accum[faces[i+1]] += tan1;
-      tan1Accum[faces[i+2]] += tan1;
+      tan1Accum[faces[i + 1]] += tan1;
+      tan1Accum[faces[i + 2]] += tan1;
       tan2Accum[faces[i]] += tan2;
-      tan2Accum[faces[i+1]] += tan2;
-      tan2Accum[faces[i+2]] += tan2;
+      tan2Accum[faces[i + 1]] += tan2;
+      tan2Accum[faces[i + 2]] += tan2;
    }
 
    for (GLuint i = 0; i < points.size(); ++i)
    {
-      const glm::vec3 &n = normals[i];
-      glm::vec3 &t1 = tan1Accum[i];
-      glm::vec3 &t2 = tan2Accum[i];
+      const glm::vec3& n = normals[i];
+      glm::vec3& t1 = tan1Accum[i];
+      glm::vec3& t2 = tan2Accum[i];
 
       // Gram-Schmidt orthogonalize
-      tangents[i] = glm::vec4(glm::normalize(t1 - (glm::dot(n,t1) * n)), 0.0f);
+      tangents[i] = glm::vec4(glm::normalize(t1 - (glm::dot(n, t1) * n)), 0.0f);
+
       // Store handedness in w
-      tangents[i].w = (glm::dot(glm::cross(n,t1), t2) < 0.0f) ? -1.0f : 1.0f;
+      tangents[i].w = (glm::dot(glm::cross(n, t1), t2) < 0.0f) ? -1.0f : 1.0f;
    }
 
    tan1Accum.clear();
    tan2Accum.clear();
 }
 
+void trimString(std::string& str)
+{
+   const char* white_space = " \t\n\r";
+   size_t location;
+   location = str.find_first_not_of(white_space);
+   str.erase(0, location);
+   location = str.find_last_not_of(white_space);
+   str.erase(location + 1);
+}
 
-void VBOMesh::storeVBO2(
+void center(std::vector<glm::vec3>& points)
+{
+   if (points.empty())
+   {
+      return;
+   }
+
+   auto max_point = points[0];
+   auto min_point = points[0];
+
+   // find the AABB
+   std::ranges::for_each(
+      points,
+      [&max_point, &min_point](auto& point)
+      {
+         max_point.x = std::max(point.x, max_point.x);
+         max_point.y = std::max(point.y, max_point.y);
+         max_point.z = std::max(point.z, max_point.z);
+         min_point.x = std::min(point.x, min_point.x);
+         min_point.y = std::min(point.y, min_point.y);
+         min_point.z = std::min(point.z, min_point.z);
+      }
+   );
+
+   // center of the AABB
+   const auto center =
+      glm::vec3((max_point.x + min_point.x) / 2.0f, (max_point.y + min_point.y) / 2.0f, (max_point.z + min_point.z) / 2.0f);
+
+   // translate center of the AABB to the origin
+   for (GLuint i = 0; i < points.size(); ++i)
+   {
+      auto& point = points[i];
+      point = point - center;
+   }
+}
+}  // namespace
+
+VBOMesh::VBOMesh(const char* filename, float scale, bool recenter_mesh, bool load_texture_coordinates, bool generate_tangents)
+    : _scale(scale), _recenter_mesh(recenter_mesh), _load_texture(load_texture_coordinates), _generate_tangents(generate_tangents)
+{
+   loadObj(filename);
+}
+
+void VBOMesh::render() const
+{
+   glBindVertexArray(_vao_handle);
+   glDrawElements(GL_TRIANGLES, 3 * _faces, GL_UNSIGNED_INT, ((GLubyte*)NULL + (0)));
+}
+
+void VBOMesh::loadObj(const char* filename)
+{
+   std::vector<glm::vec3> points;
+   std::vector<glm::vec3> normals;
+   std::vector<glm::vec2> texcoords;
+   std::vector<GLuint> faces;
+   std::vector<Vertex> vertices;
+
+   int face_count = 0;
+
+   std::ifstream input_filestream(filename, std::ios::in);
+
+   if (!input_filestream)
+   {
+      std::cerr << "Unable to open OBJ file: " << filename << "\n";
+      exit(1);
+   }
+
+   std::string line;
+   std::string token;
+   std::vector<int> face;
+   std::vector<Vertex> face_vertices;
+
+   getline(input_filestream, line);
+   while (!input_filestream.eof())
+   {
+      trimString(line);
+      if (!line.empty() && line.at(0) != '#')
+      {
+         std::istringstream lineStream(line);
+
+         lineStream >> token;
+
+         if (token == "v")
+         {
+            float x{};
+            float y{};
+            float z{};
+            lineStream >> x >> y >> z;
+            points.push_back(glm::vec3(x, y, z) * _scale);
+         }
+         else if (token == "vt" && _load_texture)
+         {
+            // Process texture coordinate
+            float s{};
+            float t{};
+            lineStream >> s >> t;
+            texcoords.push_back(glm::vec2(s, t));
+         }
+         else if (token == "vn")
+         {
+            float x{};
+            float y{};
+            float z{};
+            lineStream >> x >> y >> z;
+            normals.push_back(glm::vec3(x, y, z));
+         }
+         else if (token == "f")
+         {
+            face_count++;
+
+            // process face
+            face.clear();
+            face_vertices.clear();
+
+            size_t slash1{};
+            size_t slash2{};
+
+            // int point, texCoord, normal;
+            while (lineStream.good())
+            {
+               std::string vertex_string;
+               lineStream >> vertex_string;
+               int pIndex = -1;
+               int nIndex = -1;
+               int tcIndex = -1;
+
+               slash1 = vertex_string.find("/");
+
+               if (slash1 == std::string::npos)
+               {
+                  pIndex = atoi(vertex_string.c_str()) - 1;
+               }
+               else
+               {
+                  slash2 = vertex_string.find("/", slash1 + 1);
+                  pIndex = atoi(vertex_string.substr(0, slash1).c_str()) - 1;
+                  if (slash2 > slash1 + 1)
+                  {
+                     tcIndex = atoi(vertex_string.substr(slash1 + 1, slash2).c_str()) - 1;
+                  }
+                  nIndex = atoi(vertex_string.substr(slash2 + 1, vertex_string.length()).c_str()) - 1;
+               }
+
+               if (pIndex == -1)
+               {
+                  std::cout << "Missing point index!!!\n";
+               }
+               else
+               {
+                  Vertex vertex;
+                  vertex.pos_index = pIndex;
+                  vertex.normal_index = nIndex;
+                  vertex.texcoord_index = tcIndex;
+
+                  face.push_back(pIndex);
+                  face_vertices.push_back(vertex);
+               }
+            }
+
+            // obj: f pos/tex/norm  pos/tex/norm  pos/tex/norm
+
+            // If number of edges in face is greater than 3,
+            // decompose into triangles as a triangle fan.
+            if (face.size() > 3)
+            {
+               int v0 = face[0];
+               int v1 = face[1];
+               int v2 = face[2];
+
+               Vertex vt0 = face_vertices[0];
+               Vertex vt1 = face_vertices[1];
+               Vertex vt2 = face_vertices[2];
+
+               // first face
+               faces.push_back(v0);
+               faces.push_back(v1);
+               faces.push_back(v2);
+
+               vertices.push_back(vt0);
+               vertices.push_back(vt1);
+               vertices.push_back(vt2);
+
+               for (GLuint i = 3; i < face.size(); i++)
+               {
+                  v1 = v2;
+                  v2 = face[i];
+
+                  vt1 = vt2;
+                  vt2 = face_vertices[i];
+
+                  faces.push_back(v0);
+                  faces.push_back(v1);
+                  faces.push_back(v2);
+
+                  vertices.push_back(vt0);
+                  vertices.push_back(vt1);
+                  vertices.push_back(vt2);
+               }
+            }
+            else
+            {
+               faces.push_back(face[0]);
+               faces.push_back(face[1]);
+               faces.push_back(face[2]);
+
+               vertices.push_back(face_vertices[0]);
+               vertices.push_back(face_vertices[1]);
+               vertices.push_back(face_vertices[2]);
+            }
+         }
+      }
+      getline(input_filestream, line);
+   }
+
+   input_filestream.close();
+
+   //    normals.clear();
+   //    if (normals.size() == 0) {
+   //        generateAveragedNormals(points,normals,faces);
+   //    }
+
+   std::vector<glm::vec4> tangents;
+   if (_generate_tangents && !texcoords.empty())
+   {
+      generateTangents(points, normals, faces, texcoords, tangents);
+   }
+
+   if (_recenter_mesh)
+   {
+      center(points);
+   }
+
+   storeVbo(points, normals, texcoords, tangents, faces, vertices);
+
+   std::cout << "Loaded mesh from: " << filename << "\n";
+   std::cout << " " << points.size() << " points\n";
+   std::cout << " " << face_count << " faces\n";
+   std::cout << " " << faces.size() / 3 << " triangles\n";
+   std::cout << " " << normals.size() << " normals\n";
+   std::cout << " " << tangents.size() << " tangents\n";
+   std::cout << " " << texcoords.size() << " texture coordinates\n";
+}
+
+void VBOMesh::storeVbo(
    const std::vector<glm::vec3>& positions,
    const std::vector<glm::vec3>& normals,
-   const std::vector<glm::vec2>&texCoords,
-   const std::vector<glm::vec4>&tangents,
-   const std::vector<GLuint>&elements,
+   const std::vector<glm::vec2>& texCoords,
+   const std::vector<glm::vec4>& tangents,
+   const std::vector<GLuint>& elements,
    const std::vector<Vertex>& vertices
 )
 {
-   GLuint nVerts  = GLuint(vertices.size());
+   const auto vertex_count = GLuint(vertices.size());
    _faces = GLuint(elements.size() / 3);
 
-   float* v = new float[3 * nVerts];
-   float* n = new float[3 * nVerts];
-   float* tc = NULL;
-   float* tang = NULL;
+   float* vertex_arr = new float[3 * vertex_count];
+   float* normal_arr = new float[3 * vertex_count];
+   float* texcoord_arr = nullptr;
+   float* tangent_arr = nullptr;
 
-   if (texCoords.size() > 0)
+   if (!texCoords.empty())
    {
-      tc = new float[ 2 * nVerts];
+      texcoord_arr = new float[2 * vertex_count];
 
-      if (tangents.size() > 0)
+      if (!tangents.empty())
       {
-         tang = new float[4*nVerts];
+         tangent_arr = new float[4 * vertex_count];
       }
    }
 
-   unsigned int *el = new unsigned int[nVerts];
+   unsigned int* el = new unsigned int[vertex_count];
 
-   int idx = 0, tcIdx = 0, tangIdx = 0;
+   int idx = 0;
+   int tcIdx = 0;
+   int tangIdx = 0;
    for (GLuint i = 0; i < vertices.size(); ++i)
    {
-      v[idx]   = positions[vertices.at(i).pIndex].x;
-      v[idx+1] = positions[vertices.at(i).pIndex].y;
-      v[idx+2] = positions[vertices.at(i).pIndex].z;
+      vertex_arr[idx] = positions[vertices.at(i).pos_index].x;
+      vertex_arr[idx + 1] = positions[vertices.at(i).pos_index].y;
+      vertex_arr[idx + 2] = positions[vertices.at(i).pos_index].z;
 
-      n[idx]   = normals[vertices.at(i).nIndex].x;
-      n[idx+1] = normals[vertices.at(i).nIndex].y;
-      n[idx+2] = normals[vertices.at(i).nIndex].z;
+      normal_arr[idx] = normals[vertices.at(i).normal_index].x;
+      normal_arr[idx + 1] = normals[vertices.at(i).normal_index].y;
+      normal_arr[idx + 2] = normals[vertices.at(i).normal_index].z;
 
       idx += 3;
 
-      if (tc != NULL)
+      if (texcoord_arr != nullptr)
       {
-         tc[tcIdx]   = texCoords[vertices.at(i).tcIndex].x;
-         tc[tcIdx+1] = texCoords[vertices.at(i).tcIndex].y;
+         texcoord_arr[tcIdx] = texCoords[vertices.at(i).texcoord_index].x;
+         texcoord_arr[tcIdx + 1] = texCoords[vertices.at(i).texcoord_index].y;
          tcIdx += 2;
       }
 
-      if (tang != NULL)
+      if (tangent_arr != nullptr)
       {
-         tang[tangIdx] = tangents[i].x;
-         tang[tangIdx + 1] = tangents[i].y;
-         tang[tangIdx + 2] = tangents[i].z;
-         tang[tangIdx + 3] = tangents[i].w;
+         tangent_arr[tangIdx] = tangents[i].x;
+         tangent_arr[tangIdx + 1] = tangents[i].y;
+         tangent_arr[tangIdx + 2] = tangents[i].z;
+         tangent_arr[tangIdx + 3] = tangents[i].w;
          tangIdx += 4;
       }
    }
 
    for (unsigned int i = 0; i < vertices.size(); ++i)
    {
-     el[i] = i;
+      el[i] = i;
    }
 
    glGenVertexArrays(1, &_vao_handle);
    glBindVertexArray(_vao_handle);
 
-   int nBuffers = 3;
+   int buffer_count = 3;
 
-   if (tc != NULL)
+   if (texcoord_arr != nullptr)
    {
-      nBuffers++;
+      buffer_count++;
    }
 
-   if (tang != NULL)
+   if (tangent_arr != nullptr)
    {
-      nBuffers++;
+      buffer_count++;
    }
 
-   GLuint elementBuffer = nBuffers - 1;
+   GLuint elementBuffer = buffer_count - 1;
 
    GLuint handle[5];
    GLuint bufIdx = 0;
-   glGenBuffers(nBuffers, handle);
+   glGenBuffers(buffer_count, handle);
 
    glBindBuffer(GL_ARRAY_BUFFER, handle[bufIdx++]);
-   glBufferData(GL_ARRAY_BUFFER, (3 * nVerts) * sizeof(float), v, GL_STATIC_DRAW);
-   glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, ((GLubyte *)NULL + (0)));
+   glBufferData(GL_ARRAY_BUFFER, (3 * vertex_count) * sizeof(float), vertex_arr, GL_STATIC_DRAW);
+   glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, ((GLubyte*)nullptr + (0)));
    glEnableVertexAttribArray(0);  // Vertex position
 
    glBindBuffer(GL_ARRAY_BUFFER, handle[bufIdx++]);
-   glBufferData(GL_ARRAY_BUFFER, (3 * nVerts) * sizeof(float), n, GL_STATIC_DRAW);
-   glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, ((GLubyte *)NULL + (0)));
+   glBufferData(GL_ARRAY_BUFFER, (3 * vertex_count) * sizeof(float), normal_arr, GL_STATIC_DRAW);
+   glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, ((GLubyte*)nullptr + (0)));
    glEnableVertexAttribArray(1);  // Vertex normal
 
-   if (tc != NULL)
+   if (texcoord_arr != nullptr)
    {
       glBindBuffer(GL_ARRAY_BUFFER, handle[bufIdx++]);
-      glBufferData(GL_ARRAY_BUFFER, (2 * nVerts) * sizeof(float), tc, GL_STATIC_DRAW);
-      glVertexAttribPointer((GLuint)2, 2, GL_FLOAT, GL_FALSE, 0, ((GLubyte *)NULL + (0)));
+      glBufferData(GL_ARRAY_BUFFER, (2 * vertex_count) * sizeof(float), texcoord_arr, GL_STATIC_DRAW);
+      glVertexAttribPointer((GLuint)2, 2, GL_FLOAT, GL_FALSE, 0, ((GLubyte*)nullptr + (0)));
       glEnableVertexAttribArray(2);  // Texture coords
    }
 
-   if (tang != NULL)
+   if (tangent_arr != nullptr)
    {
       glBindBuffer(GL_ARRAY_BUFFER, handle[bufIdx++]);
-      glBufferData(GL_ARRAY_BUFFER, (4 * nVerts) * sizeof(float), tang, GL_STATIC_DRAW);
-      glVertexAttribPointer((GLuint)3, 4, GL_FLOAT, GL_FALSE, 0, ((GLubyte *)NULL + (0)));
+      glBufferData(GL_ARRAY_BUFFER, (4 * vertex_count) * sizeof(float), tangent_arr, GL_STATIC_DRAW);
+      glVertexAttribPointer((GLuint)3, 4, GL_FLOAT, GL_FALSE, 0, ((GLubyte*)nullptr + (0)));
       glEnableVertexAttribArray(3);  // Tangent std::vector
    }
 
@@ -473,30 +474,9 @@ void VBOMesh::storeVBO2(
    glBindVertexArray(0);
 
    // Clean up
-   delete[] v;
-   delete[] n;
-
-   if (tc != NULL)
-   {
-      delete[] tc;
-   }
-
-   if (tang != NULL)
-   {
-      delete[] tang;
-   }
-
+   delete[] vertex_arr;
+   delete[] normal_arr;
+   delete[] texcoord_arr;
+   delete[] tangent_arr;
    delete[] el;
 }
-
-
-void VBOMesh::trimString(std::string & str)
-{
-   const char * whiteSpace = " \t\n\r";
-   size_t location;
-   location = str.find_first_not_of(whiteSpace);
-   str.erase(0,location);
-   location = str.find_last_not_of(whiteSpace);
-   str.erase(location + 1);
-}
-
