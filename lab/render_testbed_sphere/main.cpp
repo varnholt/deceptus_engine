@@ -136,6 +136,9 @@ int main()
 
    _editor_window.create(_editor_mode, editorTitle, static_cast<uint32_t>(sf::Style::Default), sf::State::Windowed);
    _editor_window.setVerticalSyncEnabled(true);
+   _editor_window.setPosition(
+      {_render_window.getPosition().x + static_cast<int32_t>(_render_window.getSize().x), _render_window.getPosition().y}
+   );
 
    // make sure the 3D rendering window's context is current before intializing glew
    if (!_render_window.setActive(true))

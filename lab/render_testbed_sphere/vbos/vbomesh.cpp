@@ -7,6 +7,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <charconv>  // for std::from_chars
+#include <string_view>  // for std::string_view
 
 namespace
 {
@@ -104,12 +106,12 @@ void generateTangents(
 
 void trimString(std::string& str)
 {
-   const char* white_space = " \t\n\r";
-   size_t location;
-   location = str.find_first_not_of(white_space);
-   str.erase(0, location);
-   location = str.find_last_not_of(white_space);
-   str.erase(location + 1);
+   if (str.empty()) return;
+
+   const auto whitespace = " \t\n\r";
+   str.erase(0, str.find_first_not_of(whitespace));
+   if (str.empty()) return;
+   str.erase(str.find_last_not_of(whitespace) + 1);
 }
 
 void center(std::vector<glm::vec3>& points)
@@ -122,28 +124,24 @@ void center(std::vector<glm::vec3>& points)
    auto max_point = points[0];
    auto min_point = points[0];
 
-   // find the AABB
-   std::ranges::for_each(
-      points,
-      [&max_point, &min_point](auto& point)
-      {
-         max_point.x = std::max(point.x, max_point.x);
-         max_point.y = std::max(point.y, max_point.y);
-         max_point.z = std::max(point.z, max_point.z);
-         min_point.x = std::min(point.x, min_point.x);
-         min_point.y = std::min(point.y, min_point.y);
-         min_point.z = std::min(point.z, min_point.z);
-      }
-   );
+   // find the AABB - using ranges where available
+   for (const auto& point : points)  // This is range-based for loop (C++11) but still C++23 compatible
+   {
+      max_point.x = std::max(point.x, max_point.x);
+      max_point.y = std::max(point.y, max_point.y);
+      max_point.z = std::max(point.z, max_point.z);
+      min_point.x = std::min(point.x, min_point.x);
+      min_point.y = std::min(point.y, min_point.y);
+      min_point.z = std::min(point.z, min_point.z);
+   }
 
    // center of the AABB
    const auto center =
       glm::vec3((max_point.x + min_point.x) / 2.0f, (max_point.y + min_point.y) / 2.0f, (max_point.z + min_point.z) / 2.0f);
 
    // translate center of the AABB to the origin
-   for (GLuint i = 0; i < points.size(); ++i)
+   for (auto& point : points)  // Range-based for loop - modern C++ style
    {
-      auto& point = points[i];
       point = point - center;
    }
 }
@@ -242,17 +240,46 @@ void VBOMesh::loadObj(const char* filename)
 
                if (slash1 == std::string::npos)
                {
-                  pIndex = atoi(vertex_string.c_str()) - 1;
+                  auto result = std::from_chars(vertex_string.data(), vertex_string.data() + vertex_string.size(), pIndex);
+                  if (result.ec == std::errc{}) {
+                      pIndex -= 1; // adjust for 0-based indexing
+                  } else {
+                      // Handle error case - set pIndex to invalid value
+                      pIndex = -1;
+                  }
                }
                else
                {
                   slash2 = vertex_string.find("/", slash1 + 1);
-                  pIndex = atoi(vertex_string.substr(0, slash1).c_str()) - 1;
+
+                  // Process position index
+                  std::string_view p_str = std::string_view(vertex_string).substr(0, slash1);
+                  auto result = std::from_chars(p_str.data(), p_str.data() + p_str.size(), pIndex);
+                  if (result.ec == std::errc{}) {
+                      pIndex -= 1; // adjust for 0-based indexing
+                  } else {
+                      // Handle error case
+                      pIndex = -1;
+                  }
+
                   if (slash2 > slash1 + 1)
                   {
-                     tcIndex = atoi(vertex_string.substr(slash1 + 1, slash2).c_str()) - 1;
+                     std::string_view tc_str = std::string_view(vertex_string).substr(slash1 + 1, slash2 - slash1 - 1);
+                     auto tc_result = std::from_chars(tc_str.data(), tc_str.data() + tc_str.size(), tcIndex);
+                     if (tc_result.ec == std::errc{}) {
+                         tcIndex -= 1; // adjust for 0-based indexing
+                     } else {
+                         tcIndex = -1;
+                     }
                   }
-                  nIndex = atoi(vertex_string.substr(slash2 + 1, vertex_string.length()).c_str()) - 1;
+
+                  std::string_view n_str = std::string_view(vertex_string).substr(slash2 + 1);
+                  auto n_result = std::from_chars(n_str.data(), n_str.data() + n_str.size(), nIndex);
+                  if (n_result.ec == std::errc{}) {
+                      nIndex -= 1; // adjust for 0-based indexing
+                  } else {
+                      nIndex = -1;
+                  }
                }
 
                if (pIndex == -1)
@@ -367,58 +394,58 @@ void VBOMesh::storeVbo(
    const auto vertex_count = GLuint(vertices.size());
    _faces = GLuint(elements.size() / 3);
 
-   float* vertex_arr = new float[3 * vertex_count];
-   float* normal_arr = new float[3 * vertex_count];
-   float* texcoord_arr = nullptr;
-   float* tangent_arr = nullptr;
+   auto vertex_buffer = std::make_unique<float[]>(3 * vertex_count);
+   auto normal_buffer = std::make_unique<float[]>(3 * vertex_count);
+   std::unique_ptr<float[]> texcoord_buffer;
+   std::unique_ptr<float[]> tangent_buffer;
 
    if (!texCoords.empty())
    {
-      texcoord_arr = new float[2 * vertex_count];
+      texcoord_buffer = std::make_unique<float[]>(2 * vertex_count);
 
       if (!tangents.empty())
       {
-         tangent_arr = new float[4 * vertex_count];
+         tangent_buffer = std::make_unique<float[]>(4 * vertex_count);
       }
    }
 
-   unsigned int* el = new unsigned int[vertex_count];
+   auto element_buffer = std::make_unique<unsigned int[]>(vertex_count);
 
    int idx = 0;
    int tcIdx = 0;
    int tangIdx = 0;
    for (GLuint i = 0; i < vertices.size(); ++i)
    {
-      vertex_arr[idx] = positions[vertices.at(i).pos_index].x;
-      vertex_arr[idx + 1] = positions[vertices.at(i).pos_index].y;
-      vertex_arr[idx + 2] = positions[vertices.at(i).pos_index].z;
+      vertex_buffer[idx] = positions[vertices.at(i).pos_index].x;
+      vertex_buffer[idx + 1] = positions[vertices.at(i).pos_index].y;
+      vertex_buffer[idx + 2] = positions[vertices.at(i).pos_index].z;
 
-      normal_arr[idx] = normals[vertices.at(i).normal_index].x;
-      normal_arr[idx + 1] = normals[vertices.at(i).normal_index].y;
-      normal_arr[idx + 2] = normals[vertices.at(i).normal_index].z;
+      normal_buffer[idx] = normals[vertices.at(i).normal_index].x;
+      normal_buffer[idx + 1] = normals[vertices.at(i).normal_index].y;
+      normal_buffer[idx + 2] = normals[vertices.at(i).normal_index].z;
 
       idx += 3;
 
-      if (texcoord_arr != nullptr)
+      if (texcoord_buffer)
       {
-         texcoord_arr[tcIdx] = texCoords[vertices.at(i).texcoord_index].x;
-         texcoord_arr[tcIdx + 1] = texCoords[vertices.at(i).texcoord_index].y;
+         texcoord_buffer[tcIdx] = texCoords[vertices.at(i).texcoord_index].x;
+         texcoord_buffer[tcIdx + 1] = texCoords[vertices.at(i).texcoord_index].y;
          tcIdx += 2;
       }
 
-      if (tangent_arr != nullptr)
+      if (tangent_buffer)
       {
-         tangent_arr[tangIdx] = tangents[i].x;
-         tangent_arr[tangIdx + 1] = tangents[i].y;
-         tangent_arr[tangIdx + 2] = tangents[i].z;
-         tangent_arr[tangIdx + 3] = tangents[i].w;
+         tangent_buffer[tangIdx] = tangents[i].x;
+         tangent_buffer[tangIdx + 1] = tangents[i].y;
+         tangent_buffer[tangIdx + 2] = tangents[i].z;
+         tangent_buffer[tangIdx + 3] = tangents[i].w;
          tangIdx += 4;
       }
    }
 
    for (unsigned int i = 0; i < vertices.size(); ++i)
    {
-      el[i] = i;
+      element_buffer[i] = i;
    }
 
    glGenVertexArrays(1, &_vao_handle);
@@ -426,57 +453,52 @@ void VBOMesh::storeVbo(
 
    int buffer_count = 3;
 
-   if (texcoord_arr != nullptr)
+   if (texcoord_buffer)
    {
       buffer_count++;
    }
 
-   if (tangent_arr != nullptr)
+   if (tangent_buffer)
    {
       buffer_count++;
    }
 
-   GLuint elementBuffer = buffer_count - 1;
+   GLuint element_buffer_index = buffer_count - 1;
 
    GLuint handle[5];
-   GLuint bufIdx = 0;
+   GLuint buf_idx = 0;
    glGenBuffers(buffer_count, handle);
 
-   glBindBuffer(GL_ARRAY_BUFFER, handle[bufIdx++]);
-   glBufferData(GL_ARRAY_BUFFER, (3 * vertex_count) * sizeof(float), vertex_arr, GL_STATIC_DRAW);
+   glBindBuffer(GL_ARRAY_BUFFER, handle[buf_idx++]);
+   glBufferData(GL_ARRAY_BUFFER, (3 * vertex_count) * sizeof(float), vertex_buffer.get(), GL_STATIC_DRAW);
    glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, ((GLubyte*)nullptr + (0)));
    glEnableVertexAttribArray(0);  // Vertex position
 
-   glBindBuffer(GL_ARRAY_BUFFER, handle[bufIdx++]);
-   glBufferData(GL_ARRAY_BUFFER, (3 * vertex_count) * sizeof(float), normal_arr, GL_STATIC_DRAW);
+   glBindBuffer(GL_ARRAY_BUFFER, handle[buf_idx++]);
+   glBufferData(GL_ARRAY_BUFFER, (3 * vertex_count) * sizeof(float), normal_buffer.get(), GL_STATIC_DRAW);
    glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, ((GLubyte*)nullptr + (0)));
    glEnableVertexAttribArray(1);  // Vertex normal
 
-   if (texcoord_arr != nullptr)
+   if (texcoord_buffer)
    {
-      glBindBuffer(GL_ARRAY_BUFFER, handle[bufIdx++]);
-      glBufferData(GL_ARRAY_BUFFER, (2 * vertex_count) * sizeof(float), texcoord_arr, GL_STATIC_DRAW);
+      glBindBuffer(GL_ARRAY_BUFFER, handle[buf_idx++]);
+      glBufferData(GL_ARRAY_BUFFER, (2 * vertex_count) * sizeof(float), texcoord_buffer.get(), GL_STATIC_DRAW);
       glVertexAttribPointer((GLuint)2, 2, GL_FLOAT, GL_FALSE, 0, ((GLubyte*)nullptr + (0)));
       glEnableVertexAttribArray(2);  // Texture coords
    }
 
-   if (tangent_arr != nullptr)
+   if (tangent_buffer)
    {
-      glBindBuffer(GL_ARRAY_BUFFER, handle[bufIdx++]);
-      glBufferData(GL_ARRAY_BUFFER, (4 * vertex_count) * sizeof(float), tangent_arr, GL_STATIC_DRAW);
+      glBindBuffer(GL_ARRAY_BUFFER, handle[buf_idx++]);
+      glBufferData(GL_ARRAY_BUFFER, (4 * vertex_count) * sizeof(float), tangent_buffer.get(), GL_STATIC_DRAW);
       glVertexAttribPointer((GLuint)3, 4, GL_FLOAT, GL_FALSE, 0, ((GLubyte*)nullptr + (0)));
       glEnableVertexAttribArray(3);  // Tangent std::vector
    }
 
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle[elementBuffer]);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * _faces * sizeof(unsigned int), el, GL_STATIC_DRAW);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle[element_buffer_index]);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * _faces * sizeof(unsigned int), element_buffer.get(), GL_STATIC_DRAW);
 
    glBindVertexArray(0);
 
-   // Clean up
-   delete[] vertex_arr;
-   delete[] normal_arr;
-   delete[] texcoord_arr;
-   delete[] tangent_arr;
-   delete[] el;
+   // Smart pointers automatically handle memory cleanup
 }
