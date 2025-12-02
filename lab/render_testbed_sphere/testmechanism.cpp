@@ -87,7 +87,7 @@ void TestMechanism::drawEditor()
    float camera_position_arr[3] = {camera_position.x, camera_position.y, camera_position.z};
    float look_at_position_arr[3] = {look_at_position.x, look_at_position.y, look_at_position.z};
 
-   if (ImGui::SliderFloat3("Position", camera_position_arr, -20.0f, 20.0f))
+   if (ImGui::SliderFloat3("Source", camera_position_arr, -20.0f, 20.0f))
    {
       _camera->setCameraPosition(glm::vec3(camera_position_arr[0], camera_position_arr[1], camera_position_arr[2]));
    }
