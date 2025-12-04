@@ -3,6 +3,9 @@
 #include <imgui.h>
 #include <SFML/OpenGL.hpp>
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
 #include "game/shaderpool.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "opengl/gl_current.h"
@@ -10,6 +13,14 @@
 TestMechanism::TestMechanism()
 {
    load();
+
+   // Set default values after initialization
+   _defaultStarmapPosition = _starmap->getPosition();
+   _defaultStarmapScale = _starmap->getScale();
+   _defaultStarmapRotationSpeed = _starmap->getRotationSpeed();
+   _defaultCameraPosition = _camera->getCameraPosition();
+   _defaultLookAtPoint = _camera->getLookAtPoint();
+   _defaultFOV = _camera->getFOV();
 }
 
 void TestMechanism::load()
@@ -47,6 +58,22 @@ void TestMechanism::load()
 void TestMechanism::drawEditor()
 {
    ImGui::Begin("3D Objects Settings");
+
+   // Add save and reset buttons at the top
+   if (ImGui::Button("Save Settings"))
+   {
+      saveValues();
+   }
+   ImGui::SameLine();
+   if (ImGui::Button("Load Saved"))
+   {
+      loadValues();
+   }
+   ImGui::SameLine();
+   if (ImGui::Button("Reset to Defaults"))
+   {
+      resetToDefaults();
+   }
 
    // starmap controls
    ImGui::Text("Starmap Settings");
@@ -157,4 +184,126 @@ void TestMechanism::resize(int width, int height)
 TestMechanism::~TestMechanism()
 {
    _objects.clear();
+}
+
+void TestMechanism::saveValues()
+{
+   std::ofstream file("editor_settings.txt");
+   if (!file.is_open())
+   {
+      std::cout << "Could not open editor_settings.txt for writing\n";
+      return;
+   }
+
+   // Save starmap values
+   const auto starmap_position = _starmap->getPosition();
+   const auto starmap_scale = _starmap->getScale();
+   const auto starmap_rotation_speed = _starmap->getRotationSpeed();
+
+   file << "starmap_position_x " << starmap_position.x << "\n";
+   file << "starmap_position_y " << starmap_position.y << "\n";
+   file << "starmap_position_z " << starmap_position.z << "\n";
+
+   file << "starmap_scale_x " << starmap_scale.x << "\n";
+   file << "starmap_scale_y " << starmap_scale.y << "\n";
+   file << "starmap_scale_z " << starmap_scale.z << "\n";
+
+   file << "starmap_rotation_speed_x " << starmap_rotation_speed.x << "\n";
+   file << "starmap_rotation_speed_y " << starmap_rotation_speed.y << "\n";
+   file << "starmap_rotation_speed_z " << starmap_rotation_speed.z << "\n";
+
+   // Save camera values
+   const auto camera_position = _camera->getCameraPosition();
+   const auto look_at_position = _camera->getLookAtPoint();
+   float fov = _camera->getFOV();
+
+   file << "camera_position_x " << camera_position.x << "\n";
+   file << "camera_position_y " << camera_position.y << "\n";
+   file << "camera_position_z " << camera_position.z << "\n";
+
+   file << "camera_look_at_x " << look_at_position.x << "\n";
+   file << "camera_look_at_y " << look_at_position.y << "\n";
+   file << "camera_look_at_z " << look_at_position.z << "\n";
+
+   file << "camera_fov " << fov << "\n";
+
+   file.close();
+   std::cout << "Settings saved to editor_settings.txt\n";
+}
+
+void TestMechanism::loadValues()
+{
+   std::ifstream file("editor_settings.txt");
+   if (!file.is_open())
+   {
+      std::cout << "Could not open editor_settings.txt for reading\n";
+      return;
+   }
+
+   std::string line;
+   std::string key;
+   float value;
+
+   // Initialize default values in case they're missing from file
+   glm::vec3 starmap_position = _starmap->getPosition();
+   glm::vec3 starmap_scale = _starmap->getScale();
+   glm::vec3 starmap_rotation_speed = _starmap->getRotationSpeed();
+
+   glm::vec3 camera_position = _camera->getCameraPosition();
+   glm::vec3 look_at_position = _camera->getLookAtPoint();
+   float fov = _camera->getFOV();
+
+   while (std::getline(file, line))
+   {
+      std::istringstream iss(line);
+      if (iss >> key >> value)
+      {
+         if (key == "starmap_position_x") starmap_position.x = value;
+         else if (key == "starmap_position_y") starmap_position.y = value;
+         else if (key == "starmap_position_z") starmap_position.z = value;
+
+         else if (key == "starmap_scale_x") starmap_scale.x = value;
+         else if (key == "starmap_scale_y") starmap_scale.y = value;
+         else if (key == "starmap_scale_z") starmap_scale.z = value;
+
+         else if (key == "starmap_rotation_speed_x") starmap_rotation_speed.x = value;
+         else if (key == "starmap_rotation_speed_y") starmap_rotation_speed.y = value;
+         else if (key == "starmap_rotation_speed_z") starmap_rotation_speed.z = value;
+
+         else if (key == "camera_position_x") camera_position.x = value;
+         else if (key == "camera_position_y") camera_position.y = value;
+         else if (key == "camera_position_z") camera_position.z = value;
+
+         else if (key == "camera_look_at_x") look_at_position.x = value;
+         else if (key == "camera_look_at_y") look_at_position.y = value;
+         else if (key == "camera_look_at_z") look_at_position.z = value;
+
+         else if (key == "camera_fov") fov = value;
+      }
+   }
+
+   // Apply loaded values
+   _starmap->setPosition(starmap_position);
+   _starmap->setScale(starmap_scale);
+   _starmap->setRotationSpeed(starmap_rotation_speed);
+
+   _camera->setCameraPosition(camera_position);
+   _camera->setLookAtPoint(look_at_position);
+   _camera->setFOV(fov);
+
+   file.close();
+   std::cout << "Settings loaded from editor_settings.txt\n";
+}
+
+void TestMechanism::resetToDefaults()
+{
+   _starmap->setPosition(_defaultStarmapPosition);
+   _starmap->setScale(_defaultStarmapScale);
+   _starmap->setRotationSpeed(_defaultStarmapRotationSpeed);
+
+   _camera->setCameraPosition(_defaultCameraPosition);
+   _camera->setLookAtPoint(_defaultLookAtPoint);
+   _camera->setFOV(_defaultFOV);
+
+   std::cout << "Values reset to defaults\n";
 }
