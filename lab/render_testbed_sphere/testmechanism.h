@@ -19,6 +19,9 @@ public:
    virtual void update(const sf::Time& dt);
    void resize(int width, int height);
    void drawEditor();
+   void saveValues();
+   void loadValues();
+   void resetToDefaults();
 
 private:
    void load();
@@ -34,4 +37,12 @@ private:
    bool _initialized{false};
 
    sf::Time _elapsed;
+
+   // Store default values for reset functionality
+   glm::vec3 _defaultStarmapPosition{0.0f, 0.0f, 0.0f};
+   glm::vec3 _defaultStarmapScale{1.0f, 1.0f, 1.0f};
+   glm::vec3 _defaultStarmapRotationSpeed{0.02f, 0.035f, 0.04f};
+   glm::vec3 _defaultCameraPosition{0.0f, 0.0f, 5.0f};
+   glm::vec3 _defaultLookAtPoint{0.0f, 0.0f, 0.0f};
+   float _defaultFOV{70.0f};
 };

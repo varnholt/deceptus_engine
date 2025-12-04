@@ -190,6 +190,9 @@ int main()
    // set up viewport
    glViewport(0, 0, static_cast<GLsizei>(_render_mode.size.x), static_cast<GLsizei>(_render_mode.size.y));
 
+   // Load saved values after all initialization is done
+   _mechanism->loadValues();
+
    while (_render_window.isOpen())
    {
       eventLoopRenderer();
