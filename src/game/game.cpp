@@ -17,15 +17,14 @@
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
 #include "game/event/eventdistributor.h"
-#include "game/io/eventserializer.h"
 #include "game/level/level.h"
 #include "game/level/levels.h"
 #include "game/player/player.h"
-#include "splashscreen.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/ui/messagebox.h"
+#include "splashscreen.h"
 
 #include "menus/menu.h"
 #include "menus/menuscreenmain.h"
@@ -254,8 +253,6 @@ void Game::initializeWindow()
    {
       _level->initializeTextures();
    }
-
-   EventSerializer::getInstance().setCallback([this](const sf::Event& event) { processEvent(event); });
 }
 
 void Game::initializeController()
@@ -409,7 +406,8 @@ void Game::nextLevel()
 
 Game::~Game()
 {
-   // _event_serializer.serialize();
+   // Unregister the global event serializer instance from the static registry
+   EventSerializer::unregisterInstance("global");
 }
 
 void Game::initialize()
@@ -420,6 +418,10 @@ void Game::initialize()
 
    _player = std::make_shared<Player>();
    _player->initialize();
+
+   _global_event_serializer = std::make_shared<EventSerializer>();
+   _global_event_serializer->setCallback([this](const sf::Event& event) { processEvent(event); });
+   EventSerializer::registerInstance("global", _global_event_serializer);
 
    _info_layer = std::make_unique<InfoLayer>();
    _ingame_menu = std::make_unique<InGameMenu>();
@@ -785,6 +787,9 @@ void Game::update()
          updateGameController();
          updateGameControllerForGame();
 
+         // Update all registered event serializers including the global one
+         EventSerializer::updateAll(dt);
+
          _level->update(dt);
          _player->update(dt);
 
@@ -856,6 +861,12 @@ void Game::takeScreenshot()
 
 void Game::processEvent(const sf::Event& event)
 {
+   _global_event_serializer->add(event);
+   if (_player && _player->getControls())
+   {
+      _player->getControls()->handleEvent(event);
+   }
+
    if (event.is<sf::Event::Closed>())
    {
       _window->close();
@@ -1126,20 +1137,27 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::F8:
       {
-         auto& serializer = EventSerializer::getInstance();
-         if (serializer.isEnabled())
+         const auto& serializer = EventSerializer::getInstance("player");
+         if (serializer)
          {
-            serializer.stop();
-         }
-         else
-         {
-            serializer.start();
+            if (serializer->isEnabled())
+            {
+               serializer->stop();
+            }
+            else
+            {
+               serializer->start();
+            }
          }
          break;
       }
       case sf::Keyboard::Key::F9:
       {
-         EventSerializer::getInstance().play();
+         const auto& serializer = EventSerializer::getInstance("player");
+         if (serializer)
+         {
+            serializer->play();
+         }
          break;
       }
       case sf::Keyboard::Key::F11:
@@ -1227,7 +1245,6 @@ void Game::processEvents()
    while (const auto event = _window->pollEvent())
    {
       processEvent(event.value());
-      EventSerializer::getInstance().add(event.value());
    }
 
    if (DrawStates::_draw_physics_config)
