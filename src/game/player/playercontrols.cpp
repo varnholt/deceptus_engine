@@ -6,12 +6,35 @@
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/player/playercontrolstate.h"
 
+PlayerControls::PlayerControls()
+{
+   _event_serializer = std::make_shared<EventSerializer>();
+   _event_serializer->setCallback(
+      [this](const sf::Event& event)
+      {
+         // route events back to PlayerControls methods during replay
+         if (const auto* key_pressed_event = event.getIf<sf::Event::KeyPressed>())
+         {
+            keyboardKeyPressed(key_pressed_event->code);
+         }
+         else if (const auto* key_released_event = event.getIf<sf::Event::KeyReleased>())
+         {
+            keyboardKeyReleased(key_released_event->code);
+         }
+      }
+   );
+
+   EventSerializer::registerInstance("player", _event_serializer);
+}
+
 void PlayerControls::update(const sf::Time& dt)
 {
    updateLockedKeys(dt);
 
    // store where the player has received input from last time
    updatePlayerInput();
+
+   _event_serializer->update(dt);
 
    setWasMoving(isMovingHorizontally());
    setWasMovingLeft(isMovingLeft());
@@ -878,4 +901,19 @@ float PlayerControls::readControllerNormalizedHorizontal() const
    }
 
    return axis_value_normalized;
+}
+
+void PlayerControls::handleEvent(const sf::Event& event)
+{
+   // events are just dropped by the serializer when not enabled
+   _event_serializer->add(event);
+
+   if (const auto* key_pressed_event = event.getIf<sf::Event::KeyPressed>())
+   {
+      keyboardKeyPressed(key_pressed_event->code);
+   }
+   else if (const auto* key_released_event = event.getIf<sf::Event::KeyReleased>())
+   {
+      keyboardKeyReleased(key_released_event->code);
+   }
 }

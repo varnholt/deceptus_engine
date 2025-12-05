@@ -771,8 +771,12 @@ void LevelScript::playEventRecording(const std::string& filename)
       filepath += ".dat";
    }
 
-   EventSerializer::getInstance().deserialize(filepath);
-   EventSerializer::getInstance().play();
+   const auto& serializer = EventSerializer::getInstance("player");
+   if (serializer)
+   {
+      serializer->deserialize(filepath);
+      serializer->play();
+   }
 }
 
 /**
