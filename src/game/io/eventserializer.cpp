@@ -6,6 +6,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <ostream>
 #include <thread>
 #include <unordered_set>
@@ -23,11 +24,8 @@ constexpr uint8_t EVENT_UNKNOWN = 255;
 
 }  // namespace
 
-template <typename R>
-static bool is_ready(std::future<R> const& f)
-{
-   return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
-}
+// Static member definition
+std::unordered_map<std::string, std::weak_ptr<EventSerializer>> EventSerializer::_instance_registry;
 
 void writeInt32(std::ostream& stream, int32_t value)
 {
@@ -89,7 +87,8 @@ void EventSerializer::add(const sf::Event& event)
       return;
    }
 
-   if (_play_result.has_value() && !is_ready(_play_result.value()))
+   // Don't add events while playing back
+   if (_playing)
    {
       return;
    }
@@ -244,7 +243,7 @@ void EventSerializer::debug()
 void EventSerializer::play()
 {
    // if still busy playing, don't allow calling another time
-   if (_play_result.has_value() && !is_ready(_play_result.value()))
+   if (_playing)
    {
       return;
    }
@@ -256,42 +255,59 @@ void EventSerializer::play()
 
    Log::Info() << "re-playing " << _events.size() << " events";
 
-   _play_start_time = HighResClock::now();
-   _play_result = std::async(std::launch::async, [this] { playThread(); });
+   _playing = true;
+   _elapsed_time = sf::Time::Zero;
+   _current_event_index = 0;
 
    DisplayMode::getInstance().enqueueSet(Display::ReplayPlaying);
 }
 
-void EventSerializer::playThread()
+void EventSerializer::update(sf::Time dt)
 {
-   using namespace std::chrono_literals;
-
-   auto done = false;
-
-   int32_t recorded_index = 0;
-
-   while (!done)
+   if (!_playing || _events.empty() || !_callback)
    {
-      const auto now = HighResClock::now();
-      const auto elapsed = now - _play_start_time;
-
-      const auto& event = _events[recorded_index];
-      if (elapsed > event._duration)
-      {
-         Log::Info() << "play event " << recorded_index << " duration: " << event._duration;
-
-         // pass event to given event loop
-         _callback(event._event);
-
-         done = (recorded_index == static_cast<int32_t>(_events.size() - 1));
-         recorded_index++;
-      }
-
-      std::this_thread::sleep_for(1ms);
+      return;
    }
 
-   // not thread safe but also only for dev purposes
-   DisplayMode::getInstance().enqueueUnset(Display::ReplayPlaying);
+   // Add the elapsed time from the game loop
+   _elapsed_time += dt;
+
+   // Convert sf::Time to the same time units as the recorded durations
+   auto elapsed_chrono = std::chrono::microseconds(static_cast<long long>(_elapsed_time.asMicroseconds()));
+
+   // Process all events that should have occurred during this time period
+   while (_current_event_index < _events.size())
+   {
+      const auto& event = _events[_current_event_index];
+
+      // Check if this event's scheduled time has been reached
+      if (elapsed_chrono >= event._duration)
+      {
+         Log::Info() << "play event " << _current_event_index << " duration: " << event._duration.count();
+
+         // Pass event to callback
+         _callback(event._event);
+
+         _current_event_index++;
+      }
+      else
+      {
+         // If the next event's time hasn't been reached yet, break and wait for more time
+         break;
+      }
+   }
+
+   // Check if all events have been processed
+   if (_current_event_index >= _events.size())
+   {
+      _playing = false;
+      DisplayMode::getInstance().enqueueUnset(Display::ReplayPlaying);
+   }
+}
+
+bool EventSerializer::isPlaying() const
+{
+   return _playing;
 }
 
 bool EventSerializer::filterMovementEvents(const sf::Event& event)
@@ -322,12 +338,6 @@ bool EventSerializer::filterMovementEvents(const sf::Event& event)
 void EventSerializer::setEnabled(bool enabled)
 {
    _enabled = enabled;
-}
-
-EventSerializer& EventSerializer::getInstance()
-{
-   static EventSerializer _instance;
-   return _instance;
 }
 
 void EventSerializer::start()
@@ -361,7 +371,49 @@ void EventSerializer::setMaxSize(size_t max_size)
    _max_size = max_size;
 }
 
+std::shared_ptr<EventSerializer> EventSerializer::getInstance(const std::string& name)
+{
+   auto it = _instance_registry.find(name);
+   if (it != _instance_registry.end())
+   {
+      return it->second.lock();
+   }
+   return nullptr;
+}
+
+void EventSerializer::registerInstance(const std::string& name, const std::shared_ptr<EventSerializer>& instance)
+{
+   _instance_registry[name] = instance;
+}
+
+void EventSerializer::unregisterInstance(const std::string& name)
+{
+   _instance_registry.erase(name);
+}
+
 void EventSerializer::setCallback(const EventCallback& callback)
 {
    _callback = callback;
+}
+
+void EventSerializer::addToAll(const sf::Event& event)
+{
+   for (auto& pair : _instance_registry)
+   {
+      if (auto instance = pair.second.lock())
+      {
+         instance->add(event);
+      }
+   }
+}
+
+void EventSerializer::updateAll(sf::Time dt)
+{
+   for (auto& pair : _instance_registry)
+   {
+      if (auto instance = pair.second.lock())
+      {
+         instance->update(dt);
+      }
+   }
 }

@@ -7,6 +7,7 @@
 #include "game/debug/console.h"
 #include "game/debug/logui.h"
 #include "game/ingamemenu/ingamemenu.h"
+#include "game/io/eventserializer.h"
 #include "game/layers/controlleroverlay.h"
 #include "game/layers/infolayer.h"
 #include "game/physics/physicsconfigurationui.h"
@@ -35,6 +36,7 @@ public:
    void draw();
 
    void takeScreenshot();
+
 
 private:
    void shutdown();
@@ -84,6 +86,8 @@ private:
 
    // temporarily here for debugging only
    std::unique_ptr<ForestScene> _test_scene;
+
+   std::shared_ptr<EventSerializer> _global_event_serializer;
 
    sf::Clock _delta_clock;
    std::atomic<bool> _level_loading_finished = false;

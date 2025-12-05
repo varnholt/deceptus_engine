@@ -2,6 +2,7 @@
 
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "game/constants.h"
+#include "game/io/eventserializer.h"
 #include "game/player/playerinput.h"
 
 #include <chrono>
@@ -12,7 +13,7 @@
 class PlayerControls
 {
 public:
-   PlayerControls() = default;
+   PlayerControls();
 
    void update(const sf::Time& dt);
 
@@ -81,6 +82,9 @@ public:
 
    float readControllerNormalizedHorizontal() const;
 
+   // Event serialization methods - these will manage the internal event serializer
+   void handleEvent(const sf::Event& event);  // New method to handle raw SFML events for recording
+
 private:
    struct LockedKey
    {
@@ -111,4 +115,5 @@ private:
    Orientation _locked_orientation = Orientation::Undefined;
    Orientation _last_requested_orientation = Orientation::Undefined;
    std::unordered_map<KeyPressed, LockedKey> _locked_keys;
+   std::shared_ptr<EventSerializer> _event_serializer;
 };
