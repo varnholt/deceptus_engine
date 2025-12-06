@@ -4,11 +4,9 @@
 
 #include <chrono>
 #include <functional>
-#include <future>
 #include <memory>
 #include <optional>
 #include <string>
-#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -23,14 +21,10 @@ public:
    struct ChronoEvent
    {
       // for playback
-      ChronoEvent(const HighResDuration& duration, const sf::Event& event) : _duration(duration), _event(event)
-      {
-      }
+      ChronoEvent(const HighResDuration& duration, const sf::Event& event);
 
       // for recording
-      ChronoEvent(const HighResTimePoint& time_point, const sf::Event& event) : _time_point(time_point), _event(event)
-      {
-      }
+      ChronoEvent(const HighResTimePoint& time_point, const sf::Event& event);
 
       HighResTimePoint _time_point;
       HighResDuration _duration;
@@ -39,10 +33,12 @@ public:
 
    using EventCallback = std::function<void(const sf::Event& event)>;
 
-   // Static registry methods for named instances
+   // registry for named instances
    static std::shared_ptr<EventSerializer> getInstance(const std::string& name);
    static void registerInstance(const std::string& name, const std::shared_ptr<EventSerializer>& instance);
    static void unregisterInstance(const std::string& name);
+   static void addToAll(const sf::Event& event);
+   static void updateAll(sf::Time delta_time);
 
    void add(const sf::Event& event);
    void clear();
@@ -53,7 +49,7 @@ public:
    void debug();
    void play();
 
-   void update(sf::Time dt);  // New time-based update function
+   void update(sf::Time dt);
    void setCallback(const EventCallback& callback);
 
    std::optional<size_t> getMaxSize() const;
@@ -61,27 +57,21 @@ public:
 
    bool isEnabled() const;
    void setEnabled(bool enabled);
+   bool isPlaying() const;
 
-   bool isPlaying() const;    // New function to check if actively playing
-
-   void start();       //!< convenience helper function
-   void stop();        //!< convenience helper function
-
-   static void addToAll(const sf::Event& event);
-   static void updateAll(sf::Time dt);
+   void start();  //!< convenience helper function
+   void stop();   //!< convenience helper function
 
 private:
-
    static bool filterMovementEvents(const sf::Event& event);
 
-   // Static registry for named instances
    static std::unordered_map<std::string, std::weak_ptr<EventSerializer>> _instance_registry;
 
    std::optional<size_t> _max_size;
    std::vector<ChronoEvent> _events;
-   bool _playing = false;              //!< New field to track playback state
-   sf::Time _elapsed_time;             //!< New field to track elapsed time during playback
-   size_t _current_event_index = 0;    //!< New field to track current event during playback
+   bool _playing = false;            //!< New field to track playback state
+   sf::Time _elapsed_time;           //!< New field to track elapsed time during playback
+   size_t _current_event_index = 0;  //!< New field to track current event during playback
    bool _enabled = false;
 
    EventCallback _callback;
