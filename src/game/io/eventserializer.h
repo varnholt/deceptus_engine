@@ -73,6 +73,7 @@ private:
    sf::Time _elapsed_time;           //!< New field to track elapsed time during playback
    size_t _current_event_index = 0;  //!< New field to track current event during playback
    bool _enabled = false;
+   HighResTimePoint _playback_start_time;  //!< Time when playback started
 
    EventCallback _callback;
 };
