@@ -8,7 +8,6 @@
 #include <iostream>
 #include <memory>
 #include <ostream>
-#include <thread>
 #include <unordered_set>
 
 namespace
@@ -24,7 +23,6 @@ constexpr uint8_t EVENT_UNKNOWN = 255;
 
 }  // namespace
 
-// Static member definition
 std::unordered_map<std::string, std::weak_ptr<EventSerializer>> EventSerializer::_instance_registry;
 
 void writeInt32(std::ostream& stream, int32_t value)
@@ -87,7 +85,6 @@ void EventSerializer::add(const sf::Event& event)
       return;
    }
 
-   // Don't add events while playing back
    if (_playing)
    {
       return;
@@ -120,9 +117,9 @@ void EventSerializer::clear()
 void writeEvent(std::ostream& stream, const sf::Event& event)
 {
    event.visit(
-      [&](const auto& e)
+      [&](const auto& visited_event)
       {
-         using event_t = std::decay_t<decltype(e)>;
+         using event_t = std::decay_t<decltype(visited_event)>;
 
          constexpr uint8_t event_id = []
          {
@@ -141,8 +138,9 @@ void writeEvent(std::ostream& stream, const sf::Event& event)
 
          if constexpr (event_id == EVENT_KEY_PRESSED || event_id == EVENT_KEY_RELEASED)
          {
-            writeUInt8(stream, static_cast<uint8_t>(e.code));
-            uint8_t flags = (e.alt << 3) | (e.control << 2) | (e.shift << 1) | (e.system << 0);
+            writeUInt8(stream, static_cast<uint8_t>(visited_event.code));
+            uint8_t flags =
+               (visited_event.alt << 3) | (visited_event.control << 2) | (visited_event.shift << 1) | (visited_event.system << 0);
             writeUInt8(stream, flags);
          }
          else
@@ -262,42 +260,32 @@ void EventSerializer::play()
    DisplayMode::getInstance().enqueueSet(Display::ReplayPlaying);
 }
 
-void EventSerializer::update(sf::Time dt)
+void EventSerializer::update(sf::Time delta_time)
 {
    if (!_playing || _events.empty() || !_callback)
    {
       return;
    }
 
-   // Add the elapsed time from the game loop
-   _elapsed_time += dt;
+   _elapsed_time += delta_time;
 
-   // Convert sf::Time to the same time units as the recorded durations
-   auto elapsed_chrono = std::chrono::microseconds(static_cast<long long>(_elapsed_time.asMicroseconds()));
-
-   // Process all events that should have occurred during this time period
+   const auto elapsed_chrono = std::chrono::microseconds(static_cast<long long>(_elapsed_time.asMicroseconds()));
    while (_current_event_index < _events.size())
    {
       const auto& event = _events[_current_event_index];
 
-      // Check if this event's scheduled time has been reached
       if (elapsed_chrono >= event._duration)
       {
          Log::Info() << "play event " << _current_event_index << " duration: " << event._duration.count();
-
-         // Pass event to callback
          _callback(event._event);
-
          _current_event_index++;
       }
       else
       {
-         // If the next event's time hasn't been reached yet, break and wait for more time
          break;
       }
    }
 
-   // Check if all events have been processed
    if (_current_event_index >= _events.size())
    {
       _playing = false;
@@ -407,13 +395,22 @@ void EventSerializer::addToAll(const sf::Event& event)
    }
 }
 
-void EventSerializer::updateAll(sf::Time dt)
+void EventSerializer::updateAll(sf::Time delta_time)
 {
    for (auto& pair : _instance_registry)
    {
       if (auto instance = pair.second.lock())
       {
-         instance->update(dt);
+         instance->update(delta_time);
       }
    }
+}
+
+EventSerializer::ChronoEvent::ChronoEvent(const HighResDuration& duration, const sf::Event& event) : _duration(duration), _event(event)
+{
+}
+
+EventSerializer::ChronoEvent::ChronoEvent(const HighResTimePoint& time_point, const sf::Event& event)
+    : _time_point(time_point), _event(event)
+{
 }
