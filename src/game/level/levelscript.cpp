@@ -675,6 +675,8 @@ LevelScript::LevelScript()
    inventory._added_callbacks.push_back(_inventory_added_callback);
    inventory._used_callbacks.push_back(_inventory_used_callback);
 
+   GameMechanismObserver::clear();
+
    _enabled_observer_reference = GameMechanismObserver::addListener<GameMechanismObserver::EnabledCallback>(
       [this](const std::string& object_id, const std::string& group_id, bool enabled) { luaMechanismEnabled(object_id, group_id, enabled); }
    );
