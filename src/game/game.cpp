@@ -406,7 +406,6 @@ void Game::nextLevel()
 
 Game::~Game()
 {
-   // Unregister the global event serializer instance from the static registry
    EventSerializer::unregisterInstance("global");
 }
 
@@ -787,7 +786,6 @@ void Game::update()
          updateGameController();
          updateGameControllerForGame();
 
-         // Update all registered event serializers including the global one
          EventSerializer::updateAll(dt);
 
          _level->update(dt);

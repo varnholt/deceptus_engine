@@ -905,6 +905,12 @@ float PlayerControls::readControllerNormalizedHorizontal() const
 
 void PlayerControls::handleEvent(const sf::Event& event)
 {
+   // during playback, don't process external events - only respond to replayed events
+   if (_event_serializer->isPlaying())
+   {
+      return;
+   }
+
    // events are just dropped by the serializer when not enabled
    _event_serializer->add(event);
 
