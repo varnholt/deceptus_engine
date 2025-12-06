@@ -82,8 +82,7 @@ public:
 
    float readControllerNormalizedHorizontal() const;
 
-   // Event serialization methods - these will manage the internal event serializer
-   void handleEvent(const sf::Event& event);  // New method to handle raw SFML events for recording
+   void handleEvent(const sf::Event& event);
 
 private:
    struct LockedKey
