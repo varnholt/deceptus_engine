@@ -256,6 +256,7 @@ void EventSerializer::play()
    _playing = true;
    _elapsed_time = sf::Time::Zero;
    _current_event_index = 0;
+   _playback_start_time = HighResClock::now();  // Record when playback started
 
    DisplayMode::getInstance().enqueueSet(Display::ReplayPlaying);
 }
@@ -267,14 +268,14 @@ void EventSerializer::update(sf::Time delta_time)
       return;
    }
 
-   _elapsed_time += delta_time;
+   const auto now = HighResClock::now();
+   const auto elapsed_duration = now - _playback_start_time;
 
-   const auto elapsed_chrono = std::chrono::microseconds(static_cast<long long>(_elapsed_time.asMicroseconds()));
    while (_current_event_index < _events.size())
    {
       const auto& event = _events[_current_event_index];
 
-      if (elapsed_chrono >= event._duration)
+      if (elapsed_duration >= event._duration)
       {
          Log::Info() << "play event " << _current_event_index << " duration: " << event._duration.count();
          _callback(event._event);
