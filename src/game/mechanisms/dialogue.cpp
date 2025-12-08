@@ -226,10 +226,6 @@ bool Dialogue::isActive() const
 
 void Dialogue::setActive(bool active)
 {
-   if (active)
-   {
-      std::cout << "active" << std::endl;
-   }
    _active = active;
 }
 

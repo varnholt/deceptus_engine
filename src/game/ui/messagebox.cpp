@@ -369,7 +369,7 @@ void MessageBox::initializeControllerCallbacks()
    }
 }
 
-void MessageBox::drawLayers(sf::RenderTarget& window, sf::RenderStates states)
+void MessageBox::drawLayers(sf::RenderTarget& window, const sf::RenderStates& states)
 {
    for (auto& layer : _layer_stack)
    {
@@ -380,7 +380,7 @@ void MessageBox::drawLayers(sf::RenderTarget& window, sf::RenderStates states)
    }
 }
 
-void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
+void MessageBox::drawText(sf::RenderTarget& window, const sf::RenderStates& states)
 {
    updateTextAnimation();
 
@@ -390,7 +390,7 @@ void MessageBox::drawText(sf::RenderStates states, sf::RenderTarget& window)
    }
 }
 
-void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
+void MessageBox::draw(sf::RenderTarget& window, const sf::RenderStates& states)
 {
    const auto messageboxes = {__active.get(), __previous.get()};
    const auto has_valid_ptr = std::ranges::any_of(messageboxes, [](const auto ptr) { return ptr != nullptr; });
@@ -413,7 +413,7 @@ void MessageBox::draw(sf::RenderTarget& window, sf::RenderStates states)
       if (messagebox)
       {
          messagebox->drawLayers(window, states);
-         messagebox->drawText(states, window);
+         messagebox->drawText(window, states);
       }
    }
 }
