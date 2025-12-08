@@ -797,6 +797,11 @@ void Player::updateAnimation(const sf::Time& dt)
 {
    PlayerAnimation::PlayerAnimationData data;
 
+   if (_bend._was_bending_down != _bend._bending_down)
+   {
+      Log::Info() << "was bending down: " << _bend._was_bending_down << ", is bending down: " << _bend._bending_down;
+   }
+
    data._dead = isDead();
    data._death_count_current_level = SaveState::getPlayerInfo()._stats._death_count_current_level;
    data._death_reason = _death_reason.value_or(DeathReason::Invalid);
@@ -949,13 +954,11 @@ void Player::updateVelocity()
       }
 
       // from here the player is crouching
-      _bend._was_crouching = _bend._crouching;
-      _bend._crouching = true;
+      _bend.setCrouchingEnabled(true);
    }
    else
    {
-      _bend._was_crouching = _bend._crouching;
-      _bend._crouching = false;
+      _bend.setCrouchingEnabled(false);
    }
 
    // we need friction to walk up diagonales
@@ -1281,12 +1284,11 @@ void Player::updateBendDown()
    // disable bend down states when player hit dash button
    if (_dash.hasMoreFrames())
    {
-      _bend._was_bending_down = false;
-      _bend._bending_down = false;
+      _bend.resetBendingDown();
       return;
    }
 
-   auto down_pressed = _controls->isBendDownActive();
+   const auto down_pressed = _controls->isBendDownActive();
 
    // if the head touches something while crouches, keep crouching
    if (_bend._bending_down && !down_pressed && (GameContactListener::getInstance().getPlayerHeadContactCollidingCount() > 0))
@@ -1301,9 +1303,7 @@ void Player::updateBendDown()
    }
 
    const auto bending_down = down_pressed && !isInAir() && !isInWater();
-
-   _bend._was_bending_down = _bend._bending_down;
-   _bend._bending_down = bending_down;
+   _bend.setBendingDownEnabled(bending_down);
 
    if (!_bend._was_bending_down && _bend._bending_down)
    {
