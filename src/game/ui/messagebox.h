@@ -64,7 +64,7 @@ struct MessageBox
    MessageBox(Type type, const std::string& message, const MessageBoxCallback& cb, const LayoutProperties& properties, int32_t buttons);
    virtual ~MessageBox();
 
-   static void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+   static void draw(sf::RenderTarget& window, const sf::RenderStates& = sf::RenderStates::Default);
    static void update(const sf::Time& dt);
    static bool keyboardKeyPressed(sf::Keyboard::Key key);
    static void reset();
@@ -83,8 +83,8 @@ struct MessageBox
       int32_t buttons = (static_cast<int32_t>(Button::Yes) | static_cast<int32_t>(Button::No))
    );
 
-   void drawLayers(sf::RenderTarget& window, sf::RenderStates states);
-   void drawText(sf::RenderStates states, sf::RenderTarget& window);
+   void drawLayers(sf::RenderTarget& window, const sf::RenderStates& states);
+   void drawText(sf::RenderTarget& window, const sf::RenderStates& states);
 
    void initializeControllerCallbacks();
    void initializeLayers();

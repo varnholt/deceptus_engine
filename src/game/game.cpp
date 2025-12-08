@@ -768,7 +768,8 @@ void Game::update()
 
    _info_layer->update(dt);
 
-   if (GameState::getInstance().getMode() == ExecutionMode::Paused)
+   const auto game_mode = GameState::getInstance().getMode();
+   if (game_mode == ExecutionMode::Paused)
    {
       updateGameController();
 
@@ -777,7 +778,7 @@ void Game::update()
          _ingame_menu->update(dt);
       }
    }
-   else if (GameState::getInstance().getMode() == ExecutionMode::Running)
+   else if (game_mode == ExecutionMode::Running)
    {
       Timer::update(Timer::Scope::UpdateIngame);
 
@@ -860,10 +861,16 @@ void Game::takeScreenshot()
 void Game::processEvent(const sf::Event& event)
 {
    _global_event_serializer->add(event);
-   if (_player && _player->getControls())
+
+   const auto invokePlayerControls = [this](auto&& func)
    {
-      _player->getControls()->handleEvent(event);
-   }
+      if (_player && _player->getControls())
+      {
+         func();
+      }
+   };
+
+   invokePlayerControls([&event, this]() { _player->getControls()->handleEvent(event); });
 
    if (event.is<sf::Event::Closed>())
    {
@@ -888,18 +895,20 @@ void Game::processEvent(const sf::Event& event)
             showPauseMenu();
          }
       }
-      else if (_player)
+      else
       {
-         CameraPanorama::getInstance().updateLookState(Look::Active, false);
-         _player->getControls()->setKeysPressed(0);
+         invokePlayerControls(
+            [this]()
+            {
+               CameraPanorama::getInstance().updateLookState(Look::Active, false);
+               _player->getControls()->setKeysPressed(0);
+            }
+         );
       }
    }
    else if (event.is<sf::Event::FocusGained>())
    {
-      if (_player)
-      {
-         _player->getControls()->forceSync();
-      }
+      invokePlayerControls([this]() { _player->getControls()->forceSync(); });
    }
    else if (auto* key_pressed_event = event.getIf<sf::Event::KeyPressed>())
    {
@@ -918,7 +927,7 @@ void Game::processEvent(const sf::Event& event)
             return;
          }
 
-         _player->getControls()->keyboardKeyPressed(key_pressed_event->code);
+         invokePlayerControls([key_pressed_event, this]() { _player->getControls()->keyboardKeyPressed(key_pressed_event->code); });
       }
 
       // this is the handling of the actual in-game keypress events
@@ -932,7 +941,7 @@ void Game::processEvent(const sf::Event& event)
          return;
       }
 
-      _player->getControls()->keyboardKeyReleased(key_released_event->code);
+      invokePlayerControls([key_released_event, this]() { _player->getControls()->keyboardKeyReleased(key_released_event->code); });
       processKeyReleasedEvents(key_released_event);
    }
 
