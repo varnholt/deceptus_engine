@@ -24,6 +24,11 @@ PlayerControls::PlayerControls()
       }
    );
 
+   // set up the playback status query function for PlayerControlState
+   PlayerControlState::setPlaybackStatusQuery([this]() {
+       return _event_serializer->isPlaying();
+   });
+
    EventSerializer::registerInstance("player", _event_serializer);
 }
 
