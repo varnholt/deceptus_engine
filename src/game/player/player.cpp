@@ -797,11 +797,6 @@ void Player::updateAnimation(const sf::Time& dt)
 {
    PlayerAnimation::PlayerAnimationData data;
 
-   if (_bend._was_bending_down != _bend._bending_down)
-   {
-      Log::Info() << "was bending down: " << _bend._was_bending_down << ", is bending down: " << _bend._bending_down;
-   }
-
    data._dead = isDead();
    data._death_count_current_level = SaveState::getPlayerInfo()._stats._death_count_current_level;
    data._death_reason = _death_reason.value_or(DeathReason::Invalid);
