@@ -162,8 +162,8 @@ void Dialogue::update(const sf::Time& /*dt*/)
    }
 
    // don't open dialogues when camera panorama is active
-   const auto& dm = DisplayMode::getInstance();
-   if (dm.isSet(Display::CameraPanorama))
+   const auto& display_mode = DisplayMode::getInstance();
+   if (display_mode.isSet(Display::CameraPanorama))
    {
       return;
    }
@@ -189,7 +189,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
       // is only removed when the messagebox is actually fully destroyed.
       // thinking about this a little more, maybe the 'active' flag can actually
       // be removed entirely.
-      if (!isActive() && !DisplayMode::getInstance().isSet(Display::Modal))
+      if (!isActive() && !display_mode.isSet(Display::Modal))
       {
          setActive(true);
 
