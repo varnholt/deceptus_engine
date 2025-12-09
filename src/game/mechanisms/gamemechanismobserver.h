@@ -20,6 +20,7 @@ extern std::vector<EventCallback> _event_listeners;
 
 void onEnabled(const std::string& object_id, const std::string& group_id, bool enabled);
 void onEvent(const std::string& object_id, const std::string& object_group, const std::string& event_name, const LuaVariant& value);
+void clear();
 
 template <typename Callback>
 struct Reference

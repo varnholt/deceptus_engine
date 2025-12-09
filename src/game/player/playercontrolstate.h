@@ -1,6 +1,8 @@
 #ifndef PLAYERCONTROLSTATE_H
 #define PLAYERCONTROLSTATE_H
 
+#include <functional>
+
 namespace PlayerControlState
 {
 ///
@@ -10,6 +12,12 @@ namespace PlayerControlState
 bool checkState();
 bool checkStateCpanOkay();
 bool checkStateUseInventory();
+
+// function type for querying playback status
+using PlaybackStatusQuery = std::function<bool()>;
+
+// set the function to use for querying playback status
+void setPlaybackStatusQuery(const PlaybackStatusQuery& query_func);
 
 };  // namespace PlayerControlState
 

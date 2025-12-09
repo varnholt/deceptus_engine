@@ -4,6 +4,13 @@ namespace GameMechanismObserver
 {
 std::vector<EnabledCallback> _enabled_listeners;
 std::vector<EventCallback> _event_listeners;
+
+void clear()
+{
+   _enabled_listeners.clear();
+   _event_listeners.clear();
+}
+
 }  // namespace GameMechanismObserver
 
 void GameMechanismObserver::onEnabled(const std::string& object_id, const std::string& group_id, bool enabled)
