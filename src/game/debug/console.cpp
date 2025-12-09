@@ -2,7 +2,6 @@
 
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
-#include "game/io/eventserializer.h"
 #include "game/level/level.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"
@@ -285,35 +284,72 @@ void Console::execute()
    // playback
    else if (results.at(0) == "playback" && results.size() == 2)
    {
+      const auto& serializer = EventSerializer::getInstance("player");
       if (results[1] == "enable")
       {
-         EventSerializer::getInstance().setEnabled(true);
+         serializer->setEnabled(true);
          _log.emplace_back("playback enabled");
       }
       else if (results[1] == "disable")
       {
-         EventSerializer::getInstance().setEnabled(false);
+         serializer->setEnabled(false);
          _log.emplace_back("playback disabled");
       }
       else if (results[1] == "save")
       {
-         EventSerializer::getInstance().serialize();
+         serializer->serialize();
          _log.emplace_back("playback saved");
       }
       else if (results[1] == "load")
       {
-         EventSerializer::getInstance().deserialize();
+         serializer->deserialize();
          _log.emplace_back("playback loaded");
       }
       else if (results[1] == "replay")
       {
-         EventSerializer::getInstance().play();
+         serializer->play();
          _log.emplace_back("playback started");
       }
       else if (results[1] == "reset")
       {
-         EventSerializer::getInstance().clear();
+         serializer->clear();
          _log.emplace_back("playback reset");
+      }
+   }
+
+   // global playback
+   else if (results.at(0) == "globalplayback" && results.size() == 2)
+   {
+      const auto& serializer = EventSerializer::getInstance("global");
+      if (results[1] == "enable")
+      {
+         serializer->setEnabled(true);
+         _log.emplace_back("global playback enabled");
+      }
+      else if (results[1] == "disable")
+      {
+         serializer->setEnabled(false);
+         _log.emplace_back("global playback disabled");
+      }
+      else if (results[1] == "save")
+      {
+         serializer->serialize();
+         _log.emplace_back("global playback saved");
+      }
+      else if (results[1] == "load")
+      {
+         serializer->deserialize();
+         _log.emplace_back("global playback loaded");
+      }
+      else if (results[1] == "replay")
+      {
+         serializer->play();
+         _log.emplace_back("global playback started");
+      }
+      else if (results[1] == "reset")
+      {
+         serializer->clear();
+         _log.emplace_back("global playback reset");
       }
    }
 
