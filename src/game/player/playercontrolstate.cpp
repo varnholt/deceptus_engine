@@ -3,8 +3,18 @@
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 
+namespace {
+// global callback for querying playback status - defaults to always returning false
+PlayerControlState::PlaybackStatusQuery __playback_status_query = []() { return false; };
+} // namespace
+
 bool PlayerControlState::checkState()
 {
+   // if playback is active, always allow input
+   if (__playback_status_query && __playback_status_query()) {
+      return true;
+   }
+
    const auto& display_mode = DisplayMode::getInstance();
    if (display_mode.isSet(Display::Modal) || display_mode.isSet(Display::CameraPanorama))
    {
@@ -21,6 +31,11 @@ bool PlayerControlState::checkState()
 
 bool PlayerControlState::checkStateCpanOkay()
 {
+   // if playback is active, always allow input
+   if (__playback_status_query && __playback_status_query()) {
+      return true;
+   }
+
    const auto& display_mode = DisplayMode::getInstance();
    if (display_mode.isSet(Display::Modal))
    {
@@ -37,6 +52,7 @@ bool PlayerControlState::checkStateCpanOkay()
 
 bool PlayerControlState::checkStateUseInventory()
 {
+   // this should always be strict, regardless of playback state
    const auto& display_mode = DisplayMode::getInstance();
    if (display_mode.isSet(Display::Modal) || display_mode.isSet(Display::IngameMenu))
    {
@@ -49,4 +65,9 @@ bool PlayerControlState::checkStateUseInventory()
    }
 
    return true;
+}
+
+void PlayerControlState::setPlaybackStatusQuery(const PlaybackStatusQuery& query_func)
+{
+   __playback_status_query = query_func;
 }
