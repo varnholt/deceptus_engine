@@ -17,15 +17,14 @@
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
 #include "game/event/eventdistributor.h"
-#include "game/io/eventserializer.h"
 #include "game/level/level.h"
 #include "game/level/levels.h"
 #include "game/player/player.h"
-#include "splashscreen.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/ui/messagebox.h"
+#include "splashscreen.h"
 
 #include "menus/menu.h"
 #include "menus/menuscreenmain.h"
@@ -254,8 +253,6 @@ void Game::initializeWindow()
    {
       _level->initializeTextures();
    }
-
-   EventSerializer::getInstance().setCallback([this](const sf::Event& event) { processEvent(event); });
 }
 
 void Game::initializeController()
@@ -409,7 +406,7 @@ void Game::nextLevel()
 
 Game::~Game()
 {
-   // _event_serializer.serialize();
+   EventSerializer::unregisterInstance("global");
 }
 
 void Game::initialize()
@@ -420,6 +417,10 @@ void Game::initialize()
 
    _player = std::make_shared<Player>();
    _player->initialize();
+
+   _global_event_serializer = std::make_shared<EventSerializer>();
+   _global_event_serializer->setCallback([this](const sf::Event& event) { processEvent(event); });
+   EventSerializer::registerInstance("global", _global_event_serializer);
 
    _info_layer = std::make_unique<InfoLayer>();
    _ingame_menu = std::make_unique<InGameMenu>();
@@ -767,7 +768,8 @@ void Game::update()
 
    _info_layer->update(dt);
 
-   if (GameState::getInstance().getMode() == ExecutionMode::Paused)
+   const auto game_mode = GameState::getInstance().getMode();
+   if (game_mode == ExecutionMode::Paused)
    {
       updateGameController();
 
@@ -776,7 +778,7 @@ void Game::update()
          _ingame_menu->update(dt);
       }
    }
-   else if (GameState::getInstance().getMode() == ExecutionMode::Running)
+   else if (game_mode == ExecutionMode::Running)
    {
       Timer::update(Timer::Scope::UpdateIngame);
 
@@ -784,6 +786,8 @@ void Game::update()
       {
          updateGameController();
          updateGameControllerForGame();
+
+         EventSerializer::updateAll(dt);
 
          _level->update(dt);
          _player->update(dt);
@@ -856,6 +860,18 @@ void Game::takeScreenshot()
 
 void Game::processEvent(const sf::Event& event)
 {
+   _global_event_serializer->add(event);
+
+   const auto invokePlayerControls = [this](auto&& func)
+   {
+      if (_player && _player->getControls())
+      {
+         func();
+      }
+   };
+
+   invokePlayerControls([&event, this]() { _player->getControls()->handleEvent(event); });
+
    if (event.is<sf::Event::Closed>())
    {
       _window->close();
@@ -879,18 +895,20 @@ void Game::processEvent(const sf::Event& event)
             showPauseMenu();
          }
       }
-      else if (_player)
+      else
       {
-         CameraPanorama::getInstance().updateLookState(Look::Active, false);
-         _player->getControls()->setKeysPressed(0);
+         invokePlayerControls(
+            [this]()
+            {
+               CameraPanorama::getInstance().updateLookState(Look::Active, false);
+               _player->getControls()->setKeysPressed(0);
+            }
+         );
       }
    }
    else if (event.is<sf::Event::FocusGained>())
    {
-      if (_player)
-      {
-         _player->getControls()->forceSync();
-      }
+      invokePlayerControls([this]() { _player->getControls()->forceSync(); });
    }
    else if (auto* key_pressed_event = event.getIf<sf::Event::KeyPressed>())
    {
@@ -909,7 +927,7 @@ void Game::processEvent(const sf::Event& event)
             return;
          }
 
-         _player->getControls()->keyboardKeyPressed(key_pressed_event->code);
+         invokePlayerControls([key_pressed_event, this]() { _player->getControls()->keyboardKeyPressed(key_pressed_event->code); });
       }
 
       // this is the handling of the actual in-game keypress events
@@ -923,7 +941,7 @@ void Game::processEvent(const sf::Event& event)
          return;
       }
 
-      _player->getControls()->keyboardKeyReleased(key_released_event->code);
+      invokePlayerControls([key_released_event, this]() { _player->getControls()->keyboardKeyReleased(key_released_event->code); });
       processKeyReleasedEvents(key_released_event);
    }
 
@@ -1126,20 +1144,27 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::F8:
       {
-         auto& serializer = EventSerializer::getInstance();
-         if (serializer.isEnabled())
+         const auto& serializer = EventSerializer::getInstance("player");
+         if (serializer)
          {
-            serializer.stop();
-         }
-         else
-         {
-            serializer.start();
+            if (serializer->isEnabled())
+            {
+               serializer->stop();
+            }
+            else
+            {
+               serializer->start();
+            }
          }
          break;
       }
       case sf::Keyboard::Key::F9:
       {
-         EventSerializer::getInstance().play();
+         const auto& serializer = EventSerializer::getInstance("player");
+         if (serializer)
+         {
+            serializer->play();
+         }
          break;
       }
       case sf::Keyboard::Key::F11:
@@ -1227,7 +1252,6 @@ void Game::processEvents()
    while (const auto event = _window->pollEvent())
    {
       processEvent(event.value());
-      EventSerializer::getInstance().add(event.value());
    }
 
    if (DrawStates::_draw_physics_config)
