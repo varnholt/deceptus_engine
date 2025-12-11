@@ -189,12 +189,12 @@ InfoLayer::InfoLayer()
    _slot_item_layers[1] = _layers["item_slot_Y"]->_layer;
 
    // load heart animation
-   const auto t = sf::milliseconds(100);
+   const auto heart_animation_interval_ms = sf::milliseconds(100);
    std::vector<sf::Time> ts;
    constexpr auto frame_count = 6 * 8 + 7;
    for (auto i = 0; i < frame_count; i++)
    {
-      ts.push_back(t);
+      ts.push_back(heart_animation_interval_ms);
    }
 
    AnimationFrameData frames{TexturePool::getInstance().get("data/sprites/health.png"), {0, 0}, 24, 24, frame_count, 8, ts, 0};
@@ -217,12 +217,15 @@ InfoLayer::InfoLayer()
    _animation_skull_blink = _animation_pool.create("skull_blink", skull_pos_x_px, skull_pos_y_px, false, false);
    _animation_hp_unlock_left = _animation_pool.create("hp_unlock_left", 0.0f, 0.0f, false, false);
    _animation_hp_unlock_right = _animation_pool.create("hp_unlock_right", 0.0f, 0.0f, false, false);
+   _animation_loading = _animation_pool.create("loading", 300, 300, false, false);
 
    _animation_heart->_reset_to_first_frame = false;
    _animation_stamina->_reset_to_first_frame = false;
    _animation_skull_blink->_reset_to_first_frame = false;
    _animation_hp_unlock_left->_reset_to_first_frame = false;
    _animation_hp_unlock_right->_reset_to_first_frame = false;
+   _animation_loading->_reset_to_first_frame = true;
+   _animation_loading->_looped = true;
 
    _event_replay_playing = _layers["icon_playing"]->_layer;
    _event_replay_recording = _layers["icon_recording"]->_layer;
@@ -413,17 +416,33 @@ void InfoLayer::drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates st
    }
 }
 
-void InfoLayer::drawAutoSave(sf::RenderTarget& window, sf::RenderStates states)
+void InfoLayer::drawLoading(sf::RenderTarget& window, sf::RenderStates states)
 {
-   const auto now = GlobalClock::getInstance().getElapsedTime();
-
-   auto autosave = _layers["autosave"]->_layer;
-   if (autosave->_visible)
+   auto layer_autosave = _layers["autosave"]->_layer;
+   if (layer_autosave->_visible)
    {
-      const auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
-      autosave->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
-      autosave->draw(window, states);
+      layer_autosave->draw(window, states);
    }
+
+   _animation_loading->play();
+   _animation_loading->draw(window, states);
+}
+
+void InfoLayer::updateLoading(const sf::Time& dt)
+{
+   auto layer_autosave = _layers["autosave"]->_layer;
+   layer_autosave->_visible = _loading;
+
+   if (_loading)
+   {
+      const auto now = GlobalClock::getInstance().getElapsedTime();
+      const auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
+      layer_autosave->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
+   }
+
+   // need to fade in/fade out now instead of using the sine
+
+   _animation_loading->update(dt);
 }
 
 void InfoLayer::drawEventReplay(sf::RenderStates states, sf::RenderTarget& window)
@@ -446,7 +465,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    const sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
 
-   drawAutoSave(window, states);
+   drawLoading(window, states);
    drawCameraPanorama(window, states);
    drawHealth(window, states);
    drawEventReplay(states, window);
@@ -545,8 +564,6 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 
 void InfoLayer::setLoading(bool loading)
 {
-   _layers["autosave"]->_layer->_visible = loading;
-
    if (_loading && !loading)
    {
       _show_time = GlobalClock::getInstance().getElapsedTime();
@@ -570,6 +587,7 @@ void InfoLayer::update(const sf::Time& dt)
    updateHealthLayerOffsets();
    updateInventoryItems();
    updateAnimations(dt);
+   updateLoading(dt);
    updateEventReplayIcons();
 
    if (_heart_animation._paused)

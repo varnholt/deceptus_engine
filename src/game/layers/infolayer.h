@@ -30,15 +30,18 @@ public:
 
 private:
    void loadInventoryItems();
+
    void drawHeartAnimation(sf::RenderTarget& window, sf::RenderStates states);
    void drawInventoryItem(sf::RenderTarget& window, sf::RenderStates states);
    void drawHealth(sf::RenderTarget& window, sf::RenderStates states);
    void drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates states);
-   void drawAutoSave(sf::RenderTarget& window, sf::RenderStates states);
+   void drawLoading(sf::RenderTarget& window, sf::RenderStates states);
    void drawEventReplay(sf::RenderStates states, sf::RenderTarget& window);
+
    void updateInventoryItems();
    void updateHealthLayerOffsets();
    void updateEventReplayIcons();
+   void updateLoading(const sf::Time& dt);
 
    BitmapFont _font;
 
@@ -73,6 +76,7 @@ private:
    HighResDuration _animation_duration_heart{HighResDuration::zero()};
    HighResDuration _animation_duration_stamina{HighResDuration::zero()};
    HighResDuration _animation_duration_skull_blink{HighResDuration::zero()};
+   std::shared_ptr<Animation> _animation_loading;
 
    // inventory
    std::array<std::shared_ptr<Layer>, 2> _slot_item_layers;
