@@ -6,12 +6,14 @@ _initialized = false
 
 _elapsed = 0.0
 
-_delay_to_show_dialogue = 0.5
+_delay_to_show_dialogue = 1.5
+_delay_to_start_kneel = 1.0
 _delay_to_show_monk = 0.5
 _delay_to_hide_monk = 2.0
 
 _player_intersected_with_monk_rect = false
 _monk_shown = false
+_player_kneeled = false
 _monk_dialogue_shown = false
 _monk_hide = false
 
@@ -40,7 +42,18 @@ function makeMonkVisible(dt)
       writeLuaNodeProperty("shadow", "show", "true")
       setLuaNodeVisible("shadow", true)
       _monk_shown = true
-      setZoomFactor(0.5)
+      setZoomFactor(0.75)
+      lockPlayerControls(5000)
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function makePlayerKneel(dt)
+   _delay_to_start_kneel = _delay_to_start_kneel - dt
+   if (_delay_to_start_kneel <= 0.0) then
+      playEventRecording("data/catacombs/animation_player_kneel.dat")
+      _player_kneeled = true
    end
 end
 
@@ -109,6 +122,8 @@ function updateMonk(dt)
       -- 3. make him disappear again
       if (not _monk_shown) then
          makeMonkVisible(dt)
+      elseif (not _player_kneeled) then
+         makePlayerKneel(dt)
       elseif (not _monk_dialogue_shown) then
          makeMonkSpeak(dt)
       elseif (_monk_hide) then
