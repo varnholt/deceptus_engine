@@ -219,15 +219,15 @@ InfoLayer::InfoLayer()
    _animation_skull_blink = _animation_pool.create("skull_blink", skull_pos_x_px, skull_pos_y_px, false, false);
    _animation_hp_unlock_left = _animation_pool.create("hp_unlock_left", 0.0f, 0.0f, false, false);
    _animation_hp_unlock_right = _animation_pool.create("hp_unlock_right", 0.0f, 0.0f, false, false);
-   _animation_loading = _animation_pool.create("loading", 300, 300, false, false);
+   _loading_anim.animation = _animation_pool.create("loading", 300, 300, false, false);
 
    _animation_heart->_reset_to_first_frame = false;
    _animation_stamina->_reset_to_first_frame = false;
    _animation_skull_blink->_reset_to_first_frame = false;
    _animation_hp_unlock_left->_reset_to_first_frame = false;
    _animation_hp_unlock_right->_reset_to_first_frame = false;
-   _animation_loading->_reset_to_first_frame = true;
-   _animation_loading->_looped = true;
+   _loading_anim.animation->_reset_to_first_frame = true;
+   _loading_anim.animation->_looped = true;
 
    _event_replay_playing = _layers["icon_playing"]->_layer;
    _event_replay_recording = _layers["icon_recording"]->_layer;
@@ -431,13 +431,12 @@ void InfoLayer::drawLoading(sf::RenderTarget& window, sf::RenderStates states)
    blend_alpha.blendMode = sf::BlendAlpha;
    updateLoading();
 
-   _animation_loading->draw(window, blend_alpha);
+   _loading_anim.animation->draw(window, blend_alpha);
 }
 
 void InfoLayer::updateLoading()
 {
-   _animation_loading->setVisible(true);
-   _animation_loading->play();
+   _loading_anim.animation->setVisible(true);
 
    static auto last_update_time = GlobalClock::getInstance().getElapsedTime();
    const auto now = GlobalClock::getInstance().getElapsedTime();
@@ -448,14 +447,23 @@ void InfoLayer::updateLoading()
 
    constexpr auto fade_duration = sf::milliseconds(1000);  // 1 second fade duration
 
+   // Update loading animation start time when loading state changes
+   if (_loading && !_loading_anim.start_time.has_value()) {
+       _loading_anim.start_time = now;
+       _loading_anim.end_time.reset();  // Reset end time when starting
+   } else if (!_loading && !_loading_anim.end_time.has_value()) {
+       _loading_anim.end_time = now;
+       _loading_anim.start_time.reset();  // Reset start time when ending
+   }
+
    // Calculate alpha based on loading state and elapsed time
    float alpha;
    if (_loading)
    {
-      // Fade in: loading started, so use _hide_time (when loading flag was set)
-      if (_hide_time.has_value())
+      // Fade in: loading started, use the dedicated loading start time
+      if (_loading_anim.start_time.has_value())
       {
-         const auto elapsed = std::min(now - _hide_time.value(), fade_duration);
+         const auto elapsed = std::min(now - _loading_anim.start_time.value(), fade_duration);
          alpha = elapsed.asSeconds() / fade_duration.asSeconds();
       }
       else
@@ -465,10 +473,10 @@ void InfoLayer::updateLoading()
    }
    else
    {
-      // Fade out: loading ended, so use _show_time (when loading flag was cleared)
-      if (_show_time.has_value())
+      // Fade out: loading ended, use the dedicated loading end time
+      if (_loading_anim.end_time.has_value())
       {
-         const auto elapsed = std::min(now - _show_time.value(), fade_duration);
+         const auto elapsed = std::min(now - _loading_anim.end_time.value(), fade_duration);
          alpha = 1.0f - (elapsed.asSeconds() / fade_duration.asSeconds());
       }
       else
@@ -481,29 +489,28 @@ void InfoLayer::updateLoading()
    alpha = std::clamp(alpha, 0.0f, 1.0f);
 
    // Update animation state based on loading state
-   // if (_loading)
-   // {
-   //    _animation_loading->play();
-   // }
-   // else if (alpha <= std::numeric_limits<float>::epsilon())
-   // {
-   //    _animation_loading->stop();
-   // }
+   if (_loading)
+   {
+      _loading_anim.animation->play();
+   }
+   else if (alpha <= std::numeric_limits<float>::epsilon())
+   {
+      _loading_anim.animation->stop();
+   }
 
    // Update alpha only if it has changed significantly
    const auto alpha_byte = static_cast<uint8_t>(alpha * 255.0f);
-   const auto current_alpha_byte = static_cast<uint8_t>(_loading_alpha * 255.0f);
+   const auto current_alpha_byte = static_cast<uint8_t>(_loading_anim.alpha * 255.0f);
 
    if (alpha_byte != current_alpha_byte)
    {
-      _animation_loading->setAlpha(alpha_byte);
-      // _animation_loading->setColor({255, 255, 255, alpha_byte});
+      _loading_anim.animation->setAlpha(alpha_byte);
       std::cout << "setting alpha to " << static_cast<int32_t>(alpha_byte) << std::endl;
-      _loading_alpha = alpha;
+      _loading_anim.alpha = alpha;
    }
 
    // Update animation frames with the time delta since last update
-   _animation_loading->update(dt);
+   _loading_anim.animation->update(dt);
 }
 
 void InfoLayer::drawEventReplay(sf::RenderStates states, sf::RenderTarget& window)
@@ -755,3 +762,4 @@ void InfoLayer::drawInventoryItem(sf::RenderTarget& window, sf::RenderStates sta
       _slot_item_layers[i]->draw(window, states);
    }
 }
+
