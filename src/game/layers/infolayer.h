@@ -68,9 +68,9 @@ private:
    std::shared_ptr<Animation> _animation_skull_blink;
    std::shared_ptr<Animation> _animation_hp_unlock_left;
    std::shared_ptr<Animation> _animation_hp_unlock_right;
-   std::array<HighResDuration, 2> _animation_heart_duration_range;
-   std::array<HighResDuration, 2> _animation_stamina_duration_range;
-   std::array<HighResDuration, 2> _animation_skull_blink_duration_range;
+   std::array<HighResDuration, 2> _animation_heart_duration_range{};
+   std::array<HighResDuration, 2> _animation_stamina_duration_range{};
+   std::array<HighResDuration, 2> _animation_skull_blink_duration_range{};
    std::optional<HighResDuration> _next_animation_duration_heart;
    std::optional<HighResDuration> _next_animation_duration_stamina;
    std::optional<HighResDuration> _next_animation_duration_skull_blink;
@@ -80,8 +80,8 @@ private:
    std::shared_ptr<Animation> _animation_loading;
 
    // inventory
-   std::array<std::shared_ptr<Layer>, 2> _slot_item_layers;
-   std::array<std::unique_ptr<sf::Sprite>, 2> _inventory_sprites;
+   std::array<std::shared_ptr<Layer>, 2> _slot_item_layers{};
+   std::array<std::unique_ptr<sf::Sprite>, 2> _inventory_sprites{};
    std::map<std::string, std::unique_ptr<sf::Sprite>> _sprites;
    std::shared_ptr<sf::Texture> _inventory_texture;
 

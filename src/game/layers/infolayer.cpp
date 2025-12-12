@@ -190,14 +190,16 @@ InfoLayer::InfoLayer()
 
    // load heart animation
    const auto heart_animation_interval_ms = sf::milliseconds(100);
-   std::vector<sf::Time> ts;
+   std::vector<sf::Time> heart_animation_interval_times;
    constexpr auto frame_count = 6 * 8 + 7;
    for (auto i = 0; i < frame_count; i++)
    {
-      ts.push_back(heart_animation_interval_ms);
+      heart_animation_interval_times.push_back(heart_animation_interval_ms);
    }
 
-   AnimationFrameData frames{TexturePool::getInstance().get("data/sprites/health.png"), {0, 0}, 24, 24, frame_count, 8, ts, 0};
+   AnimationFrameData frames{
+      TexturePool::getInstance().get("data/sprites/health.png"), {0, 0}, 24, 24, frame_count, 8, heart_animation_interval_times, 0
+   };
    _heart_animation._frames = frames._frames;
    _heart_animation._color_texture = frames._texture;
    _heart_animation.setFrameTimes(frames._frame_times);
@@ -418,11 +420,12 @@ void InfoLayer::drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates st
 
 void InfoLayer::drawLoading(sf::RenderTarget& window, sf::RenderStates states)
 {
-   auto layer_autosave = _layers["autosave"]->_layer;
-   if (layer_autosave->_visible)
-   {
-      layer_autosave->draw(window, states);
-   }
+   // we don't need the autosave icon for now
+   // auto layer_autosave = _layers["autosave"]->_layer;
+   // if (layer_autosave->_visible)
+   // {
+   //    layer_autosave->draw(window, states);
+   // }
 
    // sf::RenderStates blend_alpha;
    // blend_alpha.blendMode = sf::BlendAlpha;
@@ -432,19 +435,23 @@ void InfoLayer::drawLoading(sf::RenderTarget& window, sf::RenderStates states)
 
 void InfoLayer::updateLoading(const sf::Time& dt)
 {
-   auto layer_autosave = _layers["autosave"]->_layer;
-   layer_autosave->_visible = false;  // we don't need the autosave icon for now
+   constexpr auto fade_in_speed = 1.0f;
+   constexpr auto fade_out_speed = 1.0f;
+
+   // we don't need the autosave icon for now
+   // auto layer_autosave = _layers["autosave"]->_layer;
+   // layer_autosave->_visible = false;
 
    auto alpha = _loading_alpha;
 
    if (_loading)
    {
       _animation_loading->play();
-      alpha = std::min(_loading_alpha + dt.asSeconds(), 1.0f);  // fade in
+      alpha = std::min(_loading_alpha + dt.asSeconds() * fade_in_speed, 1.0f);  // fade in
    }
    else
    {
-      const auto alpha_not_clamped = _loading_alpha - dt.asSeconds();
+      const auto alpha_not_clamped = _loading_alpha - dt.asSeconds() * fade_out_speed;
       if (alpha_not_clamped <= std::numeric_limits<float>::epsilon())
       {
          _animation_loading->stop();
@@ -454,8 +461,9 @@ void InfoLayer::updateLoading(const sf::Time& dt)
    }
 
    // only update alpha if really needed
-   const auto alpha_byte = static_cast<uint8_t>(alpha * 255);
-   if (alpha_byte != static_cast<uint8_t>(_loading_alpha * 255))
+   const auto alpha_byte = std::clamp<uint8_t>(static_cast<uint8_t>(alpha * 255), 0, 255);
+   const auto alpha_byte_current = std::clamp<uint8_t>(static_cast<uint8_t>(_loading_alpha * 255), 0, 255);
+   if (alpha_byte != alpha_byte_current)
    {
       std::cout << alpha << std::endl;
       _animation_loading->setAlpha(alpha_byte);
@@ -485,10 +493,10 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    const sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
 
-   drawLoading(window, states);
    drawCameraPanorama(window, states);
    drawHealth(window, states);
    drawEventReplay(states, window);
+   drawLoading(window, states);
 }
 
 void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
@@ -605,10 +613,10 @@ void InfoLayer::updateEventReplayIcons()
 
 void InfoLayer::update(const sf::Time& dt)
 {
+   updateLoading(dt);
    updateHealthLayerOffsets();
    updateInventoryItems();
    updateAnimations(dt);
-   updateLoading(dt);
    updateEventReplayIcons();
 
    if (_heart_animation._paused)
