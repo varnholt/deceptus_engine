@@ -41,7 +41,7 @@ private:
    void updateInventoryItems();
    void updateHealthLayerOffsets();
    void updateEventReplayIcons();
-   void updateLoading(const sf::Time& dt);
+   void updateLoading();
 
    BitmapFont _font;
 

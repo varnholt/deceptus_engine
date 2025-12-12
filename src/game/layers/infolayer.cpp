@@ -427,49 +427,82 @@ void InfoLayer::drawLoading(sf::RenderTarget& window, sf::RenderStates states)
    //    layer_autosave->draw(window, states);
    // }
 
-   // sf::RenderStates blend_alpha;
-   // blend_alpha.blendMode = sf::BlendAlpha;
+   sf::RenderStates blend_alpha;
+   blend_alpha.blendMode = sf::BlendAlpha;
+   updateLoading();
 
-   _animation_loading->draw(window, states);
+   _animation_loading->draw(window, blend_alpha);
 }
 
-void InfoLayer::updateLoading(const sf::Time& dt)
+void InfoLayer::updateLoading()
 {
-   constexpr auto fade_in_speed = 1.0f;
-   constexpr auto fade_out_speed = 1.0f;
+   _animation_loading->setVisible(true);
+   _animation_loading->play();
 
-   // we don't need the autosave icon for now
-   // auto layer_autosave = _layers["autosave"]->_layer;
-   // layer_autosave->_visible = false;
+   static auto last_update_time = GlobalClock::getInstance().getElapsedTime();
+   const auto now = GlobalClock::getInstance().getElapsedTime();
 
-   auto alpha = _loading_alpha;
+   // Calculate the delta time since last update for animation purposes
+   const auto dt = now - last_update_time;
+   last_update_time = now;
 
+   constexpr auto fade_duration = sf::milliseconds(1000);  // 1 second fade duration
+
+   // Calculate alpha based on loading state and elapsed time
+   float alpha;
    if (_loading)
    {
-      _animation_loading->play();
-      alpha = std::min(_loading_alpha + dt.asSeconds() * fade_in_speed, 1.0f);  // fade in
+      // Fade in: loading started, so use _hide_time (when loading flag was set)
+      if (_hide_time.has_value())
+      {
+         const auto elapsed = std::min(now - _hide_time.value(), fade_duration);
+         alpha = elapsed.asSeconds() / fade_duration.asSeconds();
+      }
+      else
+      {
+         alpha = 0.0f;  // Default to 0 if no start time is set
+      }
    }
    else
    {
-      const auto alpha_not_clamped = _loading_alpha - dt.asSeconds() * fade_out_speed;
-      if (alpha_not_clamped <= std::numeric_limits<float>::epsilon())
+      // Fade out: loading ended, so use _show_time (when loading flag was cleared)
+      if (_show_time.has_value())
       {
-         _animation_loading->stop();
+         const auto elapsed = std::min(now - _show_time.value(), fade_duration);
+         alpha = 1.0f - (elapsed.asSeconds() / fade_duration.asSeconds());
       }
-
-      alpha = std::max(alpha_not_clamped, 0.0f);  // fade out
+      else
+      {
+         alpha = 0.0f;  // Default to 0 if no start time is set
+      }
    }
 
-   // only update alpha if really needed
-   const auto alpha_byte = std::clamp<uint8_t>(static_cast<uint8_t>(alpha * 255), 0, 255);
-   const auto alpha_byte_current = std::clamp<uint8_t>(static_cast<uint8_t>(_loading_alpha * 255), 0, 255);
-   if (alpha_byte != alpha_byte_current)
+   // Clamp alpha to valid range [0, 1]
+   alpha = std::clamp(alpha, 0.0f, 1.0f);
+
+   // Update animation state based on loading state
+   // if (_loading)
+   // {
+   //    _animation_loading->play();
+   // }
+   // else if (alpha <= std::numeric_limits<float>::epsilon())
+   // {
+   //    _animation_loading->stop();
+   // }
+
+   // Update alpha only if it has changed significantly
+   const auto alpha_byte = static_cast<uint8_t>(alpha * 255.0f);
+   const auto current_alpha_byte = static_cast<uint8_t>(_loading_alpha * 255.0f);
+
+   if (alpha_byte != current_alpha_byte)
    {
-      std::cout << alpha << std::endl;
       _animation_loading->setAlpha(alpha_byte);
+      // _animation_loading->setColor({255, 255, 255, alpha_byte});
+      std::cout << "setting alpha to " << static_cast<int32_t>(alpha_byte) << std::endl;
       _loading_alpha = alpha;
    }
 
+   // Update animation frames with the time delta since last update
    _animation_loading->update(dt);
 }
 
@@ -613,7 +646,6 @@ void InfoLayer::updateEventReplayIcons()
 
 void InfoLayer::update(const sf::Time& dt)
 {
-   updateLoading(dt);
    updateHealthLayerOffsets();
    updateInventoryItems();
    updateAnimations(dt);
