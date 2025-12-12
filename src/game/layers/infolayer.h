@@ -48,6 +48,7 @@ private:
    std::atomic<bool> _loading;
    std::optional<sf::Time> _show_time;
    std::optional<sf::Time> _hide_time;
+   float _loading_alpha{0.0f};
 
    std::map<std::string, std::shared_ptr<LayerData>> _layers;
    std::vector<std::shared_ptr<LayerData>> _player_health_layers;

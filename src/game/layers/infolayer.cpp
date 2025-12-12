@@ -424,23 +424,43 @@ void InfoLayer::drawLoading(sf::RenderTarget& window, sf::RenderStates states)
       layer_autosave->draw(window, states);
    }
 
-   _animation_loading->play();
+   // sf::RenderStates blend_alpha;
+   // blend_alpha.blendMode = sf::BlendAlpha;
+
    _animation_loading->draw(window, states);
 }
 
 void InfoLayer::updateLoading(const sf::Time& dt)
 {
    auto layer_autosave = _layers["autosave"]->_layer;
-   layer_autosave->_visible = _loading;
+   layer_autosave->_visible = false;  // we don't need the autosave icon for now
+
+   auto alpha = _loading_alpha;
 
    if (_loading)
    {
-      const auto now = GlobalClock::getInstance().getElapsedTime();
-      const auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
-      layer_autosave->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
+      _animation_loading->play();
+      alpha = std::min(_loading_alpha + dt.asSeconds(), 1.0f);  // fade in
+   }
+   else
+   {
+      const auto alpha_not_clamped = _loading_alpha - dt.asSeconds();
+      if (alpha_not_clamped <= std::numeric_limits<float>::epsilon())
+      {
+         _animation_loading->stop();
+      }
+
+      alpha = std::max(alpha_not_clamped, 0.0f);  // fade out
    }
 
-   // need to fade in/fade out now instead of using the sine
+   // only update alpha if really needed
+   const auto alpha_byte = static_cast<uint8_t>(alpha * 255);
+   if (alpha_byte != static_cast<uint8_t>(_loading_alpha * 255))
+   {
+      std::cout << alpha << std::endl;
+      _animation_loading->setAlpha(alpha_byte);
+      _loading_alpha = alpha;
+   }
 
    _animation_loading->update(dt);
 }
@@ -539,12 +559,13 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    std::ostringstream oss;
 
    std::vector<std::string> sorted_topics;
+   sorted_topics.reserve(help._help_messages.size());
    for (const auto& entry : help._help_messages)
    {
       sorted_topics.push_back(entry.first);
    }
 
-   std::sort(sorted_topics.begin(), sorted_topics.end());
+   std::ranges::sort(sorted_topics.begin(), sorted_topics.end());
    for (const auto& topic : sorted_topics)
    {
       _font.draw(window, _font.getCoords(topic), w_screen / 2, (++y) * 14, sf::Color::Green);
