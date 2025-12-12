@@ -49,12 +49,21 @@ private:
    std::optional<sf::Time> _show_time;
    std::optional<sf::Time> _hide_time;
 
+   enum class LoadingFadeState
+   {
+      None,    // Not currently fading
+      FadeIn,  // Fading in to full opacity
+      FadeOut  // Fading out to transparent
+   };
+
    struct LoadingAnimation
    {
-      std::optional<sf::Time> start_time;
-      std::optional<sf::Time> end_time;
       float alpha{0.0f};
       std::shared_ptr<Animation> animation;
+      LoadingFadeState fade_state{LoadingFadeState::None};
+
+      void update(bool loading);
+      void draw(sf::RenderTarget& window, sf::RenderStates states);
    } _loading_anim;
 
    std::map<std::string, std::shared_ptr<LayerData>> _layers;
