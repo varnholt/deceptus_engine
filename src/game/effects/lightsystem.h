@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
 
 #include "game/io/gamedeserializedata.h"

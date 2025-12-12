@@ -1,6 +1,6 @@
 #include "playerdash.h"
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 
 #include "game/audio/audio.h"
 #include "game/physics/physicsconfiguration.h"
@@ -67,7 +67,7 @@ void PlayerDash::update(const DashInput& input)
       // this could be replaced by stamina part
       using namespace std::chrono_literals;
       const auto now = std::chrono::high_resolution_clock::now();
-      if (now - _last_dash_time_point < 1s)
+      if (now - _last_dash_time_point < 1.0s)
       {
          return;
       }

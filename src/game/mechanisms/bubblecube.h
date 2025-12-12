@@ -14,7 +14,7 @@ struct TmxObject;
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 
 #include <filesystem>
 
