@@ -83,7 +83,7 @@ protected:
     */
    virtual size_t computeResourceSize(const Resource& resource) const = 0;
 
-private:
+protected:
    mutable std::mutex m_mutex;
    std::map<std::string, std::weak_ptr<Resource>> m_pool;
 };

@@ -204,10 +204,11 @@ void Level::initializeTextures()
    _render_textures.push_back(_render_texture_normal_tmp);
    _render_textures.push_back(_render_texture_deferred);
 
-   for (const auto& texture : _render_textures)
-   {
-      Log::Info() << "created render texture: " << texture->getSize().x << " x " << texture->getSize().y;
-   }
+   // re-enable if needed
+   // for (const auto& texture : _render_textures)
+   // {
+   //    Log::Info() << "created render texture: " << texture->getSize().x << " x " << texture->getSize().y;
+   // }
 
    _atmosphere_shader->initialize();
    _gamma_shader->initialize();
@@ -455,6 +456,8 @@ bool Level::load()
    loadTmx();
 
    _ambient_occlusion->load(level_json_path.parent_path(), std::filesystem::path(_description->_filename).stem().string());
+   // For now, continue using the synchronous load method which still uses async internally
+   // but waits for completion, preserving the existing behavior during level loading
 
    Log::Info() << "level loading complete";
 
@@ -916,7 +919,10 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // ambient occlusion
       if (z_index == _ambient_occlusion->getZ())
       {
-         _ambient_occlusion->draw(target);
+         // Only draw if the texture has finished loading
+         if (_ambient_occlusion->isReady()) {
+            _ambient_occlusion->draw(target);
+         }
       }
 
       // draw enemies
@@ -1302,6 +1308,11 @@ void Level::update(const sf::Time& dt)
    LuaInterface::instance().update(
       dt, [&player_chunk](const std::shared_ptr<GameMechanism>& mechanism) { return checkUpdateMechanism(player_chunk, mechanism); }
    );
+
+   // Update ambient occlusion (for processing async texture loads)
+   if (_ambient_occlusion) {
+       _ambient_occlusion->update();
+   }
 
    updatePlayerLight();
 

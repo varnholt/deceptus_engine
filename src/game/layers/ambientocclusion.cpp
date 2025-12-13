@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <thread>
 
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
@@ -20,66 +21,106 @@ constexpr int32_t chunk_range_y_right = 3;
 
 void AmbientOcclusion::load(const std::filesystem::path& path, const std::string& base_filename)
 {
-   Log::Info() << "loading ao: " << path.string() << "/" << base_filename;
+   loadAsync(path, base_filename);  // For backward compatibility, use async loading internally
+   // Wait for the texture to load (this maintains the same blocking behavior as before)
+   // but process the async loading completion in the meantime
+   while (!isReady()) {
+      update(); // Process the async loading completion
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+   }
+}
+
+void AmbientOcclusion::loadAsync(const std::filesystem::path& path, const std::string& base_filename)
+{
+   Log::Info() << "loading ao (async): " << path.string() << "/" << base_filename;
 
    _config = Config(path, base_filename);
 
    if (_config._valid)
    {
-      _texture = TexturePool::getInstance().get(_config._texture_filename);
-   }
+      // Start async texture loading
+      _async_texture_handle = TexturePool::getInstance().getAsync(_config._texture_filename);
+      _async_load_started = true;
+      _texture_loaded = false;
 
-   if (_texture == nullptr || _texture->getSize().x == 0 || _texture->getSize().y == 0)
-   {
-      Log::Error() << "bad ambient occlusion texture";
-      return;
-   }
+      // Store the UV data to be processed after texture loads
+      auto quad_index = 0;
+      auto x_px = 0;
+      auto y_px = 0;
+      auto width_px = 0;
+      auto height_px = 0;
 
-   auto x_index_px = 0;
-   auto y_index_px = 0;
-   auto quad_index = 0;
-   auto x_px = 0;
-   auto y_px = 0;
-   auto width_px = 0;
-   auto height_px = 0;
+      std::string line;
+      std::ifstream uv_file(_config._uv_filename);
 
-   auto group_x = 0;
-   auto group_y = 0;
-
-   std::string line;
-   std::ifstream uv_file(_config._uv_filename);
-
-   if (!uv_file.is_open())
-   {
-      return;
-   }
-
-   while (uv_file.good())
-   {
-      std::getline(uv_file, line);
-      std::sscanf(line.c_str(), "%d;%d;%d;%d;%d", &quad_index, &x_px, &y_px, &width_px, &height_px);
-
-      const auto x_index_px_prev = x_index_px;
-      x_index_px = (quad_index * width_px) % _texture->getSize().x;
-      if (x_index_px == 0 && x_index_px_prev != 0)
+      if (!uv_file.is_open())
       {
-         y_index_px += height_px;
+         Log::Error() << "could not open UV file: " << _config._uv_filename;
+         return;
       }
 
-      sf::Sprite sprite(*_texture);
-      sprite.setPosition({static_cast<float>(x_px - _config._offset_x_px), static_cast<float>(y_px - _config._offset_y_px)});
-      sprite.setTextureRect({{x_index_px, y_index_px}, {width_px, height_px}});
+      while (uv_file.good())
+      {
+         std::getline(uv_file, line);
+         std::sscanf(line.c_str(), "%d;%d;%d;%d;%d", &quad_index, &x_px, &y_px, &width_px, &height_px);
 
-      group_x = (x_px >> 8);
-      group_y = (y_px >> 8);
-      _sprite_map[group_y][group_x].push_back(sprite);
+         // Store the UV data to be processed later when texture is available
+         _uv_data.push_back({quad_index, x_px, y_px, width_px, height_px});
+      }
+
+      uv_file.close();
    }
+}
 
-   uv_file.close();
+void AmbientOcclusion::update()
+{
+   if (_async_load_started && !_texture_loaded) {
+      // Check if the texture has finished loading
+      if (TexturePool::getInstance().isLoaded(_config._texture_filename)) {
+         _texture = TexturePool::getInstance().tryGet(_config._texture_filename);
+         if (_texture && _texture->getSize().x > 0 && _texture->getSize().y > 0) {
+            // Now create the sprites with the loaded texture
+            auto x_index_px = 0;
+            auto y_index_px = 0;
+
+            for (const auto& uv : _uv_data) {
+               const auto x_index_px_prev = x_index_px;
+               x_index_px = (uv.quad_index * uv.width_px) % _texture->getSize().x;
+               if (x_index_px == 0 && x_index_px_prev != 0)
+               {
+                  y_index_px += uv.height_px;
+               }
+
+               sf::Sprite sprite(*_texture);
+               sprite.setPosition({static_cast<float>(uv.x_px - _config._offset_x_px), static_cast<float>(uv.y_px - _config._offset_y_px)});
+               sprite.setTextureRect({{x_index_px, y_index_px}, {uv.width_px, uv.height_px}});
+
+               auto group_x = (uv.x_px >> 8);
+               auto group_y = (uv.y_px >> 8);
+               _sprite_map[group_y][group_x].push_back(sprite);
+            }
+
+            _texture_loaded = true;
+            Log::Info() << "AO texture loaded: " << _config._texture_filename;
+         } else {
+            Log::Error() << "Failed to load AO texture: " << _config._texture_filename;
+         }
+      }
+   }
+}
+
+bool AmbientOcclusion::isReady() const
+{
+   return _texture_loaded && _texture != nullptr;
 }
 
 void AmbientOcclusion::draw(sf::RenderTarget& window)
 {
+   // Only draw if the texture has been loaded
+   if (!isReady()) {
+      return;  // Not ready yet, skip drawing
+   }
+
    const auto& player_pos_px = Player::getCurrent()->getPixelPositionInt();
 
    const int32_t player_chunk_x = player_pos_px.x >> 8;

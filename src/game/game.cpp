@@ -17,6 +17,7 @@
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
 #include "game/event/eventdistributor.h"
+#include "game/io/texturepool.h"
 #include "game/level/level.h"
 #include "game/level/levels.h"
 #include "game/player/player.h"
@@ -756,6 +757,9 @@ void Game::update()
 
    // update screen transitions here
    ScreenTransitionHandler::getInstance().update(dt);
+
+   // Update async texture pool to process loaded textures
+   TexturePool::getInstance().update();
 
    // reload the level when the save state has been invalidated, that means when a state is selected from the menu
    if (SaveState::getCurrent()._load_level_requested)

@@ -503,7 +503,7 @@ void InfoLayer::LoadingAnimation::update(bool loading)
    if (alpha_byte != current_alpha_byte)
    {
       animation->setAlpha(alpha_byte);
-      std::cout << "setting alpha to " << static_cast<int32_t>(alpha_byte) << std::endl;
+      // std::cout << "setting alpha to " << static_cast<int32_t>(alpha_byte) << std::endl;
       this->alpha = new_alpha;
    }
 
