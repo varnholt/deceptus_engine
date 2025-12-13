@@ -6,6 +6,8 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 
+#include <filesystem>
+
 namespace
 {
     std::map<std::string, std::function<ShaderLayer::FactoryFunction>>& getCustomizations()
@@ -106,7 +108,11 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
    if (vert_file.has_value())
    {
-      if (!instance->_shader.loadFromFile(vert_file.value(), sf::Shader::Type::Vertex))
+      // Check if vertex shader file exists before attempting to load
+      if (!std::filesystem::exists(vert_file.value())) {
+         Log::Error() << "vertex shader file does not exist: " << vert_file.value();
+      }
+      else if (!instance->_shader.loadFromFile(vert_file.value(), sf::Shader::Type::Vertex))
       {
          Log::Error() << "error compiling " << vert_file.value();
       }
@@ -115,7 +121,11 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
    if (frag_file.has_value())
    {
-      if (!instance->_shader.loadFromFile(frag_file.value(), sf::Shader::Type::Fragment))
+      // Check if fragment shader file exists before attempting to load
+      if (!std::filesystem::exists(frag_file.value())) {
+         Log::Error() << "fragment shader file does not exist: " << frag_file.value();
+      }
+      else if (!instance->_shader.loadFromFile(frag_file.value(), sf::Shader::Type::Fragment))
       {
          Log::Error() << "error compiling " << frag_file.value();
       }
