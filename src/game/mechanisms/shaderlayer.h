@@ -27,9 +27,14 @@ struct ShaderLayer : public GameMechanism, public GameNode
    float _uv_height = 1.0f;
    sf::Time _elapsed;
 
+   bool _has_u_resolution = false;
+   bool _has_u_uv_height = false;
+
    static std::shared_ptr<ShaderLayer> deserialize(GameNode* parent, const GameDeserializeData& data);
 
    // customization factory
    using FactoryFunction = std::shared_ptr<ShaderLayer>(GameNode* parent);
    static void registerCustomization(const std::string& id, const std::function<FactoryFunction>&);
+
+   void checkShaderUniforms(const std::string& shaderPath);
 };

@@ -219,7 +219,10 @@ InfoLayer::InfoLayer()
    _animation_skull_blink = _animation_pool.create("skull_blink", skull_pos_x_px, skull_pos_y_px, false, false);
    _animation_hp_unlock_left = _animation_pool.create("hp_unlock_left", 0.0f, 0.0f, false, false);
    _animation_hp_unlock_right = _animation_pool.create("hp_unlock_right", 0.0f, 0.0f, false, false);
-   _loading_anim.animation = _animation_pool.create("loading", 300, 300, false, false);
+
+   const auto view_width_px = GameConfiguration::getInstance()._view_width;
+   const auto view_height_px = GameConfiguration::getInstance()._view_height;
+   _loading_anim.animation = _animation_pool.create("loading", view_width_px - 45 - 3, view_height_px - 45 - 3, false, false);
 
    _animation_heart->_reset_to_first_frame = false;
    _animation_stamina->_reset_to_first_frame = false;
@@ -462,8 +465,8 @@ void InfoLayer::LoadingAnimation::update(bool loading)
    else if (!loading && fade_state != LoadingFadeState::FadeOut)
    {
       fade_state = LoadingFadeState::FadeOut;
-      animation->seekToStart();  // Reset animation to first frame
-      animation->play();  // Restart animation when starting fade out
+      // animation->seekToStart();  // Reset animation to first frame
+      // animation->play();  // Restart animation when starting fade out
    }
 
    // Update alpha based on current fade state
@@ -477,7 +480,6 @@ void InfoLayer::LoadingAnimation::update(bool loading)
       if (new_alpha >= 1.0f)
       {
          new_alpha = 1.0f;
-         fade_state = LoadingFadeState::None;
       }
    }
    else if (fade_state == LoadingFadeState::FadeOut)
@@ -489,12 +491,8 @@ void InfoLayer::LoadingAnimation::update(bool loading)
       if (new_alpha <= 0.0f)
       {
          new_alpha = 0.0f;
-         fade_state = LoadingFadeState::None;
       }
    }
-
-   // Keep animation always playing regardless of alpha value
-   animation->play();
 
    // Update alpha only if it has changed significantly
    const auto alpha_byte = static_cast<uint8_t>(new_alpha * 255.0f);
