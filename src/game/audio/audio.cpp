@@ -4,6 +4,7 @@
 #include "game/config/gameconfiguration.h"
 
 #include <algorithm>
+#include <chrono>
 #include <filesystem>
 #include <iostream>
 #include <ranges>
@@ -36,11 +37,30 @@ Audio& Audio::getInstance()
 
 std::shared_ptr<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
 {
+   // Check if the file exists before attempting to load
+   const std::string full_path = sfx_path + filename;
+   if (!std::filesystem::exists(full_path)) {
+      Log::Error() << "audio file does not exist: " << filename;
+      return nullptr;
+   }
+
    auto buffer = std::make_shared<sf::SoundBuffer>();
-   if (!buffer->loadFromFile(sfx_path + filename))
+
+   // Time the audio file loading operation
+   auto start_time = std::chrono::high_resolution_clock::now();
+   bool success = buffer->loadFromFile(full_path);
+   auto end_time = std::chrono::high_resolution_clock::now();
+
+   auto load_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+   if (!success)
    {
       Log::Error() << "unable to load file: " << filename;
       return nullptr;
+   }
+   else if (load_duration.count() >= 100)
+   {
+      Log::Info() << "Audio load time for " << filename << ": " << load_duration.count() << " ms (Main thread - may cause hiccups)";
    }
 
    if (buffer->getChannelCount() < 2)
