@@ -6,7 +6,7 @@
 #include "game/weapons/projectilehitanimation.h"
 #include "game/weapons/projectilehitaudio.h"
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 
 #include <iostream>
 #include <memory>

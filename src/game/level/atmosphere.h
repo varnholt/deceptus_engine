@@ -3,7 +3,7 @@
 #include "game/constants.h"
 #include "level/tilemap.h"
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
 
 #include <cstdint>

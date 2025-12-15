@@ -7,7 +7,7 @@
 #include <SFML/System/Clock.hpp>
 
 // box2d
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 
 // std
 #include <filesystem>
