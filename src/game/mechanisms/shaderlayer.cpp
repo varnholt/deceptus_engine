@@ -159,7 +159,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
       }
 
       // analyze the fragment shader source to determine which uniforms are present
-      instance->checkShaderUniforms(frag_file.value());
+      instance->checkUniforms(frag_file.value());
    }
 
    const auto texture_id = ValueReader::readValue<std::string>("texture", map);
