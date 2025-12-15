@@ -38,5 +38,28 @@
       "origin": [0, 0],
       "sprite_count": 30,
       "texture": "data/game/ingame_hp_unlock.png"
+   },
+   "loading_fade_in": {
+      "frame_durations": [
+        100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 
+        100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 
+        100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 
+        100, 100, 100, 100, 100, 100, 100, 100],
+      "frame_offset": [0, 0],
+      "frame_size": [45, 45],
+      "origin": [0, 0],
+      "sprite_count": 38,
+      "texture": "data/game/loading.png"
+   },
+   "loading": {
+      "frame_durations": [
+        100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 
+        100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 
+        100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+      "frame_offset": [0, 45],
+      "frame_size": [45, 45],
+      "origin": [0, 0],
+      "sprite_count": 30,
+      "texture": "data/game/loading.png"
    }
 }

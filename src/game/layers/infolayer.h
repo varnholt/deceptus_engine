@@ -30,21 +30,41 @@ public:
 
 private:
    void loadInventoryItems();
+
    void drawHeartAnimation(sf::RenderTarget& window, sf::RenderStates states);
    void drawInventoryItem(sf::RenderTarget& window, sf::RenderStates states);
    void drawHealth(sf::RenderTarget& window, sf::RenderStates states);
    void drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates states);
-   void drawAutoSave(sf::RenderTarget& window, sf::RenderStates states);
+   void drawLoading(sf::RenderTarget& window, sf::RenderStates states);
    void drawEventReplay(sf::RenderStates states, sf::RenderTarget& window);
+
    void updateInventoryItems();
    void updateHealthLayerOffsets();
    void updateEventReplayIcons();
+   void updateLoading();
 
    BitmapFont _font;
 
    std::atomic<bool> _loading;
    std::optional<sf::Time> _show_time;
    std::optional<sf::Time> _hide_time;
+
+   enum class LoadingFadeState
+   {
+      None,    // not currently fading
+      FadeIn,  // fading in to full opacity
+      FadeOut  // fading out to transparent
+   };
+
+   struct LoadingAnimation
+   {
+      float alpha{0.0f};
+      std::shared_ptr<Animation> animation;
+      LoadingFadeState fade_state{LoadingFadeState::None};
+
+      void update(bool loading);
+      void draw(sf::RenderTarget& window, sf::RenderStates states);
+   } _loading_anim;
 
    std::map<std::string, std::shared_ptr<LayerData>> _layers;
    std::vector<std::shared_ptr<LayerData>> _player_health_layers;
@@ -64,19 +84,20 @@ private:
    std::shared_ptr<Animation> _animation_skull_blink;
    std::shared_ptr<Animation> _animation_hp_unlock_left;
    std::shared_ptr<Animation> _animation_hp_unlock_right;
-   std::array<HighResDuration, 2> _animation_heart_duration_range;
-   std::array<HighResDuration, 2> _animation_stamina_duration_range;
-   std::array<HighResDuration, 2> _animation_skull_blink_duration_range;
+   std::array<HighResDuration, 2> _animation_heart_duration_range{};
+   std::array<HighResDuration, 2> _animation_stamina_duration_range{};
+   std::array<HighResDuration, 2> _animation_skull_blink_duration_range{};
    std::optional<HighResDuration> _next_animation_duration_heart;
    std::optional<HighResDuration> _next_animation_duration_stamina;
    std::optional<HighResDuration> _next_animation_duration_skull_blink;
    HighResDuration _animation_duration_heart{HighResDuration::zero()};
    HighResDuration _animation_duration_stamina{HighResDuration::zero()};
    HighResDuration _animation_duration_skull_blink{HighResDuration::zero()};
+   std::shared_ptr<Animation> _animation_loading;
 
    // inventory
-   std::array<std::shared_ptr<Layer>, 2> _slot_item_layers;
-   std::array<std::unique_ptr<sf::Sprite>, 2> _inventory_sprites;
+   std::array<std::shared_ptr<Layer>, 2> _slot_item_layers{};
+   std::array<std::unique_ptr<sf::Sprite>, 2> _inventory_sprites{};
    std::map<std::string, std::unique_ptr<sf::Sprite>> _sprites;
    std::shared_ptr<sf::Texture> _inventory_texture;
 

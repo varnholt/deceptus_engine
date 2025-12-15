@@ -20,7 +20,7 @@ void show(sf::RenderWindow& window)
 
    sf::Texture loading_texture;
    window.clear(sf::Color(30, 30, 30));
-   if (loading_texture.loadFromFile("data/game/loading.png"))
+   if (loading_texture.loadFromFile("data/game/splash.png"))
    {
       sf::Sprite loading_sprite(loading_texture);
 
