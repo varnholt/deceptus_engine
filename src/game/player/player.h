@@ -18,7 +18,7 @@
 #include "game/player/playerplatform.h"
 #include "game/player/playerspeed.h"
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 

@@ -6,7 +6,7 @@
 #include <map>
 #include <sstream>
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 
 #include "constants.h"
 #include "framework/tmxparser/tmxlayer.h"

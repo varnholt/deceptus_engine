@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"

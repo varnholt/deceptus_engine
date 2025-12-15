@@ -5,7 +5,7 @@
 #include "game/audio/audioupdatedata.h"
 #include "game/constants.h"
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 
 #include <memory>
 #include <optional>

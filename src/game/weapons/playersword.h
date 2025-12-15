@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 
 #include "game/animation/animationpool.h"
 #include "game/physics/worldquery.h"
