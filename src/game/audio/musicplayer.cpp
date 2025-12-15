@@ -230,13 +230,13 @@ void MusicPlayer::beginTransition(const TrackRequest& request)
    auto& next_track = next();
    auto& current_track = current();
 
-   // Check if the file exists before attempting to load
+   // check if the file exists before attempting to load
    if (!std::filesystem::exists(request.filename)) {
       Log::Error() << "music file does not exist: " << request.filename;
       return;
    }
 
-   // Time the music file loading operation
+   // time the music file loading operation
    auto start_time = std::chrono::high_resolution_clock::now();
    bool success = next_track.openFromFile(request.filename);
    auto end_time = std::chrono::high_resolution_clock::now();

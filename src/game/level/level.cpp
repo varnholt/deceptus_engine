@@ -204,11 +204,10 @@ void Level::initializeTextures()
    _render_textures.push_back(_render_texture_normal_tmp);
    _render_textures.push_back(_render_texture_deferred);
 
-   // re-enable if needed
-   // for (const auto& texture : _render_textures)
-   // {
-   //    Log::Info() << "created render texture: " << texture->getSize().x << " x " << texture->getSize().y;
-   // }
+   for (const auto& texture : _render_textures)
+   {
+      Log::Info() << "created render texture: " << texture->getSize().x << " x " << texture->getSize().y;
+   }
 
    _atmosphere_shader->initialize();
    _gamma_shader->initialize();

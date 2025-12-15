@@ -200,6 +200,7 @@ InfoLayer::InfoLayer()
    AnimationFrameData frames{
       TexturePool::getInstance().get("data/sprites/health.png"), {0, 0}, 24, 24, frame_count, 8, heart_animation_interval_times, 0
    };
+
    _heart_animation._frames = frames._frames;
    _heart_animation._color_texture = frames._texture;
    _heart_animation.setFrameTimes(frames._frame_times);
@@ -446,37 +447,26 @@ void InfoLayer::LoadingAnimation::update(bool loading)
 {
    static auto last_update_time = GlobalClock::getInstance().getElapsedTime();
    const auto now = GlobalClock::getInstance().getElapsedTime();
-
-   // Calculate the delta time since last update
    const auto dt = now - last_update_time;
    last_update_time = now;
+   constexpr float alpha_change_rate = 1.0f;
 
-   // Define the rate of alpha change per second
-   constexpr float alpha_change_rate = 1.0f;  // Full range per second
-
-   // When loading flag changes, immediately start the appropriate fade
-   // This overrides any ongoing fade to match the new loading state
    if (loading && fade_state != LoadingFadeState::FadeIn)
    {
       fade_state = LoadingFadeState::FadeIn;
-      animation->seekToStart();  // Reset animation to first frame
-      animation->play();  // Restart animation when starting fade in
+      animation->seekToStart();
+      animation->play();
    }
    else if (!loading && fade_state != LoadingFadeState::FadeOut)
    {
       fade_state = LoadingFadeState::FadeOut;
-      // animation->seekToStart();  // Reset animation to first frame
-      // animation->play();  // Restart animation when starting fade out
    }
 
-   // Update alpha based on current fade state
-   float new_alpha = alpha;
+   // update alpha
+   auto new_alpha = alpha;
    if (fade_state == LoadingFadeState::FadeIn)
    {
-      // Fade in: increase alpha towards 1.0
       new_alpha = std::min(1.0f, alpha + dt.asSeconds() * alpha_change_rate);
-
-      // Check if fade-in is complete
       if (new_alpha >= 1.0f)
       {
          new_alpha = 1.0f;
@@ -484,28 +474,23 @@ void InfoLayer::LoadingAnimation::update(bool loading)
    }
    else if (fade_state == LoadingFadeState::FadeOut)
    {
-      // Fade out: decrease alpha towards 0.0
       new_alpha = std::max(0.0f, alpha - dt.asSeconds() * alpha_change_rate);
-
-      // Check if fade-out is complete
       if (new_alpha <= 0.0f)
       {
          new_alpha = 0.0f;
       }
    }
 
-   // Update alpha only if it has changed significantly
+   // update alpha only if it has changed
    const auto alpha_byte = static_cast<uint8_t>(new_alpha * 255.0f);
    const auto current_alpha_byte = static_cast<uint8_t>(this->alpha * 255.0f);
 
    if (alpha_byte != current_alpha_byte)
    {
       animation->setAlpha(alpha_byte);
-      // std::cout << "setting alpha to " << static_cast<int32_t>(alpha_byte) << std::endl;
       this->alpha = new_alpha;
    }
 
-   // Update animation frames with the time delta since last update
    animation->update(dt);
 }
 

@@ -34,9 +34,9 @@ std::string_view ShaderLayer::objectName() const
    return "ShaderLayer";
 }
 
-void ShaderLayer::checkShaderUniforms(const std::string& shaderPath)
+void ShaderLayer::checkUniforms(const std::string& shader_path)
 {
-   std::ifstream file(shaderPath);
+   std::ifstream file(shader_path);
    if (!file.is_open())
    {
       return;
@@ -148,7 +148,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
    if (frag_file.has_value())
    {
-      // Check if fragment shader file exists before attempting to load
+      // check if fragment shader file exists before attempting to load
       if (!std::filesystem::exists(frag_file.value()))
       {
          Log::Error() << "fragment shader file does not exist: " << frag_file.value();
@@ -158,7 +158,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
          Log::Error() << "error compiling " << frag_file.value();
       }
 
-      // Analyze the fragment shader source to determine which uniforms are present
+      // analyze the fragment shader source to determine which uniforms are present
       instance->checkShaderUniforms(frag_file.value());
    }
 

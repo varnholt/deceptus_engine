@@ -16,6 +16,7 @@ struct ShaderLayer : public GameMechanism, public GameNode
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+   void checkUniforms(const std::string& shaderPath);
 
    sf::Shader _shader;
    sf::Vector2f _position;
@@ -35,6 +36,4 @@ struct ShaderLayer : public GameMechanism, public GameNode
    // customization factory
    using FactoryFunction = std::shared_ptr<ShaderLayer>(GameNode* parent);
    static void registerCustomization(const std::string& id, const std::function<FactoryFunction>&);
-
-   void checkShaderUniforms(const std::string& shaderPath);
 };

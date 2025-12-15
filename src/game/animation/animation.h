@@ -72,7 +72,7 @@ public:
    bool _visible{true};
 
    std::vector<std::shared_ptr<Animation>> _children;
-   uint8_t _alpha{255};  // Default alpha is fully opaque
+   uint8_t _alpha{255};
 
    const std::vector<sf::Time>& getFrameTimes() const;
 
