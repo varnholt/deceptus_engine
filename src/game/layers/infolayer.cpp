@@ -189,15 +189,18 @@ InfoLayer::InfoLayer()
    _slot_item_layers[1] = _layers["item_slot_Y"]->_layer;
 
    // load heart animation
-   const auto t = sf::milliseconds(100);
-   std::vector<sf::Time> ts;
+   const auto heart_animation_interval_ms = sf::milliseconds(100);
+   std::vector<sf::Time> heart_animation_interval_times;
    constexpr auto frame_count = 6 * 8 + 7;
    for (auto i = 0; i < frame_count; i++)
    {
-      ts.push_back(t);
+      heart_animation_interval_times.push_back(heart_animation_interval_ms);
    }
 
-   AnimationFrameData frames{TexturePool::getInstance().get("data/sprites/health.png"), {0, 0}, 24, 24, frame_count, 8, ts, 0};
+   AnimationFrameData frames{
+      TexturePool::getInstance().get("data/sprites/health.png"), {0, 0}, 24, 24, frame_count, 8, heart_animation_interval_times, 0
+   };
+
    _heart_animation._frames = frames._frames;
    _heart_animation._color_texture = frames._texture;
    _heart_animation.setFrameTimes(frames._frame_times);
@@ -218,11 +221,17 @@ InfoLayer::InfoLayer()
    _animation_hp_unlock_left = _animation_pool.create("hp_unlock_left", 0.0f, 0.0f, false, false);
    _animation_hp_unlock_right = _animation_pool.create("hp_unlock_right", 0.0f, 0.0f, false, false);
 
+   const auto view_width_px = GameConfiguration::getInstance()._view_width;
+   const auto view_height_px = GameConfiguration::getInstance()._view_height;
+   _loading_anim.animation = _animation_pool.create("loading", view_width_px - 45 - 3, view_height_px - 45 - 3, false, false);
+
    _animation_heart->_reset_to_first_frame = false;
    _animation_stamina->_reset_to_first_frame = false;
    _animation_skull_blink->_reset_to_first_frame = false;
    _animation_hp_unlock_left->_reset_to_first_frame = false;
    _animation_hp_unlock_right->_reset_to_first_frame = false;
+   _loading_anim.animation->_reset_to_first_frame = true;
+   _loading_anim.animation->_looped = true;
 
    _event_replay_playing = _layers["icon_playing"]->_layer;
    _event_replay_recording = _layers["icon_recording"]->_layer;
@@ -413,17 +422,82 @@ void InfoLayer::drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates st
    }
 }
 
-void InfoLayer::drawAutoSave(sf::RenderTarget& window, sf::RenderStates states)
+void InfoLayer::drawLoading(sf::RenderTarget& window, sf::RenderStates states)
 {
-   const auto now = GlobalClock::getInstance().getElapsedTime();
+   // we don't need the autosave icon for now
+   // auto layer_autosave = _layers["autosave"]->_layer;
+   // if (layer_autosave->_visible)
+   // {
+   //    layer_autosave->draw(window, states);
+   // }
 
-   auto autosave = _layers["autosave"]->_layer;
-   if (autosave->_visible)
+   sf::RenderStates blend_alpha;
+   blend_alpha.blendMode = sf::BlendAlpha;
+   updateLoading();
+
+   _loading_anim.draw(window, blend_alpha);
+}
+
+void InfoLayer::updateLoading()
+{
+   _loading_anim.update(_loading);
+}
+
+void InfoLayer::LoadingAnimation::update(bool loading)
+{
+   static auto last_update_time = GlobalClock::getInstance().getElapsedTime();
+   const auto now = GlobalClock::getInstance().getElapsedTime();
+   const auto dt = now - last_update_time;
+   last_update_time = now;
+   constexpr float alpha_change_rate = 1.0f;
+
+   if (loading && fade_state != LoadingFadeState::FadeIn)
    {
-      const auto alpha = 0.5f * (1.0f + sin(now.asSeconds() * 2.0f));
-      autosave->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(alpha * 255)));
-      autosave->draw(window, states);
+      fade_state = LoadingFadeState::FadeIn;
+      animation->seekToStart();
+      animation->play();
    }
+   else if (!loading && fade_state != LoadingFadeState::FadeOut)
+   {
+      fade_state = LoadingFadeState::FadeOut;
+   }
+
+   // update alpha
+   auto new_alpha = alpha;
+   if (fade_state == LoadingFadeState::FadeIn)
+   {
+      new_alpha = std::min(1.0f, alpha + dt.asSeconds() * alpha_change_rate);
+      if (new_alpha >= 1.0f)
+      {
+         new_alpha = 1.0f;
+      }
+   }
+   else if (fade_state == LoadingFadeState::FadeOut)
+   {
+      new_alpha = std::max(0.0f, alpha - dt.asSeconds() * alpha_change_rate);
+      if (new_alpha <= 0.0f)
+      {
+         new_alpha = 0.0f;
+      }
+   }
+
+   // update alpha only if it has changed
+   const auto alpha_byte = static_cast<uint8_t>(new_alpha * 255.0f);
+   const auto current_alpha_byte = static_cast<uint8_t>(this->alpha * 255.0f);
+
+   if (alpha_byte != current_alpha_byte)
+   {
+      animation->setAlpha(alpha_byte);
+      this->alpha = new_alpha;
+   }
+
+   animation->update(dt);
+}
+
+void InfoLayer::LoadingAnimation::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   animation->setVisible(true);
+   animation->draw(window, states);
 }
 
 void InfoLayer::drawEventReplay(sf::RenderStates states, sf::RenderTarget& window)
@@ -446,10 +520,10 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    const sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
 
-   drawAutoSave(window, states);
    drawCameraPanorama(window, states);
    drawHealth(window, states);
    drawEventReplay(states, window);
+   drawLoading(window, states);
 }
 
 void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
@@ -520,12 +594,13 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    std::ostringstream oss;
 
    std::vector<std::string> sorted_topics;
+   sorted_topics.reserve(help._help_messages.size());
    for (const auto& entry : help._help_messages)
    {
       sorted_topics.push_back(entry.first);
    }
 
-   std::sort(sorted_topics.begin(), sorted_topics.end());
+   std::ranges::sort(sorted_topics.begin(), sorted_topics.end());
    for (const auto& topic : sorted_topics)
    {
       _font.draw(window, _font.getCoords(topic), w_screen / 2, (++y) * 14, sf::Color::Green);
@@ -545,8 +620,6 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 
 void InfoLayer::setLoading(bool loading)
 {
-   _layers["autosave"]->_layer->_visible = loading;
-
    if (_loading && !loading)
    {
       _show_time = GlobalClock::getInstance().getElapsedTime();
