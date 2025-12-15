@@ -6,14 +6,18 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+
 namespace
 {
-    std::map<std::string, std::function<ShaderLayer::FactoryFunction>>& getCustomizations()
-    {
-        static std::map<std::string, std::function<ShaderLayer::FactoryFunction>> __customizations;
-        return __customizations;
-    }
+std::map<std::string, std::function<ShaderLayer::FactoryFunction>>& getCustomizations()
+{
+   static std::map<std::string, std::function<ShaderLayer::FactoryFunction>> __customizations;
+   return __customizations;
 }
+}  // namespace
 
 void ShaderLayer::registerCustomization(const std::string& id, const std::function<FactoryFunction>& factory_function)
 {
@@ -30,6 +34,22 @@ std::string_view ShaderLayer::objectName() const
    return "ShaderLayer";
 }
 
+void ShaderLayer::checkUniforms(const std::string& shader_path)
+{
+   std::ifstream file(shader_path);
+   if (!file.is_open())
+   {
+      return;
+   }
+
+   std::stringstream buffer;
+   buffer << file.rdbuf();
+   const auto shader_source = buffer.str();
+
+   _has_u_resolution = shader_source.find("u_resolution;") != std::string::npos;
+   _has_u_uv_height = shader_source.find("u_uv_height;") != std::string::npos;
+}
+
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    const auto x = _position.x;
@@ -37,10 +57,18 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    const auto w = _size.x;
    const auto h = _size.y;
 
-   _shader.setUniform("u_uv_height", _uv_height);
    _shader.setUniform("u_texture", *_texture.get());
    _shader.setUniform("u_time", _elapsed.asSeconds() + _time_offset);
-   _shader.setUniform("u_resolution", sf::Vector2f(w, h));
+
+   if (_has_u_resolution)
+   {
+      _shader.setUniform("u_resolution", sf::Vector2f(w, h));
+   }
+
+   if (_has_u_uv_height)
+   {
+      _shader.setUniform("u_uv_height", _uv_height);
+   }
 
    sf::Vertex quad[] = {
       sf::Vertex(sf::Vector2f(x, y), sf::Color::White, sf::Vector2f(0.0f, _uv_height)),
@@ -106,7 +134,12 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
    if (vert_file.has_value())
    {
-      if (!instance->_shader.loadFromFile(vert_file.value(), sf::Shader::Type::Vertex))
+      // Check if vertex shader file exists before attempting to load
+      if (!std::filesystem::exists(vert_file.value()))
+      {
+         Log::Error() << "vertex shader file does not exist: " << vert_file.value();
+      }
+      else if (!instance->_shader.loadFromFile(vert_file.value(), sf::Shader::Type::Vertex))
       {
          Log::Error() << "error compiling " << vert_file.value();
       }
@@ -115,10 +148,18 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
    if (frag_file.has_value())
    {
-      if (!instance->_shader.loadFromFile(frag_file.value(), sf::Shader::Type::Fragment))
+      // check if fragment shader file exists before attempting to load
+      if (!std::filesystem::exists(frag_file.value()))
+      {
+         Log::Error() << "fragment shader file does not exist: " << frag_file.value();
+      }
+      else if (!instance->_shader.loadFromFile(frag_file.value(), sf::Shader::Type::Fragment))
       {
          Log::Error() << "error compiling " << frag_file.value();
       }
+
+      // analyze the fragment shader source to determine which uniforms are present
+      instance->checkShaderUniforms(frag_file.value());
    }
 
    const auto texture_id = ValueReader::readValue<std::string>("texture", map);

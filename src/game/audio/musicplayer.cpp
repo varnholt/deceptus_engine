@@ -1,6 +1,10 @@
 #include "musicplayer.h"
 
+#include "framework/tools/log.h"
 #include "game/config/gameconfiguration.h"
+
+#include <chrono>
+#include <filesystem>
 
 MusicPlayer& MusicPlayer::getInstance()
 {
@@ -226,10 +230,27 @@ void MusicPlayer::beginTransition(const TrackRequest& request)
    auto& next_track = next();
    auto& current_track = current();
 
-   if (!next_track.openFromFile(request.filename))
-   {
-      // optionally handle error
+   // check if the file exists before attempting to load
+   if (!std::filesystem::exists(request.filename)) {
+      Log::Error() << "music file does not exist: " << request.filename;
       return;
+   }
+
+   // time the music file loading operation
+   auto start_time = std::chrono::high_resolution_clock::now();
+   bool success = next_track.openFromFile(request.filename);
+   auto end_time = std::chrono::high_resolution_clock::now();
+
+   auto load_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+   if (!success)
+   {
+      Log::Error() << "unable to load music file: " << request.filename;
+      return;
+   }
+   else if (load_duration.count() >= 100)
+   {
+      Log::Info() << "Music load time for " << request.filename << ": " << load_duration.count() << " ms (Main thread - may cause hiccups)";
    }
 
    if (request.transition == MusicPlayerTypes::TransitionType::Crossfade)

@@ -484,9 +484,6 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
 
    _gradient = TexturePool::getInstance().get(gradient_texture);
 
-   Log::Info() << "deserialize water surface at: " << _bounding_box.position.x << ", " << _bounding_box.position.y << " w: " << _bounding_box.size.x
-               << ", h:" << _bounding_box.size.y;
-
    // if a pixel ratio is configured, we gotta render to texture
    if (_pixel_ratio.has_value())
    {

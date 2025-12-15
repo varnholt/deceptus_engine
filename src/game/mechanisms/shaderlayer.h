@@ -16,6 +16,7 @@ struct ShaderLayer : public GameMechanism, public GameNode
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
    void update(const sf::Time& dt) override;
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+   void checkUniforms(const std::string& shaderPath);
 
    sf::Shader _shader;
    sf::Vector2f _position;
@@ -26,6 +27,9 @@ struct ShaderLayer : public GameMechanism, public GameNode
    float _uv_width = 1.0f;
    float _uv_height = 1.0f;
    sf::Time _elapsed;
+
+   bool _has_u_resolution = false;
+   bool _has_u_uv_height = false;
 
    static std::shared_ptr<ShaderLayer> deserialize(GameNode* parent, const GameDeserializeData& data);
 
