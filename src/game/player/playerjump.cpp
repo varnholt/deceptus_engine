@@ -9,7 +9,7 @@
 #include "game/state/displaymode.h"
 #include "game/state/savestate.h"
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 
 namespace
 {

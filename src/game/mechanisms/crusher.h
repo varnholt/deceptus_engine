@@ -5,7 +5,7 @@
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
-#include <box2d/box2d.h>
+#include "box2d/box2d.h"
 
 struct TmxObject;
 
