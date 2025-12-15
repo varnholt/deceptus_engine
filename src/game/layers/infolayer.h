@@ -51,9 +51,9 @@ private:
 
    enum class LoadingFadeState
    {
-      None,    // Not currently fading
-      FadeIn,  // Fading in to full opacity
-      FadeOut  // Fading out to transparent
+      None,    // not currently fading
+      FadeIn,  // fading in to full opacity
+      FadeOut  // fading out to transparent
    };
 
    struct LoadingAnimation
