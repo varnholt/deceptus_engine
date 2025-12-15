@@ -288,15 +288,21 @@ void GameMechanismDeserializer::deserialize(
       *mechanism_doors
    );
 
-   for (auto& [k, v] : mechanisms)
+   static auto warning_shown = false;
+   if (!warning_shown)
    {
-      for (const auto& mechanism : (*v))
+      for (auto& [k, v] : mechanisms)
       {
-         if (mechanism->getZ() == 0)
+         for (const auto& mechanism : (*v))
          {
-            Log::Info() << k << " has a mechanism with z = 0 ";
+            if (mechanism->getZ() == 0)
+            {
+               Log::Info() << k << " has a mechanism with z = 0 ";
+            }
          }
       }
+
+      warning_shown = true;
    }
 
    // debugOutputMechanisms(mechanisms);
