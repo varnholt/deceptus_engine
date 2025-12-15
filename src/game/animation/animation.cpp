@@ -128,6 +128,8 @@ void Animation::setAlpha(uint8_t alpha)
    _vertices[1].color.a = alpha;
    _vertices[2].color.a = alpha;
    _vertices[3].color.a = alpha;
+
+   _alpha = alpha;
 }
 
 void Animation::setAlphaTree(uint8_t alpha)
@@ -277,10 +279,10 @@ void Animation::updateVertices(bool reset_time)
    sf::Vector2f bottom_right = {static_cast<float>(rect_px.size.x), static_cast<float>(rect_px.size.y)};
    sf::Vector2f top_right = {static_cast<float>(rect_px.size.x), 0.f};
 
-   _vertices[0] = sf::Vertex(top_left, sf::Color::White);
-   _vertices[1] = sf::Vertex(bottom_left, sf::Color::White);
-   _vertices[2] = sf::Vertex(top_right, sf::Color::White);
-   _vertices[3] = sf::Vertex(bottom_right, sf::Color::White);
+   _vertices[0] = sf::Vertex(top_left, sf::Color(255, 255, 255, _alpha));
+   _vertices[1] = sf::Vertex(bottom_left, sf::Color(255, 255, 255, _alpha));
+   _vertices[2] = sf::Vertex(top_right, sf::Color(255, 255, 255, _alpha));
+   _vertices[3] = sf::Vertex(bottom_right, sf::Color(255, 255, 255, _alpha));
 
    sf::Vector2f tex_top_left = {left, top};
    sf::Vector2f tex_bottom_left = {left, bottom};
@@ -340,6 +342,6 @@ size_t Animation::getFrameCount() const
 
 void Animation::reverse()
 {
-   std::reverse(_frame_times.begin(), _frame_times.end());
-   std::reverse(_frames.begin(), _frames.end());
+   std::ranges::reverse(_frame_times.begin(), _frame_times.end());
+   std::ranges::reverse(_frames.begin(), _frames.end());
 }
