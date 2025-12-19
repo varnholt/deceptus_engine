@@ -223,15 +223,16 @@ InfoLayer::InfoLayer()
 
    const auto view_width_px = GameConfiguration::getInstance()._view_width;
    const auto view_height_px = GameConfiguration::getInstance()._view_height;
-   _loading_anim.animation = _animation_pool.create("loading", view_width_px - 45 - 3, view_height_px - 45 - 3, false, false);
+   _loading_anim._animation = _animation_pool.create("loading", view_width_px - 45 - 3, view_height_px - 45 - 3, false, false);
+   _loading_anim._animation->_reset_to_first_frame = true;
+   _loading_anim._animation->_looped = true;
+   _loading_anim._animation->setAlpha(0);
 
    _animation_heart->_reset_to_first_frame = false;
    _animation_stamina->_reset_to_first_frame = false;
    _animation_skull_blink->_reset_to_first_frame = false;
    _animation_hp_unlock_left->_reset_to_first_frame = false;
    _animation_hp_unlock_right->_reset_to_first_frame = false;
-   _loading_anim.animation->_reset_to_first_frame = true;
-   _loading_anim.animation->_looped = true;
 
    _event_replay_playing = _layers["icon_playing"]->_layer;
    _event_replay_recording = _layers["icon_recording"]->_layer;
@@ -300,8 +301,8 @@ void InfoLayer::updateHealthLayerOffsets()
    // -> reset
    if (DisplayMode::getInstance().isSet(Display::MainMenu))
    {
-      _hide_time.reset();
-      _show_time.reset();
+      _hide_time_health.reset();
+      _show_time_health.reset();
       _player_health_x_offset = x_offset_hidden;
    }
 
@@ -311,10 +312,10 @@ void InfoLayer::updateHealthLayerOffsets()
 
    auto effect_elapsed = false;
 
-   if (_hide_time.has_value())
+   if (_hide_time_health.has_value())
    {
       // evaluate hide time
-      const auto time_diff_s = (now - _hide_time.value()).asSeconds();
+      const auto time_diff_s = (now - _hide_time_health.value()).asSeconds();
       const auto time_diff_norm = time_diff_s / duration_hide_s;
       effect_elapsed = time_diff_norm > 1.0f;
       if (!effect_elapsed)
@@ -325,13 +326,13 @@ void InfoLayer::updateHealthLayerOffsets()
       }
       else
       {
-         _hide_time.reset();
+         _hide_time_health.reset();
       }
    }
-   else if (_show_time.has_value())
+   else if (_show_time_health.has_value())
    {
       // evaluate show time
-      const auto time_diff_s = (now - _show_time.value()).asSeconds();
+      const auto time_diff_s = (now - _show_time_health.value()).asSeconds();
       const auto time_diff_norm = time_diff_s / duration_hide_s;
       effect_elapsed = time_diff_norm > 1.0f;
       if (!effect_elapsed)
@@ -342,7 +343,7 @@ void InfoLayer::updateHealthLayerOffsets()
       }
       else
       {
-         _show_time.reset();
+         _show_time_health.reset();
       }
    }
 
@@ -431,73 +432,92 @@ void InfoLayer::drawLoading(sf::RenderTarget& window, sf::RenderStates states)
    //    layer_autosave->draw(window, states);
    // }
 
-   sf::RenderStates blend_alpha;
-   blend_alpha.blendMode = sf::BlendAlpha;
-   updateLoading();
-
-   _loading_anim.draw(window, blend_alpha);
+   _loading_anim.draw(window, states);
 }
 
-void InfoLayer::updateLoading()
+void InfoLayer::LoadingAnimation::show()
 {
-   _loading_anim.update(_loading);
+   _fade_state = LoadingFadeState::FadeIn;
+   _animation->seekToStart();
+   _animation->play();
+   _show_time = GlobalClock::getInstance().getElapsedTime();
 }
 
-void InfoLayer::LoadingAnimation::update(bool loading)
+void InfoLayer::LoadingAnimation::hide()
 {
-   static auto last_update_time = GlobalClock::getInstance().getElapsedTime();
+   _hide_time = GlobalClock::getInstance().getElapsedTime();
+}
+
+void InfoLayer::LoadingAnimation::update(const sf::Time& delta_time)
+{
+   // workflow
+   // 1) show_time becomes valid
+   // 2) fade in
+   // 3) animation keeps updated with alpha = 255
+   // 4) hide_time becomes valid
+   // 5) fade out
+   // 6) alpha becomes 0
+   // 7) stop animation
+   //
+   // hide_time can become valid while still fading in,
+   // i.e. wait for fade in to finish before fading out
+
+   // nothing to do if both start and stop time are invalid
+   if (!_show_time.has_value() && !_hide_time.has_value())
+   {
+      return;
+   }
+
+   static sf::Time show_duration = sf::seconds(2.0f);
+   static sf::Time hide_duration = sf::seconds(2.0f);
+   constexpr auto alpha_change_rate = 1.0f;
    const auto now = GlobalClock::getInstance().getElapsedTime();
-   const auto dt = now - last_update_time;
-   last_update_time = now;
-   constexpr float alpha_change_rate = 1.0f;
 
-   if (loading && fade_state != LoadingFadeState::FadeIn)
-   {
-      fade_state = LoadingFadeState::FadeIn;
-      animation->seekToStart();
-      animation->play();
-   }
-   else if (!loading && fade_state != LoadingFadeState::FadeOut)
-   {
-      fade_state = LoadingFadeState::FadeOut;
-   }
+   auto alpha = _alpha;
 
-   // update alpha
-   auto new_alpha = alpha;
-   if (fade_state == LoadingFadeState::FadeIn)
+   if (_show_time.has_value() && _fade_state == LoadingFadeState::FadeIn)  // fade in
    {
-      new_alpha = std::min(1.0f, alpha + dt.asSeconds() * alpha_change_rate);
-      if (new_alpha >= 1.0f)
+      alpha = std::min(1.0f, (now - _show_time.value()).asSeconds() / show_duration.asSeconds());
+
+      if (alpha > 1.0f - std::numeric_limits<float>::epsilon())
       {
-         new_alpha = 1.0f;
+         _fade_state = LoadingFadeState::Keep;
       }
    }
-   else if (fade_state == LoadingFadeState::FadeOut)
+   else if (_hide_time.has_value() && _fade_state == LoadingFadeState::Keep)  // fade out after reaching full opacity
    {
-      new_alpha = std::max(0.0f, alpha - dt.asSeconds() * alpha_change_rate);
-      if (new_alpha <= 0.0f)
-      {
-         new_alpha = 0.0f;
-      }
+      alpha = 1.0f - std::max(0.0f, (now - _hide_time.value()).asSeconds() / hide_duration.asSeconds());
+   }
+   else
+   {
+      alpha = 1.0f;
    }
 
-   // update alpha only if it has changed
-   const auto alpha_byte = static_cast<uint8_t>(new_alpha * 255.0f);
-   const auto current_alpha_byte = static_cast<uint8_t>(this->alpha * 255.0f);
+   const auto alpha_byte = static_cast<uint8_t>(alpha * 255.0f);
+   const auto current_alpha_byte = static_cast<uint8_t>(this->_alpha * 255.0f);
+
+   // hide complete, we're done.
+   if (alpha <= 0.01f && _hide_time.has_value())
+   {
+      _animation->stop();
+      _hide_time.reset();
+      _show_time.reset();
+      _fade_state = LoadingFadeState::None;
+   }
 
    if (alpha_byte != current_alpha_byte)
    {
-      animation->setAlpha(alpha_byte);
-      this->alpha = new_alpha;
+      _alpha = alpha;
+      _animation->setAlpha(alpha_byte);
    }
 
-   animation->update(dt);
+   _animation->update(delta_time);
 }
 
 void InfoLayer::LoadingAnimation::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-   animation->setVisible(true);
-   animation->draw(window, states);
+   _animation->setVisible(true);
+   _animation->draw(window, states);
 }
 
 void InfoLayer::drawEventReplay(sf::RenderStates states, sf::RenderTarget& window)
@@ -622,11 +642,13 @@ void InfoLayer::setLoading(bool loading)
 {
    if (_loading && !loading)
    {
-      _show_time = GlobalClock::getInstance().getElapsedTime();
+      _show_time_health = GlobalClock::getInstance().getElapsedTime();
+      _loading_anim.hide();  // no longer loading -> hide icon
    }
    else if (!_loading && loading)
    {
-      _hide_time = GlobalClock::getInstance().getElapsedTime();
+      _hide_time_health = GlobalClock::getInstance().getElapsedTime();
+      _loading_anim.show();  // loading started -> show icon
    }
 
    _loading = loading;
@@ -638,11 +660,12 @@ void InfoLayer::updateEventReplayIcons()
    _event_replay_playing->_visible = DisplayMode::getInstance().isSet(Display::ReplayPlaying);
 }
 
-void InfoLayer::update(const sf::Time& dt)
+void InfoLayer::update(const sf::Time& delta_time)
 {
+   _loading_anim.update(delta_time);
    updateHealthLayerOffsets();
    updateInventoryItems();
-   updateAnimations(dt);
+   updateAnimations(delta_time);
    updateEventReplayIcons();
 
    if (_heart_animation._paused)
@@ -650,7 +673,7 @@ void InfoLayer::update(const sf::Time& dt)
       return;
    }
 
-   _heart_animation.update(dt);
+   _heart_animation.update(delta_time);
 }
 
 void InfoLayer::updateAnimations(const sf::Time& dt)

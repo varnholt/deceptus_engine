@@ -41,29 +41,33 @@ private:
    void updateInventoryItems();
    void updateHealthLayerOffsets();
    void updateEventReplayIcons();
-   void updateLoading();
 
    BitmapFont _font;
 
    std::atomic<bool> _loading;
-   std::optional<sf::Time> _show_time;
-   std::optional<sf::Time> _hide_time;
+   std::optional<sf::Time> _show_time_health;
+   std::optional<sf::Time> _hide_time_health;
 
    enum class LoadingFadeState
    {
-      None,    // not currently fading
-      FadeIn,  // fading in to full opacity
-      FadeOut  // fading out to transparent
+      None,    // no animation
+      FadeIn,  // fading in
+      Keep,    // just spinning
+      FadeOut  // fading out (unused)
    };
 
    struct LoadingAnimation
    {
-      float alpha{0.0f};
-      std::shared_ptr<Animation> animation;
-      LoadingFadeState fade_state{LoadingFadeState::None};
-
-      void update(bool loading);
+      void show();
+      void hide();
+      void update(const sf::Time& delta_time);
       void draw(sf::RenderTarget& window, sf::RenderStates states);
+
+      float _alpha{0.0f};
+      std::shared_ptr<Animation> _animation;
+      std::optional<sf::Time> _show_time;
+      std::optional<sf::Time> _hide_time;
+      LoadingFadeState _fade_state{LoadingFadeState::None};
    } _loading_anim;
 
    std::map<std::string, std::shared_ptr<LayerData>> _layers;
