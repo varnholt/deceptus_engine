@@ -1,6 +1,11 @@
 #include "splashscreen.h"
+#include <algorithm>
 #include <cstdint>
+#include <functional>
+#include <optional>
+#include <vector>
 #include "framework/easings/easings.h"
+#include "framework/tools/log.h"
 
 namespace
 {
@@ -9,6 +14,128 @@ bool shown = false;
 
 namespace SplashScreen
 {
+
+void eatEvents(sf::RenderWindow& window)
+{
+   const std::vector<std::function<bool(const sf::Event&)>> ignoredEventChecks = {
+      // keyboard events
+      [](const sf::Event& evt) { return evt.is<sf::Event::KeyPressed>(); },
+      [](const sf::Event& evt) { return evt.is<sf::Event::KeyReleased>(); },
+      // mouse events
+      [](const sf::Event& evt) { return evt.is<sf::Event::MouseButtonPressed>(); },
+      [](const sf::Event& evt) { return evt.is<sf::Event::MouseButtonReleased>(); },
+      [](const sf::Event& evt) { return evt.is<sf::Event::MouseMoved>(); },
+      [](const sf::Event& evt) { return evt.is<sf::Event::MouseWheelScrolled>(); },
+      // touch events
+      [](const sf::Event& evt) { return evt.is<sf::Event::TouchBegan>(); },
+      [](const sf::Event& evt) { return evt.is<sf::Event::TouchMoved>(); },
+      [](const sf::Event& evt) { return evt.is<sf::Event::TouchEnded>(); },
+      // joystick events
+      [](const sf::Event& evt) { return evt.is<sf::Event::JoystickButtonPressed>(); },
+      [](const sf::Event& evt) { return evt.is<sf::Event::JoystickButtonReleased>(); },
+      [](const sf::Event& evt) { return evt.is<sf::Event::JoystickMoved>(); },
+      [](const sf::Event& evt) { return evt.is<sf::Event::JoystickConnected>(); },
+      [](const sf::Event& evt) { return evt.is<sf::Event::JoystickDisconnected>(); }
+   };
+
+   auto isIgnoredEvent = [&ignoredEventChecks](const sf::Event& evt) -> bool
+   {
+      return std::ranges::find_if(
+                ignoredEventChecks.begin(),
+                ignoredEventChecks.end(),
+                [&evt](const std::function<bool(const sf::Event&)>& check) { return check(evt); }
+             ) != ignoredEventChecks.end();
+   };
+
+   while (auto event = window.pollEvent())
+   {
+      if (!isIgnoredEvent(*event))
+      {
+         auto getEventTypeName = [](const sf::Event& evt) -> std::optional<std::string>
+         {
+            if (evt.is<sf::Event::Closed>())
+            {
+               return "Closed";
+            }
+            if (evt.is<sf::Event::Resized>())
+            {
+               return "Resized";
+            }
+            if (evt.is<sf::Event::TextEntered>())
+            {
+               return "TextEntered";
+            }
+            if (evt.is<sf::Event::KeyPressed>())
+            {
+               return "KeyPressed";
+            }
+            if (evt.is<sf::Event::KeyReleased>())
+            {
+               return "KeyReleased";
+            }
+            if (evt.is<sf::Event::MouseWheelScrolled>())
+            {
+               return "MouseWheelScrolled";
+            }
+            if (evt.is<sf::Event::MouseButtonPressed>())
+            {
+               return "MouseButtonPressed";
+            }
+            if (evt.is<sf::Event::MouseButtonReleased>())
+            {
+               return "MouseButtonReleased";
+            }
+            if (evt.is<sf::Event::MouseMoved>())
+            {
+               return "MouseMoved";
+            }
+            if (evt.is<sf::Event::JoystickButtonPressed>())
+            {
+               return "JoystickButtonPressed";
+            }
+            if (evt.is<sf::Event::JoystickButtonReleased>())
+            {
+               return "JoystickButtonReleased";
+            }
+            if (evt.is<sf::Event::JoystickMoved>())
+            {
+               return "JoystickMoved";
+            }
+            if (evt.is<sf::Event::JoystickConnected>())
+            {
+               return "JoystickConnected";
+            }
+            if (evt.is<sf::Event::JoystickDisconnected>())
+            {
+               return "JoystickDisconnected";
+            }
+            if (evt.is<sf::Event::TouchBegan>())
+            {
+               return "TouchBegan";
+            }
+            if (evt.is<sf::Event::TouchMoved>())
+            {
+               return "TouchMoved";
+            }
+            if (evt.is<sf::Event::TouchEnded>())
+            {
+               return "TouchEnded";
+            }
+            if (evt.is<sf::Event::SensorChanged>())
+            {
+               return "SensorChanged";
+            }
+            return std::nullopt;
+         };
+
+         if (auto event_name = getEventTypeName(*event); event_name.has_value())
+         {
+            Log::Info() << "event ignored: " << event_name.value();
+         }
+      }
+   }
+}
+
 void show(sf::RenderWindow& window)
 {
    if (shown)
@@ -78,5 +205,7 @@ void show(sf::RenderWindow& window)
       window.draw(loading_sprite);
       window.display();
    }
+
+   eatEvents(window);
 }
 }  // namespace SplashScreen
