@@ -1,6 +1,6 @@
 {
     "GameConfiguration": {
-        "audio_volume_master": 100,
+        "audio_volume_master": 0,
         "audio_volume_music": 100,
         "audio_volume_sfx": 100,
         "fullscreen": false,
