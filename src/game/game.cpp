@@ -35,6 +35,9 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
+// Include GLEW for OpenGL extensions
+#include "GL/glew.h"
+
 #include <ctime>
 #include <iomanip>
 #include <iostream>
@@ -416,6 +419,18 @@ Game::~Game()
 void Game::initialize()
 {
    initializeWindow();
+
+   // Initialize GLEW after the OpenGL context is created but before any OpenGL calls
+   if (!_window_render_texture->setActive(true)) {
+      return; // Or handle error appropriately
+   }
+
+   GLenum err = glewInit();
+   if (err != GLEW_OK) {
+      std::cerr << "Failed to initialize GLEW: " << err << std::endl;
+      return; // Handle error appropriately
+   }
+   std::cout << "GLEW initialized successfully." << std::endl;
 
    initializeController();
 
