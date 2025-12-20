@@ -1,5 +1,8 @@
 #pragma once
 
+// Include GLEW for OpenGL extensions
+#include "GL/glew.h"
+
 #include "game/audio/audio.h"
 #include "game/audio/musicfilenames.h"
 #include "game/camera/camerasystemconfigurationui.h"
