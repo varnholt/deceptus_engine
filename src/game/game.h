@@ -20,6 +20,9 @@
 
 #include <future>
 
+// Include 3D menu renderer
+#include "game/menu3d/menu3drenderer.h"
+
 class Level;
 class Player;
 struct ScreenTransition;
@@ -88,6 +91,9 @@ private:
    std::unique_ptr<ForestScene> _test_scene;
 
    std::shared_ptr<EventSerializer> _global_event_serializer;
+
+   // 3D menu background renderer
+   std::unique_ptr<deceptus::menu3d::Menu3DRenderer> _menu3d_renderer;
 
    sf::Clock _delta_clock;
    std::atomic<bool> _level_loading_finished = false;

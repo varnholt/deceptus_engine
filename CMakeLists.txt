@@ -549,7 +549,20 @@ set(GAME_FILES
     src/menus/menuscreenvideo.cpp
     src/menus/menuscreenvideo.h
     src/main.cpp
-    deceptus_resource.rc)
+    deceptus_resource.rc
+    src/game/menu3d/menu3drenderer.cpp
+    src/game/menu3d/menu3drenderer.h
+    src/interfaces/drawable.h
+    src/opengl/gl_current.h
+    src/opengl/glslprogram.cpp
+    src/opengl/glslprogram.h
+    src/opengl/glutils.cpp
+    src/opengl/glutils.h
+    src/opengl/vbos/vbosphere.cpp
+    src/opengl/vbos/vbosphere.h
+    src/game/shaders/shaderpool.cpp
+    src/game/shaders/shaderpool.h
+    src/GL/glew.h)
 
 set(THIRD_PARTY_FILES
     thirdparty/box2d/include/box2d/b2_api.h
@@ -832,7 +845,7 @@ endif()
 # ----------------------------------------------------------------------------------------------------
 
 target_link_libraries(deceptus PRIVATE sfml-system sfml-audio sfml-graphics sfml-window SDL3::SDL3
-                                       lua)
+                                       lua opengl32 glu32)
 
 if(WIN32)
 
@@ -851,7 +864,10 @@ if(WIN32)
         add_compile_options(/MP)
     endif()
 
-    target_link_libraries(deceptus PRIVATE glu32 opengl32)
+    # Link GLEW library for Windows
+    target_link_libraries(deceptus PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/GL/lib/Release/x64/glew32s.lib
+    )
 
 endif()
 
