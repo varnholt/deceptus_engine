@@ -23,12 +23,14 @@
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
-#include "game/ui/messagebox.h"
 #include "splashscreen.h"
 
 #include "menus/menu.h"
 #include "menus/menuscreenmain.h"
 #include "menus/menuscreenvideo.h"
+
+// Include 3D menu renderer
+#include "game/menu3d/menu3drenderer.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
@@ -43,6 +45,8 @@
 #ifdef MessageBox
 #undef MessageBox
 #endif
+
+#include "game/ui/messagebox.h"
 
 #ifdef __linux__
 #define setUniform setParameter
@@ -427,6 +431,15 @@ void Game::initialize()
    _controller_overlay = std::make_unique<ControllerOverlay>();
    _test_scene = std::make_unique<ForestScene>();
 
+   // Initialize 3D menu renderer
+   _menu3d_renderer = std::make_unique<deceptus::menu3d::Menu3DRenderer>();
+   _menu3d_renderer->initialize();
+
+   // Add a default skybox for menu backgrounds
+   auto skybox = std::make_shared<deceptus::menu3d::SkyboxObject>(5.0f, 32, 32);
+   skybox->setRotationSpeed(glm::vec3(0.0f, 0.005f, 0.0f)); // Slow rotation
+   _menu3d_renderer->add3DObject(skybox);
+
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
    Audio::getInstance();
@@ -550,6 +563,20 @@ void Game::draw()
    if (DrawStates::_draw_test_scene)
    {
       _test_scene->draw(*_window_render_texture.get());
+   }
+
+   // Render 3D background for menus if menu is visible
+   if (Menu::getInstance()->isVisible() && _menu3d_renderer)
+   {
+      // Activate the render texture for 3D rendering
+      if (_window_render_texture->setActive(true))
+      {
+         // Render the 3D background
+         _menu3d_renderer->render(*_window_render_texture);
+
+         // Reset SFML states after 3D rendering
+         _window_render_texture->resetGLStates();
+      }
    }
 
    Menu::getInstance()->draw(*_window_render_texture.get(), {sf::BlendAlpha});
@@ -765,6 +792,12 @@ void Game::update()
    }
 
    Menu::getInstance()->update(dt);
+
+   // Update 3D menu renderer if menu is visible
+   if (Menu::getInstance()->isVisible() && _menu3d_renderer)
+   {
+      _menu3d_renderer->update(dt);
+   }
 
    _info_layer->update(dt);
 
