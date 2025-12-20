@@ -8,60 +8,111 @@
 namespace deceptus {
 namespace menu3d {
 
-// SkyboxObject implementation
-SkyboxObject::SkyboxObject(float radius, int slices, int stacks)
-    : _sphere(std::make_unique<VBOSphere>(radius, slices, stacks))
+// StarmapObject implementation
+StarmapObject::StarmapObject(
+   const std::string& objFile,
+   const std::string& textureFile,
+   float scale,
+   bool reCenterMesh,
+   bool loadTc,
+   bool useLighting
+)
+    : _mesh(std::make_unique<VBOMesh>(objFile.c_str(), scale, reCenterMesh, loadTc)), _useLighting(useLighting)
 {
-    // Set default scale to make it large enough to be a skybox
-    setScale(glm::vec3(10.0f, 10.0f, 10.0f));
+   loadTexture(textureFile);
 }
 
-void SkyboxObject::update(float deltaTime)
+StarmapObject::~StarmapObject()
 {
-    _currentRotation += _rotationSpeed * deltaTime;
+   if (_textureId != 0)
+   {
+      glDeleteTextures(1, &_textureId);
+      _textureId = 0;
+   }
 }
 
-void SkyboxObject::render(const std::shared_ptr<GLSLProgram>& shader,
-                         const glm::mat4& view_matrix,
-                         const glm::mat4& projection_matrix)
+void StarmapObject::update(float deltaTime)
 {
-    if (!_sphere || !shader) {
-        return;
-    }
+   _currentRotation += _rotationSpeed * deltaTime;
+}
 
-    // Create model matrix with position, rotation, and scale
-    glm::mat4 model_matrix = glm::translate(glm::mat4(1.0f), _position);
-    model_matrix = glm::rotate(model_matrix, _currentRotation.y + _rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-    model_matrix = glm::rotate(model_matrix, _currentRotation.x + _rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-    model_matrix = glm::rotate(model_matrix, _currentRotation.z + _rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-    model_matrix = glm::scale(model_matrix, _scale);
+void StarmapObject::render(const std::shared_ptr<GLSLProgram>& shader, const glm::mat4& view_matrix, const glm::mat4& projection_matrix)
+{
+   if (!_mesh || !shader || _textureId == 0)
+   {
+      return;
+   }
 
-    // Calculate MVP matrices
-    glm::mat4 mv_matrix = view_matrix * model_matrix;
-    glm::mat4 mvp_matrix = projection_matrix * mv_matrix;
-    glm::mat3 normal_matrix = glm::mat3(
-        glm::vec3(mv_matrix[0]),
-        glm::vec3(mv_matrix[1]),
-        glm::vec3(mv_matrix[2])
-    );
+   // Create model matrix with position, rotation, and scale
+   glm::mat4 model_matrix = glm::translate(glm::mat4(1.0f), _position);
 
-    // Set the uniforms for the skybox
-    shader->setUniform("MVP", mvp_matrix);
-    shader->setUniform("ModelViewMatrix", mv_matrix);
-    shader->setUniform("ModelMatrix", model_matrix);
-    shader->setUniform("NormalMatrix", normal_matrix);
+   // Apply rotations around X, Y, and Z axes
+   model_matrix = glm::rotate(model_matrix, _currentRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));  // X-axis
+   model_matrix = glm::rotate(model_matrix, _currentRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));  // Y-axis
+   model_matrix = glm::rotate(model_matrix, _currentRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));  // Z-axis
 
-    // Set material properties for the skybox
-    shader->setUniform("Material.Kd", 0.8f, 0.9f, 1.0f);  // Light blueish diffuse
-    shader->setUniform("Material.Ks", 0.2f, 0.2f, 0.2f);
-    shader->setUniform("Material.Ka", 0.5f, 0.6f, 0.8f);
-    shader->setUniform("Material.Shininess", 10.0f);
+   model_matrix = glm::scale(model_matrix, _scale);
 
-    // Set additional uniforms for special skybox effects
-    shader->setUniform("useLighting", true);
-    shader->setUniform("DrawSkyBox", true);
+   // Calculate MVP matrices
+   glm::mat4 mv_matrix = view_matrix * model_matrix;
+   glm::mat4 mvp_matrix = projection_matrix * mv_matrix;
+   glm::mat3 normal_matrix = glm::mat3(
+      glm::vec3(mv_matrix[0]),
+      glm::vec3(mv_matrix[1]),
+      glm::vec3(mv_matrix[2])
+   );
 
-    _sphere->render();
+   // Set the uniforms for the textured mesh
+   shader->setUniform("MVP", mvp_matrix);
+   shader->setUniform("ModelViewMatrix", mv_matrix);
+   shader->setUniform("ModelMatrix", model_matrix);
+   shader->setUniform("NormalMatrix", normal_matrix);
+
+   // Set material properties for textured mesh
+   shader->setUniform("Material.Kd", glm::vec3(1.0f, 1.0f, 1.0f));  // Use texture for diffuse
+   shader->setUniform("Material.Ks", glm::vec3(0.5f, 0.5f, 0.5f));
+   shader->setUniform("Material.Ka", glm::vec3(0.3f, 0.3f, 0.3f));
+   shader->setUniform("Material.Shininess", 32.0f);
+
+   // Set the lighting uniform
+   shader->setUniform("useLighting", _useLighting);
+
+   // Bind the texture to texture unit 0
+   glActiveTexture(GL_TEXTURE0);
+   glBindTexture(GL_TEXTURE_2D, _textureId);
+
+   // Tell the shader which texture unit we're using
+   shader->setUniform("Tex1", 0);
+
+   _mesh->render();
+}
+
+void StarmapObject::loadTexture(const std::string& textureFile)
+{
+   if (_textureId != 0)
+   {
+      glDeleteTextures(1, &_textureId);
+      _textureId = 0;
+   }
+
+   GLint w, h;
+   GLubyte* textureData = TGAIO::read(textureFile.c_str(), w, h);
+   if (textureData)
+   {
+      glGenTextures(1, &_textureId);
+      glBindTexture(GL_TEXTURE_2D, _textureId);
+      glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, w, h);
+      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      glGenerateMipmap(GL_TEXTURE_2D);
+
+      delete[] textureData;
+   }
+   else
+   {
+      std::cerr << "Failed to load texture: " << textureFile << std::endl;
+   }
 }
 
 // Menu3DCamera implementation

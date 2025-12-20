@@ -9,9 +9,12 @@
 #define NOMINMAX
 #endif
 
+// Define GLEW_NO_GLU to avoid GLU dependencies
+#define GLEW_NO_GLU
+
 #include <windows.h>  // For APIENTRY definition on Windows
 
-// Include GLEW before any OpenGL headers to avoid conflicts
+// Include GLEW before any other OpenGL headers to avoid conflicts
 #include "GL/glew.h"  // Include the copied glew header
 
 #endif

@@ -35,8 +35,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
-// Include GLEW for OpenGL extensions
-#include "GL/glew.h"
 
 #include <ctime>
 #include <iomanip>
@@ -450,10 +448,10 @@ void Game::initialize()
    _menu3d_renderer = std::make_unique<deceptus::menu3d::Menu3DRenderer>();
    _menu3d_renderer->initialize();
 
-   // Add a default skybox for menu backgrounds
-   auto skybox = std::make_shared<deceptus::menu3d::SkyboxObject>(5.0f, 32, 32);
-   skybox->setRotationSpeed(glm::vec3(0.0f, 0.005f, 0.0f)); // Slow rotation
-   _menu3d_renderer->add3DObject(skybox);
+   // Add a default starmap for menu backgrounds
+   auto starmap = std::make_shared<deceptus::menu3d::StarmapObject>("data/objects/starmap.obj", "data/textures/starmap_color.tga");
+   starmap->setRotationSpeed(glm::vec3(0.0f, 0.005f, 0.0f)); // Slow rotation
+   _menu3d_renderer->add3DObject(starmap);
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
