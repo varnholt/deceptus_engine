@@ -126,7 +126,7 @@ void Menu3DRenderer::initialize()
 
     // Initialize the shader for 3D rendering
     auto& shader_pool = ShaderPool::getInstance();
-    shader_pool.add("menu3d", "data/shaders/texture.vs", "data/shaders/texture.fs");
+    shader_pool.add("menu3d", "data/shaders/menu3d.vs", "data/shaders/menu3d.fs");
     _shader = shader_pool.get("menu3d");
 
     if (!_shader) {
