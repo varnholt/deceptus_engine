@@ -558,6 +558,8 @@ set(GAME_FILES
     src/opengl/glslprogram.h
     src/opengl/glutils.cpp
     src/opengl/glutils.h
+    src/opengl/vbos/vbomesh.cpp
+    src/opengl/vbos/vbomesh.h
     src/opengl/vbos/vbosphere.cpp
     src/opengl/vbos/vbosphere.h
     src/game/shaders/shaderpool.cpp
