@@ -128,7 +128,7 @@ void Menu3DRenderer::render(sf::RenderTarget& target)
     _shader->setUniform("Light.Position", glm::vec4(100.0f, 100.0f, 100.0f, 1.0f));
     _shader->setUniform("Light.Intensity", glm::vec3(1.0f, 1.0f, 1.0f));
     _shader->setUniform("useAO", false);
-    _shader->setUniform("useSpecular", true);
+    _shader->setUniform("useSpecular", false);  // Disable specular to match original starmap appearance
     _shader->setUniform("WorldCameraPosition", _camera->getCameraPosition());
 
     // Get matrices from camera
@@ -155,8 +155,9 @@ void Menu3DRenderer::setupOpenGLState()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
-    // Set clear color and clear buffers
-    glClearColor(0.05f, 0.05f, 0.1f, 1.0f); // Dark blueish background
+    // Set clear color and clear buffers - using red to verify 3D rendering is happening
+    glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
+    // glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background to verify 3D rendering
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 

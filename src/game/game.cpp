@@ -41,7 +41,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
-
 #include <ctime>
 #include <iomanip>
 #include <iostream>
@@ -425,14 +424,16 @@ void Game::initialize()
    initializeWindow();
 
    // Initialize GLEW after the OpenGL context is created but before any OpenGL calls
-   if (!_window_render_texture->setActive(true)) {
-      return; // Or handle error appropriately
+   if (!_window_render_texture->setActive(true))
+   {
+      return;  // Or handle error appropriately
    }
 
    GLenum err = glewInit();
-   if (err != GLEW_OK) {
+   if (err != GLEW_OK)
+   {
       std::cerr << "Failed to initialize GLEW: " << err << std::endl;
-      return; // Handle error appropriately
+      return;  // Handle error appropriately
    }
    std::cout << "GLEW initialized successfully." << std::endl;
 
@@ -456,8 +457,9 @@ void Game::initialize()
 
    // Add a default textured sphere for menu backgrounds
    auto texturedSphere = std::make_shared<deceptus::menu3d::TexturedSphereObject>("data/textures/starmap_color.tga");
-   texturedSphere->setRotationSpeed(glm::vec3(0.0f, 0.005f, 0.0f)); // Slow rotation
-   texturedSphere->setScale(glm::vec3(3.0f, 3.0f, 3.0f)); // Make it larger to fill the background
+   texturedSphere->setRotationSpeed(glm::vec3(0.0f, 0.005f, 0.0f));  // Slow rotation
+   texturedSphere->setScale(glm::vec3(5.0f, 5.0f, 5.0f));            // Make it much larger to fill the background
+   texturedSphere->setPosition(glm::vec3(0.0f, 0.0f, -5.0f));        // Position it in the background
    _menu3d_renderer->add3DObject(texturedSphere);
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
