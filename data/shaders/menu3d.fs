@@ -22,6 +22,10 @@ uniform bool useSpecular = true;
 uniform bool DrawSkyBox = false;
 uniform vec3 WorldCameraPosition;
 
+// Texture sampling
+uniform sampler2D Tex1;
+uniform bool useTexture = true;
+
 in vec3 FragPos;
 in vec3 Normal_out;
 in vec2 TexCoord_out;
@@ -39,13 +43,13 @@ vec3 phongModel()
     vec3 s = normalize(vec3(Light.Position) - FragPos);
     vec3 v = normalize(WorldCameraPosition - FragPos);
     vec3 r = reflect(-s, Normal_out);
-    
+
     // Only calculate specular if the surface is facing the light
     vec3 specular = vec3(0.0);
     if (useSpecular && dot(Normal_out, s) > 0.0) {
         specular = Material.Ks * Light.Intensity * pow(max(dot(r, v), 0.0), Material.Shininess);
     }
-    
+
     vec3 diffuse = Material.Kd * Light.Intensity * max(dot(Normal_out, s), 0.0);
 
     return diffuse + specular + ambient;
@@ -53,10 +57,19 @@ vec3 phongModel()
 
 void main()
 {
+    vec3 color = phongModel();
+
+    if (useTexture) {
+        // Sample the texture and modulate with lighting
+        vec4 texColor = texture(Tex1, TexCoord_out);
+        // Use the texture color for diffuse component
+        color = texColor.rgb * color;
+    }
+
     if (DrawSkyBox) {
         // For skybox rendering, we can have a special appearance
-        FragColor = vec4(phongModel(), 1.0);
+        FragColor = vec4(color, 1.0);
     } else {
-        FragColor = vec4(phongModel(), 1.0);
+        FragColor = vec4(color, 1.0);
     }
 }

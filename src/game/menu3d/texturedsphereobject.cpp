@@ -65,8 +65,11 @@ void TexturedSphereObject::render(const std::shared_ptr<GLSLProgram>& shader, co
    shader->setUniform("Material.Ka", 0.3f, 0.3f, 0.3f);
    shader->setUniform("Material.Shininess", 32.0f);
 
-   // Set the lighting uniform
-   shader->setUniform("useLighting", _useLighting);
+   // Set the lighting uniform - disable lighting to match original starmap appearance
+   shader->setUniform("useLighting", false);
+
+   // Enable texture usage
+   shader->setUniform("useTexture", true);
 
    // Bind the texture to texture unit 0
    glActiveTexture(GL_TEXTURE0);
