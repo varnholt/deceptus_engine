@@ -32,6 +32,12 @@
 // Include 3D menu renderer
 #include "game/menu3d/menu3drenderer.h"
 
+// Include textured sphere object
+#include "game/menu3d/texturedsphereobject.h"
+
+// Include textured object (for StarmapObject typedef)
+#include "game/menu3d/texturedobject.h"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
@@ -448,10 +454,11 @@ void Game::initialize()
    _menu3d_renderer = std::make_unique<deceptus::menu3d::Menu3DRenderer>();
    _menu3d_renderer->initialize();
 
-   // Add a default starmap for menu backgrounds
-   auto starmap = std::make_shared<deceptus::menu3d::StarmapObject>("data/objects/starmap.obj", "data/textures/starmap_color.tga");
-   starmap->setRotationSpeed(glm::vec3(0.0f, 0.005f, 0.0f)); // Slow rotation
-   _menu3d_renderer->add3DObject(starmap);
+   // Add a default textured sphere for menu backgrounds
+   auto texturedSphere = std::make_shared<deceptus::menu3d::TexturedSphereObject>("data/textures/starmap_color.tga");
+   texturedSphere->setRotationSpeed(glm::vec3(0.0f, 0.005f, 0.0f)); // Slow rotation
+   texturedSphere->setScale(glm::vec3(3.0f, 3.0f, 3.0f)); // Make it larger to fill the background
+   _menu3d_renderer->add3DObject(texturedSphere);
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
