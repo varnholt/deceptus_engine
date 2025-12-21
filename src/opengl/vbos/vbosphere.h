@@ -23,3 +23,4 @@ class VBOSphere : public Drawable
       GLuint slices, stacks;
 
 };
+
