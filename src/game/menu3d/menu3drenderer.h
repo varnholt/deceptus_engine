@@ -11,87 +11,16 @@
 #include "opengl/glslprogram.h"
 #include "opengl/vbos/vbomesh.h"
 #include "opengl/vbos/vbosphere.h"
+#include "menu3dobject.h"
 
 namespace deceptus
 {
 namespace menu3d
 {
 
-class Menu3DObject
-{
-public:
-   Menu3DObject() = default;
-   virtual ~Menu3DObject() = default;
-
-   virtual void update(float deltaTime) = 0;
-   virtual void
-   render(const std::shared_ptr<class GLSLProgram>& shader, const glm::mat4& view_matrix, const glm::mat4& projection_matrix) = 0;
-
-   void setPosition(const glm::vec3& pos)
-   {
-      _position = pos;
-   }
-   glm::vec3 getPosition() const
-   {
-      return _position;
-   }
-   void setScale(const glm::vec3& scale)
-   {
-      _scale = scale;
-   }
-   glm::vec3 getScale() const
-   {
-      return _scale;
-   }
-   void setRotation(const glm::vec3& rot)
-   {
-      _rotation = rot;
-   }
-   glm::vec3 getRotation() const
-   {
-      return _rotation;
-   }
-
-protected:
-   glm::vec3 _position{0.0f, 0.0f, 0.0f};
-   glm::vec3 _scale{1.0f, 1.0f, 1.0f};
-   glm::vec3 _rotation{0.0f, 0.0f, 0.0f};
-};
-
-class StarmapObject : public Menu3DObject
-{
-public:
-   StarmapObject(
-      const std::string& objFile = "data/objects/starmap.obj",
-      const std::string& textureFile = "data/textures/starmap_color.tga",
-      float scale = 1.0f,
-      bool reCenterMesh = true,
-      bool loadTc = true,
-      bool useLighting = true
-   );
-   virtual ~StarmapObject();
-
-   void update(float deltaTime) override;
-   void render(const std::shared_ptr<class GLSLProgram>& shader, const glm::mat4& view_matrix, const glm::mat4& projection_matrix) override;
-
-   void setRotationSpeed(const glm::vec3& speed)
-   {
-      _rotationSpeed = speed;
-   }
-   glm::vec3 getRotationSpeed() const
-   {
-      return _rotationSpeed;
-   }
-
-private:
-   std::unique_ptr<class VBOMesh> _mesh;
-   glm::vec3 _rotationSpeed{0.0f, 0.01f, 0.0f};
-   glm::vec3 _currentRotation{0.0f, 0.0f, 0.0f};
-   GLuint _textureId{0};
-   bool _useLighting{true};
-
-   void loadTexture(const std::string& textureFile);
-};
+// Define StarmapObject as a typedef to TexturedObject for consistency with our naming
+class TexturedObject;  // Forward declaration
+using StarmapObject = TexturedObject;
 
 class Menu3DCamera
 {
@@ -115,33 +44,16 @@ public:
       return _viewMatrix;
    }
 
-   void setCameraPosition(const glm::vec3& pos)
-   {
-      _cameraPosition = pos;
-      _viewDirty = true;
-   }
-   glm::vec3 getCameraPosition() const
-   {
-      return _cameraPosition;
-   }
-   void setLookAtPoint(const glm::vec3& target)
-   {
-      _lookAtPoint = target;
-      _viewDirty = true;
-   }
-   glm::vec3 getLookAtPoint() const
-   {
-      return _lookAtPoint;
-   }
+   void setCameraPosition(const glm::vec3& pos);
+   glm::vec3 getCameraPosition() const { return _cameraPosition; }
+   void setLookAtPoint(const glm::vec3& target);
+   glm::vec3 getLookAtPoint() const { return _lookAtPoint; }
    void setFOV(float fov)
    {
       _fov = fov;
       _projDirty = true;
    }
-   float getFOV() const
-   {
-      return _fov;
-   }
+   float getFOV() const { return _fov; }
 
 private:
    void updateViewMatrix();

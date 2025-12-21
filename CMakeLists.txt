@@ -564,7 +564,24 @@ set(GAME_FILES
     src/opengl/vbos/vbosphere.h
     src/game/shaders/shaderpool.cpp
     src/game/shaders/shaderpool.h
-    src/GL/glew.h)
+    src/GL/glew.h
+    src/interfaces/drawable.cpp
+    src/interfaces/drawable.h
+    src/interfaces/transformable.cpp
+    src/interfaces/transformable.h
+    src/opengl/image/bmpreader.cpp
+    src/opengl/image/bmpreader.h
+    src/opengl/image/png.cpp
+    src/opengl/image/png.h
+    src/opengl/image/tgaio.cpp
+    src/opengl/image/tgaio.h
+    src/game/menu3d/menu3dobject.h
+    src/game/menu3d/texturedobject.cpp
+    src/game/menu3d/texturedobject.h
+    src/game/menu3d/sphereobject.cpp
+    src/game/menu3d/sphereobject.h
+    src/game/menu3d/texturedsphereobject.cpp
+    src/game/menu3d/texturedsphereobject.h)
 
 set(THIRD_PARTY_FILES
     thirdparty/box2d/include/box2d/b2_api.h
