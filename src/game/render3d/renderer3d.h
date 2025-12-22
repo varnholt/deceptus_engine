@@ -87,6 +87,9 @@ public:
    void add3DObject(std::shared_ptr<Object3D> object);
    void clear3DObjects();
 
+   // Set camera parameters specifically for starmap rendering
+   void setupStarmapCamera();
+
 private:
    void setupOpenGLState();
    void restoreOpenGLState();

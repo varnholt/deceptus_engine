@@ -79,7 +79,7 @@ void Renderer3D::initialize()
 
     // Initialize the camera
     _camera = std::make_unique<Camera3D>();
-    _camera->initialize(800, 600, 0.1f, 100.0f); // Default size, will be updated before rendering
+    _camera->initialize(800, 600, 0.1f, 1000.0f); // Extended far plane for large objects like starmap, will be updated before rendering
 
     // Initialize required shaders
     auto& shader_pool = ShaderPool::getInstance();
@@ -121,6 +121,9 @@ void Renderer3D::render(sf::RenderTarget& target)
     // Setup OpenGL state for 3D rendering
     setupOpenGLState();
 
+    // Temporarily disable culling to handle potentially inverted normals
+    glDisable(GL_CULL_FACE);
+
     // Use the shader
     _shader->use();
 
@@ -140,6 +143,9 @@ void Renderer3D::render(sf::RenderTarget& target)
         obj->render(_shader, view_matrix, projection_matrix);
     }
 
+    // Re-enable culling after 3D rendering
+    glEnable(GL_CULL_FACE);
+
     // Restore OpenGL state after 3D rendering
     restoreOpenGLState();
 }
@@ -155,9 +161,8 @@ void Renderer3D::setupOpenGLState()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
-    // Set clear color and clear buffers - using red to verify 3D rendering is happening
+    // Set clear color and clear buffers - using dark background
     glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
-    // glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // Red background to verify 3D rendering
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -175,6 +180,17 @@ void Renderer3D::restoreOpenGLState()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glUseProgram(0);
+}
+
+void Renderer3D::setupStarmapCamera()
+{
+    if (_camera) {
+        // For starmap rendering, position the camera at the center
+        // and look in a default direction
+        _camera->setCameraPosition(glm::vec3(0.0f, 0.0f, 0.0f));  // Center of the starmap
+        _camera->setLookAtPoint(glm::vec3(0.0f, 0.0f, -1.0f));    // Look along negative Z
+        _camera->setFOV(70.0f);  // Default FOV
+    }
 }
 
 void Renderer3D::clear3DObjects()
