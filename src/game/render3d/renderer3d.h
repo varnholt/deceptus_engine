@@ -11,22 +11,22 @@
 #include "opengl/glslprogram.h"
 #include "opengl/vbos/vbomesh.h"
 #include "opengl/vbos/vbosphere.h"
-#include "menu3dobject.h"
+#include "game/render3d/3dobject.h"
 
 namespace deceptus
 {
-namespace menu3d
+namespace render3d
 {
 
 // Define StarmapObject as a typedef to TexturedObject for consistency with our naming
 class TexturedObject;  // Forward declaration
 using StarmapObject = TexturedObject;
 
-class Menu3DCamera
+class Camera3D
 {
 public:
-   Menu3DCamera();
-   virtual ~Menu3DCamera() = default;
+   Camera3D();
+   virtual ~Camera3D() = default;
 
    void initialize(int width, int height, float near_plane = 0.1f, float far_plane = 100.0f);
    void update(float deltaTime);
@@ -74,28 +74,28 @@ private:
    bool _projDirty{true};
 };
 
-class Menu3DRenderer
+class Renderer3D
 {
 public:
-   Menu3DRenderer();
-   ~Menu3DRenderer();
+   Renderer3D();
+   ~Renderer3D();
 
    void initialize();
    void update(const sf::Time& deltaTime);
    void render(sf::RenderTarget& target);
 
-   void add3DObject(std::shared_ptr<Menu3DObject> object);
+   void add3DObject(std::shared_ptr<Object3D> object);
    void clear3DObjects();
 
 private:
    void setupOpenGLState();
    void restoreOpenGLState();
 
-   std::unique_ptr<Menu3DCamera> _camera;
-   std::vector<std::shared_ptr<Menu3DObject>> _objects;
+   std::unique_ptr<Camera3D> _camera;
+   std::vector<std::shared_ptr<Object3D>> _objects;
    std::shared_ptr<class GLSLProgram> _shader;
    bool _initialized{false};
 };
 
-}  // namespace menu3d
+}  // namespace render3d
 }  // namespace deceptus

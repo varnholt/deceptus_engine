@@ -5,6 +5,9 @@
 #include "opengl/glslprogram.h"
 #include <memory>
 
+namespace deceptus {
+namespace render3d {
+
 class Object3D
 {
 public:
@@ -29,3 +32,6 @@ protected:
     glm::vec3 _rotation{0.0f, 0.0f, 0.0f};
     glm::vec3 _scale{1.0f, 1.0f, 1.0f};
 };
+
+} // namespace render3d
+} // namespace deceptus

@@ -2,13 +2,13 @@
 
 #include "opengl/vbos/vbosphere.h"
 #include "opengl/glslprogram.h"
-#include "menu3dobject.h"  // Include the Menu3DObject base class
+#include "game/render3d/3dobject.h"  // Include the base 3D object class
 #include <memory>
 
 namespace deceptus {
-namespace menu3d {
+namespace render3d {
 
-class SphereObject : public deceptus::menu3d::Menu3DObject
+class SphereObject : public deceptus::render3d::Object3D
 {
 public:
     SphereObject(float radius = 1.0f, int slices = 50, int stacks = 50);
@@ -28,5 +28,5 @@ private:
     float _currentRotation{0.0f};
 };
 
-} // namespace menu3d
+} // namespace render3d
 } // namespace deceptus
