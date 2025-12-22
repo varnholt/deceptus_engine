@@ -455,12 +455,20 @@ void Game::initialize()
    _render3d_renderer = std::make_unique<deceptus::render3d::Renderer3D>();
    _render3d_renderer->initialize();
 
-   // Add a default textured sphere for menu backgrounds
-   auto texturedSphere = std::make_shared<deceptus::render3d::TexturedSphereObject>("data/objects/starmap.obj", "data/textures/starmap_color.tga");
-   texturedSphere->setRotationSpeed(glm::vec3(0.0f, 0.005f, 0.0f));  // Slow rotation
-   texturedSphere->setScale(glm::vec3(5.0f, 5.0f, 5.0f));            // Make it much larger to fill the background
-   texturedSphere->setPosition(glm::vec3(0.0f, 0.0f, -5.0f));        // Position it in the background
-   _render3d_renderer->add3DObject(texturedSphere);
+   // Add a default textured object for menu backgrounds (using same approach as working lab)
+   auto texturedObject = std::make_shared<deceptus::render3d::TexturedObject>(
+       "data/objects/starmap.obj",
+       "data/textures/starmap_color.tga",
+       1.0f,      // scale
+       true,      // reCenterMesh
+       true,      // loadTc
+       false      // useLighting (to match lab's working version)
+   );
+   texturedObject->setRotationSpeed(glm::vec3(0.02f, 0.035f, 0.04f));  // Use lab's rotation speed
+   texturedObject->setScale(glm::vec3(1.0f, 1.0f, 1.0f));              // Use default scale
+   texturedObject->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));           // Position at origin
+   texturedObject->setUseLighting(false);                              // Disable lighting like lab
+   _render3d_renderer->add3DObject(texturedObject);
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
