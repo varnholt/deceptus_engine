@@ -7,12 +7,13 @@ namespace deceptus {
 namespace render3d {
 
 TexturedSphereObject::TexturedSphereObject(
+   const std::string& objFile,
    const std::string& textureFile,
-   float radius,
-   int slices,
-   int stacks
+   float scale,
+   bool reCenterMesh,
+   bool loadTc
 )
-    : _sphere(std::make_unique<VBOSphere>(radius, slices, stacks)), _useLighting(true)
+    : _mesh(std::make_unique<VBOMesh>(objFile.c_str(), scale, reCenterMesh, loadTc)), _useLighting(true)
 {
    loadTexture(textureFile);
 }
@@ -33,7 +34,7 @@ void TexturedSphereObject::update(float deltaTime)
 
 void TexturedSphereObject::render(const std::shared_ptr<GLSLProgram>& shader, const glm::mat4& view_matrix, const glm::mat4& projection_matrix)
 {
-   if (!_sphere || !shader || _textureId == 0)
+   if (!_mesh || !shader || _textureId == 0)
    {
       return;
    }
@@ -78,7 +79,7 @@ void TexturedSphereObject::render(const std::shared_ptr<GLSLProgram>& shader, co
    // Tell the shader which texture unit we're using
    shader->setUniform("Tex1", 0);
 
-   _sphere->render();
+   _mesh->render();
 }
 
 void TexturedSphereObject::loadTexture(const std::string& textureFile)

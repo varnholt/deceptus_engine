@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "opengl/vbos/vbosphere.h"
+#include "opengl/vbos/vbomesh.h"
 #include "opengl/glslprogram.h"
 #include "game/render3d/3dobject.h"  // Include the base 3D object class
 
@@ -12,10 +12,11 @@ class TexturedSphereObject : public deceptus::render3d::Object3D
 {
 public:
    TexturedSphereObject(
+      const std::string& objFile,
       const std::string& textureFile,
-      float radius = 1.0f,
-      int slices = 50,
-      int stacks = 50
+      float scale = 1.0f,
+      bool reCenterMesh = true,
+      bool loadTc = true
    );
    virtual ~TexturedSphereObject();
 
@@ -40,7 +41,7 @@ public:
    }
 
 private:
-   std::unique_ptr<VBOSphere> _sphere;
+   std::unique_ptr<VBOMesh> _mesh;
    glm::vec3 _rotationSpeed{0.0f, 0.5f, 0.0f};  // Default rotation around Y-axis
    glm::vec3 _currentRotation{0.0f, 0.0f, 0.0f};
    GLuint _textureId{0};
