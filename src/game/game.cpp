@@ -29,14 +29,14 @@
 #include "menus/menuscreenmain.h"
 #include "menus/menuscreenvideo.h"
 
-// Include 3D menu renderer
-#include "game/menu3d/menu3drenderer.h"
+// Include 3D renderer
+#include "game/render3d/renderer3d.h"
 
 // Include textured sphere object
-#include "game/menu3d/texturedsphereobject.h"
+#include "game/render3d/texturedsphereobject.h"
 
 // Include textured object (for StarmapObject typedef)
-#include "game/menu3d/texturedobject.h"
+#include "game/render3d/texturedobject.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
@@ -452,15 +452,15 @@ void Game::initialize()
    _test_scene = std::make_unique<ForestScene>();
 
    // Initialize 3D menu renderer
-   _menu3d_renderer = std::make_unique<deceptus::menu3d::Menu3DRenderer>();
-   _menu3d_renderer->initialize();
+   _render3d_renderer = std::make_unique<deceptus::render3d::Renderer3D>();
+   _render3d_renderer->initialize();
 
    // Add a default textured sphere for menu backgrounds
-   auto texturedSphere = std::make_shared<deceptus::menu3d::TexturedSphereObject>("data/textures/starmap_color.tga");
+   auto texturedSphere = std::make_shared<deceptus::render3d::TexturedSphereObject>("data/textures/starmap_color.tga");
    texturedSphere->setRotationSpeed(glm::vec3(0.0f, 0.005f, 0.0f));  // Slow rotation
    texturedSphere->setScale(glm::vec3(5.0f, 5.0f, 5.0f));            // Make it much larger to fill the background
    texturedSphere->setPosition(glm::vec3(0.0f, 0.0f, -5.0f));        // Position it in the background
-   _menu3d_renderer->add3DObject(texturedSphere);
+   _render3d_renderer->add3DObject(texturedSphere);
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
@@ -588,13 +588,13 @@ void Game::draw()
    }
 
    // Render 3D background for menus if menu is visible
-   if (Menu::getInstance()->isVisible() && _menu3d_renderer)
+   if (Menu::getInstance()->isVisible() && _render3d_renderer)
    {
       // Activate the render texture for 3D rendering
       if (_window_render_texture->setActive(true))
       {
          // Render the 3D background
-         _menu3d_renderer->render(*_window_render_texture);
+         _render3d_renderer->render(*_window_render_texture);
 
          // Reset SFML states after 3D rendering
          _window_render_texture->resetGLStates();
@@ -816,9 +816,9 @@ void Game::update()
    Menu::getInstance()->update(dt);
 
    // Update 3D menu renderer if menu is visible
-   if (Menu::getInstance()->isVisible() && _menu3d_renderer)
+   if (Menu::getInstance()->isVisible() && _render3d_renderer)
    {
-      _menu3d_renderer->update(dt);
+      _render3d_renderer->update(dt);
    }
 
    _info_layer->update(dt);

@@ -1,10 +1,9 @@
 #include "texturedobject.h"
 #include <iostream>
 #include "opengl/image/tgaio.h"
-#include <glm/gtc/type_ptr.hpp>
 
 namespace deceptus {
-namespace menu3d {
+namespace render3d {
 
 TexturedObject::TexturedObject(
    const std::string& objFile,
@@ -108,5 +107,5 @@ void TexturedObject::loadTexture(const std::string& textureFile)
    }
 }
 
-} // namespace menu3d
+} // namespace render3d
 } // namespace deceptus

@@ -3,12 +3,12 @@
 #include <memory>
 #include "opengl/vbos/vbosphere.h"
 #include "opengl/glslprogram.h"
-#include "menu3dobject.h"  // Include the Menu3DObject base class
+#include "game/render3d/3dobject.h"  // Include the base 3D object class
 
 namespace deceptus {
-namespace menu3d {
+namespace render3d {
 
-class TexturedSphereObject : public deceptus::menu3d::Menu3DObject
+class TexturedSphereObject : public deceptus::render3d::Object3D
 {
 public:
    TexturedSphereObject(
@@ -49,5 +49,5 @@ private:
    void loadTexture(const std::string& textureFile);
 };
 
-} // namespace menu3d
+} // namespace render3d
 } // namespace deceptus
