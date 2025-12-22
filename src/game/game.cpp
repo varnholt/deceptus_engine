@@ -456,7 +456,7 @@ void Game::initialize()
    _render3d_renderer->initialize();
 
    // Add a default textured sphere for menu backgrounds
-   auto texturedSphere = std::make_shared<deceptus::render3d::TexturedSphereObject>("data/textures/starmap_color.tga");
+   auto texturedSphere = std::make_shared<deceptus::render3d::TexturedSphereObject>("data/objects/starmap.obj", "data/textures/starmap_color.tga");
    texturedSphere->setRotationSpeed(glm::vec3(0.0f, 0.005f, 0.0f));  // Slow rotation
    texturedSphere->setScale(glm::vec3(5.0f, 5.0f, 5.0f));            // Make it much larger to fill the background
    texturedSphere->setPosition(glm::vec3(0.0f, 0.0f, -5.0f));        // Position it in the background
