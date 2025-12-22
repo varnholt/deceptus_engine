@@ -3,8 +3,11 @@
 namespace deceptus {
 namespace render3d {
 
-SphereObject::SphereObject(float radius, int slices, int stacks)
-    : _sphere(std::make_unique<VBOSphere>(radius, slices, stacks))
+SphereObject::SphereObject(const std::string& objFile,
+                           float scale,
+                           bool reCenterMesh,
+                           bool loadTc)
+    : _mesh(std::make_unique<VBOMesh>(objFile.c_str(), scale, reCenterMesh, loadTc))
 {
 }
 
@@ -17,7 +20,7 @@ void SphereObject::render(const std::shared_ptr<GLSLProgram>& shader,
                          const glm::mat4& view_matrix,
                          const glm::mat4& projection_matrix)
 {
-    if (!_sphere || !shader) {
+    if (!_mesh || !shader) {
         return;
     }
 
@@ -47,7 +50,7 @@ void SphereObject::render(const std::shared_ptr<GLSLProgram>& shader,
     shader->setUniform("Material.Ka", 0.6f, 0.8f, 1.0f);
     shader->setUniform("Material.Shininess", 50.0f);
 
-    _sphere->render();
+    _mesh->render();
 }
 
 } // namespace render3d
