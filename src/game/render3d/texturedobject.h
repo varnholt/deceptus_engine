@@ -1,14 +1,13 @@
 #pragma once
 
 #include <memory>
+#include "game/render3d/3dobject.h"
 #include "opengl/vbos/vbomesh.h"
-#include "opengl/glslprogram.h"
-#include "menu3dobject.h"  // Include the Menu3DObject base class
 
 namespace deceptus {
-namespace menu3d {
+namespace render3d {
 
-class TexturedObject : public deceptus::menu3d::Menu3DObject
+class TexturedObject : public Object3D
 {
 public:
    TexturedObject(
@@ -51,5 +50,5 @@ private:
    void loadTexture(const std::string& textureFile);
 };
 
-} // namespace menu3d
+} // namespace render3d
 } // namespace deceptus

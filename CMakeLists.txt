@@ -550,8 +550,8 @@ set(GAME_FILES
     src/menus/menuscreenvideo.h
     src/main.cpp
     deceptus_resource.rc
-    src/game/menu3d/menu3drenderer.cpp
-    src/game/menu3d/menu3drenderer.h
+    src/game/render3d/renderer3d.cpp
+    src/game/render3d/renderer3d.h
     src/interfaces/drawable.h
     src/opengl/gl_current.h
     src/opengl/glslprogram.cpp
@@ -575,13 +575,13 @@ set(GAME_FILES
     src/opengl/image/png.h
     src/opengl/image/tgaio.cpp
     src/opengl/image/tgaio.h
-    src/game/menu3d/menu3dobject.h
-    src/game/menu3d/texturedobject.cpp
-    src/game/menu3d/texturedobject.h
-    src/game/menu3d/sphereobject.cpp
-    src/game/menu3d/sphereobject.h
-    src/game/menu3d/texturedsphereobject.cpp
-    src/game/menu3d/texturedsphereobject.h)
+    src/game/render3d/3dobject.h
+    src/game/render3d/texturedobject.cpp
+    src/game/render3d/texturedobject.h
+    src/game/render3d/sphereobject.cpp
+    src/game/render3d/sphereobject.h
+    src/game/render3d/texturedsphereobject.cpp
+    src/game/render3d/texturedsphereobject.h)
 
 set(THIRD_PARTY_FILES
     thirdparty/box2d/include/box2d/b2_api.h

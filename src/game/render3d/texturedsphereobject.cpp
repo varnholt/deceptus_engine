@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace deceptus {
-namespace menu3d {
+namespace render3d {
 
 TexturedSphereObject::TexturedSphereObject(
    const std::string& textureFile,
@@ -109,5 +109,5 @@ void TexturedSphereObject::loadTexture(const std::string& textureFile)
    }
 }
 
-} // namespace menu3d
+} // namespace render3d
 } // namespace deceptus

@@ -1,7 +1,7 @@
 #include "sphereobject.h"
 
 namespace deceptus {
-namespace menu3d {
+namespace render3d {
 
 SphereObject::SphereObject(float radius, int slices, int stacks)
     : _sphere(std::make_unique<VBOSphere>(radius, slices, stacks))
@@ -50,5 +50,5 @@ void SphereObject::render(const std::shared_ptr<GLSLProgram>& shader,
     _sphere->render();
 }
 
-} // namespace menu3d
+} // namespace render3d
 } // namespace deceptus
