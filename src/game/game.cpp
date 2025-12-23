@@ -459,14 +459,14 @@ void Game::initialize()
    auto texturedObject = std::make_shared<deceptus::render3d::TexturedObject>(
        "data/objects/starmap.obj",
        "data/textures/starmap_color.tga",
-       1.0f,      // scale
+       0.1f,      // scale for loading - will be overridden by setScale
        true,      // reCenterMesh
        true,      // loadTc
        false      // useLighting (to match lab's working version)
    );
    texturedObject->setRotationSpeed(glm::vec3(0.02f, 0.035f, 0.04f));  // Use lab's rotation speed
-   texturedObject->setScale(glm::vec3(1.0f, 1.0f, 1.0f));              // Use default scale
-   texturedObject->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));           // Position at origin
+   texturedObject->setScale(glm::vec3(0.5f, 0.5f, 0.5f));              // Use smaller scale - mesh is 100 units, so this makes it 50 units
+   texturedObject->setPosition(glm::vec3(0.0f, 0.0f, -2.0f));         // Position slightly in front of look-at point
    texturedObject->setUseLighting(false);                              // Disable lighting like lab
    _render3d_renderer->add3DObject(texturedObject);
 
