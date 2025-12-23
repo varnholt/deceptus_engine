@@ -83,7 +83,7 @@ void Renderer3D::initialize()
 
    // Initialize the camera
    _camera = std::make_unique<Camera3D>();
-   _camera->initialize(800, 600, 0.1f, 1000.0f);  // Extended far plane for large objects like starmap, will be updated before rendering
+   _camera->initialize(800, 600, 0.3f, 1000.0f);  // Use same near/far as lab after correction, will be updated before rendering
 
    // Initialize required shaders - use the same shader as the working lab project
    auto& shader_pool = ShaderPool::getInstance();
@@ -150,6 +150,29 @@ void Renderer3D::render(sf::RenderTarget& target)
    // Set the projection matrix as a uniform (needed for the texture shader)
    _shader->setUniform("ProjectionMatrix", projection_matrix);
 
+   // Debug output - print camera parameters and object info periodically
+   static float lastDebugOutput = 0.0f;
+   static sf::Clock debugClock; // Use SFML's clock to track time
+   float currentTime = debugClock.getElapsedTime().asSeconds();
+   if (currentTime - lastDebugOutput > 2.0f) { // Print every 2 seconds
+       std::cout << "=== RENDER DEBUG INFO ===" << std::endl;
+       std::cout << "Camera Position: (" << _camera->getCameraPosition().x << ", "
+                 << _camera->getCameraPosition().y << ", " << _camera->getCameraPosition().z << ")" << std::endl;
+       std::cout << "Camera LookAt: (" << _camera->getLookAtPoint().x << ", "
+                 << _camera->getLookAtPoint().y << ", " << _camera->getLookAtPoint().z << ")" << std::endl;
+       // Note: Camera near/far values are not accessible through public interface
+       std::cout << "Camera Near/Far: (not accessible via public interface)" << std::endl;
+
+       if (!_objects.empty()) {
+           auto obj = _objects[0]; // First object (starmap)
+           auto pos = obj->getPosition();
+           std::cout << "Object Position: (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << std::endl;
+       }
+       std::cout << "=========================" << std::endl;
+
+       lastDebugOutput = currentTime;
+   }
+
    // Render all 3D objects
    for (auto& obj : _objects)
    {
@@ -174,10 +197,11 @@ void Renderer3D::setupOpenGLState()
    glEnable(GL_DEPTH_TEST);
    glDepthFunc(GL_LESS);
 
+   // Disable culling to handle potentially inverted normals in the starmap object
+   glDisable(GL_CULL_FACE);
+
    // Set clear color and clear buffers - using dark background
-   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-   // glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
-   // glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+   glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -185,6 +209,9 @@ void Renderer3D::restoreOpenGLState()
 {
    // Disable depth test to return to 2D rendering state
    glDisable(GL_DEPTH_TEST);
+
+   // Re-enable culling for other rendering
+   glEnable(GL_CULL_FACE);
 
    // Enable blending for 2D rendering
    glEnable(GL_BLEND);

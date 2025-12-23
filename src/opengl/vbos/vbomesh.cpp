@@ -366,20 +366,68 @@ void VBOMesh::loadObj(const char* filename)
       generateTangents(points, normals, faces, texcoords, tangents);
    }
 
-   if (_recenter_mesh)
-   {
-      center(points);
+   // Calculate and output boundaries of the loaded mesh BEFORE centering
+   // Use C++23 ranges to find min/max for each coordinate
+   if (!points.empty()) {
+       auto [min_x, max_x] = std::ranges::minmax_element(points, {}, [](const glm::vec3& p) { return p.x; });
+       auto [min_y, max_y] = std::ranges::minmax_element(points, {}, [](const glm::vec3& p) { return p.y; });
+       auto [min_z, max_z] = std::ranges::minmax_element(points, {}, [](const glm::vec3& p) { return p.z; });
+
+       glm::vec3 min_point_before = glm::vec3(min_x->x, min_y->y, min_z->z);
+       glm::vec3 max_point_before = glm::vec3(max_x->x, max_y->y, max_z->z);
+
+       if (_recenter_mesh)
+       {
+          center(points);
+       }
+
+       storeVbo(points, normals, texcoords, tangents, faces, vertices);
+
+       std::cout << "Loaded mesh from: " << filename << "\n";
+       std::cout << " " << points.size() << " points\n";
+       std::cout << " " << face_count << " faces\n";
+       std::cout << " " << faces.size() / 3 << " triangles\n";
+       std::cout << " " << normals.size() << " normals\n";
+       std::cout << " " << tangents.size() << " tangents\n";
+       std::cout << " " << texcoords.size() << " texture coordinates\n";
+
+       std::cout << " Boundaries before centering:\n";
+       std::cout << "  Min: (" << min_point_before.x << ", " << min_point_before.y << ", " << min_point_before.z << ")\n";
+       std::cout << "  Max: (" << max_point_before.x << ", " << max_point_before.y << ", " << max_point_before.z << ")\n";
+       std::cout << "  Size: (" << (max_point_before.x - min_point_before.x) << ", " << (max_point_before.y - min_point_before.y) << ", " << (max_point_before.z - min_point_before.z) << ")\n";
+   } else {
+       // Handle empty points case
+       if (_recenter_mesh)
+       {
+          center(points);
+       }
+
+       storeVbo(points, normals, texcoords, tangents, faces, vertices);
+
+       std::cout << "Loaded mesh from: " << filename << "\n";
+       std::cout << " " << points.size() << " points\n";
+       std::cout << " " << face_count << " faces\n";
+       std::cout << " " << faces.size() / 3 << " triangles\n";
+       std::cout << " " << normals.size() << " normals\n";
+       std::cout << " " << tangents.size() << " tangents\n";
+       std::cout << " " << texcoords.size() << " texture coordinates\n";
    }
 
-   storeVbo(points, normals, texcoords, tangents, faces, vertices);
+   // Calculate and output boundaries of the loaded mesh AFTER centering
+   if (!points.empty()) {
+       // Use C++23 ranges to find min/max for each coordinate after centering
+       auto [min_x, max_x] = std::ranges::minmax_element(points, {}, [](const glm::vec3& p) { return p.x; });
+       auto [min_y, max_y] = std::ranges::minmax_element(points, {}, [](const glm::vec3& p) { return p.y; });
+       auto [min_z, max_z] = std::ranges::minmax_element(points, {}, [](const glm::vec3& p) { return p.z; });
 
-   std::cout << "Loaded mesh from: " << filename << "\n";
-   std::cout << " " << points.size() << " points\n";
-   std::cout << " " << face_count << " faces\n";
-   std::cout << " " << faces.size() / 3 << " triangles\n";
-   std::cout << " " << normals.size() << " normals\n";
-   std::cout << " " << tangents.size() << " tangents\n";
-   std::cout << " " << texcoords.size() << " texture coordinates\n";
+       glm::vec3 min_point_after = glm::vec3(min_x->x, min_y->y, min_z->z);
+       glm::vec3 max_point_after = glm::vec3(max_x->x, max_y->y, max_z->z);
+
+       std::cout << " Boundaries after centering:\n";
+       std::cout << "  Min: (" << min_point_after.x << ", " << min_point_after.y << ", " << min_point_after.z << ")\n";
+       std::cout << "  Max: (" << max_point_after.x << ", " << max_point_after.y << ", " << max_point_after.z << ")\n";
+       std::cout << "  Size: (" << (max_point_after.x - min_point_after.x) << ", " << (max_point_after.y - min_point_after.y) << ", " << (max_point_after.z - min_point_after.z) << ")\n";
+   }
 }
 
 void VBOMesh::storeVbo(
