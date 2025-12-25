@@ -30,10 +30,7 @@
 #include "menus/menuscreenvideo.h"
 
 // Include 3D renderer
-#include "game/render3d/renderer3d.h"
-
-// Include textured sphere object
-#include "game/render3d/texturedsphereobject.h"
+#include "game/render3d/menubackgroundscene.h"
 
 // Include textured object (for StarmapObject typedef)
 #include "game/render3d/texturedobject.h"
@@ -450,25 +447,7 @@ void Game::initialize()
    _ingame_menu = std::make_unique<InGameMenu>();
    _controller_overlay = std::make_unique<ControllerOverlay>();
    _test_scene = std::make_unique<ForestScene>();
-
-   // Initialize 3D menu renderer
-   _render3d_renderer = std::make_unique<deceptus::render3d::Renderer3D>();
-   _render3d_renderer->initialize();
-
-   // Add a default textured object for menu backgrounds (using same approach as working lab)
-   auto texturedObject = std::make_shared<deceptus::render3d::TexturedObject>(
-       "data/objects/starmap.obj",
-       "data/textures/starmap_color.tga",
-       0.1f,      // scale for loading - will be overridden by setScale
-       true,      // reCenterMesh
-       true,      // loadTc
-       false      // useLighting (to match lab's working version)
-   );
-   texturedObject->setRotationSpeed(glm::vec3(0.02f, 0.035f, 0.04f));  // Use lab's rotation speed
-   texturedObject->setScale(glm::vec3(0.5f, 0.5f, 0.5f));              // Use smaller scale - mesh is 100 units, so this makes it 50 units
-   texturedObject->setPosition(glm::vec3(0.0f, 0.0f, -2.0f));         // Position slightly in front of look-at point
-   texturedObject->setUseLighting(false);                              // Disable lighting like lab
-   _render3d_renderer->add3DObject(texturedObject);
+   _menu_background = std::make_unique<MenuBackgroundScene>();
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
@@ -596,13 +575,13 @@ void Game::draw()
    }
 
    // Render 3D background for menus if menu is visible
-   if (Menu::getInstance()->isVisible() && _render3d_renderer)
+   if (Menu::getInstance()->isVisible() && _menu_background)
    {
       // Activate the render texture for 3D rendering
       if (_window_render_texture->setActive(true))
       {
          // Render the 3D background
-         _render3d_renderer->render(*_window_render_texture);
+         _menu_background->render(*_window_render_texture);
 
          // Reset SFML states after 3D rendering
          _window_render_texture->resetGLStates();
@@ -824,9 +803,9 @@ void Game::update()
    Menu::getInstance()->update(dt);
 
    // Update 3D menu renderer if menu is visible
-   if (Menu::getInstance()->isVisible() && _render3d_renderer)
+   if (Menu::getInstance()->isVisible() && _menu_background)
    {
-      _render3d_renderer->update(dt);
+      _menu_background->update(dt);
    }
 
    _info_layer->update(dt);
@@ -1020,9 +999,12 @@ void Game::processEvent(const sf::Event& event)
    {
       if (mouse_button_pressed_event->button == sf::Mouse::Button::Right)
       {
-         const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
-         const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *Level::getCurrentLevel()->getLevelView());
-         Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
+         if (Level::getCurrentLevel())
+         {
+            const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
+            const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *Level::getCurrentLevel()->getLevelView());
+            Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
+         }
       }
    }
    else if (auto* mouse_wheel_scrolled_event = event.getIf<sf::Event::MouseWheelScrolled>())
