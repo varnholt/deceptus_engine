@@ -1,10 +1,7 @@
 #include "texturedsphereobject.h"
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include "opengl/image/tgaio.h"
-#include <glm/gtc/type_ptr.hpp>
-
-namespace deceptus {
-namespace render3d {
 
 TexturedSphereObject::TexturedSphereObject(
    const std::string& objFile,
@@ -32,7 +29,11 @@ void TexturedSphereObject::update(float deltaTime)
    _currentRotation += _rotationSpeed * deltaTime;
 }
 
-void TexturedSphereObject::render(const std::shared_ptr<GLSLProgram>& shader, const glm::mat4& view_matrix, const glm::mat4& projection_matrix)
+void TexturedSphereObject::render(
+   const std::shared_ptr<GLSLProgram>& shader,
+   const glm::mat4& view_matrix,
+   const glm::mat4& projection_matrix
+)
 {
    if (!_mesh || !shader || _textureId == 0)
    {
@@ -106,6 +107,3 @@ void TexturedSphereObject::loadTexture(const std::string& textureFile)
       std::cerr << "Failed to load texture: " << textureFile << std::endl;
    }
 }
-
-} // namespace render3d
-} // namespace deceptus

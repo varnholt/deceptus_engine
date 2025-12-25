@@ -1,62 +1,100 @@
-#version 330 core
+#version 430
 
-struct Material
-{
-    vec3 Kd;            // Diffuse reflectivity
-    vec3 Ks;            // Specular reflectivity
-    vec3 Ka;            // Ambient reflectivity
-    float Shininess;    // Specular shininess factor
+in vec3 ReflectDir;
+
+in vec3 Position;
+in vec3 Normal;
+in vec2 TexCoord;
+
+layout(binding=0) uniform sampler2D Tex1;
+layout(binding=2) uniform sampler2D Specular;
+layout(binding=4) uniform sampler2D AO;
+layout(binding=6) uniform samplerCube CubeMapTex;
+
+uniform bool useAO;
+uniform bool useSpecular;
+
+// reflection
+uniform bool DrawSkyBox;
+uniform float ReflectFactor;
+
+struct LightInfo {
+  vec4 Position;  // Light position in eye coords.
+  vec3 Intensity; // A,D,S intensity
 };
 
-struct Light
-{
-    vec4 Position;      // Position in eye coordinates
-    vec3 Intensity;     // Light intensity (diffuse and ambient)
+uniform LightInfo Light;
+
+struct MaterialInfo {
+  vec3 Ka;            // Ambient reflectivity
+  vec3 Kd;            // Diffuse reflectivity
+  vec3 Ks;            // Specular reflectivity
+  float Shininess;    // Specular shininess factor
 };
+uniform MaterialInfo Material;
 
-uniform Light Light;
-uniform Material Material;
-uniform bool useLighting = true;
-uniform bool useAO = false;
-uniform bool useSpecular = true;
-uniform bool DrawSkyBox = false;
-uniform vec3 WorldCameraPosition;
+uniform bool useLighting;  // When false, just return texture color without lighting
 
-in vec3 FragPos;
-in vec3 Normal_out;
-in vec2 TexCoord_out;
+layout( location = 0 ) out vec4 FragColor;
 
-out vec4 FragColor;
-
-vec3 phongModel()
+void phongModel( vec3 pos, vec3 norm, out vec3 ambAndDiff, out vec3 spec )
 {
-    vec3 ambient = Material.Ka * Light.Intensity;
+   vec3 s = normalize(vec3(Light.Position) - pos);
+   vec3 v = normalize(-pos.xyz);
+   vec3 r = reflect( -s, norm );
+   vec3 ambient = Light.Intensity * Material.Ka;
+   float sDotN = max( dot(s,norm), 0.0 );
+   vec3 diffuse = Light.Intensity * Material.Kd * sDotN;
+   spec = vec3(0.0);
 
-    if (!useLighting) {
-        return ambient;
-    }
+   if (useAO)
+   {
+      vec4 aoVec = texture( AO, TexCoord );
+      ambient *= aoVec.x;
+   }
 
-    vec3 s = normalize(vec3(Light.Position) - FragPos);
-    vec3 v = normalize(WorldCameraPosition - FragPos);
-    vec3 r = reflect(-s, Normal_out);
-    
-    // Only calculate specular if the surface is facing the light
-    vec3 specular = vec3(0.0);
-    if (useSpecular && dot(Normal_out, s) > 0.0) {
-        specular = Material.Ks * Light.Intensity * pow(max(dot(r, v), 0.0), Material.Shininess);
-    }
-    
-    vec3 diffuse = Material.Kd * Light.Intensity * max(dot(Normal_out, s), 0.0);
+   if( sDotN > 0.0 )
+   {
+        spec = Light.Intensity * Material.Ks *
+               pow( max( dot(r,v), 0.0 ), Material.Shininess );
 
-    return diffuse + specular + ambient;
+      if (useSpecular)
+      {
+         vec4 texColor = texture( Specular, TexCoord );
+         spec *= texColor.x;
+
+         // mix specular with cube map texture
+         // vec4 cubeMapColor = texture(CubeMapTex, ReflectDir);
+         // spec += cubeMapColor.xyz * texColor.x * ReflectFactor;
+      }
+   }
+
+   ambAndDiff = ambient + diffuse;
 }
+
 
 void main()
 {
-    if (DrawSkyBox) {
-        // For skybox rendering, we can have a special appearance
-        FragColor = vec4(phongModel(), 1.0);
-    } else {
-        FragColor = vec4(phongModel(), 1.0);
-    }
+   if (DrawSkyBox)
+   {
+      vec4 cubeMapColor = texture(CubeMapTex, ReflectDir);
+      FragColor = cubeMapColor;
+   }
+   else
+   {
+      vec4 texColor = texture( Tex1, TexCoord );
+
+      if (useLighting)
+      {
+         vec3 ambAndDiff, spec;
+         phongModel( Position, Normal, ambAndDiff, spec );
+         FragColor = (vec4( ambAndDiff, 1.0 ) * texColor) + vec4(spec,1.0);
+      }
+      else
+      {
+         // Just return the texture color without any lighting
+         FragColor = texColor;
+      }
+   }
 }
+

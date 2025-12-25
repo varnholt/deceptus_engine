@@ -550,8 +550,8 @@ set(GAME_FILES
     src/menus/menuscreenvideo.h
     src/main.cpp
     deceptus_resource.rc
-    src/game/render3d/renderer3d.cpp
-    src/game/render3d/renderer3d.h
+    src/game/render3d/menubackgroundscene.cpp
+    src/game/render3d/menubackgroundscene.h
     src/interfaces/drawable.h
     src/opengl/gl_current.h
     src/opengl/glslprogram.cpp
@@ -575,13 +575,9 @@ set(GAME_FILES
     src/opengl/image/png.h
     src/opengl/image/tgaio.cpp
     src/opengl/image/tgaio.h
-    src/game/render3d/3dobject.h
+    src/game/render3d/object3d.h
     src/game/render3d/texturedobject.cpp
-    src/game/render3d/texturedobject.h
-    src/game/render3d/sphereobject.cpp
-    src/game/render3d/sphereobject.h
-    src/game/render3d/texturedsphereobject.cpp
-    src/game/render3d/texturedsphereobject.h)
+    src/game/render3d/texturedobject.h)
 
 set(THIRD_PARTY_FILES
     thirdparty/box2d/include/box2d/b2_api.h
@@ -781,7 +777,9 @@ add_executable(
     data/scripts/enemies/state_machine.lua
     data/scripts/enemies/vector2.lua
     data/scripts/enemies/vectorial2.lua
-    data/scripts/enemies/watermine.lua)
+    data/scripts/enemies/watermine.lua
+    src/game/render3d/object3d.cpp
+    src/game/render3d/camera3d.h src/game/render3d/camera3d.cpp)
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
 

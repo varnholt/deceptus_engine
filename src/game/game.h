@@ -24,7 +24,7 @@
 #include <future>
 
 // Include 3D menu renderer
-#include "game/render3d/renderer3d.h"
+#include "game/render3d/menubackgroundscene.h"
 
 class Level;
 class Player;
@@ -96,7 +96,7 @@ private:
    std::shared_ptr<EventSerializer> _global_event_serializer;
 
    // 3D menu background renderer
-   std::unique_ptr<deceptus::render3d::Renderer3D> _render3d_renderer;
+   std::unique_ptr<MenuBackgroundScene> _menu_background;
 
    sf::Clock _delta_clock;
    std::atomic<bool> _level_loading_finished = false;

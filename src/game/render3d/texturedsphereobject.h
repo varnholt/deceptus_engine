@@ -1,14 +1,11 @@
 #pragma once
 
 #include <memory>
-#include "opengl/vbos/vbomesh.h"
-#include "opengl/glslprogram.h"
 #include "game/render3d/3dobject.h"  // Include the base 3D object class
+#include "opengl/glslprogram.h"
+#include "opengl/vbos/vbomesh.h"
 
-namespace deceptus {
-namespace render3d {
-
-class TexturedSphereObject : public deceptus::render3d::Object3D
+class TexturedSphereObject : public Object3D
 {
 public:
    TexturedSphereObject(
@@ -49,6 +46,3 @@ private:
 
    void loadTexture(const std::string& textureFile);
 };
-
-} // namespace render3d
-} // namespace deceptus
