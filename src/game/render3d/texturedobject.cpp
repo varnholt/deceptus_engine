@@ -2,9 +2,6 @@
 #include <iostream>
 #include "opengl/image/tgaio.h"
 
-namespace deceptus {
-namespace render3d {
-
 TexturedObject::TexturedObject(
    const std::string& objFile,
    const std::string& textureFile,
@@ -106,6 +103,3 @@ void TexturedObject::loadTexture(const std::string& textureFile)
       std::cerr << "Failed to load texture: " << textureFile << std::endl;
    }
 }
-
-} // namespace render3d
-} // namespace deceptus
