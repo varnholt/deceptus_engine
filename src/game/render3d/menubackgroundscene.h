@@ -21,7 +21,7 @@ public:
    void update(const sf::Time& deltaTime);
    void render(sf::RenderTarget& target);
 
-   void add3DObject(std::shared_ptr<Object3D> object);
+   void addObject(std::shared_ptr<Object3D> object);
    void clear3DObjects();
 
 private:
