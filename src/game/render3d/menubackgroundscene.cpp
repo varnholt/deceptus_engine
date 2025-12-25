@@ -8,7 +8,9 @@ MenuBackgroundScene::MenuBackgroundScene()
 {
    // Initialize the camera
    _camera = std::make_unique<Camera3D>();
-   _camera->initialize(800, 600, -10, 10);  // Use same near/far as lab after correction, will be updated before rendering
+   _camera->initialize(800, 600, -10, 10);       // Use same near/far as lab after correction, will be updated before rendering
+   _camera->setPosition({0.0f, 0.0f, 5.0f});     // Position camera along z-axis                                               │
+   _camera->setLookAtPoint({0.0f, 0.0f, 0.0f});  // Look at origin where starmap is
 
    // create textured starmap
    _starmap = std::make_shared<TexturedObject>(
@@ -24,7 +26,7 @@ MenuBackgroundScene::MenuBackgroundScene()
    _starmap->setScale({1, 1, 1});
    _starmap->setRotationSpeed(glm::vec3(0.02f, 0.035f, 0.04f));  // Use lab's rotation speed
 
-   add3DObject(_starmap);
+   addObject(_starmap);
 
    // initialize required shaders
    auto& shader_pool = ShaderPool::getInstance();
@@ -91,7 +93,7 @@ void MenuBackgroundScene::render(sf::RenderTarget& target)
    restoreOpenGLState();
 }
 
-void MenuBackgroundScene::add3DObject(std::shared_ptr<Object3D> object)
+void MenuBackgroundScene::addObject(std::shared_ptr<Object3D> object)
 {
    _objects.push_back(object);
 }
