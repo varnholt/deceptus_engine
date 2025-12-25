@@ -64,7 +64,6 @@ void MenuBackgroundScene::render(sf::RenderTarget& target)
    // Get current target size and set viewport
    sf::Vector2u target_size = target.getSize();
    glViewport(0, 0, static_cast<GLsizei>(target_size.x), static_cast<GLsizei>(target_size.y));
-   //_camera->initialize(static_cast<int>(target_size.x), static_cast<int>(target_size.y));
 
    // Setup OpenGL state for 3D rendering
    setupOpenGLState();
