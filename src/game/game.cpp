@@ -574,18 +574,10 @@ void Game::draw()
       _test_scene->draw(*_window_render_texture.get());
    }
 
-   // Render 3D background for menus if menu is visible
+   // render menu background if menu is visible
    if (Menu::getInstance()->isVisible() && _menu_background)
    {
-      // Activate the render texture for 3D rendering
-      if (_window_render_texture->setActive(true))
-      {
-         // Render the 3D background
-         _menu_background->render(*_window_render_texture);
-
-         // Reset SFML states after 3D rendering
-         _window_render_texture->resetGLStates();
-      }
+      _menu_background->render(*_window_render_texture);
    }
 
    Menu::getInstance()->draw(*_window_render_texture.get(), {sf::BlendAlpha});
