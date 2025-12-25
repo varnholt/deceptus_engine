@@ -1,10 +1,9 @@
 #include "camera.h"
 
 // glm
+#include <iostream>
 #include "../glm/gtc/matrix_transform.hpp"
 #include "../glm/gtx/transform.hpp"
-
-
 
 Camera& Camera::getInstance()
 {
