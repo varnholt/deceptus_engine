@@ -1,11 +1,13 @@
 #pragma once
 
-#include "interfaces/drawable.h"
+#include "opengl/interfaces/drawable.h"
+
 #include "opengl/gl_current.h"
+
+#include "glm/glm.hpp"
 
 #include <string>
 #include <vector>
-#include "../glm/glm.hpp"
 
 class VBOMesh : public Drawable
 {

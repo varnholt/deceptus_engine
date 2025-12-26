@@ -1,6 +1,6 @@
 #pragma once
 
-#include "interfaces/drawable.h"
+#include "opengl/interfaces/drawable.h"
 #include "opengl/gl_current.h"
 
 class VBOSphere : public Drawable
