@@ -8,8 +8,8 @@ namespace LE
 
 int readShort(std::ifstream& stream)
 {
-   unsigned char ic;  // input char
-   int result;        // result
+   unsigned char ic{};  // input char
+   int result{};        // result
 
    ic = stream.get();
    result = ic;
@@ -184,7 +184,8 @@ GLuint loadTex(const char* fName, GLint& width, GLint& height)
 
 GLuint loadTex(const char* fName)
 {
-   GLint w, h;
+   GLint w{};
+   GLint h{};
    return TGAIO::loadTex(fName, w, h);
 }
 

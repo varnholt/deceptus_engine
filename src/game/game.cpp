@@ -23,17 +23,13 @@
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
+#include "opengl/render3d/menubackgroundscene.h"
+#include "opengl/render3d/texturedobject.h"
 #include "splashscreen.h"
 
 #include "menus/menu.h"
 #include "menus/menuscreenmain.h"
 #include "menus/menuscreenvideo.h"
-
-// Include 3D renderer
-#include "game/render3d/menubackgroundscene.h"
-
-// Include textured object (for StarmapObject typedef)
-#include "game/render3d/texturedobject.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>

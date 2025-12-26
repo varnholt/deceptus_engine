@@ -550,33 +550,32 @@ set(GAME_FILES
     src/menus/menuscreenvideo.h
     src/main.cpp
     deceptus_resource.rc
-    src/game/render3d/menubackgroundscene.cpp
-    src/game/render3d/menubackgroundscene.h
     src/opengl/gl_current.h
+    src/opengl/glew.h
     src/opengl/glslprogram.cpp
     src/opengl/glslprogram.h
     src/opengl/glutils.cpp
     src/opengl/glutils.h
-    src/opengl/vbos/vbomesh.cpp
-    src/opengl/vbos/vbomesh.h
-    src/opengl/vbos/vbosphere.cpp
-    src/opengl/vbos/vbosphere.h
-    src/game/shaders/shaderpool.cpp
-    src/game/shaders/shaderpool.h
-    src/opengl/glew.h
+    src/opengl/shaderpool.cpp
+    src/opengl/shaderpool.h
+    src/opengl/image/tgaio.cpp
+    src/opengl/image/tgaio.h
     src/opengl/interfaces/drawable.cpp
     src/opengl/interfaces/drawable.h
     src/opengl/interfaces/transformable.cpp
     src/opengl/interfaces/transformable.h
-
-
-
-
-    src/opengl/image/tgaio.cpp
-    src/opengl/image/tgaio.h
-    src/game/render3d/object3d.h
-    src/game/render3d/texturedobject.cpp
-    src/game/render3d/texturedobject.h)
+    src/opengl/render3d/camera3d.cpp
+    src/opengl/render3d/camera3d.h
+    src/opengl/render3d/menubackgroundscene.cpp
+    src/opengl/render3d/menubackgroundscene.h
+    src/opengl/render3d/object3d.cpp
+    src/opengl/render3d/object3d.h
+    src/opengl/render3d/texturedobject.cpp
+    src/opengl/render3d/texturedobject.h
+    src/opengl/vbos/vbomesh.cpp
+    src/opengl/vbos/vbomesh.h
+    src/opengl/vbos/vbosphere.cpp
+    src/opengl/vbos/vbosphere.h)
 
 set(THIRD_PARTY_FILES
     thirdparty/box2d/include/box2d/b2_api.h
@@ -776,9 +775,7 @@ add_executable(
     data/scripts/enemies/state_machine.lua
     data/scripts/enemies/vector2.lua
     data/scripts/enemies/vectorial2.lua
-    data/scripts/enemies/watermine.lua
-    src/game/render3d/object3d.cpp
-    src/game/render3d/camera3d.h src/game/render3d/camera3d.cpp)
+    data/scripts/enemies/watermine.lua)
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
 
