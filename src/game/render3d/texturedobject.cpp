@@ -36,44 +36,57 @@ void TexturedObject::render(const std::shared_ptr<GLSLProgram>& shader, const gl
       return;
    }
 
-   // Create model matrix with position, rotation, and scale
+   // create model matrix with position, rotation, and scale
    glm::mat4 model_matrix = glm::translate(glm::mat4(1.0f), _position);
-
-   // Apply rotations around X, Y, and Z axes
    model_matrix = glm::rotate(model_matrix, _currentRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));  // X-axis
    model_matrix = glm::rotate(model_matrix, _currentRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));  // Y-axis
    model_matrix = glm::rotate(model_matrix, _currentRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));  // Z-axis
-
    model_matrix = glm::scale(model_matrix, _scale);
 
-   // Calculate MVP matrices
+   // calculate MVP matrices
    glm::mat4 mv_matrix = view_matrix * model_matrix;
    glm::mat4 mvp_matrix = projection_matrix * mv_matrix;
    glm::mat3 normal_matrix = glm::mat3(glm::vec3(mv_matrix[0]), glm::vec3(mv_matrix[1]), glm::vec3(mv_matrix[2]));
 
-   // Set the uniforms for the textured mesh
+   // transform uniforms
    shader->setUniform("MVP", mvp_matrix);
    shader->setUniform("ModelViewMatrix", mv_matrix);
    shader->setUniform("ModelMatrix", model_matrix);
    shader->setUniform("NormalMatrix", normal_matrix);
 
-   // Set material properties for textured mesh
-   shader->setUniform("Material.Kd", 1.0f, 1.0f, 1.0f);  // Use texture for diffuse
+   // material properties
+   shader->setUniform("Material.Kd", 1.0f, 1.0f, 1.0f);
    shader->setUniform("Material.Ks", 0.5f, 0.5f, 0.5f);
    shader->setUniform("Material.Ka", 0.3f, 0.3f, 0.3f);
    shader->setUniform("Material.Shininess", 32.0f);
-
-   // Set the lighting uniform
    shader->setUniform("useLighting", _useLighting);
 
-   // Bind the texture to texture unit 0
+   // bind texture
    glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, _textureId);
-
-   // Tell the shader which texture unit we're using
    shader->setUniform("Tex1", 0);
 
    _mesh->render();
+}
+
+void TexturedObject::setRotationSpeed(const vec3& speed)
+{
+   _rotationSpeed = speed;
+}
+
+void TexturedObject::setUseLighting(bool use)
+{
+   _useLighting = use;
+}
+
+bool TexturedObject::getUseLighting() const
+{
+   return _useLighting;
+}
+
+vec3 TexturedObject::getRotationSpeed() const
+{
+   return _rotationSpeed;
 }
 
 void TexturedObject::loadTexture(const std::string& textureFile)
