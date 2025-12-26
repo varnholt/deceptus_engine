@@ -7,10 +7,10 @@
 #include <memory>
 #include <vector>
 
-#include "game/render3d/camera3d.h"
-#include "game/render3d/object3d.h"
-#include "game/render3d/texturedobject.h"
 #include "opengl/glslprogram.h"
+#include "opengl/render3d/camera3d.h"
+#include "opengl/render3d/object3d.h"
+#include "opengl/render3d/texturedobject.h"
 
 class MenuBackgroundScene
 {

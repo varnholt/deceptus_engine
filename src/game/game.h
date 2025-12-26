@@ -16,15 +16,12 @@
 #include "game/physics/physicsconfigurationui.h"
 #include "game/scenes/forestscene.h"
 #include "game/sfx/gameaudio.h"
+#include "opengl/render3d/menubackgroundscene.h"
 
 #include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
-
 #include <future>
-
-// Include 3D menu renderer
-#include "game/render3d/menubackgroundscene.h"
 
 class Level;
 class Player;

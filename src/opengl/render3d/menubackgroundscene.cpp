@@ -1,7 +1,7 @@
 #include "menubackgroundscene.h"
 
-#include "game/shaders/shaderpool.h"
 #include "opengl/glm/gtc/type_ptr.hpp"
+#include "opengl/shaderpool.h"
 
 #include <iostream>
 

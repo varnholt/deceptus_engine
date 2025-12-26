@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "game/render3d/object3d.h"
+#include "opengl/render3d/object3d.h"
 #include "opengl/vbos/vbomesh.h"
 
 class TexturedObject : public Object3D
