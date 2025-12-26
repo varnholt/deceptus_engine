@@ -296,7 +296,7 @@ void Game::playLevelMusic()
 void Game::showMainMenu()
 {
    Menu::getInstance()->show(Menu::MenuType::Main);
-   GameState::getInstance().enqueuePause();
+   GameState::getInstance().enqueueStop();
 
    playMenuMusic();
 }
@@ -570,8 +570,7 @@ void Game::draw()
       _test_scene->draw(*_window_render_texture.get());
    }
 
-   // render menu background if menu is visible
-   if (Menu::getInstance()->isVisible() && _menu_background)
+   if (GameState::getInstance().getMode() == ExecutionMode::NotRunning)
    {
       _menu_background->render(*_window_render_texture);
    }
@@ -788,17 +787,17 @@ void Game::update()
       menuLoadRequest();
    }
 
+   const auto game_mode = GameState::getInstance().getMode();
+
    Menu::getInstance()->update(dt);
 
-   // Update 3D menu renderer if menu is visible
-   if (Menu::getInstance()->isVisible() && _menu_background)
+   if (game_mode == ExecutionMode::NotRunning)
    {
       _menu_background->update(dt);
    }
 
    _info_layer->update(dt);
 
-   const auto game_mode = GameState::getInstance().getMode();
    if (game_mode == ExecutionMode::Paused)
    {
       updateGameController();

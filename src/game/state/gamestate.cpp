@@ -56,6 +56,11 @@ void GameState::enqueuePause()
    enqueue(ExecutionMode::Paused);
 }
 
+void GameState::enqueueStop()
+{
+   enqueue(ExecutionMode::NotRunning);
+}
+
 void GameState::enqueueResume()
 {
    enqueue(ExecutionMode::Running);

@@ -32,7 +32,10 @@ void VolumeUpdater::updateVolume(const std::shared_ptr<GameMechanism>& mechanism
       return;
    }
 
-   const auto paused_factor = (GameState::getInstance().getMode() == ExecutionMode::Paused) ? 0.5f : 1.0f;
+   const auto paused_factor =
+      (GameState::getInstance().getMode() == ExecutionMode::Paused || GameState::getInstance().getMode() == ExecutionMode::NotRunning)
+         ? 0.5f
+         : 1.0f;
 
    switch (mechanism->getAudioUpdateBehavior())
    {
