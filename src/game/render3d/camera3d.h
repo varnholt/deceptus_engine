@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-#include "../glm/glm.hpp"
+#include "glm/glm.hpp"
 
 class Camera3D
 {
