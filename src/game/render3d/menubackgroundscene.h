@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opengl/gl_current.h"  // Include GLEW first
+#include "opengl/gl_current.h"  // include GLEW first
 
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>

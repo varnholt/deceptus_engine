@@ -1,19 +1,12 @@
 #include "camera3d.h"
 
 // glm
-#include <iostream>
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtx/transform.hpp"
-
-// Camera3D& Camera3D::getInstance()
-// {
-//    static Camera3D __Camera3D;
-//    return __Camera3D;
-// }
+#include "opengl/glm/gtc/matrix_transform.hpp"
+#include "opengl/glm/gtx/transform.hpp"
 
 void Camera3D::initialize(int32_t w, int32_t h)
 {
-   initialize(w, h, 0.3f, 1000.0f);  // Use default values
+   initialize(w, h, _near_plane, _far_plane);
 }
 
 void Camera3D::updateProjectionMatrix()
@@ -52,7 +45,7 @@ const glm::vec3& Camera3D::getPosition() const
 void Camera3D::setPosition(const glm::vec3& position)
 {
    _position = position;
-   updateViewMatrix();  // Update view matrix when Camera3D position changes
+   updateViewMatrix();
 }
 
 const glm::vec3& Camera3D::getLookAtPoint() const
@@ -63,7 +56,7 @@ const glm::vec3& Camera3D::getLookAtPoint() const
 void Camera3D::setLookAtPoint(const glm::vec3& look_at_point)
 {
    _look_at_point = look_at_point;
-   updateViewMatrix();  // Update view matrix when look-at point changes
+   updateViewMatrix();
 }
 
 void Camera3D::updateViewMatrix()

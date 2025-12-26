@@ -4,7 +4,7 @@
 
 #include "opengl/gl_current.h"
 
-#include "glm/glm.hpp"
+#include "opengl/glm/glm.hpp"
 
 #include <string>
 #include <vector>
