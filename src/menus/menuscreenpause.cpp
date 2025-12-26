@@ -113,7 +113,7 @@ void MenuScreenPause::select()
             {
                if (button == MessageBox::Button::Yes)
                {
-                  GameState::getInstance().enqueuePause();
+                  GameState::getInstance().enqueueStop();
                   Menu::getInstance()->show(Menu::MenuType::Main);
                }
             }
