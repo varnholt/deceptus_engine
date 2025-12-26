@@ -1,8 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <memory>
+
+#include "opengl/glm/glm.hpp"
+#include "opengl/glm/gtc/matrix_transform.hpp"
 #include "opengl/glslprogram.h"
 
 class Object3D

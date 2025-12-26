@@ -58,7 +58,7 @@ void generateTangents(
       tangents.push_back(glm::vec4(0.0f));
    }
 
-   // Compute the tangent std::vector
+   // compute tangent
    for (GLuint i = 0; i < faces.size(); i += 3)
    {
       const glm::vec3& point_1 = points[faces[i]];

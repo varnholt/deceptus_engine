@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glm/glm.hpp"
+#include "opengl/glm/glm.hpp"
 
 class Transformable
 {

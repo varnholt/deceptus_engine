@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cstdio>
 
-#include <glm/gtc/constants.hpp>
+#include "opengl/glm/gtc/constants.hpp"
 
 VBOSphere::VBOSphere(float rad, GLuint sl, GLuint st) : radius(rad), slices(sl), stacks(st)
 {

@@ -1,8 +1,9 @@
 #include "menubackgroundscene.h"
 
-#include <glm/gtc/type_ptr.hpp>
-#include <iostream>
 #include "game/shaders/shaderpool.h"
+#include "opengl/glm/gtc/type_ptr.hpp"
+
+#include <iostream>
 
 MenuBackgroundScene::MenuBackgroundScene()
 {
@@ -48,8 +49,6 @@ MenuBackgroundScene::~MenuBackgroundScene()
 void MenuBackgroundScene::update(const sf::Time& delta_time)
 {
    const auto delta_time_s = delta_time.asSeconds();
-
-   // Update all 3D objects
    for (auto& obj : _objects)
    {
       obj->update(delta_time_s);
@@ -63,11 +62,11 @@ void MenuBackgroundScene::render(sf::RenderTarget& target)
       return;
    }
 
-   // Get current target size and set viewport
+   // set viewport
    sf::Vector2u target_size = target.getSize();
    glViewport(0, 0, static_cast<GLsizei>(target_size.x), static_cast<GLsizei>(target_size.y));
 
-   // Setup OpenGL state for 3D rendering
+   // prepare OpenGL state
    setupOpenGLState();
 
    _shader->use();
@@ -79,17 +78,17 @@ void MenuBackgroundScene::render(sf::RenderTarget& target)
    _shader->setUniform("ReflectFactor", 0.3f);
    _shader->setUniform("WorldCameraPosition", _camera->getPosition());
 
-   // Get matrices from camera
+   // get matrices from camera
    glm::mat4 view_matrix = _camera->getViewMatrix();
    glm::mat4 projection_matrix = _camera->getProjectionMatrix();
 
-   // Render all 3D objects
+   // render all objects
    for (auto& obj : _objects)
    {
       obj->render(_shader, view_matrix, projection_matrix);
    }
 
-   // Restore OpenGL state after 3D rendering
+   // restore OpenGL state
    restoreOpenGLState();
 }
 
