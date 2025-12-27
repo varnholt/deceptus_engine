@@ -574,8 +574,8 @@ set(GAME_FILES
     src/opengl/render3d/texturedobject.h
     src/opengl/vbos/vbomesh.cpp
     src/opengl/vbos/vbomesh.h
-    src/opengl/vbos/vbosphere.cpp
-    src/opengl/vbos/vbosphere.h)
+
+)
 
 set(THIRD_PARTY_FILES
     thirdparty/box2d/include/box2d/b2_api.h
