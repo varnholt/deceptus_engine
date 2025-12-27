@@ -31,7 +31,7 @@ MenuBackgroundScene::MenuBackgroundScene()
 
    // initialize required shaders
    auto& shader_pool = ShaderPool::getInstance();
-   shader_pool.add("texture", "data/shaders/texture/texture.vs", "data/shaders/texture/texture.fs");
+   shader_pool.add("texture", "data/shaders/texture.vs", "data/shaders/texture.fs");
 
    _shader = shader_pool.get("texture");
    if (!_shader)
