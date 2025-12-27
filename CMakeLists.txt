@@ -549,7 +549,33 @@ set(GAME_FILES
     src/menus/menuscreenvideo.cpp
     src/menus/menuscreenvideo.h
     src/main.cpp
-    deceptus_resource.rc)
+    deceptus_resource.rc
+    src/opengl/gl_current.h
+    src/opengl/glew.h
+    src/opengl/glslprogram.cpp
+    src/opengl/glslprogram.h
+    src/opengl/glutils.cpp
+    src/opengl/glutils.h
+    src/opengl/shaderpool.cpp
+    src/opengl/shaderpool.h
+
+
+    src/opengl/interfaces/drawable.cpp
+    src/opengl/interfaces/drawable.h
+    src/opengl/interfaces/transformable.cpp
+    src/opengl/interfaces/transformable.h
+    src/opengl/render3d/camera3d.cpp
+    src/opengl/render3d/camera3d.h
+    src/opengl/render3d/menubackgroundscene.cpp
+    src/opengl/render3d/menubackgroundscene.h
+    src/opengl/render3d/object3d.cpp
+    src/opengl/render3d/object3d.h
+    src/opengl/render3d/texturedobject.cpp
+    src/opengl/render3d/texturedobject.h
+    src/opengl/vbos/vbomesh.cpp
+    src/opengl/vbos/vbomesh.h
+
+)
 
 set(THIRD_PARTY_FILES
     thirdparty/box2d/include/box2d/b2_api.h
@@ -792,8 +818,12 @@ FetchContent_Declare(
     LUA
     GIT_REPOSITORY https://github.com/lua/lua.git
     GIT_TAG v5.4.7)
+FetchContent_Declare(
+    GLEW
+    GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
+    GIT_TAG glew-cmake-2.3.0)
 
-FetchContent_MakeAvailable(SFML SDL3 LUA)
+FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
 
 # ----------------------------------------------------------------------------------------------------
 # lua configuration (lua is not a cmake project)
@@ -813,13 +843,13 @@ target_compile_options(deceptus PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${THIRD_PARTY_
 target_include_directories(
     deceptus
     PRIVATE .
-            src
-            src/game
-            thirdparty
-            thirdparty/box2d/include
-            thirdparty/lua
-            ${SFML_INCLUDE_DIR}
-            ${SDL3_INCLUDE_DIRS})
+    src
+    src/game
+    thirdparty
+    thirdparty/box2d/include
+    thirdparty/lua
+    ${SFML_INCLUDE_DIR}
+    ${SDL3_INCLUDE_DIRS})
 
 target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
 
@@ -832,7 +862,7 @@ endif()
 # ----------------------------------------------------------------------------------------------------
 
 target_link_libraries(deceptus PRIVATE sfml-system sfml-audio sfml-graphics sfml-window SDL3::SDL3
-                                       lua)
+    lua libglew_static opengl32 glu32)
 
 if(WIN32)
 
@@ -851,7 +881,7 @@ if(WIN32)
         add_compile_options(/MP)
     endif()
 
-    target_link_libraries(deceptus PRIVATE glu32 opengl32)
+    # GLEW is now handled via FetchContent
 
 endif()
 

@@ -1,5 +1,8 @@
 #pragma once
 
+// Include GLEW for OpenGL extensions
+#include "opengl/glew.h"
+
 #include "game/audio/audio.h"
 #include "game/audio/musicfilenames.h"
 #include "game/camera/camerasystemconfigurationui.h"
@@ -13,11 +16,11 @@
 #include "game/physics/physicsconfigurationui.h"
 #include "game/scenes/forestscene.h"
 #include "game/sfx/gameaudio.h"
+#include "opengl/render3d/menubackgroundscene.h"
 
 #include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
-
 #include <future>
 
 class Level;
@@ -88,6 +91,9 @@ private:
    std::unique_ptr<ForestScene> _test_scene;
 
    std::shared_ptr<EventSerializer> _global_event_serializer;
+
+   // 3D menu background renderer
+   std::unique_ptr<MenuBackgroundScene> _menu_background;
 
    sf::Clock _delta_clock;
    std::atomic<bool> _level_loading_finished = false;

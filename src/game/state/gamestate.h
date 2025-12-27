@@ -16,6 +16,7 @@ public:
    void sync();
 
    void enqueuePause();
+   void enqueueStop();
    void enqueueResume();
    void enqueueTogglePauseResume();
 
@@ -29,8 +30,8 @@ public:
 
 private:
    mutable std::mutex _mutex;
-   ExecutionMode _mode = ExecutionMode::Running;
-   ExecutionMode _queued_mode = ExecutionMode::Running;
+   ExecutionMode _mode = ExecutionMode::NotRunning;
+   ExecutionMode _queued_mode = ExecutionMode::NotRunning;
 
    std::vector<StateChangeCallback> _callbacks;
 };

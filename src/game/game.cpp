@@ -23,7 +23,8 @@
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
-#include "game/ui/messagebox.h"
+#include "opengl/render3d/menubackgroundscene.h"
+#include "opengl/render3d/texturedobject.h"
 #include "splashscreen.h"
 
 #include "menus/menu.h"
@@ -43,6 +44,8 @@
 #ifdef MessageBox
 #undef MessageBox
 #endif
+
+#include "game/ui/messagebox.h"
 
 #ifdef __linux__
 #define setUniform setParameter
@@ -293,7 +296,7 @@ void Game::playLevelMusic()
 void Game::showMainMenu()
 {
    Menu::getInstance()->show(Menu::MenuType::Main);
-   GameState::getInstance().enqueuePause();
+   GameState::getInstance().enqueueStop();
 
    playMenuMusic();
 }
@@ -413,6 +416,20 @@ void Game::initialize()
 {
    initializeWindow();
 
+   // Initialize GLEW after the OpenGL context is created but before any OpenGL calls
+   if (!_window_render_texture->setActive(true))
+   {
+      return;  // Or handle error appropriately
+   }
+
+   GLenum err = glewInit();
+   if (err != GLEW_OK)
+   {
+      std::cerr << "Failed to initialize GLEW: " << err << std::endl;
+      return;  // Handle error appropriately
+   }
+   std::cout << "GLEW initialized successfully." << std::endl;
+
    initializeController();
 
    _player = std::make_shared<Player>();
@@ -426,6 +443,7 @@ void Game::initialize()
    _ingame_menu = std::make_unique<InGameMenu>();
    _controller_overlay = std::make_unique<ControllerOverlay>();
    _test_scene = std::make_unique<ForestScene>();
+   _menu_background = std::make_unique<MenuBackgroundScene>();
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
@@ -550,6 +568,11 @@ void Game::draw()
    if (DrawStates::_draw_test_scene)
    {
       _test_scene->draw(*_window_render_texture.get());
+   }
+
+   if (GameState::getInstance().getMode() == ExecutionMode::NotRunning)
+   {
+      _menu_background->render(*_window_render_texture);
    }
 
    Menu::getInstance()->draw(*_window_render_texture.get(), {sf::BlendAlpha});
@@ -764,11 +787,17 @@ void Game::update()
       menuLoadRequest();
    }
 
+   const auto game_mode = GameState::getInstance().getMode();
+
    Menu::getInstance()->update(dt);
+
+   if (game_mode == ExecutionMode::NotRunning)
+   {
+      _menu_background->update(dt);
+   }
 
    _info_layer->update(dt);
 
-   const auto game_mode = GameState::getInstance().getMode();
    if (game_mode == ExecutionMode::Paused)
    {
       updateGameController();
@@ -957,9 +986,12 @@ void Game::processEvent(const sf::Event& event)
    {
       if (mouse_button_pressed_event->button == sf::Mouse::Button::Right)
       {
-         const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
-         const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *Level::getCurrentLevel()->getLevelView());
-         Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
+         if (Level::getCurrentLevel())
+         {
+            const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
+            const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *Level::getCurrentLevel()->getLevelView());
+            Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
+         }
       }
    }
    else if (auto* mouse_wheel_scrolled_event = event.getIf<sf::Event::MouseWheelScrolled>())

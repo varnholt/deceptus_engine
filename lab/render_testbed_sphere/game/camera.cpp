@@ -1,10 +1,9 @@
 #include "camera.h"
 
 // glm
+#include <iostream>
 #include "../glm/gtc/matrix_transform.hpp"
 #include "../glm/gtx/transform.hpp"
-
-
 
 Camera& Camera::getInstance()
 {
@@ -31,6 +30,8 @@ void Camera::initialize(int32_t w, int32_t h, float nearPlane, float farPlane)
    _far_plane = farPlane;
    _screen_dimensions[0] = w;
    _screen_dimensions[1] = h;
+
+   std::cout << "near: " << _near_plane << ", far: " << _far_plane << std::endl;
 
    updateProjectionMatrix();
    updateViewMatrix();
