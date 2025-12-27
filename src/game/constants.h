@@ -120,7 +120,7 @@ enum class Display
 
 enum class ExecutionMode
 {
-   None,
+   NotRunning,
    Running,
    Paused,
 };
