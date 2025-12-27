@@ -558,8 +558,8 @@ set(GAME_FILES
     src/opengl/glutils.h
     src/opengl/shaderpool.cpp
     src/opengl/shaderpool.h
-    src/opengl/image/tgaio.cpp
-    src/opengl/image/tgaio.h
+
+
     src/opengl/interfaces/drawable.cpp
     src/opengl/interfaces/drawable.h
     src/opengl/interfaces/transformable.cpp

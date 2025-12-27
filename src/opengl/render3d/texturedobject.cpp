@@ -1,6 +1,6 @@
 #include "texturedobject.h"
 #include <iostream>
-#include "opengl/image/tgaio.h"
+#include <SFML/Graphics.hpp>
 
 TexturedObject::TexturedObject(
    const std::string& objFile,
@@ -97,19 +97,26 @@ void TexturedObject::loadTexture(const std::string& texture_file_path)
       _texture_id = 0;
    }
 
-   GLint w, h;
-   GLubyte* texture_data = TGAIO::read(texture_file_path.c_str(), w, h);
-   if (texture_data)
+   sf::Image image;
+   if (image.loadFromFile(texture_file_path))
    {
       glGenTextures(1, &_texture_id);
       glBindTexture(GL_TEXTURE_2D, _texture_id);
-      glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, w, h);
-      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+
+      // get image dimensions
+      sf::Vector2u size = image.getSize();
+      const auto width = static_cast<GLsizei>(size.x);
+      const auto height = static_cast<GLsizei>(size.y);
+
+      // convert SFML image to OpenGL format (RGBA)
+      const GLubyte* pixels = image.getPixelsPtr();
+
+      glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
+      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
       glGenerateMipmap(GL_TEXTURE_2D);
-
-      delete[] texture_data;
    }
    else
    {
