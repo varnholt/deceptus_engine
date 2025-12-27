@@ -106,6 +106,7 @@ add_executable(RenderTestbed
 
     # Object sources
     ${OBJECT_SOURCES}
+    object3d.cpp
 )
 
 target_include_directories(RenderTestbed PRIVATE
