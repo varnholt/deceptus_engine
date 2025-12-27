@@ -3,8 +3,8 @@
 class Drawable
 {
 public:
-    Drawable() = default;
-    virtual ~Drawable() = default;
+   Drawable() = default;
+   virtual ~Drawable() = default;
 
-    virtual void render() const = 0;
+   virtual void render() const = 0;
 };

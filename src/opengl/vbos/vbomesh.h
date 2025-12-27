@@ -12,7 +12,13 @@
 class VBOMesh : public Drawable
 {
 public:
-   VBOMesh(const char* fileName, float scale = 1.0f, bool recenter_mesh = false, bool loadTc = false, bool genTangents = false);
+   VBOMesh(
+      const char* filename,
+      float scale = 1.0f,
+      bool recenter_mesh = false,
+      bool load_texture_coordinates = false,
+      bool generate_tangents = false
+   );
 
    void render() const override;
    void loadObj(const char* fileName);
