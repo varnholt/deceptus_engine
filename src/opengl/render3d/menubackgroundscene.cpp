@@ -66,9 +66,6 @@ void MenuBackgroundScene::render(sf::RenderTarget& target)
    sf::Vector2u target_size = target.getSize();
    glViewport(0, 0, static_cast<GLsizei>(target_size.x), static_cast<GLsizei>(target_size.y));
 
-   // prepare OpenGL state
-   setupOpenGLState();
-
    _shader->use();
    _shader->setUniform("Light.Position", glm::vec4(100.0f, 100.0f, 100.0f, 1.0f));
    _shader->setUniform("Light.Intensity", glm::vec3(1.0f, 1.0f, 1.0f));
@@ -88,33 +85,15 @@ void MenuBackgroundScene::render(sf::RenderTarget& target)
       obj->render(_shader, view_matrix, projection_matrix);
    }
 
-   // restore OpenGL state
-   restoreOpenGLState();
+   glBindVertexArray(0);
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   glUseProgram(0);
 }
 
 void MenuBackgroundScene::addObject(std::shared_ptr<Object3D> object)
 {
    _objects.push_back(object);
-}
-
-void MenuBackgroundScene::setupOpenGLState()
-{
-   glEnable(GL_DEPTH_TEST);
-   glDepthFunc(GL_LESS);
-   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void MenuBackgroundScene::restoreOpenGLState()
-{
-   glDisable(GL_DEPTH_TEST);
-   glEnable(GL_BLEND);
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-   glBindVertexArray(0);
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-   glUseProgram(0);
 }
 
 void MenuBackgroundScene::clear3DObjects()
