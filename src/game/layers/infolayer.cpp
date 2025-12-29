@@ -14,6 +14,7 @@
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
 #include "game/state/displaymode.h"
+#include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 
 #include <iostream>
@@ -297,9 +298,9 @@ void InfoLayer::updateHealthLayerOffsets()
    // -> move in health bar
    // not loading
    // -> move out health bar
-   // if game state menu detected
+   // if game state 'not running' detected
    // -> reset
-   if (DisplayMode::getInstance().isSet(Display::MainMenu))
+   if (GameState::getInstance().getMode() == ExecutionMode::NotRunning)
    {
       _hide_time_health.reset();
       _show_time_health.reset();
