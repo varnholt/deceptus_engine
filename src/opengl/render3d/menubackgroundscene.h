@@ -25,9 +25,6 @@ public:
    void clear3DObjects();
 
 private:
-   void setupOpenGLState();
-   void restoreOpenGLState();
-
    std::unique_ptr<Camera3D> _camera;
    std::vector<std::shared_ptr<Object3D>> _objects;
    std::shared_ptr<TexturedObject> _starmap;
