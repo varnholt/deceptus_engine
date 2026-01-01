@@ -88,6 +88,8 @@ private:
       std::shared_ptr<Animation> _animation_idle;
       std::shared_ptr<Animation> _animation_hide;
 
+      std::optional<std::chrono::high_resolution_clock::time_point> _hide_time_start;
+
       Step _step{Step::Show};
       int32_t _idle_cycle_count{0};
    };
