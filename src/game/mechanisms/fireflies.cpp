@@ -90,9 +90,9 @@ void Fireflies::deserialize(const GameDeserializeData& data)
    addChunks(_rect_px);
 
    auto animation_speed = ANIMATION_SPEED;
-   float scale_vertical[2]{1.0f, 1.0f};
-   float scale_horizontal[2]{1.0f, 1.0f};
-   float speed[2]{1.0, 1.0f + (std::rand() % 1000) * 0.001f};
+   std::array<float, 2> scale_vertical{1.0f, 1.0f};
+   std::array<float, 2> scale_horizontal{1.0f, 1.0f};
+   std::array<float, 2> speed{1.0, 1.0f + (std::rand() % 1000) * 0.001f};
    auto count = 1;
    if (data._tmx_object->_properties)
    {
@@ -161,7 +161,7 @@ void Fireflies::deserialize(const GameDeserializeData& data)
    auto frand = [](float min, float max)
    {
       const auto val = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-      return min + val * (max - min);
+      return min + (val * (max - min));
    };
 
    for (auto& firefly : _fireflies)
@@ -170,8 +170,8 @@ void Fireflies::deserialize(const GameDeserializeData& data)
       firefly._rect_px = _rect_px;
       firefly._sprite->setTextureRect({{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
       firefly._elapsed += sf::seconds(static_cast<float>(std::rand() % 999));
-      firefly._angle_x = (std::rand() % 360) * FACTOR_DEG_TO_RAD;
-      firefly._angle_y = (std::rand() % 360) * FACTOR_DEG_TO_RAD;
+      firefly._angle_x = frand(30.0, 360.0) * FACTOR_DEG_TO_RAD;
+      firefly._angle_y = frand(30.0, 360.0) * FACTOR_DEG_TO_RAD;
       firefly._speed = frand(speed[0], speed[1]);
       firefly._dir = (std::rand() % 2) ? 1.0f : -1.0f;
       firefly._scale_vertical = frand(scale_vertical[0], scale_vertical[1]);
