@@ -56,6 +56,9 @@ void SpawnEffect::update(const sf::Time& dt)
 {
    if (_orb->_step == Orb::Step::Hide)
    {
+      // fade out is too late, only after hide is completed...
+      // maybe add simple hide delay
+
       _elapsed_hide += dt;
       _particles->_alpha = 1.0f - std::min(_elapsed_hide.asSeconds(), _hide_duration_s) / _hide_duration_s;
       _particles->_respawn = false;
@@ -283,11 +286,13 @@ void SpawnEffect::Orb::update(const sf::Time& dt)
       }
       case Step::Idle:
       {
+         auto now = std::chrono::high_resolution_clock::now();
+
          if (_animation_idle->_loop_count == _idle_cycle_count)
          {
-            _animation_idle->pause();
+            using namespace std::chrono_literals;
+            _hide_time_start = now + 2s;
             _step = Step::Hide;
-            _animation_hide->play();
          }
 
          if (!_animation_idle->_paused)
@@ -299,6 +304,19 @@ void SpawnEffect::Orb::update(const sf::Time& dt)
       }
       case Step::Hide:
       {
+         auto now = std::chrono::high_resolution_clock::now();
+
+         if (_hide_time_start.has_value() && now > _hide_time_start)
+         {
+            _animation_idle->pause();
+            _animation_hide->play();
+         }
+
+         if (!_animation_idle->_paused)
+         {
+            _animation_idle->update(dt);
+         }
+
          if (!_animation_hide->_paused)
          {
             _animation_hide->update(dt);
