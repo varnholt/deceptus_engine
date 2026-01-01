@@ -1,6 +1,7 @@
 #include "eventserializer.h"
 
 #include "framework/tools/log.h"
+#include "framework/tools/gamepaths.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 
@@ -8,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <ostream>
+#include <sstream>
 #include <unordered_set>
 
 namespace
@@ -193,8 +195,16 @@ void EventSerializer::serialize()
       return;
    }
 
-   Log::Info() << "serializing " << _events.size() << " events";
-   std::ofstream output_stream("events.dat", std::ios::out | std::ios::binary);
+   // generate filename with current date and time
+   const auto now = std::chrono::system_clock::now();
+   const auto now_time = std::chrono::system_clock::to_time_t(now);
+   std::stringstream filename_stream;
+   filename_stream << std::put_time(std::localtime(&now_time), "recording-%Y-%m-%d__%H-%M-%S.dat");
+   const auto filename = filename_stream.str();
+   const auto recording_path = GamePaths::getRecordingDir() / filename;
+
+   Log::Info() << "serializing " << _events.size() << " events to " << recording_path;
+   std::ofstream output_stream(recording_path, std::ios::out | std::ios::binary);
 
    writeInt32(output_stream, static_cast<int32_t>(_events.size()));
 

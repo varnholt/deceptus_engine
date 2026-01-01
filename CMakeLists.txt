@@ -98,6 +98,8 @@ set(GAME_FILES
     src/framework/tools/checksum.cpp
     src/framework/tools/elapsedtimer.cpp
     src/framework/tools/elapsedtimer.h
+    src/framework/tools/gamepaths.cpp
+    src/framework/tools/gamepaths.h
     src/framework/tools/globalclock.cpp
     src/framework/tools/jsonconfiguration.cpp
     src/framework/tools/jsonconfiguration.h
@@ -558,8 +560,6 @@ set(GAME_FILES
     src/opengl/glutils.h
     src/opengl/shaderpool.cpp
     src/opengl/shaderpool.h
-
-
     src/opengl/interfaces/drawable.cpp
     src/opengl/interfaces/drawable.h
     src/opengl/interfaces/transformable.cpp
@@ -574,7 +574,6 @@ set(GAME_FILES
     src/opengl/render3d/texturedobject.h
     src/opengl/vbos/vbomesh.cpp
     src/opengl/vbos/vbomesh.h
-
 )
 
 set(THIRD_PARTY_FILES
