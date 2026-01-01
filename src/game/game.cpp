@@ -416,19 +416,19 @@ void Game::initialize()
 {
    initializeWindow();
 
-   // Initialize GLEW after the OpenGL context is created but before any OpenGL calls
+   // initialize GLEW after the OpenGL context is created but before any OpenGL calls
    if (!_window_render_texture->setActive(true))
    {
-      return;  // Or handle error appropriately
+      Log::Error() << "Failed to activate render texture";
+      return;
    }
 
-   GLenum err = glewInit();
-   if (err != GLEW_OK)
+   const auto glew_error = glewInit();
+   if (glew_error != GLEW_OK)
    {
-      std::cerr << "Failed to initialize GLEW: " << err << std::endl;
-      return;  // Handle error appropriately
+      Log::Error() << "Failed to initialize GLEW: " << glew_error;
+      return;
    }
-   std::cout << "GLEW initialized successfully." << std::endl;
 
    initializeController();
 

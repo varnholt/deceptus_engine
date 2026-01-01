@@ -1,4 +1,5 @@
 #include "logthread.h"
+#include "gamepaths.h"
 
 #include <ctime>
 #include <filesystem>
@@ -16,15 +17,16 @@ LogThread::LogThread()
    // generate filename with current date
    const auto now = std::chrono::system_clock::now();
    const auto now_time = std::chrono::system_clock::to_time_t(now);
-   std::stringstream ss;
-   ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d__%H-%M.log");
-   const auto filename = ss.str();
+   std::stringstream output_stream;
+   output_stream << std::put_time(std::localtime(&now_time), "%Y-%m-%d__%H-%M.log");
+   const auto filename = output_stream.str();
+   const auto log_path = GamePaths::getLogDir() / filename;
 
    _thread = std::make_unique<std::thread>(&LogThread::run, this);
-   _out = std::make_unique<std::ofstream>(filename, std::ios::out | std::ios::app);
+   _out = std::make_unique<std::ofstream>(log_path, std::ios::out | std::ios::app);
    if (!_out->is_open())
    {
-      std::cerr << "failed to create log file: " << filename << std::endl;
+      std::cerr << "failed to create log file: " << log_path << "\n";
       return;
    }
 }

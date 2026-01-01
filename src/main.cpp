@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "framework/tools/gamepaths.h"
 #include "framework/tools/logthread.h"
 #include "game/constants.h"
 #include "game/debug/logui.h"
@@ -44,6 +45,8 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /
 int main(int /*argc*/, char** /*argv*/)
 #endif
 {
+   GamePaths::createGameDirectories();
+
 #ifndef DEBUG
    // setup logging to file
    LogThread log_thread;
