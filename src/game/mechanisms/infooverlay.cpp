@@ -108,7 +108,8 @@ void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       return;
    }
 
-   const auto& level_view = color.getView();
+   // a copy of the current view is created here on purpose
+   const auto level_view = color.getView();
    if (_settings._fullscreen)
    {
       const sf::View ortho(sf::FloatRect(
