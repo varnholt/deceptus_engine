@@ -28,7 +28,8 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       return;
    }
 
-   const auto& level_view = target.getView();
+   // level view is copied here on purpose
+   const auto level_view = target.getView();
 
    if (_parallax_settings.has_value())
    {
