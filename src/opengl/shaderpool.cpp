@@ -28,8 +28,6 @@ void ShaderPool::add(const std::string& key, const std::filesystem::path& vertex
       shader->use();
       shader->validate();
 
-      shader->printActiveUniforms();
-
       _shaders[key] = shader;
    }
    catch (GLSLProgramException& e)
