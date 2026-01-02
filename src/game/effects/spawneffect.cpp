@@ -44,21 +44,30 @@ void SpawnEffect::deserialize(const GameDeserializeData& data)
    _particle_velocity_min = ValueReader::readValue<float>("particle_velocity_min", map).value_or(_default_particle_velocity_min);
    _particle_velocity_max = ValueReader::readValue<float>("particle_velocity_max", map).value_or(_default_particle_velocity_max);
    _orb_idle_cycle_count = ValueReader::readValue<int32_t>("orb_idle_cycle_count", map).value_or(_default_orb_idle_cycle_count);
+   _orb->_hide_duration_s = _hide_duration_s;
 }
 
 void SpawnEffect::draw(sf::RenderTarget& target)
 {
+   if (isFinished())
+   {
+      return;
+   }
+
    _particles->draw(target);
    _orb->draw(target);
 }
 
 void SpawnEffect::update(const sf::Time& dt)
 {
-   if (_orb->_step == Orb::Step::Hide)
+   if (isFinished())
    {
-      // fade out is too late, only after hide is completed...
-      // maybe add simple hide delay
+      return;
+   }
 
+   if (_orb->_step == Orb::Step::ParticlesDisappear || _orb->_step == Orb::Step::Hide)
+   {
+      // orb hide animation can only play when this is completed
       _elapsed_hide += dt;
       _particles->_alpha = 1.0f - std::min(_elapsed_hide.asSeconds(), _hide_duration_s) / _hide_duration_s;
       _particles->_respawn = false;
@@ -286,13 +295,9 @@ void SpawnEffect::Orb::update(const sf::Time& dt)
       }
       case Step::Idle:
       {
-         auto now = std::chrono::high_resolution_clock::now();
-
          if (_animation_idle->_loop_count == _idle_cycle_count)
          {
-            using namespace std::chrono_literals;
-            _hide_time_start = now + 2s;
-            _step = Step::Hide;
+            _step = Step::ParticlesDisappear;
          }
 
          if (!_animation_idle->_paused)
@@ -302,21 +307,22 @@ void SpawnEffect::Orb::update(const sf::Time& dt)
 
          break;
       }
-      case Step::Hide:
+      case Step::ParticlesDisappear:
       {
-         auto now = std::chrono::high_resolution_clock::now();
-
-         if (_hide_time_start.has_value() && now > _hide_time_start)
+         _elapsed_hide += dt;
+         if (_elapsed_hide.asSeconds() > _hide_duration_s)
          {
             _animation_idle->pause();
             _animation_hide->play();
+            _step = Step::Hide;
          }
-
-         if (!_animation_idle->_paused)
+         else if (!_animation_idle->_paused)
          {
             _animation_idle->update(dt);
          }
-
+      }
+      case Step::Hide:
+      {
          if (!_animation_hide->_paused)
          {
             _animation_hide->update(dt);
