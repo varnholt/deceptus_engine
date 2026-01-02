@@ -75,6 +75,7 @@ private:
       {
          Show,
          Idle,
+         ParticlesDisappear,
          Hide
       };
 
@@ -88,7 +89,8 @@ private:
       std::shared_ptr<Animation> _animation_idle;
       std::shared_ptr<Animation> _animation_hide;
 
-      std::optional<std::chrono::high_resolution_clock::time_point> _hide_time_start;
+      float _hide_duration_s{_default_hide_duration_s};
+      sf::Time _elapsed_hide;
 
       Step _step{Step::Show};
       int32_t _idle_cycle_count{0};
