@@ -44,18 +44,30 @@ void SpawnEffect::deserialize(const GameDeserializeData& data)
    _particle_velocity_min = ValueReader::readValue<float>("particle_velocity_min", map).value_or(_default_particle_velocity_min);
    _particle_velocity_max = ValueReader::readValue<float>("particle_velocity_max", map).value_or(_default_particle_velocity_max);
    _orb_idle_cycle_count = ValueReader::readValue<int32_t>("orb_idle_cycle_count", map).value_or(_default_orb_idle_cycle_count);
+   _orb->_hide_duration_s = _hide_duration_s;
 }
 
 void SpawnEffect::draw(sf::RenderTarget& target)
 {
+   if (isFinished())
+   {
+      return;
+   }
+
    _particles->draw(target);
    _orb->draw(target);
 }
 
 void SpawnEffect::update(const sf::Time& dt)
 {
-   if (_orb->_step == Orb::Step::Hide)
+   if (isFinished())
    {
+      return;
+   }
+
+   if (_orb->_step == Orb::Step::ParticlesDisappear || _orb->_step == Orb::Step::Hide)
+   {
+      // orb hide animation can only play when this is completed
       _elapsed_hide += dt;
       _particles->_alpha = 1.0f - std::min(_elapsed_hide.asSeconds(), _hide_duration_s) / _hide_duration_s;
       _particles->_respawn = false;
@@ -285,9 +297,7 @@ void SpawnEffect::Orb::update(const sf::Time& dt)
       {
          if (_animation_idle->_loop_count == _idle_cycle_count)
          {
-            _animation_idle->pause();
-            _step = Step::Hide;
-            _animation_hide->play();
+            _step = Step::ParticlesDisappear;
          }
 
          if (!_animation_idle->_paused)
@@ -296,6 +306,20 @@ void SpawnEffect::Orb::update(const sf::Time& dt)
          }
 
          break;
+      }
+      case Step::ParticlesDisappear:
+      {
+         _elapsed_hide += dt;
+         if (_elapsed_hide.asSeconds() > _hide_duration_s)
+         {
+            _animation_idle->pause();
+            _animation_hide->play();
+            _step = Step::Hide;
+         }
+         else if (!_animation_idle->_paused)
+         {
+            _animation_idle->update(dt);
+         }
       }
       case Step::Hide:
       {
