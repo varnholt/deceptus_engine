@@ -134,7 +134,7 @@ void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&)
       _animation_idle_open->draw(target);
    }
 
-   if (_spawn_effect->isActive())
+   if (_spawn_effect && _spawn_effect->isActive())
    {
       _spawn_effect->draw(target);
    }
@@ -204,7 +204,7 @@ void TreasureChest::update(const sf::Time& dt)
       }
    }
 
-   if (_spawn_effect->isActive())
+   if (_spawn_effect && _spawn_effect->isActive())
    {
       _spawn_effect->update(dt);
 
