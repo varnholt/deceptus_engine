@@ -22,5 +22,29 @@
       "origin": [36.0, 36.0],
       "sprite_count": 22,
       "texture": "data/sprites/treasure_chest.png"
+   },
+  "locker_idle": {
+      "frame_durations": [100, 100, 100, 100, 100, 100, 100, 100, 100, 6000],
+      "frame_offset": [0, 72],
+      "frame_size": [72, 72],
+      "origin": [36.0, 12.0],
+      "sprite_count": 10,
+      "texture": "data/sprites/locker_box.png"
+   },
+   "locker_opening": {
+      "frame_durations": [100, 100, 100, 100, 100, 100],
+      "frame_offset": [0, 0],
+      "frame_size": [72, 72],
+      "origin": [36.0, 12.0],
+      "sprite_count": 6,
+      "texture": "data/sprites/locker_box.png"
+   },
+   "locker_open": {
+      "frame_durations": [6000],
+      "frame_offset": [360, 0],
+      "frame_size": [72, 72],
+      "origin": [36.0, 12.0],
+      "sprite_count": 1,
+      "texture": "data/sprites/locker_box.png"
    }
 }
