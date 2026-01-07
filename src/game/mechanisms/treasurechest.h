@@ -33,13 +33,17 @@ private:
       Open
    };
 
+   bool playerHasRequiredKey() const;
+
    sf::FloatRect _rect;
    Alignment _alignment{Alignment::Left};
    std::shared_ptr<sf::Texture> _texture;
    std::unique_ptr<sf::Sprite> _sprite;
    std::string _sample_open;
+   std::string _sample_locked;
    State _state{State::Closed};
    std::optional<std::string> _spawn_extra;
+   std::optional<std::string> _item_required;
 
    std::shared_ptr<Animation> _animation_idle_closed;
    std::shared_ptr<Animation> _animation_opening;
