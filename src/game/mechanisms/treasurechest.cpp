@@ -53,6 +53,8 @@ std::string_view TreasureChest::objectName() const
 
 void TreasureChest::deserialize(const GameDeserializeData& data)
 {
+   setObjectId(data._tmx_object->_name);
+
    const auto pos_x_px = data._tmx_object->_x_px;
    const auto pos_y_px = data._tmx_object->_y_px;
    const auto width_px = data._tmx_object->_width_px;
@@ -89,10 +91,10 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
       _spawn_extra = spawn_extra;
    }
 
-   const auto key_required = ValueReader::readValue<std::string>("key_required", map).value_or("");
-   if (!key_required.empty())
+   const auto item_required = ValueReader::readValue<std::string>("item_required", map).value_or("");
+   if (!item_required.empty())
    {
-      _key_required = key_required;
+      _item_required = item_required;
    }
 
    _observed = ValueReader::readValue<bool>("observed", map).value_or(false);
@@ -185,15 +187,30 @@ void TreasureChest::update(const sf::Time& dt)
                   _animation_opening->seekToStart();
                   _animation_opening->play();
                   _animation_idle_closed->pause();
+
+                  if (!_sample_open.empty())
+                  {
+                     Audio::getInstance().playSample(Audio::PlayInfo{_sample_open});
+                  }
+
+                  if (_observed)
+                  {
+                     GameMechanismObserver::onEvent(getObjectId(), "treasurechests", "state", "opening");
+                  }
                }
                else
                {
                   if (_observed)
                   {
                      GameMechanismObserver::onEvent(getObjectId(), "treasurechests", "state", "locked");
+
+                     if (!_sample_locked.empty())
+                     {
+                        Audio::getInstance().playSample(Audio::PlayInfo{_sample_locked});
+                     }
                   }
 
-                  Log::Info() << "player doesn't have key: " << _key_required.value();
+                  Log::Info() << "player doesn't have key: " << _item_required.value();
                }
             }
          }
@@ -215,6 +232,11 @@ void TreasureChest::update(const sf::Time& dt)
                _animation_idle_open->seekToStart();
                _animation_idle_open->play();
                _animation_opening->pause();
+
+               if (_observed)
+               {
+                  GameMechanismObserver::onEvent(getObjectId(), "treasurechests", "state", "open");
+               }
             }
          }
 
@@ -252,5 +274,5 @@ std::optional<sf::FloatRect> TreasureChest::getBoundingBoxPx()
 
 bool TreasureChest::playerHasRequiredKey() const
 {
-   return !_key_required.has_value() || (_key_required.has_value() && SaveState::getPlayerInfo()._inventory.has(*_key_required));
+   return !_item_required.has_value() || (_item_required.has_value() && SaveState::getPlayerInfo()._inventory.has(*_item_required));
 }
