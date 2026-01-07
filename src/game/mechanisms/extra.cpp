@@ -189,7 +189,7 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
    }
 
    // or show static extra texture
-   else
+   else if (_sprite)
    {
       target.draw(*_sprite);
    }
