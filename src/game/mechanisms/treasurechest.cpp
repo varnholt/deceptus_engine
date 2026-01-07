@@ -8,7 +8,9 @@
 #include "game/io/valuereader.h"
 #include "game/mechanisms/extrawrapper.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "game/player/player.h"
+#include "game/state/savestate.h"
 
 namespace
 {
@@ -51,6 +53,8 @@ std::string_view TreasureChest::objectName() const
 
 void TreasureChest::deserialize(const GameDeserializeData& data)
 {
+   setObjectId(data._tmx_object->_name);
+
    const auto pos_x_px = data._tmx_object->_x_px;
    const auto pos_y_px = data._tmx_object->_y_px;
    const auto width_px = data._tmx_object->_width_px;
@@ -72,14 +76,28 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
    _sprite = std::make_unique<sf::Sprite>(*_texture);
    _sprite->setPosition({pos_x_px, pos_y_px});
 
-   _sample_open = ValueReader::readValue<std::string>("sample", map).value_or("treasure_chest_open.wav");
+   _sample_open = ValueReader::readValue<std::string>("sample_open", map).value_or("treasure_chest_open.wav");
    Audio::getInstance().addSample(_sample_open);
+
+   _sample_locked = ValueReader::readValue<std::string>("sample_locked", map).value_or("");
+   if (!_sample_locked.empty())
+   {
+      Audio::getInstance().addSample(_sample_locked);
+   }
 
    const auto spawn_extra = ValueReader::readValue<std::string>("spawn_extra", map).value_or("");
    if (!spawn_extra.empty())
    {
       _spawn_extra = spawn_extra;
    }
+
+   const auto item_required = ValueReader::readValue<std::string>("item_required", map).value_or("");
+   if (!item_required.empty())
+   {
+      _item_required = item_required;
+   }
+
+   _observed = ValueReader::readValue<bool>("observed", map).value_or(false);
 
    // read animations if set up
    const auto offset_x = width_px * 0.5f;
@@ -162,12 +180,38 @@ void TreasureChest::update(const sf::Time& dt)
             const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
             if (player_rect_px.findIntersection(_rect).has_value())
             {
-               _spawn_effect->activate();
+               if (playerHasRequiredKey())
+               {
+                  _spawn_effect->activate();
+                  _state = State::Opening;
+                  _animation_opening->seekToStart();
+                  _animation_opening->play();
+                  _animation_idle_closed->pause();
 
-               _state = State::Opening;
-               _animation_opening->seekToStart();
-               _animation_opening->play();
-               _animation_idle_closed->pause();
+                  if (!_sample_open.empty())
+                  {
+                     Audio::getInstance().playSample(Audio::PlayInfo{_sample_open});
+                  }
+
+                  if (_observed)
+                  {
+                     GameMechanismObserver::onEvent(getObjectId(), "treasurechests", "state", "opening");
+                  }
+               }
+               else
+               {
+                  if (_observed)
+                  {
+                     GameMechanismObserver::onEvent(getObjectId(), "treasurechests", "state", "locked");
+
+                     if (!_sample_locked.empty())
+                     {
+                        Audio::getInstance().playSample(Audio::PlayInfo{_sample_locked});
+                     }
+                  }
+
+                  Log::Info() << "player doesn't have key: " << _item_required.value();
+               }
             }
          }
 
@@ -188,6 +232,11 @@ void TreasureChest::update(const sf::Time& dt)
                _animation_idle_open->seekToStart();
                _animation_idle_open->play();
                _animation_opening->pause();
+
+               if (_observed)
+               {
+                  GameMechanismObserver::onEvent(getObjectId(), "treasurechests", "state", "open");
+               }
             }
          }
 
@@ -221,4 +270,9 @@ void TreasureChest::update(const sf::Time& dt)
 std::optional<sf::FloatRect> TreasureChest::getBoundingBoxPx()
 {
    return std::nullopt;
+}
+
+bool TreasureChest::playerHasRequiredKey() const
+{
+   return !_item_required.has_value() || (_item_required.has_value() && SaveState::getPlayerInfo()._inventory.has(*_item_required));
 }
