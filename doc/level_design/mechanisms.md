@@ -1280,15 +1280,58 @@ Further, when the extra is spawned, a 'Spawn Animation' is played which introduc
 |-|-|-|
 |z|int|The layer's z index|
 |texture|string|Path to the treasure chest texture (default is `data/sprites/treasure_chest.png`)|
-|sample|string|Sample that is played when the chest is opened (default is `treasure_chest_open.wav`)|
+|sample_open|string|Sample that is played when the chest is opened (default is `treasure_chest_open.wav`)|
+|sample_locked|string|Sample that is played when the player attempts to open the chest without the required item (optional)|
 |spawn_extra|string|The identifier of the extra that's supposed to be spawned when opened (default is an empty string)|
+|item_required|string|The identifier of the item required to open the chest (optional)|
 |animation_idle_closed|string|The closed idle animation loaded from `data/sprites/treasure_chest_animations.json` (default is "idle")|
 |animation_opening|string|The opening animation loaded from `data/sprites/treasure_chest_animations.json` (default is "opening")|
 |animation_idle_open|string|The open idle animation loaded from `data/sprites/treasure_chest_animations.json` (default is "open")|
+|observed|bool|Whether or not the treasure chest events are shared with the level's Lua script (default is `false`). When enabled, the mechanism will emit events that can be handled in the `mechanismEvent` function in your level's Lua script.|
+
+### Events
+
+When the `observed` flag is set to `true`, the treasure chest will emit the following events that can be handled in the `mechanismEvent` function in your level's Lua script:
+
+|Event Name|Value|Description|
+|-|-|-|
+|state|`opening`|Emitted when the player interacts with the chest and it begins opening (only when the player has the required item)|
+|state|`locked`|Emitted when the player attempts to open the chest without having the required item|
+|state|`open`|Emitted when the chest has fully opened and the spawn effect is shown|
 
 ### Spawn Effect Properties (extension to the Object Properties above)
 
 The spawn effect consists of an orb animation in the center and particles that move towards that orb.
+
+### Example Usage in Lua
+
+When the `observed` flag is enabled, you can handle the treasure chest events in your level's Lua script using the `mechanismEvent` function:
+
+```lua
+function mechanismEvent(object_id, group_id, event_name, value)
+   -- Log all events for debugging
+   log(string.format("object_id: %s, group_id: %s, event_name: %s, value: %s",
+         object_id, group_id, event_name, tostring(value)))
+
+   -- Example: Show a message when a specific treasure chest is locked
+   if (object_id == "locked_box" and event_name == "state" and value == "locked") then
+      showDialogue("locked_message")
+   end
+
+   -- Example: Handle when a treasure chest starts opening
+   if (event_name == "state" and value == "opening") then
+      log("Treasure chest is opening!")
+   end
+
+   -- Example: Handle when a treasure chest has fully opened
+   if (event_name == "state" and value == "open") then
+      log("Treasure chest has opened!")
+      -- You could trigger other events here, like spawning enemies or opening doors
+   end
+end
+```
+
+### Spawn Effect Properties (continued)
 
 |Property|Type|Description|
 |-|-|-|
