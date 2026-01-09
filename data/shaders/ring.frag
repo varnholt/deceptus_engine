@@ -52,50 +52,63 @@ float circularEffect(vec2 p)
 }
 
 
-void main() 
+void main()
 {
     // without pixelate
     // vec2 uv = gl_TexCoord[0].xy;
-    // vec2 p = uv - 0.5; 
-    
+    // vec2 p = uv - 0.5;
+
     // pixelate
     vec2 uv = gl_TexCoord[0].xy;
-    
+
     // convert world-space to screen-space
     vec2 screen_uv = uv * u_resolution;
-    
+
     // pixelate in screen space
     float pixel_size = 1.0;
     screen_uv = floor(screen_uv / pixel_size) * pixel_size;
-    
+
     // convert back to UV space
     vec2 uv_pixel = screen_uv / u_resolution;
     vec2 quad_scale = (fwidth(gl_TexCoord[0].xy) * u_resolution) / 2.0; // use half of the quad size for effect
     vec2 p = (uv_pixel - 0.5) / quad_scale;
 
-    
+
     float aspect = u_resolution.x / u_resolution.y;
     vec2 center_offset = vec2(sin(TIME * 15.0) * 0.01, 0.0);
     p += center_offset;
     p.x *= aspect;
     p *= 1.0;
 
-    float fbm_value = fbm(p);    
+    float fbm_value = fbm(p);
     vec2 offset = vec2(p.x / 14.0, p.y / 14.0);
     float effect = abs(-circularEffect(offset));
     fbm_value *= effect * effect * 2.0;
 
     vec3 col = vec3(0.2, 0.1, 0.4) / fbm_value;
-    
-    
+
+
     // calculate brightness (perceived luminance)
     float brightness = dot(col, vec3(0.299, 0.587, 0.114)); // standard grayscale conversion
 
-    // invert brightness so black (low values) = high transparency
-    float alpha = clamp(brightness, 0.1, 1.0); // keep min alpha > 0 to avoid full disappearance
+    // calculate distance from center to create circular falloff
+    vec2 center = vec2(0.5, 0.5);  // center of the quad in uv coordinates
+    float dist_from_center = distance(uv, center);  // distance from current pixel to center
+
+    // define the maximum radius where the ring effect should be visible
+    // this creates a circular mask that smoothly fades out at the edges
+    float max_radius = 0.5;  // full alpha at center, fading toward edges
+    float edge_softness = 0.2;  // controls how soft the edge transition is
+
+    // calculate alpha based on both brightness and distance from center
+    float brightness_alpha = clamp(brightness, 0.0, 1.0);
+    float distance_alpha = smoothstep(max_radius, max_radius - edge_softness, dist_from_center);
+
+    // combine both alpha factors
+    float alpha = brightness_alpha * distance_alpha;
 
     gl_FragColor = vec4(col, alpha);
-    
+
     // gl_FragColor = vec4(col, 1.0);
     // gl_FragColor = vec4(p, 1.0, 1.0);
     // gl_FragColor = vec4(col, 1.0);
