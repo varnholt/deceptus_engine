@@ -163,6 +163,12 @@ void GameContactListener::processPlayerFootSensorContactBegin(FixtureNode* fixtu
       // this only goes for enemies the player is supposed to walk through
       if (!(fixture->GetFilterData().categoryBits & CategoryEnemyCollideWith))
       {
+         // here it makes good sense to check if we can smash the enemy
+         // we could either just check an enemy property "smash-able" or just
+         // call a "smash" function
+         // i suppose the only requirement is that the player has some sort of
+         // downwards velocity, so you can just smash an enemy by walking into it
+
          return;
       }
    }
