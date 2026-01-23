@@ -694,6 +694,17 @@ LevelScript::~LevelScript()
    // remove 'item added' callback
    auto& inventory = SaveState::getPlayerInfo()._inventory;
    inventory.removeAddedCallback(_inventory_added_callback);
+
+   stopScript();
+}
+
+void LevelScript::stopScript()
+{
+   if (_lua_state)
+   {
+      lua_close(_lua_state);
+      _lua_state = nullptr;
+   }
 }
 
 void LevelScript::setup(const std::filesystem::path& path)
