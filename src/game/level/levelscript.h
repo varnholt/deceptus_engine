@@ -74,6 +74,7 @@ public:
    void createExtraCallbacks(const std::vector<std::shared_ptr<GameMechanism>>& extras);
 
 private:
+   void stopScript();
    std::vector<std::shared_ptr<LuaNode>> findLuaNodes(const std::string& search_pattern);
 
    std::vector<sf::IntRect> _collision_rects;
