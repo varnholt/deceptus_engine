@@ -2,11 +2,51 @@
 
 #include "box2d/box2d.h"
 
+#include <memory>
+#include <vector>
+
+struct LuaNode;
 class FixtureNode;
 
 class GameContactListener : public b2ContactListener
 {
 public:
+   enum class EventType
+   {
+      Invalid,
+      DamageContact,
+      SmashEnemyContact
+   };
+
+   struct ContactEvent
+   {
+      EventType _type;
+
+      explicit ContactEvent(EventType type) : _type(type) {}
+      virtual void execute() {};
+   };
+
+   struct DamageContactEvent : public ContactEvent
+   {
+      LuaNode* _enemy{nullptr};
+      int32_t _damage{0};
+
+      DamageContactEvent() : ContactEvent(EventType::DamageContact) {}
+      DamageContactEvent(LuaNode* enemy, int32_t damage)
+          : ContactEvent(EventType::DamageContact), _enemy(enemy), _damage(damage) {}
+
+      void execute() override;
+   };
+
+   struct SmashEnemyContactEvent : public ContactEvent
+   {
+      LuaNode* _enemy{nullptr};
+
+      SmashEnemyContactEvent() : ContactEvent(EventType::SmashEnemyContact) {}
+
+      void execute() override;
+   };
+
    int32_t getPlayerHeadContactCount() const;
    int32_t getPlayerHeadContactCollidingCount() const;
    int32_t getPlayerFootContactCount() const;
@@ -28,6 +68,7 @@ public:
 
    void debug();
    void reset();
+   void processEvents();
 
    static GameContactListener& getInstance();
 
@@ -89,4 +130,6 @@ private:
    int32_t _count_moving_platform_contacts = 0;
    int32_t _count_death_block_contacts = 0;
    bool _smashed = false;
+
+   std::vector<std::shared_ptr<ContactEvent>> _events;
 };
