@@ -15,6 +15,7 @@
 #include "game/weapons/projectile.h"
 
 #include <iostream>
+#include <ranges>
 
 // http://www.iforce2d.net/b2dtut/collision-anatomy
 //
@@ -169,6 +170,17 @@ void GameContactListener::processPlayerFootSensorContactBegin(FixtureNode* fixtu
          // i suppose the only requirement is that the player has some sort of
          // downwards velocity, so you can just smash an enemy by walking into it
 
+         if (down_velocity > 1.0f)
+         {
+            auto lua_node = dynamic_cast<LuaNode*>(fixture_node->getParent());
+            if (lua_node)
+            {
+               auto event = std::make_shared<SmashEnemyContactEvent>();
+               event->_enemy = lua_node;
+               _events.push_back(event);
+            }
+         }
+
          return;
       }
    }
@@ -268,7 +280,19 @@ void GameContactListener::processEnemyContactBegin(FixtureNode* fixture_node_a, 
 
    const auto damage = std::get<int32_t>(fixture_node_a->getProperty("damage"));
    fixture_node_a->collisionWithPlayer();
-   Player::getCurrent()->damage(damage);
+
+   // Create a damage contact event to be processed later
+   auto lua_node = dynamic_cast<LuaNode*>(fixture_node_a->getParent());
+   if (lua_node)
+   {
+      auto event = std::make_shared<DamageContactEvent>(lua_node, damage);
+      _events.push_back(event);
+   }
+   else
+   {
+      // If no LuaNode, apply damage directly
+      Player::getCurrent()->damage(damage);
+   }
 }
 
 void GameContactListener::processBouncerContactBegin(FixtureNode* fixture_node)
@@ -868,4 +892,75 @@ int32_t GameContactListener::getMovingPlatformContactCount() const
 int32_t GameContactListener::getDeathBlockContactCount() const
 {
    return _count_death_block_contacts;
+}
+
+void GameContactListener::DamageContactEvent::execute()
+{
+   if (_enemy)
+   {
+      Player::getCurrent()->damage(_damage);
+   }
+}
+
+void GameContactListener::SmashEnemyContactEvent::execute()
+{
+   _enemy->setDamageToPlayer(0);
+   _enemy->luaHit(1000);
+}
+
+void GameContactListener::processEvents()
+{
+   // Process contact events with priority handling to resolve conflicts between simultaneous collisions.
+   //
+   // In certain scenarios, Box2D may generate multiple contact events simultaneously that could
+   // lead to conflicting game logic outcomes. For example:
+   // - When a player jumps onto an enemy, we get a SmashEnemyContactEvent that should kill the enemy
+   // - At the same time, we might also get a DamageContactEvent from the enemy that would normally hurt the player
+   //
+   // In such cases, the "smash enemy" action should take priority and cancel out any damage events
+   // involving the same enemy, since killing an enemy should prevent that enemy from causing damage.
+   //
+   // This function implements this priority system by:
+   // 1. Collecting all enemies involved in smash events
+   // 2. Removing any damage events that involve those same enemies
+   // 3. Executing the remaining events in order of priority
+   //
+   std::vector<LuaNode*> smashed_enemies;
+   std::ranges::for_each(
+      _events,
+      [&smashed_enemies](const auto& event)
+      {
+         if (event->_type == EventType::SmashEnemyContact)
+         {
+            const auto* smash_event = dynamic_cast<const SmashEnemyContactEvent*>(event.get());
+            smashed_enemies.push_back(smash_event->_enemy);
+         }
+      }
+   );
+
+   // remove all DamageContactEvents with an enemy that's been smashed
+   _events.erase(
+      std::ranges::remove_if(
+         _events,
+         [&smashed_enemies](const auto& event) -> bool
+         {
+            if (event->_type == EventType::DamageContact)
+            {
+               const auto* damage_event = dynamic_cast<const DamageContactEvent*>(event.get());
+               return std::ranges::any_of(
+                  smashed_enemies,
+                  [enemy = damage_event->_enemy](LuaNode* smashed_enemy) { return enemy == smashed_enemy; }
+               );
+            }
+            return false;
+         }
+      ).begin(),
+      _events.end()
+   );
+
+   std::ranges::for_each(_events, [](const std::shared_ptr<ContactEvent>& event) {
+      event->execute();
+   });
+
+   _events.clear();
 }
