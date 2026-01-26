@@ -13,7 +13,7 @@ class FixtureNode : public GameNode
 {
 public:
    using CollisionCallback = std::function<void(void)>;
-   using Variant = std::variant<std::string, int32_t, double>;
+   using Variant = std::variant<std::string, int32_t, double, bool>;
 
    FixtureNode(GameNode* parent);
 

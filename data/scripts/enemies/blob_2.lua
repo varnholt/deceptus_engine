@@ -8,7 +8,8 @@ properties = {
    sprite = "data/sprites/enemy_blob_2.png",
    velocity_walk_max = 0.4,
    acceleration_ground = 0.1,
-   damage = 4
+   damage = 4,
+   smash = true
 }
 
 
@@ -60,6 +61,7 @@ _patrol_epsilon = 1.0
 _tick = 0
 _energy = 30
 _dead = false
+_smashed = false
 
 -- jump related
 _jump = false
@@ -627,6 +629,23 @@ function setStartPosition(x, y)
 end
 
 
+
+------------------------------------------------------------------------------------------------------------------------
+function startDying()
+   _dead = true
+   _elapsed = 0.0
+
+   -- make sure the thing stops to move
+   keyReleased(Key["KeyLeft"])
+   keyReleased(Key["KeyRight"])
+   prop = {velocity_walk_max = 0.0}
+   updateProperties(prop)
+
+   -- when dead, stop causing damage to the player
+   setDamage(0)
+end
+
+
 ------------------------------------------------------------------------------------------------------------------------
 function hit(damage_value)
 
@@ -638,16 +657,18 @@ function hit(damage_value)
    -- print(string.format("hit: damage: %d, energy: %d", damage_value, _energy))
    _energy = _energy - damage_value
    if (_energy <= 0) then
-      _dead = true
-      _elapsed = 0.0
-
-      -- make sure the thing stops to move
-      keyReleased(Key["KeyLeft"])
-      keyReleased(Key["KeyRight"])
-      prop = {velocity_walk_max = 0.0}
-      updateProperties(prop)
-
-      -- when dead, stop causing damage to the player
-      setDamage(0)
+      startDying()
    end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function smashed()
+
+   if (_smashed) then
+      return
+   end
+
+   _smashed = true
+   startDying()
 end

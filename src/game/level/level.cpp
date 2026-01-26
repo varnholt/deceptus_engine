@@ -1247,6 +1247,7 @@ void Level::update(const sf::Time& dt)
    ConveyorBelt::resetBeltState();
 
    _world->Step(PhysicsConfiguration::getInstance()._time_step, 8, 3);
+   GameContactListener::getInstance().processEvents();
 
    CameraPanorama::getInstance().update();
    _boom_effect.update(dt);

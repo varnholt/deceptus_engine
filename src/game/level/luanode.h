@@ -184,6 +184,7 @@ struct LuaNode : public GameMechanism, public GameNode
    void luaUpdate(const sf::Time& dt);
    void luaWriteProperty(const std::string& key, const std::string& value);
    void luaCollisionWithPlayer();
+   void luaSmashed();
 
    // property accessors
    void synchronizeProperties();
@@ -226,6 +227,7 @@ struct LuaNode : public GameMechanism, public GameNode
    std::optional<HighResTimePoint> _hit_time;
    int32_t _damage_from_player{0};
    bool _dead{false};
+   bool _smashed{false};
 
    using LuaVariant = std::variant<std::string, int64_t, double, bool>;
    std::unordered_map<std::string, LuaVariant> _properties;
