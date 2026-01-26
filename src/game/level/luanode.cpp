@@ -8,6 +8,10 @@
 
 // game
 #include "framework/math/sfmlmath.h"
+#include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxparser.h"
+#include "framework/tmxparser/tmxpolygon.h"
+#include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationplayer.h"
@@ -2011,6 +2015,19 @@ void LuaNode::luaCollisionWithPlayer()
    }
 }
 
+void LuaNode::luaSmashed()
+{
+   _smashed = true;
+
+   lua_getglobal(_lua_state, FUNCTION_SMASHED);
+   const auto result = lua_pcall(_lua_state, 0, 0, 0);
+
+   if (result != LUA_OK)
+   {
+      error(_lua_state, FUNCTION_SMASHED);
+   }
+}
+
 /**
  * @brief LuaNode::luaSendPatrolPath sends the patrol path coordinates to the lua script
  * callback name: setPath
@@ -2048,9 +2065,6 @@ void LuaNode::die()
    _body = nullptr;
 }
 
-#include "framework/tmxparser/tmxobject.h"
-#include "framework/tmxparser/tmxparser.h"
-
 /*
 <map version="1.9" tiledversion="1.9.1" orientation="orthogonal" renderorder="right-down" width="2" height="2" tilewidth="24"
 tileheight="24" infinite="0" nextlayerid="4" nextobjectid="11"> <tileset firstgid="1" source="enemy_spiky.tsx"/> <layer id="1" name="Tile
@@ -2077,9 +2091,6 @@ Layer 1" width="2" height="2"> <data encoding="csv"> 1,2, 25,26
 </map>
 
  */
-
-#include "framework/tmxparser/tmxpolygon.h"
-#include "framework/tmxparser/tmxpolyline.h"
 
 void LuaNode::loadShapesFromTmx(const std::string& tmxFile)
 {
