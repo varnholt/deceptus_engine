@@ -19,3 +19,4 @@
 #define FUNCTION_TIMEOUT "timeout"
 #define FUNCTION_UPDATE "update"
 #define FUNCTION_WRITE_PROPERTY "writeProperty"
+#define FUNCTION_SMASHED "smashed"
