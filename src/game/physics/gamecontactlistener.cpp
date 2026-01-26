@@ -169,15 +169,20 @@ void GameContactListener::processPlayerFootSensorContactBegin(FixtureNode* fixtu
          // call a "smash" function
          // i suppose the only requirement is that the player has some sort of
          // downwards velocity, so you can just smash an enemy by walking into it
-
-         if (down_velocity > 1.0f)
+         auto lua_node = dynamic_cast<LuaNode*>(fixture_node->getParent());
+         if (lua_node && !lua_node->_smashed)
          {
-            auto lua_node = dynamic_cast<LuaNode*>(fixture_node->getParent());
-            if (lua_node)
+            if (lua_node->getPropertyBool("smash", false))
             {
-               auto event = std::make_shared<SmashEnemyContactEvent>();
-               event->_enemy = lua_node;
-               _events.push_back(event);
+               const auto down_velocity = Player::getCurrent()->getBody()->GetLinearVelocity().y;
+               if (down_velocity > 1.0f)
+               {
+                  {
+                     auto event = std::make_shared<SmashEnemyContactEvent>();
+                     event->_enemy = lua_node;
+                     _events.push_back(event);
+                  }
+               }
             }
          }
 
@@ -904,8 +909,22 @@ void GameContactListener::DamageContactEvent::execute()
 
 void GameContactListener::SmashEnemyContactEvent::execute()
 {
-   _enemy->setDamageToPlayer(0);
-   _enemy->luaHit(1000);
+   if (_enemy->_smashed)
+   {
+      return;
+   }
+
+   _enemy->luaSmashed();
+
+   auto* body = Player::getCurrent()->getBody();
+
+   // it's pretty important to reset the body's y velocity
+   const auto& velocity = body->GetLinearVelocity();
+   body->SetLinearVelocity(b2Vec2(velocity.x, 0.0f));
+
+   // aaaaand.. up!
+   const auto& pos = body->GetWorldCenter();
+   body->ApplyLinearImpulse(b2Vec2{0.0f, -0.6f}, pos, true);
 }
 
 void GameContactListener::processEvents()
