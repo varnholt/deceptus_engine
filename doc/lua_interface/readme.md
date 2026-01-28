@@ -662,3 +662,39 @@ Update the sprite rectangle for a particular sprite.
 |4|int32_t|Rectangle width (in px)|
 |5|int32_t|Rectangle height (in px)|
 
+
+## Enemy Smashing Behavior
+
+Enemies can be made "smashable" by the player through a special property and callback function.
+
+### `smash` property
+|Property|Type|Description|
+|-|-|-|
+|smash|bool|If `true`, the enemy can be smashed by the player when jumping on it with sufficient downward velocity. Default is `false`.|
+
+### `smashed()` callback function
+When an enemy with `smash = true` is jumped on by the player with sufficient downward velocity (typically > 1.0), the `smashed()` function will be called if implemented in the enemy script.
+
+Example implementation:
+```lua
+function smashed()
+   -- This function is called when the enemy is smashed by the player
+   -- Commonly used to trigger death animations or effects
+
+   if (_smashed) then
+      return  -- Prevent multiple executions
+   end
+
+   _smashed = true
+   startDying()  -- Your custom death function
+end
+```
+
+When an enemy is successfully smashed:
+- The enemy's `smashed()` function is called (if implemented)
+- The enemy is marked as `_smashed = true` to prevent multiple smashes
+- The player receives a slight upward bounce effect after landing on the enemy
+- Any potential damage from the enemy to the player is cancelled during the smash event
+
+Note: The smash behavior only triggers when the player has sufficient downward velocity when contacting the top of the enemy, simulating a jump-stomp action.
+
