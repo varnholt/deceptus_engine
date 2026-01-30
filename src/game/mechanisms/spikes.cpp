@@ -26,7 +26,7 @@ namespace
 //     + unused
 constexpr auto SPRITES_PER_CYCLE = 15;
 constexpr auto TOLERANCE_PIXELS = 5;
-constexpr auto SPIKES_TILE_INDEX_TRAP_START = (SPRITES_PER_CYCLE - 4);
+constexpr auto SPIKES_TILE_INDEX_TRAP_START = (SPRITES_PER_CYCLE - 1);
 constexpr auto SPIKES_TILE_INDEX_EXTRACT_START = 1;
 constexpr auto SPIKES_TILE_INDEX_EXTRACT_END = 5;
 constexpr auto SPIKES_TILE_INDEX_RETRACT_START = 6;
