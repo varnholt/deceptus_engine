@@ -32,7 +32,7 @@
       "texture": "data/sprites/ingame-items.png"
    },
    "heart_regular": {
-      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_durations": [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40],
       "frame_offset": [0, 0],
       "frame_size": [48, 48],
       "origin": [24, 24],
