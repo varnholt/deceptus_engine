@@ -1105,6 +1105,12 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
 
 #ifdef DEVELOPMENT_MODE
+      case sf::Keyboard::Key::G:
+      {
+         const auto scale = Player::getCurrent()->getBody()->GetGravityScale();
+         Player::getCurrent()->getBody()->SetGravityScale(scale < 0.0f ? 1.0f : -0.1f);
+         break;
+      }
       case sf::Keyboard::Key::F1:
       {
          DisplayMode::getInstance().enqueueToggle(Display::Debug);
