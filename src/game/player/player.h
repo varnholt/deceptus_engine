@@ -13,6 +13,7 @@
 #include "game/player/playerclimb.h"
 #include "game/player/playercontrols.h"
 #include "game/player/playerdash.h"
+#include "game/player/playerdive.h"
 #include "game/player/playerjump.h"
 #include "game/player/playerjumptrace.h"
 #include "game/player/playerplatform.h"
@@ -229,6 +230,7 @@ private:
    PlayerJump _jump;
    PlayerJumpTrace _jump_trace;
    PlayerPlatform _platform;
+   PlayerDive _dive;
    WaterBubbles _water_bubbles;
 
    std::shared_ptr<PlayerAnimation> _player_animation;

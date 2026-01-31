@@ -1529,6 +1529,7 @@ void Player::update(const sf::Time& dt)
    updateJump();
    updateDash();
    _climb.update(_body, isInAir());
+   _dive.update(dt, isInWater());
    _platform.update(_body, _jump.isJumping());
    PlayerAudio::updateListenerPosition(_pixel_position_f);
    updateFootsteps();

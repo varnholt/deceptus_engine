@@ -774,7 +774,8 @@ add_executable(
     data/scripts/enemies/state_machine.lua
     data/scripts/enemies/vector2.lua
     data/scripts/enemies/vectorial2.lua
-    data/scripts/enemies/watermine.lua)
+    data/scripts/enemies/watermine.lua
+    src/game/player/playerdive.h src/game/player/playerdive.cpp)
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
 
