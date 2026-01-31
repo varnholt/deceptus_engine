@@ -1205,7 +1205,7 @@ std::vector<std::shared_ptr<LuaNode>> LevelScript::findLuaNodes(const std::strin
 
    const auto& object_list = LuaInterface::instance().getObjectList();
    std::regex pattern(search_pattern);
-   for (auto& node : object_list)
+   for (const auto& node : object_list)
    {
       auto lua_node = std::dynamic_pointer_cast<LuaNode>(node);
       if (std::regex_match(lua_node->_name, pattern))
@@ -1227,7 +1227,7 @@ void LevelScript::writeLuaNodeProperty(const std::string& search_pattern, const 
       return;
    }
 
-   for (auto& lua_node : results)
+   for (const auto& lua_node : results)
    {
       lua_node->luaWriteProperty(key, value);
    }
@@ -1243,7 +1243,7 @@ void LevelScript::setLuaNodeVisible(const std::string& search_pattern, bool visi
       return;
    }
 
-   for (auto& lua_node : results)
+   for (const auto& lua_node : results)
    {
       lua_node->_visible = visible;
    }
@@ -1259,7 +1259,7 @@ void LevelScript::setLuaNodeActive(const std::string& search_pattern, bool activ
       return;
    }
 
-   for (auto& lua_node : results)
+   for (const auto& lua_node : results)
    {
       lua_node->setActive(active);
    }
