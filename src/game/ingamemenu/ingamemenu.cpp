@@ -318,6 +318,13 @@ void InGameMenu::rotateRight()
 
 void InGameMenu::goToRightSubMenu()
 {
+   // block rotation while other state changes are ongoing
+   auto menu = _submenu_type_map[static_cast<uint8_t>(_selected_submenu)];
+   if (menu->getAnimation().has_value())
+   {
+      return;
+   }
+
    rotateRight();
 
    // debug();
@@ -338,6 +345,13 @@ void InGameMenu::rotateLeft()
 
 void InGameMenu::goToLeftSubMenu()
 {
+   // block rotation while other state changes are ongoing
+   auto menu = _submenu_type_map[static_cast<uint8_t>(_selected_submenu)];
+   if (menu->getAnimation().has_value())
+   {
+      return;
+   }
+
    rotateLeft();
 
    // debug();
