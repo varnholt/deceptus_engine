@@ -48,6 +48,7 @@ function makeMonkVisible(dt)
 end
 
 
+
 ------------------------------------------------------------------------------------------------------------------------
 function makePlayerKneel(dt)
    _delay_to_start_kneel = _delay_to_start_kneel - dt
@@ -231,6 +232,19 @@ function playerReceivedExtra(extra)
 
 end
 
+
+------------------------------------------------------------------------------------------------------------------------
+
+function mechanismEvent(object_id, group_id, event_name, value)
+
+log(string.format("object_id: %s, group_id: %s, event_name: %s, value: %s", object_id, group_id, event_name, tostring(value)))
+
+   if (object_id == "locked_box" and event_name == "state" and value == "locked") then
+      log("burp")
+      showDialogue("locked_message")
+   end
+
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerCollidesWithSensorRect(rect_id)
