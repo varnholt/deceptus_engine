@@ -37,7 +37,11 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function makeMonkVisible(dt)
+
+    log("make monk visible")
+
    _delay_to_show_monk = _delay_to_show_monk - dt
+   
    if (_delay_to_show_monk <= 0.0) then
       writeLuaNodeProperty("shadow", "show", "true")
       setLuaNodeVisible("shadow", true)
@@ -46,7 +50,6 @@ function makeMonkVisible(dt)
       lockPlayerControls(5000)
    end
 end
-
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -61,8 +64,11 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function makeMonkSpeak(dt)
+
    _delay_to_show_dialogue = _delay_to_show_dialogue - dt
+
    if (_delay_to_show_dialogue <= 0.0) then
+      log("make monk speak")
       _monk_dialogue_shown = true
       showDialogue("monk")
    end
@@ -71,8 +77,11 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function makeMonkDisappear(dt)
+
    _delay_to_hide_monk = _delay_to_hide_monk - dt
+
    if (_delay_to_hide_monk <= 0.0) then
+      log("make monk disappear")
       _monk_hide = false
       writeLuaNodeProperty("shadow", "hide", "true")
       setZoomFactor(1.0)
@@ -94,6 +103,9 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function openLocker()
+
+   log("open locker")
+
    setMechanismVisible("locker_open", true, "imagelayers")
    setMechanismVisible("handle", true, "extras")
    setMechanismEnabled("handle", true, "extras")
@@ -116,20 +128,21 @@ end
 function updateMonk(dt)
 
    -- monk dialogue logic
-   if (_player_intersected_with_monk_rect) then
+   if (not _player_intersected_with_monk_rect) then
+      return
+   end
       
-      -- 1. make him visible
-      -- 2. make him speak
-      -- 3. make him disappear again
-      if (not _monk_shown) then
-         makeMonkVisible(dt)
-      elseif (not _player_kneeled) then
-         makePlayerKneel(dt)
-      elseif (not _monk_dialogue_shown) then
-         makeMonkSpeak(dt)
-      elseif (_monk_hide) then
-         makeMonkDisappear(dt)
-      end
+   -- 1. make him visible
+   -- 2. make him speak
+   -- 3. make him disappear again
+   if (not _monk_shown) then
+      makeMonkVisible(dt)
+   elseif (not _player_kneeled) then
+      makePlayerKneel(dt)
+   elseif (not _monk_dialogue_shown) then
+      makeMonkSpeak(dt)
+   elseif (_monk_hide) then
+      makeMonkDisappear(dt)
    end
 end
 
@@ -170,8 +183,15 @@ function mechanismEvent(object_id, group_id, event_name, value)
       setMechanismEnabled("door_opened_dialogue", true, "dialogues")
    end
    
+   -- object_id: monk, group_id: dialogues, event_name: state, value: hide
    if (object_id == "monk" and event_name == "state" and value == "hide") then
+      log("hide monk")
       _monk_hide = true
+   end
+
+   if (object_id == "locked_box" and event_name == "state" and value == "locked") then
+      log("burp")
+      showDialogue("locked_message")
    end
 
 end
@@ -232,19 +252,6 @@ function playerReceivedExtra(extra)
 
 end
 
-
-------------------------------------------------------------------------------------------------------------------------
-
-function mechanismEvent(object_id, group_id, event_name, value)
-
-log(string.format("object_id: %s, group_id: %s, event_name: %s, value: %s", object_id, group_id, event_name, tostring(value)))
-
-   if (object_id == "locked_box" and event_name == "state" and value == "locked") then
-      log("burp")
-      showDialogue("locked_message")
-   end
-
-end
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerCollidesWithSensorRect(rect_id)
