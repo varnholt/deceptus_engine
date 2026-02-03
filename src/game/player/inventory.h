@@ -20,6 +20,7 @@ struct Inventory
    const std::vector<std::string>& getItems() const;
    void clear();
    void resetKeys();
+   std::vector<std::string> readItemNames() const;
 
    void selectItem(int32_t slot, const std::string& item);
    void autoPopulate(const std::string& item);

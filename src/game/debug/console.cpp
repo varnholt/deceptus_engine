@@ -29,8 +29,8 @@ Console::Console()
    );
    _help.registerCommand(
       "inventory",
-      "item <add/clear/list/remove> <item name>: add/clear/list/remove items",
-      {"item add key_skull", "item remove key_skull", "item list", "item clear"}
+      "item <add/clear/list/listall/remove> <item name>: add/clear/list/remove items",
+      {"item add key_skull", "item remove key_skull", "item list", "item clear", "item listall"}
    );
    _help.registerCommand("inventory", "weapon <add/clear> <sword/bow/gun>: add/clear weapons", {"weapon add sword", "weapon clear"});
    _help.registerCommand("cheats", "damage <n>: cause damage to player", {"damage 100"});
@@ -255,6 +255,13 @@ void Console::execute()
          for (const auto& item : SaveState::getPlayerInfo()._inventory._items)
          {
             _log.emplace_back(item);
+         }
+      }
+      else if (results.at(1) == "listall")
+      {
+         for (const auto& name : SaveState::getPlayerInfo()._inventory.readItemNames())
+         {
+            _log.emplace_back(name);
          }
       }
       else if (results.at(1) == "clear")
