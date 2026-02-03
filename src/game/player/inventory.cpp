@@ -60,6 +60,15 @@ void Inventory::resetKeys()
    std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
 }
 
+std::vector<std::string> Inventory::readItemNames() const
+{
+   std::vector<std::string> names;
+   std::ranges::transform(
+      _descriptions, std::back_inserter(names), [](const auto& description) -> std::string { return description._name; }
+   );
+   return names;
+}
+
 void Inventory::selectItem(int32_t slot, const std::string& item)
 {
    _slots[slot] = item;
