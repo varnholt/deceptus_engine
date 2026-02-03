@@ -189,11 +189,17 @@ function mechanismEvent(object_id, group_id, event_name, value)
       _monk_hide = true
    end
 
+   -- object_id: locked_box, group_id: treasurechests, event_name: state, value: locked
    if (object_id == "locked_box" and event_name == "state" and value == "locked") then
-      log("burp")
       showDialogue("locked_message")
    end
-
+   
+   -- object_id: locked_box, group_id: treasurechests, event_name: state, value: open
+   if (object_id == "locked_box" and event_name == "state" and value == "open") then
+      setMechanismEnabled("locked_message", false, "dialogues")
+      setMechanismEnabled("locked_box_interaction_help", false, "interaction_help")
+      setMechanismEnabled("handle_help", false, "interaction_help")      
+   end
 end
 
 
