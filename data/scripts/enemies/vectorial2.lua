@@ -160,6 +160,46 @@ local module = {}
       return out
    end
 
+   function v2d:sub(other)
+      -- Subtract another vector from this vector
+      return self - other
+   end
+
+   function v2d:add(other)
+      -- Add another vector to this vector
+      return self + other
+   end
+
+   function v2d:mul(scalar)
+      -- Multiply this vector by a scalar
+      if type(scalar) == "number" then
+         -- If scalar is a number, multiply both components by it
+         local result = self:deepcopy(self)
+         result:setX(self:getX() * scalar)
+         result:setY(self:getY() * scalar)
+         return result
+      else
+         -- If scalar is another vector, use component-wise multiplication
+         return self * scalar
+      end
+   end
+
+   function v2d:len()
+      -- Get the length (magnitude) of the vector
+      return math.sqrt((self:getX() * self:getX()) + (self:getY() * self:getY()))
+   end
+
+   function v2d:norm()
+      -- Normalize the vector (get unit vector in same direction)
+      local length = self:len()
+      if length == 0 then
+         -- Return zero vector if length is zero to avoid division by zero
+         return module.Vector2D(0, 0)
+      else
+         return module.Vector2D(self:getX() / length, self:getY() / length)
+      end
+   end
+
    mt.__tostring = function(self)
       --tostring handler for Vector2D
       out = ""	--This is a string operation, so no deepcopy.
