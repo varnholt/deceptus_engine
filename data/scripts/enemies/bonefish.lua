@@ -160,7 +160,7 @@ function setPath(name, table)
       -- Calculate angle in degrees
       local dx = right:getX() - left:getX()
       local dy = right:getY() - left:getY()
-      local angleRad = math.atan2(dy, dx)
+      local angleRad = math.atan(dy, dx)
       local angleDeg = math.deg(angleRad)
       
       -- Normalize angle to -180 to 180 range
