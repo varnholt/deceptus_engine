@@ -21,7 +21,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 -- 4) idle right (8 frames)
 -- 5) idle blink right (8 frames)
 -- 6) attack right (6 frames)
--- 
+--
 -- his tongue can be extended by using the sprites next to rows 3 and 6
 
 CYCLE_IDLE = 1
@@ -41,53 +41,55 @@ STATE_ATTACK = 2
 
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
-   static_body = true,
    sprite = "data/sprites/enemy_frog.png",
-   damage = 0,
-   sensor = true
+   damage = 4,
+   smash = true
 }
 
 
 ------------------------------------------------------------------------------------------------------------------------
-mDone = false
-mPosition = v2d.Vector2D(0, 0)
-mPlayerPosition = v2d.Vector2D(0, 0)
-mElapsed = 0
-mAlignmentOffset = 0
-mState = STATE_IDLE
-mPointsLeft = true
+_done = false
+_position = v2d.Vector2D(0, 0)
+_player_position = v2d.Vector2D(0, 0)
+_elapsed = 0
+_alignment_offset = 0
+_state = STATE_IDLE
+_points_left = true
+_smashed = false
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function updateState()
 
-   xDiff = mPlayerPosition:getX() // 24 - mPosition:getX() // 24
-   yDiff = mPlayerPosition:getY() // 24 - mPosition:getY() // 24
+   x_diff = _player_position:getX() // 24 - _position:getX() // 24
+   y_diff = _player_position:getY() // 24 - _position:getY() // 24
 
-   xInRange = (mPointsLeft and xDiff >= -5 and xDiff <= 0) or (not mPointsLeft and xDiff <= 5 and xDiff >= 0)
-   yInRange = yDiff >= -1 and yDiff <= 1
+   x_in_range =
+      (_points_left and x_diff >= -5 and x_diff <= 0) or
+      (not _points_left and x_diff <= 5 and x_diff >= 0)
 
-   nextState = STATE_IDLE
+   y_in_range = y_diff >= -1 and y_diff <= 1
+
+   next_state = STATE_IDLE
 
    -- check for attack transition
-   if (yInRange and xInRange) then
+   if (y_in_range and x_in_range) then
       if (
          isPhsyicsPathClear(
-            mPosition:getX(),
-            mPosition:getY(),
-            mPlayerPosition:getX(),
-            mPlayerPosition:getY()
+            _position:getX(),
+            _position:getY(),
+            _player_position:getX(),
+            _player_position:getY()
          )
-      )
-      then
-         print(xDiff)
+      ) then
+         print(x_diff)
          print("attack")
-         nextState = STATE_ATTACK
+         next_state = STATE_ATTACK
       end
    end
 
-   if (nextState ~= mStatateNeeded) then
-      mState = nextState
+   if (next_state ~= mStatateNeeded) then
+      _state = next_state
    end
 
 end
@@ -101,17 +103,28 @@ function updateSprite(dt)
    updateSpriteRect(
       0,
       x,
-      y + mAlignmentOffset,
+      y + _alignment_offset,
       SPRITE_WIDTH,
       SPRITE_HEIGHT
    )
 
 end
 
+------------------------------------------------------------------------------------------------------------------------
+function smashed()
+
+   if (_smashed) then
+      return
+   end
+
+   _smashed = true
+   startDying()
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   addShapeRect(0.2, 0.2, 0.0, 0.1)
+   addShapeRect(0.4, 0.25, 0.0, 0.05)
+   -- setSpriteOffset(0, 0, 24);
    updateSprite(0.0)
    print("frog.lua initialized")
 end
@@ -130,25 +143,25 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   mPosition = v2d.Vector2D(x, y)
+   _position = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
 
-   if (mDone) then
+   if (_done) then
       return
    end
 
-   mPlayerPosition = v2d.Vector2D(x, y)
-   distanceToPlayer = (mPlayerPosition - mPosition):getLength()
+   _player_position = v2d.Vector2D(x, y)
+   distance_to_player = (_player_position - _position):getLength()
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
-   mElapsed = mElapsed + dt
+   _elapsed = _elapsed + dt
    updateState()
    updateSprite(dt)
 end
@@ -163,9 +176,8 @@ end
 function writeProperty(key, value)
    if (key == "alignment") then
       if (value == "right") then
-         mAlignmentOffset = 3 * SPRITE_HEIGHT
-         mPointsLeft = false
+         _alignment_offset = 3 * SPRITE_HEIGHT
+         _points_left = false
       end
    end
 end
-
