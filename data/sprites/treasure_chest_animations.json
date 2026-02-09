@@ -24,11 +24,11 @@
       "texture": "data/sprites/treasure_chest.png"
    },
   "locker_idle": {
-      "frame_durations": [100, 100, 100, 100, 100, 100, 100, 100, 100, 6000],
+      "frame_durations": [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 6000],
       "frame_offset": [0, 72],
       "frame_size": [72, 72],
       "origin": [36.0, 12.0],
-      "sprite_count": 10,
+      "sprite_count": 11,
       "texture": "data/sprites/locker_box.png"
    },
    "locker_opening": {
