@@ -114,7 +114,6 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
-
 function writeProperty(parameter, value)
 
    if (parameter == "speed") then
@@ -124,6 +123,34 @@ function writeProperty(parameter, value)
    elseif (parameter == "amplitude") then
       mAmplitude = value
    end
+end
+
+------------------------------------------------------------------------------------------------------------------------
+-- Helper function to replicate math.atan2 functionality using math.atan
+function atan2(y, x)
+    if x == 0 then
+        if y > 0 then
+            return math.pi / 2
+        elseif y < 0 then
+            return -math.pi / 2
+        else
+            -- Both x and y are 0, undefined angle
+            return 0
+        end
+    else
+        local angle = math.atan(y / x)
+        
+        -- Adjust for correct quadrant
+        if x < 0 then
+            if y >= 0 then
+                return angle + math.pi
+            else
+                return angle - math.pi
+            end
+        else
+            return angle
+        end
+    end
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -157,27 +184,27 @@ function setPath(name, table)
       local rightArr = patrolPath[1]
       local right = v2d.Vector2D(rightArr:getX(), rightArr:getY())
 
-      -- Calculate angle in degrees
+      -- Calculate angle in degrees using our custom atan2 function
       local dx = right:getX() - left:getX()
       local dy = right:getY() - left:getY()
-      local angleRad = math.atan(dy, dx)
+      local angleRad = atan2(dy, dx)
       local angleDeg = math.deg(angleRad)
-      
+
       -- Normalize angle to -180 to 180 range
       if angleDeg > 180 then
           angleDeg = angleDeg - 360
       elseif angleDeg < -180 then
           angleDeg = angleDeg + 360
       end
-      
+
       -- Determine if path is vertical or horizontal
       -- -45 to 45 degrees means horizontal movement
       -- Otherwise it's vertical (or diagonal treated as vertical)
       mIsVerticalPath = not (angleDeg >= -45 and angleDeg <= 45)
-      
+
       -- Calculate center point
       mCenter = v2d.Vector2D((left:getX() + right:getX()) / 2.0, (left:getY() + right:getY()) / 2.0)
-      
+
       -- Calculate distance to use for movement (either horizontal or vertical)
       if mIsVerticalPath then
           mDistance = math.sqrt(dx * dx + dy * dy)  -- Use full distance for vertical paths
