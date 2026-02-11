@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <chrono>
 #include <memory>
@@ -140,8 +140,14 @@ struct LuaNode : public GameMechanism, public GameNode
    //! update the sprite's texture rect
    void updateSpriteRect(int32_t id, int32_t x, int32_t y, int32_t w, int32_t h);
 
+   //! set a sprite's scale
+   void setSpriteScale(int32_t id, float x_scale, float y_scale);
+
    //! set a sprite's color
    void setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+
+   //! set a sprite's visibility
+   void setSpriteVisible(int32_t id, bool visible);
 
    //! update a debug rect
    void updateDebugRect(int32_t index, float left_px, float top_px, float width_px, float height_px);
