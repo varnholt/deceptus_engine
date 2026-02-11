@@ -1,4 +1,4 @@
-// base
+﻿// base
 #include "luanode.h"
 
 #include <iostream>
@@ -317,6 +317,36 @@ int32_t setSpriteColor(lua_State* state)
    const auto b = static_cast<uint8_t>(lua_tointeger(state, 4));
    const auto a = static_cast<uint8_t>(lua_tointeger(state, 5));
    node->setSpriteColor(id, r, g, b, a);
+
+   return 0;
+}
+
+/**
+ * @brief setSpriteScale set scale of a given sprite
+ * @param state lua state
+ *    param 1: sprite id
+ *    param 2: x scale factor
+ *    param 3: y scale factor
+ * @return error code
+ */
+int32_t setSpriteScale(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 3)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto x_scale = static_cast<float>(lua_tonumber(state, 2));
+   const auto y_scale = static_cast<float>(lua_tonumber(state, 3));
+   node->setSpriteScale(id, x_scale, y_scale);
 
    return 0;
 }
@@ -951,6 +981,34 @@ int32_t setSpriteOffset(lua_State* state)
 }
 
 /**
+ * @brief setSpriteVisible sets the visibility for a given sprite
+ * @param state lua state
+ *    param 1: sprite id
+ *    param 2: visibility flag (boolean)
+ * @return error code
+ */
+int32_t setSpriteVisible(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto visible = static_cast<bool>(lua_toboolean(state, 2));
+   node->setSpriteVisible(id, visible);
+
+   return 0;
+}
+
+/**
  * @brief boom make the game go booom
  * @param state lua state
  *    param 1: detonation center x
@@ -1247,8 +1305,15 @@ int32_t addWeapon(lua_State* state)
    properties._properties["use_interval_ms"] = fire_interval;
    properties._properties["gravity_scale"] = gravity_scale;
 
-   auto weapon = WeaponFactory::create(weapon_type, properties);
-   node->addWeapon(std::move(weapon));
+   if (weapon_type != WeaponType::None)
+   {
+      auto weapon = WeaponFactory::create(weapon_type, properties);
+      node->addWeapon(std::move(weapon));
+   }
+   else
+   {
+      Log::Fatal() << node->_script_name << " tried to set an invalid weapon";
+   }
 
    return 0;
 }
@@ -1859,6 +1924,8 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "setSpriteColor", ::setSpriteColor);
    lua_register(_lua_state, "setSpriteOffset", ::setSpriteOffset);
    lua_register(_lua_state, "setSpriteOrigin", ::setSpriteOrigin);
+   lua_register(_lua_state, "setSpriteScale", ::setSpriteScale);
+   lua_register(_lua_state, "setSpriteVisible", ::setSpriteVisible);
    lua_register(_lua_state, "setTransform", ::setTransform);
    lua_register(_lua_state, "setVisible", ::setVisible);
    lua_register(_lua_state, "setZ", ::setZIndex);
@@ -2753,9 +2820,30 @@ void LuaNode::updateSpriteRect(int32_t id, int32_t x_px, int32_t y_px, int32_t w
    _sprites[id]->setTextureRect(sf::IntRect({x_px, y_px}, {w_px, h_px}));
 }
 
+
+void LuaNode::setSpriteScale(int32_t id, float x_scale, float y_scale)
+{
+   _sprites[id]->setScale({x_scale, y_scale});
+}
+
 void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
    _sprites[id]->setColor({r, g, b, a});
+}
+
+void LuaNode::setSpriteVisible(int32_t id, bool visible)
+{
+   if (id >= 0 && id < static_cast<int32_t>(_sprites.size()))
+   {
+      // Get the current color of the sprite
+      sf::Color current_color = _sprites[id]->getColor();
+      
+      // Set the alpha channel to 0 (invisible) or 255 (fully visible)
+      current_color.a = visible ? 255 : 0;
+      
+      // Apply the new color with updated alpha
+      _sprites[id]->setColor(current_color);
+   }
 }
 
 void LuaNode::updateDebugRect(int32_t index, float left_px, float top_px, float width_px, float height_px)
