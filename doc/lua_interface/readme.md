@@ -550,6 +550,17 @@ Sets the offset for a given sprite
 |3|int32_t|y-position (in px)|
 
 
+## `setSpriteScale`
+
+Set the scale of a given sprite
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Sprite id|
+|2|float|x-scale factor|
+|3|float|y-scale factor|
+
+
 ## `setSpriteOrigin`
 
 Set the origin of a given sprite
@@ -559,6 +570,16 @@ Set the origin of a given sprite
 |1|int32_t|Sprite id|
 |2|int32_t|x-position (in px)|
 |3|int32_t|y-position (in px)|
+
+
+## `setSpriteVisible`
+
+Set the visibility of a given sprite
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Sprite id|
+|2|bool|Visibility flag (true for visible, false for invisible)|
 
 
 ## `setTransform`
