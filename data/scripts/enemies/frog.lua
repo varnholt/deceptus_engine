@@ -132,13 +132,12 @@ function initialize()
    -- initialize sprite slot for stretched tongue (hidden by default)
    addSprite()
    setSpriteOffset(1, 24, 12)
+   setSpriteScale(1, 0, 0)
 
    -- tip of the tongue
    addSprite()
    setSpriteOffset(2, 24, 12)
-
-   -- hide tongue initially
-   setSpriteScale(1, 0, 0)
+   setSpriteVisible(2, false)
 
    updateSprite(0.0)
    print("frog.lua initialized")
@@ -313,6 +312,9 @@ function updateSpriteAttack(dt)
       end
    end
    setSpriteScale(1, _tongue_scale, 1.0)
+
+   -- Show tongue tip only when maximum attack frame is reached (animation completed), hide in all other situations
+   setSpriteVisible(2, animation_completed)
 
 --   -- debug output for tongue scale and frame
 --   if _tongue_scale > 0 then
