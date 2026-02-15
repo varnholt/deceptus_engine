@@ -33,6 +33,14 @@ v2d = require "data/scripts/enemies/vectorial2"
 --    tongue extension: 288, 264
 --    tongue tip: 312, 264 (24x24)
 
+-- tongue animation logic
+-- 1. the attack animation plays through all frames at regular speed
+-- 2. the tongue only starts extending after the attack animation has completed
+-- 3. the mouth stays on the last frame (open) while the tongue is extending and retracting
+-- 4. when the tongue is fully retracted, the mouth animation plays backwards from the last frame to frame 0 (closed)
+-- 5. once the backward animation reaches frame 0, it stays there until the state changes back to idle
+
+
 CYCLE_IDLE = 1
 CYCLE_BLINK = 2
 CYCLE_ATTACK = 3
@@ -79,6 +87,8 @@ _tongue_fully_extended = false  -- Flag to track if tongue is fully extended
 _tongue_hit_player = false        -- Flag to track if tongue has hit the player
 _retracting_tongue = false        -- Flag to track if tongue is retracting
 _attack_animation_time = 0.0      -- Time elapsed in the current attack animation phase
+_attack_animation_time_at_full_retraction = nil  -- Time when tongue became fully retracted
+_backward_animation_completed = false  -- Flag to track if backward animation has completed
 
 -- health and death variables
 _energy = 30  -- frog's health points
@@ -130,6 +140,8 @@ function initialize()
       16           -- height in sprite sheet
    )
 
+   setSpriteOffset(1, 24, 12)
+
    -- hide tongue initially
    setSpriteScale(1, 0, 0)
 
@@ -141,7 +153,6 @@ end
 function checkAttackCondition(next_state)
 
    -- only check for attack transition if we're in a state that allows it
-   -- (not in attack or dying state)
    if next_state == _state and _state ~= STATE_DYING and _state ~= STATE_ATTACK then
       -- check for attack transition
       x_diff = _player_position:getX() // 24 - _position:getX() // 24
@@ -153,8 +164,7 @@ function checkAttackCondition(next_state)
 
       y_in_range = y_diff >= -1 and y_diff <= 1
 
-      -- Check if the tongue is fully retracted (ready for next attack)
-      local tongue_retracted = _tongue_scale <= 0.01  -- using small epsilon instead of exact zero
+      local tongue_retracted = _tongue_scale <= 0.01
 
       if (y_in_range and x_in_range and tongue_retracted) then
          if (
@@ -208,6 +218,8 @@ function updateState(dt)
       _tongue_hit_player = false
       _retracting_tongue = false
       _attack_animation_time = 0.0
+      _attack_animation_time_at_full_retraction = nil
+      _backward_animation_completed = false
    end
 
    if _death_animation_finished then
@@ -275,23 +287,36 @@ function updateSpriteAttack(dt)
    -- calculate distance to player to determine tongue length
    local dist_to_player = math.abs(_player_position:getX() - _position:getX())
 
+   -- Calculate the current frame index to determine if animation has completed
+   local anim_speed_factor = _attack_anim_speed
+   local frame_rate = 10.0  -- Base frame rate
+   local current_frame_index = math.floor(_attack_animation_time * frame_rate * anim_speed_factor)
+   local max_frames = FRAME_COUNTS[CYCLE_ATTACK] - 1  -- Max frames for attack animation
+   local animation_completed = current_frame_index >= max_frames
+
    -- extend or retract
    if not _retracting_tongue then
-      -- extending
-      _tongue_scale = _tongue_scale + dt * 1
-      if _tongue_scale >= MAX_TONGUE_SCALE and not _retracting_tongue then
-         _tongue_scale = MAX_TONGUE_SCALE
-         _tongue_fully_extended = true
-         _retracting_tongue = true
+      -- Only start extending the tongue after the attack animation has completed
+      if animation_completed then
+         _tongue_scale = _tongue_scale + dt * 1
+         if _tongue_scale >= MAX_TONGUE_SCALE and not _retracting_tongue then
+            _tongue_scale = MAX_TONGUE_SCALE
+            _tongue_fully_extended = true
+            _retracting_tongue = true
+         end
       end
    else
       -- retract
       _tongue_scale = _tongue_scale - dt * 1
       if _tongue_scale <= 0.0 then
          _tongue_scale = 0.0
+         -- Record the time when tongue became fully retracted (if not already recorded)
+         if not _attack_animation_time_at_full_retraction then
+            _attack_animation_time_at_full_retraction = _attack_animation_time
+         end
+         -- When fully retracted, allow transition back to idle state
       end
    end
-
    setSpriteScale(1, _tongue_scale, 1.0)
 
 --   -- debug output for tongue scale and frame
@@ -304,8 +329,6 @@ function updateSpriteAttack(dt)
 
    -- check for collision between tongue and player using the engine's helper function
    local tongue_x, tongue_y, tongue_w, tongue_h
-
-   setSpriteOffset(1, 0, 0)
 
    local base_x, base_y
    base_x = _position:getX()
@@ -496,8 +519,22 @@ function getAttackSpriteCoords()
    local frame_index = math.floor(_attack_animation_time * frame_rate * anim_speed_factor)
 
    -- Determine the current animation frame based on the tongue state
-   if _retracting_tongue and _tongue_scale <= 0.0 then
-      -- When fully retracted after being in retraction, go back to frame 0
+   if _retracting_tongue and _tongue_scale <= 0.0 and not _backward_animation_completed then
+      -- When fully retracted after being in retraction, animate backwards from last frame to frame 0
+      -- Calculate how much time has passed since tongue scale became <= 0
+      local time_since_full_retraction = math.max(0, _attack_animation_time - (_attack_animation_time_at_full_retraction or _attack_animation_time))
+      -- Calculate frame index going backwards from max to 0 based on time since full retraction
+      local anim_speed_factor = _attack_anim_speed
+      local frame_rate = 10.0  -- Base frame rate
+      local frames_since_full_retraction = math.floor(time_since_full_retraction * frame_rate * anim_speed_factor)
+      frame_index = math.max(0, max_frames - frames_since_full_retraction)
+      
+      -- Check if backward animation has completed (reached frame 0)
+      if frame_index == 0 then
+         _backward_animation_completed = true
+      end
+   elseif _retracting_tongue and _tongue_scale <= 0.0 and _backward_animation_completed then
+      -- When backward animation is completed, stay at frame 0
       frame_index = 0
    elseif _retracting_tongue or _tongue_fully_extended then
       -- When extending, retracting, or fully extended, stay on the last frame
@@ -588,9 +625,13 @@ end
 -- function to update attack state
 function updateStateAttack(dt)
    _attack_animation_time = _attack_animation_time + dt
-   
-   -- return to idle only when tongue is fully retracted (back to scale 0)
-   if _tongue_scale <= 0.0 and _retracting_tongue then
+
+   -- return to idle only when tongue is fully retracted AND backward animation is completed
+   if _tongue_scale <= 0.0 and _retracting_tongue and _backward_animation_completed then
+      -- Reset state variables when returning to idle
+      _attack_animation_time = 0.0
+      _attack_animation_time_at_full_retraction = nil
+      _backward_animation_completed = false
       return STATE_IDLE
    else
       return STATE_ATTACK
