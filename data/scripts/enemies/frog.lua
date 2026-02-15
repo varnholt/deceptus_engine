@@ -94,6 +94,12 @@ _prev_sprite_row = nil
 -- animation tracking
 _prev_animation_frame = 0
 
+-- tongue sprite dimensions
+_tongue_extension_x = 288
+_tongue_extension_y = 120
+_tongue_tip_x = 312
+_tongue_tip_y = 120
+
 
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
@@ -124,7 +130,6 @@ function initialize()
    )
 
    -- hide tongue initially
-   setSpriteVisible(1, false)
    setSpriteScale(1, 0, 0)
 
    updateSprite(0.0)
@@ -132,26 +137,7 @@ function initialize()
 end
 
 
-
-------------------------------------------------------------------------------------------------------------------------
-function updateState(dt)
-
-   -- Note: attack cooldown is now handled by tongue retraction mechanism
-   -- The frog cannot attack again until tongue is fully retracted
-
-   local next_state
-    
-   -- handle dying state separately
-   if _state == STATE_DYING then
-      updateStateDying(dt)
-      next_state = STATE_DYING
-   elseif _state == STATE_ATTACK then
-      next_state = updateStateAttack(dt)
-   elseif _is_blinking then
-      next_state = updateStateBlinking(dt)
-   else
-      next_state = updateStateIdle(dt)
-   end
+function checkAttackCondition(next_state)
 
    -- only check for attack transition if we're in a state that allows it
    -- (not in attack or dying state)
@@ -168,7 +154,7 @@ function updateState(dt)
 
       -- Check if the tongue is fully retracted (ready for next attack)
       local tongue_retracted = _tongue_scale <= 0.01  -- using small epsilon instead of exact zero
-      
+
       if (y_in_range and x_in_range and tongue_retracted) then
          if (
             isPhsyicsPathClear(
@@ -184,55 +170,59 @@ function updateState(dt)
       end
    end
 
+   return next_state
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function updateState(dt)
+
+   local next_state
+    
+   if _state == STATE_DYING then
+      updateStateDying(dt)
+      next_state = STATE_DYING
+   elseif _state == STATE_ATTACK then
+      next_state = updateStateAttack(dt)
+   elseif _is_blinking then
+      next_state = updateStateBlinking(dt)
+   else
+      next_state = updateStateIdle(dt)
+   end
+
+   next_state = checkAttackCondition()
+
    if (next_state ~= _state) then
 
-      -- update state
       _prev_state = _state
       _state = next_state
 
-      -- log state change
       local state_names = {[STATE_IDLE] = "IDLE", [STATE_ATTACK] = "ATTACK", [STATE_DYING] = "DYING"}
       print("Frog: State changed from " .. state_names[_prev_state] .. " to " .. state_names[_state])
 
-      -- reset the animation frame to 0 when the state changes
+      -- reset all on each state transition
       _animation_frame = 0
-
-      -- reset tongue extension
       _tongue_scale = 0.0
-
-      -- The frog cannot attack again until tongue is fully retracted
-
-      -- reset attack-related flags when leaving attack state
-      if _prev_state == STATE_ATTACK then
-         _tongue_fully_extended = false
-         _tongue_hit_player = false
-         _retracting_tongue = false  -- also reset retraction flag
-         _attack_animation_time = 0.0  -- reset attack animation time
-         _tongue_scale = 0.0  -- also reset tongue scale
-      end
+      _tongue_fully_extended = false
+      _tongue_hit_player = false
+      _retracting_tongue = false
+      _attack_animation_time = 0.0
    end
 
+   if _death_animation_finished then
+      die()
+   end
 end
 
 ------------------------------------------------------------------------------------------------------------------------
-function updateSprite(dt)
+function logSprite(dt)
 
-   local x = 0
-   local y = 0
-
-   -- Determine sprite coordinates based on current state
-   if _state == STATE_DYING then
-      x, y = getDyingSpriteCoords()
-   elseif _state == STATE_ATTACK then
-      x, y = getAttackSpriteCoords()
-   else  -- STATE_IDLE
-      x, y = getIdleSpriteCoords()
-   end
-
-   -- log the sprite row being used (only when it changes significantly)
    local current_row = math.floor(y / SPRITE_HEIGHT)
+
    if _prev_sprite_row ~= current_row then
+
       _prev_sprite_row = current_row
+
       local state_names = {[STATE_IDLE] = "IDLE", [STATE_ATTACK] = "ATTACK", [STATE_DYING] = "DYING"}
       local cycle_names = {[CYCLE_IDLE] = "IDLE", [CYCLE_BLINK] = "BLINK", [CYCLE_ATTACK] = "ATTACK"}
 
@@ -244,9 +234,24 @@ function updateSprite(dt)
          local cycle = _is_blinking and CYCLE_BLINK or CYCLE_IDLE
          print("Frog: Using " .. cycle_names[cycle] .. " animation row " .. current_row .. " for state " .. state_names[_state])
       end
+
+   end
+end
+
+------------------------------------------------------------------------------------------------------------------------
+function updateSprite(dt)
+
+   local x = 0
+   local y = 0
+
+   if _state == STATE_DYING then
+      x, y = getDyingSpriteCoords()
+   elseif _state == STATE_ATTACK then
+      x, y = getAttackSpriteCoords()
+   elseif _state == STATE_IDLE then
+      x, y = getIdleSpriteCoords()
    end
 
-   -- update the main frog sprite
    updateSpriteRect(
       0,
       x,
@@ -255,71 +260,23 @@ function updateSprite(dt)
       SPRITE_HEIGHT
    )
 
-   -- handle state-specific updates
-   if _state == STATE_IDLE then
-      -- just set tongue scale to 0 when in idle state, no need to hide
-      setSpriteScale(1, 0, 0)
-   elseif _state == STATE_ATTACK then
-      local current_attack_frame = math.floor(_animation_frame)
-      updateSpriteAttack(dt, current_attack_frame)
-   elseif _state == STATE_DYING then
-      -- hide tongue during death animation
-      setSpriteScale(1, 0, 0)
+   if _state == STATE_ATTACK then
+      updateSpriteAttack(dt)
    end
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 -- function to handle attack state updates
-function updateSpriteAttack(dt, current_attack_frame)
+function updateSpriteAttack(dt)
+   local current_attack_frame = math.floor(_animation_frame)
+
    -- calculate distance to player to determine tongue length
    local dist_to_player = math.abs(_player_position:getX() - _position:getX())
 
-   -- scale the tongue length based on distance to player (but cap it)
-   local max_tongue_length = 100  -- max length in pixels
-   local current_tongue_length = math.min(dist_to_player, max_tongue_length)
-
-   -- define tongue properties with floating-point precision
-   local tongue_width = current_tongue_length  -- stretch the tongue to the calculated length
-   local tongue_height = 8.0                 -- fixed height for the tongue (float)
-
-   -- calculate tongue position based on frog facing direction with floating-point precision
    local base_x, base_y
-   if _points_left then
-      -- tongue extends to the left
-      base_x = _position:getX()
-      base_y = _position:getY()
-   else
-      -- tongue extends to the right
-      base_x = _position:getX()
-      base_y = _position:getY()
-   end
-
-   -- update the tongue sprite dimensions once
-   local tongue_extension_x, tongue_extension_y, tongue_tip_x, tongue_tip_y
-   if _points_left then
-      -- use left-facing tongue sprites
-      tongue_extension_x = 288
-      tongue_extension_y = 120
-      tongue_tip_x = 312
-      tongue_tip_y = 120
-   else
-      -- use right-facing tongue sprites
-      tongue_extension_x = 288
-      tongue_extension_y = 264
-      tongue_tip_x = 312
-      tongue_tip_y = 264
-   end
-   
-   updateSpriteRect(
-      1,                    -- sprite slot for stretched tongue
-      tongue_extension_x,   -- x coordinate in sprite sheet for tongue extension
-      tongue_extension_y,   -- y coordinate in sprite sheet for tongue extension
-      24,                   -- width in sprite sheet (source)
-      24                    -- height in sprite sheet (source)
-   )
-
-   -- position the tongue sprite using offset
+   base_x = _position:getX()
+   base_y = _position:getY()
    setSpriteOffset(1, base_x, base_y)
 
    -- extend or retract the tongue based on state
@@ -329,34 +286,18 @@ function updateSpriteAttack(dt, current_attack_frame)
       if _tongue_scale >= 5.0 and not _retracting_tongue then
          _tongue_scale = 5.0  -- clamp at 5
          _tongue_fully_extended = true
-         
-         -- start retracting after fully extended or hitting player
-         if _tongue_hit_player then
-            _retracting_tongue = true  -- start retracting immediately if hit player
-         else
-            -- Just became fully extended, start retracting
-            _retracting_tongue = true
-         end
+         _retracting_tongue = true
       end
    else
       -- retracting phase: scale the sprite back to 0
       _tongue_scale = _tongue_scale - dt * 1  -- decrement by dt * 10
       if _tongue_scale <= 0.0 then
-         _tongue_scale = 0.0  -- clamp at 0
-         -- Tongue is fully retracted, attack can end
+         _tongue_scale = 0.0
       end
-   end
-
-   -- check if tongue is fully extended (for the first time)
-   if not _tongue_fully_extended and _tongue_scale >= 5.0 then
-      _tongue_fully_extended = true
    end
 
    -- apply the scale
    setSpriteScale(1, _tongue_scale, 1.0)  -- scale only horizontally
-
-   -- show the tongue sprite
-   setSpriteVisible(1, true)
 
    -- debug output for tongue scale and frame
    if _tongue_scale > 0 then
@@ -380,10 +321,10 @@ function updateSpriteAttack(dt, current_attack_frame)
    end
 
    local player_rect = {
-      x = _player_position:getX() - 12,  -- assuming player is 24x24
+      x = _player_position:getX() - 12,
       y = _player_position:getY() - 12,
       w = 24,
-      h = 24
+      h = 49
    }
 
    -- simple rectangle collision check with tongue
@@ -392,13 +333,8 @@ function updateSpriteAttack(dt, current_attack_frame)
        tongue_rect.y < player_rect.y + player_rect.h and
        tongue_rect.y + tongue_rect.h > player_rect.y) then
 
-       -- cause damage to player when tongue hits
        damage(properties.damage, 0, 0)
-
-       -- mark that the tongue has hit the player
        _tongue_hit_player = true
-       
-       -- start retracting immediately if hit player
        _retracting_tongue = true
    end
 end
@@ -415,6 +351,7 @@ function smashed()
    startDying()
 end
 
+
 ------------------------------------------------------------------------------------------------------------------------
 function startDying()
    _state = STATE_DYING
@@ -423,15 +360,16 @@ function startDying()
 
    print("Frog: Starting to die")
 
-   -- make sure the thing stops to move
-   if _key_pressed then
-      keyReleased(Key["KeyLeft"])
-      keyReleased(Key["KeyRight"])
-   end
+--   -- make sure the thing stops to move
+--   if _key_pressed then
+--      keyReleased(Key["KeyLeft"])
+--      keyReleased(Key["KeyRight"])
+--   end
 
    -- when dying, stop causing damage to the player
    setDamage(0)
 end
+
 
 ------------------------------------------------------------------------------------------------------------------------
 function hit(damage_value)
@@ -440,9 +378,9 @@ function hit(damage_value)
       return
    end
 
-   -- need to store the current hit time
    _energy = _energy - damage_value
    print("Frog: Hit for " .. damage_value .. " damage, remaining energy: " .. _energy)
+
    if (_energy <= 0) then
       print("Frog: Energy depleted, starting to die")
       startDying()
@@ -481,18 +419,12 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function update(dt)
+
    _elapsed = _elapsed + dt
+
    updateState(dt)
    updateSprite(dt)
-
-   -- update key presses for movement
    updateKeysPressed(_key_pressed)
-   
-   -- If death animation is finished, remove the enemy
-   if _death_animation_finished then
-      -- This would typically trigger removal of the entity from the game
-      -- The exact method depends on the engine's API
-   end
 end
 
 
@@ -506,18 +438,35 @@ function keyPressed(key)
    _key_pressed = (_key_pressed | key)
 end
 
+
 ------------------------------------------------------------------------------------------------------------------------
 function keyReleased(key)
    _key_pressed = _key_pressed & (~key)
 end
 
+
 ------------------------------------------------------------------------------------------------------------------------
 function writeProperty(key, value)
+
    if (key == "alignment") then
       if (value == "right") then
          _alignment_offset = 3 * SPRITE_HEIGHT
          _points_left = false
+         _tongue_extension_y = 264
+         _tongue_tip_y = 264
+      else
+         _tongue_extension_y = 120
+         _tongue_tip_y = 120
       end
+      _tongue_tip_x = 312
+      _tongue_extension_x = 288
+      updateSpriteRect(
+         1,
+         _tongue_extension_x,
+         _tongue_extension_y,
+         24,
+         24
+      )
    elseif (key == "idle_anim_speed") then
       _idle_anim_speed = value
    elseif (key == "attack_anim_speed") then
@@ -543,12 +492,8 @@ function getIdleSpriteCoords()
    end
    
    local frame_index = math.floor(_animation_frame) % max_frames
-   
-   -- calculate sprite coordinates
    local x = frame_index * SPRITE_WIDTH
    local y = (cycle - 1) * SPRITE_HEIGHT
-   
-   -- Apply alignment offset for non-dying states
    y = y + _alignment_offset
    
    return x, y
@@ -591,24 +536,12 @@ end
 function getDyingSpriteCoords()
    local death_frame_index = math.floor(_death_animation_frame)
    
-   -- Calculate sprite coordinates for death animation
    local x = death_frame_index * SPRITE_WIDTH
-   local y = DEATH_ROW * SPRITE_HEIGHT  -- Use the death row (9th row, counting from 0)
+   local y = DEATH_ROW * SPRITE_HEIGHT
    
-   -- Apply alignment offset for death animation (same for both left and right)
    y = y + _alignment_offset
    
    return x, y
-end
-
-------------------------------------------------------------------------------------------------------------------------
--- function to update animation frames
-function updateAnimationFrames(dt, anim_speed_factor, is_death_animation)
-   if is_death_animation then
-      _death_animation_frame = _death_animation_frame + dt * 10.0  -- 10 fps base rate for death animation
-   else
-      _animation_frame = _animation_frame + dt * 10.0 * anim_speed_factor  -- 10 fps base rate
-   end
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -648,8 +581,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- function to update dying state
 function updateStateDying(dt)
-   -- update death animation frame
-   updateAnimationFrames(dt, 1.0, true)  -- 10 fps base rate for death animation
+   _death_animation_frame = _death_animation_frame + dt * 10.0  -- 10 fps base rate for death animation
    local death_frame_index = math.floor(_death_animation_frame)
 
    -- check if death animation is finished
@@ -667,7 +599,6 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- function to update attack state
 function updateStateAttack(dt)
-   -- increase the animation time based on dt
    _attack_animation_time = _attack_animation_time + dt
    
    -- return to idle only when tongue is fully retracted (back to scale 0)
@@ -681,9 +612,8 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- function to update idle state
 function updateStateIdle(dt)
-   -- increase the current frame based on dt
    local anim_speed_factor = _idle_anim_speed    -- idle animation speed
-   updateAnimationFrames(dt, anim_speed_factor, false)  -- 10 fps base rate
+   _animation_frame = _animation_frame + dt * 10.0 * anim_speed_factor  -- 10 fps base rate
 
    -- Check if an animation cycle has completed
    local current_frame_idx = math.floor(_animation_frame) % FRAME_COUNTS[CYCLE_IDLE]
@@ -703,12 +633,9 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- function to update blink state
 function updateStateBlinking(dt)
-   -- increase the current frame based on dt
    local anim_speed_factor = _blink_anim_speed   -- blink animation speed
-   updateAnimationFrames(dt, anim_speed_factor, false)  -- 10 fps base rate
-
-   -- update blinking state (to check if blink animation is complete)
+   _animation_frame = _animation_frame + dt * 10.0 * anim_speed_factor  -- 10 fps base rate
    updateBlinking()
-   
+
    return STATE_IDLE  -- return to idle state when blinking is done
 end
