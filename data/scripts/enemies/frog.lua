@@ -307,32 +307,21 @@ function updateSpriteAttack(dt)
    -- calculate the actual displayed tongue width based on scale
    local displayed_tongue_width = 24 * _tongue_scale  -- original width (24) scaled by current scale
 
-   -- check for collision between tongue and player
-   local tongue_rect = {
-      x = base_x - (displayed_tongue_width / 2),
-      y = base_y - 4,  -- half of original height (8)
-      w = displayed_tongue_width,
-      h = 8  -- original height
-   }
-
-   -- adjust the x position based on direction
+   -- check for collision between tongue and player using the engine's helper function
+   local tongue_x, tongue_y, tongue_w, tongue_h
+   
    if _points_left then
-      tongue_rect.x = base_x - displayed_tongue_width
+      tongue_x = base_x - displayed_tongue_width
+   else
+      tongue_x = base_x
    end
+   
+   tongue_y = base_y - 4  -- half of original height (8)
+   tongue_w = displayed_tongue_width
+   tongue_h = 8  -- original height
 
-   local player_rect = {
-      x = _player_position:getX() - 12,
-      y = _player_position:getY() - 12,
-      w = 24,
-      h = 49
-   }
-
-   -- simple rectangle collision check with tongue
-   if (tongue_rect.x < player_rect.x + player_rect.w and
-       tongue_rect.x + tongue_rect.w > player_rect.x and
-       tongue_rect.y < player_rect.y + player_rect.h and
-       tongue_rect.y + tongue_rect.h > player_rect.y) then
-
+   -- use the engine's intersectsWithPlayer function to check for collision
+   if intersectsWithPlayer(tongue_x, tongue_y, tongue_w, tongue_h) then
        damage(properties.damage, 0, 0)
        _tongue_hit_player = true
        _retracting_tongue = true
