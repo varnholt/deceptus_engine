@@ -39,10 +39,11 @@ CYCLE_ATTACK = 3
 ROW_OFFSET_RIGHT = 3
 FRAME_COUNTS = {8, 8, 6, 24}  -- Added 24 frames for dying animation
 DEATH_ROW = 9  -- Row index for death animation (counting from 0)
-DEBUG_ATTACK_OFFSET = 8 * 48  -- 8x48 px offset when attacking
+DEBUG_ATTACK_OFFSET = 0 * 48  -- 8x48 px offset when attacking
 TONGUE_PART_1 = {288, 96} -- height: 48px, width: 24px
 TONGUE_PART_2 = {312, 96} -- height: 48px, width: 24px
 
+MAX_TONGUE_SCALE = 5.0  -- Maximum scale factor for the tongue extension
 SPRITE_WIDTH = 48
 SPRITE_HEIGHT = 48
 
@@ -190,7 +191,7 @@ function updateState(dt)
       next_state = updateStateIdle(dt)
    end
 
-   next_state = checkAttackCondition()
+   next_state = checkAttackCondition(next_state)
 
    if (next_state ~= _state) then
 
@@ -274,54 +275,50 @@ function updateSpriteAttack(dt)
    -- calculate distance to player to determine tongue length
    local dist_to_player = math.abs(_player_position:getX() - _position:getX())
 
-   local base_x, base_y
-   base_x = _position:getX()
-   base_y = _position:getY()
-   setSpriteOffset(1, base_x, base_y)
-
-   -- extend or retract the tongue based on state
+   -- extend or retract
    if not _retracting_tongue then
-      -- extending phase: scale the sprite over time from current scale to 5
-      _tongue_scale = _tongue_scale + dt * 1  -- increment by dt * 10
-      if _tongue_scale >= 5.0 and not _retracting_tongue then
-         _tongue_scale = 5.0  -- clamp at 5
+      -- extending
+      _tongue_scale = _tongue_scale + dt * 1
+      if _tongue_scale >= MAX_TONGUE_SCALE and not _retracting_tongue then
+         _tongue_scale = MAX_TONGUE_SCALE
          _tongue_fully_extended = true
          _retracting_tongue = true
       end
    else
-      -- retracting phase: scale the sprite back to 0
-      _tongue_scale = _tongue_scale - dt * 1  -- decrement by dt * 10
+      -- retract
+      _tongue_scale = _tongue_scale - dt * 1
       if _tongue_scale <= 0.0 then
          _tongue_scale = 0.0
       end
    end
 
-   -- apply the scale
-   setSpriteScale(1, _tongue_scale, 1.0)  -- scale only horizontally
+   setSpriteScale(1, _tongue_scale, 1.0)
 
-   -- debug output for tongue scale and frame
-   if _tongue_scale > 0 then
-      print("Frog tongue scale: " .. _tongue_scale .. ", frame: " .. current_attack_frame)
-   end
+--   -- debug output for tongue scale and frame
+--   if _tongue_scale > 0 then
+--      print("Frog tongue scale: " .. _tongue_scale .. ", frame: " .. current_attack_frame)
+--   end
 
    -- calculate the actual displayed tongue width based on scale
-   local displayed_tongue_width = 24 * _tongue_scale  -- original width (24) scaled by current scale
+   local displayed_tongue_width = 24 * _tongue_scale
 
    -- check for collision between tongue and player using the engine's helper function
    local tongue_x, tongue_y, tongue_w, tongue_h
-   
+
+   setSpriteOffset(1, 0, 0)
+
+   local base_x, base_y
+   base_x = _position:getX()
+   base_y = _position:getY()
+
    if _points_left then
       tongue_x = base_x - displayed_tongue_width
    else
       tongue_x = base_x
    end
-   
-   tongue_y = base_y - 4  -- half of original height (8)
-   tongue_w = displayed_tongue_width
-   tongue_h = 8  -- original height
 
    -- use the engine's intersectsWithPlayer function to check for collision
-   if intersectsWithPlayer(tongue_x, tongue_y, tongue_w, tongue_h) then
+   if intersectsWithPlayer(tongue_x, base_y, displayed_tongue_width, 24) then
        damage(properties.damage, 0, 0)
        _tongue_hit_player = true
        _retracting_tongue = true
@@ -497,15 +494,17 @@ function getAttackSpriteCoords()
    local anim_speed_factor = _attack_anim_speed
    local frame_rate = 10.0  -- Base frame rate
    local frame_index = math.floor(_attack_animation_time * frame_rate * anim_speed_factor)
-   
+
    -- Determine the current animation frame based on the tongue state
-   if _retracting_tongue then
-      -- During retraction, we want to play the animation frames in reverse
-      -- Play the animation in reverse, starting from the last frame
-      frame_index = max_frames - (frame_index % (max_frames + 1))
+   if _retracting_tongue and _tongue_scale <= 0.0 then
+      -- When fully retracted after being in retraction, go back to frame 0
+      frame_index = 0
+   elseif _retracting_tongue or _tongue_fully_extended then
+      -- When extending, retracting, or fully extended, stay on the last frame
+      frame_index = max_frames
    else
-      -- Going forward from 0 to max
-      frame_index = frame_index % (max_frames + 1)
+      -- Going forward from 0 to max at regular speed during initial animation, then stay at max
+      frame_index = math.min(frame_index, max_frames)
    end
 
    -- calculate sprite coordinates
