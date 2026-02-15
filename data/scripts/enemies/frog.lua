@@ -48,8 +48,6 @@ ROW_OFFSET_RIGHT = 3
 FRAME_COUNTS = {8, 8, 6, 24}  -- Added 24 frames for dying animation
 DEATH_ROW = 9  -- Row index for death animation (counting from 0)
 DEBUG_ATTACK_OFFSET = 0 * 48  -- 8x48 px offset when attacking
-TONGUE_PART_1 = {288, 96} -- height: 48px, width: 24px
-TONGUE_PART_2 = {312, 96} -- height: 48px, width: 24px
 
 MAX_TONGUE_SCALE = 5.0  -- Maximum scale factor for the tongue extension
 SPRITE_WIDTH = 48
@@ -69,6 +67,7 @@ _elapsed = 0
 _alignment_offset = 0
 _state = STATE_IDLE
 _points_left = true
+_tongue_direction_multiplier = -1  -- -1 for left, 1 for right
 _smashed = false
 _animation_frame = 0
 _prev_state = STATE_IDLE
@@ -132,15 +131,11 @@ function initialize()
 
    -- initialize sprite slot for stretched tongue (hidden by default)
    addSprite()
-   updateSpriteRect(
-      1,           -- sprite slot for tongue
-      240,         -- x in sprite sheet for tongue
-      80,          -- y in sprite sheet for tongue
-      24,          -- width in sprite sheet
-      16           -- height in sprite sheet
-   )
-
    setSpriteOffset(1, 24, 12)
+
+   -- tip of the tongue
+   addSprite()
+   setSpriteOffset(2, 24, 12)
 
    -- hide tongue initially
    setSpriteScale(1, 0, 0)
@@ -346,6 +341,10 @@ function updateSpriteAttack(dt)
        _tongue_hit_player = true
        _retracting_tongue = true
    end
+
+   local tip_offset_x = _tongue_direction_multiplier * (24 * _tongue_scale) + _tongue_direction_multiplier  -- Use multiplier for direction and add/subtract 1
+
+   setSpriteOffset(2, tip_offset_x, 12)
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -458,17 +457,22 @@ end
 function writeProperty(key, value)
 
    if (key == "alignment") then
+
+      _tongue_tip_x = 312
+      _tongue_extension_x = 288
+
       if (value == "right") then
          _alignment_offset = 3 * SPRITE_HEIGHT
          _points_left = false
+         _tongue_direction_multiplier = 1  -- 1 for right
          _tongue_extension_y = 264
          _tongue_tip_y = 264
       else
+         _tongue_direction_multiplier = -1  -- -1 for left (default)
          _tongue_extension_y = 120
          _tongue_tip_y = 120
       end
-      _tongue_tip_x = 312
-      _tongue_extension_x = 288
+
       updateSpriteRect(
          1,
          _tongue_extension_x,
@@ -476,6 +480,15 @@ function writeProperty(key, value)
          24,
          24
       )
+
+      updateSpriteRect(
+         2,
+         _tongue_tip_x,
+         _tongue_tip_y,
+         24,
+         24
+      )
+
    elseif (key == "idle_anim_speed") then
       _idle_anim_speed = value
    elseif (key == "attack_anim_speed") then
