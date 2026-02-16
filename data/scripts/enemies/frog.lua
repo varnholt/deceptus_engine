@@ -88,6 +88,8 @@ _retracting_tongue = false        -- Flag to track if tongue is retracting
 _attack_animation_time = 0.0      -- Time elapsed in the current attack animation phase
 _attack_animation_time_at_full_retraction = nil  -- Time when tongue became fully retracted
 _backward_animation_completed = false  -- Flag to track if backward animation has completed
+_attack_animation_speed = 10.0
+_tongue_speed = 10.0
 
 -- health and death variables
 _energy = 30  -- frog's health points
@@ -131,12 +133,12 @@ function initialize()
 
    -- initialize sprite slot for stretched tongue (hidden by default)
    addSprite()
-   setSpriteOffset(1, 24, 12)
+   setSpriteOffset(1, 36, 12)
    setSpriteScale(1, 0, 0)
 
    -- tip of the tongue
    addSprite()
-   setSpriteOffset(2, 24, 12)
+   setSpriteOffset(2, 36, 12)
    setSpriteVisible(2, false)
 
    updateSprite(0.0)
@@ -280,7 +282,7 @@ function updateSpriteAttack(dt)
    local dist_to_player = math.abs(_player_position:getX() - _position:getX())
 
    -- Calculate the current frame index to determine if animation has completed
-   local current_frame_index = math.floor(_attack_animation_time * 10.0 * _attack_anim_speed)
+   local current_frame_index = math.floor(_attack_animation_time * _attack_animation_speed * _attack_anim_speed)
    local max_frames = FRAME_COUNTS[CYCLE_ATTACK] - 1  -- Max frames for attack animation
    local animation_completed = current_frame_index >= max_frames
 
@@ -288,7 +290,7 @@ function updateSpriteAttack(dt)
    if not _retracting_tongue then
       -- Only start extending the tongue after the attack animation has completed
       if animation_completed then
-         _tongue_scale = _tongue_scale + dt * 1
+         _tongue_scale = _tongue_scale + dt * _tongue_speed
          if _tongue_scale >= MAX_TONGUE_SCALE and not _retracting_tongue then
             _tongue_scale = MAX_TONGUE_SCALE
             _tongue_fully_extended = true
@@ -297,7 +299,7 @@ function updateSpriteAttack(dt)
       end
    else
       -- retract
-      _tongue_scale = _tongue_scale - dt * 1
+      _tongue_scale = _tongue_scale - dt * _tongue_speed
       if _tongue_scale <= 0.0 then
          _tongue_scale = 0.0
          -- Record the time when tongue became fully retracted (if not already recorded)
@@ -308,9 +310,9 @@ function updateSpriteAttack(dt)
    end
 
    setSpriteScale(1, _tongue_scale, 1.0)
-   setSpriteVisible(2, animation_completed)
+   setSpriteVisible(2, _tongue_scale >= 0.01)
 
-   print(" " .. current_attack_frame .. "/" .. max_frames .. " -> " .. tostring(animation_completed))
+   print(" " .. tostring(_tongue_scale <= 0.01))
 
 --   -- debug output for tongue scale and frame
 --   if _tongue_scale > 0 then
@@ -340,7 +342,7 @@ function updateSpriteAttack(dt)
        _retracting_tongue = true
    end
 
-   local tip_offset_x = _tongue_direction_multiplier * (24 * _tongue_scale) + _tongue_direction_multiplier  -- Use multiplier for direction and add/subtract 1
+   local tip_offset_x = _tongue_direction_multiplier * (24 * _tongue_scale) + 16 * _tongue_direction_multiplier  -- Use multiplier for direction and add/subtract 1
 
    setSpriteOffset(2, tip_offset_x, 12)
 end
@@ -517,9 +519,7 @@ function getAttackSpriteCoords()
    local max_frames = FRAME_COUNTS[cycle] - 1
 
    -- Calculate the frame index based on animation time and speed
-   local anim_speed_factor = _attack_anim_speed
-   local frame_rate = 10.0  -- Base frame rate
-   local frame_index = math.floor(_attack_animation_time * frame_rate * anim_speed_factor)
+   local frame_index = math.floor(_attack_animation_time * _attack_animation_speed * _attack_anim_speed)
 
    -- Determine the current animation frame based on the tongue state
    if _retracting_tongue and _tongue_scale <= 0.0 and not _backward_animation_completed then
@@ -529,9 +529,7 @@ function getAttackSpriteCoords()
       local time_since_full_retraction = math.max(0, _attack_animation_time - (_attack_animation_time_at_full_retraction or _attack_animation_time))
 
       -- Calculate frame index going backwards from max to 0 based on time since full retraction
-      local anim_speed_factor = _attack_anim_speed
-      local frame_rate = 10.0  -- Base frame rate
-      local frames_since_full_retraction = math.floor(time_since_full_retraction * frame_rate * anim_speed_factor)
+      local frames_since_full_retraction = math.floor(time_since_full_retraction * _attack_animation_speed * _attack_anim_speed)
       frame_index = math.max(0, max_frames - frames_since_full_retraction)
       
       -- Check if backward animation has completed (reached frame 0)
