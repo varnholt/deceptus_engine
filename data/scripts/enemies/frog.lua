@@ -40,10 +40,6 @@ v2d = require "data/scripts/enemies/vectorial2"
 -- 4. when the tongue is fully retracted, the mouth animation plays backwards from the last frame to frame 0 (closed)
 -- 5. once the backward animation reaches frame 0, it stays there until the state changes back to idle
 
-
-CYCLE_IDLE = 1
-CYCLE_BLINK = 2
-CYCLE_ATTACK = 3
 ROW_OFFSET_RIGHT = 3
 FRAME_COUNTS = {8, 8, 6, 24}  -- Added 24 frames for dying animation
 DEATH_ROW = 9  -- Row index for death animation (counting from 0)
@@ -56,6 +52,10 @@ SPRITE_HEIGHT = 48
 STATE_IDLE = 1
 STATE_ATTACK = 2
 STATE_DYING = 3
+
+CYCLE_IDLE = 1
+CYCLE_BLINK = 2
+CYCLE_ATTACK = 3
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -189,8 +189,6 @@ function updateState(dt)
       next_state = STATE_DYING
    elseif _state == STATE_ATTACK then
       next_state = updateStateAttack(dt)
-   elseif _is_blinking then
-      next_state = updateStateBlinking(dt)
    else
       next_state = updateStateIdle(dt)
    end
@@ -282,9 +280,7 @@ function updateSpriteAttack(dt)
    local dist_to_player = math.abs(_player_position:getX() - _position:getX())
 
    -- Calculate the current frame index to determine if animation has completed
-   local anim_speed_factor = _attack_anim_speed
-   local frame_rate = 10.0  -- Base frame rate
-   local current_frame_index = math.floor(_attack_animation_time * frame_rate * anim_speed_factor)
+   local current_frame_index = math.floor(_attack_animation_time * 10.0 * _attack_anim_speed)
    local max_frames = FRAME_COUNTS[CYCLE_ATTACK] - 1  -- Max frames for attack animation
    local animation_completed = current_frame_index >= max_frames
 
@@ -308,13 +304,13 @@ function updateSpriteAttack(dt)
          if not _attack_animation_time_at_full_retraction then
             _attack_animation_time_at_full_retraction = _attack_animation_time
          end
-         -- When fully retracted, allow transition back to idle state
       end
    end
-   setSpriteScale(1, _tongue_scale, 1.0)
 
-   -- Show tongue tip only when maximum attack frame is reached (animation completed), hide in all other situations
+   setSpriteScale(1, _tongue_scale, 1.0)
    setSpriteVisible(2, animation_completed)
+
+   print(" " .. current_attack_frame .. "/" .. max_frames .. " -> " .. tostring(animation_completed))
 
 --   -- debug output for tongue scale and frame
 --   if _tongue_scale > 0 then
@@ -367,14 +363,6 @@ function startDying()
    _state = STATE_DYING
    _death_animation_frame = 0
    _elapsed = 0.0
-
-   print("Frog: Starting to die")
-
---   -- make sure the thing stops to move
---   if _key_pressed then
---      keyReleased(Key["KeyLeft"])
---      keyReleased(Key["KeyRight"])
---   end
 
    -- when dying, stop causing damage to the player
    setDamage(0)
@@ -526,7 +514,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function getAttackSpriteCoords()
    local cycle = CYCLE_ATTACK
-   local max_frames = FRAME_COUNTS[cycle] - 1  -- Adjust to 0-indexed
+   local max_frames = FRAME_COUNTS[cycle] - 1
 
    -- Calculate the frame index based on animation time and speed
    local anim_speed_factor = _attack_anim_speed
@@ -535,9 +523,11 @@ function getAttackSpriteCoords()
 
    -- Determine the current animation frame based on the tongue state
    if _retracting_tongue and _tongue_scale <= 0.0 and not _backward_animation_completed then
+
       -- When fully retracted after being in retraction, animate backwards from last frame to frame 0
       -- Calculate how much time has passed since tongue scale became <= 0
       local time_since_full_retraction = math.max(0, _attack_animation_time - (_attack_animation_time_at_full_retraction or _attack_animation_time))
+
       -- Calculate frame index going backwards from max to 0 based on time since full retraction
       local anim_speed_factor = _attack_anim_speed
       local frame_rate = 10.0  -- Base frame rate
@@ -585,40 +575,6 @@ function getDyingSpriteCoords()
 end
 
 ------------------------------------------------------------------------------------------------------------------------
--- function to update blinking logic when an idle animation cycle completes
-function updateBlinkingOnCycleComplete()
-   -- only handle blinking when in idle state and not already blinking
-   if _state ~= STATE_IDLE or _is_blinking then
-      return
-   end
-
-   -- note that during idle, the frog can also blink
-   -- i'd just go by random and pick that animation cycle with a change from 1:20
-   if math.random(1, 20) == 1 then
-      _is_blinking = true
-      _blink_timer = 0
-      print("Frog: Blinking started")
-   end
-end
-
-------------------------------------------------------------------------------------------------------------------------
--- function to update blinking state (when already blinking)
-function updateBlinking()
-   -- only handle blinking when in idle state and currently blinking
-   if _state ~= STATE_IDLE or not _is_blinking then
-      return
-   end
-
-   -- handle blinking state - finish when last frame is reached
-   -- check if we've reached the last frame of the blink animation
-   local max_blink_frames = FRAME_COUNTS[CYCLE_BLINK]
-   if _animation_frame >= max_blink_frames then
-      _is_blinking = false
-      print("Frog: Blinking stopped")
-   end
-end
-
-------------------------------------------------------------------------------------------------------------------------
 -- function to update dying state
 function updateStateDying(dt)
    _death_animation_frame = _death_animation_frame + dt * 10.0  -- 10 fps base rate for death animation
@@ -643,10 +599,6 @@ function updateStateAttack(dt)
 
    -- return to idle only when tongue is fully retracted AND backward animation is completed
    if _tongue_scale <= 0.0 and _retracting_tongue and _backward_animation_completed then
-      -- Reset state variables when returning to idle
-      _attack_animation_time = 0.0
-      _attack_animation_time_at_full_retraction = nil
-      _backward_animation_completed = false
       return STATE_IDLE
    else
       return STATE_ATTACK
@@ -665,8 +617,7 @@ function updateStateIdle(dt)
 
    -- If we've gone from a higher frame number to a lower one, a cycle has completed
    if prev_frame_idx > current_frame_idx and prev_frame_idx >= FRAME_COUNTS[CYCLE_IDLE] - 1 then
-      -- Call the blinking logic when an idle animation cycle completes
-      updateBlinkingOnCycleComplete()
+      _is_blinking = math.random(1, 20) == 1
    end
 
    _prev_animation_frame = _animation_frame
@@ -674,12 +625,4 @@ function updateStateIdle(dt)
    return STATE_IDLE
 end
 
-------------------------------------------------------------------------------------------------------------------------
--- function to update blink state
-function updateStateBlinking(dt)
-   local anim_speed_factor = _blink_anim_speed   -- blink animation speed
-   _animation_frame = _animation_frame + dt * 10.0 * anim_speed_factor  -- 10 fps base rate
-   updateBlinking()
 
-   return STATE_IDLE  -- return to idle state when blinking is done
-end
