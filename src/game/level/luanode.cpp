@@ -2835,13 +2835,8 @@ void LuaNode::setSpriteVisible(int32_t id, bool visible)
 {
    if (id >= 0 && id < static_cast<int32_t>(_sprites.size()))
    {
-      // Get the current color of the sprite
       sf::Color current_color = _sprites[id]->getColor();
-      
-      // Set the alpha channel to 0 (invisible) or 255 (fully visible)
       current_color.a = visible ? 255 : 0;
-      
-      // Apply the new color with updated alpha
       _sprites[id]->setColor(current_color);
    }
 }
@@ -2934,8 +2929,7 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
    if (_hit_time.has_value())
    {
-      // using namespace std::chrono_literals;
-      std::chrono::duration<float> hit_duration_s = (std::chrono::high_resolution_clock::now() - _hit_time.value());
+      const auto hit_duration_s = (std::chrono::high_resolution_clock::now() - _hit_time.value());
       constexpr auto hit_duration_max_s = 0.3f;
       if (hit_duration_s.count() > hit_duration_max_s)
       {
@@ -2959,6 +2953,12 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    for (auto i = 0u; i < _sprites.size(); i++)
    {
       auto& sprite = _sprites[i];
+
+      if (sprite->getColor().a == 0)
+      {
+         continue;
+      }
+
       const auto& offset = _sprite_offsets_px[i];
       const auto center = sf::Vector2f(sprite->getTextureRect().size.x / 2.0f, sprite->getTextureRect().size.y / 2.0f);
       sprite->setPosition(_position_px - center + offset);
