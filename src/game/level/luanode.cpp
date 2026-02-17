@@ -390,6 +390,18 @@ int32_t intersectsWithPlayer(lua_State* state)
 }
 
 /**
+ * @brief isPlayerDead check if the player is dead
+ * @param state lua state
+ * @return 1 if player is dead, 0 if alive
+ */
+int32_t isPlayerDead(lua_State* state)
+{
+   const auto player = Player::getCurrent();
+   lua_pushboolean(state, player ? player->isDead() : false);
+   return 1;
+}
+
+/**
  * @brief queryAABB do an aabb query
  * @param state lua state
  *    param 1: aabb x1
@@ -1905,6 +1917,7 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "getGravity", ::getGravity);
    lua_register(_lua_state, "intersectsWithPlayer", ::intersectsWithPlayer);
    lua_register(_lua_state, "isPhsyicsPathClear", ::isPhsyicsPathClear);
+   lua_register(_lua_state, "isPlayerDead", ::isPlayerDead);
    lua_register(_lua_state, "log", ::debug);
    lua_register(_lua_state, "makeDynamic", ::makeDynamic);
    lua_register(_lua_state, "makeStatic", ::makeStatic);
