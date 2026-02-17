@@ -275,6 +275,8 @@ set(GAME_FILES
     src/game/level/luaconstants.h
     src/game/level/luainterface.cpp
     src/game/level/luainterface.h
+    src/game/level/luanodecallbacks.cpp
+    src/game/level/luanodecallbacks.h
     src/game/level/luanode.cpp
     src/game/level/luanode.h
     src/game/level/parsedata.cpp
