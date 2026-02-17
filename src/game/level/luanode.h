@@ -149,6 +149,12 @@ struct LuaNode : public GameMechanism, public GameNode
    //! set a sprite's visibility
    void setSpriteVisible(int32_t id, bool visible);
 
+   //! set visibility
+   void setVisible(bool visible);
+
+   //! set keys pressed
+   void setKeysPressed(int32_t keys);
+
    //! update a debug rect
    void updateDebugRect(int32_t index, float left_px, float top_px, float width_px, float height_px);
 
@@ -166,6 +172,70 @@ struct LuaNode : public GameMechanism, public GameNode
 
    //! play a sample
    void playSample(const std::string& sample, float volume);
+
+   //! check if a rectangle intersects with the player's bounding rect
+   bool intersectsPlayer(float x, float y, float width, float height);
+
+   //! check if the player is dead
+   bool checkPlayerDead() const;
+
+   //! check if a physics path is clear
+   bool isPhysicsPathClear(int32_t x0, int32_t y0, int32_t x1, int32_t y1) const;
+
+   //! get the world's gravity
+   float getWorldGravity() const;
+
+   //! add a weapon
+   void addWeaponFromScript(
+      WeaponType weapon_type,
+      int fire_interval,
+      int damage_value,
+      float gravity_scale,
+      float radius,
+      const std::vector<b2Vec2>& polygon_points
+   );
+
+   //! set projectile texture
+   void setProjectileTexture(uint32_t weapon_index, const std::string& path, const sf::Rect<int32_t>& rect);
+
+   //! set projectile animation
+   void setProjectileAnimation(
+      uint32_t weapon_index,
+      const std::string& path,
+      uint32_t frame_width,
+      uint32_t frame_height,
+      float frame_origin_x,
+      float frame_origin_y,
+      float time_per_frame_s,
+      uint32_t frame_count,
+      uint32_t frames_per_row,
+      uint32_t start_frame
+   );
+
+   //! start a timer
+   void startTimer(int32_t delay, int32_t timer_id);
+
+   //! register hit animation
+   void registerHitAnimation(
+      uint32_t weapon_index,
+      const std::string& path,
+      uint32_t frame_width,
+      uint32_t frame_height,
+      float time_per_frame_s,
+      uint32_t frame_count,
+      uint32_t frames_per_row,
+      uint32_t start_frame
+   );
+
+   //! register hit samples
+   void registerHitSamples(const std::string& path, const std::vector<std::pair<std::string, float>>& samples);
+
+   //! play detonation animation
+   void playDetonationAnimationFromScript(
+      float x,
+      float y,
+      const std::vector<DetonationAnimation::DetonationRing>& rings
+   );
 
    //! node is dead, reset its body, set dead flag
    void die();
