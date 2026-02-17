@@ -275,6 +275,8 @@ set(GAME_FILES
     src/game/level/luaconstants.h
     src/game/level/luainterface.cpp
     src/game/level/luainterface.h
+    src/game/level/luanodecallbacks.cpp
+    src/game/level/luanodecallbacks.h
     src/game/level/luanode.cpp
     src/game/level/luanode.h
     src/game/level/parsedata.cpp
@@ -711,6 +713,7 @@ add_executable(
     data/scripts/enemies/deprecated_endboss_1.lua
     data/scripts/enemies/deprecated_klonk.lua
     data/scripts/enemies/deprecated_skeleton.lua
+    data/scripts/enemies/frog.lua
     data/scripts/enemies/ghost.lua
     data/scripts/enemies/helpers.lua
     data/scripts/enemies/interpolation.lua
