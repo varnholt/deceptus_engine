@@ -45,6 +45,8 @@ FRAME_COUNTS = {8, 8, 6, 24}  -- Added 24 frames for dying animation
 DEATH_ROW = 9  -- Row index for death animation (counting from 0)
 DEBUG_ATTACK_OFFSET = 0 * 48  -- 8x48 px offset when attacking
 
+MIN_ATTACK_WAIT = 1.5  -- Minimum wait time in seconds between attacks
+
 MAX_TONGUE_SCALE = 5.0  -- Maximum scale factor for the tongue extension
 SPRITE_WIDTH = 48
 SPRITE_HEIGHT = 48
@@ -90,6 +92,7 @@ _attack_animation_time_at_full_retraction = nil  -- Time when tongue became full
 _backward_animation_completed = false  -- Flag to track if backward animation has completed
 _attack_animation_speed = 10.0
 _tongue_speed = 10.0
+_last_attack_time = 0.0  -- Time of the last attack
 
 -- health and death variables
 _energy = 30  -- frog's health points
@@ -162,7 +165,11 @@ function checkAttackCondition(next_state)
 
       local tongue_retracted = _tongue_scale <= 0.01
 
-      if (y_in_range and x_in_range and tongue_retracted) then
+      -- check minimum wait time between attacks
+      local time_since_last_attack = _elapsed - _last_attack_time
+      local can_attack = time_since_last_attack >= MIN_ATTACK_WAIT
+
+      if (y_in_range and x_in_range and tongue_retracted and can_attack) then
          if (
             isPhsyicsPathClear(
                _position:getX(),
@@ -214,6 +221,11 @@ function updateState(dt)
       _attack_animation_time = 0.0
       _attack_animation_time_at_full_retraction = nil
       _backward_animation_completed = false
+
+      -- record attack start time when transitioning to attack state
+      if next_state == STATE_ATTACK then
+         _last_attack_time = _elapsed
+      end
    end
 
    if _death_animation_finished then
@@ -312,12 +324,7 @@ function updateSpriteAttack(dt)
    setSpriteScale(1, _tongue_scale, 1.0)
    setSpriteVisible(2, _tongue_scale >= 0.01)
 
-   print(" " .. tostring(_tongue_scale <= 0.01))
-
---   -- debug output for tongue scale and frame
---   if _tongue_scale > 0 then
---      print("Frog tongue scale: " .. _tongue_scale .. ", frame: " .. current_attack_frame)
---   end
+   -- print(" " .. tostring(_tongue_scale <= 0.01))
 
    -- calculate the actual displayed tongue width based on scale
    local displayed_tongue_width = 24 * _tongue_scale
