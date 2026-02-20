@@ -41,8 +41,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 -- 5. once the backward animation reaches frame 0, it stays there until the state changes back to idle
 
 ROW_OFFSET_RIGHT = 3
-FRAME_COUNTS = {8, 8, 6, 24}  -- Added 24 frames for dying animation
-DEATH_ROW = 9  -- Row index for death animation (counting from 0)
+FRAME_COUNTS = {8, 8, 6, 19}
 DEBUG_ATTACK_OFFSET = 0 * 48  -- 8x48 px offset when attacking
 
 MIN_ATTACK_WAIT = 1.5  -- Minimum wait time in seconds between attacks
@@ -51,6 +50,10 @@ MAX_TONGUE_SCALE = 5.0  -- Maximum scale factor for the tongue extension
 SPRITE_WIDTH = 48
 SPRITE_HEIGHT = 48
 
+SPRITE_WIDTH_DYING = 72
+SPRITE_HEIGHT_DYING = 72
+SPRITE_ROW_DYING = 6
+
 STATE_IDLE = 1
 STATE_ATTACK = 2
 STATE_DYING = 3
@@ -58,6 +61,7 @@ STATE_DYING = 3
 CYCLE_IDLE = 1
 CYCLE_BLINK = 2
 CYCLE_ATTACK = 3
+CYCLE_DYING = 4
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -104,7 +108,7 @@ _death_animation_frame = 0
 _death_animation_finished = false
 
 -- sprite row tracking for debug
-_prev_sprite_row = nil
+_prev_log_sprite_row = nil
 
 -- animation tracking
 _prev_animation_frame = 0
@@ -119,7 +123,7 @@ _tongue_tip_y = 120
 ------------------------------------------------------------------------------------------------------------------------
 properties = {
    sprite = "data/sprites/enemy_frog.png",
-   damage = 4,
+   damage = 1,
    smash = true,
    velocity_walk_max = 0.0,  -- frogs don't walk, so set to 0
    acceleration_ground = 0.0  -- frogs don't accelerate, so set to 0
@@ -149,6 +153,7 @@ function initialize()
 end
 
 
+------------------------------------------------------------------------------------------------------------------------
 function checkAttackCondition(next_state)
 
    -- only check for attack transition if we're in a state that allows it
@@ -189,13 +194,24 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
+function resetOnStateTransition()
+   _animation_frame = 0
+   _tongue_scale = 0.0
+   _tongue_fully_extended = false
+   _tongue_hit_player = false
+   _retracting_tongue = false
+   _attack_animation_time = 0.0
+   _attack_animation_time_at_full_retraction = nil
+   _backward_animation_completed = false
+end
+
+------------------------------------------------------------------------------------------------------------------------
 function updateState(dt)
 
    local next_state
     
    if _state == STATE_DYING then
-      updateStateDying(dt)
-      next_state = STATE_DYING
+      next_state = updateStateDying(dt)
    elseif _state == STATE_ATTACK then
       next_state = updateStateAttack(dt)
    else
@@ -212,17 +228,8 @@ function updateState(dt)
       local state_names = {[STATE_IDLE] = "IDLE", [STATE_ATTACK] = "ATTACK", [STATE_DYING] = "DYING"}
       print("Frog: State changed from " .. state_names[_prev_state] .. " to " .. state_names[_state])
 
-      -- reset all on each state transition
-      _animation_frame = 0
-      _tongue_scale = 0.0
-      _tongue_fully_extended = false
-      _tongue_hit_player = false
-      _retracting_tongue = false
-      _attack_animation_time = 0.0
-      _attack_animation_time_at_full_retraction = nil
-      _backward_animation_completed = false
+      resetOnStateTransition()
 
-      -- record attack start time when transitioning to attack state
       if next_state == STATE_ATTACK then
          _last_attack_time = _elapsed
       end
@@ -238,9 +245,9 @@ function logSprite(dt)
 
    local current_row = math.floor(y / SPRITE_HEIGHT)
 
-   if _prev_sprite_row ~= current_row then
+   if _prev_log_sprite_row ~= current_row then
 
-      _prev_sprite_row = current_row
+      _prev_log_sprite_row = current_row
 
       local state_names = {[STATE_IDLE] = "IDLE", [STATE_ATTACK] = "ATTACK", [STATE_DYING] = "DYING"}
       local cycle_names = {[CYCLE_IDLE] = "IDLE", [CYCLE_BLINK] = "BLINK", [CYCLE_ATTACK] = "ATTACK"}
@@ -262,21 +269,23 @@ function updateSprite(dt)
 
    local x = 0
    local y = 0
+   local width = 0
+   local height = 0
 
    if _state == STATE_DYING then
-      x, y = getDyingSpriteCoords()
+      x, y, width, height = getDyingSpriteCoords()
    elseif _state == STATE_ATTACK then
-      x, y = getAttackSpriteCoords()
+      x, y, width, height = getAttackSpriteCoords()
    elseif _state == STATE_IDLE then
-      x, y = getIdleSpriteCoords()
+      x, y, width, height = getIdleSpriteCoords()
    end
 
    updateSpriteRect(
       0,
       x,
       y,
-      SPRITE_WIDTH,
-      SPRITE_HEIGHT
+      width,
+      height
    )
 
    if _state == STATE_ATTACK then
@@ -361,8 +370,9 @@ function smashed()
       return
    end
 
-   _smashed = true
    print("Frog: Smashed, starting to die")
+
+   _smashed = true
    startDying()
 end
 
@@ -372,6 +382,9 @@ function startDying()
    _state = STATE_DYING
    _death_animation_frame = 0
    _elapsed = 0.0
+   setSpriteOffset(1, 36, 0)
+   setSpriteVisible(1, false) -- hide the tongue
+   setSpriteVisible(2, false) -- hide the tongue
 
    -- when dying, stop causing damage to the player
    setDamage(0)
@@ -517,7 +530,7 @@ function getIdleSpriteCoords()
    local y = (cycle - 1) * SPRITE_HEIGHT
    y = y + _alignment_offset
    
-   return x, y
+   return x, y, SPRITE_WIDTH, SPRITE_WIDTH
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -564,37 +577,34 @@ function getAttackSpriteCoords()
    -- Apply alignment offset for non-dying states
    y = y + _alignment_offset
 
-   return x, y
+   return x, y, SPRITE_WIDTH, SPRITE_HEIGHT
 end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getDyingSpriteCoords()
    local death_frame_index = math.floor(_death_animation_frame)
    
-   local x = death_frame_index * SPRITE_WIDTH
-   local y = DEATH_ROW * SPRITE_HEIGHT
-   
-   y = y + _alignment_offset
-   
-   return x, y
+   local x = death_frame_index * SPRITE_WIDTH_DYING
+   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING
+   return x, y, SPRITE_WIDTH_DYING, SPRITE_HEIGHT_DYING
 end
 
 ------------------------------------------------------------------------------------------------------------------------
 -- function to update dying state
 function updateStateDying(dt)
-   _death_animation_frame = _death_animation_frame + dt * 10.0  -- 10 fps base rate for death animation
+   _death_animation_frame = _death_animation_frame + dt * 10.0
    local death_frame_index = math.floor(_death_animation_frame)
 
    -- check if death animation is finished
-   if death_frame_index >= FRAME_COUNTS[4] then  -- FRAME_COUNTS[4] corresponds to death animation frames
+   if death_frame_index >= FRAME_COUNTS[CYCLE_DYING] then
       if not _death_animation_finished then
          _death_animation_finished = true
-         _dead = true  -- mark as truly dead after animation finishes
+         _dead = true
          print("Frog: Death animation finished, frog is now dead")
       end
    end
    
-   return STATE_DYING  -- stay in dying state
+   return STATE_DYING
 end
 
 ------------------------------------------------------------------------------------------------------------------------
