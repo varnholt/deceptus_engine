@@ -330,37 +330,37 @@ function updateSpriteAttack(dt)
       end
    end
 
-   setSpriteScale(1, _tongue_scale, 1.0)
-   setSpriteVisible(2, _tongue_scale >= 0.01)
-
    -- print(" " .. tostring(_tongue_scale <= 0.01))
 
    -- calculate the actual displayed tongue width based on scale
    local displayed_tongue_width = 24 * _tongue_scale
 
-   -- check for collision between tongue and player using the engine's helper function
-   local tongue_x, tongue_y, tongue_w, tongue_h
-
    local base_x, base_y
    base_x = _position:getX()
    base_y = _position:getY()
+   local tongue_tip_offset_x = 0
+   local tongue_base_offset_x = 36
 
    if _points_left then
-      tongue_x = base_x - displayed_tongue_width
-   else
-      tongue_x = base_x
+      tongue_tip_offset_x = -displayed_tongue_width
+      tongue_base_offset_x = 0
    end
 
-   -- use the engine's intersectsWithPlayer function to check for collision
+   local tongue_x = base_x + tongue_tip_offset_x
+
+   local tip_offset_x = _tongue_direction_multiplier * ((24 * _tongue_scale) + 16)
+
+   setSpriteOffset(1, tongue_base_offset_x, 12)
+   setSpriteScale(1, _tongue_direction_multiplier * _tongue_scale, 1.0)
+   setSpriteOffset(2, tip_offset_x, 12)
+   setSpriteVisible(2, _tongue_scale >= 0.01)
+
+   -- check for collision with player
    if intersectsWithPlayer(tongue_x, base_y, displayed_tongue_width, 24) then
        damage(properties.damage, 0, 0)
        _tongue_hit_player = true
        _retracting_tongue = true
    end
-
-   local tip_offset_x = _tongue_direction_multiplier * (24 * _tongue_scale) + 16 * _tongue_direction_multiplier  -- Use multiplier for direction and add/subtract 1
-
-   setSpriteOffset(2, tip_offset_x, 12)
 end
 
 ------------------------------------------------------------------------------------------------------------------------
