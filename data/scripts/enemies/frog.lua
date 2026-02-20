@@ -80,7 +80,8 @@ _prev_state = STATE_IDLE
 _is_blinking = false
 
 -- animation speed factors for different states
-_idle_anim_speed = 1.0
+_death_anim_speed = 10.0
+_idle_anim_speed = 10.0
 _attack_anim_speed = 2.0
 _blink_anim_speed = 1.0
 
@@ -592,7 +593,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- function to update dying state
 function updateStateDying(dt)
-   _death_animation_frame = _death_animation_frame + dt * 10.0
+   _death_animation_frame = _death_animation_frame + dt * _death_anim_speed
    local death_frame_index = math.floor(_death_animation_frame)
 
    -- check if death animation is finished
@@ -623,8 +624,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- function to update idle state
 function updateStateIdle(dt)
-   local anim_speed_factor = _idle_anim_speed    -- idle animation speed
-   _animation_frame = _animation_frame + dt * 10.0 * anim_speed_factor  -- 10 fps base rate
+   _animation_frame = _animation_frame + dt * _idle_anim_speed
 
    -- Check if an animation cycle has completed
    local current_frame_idx = math.floor(_animation_frame) % FRAME_COUNTS[CYCLE_IDLE]
