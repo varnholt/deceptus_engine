@@ -11,29 +11,33 @@ properties = {
 
 
 ------------------------------------------------------------------------------------------------------------------------
-_position = v2d.Vector2D(0, 0)
+-- constants
+local SPRITE_WIDTH = 72
+local SPRITE_HEIGHT = 48
+local ANIMATION_SPEED = 20.0
+local ANIMATION_FRAMES = 30
+local FLIP_OFFSET = 48
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- state
 _speed = 1.0
 _frequency = 1.0
 _amplitude = 1.0
-_player_position = v2d.Vector2D(0, 0)
 _center = v2d.Vector2D(0, 0)
 _distance = 0
 _elapsed = math.random(0, 3)
 _sprite_index = 0
-_direction_x = 1.0  -- X component of movement direction (normalized)
-_direction_y = 0.0  -- Y component of movement direction (normalized)
-_prev_offset = 0.0  -- Previous sine offset for sprite flip detection
-_points_left = false  -- For horizontal movement direction
+_direction_x = 1.0  -- x component of movement direction (normalized)
+_direction_y = 0.0  -- y component of movement direction (normalized)
+_prev_offset = 0.0  -- previous sine offset for sprite flip detection
+_points_left = false  -- for horizontal movement direction
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-
-   patrol_path = {}
-   patrol_epsilon = 1.0
-
    addShapeRect(0.3, 0.15, 0, 0.05)
-   updateSpriteRect(0, 0, 0, 72, 48)
+   updateSpriteRect(0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT)
 end
 
 
@@ -44,26 +48,26 @@ function update(dt)
 
    -- get sprite index
    _elapsed = _elapsed + dt
-   sprite_index = math.floor(math.fmod(_elapsed * 20.0, 30))
+   sprite_index = math.floor(math.fmod(_elapsed * ANIMATION_SPEED, ANIMATION_FRAMES))
 
-   -- Calculate position using direction factors (no branching needed)
+   -- calculate position using direction factors (no branching needed)
    local offset = 0.5 * math.sin(_elapsed * _speed) * _distance
    local pos_x = _center:getX() + offset * _direction_x
    local pos_y = _center:getY() + offset * _direction_y
 
-   -- Add perpendicular oscillation (direction rotated 90 degrees)
+   -- add perpendicular oscillation (direction rotated 90 degrees)
    local perp_x = -_direction_y
    local perp_y = _direction_x
    local perp_offset = math.sin(_elapsed * _frequency) * _amplitude
    pos_x = pos_x + perp_x * perp_offset
    pos_y = pos_y + perp_y * perp_offset
 
-   -- Detect movement direction for sprite flip (only when moving primarily horizontally)
+   -- detect movement direction for sprite flip (only when moving primarily horizontally)
    if math.abs(_direction_x) > math.abs(_direction_y) then
       if offset > _prev_offset then
-         _points_left = false  -- Moving right
+         _points_left = false  -- moving right
       else
-         _points_left = true   -- Moving left
+         _points_left = true   -- moving left
       end
    end
    _prev_offset = offset
@@ -77,15 +81,15 @@ function update(dt)
       update_sprite = true
    end
 
-   -- Handle sprite flipping based on movement direction
+   -- handle sprite flipping based on movement direction
    if math.abs(_direction_x) > math.abs(_direction_y) and _points_left then
-      y_offset = 0   -- Normal when moving left
+      y_offset = 0   -- normal when moving left
    else
-      y_offset = 48  -- Flip when moving right (or vertical movement)
+      y_offset = FLIP_OFFSET  -- flip when moving right (or vertical movement)
    end
 
    if (update_sprite) then
-      updateSpriteRect(0, _sprite_index * 72, y_offset, 72, 48) -- x, y, width, height
+      updateSpriteRect(0, _sprite_index * SPRITE_WIDTH, y_offset, SPRITE_WIDTH, SPRITE_HEIGHT)
    end
 
 end
@@ -105,7 +109,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function setPath(name, table)
-   -- print(string.format("Received %d arguments:", #table))
+   -- print(string.format("received %d arguments:", #table))
 
    local i = 0
    local x = 0.0;
@@ -126,12 +130,10 @@ function setPath(name, table)
    end
 
    if (name == "path") then
-      patrol_path = v
-
       -- compute movement direction as normalized factors
-      local left_arr = patrol_path[0]
+      local left_arr = v[0]
       local left = v2d.Vector2D(left_arr:getX(), left_arr:getY())
-      local right_arr = patrol_path[1]
+      local right_arr = v[1]
       local right = v2d.Vector2D(right_arr:getX(), right_arr:getY())
       local dx = right:getX() - left:getX()
       local dy = right:getY() - left:getY()
@@ -157,13 +159,11 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   _player_position = v2d.Vector2D(x, y)
 end
 
 
