@@ -17,12 +17,12 @@ mFrequency = 1.0
 mAmplitude = 1.0
 mPlayerPosition = v2d.Vector2D(0, 0)
 mCenter = v2d.Vector2D(0, 0)
-mDistance = 0  -- Will hold either horizontal or vertical distance depending on path orientation
+mDistance = 0
 mElapsed = math.random(0, 3)
 mSpriteIndex = 0
-mPointsLeft = false  -- For horizontal movement direction (true = moving left, false = moving right)
-mPrevCoord = 0.0     -- Previous coordinate (x for horizontal, y for vertical)
-mIsVerticalPath = false  -- Flag to determine if path is vertical or horizontal
+mDirectionX = 1.0  -- X component of movement direction (normalized)
+mDirectionY = 0.0  -- Y component of movement direction (normalized)
+mPrevOffset = 0.0  -- Previous sine offset for sprite flip detection
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -46,40 +46,27 @@ function update(dt)
    mElapsed = mElapsed + dt
    spriteIndex = math.floor(math.fmod(mElapsed * 20.0, 30))
 
-   -- Calculate position based on path orientation
+   -- Calculate position using direction factors (no branching needed)
    local offset = 0.5 * math.sin(mElapsed * mSpeed) * mDistance
+   local posX = mCenter:getX() + offset * mDirectionX
+   local posY = mCenter:getY() + offset * mDirectionY
 
-   -- Determine position based on path orientation
-   local posX, posY
+   -- Add perpendicular oscillation (direction rotated 90 degrees)
+   local perpX = -mDirectionY
+   local perpY = mDirectionX
+   local perpOffset = math.sin(mElapsed * mFrequency) * mAmplitude
+   posX = posX + perpX * perpOffset
+   posY = posY + perpY * perpOffset
 
-   if mIsVerticalPath then
-      -- Vertical movement along the path
-      posY = mCenter:getY() + offset
-      posX = mCenter:getX()
-   else
-      -- Horizontal movement along the path
-      posX = mCenter:getX() + offset
-      posY = mCenter:getY()
-
-      -- Check direction for sprite flipping (horizontal movement only)
-      if (offset > mPrevCoord) then
+   -- Detect movement direction for sprite flip (only when moving primarily horizontally)
+   if math.abs(mDirectionX) > math.abs(mDirectionY) then
+      if offset > mPrevOffset then
          mPointsLeft = false  -- Moving right
-         yOffset = 48  -- Flip sprite horizontally when moving right
       else
          mPointsLeft = true   -- Moving left
       end
    end
-
-   mPrevCoord = offset
-
-   -- Apply perpendicular oscillation based on path orientation
-   if mIsVerticalPath then
-      -- For vertical paths, add horizontal oscillation
-      posX = posX + math.sin(mElapsed * mFrequency) * mAmplitude
-   else
-      -- For horizontal paths, add vertical oscillation
-      posY = posY + math.sin(mElapsed * mFrequency) * mAmplitude
-   end
+   mPrevOffset = offset
 
    -- update transform
    setTransform(posX, posY, 0.0)
@@ -91,19 +78,10 @@ function update(dt)
    end
 
    -- Handle sprite flipping based on movement direction
-   -- For horizontal paths, apply left/right flip based on movement direction
-   -- For vertical paths, we don't apply horizontal flip since the fish is moving up/down
-   if not mIsVerticalPath then
-       -- Only apply horizontal flip for horizontal movement
-       if mPointsLeft then
-           yOffset = 0   -- Normal when moving left
-       else
-           yOffset = 48  -- Flip when moving right
-       end
+   if math.abs(mDirectionX) > math.abs(mDirectionY) and mPointsLeft then
+      yOffset = 0   -- Normal when moving left
    else
-       -- For vertical paths, we keep yOffset as 0 (no horizontal flip)
-       -- The sprite remains in its default orientation during vertical movement
-       yOffset = 0
+      yOffset = 48  -- Flip when moving right (or vertical movement)
    end
 
    if (updateSprite) then
@@ -123,34 +101,6 @@ function writeProperty(parameter, value)
    elseif (parameter == "amplitude") then
       mAmplitude = value
    end
-end
-
-------------------------------------------------------------------------------------------------------------------------
--- Helper function to replicate math.atan2 functionality using math.atan
-function atan2(y, x)
-    if x == 0 then
-        if y > 0 then
-            return math.pi / 2
-        elseif y < 0 then
-            return -math.pi / 2
-        else
-            -- Both x and y are 0, undefined angle
-            return 0
-        end
-    else
-        local angle = math.atan(y / x)
-        
-        -- Adjust for correct quadrant
-        if x < 0 then
-            if y >= 0 then
-                return angle + math.pi
-            else
-                return angle - math.pi
-            end
-        else
-            return angle
-        end
-    end
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -178,38 +128,22 @@ function setPath(name, table)
    if (name == "path") then
       patrolPath = v
 
-      -- Calculate the angle between the two path points to determine orientation
+      -- compute movement direction as normalized factors
       local leftArr = patrolPath[0]
       local left = v2d.Vector2D(leftArr:getX(), leftArr:getY())
       local rightArr = patrolPath[1]
       local right = v2d.Vector2D(rightArr:getX(), rightArr:getY())
-
-      -- Calculate angle in degrees using our custom atan2 function
       local dx = right:getX() - left:getX()
       local dy = right:getY() - left:getY()
-      local angleRad = atan2(dy, dx)
-      local angleDeg = math.deg(angleRad)
 
-      -- Normalize angle to -180 to 180 range
-      if angleDeg > 180 then
-          angleDeg = angleDeg - 360
-      elseif angleDeg < -180 then
-          angleDeg = angleDeg + 360
-      end
-
-      -- Determine if path is vertical or horizontal
-      -- -45 to 45 degrees means horizontal movement
-      -- Otherwise it's vertical (or diagonal treated as vertical)
-      mIsVerticalPath = not (angleDeg >= -45 and angleDeg <= 45)
-
-      -- Calculate center point
+      -- calculate center point
       mCenter = v2d.Vector2D((left:getX() + right:getX()) / 2.0, (left:getY() + right:getY()) / 2.0)
 
-      -- Calculate distance to use for movement (either horizontal or vertical)
-      if mIsVerticalPath then
-          mDistance = math.sqrt(dx * dx + dy * dy)  -- Use full distance for vertical paths
-      else
-          mDistance = math.abs(dx)  -- Use horizontal distance for horizontal paths
+      -- calculate distance and normalized direction
+      mDistance = math.sqrt(dx * dx + dy * dy)
+      if mDistance > 0 then
+         mDirectionX = dx / mDistance
+         mDirectionY = dy / mDistance
       end
    end
 end
