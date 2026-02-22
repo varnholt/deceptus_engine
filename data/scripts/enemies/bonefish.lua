@@ -111,22 +111,15 @@ end
 function setPath(name, table)
    -- print(string.format("received %d arguments:", #table))
 
-   local i = 0
-   local x = 0.0;
-   local y = 0.0;
    local v = {}
+   local num_points = 0
 
-   for key, value in pairs(table) do
-
-      if ((i % 2) == 0) then
-         x = value
-      else
-         y = value
-         -- print(string.format("v%d: %f, %f", (i - 1) / 2, x, y))
-         v[(i - 1) / 2] = v2d.Vector2D(x, y)
-      end
-
-      i = i + 1
+   for i = 1, #table, 2 do
+      local x = table[i]
+      local y = table[i + 1]
+      -- print(string.format("v%d: %f, %f", num_points, x, y))
+      v[num_points] = v2d.Vector2D(x, y)
+      num_points = num_points + 1
    end
 
    if (name == "path") then
