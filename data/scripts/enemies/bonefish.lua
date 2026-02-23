@@ -31,7 +31,8 @@ _sprite_index = 0
 _direction_x = 1.0  -- x component of movement direction (normalized)
 _direction_y = 0.0  -- y component of movement direction (normalized)
 _prev_offset = 0.0  -- previous sine offset for sprite flip detection
-_points_left = false  -- for horizontal movement direction
+_horizontal_movement = false
+_points_left = false
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -63,13 +64,8 @@ function update(dt)
    pos_y = pos_y + perp_y * perp_offset
 
    -- detect movement direction for sprite flip (only when moving primarily horizontally)
-   if math.abs(_direction_x) > math.abs(_direction_y) then
-      if offset > _prev_offset then
-         _points_left = false  -- moving right
-      else
-         _points_left = true   -- moving left
-      end
-   end
+   local offset_delta = offset - _prev_offset
+   _points_left = (offset_delta * _direction_x) < 0.0
    _prev_offset = offset
 
    -- update transform
@@ -82,11 +78,7 @@ function update(dt)
    end
 
    -- handle sprite flipping based on movement direction
-   if math.abs(_direction_x) > math.abs(_direction_y) and _points_left then
-      y_offset = 0   -- normal when moving left
-   else
-      y_offset = FLIP_OFFSET  -- flip when moving right (or vertical movement)
-   end
+   y_offset = (_horizontal_movement and _points_left) and 0 or FLIP_OFFSET
 
    if (update_sprite) then
       updateSpriteRect(0, _sprite_index * SPRITE_WIDTH, y_offset, SPRITE_WIDTH, SPRITE_HEIGHT)
@@ -139,6 +131,7 @@ function setPath(name, table)
       if _distance > 0 then
          _direction_x = dx / _distance
          _direction_y = dy / _distance
+         _horizontal_movement = math.abs(_direction_x) > math.abs(_direction_y)
       end
    end
 end
