@@ -22,6 +22,7 @@ Console::Console()
    _help.registerCommand("teleportation", "tpp <x>,<y>: teleport to tile position", {"tpp 100, 330"});
    _help.registerCommand("teleportation", "tps: teleport to start position");
    _help.registerCommand("teleportation", "tpc <n>: teleport to checkpoint", {"tpc 0"});
+   _help.registerCommand("teleportation", "tpr <name>: teleport to room by name (uses first subroom if available)", {"tpr my_room"});
    _help.registerCommand(
       "inventory",
       "extra <add/clear> <climb/dash/wallslide/walljump/doublejump/invulnerable/crouch/all>: toggle extras",
@@ -125,6 +126,43 @@ void Console::teleportToTile(int32_t x_tl, int32_t y_tl)
    _log.push_back(os.str());
 
    Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x_tl * PIXELS_PER_TILE), static_cast<float>(y_tl * PIXELS_PER_TILE));
+}
+
+void Console::teleportToRoom(const std::string& room_name)
+{
+   std::ostringstream os;
+   auto* level = Level::getCurrentLevel();
+   const auto& rooms = level->getRooms();
+
+   std::shared_ptr<Room> found_room;
+   for (const auto& room : rooms)
+   {
+      if (room->getObjectId() == room_name)
+      {
+         found_room = room;
+         break;
+      }
+   }
+
+   if (!found_room)
+   {
+      os << "room '" << room_name << "' not found" << std::endl;
+      _log.push_back(os.str());
+      return;
+   }
+
+   // If the room has subrooms, use the first subroom
+   sf::Vector2f target_position;
+   if (!found_room->_sub_rooms.empty())
+   {
+      const auto& sub_room = found_room->_sub_rooms.front();
+      target_position.x = sub_room._rect.position.x + sub_room._rect.size.x / 2.0f;
+      target_position.y = sub_room._rect.position.y + sub_room._rect.size.y / 2.0f;
+      os << "teleported to room '" << room_name << "' (first subroom)" << std::endl;
+   }
+
+   _log.push_back(os.str());
+   Player::getCurrent()->setBodyViaPixelPosition(target_position.x, target_position.y);
 }
 
 const Console::Help& Console::help() const
@@ -286,6 +324,10 @@ void Console::execute()
    else if (results[0] == "tps")
    {
       teleportToStartPosition();
+   }
+   else if (results.at(0) == "tpr" && results.size() == 2)
+   {
+      teleportToRoom(results.at(1));
    }
 
    // playback
