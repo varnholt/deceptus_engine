@@ -22,7 +22,7 @@ Console::Console()
    _help.registerCommand("teleportation", "tpp <x>,<y>: teleport to tile position", {"tpp 100, 330"});
    _help.registerCommand("teleportation", "tps: teleport to start position");
    _help.registerCommand("teleportation", "tpc <n>: teleport to checkpoint", {"tpc 0"});
-   _help.registerCommand("teleportation", "tpr <name>: teleport to room by name (uses first subroom if available)", {"tpr my_room"});
+   _help.registerCommand("teleportation", "tpr <name>: teleport to room by name", {"tpr my_room"});
    _help.registerCommand(
       "inventory",
       "extra <add/clear> <climb/dash/wallslide/walljump/doublejump/invulnerable/crouch/all>: toggle extras",
@@ -151,7 +151,6 @@ void Console::teleportToRoom(const std::string& room_name)
       return;
    }
 
-   // If the room has subrooms, use the first subroom
    sf::Vector2f target_position;
    if (!found_room->_sub_rooms.empty())
    {
