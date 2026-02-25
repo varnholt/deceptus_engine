@@ -103,9 +103,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function openLocker()
-
    log("open locker")
-
    setMechanismVisible("locker_open", true, "imagelayers")
    setMechanismVisible("handle", true, "extras")
    setMechanismEnabled("handle", true, "extras")
@@ -121,6 +119,25 @@ function initLocker()
    setMechanismEnabled("handle", false, "extras")
    setMechanismEnabled("locker_dialogue_locked", true, "dialogues")
    setMechanismEnabled("locker_dialogue_unlocked", false, "dialogues")
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function initDrawer()
+   setMechanismVisible("drawer_open", false, "imagelayers")
+   setMechanismVisible("key", false, "extras")
+   setMechanismEnabled("key", false, "extras")
+end
+
+------------------------------------------------------------------------------------------------------------------------
+function openDrawer()
+   log("open drawer")
+   setMechanismVisible("drawer_open", true, "imagelayers")
+   setMechanismVisible("key", true, "extras")
+   setMechanismEnabled("key", true, "extras")
+   
+   -- dialogue still missing
+   -- setMechanismEnabled("drawer_dialogue_key", true, "dialogues")
 end
 
 
@@ -166,6 +183,7 @@ function update(dt)
       addSensorRectCallback("zone_rect")
 
       initLocker()
+      initDrawer()
    end
 
    updateMonk(dt) 
@@ -249,6 +267,10 @@ function playerReceivedExtra(extra)
 
    if (extra == "locker_key") then
       -- change text when inspecting locker "use key"
+   end
+   
+   if (extra == "key") then
+      -- disable "key in drawer" dialogue
    end
    
    if extra:match("^heart_") then
