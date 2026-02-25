@@ -99,6 +99,8 @@ public:
 
    const GameMechanismRegistry& getMechanismRegistry() const;
 
+   const std::vector<std::shared_ptr<Room>>& getRooms() const;
+
 protected:
    void parsePhysicsTiles(
       const std::shared_ptr<TmxLayer>& layer,

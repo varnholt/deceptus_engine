@@ -1090,6 +1090,11 @@ void Level::drawGlowSprite()
 #endif
 }
 
+const std::vector<std::shared_ptr<Room>>& Level::getRooms() const
+{
+   return _rooms;
+}
+
 const GameMechanismRegistry& Level::getMechanismRegistry() const
 {
    return _mechanism_registry;
