@@ -135,10 +135,10 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
 
    if (data._tmx_object->_properties)
    {
-      const auto z = data._tmx_object->_properties->_map.find("z");
-      if (z != data._tmx_object->_properties->_map.end())
+      const auto z_index = data._tmx_object->_properties->_map.find("z");
+      if (z_index != data._tmx_object->_properties->_map.end())
       {
-         instance->_z_index = z->second->_value_int.value();
+         instance->_z_index = z_index->second->_value_int.value();
       }
 
       const auto start_delay_duration = data._tmx_object->_properties->_map.find("start_delay_duration");
