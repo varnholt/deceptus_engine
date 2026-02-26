@@ -442,11 +442,13 @@ void InfoLayer::LoadingAnimation::show()
    _animation->seekToStart();
    _animation->play();
    _show_time = GlobalClock::getInstance().getElapsedTime();
+   _hide_time.reset();
 }
 
 void InfoLayer::LoadingAnimation::hide()
 {
    _hide_time = GlobalClock::getInstance().getElapsedTime();
+   _show_time.reset();
 }
 
 void InfoLayer::LoadingAnimation::update(const sf::Time& delta_time)
@@ -641,15 +643,15 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 
 void InfoLayer::setLoading(bool loading)
 {
-   if (_loading && !loading)
-   {
-      _show_time_health = GlobalClock::getInstance().getElapsedTime();
-      _loading_anim.hide();  // no longer loading -> hide icon
-   }
-   else if (!_loading && loading)
+   if (loading)
    {
       _hide_time_health = GlobalClock::getInstance().getElapsedTime();
       _loading_anim.show();  // loading started -> show icon
+   }
+   else
+   {
+      _show_time_health = GlobalClock::getInstance().getElapsedTime();
+      _loading_anim.hide();  // no longer loading -> hide icon
    }
 
    _loading = loading;
