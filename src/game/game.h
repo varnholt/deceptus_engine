@@ -14,6 +14,7 @@
 #include "game/layers/controlleroverlay.h"
 #include "game/layers/infolayer.h"
 #include "game/physics/physicsconfigurationui.h"
+#include "game/rendering/rendertargets.h"
 #include "game/scenes/forestscene.h"
 #include "game/sfx/gameaudio.h"
 #include "opengl/render3d/menubackgroundscene.h"
@@ -78,6 +79,7 @@ private:
 
    std::shared_ptr<sf::RenderWindow> _window;
    std::shared_ptr<sf::RenderTexture> _window_render_texture;
+   RenderTargets _render_targets;
    std::shared_ptr<Player> _player;
    std::shared_ptr<Level> _level;
    std::unique_ptr<InfoLayer> _info_layer;
