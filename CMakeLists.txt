@@ -474,12 +474,16 @@ set(GAME_FILES
     src/game/player/playerstencil.h
     src/game/player/playerutils.cpp
     src/game/player/playerutils.h
+    src/game/player/playerdive.cpp
+    src/game/player/playerdive.h
     src/game/player/skill.cpp
     src/game/player/skill.h
     src/game/player/timerlock.cpp
     src/game/player/timerlock.h
     src/game/player/weaponsystem.cpp
     src/game/player/weaponsystem.h
+    src/game/rendering/rendertargets.cpp
+    src/game/rendering/rendertargets.h
     src/game/scenes/forestscene.cpp
     src/game/scenes/forestscene.h
     src/game/sfx/gameaudio.cpp
@@ -696,11 +700,11 @@ add_executable(
     ${GAME_FILES}
     data/scripts/enemies/archer.lua
     data/scripts/enemies/arrowtrap.lua
-    data/scripts/enemies/arrowtrap.lua
-    data/scripts/enemies/arrowtrap_2.lua
     data/scripts/enemies/arrowtrap_2.lua
     data/scripts/enemies/bat_2.lua
+    data/scripts/enemies/bat_guard.lua
     data/scripts/enemies/bat_oneway.lua
+    data/scripts/enemies/bat_patrol.lua
     data/scripts/enemies/blob_2.lua
     data/scripts/enemies/bonefish.lua
     data/scripts/enemies/cannon_2.lua
@@ -721,9 +725,11 @@ add_executable(
     data/scripts/enemies/landmine.lua
     data/scripts/enemies/minik_bomber.lua
     data/scripts/enemies/nukumaru.lua
+    data/scripts/enemies/orb.lua
     data/scripts/enemies/rat.lua
     data/scripts/enemies/shadow_monk.lua
     data/scripts/enemies/spiky.lua
+    data/scripts/enemies/state_machine.lua
     data/scripts/enemies/vector2.lua
     data/scripts/enemies/vectorial2.lua
     data/scripts/enemies/watermine.lua
@@ -746,39 +752,7 @@ add_executable(
     doc/level_design/mechanisms.md
     doc/level_design/visual_effects.md
     doc/lua_interface/readme.md
-    data/scripts/enemies/state_machine.lua
-    data/scripts/enemies/archer.lua
-    data/scripts/enemies/arrowtrap.lua
-    data/scripts/enemies/arrowtrap_2.lua
-    data/scripts/enemies/bat_2.lua
-    data/scripts/enemies/bat_oneway.lua
-    data/scripts/enemies/blob_2.lua
-    data/scripts/enemies/bonefish.lua
-    data/scripts/enemies/cannon_2.lua
-    data/scripts/enemies/constants.lua
-    data/scripts/enemies/critter.lua
-    data/scripts/enemies/deprecated_bat.lua
-    data/scripts/enemies/deprecated_blob.lua
-    data/scripts/enemies/deprecated_cannon.lua
-    data/scripts/enemies/deprecated_dumb.lua
-    data/scripts/enemies/deprecated_endboss_1.lua
-    data/scripts/enemies/deprecated_klonk.lua
-    data/scripts/enemies/deprecated_skeleton.lua
-    data/scripts/enemies/ghost.lua
-    data/scripts/enemies/helpers.lua
-    data/scripts/enemies/interpolation.lua
-    data/scripts/enemies/klonk_2.lua
-    data/scripts/enemies/landmine.lua
-    data/scripts/enemies/minik_bomber.lua
-    data/scripts/enemies/nukumaru.lua
-    data/scripts/enemies/rat.lua
-    data/scripts/enemies/shadow_monk.lua
-    data/scripts/enemies/spiky.lua
-    data/scripts/enemies/state_machine.lua
-    data/scripts/enemies/vector2.lua
-    data/scripts/enemies/vectorial2.lua
-    data/scripts/enemies/watermine.lua
-    src/game/player/playerdive.h src/game/player/playerdive.cpp)
+)
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
 

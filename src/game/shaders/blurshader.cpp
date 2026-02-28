@@ -4,40 +4,11 @@
 
 #include <iostream>
 
-BlurShader::BlurShader(uint32_t width, uint32_t height)
+void BlurShader::initialize(const std::shared_ptr<sf::RenderTexture>& render_texture, const std::shared_ptr<sf::RenderTexture>& render_texture_scaled)
 {
-   sf::ContextSettings contextSettings;
-   contextSettings.stencilBits = 8;
+   _render_texture = render_texture;
+   _render_texture_scaled = render_texture_scaled;
 
-   try
-   {
-      _render_texture = std::make_shared<sf::RenderTexture>(sf::Vector2u{width, height}, contextSettings);
-   }
-   catch (...)
-   {
-      Log::Fatal() << "failed to create render texture";
-   }
-
-   try
-   {
-      _render_texture_scaled = std::make_shared<sf::RenderTexture>(sf::Vector2u{960, 540}, contextSettings);
-   }
-   catch (...)
-   {
-      Log::Fatal() << "failed to create scaled texture";
-   }
-
-   _render_texture_scaled->setSmooth(true);
-}
-
-BlurShader::~BlurShader()
-{
-   _render_texture.reset();
-   _render_texture_scaled.reset();
-}
-
-void BlurShader::initialize()
-{
    if (!_shader.loadFromFile("data/shaders/blur.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading blur shader";
