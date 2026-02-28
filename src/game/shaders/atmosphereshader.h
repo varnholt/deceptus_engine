@@ -6,10 +6,9 @@
 class AtmosphereShader
 {
 public:
-   AtmosphereShader(uint32_t texture_width, uint32_t texture_height);
-   ~AtmosphereShader();
+   AtmosphereShader() = default;
 
-   void initialize();
+   void initialize(const std::shared_ptr<sf::RenderTexture>& render_texture);
    void update();
 
    const std::shared_ptr<sf::RenderTexture>& getRenderTexture() const;

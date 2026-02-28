@@ -151,75 +151,17 @@ const Atmosphere& Level::getAtmosphere() const
    return _atmosphere;
 }
 
-void Level::initializeTextures()
-{
-   const auto& game_config = GameConfiguration::getInstance();
-
-   // since stencil buffers are used, it is required to enable them explicitly
-   sf::ContextSettings stencil_context_settings;
-   stencil_context_settings.stencilBits = 8;
-   // stencil_context_settings.antialiasingLevel = 8; // makes texture tearing much more reproducable
-
-   _render_texture_level_background.reset();
-
-   _atmosphere_shader.reset();
-   _gamma_shader.reset();
-   _blur_shader.reset();
-
-   // this the render texture size derived from the window dimensions. as opposed to the window
-   // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
-   const auto ratio_width = game_config._video_mode_width / game_config._view_width;
-   const auto ratio_height = game_config._video_mode_height / game_config._view_height;
-   const auto size_ratio = std::min(ratio_width, ratio_height);
-   _view_to_texture_scale = 1.0f / size_ratio;
-
-   const auto texture_width = static_cast<int32_t>(size_ratio * game_config._view_width);
-   const auto texture_height = static_cast<int32_t>(size_ratio * game_config._view_height);
-
-   try
-   {
-      const auto texture_size = sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)};
-      _render_texture_level_background = std::make_shared<sf::RenderTexture>(texture_size);
-      _render_texture_level = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
-      _render_texture_lighting = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
-      _render_texture_normal = std::make_shared<sf::RenderTexture>(texture_size);
-      _render_texture_normal_tmp = std::make_shared<sf::RenderTexture>(texture_size);
-      _render_texture_deferred = std::make_shared<sf::RenderTexture>(texture_size);
-   }
-   catch (const std::exception& e)
-   {
-      Log::Fatal() << "failed to create render textures: " << e.what();
-   }
-
-   _atmosphere_shader = std::make_unique<AtmosphereShader>(texture_width, texture_height);
-   _gamma_shader = std::make_unique<GammaShader>();
-   _blur_shader = std::make_unique<BlurShader>(texture_width, texture_height);
-
-   // keep track of those textures
-   _render_textures.clear();
-   _render_textures.push_back(_render_texture_level);
-   _render_textures.push_back(_render_texture_level_background);
-   _render_textures.push_back(_render_texture_lighting);
-   _render_textures.push_back(_render_texture_normal);
-   _render_textures.push_back(_render_texture_normal_tmp);
-   _render_textures.push_back(_render_texture_deferred);
-
-   for (const auto& texture : _render_textures)
-   {
-      Log::Info() << "created render texture: " << texture->getSize().x << " x " << texture->getSize().y;
-   }
-
-   _atmosphere_shader->initialize();
-   _gamma_shader->initialize();
-   _blur_shader->initialize();
-}
-
-Level::Level() : GameNode(nullptr)
+Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_targets(render_targets)
 {
    setClassName(typeid(Level).name());
 
    _ambient_occlusion = std::make_unique<AmbientOcclusion>();
    _volume_updater = std::make_unique<VolumeUpdater>();
+
+   // create shaders (render textures are owned by Game)
+   _atmosphere_shader = std::make_unique<AtmosphereShader>();
+   _blur_shader = std::make_unique<BlurShader>();
+   _gamma_shader = std::make_unique<GammaShader>();
 
    // init world for this level
    const b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
@@ -516,6 +458,11 @@ void Level::initialize()
       Log::Error() << "level loading failed, filename: " << _description_filename;
       return;
    }
+
+   // initialize shaders with render targets from Game
+   _atmosphere_shader->initialize(_render_targets.atmosphere);
+   _blur_shader->initialize(_render_targets.blur, _render_targets.blur_scaled);
+   _gamma_shader->initialize();
 
    loadStartPosition();
 
@@ -841,10 +788,10 @@ void Level::zoomReset()
 
 void Level::drawLightMap()
 {
-   _render_texture_lighting->clear();
-   _render_texture_lighting->setView(*_level_view);
-   _light_system->draw(*_render_texture_lighting, {});
-   _render_texture_lighting->display();
+   _render_targets.lighting->clear();
+   _render_targets.lighting->setView(*_level_view);
+   _light_system->draw(*_render_targets.lighting, {});
+   _render_targets.lighting->display();
 
    //   static int32_t light_map_save_counter = 0;
    //   light_map_save_counter++;
@@ -1018,7 +965,7 @@ void Level::drawDebugInformation()
 {
    if (DisplayMode::getInstance().isSet(Display::Debug))
    {
-      auto& texture = *_render_texture_level.get();
+      auto& texture = *_render_targets.level.get();
       drawStaticChains(texture);
       DebugDraw::debugBodies(texture, this);
       DebugDraw::drawRect(texture, Player::getCurrent()->getPixelRectFloat());
@@ -1038,23 +985,23 @@ void Level::displayFinalTextures()
 {
    // display the whole texture
    sf::View view(sf::FloatRect(
-      {0.0f, 0.0f}, {static_cast<float>(_render_texture_level->getSize().x), static_cast<float>(_render_texture_level->getSize().y)}
+      {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
    ));
 
    view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 
-   _render_texture_level->setView(view);
-   _render_texture_level->display();
+   _render_targets.level->setView(view);
+   _render_targets.level->display();
 
-   _render_texture_normal->setView(view);
-   _render_texture_normal->display();
+   _render_targets.normal->setView(view);
+   _render_targets.normal->display();
 }
 
 void Level::drawGlowLayer()
 {
 #ifdef GLOW_ENABLED
    _blur_shader->clearTexture();
-   drawBlurLayer(*mBlurShader->getRenderTexture().get());
+   drawBlurLayer(*_blur_shader->getRenderTexture().get());
    _blur_shader->getRenderTexture()->display();
    takeScreenshot("screenshot_blur", *_blur_shader->getRenderTexture().get());
 #endif
@@ -1065,17 +1012,17 @@ void Level::drawGlowSprite()
 #ifdef GLOW_ENABLED
    sf::Sprite blur_sprite(_blur_shader->getRenderTexture()->getTexture());
    const auto down_scale_x =
-      _blur_shader->getRenderTextureScaled()->getSize().x / static_cast<float>(mBlurShader->getRenderTexture()->getSize().x);
+      _blur_shader->getRenderTextureScaled()->getSize().x / static_cast<float>(_blur_shader->getRenderTexture()->getSize().x);
    const auto down_scale_y =
-      _blur_shader->getRenderTextureScaled()->getSize().y / static_cast<float>(mBlurShader->getRenderTexture()->getSize().y);
+      _blur_shader->getRenderTextureScaled()->getSize().y / static_cast<float>(_blur_shader->getRenderTexture()->getSize().y);
    blur_sprite.scale({down_scale_x, down_scale_y});
 
-   sf::RenderStates statesShader;
+   sf::RenderStates states_shader;
    _blur_shader->update();
-   states_shader.shader = &mBlurShader->getShader();
-   _blur_shader->getRenderTextureScaled()->draw(blur_sprite, statesShader);
+   states_shader.shader = &_blur_shader->getShader();
+   _blur_shader->getRenderTextureScaled()->draw(blur_sprite, states_shader);
 
-   sf::Sprite blur_scale_sprite(mBlurShader->getRenderTextureScaled()->getTexture());
+   sf::Sprite blur_scale_sprite(_blur_shader->getRenderTextureScaled()->getTexture());
    blur_scale_sprite.scale(1.0f / down_scale_x, 1.0f / down_scale_y);
    blur_scale_sprite.setTextureRect(sf::IntRect(
       0,
@@ -1085,8 +1032,8 @@ void Level::drawGlowSprite()
    ));
 
    sf::RenderStates states_add;
-   statesAdd.blendMode = sf::BlendAdd;
-   _level_render_texture->draw(blur_scale_sprite, states_add);
+   states_add.blendMode = sf::BlendAdd;
+   _render_targets.level->draw(blur_scale_sprite, states_add);
 #endif
 }
 
@@ -1151,48 +1098,48 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    drawGlowLayer();
 
    // render layers affected by the atmosphere
-   _render_texture_level->clear();
-   _render_texture_level_background->clear();
-   _render_texture_normal_tmp->clear();
-   _render_texture_normal->clear();
+   _render_targets.level->clear();
+   _render_targets.level_background->clear();
+   _render_targets.normal_tmp->clear();
+   _render_targets.normal->clear();
 
    drawLayers(
-      *_render_texture_level_background.get(),
-      *_render_texture_normal_tmp.get(),
+      *_render_targets.level_background.get(),
+      *_render_targets.normal_tmp.get(),
       static_cast<int32_t>(ZDepth::BackgroundMin),
       static_cast<int32_t>(ZDepth::BackgroundMax)
    );
 
-   _render_texture_level_background->display();
-   takeScreenshot("texture_level_background", *_render_texture_level_background.get());
+   _render_targets.level_background->display();
+   takeScreenshot("texture_level_background", *_render_targets.level_background.get());
 
-   _render_texture_normal_tmp->display();
-   takeScreenshot("texture_level_background_normal", *_render_texture_normal_tmp.get());
+   _render_targets.normal_tmp->display();
+   takeScreenshot("texture_level_background_normal", *_render_targets.normal_tmp.get());
 
    // draw the atmospheric parts into the level texture using the atmosphere shader
-   sf::Sprite tmp_sprite(_render_texture_level_background->getTexture());
+   sf::Sprite tmp_sprite(_render_targets.level_background->getTexture());
    _atmosphere_shader->update();
-   _render_texture_level->draw(tmp_sprite, &_atmosphere_shader->getShader());
-   takeScreenshot("texture_level_level_dist", *_render_texture_level.get());
+   _render_targets.level->draw(tmp_sprite, &_atmosphere_shader->getShader());
+   takeScreenshot("texture_level_level_dist", *_render_targets.level.get());
 
    // draw the normal parts into the final normal texture using the atmosphere shader
-   tmp_sprite.setTexture(_render_texture_normal_tmp->getTexture());
+   tmp_sprite.setTexture(_render_targets.normal_tmp->getTexture());
    _atmosphere_shader->update();
-   _render_texture_normal->draw(tmp_sprite, &_atmosphere_shader->getShader());
-   takeScreenshot("texture_level_background_normal_dist", *_render_texture_normal.get());
+   _render_targets.normal->draw(tmp_sprite, &_atmosphere_shader->getShader());
+   takeScreenshot("texture_level_background_normal_dist", *_render_targets.normal.get());
 
    drawGlowSprite();
 
    // draw the level layers into the level texture
    drawLayers(
-      *_render_texture_level.get(),
-      *_render_texture_normal.get(),
+      *_render_targets.level.get(),
+      *_render_targets.normal.get(),
       static_cast<int32_t>(ZDepth::ForegroundMin),
       static_cast<int32_t>(ZDepth::ForegroundMax)
    );
 
-   Gun::drawProjectileHitAnimations(*_render_texture_level.get());
-   AnimationPlayer::getInstance().draw(*_render_texture_level.get());
+   Gun::drawProjectileHitAnimations(*_render_targets.level.get());
+   AnimationPlayer::getInstance().draw(*_render_targets.level.get());
 
    drawDebugInformation();
 
@@ -1200,20 +1147,20 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    drawLightMap();
 
-   _light_system->draw(*_render_texture_deferred.get(), _render_texture_level, _render_texture_lighting, _render_texture_normal);
+   _light_system->draw(*_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.normal);
 
-   _render_texture_deferred->display();
+   _render_targets.deferred->display();
 
-   takeScreenshot("texture_map_color", *_render_texture_level.get());
-   takeScreenshot("texture_map_light", *_render_texture_lighting.get());
-   takeScreenshot("texture_map_normal", *_render_texture_normal.get());
-   takeScreenshot("texture_map_deferred", *_render_texture_deferred.get());
+   takeScreenshot("texture_map_color", *_render_targets.level.get());
+   takeScreenshot("texture_map_light", *_render_targets.lighting.get());
+   takeScreenshot("texture_map_normal", *_render_targets.normal.get());
+   takeScreenshot("texture_map_deferred", *_render_targets.deferred.get());
 
-   auto level_texture_sprite = sf::Sprite(_render_texture_deferred->getTexture());
-   _gamma_shader->setTexture(_render_texture_deferred->getTexture());
+   auto level_texture_sprite = sf::Sprite(_render_targets.deferred->getTexture());
+   _gamma_shader->setTexture(_render_targets.deferred->getTexture());
 
    level_texture_sprite.setPosition({_boom_effect._boom_offset_x, _boom_effect._boom_offset_y});
-   level_texture_sprite.scale({_view_to_texture_scale, _view_to_texture_scale});
+   level_texture_sprite.scale({_render_targets.view_to_texture_scale, _render_targets.view_to_texture_scale});
 
    _gamma_shader->update();
    window->draw(level_texture_sprite, &_gamma_shader->getGammaShader());

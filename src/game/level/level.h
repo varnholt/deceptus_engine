@@ -18,6 +18,7 @@
 #include "game/mechanisms/portal.h"
 #include "game/physics/physics.h"
 #include "game/physics/squaremarcher.h"
+#include "game/rendering/rendertargets.h"
 #include "game/shaders/atmosphereshader.h"
 #include "game/shaders/blurshader.h"
 #include "game/shaders/gammashader.h"
@@ -50,11 +51,11 @@ struct ParseData;
 class Level : public GameNode
 {
 public:
-   Level();
+   Level() = delete;
+   explicit Level(const RenderTargets& render_targets);
    virtual ~Level();
 
    virtual void initialize();
-   void initializeTextures();
    void reset();
    void loadStartPosition();
 
@@ -148,15 +149,8 @@ protected:
    std::vector<std::shared_ptr<Room>> _rooms;
    LevelScript _level_script;
 
-   std::shared_ptr<sf::RenderTexture> _render_texture_level;
-   std::shared_ptr<sf::RenderTexture> _render_texture_level_background;
-   std::shared_ptr<sf::RenderTexture> _render_texture_lighting;
-   std::shared_ptr<sf::RenderTexture> _render_texture_normal;
-   std::shared_ptr<sf::RenderTexture> _render_texture_normal_tmp;
-   std::shared_ptr<sf::RenderTexture> _render_texture_deferred;
-   std::vector<std::shared_ptr<sf::RenderTexture>> _render_textures;
+   const RenderTargets& _render_targets;
 
-   float _view_to_texture_scale = 1.0f;
    std::shared_ptr<sf::View> _level_view;
 
    std::map<std::string, int32_t> _screenshot_counters;

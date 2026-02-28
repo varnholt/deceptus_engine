@@ -254,7 +254,11 @@ void Game::initializeWindow()
 
    if (_level)
    {
-      _level->initializeTextures();
+      _render_targets.recreateOnResize(game_config._video_mode_width, game_config._video_mode_height, game_config._view_width, game_config._view_height);
+   }
+   else
+   {
+      _render_targets.create(game_config._video_mode_width, game_config._video_mode_height, game_config._view_width, game_config._view_height);
    }
 }
 
@@ -344,11 +348,10 @@ void Game::loadLevel(LoadingMode loading_mode)
 
       // load level
       const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
-      _level = std::make_shared<Level>();
+      _level = std::make_shared<Level>(_render_targets);
       _level->setDescriptionFilename(level_item._level_name);
       _level->setLoadingMode(loading_mode);
       _level->initialize();
-      _level->initializeTextures();
 
       // put the player in there
       _player->setWorld(_level->getWorld());
