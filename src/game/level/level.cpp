@@ -54,6 +54,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
+#include <execution>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -187,7 +188,6 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
       _player_light->_color = sf::Color(255, 255, 255, Tweaks::instance()._player_light_alpha);
       _light_system->_lights.push_back(_player_light);
    }
-
 }
 
 Level::~Level()
@@ -272,17 +272,25 @@ void Level::loadTmx()
 
    GameMechanismDeserializer::deserialize(tmx_parser, this, data, _mechanism_registry.getMap());
 
-   // preload mechanism data
+   // preload mechanism data in parallel
    for (auto& [vec_key, vec_values] : _mechanism_registry.getMap())
    {
-      for (auto& val : *vec_values)
-      {
-         val->preload();
-      }
+      std::for_each(std::execution::par, vec_values->begin(), vec_values->end(), [](auto& val) { val->preload(); });
    }
 
    // process everything that's not considered a mechanism
    const auto& tmx_elements = tmx_parser.getElements();
+
+   // collect all layer data first for parallel loading
+   struct LayerLoadData
+   {
+      std::shared_ptr<TmxLayer> layer;
+      std::shared_ptr<TmxTileSet> tileset;
+      std::shared_ptr<TileMap> tile_map;
+      bool push_tile_map = true;
+   };
+   std::vector<LayerLoadData> layer_load_data;
+
    for (const auto& element : tmx_elements)
    {
       data._tmx_layer = nullptr;
@@ -304,30 +312,8 @@ void Level::loadTmx()
          data._tmx_layer = layer;
          data._tmx_tileset = tileset;
 
-         const auto tile_map = TileMapFactory::makeTileMap(layer);
-         tile_map->load(layer, tileset, path);
-         auto push_tile_map = true;
-
-         if (layer->_name == "atmosphere")
-         {
-            _atmosphere._tile_map = tile_map;
-            _atmosphere.parse(layer, tileset);
-         }
-         else if (layer->_name.compare(0, parallax_identifier.length(), parallax_identifier) == 0)
-         {
-            auto parallax_layer = ParallaxLayer::deserialize(layer, tile_map);
-            _parallax_layers.push_back(std::move(parallax_layer));
-            push_tile_map = false;
-         }
-         else if (layer->_name == "level" || layer->_name == "level_solid_onesided" || layer->_name == "level_deadly")
-         {
-            parsePhysicsTiles(layer, tileset, path);
-         }
-
-         if (push_tile_map)
-         {
-            _tile_maps.push_back(tile_map);
-         }
+         auto tile_map = TileMapFactory::makeTileMap(layer);
+         layer_load_data.push_back({layer, tileset, tile_map, true});
       }
 
       // parse objects
@@ -364,6 +350,43 @@ void Level::loadTmx()
       {
          const auto image = ImageLayer::deserialize(element, path);
          _mechanism_registry.addImageLayer(image);
+      }
+   }
+
+   // load tilemaps in parallel
+   std::for_each(
+      std::execution::par,
+      layer_load_data.begin(),
+      layer_load_data.end(),
+      [&path](auto& layer_data) { layer_data.tile_map->load(layer_data.layer, layer_data.tileset, path); }
+   );
+
+   // process loaded tilemaps sequentially
+   for (auto& layer_data : layer_load_data)
+   {
+      const auto& layer = layer_data.layer;
+      const auto& tileset = layer_data.tileset;
+      const auto& tile_map = layer_data.tile_map;
+
+      if (layer->_name == "atmosphere")
+      {
+         _atmosphere._tile_map = tile_map;
+         _atmosphere.parse(layer, tileset);
+      }
+      else if (layer->_name.compare(0, parallax_identifier.length(), parallax_identifier) == 0)
+      {
+         auto parallax_layer = ParallaxLayer::deserialize(layer, tile_map);
+         _parallax_layers.push_back(std::move(parallax_layer));
+         layer_data.push_tile_map = false;
+      }
+      else if (layer->_name == "level" || layer->_name == "level_solid_onesided" || layer->_name == "level_deadly")
+      {
+         parsePhysicsTiles(layer, tileset, path);
+      }
+
+      if (layer_data.push_tile_map)
+      {
+         _tile_maps.push_back(tile_map);
       }
    }
 
@@ -984,9 +1007,11 @@ void Level::drawDebugInformation()
 void Level::displayFinalTextures()
 {
    // display the whole texture
-   sf::View view(sf::FloatRect(
-      {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
-   ));
+   sf::View view(
+      sf::FloatRect(
+         {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
+      )
+   );
 
    view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 
@@ -1024,12 +1049,14 @@ void Level::drawGlowSprite()
 
    sf::Sprite blur_scale_sprite(_blur_shader->getRenderTextureScaled()->getTexture());
    blur_scale_sprite.scale(1.0f / down_scale_x, 1.0f / down_scale_y);
-   blur_scale_sprite.setTextureRect(sf::IntRect(
-      0,
-      static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y),
-      static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().x),
-      -static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y)
-   ));
+   blur_scale_sprite.setTextureRect(
+      sf::IntRect(
+         0,
+         static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y),
+         static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().x),
+         -static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y)
+      )
+   );
 
    sf::RenderStates states_add;
    states_add.blendMode = sf::BlendAdd;
@@ -1470,4 +1497,3 @@ Level* Level::getCurrentLevel()
 {
    return __current_level;
 }
-
