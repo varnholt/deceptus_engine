@@ -333,13 +333,12 @@ void Game::showPauseMenu()
 
 void Game::loadLevel(LoadingMode loading_mode)
 {
-   _level_loading_finished = false;
-   _level_loading_finished_previous = false;
-
-   _info_layer->setLoading(!_level_loading_finished);
-
-   const auto loadLevelFunc = [this, loading_mode]()
+   const auto level_loader = [this, loading_mode]()
    {
+      // create an opengl context for this thread
+      sf::Context loader_context;
+      loader_context.setActive(true);
+
       _player->resetWorld();  // free the pointer that's shared with the player
       _level.reset();
 
@@ -376,7 +375,7 @@ void Game::loadLevel(LoadingMode loading_mode)
       CameraSystem::getInstance().syncNow();
       GameClock::getInstance().reset();
 
-      _info_layer->setLoading(!_level_loading_finished);
+      _info_layer->setLoading(false);
 
       // notify listeners
       for (const auto& callback : _level_loaded_callbacks)
@@ -385,10 +384,14 @@ void Game::loadLevel(LoadingMode loading_mode)
       }
 
       _level_loaded_callbacks.clear();
+
+      loader_context.setActive(false);
    };
 
-   // loadLevelFunc();
-   _level_loading_thread = std::async(std::launch::async, loadLevelFunc);
+   _level_loading_finished = false;
+   _level_loading_finished_previous = false;
+   _info_layer->setLoading(true);
+   _level_loading_thread = std::async(std::launch::async, level_loader);
 }
 
 void Game::nextLevel()
