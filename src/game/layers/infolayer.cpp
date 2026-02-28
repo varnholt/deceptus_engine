@@ -487,7 +487,7 @@ void InfoLayer::LoadingAnimation::update(const sf::Time& delta_time)
          _fade_state = LoadingFadeState::Keep;
       }
    }
-   else if (_hide_time.has_value() && _fade_state == LoadingFadeState::Keep)  // fade out after reaching full opacity
+   else if (_hide_time.has_value() && (_fade_state == LoadingFadeState::Keep || _fade_state == LoadingFadeState::FadeIn))  // fade out
    {
       alpha = 1.0f - std::max(0.0f, (now - _hide_time.value()).asSeconds() / hide_duration.asSeconds());
    }
