@@ -6,6 +6,9 @@
 #include "framework/tools/log.h"
 #include "stenciltilemap.h"
 
+#include <algorithm>
+#include <execution>
+
 std::shared_ptr<TileMap> TileMapFactory::makeTileMap(const std::shared_ptr<TmxLayer>& layer)
 {
    std::shared_ptr<TileMap> tile_map;
@@ -31,30 +34,37 @@ std::shared_ptr<TileMap> TileMapFactory::makeTileMap(const std::shared_ptr<TmxLa
 
 void TileMapFactory::merge(const std::vector<std::shared_ptr<TileMap>>& tile_maps)
 {
+   // build map of tilemaps by layer name (sequential - needed for thread safety)
    std::map<std::string, std::shared_ptr<TileMap>> tile_maps_map;
    for (const auto& tile_map : tile_maps)
    {
       tile_maps_map[tile_map->getLayerName()] = tile_map;
    }
 
-   for (auto& tile_map : tile_maps)
-   {
-      auto stencil_tile_map = dynamic_pointer_cast<StencilTileMap>(tile_map);
-
-      if (!stencil_tile_map)
+   // set stencil tilemaps in parallel
+   std::for_each(
+      std::execution::par,
+      tile_maps.begin(),
+      tile_maps.end(),
+      [&tile_maps_map](auto& tile_map)
       {
-         continue;
+         auto stencil_tile_map = dynamic_pointer_cast<StencilTileMap>(tile_map);
+
+         if (!stencil_tile_map)
+         {
+            return;
+         }
+
+         const auto reference_name = stencil_tile_map->getStencilReference();
+         auto reference_map = tile_maps_map[reference_name];
+
+         if (!reference_map)
+         {
+            Log::Error() << "stencil reference map (" << reference_name << ") is not available";
+            return;
+         }
+
+         stencil_tile_map->setStencilTilemap(reference_map);
       }
-
-      const auto reference_name = stencil_tile_map->getStencilReference();
-      auto reference_map = tile_maps_map[reference_name];
-
-      if (!reference_map)
-      {
-         Log::Error() << "stencil reference map (" << reference_name << ") is not available";
-         continue;
-      }
-
-      stencil_tile_map->setStencilTilemap(reference_map);
-   }
+   );
 }
