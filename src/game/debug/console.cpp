@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <ostream>
+#include <ranges>
 #include <sstream>
 
 Console::Console()
@@ -146,8 +147,42 @@ void Console::teleportToRoom(const std::string& room_name)
 
    if (!found_room)
    {
-      os << "room '" << room_name << "' not found" << std::endl;
-      _log.push_back(os.str());
+      _log.push_back("room '" + room_name + "' not found");
+      _log.push_back("available rooms:");
+
+      // list available rooms (alphabetically sorted), 5 per line
+      constexpr size_t rooms_per_line = 5;
+
+      std::vector<std::string> room_names;
+      room_names.reserve(rooms.size());
+      for (const auto& room : rooms)
+      {
+         room_names.push_back(room->getObjectId());
+      }
+      std::ranges::sort(room_names);
+
+      std::string line = "  ";
+      for (size_t index = 0; index < room_names.size(); ++index)
+      {
+         if (index > 0 && index % rooms_per_line == 0)
+         {
+            _log.push_back(line);
+            line = "  ";
+         }
+
+         if (index % rooms_per_line > 0)
+         {
+            line += ", ";
+         }
+
+         line += room_names[index];
+      }
+
+      if (!line.empty() && line != "  ")
+      {
+         _log.push_back(line);
+      }
+
       return;
    }
 
