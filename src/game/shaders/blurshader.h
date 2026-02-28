@@ -6,11 +6,9 @@
 class BlurShader
 {
 public:
-   BlurShader(uint32_t width, uint32_t height);
+   BlurShader() = default;
 
-   ~BlurShader();
-
-   void initialize();
+   void initialize(const std::shared_ptr<sf::RenderTexture>& render_texture, const std::shared_ptr<sf::RenderTexture>& render_texture_scaled);
    void update();
    void clearTexture();
 

@@ -4,26 +4,10 @@
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 
-AtmosphereShader::AtmosphereShader(uint32_t texture_width, uint32_t texture_height) : _render_texture(std::make_shared<sf::RenderTexture>())
+void AtmosphereShader::initialize(const std::shared_ptr<sf::RenderTexture>& render_texture)
 {
-   try
-   {
-      _render_texture =
-         std::make_unique<sf::RenderTexture>(sf::Vector2u(static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)));
-   }
-   catch (...)
-   {
-      Log::Fatal() << "failed to create texture";
-   }
-}
+   _render_texture = render_texture;
 
-AtmosphereShader::~AtmosphereShader()
-{
-   _render_texture.reset();
-}
-
-void AtmosphereShader::initialize()
-{
    if (!_shader.loadFromFile("data/shaders/water.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading water shader";
