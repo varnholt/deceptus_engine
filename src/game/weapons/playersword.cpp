@@ -6,7 +6,7 @@
 #include "framework/tools/stopwatch.h"
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
-#include "game/debug/drawstates.h"
+#include "game/debug/debugdrawstates.h"
 #include "game/physics/worldquery.h"
 #include "game/player/player.h"
 
@@ -89,7 +89,7 @@ void PlayerSword::draw(sf::RenderTarget& target)
       return;
    }
 
-   if (DrawStates::_draw_debug_info)
+   if (DebugDrawStates::_draw_debug_info)
    {
       DebugDraw::drawRect(target, _hit_rect_px, sf::Color{255, 0, 0});
 

@@ -2,11 +2,13 @@
 
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
+#include "game/debug/debugdrawstates.h"
 #include "game/level/level.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
 #include "game/player/weaponsystem.h"
+#include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/weapons/bow.h"
 #include "game/weapons/weaponfactory.h"
@@ -40,19 +42,17 @@ Console::Console()
    _help.registerCommand("cheats", "pgravity <gravity>: set player gravity scale", {"pgravity 0.1"});
 }
 
-bool Console::isActive() const
-{
-   return _active;
-}
-
 void Console::setActive(bool active)
 {
    _active = active;
 }
 
-void Console::append(char c)
+void Console::append(char32_t unicode)
 {
-   _command.push_back(c);
+   if (unicode > 0x1F && unicode < 0x80)
+   {
+      _command.push_back(unicode);
+   }
 }
 
 void Console::chop()
@@ -540,6 +540,13 @@ Console& Console::getInstance()
    return __instance;
 }
 
+void Console::toggleActive()
+{
+   DebugDrawStates::_draw_console = !DebugDrawStates::_draw_console;
+   Console::getInstance().setActive(DebugDrawStates::_draw_console);
+   GameState::getInstance().enqueueTogglePauseResume();
+}
+
 const std::string& Console::getCommand() const
 {
    return _command;
@@ -583,4 +590,28 @@ std::string Console::Help::getFormattedHelp() const
    }
 
    return oss.str();
+}
+
+void Console::processEvent(sf::Keyboard::Key key)
+{
+   if (key == sf::Keyboard::Key::Enter)
+   {
+      execute();
+   }
+   else if (key == sf::Keyboard::Key::Backspace)
+   {
+      chop();
+   }
+   else if (key == sf::Keyboard::Key::Up)
+   {
+      previousCommand();
+   }
+   else if (key == sf::Keyboard::Key::Down)
+   {
+      nextCommand();
+   }
+   else if (key == sf::Keyboard::Key::F11)
+   {
+      toggleActive();
+   }
 }

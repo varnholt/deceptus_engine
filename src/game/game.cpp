@@ -13,7 +13,7 @@
 #include "game/controller/gamecontrollerdata.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/debug/debugdraw.h"
-#include "game/debug/drawstates.h"
+#include "game/debug/debugdrawstates.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
 #include "game/event/eventdistributor.h"
@@ -546,22 +546,22 @@ void Game::draw()
 
    _info_layer->draw(*_window_render_texture.get());
 
-   if (DrawStates::_draw_debug_info)
+   if (DebugDrawStates::_draw_debug_info)
    {
       _info_layer->drawDebugInfo(*_window_render_texture.get());
    }
 
-   if (DrawStates::_draw_console)
+   if (DebugDrawStates::_draw_console)
    {
       _info_layer->drawConsole(*_window_render_texture.get());
    }
 
-   if (DrawStates::_draw_camera_system)
+   if (DebugDrawStates::_draw_camera_system)
    {
       DebugDraw::debugCameraSystem(*_window_render_texture.get());
    }
 
-   if (DrawStates::_draw_controller_overlay)
+   if (DebugDrawStates::_draw_controller_overlay)
    {
       _controller_overlay->draw(*_window_render_texture.get());
    }
@@ -571,7 +571,7 @@ void Game::draw()
       _ingame_menu->draw(*_window_render_texture.get());
    }
 
-   if (DrawStates::_draw_test_scene)
+   if (DebugDrawStates::_draw_test_scene)
    {
       _test_scene->draw(*_window_render_texture.get());
    }
@@ -623,17 +623,17 @@ void Game::draw()
       record.detach();
    }
 
-   if (DrawStates::_draw_physics_config)
+   if (DebugDrawStates::_draw_physics_config)
    {
       _physics_ui->draw();
    }
 
-   if (DrawStates::_draw_camera_system)
+   if (DebugDrawStates::_draw_camera_system)
    {
       _camera_ui->draw();
    }
 
-   if (DrawStates::_draw_log)
+   if (DebugDrawStates::_draw_log)
    {
       _log_ui->draw();
    }
@@ -827,7 +827,7 @@ void Game::update()
          _level->update(dt);
          _player->update(dt);
 
-         if (DrawStates::_draw_test_scene)
+         if (DebugDrawStates::_draw_test_scene)
          {
             _test_scene->update(dt);
          }
@@ -925,7 +925,7 @@ void Game::processEvent(const sf::Event& event)
       {
          // the in-game menu is save to leave open when losing the window focus
          // while the console is open, don't disturb
-         if (!DisplayMode::getInstance().isSet(Display::IngameMenu) && !Console::getInstance().isActive())
+         if (!DisplayMode::getInstance().isSet(Display::IngameMenu) && !DebugDrawStates::_draw_console)
          {
             showPauseMenu();
          }
@@ -953,8 +953,14 @@ void Game::processEvent(const sf::Event& event)
          return;
       }
 
-      // todo: process keyboard events in the console class, just like done in the message box
-      if (!Console::getInstance().isActive())
+      if (DebugDrawStates::_draw_console)
+      {
+#ifdef DEVELOPMENT_MODE
+         Console::getInstance().processEvent(key_pressed_event->code);
+         return;
+#endif
+      }
+      else
       {
          if (Menu::getInstance()->isVisible())
          {
@@ -983,9 +989,10 @@ void Game::processEvent(const sf::Event& event)
 #ifdef DEVELOPMENT_MODE
    else if (auto* text_entered_event = event.getIf<sf::Event::TextEntered>())
    {
-      if (Console::getInstance().isActive() && text_entered_event->unicode > 0x1F && text_entered_event->unicode < 0x80)
+      if (DebugDrawStates::_draw_console)
       {
-         Console::getInstance().append(static_cast<char>(text_entered_event->unicode));
+         Console::getInstance().append(text_entered_event->unicode);
+         return;
       }
    }
    else if (auto* mouse_button_pressed_event = event.getIf<sf::Event::MouseButtonPressed>())
@@ -1052,36 +1059,6 @@ void Game::reloadLevel(LoadingMode loading_mode)
 
 void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
 {
-#ifdef DEVELOPMENT_MODE
-   if (Console::getInstance().isActive())
-   {
-      // these should be moved to the console itself
-      if (key_event->code == sf::Keyboard::Key::Enter)
-      {
-         Console::getInstance().execute();
-      }
-      if (key_event->code == sf::Keyboard::Key::F11)
-      {
-         DrawStates::_draw_console = !DrawStates::_draw_console;
-         Console::getInstance().setActive(DrawStates::_draw_console);
-      }
-      else if (key_event->code == sf::Keyboard::Key::Backspace)
-      {
-         Console::getInstance().chop();
-      }
-      else if (key_event->code == sf::Keyboard::Key::Up)
-      {
-         Console::getInstance().previousCommand();
-      }
-      else if (key_event->code == sf::Keyboard::Key::Down)
-      {
-         Console::getInstance().nextCommand();
-      }
-
-      return;
-   }
-#endif
-
    if (DisplayMode::getInstance().isSet(Display::IngameMenu))
    {
       _ingame_menu->processEvent(key_event);
@@ -1124,13 +1101,13 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::F2:
       {
-         DrawStates::_draw_controller_overlay = !DrawStates::_draw_controller_overlay;
+         DebugDrawStates::_draw_controller_overlay = !DebugDrawStates::_draw_controller_overlay;
          break;
       }
       case sf::Keyboard::Key::F3:
       {
-         DrawStates::_draw_camera_system = !DrawStates::_draw_camera_system;
-         if (DrawStates::_draw_camera_system && !_camera_ui)
+         DebugDrawStates::_draw_camera_system = !DebugDrawStates::_draw_camera_system;
+         if (DebugDrawStates::_draw_camera_system && !_camera_ui)
          {
             _camera_ui = std::make_unique<CameraSystemConfigurationUi>();
          }
@@ -1148,13 +1125,13 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
          {
             shutdown();
          }
-         DrawStates::_draw_debug_info = !DrawStates::_draw_debug_info;
+         DebugDrawStates::_draw_debug_info = !DebugDrawStates::_draw_debug_info;
          break;
       }
       case sf::Keyboard::Key::F5:
       {
-         DrawStates::_draw_log = !DrawStates::_draw_log;
-         if (DrawStates::_draw_log && !_log_ui)
+         DebugDrawStates::_draw_log = !DebugDrawStates::_draw_log;
+         if (DebugDrawStates::_draw_log && !_log_ui)
          {
             _log_ui = std::make_unique<LogUi>();
          }
@@ -1168,13 +1145,13 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::F6:
       {
-         DrawStates::_draw_test_scene = !DrawStates::_draw_test_scene;
+         DebugDrawStates::_draw_test_scene = !DebugDrawStates::_draw_test_scene;
          break;
       }
       case sf::Keyboard::Key::F7:
       {
-         DrawStates::_draw_physics_config = !DrawStates::_draw_physics_config;
-         if (DrawStates::_draw_physics_config && !_physics_ui)
+         DebugDrawStates::_draw_physics_config = !DebugDrawStates::_draw_physics_config;
+         if (DebugDrawStates::_draw_physics_config && !_physics_ui)
          {
             _physics_ui = std::make_unique<PhysicsConfigurationUi>();
          }
@@ -1213,8 +1190,7 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::F11:
       {
-         DrawStates::_draw_console = !DrawStates::_draw_console;
-         Console::getInstance().setActive(DrawStates::_draw_console);
+         Console::getInstance().toggleActive();
          break;
       }
       case sf::Keyboard::Key::PageUp:
@@ -1298,17 +1274,17 @@ void Game::processEvents()
       processEvent(event.value());
    }
 
-   if (DrawStates::_draw_physics_config)
+   if (DebugDrawStates::_draw_physics_config)
    {
       _physics_ui->processEvents();
    }
 
-   if (DrawStates::_draw_camera_system)
+   if (DebugDrawStates::_draw_camera_system)
    {
       _camera_ui->processEvents();
    }
 
-   if (DrawStates::_draw_log)
+   if (DebugDrawStates::_draw_log)
    {
       _log_ui->processEvents();
    }
