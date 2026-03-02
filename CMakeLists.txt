@@ -169,8 +169,8 @@ set(GAME_FILES
     src/game/debug/console.h
     src/game/debug/debugdraw.cpp
     src/game/debug/debugdraw.h
-    src/game/debug/drawstates.cpp
-    src/game/debug/drawstates.h
+    src/game/debug/debugdrawstates.cpp
+    src/game/debug/debugdrawstates.h
     src/game/debug/logui.cpp
     src/game/debug/logui.h
     src/game/effects/boomeffect.cpp
@@ -856,6 +856,8 @@ if(WIN32)
 
     if(MSVC)
         add_compile_options(/MP)
+        target_compile_options(deceptus PRIVATE $<$<CONFIG:RelWithDebInfo>:/Zi>)
+        target_link_options(deceptus PRIVATE $<$<CONFIG:RelWithDebInfo>:/DEBUG>)
     endif()
 
     # GLEW is now handled via FetchContent
