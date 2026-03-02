@@ -1,7 +1,7 @@
-#ifndef DRAWSTATES_H
-#define DRAWSTATES_H
+#ifndef DEBUGDRAWSTATES_H
+#define DEBUGDRAWSTATES_H
 
-struct DrawStates
+struct DebugDrawStates
 {
    static bool _draw_test_scene;
    static bool _draw_console;
@@ -12,4 +12,4 @@ struct DrawStates
    static bool _draw_log;
 };  // namespace DrawStates
 
-#endif  // DRAWSTATES_H
+#endif  // DEBUGDRAWSTATES_H

@@ -1,10 +1,11 @@
+#include <cstdint>
 #include <deque>
 #include <functional>
 #include <map>
 #include <optional>
 #include <string>
 #include <vector>
-#include <cstdint>
+#include "SFML/Graphics.hpp"
 
 class Console
 {
@@ -24,10 +25,9 @@ public:
       std::map<std::string, std::vector<HelpCommand>> _help_messages;
    };
 
-   bool isActive() const;
    void setActive(bool active);
 
-   void append(char c);
+   void append(char32_t unicode);
    void chop();
    void execute();
    void previousCommand();
@@ -47,6 +47,9 @@ public:
    static Console& getInstance();
 
    const Help& help() const;
+
+   void toggleActive();
+   void processEvent(sf::Keyboard::Key key);
 
 private:
    Console();
