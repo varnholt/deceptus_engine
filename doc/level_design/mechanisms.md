@@ -1079,6 +1079,38 @@ So you can build quite complex mechanisms with this while the mechanism itself i
 |event|string|The event that triggers the action. This can either be `on_enter` (default) or `on_leave`. |
 |action|string|Whether to `enable`, `disable`, or `toggle` the other reference mechanism. Valid values are `enable` (default), `disable`, `toggle`.|
 |z|int|The object's z index|
+|observed|bool|Whether or not the sensor rect events are shared with the level's Lua script (default is `false`). When enabled, the mechanism will emit events that can be handled in the `mechanismEvent` function in your level's Lua script.|
+
+### Events
+
+When the `observed` flag is set to `true`, the sensor rect will emit the following event that can be handled in the `mechanismEvent` function in your level's Lua script:
+
+|Event Name|Value|Description|
+|-|-|-|
+|action|`enable`, `disable`, or `toggle`|Emitted when the sensor is triggered and performs the configured action|
+
+### Example Usage in Lua
+
+When the `observed` flag is enabled, you can handle the sensor rect events in your level's Lua script using the `mechanismEvent` function:
+
+```lua
+function mechanismEvent(object_id, group_id, event_name, value)
+   -- Log all events for debugging
+   log(string.format("object_id: %s, group_id: %s, event_name: %s, value: %s",
+         object_id, group_id, event_name, tostring(value)))
+
+   -- Example: Handle when a specific sensor rect triggers an action
+   if (object_id == "room_entry_sensor" and event_name == "action") then
+      if (value == "enable") then
+         log("Sensor triggered - enabling referenced mechanism")
+      elseif (value == "disable") then
+         log("Sensor triggered - disabling referenced mechanism")
+      elseif (value == "toggle") then
+         log("Sensor triggered - toggling referenced mechanism")
+      end
+   end
+end
+```
 
 ---
 
