@@ -47,4 +47,5 @@ private:
    std::optional<std::string> _reference_id;
    std::vector<std::shared_ptr<GameMechanism>> _references;
    std::vector<SensorCallback> _callbacks;
+   bool _observed = false;
 };

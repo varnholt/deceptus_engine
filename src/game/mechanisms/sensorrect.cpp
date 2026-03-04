@@ -3,7 +3,9 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "game/player/player.h"
 
 namespace
@@ -126,6 +128,8 @@ void SensorRect::setup(const GameDeserializeData& data)
             _event = Event::OnLeave;
          }
       }
+
+      _observed = ValueReader::readValue<bool>("observed", data._tmx_object->_properties->_map).value_or(false);
    }
 }
 
@@ -190,5 +194,24 @@ void SensorRect::processAction()
    for (auto& callback : _callbacks)
    {
       callback(_object_id);
+   }
+
+   if (_observed)
+   {
+      const auto action_str = [_action = _action]() -> std::string
+      {
+         switch (_action)
+         {
+            case Action::Enable:
+               return "enable";
+            case Action::Disable:
+               return "disable";
+            case Action::Toggle:
+               return "toggle";
+         }
+         return "unknown";
+      }();
+
+      GameMechanismObserver::onEvent(getObjectId(), "sensor_rects", "action", action_str);
    }
 }
