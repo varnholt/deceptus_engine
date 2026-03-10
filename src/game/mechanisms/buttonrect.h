@@ -37,5 +37,5 @@ private:
 
    sf::FloatRect _rect;
    bool _player_intersects = false;
-   Button _botton{Button::B};
+   Button _button{Button::B};
 };

@@ -49,15 +49,20 @@ void ButtonRect::update(const sf::Time& /*dt*/)
 {
    _player_intersects = Player::getCurrent()->getPixelRectFloat().findIntersection(_rect).has_value();
 
+   if (!isEnabled())
+   {
+      return;
+   }
+
    if (!_player_intersects)
    {
       return;
    }
 
-   if ((_botton == Button::A && Player::getCurrent()->getControls()->isButtonAPressed()) ||
-       (_botton == Button::B && Player::getCurrent()->getControls()->isButtonBPressed()) ||
-       (_botton == Button::X && Player::getCurrent()->getControls()->isButtonXPressed()) ||
-       (_botton == Button::Y && Player::getCurrent()->getControls()->isButtonYPressed()))
+   if ((_button == Button::A && Player::getCurrent()->getControls()->isButtonAPressed()) ||
+       (_button == Button::B && Player::getCurrent()->getControls()->isButtonBPressed()) ||
+       (_button == Button::X && Player::getCurrent()->getControls()->isButtonXPressed()) ||
+       (_button == Button::Y && Player::getCurrent()->getControls()->isButtonYPressed()))
    {
       GameMechanismObserver::onEvent(getObjectId(), "button_rects", "pressed", "true");
    }
@@ -79,6 +84,11 @@ void ButtonRect::setup(const GameDeserializeData& data)
 
       const auto& map = data._tmx_object->_properties->_map;
       const auto button_id_str = ValueReader::readValue<std::string>("button", map).value_or("b");
+      const auto button_it = button_map.find(button_id_str);
+      if (button_it != button_map.end())
+      {
+         _button = button_it->second;
+      }
    }
 
    addChunks(_rect);
