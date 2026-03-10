@@ -125,19 +125,15 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function initDrawer()
    setMechanismVisible("drawer_open", false, "imagelayers")
-   setMechanismVisible("key", false, "extras")
-   setMechanismEnabled("key", false, "extras")
 end
 
 ------------------------------------------------------------------------------------------------------------------------
 function openDrawer()
    log("open drawer")
    setMechanismVisible("drawer_open", true, "imagelayers")
-   setMechanismVisible("key", true, "extras")
-   setMechanismEnabled("key", true, "extras")
-   
-   -- dialogue still missing
-   -- setMechanismEnabled("drawer_dialogue_key", true, "dialogues")
+   setMechanismEnabled("drawer_rect", false, "button_rects")
+   inventoryAdd("key")   
+   showDialogue("drawer_dialogue_key")
 end
 
 
@@ -196,27 +192,33 @@ function mechanismEvent(object_id, group_id, event_name, value)
 
    log(string.format("object_id: %s, group_id: %s, event_name: %s, value: %s", object_id, group_id, event_name, tostring(value)))
 
+   -- update door dialogue when open
    if (object_id == "iron_door" and event_name == "state" and value == "opening") then
       setMechanismEnabled("door_locked_dialogue", false, "dialogues")
       setMechanismEnabled("door_opened_dialogue", true, "dialogues")
    end
    
-   -- object_id: monk, group_id: dialogues, event_name: state, value: hide
+   -- dialogue with monk done, hide him
    if (object_id == "monk" and event_name == "state" and value == "hide") then
       log("hide monk")
       _monk_hide = true
    end
 
-   -- object_id: locked_box, group_id: treasurechests, event_name: state, value: locked
+   -- treasure chest is locked
    if (object_id == "locked_box" and event_name == "state" and value == "locked") then
       showDialogue("locked_message")
    end
    
-   -- object_id: locked_box, group_id: treasurechests, event_name: state, value: open
+   -- open treasure chest
    if (object_id == "locked_box" and event_name == "state" and value == "open") then
       setMechanismEnabled("locked_message", false, "dialogues")
       setMechanismEnabled("locked_box_interaction_help", false, "interaction_help")
       setMechanismEnabled("handle_help", false, "interaction_help")      
+   end
+   
+   -- open drawer in library
+   if (object_id == "drawer_rect" and event_name == "pressed" and value == "true") then
+      openDrawer()
    end
 end
 
