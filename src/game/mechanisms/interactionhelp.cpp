@@ -261,19 +261,37 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 
       help._button_sprite->setTextureRect(help._button_rect_keyboard);
       help._button_sprite->setTexture(*_button_texture);
+      help._text->setString(text_value.value());
 
       // row 0 at bottom, row 1 above
-      const auto text_x_px = 580.0f;
-      const auto base_y_px = 339.0f;
+      const auto view_width = GameConfiguration::getInstance()._view_width;
+      const auto text_base_x_px = 580.0f;
+      const auto text_base_y_px = 339.0f;
       const auto row_spacing_px = 24.0f;
-      const auto text_y_px = base_y_px - row_spacing_px * row;
+      const auto text_y_px = text_base_y_px - (row_spacing_px * row);
+      const auto icon_x_px = view_width - 24.0f;
       const auto icon_y_px = text_y_px - 4.0f;
-      help._text->setString(text_value.value());
-      help._text->setPosition({text_x_px, text_y_px});
+      const auto text_local_bounds = help._text->getLocalBounds();
+      const auto text_x_px = view_width - text_local_bounds.size.x - 24.0f - 4.0f;
 
-      const auto local_bounds = help._text->getLocalBounds();
-      const auto icon_x_px = text_x_px + local_bounds.position.x + local_bounds.size.x;
+      // text is right aligned towards the icon
+      //
+      // text:
+      //
+      //    hello
+      //    <---> (localbounds.width)
+      //
+      // view:
+      //
+      // 0                                       view.width
+      // |            |                 | |    | |
+      // |            |localbounds.width| |    | |
+      //                                  [icon]
+      //
+      // text location: view.width - text.localbounds.x - icon.width - some_offset
+
       help._button_sprite->setPosition({icon_x_px, icon_y_px});
+      help._text->setPosition({text_x_px, text_y_px});
 
       _help_elements.push_back(std::move(help));
    }
