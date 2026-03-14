@@ -37,7 +37,7 @@ public:
       int32_t _width_px = 256;
       int32_t _height_px = 256;
 
-      void updateSpritePosition();
+      void updateSpritePosition() const;
    };
 
    std::vector<std::shared_ptr<LightInstance>> _lights;
@@ -65,6 +65,6 @@ private:
    mutable std::vector<std::shared_ptr<LightInstance>> _active_lights;
 
    std::array<float, 4> _ambient_color = {1.0f, 1.0f, 1.0f, 1.0f};
-   static constexpr auto segments = 20;
-   std::array<b2Vec2, segments> _unit_circle;
+   static constexpr auto segment_count = 20;
+   std::array<b2Vec2, segment_count> _unit_circle;
 };

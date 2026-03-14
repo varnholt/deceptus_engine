@@ -25,14 +25,14 @@ constexpr auto max_distance_m2 = 100.0f;  // depends on the view dimensions
 LightSystem::LightSystem()
 {
    // prepare unit circle for circle shapes
-   for (auto i = 0u; i < segments; i++)
+   for (auto i = 0u; i < segment_count; i++)
    {
-      auto angle = (2.0 * std::numbers::pi) * (i / static_cast<double>(segments));
+      auto angle = (2.0 * std::numbers::pi) * (i / static_cast<double>(segment_count));
 
-      auto x = static_cast<float>(cos(angle));
-      auto y = static_cast<float>(sin(angle));
+      auto x_normalized = static_cast<float>(cos(angle));
+      auto y_normalized = static_cast<float>(sin(angle));
 
-      _unit_circle[i] = b2Vec2{x, y};
+      _unit_circle[i] = b2Vec2{x_normalized, y_normalized};
    }
 
    if (!_light_shader.loadFromFile("data/shaders/light.frag", sf::Shader::Type::Fragment))
@@ -111,8 +111,8 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                continue;
             }
 
-            std::array<b2Vec2, segments> circle_positions;
-            for (auto i = 0u; i < segments; i++)
+            std::array<b2Vec2, segment_count> circle_positions;
+            for (auto i = 0u; i < segment_count; i++)
             {
                circle_positions[i] = b2Vec2{
                   center.x + _unit_circle[i].x * shape_circle->m_radius * 1.2f, center.y + _unit_circle[i].y * shape_circle->m_radius * 1.2f
@@ -140,7 +140,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                const auto v0far = 10000.0f * (v0 - light_pos_m);
                const auto v1far = 10000.0f * (v1 - light_pos_m);
 
-               sf::Vertex quad[] = {
+               std::array<sf::Vertex, 6> quad = {
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
@@ -150,7 +150,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad, 6, sf::PrimitiveType::Triangles);
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles);
             }
          }
          else if (shape_chain)
@@ -165,28 +165,28 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   pos_next = 0;
                }
 
-               const auto& v0 = shape_chain->m_vertices[pos_current];
-               const auto& v1 = shape_chain->m_vertices[pos_next];
+               const auto& vertex_0 = shape_chain->m_vertices[pos_current];
+               const auto& vertex_1 = shape_chain->m_vertices[pos_next];
 
-               if ((light_pos_m - v0).LengthSquared() > max_distance_m2 && (light_pos_m - v1).LengthSquared() > max_distance_m2)
+               if ((light_pos_m - vertex_0).LengthSquared() > max_distance_m2 && (light_pos_m - vertex_1).LengthSquared() > max_distance_m2)
                {
                   continue;
                }
 
-               const auto v0_far = 10000.0f * (v0 - light_pos_m);
-               const auto v1_far = 10000.0f * (v1 - light_pos_m);
+               const auto v0_far = 10000.0f * (vertex_0 - light_pos_m);
+               const auto v1_far = 10000.0f * (vertex_1 - light_pos_m);
 
-               sf::Vertex quad[] = {
-                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
+               std::array<sf::Vertex, 6> quad = {
+                  sf::Vertex(sf::Vector2f(vertex_0.x, vertex_0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0_far.x, v0_far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1_far.x, v1_far.y) * PPM, sf::Color::Black),
 
-                  sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
+                  sf::Vertex(sf::Vector2f(vertex_0.x, vertex_0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1_far.x, v1_far.y) * PPM, sf::Color::Black),
-                  sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
+                  sf::Vertex(sf::Vector2f(vertex_1.x, vertex_1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad, 6, sf::PrimitiveType::Triangles);
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles);
             }
          }
          else if (shape_polygon)
@@ -210,7 +210,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                const auto v0far = 10000.0f * (v0 - light_pos_m);
                const auto v1far = 10000.0f * (v1 - light_pos_m);
 
-               sf::Vertex quad[] = {
+               std::array<sf::Vertex, 6> quad = {
                   sf::Vertex(sf::Vector2f(v0.x, v0.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v0far.x, v0far.y) * PPM, sf::Color::Black),
                   sf::Vertex(sf::Vector2f(v1far.x, v1far.y) * PPM, sf::Color::Black),
@@ -220,7 +220,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad, 6, sf::PrimitiveType::Triangles);
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles);
             }
          }
       }
@@ -249,8 +249,8 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
    // then convert to viewport coordinates
    sf::Vector2f pixel;
    const auto viewport = target.getViewport(view);
-   pixel.x = (normalized.x + 1.0f) / 2.0f * static_cast<float>(viewport.size.x) + static_cast<float>(viewport.position.x);
-   pixel.y = (-normalized.y + 1.0f) / 2.0f * static_cast<float>(viewport.size.y) + static_cast<float>(viewport.position.y);
+   pixel.x = ((normalized.x + 1.0f) / (2.0f * static_cast<float>(viewport.size.x))) + static_cast<float>(viewport.position.x);
+   pixel.y = ((-normalized.y + 1.0f) / (2.0f * static_cast<float>(viewport.size.y))) + static_cast<float>(viewport.position.y);
 
    return pixel;
 }
@@ -366,7 +366,7 @@ void LightSystem::draw(
    target.draw(sprite, &_light_shader);
 }
 
-void LightSystem::LightInstance::updateSpritePosition()
+void LightSystem::LightInstance::updateSpritePosition() const
 {
    _sprite->setPosition(sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
 }
@@ -464,8 +464,8 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 
       // set up the box2d position of the light
       light->_pos_m = b2Vec2(
-         data._tmx_object->_x_px * MPP + (data._tmx_object->_width_px * 0.5f) * MPP,
-         data._tmx_object->_y_px * MPP + (data._tmx_object->_height_px * 0.5f) * MPP
+         (data._tmx_object->_x_px * MPP) + (data._tmx_object->_width_px * 0.5f * MPP),
+         (data._tmx_object->_y_px * MPP) + (data._tmx_object->_height_px * 0.5f * MPP)
       );
 
       light->setObjectId(data._tmx_object->_name);
@@ -488,7 +488,7 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 
    light->updateSpritePosition();
 
-   auto scale = static_cast<float>(light->_width_px) / light->_texture->getSize().x;
+   const auto scale = static_cast<float>(light->_width_px) / static_cast<float>(light->_texture->getSize().x);
    light->_sprite->setScale({scale, scale});
 
    return light;
@@ -496,10 +496,14 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 
 void LightSystem::increaseAmbient(float amount)
 {
-   std::transform(_ambient_color.begin(), _ambient_color.end(), _ambient_color.begin(), [amount](auto value) { return value + amount; });
+   std::ranges::transform(
+      _ambient_color.begin(), _ambient_color.end(), _ambient_color.begin(), [amount](auto value) { return value + amount; }
+   );
 }
 
 void LightSystem::decreaseAmbient(float amount)
 {
-   std::transform(_ambient_color.begin(), _ambient_color.end(), _ambient_color.begin(), [amount](auto value) { return value - amount; });
+   std::ranges::transform(
+      _ambient_color.begin(), _ambient_color.end(), _ambient_color.begin(), [amount](auto value) { return value - amount; }
+   );
 }
