@@ -18,13 +18,16 @@
 #include "game/physics/onewaywall.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/player/inventorybasedcontrols.h"
+#include "game/player/itemsystem.h"
 #include "game/player/playeraudio.h"
 #include "game/player/playercontrolstate.h"
 #include "game/player/playerinfo.h"
 #include "game/player/weaponsystem.h"
 #include "game/state/displaymode.h"
 #include "game/state/savestate.h"
+#include "game/weapons/bow.h"
 #include "game/weapons/weapon.h"
+#include "game/weapons/weaponfactory.h"
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -153,6 +156,15 @@ void Player::initialize()
    _controls->addKeypressedCallback([this](sf::Keyboard::Key key) { keyPressed(key); });
 
    initializeController();
+
+   // Set up inventory callback to sync weapon and item systems
+   auto& inventory = SaveState::getPlayerInfo()._inventory;
+   inventory._updated_callbacks.push_back([this]() {
+      syncWeaponSystem();
+      syncItemSystem();
+   });
+   syncWeaponSystem();   // Initial sync
+   syncItemSystem();     // Initial sync
 }
 
 void Player::initializeLevel()
@@ -311,11 +323,14 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       _player_animation->getWallslideAnimation()->draw(color);
    }
 
-   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+   const auto& weapon_system = _weapon_system;
    if (weapon_system._selected)
    {
       weapon_system._selected->draw(color);
    }
+
+   // Draw equipped items
+   _item_system.draw(color);
 
    // that y offset is to compensate the wonky box2d origin
    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
@@ -828,8 +843,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._timepoint_attack_jumping_start = _attack._timepoint_attack_jumping_start;
    data._attacking = _attack.isAttacking();
 
-   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
-   data._weapon_type = (!weapon_system._selected) ? WeaponType::None : weapon_system._selected->getWeaponType();
+   data._weapon_type = (!_weapon_system._selected) ? WeaponType::None : _weapon_system._selected->getWeaponType();
 
    if (_dash.hasMoreFrames())
    {
@@ -1019,6 +1033,26 @@ const Chunk& Player::getChunk() const
    return _chunk;
 }
 
+WeaponSystem& Player::getWeaponSystem()
+{
+   return _weapon_system;
+}
+
+const WeaponSystem& Player::getWeaponSystem() const
+{
+   return _weapon_system;
+}
+
+ItemSystem& Player::getItemSystem()
+{
+   return _item_system;
+}
+
+const ItemSystem& Player::getItemSystem() const
+{
+   return _item_system;
+}
+
 const PlayerBend& Player::getBend() const
 {
    return _bend;
@@ -1202,15 +1236,14 @@ void Player::updateAttack()
    // require a fresh button press each time the sword should be swung
    if (_attack._attack_button_pressed)
    {
-      const auto result = _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
+      const auto result = _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir(), _weapon_system);
 
       // sword attack is combined with a small impulse move forward
-      auto uses_sword = []()
+      auto uses_sword = [this]()
       {
-         const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
-         if (weapon_system._selected)
+         if (_weapon_system._selected)
          {
-            return weapon_system._selected->getWeaponType() == WeaponType::Sword;
+            return _weapon_system._selected->getWeaponType() == WeaponType::Sword;
          }
          return false;
       };
@@ -1535,6 +1568,7 @@ void Player::update(const sf::Time& dt)
    updateFootsteps();
    updatePreviousBodyState();
    updateWeapons(dt);
+   updateItems(dt);
    updateWallslide(dt);
    updateWaterBubbles(dt);
    updateSpawn();
@@ -1642,10 +1676,85 @@ bool Player::isInAir() const
 
 void Player::updateWeapons(const sf::Time& dt)
 {
-   for (const auto& weapon : SaveState::getPlayerInfo()._weapons._weapons)
+   for (const auto& weapon : _weapon_system._weapons)
    {
       weapon->update({dt, _world});
    }
+}
+
+void Player::updateItems(const sf::Time& dt)
+{
+   _item_system.update(dt, _pixel_position_f);
+}
+
+void Player::syncWeaponSystem()
+{
+   const auto& inventory = SaveState::getPlayerInfo()._inventory;
+
+   // For now, the first slot weapon becomes the selected weapon
+   // This can be extended to support weapon switching logic
+   const auto& slot_0 = inventory._slots[0];
+
+   if (slot_0.empty())
+   {
+      _weapon_system._selected = nullptr;
+      return;
+   }
+
+   // Check if we already have this weapon
+   if (_weapon_system._selected && _weapon_system._selected->getName() == slot_0)
+   {
+      return;  // Already equipped
+   }
+
+   // Try to find existing weapon in _weapons vector
+   auto it = std::find_if(
+      _weapon_system._weapons.begin(),
+      _weapon_system._weapons.end(),
+      [&slot_0](const auto& w) { return w && w->getName() == slot_0; }
+   );
+
+   if (it != _weapon_system._weapons.end())
+   {
+      _weapon_system._selected = *it;
+      return;
+   }
+
+   // Map string name to WeaponType and create new weapon
+   WeaponType weapon_type = WeaponType::None;
+   if (slot_0 == "Sword")
+   {
+      weapon_type = WeaponType::Sword;
+   }
+   else if (slot_0 == "Bow")
+   {
+      weapon_type = WeaponType::Bow;
+   }
+   else if (slot_0 == "Gun")
+   {
+      weapon_type = WeaponType::Gun;
+   }
+
+   if (weapon_type != WeaponType::None)
+   {
+      auto new_weapon = WeaponFactory::create(weapon_type);
+      if (new_weapon)
+      {
+         // Special setup for bow
+         if (weapon_type == WeaponType::Bow)
+         {
+            std::dynamic_pointer_cast<Bow>(new_weapon)->setLauncherBody(_body);
+         }
+         _weapon_system._weapons.push_back(new_weapon);
+         _weapon_system._selected = new_weapon;
+      }
+   }
+}
+
+void Player::syncItemSystem()
+{
+   const auto& inventory = SaveState::getPlayerInfo()._inventory;
+   _item_system.syncWithInventory(inventory._slots);
 }
 
 void Player::die()

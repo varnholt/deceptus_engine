@@ -5,6 +5,7 @@
 #include "game/effects/waterbubbles.h"
 #include "game/level/chunk.h"
 #include "game/level/gamenode.h"
+#include "game/player/itemsystem.h"
 #include "game/player/playeranimation.h"
 #include "game/player/playerattack.h"
 #include "game/player/playerattackdash.h"
@@ -18,6 +19,7 @@
 #include "game/player/playerjumptrace.h"
 #include "game/player/playerplatform.h"
 #include "game/player/playerspeed.h"
+#include "game/player/weaponsystem.h"
 
 #include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
@@ -33,6 +35,7 @@ class GameContactListener;
 struct ScreenTransition;
 class Weapon;
 struct WeaponSystem;
+class ItemSystem;
 
 class Player : public GameNode
 {
@@ -122,6 +125,11 @@ public:
    PlayerPlatform& getPlatform();
    const Chunk& getChunk() const;
 
+   WeaponSystem& getWeaponSystem();
+   const WeaponSystem& getWeaponSystem() const;
+   ItemSystem& getItemSystem();
+   const ItemSystem& getItemSystem() const;
+
    void setToggleCallback(const ToggleCallback& callback);
 
 private:
@@ -144,6 +152,7 @@ private:
    void updatePortal();
    void updateVelocity();
    void updateWeapons(const sf::Time& dt);
+   void updateItems(const sf::Time& dt);
    void updateJump();
    void updateWallslide(const sf::Time& dt);
    void updateWaterBubbles(const sf::Time& dt);
@@ -167,6 +176,9 @@ private:
 
    void traceJumpCurve();
    void keyPressed(sf::Keyboard::Key key);
+
+   void syncWeaponSystem();
+   void syncItemSystem();
 
    void drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>& current_cycle, const sf::Vector2f& draw_position_px);
    bool checkDamageDrawSkip() const;
@@ -238,6 +250,9 @@ private:
 
    Chunk _chunk{0, 0};
    AnimationPool _animation_pool{"data/sprites/animations.json"};
+
+   WeaponSystem _weapon_system;
+   ItemSystem _item_system;
 
    static Player* __current;
 };

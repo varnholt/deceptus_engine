@@ -437,6 +437,8 @@ set(GAME_FILES
     src/game/player/inventorybasedcontrols.h
     src/game/player/inventoryitemdescriptionreader.cpp
     src/game/player/inventoryitemdescriptionreader.h
+    src/game/player/itemsystem.cpp
+    src/game/player/itemsystem.h
     src/game/player/player.cpp
     src/game/player/player.h
     src/game/player/playeranimation.cpp
@@ -528,6 +530,12 @@ set(GAME_FILES
     src/game/weapons/weaponfactory.h
     src/game/weapons/weaponproperties.cpp
     src/game/weapons/weaponproperties.h
+    src/game/items/item.cpp
+    src/game/items/item.h
+    src/game/items/itemfactory.cpp
+    src/game/items/itemfactory.h
+    src/game/items/itemlantern.cpp
+    src/game/items/itemlantern.h
     src/menus/menu.cpp
     src/menus/menu.h
     src/menus/menuaudio.cpp
