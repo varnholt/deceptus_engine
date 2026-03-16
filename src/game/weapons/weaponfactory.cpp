@@ -1,5 +1,6 @@
 #include "weaponfactory.h"
 
+#include <unordered_map>
 #include <utility>
 
 #include "bow.h"
@@ -70,4 +71,20 @@ std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type, const WeaponPrope
    weapon->initialize();
 
    return weapon;
+}
+
+std::shared_ptr<Weapon> WeaponFactory::create(const std::string& name)
+{
+   static const std::unordered_map<std::string, WeaponType> weapon_map = {
+      {"Sword", WeaponType::Sword},
+      {"Bow", WeaponType::Bow},
+      {"Gun", WeaponType::Gun}
+   };
+
+   if (auto it = weapon_map.find(name); it != weapon_map.end())
+   {
+      return create(it->second);
+   }
+
+   return nullptr;
 }

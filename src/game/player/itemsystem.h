@@ -11,7 +11,7 @@ class ItemSystem
 public:
    ItemSystem() = default;
 
-   void update(const sf::Time& dt, const sf::Vector2f& player_position_px);
+   void update(const sf::Time& dt);
    void draw(sf::RenderTarget& target);
 
    void syncWithInventory(const std::array<std::string, 2>& slots);

@@ -157,14 +157,19 @@ void Player::initialize()
 
    initializeController();
 
-   // Set up inventory callback to sync weapon and item systems
+   // set up inventory callback to sync weapon and item systems
    auto& inventory = SaveState::getPlayerInfo()._inventory;
-   inventory._updated_callbacks.push_back([this]() {
-      syncWeaponSystem();
-      syncItemSystem();
-   });
-   syncWeaponSystem();   // Initial sync
-   syncItemSystem();     // Initial sync
+   inventory._updated_callbacks.push_back(
+      [this, inventory]()
+      {
+         _weapon_system.syncWithInventory(inventory._slots, _body);
+         _item_system.syncWithInventory(inventory._slots);
+      }
+   );
+
+   // initial sync
+   _weapon_system.syncWithInventory(SaveState::getPlayerInfo()._inventory._slots, _body);
+   _item_system.syncWithInventory(SaveState::getPlayerInfo()._inventory._slots);
 }
 
 void Player::initializeLevel()
@@ -1236,7 +1241,8 @@ void Player::updateAttack()
    // require a fresh button press each time the sword should be swung
    if (_attack._attack_button_pressed)
    {
-      const auto result = _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir(), _weapon_system);
+      const auto result =
+         _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir(), _weapon_system);
 
       // sword attack is combined with a small impulse move forward
       auto uses_sword = [this]()
@@ -1684,77 +1690,7 @@ void Player::updateWeapons(const sf::Time& dt)
 
 void Player::updateItems(const sf::Time& dt)
 {
-   _item_system.update(dt, _pixel_position_f);
-}
-
-void Player::syncWeaponSystem()
-{
-   const auto& inventory = SaveState::getPlayerInfo()._inventory;
-
-   // For now, the first slot weapon becomes the selected weapon
-   // This can be extended to support weapon switching logic
-   const auto& slot_0 = inventory._slots[0];
-
-   if (slot_0.empty())
-   {
-      _weapon_system._selected = nullptr;
-      return;
-   }
-
-   // Check if we already have this weapon
-   if (_weapon_system._selected && _weapon_system._selected->getName() == slot_0)
-   {
-      return;  // Already equipped
-   }
-
-   // Try to find existing weapon in _weapons vector
-   auto it = std::find_if(
-      _weapon_system._weapons.begin(),
-      _weapon_system._weapons.end(),
-      [&slot_0](const auto& w) { return w && w->getName() == slot_0; }
-   );
-
-   if (it != _weapon_system._weapons.end())
-   {
-      _weapon_system._selected = *it;
-      return;
-   }
-
-   // Map string name to WeaponType and create new weapon
-   WeaponType weapon_type = WeaponType::None;
-   if (slot_0 == "Sword")
-   {
-      weapon_type = WeaponType::Sword;
-   }
-   else if (slot_0 == "Bow")
-   {
-      weapon_type = WeaponType::Bow;
-   }
-   else if (slot_0 == "Gun")
-   {
-      weapon_type = WeaponType::Gun;
-   }
-
-   if (weapon_type != WeaponType::None)
-   {
-      auto new_weapon = WeaponFactory::create(weapon_type);
-      if (new_weapon)
-      {
-         // Special setup for bow
-         if (weapon_type == WeaponType::Bow)
-         {
-            std::dynamic_pointer_cast<Bow>(new_weapon)->setLauncherBody(_body);
-         }
-         _weapon_system._weapons.push_back(new_weapon);
-         _weapon_system._selected = new_weapon;
-      }
-   }
-}
-
-void Player::syncItemSystem()
-{
-   const auto& inventory = SaveState::getPlayerInfo()._inventory;
-   _item_system.syncWithInventory(inventory._slots);
+   _item_system.update(dt);
 }
 
 void Player::die()

@@ -1,6 +1,51 @@
 #include "game/player/weaponsystem.h"
 #include "game/weapons/weapon.h"
 #include "game/weapons/weaponfactory.h"
+#include "game/weapons/bow.h"
+
+void WeaponSystem::syncWithInventory(const std::array<std::string, 2>& slots, b2Body* player_body)
+{
+   // For now, the first slot weapon becomes the selected weapon
+   const auto& slot_0 = slots[0];
+
+   if (slot_0.empty())
+   {
+      _selected = nullptr;
+      return;
+   }
+
+   // Check if we already have this weapon selected
+   if (_selected && _selected->getName() == slot_0)
+   {
+      return;  // Already equipped
+   }
+
+   // Try to find existing weapon in _weapons vector
+   auto it = std::find_if(
+      _weapons.begin(),
+      _weapons.end(),
+      [&slot_0](const auto& w) { return w && w->getName() == slot_0; }
+   );
+
+   if (it != _weapons.end())
+   {
+      _selected = *it;
+      return;
+   }
+
+   // Create new weapon from factory
+   auto new_weapon = WeaponFactory::create(slot_0);
+   if (new_weapon)
+   {
+      // Special setup for bow - set launcher body
+      if (slot_0 == "Bow" && player_body)
+      {
+         std::dynamic_pointer_cast<Bow>(new_weapon)->setLauncherBody(player_body);
+      }
+      _weapons.push_back(new_weapon);
+      _selected = new_weapon;
+   }
+}
 
 void to_json(nlohmann::json& j, const WeaponSystem& d)
 {

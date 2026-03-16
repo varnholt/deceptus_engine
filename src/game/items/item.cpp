@@ -4,7 +4,7 @@ void Item::draw(sf::RenderTarget& /*target*/)
 {
 }
 
-void Item::update(const ItemUpdateData& /*data*/)
+void Item::update(const sf::Time& /*dt*/)
 {
 }
 

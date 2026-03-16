@@ -10,7 +10,7 @@ public:
    ItemLantern();
 
    void draw(sf::RenderTarget& target) override;
-   void update(const ItemUpdateData& data) override;
+   void update(const sf::Time& dt) override;
    void onEquipped() override;
    void onUnequipped() override;
    std::string getName() const override;
