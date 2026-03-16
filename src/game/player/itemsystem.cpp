@@ -2,15 +2,13 @@
 
 #include "game/items/itemfactory.h"
 
-void ItemSystem::update(const sf::Time& dt, const sf::Vector2f& player_position_px)
+void ItemSystem::update(const sf::Time& dt)
 {
-   Item::ItemUpdateData item_data{dt, player_position_px};
-
    for (auto& item : _slots)
    {
       if (item)
       {
-         item->update(item_data);
+         item->update(dt);
       }
    }
 }

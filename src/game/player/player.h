@@ -177,9 +177,6 @@ private:
    void traceJumpCurve();
    void keyPressed(sf::Keyboard::Key key);
 
-   void syncWeaponSystem();
-   void syncItemSystem();
-
    void drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>& current_cycle, const sf::Vector2f& draw_position_px);
    bool checkDamageDrawSkip() const;
    void updateHurtColor(const std::shared_ptr<Animation>& current_cycle);
