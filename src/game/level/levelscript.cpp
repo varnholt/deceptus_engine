@@ -1174,9 +1174,12 @@ namespace
 {
 void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
 {
-   auto& weapon_system = SaveState::getPlayerInfo()._weapons;
-   weapon_system._weapons.push_back(weapon);
-   weapon_system._selected = weapon;
+   auto* player = Player::getCurrent();
+   if (player)
+   {
+      player->getWeaponSystem()._weapons.push_back(weapon);
+      player->getWeaponSystem()._selected = weapon;
+   }
 }
 }  // namespace
 
