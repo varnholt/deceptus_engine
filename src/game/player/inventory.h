@@ -11,6 +11,7 @@ struct Inventory
    Inventory();
 
    using AddedCallback = std::function<void(const std::string&)>;
+   using RemovedCallback = std::function<void(const std::string&)>;
    using UpdatedCallback = std::function<void()>;
    using UsedCallback = std::function<bool(const std::string&)>;
 
@@ -27,9 +28,11 @@ struct Inventory
    void use(int32_t);
 
    void removeAddedCallback(const AddedCallback& callbackToRemove);
+   void removeRemovedCallback(const RemovedCallback& callbackToRemove);
    void removeUsedCallback(const UsedCallback& callbackToRemove);
 
    std::vector<AddedCallback> _added_callbacks;
+   std::vector<RemovedCallback> _removed_callbacks;
    std::vector<UpdatedCallback> _updated_callbacks;
    std::vector<UsedCallback> _used_callbacks;
 

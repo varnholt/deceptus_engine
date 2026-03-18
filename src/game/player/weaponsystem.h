@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <string>
 
 #include "json/json.hpp"
 
@@ -13,6 +14,8 @@ struct WeaponSystem
 {
    WeaponSystem() = default;
 
+   void onInventoryItemAdded(const std::string& item_name, b2Body* player_body);
+   void onInventoryItemRemoved(const std::string& item_name);
    void syncWithInventory(const std::array<std::string, 2>& slots, b2Body* player_body);
 
    std::shared_ptr<Weapon> _selected;

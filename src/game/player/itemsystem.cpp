@@ -2,6 +2,8 @@
 
 #include "game/items/itemfactory.h"
 
+#include <algorithm>
+
 void ItemSystem::update(const sf::Time& dt)
 {
    for (auto& item : _slots)
@@ -24,6 +26,50 @@ void ItemSystem::draw(sf::RenderTarget& target)
    }
 }
 
+void ItemSystem::onInventoryItemAdded(const std::string& item_name)
+{
+   auto it = std::find_if(
+      _items.begin(),
+      _items.end(),
+      [&item_name](const auto& item) { return item && item->getName() == item_name; }
+   );
+
+   if (it != _items.end())
+   {
+      return;
+   }
+
+   if (auto item = ItemFactory::create(item_name))
+   {
+      _items.push_back(item);
+   }
+}
+
+void ItemSystem::onInventoryItemRemoved(const std::string& item_name)
+{
+   auto it = std::find_if(
+      _items.begin(),
+      _items.end(),
+      [&item_name](const auto& item) { return item && item->getName() == item_name; }
+   );
+
+   if (it == _items.end())
+   {
+      return;
+   }
+
+   for (auto& slot : _slots)
+   {
+      if (slot == *it)
+      {
+         slot->onUnequipped();
+         slot = nullptr;
+      }
+   }
+
+   _items.erase(it);
+}
+
 void ItemSystem::syncWithInventory(const std::array<std::string, 2>& slots)
 {
    for (size_t i = 0; i < slots.size(); ++i)
@@ -38,13 +84,26 @@ void ItemSystem::syncWithInventory(const std::array<std::string, 2>& slots)
          }
          _slots[i] = nullptr;
       }
-      else if (!_slots[i] || _slots[i]->getName() != item_name)
+      else
       {
+         auto it = std::find_if(
+            _items.begin(),
+            _items.end(),
+            [&item_name](const auto& item) { return item && item->getName() == item_name; }
+         );
+
+         auto next_item = it != _items.end() ? *it : nullptr;
+         if (_slots[i] == next_item)
+         {
+            continue;
+         }
+
          if (_slots[i])
          {
             _slots[i]->onUnequipped();
          }
-         _slots[i] = ItemFactory::create(item_name);
+
+         _slots[i] = next_item;
          if (_slots[i])
          {
             _slots[i]->onEquipped();
