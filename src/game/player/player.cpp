@@ -159,17 +159,39 @@ void Player::initialize()
 
    // set up inventory callback to sync weapon and item systems
    auto& inventory = SaveState::getPlayerInfo()._inventory;
+   inventory._added_callbacks.push_back(
+      [this](const std::string& item_name)
+      {
+         _weapon_system.onInventoryItemAdded(item_name, _body);
+         _item_system.onInventoryItemAdded(item_name);
+      }
+   );
+
+   inventory._removed_callbacks.push_back(
+      [this](const std::string& item_name)
+      {
+         _weapon_system.onInventoryItemRemoved(item_name);
+         _item_system.onInventoryItemRemoved(item_name);
+      }
+   );
+
    inventory._updated_callbacks.push_back(
-      [this, inventory]()
+      [this, &inventory]()
       {
          _weapon_system.syncWithInventory(inventory._slots, _body);
          _item_system.syncWithInventory(inventory._slots);
       }
    );
 
+   for (const auto& item_name : inventory._items)
+   {
+      _weapon_system.onInventoryItemAdded(item_name, _body);
+      _item_system.onInventoryItemAdded(item_name);
+   }
+
    // initial sync
-   _weapon_system.syncWithInventory(SaveState::getPlayerInfo()._inventory._slots, _body);
-   _item_system.syncWithInventory(SaveState::getPlayerInfo()._inventory._slots);
+   _weapon_system.syncWithInventory(inventory._slots, _body);
+   _item_system.syncWithInventory(inventory._slots);
 }
 
 void Player::initializeLevel()

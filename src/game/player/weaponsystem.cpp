@@ -3,6 +3,66 @@
 #include "game/weapons/weaponfactory.h"
 #include "game/weapons/bow.h"
 
+#include <algorithm>
+
+namespace
+{
+void configureWeaponForPlayer(const std::shared_ptr<Weapon>& weapon, b2Body* player_body)
+{
+   if (!weapon || !player_body)
+   {
+      return;
+   }
+
+   if (auto bow = std::dynamic_pointer_cast<Bow>(weapon))
+   {
+      bow->setLauncherBody(player_body);
+   }
+}
+}  // namespace
+
+void WeaponSystem::onInventoryItemAdded(const std::string& item_name, b2Body* player_body)
+{
+   auto existing = std::find_if(
+      _weapons.begin(),
+      _weapons.end(),
+      [&item_name](const auto& weapon) { return weapon && weapon->getName() == item_name; }
+   );
+   if (existing != _weapons.end())
+   {
+      configureWeaponForPlayer(*existing, player_body);
+      return;
+   }
+
+   auto weapon = WeaponFactory::create(item_name);
+   if (!weapon)
+   {
+      return;
+   }
+
+   configureWeaponForPlayer(weapon, player_body);
+   _weapons.push_back(weapon);
+}
+
+void WeaponSystem::onInventoryItemRemoved(const std::string& item_name)
+{
+   const auto was_selected = _selected && _selected->getName() == item_name;
+
+   _weapons.erase(
+      std::remove_if(
+         _weapons.begin(),
+         _weapons.end(),
+         [&item_name](const auto& weapon) { return weapon && weapon->getName() == item_name; }
+      ),
+      _weapons.end()
+   );
+
+   if (was_selected)
+   {
+      _selected = nullptr;
+   }
+}
+
 void WeaponSystem::syncWithInventory(const std::array<std::string, 2>& slots, b2Body* player_body)
 {
    // For now, the first slot weapon becomes the selected weapon
@@ -17,34 +77,23 @@ void WeaponSystem::syncWithInventory(const std::array<std::string, 2>& slots, b2
    // Check if we already have this weapon selected
    if (_selected && _selected->getName() == slot_0)
    {
+      configureWeaponForPlayer(_selected, player_body);
       return;  // Already equipped
    }
 
-   // Try to find existing weapon in _weapons vector
-   auto it = std::find_if(
+   auto selected = std::find_if(
       _weapons.begin(),
       _weapons.end(),
-      [&slot_0](const auto& w) { return w && w->getName() == slot_0; }
+      [&slot_0](const auto& weapon) { return weapon && weapon->getName() == slot_0; }
    );
-
-   if (it != _weapons.end())
+   if (selected != _weapons.end())
    {
-      _selected = *it;
+      configureWeaponForPlayer(*selected, player_body);
+      _selected = *selected;
       return;
    }
 
-   // Create new weapon from factory
-   auto new_weapon = WeaponFactory::create(slot_0);
-   if (new_weapon)
-   {
-      // Special setup for bow - set launcher body
-      if (slot_0 == "Bow" && player_body)
-      {
-         std::dynamic_pointer_cast<Bow>(new_weapon)->setLauncherBody(player_body);
-      }
-      _weapons.push_back(new_weapon);
-      _selected = new_weapon;
-   }
+   _selected = nullptr;
 }
 
 void to_json(nlohmann::json& j, const WeaponSystem& d)

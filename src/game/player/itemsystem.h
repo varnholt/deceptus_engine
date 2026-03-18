@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <string>
 
 #include "game/items/item.h"
 
@@ -13,6 +14,8 @@ public:
 
    void update(const sf::Time& dt);
    void draw(sf::RenderTarget& target);
+   void onInventoryItemAdded(const std::string& item_name);
+   void onInventoryItemRemoved(const std::string& item_name);
 
    void syncWithInventory(const std::array<std::string, 2>& slots);
 
