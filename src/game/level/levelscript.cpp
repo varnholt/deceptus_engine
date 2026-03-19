@@ -694,6 +694,7 @@ LevelScript::~LevelScript()
    // remove 'item added' callback
    auto& inventory = SaveState::getPlayerInfo()._inventory;
    inventory.removeAddedCallback(_inventory_added_callback);
+   inventory.removeUsedCallback(_inventory_used_callback);
 
    stopScript();
 }
