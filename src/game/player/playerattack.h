@@ -33,8 +33,7 @@ struct PlayerAttack
       const std::shared_ptr<PlayerAnimation>& animation,
       const sf::Vector2f& player_pos_px,
       bool points_to_left,
-      bool in_air,
-      const WeaponSystem& weapon_system
+      bool in_air
    );
 
    bool isAttacking() const;
