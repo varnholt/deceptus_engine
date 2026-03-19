@@ -5,6 +5,7 @@
 #include "game/player/playeranimation.h"
 #include "game/player/playercontrols.h"
 #include "game/player/weaponsystem.h"
+#include "game/state/savestate.h"
 #include "game/weapons/bow.h"
 #include "game/weapons/gun.h"
 #include "game/weapons/playersword.h"
@@ -15,10 +16,11 @@ PlayerAttack::AttackResult PlayerAttack::attack(
    const std::shared_ptr<PlayerAnimation>& animation,
    const sf::Vector2f& player_pos_px,
    bool points_to_left,
-   bool in_air,
-   const WeaponSystem& weapon_system
+   bool in_air
 )
 {
+   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+
    if (!weapon_system._selected)
    {
       return AttackResult::Discarded;

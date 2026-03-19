@@ -125,11 +125,6 @@ public:
    PlayerPlatform& getPlatform();
    const Chunk& getChunk() const;
 
-   WeaponSystem& getWeaponSystem();
-   const WeaponSystem& getWeaponSystem() const;
-   ItemSystem& getItemSystem();
-   const ItemSystem& getItemSystem() const;
-
    void setToggleCallback(const ToggleCallback& callback);
 
 private:
@@ -247,9 +242,6 @@ private:
 
    Chunk _chunk{0, 0};
    AnimationPool _animation_pool{"data/sprites/animations.json"};
-
-   WeaponSystem _weapon_system;
-   ItemSystem _item_system;
 
    static Player* __current;
 };

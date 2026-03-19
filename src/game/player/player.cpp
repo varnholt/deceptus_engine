@@ -350,7 +350,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       _player_animation->getWallslideAnimation()->draw(color);
    }
 
-   const auto& weapon_system = _weapon_system;
+   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
    if (weapon_system._selected)
    {
       weapon_system._selected->draw(color);
@@ -870,7 +870,8 @@ void Player::updateAnimation(const sf::Time& dt)
    data._timepoint_attack_jumping_start = _attack._timepoint_attack_jumping_start;
    data._attacking = _attack.isAttacking();
 
-   data._weapon_type = (!_weapon_system._selected) ? WeaponType::None : _weapon_system._selected->getWeaponType();
+   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+   data._weapon_type = (!weapon_system._selected) ? WeaponType::None : weapon_system._selected->getWeaponType();
 
    if (_dash.hasMoreFrames())
    {
@@ -1060,26 +1061,6 @@ const Chunk& Player::getChunk() const
    return _chunk;
 }
 
-WeaponSystem& Player::getWeaponSystem()
-{
-   return _weapon_system;
-}
-
-const WeaponSystem& Player::getWeaponSystem() const
-{
-   return _weapon_system;
-}
-
-ItemSystem& Player::getItemSystem()
-{
-   return _item_system;
-}
-
-const ItemSystem& Player::getItemSystem() const
-{
-   return _item_system;
-}
-
 const PlayerBend& Player::getBend() const
 {
    return _bend;
@@ -1263,13 +1244,13 @@ void Player::updateAttack()
    // require a fresh button press each time the sword should be swung
    if (_attack._attack_button_pressed)
    {
-      const auto result =
-         _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir(), _weapon_system);
+      const auto result = _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
 
       // sword attack is combined with a small impulse move forward
-      auto uses_sword = [this]()
+      auto uses_sword = []()
       {
-         if (_weapon_system._selected)
+         const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+         if (weapon_system._selected)
          {
             return _weapon_system._selected->getWeaponType() == WeaponType::Sword;
          }
@@ -1704,7 +1685,7 @@ bool Player::isInAir() const
 
 void Player::updateWeapons(const sf::Time& dt)
 {
-   for (const auto& weapon : _weapon_system._weapons)
+   for (const auto& weapon : SaveState::getPlayerInfo()._weapons._weapons)
    {
       weapon->update({dt, _world});
    }
@@ -1712,7 +1693,7 @@ void Player::updateWeapons(const sf::Time& dt)
 
 void Player::updateItems(const sf::Time& dt)
 {
-   _item_system.update(dt);
+   SaveState::getPlayerInfo()._items.update(dt);
 }
 
 void Player::die()
