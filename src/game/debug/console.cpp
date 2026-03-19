@@ -69,12 +69,9 @@ namespace
 {
 void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
 {
-   auto* player = Player::getCurrent();
-   if (player)
-   {
-      player->getWeaponSystem()._weapons.push_back(weapon);
-      player->getWeaponSystem()._selected = weapon;
-   }
+   auto& weapons = SaveState::getPlayerInfo()._weapons;
+   weapons._weapons.push_back(weapon);
+   weapons._selected = weapon;
 }
 }  // namespace
 
@@ -249,12 +246,8 @@ void Console::execute()
       }
       else if (results.at(1) == "clear")
       {
-         auto* player = Player::getCurrent();
-         if (player)
-         {
-            player->getWeaponSystem()._weapons.clear();
-            player->getWeaponSystem()._selected.reset();
-         }
+         SaveState::getPlayerInfo()._weapons._weapons.clear();
+         SaveState::getPlayerInfo()._weapons._selected.reset();
          _log.emplace_back("cleared all weapons");
       }
    }
