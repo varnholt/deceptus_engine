@@ -157,41 +157,23 @@ void Player::initialize()
 
    initializeController();
 
-   // set up inventory callback to sync weapon and item systems
+   // set up inventory callback to sync item systems
    auto& inventory = SaveState::getPlayerInfo()._inventory;
-   inventory._added_callbacks.push_back(
-      [this](const std::string& item_name)
-      {
-         _weapon_system.onInventoryItemAdded(item_name, _body);
-         _item_system.onInventoryItemAdded(item_name);
-      }
-   );
+   inventory._added_callbacks.push_back([this](const std::string& item_name)
+                                        { SaveState::getPlayerInfo()._items.onInventoryItemAdded(item_name); });
 
-   inventory._removed_callbacks.push_back(
-      [this](const std::string& item_name)
-      {
-         _weapon_system.onInventoryItemRemoved(item_name);
-         _item_system.onInventoryItemRemoved(item_name);
-      }
-   );
+   inventory._removed_callbacks.push_back([this](const std::string& item_name)
+                                          { SaveState::getPlayerInfo()._items.onInventoryItemRemoved(item_name); });
 
-   inventory._updated_callbacks.push_back(
-      [this, &inventory]()
-      {
-         _weapon_system.syncWithInventory(inventory._slots, _body);
-         _item_system.syncWithInventory(inventory._slots);
-      }
-   );
+   inventory._updated_callbacks.push_back([this, &inventory]() { SaveState::getPlayerInfo()._items.syncWithInventory(inventory._slots); });
 
    for (const auto& item_name : inventory._items)
    {
-      _weapon_system.onInventoryItemAdded(item_name, _body);
-      _item_system.onInventoryItemAdded(item_name);
+      SaveState::getPlayerInfo()._items.onInventoryItemAdded(item_name);
    }
 
    // initial sync
-   _weapon_system.syncWithInventory(inventory._slots, _body);
-   _item_system.syncWithInventory(inventory._slots);
+   SaveState::getPlayerInfo()._items.syncWithInventory(inventory._slots);
 }
 
 void Player::initializeLevel()
@@ -357,7 +339,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    }
 
    // Draw equipped items
-   _item_system.draw(color);
+   SaveState::getPlayerInfo()._items.draw(color);
 
    // that y offset is to compensate the wonky box2d origin
    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
@@ -1252,7 +1234,7 @@ void Player::updateAttack()
          const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
          if (weapon_system._selected)
          {
-            return _weapon_system._selected->getWeaponType() == WeaponType::Sword;
+            return weapon_system._selected->getWeaponType() == WeaponType::Sword;
          }
          return false;
       };
