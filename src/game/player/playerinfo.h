@@ -8,6 +8,7 @@
 
 #include "game/player/extratable.h"
 #include "game/player/inventory.h"
+#include "game/player/itemsystem.h"
 #include "game/player/playerstats.h"
 #include "game/player/weaponsystem.h"
 
@@ -17,6 +18,7 @@ struct PlayerInfo
    ExtraTable _extra_table;
    PlayerStats _stats;
    WeaponSystem _weapons;
+   ItemSystem _items;
 
    std::string _name;
 };

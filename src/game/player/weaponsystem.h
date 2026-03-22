@@ -1,11 +1,14 @@
 #pragma once
 
+#include <array>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "json/json.hpp"
 
 class Weapon;
+struct b2Body;
 
 struct WeaponSystem
 {

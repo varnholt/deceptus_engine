@@ -5,6 +5,7 @@
 #include "game/effects/waterbubbles.h"
 #include "game/level/chunk.h"
 #include "game/level/gamenode.h"
+#include "game/player/itemsystem.h"
 #include "game/player/playeranimation.h"
 #include "game/player/playerattack.h"
 #include "game/player/playerattackdash.h"
@@ -18,6 +19,7 @@
 #include "game/player/playerjumptrace.h"
 #include "game/player/playerplatform.h"
 #include "game/player/playerspeed.h"
+#include "game/player/weaponsystem.h"
 
 #include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
@@ -33,6 +35,7 @@ class GameContactListener;
 struct ScreenTransition;
 class Weapon;
 struct WeaponSystem;
+class ItemSystem;
 
 class Player : public GameNode
 {
@@ -144,6 +147,7 @@ private:
    void updatePortal();
    void updateVelocity();
    void updateWeapons(const sf::Time& dt);
+   void updateItems(const sf::Time& dt);
    void updateJump();
    void updateWallslide(const sf::Time& dt);
    void updateWaterBubbles(const sf::Time& dt);

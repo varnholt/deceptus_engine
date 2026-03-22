@@ -1,5 +1,7 @@
 #include "inventory.h"
 
+#include "framework/tools/log.h"
+
 #include <ranges>
 
 using json = nlohmann::json;
@@ -12,29 +14,41 @@ Inventory::Inventory()
 void Inventory::add(const std::string& item)
 {
    _items.push_back(item);
-   std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
-   std::ranges::for_each(_added_callbacks, [&item](const auto& cb) { cb(item); });
 
    // fill empty slots with new items
    autoPopulate(item);
+
+   Log::Info() << _updated_callbacks.size();
+
+   std::ranges::for_each(_updated_callbacks, [](const auto& callback) { callback(); });
+   std::ranges::for_each(_added_callbacks, [&item](const auto& callback) { callback(item); });
 }
 
 void Inventory::remove(const std::string& item)
 {
    auto it = std::remove(_items.begin(), _items.end(), item);
+   const auto removed_count = static_cast<size_t>(std::distance(it, _items.end()));
    _items.erase(it, _items.end());
+
+   auto slot_cleared = false;
 
    // remove item from slots
    std::ranges::for_each(
       _slots,
-      [item](auto& slot)
+      [item, &slot_cleared](auto& slot)
       {
          if (slot == item)
          {
             slot.clear();
+            slot_cleared = true;
          }
       }
    );
+
+   if (removed_count > 0 || slot_cleared)
+   {
+      std::ranges::for_each(_removed_callbacks, [&item](const auto& cb) { cb(item); });
+   }
 
    // notify callbacks
    std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
@@ -42,8 +56,13 @@ void Inventory::remove(const std::string& item)
 
 void Inventory::clear()
 {
+   const auto removed_items = _items;
    _items.clear();
    std::ranges::for_each(_slots, [](auto& slot) { slot.clear(); });
+
+   std::ranges::for_each(
+      removed_items, [this](const auto& item) { std::ranges::for_each(_removed_callbacks, [&item](const auto& cb) { cb(item); }); }
+   );
 
    // notify callbacks
    std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
@@ -56,7 +75,32 @@ const std::vector<std::string>& Inventory::getItems() const
 
 void Inventory::resetKeys()
 {
+   std::vector<std::string> removed_keys;
+   for (const auto& key : _items)
+   {
+      if (key.starts_with("key"))
+      {
+         removed_keys.push_back(key);
+      }
+   }
+
    _items.erase(std::remove_if(_items.begin(), _items.end(), [](const auto& key) -> bool { return key.starts_with("key"); }), _items.end());
+
+   std::ranges::for_each(
+      _slots,
+      [](auto& slot)
+      {
+         if (slot.starts_with("key"))
+         {
+            slot.clear();
+         }
+      }
+   );
+
+   std::ranges::for_each(
+      removed_keys, [this](const auto& item) { std::ranges::for_each(_removed_callbacks, [&item](const auto& cb) { cb(item); }); }
+   );
+
    std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
 }
 
@@ -71,7 +115,24 @@ std::vector<std::string> Inventory::readItemNames() const
 
 void Inventory::selectItem(int32_t slot, const std::string& item)
 {
+   if (slot < 0 || slot >= static_cast<int32_t>(_slots.size()))
+   {
+      return;
+   }
+
    _slots[slot] = item;
+
+   // ensure one item is only selected in one slot
+   if (!item.empty())
+   {
+      const auto other_slot_index = 1 - slot;
+      if (_slots[other_slot_index] == item)
+      {
+         _slots[other_slot_index].clear();
+      }
+   }
+
+   std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
 }
 
 void Inventory::autoPopulate(const std::string& item)
@@ -131,6 +192,24 @@ void Inventory::removeAddedCallback(const AddedCallback& callback_to_remove)
          }
       ),
       _added_callbacks.end()
+   );
+}
+
+void Inventory::removeRemovedCallback(const RemovedCallback& callback_to_remove)
+{
+   _removed_callbacks.erase(
+      std::remove_if(
+         _removed_callbacks.begin(),
+         _removed_callbacks.end(),
+         [&callback_to_remove](const auto& callback)
+         {
+            const auto match = callback.target_type() == callback_to_remove.target_type() &&
+                               callback.template target<RemovedCallback>() == callback_to_remove.target<RemovedCallback>();
+
+            return match;
+         }
+      ),
+      _removed_callbacks.end()
    );
 }
 

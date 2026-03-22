@@ -19,6 +19,7 @@
 #include "game/event/eventdistributor.h"
 #include "game/level/level.h"
 #include "game/level/levels.h"
+#include "game/player/inventoryconfig.h"
 #include "game/player/player.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
@@ -356,6 +357,9 @@ void Game::loadLevel(LoadingMode loading_mode)
       // put the player in there
       _player->setWorld(_level->getWorld());
       _player->initializeLevel();
+
+      // set up inventory callbacks for ItemSystem (after save slot is selected)
+      InventoryConfig::setupItemSystemCallbacks(SaveState::getPlayerInfo()._inventory);
 
       // jump back to stored position, that's only for debugging purposes, not for checkpoints
       if (_restore_previous_position)

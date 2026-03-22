@@ -18,13 +18,16 @@
 #include "game/physics/onewaywall.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/player/inventorybasedcontrols.h"
+#include "game/player/itemsystem.h"
 #include "game/player/playeraudio.h"
 #include "game/player/playercontrolstate.h"
 #include "game/player/playerinfo.h"
 #include "game/player/weaponsystem.h"
 #include "game/state/displaymode.h"
 #include "game/state/savestate.h"
+#include "game/weapons/bow.h"
 #include "game/weapons/weapon.h"
+#include "game/weapons/weaponfactory.h"
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -316,6 +319,9 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    {
       weapon_system._selected->draw(color);
    }
+
+   // Draw equipped items
+   SaveState::getPlayerInfo()._items.draw(color);
 
    // that y offset is to compensate the wonky box2d origin
    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
@@ -1535,6 +1541,7 @@ void Player::update(const sf::Time& dt)
    updateFootsteps();
    updatePreviousBodyState();
    updateWeapons(dt);
+   updateItems(dt);
    updateWallslide(dt);
    updateWaterBubbles(dt);
    updateSpawn();
@@ -1646,6 +1653,11 @@ void Player::updateWeapons(const sf::Time& dt)
    {
       weapon->update({dt, _world});
    }
+}
+
+void Player::updateItems(const sf::Time& dt)
+{
+   SaveState::getPlayerInfo()._items.update(dt);
 }
 
 void Player::die()

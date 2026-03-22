@@ -8,8 +8,8 @@ void to_json(nlohmann::json& j, const PlayerInfo& data)
       {"name", data._name},
       {"inventory", data._inventory},
       {"extras", data._extra_table},
-      {"stats", data._extra_table},
-      {"weapons", data._weapons}
+      {"stats", data._stats},
+      {"weapons", data._weapons},
    };
 }
 

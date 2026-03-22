@@ -18,6 +18,14 @@
         "title": "Chrono-Skeleton Key",
         "description": "Crafted by Chrono-Smiths, this key unlocks doors frozen in time. Its intricate design hints at mysteries, allowing passage to hidden realms where echoes of history linger. The surprise lies in its seamless compatibility with locks guarding yesteryear's secrets."
     },
+    "locker_key": {
+        "x_px": 38,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38,
+        "title": "Locker Key",
+        "description": "I shiny key."
+    },
     "sword": {
         "x_px": 76,
         "y_px": 0,
@@ -50,13 +58,13 @@
         "title": "Temporal Grimoire",
         "description": "Penned by a Chrono-Scribe, this grimoire unravels time's threads, revealing lost spells. Its pages hold the key to manipulating reality, a coveted tome for seekers of forgotten wisdom."
     },
-    "locker_key": {
-        "x_px": 38,
+    "lantern": {
+        "x_px": 228,
         "y_px": 0,
         "width_px": 38,
         "height_px": 38,
-        "title": "Locker Key",
-        "description": "I shiny key."
+        "title": "Lantern",
+        "description": "A lantern ripped off of itch.io."
     }
     
 }
