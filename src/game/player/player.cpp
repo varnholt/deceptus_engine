@@ -156,24 +156,6 @@ void Player::initialize()
    _controls->addKeypressedCallback([this](sf::Keyboard::Key key) { keyPressed(key); });
 
    initializeController();
-
-   // set up inventory callback to sync item systems
-   auto& inventory = SaveState::getPlayerInfo()._inventory;
-   inventory._added_callbacks.push_back([this](const std::string& item_name)
-                                        { SaveState::getPlayerInfo()._items.onInventoryItemAdded(item_name); });
-
-   inventory._removed_callbacks.push_back([this](const std::string& item_name)
-                                          { SaveState::getPlayerInfo()._items.onInventoryItemRemoved(item_name); });
-
-   inventory._updated_callbacks.push_back([this, &inventory]() { SaveState::getPlayerInfo()._items.syncWithInventory(inventory._slots); });
-
-   for (const auto& item_name : inventory._items)
-   {
-      SaveState::getPlayerInfo()._items.onInventoryItemAdded(item_name);
-   }
-
-   // initial sync
-   SaveState::getPlayerInfo()._items.syncWithInventory(inventory._slots);
 }
 
 void Player::initializeLevel()
