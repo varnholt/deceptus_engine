@@ -435,6 +435,8 @@ set(GAME_FILES
     src/game/player/health.h
     src/game/player/inventory.cpp
     src/game/player/inventory.h
+    src/game/player/inventoryconfig.cpp
+    src/game/player/inventoryconfig.h
     src/game/player/inventorybasedcontrols.cpp
     src/game/player/inventorybasedcontrols.h
     src/game/player/inventoryitemdescriptionreader.cpp
