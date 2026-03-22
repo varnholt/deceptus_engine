@@ -4,6 +4,11 @@
 
 #include <algorithm>
 
+// as opposed to the weapon system, the item system is directly linked to the inventory.
+// the idea is that for "supported" items, instances are being created as "Item" instance.
+// Items have their own update and draw functions, so they can have their own behavior and
+// visuals while being equipped.
+
 void ItemSystem::update(const sf::Time& dt)
 {
    for (auto& item : _slots)
