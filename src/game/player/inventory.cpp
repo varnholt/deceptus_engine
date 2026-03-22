@@ -1,5 +1,7 @@
 #include "inventory.h"
 
+#include "framework/tools/log.h"
+
 #include <ranges>
 
 using json = nlohmann::json;
@@ -16,8 +18,10 @@ void Inventory::add(const std::string& item)
    // fill empty slots with new items
    autoPopulate(item);
 
-   std::ranges::for_each(_updated_callbacks, [](const auto& cb) { cb(); });
-   std::ranges::for_each(_added_callbacks, [&item](const auto& cb) { cb(item); });
+   Log::Info() << _updated_callbacks.size();
+
+   std::ranges::for_each(_updated_callbacks, [](const auto& callback) { callback(); });
+   std::ranges::for_each(_added_callbacks, [&item](const auto& callback) { callback(item); });
 }
 
 void Inventory::remove(const std::string& item)

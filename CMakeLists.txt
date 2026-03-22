@@ -110,6 +110,8 @@ set(GAME_FILES
     src/framework/tools/resourcepool.h
     src/framework/tools/scopeexit.cpp
     src/framework/tools/scopeexit.h
+    src/framework/tools/stringutils.cpp
+    src/framework/tools/stringutils.h
     src/framework/tools/stopwatch.cpp
     src/framework/tools/stopwatch.h
     src/framework/tools/timer.cpp
