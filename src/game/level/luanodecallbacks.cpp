@@ -1464,7 +1464,7 @@ int32_t addSample(lua_State* state)
       return 0;
    }
 
-   const auto sample = lua_tostring(state, 1);
+   const std::string sample = lua_tostring(state, 1);
    auto node = OBJINSTANCE;
    if (!node)
    {
@@ -1490,7 +1490,7 @@ int32_t playSample(lua_State* state)
       return 0;
    }
 
-   const auto sample = lua_tostring(state, 1);
+   const std::string sample = lua_tostring(state, 1);
    const auto volume = static_cast<float>(lua_tonumber(state, 2));
 
    auto node = OBJINSTANCE;
@@ -1518,7 +1518,7 @@ int32_t debug(lua_State* state)
       return 0;
    }
 
-   const auto message = lua_tostring(state, 1);
+   const std::string message = lua_tostring(state, 1);
    Log::Info() << message;
 
    return 0;
@@ -1600,7 +1600,7 @@ int32_t registerHitSamples(lua_State* state)
    std::vector<std::pair<std::string, float>> samples;
    for (auto index = 2; index <= argc; index++)
    {
-      const auto sample_path = lua_tostring(state, index);
+      const std::string sample_path = lua_tostring(state, index);
 
       auto volume = 1.0f;
       if (index + 1 <= argc)
