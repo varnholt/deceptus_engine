@@ -10,11 +10,6 @@ struct Inventory
 {
    Inventory();
 
-   using AddedCallback = std::function<void(const std::string&)>;
-   using RemovedCallback = std::function<void(const std::string&)>;
-   using UpdatedCallback = std::function<void()>;
-   using UsedCallback = std::function<bool(const std::string&)>;
-
    void add(const std::string&);
    void remove(const std::string&);
    bool has(const std::string& item_key) const;
@@ -27,9 +22,15 @@ struct Inventory
    void autoPopulate(const std::string& item);
    void use(int32_t);
 
-   void removeAddedCallback(const AddedCallback& callbackToRemove);
-   void removeRemovedCallback(const RemovedCallback& callbackToRemove);
-   void removeUsedCallback(const UsedCallback& callbackToRemove);
+   using AddedCallback = std::function<void(const std::string&)>;
+   using RemovedCallback = std::function<void(const std::string&)>;
+   using UpdatedCallback = std::function<void()>;
+   using UsedCallback = std::function<bool(const std::string&)>;
+
+   void removeAddedCallback(const AddedCallback& callback_to_remove);
+   void removeRemovedCallback(const RemovedCallback& callback_to_remove);
+   void removeUpdatedCallback(const UpdatedCallback& callback_to_remove);
+   void removeUsedCallback(const UsedCallback& callback_to_remove);
 
    std::vector<AddedCallback> _added_callbacks;
    std::vector<RemovedCallback> _removed_callbacks;

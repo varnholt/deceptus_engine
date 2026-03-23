@@ -146,7 +146,7 @@ void from_json(const nlohmann::json& j, SaveState& data)
    }
 }
 
-void SaveState::updatePlayerStatsToFile(const std::string& filename) const
+void SaveState::writePlayerStatsToFile(const std::string& filename) const
 {
    // open the file and read its current contents
    std::ifstream input_file(filename);

@@ -14,6 +14,9 @@
 
 struct PlayerInfo
 {
+   PlayerInfo();
+
+   InventoryConfig _inventory_config;
    Inventory _inventory;
    ExtraTable _extra_table;
    PlayerStats _stats;
