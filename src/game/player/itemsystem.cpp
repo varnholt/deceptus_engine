@@ -31,21 +31,23 @@ void ItemSystem::draw(sf::RenderTarget& target)
    }
 }
 
-void ItemSystem::onInventoryItemAdded(const std::string& item_name)
+std::shared_ptr<Item> ItemSystem::onInventoryItemAdded(const std::string& item_name)
 {
    auto it = std::find_if(_items.begin(), _items.end(), [&item_name](const auto& item) { return item && item->getName() == item_name; });
 
    // if item already exist, don't bother
    if (it != _items.end())
    {
-      return;
+      return *it;
    }
 
    // create item instance if supported
-   if (auto item = ItemFactory::create(item_name))
+   auto item = ItemFactory::create(item_name);
+   if (item)
    {
       _items.push_back(item);
    }
+   return item;
 }
 
 void ItemSystem::onInventoryItemRemoved(const std::string& item_name)
@@ -77,27 +79,26 @@ void ItemSystem::syncInventorySlots(const std::array<std::string, 2>& inventory_
 
       // resolve inventory item name to an instantiated item.
       // empty or unknown names intentionally map to nullptr (clear slot).
-      std::shared_ptr<Item> next_item = nullptr;
+      std::shared_ptr<Item> instanciated_item = nullptr;
 
       if (!item_name.empty())
       {
          auto it =
             std::find_if(_items.begin(), _items.end(), [&item_name](const auto& item) { return item && item->getName() == item_name; });
 
-         // keep sync independent from inventory callback order by creating the
-         // item on demand if it has not been registered yet.
+         // create item if it doesn't exist yet (e.g., added to inventory but not equipped before)
          if (it == _items.end())
          {
-            onInventoryItemAdded(item_name);
-            it =
-               std::find_if(_items.begin(), _items.end(), [&item_name](const auto& item) { return item && item->getName() == item_name; });
+            instanciated_item = onInventoryItemAdded(item_name);
          }
-
-         next_item = it != _items.end() ? *it : nullptr;
+         else
+         {
+            instanciated_item = *it;
+         }
       }
 
       // same pointer means no state transition: keep current equip state unchanged.
-      if (_slots[i] == next_item)
+      if (_slots[i] == instanciated_item)
       {
          continue;
       }
@@ -111,7 +112,7 @@ void ItemSystem::syncInventorySlots(const std::array<std::string, 2>& inventory_
          _slots[i]->onUnequipped();
       }
 
-      _slots[i] = next_item;
+      _slots[i] = instanciated_item;
 
       if (_slots[i])
       {

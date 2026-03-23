@@ -24,10 +24,10 @@ void InventoryConfig::linkInventoryToItemSystem(Inventory& inventory, ItemSystem
       inventory.removeUpdatedCallback(_updated_callback);
    }
 
-   // create new callbacks
-   _added_callback = [&item_system](const std::string& item_name) { item_system.onInventoryItemAdded(item_name); };
-   _removed_callback = [&item_system](const std::string& item_name) { item_system.onInventoryItemRemoved(item_name); };
-   _updated_callback = [&item_system]() { item_system.syncInventorySlots(SaveState::getPlayerInfo()._inventory._slots); };
+   // create new callbacks - access via SaveState to survive PlayerInfo replacement
+   _added_callback = [](const std::string& item_name) { SaveState::getPlayerInfo()._items.onInventoryItemAdded(item_name); };
+   _removed_callback = [](const std::string& item_name) { SaveState::getPlayerInfo()._items.onInventoryItemRemoved(item_name); };
+   _updated_callback = []() { SaveState::getPlayerInfo()._items.syncInventorySlots(SaveState::getPlayerInfo()._inventory._slots); };
 
    // register callbacks
    inventory._added_callbacks.push_back(_added_callback);
