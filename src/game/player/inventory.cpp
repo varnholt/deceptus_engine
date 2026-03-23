@@ -6,6 +6,29 @@
 
 using json = nlohmann::json;
 
+namespace
+{
+// helper to remove a callback from a vector
+template <typename Callback>
+void removeCallbackFromVector(std::vector<Callback>& callbacks, const Callback& callback_to_remove)
+{
+   callbacks.erase(
+      std::remove_if(
+         callbacks.begin(),
+         callbacks.end(),
+         [&callback_to_remove](const auto& callback)
+         {
+            const auto match = callback.target_type() == callback_to_remove.target_type() &&
+                               callback.template target<Callback>() == callback_to_remove.template target<Callback>();
+
+            return match;
+         }
+      ),
+      callbacks.end()
+   );
+}
+}  // namespace
+
 Inventory::Inventory()
 {
    _descriptions = InventoryItemDescriptionReader::readItemDescriptions();
@@ -179,75 +202,22 @@ void Inventory::use(int32_t slot)
 
 void Inventory::removeAddedCallback(const AddedCallback& callback_to_remove)
 {
-   _added_callbacks.erase(
-      std::remove_if(
-         _added_callbacks.begin(),
-         _added_callbacks.end(),
-         [&callback_to_remove](const auto& callback)
-         {
-            const auto match = callback.target_type() == callback_to_remove.target_type() &&
-                               callback.template target<AddedCallback>() == callback_to_remove.target<AddedCallback>();
-
-            return match;
-         }
-      ),
-      _added_callbacks.end()
-   );
+   removeCallbackFromVector(_added_callbacks, callback_to_remove);
 }
 
 void Inventory::removeRemovedCallback(const RemovedCallback& callback_to_remove)
 {
-   _removed_callbacks.erase(
-      std::remove_if(
-         _removed_callbacks.begin(),
-         _removed_callbacks.end(),
-         [&callback_to_remove](const auto& callback)
-         {
-            const auto match = callback.target_type() == callback_to_remove.target_type() &&
-                               callback.template target<RemovedCallback>() == callback_to_remove.target<RemovedCallback>();
-
-            return match;
-         }
-      ),
-      _removed_callbacks.end()
-   );
+   removeCallbackFromVector(_removed_callbacks, callback_to_remove);
 }
 
 void Inventory::removeUpdatedCallback(const UpdatedCallback& callback_to_remove)
 {
-   _updated_callbacks.erase(
-      std::remove_if(
-         _updated_callbacks.begin(),
-         _updated_callbacks.end(),
-         [&callback_to_remove](const auto& callback)
-         {
-            const auto match = callback.target_type() == callback_to_remove.target_type() &&
-                               callback.template target<UpdatedCallback>() == callback_to_remove.target<UpdatedCallback>();
-
-            return match;
-         }
-      ),
-      _updated_callbacks.end()
-   );
+   removeCallbackFromVector(_updated_callbacks, callback_to_remove);
 }
 
 void Inventory::removeUsedCallback(const UsedCallback& callback_to_remove)
 {
-   _used_callbacks.erase(
-      std::remove_if(
-         _used_callbacks.begin(),
-         _used_callbacks.end(),
-         [&callback_to_remove](const auto& callback)
-         {
-            const auto match = callback.target_type() == callback_to_remove.target_type() &&
-                               callback.template target<UsedCallback>() == callback_to_remove.target<UsedCallback>();
-
-            return match;
-         }
-
-      ),
-      _used_callbacks.end()
-   );
+   removeCallbackFromVector(_used_callbacks, callback_to_remove);
 }
 
 bool Inventory::has(const std::string& item_key) const

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "player/inventory.h"
+
 #include <functional>
 
 struct Inventory;
