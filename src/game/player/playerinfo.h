@@ -8,6 +8,7 @@
 
 #include "game/player/extratable.h"
 #include "game/player/inventory.h"
+#include "game/player/inventoryconfig.h"
 #include "game/player/itemsystem.h"
 #include "game/player/playerstats.h"
 #include "game/player/weaponsystem.h"
