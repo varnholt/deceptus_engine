@@ -14,7 +14,7 @@ public:
 
    void update(const sf::Time& dt);
    void draw(sf::RenderTarget& target);
-   void onInventoryItemAdded(const std::string& item_name);
+   std::shared_ptr<Item> onInventoryItemAdded(const std::string& item_name);
    void onInventoryItemRemoved(const std::string& item_name);
    void syncInventorySlots(const std::array<std::string, 2>& slots);
 
