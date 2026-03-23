@@ -41,7 +41,7 @@ struct SaveState
    static void deserializeFromFile(const std::string& filename = "data/config/savestate.json");
    static void serializeToFile(const std::string& filename = "data/config/savestate.json");
 
-   void updatePlayerStatsToFile(const std::string& filename = "data/config/savestate.json") const;
+   void writePlayerStatsToFile(const std::string& filename = "data/config/savestate.json") const;
 
 private:
    static std::string serialize();

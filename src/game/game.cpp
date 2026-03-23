@@ -358,9 +358,6 @@ void Game::loadLevel(LoadingMode loading_mode)
       _player->setWorld(_level->getWorld());
       _player->initializeLevel();
 
-      // set up inventory callbacks for ItemSystem (after save slot is selected)
-      InventoryConfig::setupItemSystemCallbacks(SaveState::getPlayerInfo()._inventory);
-
       // jump back to stored position, that's only for debugging purposes, not for checkpoints
       if (_restore_previous_position)
       {

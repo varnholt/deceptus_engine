@@ -1670,7 +1670,7 @@ void Player::die()
    stats._death_count_current_level++;
 
    // need to write the stats to JSON now because they will be re-loaded when the player restarts at the last checkpoint
-   SaveState::getCurrent().updatePlayerStatsToFile();
+   SaveState::getCurrent().writePlayerStatsToFile();
 }
 
 void Player::reset()
