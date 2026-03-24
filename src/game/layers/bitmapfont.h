@@ -19,10 +19,12 @@ struct BitmapFont
 {
    /// \brief creates an unloaded bitmap font.
    BitmapFont() = default;
+
    /// \brief loads the glyph atlas texture and builds character-to-rect mappings.
    /// \param texture path to the bitmap font texture.
    /// \param map path to the glyph map text file.
    void load(const std::string& texture, const std::string& map);
+
    /// \brief resolves each character in a string to its atlas rectangle.
    /// \param text text to convert into drawable glyph coordinates.
    /// \return ordered list of glyph texture rectangles for known characters.

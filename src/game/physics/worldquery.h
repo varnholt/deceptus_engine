@@ -31,6 +31,7 @@ public:
    /// \brief creates a body-query callback with an ignore list.
    /// \param ignore_list bodies that should not be added to the query result.
    explicit BodyQueryCallback(const std::unordered_set<b2Body*>& ignore_list = {});
+
    /// \brief stores the fixture body unless it is present in the ignore list.
    /// \param fixture fixture reported by box2d.
    /// \return true to continue iterating through remaining fixtures.
@@ -73,6 +74,7 @@ struct OctreeNode
    /// \brief prints body counts per leaf cell for a fixed depth grid.
    /// \param max_depth depth used to format and print the leaf grid.
    void debugBodyCounts(int32_t max_depth) const;
+
    /// \brief collects rectangle bounds from leaf nodes up to the requested depth.
    /// \param depth current traversal depth.
    /// \param max_depth depth at which to collect leaf rectangles.
@@ -86,6 +88,7 @@ private:
    /// \param max_depth depth where counts are collected.
    /// \param index flattened index offset for this subtree.
    void countBodiesInLeaves(std::vector<int32_t>& leaf_body_counts, int32_t depth, int32_t max_depth, int32_t index) const;
+
    /// \brief splits this node into four children and queries each child region.
    /// \param world physics world queried for child nodes.
    /// \param depth depth used for child node construction.
@@ -147,6 +150,7 @@ std::vector<b2Body*> retrieveBodiesInsideRectOfTypes(
 /// \param attack_rect search rectangle in sfml coordinates.
 /// \return collided nodes with the specific hitbox rectangle that intersected.
 std::vector<WorldQuery::CollidedNode> findNodesByHitbox(const sf::FloatRect& attack_rect);
+
 /// \brief finds Lua nodes whose translated hitboxes intersect any rectangle in a set.
 /// \param attack_rects search rectangles in sfml coordinates.
 /// \return collided nodes with the first intersecting hitbox rectangle per node.

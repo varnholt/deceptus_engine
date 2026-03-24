@@ -13,8 +13,10 @@ public:
 
    /// \brief polls sfml events, forwards them to imgui, and handles window close requests.
    void processEvents();
+
    /// \brief renders configuration controls and applies edits directly to the singleton config.
    void draw();
+
    /// \brief shuts down imgui-sfml resources.
    void close();
 

@@ -15,6 +15,7 @@ public:
    /// \param f Callback executed at scope exit.
    ///
    ScopeExit(const ExitFunction& f);
+
    ///
    /// \brief Runs the stored exit callback.
    ///

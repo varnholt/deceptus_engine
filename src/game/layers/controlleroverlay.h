@@ -15,6 +15,7 @@ class ControllerOverlay
 public:
    /// \brief loads controller overlay layers from data/game/controller.psd.
    ControllerOverlay();
+
    /// \brief draws the controller base and highlights currently pressed inputs.
    /// \param window SFML render target used for overlay output.
    /// \param RenderStates render state overrides passed to layer draw calls.

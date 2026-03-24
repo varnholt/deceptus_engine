@@ -30,8 +30,10 @@ public:
    /// \brief creates a dust mechanism with no particles configured yet.
    /// \param parent parent node in the scene graph.
    Dust(GameNode* parent = nullptr);
+
    /// \brief unregisters the optional flow-field texture change listener.
    virtual ~Dust() override;
+
    /// \brief returns the mechanism registry name.
    /// \return string view containing `Dust`.
    std::string_view objectName() const override;
@@ -39,10 +41,12 @@ public:
    /// \brief advances particle motion using flow-field direction and configured wind.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief draws all particles as batched triangle quads with age-based alpha.
    /// \param target render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
    /// \brief returns the clip rectangle used for simulation and visibility queries.
    /// \return clip rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

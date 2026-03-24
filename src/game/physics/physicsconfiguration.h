@@ -88,6 +88,7 @@ struct PhysicsConfiguration
    /// \brief loads configuration values from a json file and keeps defaults for missing keys.
    /// \param filename path to the physics configuration json file.
    void deserializeFromFile(const std::string& filename = "data/config/physics.json");
+
    /// \brief writes the current configuration values to a json file.
    /// \param filename path to the physics configuration json file.
    void serializeToFile(const std::string& filename = "data/config/physics.json");
@@ -100,6 +101,7 @@ private:
    /// \brief serializes the configuration to formatted json text.
    /// \return json document containing current configuration values.
    std::string serialize();
+
    /// \brief parses configuration values from a json string after resetting to defaults.
    /// \param data json text to parse.
    void deserialize(const std::string& data);

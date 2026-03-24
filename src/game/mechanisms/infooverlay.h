@@ -23,10 +23,12 @@ public:
    /// \brief advances overlay timing and updates sprite alpha based on the active phase.
    /// \param delta_time elapsed frame time.
    void update(const sf::Time& delta_time) override;
+
    /// \brief draws the overlay sprite, optionally in a fullscreen orthographic view.
    /// \param color color render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
    /// \brief returns bounds for mechanism queries.
    /// \return `std::nullopt` because this mechanism has no collision bounds.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -39,6 +41,7 @@ public:
 
 private:
    using FloatSeconds = std::chrono::duration<float>;
+
    /// \brief groups timing and display options that control overlay playback.
    struct Settings
    {

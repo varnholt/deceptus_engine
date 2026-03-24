@@ -9,6 +9,7 @@ class BoomEffectEnvelope
 {
 public:
    BoomEffectEnvelope() = default;
+
    /// \brief destroys the envelope instance through the base interface.
    virtual ~BoomEffectEnvelope() = default;
 

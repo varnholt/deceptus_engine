@@ -48,6 +48,7 @@ public:
    /// \brief checks activation conditions and opens the first page when triggered.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the trigger rectangle used for player intersection tests.
    /// \return dialogue trigger rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -55,9 +56,11 @@ public:
    /// \brief reports whether this dialogue is currently marked as active.
    /// \return true when the dialogue is active and waiting for completion or reset.
    bool isActive() const;
+
    /// \brief marks the dialogue as active or inactive.
    /// \param active true to mark as active.
    void setActive(bool active);
+
    /// \brief shows the next page and finalizes the sequence when the last page was shown.
    void showNext();
 
@@ -65,6 +68,7 @@ private:
    /// \brief replaces runtime tags like `<player>` and `<br>` inside dialogue text.
    /// \param str message text to modify in place.
    void replaceTags(std::string& str);
+
    /// \brief replaces every occurrence of one token inside a string.
    /// \param str text to modify in place.
    /// \param what token to search for.

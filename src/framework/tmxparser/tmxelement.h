@@ -23,6 +23,7 @@ struct TmxElement
    };
 
    TmxElement() = default;
+
    ///
    /// \brief Destroys the element.
    ///

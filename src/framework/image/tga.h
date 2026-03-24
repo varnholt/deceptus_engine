@@ -23,6 +23,7 @@ struct TGAHeader
    /// \brief Initializes object state for this type.
    ///
    TGAHeader() = default;
+
    ///
    /// \brief Initializes object state for this type.
    /// \param w W.
@@ -30,6 +31,7 @@ struct TGAHeader
    /// \param bits Bits.
    ///
    TGAHeader(uint16_t w, uint16_t h, uint8_t bits);
+
    ///
    /// \brief Writes data to the output target.
    /// \param stream Binary input stream.

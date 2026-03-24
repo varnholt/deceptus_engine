@@ -13,8 +13,10 @@ public:
 
    /// \brief processes window and ImGui events, including close requests.
    void processEvents();
+
    /// \brief draws the configuration controls and applies edited values to the shared config.
    void draw();
+
    /// \brief shuts down ImGui-SFML resources used by the configuration window.
    void close();
 

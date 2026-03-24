@@ -15,6 +15,7 @@ struct ScriptProperty
 /// \param j destination json object.
 /// \param p source property to serialize.
 void to_json(nlohmann::json& j, const ScriptProperty& p);
+
 /// \brief deserializes a ScriptProperty from a json object.
 /// \param j source json object containing name and value fields.
 /// \param p destination property to fill.

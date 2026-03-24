@@ -15,6 +15,7 @@ public:
    /// \brief creates a water-damage controller.
    /// \param parent owning game node in the scene graph.
    WaterDamage(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "WaterDamage".
    std::string_view objectName() const override;
@@ -22,9 +23,11 @@ public:
    /// \brief tracks submersion time and damages the player at configured intervals.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief reads damage amount and hurt interval from tmx properties.
    /// \param data deserialization data containing water-damage settings.
    void setup(const GameDeserializeData& data);
+
    /// \brief reports that this mechanism has no local collision rectangle.
    /// \return std::nullopt.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

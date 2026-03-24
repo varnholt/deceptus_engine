@@ -18,6 +18,7 @@ public:
 
    /// \brief lazily loads animation settings from disk once.
    void initialize();
+
    /// \brief resets initialization state and loads settings from disk again.
    void reload();
 
@@ -35,6 +36,7 @@ public:
    /// \param target render target that receives animation geometry.
    /// \param animations optional name filter; when empty, all managed animations are drawn.
    void drawAnimations(sf::RenderTarget& target, const std::vector<std::string>& animations = {});
+
    /// \brief draws managed animations to color and normal targets, optionally filtered by names.
    /// \param target render target for color output.
    /// \param normal render target for normal-map output.
@@ -44,6 +46,7 @@ public:
    /// \brief updates all managed animations and removes finished non-looping ones when garbage collection is enabled.
    /// \param dt elapsed frame time since the previous update.
    void updateAnimations(const sf::Time& dt);
+
    /// \brief exposes the current map of managed runtime animation instances.
    /// \return reference to the managed animation map keyed by animation name.
    const std::map<std::string, std::shared_ptr<Animation>>& getAnimations();
@@ -58,6 +61,7 @@ public:
 
    /// \brief serializes current settings back to the json file path owned by this pool.
    void saveToJson();
+
    /// \brief clears current settings and animations, then reloads settings from json.
    void reloadFromJson();
 
@@ -77,6 +81,7 @@ private:
    /// \brief parses animation settings json text, populates settings, and loads referenced textures.
    /// \param data json text containing animation definitions.
    void deserialize(const std::string& data);
+
    /// \brief reads animation settings from a file and forwards content to json deserialization.
    /// \param filename path to the settings file to read.
    void deserializeFromFile(const std::string& filename);

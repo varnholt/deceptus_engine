@@ -25,6 +25,7 @@ public:
    /// \brief creates an extra mechanism.
    /// \param parent parent node in the scene graph.
    Extra(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism registry name.
    /// \return string view containing `Extra`.
    std::string_view objectName() const override;
@@ -38,12 +39,15 @@ public:
    /// \param target render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
+
    /// \brief updates animations and handles pickup checks against the player rectangle.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the collectible interaction rectangle.
    /// \return extra rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
    /// \brief marks the extra as spawned and starts spawn animation playback when configured.
    void spawn();
 

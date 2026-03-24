@@ -8,6 +8,7 @@ class BoomEffectEnvelopeSine : public BoomEffectEnvelope
 {
 public:
    BoomEffectEnvelopeSine() = default;
+
    /// \brief evaluates a sine-based waveform that fades out as normalized time increases.
    /// \param t normalized elapsed time in the active shake interval.
    /// \return signed shake amplitude scaled by configured envelope amplitude.

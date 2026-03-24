@@ -20,6 +20,7 @@ public:
       /// \brief updates motion on a rotated lemniscate path and advances animation frames.
       /// \param dt elapsed frame time.
       void update(const sf::Time& dt);
+
       /// \brief updates the sprite texture rectangle for the current animation frame.
       void updateTextureRect();
 
@@ -42,6 +43,7 @@ public:
    /// \brief creates a fireflies mechanism.
    /// \param parent parent node in the scene graph.
    Fireflies(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism registry name.
    /// \return string view containing `Fireflies`.
    std::string_view objectName() const override;
@@ -50,12 +52,15 @@ public:
    /// \param target render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
    /// \brief updates all firefly instances.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns bounds for mechanism queries.
    /// \return `std::nullopt` because this mechanism does not expose collision bounds.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
    /// \brief initializes area, count, animation speed, and randomized movement parameters from TMX data.
    /// \param data deserialize context with TMX object and properties.
    void deserialize(const GameDeserializeData& data);

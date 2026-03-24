@@ -24,6 +24,7 @@ public:
 
    /// \brief advances the attack dash by one frame and applies horizontal force to the player body.
    void update(const sf::Time& /*dt*/);
+
    /// \brief starts a new attack dash sequence when a valid direction is provided.
    /// \param input dash direction and player body used for force application.
    void reset(const DashInput& input);

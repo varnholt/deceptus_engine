@@ -30,6 +30,7 @@ public:
 
    /// \brief constructs an empty menu page before PSD layers are loaded.
    InGameMenuPage() = default;
+
    /// \brief destroys the page through a polymorphic base pointer.
    virtual ~InGameMenuPage() = default;
 
@@ -37,12 +38,14 @@ public:
    /// \param window render target that receives the page layers.
    /// \param states render states used for drawing.
    virtual void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+
    /// \brief advances page-specific state and animations.
    /// \param dt elapsed frame time passed by the menu manager.
    virtual void update(const sf::Time& dt) = 0;
 
    /// \brief starts the page show transition and performs an immediate update step.
    virtual void show();
+
    /// \brief starts the page hide transition unless another animation is active.
    virtual void hide();
 
@@ -51,19 +54,25 @@ public:
 
    /// \brief handles a left navigation action.
    virtual void left() {};
+
    /// \brief handles a right navigation action.
    virtual void right() {};
+
    /// \brief handles an up navigation action.
    virtual void up() {};
+
    /// \brief handles a down navigation action.
    virtual void down() {};
 
    /// \brief starts a transition that slides the page out to the left.
    void moveOutToLeft();
+
    /// \brief starts a transition that slides the page in from the left.
    void moveInFromLeft();
+
    /// \brief starts a transition that slides the page out to the right.
    void moveOutToRight();
+
    /// \brief starts a transition that slides the page in from the right.
    void moveInFromRight();
 
@@ -74,6 +83,7 @@ public:
 protected:
    /// \brief loads layers from the configured PSD file into drawable page structures.
    void load();
+
    /// \brief computes the current horizontal offset for move animations.
    /// \return current x offset in pixels, or std::nullopt when move animation finished.
    std::optional<float> getMoveOffset() const;

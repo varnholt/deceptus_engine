@@ -45,9 +45,11 @@ public:
 
    std::vector<std::shared_ptr<LightInstance>> _lights;
    sf::Shader _light_shader;
+
    /// \brief increases all ambient light channels by the same amount.
    /// \param amount value added to each ambient rgba channel.
    void increaseAmbient(float amount);
+
    /// \brief decreases all ambient light channels by the same amount.
    /// \param amount value subtracted from each ambient rgba channel.
    void decreaseAmbient(float amount);
@@ -83,6 +85,7 @@ private:
    /// \param target render target.
    /// \param light active light for which occluder shadows are generated.
    void drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightInstance> light) const;
+
    /// \brief refreshes shader uniforms for active lights, ambient color, and target resolution.
    /// \param target render target.
    void updateLightShader(sf::RenderTarget& target);

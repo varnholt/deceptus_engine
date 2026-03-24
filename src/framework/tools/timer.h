@@ -31,6 +31,7 @@ public:
    };
 
    Timer() = default;
+
    ///
    /// \brief Destroys the timer.
    ///
@@ -41,6 +42,7 @@ public:
    /// \param scope Update scope currently being processed.
    ///
    static void update(Scope scope);
+
    ///
    /// \brief Registers a new timer callback.
    /// \param interval Delay between callback invocations.

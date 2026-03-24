@@ -14,6 +14,7 @@ public:
 
    /// \brief registers pause and resume samples with the audio system.
    void initialize();
+
    /// \brief plays one of the registered game-state sound effects.
    /// \param effect sound effect identifier to trigger.
    void play(SoundEffect effect);

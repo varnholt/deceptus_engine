@@ -26,6 +26,7 @@ public:
    /// \param parent parent node in the scene graph.
    /// \param data deserialize context with tmx properties and world access.
    BubbleCube(GameNode* parent, const GameDeserializeData& data);
+
    /// \brief returns the mechanism type identifier.
    /// \return non-owning string view with value "BubbleCube".
    std::string_view objectName() const override;
@@ -34,9 +35,11 @@ public:
    /// \param target render target.
    /// \param normal normal render target.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
    /// \brief updates motion, contact logic, popping conditions, and respawn state.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the original platform bounds in pixel coordinates.
    /// \return rectangle for culling and gameplay checks.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -45,6 +48,7 @@ public:
    /// \param contact box2d contact object.
    /// \param other other fixture node involved in the contact.
    void beginContact(b2Contact* contact, FixtureNode* other);
+
    /// \brief handles end-contact callbacks.
    /// \param other other fixture node that ended contact.
    void endContact(FixtureNode* other);
@@ -52,19 +56,26 @@ public:
 private:
    /// \brief synchronizes sprite and translated bounds with the box2d body position.
    void updatePosition();
+
    /// \brief handles timed respawn and fade-in after the bubble has popped.
    void updateRespawnCondition();
+
    /// \brief evaluates whether current flags require popping the platform.
    void updatePoppedCondition();
+
    /// \brief checks whether the bubble is pressed into surrounding bodies and should pop.
    void updatePopOnCollisionCondition();
+
    /// \brief tracks standing time and flags a pop when max contact duration is exceeded.
    /// \param dt elapsed frame time.
    void updateMaxDurationCondition(const sf::Time& dt);
+
    /// \brief updates whether the player's foot sensor overlaps the bubble top area.
    void updateFootSensorContact();
+
    /// \brief detects jump-off events from this bubble on the jump start frame.
    void updateJumpedOffPlatformCondition();
+
    /// \brief updates prismatic motor speed for bobbing, sinking, and retracting behavior.
    /// \param dt elapsed frame time.
    void updateMotorSpeed(const sf::Time& dt);
@@ -120,6 +131,7 @@ private:
    b2PrismaticJoint* _joint{nullptr};
    float _motor_time_s{0.0f};
    float _motor_speed{0.0f};
+
    /// \brief advances the animation phase used by the regular floating animation.
    void updateSpriteIndex();
 };

@@ -33,6 +33,7 @@ struct GameConfiguration
    /// \brief loads configuration values from a json file.
    /// \param filename source configuration file path.
    void deserializeFromFile(const std::string& filename = "data/config/game.json");
+
    /// \brief writes current configuration values to a json file.
    /// \param filename destination configuration file path.
    void serializeToFile(const std::string& filename = "data/config/game.json");
@@ -40,6 +41,7 @@ struct GameConfiguration
    /// \brief returns the built-in default configuration values.
    /// \return shared default configuration object.
    static GameConfiguration& getDefaults();
+
    /// \brief returns the active game configuration, loading from disk on first access.
    /// \return singleton runtime configuration object.
    static GameConfiguration& getInstance();
@@ -51,6 +53,7 @@ private:
    /// \brief serializes the current settings into formatted json text.
    /// \return json string containing the GameConfiguration object.
    std::string serialize();
+
    /// \brief parses json text and applies known configuration values.
    /// \param data json payload containing a GameConfiguration object.
    void deserialize(const std::string& data);

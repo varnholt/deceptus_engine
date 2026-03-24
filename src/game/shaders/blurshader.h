@@ -14,14 +14,17 @@ public:
    /// \param render_texture full-resolution source texture used by the shader.
    /// \param render_texture_scaled scaled render texture used by the blur pass pipeline.
    void initialize(const std::shared_ptr<sf::RenderTexture>& render_texture, const std::shared_ptr<sf::RenderTexture>& render_texture_scaled);
+
    /// \brief updates blur uniforms such as sample dimensions, radius, and blend factor.
    void update();
+
    /// \brief clears the main render texture to transparent black.
    void clearTexture();
 
    /// \brief returns the full-resolution render texture used by the blur shader.
    /// \return shared pointer reference to the source render texture.
    const std::shared_ptr<sf::RenderTexture>& getRenderTexture() const;
+
    /// \brief returns the scaled render texture used in the blur pipeline.
    /// \return shared pointer reference to the scaled render texture.
    const std::shared_ptr<sf::RenderTexture>& getRenderTextureScaled() const;

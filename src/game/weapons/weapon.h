@@ -23,8 +23,10 @@ public:
 
    /// \brief constructs a weapon with type set to none.
    Weapon() = default;
+
    /// \brief virtual destructor for polymorphic cleanup.
    virtual ~Weapon() = default;
+
    /// \brief returns the runtime weapon type tag.
    /// \return weapon type enum value.
    WeaponType getWeaponType() const;
@@ -32,14 +34,18 @@ public:
    /// \brief draws weapon-specific visuals.
    /// \param target render target used for weapon rendering.
    virtual void draw(sf::RenderTarget& target);
+
    /// \brief updates weapon state for the current frame.
    /// \param data per-frame timing and world context.
    virtual void update(const WeaponUpdateData& data);
+
    /// \brief performs optional post-construction initialization.
    virtual void initialize();
+
    /// \brief returns nominal damage dealt by this weapon.
    /// \return damage value used by weapon hits.
    virtual int32_t getDamage() const;
+
    /// \brief returns a stable weapon name string.
    /// \return weapon name used for lookup and debugging.
    virtual std::string getName() const = 0;

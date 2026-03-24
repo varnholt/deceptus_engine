@@ -15,6 +15,7 @@ public:
 
    /// \brief stores the current high-resolution timestamp as the new start time.
    void reset();
+
    /// \brief returns the elapsed duration since the most recent reset().
    /// \return high-resolution duration between now and the stored start time.
    HighResDuration durationSinceSpawn() const;

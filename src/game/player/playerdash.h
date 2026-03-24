@@ -27,11 +27,14 @@ struct PlayerDash
    /// \brief processes dash activation and applies dash forces while the dash is active.
    /// \param input dash command, environment state, facing direction reference, and player body.
    void update(const DashInput& input);
+
    /// \brief cancels the active dash immediately without running remaining dash frames.
    void abort();
+
    /// \brief reports whether dash force application is still active.
    /// \return true when there are remaining dash frames.
    bool hasMoreFrames() const;
+
    /// \brief finalizes dash state, restores gravity, and removes dash stamina drain.
    /// \param player_body player body whose gravity scale is restored.
    void reset(b2Body* player_body);

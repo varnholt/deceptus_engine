@@ -16,9 +16,11 @@ public:
    /// \param path directory containing ambient_occlusion.json and referenced assets.
    /// \param ao_base_filename fallback texture base name used when json fields are missing.
    void load(const std::filesystem::path& path, const std::string& ao_base_filename);
+
    /// \brief draws only ao sprite chunks near the player's current chunk.
    /// \param window SFML render target that receives ambient occlusion sprites.
    void draw(sf::RenderTarget& window);
+
    /// \brief gets the render depth configured for this ao layer.
    /// \return z index used to sort the layer in the scene renderer.
    int32_t getZ() const;
@@ -28,6 +30,7 @@ public:
    {
       /// \brief creates an empty, invalid configuration.
       Config() = default;
+
       /// \brief loads ambient occlusion settings from json and resolves file paths.
       /// \param path directory containing ambient_occlusion.json.
       /// \param base_filename fallback base filename for generated defaults.

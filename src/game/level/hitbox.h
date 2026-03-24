@@ -9,6 +9,7 @@ struct Hitbox
    /// \param rect rectangle in local pixel coordinates.
    /// \param offset translation applied when querying world-space bounds.
    Hitbox(const sf::FloatRect& rect, const sf::Vector2f& offset);
+
    /// \brief returns the rectangle translated by the stored offset.
    /// \return rectangle in pixel coordinates after adding _offset_px.
    sf::FloatRect getRectTranslated() const;

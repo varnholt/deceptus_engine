@@ -23,12 +23,14 @@ extern std::vector<EventCallback> _event_listeners;
 /// \param group_id mechanism group id associated with the event.
 /// \param enabled true when the mechanism was enabled, false when disabled.
 void onEnabled(const std::string& object_id, const std::string& group_id, bool enabled);
+
 /// \brief broadcasts a named mechanism event with a lua-compatible payload.
 /// \param object_id id of the mechanism that emitted the event.
 /// \param object_group mechanism group that emitted the event.
 /// \param event_name event identifier, for example "pressed".
 /// \param value event payload passed to listeners.
 void onEvent(const std::string& object_id, const std::string& object_group, const std::string& event_name, const LuaVariant& value);
+
 /// \brief removes all registered enabled and event listeners.
 void clear();
 

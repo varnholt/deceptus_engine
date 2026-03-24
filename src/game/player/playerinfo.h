@@ -33,6 +33,7 @@ struct PlayerInfo
 /// \param j destination json object.
 /// \param d player profile data to serialize.
 void to_json(nlohmann::json& j, const PlayerInfo& d);
+
 /// \brief deserializes player profile fields from json and re-links inventory item callbacks.
 /// \param j source json object.
 /// \param d player profile instance that receives deserialized values.

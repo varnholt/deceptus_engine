@@ -20,6 +20,7 @@ public:
    /// \brief reports whether keyboard input was used most recently.
    /// \return true when the last recorded input source is keyboard.
    bool isKeyboardUsed() const;
+
    /// \brief reports whether controller input was used most recently.
    /// \return true when the last recorded input source is controller.
    bool isControllerUsed() const;

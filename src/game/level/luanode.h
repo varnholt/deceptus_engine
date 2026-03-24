@@ -31,6 +31,7 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \param parent parent node in the scene graph.
    /// \param filename lua script file path used by this node.
    LuaNode(GameNode* parent, const std::string& filename);
+
    /// \brief stops script execution and releases runtime resources.
    ~LuaNode();
 
@@ -42,6 +43,7 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \param window color render target.
    /// \param normal normal-map render target.
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
+
    /// \brief returns cached world-space bounding box built from active hitboxes.
    /// \return bounding rectangle in pixels, or std::nullopt when no hitboxes exist.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -49,26 +51,33 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \brief reports whether this enemy can be damaged by the player.
    /// \return true because LuaNode enemies are destructible.
    bool isDestructible() const override;
+
    /// \brief exposes current hitbox list used for player attacks.
    /// \return reference to the internal hitbox vector.
    const std::vector<Hitbox>& getHitboxes() override;
 
    /// \brief initializes script state, body fixtures, and shaders.
    void initialize();
+
    /// \brief applies parsed enemy description data to runtime fields.
    void deserializeEnemyDescription();
 
    /// \brief creates lua state, registers callbacks, and executes the script file.
    void setupLua();
+
    /// \brief loads sprite texture from script properties and creates the first sprite.
    void setupTexture();
+
    /// \brief syncs rendered position from box2d body coordinates.
    void updatePosition();
+
    /// \brief applies script-facing velocity constraints and friction behavior.
    void updateVelocity();
+
    /// \brief updates weapon instances attached to this node.
    /// \param dt elapsed frame time.
    void updateWeapons(const sf::Time& dt);
+
    /// \brief refreshes hitbox world positions based on current node position.
    void updateHitboxOffsets();
 
@@ -394,6 +403,7 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \brief loads collision shapes from an auxiliary TMX file.
    /// \param tmxFile path to the TMX file.
    void loadShapesFromTmx(const std::string& tmxFile);
+
    /// \brief loads hitbox definitions from an auxiliary TMX file.
    /// \param tmxFile path to the TMX file.
    void loadHitboxesFromTmx(const std::string& tmxFile);
@@ -410,49 +420,64 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \brief calls the script hit callback with incoming damage amount.
    /// \param damage damage amount.
    void luaHit(int32_t damage);
+
    /// \brief calls the script initialize callback.
    void luaInitialize();
+
    /// \brief calls the script movedTo callback with current node position.
    void luaMovedTo();
+
    /// \brief calls the script setStartPosition callback.
    void luaSetStartPosition();
+
    /// \brief calls the script playerMovedTo callback with player position.
    void luaPlayerMovedTo();
+
    /// \brief calls the script retrieveProperties callback.
    void luaRetrieveProperties();
+
    /// \brief pushes a vector path as a lua number table.
    /// \param vec path points in pixels.
    void luaSendPath(const std::vector<sf::Vector2f>& vec);
+
    /// \brief calls setPath callback with this node patrol path.
    void luaSendPatrolPath();
+
    /// \brief calls timeout callback after a timer has fired.
    /// \param timerId script-defined timer identifier.
    void luaTimeout(int32_t timerId);
+
    /// \brief calls update callback with frame delta in seconds.
    /// \param dt elapsed frame time.
    void luaUpdate(const sf::Time& dt);
+
    /// \brief calls writeProperty callback with one key-value pair.
    /// \param key property key.
    /// \param value property value.
    void luaWriteProperty(const std::string& key, const std::string& value);
+
    /// \brief calls collisionWithPlayer callback when fixtures collide with player.
    void luaCollisionWithPlayer();
+
    /// \brief calls smashed callback and marks node as smashed.
    void luaSmashed();
 
    // property accessors
    /// \brief applies property-dependent native side effects after lua updates.
    void synchronizeProperties();
+
    /// \brief reads a boolean property from the script property map.
    /// \param key property name.
    /// \param default_value value returned when property is missing.
    /// \return property value or \p default_value.
    bool getPropertyBool(const std::string& key, bool default_value = false);
+
    /// \brief reads a floating-point property from the script property map.
    /// \param key property name.
    /// \param default_value value returned when property is missing.
    /// \return property value or \p default_value.
    double getPropertyDouble(const std::string& key, double default_value = 0.0);
+
    /// \brief reads an integer property from the script property map.
    /// \param key property name.
    /// \param default_value value returned when property is missing.
@@ -462,6 +487,7 @@ struct LuaNode : public GameMechanism, public GameNode
    // box2d related
    /// \brief creates fixtures and collision metadata from current properties and shapes.
    void setupBody();
+
    /// \brief closes lua state and frees owned native resources.
    void stopScript();
 

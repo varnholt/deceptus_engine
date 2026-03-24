@@ -18,12 +18,14 @@ public:
    /// \param texture_path file path of the texture image on disk.
    /// \param texture_chunks chunk list in which this texture is considered relevant.
    explicit LazyTexture(const std::filesystem::path& texture_path, std::vector<Chunk>& texture_chunks);
+
    /// \brief destroys the lazy texture instance and joins any pending loader thread.
    virtual ~LazyTexture() = default;
 
    /// \brief decides whether texture data should be loaded, uploaded, kept, or released.
    /// \param player_chunk chunk currently occupied by the player.
    void update(const Chunk& player_chunk);
+
    /// \brief returns the currently uploaded texture, if available.
    /// \return shared texture pointer reference used by render code.
    const std::shared_ptr<sf::Texture>& getTexture() const;
@@ -31,8 +33,10 @@ public:
 private:
    /// \brief starts background loading of image pixels from disk into a pending buffer.
    void loadTexture();
+
    /// \brief releases uploaded texture and any pending image data.
    void unloadTexture();
+
    /// \brief uploads a loaded pending image to GPU texture memory on the main thread.
    void uploadTexture();
 

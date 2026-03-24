@@ -13,6 +13,7 @@ struct TmxProperties : public TmxElement
 {
 public:
    TmxProperties() = default;
+
    ///
    /// \brief Parses child `<property>` elements into `_map`.
    /// \param e XML element for `<properties>`.

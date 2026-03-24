@@ -18,6 +18,7 @@ public:
    /// \brief creates a static light mechanism instance.
    /// \param parent owning game node in the scene graph.
    StaticLight(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "StaticLight".
    std::string_view objectName() const override;
@@ -26,6 +27,7 @@ public:
    /// \param target render target.
    /// \param color secondary render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& color) override;
+
    /// \brief updates procedural flicker amount from global time.
    /// \param time elapsed frame time, unused directly.
    void update(const sf::Time& time) override;

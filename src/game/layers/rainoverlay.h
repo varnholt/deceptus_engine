@@ -60,6 +60,7 @@ public:
    /// \param target SFML render target used for rain rendering.
    /// \param normal unused normal-map target required by the weather overlay interface.
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
+
    /// \brief updates drop motion, surface intersections, and splash lifetimes.
    /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt) override;

@@ -17,19 +17,23 @@ public:
    /// \brief creates a moveable box mechanism.
    /// \param node parent node in the scene graph.
    MoveableBox(GameNode* node);
+
    /// \brief returns the mechanism registry name.
    /// \return string view containing `MoveableBox`.
    std::string_view objectName() const override;
 
    /// \brief preloads the looping push sound sample.
    void preload() override;
+
    /// \brief draws the moveable box sprite.
    /// \param color color render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
    /// \brief syncs sprite position from box2d and starts or stops pushing audio by velocity.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the current sprite bounds.
    /// \return box bounds in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -50,6 +54,7 @@ private:
    /// \brief creates the dynamic beveled box body and collision fixture.
    /// \param world shared box2d world.
    void setupBody(const std::shared_ptr<b2World>& world);
+
    /// \brief initializes the body transform from the current sprite position.
    void setupTransform();
 

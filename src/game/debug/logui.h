@@ -11,6 +11,7 @@
 namespace LogUiBuffer
 {
 using SysClockTimePoint = std::chrono::time_point<std::chrono::system_clock>;
+
 /// \brief appends one log entry to the thread-safe ui buffer and trims old entries.
 /// \param time_point timestamp captured when the log message was emitted.
 /// \param level severity level of the log message.
@@ -38,8 +39,10 @@ public:
 
    /// \brief processes sfml window events and forwards them to imgui.
    void processEvents();
+
    /// \brief advances imgui state and draws buffered log lines into the viewer window.
    void draw();
+
    /// \brief shuts down imgui-sfml resources used by the log viewer.
    void close();
 

@@ -23,6 +23,7 @@ struct InventoryItemDescription
 /// \param j json object receiving sprite bounds, text fields, and properties.
 /// \param d description source data.
 void to_json(nlohmann::json& j, const InventoryItemDescription& d);
+
 /// \brief deserializes an inventory item description from json fields.
 /// \param j json object with atlas coordinates and text data.
 /// \param d description target to populate.

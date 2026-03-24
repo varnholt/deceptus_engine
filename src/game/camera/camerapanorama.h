@@ -15,10 +15,12 @@ public:
 
    /// \brief updates the panorama offset and applies snap-back when no look input is active.
    void update();
+
    /// \brief sets or clears a specific look-state bit.
    /// \param look look direction or state flag to modify.
    /// \param enable true to set the flag, false to clear it.
    void updateLookState(Look look, bool enable);
+
    /// \brief replaces the current look offset with a new target vector.
    /// \param desired desired panorama offset in pixels.
    void updateLookVector(const sf::Vector2f& desired);
@@ -26,6 +28,7 @@ public:
    /// \brief handles key-press input that starts or steers camera panorama mode.
    /// \param event pressed-key event from SFML input dispatch.
    void processKeyPressedEvents(const sf::Event::KeyPressed* event);
+
    /// \brief handles key-release input that stops or unsets panorama directions.
    /// \param event released-key event from SFML input dispatch.
    void processKeyReleasedEvents(const sf::Event::KeyReleased* event);
@@ -33,6 +36,7 @@ public:
    /// \brief checks whether keyboard panorama mode is currently active.
    /// \return true when the active look-state flag is set.
    bool isKeyboardLookActive() const;
+
    /// \brief returns the current camera panorama offset.
    /// \return look vector in pixel coordinates.
    const sf::Vector2f& getLookVector() const;

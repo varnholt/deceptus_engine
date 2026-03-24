@@ -38,9 +38,11 @@ public:
    /// \param color color render target.
    /// \param normal normal render target.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
    /// \brief updates crusher state machine, motion, and collision transform.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the configured crusher area in pixel coordinates.
    /// \return rectangle used for culling and editor bounds.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -52,6 +54,7 @@ public:
 private:
    /// \brief updates body transform and velocity to follow the animated blade position.
    void updateTransform();
+
    /// \brief builds kinematic crusher fixtures for deadly spike and push volume.
    /// \param world physics world that owns the crusher body.
    void setupBody(const std::shared_ptr<b2World>& world);
@@ -59,12 +62,16 @@ private:
    /// \brief advances blade offset for the current state using easing functions.
    /// \param dt elapsed frame time.
    void step(const sf::Time& dt);
+
    /// \brief advances the interval state machine between idle, extract, and retract.
    void updateState();
+
    /// \brief updates sprite scaling and positions to match current blade offset.
    void updateSpritePositions();
+
    /// \brief triggers a camera shake boom once during extraction when allowed.
    void startBoomEffect();
+
    /// \brief resets the boom trigger guard after retraction has progressed.
    void stopBoomEffect();
 

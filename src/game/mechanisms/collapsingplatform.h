@@ -57,19 +57,23 @@ public:
    /// \param parent owning game node in the scene graph.
    /// \param data deserialize context with tmx object data and world pointers.
    CollapsingPlatform(GameNode* parent, const GameDeserializeData& data);
+
    /// \brief returns the mechanism type identifier.
    /// \return non-owning string view with value "CollapsingPlatform".
    std::string_view objectName() const override;
 
    /// \brief preloads the crumble sound used while the platform is shaking.
    void preload() override;
+
    /// \brief draws all visible platform blocks.
    /// \param target render target.
    /// \param normal normal render target.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
    /// \brief updates collapse timing, block animation, and respawn behavior.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the platform bounds in pixel coordinates.
    /// \return rectangle used for culling and respawn overlap checks.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -78,6 +82,7 @@ public:
    /// \param contact box2d contact object.
    /// \param other other fixture node involved in the contact.
    void beginContact(b2Contact* /*contact*/, FixtureNode* other);
+
    /// \brief clears foot contact when the player foot sensor leaves the platform.
    /// \param other other fixture node that ended contact.
    void endContact(FixtureNode* other);
@@ -88,14 +93,18 @@ public:
 private:
    /// \brief updates sprite positions and texture rectangles for all blocks.
    void updateBlockSprites();
+
    /// \brief advances collapse destruction frames and falling offsets while collapsed.
    /// \param dt elapsed frame time.
    void updateBlockDestruction(const sf::Time& dt);
+
    /// \brief advances collapse timer and starts respawn when allowed.
    /// \param dt elapsed frame time.
    void updateRespawn(const sf::Time& dt);
+
    /// \brief applies shake offsets to blocks while collapse countdown is active.
    void updateShakeBlocks();
+
    /// \brief enters collapsed state and disables the physics body.
    void collapse();
 
@@ -123,6 +132,7 @@ private:
    b2Fixture* _fixture = nullptr;
    b2Vec2 _position_m;
    b2PolygonShape _shape;
+
    /// \brief resets every block to its initial animation state.
    void resetAllBlocks();
 };

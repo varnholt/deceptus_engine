@@ -16,15 +16,19 @@ public:
    /// \brief creates a gateway mechanism and preloads gateway sound samples.
    /// \param parent parent node in the scene graph.
    Gateway(GameNode* parent = nullptr);
+
    /// \brief unregisters this gateway from the global gateway registry.
    virtual ~Gateway();
+
    /// \brief returns the mechanism registry name.
    /// \return string view containing `Gateway`.
    std::string_view objectName() const override;
+
    /// \brief draws gateway layers, rotating side parts, void shader effect, and eye animation.
    /// \param target render target.
    /// \param normal normal-map render target (unused).
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
+
    /// \brief updates activation state, side animations, eye tracking, and optional teleport use.
    /// \param dt elapsed frame time.
    virtual void update(const sf::Time& dt);
@@ -32,6 +36,7 @@ public:
    /// \brief initializes gateway geometry, visuals, shader resources, and object properties.
    /// \param data deserialize context with TMX object data and resource paths.
    void setup(const GameDeserializeData& data);
+
    /// \brief returns bounds for mechanism queries.
    /// \return `std::nullopt` because gateway interaction uses internal checks.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -53,6 +58,7 @@ private:
    {
       /// \brief updates the side sprite transform from angle, distance, and offset.
       void update();
+
       /// \brief resets side transform values to the default idle configuration.
       void reset();
 
@@ -81,6 +87,7 @@ private:
       /// \brief draws the currently active eye animation.
       /// \param target render target.
       void draw(sf::RenderTarget& target);
+
       /// \brief updates iris state, animation playback, and gaze tracking towards the player.
       /// \param dt elapsed frame time.
       /// \param state current gateway activation state.
@@ -114,6 +121,7 @@ private:
    struct PortalState
    {
       sf::Time _elapsed_time;
+
       /// \brief resets elapsed time for the current step.
       void resetTime();
    };
@@ -193,6 +201,7 @@ private:
    /// \brief loads and configures the repeating noise texture used by the void shader.
    /// \param filename texture filename to load.
    void loadNoiseTexture(const std::string& filename);
+
    /// \brief renders the animated shader-based void effect at the gateway center.
    /// \param target render target.
    void drawVoid(sf::RenderTarget& target);

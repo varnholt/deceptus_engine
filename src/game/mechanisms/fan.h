@@ -20,6 +20,7 @@ public:
      /// \brief creates a fan mechanism.
      /// \param parent parent node in the scene graph.
      Fan(GameNode* parent = nullptr);
+
      /// \brief returns the mechanism registry name.
      /// \return string view containing `Fan`.
      std::string_view objectName() const override;
@@ -28,12 +29,15 @@ public:
      /// \param color color render target.
      /// \param normal normal-map render target (unused).
      void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
      /// \brief updates tile animation, power ramping, and wind collision with the player.
      /// \param dt elapsed frame time.
      void update(const sf::Time& dt) override;
+
      /// \brief returns the full fan area used for wind checks.
      /// \return fan rectangle in pixels.
      std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
      /// \brief enables or disables the fan and resets startup or shutdown ramping.
      /// \param enabled true to enable airflow, false to begin ramping down.
      void setEnabled(bool enabled) override;

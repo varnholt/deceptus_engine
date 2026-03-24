@@ -22,6 +22,7 @@ public:
    void update(const sf::Time& dt);
 
    using KeypressedCallback = std::function<void(sf::Keyboard::Key)>;
+
    /// \brief registers a callback invoked whenever a key press event is processed.
    /// \param callback callback that receives the pressed sfml key code.
    void addKeypressedCallback(const KeypressedCallback& callback);
@@ -34,15 +35,18 @@ public:
    /// \brief handles a keyboard key press and refreshes internal key-bit state.
    /// \param key lookup key.
    void keyboardKeyPressed(sf::Keyboard::Key key);
+
    /// \brief handles a keyboard key release and clears internal key-bit state.
    /// \param key lookup key.
    void keyboardKeyReleased(sf::Keyboard::Key key);
+
    /// \brief synchronizes key-bit state with current realtime keyboard state.
    void forceSync();
 
    /// \brief gets the raw bit mask of pressed keyboard actions.
    /// \return current key bit field.
    int getKeysPressed() const;
+
    /// \brief overwrites the raw pressed-key bit field.
    /// \param keys new key bit field.
    void setKeysPressed(int32_t keys);
@@ -50,16 +54,20 @@ public:
    /// \brief determines whether camera-panorama control input is currently active.
    /// \return true when look key or right-stick movement exceeds configured thresholds.
    bool isCpanControlActive() const;
+
    /// \brief queries the current state of a controller button.
    /// \param button_enum SDL gamepad button enum value.
    /// \return true when that controller button is currently pressed.
    bool isControllerButtonPressed(int32_t button_enum) const;
+
    /// \brief determines whether jump input is active from keyboard or controller.
    /// \return true when jump is pressed.
    bool isButtonAPressed() const;
+
    /// \brief determines whether action input is active from keyboard or controller.
    /// \return true when action is pressed.
    bool isButtonBPressed() const;
+
    /// \brief determines whether slot-1 input is active from keyboard or controller.
    /// \return true when slot 1 is pressed.
    bool isButtonXPressed() const;  // slot 1
@@ -69,9 +77,11 @@ public:
    /// \brief determines whether upward digital input is active.
    /// \return true when up is pressed.
    bool isUpButtonPressed() const;
+
    /// \brief determines whether downward digital input is active.
    /// \return true when down is pressed.
    bool isDownButtonPressed() const;
+
    /// \brief determines whether drop-through input is active.
    /// \return true when jump is held while moving down.
    bool isDroppingDown() const;
@@ -79,17 +89,21 @@ public:
    /// \brief determines whether horizontal movement input currently points right.
    /// \return true when right movement is active.
    bool isMovingRight() const;
+
    /// \brief determines whether horizontal movement input currently points left.
    /// \return true when left movement is active.
    bool isMovingLeft() const;
+
    /// \brief determines whether movement input currently points down.
    /// \param analog_threshold minimum absolute stick value needed for analog down input.
    /// \return true when down movement is active.
    bool isMovingDown(float analog_threshold = 0.3f) const;
+
    /// \brief determines whether movement input currently points up.
    /// \param analog_threshold minimum absolute stick value needed for analog up input.
    /// \return true when up movement is active.
    bool isMovingUp(float analog_threshold = 0.3f) const;
+
    /// \brief determines whether any horizontal movement input is active.
    /// \return true when either left or right movement is active.
    bool isMovingHorizontally() const;
@@ -97,6 +111,7 @@ public:
    /// \brief gets cached joystick state collected by the controller integration.
    /// \return current controller info snapshot.
    const GameControllerInfo& getJoystickInfo() const;
+
    /// \brief stores the latest joystick state snapshot.
    /// \param joystickInfo controller state to cache for later queries.
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
@@ -104,6 +119,7 @@ public:
    /// \brief reports whether horizontal movement was active during the previous update.
    /// \return true when the previous frame had horizontal movement.
    bool wasMoving() const;
+
    /// \brief stores previous-frame horizontal movement state.
    /// \param was_moving true when horizontal movement was active.
    void setWasMoving(bool was_moving);
@@ -111,6 +127,7 @@ public:
    /// \brief reports whether left movement was active during the previous update.
    /// \return true when previous-frame left movement was active.
    bool wasMovingLeft() const;
+
    /// \brief stores previous-frame left movement state.
    /// \param was_moving_left true when left movement was active.
    void setWasMovingLeft(bool was_moving_left);
@@ -118,6 +135,7 @@ public:
    /// \brief reports whether right movement was active during the previous update.
    /// \return true when previous-frame right movement was active.
    bool wasMovingRight() const;
+
    /// \brief stores previous-frame right movement state.
    /// \param was_moving_right true when right movement was active.
    void setWasMovingRight(bool was_moving_right);
@@ -125,6 +143,7 @@ public:
    /// \brief determines whether movement changed from moving to idle since the previous update.
    /// \return true when the player stopped horizontal movement this frame.
    bool changedToIdle() const;
+
    /// \brief determines whether movement changed from idle to moving since the previous update.
    /// \return true when the player started horizontal movement this frame.
    bool changedToMoving() const;
@@ -145,21 +164,26 @@ public:
    /// \brief resolves the player's facing orientation from current input and orientation locks.
    /// \return requested orientation for this frame, or undefined when no orientation input exists.
    Orientation updateOrientation();
+
    /// \brief determines whether bend-down input is active while allowing camera-panorama state.
    /// \return true when down input exceeds the configured bend threshold.
    bool isBendDownActive() const;
+
    /// \brief reports whether the controller was the last input source.
    /// \return true when controller input was seen more recently than keyboard input.
    bool isControllerUsedLast() const;
+
    /// \brief locks facing orientation for a duration, optionally forcing a specific direction.
    /// \param duration lock duration.
    /// \param orientation orientation to force, or undefined to keep current orientation.
    void lockOrientation(std::chrono::milliseconds duration, Orientation = Orientation::Undefined);
+
    /// \brief locks one key state to pressed or released for a duration.
    /// \param key lookup key.
    /// \param state forced key state while locked.
    /// \param duration lock duration.
    void lockState(KeyPressed key, LockedState state, const std::chrono::milliseconds& duration);
+
    /// \brief applies the same temporary lock state to all supported player input keys.
    /// \param state forced key state while locked.
    /// \param duration lock duration.
@@ -180,6 +204,7 @@ private:
       std::chrono::milliseconds _locked_duration;
       LockedState _state{LockedState::Pressed};
       std::chrono::milliseconds _elapsed;
+
       /// \brief converts the locked state enum to its boolean pressed/released value.
       /// \return true when the lock enforces a pressed state.
       bool asBool() const;
@@ -187,9 +212,11 @@ private:
 
    /// \brief refreshes which input device was used last based on current controller activity.
    void updatePlayerInput();
+
    /// \brief advances lock timers and clears expired key locks.
    /// \param dt elapsed frame time.
    void updateLockedKeys(const sf::Time& dt);
+
    /// \brief looks up whether a key currently has an active lock override.
    /// \param key logical input key to query.
    /// \return iterator to the key lock entry or end when no lock exists.

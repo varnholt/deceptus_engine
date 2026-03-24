@@ -24,21 +24,25 @@ public:
 
    /// \brief registers this projectile in the global projectile set and ensures default hit animation data exists.
    Projectile();
+
    /// \brief notifies destruction callbacks and destroys the associated box2d body when present.
    virtual ~Projectile();
 
    /// \brief returns the box2d body backing this projectile.
    /// \return pointer to the projectile body, or nullptr when not assigned.
    b2Body* getBody() const;
+
    /// \brief assigns the box2d body used by this projectile.
    /// \param body projectile physics body pointer.
    void setBody(b2Body* body);
 
    /// \brief deletes all registered projectiles and clears global projectile state.
    static void clear();
+
    /// \brief updates projectile lifetime, handles removals, and advances hit animations.
    /// \param dt frame delta time.
    static void update(const sf::Time& dt);
+
    /// \brief returns the global set of currently tracked projectiles.
    /// \return reference to the static projectile set.
    static std::set<Projectile*>& getProjectiles();
@@ -50,6 +54,7 @@ public:
    /// \brief checks whether the projectile should stick to impacted objects.
    /// \return true when sticky behavior is enabled.
    bool isSticky() const;
+
    /// \brief enables or disables sticky behavior.
    /// \param sticky true to keep projectile attached on impact.
    void setSticky(bool sticky);
@@ -57,6 +62,7 @@ public:
    /// \brief checks whether this projectile already registered an impact.
    /// \return true when an impact was reported.
    bool hitSomething() const;
+
    /// \brief marks whether this projectile has impacted something.
    /// \param hit_something true when the projectile has collided with a valid target.
    void setHitSomething(bool hit_something);
@@ -64,6 +70,7 @@ public:
    /// \brief checks whether this projectile is queued for deletion.
    /// \return true when the projectile will be deleted in the update flow.
    bool isScheduledForRemoval() const;
+
    /// \brief marks this projectile for removal in the next collection step.
    /// \param isScheduledForRemoval true to schedule deletion.
    void setScheduledForRemoval(bool isScheduledForRemoval);
@@ -71,6 +78,7 @@ public:
    /// \brief checks whether this projectile should be disabled instead of removed.
    /// \return true when inactive scheduling is enabled.
    bool isScheduledForInactivity() const;
+
    /// \brief marks this projectile to have its body disabled by weapon update logic.
    /// \param scheduled_for_inactivity true to schedule body disable.
    void setScheduledForInactivity(bool scheduled_for_inactivity);
@@ -78,6 +86,7 @@ public:
    /// \brief checks whether animation rotation follows projectile rotation.
    /// \return true when rotating visuals are enabled.
    bool isRotating() const;
+
    /// \brief enables or disables rotation-driven animation rendering.
    /// \param rotating true to apply stored rotation to animation.
    void setRotating(bool rotating);
@@ -85,6 +94,7 @@ public:
    /// \brief returns the projectile rotation in radians.
    /// \return current rotation value used for rendering.
    float getRotation() const;
+
    /// \brief sets the projectile rotation used by rendering and hit effects.
    /// \param rotation rotation angle in radians.
    void setRotation(float rotation);
@@ -92,6 +102,7 @@ public:
    /// \brief returns the animation instance used to draw this projectile.
    /// \return mutable reference to projectile animation.
    Animation& getAnimation();
+
    /// \brief replaces the projectile animation state.
    /// \param sprite animation template copied into this projectile.
    void setAnimation(const Animation& sprite);
@@ -99,6 +110,7 @@ public:
    /// \brief returns the identifier used for hit animation and audio lookup.
    /// \return projectile effect identifier string.
    std::string getProjectileIdentifier() const;
+
    /// \brief sets the identifier used for hit animation and audio lookup.
    /// \param projectile_identifier effect identifier key.
    void setProjectileIdentifier(const std::string& projectile_identifier);
@@ -110,6 +122,7 @@ public:
    /// \brief returns optional parent audio context inherited from the owning weapon.
    /// \return optional audio update data when set.
    std::optional<AudioUpdateData> getParentAudioUpdateData() const;
+
    /// \brief enables or disables hit sound playback for this projectile.
    /// \param enabled true to allow hit audio playback.
    void setAudioEnabled(bool enabled);
@@ -117,6 +130,7 @@ public:
 protected:
    /// \brief gathers hit data from projectiles scheduled for removal and deletes them.
    static void collectHitInformation();
+
    /// \brief spawns hit animations and optionally plays hit audio for collected impacts.
    static void processHitInformation();
 

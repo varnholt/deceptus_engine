@@ -11,8 +11,10 @@ public:
 
    /// \brief loads the brightness fragment shader from disk.
    void initialize();
+
    /// \brief updates the gamma uniform from the current brightness configuration.
    void update();
+
    /// \brief binds the input texture sampled by the shader.
    /// \param texture source texture passed to the shader as texture uniform.
    void setTexture(const sf::Texture& texture);

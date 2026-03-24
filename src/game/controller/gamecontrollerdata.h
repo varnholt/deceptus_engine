@@ -17,6 +17,7 @@ public:
    /// \brief replaces the cached controller information with a new sample.
    /// \param joystickInfo freshly polled controller state.
    void setJoystickInfo(const GameControllerInfo& joystickInfo);
+
    /// \brief checks whether any controller axis values have been recorded.
    /// \return true when the cached axis-value collection is not empty.
    bool isControllerUsed() const;

@@ -18,12 +18,15 @@ public:
 
    /// \brief applies all queued mode mutations in insertion order.
    void sync();
+
    /// \brief queues a bitwise set operation for a display flag.
    /// \param mode display flag that will be enabled during the next sync call.
    void enqueueSet(Display mode);
+
    /// \brief queues a bitwise clear operation for a display flag.
    /// \param mode display flag that will be disabled during the next sync call.
    void enqueueUnset(Display mode);
+
    /// \brief queues a toggle operation for a display flag.
    /// \param mode display flag that will be toggled during the next sync call.
    void enqueueToggle(Display mode);
@@ -31,6 +34,7 @@ public:
    /// \brief returns the raw bitmask of currently active display flags.
    /// \return current display mode bitmask.
    int32_t get() const;
+
    /// \brief checks whether a specific display flag is currently set.
    /// \param mode display flag to test.
    /// \return true when the given flag bit is set in the current mask.

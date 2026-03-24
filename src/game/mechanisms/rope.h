@@ -18,6 +18,7 @@ public:
    /// \brief creates a rope mechanism with default segment and wind settings.
    /// \param parent owning game node in the scene graph.
    Rope(GameNode* parent);
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "Rope".
    std::string_view objectName() const override;
@@ -26,9 +27,11 @@ public:
    /// \param color color render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
    /// \brief updates wind impulses, player influence, and rope motion.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the interaction area used for player impulse transfer.
    /// \return rope bounding rectangle in pixel space.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -40,6 +43,7 @@ public:
    /// \brief returns the rope anchor position in pixels.
    /// \return anchor position used to initialize the rope chain.
    sf::Vector2i getPixelPosition() const;
+
    /// \brief sets the rope anchor position in pixels.
    /// \param pixel_position anchor position used for box2d body creation.
    void setPixelPosition(const sf::Vector2i& pixel_position);

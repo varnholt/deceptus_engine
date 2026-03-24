@@ -20,6 +20,7 @@ public:
    /// \brief returns the camera's top-left x position for rendering.
    /// \return world x coordinate in pixels after focus-zone centering.
    float getX() const;
+
    /// \brief returns the camera's top-left y position for rendering.
    /// \return world y coordinate in pixels adjusted by the configured vertical view ratio.
    float getY() const;
@@ -27,6 +28,7 @@ public:
    /// \brief returns the left edge of the horizontal focus zone in view space.
    /// \return focus-zone left boundary in pixels.
    float getFocusZoneX0() const;
+
    /// \brief returns the right edge of the horizontal focus zone in view space.
    /// \return focus-zone right boundary in pixels.
    float getFocusZoneX1() const;
@@ -34,6 +36,7 @@ public:
    /// \brief returns the upper panic line used for vertical camera triggering.
    /// \return upper panic-line y coordinate in view space pixels.
    float getPanicLineY0() const;
+
    /// \brief returns the lower panic line used for vertical camera triggering.
    /// \return lower panic-line y coordinate in view space pixels.
    float getPanicLineY1() const;
@@ -41,6 +44,7 @@ public:
    /// \brief returns the current horizontal focus-zone shift caused by facing direction.
    /// \return signed focus offset in pixels.
    float getFocusOffset() const;
+
    /// \brief returns the center of the shifted horizontal focus zone.
    /// \return focus-zone center in view space pixels.
    float getFocusZoneCenter() const;
@@ -48,6 +52,7 @@ public:
    /// \brief returns the last computed horizontal delta from player to camera center.
    /// \return horizontal delta in pixels before velocity scaling.
    float getDx() const;
+
    /// \brief returns the last computed vertical delta from player to camera center.
    /// \return vertical delta in pixels before velocity scaling.
    float getDy() const;
@@ -66,6 +71,7 @@ private:
    /// \brief updates horizontal camera tracking, including focus-zone triggers and room locks.
    /// \param delta_time elapsed frame time used for smoothing and interpolation.
    void updateX(const sf::Time& delta_time);
+
    /// \brief updates vertical camera tracking, panic behavior, and y-axis acceleration.
    /// \param delta_time elapsed frame time used for smoothing and interpolation.
    void updateY(const sf::Time& delta_time);

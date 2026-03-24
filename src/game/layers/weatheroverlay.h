@@ -13,6 +13,7 @@ public:
    /// \param target primary color render target for weather output.
    /// \param normal normal-map render target for weather effects that contribute normals.
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal) = 0;
+
    /// \brief advances weather simulation state for the current frame.
    /// \param dt elapsed frame time since the previous update.
    virtual void update(const sf::Time& dt) = 0;
