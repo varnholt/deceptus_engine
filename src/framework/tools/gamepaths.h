@@ -3,43 +3,38 @@
 #include <filesystem>
 #include <string>
 
-/*!
- * GamePaths namespace provides functions to get standard directories for the game
- * such as settings, logs, recordings, etc. It follows platform conventions for
- * where to store game data.
- *
- * The directory structure should be initialized once at application startup
- * by calling createGameDirectories() from main.cpp.
- */
+///
+/// \brief Resolves and creates the application's data directories.
+///
 namespace GamePaths
 {
-
-/*!
- * Gets the base directory for game data.
- * On Windows: %APPDATA%\deceptus
- * On Linux/macOS: ~/.local/share/deceptus
- */
+///
+/// \brief Returns the platform-specific base directory for deceptus data.
+/// \return Base data directory path.
+///
 std::filesystem::path getGameDataDir();
 
-/*!
- * Gets the directory for game settings/config files.
- */
+///
+/// \brief Returns the settings directory and creates it when missing.
+/// \return Settings directory path.
+///
 std::filesystem::path getSettingsDir();
 
-/*!
- * Gets the directory for game log files.
- */
+///
+/// \brief Returns the log directory and creates it when missing.
+/// \return Log directory path.
+///
 std::filesystem::path getLogDir();
 
-/*!
- * Gets the directory for game recording files.
- */
+///
+/// \brief Returns the recordings directory and creates it when missing.
+/// \return Recordings directory path.
+///
 std::filesystem::path getRecordingDir();
 
-/*!
- * Creates the directory structure for the game if it doesn't exist.
- * This includes all the standard directories like settings, logs, recordings, etc.
- */
+///
+/// \brief Creates the standard settings, logs, and recordings directories.
+///
 void createGameDirectories();
 
-} // namespace GamePaths
+}  // namespace GamePaths

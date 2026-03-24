@@ -9,11 +9,22 @@ struct TmxPolygon;
 struct TmxPolyLine;
 struct TmxProperties;
 
+///
+/// \brief Represents one TMX object entry with optional geometry and properties.
+///
 struct TmxObject : TmxElement
 {
+   ///
+   /// \brief Constructs an empty object.
+   ///
    TmxObject() = default;
 
-   void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>&) override;
+   ///
+   /// \brief Parses object attributes and optional child elements.
+   /// \param e XML element for `<object>`.
+   /// \param parse_data Shared TMX parse context.
+   ///
+   void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>& parse_data) override;
 
    std::string _id;
    float _x_px = 0.0f;

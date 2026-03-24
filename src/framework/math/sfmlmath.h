@@ -9,10 +9,37 @@
 namespace SfmlMath
 {
 
+///
+/// \brief Returns the euclidean length of a 2d vector.
+/// \param v Input vector.
+/// \return Vector length.
+///
 float length(const sf::Vector2f&);
+///
+/// \brief Returns the squared length of a 2d vector.
+/// \param v Input vector.
+/// \return Squared vector length.
+///
 float lengthSquared(const sf::Vector2f&);
+///
+/// \brief Returns a normalized copy of a 2d vector.
+/// \param v Input vector.
+/// \return Unit vector, or zero vector when input length is zero.
+///
 sf::Vector2f normalize(const sf::Vector2f& v);
+///
+/// \brief linearly blends two colors by ratio.
+/// \param color_1 First color.
+/// \param color_2 Second color.
+/// \param ratio Blend ratio applied to first color.
+/// \return Blended color.
+///
 sf::Color mixColors(const sf::Color& color_1, const sf::Color& color_2, float ratio);
+///
+/// \brief Computes polyline length across a point list.
+/// \param points Polyline points.
+/// \return Sum of segment lengths.
+///
 float length(const std::vector<sf::Vector2f>& points);
 
 template <typename T>
