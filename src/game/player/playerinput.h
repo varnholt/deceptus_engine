@@ -1,9 +1,6 @@
 #pragma once
 
-/*! \brief PlayerInput tells where the last player input came from
- *
- * That can be either keyboard or controller.
- */
+/// \brief stores the most recent active input device for the player.
 class PlayerInput
 {
 public:
@@ -13,11 +10,18 @@ public:
       Controller
    };
 
+   /// \brief constructs input-source tracking with keyboard as the default source.
    PlayerInput() = default;
 
+   /// \brief records which input device was used last.
+   /// \param input_type input source to store.
    void update(InputType input_type);
 
+   /// \brief reports whether keyboard input was used most recently.
+   /// \return true when the last recorded input source is keyboard.
    bool isKeyboardUsed() const;
+   /// \brief reports whether controller input was used most recently.
+   /// \return true when the last recorded input source is controller.
    bool isControllerUsed() const;
 
 private:

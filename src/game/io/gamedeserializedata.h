@@ -7,6 +7,7 @@
 #include "framework/tmxparser/tmxobjectgroup.h"
 #include "framework/tmxparser/tmxtileset.h"
 
+/// \brief bundles context objects shared while constructing level objects from serialized data.
 struct GameDeserializeData
 {
    std::filesystem::path _base_path;

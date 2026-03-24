@@ -7,6 +7,7 @@
 
 #include "constants.h"
 
+/// \brief bundle of asset paths and collision metadata used during level parsing.
 struct ParseData
 {
    std::string filename_obj_optimized;

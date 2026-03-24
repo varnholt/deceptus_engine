@@ -9,6 +9,7 @@
 
 struct TmxObject;
 
+/// \brief animated spike trap that periodically extends and retracts to crush the player.
 class Crusher : public GameMechanism, public GameNode
 {
 public:
@@ -25,24 +26,46 @@ public:
       Retract
    };
 
+   /// \brief initializes crusher sprites and assigns a unique instance id.
+   /// \param parent owning game node in the scene graph.
    Crusher(GameNode* parent = nullptr);
 
+   /// \brief returns the mechanism type identifier.
+   /// \return non-owning string view with value "Crusher".
    std::string_view objectName() const override;
 
+   /// \brief draws crusher mount, pusher, and spike sprites.
+   /// \param color color render target.
+   /// \param normal normal render target.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+   /// \brief updates crusher state machine, motion, and collision transform.
+   /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   /// \brief returns the configured crusher area in pixel coordinates.
+   /// \return rectangle used for culling and editor bounds.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   /// \brief initializes geometry, timing, alignment, sprites, and body from tmx properties.
+   /// \param data deserialize context with tmx object and physics world.
    void setup(const GameDeserializeData& data);
 
 private:
+   /// \brief updates body transform and velocity to follow the animated blade position.
    void updateTransform();
+   /// \brief builds kinematic crusher fixtures for deadly spike and push volume.
+   /// \param world physics world that owns the crusher body.
    void setupBody(const std::shared_ptr<b2World>& world);
 
+   /// \brief advances blade offset for the current state using easing functions.
+   /// \param dt elapsed frame time.
    void step(const sf::Time& dt);
+   /// \brief advances the interval state machine between idle, extract, and retract.
    void updateState();
+   /// \brief updates sprite scaling and positions to match current blade offset.
    void updateSpritePositions();
+   /// \brief triggers a camera shake boom once during extraction when allowed.
    void startBoomEffect();
+   /// \brief resets the boom trigger guard after retraction has progressed.
    void stopBoomEffect();
 
    Mode _mode = Mode::Interval;

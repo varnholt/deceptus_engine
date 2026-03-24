@@ -10,9 +10,14 @@
 class b2Body;
 class b2Shape;
 
+/// \brief lightweight property bag passed into weapon constructors.
 struct WeaponProperties
 {
    using PropertyTypes = std::variant<std::string, int32_t, float, bool>;
+   /// \brief reads a typed property by key and falls back when the key is missing.
+   /// \param key property name to look up.
+   /// \param default_value value returned when the key is not present.
+   /// \return stored property cast to T, or default_value when key is absent.
    template <class T>
    T read(const std::string& key, T default_value) const
    {

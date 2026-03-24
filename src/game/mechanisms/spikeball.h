@@ -10,9 +10,11 @@
 
 struct TmxObject;
 
+/// \brief simulates a chained swinging spike ball that kills the player on contact.
 class SpikeBall : public GameMechanism, public GameNode
 {
 public:
+   /// \brief physical and visual tuning values for chain and ball behavior.
    struct SpikeConfig
    {
       // factor to control the push force when ball moves from right to left
@@ -29,20 +31,40 @@ public:
       float _chain_element_height = 0.0125f;
    };
 
+   /// \brief creates sprites, audio setup, and default chain fixture templates.
+   /// \param parent owning game node in the scene graph.
    SpikeBall(GameNode* parent = nullptr);
+   /// \brief returns the mechanism type name used by the serialization system.
+   /// \return constant string view containing "SpikeBall".
    std::string_view objectName() const override;
 
+   /// \brief preloads swing direction-change sound effects.
    void preload() override;
+   /// \brief draws the chain spline and spike ball sprite.
+   /// \param color color render target.
+   /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+   /// \brief updates ball pose, swing audio, and optional push impulse.
+   /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   /// \brief returns the map-defined mechanism bounds in pixel space.
+   /// \return rectangle used for chunk activation.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   /// \brief creates chain bodies, joints, and deadly ball fixture from tmx settings.
+   /// \param data deserialization data with world pointer and spikeball properties.
    void setup(const GameDeserializeData& data);
 
+   /// \brief returns the anchor position in pixels.
+   /// \return pixel position used as the spikeball origin.
    sf::Vector2i getPixelPosition() const;
+   /// \brief sets the anchor position in pixels.
+   /// \param pixel_position position in pixels.
    void setPixelPosition(const sf::Vector2i& pixel_position);
 
 private:
+   /// \brief draws interpolated chain segments between box2d chain bodies.
+   /// \param window render target window.
    void drawChain(sf::RenderTarget& window);
 
    std::shared_ptr<sf::Texture> _texture;
