@@ -26,9 +26,11 @@ public:
 private:
    /// \brief constructs the tweaks container with built-in fallback values.
    Tweaks() = default;
+
    /// \brief serializes tweak fields into json text for persistence.
    /// \return json string containing the Tweaks object.
    std::string serialize() override;
+
    /// \brief parses tweak json and updates known fields when present.
    /// \param data json payload containing a Tweaks object.
    void deserialize(const std::string& data) override;

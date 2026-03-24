@@ -39,6 +39,7 @@ static const std::map<std::string, std::string> key_controller_map{
 /// \param key logical key name, for example "key_space" or "bt_a".
 /// \return {column, row} tile coordinates in the 16x9 atlas table.
 std::pair<int32_t, int32_t> getArrayPosition(const std::string& key);
+
 /// \brief returns keyboard and controller key ids for one logical input.
 /// \param key keyboard key id to map.
 /// \return pair {keyboard_key, controller_key}; falls back to {key, key} when no mapping exists.

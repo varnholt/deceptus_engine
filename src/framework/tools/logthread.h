@@ -20,12 +20,14 @@ public:
    /// \brief starts the logging thread and opens a timestamped log file.
    ///
    LogThread();
+
    ///
    /// \brief stops the logging thread and flushes pending log items.
    ///
    virtual ~LogThread();
 
    using SysClockTimePoint = std::chrono::time_point<std::chrono::system_clock>;
+
    ///
    /// \brief queues one log entry for asynchronous file output.
    /// \param time_point message timestamp.
@@ -51,6 +53,7 @@ private:
    /// \brief runs the background loop and flushes periodically.
    ///
    void run();
+
    ///
    /// \brief writes queued log records to disk.
    ///

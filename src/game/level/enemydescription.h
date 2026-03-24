@@ -26,6 +26,7 @@ struct EnemyDescription
 /// \param j json object that receives the serialized fields.
 /// \param d enemy description to serialize.
 void to_json(nlohmann::json& j, const EnemyDescription& d);
+
 /// \brief deserializes an enemy description from json.
 /// \param j json object containing enemy spawn configuration.
 /// \param d enemy description to populate.

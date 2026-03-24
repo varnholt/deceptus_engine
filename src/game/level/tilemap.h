@@ -23,6 +23,7 @@ class TileMap : public sf::Drawable, public sf::Transformable
 {
 public:
    TileMap() = default;
+
    /// \brief releases dynamic animation frame storage.
    ~TileMap() override;
 
@@ -33,18 +34,22 @@ public:
    /// \return true when loading succeeded.
    virtual bool
    load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileSet, const std::filesystem::path& basePath);
+
    /// \brief advances visible animated tiles and rebuilds animated vertex data.
    /// \param dt elapsed frame time.
    virtual void update(const sf::Time& dt);
+
    /// \brief draws color map and optional normal map to separate render targets.
    /// \param color color render target.
    /// \param normal normal render target.
    /// \param states render states forwarded to draw calls.
    virtual void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const;
+
    /// \brief draws this layer to a single render target.
    /// \param target render target.
    /// \param states render states forwarded to draw calls.
    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
    /// \brief renders the layer to an image file for debugging.
    /// \param output_path target png file path.
    /// \return true when the image was written successfully.
@@ -53,6 +58,7 @@ public:
    /// \brief returns z-order used for layer sorting.
    /// \return layer z index.
    int32_t getZ() const;
+
    /// \brief sets z-order used for layer sorting.
    /// \param z layer z index.
    void setZ(int32_t z);
@@ -60,6 +66,7 @@ public:
    /// \brief reports whether the layer is currently visible.
    /// \return true when rendering is enabled.
    bool isVisible() const;
+
    /// \brief toggles layer visibility.
    /// \param visible true to draw the layer.
    void setVisible(bool visible);
@@ -86,6 +93,7 @@ private:
    /// \param ty tile y index in tile coordinates.
    /// \param animation TMX animation description for this tile.
    void storeAnimation(const std::array<sf::Vertex, 4>& quad, int32_t tx, int32_t ty, const std::shared_ptr<TmxAnimation>& animation);
+
    /// \brief stores one tile quad inside the static block vertex cache.
    /// \param quad tile quad geometry and uv data.
    /// \param tx tile x index in tile coordinates.

@@ -22,12 +22,15 @@ public:
    /// \brief draws active impact animations and optional debug overlays for sword queries.
    /// \param target render target used for sword visuals.
    void draw(sf::RenderTarget& target) override;
+
    /// \brief updates impact animations and applies hit detection while the swing window is active.
    /// \param data per-frame update context containing delta time and world.
    void update(const WeaponUpdateData& data) override;
+
    /// \brief returns nominal sword damage value.
    /// \return damage amount used for sword hits.
    int32_t getDamage() const override;
+
    /// \brief returns the weapon name used by gameplay and config code.
    /// \return string literal "sword".
    std::string getName() const override;
@@ -41,17 +44,22 @@ private:
    /// \brief checks whether the current time is inside the active damage window of the swing.
    /// \return true when hits should currently be processed.
    bool checkHitWindowActive() const;
+
    /// \brief advances and prunes one-shot impact animations.
    /// \param data per-frame update context containing delta time.
    void updateAnimations(const WeaponUpdateData& data);
+
    /// \brief performs all sword impact queries against nodes, mechanisms, and solid geometry.
    /// \param data per-frame update context containing world access.
    void updateImpact(const WeaponUpdateData& data);
+
    /// \brief recomputes the sword hit rectangle from player pose, stance, and direction.
    void updateHitbox();
+
    /// \brief reserved helper for attack dash behavior.
    /// \param dt frame delta time.
    void updateAttackDash(const sf::Time& dt);
+
    /// \brief triggers camera shake feedback for impactful sword hits.
    static void cameraShake();
 
@@ -59,10 +67,12 @@ private:
    /// \param ignored_bodies body set extended with impacted bodies to avoid duplicate handling.
    /// \return list of collided lua nodes detected in this step.
    std::vector<WorldQuery::CollidedNode> impactLuaNode(std::unordered_set<b2Body*>& ignored_bodies);
+
    /// \brief applies sword damage to destructible mechanisms intersecting the hitbox.
    /// \param ignored_bodies currently ignored bodies, kept for interface symmetry with other impact paths.
    /// \return list of impacted mechanisms.
    std::vector<std::shared_ptr<GameMechanism>> impactMechanisms(std::unordered_set<b2Body*>& ignored_bodies);
+
    /// \brief detects closest solid-object impact position for hit feedback and animation spawn.
    /// \param data per-frame update context containing world access.
    /// \param ignored_bodies body set excluded from solid hit tests.

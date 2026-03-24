@@ -31,8 +31,10 @@ public:
    /// \brief initializes blade sprites, audio data, and default render order.
    /// \param parent owning game node in the scene graph.
    RotatingBlade(GameNode* parent = nullptr);
+
    /// \brief stops any active blade audio samples before destruction.
    ~RotatingBlade();
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "RotatingBlade".
    std::string_view objectName() const override;
@@ -40,21 +42,27 @@ public:
    /// \brief reads path and properties from tmx data and configures blade behavior.
    /// \param data deserialization data with shape path and blade properties.
    void setup(const GameDeserializeData& data);
+
    /// \brief preloads blade movement audio samples.
    void preload() override;
+
    /// \brief advances blade speed, movement, rotation, audio state, and hit detection.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief draws the rotating blade sprite.
    /// \param target render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
    /// \brief enables or disables blade sound playback updates.
    /// \param enabled true to allow blade audio.
    void setAudioEnabled(bool enabled) override;
+
    /// \brief updates base reference volume and applies it to active blade samples.
    /// \param volume target reference volume.
    void setReferenceVolume(float volume) override;
+
    /// \brief returns the mechanism bounds used for chunk activation.
    /// \return rectangle centered on the blade origin area.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

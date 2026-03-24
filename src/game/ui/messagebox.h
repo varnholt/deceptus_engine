@@ -66,19 +66,23 @@ struct MessageBox
    /// \param properties layout, color, and animation settings for this dialog.
    /// \param buttons bitmask of enabled buttons from MessageBox::Button.
    MessageBox(Type type, const std::string& message, const MessageBoxCallback& cb, const LayoutProperties& properties, int32_t buttons);
+
    /// \brief removes controller callbacks and leaves modal display mode.
    virtual ~MessageBox();
 
    /// \brief draws the active and fading-out previous dialogs.
    /// \param window render target used for message box rendering.
    static void draw(sf::RenderTarget& window, const sf::RenderStates& = sf::RenderStates::Default);
+
    /// \brief updates animations, button prompts, and deferred controller input.
    /// \param dt frame delta time.
    static void update(const sf::Time& dt);
+
    /// \brief handles confirm or cancel key input for the active dialog.
    /// \param key keyboard key to process.
    /// \return true when the key was handled by the message box system.
    static bool keyboardKeyPressed(sf::Keyboard::Key key);
+
    /// \brief clears the active dialog instance immediately.
    static void reset();
 
@@ -110,6 +114,7 @@ struct MessageBox
    /// \param window render target used for drawing.
    /// \param states render states forwarded to layer drawing.
    void drawLayers(sf::RenderTarget& window, const sf::RenderStates& states);
+
    /// \brief updates text animation and draws all parsed text segments.
    /// \param window render target used for text drawing.
    /// \param states render states forwarded to sf::Text drawing.
@@ -117,22 +122,28 @@ struct MessageBox
 
    /// \brief registers gamepad button callbacks that emulate enter and escape input.
    void initializeControllerCallbacks();
+
    /// \brief loads PSD layers, creates sprites, and caches key layer positions.
    void initializeLayers();
 
    /// \brief runs the show animation and updates alpha, scale, and state.
    void showAnimation();
+
    /// \brief runs the hide animation and marks instance reset when finished.
    void hideAnimation();
 
    /// \brief applies fully visible transforms when show and hide animations are disabled.
    void noAnimation();
+
    /// \brief updates button prompt visibility based on input device and button mask.
    void updateBoxContentLayers();
+
    /// \brief reveals text characters over time when text animation is enabled.
    void updateTextAnimation();
+
    /// \brief animates the next-page icon with a vertical sine offset.
    void updateNextPageIcon();
+
    /// \brief applies alpha to text segments and content button layers.
    /// \param contents_alpha normalized alpha factor in range 0.0 to 1.0.
    void updateTextAndButtonColor(float contents_alpha);

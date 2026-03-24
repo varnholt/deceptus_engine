@@ -11,6 +11,7 @@ namespace InventoryBasedControls
 /// \param y_button_pressed true when the y action button is pressed.
 /// \return true when the pressed button corresponds to a slot containing "sword".
 bool isSwordButtonPressed(const Inventory& inventory, bool x_button_pressed, bool y_button_pressed);
+
 /// \brief checks whether any currently supported attack input is pressed.
 /// \param inventory inventory used to resolve equipped items per button slot.
 /// \param x_button_pressed true when the x action button is pressed.

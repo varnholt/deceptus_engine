@@ -18,6 +18,7 @@ public:
    /// \brief creates an image layer mechanism.
    /// \param parent parent node in the scene graph.
    ImageLayer(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism registry name.
    /// \return string view containing `ImageLayer`.
    std::string_view objectName() const override;
@@ -26,6 +27,7 @@ public:
    /// \param target render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
    /// \brief updates lazy texture chunk loading and creates or removes the sprite as needed.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
@@ -36,6 +38,7 @@ public:
    /// \param view_width current view width in pixels.
    /// \param view_height current view height in pixels.
    void updateView(float level_view_x, float level_view_y, float view_width, float view_height);
+
    /// \brief resets the internal parallax view to a default full-screen viewport.
    /// \param view_width current view width in pixels.
    /// \param view_height current view height in pixels.

@@ -12,8 +12,10 @@ public:
    /// \brief creates a sound emitter mechanism.
    /// \param parent owning game node in the scene graph.
    SoundEmitter(GameNode* parent);
+
    /// \brief stops any active sample thread on destruction.
    ~SoundEmitter() override;
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "SoundEmitter".
    std::string_view objectName() const override;
@@ -21,6 +23,7 @@ public:
    /// \brief starts or stops the configured sample when audio toggles.
    /// \param enabled true to allow playback, false to stop it.
    void setAudioEnabled(bool enabled) override;
+
    /// \brief updates reference volume and applies it to the active sample.
    /// \param volume target reference volume.
    void setReferenceVolume(float volume) override;

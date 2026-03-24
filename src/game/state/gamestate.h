@@ -20,15 +20,19 @@ public:
    /// \brief stores a mode request to be applied later by sync.
    /// \param mode mode that should become active on the next sync call.
    void enqueue(ExecutionMode mode);
+
    /// \brief applies the queued mode by forwarding it to setMode.
    void sync();
 
    /// \brief queues the paused mode.
    void enqueuePause();
+
    /// \brief queues the not-running mode.
    void enqueueStop();
+
    /// \brief queues the running mode.
    void enqueueResume();
+
    /// \brief toggles the queued mode between running and paused based on current mode.
    void enqueueTogglePauseResume();
 
@@ -39,9 +43,11 @@ public:
    /// \brief returns the currently active execution mode.
    /// \return current execution mode.
    ExecutionMode getMode() const;
+
    /// \brief returns the currently queued execution mode.
    /// \return queued execution mode.
    ExecutionMode getQueuedMode() const;
+
    /// \brief changes the active mode and notifies registered callbacks when it actually changes.
    /// \param mode new mode to activate.
    void setMode(const ExecutionMode& mode);

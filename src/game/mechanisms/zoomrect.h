@@ -26,6 +26,7 @@ public:
    /// \brief creates a zoom rectangle mechanism.
    /// \param parent owning game node in the scene graph.
    ZoomRect(GameNode* parent);
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "ZoomRect".
    std::string_view objectName() const override;
@@ -33,6 +34,7 @@ public:
    /// \brief updates camera zoom from player position while inside the rectangle.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief initializes area bounds and radius-to-zoom mapping from tmx properties.
    /// \param data deserialization data with zoom curve values.
    void setup(const GameDeserializeData& data);

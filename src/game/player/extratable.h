@@ -23,6 +23,7 @@ public:
 /// \param j json object receiving "health" and "skills".
 /// \param d extra-table source data.
 void to_json(nlohmann::json& j, const ExtraTable& d);
+
 /// \brief deserializes health and skills from json into the extra table.
 /// \param j json object containing serialized extra-table fields.
 /// \param d extra-table target data.

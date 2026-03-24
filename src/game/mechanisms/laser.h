@@ -41,6 +41,7 @@ public:
    /// \brief creates a laser mechanism.
    /// \param parent parent node in the scene graph.
    Laser(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism registry name.
    /// \return string view containing `Laser`.
    std::string_view objectName() const override;
@@ -49,9 +50,11 @@ public:
    /// \param color color render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
    /// \brief updates signal timing, frame animation, optional movement, and player collision checks.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the base laser tile rectangle.
    /// \return laser rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -65,24 +68,30 @@ public:
    /// \brief stores a TMX object for later group merging and optional path assignment.
    /// \param object TMX object describing groups or movement paths.
    static void addObject(const std::shared_ptr<TmxObject>& object);
+
    /// \brief initializes the fine-collision bitmasks for version-1 laser tiles.
    static void addTilesVersion1();
+
    /// \brief initializes the fine-collision bitmasks for version-2 laser tiles.
    static void addTilesVersion2();
+
    /// \brief merges stored TMX objects into laser groups, signal plots, and movement paths.
    static void merge();
 
    /// \brief resets runtime state like animation frame and signal counters.
    void reset();
+
    /// \brief clears static staging data used while loading and merging laser groups.
    static void resetAll();
 
    /// \brief returns the tile position of this laser in tile units.
    /// \return tile position in tile units.
    const sf::Vector2f& getTilePosition() const;
+
    /// \brief returns the base world position of this laser in pixels.
    /// \return laser position in pixel coordinates.
    const sf::Vector2f& getPixelPosition() const;
+
    /// \brief returns the laser base collision rectangle in pixel space.
    /// \return laser rectangle in pixel coordinates.
    const sf::FloatRect& getPixelRect() const;

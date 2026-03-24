@@ -21,17 +21,22 @@ public:
    {
       /// detonations inside ring
       int32_t _detonation_count = 1;
+
       /// ring center
       sf::Vector2f _center;
+
       /// ring radius
       float _radius = 0.0f;
+
       /// error in animation speed
       float _variance_animation_speed = 0.0f;
+
       /// error in positioning
       sf::Vector2f _variance_position;
    };
 
    DetonationAnimation() = delete;
+
    /// \brief creates one animation per configured ring detonation with randomized position and timing offsets.
    /// \param rings concentric ring descriptions used to spawn big center and small outer explosions.
    DetonationAnimation(const std::vector<DetonationRing>& rings);
@@ -44,6 +49,7 @@ public:
    /// \param center world position in pixels used as the explosion center.
    /// \return detonation animation containing the predefined huge-explosion rings.
    static DetonationAnimation makeHugeExplosion(const sf::Vector2f& center);
+
    /// \brief returns cached frame data for a random variation of the requested explosion type.
    /// \param type selects big or small explosion sprite layout.
    /// \return reference to one cached frame-data variant.

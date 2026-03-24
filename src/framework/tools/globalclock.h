@@ -24,11 +24,13 @@ public:
    /// \return Elapsed milliseconds.
    ///
    int getElapsedTimeInMs();
+
    ///
    /// \brief Returns elapsed time in seconds since clock creation.
    /// \return Elapsed seconds.
    ///
    float getElapsedTimeInS();
+
    ///
    /// \brief Returns SFML time since clock creation.
    /// \return Elapsed `sf::Time`.

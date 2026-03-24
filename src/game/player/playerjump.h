@@ -43,15 +43,20 @@ struct PlayerJump
 
    /// \brief handles a jump button press, including regular jump, jump buffering, wall jump, and double jump.
    void jump();
+
    /// \brief applies a fixed upward impulse-based jump.
    void jumpImpulse();
+
    /// \brief applies a caller-provided jump impulse vector.
    /// \param impulse impulse vector applied to the player body.
    void jumpImpulse(const b2Vec2& impulse);
+
    /// \brief starts a force-driven jump by initializing jump frame counters.
    void jumpForce();
+
    /// \brief performs a mid-air double jump when the skill is unlocked and not yet consumed.
    void doubleJump();
+
    /// \brief starts a wall jump from wall-slide state and locks directional input briefly.
    void wallJump();
 
@@ -61,18 +66,23 @@ struct PlayerJump
 
    /// \brief executes buffered jump input shortly after landing.
    void updateJumpBuffer();
+
    /// \brief applies upward jump forces while jump conditions remain valid.
    void updateJump();
+
    /// \brief maintains coyote-time state after losing ground contact.
    void updateLostGroundContact();
+
    /// \brief advances wall-slide detection, friction force, and looping wall-slide audio.
    void updateWallSlide();
+
    /// \brief applies per-frame force for an active wall jump.
    void updateWallJump();
 
    /// \brief reports whether jump-force frames are still active.
    /// \return true when the regular jump force sequence is still running.
    bool isJumping() const;
+
    /// \brief reports whether the player is currently in wall-slide state.
    /// \return true when wall sliding is active and no wall jump is currently playing.
    bool isWallSliding() const;

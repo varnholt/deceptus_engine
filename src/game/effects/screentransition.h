@@ -17,11 +17,14 @@ struct ScreenTransition
 
    /// \brief starts the first effect, wires completion callbacks, and notifies start listeners.
    void startEffect1();
+
    /// \brief starts the second effect and notifies start listeners.
    void startEffect2();
+
    /// \brief advances the currently active effect, if any.
    /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt);
+
    /// \brief draws the currently active effect to the provided render texture.
    /// \param window render texture used for transition rendering.
    void draw(const std::shared_ptr<sf::RenderTexture>& window);
@@ -41,6 +44,7 @@ struct ScreenTransition
 private:
    /// \brief handles completion of effect 1, runs end callbacks, and optionally schedules effect 2.
    void effect1Done();
+
    /// \brief handles completion of effect 2, clears active effect state, and runs end callbacks.
    void effect2Done();
 
@@ -53,12 +57,16 @@ struct ScreenTransitionHandler
    /// \brief appends a transition to the queue without starting it automatically.
    /// \param transition transition object transferred into the handler queue.
    void push(std::unique_ptr<ScreenTransition>);
+
    /// \brief removes the front transition when one is active.
    void pop();
+
    /// \brief clears all queued transitions.
    void clear();
+
    /// \brief starts effect 2 on the front transition if the queue is not empty.
    void startEffect2();
+
    /// \brief reports whether at least one transition is queued.
    /// \return true if the handler has an active front transition.
    bool active() const;
@@ -68,6 +76,7 @@ struct ScreenTransitionHandler
    /// \brief draws the front transition if one is active.
    /// \param window render texture used by the transition effect.
    void draw(const std::shared_ptr<sf::RenderTexture>& window);
+
    /// \brief advances the front transition if one is active.
    /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt);

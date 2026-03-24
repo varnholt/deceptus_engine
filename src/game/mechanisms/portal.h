@@ -24,6 +24,7 @@ public:
    /// \brief creates a portal mechanism instance.
    /// \param parent owning game node in the scene graph.
    Portal(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "Portal".
    std::string_view objectName() const override;
@@ -32,9 +33,11 @@ public:
    /// \param window color render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
+
    /// \brief updates player interaction state and handles activation input.
    /// \param dt elapsed frame time, unused by this mechanism.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the portal interaction bounds in pixel space.
    /// \return portal rectangle used for player overlap checks.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -57,6 +60,7 @@ public:
    /// \brief returns the linked destination portal.
    /// \return destination portal or nullptr when unlinked.
    std::shared_ptr<Portal> getDestination() const;
+
    /// \brief sets the linked destination portal.
    /// \param dst portal reached after activation.
    void setDestination(const std::shared_ptr<Portal>& dst);
@@ -64,14 +68,17 @@ public:
    /// \brief returns the teleport exit position derived from the top sprite.
    /// \return pixel position used to place the player at the destination portal.
    sf::Vector2f getPortalPosition();
+
    /// \brief returns the portal base tile coordinate.
    /// \return tile-space position used during portal linking.
    const sf::Vector2f& getTilePosition() const;
 
    /// \brief acquires the global portal lock to prevent re-entrant teleports.
    static void lock();
+
    /// \brief releases the global portal lock after teleport completion.
    static void unlock();
+
    /// \brief reports whether portal transitions are currently locked globally.
    /// \return true if teleporting is locked.
    static bool isLocked();

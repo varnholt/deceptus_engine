@@ -13,6 +13,7 @@ struct TmxPolygon : TmxElement
    /// \brief Constructs an empty polygon.
    ///
    TmxPolygon() = default;
+
    ///
    /// \brief Parses polygon point pairs into `_polyline`.
    /// \param element XML element for `<polygon>`.

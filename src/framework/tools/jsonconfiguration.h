@@ -18,6 +18,7 @@ protected:
    /// \param filename Input JSON file path.
    ///
    void deserializeFromFile(const std::string& filename);
+
    ///
    /// \brief Serializes current state and writes it to file.
    /// \param filename Output JSON file path.
@@ -30,6 +31,7 @@ protected:
    /// \return Parsed JSON object, or empty object on parse failure.
    ///
    nlohmann::json toJson(const std::string& data);
+
    ///
    /// \brief Formats a JSON object as an indented string.
    /// \param config JSON object to format.
@@ -42,6 +44,7 @@ protected:
    /// \return Serialized JSON text.
    ///
    virtual std::string serialize();
+
    ///
    /// \brief Applies JSON text to derived configuration state.
    /// \param data JSON text to consume.

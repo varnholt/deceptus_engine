@@ -15,6 +15,7 @@ public:
    /// \return Accumulated checksum value.
    ///
    static uint32_t calcChecksum(std::ifstream& file);
+
    ///
    /// \brief Opens a file and computes its checksum.
    /// \param path File path to read.
@@ -28,6 +29,7 @@ public:
    /// \return Checksum word value.
    ///
    static uint32_t readChecksum(std::ifstream& file);
+
    ///
    /// \brief Opens a file and reads its first checksum word.
    /// \param path File path to read.
@@ -41,6 +43,7 @@ public:
    /// \param sum Checksum value to write.
    ///
    static void writeChecksum(std::ofstream& file, uint32_t sum);
+
    ///
    /// \brief Opens a file and writes one checksum word.
    /// \param path File path to write.

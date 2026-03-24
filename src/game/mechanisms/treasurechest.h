@@ -14,6 +14,7 @@ public:
    /// \brief creates a treasure chest mechanism instance.
    /// \param parent owning game node in the scene graph.
    TreasureChest(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "TreasureChest".
    std::string_view objectName() const override;
@@ -26,9 +27,11 @@ public:
    /// \param target render target.
    /// \param /*normal*/ normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
+
    /// \brief handles interaction, state transitions, and reward spawning.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief reports that this mechanism does not expose a gameplay bounding box.
    /// \return std::nullopt.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

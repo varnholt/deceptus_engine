@@ -28,12 +28,14 @@ public:
 
    /// \brief prints a binary collision map to stdout for debugging.
    void printMap();
+
    /// \brief writes the raw tile id map to map.dump for debugging.
    void dumpMap();
 
    /// \brief renders colliding grid cells to an image file when the target file does not exist.
    /// \param imagePath destination image path.
    void writeGridToImage(const std::filesystem::path& imagePath);
+
    /// \brief renders extracted polygon outlines to an image file when the target file does not exist.
    /// \param imagePath destination image path.
    void writePathToImage(const std::filesystem::path& imagePath);
@@ -65,6 +67,7 @@ public:
 
       /// \brief prints polygon vertices for debugging.
       void printPoly();
+
       /// \brief prints encoded march directions for debugging.
       void printDirs();
    };
@@ -74,31 +77,40 @@ public:
 private:
    /// \brief loads cached contours or scans the tile grid to generate and cache new contours.
    void scan();
+
    /// \brief traces one closed contour starting at a colliding unvisited tile coordinate.
    /// \param startX starting x coordinate in tile space.
    /// \param startY starting y coordinate in tile space.
    /// \return traced contour path including polygon points and step directions.
    Path march(uint32_t startX, uint32_t startY);
+
    /// \brief computes the next march direction from the current 2x2 occupancy configuration.
    void updateDirection();
+
    /// \brief advances the current march position by one step in the current direction.
    void updatePosition();
+
    /// \brief checks whether a tile coordinate is inside bounds and marked as colliding.
    /// \param x x coordinate in tile space.
    /// \param y y coordinate in tile space.
    /// \return true when the coordinate maps to a colliding tile id.
    bool isColliding(uint32_t x, uint32_t y);
+
    /// \brief checks whether a tile coordinate has already been visited by contour tracing.
    /// \param x x coordinate in tile space.
    /// \param y y coordinate in tile space.
    /// \return true when the coordinate is within bounds and marked as visited.
    bool isVisited(uint32_t x, uint32_t y);
+
    /// \brief writes traced polygon paths to the cache file.
    void serialize();
+
    /// \brief reads polygon paths from the cache file.
    void deserialize();
+
    /// \brief removes redundant collinear points from traced paths.
    void optimize();
+
    /// \brief fills scaled floating-point coordinates for each path using the configured scale factor.
    void scale();
 

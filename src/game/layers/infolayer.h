@@ -24,6 +24,7 @@ public:
    /// \brief updates loading fade, health panel motion, inventory icons, and timed animations.
    /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt);
+
    /// \brief advances randomized heartbeat, stamina, and skull-blink animations.
    /// \param dt elapsed frame time since the previous update.
    void updateAnimations(const sf::Time& dt);
@@ -32,9 +33,11 @@ public:
    /// \param window SFML render target used for hud output.
    /// \param RenderStates render state overrides passed to sub-draw calls.
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+
    /// \brief draws debug text such as player tile position, pixel position, and room name.
    /// \param window SFML render target used for debug text rendering.
    void drawDebugInfo(sf::RenderTarget& window);
+
    /// \brief draws the developer console, command history, and help topics.
    /// \param window SFML render target used for console output.
    /// \param states render state overrides for console background layers.
@@ -52,22 +55,27 @@ private:
    /// \param window SFML render target used for animation output.
    /// \param states render state overrides for the animation draw.
    void drawHeartAnimation(sf::RenderTarget& window, sf::RenderStates states);
+
    /// \brief draws equipped inventory slot icons and their slot overlays.
    /// \param window SFML render target used for inventory output.
    /// \param states render state overrides for slot layer draws.
    void drawInventoryItem(sf::RenderTarget& window, sf::RenderStates states);
+
    /// \brief draws health quarters, stamina bars, inventory slots, and ui micro-animations.
    /// \param window SFML render target used for hud output.
    /// \param states render state overrides for layer and animation draws.
    void drawHealth(sf::RenderTarget& window, sf::RenderStates states);
+
    /// \brief draws camera-pan indicator arrows while keyboard look is active.
    /// \param window SFML render target used for indicator output.
    /// \param states render state overrides for indicator layer draws.
    void drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates states);
+
    /// \brief draws the loading spinner animation with current fade alpha.
    /// \param window SFML render target used for loading icon output.
    /// \param states render state overrides for animation drawing.
    void drawLoading(sf::RenderTarget& window, sf::RenderStates states);
+
    /// \brief draws replay recording and playback status icons when enabled.
    /// \param states render state overrides for icon layer draws.
    /// \param window SFML render target used for event replay icon output.
@@ -75,8 +83,10 @@ private:
 
    /// \brief updates slot texture rects from the current saved inventory entries.
    void updateInventoryItems();
+
    /// \brief animates health panel x-offset for hide/show transitions and applies it to hud layers.
    void updateHealthLayerOffsets();
+
    /// \brief syncs replay icon visibility with active display mode flags.
    void updateEventReplayIcons();
 
@@ -99,11 +109,14 @@ private:
    {
       /// \brief starts fade-in and restarts the loading animation.
       void show();
+
       /// \brief requests fade-out of the loading animation.
       void hide();
+
       /// \brief advances fade timing, alpha, and animation playback state.
       /// \param delta_time elapsed frame time since the previous update.
       void update(const sf::Time& delta_time);
+
       /// \brief draws the loading animation when visible.
       /// \param window SFML render target used for loading icon output.
       /// \param states render state overrides for animation drawing.

@@ -41,6 +41,7 @@ public:
    /// \param target render target.
    /// \param normal normal-map render target, currently unused by this effect.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
+
    /// \brief advances bubble spawning, movement, and removal based on player water state.
    /// \param dt elapsed frame time since the previous update.
    /// \param input current player water state and bounding rectangle.
@@ -51,9 +52,11 @@ private:
    /// \param pos_px position in pixels.
    /// \param vel_px initial velocity in pixels per second.
    void spawnBubble(const sf::Vector2f pos_px, const sf::Vector2f vel_px);
+
    /// \brief emits periodic rising bubbles near the player's head region while submerged.
    /// \param input current player water state and bounding rectangle.
    void spawnBubblesFromHead(const WaterBubbleInput& input);
+
    /// \brief emits burst bubbles for several frames after entering water.
    /// \param input current player water state and bounding rectangle.
    void spawnSplashBubbles(const WaterBubbleInput& input);

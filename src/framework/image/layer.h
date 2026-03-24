@@ -33,6 +33,7 @@ struct Layer : public sf::Drawable
 ///
 
    void show();
+
    ///
    /// \brief Hides the associated view.
    ///

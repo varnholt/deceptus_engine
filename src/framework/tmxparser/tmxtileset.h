@@ -27,6 +27,7 @@ struct TmxTileSet : TmxElement
    /// \param parse_data Shared TMX parse context.
    ///
    void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>&) override;
+
    ///
    /// \brief Parses a concrete tileset element into this object.
    /// \param element XML element containing tileset fields.

@@ -97,6 +97,7 @@ float dot(vec2 v1, vec2 v2);
 ///
 
 float fract(float x);
+
 ///
 /// \brief Executes mix.
 /// \param a A.
@@ -118,6 +119,7 @@ float mix(float a, float b, float x);
 
 // random version 1
 float random1(const vec2& st);
+
 ///
 /// \brief Executes noise1.
 /// \param st St.
@@ -137,12 +139,14 @@ float noise1(const vec2& st);
 
 // random version 2
 float hash(float n);
+
 ///
 /// \brief Executes hash.
 /// \param p P.
 /// \return Requested value.
 ///
 float hash(const vec2& p);
+
 ///
 /// \brief Executes noise2.
 /// \param st St.
@@ -161,6 +165,7 @@ float noise2(const vec2& st);
 ///
 
 float fbm(vec2 st);
+
 ///
 /// \brief Executes test.
 ///

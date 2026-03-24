@@ -13,6 +13,7 @@ struct TmxChunk : TmxElement
    /// \brief Constructs an empty chunk.
    ///
    TmxChunk() = default;
+
    ///
    /// \brief Releases the heap-allocated tile data array.
    ///

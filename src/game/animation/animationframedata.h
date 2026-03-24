@@ -10,6 +10,7 @@ struct AnimationFrameData
 {
    /// \brief constructs an empty frame-data container.
    AnimationFrameData() = default;
+
    /// \brief builds frame rectangles from a sprite sheet and stores matching frame timings.
    /// \param texture sprite-sheet texture containing all frames.
    /// \param origin local origin applied to spawned animations.

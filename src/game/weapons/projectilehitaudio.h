@@ -18,6 +18,7 @@ struct ProjectileHitSample
 /// \param id projectile identifier key.
 /// \return copy of the sample list stored for the identifier.
 std::vector<ProjectileHitSample> getReferenceSamples(const std::string& id);
+
 /// \brief registers hit sound samples for a projectile identifier.
 /// \param id projectile identifier key.
 /// \param reference sample list used when this projectile hits something.

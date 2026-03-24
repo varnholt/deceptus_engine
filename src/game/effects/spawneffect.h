@@ -21,17 +21,22 @@ public:
    /// \brief draws active particles and orb animations while the effect is not finished.
    /// \param target render target.
    void draw(sf::RenderTarget& target);
+
    /// \brief advances particle simulation, orb animation state, and show or hide alpha ramps.
    /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt);
+
    /// \brief reports whether hide animation finished and particle alpha faded out.
    /// \return true when the full spawn effect sequence is complete.
    bool isFinished() const;
+
    /// \brief reports whether the orb show animation has completed.
    /// \return true when the effect reached the visible idle phase.
    bool isShown() const;
+
    /// \brief marks the effect as activated for external game logic.
    void activate();
+
    /// \brief reports whether activate() was called.
    /// \return true when the effect has been marked active.
    bool isActive() const;
@@ -63,9 +68,11 @@ private:
 
       /// \brief resets direction, velocity, delay, and sprite frame for a new particle cycle.
       void spawn();
+
       /// \brief advances delay, alpha, position, and optional respawn behavior for one frame.
       /// \param dt elapsed frame time since the previous update.
       void update(const sf::Time& dt);
+
       /// \brief picks a random direction and radial scale for this particle.
       /// \param random_scale normalized radius multiplier used to place the particle from center.
       void setupPosition(float random_scale);
@@ -93,9 +100,11 @@ private:
       /// \brief draws non-delayed, non-dead particles using additive blending.
       /// \param target render target.
       void draw(sf::RenderTarget& target);
+
       /// \brief forwards alpha and respawn settings to particles and advances all particles.
       /// \param dt elapsed frame time since the previous update.
       void update(const sf::Time& dt);
+
       /// \brief reports whether every particle reached the dead state.
       /// \return true when no particle remains alive.
       bool allDead() const;
@@ -127,6 +136,7 @@ private:
       /// \brief draws whichever orb animations are currently playing.
       /// \param target render target.
       void draw(sf::RenderTarget& target);
+
       /// \brief advances the orb phase machine and active animations.
       /// \param dt elapsed frame time since the previous update.
       void update(const sf::Time& dt);

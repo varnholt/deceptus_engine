@@ -15,19 +15,24 @@ struct ShaderLayer : public GameMechanism, public GameNode
    /// \brief creates a shader layer instance.
    /// \param parent owning game node in the scene graph.
    ShaderLayer(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "ShaderLayer".
    std::string_view objectName() const override;
+
    /// \brief draws the quad with shader uniforms and optional uv parameters.
    /// \param target render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
    /// \brief accumulates elapsed time for time-driven shader uniforms.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the rectangle covered by the shader layer.
    /// \return layer bounds in pixel space.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
    /// \brief inspects shader source to detect optional uniform support.
    /// \param shader_path file path to the fragment shader source.
    void checkUniforms(const std::string& shader_path);
@@ -53,6 +58,7 @@ struct ShaderLayer : public GameMechanism, public GameNode
 
    // customization factory
    using FactoryFunction = std::shared_ptr<ShaderLayer>(GameNode* parent);
+
    /// \brief registers a custom shader layer factory by customization id.
    /// \param id customization identifier read from tmx properties.
    /// \param factory_function factory callback creating a specialized shader layer.

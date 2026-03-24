@@ -10,10 +10,13 @@ struct TimerLock
    /// \brief locks immediately and schedules an unlock once the interval has elapsed.
    /// \param interval duration to keep the lock active before timer-based unlock.
    void lockFor(std::chrono::milliseconds interval);
+
    /// \brief marks the lock as active.
    void lock();
+
    /// \brief marks the lock as inactive.
    void unlock();
+
    /// \brief reports whether the lock is currently active.
    /// \return true when lock() or lockFor() has set the lock and it has not yet been released.
    bool isLocked();

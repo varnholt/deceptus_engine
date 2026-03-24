@@ -27,6 +27,7 @@ public:
    /// \return Elapsed duration from internal start time to now.
    ///
    HighResDuration duration() const;
+
    ///
    /// \brief Returns elapsed time from the last reset to `time_point`.
    /// \param time_point End time point.
@@ -41,6 +42,7 @@ public:
    /// \return Duration between `earlier` and `later`.
    ///
    static HighResDuration duration(const HighResTimePoint& earlier, const HighResTimePoint& later);
+
    ///
    /// \brief Returns current high-resolution time point.
    /// \return Current time point.

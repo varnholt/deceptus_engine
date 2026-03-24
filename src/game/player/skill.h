@@ -31,6 +31,7 @@ public:
 /// \param j json object that receives the "skills" field.
 /// \param d skill data source.
 void to_json(nlohmann::json& j, const Skill& d);
+
 /// \brief deserializes the skill bitmask from json.
 /// \param j json object that contains the "skills" field.
 /// \param d skill data target to populate.

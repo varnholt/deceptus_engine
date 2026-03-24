@@ -30,6 +30,7 @@ public:
    /// \param window render target that receives map page rendering.
    /// \param states render states used for drawing.
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
+
    /// \brief advances panorama camera state and active map page animations.
    /// \param dt elapsed frame time, currently unused by this page.
    void update(const sf::Time& dt) override;
@@ -37,6 +38,7 @@ public:
    /// \brief stores door mechanisms that are rendered as map markers.
    /// \param doors door mechanism list for map overlay rendering.
    void setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors);
+
    /// \brief stores portal mechanisms that are rendered as map markers.
    /// \param portals portal mechanism list for map overlay rendering.
    void setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals);
@@ -46,10 +48,13 @@ private:
    /// \param window render target used as the map overlay canvas.
    /// \param states render states used for drawing primitives.
    void drawLevelItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+
    /// \brief applies static map button prompt and zoom indicator layer visibility.
    void updateButtons();
+
    /// \brief animates panel offsets and alpha during map show and hide transitions.
    void updateShowHide();
+
    /// \brief animates horizontal submenu slide transitions for map panel groups.
    void updateMove();
 

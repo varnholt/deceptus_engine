@@ -25,10 +25,12 @@ struct Chunk
 {
    /// \brief disables default construction because chunk coordinates must be derived from a position.
    Chunk() = delete;
+
    /// \brief computes chunk indices from a pixel position.
    /// \param x_px horizontal position in pixels.
    /// \param y_px vertical position in pixels.
    Chunk(int32_t x_px, int32_t y_px);
+
    /// \brief computes chunk indices from a pixel position.
    /// \param x_px horizontal position in pixels.
    /// \param y_px vertical position in pixels.
@@ -38,6 +40,7 @@ struct Chunk
    /// \param x_px horizontal position in pixels.
    /// \param y_px vertical position in pixels.
    void update(int32_t x_px, int32_t y_px);
+
    /// \brief compares two chunk coordinates.
    /// \param other chunk to compare against.
    /// \return true when both chunk indices are equal.

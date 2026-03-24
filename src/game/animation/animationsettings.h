@@ -51,6 +51,7 @@ struct AnimationSettings
 /// \param j json object containing frame geometry, durations, origin, and texture path.
 /// \param settings destination settings object to populate.
 void from_json(const nlohmann::json& j, AnimationSettings& settings);
+
 /// \brief serializes an AnimationSettings instance into the json schema used by the editor.
 /// \param j destination json object that receives serialized fields.
 /// \param settings settings instance to serialize.

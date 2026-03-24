@@ -6,6 +6,7 @@
 /// \details
 /// draw() uses a two-pass pipeline on the color target:
 /// 1) write 1s to the stencil where the mask tilemap renders (no color writes);
+
 /// if _alpha_threshold < 0.99f an alpha-test shader discards pixels below the threshold.
 /// 2) draw this tilemap where stencil == 1.
 /// - the stencil buffer is cleared to 0 at the start of each draw().
@@ -30,14 +31,17 @@ public:
    /// \return true when base loading and stencil setup succeeded.
    bool load(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileset, const std::filesystem::path& base_path)
       override;
+
    /// \brief draws this layer using stencil mask data from the referenced tilemap.
    /// \param color color render target.
    /// \param normal normal render target.
    /// \param states render states forwarded to draw calls.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const override;
+
    /// \brief returns TMX layer name of the mask tilemap.
    /// \return stencil reference string.
    const std::string& getStencilReference() const;
+
    /// \brief sets the tilemap used to write stencil mask bits.
    /// \param stencil_tilemap mask tilemap that defines visible pixels.
    void setStencilTilemap(const std::shared_ptr<TileMap>& stencil_tilemap);

@@ -21,16 +21,20 @@ public:
    /// \brief initializes rectangle geometry, optional textures, and a static box2d collider from tmx data.
    /// \param data deserialize context containing object properties and physics world.
    void setup(const GameDeserializeData& data);
+
    /// \brief draws the configured texture and normal map when the rectangle is enabled.
    /// \param target color render target.
    /// \param normal normal-map render target.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
    /// \brief updates runtime logic.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief enables or disables the underlying box2d body.
    /// \param enabled true to keep the blocker collidable.
    void setEnabled(bool enabled) override;
+
    /// \brief returns the blocking rectangle in pixel coordinates.
    /// \return rectangle bounds used for culling and overlap checks.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

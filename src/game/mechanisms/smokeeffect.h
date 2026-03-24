@@ -26,6 +26,7 @@ public:
    /// \brief creates a smoke effect with default texture and render settings.
    /// \param parent owning game node in the scene graph.
    SmokeEffect(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "SmokeEffect".
    std::string_view objectName() const override;
@@ -34,9 +35,11 @@ public:
    /// \param color color render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
    /// \brief animates particle rotation, offsets, color, and batched vertices.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the effect rectangle in pixel space.
    /// \return bounding box used for chunk activation and culling.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

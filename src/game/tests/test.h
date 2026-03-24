@@ -6,6 +6,7 @@ class Test
 public:
    /// \brief constructs the test harness object.
    Test();
+
    /// \brief runs the path interpolation debug output routine.
    void testInterpolation();
 };

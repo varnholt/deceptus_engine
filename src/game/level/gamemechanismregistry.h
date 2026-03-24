@@ -20,6 +20,7 @@ public:
    /// \brief returns the mutable map from mechanism layer names to mechanism vectors.
    /// \return mechanism group map used during deserialization and lookup.
    MechanismVectorMap& getMap();
+
    /// \brief returns all mechanism vectors as a flat list of group pointers.
    /// \return list of mechanism groups for bulk iteration.
    std::vector<MechanismVector*>& getList();
@@ -27,24 +28,30 @@ public:
    /// \brief returns the extra mechanism group.
    /// \return vector containing extra mechanisms.
    const MechanismVector& getExtras() const;
+
    /// \brief returns the door mechanism group.
    /// \return vector containing door mechanisms.
    const MechanismVector& getDoors() const;
+
    /// \brief returns the bouncer mechanism group.
    /// \return vector containing bouncer mechanisms.
    const MechanismVector& getBouncers() const;
+
    /// \brief returns the portal mechanism group.
    /// \return vector containing portal mechanisms.
    const MechanismVector& getPortals() const;
+
    /// \brief returns the checkpoint mechanism group.
    /// \return vector containing checkpoint mechanisms.
    const MechanismVector& getCheckpoints() const;
+
    /// \brief returns all non-mechanism image layers.
    /// \return copy of image layer instances loaded from TMX image layers.
    std::vector<std::shared_ptr<ImageLayer>> getImageLayers() const;
 
    /// \brief clears all stored door pointers.
    void resetDoors();
+
    /// \brief stores an image layer loaded from TMX.
    /// \param image_layer image layer instance to append.
    void addImageLayer(const std::shared_ptr<ImageLayer>& image_layer);
@@ -57,6 +64,7 @@ public:
    searchMechanisms(const std::string& regexp, const std::optional<std::string>& group = std::nullopt);
 
    using MechanismPredicate = std::function<bool(const std::shared_ptr<GameMechanism>&, std::string_view)>;
+
    /// \brief returns mechanisms that satisfy a caller-provided predicate.
    /// \param predicate predicate receiving a mechanism and its group key.
    /// \return flattened list of all mechanisms for which predicate returns true.

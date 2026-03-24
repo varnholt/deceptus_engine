@@ -13,15 +13,19 @@ struct CameraSystemConfiguration
    /// \brief returns horizontal camera interpolation speed multiplier.
    /// \return velocity factor applied during x-axis camera updates.
    float getCameraVelocityFactorX() const;
+
    /// \brief returns the divisor used to derive horizontal focus-zone half-width from view width.
    /// \return focus-zone divider value.
    float getFocusZoneDivider() const;
+
    /// \brief returns how far the focus zone shifts based on player orientation.
    /// \return shift factor multiplied by focus-zone half-range.
    float getTargetShiftFactor() const;
+
    /// \brief returns horizontal deadband used to clear focus-zone triggering.
    /// \return x-axis tolerance in pixels.
    int32_t getBackInBoundsToleranceX() const;
+
    /// \brief checks whether camera focus shifts with player facing direction.
    /// \return true when orientation-based target shifting is enabled.
    bool isFollowingPlayerOrientation() const;
@@ -29,15 +33,19 @@ struct CameraSystemConfiguration
    /// \brief returns vertical camera interpolation speed multiplier.
    /// \return velocity factor applied during y-axis camera updates.
    float getCameraVelocityFactorY() const;
+
    /// \brief returns the divisor used to place upper and lower panic lines.
    /// \return panic-line divider value.
    float getPanicLineDivider() const;
+
    /// \brief returns the vertical anchor ratio used for camera top-left conversion.
    /// \return view ratio used by CameraSystem::getY().
    float getViewRatioY() const;
+
    /// \brief returns vertical deadband used to clear focus and panic follow state.
    /// \return y-axis tolerance in pixels.
    int32_t getBackInBoundsToleranceY() const;
+
    /// \brief returns the vertical player sampling offset for camera tracking.
    /// \return y offset in pixels added to the player's position before tracking.
    int32_t getPlayerOffsetY() const;
@@ -45,6 +53,7 @@ struct CameraSystemConfiguration
    /// \brief writes the current camera configuration as json to disk.
    /// \param filename destination json file path.
    void serializeToFile(const std::string& filename = "data/config/camera.json");
+
    /// \brief reads camera configuration from a json file and applies it.
    /// \param filename source json file path.
    void deserializeFromFile(const std::string& filename = "data/config/camera.json");
@@ -52,6 +61,7 @@ struct CameraSystemConfiguration
    /// \brief serializes all camera parameters into a formatted json string.
    /// \return json text containing the camera configuration object.
    std::string serialize();
+
    /// \brief parses a json payload and updates camera parameters from it.
    /// \param data json text that contains a CameraSystemConfiguration object.
    void deserialize(const std::string& data);

@@ -18,6 +18,7 @@ public:
        /// \param dampening velocity dampening factor.
        /// \param tension spring tension factor.
        void update(float dampening, float tension);
+
        /// \brief clears per-step neighbor transfer deltas.
        void resetDeltas();
 
@@ -65,6 +66,7 @@ public:
    /// \param parent owning game node in the scene graph.
    /// \param data deserialize context with surface bounds and property values.
    WaterSurface(GameNode* parent, const GameDeserializeData& data);
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "WaterSurface".
    std::string_view objectName() const override;
@@ -73,9 +75,11 @@ public:
    /// \param color color render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
    /// \brief updates wave simulation, player splashes, and emitter-generated disturbances.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the surface area rectangle in pixel space.
    /// \return bounding box used for interaction and chunk registration.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -84,10 +88,12 @@ public:
    /// \param index target segment index near the splash location.
    /// \param velocity velocity impulse applied to the segment.
    void splash(int32_t index, float velocity);
+
    /// \brief stores a splash emitter definition to be attached during merge.
    /// \param parent owning game node in the scene graph, unused for emitters.
    /// \param data deserialization data for the emitter object.
    static void addEmitter(GameNode* parent, const GameDeserializeData& data);
+
    /// \brief attaches queued emitters to their referenced water surfaces.
    static void merge();
 
@@ -95,6 +101,7 @@ private:
    /// \brief updates alternating top or bottom vertices of the strip mesh.
    /// \param start_index first vertex parity to update, typically 0 for top or 1 for bottom.
    void updateVertices(int32_t start_index = 0);
+
    /// \brief advances emitter timers and emits splash impulses when timers elapse.
    /// \param elapsed_s elapsed seconds since the previous frame.
    void updateEmitters(float elapsed_s);

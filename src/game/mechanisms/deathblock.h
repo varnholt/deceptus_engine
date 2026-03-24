@@ -32,12 +32,15 @@ public:
    /// \param color color render target.
    /// \param normal normal render target.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
    /// \brief updates lever lag, spike animation states, movement, and player damage checks.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns current block bounds in pixel coordinates.
    /// \return bounding rectangle around the 3x3 tile trap.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
    /// \brief initializes sprites, mode, timings, path interpolation, and physics body from tmx data.
    /// \param data deserialize context with object properties and world.
    void setup(const GameDeserializeData& data);
@@ -84,13 +87,16 @@ private:
        /// \brief advances extracting animation until fully extended.
        /// \param dt elapsed frame time.
        void extract(const sf::Time& dt);
+
        /// \brief keeps spike extended until on-time expires.
        /// \param dt elapsed frame time.
        /// \param time_on duration to keep spikes extended.
        void extracted(const sf::Time& dt, const sf::Time& time_on);
+
        /// \brief advances retracting animation until fully retracted.
        /// \param dt elapsed frame time.
        void retract(const sf::Time& dt);
+
        /// \brief keeps spike retracted until off-time expires.
        /// \param dt elapsed frame time.
        /// \param time_off duration to keep spikes retracted.
@@ -110,27 +116,36 @@ private:
 
     /// \brief positions the physics body from configured pixel coordinates.
     void setupTransform();
+
     /// \brief creates the kinematic body and fixture used for trap collisions.
     /// \param world physics world that owns the body.
     void setupBody(const std::shared_ptr<b2World>& world);
+
     /// \brief eases lever lag toward enabled or disabled target.
     /// \param dt elapsed frame time.
     void updateLeverLag(const sf::Time& dt);
+
     /// \brief updates absolute spike hit rects and damages the player on lethal overlap.
     void updateCollision();
+
     /// \brief updates spike states according to the selected operating mode.
     /// \param dt elapsed frame time.
     void updateStates(const sf::Time& dt);
+
     /// \brief updates cached bounding rectangle from the current body position.
     void updateBoundingBox();
+
     /// \brief applies current animation frame and position to all sprites.
     void updateSprites();
+
     /// \brief moves the trap along its interpolation path and updates platform coupling for the player.
     /// \param dt elapsed frame time.
     void updatePosition(const sf::Time& dt);
+
     /// \brief updates all spikes using the interval mode state machine.
     /// \param dt elapsed frame time.
     void updateStatesInterval(const sf::Time& dt);
+
     /// \brief updates one active spike at a time and rotates active side after each cycle.
     /// \param dt elapsed frame time.
     void updateStatesRotate(const sf::Time& dt);

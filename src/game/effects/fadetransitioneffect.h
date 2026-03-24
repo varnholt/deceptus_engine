@@ -21,6 +21,7 @@ struct FadeTransitionEffect : public ScreenTransitionEffect
    /// \brief advances fade alpha, clamps to [0, 1], and finishes when target opacity is reached.
    /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt) override;
+
    /// \brief draws the fade quad using the current alpha value across the configured view size.
    /// \param window render texture that receives the fade overlay.
    void draw(const std::shared_ptr<sf::RenderTexture>& window) override;

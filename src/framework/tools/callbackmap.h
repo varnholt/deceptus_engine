@@ -23,6 +23,7 @@ struct CallbackMap
    /// \param cb Callback to register.
    ///
    void addCallback(int32_t id, const Callback& cb);
+
    ///
    /// \brief Invokes all callbacks registered for `id`.
    /// \param id Callback group id.

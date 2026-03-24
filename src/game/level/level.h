@@ -46,16 +46,20 @@ class Level : public GameNode
 public:
    /// \brief disables default construction because render targets are required.
    Level() = delete;
+
    /// \brief creates a level and initializes core systems such as box2d world, shaders, and light system.
    /// \param render_targets shared render textures used by the level rendering pipeline.
    explicit Level(const RenderTargets& render_targets);
+
    /// \brief stops background watchers and removes active enemy timers before destruction.
    virtual ~Level();
 
    /// \brief loads level description, tmx content, save state, enemies, scripts, and render view setup.
    virtual void initialize();
+
    /// \brief resets runtime door state in the mechanism registry.
    void reset();
+
    /// \brief computes the player spawn position in pixels from the description tile start position.
    void loadStartPosition();
 
@@ -68,21 +72,27 @@ public:
    /// \brief advances physics, mechanisms, enemies, scripts, camera, and audio volumes for one frame.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt);
+
    /// \brief recalculates level, parallax, and image-layer views from camera position, panorama, and zoom.
    void updateViews();
+
    /// \brief refreshes mechanism audio volume inputs with the current player position.
    void updateMechanismVolumes();
+
    /// \brief advances active room and camera behavior, including room locks, transitions, and zoom.
    /// \param dt elapsed frame time.
    void updateCameraSystem(const sf::Time& dt);
 
    /// \brief decreases camera zoom factor slightly to zoom in.
    void zoomIn();
+
    /// \brief increases camera zoom factor slightly to zoom out.
    void zoomOut();
+
    /// \brief modifies camera zoom factor by a scaled delta and clamps it to a safe range.
    /// \param delta signed user zoom input.
    void zoomBy(float delta);
+
    /// \brief resets camera zoom factor to 1.0.
    void zoomReset();
 
@@ -97,6 +107,7 @@ public:
    /// \brief returns the level's shared box2d world instance.
    /// \return shared pointer reference to the active box2d world.
    const std::shared_ptr<b2World>& getWorld() const;
+
    /// \brief returns the current player start or checkpoint spawn position in pixels.
    /// \return spawn position in pixel coordinates.
    const sf::Vector2f& getStartPosition() const;
@@ -104,6 +115,7 @@ public:
    /// \brief returns the configured level description file path.
    /// \return level description filename.
    std::string getDescriptionFilename() const;
+
    /// \brief sets the level description file path to load during initialize().
    /// \param description_filename path to the level json description file.
    void setDescriptionFilename(const std::string& description_filename);
@@ -125,6 +137,7 @@ public:
    /// \brief returns the raycast light system used by deferred lighting.
    /// \return shared pointer reference to the light system.
    const std::shared_ptr<LightSystem>& getLightSystem() const;
+
    /// \brief returns the current gameplay camera view.
    /// \return shared pointer reference to the level view.
    const std::shared_ptr<sf::View>& getLevelView() const;
@@ -132,12 +145,14 @@ public:
    /// \brief returns the globally tracked active level instance.
    /// \return pointer to the current level instance.
    static Level* getCurrentLevel();
+
    /// \brief synchronizes room updater and camera room lock to the player's current room immediately.
    void syncRoom();
 
    /// \brief reports whether file watching detected a modified level source file.
    /// \return true when the level content changed on disk and should be reloaded.
    bool isDirty() const;
+
    /// \brief sets how level loading handles generated physics artifacts.
    /// \param loading_mode loading mode controlling cleanup and regeneration behavior.
    void setLoadingMode(LoadingMode loading_mode);
@@ -182,10 +197,13 @@ protected:
    /// \brief loads tmx data, ambient occlusion data, and starts file watching for hot-reload detection.
    /// \return true when loading succeeds and required files are available.
    bool load();
+
    /// \brief parses tmx content, deserializes mechanisms, tile maps, rooms, lights, and physics layers.
    void loadTmx();
+
    /// \brief restores checkpoint spawn position and deserializes saved mechanism state.
    void loadSaveState();
+
    /// \brief initializes level.lua and binds mechanism lookup callbacks.
    void loadLevelScript();
 
@@ -210,8 +228,10 @@ protected:
    /// \param basename filename prefix used for generated screenshot files.
    /// \param texture render texture to save.
    void takeScreenshot(const std::string& basename, sf::RenderTexture& texture);
+
    /// \brief refreshes player light position and visibility state.
    void updatePlayerLight();
+
    /// \brief refreshes the current room from the player's current position.
    void updateRoom();
 
@@ -219,32 +239,42 @@ protected:
    /// \param target render target.
    /// \param z_index z layer to draw.
    void drawParallaxMaps(sf::RenderTarget& target, int32_t z_index);
+
    /// \brief draws tile maps, mechanisms, enemies, player, and image layers for a z-range.
    /// \param color color render target.
    /// \param normal normal render target.
    /// \param from first z layer to draw.
    /// \param to last z layer to draw.
    void drawLayers(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t from, int32_t to);
+
    /// \brief renders the atmosphere tile map into the atmosphere shader render texture.
    void drawAtmosphereLayer();
+
    /// \brief draws glow-contributing elements into the blur target.
    /// \param target render target.
    void drawBlurLayer(sf::RenderTarget& target);
+
    /// \brief renders light sources into the lighting target.
    void drawLightMap();
+
    /// \brief draws the player sprite and normal map contribution.
    /// \param color color render target.
    /// \param normal normal render target.
    void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);
+
    /// \brief draws cached physics outline chains for debug visualization.
    /// \param target render target.
    void drawStaticChains(sf::RenderTarget& target);
+
    /// \brief draws debug overlays such as bodies, hitboxes, and room bounds when enabled.
    void drawDebugInformation();
+
    /// \brief finalizes and displays intermediate level and normal render textures.
    void displayFinalTextures();
+
    /// \brief builds the blur texture used for additive glow composition.
    void drawGlowLayer();
+
    /// \brief composites the blurred glow texture back onto the main level target.
    void drawGlowSprite();
 

@@ -10,6 +10,7 @@ namespace StringUtils
 /// \return Lowercased string.
 ///
 [[nodiscard]] std::string toLower(const std::string& str);
+
 ///
 /// \brief Returns an uppercase copy of a string.
 /// \param str Input string.

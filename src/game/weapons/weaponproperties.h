@@ -14,6 +14,7 @@ class b2Shape;
 struct WeaponProperties
 {
    using PropertyTypes = std::variant<std::string, int32_t, float, bool>;
+
    /// \brief reads a typed property by key and falls back when the key is missing.
    /// \param key property name to look up.
    /// \param default_value value returned when the key is not present.

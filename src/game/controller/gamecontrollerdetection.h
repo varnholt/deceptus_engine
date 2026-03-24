@@ -12,6 +12,7 @@ class GameControllerDetection
 public:
    /// \brief starts the background event thread that waits for SDL controller events.
    void start();
+
    /// \brief stops the event thread and waits until it has terminated.
    void stop();
 
@@ -21,6 +22,7 @@ public:
    /// \brief sets the callback invoked for SDL joystick-added events.
    /// \param callback_added handler receiving the added device index.
    void setCallbackAdded(const AddedCallback& callback_added);
+
    /// \brief sets the callback invoked for SDL joystick-removed events.
    /// \param callback_removed handler receiving the removed device instance id.
    void setCallbackRemoved(const RemovedCallback& callback_removed);

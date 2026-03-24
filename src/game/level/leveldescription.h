@@ -24,6 +24,7 @@ struct LevelDescription
 /// \param j json object that receives the serialized fields.
 /// \param d level description to serialize.
 void to_json(nlohmann::json& j, const LevelDescription& d);
+
 /// \brief deserializes a level description from json.
 /// \param j json object containing level metadata and enemy definitions.
 /// \param d level description to populate.

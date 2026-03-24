@@ -34,6 +34,7 @@ public:
    /// \brief creates a spike block mechanism.
    /// \param parent owning game node in the scene graph.
    SpikeBlock(GameNode* parent = nullptr);
+
    /// \brief returns the mechanism type name used by the serialization system.
    /// \return constant string view containing "SpikeBlock".
    std::string_view objectName() const override;
@@ -46,12 +47,15 @@ public:
    /// \param target render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
    /// \brief advances animation state, interval toggles, and player damage checks.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief queues a target enabled state for animated transitions.
    /// \param enabled true to animate toward the extended state.
    void setEnabled(bool enabled) override;
+
    /// \brief returns the block rectangle in pixel space.
    /// \return area used for chunk activation and collision damage tests.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

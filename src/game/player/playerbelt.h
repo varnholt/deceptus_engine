@@ -17,6 +17,7 @@ public:
    /// \brief gets the configured conveyor belt velocity.
    /// \return belt velocity contribution in meters per second.
    float getBeltVelocity() const;
+
    /// \brief stores the current conveyor belt velocity.
    /// \param belt_velocity belt velocity contribution in meters per second.
    void setBeltVelocity(float belt_velocity);
@@ -24,6 +25,7 @@ public:
    /// \brief reports whether the player is currently standing on a belt surface.
    /// \return true when belt velocity should affect movement.
    bool isOnBelt() const;
+
    /// \brief marks whether the player is currently on a belt.
    /// \param on_belt true when belt logic should be active.
    void setOnBelt(bool on_belt);

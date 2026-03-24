@@ -22,6 +22,7 @@ namespace Levels
 /// \param index zero-based index into the cached level list.
 /// \return requested level item, or a default-constructed item when out of range.
 LevelItem readLevelItem(int32_t index);
+
 /// \brief returns all level entries, loading and caching levels.json on first use.
 /// \return copy of the cached level item list.
 std::vector<LevelItem> readLevelItems();

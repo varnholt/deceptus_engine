@@ -20,6 +20,7 @@ struct TmxEnemy
    /// \brief parses a TMX object into enemy fields, properties, bounds, and optional path points.
    /// \param object TMX object that defines the enemy.
    void parse(const std::shared_ptr<TmxObject>& object);
+
    /// \brief assigns a physics path by matching this enemy rect against path chains.
    /// \param paths candidate world paths in box2d coordinates.
    void addPaths(const std::vector<std::vector<b2Vec2>>& paths);

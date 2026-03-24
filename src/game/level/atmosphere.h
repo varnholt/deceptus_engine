@@ -17,6 +17,7 @@ struct Atmosphere
 {
    /// \brief creates an empty atmosphere map.
    Atmosphere() = default;
+
    /// \brief releases cached atmosphere tile data.
    ~Atmosphere();
 
@@ -24,10 +25,12 @@ struct Atmosphere
    /// \param layer tile layer containing atmosphere tile gids.
    /// \param tileSet tileset used to convert global tile ids to local tile ids.
    void parse(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TmxTileSet>& tileSet);
+
    /// \brief returns the atmosphere tile at a world position given in box2d meters.
    /// \param pos_m world position in meters.
    /// \return atmosphere tile at the queried location, or AtmosphereTileInvalid when out of bounds.
    AtmosphereTile getTileForPosition(const b2Vec2& pos_m) const;
+
    /// \brief returns the atmosphere tile at a world position given in pixels.
    /// \param pos_px world position in pixels.
    /// \return atmosphere tile at the queried location, or AtmosphereTileInvalid when out of bounds.

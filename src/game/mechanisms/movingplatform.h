@@ -22,6 +22,7 @@ public:
    /// \brief creates a moving platform mechanism.
    /// \param parent parent node in the scene graph.
    MovingPlatform(GameNode* parent);
+
    /// \brief returns the mechanism registry name.
    /// \return string view containing `MovingPlatform`.
    std::string_view objectName() const override;
@@ -38,9 +39,11 @@ public:
    /// \param color color render target.
    /// \param normal normal render target.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
    /// \brief updates path movement, enable-ramp lag, player coupling, and wheel animations.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
    /// \brief returns the precomputed area covered by this platform path.
    /// \return platform bounds in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -48,12 +51,15 @@ public:
    /// \brief creates the kinematic platform body and collision fixture.
    /// \param world shared box2d world.
    void setupBody(const std::shared_ptr<b2World>& world);
+
    /// \brief appends one tile sprite to the platform sprite list.
    /// \param sprite sprite to append.
    void addSprite(const sf::Sprite& sprite);
+
    /// \brief returns the underlying platform box2d body.
    /// \return non-owning pointer to the kinematic body.
    b2Body* getBody();
+
    /// \brief toggles platform movement and updates lever lag transition state.
    /// \param enabled true to accelerate towards active motion.
    void setEnabled(bool enabled) override;
@@ -61,6 +67,7 @@ public:
    /// \brief returns the polyline path points in pixel space.
    /// \return path points in pixel coordinates.
    const std::vector<sf::Vector2f>& getPixelPath() const;
+
    /// \brief returns frame-to-frame x displacement based on body position history.
    /// \return current x delta since previous update.
    float getDx() const;
@@ -68,6 +75,7 @@ public:
 private:
    /// \brief initializes the body transform from stored tile coordinates.
    void setupTransform();
+
    /// \brief smooths movement startup and shutdown after lever state changes.
    /// \param dt elapsed frame time.
    void updateLeverLag(const sf::Time& dt);
