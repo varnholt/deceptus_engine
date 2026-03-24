@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 
+/// \brief stores temporary values used for jump-curve debug tracing.
 struct PlayerJumpTrace
 {
    bool _jump_started = false;

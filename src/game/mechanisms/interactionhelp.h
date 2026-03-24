@@ -10,14 +10,28 @@
 
 struct TmxObject;
 
+/// \brief shows contextual interaction hints when the player enters a trigger area.
 class InteractionHelp : public GameMechanism, public GameNode
 {
 public:
+   /// \brief creates an interaction-help mechanism and loads the help font.
+   /// \param parent parent node in the scene graph.
    InteractionHelp(GameNode* parent = nullptr);
+   /// \brief returns the mechanism registry name.
+   /// \return string view containing `InteractionHelp`.
    std::string_view objectName() const override;
+   /// \brief draws show or hide animations and current hint ui rows.
+   /// \param target render target.
+   /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+   /// \brief updates trigger transitions, animation alpha, and keyboard or controller icon selection.
+   /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   /// \brief initializes trigger bounds, show or hide animations, and help rows from TMX properties.
+   /// \param data deserialize context containing TMX object data.
    void deserialize(const GameDeserializeData& data);
+   /// \brief returns the interaction trigger rectangle.
+   /// \return trigger rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
 private:
@@ -28,6 +42,7 @@ private:
       Use
    };
 
+   /// \brief stores one help row with button icon variants and text.
    struct HelpElement
    {
       std::unique_ptr<sf::Sprite> _button_sprite;

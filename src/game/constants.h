@@ -49,6 +49,7 @@ constexpr auto CHUNK_ALLOWED_DELTA_Y{3};
 // 1 / 1.097656 => 0.91103223596463737272879663574016
 constexpr auto TIMESTEP_ERROR = 0.91192227210220912883854305376065f;
 
+/// \brief reasons that transition the player into dead state.
 enum class DeathReason
 {
    Invalid,
@@ -59,6 +60,7 @@ enum class DeathReason
    TouchesDeadly,
 };
 
+/// \brief level mechanism serialization version selector.
 enum class MechanismVersion
 {
    Version1,
@@ -84,6 +86,7 @@ enum class MechanismVersion
 // [02]
 // [..] parallax layers
 // [00]
+/// \brief render-depth bands used for layer and entity sorting.
 enum class ZDepth
 {
    BackgroundMin = 0,
@@ -95,6 +98,7 @@ enum class ZDepth
    Player = 20
 };
 
+/// \brief directional bit flags used by moving and sensing logic.
 enum class Alignment
 {
    PointsNowhere = 0x00,
@@ -104,6 +108,7 @@ enum class Alignment
    PointsLeft = 0x08,
 };
 
+/// \brief display-mode bit flags that describe active ui and rendering overlays.
 enum class Display
 {
    Invalid = 0x00,
@@ -118,6 +123,7 @@ enum class Display
    ReplayPlaying = 0x100,
 };
 
+/// \brief high-level runtime state of the game loop.
 enum class ExecutionMode
 {
    NotRunning,
@@ -125,6 +131,7 @@ enum class ExecutionMode
    Paused,
 };
 
+/// \brief abstract menu control actions.
 enum class MenuAction
 {
    Confirm,
@@ -135,6 +142,7 @@ enum class MenuAction
    Increase,
 };
 
+/// \brief abstract gameplay actions triggered by control mapping.
 enum class PlayerAction
 {
    None,
@@ -155,6 +163,7 @@ enum class PlayerAction
    WallJump,
 };
 
+/// \brief abstract inventory and pause-menu actions.
 enum class InvetoryAction
 {
    ShowMap,
@@ -169,6 +178,7 @@ enum class InvetoryAction
    MoveLeft,
 };
 
+/// \brief camera look-state flags for free-look behavior.
 enum class Look
 {
    Inactive = 0x00,
@@ -179,6 +189,7 @@ enum class Look
    Right = 0x10,
 };
 
+/// \brief bitmask of raw gameplay keys currently pressed.
 enum KeyPressed
 {
    KeyPressedUp = 0x01,
@@ -192,6 +203,7 @@ enum KeyPressed
    KeyPressedAction = 0x100,
 };
 
+/// \brief runtime type ids assigned to physics fixtures and mechanisms.
 enum ObjectType
 {
    ObjectTypeInvalid,               //  0
@@ -217,6 +229,7 @@ enum ObjectType
    ObjectTypeObstacle,              // 20
 };
 
+/// \brief box2d category bits used for collision filtering.
 enum EntityCategory
 {
    CategoryBoundary = 0x01,
@@ -226,6 +239,7 @@ enum EntityCategory
    CategoryMoveableBox = 0x10,
 };
 
+/// \brief screen anchor positions for message-box placement.
 enum class MessageBoxLocation
 {
    Invalid = 0,
@@ -240,6 +254,7 @@ enum class MessageBoxLocation
    BottomRight,
 };
 
+/// \brief supported weapon archetypes.
 enum class WeaponType
 {
    None = 0,
@@ -249,6 +264,7 @@ enum class WeaponType
 };
 
 // this enum should be removed
+/// \brief legacy atmosphere tile ids used by water rendering logic.
 enum AtmosphereTile  // 16 cols per row
 {
    AtmosphereTileWaterFull = 48,
@@ -264,12 +280,14 @@ enum AtmosphereTile  // 16 cols per row
    AtmosphereTileInvalid = 1024,
 };
 
+/// \brief tilemap pass type for color or normal rendering.
 enum class DrawMode
 {
    ColorMap,
    NormalMap
 };
 
+/// \brief horizontal edge side markers.
 enum class Edge
 {
    None,
@@ -277,6 +295,7 @@ enum class Edge
    Right
 };
 
+/// \brief dash direction state.
 enum class Dash
 {
    None,
@@ -285,24 +304,28 @@ enum class Dash
 };
 
 // it might make more sense to remove game related stuff here and use a simple uint32_t _id
+/// \brief callback ids used by global callback map registration.
 enum class CallbackType
 {
    EndGame,
    NextLevel
 };
 
+/// \brief polygon winding order.
 enum class Winding
 {
    Clockwise,
    CounterClockwise
 };
 
+/// \brief level loading variants.
 enum class LoadingMode
 {
    Standard,
    Clean,
 };
 
+/// \brief policy for updating positional audio volumes.
 enum class AudioUpdateBehavior
 {
    AlwaysOn,

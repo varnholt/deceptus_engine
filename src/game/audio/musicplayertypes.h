@@ -3,6 +3,7 @@
 
 namespace MusicPlayerTypes
 {
+/// \brief defines how a new music track should replace the currently playing track.
 enum class TransitionType
 {
    LetCurrentFinish,
@@ -11,6 +12,7 @@ enum class TransitionType
    FadeOutThenNew
 };
 
+/// \brief defines what the music player does after a track finishes playback.
 enum class PostPlaybackAction
 {
    None,      // do nothing when the track ends
@@ -18,6 +20,7 @@ enum class PostPlaybackAction
    PlayNext,  // play next track in a list
 };
 
+/// \brief tracks the internal state of an ongoing music transition.
 enum class MusicTransitionState
 {
    None,

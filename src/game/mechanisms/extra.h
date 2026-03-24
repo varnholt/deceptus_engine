@@ -18,17 +18,33 @@ class TileMap;
 struct TmxLayer;
 struct TmxTileSet;
 
+/// \brief represents a collectible extra that can be animated, gated, and added to inventory.
 class Extra : public GameMechanism, public GameNode
 {
 public:
+   /// \brief creates an extra mechanism.
+   /// \param parent parent node in the scene graph.
    Extra(GameNode* parent = nullptr);
+   /// \brief returns the mechanism registry name.
+   /// \return string view containing `Extra`.
    std::string_view objectName() const override;
 
+   /// \brief loads visuals, interaction flags, audio, and animations from TMX properties.
+   /// \param data deserialize context containing TMX object properties.
+   /// \return true when TMX object data exists and setup completes.
    bool deserialize(const GameDeserializeData& data);
 
+   /// \brief draws spawn and pickup animations, then draws the item when active and visible.
+   /// \param target render target.
+   /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
+   /// \brief updates animations and handles pickup checks against the player rectangle.
+   /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   /// \brief returns the collectible interaction rectangle.
+   /// \return extra rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+   /// \brief marks the extra as spawned and starts spawn animation playback when configured.
    void spawn();
 
    using ExtraCallback = std::function<void(const std::string&)>;

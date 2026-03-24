@@ -3,6 +3,7 @@
 
 #include <optional>
 
+/// \brief distance-based volume profile with near and far radii in pixels and their target volume levels.
 struct AudioRange
 {
    float _radius_far_px{0.0f};
