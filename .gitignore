@@ -15,3 +15,4 @@ build_*/*
 **/.qtc/
 **/build/
 .idea/*
+/doc/doxygen-html
