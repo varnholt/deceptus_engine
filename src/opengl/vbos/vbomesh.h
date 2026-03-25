@@ -9,9 +9,16 @@
 #include <string>
 #include <vector>
 
+/// \brief obj mesh loader and renderer that stores geometry in OpenGL buffers.
 class VBOMesh : public Drawable
 {
 public:
+   /// \brief loads an obj mesh and uploads its data into a VAO-backed VBO set.
+   /// \param filename path to obj file.
+   /// \param scale scale factor applied to loaded positions.
+   /// \param recenter_mesh whether to center loaded vertices around origin.
+   /// \param load_texture_coordinates whether to parse texture coordinates.
+   /// \param generate_tangents whether to derive tangent vectors from UVs.
    VBOMesh(
       const char* filename,
       float scale = 1.0f,
@@ -20,7 +27,11 @@ public:
       bool generate_tangents = false
    );
 
+   /// \brief draws the uploaded mesh as indexed triangles.
    void render() const override;
+
+   /// \brief loads or reloads mesh data from an obj file and recreates buffers.
+   /// \param fileName path to obj file.
    void loadObj(const char* fileName);
 
 private:
