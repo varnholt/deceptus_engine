@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game/effects/lightsystem.h"
 #include "game/items/item.h"
 
 #include <SFML/Graphics.hpp>
@@ -33,4 +34,5 @@ private:
    sf::CircleShape _light_circle;
    float _light_radius;
    bool _enabled{false};
+   std::shared_ptr<LightSystem::LightInstance> _player_light;
 };
