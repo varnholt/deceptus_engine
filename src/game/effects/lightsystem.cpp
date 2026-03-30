@@ -391,6 +391,10 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
       {
          texture = (std::filesystem::path("data/light/") / it->second->_value_string.value()).string();
       }
+      else
+      {
+         Log::Warning() << "no texture property found, using default: " << texture;
+      }
 
       // A) center of the physical light is in the center of the textured quad
       //
