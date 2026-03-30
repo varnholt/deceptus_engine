@@ -86,7 +86,7 @@ void ItemLantern::onEquipped()
    // data._tmx_object->_properties->_map["center_offset_y_px"] = center_offset_y_property;
 
    _player_light = LightSystem::createLightInstance(player, data);
-   _player_light->_color = sf::Color(255, 200, 100, 50);
+   _player_light->_color = sf::Color(255, 200, 100, 255);
    _player_light->_sprite->setColor(_player_light->_color);
 
    auto* level = Level::getCurrentLevel();
