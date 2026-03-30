@@ -28,53 +28,119 @@ class Level;
 class Player;
 struct ScreenTransition;
 
+/// \brief top-level game runtime that owns windowing, loop, level loading, and event dispatch.
 class Game
 {
 public:
+   /// \brief constructs game runtime with default-initialized subsystem handles.
    Game() = default;
+
+   /// \brief unregisters global serializers and releases runtime-owned systems.
    virtual ~Game();
 
+   /// \brief initializes window, subsystems, player, menus, and callbacks.
    void initialize();
+
+   /// \brief runs the main loop until the window is closed.
+   /// \return process exit code.
    int32_t loop();
+
+   /// \brief polls and dispatches window events.
    void processEvents();
+
+   /// \brief renders the current frame into offscreen and window targets.
    void draw();
 
+   /// \brief requests a screenshot during the next frame render.
    void takeScreenshot();
 
 
 private:
+   /// \brief shuts down runtime systems before exit.
    void shutdown();
+
+   /// \brief handles one sfml event and routes it to relevant systems.
+   /// \param event event to process.
    void processEvent(const sf::Event& event);
 
+   /// \brief creates or recreates window and render textures from configuration.
    void initializeWindow();
+
+   /// \brief initializes game controller integration and pause bindings.
    void initializeController();
 
+   /// \brief draws current level content.
    void drawLevel();
+
+   /// \brief asynchronously loads current save-state level and syncs player/world links.
+   /// \param loading_mode loading strategy used by Level initialization.
    void loadLevel(LoadingMode loading_mode = LoadingMode::Standard);
+
+   /// \brief reloads the active level while preserving selected transient state.
+   /// \param loading_mode loading strategy used by Level initialization.
    void reloadLevel(LoadingMode loading_mode = LoadingMode::Standard);
+
+   /// \brief advances save-state level index and starts loading the next level.
    void nextLevel();
 
+   /// \brief resets player state using current checkpoint information.
    void reset();
+
+   /// \brief drives death fade transitions and checkpoint reload timing.
+   /// \param dt elapsed frame time.
    void resetAfterDeath(const sf::Time& dt);
 
+   /// \brief updates timers, state machines, gameplay, and ui each frame.
    void update();
+
+   /// \brief checks player death reasons and triggers post-death flow.
+   /// \param dt elapsed frame time.
    void updateGameState(const sf::Time& dt);
+
+   /// \brief updates controller devices and pushes state into player controls.
    void updateGameController();
+
+   /// \brief forwards controller state to gameplay-specific controller storage.
    void updateGameControllerForGame();
+
+   /// \brief updates atmosphere shader parameters.
    void updateAtmosphereShader();
+
+   /// \brief refreshes window title with runtime fps data.
    void updateWindowTitle();
 
+   /// \brief opens the main menu and switches game state to not running.
    void showMainMenu();
+
+   /// \brief opens the pause menu when pausing is currently allowed.
    void showPauseMenu();
 
+   /// \brief handles gameplay-level key-press shortcuts and actions.
+   /// \param event key press event data.
    void processKeyPressedEvents(const sf::Event::KeyPressed* event);
+
+   /// \brief handles gameplay-level key-release actions.
+   /// \param event key release event data.
    void processKeyReleasedEvents(const sf::Event::KeyReleased* event);
 
+   /// \brief toggles fullscreen mode and recreates rendering resources.
    void toggleFullScreen();
+
+   /// \brief applies a new window resolution and recreates rendering resources.
+   /// \param w target width in pixels.
+   /// \param h target height in pixels.
    void changeResolution(int32_t w, int32_t h);
+
+   /// \brief reloads save-state data and loads level at last checkpoint.
    void goToLastCheckpoint();
+
+   /// \brief handles menu-triggered level load request with fade-in transition.
    void menuLoadRequest();
+
+   /// \brief queues looping menu music.
    void playMenuMusic();
+
+   /// \brief queues looping level music.
    void playLevelMusic();
 
    std::shared_ptr<sf::RenderWindow> _window;

@@ -391,6 +391,10 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
       {
          texture = (std::filesystem::path("data/light/") / it->second->_value_string.value()).string();
       }
+      else
+      {
+         Log::Warning() << "no texture property found, using default: " << texture;
+      }
 
       // A) center of the physical light is in the center of the textured quad
       //
@@ -459,8 +463,8 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 
    if (data._tmx_object)
    {
-      light->_width_px = static_cast<int>(data._tmx_object->_width_px);
-      light->_height_px = static_cast<int>(data._tmx_object->_height_px);
+      light->_width_px = static_cast<int32_t>(data._tmx_object->_width_px);
+      light->_height_px = static_cast<int32_t>(data._tmx_object->_height_px);
 
       // set up the box2d position of the light
       light->_pos_m = b2Vec2(

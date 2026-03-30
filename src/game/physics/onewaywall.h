@@ -4,32 +4,30 @@
 
 #include <set>
 
-/*! \brief OneWayWall implements walls that are only solid from one side.
- *         This is the classic Mario style behavior where you jump through the bottom of the surface and
- *         as soon as the player is falling down again, the surface becomes solid.
- *
- *  The concept is simple:
- *     When the player moves upwards into a one way wall, the contact is disabled
- *     When the player moves downwards into a one way wall, the contact is NOT disabled
- *
- *  To make this work, box2d code has been modified so that contacts that have been
- *  disabled once will remain disabled. see code change below:
- *
- *  void b2Contact::Update(b2ContactListener* listener)
- *  {
- *     b2Manifold oldManifold = m_manifold;
- *
- *     // Re-enable this contact.
- *     // m_flags |= e_enabledFlag;
- */
+/// \brief tracks active one-way-wall contacts and toggles contact solidity based on player movement.
 struct OneWayWall
 {
+   /// \brief returns the singleton one-way-wall handler.
+   /// \return global one-way-wall state instance.
    static OneWayWall& instance();
 
+   /// \brief handles begin contact and disables solidity while the player is moving upward.
+   /// \param contact one-way-wall contact to track and potentially disable.
+   /// \param player_fixture player fixture in this contact, used for head/velocity checks.
    void beginContact(b2Contact* contact, b2Fixture* player_fixture);
+
+   /// \brief re-enables a contact and removes it from the tracked one-way-wall set.
+   /// \param contact one-way-wall contact that just ended.
    void endContact(b2Contact* contact);
+
+   /// \brief clears tracked contacts without changing their enabled state.
    void clear();
+
+   /// \brief disables every tracked one-way-wall contact to force a drop-through.
    void drop();
+
+   /// \brief reports whether any one-way-wall contacts are currently tracked.
+   /// \return true when at least one one-way-wall contact is active.
    bool hasContacts() const;
 
 private:

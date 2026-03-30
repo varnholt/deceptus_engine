@@ -1,8 +1,10 @@
 #ifndef BOOMSETTINGS_H
 #define BOOMSETTINGS_H
 
+/// \brief stores parameters that control camera shake strength, duration, and waveform.
 struct BoomSettings
 {
+   /// \brief selects the envelope algorithm used to produce shake offsets.
    enum class ShakeType
    {
       Sine,

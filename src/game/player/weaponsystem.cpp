@@ -1,6 +1,9 @@
 #include "game/player/weaponsystem.h"
+#include "game/weapons/bow.h"
 #include "game/weapons/weapon.h"
 #include "game/weapons/weaponfactory.h"
+
+#include <algorithm>
 
 void to_json(nlohmann::json& j, const WeaponSystem& d)
 {

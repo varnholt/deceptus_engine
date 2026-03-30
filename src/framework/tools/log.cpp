@@ -5,9 +5,58 @@
 #include <iostream>
 #include <source_location>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 namespace
 {
+constexpr bool colored_output = true;
+
+// ansi color codes
+constexpr const char* color_reset = "\033[0m";
+constexpr const char* color_yellow = "\033[33m";
+constexpr const char* color_red = "\033[31m";
+constexpr const char* color_bright_red = "\033[91m";
+
 std::vector<Log::ListenerCallback> _log_callbacks;
+
+// enable ansi colors on windows console
+void enableWindowsAnsiColors()
+{
+#ifdef _WIN32
+   static bool initialized = false;
+   if (!initialized)
+   {
+      HANDLE h_out = GetStdHandle(STD_OUTPUT_HANDLE);
+      if (h_out != INVALID_HANDLE_VALUE)
+      {
+         DWORD dw_mode = 0;
+         if (GetConsoleMode(h_out, &dw_mode))
+         {
+            dw_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            SetConsoleMode(h_out, dw_mode);
+         }
+      }
+      initialized = true;
+   }
+#endif
+}
+
+constexpr const char* getColorForLevel(Log::Level level)
+{
+   switch (level)
+   {
+      case Log::Level::Warning:
+         return color_yellow;
+      case Log::Level::Error:
+         return color_red;
+      case Log::Level::Fatal:
+         return color_bright_red;
+      default:
+         return "";
+   }
+}
 
 std::string formatTime(const std::chrono::system_clock::time_point& now)
 {
@@ -20,7 +69,17 @@ void log(Log::Level level, const std::string_view& message, const std::source_lo
    const auto source_tag = Log::parseSourceTag(source_location);
    const auto now_local = formatTime(now);
 
-   std::cout << "[" << static_cast<char>(level) << "] " << now_local << " | " << source_tag << ": " << message << std::endl;
+   if constexpr (colored_output)
+   {
+      enableWindowsAnsiColors();
+      const char* color = getColorForLevel(level);
+      std::cout << color << "[" << static_cast<char>(level) << "] " << now_local << " | " << source_tag << ": " << message << color_reset
+                << std::endl;
+   }
+   else
+   {
+      std::cout << "[" << static_cast<char>(level) << "] " << now_local << " | " << source_tag << ": " << message << std::endl;
+   }
 
    for (const auto& callback : _log_callbacks)
    {

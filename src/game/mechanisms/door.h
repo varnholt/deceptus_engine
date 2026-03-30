@@ -15,6 +15,7 @@
 struct TmxLayer;
 struct TmxTileSet;
 
+/// \brief controls an interactable door that can block or allow passage.
 class Door : public GameMechanism, public GameNode
 {
 public:
@@ -32,32 +33,80 @@ public:
       Closed,
    };
 
+   /// \brief creates a door mechanism.
+   /// \param parent parent node in the scene graph.
    Door(GameNode* parent);
+
+   /// \brief destroys the door mechanism.
+   ///
+   /// no special runtime cleanup is performed here.
    virtual ~Door();
+
+   /// \brief returns the mechanism registry name.
+   /// \return string view containing `Door`.
    std::string_view objectName() const override;
 
+   /// \brief draws the current door visual state and optional key hint animation.
+   /// \param color color render target.
+   /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
+   /// \brief updates animations, body enable state, and player interaction with button b.
+   /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
+   /// \brief maps mechanism enabled state to door motion.
+   /// \param enabled true to open the door, false to close it.
    void setEnabled(bool enabled) override;
+
+   /// \brief returns the door bounds used for mechanism queries.
+   /// \return door rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   /// \brief starts the opening sequence, including observer, audio, and animation events.
    void open();
+
+   /// \brief starts the closing sequence when this door is allowed to close.
    void close();
+
+   /// \brief toggles between open and closed states when no transition is running.
    void toggle() override;
 
+   /// \brief initializes properties, visuals, interaction range, and physics body from TMX data.
+   /// \param data deserialize context with TMX object data and box2d world.
+   /// \return true when TMX object data is available and setup completed.
    bool setup(const GameDeserializeData& data);
 
+   /// \brief reports whether the door currently treats the player as nearby.
+   /// \return true when the player-at-door flag is set.
    bool isPlayerAtDoor() const;
+
+   /// \brief updates the cached nearby-player flag used for ui and audio behavior.
+   /// \param isPlayerAtDoor true when the player is considered near the door.
    void setPlayerAtDoor(bool isPlayerAtDoor);
 
+   /// \brief returns the top-left tile coordinate of the door.
+   /// \return tile position in tile units.
    const sf::Vector2i& getTilePosition() const;
+
+   /// \brief returns the door rectangle in pixel coordinates.
+   /// \return door rectangle in pixel coordinates.
    const sf::FloatRect& getPixelRect() const;
 
 private:
+   /// \brief creates the kinematic box2d body used to block player movement.
+   /// \param world shared box2d world.
    void setupBody(const std::shared_ptr<b2World>& world);
 
+   /// \brief updates body transform so collision follows the animated door offset.
    void updateTransform();
+
+   /// \brief updates legacy version-1 bar movement and its collision transform.
+   /// \param dt elapsed frame time.
    void updateBars(const sf::Time& dt);
+
+   /// \brief checks whether the player's pixel position lies inside the interaction area.
+   /// \return true when the player is inside the interaction rectangle.
    bool checkPlayerAtDoor() const;
 
    std::unique_ptr<sf::Sprite> _sprite;

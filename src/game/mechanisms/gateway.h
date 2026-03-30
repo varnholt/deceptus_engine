@@ -9,18 +9,40 @@
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
+/// \brief controls a gateway that activates through staged animation and teleports the player.
 class Gateway : public GameMechanism, public GameNode
 {
 public:
+   /// \brief creates a gateway mechanism and preloads gateway sound samples.
+   /// \param parent parent node in the scene graph.
    Gateway(GameNode* parent = nullptr);
+
+   /// \brief unregisters this gateway from the global gateway registry.
    virtual ~Gateway();
+
+   /// \brief returns the mechanism registry name.
+   /// \return string view containing `Gateway`.
    std::string_view objectName() const override;
+
+   /// \brief draws gateway layers, rotating side parts, void shader effect, and eye animation.
+   /// \param target render target.
+   /// \param normal normal-map render target (unused).
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
+
+   /// \brief updates activation state, side animations, eye tracking, and optional teleport use.
+   /// \param dt elapsed frame time.
    virtual void update(const sf::Time& dt);
 
+   /// \brief initializes gateway geometry, visuals, shader resources, and object properties.
+   /// \param data deserialize context with TMX object data and resource paths.
    void setup(const GameDeserializeData& data);
+
+   /// \brief returns bounds for mechanism queries.
+   /// \return `std::nullopt` because gateway interaction uses internal checks.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   /// \brief sets the destination gateway object id used by teleport.
+   /// \param destination_gateway_id object id of the destination gateway.
    void setTargetId(const std::string& destination_gateway_id);
 
 private:
@@ -31,9 +53,13 @@ private:
       Enabled
    };
 
+   /// \brief stores one rotating side element and its transform state.
    struct Side
    {
+      /// \brief updates the side sprite transform from angle, distance, and offset.
       void update();
+
+      /// \brief resets side transform values to the default idle configuration.
       void reset();
 
       std::shared_ptr<Layer> _layer;
@@ -44,6 +70,7 @@ private:
       float _distance_factor{1.0f};
    };
 
+   /// \brief handles gateway eye animations and iris state transitions.
    struct Eye
    {
       enum class IrisState
@@ -53,11 +80,20 @@ private:
          Idle
       };
 
+      /// \brief creates eye visuals centered on the given gateway position.
+      /// \param center center position of the gateway in pixels.
       Eye(const sf::Vector2f& center);
 
+      /// \brief draws the currently active eye animation.
+      /// \param target render target.
       void draw(sf::RenderTarget& target);
+
+      /// \brief updates iris state, animation playback, and gaze tracking towards the player.
+      /// \param dt elapsed frame time.
+      /// \param state current gateway activation state.
       void update(const sf::Time& dt, State state);
 
+      /// \brief starts the eye wake-up sequence.
       void wakeUp();
 
       sf::Vector2f _eye_pos_px;
@@ -81,12 +117,16 @@ private:
       State _state = State::Disabled;
    };
 
+   /// \brief base state container with shared elapsed-time handling.
    struct PortalState
    {
       sf::Time _elapsed_time;
+
+      /// \brief resets elapsed time for the current step.
       void resetTime();
    };
 
+   /// \brief stores oscillation parameters used while the gateway is fully enabled.
    struct EnabledState : PortalState
    {
       float _frequency{1.0f};
@@ -96,6 +136,7 @@ private:
       float _distances_when_activated{0.0f};
    };
 
+   /// \brief stores parameters and intermediate values for the enabling animation sequence.
    struct ActivatedState : PortalState
    {
       int32_t _step{0};
@@ -117,10 +158,16 @@ private:
       float _fade_duration_s{2.0f};
    };
 
+   /// \brief toggles visibility for all side layers in an array.
+   /// \param sides side array to update.
+   /// \param visible true to mark layers as visible.
    void setSidesVisible(std::array<Side, 4>& sides, bool visible);
 
+   /// \brief checks whether the player's pixel position is inside the gateway rectangle.
+   /// \return true when the player is inside the gateway area.
    bool checkPlayerAtGateway() const;
 
+   /// \brief starts teleport usage with a fade transition when a valid target gateway exists.
    void use();
 
    State _state{State::Disabled};
@@ -151,7 +198,12 @@ private:
    std::string _target_id;
 
    // shader
+   /// \brief loads and configures the repeating noise texture used by the void shader.
+   /// \param filename texture filename to load.
    void loadNoiseTexture(const std::string& filename);
+
+   /// \brief renders the animated shader-based void effect at the gateway center.
+   /// \param target render target.
    void drawVoid(sf::RenderTarget& target);
 
    sf::Shader _shader;

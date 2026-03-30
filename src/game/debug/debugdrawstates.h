@@ -1,6 +1,7 @@
 #ifndef DEBUGDRAWSTATES_H
 #define DEBUGDRAWSTATES_H
 
+/// \brief holds global toggles that enable or disable optional debug overlays.
 struct DebugDrawStates
 {
    static bool _draw_test_scene;
