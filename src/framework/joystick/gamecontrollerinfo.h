@@ -6,13 +6,21 @@
 // joystick
 #include "gamecontrollerballvector.h"
 
+///
+/// \brief Stores one sampled snapshot of controller axes, buttons, balls, and hats.
+///
 class GameControllerInfo
 {
 public:
-   //! constructor a
    GameControllerInfo() = default;
 
-   //! constructor b
+   ///
+   /// \brief Constructs a snapshot from fully populated input vectors.
+   /// \param axis_values Axis values in SDL read order.
+   /// \param button_values Button states in SDL button order.
+   /// \param ball_values Ball delta values.
+   /// \param hat_values Hat states.
+   ///
    GameControllerInfo(
       const std::vector<int32_t>& axis_values,
       const std::vector<bool>& button_values,
@@ -20,40 +28,57 @@ public:
       const std::vector<int32_t>& hat_values
    );
 
-   //! add axis value
-   void addAxisValue(int32_t);
+   ///
+   /// \brief Appends one axis sample.
+   /// \param value Axis value to append.
+   ///
+   void addAxisValue(int32_t value);
 
-   //! add button state
-   void addButtonState(bool);
+   ///
+   /// \brief Appends one button state sample.
+   /// \param value Button state to append.
+   ///
+   void addButtonState(bool value);
 
-   //! add ball value
-   void addBallValue(const GameControllerBallVector&);
+   ///
+   /// \brief Appends one trackball sample.
+   /// \param value Ball value to append.
+   ///
+   void addBallValue(const GameControllerBallVector& value);
 
-   //! add hat value
-   void addHatValue(int32_t);
+   ///
+   /// \brief Appends one hat sample.
+   /// \param value Hat value to append.
+   ///
+   void addHatValue(int32_t value);
 
-   //! getter for axis values
+   ///
+   /// \brief Returns sampled axis values.
+   /// \return Axis value vector.
+   ///
    const std::vector<int32_t>& getAxisValues() const;
 
-   //! getter for button values
+   ///
+   /// \brief Returns sampled button states.
+   /// \return Button state vector.
+   ///
    const std::vector<bool>& getButtonValues() const;
 
-   //! getter for ball values
+   ///
+   /// \brief Returns sampled trackball values.
+   /// \return Ball value vector.
+   ///
    const std::vector<GameControllerBallVector>& getBallValues() const;
 
-   //! getter for hat values
+   ///
+   /// \brief Returns sampled hat values.
+   /// \return Hat value vector.
+   ///
    const std::vector<int32_t>& getHatValues() const;
 
 protected:
-   //! axis values
    std::vector<int32_t> _axis_values;
-
-   //! button values
    std::vector<bool> _button_values;
-
-   //! ball values
    std::vector<GameControllerBallVector> _ball_values;
-
-   //! hat values
    std::vector<int32_t> _hat_values;
 };

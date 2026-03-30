@@ -5,30 +5,37 @@
 #include <map>
 #include <memory>
 
-/*! \brief Implements font rendering based on a bitmap.
- *         Each character in the texture (glyph) is defined in a font map.
- *
- *  Use load to load a texture and font map.
- *  Each character in the texture is supposed to have the same width and height.
- *  The texture map must have the format below:
- *
- *      6;12
- *      ABCDEFGHIJKLMNOPQRSTUVWXYZ
- *      abcdefghijklmnopqrstuvwxyz
- *      0123456789!@#$%^&*()_-+=\/
- *      |{}[]<>:?.,
- *
- *
- * You can create the UV coordinates for a given text by calling getCoords.
- * Once you have them you can use the draw function to render a given vector of coordinates to a specified
- * position on the screen.
- */
+/// \brief renders fixed-size bitmap glyphs mapped from a plain text font map file.
+/// each glyph in the atlas uses the same width and height.
+/// the font map format starts with "width;height", followed by lines that list glyphs in atlas order:
+/// 6;12
+/// ABCDEFGHIJKLMNOPQRSTUVWXYZ
+/// abcdefghijklmnopqrstuvwxyz
+/// 0123456789!@#$%^&*()_-+=\/
+/// |{}[]<>:?.,
+/// call getCoords() to translate text into atlas rectangles, then draw() to render them.
+/// \brief bitmap font data and drawing helpers used by ui layers.
 struct BitmapFont
 {
+   /// \brief creates an unloaded bitmap font.
    BitmapFont() = default;
+
+   /// \brief loads the glyph atlas texture and builds character-to-rect mappings.
+   /// \param texture path to the bitmap font texture.
+   /// \param map path to the glyph map text file.
    void load(const std::string& texture, const std::string& map);
+
+   /// \brief resolves each character in a string to its atlas rectangle.
+   /// \param text text to convert into drawable glyph coordinates.
+   /// \return ordered list of glyph texture rectangles for known characters.
    std::vector<std::shared_ptr<sf::IntRect>> getCoords(const std::string& text);
 
+   /// \brief draws bitmap glyphs left-to-right at the specified screen position.
+   /// \param window SFML render target used for text output.
+   /// \param coords glyph uv rectangles returned by getCoords().
+   /// \param x left start position in pixels.
+   /// \param y top start position in pixels.
+   /// \param color optional tint color applied to all glyphs for this draw call.
    void draw(
       sf::RenderTarget& window,
       const std::vector<std::shared_ptr<sf::IntRect>>& coords,

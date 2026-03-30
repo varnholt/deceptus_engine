@@ -19,6 +19,7 @@
 #include "game/event/eventdistributor.h"
 #include "game/level/level.h"
 #include "game/level/levels.h"
+#include "game/player/inventoryconfig.h"
 #include "game/player/player.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"

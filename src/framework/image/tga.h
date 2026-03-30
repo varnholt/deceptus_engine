@@ -1,3 +1,11 @@
+///
+/// \brief Executes savetga.
+/// \param filename Input file path.
+/// \param data Data.
+/// \param width Width in pixels.
+/// \param height Height in pixels.
+/// \return Requested value.
+///
 #pragma once
 
 #include <stdint.h>
@@ -5,10 +13,29 @@
 
 int savetga(const std::string& filename, uint32_t* data, int16_t width, int16_t height);
 
+///
+/// \brief Represents tgaheader state and behavior.
+///
+
 struct TGAHeader
 {
+   ///
+   /// \brief Initializes object state for this type.
+   ///
    TGAHeader() = default;
+
+   ///
+   /// \brief Initializes object state for this type.
+   /// \param w W.
+   /// \param h H.
+   /// \param bits Bits.
+   ///
    TGAHeader(uint16_t w, uint16_t h, uint8_t bits);
+
+   ///
+   /// \brief Writes data to the output target.
+   /// \param stream Binary input stream.
+   ///
    void save(std::ostream& stream);
 
    uint8_t _ident_size = 0;  // size of ID field that follows 18 byte header (0 usually)

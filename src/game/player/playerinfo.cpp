@@ -1,6 +1,13 @@
 #include "playerinfo.h"
 
+#include "game/player/inventoryconfig.h"
+
 using json = nlohmann::json;
+
+PlayerInfo::PlayerInfo()
+{
+   _inventory_config.linkInventoryToItemSystem(_inventory, _items);
+}
 
 void to_json(nlohmann::json& j, const PlayerInfo& data)
 {
@@ -8,8 +15,8 @@ void to_json(nlohmann::json& j, const PlayerInfo& data)
       {"name", data._name},
       {"inventory", data._inventory},
       {"extras", data._extra_table},
-      {"stats", data._extra_table},
-      {"weapons", data._weapons}
+      {"stats", data._stats},
+      {"weapons", data._weapons},
    };
 }
 
@@ -36,4 +43,7 @@ void from_json(const nlohmann::json& j, PlayerInfo& data)
    {
       data._weapons = j.at("weapons").get<WeaponSystem>();
    }
+
+   // re-link inventory callbacks after deserialization
+   data._inventory_config.linkInventoryToItemSystem(data._inventory, data._items);
 }

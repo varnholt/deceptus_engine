@@ -2,11 +2,14 @@
 
 #include "menuscreen.h"
 
+/// \brief options hub screen that links to controls, video, audio, game, achievements, and credits.
 class MenuScreenOptions : public MenuScreen
 {
 public:
+   /// \brief initializes the options screen with its PSD layout.
    MenuScreenOptions();
 
+   /// \brief identifies selectable option categories.
    enum class Selection
    {
       Controls = 0,
@@ -18,14 +21,26 @@ public:
       Count
    };
 
+   /// \brief routes navigation, confirm, and cancel keys to options screen actions.
+   /// \param key key that was pressed.
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
+   /// \brief updates option highlights and input prompts.
    void updateLayers();
+
+   /// \brief refreshes layers after PSD loading.
    void loadingFinished() override;
 
+   /// \brief moves selection up, skipping achievements, with wrap-around.
    void up();
+
+   /// \brief moves selection down, skipping achievements, with wrap-around.
    void down();
+
+   /// \brief returns to the most recent parent menu that opened options.
    void back();
+
+   /// \brief opens the submenu corresponding to the current selection.
    void select();
 
    Selection _selection = Selection::Controls;

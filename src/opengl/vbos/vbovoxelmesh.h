@@ -9,11 +9,12 @@
 
 struct Voxel;
 
+/// \brief voxel-based mesh builder that emits cube faces into OpenGL buffers.
 class VboVoxelMesh : public Drawable
 {
-
 public:
 
+   /// \brief indices for precomputed face normals used by cube faces.
    enum NormalIndex
    {
       NormalIndexUp    = 0,
@@ -24,6 +25,7 @@ public:
       NormalIndexFront = 5
    };
 
+   /// \brief indices for canonical quad UV coordinates.
    enum UvIndex
    {
       UvUpLeft    = 0,
@@ -32,6 +34,7 @@ public:
       UvDownRight = 3
    };
 
+   /// \brief packed index references for one generated mesh vertex.
    struct Vertex
    {
       uint32_t pIndex;
@@ -41,8 +44,26 @@ public:
       uint32_t uvIndex;
    };
 
+   /// \brief builds a voxel mesh for a 2d slice interpreted over y/z dimensions.
+   /// \param space pointer array containing voxel pointers.
+   /// \param lengthY number of cells along y.
+   /// \param lengthZ number of cells along z.
    VboVoxelMesh(Voxel** space, uint32_t lengthY, uint32_t lengthZ);
+
+   /// \brief builds a voxel mesh for a full 3d voxel field.
+   /// \param space pointer array containing voxel pointers.
+   /// \param lengthX number of cells along x.
+   /// \param lengthY number of cells along y.
+   /// \param lengthZ number of cells along z.
    VboVoxelMesh(Voxel** space, uint32_t lengthX, uint32_t lengthY, uint32_t lengthZ);
+
+   /// \brief builds a voxel mesh for a contiguous x-axis slice range.
+   /// \param space pointer array containing voxel pointers.
+   /// \param slice_from starting x index of included slice.
+   /// \param slice_count number of x slices to include.
+   /// \param lengthX number of cells along x in source field.
+   /// \param lengthY number of cells along y in source field.
+   /// \param lengthZ number of cells along z in source field.
    VboVoxelMesh(
       Voxel** space,
       uint32_t slice_from,
@@ -52,11 +73,19 @@ public:
       uint32_t lengthZ
    );
 
+   /// \brief draws generated voxel faces as indexed triangles.
    void render() const override;
 
+   /// \brief returns the raw voxel pointer storage used to build this mesh.
+   /// \return pointer to voxel pointer array.
    Voxel** slice() const;
 
+   /// \brief returns stored y-dimension length.
+   /// \return number of cells along y.
    uint32_t getLengthY() const;
+
+   /// \brief returns stored z-dimension length.
+   /// \return number of cells along z.
    uint32_t getLengthZ() const;
 
 

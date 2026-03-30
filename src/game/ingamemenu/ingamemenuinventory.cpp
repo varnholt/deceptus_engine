@@ -486,14 +486,7 @@ std::optional<std::string> InGameMenuInventory::getSelectedItem() const
 void InGameMenuInventory::assign(const std::string& item, int32_t slot)
 {
    auto& inventory = getInventory();
-   inventory._slots[slot] = item;
-
-   // clear slot if there's a duplicate assignment
-   const auto other_slot_index = 1 - slot;
-   if (inventory._slots[other_slot_index] == item)
-   {
-      inventory._slots[other_slot_index].clear();
-   }
+   inventory.selectItem(slot, item);
 
 #ifdef DEBUG_INVENTORY
    std::cout << "assigning " << item << " to slot " << slot << std::endl;

@@ -11,20 +11,42 @@
 class GameNode;
 struct TmxObject;
 
+/// \brief simulates and renders a swinging rope built from box2d chain segments.
 class Rope : public GameMechanism, public GameNode
 {
 public:
+   /// \brief creates a rope mechanism with default segment and wind settings.
+   /// \param parent owning game node in the scene graph.
    Rope(GameNode* parent);
+
+   /// \brief returns the mechanism type name used by the serialization system.
+   /// \return constant string view containing "Rope".
    std::string_view objectName() const override;
 
+   /// \brief draws the rope as a textured strip between simulated chain bodies.
+   /// \param color color render target.
+   /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
+   /// \brief updates wind impulses, player influence, and rope motion.
+   /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
+   /// \brief returns the interaction area used for player impulse transfer.
+   /// \return rope bounding rectangle in pixel space.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   /// \brief builds rope geometry, reads tmx properties, and creates box2d joints.
+   /// \param data deserialization data with polyline path, world, and properties.
    virtual void setup(const GameDeserializeData& data);
 
+   /// \brief returns the rope anchor position in pixels.
+   /// \return anchor position used to initialize the rope chain.
    sf::Vector2i getPixelPosition() const;
-   void setPixelPosition(const sf::Vector2i& pixelPosition);
+
+   /// \brief sets the rope anchor position in pixels.
+   /// \param pixel_position anchor position used for box2d body creation.
+   void setPixelPosition(const sf::Vector2i& pixel_position);
 
 protected:
    int32_t _segment_count = 7;
@@ -34,6 +56,8 @@ protected:
    std::shared_ptr<sf::Texture> _texture;
 
 private:
+   /// \brief applies a horizontal impulse to all chain elements.
+   /// \param impulse impulse strength applied in world units.
    void pushChain(float impulse);
 
    sf::Vector2i _position_px;

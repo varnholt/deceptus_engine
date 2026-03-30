@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 
+/// \brief stores global game settings and handles json persistence.
 struct GameConfiguration
 {
    int32_t _video_mode_width = 1280;
@@ -29,18 +30,35 @@ struct GameConfiguration
    int32_t _text_speed = 2;
    PauseMode _pause_mode = PauseMode::AutomaticPause;
 
+   /// \brief loads configuration values from a json file.
+   /// \param filename source configuration file path.
    void deserializeFromFile(const std::string& filename = "data/config/game.json");
+
+   /// \brief writes current configuration values to a json file.
+   /// \param filename destination configuration file path.
    void serializeToFile(const std::string& filename = "data/config/game.json");
 
+   /// \brief returns the built-in default configuration values.
+   /// \return shared default configuration object.
    static GameConfiguration& getDefaults();
+
+   /// \brief returns the active game configuration, loading from disk on first access.
+   /// \return singleton runtime configuration object.
    static GameConfiguration& getInstance();
 
+   /// \brief restores all runtime audio volume settings to their default values.
    static void resetAudioDefaults();
 
 private:
+   /// \brief serializes the current settings into formatted json text.
+   /// \return json string containing the GameConfiguration object.
    std::string serialize();
+
+   /// \brief parses json text and applies known configuration values.
+   /// \param data json payload containing a GameConfiguration object.
    void deserialize(const std::string& data);
 
+   /// \brief constructs a configuration object populated with default values.
    GameConfiguration() = default;
 
    static bool __initialized;

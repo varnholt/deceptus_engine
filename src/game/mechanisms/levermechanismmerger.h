@@ -9,9 +9,22 @@
 namespace LeverMechanismMerger
 {
 
+/// \brief stores a legacy TMX search rectangle for rectangle-based lever linking.
+/// \param rect TMX rectangle object defining a search area.
 void addSearchRect(const std::shared_ptr<TmxObject>& rect);
 
 // requires a unified datastructure/mechanism in the future!
+/// \brief connects levers to target mechanisms using target ids and legacy rectangle matching.
+/// \param levers lever mechanism list.
+/// \param lasers laser mechanism list.
+/// \param platforms moving-platform mechanism list.
+/// \param fans fan mechanism list.
+/// \param belts conveyor-belt mechanism list.
+/// \param spikes spikes mechanism list.
+/// \param spike_blocks spike-block mechanism list.
+/// \param on_off_blocks on-off-block mechanism list.
+/// \param rotating_blades rotating-blade mechanism list.
+/// \param doors door mechanism list.
 void merge(
    const std::vector<std::shared_ptr<GameMechanism>>& levers,
    const std::vector<std::shared_ptr<GameMechanism>>& lasers,

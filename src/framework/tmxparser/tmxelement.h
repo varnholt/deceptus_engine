@@ -7,6 +7,9 @@
 
 struct TmxParseData;
 
+///
+/// \brief Base type for all parsed TMX elements.
+///
 struct TmxElement
 {
    enum class Type
@@ -20,8 +23,17 @@ struct TmxElement
    };
 
    TmxElement() = default;
+
+   ///
+   /// \brief Destroys the element.
+   ///
    virtual ~TmxElement() = default;
 
+   ///
+   /// \brief Reads common TMX fields shared by derived elements.
+   /// \param e XML element being parsed.
+   /// \param parse_data Shared parse context.
+   ///
    virtual void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>& parse_data);
 
    std::string _name;

@@ -8,53 +8,33 @@
 #include <mutex>
 #include <vector>
 
-/**
- * @file eventdistributor.h
- * @brief A lightweight, thread-safe generic event distributor system.
- *
- * Allows registering callbacks for any event type and dispatching events
- * to all registered listeners. Each callback registration returns an ID
- * which can be used to unregister it later.
- */
+/// \file eventdistributor.h
+/// \brief provides a thread-safe, per-type callback registry for runtime events.
 
 namespace EventDistributor
 {
 
-/**
- * @brief Type alias for event callback functions.
- *
- * @tparam EventT The type of event this callback handles.
- */
+/// \brief callback type used for a specific event payload type.
+/// \tparam EventT event type delivered to subscribers.
 template <typename EventT>
 using EventCallback = std::function<void(const EventT&)>;
 
-/**
- * @brief Generates a unique callback ID.
- *
- * Thread-safe monotonic counter to assign unique IDs to registered callbacks.
- *
- * @return A unique int32_t ID.
- */
+/// \brief generates a unique callback identifier across all event types.
+/// \return monotonically increasing callback id.
 inline int32_t getNextCallbackId()
 {
    static std::atomic<int32_t> current_id{0};
    return ++current_id;
 }
 
-/**
- * @brief Internal type storing a callback ID and its corresponding function.
- *
- * @tparam EventT The event type associated with this callback.
- */
+/// \brief stores a callback id together with its handler function.
+/// \tparam EventT event type associated with the callback.
 template <typename EventT>
 using CallbackEntry = std::pair<int32_t, EventCallback<EventT>>;
 
-/**
- * @brief Provides access to the internal list of callback entries for a specific event type.
- *
- * @tparam EventT The event type.
- * @return Reference to the vector of registered callback entries.
- */
+/// \brief returns the static callback list for one event type.
+/// \tparam EventT event type whose callback list is requested.
+/// \return mutable callback storage for the given event type.
 template <typename EventT>
 std::vector<CallbackEntry<EventT>>& getCallbackList()
 {
@@ -62,12 +42,9 @@ std::vector<CallbackEntry<EventT>>& getCallbackList()
    return callbacks;
 }
 
-/**
- * @brief Provides access to the mutex protecting the callback list for a specific event type.
- *
- * @tparam EventT The event type.
- * @return Reference to the mutex guarding the callback list.
- */
+/// \brief returns the mutex guarding the callback list for one event type.
+/// \tparam EventT event type whose callback mutex is requested.
+/// \return mutex used to synchronize register, dispatch, and unregister calls.
 template <typename EventT>
 std::mutex& getCallbackMutex()
 {
@@ -75,15 +52,9 @@ std::mutex& getCallbackMutex()
    return mtx;
 }
 
-/**
- * @brief Dispatches an event to all registered callbacks for the given event type.
- *
- * Thread-safe. All registered callbacks for the given type are invoked
- * in the order they were registered.
- *
- * @tparam EventT The event type.
- * @param event The event instance to dispatch.
- */
+/// \brief dispatches an event to all callbacks registered for the same event type.
+/// \tparam EventT event type being dispatched.
+/// \param event event payload forwarded to every subscribed callback.
 template <typename EventT>
 void event(const EventT& event)
 {
@@ -97,16 +68,10 @@ void event(const EventT& event)
    }
 }
 
-/**
- * @brief Registers a callback for the given event type.
- *
- * Thread-safe. The callback will be called whenever an event of this type
- * is dispatched using event().
- *
- * @tparam EventT The event type.
- * @param callback The callback function to register.
- * @return A unique int32_t ID that can be used to unregister the callback.
- */
+/// \brief registers a callback for a specific event type.
+/// \tparam EventT event type accepted by the callback.
+/// \param callback function invoked when an event of type EventT is dispatched.
+/// \return callback id that can be passed to unregisterEvent.
 template <typename EventT>
 int32_t registerEvent(EventCallback<EventT> callback)
 {
@@ -119,14 +84,9 @@ int32_t registerEvent(EventCallback<EventT> callback)
    return id;
 }
 
-/**
- * @brief Unregisters a previously registered callback by its ID.
- *
- * Thread-safe. If no callback with the given ID exists, this function does nothing.
- *
- * @tparam EventT The event type.
- * @param id The ID of the callback to unregister.
- */
+/// \brief removes a callback from an event type by callback id.
+/// \tparam EventT event type registry to remove the callback from.
+/// \param id callback id previously returned by registerEvent.
 template <typename EventT>
 void unregisterEvent(int32_t id)
 {

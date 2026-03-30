@@ -113,7 +113,7 @@ int32_t addSensorRectCallback(lua_State* state)
       return 0;
    }
 
-   const auto* rect_id = lua_tostring(state, 1);
+   const std::string rect_id = lua_tostring(state, 1);
    getInstance()->addSensorRectCallback(rect_id);
    return 0;
 }
@@ -134,7 +134,7 @@ int32_t isMechanismVisible(lua_State* state)
       return 0;
    }
 
-   const auto* search_pattern = lua_tostring(state, 1);
+   const std::string search_pattern = lua_tostring(state, 1);
 
    std::optional<std::string> group;
    if (argc == 2)
@@ -162,7 +162,7 @@ int32_t isPlayerIntersectingSensorRect(lua_State* state)
       return 0;
    }
 
-   const auto* search_pattern = lua_tostring(state, 1);
+   const std::string search_pattern = lua_tostring(state, 1);
 
    const auto intersects = getInstance()->isPlayerIntersectingSensorRect(search_pattern);
    lua_pushboolean(state, intersects);
@@ -185,7 +185,7 @@ int32_t setMechanismVisible(lua_State* state)
       return 0;
    }
 
-   const auto* search_pattern = lua_tostring(state, 1);
+   const std::string search_pattern = lua_tostring(state, 1);
    const auto visible = lua_toboolean(state, 2);
 
    std::optional<std::string> group;
@@ -214,7 +214,7 @@ int32_t isMechanismEnabled(lua_State* state)
       return 0;
    }
 
-   const auto* search_pattern = lua_tostring(state, 1);
+   const std::string search_pattern = lua_tostring(state, 1);
 
    std::optional<std::string> group;
    if (argc == 2)
@@ -242,7 +242,7 @@ int32_t setMechanismEnabled(lua_State* state)
       return 0;
    }
 
-   const auto* search_pattern = lua_tostring(state, 1);
+   const std::string search_pattern = lua_tostring(state, 1);
    const auto enabled = lua_toboolean(state, 2);
 
    std::optional<std::string> group;
@@ -269,7 +269,7 @@ int32_t inventoryAdd(lua_State* state)
       return 0;
    }
 
-   const auto* item_key = lua_tostring(state, 1);
+   const std::string item_key = lua_tostring(state, 1);
    getInstance()->inventoryAdd(item_key);
    return 0;
 }
@@ -288,7 +288,7 @@ int32_t inventoryRemove(lua_State* state)
       return 0;
    }
 
-   const auto* item_key = lua_tostring(state, 1);
+   const std::string item_key = lua_tostring(state, 1);
    getInstance()->inventoryRemove(item_key);
    return 0;
 }
@@ -308,7 +308,7 @@ int32_t inventoryHas(lua_State* state)
       return 0;
    }
 
-   const auto* item_key = lua_tostring(state, 1);
+   const std::string item_key = lua_tostring(state, 1);
    const auto has_item = getInstance()->inventoryHas(item_key);
    lua_pushboolean(state, has_item);
    return 1;
@@ -329,7 +329,7 @@ int32_t showDialogue(lua_State* state)
       return 0;
    }
 
-   const auto* search_pattern = lua_tostring(state, 1);
+   const std::string search_pattern = lua_tostring(state, 1);
 
    getInstance()->showDialogue(search_pattern);
    return 0;
@@ -350,7 +350,7 @@ int32_t toggle(lua_State* state)
       return 0;
    }
 
-   const auto* search_pattern = lua_tostring(state, 1);
+   const std::string search_pattern = lua_tostring(state, 1);
 
    std::optional<std::string> group;
    if (argc == 2)
@@ -378,9 +378,9 @@ int32_t writeLuaNodeProperty(lua_State* state)
       return 0;
    }
 
-   const auto search_pattern = lua_tostring(state, 1);
-   const auto key = lua_tostring(state, 2);
-   const auto value = lua_tostring(state, 3);
+   const std::string search_pattern = lua_tostring(state, 1);
+   const std::string key = lua_tostring(state, 2);
+   const std::string value = lua_tostring(state, 3);
 
    getInstance()->writeLuaNodeProperty(search_pattern, key, value);
    return 0;
@@ -401,7 +401,7 @@ int32_t setLuaNodeVisible(lua_State* state)
       return 0;
    }
 
-   const auto* search_pattern = lua_tostring(state, 1);
+   const std::string search_pattern = lua_tostring(state, 1);
    const auto visible = lua_toboolean(state, 2);
 
    getInstance()->setLuaNodeVisible(search_pattern, visible);
@@ -423,7 +423,7 @@ int32_t setLuaNodeActive(lua_State* state)
       return 0;
    }
 
-   const auto* search_pattern = lua_tostring(state, 1);
+   const std::string search_pattern = lua_tostring(state, 1);
    const auto active = lua_toboolean(state, 2);
 
    getInstance()->setLuaNodeActive(search_pattern, active);
@@ -548,7 +548,7 @@ int32_t debug(lua_State* state)
       return 0;
    }
 
-   const auto* message = lua_tostring(state, 1);
+   const std::string message = lua_tostring(state, 1);
    Log::Info() << message;
 
    return 0;
@@ -694,6 +694,7 @@ LevelScript::~LevelScript()
    // remove 'item added' callback
    auto& inventory = SaveState::getPlayerInfo()._inventory;
    inventory.removeAddedCallback(_inventory_added_callback);
+   inventory.removeUsedCallback(_inventory_used_callback);
 
    stopScript();
 }

@@ -2,9 +2,12 @@
 
 #include "framework/tools/jsonconfiguration.h"
 
+/// \brief stores gameplay tuning values loaded from data/config/tweaks.json.
 class Tweaks : public JsonConfiguration
 {
 public:
+   /// \brief returns the global tweaks object and lazily loads it from disk.
+   /// \return singleton tweaks instance used across gameplay systems.
    static Tweaks& instance();
 
    float _bend_down_threshold = 0.6f;
@@ -21,8 +24,15 @@ public:
    uint8_t _player_stencil_alpha = 40;
 
 private:
+   /// \brief constructs the tweaks container with built-in fallback values.
    Tweaks() = default;
+
+   /// \brief serializes tweak fields into json text for persistence.
+   /// \return json string containing the Tweaks object.
    std::string serialize() override;
+
+   /// \brief parses tweak json and updates known fields when present.
+   /// \param data json payload containing a Tweaks object.
    void deserialize(const std::string& data) override;
    bool initialized = false;
 };

@@ -9,6 +9,7 @@
 
 struct TmxObject;
 
+/// \brief controls a solid block that switches collision and visuals on lever or interval timing.
 class OnOffBlock : public GameMechanism, public GameNode
 {
 public:
@@ -18,19 +19,41 @@ public:
       Interval
    };
 
+   /// \brief creates an on-off block mechanism.
+   /// \param parent parent node in the scene graph.
    OnOffBlock(GameNode* parent = nullptr);
+
+   /// \brief returns the mechanism registry name.
+   /// \return string view containing `OnOffBlock`.
    std::string_view objectName() const override;
 
+   /// \brief initializes sprite, timing mode, inversion, and static box2d body from TMX data.
+   /// \param data deserialize context containing TMX object and world.
    void setup(const GameDeserializeData& data);
 
+   /// \brief draws the current on-off block sprite frame.
+   /// \param target render target.
+   /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
+   /// \brief updates interval toggling, queued state changes, and transition animation.
+   /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
+   /// \brief queues a target enabled state and applies inversion when configured.
+   /// \param enabled requested enabled state before inversion rules are applied.
    void setEnabled(bool enabled) override;
+
+   /// \brief returns the block rectangle in pixel coordinates.
+   /// \return block rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   /// \brief returns the block rectangle used for intersection checks.
+   /// \return block rectangle in pixel coordinates.
    const sf::FloatRect& getPixelRect() const;
 
 private:
+   /// \brief updates sprite texture coordinates from the current animation index.
    void updateSpriteRect();
 
    std::shared_ptr<sf::Texture> _texture_map;

@@ -12,27 +12,48 @@
 struct TmxObject;
 struct TmxObjectGroup;
 
+/// \brief renders animated smoke or fog particles inside a rectangular area.
 class SmokeEffect : public GameMechanism, public GameNode
 {
 public:
+   /// \brief particle animation style used by this effect.
    enum class Mode
    {
       Smoke,
       Fog,
    };
 
+   /// \brief creates a smoke effect with default texture and render settings.
+   /// \param parent owning game node in the scene graph.
    SmokeEffect(GameNode* parent = nullptr);
+
+   /// \brief returns the mechanism type name used by the serialization system.
+   /// \return constant string view containing "SmokeEffect".
    std::string_view objectName() const override;
 
+   /// \brief renders all particles into an offscreen texture and draws the layer.
+   /// \param color color render target.
+   /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
-   void update(const sf::Time& time) override;
+
+   /// \brief animates particle rotation, offsets, color, and batched vertices.
+   /// \param dt elapsed frame time.
+   void update(const sf::Time& dt) override;
+
+   /// \brief returns the effect rectangle in pixel space.
+   /// \return bounding box used for chunk activation and culling.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   /// \brief creates and configures a smoke effect from tmx object properties.
+   /// \param parent owning game node in the scene graph.
+   /// \param data deserialization data with particle counts, colors, and mode.
+   /// \return configured smoke effect instance.
    static std::shared_ptr<SmokeEffect> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 private:
    std::shared_ptr<sf::Texture> _texture;
 
+   /// \brief stores one particle sprite and its orbit animation parameters.
    struct SmokeParticle
    {
       SmokeParticle(const sf::Texture& texture)

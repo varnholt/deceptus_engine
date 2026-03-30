@@ -12,34 +12,82 @@
 #include <atomic>
 #include <memory>
 
+/// \brief draws and updates the in-game hud, console text, and ui animations.
 class InfoLayer
 {
 public:
    using HighResDuration = std::chrono::high_resolution_clock::duration;
 
+   /// \brief loads ui layers, hud animations, and inventory icon sprites.
    InfoLayer();
 
+   /// \brief updates loading fade, health panel motion, inventory icons, and timed animations.
+   /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt);
+
+   /// \brief advances randomized heartbeat, stamina, and skull-blink animations.
+   /// \param dt elapsed frame time since the previous update.
    void updateAnimations(const sf::Time& dt);
 
+   /// \brief draws the complete hud pass in view space.
+   /// \param window SFML render target used for hud output.
+   /// \param RenderStates render state overrides passed to sub-draw calls.
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+
+   /// \brief draws debug text such as player tile position, pixel position, and room name.
+   /// \param window SFML render target used for debug text rendering.
    void drawDebugInfo(sf::RenderTarget& window);
+
+   /// \brief draws the developer console, command history, and help topics.
+   /// \param window SFML render target used for console output.
+   /// \param states render state overrides for console background layers.
    void drawConsole(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
 
+   /// \brief toggles loading mode and triggers hud/show hide transitions.
+   /// \param loading true to show loading icon and hide health panel, false to reverse it.
    void setLoading(bool loading);
 
 private:
+   /// \brief loads inventory icon atlas sprites and initializes two item slot sprites.
    void loadInventoryItems();
 
+   /// \brief draws the legacy heart animation strip.
+   /// \param window SFML render target used for animation output.
+   /// \param states render state overrides for the animation draw.
    void drawHeartAnimation(sf::RenderTarget& window, sf::RenderStates states);
+
+   /// \brief draws equipped inventory slot icons and their slot overlays.
+   /// \param window SFML render target used for inventory output.
+   /// \param states render state overrides for slot layer draws.
    void drawInventoryItem(sf::RenderTarget& window, sf::RenderStates states);
+
+   /// \brief draws health quarters, stamina bars, inventory slots, and ui micro-animations.
+   /// \param window SFML render target used for hud output.
+   /// \param states render state overrides for layer and animation draws.
    void drawHealth(sf::RenderTarget& window, sf::RenderStates states);
+
+   /// \brief draws camera-pan indicator arrows while keyboard look is active.
+   /// \param window SFML render target used for indicator output.
+   /// \param states render state overrides for indicator layer draws.
    void drawCameraPanorama(sf::RenderTarget& window, sf::RenderStates states);
+
+   /// \brief draws the loading spinner animation with current fade alpha.
+   /// \param window SFML render target used for loading icon output.
+   /// \param states render state overrides for animation drawing.
    void drawLoading(sf::RenderTarget& window, sf::RenderStates states);
+
+   /// \brief draws replay recording and playback status icons when enabled.
+   /// \param states render state overrides for icon layer draws.
+   /// \param window SFML render target used for event replay icon output.
    void drawEventReplay(sf::RenderStates states, sf::RenderTarget& window);
 
+   /// \brief updates slot texture rects from the current saved inventory entries.
    void updateInventoryItems();
+
+   /// \brief animates health panel x-offset for hide/show transitions and applies it to hud layers.
    void updateHealthLayerOffsets();
+
+   /// \brief syncs replay icon visibility with active display mode flags.
    void updateEventReplayIcons();
 
    BitmapFont _font;
@@ -56,11 +104,22 @@ private:
       FadeOut  // fading out (unused)
    };
 
+   /// \brief state machine for fading the loading spinner in and out.
    struct LoadingAnimation
    {
+      /// \brief starts fade-in and restarts the loading animation.
       void show();
+
+      /// \brief requests fade-out of the loading animation.
       void hide();
+
+      /// \brief advances fade timing, alpha, and animation playback state.
+      /// \param delta_time elapsed frame time since the previous update.
       void update(const sf::Time& delta_time);
+
+      /// \brief draws the loading animation when visible.
+      /// \param window SFML render target used for loading icon output.
+      /// \param states render state overrides for animation drawing.
       void draw(sf::RenderTarget& window, sf::RenderStates states);
 
       float _alpha{0.0f};
