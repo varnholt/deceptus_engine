@@ -86,16 +86,8 @@ void ItemLantern::onEquipped()
    // data._tmx_object->_properties->_map["center_offset_y_px"] = center_offset_y_property;
 
    _player_light = LightSystem::createLightInstance(player, data);
-   _player_light->_color = sf::Color(255, 200, 100, 255);  // warm yellowish color
-   // _player_light->_sprite->setRotation(sf::degrees(270));  // TEMPORARILY DISABLED
-
-   Log::Info() << "ItemLantern: Light created, texture size: " << _player_light->_texture->getSize().x << "x" 
-               << _player_light->_texture->getSize().y 
-               << ", sprite scale: " << _player_light->_sprite->getScale().x
-               << ", sprite color: " << (int)_player_light->_sprite->getColor().r << "," 
-               << (int)_player_light->_sprite->getColor().g << ","
-               << (int)_player_light->_sprite->getColor().b << ","
-               << (int)_player_light->_sprite->getColor().a;
+   _player_light->_color = sf::Color(255, 200, 100, 50);
+   _player_light->_sprite->setColor(_player_light->_color);
 
    auto* level = Level::getCurrentLevel();
    if (level && level->getLightSystem())

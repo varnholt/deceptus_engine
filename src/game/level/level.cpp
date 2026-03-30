@@ -186,6 +186,7 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    {
       _player_light = LightSystem::createLightInstance(Player::getCurrent(), {});
       _player_light->_color = sf::Color(255, 255, 255, Tweaks::instance()._player_light_alpha);
+      _player_light->_sprite->setColor(_player_light->_color);
       _light_system->_lights.push_back(_player_light);
    }
 }
@@ -1206,6 +1207,7 @@ void Level::updatePlayerLight()
    // the player, once he dies, becomes inactive and just sinks down
    // so the player light is disabled to avoid any glitches
    _player_light->_color = sf::Color(255, 255, 255, Player::getCurrent()->isDead() ? 0 : Tweaks::instance()._player_light_alpha);
+   _player_light->_sprite->setColor(_player_light->_color);  // update sprite color every frame
 }
 
 const std::shared_ptr<LightSystem>& Level::getLightSystem() const
