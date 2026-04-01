@@ -24,9 +24,9 @@ public:
          setClassName(typeid(LightInstance).name());
       }
 
-      b2Vec2 _pos_m = b2Vec2{0.0f, 0.0f};
-      b2Vec2 _center_offset_m = b2Vec2{0.0f, 0.0f};
-      sf::Vector2i _center_offset_px;
+      b2Vec2 _pos_m = b2Vec2{0.0f, 0.0f};            //!< world position of the light in box2d meters
+      b2Vec2 _center_offset_m = b2Vec2{0.0f, 0.0f};  //!< offset from the light's box2d position to the center of its sprite
+      sf::Vector2i _center_offset_px;                //!< pixel offset used for sprite positioning
 
       sf::Color _color = {255, 255, 255, 80};
       std::array<float, 3> _falloff = {0.4f, 3.0f, 20.0f};
@@ -79,6 +79,10 @@ public:
       const std::shared_ptr<sf::RenderTexture>& light_map,
       const std::shared_ptr<sf::RenderTexture>& normal_map
    );
+
+   /// \brief draws debug visualization for active lights.
+   /// \param target render target.
+   void drawDebug(sf::RenderTarget& target);
 
 private:
    /// \brief renders shadow extrusion triangles for geometry that should occlude a given light.

@@ -1166,6 +1166,8 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       static_cast<int32_t>(ZDepth::ForegroundMax)
    );
 
+   _light_system->drawDebug(*_render_targets.level.get());
+
    Gun::drawProjectileHitAnimations(*_render_targets.level.get());
    AnimationPlayer::getInstance().draw(*_render_targets.level.get());
 
