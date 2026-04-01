@@ -17,6 +17,12 @@
 
 #include <SFML/OpenGL.hpp>
 
+// #define DEBUG_DRAW_LIGHT_SYSTEM
+
+#ifdef DEBUG_DRAW_LIGHT_SYSTEM
+#include "game/debug/debugdraw.h"
+#endif
+
 namespace
 {
 constexpr auto max_distance_m2 = 100.0f;  // depends on the view dimensions
@@ -364,6 +370,42 @@ void LightSystem::draw(
 
    sf::Sprite sprite(color_map->getTexture());
    target.draw(sprite, &_light_shader);
+}
+
+void LightSystem::drawDebug(sf::RenderTarget& target)
+{
+#ifdef DEBUG_DRAW_LIGHT_SYSTEM
+   // debug draw light system:
+   //
+   // red circle = light's base position (_pos_m)
+   // green circle = center position
+   for (const auto& light : _lights)
+   {
+      // debug draw light texture quad boundaries
+      const auto sprite_bounds = light->_sprite->getGlobalBounds();
+      DebugDraw::drawRect(target, sprite_bounds, sf::Color::Cyan, sf::Color::Transparent);
+
+      // debug draw light base position (without center offset)
+      const auto base_pos = light->_pos_m;
+      DebugDraw::drawPoint(target, base_pos, b2Color(1.0f, 0.0f, 0.0f));  // red point
+      DebugDraw::drawCircle(target, base_pos, 0.1f, b2Color(1.0f, 0.0f, 0.0f));
+
+      // debug draw light center position (with center offset)
+      const auto center_pos = light->_pos_m + light->_center_offset_m;
+      DebugDraw::drawPoint(target, center_pos, b2Color(0.0f, 1.0f, 0.0f));  // green point
+      DebugDraw::drawCircle(target, center_pos, 0.15f, b2Color(0.0f, 1.0f, 0.0f));
+
+      // debug draw line from base position to center position if there's an offset
+      if (light->_center_offset_m.x != 0.0f || light->_center_offset_m.y != 0.0f)
+      {
+         DebugDraw::drawLine(target, base_pos, center_pos, b2Color(1.0f, 1.0f, 0.0f));  // yellow line
+      }
+
+      // debug draw cross at sprite center
+      const auto sprite_center_px = sf::Vector2f(sprite_bounds.position.x + sprite_bounds.size.x * 0.5f, sprite_bounds.position.y + sprite_bounds.size.y * 0.5f);
+      DebugDraw::drawPoint(target, sprite_center_px, b2Color(0.0f, 0.0f, 1.0f));  // blue point
+   }
+#endif
 }
 
 void LightSystem::LightInstance::updateSpritePosition() const

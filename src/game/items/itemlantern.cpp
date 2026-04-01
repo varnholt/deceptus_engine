@@ -45,9 +45,8 @@ void ItemLantern::update(const sf::Time& dt)
 #ifdef DEBUG_DRAW
       _light_circle.setPosition(player->getPixelPositionFloat());
 #endif
-      // offset the light downward so it appears to be "held" by the player
-      constexpr float offset_x_m = -3.2f;  // offset downward by 0.5 meters
-      constexpr float offset_y_m = -0.1f;  // offset downward by 0.5 meters
+      constexpr float offset_x_m = -3.3f;
+      constexpr float offset_y_m = -0.1f;
       _player_light->_pos_m = player->getBody()->GetPosition() + b2Vec2(offset_x_m, offset_y_m);
       _player_light->updateSpritePosition();
    }
@@ -75,18 +74,18 @@ void ItemLantern::onEquipped()
 
    // set texture property to topdown.png
    auto texture_property = std::make_shared<TmxProperty>();
-   texture_property->_value_string = "lantern.png";  // X-shaped pattern - VERY obvious if working
+   texture_property->_value_string = "spotlight.png";
    data._tmx_object->_properties->_map["texture"] = texture_property;
 
    Log::Info() << "ItemLantern: Creating light with texture: " << texture_property->_value_string.value();
 
    // set center offset to move light down by 256px
    auto center_offset_x_property = std::make_shared<TmxProperty>();
-   // auto center_offset_y_property = std::make_shared<TmxProperty>();
-   center_offset_x_property->_value_int = 160;
-   // center_offset_y_property->_value_int = 105;
+   auto center_offset_y_property = std::make_shared<TmxProperty>();
+   center_offset_x_property->_value_int = 256;
+   center_offset_y_property->_value_int = -100;
    data._tmx_object->_properties->_map["center_offset_x_px"] = center_offset_x_property;
-   // data._tmx_object->_properties->_map["center_offset_y_px"] = center_offset_y_property;
+   data._tmx_object->_properties->_map["center_offset_y_px"] = center_offset_y_property;
 
    _player_light = LightSystem::createLightInstance(player, data);
    _player_light->_color = sf::Color(255, 200, 100, 255);
