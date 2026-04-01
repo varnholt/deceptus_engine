@@ -1,10 +1,11 @@
-// #define DEBUG_DRAW
+#define DEBUG_DRAW
 
 #include "itemlantern.h"
 
 #include <cmath>
 
 #include "game/io/gamedeserializedata.h"
+#include "game/io/texturepool.h"
 #include "game/level/level.h"
 #include "game/player/player.h"
 #include "framework/tmxparser/tmxobject.h"
@@ -63,27 +64,38 @@ void ItemLantern::onEquipped()
       return;
    }
 
+   // load texture first to get actual dimensions
+   const std::string texture_name = "spotlight.png";
+   const std::string texture_path = "data/light/" + texture_name;
+   auto texture = TexturePool::getInstance().get(texture_path);
+   const auto texture_size = texture->getSize();
+
    // create mock GameDeserializeData
    GameDeserializeData data;
    data._tmx_object = std::make_shared<TmxObject>();
    data._tmx_object->_properties = std::make_shared<TmxProperties>();
 
-   // set light quad dimensions
-   data._tmx_object->_width_px = 512.0f;
-   data._tmx_object->_height_px = 512.0f;
+   // set desired light quad display dimensions (smaller than before)
+   constexpr float desired_width_px = 256.0f;
+   constexpr float desired_height_px = 256.0f;
+   data._tmx_object->_width_px = desired_width_px;
+   data._tmx_object->_height_px = desired_height_px;
 
-   // set texture property to topdown.png
+   // set texture property
    auto texture_property = std::make_shared<TmxProperty>();
-   texture_property->_value_string = "spotlight.png";
+   texture_property->_value_string = texture_name;
    data._tmx_object->_properties->_map["texture"] = texture_property;
 
-   Log::Info() << "ItemLantern: Creating light with texture: " << texture_property->_value_string.value();
+   Log::Info() << "ItemLantern: Creating light with texture: " << texture_name 
+               << " (texture size: " << texture_size.x << "x" << texture_size.y 
+               << ", display size: " << desired_width_px << "x" << desired_height_px << ")";
 
-   // set center offset to move light down by 256px
+   // calculate center offset based on light source position in texture
+   // the light source is at the right edge, vertically centered
    auto center_offset_x_property = std::make_shared<TmxProperty>();
    auto center_offset_y_property = std::make_shared<TmxProperty>();
-   center_offset_x_property->_value_int = 256;
-   center_offset_y_property->_value_int = -100;
+   center_offset_x_property->_value_int = static_cast<int32_t>(desired_width_px / 2);  // shift right to edge
+   center_offset_y_property->_value_int = 0;  // vertical middle is already centered
    data._tmx_object->_properties->_map["center_offset_x_px"] = center_offset_x_property;
    data._tmx_object->_properties->_map["center_offset_y_px"] = center_offset_y_property;
 
