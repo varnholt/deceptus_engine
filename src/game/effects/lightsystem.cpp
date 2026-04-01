@@ -534,8 +534,9 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 
    light->updateSpritePosition();
 
-   const auto scale = static_cast<float>(light->_width_px) / static_cast<float>(light->_texture->getSize().x);
-   light->_sprite->setScale({scale, scale});
+   const auto scale_x = static_cast<float>(light->_width_px) / static_cast<float>(light->_texture->getSize().x);
+   const auto scale_y = static_cast<float>(light->_height_px) / static_cast<float>(light->_texture->getSize().y);
+   light->_sprite->setScale({scale_x, scale_y});
 
    return light;
 }

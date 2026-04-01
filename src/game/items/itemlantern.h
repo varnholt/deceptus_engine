@@ -32,7 +32,8 @@ public:
 
 private:
    sf::CircleShape _light_circle;
-   float _light_radius;
+   float _light_radius{50.0f};
    bool _enabled{false};
+   sf::Time _elapsed;
    std::shared_ptr<LightSystem::LightInstance> _player_light;
 };
