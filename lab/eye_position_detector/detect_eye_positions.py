@@ -318,6 +318,34 @@ def write_animations_with_eyes(animations: Dict, results: Dict, output_path: Pat
     logger.success(f"animations with eye positions saved: {output_path}")
 
 
+def write_eye_positions_only(results: Dict, output_path: Path) -> None:
+    """
+    @brief Write eye positions to a simplified json file
+    @param results Detected eye positions per animation
+    @param output_path Output file path
+    """
+    output_data = {}
+    
+    for anim_name, frames in results.items():
+        eye_positions_x = []
+        eye_positions_y = []
+        
+        for entry in frames:
+            rx, ry = entry["eye_relative"]
+            eye_positions_x.append(rx)
+            eye_positions_y.append(ry)
+        
+        output_data[anim_name] = {
+            "eye_positions_x": eye_positions_x,
+            "eye_positions_y": eye_positions_y
+        }
+    
+    with open(output_path, 'w') as f:
+        json.dump(output_data, f, indent=3)
+    
+    logger.success(f"eye positions saved: {output_path}")
+
+
 def main():
     """@brief Main entry point"""
     parser = argparse.ArgumentParser(description="detect player eye positions from animations.json")
@@ -327,9 +355,14 @@ def main():
         help="generate debug image with colored overlays and eye markers"
     )
     parser.add_argument(
-        "--output",
+        "--write-animations",
         metavar="OUTPUT.json",
         help="write animations.json with eye_positions data added"
+    )
+    parser.add_argument(
+        "--write-eye-positions-only",
+        metavar="OUTPUT.json",
+        help="write eye positions only to a simplified json file"
     )
     args = parser.parse_args()
 
@@ -361,8 +394,11 @@ def main():
         marked_img.save(args.mark)
         logger.success(f"debug image saved: {args.mark}")
     
-    if args.output:
-        write_animations_with_eyes(animations, results, Path(args.output))
+    if args.write_animations:
+        write_animations_with_eyes(animations, results, Path(args.write_animations))
+    
+    if args.write_eye_positions_only:
+        write_eye_positions_only(results, Path(args.write_eye_positions_only))
 
 
 if __name__ == "__main__":

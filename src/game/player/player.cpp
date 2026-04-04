@@ -1040,6 +1040,16 @@ PlayerBelt& Player::getBelt()
    return _belt;
 }
 
+const PlayerEyePositions& Player::getEyePositions() const
+{
+   return _eye_positions;
+}
+
+const std::shared_ptr<PlayerAnimation>& Player::getPlayerAnimation() const
+{
+   return _player_animation;
+}
+
 PlayerPlatform& Player::getPlatform()
 {
    return _platform;
