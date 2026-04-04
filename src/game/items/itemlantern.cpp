@@ -15,6 +15,10 @@
 namespace
 {
 
+constexpr float offset_left_x_m = -3.2f;
+constexpr float offset_right_x_m = -2.5f;
+constexpr float offset_y_m = -0.6f;
+
 sf::Vector2f update_torch_offset(sf::Vector2f current_offset, sf::Vector2f target_offset, const sf::Time dt)
 {
    const sf::Vector2f delta = target_offset - current_offset;
@@ -58,7 +62,7 @@ void ItemLantern::update(const sf::Time& dt)
 
    // update light position to follow player with eye position offset
    auto* player = Player::getCurrent();
-   if (!player || !_player_light)
+   if (!player)
    {
       return;
    }
@@ -91,89 +95,104 @@ void ItemLantern::update(const sf::Time& dt)
    // convert to meters
    const float eye_offset_x_m = _last_valid_eye_position.x * MPP;
    const float eye_offset_y_m = _last_valid_eye_position.y * MPP;
+
+   // switch active light based on player direction
+   const bool pointing_right = player->isPointingRight();
+   const float offset_x_m = pointing_right ? offset_right_x_m : offset_left_x_m;
    
-   // add static offset
-   static constexpr float offset_x_m = -2.85f;
-   static constexpr float offset_y_m = -0.6f;
+   auto& active_light = pointing_right ? _player_light_right : _player_light_left;
+   auto& inactive_light = pointing_right ? _player_light_left : _player_light_right;
    
-   _player_light->_pos_m = player->getBody()->GetPosition() + b2Vec2(eye_offset_x_m + offset_x_m, eye_offset_y_m + offset_y_m);
-   _player_light->updateSpritePosition();
+   if (active_light)
+   {
+      active_light->_enabled = true;
+      active_light->_pos_m = player->getBody()->GetPosition() + b2Vec2(eye_offset_x_m + offset_x_m, eye_offset_y_m + offset_y_m);
+      active_light->updateSpritePosition();
+   }
+   
+   if (inactive_light)
+   {
+      inactive_light->_enabled = false;
+   }
 }
 
 void ItemLantern::onEquipped()
 {
    _enabled = true;
 
-   // create and add light instance to the light system
    auto* player = Player::getCurrent();
    if (!player)
    {
       return;
    }
 
-   // load texture first to get actual dimensions
+   auto* level = Level::getCurrentLevel();
+   if (!level || !level->getLightSystem())
+   {
+      return;
+   }
+
    const std::string texture_name = "spotlight.png";
-   const std::string texture_path = "data/light/" + texture_name;
-   auto texture = TexturePool::getInstance().get(texture_path);
-   const auto texture_size = texture->getSize();
-
-   // create mock GameDeserializeData
-   GameDeserializeData data;
-   data._tmx_object = std::make_shared<TmxObject>();
-   data._tmx_object->_properties = std::make_shared<TmxProperties>();
-
-   // set desired light quad display dimensions (smaller than before)
    constexpr float desired_width_px = 256.0f;
    constexpr float desired_height_px = 128.0f;
-   data._tmx_object->_width_px = desired_width_px;
-   data._tmx_object->_height_px = desired_height_px;
 
-   // set texture property
-   auto texture_property = std::make_shared<TmxProperty>();
-   texture_property->_value_string = texture_name;
-   data._tmx_object->_properties->_map["texture"] = texture_property;
+   Log::Info() << "ItemLantern: Creating directional lights";
 
-   Log::Info() << "ItemLantern: Creating light with texture: " << texture_name 
-               << " (texture size: " << texture_size.x << "x" << texture_size.y 
-               << ", display size: " << desired_width_px << "x" << desired_height_px << ")";
-
-   // calculate center offset based on light source position in texture
-   // the light source is at the right edge, vertically centered
-   auto center_offset_x_property = std::make_shared<TmxProperty>();
-   auto center_offset_y_property = std::make_shared<TmxProperty>();
-   center_offset_x_property->_value_int = static_cast<int32_t>(desired_width_px / 2);
-   center_offset_y_property->_value_int = 0;  // static_cast<int32_t>(desired_height_px / 2);
-   data._tmx_object->_properties->_map["center_offset_x_px"] = center_offset_x_property;
-   data._tmx_object->_properties->_map["center_offset_y_px"] = center_offset_y_property;
-
-   _player_light = LightSystem::createLightInstance(player, data);
-   _player_light->_color = sf::Color(255, 200, 100, 255);
-   _player_light->_sprite->setColor(_player_light->_color);
-
-   auto* level = Level::getCurrentLevel();
-   if (level && level->getLightSystem())
+   // helper to create an identical light instance
+   auto create_light = [&]()
    {
-      level->getLightSystem()->_lights.push_back(_player_light);
-   }
+      GameDeserializeData data;
+      data._tmx_object = std::make_shared<TmxObject>();
+      data._tmx_object->_properties = std::make_shared<TmxProperties>();
+      data._tmx_object->_width_px = desired_width_px;
+      data._tmx_object->_height_px = desired_height_px;
+
+      auto texture_property = std::make_shared<TmxProperty>();
+      texture_property->_value_string = texture_name;
+      data._tmx_object->_properties->_map["texture"] = texture_property;
+
+      auto center_offset_x_property = std::make_shared<TmxProperty>();
+      auto center_offset_y_property = std::make_shared<TmxProperty>();
+      center_offset_x_property->_value_int = static_cast<int32_t>(desired_width_px / 2);
+      center_offset_y_property->_value_int = 0;
+      data._tmx_object->_properties->_map["center_offset_x_px"] = center_offset_x_property;
+      data._tmx_object->_properties->_map["center_offset_y_px"] = center_offset_y_property;
+
+      auto light = LightSystem::createLightInstance(player, data);
+      light->_color = sf::Color(255, 200, 100, 255);
+      light->_sprite->setColor(light->_color);
+      light->_enabled = false;
+      
+      return light;
+   };
+
+   _player_light_left = create_light();
+   level->getLightSystem()->_lights.push_back(_player_light_left);
+
+   _player_light_right = create_light();
+   level->getLightSystem()->_lights.push_back(_player_light_right);
 }
 
 void ItemLantern::onUnequipped()
 {
    _enabled = false;
 
-   // remove light instance from the light system
-   if (_player_light)
+   auto* level = Level::getCurrentLevel();
+   if (level && level->getLightSystem())
    {
-      auto* level = Level::getCurrentLevel();
-      if (level && level->getLightSystem())
+      auto& lights = level->getLightSystem()->_lights;
+      
+      if (_player_light_left)
       {
-         auto& lights = level->getLightSystem()->_lights;
-         lights.erase(
-            std::remove(lights.begin(), lights.end(), _player_light),
-            lights.end()
-         );
+         lights.erase(std::remove(lights.begin(), lights.end(), _player_light_left), lights.end());
+         _player_light_left.reset();
       }
-      _player_light.reset();
+      
+      if (_player_light_right)
+      {
+         lights.erase(std::remove(lights.begin(), lights.end(), _player_light_right), lights.end());
+         _player_light_right.reset();
+      }
    }
 }
 

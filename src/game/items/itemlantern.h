@@ -35,6 +35,7 @@ private:
    float _light_radius{50.0f};
    bool _enabled{false};
    sf::Time _elapsed;
-   std::shared_ptr<LightSystem::LightInstance> _player_light;
+   std::shared_ptr<LightSystem::LightInstance> _player_light_left;
+   std::shared_ptr<LightSystem::LightInstance> _player_light_right;
    sf::Vector2f _last_valid_eye_position{0.0f, 0.0f};
 };
