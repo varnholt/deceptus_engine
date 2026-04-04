@@ -1,4123 +1,1087 @@
 {
    "player_appear_l": {
-      "frame_durations": [
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20
-      ],
-      "frame_offset": [
-         0,
-         1368
-      ],
-      "frame_size": [
-         120,
-         72
-      ],
-      "origin": [
-         67,
-         72
-      ],
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 1368],
+      "frame_size": [120, 72],
+      "origin": [67, 72],
       "sprite_count": 20,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63
-      ],
-      "eye_positions_y": [
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         40,
-         40,
-         41,
-         41,
-         41,
-         41,
-         41
-      ]
+      "eye_positions_x": [63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63],
+      "eye_positions_y": [39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 40, 40, 41, 41, 41, 41, 41]
    },
    "player_appear_r": {
-      "frame_durations": [
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20,
-         20
-      ],
-      "frame_offset": [
-         0,
-         1296
-      ],
-      "frame_size": [
-         120,
-         72
-      ],
-      "origin": [
-         53,
-         72
-      ],
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 1296],
+      "frame_size": [120, 72],
+      "origin": [53, 72],
       "sprite_count": 20,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56
-      ],
-      "eye_positions_y": [
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         40,
-         40,
-         41,
-         41,
-         41,
-         41,
-         41
-      ]
+      "eye_positions_x": [56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56],
+      "eye_positions_y": [39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 40, 40, 41, 41, 41, 41, 41]
    },
    "player_appear_sword_l": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         0,
-         1224
-      ],
-      "frame_size": [
-         120,
-         72
-      ],
-      "origin": [
-         67.0,
-         72.0
-      ],
+      "frame_durations": [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40],
+      "frame_offset": [0, 1224],
+      "frame_size": [120, 72],
+      "origin": [67.0, 72.0],
       "sprite_count": 24,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63,
-         63
-      ],
-      "eye_positions_y": [
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         41,
-         41,
-         41,
-         42,
-         42
-      ]
+      "eye_positions_x": [63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63],
+      "eye_positions_y": [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 41, 41, 41, 42, 42]
    },
    "player_appear_sword_r": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         0,
-         1152
-      ],
-      "frame_size": [
-         120,
-         72
-      ],
-      "origin": [
-         53.0,
-         72.0
-      ],
+      "frame_durations": [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40],
+      "frame_offset": [0, 1152],
+      "frame_size": [120, 72],
+      "origin": [53.0, 72.0],
       "sprite_count": 24,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56,
-         56
-      ],
-      "eye_positions_y": [
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         41,
-         41,
-         41,
-         42,
-         42
-      ]
+      "eye_positions_x": [56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56, 56],
+      "eye_positions_y": [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 41, 41, 41, 42, 42]
    },
    "player_bend_down_attack_sword_1_l": {
-      "frame_durations": [
-         40,
-         80,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         1440,
-         240
-      ],
-      "frame_size": [
-         96,
-         48
-      ],
-      "origin": [
-         59.0,
-         48.0
-      ],
+      "frame_durations": [40, 80, 40, 40, 40, 40, 40, 40, 40],
+      "frame_offset": [1440, 240],
+      "frame_size": [96, 48],
+      "origin": [59.0, 48.0],
       "sprite_count": 9,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         47,
-         48,
-         45,
-         42,
-         42,
-         42,
-         42,
-         43,
-         44
-      ],
-      "eye_positions_y": [
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30
-      ]
+      "eye_positions_x": [47, 48, 45, 42, 42, 42, 42, 43, 44],
+      "eye_positions_y": [30, 30, 30, 30, 30, 30, 30, 30, 30]
    },
    "player_bend_down_attack_sword_1_r": {
-      "frame_durations": [
-         40,
-         80,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         1440,
-         192
-      ],
-      "frame_size": [
-         96,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 80, 40, 40, 40, 40, 40, 40, 40],
+      "frame_offset": [1440, 192],
+      "frame_size": [96, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 9,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         47,
-         46,
-         49,
-         52,
-         52,
-         52,
-         52,
-         51,
-         50
-      ],
-      "eye_positions_y": [
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30
-      ]
+      "eye_positions_x": [47, 46, 49, 52, 52, 52, 52, 51, 50],
+      "eye_positions_y": [30, 30, 30, 30, 30, 30, 30, 30, 30]
    },
    "player_bend_down_attack_sword_2_l": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         1440,
-         336
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 40, 40, 40, 40, 40, 40, 40, 40],
+      "frame_offset": [1440, 336],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 9,
       "texture": "data/sprites/player.png"
    },
    "player_bend_down_attack_sword_2_r": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         1440,
-         288
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 40, 40, 40, 40, 40, 40, 40, 40],
+      "frame_offset": [1440, 288],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 9,
       "texture": "data/sprites/player.png"
    },
    "player_bend_down_idle_blink_l": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         432,
-         144
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 40, 40, 40],
+      "frame_offset": [432, 144],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 4,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         24,
-         24,
-         24,
-         24
-      ],
-      "eye_positions_y": [
-         30,
-         30,
-         30,
-         30
-      ]
+      "eye_positions_x": [24, 24, 24, 24],
+      "eye_positions_y": [30, 30, 30, 30]
    },
    "player_bend_down_idle_blink_r": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         432,
-         96
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 40, 40, 40],
+      "frame_offset": [432, 96],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 4,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         47,
-         47,
-         47,
-         47
-      ],
-      "eye_positions_y": [
-         30,
-         30,
-         30,
-         30
-      ]
+      "eye_positions_x": [47, 47, 47, 47],
+      "eye_positions_y": [30, 30, 30, 30]
    },
    "player_bend_down_idle_blink_sword_l": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         1872,
-         144
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 40, 40, 40],
+      "frame_offset": [1872, 144],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 4,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         23,
-         23,
-         23,
-         23
-      ],
-      "eye_positions_y": [
-         30,
-         30,
-         30,
-         30
-      ]
+      "eye_positions_x": [23, 23, 23, 23],
+      "eye_positions_y": [30, 30, 30, 30]
    },
    "player_bend_down_idle_blink_sword_r": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         1872,
-         96
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 40, 40, 40],
+      "frame_offset": [1872, 96],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 4,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         48,
-         48,
-         48,
-         48
-      ],
-      "eye_positions_y": [
-         30,
-         30,
-         30,
-         30
-      ]
+      "eye_positions_x": [48, 48, 48, 48],
+      "eye_positions_y": [30, 30, 30, 30]
    },
    "player_bend_down_idle_l": {
-      "frame_durations": [
-         40
-      ],
-      "frame_offset": [
-         432,
-         144
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40],
+      "frame_offset": [432, 144],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_bend_down_idle_r": {
-      "frame_durations": [
-         40
-      ],
-      "frame_offset": [
-         432,
-         96
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40],
+      "frame_offset": [432, 96],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_bend_down_idle_sword_l": {
-      "frame_durations": [
-         40
-      ],
-      "frame_offset": [
-         1872,
-         144
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40],
+      "frame_offset": [1872, 144],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_bend_down_idle_sword_r": {
-      "frame_durations": [
-         40
-      ],
-      "frame_offset": [
-         1872,
-         96
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40],
+      "frame_offset": [1872, 96],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_bend_down_l": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         0,
-         144
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 40, 40, 40, 40, 40, 40],
+      "frame_offset": [0, 144],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 7,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         31,
-         30,
-         29,
-         26,
-         24,
-         24
-      ],
-      "eye_positions_y": [
-         16,
-         18,
-         20,
-         26,
-         33,
-         32
-      ]
+      "eye_positions_x": [31, 30, 29, 26, 24, 24],
+      "eye_positions_y": [16, 18, 20, 26, 33, 32]
    },
    "player_bend_down_r": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         0,
-         96
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 40, 40, 40, 40, 40, 40],
+      "frame_offset": [0, 96],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 7,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         40,
-         41,
-         42,
-         45,
-         47,
-         47
-      ],
-      "eye_positions_y": [
-         16,
-         18,
-         20,
-         26,
-         33,
-         32
-      ]
+      "eye_positions_x": [40, 41, 42, 45, 47, 47],
+      "eye_positions_y": [16, 18, 20, 26, 33, 32]
    },
    "player_bend_down_sword_l": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         1440,
-         144
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 40, 40, 40, 40, 40, 40],
+      "frame_offset": [1440, 144],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 7,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         31,
-         29,
-         28,
-         27,
-         23,
-         23
-      ],
-      "eye_positions_y": [
-         17,
-         19,
-         21,
-         23,
-         32,
-         31
-      ]
+      "eye_positions_x": [31, 29, 28, 27, 23, 23],
+      "eye_positions_y": [17, 19, 21, 23, 32, 31]
    },
    "player_bend_down_sword_r": {
-      "frame_durations": [
-         40,
-         40,
-         40,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         1440,
-         96
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [40, 40, 40, 40, 40, 40, 40],
+      "frame_offset": [1440, 96],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 7,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         40,
-         42,
-         43,
-         44,
-         48,
-         48
-      ],
-      "eye_positions_y": [
-         17,
-         19,
-         21,
-         23,
-         32,
-         31
-      ]
+      "eye_positions_x": [40, 42, 43, 44, 48, 48],
+      "eye_positions_y": [17, 19, 21, 23, 32, 31]
    },
    "player_dash_init_l": {
-      "frame_durations": [
-         75
-      ],
-      "frame_offset": [
-         0,
-         528
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75],
+      "frame_offset": [0, 528],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         22
-      ],
-      "eye_positions_y": [
-         20
-      ]
+      "eye_positions_x": [22],
+      "eye_positions_y": [20]
    },
    "player_dash_init_r": {
-      "frame_durations": [
-         75
-      ],
-      "frame_offset": [
-         0,
-         480
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75],
+      "frame_offset": [0, 480],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         49
-      ],
-      "eye_positions_y": [
-         20
-      ]
+      "eye_positions_x": [49],
+      "eye_positions_y": [20]
    },
    "player_dash_init_sword_l": {
-      "frame_durations": [
-         100
-      ],
-      "frame_offset": [
-         2808,
-         240
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [100],
+      "frame_offset": [2808, 240],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         20
-      ],
-      "eye_positions_y": [
-         19
-      ]
+      "eye_positions_x": [20],
+      "eye_positions_y": [19]
    },
    "player_dash_init_sword_r": {
-      "frame_durations": [
-         100
-      ],
-      "frame_offset": [
-         2808,
-         192
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [100],
+      "frame_offset": [2808, 192],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         51
-      ],
-      "eye_positions_y": [
-         19
-      ]
+      "eye_positions_x": [51],
+      "eye_positions_y": [19]
    },
    "player_dash_l": {
-      "frame_durations": [
-         75
-      ],
-      "frame_offset": [
-         72,
-         528
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75],
+      "frame_offset": [72, 528],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         19
-      ],
-      "eye_positions_y": [
-         22
-      ]
+      "eye_positions_x": [19],
+      "eye_positions_y": [22]
    },
    "player_dash_r": {
-      "frame_durations": [
-         75
-      ],
-      "frame_offset": [
-         72,
-         480
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75],
+      "frame_offset": [72, 480],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         52
-      ],
-      "eye_positions_y": [
-         22
-      ]
+      "eye_positions_x": [52],
+      "eye_positions_y": [22]
    },
    "player_dash_sword_l": {
-      "frame_durations": [
-         100
-      ],
-      "frame_offset": [
-         2808,
-         240
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [100],
+      "frame_offset": [2808, 240],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_dash_sword_r": {
-      "frame_durations": [
-         100
-      ],
-      "frame_offset": [
-         2808,
-         192
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [100],
+      "frame_offset": [2808, 192],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_death": {
-      "frame_durations": [
-         50,
-         50,
-         50,
-         50,
-         50,
-         50,
-         60,
-         60,
-         60,
-         60,
-         70,
-         70,
-         70,
-         70,
-         80,
-         80,
-         80,
-         80,
-         80,
-         80
-      ],
-      "frame_offset": [
-         0,
-         1704
-      ],
-      "frame_size": [
-         72,
-         72
-      ],
-      "origin": [
-         36.0,
-         72.0
-      ],
+      "frame_durations": [50, 50, 50, 50, 50, 50, 60, 60, 60, 60, 70, 70, 70, 70, 80, 80, 80, 80, 80, 80],
+      "frame_offset": [0, 1704],
+      "frame_size": [72, 72],
+      "origin": [36.0, 72.0],
       "sprite_count": 20,
       "texture": "data/sprites/player.png"
    },
    "player_death_electrocuted_l": {
-      "frame_durations": [
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65
-      ],
-      "frame_offset": [
-         0,
-         816
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65],
+      "frame_offset": [0, 816],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 18,
       "texture": "data/sprites/player.png"
    },
    "player_death_electrocuted_r": {
-      "frame_durations": [
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65,
-         65
-      ],
-      "frame_offset": [
-         0,
-         768
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65],
+      "frame_offset": [0, 768],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 18,
       "texture": "data/sprites/player.png"
    },
    "player_double_jump_l": {
-      "frame_durations": [
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30
-      ],
-      "frame_offset": [
-         0,
-         624
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+      "frame_offset": [0, 624],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 16,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         32,
-         34,
-         34,
-         34,
-         35,
-         35,
-         35,
-         36,
-         35,
-         35,
-         34,
-         34,
-         34,
-         33,
-         32,
-         32
-      ],
-      "eye_positions_y": [
-         16,
-         16,
-         17,
-         18,
-         20,
-         21,
-         22,
-         24,
-         22,
-         20,
-         18,
-         16,
-         15,
-         15,
-         16,
-         16
-      ]
+      "eye_positions_x": [32, 34, 34, 34, 35, 35, 35, 36, 35, 35, 34, 34, 34, 33, 32, 32],
+      "eye_positions_y": [16, 16, 17, 18, 20, 21, 22, 24, 22, 20, 18, 16, 15, 15, 16, 16]
    },
    "player_double_jump_r": {
-      "frame_durations": [
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30
-      ],
-      "frame_offset": [
-         0,
-         576
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+      "frame_offset": [0, 576],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 16,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         39,
-         37,
-         36,
-         36,
-         36,
-         35,
-         35,
-         35,
-         35,
-         35,
-         36,
-         36,
-         37,
-         38,
-         39,
-         39
-      ],
-      "eye_positions_y": [
-         16,
-         16,
-         17,
-         18,
-         20,
-         21,
-         22,
-         24,
-         22,
-         20,
-         18,
-         16,
-         15,
-         15,
-         16,
-         16
-      ]
+      "eye_positions_x": [39, 37, 36, 36, 36, 35, 35, 35, 35, 35, 36, 36, 37, 38, 39, 39],
+      "eye_positions_y": [16, 16, 17, 18, 20, 21, 22, 24, 22, 20, 18, 16, 15, 15, 16, 16]
    },
    "player_double_jump_sword_l": {
-      "frame_durations": [
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30
-      ],
-      "frame_offset": [
-         1440,
-         1008
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+      "frame_offset": [1440, 1008],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 16,
       "texture": "data/sprites/player.png"
    },
    "player_double_jump_sword_r": {
-      "frame_durations": [
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30
-      ],
-      "frame_offset": [
-         1440,
-         960
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+      "frame_offset": [1440, 960],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 16,
       "texture": "data/sprites/player.png"
    },
    "player_idle_blink_l": {
-      "frame_durations": [
-         120,
-         120,
-         120,
-         120,
-         120,
-         120,
-         120,
-         120
-      ],
-      "frame_offset": [
-         576,
-         48
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [120, 120, 120, 120, 120, 120, 120, 120],
+      "frame_offset": [576, 48],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32
-      ],
-      "eye_positions_y": [
-         16,
-         15,
-         15,
-         15,
-         15,
-         16,
-         17,
-         17
-      ]
+      "eye_positions_x": [32, 32, 32, 32, 32, 32, 32, 32],
+      "eye_positions_y": [16, 15, 15, 15, 15, 16, 17, 17]
    },
    "player_idle_blink_r": {
-      "frame_durations": [
-         120,
-         120,
-         120,
-         120,
-         120,
-         120,
-         120,
-         120
-      ],
-      "frame_offset": [
-         576,
-         0
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [120, 120, 120, 120, 120, 120, 120, 120],
+      "frame_offset": [576, 0],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39
-      ],
-      "eye_positions_y": [
-         16,
-         15,
-         15,
-         15,
-         15,
-         16,
-         17,
-         17
-      ]
+      "eye_positions_x": [39, 39, 39, 39, 39, 39, 39, 39],
+      "eye_positions_y": [16, 15, 15, 15, 15, 16, 17, 17]
    },
    "player_idle_blink_sword_l": {
-      "frame_durations": [
-         95,
-         95,
-         95,
-         95,
-         95,
-         95,
-         95,
-         95
-      ],
-      "frame_offset": [
-         2016,
-         48
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [95, 95, 95, 95, 95, 95, 95, 95],
+      "frame_offset": [2016, 48],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32
-      ],
-      "eye_positions_y": [
-         17,
-         16,
-         15,
-         15,
-         16,
-         17,
-         18,
-         18
-      ]
+      "eye_positions_x": [32, 32, 32, 32, 32, 32, 32, 32],
+      "eye_positions_y": [17, 16, 15, 15, 16, 17, 18, 18]
    },
    "player_idle_blink_sword_r": {
-      "frame_durations": [
-         95,
-         95,
-         95,
-         95,
-         95,
-         95,
-         95,
-         95
-      ],
-      "frame_offset": [
-         2016,
-         0
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [95, 95, 95, 95, 95, 95, 95, 95],
+      "frame_offset": [2016, 0],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39
-      ],
-      "eye_positions_y": [
-         17,
-         16,
-         16,
-         16,
-         16,
-         17,
-         18,
-         18
-      ]
+      "eye_positions_x": [39, 39, 39, 39, 39, 39, 39, 39],
+      "eye_positions_y": [17, 16, 16, 16, 16, 17, 18, 18]
    },
    "player_idle_l": {
-      "frame_durations": [
-         120,
-         120,
-         120,
-         120,
-         120,
-         120,
-         120,
-         120
-      ],
-      "frame_offset": [
-         0,
-         48
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [120, 120, 120, 120, 120, 120, 120, 120],
+      "frame_offset": [0, 48],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32
-      ],
-      "eye_positions_y": [
-         16,
-         15,
-         14,
-         14,
-         15,
-         16,
-         17,
-         17
-      ]
+      "eye_positions_x": [32, 32, 32, 32, 32, 32, 32, 32],
+      "eye_positions_y": [16, 15, 14, 14, 15, 16, 17, 17]
    },
    "player_idle_r": {
-      "frame_durations": [
-         120,
-         120,
-         120,
-         120,
-         120,
-         120,
-         120,
-         120
-      ],
-      "frame_offset": [
-         0,
-         0
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [120, 120, 120, 120, 120, 120, 120, 120],
+      "frame_offset": [0, 0],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39
-      ],
-      "eye_positions_y": [
-         16,
-         15,
-         14,
-         14,
-         15,
-         16,
-         17,
-         17
-      ]
+      "eye_positions_x": [39, 39, 39, 39, 39, 39, 39, 39],
+      "eye_positions_y": [16, 15, 14, 14, 15, 16, 17, 17]
    },
    "player_idle_sword_l": {
-      "frame_durations": [
-         95,
-         95,
-         95,
-         95,
-         95,
-         95,
-         95,
-         95
-      ],
-      "frame_offset": [
-         1440,
-         48
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [95, 95, 95, 95, 95, 95, 95, 95],
+      "frame_offset": [1440, 48],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32
-      ],
-      "eye_positions_y": [
-         17,
-         16,
-         15,
-         15,
-         16,
-         17,
-         18,
-         18
-      ]
+      "eye_positions_x": [32, 32, 32, 32, 32, 32, 32, 32],
+      "eye_positions_y": [17, 16, 15, 15, 16, 17, 18, 18]
    },
    "player_idle_sword_r": {
-      "frame_durations": [
-         95,
-         95,
-         95,
-         95,
-         95,
-         95,
-         95,
-         95
-      ],
-      "frame_offset": [
-         1440,
-         0
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [95, 95, 95, 95, 95, 95, 95, 95],
+      "frame_offset": [1440, 0],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39
-      ],
-      "eye_positions_y": [
-         17,
-         16,
-         15,
-         15,
-         16,
-         17,
-         18,
-         18
-      ]
+      "eye_positions_x": [39, 39, 39, 39, 39, 39, 39, 39],
+      "eye_positions_y": [17, 16, 15, 15, 16, 17, 18, 18]
    },
    "player_idle_to_run_l": {
-      "frame_durations": [
-         75,
-         75
-      ],
-      "frame_offset": [
-         0,
-         240
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75],
+      "frame_offset": [0, 240],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         26,
-         26
-      ],
-      "eye_positions_y": [
-         17,
-         17
-      ]
+      "eye_positions_x": [26, 26],
+      "eye_positions_y": [17, 17]
    },
    "player_idle_to_run_r": {
-      "frame_durations": [
-         75,
-         75
-      ],
-      "frame_offset": [
-         0,
-         192
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75],
+      "frame_offset": [0, 192],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         45,
-         45
-      ],
-      "eye_positions_y": [
-         17,
-         17
-      ]
+      "eye_positions_x": [45, 45],
+      "eye_positions_y": [17, 17]
    },
    "player_jump_init_l": {
-      "frame_durations": [
-         60,
-         60
-      ],
-      "frame_offset": [
-         0,
-         336
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60],
+      "frame_offset": [0, 336],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         30,
-         30
-      ],
-      "eye_positions_y": [
-         11,
-         11
-      ]
+      "eye_positions_x": [30, 30],
+      "eye_positions_y": [11, 11]
    },
    "player_jump_init_r": {
-      "frame_durations": [
-         60,
-         60
-      ],
-      "frame_offset": [
-         0,
-         288
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60],
+      "frame_offset": [0, 288],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         41,
-         41
-      ],
-      "eye_positions_y": [
-         11,
-         11
-      ]
+      "eye_positions_x": [41, 41],
+      "eye_positions_y": [11, 11]
    },
    "player_jump_up_l": {
-      "frame_durations": [
-         60,
-         60
-      ],
-      "frame_offset": [
-         0,
-         336
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60],
+      "frame_offset": [0, 336],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
    "player_jump_up_r": {
-      "frame_durations": [
-         60,
-         60
-      ],
-      "frame_offset": [
-         0,
-         288
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60],
+      "frame_offset": [0, 288],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
    "player_jump_midair_l": {
-      "frame_durations": [
-         60,
-         60,
-         60
-      ],
-      "frame_offset": [
-         144,
-         336
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60, 60],
+      "frame_offset": [144, 336],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 3,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         30,
-         30,
-         30
-      ],
-      "eye_positions_y": [
-         11,
-         12,
-         12
-      ]
+      "eye_positions_x": [30, 30, 30],
+      "eye_positions_y": [11, 12, 12]
    },
    "player_jump_midair_r": {
-      "frame_durations": [
-         60,
-         60,
-         60
-      ],
-      "frame_offset": [
-         144,
-         288
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60, 60],
+      "frame_offset": [144, 288],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 3,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         41,
-         41,
-         41
-      ],
-      "eye_positions_y": [
-         11,
-         12,
-         12
-      ]
+      "eye_positions_x": [41, 41, 41],
+      "eye_positions_y": [11, 12, 12]
    },
    "player_jump_down_l": {
-      "frame_durations": [
-         60,
-         60
-      ],
-      "frame_offset": [
-         360,
-         336
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60],
+      "frame_offset": [360, 336],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         30,
-         30
-      ],
-      "eye_positions_y": [
-         13,
-         13
-      ]
+      "eye_positions_x": [30, 30],
+      "eye_positions_y": [13, 13]
    },
    "player_jump_down_r": {
-      "frame_durations": [
-         60,
-         60
-      ],
-      "frame_offset": [
-         360,
-         288
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60],
+      "frame_offset": [360, 288],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         41,
-         41
-      ],
-      "eye_positions_y": [
-         13,
-         13
-      ]
+      "eye_positions_x": [41, 41],
+      "eye_positions_y": [13, 13]
    },
    "player_jump_landing_l": {
-      "frame_durations": [
-         100,
-         100,
-         100,
-         100,
-         100,
-         100,
-         240,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         0,
-         432
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [100, 100, 100, 100, 100, 100, 240, 40, 40, 40, 40],
+      "frame_offset": [0, 432],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 11,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         33,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32
-      ],
-      "eye_positions_y": [
-         31,
-         29,
-         29,
-         29,
-         29,
-         29,
-         29,
-         26,
-         24,
-         22,
-         19
-      ]
+      "eye_positions_x": [33, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32],
+      "eye_positions_y": [31, 29, 29, 29, 29, 29, 29, 26, 24, 22, 19]
    },
    "player_jump_landing_r": {
-      "frame_durations": [
-         100,
-         100,
-         100,
-         100,
-         100,
-         100,
-         240,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         0,
-         384
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [100, 100, 100, 100, 100, 100, 240, 40, 40, 40, 40],
+      "frame_offset": [0, 384],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 11,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         38,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39
-      ],
-      "eye_positions_y": [
-         31,
-         29,
-         29,
-         29,
-         29,
-         29,
-         29,
-         26,
-         24,
-         22,
-         19
-      ]
+      "eye_positions_x": [38, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39],
+      "eye_positions_y": [31, 29, 29, 29, 29, 29, 29, 26, 24, 22, 19]
    },
    "player_jump_dust_l": {
-      "frame_durations": [
-         80,
-         80,
-         80,
-         80,
-         80,
-         80,
-         80,
-         80,
-         80,
-         80
-      ],
-      "frame_offset": [
-         768,
-         120
-      ],
-      "frame_size": [
-         24,
-         24
-      ],
-      "origin": [
-         9.0,
-         12.0
-      ],
+      "frame_durations": [80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
+      "frame_offset": [768, 120],
+      "frame_size": [24, 24],
+      "origin": [9.0, 12.0],
       "sprite_count": 10,
       "texture": "data/sprites/player.png"
    },
    "player_jump_dust_r": {
-      "frame_durations": [
-         80,
-         80,
-         80,
-         80,
-         80,
-         80,
-         80,
-         80,
-         80,
-         80
-      ],
-      "frame_offset": [
-         768,
-         120
-      ],
-      "frame_size": [
-         24,
-         24
-      ],
-      "origin": [
-         12.0,
-         12.0
-      ],
+      "frame_durations": [80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
+      "frame_offset": [768, 120],
+      "frame_size": [24, 24],
+      "origin": [12.0, 12.0],
       "sprite_count": 10,
       "texture": "data/sprites/player.png"
    },
    "player_jump_dust_inair_l": {
-      "frame_durations": [
-         50
-      ],
-      "frame_offset": [
-         768,
-         144
-      ],
-      "frame_size": [
-         24,
-         24
-      ],
-      "origin": [
-         9.0,
-         12.0
-      ],
+      "frame_durations": [50],
+      "frame_offset": [768, 144],
+      "frame_size": [24, 24],
+      "origin": [9.0, 12.0],
       "sprite_count": 14,
       "texture": "data/sprites/player.png"
    },
    "player_jump_dust_inair_r": {
-      "frame_durations": [
-         50
-      ],
-      "frame_offset": [
-         768,
-         144
-      ],
-      "frame_size": [
-         24,
-         24
-      ],
-      "origin": [
-         12.0,
-         12.0
-      ],
+      "frame_durations": [50],
+      "frame_offset": [768, 144],
+      "frame_size": [24, 24],
+      "origin": [12.0, 12.0],
       "sprite_count": 14,
       "texture": "data/sprites/player.png"
    },
    "player_run_l": {
-      "frame_durations": [
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55
-      ],
-      "frame_offset": [
-         0,
-         240
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55],
+      "frame_offset": [0, 240],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 12,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         26,
-         26,
-         26,
-         26,
-         27,
-         27,
-         27,
-         27,
-         27,
-         27
-      ],
-      "eye_positions_y": [
-         16,
-         15,
-         15,
-         16,
-         17,
-         17,
-         16,
-         15,
-         15,
-         16
-      ]
+      "eye_positions_x": [26, 26, 26, 26, 27, 27, 27, 27, 27, 27],
+      "eye_positions_y": [16, 15, 15, 16, 17, 17, 16, 15, 15, 16]
    },
    "player_run_r": {
-      "frame_durations": [
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55
-      ],
-      "frame_offset": [
-         0,
-         192
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55],
+      "frame_offset": [0, 192],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 12,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         45,
-         45,
-         45,
-         45,
-         44,
-         44,
-         44,
-         44,
-         44,
-         44
-      ],
-      "eye_positions_y": [
-         16,
-         15,
-         15,
-         16,
-         17,
-         17,
-         16,
-         15,
-         15,
-         16
-      ]
+      "eye_positions_x": [45, 45, 45, 45, 44, 44, 44, 44, 44, 44],
+      "eye_positions_y": [16, 15, 15, 16, 17, 17, 16, 15, 15, 16]
    },
    "player_run_sword_r": {
-      "frame_durations": [
-         45,
-         45,
-         45,
-         45,
-         45,
-         45,
-         45,
-         45,
-         45,
-         45
-      ],
-      "frame_offset": [
-         2304,
-         96
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [45, 45, 45, 45, 45, 45, 45, 45, 45, 45],
+      "frame_offset": [2304, 96],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 10,
       "texture": "data/sprites/player.png"
    },
    "player_run_sword_l": {
-      "frame_durations": [
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55,
-         55
-      ],
-      "frame_offset": [
-         2304,
-         144
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [55, 55, 55, 55, 55, 55, 55, 55, 55, 55],
+      "frame_offset": [2304, 144],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 10,
       "texture": "data/sprites/player.png"
    },
    "player_runstop_l": {
-      "frame_durations": [
-         75
-      ],
-      "frame_offset": [
-         0,
-         336
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75],
+      "frame_offset": [0, 336],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_runstop_r": {
-      "frame_durations": [
-         75
-      ],
-      "frame_offset": [
-         0,
-         288
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75],
+      "frame_offset": [0, 288],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_standing_attack_sword_1_l": {
-      "frame_durations": [
-         30,
-         30,
-         50,
-         50,
-         50,
-         50,
-         50,
-         50,
-         50,
-         50,
-         50,
-         50
-      ],
-      "frame_offset": [
-         1296,
-         384
-      ],
-      "frame_size": [
-         144,
-         72
-      ],
-      "origin": [
-         100.0,
-         72.0
-      ],
+      "frame_durations": [30, 30, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+      "frame_offset": [1296, 384],
+      "frame_size": [144, 72],
+      "origin": [100.0, 72.0],
       "sprite_count": 12,
       "texture": "data/sprites/player.png"
    },
    "player_standing_attack_sword_1_r": {
-      "frame_durations": [
-         30,
-         30,
-         50,
-         50,
-         50,
-         50,
-         50,
-         50,
-         50,
-         50,
-         50,
-         50
-      ],
-      "frame_offset": [
-         1296,
-         312
-      ],
-      "frame_size": [
-         144,
-         72
-      ],
-      "origin": [
-         46.0,
-         72.0
-      ],
+      "frame_durations": [30, 30, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+      "frame_offset": [1296, 312],
+      "frame_size": [144, 72],
+      "origin": [46.0, 72.0],
       "sprite_count": 12,
       "texture": "data/sprites/player.png"
    },
    "player_standing_attack_sword_2_l": {
-      "frame_durations": [
-         60,
-         50,
-         50,
-         50,
-         50,
-         50,
-         120,
-         40,
-         40,
-         40,
-         30,
-         20
-      ],
-      "frame_offset": [
-         1320,
-         528
-      ],
-      "frame_size": [
-         144,
-         72
-      ],
-      "origin": [
-         74.0,
-         72.0
-      ],
+      "frame_durations": [60, 50, 50, 50, 50, 50, 120, 40, 40, 40, 30, 20],
+      "frame_offset": [1320, 528],
+      "frame_size": [144, 72],
+      "origin": [74.0, 72.0],
       "sprite_count": 12,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         71,
-         72,
-         72,
-         58,
-         57,
-         54,
-         53,
-         53,
-         56,
-         61,
-         64,
-         65
-      ],
-      "eye_positions_y": [
-         42,
-         42,
-         42,
-         46,
-         46,
-         46,
-         46,
-         46,
-         46,
-         45,
-         44,
-         43
-      ]
+      "eye_positions_x": [71, 72, 72, 58, 57, 54, 53, 53, 56, 61, 64, 65],
+      "eye_positions_y": [42, 42, 42, 46, 46, 46, 46, 46, 46, 45, 44, 43]
    },
    "player_standing_attack_sword_2_r": {
-      "frame_durations": [
-         60,
-         50,
-         50,
-         50,
-         50,
-         50,
-         120,
-         40,
-         40,
-         40,
-         30,
-         20
-      ],
-      "frame_offset": [
-         1296,
-         456
-      ],
-      "frame_size": [
-         144,
-         72
-      ],
-      "origin": [
-         46.0,
-         72.0
-      ],
+      "frame_durations": [60, 50, 50, 50, 50, 50, 120, 40, 40, 40, 30, 20],
+      "frame_offset": [1296, 456],
+      "frame_size": [144, 72],
+      "origin": [46.0, 72.0],
       "sprite_count": 12,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         48,
-         47,
-         47,
-         61,
-         62,
-         65,
-         66,
-         66,
-         63,
-         58,
-         55,
-         54
-      ],
-      "eye_positions_y": [
-         42,
-         42,
-         42,
-         46,
-         46,
-         46,
-         46,
-         46,
-         46,
-         45,
-         44,
-         43
-      ]
+      "eye_positions_x": [48, 47, 47, 61, 62, 65, 66, 66, 63, 58, 55, 54],
+      "eye_positions_y": [42, 42, 42, 46, 46, 46, 46, 46, 46, 45, 44, 43]
    },
    "player_standing_attack_sword_3_l": {
-      "frame_durations": [
-         80,
-         80,
-         60,
-         60,
-         60,
-         60,
-         60,
-         60,
-         60,
-         80,
-         80,
-         80,
-         80
-      ],
-      "frame_offset": [
-         1320,
-         768
-      ],
-      "frame_size": [
-         120,
-         48
-      ],
-      "origin": [
-         48.0,
-         48.0
-      ],
+      "frame_durations": [80, 80, 60, 60, 60, 60, 60, 60, 60, 80, 80, 80, 80],
+      "frame_offset": [1320, 768],
+      "frame_size": [120, 48],
+      "origin": [48.0, 48.0],
       "sprite_count": 13,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         59,
-         59,
-         59,
-         59,
-         59,
-         59,
-         12,
-         36,
-         60,
-         84,
-         108,
-         60,
-         60
-      ],
-      "eye_positions_y": [
-         31,
-         31,
-         31,
-         31,
-         31,
-         31,
-         29,
-         29,
-         29,
-         26,
-         22,
-         19,
-         19
-      ]
+      "eye_positions_x": [59, 59, 59, 59, 59, 59, 12, 36, 60, 84, 108, 60, 60],
+      "eye_positions_y": [31, 31, 31, 31, 31, 31, 29, 29, 29, 26, 22, 19, 19]
    },
    "player_standing_attack_sword_3_r": {
-      "frame_durations": [
-         80,
-         80,
-         60,
-         60,
-         60,
-         60,
-         60,
-         60,
-         60,
-         80,
-         80,
-         80,
-         80
-      ],
-      "frame_offset": [
-         1320,
-         720
-      ],
-      "frame_size": [
-         120,
-         48
-      ],
-      "origin": [
-         48.0,
-         48.0
-      ],
+      "frame_durations": [80, 80, 60, 60, 60, 60, 60, 60, 60, 80, 80, 80, 80],
+      "frame_offset": [1320, 720],
+      "frame_size": [120, 48],
+      "origin": [48.0, 48.0],
       "sprite_count": 13,
       "texture": "data/sprites/player.png"
    },
    "player_standing_attack_sword_4_l": {
-      "frame_durations": [
-         80,
-         80,
-         60,
-         60,
-         60,
-         60,
-         60,
-         60,
-         60,
-         80
-      ],
-      "frame_offset": [
-         1320,
-         864
-      ],
-      "frame_size": [
-         120,
-         48
-      ],
-      "origin": [
-         48.0,
-         48.0
-      ],
+      "frame_durations": [80, 80, 60, 60, 60, 60, 60, 60, 60, 80],
+      "frame_offset": [1320, 864],
+      "frame_size": [120, 48],
+      "origin": [48.0, 48.0],
       "sprite_count": 10,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         38,
-         38,
-         62,
-         14,
-         37,
-         37,
-         37,
-         37,
-         37,
-         37
-      ],
-      "eye_positions_y": [
-         11,
-         11,
-         11,
-         12,
-         13,
-         13,
-         13,
-         13,
-         13,
-         13
-      ]
+      "eye_positions_x": [38, 38, 62, 14, 37, 37, 37, 37, 37, 37],
+      "eye_positions_y": [11, 11, 11, 12, 13, 13, 13, 13, 13, 13]
    },
    "player_standing_attack_sword_4_r": {
-      "frame_durations": [
-         80,
-         80,
-         60,
-         60,
-         60,
-         60,
-         60,
-         60,
-         60,
-         80
-      ],
-      "frame_offset": [
-         1320,
-         816
-      ],
-      "frame_size": [
-         120,
-         48
-      ],
-      "origin": [
-         48.0,
-         48.0
-      ],
+      "frame_durations": [80, 80, 60, 60, 60, 60, 60, 60, 60, 80],
+      "frame_offset": [1320, 816],
+      "frame_size": [120, 48],
+      "origin": [48.0, 48.0],
       "sprite_count": 10,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         60,
-         60,
-         60,
-         60,
-         60,
-         60,
-         83,
-         107,
-         59,
-         83
-      ],
-      "eye_positions_y": [
-         31,
-         31,
-         31,
-         31,
-         31,
-         31,
-         29,
-         29,
-         29,
-         26
-      ]
+      "eye_positions_x": [60, 60, 60, 60, 60, 60, 83, 107, 59, 83],
+      "eye_positions_y": [31, 31, 31, 31, 31, 31, 29, 29, 29, 26]
    },
    "player_swim_idle_l": {
-      "frame_durations": [
-         75,
-         75,
-         75,
-         75,
-         75
-      ],
-      "frame_offset": [
-         0,
-         672
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75, 75, 75, 75],
+      "frame_offset": [0, 672],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 5,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         50,
-         51,
-         52,
-         52,
-         52
-      ],
-      "eye_positions_y": [
-         22,
-         22,
-         22,
-         22,
-         22
-      ]
+      "eye_positions_x": [50, 51, 52, 52, 52],
+      "eye_positions_y": [22, 22, 22, 22, 22]
    },
    "player_swim_idle_r": {
-      "frame_durations": [
-         75,
-         75,
-         75,
-         75,
-         75
-      ],
-      "frame_offset": [
-         0,
-         720
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75, 75, 75, 75],
+      "frame_offset": [0, 720],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 5,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         21,
-         20,
-         19,
-         19,
-         19
-      ],
-      "eye_positions_y": [
-         22,
-         22,
-         22,
-         22,
-         22
-      ]
+      "eye_positions_x": [21, 20, 19, 19, 19],
+      "eye_positions_y": [22, 22, 22, 22, 22]
    },
    "player_swim_idle_sword_l": {
-      "frame_durations": [
-         75,
-         75,
-         75,
-         75,
-         75
-      ],
-      "frame_offset": [
-         1464,
-         912
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75, 75, 75, 75],
+      "frame_offset": [1464, 912],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 5,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         6,
-         6,
-         6,
-         6,
-         6
-      ],
-      "eye_positions_y": [
-         11,
-         11,
-         11,
-         12,
-         12
-      ]
+      "eye_positions_x": [6, 6, 6, 6, 6],
+      "eye_positions_y": [11, 11, 11, 12, 12]
    },
    "player_swim_idle_sword_r": {
-      "frame_durations": [
-         75,
-         75,
-         75,
-         75,
-         75
-      ],
-      "frame_offset": [
-         1464,
-         864
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75, 75, 75, 75],
+      "frame_offset": [1464, 864],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 5,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         17,
-         17,
-         17,
-         17,
-         17
-      ],
-      "eye_positions_y": [
-         11,
-         11,
-         11,
-         12,
-         12
-      ]
+      "eye_positions_x": [17, 17, 17, 17, 17],
+      "eye_positions_y": [11, 11, 11, 12, 12]
    },
    "player_swim_l": {
-      "frame_durations": [
-         140,
-         140,
-         140,
-         140,
-         140,
-         140,
-         140,
-         140
-      ],
-      "frame_offset": [
-         0,
-         720
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [140, 140, 140, 140, 140, 140, 140, 140],
+      "frame_offset": [0, 720],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         17,
-         18,
-         18
-      ],
-      "eye_positions_y": [
-         22,
-         22,
-         22
-      ]
+      "eye_positions_x": [17, 18, 18],
+      "eye_positions_y": [22, 22, 22]
    },
    "player_swim_r": {
-      "frame_durations": [
-         140,
-         140,
-         140,
-         140,
-         140,
-         140,
-         140,
-         140
-      ],
-      "frame_offset": [
-         0,
-         672
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [140, 140, 140, 140, 140, 140, 140, 140],
+      "frame_offset": [0, 672],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         54,
-         53,
-         53
-      ],
-      "eye_positions_y": [
-         22,
-         22,
-         22
-      ]
+      "eye_positions_x": [54, 53, 53],
+      "eye_positions_y": [22, 22, 22]
    },
    "player_swim_sword_l": {
-      "frame_durations": [
-         140,
-         140,
-         140,
-         140,
-         140,
-         140,
-         140,
-         140
-      ],
-      "frame_offset": [
-         2592,
-         48
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [140, 140, 140, 140, 140, 140, 140, 140],
+      "frame_offset": [2592, 48],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         18,
-         17,
-         16,
-         16,
-         16,
-         17,
-         18,
-         18
-      ],
-      "eye_positions_y": [
-         22,
-         22,
-         22,
-         22,
-         22,
-         22,
-         22,
-         22
-      ]
+      "eye_positions_x": [18, 17, 16, 16, 16, 17, 18, 18],
+      "eye_positions_y": [22, 22, 22, 22, 22, 22, 22, 22]
    },
    "player_swim_sword_r": {
-      "frame_durations": [
-         140,
-         140,
-         140,
-         140,
-         140,
-         140,
-         140,
-         140
-      ],
-      "frame_offset": [
-         2592,
-         0
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [140, 140, 140, 140, 140, 140, 140, 140],
+      "frame_offset": [2592, 0],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 8,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         53,
-         54,
-         55,
-         55,
-         55,
-         54,
-         53,
-         53
-      ],
-      "eye_positions_y": [
-         22,
-         22,
-         22,
-         22,
-         22,
-         22,
-         22,
-         22
-      ]
+      "eye_positions_x": [53, 54, 55, 55, 55, 54, 53, 53],
+      "eye_positions_y": [22, 22, 22, 22, 22, 22, 22, 22]
    },
    "player_wall_jump_l": {
-      "frame_durations": [
-         80
-      ],
-      "frame_offset": [
-         1008,
-         240
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [80],
+      "frame_offset": [1008, 240],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         27
-      ],
-      "eye_positions_y": [
-         11
-      ]
+      "eye_positions_x": [27],
+      "eye_positions_y": [11]
    },
    "player_wall_jump_r": {
-      "frame_durations": [
-         80
-      ],
-      "frame_offset": [
-         1008,
-         192
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [80],
+      "frame_offset": [1008, 192],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         44
-      ],
-      "eye_positions_y": [
-         11
-      ]
+      "eye_positions_x": [44],
+      "eye_positions_y": [11]
    },
    "player_wall_jump_sword_l": {
-      "frame_durations": [
-         80
-      ],
-      "frame_offset": [
-         2664,
-         240
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [80],
+      "frame_offset": [2664, 240],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         27
-      ],
-      "eye_positions_y": [
-         12
-      ]
+      "eye_positions_x": [27],
+      "eye_positions_y": [12]
    },
    "player_wall_jump_sword_r": {
-      "frame_durations": [
-         80
-      ],
-      "frame_offset": [
-         2664,
-         192
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [80],
+      "frame_offset": [2664, 192],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         44
-      ],
-      "eye_positions_y": [
-         12
-      ]
+      "eye_positions_x": [44],
+      "eye_positions_y": [12]
    },
    "player_wallslide_impact_l": {
-      "frame_durations": [
-         50
-      ],
-      "frame_offset": [
-         864,
-         240
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [50],
+      "frame_offset": [864, 240],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         27
-      ],
-      "eye_positions_y": [
-         14
-      ]
+      "eye_positions_x": [27],
+      "eye_positions_y": [14]
    },
    "player_wallslide_impact_r": {
-      "frame_durations": [
-         50
-      ],
-      "frame_offset": [
-         864,
-         192
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [50],
+      "frame_offset": [864, 192],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         44
-      ],
-      "eye_positions_y": [
-         14
-      ]
+      "eye_positions_x": [44],
+      "eye_positions_y": [14]
    },
    "player_wallslide_impact_sword_l": {
-      "frame_durations": [
-         50
-      ],
-      "frame_offset": [
-         2448,
-         240
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [50],
+      "frame_offset": [2448, 240],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         27
-      ],
-      "eye_positions_y": [
-         14
-      ]
+      "eye_positions_x": [27],
+      "eye_positions_y": [14]
    },
    "player_wallslide_impact_sword_r": {
-      "frame_durations": [
-         50
-      ],
-      "frame_offset": [
-         2448,
-         192
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [50],
+      "frame_offset": [2448, 192],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         44
-      ],
-      "eye_positions_y": [
-         14
-      ]
+      "eye_positions_x": [44],
+      "eye_positions_y": [14]
    },
    "player_wallslide_l": {
-      "frame_durations": [
-         120,
-         120
-      ],
-      "frame_offset": [
-         864,
-         240
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [120, 120],
+      "frame_offset": [864, 240],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         27
-      ],
-      "eye_positions_y": [
-         14
-      ]
+      "eye_positions_x": [27],
+      "eye_positions_y": [14]
    },
    "player_wallslide_r": {
-      "frame_durations": [
-         120,
-         120
-      ],
-      "frame_offset": [
-         864,
-         192
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [120, 120],
+      "frame_offset": [864, 192],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         44
-      ],
-      "eye_positions_y": [
-         14
-      ]
+      "eye_positions_x": [44],
+      "eye_positions_y": [14]
    },
    "player_wallslide_sword_l": {
-      "frame_durations": [
-         120,
-         120
-      ],
-      "frame_offset": [
-         2448,
-         240
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [120, 120],
+      "frame_offset": [2448, 240],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         27
-      ],
-      "eye_positions_y": [
-         14
-      ]
+      "eye_positions_x": [27],
+      "eye_positions_y": [14]
    },
    "player_wallslide_sword_r": {
-      "frame_durations": [
-         120,
-         120
-      ],
-      "frame_offset": [
-         2448,
-         192
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [120, 120],
+      "frame_offset": [2448, 192],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         44
-      ],
-      "eye_positions_y": [
-         14
-      ]
+      "eye_positions_x": [44],
+      "eye_positions_y": [14]
    },
    "player_water_splash": {
-      "frame_durations": [
-         20,
-         20,
-         20,
-         20,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         30,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         0,
-         1440
-      ],
-      "frame_size": [
-         72,
-         72
-      ],
-      "origin": [
-         36.0,
-         38.0
-      ],
+      "frame_durations": [20, 20, 20, 20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 40, 40, 40],
+      "frame_offset": [0, 1440],
+      "frame_size": [72, 72],
+      "origin": [36.0, 38.0],
       "sprite_count": 20,
       "texture": "data/sprites/player.png"
    },
    "player_jump_init_sword_l": {
-      "frame_durations": [
-         75,
-         75
-      ],
-      "frame_offset": [
-         1440,
-         912
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75],
+      "frame_offset": [1440, 912],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         30,
-         30
-      ],
-      "eye_positions_y": [
-         11,
-         11
-      ]
+      "eye_positions_x": [30, 30],
+      "eye_positions_y": [11, 11]
    },
    "player_jump_init_sword_r": {
-      "frame_durations": [
-         75,
-         75
-      ],
-      "frame_offset": [
-         1440,
-         864
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75],
+      "frame_offset": [1440, 864],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         41,
-         41
-      ],
-      "eye_positions_y": [
-         11,
-         11
-      ]
+      "eye_positions_x": [41, 41],
+      "eye_positions_y": [11, 11]
    },
    "player_jump_up_sword_l": {
-      "frame_durations": [
-         60,
-         60
-      ],
-      "frame_offset": [
-         1440,
-         912
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60],
+      "frame_offset": [1440, 912],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
    "player_jump_up_sword_r": {
-      "frame_durations": [
-         60,
-         60
-      ],
-      "frame_offset": [
-         1440,
-         864
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60],
+      "frame_offset": [1440, 864],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
    "player_jump_midair_sword_l": {
-      "frame_durations": [
-         60,
-         60,
-         60
-      ],
-      "frame_offset": [
-         1584,
-         912
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60, 60],
+      "frame_offset": [1584, 912],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 3,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         30,
-         30,
-         30
-      ],
-      "eye_positions_y": [
-         11,
-         12,
-         12
-      ]
+      "eye_positions_x": [30, 30, 30],
+      "eye_positions_y": [11, 12, 12]
    },
    "player_jump_midair_sword_r": {
-      "frame_durations": [
-         60,
-         60,
-         60
-      ],
-      "frame_offset": [
-         1584,
-         864
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60, 60],
+      "frame_offset": [1584, 864],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 3,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         41,
-         41,
-         41
-      ],
-      "eye_positions_y": [
-         11,
-         12,
-         12
-      ]
+      "eye_positions_x": [41, 41, 41],
+      "eye_positions_y": [11, 12, 12]
    },
    "player_jump_down_sword_l": {
-      "frame_durations": [
-         60,
-         60
-      ],
-      "frame_offset": [
-         1800,
-         912
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60],
+      "frame_offset": [1800, 912],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         31,
-         31
-      ],
-      "eye_positions_y": [
-         13,
-         13
-      ]
+      "eye_positions_x": [31, 31],
+      "eye_positions_y": [13, 13]
    },
    "player_jump_down_sword_r": {
-      "frame_durations": [
-         60,
-         60
-      ],
-      "frame_offset": [
-         1800,
-         864
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [60, 60],
+      "frame_offset": [1800, 864],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         40,
-         40
-      ],
-      "eye_positions_y": [
-         13,
-         13
-      ]
+      "eye_positions_x": [40, 40],
+      "eye_positions_y": [13, 13]
    },
    "player_jump_landing_sword_l": {
-      "frame_durations": [
-         100,
-         100,
-         100,
-         100,
-         100,
-         100,
-         240,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         1944,
-         816
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [100, 100, 100, 100, 100, 100, 240, 40, 40, 40, 40],
+      "frame_offset": [1944, 816],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 11,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         33,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         32,
-         31,
-         32,
-         32
-      ],
-      "eye_positions_y": [
-         31,
-         29,
-         29,
-         29,
-         29,
-         29,
-         29,
-         26,
-         24,
-         22,
-         19
-      ]
+      "eye_positions_x": [33, 32, 32, 32, 32, 32, 32, 32, 31, 32, 32],
+      "eye_positions_y": [31, 29, 29, 29, 29, 29, 29, 26, 24, 22, 19]
    },
    "player_jump_landing_sword_r": {
-      "frame_durations": [
-         100,
-         100,
-         100,
-         100,
-         100,
-         100,
-         240,
-         40,
-         40,
-         40,
-         40
-      ],
-      "frame_offset": [
-         1944,
-         768
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [100, 100, 100, 100, 100, 100, 240, 40, 40, 40, 40],
+      "frame_offset": [1944, 768],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 11,
       "texture": "data/sprites/player.png",
-      "eye_positions_x": [
-         38,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39,
-         39
-      ],
-      "eye_positions_y": [
-         31,
-         29,
-         29,
-         29,
-         29,
-         29,
-         29,
-         26,
-         24,
-         22,
-         19
-      ]
+      "eye_positions_x": [38, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39],
+      "eye_positions_y": [31, 29, 29, 29, 29, 29, 29, 26, 24, 22, 19]
    },
    "player_jump_init_attack_sword_legs_l": {
-      "frame_durations": [
-         75,
-         75
-      ],
-      "frame_offset": [
-         1440,
-         816
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75],
+      "frame_offset": [1440, 816],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
    "player_jump_init_attack_sword_legs_r": {
-      "frame_durations": [
-         75,
-         75
-      ],
-      "frame_offset": [
-         1440,
-         768
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75],
+      "frame_offset": [1440, 768],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
    "player_jump_up_attack_sword_legs_l": {
-      "frame_durations": [
-         75,
-         75
-      ],
-      "frame_offset": [
-         1584,
-         816
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75],
+      "frame_offset": [1584, 816],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
    "player_jump_up_attack_sword_legs_r": {
-      "frame_durations": [
-         75,
-         75
-      ],
-      "frame_offset": [
-         1584,
-         768
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75],
+      "frame_offset": [1584, 768],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
    "player_jump_midair_attack_sword_legs_l": {
-      "frame_durations": [
-         75
-      ],
-      "frame_offset": [
-         1728,
-         816
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75],
+      "frame_offset": [1728, 816],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_jump_midair_attack_sword_legs_r": {
-      "frame_durations": [
-         75
-      ],
-      "frame_offset": [
-         1728,
-         768
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75],
+      "frame_offset": [1728, 768],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 1,
       "texture": "data/sprites/player.png"
    },
    "player_jump_down_attack_sword_legs_l": {
-      "frame_durations": [
-         75,
-         75
-      ],
-      "frame_offset": [
-         1800,
-         816
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75],
+      "frame_offset": [1800, 816],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
    "player_jump_down_attack_sword_legs_r": {
-      "frame_durations": [
-         75,
-         75
-      ],
-      "frame_offset": [
-         1800,
-         768
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75],
+      "frame_offset": [1800, 768],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 2,
       "texture": "data/sprites/player.png"
    },
    "player_jump_landing_attack_sword_legs_l": {
-      "frame_durations": [
-         800,
-         100,
-         100
-      ],
-      "frame_offset": [
-         1944,
-         816
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [800, 100, 100],
+      "frame_offset": [1944, 816],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 3,
       "texture": "data/sprites/player.png"
    },
    "player_jump_landing_attack_sword_legs_r": {
-      "frame_durations": [
-         800,
-         100,
-         100
-      ],
-      "frame_offset": [
-         1944,
-         768
-      ],
-      "frame_size": [
-         72,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [800, 100, 100],
+      "frame_offset": [1944, 768],
+      "frame_size": [72, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 3,
       "texture": "data/sprites/player.png"
    },
    "player_jump_attack_sword_l": {
-      "frame_durations": [
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75
-      ],
-      "frame_offset": [
-         1944,
-         912
-      ],
-      "frame_size": [
-         96,
-         48
-      ],
-      "origin": [
-         60.0,
-         48.0
-      ],
+      "frame_durations": [75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75],
+      "frame_offset": [1944, 912],
+      "frame_size": [96, 48],
+      "origin": [60.0, 48.0],
       "sprite_count": 12,
       "texture": "data/sprites/player.png"
    },
    "player_jump_attack_sword_r": {
-      "frame_durations": [
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75,
-         75
-      ],
-      "frame_offset": [
-         1944,
-         864
-      ],
-      "frame_size": [
-         96,
-         48
-      ],
-      "origin": [
-         36.0,
-         48.0
-      ],
+      "frame_durations": [75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75],
+      "frame_offset": [1944, 864],
+      "frame_size": [96, 48],
+      "origin": [36.0, 48.0],
       "sprite_count": 12,
       "texture": "data/sprites/player.png"
    },
    "player_wallslide_dust": {
-      "frame_durations": [
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5,
-         5
-      ],
-      "frame_offset": [
-         0,
-         1536
-      ],
-      "frame_size": [
-         24,
-         48
-      ],
-      "origin": [
-         12,
-         48
-      ],
+      "frame_durations": [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+      "frame_offset": [0, 1536],
+      "frame_size": [24, 48],
+      "origin": [12, 48],
       "sprite_count": 60,
       "texture": "data/sprites/player.png"
    }

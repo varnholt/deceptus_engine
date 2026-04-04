@@ -12,6 +12,23 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 
+namespace
+{
+
+sf::Vector2f update_torch_offset(sf::Vector2f current_offset, sf::Vector2f target_offset, const sf::Time dt)
+{
+   const sf::Vector2f delta = target_offset - current_offset;
+   const auto distance_sq = (delta.x * delta.x) + (delta.y * delta.y);
+   constexpr auto base_speed = 0.5f;
+   constexpr auto reference_distance_px = 5.0f;
+   const auto reference_distance_sq = reference_distance_px * reference_distance_px;
+   const auto normalized_sq = distance_sq / reference_distance_sq;
+   const auto factor = std::clamp(base_speed * dt.asSeconds() * normalized_sq * normalized_sq, 0.0f, 1.0f);
+   return current_offset + delta * factor;
+}
+
+}  // namespace
+
 ItemLantern::ItemLantern()
 {
    _light_circle.setRadius(_light_radius);
@@ -39,21 +56,48 @@ void ItemLantern::update(const sf::Time& dt)
 
    _elapsed += dt;
 
-   // update light position to follow player with downward offset
+   // update light position to follow player with eye position offset
    auto* player = Player::getCurrent();
-   if (player && _player_light)
+   if (!player || !_player_light)
    {
-#ifdef DEBUG_DRAW
-      _light_circle.setPosition(player->getPixelPositionFloat());
-#endif
-      const float offset_x_m = -2.85f;  // small horizontal sway
-      const float offset_y_m = -0.6f + sin(_elapsed.asSeconds() * 3.0f) * 0.015f;
-      _player_light->_pos_m = player->getBody()->GetPosition() + b2Vec2(offset_x_m, offset_y_m);
-      _player_light->updateSpritePosition();
-      // _player_light->_sprite->setOrigin({128, 64});
-      // _player_light->_sprite->setRotation(sf::degrees(sin(_elapsed.asSeconds() * 3.0f) * 3.f));
-      // _player_light->_sprite->setRotation(sf::degrees(sin(_elapsed.asSeconds() * 3.0f) * 0.2f));
+      return;
    }
+
+   const auto& player_animation = player->getPlayerAnimation();
+   if (!player_animation)
+   {
+      return;
+   }
+
+   const auto& current_cycle = player_animation->getCurrentCycle();
+   if (!current_cycle)
+   {
+      return;
+   }
+
+#ifdef DEBUG_DRAW
+   _light_circle.setPosition(player->getPixelPositionFloat());
+#endif
+
+   // get eye position in pixels, or reuse last valid position
+   const auto& eye_positions = player->getEyePositions();
+   const auto eye_pos_opt = eye_positions.getEyePosition(current_cycle);
+   
+   if (eye_pos_opt.has_value())
+   {
+      _last_valid_eye_position = eye_pos_opt.value();
+   }
+   
+   // convert to meters
+   const float eye_offset_x_m = _last_valid_eye_position.x * MPP;
+   const float eye_offset_y_m = _last_valid_eye_position.y * MPP;
+   
+   // add static offset
+   static constexpr float offset_x_m = -2.85f;
+   static constexpr float offset_y_m = -0.6f;
+   
+   _player_light->_pos_m = player->getBody()->GetPosition() + b2Vec2(eye_offset_x_m + offset_x_m, eye_offset_y_m + offset_y_m);
+   _player_light->updateSpritePosition();
 }
 
 void ItemLantern::onEquipped()

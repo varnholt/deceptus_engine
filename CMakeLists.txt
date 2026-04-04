@@ -464,6 +464,8 @@ set(GAME_FILES
     src/game/player/playercontrolstate.h
     src/game/player/playerdash.cpp
     src/game/player/playerdash.h
+    src/game/player/playereyepositions.cpp
+    src/game/player/playereyepositions.h
     src/game/player/playerinfo.cpp
     src/game/player/playerinfo.h
     src/game/player/playerinput.cpp

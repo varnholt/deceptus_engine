@@ -15,6 +15,7 @@
 #include "game/player/playercontrols.h"
 #include "game/player/playerdash.h"
 #include "game/player/playerdive.h"
+#include "game/player/playereyepositions.h"
 #include "game/player/playerjump.h"
 #include "game/player/playerjumptrace.h"
 #include "game/player/playerplatform.h"
@@ -267,6 +268,14 @@ public:
    /// \return reference to player platform subsystem.
    PlayerPlatform& getPlatform();
 
+   /// \brief gets eye positions reader for current player.
+   /// \return reference to eye positions instance.
+   const PlayerEyePositions& getEyePositions() const;
+
+   /// \brief gets player animation controller.
+   /// \return shared pointer to player animation instance.
+   const std::shared_ptr<PlayerAnimation>& getPlayerAnimation() const;
+
    /// \brief gets current chunk index for streaming and logic queries.
    /// \return reference to current chunk coordinates.
    const Chunk& getChunk() const;
@@ -482,6 +491,7 @@ private:
    PlayerBend _bend;
    PlayerClimb _climb;
    PlayerDash _dash;
+   PlayerEyePositions _eye_positions;
    PlayerJump _jump;
    PlayerJumpTrace _jump_trace;
    PlayerPlatform _platform;

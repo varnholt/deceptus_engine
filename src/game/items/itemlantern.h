@@ -36,4 +36,5 @@ private:
    bool _enabled{false};
    sf::Time _elapsed;
    std::shared_ptr<LightSystem::LightInstance> _player_light;
+   sf::Vector2f _last_valid_eye_position{0.0f, 0.0f};
 };
