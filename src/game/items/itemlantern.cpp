@@ -15,9 +15,9 @@
 namespace
 {
 
-constexpr float offset_left_x_m = -3.2f;
-constexpr float offset_right_x_m = -2.5f;
-constexpr float offset_y_m = -0.6f;
+constexpr float offset_left_x_m = -3.3f;
+constexpr float offset_right_x_m = 1.9f;
+constexpr float offset_y_m = -0.9f;
 
 sf::Vector2f update_torch_offset(sf::Vector2f current_offset, sf::Vector2f target_offset, const sf::Time dt)
 {
@@ -102,18 +102,11 @@ void ItemLantern::update(const sf::Time& dt)
    
    auto& active_light = pointing_right ? _player_light_right : _player_light_left;
    auto& inactive_light = pointing_right ? _player_light_left : _player_light_right;
-   
-   if (active_light)
-   {
-      active_light->_enabled = true;
-      active_light->_pos_m = player->getBody()->GetPosition() + b2Vec2(eye_offset_x_m + offset_x_m, eye_offset_y_m + offset_y_m);
-      active_light->updateSpritePosition();
-   }
-   
-   if (inactive_light)
-   {
-      inactive_light->_enabled = false;
-   }
+
+   active_light->_enabled = true;
+   inactive_light->_enabled = false;
+   active_light->_pos_m = player->getBody()->GetPosition() + b2Vec2(eye_offset_x_m + offset_x_m, eye_offset_y_m + offset_y_m);
+   active_light->updateSpritePosition();
 }
 
 void ItemLantern::onEquipped()
@@ -132,15 +125,22 @@ void ItemLantern::onEquipped()
       return;
    }
 
-   const std::string texture_name = "spotlight.png";
    constexpr float desired_width_px = 256.0f;
    constexpr float desired_height_px = 128.0f;
 
    Log::Info() << "ItemLantern: Creating directional lights";
 
-   // helper to create an identical light instance
-   auto create_light = [&]()
+   enum class Orientation : uint8_t
    {
+      Left,
+      Right
+   };
+
+   // helper to create an identical light instance
+   auto create_light = [&](Orientation orientation)
+   {
+      const auto direction = (orientation == Orientation::Left) ? 1 : -1;
+      const std::string texture_name = (orientation == Orientation::Left) ? "spotlight_l.png" : "spotlight_r.png";
       GameDeserializeData data;
       data._tmx_object = std::make_shared<TmxObject>();
       data._tmx_object->_properties = std::make_shared<TmxProperties>();
@@ -153,7 +153,7 @@ void ItemLantern::onEquipped()
 
       auto center_offset_x_property = std::make_shared<TmxProperty>();
       auto center_offset_y_property = std::make_shared<TmxProperty>();
-      center_offset_x_property->_value_int = static_cast<int32_t>(desired_width_px / 2);
+      center_offset_x_property->_value_int = direction * static_cast<int32_t>(desired_width_px / 2);
       center_offset_y_property->_value_int = 0;
       data._tmx_object->_properties->_map["center_offset_x_px"] = center_offset_x_property;
       data._tmx_object->_properties->_map["center_offset_y_px"] = center_offset_y_property;
@@ -162,14 +162,14 @@ void ItemLantern::onEquipped()
       light->_color = sf::Color(255, 200, 100, 255);
       light->_sprite->setColor(light->_color);
       light->_enabled = false;
-      
+
       return light;
    };
 
-   _player_light_left = create_light();
+   _player_light_left = create_light(Orientation::Left);
    level->getLightSystem()->_lights.push_back(_player_light_left);
 
-   _player_light_right = create_light();
+   _player_light_right = create_light(Orientation::Right);
    level->getLightSystem()->_lights.push_back(_player_light_right);
 }
 

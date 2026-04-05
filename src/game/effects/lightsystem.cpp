@@ -321,6 +321,11 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
 
    for (const auto& light : _lights)
    {
+      if (!light->_enabled)
+      {
+         continue;
+      }
+
       // don't draw lights that are too far away
       auto distanceToPlayer = (player_body->GetWorldCenter() - light->_pos_m).LengthSquared();
       if (distanceToPlayer > max_distance_m2)
