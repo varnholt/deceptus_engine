@@ -320,9 +320,6 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       weapon_system._selected->draw(color);
    }
 
-   // Draw equipped items
-   SaveState::getPlayerInfo()._items.draw(color);
-
    // that y offset is to compensate the wonky box2d origin
    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
 
@@ -350,6 +347,9 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       normal,
       {"player_jump_dust_l", "player_jump_dust_r", "player_jump_dust_inair_l", "player_jump_dust_inair_r", "player_water_splash"}
    );
+
+   // draw equipped items
+   SaveState::getPlayerInfo()._items.draw(color);
 }
 
 void Player::drawStencil(sf::RenderTarget& color)

@@ -38,4 +38,7 @@ private:
    std::shared_ptr<LightSystem::LightInstance> _player_light_left;
    std::shared_ptr<LightSystem::LightInstance> _player_light_right;
    sf::Vector2f _last_valid_eye_position{0.0f, 0.0f};
+   std::shared_ptr<sf::Texture> _player_texture;
+   std::unique_ptr<sf::Sprite> _helmet_sprite_r;
+   std::unique_ptr<sf::Sprite> _helmet_sprite_l;
 };
