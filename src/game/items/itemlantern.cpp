@@ -15,9 +15,9 @@
 namespace
 {
 
-constexpr float offset_left_x_m = -3.3f;
+constexpr float offset_left_x_m = -3.4f;
 constexpr float offset_right_x_m = 1.9f;
-constexpr float offset_y_m = -0.9f;
+constexpr float offset_y_m = -1.0f;
 
 sf::Vector2f update_torch_offset(sf::Vector2f current_offset, sf::Vector2f target_offset, const sf::Time dt)
 {
@@ -34,9 +34,15 @@ sf::Vector2f update_torch_offset(sf::Vector2f current_offset, sf::Vector2f targe
 }  // namespace
 
 ItemLantern::ItemLantern()
+    : _player_texture(TexturePool::getInstance().get("data/sprites/player.png")),
+      _helmet_sprite_r(std::make_unique<sf::Sprite>(*_player_texture)),
+      _helmet_sprite_l(std::make_unique<sf::Sprite>(*_player_texture))
 {
    _light_circle.setRadius(_light_radius);
    _light_circle.setOrigin({_light_radius, _light_radius});
+
+   _helmet_sprite_r->setTextureRect(sf::IntRect({0, 1776}, {24, 24}));
+   _helmet_sprite_l->setTextureRect(sf::IntRect({24, 1776}, {24, 24}));
 }
 
 void ItemLantern::draw(sf::RenderTarget& target)
@@ -49,16 +55,24 @@ void ItemLantern::draw(sf::RenderTarget& target)
 #ifdef DEBUG_DRAW
    target.draw(_light_circle);
 #endif
+
+   auto* player = Player::getCurrent();
+   if (!player)
+   {
+      return;
+   }
+
+   target.draw(player->isPointingRight() ? *_helmet_sprite_r : *_helmet_sprite_l);
 }
 
-void ItemLantern::update(const sf::Time& dt)
+void ItemLantern::update(const sf::Time& delta_time)
 {
    if (!_enabled)
    {
       return;
    }
 
-   _elapsed += dt;
+   _elapsed += delta_time;
 
    // update light position to follow player with eye position offset
    auto* player = Player::getCurrent();
@@ -68,11 +82,6 @@ void ItemLantern::update(const sf::Time& dt)
    }
 
    const auto& player_animation = player->getPlayerAnimation();
-   if (!player_animation)
-   {
-      return;
-   }
-
    const auto& current_cycle = player_animation->getCurrentCycle();
    if (!current_cycle)
    {
@@ -107,6 +116,11 @@ void ItemLantern::update(const sf::Time& dt)
    inactive_light->_enabled = false;
    active_light->_pos_m = player->getBody()->GetPosition() + b2Vec2(eye_offset_x_m + offset_x_m, eye_offset_y_m + offset_y_m);
    active_light->updateSpritePosition();
+
+   sf::Vector2f helmet_offset_px{pointing_right ? -50.0f : -45.0f, -54.0f};
+   const auto helmet_position_px = player->getPixelPositionFloat() + _last_valid_eye_position + helmet_offset_px;
+   _helmet_sprite_r->setPosition(helmet_position_px);
+   _helmet_sprite_l->setPosition(helmet_position_px);
 }
 
 void ItemLantern::onEquipped()
