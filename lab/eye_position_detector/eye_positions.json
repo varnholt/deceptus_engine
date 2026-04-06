@@ -47,6 +47,14 @@
       "eye_positions_x": [40, 41, 42, 45, 47, 47],
       "eye_positions_y": [16, 18, 20, 26, 33, 32]
    },
+   "player_bend_down_idle_l": {
+      "eye_positions_x": [24],
+      "eye_positions_y": [32]
+   },
+   "player_bend_down_idle_r": {
+      "eye_positions_x": [47],
+      "eye_positions_y": [32]
+   },
    "player_bend_down_sword_l": {
       "eye_positions_x": [31, 29, 28, 27, 23, 23],
       "eye_positions_y": [17, 19, 21, 23, 32, 31]
@@ -126,6 +134,14 @@
    "player_idle_to_run_r": {
       "eye_positions_x": [45, 45],
       "eye_positions_y": [17, 17]
+   },
+   "player_jump_up_l": {
+      "eye_positions_x": [30, 30],
+      "eye_positions_y": [11, 11]
+   },
+   "player_jump_up_r": {
+      "eye_positions_x": [41, 41],
+      "eye_positions_y": [11, 11]
    },
    "player_jump_init_l": {
       "eye_positions_x": [30, 30],

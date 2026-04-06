@@ -3,7 +3,10 @@
 #include "game/animation/animation.h"
 
 #include <fstream>
+#include "framework/tools/log.h"
 #include "json/json.hpp"
+
+// #define DEBUG_PLAYER_EYE_POSITIONS
 
 PlayerEyePositions::PlayerEyePositions()
 {
@@ -15,6 +18,9 @@ std::optional<sf::Vector2f> PlayerEyePositions::getEyePosition(const std::string
    const auto eye_position_it = _eye_positions.find(animation_id);
    if (eye_position_it == _eye_positions.end() || eye_position_it->second.empty())
    {
+#ifdef DEBUG_PLAYER_EYE_POSITIONS
+      Log::Warning() << "[playereyepositions] map miss: animation_id='" << animation_id << "', frame=" << frame_index;
+#endif
       return std::nullopt;
    }
 
@@ -64,4 +70,23 @@ void PlayerEyePositions::load()
 
       _eye_positions[key] = std::move(positions);
    }
+
+#ifdef DEBUG_PLAYER_EYE_POSITIONS
+   Log::Info() << "[playereyepositions] loaded " << _eye_positions.size() << " animation cycles";
+   for (const auto& [cycle_name, positions] : _eye_positions)
+   {
+      std::ostringstream oss;
+      oss << "  " << cycle_name << " (" << positions.size() << " frames): y=[";
+      for (size_t i = 0; i < positions.size(); ++i)
+      {
+         if (i > 0)
+         {
+            oss << ", ";
+         }
+         oss << positions[i].y;
+      }
+      oss << "]";
+      Log::Info() << oss.str();
+   }
+#endif
 }
