@@ -237,7 +237,12 @@ void Game::initializeWindow()
    const auto ratio_width = game_config._video_mode_width / game_config._view_width;
    const auto ratio_height = game_config._video_mode_height / game_config._view_height;
 
-   const auto size_ratio = std::min(ratio_width, ratio_height);
+   auto size_ratio = std::min(ratio_width, ratio_height);
+   if (size_ratio < std::numeric_limits<float>::epsilon())
+   {
+      Log::Warning() << "invalid video mode dimensions";
+      size_ratio = 1.0f;
+   }
 
    const int32_t texture_width = size_ratio * game_config._view_width;
    const int32_t texture_height = size_ratio * game_config._view_height;
