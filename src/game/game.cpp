@@ -922,8 +922,11 @@ void Game::processEvent(const sf::Event& event)
 #ifdef __linux__
       return;
 #endif
-      // avoid bad aspect ratios for windowed mode
-      changeResolution(resized_event->size.x, resized_event->size.y);
+      // only handle intentional user resizes, not OS-generated DPI adjustments
+      if (GameConfiguration::getInstance().isResolutionChangeApplicable(resized_event->size.x, resized_event->size.y))
+      {
+         changeResolution(resized_event->size.x, resized_event->size.y);
+      }
    }
    else if (event.is<sf::Event::FocusLost>())
    {

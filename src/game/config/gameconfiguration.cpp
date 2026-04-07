@@ -11,6 +11,13 @@
 
 using json = nlohmann::json;
 
+namespace
+{
+// minimum pixel difference required to trigger window recreation
+// filters out small DPI adjustments when moving windows between monitors
+constexpr int32_t min_resolution_change_threshold = 10;
+}  // namespace
+
 bool GameConfiguration::__initialized = false;
 GameConfiguration GameConfiguration::__defaults;
 
@@ -124,4 +131,20 @@ void GameConfiguration::resetAudioDefaults()
    getInstance()._audio_volume_master = getDefaults()._audio_volume_master;
    getInstance()._audio_volume_music = getDefaults()._audio_volume_music;
    getInstance()._audio_volume_sfx = getDefaults()._audio_volume_sfx;
+}
+
+bool GameConfiguration::isResolutionChangeApplicable(int32_t new_width, int32_t new_height) const
+{
+   // in fullscreen mode, the OS manages the window size
+   if (_fullscreen)
+   {
+      return false;
+   }
+
+   // only apply resolution changes that exceed the threshold
+   // this filters out DPI scaling adjustments when moving windows between monitors
+   const auto width_diff = std::abs(new_width - _video_mode_width);
+   const auto height_diff = std::abs(new_height - _video_mode_height);
+
+   return (width_diff > min_resolution_change_threshold || height_diff > min_resolution_change_threshold);
 }
