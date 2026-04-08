@@ -6,6 +6,7 @@
 #include <ostream>
 #include <sstream>
 
+#include "SFML/Graphics.hpp"
 #include "framework/tools/log.h"
 #include "json/json.hpp"
 
@@ -147,4 +148,21 @@ bool GameConfiguration::isResolutionChangeApplicable(int32_t new_width, int32_t 
    const auto height_diff = std::abs(new_height - _video_mode_height);
 
    return (width_diff > min_resolution_change_threshold || height_diff > min_resolution_change_threshold);
+}
+
+void GameConfiguration::clampResolutionToDesktop()
+{
+   const auto desktop_mode = sf::VideoMode::getDesktopMode();
+   const auto desktop_width = static_cast<int32_t>(desktop_mode.size.x);
+   const auto desktop_height = static_cast<int32_t>(desktop_mode.size.y);
+
+   if (_video_mode_width > desktop_width || _video_mode_height > desktop_height)
+   {
+      Log::Warning() << "configured resolution " << _video_mode_width << "x" << _video_mode_height << " exceeds desktop resolution "
+                     << desktop_width << "x" << desktop_height << ", clamping to desktop size";
+
+      _video_mode_width = std::min(_video_mode_width, desktop_width);
+      _video_mode_height = std::min(_video_mode_height, desktop_height);
+      serializeToFile();
+   }
 }
