@@ -55,6 +55,11 @@ struct GameConfiguration
    /// \return true if the size change is significant and should be applied.
    bool isResolutionChangeApplicable(int32_t new_width, int32_t new_height) const;
 
+   /// \brief ensures the configured resolution fits within desktop limits.
+   /// clamps _video_mode_width and _video_mode_height to the desktop resolution if needed.
+   /// persists changes to disk if the resolution was adjusted.
+   void clampResolutionToDesktop();
+
 private:
    /// \brief serializes the current settings into formatted json text.
    /// \return json string containing the GameConfiguration object.

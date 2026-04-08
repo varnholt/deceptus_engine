@@ -260,11 +260,15 @@ void Game::initializeWindow()
 
    if (_level)
    {
-      _render_targets.recreateOnResize(game_config._video_mode_width, game_config._video_mode_height, game_config._view_width, game_config._view_height);
+      _render_targets.recreateOnResize(
+         game_config._video_mode_width, game_config._video_mode_height, game_config._view_width, game_config._view_height
+      );
    }
    else
    {
-      _render_targets.create(game_config._video_mode_width, game_config._video_mode_height, game_config._view_width, game_config._view_height);
+      _render_targets.create(
+         game_config._video_mode_width, game_config._video_mode_height, game_config._view_width, game_config._view_height
+      );
    }
 }
 
@@ -426,6 +430,9 @@ Game::~Game()
 
 void Game::initialize()
 {
+   // clamp resolution to desktop limits on startup
+   GameConfiguration::getInstance().clampResolutionToDesktop();
+   
    initializeWindow();
 
    // initialize GLEW after the OpenGL context is created but before any OpenGL calls
@@ -882,9 +889,13 @@ void Game::toggleFullScreen()
 
 void Game::changeResolution(int32_t w, int32_t h)
 {
-   GameConfiguration::getInstance()._video_mode_width = w;
-   GameConfiguration::getInstance()._video_mode_height = h;
-   GameConfiguration::getInstance().serializeToFile();
+   auto& config = GameConfiguration::getInstance();
+   
+   config._video_mode_width = w;
+   config._video_mode_height = h;
+   
+   // clamp to desktop limits to prevent SFML errors
+   config.clampResolutionToDesktop();
 
    initializeWindow();
 
