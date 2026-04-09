@@ -264,6 +264,15 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
 void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
    int32_t light_id = 0;
+   
+   static int32_t last_light_count = -1;
+   bool count_changed = (last_light_count != static_cast<int32_t>(_active_lights.size()));
+   
+   if (count_changed)
+   {
+      last_light_count = _active_lights.size();
+      Log::Info() << "=== Light count changed to: " << _active_lights.size() << " ===";
+   }
 
    _light_shader.setUniform("u_light_count", static_cast<int32_t>(_active_lights.size()));
    _light_shader.setUniform("u_resolution", sf::Glsl::Vec2(static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)));
@@ -272,6 +281,12 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    for (auto& light : _active_lights)
    {
       std::string id = "u_lights[" + std::to_string(light_id) + "]";
+      
+      if (count_changed)
+      {
+         Log::Info() << "  Light " << light_id << ": rgba=" 
+                     << (int)light->_color.r << "," << (int)light->_color.g << "," << (int)light->_color.b << "," << (int)light->_color.a;
+      }
 
       // transform light coordinates from box2d to normalized screen coordinates
       sf::Vector2f light_screen_pos = mapCoordsToPixelNormalized(
@@ -297,6 +312,12 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
             static_cast<float>(light->_color.a) / 255.0f
          )
       );
+      
+      if (count_changed)
+      {
+         Log::Info() << "  Light " << light_id << ": rgba=" 
+                     << (int)light->_color.r << "," << (int)light->_color.g << "," << (int)light->_color.b << "," << (int)light->_color.a;
+      }
 
       // Log::Info()
       //    << "light position on screen "

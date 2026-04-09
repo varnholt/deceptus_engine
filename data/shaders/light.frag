@@ -39,13 +39,13 @@ void main()
 
       // the light sprite texture already provides distance falloff via its gradient
       // shader only applies normal mapping (surface angle) and color
-      vec3 diffuse_light = (light._color.rgb * light._color.a) * max(dot(n, l), 0.0);
+      // use very low multiplier since we're adding all lights together
+      vec3 diffuse_light = (light._color.rgb * light._color.a) * max(dot(n, l), 0.0) * 0.15;
       
-      // simple addition - the sprite falloff prevents over-brightening
       light_sum += diffuse_light;
    }
 
-   // apply sprite mask (provides shadow boundaries and distance falloff)
+   // apply combined sprite mask (provides shadow boundaries)
    light_sum *= light_mask;
 
    gl_FragColor = vec4(u_ambient.rgb * diffuse_color.rgb + light_sum, diffuse_color.a);
