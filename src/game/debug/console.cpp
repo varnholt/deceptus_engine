@@ -22,6 +22,7 @@ Console::Console()
 {
    _help.registerCommand("leveldesign", "playback <enable/disable/load/save/replay/reset>: use game playback", {"playback enable"});
    _help.registerCommand("leveldesign", "cpanlimitoff: disable cpan maximum radius");
+   _help.registerCommand("leveldesign", "playerlight <enable/disable/alpha>: toggle or set player light intensity", {"playerlight enable", "playerlight disable", "playerlight alpha 100"});
    _help.registerCommand("teleportation", "tpp <x>,<y>: teleport to tile position", {"tpp 100, 330"});
    _help.registerCommand("teleportation", "tps: teleport to start position");
    _help.registerCommand("teleportation", "tpc <n>: teleport to checkpoint", {"tpc 0"});
@@ -463,6 +464,31 @@ void Console::execute()
    {
       Tweaks::instance()._cpan_unlimited = true;
       _log.emplace_back("disabled cpan limit");
+   }
+   else if (results.at(0) == "playerlight" && results.size() >= 2)
+   {
+      if (results.at(1) == "enable")
+      {
+         Tweaks::instance()._player_light_enabled = true;
+         _log.emplace_back("player light enabled");
+      }
+      else if (results.at(1) == "disable")
+      {
+         Tweaks::instance()._player_light_enabled = false;
+         _log.emplace_back("player light disabled");
+      }
+      else if (results.at(1) == "alpha" && results.size() == 3)
+      {
+         const auto alpha = std::clamp(std::atoi(results.at(2).c_str()), 0, 255);
+         Tweaks::instance()._player_light_alpha = static_cast<uint8_t>(alpha);
+         std::ostringstream os;
+         os << "player light alpha set to " << alpha;
+         _log.push_back(os.str());
+      }
+      else
+      {
+         _log.emplace_back("usage: playerlight <enable/disable/alpha <0-255>>");
+      }
    }
 
    // generic
