@@ -956,6 +956,7 @@ void Game::processEvent(const sf::Event& event)
             [this]()
             {
                CameraPanorama::getInstance().updateLookState(Look::Active, false);
+               DisplayMode::getInstance().enqueueUnset(Display::CameraPanorama);
                _player->getControls()->setKeysPressed(0);
             }
          );
