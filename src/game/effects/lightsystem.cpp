@@ -298,8 +298,6 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
          )
       );
 
-      _light_shader.setUniform(id + "._falloff", sf::Glsl::Vec3(light->_falloff[0], light->_falloff[1], light->_falloff[2]));
-
       // Log::Info()
       //    << "light position on screen "
       //    << id << ": "
