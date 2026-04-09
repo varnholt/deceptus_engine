@@ -47,15 +47,14 @@ int main(int /*argc*/, char** /*argv*/)
 {
    GamePaths::createGameDirectories();
 
-#ifndef DEBUG
    // setup logging to file
    LogThread log_thread;
    Log::registerListenerCallback([&log_thread](const auto& time_point, auto level, const auto& message, const auto& location)
                                  { log_thread.log(time_point, level, message, location); });
 
+#ifdef DEVELOPMENT_MODE
    Log::registerListenerCallback([](const auto& time_point, auto level, const auto& message, const auto& location)
                                  { LogUiBuffer::log(time_point, level, message, location); });
-
 #endif
 
 #ifdef __linux__
