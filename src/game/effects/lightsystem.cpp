@@ -353,6 +353,13 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
       }
 
       _active_lights.push_back(light);
+   }
+
+   // now draw sprites to channels (limit to 3 lights for RGB)
+   int32_t channel_index = 0;
+   for (const auto& light : _active_lights)
+   {
+      if (channel_index >= 3) break; // only RGB channels available
 
       // fill stencil buffer
       glClear(GL_STENCIL_BUFFER_BIT);
@@ -368,8 +375,19 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
       glStencilFunc(GL_EQUAL, 0, 1);
       glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
+      // draw sprite to specific RGB channel (white gradient)
+      // channel 0 = red, channel 1 = green, channel 2 = blue
+      sf::Color channel_color = sf::Color::White;
+      if (channel_index == 0) channel_color = sf::Color(255, 0, 0, 255);      // red channel
+      else if (channel_index == 1) channel_color = sf::Color(0, 255, 0, 255); // green channel
+      else if (channel_index == 2) channel_color = sf::Color(0, 0, 255, 255); // blue channel
+      
+      light->_sprite->setColor(channel_color);
+      
       sf::RenderStates render_states{sf::BlendAdd};
       target.draw(*light->_sprite, render_states);
+      
+      channel_index++;
    }
 
    glDisable(GL_STENCIL_TEST);
