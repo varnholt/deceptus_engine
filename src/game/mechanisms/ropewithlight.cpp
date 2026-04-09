@@ -67,10 +67,7 @@ void RopeWithLight::update(const sf::Time& dt)
    const auto angle_rad = static_cast<float>(atan2(c_m.y, c_m.x));
 
    _lamp_sprite->setRotation(sf::degrees(90.0f + FACTOR_RAD_TO_DEG * angle_rad));
-   _lamp_sprite->setPosition(
-      {_light->_pos_m.x * PPM,  // - _lamp_sprite_rect.size.x / 2,
-       _light->_pos_m.y * PPM}  // - _lamp_sprite_rect.size.y / 2
-   );
+   _lamp_sprite->setPosition({_light->_pos_m.x * PPM, _light->_pos_m.y * PPM});
 }
 
 void RopeWithLight::setup(const GameDeserializeData& data)
@@ -87,7 +84,7 @@ void RopeWithLight::setup(const GameDeserializeData& data)
       sf::IntRect{{1056, 131}, {24, 30}},
    };
 
-   std::array<uint8_t, 4> color = {255, 255, 255, 100};
+   std::array<uint8_t, 4> color = {255, 255, 255, 50};
    const auto map = data._tmx_object->_properties->_map;
    const auto color_it = map.find("color");
    if (color_it != map.end())
