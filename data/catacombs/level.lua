@@ -38,8 +38,6 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function makeMonkVisible(dt)
 
-    log("make monk visible")
-
    _delay_to_show_monk = _delay_to_show_monk - dt
    
    if (_delay_to_show_monk <= 0.0) then

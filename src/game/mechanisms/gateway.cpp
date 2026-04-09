@@ -147,7 +147,6 @@ Gateway::Gateway(GameNode* parent) : GameNode(parent)
 
 Gateway::~Gateway()
 {
-   std::cerr << "gateway destuctor, this = " << static_cast<const void*>(this) << std::endl;
    unregisterGateway(getObjectId());
 }
 
