@@ -21,12 +21,18 @@ void main()
 
    vec4 diffuse_color = texture2D(color_map,  uv);
    vec3 normal        = texture2D(normal_map, uv).rgb;
-   float light_mask   = texture2D(light_map,  uv).r;
+   vec3 light_mask    = texture2D(light_map,  uv).rgb; // RGB channels for 3 lights
 
    vec3 light_sum = vec3(0.0);
-   for (int i = 0; i < u_light_count; i++)
+   for (int i = 0; i < min(u_light_count, 3); i++) // limit to 3 lights (RGB channels)
    {
       Light light = u_lights[i];
+
+      // get mask for this light's channel
+      float mask = (i == 0) ? light_mask.r : (i == 1) ? light_mask.g : light_mask.b;
+      
+      // only calculate if mask is non-zero (sprite reaches this pixel)
+      if (mask < 0.01) continue;
 
       vec2 light_pos_normalized = light._position.xy; // xy are already in 0..1
 
@@ -37,16 +43,12 @@ void main()
       vec3 n = normalize(normal * 2.0 - 1.0);
       vec3 l = normalize(light_dir);
 
-      // the light sprite texture already provides distance falloff via its gradient
-      // shader only applies normal mapping (surface angle) and color
-      // use very low multiplier since we're adding all lights together
-      vec3 diffuse_light = (light._color.rgb * light._color.a) * max(dot(n, l), 0.0) * 0.15;
+      // calculate lighting: color × surface angle (bump mapping) × sprite mask
+      // mask provides falloff gradient from sprite texture
+      vec3 diffuse_light = (light._color.rgb * light._color.a) * max(dot(n, l), 0.0) * mask;
       
       light_sum += diffuse_light;
    }
-
-   // apply combined sprite mask (provides shadow boundaries)
-   light_sum *= light_mask;
 
    gl_FragColor = vec4(u_ambient.rgb * diffuse_color.rgb + light_sum, diffuse_color.a);
 }
