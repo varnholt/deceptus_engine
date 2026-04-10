@@ -893,16 +893,14 @@ void Game::toggleFullScreen()
       config._windowed_width = config._video_mode_width;
       config._windowed_height = config._video_mode_height;
       
-      // borderless fullscreen: use desktop resolution in windowed mode
       auto desktop_mode = sf::VideoMode::getDesktopMode();
       _window->create(
          desktop_mode,
          GAME_NAME,
-         sf::Style::None,  // borderless
-         sf::State::Windowed,
+         sf::Style::None,
+         sf::State::Fullscreen,
          context_settings
       );
-      _window->setPosition({0, 0});
       
       // update active resolution to match desktop
       config._video_mode_width = desktop_mode.size.x;
@@ -922,9 +920,9 @@ void Game::toggleFullScreen()
          context_settings
       );
    }
-   
-   config.serializeToFile();dimensions
-   
+
+   config.serializeToFile();
+
    _window->setVerticalSyncEnabled(config._vsync_enabled);
    _window->setFramerateLimit(60);
    _window->setKeyRepeatEnabled(false);
