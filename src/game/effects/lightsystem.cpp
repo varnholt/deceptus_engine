@@ -264,15 +264,6 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
 void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
    int32_t light_id = 0;
-   
-   static int32_t last_light_count = -1;
-   bool count_changed = (last_light_count != static_cast<int32_t>(_active_lights.size()));
-   
-   if (count_changed)
-   {
-      last_light_count = _active_lights.size();
-      Log::Info() << "=== Light count changed to: " << _active_lights.size() << " ===";
-   }
 
    _light_shader.setUniform("u_light_count", static_cast<int32_t>(_active_lights.size()));
    _light_shader.setUniform("u_resolution", sf::Glsl::Vec2(static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)));
@@ -281,12 +272,6 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    for (auto& light : _active_lights)
    {
       std::string id = "u_lights[" + std::to_string(light_id) + "]";
-      
-      if (count_changed)
-      {
-         Log::Info() << "  Light " << light_id << ": rgba=" 
-                     << (int)light->_color.r << "," << (int)light->_color.g << "," << (int)light->_color.b << "," << (int)light->_color.a;
-      }
 
       // transform light coordinates from box2d to normalized screen coordinates
       sf::Vector2f light_screen_pos = mapCoordsToPixelNormalized(
@@ -312,12 +297,6 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
             static_cast<float>(light->_color.a) / 255.0f
          )
       );
-      
-      if (count_changed)
-      {
-         Log::Info() << "  Light " << light_id << ": rgba=" 
-                     << (int)light->_color.r << "," << (int)light->_color.g << "," << (int)light->_color.b << "," << (int)light->_color.a;
-      }
 
       // Log::Info()
       //    << "light position on screen "
@@ -332,7 +311,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    }
 }
 
-void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
+void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates /*states*/)
 {
    _active_lights.clear();
 
@@ -355,11 +334,16 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
       _active_lights.push_back(light);
    }
 
-   // now draw sprites to channels (limit to 3 lights for RGB)
+   // draw sprites to channels (lights 0-2 to target1 RGB, lights 3-5 to target2 RGB)
+   // we skip alpha channels because they're harder to work with
    int32_t channel_index = 0;
    for (const auto& light : _active_lights)
    {
-      if (channel_index >= 3) break; // only RGB channels available
+      if (channel_index >= 6) break; // max 6 lights (2 textures × RGB, skip alpha)
+
+      // determine which target and which RGB channel
+      sf::RenderTarget& target = (channel_index < 3) ? target1 : target2;
+      int local_channel = channel_index % 3;
 
       // fill stencil buffer
       glClear(GL_STENCIL_BUFFER_BIT);
@@ -375,12 +359,11 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
       glStencilFunc(GL_EQUAL, 0, 1);
       glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-      // draw sprite to specific RGB channel (white gradient)
-      // channel 0 = red, channel 1 = green, channel 2 = blue
+      // assign RGB channel only: 0=R, 1=G, 2=B
       sf::Color channel_color = sf::Color::White;
-      if (channel_index == 0) channel_color = sf::Color(255, 0, 0, 255);      // red channel
-      else if (channel_index == 1) channel_color = sf::Color(0, 255, 0, 255); // green channel
-      else if (channel_index == 2) channel_color = sf::Color(0, 0, 255, 255); // blue channel
+      if (local_channel == 0) channel_color = sf::Color(255, 0, 0, 255);        // red
+      else if (local_channel == 1) channel_color = sf::Color(0, 255, 0, 255);   // green
+      else if (local_channel == 2) channel_color = sf::Color(0, 0, 255, 255);   // blue
       
       light->_sprite->setColor(channel_color);
       
@@ -399,12 +382,13 @@ void LightSystem::draw(
    sf::RenderTarget& target,
    const std::shared_ptr<sf::RenderTexture>& color_map,
    const std::shared_ptr<sf::RenderTexture>& light_map,
+   const std::shared_ptr<sf::RenderTexture>& light_map2,
    const std::shared_ptr<sf::RenderTexture>& normal_map
 )
 {
-   // MOVE THIS IN FUNCTION BELOW
    _light_shader.setUniform("color_map", color_map->getTexture());
    _light_shader.setUniform("light_map", light_map->getTexture());
+   _light_shader.setUniform("light_map2", light_map2->getTexture());
    _light_shader.setUniform("normal_map", normal_map->getTexture());
 
    // update shader uniforms

@@ -814,8 +814,11 @@ void Level::drawLightMap()
 {
    _render_targets.lighting->clear();
    _render_targets.lighting->setView(*_level_view);
-   _light_system->draw(*_render_targets.lighting, {});
+   _render_targets.lighting2->clear();
+   _render_targets.lighting2->setView(*_level_view);
+   _light_system->draw(*_render_targets.lighting, *_render_targets.lighting2, {});
    _render_targets.lighting->display();
+   _render_targets.lighting2->display();
 
    //   static int32_t light_map_save_counter = 0;
    //   light_map_save_counter++;
@@ -982,6 +985,8 @@ void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& textu
    std::ostringstream ss;
    ss << basename << "_" << std::setw(2) << std::setfill('0') << _screenshot_counters[basename] << ".png";
    _screenshot_counters[basename]++;
+   
+   Log::Info() << "Saving screenshot: " << ss.str();
    texture.getTexture().copyToImage().saveToFile(ss.str());
 }
 
@@ -1177,12 +1182,13 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    drawLightMap();
 
-   _light_system->draw(*_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.normal);
+   _light_system->draw(*_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.lighting2, _render_targets.normal);
 
    _render_targets.deferred->display();
 
    takeScreenshot("texture_map_color", *_render_targets.level.get());
    takeScreenshot("texture_map_light", *_render_targets.lighting.get());
+   takeScreenshot("texture_map_light2", *_render_targets.lighting2.get());
    takeScreenshot("texture_map_normal", *_render_targets.normal.get());
    takeScreenshot("texture_map_deferred", *_render_targets.deferred.get());
 
