@@ -1,6 +1,6 @@
 uniform sampler2D color_map;
-uniform sampler2D light_map;
-uniform sampler2D light_map2;
+uniform sampler2D light_map_1;
+uniform sampler2D light_map_2;
 uniform sampler2D normal_map;
 
 uniform vec2 u_resolution;
@@ -24,8 +24,8 @@ void main()
    vec3 normal        = texture2D(normal_map, uv).rgb;
    
    // sample both light textures (RGB only, 6 lights total)
-   vec3 light_mask1   = texture2D(light_map,  uv).rgb;  // lights 0-2 (RGB)
-   vec3 light_mask2   = texture2D(light_map2, uv).rgb;  // lights 3-5 (RGB)
+   vec3 light_mask1   = texture2D(light_map_1, uv).rgb;  // lights 0-2 (RGB)
+   vec3 light_mask2   = texture2D(light_map_2, uv).rgb;  // lights 3-5 (RGB)
 
    vec3 light_sum = vec3(0.0);
    for (int i = 0; i < min(u_light_count, 6); i++) // limit to 6 lights (2 textures × RGB)

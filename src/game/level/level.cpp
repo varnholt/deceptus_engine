@@ -985,8 +985,6 @@ void Level::takeScreenshot(const std::string& basename, sf::RenderTexture& textu
    std::ostringstream ss;
    ss << basename << "_" << std::setw(2) << std::setfill('0') << _screenshot_counters[basename] << ".png";
    _screenshot_counters[basename]++;
-   
-   Log::Info() << "Saving screenshot: " << ss.str();
    texture.getTexture().copyToImage().saveToFile(ss.str());
 }
 

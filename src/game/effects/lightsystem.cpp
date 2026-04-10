@@ -387,8 +387,8 @@ void LightSystem::draw(
 )
 {
    _light_shader.setUniform("color_map", color_map->getTexture());
-   _light_shader.setUniform("light_map", light_map->getTexture());
-   _light_shader.setUniform("light_map2", light_map2->getTexture());
+   _light_shader.setUniform("light_map_1", light_map->getTexture());
+   _light_shader.setUniform("light_map_2", light_map2->getTexture());
    _light_shader.setUniform("normal_map", normal_map->getTexture());
 
    // update shader uniforms
