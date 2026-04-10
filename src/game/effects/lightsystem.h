@@ -29,6 +29,9 @@ public:
       sf::Vector2i _center_offset_px;                //!< pixel offset used for sprite positioning
 
       sf::Color _color = {255, 255, 255, 80};
+      
+      // falloff values are loaded from tiled but not currently used by the shader
+      // the sprite texture gradient provides distance falloff instead
       std::array<float, 3> _falloff = {0.4f, 3.0f, 20.0f};
 
       bool _enabled = true;
@@ -66,17 +69,20 @@ public:
    /// \brief renders per-light sprites with stencil-clipped shadow volumes into a light map target.
    /// \param target render target.
    /// \param states render states passed by caller and currently ignored.
-   void draw(sf::RenderTarget& target, sf::RenderStates states);
+   void draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states);
 
-   /// \brief combines color, light, and normal maps through the light shader into the final target.
+   /// \brief renders light sprites to both textures then composites with shader.
+   /// lights 0-3 render to light_map RGBA, lights 4-7 render to light_map2 RGBA.
    /// \param target render target.
    /// \param color_map scene color buffer.
-   /// \param light_map pre-rendered light accumulation buffer.
+   /// \param light_map first light accumulation buffer (lights 0-3).
+   /// \param light_map2 second light accumulation buffer (lights 4-7).
    /// \param normal_map normal buffer used for per-pixel lighting.
    void draw(
       sf::RenderTarget& target,
       const std::shared_ptr<sf::RenderTexture>& color_map,
       const std::shared_ptr<sf::RenderTexture>& light_map,
+      const std::shared_ptr<sf::RenderTexture>& light_map2,
       const std::shared_ptr<sf::RenderTexture>& normal_map
    );
 

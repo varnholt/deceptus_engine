@@ -298,8 +298,6 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
          )
       );
 
-      _light_shader.setUniform(id + "._falloff", sf::Glsl::Vec3(light->_falloff[0], light->_falloff[1], light->_falloff[2]));
-
       // Log::Info()
       //    << "light position on screen "
       //    << id << ": "
@@ -313,7 +311,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    }
 }
 
-void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
+void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates /*states*/)
 {
    _active_lights.clear();
 
@@ -334,6 +332,18 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
       }
 
       _active_lights.push_back(light);
+   }
+
+   // draw sprites to channels (lights 0-2 to target1 RGB, lights 3-5 to target2 RGB)
+   // we skip alpha channels because they're harder to work with
+   int32_t channel_index = 0;
+   for (const auto& light : _active_lights)
+   {
+      if (channel_index >= 6) break; // max 6 lights (2 textures × RGB, skip alpha)
+
+      // determine which target and which RGB channel
+      sf::RenderTarget& target = (channel_index < 3) ? target1 : target2;
+      int local_channel = channel_index % 3;
 
       // fill stencil buffer
       glClear(GL_STENCIL_BUFFER_BIT);
@@ -349,8 +359,18 @@ void LightSystem::draw(sf::RenderTarget& target, sf::RenderStates /*states*/)
       glStencilFunc(GL_EQUAL, 0, 1);
       glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
+      // assign RGB channel only: 0=R, 1=G, 2=B
+      sf::Color channel_color = sf::Color::White;
+      if (local_channel == 0) channel_color = sf::Color(255, 0, 0, 255);        // red
+      else if (local_channel == 1) channel_color = sf::Color(0, 255, 0, 255);   // green
+      else if (local_channel == 2) channel_color = sf::Color(0, 0, 255, 255);   // blue
+      
+      light->_sprite->setColor(channel_color);
+      
       sf::RenderStates render_states{sf::BlendAdd};
       target.draw(*light->_sprite, render_states);
+      
+      channel_index++;
    }
 
    glDisable(GL_STENCIL_TEST);
@@ -362,12 +382,13 @@ void LightSystem::draw(
    sf::RenderTarget& target,
    const std::shared_ptr<sf::RenderTexture>& color_map,
    const std::shared_ptr<sf::RenderTexture>& light_map,
+   const std::shared_ptr<sf::RenderTexture>& light_map2,
    const std::shared_ptr<sf::RenderTexture>& normal_map
 )
 {
-   // MOVE THIS IN FUNCTION BELOW
    _light_shader.setUniform("color_map", color_map->getTexture());
-   _light_shader.setUniform("light_map", light_map->getTexture());
+   _light_shader.setUniform("light_map_1", light_map->getTexture());
+   _light_shader.setUniform("light_map_2", light_map2->getTexture());
    _light_shader.setUniform("normal_map", normal_map->getTexture());
 
    // update shader uniforms
