@@ -64,7 +64,7 @@ std::string_view Rope::objectName() const
    return "Rope";
 }
 
-void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    std::optional<b2Vec2> q1_prev;
    std::optional<b2Vec2> q4_prev;
@@ -82,13 +82,13 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       constexpr auto thickness_m = 0.025f;
 
       const auto dist = (c2_pos_m - c1_pos_m);
-      auto normal = b2Vec2(dist.y, -dist.x);
-      normal.Normalize();
+      auto normal_vec = b2Vec2(dist.y, -dist.x);
+      normal_vec.Normalize();
 
-      const auto q1 = q1_prev.value_or(c1_pos_m - (thickness_m * normal));
-      const auto q2 = c2_pos_m - (thickness_m * normal);
-      const auto q3 = c2_pos_m + (thickness_m * normal);
-      const auto q4 = q4_prev.value_or(c1_pos_m + (thickness_m * normal));
+      const auto q1 = q1_prev.value_or(c1_pos_m - (thickness_m * normal_vec));
+      const auto q2 = c2_pos_m - (thickness_m * normal_vec);
+      const auto q3 = c2_pos_m + (thickness_m * normal_vec);
+      const auto q4 = q4_prev.value_or(c1_pos_m + (thickness_m * normal_vec));
 
       q1_prev = q2;
       q4_prev = q3;
@@ -133,10 +133,14 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       strip.push_back(v3);
    }
 
-   // render out those quads
+   // render color texture
    sf::RenderStates states;
    states.texture = _texture.get();
    color.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
+   
+   // render normal map (same geometry, different texture)
+   states.texture = _normal_map.get();
+   normal.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
 }
 
 void Rope::pushChain(float impulse)
@@ -199,6 +203,9 @@ void Rope::setup(const GameDeserializeData& data)
 {
    const auto path = data._base_path / "tilesets" / "catacombs-level-diffuse.png";
    _texture = TexturePool::getInstance().get(path);
+   
+   // load default flat normal map
+   _normal_map = TexturePool::getInstance().get("data/sprites/default_normal.png");
 
    // rope 1
    // 971,  73 .. 973,  73
