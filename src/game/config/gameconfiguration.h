@@ -6,8 +6,10 @@
 /// \brief stores global game settings and handles json persistence.
 struct GameConfiguration
 {
-   int32_t _video_mode_width = 1280;
-   int32_t _video_mode_height = 720;
+   int32_t _video_mode_width = 1280;  // current active window width
+   int32_t _video_mode_height = 720;  // current active window height
+   int32_t _windowed_width = 1280;    // windowed mode width (serialized)
+   int32_t _windowed_height = 720;    // windowed mode height (serialized)
    int32_t _view_width = 640;
    int32_t _view_height = 360;
    bool _fullscreen = false;

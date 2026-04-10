@@ -29,6 +29,8 @@ std::string GameConfiguration::serialize()
        {
           {"video_mode_width", _video_mode_width},
           {"video_mode_height", _video_mode_height},
+          {"windowed_width", _windowed_width},
+          {"windowed_height", _windowed_height},
           {"view_width", _view_width},
           {"view_height", _view_height},
           {"fullscreen", _fullscreen},
@@ -58,6 +60,19 @@ void GameConfiguration::deserialize(const std::string& data)
    {
       _video_mode_width = config["GameConfiguration"]["video_mode_width"].get<int32_t>();
       _video_mode_height = config["GameConfiguration"]["video_mode_height"].get<int32_t>();
+      
+      // load windowed dimensions, fallback to video_mode if not present
+      if (config["GameConfiguration"].find("windowed_width") != config.end())
+      {
+         _windowed_width = config["GameConfiguration"]["windowed_width"].get<int32_t>();
+         _windowed_height = config["GameConfiguration"]["windowed_height"].get<int32_t>();
+      }
+      else
+      {
+         _windowed_width = _video_mode_width;
+         _windowed_height = _video_mode_height;
+      }
+      
       _view_width = config["GameConfiguration"]["view_width"].get<int32_t>();
       _view_height = config["GameConfiguration"]["view_height"].get<int32_t>();
       _fullscreen = config["GameConfiguration"]["fullscreen"].get<bool>();
@@ -66,6 +81,8 @@ void GameConfiguration::deserialize(const std::string& data)
 
       _video_mode_width = std::max(_video_mode_width, 640);
       _video_mode_height = std::max(_video_mode_height, 360);
+      _windowed_width = std::max(_windowed_width, 640);
+      _windowed_height = std::max(_windowed_height, 360);
 
       _view_scale_width = static_cast<float>(_view_width) / static_cast<float>(_video_mode_width);
       _view_scale_height = static_cast<float>(_view_height) / static_cast<float>(_video_mode_height);
@@ -121,6 +138,15 @@ GameConfiguration& GameConfiguration::getInstance()
    if (!__initialized)
    {
       __instance.deserializeFromFile();
+      
+      // ensure windowed dimensions are initialized
+      // if they're zero (first launch or old config), copy from video_mode
+      if (__instance._windowed_width == 0 || __instance._windowed_height == 0)
+      {
+         __instance._windowed_width = __instance._video_mode_width;
+         __instance._windowed_height = __instance._video_mode_height;
+      }
+      
       __initialized = true;
    }
 
