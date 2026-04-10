@@ -25,6 +25,14 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
       level_background = std::make_shared<sf::RenderTexture>(texture_size);
       level = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
       lighting = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
+      lighting2 = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
+      
+      // explicitly clear lighting textures to black on creation
+      lighting->clear(sf::Color::Black);
+      lighting->display();
+      lighting2->clear(sf::Color::Black);
+      lighting2->display();
+      
       normal = std::make_shared<sf::RenderTexture>(texture_size);
       normal_tmp = std::make_shared<sf::RenderTexture>(texture_size);
       deferred = std::make_shared<sf::RenderTexture>(texture_size);
@@ -42,6 +50,7 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
    _all_textures.push_back(level);
    _all_textures.push_back(level_background);
    _all_textures.push_back(lighting);
+   _all_textures.push_back(lighting2);
    _all_textures.push_back(normal);
    _all_textures.push_back(normal_tmp);
    _all_textures.push_back(deferred);
@@ -61,6 +70,7 @@ void RenderTargets::recreateOnResize(uint32_t video_mode_width, uint32_t video_m
    level_background.reset();
    level.reset();
    lighting.reset();
+   lighting2.reset();
    normal.reset();
    normal_tmp.reset();
    deferred.reset();

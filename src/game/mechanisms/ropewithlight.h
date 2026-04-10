@@ -34,7 +34,5 @@ public:
 private:
    std::unique_ptr<sf::Sprite> _lamp_sprite;
    std::array<sf::IntRect, 3> _lamp_sprite_rects;
-   // sf::IntRect _lamp_sprite_rect_1;
-   // sf::IntRect _lamp_sprite_rect_2;
    std::shared_ptr<LightSystem::LightInstance> _light;
 };
