@@ -16,7 +16,7 @@ struct GameConfiguration
    float _view_scale_width = 1.0f;
    float _view_scale_height = 1.0f;
    float _brightness = 0.5f;
-   bool _vsync_enabled = false;
+   bool _vsync_enabled = true;
    bool _rumble_enabled = true;
 
    int32_t _audio_volume_master = 100;
