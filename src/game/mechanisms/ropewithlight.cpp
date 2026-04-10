@@ -3,6 +3,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
+#include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/level.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -51,6 +52,11 @@ void RopeWithLight::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    Rope::draw(color, normal);
 
    color.draw(*_lamp_sprite);
+   
+   // draw lamp normal map
+   _lamp_sprite->setTexture(*_lamp_normal_map);
+   normal.draw(*_lamp_sprite);
+   _lamp_sprite->setTexture(*_texture);  // restore for next frame
 }
 
 void RopeWithLight::update(const sf::Time& dt)
@@ -76,6 +82,9 @@ void RopeWithLight::setup(const GameDeserializeData& data)
 
    // set up texture
    _lamp_sprite = std::make_unique<sf::Sprite>(*_texture);
+   
+   // load default normal map for lamp
+   _lamp_normal_map = TexturePool::getInstance().get("data/sprites/default_normal.png");
 
    // cut off 1st 4 pixels of the texture rect since there's some rope pixels in the spriteset
    _lamp_sprite_rects = {

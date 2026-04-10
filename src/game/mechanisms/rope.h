@@ -54,6 +54,7 @@ protected:
 
    std::vector<b2Body*> _chain_elements;
    std::shared_ptr<sf::Texture> _texture;
+   std::shared_ptr<sf::Texture> _normal_map;
 
 private:
    /// \brief applies a horizontal impulse to all chain elements.
