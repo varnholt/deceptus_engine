@@ -318,6 +318,7 @@ protected:
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
    std::unique_ptr<BlurShader> _blur_shader;
    std::unique_ptr<GammaShader> _gamma_shader;
+   sf::Shader _occluder_shader;  //!< alpha-test shader for light occluder stencil rendering
    bool _screenshot = false;
 
    // box2d

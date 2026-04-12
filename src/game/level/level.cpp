@@ -164,6 +164,14 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    _blur_shader = std::make_unique<BlurShader>();
    _gamma_shader = std::make_unique<GammaShader>();
 
+   // load alpha-test shader for occluder stencil rendering
+   if (!_occluder_shader.loadFromFile("data/shaders/stencil_write.vert", "data/shaders/stencil_write.frag"))
+   {
+      Log::Warning() << "failed to load occluder stencil shader";
+   }
+   _occluder_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
+   _occluder_shader.setUniform("u_alpha_threshold", 0.01f);
+
    // init world for this level
    const b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
 
@@ -1029,6 +1037,7 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
    
    sf::RenderStates states;
    states.blendMode = stencil_only_blend;
+   states.shader = &_occluder_shader;
    
    for (const auto& tile_map : _tile_maps)
    {
