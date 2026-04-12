@@ -269,6 +269,10 @@ protected:
    /// \brief draws debug overlays such as bodies, hitboxes, and room bounds when enabled.
    void drawDebugInformation();
 
+   /// \brief draws z=24 tilemap geometry to the stencil buffer for light occlusion.
+   /// \param target render target with active stencil context.
+   void drawLightOccluders(sf::RenderTarget& target);
+
    /// \brief finalizes and displays intermediate level and normal render textures.
    void displayFinalTextures();
 
