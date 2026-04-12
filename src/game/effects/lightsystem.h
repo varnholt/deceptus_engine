@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -16,6 +17,8 @@ struct TmxObject;
 class LightSystem
 {
 public:
+   /// \brief callback to render geometry that occludes lights into the stencil buffer.
+   using OccluderDrawCallback = std::function<void(sf::RenderTarget& target)>;
    /// \brief represents one light source instance loaded from level data.
    struct LightInstance : public GameNode
    {
@@ -90,11 +93,19 @@ public:
    /// \param target render target.
    void drawDebug(sf::RenderTarget& target);
 
+   /// \brief sets the callback used to render occluder geometry to the stencil buffer.
+   /// \param callback function that draws level geometry (e.g. z=24 layer) to stencil.
+   void setOccluderCallback(OccluderDrawCallback callback);
+
 private:
    /// \brief renders shadow extrusion triangles for geometry that should occlude a given light.
    /// \param target render target.
    /// \param light active light for which occluder shadows are generated.
    void drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightInstance> light) const;
+
+   /// \brief renders level occluder geometry to the stencil buffer before shadow/light passes.
+   /// \param target render target with active stencil context.
+   void drawOccluders(sf::RenderTarget& target) const;
 
    /// \brief refreshes shader uniforms for active lights, ambient color, and target resolution.
    /// \param target render target.
@@ -105,4 +116,6 @@ private:
    std::array<float, 4> _ambient_color = {1.0f, 1.0f, 1.0f, 1.0f};
    static constexpr auto segment_count = 20;
    std::array<b2Vec2, segment_count> _unit_circle;
+
+   OccluderDrawCallback _occluder_callback;
 };

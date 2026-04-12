@@ -261,6 +261,19 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
    return pixel;
 }
 
+void LightSystem::drawOccluders(sf::RenderTarget& target) const
+{
+   if (_occluder_callback)
+   {
+      _occluder_callback(target);
+   }
+}
+
+void LightSystem::setOccluderCallback(OccluderDrawCallback callback)
+{
+   _occluder_callback = std::move(callback);
+}
+
 void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
    int32_t light_id = 0;
@@ -352,6 +365,10 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       glStencilFunc(GL_ALWAYS, 1, 1);
       glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
+      // draw level occluders first (e.g. z=24 layer geometry)
+      drawOccluders(target);
+
+      // then draw shadow quads (adds more occlusion from physics bodies)
       drawShadowQuads(target, light);
 
       // draw light quads with stencil boundaries

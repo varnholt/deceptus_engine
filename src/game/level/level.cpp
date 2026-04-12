@@ -181,6 +181,14 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
 
    _light_system = std::make_shared<LightSystem>();
 
+   // set up occluder callback for light occlusion (z=24 "level" layer)
+   _light_system->setOccluderCallback(
+      [this](sf::RenderTarget& target)
+      {
+         drawLightOccluders(target);
+      }
+   );
+
    // add raycast light for player
    if (Tweaks::instance()._player_light_enabled)
    {
@@ -1004,6 +1012,29 @@ void Level::drawDebugInformation()
          {
             DebugDraw::drawRect(texture, sub_room._rect, sf::Color::Yellow);
          }
+      }
+   }
+}
+
+void Level::drawLightOccluders(sf::RenderTarget& target)
+{
+   // draw all tilemaps at z=24 to stencil (the "level" layer)
+   // use a zero blend mode to prevent color writes - we only want stencil
+   const sf::BlendMode stencil_only_blend(
+      sf::BlendMode::Factor::Zero, sf::BlendMode::Factor::Zero, sf::BlendMode::Equation::Add,
+      sf::BlendMode::Factor::Zero, sf::BlendMode::Factor::Zero, sf::BlendMode::Equation::Add
+   );
+   
+   target.setView(*_level_view);
+   
+   sf::RenderStates states;
+   states.blendMode = stencil_only_blend;
+   
+   for (const auto& tile_map : _tile_maps)
+   {
+      if (tile_map->getZ() == 24 && tile_map->isVisible())
+      {
+         tile_map->draw(target, states);
       }
    }
 }
