@@ -610,3 +610,8 @@ void LightSystem::decreaseAmbient(float amount)
       _ambient_color.begin(), _ambient_color.end(), _ambient_color.begin(), [amount](auto value) { return value - amount; }
    );
 }
+
+void LightSystem::setAmbient(sf::Color color)
+{
+   _ambient_color = {color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f};
+}
