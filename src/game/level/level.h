@@ -269,6 +269,10 @@ protected:
    /// \brief draws debug overlays such as bodies, hitboxes, and room bounds when enabled.
    void drawDebugInformation();
 
+   /// \brief draws z=24 tilemap geometry to the stencil buffer for light occlusion.
+   /// \param target render target with active stencil context.
+   void drawLightOccluders(sf::RenderTarget& target);
+
    /// \brief finalizes and displays intermediate level and normal render textures.
    void displayFinalTextures();
 
@@ -314,6 +318,7 @@ protected:
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
    std::unique_ptr<BlurShader> _blur_shader;
    std::unique_ptr<GammaShader> _gamma_shader;
+   sf::Shader _occluder_shader;  //!< alpha-test shader for light occluder stencil rendering
    bool _screenshot = false;
 
    // box2d

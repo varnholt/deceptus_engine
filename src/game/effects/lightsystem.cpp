@@ -15,8 +15,6 @@
 #include <numbers>
 #include <ranges>
 
-#include <SFML/OpenGL.hpp>
-
 // #define DEBUG_DRAW_LIGHT_SYSTEM
 
 #ifdef DEBUG_DRAW_LIGHT_SYSTEM
@@ -26,6 +24,28 @@
 namespace
 {
 constexpr auto max_distance_m2 = 400.0f;  // depends on the view dimensions
+
+// SFML3 overrides raw glStencilFunc/Op calls with glDisable(GL_STENCIL_TEST) on every draw.
+// All stencil work must go through sf::RenderStates::stencilMode so SFML manages it correctly.
+
+// write pass: write 1 to stencil for every fragment that should be in shadow.
+// stencilOnly=true suppresses color writes (equivalent to glColorMask(false,...)).
+const sf::StencilMode stencil_write_mode{
+   sf::StencilComparison::Always,
+   sf::StencilUpdateOperation::Replace,
+   1,     // reference — writes 1 to mark occluded pixels
+   ~0u,   // mask
+   true   // stencilOnly: no color output
+};
+
+// read pass: only draw where stencil == 0 (not occluded by any shadow).
+const sf::StencilMode stencil_test_mode{
+   sf::StencilComparison::Equal,
+   sf::StencilUpdateOperation::Keep,
+   0,     // reference — 0 means "lit"
+   ~0u,   // mask
+   false  // write color
+};
 }
 
 LightSystem::LightSystem()
@@ -156,20 +176,20 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles);
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{stencil_write_mode});
             }
          }
          else if (shape_chain)
          {
             // for now it is assumed that chainshapes are static objects only.
             // therefore no transform is applied to chainshape based objects.
-            for (auto pos_current = 0; pos_current < shape_chain->m_count; pos_current++)
+            //
+            // iterate m_count - 1 edges: for CreateLoop chains m_vertices[m_count-1] == m_vertices[0]
+            // so the closing edge is naturally covered; for open CreateChain shapes wrapping to 0
+            // would create a phantom closing edge that does not exist.
+            for (auto pos_current = 0; pos_current < shape_chain->m_count - 1; pos_current++)
             {
                auto pos_next = pos_current + 1;
-               if (pos_next == shape_chain->m_count)
-               {
-                  pos_next = 0;
-               }
 
                const auto& vertex_0 = shape_chain->m_vertices[pos_current];
                const auto& vertex_1 = shape_chain->m_vertices[pos_next];
@@ -192,15 +212,16 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(vertex_1.x, vertex_1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles);
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{stencil_write_mode});
             }
          }
          else if (shape_polygon)
          {
-            for (auto pos_current = 0; pos_current < shape_polygon->GetChildCount(); pos_current++)
+            // use m_count (vertex count), NOT GetChildCount() which always returns 1 for polygons.
+            for (auto pos_current = 0; pos_current < shape_polygon->m_count; pos_current++)
             {
                auto pos_next = pos_current + 1;
-               if (pos_next == shape_polygon->GetChildCount())
+               if (pos_next == shape_polygon->m_count)
                {
                   pos_next = 0;
                }
@@ -226,7 +247,7 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles);
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{stencil_write_mode});
             }
          }
       }
@@ -259,6 +280,19 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
    pixel.y = ((-normalized.y + 1.0f) / (2.0f * static_cast<float>(viewport.size.y))) + static_cast<float>(viewport.position.y);
 
    return pixel;
+}
+
+void LightSystem::drawOccluders(sf::RenderTarget& target) const
+{
+   if (_occluder_callback)
+   {
+      _occluder_callback(target);
+   }
+}
+
+void LightSystem::setOccluderCallback(OccluderDrawCallback callback)
+{
+   _occluder_callback = std::move(callback);
 }
 
 void LightSystem::updateLightShader(sf::RenderTarget& target)
@@ -345,35 +379,31 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       sf::RenderTarget& target = (channel_index < 3) ? target1 : target2;
       int local_channel = channel_index % 3;
 
-      // fill stencil buffer
-      glClear(GL_STENCIL_BUFFER_BIT);
-      glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-      glEnable(GL_STENCIL_TEST);
-      glStencilFunc(GL_ALWAYS, 1, 1);
-      glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+      // clear the stencil buffer for this light via SFML's API.
+      // raw glClear(GL_STENCIL_BUFFER_BIT) would be fine here but using the SFML
+      // path keeps all stencil management consistent and avoids context surprises.
+      target.clearStencil(0);
 
+      // draw occluders and shadow quads into the stencil buffer only.
+      // each draw call carries stencil_write_mode so SFML enables the stencil test
+      // and writes 1 for every occluded pixel instead of disabling it (default behaviour).
+      drawOccluders(target);
       drawShadowQuads(target, light);
 
-      // draw light quads with stencil boundaries
-      glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-      glStencilFunc(GL_EQUAL, 0, 1);
-      glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
-      // assign RGB channel only: 0=R, 1=G, 2=B
-      sf::Color channel_color = sf::Color::White;
+      // draw the light sprite only where stencil == 0 (not occluded).
+      sf::Color channel_color;
       if (local_channel == 0) channel_color = sf::Color(255, 0, 0, 255);        // red
       else if (local_channel == 1) channel_color = sf::Color(0, 255, 0, 255);   // green
-      else if (local_channel == 2) channel_color = sf::Color(0, 0, 255, 255);   // blue
-      
+      else                         channel_color = sf::Color(0, 0, 255, 255);   // blue
+
       light->_sprite->setColor(channel_color);
-      
+
       sf::RenderStates render_states{sf::BlendAdd};
+      render_states.stencilMode = stencil_test_mode;
       target.draw(*light->_sprite, render_states);
-      
+
       channel_index++;
    }
-
-   glDisable(GL_STENCIL_TEST);
 
    // Log::Info() << _active_lights.size() << " active light sources";
 }
