@@ -1026,19 +1026,21 @@ void Level::drawDebugInformation()
 
 void Level::drawLightOccluders(sf::RenderTarget& target)
 {
-   // draw all tilemaps at z=24 to stencil (the "level" layer)
-   // use a zero blend mode to prevent color writes - we only want stencil
-   const sf::BlendMode stencil_only_blend(
-      sf::BlendMode::Factor::Zero, sf::BlendMode::Factor::Zero, sf::BlendMode::Equation::Add,
-      sf::BlendMode::Factor::Zero, sf::BlendMode::Factor::Zero, sf::BlendMode::Equation::Add
-   );
-   
+   // draw all tilemaps at z=24 into the stencil buffer only.
+   // stencilOnly=true suppresses color output (replaces the old zero/zero blend mode).
+   // the fragment shader's discard still runs so transparent tile regions don't occlude.
    target.setView(*_level_view);
-   
+
    sf::RenderStates states;
-   states.blendMode = stencil_only_blend;
    states.shader = &_occluder_shader;
-   
+   states.stencilMode = {
+      sf::StencilComparison::Always,
+      sf::StencilUpdateOperation::Replace,
+      1,    // reference: mark occluded pixels with 1
+      ~0u,  // mask
+      true  // stencilOnly: no color writes
+   };
+
    for (const auto& tile_map : _tile_maps)
    {
       if (tile_map->getZ() == 24 && tile_map->isVisible())
