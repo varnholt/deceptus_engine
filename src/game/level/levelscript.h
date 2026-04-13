@@ -124,6 +124,10 @@ public:
    /// \param zoom_factor absolute zoom multiplier.
    void setZoomFactor(float zoom_factor);
 
+   /// \brief sets the ambient light color for the current level.
+   /// \param color rgba color (0–255 per channel).
+   void setAmbient(sf::Color color);
+
    /// \brief adds an item to the player inventory.
    /// \param item inventory item id.
    void inventoryAdd(const std::string& item);

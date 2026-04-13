@@ -4,6 +4,8 @@
 #include "game/audio/musicfilenames.h"
 #include "game/audio/musicplayer.h"
 #include "game/camera/camerazoom.h"
+#include "game/effects/lightsystem.h"
+#include "game/level/level.h"
 #include "game/io/eventserializer.h"
 #include "game/level/luaconstants.h"
 #include "game/level/luainterface.h"
@@ -605,6 +607,32 @@ int32_t lockPlayerControls(lua_State* state)
 }
 
 /**
+ * @brief setAmbient sets the ambient light color
+ * @param state lua state
+ *    param 1: red   (0–255)
+ *    param 2: green (0–255)
+ *    param 3: blue  (0–255)
+ *    param 4: alpha (0–255)
+ * @return error code
+ */
+int32_t setAmbient(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 4)
+   {
+      return 0;
+   }
+
+   const auto r = static_cast<uint8_t>(lua_tointeger(state, 1));
+   const auto g = static_cast<uint8_t>(lua_tointeger(state, 2));
+   const auto b = static_cast<uint8_t>(lua_tointeger(state, 3));
+   const auto a = static_cast<uint8_t>(lua_tointeger(state, 4));
+   getInstance()->setAmbient(sf::Color{r, g, b, a});
+
+   return 0;
+}
+
+/**
  * @brief setZoomFactor sets the zoom factor for the camera
  * @param state lua state
  *    param 1: zoom factor
@@ -737,6 +765,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
    lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
    lua_register(_lua_state, "setMechanismVisible", ::setMechanismVisible);
+   lua_register(_lua_state, "setAmbient", ::setAmbient);
    lua_register(_lua_state, "setZoomFactor", ::setZoomFactor);
    lua_register(_lua_state, "showDialogue", ::showDialogue);
    lua_register(_lua_state, "toggle", ::toggle);
@@ -1140,6 +1169,11 @@ void LevelScript::addPlayerHealthMax(int32_t health_points_to_add)
 void LevelScript::setZoomFactor(float zoom_factor)
 {
    CameraZoom::getInstance().setZoomFactor(zoom_factor);
+}
+
+void LevelScript::setAmbient(sf::Color color)
+{
+   Level::getCurrentLevel()->getLightSystem()->setAmbient(color);
 }
 
 void LevelScript::inventoryAdd(const std::string& item)

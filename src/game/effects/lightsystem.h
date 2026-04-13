@@ -60,6 +60,10 @@ public:
    /// \param amount value subtracted from each ambient rgba channel.
    void decreaseAmbient(float amount);
 
+   /// \brief sets the ambient light color directly.
+   /// \param color rgba color (0–255 per channel).
+   void setAmbient(sf::Color color);
+
    /// \brief precomputes helper geometry and loads the fragment shader used for lighting.
    LightSystem();
 
