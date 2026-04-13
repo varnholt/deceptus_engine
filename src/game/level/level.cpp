@@ -164,6 +164,14 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    _blur_shader = std::make_unique<BlurShader>();
    _gamma_shader = std::make_unique<GammaShader>();
 
+   // load alpha-test shader for occluder stencil rendering
+   if (!_occluder_shader.loadFromFile("data/shaders/stencil_write.vert", "data/shaders/stencil_write.frag"))
+   {
+      Log::Warning() << "failed to load occluder stencil shader";
+   }
+   _occluder_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
+   _occluder_shader.setUniform("u_alpha_threshold", 0.01f);
+
    // init world for this level
    const b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
 
@@ -180,6 +188,14 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    __current_level = this;
 
    _light_system = std::make_shared<LightSystem>();
+
+   // set up occluder callback for light occlusion (z=24 "level" layer)
+   _light_system->setOccluderCallback(
+      [this](sf::RenderTarget& target)
+      {
+         drawLightOccluders(target);
+      }
+   );
 
    // add raycast light for player
    if (Tweaks::instance()._player_light_enabled)
@@ -1004,6 +1020,32 @@ void Level::drawDebugInformation()
          {
             DebugDraw::drawRect(texture, sub_room._rect, sf::Color::Yellow);
          }
+      }
+   }
+}
+
+void Level::drawLightOccluders(sf::RenderTarget& target)
+{
+   // draw all tilemaps at z=24 into the stencil buffer only.
+   // stencilOnly=true suppresses color output (replaces the old zero/zero blend mode).
+   // the fragment shader's discard still runs so transparent tile regions don't occlude.
+   target.setView(*_level_view);
+
+   sf::RenderStates states;
+   states.shader = &_occluder_shader;
+   states.stencilMode = {
+      sf::StencilComparison::Always,
+      sf::StencilUpdateOperation::Replace,
+      1,    // reference: mark occluded pixels with 1
+      ~0u,  // mask
+      true  // stencilOnly: no color writes
+   };
+
+   for (const auto& tile_map : _tile_maps)
+   {
+      if (tile_map->getZ() == 24 && tile_map->isVisible())
+      {
+         tile_map->draw(target, states);
       }
    }
 }
