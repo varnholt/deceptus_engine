@@ -80,8 +80,16 @@ void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<Ligh
    }
 
    auto body_view = bodies_to_process | std::views::filter(
-                                           [](b2Body* body)
+                                           [&light](b2Body* body)
                                            {
+                                              // skip bodies that belong to the light's own mechanism
+                                              // (e.g. rope chain elements) - they produce degenerate
+                                              // or unwanted shadow quads relative to the light source.
+                                              if (light->_excluded_bodies.count(body))
+                                              {
+                                                 return false;
+                                              }
+
                                               auto* player_body = Player::getCurrent()->getBody();
                                               if (body == player_body)
                                               {

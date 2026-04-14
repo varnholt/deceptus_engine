@@ -3,6 +3,7 @@
 #include <array>
 #include <functional>
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 #include "box2d/box2d.h"
@@ -44,6 +45,10 @@ public:
 
       int32_t _width_px = 256;
       int32_t _height_px = 256;
+
+      /// \brief physics bodies excluded from shadow casting for this light (e.g. rope chain
+      ///        elements whose positions would produce degenerate or unwanted shadow quads).
+      std::unordered_set<b2Body*> _excluded_bodies;
 
       /// \brief repositions the sprite so it remains centered on the light's world position.
       void updateSpritePosition() const;

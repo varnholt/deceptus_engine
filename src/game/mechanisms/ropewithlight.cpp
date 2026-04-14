@@ -3,7 +3,6 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
-#include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/level.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -50,13 +49,7 @@ std::string_view RopeWithLight::objectName() const
 void RopeWithLight::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    Rope::draw(color, normal);
-
    color.draw(*_lamp_sprite);
-   
-   // draw lamp normal map
-   _lamp_sprite->setTexture(*_lamp_normal_map);
-   normal.draw(*_lamp_sprite);
-   _lamp_sprite->setTexture(*_texture);  // restore for next frame
 }
 
 void RopeWithLight::update(const sf::Time& dt)
@@ -82,9 +75,6 @@ void RopeWithLight::setup(const GameDeserializeData& data)
 
    // set up texture
    _lamp_sprite = std::make_unique<sf::Sprite>(*_texture);
-   
-   // load default normal map for lamp
-   _lamp_normal_map = TexturePool::getInstance().get("data/sprites/default_normal.png");
 
    // cut off 1st 4 pixels of the texture rect since there's some rope pixels in the spriteset
    _lamp_sprite_rects = {
@@ -107,8 +97,13 @@ void RopeWithLight::setup(const GameDeserializeData& data)
       {static_cast<float>(_lamp_sprite_rects[sprite_index].size.x / 2), static_cast<float>(_lamp_sprite_rects[sprite_index].size.y / 2)}
    );
 
-   // add raycast light
+   // add raycast light; exclude all chain bodies from shadow casting — they are tiny
+   // physics proxies that produce degenerate or distracting shadow quads.
    _light = LightSystem::createLightInstance(this, {});
    _light->_color = sf::Color(color[0], color[1], color[2], color[3]);
+   for (auto* body : _chain_elements)
+   {
+      _light->_excluded_bodies.insert(body);
+   }
    Level::getCurrentLevel()->getLightSystem()->_lights.push_back(_light);
 }
