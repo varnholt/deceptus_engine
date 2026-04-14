@@ -274,6 +274,8 @@ set(GAME_FILES
     src/game/level/levels.h
     src/game/level/levelscript.cpp
     src/game/level/levelscript.h
+    src/game/level/levelscriptcallbacks.cpp
+    src/game/level/levelscriptcallbacks.h
     src/game/level/luaconstants.h
     src/game/level/luainterface.cpp
     src/game/level/luainterface.h

@@ -216,6 +216,10 @@ public:
    /// \param extras list of extra mechanisms in the level.
    void createExtraCallbacks(const std::vector<std::shared_ptr<GameMechanism>>& extras);
 
+   /// \brief returns the currently active LevelScript instance.
+   /// \return pointer to the active instance, or nullptr when none is active.
+   static LevelScript* getCurrent();
+
 private:
    /// \brief closes the lua state if it is active.
    void stopScript();
