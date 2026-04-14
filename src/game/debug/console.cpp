@@ -636,7 +636,7 @@ void Console::processEvent(sf::Keyboard::Key key)
    {
       nextCommand();
    }
-   else if (key == sf::Keyboard::Key::F11)
+   else if (key == sf::Keyboard::Key::F12)
    {
       toggleActive();
    }
