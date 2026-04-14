@@ -9,6 +9,7 @@ namespace
 const auto registered_boxcollider = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.markAsNonVisual("box_colliders");
    registry.mapGroupToLayer("BoxCollider", "box_colliders");
 
    registry.registerLayerName(

@@ -291,8 +291,14 @@ void GameMechanismDeserializer::deserialize(
    static auto warning_shown = false;
    if (!warning_shown)
    {
+      const auto& registry = GameMechanismDeserializerRegistry::instance();
       for (auto& [k, v] : mechanisms)
       {
+         if (!registry.isVisual(k))
+         {
+            continue;
+         }
+
          for (const auto& mechanism : (*v))
          {
             if (mechanism->getZ() == 0)

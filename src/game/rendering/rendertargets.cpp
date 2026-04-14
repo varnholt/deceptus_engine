@@ -58,10 +58,10 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
    _all_textures.push_back(blur);
    _all_textures.push_back(blur_scaled);
 
-   for (const auto& texture : _all_textures)
-   {
-      Log::Info() << "created render texture: " << texture->getSize().x << " x " << texture->getSize().y;
-   }
+   // for (const auto& texture : _all_textures)
+   // {
+   //    Log::Info() << "created render texture: " << texture->getSize().x << " x " << texture->getSize().y;
+   // }
 }
 
 void RenderTargets::recreateOnResize(uint32_t video_mode_width, uint32_t video_mode_height, float view_width, float view_height)

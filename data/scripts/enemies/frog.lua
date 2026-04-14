@@ -150,7 +150,6 @@ function initialize()
    setSpriteVisible(2, false)
 
    updateSprite(0.0)
-   print("frog.lua initialized")
 end
 
 

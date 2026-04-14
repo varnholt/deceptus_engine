@@ -12,7 +12,7 @@ namespace
 const auto registered_wind = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
+   registry.markAsNonVisual("wind");
    registry.mapGroupToLayer("Wind", "wind");
 
    registry.registerLayerName(
