@@ -1,4 +1,5 @@
 #include "levelscript.h"
+#include "levelscriptcallbacks.h"
 
 #include "framework/tools/log.h"
 #include "game/audio/musicfilenames.h"
@@ -47,626 +48,12 @@ void resetInstance()
    instance = nullptr;
 }
 
-/**
- * @brief addCollisionRect add a collision rect that fires when the player intersects
- * @param state lua state
- *    param 1: x position relative to where the object has been placed
- *    param 2: y position relative to where the object has been placed
- *    param 3: collision rect width
- *    param 4: collision rect height
- * @return collision rect id
- */
-int32_t addCollisionRect(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 4)
-   {
-      return 0;
-   }
-
-   const auto x_px = static_cast<int32_t>(lua_tointeger(state, 1));
-   const auto y_px = static_cast<int32_t>(lua_tointeger(state, 2));
-   const auto w_px = static_cast<int32_t>(lua_tointeger(state, 3));
-   const auto h_px = static_cast<int32_t>(lua_tointeger(state, 4));
-
-   const auto rect_id = getInstance()->addCollisionRect({{x_px, y_px}, {w_px, h_px}});
-   lua_pushinteger(state, rect_id);
-   return 1;
-}
-
-/**
- * @brief playMusic binds music playback to Lua
- * @param state lua state
- *    param 1: filename (string)
- *    param 2: transition type (integer, enum value)
- *    param 3: transition duration in ms (integer)
- *    param 4: post playback action (integer, enum value)
- * @return nothing
- */
-int32_t playMusic(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 4)
-   {
-      return 0;
-   }
-
-   const auto filename = std::string(lua_tostring(state, 1));
-   const auto transition_type = static_cast<MusicPlayerTypes::TransitionType>(lua_tointeger(state, 2));
-   const auto transition_duration = std::chrono::milliseconds(lua_tointeger(state, 3));
-   const auto post_action = static_cast<MusicPlayerTypes::PostPlaybackAction>(lua_tointeger(state, 4));
-
-   getInstance()->playMusic(filename, transition_type, transition_duration, post_action);
-
-   return 0;
-}
-
-/**
- * @brief addSensorRectCallback add a callback when player intersects with a given sensor rect
- * @param state lua state
- *    param 1: identifier of the sensor rect
- * @return error code
- */
-int32_t addSensorRectCallback(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const std::string rect_id = lua_tostring(state, 1);
-   getInstance()->addSensorRectCallback(rect_id);
-   return 0;
-}
-
-/**
- * @brief isMechanismVisible check if a given mechanism is visible
- * @param state lua state
- *    param 1: mechanism search pattern
- *    param 2: mechanism group (optional)
- *    return \c true if mechanism is visible
- * @return error code
- */
-int32_t isMechanismVisible(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc < 1 || argc > 2)
-   {
-      return 0;
-   }
-
-   const std::string search_pattern = lua_tostring(state, 1);
-
-   std::optional<std::string> group;
-   if (argc == 2)
-   {
-      group = lua_tostring(state, 2);
-   }
-
-   const auto visible = getInstance()->isMechanismVisible(search_pattern, group);
-   lua_pushboolean(state, visible);
-   return 1;
-}
-
-/**
- * @brief isPlayerIntersectingSensorRect check if the player intersects with a sensor rect
- * @param state lua state
- *    param 1: mechanism search pattern
- *    return \c true if the player intersects a given sensor rect
- * @return error code
- */
-int32_t isPlayerIntersectingSensorRect(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc < 1)
-   {
-      return 0;
-   }
-
-   const std::string search_pattern = lua_tostring(state, 1);
-
-   const auto intersects = getInstance()->isPlayerIntersectingSensorRect(search_pattern);
-   lua_pushboolean(state, intersects);
-   return 1;
-}
-
-/**
- * @brief setMechanismVisible set a mechanism node to visible/invisible
- * @param state lua state
- *    param 1: search pattern
- *    param 2: visible flag
- *    param 3: group (optional)
- * @return error code
- */
-int32_t setMechanismVisible(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc < 2 || argc > 3)
-   {
-      return 0;
-   }
-
-   const std::string search_pattern = lua_tostring(state, 1);
-   const auto visible = lua_toboolean(state, 2);
-
-   std::optional<std::string> group;
-   if (argc == 3)
-   {
-      group = lua_tostring(state, 3);
-   }
-
-   getInstance()->setMechanismVisible(search_pattern, visible, group);
-   return 0;
-}
-
-/**
- * @brief isMechanismEnabled check if a given mechanism is enabled
- * @param state lua state
- *    param 1: mechanism search pattern
- *    param 2: mechanism group
- *    return \c true if mechanism is enabled
- * @return error code
- */
-int32_t isMechanismEnabled(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc < 1 || argc > 2)
-   {
-      return 0;
-   }
-
-   const std::string search_pattern = lua_tostring(state, 1);
-
-   std::optional<std::string> group;
-   if (argc == 2)
-   {
-      group = lua_tostring(state, 2);
-   }
-
-   const auto enabled = getInstance()->isMechanismEnabled(search_pattern, group);
-   lua_pushboolean(state, enabled);
-   return 1;
-}
-
-/**
- * @brief setMechanismEnabled set a mechanism node to enabled/disabled
- * @param state lua state
- *    param 1: search pattern
- *    param 2: enabled flag
- * @return error code
- */
-int32_t setMechanismEnabled(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc < 2 || argc > 3)
-   {
-      return 0;
-   }
-
-   const std::string search_pattern = lua_tostring(state, 1);
-   const auto enabled = lua_toboolean(state, 2);
-
-   std::optional<std::string> group;
-   if (argc == 3)
-   {
-      group = lua_tostring(state, 3);
-   }
-
-   getInstance()->setMechanismEnabled(search_pattern, enabled, group);
-   return 0;
-}
-
-/**
- * @brief inventory_add adds an item to the inventory
- * @param state lua state
- *    param 1: item key (string)
- * @return error code
- */
-int32_t inventoryAdd(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const std::string item_key = lua_tostring(state, 1);
-   getInstance()->inventoryAdd(item_key);
-   return 0;
-}
-
-/**
- * @brief inventory_remove removes an item from the inventory
- * @param state lua state
- *    param 1: item key (string)
- * @return error code
- */
-int32_t inventoryRemove(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const std::string item_key = lua_tostring(state, 1);
-   getInstance()->inventoryRemove(item_key);
-   return 0;
-}
-
-/**
- * @brief inventory_has checks if the inventory contains the given item
- * @param state lua state
- *    param 1: item key (string)
- *    return true if item is in inventory
- * @return number of return values (1)
- */
-int32_t inventoryHas(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const std::string item_key = lua_tostring(state, 1);
-   const auto has_item = getInstance()->inventoryHas(item_key);
-   lua_pushboolean(state, has_item);
-   return 1;
-}
-
-// todo: document
-/**
- * @brief showDialogue show a dialogue
- * @param state lua state
- *    param 1: search pattern
- * @return error code
- */
-int32_t showDialogue(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const std::string search_pattern = lua_tostring(state, 1);
-
-   getInstance()->showDialogue(search_pattern);
-   return 0;
-}
-
-/**
- * @brief toggle toggle a mechanism
- * @param state lua state
- *    param 1: mechanism name
- *    param 2: group name
- * @return error code
- */
-int32_t toggle(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc < 1 || argc > 2)
-   {
-      return 0;
-   }
-
-   const std::string search_pattern = lua_tostring(state, 1);
-
-   std::optional<std::string> group;
-   if (argc == 2)
-   {
-      group = lua_tostring(state, 2);
-   }
-
-   getInstance()->toggle(search_pattern, group);
-   return 0;
-}
-
-/**
- * @brief writeLuaNodeProperty write a property of another lua node
- * @param state lua state
- *    param 1: mechanism name
- *    param 2: property key
- *    param 3: property value
- * @return error code
- */
-int32_t writeLuaNodeProperty(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 3)
-   {
-      return 0;
-   }
-
-   const std::string search_pattern = lua_tostring(state, 1);
-   const std::string key = lua_tostring(state, 2);
-   const std::string value = lua_tostring(state, 3);
-
-   getInstance()->writeLuaNodeProperty(search_pattern, key, value);
-   return 0;
-}
-
-/**
- * @brief setLuaNodeVisible write a property of another lua node
- * @param state lua state
- *    param 1: mechanism name
- *    param 2: visible flag
- * @return error code
- */
-int32_t setLuaNodeVisible(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 2)
-   {
-      return 0;
-   }
-
-   const std::string search_pattern = lua_tostring(state, 1);
-   const auto visible = lua_toboolean(state, 2);
-
-   getInstance()->setLuaNodeVisible(search_pattern, visible);
-   return 0;
-}
-
-/**
- * @brief setLuaNodeActive write a property of another lua node
- * @param state lua state
- *    param 1: mechanism name
- *    param 2: active flag
- * @return error code
- */
-int32_t setLuaNodeActive(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 2)
-   {
-      return 0;
-   }
-
-   const std::string search_pattern = lua_tostring(state, 1);
-   const auto active = lua_toboolean(state, 2);
-
-   getInstance()->setLuaNodeActive(search_pattern, active);
-   return 0;
-}
-
-/**
- * @brief addPlayerSkill add a skill to the player
- * @param state lua state
- *    param 1: skill to add
- * @return error code
- */
-int32_t addPlayerSkill(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const auto skill = static_cast<int32_t>(lua_tointeger(state, 1));
-
-   getInstance()->addPlayerSkill(skill);
-   return 0;
-}
-
-/**
- * @brief addPlayerHealth add health points to the player
- * @param state lua state
- *    param 1: health points to add
- * @return error code
- */
-int32_t addPlayerHealth(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const auto health_points = static_cast<int32_t>(lua_tointeger(state, 1));
-
-   getInstance()->addPlayerHealth(health_points);
-   return 0;
-}
-
-/**
- * @brief playEventRecording plays back a specific event recording file
- * @param state lua state
- *    param 1: filename of the recording to play (without .dat extension)
- * @return error code
- */
-int32_t playEventRecording(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const char* filename = lua_tostring(state, 1);
-   if (filename == nullptr)
-   {
-      return 0;
-   }
-
-   getInstance()->playEventRecording(std::string(filename));
-   return 0;
-}
-
-/**
- * @brief addPlayerHealthMax add health points to the player's max health
- * @param state lua state
- *    param 1: health points to add
- * @return error code
- */
-int32_t addPlayerHealthMax(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const auto health_points = static_cast<int32_t>(lua_tointeger(state, 1));
-
-   getInstance()->addPlayerHealthMax(health_points);
-   return 0;
-}
-
-/**
- * @brief removePlayerSkill add a skill to the player
- * @param state lua state
- *    param 1: skill to add
- * @return error code
- */
-int32_t removePlayerSkill(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const auto skill = static_cast<int32_t>(lua_tointeger(state, 1));
-
-   getInstance()->removePlayerSkill(skill);
-   return 0;
-}
-
-/**
- * @brief debug output a debug message to stdout
- * @param state lua state
- *    param 1: debug message
- * @return error code
- */
-int32_t debug(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const std::string message = lua_tostring(state, 1);
-   Log::Info() << message;
-
-   return 0;
-}
-
-/**
- * @brief giveWeaponBow give bow to player
- * @return error code
- */
-int32_t giveWeaponBow(lua_State* /*state*/)
-{
-   getInstance()->giveWeaponBow();
-   return 0;
-}
-
-/**
- * @brief giveWeaponGun give gun to player
- * @return error code
- */
-int32_t giveWeaponGun(lua_State* /*state*/)
-{
-   getInstance()->giveWeaponGun();
-   return 0;
-}
-
-/**
- * @brief giveWeaponSword give sword to player
- * @return error code
- */
-int32_t giveWeaponSword(lua_State* /*state*/)
-{
-   getInstance()->giveWeaponSword();
-   return 0;
-}
-
-/**
- * @brief lockPlayerControls lock the player's controls
- * @param state lua state
- *    param 1: duration in milliseconds for lock
- * @return error code
- */
-int32_t lockPlayerControls(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const auto duration = static_cast<int32_t>(lua_tointeger(state, 1));
-
-   getInstance()->lockPlayerControls(std::chrono::milliseconds{duration});
-   return 0;
-}
-
-/**
- * @brief setAmbient sets the ambient light color
- * @param state lua state
- *    param 1: red   (0–255)
- *    param 2: green (0–255)
- *    param 3: blue  (0–255)
- *    param 4: alpha (0–255)
- * @return error code
- */
-int32_t setAmbient(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 4)
-   {
-      return 0;
-   }
-
-   const auto r = static_cast<uint8_t>(lua_tointeger(state, 1));
-   const auto g = static_cast<uint8_t>(lua_tointeger(state, 2));
-   const auto b = static_cast<uint8_t>(lua_tointeger(state, 3));
-   const auto a = static_cast<uint8_t>(lua_tointeger(state, 4));
-   getInstance()->setAmbient(sf::Color{r, g, b, a});
-
-   return 0;
-}
-
-/**
- * @brief setZoomFactor sets the zoom factor for the camera
- * @param state lua state
- *    param 1: zoom factor
- * @return error code
- */
-int32_t setZoomFactor(lua_State* state)
-{
-   const auto argc = lua_gettop(state);
-   if (argc != 1)
-   {
-      return 0;
-   }
-
-   const auto zoom_factor = static_cast<float>(lua_tonumber(state, 1));
-   getInstance()->setZoomFactor(zoom_factor);
-
-   return 0;
-}
-
-[[noreturn]] void error(lua_State* state, const char* /*scope*/ = nullptr)
-{
-   // the error message is on top of the stack.
-   // fetch it, print32_t it and then pop it off the stack.
-   std::stringstream output_stream;
-   output_stream << lua_tostring(state, -1);
-
-   Log::Error() << output_stream.str();
-
-   lua_pop(state, 1);
-
-   exit(1);
-}
-
 }  // namespace
+
+LevelScript* LevelScript::getCurrent()
+{
+   return getInstance();
+}
 
 void LevelScript::update(const sf::Time& delta_time)
 {
@@ -743,34 +130,34 @@ void LevelScript::setup(const std::filesystem::path& path)
    _lua_state = luaL_newstate();
 
    // register callbacks
-   lua_register(_lua_state, "addCollisionRect", ::addCollisionRect);
-   lua_register(_lua_state, "addPlayerSkill", ::addPlayerSkill);
-   lua_register(_lua_state, "addPlayerHealth", ::addPlayerHealth);
-   lua_register(_lua_state, "addPlayerHealthMax", ::addPlayerHealthMax);
-   lua_register(_lua_state, "addSensorRectCallback", ::addSensorRectCallback);
-   lua_register(_lua_state, "giveWeaponBow", ::giveWeaponBow);
-   lua_register(_lua_state, "giveWeaponGun", ::giveWeaponGun);
-   lua_register(_lua_state, "giveWeaponSword", ::giveWeaponSword);
-   lua_register(_lua_state, "inventoryAdd", ::inventoryAdd);
-   lua_register(_lua_state, "inventoryRemove", ::inventoryRemove);
-   lua_register(_lua_state, "inventoryHas", ::inventoryHas);
-   lua_register(_lua_state, "isMechanismEnabled", ::isMechanismEnabled);
-   lua_register(_lua_state, "isMechanismVisible", ::isMechanismVisible);
-   lua_register(_lua_state, "isPlayerIntersectingSensorRect", ::isPlayerIntersectingSensorRect);
-   lua_register(_lua_state, "lockPlayerControls", ::lockPlayerControls);
-   lua_register(_lua_state, "log", ::debug);
-   lua_register(_lua_state, "playMusic", ::playMusic);
-   lua_register(_lua_state, "removePlayerSkill", ::removePlayerSkill);
-   lua_register(_lua_state, "setLuaNodeActive", ::setLuaNodeActive);
-   lua_register(_lua_state, "setLuaNodeVisible", ::setLuaNodeVisible);
-   lua_register(_lua_state, "setMechanismEnabled", ::setMechanismEnabled);
-   lua_register(_lua_state, "setMechanismVisible", ::setMechanismVisible);
-   lua_register(_lua_state, "setAmbient", ::setAmbient);
-   lua_register(_lua_state, "setZoomFactor", ::setZoomFactor);
-   lua_register(_lua_state, "showDialogue", ::showDialogue);
-   lua_register(_lua_state, "toggle", ::toggle);
-   lua_register(_lua_state, "writeLuaNodeProperty", ::writeLuaNodeProperty);
-   lua_register(_lua_state, "playEventRecording", ::playEventRecording);
+   lua_register(_lua_state, "addCollisionRect", LevelScriptCallbacks::addCollisionRect);
+   lua_register(_lua_state, "addPlayerSkill", LevelScriptCallbacks::addPlayerSkill);
+   lua_register(_lua_state, "addPlayerHealth", LevelScriptCallbacks::addPlayerHealth);
+   lua_register(_lua_state, "addPlayerHealthMax", LevelScriptCallbacks::addPlayerHealthMax);
+   lua_register(_lua_state, "addSensorRectCallback", LevelScriptCallbacks::addSensorRectCallback);
+   lua_register(_lua_state, "giveWeaponBow", LevelScriptCallbacks::giveWeaponBow);
+   lua_register(_lua_state, "giveWeaponGun", LevelScriptCallbacks::giveWeaponGun);
+   lua_register(_lua_state, "giveWeaponSword", LevelScriptCallbacks::giveWeaponSword);
+   lua_register(_lua_state, "inventoryAdd", LevelScriptCallbacks::inventoryAdd);
+   lua_register(_lua_state, "inventoryRemove", LevelScriptCallbacks::inventoryRemove);
+   lua_register(_lua_state, "inventoryHas", LevelScriptCallbacks::inventoryHas);
+   lua_register(_lua_state, "isMechanismEnabled", LevelScriptCallbacks::isMechanismEnabled);
+   lua_register(_lua_state, "isMechanismVisible", LevelScriptCallbacks::isMechanismVisible);
+   lua_register(_lua_state, "isPlayerIntersectingSensorRect", LevelScriptCallbacks::isPlayerIntersectingSensorRect);
+   lua_register(_lua_state, "lockPlayerControls", LevelScriptCallbacks::lockPlayerControls);
+   lua_register(_lua_state, "log", LevelScriptCallbacks::debug);
+   lua_register(_lua_state, "playMusic", LevelScriptCallbacks::playMusic);
+   lua_register(_lua_state, "removePlayerSkill", LevelScriptCallbacks::removePlayerSkill);
+   lua_register(_lua_state, "setLuaNodeActive", LevelScriptCallbacks::setLuaNodeActive);
+   lua_register(_lua_state, "setLuaNodeVisible", LevelScriptCallbacks::setLuaNodeVisible);
+   lua_register(_lua_state, "setMechanismEnabled", LevelScriptCallbacks::setMechanismEnabled);
+   lua_register(_lua_state, "setMechanismVisible", LevelScriptCallbacks::setMechanismVisible);
+   lua_register(_lua_state, "setAmbient", LevelScriptCallbacks::setAmbient);
+   lua_register(_lua_state, "setZoomFactor", LevelScriptCallbacks::setZoomFactor);
+   lua_register(_lua_state, "showDialogue", LevelScriptCallbacks::showDialogue);
+   lua_register(_lua_state, "toggle", LevelScriptCallbacks::toggle);
+   lua_register(_lua_state, "writeLuaNodeProperty", LevelScriptCallbacks::writeLuaNodeProperty);
+   lua_register(_lua_state, "playEventRecording", LevelScriptCallbacks::playEventRecording);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -784,7 +171,7 @@ void LevelScript::setup(const std::filesystem::path& path)
 
       if (result != LUA_OK)
       {
-         error(_lua_state);
+         LevelScriptCallbacks::error(_lua_state);
       }
       else
       {
@@ -833,7 +220,7 @@ void LevelScript::luaInitialize()
 
    if (result != LUA_OK)
    {
-      error(_lua_state, FUNCTION_INITIALIZE);
+      LevelScriptCallbacks::error(_lua_state, FUNCTION_INITIALIZE);
    }
 
    _initialized = true;
@@ -853,7 +240,7 @@ void LevelScript::luaUpdate(const sf::Time& delta_time)
 
    if (result != LUA_OK)
    {
-      error(_lua_state, FUNCTION_UPDATE);
+      LevelScriptCallbacks::error(_lua_state, FUNCTION_UPDATE);
    }
 }
 
@@ -875,7 +262,7 @@ void LevelScript::luaWriteProperty(const std::string& key, const std::string& va
 
       if (result != LUA_OK)
       {
-         error(_lua_state, FUNCTION_WRITE_PROPERTY);
+         LevelScriptCallbacks::error(_lua_state, FUNCTION_WRITE_PROPERTY);
       }
    }
 }
@@ -895,7 +282,7 @@ void LevelScript::luaPlayerReceivedExtra(const std::string& extra_name)
 
       if (result != LUA_OK)
       {
-         error(_lua_state, FUNCTION_PLAYER_RECEIVED_EXTRA);
+         LevelScriptCallbacks::error(_lua_state, FUNCTION_PLAYER_RECEIVED_EXTRA);
       }
    }
 }
@@ -915,7 +302,7 @@ void LevelScript::luaPlayerReceivedItem(const std::string& item)
 
       if (result != LUA_OK)
       {
-         error(_lua_state, FUNCTION_PLAYER_RECEIVED_ITEM);
+         LevelScriptCallbacks::error(_lua_state, FUNCTION_PLAYER_RECEIVED_ITEM);
       }
    }
 }
@@ -939,7 +326,7 @@ bool LevelScript::luaPlayerUsedItem(const std::string& item)
    const auto result = lua_pcall(_lua_state, 1, 1, 0);
    if (result != LUA_OK)
    {
-      error(_lua_state, FUNCTION_PLAYER_USED_ITEM);
+      LevelScriptCallbacks::error(_lua_state, FUNCTION_PLAYER_USED_ITEM);
       lua_pop(_lua_state, 1);
       return false;
    }
@@ -974,7 +361,7 @@ void LevelScript::luaMechanismEnabled(const std::string& object_id, const std::s
 
       if (result != LUA_OK)
       {
-         error(_lua_state, FUNCTION_MECHANISM_ENABLED);
+         LevelScriptCallbacks::error(_lua_state, FUNCTION_MECHANISM_ENABLED);
       }
    }
 }
@@ -1033,7 +420,7 @@ void LevelScript::luaMechanismEvent(
 
       if (result != LUA_OK)
       {
-         error(_lua_state, FUNCTION_WRITE_PROPERTY);
+         LevelScriptCallbacks::error(_lua_state, FUNCTION_WRITE_PROPERTY);
       }
    }
 }
@@ -1361,7 +748,7 @@ void LevelScript::luaPlayerCollidesWithRect(int32_t rect_id)
 
    if (result != LUA_OK)
    {
-      error(_lua_state, FUNCTION_PLAYER_COLLIDES_WITH_RECT);
+      LevelScriptCallbacks::error(_lua_state, FUNCTION_PLAYER_COLLIDES_WITH_RECT);
    }
 }
 
@@ -1374,6 +761,6 @@ void LevelScript::luaPlayerCollidesWithSensorRect(const std::string& sensor_rect
 
    if (result != LUA_OK)
    {
-      error(_lua_state, FUNCTION_PLAYER_COLLIDES_WITH_SENSOR_RECT);
+      LevelScriptCallbacks::error(_lua_state, FUNCTION_PLAYER_COLLIDES_WITH_SENSOR_RECT);
    }
 }
