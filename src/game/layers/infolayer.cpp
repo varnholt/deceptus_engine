@@ -447,8 +447,7 @@ void InfoLayer::LoadingAnimation::show()
 
 void InfoLayer::LoadingAnimation::hide()
 {
-   _hide_time = GlobalClock::getInstance().getElapsedTime();
-   _show_time.reset();
+   _hide_pending = true;
 }
 
 void InfoLayer::LoadingAnimation::update(const sf::Time& delta_time)
@@ -466,7 +465,7 @@ void InfoLayer::LoadingAnimation::update(const sf::Time& delta_time)
    // i.e. wait for fade in to finish before fading out
 
    // nothing to do if both start and stop time are invalid
-   if (!_show_time.has_value() && !_hide_time.has_value())
+   if (!_show_time.has_value() && !_hide_time.has_value() && !_hide_pending)
    {
       return;
    }
@@ -475,6 +474,14 @@ void InfoLayer::LoadingAnimation::update(const sf::Time& delta_time)
    static sf::Time hide_duration = sf::seconds(2.0f);
    constexpr auto alpha_change_rate = 1.0f;
    const auto now = GlobalClock::getInstance().getElapsedTime();
+
+   // consume pending hide on the main thread to avoid data races on _hide_time/_show_time
+   if (_hide_pending.exchange(false) && _fade_state != LoadingFadeState::None)
+   {
+      _hide_time = now - sf::seconds((1.0f - _alpha) * hide_duration.asSeconds());
+      _show_time.reset();
+      _fade_state = LoadingFadeState::Keep;
+   }
 
    auto alpha = _alpha;
 
@@ -491,16 +498,12 @@ void InfoLayer::LoadingAnimation::update(const sf::Time& delta_time)
    {
       alpha = 1.0f - std::max(0.0f, (now - _hide_time.value()).asSeconds() / hide_duration.asSeconds());
    }
-   else
-   {
-      alpha = 1.0f;
-   }
 
    const auto alpha_byte = static_cast<uint8_t>(alpha * 255.0f);
    const auto current_alpha_byte = static_cast<uint8_t>(this->_alpha * 255.0f);
 
    // hide complete, we're done.
-   if (alpha <= 0.01f && _hide_time.has_value())
+   if (alpha <= 0.0f && _hide_time.has_value())
    {
       _animation->stop();
       _hide_time.reset();
@@ -519,6 +522,10 @@ void InfoLayer::LoadingAnimation::update(const sf::Time& delta_time)
 
 void InfoLayer::LoadingAnimation::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
+   if (_fade_state == LoadingFadeState::None)
+   {
+      return;
+   }
    _animation->setVisible(true);
    _animation->draw(window, states);
 }
