@@ -10,6 +10,7 @@ namespace
 const auto registered_buttonrect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.markAsNonVisual("button_rects");
    registry.mapGroupToLayer("ButtonRect", "button_rects");
 
    registry.registerLayerName(

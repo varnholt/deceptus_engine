@@ -13,6 +13,7 @@ namespace
 const auto registered_sensorrect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.markAsNonVisual("sensor_rects");
    registry.mapGroupToLayer("SensorRect", "sensor_rects");
 
    registry.registerLayerName(

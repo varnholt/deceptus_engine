@@ -69,6 +69,16 @@ std::optional<GameMechanismDeserializerRegistry::DeserializerFunction> GameMecha
    return std::nullopt;
 }
 
+void GameMechanismDeserializerRegistry::markAsNonVisual(const std::string& layer_name)
+{
+   _non_visual_layers.insert(layer_name);
+}
+
+bool GameMechanismDeserializerRegistry::isVisual(const std::string& layer_name) const
+{
+   return _non_visual_layers.find(layer_name) == _non_visual_layers.end();
+}
+
 std::optional<GameMechanismDeserializerRegistry::DeserializerFunction> GameMechanismDeserializerRegistry::getForLayerName(
    const std::string& key
 ) const

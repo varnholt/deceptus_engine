@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "game/io/gamedeserializedata.h"
 #include "game/mechanisms/gamemechanism.h"
@@ -65,12 +66,23 @@ public:
    /// \return map of object-group keys to deserializer callbacks.
    const std::unordered_map<std::string, DeserializerFunction>& getObjectGroupMap() const;
 
+   /// \brief marks a layer as non-visual so that z=0 warnings are suppressed for it.
+   /// \param layer_name layer key to mark.
+   void markAsNonVisual(const std::string& layer_name);
+
+   /// \brief checks whether a layer is expected to produce visible draw output.
+   /// \param layer_name layer key to query.
+   /// \return false when the layer was registered as non-visual.
+   bool isVisual(const std::string& layer_name) const;
+
 private:
    std::unordered_map<std::string, DeserializerFunction> _layer_name_map;
    std::unordered_map<std::string, DeserializerFunction> _object_group_map;
 
    std::map<std::string, std::string> _group_to_layer_name;
    std::map<std::string, std::string> _layer_to_group_name;
+
+   std::unordered_set<std::string> _non_visual_layers;
 };
 
 #endif  // GAMEMECHANISMDESERIALIZERREGISTRY_H

@@ -60,12 +60,12 @@ std::unique_ptr<Reference<Callback>, std::function<void(Reference<Callback>*)>> 
 
       if constexpr (std::is_same_v<Callback, EnabledCallback>)
       {
-         Log::Info() << "calling custom deleter for enabled callback";
+         // Log::Info() << "calling custom deleter for enabled callback";
          std::erase_if(_enabled_listeners, [&callback_to_remove](const auto& callback) { return &callback == &callback_to_remove; });
       }
       else if constexpr (std::is_same_v<Callback, EventCallback>)
       {
-         Log::Info() << "calling custom deleter for event callback";
+         // Log::Info() << "calling custom deleter for event callback";
          std::erase_if(_event_listeners, [&callback_to_remove](const auto& callback) { return &callback == &callback_to_remove; });
       }
 
@@ -74,12 +74,12 @@ std::unique_ptr<Reference<Callback>, std::function<void(Reference<Callback>*)>> 
 
    if constexpr (std::is_same_v<Callback, EnabledCallback>)
    {
-      Log::Info() << "register enabled callback";
+      // Log::Info() << "register enabled callback";
       _enabled_listeners.push_back(callback_to_add);
    }
    else if constexpr (std::is_same_v<Callback, EventCallback>)
    {
-      Log::Info() << "register event callback";
+      // Log::Info() << "register event callback";
       _event_listeners.push_back(callback_to_add);
    }
 

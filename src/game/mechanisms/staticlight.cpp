@@ -18,6 +18,7 @@ namespace
 const auto registered_staticlight = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.markAsNonVisual("static_lights");
    registry.mapGroupToLayer("StaticLight", "static_lights");
 
    registry.registerLayerName(
