@@ -952,6 +952,9 @@ void Game::toggleFullScreen()
       );
       _level->createViews();
    }
+
+   // recreate the 3D menu background — its GL resources are tied to the old context
+   _menu_background = std::make_unique<MenuBackgroundScene>();
 }
 
 void Game::changeResolution(int32_t w, int32_t h)
@@ -1043,6 +1046,12 @@ void Game::processEvent(const sf::Event& event)
    }
    else if (auto* key_pressed_event = event.getIf<sf::Event::KeyPressed>())
    {
+      if (key_pressed_event->code == sf::Keyboard::Key::F11)
+      {
+         toggleFullScreen();
+         return;
+      }
+
       if (MessageBox::keyboardKeyPressed(key_pressed_event->code))
       {
          // nom nom nom
@@ -1284,7 +1293,7 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
          }
          break;
       }
-      case sf::Keyboard::Key::F11:
+      case sf::Keyboard::Key::F12:
       {
          Console::getInstance().toggleActive();
          break;
