@@ -70,7 +70,11 @@ void SaveState::deserialize(const std::string& data)
    try
    {
       json save_states = json::parse(data);
-      __save_states = save_states.get<std::array<SaveState, 3>>();
+      const auto count = std::min(save_states.size(), __save_states.size());
+      for (auto i = 0u; i < count; i++)
+      {
+         __save_states[i] = save_states[i].get<SaveState>();
+      }
    }
    catch (const std::exception& e)
    {

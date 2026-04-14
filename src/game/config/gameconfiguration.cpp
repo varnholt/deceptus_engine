@@ -62,10 +62,11 @@ void GameConfiguration::deserialize(const std::string& data)
       _video_mode_height = config["GameConfiguration"]["video_mode_height"].get<int32_t>();
       
       // load windowed dimensions, fallback to video_mode if not present
-      if (config["GameConfiguration"].find("windowed_width") != config.end())
+      const auto& gc = config["GameConfiguration"];
+      if (const auto it = gc.find("windowed_width"); it != gc.end())
       {
-         _windowed_width = config["GameConfiguration"]["windowed_width"].get<int32_t>();
-         _windowed_height = config["GameConfiguration"]["windowed_height"].get<int32_t>();
+         _windowed_width = it->get<int32_t>();
+         _windowed_height = gc["windowed_height"].get<int32_t>();
       }
       else
       {
@@ -137,16 +138,23 @@ GameConfiguration& GameConfiguration::getInstance()
 
    if (!__initialized)
    {
+      // seed defaults from the actual desktop so first-launch resolution is sensible
+      const auto desktop = sf::VideoMode::getDesktopMode();
+      __instance._video_mode_width  = static_cast<int32_t>(desktop.size.x);
+      __instance._video_mode_height = static_cast<int32_t>(desktop.size.y);
+      __instance._windowed_width    = __instance._video_mode_width;
+      __instance._windowed_height   = __instance._video_mode_height;
+
+      // config file values override the desktop defaults when present
       __instance.deserializeFromFile();
-      
-      // ensure windowed dimensions are initialized
-      // if they're zero (first launch or old config), copy from video_mode
+
+      // if the file was missing or corrupt, windowed dimensions may still be zero
       if (__instance._windowed_width == 0 || __instance._windowed_height == 0)
       {
-         __instance._windowed_width = __instance._video_mode_width;
+         __instance._windowed_width  = __instance._video_mode_width;
          __instance._windowed_height = __instance._video_mode_height;
       }
-      
+
       __initialized = true;
    }
 
