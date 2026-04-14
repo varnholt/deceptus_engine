@@ -288,6 +288,11 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
 
    for (auto& light : _active_lights)
    {
+      if (light_id >= static_cast<int32_t>(position_uniforms.size()))
+      {
+         break;
+      }
+
       // transform light coordinates from box2d to normalized screen coordinates
       sf::Vector2f light_screen_pos = mapCoordsToPixelNormalized(
          {light->_pos_m.x * PPM + light->_center_offset_px.x, light->_pos_m.y * PPM + light->_center_offset_px.y},
@@ -347,6 +352,28 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       }
 
       _active_lights.push_back(light);
+   }
+
+   // sort by distance so the closest lights always take the available channels
+   std::ranges::sort(
+      _active_lights,
+      [&player_body](const auto& a, const auto& b)
+      {
+         return (player_body->GetWorldCenter() - a->_pos_m).LengthSquared() <
+                (player_body->GetWorldCenter() - b->_pos_m).LengthSquared();
+      }
+   );
+
+   constexpr auto max_lights = 6;
+   if (_active_lights.size() > max_lights)
+   {
+      static auto warned = false;
+      if (!warned)
+      {
+         Log::Warning() << "LightSystem: " << _active_lights.size() << " active lights, only " << max_lights << " can be drawn";
+         warned = true;
+      }
+      _active_lights.resize(max_lights);
    }
 
    // pre-build shadow caster candidates once per frame — player, disabled bodies, and
