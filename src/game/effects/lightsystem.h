@@ -110,7 +110,8 @@ private:
    /// \brief renders shadow extrusion triangles for geometry that should occlude a given light.
    /// \param target render target.
    /// \param light active light for which occluder shadows are generated.
-   void drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightInstance> light) const;
+   /// \param candidates pre-filtered list of shadow-casting bodies built once per frame.
+   void drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightInstance> light, const std::vector<b2Body*>& candidates) const;
 
    /// \brief renders level occluder geometry to the stencil buffer before shadow/light passes.
    /// \param target render target with active stencil context.
@@ -121,6 +122,12 @@ private:
    void updateLightShader(sf::RenderTarget& target);
 
    mutable std::vector<std::shared_ptr<LightInstance>> _active_lights;
+
+   // cached texture pointers to avoid redundant setUniform calls each frame
+   const sf::Texture* _last_color_map{nullptr};
+   const sf::Texture* _last_light_map{nullptr};
+   const sf::Texture* _last_light_map2{nullptr};
+   const sf::Texture* _last_normal_map{nullptr};
 
    std::array<float, 4> _ambient_color = {1.0f, 1.0f, 1.0f, 1.0f};
    static constexpr auto segment_count = 20;

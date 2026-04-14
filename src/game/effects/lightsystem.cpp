@@ -33,9 +33,9 @@ constexpr auto max_distance_m2 = 400.0f;  // depends on the view dimensions
 const sf::StencilMode stencil_write_mode{
    sf::StencilComparison::Always,
    sf::StencilUpdateOperation::Replace,
-   1,     // reference — writes 1 to mark occluded pixels
-   ~0u,   // mask
-   true   // stencilOnly: no color output
+   1,    // reference — writes 1 to mark occluded pixels
+   ~0u,  // mask
+   true  // stencilOnly: no color output
 };
 
 // read pass: only draw where stencil == 0 (not occluded by any shadow).
@@ -46,7 +46,7 @@ const sf::StencilMode stencil_test_mode{
    ~0u,   // mask
    false  // write color
 };
-}
+}  // namespace
 
 LightSystem::LightSystem()
 {
@@ -67,60 +67,23 @@ LightSystem::LightSystem()
    }
 }
 
-void LightSystem::drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightSystem::LightInstance> light) const
+void LightSystem::drawShadowQuads(
+   sf::RenderTarget& target,
+   std::shared_ptr<LightSystem::LightInstance> light,
+   const std::vector<b2Body*>& candidates
+) const
 {
    const auto light_pos_m = light->_pos_m + light->_center_offset_m;
-   const auto& world = Level::getCurrentLevel()->getWorld();
 
-   // read all bodies from world
-   std::vector<b2Body*> bodies_to_process;
-   for (auto* body = world->GetBodyList(); body; body = body->GetNext())
+   for (auto* body : candidates)
    {
-      bodies_to_process.push_back(body);
-   }
-
-   auto body_view = bodies_to_process | std::views::filter(
-                                           [&light](b2Body* body)
-                                           {
-                                              // skip bodies that belong to the light's own mechanism
-                                              // (e.g. rope chain elements) - they produce degenerate
-                                              // or unwanted shadow quads relative to the light source.
-                                              if (light->_excluded_bodies.count(body))
-                                              {
-                                                 return false;
-                                              }
-
-                                              auto* player_body = Player::getCurrent()->getBody();
-                                              if (body == player_body)
-                                              {
-                                                 return false;
-                                              }
-
-                                              if (!body->IsEnabled())
-                                              {
-                                                 return false;
-                                              }
-
-                                              // for now enemies shouldn't cast shadows
-                                              for (auto* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
-                                              {
-                                                 auto* user_data = fixture->GetUserData().pointer;
-                                                 if (user_data)
-                                                 {
-                                                    auto* fixture_node = static_cast<FixtureNode*>(user_data);
-                                                    if (fixture_node->getType() == ObjectType::ObjectTypeEnemy)
-                                                    {
-                                                       return false;
-                                                    }
-                                                 }
-                                              }
-
-                                              return true;
-                                           }
-                                        );
-
-   for (auto* body : body_view)
-   {
+      // skip bodies that belong to the light's own mechanism
+      // (e.g. rope chain elements) - they produce degenerate
+      // or unwanted shadow quads relative to the light source.
+      if (light->_excluded_bodies.count(body))
+      {
+         continue;
+      }
       for (auto* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
       {
          // if something doesn't collide, it probably shouldn't have any impact on lighting, too.
@@ -311,10 +274,20 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    _light_shader.setUniform("u_resolution", sf::Glsl::Vec2(static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)));
    _light_shader.setUniform("u_ambient", sf::Glsl::Vec4(_ambient_color[0], _ambient_color[1], _ambient_color[2], _ambient_color[3]));
 
+   static const std::array<std::string, 6> position_uniforms = {
+      "u_lights[0]._position",
+      "u_lights[1]._position",
+      "u_lights[2]._position",
+      "u_lights[3]._position",
+      "u_lights[4]._position",
+      "u_lights[5]._position"
+   };
+   static const std::array<std::string, 6> color_uniforms = {
+      "u_lights[0]._color", "u_lights[1]._color", "u_lights[2]._color", "u_lights[3]._color", "u_lights[4]._color", "u_lights[5]._color"
+   };
+
    for (auto& light : _active_lights)
    {
-      std::string id = "u_lights[" + std::to_string(light_id) + "]";
-
       // transform light coordinates from box2d to normalized screen coordinates
       sf::Vector2f light_screen_pos = mapCoordsToPixelNormalized(
          {light->_pos_m.x * PPM + light->_center_offset_px.x, light->_pos_m.y * PPM + light->_center_offset_px.y},
@@ -322,7 +295,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
       );
 
       _light_shader.setUniform(
-         id + "._position",
+         position_uniforms[light_id],
          sf::Glsl::Vec3(
             static_cast<float>(light_screen_pos.x),
             static_cast<float>(1.0f - light_screen_pos.y),
@@ -331,7 +304,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
       );
 
       _light_shader.setUniform(
-         id + "._color",
+         color_uniforms[light_id],
          sf::Glsl::Vec4(
             static_cast<float>(light->_color.r) / 255.0f,
             static_cast<float>(light->_color.g) / 255.0f,
@@ -376,12 +349,39 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       _active_lights.push_back(light);
    }
 
+   // pre-build shadow caster candidates once per frame — player, disabled bodies, and
+   // enemies are excluded here so drawShadowQuads only needs to check per-light exclusions.
+   std::vector<b2Body*> shadow_candidates;
+   const auto& world = Level::getCurrentLevel()->getWorld();
+   for (auto* body = world->GetBodyList(); body; body = body->GetNext())
+   {
+      if (body == player_body || !body->IsEnabled())
+      {
+         continue;
+      }
+      bool is_enemy = false;
+      for (auto* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+      {
+         auto* user_data = fixture->GetUserData().pointer;
+         if (user_data && static_cast<FixtureNode*>(user_data)->getType() == ObjectType::ObjectTypeEnemy)
+         {
+            is_enemy = true;
+            break;
+         }
+      }
+      if (!is_enemy)
+      {
+         shadow_candidates.push_back(body);
+      }
+   }
+
    // draw sprites to channels (lights 0-2 to target1 RGB, lights 3-5 to target2 RGB)
    // we skip alpha channels because they're harder to work with
    int32_t channel_index = 0;
    for (const auto& light : _active_lights)
    {
-      if (channel_index >= 6) break; // max 6 lights (2 textures × RGB, skip alpha)
+      if (channel_index >= 6)
+         break;  // max 6 lights (2 textures × RGB, skip alpha)
 
       // determine which target and which RGB channel
       sf::RenderTarget& target = (channel_index < 3) ? target1 : target2;
@@ -396,13 +396,16 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       // each draw call carries stencil_write_mode so SFML enables the stencil test
       // and writes 1 for every occluded pixel instead of disabling it (default behaviour).
       drawOccluders(target);
-      drawShadowQuads(target, light);
+      drawShadowQuads(target, light, shadow_candidates);
 
       // draw the light sprite only where stencil == 0 (not occluded).
       sf::Color channel_color;
-      if (local_channel == 0) channel_color = sf::Color(255, 0, 0, 255);        // red
-      else if (local_channel == 1) channel_color = sf::Color(0, 255, 0, 255);   // green
-      else                         channel_color = sf::Color(0, 0, 255, 255);   // blue
+      if (local_channel == 0)
+         channel_color = sf::Color(255, 0, 0, 255);  // red
+      else if (local_channel == 1)
+         channel_color = sf::Color(0, 255, 0, 255);  // green
+      else
+         channel_color = sf::Color(0, 0, 255, 255);  // blue
 
       light->_sprite->setColor(channel_color);
 
@@ -424,10 +427,23 @@ void LightSystem::draw(
    const std::shared_ptr<sf::RenderTexture>& normal_map
 )
 {
-   _light_shader.setUniform("color_map", color_map->getTexture());
-   _light_shader.setUniform("light_map_1", light_map->getTexture());
-   _light_shader.setUniform("light_map_2", light_map2->getTexture());
-   _light_shader.setUniform("normal_map", normal_map->getTexture());
+   // texture uniforms only need to be rebound when the render texture objects change
+   // (i.e. on resize); skip the setUniform calls when the pointers are unchanged.
+   const auto* color_tex = &color_map->getTexture();
+   const auto* light_tex = &light_map->getTexture();
+   const auto* light2_tex = &light_map2->getTexture();
+   const auto* normal_tex = &normal_map->getTexture();
+   if (color_tex != _last_color_map || light_tex != _last_light_map || light2_tex != _last_light_map2 || normal_tex != _last_normal_map)
+   {
+      _light_shader.setUniform("color_map", *color_tex);
+      _light_shader.setUniform("light_map_1", *light_tex);
+      _light_shader.setUniform("light_map_2", *light2_tex);
+      _light_shader.setUniform("normal_map", *normal_tex);
+      _last_color_map = color_tex;
+      _last_light_map = light_tex;
+      _last_light_map2 = light2_tex;
+      _last_normal_map = normal_tex;
+   }
 
    // update shader uniforms
    updateLightShader(target);
@@ -466,7 +482,8 @@ void LightSystem::drawDebug(sf::RenderTarget& target)
       }
 
       // debug draw cross at sprite center
-      const auto sprite_center_px = sf::Vector2f(sprite_bounds.position.x + sprite_bounds.size.x * 0.5f, sprite_bounds.position.y + sprite_bounds.size.y * 0.5f);
+      const auto sprite_center_px =
+         sf::Vector2f(sprite_bounds.position.x + sprite_bounds.size.x * 0.5f, sprite_bounds.position.y + sprite_bounds.size.y * 0.5f);
       DebugDraw::drawPoint(target, sprite_center_px, b2Color(0.0f, 0.0f, 1.0f));  // blue point
    }
 #endif
