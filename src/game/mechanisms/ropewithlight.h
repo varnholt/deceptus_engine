@@ -35,5 +35,4 @@ private:
    std::unique_ptr<sf::Sprite> _lamp_sprite;
    std::array<sf::IntRect, 3> _lamp_sprite_rects;
    std::shared_ptr<LightSystem::LightInstance> _light;
-   std::shared_ptr<sf::Texture> _lamp_normal_map;
 };
