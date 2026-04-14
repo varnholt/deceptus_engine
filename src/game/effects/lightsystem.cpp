@@ -381,7 +381,9 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
    for (const auto& light : _active_lights)
    {
       if (channel_index >= 6)
+      {
          break;  // max 6 lights (2 textures × RGB, skip alpha)
+      }
 
       // determine which target and which RGB channel
       sf::RenderTarget& target = (channel_index < 3) ? target1 : target2;
@@ -401,11 +403,17 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       // draw the light sprite only where stencil == 0 (not occluded).
       sf::Color channel_color;
       if (local_channel == 0)
+      {
          channel_color = sf::Color(255, 0, 0, 255);  // red
+      }
       else if (local_channel == 1)
+      {
          channel_color = sf::Color(0, 255, 0, 255);  // green
+      }
       else
+      {
          channel_color = sf::Color(0, 0, 255, 255);  // blue
+      }
 
       light->_sprite->setColor(channel_color);
 
