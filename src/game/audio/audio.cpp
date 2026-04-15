@@ -73,6 +73,8 @@ std::shared_ptr<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
 
 void Audio::addSample(const std::string& sample)
 {
+   std::lock_guard<std::mutex> lock(_mutex);
+
    if (_sound_buffers.find(sample) != _sound_buffers.end())
    {
       return;
