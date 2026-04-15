@@ -46,12 +46,8 @@ void ShaderLayer::checkUniforms(const std::string& shader_path)
    buffer << file.rdbuf();
    const auto shader_source = buffer.str();
 
-   _has_u_resolution  = shader_source.find("u_resolution;")  != std::string::npos;
-   _has_u_uv_height   = shader_source.find("u_uv_height;")   != std::string::npos;
-   _has_u_ring_scale  = shader_source.find("u_ring_scale;")  != std::string::npos;
-   _has_u_pixel_size      = shader_source.find("u_pixel_size;")      != std::string::npos;
-   _has_u_flash_color     = shader_source.find("u_flash_color;")     != std::string::npos;
-   _has_u_flash_intensity = shader_source.find("u_flash_intensity;") != std::string::npos;
+   _has_u_resolution = shader_source.find("u_resolution;") != std::string::npos;
+   _has_u_uv_height  = shader_source.find("u_uv_height;")  != std::string::npos;
 }
 
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
@@ -72,26 +68,6 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    if (_has_u_uv_height)
    {
       _shader.setUniform("u_uv_height", _uv_height);
-   }
-
-   if (_has_u_ring_scale)
-   {
-      _shader.setUniform("u_ring_scale", _ring_scale);
-   }
-
-   if (_has_u_pixel_size)
-   {
-      _shader.setUniform("u_pixel_size", _pixel_size);
-   }
-
-   if (_has_u_flash_color)
-   {
-      _shader.setUniform("u_flash_color", _flash_color);
-   }
-
-   if (_has_u_flash_intensity)
-   {
-      _shader.setUniform("u_flash_intensity", _flash_intensity);
    }
 
    sf::Vertex quad[] = {
@@ -150,17 +126,14 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    instance->setObjectId(data._tmx_object->_name);
    instance->_rect = bounding_rect;
    instance->addChunks(bounding_rect);
-   instance->_z_index = ValueReader::readValue<int32_t>("z", map).value_or(instance->_z_index);
-   instance->_uv_width = ValueReader::readValue<float>("uv_width", map).value_or(instance->_uv_width);
-   instance->_uv_height   = ValueReader::readValue<float>("uv_height",   map).value_or(instance->_uv_height);
-   instance->_ring_scale  = ValueReader::readValue<float>("ring_scale",  map).value_or(instance->_ring_scale);
-   instance->_pixel_size  = ValueReader::readValue<float>("pixel_size",  map).value_or(instance->_pixel_size);
-   instance->_time_offset = ValueReader::readValue<float>("time_offset_s", map).value_or(instance->_time_offset);
+   instance->_z_index    = ValueReader::readValue<int32_t>("z",            map).value_or(instance->_z_index);
+   instance->_uv_width   = ValueReader::readValue<float>  ("uv_width",     map).value_or(instance->_uv_width);
+   instance->_uv_height  = ValueReader::readValue<float>  ("uv_height",    map).value_or(instance->_uv_height);
+   instance->_time_offset = ValueReader::readValue<float> ("time_offset_s", map).value_or(instance->_time_offset);
 
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
    if (vert_file.has_value())
    {
-      // Check if vertex shader file exists before attempting to load
       if (!std::filesystem::exists(vert_file.value()))
       {
          Log::Error() << "vertex shader file does not exist: " << vert_file.value();
@@ -174,7 +147,6 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
    if (frag_file.has_value())
    {
-      // check if fragment shader file exists before attempting to load
       if (!std::filesystem::exists(frag_file.value()))
       {
          Log::Error() << "fragment shader file does not exist: " << frag_file.value();
@@ -184,7 +156,6 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
          Log::Error() << "error compiling " << frag_file.value();
       }
 
-      // analyze the fragment shader source to determine which uniforms are present
       instance->checkUniforms(frag_file.value());
    }
 
@@ -197,6 +168,8 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
       const auto smooth_texture = ValueReader::readValue<bool>("smooth_texture", map).value_or(false);
       instance->_texture->setSmooth(smooth_texture);
    }
+
+   instance->readCustomProperties(data);
 
    return instance;
 }
