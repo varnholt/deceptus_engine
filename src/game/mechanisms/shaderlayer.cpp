@@ -49,6 +49,7 @@ void ShaderLayer::checkUniforms(const std::string& shader_path)
    _has_u_resolution  = shader_source.find("u_resolution;")  != std::string::npos;
    _has_u_uv_height   = shader_source.find("u_uv_height;")   != std::string::npos;
    _has_u_ring_scale  = shader_source.find("u_ring_scale;")  != std::string::npos;
+   _has_u_pixel_size  = shader_source.find("u_pixel_size;")  != std::string::npos;
 }
 
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
@@ -74,6 +75,11 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    if (_has_u_ring_scale)
    {
       _shader.setUniform("u_ring_scale", _ring_scale);
+   }
+
+   if (_has_u_pixel_size)
+   {
+      _shader.setUniform("u_pixel_size", _pixel_size);
    }
 
    sf::Vertex quad[] = {
