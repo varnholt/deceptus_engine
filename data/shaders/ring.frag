@@ -5,6 +5,7 @@ uniform vec2      u_resolution;
 uniform sampler2D u_texture;
 uniform float     u_uv_height;
 uniform float     u_ring_scale;
+uniform float     u_pixel_size;  //!< pixel block size in screen pixels; 1.0 = no pixelation, 4.0 = coarse retro look
 
 #define TIME (u_time * 0.15)
 
@@ -51,9 +52,8 @@ float circularEffect(vec2 p)
 
 void main()
 {
-    // Reproduce Shadertoy's 4-pixel block pixelation
     vec2 frag_coord  = gl_TexCoord[0].xy * u_resolution;
-    vec2 p_pixelated = floor(frag_coord / 4.0) * 4.0;
+    vec2 p_pixelated = floor(frag_coord / u_pixel_size) * u_pixel_size;
     vec2 p           = p_pixelated / u_resolution - 0.5;
 
     p += vec2(sin(TIME * 15.0) * 0.01, 0.0);
