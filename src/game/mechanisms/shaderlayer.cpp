@@ -142,6 +142,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    instance->_uv_width = ValueReader::readValue<float>("uv_width", map).value_or(instance->_uv_width);
    instance->_uv_height   = ValueReader::readValue<float>("uv_height",   map).value_or(instance->_uv_height);
    instance->_ring_scale  = ValueReader::readValue<float>("ring_scale",  map).value_or(instance->_ring_scale);
+   instance->_pixel_size  = ValueReader::readValue<float>("pixel_size",  map).value_or(instance->_pixel_size);
    instance->_time_offset = ValueReader::readValue<float>("time_offset_s", map).value_or(instance->_time_offset);
 
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
