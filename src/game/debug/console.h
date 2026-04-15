@@ -11,7 +11,7 @@
 class Console
 {
 public:
-   using CommandFunction = std::function<void(void)>;
+   using CommandFunction = std::function<void(const std::vector<std::string>&)>;
 
    /// \brief stores one help entry with a command description and optional usage examples.
    struct HelpCommand
@@ -95,6 +95,11 @@ public:
 private:
    /// \brief constructs the singleton console and pre-registers built-in command help entries.
    Console();
+
+   /// \brief inserts a command into the dispatch table without adding a help entry.
+   /// \param command the key used to look up this command (may be multi-token, e.g. "weapon add gun").
+   /// \param callback function invoked when the command is matched.
+   void addCommand(const std::string& command, CommandFunction callback);
 
    /// \brief gives the player a bow weapon and binds it to the current player body.
    void giveWeaponBow();
