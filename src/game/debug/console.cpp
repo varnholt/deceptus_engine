@@ -18,29 +18,469 @@
 #include <ranges>
 #include <sstream>
 
+namespace
+{
+void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
+{
+   auto& weapons = SaveState::getPlayerInfo()._weapons;
+   weapons._weapons.push_back(weapon);
+   weapons._selected = weapon;
+}
+}  // namespace
+
 Console::Console()
 {
-   _help.registerCommand("leveldesign", "playback <enable/disable/load/save/replay/reset>: use game playback", {"playback enable"});
-   _help.registerCommand("leveldesign", "cpanlimitoff: disable cpan maximum radius");
-   _help.registerCommand("leveldesign", "playerlight <enable/disable/alpha>: toggle or set player light intensity", {"playerlight enable", "playerlight disable", "playerlight alpha 100"});
-   _help.registerCommand("teleportation", "tpp <x>,<y>: teleport to tile position", {"tpp 100, 330"});
-   _help.registerCommand("teleportation", "tps: teleport to start position");
-   _help.registerCommand("teleportation", "tpc <n>: teleport to checkpoint", {"tpc 0"});
-   _help.registerCommand("teleportation", "tpr <name>: teleport to room by name", {"tpr my_room"});
+   // weapon
+   _help.registerCommand("inventory", "weapon <add/clear> <sword/bow/gun>: add/clear weapons", {"weapon add sword", "weapon clear"});
+
+   addCommand(
+      "weapon add gun",
+      [this](const auto&)
+      {
+         giveWeaponGun();
+         _log.emplace_back("given gun to player");
+      }
+   );
+
+   addCommand(
+      "weapon add bow",
+      [this](const auto&)
+      {
+         giveWeaponBow();
+         _log.emplace_back("given bow to player");
+      }
+   );
+
+   addCommand(
+      "weapon add sword",
+      [this](const auto&)
+      {
+         giveWeaponSword();
+         _log.emplace_back("given sword to player");
+      }
+   );
+
+   addCommand(
+      "weapon clear",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._weapons._weapons.clear();
+         SaveState::getPlayerInfo()._weapons._selected.reset();
+         _log.emplace_back("cleared all weapons");
+      }
+   );
+
+   // extra
    _help.registerCommand(
       "inventory",
       "extra <add/clear> <climb/dash/wallslide/walljump/doublejump/invulnerable/crouch/all>: toggle extras",
       {"extra add doublejump", "extra clear"}
    );
+
+   addCommand(
+      "extra add climb",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::WallClimb);
+         _log.emplace_back("given climb extra to player");
+      }
+   );
+
+   addCommand(
+      "extra add crouch",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Crouch);
+         _log.emplace_back("given crouch extra to player");
+      }
+   );
+
+   addCommand(
+      "extra add dash",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Dash);
+         _log.emplace_back("given dash extra to player");
+      }
+   );
+
+   addCommand(
+      "extra add wallslide",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::WallSlide);
+         _log.emplace_back("given wallslide extra to player");
+      }
+   );
+
+   addCommand(
+      "extra add walljump",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::WallJump);
+         _log.emplace_back("given walljump extra to player");
+      }
+   );
+
+   addCommand(
+      "extra add doublejump",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::DoubleJump);
+         _log.emplace_back("given doublejump extra to player");
+      }
+   );
+
+   addCommand(
+      "extra add invulnerable",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Invulnerable);
+         _log.emplace_back("given invulnerable extra to player");
+      }
+   );
+
+   addCommand(
+      "extra add all",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._extra_table._skills._skills = 0xffffffff;
+         _log.emplace_back("given all extras to player");
+      }
+   );
+
+   addCommand(
+      "extra clear",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._extra_table._skills._skills = 0;
+         _log.emplace_back("cleared all player extras");
+      }
+   );
+
+   // item
    _help.registerCommand(
       "inventory",
       "item <add/clear/list/listall/remove> <item name>: add/clear/list/remove items",
       {"item add key_skull", "item remove key_skull", "item list", "item clear", "item listall"}
    );
-   _help.registerCommand("inventory", "weapon <add/clear> <sword/bow/gun>: add/clear weapons", {"weapon add sword", "weapon clear"});
-   _help.registerCommand("cheats", "damage <n>: cause damage to player", {"damage 100"});
-   _help.registerCommand("cheats", "iddqd: make player invulnerable");
-   _help.registerCommand("cheats", "pgravity <gravity>: set player gravity scale", {"pgravity 0.1"});
+
+   addCommand(
+      "item add",
+      [this](const auto& args)
+      {
+         if (args.size() == 3)
+         {
+            SaveState::getPlayerInfo()._inventory.add(args.at(2));
+            _log.emplace_back("added item to player");
+         }
+      }
+   );
+
+   addCommand(
+      "item remove",
+      [this](const auto& args)
+      {
+         if (args.size() == 3)
+         {
+            SaveState::getPlayerInfo()._inventory.remove(args.at(2));
+            _log.emplace_back("removed item from player");
+         }
+      }
+   );
+
+   addCommand(
+      "item list",
+      [this](const auto&)
+      {
+         for (const auto& item : SaveState::getPlayerInfo()._inventory._items)
+         {
+            _log.emplace_back(item);
+         }
+      }
+   );
+
+   addCommand(
+      "item listall",
+      [this](const auto&)
+      {
+         for (const auto& name : SaveState::getPlayerInfo()._inventory.readItemNames())
+         {
+            _log.emplace_back(name);
+         }
+      }
+   );
+
+   addCommand(
+      "item clear",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._inventory._items.clear();
+         _log.emplace_back("removed all items");
+      }
+   );
+
+   // teleportation
+   registerCallback("tps", [this](const auto&) { teleportToStartPosition(); }, "teleportation", "tps: teleport to start position");
+
+   registerCallback(
+      "tpp",
+      [this](const auto& args)
+      {
+         if (args.size() == 3)
+         {
+            teleportToTile(std::atoi(args.at(1).c_str()), std::atoi(args.at(2).c_str()));
+         }
+      },
+      "teleportation",
+      "tpp <x>,<y>: teleport to tile position",
+      {"tpp 100, 330"}
+   );
+
+   registerCallback(
+      "tpc",
+      [this](const auto& args)
+      {
+         if (args.size() == 2)
+         {
+            teleportToCheckpoint(std::atoi(args.at(1).c_str()));
+         }
+      },
+      "teleportation",
+      "tpc <n>: teleport to checkpoint",
+      {"tpc 0"}
+   );
+
+   registerCallback(
+      "tpr",
+      [this](const auto& args)
+      {
+         if (args.size() == 2)
+         {
+            teleportToRoom(args.at(1));
+         }
+      },
+      "teleportation",
+      "tpr <name>: teleport to room by name",
+      {"tpr my_room"}
+   );
+
+   // playback
+   _help.registerCommand("leveldesign", "playback <enable/disable/load/save/replay/reset>: use game playback", {"playback enable"});
+   addCommand(
+      "playback enable",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("player")->setEnabled(true);
+         _log.emplace_back("playback enabled");
+      }
+   );
+
+   addCommand(
+      "playback disable",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("player")->setEnabled(false);
+         _log.emplace_back("playback disabled");
+      }
+   );
+
+   addCommand(
+      "playback save",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("player")->serialize();
+         _log.emplace_back("playback saved");
+      }
+   );
+
+   addCommand(
+      "playback load",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("player")->deserialize();
+         _log.emplace_back("playback loaded");
+      }
+   );
+
+   addCommand(
+      "playback replay",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("player")->play();
+         _log.emplace_back("playback started");
+      }
+   );
+
+   addCommand(
+      "playback reset",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("player")->clear();
+         _log.emplace_back("playback reset");
+      }
+   );
+
+   // global playback
+   _help.registerCommand(
+      "leveldesign", "globalplayback <enable/disable/load/save/replay/reset>: use global game playback", {"globalplayback enable"}
+   );
+
+   addCommand(
+      "globalplayback enable",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("global")->setEnabled(true);
+         _log.emplace_back("global playback enabled");
+      }
+   );
+
+   addCommand(
+      "globalplayback disable",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("global")->setEnabled(false);
+         _log.emplace_back("global playback disabled");
+      }
+   );
+
+   addCommand(
+      "globalplayback save",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("global")->serialize();
+         _log.emplace_back("global playback saved");
+      }
+   );
+
+   addCommand(
+      "globalplayback load",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("global")->deserialize();
+         _log.emplace_back("global playback loaded");
+      }
+   );
+
+   addCommand(
+      "globalplayback replay",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("global")->play();
+         _log.emplace_back("global playback started");
+      }
+   );
+
+   addCommand(
+      "globalplayback reset",
+      [this](const auto&)
+      {
+         EventSerializer::getInstance("global")->clear();
+         _log.emplace_back("global playback reset");
+      }
+   );
+
+   // playerlight
+   _help.registerCommand(
+      "leveldesign",
+      "playerlight <enable/disable/alpha>: toggle or set player light intensity",
+      {"playerlight enable", "playerlight disable", "playerlight alpha 100"}
+   );
+
+   addCommand(
+      "playerlight enable",
+      [this](const auto&)
+      {
+         Tweaks::instance()._player_light_enabled = true;
+         _log.emplace_back("player light enabled");
+      }
+   );
+
+   addCommand(
+      "playerlight disable",
+      [this](const auto&)
+      {
+         Tweaks::instance()._player_light_enabled = false;
+         _log.emplace_back("player light disabled");
+      }
+   );
+
+   addCommand(
+      "playerlight alpha",
+      [this](const auto& args)
+      {
+         if (args.size() == 3)
+         {
+            const auto alpha = std::clamp(std::atoi(args.at(2).c_str()), 0, 255);
+            Tweaks::instance()._player_light_alpha = static_cast<uint8_t>(alpha);
+            std::ostringstream os;
+            os << "player light alpha set to " << alpha;
+            _log.push_back(os.str());
+         }
+      }
+   );
+
+   // cheats
+   registerCallback(
+      "iddqd",
+      [this](const auto&)
+      {
+         SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Invulnerable);
+         _log.emplace_back("invulnerable");
+      },
+      "cheats",
+      "iddqd: make player invulnerable"
+   );
+
+   registerCallback(
+      "damage",
+      [this](const auto& args)
+      {
+         if (args.size() == 2)
+         {
+            const auto damage = std::atoi(args.at(1).c_str());
+            Player::getCurrent()->damage(damage);
+            std::ostringstream os;
+            os << "damage player " << damage << std::endl;
+            _log.push_back(os.str());
+         }
+      },
+      "cheats",
+      "damage <n>: cause damage to player",
+      {"damage 100"}
+   );
+
+   registerCallback(
+      "pgravity",
+      [this](const auto& args)
+      {
+         if (args.size() == 2)
+         {
+            const auto scale = std::atof(args.at(1).c_str());
+            Player::getCurrent()->getBody()->SetGravityScale(scale);
+            std::ostringstream os;
+            os << "player gravity " << scale << std::endl;
+            _log.push_back(os.str());
+         }
+      },
+      "cheats",
+      "pgravity <gravity>: set player gravity scale",
+      {"pgravity 0.1"}
+   );
+
+   // leveldesign
+   registerCallback(
+      "cpanlimitoff",
+      [this](const auto&)
+      {
+         Tweaks::instance()._cpan_unlimited = true;
+         _log.emplace_back("disabled cpan limit");
+      },
+      "leveldesign",
+      "cpanlimitoff: disable cpan maximum radius"
+   );
+
+   registerCallback("ra", [](const auto&) { Player::getCurrent()->reloadAnimationPool(); }, "leveldesign", "ra: reload animations");
 }
 
 void Console::setActive(bool active)
@@ -65,16 +505,6 @@ void Console::chop()
 
    _command.pop_back();
 }
-
-namespace
-{
-void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
-{
-   auto& weapons = SaveState::getPlayerInfo()._weapons;
-   weapons._weapons.push_back(weapon);
-   weapons._selected = weapon;
-}
-}  // namespace
 
 void Console::giveWeaponBow()
 {
@@ -209,7 +639,6 @@ void Console::execute()
 {
    Log::Info() << "process command: " << _command;
 
-   // parse command
    std::istringstream iss(_command);
    std::vector<std::string> results((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
 
@@ -220,292 +649,32 @@ void Console::execute()
 
    _log.push_back(_command);
 
-   // weapon system
-   if (results.at(0) == "weapon" && results.size() >= 2)
+   const auto joined = [&](size_t token_count)
    {
-      if (results.at(1) == "add" && results.size() == 3)
+      std::string key = results[0];
+      for (size_t token_index = 1; token_index < token_count; ++token_index)
       {
-         if (results.at(2) == "gun")
-         {
-            giveWeaponGun();
-            _log.emplace_back("given gun to player");
-         }
-         else if (results.at(2) == "bow")
-         {
-            giveWeaponBow();
-            _log.emplace_back("given bow to player");
-         }
-         else if (results.at(2) == "sword")
-         {
-            giveWeaponSword();
-            _log.emplace_back("given sword to player");
-         }
-         else
-         {
-            _log.emplace_back("unknown weapon");
-         }
+         key += ' ';
+         key += results[token_index];
       }
-      else if (results.at(1) == "clear")
-      {
-         SaveState::getPlayerInfo()._weapons._weapons.clear();
-         SaveState::getPlayerInfo()._weapons._selected.reset();
-         _log.emplace_back("cleared all weapons");
-      }
+      return key;
+   };
+
+   auto command_it = _registered_commands.end();
+   for (auto token_count = std::min(results.size(), size_t{3}); token_count > 0 && command_it == _registered_commands.end(); --token_count)
+   {
+      command_it = _registered_commands.find(joined(token_count));
    }
 
-   // extras
-   else if (results.at(0) == "extra" && results.size() >= 2)
+   if (command_it != _registered_commands.end())
    {
-      if (results.at(1) == "add" && results.size() == 3)
-      {
-         auto& skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
-         if (results.at(2) == "climb")
-         {
-            skills |= static_cast<int32_t>(Skill::SkillType::WallClimb);
-            _log.emplace_back("given climb extra to player");
-         }
-         if (results.at(2) == "crouch")
-         {
-            skills |= static_cast<int32_t>(Skill::SkillType::Crouch);
-            _log.emplace_back("given crouch extra to player");
-         }
-         else if (results.at(2) == "dash")
-         {
-            skills |= static_cast<int32_t>(Skill::SkillType::Dash);
-            _log.emplace_back("given dash extra to player");
-         }
-         else if (results.at(2) == "wallslide")
-         {
-            skills |= static_cast<int32_t>(Skill::SkillType::WallSlide);
-            _log.emplace_back("given wallslide extra to player");
-         }
-         else if (results.at(2) == "walljump")
-         {
-            skills |= static_cast<int32_t>(Skill::SkillType::WallJump);
-            _log.emplace_back("given walljump extra to player");
-         }
-         else if (results.at(2) == "doublejump")
-         {
-            skills |= static_cast<int32_t>(Skill::SkillType::DoubleJump);
-            _log.emplace_back("given doublejump extra to player");
-         }
-         else if (results.at(2) == "invulnerable")
-         {
-            skills |= static_cast<int32_t>(Skill::SkillType::Invulnerable);
-            _log.emplace_back("given invulnerable extra to player");
-         }
-         else if (results.at(2) == "all")
-         {
-            skills = 0xffffffff;
-            _log.emplace_back("given all extras to player");
-         }
-      }
-      else if (results.at(1) == "clear")
-      {
-         auto& skills = SaveState::getPlayerInfo()._extra_table._skills._skills;
-         skills = 0;
-         _log.emplace_back("cleared all player extras");
-      }
+      command_it->second(results);
    }
-
-   // inventory
-   else if (results.at(0) == "item" && results.size() >= 2)
-   {
-      if (results.at(1) == "add" && results.size() == 3)
-      {
-         const auto item = results.at(2);
-         SaveState::getPlayerInfo()._inventory.add(item);
-         _log.emplace_back("added item to player");
-      }
-      else if (results.at(1) == "remove" && results.size() == 3)
-      {
-         const auto item = results.at(2);
-         SaveState::getPlayerInfo()._inventory.remove(item);
-         _log.emplace_back("removed item from player");
-      }
-      else if (results.at(1) == "list")
-      {
-         for (const auto& item : SaveState::getPlayerInfo()._inventory._items)
-         {
-            _log.emplace_back(item);
-         }
-      }
-      else if (results.at(1) == "listall")
-      {
-         for (const auto& name : SaveState::getPlayerInfo()._inventory.readItemNames())
-         {
-            _log.emplace_back(name);
-         }
-      }
-      else if (results.at(1) == "clear")
-      {
-         SaveState::getPlayerInfo()._inventory._items.clear();
-         _log.emplace_back("removed all items");
-      }
-   }
-
-   // teleportation
-   else if (results.at(0) == "tpp" && results.size() == 3)
-   {
-      const auto x_tl = std::atoi(results.at(1).c_str());
-      const auto y_tl = std::atoi(results.at(2).c_str());
-      teleportToTile(x_tl, y_tl);
-   }
-   else if (results.at(0) == "tpc" && results.size() == 2)
-   {
-      const auto checkpoint_index = std::atoi(results.at(1).c_str());
-      teleportToCheckpoint(checkpoint_index);
-   }
-   else if (results[0] == "tps")
-   {
-      teleportToStartPosition();
-   }
-   else if (results.at(0) == "tpr" && results.size() == 2)
-   {
-      teleportToRoom(results.at(1));
-   }
-
-   // playback
-   else if (results.at(0) == "playback" && results.size() == 2)
-   {
-      const auto& serializer = EventSerializer::getInstance("player");
-      if (results[1] == "enable")
-      {
-         serializer->setEnabled(true);
-         _log.emplace_back("playback enabled");
-      }
-      else if (results[1] == "disable")
-      {
-         serializer->setEnabled(false);
-         _log.emplace_back("playback disabled");
-      }
-      else if (results[1] == "save")
-      {
-         serializer->serialize();
-         _log.emplace_back("playback saved");
-      }
-      else if (results[1] == "load")
-      {
-         serializer->deserialize();
-         _log.emplace_back("playback loaded");
-      }
-      else if (results[1] == "replay")
-      {
-         serializer->play();
-         _log.emplace_back("playback started");
-      }
-      else if (results[1] == "reset")
-      {
-         serializer->clear();
-         _log.emplace_back("playback reset");
-      }
-   }
-
-   // global playback
-   else if (results.at(0) == "globalplayback" && results.size() == 2)
-   {
-      const auto& serializer = EventSerializer::getInstance("global");
-      if (results[1] == "enable")
-      {
-         serializer->setEnabled(true);
-         _log.emplace_back("global playback enabled");
-      }
-      else if (results[1] == "disable")
-      {
-         serializer->setEnabled(false);
-         _log.emplace_back("global playback disabled");
-      }
-      else if (results[1] == "save")
-      {
-         serializer->serialize();
-         _log.emplace_back("global playback saved");
-      }
-      else if (results[1] == "load")
-      {
-         serializer->deserialize();
-         _log.emplace_back("global playback loaded");
-      }
-      else if (results[1] == "replay")
-      {
-         serializer->play();
-         _log.emplace_back("global playback started");
-      }
-      else if (results[1] == "reset")
-      {
-         serializer->clear();
-         _log.emplace_back("global playback reset");
-      }
-   }
-
-   // tweaks
-   else if (results.at(0) == "iddqd")
-   {
-      SaveState::getPlayerInfo()._extra_table._skills._skills |= static_cast<int32_t>(Skill::SkillType::Invulnerable);
-      _log.emplace_back("invulnerable");
-   }
-   else if (results.at(0) == "damage" && results.size() == 2)
-   {
-      const auto damage = std::atoi(results.at(1).c_str());
-      Player::getCurrent()->damage(damage);
-
-      std::ostringstream os;
-      os << "damage player " << damage << std::endl;
-      _log.push_back(os.str());
-   }
-   else if (results[0] == "pgravity" && results.size() == 2)
-   {
-      const auto scale = std::atof(results.at(1).c_str());
-      Player::getCurrent()->getBody()->SetGravityScale(scale);
-      std::ostringstream os;
-      os << "player gravity " << scale << std::endl;
-      _log.push_back(os.str());
-   }
-   else if (results.at(0) == "cpanlimitoff")
-   {
-      Tweaks::instance()._cpan_unlimited = true;
-      _log.emplace_back("disabled cpan limit");
-   }
-   else if (results.at(0) == "playerlight" && results.size() >= 2)
-   {
-      if (results.at(1) == "enable")
-      {
-         Tweaks::instance()._player_light_enabled = true;
-         _log.emplace_back("player light enabled");
-      }
-      else if (results.at(1) == "disable")
-      {
-         Tweaks::instance()._player_light_enabled = false;
-         _log.emplace_back("player light disabled");
-      }
-      else if (results.at(1) == "alpha" && results.size() == 3)
-      {
-         const auto alpha = std::clamp(std::atoi(results.at(2).c_str()), 0, 255);
-         Tweaks::instance()._player_light_alpha = static_cast<uint8_t>(alpha);
-         std::ostringstream os;
-         os << "player light alpha set to " << alpha;
-         _log.push_back(os.str());
-      }
-      else
-      {
-         _log.emplace_back("usage: playerlight <enable/disable/alpha <0-255>>");
-      }
-   }
-
-   // generic
    else
    {
-      const auto command_it = _registered_commands.find(results.at(0));
-      if (command_it != _registered_commands.end())
-      {
-         command_it->second();
-         _log.push_back(command_it->first + " executed");
-      }
-      else
-      {
-         std::ostringstream os;
-         os << "unknown command: " << _command << std::endl;
-         _log.push_back(os.str());
-      }
+      std::ostringstream os;
+      os << "unknown command: " << _command << std::endl;
+      _log.push_back(os.str());
    }
 
    while (_log.size() > 50)
@@ -514,7 +683,7 @@ void Console::execute()
    }
 
    _history.push_back(_command);
-   _history_index = static_cast<int32_t>(_history.size());  // n + 1 is intentional
+   _history_index = static_cast<int32_t>(_history.size());
    _command.clear();
 }
 
@@ -546,6 +715,11 @@ void Console::nextCommand()
       _history_index = static_cast<int32_t>(_history.size() - 1);
    }
    _command = _history[static_cast<size_t>(_history_index)];
+}
+
+void Console::addCommand(const std::string& command, CommandFunction callback)
+{
+   _registered_commands[command] = callback;
 }
 
 void Console::registerCallback(
