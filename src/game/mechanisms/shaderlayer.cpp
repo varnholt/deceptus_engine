@@ -134,6 +134,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
    if (vert_file.has_value())
    {
+      // Check if vertex shader file exists before attempting to load
       if (!std::filesystem::exists(vert_file.value()))
       {
          Log::Error() << "vertex shader file does not exist: " << vert_file.value();
@@ -147,6 +148,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
    if (frag_file.has_value())
    {
+      // check if fragment shader file exists before attempting to load
       if (!std::filesystem::exists(frag_file.value()))
       {
          Log::Error() << "fragment shader file does not exist: " << frag_file.value();
@@ -156,6 +158,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
          Log::Error() << "error compiling " << frag_file.value();
       }
 
+      // analyze the fragment shader source to determine which uniforms are present
       instance->checkUniforms(frag_file.value());
    }
 

@@ -67,9 +67,13 @@ void main()
     float effect    = abs(-circularEffect(offset));
     fbm_value      *= effect * effect * 2.0;
 
-    vec3  col        = mix(vec3(0.2, 0.1, 0.4) / fbm_value, u_flash_color, u_flash_intensity);
-    float brightness = dot(col, vec3(0.299, 0.587, 0.114));
+    vec3  base_color = vec3(0.2, 0.1, 0.4) / fbm_value;
+    float brightness = dot(base_color, vec3(0.299, 0.587, 0.114));
+
+    // flash only tints already-visible pixels; alpha stays gated on the original brightness
+    // so background pixels remain transparent even at full flash intensity
+    vec3 output_color = mix(base_color, u_flash_color, u_flash_intensity);
 
     // threshold cuts near-black pixels to fully transparent, preventing colour bleed onto adjacent layers
-    gl_FragColor = vec4(col, clamp(brightness - 0.05, 0.0, 1.0));
+    gl_FragColor = vec4(output_color, clamp(brightness - 0.05, 0.0, 1.0));
 }
