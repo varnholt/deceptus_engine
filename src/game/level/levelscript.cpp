@@ -12,6 +12,7 @@
 #include "game/level/luainterface.h"
 #include "game/level/luanode.h"
 #include "game/mechanisms/dialogue.h"
+#include "game/mechanisms/ringshaderlayer.h"
 #include "game/mechanisms/extra.h"
 #include "game/mechanisms/sensorrect.h"
 #include "game/player/player.h"
@@ -152,6 +153,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setLuaNodeVisible", LevelScriptCallbacks::setLuaNodeVisible);
    lua_register(_lua_state, "setMechanismEnabled", LevelScriptCallbacks::setMechanismEnabled);
    lua_register(_lua_state, "setMechanismVisible", LevelScriptCallbacks::setMechanismVisible);
+   lua_register(_lua_state, "flashMechanism",       LevelScriptCallbacks::flashMechanism);
    lua_register(_lua_state, "setAmbient", LevelScriptCallbacks::setAmbient);
    lua_register(_lua_state, "setZoomFactor", LevelScriptCallbacks::setZoomFactor);
    lua_register(_lua_state, "showDialogue", LevelScriptCallbacks::showDialogue);
@@ -458,6 +460,27 @@ void LevelScript::setMechanismEnabled(const std::string& search_pattern, bool en
    for (auto& mechanism : mechanisms)
    {
       mechanism->setEnabled(enabled);
+   }
+}
+
+void LevelScript::flashMechanism(const std::string& search_pattern, float red, float green, float blue, float duration_s)
+{
+   if (!_search_mechanism_callback)
+   {
+      Log::Error() << "search mechanism callback not initialized yet";
+      return;
+   }
+
+   const auto mechanisms = _search_mechanism_callback(search_pattern, std::nullopt);
+   Log::Info() << "flashMechanism: pattern '" << search_pattern << "' matched " << mechanisms.size() << " mechanism(s)";
+   for (auto& mechanism : mechanisms)
+   {
+      auto* ring = dynamic_cast<RingShaderLayer*>(mechanism.get());
+      Log::Info() << "flashMechanism: dynamic_cast " << (ring ? "succeeded" : "FAILED — not a RingShaderLayer");
+      if (ring)
+      {
+         ring->flash(red, green, blue, duration_s);
+      }
    }
 }
 

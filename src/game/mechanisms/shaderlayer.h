@@ -35,7 +35,11 @@ struct ShaderLayer : public GameMechanism, public GameNode
 
    /// \brief inspects shader source to detect optional uniform support.
    /// \param shader_path file path to the fragment shader source.
-   void checkUniforms(const std::string& shader_path);
+   virtual void checkUniforms(const std::string& shader_path);
+
+   /// \brief called after base deserialization so subclasses can read their own TMX properties.
+   /// \param data deserialization data passed through from the factory.
+   virtual void readCustomProperties(const GameDeserializeData& data) {}
 
    sf::Shader _shader;
    sf::Vector2f _position;
@@ -49,10 +53,6 @@ struct ShaderLayer : public GameMechanism, public GameNode
 
    bool _has_u_resolution = false;
    bool _has_u_uv_height = false;
-   bool _has_u_ring_scale = false;
-   float _ring_scale = 1.0f / 3.0f; //!< ring size relative to the quad, exposed via TMX property "ring_scale"
-   bool _has_u_pixel_size = false;
-   float _pixel_size = 1.0f; //!< pixel block size in screen pixels, exposed via TMX property "pixel_size"
 
    /// \brief creates and configures a shader layer from tmx object properties.
    /// \param parent owning game node in the scene graph.
