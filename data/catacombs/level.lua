@@ -22,6 +22,8 @@ _player_intersected_with_water_block_sensor = false
 _player_wont_dive_dialogue_shown = false
 _player_intersected_with_zone_rect = false
 
+_sword_ring_flash_color = {r = 1.0, g = 0.6, b = 0.2}
+
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
@@ -176,6 +178,8 @@ function update(dt)
       -- change music on zone enter event
       addSensorRectCallback("zone_rect")
 
+      addSensorRectCallback("sword_ring_sensor")
+
       initLocker()
       initDrawer()
    end
@@ -289,6 +293,8 @@ function playerCollidesWithSensorRect(rect_id)
       _player_intersected_with_monk_rect = true
    elseif (rect_id == "water_block_sensor_01") then
       _player_intersected_with_water_block_sensor = true
+   elseif (rect_id == "sword_ring_sensor") then
+      flashMechanism("sword_ring", _sword_ring_flash_color.r, _sword_ring_flash_color.g, _sword_ring_flash_color.b, 0.4)
    elseif (rect_id == "zone_rect") then
       if (not _player_intersected_with_zone_rect) then
          _player_intersected_with_zone_rect = true
