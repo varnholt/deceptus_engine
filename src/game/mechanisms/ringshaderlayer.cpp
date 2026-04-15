@@ -21,16 +21,23 @@ void RingShaderLayer::update(const sf::Time& dt)
 {
    ShaderLayer::update(dt);
 
-   // update uniforms depending on enabled state
+   if (_flash_duration > 0.0f)
+   {
+      _flash_elapsed += dt.asSeconds();
+      _flash_intensity = std::max(1.0f - _flash_elapsed / _flash_duration, 0.0f);
+      if (_flash_elapsed >= _flash_duration)
+      {
+         _flash_duration  = 0.0f;
+         _flash_intensity = 0.0f;
+      }
+   }
+}
 
-   // slightly decrease the effect value
-   // effect *= 0.2;
-   // slightly decrease the alpha value of the color
-   // fragColor = vec4(col, 1.0);
-
-   const auto now = std::chrono::high_resolution_clock::now();
-
-   const auto elapsed = now - _disable_time;
+void RingShaderLayer::flash(float red, float green, float blue, float duration_s)
+{
+   _flash_color    = sf::Glsl::Vec3{red, green, blue};
+   _flash_duration = duration_s;
+   _flash_elapsed  = 0.0f;
 }
 
 void RingShaderLayer::setEnabled(bool enabled)

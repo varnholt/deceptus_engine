@@ -49,7 +49,9 @@ void ShaderLayer::checkUniforms(const std::string& shader_path)
    _has_u_resolution  = shader_source.find("u_resolution;")  != std::string::npos;
    _has_u_uv_height   = shader_source.find("u_uv_height;")   != std::string::npos;
    _has_u_ring_scale  = shader_source.find("u_ring_scale;")  != std::string::npos;
-   _has_u_pixel_size  = shader_source.find("u_pixel_size;")  != std::string::npos;
+   _has_u_pixel_size      = shader_source.find("u_pixel_size;")      != std::string::npos;
+   _has_u_flash_color     = shader_source.find("u_flash_color;")     != std::string::npos;
+   _has_u_flash_intensity = shader_source.find("u_flash_intensity;") != std::string::npos;
 }
 
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
@@ -80,6 +82,16 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    if (_has_u_pixel_size)
    {
       _shader.setUniform("u_pixel_size", _pixel_size);
+   }
+
+   if (_has_u_flash_color)
+   {
+      _shader.setUniform("u_flash_color", _flash_color);
+   }
+
+   if (_has_u_flash_intensity)
+   {
+      _shader.setUniform("u_flash_intensity", _flash_intensity);
    }
 
    sf::Vertex quad[] = {
