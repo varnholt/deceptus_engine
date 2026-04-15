@@ -55,6 +55,14 @@ public:
    /// \param group optional mechanism group filter.
    void setMechanismVisible(const std::string& search_pattern, bool visible, const std::optional<std::string>& group = std::nullopt);
 
+   /// \brief triggers a colour flash on all matching RingShaderLayer mechanisms.
+   /// \param search_pattern regex used to select mechanisms.
+   /// \param red red component 0-1.
+   /// \param green green component 0-1.
+   /// \param blue blue component 0-1.
+   /// \param duration_s fade-out duration in seconds.
+   void flashMechanism(const std::string& search_pattern, float red, float green, float blue, float duration_s);
+
    /// \brief checks visibility of the first mechanism that matches the query.
    /// \param mechanism_id regex used to select mechanisms.
    /// \param group optional mechanism group filter.

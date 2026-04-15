@@ -18,6 +18,7 @@ int32_t isMechanismEnabled(lua_State* state);
 int32_t isMechanismVisible(lua_State* state);
 int32_t setMechanismEnabled(lua_State* state);
 int32_t setMechanismVisible(lua_State* state);
+int32_t flashMechanism(lua_State* state);
 int32_t toggle(lua_State* state);
 int32_t showDialogue(lua_State* state);
 
