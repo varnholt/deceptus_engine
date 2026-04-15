@@ -68,5 +68,5 @@ void main()
     vec3  col        = vec3(0.2, 0.1, 0.4) / fbm_value;
     float brightness = dot(col, vec3(0.299, 0.587, 0.114));
 
-    gl_FragColor = vec4(col, clamp(brightness, 0.0, 1.0));
+    gl_FragColor = vec4(col, clamp(brightness - 0.05, 0.0, 1.0));
 }
