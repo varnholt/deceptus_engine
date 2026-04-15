@@ -3,7 +3,8 @@
 uniform float u_time;
 uniform vec2 u_resolution;
 uniform sampler2D u_texture;
-uniform float u_uv_height; // used as a uv stretch factor for the quad height
+uniform float u_uv_height;   //!< used as a uv stretch factor for the quad height
+uniform float u_ring_scale;  //!< controls the ring size relative to the quad; default 0.333
 
 
 #define TIME (u_time * 0.15)
@@ -70,7 +71,7 @@ void main()
 
     // convert back to UV space
     vec2 uv_pixel = screen_uv / u_resolution;
-    vec2 quad_scale = (fwidth(gl_TexCoord[0].xy) * u_resolution) / 2.0; // use half of the quad size for effect
+    vec2 quad_scale = vec2(u_ring_scale);
     vec2 p = (uv_pixel - 0.5) / quad_scale;
 
 
