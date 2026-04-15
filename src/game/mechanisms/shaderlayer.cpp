@@ -46,8 +46,10 @@ void ShaderLayer::checkUniforms(const std::string& shader_path)
    buffer << file.rdbuf();
    const auto shader_source = buffer.str();
 
-   _has_u_resolution = shader_source.find("u_resolution;") != std::string::npos;
-   _has_u_uv_height = shader_source.find("u_uv_height;") != std::string::npos;
+   _has_u_resolution  = shader_source.find("u_resolution;")  != std::string::npos;
+   _has_u_uv_height   = shader_source.find("u_uv_height;")   != std::string::npos;
+   _has_u_ring_scale  = shader_source.find("u_ring_scale;")  != std::string::npos;
+   _has_u_pixel_size  = shader_source.find("u_pixel_size;")  != std::string::npos;
 }
 
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
@@ -68,6 +70,16 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    if (_has_u_uv_height)
    {
       _shader.setUniform("u_uv_height", _uv_height);
+   }
+
+   if (_has_u_ring_scale)
+   {
+      _shader.setUniform("u_ring_scale", _ring_scale);
+   }
+
+   if (_has_u_pixel_size)
+   {
+      _shader.setUniform("u_pixel_size", _pixel_size);
    }
 
    sf::Vertex quad[] = {
@@ -128,7 +140,9 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    instance->addChunks(bounding_rect);
    instance->_z_index = ValueReader::readValue<int32_t>("z", map).value_or(instance->_z_index);
    instance->_uv_width = ValueReader::readValue<float>("uv_width", map).value_or(instance->_uv_width);
-   instance->_uv_height = ValueReader::readValue<float>("uv_height", map).value_or(instance->_uv_height);
+   instance->_uv_height   = ValueReader::readValue<float>("uv_height",   map).value_or(instance->_uv_height);
+   instance->_ring_scale  = ValueReader::readValue<float>("ring_scale",  map).value_or(instance->_ring_scale);
+   instance->_pixel_size  = ValueReader::readValue<float>("pixel_size",  map).value_or(instance->_pixel_size);
    instance->_time_offset = ValueReader::readValue<float>("time_offset_s", map).value_or(instance->_time_offset);
 
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);

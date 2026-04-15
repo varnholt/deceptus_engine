@@ -49,6 +49,10 @@ struct ShaderLayer : public GameMechanism, public GameNode
 
    bool _has_u_resolution = false;
    bool _has_u_uv_height = false;
+   bool _has_u_ring_scale = false;
+   float _ring_scale = 1.0f / 3.0f; //!< ring size relative to the quad, exposed via TMX property "ring_scale"
+   bool _has_u_pixel_size = false;
+   float _pixel_size = 1.0f; //!< pixel block size in screen pixels, exposed via TMX property "pixel_size"
 
    /// \brief creates and configures a shader layer from tmx object properties.
    /// \param parent owning game node in the scene graph.
