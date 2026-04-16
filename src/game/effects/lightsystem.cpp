@@ -386,17 +386,22 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       {
          continue;
       }
-      bool is_enemy = false;
+      bool skip = false;
       for (auto* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
       {
+         if (fixture->GetFilterData().categoryBits & CategoryNoCastShadow)
+         {
+            skip = true;
+            break;
+         }
          auto* user_data = fixture->GetUserData().pointer;
          if (user_data && static_cast<FixtureNode*>(user_data)->getType() == ObjectType::ObjectTypeEnemy)
          {
-            is_enemy = true;
+            skip = true;
             break;
          }
       }
-      if (!is_enemy)
+      if (!skip)
       {
          shadow_candidates.push_back(body);
       }
