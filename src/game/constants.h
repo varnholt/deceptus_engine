@@ -237,6 +237,7 @@ enum EntityCategory
    CategoryEnemyWalkThrough = 0x04,
    CategoryEnemyCollideWith = 0x08,
    CategoryMoveableBox = 0x10,
+   CategoryNoCastShadow = 0x20,
 };
 
 /// \brief screen anchor positions for message-box placement.
