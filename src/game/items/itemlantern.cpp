@@ -125,8 +125,6 @@ void ItemLantern::update(const sf::Time& delta_time)
 
 void ItemLantern::onEquipped()
 {
-   _enabled = true;
-
    auto* player = Player::getCurrent();
    if (!player)
    {
@@ -185,6 +183,8 @@ void ItemLantern::onEquipped()
 
    _player_light_right = create_light(Orientation::Right);
    level->getLightSystem()->_lights.push_back(_player_light_right);
+
+   _enabled = true;
 }
 
 void ItemLantern::onUnequipped()
