@@ -1,0 +1,27 @@
+{
+    "offset_y_m": -1.0,
+    "left": {
+        "texture": "spotlight_l.png",
+        "color_r": 255,
+        "color_g": 200,
+        "color_b": 100,
+        "color_a": 255,
+        "width_px": 256,
+        "height_px": 128,
+        "center_offset_x_px": 128,
+        "center_offset_y_px": 0,
+        "offset_x_m": -3.4
+    },
+    "right": {
+        "texture": "spotlight_r.png",
+        "color_r": 255,
+        "color_g": 200,
+        "color_b": 100,
+        "color_a": 255,
+        "width_px": 256,
+        "height_px": 128,
+        "center_offset_x_px": -128,
+        "center_offset_y_px": 0,
+        "offset_x_m": 1.9
+    }
+}

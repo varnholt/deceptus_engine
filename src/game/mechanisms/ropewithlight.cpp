@@ -99,7 +99,7 @@ void RopeWithLight::setup(const GameDeserializeData& data)
 
    // add raycast light; exclude all chain bodies from shadow casting — they are tiny
    // physics proxies that produce degenerate or distracting shadow quads.
-   _light = LightSystem::createLightInstance(this, {});
+   _light = LightSystem::createLightInstance(this, GameDeserializeData{});
    _light->_color = sf::Color(color[0], color[1], color[2], color[3]);
    for (auto* body : _chain_elements)
    {

@@ -190,19 +190,17 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    _light_system = std::make_shared<LightSystem>();
 
    // set up occluder callback for light occlusion (z=24 "level" layer)
-   _light_system->setOccluderCallback(
-      [this](sf::RenderTarget& target)
-      {
-         drawLightOccluders(target);
-      }
-   );
+   _light_system->setOccluderCallback([this](sf::RenderTarget& target) { drawLightOccluders(target); });
 
    // add raycast light for player
    if (Tweaks::instance()._player_light_enabled)
    {
-      _player_light = LightSystem::createLightInstance(Player::getCurrent(), {});
-      _player_light->_color = sf::Color(255, 255, 255, Tweaks::instance()._player_light_alpha);
-      _player_light->_sprite->setColor(_player_light->_color);
+      _player_light = LightSystem::createLightInstance(Player::getCurrent(), GameDeserializeData{});
+
+      nlohmann::json player_light_config;
+      std::ifstream("data/config/player_light.json") >> player_light_config;
+      _player_light->deserialize(player_light_config);
+
       _light_system->_lights.push_back(_player_light);
    }
 }
@@ -1053,11 +1051,9 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
 void Level::displayFinalTextures()
 {
    // display the whole texture
-   sf::View view(
-      sf::FloatRect(
-         {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
-      )
-   );
+   sf::View view(sf::FloatRect(
+      {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
+   ));
 
    view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 
@@ -1095,14 +1091,12 @@ void Level::drawGlowSprite()
 
    sf::Sprite blur_scale_sprite(_blur_shader->getRenderTextureScaled()->getTexture());
    blur_scale_sprite.scale(1.0f / down_scale_x, 1.0f / down_scale_y);
-   blur_scale_sprite.setTextureRect(
-      sf::IntRect(
-         0,
-         static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y),
-         static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().x),
-         -static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y)
-      )
-   );
+   blur_scale_sprite.setTextureRect(sf::IntRect(
+      0,
+      static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y),
+      static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().x),
+      -static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y)
+   ));
 
    sf::RenderStates states_add;
    states_add.blendMode = sf::BlendAdd;
@@ -1222,7 +1216,9 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    drawLightMap();
 
-   _light_system->draw(*_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.lighting2, _render_targets.normal);
+   _light_system->draw(
+      *_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.lighting2, _render_targets.normal
+   );
 
    _render_targets.deferred->display();
 
@@ -1252,10 +1248,13 @@ void Level::updatePlayerLight()
    _player_light->_pos_m = Player::getCurrent()->getBody()->GetPosition();
    _player_light->updateSpritePosition();
 
-   // the player, once he dies, becomes inactive and just sinks down
-   // so the player light is disabled to avoid any glitches
-   _player_light->_color = sf::Color(255, 255, 255, Player::getCurrent()->isDead() ? 0 : Tweaks::instance()._player_light_alpha);
-   _player_light->_sprite->setColor(_player_light->_color);  // update sprite color every frame
+   // zero alpha on death to avoid glitches as the player sinks down
+   auto color = _player_light->_color;
+   if (Player::getCurrent()->isDead())
+   {
+      color.a = 0;
+   }
+   _player_light->_sprite->setColor(color);
 }
 
 const std::shared_ptr<LightSystem>& Level::getLightSystem() const

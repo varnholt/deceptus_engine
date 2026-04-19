@@ -358,10 +358,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
    std::ranges::sort(
       _active_lights,
       [&player_body](const auto& a, const auto& b)
-      {
-         return (player_body->GetWorldCenter() - a->_pos_m).LengthSquared() <
-                (player_body->GetWorldCenter() - b->_pos_m).LengthSquared();
-      }
+      { return (player_body->GetWorldCenter() - a->_pos_m).LengthSquared() < (player_body->GetWorldCenter() - b->_pos_m).LengthSquared(); }
    );
 
    constexpr auto max_lights = 6;
@@ -529,6 +526,61 @@ void LightSystem::drawDebug(sf::RenderTarget& target)
 #endif
 }
 
+void LightSystem::LightInstance::deserialize(const nlohmann::json& node)
+{
+   if (!node.is_object())
+   {
+      return;
+   }
+   if (const auto it = node.find("color_r"); it != node.end())
+   {
+      _color.r = static_cast<uint8_t>(it->get<int32_t>());
+   }
+   if (const auto it = node.find("color_g"); it != node.end())
+   {
+      _color.g = static_cast<uint8_t>(it->get<int32_t>());
+   }
+   if (const auto it = node.find("color_b"); it != node.end())
+   {
+      _color.b = static_cast<uint8_t>(it->get<int32_t>());
+   }
+   if (const auto it = node.find("color_a"); it != node.end())
+   {
+      _color.a = static_cast<uint8_t>(it->get<int32_t>());
+   }
+   if (const auto it = node.find("width_px"); it != node.end())
+   {
+      _width_px = it->get<int32_t>();
+   }
+   if (const auto it = node.find("height_px"); it != node.end())
+   {
+      _height_px = it->get<int32_t>();
+   }
+   if (const auto it = node.find("center_offset_x_px"); it != node.end())
+   {
+      _center_offset_px.x = it->get<int32_t>();
+      _center_offset_m.x = _center_offset_px.x * MPP;
+   }
+   if (const auto it = node.find("center_offset_y_px"); it != node.end())
+   {
+      _center_offset_px.y = it->get<int32_t>();
+      _center_offset_m.y = _center_offset_px.y * MPP;
+   }
+   if (const auto it = node.find("texture"); it != node.end())
+   {
+      _texture = TexturePool::getInstance().get((std::filesystem::path("data/light/") / it->get<std::string>()).string());
+   }
+   if (_sprite && _texture)
+   {
+      _sprite->setTexture(*_texture);
+      _sprite->setTextureRect(
+         sf::IntRect({0, 0}, {static_cast<int32_t>(_texture->getSize().x), static_cast<int32_t>(_texture->getSize().y)})
+      );
+      _sprite->setScale({static_cast<float>(_width_px) / _texture->getSize().x, static_cast<float>(_height_px) / _texture->getSize().y});
+      _sprite->setColor(_color);
+   }
+}
+
 void LightSystem::LightInstance::updateSpritePosition() const
 {
    _sprite->setPosition(sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
@@ -659,6 +711,18 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    const auto scale_y = static_cast<float>(light->_height_px) / static_cast<float>(light->_texture->getSize().y);
    light->_sprite->setScale({scale_x, scale_y});
 
+   return light;
+}
+
+std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(GameNode* parent, const nlohmann::json& node)
+{
+   auto light = std::make_shared<LightSystem::LightInstance>(parent);
+   light->_texture = TexturePool::getInstance().get("data/light/smooth.png");
+   light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
+   light->_sprite->setTextureRect(
+      sf::IntRect({0, 0}, {static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y)})
+   );
+   light->deserialize(node);
    return light;
 }
 
