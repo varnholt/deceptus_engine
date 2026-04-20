@@ -391,7 +391,11 @@ Console::Console()
       "playerlight enable",
       [this](const auto&)
       {
-         Tweaks::instance()._player_light_enabled = true;
+         auto* level = Level::getCurrentLevel();
+         if (level && level->getPlayerLight())
+         {
+            level->getPlayerLight()->_enabled = true;
+         }
          _log.emplace_back("player light enabled");
       }
    );
@@ -400,7 +404,11 @@ Console::Console()
       "playerlight disable",
       [this](const auto&)
       {
-         Tweaks::instance()._player_light_enabled = false;
+         auto* level = Level::getCurrentLevel();
+         if (level && level->getPlayerLight())
+         {
+            level->getPlayerLight()->_enabled = false;
+         }
          _log.emplace_back("player light disabled");
       }
    );
@@ -411,11 +419,16 @@ Console::Console()
       {
          if (args.size() == 3)
          {
-            const auto alpha = std::clamp(std::atoi(args.at(2).c_str()), 0, 255);
-            Tweaks::instance()._player_light_alpha = static_cast<uint8_t>(alpha);
-            std::ostringstream os;
-            os << "player light alpha set to " << alpha;
-            _log.push_back(os.str());
+            const auto alpha = static_cast<uint8_t>(std::clamp(std::atoi(args.at(2).c_str()), 0, 255));
+            auto* level = Level::getCurrentLevel();
+            if (level && level->getPlayerLight())
+            {
+               level->getPlayerLight()->_color.a = alpha;
+               level->getPlayerLight()->_sprite->setColor(level->getPlayerLight()->_color);
+            }
+            std::ostringstream oss;
+            oss << "player light alpha set to " << static_cast<int>(alpha);
+            _log.push_back(oss.str());
          }
       }
    );

@@ -1,4 +1,5 @@
 {
+    "enabled": true,
     "texture": "smooth.png",
     "color_r": 255,
     "color_g": 255,

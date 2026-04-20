@@ -1,5 +1,4 @@
 {
-    "offset_y_m": -1.0,
     "left": {
         "texture": "spotlight_l.png",
         "color_r": 255,
@@ -10,7 +9,8 @@
         "height_px": 128,
         "center_offset_x_px": 128,
         "center_offset_y_px": 0,
-        "offset_x_m": -3.4
+        "offset_x_px": -163,
+        "offset_y_px": -48
     },
     "right": {
         "texture": "spotlight_r.png",
@@ -22,6 +22,7 @@
         "height_px": 128,
         "center_offset_x_px": -128,
         "center_offset_y_px": 0,
-        "offset_x_m": 1.9
+        "offset_x_px": 91,
+        "offset_y_px": -48
     }
 }

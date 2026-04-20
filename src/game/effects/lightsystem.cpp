@@ -532,44 +532,59 @@ void LightSystem::LightInstance::deserialize(const nlohmann::json& node)
    {
       return;
    }
+
    if (const auto it = node.find("color_r"); it != node.end())
    {
       _color.r = static_cast<uint8_t>(it->get<int32_t>());
    }
+
    if (const auto it = node.find("color_g"); it != node.end())
    {
       _color.g = static_cast<uint8_t>(it->get<int32_t>());
    }
+
    if (const auto it = node.find("color_b"); it != node.end())
    {
       _color.b = static_cast<uint8_t>(it->get<int32_t>());
    }
+
    if (const auto it = node.find("color_a"); it != node.end())
    {
       _color.a = static_cast<uint8_t>(it->get<int32_t>());
    }
+
    if (const auto it = node.find("width_px"); it != node.end())
    {
       _width_px = it->get<int32_t>();
    }
+
    if (const auto it = node.find("height_px"); it != node.end())
    {
       _height_px = it->get<int32_t>();
    }
+
    if (const auto it = node.find("center_offset_x_px"); it != node.end())
    {
       _center_offset_px.x = it->get<int32_t>();
       _center_offset_m.x = _center_offset_px.x * MPP;
    }
+
    if (const auto it = node.find("center_offset_y_px"); it != node.end())
    {
       _center_offset_px.y = it->get<int32_t>();
       _center_offset_m.y = _center_offset_px.y * MPP;
    }
+
    if (const auto it = node.find("texture"); it != node.end())
    {
       _texture = TexturePool::getInstance().get((std::filesystem::path("data/light/") / it->get<std::string>()).string());
    }
+
+   if (const auto it = node.find("enabled"); it != node.end())
+   {
+      _enabled = it->get<bool>();
+   }
+
    if (_sprite && _texture)
    {
       _sprite->setTexture(*_texture);
