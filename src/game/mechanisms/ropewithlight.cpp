@@ -2,7 +2,6 @@
 
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "framework/tmxparser/tmxtools.h"
 #include "game/io/valuereader.h"
 #include "game/level/level.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -83,13 +82,7 @@ void RopeWithLight::setup(const GameDeserializeData& data)
       sf::IntRect{{1056, 131}, {24, 30}},
    };
 
-   std::array<uint8_t, 4> color = {255, 255, 255, 50};
-   const auto map = data._tmx_object->_properties->_map;
-   const auto color_it = map.find("color");
-   if (color_it != map.end())
-   {
-      color = TmxTools::color(color_it->second->_value_string.value());
-   }
+   const auto& map = data._tmx_object->_properties->_map;
 
    auto sprite_index = std::clamp(ValueReader::readValue<int32_t>("sprite", map).value_or(1) - 1, 0, 3);
    _lamp_sprite->setTextureRect(_lamp_sprite_rects[sprite_index]);
@@ -99,8 +92,23 @@ void RopeWithLight::setup(const GameDeserializeData& data)
 
    // add raycast light; exclude all chain bodies from shadow casting — they are tiny
    // physics proxies that produce degenerate or distracting shadow quads.
-   _light = LightSystem::createLightInstance(this, GameDeserializeData{});
-   _light->_color = sf::Color(color[0], color[1], color[2], color[3]);
+   _light = LightSystem::createLightInstance(this, data);
+
+   if (const auto width = ValueReader::readValue<int32_t>("width_px", map))
+   {
+      _light->_width_px = width.value();
+   }
+
+   if (const auto height = ValueReader::readValue<int32_t>("height_px", map))
+   {
+      _light->_height_px = height.value();
+   }
+
+   _light->_sprite->setScale(
+      {static_cast<float>(_light->_width_px) / _light->_texture->getSize().x,
+       static_cast<float>(_light->_height_px) / _light->_texture->getSize().y}
+   );
+
    for (auto* body : _chain_elements)
    {
       _light->_excluded_bodies.insert(body);

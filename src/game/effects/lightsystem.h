@@ -35,10 +35,6 @@ public:
 
       sf::Color _color = {255, 255, 255, 80};
 
-      // falloff values are loaded from tiled but not currently used by the shader
-      // the sprite texture gradient provides distance falloff instead
-      std::array<float, 3> _falloff = {0.4f, 3.0f, 20.0f};
-
       bool _enabled = true;
 
       std::shared_ptr<sf::Texture> _texture;
