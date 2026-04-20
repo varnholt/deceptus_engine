@@ -1,6 +1,6 @@
 {
     "enabled": true,
-    "texture": "smooth.png",
+    "texture": "data/light/smooth.png",
     "color_r": 255,
     "color_g": 255,
     "color_b": 255,

@@ -1,6 +1,6 @@
 {
     "left": {
-        "texture": "spotlight_l.png",
+        "texture": "data/light/spotlight_l.png",
         "color_r": 255,
         "color_g": 200,
         "color_b": 100,
@@ -13,7 +13,7 @@
         "offset_y_px": -48
     },
     "right": {
-        "texture": "spotlight_r.png",
+        "texture": "data/light/spotlight_r.png",
         "color_r": 255,
         "color_g": 200,
         "color_b": 100,
