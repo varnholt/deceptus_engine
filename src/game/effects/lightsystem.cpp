@@ -577,7 +577,7 @@ void LightSystem::LightInstance::deserialize(const nlohmann::json& node)
 
    if (const auto it = node.find("texture"); it != node.end())
    {
-      _texture = TexturePool::getInstance().get((std::filesystem::path("data/light/") / it->get<std::string>()).string());
+      _texture = TexturePool::getInstance().get(it->get<std::string>());
    }
 
    if (const auto it = node.find("enabled"); it != node.end())
