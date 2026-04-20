@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "texture": "data/light/smooth.png",
+    "color_r": 255,
+    "color_g": 255,
+    "color_b": 255,
+    "color_a": 10,
+    "width_px": 256,
+    "height_px": 256
+}

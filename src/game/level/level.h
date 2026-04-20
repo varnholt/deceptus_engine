@@ -138,6 +138,10 @@ public:
    /// \return shared pointer reference to the light system.
    const std::shared_ptr<LightSystem>& getLightSystem() const;
 
+   /// \brief returns the ambient player light instance.
+   /// \return shared pointer to the player light, or nullptr if not created.
+   const std::shared_ptr<LightSystem::LightInstance>& getPlayerLight() const;
+
    /// \brief returns the current gameplay camera view.
    /// \return shared pointer reference to the level view.
    const std::shared_ptr<sf::View>& getLevelView() const;
