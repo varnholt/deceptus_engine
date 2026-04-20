@@ -193,16 +193,10 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    _light_system->setOccluderCallback([this](sf::RenderTarget& target) { drawLightOccluders(target); });
 
    // add raycast light for player
-   if (Tweaks::instance()._player_light_enabled)
-   {
-      _player_light = LightSystem::createLightInstance(Player::getCurrent(), GameDeserializeData{});
-
-      nlohmann::json player_light_config;
-      std::ifstream("data/config/player_light.json") >> player_light_config;
-      _player_light->deserialize(player_light_config);
-
-      _light_system->_lights.push_back(_player_light);
-   }
+   nlohmann::json player_light_config;
+   std::ifstream("data/config/player_light.json") >> player_light_config;
+   _player_light = LightSystem::createLightInstance(Player::getCurrent(), player_light_config);
+   _light_system->_lights.push_back(_player_light);
 }
 
 Level::~Level()
@@ -1240,7 +1234,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
 void Level::updatePlayerLight()
 {
-   if (!Tweaks::instance()._player_light_enabled)
+   if (!_player_light->_enabled)
    {
       return;
    }
@@ -1260,6 +1254,11 @@ void Level::updatePlayerLight()
 const std::shared_ptr<LightSystem>& Level::getLightSystem() const
 {
    return _light_system;
+}
+
+const std::shared_ptr<LightSystem::LightInstance>& Level::getPlayerLight() const
+{
+   return _player_light;
 }
 
 void Level::update(const sf::Time& dt)

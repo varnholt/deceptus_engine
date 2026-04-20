@@ -2,29 +2,11 @@
 
 #include "itemlantern.h"
 
-#include <cmath>
 #include <fstream>
 
 #include "game/io/texturepool.h"
 #include "game/level/level.h"
 #include "game/player/player.h"
-
-namespace
-{
-
-sf::Vector2f update_torch_offset(sf::Vector2f current_offset, sf::Vector2f target_offset, const sf::Time dt)
-{
-   const sf::Vector2f delta = target_offset - current_offset;
-   const auto distance_sq = (delta.x * delta.x) + (delta.y * delta.y);
-   constexpr auto base_speed = 0.5f;
-   constexpr auto reference_distance_px = 5.0f;
-   const auto reference_distance_sq = reference_distance_px * reference_distance_px;
-   const auto normalized_sq = distance_sq / reference_distance_sq;
-   const auto factor = std::clamp(base_speed * dt.asSeconds() * normalized_sq * normalized_sq, 0.0f, 1.0f);
-   return current_offset + delta * factor;
-}
-
-}  // namespace
 
 ItemLantern::ItemLantern()
     : _player_texture(TexturePool::getInstance().get("data/sprites/player.png")),
@@ -107,7 +89,8 @@ void ItemLantern::update(const sf::Time& delta_time)
 
    active_light->_enabled = true;
    inactive_light->_enabled = false;
-   active_light->_pos_m = player->getBody()->GetPosition() + b2Vec2(eye_offset_x_m + offset_x_m, eye_offset_y_m + _offset_y_m);
+   const float offset_y_m = pointing_right ? _offset_right_y_m : _offset_left_y_m;
+   active_light->_pos_m = player->getBody()->GetPosition() + b2Vec2(eye_offset_x_m + offset_x_m, eye_offset_y_m + offset_y_m);
    active_light->updateSpritePosition();
 
    sf::Vector2f helmet_offset_px{pointing_right ? -50.0f : -45.0f, -54.0f};
@@ -133,17 +116,24 @@ void ItemLantern::onEquipped()
    nlohmann::json config;
    std::ifstream("data/config/player_lantern.json") >> config;
 
-   if (const auto it = config.find("offset_y_m"); it != config.end())
+   if (const auto it = config["left"].find("offset_x_px"); it != config["left"].end())
    {
-      _offset_y_m = it->get<float>();
+      _offset_left_x_m = it->get<float>() * MPP;
    }
-   if (const auto it = config["left"].find("offset_x_m"); it != config["left"].end())
+
+   if (const auto it = config["left"].find("offset_y_px"); it != config["left"].end())
    {
-      _offset_left_x_m = it->get<float>();
+      _offset_left_y_m = it->get<float>() * MPP;
    }
-   if (const auto it = config["right"].find("offset_x_m"); it != config["right"].end())
+
+   if (const auto it = config["right"].find("offset_x_px"); it != config["right"].end())
    {
-      _offset_right_x_m = it->get<float>();
+      _offset_right_x_m = it->get<float>() * MPP;
+   }
+
+   if (const auto it = config["right"].find("offset_y_px"); it != config["right"].end())
+   {
+      _offset_right_y_m = it->get<float>() * MPP;
    }
 
    _player_light_left = LightSystem::createLightInstance(player, config["left"]);
