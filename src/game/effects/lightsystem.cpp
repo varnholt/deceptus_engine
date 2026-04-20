@@ -449,6 +449,17 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
 
       sf::RenderStates render_states{sf::BlendAdd};
       render_states.stencilMode = stencil_test_mode;
+
+      if (light->_shader)
+      {
+         light->_shader->setUniform("texture", *light->_texture);
+         if (light->_shader_update_callback)
+         {
+            light->_shader_update_callback(*light->_shader, *light, _clock.getElapsedTime().asSeconds());
+         }
+         render_states.shader = light->_shader.get();
+      }
+
       target.draw(*light->_sprite, render_states);
 
       channel_index++;

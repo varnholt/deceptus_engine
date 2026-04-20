@@ -144,6 +144,45 @@ void ItemLantern::onEquipped()
    _player_light_right->_enabled = false;
    level->getLightSystem()->_lights.push_back(_player_light_right);
 
+   const auto& dust_config = config["dust"];
+   const bool dust_enabled = dust_config.value("enabled", false);
+   const float dust_intensity = dust_config.value("intensity", 1.0f);
+   const float layer_1_size = dust_config.value("layer_1_size", 6.0f);
+   const float layer_1_speed_x = dust_config.value("layer_1_speed_x", 3.0f);
+   const float layer_1_speed_y = dust_config.value("layer_1_speed_y", -2.0f);
+   const float layer_2_size = dust_config.value("layer_2_size", 4.0f);
+   const float layer_2_speed_x = dust_config.value("layer_2_speed_x", -2.0f);
+   const float layer_2_speed_y = dust_config.value("layer_2_speed_y", 3.5f);
+
+   if (dust_enabled)
+   {
+      _noise_shader = std::make_shared<sf::Shader>();
+      if (_noise_shader->loadFromFile("data/shaders/light_noise.frag", sf::Shader::Type::Fragment))
+      {
+         const auto dust_callback =
+            [dust_intensity, layer_1_size, layer_1_speed_x, layer_1_speed_y, layer_2_size, layer_2_speed_x, layer_2_speed_y](
+               sf::Shader& shader, const LightSystem::LightInstance& light_instance, float elapsed_seconds
+            )
+         {
+            shader.setUniform("u_time", elapsed_seconds);
+            shader.setUniform("u_intensity", dust_intensity);
+            shader.setUniform("u_layer_1_size", layer_1_size);
+            shader.setUniform("u_layer_1_speed", sf::Glsl::Vec2(layer_1_speed_x, layer_1_speed_y));
+            shader.setUniform("u_layer_2_size", layer_2_size);
+            shader.setUniform("u_layer_2_speed", sf::Glsl::Vec2(layer_2_speed_x, layer_2_speed_y));
+            shader.setUniform("u_sprite_pos_px", sf::Glsl::Vec2(light_instance._sprite->getPosition()));
+            shader.setUniform(
+               "u_sprite_size_px",
+               sf::Glsl::Vec2(static_cast<float>(light_instance._width_px), static_cast<float>(light_instance._height_px))
+            );
+         };
+         _player_light_left->_shader = _noise_shader;
+         _player_light_left->_shader_update_callback = dust_callback;
+         _player_light_right->_shader = _noise_shader;
+         _player_light_right->_shader_update_callback = dust_callback;
+      }
+   }
+
    _enabled = true;
 }
 
