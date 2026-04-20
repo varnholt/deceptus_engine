@@ -33,8 +33,6 @@ std::string Tweaks::serialize()
           {"cpan_snap_back_factor", _cpan_snap_back_factor},
           {"cpan_unlimited", _cpan_unlimited},
           {"enter_portal_threshold", _enter_portal_threshold},
-          {"player_light_enabled", _player_light_enabled},
-          {"player_light_alpha", _player_light_alpha},
           {"player_stencil_alpha", _player_stencil_alpha},
        }}
    };
@@ -89,16 +87,6 @@ void Tweaks::deserialize(const std::string& data)
    if (config.find("enter_portal_threshold") != config.end())
    {
       _enter_portal_threshold = config.at("enter_portal_threshold").get<float>();
-   }
-
-   if (config.find("player_light_enabled") != config.end())
-   {
-      _player_light_enabled = config.at("player_light_enabled").get<bool>();
-   }
-
-   if (config.find("player_light_alpha") != config.end())
-   {
-      _player_light_alpha = config.at("player_light_alpha").get<uint8_t>();
    }
 
    if (config.find("player_stencil_alpha") != config.end())

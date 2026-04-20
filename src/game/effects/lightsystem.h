@@ -6,11 +6,12 @@
 #include <unordered_set>
 #include <vector>
 
-#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
+#include "box2d/box2d.h"
 
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
+#include "json/json.hpp"
 
 struct TmxObject;
 
@@ -33,7 +34,7 @@ public:
       sf::Vector2i _center_offset_px;                //!< pixel offset used for sprite positioning
 
       sf::Color _color = {255, 255, 255, 80};
-      
+
       // falloff values are loaded from tiled but not currently used by the shader
       // the sprite texture gradient provides distance falloff instead
       std::array<float, 3> _falloff = {0.4f, 3.0f, 20.0f};
@@ -52,6 +53,11 @@ public:
 
       /// \brief repositions the sprite so it remains centered on the light's world position.
       void updateSpritePosition() const;
+
+      /// \brief populates color, dimensions, and center offset from a json node.
+      /// \param node json object containing any of: color_r, color_g, color_b, color_a,
+      ///             width_px, height_px, center_offset_x_px, center_offset_y_px.
+      void deserialize(const nlohmann::json& node);
    };
 
    std::vector<std::shared_ptr<LightInstance>> _lights;
@@ -77,6 +83,12 @@ public:
    /// \param data deserialization payload containing tmx geometry and custom properties.
    /// \return newly created light instance with texture, color, falloff, and transform initialized.
    static std::shared_ptr<LightSystem::LightInstance> createLightInstance(GameNode* parent, const GameDeserializeData& data);
+
+   /// \brief creates a light instance initialized from a json config node.
+   /// \param parent parent game node that owns the created light node.
+   /// \param node json object with any of: texture, color_r/g/b/a, width_px, height_px, center_offset_x/y_px.
+   /// \return newly created light instance with default smooth texture overridden by json values.
+   static std::shared_ptr<LightSystem::LightInstance> createLightInstance(GameNode* parent, const nlohmann::json& node);
 
    /// \brief renders per-light sprites with stencil-clipped shadow volumes into a light map target.
    /// \param target render target.
