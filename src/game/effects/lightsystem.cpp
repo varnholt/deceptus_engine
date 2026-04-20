@@ -6,6 +6,7 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
 #include "game/player/player.h"
@@ -605,110 +606,80 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 {
    auto light = std::make_shared<LightSystem::LightInstance>(parent);
 
-   std::array<uint8_t, 4> rgba = {255, 255, 255, 255};
    std::string texture = "data/light/smooth.png";
-
-   if (data._tmx_object && data._tmx_object->_properties)
-   {
-      auto it = data._tmx_object->_properties->_map.find("color");
-      if (it != data._tmx_object->_properties->_map.end())
-      {
-         rgba = TmxTools::color(it->second->_value_string.value());
-      }
-
-      it = data._tmx_object->_properties->_map.find("texture");
-      if (it != data._tmx_object->_properties->_map.end())
-      {
-         texture = (std::filesystem::path("data/light/") / it->second->_value_string.value()).string();
-      }
-      else
-      {
-         Log::Warning() << "no texture property found, using default: " << texture;
-      }
-
-      // A) center of the physical light is in the center of the textured quad
-      //
-      //   +----+----+
-      //   |    |    |
-      //   |   \|/   |
-      //   +----+----+
-      //   |   /|\   |
-      //   |    |    |
-      //   +----+----+
-      //
-      // B) center of the phyisical light is not in the center of the textured quad
-      //    but has some offset to it. here the center is, say -24px, higher
-      //
-      //   +----+----+
-      //   |   \|/   |
-      //   +----+----+ center_offset_x_px = 0
-      //   |   /|\   | center_offset_y_px= -24
-      //   |    |    |
-      //   |    |    |
-      //   +----+----+
-
-      // read offset
-      it = data._tmx_object->_properties->_map.find("center_offset_x_px");
-      if (it != data._tmx_object->_properties->_map.end())
-      {
-         light->_center_offset_px.x = it->second->_value_int.value();
-         light->_center_offset_m.x = it->second->_value_int.value() * MPP;
-      }
-
-      it = data._tmx_object->_properties->_map.find("center_offset_y_px");
-      if (it != data._tmx_object->_properties->_map.end())
-      {
-         light->_center_offset_px.y = it->second->_value_int.value();
-         light->_center_offset_m.y = it->second->_value_int.value() * MPP;
-      }
-
-      // read falloff
-      //
-      // constant falloff:   basically ambient light amount
-      // linear falloff:    light = 1 / distance to light
-      // quadratic falloff: light = 1 / (distance to light)^2
-      //
-      //                                                                1.0
-      // attenuation = --------------------------------------------------------------------------------------------
-      //                (constant falloff + (linear falloff * distance) + (quadratic falloff * distane * distance))
-      //
-      it = data._tmx_object->_properties->_map.find("falloff_constant");
-      if (it != data._tmx_object->_properties->_map.end())
-      {
-         light->_falloff[0] = it->second->_value_float.value();
-      }
-
-      it = data._tmx_object->_properties->_map.find("falloff_linear");
-      if (it != data._tmx_object->_properties->_map.end())
-      {
-         light->_falloff[1] = it->second->_value_float.value();
-      }
-
-      it = data._tmx_object->_properties->_map.find("falloff_quadratic");
-      if (it != data._tmx_object->_properties->_map.end())
-      {
-         light->_falloff[2] = it->second->_value_float.value();
-      }
-   }
 
    if (data._tmx_object)
    {
-      light->_width_px = static_cast<int32_t>(data._tmx_object->_width_px);
-      light->_height_px = static_cast<int32_t>(data._tmx_object->_height_px);
+      if (data._tmx_object->_width_px > 0)
+      {
+         light->_width_px = static_cast<int32_t>(data._tmx_object->_width_px);
+      }
 
-      // set up the box2d position of the light
+      if (data._tmx_object->_height_px > 0)
+      {
+         light->_height_px = static_cast<int32_t>(data._tmx_object->_height_px);
+      }
+
       light->_pos_m = b2Vec2(
          (data._tmx_object->_x_px * MPP) + (data._tmx_object->_width_px * 0.5f * MPP),
          (data._tmx_object->_y_px * MPP) + (data._tmx_object->_height_px * 0.5f * MPP)
       );
 
       light->setObjectId(data._tmx_object->_name);
-   }
 
-   light->_color.r = rgba[0];
-   light->_color.g = rgba[1];
-   light->_color.b = rgba[2];
-   light->_color.a = rgba[3];
+      if (data._tmx_object->_properties)
+      {
+         const auto& property_map = data._tmx_object->_properties->_map;
+
+         if (const auto color_string = ValueReader::readValue<std::string>("color", property_map))
+         {
+            const auto color_channels = TmxTools::color(color_string.value());
+            light->_color = sf::Color(color_channels[0], color_channels[1], color_channels[2], color_channels[3]);
+         }
+
+         if (const auto texture_name = ValueReader::readValue<std::string>("texture", property_map))
+         {
+            texture = (std::filesystem::path("data/light/") / texture_name.value()).string();
+         }
+         else
+         {
+            Log::Warning() << "no texture property found, using default: " << texture;
+         }
+
+         // A) center of the physical light is in the center of the textured quad
+         //
+         //   +----+----+
+         //   |    |    |
+         //   |   \|/   |
+         //   +----+----+
+         //   |   /|\   |
+         //   |    |    |
+         //   +----+----+
+         //
+         // B) center of the physical light is not in the center of the textured quad
+         //    but has some offset to it. here the center is, say -24px, higher
+         //
+         //   +----+----+
+         //   |   \|/   |
+         //   +----+----+ center_offset_x_px = 0
+         //   |   /|\   | center_offset_y_px = -24
+         //   |    |    |
+         //   |    |    |
+         //   +----+----+
+
+         if (const auto center_offset_x = ValueReader::readValue<int32_t>("center_offset_x_px", property_map))
+         {
+            light->_center_offset_px.x = center_offset_x.value();
+            light->_center_offset_m.x = center_offset_x.value() * MPP;
+         }
+
+         if (const auto center_offset_y = ValueReader::readValue<int32_t>("center_offset_y_px", property_map))
+         {
+            light->_center_offset_px.y = center_offset_y.value();
+            light->_center_offset_m.y = center_offset_y.value() * MPP;
+         }
+      }
+   }
 
    // for now the sprite color is left white since it'll be used as attenuation value in the light shader
    //

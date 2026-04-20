@@ -151,9 +151,6 @@ In order to create a dynamic light source, have an object layer called `lights` 
 |Custom Property|Type|Description|
 |-|-|-|
 |color|color|The color of your light source (default is white)|
-|falloff_constant|float|The amount of illumination that is independent of the distance to the light source (range `0..1`). The name is a bit misleading. There's no falloff at all. The function is simply `attenuation = 1 / falloff_constant`. A good value is `0.4`. <br><br>![](images/falloff_constant.png)|
-|falloff_linear|float|The further away from the light, the darker it gets. `falloff_linear` is a factor for the distance (`attenuation = 1 / (falloff_linear * distance_to_light)`). A good value is `3`.<br><br>![](images/falloff_linear.png)|
-|falloff_quadratic|float|The further away from the light, the less illumination - but this time the distance is squared (`attenuation = 1 / (falloff_quadratic * distance_to_light^2)`). A good value is `20`.<br><br>![](images/falloff_quadratic.png)|
 |center_offset_x_px|int|You may adjust the center of your light source using this x-offset (optional)|
 |center_offset_y_px|int|You may adjust the center of your light source using this y-offset (optional)|
 |texture|string|You can use a texture to give your light source a specific look (optional), <br>Some examples:<br><br>![](images/light_scalemap.png) ![](images/light_star.png) ![](images/light_topdown.png)|
@@ -169,14 +166,28 @@ Ropes with Lights are exactly what the name promises. They are based on the Rope
 
 So on top of the Rope properties, there are a few additional ones:
 
+### Rope properties
+
 |Custom Property|Type|Description|
 |-|-|-|
 |push_interval_s|float|The interval how often the rope is pushed (in seconds, a good value is `5.0`)|
 |push_duration_s|float|The duration for how long the rope is pushed (in seconds), a good value is `1.0`|
 |push_strength|float|The amount of force to be applied for each frame during the push duration (`0.01` is a good value)|
 |segments|int|The amount of segments your rope should have (less is better, `7` is a good value)|
-|color|color|The color of the dynamic light (the default is white)|
-|sprite|int|Selects which light sprite to use. At the moment only `1` and `2` are supported.|
+|sprite|int|Selects which lamp sprite to use. At the moment only `1` and `2` are supported.|
+
+### Light properties
+
+The light attached to the rope end is fully configurable via the custom properties below. Unlike standalone dynamic lights, the width and height of the rectangle object are **not** used for the light size — use `width_px` and `height_px` instead.
+
+|Custom Property|Type|Description|
+|-|-|-|
+|color|color|The color of the dynamic light (default is white with alpha `80`)|
+|texture|string|Path to the light texture (e.g. `data/light/smooth.png`). Defaults to `data/light/smooth.png`.|
+|width_px|int|Width of the light sprite in pixels.|
+|height_px|int|Height of the light sprite in pixels.|
+|center_offset_x_px|int|Shifts the physical center of the light horizontally relative to the sprite (optional, default is `0`).|
+|center_offset_y_px|int|Shifts the physical center of the light vertically relative to the sprite (optional, default is `0`).|
 
 
 ## Atmosphere layers
