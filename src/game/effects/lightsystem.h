@@ -47,6 +47,10 @@ public:
       ///        elements whose positions would produce degenerate or unwanted shadow quads).
       std::unordered_set<b2Body*> _excluded_bodies;
 
+      using ShaderUpdateCallback = std::function<void(sf::Shader& shader, const LightInstance& light, float elapsed_seconds)>;
+      std::shared_ptr<sf::Shader> _shader;           //!< optional per-light shader applied when drawing the light sprite
+      ShaderUpdateCallback _shader_update_callback;  //!< called before drawing to let the owner set shader-specific uniforms
+
       /// \brief repositions the sprite so it remains centered on the light's world position.
       void updateSpritePosition() const;
 
@@ -142,4 +146,5 @@ private:
    std::array<b2Vec2, segment_count> _unit_circle;
 
    OccluderDrawCallback _occluder_callback;
+   sf::Clock _clock;  //!< tracks elapsed time for per-light shader uniforms
 };

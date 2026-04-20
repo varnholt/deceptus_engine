@@ -41,8 +41,9 @@ private:
    std::shared_ptr<sf::Texture> _player_texture;
    std::unique_ptr<sf::Sprite> _helmet_sprite_r;
    std::unique_ptr<sf::Sprite> _helmet_sprite_l;
-   float _offset_left_x_m{-3.4f};   //!< x body offset when facing left, in box2d meters
-   float _offset_right_x_m{1.9f};   //!< x body offset when facing right, in box2d meters
-   float _offset_left_y_m{-1.0f};   //!< y body offset when facing left, in box2d meters
-   float _offset_right_y_m{-1.0f};  //!< y body offset when facing right, in box2d meters
+   std::shared_ptr<sf::Shader> _noise_shader;  //!< shared noise shader applied to both lantern lights
+   float _offset_left_x_m{-3.4f};              //!< x body offset when facing left, in box2d meters
+   float _offset_right_x_m{1.9f};              //!< x body offset when facing right, in box2d meters
+   float _offset_left_y_m{-1.0f};              //!< y body offset when facing left, in box2d meters
+   float _offset_right_y_m{-1.0f};             //!< y body offset when facing right, in box2d meters
 };

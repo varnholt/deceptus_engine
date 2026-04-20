@@ -24,5 +24,15 @@
         "center_offset_y_px": 0,
         "offset_x_px": 91,
         "offset_y_px": -48
+    },
+    "dust": {
+        "enabled": true,
+        "intensity": 1.0,
+        "layer_1_size": 3.0,
+        "layer_1_speed_x": 3.0,
+        "layer_1_speed_y": -2.0,
+        "layer_2_size": 2.0,
+        "layer_2_speed_x": -2.0,
+        "layer_2_speed_y": 3.5
     }
 }
