@@ -1193,6 +1193,11 @@ bool Player::isOnGround() const
    return GameContactListener::getInstance().getPlayerFootContactCount() > 0;
 }
 
+bool Player::isHardLanding() const
+{
+   return _hard_landing;
+}
+
 void Player::updateAttack()
 {
    // at the moment the game doesn't have any in-water attacks
