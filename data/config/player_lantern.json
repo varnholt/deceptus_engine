@@ -37,15 +37,15 @@
     },
     "flicker": {
         "speed": 3.0,
-        "amount": 0.12
+        "amount": 0.3
     },
     "jitter": {
         "duration_s": 0.4,
-        "magnitude_m": 0.12
+        "magnitude_m": 0.35
     },
     "landing_tilt": {
         "duration_s": 0.8,
-        "max_degrees": 6.0
+        "max_degrees": 7.0
     },
     "dust_burst": {
         "duration_s": 0.5,
