@@ -34,5 +34,21 @@
         "layer_2_size": 2.0,
         "layer_2_speed_x": -2.0,
         "layer_2_speed_y": 3.5
+    },
+    "flicker": {
+        "speed": 3.0,
+        "amount": 0.3
+    },
+    "jitter": {
+        "duration_s": 0.4,
+        "magnitude_m": 0.35
+    },
+    "landing_tilt": {
+        "duration_s": 0.8,
+        "max_degrees": 7.0
+    },
+    "dust_burst": {
+        "duration_s": 0.5,
+        "peak_multiplier": 4.0
     }
 }

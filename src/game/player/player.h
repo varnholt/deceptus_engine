@@ -22,9 +22,9 @@
 #include "game/player/playerspeed.h"
 #include "game/player/weaponsystem.h"
 
-#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
+#include "box2d/box2d.h"
 
 #include <chrono>
 #include <deque>
@@ -210,6 +210,10 @@ public:
    /// \brief reports whether the player currently has ground foot contacts.
    /// \return true when at least one foot contact exists.
    bool isOnGround() const;
+
+   /// \brief reports whether the player is currently in a hard-landing stun.
+   /// \return true when the hard-landing stun is active.
+   bool isHardLanding() const;
 
    /// \brief reports whether the player has entered dead state.
    /// \return true when dead.
