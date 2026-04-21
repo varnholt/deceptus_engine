@@ -11,6 +11,10 @@ uniform vec2 u_layer_1_speed;
 uniform float u_layer_2_size;
 uniform vec2 u_layer_2_speed;
 
+// low-frequency noise multiplier that dims the whole beam to simulate organic flicker
+uniform float u_flicker_speed;
+uniform float u_flicker_amount;
+
 // top-left corner and dimensions of the light sprite in world pixels,
 // used to sample noise in world space so dust stays fixed as the player moves
 uniform vec2 u_sprite_pos_px;
@@ -59,6 +63,9 @@ void main()
    float dust_intensity = (motes_1 * 0.7 + motes_2 * 0.5) * light_mask * u_intensity;
    dust_intensity = clamp(dust_intensity, 0.0, 1.0);
 
-   // add dust on top of the light in the same channel
-   gl_FragColor = vec4(texel.rgb + gl_Color.rgb * dust_intensity, texel.a);
+   // low-frequency noise dims the whole beam to simulate organic flame flicker
+   float flicker_factor = 1.0 - u_flicker_amount * noise(vec2(u_time * u_flicker_speed, 0.42));
+
+   // add dust on top of the light in the same channel, then apply flicker to the full beam
+   gl_FragColor = vec4((texel.rgb + gl_Color.rgb * dust_intensity) * flicker_factor, texel.a);
 }

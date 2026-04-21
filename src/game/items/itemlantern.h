@@ -46,4 +46,21 @@ private:
    float _offset_right_x_m{1.9f};              //!< x body offset when facing right, in box2d meters
    float _offset_left_y_m{-1.0f};              //!< y body offset when facing left, in box2d meters
    float _offset_right_y_m{-1.0f};             //!< y body offset when facing right, in box2d meters
+
+   float _flicker_speed{3.0f};    //!< noise frequency controlling the organic light flicker
+   float _flicker_amount{0.12f};  //!< fractional brightness variation from flicker (0–1)
+
+   bool _was_hard_landing{false};                 //!< previous-frame hard-landing state for rising-edge detection
+   sf::Time _jitter_elapsed;                      //!< remaining jitter animation time
+   sf::Time _jitter_duration{sf::seconds(0.4f)};  //!< total duration of the hard-landing jitter animation
+   float _jitter_magnitude_m{0.12f};              //!< peak jitter displacement in box2d meters
+
+   bool _was_on_ground{false};                          //!< previous-frame ground state for rising-edge detection
+   sf::Time _landing_tilt_elapsed;                      //!< remaining landing-tilt animation time
+   sf::Time _landing_tilt_duration{sf::seconds(0.8f)};  //!< total duration of the tilt ease-back animation
+   float _landing_tilt_max_degrees{6.0f};               //!< peak downward beam tilt applied at the moment of landing
+
+   sf::Time _dust_burst_elapsed;                      //!< remaining dust-burst animation time
+   sf::Time _dust_burst_duration{sf::seconds(0.5f)};  //!< total duration of the dust burst on hard landing
+   float _dust_burst_peak_multiplier{4.0f};           //!< peak dust intensity multiplier during the burst
 };
