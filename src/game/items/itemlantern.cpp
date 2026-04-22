@@ -33,7 +33,7 @@ void ItemLantern::draw(sf::RenderTarget& target)
 #endif
 
    auto* player = Player::getCurrent();
-   if (!player)
+   if (!player || player->isDead())
    {
       return;
    }
@@ -88,7 +88,7 @@ void ItemLantern::update(const sf::Time& delta_time)
    auto& active_light = pointing_right ? _player_light_right : _player_light_left;
    auto& inactive_light = pointing_right ? _player_light_left : _player_light_right;
 
-   active_light->_enabled = true;
+   active_light->_enabled = !Player::getCurrent()->isDead();
    inactive_light->_enabled = false;
 
    // detect rising edges for hard landing (jitter + dust burst) and any landing (angle tilt)
