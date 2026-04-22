@@ -207,13 +207,27 @@ const std::map<int32_t, std::string>& getSdlToControllerButtonNameMap()
    return sdl_to_name;
 }
 
-}  // namespace
+bool input_configuration_initialized = false;
+InputConfiguration input_configuration_defaults;
 
-bool InputConfiguration::__initialized = false;
-InputConfiguration InputConfiguration::__defaults;
+}  // namespace
 
 void InputConfiguration::setDefaults()
 {
+   // default bindings:
+   //
+   //   action   keyboard     controller button
+   //   -------  -----------  -----------------------------------------
+   //   up       Up           DpadUp
+   //   down     Down         DpadDown
+   //   left     Left         (analog stick / d-pad hat only, no button)
+   //   right    Right        (analog stick / d-pad hat only, no button)
+   //   jump     Space        South (A)
+   //   slot_1   LControl     West  (X)
+   //   slot_2   LAlt         North (Y)
+   //   look     LShift       (right analog stick only, no button)
+   //   action   Enter        East  (B)
+
    _action_to_key = {
       {KeyPressedUp, sf::Keyboard::Key::Up},
       {KeyPressedDown, sf::Keyboard::Key::Down},
@@ -377,19 +391,19 @@ void InputConfiguration::serializeToFile(const std::string& filename)
 
 InputConfiguration& InputConfiguration::getDefaults()
 {
-   return __defaults;
+   return input_configuration_defaults;
 }
 
 InputConfiguration& InputConfiguration::getInstance()
 {
    static InputConfiguration __instance;
 
-   if (!__initialized)
+   if (!input_configuration_initialized)
    {
       __instance.setDefaults();
-      __defaults.setDefaults();
+      input_configuration_defaults.setDefaults();
       __instance.deserializeFromFile();
-      __initialized = true;
+      input_configuration_initialized = true;
    }
 
    return __instance;
