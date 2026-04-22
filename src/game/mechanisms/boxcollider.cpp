@@ -79,8 +79,8 @@ void BoxCollider::setupBody(const std::shared_ptr<b2World>& world)
    fixture_def.shape = &shape;
    fixture_def.density = 1.0f;
    fixture_def.friction = 0.3f;
-   fixture_def.filter.categoryBits = CategoryBoundary;                    // I am a
-   fixture_def.filter.maskBits = CategoryMoveableBox | CategoryBoundary;  // I collide with
+   fixture_def.filter.categoryBits = CategoryBoundary | CategoryNoCastShadow;  // I am a
+   fixture_def.filter.maskBits = CategoryMoveableBox | CategoryBoundary;       // I collide with
 
    auto* fixture = _body->CreateFixture(&fixture_def);
    auto* object_data = new FixtureNode(this);
