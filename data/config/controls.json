@@ -1,0 +1,23 @@
+{
+    "Controls": {
+        "keyboard": {
+            "action": "Enter",
+            "down": "Down",
+            "jump": "Space",
+            "left": "Left",
+            "look": "LShift",
+            "right": "Right",
+            "slot_1": "LControl",
+            "slot_2": "LAlt",
+            "up": "Up"
+        },
+        "controller": {
+            "action": "East",
+            "down": "DpadDown",
+            "jump": "South",
+            "slot_1": "West",
+            "slot_2": "North",
+            "up": "DpadUp"
+        }
+    }
+}

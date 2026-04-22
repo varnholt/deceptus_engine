@@ -9,9 +9,13 @@
 /// \brief stores player input key and controller button bindings and handles json persistence.
 struct InputConfiguration
 {
-   std::map<sf::Keyboard::Key, KeyPressed> _key_to_action;      //!< reverse keyboard lookup: key → action flag
-   std::map<KeyPressed, sf::Keyboard::Key> _action_to_key;      //!< forward keyboard lookup: action flag → key
-   std::map<KeyPressed, int32_t> _action_to_controller_button;  //!< controller lookup: action flag → SDL gamepad button enum value
+   // sf::Keyboard::Key is a scoped enum (enum class) in SFML 3 — no implicit integer conversion, so
+   // std::unordered_map would require a custom hasher. std::map works because scoped enums support
+   // operator< via their underlying integral type. KeyPressed is a plain enum and would work with
+   // either; std::map is used throughout for consistency.
+   std::map<sf::Keyboard::Key, KeyPressed> _key_to_action;      //!< reverse keyboard lookup (key → action): used in keyboardKeyPressed / keyboardKeyReleased
+   std::map<KeyPressed, sf::Keyboard::Key> _action_to_key;      //!< forward keyboard lookup (action → key): used in forceSync to call sf::Keyboard::isKeyPressed per bound action
+   std::map<KeyPressed, int32_t> _action_to_controller_button;  //!< controller lookup (action → SDL button index): used in isControllerActionPressed
 
    /// \brief loads bindings from a json file, falling back to defaults for missing entries.
    /// \param filename source configuration file path.
@@ -33,9 +37,4 @@ private:
    void deserialize(const std::string& data);
    std::string serialize() const;
    void setDefaults();
-
-   InputConfiguration() = default;
-
-   static bool __initialized;
-   static InputConfiguration __defaults;
 };
