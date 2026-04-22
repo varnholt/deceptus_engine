@@ -2,6 +2,7 @@
 
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/log.h"
+#include "game/config/inputconfiguration.h"
 #include "game/config/tweaks.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/player/playercontrolstate.h"
@@ -25,9 +26,7 @@ PlayerControls::PlayerControls()
    );
 
    // set up the playback status query function for PlayerControlState
-   PlayerControlState::setPlaybackStatusQuery([this]() {
-       return _event_serializer->isPlaying();
-   });
+   PlayerControlState::setPlaybackStatusQuery([this]() { return _event_serializer->isPlaying(); });
 
    EventSerializer::registerInstance("player", _event_serializer);
 }
@@ -65,49 +64,13 @@ bool PlayerControls::hasFlag(KeyPressed flag) const
 
 void PlayerControls::forceSync()
 {
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
+   const auto& action_to_key = InputConfiguration::getInstance()._action_to_key;
+   for (const auto& [action_flag, keyboard_key] : action_to_key)
    {
-      _keys_pressed |= KeyPressedJump;
-   }
-
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift))
-   {
-      _keys_pressed |= KeyPressedLook;
-   }
-
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
-   {
-      _keys_pressed |= KeyPressedUp;
-   }
-
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
-   {
-      _keys_pressed |= KeyPressedDown;
-   }
-
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-   {
-      _keys_pressed |= KeyPressedLeft;
-   }
-
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-   {
-      _keys_pressed |= KeyPressedRight;
-   }
-
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl))
-   {
-      _keys_pressed |= KeyPressedSlot1;
-   }
-
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LAlt))
-   {
-      _keys_pressed |= KeyPressedSlot2;
-   }
-
-   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter))
-   {
-      _keys_pressed |= KeyPressedAction;
+      if (sf::Keyboard::isKeyPressed(keyboard_key))
+      {
+         _keys_pressed |= action_flag;
+      }
    }
 }
 
@@ -115,41 +78,11 @@ void PlayerControls::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    _player_input.update(PlayerInput::InputType::Keyboard);
 
-   if (key == sf::Keyboard::Key::Space)
+   const auto& key_to_action = InputConfiguration::getInstance()._key_to_action;
+   const auto found_action = key_to_action.find(key);
+   if (found_action != key_to_action.end())
    {
-      _keys_pressed |= KeyPressedJump;
-   }
-   else if (key == sf::Keyboard::Key::LShift)
-   {
-      _keys_pressed |= KeyPressedLook;
-   }
-   else if (key == sf::Keyboard::Key::Up)
-   {
-      _keys_pressed |= KeyPressedUp;
-   }
-   else if (key == sf::Keyboard::Key::Down)
-   {
-      _keys_pressed |= KeyPressedDown;
-   }
-   else if (key == sf::Keyboard::Key::Left)
-   {
-      _keys_pressed |= KeyPressedLeft;
-   }
-   else if (key == sf::Keyboard::Key::Right)
-   {
-      _keys_pressed |= KeyPressedRight;
-   }
-   else if (key == sf::Keyboard::Key::LControl)
-   {
-      _keys_pressed |= KeyPressedSlot1;
-   }
-   else if (key == sf::Keyboard::Key::LAlt)
-   {
-      _keys_pressed |= KeyPressedSlot2;
-   }
-   else if (key == sf::Keyboard::Key::Enter)
-   {
-      _keys_pressed |= KeyPressedAction;
+      _keys_pressed |= found_action->second;
    }
 
    for (const auto& callback : _keypressed_callbacks)
@@ -162,41 +95,11 @@ void PlayerControls::keyboardKeyReleased(sf::Keyboard::Key key)
 {
    _player_input.update(PlayerInput::InputType::Keyboard);
 
-   if (key == sf::Keyboard::Key::LShift)
+   const auto& key_to_action = InputConfiguration::getInstance()._key_to_action;
+   const auto found_action = key_to_action.find(key);
+   if (found_action != key_to_action.end())
    {
-      _keys_pressed &= ~KeyPressedLook;
-   }
-   else if (key == sf::Keyboard::Key::Up)
-   {
-      _keys_pressed &= ~KeyPressedUp;
-   }
-   else if (key == sf::Keyboard::Key::Down)
-   {
-      _keys_pressed &= ~KeyPressedDown;
-   }
-   else if (key == sf::Keyboard::Key::Left)
-   {
-      _keys_pressed &= ~KeyPressedLeft;
-   }
-   else if (key == sf::Keyboard::Key::Right)
-   {
-      _keys_pressed &= ~KeyPressedRight;
-   }
-   else if (key == sf::Keyboard::Key::Space)
-   {
-      _keys_pressed &= ~KeyPressedJump;
-   }
-   else if (key == sf::Keyboard::Key::LControl)
-   {
-      _keys_pressed &= ~KeyPressedSlot1;
-   }
-   else if (key == sf::Keyboard::Key::LAlt)
-   {
-      _keys_pressed &= ~KeyPressedSlot2;
-   }
-   else if (key == sf::Keyboard::Key::Enter)
-   {
-      _keys_pressed &= ~KeyPressedAction;
+      _keys_pressed &= ~found_action->second;
    }
 }
 
@@ -242,6 +145,17 @@ bool PlayerControls::isControllerButtonPressed(int32_t button_enum) const
    return pressed;
 }
 
+bool PlayerControls::isControllerActionPressed(KeyPressed action) const
+{
+   const auto& controller_map = InputConfiguration::getInstance()._action_to_controller_button;
+   const auto found_button = controller_map.find(action);
+   if (found_button != controller_map.end())
+   {
+      return isControllerButtonPressed(found_button->second);
+   }
+   return false;
+}
+
 bool PlayerControls::isButtonXPressed() const
 {
    if (!PlayerControlState::checkState())
@@ -256,7 +170,7 @@ bool PlayerControls::isButtonXPressed() const
 
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      return isControllerButtonPressed(SDL_GAMEPAD_BUTTON_WEST);
+      return isControllerActionPressed(KeyPressedSlot1);
    }
 
    return false;
@@ -276,7 +190,7 @@ bool PlayerControls::isButtonYPressed() const
 
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      return isControllerButtonPressed(SDL_GAMEPAD_BUTTON_NORTH);
+      return isControllerActionPressed(KeyPressedSlot2);
    }
 
    return false;
@@ -296,7 +210,7 @@ bool PlayerControls::isButtonAPressed() const
 
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      return isControllerButtonPressed(SDL_GAMEPAD_BUTTON_SOUTH);
+      return isControllerActionPressed(KeyPressedJump);
    }
 
    return false;
@@ -316,7 +230,7 @@ bool PlayerControls::isButtonBPressed() const
 
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      return isControllerButtonPressed(SDL_GAMEPAD_BUTTON_EAST);
+      return isControllerActionPressed(KeyPressedAction);
    }
 
    return false;
@@ -336,7 +250,7 @@ bool PlayerControls::isUpButtonPressed() const
 
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      return isControllerButtonPressed(SDL_GAMEPAD_BUTTON_DPAD_UP);
+      return isControllerActionPressed(KeyPressedUp);
    }
 
    return false;
@@ -356,7 +270,7 @@ bool PlayerControls::isDownButtonPressed() const
 
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
-      return isControllerButtonPressed(SDL_GAMEPAD_BUTTON_DPAD_DOWN);
+      return isControllerActionPressed(KeyPressedDown);
    }
 
    return false;

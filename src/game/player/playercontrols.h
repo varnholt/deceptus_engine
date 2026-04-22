@@ -222,6 +222,11 @@ private:
    /// \return iterator to the key lock entry or end when no lock exists.
    std::unordered_map<KeyPressed, LockedKey>::const_iterator readLockedState(KeyPressed) const;
 
+   /// \brief looks up the configured controller button for an action and checks if it is pressed.
+   /// \param action logical input action to query.
+   /// \return true when the mapped controller button is currently pressed.
+   bool isControllerActionPressed(KeyPressed action) const;
+
    GameControllerInfo _joystick_info;
 
    int32_t _keys_pressed = 0;
