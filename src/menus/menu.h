@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "menuscreen.h"
-#include "menuscreeninputassignment.h"
 
 /// \brief owns all menu screens and routes menu input to the currently shown screen.
 class Menu
@@ -21,7 +20,6 @@ public:
       Main,
       Options,
       Controls,
-      InputAssignment,
       Video,
       Audio,
       Game,
@@ -91,11 +89,6 @@ public:
    /// \return shared pointer reference to the global menu manager.
    static std::shared_ptr<Menu>& getInstance();
 
-   /// \brief sets the device mode on the input assignment screen before showing it.
-   /// \param mode keyboard or controller device mode.
-   /// \param device_name display name of the selected device.
-   void setInputAssignmentDeviceMode(MenuScreenInputAssignment::DeviceMode mode, const std::string& device_name);
-
 private:
    MenuType _current_type = MenuType::None;
    MenuType _previous_type = MenuType::None;
@@ -108,7 +101,6 @@ private:
    std::shared_ptr<MenuScreen> _menu_audio;
    std::shared_ptr<MenuScreen> _menu_video;
    std::shared_ptr<MenuScreen> _menu_controls;
-   std::shared_ptr<MenuScreen> _menu_input_assignment;
    std::shared_ptr<MenuScreen> _menu_game;
    std::shared_ptr<MenuScreen> _menu_achievements;
    std::shared_ptr<MenuScreen> _menu_credits;

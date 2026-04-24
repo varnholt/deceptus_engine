@@ -809,6 +809,7 @@ void Game::update()
 
    if (game_mode == ExecutionMode::NotRunning)
    {
+      updateGameController();
       _menu_background->update(dt);
    }
 
