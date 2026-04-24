@@ -52,6 +52,12 @@ MenuScreenInputAssignment::MenuScreenInputAssignment()
    _cursor_highlight.setFillColor(sf::Color{80, 60, 100, 110});
 }
 
+void MenuScreenInputAssignment::setDeviceMode(DeviceMode mode, const std::string& device_name)
+{
+   _device_mode = mode;
+   _device_name = device_name;
+}
+
 void MenuScreenInputAssignment::showEvent()
 {
    _assignment_state = AssignmentState::Idle;
@@ -87,13 +93,29 @@ void MenuScreenInputAssignment::select()
       return;
    }
    _pending_action = InputConfiguration::actionList()[static_cast<size_t>(_selected_row_index)];
-   _assignment_state = AssignmentState::WaitingForKey;
+   if (_device_mode == DeviceMode::Controller)
+   {
+      _assignment_state = AssignmentState::WaitingForButton;
+      _previous_controller_button_values.clear();
+   }
+   else
+   {
+      _assignment_state = AssignmentState::WaitingForKey;
+   }
    MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
 }
 
 void MenuScreenInputAssignment::back()
 {
-   InputConfiguration::getInstance().serializeToFile();
+   auto& input_config = InputConfiguration::getInstance();
+   if (_device_mode == DeviceMode::Controller)
+   {
+      input_config.saveControllerBindingsToFile(input_config.getCurrentFilename());
+   }
+   else
+   {
+      input_config.serializeToFile();
+   }
    Menu::getInstance()->show(Menu::MenuType::Controls);
    MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
 }
@@ -102,10 +124,19 @@ void MenuScreenInputAssignment::resetDefaults()
 {
    auto& active_config = InputConfiguration::getInstance();
    const auto& default_config = InputConfiguration::getDefaults();
-   active_config._action_to_key = default_config._action_to_key;
-   active_config._key_to_action = default_config._key_to_action;
-   active_config._action_to_controller_button = default_config._action_to_controller_button;
-   active_config.serializeToFile();
+
+   if (_device_mode == DeviceMode::Controller)
+   {
+      active_config._action_to_controller_button = default_config._action_to_controller_button;
+      active_config.saveControllerBindingsToFile(active_config.getCurrentFilename());
+   }
+   else
+   {
+      active_config._action_to_key = default_config._action_to_key;
+      active_config._key_to_action = default_config._key_to_action;
+      active_config._action_to_controller_button = default_config._action_to_controller_button;
+      active_config.serializeToFile();
+   }
    MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
 }
 
@@ -299,7 +330,7 @@ void MenuScreenInputAssignment::draw(sf::RenderTarget& window, sf::RenderStates 
 
    // title
    _text->setCharacterSize(14);
-   _text->setString("Input Assignment");
+   _text->setString(_device_name);
    _text->setFillColor(color_title);
    const auto title_bounds = _text->getLocalBounds();
    _text->setPosition({(640.0f - title_bounds.size.x) / 2.0f, title_y});
@@ -386,7 +417,14 @@ void MenuScreenInputAssignment::draw(sf::RenderTarget& window, sf::RenderStates 
 
    // hint lines
    _text->setFillColor(color_hint);
-   _text->setString("Enter: assign keyboard key    Y button: assign controller button");
+   if (_device_mode == DeviceMode::Controller)
+   {
+      _text->setString("Enter / Y button: assign controller button");
+   }
+   else
+   {
+      _text->setString("Enter: assign keyboard key    Y button: assign controller button");
+   }
    _text->setPosition({column_action_x, hint_y});
    window.draw(*_text, states);
 

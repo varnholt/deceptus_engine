@@ -213,6 +213,70 @@ InputConfiguration input_configuration_defaults;
 
 }  // namespace
 
+void InputConfiguration::deserializeControllerSection(const std::string& data)
+{
+   const auto& action_name_to_flag = getActionNameToFlagMap();
+   const auto& controller_button_name_to_sdl = getControllerButtonNameToSdlMap();
+
+   try
+   {
+      json config = json::parse(data);
+      const auto& controls = config["Controls"];
+      if (!controls.count("controller"))
+      {
+         return;
+      }
+
+      const auto& controller_json = controls["controller"];
+      for (const auto& [action_name, button_name_value] : controller_json.items())
+      {
+         const auto button_name = button_name_value.get<std::string>();
+         const auto action_flag_it = action_name_to_flag.find(action_name);
+         const auto button_it = controller_button_name_to_sdl.find(button_name);
+         if (action_flag_it != action_name_to_flag.end() && button_it != controller_button_name_to_sdl.end())
+         {
+            _action_to_controller_button[action_flag_it->second] = button_it->second;
+         }
+         else
+         {
+            Log::Warning() << "controller config: unknown action or button name: " << action_name << " -> " << button_name;
+         }
+      }
+   }
+   catch (const std::exception& exception)
+   {
+      Log::Error() << "failed to parse controller config: " << exception.what();
+   }
+}
+
+std::string InputConfiguration::serializeControllerSection() const
+{
+   const auto& action_flag_to_name = getActionFlagToNameMap();
+   const auto& sdl_to_controller_button_name = getSdlToControllerButtonNameMap();
+
+   json controller_json;
+   for (const auto& [action_flag, sdl_button] : _action_to_controller_button)
+   {
+      const auto action_name_it = action_flag_to_name.find(action_flag);
+      const auto button_name_it = sdl_to_controller_button_name.find(sdl_button);
+      if (action_name_it != action_flag_to_name.end() && button_name_it != sdl_to_controller_button_name.end())
+      {
+         controller_json[action_name_it->second] = button_name_it->second;
+      }
+   }
+
+   json config = {
+      {"Controls",
+       {
+          {"controller", controller_json},
+       }}
+   };
+
+   std::stringstream sstream;
+   sstream << std::setw(4) << config << "\n\n";
+   return sstream.str();
+}
+
 void InputConfiguration::setDefaults()
 {
    // default bindings:
@@ -367,7 +431,7 @@ void InputConfiguration::deserializeFromFile(const std::string& filename)
 
    if (!ifs.good())
    {
-      Log::Info() << "controls.json not found, writing defaults to " << filename;
+      Log::Info() << "controls file not found, writing defaults to " << filename;
       setDefaults();
       serializeToFile(filename);
       return;
@@ -388,11 +452,69 @@ void InputConfiguration::deserializeFromFile(const std::string& filename)
    deserialize(data);
 }
 
+void InputConfiguration::deserializeFromFile()
+{
+   deserializeFromFile(_current_filename);
+}
+
 void InputConfiguration::serializeToFile(const std::string& filename)
 {
    std::string data = serialize();
    std::ofstream output_file(filename);
    output_file << data;
+}
+
+void InputConfiguration::serializeToFile()
+{
+   serializeToFile(_current_filename);
+}
+
+void InputConfiguration::mergeControllerBindingsFromFile(const std::string& filename)
+{
+   std::ifstream ifs(filename, std::ifstream::in);
+   if (!ifs.good())
+   {
+      return;
+   }
+
+   char character = static_cast<char>(ifs.get());
+   std::string data;
+
+   while (ifs.good())
+   {
+      data.push_back(character);
+      character = static_cast<char>(ifs.get());
+   }
+
+   ifs.close();
+   deserializeControllerSection(data);
+}
+
+void InputConfiguration::saveControllerBindingsToFile(const std::string& filename)
+{
+   std::string data = serializeControllerSection();
+   std::ofstream output_file(filename);
+   output_file << data;
+}
+
+void InputConfiguration::setCurrentFilename(const std::string& filename)
+{
+   _current_filename = filename;
+}
+
+const std::string& InputConfiguration::getCurrentFilename() const
+{
+   return _current_filename;
+}
+
+std::string InputConfiguration::keyboardFilename()
+{
+   return "data/config/controls.json";
+}
+
+std::string InputConfiguration::controllerFilename(const std::string& guid)
+{
+   return "data/config/controls_controller_" + guid + ".json";
 }
 
 InputConfiguration& InputConfiguration::getDefaults()
@@ -469,7 +591,8 @@ InputConfiguration& InputConfiguration::getInstance()
    {
       __instance.setDefaults();
       input_configuration_defaults.setDefaults();
-      __instance.deserializeFromFile();
+      __instance._current_filename = keyboardFilename();
+      __instance.deserializeFromFile(keyboardFilename());
       input_configuration_initialized = true;
    }
 

@@ -2,9 +2,11 @@
 
 #include <deque>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "menuscreen.h"
+#include "menuscreeninputassignment.h"
 
 /// \brief owns all menu screens and routes menu input to the currently shown screen.
 class Menu
@@ -88,6 +90,11 @@ public:
    /// \brief returns the singleton menu instance, creating and initializing it on first use.
    /// \return shared pointer reference to the global menu manager.
    static std::shared_ptr<Menu>& getInstance();
+
+   /// \brief sets the device mode on the input assignment screen before showing it.
+   /// \param mode keyboard or controller device mode.
+   /// \param device_name display name of the selected device.
+   void setInputAssignmentDeviceMode(MenuScreenInputAssignment::DeviceMode mode, const std::string& device_name);
 
 private:
    MenuType _current_type = MenuType::None;

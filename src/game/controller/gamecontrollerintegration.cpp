@@ -10,6 +10,7 @@
 
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/log.h"
+#include "game/config/inputconfiguration.h"
 #include "gamecontrollerdetection.h"
 
 #include <iostream>
@@ -61,6 +62,14 @@ void GameControllerIntegration::add(int32_t joystick_id)
          _game_controllers[joystick_id] = game_controller;
          _selected_controller_id = joystick_id;
 
+         // load per-controller bindings if a saved file exists for this device's guid
+         const auto controller_guid = game_controller->getGuid();
+         if (!controller_guid.empty())
+         {
+            const auto controller_filename = InputConfiguration::controllerFilename(controller_guid);
+            InputConfiguration::getInstance().mergeControllerBindingsFromFile(controller_filename);
+         }
+
          for (const auto& cb : _device_added_callbacks)
          {
             cb(joystick_id);
@@ -88,6 +97,27 @@ void GameControllerIntegration::remove(int32_t joystick_id)
 const std::shared_ptr<GameController>& GameControllerIntegration::getController(int32_t controller_id) const
 {
    return _game_controllers.at(controller_id);
+}
+
+std::string GameControllerIntegration::getControllerGuid(int32_t controller_id) const
+{
+   const auto found_entry = _game_controllers.find(controller_id);
+   if (found_entry == _game_controllers.end() || !found_entry->second)
+   {
+      return {};
+   }
+   return found_entry->second->getGuid();
+}
+
+std::vector<int32_t> GameControllerIntegration::getControllerIds() const
+{
+   std::vector<int32_t> ids;
+   ids.reserve(_game_controllers.size());
+   for (const auto& [controller_id, controller] : _game_controllers)
+   {
+      ids.push_back(controller_id);
+   }
+   return ids;
 }
 
 void GameControllerIntegration::addDeviceAddedCallback(const DeviceAddedCallback& callback)

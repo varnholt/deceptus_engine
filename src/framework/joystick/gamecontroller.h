@@ -75,6 +75,12 @@ public:
    virtual std::string getName(int32_t id) const;
 
    ///
+   /// \brief Returns the SDL GUID of the active joystick as a 32-character hex string.
+   /// \return GUID string, or empty string when no joystick is open.
+   ///
+   virtual std::string getGuid() const;
+
+   ///
    /// \brief Returns the number of axes exposed by the active joystick.
    /// \return Axis count.
    ///
