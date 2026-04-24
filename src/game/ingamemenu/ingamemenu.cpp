@@ -2,6 +2,7 @@
 
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
+#include "game/config/inputconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
@@ -25,8 +26,14 @@ void InGameMenu::initializeController()
       [this](int32_t /*id*/)
       {
          const auto& gji = GameControllerIntegration::getInstance();
-         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_BACK, [this]() { open(); });
-         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_BACK, [this]() { close(); });
+         const auto& action_to_button = InputConfiguration::getInstance()._action_to_controller_button;
+         const auto inventory_button_entry = action_to_button.find(KeyPressedInventory);
+         if (inventory_button_entry != action_to_button.end())
+         {
+            const auto inventory_button = static_cast<SDL_GamepadButton>(inventory_button_entry->second);
+            gji.getController()->addButtonPressedCallback(inventory_button, [this]() { open(); });
+            gji.getController()->addButtonPressedCallback(inventory_button, [this]() { close(); });
+         }
          gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_SOUTH, [this]() { close(); });
          gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_EAST, [this]() { close(); });
          gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, [this]() { goToLeftSubMenu(); });

@@ -201,6 +201,7 @@ enum KeyPressed
    KeyPressedSlot2 = 0x40,
    KeyPressedLook = 0x80,
    KeyPressedAction = 0x100,
+   KeyPressedInventory = 0x200,
 };
 
 /// \brief runtime type ids assigned to physics fixtures and mechanisms.

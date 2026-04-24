@@ -34,6 +34,7 @@ const std::map<std::string, KeyPressed>& getActionNameToFlagMap()
       {"slot_2", KeyPressedSlot2},
       {"look", KeyPressedLook},
       {"action", KeyPressedAction},
+      {"inventory", KeyPressedInventory},
    };
    return action_name_to_flag;
 }
@@ -238,6 +239,7 @@ void InputConfiguration::setDefaults()
       {KeyPressedSlot2, sf::Keyboard::Key::LAlt},
       {KeyPressedLook, sf::Keyboard::Key::LShift},
       {KeyPressedAction, sf::Keyboard::Key::Enter},
+      {KeyPressedInventory, sf::Keyboard::Key::Tab},
    };
 
    _key_to_action.clear();
@@ -253,6 +255,7 @@ void InputConfiguration::setDefaults()
       {KeyPressedSlot2, SDL_GAMEPAD_BUTTON_NORTH},
       {KeyPressedUp, SDL_GAMEPAD_BUTTON_DPAD_UP},
       {KeyPressedDown, SDL_GAMEPAD_BUTTON_DPAD_DOWN},
+      {KeyPressedInventory, SDL_GAMEPAD_BUTTON_BACK},
    };
 }
 
@@ -308,9 +311,6 @@ void InputConfiguration::deserialize(const std::string& data)
       json config = json::parse(data);
       const auto& controls = config["Controls"];
 
-      _action_to_key.clear();
-      _key_to_action.clear();
-
       const auto& keyboard_json = controls["keyboard"];
       for (const auto& [action_name, key_name_value] : keyboard_json.items())
       {
@@ -321,6 +321,14 @@ void InputConfiguration::deserialize(const std::string& data)
          {
             const auto action_flag = action_flag_it->second;
             const auto keyboard_key = key_it->second;
+
+            // remove any existing reverse mapping for the old key bound to this action
+            const auto previous_key_it = _action_to_key.find(action_flag);
+            if (previous_key_it != _action_to_key.end())
+            {
+               _key_to_action.erase(previous_key_it->second);
+            }
+
             _action_to_key[action_flag] = keyboard_key;
             _key_to_action[keyboard_key] = action_flag;
          }
@@ -329,8 +337,6 @@ void InputConfiguration::deserialize(const std::string& data)
             Log::Warning() << "controls.json: unknown action or key name: " << action_name << " -> " << key_name;
          }
       }
-
-      _action_to_controller_button.clear();
 
       const auto& controller_json = controls["controller"];
       for (const auto& [action_name, button_name_value] : controller_json.items())
@@ -392,6 +398,67 @@ void InputConfiguration::serializeToFile(const std::string& filename)
 InputConfiguration& InputConfiguration::getDefaults()
 {
    return input_configuration_defaults;
+}
+
+std::string InputConfiguration::keyName(sf::Keyboard::Key key)
+{
+   const auto& key_to_name = getKeyToKeyboardNameMap();
+   const auto found_entry = key_to_name.find(key);
+   if (found_entry != key_to_name.end())
+   {
+      return found_entry->second;
+   }
+   return "--";
+}
+
+std::string InputConfiguration::buttonName(int32_t sdl_button)
+{
+   const auto& sdl_to_name = getSdlToControllerButtonNameMap();
+   const auto found_entry = sdl_to_name.find(sdl_button);
+   if (found_entry != sdl_to_name.end())
+   {
+      return found_entry->second;
+   }
+   return "--";
+}
+
+std::string InputConfiguration::actionDisplayName(KeyPressed action)
+{
+   static const std::map<KeyPressed, std::string> action_to_display_name = {
+      {KeyPressedUp, "Up"},
+      {KeyPressedDown, "Down"},
+      {KeyPressedLeft, "Left"},
+      {KeyPressedRight, "Right"},
+      {KeyPressedJump, "Jump"},
+      {KeyPressedSlot1, "Slot 1"},
+      {KeyPressedSlot2, "Slot 2"},
+      {KeyPressedLook, "Look"},
+      {KeyPressedAction, "Action"},
+      {KeyPressedInventory, "Inventory"},
+   };
+   const auto found_entry = action_to_display_name.find(action);
+   if (found_entry != action_to_display_name.end())
+   {
+      return found_entry->second;
+   }
+   return "Unknown";
+}
+
+const std::vector<KeyPressed>& InputConfiguration::actionList()
+{
+   static const std::vector<KeyPressed> action_list = {
+      KeyPressedUp,
+      KeyPressedDown,
+      KeyPressedLeft,
+      KeyPressedRight,
+      KeyPressedJump,
+      KeyPressedSlot1,
+      KeyPressedSlot2,
+      KeyPressedLook,
+      KeyPressedAction,
+      KeyPressedInventory,
+   };
+   return action_list;
 }
 
 InputConfiguration& InputConfiguration::getInstance()
