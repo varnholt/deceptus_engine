@@ -5,6 +5,7 @@
 #include "game/constants.h"
 
 #include <SFML/Graphics.hpp>
+#include <memory>
 #include <vector>
 
 /// \brief input assignment screen for rebinding keyboard keys and controller buttons to game actions.
@@ -66,7 +67,7 @@ private:
    void completeButtonAssignment(int32_t sdl_button);
 
    sf::Font _font;
-   sf::Text _text;  //!< reused per draw call to render all table cells and labels
+   std::unique_ptr<sf::Text> _text;  //!< reused per draw call to render all table cells and labels
 
    sf::RectangleShape _background;        //!< full-screen dark panel
    sf::RectangleShape _cursor_highlight;  //!< highlight rect drawn behind the selected row

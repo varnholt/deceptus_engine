@@ -39,9 +39,9 @@ MenuScreenInputAssignment::MenuScreenInputAssignment()
    _font.openFromFile("data/fonts/deceptum.ttf");
    const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
 
-   _text = sf::Text(_font);
-   _text.setFont(_font);
-   _text.setCharacterSize(12);
+   _text = std::make_unique<sf::Text>(_font);
+   _text->setFont(_font);
+   _text->setCharacterSize(12);
 
    _background.setSize({640.0f, 360.0f});
    _background.setPosition({0.0f, 0.0f});
@@ -298,28 +298,28 @@ void MenuScreenInputAssignment::draw(sf::RenderTarget& window, sf::RenderStates 
    window.draw(_cursor_highlight, states);
 
    // title
-   _text.setCharacterSize(14);
-   _text.setString("Input Assignment");
-   _text.setFillColor(color_title);
-   const auto title_bounds = _text.getLocalBounds();
-   _text.setPosition({(640.0f - title_bounds.size.x) / 2.0f, title_y});
-   window.draw(_text, states);
+   _text->setCharacterSize(14);
+   _text->setString("Input Assignment");
+   _text->setFillColor(color_title);
+   const auto title_bounds = _text->getLocalBounds();
+   _text->setPosition({(640.0f - title_bounds.size.x) / 2.0f, title_y});
+   window.draw(*_text, states);
 
-   _text.setCharacterSize(12);
+   _text->setCharacterSize(12);
 
    // column headers
-   _text.setFillColor(color_header);
-   _text.setString("Action");
-   _text.setPosition({column_action_x, header_y});
-   window.draw(_text, states);
+   _text->setFillColor(color_header);
+   _text->setString("Action");
+   _text->setPosition({column_action_x, header_y});
+   window.draw(*_text, states);
 
-   _text.setString("Keyboard");
-   _text.setPosition({column_keyboard_x, header_y});
-   window.draw(_text, states);
+   _text->setString("Keyboard");
+   _text->setPosition({column_keyboard_x, header_y});
+   window.draw(*_text, states);
 
-   _text.setString("Controller");
-   _text.setPosition({column_controller_x, header_y});
-   window.draw(_text, states);
+   _text->setString("Controller");
+   _text->setPosition({column_controller_x, header_y});
+   window.draw(*_text, states);
 
    // action rows
    const auto& active_config = InputConfiguration::getInstance();
@@ -331,11 +331,11 @@ void MenuScreenInputAssignment::draw(sf::RenderTarget& window, sf::RenderStates 
       const auto selected = (row_index == _selected_row_index);
       const auto row_color = selected ? color_row_selected : color_row_normal;
 
-      _text.setFillColor(row_color);
+      _text->setFillColor(row_color);
 
-      _text.setString(InputConfiguration::actionDisplayName(action));
-      _text.setPosition({column_action_x, row_y});
-      window.draw(_text, states);
+      _text->setString(InputConfiguration::actionDisplayName(action));
+      _text->setPosition({column_action_x, row_y});
+      window.draw(*_text, states);
 
       std::string keyboard_name = "--";
       const auto key_entry = active_config._action_to_key.find(action);
@@ -343,9 +343,9 @@ void MenuScreenInputAssignment::draw(sf::RenderTarget& window, sf::RenderStates 
       {
          keyboard_name = InputConfiguration::keyName(key_entry->second);
       }
-      _text.setString(keyboard_name);
-      _text.setPosition({column_keyboard_x, row_y});
-      window.draw(_text, states);
+      _text->setString(keyboard_name);
+      _text->setPosition({column_keyboard_x, row_y});
+      window.draw(*_text, states);
 
       std::string button_name = "--";
       const auto button_entry = active_config._action_to_controller_button.find(action);
@@ -353,44 +353,44 @@ void MenuScreenInputAssignment::draw(sf::RenderTarget& window, sf::RenderStates 
       {
          button_name = InputConfiguration::buttonName(button_entry->second);
       }
-      _text.setString(button_name);
-      _text.setPosition({column_controller_x, row_y});
-      window.draw(_text, states);
+      _text->setString(button_name);
+      _text->setPosition({column_controller_x, row_y});
+      window.draw(*_text, states);
    }
 
    // Reset Defaults row
    {
       const auto reset_row_y = row_start_y + static_cast<float>(row_count) * row_height;
       const auto reset_selected = (_selected_row_index == row_count);
-      _text.setFillColor(reset_selected ? color_row_reset_selected : color_row_reset_normal);
-      _text.setString("Reset to Defaults");
-      _text.setPosition({column_action_x, reset_row_y});
-      window.draw(_text, states);
+      _text->setFillColor(reset_selected ? color_row_reset_selected : color_row_reset_normal);
+      _text->setString("Reset to Defaults");
+      _text->setPosition({column_action_x, reset_row_y});
+      window.draw(*_text, states);
    }
 
    // status text (shown while waiting for input)
    if (_assignment_state == AssignmentState::WaitingForKey)
    {
-      _text.setFillColor(color_waiting);
-      _text.setString("Press a key to assign  (Esc to cancel)");
-      _text.setPosition({column_action_x, status_y});
-      window.draw(_text, states);
+      _text->setFillColor(color_waiting);
+      _text->setString("Press a key to assign  (Esc to cancel)");
+      _text->setPosition({column_action_x, status_y});
+      window.draw(*_text, states);
    }
    else if (_assignment_state == AssignmentState::WaitingForButton)
    {
-      _text.setFillColor(color_waiting);
-      _text.setString("Press a face or shoulder button  (Esc to cancel)");
-      _text.setPosition({column_action_x, status_y});
-      window.draw(_text, states);
+      _text->setFillColor(color_waiting);
+      _text->setString("Press a face or shoulder button  (Esc to cancel)");
+      _text->setPosition({column_action_x, status_y});
+      window.draw(*_text, states);
    }
 
    // hint lines
-   _text.setFillColor(color_hint);
-   _text.setString("Enter: assign keyboard key    Y button: assign controller button");
-   _text.setPosition({column_action_x, hint_y});
-   window.draw(_text, states);
+   _text->setFillColor(color_hint);
+   _text->setString("Enter: assign keyboard key    Y button: assign controller button");
+   _text->setPosition({column_action_x, hint_y});
+   window.draw(*_text, states);
 
-   _text.setString("Esc: save and return");
-   _text.setPosition({column_action_x, hint_2_y});
-   window.draw(_text, states);
+   _text->setString("Esc: save and return");
+   _text->setPosition({column_action_x, hint_2_y});
+   window.draw(*_text, states);
 }
