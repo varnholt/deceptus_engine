@@ -158,6 +158,8 @@ set(GAME_FILES
     src/game/clock/gameclock.h
     src/game/config/gameconfiguration.cpp
     src/game/config/gameconfiguration.h
+    src/game/config/inputconfiguration.cpp
+    src/game/config/inputconfiguration.h
     src/game/config/tweaks.cpp
     src/game/config/tweaks.h
     src/game/constants.h

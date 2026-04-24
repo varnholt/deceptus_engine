@@ -43,6 +43,15 @@ public:
    /// \return shared pointer reference for the requested controller.
    const std::shared_ptr<GameController>& getController(int32_t controller_id = _selected_controller_id) const;
 
+   /// \brief returns the SDL GUID string of the controller with the given id.
+   /// \param controller_id joystick id key used in the internal controller map.
+   /// \return GUID hex string, or empty string when not found.
+   std::string getControllerGuid(int32_t controller_id = _selected_controller_id) const;
+
+   /// \brief returns all connected controller joystick ids.
+   /// \return vector of joystick ids currently in the controller map.
+   std::vector<int32_t> getControllerIds() const;
+
    using DeviceAddedCallback = std::function<void(int32_t)>;
    using DeviceRemovedCallback = std::function<void(int32_t)>;
    using DeviceChangedCallback = std::function<void(void)>;

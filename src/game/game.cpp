@@ -431,10 +431,10 @@ Game::~Game()
 void Game::initialize()
 {
    auto& config = GameConfiguration::getInstance();
-   
+
    // clamp resolution to desktop limits on startup
    config.clampResolutionToDesktop();
-   
+
    initializeWindow();
 
    // initialize GLEW after the OpenGL context is created but before any OpenGL calls
@@ -521,7 +521,6 @@ void Game::initialize()
          }
       }
    );
-
 
    GameAudio::getInstance().initialize();
    _audio_callback = [](GameAudio::SoundEffect effect) { GameAudio::getInstance().play(effect); };
@@ -810,6 +809,7 @@ void Game::update()
 
    if (game_mode == ExecutionMode::NotRunning)
    {
+      updateGameController();
       _menu_background->update(dt);
    }
 
@@ -878,26 +878,20 @@ void Game::toggleFullScreen()
 {
    auto& config = GameConfiguration::getInstance();
    config._fullscreen = !config._fullscreen;
-   
+
    // since stencil buffers are used, it is required to enable them explicitly
    sf::ContextSettings context_settings;
    context_settings.stencilBits = 8;
-   
+
    if (config._fullscreen)
    {
       // save current windowed dimensions before switching
       config._windowed_width = config._video_mode_width;
       config._windowed_height = config._video_mode_height;
-      
+
       auto desktop_mode = sf::VideoMode::getDesktopMode();
-      _window->create(
-         desktop_mode,
-         GAME_NAME,
-         sf::Style::None,
-         sf::State::Fullscreen,
-         context_settings
-      );
-      
+      _window->create(desktop_mode, GAME_NAME, sf::Style::None, sf::State::Fullscreen, context_settings);
+
       // update active resolution to match desktop
       config._video_mode_width = desktop_mode.size.x;
       config._video_mode_height = desktop_mode.size.y;
@@ -907,7 +901,7 @@ void Game::toggleFullScreen()
       // restore windowed mode with saved dimensions
       config._video_mode_width = config._windowed_width;
       config._video_mode_height = config._windowed_height;
-      
+
       _window->create(
          sf::VideoMode({static_cast<uint32_t>(config._video_mode_width), static_cast<uint32_t>(config._video_mode_height)}),
          GAME_NAME,
@@ -923,29 +917,27 @@ void Game::toggleFullScreen()
    _window->setFramerateLimit(60);
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!config._fullscreen);
-   
+
    // recalculate render texture dimensions and offsets
    const auto ratio_width = config._video_mode_width / config._view_width;
    const auto ratio_height = config._video_mode_height / config._view_height;
    auto size_ratio = std::min(ratio_width, ratio_height);
-   
+
    const int32_t texture_width = size_ratio * config._view_width;
    const int32_t texture_height = size_ratio * config._view_height;
-   
+
    _render_texture_offset.x = static_cast<uint32_t>((config._video_mode_width - texture_width) / 2);
    _render_texture_offset.y = static_cast<uint32_t>((config._video_mode_height - texture_height) / 2);
-   
+
    // recreate window render texture with new dimensions
    _window_render_texture.reset();
    _window_render_texture =
       std::make_shared<sf::RenderTexture>(sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)});
-   
+
    // recreate level render targets
    if (_level)
    {
-      _render_targets.recreateOnResize(
-         config._video_mode_width, config._video_mode_height, config._view_width, config._view_height
-      );
+      _render_targets.recreateOnResize(config._video_mode_width, config._video_mode_height, config._view_width, config._view_height);
       _level->createViews();
    }
 
@@ -956,10 +948,10 @@ void Game::toggleFullScreen()
 void Game::changeResolution(int32_t w, int32_t h)
 {
    auto& config = GameConfiguration::getInstance();
-   
+
    config._video_mode_width = w;
    config._video_mode_height = h;
-   
+
    // if in windowed mode, save these dimensions for later restoration
    if (!config._fullscreen)
    {
@@ -967,7 +959,7 @@ void Game::changeResolution(int32_t w, int32_t h)
       config._windowed_height = h;
       config.serializeToFile();
    }
-   
+
    // clamp to desktop limits to prevent SFML errors
    config.clampResolutionToDesktop();
 
@@ -1168,17 +1160,17 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
 
    CameraPanorama::getInstance().processKeyPressedEvents(key_event);
 
+   if (_player && _player->getControls() && _player->getControls()->hasFlag(KeyPressedInventory))
+   {
+      _ingame_menu->open();
+      return;
+   }
+
    switch (key_event->code)
    {
       case sf::Keyboard::Key::F:
       {
          toggleFullScreen();
-         break;
-      }
-      case sf::Keyboard::Key::I:
-      case sf::Keyboard::Key::Tab:
-      {
-         _ingame_menu->open();
          break;
       }
       case sf::Keyboard::Key::P:
@@ -1355,11 +1347,6 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
          break;
       }
 #endif
-
-      default:
-      {
-         break;
-      }
    }
 }
 
