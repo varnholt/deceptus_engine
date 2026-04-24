@@ -19,6 +19,7 @@ public:
       Main,
       Options,
       Controls,
+      InputAssignment,
       Video,
       Audio,
       Game,
@@ -100,6 +101,7 @@ private:
    std::shared_ptr<MenuScreen> _menu_audio;
    std::shared_ptr<MenuScreen> _menu_video;
    std::shared_ptr<MenuScreen> _menu_controls;
+   std::shared_ptr<MenuScreen> _menu_input_assignment;
    std::shared_ptr<MenuScreen> _menu_game;
    std::shared_ptr<MenuScreen> _menu_achievements;
    std::shared_ptr<MenuScreen> _menu_credits;

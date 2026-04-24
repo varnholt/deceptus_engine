@@ -12,6 +12,7 @@
 #include "menuscreencredits.h"
 #include "menuscreenfileselect.h"
 #include "menuscreengame.h"
+#include "menuscreeninputassignment.h"
 #include "menuscreenmain.h"
 #include "menuscreennameselect.h"
 #include "menuscreenoptions.h"
@@ -30,6 +31,7 @@ Menu::Menu()
       _menu_audio(std::make_shared<MenuScreenAudio>()),
       _menu_video(std::make_shared<MenuScreenVideo>()),
       _menu_controls(std::make_shared<MenuScreenControls>()),
+      _menu_input_assignment(std::make_shared<MenuScreenInputAssignment>()),
       _menu_game(std::make_shared<MenuScreenGame>()),
       _menu_achievements(std::make_shared<MenuScreenAchievements>()),
       _menu_credits(std::make_shared<MenuScreenCredits>()),
@@ -42,6 +44,7 @@ Menu::Menu()
    _menus.push_back(_menu_audio);
    _menus.push_back(_menu_video);
    _menus.push_back(_menu_controls);
+   _menus.push_back(_menu_input_assignment);
    _menus.push_back(_menu_game);
    _menus.push_back(_menu_achievements);
    _menus.push_back(_menu_credits);
@@ -115,6 +118,9 @@ void Menu::show(Menu::MenuType menu)
          break;
       case MenuType::Controls:
          _current_menu = _menu_controls;
+         break;
+      case MenuType::InputAssignment:
+         _current_menu = _menu_input_assignment;
          break;
       case MenuType::Video:
          _current_menu = _menu_video;
@@ -239,6 +245,8 @@ const std::shared_ptr<MenuScreen>& Menu::getMenuScreen(Menu::MenuType type) cons
          return _menu_name_select;
       case MenuType::Controls:
          return _menu_controls;
+      case MenuType::InputAssignment:
+         return _menu_input_assignment;
       case MenuType::Video:
          return _menu_video;
       case MenuType::Audio:

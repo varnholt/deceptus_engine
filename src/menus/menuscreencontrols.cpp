@@ -20,6 +20,7 @@ void MenuScreenControls::down()
 
 void MenuScreenControls::select()
 {
+   Menu::getInstance()->show(Menu::MenuType::InputAssignment);
    MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
 }
 
