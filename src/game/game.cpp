@@ -10,7 +10,6 @@
 #include "game/camera/camerasystem.h"
 #include "game/clock/gameclock.h"
 #include "game/config/gameconfiguration.h"
-#include "game/config/inputconfiguration.h"
 #include "game/controller/gamecontrollerdata.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/debug/debugdraw.h"
@@ -1160,9 +1159,7 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
 
    CameraPanorama::getInstance().processKeyPressedEvents(key_event);
 
-   const auto& key_to_action = InputConfiguration::getInstance()._key_to_action;
-   const auto found_action = key_to_action.find(key_event->code);
-   if (found_action != key_to_action.end() && found_action->second == KeyPressedInventory)
+   if (_player && _player->getControls() && _player->getControls()->hasFlag(KeyPressedInventory))
    {
       _ingame_menu->open();
       return;
