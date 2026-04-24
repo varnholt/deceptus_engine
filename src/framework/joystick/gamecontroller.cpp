@@ -20,6 +20,18 @@ std::string GameController::getName(int32_t joystick_id) const
    return SDL_GetJoystickNameForID(joystick_id);
 }
 
+std::string GameController::getGuid() const
+{
+   if (!_joystick)
+   {
+      return {};
+   }
+   const auto guid = SDL_GetJoystickGUID(_joystick);
+   char guid_string[33] = {};
+   SDL_GUIDToString(guid, guid_string, static_cast<int>(sizeof(guid_string)));
+   return guid_string;
+}
+
 /*!
    \return axis count for joystick with given axis
 */

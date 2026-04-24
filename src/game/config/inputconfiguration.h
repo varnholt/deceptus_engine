@@ -23,11 +23,25 @@ struct InputConfiguration
 
    /// \brief loads bindings from a json file, falling back to defaults for missing entries.
    /// \param filename source configuration file path.
-   void deserializeFromFile(const std::string& filename = "data/config/controls.json");
+   void deserializeFromFile(const std::string& filename);
+
+   /// \brief loads bindings from the current device file (set via setCurrentFilename).
+   void deserializeFromFile();
 
    /// \brief writes current bindings to a json file.
    /// \param filename destination configuration file path.
-   void serializeToFile(const std::string& filename = "data/config/controls.json");
+   void serializeToFile(const std::string& filename);
+
+   /// \brief writes current bindings to the current device file (set via setCurrentFilename).
+   void serializeToFile();
+
+   /// \brief loads only the controller bindings section from a file without resetting keyboard bindings.
+   /// \param filename source configuration file path.
+   void mergeControllerBindingsFromFile(const std::string& filename);
+
+   /// \brief writes only the controller bindings section to a file.
+   /// \param filename destination configuration file path.
+   void saveControllerBindingsToFile(const std::string& filename);
 
    /// \brief returns the built-in default bindings.
    /// \return shared default configuration object.
@@ -36,6 +50,23 @@ struct InputConfiguration
    /// \brief returns the active input configuration, loading from disk on first access.
    /// \return singleton runtime configuration object.
    static InputConfiguration& getInstance();
+
+   /// \brief sets the file path used by no-argument serialize/deserialize calls.
+   /// \param filename path to the device-specific configuration file.
+   void setCurrentFilename(const std::string& filename);
+
+   /// \brief returns the file path currently set for serialize/deserialize calls.
+   /// \return current device configuration file path.
+   const std::string& getCurrentFilename() const;
+
+   /// \brief returns the keyboard profile filename.
+   /// \return path to the keyboard configuration file.
+   static std::string keyboardFilename();
+
+   /// \brief returns the controller profile filename for a given SDL GUID.
+   /// \param guid controller GUID hex string.
+   /// \return path to the controller-specific configuration file.
+   static std::string controllerFilename(const std::string& guid);
 
    /// \brief returns the display name of a keyboard key (e.g. "Space", "Left").
    /// \param key keyboard key to look up.
@@ -58,6 +89,10 @@ struct InputConfiguration
 
 private:
    void deserialize(const std::string& data);
+   void deserializeControllerSection(const std::string& data);
    std::string serialize() const;
+   std::string serializeControllerSection() const;
    void setDefaults();
+
+   std::string _current_filename{"data/config/controls.json"};
 };

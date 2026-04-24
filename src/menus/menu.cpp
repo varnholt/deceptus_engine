@@ -211,6 +211,15 @@ void Menu::controllerButtonY()
    _current_menu->controllerButtonY();
 }
 
+void Menu::setInputAssignmentDeviceMode(MenuScreenInputAssignment::DeviceMode mode, const std::string& device_name)
+{
+   auto* assignment_screen = dynamic_cast<MenuScreenInputAssignment*>(_menu_input_assignment.get());
+   if (assignment_screen)
+   {
+      assignment_screen->setDeviceMode(mode, device_name);
+   }
+}
+
 bool Menu::isVisible() const
 {
    return (_current_type != MenuType::None);
