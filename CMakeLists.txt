@@ -558,8 +558,6 @@ set(GAME_FILES
     src/menus/menuscreenaudio.h
     src/menus/menuscreencontrols.cpp
     src/menus/menuscreencontrols.h
-    src/menus/menuscreeninputassignment.cpp
-    src/menus/menuscreeninputassignment.h
     src/menus/menuscreencredits.cpp
     src/menus/menuscreencredits.h
     src/menus/menuscreenfileselect.cpp

@@ -31,7 +31,7 @@ static const std::map<std::string, std::string> key_controller_map{
    {"key_cursor_l", "dpad_l"},
    {"key_cursor_r", "dpad_r"},
    {"key_space",    "bt_a"},
-   {"key_return",   "bt_a"},
+   {"key_return",   "bt_b"},
    {"key_escape",   "bt_b"},
 };
 // clang-format on
