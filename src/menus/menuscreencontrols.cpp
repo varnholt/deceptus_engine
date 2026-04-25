@@ -3,21 +3,15 @@
 #include "menu.h"
 #include "menuaudio.h"
 
+#include "framework/joystick/gamecontroller.h"
+#include "framework/tools/log.h"
 #include "game/config/inputconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
-#include "framework/joystick/gamecontroller.h"
 
 #include <SDL3/SDL.h>
 
 namespace
 {
-
-// device selection view layout
-constexpr float device_title_y = 30.0f;
-constexpr float device_row_start_y = 100.0f;
-constexpr float device_row_height = 22.0f;
-constexpr float device_hint_y = 310.0f;
-constexpr float device_entry_x = 220.0f;
 
 // input assignment view layout
 constexpr float assign_title_y = 22.0f;
@@ -87,11 +81,26 @@ void MenuScreenControls::rebuildDeviceList()
    }
 }
 
-void MenuScreenControls::enterInputAssignment(DeviceMode mode, const std::string& device_name)
+void MenuScreenControls::loadDevice(int32_t index)
 {
-   _device_mode = mode;
-   _device_name = device_name;
-   _view_state = ViewState::InputAssignment;
+   const auto& entry = _device_entries[static_cast<size_t>(index)];
+   auto& input_config = InputConfiguration::getInstance();
+
+   if (entry.guid.empty())
+   {
+      input_config.setCurrentFilename(InputConfiguration::keyboardFilename());
+      input_config.deserializeFromFile();
+      _device_mode = DeviceMode::Keyboard;
+   }
+   else
+   {
+      const auto controller_filename = InputConfiguration::controllerFilename(entry.guid);
+      input_config.setCurrentFilename(controller_filename);
+      input_config.mergeControllerBindingsFromFile(controller_filename);
+      _device_mode = DeviceMode::Controller;
+   }
+
+   _device_name = entry.display_name;
    _assignment_state = AssignmentState::Idle;
    _action_row_index = 0;
    _previous_controller_button_values.clear();
@@ -99,13 +108,26 @@ void MenuScreenControls::enterInputAssignment(DeviceMode mode, const std::string
 
 void MenuScreenControls::showEvent()
 {
-   _view_state = ViewState::DeviceSelection;
    _device_row_index = 0;
    rebuildDeviceList();
+   if (!_device_entries.empty())
+   {
+      loadDevice(_device_row_index);
+   }
 }
 
 void MenuScreenControls::loadingFinished()
 {
+   for (const auto& layer_entry : _layers)
+   {
+      Log::Info() << "controls psd layer: " << layer_entry.first;
+   }
+
+   for (const auto& layer_entry : _layers)
+   {
+      layer_entry.second->_visible = false;
+   }
+
    updateLayers();
 }
 
@@ -133,117 +155,58 @@ void MenuScreenControls::updateLayers()
 
 void MenuScreenControls::up()
 {
-   if (_view_state == ViewState::DeviceSelection)
+   if (_action_row_index > 0)
    {
-      if (_device_row_index > 0)
-      {
-         _device_row_index--;
-      }
-   }
-   else
-   {
-      if (_action_row_index > 0)
-      {
-         _action_row_index--;
-      }
+      _action_row_index--;
    }
    MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
 
 void MenuScreenControls::down()
 {
-   if (_view_state == ViewState::DeviceSelection)
+   const auto row_count = static_cast<int32_t>(InputConfiguration::actionList().size());
+   if (_action_row_index < row_count)
    {
-      if (_device_row_index < static_cast<int32_t>(_device_entries.size()) - 1)
-      {
-         _device_row_index++;
-      }
-   }
-   else
-   {
-      const auto row_count = static_cast<int32_t>(InputConfiguration::actionList().size());
-      if (_action_row_index < row_count)
-      {
-         _action_row_index++;
-      }
+      _action_row_index++;
    }
    MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
 }
 
 void MenuScreenControls::select()
 {
-   if (_view_state == ViewState::DeviceSelection)
+   const auto row_count = static_cast<int32_t>(InputConfiguration::actionList().size());
+   if (_action_row_index == row_count)
    {
-      if (_device_entries.empty())
-      {
-         return;
-      }
+      resetDefaults();
+      return;
+   }
 
-      const auto& entry = _device_entries[static_cast<size_t>(_device_row_index)];
-      auto& input_config = InputConfiguration::getInstance();
-
-      if (entry.guid.empty())
-      {
-         // keyboard selected
-         input_config.setCurrentFilename(InputConfiguration::keyboardFilename());
-         input_config.deserializeFromFile();
-         enterInputAssignment(DeviceMode::Keyboard, "Keyboard");
-      }
-      else
-      {
-         // controller selected — load controller-specific bindings on top of current keyboard bindings
-         const auto controller_filename = InputConfiguration::controllerFilename(entry.guid);
-         input_config.setCurrentFilename(controller_filename);
-         input_config.mergeControllerBindingsFromFile(controller_filename);
-         enterInputAssignment(DeviceMode::Controller, entry.display_name);
-      }
-
-      MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
+   _pending_action = InputConfiguration::actionList()[static_cast<size_t>(_action_row_index)];
+   if (_device_mode == DeviceMode::Controller)
+   {
+      _assignment_state = AssignmentState::WaitingForButton;
+      _previous_controller_button_values.clear();
    }
    else
    {
-      const auto row_count = static_cast<int32_t>(InputConfiguration::actionList().size());
-      if (_action_row_index == row_count)
-      {
-         resetDefaults();
-         return;
-      }
-
-      _pending_action = InputConfiguration::actionList()[static_cast<size_t>(_action_row_index)];
-      if (_device_mode == DeviceMode::Controller)
-      {
-         _assignment_state = AssignmentState::WaitingForButton;
-         _previous_controller_button_values.clear();
-      }
-      else
-      {
-         _assignment_state = AssignmentState::WaitingForKey;
-      }
-      MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
+      _assignment_state = AssignmentState::WaitingForKey;
    }
+   MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
 }
 
 void MenuScreenControls::back()
 {
-   if (_view_state == ViewState::InputAssignment)
+   auto& input_config = InputConfiguration::getInstance();
+   if (_device_mode == DeviceMode::Controller)
    {
-      auto& input_config = InputConfiguration::getInstance();
-      if (_device_mode == DeviceMode::Controller)
-      {
-         input_config.saveControllerBindingsToFile(input_config.getCurrentFilename());
-      }
-      else
-      {
-         input_config.serializeToFile();
-      }
-      _view_state = ViewState::DeviceSelection;
-      MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
+      input_config.saveControllerBindingsToFile(input_config.getCurrentFilename());
    }
    else
    {
-      Menu::getInstance()->show(Menu::MenuType::Options);
-      MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
+      input_config.serializeToFile();
    }
+   Menu::getInstance()->show(Menu::MenuType::Options);
+   MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
 }
 
 void MenuScreenControls::resetDefaults()
@@ -296,8 +259,7 @@ void MenuScreenControls::completeButtonAssignment(int32_t sdl_button)
    auto& active_config = InputConfiguration::getInstance();
 
    // remove any existing binding for this button to avoid duplicates
-   for (auto map_entry = active_config._action_to_controller_button.begin();
-        map_entry != active_config._action_to_controller_button.end();)
+   for (auto map_entry = active_config._action_to_controller_button.begin(); map_entry != active_config._action_to_controller_button.end();)
    {
       if (map_entry->second == sdl_button && map_entry->first != _pending_action)
       {
@@ -317,32 +279,28 @@ void MenuScreenControls::completeButtonAssignment(int32_t sdl_button)
 
 void MenuScreenControls::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   if (_view_state == ViewState::InputAssignment)
+   if (_assignment_state == AssignmentState::WaitingForKey)
    {
-      if (_assignment_state == AssignmentState::WaitingForKey)
+      if (key == sf::Keyboard::Key::Escape)
       {
-         if (key == sf::Keyboard::Key::Escape)
-         {
-            _assignment_state = AssignmentState::Idle;
-            return;
-         }
-         completeKeyAssignment(key);
+         _assignment_state = AssignmentState::Idle;
          return;
       }
-
-      if (_assignment_state == AssignmentState::WaitingForButton)
-      {
-         if (key == sf::Keyboard::Key::Escape)
-         {
-            _assignment_state = AssignmentState::Idle;
-            _previous_controller_button_values.clear();
-         }
-         // all other keys are ignored while waiting for a controller button
-         return;
-      }
+      completeKeyAssignment(key);
+      return;
    }
 
-   // idle navigation (shared by both views)
+   if (_assignment_state == AssignmentState::WaitingForButton)
+   {
+      if (key == sf::Keyboard::Key::Escape)
+      {
+         _assignment_state = AssignmentState::Idle;
+         _previous_controller_button_values.clear();
+      }
+      // all other keys are ignored while waiting for a controller button
+      return;
+   }
+
    if (key == sf::Keyboard::Key::Up)
    {
       up();
@@ -350,6 +308,14 @@ void MenuScreenControls::keyboardKeyPressed(sf::Keyboard::Key key)
    else if (key == sf::Keyboard::Key::Down)
    {
       down();
+   }
+   else if (key == sf::Keyboard::Key::Left)
+   {
+      cycleDevice(-1);
+   }
+   else if (key == sf::Keyboard::Key::Right)
+   {
+      cycleDevice(1);
    }
    else if (key == sf::Keyboard::Key::Enter)
    {
@@ -363,11 +329,6 @@ void MenuScreenControls::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenControls::controllerButtonY()
 {
-   if (_view_state != ViewState::InputAssignment)
-   {
-      return;
-   }
-
    if (_assignment_state != AssignmentState::Idle)
    {
       return;
@@ -385,11 +346,23 @@ void MenuScreenControls::controllerButtonY()
    MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
 }
 
+void MenuScreenControls::cycleDevice(int32_t direction)
+{
+   const auto new_index = std::clamp(_device_row_index + direction, 0, static_cast<int32_t>(_device_entries.size()) - 1);
+   if (new_index == _device_row_index)
+   {
+      return;
+   }
+   _device_row_index = new_index;
+   loadDevice(_device_row_index);
+   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+}
+
 void MenuScreenControls::update(const sf::Time& dt)
 {
    MenuScreen::update(dt);
 
-   if (_view_state != ViewState::InputAssignment || _assignment_state != AssignmentState::WaitingForButton)
+   if (_assignment_state != AssignmentState::WaitingForButton)
    {
       // keep previous values in sync so WaitingForButton starts from an accurate baseline
       if (GameControllerIntegration::getInstance().isControllerConnected())
@@ -456,157 +429,120 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    updateLayers();
    MenuScreen::draw(window, states);
 
-   if (_view_state == ViewState::DeviceSelection)
+   const auto& actions = InputConfiguration::actionList();
+   const auto row_count = static_cast<int32_t>(actions.size());
+
+   // cursor highlight
+   const auto cursor_row_y = assign_row_start_y + static_cast<float>(_action_row_index) * assign_row_height;
+   _cursor_highlight.setSize({580.0f, assign_row_height - 1.0f});
+   _cursor_highlight.setPosition({30.0f, cursor_row_y});
+   window.draw(_cursor_highlight, states);
+
+   // device selector title
+   _text->setCharacterSize(14);
+   _text->setFillColor(color_title);
+   const auto title_prefix = (_device_row_index > 0) ? "< " : "  ";
+   const auto title_suffix = (_device_row_index < static_cast<int32_t>(_device_entries.size()) - 1) ? " >" : "  ";
+   _text->setString(title_prefix + _device_name + title_suffix);
+   const auto title_bounds = _text->getLocalBounds();
+   _text->setPosition({(640.0f - title_bounds.size.x) / 2.0f, assign_title_y});
+   window.draw(*_text, states);
+
+   _text->setCharacterSize(12);
+
+   // column headers
+   _text->setFillColor(color_header);
+   _text->setString("Action");
+   _text->setPosition({assign_column_action_x, assign_header_y});
+   window.draw(*_text, states);
+
+   _text->setString("Keyboard");
+   _text->setPosition({assign_column_keyboard_x, assign_header_y});
+   window.draw(*_text, states);
+
+   _text->setString("Controller");
+   _text->setPosition({assign_column_controller_x, assign_header_y});
+   window.draw(*_text, states);
+
+   // action rows
+   const auto& active_config = InputConfiguration::getInstance();
+
+   for (auto row_index = 0; row_index < row_count; row_index++)
    {
-      // cursor highlight
-      const auto cursor_row_y = device_row_start_y + static_cast<float>(_device_row_index) * device_row_height;
-      _cursor_highlight.setSize({300.0f, device_row_height - 1.0f});
-      _cursor_highlight.setPosition({device_entry_x - 10.0f, cursor_row_y});
-      window.draw(_cursor_highlight, states);
+      const auto action = actions[static_cast<size_t>(row_index)];
+      const auto row_y = assign_row_start_y + static_cast<float>(row_index) * assign_row_height;
+      const auto selected = (row_index == _action_row_index);
+      const auto row_color = selected ? color_row_selected : color_row_normal;
 
-      // title
-      _text->setCharacterSize(14);
-      _text->setFillColor(color_title);
-      _text->setString("Select Input Device");
-      const auto title_bounds = _text->getLocalBounds();
-      _text->setPosition({(640.0f - title_bounds.size.x) / 2.0f, device_title_y});
+      _text->setFillColor(row_color);
+
+      _text->setString(InputConfiguration::actionDisplayName(action));
+      _text->setPosition({assign_column_action_x, row_y});
       window.draw(*_text, states);
 
-      _text->setCharacterSize(12);
-
-      // device entries
-      for (auto row_index = 0; row_index < static_cast<int32_t>(_device_entries.size()); row_index++)
+      std::string keyboard_name = "--";
+      const auto key_entry = active_config._action_to_key.find(action);
+      if (key_entry != active_config._action_to_key.end())
       {
-         const auto row_y = device_row_start_y + static_cast<float>(row_index) * device_row_height;
-         const auto selected = (row_index == _device_row_index);
-
-         _text->setFillColor(selected ? color_row_selected : color_row_normal);
-         _text->setString(_device_entries[static_cast<size_t>(row_index)].display_name);
-         _text->setPosition({device_entry_x, row_y});
-         window.draw(*_text, states);
+         keyboard_name = InputConfiguration::keyName(key_entry->second);
       }
-
-      // hints
-      _text->setFillColor(color_hint);
-      _text->setString("Enter: configure bindings    Esc: back");
-      _text->setPosition({device_entry_x - 10.0f, device_hint_y});
+      _text->setString(keyboard_name);
+      _text->setPosition({assign_column_keyboard_x, row_y});
       window.draw(*_text, states);
+
+      std::string button_name = "--";
+      const auto button_entry = active_config._action_to_controller_button.find(action);
+      if (button_entry != active_config._action_to_controller_button.end())
+      {
+         button_name = InputConfiguration::buttonName(button_entry->second);
+      }
+      _text->setString(button_name);
+      _text->setPosition({assign_column_controller_x, row_y});
+      window.draw(*_text, states);
+   }
+
+   // Reset Defaults row
+   {
+      const auto reset_row_y = assign_row_start_y + static_cast<float>(row_count) * assign_row_height;
+      const auto reset_selected = (_action_row_index == row_count);
+      _text->setFillColor(reset_selected ? color_row_reset_selected : color_row_reset_normal);
+      _text->setString("Reset to Defaults");
+      _text->setPosition({assign_column_action_x, reset_row_y});
+      window.draw(*_text, states);
+   }
+
+   // status text (shown while waiting for input)
+   if (_assignment_state == AssignmentState::WaitingForKey)
+   {
+      _text->setFillColor(color_waiting);
+      _text->setString("Press a key to assign  (Esc to cancel)");
+      _text->setPosition({assign_column_action_x, assign_status_y});
+      window.draw(*_text, states);
+   }
+   else if (_assignment_state == AssignmentState::WaitingForButton)
+   {
+      _text->setFillColor(color_waiting);
+      _text->setString("Press a face or shoulder button  (Esc to cancel)");
+      _text->setPosition({assign_column_action_x, assign_status_y});
+      window.draw(*_text, states);
+   }
+
+   // hint lines
+   _text->setFillColor(color_hint);
+   if (_device_mode == DeviceMode::Controller)
+   {
+      _text->setString("Enter / Y button: assign controller button");
    }
    else
    {
-      const auto& actions = InputConfiguration::actionList();
-      const auto row_count = static_cast<int32_t>(actions.size());
-
-      // cursor highlight
-      const auto cursor_row_y = assign_row_start_y + static_cast<float>(_action_row_index) * assign_row_height;
-      _cursor_highlight.setSize({580.0f, assign_row_height - 1.0f});
-      _cursor_highlight.setPosition({30.0f, cursor_row_y});
-      window.draw(_cursor_highlight, states);
-
-      // title
-      _text->setCharacterSize(14);
-      _text->setString(_device_name);
-      _text->setFillColor(color_title);
-      const auto title_bounds = _text->getLocalBounds();
-      _text->setPosition({(640.0f - title_bounds.size.x) / 2.0f, assign_title_y});
-      window.draw(*_text, states);
-
-      _text->setCharacterSize(12);
-
-      // column headers
-      _text->setFillColor(color_header);
-      _text->setString("Action");
-      _text->setPosition({assign_column_action_x, assign_header_y});
-      window.draw(*_text, states);
-
-      _text->setString("Keyboard");
-      _text->setPosition({assign_column_keyboard_x, assign_header_y});
-      window.draw(*_text, states);
-
-      _text->setString("Controller");
-      _text->setPosition({assign_column_controller_x, assign_header_y});
-      window.draw(*_text, states);
-
-      // action rows
-      const auto& active_config = InputConfiguration::getInstance();
-
-      for (auto row_index = 0; row_index < row_count; row_index++)
-      {
-         const auto action = actions[static_cast<size_t>(row_index)];
-         const auto row_y = assign_row_start_y + static_cast<float>(row_index) * assign_row_height;
-         const auto selected = (row_index == _action_row_index);
-         const auto row_color = selected ? color_row_selected : color_row_normal;
-
-         _text->setFillColor(row_color);
-
-         _text->setString(InputConfiguration::actionDisplayName(action));
-         _text->setPosition({assign_column_action_x, row_y});
-         window.draw(*_text, states);
-
-         std::string keyboard_name = "--";
-         const auto key_entry = active_config._action_to_key.find(action);
-         if (key_entry != active_config._action_to_key.end())
-         {
-            keyboard_name = InputConfiguration::keyName(key_entry->second);
-         }
-         _text->setString(keyboard_name);
-         _text->setPosition({assign_column_keyboard_x, row_y});
-         window.draw(*_text, states);
-
-         std::string button_name = "--";
-         const auto button_entry = active_config._action_to_controller_button.find(action);
-         if (button_entry != active_config._action_to_controller_button.end())
-         {
-            button_name = InputConfiguration::buttonName(button_entry->second);
-         }
-         _text->setString(button_name);
-         _text->setPosition({assign_column_controller_x, row_y});
-         window.draw(*_text, states);
-      }
-
-      // Reset Defaults row
-      {
-         const auto reset_row_y = assign_row_start_y + static_cast<float>(row_count) * assign_row_height;
-         const auto reset_selected = (_action_row_index == row_count);
-         _text->setFillColor(reset_selected ? color_row_reset_selected : color_row_reset_normal);
-         _text->setString("Reset to Defaults");
-         _text->setPosition({assign_column_action_x, reset_row_y});
-         window.draw(*_text, states);
-      }
-
-      // status text (shown while waiting for input)
-      if (_assignment_state == AssignmentState::WaitingForKey)
-      {
-         _text->setFillColor(color_waiting);
-         _text->setString("Press a key to assign  (Esc to cancel)");
-         _text->setPosition({assign_column_action_x, assign_status_y});
-         window.draw(*_text, states);
-      }
-      else if (_assignment_state == AssignmentState::WaitingForButton)
-      {
-         _text->setFillColor(color_waiting);
-         _text->setString("Press a face or shoulder button  (Esc to cancel)");
-         _text->setPosition({assign_column_action_x, assign_status_y});
-         window.draw(*_text, states);
-      }
-
-      // hint lines
-      _text->setFillColor(color_hint);
-      if (_device_mode == DeviceMode::Controller)
-      {
-         _text->setString("Enter / Y button: assign controller button");
-      }
-      else
-      {
-         _text->setString("Enter: assign keyboard key    Y button: assign controller button");
-      }
-      _text->setPosition({assign_column_action_x, assign_hint_y});
-      window.draw(*_text, states);
-
-      _text->setString("Esc: save and return");
-      _text->setPosition({assign_column_action_x, assign_hint_2_y});
-      window.draw(*_text, states);
+      _text->setString("Enter: assign keyboard key    Y button: assign controller button");
    }
+   _text->setPosition({assign_column_action_x, assign_hint_y});
+   window.draw(*_text, states);
+
+   _text->setString("Left/Right: change device    Esc: save and return");
+   _text->setPosition({assign_column_action_x, assign_hint_2_y});
+   window.draw(*_text, states);
 }
 
 /*
@@ -622,4 +558,3 @@ data/menus/controls.psd
     body_header
     header
 */
-

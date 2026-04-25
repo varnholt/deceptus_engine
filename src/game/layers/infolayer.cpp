@@ -601,7 +601,8 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    const auto& layer_health = _layers["console"]->_layer;
    layer_health->draw(window, states);
 
-   sf::View view_screen(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(console_base_width_px), static_cast<float>(console_base_height_px)})
+   sf::View view_screen(
+      sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(console_base_width_px), static_cast<float>(console_base_height_px)})
    );
    window.setView(view_screen);
 

@@ -55,13 +55,6 @@ public:
    void updateLayers();
 
 private:
-   /// \brief identifies the active top-level view of the controls screen.
-   enum class ViewState
-   {
-      DeviceSelection,  //!< showing the list of input devices to configure
-      InputAssignment,  //!< showing the action/binding table for the selected device
-   };
-
    /// \brief identifies the interaction state within the assignment view.
    enum class AssignmentState
    {
@@ -81,10 +74,13 @@ private:
    /// \brief rebuilds _device_entries from the current controller integration state.
    void rebuildDeviceList();
 
-   /// \brief loads bindings for the selected device and transitions to the assignment view.
-   /// \param mode keyboard or controller device mode.
-   /// \param device_name human-readable name shown in the assignment view title.
-   void enterInputAssignment(DeviceMode mode, const std::string& device_name);
+   /// \brief loads bindings for the device at the given index in the device list.
+   /// \param index index into _device_entries.
+   void loadDevice(int32_t index);
+
+   /// \brief cycles the active device by direction (-1 or +1) and reloads its bindings.
+   /// \param direction -1 for previous device, +1 for next device.
+   void cycleDevice(int32_t direction);
 
    /// \brief moves cursor up one row in the active view.
    void up();
@@ -113,17 +109,15 @@ private:
    std::unique_ptr<sf::Text> _text;       //!< reused per draw call for all labels and table cells
    sf::RectangleShape _cursor_highlight;  //!< highlight rect drawn behind the selected row
 
-   ViewState _view_state = ViewState::DeviceSelection;  //!< active top-level view
-
    // device selection state
    std::vector<DeviceEntry> _device_entries;
    int32_t _device_row_index = 0;  //!< selected row in the device list
 
    // input assignment state
    AssignmentState _assignment_state = AssignmentState::Idle;
-   int32_t _action_row_index = 0;                                         //!< 0..num_actions-1 for action rows; num_actions for Reset Defaults
-   KeyPressed _pending_action = KeyPressedUp;                             //!< action being reassigned while not Idle
-   std::vector<bool> _previous_controller_button_values;                  //!< previous-frame button states for edge detection
-   DeviceMode _device_mode = DeviceMode::Keyboard;                        //!< current device being configured
-   std::string _device_name{"Keyboard"};                                  //!< display name shown in the assignment view title
+   int32_t _action_row_index = 0;                         //!< 0..num_actions-1 for action rows; num_actions for Reset Defaults
+   KeyPressed _pending_action = KeyPressedUp;             //!< action being reassigned while not Idle
+   std::vector<bool> _previous_controller_button_values;  //!< previous-frame button states for edge detection
+   DeviceMode _device_mode = DeviceMode::Keyboard;        //!< current device being configured
+   std::string _device_name{"Keyboard"};                  //!< display name shown in the assignment view title
 };
