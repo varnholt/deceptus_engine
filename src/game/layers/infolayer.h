@@ -91,6 +91,7 @@ private:
    void updateEventReplayIcons();
 
    BitmapFont _font;
+   sf::Font _console_font;  //!< ttf font used exclusively for console text rendering
 
    std::atomic<bool> _loading;
    std::optional<sf::Time> _show_time_health;
@@ -127,7 +128,7 @@ private:
       std::optional<sf::Time> _show_time;
       std::optional<sf::Time> _hide_time;
       LoadingFadeState _fade_state{LoadingFadeState::None};
-      std::atomic<bool> _hide_pending{false}; //!< set from any thread; consumed and applied on the main thread in update().
+      std::atomic<bool> _hide_pending{false};  //!< set from any thread; consumed and applied on the main thread in update().
    } _loading_anim;
 
    std::map<std::string, std::shared_ptr<LayerData>> _layers;

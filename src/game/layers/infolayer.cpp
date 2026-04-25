@@ -54,11 +54,14 @@ constexpr auto stamina_pos_x_px = 81.0f;
 constexpr auto stamina_pos_y_px = 28.0f;
 constexpr auto skull_pos_x_px = 32.0f;
 constexpr auto skull_pos_y_px = 0.0f;
+constexpr auto console_base_font_size_px = 7u;
 }  // namespace
 
 InfoLayer::InfoLayer()
 {
    _font.load("data/game/font.png", "data/game/font.map");
+   _console_font.openFromFile("data/fonts/deceptum.ttf");
+   const_cast<sf::Texture&>(_console_font.getTexture(console_base_font_size_px)).setSmooth(false);
 
    const auto player_health_layers = {
       "1",
@@ -580,46 +583,60 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
 
 void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 {
-   const auto w_view = GameConfiguration::getInstance()._view_width;
-   const auto h_view = GameConfiguration::getInstance()._view_height;
-   const auto w_screen = GameConfiguration::getInstance()._video_mode_width;
-   const auto h_screen = GameConfiguration::getInstance()._video_mode_height;
+   const auto view_width_px = GameConfiguration::getInstance()._view_width;
+   const auto view_height_px = GameConfiguration::getInstance()._view_height;
    const auto& console = Console::getInstance();
    const auto& command = console.getCommand();
    const auto& commands = console.getLog();
-   constexpr auto offset_x = 16;
-   static const auto offset_y = h_screen - 48;
+   const auto console_base_width_px = static_cast<int32_t>(window.getSize().x);
+   const auto console_base_height_px = static_cast<int32_t>(window.getSize().y);
+   const auto scale_factor = console_base_width_px / view_width_px;
+   const auto line_spacing_px = static_cast<int32_t>(console_base_font_size_px) * scale_factor;
+   const auto offset_x_px = 8 * scale_factor;
+   const auto offset_y_px = console_base_height_px - 24 * scale_factor;
 
-   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w_view), static_cast<float>(h_view)}));
+   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(view_width_px), static_cast<float>(view_height_px)}));
    window.setView(view);
 
    const auto& layer_health = _layers["console"]->_layer;
    layer_health->draw(window, states);
 
-   sf::View view_screen(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w_screen), static_cast<float>(h_screen)}));
+   sf::View view_screen(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(console_base_width_px), static_cast<float>(console_base_height_px)})
+   );
    window.setView(view_screen);
 
+   sf::Text console_text(_console_font);
+   console_text.setCharacterSize(console_base_font_size_px * scale_factor);
+
    // draw command history
-   auto y = 0;
+   auto line_index = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
    {
-      _font.draw(window, _font.getCoords(*it), offset_x, offset_y - ((y + 1) * 14));
-      y++;
+      console_text.setString(*it);
+      console_text.setFillColor(sf::Color::White);
+      console_text.setPosition({static_cast<float>(offset_x_px), static_cast<float>(offset_y_px - ((line_index + 1) * line_spacing_px))});
+      window.draw(console_text);
+      line_index++;
    }
 
-   auto bitmap_font = _font.getCoords(command);
-   _font.draw(window, bitmap_font, offset_x, h_screen - 28);
+   console_text.setString(command);
+   console_text.setFillColor(sf::Color::White);
+   console_text.setPosition({static_cast<float>(offset_x_px), static_cast<float>(console_base_height_px - 14 * scale_factor)});
+   window.draw(console_text);
 
    // draw cursor
    const auto elapsed = GlobalClock::getInstance().getElapsedTime();
    if (static_cast<int32_t>(elapsed.asSeconds()) % 2 == 0)
    {
-      _font.draw(window, _font.getCoords("_"), _font._text_width + offset_x, h_screen - 28);
+      const auto cursor_position = console_text.findCharacterPos(command.size());
+      console_text.setString("_");
+      console_text.setPosition(cursor_position);
+      window.draw(console_text);
    }
 
    // draw console help
-   y = 0;
-   const auto indent = w_screen / 40;
+   line_index = 0;
+   const auto indent_px = console_base_width_px / 40;
    const auto& help = console.help();
    std::ostringstream oss;
 
@@ -633,16 +650,29 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    std::ranges::sort(sorted_topics.begin(), sorted_topics.end());
    for (const auto& topic : sorted_topics)
    {
-      _font.draw(window, _font.getCoords(topic), w_screen / 2, (++y) * 14, sf::Color::Green);
+      console_text.setString(topic);
+      console_text.setFillColor(sf::Color::Green);
+      console_text.setPosition({static_cast<float>(console_base_width_px / 2), static_cast<float>((++line_index) * line_spacing_px)});
+      window.draw(console_text);
 
       const auto& commands = help._help_messages.at(topic);
       for (const auto& command : commands)
       {
-         _font.draw(window, _font.getCoords(command.description), w_screen / 2 + indent, (++y) * 14, sf::Color::White);
+         console_text.setString(command.description);
+         console_text.setFillColor(sf::Color::White);
+         console_text.setPosition(
+            {static_cast<float>(console_base_width_px / 2 + indent_px), static_cast<float>((++line_index) * line_spacing_px)}
+         );
+         window.draw(console_text);
 
          for (const auto& example : command.examples)
          {
-            _font.draw(window, _font.getCoords(example), w_screen / 2 + indent * 2, (++y) * 14, sf::Color::Red);
+            console_text.setString(example);
+            console_text.setFillColor(sf::Color::Red);
+            console_text.setPosition(
+               {static_cast<float>(console_base_width_px / 2 + indent_px * 2), static_cast<float>((++line_index) * line_spacing_px)}
+            );
+            window.draw(console_text);
          }
       }
    }
