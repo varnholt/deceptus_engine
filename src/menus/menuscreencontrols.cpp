@@ -20,7 +20,6 @@ constexpr float assign_row_start_y = 72.0f;
 constexpr float assign_row_height = 18.0f;
 constexpr float assign_column_action_x = 72.0f;
 constexpr float assign_column_keyboard_x = 240.0f;
-constexpr float assign_column_controller_x = 410.0f;
 constexpr float assign_status_y = 258.0f;
 constexpr float assign_hint_y = 280.0f;
 constexpr float assign_hint_2_y = 298.0f;
@@ -456,12 +455,8 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    _text->setPosition({assign_column_action_x, assign_header_y});
    window.draw(*_text, states);
 
-   _text->setString("Keyboard");
+   _text->setString(_device_mode == DeviceMode::Keyboard ? "Keyboard" : "Controller");
    _text->setPosition({assign_column_keyboard_x, assign_header_y});
-   window.draw(*_text, states);
-
-   _text->setString("Controller");
-   _text->setPosition({assign_column_controller_x, assign_header_y});
    window.draw(*_text, states);
 
    // action rows
@@ -480,24 +475,25 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
       _text->setPosition({assign_column_action_x, row_y});
       window.draw(*_text, states);
 
-      std::string keyboard_name = "--";
-      const auto key_entry = active_config._action_to_key.find(action);
-      if (key_entry != active_config._action_to_key.end())
+      std::string binding_name = "--";
+      if (_device_mode == DeviceMode::Keyboard)
       {
-         keyboard_name = InputConfiguration::keyName(key_entry->second);
+         const auto key_entry = active_config._action_to_key.find(action);
+         if (key_entry != active_config._action_to_key.end())
+         {
+            binding_name = InputConfiguration::keyName(key_entry->second);
+         }
       }
-      _text->setString(keyboard_name);
+      else
+      {
+         const auto button_entry = active_config._action_to_controller_button.find(action);
+         if (button_entry != active_config._action_to_controller_button.end())
+         {
+            binding_name = InputConfiguration::buttonName(button_entry->second);
+         }
+      }
+      _text->setString(binding_name);
       _text->setPosition({assign_column_keyboard_x, row_y});
-      window.draw(*_text, states);
-
-      std::string button_name = "--";
-      const auto button_entry = active_config._action_to_controller_button.find(action);
-      if (button_entry != active_config._action_to_controller_button.end())
-      {
-         button_name = InputConfiguration::buttonName(button_entry->second);
-      }
-      _text->setString(button_name);
-      _text->setPosition({assign_column_controller_x, row_y});
       window.draw(*_text, states);
    }
 
