@@ -1,5 +1,6 @@
 #include "menuscreenpause.h"
 
+#include "framework/tools/localization.h"
 #include "game/audio/audio.h"
 #include "game/audio/musicfilenames.h"
 #include "game/audio/musicplayer.h"
@@ -108,7 +109,7 @@ void MenuScreenPause::select()
          break;
       case Selection::Quit:
          MessageBox::question(
-            "Do you want to end the game?",
+            tr("Do you want to end the game?"),
             [](MessageBox::Button button)
             {
                if (button == MessageBox::Button::Yes)

@@ -1,5 +1,6 @@
 #include "menuscreenfileselect.h"
 
+#include "framework/tools/localization.h"
 #include "menu.h"
 #include "menuaudio.h"
 
@@ -90,7 +91,7 @@ void MenuScreenFileSelect::select()
       auto description = LevelDescription::load(level_item._level_name);
       if (!description)
       {
-         MessageBox::info("The selected level is not available.", [](MessageBox::Button) {});
+         MessageBox::info(tr("The selected level is not available."), [](MessageBox::Button) {});
          return;
       }
 
@@ -114,7 +115,7 @@ void MenuScreenFileSelect::back()
 void MenuScreenFileSelect::remove()
 {
    MessageBox::question(
-      "Are you sure you want to delete this file?",
+      tr("Are you sure you want to delete this file?"),
       [this](MessageBox::Button button)
       {
          if (button == MessageBox::Button::Yes)

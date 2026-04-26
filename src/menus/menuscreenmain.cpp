@@ -196,7 +196,7 @@ void MenuScreenMain::select()
       case Selection::Quit:
       {
          MessageBox::question(
-            "Are you sure you want to quit?",
+            tr("Are you sure you want to quit?"),
             [this](MessageBox::Button button)
             {
                if (button == MessageBox::Button::Yes)
