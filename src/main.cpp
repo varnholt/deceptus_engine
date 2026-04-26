@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include "framework/tools/gamepaths.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/logthread.h"
 #include "game/constants.h"
 #include "game/debug/logui.h"
@@ -66,5 +67,11 @@ int main(int /*argc*/, char** /*argv*/)
    Game game;
    game.initialize();
    Preloader::preload();
-   return game.loop();
+   const auto result = game.loop();
+
+#ifdef DEVELOPMENT_MODE
+   Localization::getInstance().flushMissingKeys();
+#endif
+
+   return result;
 }

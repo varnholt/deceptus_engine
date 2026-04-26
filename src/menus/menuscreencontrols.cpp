@@ -1,5 +1,6 @@
 #include "menuscreencontrols.h"
 
+#include "framework/tools/localization.h"
 #include "menu.h"
 #include "menuaudio.h"
 
@@ -54,7 +55,7 @@ void MenuScreenControls::rebuildDeviceList()
    _device_entries.clear();
 
    DeviceEntry keyboard_entry;
-   keyboard_entry.display_name = "Keyboard";
+   keyboard_entry.display_name = tr("Keyboard");
    _device_entries.push_back(keyboard_entry);
 
    const auto& gci = GameControllerIntegration::getInstance();
@@ -451,11 +452,11 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    // column headers
    _text->setFillColor(color_header);
-   _text->setString("Action");
+   _text->setString(tr("Action"));
    _text->setPosition({assign_column_action_x, assign_header_y});
    window.draw(*_text, states);
 
-   _text->setString(_device_mode == DeviceMode::Keyboard ? "Keyboard" : "Controller");
+   _text->setString(_device_mode == DeviceMode::Keyboard ? tr("Keyboard") : tr("Controller"));
    _text->setPosition({assign_column_keyboard_x, assign_header_y});
    window.draw(*_text, states);
 
@@ -502,7 +503,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
       const auto reset_row_y = assign_row_start_y + static_cast<float>(row_count) * assign_row_height;
       const auto reset_selected = (_action_row_index == row_count);
       _text->setFillColor(reset_selected ? color_row_reset_selected : color_row_reset_normal);
-      _text->setString("Reset to Defaults");
+      _text->setString(tr("Reset to Defaults"));
       _text->setPosition({assign_column_action_x, reset_row_y});
       window.draw(*_text, states);
    }
@@ -511,14 +512,14 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    if (_assignment_state == AssignmentState::WaitingForKey)
    {
       _text->setFillColor(color_waiting);
-      _text->setString("Press a key to assign  (Esc to cancel)");
+      _text->setString(tr("Press a key to assign  (Esc to cancel)"));
       _text->setPosition({assign_column_action_x, assign_status_y});
       window.draw(*_text, states);
    }
    else if (_assignment_state == AssignmentState::WaitingForButton)
    {
       _text->setFillColor(color_waiting);
-      _text->setString("Press a face or shoulder button  (Esc to cancel)");
+      _text->setString(tr("Press a face or shoulder button  (Esc to cancel)"));
       _text->setPosition({assign_column_action_x, assign_status_y});
       window.draw(*_text, states);
    }
@@ -527,16 +528,16 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    _text->setFillColor(color_hint);
    if (_device_mode == DeviceMode::Controller)
    {
-      _text->setString("Enter / Y button: assign controller button");
+      _text->setString(tr("Enter / Y button: assign controller button"));
    }
    else
    {
-      _text->setString("Enter: assign keyboard key    Y button: assign controller button");
+      _text->setString(tr("Enter: assign keyboard key    Y button: assign controller button"));
    }
    _text->setPosition({assign_column_action_x, assign_hint_y});
    window.draw(*_text, states);
 
-   _text->setString("Left/Right: change device    Esc: save and return");
+   _text->setString(tr("Left/Right: change device    Esc: save and return"));
    _text->setPosition({assign_column_action_x, assign_hint_2_y});
    window.draw(*_text, states);
 }

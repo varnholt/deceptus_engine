@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include "framework/easings/easings.h"
+#include "framework/tools/localization.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/ui/messagebox.h"
@@ -196,7 +197,7 @@ void MenuScreenMain::select()
       case Selection::Quit:
       {
          MessageBox::question(
-            "Are you sure you want to quit?",
+            tr("Are you sure you want to quit?"),
             [this](MessageBox::Button button)
             {
                if (button == MessageBox::Button::Yes)

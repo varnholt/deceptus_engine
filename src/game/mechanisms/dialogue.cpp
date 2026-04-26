@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/io/valuereader.h"
@@ -116,7 +117,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
       {
          DialogueItem item;
          item._pos = pos;
-         item._message = (*it_dialogue_items).second->_value_string.value();
+         item._message = tr((*it_dialogue_items).second->_value_string.value());
          item._text_color = text_color.value_or(item._text_color);
          item._background_color = background_color.value_or(item._background_color);
          dialogue->_dialogue_items.push_back(item);
