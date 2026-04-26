@@ -319,6 +319,8 @@ void InputConfiguration::setDefaults()
       {KeyPressedSlot2, SDL_GAMEPAD_BUTTON_NORTH},
       {KeyPressedUp, SDL_GAMEPAD_BUTTON_DPAD_UP},
       {KeyPressedDown, SDL_GAMEPAD_BUTTON_DPAD_DOWN},
+      {KeyPressedLeft, SDL_GAMEPAD_BUTTON_DPAD_LEFT},
+      {KeyPressedRight, SDL_GAMEPAD_BUTTON_DPAD_RIGHT},
       {KeyPressedInventory, SDL_GAMEPAD_BUTTON_BACK},
    };
 }

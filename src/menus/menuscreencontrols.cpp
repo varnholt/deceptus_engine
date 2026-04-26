@@ -28,10 +28,26 @@ const sf::Color color_title{220, 200, 255};
 const sf::Color color_header{130, 120, 150};
 const sf::Color color_row_normal{200, 185, 220};
 const sf::Color color_row_selected{255, 255, 255};
+const sf::Color color_row_disabled{100, 90, 115};
 const sf::Color color_row_reset_normal{220, 175, 140};
 const sf::Color color_row_reset_selected{255, 205, 165};
 const sf::Color color_waiting{255, 220, 80};
 const sf::Color color_hint{110, 100, 130};
+
+bool isReadOnlyControllerAction(KeyPressed action)
+{
+   return action == KeyPressedUp || action == KeyPressedDown || action == KeyPressedLeft ||
+          action == KeyPressedRight || action == KeyPressedLook;
+}
+
+std::string_view controllerReadOnlyLabel(KeyPressed action)
+{
+   if (action == KeyPressedLook)
+   {
+      return "Right Stick";
+   }
+   return "Analog / DPad";
+}
 
 }  // namespace
 
@@ -101,8 +117,25 @@ void MenuScreenControls::loadDevice(int32_t index)
 
    _device_name = entry.display_name;
    _assignment_state = AssignmentState::Idle;
-   _action_row_index = 0;
    _previous_controller_button_values.clear();
+
+   if (_device_mode == DeviceMode::Controller)
+   {
+      const auto& actions = InputConfiguration::actionList();
+      _action_row_index = 0;
+      for (auto action_index = 0; action_index < static_cast<int32_t>(actions.size()); action_index++)
+      {
+         if (!isReadOnlyControllerAction(actions[static_cast<size_t>(action_index)]))
+         {
+            _action_row_index = action_index;
+            break;
+         }
+      }
+   }
+   else
+   {
+      _action_row_index = 0;
+   }
 }
 
 void MenuScreenControls::showEvent()
@@ -154,21 +187,36 @@ void MenuScreenControls::updateLayers()
 
 void MenuScreenControls::up()
 {
-   if (_action_row_index > 0)
+   const auto& actions = InputConfiguration::actionList();
+   auto candidate = _action_row_index - 1;
+   while (candidate > 0 && _device_mode == DeviceMode::Controller &&
+          isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)]))
    {
-      _action_row_index--;
+      candidate--;
    }
-   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+   if (candidate >= 0 &&
+       !(_device_mode == DeviceMode::Controller && isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)])))
+   {
+      _action_row_index = candidate;
+      MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+   }
 }
 
 void MenuScreenControls::down()
 {
-   const auto row_count = static_cast<int32_t>(InputConfiguration::actionList().size());
-   if (_action_row_index < row_count)
+   const auto& actions = InputConfiguration::actionList();
+   const auto row_count = static_cast<int32_t>(actions.size());
+   auto candidate = _action_row_index + 1;
+   while (candidate < row_count && _device_mode == DeviceMode::Controller &&
+          isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)]))
    {
-      _action_row_index++;
+      candidate++;
    }
-   MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+   if (candidate <= row_count)
+   {
+      _action_row_index = candidate;
+      MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
+   }
 }
 
 void MenuScreenControls::select()
@@ -183,6 +231,10 @@ void MenuScreenControls::select()
    _pending_action = InputConfiguration::actionList()[static_cast<size_t>(_action_row_index)];
    if (_device_mode == DeviceMode::Controller)
    {
+      if (isReadOnlyControllerAction(_pending_action))
+      {
+         return;
+      }
       _assignment_state = AssignmentState::WaitingForButton;
       _previous_controller_button_values.clear();
    }
@@ -340,6 +392,10 @@ void MenuScreenControls::controllerButtonY()
    }
 
    _pending_action = InputConfiguration::actionList()[static_cast<size_t>(_action_row_index)];
+   if (isReadOnlyControllerAction(_pending_action))
+   {
+      return;
+   }
    _assignment_state = AssignmentState::WaitingForButton;
    _previous_controller_button_values.clear();
    MenuAudio::play(MenuAudio::SoundEffect::ItemSelect);
@@ -433,9 +489,16 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    // cursor highlight
    const auto cursor_row_y = assign_row_start_y + static_cast<float>(_action_row_index) * assign_row_height;
-   _cursor_highlight.setSize({580.0f, assign_row_height - 1.0f});
-   _cursor_highlight.setPosition({30.0f, cursor_row_y});
-   window.draw(_cursor_highlight, states);
+   const auto cursor_action_index = static_cast<size_t>(_action_row_index);
+   const auto cursor_on_disabled = (_device_mode == DeviceMode::Controller &&
+                                    cursor_action_index < actions.size() &&
+                                    isReadOnlyControllerAction(actions[cursor_action_index]));
+   if (!cursor_on_disabled)
+   {
+      _cursor_highlight.setSize({580.0f, assign_row_height - 1.0f});
+      _cursor_highlight.setPosition({30.0f, cursor_row_y});
+      window.draw(_cursor_highlight, states);
+   }
 
    // device selector title
    _text->setCharacterSize(14);
@@ -467,7 +530,8 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
       const auto action = actions[static_cast<size_t>(row_index)];
       const auto row_y = assign_row_start_y + static_cast<float>(row_index) * assign_row_height;
       const auto selected = (row_index == _action_row_index);
-      const auto row_color = selected ? color_row_selected : color_row_normal;
+      const auto disabled = (_device_mode == DeviceMode::Controller && isReadOnlyControllerAction(action));
+      const auto row_color = disabled ? color_row_disabled : (selected ? color_row_selected : color_row_normal);
 
       _text->setFillColor(row_color);
 
@@ -476,7 +540,11 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
       window.draw(*_text, states);
 
       std::string binding_name = "--";
-      if (_device_mode == DeviceMode::Keyboard)
+      if (_device_mode == DeviceMode::Controller && isReadOnlyControllerAction(action))
+      {
+         binding_name = controllerReadOnlyLabel(action);
+      }
+      else if (_device_mode == DeviceMode::Keyboard)
       {
          const auto key_entry = active_config._action_to_key.find(action);
          if (key_entry != active_config._action_to_key.end())
