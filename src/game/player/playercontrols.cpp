@@ -797,9 +797,16 @@ float PlayerControls::readControllerNormalizedHorizontal() const
    {
       return -1.0f;
    }
+
    if (it_right != _locked_keys.end() && it_right->second._state == LockedState::Pressed)
    {
       return 1.0f;
+   }
+
+   // when movement is locked to released, suppress controller axis input entirely
+   if (it_left != _locked_keys.end() && it_left->second._state == LockedState::Released)
+   {
+      return 0.0f;
    }
 
    // analogue input normalized to -1..1
