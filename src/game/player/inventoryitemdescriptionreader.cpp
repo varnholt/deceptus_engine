@@ -1,5 +1,6 @@
 #include "inventoryitemdescriptionreader.h"
 
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 
 #include <filesystem>
@@ -27,7 +28,9 @@ void InventoryItemDescriptionReader::from_json(const json& j, InventoryItemDescr
    j.at("width_px").get_to(description._width_px);
    j.at("height_px").get_to(description._height_px);
    j.at("title").get_to(description._title);
+   description._title = tr(description._title);
    j.at("description").get_to(description._description);
+   description._description = tr(description._description);
 
    if (j.find("properties") != j.end())
    {

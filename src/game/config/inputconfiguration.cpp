@@ -5,6 +5,7 @@
 #include <ostream>
 #include <sstream>
 
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "json/json.hpp"
 
@@ -546,24 +547,24 @@ std::string InputConfiguration::buttonName(int32_t sdl_button)
 
 std::string InputConfiguration::actionDisplayName(KeyPressed action)
 {
-   static const std::map<KeyPressed, std::string> action_to_display_name = {
-      {KeyPressedUp, "Up"},
-      {KeyPressedDown, "Down"},
-      {KeyPressedLeft, "Left"},
-      {KeyPressedRight, "Right"},
-      {KeyPressedJump, "Jump"},
-      {KeyPressedSlot1, "Slot 1"},
-      {KeyPressedSlot2, "Slot 2"},
-      {KeyPressedLook, "Look"},
-      {KeyPressedAction, "Action"},
-      {KeyPressedInventory, "Inventory"},
+   const std::map<KeyPressed, std::string> action_to_display_name = {
+      {KeyPressedUp, tr("Up")},
+      {KeyPressedDown, tr("Down")},
+      {KeyPressedLeft, tr("Left")},
+      {KeyPressedRight, tr("Right")},
+      {KeyPressedJump, tr("Jump")},
+      {KeyPressedSlot1, tr("Slot 1")},
+      {KeyPressedSlot2, tr("Slot 2")},
+      {KeyPressedLook, tr("Look")},
+      {KeyPressedAction, tr("Action")},
+      {KeyPressedInventory, tr("Inventory")},
    };
    const auto found_entry = action_to_display_name.find(action);
    if (found_entry != action_to_display_name.end())
    {
       return found_entry->second;
    }
-   return "Unknown";
+   return tr("Unknown");
 }
 
 const std::vector<KeyPressed>& InputConfiguration::actionList()

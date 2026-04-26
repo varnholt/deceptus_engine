@@ -16,13 +16,14 @@ Localization& Localization::getInstance()
 void Localization::load(const std::string& locale)
 {
    _locale = locale;
+   _locale_path = std::string{"data/locale/"} + locale + ".json";
    _translations.clear();
+   _missing_keys.clear();
 
-   const auto path = std::string{"data/locale/"} + locale + ".json";
-   std::ifstream file_stream(path);
+   std::ifstream file_stream(_locale_path);
    if (!file_stream.is_open())
    {
-      Log::Warning() << "localization: could not open " << path;
+      Log::Warning() << "localization: could not open " << _locale_path;
       return;
    }
 
@@ -38,7 +39,7 @@ void Localization::load(const std::string& locale)
    }
    catch (const std::exception& exception)
    {
-      Log::Error() << "localization: failed to parse " << path << ": " << exception.what();
+      Log::Error() << "localization: failed to parse " << _locale_path << ": " << exception.what();
       return;
    }
 
@@ -57,7 +58,69 @@ std::string_view Localization::translate(std::string_view source_text) const
    {
       return found->second;
    }
+
+   // record untranslated strings so flushMissingKeys() can write them back
+   if (!_locale_path.empty() && !source_text.empty())
+   {
+      _missing_keys.insert(std::string{source_text});
+   }
+
    return source_text;
+}
+
+void Localization::flushMissingKeys()
+{
+   if (_locale_path.empty() || _missing_keys.empty())
+   {
+      return;
+   }
+
+   // load the current file so we preserve existing translations
+   nlohmann::json json_data;
+   {
+      std::ifstream file_stream(_locale_path);
+      if (file_stream.is_open())
+      {
+         try
+         {
+            json_data = nlohmann::json::parse(std::string{std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>()});
+         }
+         catch (const std::exception&)
+         {
+            json_data = nlohmann::json::object();
+         }
+      }
+      else
+      {
+         json_data = nlohmann::json::object();
+      }
+   }
+
+   auto new_count = 0;
+   for (const auto& key : _missing_keys)
+   {
+      if (json_data.count(key) == 0)
+      {
+         json_data[key] = "";
+         new_count++;
+      }
+   }
+
+   if (new_count == 0)
+   {
+      return;
+   }
+
+   std::ofstream out_stream(_locale_path);
+   if (!out_stream.is_open())
+   {
+      Log::Warning() << "localization: could not write missing keys to " << _locale_path;
+      return;
+   }
+
+   out_stream << json_data.dump(2) << "\n";
+   Log::Info() << "localization: wrote " << new_count << " missing key(s) to " << _locale_path;
+   _missing_keys.clear();
 }
 
 std::string tr(std::string_view source_text)

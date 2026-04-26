@@ -52,6 +52,7 @@ int32_t playEventRecording(lua_State* state);
 
 // utilities
 int32_t debug(lua_State* state);
+int32_t translate(lua_State* state);
 
 // error handling
 /// \brief logs lua error text and terminates execution.

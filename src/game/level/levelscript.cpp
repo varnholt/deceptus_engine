@@ -158,6 +158,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setZoomFactor", LevelScriptCallbacks::setZoomFactor);
    lua_register(_lua_state, "showDialogue", LevelScriptCallbacks::showDialogue);
    lua_register(_lua_state, "toggle", LevelScriptCallbacks::toggle);
+   lua_register(_lua_state, "tr", LevelScriptCallbacks::translate);
    lua_register(_lua_state, "writeLuaNodeProperty", LevelScriptCallbacks::writeLuaNodeProperty);
    lua_register(_lua_state, "playEventRecording", LevelScriptCallbacks::playEventRecording);
 

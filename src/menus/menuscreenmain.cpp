@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include "framework/easings/easings.h"
+#include "framework/tools/localization.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/ui/messagebox.h"

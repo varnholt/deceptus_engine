@@ -84,6 +84,31 @@ def extract_from_tmx_files(root: Path) -> list[str]:
     return found
 
 
+def extract_from_inventory_json(root: Path) -> list[str]:
+    """collect title and description strings from inventory_items.json."""
+    found: list[str] = []
+    seen: set[str] = set()
+
+    inventory_path = root / "data" / "sprites" / "inventory_items.json"
+    if not inventory_path.exists():
+        return found
+
+    try:
+        data = json.loads(inventory_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as load_error:
+        print(f"warning: could not load {inventory_path}: {load_error}")
+        return found
+
+    for item in data.values():
+        for field in ("title", "description"):
+            source_text = item.get(field, "").strip()
+            if source_text and source_text not in seen:
+                seen.add(source_text)
+                found.append(source_text)
+
+    return found
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--locale", default="en", help="locale identifier written to the output file (default: en)")
@@ -106,6 +131,7 @@ def main() -> None:
     source_strings = extract_from_source_files(repo_root / "src")
     source_strings += extract_from_source_files(repo_root / "data")
     source_strings += extract_from_tmx_files(repo_root / "data")
+    source_strings += extract_from_inventory_json(repo_root)
 
     # deduplicate while preserving first-seen order
     unique_strings: list[str] = []

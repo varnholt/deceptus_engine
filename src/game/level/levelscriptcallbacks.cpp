@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "SFML/Graphics.hpp"
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "game/audio/musicplayertypes.h"
 #include "game/level/levelscript.h"
@@ -390,6 +391,18 @@ int32_t debug(lua_State* state)
 
    Log::Info() << lua_tostring(state, 1);
    return 0;
+}
+
+int32_t translate(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   const auto translated = tr(lua_tostring(state, 1));
+   lua_pushstring(state, translated.c_str());
+   return 1;
 }
 
 [[noreturn]] void error(lua_State* state, const char* /*scope*/)
