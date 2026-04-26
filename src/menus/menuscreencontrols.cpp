@@ -63,6 +63,34 @@ MenuScreenControls::MenuScreenControls()
    _text->setCharacterSize(12);
 
    _cursor_highlight.setFillColor(sf::Color{80, 60, 100, 110});
+
+   GameControllerIntegration::getInstance().addDeviceRemovedCallback(
+      [this](int32_t removed_joystick_id)
+      {
+         if (_device_mode != DeviceMode::Controller)
+         {
+            return;
+         }
+
+         if (_device_row_index >= static_cast<int32_t>(_device_entries.size()))
+         {
+            return;
+         }
+
+         if (_device_entries[static_cast<size_t>(_device_row_index)].joystick_id != removed_joystick_id)
+         {
+            return;
+         }
+
+         auto& input_config = InputConfiguration::getInstance();
+         input_config.saveControllerBindingsToFile(input_config.getCurrentFilename());
+         rebuildDeviceList();
+         _device_row_index = 0;
+         loadDevice(_device_row_index);
+         _assignment_state = AssignmentState::Idle;
+         _previous_controller_button_values.clear();
+      }
+   );
 }
 
 void MenuScreenControls::rebuildDeviceList()
