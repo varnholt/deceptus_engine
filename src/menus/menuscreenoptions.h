@@ -1,5 +1,6 @@
 #pragma once
 
+#include "menu.h"
 #include "menuscreen.h"
 
 /// \brief options hub screen that links to controls, video, audio, game, achievements, and credits.
@@ -40,8 +41,14 @@ public:
    /// \brief returns to the most recent parent menu that opened options.
    void back();
 
+   /// \brief captures the back-navigation target when the screen becomes active.
+   void showEvent() override;
+
    /// \brief opens the submenu corresponding to the current selection.
    void select();
 
    Selection _selection = Selection::Controls;
+
+private:
+   Menu::MenuType _back_target = Menu::MenuType::Main; //!< parent menu to return to when pressing back.
 };

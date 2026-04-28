@@ -31,28 +31,19 @@ void MenuScreenOptions::keyboardKeyPressed(sf::Keyboard::Key key)
    }
 }
 
+void MenuScreenOptions::showEvent()
+{
+   const auto previous = Menu::getInstance()->getPreviousType();
+   if (previous == Menu::MenuType::Main || previous == Menu::MenuType::Pause)
+   {
+      _back_target = previous;
+   }
+   updateLayers();
+}
+
 void MenuScreenOptions::back()
 {
-   const auto& history = Menu::getInstance()->getHistory();
-
-   // choose whatever has been used the last time to open up the options menu
-   auto menu = Menu::MenuType::Main;
-   for (auto it = history.crbegin(); it != history.crend(); ++it)
-   {
-      if ((*it) == Menu::MenuType::Main)
-      {
-         menu = Menu::MenuType::Main;
-         break;
-      }
-      if ((*it) == Menu::MenuType::Pause)
-      {
-         menu = Menu::MenuType::Pause;
-         break;
-      }
-   }
-
-   Menu::getInstance()->show(menu);
-
+   Menu::getInstance()->show(_back_target);
    MenuAudio::play(MenuAudio::SoundEffect::MenuBack);
 }
 
