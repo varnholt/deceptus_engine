@@ -100,6 +100,10 @@ private:
    /// \return true when the repeat delay window is still active.
    bool isControllerActionSkipped() const;
 
+   /// \brief dispatches a directional navigation call to the selected submenu unless it is hiding.
+   /// \param action callable invoked with the current page when navigation is allowed.
+   void navigate(std::function<void(InGameMenuPage&)> action);
+
    /// \brief rotates submenu ordering one step to the right and updates selection state.
    void rotateRight();
 

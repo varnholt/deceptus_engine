@@ -285,24 +285,33 @@ void InGameMenu::close()
    hide();
 }
 
+void InGameMenu::navigate(std::function<void(InGameMenuPage&)> action)
+{
+   auto& menu = *_submenu_type_map[static_cast<uint8_t>(_selected_submenu)];
+   if (menu.getAnimation() != InGameMenuPage::Animation::Hide)
+   {
+      action(menu);
+   }
+}
+
 void InGameMenu::left()
 {
-   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->left();
+   navigate([](InGameMenuPage& menu) { menu.left(); });
 }
 
 void InGameMenu::right()
 {
-   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->right();
+   navigate([](InGameMenuPage& menu) { menu.right(); });
 }
 
 void InGameMenu::up()
 {
-   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->up();
+   navigate([](InGameMenuPage& menu) { menu.up(); });
 }
 
 void InGameMenu::down()
 {
-   _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->down();
+   navigate([](InGameMenuPage& menu) { menu.down(); });
 }
 
 void InGameMenu::show()
