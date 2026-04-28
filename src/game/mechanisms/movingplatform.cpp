@@ -194,7 +194,7 @@ void MovingPlatform::setup(const GameDeserializeData& data)
 
    // read properties
    const auto& map = data._tmx_object->_properties->_map;
-   _z_index = ValueReader::readValue<int32_t>("z", map).value_or(10);
+   setZ(ValueReader::readValue<int32_t>("z", map).value_or(static_cast<int32_t>(ZDepth::ForegroundMin)));
    _platform_width_tl = ValueReader::readValue<int32_t>("platform_width_tl", map).value_or(4);
    const auto interpolation_time = ValueReader::readValue<float>("interpolation_time", map);
 
