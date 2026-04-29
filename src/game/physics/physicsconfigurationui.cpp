@@ -79,10 +79,6 @@ void PhysicsConfigurationUi::draw()
 
    ImGui::SFML::Update(*_render_window.get(), _clock.restart());
 
-   ImGui::Begin("physics");
-   ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
-   ImGuiTreeNodeFlags header_flags = ImGuiTreeNodeFlags_DefaultOpen;
-
    if (ImGui::BeginMainMenuBar())
    {
       if (ImGui::BeginMenu("File", true))
@@ -103,6 +99,15 @@ void PhysicsConfigurationUi::draw()
       }
       ImGui::EndMainMenuBar();
    }
+
+   const auto* viewport = ImGui::GetMainViewport();
+   ImGui::SetNextWindowPos(viewport->WorkPos);
+   ImGui::SetNextWindowSize(viewport->WorkSize);
+   ImGui::Begin(
+      "physics", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar
+   );
+   ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
+   ImGuiTreeNodeFlags header_flags = ImGuiTreeNodeFlags_DefaultOpen;
 
    if (ImGui::CollapsingHeader("gravity", header_flags))
    {

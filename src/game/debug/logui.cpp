@@ -83,7 +83,11 @@ void LogUi::draw()
 {
    ImGui::SFML::Update(*_render_window.get(), _clock.restart());
 
-   ImGui::Begin("log");
+   ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+   ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+   ImGui::Begin(
+      "log", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar
+   );
 
    ImGui::PushItemWidth(ImGui::GetWindowWidth());
    ImGuiTreeNodeFlags header_flags = ImGuiTreeNodeFlags_DefaultOpen;

@@ -79,10 +79,6 @@ void CameraSystemConfigurationUi::draw()
 
    ImGui::SFML::Update(*_render_window.get(), _clock.restart());
 
-   ImGui::Begin("camera");
-   ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
-   ImGuiTreeNodeFlags header_flags = ImGuiTreeNodeFlags_DefaultOpen;
-
    if (ImGui::BeginMainMenuBar())
    {
       if (ImGui::BeginMenu("File", true))
@@ -103,6 +99,15 @@ void CameraSystemConfigurationUi::draw()
       }
       ImGui::EndMainMenuBar();
    }
+
+   const auto* viewport = ImGui::GetMainViewport();
+   ImGui::SetNextWindowPos(viewport->WorkPos);
+   ImGui::SetNextWindowSize(viewport->WorkSize);
+   ImGui::Begin(
+      "camera", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar
+   );
+   ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
+   ImGuiTreeNodeFlags header_flags = ImGuiTreeNodeFlags_DefaultOpen;
 
    if (ImGui::CollapsingHeader("horizontal", header_flags))
    {
