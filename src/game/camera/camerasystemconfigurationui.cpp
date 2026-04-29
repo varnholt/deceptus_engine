@@ -137,5 +137,5 @@ void CameraSystemConfigurationUi::draw()
 
 void CameraSystemConfigurationUi::close()
 {
-   ImGui::SFML::Shutdown();
+   ImGui::SFML::Shutdown(*_render_window.get());
 }

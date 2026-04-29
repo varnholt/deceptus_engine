@@ -81,7 +81,7 @@ Deceptus supports different blend modes for Image Layers.
 They have the properties below:
 |Custom Property|Type|Description|
 |-|-|-|
-|blendmode|string|Valid blend modes are: `alpha`, `multiply`, `add` or `none`.|
+|blendmode|string|Valid blend modes are: `alpha`, `multiply`, `add` or `none`. The default is `alpha`.|
 |z|int|The z depth of the image layer (default is `0`).|
 |use_parallax|bool|When set to `true`, the image layer will scroll with parallax factors as defined in your level’s parallax settings (default is `false`).|
 
@@ -174,7 +174,7 @@ So on top of the Rope properties, there are a few additional ones:
 |push_duration_s|float|The duration for how long the rope is pushed (in seconds), a good value is `1.0`|
 |push_strength|float|The amount of force to be applied for each frame during the push duration (`0.01` is a good value)|
 |segments|int|The amount of segments your rope should have (less is better, `7` is a good value)|
-|sprite|int|Selects which lamp sprite to use. At the moment only `1` and `2` are supported.|
+|sprite|int|Selects which lamp sprite to use. Valid values are `1`, `2`, and `3`.|
 
 ### Light properties
 
@@ -264,7 +264,7 @@ To create a Shader Quad, create an object group starting with `shader_quads`. Th
 |vertex_shader|string|the relative path to your vertex shader (optional)|
 |fragment_shader|string|the relative path to your fragment shader (optional)|
 |texture|string|a path to a texture used by the shader|
-|smooth_texture|bool|Whether the shader texture should be smoothed (default is `true`).|
+|smooth_texture|bool|Whether the shader texture should be smoothed (default is `false`).|
 |customization|string|Optional customization parameters passed to the shader; use this to send arbitrary values into the shader program.|
 |time_offset_s|float|Time offset in seconds; it is used to avoid that shader quads next to each other won't look identical.|
 |uv_width|float|UV x coordinate goes from `0` .. `uv_width`; the default value is `1.0`.|
@@ -285,6 +285,7 @@ All weather types have the same generic parameters below:
 |Custom Property|Type|Description|
 |-|-|-|
 |z|int|The z depth of your rain layer|
+|enabled|bool|Whether the weather effect is initially enabled (default is `true`).|
 |limit_effect_to_room|bool|Whether to only show the effect when the player is in the same room that has been assigned to the object. The default is `false`.|
 |effect_start_delay_s|float|Whenever the player activates the effect by entering the effect's rectangle (and if required also the effect's room via enabling `limit_effect_to_room`), this delay is applied until the effect is actually enabled. The default delay is 0.|
 

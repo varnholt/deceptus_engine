@@ -127,5 +127,5 @@ void LogUi::draw()
 
 void LogUi::close()
 {
-   ImGui::SFML::Shutdown();
+   ImGui::SFML::Shutdown(*_render_window.get());
 }

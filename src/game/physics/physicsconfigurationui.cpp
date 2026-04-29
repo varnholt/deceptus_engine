@@ -221,5 +221,5 @@ void PhysicsConfigurationUi::draw()
 
 void PhysicsConfigurationUi::close()
 {
-   ImGui::SFML::Shutdown();
+   ImGui::SFML::Shutdown(*_render_window.get());
 }
