@@ -1032,20 +1032,11 @@ To create a rotating blade object, just create a polyline for its path.
 |Property|Type|Description|
 |-|-|-|
 |z|int|The layer's z index|
-|mode|string|Specifies the spike behavior: `interval` makes the spikes extend and retract in cycles, `trap` makes them extend shortly after the player steps on them, and `toggled` lets them be controlled via levers (default is `interval`).|
-|orientation|string|The direction the spikes point: `up`, `down`, `left`, or `right` (default is `up`).|
-|down_time_ms|int|In interval mode, the time in milliseconds that the spikes remain retracted (default is `2000`).|
-|up_time_ms|int|In interval mode, the time in milliseconds that the spikes remain extended (default is `2000`).|
-|trap_time_ms|int|In trap mode, the delay in milliseconds between the player touching the spikes and the spikes extending (default is `250`).|
-|speed_up|float|Speed factor applied when the spikes extend (default is `1.0`).|
-|speed_down|float|Speed factor applied when the spikes retract (default is `1.0`).|
-|time_offset_ms|int|An optional time offset in milliseconds to desynchronize multiple spike objects (default is `0`).|
-|under_water|bool|If set to `true`, an alternative underwater spike sprite is used (default is `false`).|
 |enabled|bool|The default enabled state (default is `true`)|
 |blade_acceleration|float|The acceleration used for the blade to gain speed (both in rotation and vertical/horizontal movement) when enabled (the default is `0.006`).|
 |blade_deceleration|float|The deceleration used for the blade to drop speed (both in rotation and vertical/horizontal movement) when disabled (the default is `0.009`).|
 |blade_rotation_speed|float|The value that is applied to the rotation of the blade sprite. The higher, the faster the rotational movement (the default is `400.0`).|
-|movement_speed|float|A factor applied to the horizontal/vertical movement of the blade. The higher, the faster the blade moves around (the default is `0.2`). |
+|movement_speed|float|A factor applied to the horizontal/vertical movement of the blade. The higher, the faster the blade moves around (the default is `0.2`).|
 
 ---
 
@@ -1402,3 +1393,88 @@ Wind zones apply a continuous force to the player whenever they are inside the r
 |direction_y|float|Vertical component of the wind force. Positive values push upward, negative values push downward (default is `0.0`).|
 
 The size and position of the wind zone are defined by the rectangle you draw.  Wind has no visible representation, so there is no z‑index to configure.
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+## Gateway
+
+The Gateway is a mystical portal-like mechanism that activates through a staged animation sequence — including rotating side parts, a shader-based void effect, and an animated eye — and then teleports the player to a linked destination Gateway when they enter it.
+
+Gateways are linked by name: each gateway object is given a Tiled Object Name, and its counterpart references that name via `target_id`. When the player steps into an enabled gateway, a fade transition plays and the player is placed at the destination gateway.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`Gateway`|
+|Object Group|`gateways`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|z|int|The object's z index.|
+|enabled|bool|Whether the gateway is initially enabled (default is `true`). A disabled gateway shows no activation animation and cannot be used.|
+|target_id|string|The Tiled Object Name of the destination gateway. When the player enters this gateway, they are teleported to the gateway with that name.|
+|flowfield_reference_id|string|Optional reference to a flow field object whose texture the gateway can update (optional).|
+|flowfield_texture|string|Optional path to a texture that replaces the flow field texture when this gateway is activated (optional).|
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+## Water Damage
+
+Water Damage applies periodic damage to the player while they are submerged in water. Place a rectangle in the `water_damage` layer (or assign the `WaterDamage` object type) to cover any water region where you want submersion to be hazardous.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`WaterDamage`|
+|Object Group|`water_damage`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|hurt_interval_ms|int|The interval in milliseconds between damage ticks while the player is submerged.|
+|hurt_amount|int|The amount of damage applied each tick.|
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+## Zoom Rects
+
+Zoom Rects smoothly interpolate the camera's zoom factor based on the player's distance from the rectangle's center. As the player moves through the zone, the zoom is looked up from a configurable radius-to-zoom curve.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`ZoomRect`|
+|Object Group|`zoom_rects`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|values|string|A semicolon-separated list of `radius:zoom_factor` pairs that define the zoom curve. The radius is a normalized value from `0.0` (center) to `1.0` (edge of the rectangle's bounding circle). Example: `"0.0:1.5;0.5:1.2;1.0:1.0"`. The default is `"0.0:1.0;1.0:1.0"` (no zoom change).|

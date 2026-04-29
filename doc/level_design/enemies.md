@@ -171,7 +171,7 @@ Ghosts fly around following a given path. When Adam gets close by, they try to s
 
 |Property|Type|Description|
 |-|-|-|
-|script|string|`critter.lua`|
+|script|string|`ghost.lua`|
 |path|string|The ghosts path given as a list of x,y-positions; format: `x0, y0, x1, y1, etc.`|
 
 

@@ -12,31 +12,44 @@
 ## Mechanisms
 - [Introduction](level_design/mechanisms.md#mechanisms)<br>
 - Mechanisms
+    - [Blocking Rects](level_design/mechanisms.md#blocking-rects)<br>
     - [Bouncers](level_design/mechanisms.md#bouncers)<br>
-    - [Conveyor Belts](level_design/mechanisms.md#conveyor-belts)<br>
-    - [Damage Rects](level_design/mechanisms.md#damage-rects)<br>
-    - [Doors](level_design/mechanisms.md#doors)<br>
-    - [Fans](level_design/mechanisms.md#fans)<br>
-    - [Lasers](level_design/mechanisms.md#lasers)<br>
+    - [Box Collider](level_design/mechanisms.md#box-collider)<br>
     - [Bubble Cubes](level_design/mechanisms.md#bubble-cubes)<br>
+    - [Button Rects](level_design/mechanisms.md#button-rects)<br>
     - [Collapsing Platforms](level_design/mechanisms.md#collapsing-platforms)<br>
-    - [Portals](level_design/mechanisms.md#portals)<br>
-    - [Crushers](level_design/mechanisms.md#crushers)<br>
-    - [Death Blocks](level_design/mechanisms.md#death-blocks)<br>
-    - [Levers](level_design/mechanisms.md#levers)<br>
-    - [Sensor Rects](level_design/mechanisms.md#sensor-rects)<br>
-    - [Ropes](level_design/mechanisms.md#ropes)<br>
-    - [Spike Balls](level_design/mechanisms.md#spike-balls)<br>
-    - [Spikes](level_design/mechanisms.md#spikes)<br>
-    - [Spike Blocks](level_design/mechanisms.md#spike-blocks)<br>
-    - [On/Off Blocks](level_design/mechanisms.md#onoff-blocks)<br>
-    - [Rotating Blades](level_design/mechanisms.md#rotating-blades)<br>
-    - [Moving Platform](level_design/mechanisms.md#moving-platform)<br>
-    - [One-Way Walls](level_design/mechanisms.md#one-way-walls)<br>
-    - [Moveable Objects](level_design/mechanisms.md#moveable-objects)<br>
-    - [Extras](level_design/mechanisms.md#extras)<br>
-    - [Dialogues](level_design/mechanisms.md#dialogues)<br>
     - [Controller Help](level_design/mechanisms.md#controller-help)<br>
+    - [Conveyor Belts](level_design/mechanisms.md#conveyor-belts)<br>
+    - [Crushers](level_design/mechanisms.md#crushers)<br>
+    - [Damage Rects](level_design/mechanisms.md#damage-rects)<br>
+    - [Death Blocks](level_design/mechanisms.md#death-blocks)<br>
+    - [Destructible Blocking Rects](level_design/mechanisms.md#destructible-blocking-rects)<br>
+    - [Dialogues](level_design/mechanisms.md#dialogues)<br>
+    - [Doors](level_design/mechanisms.md#doors)<br>
+    - [Enemy Wall](level_design/mechanisms.md#enemy-wall)<br>
+    - [Extras](level_design/mechanisms.md#extras)<br>
+    - [Fans](level_design/mechanisms.md#fans)<br>
+    - [Fireflies](level_design/mechanisms.md#fireflies)<br>
+    - [Gateway](level_design/mechanisms.md#gateway)<br>
+    - [Interaction Help](level_design/mechanisms.md#interaction-help)<br>
+    - [Lasers](level_design/mechanisms.md#lasers)<br>
+    - [Levers](level_design/mechanisms.md#levers)<br>
+    - [Moveable Objects](level_design/mechanisms.md#moveable-objects)<br>
+    - [Moving Platform](level_design/mechanisms.md#moving-platform)<br>
+    - [On/Off Blocks](level_design/mechanisms.md#onoff-blocks)<br>
+    - [One-Way Walls](level_design/mechanisms.md#one-way-walls)<br>
+    - [Portals](level_design/mechanisms.md#portals)<br>
+    - [Ropes](level_design/mechanisms.md#ropes)<br>
+    - [Rotating Blades](level_design/mechanisms.md#rotating-blades)<br>
+    - [Sensor Rects](level_design/mechanisms.md#sensor-rects)<br>
+    - [Spike Balls](level_design/mechanisms.md#spike-balls)<br>
+    - [Spike Blocks](level_design/mechanisms.md#spike-blocks)<br>
+    - [Spikes](level_design/mechanisms.md#spikes)<br>
+    - [Text Layers](level_design/mechanisms.md#text-layers)<br>
+    - [Treasure Chests](level_design/mechanisms.md#treasure-chests)<br>
+    - [Water Damage](level_design/mechanisms.md#water-damage)<br>
+    - [Wind](level_design/mechanisms.md#wind)<br>
+    - [Zoom Rects](level_design/mechanisms.md#zoom-rects)<br>
 
 
 ## Enemies
@@ -46,7 +59,7 @@
 - [Generic properties](level_design/enemies.md#generic-properties)<br>
 - Enemies
     - [Arrow Trap](level_design/enemies.md#arrow-trap)<br>
-    - [Bat](level_design/designing_a_level.enemies#bat)<br>
+    - [Bat](level_design/enemies.md#bat)<br>
     - [Blob](level_design/enemies.md#blob)<br>
     - [Bonefish](level_design/enemies.md#bonefish)<br>
     - [Cannon](level_design/enemies.md#cannon)<br>
@@ -54,6 +67,7 @@
     - [Ghost](level_design/enemies.md#ghost)<br>
     - [Klonk](level_design/enemies.md#klonk)<br>
     - [Landmine](level_design/enemies.md#landmine)<br>
+    - [Minik Bomber](level_design/enemies.md#minik-bomber)<br>
     - [Watermine](level_design/enemies.md#watermine)<br>
 
 
