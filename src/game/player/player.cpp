@@ -39,6 +39,7 @@ namespace
 {
 constexpr uint16_t category_bits = CategoryFriendly;
 constexpr uint16_t mask_bits_standing = CategoryBoundary | CategoryEnemyCollideWith | CategoryMoveableBox;
+constexpr uint16_t mask_bits_sensors = mask_bits_standing | CategoryEnemyWalkThrough;
 constexpr uint16_t mask_bits_crouching = CategoryEnemyCollideWith;
 constexpr int16_t group_index = 0;
 constexpr auto impulse_epsilon = 0.0000001f;
@@ -491,7 +492,7 @@ void Player::createFeet()
    // without explicit filter bits, box2d defaults to maskBits=0xffff which causes sensors to
    // register contacts with box collider side walls, leading to false ground/tunnel detections
    foot_sensor_fixture_def.filter.categoryBits = category_bits;
-   foot_sensor_fixture_def.filter.maskBits = mask_bits_standing;
+   foot_sensor_fixture_def.filter.maskBits = mask_bits_sensors;
 
    _foot_sensor_fixture = _body->CreateFixture(&foot_sensor_fixture_def);
    auto* foot_object_data = new FixtureNode(this);
@@ -508,7 +509,7 @@ void Player::createFeet()
    head_sensor_fixture_def.isSensor = true;
    head_sensor_fixture_def.shape = &head_polygon_shape;
    head_sensor_fixture_def.filter.categoryBits = category_bits;
-   head_sensor_fixture_def.filter.maskBits = mask_bits_standing;
+   head_sensor_fixture_def.filter.maskBits = mask_bits_sensors;
 
    auto* head_sensor_fixture = _body->CreateFixture(&head_sensor_fixture_def);
    auto* head_object_data = new FixtureNode(this);
@@ -528,7 +529,7 @@ void Player::createFeet()
    left_arm_sensor_fixture_def.isSensor = true;
    left_arm_sensor_fixture_def.shape = &left_arm_polygon_shape;
    left_arm_sensor_fixture_def.filter.categoryBits = category_bits;
-   left_arm_sensor_fixture_def.filter.maskBits = mask_bits_standing;
+   left_arm_sensor_fixture_def.filter.maskBits = mask_bits_sensors;
 
    auto* left_arm_sensor_fixture = _body->CreateFixture(&left_arm_sensor_fixture_def);
    auto* left_arm_object_data = new FixtureNode(this);
@@ -547,7 +548,7 @@ void Player::createFeet()
    right_arm_sensor_fixture_def.isSensor = true;
    right_arm_sensor_fixture_def.shape = &right_arm_polygon_shape;
    right_arm_sensor_fixture_def.filter.categoryBits = category_bits;
-   right_arm_sensor_fixture_def.filter.maskBits = mask_bits_standing;
+   right_arm_sensor_fixture_def.filter.maskBits = mask_bits_sensors;
 
    auto* right_arm_sensor_fixture = _body->CreateFixture(&right_arm_sensor_fixture_def);
    auto* right_arm_object_data = new FixtureNode(this);
