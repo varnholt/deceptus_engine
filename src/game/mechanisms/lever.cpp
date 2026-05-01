@@ -1,5 +1,7 @@
 #include "lever.h"
 
+#include <ranges>
+
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -221,9 +223,25 @@ void Lever::setHandleAvailable(bool handle_available)
    _handle_available = handle_available;
 }
 
-const std::vector<std::string>& Lever::getTargetIds() const
+void Lever::resolveTargets(const std::vector<std::shared_ptr<GameMechanism>>& mechanisms)
 {
-   return _target_ids;
+   for (const auto& target_id : _target_ids)
+   {
+      auto filtered_view = mechanisms | std::views::filter(
+                                           [&target_id](const auto& mechanism)
+                                           {
+                                              auto* game_node = dynamic_cast<GameNode*>(mechanism.get());
+                                              return (game_node && game_node->getObjectId() == target_id);
+                                           }
+                                        );
+
+      for (const auto& mechanism : filtered_view)
+      {
+         addCallback([mechanism](int32_t state) { mechanism->setEnabled(state != -1); });
+      }
+   }
+
+   updateReceivers();
 }
 
 void Lever::update(const sf::Time& dt)
@@ -380,11 +398,6 @@ void Lever::toggle()
 void Lever::addCallback(const Callback& callback)
 {
    _callbacks.push_back(callback);
-}
-
-void Lever::setCallbacks(const std::vector<Callback>& callbacks)
-{
-   _callbacks = callbacks;
 }
 
 void Lever::serializeState(nlohmann::json& j)
