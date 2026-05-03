@@ -853,6 +853,7 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
 
 void Level::drawPostLightingLayers(sf::RenderTarget& target)
 {
+   const auto previous_view = target.getView();
    target.setView(*_level_view);
 
    const auto& player_chunk = Player::getCurrent()->getChunk();
@@ -881,6 +882,8 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
          }
       }
    }
+
+   target.setView(previous_view);
 }
 
 void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
