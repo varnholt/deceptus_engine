@@ -851,6 +851,38 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
    target.setView(*_level_view);
 }
 
+void Level::drawPostLightingLayers(sf::RenderTarget& target)
+{
+   target.setView(*_level_view);
+
+   const auto& player_chunk = Player::getCurrent()->getChunk();
+
+   for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
+   {
+      for (auto* mechanism_vector : _mechanism_registry.getList())
+      {
+         for (const auto& mechanism : *mechanism_vector)
+         {
+            if (mechanism->getZ() == z_index && mechanism->isPostLighting())
+            {
+               if (checkUpdateMechanism(player_chunk, mechanism))
+               {
+                  mechanism->draw(target, target);
+               }
+            }
+         }
+      }
+
+      for (auto& layer : _mechanism_registry.getImageLayers())
+      {
+         if (layer->getZ() == z_index && layer->isPostLighting())
+         {
+            layer->draw(target, target);
+         }
+      }
+   }
+}
+
 void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    auto player = Player::getCurrent();
@@ -888,6 +920,11 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
                continue;
             }
 
+            if (mechanism->isPostLighting())
+            {
+               continue;
+            }
+
             if (checkUpdateMechanism(player_chunk, mechanism))
             {
                mechanism->draw(target, normal);
@@ -919,11 +956,15 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          drawPlayer(target, normal);
       }
 
-      // draw image layers
+      // draw image layers; post-lighting layers are drawn after the lighting pass
       for (auto& layer : _mechanism_registry.getImageLayers())
       {
          if (layer->getZ() == z_index)
          {
+            if (layer->isPostLighting())
+            {
+               continue;
+            }
             layer->draw(target, normal);
          }
       }
@@ -1213,6 +1254,8 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _light_system->draw(
       *_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.lighting2, _render_targets.normal
    );
+
+   drawPostLightingLayers(*_render_targets.deferred.get());
 
    _render_targets.deferred->display();
 

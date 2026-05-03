@@ -83,7 +83,10 @@ They have the properties below:
 |-|-|-|
 |blendmode|string|Valid blend modes are: `alpha`, `multiply`, `add` or `none`. The default is `alpha`.|
 |z|int|The z depth of the image layer (default is `0`).|
-|use_parallax|bool|When set to `true`, the image layer will scroll with parallax factors as defined in your level’s parallax settings (default is `false`).|
+|use_parallax|bool|When set to `true`, the image layer scrolls at a different speed than the camera. Requires `factor_x` and `factor_y` to be set (default is `false`).|
+|factor_x|float|Horizontal parallax scroll factor. `0.0` means the layer does not move horizontally; `1.0` moves with the camera. Only relevant when `use_parallax` is `true`.|
+|factor_y|float|Vertical parallax scroll factor. Same scale as `factor_x`. Only relevant when `use_parallax` is `true`.|
+|post_lighting|bool|When set to `true`, the layer is drawn after the normal-map lighting pass so dynamic lighting does not render on top of it. Use this for front parallax layers and overlays that should appear unaffected by in-game lights (default is `false`).|
 
 
 ## Info Overlays

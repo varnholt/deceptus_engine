@@ -142,6 +142,12 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
          }
       }
 
+      const auto& post_lighting_it = image_layer->_properties->_map.find("post_lighting");
+      if (post_lighting_it != image_layer->_properties->_map.end())
+      {
+         image->_post_lighting = post_lighting_it->second->_value_bool.value();
+      }
+
       // todo: read room limitations
    }
 
