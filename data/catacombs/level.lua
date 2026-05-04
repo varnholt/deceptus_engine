@@ -267,10 +267,14 @@ function playerReceivedExtra(extra)
       showDialogue("handle_dialogue_2")
       setMechanismEnabled("handle_help", false, "interaction_help")
       setMechanismEnabled("handle_dialogue_1", false, "dialogues")
+      setMechanismEnabled("locker_dialogue_unlocked", false, "dialogues")
    end
 
    if (extra == "locker_key") then
       -- change text when inspecting locker "use key"
+      showDialogue("locker_key_acquired")
+      setMechanismEnabled("ih_locker_key", false, "interaction_help")
+      setMechanismEnabled("d_locker_key", false, "dialogues")
    end
    
    if (extra == "key") then
