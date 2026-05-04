@@ -152,6 +152,11 @@ bool GameMechanism::isVisible() const
    return _visible;
 }
 
+bool GameMechanism::isPostLighting() const
+{
+   return _post_lighting;
+}
+
 void GameMechanism::setVisible(bool visible)
 {
    _visible = visible;

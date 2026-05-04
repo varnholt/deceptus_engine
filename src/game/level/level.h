@@ -244,6 +244,11 @@ protected:
    /// \param z_index z layer to draw.
    void drawParallaxMaps(sf::RenderTarget& target, int32_t z_index);
 
+   /// \brief draws all mechanisms flagged as post-lighting directly onto target after the lighting
+   ///        pass so normal-map lighting does not render on top of them.
+   /// \param target render target (the deferred composite texture).
+   void drawPostLightingLayers(sf::RenderTarget& target);
+
    /// \brief draws tile maps, mechanisms, enemies, player, and image layers for a z-range.
    /// \param color color render target.
    /// \param normal normal render target.

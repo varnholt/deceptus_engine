@@ -53,6 +53,12 @@ public:
    /// \return true when the mechanism is visible.
    virtual bool isVisible() const;
 
+   /// \brief checks whether this mechanism should be drawn after the lighting pass.
+   /// when true the mechanism is excluded from the lit scene and composited onto the
+   /// deferred target afterwards so normal-map lighting does not render on top of it.
+   /// \return true when the mechanism opts out of the lighting pass.
+   virtual bool isPostLighting() const;
+
    /// \brief sets render visibility for this mechanism.
    /// \param visible true to render the mechanism.
    virtual void setVisible(bool visible);
@@ -163,6 +169,7 @@ protected:
    bool _visible{true};
    bool _serialized{false};
    bool _observed{false};
+   bool _post_lighting{false};  //!< when true, drawn after the lighting pass so normal-map lighting does not composite on top
 
    // audio related
    bool _has_audio{false};
