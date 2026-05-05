@@ -249,6 +249,11 @@ protected:
    /// \param target render target (the deferred composite texture).
    void drawPostLightingLayers(sf::RenderTarget& target);
 
+   /// \brief draws all mechanisms flagged as overlay directly onto target after the post-lighting
+   ///        pass so they appear on top of all other layers including post-lighting image layers.
+   /// \param target render target (the deferred composite texture).
+   void drawOverlayLayers(sf::RenderTarget& target);
+
    /// \brief draws tile maps, mechanisms, enemies, player, and image layers for a z-range.
    /// \param color color render target.
    /// \param normal normal render target.

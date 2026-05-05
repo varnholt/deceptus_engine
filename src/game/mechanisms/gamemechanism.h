@@ -59,6 +59,11 @@ public:
    /// \return true when the mechanism opts out of the lighting pass.
    virtual bool isPostLighting() const;
 
+   /// \brief checks whether this mechanism is a screen overlay drawn on top of all other layers,
+   /// including post-lighting layers, so it is always visible regardless of lighting compositing.
+   /// \return true when the mechanism should be drawn in the overlay pass.
+   virtual bool isOverlay() const;
+
    /// \brief sets render visibility for this mechanism.
    /// \param visible true to render the mechanism.
    virtual void setVisible(bool visible);
@@ -170,6 +175,7 @@ protected:
    bool _serialized{false};
    bool _observed{false};
    bool _post_lighting{false};  //!< when true, drawn after the lighting pass so normal-map lighting does not composite on top
+   bool _is_overlay{false};     //!< when true, drawn after all other layers including post-lighting layers
 
    // audio related
    bool _has_audio{false};

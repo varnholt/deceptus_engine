@@ -886,6 +886,33 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
    target.setView(previous_view);
 }
 
+void Level::drawOverlayLayers(sf::RenderTarget& target)
+{
+   const auto previous_view = target.getView();
+   target.setView(*_level_view);
+
+   const auto& player_chunk = Player::getCurrent()->getChunk();
+
+   for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
+   {
+      for (auto* mechanism_vector : _mechanism_registry.getList())
+      {
+         for (const auto& mechanism : *mechanism_vector)
+         {
+            if (mechanism->getZ() == z_index && mechanism->isOverlay())
+            {
+               if (checkUpdateMechanism(player_chunk, mechanism))
+               {
+                  mechanism->draw(target, target);
+               }
+            }
+         }
+      }
+   }
+
+   target.setView(previous_view);
+}
+
 void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    auto player = Player::getCurrent();
@@ -924,6 +951,11 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
             }
 
             if (mechanism->isPostLighting())
+            {
+               continue;
+            }
+
+            if (mechanism->isOverlay())
             {
                continue;
             }
@@ -1259,6 +1291,8 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    );
 
    drawPostLightingLayers(*_render_targets.deferred.get());
+
+   drawOverlayLayers(*_render_targets.deferred.get());
 
    _render_targets.deferred->display();
 
