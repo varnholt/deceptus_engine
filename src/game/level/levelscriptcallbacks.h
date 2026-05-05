@@ -28,6 +28,12 @@ int32_t removePlayerSkill(lua_State* state);
 int32_t addPlayerHealth(lua_State* state);
 int32_t addPlayerHealthMax(lua_State* state);
 
+// achievements and treasures
+int32_t addAchievement(lua_State* state);
+int32_t hasAchievement(lua_State* state);
+int32_t addTreasure(lua_State* state);
+int32_t hasTreasure(lua_State* state);
+
 // inventory
 int32_t inventoryAdd(lua_State* state);
 int32_t inventoryRemove(lua_State* state);

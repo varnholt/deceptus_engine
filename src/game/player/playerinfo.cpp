@@ -7,6 +7,8 @@ using json = nlohmann::json;
 PlayerInfo::PlayerInfo()
 {
    _inventory_config.linkInventoryToItemSystem(_inventory, _items);
+   AchievementDefinitions::loadDefinitions("data/config/achievements.json");
+   TreasureDefinitions::loadDefinitions("data/config/treasures.json");
 }
 
 void to_json(nlohmann::json& j, const PlayerInfo& data)
@@ -17,6 +19,8 @@ void to_json(nlohmann::json& j, const PlayerInfo& data)
       {"extras", data._extra_table},
       {"stats", data._stats},
       {"weapons", data._weapons},
+      {"achievements", data._achievements},
+      {"treasures", data._treasures},
    };
 }
 
@@ -42,6 +46,16 @@ void from_json(const nlohmann::json& j, PlayerInfo& data)
    if (j.find("weapons") != j.end())
    {
       data._weapons = j.at("weapons").get<WeaponSystem>();
+   }
+
+   if (j.find("achievements") != j.end())
+   {
+      data._achievements = j.at("achievements").get<Achievements>();
+   }
+
+   if (j.find("treasures") != j.end())
+   {
+      data._treasures = j.at("treasures").get<Treasures>();
    }
 
    // re-link inventory callbacks after deserialization

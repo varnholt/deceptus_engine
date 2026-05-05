@@ -6,11 +6,13 @@
 
 #include "json/json.hpp"
 
+#include "game/player/achievements.h"
 #include "game/player/extratable.h"
 #include "game/player/inventory.h"
 #include "game/player/inventoryconfig.h"
 #include "game/player/itemsystem.h"
 #include "game/player/playerstats.h"
+#include "game/player/treasures.h"
 #include "game/player/weaponsystem.h"
 
 /// \brief persistent player profile data used for save and load operations.
@@ -25,6 +27,8 @@ struct PlayerInfo
    PlayerStats _stats;
    WeaponSystem _weapons;
    ItemSystem _items;
+   Achievements _achievements;
+   Treasures _treasures;
 
    std::string _name;
 };

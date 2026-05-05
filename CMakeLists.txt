@@ -439,6 +439,8 @@ set(GAME_FILES
     src/game/player/extratable.h
     src/game/player/health.cpp
     src/game/player/health.h
+    src/game/player/achievements.cpp
+    src/game/player/achievements.h
     src/game/player/inventory.cpp
     src/game/player/inventory.h
     src/game/player/inventoryconfig.cpp
@@ -492,6 +494,8 @@ set(GAME_FILES
     src/game/player/playerdive.h
     src/game/player/skill.cpp
     src/game/player/skill.h
+    src/game/player/treasures.cpp
+    src/game/player/treasures.h
     src/game/player/timerlock.cpp
     src/game/player/timerlock.h
     src/game/player/weaponsystem.cpp
