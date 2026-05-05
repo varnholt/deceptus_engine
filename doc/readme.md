@@ -96,6 +96,11 @@
 - [Folder Structure](level_design/advanced_topics.md#folder-structure)<br>
 
 
+## Development
+
+- [Development Hotkeys](development_hotkeys.md)<br>
+
+
 ## Creating Your Own Enemies
 - [Deceptus Engine Lua Interface](lua_interface/readme.md#deceptus-engine-lua-interface)<br>
 - [Creating Your First Own Enemy](lua_interface/readme.md#creating-your-first-own-enemy)<br>
