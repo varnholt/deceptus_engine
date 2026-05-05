@@ -851,28 +851,34 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
    target.setView(*_level_view);
 }
 
+void Level::drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t z_index, auto predicate)
+{
+   for (auto* mechanism_vector : _mechanism_registry.getList())
+   {
+      for (const auto& mechanism : *mechanism_vector)
+      {
+         if (mechanism->getZ() == z_index && predicate(mechanism))
+         {
+            mechanism->draw(color, normal);
+         }
+      }
+   }
+}
+
 void Level::drawPostLightingLayers(sf::RenderTarget& target)
 {
    const auto previous_view = target.getView();
    target.setView(*_level_view);
-
    const auto& player_chunk = Player::getCurrent()->getChunk();
 
    for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
    {
-      for (auto* mechanism_vector : _mechanism_registry.getList())
-      {
-         for (const auto& mechanism : *mechanism_vector)
-         {
-            if (mechanism->getZ() == z_index && mechanism->isPostLighting())
-            {
-               if (checkUpdateMechanism(player_chunk, mechanism))
-               {
-                  mechanism->draw(target, target);
-               }
-            }
-         }
-      }
+      drawMechanismsAtZ(
+         target,
+         target,
+         z_index,
+         [&player_chunk](const auto& mechanism) { return mechanism->isPostLighting() && checkUpdateMechanism(player_chunk, mechanism); }
+      );
 
       for (auto& layer : _mechanism_registry.getImageLayers())
       {
@@ -890,24 +896,16 @@ void Level::drawOverlayLayers(sf::RenderTarget& target)
 {
    const auto previous_view = target.getView();
    target.setView(*_level_view);
-
    const auto& player_chunk = Player::getCurrent()->getChunk();
 
    for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
    {
-      for (auto* mechanism_vector : _mechanism_registry.getList())
-      {
-         for (const auto& mechanism : *mechanism_vector)
-         {
-            if (mechanism->getZ() == z_index && mechanism->isOverlay())
-            {
-               if (checkUpdateMechanism(player_chunk, mechanism))
-               {
-                  mechanism->draw(target, target);
-               }
-            }
-         }
-      }
+      drawMechanismsAtZ(
+         target,
+         target,
+         z_index,
+         [&player_chunk](const auto& mechanism) { return mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); }
+      );
    }
 
    target.setView(previous_view);
@@ -941,31 +939,13 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       }
 
       // draw mechanisms
-      for (auto* mechanism_vector : _mechanism_registry.getList())
-      {
-         for (const auto& mechanism : *mechanism_vector)
-         {
-            if (mechanism->getZ() != z_index)
-            {
-               continue;
-            }
-
-            if (mechanism->isPostLighting())
-            {
-               continue;
-            }
-
-            if (mechanism->isOverlay())
-            {
-               continue;
-            }
-
-            if (checkUpdateMechanism(player_chunk, mechanism))
-            {
-               mechanism->draw(target, normal);
-            }
-         }
-      }
+      drawMechanismsAtZ(
+         target,
+         normal,
+         z_index,
+         [&player_chunk](const auto& mechanism)
+         { return !mechanism->isPostLighting() && !mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); }
+      );
 
       // ambient occlusion
       if (z_index == _ambient_occlusion->getZ())

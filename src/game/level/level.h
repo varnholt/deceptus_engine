@@ -239,6 +239,13 @@ protected:
    /// \brief refreshes the current room from the player's current position.
    void updateRoom();
 
+   /// \brief draws mechanisms from all groups that pass predicate at a specific z layer.
+   /// \param color color render target.
+   /// \param normal normal-map render target.
+   /// \param z_index z layer to draw.
+   /// \param predicate returns true for mechanisms that should be drawn.
+   void drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t z_index, auto predicate);
+
    /// \brief draws parallax tile maps at a specific z layer.
    /// \param target render target.
    /// \param z_index z layer to draw.
