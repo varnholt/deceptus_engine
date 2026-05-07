@@ -108,4 +108,42 @@ Removes a skill from the player (as specified in `constants.lua`).
 |1|int|Skill to remove|
 
 
+## `addAchievement`
+
+Marks an achievement as earned for the current player.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Achievement identifier (as defined in `data/config/achievements.json`)|
+
+
+## `hasAchievement`
+
+Returns whether the player has already earned a given achievement.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Achievement identifier (as defined in `data/config/achievements.json`)|
+|return|bool|`true` if the achievement has been earned|
+
+
+## `addTreasure`
+
+Marks a treasure as collected for the current player.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Treasure identifier (as defined in `data/config/treasures.json`)|
+
+
+## `hasTreasure`
+
+Returns whether the player has already collected a given treasure.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Treasure identifier (as defined in `data/config/treasures.json`)|
+|return|bool|`true` if the treasure has been collected|
+
+
 
