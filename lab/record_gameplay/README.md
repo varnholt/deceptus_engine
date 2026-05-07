@@ -19,13 +19,15 @@ Edit `config.json` to point at your local paths:
 {
   "game_executable": "D:/deceptus/build/deceptus.exe",
   "working_directory": "D:/deceptus/deceptus_engine",
-  "capture_duration_seconds": 8
+  "capture_duration_seconds": 8,
+  "gif_fps": 25
 }
 ```
 
 `game_executable` — path to the built executable.  
 `working_directory` — the repo root; the game reads `data/` relative to this.  
 `capture_duration_seconds` — (optional) how many seconds to record; defaults to 8.  
+`gif_fps` — (optional) output GIF framerate; defaults to 25. Must divide evenly into 100 for stable timing (valid: 50, 25, 20, 10). 60fps is not a valid GIF rate.  
 `teleport_x` / `teleport_y` — (optional) tile coordinates to teleport to before recording starts. Omit both keys to skip teleportation.
 
 Available teleport commands (opened via F12 in-game):
@@ -52,6 +54,7 @@ progress. The GIF is written to `lab/record_gameplay/output/gameplay.gif`.
 
 | Constant | Default | Description |
 |---|---|---|
-| `CAPTURE_FPS` | 60 | Frames captured per second |
+| `CAPTURE_FPS` | 60 | Frames captured per second (source quality) |
 | `CAPTURE_DURATION_SECONDS` | 8 | How long to record (also settable via `config.json`) |
+| `GIF_FPS` | 25 | Output GIF framerate — must divide evenly into 100 (also settable via `config.json`) |
 | `LOAD_TIMEOUT_SECONDS` | 30 | How long to wait for the level to load |

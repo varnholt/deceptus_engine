@@ -35,6 +35,7 @@ LOAD_TIMEOUT_SECONDS = 30
 
 CAPTURE_FPS = 60
 CAPTURE_DURATION_SECONDS: int = _config.get("capture_duration_seconds", 8)
+GIF_FPS: int = _config.get("gif_fps", 25)
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 OUTPUT_GIF = OUTPUT_DIR / "gameplay.gif"
@@ -82,7 +83,7 @@ def console_teleport(hwnd: int, command: str) -> None:
     time.sleep(0.3)
 
 
-def capture_to_gif(hwnd: int, duration_seconds: float, fps: int, output_path: Path) -> None:
+def capture_to_gif(hwnd: int, duration_seconds: float, fps: int, gif_fps: int, output_path: Path) -> None:
     output_path.parent.mkdir(exist_ok=True)
     raw_video = output_path.parent / "raw_capture.mp4"
 
@@ -107,10 +108,14 @@ def capture_to_gif(hwnd: int, duration_seconds: float, fps: int, output_path: Pa
     capture_result = subprocess.run(capture_command, capture_output=True, text=True)
     assert capture_result.returncode == 0, f"ffmpeg capture failed:\n{capture_result.stderr}"
 
+    gif_filter = (
+        f"fps={gif_fps},"
+        "split[s0][s1];[s0]palettegen=max_colors=256[p];[s1][p]paletteuse=dither=bayer"
+    )
     gif_command = [
         "ffmpeg", "-y",
         "-i", str(raw_video),
-        "-vf", "split[s0][s1];[s0]palettegen=max_colors=256[p];[s1][p]paletteuse=dither=bayer",
+        "-vf", gif_filter,
         "-loop", "0",
         str(output_path),
     ]
@@ -158,7 +163,7 @@ def test_record_gameplay():
             console_teleport(hwnd, TELEPORT_COMMAND)
             time.sleep(2.0)
 
-        capture_to_gif(hwnd, CAPTURE_DURATION_SECONDS, CAPTURE_FPS, OUTPUT_GIF)
+        capture_to_gif(hwnd, CAPTURE_DURATION_SECONDS, CAPTURE_FPS, GIF_FPS, OUTPUT_GIF)
         assert OUTPUT_GIF.exists()
         print(f"\nGIF written to {OUTPUT_GIF}")
 
