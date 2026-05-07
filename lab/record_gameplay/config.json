@@ -1,0 +1,7 @@
+{
+  "game_executable": "D:/deceptus/build/deceptus.exe",
+  "working_directory": "D:/deceptus/deceptus_engine",
+  "teleport_x": 85,
+  "teleport_y": 129,
+  "capture_duration_seconds": 8
+}
