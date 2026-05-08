@@ -67,6 +67,16 @@ sf::Vector2f CameraPanorama::computeDesiredLookVector(
    if (!tweaks._cpan_unlimited)
    {
       limit_look_vector(desired_look_vector);
+      const auto x_was_moved = (looking_left && can_look_left) || (looking_right && can_look_right);
+      const auto y_was_moved = (looking_up && can_look_up) || (looking_down && can_look_down);
+      if (!x_was_moved)
+      {
+         desired_look_vector.x = _look_vector.x;
+      }
+      if (!y_was_moved)
+      {
+         desired_look_vector.y = _look_vector.y;
+      }
    }
 
    return desired_look_vector;
