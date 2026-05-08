@@ -1,0 +1,16 @@
+[package]
+name = "patch_tool"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "fuzzy_diff"
+path = "src/patcher.rs"
+
+[[bin]]
+name = "tmx_patcher"
+path = "src/main.rs"
+
+[dependencies]
+eframe = "0.28"
+egui = "0.28"

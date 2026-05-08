@@ -851,6 +851,66 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
    target.setView(*_level_view);
 }
 
+void Level::drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t z_index, auto predicate)
+{
+   for (auto* mechanism_vector : _mechanism_registry.getList())
+   {
+      for (const auto& mechanism : *mechanism_vector)
+      {
+         if (mechanism->getZ() == z_index && predicate(mechanism))
+         {
+            mechanism->draw(color, normal);
+         }
+      }
+   }
+}
+
+void Level::drawPostLightingLayers(sf::RenderTarget& target)
+{
+   const auto previous_view = target.getView();
+   target.setView(*_level_view);
+   const auto& player_chunk = Player::getCurrent()->getChunk();
+
+   for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
+   {
+      drawMechanismsAtZ(
+         target,
+         target,
+         z_index,
+         [&player_chunk](const auto& mechanism) { return mechanism->isPostLighting() && checkUpdateMechanism(player_chunk, mechanism); }
+      );
+
+      for (auto& layer : _mechanism_registry.getImageLayers())
+      {
+         if (layer->getZ() == z_index && layer->isPostLighting())
+         {
+            layer->draw(target, target);
+         }
+      }
+   }
+
+   target.setView(previous_view);
+}
+
+void Level::drawOverlayLayers(sf::RenderTarget& target)
+{
+   const auto previous_view = target.getView();
+   target.setView(*_level_view);
+   const auto& player_chunk = Player::getCurrent()->getChunk();
+
+   for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
+   {
+      drawMechanismsAtZ(
+         target,
+         target,
+         z_index,
+         [&player_chunk](const auto& mechanism) { return mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); }
+      );
+   }
+
+   target.setView(previous_view);
+}
+
 void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    auto player = Player::getCurrent();
@@ -879,21 +939,13 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       }
 
       // draw mechanisms
-      for (auto* mechanism_vector : _mechanism_registry.getList())
-      {
-         for (const auto& mechanism : *mechanism_vector)
-         {
-            if (mechanism->getZ() != z_index)
-            {
-               continue;
-            }
-
-            if (checkUpdateMechanism(player_chunk, mechanism))
-            {
-               mechanism->draw(target, normal);
-            }
-         }
-      }
+      drawMechanismsAtZ(
+         target,
+         normal,
+         z_index,
+         [&player_chunk](const auto& mechanism)
+         { return !mechanism->isPostLighting() && !mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); }
+      );
 
       // ambient occlusion
       if (z_index == _ambient_occlusion->getZ())
@@ -919,11 +971,15 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          drawPlayer(target, normal);
       }
 
-      // draw image layers
+      // draw image layers; post-lighting layers are drawn after the lighting pass
       for (auto& layer : _mechanism_registry.getImageLayers())
       {
          if (layer->getZ() == z_index)
          {
+            if (layer->isPostLighting())
+            {
+               continue;
+            }
             layer->draw(target, normal);
          }
       }
@@ -1213,6 +1269,10 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _light_system->draw(
       *_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.lighting2, _render_targets.normal
    );
+
+   drawPostLightingLayers(*_render_targets.deferred.get());
+
+   drawOverlayLayers(*_render_targets.deferred.get());
 
    _render_targets.deferred->display();
 

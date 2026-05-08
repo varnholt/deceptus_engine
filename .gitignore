@@ -16,3 +16,5 @@ build_*/*
 **/build/
 .idea/*
 /doc/doxygen-html
+/lab/patch_tool/target
+/lab/patch_tool/Cargo.lock

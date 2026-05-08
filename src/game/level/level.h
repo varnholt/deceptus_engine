@@ -239,10 +239,27 @@ protected:
    /// \brief refreshes the current room from the player's current position.
    void updateRoom();
 
+   /// \brief draws mechanisms from all groups that pass predicate at a specific z layer.
+   /// \param color color render target.
+   /// \param normal normal-map render target.
+   /// \param z_index z layer to draw.
+   /// \param predicate returns true for mechanisms that should be drawn.
+   void drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t z_index, auto predicate);
+
    /// \brief draws parallax tile maps at a specific z layer.
    /// \param target render target.
    /// \param z_index z layer to draw.
    void drawParallaxMaps(sf::RenderTarget& target, int32_t z_index);
+
+   /// \brief draws all mechanisms flagged as post-lighting directly onto target after the lighting
+   ///        pass so normal-map lighting does not render on top of them.
+   /// \param target render target (the deferred composite texture).
+   void drawPostLightingLayers(sf::RenderTarget& target);
+
+   /// \brief draws all mechanisms flagged as overlay directly onto target after the post-lighting
+   ///        pass so they appear on top of all other layers including post-lighting image layers.
+   /// \param target render target (the deferred composite texture).
+   void drawOverlayLayers(sf::RenderTarget& target);
 
    /// \brief draws tile maps, mechanisms, enemies, player, and image layers for a z-range.
    /// \param color color render target.

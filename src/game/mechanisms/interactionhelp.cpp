@@ -44,6 +44,7 @@ const auto registered_interactionhelp = []
 InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(InteractionHelp).name());
+   _is_overlay = true;
 
    if (_font.openFromFile("data/fonts/deceptum.ttf"))
    {

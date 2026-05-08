@@ -84,6 +84,16 @@ void CameraPanorama::update()
    const auto locked_left = result[2];
    const auto locked_right = result[3];
 
+   if (Player::getCurrent()->isInAir())
+   {
+      if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
+      {
+         DisplayMode::getInstance().enqueueUnset(Display::CameraPanorama);
+      }
+      _look_vector *= tweaks._cpan_snap_back_factor;
+      return;
+   }
+
    if (_look_state & static_cast<int32_t>(Look::Active))
    {
       // only update the desired look vector when boundaries are not exceeded
@@ -125,12 +135,6 @@ void CameraPanorama::update()
 
       if (fabs(x_normalized) > tolerance_x || fabs(y_normalized) > tolerance_y)
       {
-         // don't enable cpan when airborne
-         if (Player::getCurrent()->isInAir())
-         {
-            return;
-         }
-
          // compute values from 0..1 removing the tolerance gap at the beginning
          const auto x_relative = (fabs(x_normalized) - tolerance_x) / (1.0f - tolerance_x);
          const auto y_relative = (fabs(y_normalized) - tolerance_y) / (1.0f - tolerance_y);
@@ -140,10 +144,10 @@ void CameraPanorama::update()
          const auto looking_up = y_normalized < 0.0f;
          const auto looking_down = y_normalized > 0.0f;
 
-         const auto can_look_left = !(locked_left && _look_vector.x < 0.0f);
-         const auto can_look_right = !(locked_right && _look_vector.x > 0.0f);
-         const auto can_look_up = !(locked_up && _look_vector.y < 0.0f);
-         const auto can_look_down = !(locked_down && _look_vector.y > 0.0f);
+         const auto can_look_left = !(locked_left && _look_vector.x < 0.0f) || tweaks._cpan_unlimited;
+         const auto can_look_right = !(locked_right && _look_vector.x > 0.0f) || tweaks._cpan_unlimited;
+         const auto can_look_up = !(locked_up && _look_vector.y < 0.0f) || tweaks._cpan_unlimited;
+         const auto can_look_down = !(locked_down && _look_vector.y > 0.0f) || tweaks._cpan_unlimited;
 
          // clang-format off
          const auto desired_look_vector = computeDesiredLookVector(
