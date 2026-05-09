@@ -215,7 +215,12 @@ function mechanismEvent(object_id, group_id, event_name, value)
    if (object_id == "locked_box" and event_name == "state" and value == "open") then
       setMechanismEnabled("locked_message", false, "dialogues")
       setMechanismEnabled("locked_box_interaction_help", false, "interaction_help")
-      setMechanismEnabled("handle_help", false, "interaction_help")      
+      setMechanismEnabled("handle_help", false, "interaction_help")
+   end
+
+   -- open diamond box
+   if (object_id == "diamond_box" and event_name == "state" and value == "open") then
+      setMechanismEnabled("diamond_box_interaction_help", false, "interaction_help")
    end
    
    -- open drawer in library

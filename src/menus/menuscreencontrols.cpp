@@ -179,10 +179,10 @@ void MenuScreenControls::showEvent()
 
 void MenuScreenControls::loadingFinished()
 {
-   for (const auto& layer_entry : _layers)
-   {
-      Log::Info() << "controls psd layer: " << layer_entry.first;
-   }
+   // for (const auto& layer_entry : _layers)
+   // {
+   //    Log::Info() << "controls psd layer: " << layer_entry.first;
+   // }
 
    for (const auto& layer_entry : _layers)
    {
