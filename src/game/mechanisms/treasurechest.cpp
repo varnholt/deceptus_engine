@@ -91,6 +91,9 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
       _spawn_extra = spawn_extra;
    }
 
+   _spawn_offset.x = ValueReader::readValue<float>("spawn_offset_x", map).value_or(0.0f);
+   _spawn_offset.y = ValueReader::readValue<float>("spawn_offset_y", map).value_or(0.0f);
+
    const auto item_required = ValueReader::readValue<std::string>("item_required", map).value_or("");
    if (!item_required.empty())
    {
@@ -257,11 +260,12 @@ void TreasureChest::update(const sf::Time& dt)
    {
       _spawn_effect->update(dt);
 
-      if (_spawn_effect->isShown())
+      if (_spawn_effect->isShown() && !_extra_spawned)
       {
+         _extra_spawned = true;
          if (_spawn_extra.has_value())
          {
-            ExtraWrapper::spawnExtra(_spawn_extra.value());
+            ExtraWrapper::spawnExtra(_spawn_extra.value(), _spawn_offset);
          }
       }
    }

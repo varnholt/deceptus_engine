@@ -1,10 +1,17 @@
 #ifndef INGAMEMENUARCHIVES_H
 #define INGAMEMENUARCHIVES_H
 
+#include "game/animation/animation.h"
+#include "game/animation/animationpool.h"
 #include "game/image/layerdata.h"
 #include "ingamemenupage.h"
 
 #include <SFML/Graphics.hpp>
+#include <map>
+#include <memory>
+#include <string>
+
+using SpriteAnimation = Animation;
 
 /// \brief renders and animates the archives submenu with category selection states.
 class InGameMenuArchives : public InGameMenuPage
@@ -38,6 +45,15 @@ private:
    /// \brief applies layer visibility for the currently selected archive category.
    void updateButtons();
 
+   /// \brief ensures an animation exists for every collected treasure and advances all of them.
+   /// \param dt elapsed frame time.
+   void updateTreasureAnimations(const sf::Time& dt);
+
+   /// \brief draws collected treasure animations and their name and description texts.
+   /// \param window render target that receives treasure rendering.
+   /// \param states render states used for drawing.
+   void drawTreasures(sf::RenderTarget& window, sf::RenderStates states);
+
    std::vector<LayerData> _panel_header;
    std::vector<LayerData> _panel_left;
    std::vector<LayerData> _panel_right;
@@ -47,6 +63,14 @@ private:
 
    FloatSeconds _duration_show;
    FloatSeconds _duration_hide;
+   float _content_alpha{1.0f};  //!< current fade alpha for treasure text and animations
+
+   std::unique_ptr<AnimationPool> _animation_pool;
+   std::map<std::string, std::shared_ptr<SpriteAnimation>> _treasure_animations;
+
+   sf::Font _font_treasure;
+   std::unique_ptr<sf::Text> _text_treasure_name;
+   std::unique_ptr<sf::Text> _text_treasure_description;
 };
 
 #endif  // INGAMEMENUARCHIVES_H
