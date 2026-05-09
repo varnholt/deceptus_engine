@@ -118,6 +118,8 @@ bool Extra::deserialize(const GameDeserializeData& data)
          _requires_button_press = requires_action_button_it->second->_value_bool.value();
       }
 
+      _is_treasure = ValueReader::readValue<bool>("is_treasure", map).value_or(false);
+
       // read animations if set up
       const auto offset_x = width_px * 0.5f;
       const auto offset_y = height_px * 0.5f;
@@ -269,7 +271,14 @@ void Extra::update(const sf::Time& delta_time)
          Audio::getInstance().playSample({_sample.value()});
       }
 
-      SaveState::getPlayerInfo()._inventory.add(_name);
+      if (_is_treasure)
+      {
+         SaveState::getPlayerInfo()._treasures.add(_name);
+      }
+      else
+      {
+         SaveState::getPlayerInfo()._inventory.add(_name);
+      }
    }
 }
 
@@ -278,9 +287,34 @@ std::optional<sf::FloatRect> Extra::getBoundingBoxPx()
    return _rect;
 }
 
-void Extra::spawn()
+void Extra::spawn(sf::Vector2f offset)
 {
    _spawned = true;
+
+   if (offset.x != 0.0f || offset.y != 0.0f)
+   {
+      _rect.position += offset;
+
+      for (auto& animation : _animations_main)
+      {
+         animation->move(offset);
+      }
+
+      if (_animation_spawn)
+      {
+         _animation_spawn->move(offset);
+      }
+
+      if (_animation_pickup)
+      {
+         _animation_pickup->move(offset);
+      }
+
+      if (_sprite)
+      {
+         _sprite->move(offset);
+      }
+   }
 
    if (_animation_spawn)
    {

@@ -141,9 +141,9 @@ int32_t flashMechanism(lua_State* state)
    }
 
    const std::string search_pattern = lua_tostring(state, 1);
-   const auto red      = static_cast<float>(lua_tonumber(state, 2));
-   const auto green    = static_cast<float>(lua_tonumber(state, 3));
-   const auto blue     = static_cast<float>(lua_tonumber(state, 4));
+   const auto red = static_cast<float>(lua_tonumber(state, 2));
+   const auto green = static_cast<float>(lua_tonumber(state, 3));
+   const auto blue = static_cast<float>(lua_tonumber(state, 4));
    const auto duration = static_cast<float>(lua_tonumber(state, 5));
 
    LevelScript::getCurrent()->flashMechanism(search_pattern, red, green, blue, duration);
@@ -224,6 +224,50 @@ int32_t addPlayerHealthMax(lua_State* state)
    return 0;
 }
 
+int32_t addAchievement(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->addAchievement(lua_tostring(state, 1));
+   return 0;
+}
+
+int32_t hasAchievement(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   lua_pushboolean(state, LevelScript::getCurrent()->hasAchievement(lua_tostring(state, 1)));
+   return 1;
+}
+
+int32_t addTreasure(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->addTreasure(lua_tostring(state, 1));
+   return 0;
+}
+
+int32_t hasTreasure(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   lua_pushboolean(state, LevelScript::getCurrent()->hasTreasure(lua_tostring(state, 1)));
+   return 1;
+}
+
 int32_t inventoryAdd(lua_State* state)
 {
    if (lua_gettop(state) != 1)
@@ -282,11 +326,7 @@ int32_t writeLuaNodeProperty(lua_State* state)
       return 0;
    }
 
-   LevelScript::getCurrent()->writeLuaNodeProperty(
-      lua_tostring(state, 1),
-      lua_tostring(state, 2),
-      lua_tostring(state, 3)
-   );
+   LevelScript::getCurrent()->writeLuaNodeProperty(lua_tostring(state, 1), lua_tostring(state, 2), lua_tostring(state, 3));
    return 0;
 }
 

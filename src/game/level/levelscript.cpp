@@ -6,14 +6,14 @@
 #include "game/audio/musicplayer.h"
 #include "game/camera/camerazoom.h"
 #include "game/effects/lightsystem.h"
-#include "game/level/level.h"
 #include "game/io/eventserializer.h"
+#include "game/level/level.h"
 #include "game/level/luaconstants.h"
 #include "game/level/luainterface.h"
 #include "game/level/luanode.h"
 #include "game/mechanisms/dialogue.h"
-#include "game/mechanisms/ringshaderlayer.h"
 #include "game/mechanisms/extra.h"
+#include "game/mechanisms/ringshaderlayer.h"
 #include "game/mechanisms/sensorrect.h"
 #include "game/player/player.h"
 #include "game/player/playercontrols.h"
@@ -131,6 +131,10 @@ void LevelScript::setup(const std::filesystem::path& path)
    _lua_state = luaL_newstate();
 
    // register callbacks
+   lua_register(_lua_state, "addAchievement", LevelScriptCallbacks::addAchievement);
+   lua_register(_lua_state, "hasAchievement", LevelScriptCallbacks::hasAchievement);
+   lua_register(_lua_state, "addTreasure", LevelScriptCallbacks::addTreasure);
+   lua_register(_lua_state, "hasTreasure", LevelScriptCallbacks::hasTreasure);
    lua_register(_lua_state, "addCollisionRect", LevelScriptCallbacks::addCollisionRect);
    lua_register(_lua_state, "addPlayerSkill", LevelScriptCallbacks::addPlayerSkill);
    lua_register(_lua_state, "addPlayerHealth", LevelScriptCallbacks::addPlayerHealth);
@@ -153,7 +157,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setLuaNodeVisible", LevelScriptCallbacks::setLuaNodeVisible);
    lua_register(_lua_state, "setMechanismEnabled", LevelScriptCallbacks::setMechanismEnabled);
    lua_register(_lua_state, "setMechanismVisible", LevelScriptCallbacks::setMechanismVisible);
-   lua_register(_lua_state, "flashMechanism",       LevelScriptCallbacks::flashMechanism);
+   lua_register(_lua_state, "flashMechanism", LevelScriptCallbacks::flashMechanism);
    lua_register(_lua_state, "setAmbient", LevelScriptCallbacks::setAmbient);
    lua_register(_lua_state, "setZoomFactor", LevelScriptCallbacks::setZoomFactor);
    lua_register(_lua_state, "showDialogue", LevelScriptCallbacks::showDialogue);
@@ -585,6 +589,26 @@ void LevelScript::setZoomFactor(float zoom_factor)
 void LevelScript::setAmbient(sf::Color color)
 {
    Level::getCurrentLevel()->getLightSystem()->setAmbient(color);
+}
+
+void LevelScript::addAchievement(const std::string& identifier)
+{
+   SaveState::getPlayerInfo()._achievements.add(identifier);
+}
+
+bool LevelScript::hasAchievement(const std::string& identifier)
+{
+   return SaveState::getPlayerInfo()._achievements.has(identifier);
+}
+
+void LevelScript::addTreasure(const std::string& identifier)
+{
+   SaveState::getPlayerInfo()._treasures.add(identifier);
+}
+
+bool LevelScript::hasTreasure(const std::string& identifier)
+{
+   return SaveState::getPlayerInfo()._treasures.has(identifier);
 }
 
 void LevelScript::inventoryAdd(const std::string& item)

@@ -63,6 +63,8 @@ private:
    State _state{State::Closed};
    std::optional<std::string> _spawn_extra;
    std::optional<std::string> _item_required;
+   sf::Vector2f _spawn_offset;
+   bool _extra_spawned{false};  //!< guards against calling spawnExtra more than once
 
    std::shared_ptr<Animation> _animation_idle_closed;
    std::shared_ptr<Animation> _animation_opening;

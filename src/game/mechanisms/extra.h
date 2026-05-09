@@ -48,8 +48,9 @@ public:
    /// \return extra rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-   /// \brief marks the extra as spawned and starts spawn animation playback when configured.
-   void spawn();
+   /// \brief marks the extra as spawned, applies a position offset, and starts spawn animation playback when configured.
+   /// \param offset pixel offset applied to the pickup rect and all animations before becoming collectable.
+   void spawn(sf::Vector2f offset = {});
 
    using ExtraCallback = std::function<void(const std::string&)>;
 
@@ -63,6 +64,7 @@ public:
    sf::FloatRect _rect;
    std::vector<ExtraCallback> _callbacks;
    bool _requires_button_press{false};
+   bool _is_treasure{false};  //!< when true, pickup is routed to treasures instead of inventory
 
    std::vector<std::shared_ptr<Animation>> _animations_main;
    std::shared_ptr<Animation> _animation_spawn;

@@ -54,5 +54,13 @@
       "origin": [12, 12],
       "sprite_count": 12,
       "texture": "data/sprites/locker_key.png"
+   },
+   "diamond": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 0],
+      "frame_size": [48, 48],
+      "origin": [24.0, 24.0],
+      "sprite_count": 40,
+      "texture": "data/sprites/treasures.png"
    }
 }

@@ -3,7 +3,7 @@
 #include "game/level/level.h"
 #include "game/mechanisms/extra.h"
 
-void ExtraWrapper::spawnExtra(const std::string& id)
+void ExtraWrapper::spawnExtra(const std::string& id, sf::Vector2f offset)
 {
    const auto extras = Level::getCurrentLevel()->getMechanismRegistry().getExtras();
 
@@ -14,7 +14,7 @@ void ExtraWrapper::spawnExtra(const std::string& id)
       auto extra = std::dynamic_pointer_cast<Extra>(tmp);
       if (extra->_name == id)
       {
-         extra->spawn();
+         extra->spawn(offset);
          break;
       }
    }

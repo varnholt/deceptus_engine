@@ -2,8 +2,56 @@
 
 #include "framework/easings/easings.h"
 #include "game/ingamemenu/menuconfig.h"
+#include "game/player/playerinfo.h"
+#include "game/player/treasures.h"
+#include "game/state/savestate.h"
 
+#include <iterator>
 #include <numbers>
+#include <sstream>
+
+namespace
+{
+
+constexpr auto treasure_font_size = 12;
+constexpr auto treasure_icon_center_x_px = 215.0f;
+constexpr auto treasure_row_start_y_px = 100.0f;
+constexpr auto treasure_row_spacing_px = 60.0f;
+constexpr auto treasure_text_offset_x_px = 255.0f;
+constexpr auto treasure_description_wrap_width_px = 300.0f;
+constexpr auto treasure_name_y_offset_px = -12.0f;
+constexpr auto treasure_description_y_offset_px = 4.0f;
+
+std::string wrapText(const std::string& original_text, float wrap_width, const sf::Font& font, int32_t character_size)
+{
+   std::string wrapped_text;
+   std::string line;
+   sf::Text temp_text(font);
+   temp_text.setCharacterSize(character_size);
+
+   std::vector<std::string> words;
+   std::istringstream iss(original_text);
+   std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), std::back_inserter(words));
+
+   for (const auto& word : words)
+   {
+      const std::string test_line = line + word + " ";
+      temp_text.setString(test_line);
+      if (temp_text.getLocalBounds().size.x <= wrap_width)
+      {
+         line = test_line;
+      }
+      else
+      {
+         wrapped_text = wrapped_text + line + "\n";
+         line = word + " ";
+      }
+   }
+   wrapped_text = wrapped_text + line;
+   return wrapped_text;
+}
+
+}  // namespace
 
 InGameMenuArchives::InGameMenuArchives()
 {
@@ -53,14 +101,34 @@ InGameMenuArchives::InGameMenuArchives()
    MenuConfig config;
    _duration_hide = config._duration_hide;
    _duration_show = config._duration_show;
+
+   _animation_pool = std::make_unique<AnimationPool>("data/sprites/extra_animations.json");
+
+   if (_font_treasure.openFromFile("data/fonts/deceptum.ttf"))
+   {
+      const_cast<sf::Texture&>(_font_treasure.getTexture(treasure_font_size)).setSmooth(false);
+
+      _text_treasure_name = std::make_unique<sf::Text>(_font_treasure);
+      _text_treasure_name->setCharacterSize(treasure_font_size);
+      _text_treasure_name->setFillColor(sf::Color{232, 219, 243});
+
+      _text_treasure_description = std::make_unique<sf::Text>(_font_treasure);
+      _text_treasure_description->setCharacterSize(treasure_font_size);
+      _text_treasure_description->setFillColor(sf::Color{232, 219, 243});
+   }
 }
 
 void InGameMenuArchives::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    InGameMenuPage::draw(window, states);
+
+   if (_selected_index == 2)
+   {
+      drawTreasures(window, states);
+   }
 }
 
-void InGameMenuArchives::update(const sf::Time& /*dt*/)
+void InGameMenuArchives::update(const sf::Time& dt)
 {
    if (_animation == Animation::Show || _animation == Animation::Hide)
    {
@@ -70,6 +138,11 @@ void InGameMenuArchives::update(const sf::Time& /*dt*/)
             _animation == Animation::MoveOutToRight)
    {
       updateMove();
+   }
+
+   if (_selected_index == 2)
+   {
+      updateTreasureAnimations(dt);
    }
 }
 
@@ -183,6 +256,72 @@ void InGameMenuArchives::updateShowHide()
    for (const auto& layer : _panel_background)
    {
       layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
+   }
+
+   _content_alpha = alpha;
+}
+
+void InGameMenuArchives::updateTreasureAnimations(const sf::Time& dt)
+{
+   const auto& collected = SaveState::getPlayerInfo()._treasures.getCollected();
+   const auto move_offset = getMoveOffset().value_or(0.0f);
+
+   int32_t row_index = 0;
+   for (const auto& identifier : collected)
+   {
+      if (_treasure_animations.find(identifier) == _treasure_animations.end())
+      {
+         auto animation = _animation_pool->create(identifier, 0.0f, 0.0f, true, false);
+         animation->_looped = true;
+         _treasure_animations[identifier] = animation;
+      }
+
+      const auto row_center_y_px = treasure_row_start_y_px + static_cast<float>(row_index) * treasure_row_spacing_px;
+      _treasure_animations[identifier]->setPosition({treasure_icon_center_x_px + move_offset, row_center_y_px});
+      _treasure_animations[identifier]->update(dt);
+
+      row_index++;
+   }
+}
+
+void InGameMenuArchives::drawTreasures(sf::RenderTarget& window, sf::RenderStates states)
+{
+   if (!_text_treasure_name || !_text_treasure_description)
+   {
+      return;
+   }
+
+   const auto& collected = SaveState::getPlayerInfo()._treasures.getCollected();
+   const auto move_offset = getMoveOffset().value_or(0.0f);
+
+   int32_t row_index = 0;
+   for (const auto& identifier : collected)
+   {
+      const auto animation_it = _treasure_animations.find(identifier);
+      if (animation_it != _treasure_animations.end())
+      {
+         animation_it->second->setAlpha(static_cast<uint8_t>(_content_alpha * 255));
+         window.draw(*animation_it->second, states);
+      }
+
+      const auto definition = TreasureDefinitions::findDefinition(identifier);
+      const auto row_center_y_px = treasure_row_start_y_px + static_cast<float>(row_index) * treasure_row_spacing_px;
+      const auto text_x_px = treasure_text_offset_x_px + move_offset;
+      const auto text_color = sf::Color{232, 219, 243, static_cast<uint8_t>(_content_alpha * 255)};
+
+      _text_treasure_name->setFillColor(text_color);
+      _text_treasure_name->setString(definition ? definition->_name : identifier);
+      _text_treasure_name->setPosition({text_x_px, row_center_y_px + treasure_name_y_offset_px});
+      window.draw(*_text_treasure_name, states);
+
+      const auto description_text = definition ? definition->_description : std::string{};
+      const auto wrapped_description = wrapText(description_text, treasure_description_wrap_width_px, _font_treasure, treasure_font_size);
+      _text_treasure_description->setFillColor(text_color);
+      _text_treasure_description->setString(wrapped_description);
+      _text_treasure_description->setPosition({text_x_px, row_center_y_px + treasure_description_y_offset_px});
+      window.draw(*_text_treasure_description, states);
+
+      row_index++;
    }
 }
 

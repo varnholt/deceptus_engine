@@ -136,6 +136,24 @@ public:
    /// \param color rgba color (0–255 per channel).
    void setAmbient(sf::Color color);
 
+   /// \brief marks an achievement as earned in the current save slot.
+   /// \param identifier achievement identifier.
+   void addAchievement(const std::string& identifier);
+
+   /// \brief checks whether an achievement has been earned in the current save slot.
+   /// \param identifier achievement identifier.
+   /// \return true when the achievement is earned.
+   bool hasAchievement(const std::string& identifier);
+
+   /// \brief marks a treasure as collected in the current save slot.
+   /// \param identifier treasure identifier.
+   void addTreasure(const std::string& identifier);
+
+   /// \brief checks whether a treasure has been collected in the current save slot.
+   /// \param identifier treasure identifier.
+   /// \return true when the treasure is collected.
+   bool hasTreasure(const std::string& identifier);
+
    /// \brief adds an item to the player inventory.
    /// \param item inventory item id.
    void inventoryAdd(const std::string& item);
