@@ -6,7 +6,7 @@
 #include "game/mechanisms/fan.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/laser.h"
-#include "game/mechanisms/levermechanismmerger.h"
+#include "game/mechanisms/lever.h"
 #include "game/mechanisms/movingplatform.h"
 #include "game/mechanisms/portal.h"
 #include "game/mechanisms/sensorrect.h"
@@ -227,10 +227,6 @@ void GameMechanismDeserializer::deserialize(
                auto mechanism = ShaderLayer::deserialize(parent, data);
                mechanism_shader_quads->push_back(mechanism);
             }
-            else if (object_group->_name == layer_name_switchable_objects || tmx_object->_template_type == type_name_switchable_object)
-            {
-               LeverMechanismMerger::addSearchRect(tmx_object);
-            }
             else if (object_group->_name == layer_name_sound_emitters || tmx_object->_template_type == type_name_sound_emitter)
             {
                auto mechanism = SoundEmitter::deserialize(parent, data);
@@ -275,18 +271,10 @@ void GameMechanismDeserializer::deserialize(
       std::dynamic_pointer_cast<SensorRect>(sensor_rect)->findReference(all_mechanisms);
    }
 
-   LeverMechanismMerger::merge(
-      *mechanism_levers,
-      *mechanism_lasers,
-      *mechanism_platforms,
-      *mechanism_fans,
-      *mechanism_conveyor_belts,
-      *mechanism_spikes,
-      *mechanism_spike_blocks,
-      *mechanism_on_off_blocks,
-      *mechanism_rotating_blades,
-      *mechanism_doors
-   );
+   for (auto& lever_mechanism : *mechanism_levers)
+   {
+      std::dynamic_pointer_cast<Lever>(lever_mechanism)->resolveTargets(all_mechanisms);
+   }
 
    static auto warning_shown = false;
    if (!warning_shown)

@@ -2,9 +2,10 @@
 
 #include <stdint.h>
 #include <functional>
+#include <memory>
 
-#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
+#include "box2d/box2d.h"
 
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
@@ -83,10 +84,6 @@ public:
    /// \param callback callback invoked with lever state as int32_t.
    void addCallback(const Callback& callback);
 
-   /// \brief replaces all registered receiver callbacks.
-   /// \param callbacks callback list invoked on state changes.
-   void setCallbacks(const std::vector<Callback>& callbacks);
-
    /// \brief initializes lever settings, sprite setup, and optional handle-from-inventory behavior.
    /// \param data deserialize context with TMX object and properties.
    void setup(const GameDeserializeData& data);
@@ -98,9 +95,9 @@ public:
    /// \return lever rectangle in pixels.
    const sf::FloatRect& getPixelRect() const;
 
-   /// \brief returns configured target mechanism ids.
-   /// \return target-id list parsed from TMX properties.
-   const std::vector<std::string>& getTargetIds() const;
+   /// \brief resolves target mechanism ids to callbacks after all mechanisms are deserialized.
+   /// \param mechanisms flat list of all deserialized game mechanisms.
+   void resolveTargets(const std::vector<std::shared_ptr<GameMechanism>>& mechanisms);
 
    /// \brief sets whether this lever currently has an interactable handle.
    /// \param handle_available true when the handle can be used.
