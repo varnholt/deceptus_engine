@@ -1,0 +1,8 @@
+[project]
+name = "record-gameplay"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = [
+    "pywin32>=308",
+    "pytest>=8.0.0",
+]

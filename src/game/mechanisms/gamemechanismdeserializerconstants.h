@@ -135,9 +135,6 @@ constexpr std::string_view layer_name_spikes{"spikes"};
 /// \brief tmx layer name for static light mechanisms.
 constexpr std::string_view layer_name_static_lights{"static_lights"};
 
-/// \brief tmx layer name for switchable object mechanisms.
-constexpr std::string_view layer_name_switchable_objects{"switchable_objects"};
-
 /// \brief tmx layer name for text layer mechanisms.
 constexpr std::string_view layer_name_text_layer{"text_layers"};
 
@@ -296,9 +293,6 @@ constexpr std::string_view type_name_text_layer{"TextLayer"};
 
 /// \brief object template type name for treasure chests.
 constexpr std::string_view type_name_treasure_chest{"TreasureChest"};
-
-/// \brief object template type name for switchable objects.
-constexpr std::string_view type_name_switchable_object{"SwitchableObject"};
 
 /// \brief object template type name for water damage.
 constexpr std::string_view type_name_water_damage{"WaterDamage"};

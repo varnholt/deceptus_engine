@@ -372,8 +372,6 @@ set(GAME_FILES
     src/game/mechanisms/laser.h
     src/game/mechanisms/lever.cpp
     src/game/mechanisms/lever.h
-    src/game/mechanisms/levermechanismmerger.cpp
-    src/game/mechanisms/levermechanismmerger.h
     src/game/mechanisms/moveablebox.cpp
     src/game/mechanisms/moveablebox.h
     src/game/mechanisms/movingplatform.cpp
