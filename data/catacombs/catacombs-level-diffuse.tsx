@@ -1606,6 +1606,14 @@
    <object id="1" x="0" y="0" width="24" height="24"/>
   </objectgroup>
  </tile>
+ <tile id="852">
+  <animation>
+   <frame tileid="1609" duration="160"/>
+   <frame tileid="1610" duration="160"/>
+   <frame tileid="1611" duration="160"/>
+   <frame tileid="1612" duration="160"/>
+  </animation>
+ </tile>
  <tile id="868">
   <animation>
    <frame tileid="868" duration="150"/>
