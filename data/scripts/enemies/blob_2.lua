@@ -105,6 +105,10 @@ function initialize()
    updateSpriteRect(0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT) -- id, x, y, width, height
    addHitbox(-18, -18, 36, 36)                            -- x offset, y offset, width, height
 
+   addSample("splat_01.wav")
+   setReferenceVolume(1.0)
+   setAudioUpdateBehavior(AudioUpdateBehavior["AlwaysOn"])
+
    -- generate jump path
    k1 = SplineKey:create{x = 0.0, y =  0.0,   time = -1.0}
    k2 = SplineKey:create{x = 0.0, y =  0.01,  time = -0.8}
@@ -669,6 +673,7 @@ function smashed()
       return
    end
 
+   playSample("splat_01.wav", 1.0)
    _smashed = true
    startDying()
 end
