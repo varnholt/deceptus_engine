@@ -2,6 +2,7 @@
 
 #include "game/constants.h"
 #include "game/level/chunk.h"
+#include "game/level/gamenode.h"
 #include "game/player/playerbelt.h"
 #include "game/player/playerbend.h"
 #include "game/player/playercontrols.h"
@@ -19,9 +20,10 @@ class PlayerAnimation;
 
 /// \brief abstract interface for the player character; used by mechanisms and systems that must
 ///        interact with the player without depending on the concrete Player implementation.
-class PlayerInterface
+class PlayerInterface : public GameNode
 {
 public:
+   PlayerInterface(GameNode* parent = nullptr) : GameNode(parent) {}
    virtual ~PlayerInterface() = default;
 
    /// \brief gets current player position in pixels with floating-point precision.

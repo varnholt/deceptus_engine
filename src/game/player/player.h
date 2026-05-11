@@ -41,7 +41,7 @@ struct WeaponSystem;
 class ItemSystem;
 
 /// \brief main player entity that coordinates rendering, physics, combat, input, and progression state.
-class Player : public GameNode, public PlayerInterface
+class Player : public PlayerInterface
 {
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    using ToggleCallback = std::function<void()>;

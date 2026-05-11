@@ -110,7 +110,7 @@ Player::~Player()
    PlayerRegistry::remove(this);
 }
 
-Player::Player(GameNode* parent) : GameNode(parent)
+Player::Player(GameNode* parent) : PlayerInterface(parent)
 {
    setClassName(typeid(Player).name());
 

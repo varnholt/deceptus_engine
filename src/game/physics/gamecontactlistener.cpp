@@ -31,7 +31,7 @@ bool isPlayer(const FixtureNode* obj)
       return false;
    }
 
-   const auto is_player = (dynamic_cast<PlayerInterface*>(obj->getParent()) != nullptr);
+   const auto is_player = (obj->getParent() == PlayerRegistry::getFirst().get());
    return is_player;
 }
 
