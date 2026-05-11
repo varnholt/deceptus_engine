@@ -42,6 +42,7 @@
 #include "game/physics/physicsconfiguration.h"
 #include "game/physics/squaremarcher.h"
 #include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/player/playerstencil.h"
 #include "game/state/displaymode.h"
 #include "game/state/savestate.h"
@@ -195,7 +196,8 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    // add raycast light for player
    nlohmann::json player_light_config;
    std::ifstream("data/config/player_light.json") >> player_light_config;
-   _player_light = LightSystem::createLightInstance(Player::getCurrent(), player_light_config);
+   _player_light =
+      LightSystem::createLightInstance(std::static_pointer_cast<Player>(PlayerRegistry::getFirst()).get(), player_light_config);
    _light_system->_lights.push_back(_player_light);
 }
 
@@ -725,17 +727,17 @@ void Level::updateMechanismVolumes()
       return;
    }
 
-   _volume_updater->setPlayerPosition(Player::getCurrent()->getPixelPositionFloat());
+   _volume_updater->setPlayerPosition(PlayerRegistry::getFirst()->getPixelPositionFloat());
 }
 
 void Level::updateRoom()
 {
-   RoomUpdater::setCurrent(Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms));
+   RoomUpdater::setCurrent(Room::find(PlayerRegistry::getFirst()->getPixelPositionFloat(), _rooms));
 }
 
 void Level::syncRoom()
 {
-   RoomUpdater::setCurrent(Room::find(Player::getCurrent()->getPixelPositionFloat(), _rooms));
+   RoomUpdater::setCurrent(Room::find(PlayerRegistry::getFirst()->getPixelPositionFloat(), _rooms));
    CameraRoomLock::setRoom(RoomUpdater::getCurrent());
 }
 
@@ -756,7 +758,7 @@ void Level::updateCameraSystem(const sf::Time& dt)
       if (room_current)
       {
          room_id = room_current->getObjectId();
-         const auto entered_area = room_current->enteredArea(Player::getCurrent()->getPixelPositionFloat());
+         const auto entered_area = room_current->enteredArea(PlayerRegistry::getFirst()->getPixelPositionFloat());
          if (entered_area.has_value())
          {
             enter_area_name = entered_area.value()._name;
@@ -869,7 +871,7 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
 {
    const auto previous_view = target.getView();
    target.setView(*_level_view);
-   const auto& player_chunk = Player::getCurrent()->getChunk();
+   const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
    for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
    {
@@ -896,7 +898,7 @@ void Level::drawOverlayLayers(sf::RenderTarget& target)
 {
    const auto previous_view = target.getView();
    target.setView(*_level_view);
-   const auto& player_chunk = Player::getCurrent()->getChunk();
+   const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
    for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
    {
@@ -913,13 +915,12 @@ void Level::drawOverlayLayers(sf::RenderTarget& target)
 
 void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   auto player = Player::getCurrent();
-   player->draw(color, normal);
+   std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->draw(color, normal);
 }
 
 void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32_t from, int32_t to)
 {
-   const auto& player_chunk = Player::getCurrent()->getChunk();
+   const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
    target.setView(*_level_view);
    normal.setView(*_level_view);
@@ -1010,7 +1011,7 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 #ifdef GLOW_ENABLED
    // lasers have been removed here because dstar added the glow to the spriteset
 
-   const auto pPos = Player::getCurrent()->getPixelPositionf();
+   const auto pPos = PlayerRegistry::getFirst()->getPixelPositionf();
 
    // draw lasers
    for (auto laser : mLasers)
@@ -1059,7 +1060,7 @@ void Level::drawDebugInformation()
       auto& texture = *_render_targets.level.get();
       drawStaticChains(texture);
       DebugDraw::debugBodies(texture, this);
-      DebugDraw::drawRect(texture, Player::getCurrent()->getPixelRectFloat());
+      DebugDraw::drawRect(texture, PlayerRegistry::getFirst()->getPixelRectFloat());
       DebugDraw::debugHitboxes(texture);
 
       for (const auto& room : _rooms)
@@ -1299,12 +1300,12 @@ void Level::updatePlayerLight()
       return;
    }
 
-   _player_light->_pos_m = Player::getCurrent()->getBody()->GetPosition();
+   _player_light->_pos_m = PlayerRegistry::getFirst()->getBody()->GetPosition();
    _player_light->updateSpritePosition();
 
    // zero alpha on death to avoid glitches as the player sinks down
    auto color = _player_light->_color;
-   if (Player::getCurrent()->isDead())
+   if (PlayerRegistry::getFirst()->isDead())
    {
       color.a = 0;
    }
@@ -1346,7 +1347,7 @@ void Level::update(const sf::Time& dt)
       tile_map->update(dt);
    }
 
-   const auto& player_chunk = Player::getCurrent()->getChunk();
+   const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
    for (auto* mechanism_vector : _mechanism_registry.getList())
    {

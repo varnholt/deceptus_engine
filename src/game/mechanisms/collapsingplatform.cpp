@@ -12,7 +12,7 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -224,7 +224,7 @@ void CollapsingPlatform::updateRespawn(const sf::Time& dt)
    // bring collapsed blocks back after some time
    if (!_respawning && _time_since_collapse.asSeconds() > _settings.time_to_respawn_s)
    {
-      if (Player::getCurrent()->getPixelRectFloat().findIntersection(_rect_px).has_value())
+      if (PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect_px).has_value())
       {
          // shift respawn time while player intersects
          _time_since_collapse = sf::seconds(_settings.time_to_respawn_s);

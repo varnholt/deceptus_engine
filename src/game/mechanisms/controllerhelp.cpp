@@ -11,7 +11,7 @@
 #include "game/io/texturepool.h"
 #include "game/mechanisms/controllerkeymap.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 // clang-format off
 //   +---------+-------+-------+---------+--------+--------+----------+-----+-----+------------+-------------+--------------+-------------+-----+------+-----+
@@ -115,7 +115,7 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
 
 void ControllerHelp::update(const sf::Time& delta_time)
 {
-   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
    _visible = (player_rect.findIntersection(_rect_px)).has_value();
 
    if (!_visible)

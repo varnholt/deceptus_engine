@@ -10,7 +10,7 @@
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/gamemechanismobserver.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
@@ -172,7 +172,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
    // check whether up button is pressed
    // actually there could be a number of 'message box activation buttons' here but for
    // now it might be sufficient to just check for the up button
-   if (_button_required && !Player::getCurrent()->getControls()->isMovingUp(0.7f))
+   if (_button_required && !PlayerRegistry::getFirst()->getControls()->isMovingUp(0.7f))
    {
       return;
    }
@@ -182,7 +182,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
       return;
    }
 
-   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
    if (_open_on_intersect && player_rect.findIntersection(_pixel_rect).has_value())
    {
       // message boxes might already be marked as inactive, however

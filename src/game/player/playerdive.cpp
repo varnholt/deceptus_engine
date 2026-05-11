@@ -1,7 +1,7 @@
 #include "playerdive.h"
 
 #include "framework/tools/log.h"
-// #include "game/player/player.h"
+// #include "game/player/playerregistry.h"
 #include "game/ui/messagebox.h"
 
 void PlayerDive::update(const sf::Time& dt, bool in_water)
@@ -18,6 +18,6 @@ void PlayerDive::update(const sf::Time& dt, bool in_water)
          "You believe you can hold your breath for 10 minutes.[br]Fortunately, this game is generous.", [](MessageBox::Button) {}
       );
 
-      // Player::getCurrent()->damage(100);
+      // PlayerRegistry::getFirst()->damage(100);
    }
 }

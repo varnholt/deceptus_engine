@@ -8,7 +8,7 @@
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 // #define DEBUG_DRAW 1
 #ifdef DEBUG_DRAW
@@ -82,7 +82,7 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       color.draw(*spike._sprite);
 
 #ifdef DEBUG_DRAW
-      const auto& player_rect = Player::getCurrent()->getPixelRectInt();
+      const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectInt();
       const auto fill_color = player_rect.findIntersection(spike._collision_rect_absolute).has_value() ? sf::Color::Red : sf::Color::Green;
       DebugDraw::drawRect(color, spike._collision_rect_absolute, fill_color);
 #endif
@@ -169,7 +169,7 @@ void DeathBlock::updateLeverLag(const sf::Time& dt)
 void DeathBlock::updateCollision()
 {
    // check for intersection with player
-   const auto& player_rect = Player::getCurrent()->getPixelRectInt();
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectInt();
    const auto x_px = static_cast<int32_t>(_body->GetPosition().x * PPM - PIXELS_PER_TILE);
    const auto y_px = static_cast<int32_t>(_body->GetPosition().y * PPM - PIXELS_PER_TILE);
 
@@ -184,7 +184,7 @@ void DeathBlock::updateCollision()
 
       if (player_rect.findIntersection(spike._collision_rect_absolute).has_value() && deadly)
       {
-         Player::getCurrent()->damage(_damage);
+         PlayerRegistry::getFirst()->damage(_damage);
       }
 
       ++index;
@@ -418,7 +418,7 @@ void DeathBlock::updatePosition(const sf::Time& dt)
    _body->SetLinearVelocity(timestep * direction);
 
    const auto dx = target_position - current_position;
-   auto& platform = Player::getCurrent()->getPlatform();
+   auto& platform = PlayerRegistry::getFirst()->getPlatform();
    if (platform.getPlatformBody() == _body)
    {
       platform.setPlatformDx(dx.x);

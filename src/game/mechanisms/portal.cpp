@@ -14,7 +14,7 @@
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
 #include "game/io/texturepool.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/state/displaymode.h"
 
 #include <atomic>
@@ -92,7 +92,7 @@ void goToPortal(auto portal)
 {
    auto dst_position_px = portal->getDestination()->getPortalPosition();
 
-   Player::getCurrent()->setBodyViaPixelPosition(
+   PlayerRegistry::getFirst()->setBodyViaPixelPosition(
       dst_position_px.x + PLAYER_ACTUAL_WIDTH / 2, dst_position_px.y + DIFF_PLAYER_TILE_TO_PHYSICS
    );
 
@@ -112,7 +112,7 @@ void Portal::use()
 
    if (_portal_clock.getElapsedTime().asSeconds() > 1.0f)
    {
-      if (Player::getCurrent()->getControls()->isButtonBPressed())
+      if (PlayerRegistry::getFirst()->getControls()->isButtonBPressed())
       {
          if (getDestination())
          {
@@ -140,7 +140,7 @@ void Portal::setDestination(const std::shared_ptr<Portal>& dst)
 
 void Portal::update(const sf::Time& /*dt*/)
 {
-   const auto player_intersects = Player::getCurrent()->getPixelRectFloat().findIntersection(_rect).has_value();
+   const auto player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
 
    // activate portal when player intersects
    if (!_player_intersects && player_intersects)
@@ -152,13 +152,13 @@ void Portal::update(const sf::Time& /*dt*/)
    // player uses gateway
    if (_player_intersects)
    {
-      if (Player::getCurrent()->getControls()->isButtonBPressed())
+      if (PlayerRegistry::getFirst()->getControls()->isButtonBPressed())
       {
          use();
       }
    }
 
-   sf::Vector2f player_pos = Player::getCurrent()->getPixelPositionFloat();
+   sf::Vector2f player_pos = PlayerRegistry::getFirst()->getPixelPositionFloat();
    sf::Vector2f portal_pos = getPortalPosition();
 
    sf::Vector2f a(player_pos.x, player_pos.y);

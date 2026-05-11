@@ -10,7 +10,7 @@
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
 
 namespace
@@ -246,7 +246,7 @@ void Lever::resolveTargets(const std::vector<std::shared_ptr<GameMechanism>>& me
 
 void Lever::update(const sf::Time& dt)
 {
-   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
    _player_at_lever = _rect.findIntersection(player_rect).has_value();
 
    if (!_handle_available)
@@ -284,7 +284,7 @@ void Lever::update(const sf::Time& dt)
 
    _reached_previous = _reached;
 
-   if (Player::getCurrent()->getControls()->isButtonBPressed() && _player_at_lever && _handle_available)
+   if (PlayerRegistry::getFirst()->getControls()->isButtonBPressed() && _player_at_lever && _handle_available)
    {
       // block spamming
       using namespace std::chrono_literals;

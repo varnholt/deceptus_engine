@@ -15,7 +15,7 @@
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h" 0
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <cmath>
 #include <numbers>
@@ -373,9 +373,9 @@ void MovingPlatform::update(const sf::Time& delta_time)
    // set the player velocity to the linear platform velocity, so he doesn't jump up for a second
    if (std::signbit(previous_velocity.y) != std::signbit(_velocity.y))
    {
-      if (Player::getCurrent()->getPlatform().isOnPlatform())
+      if (PlayerRegistry::getFirst()->getPlatform().isOnPlatform())
       {
-         Player::getCurrent()->getBody()->SetLinearVelocity(_velocity);
+         PlayerRegistry::getFirst()->getBody()->SetLinearVelocity(_velocity);
       }
    }
 
@@ -384,7 +384,7 @@ void MovingPlatform::update(const sf::Time& delta_time)
    _pos.x = _body->GetPosition().x;
    _pos.y = _body->GetPosition().y;
 
-   auto& platform = Player::getCurrent()->getPlatform();
+   auto& platform = PlayerRegistry::getFirst()->getPlatform();
    if (platform.getPlatformBody() == _body)
    {
       platform.setPlatformDx(getDx());

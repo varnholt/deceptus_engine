@@ -451,6 +451,9 @@ set(GAME_FILES
     src/game/player/itemsystem.h
     src/game/player/player.cpp
     src/game/player/player.h
+    src/game/player/playerinterface.h
+    src/game/player/playerregistry.cpp
+    src/game/player/playerregistry.h
     src/game/player/playeranimation.cpp
     src/game/player/playeranimation.h
     src/game/player/playerattack.cpp

@@ -9,6 +9,7 @@
 #include "game/level/level.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <iostream>
 #include <numbers>
@@ -235,7 +236,7 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    DebugDraw::drawRect(color, _foot_collision_rect_px, sf::Color::Magenta);
    DebugDraw::drawRect(color, _original_rect_px, sf::Color::Green);
    DebugDraw::drawRect(color, _jump_off_collision_rect_px, sf::Color::Blue);
-   DebugDraw::drawPoint(color, Player::getCurrent()->getPixelPositionFloat() + sf::Vector2f(0.0f, 10.0f), b2Color(1.0f, 0.5f, 0.5f));
+   DebugDraw::drawPoint(color, PlayerRegistry::getFirst()->getPixelPositionFloat() + sf::Vector2f(0.0f, 10.0f), b2Color(1.0f, 0.5f, 0.5f));
 #endif
 }
 
@@ -286,7 +287,7 @@ void BubbleCube::updateRespawnCondition()
    if (_popped && (now - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
       // don't respawn while player blocks the area
-      if (!Player::getCurrent()->getPixelRectFloat().findIntersection(_original_rect_px).has_value())
+      if (!PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_original_rect_px).has_value())
       {
          _popped = false;
          _body->SetEnabled(true);
@@ -329,7 +330,7 @@ void BubbleCube::updateFootSensorContact()
       {width_px - (2 * bevel_px) + (2 * bevel_range_increase_px), collision_rect_height}
    };
 
-   const auto foot_sensor_rect = Player::getCurrent()->computeFootSensorPixelFloatRect();
+   const auto foot_sensor_rect = PlayerRegistry::getFirst()->computeFootSensorPixelFloatRect();
    _foot_sensor_rect_intersects_previous = _foot_sensor_rect_intersects;
    _foot_sensor_rect_intersects = foot_sensor_rect.findIntersection(_foot_collision_rect_px).has_value();
 
@@ -345,9 +346,9 @@ void BubbleCube::updateJumpedOffPlatformCondition()
    _jump_off_collision_rect_px.position.x -= 8;
    _jump_off_collision_rect_px.size.x += 8 * 2;
 
-   const auto first_jump_frame = (Player::getCurrent()->getJump()._jump_frame_count == 9);
+   const auto first_jump_frame = (PlayerRegistry::getFirst()->getJump()._jump_frame_count == 9);
    const auto intersects =
-      _jump_off_collision_rect_px.findIntersection(Player::getCurrent()->computeFootSensorPixelFloatRect()).has_value();
+      _jump_off_collision_rect_px.findIntersection(PlayerRegistry::getFirst()->computeFootSensorPixelFloatRect()).has_value();
 
    if (first_jump_frame && intersects)
    {

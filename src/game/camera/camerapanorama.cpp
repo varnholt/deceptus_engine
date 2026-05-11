@@ -6,7 +6,7 @@
 #include "game/config/tweaks.h"
 #include "game/controller/gamecontrollerdata.h"
 #include "game/controller/gamecontrollerintegration.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/state/displaymode.h"
 
 CameraPanorama& CameraPanorama::getInstance()
@@ -84,7 +84,7 @@ void CameraPanorama::update()
    const auto locked_left = result[2];
    const auto locked_right = result[3];
 
-   if (Player::getCurrent()->isInAir())
+   if (PlayerRegistry::getFirst()->isInAir())
    {
       if (DisplayMode::getInstance().isSet(Display::CameraPanorama))
       {
@@ -194,7 +194,7 @@ void CameraPanorama::processKeyPressedEvents(const sf::Event::KeyPressed* key_ev
       case sf::Keyboard::Key::LShift:
       {
          // don't enable cpan when airborne
-         if (Player::getCurrent()->isInAir())
+         if (PlayerRegistry::getFirst()->isInAir())
          {
             return;
          }

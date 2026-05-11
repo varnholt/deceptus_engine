@@ -3,7 +3,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -48,7 +48,7 @@ std::string_view DamageRect::objectName() const
 
 void DamageRect::update(const sf::Time& /*dt*/)
 {
-   auto* player = Player::getCurrent();
+   auto player = PlayerRegistry::getFirst();
    const auto player_intersects = player->getPixelRectFloat().findIntersection(_rect).has_value();
 
    if (player_intersects)

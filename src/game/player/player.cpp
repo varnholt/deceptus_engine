@@ -1,5 +1,7 @@
 #include "player.h"
 
+#include "game/player/playerregistry.h"
+
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
@@ -48,8 +50,6 @@ constexpr auto wall_slide_sensor_width = 8.0f;
 constexpr auto wall_slide_sensor_height = 0.75f;
 constexpr auto wall_slide_sensor_distance = 0.21f;
 }  // namespace
-
-Player* Player::__current = nullptr;
 
 b2Body* Player::getBody() const
 {
@@ -105,11 +105,14 @@ sf::FloatRect Player::computeFootSensorPixelFloatRect() const
    return rect_px;
 }
 
+Player::~Player()
+{
+   PlayerRegistry::remove(this);
+}
+
 Player::Player(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Player).name());
-
-   __current = this;
 
    PlayerAudio::addSamples();
 
@@ -122,11 +125,6 @@ Player::Player(GameNode* parent) : GameNode(parent)
    _dash._reset_dash_callback = [this]() { resetMotionBlur(); };
 
    _player_animation->loadAnimations(_animation_pool);
-}
-
-Player* Player::getCurrent()
-{
-   return __current;
 }
 
 void Player::initialize()

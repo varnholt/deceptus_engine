@@ -7,7 +7,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <array>
 #include <iostream>
@@ -166,10 +166,10 @@ void Rope::update(const sf::Time& dt)
       return;
    }
 
-   if (_player_impulse.has_value() && Player::getCurrent()->getPixelRectFloat().findIntersection(_bounding_box).has_value())
+   if (_player_impulse.has_value() && PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_bounding_box).has_value())
    {
       // using a fix timestep for now, everything else lets box2d go nuts
-      const auto impulse = Player::getCurrent()->getBody()->GetLinearVelocity().x * _player_impulse.value() * dt.asSeconds();
+      const auto impulse = PlayerRegistry::getFirst()->getBody()->GetLinearVelocity().x * _player_impulse.value() * dt.asSeconds();
       pushChain(impulse);
 
       // cap speed

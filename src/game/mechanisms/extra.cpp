@@ -8,7 +8,7 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/player/playercontrols.h"
 #include "game/player/playerinfo.h"
 #include "game/state/savestate.h"
@@ -250,13 +250,13 @@ void Extra::update(const sf::Time& delta_time)
    // if the extra requires a button press, only proceed if the button is down
    if (_requires_button_press)
    {
-      if (!Player::getCurrent()->getControls()->isButtonBPressed())
+      if (!PlayerRegistry::getFirst()->getControls()->isButtonBPressed())
       {
          return;
       }
    }
 
-   const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
+   const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
    if (player_rect_px.findIntersection(_rect).has_value())
    {
       _active = false;

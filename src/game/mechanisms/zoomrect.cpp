@@ -5,7 +5,7 @@
 #include "game/camera/camerazoom.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -87,8 +87,8 @@ std::string_view ZoomRect::objectName() const
 
 void ZoomRect::update(const sf::Time& dt)
 {
-   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
-   const auto player_position_px = Player::getCurrent()->getPixelPositionFloat();
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+   const auto player_position_px = PlayerRegistry::getFirst()->getPixelPositionFloat();
    const auto within_rect = (player_rect.findIntersection(_rect_px).has_value());
 
    if (!within_rect)

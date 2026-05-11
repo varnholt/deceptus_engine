@@ -1,4 +1,4 @@
-﻿#include "treasurechest.h"
+#include "treasurechest.h"
 
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -9,7 +9,7 @@
 #include "game/mechanisms/extrawrapper.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/gamemechanismobserver.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
 
 namespace
@@ -178,9 +178,9 @@ void TreasureChest::update(const sf::Time& dt)
             _animation_idle_closed->update(dt);
          }
 
-         if (Player::getCurrent()->getControls()->isButtonBPressed())
+         if (PlayerRegistry::getFirst()->getControls()->isButtonBPressed())
          {
-            const auto& player_rect_px = Player::getCurrent()->getPixelRectFloat();
+            const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
             if (player_rect_px.findIntersection(_rect).has_value())
             {
                if (playerHasRequiredKey())

@@ -6,7 +6,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <iostream>
 #include <map>
@@ -234,9 +234,9 @@ void Fan::collide()
         return;
     }
 
-    const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
     if (player_rect.findIntersection(_pixel_rect).has_value())
     {
-        Player::getCurrent()->getBody()->ApplyForceToCenter(b2Vec2(2.0F * _direction.x, _direction.y), true);
+        PlayerRegistry::getFirst()->getBody()->ApplyForceToCenter(b2Vec2(2.0F * _direction.x, _direction.y), true);
     }
 }

@@ -1,4 +1,4 @@
-﻿#include "watersurface.h"
+#include "watersurface.h"
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
@@ -7,7 +7,7 @@
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <iostream>
 
@@ -123,7 +123,7 @@ void WaterSurface::update(const sf::Time& dt)
    const auto elapsed_s = dt.asSeconds();
    updateEmitters(elapsed_s);
 
-   auto* player = Player::getCurrent();
+   auto player = PlayerRegistry::getFirst();
 
    bool splash_needed = false;
    auto splash_velocity_factor = 1.0f;

@@ -7,7 +7,7 @@
 
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -80,7 +80,7 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
 
 void AmbientOcclusion::draw(sf::RenderTarget& window)
 {
-   const auto& player_pos_px = Player::getCurrent()->getPixelPositionInt();
+   const auto& player_pos_px = PlayerRegistry::getFirst()->getPixelPositionInt();
 
    const int32_t player_chunk_x = player_pos_px.x >> 8;
    const int32_t player_chunk_y = player_pos_px.y >> 8;

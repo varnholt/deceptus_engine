@@ -6,7 +6,7 @@
 #include "game/io/texturepool.h"
 #include "game/level/level.h"
 #include "game/physics/worldquery.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -154,7 +154,7 @@ void RainOverlay::update(const sf::Time& dt)
    //   :        :                      :        :
    //   :        :                      :        :
    //   +- - - - +----------------------+- - - - +
-   auto player_position = Player::getCurrent()->getPixelPositionFloat();
+   auto player_position = PlayerRegistry::getFirst()->getPixelPositionFloat();
    _clip_rect.position.x = player_position.x - _screen.size.x;
    _clip_rect.position.y = player_position.y - _screen.size.y;
    _clip_rect.size.y = _screen.size.y * 2;

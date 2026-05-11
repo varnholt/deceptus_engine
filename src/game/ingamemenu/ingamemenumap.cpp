@@ -7,7 +7,7 @@
 #include "game/io/texturepool.h"
 #include "game/mechanisms/door.h"
 #include "game/mechanisms/portal.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <numbers>
 
@@ -108,7 +108,7 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
    if (_level_grid_texture)
    {
       sf::Vector2f center;
-      center += Player::getCurrent()->getPixelPositionFloat() * 0.125f;
+      center += PlayerRegistry::getFirst()->getPixelPositionFloat() * 0.125f;
       center += CameraPanorama::getInstance().getLookVector();
       center.x += _level_grid_sprite->getTexture().getSize().x / 2.0f;
       center.y += _level_grid_sprite->getTexture().getSize().y / 2.0f;
@@ -289,7 +289,7 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    auto playerWidth = 5.0f;
    auto playerHeight = 4;
    sf::CircleShape square(playerWidth, static_cast<uint32_t>(playerHeight));
-   square.setPosition(Player::getCurrent()->getPixelPositionFloat() * 0.125f);
+   square.setPosition(PlayerRegistry::getFirst()->getPixelPositionFloat() * 0.125f);
    square.move({-playerWidth, -playerHeight * 2.0f});
    square.setFillColor(sf::Color::White);
    target.draw(square);

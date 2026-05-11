@@ -1,8 +1,8 @@
 #include "playerutils.h"
 
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 sf::Vector2f PlayerUtils::getPixelPositionFloat()
 {
-   return Player::getCurrent()->getPixelPositionFloat();
+   return PlayerRegistry::getFirst()->getPixelPositionFloat();
 }

@@ -1,6 +1,6 @@
 #include "conveyorbelt.h"
 #include "game/io/texturepool.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
@@ -240,7 +240,7 @@ float ConveyorBelt::getVelocity() const
 void ConveyorBelt::resetBeltState()
 {
    __bodies_on_belt.clear();
-   auto* player = Player::getCurrent();
+   auto player = PlayerRegistry::getFirst();
    player->getBelt().setBeltVelocity(0.0f);
    player->getBelt().setOnBelt(false);
 }
@@ -249,7 +249,7 @@ void ConveyorBelt::processFixtureNode(FixtureNode* fixture_node, b2Body* collidi
 {
    if (fixture_node->getType() == ObjectTypeConveyorBelt)
    {
-      auto* player_body = Player::getCurrent()->getBody();
+      auto* player_body = PlayerRegistry::getFirst()->getBody();
 
       auto* belt = dynamic_cast<ConveyorBelt*>(fixture_node);
 
@@ -274,7 +274,7 @@ void ConveyorBelt::processFixtureNode(FixtureNode* fixture_node, b2Body* collidi
          else
          {
             // handle player differently because multiple linear velocities are applied to the player
-            auto* player = Player::getCurrent();
+            auto player = PlayerRegistry::getFirst();
             player->getBelt().setOnBelt(true);
             player->getBelt().setBeltVelocity(belt_velocity);
 

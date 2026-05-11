@@ -15,8 +15,8 @@
 #include "game/mechanisms/extra.h"
 #include "game/mechanisms/ringshaderlayer.h"
 #include "game/mechanisms/sensorrect.h"
-#include "game/player/player.h"
 #include "game/player/playercontrols.h"
+#include "game/player/playerregistry.h"
 #include "game/player/weaponsystem.h"
 #include "game/state/savestate.h"
 #include "game/weapons/bow.h"
@@ -66,7 +66,7 @@ void LevelScript::update(const sf::Time& delta_time)
 
    luaUpdate(delta_time);
 
-   const auto player_rect = Player::getCurrent()->getPixelRectInt();
+   const auto player_rect = PlayerRegistry::getFirst()->getPixelRectInt();
    auto id = 0;
    for (const auto& rect : _collision_rects)
    {
@@ -653,7 +653,7 @@ void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
 void LevelScript::giveWeaponBow()
 {
    auto bow = WeaponFactory::create(WeaponType::Bow);
-   std::dynamic_pointer_cast<Bow>(bow)->setLauncherBody(Player::getCurrent()->getBody());
+   std::dynamic_pointer_cast<Bow>(bow)->setLauncherBody(PlayerRegistry::getFirst()->getBody());
    giveWeaponToPlayer(bow);
 }
 
@@ -758,7 +758,7 @@ void LevelScript::showDialogue(const std::string& search_pattern)
 
 void LevelScript::lockPlayerControls(const std::chrono::milliseconds& duration)
 {
-   Player::getCurrent()->getControls()->lockAll(PlayerControls::LockedState::Released, duration);
+   PlayerRegistry::getFirst()->getControls()->lockAll(PlayerControls::LockedState::Released, duration);
 }
 
 void LevelScript::addSensorRectCallback(const std::string& search_pattern)

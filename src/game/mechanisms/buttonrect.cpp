@@ -3,7 +3,7 @@
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/gamemechanismobserver.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -48,7 +48,7 @@ std::string_view ButtonRect::objectName() const
 
 void ButtonRect::update(const sf::Time& /*dt*/)
 {
-   _player_intersects = Player::getCurrent()->getPixelRectFloat().findIntersection(_rect).has_value();
+   _player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
 
    if (!isEnabled())
    {
@@ -60,10 +60,10 @@ void ButtonRect::update(const sf::Time& /*dt*/)
       return;
    }
 
-   if ((_button == Button::A && Player::getCurrent()->getControls()->isButtonAPressed()) ||
-       (_button == Button::B && Player::getCurrent()->getControls()->isButtonBPressed()) ||
-       (_button == Button::X && Player::getCurrent()->getControls()->isButtonXPressed()) ||
-       (_button == Button::Y && Player::getCurrent()->getControls()->isButtonYPressed()))
+   if ((_button == Button::A && PlayerRegistry::getFirst()->getControls()->isButtonAPressed()) ||
+       (_button == Button::B && PlayerRegistry::getFirst()->getControls()->isButtonBPressed()) ||
+       (_button == Button::X && PlayerRegistry::getFirst()->getControls()->isButtonXPressed()) ||
+       (_button == Button::Y && PlayerRegistry::getFirst()->getControls()->isButtonYPressed()))
    {
       GameMechanismObserver::onEvent(getObjectId(), "button_rects", "pressed", "true");
    }

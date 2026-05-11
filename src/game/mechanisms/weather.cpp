@@ -5,7 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/valuereader.h"
 #include "game/level/roomupdater.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 Weather::Weather(GameNode* parent) : GameNode(parent)
 {
@@ -34,7 +34,7 @@ void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
       return;
    }
 
-   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
    const auto intersects = _rect.findIntersection(player_rect).has_value();
    if (intersects)
    {
@@ -93,7 +93,7 @@ void Weather::update(const sf::Time& dt)
       return;
    }
 
-   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
    const auto intersects = _rect.findIntersection(player_rect).has_value();
    updateWaitDelay(dt, intersects);
 

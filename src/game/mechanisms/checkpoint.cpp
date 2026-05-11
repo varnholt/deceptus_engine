@@ -10,7 +10,7 @@
 #include "game/io/texturepool.h"
 #include "game/level/level.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
 
 #include <iostream>
@@ -178,7 +178,7 @@ void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
 void Checkpoint::update(const sf::Time& dt)
 {
-   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
 
    if (player_rect.findIntersection(_rect).has_value())
    {

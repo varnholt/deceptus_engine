@@ -2,7 +2,7 @@
 
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <iostream>
 
@@ -62,7 +62,7 @@ void DeathShader::update(const sf::Time& dt)
    _shader.setUniform("time", _elapsed);
    _shader.setUniform(
       "flowfield_offset",
-      Player::getCurrent()->isPointingLeft() ? sf::Glsl::Vec2(0.5f, -0.32f)  // picked randomly
+      PlayerRegistry::getFirst()->isPointingLeft() ? sf::Glsl::Vec2(0.5f, -0.32f)  // picked randomly
                                              : sf::Glsl::Vec2(0.8f, 0.8f)
    );
 }

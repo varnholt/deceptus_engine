@@ -5,7 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -68,7 +68,7 @@ std::shared_ptr<Wind> Wind::deserialize(GameNode* parent, const GameDeserializeD
 
 void Wind::update(const sf::Time& /*dt*/)
 {
-   const auto* player = Player::getCurrent();
+   const auto player = PlayerRegistry::getFirst();
    const auto& player_rect = player->getPixelRectFloat();
    if (!_area.findIntersection(player_rect).has_value())
    {

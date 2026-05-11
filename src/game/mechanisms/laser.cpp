@@ -14,7 +14,7 @@
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <iostream>
 
@@ -372,7 +372,7 @@ void Laser::collide()
 {
    auto checkCollision = [this]()
    {
-      const sf::FloatRect& player_rect = Player::getCurrent()->getPixelRectFloat();
+      const sf::FloatRect& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
       auto pixel_rect = _pixel_rect;
 
       if (_path.has_value())
@@ -448,7 +448,7 @@ void Laser::collide()
    if (checkCollision())
    {
       // player is dead
-      Player::getCurrent()->kill(DeathReason::Laser);
+      PlayerRegistry::getFirst()->kill(DeathReason::Laser);
    }
 }
 

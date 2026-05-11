@@ -13,7 +13,7 @@
 #include "game/config/gameconfiguration.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -313,7 +313,7 @@ std::unique_ptr<ScreenTransition> Room::makeFadeTransition()
 
 void Room::movePlayerToRoomStartPosition()
 {
-   const auto player_pos_px = Player::getCurrent()->getPixelPositionFloat();
+   const auto player_pos_px = PlayerRegistry::getFirst()->getPixelPositionFloat();
 
    const auto active_sub_room = activeSubRoom(player_pos_px);
    if (!active_sub_room.has_value())
@@ -331,16 +331,16 @@ void Room::movePlayerToRoomStartPosition()
 
    if (area._start_position.has_value())
    {
-      Player::getCurrent()->setBodyViaPixelPosition(
+      PlayerRegistry::getFirst()->setBodyViaPixelPosition(
          static_cast<float>(area._start_position.value().x), static_cast<float>(area._start_position.value().y)
       );
    }
 
    if (area._start_offset.has_value())
    {
-      auto player_pos = Player::getCurrent()->getPixelPositionInt();
+      auto player_pos = PlayerRegistry::getFirst()->getPixelPositionInt();
       player_pos += area._start_offset.value();
-      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(player_pos.x), static_cast<float>(player_pos.y));
+      PlayerRegistry::getFirst()->setBodyViaPixelPosition(static_cast<float>(player_pos.x), static_cast<float>(player_pos.y));
    }
 }
 
@@ -372,11 +372,11 @@ void Room::startTransition()
                }
 
                // apply room start position if available
-               Player::getCurrent()->fadeOutReset();
+               PlayerRegistry::getFirst()->fadeOutReset();
                movePlayerToRoomStartPosition();
             }
          );
-         Player::getCurrent()->fadeOut();
+         PlayerRegistry::getFirst()->fadeOut();
          screen_transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
          screen_transition->startEffect1();
          ScreenTransitionHandler::getInstance().push(std::move(screen_transition));

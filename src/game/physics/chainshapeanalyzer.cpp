@@ -7,7 +7,7 @@
 
 #include "game/constants.h"
 #include "game/level/fixturenode.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -131,7 +131,7 @@ void ChainShapeAnalyzer::analyze(const std::shared_ptr<b2World>& world)
 
 std::optional<b2Vec2> ChainShapeAnalyzer::checkPlayerAtCollisionPosition()
 {
-   auto player = Player::getCurrent();
+   auto player = PlayerRegistry::getFirst();
    auto foot_sensor_fixture = player->getFootSensorFixture();
    const auto& world_transform = player->getBody()->GetTransform();
 

@@ -17,7 +17,7 @@
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
 
 #include <iostream>
@@ -201,7 +201,7 @@ void Door::update(const sf::Time& dt)
       updateBars(dt);
    }
 
-   if (Player::getCurrent()->getControls()->isButtonBPressed() && checkPlayerAtDoor())
+   if (PlayerRegistry::getFirst()->getControls()->isButtonBPressed() && checkPlayerAtDoor())
    {
       // block spamming
       using namespace std::chrono_literals;
@@ -280,7 +280,7 @@ void Door::setupBody(const std::shared_ptr<b2World>& world)
 
 bool Door::checkPlayerAtDoor() const
 {
-   const auto player_pos = Player::getCurrent()->getPixelPositionFloat();
+   const auto player_pos = PlayerRegistry::getFirst()->getPixelPositionFloat();
    const auto at_door = _player_at_door_rect.contains(player_pos);
    return at_door;
 }

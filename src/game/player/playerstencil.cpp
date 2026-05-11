@@ -7,6 +7,7 @@
 
 #include "game/constants.h"
 #include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 void PlayerStencil::replaceAllWithOne()
 {
@@ -99,7 +100,7 @@ void PlayerStencil::draw(sf::RenderTarget& target, int32_t z_index)
    {
       PlayerStencil::enableTest();
       PlayerStencil::keepIfOne();
-      Player::getCurrent()->drawStencil(target);
+      std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->drawStencil(target);
       PlayerStencil::disableTest();
       PlayerStencil::clearStencilBuffer();
    }

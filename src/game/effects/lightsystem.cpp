@@ -9,7 +9,7 @@
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/level/level.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <algorithm>
 #include <cmath>
@@ -336,7 +336,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
 {
    _active_lights.clear();
 
-   auto* player_body = Player::getCurrent()->getBody();
+   auto* player_body = PlayerRegistry::getFirst()->getBody();
 
    for (const auto& light : _lights)
    {

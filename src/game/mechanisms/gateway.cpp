@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "game/animation/animationpool.h"
 #include "game/audio/audio.h"
 #include "game/camera/camerasystem.h"
 #include "game/effects/fadetransitioneffect.h"
@@ -14,7 +15,7 @@
 #include "game/io/valuereader.h"
 #include "game/mechanisms/flowfieldtexturechangeevent.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include <iostream>
 
@@ -258,7 +259,7 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
 void Gateway::update(const sf::Time& dt)
 {
-   const auto player_intersects = Player::getCurrent()->getPixelRectFloat().findIntersection(_rect).has_value();
+   const auto player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
 
    // activate portal when player intersects
    if (!_player_intersects && player_intersects)
@@ -280,7 +281,7 @@ void Gateway::update(const sf::Time& dt)
    // player uses gateway
    if (_player_intersects)
    {
-      if (Player::getCurrent()->getControls()->isButtonBPressed() && checkPlayerAtGateway())
+      if (PlayerRegistry::getFirst()->getControls()->isButtonBPressed() && checkPlayerAtGateway())
       {
          use();
       }
@@ -571,12 +572,10 @@ void Gateway::update(const sf::Time& dt)
                // update flow field
                if (_flowfield_reference_id.has_value() && _flowfield_texture.has_value())
                {
-                  EventDistributor::event(
-                     FlowFieldTextureChangeEvent{
-                        ._object_id = _flowfield_reference_id.value(),  // update flow field
-                        ._texture_id = _flowfield_texture.value()
-                     }
-                  );
+                  EventDistributor::event(FlowFieldTextureChangeEvent{
+                     ._object_id = _flowfield_reference_id.value(),  // update flow field
+                     ._texture_id = _flowfield_texture.value()
+                  });
                }
             }
          }
@@ -725,7 +724,7 @@ std::optional<sf::FloatRect> Gateway::getBoundingBoxPx()
 
 bool Gateway::checkPlayerAtGateway() const
 {
-   const auto player_pos = Player::getCurrent()->getPixelPositionFloat();
+   const auto player_pos = PlayerRegistry::getFirst()->getPixelPositionFloat();
    const auto at_door = _rect.contains(player_pos);
    return at_door;
 }
@@ -759,7 +758,9 @@ void Gateway::use()
    {
       {
          const auto y_tl_to_px = static_cast<int32_t>(target_pos_px.y / PIXELS_PER_TILE) * PIXELS_PER_TILE;
-         Player::getCurrent()->setBodyViaPixelPosition(target_pos_px.x + PLAYER_ACTUAL_WIDTH / 2, y_tl_to_px + PIXELS_PER_TILE * 3 - 8);
+         PlayerRegistry::getFirst()->setBodyViaPixelPosition(
+            target_pos_px.x + PLAYER_ACTUAL_WIDTH / 2, y_tl_to_px + PIXELS_PER_TILE * 3 - 8
+         );
 
          // update the camera system to point to the player position immediately
          CameraSystem::getInstance().syncNow();
@@ -897,7 +898,7 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
    }
 
    const auto error_gaze_px = sf::Vector2f(-PLAYER_ACTUAL_WIDTH / 2, 0);
-   const auto player_pos_px = Player::getCurrent()->getPixelPositionFloat() + error_gaze_px;
+   const auto player_pos_px = PlayerRegistry::getFirst()->getPixelPositionFloat() + error_gaze_px;
    const auto dir_to_player = player_pos_px - _center_pos_px;
    const auto dir_to_player_normalized = dir_to_player.normalized();
    _eye_pos_px = {dir_to_player_normalized.x * 12.0f, dir_to_player_normalized.y * 6};

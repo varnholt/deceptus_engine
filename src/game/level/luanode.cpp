@@ -1,4 +1,4 @@
-﻿// base
+// base
 #include "luanode.h"
 
 #include <lua.hpp>
@@ -26,6 +26,7 @@
 #include "game/level/luanodecallbacks.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
 #include "game/weapons/gun.h"
 #include "game/weapons/projectilehitaudio.h"
@@ -570,7 +571,7 @@ void LuaNode::luaSetStartPosition()
  */
 void LuaNode::luaPlayerMovedTo()
 {
-   const auto& pos = Player::getCurrent()->getPixelPositionFloat();
+   const auto& pos = PlayerRegistry::getFirst()->getPixelPositionFloat();
 
    lua_getglobal(_lua_state, FUNCTION_PLAYER_MOVED_TO);
 
@@ -645,7 +646,7 @@ void LuaNode::luaSendPath(const std::vector<sf::Vector2f>& vec)
 void LuaNode::damagePlayerInRadius(int32_t damage, float x, float y, float radius)
 {
    sf::Vector2f node_position{x, y};
-   const auto player_position = Player::getCurrent()->getPixelPositionFloat();
+   const auto player_position = PlayerRegistry::getFirst()->getPixelPositionFloat();
 
    auto dist = (player_position - node_position);
    auto len = SfmlMath::length(dist);
@@ -653,13 +654,13 @@ void LuaNode::damagePlayerInRadius(int32_t damage, float x, float y, float radiu
    if (len <= radius)
    {
       // does it really make sense to normalize this vector?
-      Player::getCurrent()->damage(damage, SfmlMath::normalize(-dist));
+      PlayerRegistry::getFirst()->damage(damage, SfmlMath::normalize(-dist));
    }
 }
 
 void LuaNode::damagePlayer(int32_t damage, float forceX, float forceY)
 {
-   Player::getCurrent()->damage(damage, sf::Vector2f(forceX, forceY));
+   PlayerRegistry::getFirst()->damage(damage, sf::Vector2f(forceX, forceY));
 }
 
 b2Vec2 LuaNode::getLinearVelocity() const
@@ -1081,7 +1082,6 @@ void LuaNode::updateSpriteRect(int32_t id, int32_t x_px, int32_t y_px, int32_t w
    _sprites[id]->setTextureRect(sf::IntRect({x_px, y_px}, {w_px, h_px}));
 }
 
-
 void LuaNode::setSpriteScale(int32_t id, float x_scale, float y_scale)
 {
    _sprites[id]->setScale({x_scale, y_scale});
@@ -1194,13 +1194,13 @@ void LuaNode::playSample(const std::string& sample, float volume)
 bool LuaNode::intersectsPlayer(float x, float y, float width, float height)
 {
    sf::FloatRect rect{{x, y}, {width, height}};
-   const auto player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
    return player_rect.findIntersection(rect).has_value();
 }
 
 bool LuaNode::checkPlayerDead() const
 {
-   const auto player = Player::getCurrent();
+   const auto player = PlayerRegistry::getFirst();
    return player ? player->isDead() : false;
 }
 
@@ -1298,10 +1298,7 @@ void LuaNode::setProjectileAnimation(
 void LuaNode::startTimer(int32_t delay, int32_t timer_id)
 {
    Timer::add(
-      std::chrono::milliseconds(delay),
-      [this, timer_id]() { luaTimeout(timer_id); },
-      Timer::Type::Singleshot,
-      Timer::Scope::UpdateIngame
+      std::chrono::milliseconds(delay), [this, timer_id]() { luaTimeout(timer_id); }, Timer::Type::Singleshot, Timer::Scope::UpdateIngame
    );
 }
 
@@ -1339,11 +1336,7 @@ void LuaNode::registerHitSamples(const std::string& path, const std::vector<std:
    ProjectileHitAudio::addReferenceSamples(path, hit_samples);
 }
 
-void LuaNode::playDetonationAnimationFromScript(
-   float x,
-   float y,
-   const std::vector<DetonationAnimation::DetonationRing>& rings
-)
+void LuaNode::playDetonationAnimationFromScript(float x, float y, const std::vector<DetonationAnimation::DetonationRing>& rings)
 {
    if (!rings.empty())
    {

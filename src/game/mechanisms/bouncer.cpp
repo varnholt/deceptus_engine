@@ -7,7 +7,7 @@
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/bouncerwrapper.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 const auto SPRITE_WIDTH = 24;
 const auto SPRITE_HEIGHT = 24;
@@ -138,7 +138,7 @@ void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
 void Bouncer::updatePlayerAtBouncer()
 {
-   auto* player = Player::getCurrent();
+   auto player = PlayerRegistry::getFirst();
 
    auto rect = player->getPixelRectFloat();
    rect.size.y *= 3;
@@ -208,7 +208,7 @@ void Bouncer::activate()
          break;
    }
 
-   auto* body = Player::getCurrent()->getBody();
+   auto* body = PlayerRegistry::getFirst()->getBody();
 
    // it's pretty important to reset the body's y velocity
    const auto& velocity = body->GetLinearVelocity();

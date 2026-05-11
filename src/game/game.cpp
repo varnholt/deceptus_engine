@@ -21,6 +21,7 @@
 #include "game/level/levels.h"
 #include "game/player/inventoryconfig.h"
 #include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
@@ -454,6 +455,7 @@ void Game::initialize()
    initializeController();
 
    _player = std::make_shared<Player>();
+   PlayerRegistry::add(_player);
    _player->initialize();
 
    _global_event_serializer = std::make_shared<EventSerializer>();
@@ -1096,7 +1098,7 @@ void Game::processEvent(const sf::Event& event)
          {
             const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
             const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *Level::getCurrentLevel()->getLevelView());
-            Player::getCurrent()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
+            PlayerRegistry::getFirst()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
          }
       }
    }
@@ -1183,8 +1185,8 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
 #ifdef DEVELOPMENT_MODE
       case sf::Keyboard::Key::G:
       {
-         const auto scale = Player::getCurrent()->getBody()->GetGravityScale();
-         Player::getCurrent()->getBody()->SetGravityScale(scale < 0.0f ? 1.0f : -0.1f);
+         const auto scale = PlayerRegistry::getFirst()->getBody()->GetGravityScale();
+         PlayerRegistry::getFirst()->getBody()->SetGravityScale(scale < 0.0f ? 1.0f : -0.1f);
          break;
       }
       case sf::Keyboard::Key::F1:

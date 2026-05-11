@@ -5,7 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 /*
    000
@@ -162,11 +162,11 @@ void SpikeBlock::update(const sf::Time& dt)
       }
    }
 
-   if (Player::getCurrent()->getPixelRectFloat().findIntersection(_rectangle).has_value())
+   if (PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rectangle).has_value())
    {
       if (_sprite_index_current >= _sprite_index_deadly_min && _sprite_index_current <= _sprite_index_deadly_max)
       {
-         Player::getCurrent()->damage(damage);
+         PlayerRegistry::getFirst()->damage(damage);
       }
    }
 

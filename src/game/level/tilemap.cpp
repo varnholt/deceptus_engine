@@ -16,7 +16,7 @@
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 #include "game/level/blendmodedeserializer.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -27,7 +27,7 @@ constexpr auto block_range_half_y = 2;
 std::array<int32_t, 2> getPlayerBlock()
 {
    // draw the vertex arrays
-   const auto& player_pos_px = Player::getCurrent()->getPixelPositionInt();
+   const auto& player_pos_px = PlayerRegistry::getFirst()->getPixelPositionInt();
    return {(player_pos_px.x / PIXELS_PER_TILE) / tile_count_per_block, (player_pos_px.y / PIXELS_PER_TILE) / tile_count_per_block};
 }
 

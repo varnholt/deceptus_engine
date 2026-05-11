@@ -8,7 +8,7 @@
 #include "game/debug/debugdraw.h"
 #include "game/debug/debugdrawstates.h"
 #include "game/physics/worldquery.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -67,7 +67,7 @@ public:
    b2Vec2 impact_normal{};
    std::unordered_set<b2Body*> _ignored_bodies;
 };
-}
+}  // namespace
 
 using namespace std::chrono_literals;
 
@@ -191,7 +191,7 @@ std::optional<sf::Vector2f> PlayerSword::impactSolidObjects(const WeaponUpdateDa
    WorldQuery::OctreeNode octree(_hit_rect_px, data._world, 0, octree_depth, ignored_bodies);
    _octree_rects = octree.collectLeafBounds(0, octree_depth);
 
-   const auto player_rect_px = Player::getCurrent()->getPixelRectFloat();
+   const auto player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
    const auto player_center_px =
       sf::Vector2f{player_rect_px.position.x + (player_rect_px.size.x / 2.0f), player_rect_px.position.y + (player_rect_px.size.y / 2.0f)};
 
@@ -200,7 +200,7 @@ std::optional<sf::Vector2f> PlayerSword::impactSolidObjects(const WeaponUpdateDa
    {
       // correct hit position by shooting a ray
       SwordRayCastCallback raycast_callback(ignored_bodies);
-      const auto ray_position_source_px = Player::getCurrent()->getPixelPositionFloat() - sf::Vector2f(0, 24);
+      const auto ray_position_source_px = PlayerRegistry::getFirst()->getPixelPositionFloat() - sf::Vector2f(0, 24);
       const auto ray_position_source_m = DebugDraw::vecS2B(ray_position_source_px);
       const auto solid_object_hit_pos_m = DebugDraw::vecS2B(solid_object_hit_pos_px.value());
       const auto extended_hit_ray_m = 1.5f * (solid_object_hit_pos_m - ray_position_source_m);
@@ -234,7 +234,7 @@ void PlayerSword::updateImpact(const WeaponUpdateData& data)
 {
    if (checkHitWindowActive())
    {
-      std::unordered_set<b2Body*> ignored_bodies{{Player::getCurrent()->getBody()}};
+      std::unordered_set<b2Body*> ignored_bodies{{PlayerRegistry::getFirst()->getBody()}};
       _cleared_to_attack = false;
 
       updateHitbox();
@@ -318,7 +318,7 @@ bool PlayerSword::checkHitWindowActive() const
 
 void PlayerSword::updateHitbox()
 {
-   auto* player = Player::getCurrent();
+   auto player = PlayerRegistry::getFirst();
    const auto crouching = player->getBend().isCrouching();
 
    const auto hitbox_width_px = crouching ? 40.0f : 60.0f;

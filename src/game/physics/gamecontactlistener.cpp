@@ -11,7 +11,7 @@
 #include "game/mechanisms/collapsingplatform.h"
 #include "game/mechanisms/conveyorbelt.h"
 #include "game/physics/onewaywall.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 #include "game/weapons/projectile.h"
 
 #include <iostream>
@@ -31,7 +31,7 @@ bool isPlayer(const FixtureNode* obj)
       return false;
    }
 
-   const auto is_player = (obj->getParent() == Player::getCurrent());
+   const auto is_player = (dynamic_cast<PlayerInterface*>(obj->getParent()) != nullptr);
    return is_player;
 }
 
@@ -42,7 +42,7 @@ bool isPlayer(const b2Fixture* obj)
       return false;
    }
 
-   const auto is_player = (obj->GetBody() == Player::getCurrent()->getBody());
+   const auto is_player = (obj->GetBody() == PlayerRegistry::getFirst()->getBody());
    return is_player;
 }
 
@@ -74,7 +74,7 @@ void GameContactListener::processProjectileContactBegin(FixtureNode* fixture_nod
 
    if (isPlayer(fixture_node_b))
    {
-      Player::getCurrent()->damage(damage);
+      PlayerRegistry::getFirst()->damage(damage);
    }
    else if (fixture_node_b && fixture_node_b->getType() == ObjectTypeEnemy)
    {
@@ -106,14 +106,14 @@ void GameContactListener::processDeathBlockContactBegin(b2Fixture* fixture, void
 
    if (fixture_node && fixture_node->getType() == ObjectType::ObjectTypePlayerHeadSensor)
    {
-      if (Player::getCurrent()->isOnGround())
+      if (PlayerRegistry::getFirst()->isOnGround())
       {
          _smashed = true;
       }
    }
 
    auto* platform_body = fixture->GetBody();
-   Player::getCurrent()->getPlatform().setPlatformBody(platform_body);
+   PlayerRegistry::getFirst()->getPlatform().setPlatformBody(platform_body);
 
    _count_death_block_contacts++;
 }
@@ -129,14 +129,14 @@ void GameContactListener::processMovingPlatformContactBegin(b2Fixture* fixture, 
 
    if (fixture_node && fixture_node->getType() == ObjectType::ObjectTypePlayerHeadSensor)
    {
-      if (Player::getCurrent()->isOnGround())
+      if (PlayerRegistry::getFirst()->isOnGround())
       {
          _smashed = true;
       }
    }
 
    auto* platform_body = fixture->GetBody();
-   Player::getCurrent()->getPlatform().setPlatformBody(platform_body);
+   PlayerRegistry::getFirst()->getPlatform().setPlatformBody(platform_body);
 
    _count_moving_platform_contacts++;
 }
@@ -174,7 +174,7 @@ void GameContactListener::processPlayerFootSensorContactBegin(FixtureNode* fixtu
          {
             if (lua_node->getPropertyBool("smash", false))
             {
-               const auto down_velocity = Player::getCurrent()->getBody()->GetLinearVelocity().y;
+               const auto down_velocity = PlayerRegistry::getFirst()->getBody()->GetLinearVelocity().y;
                if (down_velocity > 1.0f)
                {
                   {
@@ -193,7 +193,7 @@ void GameContactListener::processPlayerFootSensorContactBegin(FixtureNode* fixtu
    // store ground body in player
    if (fixture->GetType() == b2Shape::e_chain)
    {
-      Player::getCurrent()->setGroundBody(fixture->GetBody());
+      PlayerRegistry::getFirst()->setGroundBody(fixture->GetBody());
    }
 
    _count_foot_contacts++;
@@ -296,7 +296,7 @@ void GameContactListener::processEnemyContactBegin(FixtureNode* fixture_node_a, 
    else
    {
       // If no LuaNode, apply damage directly
-      Player::getCurrent()->damage(damage);
+      PlayerRegistry::getFirst()->damage(damage);
    }
 }
 
@@ -569,7 +569,7 @@ void GameContactListener::processDeathBlockContactEnd(FixtureNode* fixture_node)
    }
 
    _count_death_block_contacts--;
-   Player::getCurrent()->getPlatform().setPlatformBody(nullptr);
+   PlayerRegistry::getFirst()->getPlatform().setPlatformBody(nullptr);
 }
 
 void GameContactListener::processMovingPlatformContactEnd(FixtureNode* fixture_node)
@@ -580,7 +580,7 @@ void GameContactListener::processMovingPlatformContactEnd(FixtureNode* fixture_n
    }
 
    _count_moving_platform_contacts--;
-   Player::getCurrent()->getPlatform().setPlatformBody(nullptr);
+   PlayerRegistry::getFirst()->getPlatform().setPlatformBody(nullptr);
 }
 
 void GameContactListener::processBubbleCubeContactEnd(FixtureNode* fixture_node_bubble, FixtureNode* fixture_node_other)
@@ -786,7 +786,7 @@ void GameContactListener::processPostSolveImpulse(float impulse)
       return;
    }
 
-   Player::getCurrent()->impulse(impulse);
+   PlayerRegistry::getFirst()->impulse(impulse);
 }
 
 void GameContactListener::processPostSolveProjectile(FixtureNode* node, float impulse)
@@ -903,7 +903,7 @@ void GameContactListener::DamageContactEvent::execute()
 {
    if (_enemy)
    {
-      Player::getCurrent()->damage(_damage);
+      PlayerRegistry::getFirst()->damage(_damage);
    }
 }
 
@@ -916,7 +916,7 @@ void GameContactListener::SmashEnemyContactEvent::execute()
 
    _enemy->luaSmashed();
 
-   auto* body = Player::getCurrent()->getBody();
+   auto* body = PlayerRegistry::getFirst()->getBody();
 
    // it's pretty important to reset the body's y velocity
    const auto& velocity = body->GetLinearVelocity();
@@ -967,8 +967,7 @@ void GameContactListener::processEvents()
             {
                const auto* damage_event = dynamic_cast<const DamageContactEvent*>(event.get());
                return std::ranges::any_of(
-                  smashed_enemies,
-                  [enemy = damage_event->_enemy](LuaNode* smashed_enemy) { return enemy == smashed_enemy; }
+                  smashed_enemies, [enemy = damage_event->_enemy](LuaNode* smashed_enemy) { return enemy == smashed_enemy; }
                );
             }
             return false;
@@ -977,9 +976,7 @@ void GameContactListener::processEvents()
       _events.end()
    );
 
-   std::ranges::for_each(_events, [](const std::shared_ptr<ContactEvent>& event) {
-      event->execute();
-   });
+   std::ranges::for_each(_events, [](const std::shared_ptr<ContactEvent>& event) { event->execute(); });
 
    _events.clear();
 }

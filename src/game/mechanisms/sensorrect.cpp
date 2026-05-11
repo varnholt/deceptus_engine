@@ -6,7 +6,7 @@
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/gamemechanismobserver.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -50,7 +50,7 @@ std::string_view SensorRect::objectName() const
 
 void SensorRect::update(const sf::Time& /*dt*/)
 {
-   const auto player_intersects = Player::getCurrent()->getPixelRectFloat().findIntersection(_rect).has_value();
+   const auto player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
 
    if (player_intersects)
    {

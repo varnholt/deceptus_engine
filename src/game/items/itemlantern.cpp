@@ -8,6 +8,7 @@
 #include "game/io/texturepool.h"
 #include "game/level/level.h"
 #include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 ItemLantern::ItemLantern()
     : _player_texture(TexturePool::getInstance().get("data/sprites/player.png")),
@@ -32,7 +33,7 @@ void ItemLantern::draw(sf::RenderTarget& target)
    target.draw(_light_circle);
 #endif
 
-   auto* player = Player::getCurrent();
+   auto player = PlayerRegistry::getFirst();
    if (!player || player->isDead())
    {
       return;
@@ -51,7 +52,7 @@ void ItemLantern::update(const sf::Time& delta_time)
    _elapsed += delta_time;
 
    // update light position to follow player with eye position offset
-   auto* player = Player::getCurrent();
+   auto player = PlayerRegistry::getFirst();
    if (!player)
    {
       return;
@@ -88,7 +89,7 @@ void ItemLantern::update(const sf::Time& delta_time)
    auto& active_light = pointing_right ? _player_light_right : _player_light_left;
    auto& inactive_light = pointing_right ? _player_light_left : _player_light_right;
 
-   active_light->_enabled = !Player::getCurrent()->isDead();
+   active_light->_enabled = !PlayerRegistry::getFirst()->isDead();
    inactive_light->_enabled = false;
 
    // detect rising edges for hard landing (jitter + dust burst) and any landing (angle tilt)
@@ -162,7 +163,7 @@ void ItemLantern::update(const sf::Time& delta_time)
 
 void ItemLantern::onEquipped()
 {
-   auto* player = Player::getCurrent();
+   auto player = std::static_pointer_cast<Player>(PlayerRegistry::getFirst());
    if (!player)
    {
       return;
@@ -197,11 +198,11 @@ void ItemLantern::onEquipped()
       _offset_right_y_m = it->get<float>() * MPP;
    }
 
-   _player_light_left = LightSystem::createLightInstance(player, config["left"]);
+   _player_light_left = LightSystem::createLightInstance(player.get(), config["left"]);
    _player_light_left->_enabled = false;
    level->getLightSystem()->_lights.push_back(_player_light_left);
 
-   _player_light_right = LightSystem::createLightInstance(player, config["right"]);
+   _player_light_right = LightSystem::createLightInstance(player.get(), config["right"]);
    _player_light_right->_enabled = false;
    level->getLightSystem()->_lights.push_back(_player_light_right);
 

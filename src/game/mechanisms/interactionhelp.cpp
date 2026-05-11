@@ -10,7 +10,7 @@
 #include "game/io/valuereader.h"
 #include "game/mechanisms/controllerkeymap.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -108,7 +108,7 @@ void InteractionHelp::update(const sf::Time& dt)
       return;
    }
 
-   const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
    const auto intersects = player_rect.findIntersection(_rect_px).has_value();
 
    if (intersects && !_player_intersected_in_last_frame && _animation_hide->_paused)

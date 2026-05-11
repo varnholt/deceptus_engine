@@ -10,7 +10,7 @@
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 // #define DEBUG_INTERSECTION
 
@@ -274,11 +274,11 @@ void RotatingBlade::update(const sf::Time& dt)
    // kill player if he moves into the blade's radius
    sf::Vector2i blade_position{_sprite->getPosition()};
    const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
-   if (SfmlMath::intersectCircleRect(blade_position, blade_radius, Player::getCurrent()->getPixelRectInt()))
+   if (SfmlMath::intersectCircleRect(blade_position, blade_radius, PlayerRegistry::getFirst()->getPixelRectInt()))
    {
       if (_velocity > 0.3f)
       {
-         Player::getCurrent()->damage(100);
+         PlayerRegistry::getFirst()->damage(100);
       }
    }
 }
@@ -292,7 +292,7 @@ void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
 
    b2Color color{1.0f, 1.0f, 1.0f};
-   if (SfmlMath::intersectCircleRect(sprite_center, blade_radius, Player::getCurrent()->getPlayerPixelRect()))
+   if (SfmlMath::intersectCircleRect(sprite_center, blade_radius, PlayerRegistry::getFirst()->getPlayerPixelRect()))
    {
       color = b2Color{1.0f, 0.0f, 0.0f};
    }

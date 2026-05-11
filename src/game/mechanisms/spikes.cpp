@@ -2,7 +2,7 @@
 
 #include "constants.h"
 #include "game/io/texturepool.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxproperties.h"
@@ -172,7 +172,7 @@ void Spikes::updateTrap()
    else
    {
       // trap trigger is done via intersection
-      const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+      const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
       if (player_rect.findIntersection(_player_collision_rect_px).has_value())
       {
          // start extracting once player has intersected
@@ -294,10 +294,10 @@ void Spikes::update(const sf::Time& dt)
    if (_deadly)
    {
       // check for intersection with player
-      const auto& player_rect = Player::getCurrent()->getPixelRectFloat();
+      const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
       if (player_rect.findIntersection(_player_collision_rect_px).has_value())
       {
-         Player::getCurrent()->damage(100);
+         PlayerRegistry::getFirst()->damage(100);
       }
    }
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "game/player/playerinterface.h"
+
 #include "game/animation/animationpool.h"
 #include "game/constants.h"
 #include "game/effects/waterbubbles.h"
@@ -39,7 +41,7 @@ struct WeaponSystem;
 class ItemSystem;
 
 /// \brief main player entity that coordinates rendering, physics, combat, input, and progression state.
-class Player : public GameNode
+class Player : public GameNode, public PlayerInterface
 {
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    using ToggleCallback = std::function<void()>;
@@ -57,11 +59,7 @@ public:
    Player(GameNode* parent = nullptr);
 
    /// \brief destroys the player instance.
-   virtual ~Player() = default;
-
-   /// \brief gets the globally tracked current player instance.
-   /// \return pointer to the active player singleton.
-   static Player* getCurrent();
+   ~Player() override;
 
    /// \brief wires callbacks and input handlers that require fully constructed subsystems.
    void initialize();
@@ -100,11 +98,11 @@ public:
 
    /// \brief reports whether the player currently faces right.
    /// \return true when orientation is right.
-   bool isPointingRight() const;
+   bool isPointingRight() const override;
 
    /// \brief reports whether the player currently faces left.
    /// \return true when orientation is left.
-   bool isPointingLeft() const;
+   bool isPointingLeft() const override;
 
    /// \brief sets the logical start pixel position used before spawning or resets.
    /// \param x x coordinate in pixels.
@@ -113,11 +111,11 @@ public:
 
    /// \brief gets current player position in pixels with floating-point precision.
    /// \return pixel-space player position.
-   const sf::Vector2f& getPixelPositionFloat() const;
+   const sf::Vector2f& getPixelPositionFloat() const override;
 
    /// \brief gets current player position in integer pixel coordinates.
    /// \return pixel-space player position rounded to integers.
-   const sf::Vector2i& getPixelPositionInt() const;
+   const sf::Vector2i& getPixelPositionInt() const override;
 
    /// \brief sets cached pixel position values.
    /// \param x x coordinate in pixels.
@@ -126,19 +124,19 @@ public:
 
    /// \brief gets current float hitbox rectangle in pixel space.
    /// \return player rectangle in pixels.
-   const sf::FloatRect& getPixelRectFloat() const;
+   const sf::FloatRect& getPixelRectFloat() const override;
 
    /// \brief gets current integer hitbox rectangle in pixel space.
    /// \return integer player rectangle in pixels.
-   const sf::IntRect& getPixelRectInt() const;
+   const sf::IntRect& getPixelRectInt() const override;
 
    /// \brief gets the player's box2d body.
    /// \return pointer to the dynamic body used for player physics.
-   b2Body* getBody() const;
+   b2Body* getBody() const override;
 
    /// \brief gets the dedicated foot sensor fixture.
    /// \return pointer to the fixture used for foot area checks.
-   b2Fixture* getFootSensorFixture() const;
+   b2Fixture* getFootSensorFixture() const override;
 
    /// \brief computes the current foot sensor aabb in integer pixel coordinates.
    /// \return integer pixel rectangle covering the foot sensor.
@@ -146,7 +144,7 @@ public:
 
    /// \brief computes the current foot sensor aabb in floating-point pixel coordinates.
    /// \return float pixel rectangle covering the foot sensor.
-   sf::FloatRect computeFootSensorPixelFloatRect() const;
+   sf::FloatRect computeFootSensorPixelFloatRect() const override;
 
    /// \brief assigns the box2d world used to create and update player fixtures.
    /// \param world box2d world instance.
@@ -170,7 +168,7 @@ public:
    /// \brief sets player pixel position and teleports the box2d body to match.
    /// \param x x coordinate in pixels.
    /// \param y y coordinate in pixels.
-   void setBodyViaPixelPosition(float x, float y);
+   void setBodyViaPixelPosition(float x, float y) override;
 
    /// \brief applies a friction value to all player fixtures and resets contact friction caches.
    /// \param f friction coefficient to apply.
@@ -190,34 +188,34 @@ public:
 
    /// \brief starts alpha fade-out animation for the player sprite.
    /// \param fade_out_speed_factor alpha decay speed multiplier per second.
-   void fadeOut(float fade_out_speed_factor = 5.0f);
+   void fadeOut(float fade_out_speed_factor = 5.0f) override;
 
    /// \brief stops fading and restores full player alpha.
-   void fadeOutReset();
+   void fadeOutReset() override;
 
    /// \brief sets the currently contacted ground body used for slope analysis.
    /// \param body ground body currently supporting the player.
-   void setGroundBody(b2Body* body);
+   void setGroundBody(b2Body* body) override;
 
    /// \brief reports whether the player has no foot contacts and is not swimming.
    /// \return true when airborne.
-   bool isInAir() const;
+   bool isInAir() const override;
 
    /// \brief reports whether the player is currently inside a water atmosphere tile.
    /// \return true when in water.
-   bool isInWater() const;
+   bool isInWater() const override;
 
    /// \brief reports whether the player currently has ground foot contacts.
    /// \return true when at least one foot contact exists.
-   bool isOnGround() const;
+   bool isOnGround() const override;
 
    /// \brief reports whether the player is currently in a hard-landing stun.
    /// \return true when the hard-landing stun is active.
-   bool isHardLanding() const;
+   bool isHardLanding() const override;
 
    /// \brief reports whether the player has entered dead state.
    /// \return true when dead.
-   bool isDead() const;
+   bool isDead() const override;
 
    /// \brief determines whether upward motion currently passes through one-way wall contacts.
    /// \return true when moving upward while touching one-way walls.
@@ -241,48 +239,48 @@ public:
 
    /// \brief stores the latest contact impulse value for hard-landing evaluation.
    /// \param intensity impulse intensity reported by contact resolution.
-   void impulse(float intensity);
+   void impulse(float intensity) override;
 
    /// \brief applies damage and optional knockback impulse, with cooldown and invulnerability guards.
    /// \param damage health points to subtract.
    /// \param force knockback vector in pixel units converted to physics impulse.
-   void damage(int32_t damage, const sf::Vector2f& force = sf::Vector2f{0.0f, 0.0f});
+   void damage(int32_t damage, const sf::Vector2f& force = sf::Vector2f{0.0f, 0.0f}) override;
 
    /// \brief kills the player by forcing lethal damage and optionally overriding death reason.
    /// \param death_reason optional explicit death reason to persist for animation and logic.
-   void kill(std::optional<DeathReason> death_reason = std::nullopt);
+   void kill(std::optional<DeathReason> death_reason = std::nullopt) override;
 
    /// \brief gets the shared controls object used by the player.
    /// \return shared pointer reference to player controls.
-   const std::shared_ptr<PlayerControls>& getControls() const;
+   const std::shared_ptr<PlayerControls>& getControls() const override;
 
    /// \brief gets jump subsystem state and logic wrapper.
    /// \return reference to player jump subsystem.
-   const PlayerJump& getJump() const;
+   const PlayerJump& getJump() const override;
 
    /// \brief gets bend and crouch state.
    /// \return reference to player bend subsystem.
-   const PlayerBend& getBend() const;
+   const PlayerBend& getBend() const override;
 
    /// \brief gets conveyor-belt movement helper.
    /// \return reference to player belt subsystem.
-   PlayerBelt& getBelt();
+   PlayerBelt& getBelt() override;
 
    /// \brief gets moving-platform helper state.
    /// \return reference to player platform subsystem.
-   PlayerPlatform& getPlatform();
+   PlayerPlatform& getPlatform() override;
 
    /// \brief gets eye positions reader for current player.
    /// \return reference to eye positions instance.
-   const PlayerEyePositions& getEyePositions() const;
+   const PlayerEyePositions& getEyePositions() const override;
 
    /// \brief gets player animation controller.
    /// \return shared pointer to player animation instance.
-   const std::shared_ptr<PlayerAnimation>& getPlayerAnimation() const;
+   const std::shared_ptr<PlayerAnimation>& getPlayerAnimation() const override;
 
    /// \brief gets current chunk index for streaming and logic queries.
    /// \return reference to current chunk coordinates.
-   const Chunk& getChunk() const;
+   const Chunk& getChunk() const override;
 
    /// \brief sets a generic toggle callback used by external systems.
    /// \param callback callback invoked by toggle-related logic.
@@ -507,6 +505,4 @@ private:
 
    Chunk _chunk{0, 0};
    AnimationPool _animation_pool{"data/sprites/animations.json"};
-
-   static Player* __current;
 };

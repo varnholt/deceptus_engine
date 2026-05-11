@@ -7,6 +7,7 @@
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
+#include "game/player/playerregistry.h"
 #include "game/player/weaponsystem.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
@@ -452,7 +453,7 @@ Console::Console()
          if (args.size() == 2)
          {
             const auto damage = std::atoi(args.at(1).c_str());
-            Player::getCurrent()->damage(damage);
+            PlayerRegistry::getFirst()->damage(damage);
             std::ostringstream os;
             os << "damage player " << damage << std::endl;
             _log.push_back(os.str());
@@ -470,7 +471,7 @@ Console::Console()
          if (args.size() == 2)
          {
             const auto scale = std::atof(args.at(1).c_str());
-            Player::getCurrent()->getBody()->SetGravityScale(scale);
+            PlayerRegistry::getFirst()->getBody()->SetGravityScale(scale);
             std::ostringstream os;
             os << "player gravity " << scale << std::endl;
             _log.push_back(os.str());
@@ -493,7 +494,12 @@ Console::Console()
       "cpanlimitoff: disable cpan maximum radius"
    );
 
-   registerCallback("ra", [](const auto&) { Player::getCurrent()->reloadAnimationPool(); }, "leveldesign", "ra: reload animations");
+   registerCallback(
+      "ra",
+      [](const auto&) { std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->reloadAnimationPool(); },
+      "leveldesign",
+      "ra: reload animations"
+   );
 }
 
 void Console::setActive(bool active)
@@ -522,7 +528,7 @@ void Console::chop()
 void Console::giveWeaponBow()
 {
    auto bow = WeaponFactory::create(WeaponType::Bow);
-   std::dynamic_pointer_cast<Bow>(bow)->setLauncherBody(Player::getCurrent()->getBody());
+   std::dynamic_pointer_cast<Bow>(bow)->setLauncherBody(PlayerRegistry::getFirst()->getBody());
    giveWeaponToPlayer(bow);
 }
 
@@ -541,7 +547,7 @@ void Console::teleportToStartPosition()
    auto* level = Level::getCurrentLevel();
    level->loadStartPosition();
    const auto pos_px = level->getStartPosition();
-   Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos_px.x), static_cast<float>(pos_px.y));
+   PlayerRegistry::getFirst()->setBodyViaPixelPosition(static_cast<float>(pos_px.x), static_cast<float>(pos_px.y));
 }
 
 void Console::teleportToCheckpoint(int32_t checkpoint_index)
@@ -554,7 +560,7 @@ void Console::teleportToCheckpoint(int32_t checkpoint_index)
       const auto pos = checkpoint->spawnPoint();
       os << "jumped to checkpoint " << checkpoint_index << std::endl;
 
-      Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));
+      PlayerRegistry::getFirst()->setBodyViaPixelPosition(static_cast<float>(pos.x), static_cast<float>(pos.y));
    }
    else
    {
@@ -570,7 +576,9 @@ void Console::teleportToTile(int32_t x_tl, int32_t y_tl)
    os << "teleport to " << x_tl << ", " << y_tl << std::endl;
    _log.push_back(os.str());
 
-   Player::getCurrent()->setBodyViaPixelPosition(static_cast<float>(x_tl * PIXELS_PER_TILE), static_cast<float>(y_tl * PIXELS_PER_TILE));
+   PlayerRegistry::getFirst()->setBodyViaPixelPosition(
+      static_cast<float>(x_tl * PIXELS_PER_TILE), static_cast<float>(y_tl * PIXELS_PER_TILE)
+   );
 }
 
 void Console::teleportToRoom(const std::string& room_name)
@@ -640,7 +648,7 @@ void Console::teleportToRoom(const std::string& room_name)
    }
 
    _log.push_back(os.str());
-   Player::getCurrent()->setBodyViaPixelPosition(target_position.x, target_position.y);
+   PlayerRegistry::getFirst()->setBodyViaPixelPosition(target_position.x, target_position.y);
 }
 
 const Console::Help& Console::help() const

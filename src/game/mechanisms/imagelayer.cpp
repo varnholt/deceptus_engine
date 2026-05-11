@@ -5,7 +5,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/texturepool.h"
-#include "player/player.h"
+#include "game/player/playerregistry.h"
 
 ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 {
@@ -46,7 +46,7 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
 void ImageLayer::update(const sf::Time& dt)
 {
-   const auto& player_chunk = Player::getCurrent()->getChunk();
+   const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
    _texture->update(player_chunk);
 
    if (_texture->getTexture())

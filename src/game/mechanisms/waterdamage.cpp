@@ -2,7 +2,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
-#include "game/player/player.h"
+#include "game/player/playerregistry.h"
 
 namespace
 {
@@ -49,7 +49,7 @@ void WaterDamage::update(const sf::Time& /*dt*/)
       return;
    }
 
-   if (!Player::getCurrent()->isInWater())
+   if (!PlayerRegistry::getFirst()->isInWater())
    {
       _last_hurt_timepoint.reset();
       return;
@@ -96,5 +96,5 @@ std::optional<sf::FloatRect> WaterDamage::getBoundingBoxPx()
 
 void WaterDamage::damage()
 {
-   Player::getCurrent()->damage(_hurt_amount);
+   PlayerRegistry::getFirst()->damage(_hurt_amount);
 }
