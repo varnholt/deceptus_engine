@@ -13,7 +13,7 @@
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/effects/screentransition.h"
 #include "game/level/fixturenode.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/mechanisms/bouncerwrapper.h"
 #include "game/physics/chainshapeanalyzer.h"
 #include "game/physics/gamecontactlistener.h"
@@ -161,7 +161,7 @@ void Player::initializeLevel()
 {
    createPlayerBody();
 
-   setBodyViaPixelPosition(Level::getCurrentLevel()->getStartPosition().x, Level::getCurrentLevel()->getStartPosition().y);
+   setBodyViaPixelPosition(LevelRegistry::getCurrent()->getStartPosition().x, LevelRegistry::getCurrent()->getStartPosition().y);
 }
 
 void Player::initializeController()
@@ -1075,7 +1075,7 @@ void Player::impulse(float intensity)
 void Player::startHardLanding()
 {
    _controls->lockOrientation(std::chrono::milliseconds(1000));
-   Level::getCurrentLevel()->getBoomEffect().boom(0.0f, 1.0f, BoomSettings{0.5, 0.5f});
+   LevelRegistry::getCurrent()->getBoomEffect().boom(0.0f, 1.0f, BoomSettings{0.5, 0.5f});
 
    _timepoint_hard_landing = StopWatch::getInstance().now();
    _hard_landing = true;
@@ -1122,7 +1122,7 @@ void Player::updateImpulse()
    // {
    //    if (impulse > 0.4f)
    //    {
-   //       Level::getCurrentLevel()->getBoomEffect().boom(0.2f, 0.0f);
+   //       LevelRegistry::getCurrent()->getBoomEffect().boom(0.2f, 0.0f);
    //    }
    // }
 
@@ -1597,7 +1597,7 @@ void Player::updateAtmosphere()
    const auto was_inside_water = isInWater();
 
    const auto& pos = _body->GetPosition();
-   auto tile = Level::getCurrentLevel()->getAtmosphere().getTileForPosition(pos);
+   auto tile = LevelRegistry::getCurrent()->getAtmosphere().getTileForPosition(pos);
 
    const auto inside_water = (tile >= AtmosphereTileWaterFull && tile <= AtmosphereTileWaterCornerTopLeft);
    setInWater(inside_water);
@@ -1713,9 +1713,9 @@ void Player::reset()
 
    _climb.removeClimbJoint();
 
-   if (Level::getCurrentLevel())
+   if (LevelRegistry::getCurrent())
    {
-      setBodyViaPixelPosition(Level::getCurrentLevel()->getStartPosition().x, Level::getCurrentLevel()->getStartPosition().y);
+      setBodyViaPixelPosition(LevelRegistry::getCurrent()->getStartPosition().x, LevelRegistry::getCurrent()->getStartPosition().y);
    }
 
    SaveState::getPlayerInfo()._extra_table._health.reset();

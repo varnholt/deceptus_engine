@@ -3,7 +3,7 @@
 #include "audio/audio.h"
 #include "game/io/texturepool.h"
 #include "game/level/atmosphere.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 
 #include <iostream>
 
@@ -151,7 +151,7 @@ void WaterBubbles::update(const sf::Time& dt, const WaterBubbleInput& input)
       bubble->_position += dt.asSeconds() * bubble->_velocity;
       bubble->_sprite->setPosition(bubble->_position);
 
-      const auto atmosphere = Level::getCurrentLevel()->getAtmosphere().getTileForPosition(bubble->_position);
+      const auto atmosphere = LevelRegistry::getCurrent()->getAtmosphere().getTileForPosition(bubble->_position);
       if (atmosphere != AtmosphereTileWaterFull)
       {
          bubble->_pop = true;

@@ -7,6 +7,7 @@
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
 #include "game/debug/debugdrawstates.h"
+#include "game/level/levelregistry.h"
 #include "game/physics/worldquery.h"
 #include "game/player/playerregistry.h"
 
@@ -110,7 +111,7 @@ void PlayerSword::cameraShake()
    const auto boom_factor_x = 0.05f;
    const auto boom_factor_y = 0.3f;
    const auto intensity = 0.2f;
-   Level::getCurrentLevel()->getBoomEffect().boom(
+   LevelRegistry::getCurrent()->getBoomEffect().boom(
       boom_factor_x, boom_factor_y, BoomSettings{intensity, 0.5f, BoomSettings::ShakeType::Random}
    );
 }
@@ -152,7 +153,7 @@ std::vector<std::shared_ptr<GameMechanism>> PlayerSword::impactMechanisms(std::u
    // this can be refactored to return mechanisms that are 'hittable'
    // luahit should then go to the base class and be renamed.
    // only from group "props"
-   const auto& registry = Level::getCurrentLevel()->getMechanismRegistry();
+   const auto& registry = LevelRegistry::getCurrent()->getMechanismRegistry();
    auto destructible_mechanisms = registry.searchMechanismsIf(
       [](const std::shared_ptr<GameMechanism>& mechanism, std::string_view /*group_key*/)
       {

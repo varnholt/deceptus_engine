@@ -8,7 +8,7 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/player/playerregistry.h"
 
 #include <algorithm>
@@ -297,7 +297,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
       // transform light coordinates from box2d to normalized screen coordinates
       sf::Vector2f light_screen_pos = mapCoordsToPixelNormalized(
          {light->_pos_m.x * PPM + light->_center_offset_px.x, light->_pos_m.y * PPM + light->_center_offset_px.y},
-         *Level::getCurrentLevel()->getLevelView().get()
+         *LevelRegistry::getCurrent()->getLevelView().get()
       );
 
       _light_shader.setUniform(
@@ -377,7 +377,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
    // pre-build shadow caster candidates once per frame — player, disabled bodies, and
    // enemies are excluded here so drawShadowQuads only needs to check per-light exclusions.
    std::vector<b2Body*> shadow_candidates;
-   const auto& world = Level::getCurrentLevel()->getWorld();
+   const auto& world = LevelRegistry::getCurrent()->getWorld();
    for (auto* body = world->GetBodyList(); body; body = body->GetNext())
    {
       if (body == player_body || !body->IsEnabled())

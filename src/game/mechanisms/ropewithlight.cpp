@@ -3,7 +3,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/io/valuereader.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 namespace
@@ -113,5 +113,5 @@ void RopeWithLight::setup(const GameDeserializeData& data)
    {
       _light->_excluded_bodies.insert(body);
    }
-   Level::getCurrentLevel()->getLightSystem()->_lights.push_back(_light);
+   LevelRegistry::getCurrent()->getLightSystem()->_lights.push_back(_light);
 }

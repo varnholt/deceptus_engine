@@ -8,7 +8,7 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/level/roomupdater.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
@@ -180,7 +180,7 @@ void Crusher::startBoomEffect()
    const auto x = 0.0f;
    const auto y = 1.0f;
    const auto intensity = 0.25f;
-   Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 0.4f, BoomSettings::ShakeType::Random});
+   LevelRegistry::getCurrent()->getBoomEffect().boom(x, y, BoomSettings{intensity, 0.4f, BoomSettings::ShakeType::Random});
 }
 
 void Crusher::stopBoomEffect()

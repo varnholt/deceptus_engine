@@ -8,7 +8,7 @@
 #include "game/audio/audio.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
@@ -157,7 +157,7 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    // whenever we reach a checkpoint, update the checkpoint index in the save state
    // and serialize the save state
    const auto cp_index = checkpoint->getIndex();
-   checkpoint->addCallback([]() { Level::getCurrentLevel()->saveState(); });
+   checkpoint->addCallback([]() { LevelRegistry::getCurrent()->saveState(); });
    checkpoint->addCallback([cp_index]() { SaveState::getCurrent()._checkpoint = cp_index; });
    checkpoint->addCallback([]() { SaveState::serializeToFile(); });
 

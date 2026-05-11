@@ -1,11 +1,11 @@
 #include "bouncerwrapper.h"
 
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/mechanisms/bouncer.h"
 
 std::shared_ptr<Bouncer> BouncerWrapper::getNearbyBouncer()
 {
-   auto* level = Level::getCurrentLevel();
+   auto level = LevelRegistry::getCurrent();
    auto bouncers = level->getMechanismRegistry().getBouncers();
 
    std::shared_ptr<Bouncer> nearby_bouncer;

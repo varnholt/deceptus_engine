@@ -136,8 +136,6 @@ bool checkUpdateMechanism(const auto& player_chunk, const auto& mechanism)
 
 }  // namespace
 
-Level* Level::__current_level = nullptr;
-
 std::string Level::getDescriptionFilename() const
 {
    return _description_filename;
@@ -185,8 +183,6 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
 
    GameContactListener::getInstance().reset();
    _world->SetContactListener(&GameContactListener::getInstance());
-
-   __current_level = this;
 
    _light_system = std::make_shared<LightSystem>();
 
@@ -1600,9 +1596,4 @@ void Level::parsePhysicsTiles(
 const sf::Vector2f& Level::getStartPosition() const
 {
    return _start_position;
-}
-
-Level* Level::getCurrentLevel()
-{
-   return __current_level;
 }

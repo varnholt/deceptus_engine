@@ -18,6 +18,7 @@
 #include "game/effects/screentransition.h"
 #include "game/event/eventdistributor.h"
 #include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/level/levels.h"
 #include "game/player/inventoryconfig.h"
 #include "game/player/player.h"
@@ -355,11 +356,13 @@ void Game::loadLevel(LoadingMode loading_mode)
       loader_context.setActive(true);
 
       _player->resetWorld();  // free the pointer that's shared with the player
+      LevelRegistry::clearCurrent();
       _level.reset();
 
       // load level
       const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
       _level = std::make_shared<Level>(_render_targets);
+      LevelRegistry::setCurrent(_level);
       _level->setDescriptionFilename(level_item._level_name);
       _level->setLoadingMode(loading_mode);
       _level->initialize();
@@ -1094,17 +1097,17 @@ void Game::processEvent(const sf::Event& event)
    {
       if (mouse_button_pressed_event->button == sf::Mouse::Button::Right)
       {
-         if (Level::getCurrentLevel())
+         if (LevelRegistry::getCurrent())
          {
             const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
-            const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *Level::getCurrentLevel()->getLevelView());
+            const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *LevelRegistry::getCurrent()->getLevelView());
             PlayerRegistry::getFirst()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
          }
       }
    }
    else if (auto* mouse_wheel_scrolled_event = event.getIf<sf::Event::MouseWheelScrolled>())
    {
-      Level::getCurrentLevel()->zoomBy(mouse_wheel_scrolled_event->delta);
+      LevelRegistry::getCurrent()->zoomBy(mouse_wheel_scrolled_event->delta);
    }
 #endif
 
@@ -1290,12 +1293,12 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::PageUp:
       {
-         Level::getCurrentLevel()->getLightSystem()->increaseAmbient(0.1f);
+         LevelRegistry::getCurrent()->getLightSystem()->increaseAmbient(0.1f);
          break;
       }
       case sf::Keyboard::Key::PageDown:
       {
-         Level::getCurrentLevel()->getLightSystem()->decreaseAmbient(0.1f);
+         LevelRegistry::getCurrent()->getLightSystem()->decreaseAmbient(0.1f);
          break;
       }
       case sf::Keyboard::Key::L:
@@ -1335,17 +1338,17 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::Num1:
       {
-         Level::getCurrentLevel()->zoomIn();
+         LevelRegistry::getCurrent()->zoomIn();
          break;
       }
       case sf::Keyboard::Key::Num2:
       {
-         Level::getCurrentLevel()->zoomOut();
+         LevelRegistry::getCurrent()->zoomOut();
          break;
       }
       case sf::Keyboard::Key::Num3:
       {
-         Level::getCurrentLevel()->zoomReset();
+         LevelRegistry::getCurrent()->zoomReset();
          break;
       }
 #endif

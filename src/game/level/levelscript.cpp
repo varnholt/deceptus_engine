@@ -7,7 +7,7 @@
 #include "game/camera/camerazoom.h"
 #include "game/effects/lightsystem.h"
 #include "game/io/eventserializer.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/level/luaconstants.h"
 #include "game/level/luainterface.h"
 #include "game/level/luanode.h"
@@ -588,7 +588,7 @@ void LevelScript::setZoomFactor(float zoom_factor)
 
 void LevelScript::setAmbient(sf::Color color)
 {
-   Level::getCurrentLevel()->getLightSystem()->setAmbient(color);
+   LevelRegistry::getCurrent()->getLightSystem()->setAmbient(color);
 }
 
 void LevelScript::addAchievement(const std::string& identifier)

@@ -1,11 +1,12 @@
 #include "extrawrapper.h"
 
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/mechanisms/extra.h"
+#include "game/mechanisms/portal.h"
 
 void ExtraWrapper::spawnExtra(const std::string& id, sf::Vector2f offset)
 {
-   const auto extras = Level::getCurrentLevel()->getMechanismRegistry().getExtras();
+   const auto extras = LevelRegistry::getCurrent()->getMechanismRegistry().getExtras();
 
    std::shared_ptr<Portal> nearby_portal;
 

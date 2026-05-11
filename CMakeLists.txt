@@ -270,6 +270,9 @@ set(GAME_FILES
     src/game/level/hitbox.h
     src/game/level/level.cpp
     src/game/level/level.h
+    src/game/level/levelinterface.h
+    src/game/level/levelregistry.cpp
+    src/game/level/levelregistry.h
     src/game/level/leveldescription.cpp
     src/game/level/leveldescription.h
     src/game/level/levelfiles.cpp

@@ -4,7 +4,7 @@
 #include "game/config/gameconfiguration.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/physics/worldquery.h"
 #include "game/player/playerregistry.h"
 
@@ -271,7 +271,7 @@ void RainOverlay::determineRainSurfaces()
 {
    _edges.clear();
 
-   auto level = Level::getCurrentLevel();
+   auto level = LevelRegistry::getCurrent();
 
    std::vector<b2Body*> bodies = retrieveBodiesOnScreen(level->getWorld(), _screen);
 

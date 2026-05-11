@@ -11,6 +11,7 @@
 #include "game/level/gamemechanismregistry.h"
 #include "game/level/gamenode.h"
 #include "game/level/leveldescription.h"
+#include "game/level/levelinterface.h"
 #include "game/level/levelscript.h"
 #include "game/level/room.h"
 #include "game/level/tmxenemy.h"
@@ -41,7 +42,7 @@ class TmxParser;
 struct ParseData;
 
 /// \brief manages a playable level including tmx loading, physics, mechanisms, camera, and rendering.
-class Level : public GameNode
+class Level : public GameNode, public LevelInterface
 {
 public:
    /// \brief disables default construction because render targets are required.
@@ -61,10 +62,10 @@ public:
    void reset();
 
    /// \brief computes the player spawn position in pixels from the description tile start position.
-   void loadStartPosition();
+   void loadStartPosition() override;
 
    /// \brief serializes mechanism state into the current save state entry for this level.
-   void saveState();
+   void saveState() override;
 
    /// \brief creates or resets main, parallax, and image-layer views from current game configuration.
    void createViews();
@@ -84,17 +85,17 @@ public:
    void updateCameraSystem(const sf::Time& dt);
 
    /// \brief decreases camera zoom factor slightly to zoom in.
-   void zoomIn();
+   void zoomIn() override;
 
    /// \brief increases camera zoom factor slightly to zoom out.
-   void zoomOut();
+   void zoomOut() override;
 
    /// \brief modifies camera zoom factor by a scaled delta and clamps it to a safe range.
    /// \param delta signed user zoom input.
-   void zoomBy(float delta);
+   void zoomBy(float delta) override;
 
    /// \brief resets camera zoom factor to 1.0.
-   void zoomReset();
+   void zoomReset() override;
 
    /// \brief spawns tmx-defined enemies and initializes their lua nodes and runtime properties.
    void spawnEnemies();
@@ -106,11 +107,11 @@ public:
 
    /// \brief returns the level's shared box2d world instance.
    /// \return shared pointer reference to the active box2d world.
-   const std::shared_ptr<b2World>& getWorld() const;
+   const std::shared_ptr<b2World>& getWorld() const override;
 
    /// \brief returns the current player start or checkpoint spawn position in pixels.
    /// \return spawn position in pixel coordinates.
-   const sf::Vector2f& getStartPosition() const;
+   const sf::Vector2f& getStartPosition() const override;
 
    /// \brief returns the configured level description file path.
    /// \return level description filename.
@@ -122,33 +123,29 @@ public:
 
    /// \brief returns atmosphere layer data used by atmosphere rendering and tile queries.
    /// \return immutable reference to the atmosphere state.
-   const Atmosphere& getAtmosphere() const;
+   const Atmosphere& getAtmosphere() const override;
 
    /// \brief tests whether a straight tile-to-tile line is unobstructed in the physics occupancy grid.
    /// \param a_tl start tile coordinate.
    /// \param b_tl end tile coordinate.
    /// \return true when the line does not cross a blocking physics cell and both points are in bounds.
-   bool isPhysicsPathClear(const sf::Vector2i& a_tl, const sf::Vector2i& b_tl) const;
+   bool isPhysicsPathClear(const sf::Vector2i& a_tl, const sf::Vector2i& b_tl) const override;
 
    /// \brief returns the screen shake and boom effect controller.
    /// \return mutable boom effect instance.
-   BoomEffect& getBoomEffect();
+   BoomEffect& getBoomEffect() override;
 
    /// \brief returns the raycast light system used by deferred lighting.
    /// \return shared pointer reference to the light system.
-   const std::shared_ptr<LightSystem>& getLightSystem() const;
+   const std::shared_ptr<LightSystem>& getLightSystem() const override;
 
    /// \brief returns the ambient player light instance.
    /// \return shared pointer to the player light, or nullptr if not created.
-   const std::shared_ptr<LightSystem::LightInstance>& getPlayerLight() const;
+   const std::shared_ptr<LightSystem::LightInstance>& getPlayerLight() const override;
 
    /// \brief returns the current gameplay camera view.
    /// \return shared pointer reference to the level view.
-   const std::shared_ptr<sf::View>& getLevelView() const;
-
-   /// \brief returns the globally tracked active level instance.
-   /// \return pointer to the current level instance.
-   static Level* getCurrentLevel();
+   const std::shared_ptr<sf::View>& getLevelView() const override;
 
    /// \brief synchronizes room updater and camera room lock to the player's current room immediately.
    void syncRoom();
@@ -163,11 +160,11 @@ public:
 
    /// \brief returns access to grouped level mechanisms.
    /// \return immutable reference to the mechanism registry.
-   const GameMechanismRegistry& getMechanismRegistry() const;
+   const GameMechanismRegistry& getMechanismRegistry() const override;
 
    /// \brief returns all rooms parsed from the level.
    /// \return immutable reference to room list.
-   const std::vector<std::shared_ptr<Room>>& getRooms() const;
+   const std::vector<std::shared_ptr<Room>>& getRooms() const override;
 
 protected:
    /// \brief loads or regenerates physics paths for a collision tile layer and adds chains to box2d.
@@ -352,6 +349,4 @@ protected:
    bool _file_watcher_thread_active{true};
    bool _dirty{false};
    LoadingMode _loading_mode{LoadingMode::Standard};
-
-   static Level* __current_level;
 };

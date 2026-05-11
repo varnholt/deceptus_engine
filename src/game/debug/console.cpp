@@ -3,7 +3,8 @@
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
 #include "game/debug/debugdrawstates.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
+#include "game/level/room.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
@@ -392,7 +393,7 @@ Console::Console()
       "playerlight enable",
       [this](const auto&)
       {
-         auto* level = Level::getCurrentLevel();
+         auto level = LevelRegistry::getCurrent();
          if (level && level->getPlayerLight())
          {
             level->getPlayerLight()->_enabled = true;
@@ -405,7 +406,7 @@ Console::Console()
       "playerlight disable",
       [this](const auto&)
       {
-         auto* level = Level::getCurrentLevel();
+         auto level = LevelRegistry::getCurrent();
          if (level && level->getPlayerLight())
          {
             level->getPlayerLight()->_enabled = false;
@@ -421,7 +422,7 @@ Console::Console()
          if (args.size() == 3)
          {
             const auto alpha = static_cast<uint8_t>(std::clamp(std::atoi(args.at(2).c_str()), 0, 255));
-            auto* level = Level::getCurrentLevel();
+            auto level = LevelRegistry::getCurrent();
             if (level && level->getPlayerLight())
             {
                level->getPlayerLight()->_color.a = alpha;
@@ -544,7 +545,7 @@ void Console::giveWeaponSword()
 
 void Console::teleportToStartPosition()
 {
-   auto* level = Level::getCurrentLevel();
+   auto level = LevelRegistry::getCurrent();
    level->loadStartPosition();
    const auto pos_px = level->getStartPosition();
    PlayerRegistry::getFirst()->setBodyViaPixelPosition(static_cast<float>(pos_px.x), static_cast<float>(pos_px.y));
@@ -554,7 +555,7 @@ void Console::teleportToCheckpoint(int32_t checkpoint_index)
 {
    std::ostringstream os;
 
-   auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, Level::getCurrentLevel()->getMechanismRegistry().getCheckpoints());
+   auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, LevelRegistry::getCurrent()->getMechanismRegistry().getCheckpoints());
    if (checkpoint)
    {
       const auto pos = checkpoint->spawnPoint();
@@ -584,7 +585,7 @@ void Console::teleportToTile(int32_t x_tl, int32_t y_tl)
 void Console::teleportToRoom(const std::string& room_name)
 {
    std::ostringstream os;
-   auto* level = Level::getCurrentLevel();
+   auto level = LevelRegistry::getCurrent();
    const auto& rooms = level->getRooms();
 
    std::shared_ptr<Room> found_room;

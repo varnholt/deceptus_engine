@@ -6,7 +6,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/globalclock.h"
 #include "game/io/texturepool.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 #include "game/player/playerregistry.h"
@@ -475,7 +475,7 @@ void BubbleCube::updatePopOnCollisionCondition()
       query_callback._body = _body;
 
       const auto aabb = _fixture->GetAABB(0);
-      Level::getCurrentLevel()->getWorld()->QueryAABB(&query_callback, aabb);
+      LevelRegistry::getCurrent()->getWorld()->QueryAABB(&query_callback, aabb);
       const auto bodies = query_callback._bodies;
       return bodies.size();
    };

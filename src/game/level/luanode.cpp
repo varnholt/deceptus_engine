@@ -20,7 +20,7 @@
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/level/luaconstants.h"
 #include "game/level/luainterface.h"
 #include "game/level/luanodecallbacks.h"
@@ -61,7 +61,7 @@ LuaNode::LuaNode(GameNode* parent, const std::string& filename) : GameNode(paren
 
    // create instances
    _body_def = new b2BodyDef();
-   _body = Level::getCurrentLevel()->getWorld()->CreateBody(_body_def);
+   _body = LevelRegistry::getCurrent()->getWorld()->CreateBody(_body_def);
 }
 
 LuaNode::~LuaNode()
@@ -390,7 +390,7 @@ void LuaNode::die()
    _dead = true;
 
    // resetting the body will get it removed from the luainterface class
-   Level::getCurrentLevel()->getWorld()->DestroyBody(_body);
+   LevelRegistry::getCurrent()->getWorld()->DestroyBody(_body);
    _body = nullptr;
 }
 
@@ -708,7 +708,7 @@ void LuaNode::applyForce(const b2Vec2& force)
 
 void LuaNode::boom(float x, float y, float intensity)
 {
-   Level::getCurrentLevel()->getBoomEffect().boom(x, y, BoomSettings{intensity, 1.0f});
+   LevelRegistry::getCurrent()->getBoomEffect().boom(x, y, BoomSettings{intensity, 1.0f});
 }
 
 void LuaNode::playDetonationAnimationHuge(float x, float y)
@@ -798,7 +798,7 @@ public:
 int32_t LuaNode::queryAABB(const b2AABB& aabb)
 {
    LuaQueryCallback query_callback;
-   Level::getCurrentLevel()->getWorld()->QueryAABB(&query_callback, aabb);
+   LevelRegistry::getCurrent()->getWorld()->QueryAABB(&query_callback, aabb);
 
    // Log::Info() << queryCallback.mBodies.size();
    return static_cast<int32_t>(query_callback._bodies.size());
@@ -824,7 +824,7 @@ public:
 int32_t LuaNode::queryRaycast(const b2Vec2& point1, const b2Vec2& point2)
 {
    LuaRaycastCallback query_callback;
-   Level::getCurrentLevel()->getWorld()->RayCast(&query_callback, point1, point2);
+   LevelRegistry::getCurrent()->getWorld()->RayCast(&query_callback, point1, point2);
 
    // Log::Info() << queryCallback.mBodies.size();
    return static_cast<int32_t>(query_callback._bodies.size());
@@ -960,7 +960,7 @@ void LuaNode::useWeapon(size_t index, b2Vec2 from, b2Vec2 to)
 {
    auto& gun = dynamic_cast<Gun&>(*_weapons[index]);
    gun.setParentAudioUpdateData(_audio_update_data);
-   gun.useInIntervals(Level::getCurrentLevel()->getWorld(), from, to);
+   gun.useInIntervals(LevelRegistry::getCurrent()->getWorld(), from, to);
 }
 
 void LuaNode::addPlayerSkill(int32_t skill_type)
@@ -1048,7 +1048,7 @@ void LuaNode::updateWeapons(const sf::Time& dt)
 {
    for (auto& w : _weapons)
    {
-      w->update({dt, Level::getCurrentLevel()->getWorld()});
+      w->update({dt, LevelRegistry::getCurrent()->getWorld()});
    }
 }
 
@@ -1206,7 +1206,7 @@ bool LuaNode::checkPlayerDead() const
 
 bool LuaNode::isPhysicsPathClear(int32_t x0, int32_t y0, int32_t x1, int32_t y1) const
 {
-   return !Level::getCurrentLevel()->isPhysicsPathClear({x0, y0}, {x1, y1});
+   return !LevelRegistry::getCurrent()->isPhysicsPathClear({x0, y0}, {x1, y1});
 }
 
 float LuaNode::getWorldGravity() const

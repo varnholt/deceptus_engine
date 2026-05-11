@@ -6,7 +6,7 @@
 
 #include "framework/easings/easings.h"
 #include "game/io/texturepool.h"
-#include "game/level/level.h"
+#include "game/level/levelregistry.h"
 #include "game/player/player.h"
 #include "game/player/playerregistry.h"
 
@@ -169,7 +169,7 @@ void ItemLantern::onEquipped()
       return;
    }
 
-   auto* level = Level::getCurrentLevel();
+   auto level = LevelRegistry::getCurrent();
    if (!level || !level->getLightSystem())
    {
       return;
@@ -278,7 +278,7 @@ void ItemLantern::onUnequipped()
 {
    _enabled = false;
 
-   auto* level = Level::getCurrentLevel();
+   auto level = LevelRegistry::getCurrent();
    if (level && level->getLightSystem())
    {
       auto& lights = level->getLightSystem()->_lights;
