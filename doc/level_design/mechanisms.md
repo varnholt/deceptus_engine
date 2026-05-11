@@ -771,6 +771,25 @@ The properties below apply for the object inside the `levers` object group.
 |serialized|bool|If set to `true`, the lever’s state is saved and restored when the level is reloaded (default is `false`).|
 |handle_available|bool|Whether the lever’s handle is initially available (default is `true`). When set to `false`, the player must bring a 'handle' item to attach before the lever can be used.|
 
+### Events
+
+When `handle_available` is set to `false`, the lever emits the following event once the player successfully inserts the handle:
+
+|Event|Group|Value|Description|
+|-|-|-|-|
+|`handle_inserted`|`levers`|`"true"`|Fired when the player uses a `handle` inventory item while standing at the lever. The handle is consumed. Use this in `mechanismEvent` to hide any "lever is missing" dialogues or interaction hints.|
+
+Example handler in your level's Lua script:
+
+```lua
+function mechanismEvent(object_id, group_id, event_name, value)
+   if (object_id == "my_lever" and event_name == "handle_inserted") then
+      setMechanismEnabled("my_lever_dialogue", false, "dialogues")
+      setMechanismEnabled("my_lever_help", false, "interaction_help")
+   end
+end
+```
+
 ---
 
 &nbsp;

@@ -10,6 +10,7 @@
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
 
@@ -94,7 +95,10 @@ void Lever::setup(const GameDeserializeData& data)
          }
       }
 
-      // todo: document handle_available
+      // when handle_available is set to false in tmx, the lever starts without its handle and cannot be
+      // toggled until the player uses a "handle" item from their inventory while standing at the lever.
+      // upon insertion, a "handle_inserted" mechanism event is fired so the level script can react
+      // (e.g. hiding "lever is missing" dialogues). the handle item is consumed on successful insertion.
       const auto handle_available_it = data._tmx_object->_properties->_map.find("handle_available");
       if (handle_available_it != data._tmx_object->_properties->_map.end())
       {
@@ -109,6 +113,7 @@ void Lever::setup(const GameDeserializeData& data)
                {
                   setHandleAvailable(true);
                   Audio::getInstance().playSample(Audio::PlayInfo{"mechanism_switch_lever_insert.wav"});
+                  GameMechanismObserver::onEvent(getObjectId(), "levers", "handle_inserted", std::string{"true"});
                   return true;
                }
                return false;

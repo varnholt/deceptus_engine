@@ -207,6 +207,12 @@ function mechanismEvent(object_id, group_id, event_name, value)
       _monk_hide = true
    end
 
+   -- handle inserted into lever_cell, hide the "lever is missing" dialogue and examine hint
+   if (object_id == "lever_cell" and event_name == "handle_inserted") then
+      setMechanismEnabled("lever_cell_dialogue", false, "dialogues")
+      setMechanismEnabled("lever_cell_help", false, "interaction_help")
+   end
+
    -- treasure chest is locked
    if (object_id == "locked_box" and event_name == "state" and value == "locked") then
       showDialogue("locked_message")
