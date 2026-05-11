@@ -4,6 +4,7 @@
 #include "framework/tools/scopeexit.h"
 #include "framework/tools/stopwatch.h"
 #include "game/audio/audio.h"
+#include "game/mechanisms/bouncerwrapper.h"
 #include "game/physics/gamecontactlistener.h"
 #include "game/physics/physicsconfiguration.h"
 #include "game/state/displaymode.h"
@@ -160,6 +161,11 @@ void PlayerJump::jumpForce()
 void PlayerJump::doubleJump()
 {
    if (_walljump_frame_count > 0)
+   {
+      return;
+   }
+
+   if (BouncerWrapper::getNearbyBouncer() != nullptr)
    {
       return;
    }
