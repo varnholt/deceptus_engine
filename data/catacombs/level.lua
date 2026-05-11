@@ -129,6 +129,9 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function openDrawer()
+   if (inventoryHas("key")) then
+      return
+   end
    log("open drawer")
    setMechanismVisible("drawer_open", true, "imagelayers")
    setMechanismEnabled("drawer_rect", false, "button_rects")
@@ -191,8 +194,6 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function mechanismEvent(object_id, group_id, event_name, value)
-
-   log(string.format("object_id: %s, group_id: %s, event_name: %s, value: %s", object_id, group_id, event_name, tostring(value)))
 
    -- update door dialogue when open
    if (object_id == "iron_door" and event_name == "state" and value == "opening") then
@@ -283,7 +284,7 @@ function playerReceivedExtra(extra)
    end
    
    if (extra == "key") then
-      -- disable "key in drawer" dialogue
+      setMechanismEnabled("drawer_dialogue_key", false, "dialogues")
    end
    
    if extra:match("^heart_") then

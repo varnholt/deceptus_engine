@@ -287,6 +287,20 @@ std::optional<sf::FloatRect> Extra::getBoundingBoxPx()
    return _rect;
 }
 
+void Extra::serializeState(nlohmann::json& json_object)
+{
+   if (_name.empty())
+   {
+      return;
+   }
+   json_object[_name] = {{"active", _active}};
+}
+
+void Extra::deserializeState(const nlohmann::json& json_object)
+{
+   _active = json_object.at("active").get<bool>();
+}
+
 void Extra::spawn(sf::Vector2f offset)
 {
    _spawned = true;

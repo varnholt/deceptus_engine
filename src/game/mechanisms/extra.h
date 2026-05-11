@@ -52,6 +52,14 @@ public:
    /// \param offset pixel offset applied to the pickup rect and all animations before becoming collectable.
    void spawn(sf::Vector2f offset = {});
 
+   /// \brief writes the active flag into the save-state json so pickup survives level reloads.
+   /// \param json json object that receives the entry keyed by this extra's name.
+   void serializeState(nlohmann::json& json) override;
+
+   /// \brief restores the active flag from a previously serialized save-state entry.
+   /// \param json json object containing the saved active field.
+   void deserializeState(const nlohmann::json& json) override;
+
    using ExtraCallback = std::function<void(const std::string&)>;
 
    bool _active{true};
