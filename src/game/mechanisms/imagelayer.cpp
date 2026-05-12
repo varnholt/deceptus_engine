@@ -11,6 +11,16 @@ ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 {
 }
 
+void ImageLayer::preload()
+{
+   _texture->preload();
+}
+
+bool ImageLayer::drainTextures()
+{
+   return _texture->drain();
+}
+
 std::string_view ImageLayer::objectName() const
 {
    return "ImageLayer";

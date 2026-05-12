@@ -33,7 +33,7 @@ void LazyTexture::update(const Chunk& player_chunk)
          // load texture from disk (jthread)
          loadTexture();
       }
-      else
+      else if (!_texture)
       {
          // shove texture into gpu (main thread)
          uploadTexture();
@@ -47,6 +47,24 @@ void LazyTexture::update(const Chunk& player_chunk)
          unloadTexture();
       }
    }
+}
+
+void LazyTexture::preload()
+{
+   if (!_texture && !_loading.test_and_set())
+   {
+      loadTexture();
+   }
+}
+
+bool LazyTexture::drain()
+{
+   if (_image_ready.load())
+   {
+      uploadTexture();
+   }
+
+   return _loading.test(std::memory_order_relaxed);
 }
 
 void LazyTexture::loadTexture()

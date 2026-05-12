@@ -360,6 +360,13 @@ void Level::loadTmx()
       }
    }
 
+   // kick off background disk loads for all image layer textures so they are in RAM
+   // by the time the drain loop runs at the end of this function
+   for (auto& image_layer : _mechanism_registry.getImageLayers())
+   {
+      image_layer->preload();
+   }
+
    // load tilemaps in parallel
    std::for_each(
       std::execution::par,
@@ -403,6 +410,29 @@ void Level::loadTmx()
    if (!_atmosphere._tile_map)
    {
       Log::Error() << "fatal: no physics layer (called 'physics') found!";
+   }
+
+   // upload all pending image layer textures to GPU before gameplay begins —
+   // background threads have been running disk I/O since the preload call above,
+   // so this loop typically only waits for GPU transfers, not disk reads
+   {
+      const auto image_layers = _mechanism_registry.getImageLayers();
+      bool any_pending = true;
+      while (any_pending)
+      {
+         any_pending = false;
+         for (auto& image_layer : image_layers)
+         {
+            if (image_layer->drainTextures())
+            {
+               any_pending = true;
+            }
+         }
+         if (any_pending)
+         {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+         }
+      }
    }
 
    Log::Info() << "loading tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s";

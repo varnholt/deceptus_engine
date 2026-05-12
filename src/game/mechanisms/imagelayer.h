@@ -44,6 +44,13 @@ public:
    /// \param view_height current view height in pixels.
    void resetView(float view_width, float view_height);
 
+   /// \brief starts background disk loading of the layer texture before gameplay begins.
+   void preload() override;
+
+   /// \brief forwards drain to the underlying lazy texture.
+   /// \return true while the texture is still loading or waiting to upload to GPU.
+   bool drainTextures();
+
    /// \brief returns bounds for mechanism queries.
    /// \return `std::nullopt` because image layers do not expose collision bounds.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

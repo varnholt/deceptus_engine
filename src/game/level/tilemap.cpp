@@ -300,7 +300,7 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
       {
          for (auto ix = bx - block_range_half_x; ix < bx + block_range_half_x; ix++)
          {
-            const auto x_it = _vertices_static_blocks[iy].find(ix);
+            const auto x_it = y_it->second.find(ix);
             if (x_it != _vertices_static_blocks[iy].end())
             {
                target.draw(x_it->second, states);

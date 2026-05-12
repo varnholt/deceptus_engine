@@ -26,6 +26,14 @@ public:
    /// \param player_chunk chunk currently occupied by the player.
    void update(const Chunk& player_chunk);
 
+   /// \brief starts background disk loading unconditionally, ignoring chunk proximity.
+   /// call during level load to avoid first-in-range hitches from disk I/O on the render thread.
+   void preload();
+
+   /// \brief uploads the texture to GPU if the background load has finished.
+   /// \return true while a background load is still in flight or waiting to upload.
+   bool drain();
+
    /// \brief returns the currently uploaded texture, if available.
    /// \return shared texture pointer reference used by render code.
    const std::shared_ptr<sf::Texture>& getTexture() const;
