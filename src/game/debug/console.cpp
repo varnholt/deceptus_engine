@@ -3,6 +3,7 @@
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
 #include "game/debug/debugdrawstates.h"
+#include "game/items/itemfactory.h"
 #include "game/level/levelregistry.h"
 #include "game/level/room.h"
 #include "game/mechanisms/checkpoint.h"
@@ -173,7 +174,13 @@ Console::Console()
       {
          if (args.size() == 3)
          {
-            SaveState::getPlayerInfo()._inventory.add(args.at(2));
+            const auto& item_name = args.at(2);
+            if (!ItemFactory::create(item_name))
+            {
+               _log.emplace_back("unknown item: " + item_name);
+               return;
+            }
+            SaveState::getPlayerInfo()._inventory.add(item_name);
             _log.emplace_back("added item to player");
          }
       }
