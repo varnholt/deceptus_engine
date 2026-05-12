@@ -371,6 +371,10 @@ void Game::loadLevel(LoadingMode loading_mode)
       _player->setWorld(_level->getWorld());
       _player->initializeLevel();
 
+      // re-equip items now that level and player are both live; items deserialized before the
+      // level was ready (e.g. lantern) had their onEquipped() silently no-op at that point
+      SaveState::getPlayerInfo()._items.reinitializeEquippedItems();
+
       // jump back to stored position, that's only for debugging purposes, not for checkpoints
       if (_restore_previous_position)
       {

@@ -236,6 +236,7 @@ void from_json(const nlohmann::json& j, Inventory& d)
    if (j.find("items") != j.end())
    {
       d._items = j.at("items").get<std::vector<std::string>>();
+      std::erase_if(d._items, [](const auto& item) { return item.empty(); });
    }
 
    if (j.find("slots") != j.end())

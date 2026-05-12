@@ -71,6 +71,18 @@ void ItemSystem::onInventoryItemRemoved(const std::string& item_name)
    _items.erase(it);
 }
 
+void ItemSystem::reinitializeEquippedItems()
+{
+   for (auto& slot : _slots)
+   {
+      if (slot)
+      {
+         slot->onUnequipped();
+         slot->onEquipped();
+      }
+   }
+}
+
 void ItemSystem::syncInventorySlots(const std::array<std::string, 2>& inventory_slots)
 {
    for (auto i = 0; i < inventory_slots.size(); ++i)

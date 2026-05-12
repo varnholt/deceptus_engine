@@ -1,9 +1,9 @@
 #pragma once
 
-#include <memory>
-#include <vector>
 #include <array>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "game/items/item.h"
 
@@ -35,8 +35,12 @@ public:
    /// \param slots two inventory slot item keys, where empty entries clear item slots.
    void syncInventorySlots(const std::array<std::string, 2>& slots);
 
-private:
+   /// \brief re-equips all currently slotted items against the active level and player.
+   /// call after a level finishes loading so items that require a live level context
+   /// (e.g. lantern lights) are properly initialized regardless of when the inventory was deserialized.
+   void reinitializeEquippedItems();
 
+private:
    std::array<std::shared_ptr<Item>, 2> _slots;
    std::vector<std::shared_ptr<Item>> _items;
 };
