@@ -34,7 +34,7 @@ void ItemLantern::draw(sf::RenderTarget& target)
 #endif
 
    auto player = PlayerRegistry::getFirst();
-   if (!player || player->isDead())
+   if (!player || player->isDead() || !_last_valid_eye_position.has_value())
    {
       return;
    }
@@ -53,34 +53,42 @@ void ItemLantern::update(const sf::Time& delta_time)
 
    // update light position to follow player with eye position offset
    auto player = PlayerRegistry::getFirst();
-   if (!player)
+   if (!player || player->isDead())
    {
+      _player_light_left->_enabled = false;
+      _player_light_right->_enabled = false;
+      _last_valid_eye_position.reset();
+      _was_eye_position_valid = false;
       return;
    }
 
    const auto& player_animation = player->getPlayerAnimation();
    const auto& current_cycle = player_animation->getCurrentCycle();
-   if (!current_cycle)
-   {
-      return;
-   }
 
 #ifdef DEBUG_DRAW
    _light_circle.setPosition(player->getPixelPositionFloat());
 #endif
 
-   // get eye position in pixels, or reuse last valid position
-   const auto& eye_positions = player->getEyePositions();
-   const auto eye_pos_opt = eye_positions.getEyePosition(current_cycle);
-
-   if (eye_pos_opt.has_value())
+   // only update the eye position while the animation is actually visible;
+   // when invisible (hidden delay before appear animation), keep _last_valid_eye_position
+   // as nullopt so the lights stay off via the has_value() check below
+   if (current_cycle && current_cycle->isVisible())
    {
-      _last_valid_eye_position = eye_pos_opt.value();
+      const auto& eye_positions = player->getEyePositions();
+      const auto eye_pos_opt = eye_positions.getEyePosition(current_cycle);
+      if (eye_pos_opt.has_value())
+      {
+         _last_valid_eye_position = eye_pos_opt.value();
+      }
    }
 
-   // convert to meters
-   const float eye_offset_x_m = _last_valid_eye_position.x * MPP;
-   const float eye_offset_y_m = _last_valid_eye_position.y * MPP;
+   // detect rising edge of valid eye position to trigger fade-in on spawn
+   const bool eye_position_valid_now = _last_valid_eye_position.has_value();
+   if (eye_position_valid_now && !_was_eye_position_valid)
+   {
+      _fade_in_elapsed = _fade_in_duration;
+   }
+   _was_eye_position_valid = eye_position_valid_now;
 
    // switch active light based on player direction
    const bool pointing_right = player->isPointingRight();
@@ -88,6 +96,17 @@ void ItemLantern::update(const sf::Time& delta_time)
 
    auto& active_light = pointing_right ? _player_light_right : _player_light_left;
    auto& inactive_light = pointing_right ? _player_light_left : _player_light_right;
+
+   if (!_last_valid_eye_position.has_value())
+   {
+      active_light->_enabled = false;
+      inactive_light->_enabled = false;
+      return;
+   }
+
+   // convert to meters
+   const float eye_offset_x_m = _last_valid_eye_position->x * MPP;
+   const float eye_offset_y_m = _last_valid_eye_position->y * MPP;
 
    active_light->_enabled = !PlayerRegistry::getFirst()->isDead();
    inactive_light->_enabled = false;
@@ -112,6 +131,11 @@ void ItemLantern::update(const sf::Time& delta_time)
    _jitter_elapsed = std::max(sf::Time::Zero, _jitter_elapsed - delta_time);
    _landing_tilt_elapsed = std::max(sf::Time::Zero, _landing_tilt_elapsed - delta_time);
    _dust_burst_elapsed = std::max(sf::Time::Zero, _dust_burst_elapsed - delta_time);
+   _fade_in_elapsed = std::max(sf::Time::Zero, _fade_in_elapsed - delta_time);
+   const float fade_alpha_factor =
+      (_fade_in_elapsed > sf::Time::Zero)
+         ? static_cast<float>(Easings::easeOutSine(1.0f - _fade_in_elapsed.asSeconds() / _fade_in_duration.asSeconds()))
+         : 1.0f;
 
    // base light position
    const float offset_y_m = pointing_right ? _offset_right_y_m : _offset_left_y_m;
@@ -151,14 +175,18 @@ void ItemLantern::update(const sf::Time& delta_time)
       tilt_angle = sf::degrees(tilt_degrees * tilt_direction);
    }
    active_light->_sprite->setRotation(tilt_angle);
+   active_light->_color.a = static_cast<uint8_t>(static_cast<float>(_target_alpha) * fade_alpha_factor);
 
    // reset rotation on the inactive light so it is clean when it next becomes active
    inactive_light->_sprite->setRotation(sf::degrees(0.0f));
 
    sf::Vector2f helmet_offset_px{pointing_right ? -50.0f : -45.0f, -54.0f};
-   const auto helmet_position_px = player->getPixelPositionFloat() + _last_valid_eye_position + helmet_offset_px;
+   const auto helmet_position_px = player->getPixelPositionFloat() + _last_valid_eye_position.value() + helmet_offset_px;
    _helmet_sprite_r->setPosition(helmet_position_px);
    _helmet_sprite_l->setPosition(helmet_position_px);
+   const uint8_t helmet_alpha = static_cast<uint8_t>(255.0f * fade_alpha_factor);
+   _helmet_sprite_r->setColor(sf::Color(255, 255, 255, helmet_alpha));
+   _helmet_sprite_l->setColor(sf::Color(255, 255, 255, helmet_alpha));
 }
 
 void ItemLantern::onEquipped()
@@ -205,6 +233,7 @@ void ItemLantern::onEquipped()
    _player_light_right = LightSystem::createLightInstance(player.get(), config["right"]);
    _player_light_right->_enabled = false;
    level->getLightSystem()->_lights.push_back(_player_light_right);
+   _target_alpha = _player_light_left->_color.a;
 
    const auto& dust_config = config["dust"];
    const bool dust_enabled = dust_config.value("enabled", false);
@@ -224,12 +253,19 @@ void ItemLantern::onEquipped()
    _landing_tilt_max_degrees = config["landing_tilt"].value("max_degrees", 6.0f);
    _dust_burst_duration = sf::seconds(config["dust_burst"].value("duration_s", 0.5f));
    _dust_burst_peak_multiplier = config["dust_burst"].value("peak_multiplier", 4.0f);
+   if (const auto fade_in_it = config.find("fade_in"); fade_in_it != config.end())
+   {
+      _fade_in_duration = sf::seconds(fade_in_it->value("duration_s", 0.5f));
+   }
 
    _was_hard_landing = false;
    _jitter_elapsed = sf::Time::Zero;
    _was_on_ground = false;
    _landing_tilt_elapsed = sf::Time::Zero;
    _dust_burst_elapsed = sf::Time::Zero;
+   _last_valid_eye_position.reset();
+   _was_eye_position_valid = false;
+   _fade_in_elapsed = sf::Time::Zero;
 
    if (dust_enabled)
    {

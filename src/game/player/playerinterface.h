@@ -23,7 +23,9 @@ class PlayerAnimation;
 class PlayerInterface : public GameNode
 {
 public:
-   PlayerInterface(GameNode* parent = nullptr) : GameNode(parent) {}
+   PlayerInterface(GameNode* parent = nullptr) : GameNode(parent)
+   {
+   }
    virtual ~PlayerInterface() = default;
 
    /// \brief gets current player position in pixels with floating-point precision.

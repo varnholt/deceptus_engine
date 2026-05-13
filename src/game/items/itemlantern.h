@@ -37,7 +37,8 @@ private:
    sf::Time _elapsed;
    std::shared_ptr<LightSystem::LightInstance> _player_light_left;
    std::shared_ptr<LightSystem::LightInstance> _player_light_right;
-   sf::Vector2f _last_valid_eye_position{0.0f, 0.0f};
+   std::optional<sf::Vector2f>
+      _last_valid_eye_position;  //!< set once a valid eye position is received since the last onEquipped; empty until then
    std::shared_ptr<sf::Texture> _player_texture;
    std::unique_ptr<sf::Sprite> _helmet_sprite_r;
    std::unique_ptr<sf::Sprite> _helmet_sprite_l;
@@ -63,4 +64,9 @@ private:
    sf::Time _dust_burst_elapsed;                      //!< remaining dust-burst animation time
    sf::Time _dust_burst_duration{sf::seconds(0.5f)};  //!< total duration of the dust burst on hard landing
    float _dust_burst_peak_multiplier{4.0f};           //!< peak dust intensity multiplier during the burst
+
+   bool _was_eye_position_valid{false};            //!< previous-frame eye-position validity for rising-edge detection
+   sf::Time _fade_in_elapsed;                      //!< remaining fade-in time after the player spawns visible
+   sf::Time _fade_in_duration{sf::seconds(0.5f)};  //!< total duration of the appear fade-in
+   uint8_t _target_alpha{80};                      //!< configured full-brightness alpha restored after fade-in completes
 };
