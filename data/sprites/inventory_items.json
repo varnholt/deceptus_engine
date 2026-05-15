@@ -65,6 +65,13 @@
         "height_px": 38,
         "title": "Lantern",
         "description": "A lantern ripped off of itch.io."
+    },
+    "playerfirefly": {
+        "x_px": 266,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38,
+        "title": "Firefly",
+        "description": "A friendly firefly that orbits you through the dark."
     }
-    
 }
