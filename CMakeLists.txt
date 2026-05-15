@@ -457,6 +457,8 @@ set(GAME_FILES
     src/game/player/itemsystem.h
     src/game/player/player.cpp
     src/game/player/player.h
+    src/game/player/playerfirefly.cpp
+    src/game/player/playerfirefly.h
     src/game/player/playerinterface.h
     src/game/player/playerregistry.cpp
     src/game/player/playerregistry.h
@@ -559,6 +561,8 @@ set(GAME_FILES
     src/game/items/itemfactory.h
     src/game/items/itemlantern.cpp
     src/game/items/itemlantern.h
+    src/game/items/itemplayerfirefly.cpp
+    src/game/items/itemplayerfirefly.h
     src/menus/menu.cpp
     src/menus/menu.h
     src/menus/menuaudio.cpp

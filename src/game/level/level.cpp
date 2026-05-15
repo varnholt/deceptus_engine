@@ -42,6 +42,7 @@
 #include "game/physics/physicsconfiguration.h"
 #include "game/physics/squaremarcher.h"
 #include "game/player/player.h"
+#include "game/player/playerfirefly.h"
 #include "game/player/playerregistry.h"
 #include "game/player/playerstencil.h"
 #include "game/state/displaymode.h"
@@ -526,6 +527,9 @@ void Level::initialize()
 
    loadSaveState();
    spawnEnemies();
+
+   auto player_firefly = std::make_shared<PlayerFirefly>(this);
+   _mechanism_registry.getMap()[std::string{layer_name_fireflies}]->push_back(player_firefly);
 
    assignMechanismsToRooms();
    _volume_updater->setMechanisms(_mechanism_registry.getList());
