@@ -36,6 +36,11 @@
 #include <map>
 #include <memory>
 
+#ifdef DEVELOPMENT_MODE
+#include <vector>
+#include "game/debug/mechanismsample.h"
+#endif
+
 class Bouncer;
 class IngameMenuMap;
 class TmxParser;
@@ -79,6 +84,16 @@ public:
 
    /// \brief refreshes mechanism audio volume inputs with the current player position.
    void updateMechanismVolumes();
+
+#ifdef DEVELOPMENT_MODE
+   /// \brief enables or disables per-mechanism cpu timing collection.
+   /// \param enabled true to record update and draw costs per mechanism type.
+   void setMechanismProfilingEnabled(bool enabled);
+
+   /// \brief returns a snapshot of per-mechanism cpu costs sorted by total cost descending.
+   /// \param top_n maximum number of entries to return.
+   std::vector<MechanismSample> getMechanismTimings(int32_t top_n) const;
+#endif
 
    /// \brief advances active room and camera behavior, including room locks, transitions, and zoom.
    /// \param dt elapsed frame time.
@@ -349,4 +364,8 @@ protected:
    bool _file_watcher_thread_active{true};
    bool _dirty{false};
    LoadingMode _loading_mode{LoadingMode::Standard};
+
+#ifdef DEVELOPMENT_MODE
+   bool _mechanism_profiling_enabled{false};
+#endif
 };

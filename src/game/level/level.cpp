@@ -53,6 +53,10 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
 
+#ifdef DEVELOPMENT_MODE
+#include "game/debug/mechanismsample.h"
+#endif
+
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
@@ -68,7 +72,7 @@
 
 // #define MECHANISM_TIMING_ENABLED 1
 
-#ifdef MECHANISM_TIMING_ENABLED
+#ifdef DEVELOPMENT_MODE
 namespace
 {
 struct MechanismTiming
@@ -76,7 +80,9 @@ struct MechanismTiming
    using HighResDuration = std::chrono::high_resolution_clock::duration;
 
    HighResDuration update_duration;
+   HighResDuration draw_duration;
    int32_t update_count{0};
+   int32_t draw_count{0};
 
    void addUpdateTime(HighResDuration duration)
    {
@@ -84,33 +90,25 @@ struct MechanismTiming
       update_count++;
    }
 
-   auto getAverageUpdateTime() const
+   void addDrawTime(HighResDuration duration)
    {
-      return (update_count > 0) ? (update_duration / update_count) : HighResDuration{0};
+      draw_duration += duration;
+      draw_count++;
+   }
+
+   float getAverageUpdateMs() const
+   {
+      return (update_count > 0) ? std::chrono::duration<float, std::milli>(update_duration).count() / static_cast<float>(update_count)
+                                : 0.0f;
+   }
+
+   float getAverageDrawMs() const
+   {
+      return (draw_count > 0) ? std::chrono::duration<float, std::milli>(draw_duration).count() / static_cast<float>(draw_count) : 0.0f;
    }
 };
 
 std::unordered_map<std::string, MechanismTiming> timing_data;
-
-void logUpdateTimes(const std::unordered_map<std::string, MechanismTiming>& timing_data, int32_t n)
-{
-   std::vector<std::pair<std::string, MechanismTiming::HighResDuration>> timings;
-   for (const auto& [name, timing] : timing_data)
-   {
-      timings.emplace_back(name, timing.getAverageUpdateTime());
-   }
-
-   std::ranges::sort(timings, [](const auto& a, const auto& b) { return a.second > b.second; });
-   const auto top_n = timings | std::views::take(n);
-
-   Log::Info() << "update times";
-
-   for (const auto& [name, avg_update_time] : top_n)
-   {
-      Log::Info() << "- mechanism: " << name << " avg: " << avg_update_time << " sum:" << timing_data.at(name).update_duration
-                  << " count:" << timing_data.at(name).update_count;
-   }
-}
 
 }  // namespace
 #endif
@@ -891,7 +889,21 @@ void Level::drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal,
       {
          if (mechanism->getZ() == z_index && predicate(mechanism))
          {
+#ifdef DEVELOPMENT_MODE
+            if (_mechanism_profiling_enabled)
+            {
+               const auto mechanism_name = std::string{mechanism->objectName()};
+               const auto time_start = std::chrono::high_resolution_clock::now();
+               mechanism->draw(color, normal);
+               timing_data[mechanism_name].addDrawTime(std::chrono::high_resolution_clock::now() - time_start);
+            }
+            else
+            {
+               mechanism->draw(color, normal);
+            }
+#else
             mechanism->draw(color, normal);
+#endif
          }
       }
    }
@@ -1379,22 +1391,33 @@ void Level::update(const sf::Time& dt)
 
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
+#ifdef DEVELOPMENT_MODE
+   if (_mechanism_profiling_enabled)
+   {
+      timing_data.clear();
+   }
+#endif
+
    for (auto* mechanism_vector : _mechanism_registry.getList())
    {
       for (const auto& mechanism : *mechanism_vector)
       {
          if (checkUpdateMechanism(player_chunk, mechanism))
          {
-#ifdef MECHANISM_TIMING_ENABLED
-            auto game_node = dynamic_cast<GameNode*>(mechanism.get());
-            const auto class_name = game_node ? game_node->getClassName() : "unknown";
-            const auto time_start = std::chrono::high_resolution_clock::now();
-#endif
+#ifdef DEVELOPMENT_MODE
+            if (_mechanism_profiling_enabled)
+            {
+               const auto mechanism_name = std::string{mechanism->objectName()};
+               const auto time_start = std::chrono::high_resolution_clock::now();
+               mechanism->update(dt);
+               timing_data[mechanism_name].addUpdateTime(std::chrono::high_resolution_clock::now() - time_start);
+            }
+            else
+            {
+               mechanism->update(dt);
+            }
+#else
             mechanism->update(dt);
-
-#ifdef MECHANISM_TIMING_ENABLED
-            const auto time_end = std::chrono::high_resolution_clock::now();
-            timing_data[class_name].addUpdateTime(time_end - time_start);
 #endif
          }
       }
@@ -1404,17 +1427,6 @@ void Level::update(const sf::Time& dt)
    {
       layer->update(dt);
    }
-
-#ifdef MECHANISM_TIMING_ENABLED
-   static auto timing_debug_counter = 0;
-   if (timing_debug_counter % 1000 == 0)
-   {
-      logUpdateTimes(timing_data, 5);
-      timing_data.clear();
-   }
-
-   timing_debug_counter++;
-#endif
 
    _level_script.update(dt);
 
@@ -1631,3 +1643,30 @@ const sf::Vector2f& Level::getStartPosition() const
 {
    return _start_position;
 }
+
+#ifdef DEVELOPMENT_MODE
+std::vector<MechanismSample> Level::getMechanismTimings(int32_t top_n) const
+{
+   std::vector<MechanismSample> samples;
+   samples.reserve(timing_data.size());
+   for (const auto& [name, timing] : timing_data)
+   {
+      samples.push_back({name, timing.getAverageUpdateMs(), timing.getAverageDrawMs()});
+   }
+   std::ranges::sort(
+      samples,
+      [](const auto& left_sample, const auto& right_sample)
+      { return (left_sample.update_ms + left_sample.draw_ms) > (right_sample.update_ms + right_sample.draw_ms); }
+   );
+   if (static_cast<int32_t>(samples.size()) > top_n)
+   {
+      samples.resize(top_n);
+   }
+   return samples;
+}
+
+void Level::setMechanismProfilingEnabled(bool enabled)
+{
+   _mechanism_profiling_enabled = enabled;
+}
+#endif

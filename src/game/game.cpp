@@ -624,7 +624,17 @@ void Game::draw()
 
    _window->draw(window_texture_sprite);
    _window->popGLStates();
+
+#ifdef DEVELOPMENT_MODE
+   sf::Clock window_display_clock;
+#endif
    _window->display();
+#ifdef DEVELOPMENT_MODE
+   if (_profiling_ui)
+   {
+      _profiling_ui->recordWindowDisplay(window_display_clock.getElapsedTime());
+   }
+#endif
 
    if (_recording)
    {
@@ -656,6 +666,13 @@ void Game::draw()
    {
       _log_ui->draw();
    }
+
+#ifdef DEVELOPMENT_MODE
+   if (_profiling_ui)
+   {
+      _profiling_ui->draw();
+   }
+#endif
 }
 
 void Game::updateGameController()
@@ -866,13 +883,47 @@ void Game::update()
    DisplayMode::getInstance().sync();
 }
 
+void Game::timedUpdate()
+{
+#ifdef DEVELOPMENT_MODE
+   sf::Clock update_clock;
+#endif
+   update();
+#ifdef DEVELOPMENT_MODE
+   _profiling_update_elapsed = update_clock.getElapsedTime();
+#endif
+}
+
+void Game::timedDraw()
+{
+#ifdef DEVELOPMENT_MODE
+   sf::Clock draw_clock;
+#endif
+   draw();
+#ifdef DEVELOPMENT_MODE
+   const auto draw_elapsed = draw_clock.getElapsedTime();
+   if (_profiling_ui)
+   {
+      _profiling_ui->recordFrame(_profiling_update_elapsed + draw_elapsed, _profiling_update_elapsed, draw_elapsed);
+   }
+   if (_level)
+   {
+      _level->setMechanismProfilingEnabled(_profiling_ui != nullptr);
+      if (_profiling_ui)
+      {
+         _profiling_ui->updateMechanismTimings(_level->getMechanismTimings(32));
+      }
+   }
+#endif
+}
+
 int32_t Game::loop()
 {
    while (_window->isOpen())
    {
       processEvents();
-      update();
-      draw();
+      timedUpdate();
+      timedDraw();
    }
 
    return 0;
@@ -1190,6 +1241,22 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
 
 #ifdef DEVELOPMENT_MODE
+      case sf::Keyboard::Key::F10:
+      {
+         if (!_profiling_ui)
+         {
+            _profiling_ui = std::make_unique<ProfilingUi>();
+         }
+         else
+         {
+            _profiling_ui->close();
+            _profiling_ui.reset();
+         }
+         break;
+      }
+#endif
+
+#ifdef DEVELOPMENT_MODE
       case sf::Keyboard::Key::G:
       {
          const auto scale = PlayerRegistry::getFirst()->getBody()->GetGravityScale();
@@ -1385,4 +1452,16 @@ void Game::processEvents()
    {
       _log_ui->processEvents();
    }
+
+#ifdef DEVELOPMENT_MODE
+   if (_profiling_ui)
+   {
+      _profiling_ui->processEvents();
+      if (!_profiling_ui->isOpen())
+      {
+         _profiling_ui->close();
+         _profiling_ui.reset();
+      }
+   }
+#endif
 }
