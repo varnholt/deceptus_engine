@@ -9,9 +9,11 @@
 namespace
 {
 constexpr auto frame_count = 4;
-constexpr auto orbit_radius_x_px = 96.0f;
+constexpr auto orbit_radius_x_px = 48.0f;
 constexpr auto orbit_radius_y_px = 48.0f;
-constexpr auto catch_up_speed = 5.0f;
+constexpr auto orbit_center_offset_y_px = -48.0f;
+constexpr auto movement_lag_factor = 0.05f;
+constexpr auto residual_catch_up_speed = 0.5f;
 constexpr auto z_switch_threshold = 0.6f;
 constexpr auto z_in_front = static_cast<int32_t>(ZDepth::Player) + 1;
 constexpr auto z_behind = static_cast<int32_t>(ZDepth::Player) - 1;
@@ -59,6 +61,7 @@ void PlayerFirefly::update(const sf::Time& dt)
    if (!_initialized)
    {
       _virtual_center_px = player_position_px;
+      _previous_player_position_px = player_position_px;
       _initialized = true;
    }
 
@@ -66,13 +69,16 @@ void PlayerFirefly::update(const sf::Time& dt)
    const auto time_s = _elapsed.asSeconds();
    const auto delta_s = dt.asSeconds();
 
-   _virtual_center_px += (player_position_px - _virtual_center_px) * catch_up_speed * delta_s;
+   const auto player_delta_px = player_position_px - _previous_player_position_px;
+   _previous_player_position_px = player_position_px;
+   _virtual_center_px += player_delta_px * movement_lag_factor;
+   _virtual_center_px += (player_position_px - _virtual_center_px) * residual_catch_up_speed * delta_s;
 
    const auto raw_x = std::cos(time_s * _speed * _dir);
    const auto raw_y = std::sin(2.0f * time_s * _speed * _dir) * 0.5f;
 
    _position_px.x = _virtual_center_px.x + raw_x * orbit_radius_x_px;
-   _position_px.y = _virtual_center_px.y + raw_y * orbit_radius_y_px;
+   _position_px.y = _virtual_center_px.y + orbit_center_offset_y_px + raw_y * orbit_radius_y_px;
 
    _sprite->setPosition(_position_px);
    _sprite->setOrigin({static_cast<float>(PIXELS_PER_TILE) * 0.5f, static_cast<float>(PIXELS_PER_TILE) * 0.5f});

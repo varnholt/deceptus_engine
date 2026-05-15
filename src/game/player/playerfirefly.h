@@ -39,14 +39,15 @@ private:
    /// \brief advances the texture-rect to the current animation frame.
    void updateTextureRect();
 
-   sf::Time _elapsed;                //!< accumulated time used for lemniscate phase and animation
-   sf::Vector2f _virtual_center_px;  //!< lagging follow position used as the orbit center
-   sf::Vector2f _position_px;        //!< current world-space position of the sprite
-   float _speed{0.8f};               //!< angular speed of the lemniscate traversal
-   float _dir{1.0f};                 //!< traversal direction (+1 or -1)
-   float _animation_speed{3.0f};     //!< animation frame rate in frames per second
-   int32_t _current_frame{0};        //!< last displayed animation frame index
-   bool _initialized{false};         //!< true after virtual center has been seeded from player position
+   sf::Time _elapsed;                          //!< accumulated time used for lemniscate phase and animation
+   sf::Vector2f _virtual_center_px;            //!< lagging follow position used as the orbit center
+   sf::Vector2f _previous_player_position_px;  //!< player position from the previous frame, used to compute movement delta
+   sf::Vector2f _position_px;                  //!< current world-space position of the sprite
+   float _speed{0.8f};                         //!< angular speed of the lemniscate traversal
+   float _dir{1.0f};                           //!< traversal direction (+1 or -1)
+   float _animation_speed{3.0f};               //!< animation frame rate in frames per second
+   int32_t _current_frame{0};                  //!< last displayed animation frame index
+   bool _initialized{false};                   //!< true after virtual center has been seeded from player position
 
    std::unique_ptr<sf::Sprite> _sprite;    //!< firefly sprite
    std::shared_ptr<sf::Texture> _texture;  //!< shared firefly texture
