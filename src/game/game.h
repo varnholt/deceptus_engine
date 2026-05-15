@@ -9,6 +9,9 @@
 #include "game/constants.h"
 #include "game/debug/console.h"
 #include "game/debug/logui.h"
+#ifdef DEVELOPMENT_MODE
+#include "game/debug/profilingui.h"
+#endif
 #include "game/ingamemenu/ingamemenu.h"
 #include "game/io/eventserializer.h"
 #include "game/layers/controlleroverlay.h"
@@ -19,10 +22,10 @@
 #include "game/sfx/gameaudio.h"
 #include "opengl/render3d/menubackgroundscene.h"
 
-#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <future>
+#include "box2d/box2d.h"
 
 class Level;
 class Player;
@@ -54,7 +57,6 @@ public:
    /// \brief requests a screenshot during the next frame render.
    void takeScreenshot();
 
-
 private:
    /// \brief shuts down runtime systems before exit.
    void shutdown();
@@ -71,6 +73,12 @@ private:
 
    /// \brief draws current level content.
    void drawLevel();
+
+   /// \brief calls update() and records elapsed time for the profiling ui.
+   void timedUpdate();
+
+   /// \brief calls draw() and submits frame timings to the profiling ui.
+   void timedDraw();
 
    /// \brief asynchronously loads current save-state level and syncs player/world links.
    /// \param loading_mode loading strategy used by Level initialization.
@@ -154,6 +162,10 @@ private:
    std::unique_ptr<CameraSystemConfigurationUi> _camera_ui;
    std::unique_ptr<PhysicsConfigurationUi> _physics_ui;
    std::unique_ptr<LogUi> _log_ui;
+#ifdef DEVELOPMENT_MODE
+   std::unique_ptr<ProfilingUi> _profiling_ui;
+   sf::Time _profiling_update_elapsed;
+#endif
 
    // temporarily here for debugging only
    std::unique_ptr<ForestScene> _test_scene;

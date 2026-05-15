@@ -179,6 +179,9 @@ set(GAME_FILES
     src/game/debug/debugdrawstates.h
     src/game/debug/logui.cpp
     src/game/debug/logui.h
+    src/game/debug/mechanismsample.h
+    src/game/debug/profilingui.cpp
+    src/game/debug/profilingui.h
     src/game/effects/boomeffect.cpp
     src/game/effects/boomeffect.h
     src/game/effects/boomeffectenvelope.cpp
@@ -774,6 +777,7 @@ add_executable(
     data/shaders/waterfall.frag
     data/shaders/waterfall.vert
     data/shaders/wave.vert
+    data/config/game.json
     doc/level_design/advanced_topics.md
     doc/level_design/designing_a_level.md
     doc/level_design/enemies.md
