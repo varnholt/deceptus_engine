@@ -2,6 +2,10 @@
 
 #include "gl_current.h"
 
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
 /// \brief utility helpers for OpenGL debugging and runtime diagnostics.
 namespace GLUtils
 {

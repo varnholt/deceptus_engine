@@ -1,6 +1,7 @@
 #include "animation.h"
 
 #include <iostream>
+#include <algorithm>
 #include <numeric>
 
 Animation::Animation(const Animation& anim)

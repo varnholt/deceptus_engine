@@ -874,10 +874,20 @@ endif()
 # platform-specific configurations
 # ----------------------------------------------------------------------------------------------------
 
-target_link_libraries(deceptus PRIVATE sfml-system sfml-audio sfml-graphics sfml-window SDL3::SDL3
-    lua libglew_static opengl32 glu32)
+target_link_libraries(
+    deceptus
+    PRIVATE
+        sfml-system
+        sfml-audio
+        sfml-graphics
+        sfml-window
+        SDL3::SDL3
+        lua
+        libglew_static
+)
 
 if(WIN32)
+    target_link_libraries(deceptus PRIVATE opengl32 glu32)
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set_target_properties(deceptus PROPERTIES WIN32_EXECUTABLE FALSE)

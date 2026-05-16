@@ -1,4 +1,4 @@
-#include "DestructibleBlockingRect.h"
+#include "destructibleblockingrect.h"
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
