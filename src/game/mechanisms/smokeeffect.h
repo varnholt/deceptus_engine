@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -68,6 +69,7 @@ private:
 
       sf::Vector2f _offset;
       sf::Vector2f _center;
+      sf::Vector2f _cached_half_size;  //!< local half-size used as the sprite origin, set once at construction
    };
 
    std::vector<SmokeParticle> _particles;
@@ -84,4 +86,6 @@ private:
    Mode _mode = Mode::Smoke;
    std::unique_ptr<sf::RenderTexture> _render_texture;
    sf::VertexArray _batched_vertices;
+   sf::Vector2f _cached_tex_size_f;                   //!< texture dimensions as floats, set once in deserialize
+   std::array<sf::Vector2f, 4> _cached_tex_coords{};  //!< texture coordinate corners, set once in deserialize
 };

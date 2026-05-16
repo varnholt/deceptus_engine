@@ -56,39 +56,56 @@ std::string_view Dust::objectName() const
    return "Dust";
 }
 
+void Dust::rebuildFlowFieldCache()
+{
+   const auto image_size = _flow_field_image.getSize();
+   _flow_field_image_width = image_size.x;
+   _flow_field_scale_factor_x = static_cast<float>(image_size.x) / _clip_rect.size.x;
+   _flow_field_scale_factor_y = static_cast<float>(image_size.y) / _clip_rect.size.y;
+
+   _flow_field_cache.resize(image_size.x * image_size.y);
+
+   for (uint32_t image_pixel_y = 0; image_pixel_y < image_size.y; ++image_pixel_y)
+   {
+      for (uint32_t image_pixel_x = 0; image_pixel_x < image_size.x; ++image_pixel_x)
+      {
+         const auto image_pixel = _flow_field_image.getPixel({image_pixel_x, image_pixel_y});
+         const auto direction_x = (static_cast<float>(image_pixel.r) / 255.0f) - 0.5f;
+         const auto direction_y = (static_cast<float>(image_pixel.g) / 255.0f) - 0.5f;
+         const auto direction_z = (static_cast<float>(image_pixel.b) / 255.0f) - 0.5f;
+         _flow_field_cache[image_pixel_y * image_size.x + image_pixel_x] = sf::Vector3f{direction_x, direction_y, direction_z};
+      }
+   }
+}
+
 void Dust::update(const sf::Time& dt)
 {
-   const auto dt_s = dt.asSeconds();
+   const auto delta_s = dt.asSeconds();
 
-   const auto scale_factor_x = static_cast<float>(_flow_field_image.getSize().x) / _clip_rect.size.x;
-   const auto scale_factor_y = static_cast<float>(_flow_field_image.getSize().y) / _clip_rect.size.y;
-
-   for (auto& p : _particles)
+   for (auto& particle : _particles)
    {
-      const auto x_px = p._position.x - _clip_rect.position.x;
-      const auto y_px = p._position.y - _clip_rect.position.y;
+      const auto clip_relative_x_px = particle._position.x - _clip_rect.position.x;
+      const auto clip_relative_y_px = particle._position.y - _clip_rect.position.y;
 
-      if (x_px < 0 || x_px >= _clip_rect.size.x || y_px < 0 || y_px >= _clip_rect.size.y)
+      if (clip_relative_x_px < 0 || clip_relative_x_px >= _clip_rect.size.x || clip_relative_y_px < 0 ||
+          clip_relative_y_px >= _clip_rect.size.y)
       {
-         p.spawn(_clip_rect);
+         particle.spawn(_clip_rect);
          continue;
       }
 
-      const auto col =
-         _flow_field_image.getPixel({static_cast<uint32_t>(x_px * scale_factor_x), static_cast<uint32_t>(y_px * scale_factor_y)});
-      const auto col_x = (static_cast<float>(col.r) / 255.0f) - 0.5f;
-      const auto col_y = (static_cast<float>(col.g) / 255.0f) - 0.5f;
-      const auto col_z = (static_cast<float>(col.b) / 255.0f) - 0.5f;
-      const auto dir = sf::Vector3f{col_x, col_y, col_z};
+      const auto flow_field_pixel_x = static_cast<uint32_t>(clip_relative_x_px * _flow_field_scale_factor_x);
+      const auto flow_field_pixel_y = static_cast<uint32_t>(clip_relative_y_px * _flow_field_scale_factor_y);
+      const auto flow_direction = _flow_field_cache[flow_field_pixel_y * _flow_field_image_width + flow_field_pixel_x];
 
-      const auto position_prev = p._position;
-      p._position = p._position + dir * dt_s * _particle_velocity + _wind_direction * dt_s * _particle_velocity;
-      p._z = col_z;
-      p._age += dt_s;
+      particle._position =
+         particle._position + flow_direction * delta_s * _particle_velocity + _wind_direction * delta_s * _particle_velocity;
+      particle._z = flow_direction.z;
+      particle._age += delta_s;
 
-      if (p._age > p._lifetime)
+      if (particle._age > particle._lifetime)
       {
-         p.spawn(_clip_rect);
+         particle.spawn(_clip_rect);
          continue;
       }
 
@@ -96,14 +113,14 @@ void Dust::update(const sf::Time& dt)
       if (_respawn_when_center_reached)
       {
          const sf::Vector2f center = _clip_rect.getCenter();
-         const auto dx = p._position.x - center.x;
-         const auto dy = p._position.y - center.y;
-         const auto dist_sq = dx * dx + dy * dy;
-         const auto too_close_to_center = dist_sq < p._center_reset_radius_sq;
+         const auto center_delta_x = particle._position.x - center.x;
+         const auto center_delta_y = particle._position.y - center.y;
+         const auto center_distance_sq = center_delta_x * center_delta_x + center_delta_y * center_delta_y;
+         const auto too_close_to_center = center_distance_sq < particle._center_reset_radius_sq;
 
          if (too_close_to_center)
          {
-            p.spawn(_clip_rect);
+            particle.spawn(_clip_rect);
             continue;
          }
       }
@@ -120,26 +137,26 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    std::size_t vertex_index = 0;
 
    sf::Vertex quad[4];
-   for (const auto& p : _particles)
+   for (const auto& particle : _particles)
    {
-      const auto pos_px = p._position;
-      auto alpha = 0.0f;
+      const auto particle_position_px = particle._position;
+      auto particle_alpha = 0.0f;
 
-      if (p._age > p._lifetime - 1.0f)
+      if (particle._age > particle._lifetime - 1.0f)
       {
-         alpha = (p._lifetime - p._age) * alpha_default;
+         particle_alpha = (particle._lifetime - particle._age) * alpha_default;
       }
-      else if (p._age < 1.0f)
+      else if (particle._age < 1.0f)
       {
-         alpha = p._age * alpha_default;
+         particle_alpha = particle._age * alpha_default;
       }
       else
       {
-         alpha = alpha_default + p._z * 50.0f;
+         particle_alpha = alpha_default + particle._z * 50.0f;
       }
 
       const auto color =
-         sf::Color{_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(std::clamp(alpha, 0.0f, 255.0f))};
+         sf::Color{_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(std::clamp(particle_alpha, 0.0f, 255.0f))};
 
       if (vertex_index + 6 > _vertices.getVertexCount())
       {
@@ -147,14 +164,16 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       }
 
       // triangle 1: top-left, top-right, bottom-right
-      _vertices[vertex_index + 0] = sf::Vertex({pos_px.x, pos_px.y}, color);
-      _vertices[vertex_index + 1] = sf::Vertex({pos_px.x + _particle_size_px, pos_px.y}, color);
-      _vertices[vertex_index + 2] = sf::Vertex({pos_px.x + _particle_size_px, pos_px.y + _particle_size_px}, color);
+      _vertices[vertex_index + 0] = sf::Vertex({particle_position_px.x, particle_position_px.y}, color);
+      _vertices[vertex_index + 1] = sf::Vertex({particle_position_px.x + _particle_size_px, particle_position_px.y}, color);
+      _vertices[vertex_index + 2] =
+         sf::Vertex({particle_position_px.x + _particle_size_px, particle_position_px.y + _particle_size_px}, color);
 
       // triangle 2: top-left, bottom-right, bottom-left
-      _vertices[vertex_index + 3] = sf::Vertex({pos_px.x, pos_px.y}, color);
-      _vertices[vertex_index + 4] = sf::Vertex({pos_px.x + _particle_size_px, pos_px.y + _particle_size_px}, color);
-      _vertices[vertex_index + 5] = sf::Vertex({pos_px.x, pos_px.y + _particle_size_px}, color);
+      _vertices[vertex_index + 3] = sf::Vertex({particle_position_px.x, particle_position_px.y}, color);
+      _vertices[vertex_index + 4] =
+         sf::Vertex({particle_position_px.x + _particle_size_px, particle_position_px.y + _particle_size_px}, color);
+      _vertices[vertex_index + 5] = sf::Vertex({particle_position_px.x, particle_position_px.y + _particle_size_px}, color);
 
       vertex_index += 6;
 
@@ -198,59 +217,59 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
 
    if (data._tmx_object->_properties)
    {
-      const auto& map = data._tmx_object->_properties->_map;
+      const auto& properties_map = data._tmx_object->_properties->_map;
 
-      const auto z_it = map.find("z");
-      const auto particle_size_it = map.find("particle_size_px");
-      const auto particle_count_it = map.find("particle_count");
-      const auto color_it = map.find("particle_color");
-      const auto velocity_it = map.find("particle_velocity");
-      const auto wind_dir_x_it = map.find("wind_dir_x");
-      const auto wind_dir_y_it = map.find("wind_dir_y");
-      const auto flowfield_texture_it = map.find("flowfield_texture");
+      const auto z_iterator = properties_map.find("z");
+      const auto particle_size_iterator = properties_map.find("particle_size_px");
+      const auto particle_count_iterator = properties_map.find("particle_count");
+      const auto color_iterator = properties_map.find("particle_color");
+      const auto velocity_iterator = properties_map.find("particle_velocity");
+      const auto wind_dir_x_iterator = properties_map.find("wind_dir_x");
+      const auto wind_dir_y_iterator = properties_map.find("wind_dir_y");
+      const auto flowfield_texture_iterator = properties_map.find("flowfield_texture");
 
-      dust->_respawn_when_center_reached = ValueReader::readValue<bool>("respawn_when_center_reached", map).value_or(false);
-      const auto allow_texture_updates = ValueReader::readValue<bool>("allow_texture_updates", map).value_or(false);
+      dust->_respawn_when_center_reached = ValueReader::readValue<bool>("respawn_when_center_reached", properties_map).value_or(false);
+      const auto allow_texture_updates = ValueReader::readValue<bool>("allow_texture_updates", properties_map).value_or(false);
 
-      if (z_it != map.end())
+      if (z_iterator != properties_map.end())
       {
-         dust->setZ(z_it->second->_value_int.value());
+         dust->setZ(z_iterator->second->_value_int.value());
       }
 
-      if (particle_size_it != map.end())
+      if (particle_size_iterator != properties_map.end())
       {
-         dust->_particle_size_px = static_cast<uint8_t>(particle_size_it->second->_value_int.value());
+         dust->_particle_size_px = static_cast<uint8_t>(particle_size_iterator->second->_value_int.value());
       }
 
-      if (particle_count_it != map.end())
+      if (particle_count_iterator != properties_map.end())
       {
-         particle_count = particle_count_it->second->_value_int.value();
+         particle_count = particle_count_iterator->second->_value_int.value();
       }
 
-      if (wind_dir_x_it != map.end())
+      if (wind_dir_x_iterator != properties_map.end())
       {
-         dust->_wind_direction.x = wind_dir_x_it->second->_value_float.value();
+         dust->_wind_direction.x = wind_dir_x_iterator->second->_value_float.value();
       }
 
-      if (wind_dir_y_it != map.end())
+      if (wind_dir_y_iterator != properties_map.end())
       {
-         dust->_wind_direction.y = wind_dir_y_it->second->_value_float.value();
+         dust->_wind_direction.y = wind_dir_y_iterator->second->_value_float.value();
       }
 
-      if (color_it != map.end())
+      if (color_iterator != properties_map.end())
       {
-         const auto rgba = TmxTools::color(color_it->second->_value_string.value());
-         dust->_particle_color = {rgba[0], rgba[1], rgba[2]};
+         const auto particle_color_components = TmxTools::color(color_iterator->second->_value_string.value());
+         dust->_particle_color = {particle_color_components[0], particle_color_components[1], particle_color_components[2]};
       }
 
-      if (velocity_it != map.end())
+      if (velocity_iterator != properties_map.end())
       {
-         dust->_particle_velocity = velocity_it->second->_value_float.value();
+         dust->_particle_velocity = velocity_iterator->second->_value_float.value();
       }
 
-      if (flowfield_texture_it != map.end())
+      if (flowfield_texture_iterator != properties_map.end())
       {
-         flowfield_texture = flowfield_texture_it->second->_value_string.value();
+         flowfield_texture = flowfield_texture_iterator->second->_value_string.value();
       }
 
       if (allow_texture_updates)
@@ -262,6 +281,7 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
                {
                   dust->_flow_field_texture = TexturePool::getInstance().get(event._texture_id);
                   dust->_flow_field_image = dust->_flow_field_texture->copyToImage();
+                  dust->rebuildFlowFieldCache();
                }
             }
          );
@@ -269,11 +289,11 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
    }
 
    // generate dust vertices
-   for (auto i = 0; i < particle_count; i++)
+   for (auto particle_index = 0; particle_index < particle_count; particle_index++)
    {
-      Particle p;
-      p.spawn(dust->_clip_rect);
-      dust->_particles.push_back(p);
+      Particle new_particle;
+      new_particle.spawn(dust->_clip_rect);
+      dust->_particles.push_back(new_particle);
    }
 
    dust->_vertices.resize(6 * particle_count);
@@ -282,6 +302,7 @@ std::shared_ptr<Dust> Dust::deserialize(GameNode* parent, const GameDeserializeD
    // dust instance has to reload the texture
    dust->_flow_field_texture = TexturePool::getInstance().get(flowfield_texture);
    dust->_flow_field_image = dust->_flow_field_texture->copyToImage();
+   dust->rebuildFlowFieldCache();
 
    return dust;
 }

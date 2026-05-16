@@ -82,42 +82,35 @@ void SmokeEffect::update(const sf::Time& dt)
          );
       }
 
-      // moved here from deserialize code
-      // origin should always depend on rotation
-      const auto bounds = particle._sprite->getGlobalBounds();
-      particle._sprite->setOrigin({bounds.size.x / 2, bounds.size.y / 2});
+      particle._sprite->setOrigin(particle._cached_half_size);
    }
 
    if (!_particles.empty())
    {
-      const sf::Vector2f tex_size_f(static_cast<float>(_texture->getSize().x), static_cast<float>(_texture->getSize().y));
-
-      for (auto i = 0u; i < _particles.size(); ++i)
+      for (auto particle_index = 0u; particle_index < _particles.size(); ++particle_index)
       {
-         const auto& sprite = *(_particles[i]._sprite);
+         const auto& sprite = *(_particles[particle_index]._sprite);
          const sf::Transform transform = sprite.getTransform();
          const sf::Color color = sprite.getColor();
 
          const sf::Vector2f quad[4] = {
             transform.transformPoint({0.0f, 0.0f}),
-            transform.transformPoint({tex_size_f.x, 0.0f}),
-            transform.transformPoint({tex_size_f.x, tex_size_f.y}),
-            transform.transformPoint({0.0f, tex_size_f.y})
+            transform.transformPoint({_cached_tex_size_f.x, 0.0f}),
+            transform.transformPoint({_cached_tex_size_f.x, _cached_tex_size_f.y}),
+            transform.transformPoint({0.0f, _cached_tex_size_f.y})
          };
 
-         const sf::Vector2f tex_coords[4] = {{0.f, 0.0f}, {tex_size_f.x, 0.0f}, {tex_size_f.x, tex_size_f.y}, {0.0f, tex_size_f.y}};
-
-         const auto vertex_index = i * 6u;
+         const auto vertex_index = particle_index * 6u;
 
          // triangle indices 0, 1, 2
-         _batched_vertices[vertex_index + 0] = sf::Vertex(quad[0], color, tex_coords[0]);
-         _batched_vertices[vertex_index + 1] = sf::Vertex(quad[1], color, tex_coords[1]);
-         _batched_vertices[vertex_index + 2] = sf::Vertex(quad[2], color, tex_coords[2]);
+         _batched_vertices[vertex_index + 0] = sf::Vertex(quad[0], color, _cached_tex_coords[0]);
+         _batched_vertices[vertex_index + 1] = sf::Vertex(quad[1], color, _cached_tex_coords[1]);
+         _batched_vertices[vertex_index + 2] = sf::Vertex(quad[2], color, _cached_tex_coords[2]);
 
          // triangle indices 0, 2, 3
-         _batched_vertices[vertex_index + 3] = sf::Vertex(quad[0], color, tex_coords[0]);
-         _batched_vertices[vertex_index + 4] = sf::Vertex(quad[2], color, tex_coords[2]);
-         _batched_vertices[vertex_index + 5] = sf::Vertex(quad[3], color, tex_coords[3]);
+         _batched_vertices[vertex_index + 3] = sf::Vertex(quad[0], color, _cached_tex_coords[0]);
+         _batched_vertices[vertex_index + 4] = sf::Vertex(quad[2], color, _cached_tex_coords[2]);
+         _batched_vertices[vertex_index + 5] = sf::Vertex(quad[3], color, _cached_tex_coords[3]);
       }
    }
 }
@@ -277,8 +270,21 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
       particle._sprite->setRotation(sf::degrees(static_cast<float>(std::rand() % 360)));
       particle._sprite->setColor(smoke_effect->_particle_color);
 
+      const auto particle_local_bounds = particle._sprite->getLocalBounds();
+      particle._cached_half_size = {particle_local_bounds.size.x / 2.0f, particle_local_bounds.size.y / 2.0f};
+
       smoke_effect->_particles.push_back(std::move(particle));
    }
+
+   const auto texture_size_f =
+      sf::Vector2f{static_cast<float>(smoke_effect->_texture->getSize().x), static_cast<float>(smoke_effect->_texture->getSize().y)};
+   smoke_effect->_cached_tex_size_f = texture_size_f;
+   smoke_effect->_cached_tex_coords = {
+      sf::Vector2f{0.0f, 0.0f},
+      sf::Vector2f{texture_size_f.x, 0.0f},
+      sf::Vector2f{texture_size_f.x, texture_size_f.y},
+      sf::Vector2f{0.0f, texture_size_f.y}
+   };
 
    smoke_effect->_batched_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
    smoke_effect->_batched_vertices.resize(smoke_effect->_particles.size() * 6);

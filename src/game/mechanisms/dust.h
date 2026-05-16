@@ -58,10 +58,16 @@ public:
    static std::shared_ptr<Dust> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 private:
+   void rebuildFlowFieldCache();
+
    std::vector<Particle> _particles;
    sf::FloatRect _clip_rect;
    std::shared_ptr<sf::Texture> _flow_field_texture;
    sf::Image _flow_field_image;
+   std::vector<sf::Vector3f> _flow_field_cache;  //!< pre-baked direction vectors indexed by pixel_y * image_width + pixel_x
+   float _flow_field_scale_factor_x{0.0f};       //!< scale from clip-rect space to flow-field image space, x axis
+   float _flow_field_scale_factor_y{0.0f};       //!< scale from clip-rect space to flow-field image space, y axis
+   uint32_t _flow_field_image_width{0};          //!< flow-field image width for flat cache index computation
    sf::Vector3f _wind_direction;
    sf::Color _particle_color = {255, 255, 255, 255};
    float _particle_velocity = 100.0f;

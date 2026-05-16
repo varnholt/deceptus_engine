@@ -14,13 +14,13 @@ public:
    {
       Segment() = default;
 
-       /// \brief integrates this segment toward its target height.
-       /// \param dampening velocity dampening factor.
-       /// \param tension spring tension factor.
-       void update(float dampening, float tension);
+      /// \brief integrates this segment toward its target height.
+      /// \param dampening velocity dampening factor.
+      /// \param tension spring tension factor.
+      void update(float dampening, float tension);
 
-       /// \brief clears per-step neighbor transfer deltas.
-       void resetDeltas();
+      /// \brief clears per-step neighbor transfer deltas.
+      void resetDeltas();
 
       float _height{0.0f};
       float _target_height{0.0f};
