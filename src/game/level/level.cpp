@@ -639,7 +639,7 @@ void Level::spawnEnemies()
 
       if (!script.has_value())
       {
-         Log::Error() << "missing script definition";
+         Log::Error() << it.first << " does not have any script definition";
          continue;
       }
 
