@@ -1,120 +1,131 @@
 
 # Building the Deceptus Engine in Docker
 
+The Docker setup compiles the engine inside an Arch Linux container and produces
+a self-contained tarball (binary + all runtime `.so` files) that can be copied
+directly onto another machine such as a Steam Deck.
 
-## Linux/macOS
+---
 
-### 1. Build the Docker Image
+## Quick start (automated)
+
+The Python script handles image build, compilation, bundling, and tarball creation
+in one step. Run it from the `docker/` directory using [uv](https://github.com/astral-sh/uv):
 
 ```bash
+uv run python build_and_package.py
+```
+
+Output: `../build_output/deceptus_<timestamp>.tgz`
+
+---
+
+## Manual steps
+
+### 1. Build the Docker image
+
+**Linux / macOS**
+```bash
+docker build -t deceptus_engine .
+```
+
+**Windows**
+```cmd
 docker build -t deceptus_engine .
 ```
 
 ---
 
-### 2. Run the Container
+### 2. Run the container
 
+**Linux / macOS**
 ```bash
 docker run -it \
-  -v "$(pwd)/game_data:/home/builder/game_data" \
   -v "$(pwd)/build_output:/home/builder/output" \
   deceptus_engine
 ```
 
----
-
-### 3. Bundle Binary + Dependencies
-
-Inside the container, create this script as `bundle_deploy.sh`:
-
-```bash
-#!/bin/bash
-set -e
-
-# Paths
-BUILD_DIR="$(pwd)"
-DEPLOY_DIR="$BUILD_DIR/deploy"
-BIN_NAME="deceptus"
-LIB_DIR="$DEPLOY_DIR/lib"
-
-# Prepare deploy directory
-rm -rf "$DEPLOY_DIR"
-mkdir -p "$DEPLOY_DIR"
-mkdir -p "$LIB_DIR"
-
-# Copy binary
-cp "$BUILD_DIR/$BIN_NAME" "$DEPLOY_DIR/"
-
-# Copy runtime shared libraries into deploy/lib
-ldd "$BUILD_DIR/$BIN_NAME" | awk '/=> \/|=>\// {print $3}' | while read lib; do
-    cp -v "$lib" "$LIB_DIR/"
-done
-
-# Copy SDL3 if built locally
-if [ -f "$BUILD_DIR/_deps/sdl3-build/libSDL3.so.0" ]; then
-    cp "$BUILD_DIR/_deps/sdl3-build/libSDL3.so.0" "$LIB_DIR/"
-fi
-
-# Add run.sh wrapper
-cat > "$DEPLOY_DIR/run.sh" <<EOF
-#!/bin/bash
-DIR="\$(cd \$(dirname "\$0") && pwd)"
-export LD_LIBRARY_PATH="\$DIR/lib"
-exec "\$DIR/$BIN_NAME" "\$@"
-EOF
-
-chmod +x "$DEPLOY_DIR/run.sh"
-
-echo "Deceptus bundled with all required libraries in: $DEPLOY_DIR"
-```
-
-Run it:
-
-```bash
-chmod +x bundle_deploy.sh
-./bundle_deploy.sh
-```
-
----
-
-### 4. Export as .tgz
-
-```bash
-tar czf /home/builder/output/deceptus_build.tgz -C deploy .
-```
-
----
-
-## Windows
-
-### 1. Build the Docker Image
-
-```cmd
-docker build -t deceptus_engine .
-```
-
----
-
-### 2. Run the Container
-
+**Windows**
 ```cmd
 docker run -it ^
-  -v "%CD%\game_data:/home/builder/game_data" ^
   -v "%CD%\build_output:/home/builder/output" ^
   deceptus_engine
 ```
 
 ---
 
-### 3. Bundle Binary + Dependencies
+### 3. Bundle binary and dependencies
 
-Inside the container, create and run `bundle_deploy.sh` exactly as shown in the Linux/macOS section above.
+Inside the container, run from the build directory:
+
+```bash
+cd /home/builder/deceptus_engine/build
+bash /path/to/bundle_deploy.sh [OPTIONS]
+```
+
+#### bundle_deploy.sh options
+
+| Option | Default | Description |
+|---|---|---|
+| *(none)* | — | Bundle binary + libs, exclude render libs (recommended for Steam Deck) |
+| `--no-strip-render-libs` | off | Also bundle GPU/render libs (libGL, libEGL, libvulkan, libOpenGL, libGLX, libGLdispatch, libdrm, libnvidia). Use only when the target system has no working Mesa or driver stack. |
+| `--help` | — | Print usage and exit. |
+
+**Default (Steam Deck and any system with Mesa):**
+```bash
+bash bundle_deploy.sh
+```
+
+**Include render libs (bare/embedded targets):**
+```bash
+bash bundle_deploy.sh --no-strip-render-libs
+```
+
+Output layout:
+```
+deploy/
+  deceptus       — release binary
+  lib/           — all bundled .so files (flat, symlinks resolved)
+  run.sh         — launcher; sets LD_LIBRARY_PATH and execs the binary
+```
 
 ---
 
-### 4. Export as .tgz
+### 4. Create the tarball
 
 ```bash
 tar czf /home/builder/output/deceptus_build.tgz -C deploy .
 ```
 
+---
+
+## Deploying to Steam Deck
+
+1. Copy the `.tgz` to the Steam Deck.
+2. Extract it alongside the game data directory:
+   ```bash
+   mkdir -p ~/deceptus
+   tar xzf deceptus_build.tgz -C ~/deceptus
+   cp -r /path/to/data ~/deceptus/
+   ```
+3. Launch:
+   ```bash
+   ~/deceptus/run.sh
+   ```
+
+The `run.sh` wrapper sets `LD_LIBRARY_PATH` to the bundled `lib/` directory.
+GPU/render libs are intentionally excluded from the bundle so the Steam Deck's
+own Mesa driver stack is used.
+
+---
+
+## Dependency notes
+
+| Dependency | Source | How bundled |
+|---|---|---|
+| SFML 3 | FetchContent (built from source) | Picked up by `ldd` via RPATH |
+| SDL3 | FetchContent (built from source) | Picked up by `ldd` + explicit glob of `_deps/sdl3-build/libSDL3.so*` |
+| Lua 5.4 | FetchContent (built as static lib) | Statically linked, no `.so` needed |
+| GLEW | FetchContent | Picked up by `ldd` |
+| System X11/audio/font libs | Arch Linux packages | Picked up by `ldd` |
+| GL/EGL/Vulkan/DRM | Host system (stripped by default) | Not bundled — provided by target's GPU driver stack |
