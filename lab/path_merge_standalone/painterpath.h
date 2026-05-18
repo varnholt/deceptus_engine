@@ -19,16 +19,16 @@ public:
    /// \brief A single path element: a typed 2D point.
    struct Element
    {
-      ElementType type = ElementType::MoveTo; //!< Whether this is a move or line.
-      double x = 0.0;                         //!< X coordinate.
-      double y = 0.0;                         //!< Y coordinate.
+      ElementType type = ElementType::MoveTo;  //!< Whether this is a move or line.
+      double x = 0.0;                          //!< X coordinate.
+      double y = 0.0;                          //!< Y coordinate.
    };
 
    /// \brief Fill rule determining the interior of the path.
    enum class FillRule
    {
-      OddEven, //!< Standard even-odd rule.
-      Winding  //!< Non-zero winding rule.
+      OddEven,  //!< Standard even-odd rule.
+      Winding   //!< Non-zero winding rule.
    };
 
    PainterPath() = default;
@@ -38,20 +38,20 @@ public:
    void moveTo(double x, double y);
    void lineTo(double x, double y);
 
-   int elementCount() const;
-   const Element& elementAt(int index) const;
+   [[nodiscard]] int elementCount() const;
+   [[nodiscard]] const Element& elementAt(int index) const;
 
-   bool isEmpty() const;
+   [[nodiscard]] bool isEmpty() const;
 
-   FillRule fillRule() const;
+   [[nodiscard]] FillRule fillRule() const;
    void setFillRule(FillRule rule);
 
    void setElementPositionAt(int index, double x, double y);
 
-   PainterPath simplified() const;
-   std::vector<std::vector<PointF>> toSubpathPolygons() const;
+   [[nodiscard]] PainterPath simplified() const;
+   [[nodiscard]] std::vector<std::vector<PointF>> toSubpathPolygons() const;
 
 private:
-   std::vector<Element> _elements;         //!< Ordered list of path elements.
-   FillRule _fill_rule = FillRule::OddEven; //!< Active fill rule.
+   std::vector<Element> _elements;           //!< Ordered list of path elements.
+   FillRule _fill_rule = FillRule::OddEven;  //!< Active fill rule.
 };

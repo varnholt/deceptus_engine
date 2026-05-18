@@ -16,53 +16,94 @@ public:
       }
    }
 
-   void reset() { _data.clear(); }
-   bool isEmpty() const { return _data.empty(); }
-   int size() const { return static_cast<int>(_data.size()); }
-   T* data() { return _data.data(); }
-   const T* data() const { return _data.data(); }
+   void reset()
+   {
+      _data.clear();
+   }
+   [[nodiscard]] bool isEmpty() const
+   {
+      return _data.empty();
+   }
+   [[nodiscard]] int size() const
+   {
+      return static_cast<int>(_data.size());
+   }
+   [[nodiscard]] T* data()
+   {
+      return _data.data();
+   }
+   [[nodiscard]] const T* data() const
+   {
+      return _data.data();
+   }
 
-   T& at(int index)
+   [[nodiscard]] T& at(int index)
    {
       assert(index >= 0 && index < size());
       return _data[index];
    }
-   const T& at(int index) const
+   [[nodiscard]] const T& at(int index) const
    {
       assert(index >= 0 && index < size());
       return _data[index];
    }
 
-   T& last()
+   [[nodiscard]] T& last()
    {
       assert(!isEmpty());
       return _data.back();
    }
-   const T& last() const
+   [[nodiscard]] const T& last() const
    {
       assert(!isEmpty());
       return _data.back();
    }
 
-   T& first()
+   [[nodiscard]] T& first()
    {
       assert(!isEmpty());
       return _data.front();
    }
-   const T& first() const
+   [[nodiscard]] const T& first() const
    {
       assert(!isEmpty());
       return _data.front();
    }
 
-   void add(const T& value) { _data.push_back(value); }
+   auto begin() noexcept
+   {
+      return _data.begin();
+   }
+   auto end() noexcept
+   {
+      return _data.end();
+   }
+   auto begin() const noexcept
+   {
+      return _data.cbegin();
+   }
+   auto end() const noexcept
+   {
+      return _data.cend();
+   }
+
+   void add(const T& value)
+   {
+      _data.push_back(value);
+   }
    void pop_back()
    {
       assert(!isEmpty());
       _data.pop_back();
    }
-   void resize(int new_size) { _data.resize(static_cast<size_t>(new_size)); }
-   void reserve(int new_capacity) { _data.reserve(static_cast<size_t>(new_capacity)); }
+   void resize(int new_size)
+   {
+      _data.resize(static_cast<size_t>(new_size));
+   }
+   void reserve(int new_capacity)
+   {
+      _data.reserve(static_cast<size_t>(new_capacity));
+   }
 
    DataBuffer& operator<<(const T& value)
    {
@@ -70,8 +111,11 @@ public:
       return *this;
    }
 
-   void swap(DataBuffer<T>& other) { _data.swap(other._data); }
+   void swap(DataBuffer<T>& other)
+   {
+      _data.swap(other._data);
+   }
 
 private:
-   std::vector<T> _data; //!< Underlying storage.
+   std::vector<T> _data;  //!< Underlying storage.
 };

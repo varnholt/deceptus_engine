@@ -17,25 +17,28 @@ public:
       int vertex = -1;  //!< Index of the intersection vertex in the point list.
       int next = 0;     //!< Relative offset to the next Intersection node, or 0 if last.
 
-      bool operator<(const Intersection& other) const { return t < other.t; }
+      bool operator==(const Intersection& other) const
+      {
+         return t == other.t;
+      }
+      auto operator<=>(const Intersection& other) const
+      {
+         return t <=> other.t;
+      }
    };
 
    /// \brief A directed line segment between two vertices, with its bounding box.
    struct Segment
    {
-      Segment(int path_id, int vertex_a, int vertex_b)
-         : path(path_id)
-         , va(vertex_a)
-         , vb(vertex_b)
-         , intersection(-1)
+      Segment(int path_id, int vertex_a, int vertex_b) : path(path_id), va(vertex_a), vb(vertex_b), intersection(-1)
       {
       }
 
-      int path = 0;          //!< Which input path this segment belongs to (0 or 1).
-      int va = -1;           //!< Index of the start vertex.
-      int vb = -1;           //!< Index of the end vertex.
-      int intersection = -1; //!< Index into _intersections of the first event, or -1.
-      RectF bounds;          //!< Axis-aligned bounding box of the segment.
+      int path = 0;           //!< Which input path this segment belongs to (0 or 1).
+      int va = -1;            //!< Index of the start vertex.
+      int vb = -1;            //!< Index of the end vertex.
+      int intersection = -1;  //!< Index into _intersections of the first event, or -1.
+      RectF bounds;           //!< Axis-aligned bounding box of the segment.
    };
 
    explicit PathSegments(int reserve_count);
@@ -43,28 +46,28 @@ public:
    void setPath(const PainterPath& path);
    void addPath(const PainterPath& path);
 
-   int intersections() const;
-   int segments() const;
-   int points() const;
+   [[nodiscard]] int intersections() const;
+   [[nodiscard]] int segments() const;
+   [[nodiscard]] int points() const;
 
-   const Segment& segmentAt(int index) const;
-   LineF lineAt(int index) const;
-   const RectF& elementBounds(int index) const;
-   int pathId(int index) const;
+   [[nodiscard]] const Segment& segmentAt(int index) const;
+   [[nodiscard]] LineF lineAt(int index) const;
+   [[nodiscard]] const RectF& elementBounds(int index) const;
+   [[nodiscard]] int pathId(int index) const;
 
-   const PointF& pointAt(int vertex) const;
-   int addPoint(const PointF& point);
+   [[nodiscard]] const PointF& pointAt(int vertex) const;
+   [[nodiscard]] int addPoint(const PointF& point);
 
-   const Intersection* intersectionAt(int index) const;
+   [[nodiscard]] const Intersection* intersectionAt(int index) const;
    void addIntersection(int index, const Intersection& intersection);
 
    void mergePoints();
 
 private:
-   DataBuffer<PointF> _points;                //!< Deduplicated vertex list.
-   DataBuffer<Segment> _segments;             //!< Flat segment list.
-   DataBuffer<Intersection> _intersections;   //!< Packed intersection events.
-   int _path_id = 0;                          //!< Counter incremented per addPath call.
+   DataBuffer<PointF> _points;               //!< Deduplicated vertex list.
+   DataBuffer<Segment> _segments;            //!< Flat segment list.
+   DataBuffer<Intersection> _intersections;  //!< Packed intersection events.
+   int _path_id = 0;                         //!< Counter incremented per addPath call.
 };
 
 inline int PathSegments::segments() const

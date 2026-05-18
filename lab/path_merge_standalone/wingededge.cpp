@@ -8,6 +8,7 @@
 #include <climits>
 #include <cmath>
 #include <limits>
+#include <ranges>
 #include <vector>
 
 namespace
@@ -861,7 +862,7 @@ void WingedEdge::intersectAndAdd()
 
    for (int point_index = 0; point_index < _segments.points(); ++point_index)
    {
-      addVertex(_segments.pointAt(point_index));
+      static_cast<void>(addVertex(_segments.pointAt(point_index)));
    }
 
    DataBuffer<PathSegments::Intersection> local_intersections(_segments.segments());
@@ -886,7 +887,7 @@ void WingedEdge::intersectAndAdd()
          }
       }
 
-      std::sort(local_intersections.data(), local_intersections.data() + local_intersections.size());
+      std::ranges::sort(local_intersections);
 
       int current_vertex = _segments.segmentAt(segment_index).va;
       const int end_vertex = _segments.segmentAt(segment_index).vb;

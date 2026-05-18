@@ -15,9 +15,9 @@ public:
    /// \brief Current position in a linked-list traversal around the graph.
    struct TraversalStatus
    {
-      int edge = -1;                                                //!< Current edge index.
-      PathEdge::Traversal traversal = PathEdge::Traversal::Right;  //!< Which face side.
-      PathEdge::Direction direction = PathEdge::Direction::Forward; //!< Travel direction.
+      int edge = -1;                                                 //!< Current edge index.
+      PathEdge::Traversal traversal = PathEdge::Traversal::Right;    //!< Which face side.
+      PathEdge::Direction direction = PathEdge::Direction::Forward;  //!< Travel direction.
 
       void flipDirection();
       void flipTraversal();
@@ -28,26 +28,26 @@ public:
    WingedEdge(const PainterPath& subject, const PainterPath& clip);
 
    void simplify();
-   PainterPath toPath() const;
+   [[nodiscard]] PainterPath toPath() const;
 
-   int edgeCount() const;
-   PathEdge* edge(int edge_index);
-   const PathEdge* edge(int edge_index) const;
+   [[nodiscard]] int edgeCount() const;
+   [[nodiscard]] PathEdge* edge(int edge_index);
+   [[nodiscard]] const PathEdge* edge(int edge_index) const;
 
-   int vertexCount() const;
-   int addVertex(const PointF& point);
-   PathVertex* vertex(int vertex_index);
-   const PathVertex* vertex(int vertex_index) const;
+   [[nodiscard]] int vertexCount() const;
+   [[nodiscard]] int addVertex(const PointF& point);
+   [[nodiscard]] PathVertex* vertex(int vertex_index);
+   [[nodiscard]] const PathVertex* vertex(int vertex_index) const;
 
-   TraversalStatus next(const TraversalStatus& status) const;
+   [[nodiscard]] TraversalStatus next(const TraversalStatus& status) const;
 
-   int addEdge(const PointF& point_a, const PointF& point_b);
-   int addEdge(int vertex_a, int vertex_b);
+   [[nodiscard]] int addEdge(const PointF& point_a, const PointF& point_b);
+   [[nodiscard]] int addEdge(int vertex_a, int vertex_b);
 
-   bool isInside(double x, double y) const;
+   [[nodiscard]] bool isInside(double x, double y) const;
 
-   static PathEdge::Traversal flip(PathEdge::Traversal traversal);
-   static PathEdge::Direction flip(PathEdge::Direction direction);
+   [[nodiscard]] static PathEdge::Traversal flip(PathEdge::Traversal traversal);
+   [[nodiscard]] static PathEdge::Direction flip(PathEdge::Direction direction);
 
 private:
    void intersectAndAdd();

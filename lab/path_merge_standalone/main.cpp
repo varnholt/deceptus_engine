@@ -1,8 +1,10 @@
 #include <deque>
+#include <format>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <ostream>
+#include <print>
+#include <ranges>
 #include <sstream>
 
 #include <math.h>
@@ -56,7 +58,7 @@ void readObj(const std::string& filename, std::vector<Vec3>& points, std::vector
 
    if (!obj_stream)
    {
-      std::cerr << "unable to open file: " << filename << std::endl;
+      std::println(stderr, "unable to open file: {}", filename);
       return;
    }
 
@@ -218,22 +220,21 @@ void writeObj(const std::string& filename, const std::vector<Vec3>& vertices, co
 {
    std::ofstream out(filename);
 
-   out.setf(std::ios::fixed);
    for (const auto& mesh_vertex : vertices)
    {
-      out << std::setprecision(3) << "v " << mesh_vertex.x << " " << mesh_vertex.y << " " << 0.0f << std::endl;
+      out << std::format("v {:.3f} {:.3f} 0.000\n", mesh_vertex.x, mesh_vertex.y);
    }
 
-   out << std::endl;
+   out << '\n';
 
    for (const auto& face : faces)
    {
-      out << "f ";
+      out << "f";
       for (const auto vertex_index : face)
       {
-         out << vertex_index << " ";
+         out << ' ' << vertex_index;
       }
-      out << std::endl;
+      out << '\n';
    }
 
    out.close();
@@ -243,7 +244,7 @@ int main(int32_t argc, char** argv)
 {
    if (argc != 3)
    {
-      std::cout << "usage: " << argv[0] << " input_file.obj output_file.obj" << std::endl;
+      std::println("usage: {} input_file.obj output_file.obj", argv[0]);
       exit(0);
    }
 
@@ -290,9 +291,8 @@ int main(int32_t argc, char** argv)
       std::vector<uint32_t> face;
       for (const auto& point : poly)
       {
-         const auto& found_point = std::find_if(
-            simplified_points.begin(),
-            simplified_points.end(),
+         const auto found_point = std::ranges::find_if(
+            simplified_points,
             [point](const Vec3& other)
             { return (fabs(point.x - static_cast<double>(other.x)) < 0.001 && fabs(point.y - static_cast<double>(other.y)) < 0.001); }
          );
@@ -317,9 +317,15 @@ int main(int32_t argc, char** argv)
 
    writeObj(output_file, simplified_points, simplified_faces);
 
-   std::cout << "optimised mesh written to '" << output_file << "', points: " << points.size() << " -> " << simplified_points.size()
-             << ", faces: " << path.elementCount() << " -> " << simplified.elementCount()
-             << ", factor: " << simplified_points.size() / static_cast<float>(points.size()) << std::endl;
+   std::println(
+      "optimised mesh written to '{}', points: {} -> {}, faces: {} -> {}, factor: {:.3f}",
+      output_file,
+      points.size(),
+      simplified_points.size(),
+      path.elementCount(),
+      simplified.elementCount(),
+      simplified_points.size() / static_cast<float>(points.size())
+   );
 
    return 0;
 }

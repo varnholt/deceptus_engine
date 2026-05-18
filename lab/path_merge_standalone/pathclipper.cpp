@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <ranges>
 #include <vector>
 
 namespace
@@ -64,9 +65,13 @@ struct CrossingEdge
    int edge = -1;   //!< Index of the crossing edge.
    double x = 0.0;  //!< X coordinate of the crossing.
 
-   bool operator<(const CrossingEdge& other) const
+   bool operator==(const CrossingEdge& other) const
    {
-      return x < other.x;
+      return x == other.x;
+   }
+   auto operator<=>(const CrossingEdge& other) const
+   {
+      return x <=> other.x;
    }
 };
 
@@ -124,8 +129,8 @@ bool PathClipper::doClip(WingedEdge& graph, ClipperMode mode)
       y_coordinates.push_back(graph.vertex(vertex_index)->y);
    }
 
-   std::sort(y_coordinates.begin(), y_coordinates.end());
-   y_coordinates.erase(std::unique(y_coordinates.begin(), y_coordinates.end(), fuzzy_compare), y_coordinates.end());
+   std::ranges::sort(y_coordinates);
+   y_coordinates.erase(std::ranges::unique(y_coordinates, fuzzy_compare).begin(), y_coordinates.end());
 
    bool found = false;
    do
@@ -222,7 +227,7 @@ bool PathClipper::handleCrossingEdges(WingedEdge& graph, double y, ClipperMode m
    std::vector<CrossingEdge> crossings = find_crossings(graph, y);
 
    assert(!crossings.empty());
-   std::sort(crossings.begin(), crossings.end());
+   std::ranges::sort(crossings);
 
    int winding_a = 0;
    int winding_b = 0;
