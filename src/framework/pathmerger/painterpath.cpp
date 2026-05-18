@@ -2,6 +2,8 @@
 
 #include "pathclipper.h"
 
+#include <cstdint>
+
 namespace PathMerge
 {
 
@@ -12,7 +14,7 @@ void PainterPath::addPolygon(const std::vector<PointF>& polygon)
       return;
    }
    moveTo(polygon[0].x, polygon[0].y);
-   for (auto point_index = 1u; point_index < polygon.size(); ++point_index)
+   for (auto point_index = size_t{1}; point_index < polygon.size(); ++point_index)
    {
       lineTo(polygon[point_index].x, polygon[point_index].y);
    }
@@ -28,12 +30,12 @@ void PainterPath::lineTo(double x, double y)
    _elements.push_back({ElementType::LineTo, x, y});
 }
 
-int PainterPath::elementCount() const
+int32_t PainterPath::elementCount() const
 {
-   return static_cast<int>(_elements.size());
+   return static_cast<int32_t>(_elements.size());
 }
 
-const PainterPath::Element& PainterPath::elementAt(int index) const
+const PainterPath::Element& PainterPath::elementAt(int32_t index) const
 {
    return _elements[index];
 }
@@ -53,7 +55,7 @@ void PainterPath::setFillRule(FillRule rule)
    _fill_rule = rule;
 }
 
-void PainterPath::setElementPositionAt(int index, double x, double y)
+void PainterPath::setElementPositionAt(int32_t index, double x, double y)
 {
    _elements[index].x = x;
    _elements[index].y = y;

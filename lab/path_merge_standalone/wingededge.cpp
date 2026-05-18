@@ -7,6 +7,7 @@
 #include <cassert>
 #include <climits>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <ranges>
 #include <vector>
@@ -62,20 +63,20 @@ struct TreeNode
    double split_right = 0.0;
    bool leaf = false;
 
-   int lowest_left_index = 0;
-   int lowest_right_index = 0;
+   int32_t lowest_left_index = 0;
+   int32_t lowest_right_index = 0;
 
    union
    {
       struct
       {
-         int first;
-         int last;
+         int32_t first;
+         int32_t last;
       } interval;
       struct
       {
-         int left;
-         int right;
+         int32_t left;
+         int32_t right;
       } children;
    } index = {};
 };
@@ -85,16 +86,17 @@ class SegmentTree
 public:
    explicit SegmentTree(PathSegments& segments);
 
-   void produce_intersections(int segment_index);
+   void produce_intersections(int32_t segment_index);
 
 private:
-   TreeNode build_tree(int first, int last, int depth, const RectF& bounds);
-   void produce_intersections_leaf(const TreeNode& node, int segment_index);
-   void produce_intersections(const TreeNode& node, int segment_index, const RectF& segment_bounds, const RectF& node_bounds, int axis);
+   TreeNode build_tree(int32_t first, int32_t last, int32_t depth, const RectF& bounds);
+   void produce_intersections_leaf(const TreeNode& node, int32_t segment_index);
+   void
+   produce_intersections(const TreeNode& node, int32_t segment_index, const RectF& segment_bounds, const RectF& node_bounds, int32_t axis);
    void intersect_lines(const LineF& line_a, const LineF& line_b, DataBuffer<SegmentIntersection>& intersections);
 
    PathSegments& _segments;
-   std::vector<int> _index;
+   std::vector<int32_t> _index;
    RectF _bounds;
    std::vector<TreeNode> _tree;
    DataBuffer<SegmentIntersection> _intersections;
@@ -111,7 +113,7 @@ SegmentTree::SegmentTree(PathSegments& segments) : _segments(segments), _interse
 
    _index.resize(_segments.segments());
 
-   for (int segment_index = 0; segment_index < static_cast<int>(_index.size()); ++segment_index)
+   for (int32_t segment_index = 0; segment_index < static_cast<int32_t>(_index.size()); ++segment_index)
    {
       _index[segment_index] = segment_index;
 
@@ -136,10 +138,10 @@ SegmentTree::SegmentTree(PathSegments& segments) : _segments(segments), _interse
    }
 
    _tree.resize(1);
-   _tree[0] = build_tree(0, static_cast<int>(_index.size()), 0, _bounds);
+   _tree[0] = build_tree(0, static_cast<int32_t>(_index.size()), 0, _bounds);
 }
 
-TreeNode SegmentTree::build_tree(int first, int last, int depth, const RectF& bounds)
+TreeNode SegmentTree::build_tree(int32_t first, int32_t last, int32_t depth, const RectF& bounds)
 {
    if (depth >= 24 || (last - first) <= 10)
    {
@@ -150,7 +152,7 @@ TreeNode SegmentTree::build_tree(int first, int last, int depth, const RectF& bo
       return leaf_node;
    }
 
-   const int split_axis = depth & 1;
+   const auto split_axis = depth & int32_t{1};
 
    TreeNode node;
    node.leaf = false;
@@ -162,18 +164,18 @@ TreeNode SegmentTree::build_tree(int first, int last, int depth, const RectF& bo
    node.lowest_left_index = INT_MAX;
    node.lowest_right_index = INT_MAX;
 
-   const int tree_size = static_cast<int>(_tree.size());
+   const auto tree_size = static_cast<int32_t>(_tree.size());
    node.index.children.left = tree_size;
    node.index.children.right = tree_size + 1;
 
    _tree.resize(tree_size + 2);
 
-   int left_cursor = first;
-   int right_cursor = last - 1;
+   int32_t left_cursor = first;
+   int32_t right_cursor = last - 1;
 
    while (left_cursor <= right_cursor)
    {
-      const int current_index = _index[left_cursor];
+      const int32_t current_index = _index[left_cursor];
       const RectF& seg_bounds = _segments.elementBounds(current_index);
 
       const double low_coord = seg_bounds.minCoord(split_axis);
@@ -359,14 +361,14 @@ void SegmentTree::intersect_lines(const LineF& line_a, const LineF& line_b, Data
    intersections.add(isect);
 }
 
-void SegmentTree::produce_intersections_leaf(const TreeNode& node, int segment_index)
+void SegmentTree::produce_intersections_leaf(const TreeNode& node, int32_t segment_index)
 {
    const RectF& bounds_a = _segments.elementBounds(segment_index);
    const LineF line_a = _segments.lineAt(segment_index);
 
-   for (int index_slot = node.index.interval.first; index_slot < node.index.interval.last; ++index_slot)
+   for (int32_t index_slot = node.index.interval.first; index_slot < node.index.interval.last; ++index_slot)
    {
-      const int other_index = _index[index_slot];
+      const int32_t other_index = _index[index_slot];
       if (other_index >= segment_index)
       {
          continue;
@@ -388,7 +390,7 @@ void SegmentTree::produce_intersections_leaf(const TreeNode& node, int segment_i
       const LineF line_b = _segments.lineAt(other_index);
       intersect_lines(line_a, line_b, _intersections);
 
-      for (int intersection_index = 0; intersection_index < _intersections.size(); ++intersection_index)
+      for (int32_t intersection_index = 0; intersection_index < _intersections.size(); ++intersection_index)
       {
          const SegmentIntersection& seg_isect = _intersections.at(intersection_index);
 
@@ -410,10 +412,10 @@ void SegmentTree::produce_intersections_leaf(const TreeNode& node, int segment_i
 
 void SegmentTree::produce_intersections(
    const TreeNode& node,
-   int segment_index,
+   int32_t segment_index,
    const RectF& segment_bounds,
    const RectF& node_bounds,
-   int axis
+   int32_t axis
 )
 {
    if (node.leaf)
@@ -438,7 +440,7 @@ void SegmentTree::produce_intersections(
    }
 }
 
-void SegmentTree::produce_intersections(int segment_index)
+void SegmentTree::produce_intersections(int32_t segment_index)
 {
    const RectF& seg_bounds = _segments.elementBounds(segment_index);
    produce_intersections(_tree[0], segment_index, seg_bounds, _bounds, 0);
@@ -454,7 +456,7 @@ public:
    void produce_intersections(PathSegments& segments)
    {
       SegmentTree tree(segments);
-      for (int segment_index = 0; segment_index < segments.segments(); ++segment_index)
+      for (int32_t segment_index = 0; segment_index < segments.segments(); ++segment_index)
       {
          tree.produce_intersections(segment_index);
       }
@@ -465,7 +467,7 @@ public:
 // Angle helper  — maps a direction vector to a 0-128 monotone angle scale
 // ---------------------------------------------------------------------------
 
-static double compute_angle(const PointF& direction)
+double compute_angle(const PointF& direction)
 {
    if (direction.x == 0.0)
    {
@@ -501,10 +503,10 @@ static double compute_angle(const PointF& direction)
 // Graph helpers
 // ---------------------------------------------------------------------------
 
-static int common_edge(const WingedEdge& graph, int vertex_a, int vertex_b)
+int32_t common_edge(const WingedEdge& graph, int32_t vertex_a, int32_t vertex_b)
 {
-   const PathVertex* vertex_ptr_a = graph.vertex(vertex_a);
-   const PathVertex* vertex_ptr_b = graph.vertex(vertex_b);
+   const PathVertex* const vertex_ptr_a = graph.vertex(vertex_a);
+   const PathVertex* const vertex_ptr_b = graph.vertex(vertex_b);
 
    if (!vertex_ptr_a || !vertex_ptr_b)
    {
@@ -522,7 +524,7 @@ static int common_edge(const WingedEdge& graph, int vertex_a, int vertex_b)
 
    do
    {
-      const PathEdge* edge_ptr = graph.edge(status.edge);
+      const PathEdge* const edge_ptr = graph.edge(status.edge);
       if ((edge_ptr->first == vertex_a && edge_ptr->second == vertex_b) || (edge_ptr->first == vertex_b && edge_ptr->second == vertex_a))
       {
          return status.edge;
@@ -534,9 +536,9 @@ static int common_edge(const WingedEdge& graph, int vertex_a, int vertex_b)
    return -1;
 }
 
-static void add_line_to(PainterPath& path, const PointF& target_point)
+void add_line_to(PainterPath& path, const PointF& target_point)
 {
-   const int element_count = path.elementCount();
+   const auto element_count = path.elementCount();
    if (element_count >= 2)
    {
       const PainterPath::Element& middle = path.elementAt(element_count - 1);
@@ -557,20 +559,20 @@ static void add_line_to(PainterPath& path, const PointF& target_point)
    path.lineTo(target_point.x, target_point.y);
 }
 
-static void add_edge_to_path(PainterPath& path, const WingedEdge& graph, int edge_index, PathEdge::Traversal traversal)
+void add_edge_to_path(PainterPath& path, const WingedEdge& graph, int32_t edge_index, PathEdge::Traversal traversal)
 {
    WingedEdge::TraversalStatus status;
    status.edge = edge_index;
    status.traversal = traversal;
    status.direction = PathEdge::Direction::Forward;
 
-   const PathVertex* start_vertex = graph.vertex(graph.edge(edge_index)->first);
+   const PathVertex* const start_vertex = graph.vertex(graph.edge(edge_index)->first);
    path.moveTo(start_vertex->x, start_vertex->y);
 
    do
    {
-      const PathEdge* edge_ptr = graph.edge(status.edge);
-      const PathVertex* target_vertex = graph.vertex(edge_ptr->vertex(status.direction));
+      const PathEdge* const edge_ptr = graph.edge(status.edge);
+      const PathVertex* const target_vertex = graph.vertex(edge_ptr->vertex(status.direction));
       add_line_to(path, {target_vertex->x, target_vertex->y});
 
       if (status.traversal == PathEdge::Traversal::Left)
@@ -606,7 +608,7 @@ WingedEdge::WingedEdge(const PainterPath& subject, const PainterPath& clip)
 
 WingedEdge::TraversalStatus WingedEdge::next(const TraversalStatus& status) const
 {
-   const PathEdge* current_edge = edge(status.edge);
+   const PathEdge* const current_edge = edge(status.edge);
    assert(current_edge);
 
    TraversalStatus result;
@@ -614,7 +616,7 @@ WingedEdge::TraversalStatus WingedEdge::next(const TraversalStatus& status) cons
    result.traversal = status.traversal;
    result.direction = status.direction;
 
-   const PathEdge* result_edge = edge(result.edge);
+   const PathEdge* const result_edge = edge(result.edge);
    assert(result_edge);
 
    if (current_edge->vertex(status.direction) == result_edge->vertex(status.direction))
@@ -625,10 +627,10 @@ WingedEdge::TraversalStatus WingedEdge::next(const TraversalStatus& status) cons
    return result;
 }
 
-double WingedEdge::delta(int vertex_index, int edge_a, int edge_b) const
+double WingedEdge::delta(int32_t vertex_index, int32_t edge_a, int32_t edge_b) const
 {
-   const PathEdge* edge_ptr_a = edge(edge_a);
-   const PathEdge* edge_ptr_b = edge(edge_b);
+   const PathEdge* const edge_ptr_a = edge(edge_a);
+   const PathEdge* const edge_ptr_b = edge(edge_b);
 
    double angle_a = edge_ptr_a->angle;
    double angle_b = edge_ptr_b->angle;
@@ -655,16 +657,16 @@ double WingedEdge::delta(int vertex_index, int edge_a, int edge_b) const
    return result;
 }
 
-WingedEdge::TraversalStatus WingedEdge::findInsertStatus(int vertex_index, int edge_index) const
+WingedEdge::TraversalStatus WingedEdge::findInsertStatus(int32_t vertex_index, int32_t edge_index) const
 {
-   const PathVertex* vertex_ptr = vertex(vertex_index);
+   const PathVertex* const vertex_ptr = vertex(vertex_index);
 
    assert(vertex_ptr);
    assert(edge_index >= 0);
    assert(vertex_ptr->edge >= 0);
 
    double smallest_delta = 128.0;
-   int best_edge = vertex_ptr->edge;
+   int32_t best_edge = vertex_ptr->edge;
 
    TraversalStatus status;
    status.direction = edge(vertex_ptr->edge)->directionTo(vertex_index);
@@ -700,9 +702,9 @@ WingedEdge::TraversalStatus WingedEdge::findInsertStatus(int vertex_index, int e
    return status;
 }
 
-void WingedEdge::removeEdge(int edge_index)
+void WingedEdge::removeEdge(int32_t edge_index)
 {
-   PathEdge* edge_ptr = edge(edge_index);
+   PathEdge* const edge_ptr = edge(edge_index);
 
    TraversalStatus status;
    status.direction = PathEdge::Direction::Forward;
@@ -733,14 +735,14 @@ void WingedEdge::removeEdge(int edge_index)
    edge_ptr->setNext(PathEdge::Direction::Forward, edge_index);
    edge_ptr->setNext(PathEdge::Direction::Backward, edge_index);
 
-   PathVertex* tail_vertex = vertex(edge_ptr->first);
-   PathVertex* head_vertex = vertex(edge_ptr->second);
+   PathVertex* const tail_vertex = vertex(edge_ptr->first);
+   PathVertex* const head_vertex = vertex(edge_ptr->second);
 
    tail_vertex->edge = backward_right.edge;
    head_vertex->edge = forward_right.edge;
 }
 
-int WingedEdge::insert(const PathVertex& vertex_to_insert)
+int32_t WingedEdge::insert(const PathVertex& vertex_to_insert)
 {
    if (!_vertices.isEmpty())
    {
@@ -750,7 +752,7 @@ int WingedEdge::insert(const PathVertex& vertex_to_insert)
          return _vertices.size() - 1;
       }
 
-      for (int vertex_index = 0; vertex_index < _vertices.size(); ++vertex_index)
+      for (int32_t vertex_index = 0; vertex_index < _vertices.size(); ++vertex_index)
       {
          const PathVertex& existing_vertex = _vertices.at(vertex_index);
          if (fuzzy_compare(existing_vertex.x, vertex_to_insert.x) && fuzzy_compare(existing_vertex.y, vertex_to_insert.y))
@@ -764,21 +766,21 @@ int WingedEdge::insert(const PathVertex& vertex_to_insert)
    return _vertices.size() - 1;
 }
 
-int WingedEdge::addEdge(const PointF& point_a, const PointF& point_b)
+int32_t WingedEdge::addEdge(const PointF& point_a, const PointF& point_b)
 {
-   const int first_index = insert(PathVertex(point_a));
-   const int second_index = insert(PathVertex(point_b));
+   const auto first_index = insert(PathVertex(point_a));
+   const auto second_index = insert(PathVertex(point_b));
    return addEdge(first_index, second_index);
 }
 
-int WingedEdge::addEdge(int first_vertex_index, int second_vertex_index)
+int32_t WingedEdge::addEdge(int32_t first_vertex_index, int32_t second_vertex_index)
 {
    if (first_vertex_index == second_vertex_index)
    {
       return -1;
    }
 
-   const int existing_edge = common_edge(*this, first_vertex_index, second_vertex_index);
+   const auto existing_edge = common_edge(*this, first_vertex_index, second_vertex_index);
    if (existing_edge >= 0)
    {
       return existing_edge;
@@ -786,11 +788,11 @@ int WingedEdge::addEdge(int first_vertex_index, int second_vertex_index)
 
    _edges << PathEdge(first_vertex_index, second_vertex_index);
 
-   const int new_edge_index = _edges.size() - 1;
+   const auto new_edge_index = _edges.size() - 1;
 
-   PathVertex* first_vertex_ptr = vertex(first_vertex_index);
-   PathVertex* second_vertex_ptr = vertex(second_vertex_index);
-   PathEdge* new_edge_ptr = edge(new_edge_index);
+   PathVertex* const first_vertex_ptr = vertex(first_vertex_index);
+   PathVertex* const second_vertex_ptr = vertex(second_vertex_index);
+   PathEdge* const new_edge_ptr = edge(new_edge_index);
 
    const PointF tangent{second_vertex_ptr->x - first_vertex_ptr->x, second_vertex_ptr->y - first_vertex_ptr->y};
    new_edge_ptr->angle = compute_angle(tangent);
@@ -800,12 +802,12 @@ int WingedEdge::addEdge(int first_vertex_index, int second_vertex_index)
       new_edge_ptr->inv_angle -= 128.0;
    }
 
-   PathVertex* vertex_ptrs[2] = {first_vertex_ptr, second_vertex_ptr};
-   PathEdge::Direction side_directions[2] = {PathEdge::Direction::Backward, PathEdge::Direction::Forward};
+   PathVertex* const vertex_ptrs[2] = {first_vertex_ptr, second_vertex_ptr};
+   const PathEdge::Direction side_directions[2] = {PathEdge::Direction::Backward, PathEdge::Direction::Forward};
 
-   for (int side_index = 0; side_index < 2; ++side_index)
+   for (int32_t side_index = 0; side_index < 2; ++side_index)
    {
-      PathVertex* current_vertex_ptr = vertex_ptrs[side_index];
+      PathVertex* const current_vertex_ptr = vertex_ptrs[side_index];
       const PathEdge::Direction current_dir = side_directions[side_index];
 
       if (current_vertex_ptr->edge < 0)
@@ -815,21 +817,21 @@ int WingedEdge::addEdge(int first_vertex_index, int second_vertex_index)
       }
       else
       {
-         const int current_vertex_index = new_edge_ptr->vertex(current_dir);
+         const int32_t current_vertex_index = new_edge_ptr->vertex(current_dir);
          assert(vertex(current_vertex_index) == vertex_ptrs[side_index]);
 
          TraversalStatus status_after = findInsertStatus(current_vertex_index, new_edge_index);
-         PathEdge* edge_after = edge(status_after.edge);
+         PathEdge* const edge_after = edge(status_after.edge);
 
          TraversalStatus status_before = next(status_after);
          status_before.flipDirection();
-         PathEdge* edge_before = edge(status_before.edge);
+         PathEdge* const edge_before = edge(status_before.edge);
 
          edge_after->setNext(status_after.traversal, status_after.direction, new_edge_index);
          edge_before->setNext(status_before.traversal, status_before.direction, new_edge_index);
 
-         const int after_edge_index = status_after.edge;
-         const int before_edge_index = status_before.edge;
+         const auto after_edge_index = status_after.edge;
+         const auto before_edge_index = status_before.edge;
 
          status_after = next(status_after);
          status_before = next(status_before);
@@ -860,18 +862,18 @@ void WingedEdge::intersectAndAdd()
 
    _segments.mergePoints();
 
-   for (int point_index = 0; point_index < _segments.points(); ++point_index)
+   for (int32_t point_index = 0; point_index < _segments.points(); ++point_index)
    {
       static_cast<void>(addVertex(_segments.pointAt(point_index)));
    }
 
    DataBuffer<PathSegments::Intersection> local_intersections(_segments.segments());
 
-   for (int segment_index = 0; segment_index < _segments.segments(); ++segment_index)
+   for (int32_t segment_index = 0; segment_index < _segments.segments(); ++segment_index)
    {
       local_intersections.reset();
 
-      const int path_id = _segments.pathId(segment_index);
+      const auto path_id = _segments.pathId(segment_index);
 
       const PathSegments::Intersection* isect = _segments.intersectionAt(segment_index);
       while (isect)
@@ -889,16 +891,17 @@ void WingedEdge::intersectAndAdd()
 
       std::ranges::sort(local_intersections);
 
-      int current_vertex = _segments.segmentAt(segment_index).va;
-      const int end_vertex = _segments.segmentAt(segment_index).vb;
+      auto current_vertex = _segments.segmentAt(segment_index).va;
+      const auto end_vertex = _segments.segmentAt(segment_index).vb;
 
-      for (int isect_index = 0; isect_index < local_intersections.size(); ++isect_index)
+      for (int32_t isect_index = 0; isect_index < local_intersections.size(); ++isect_index)
       {
          const PathSegments::Intersection& current_isect = local_intersections.at(isect_index);
-         PathEdge* new_edge_ptr = edge(addEdge(current_vertex, current_isect.vertex));
+         PathEdge* const new_edge_ptr = edge(addEdge(current_vertex, current_isect.vertex));
          if (new_edge_ptr)
          {
-            const int winding_dir = _segments.pointAt(current_vertex).y < _segments.pointAt(current_isect.vertex).y ? 1 : -1;
+            const int32_t winding_dir =
+               _segments.pointAt(current_vertex).y < _segments.pointAt(current_isect.vertex).y ? int32_t{1} : int32_t{-1};
             if (path_id == 0)
             {
                new_edge_ptr->winding_a += winding_dir;
@@ -911,10 +914,10 @@ void WingedEdge::intersectAndAdd()
          current_vertex = current_isect.vertex;
       }
 
-      PathEdge* final_edge_ptr = edge(addEdge(current_vertex, end_vertex));
+      PathEdge* const final_edge_ptr = edge(addEdge(current_vertex, end_vertex));
       if (final_edge_ptr)
       {
-         const int winding_dir = _segments.pointAt(current_vertex).y < _segments.pointAt(end_vertex).y ? 1 : -1;
+         const int32_t winding_dir = _segments.pointAt(current_vertex).y < _segments.pointAt(end_vertex).y ? int32_t{1} : int32_t{-1};
          if (path_id == 0)
          {
             final_edge_ptr->winding_a += winding_dir;
@@ -929,19 +932,19 @@ void WingedEdge::intersectAndAdd()
 
 bool WingedEdge::isInside(double x, double y) const
 {
-   int winding = 0;
-   for (int edge_index = 0; edge_index < edgeCount(); ++edge_index)
+   int32_t winding = 0;
+   for (int32_t edge_index = 0; edge_index < edgeCount(); ++edge_index)
    {
-      const PathEdge* edge_ptr = edge(edge_index);
+      const PathEdge* const edge_ptr = edge(edge_index);
 
-      const int winding_weight = ((edge_ptr->flag >> 4) ^ (edge_ptr->flag >> 5)) & 1;
+      const auto winding_weight = ((edge_ptr->flag >> 4) ^ (edge_ptr->flag >> 5)) & 1;
       if (!winding_weight)
       {
          continue;
       }
 
-      const PathVertex* vertex_a = vertex(edge_ptr->first);
-      const PathVertex* vertex_b = vertex(edge_ptr->second);
+      const PathVertex* const vertex_a = vertex(edge_ptr->first);
+      const PathVertex* const vertex_b = vertex(edge_ptr->second);
 
       if ((vertex_a->y < y && vertex_b->y > y) || (vertex_a->y > y && vertex_b->y < y))
       {
@@ -957,10 +960,10 @@ bool WingedEdge::isInside(double x, double y) const
 
 void WingedEdge::simplify()
 {
-   for (int edge_index = 0; edge_index < edgeCount(); ++edge_index)
+   for (int32_t edge_index = 0; edge_index < edgeCount(); ++edge_index)
    {
-      const PathEdge* edge_ptr = edge(edge_index);
-      const int both_sides_flag = 0x3 << 4;
+      const PathEdge* const edge_ptr = edge(edge_index);
+      const int32_t both_sides_flag = 0x3 << 4;
       if ((edge_ptr->flag & both_sides_flag) == both_sides_flag)
       {
          removeEdge(edge_index);
@@ -973,9 +976,9 @@ PainterPath WingedEdge::toPath() const
 {
    PainterPath result;
 
-   for (int edge_index = 0; edge_index < edgeCount(); ++edge_index)
+   for (int32_t edge_index = 0; edge_index < edgeCount(); ++edge_index)
    {
-      const PathEdge* edge_ptr = edge(edge_index);
+      const PathEdge* const edge_ptr = edge(edge_index);
 
       if (edge_ptr->flag & 16)
       {

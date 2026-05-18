@@ -5,6 +5,8 @@
 #include "pathsegments.h"
 #include "pathvertex.h"
 
+#include <cstdint>
+
 class PainterPath;
 
 /// \brief Planar winged-edge graph built from one or two PainterPaths,
@@ -15,7 +17,7 @@ public:
    /// \brief Current position in a linked-list traversal around the graph.
    struct TraversalStatus
    {
-      int edge = -1;                                                 //!< Current edge index.
+      int32_t edge = -1;                                             //!< Current edge index.
       PathEdge::Traversal traversal = PathEdge::Traversal::Right;    //!< Which face side.
       PathEdge::Direction direction = PathEdge::Direction::Forward;  //!< Travel direction.
 
@@ -30,19 +32,19 @@ public:
    void simplify();
    [[nodiscard]] PainterPath toPath() const;
 
-   [[nodiscard]] int edgeCount() const;
-   [[nodiscard]] PathEdge* edge(int edge_index);
-   [[nodiscard]] const PathEdge* edge(int edge_index) const;
+   [[nodiscard]] int32_t edgeCount() const;
+   [[nodiscard]] PathEdge* edge(int32_t edge_index);
+   [[nodiscard]] const PathEdge* edge(int32_t edge_index) const;
 
-   [[nodiscard]] int vertexCount() const;
-   [[nodiscard]] int addVertex(const PointF& point);
-   [[nodiscard]] PathVertex* vertex(int vertex_index);
-   [[nodiscard]] const PathVertex* vertex(int vertex_index) const;
+   [[nodiscard]] int32_t vertexCount() const;
+   [[nodiscard]] int32_t addVertex(const PointF& point);
+   [[nodiscard]] PathVertex* vertex(int32_t vertex_index);
+   [[nodiscard]] const PathVertex* vertex(int32_t vertex_index) const;
 
    [[nodiscard]] TraversalStatus next(const TraversalStatus& status) const;
 
-   [[nodiscard]] int addEdge(const PointF& point_a, const PointF& point_b);
-   [[nodiscard]] int addEdge(int vertex_a, int vertex_b);
+   [[nodiscard]] int32_t addEdge(const PointF& point_a, const PointF& point_b);
+   [[nodiscard]] int32_t addEdge(int32_t vertex_a, int32_t vertex_b);
 
    [[nodiscard]] bool isInside(double x, double y) const;
 
@@ -51,48 +53,48 @@ public:
 
 private:
    void intersectAndAdd();
-   void removeEdge(int edge_index);
-   int insert(const PathVertex& vertex);
-   TraversalStatus findInsertStatus(int vertex_index, int edge_index) const;
-   double delta(int vertex_index, int edge_a, int edge_b) const;
+   void removeEdge(int32_t edge_index);
+   int32_t insert(const PathVertex& vertex);
+   TraversalStatus findInsertStatus(int32_t vertex_index, int32_t edge_index) const;
+   double delta(int32_t vertex_index, int32_t edge_a, int32_t edge_b) const;
 
    DataBuffer<PathEdge> _edges;       //!< Flat edge storage.
    DataBuffer<PathVertex> _vertices;  //!< Flat vertex storage.
    PathSegments _segments;            //!< Segment list built from the input paths.
 };
 
-inline int WingedEdge::edgeCount() const
+inline int32_t WingedEdge::edgeCount() const
 {
    return _edges.size();
 }
 
-inline PathEdge* WingedEdge::edge(int edge_index)
+inline PathEdge* WingedEdge::edge(int32_t edge_index)
 {
    return edge_index < 0 ? nullptr : &_edges.at(edge_index);
 }
 
-inline const PathEdge* WingedEdge::edge(int edge_index) const
+inline const PathEdge* WingedEdge::edge(int32_t edge_index) const
 {
    return edge_index < 0 ? nullptr : &_edges.at(edge_index);
 }
 
-inline int WingedEdge::vertexCount() const
+inline int32_t WingedEdge::vertexCount() const
 {
    return _vertices.size();
 }
 
-inline int WingedEdge::addVertex(const PointF& point)
+inline int32_t WingedEdge::addVertex(const PointF& point)
 {
    _vertices << PathVertex(point);
    return _vertices.size() - 1;
 }
 
-inline PathVertex* WingedEdge::vertex(int vertex_index)
+inline PathVertex* WingedEdge::vertex(int32_t vertex_index)
 {
    return vertex_index < 0 ? nullptr : &_vertices.at(vertex_index);
 }
 
-inline const PathVertex* WingedEdge::vertex(int vertex_index) const
+inline const PathVertex* WingedEdge::vertex(int32_t vertex_index) const
 {
    return vertex_index < 0 ? nullptr : &_vertices.at(vertex_index);
 }

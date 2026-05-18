@@ -1,5 +1,6 @@
 #include "pathmerger.h"
 
+#include <cstdint>
 #include <format>
 #include <fstream>
 #include <iostream>
@@ -113,9 +114,9 @@ void PathMerger::loadObj(const std::string& filename)
                   std::string vert_string;
                   line_stream >> vert_string;
 
-                  auto index_pos = 0u;
-                  auto index_normal = 0u;
-                  auto index_texcoord = 0u;
+                  uint32_t index_pos = 0;
+                  uint32_t index_normal = 0;
+                  uint32_t index_texcoord = 0;
 
                   slash_1 = vert_string.find("/");
 
@@ -169,7 +170,7 @@ void PathMerger::loadObj(const std::string& filename)
                   vertices.push_back(prev_triangle_vertex);
                   vertices.push_back(curr_triangle_vertex);
 
-                  for (auto fan_index = 3u; fan_index < face.size(); fan_index++)
+                  for (auto fan_index = size_t{3}; fan_index < face.size(); fan_index++)
                   {
                      prev_vertex_index = curr_vertex_index;
                      curr_vertex_index = face[fan_index];
@@ -188,7 +189,7 @@ void PathMerger::loadObj(const std::string& filename)
                }
                else
                {
-                  for (auto face_vertex_index = 0u; face_vertex_index < face.size(); face_vertex_index++)
+                  for (auto face_vertex_index = size_t{0}; face_vertex_index < face.size(); face_vertex_index++)
                   {
                      face_indices.push_back(face[face_vertex_index]);
                      vertices.push_back(vertices[face_vertex_index]);
@@ -209,9 +210,9 @@ void PathMerger::loadObj(const std::string& filename)
    for (auto& face : faces)
    {
       std::vector<PointF> polygon;
-      for (auto face_vertex_index = 0u; face_vertex_index < face.size(); face_vertex_index++)
+      for (const auto face_vertex_value : face)
       {
-         const auto& point = points[face[face_vertex_index]];
+         const auto& point = points[face_vertex_value];
          polygon.push_back({static_cast<double>(point.x), static_cast<double>(point.y)});
       }
       addPolygon(polygon);

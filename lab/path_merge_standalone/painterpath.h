@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 #include "pointf.h"
@@ -38,15 +39,15 @@ public:
    void moveTo(double x, double y);
    void lineTo(double x, double y);
 
-   [[nodiscard]] int elementCount() const;
-   [[nodiscard]] const Element& elementAt(int index) const;
+   [[nodiscard]] int32_t elementCount() const;
+   [[nodiscard]] const Element& elementAt(int32_t index) const;
 
    [[nodiscard]] bool isEmpty() const;
 
    [[nodiscard]] FillRule fillRule() const;
    void setFillRule(FillRule rule);
 
-   void setElementPositionAt(int index, double x, double y);
+   void setElementPositionAt(int32_t index, double x, double y);
 
    [[nodiscard]] PainterPath simplified() const;
    [[nodiscard]] std::vector<std::vector<PointF>> toSubpathPolygons() const;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstdint>
 #include <vector>
 
 /// \brief A flat, resizable buffer backed by std::vector.
@@ -8,7 +9,7 @@ template <typename T>
 class DataBuffer
 {
 public:
-   explicit DataBuffer(int reserve_count = 0)
+   explicit DataBuffer(int32_t reserve_count = 0)
    {
       if (reserve_count > 0)
       {
@@ -24,9 +25,9 @@ public:
    {
       return _data.empty();
    }
-   [[nodiscard]] int size() const
+   [[nodiscard]] int32_t size() const
    {
-      return static_cast<int>(_data.size());
+      return static_cast<int32_t>(_data.size());
    }
    [[nodiscard]] T* data()
    {
@@ -37,12 +38,12 @@ public:
       return _data.data();
    }
 
-   [[nodiscard]] T& at(int index)
+   [[nodiscard]] T& at(int32_t index)
    {
       assert(index >= 0 && index < size());
       return _data[index];
    }
-   [[nodiscard]] const T& at(int index) const
+   [[nodiscard]] const T& at(int32_t index) const
    {
       assert(index >= 0 && index < size());
       return _data[index];
@@ -96,11 +97,11 @@ public:
       assert(!isEmpty());
       _data.pop_back();
    }
-   void resize(int new_size)
+   void resize(int32_t new_size)
    {
       _data.resize(static_cast<size_t>(new_size));
    }
-   void reserve(int new_capacity)
+   void reserve(int32_t new_capacity)
    {
       _data.reserve(static_cast<size_t>(new_capacity));
    }

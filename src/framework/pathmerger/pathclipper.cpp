@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <ranges>
 #include <vector>
 
@@ -21,7 +22,7 @@ inline bool fuzzyCompare(double first, double second)
 }
 
 // Marks a connected face as inside (to be included in the result).
-void traverseFace(WingedEdge& graph, int edge_index, PathEdge::Traversal traversal)
+void traverseFace(WingedEdge& graph, int32_t edge_index, PathEdge::Traversal traversal)
 {
    WingedEdge::TraversalStatus status;
    status.edge = edge_index;
@@ -30,15 +31,15 @@ void traverseFace(WingedEdge& graph, int edge_index, PathEdge::Traversal travers
 
    do
    {
-      const int face_flag = status.traversal == PathEdge::Traversal::Left ? 1 : 2;
-      PathEdge* edge_ptr = graph.edge(status.edge);
+      const int32_t face_flag = status.traversal == PathEdge::Traversal::Left ? 1 : 2;
+      PathEdge* const edge_ptr = graph.edge(status.edge);
       edge_ptr->flag |= (face_flag | (face_flag << 4));
       status = graph.next(status);
    } while (status.edge != edge_index);
 }
 
 // Marks a connected face as outside (not included in the result).
-void clearFace(WingedEdge& graph, int edge_index, PathEdge::Traversal traversal)
+void clearFace(WingedEdge& graph, int32_t edge_index, PathEdge::Traversal traversal)
 {
    WingedEdge::TraversalStatus status;
    status.edge = edge_index;
@@ -47,7 +48,7 @@ void clearFace(WingedEdge& graph, int edge_index, PathEdge::Traversal traversal)
 
    do
    {
-      const int face_flag = status.traversal == PathEdge::Traversal::Left ? 1 : 2;
+      const int32_t face_flag = status.traversal == PathEdge::Traversal::Left ? 1 : 2;
       graph.edge(status.edge)->flag |= face_flag;
       status = graph.next(status);
    } while (status.edge != edge_index);
@@ -56,8 +57,8 @@ void clearFace(WingedEdge& graph, int edge_index, PathEdge::Traversal traversal)
 // An edge that crosses the sweep line at a given x coordinate.
 struct CrossingEdge
 {
-   int edge = -1;   //!< Index of the crossing edge.
-   double x = 0.0;  //!< X coordinate of the crossing.
+   int32_t edge = -1;  //!< Index of the crossing edge.
+   double x = 0.0;     //!< X coordinate of the crossing.
 
    bool operator==(const CrossingEdge& other) const
    {
@@ -73,11 +74,11 @@ struct CrossingEdge
 std::vector<CrossingEdge> findCrossings(const WingedEdge& graph, double y)
 {
    std::vector<CrossingEdge> crossings;
-   for (int edge_index = 0; edge_index < graph.edgeCount(); ++edge_index)
+   for (int32_t edge_index = 0; edge_index < graph.edgeCount(); ++edge_index)
    {
-      const PathEdge* edge_ptr = graph.edge(edge_index);
-      const PathVertex* vertex_a = graph.vertex(edge_ptr->first);
-      const PathVertex* vertex_b = graph.vertex(edge_ptr->second);
+      const PathEdge* const edge_ptr = graph.edge(edge_index);
+      const PathVertex* const vertex_a = graph.vertex(edge_ptr->first);
+      const PathVertex* const vertex_b = graph.vertex(edge_ptr->second);
 
       if ((vertex_a->y < y && vertex_b->y > y) || (vertex_a->y > y && vertex_b->y < y))
       {
@@ -92,8 +93,8 @@ std::vector<CrossingEdge> findCrossings(const WingedEdge& graph, double y)
 
 PathClipper::PathClipper(const PainterPath& subject, const PainterPath& clip) : _subject_path(subject), _clip_path(clip)
 {
-   _a_mask = subject.fillRule() == PainterPath::FillRule::Winding ? ~0 : 0x1;
-   _b_mask = clip.fillRule() == PainterPath::FillRule::Winding ? ~0 : 0x1;
+   _a_mask = subject.fillRule() == PainterPath::FillRule::Winding ? ~int32_t{0} : int32_t{0x1};
+   _b_mask = clip.fillRule() == PainterPath::FillRule::Winding ? ~int32_t{0} : int32_t{0x1};
 }
 
 PainterPath PathClipper::clip(Operation operation)
@@ -111,7 +112,7 @@ bool PathClipper::doClip(WingedEdge& graph, ClipperMode mode)
 {
    std::vector<double> y_coordinates;
    y_coordinates.reserve(graph.vertexCount());
-   for (int vertex_index = 0; vertex_index < graph.vertexCount(); ++vertex_index)
+   for (int32_t vertex_index = 0; vertex_index < graph.vertexCount(); ++vertex_index)
    {
       y_coordinates.push_back(graph.vertex(vertex_index)->y);
    }
@@ -123,20 +124,20 @@ bool PathClipper::doClip(WingedEdge& graph, ClipperMode mode)
    do
    {
       found = false;
-      int best_edge_index = 0;
+      int32_t best_edge_index = 0;
       double max_height = 0.0;
 
-      for (int edge_index = 0; edge_index < graph.edgeCount(); ++edge_index)
+      for (int32_t edge_index = 0; edge_index < graph.edgeCount(); ++edge_index)
       {
-         PathEdge* edge_ptr = graph.edge(edge_index);
+         PathEdge* const edge_ptr = graph.edge(edge_index);
 
          if ((edge_ptr->flag & 0x3) == 0x3)
          {
             continue;
          }
 
-         const PathVertex* vertex_a = graph.vertex(edge_ptr->first);
-         const PathVertex* vertex_b = graph.vertex(edge_ptr->second);
+         const PathVertex* const vertex_a = graph.vertex(edge_ptr->first);
+         const PathVertex* const vertex_b = graph.vertex(edge_ptr->second);
 
          if (fuzzyCompare(vertex_a->y, vertex_b->y))
          {
@@ -155,17 +156,15 @@ bool PathClipper::doClip(WingedEdge& graph, ClipperMode mode)
 
       if (found)
       {
-         PathEdge* edge_ptr = graph.edge(best_edge_index);
-         const PathVertex* vertex_a = graph.vertex(edge_ptr->first);
-         const PathVertex* vertex_b = graph.vertex(edge_ptr->second);
+         PathEdge* const edge_ptr = graph.edge(best_edge_index);
+         const PathVertex* const vertex_a = graph.vertex(edge_ptr->first);
+         const PathVertex* const vertex_b = graph.vertex(edge_ptr->second);
 
          const double min_y = std::min(vertex_a->y, vertex_b->y);
          const double max_y = std::max(vertex_a->y, vertex_b->y);
 
          auto fuzzy_find = [&](double target) -> std::vector<double>::iterator {
-            return std::find_if(
-               y_coordinates.begin(), y_coordinates.end(), [target](double value) { return fuzzyCompare(value, target); }
-            );
+            return std::find_if(y_coordinates.begin(), y_coordinates.end(), [target](double value) { return fuzzyCompare(value, target); });
          };
 
          const auto first_iter = fuzzy_find(min_y);
@@ -174,13 +173,13 @@ bool PathClipper::doClip(WingedEdge& graph, ClipperMode mode)
          assert(first_iter != y_coordinates.end());
          assert(first_iter != y_coordinates.end() - 1);
 
-         const int first_idx = static_cast<int>(first_iter - y_coordinates.begin());
-         const int last_idx = static_cast<int>(last_iter - y_coordinates.begin());
+         const auto first_idx = static_cast<int32_t>(first_iter - y_coordinates.begin());
+         const auto last_idx = static_cast<int32_t>(last_iter - y_coordinates.begin());
 
          double biggest_gap = y_coordinates[first_idx + 1] - y_coordinates[first_idx];
-         int best_gap_idx = first_idx;
+         int32_t best_gap_idx = first_idx;
 
-         for (int gap_idx = first_idx + 1; gap_idx < last_idx; ++gap_idx)
+         for (int32_t gap_idx = first_idx + 1; gap_idx < last_idx; ++gap_idx)
          {
             const double gap = y_coordinates[gap_idx + 1] - y_coordinates[gap_idx];
             if (gap > biggest_gap)
@@ -216,14 +215,14 @@ bool PathClipper::handleCrossingEdges(WingedEdge& graph, double y, ClipperMode m
    assert(!crossings.empty());
    std::ranges::sort(crossings);
 
-   int winding_a = 0;
-   int winding_b = 0;
-   int winding_d = 0;
+   int32_t winding_a = 0;
+   int32_t winding_b = 0;
+   int32_t winding_d = 0;
 
-   for (int crossing_index = 0; crossing_index < static_cast<int>(crossings.size()) - 1; ++crossing_index)
+   for (int32_t crossing_index = 0; crossing_index < static_cast<int32_t>(crossings.size()) - 1; ++crossing_index)
    {
-      const int edge_index = crossings[crossing_index].edge;
-      const PathEdge* edge_ptr = graph.edge(edge_index);
+      const int32_t edge_index = crossings[crossing_index].edge;
+      const PathEdge* const edge_ptr = graph.edge(edge_index);
 
       winding_a += edge_ptr->winding_a;
       winding_b += edge_ptr->winding_b;
@@ -231,7 +230,7 @@ bool PathClipper::handleCrossingEdges(WingedEdge& graph, double y, ClipperMode m
       const bool has_left = (edge_ptr->flag >> 4) & 1;
       const bool has_right = (edge_ptr->flag >> 4) & 2;
 
-      winding_d += static_cast<int>(has_left) ^ static_cast<int>(has_right);
+      winding_d += static_cast<int32_t>(has_left) ^ static_cast<int32_t>(has_right);
 
       const bool in_a = (winding_a & _a_mask) != 0;
       const bool in_b = (winding_b & _b_mask) != 0;

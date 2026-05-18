@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdint>
 
 namespace
 {
@@ -20,8 +21,8 @@ inline bool points_are_close(const PointF& point_a, const PointF& point_b)
 
 struct KdNode
 {
-   int point = -1;     //!< Index into the parent PathSegments point list.
-   int merged_id = -1; //!< Assigned merge-group id, or -1 if not yet visited.
+   int32_t point = -1;      //!< Index into the parent PathSegments point list.
+   int32_t merged_id = -1;  //!< Assigned merge-group id, or -1 if not yet visited.
    KdNode* left = nullptr;
    KdNode* right = nullptr;
 };
@@ -39,28 +40,32 @@ public:
 
    explicit KdPointTree(const PathSegments& segments);
 
-   int build(int begin, int end, int depth = 0);
+   int32_t build(int32_t begin, int32_t end, int32_t depth = 0);
 
-   KdNode* rootNode() { return _root_index >= 0 ? &_nodes.at(_root_index) : nullptr; }
+   KdNode* rootNode()
+   {
+      return _root_index >= 0 ? &_nodes.at(_root_index) : nullptr;
+   }
 
-   int nextId() { return _next_id++; }
+   int32_t nextId()
+   {
+      return _next_id++;
+   }
 
 private:
    friend class KdPointFinder;
 
    const PathSegments& _segments;
    DataBuffer<KdNode> _nodes;
-   int _root_index = -1;
-   int _next_id = 0;
+   int32_t _root_index = -1;
+   int32_t _next_id = 0;
 };
 
-KdPointTree::KdPointTree(const PathSegments& segments)
-   : _segments(segments)
-   , _nodes(segments.points())
+KdPointTree::KdPointTree(const PathSegments& segments) : _segments(segments), _nodes(segments.points())
 {
    _nodes.resize(segments.points());
 
-   for (int node_index = 0; node_index < _nodes.size(); ++node_index)
+   for (int32_t node_index = 0; node_index < _nodes.size(); ++node_index)
    {
       _nodes.at(node_index).point = node_index;
       _nodes.at(node_index).merged_id = -1;
@@ -72,16 +77,16 @@ KdPointTree::KdPointTree(const PathSegments& segments)
    }
 }
 
-int KdPointTree::build(int begin, int end, int depth)
+int32_t KdPointTree::build(int32_t begin, int32_t end, int32_t depth)
 {
    assert(end > begin);
 
-   const int split_axis = depth & 1;
+   const auto split_axis = depth & int32_t{1};
    const PointF& pivot_point = _segments.pointAt(_nodes.at(begin).point);
    const double pivot = split_axis == 0 ? pivot_point.x : pivot_point.y;
 
-   int first = begin + 1;
-   int last = end - 1;
+   int32_t first = begin + 1;
+   int32_t last = end - 1;
 
    while (first <= last)
    {
@@ -125,7 +130,7 @@ int KdPointTree::build(int begin, int end, int depth)
 }
 
 template <typename Functor>
-void traverseKdTree(KdNode& node, Functor& functor, int depth = 0)
+void traverseKdTree(KdNode& node, Functor& functor, int32_t depth = 0)
 {
    KdPointTree::Traversal status = functor(node, depth);
 
@@ -149,17 +154,15 @@ void traverseKdTree(KdNode& node, Functor& functor, int depth = 0)
 class KdPointFinder
 {
 public:
-   KdPointFinder(int target_point_index, const PathSegments& segments, KdPointTree& tree)
-      : _result(-1)
-      , _segments(segments)
-      , _tree(tree)
+   KdPointFinder(int32_t target_point_index, const PathSegments& segments, KdPointTree& tree)
+       : _result(-1), _segments(segments), _tree(tree)
    {
       const PointF& target = segments.pointAt(target_point_index);
       _target_components[0] = target.x;
       _target_components[1] = target.y;
    }
 
-   KdPointTree::Traversal operator()(KdNode& node, int depth)
+   KdPointTree::Traversal operator()(KdNode& node, int32_t depth)
    {
       if (_result != -1)
       {
@@ -169,8 +172,8 @@ public:
       const PointF& node_point = _segments.pointAt(node.point);
       const double pivot_components[2] = {node_point.x, node_point.y};
 
-      const int primary_axis = depth & 1;
-      const int secondary_axis = (depth + 1) & 1;
+      const auto primary_axis = depth & int32_t{1};
+      const auto secondary_axis = (depth + 1) & int32_t{1};
 
       if (MathHelpers::fuzzyIsNull(pivot_components[primary_axis] - _target_components[primary_axis]))
       {
@@ -195,26 +198,26 @@ public:
       }
    }
 
-   int result() const { return _result; }
+   int32_t result() const
+   {
+      return _result;
+   }
 
 private:
    double _target_components[2];
-   int _result;
+   int32_t _result;
    const PathSegments& _segments;
    KdPointTree& _tree;
 };
 
-} // namespace
+}  // namespace
 
 // ---------------------------------------------------------------------------
 // PathSegments
 // ---------------------------------------------------------------------------
 
-PathSegments::PathSegments(int reserve_count)
-   : _points(reserve_count)
-   , _segments(reserve_count)
-   , _intersections(reserve_count)
-   , _path_id(0)
+PathSegments::PathSegments(int32_t reserve_count)
+    : _points(reserve_count), _segments(reserve_count), _intersections(reserve_count), _path_id(0)
 {
 }
 
@@ -229,18 +232,18 @@ void PathSegments::setPath(const PainterPath& path)
 
 void PathSegments::addPath(const PainterPath& path)
 {
-   const int first_new_segment = _segments.size();
+   const auto first_new_segment = _segments.size();
 
    bool has_move_to = false;
-   int last_move_to_vertex = 0;
-   int last_vertex = 0;
+   int32_t last_move_to_vertex = 0;
+   int32_t last_vertex = 0;
 
-   for (int element_index = 0; element_index < path.elementCount(); ++element_index)
+   for (int32_t element_index = 0; element_index < path.elementCount(); ++element_index)
    {
       const PainterPath::Element& element = path.elementAt(element_index);
 
       const PointF current_point{element.x, element.y};
-      int current_vertex = _points.size();
+      int32_t current_vertex = _points.size();
 
       if (element_index > 0 && points_are_close(_points.at(last_move_to_vertex), current_point))
       {
@@ -253,8 +256,8 @@ void PathSegments::addPath(const PainterPath& path)
 
       if (element.type == PainterPath::ElementType::MoveTo)
       {
-         if (has_move_to && last_vertex != last_move_to_vertex
-             && !points_are_close(_points.at(last_vertex), _points.at(last_move_to_vertex)))
+         if (has_move_to && last_vertex != last_move_to_vertex &&
+             !points_are_close(_points.at(last_vertex), _points.at(last_move_to_vertex)))
          {
             _segments << Segment(_path_id, last_vertex, last_move_to_vertex);
          }
@@ -268,13 +271,12 @@ void PathSegments::addPath(const PainterPath& path)
       }
    }
 
-   if (has_move_to && last_vertex != last_move_to_vertex
-       && !points_are_close(_points.at(last_vertex), _points.at(last_move_to_vertex)))
+   if (has_move_to && last_vertex != last_move_to_vertex && !points_are_close(_points.at(last_vertex), _points.at(last_move_to_vertex)))
    {
       _segments << Segment(_path_id, last_vertex, last_move_to_vertex);
    }
 
-   for (int segment_index = first_new_segment; segment_index < _segments.size(); ++segment_index)
+   for (int32_t segment_index = first_new_segment; segment_index < _segments.size(); ++segment_index)
    {
       const LineF line = lineAt(segment_index);
       double bx1 = line.p1.x;
@@ -304,9 +306,9 @@ void PathSegments::mergePoints()
    if (tree.rootNode())
    {
       DataBuffer<PointF> merged_points(points());
-      DataBuffer<int> point_index_mapping(points());
+      DataBuffer<int32_t> point_index_mapping(points());
 
-      for (int point_index = 0; point_index < points(); ++point_index)
+      for (int32_t point_index = 0; point_index < points(); ++point_index)
       {
          KdPointFinder finder(point_index, *this, tree);
          traverseKdTree(*tree.rootNode(), finder);
@@ -321,13 +323,13 @@ void PathSegments::mergePoints()
          point_index_mapping << finder.result();
       }
 
-      for (int segment_index = 0; segment_index < _segments.size(); ++segment_index)
+      for (int32_t segment_index = 0; segment_index < _segments.size(); ++segment_index)
       {
          _segments.at(segment_index).va = point_index_mapping.at(_segments.at(segment_index).va);
          _segments.at(segment_index).vb = point_index_mapping.at(_segments.at(segment_index).vb);
       }
 
-      for (int isect_index = 0; isect_index < _intersections.size(); ++isect_index)
+      for (int32_t isect_index = 0; isect_index < _intersections.size(); ++isect_index)
       {
          _intersections.at(isect_index).vertex = point_index_mapping.at(_intersections.at(isect_index).vertex);
       }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace PathMerge
 {
 
@@ -33,12 +35,12 @@ private:
    bool handleCrossingEdges(class WingedEdge& graph, double y, ClipperMode mode);
    bool doClip(class WingedEdge& graph, ClipperMode mode);
 
-   const PainterPath& _subject_path; //!< The path being clipped.
-   const PainterPath& _clip_path;    //!< The clip region (empty for Simplify).
+   const PainterPath& _subject_path;  //!< The path being clipped.
+   const PainterPath& _clip_path;     //!< The clip region (empty for Simplify).
    Operation _operation = Operation::Simplify;
 
-   int _a_mask = 0; //!< Winding mask for the subject path fill rule.
-   int _b_mask = 0; //!< Winding mask for the clip path fill rule.
+   int32_t _a_mask = 0;  //!< Winding mask for the subject path fill rule.
+   int32_t _b_mask = 0;  //!< Winding mask for the clip path fill rule.
 };
 
 }  // namespace PathMerge
