@@ -31,9 +31,9 @@ public:
    Stats saveObj(const std::string& filename) const;
 
 private:
-   PainterPath _path;        //!< Accumulated input path.
-   size_t _points_in = 0;   //!< Vertex count from the last loadObj call.
-   size_t _faces_in = 0;    //!< Face count from the last loadObj call.
+   PainterPath _path;      //!< Accumulated input path.
+   size_t _points_in = 0;  //!< Vertex count from the last loadObj call.
+   size_t _faces_in = 0;   //!< Face count from the last loadObj call.
 };
 
 }  // namespace PathMerge
