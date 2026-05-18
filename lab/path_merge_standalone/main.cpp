@@ -9,7 +9,7 @@
 
 #include <math.h>
 
-#include "painterpath.h"
+#include "pathmerger.h"
 #include "pointf.h"
 
 namespace
@@ -258,30 +258,22 @@ int main(int32_t argc, char** argv)
 
    readObj(input_file, points, faces);
 
-   std::vector<std::vector<PointF>> polys;
+   PathMerger merger;
    for (auto& face : faces)
    {
-      std::vector<PointF> poly;
+      std::vector<PointF> polygon;
 
       for (auto face_vertex_index = 0u; face_vertex_index < face.size(); face_vertex_index++)
       {
          const auto face_index = face[face_vertex_index];
          const auto& point = points[face_index];
-         poly.push_back({static_cast<double>(point.x), static_cast<double>(point.y)});
+         polygon.push_back({static_cast<double>(point.x), static_cast<double>(point.y)});
       }
 
-      polys.push_back(poly);
+      merger.addPolygon(polygon);
    }
 
-   PainterPath path;
-   for (auto& poly : polys)
-   {
-      path.addPolygon(poly);
-   }
-
-   PainterPath simplified = path.simplified();
-
-   auto simplified_polys = simplified.toSubpathPolygons();
+   auto simplified_polys = merger.simplified();
 
    std::vector<std::vector<uint32_t>> simplified_faces;
    std::vector<Vec3> simplified_points;
@@ -318,12 +310,12 @@ int main(int32_t argc, char** argv)
    writeObj(output_file, simplified_points, simplified_faces);
 
    std::println(
-      "optimised mesh written to '{}', points: {} -> {}, faces: {} -> {}, factor: {:.3f}",
+      "optimised mesh written to '{}', points: {} -> {}, faces: {} -> {}, factor: {:g}",
       output_file,
       points.size(),
       simplified_points.size(),
-      path.elementCount(),
-      simplified.elementCount(),
+      faces.size(),
+      simplified_polys.size(),
       simplified_points.size() / static_cast<float>(points.size())
    );
 

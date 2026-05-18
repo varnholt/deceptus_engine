@@ -12,16 +12,13 @@
 namespace
 {
 
-inline bool fuzzy_compare(double first, double second)
+inline bool fuzzyCompare(double first, double second)
 {
    return std::abs(first - second) * 1000000000000.0 <= std::min(std::abs(first), std::abs(second));
 }
 
-// ---------------------------------------------------------------------------
-// traverse_face — marks a connected face as inside (to be included in the result)
-// ---------------------------------------------------------------------------
-
-static void traverse_face(WingedEdge& graph, int edge_index, PathEdge::Traversal traversal)
+// Marks a connected face as inside (to be included in the result).
+void traverseFace(WingedEdge& graph, int edge_index, PathEdge::Traversal traversal)
 {
    WingedEdge::TraversalStatus status;
    status.edge = edge_index;
@@ -37,11 +34,8 @@ static void traverse_face(WingedEdge& graph, int edge_index, PathEdge::Traversal
    } while (status.edge != edge_index);
 }
 
-// ---------------------------------------------------------------------------
-// clear_face — marks a connected face as outside (not included in the result)
-// ---------------------------------------------------------------------------
-
-static void clear_face(WingedEdge& graph, int edge_index, PathEdge::Traversal traversal)
+// Marks a connected face as outside (not included in the result).
+void clearFace(WingedEdge& graph, int edge_index, PathEdge::Traversal traversal)
 {
    WingedEdge::TraversalStatus status;
    status.edge = edge_index;
@@ -56,10 +50,7 @@ static void clear_face(WingedEdge& graph, int edge_index, PathEdge::Traversal tr
    } while (status.edge != edge_index);
 }
 
-// ---------------------------------------------------------------------------
-// CrossingEdge — an edge that crosses the sweep line at a given x coordinate
-// ---------------------------------------------------------------------------
-
+// An edge that crosses the sweep line at a given x coordinate.
 struct CrossingEdge
 {
    int edge = -1;   //!< Index of the crossing edge.
@@ -75,11 +66,8 @@ struct CrossingEdge
    }
 };
 
-// ---------------------------------------------------------------------------
-// find_crossings — gathers all edges that straddle the given y coordinate
-// ---------------------------------------------------------------------------
-
-static std::vector<CrossingEdge> find_crossings(const WingedEdge& graph, double y)
+// Gathers all edges that straddle the given y coordinate.
+std::vector<CrossingEdge> findCrossings(const WingedEdge& graph, double y)
 {
    std::vector<CrossingEdge> crossings;
    for (int edge_index = 0; edge_index < graph.edgeCount(); ++edge_index)
@@ -98,10 +86,6 @@ static std::vector<CrossingEdge> find_crossings(const WingedEdge& graph, double 
 }
 
 }  // namespace
-
-// ---------------------------------------------------------------------------
-// PathClipper implementation
-// ---------------------------------------------------------------------------
 
 PathClipper::PathClipper(const PainterPath& subject, const PainterPath& clip) : _subject_path(subject), _clip_path(clip)
 {
@@ -130,7 +114,7 @@ bool PathClipper::doClip(WingedEdge& graph, ClipperMode mode)
    }
 
    std::ranges::sort(y_coordinates);
-   y_coordinates.erase(std::ranges::unique(y_coordinates, fuzzy_compare).begin(), y_coordinates.end());
+   y_coordinates.erase(std::ranges::unique(y_coordinates, fuzzyCompare).begin(), y_coordinates.end());
 
    bool found = false;
    do
@@ -151,7 +135,7 @@ bool PathClipper::doClip(WingedEdge& graph, ClipperMode mode)
          const PathVertex* vertex_a = graph.vertex(edge_ptr->first);
          const PathVertex* vertex_b = graph.vertex(edge_ptr->second);
 
-         if (fuzzy_compare(vertex_a->y, vertex_b->y))
+         if (fuzzyCompare(vertex_a->y, vertex_b->y))
          {
             continue;
          }
@@ -177,7 +161,7 @@ bool PathClipper::doClip(WingedEdge& graph, ClipperMode mode)
 
          auto fuzzy_find = [&](double target) -> std::vector<double>::iterator {
             return std::find_if(
-               y_coordinates.begin(), y_coordinates.end(), [target](double value) { return fuzzy_compare(value, target); }
+               y_coordinates.begin(), y_coordinates.end(), [target](double value) { return fuzzyCompare(value, target); }
             );
          };
 
@@ -224,7 +208,7 @@ bool PathClipper::doClip(WingedEdge& graph, ClipperMode mode)
 
 bool PathClipper::handleCrossingEdges(WingedEdge& graph, double y, ClipperMode mode)
 {
-   std::vector<CrossingEdge> crossings = find_crossings(graph, y);
+   std::vector<CrossingEdge> crossings = findCrossings(graph, y);
 
    assert(!crossings.empty());
    std::ranges::sort(crossings);
@@ -281,22 +265,22 @@ bool PathClipper::handleCrossingEdges(WingedEdge& graph, double y, ClipperMode m
          {
             if (!(edge_ptr->flag & 1))
             {
-               traverse_face(graph, edge_index, PathEdge::Traversal::Left);
+               traverseFace(graph, edge_index, PathEdge::Traversal::Left);
             }
             if (!(edge_ptr->flag & 2))
             {
-               clear_face(graph, edge_index, PathEdge::Traversal::Right);
+               clearFace(graph, edge_index, PathEdge::Traversal::Right);
             }
          }
          else
          {
             if (!(edge_ptr->flag & 1))
             {
-               clear_face(graph, edge_index, PathEdge::Traversal::Left);
+               clearFace(graph, edge_index, PathEdge::Traversal::Left);
             }
             if (!(edge_ptr->flag & 2))
             {
-               traverse_face(graph, edge_index, PathEdge::Traversal::Right);
+               traverseFace(graph, edge_index, PathEdge::Traversal::Right);
             }
          }
 
@@ -306,11 +290,11 @@ bool PathClipper::handleCrossingEdges(WingedEdge& graph, double y, ClipperMode m
       {
          if (!(edge_ptr->flag & 1))
          {
-            clear_face(graph, edge_index, PathEdge::Traversal::Left);
+            clearFace(graph, edge_index, PathEdge::Traversal::Left);
          }
          if (!(edge_ptr->flag & 2))
          {
-            clear_face(graph, edge_index, PathEdge::Traversal::Right);
+            clearFace(graph, edge_index, PathEdge::Traversal::Right);
          }
       }
    }
