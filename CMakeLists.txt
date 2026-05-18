@@ -117,6 +117,23 @@ set(GAME_FILES
     src/framework/tools/stopwatch.cpp
     src/framework/tools/stopwatch.h
     src/framework/tools/timer.cpp
+    src/framework/pathmerger/databuffer.h
+    src/framework/pathmerger/linef.h
+    src/framework/pathmerger/mathhelpers.h
+    src/framework/pathmerger/painterpath.cpp
+    src/framework/pathmerger/painterpath.h
+    src/framework/pathmerger/pathclipper.cpp
+    src/framework/pathmerger/pathclipper.h
+    src/framework/pathmerger/pathedge.h
+    src/framework/pathmerger/pathmerger.cpp
+    src/framework/pathmerger/pathmerger.h
+    src/framework/pathmerger/pathsegments.cpp
+    src/framework/pathmerger/pathsegments.h
+    src/framework/pathmerger/pathvertex.h
+    src/framework/pathmerger/pointf.h
+    src/framework/pathmerger/rectf.h
+    src/framework/pathmerger/wingededge.cpp
+    src/framework/pathmerger/wingededge.h
     src/game/animation/animation.cpp
     src/game/animation/animation.h
     src/game/animation/animationframedata.cpp

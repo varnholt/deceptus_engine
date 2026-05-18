@@ -8,6 +8,7 @@
 #include "framework/tmxparser/tmxparser.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/checksum.h"
+#include "framework/pathmerger/pathmerger.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationplayer.h"
@@ -1554,26 +1555,14 @@ void Level::regenerateLevelPaths(
    // dump the tileset into an obj file, optimise that and load it
    if (_physics.dumpObj(layer, tileset, path_solid_not_optimized))
    {
-#ifdef __linux__
-      auto cmd = std::string("tools/path_merge/path_merge") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
-#elif defined __APPLE__
-      auto cmd =
-         std::string("tools/path_merge/path_merge_macos") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
-#else
-      auto cmd =
-         std::string("tools\\path_merge\\path_merge.exe") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
-#endif
+      Log::Info() << "optimising: " << path_solid_not_optimized;
 
-      Log::Info() << "running cmd: " << cmd;
+      PathMerge::PathMerger merger;
+      merger.loadObj(path_solid_not_optimized.string());
+      const auto stats = merger.saveObj(path_solid_optimized.string());
 
-      if (std::system(cmd.c_str()) != 0)
-      {
-         Log::Error() << "command failed";
-      }
-      else
-      {
-         Log::Info() << "command succeeded";
-      }
+      Log::Info() << "optimised: points " << stats.points_in << " -> " << stats.points_out
+                  << ", faces " << stats.faces_in << " -> " << stats.faces_out;
    }
    else
    {
