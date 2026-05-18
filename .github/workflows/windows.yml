@@ -1,0 +1,54 @@
+name: Windows
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  APPVEYOR_BUILD_NUMBER: ${{ github.run_number }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache FetchContent
+        uses: actions/cache@v4
+        with:
+          path: build/_deps
+          key: fetchcontent-windows-${{ hashFiles('CMakeLists.txt') }}
+
+      - name: Configure
+        run: |
+          cmake -B build `
+            -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_INSTALL_PREFIX=install
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Install
+        run: cmake --install build --config Release
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force artifacts
+          if (Test-Path install/bin) {
+            Copy-Item -Force install/bin/* artifacts/
+          }
+          Copy-Item -Recurse -Force data artifacts/data
+          if (Test-Path build/Release/deceptus.pdb) {
+            Copy-Item -Force build/Release/deceptus.pdb artifacts/
+          }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deceptus-windows
+          path: artifacts/

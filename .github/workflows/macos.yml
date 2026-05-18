@@ -1,0 +1,49 @@
+name: macOS
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    # macos-13 is Intel — Homebrew installs to /usr/local/opt/llvm which matches
+    # the path hardcoded in CMakeLists.txt. Apple Silicon runners use /opt/homebrew.
+    runs-on: macos-13
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install llvm glm ninja
+
+      - name: Cache FetchContent
+        uses: actions/cache@v4
+        with:
+          path: build/_deps
+          key: fetchcontent-macos-${{ hashFiles('CMakeLists.txt') }}
+
+      - name: Configure
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Package
+        run: |
+          mkdir -p artifacts/data artifacts/lib
+          cp build/deceptus artifacts/
+          cp -r data artifacts/
+          find build/_deps -name "*.dylib" ! -type l -exec cp {} artifacts/lib/ \;
+          printf '#!/bin/sh\nDIR="$(cd "$(dirname "$0")" && pwd)"\nDYLD_LIBRARY_PATH="$DIR/lib" exec "$DIR/deceptus" "$@"\n' \
+            > artifacts/run.sh
+          chmod +x artifacts/run.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deceptus-macos
+          path: artifacts/

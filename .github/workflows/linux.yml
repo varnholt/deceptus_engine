@@ -1,0 +1,60 @@
+name: Linux
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-14 g++-14 cmake ninja-build \
+            libglm-dev \
+            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+            libxkbcommon-dev \
+            mesa-common-dev libgl-dev libglvnd-dev \
+            libasound2-dev libpulse-dev \
+            libogg-dev libvorbis-dev libflac-dev libopenal-dev \
+            libfreetype-dev libpng-dev \
+            libudev-dev
+
+      - name: Cache FetchContent
+        uses: actions/cache@v4
+        with:
+          path: build/_deps
+          key: fetchcontent-linux-${{ hashFiles('CMakeLists.txt') }}
+
+      - name: Configure
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=gcc-14 \
+            -DCMAKE_CXX_COMPILER=g++-14
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Package
+        run: |
+          mkdir -p artifacts/data artifacts/lib
+          cp build/deceptus artifacts/
+          cp -r data artifacts/
+          find build/_deps -name "*.so*" ! -type l -exec cp {} artifacts/lib/ \;
+          printf '#!/bin/sh\nDIR="$(cd "$(dirname "$0")" && pwd)"\nLD_LIBRARY_PATH="$DIR/lib" exec "$DIR/deceptus" "$@"\n' \
+            > artifacts/run.sh
+          chmod +x artifacts/run.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deceptus-linux
+          path: artifacts/
