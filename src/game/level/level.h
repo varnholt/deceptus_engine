@@ -223,7 +223,7 @@ protected:
    /// \brief initializes level.lua and binds mechanism lookup callbacks.
    void loadLevelScript();
 
-   /// \brief generates unoptimized physics geometry, runs path_merge, then loads optimized paths.
+   /// \brief generates unoptimized physics geometry, merges and optimizes paths, then loads them.
    /// \param layer tmx layer used to generate collision geometry.
    /// \param tileset tileset used by physics geometry extraction.
    /// \param base_path base directory for generated intermediate and output files.
