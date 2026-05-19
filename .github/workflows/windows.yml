@@ -46,6 +46,7 @@ jobs:
           if (Test-Path build/Release/deceptus.pdb) {
             Copy-Item -Force build/Release/deceptus.pdb artifacts/
           }
+          Copy-Item -Force build/Release/SDL3.dll artifacts/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

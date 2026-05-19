@@ -965,4 +965,3 @@ install(
     BUNDLE DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(SCRIPT "${CMAKE_SOURCE_DIR}/thirdparty/sdl2/copy_sdl2_dll.cmake")
