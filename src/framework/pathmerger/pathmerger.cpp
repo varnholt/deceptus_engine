@@ -1,5 +1,6 @@
 #include "pathmerger.h"
 
+#include <cmath>
 #include <cstdint>
 #include <format>
 #include <fstream>
