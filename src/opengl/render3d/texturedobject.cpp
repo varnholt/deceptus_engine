@@ -69,7 +69,7 @@ void TexturedObject::render(const std::shared_ptr<GLSLProgram>& shader, const gl
    _mesh->render();
 }
 
-void TexturedObject::setRotationSpeed(const vec3& speed)
+void TexturedObject::setRotationSpeed(const glm::vec3& speed)
 {
    _rotation_speed = speed;
 }
@@ -84,7 +84,7 @@ bool TexturedObject::getUseLighting() const
    return _use_lighting;
 }
 
-vec3 TexturedObject::getRotationSpeed() const
+glm::vec3 TexturedObject::getRotationSpeed() const
 {
    return _rotation_speed;
 }

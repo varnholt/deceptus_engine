@@ -2,11 +2,8 @@
 
 #include "glutils.h"
 
-#include <fstream>
-using std::ifstream;
-using std::ios;
-
 #include <sys/stat.h>
+#include <fstream>
 #include <sstream>
 
 namespace GLSLShaderInfo
@@ -32,64 +29,66 @@ struct shader_file_extension extensions[] = {
 
 GLSLProgram::~GLSLProgram()
 {
-   if (mHandle == 0)
+   if (_handle == 0)
    {
       return;
    }
 
-   GLint numShaders = 0;
-   glGetProgramiv(mHandle, GL_ATTACHED_SHADERS, &numShaders);
+   GLint num_shaders = 0;
+   glGetProgramiv(_handle, GL_ATTACHED_SHADERS, &num_shaders);
 
-   auto shaderNames = new GLuint[numShaders];
-   glGetAttachedShaders(mHandle, numShaders, NULL, shaderNames);
+   auto shader_names = new GLuint[num_shaders];
+   glGetAttachedShaders(_handle, num_shaders, NULL, shader_names);
 
-   for (auto i = 0; i < numShaders; i++)
-      glDeleteShader(shaderNames[i]);
+   for (auto shader_index = 0; shader_index < num_shaders; shader_index++)
+   {
+      glDeleteShader(shader_names[shader_index]);
+   }
 
-   glDeleteProgram(mHandle);
+   glDeleteProgram(_handle);
 
-   delete[] shaderNames;
+   delete[] shader_names;
 }
 
 void GLSLProgram::compileShader(const char* fileName)
 {
    _filename = fileName;
 
-   int numExts = sizeof(GLSLShaderInfo::extensions) / sizeof(GLSLShaderInfo::shader_file_extension);
+   int num_extensions = sizeof(GLSLShaderInfo::extensions) / sizeof(GLSLShaderInfo::shader_file_extension);
 
    // Check the file name's extension to determine the shader type
-   string ext = getExtension(fileName);
+   std::string extension = getExtension(fileName);
    GLSLShader::GLSLShaderType type = GLSLShader::VERTEX;
-   bool matchFound = false;
-   for (int i = 0; i < numExts; i++)
+   bool match_found = false;
+   for (int extension_index = 0; extension_index < num_extensions; extension_index++)
    {
-      if (ext == GLSLShaderInfo::extensions[i].ext)
+      if (extension == GLSLShaderInfo::extensions[extension_index].ext)
       {
-         matchFound = true;
-         type = GLSLShaderInfo::extensions[i].type;
+         match_found = true;
+         type = GLSLShaderInfo::extensions[extension_index].type;
          break;
       }
    }
 
    // If we didn't find a match, throw an exception
-   if (!matchFound)
+   if (!match_found)
    {
-      string msg = "Unrecognized extension: " + ext;
-      throw GLSLProgramException(msg);
+      std::string message = "Unrecognized extension: " + extension;
+      throw GLSLProgramException(message);
    }
 
    // Pass the discovered shader type along
    compileShader(fileName, type);
 }
 
-string GLSLProgram::getExtension(const char* name)
+std::string GLSLProgram::getExtension(const char* file_name)
 {
-   string nameStr(name);
+   std::string name_string(file_name);
 
-   size_t loc = nameStr.find_last_of('.');
-   if (loc != string::npos)
+   size_t dot_position = name_string.find_last_of('.');
+   if (dot_position != std::string::npos)
    {
-      return nameStr.substr(loc, string::npos);
+      return name_string.substr(dot_position, std::string::npos);
    }
    return "";
 }
@@ -105,259 +104,270 @@ void GLSLProgram::compileShader(const char* fileName, GLSLShader::GLSLShaderType
 
    if (!fileExists(fileName))
    {
-      string message = string("Shader: ") + fileName + " not found.";
+      std::string message = std::string("Shader: ") + fileName + " not found.";
       throw GLSLProgramException(message);
    }
 
-   if (mHandle <= 0)
+   if (_handle <= 0)
    {
-      mHandle = glCreateProgram();
-      if (mHandle == 0)
+      _handle = glCreateProgram();
+      if (_handle == 0)
       {
          throw GLSLProgramException("Unable to create shader program.");
       }
    }
 
-   ifstream inFile(fileName, ios::in);
-   if (!inFile)
+   std::ifstream in_file(fileName, std::ios::in);
+   if (!in_file)
    {
-      string message = string("Unable to open: ") + fileName;
+      std::string message = std::string("Unable to open: ") + fileName;
       throw GLSLProgramException(message);
    }
 
    // Get file contents
    std::stringstream code;
-   code << inFile.rdbuf();
-   inFile.close();
+   code << in_file.rdbuf();
+   in_file.close();
 
    compileShader(code.str(), type, fileName);
 }
 
-void GLSLProgram::compileShader(const string& source, GLSLShader::GLSLShaderType type, const char* fileName)
+void GLSLProgram::compileShader(const std::string& source, GLSLShader::GLSLShaderType type, const char* fileName)
 {
    _filename = fileName;
 
-   if (mHandle <= 0)
+   if (_handle <= 0)
    {
-      mHandle = glCreateProgram();
-      if (mHandle == 0)
+      _handle = glCreateProgram();
+      if (_handle == 0)
       {
          throw GLSLProgramException("Unable to create shader program.");
       }
    }
 
-   GLuint shaderHandle = glCreateShader(type);
+   GLuint shader_handle = glCreateShader(type);
 
-   const char* c_code = source.c_str();
-   glShaderSource(shaderHandle, 1, &c_code, nullptr);
+   const char* source_c_str = source.c_str();
+   glShaderSource(shader_handle, 1, &source_c_str, nullptr);
 
    // Compile the shader
-   glCompileShader(shaderHandle);
+   glCompileShader(shader_handle);
 
    // Check for errors
-   int result;
-   glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &result);
-   if (GL_FALSE == result)
+   int compile_status;
+   glGetShaderiv(shader_handle, GL_COMPILE_STATUS, &compile_status);
+   if (GL_FALSE == compile_status)
    {
       // Compile failed, get log
-      int length = 0;
-      string logString;
-      glGetShaderiv(shaderHandle, GL_INFO_LOG_LENGTH, &length);
-      if (length > 0)
+      int log_length = 0;
+      std::string log_string;
+      glGetShaderiv(shader_handle, GL_INFO_LOG_LENGTH, &log_length);
+      if (log_length > 0)
       {
-         char* c_log = new char[length];
-         int written = 0;
-         glGetShaderInfoLog(shaderHandle, length, &written, c_log);
-         logString = c_log;
-         delete[] c_log;
+         char* log_buffer = new char[log_length];
+         int written_count = 0;
+         glGetShaderInfoLog(shader_handle, log_length, &written_count, log_buffer);
+         log_string = log_buffer;
+         delete[] log_buffer;
       }
-      string msg;
+      std::string message;
       if (fileName)
       {
-         msg = string(fileName) + ": shader compliation failed\n";
+         message = std::string(fileName) + ": shader compliation failed\n";
       }
       else
       {
-         msg = "Shader compilation failed.\n";
+         message = "Shader compilation failed.\n";
       }
-      msg += logString;
+      message += log_string;
 
-      throw GLSLProgramException(msg);
+      throw GLSLProgramException(message);
    }
    else
    {
       // Compile succeeded, attach shader
-      glAttachShader(mHandle, shaderHandle);
+      glAttachShader(_handle, shader_handle);
    }
 }
 
 void GLSLProgram::link()
 {
-   if (mLinked)
+   if (_linked)
+   {
       return;
-   if (mHandle <= 0)
+   }
+   if (_handle <= 0)
+   {
       throw GLSLProgramException("Program has not been compiled.");
+   }
 
-   glLinkProgram(mHandle);
+   glLinkProgram(_handle);
 
-   int status = 0;
-   glGetProgramiv(mHandle, GL_LINK_STATUS, &status);
-   if (GL_FALSE == status)
+   int link_status = 0;
+   glGetProgramiv(_handle, GL_LINK_STATUS, &link_status);
+   if (GL_FALSE == link_status)
    {
       // Store log and return false
-      int length = 0;
-      string logString;
+      int log_length = 0;
+      std::string log_string;
 
-      glGetProgramiv(mHandle, GL_INFO_LOG_LENGTH, &length);
+      glGetProgramiv(_handle, GL_INFO_LOG_LENGTH, &log_length);
 
-      if (length > 0)
+      if (log_length > 0)
       {
-         char* c_log = new char[length];
-         int written = 0;
-         glGetProgramInfoLog(mHandle, length, &written, c_log);
-         logString = c_log;
-         delete[] c_log;
+         char* log_buffer = new char[log_length];
+         int written_count = 0;
+         glGetProgramInfoLog(_handle, log_length, &written_count, log_buffer);
+         log_string = log_buffer;
+         delete[] log_buffer;
       }
 
-      throw GLSLProgramException(string("Program link failed:\n") + logString);
+      throw GLSLProgramException(std::string("Program link failed:\n") + log_string);
    }
    else
    {
-      uniformLocations.clear();
-      mLinked = true;
+      _uniform_locations.clear();
+      _linked = true;
    }
 }
 
 void GLSLProgram::use()
 {
-   if (mHandle <= 0 || (!mLinked))
+   if (_handle <= 0 || (!_linked))
+   {
       throw GLSLProgramException("Shader has not been linked");
-   glUseProgram(mHandle);
+   }
+   glUseProgram(_handle);
 }
 
 int GLSLProgram::getHandle()
 {
-   return mHandle;
+   return _handle;
 }
 
 bool GLSLProgram::isLinked()
 {
-   return mLinked;
+   return _linked;
 }
 
 void GLSLProgram::bindAttribLocation(GLuint location, const char* name)
 {
-   glBindAttribLocation(mHandle, location, name);
+   glBindAttribLocation(_handle, location, name);
 }
 
 void GLSLProgram::bindFragDataLocation(GLuint location, const char* name)
 {
-   glBindFragDataLocation(mHandle, location, name);
+   glBindFragDataLocation(_handle, location, name);
 }
 
 void GLSLProgram::setUniform(const char* name, float x, float y, float z)
 {
-   GLint loc = getUniformLocation(name);
-   glUniform3f(loc, x, y, z);
+   GLint uniform_location = getUniformLocation(name);
+   glUniform3f(uniform_location, x, y, z);
 }
 
-void GLSLProgram::setUniform(const char* name, const vec3& v)
+void GLSLProgram::setUniform(const char* name, const glm::vec3& v)
 {
    this->setUniform(name, v.x, v.y, v.z);
 }
 
-void GLSLProgram::setUniform(const char* name, const vec4& v)
+void GLSLProgram::setUniform(const char* name, const glm::vec4& v)
 {
-   GLint loc = getUniformLocation(name);
-   glUniform4f(loc, v.x, v.y, v.z, v.w);
+   GLint uniform_location = getUniformLocation(name);
+   glUniform4f(uniform_location, v.x, v.y, v.z, v.w);
 }
 
-void GLSLProgram::setUniform(const char* name, const vec2& v)
+void GLSLProgram::setUniform(const char* name, const glm::vec2& v)
 {
-   GLint loc = getUniformLocation(name);
-   glUniform2f(loc, v.x, v.y);
+   GLint uniform_location = getUniformLocation(name);
+   glUniform2f(uniform_location, v.x, v.y);
 }
 
-void GLSLProgram::setUniform(const char* name, const mat4& m)
+void GLSLProgram::setUniform(const char* name, const glm::mat4& m)
 {
-   GLint loc = getUniformLocation(name);
-   glUniformMatrix4fv(loc, 1, GL_FALSE, &m[0][0]);
+   GLint uniform_location = getUniformLocation(name);
+   glUniformMatrix4fv(uniform_location, 1, GL_FALSE, &m[0][0]);
 }
 
-void GLSLProgram::setUniform(const char* name, const mat3& m)
+void GLSLProgram::setUniform(const char* name, const glm::mat3& m)
 {
-   GLint loc = getUniformLocation(name);
-   glUniformMatrix3fv(loc, 1, GL_FALSE, &m[0][0]);
+   GLint uniform_location = getUniformLocation(name);
+   glUniformMatrix3fv(uniform_location, 1, GL_FALSE, &m[0][0]);
 }
 
-void GLSLProgram::setUniform(const char* name, float val)
+void GLSLProgram::setUniform(const char* name, float value)
 {
-   GLint loc = getUniformLocation(name);
-   glUniform1f(loc, val);
+   GLint uniform_location = getUniformLocation(name);
+   glUniform1f(uniform_location, value);
 }
 
-void GLSLProgram::setUniform(const char* name, int val)
+void GLSLProgram::setUniform(const char* name, int value)
 {
-   GLint loc = getUniformLocation(name);
-   glUniform1i(loc, val);
+   GLint uniform_location = getUniformLocation(name);
+   glUniform1i(uniform_location, value);
 }
 
-void GLSLProgram::setUniform(const char* name, GLuint val)
+void GLSLProgram::setUniform(const char* name, GLuint value)
 {
-   GLint loc = getUniformLocation(name);
-   glUniform1ui(loc, val);
+   GLint uniform_location = getUniformLocation(name);
+   glUniform1ui(uniform_location, value);
 }
 
-void GLSLProgram::setUniform(const char* name, bool val)
+void GLSLProgram::setUniform(const char* name, bool value)
 {
-   int loc = getUniformLocation(name);
-   glUniform1i(loc, val);
+   int uniform_location = getUniformLocation(name);
+   glUniform1i(uniform_location, value);
 }
 
 void GLSLProgram::printActiveUniforms()
 {
 #ifdef __APPLE__
    // For OpenGL 4.1, use glGetActiveUniform
-   GLint nUniforms, size, location, maxLen;
-   GLchar* name;
-   GLsizei written;
-   GLenum type;
+   GLint num_uniforms;
+   GLint uniform_size;
+   GLint uniform_location;
+   GLint max_name_length;
+   GLchar* uniform_name;
+   GLsizei written_count;
+   GLenum uniform_type;
 
-   glGetProgramiv(handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLen);
-   glGetProgramiv(handle, GL_ACTIVE_UNIFORMS, &nUniforms);
+   glGetProgramiv(_handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_name_length);
+   glGetProgramiv(_handle, GL_ACTIVE_UNIFORMS, &num_uniforms);
 
-   name = new GLchar[maxLen];
+   uniform_name = new GLchar[max_name_length];
 
    printf("Active uniforms:\n");
    printf("------------------------------------------------\n");
-   for (int i = 0; i < nUniforms; ++i)
+   for (int uniform_index = 0; uniform_index < num_uniforms; ++uniform_index)
    {
-      glGetActiveUniform(handle, i, maxLen, &written, &size, &type, name);
-      location = glGetUniformLocation(handle, name);
-      printf(" %-5d %s (%s)\n", location, name, getTypeString(type));
+      glGetActiveUniform(_handle, uniform_index, max_name_length, &written_count, &uniform_size, &uniform_type, uniform_name);
+      uniform_location = glGetUniformLocation(_handle, uniform_name);
+      printf(" %-5d %s (%s)\n", uniform_location, uniform_name, getTypeString(uniform_type));
    }
 
-   delete[] name;
+   delete[] uniform_name;
 #else
    // For OpenGL 4.3 and above, use glGetProgramResource
-   GLint numUniforms = 0;
-   glGetProgramInterfaceiv(mHandle, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
+   GLint num_uniforms = 0;
+   glGetProgramInterfaceiv(_handle, GL_UNIFORM, GL_ACTIVE_RESOURCES, &num_uniforms);
 
    GLenum properties[] = {GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_BLOCK_INDEX};
 
    printf("%s Active uniforms:\n", _filename.c_str());
-   for (int i = 0; i < numUniforms; ++i)
+   for (int uniform_index = 0; uniform_index < num_uniforms; ++uniform_index)
    {
       GLint results[4];
-      glGetProgramResourceiv(mHandle, GL_UNIFORM, i, 4, properties, 4, NULL, results);
+      glGetProgramResourceiv(_handle, GL_UNIFORM, uniform_index, 4, properties, 4, NULL, results);
 
       if (results[3] != -1)
+      {
          continue;  // Skip uniforms in blocks
-      GLint nameBufSize = results[0] + 1;
-      char* name = new char[nameBufSize];
-      glGetProgramResourceName(mHandle, GL_UNIFORM, i, nameBufSize, NULL, name);
-      printf("%-5d %s (%s)\n", results[2], name, getTypeString(results[1]));
-      delete[] name;
+      }
+      GLint name_buffer_size = results[0] + 1;
+      char* uniform_name = new char[name_buffer_size];
+      glGetProgramResourceName(_handle, GL_UNIFORM, uniform_index, name_buffer_size, NULL, uniform_name);
+      printf("%-5d %s (%s)\n", results[2], uniform_name, getTypeString(results[1]));
+      delete[] uniform_name;
    }
 #endif
 }
@@ -366,78 +376,84 @@ void GLSLProgram::printActiveUniformBlocks()
 {
 #ifdef __APPLE__
    // For OpenGL 4.1, use glGetActiveUniformBlockiv
-   GLint written, maxLength, maxUniLen, nBlocks, binding;
-   GLchar* name;
+   GLint written_count;
+   GLint max_name_length;
+   GLint max_uniform_name_length;
+   GLint num_blocks;
+   GLint block_binding;
+   GLchar* block_name;
 
-   glGetProgramiv(handle, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH, &maxLength);
-   glGetProgramiv(handle, GL_ACTIVE_UNIFORM_BLOCKS, &nBlocks);
-   glGetProgramiv(handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniLen);
-   GLchar* uniName = new GLchar[maxUniLen];
-   name = new GLchar[maxLength];
+   glGetProgramiv(_handle, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH, &max_name_length);
+   glGetProgramiv(_handle, GL_ACTIVE_UNIFORM_BLOCKS, &num_blocks);
+   glGetProgramiv(_handle, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_uniform_name_length);
+   GLchar* uniform_name = new GLchar[max_uniform_name_length];
+   block_name = new GLchar[max_name_length];
 
    printf("Active Uniform blocks: \n");
    printf("------------------------------------------------\n");
-   for (int i = 0; i < nBlocks; i++)
+   for (int block_index = 0; block_index < num_blocks; block_index++)
    {
-      glGetActiveUniformBlockName(handle, i, maxLength, &written, name);
-      glGetActiveUniformBlockiv(handle, i, GL_UNIFORM_BLOCK_BINDING, &binding);
-      printf("Uniform block \"%s\" (%d):\n", name, binding);
+      glGetActiveUniformBlockName(_handle, block_index, max_name_length, &written_count, block_name);
+      glGetActiveUniformBlockiv(_handle, block_index, GL_UNIFORM_BLOCK_BINDING, &block_binding);
+      printf("Uniform block \"%s\" (%d):\n", block_name, block_binding);
 
-      GLint nUnis;
-      glGetActiveUniformBlockiv(handle, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &nUnis);
-      GLint* unifIndexes = new GLint[nUnis];
-      glGetActiveUniformBlockiv(handle, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, unifIndexes);
+      GLint num_block_uniforms;
+      glGetActiveUniformBlockiv(_handle, block_index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &num_block_uniforms);
+      GLint* uniform_indices = new GLint[num_block_uniforms];
+      glGetActiveUniformBlockiv(_handle, block_index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, uniform_indices);
 
-      for (int unif = 0; unif < nUnis; ++unif)
+      for (int uniform_index = 0; uniform_index < num_block_uniforms; ++uniform_index)
       {
-         GLint uniIndex = unifIndexes[unif];
-         GLint size;
-         GLenum type;
+         GLint uniform_array_index = uniform_indices[uniform_index];
+         GLint uniform_size;
+         GLenum uniform_type;
 
-         glGetActiveUniform(handle, uniIndex, maxUniLen, &written, &size, &type, uniName);
-         printf("    %s (%s)\n", name, getTypeString(type));
+         glGetActiveUniform(
+            _handle, uniform_array_index, max_uniform_name_length, &written_count, &uniform_size, &uniform_type, uniform_name
+         );
+         printf("    %s (%s)\n", block_name, getTypeString(uniform_type));
       }
 
-      delete[] unifIndexes;
+      delete[] uniform_indices;
    }
-   delete[] name;
-   delete[] uniName;
+   delete[] block_name;
+   delete[] uniform_name;
 #else
-   GLint numBlocks = 0;
+   GLint num_blocks = 0;
 
-   glGetProgramInterfaceiv(mHandle, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &numBlocks);
-   GLenum blockProps[] = {GL_NUM_ACTIVE_VARIABLES, GL_NAME_LENGTH};
-   GLenum blockIndex[] = {GL_ACTIVE_VARIABLES};
-   GLenum props[] = {GL_NAME_LENGTH, GL_TYPE, GL_BLOCK_INDEX};
+   glGetProgramInterfaceiv(_handle, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &num_blocks);
+   GLenum block_properties[] = {GL_NUM_ACTIVE_VARIABLES, GL_NAME_LENGTH};
+   GLenum block_active_variables[] = {GL_ACTIVE_VARIABLES};
+   GLenum uniform_properties[] = {GL_NAME_LENGTH, GL_TYPE, GL_BLOCK_INDEX};
 
-   for (int block = 0; block < numBlocks; ++block)
+   for (int block_index = 0; block_index < num_blocks; ++block_index)
    {
-      GLint blockInfo[2];
-      glGetProgramResourceiv(mHandle, GL_UNIFORM_BLOCK, block, 2, blockProps, 2, NULL, blockInfo);
-      GLint numUnis = blockInfo[0];
+      GLint block_resource_info[2];
+      glGetProgramResourceiv(_handle, GL_UNIFORM_BLOCK, block_index, 2, block_properties, 2, NULL, block_resource_info);
+      GLint num_block_uniforms = block_resource_info[0];
 
-      char* blockName = new char[blockInfo[1] + 1];
-      glGetProgramResourceName(mHandle, GL_UNIFORM_BLOCK, block, blockInfo[1] + 1, NULL, blockName);
-      printf("Uniform block \"%s\":\n", blockName);
-      delete[] blockName;
+      char* block_name = new char[block_resource_info[1] + 1];
+      glGetProgramResourceName(_handle, GL_UNIFORM_BLOCK, block_index, block_resource_info[1] + 1, NULL, block_name);
+      printf("Uniform block \"%s\":\n", block_name);
+      delete[] block_name;
 
-      GLint* unifIndexes = new GLint[numUnis];
-      glGetProgramResourceiv(mHandle, GL_UNIFORM_BLOCK, block, 1, blockIndex, numUnis, NULL, unifIndexes);
+      GLint* uniform_indices = new GLint[num_block_uniforms];
+      glGetProgramResourceiv(_handle, GL_UNIFORM_BLOCK, block_index, 1, block_active_variables, num_block_uniforms, NULL, uniform_indices);
 
-      for (int unif = 0; unif < numUnis; ++unif)
+      for (int uniform_index = 0; uniform_index < num_block_uniforms; ++uniform_index)
       {
-         GLint uniIndex = unifIndexes[unif];
+         GLint uniform_array_index = uniform_indices[uniform_index];
          GLint results[3];
-         glGetProgramResourceiv(mHandle, GL_UNIFORM, uniIndex, 3, props, 3, NULL, results);
+         glGetProgramResourceiv(_handle, GL_UNIFORM, uniform_array_index, 3, uniform_properties, 3, NULL, results);
 
-         GLint nameBufSize = results[0] + 1;
-         char* name = new char[nameBufSize];
-         glGetProgramResourceName(mHandle, GL_UNIFORM, uniIndex, nameBufSize, NULL, name);
-         printf("    %s (%s)\n", name, getTypeString(results[1]));
-         delete[] name;
+         GLint name_buffer_size = results[0] + 1;
+         char* uniform_name = new char[name_buffer_size];
+         glGetProgramResourceName(_handle, GL_UNIFORM, uniform_array_index, name_buffer_size, NULL, uniform_name);
+         printf("    %s (%s)\n", uniform_name, getTypeString(results[1]));
+         delete[] uniform_name;
       }
 
-      delete[] unifIndexes;
+      delete[] uniform_indices;
    }
 #endif
 }
@@ -446,41 +462,45 @@ void GLSLProgram::printActiveAttribs()
 {
 #ifdef __APPLE__
    // For OpenGL 4.1, use glGetActiveAttrib
-   GLint written, size, location, maxLength, nAttribs;
-   GLenum type;
-   GLchar* name;
+   GLint written_count;
+   GLint attrib_size;
+   GLint attrib_location;
+   GLint max_name_length;
+   GLint num_attribs;
+   GLenum attrib_type;
+   GLchar* attrib_name;
 
-   glGetProgramiv(handle, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLength);
-   glGetProgramiv(handle, GL_ACTIVE_ATTRIBUTES, &nAttribs);
+   glGetProgramiv(_handle, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &max_name_length);
+   glGetProgramiv(_handle, GL_ACTIVE_ATTRIBUTES, &num_attribs);
 
-   name = new GLchar[maxLength];
+   attrib_name = new GLchar[max_name_length];
    printf("Active Attributes: \n");
    printf("------------------------------------------------\n");
-   for (int i = 0; i < nAttribs; i++)
+   for (int attrib_index = 0; attrib_index < num_attribs; attrib_index++)
    {
-      glGetActiveAttrib(handle, i, maxLength, &written, &size, &type, name);
-      location = glGetAttribLocation(handle, name);
-      printf(" %-5d %s (%s)\n", location, name, getTypeString(type));
+      glGetActiveAttrib(_handle, attrib_index, max_name_length, &written_count, &attrib_size, &attrib_type, attrib_name);
+      attrib_location = glGetAttribLocation(_handle, attrib_name);
+      printf(" %-5d %s (%s)\n", attrib_location, attrib_name, getTypeString(attrib_type));
    }
-   delete[] name;
+   delete[] attrib_name;
 #else
    // >= OpenGL 4.3, use glGetProgramResource
-   GLint numAttribs;
-   glGetProgramInterfaceiv(mHandle, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numAttribs);
+   GLint num_attribs;
+   glGetProgramInterfaceiv(_handle, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &num_attribs);
 
    GLenum properties[] = {GL_NAME_LENGTH, GL_TYPE, GL_LOCATION};
 
    printf("Active attributes:\n");
-   for (int i = 0; i < numAttribs; ++i)
+   for (int attrib_index = 0; attrib_index < num_attribs; ++attrib_index)
    {
       GLint results[3];
-      glGetProgramResourceiv(mHandle, GL_PROGRAM_INPUT, i, 3, properties, 3, NULL, results);
+      glGetProgramResourceiv(_handle, GL_PROGRAM_INPUT, attrib_index, 3, properties, 3, NULL, results);
 
-      GLint nameBufSize = results[0] + 1;
-      char* name = new char[nameBufSize];
-      glGetProgramResourceName(mHandle, GL_PROGRAM_INPUT, i, nameBufSize, NULL, name);
-      printf("%-5d %s (%s)\n", results[2], name, getTypeString(results[1]));
-      delete[] name;
+      GLint name_buffer_size = results[0] + 1;
+      char* attrib_name = new char[name_buffer_size];
+      glGetProgramResourceName(_handle, GL_PROGRAM_INPUT, attrib_index, name_buffer_size, NULL, attrib_name);
+      printf("%-5d %s (%s)\n", results[2], attrib_name, getTypeString(results[1]));
+      delete[] attrib_name;
    }
 #endif
 }
@@ -521,51 +541,52 @@ const char* GLSLProgram::getTypeString(GLenum type)
 void GLSLProgram::validate()
 {
    if (!isLinked())
+   {
       throw GLSLProgramException("Program is not linked");
+   }
 
-   GLint status;
-   glValidateProgram(mHandle);
-   glGetProgramiv(mHandle, GL_VALIDATE_STATUS, &status);
+   GLint validation_status;
+   glValidateProgram(_handle);
+   glGetProgramiv(_handle, GL_VALIDATE_STATUS, &validation_status);
 
-   if (GL_FALSE == status)
+   if (GL_FALSE == validation_status)
    {
       // Store log and return false
-      int length = 0;
-      string logString;
+      int log_length = 0;
+      std::string log_string;
 
-      glGetProgramiv(mHandle, GL_INFO_LOG_LENGTH, &length);
+      glGetProgramiv(_handle, GL_INFO_LOG_LENGTH, &log_length);
 
-      if (length > 0)
+      if (log_length > 0)
       {
-         char* c_log = new char[length];
-         int written = 0;
-         glGetProgramInfoLog(mHandle, length, &written, c_log);
-         logString = c_log;
-         delete[] c_log;
+         char* log_buffer = new char[log_length];
+         int written_count = 0;
+         glGetProgramInfoLog(_handle, log_length, &written_count, log_buffer);
+         log_string = log_buffer;
+         delete[] log_buffer;
       }
 
-      throw GLSLProgramException(string("Program failed to validate\n") + logString);
+      throw GLSLProgramException(std::string("Program failed to validate\n") + log_string);
    }
 }
 
 int GLSLProgram::getUniformLocation(const char* name)
 {
-   std::map<string, int>::iterator pos;
-   pos = uniformLocations.find(name);
+   auto location_iterator = _uniform_locations.find(name);
 
-   if (pos == uniformLocations.end())
+   if (location_iterator == _uniform_locations.end())
    {
-      uniformLocations[name] = glGetUniformLocation(mHandle, name);
+      _uniform_locations[name] = glGetUniformLocation(_handle, name);
    }
 
-   return uniformLocations[name];
+   return _uniform_locations[name];
 }
 
-bool GLSLProgram::fileExists(const string& fileName)
+bool GLSLProgram::fileExists(const std::string& fileName)
 {
-   struct stat info;
-   int ret = -1;
+   struct stat file_info;
+   int stat_result = -1;
 
-   ret = stat(fileName.c_str(), &info);
-   return 0 == ret;
+   stat_result = stat(fileName.c_str(), &file_info);
+   return 0 == stat_result;
 }
