@@ -282,7 +282,11 @@ void Level::loadTmx()
    // preload mechanism data in parallel
    for (auto& [vec_key, vec_values] : _mechanism_registry.getMap())
    {
+#ifdef __APPLE__
+      std::for_each(std::execution::seq, vec_values->begin(), vec_values->end(), [](auto& val) { val->preload(); });
+#else
       std::for_each(std::execution::par, vec_values->begin(), vec_values->end(), [](auto& val) { val->preload(); });
+#endif
    }
 
    // process everything that's not considered a mechanism
@@ -368,12 +372,16 @@ void Level::loadTmx()
    }
 
    // load tilemaps in parallel
+#ifdef __APPLE__
+   std::for_each(std::execution::seq, layer_load_data.begin(), layer_load_data.end(), [&path](auto& layer_data) { layer_data.tile_map->load(layer_data.layer, layer_data.tileset, path); });
+#else
    std::for_each(
       std::execution::par,
       layer_load_data.begin(),
       layer_load_data.end(),
       [&path](auto& layer_data) { layer_data.tile_map->load(layer_data.layer, layer_data.tileset, path); }
    );
+#endif
 
    // process loaded tilemaps sequentially
    for (auto& layer_data : layer_load_data)
