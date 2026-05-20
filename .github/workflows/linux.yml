@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install dependencies
         run: |
@@ -28,7 +28,7 @@ jobs:
             libudev-dev
 
       - name: Cache FetchContent
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: build/_deps
           key: fetchcontent-linux-${{ hashFiles('CMakeLists.txt') }}
@@ -54,7 +54,7 @@ jobs:
           chmod +x artifacts/run.sh
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: deceptus-linux
           path: artifacts/

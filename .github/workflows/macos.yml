@@ -8,18 +8,16 @@ on:
 
 jobs:
   build:
-    # macos-13 is Intel — Homebrew installs to /usr/local/opt/llvm which matches
-    # the path hardcoded in CMakeLists.txt. Apple Silicon runners use /opt/homebrew.
-    runs-on: macos-13
+    runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install dependencies
         run: brew install llvm glm ninja
 
       - name: Cache FetchContent
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: build/_deps
           key: fetchcontent-macos-${{ hashFiles('CMakeLists.txt') }}
@@ -43,7 +41,7 @@ jobs:
           chmod +x artifacts/run.sh
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: deceptus-macos
           path: artifacts/
