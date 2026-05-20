@@ -42,10 +42,16 @@ void TileMapFactory::merge(const std::vector<std::shared_ptr<TileMap>>& tile_map
    }
 
    // set stencil tilemaps in parallel
+#ifdef __APPLE__
+   std::for_each(
+      tile_maps.begin(),
+      tile_maps.end(),
+#else
    std::for_each(
       std::execution::par,
       tile_maps.begin(),
       tile_maps.end(),
+#endif
       [&tile_maps_map](auto& tile_map)
       {
          auto stencil_tile_map = dynamic_pointer_cast<StencilTileMap>(tile_map);
