@@ -49,8 +49,18 @@ jobs:
           cp build/deceptus artifacts/
           cp -r data artifacts/
           find build/_deps -name "*.so*" ! -type l -exec cp {} artifacts/lib/ \;
-          printf '#!/bin/sh\nDIR="$(cd "$(dirname "$0")" && pwd)"\nLD_LIBRARY_PATH="$DIR/lib" exec "$DIR/deceptus" "$@"\n' \
-            > artifacts/run.sh
+          cat > artifacts/run.sh << 'EOF'
+          #!/bin/sh
+          DIR="$(cd "$(dirname "$0")" && pwd)"
+          for versioned_lib in "$DIR/lib/"*.so.*; do
+            base=$(basename "$versioned_lib")
+            soname=$(echo "$base" | grep -oP '.*\.so\.\d+')
+            if [ -n "$soname" ] && [ ! -e "$DIR/lib/$soname" ]; then
+              ln -s "$base" "$DIR/lib/$soname"
+            fi
+          done
+          LD_LIBRARY_PATH="$DIR/lib" exec "$DIR/deceptus" "$@"
+          EOF
           chmod +x artifacts/run.sh
 
       - name: Upload artifact
