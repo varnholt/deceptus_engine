@@ -224,7 +224,15 @@ public:
    /// \param animation_id animation name as defined in the settings file.
    /// \param x_px initial x position in world pixels.
    /// \param y_px initial y position in world pixels.
-   void createSprite(const std::string& name, const std::string& animation_file, const std::string& animation_id, float x_px, float y_px);
+   /// \param looped true to loop the animation continuously.
+   void createSprite(
+      const std::string& name,
+      const std::string& animation_file,
+      const std::string& animation_id,
+      float x_px,
+      float y_px,
+      bool looped
+   );
 
    /// \brief removes a managed cutscene sprite by name.
    /// \param name sprite identifier passed to createSprite.
@@ -233,7 +241,8 @@ public:
    /// \brief switches the active animation on a managed cutscene sprite.
    /// \param name sprite identifier.
    /// \param animation_id animation name in the sprite's animation file.
-   void setSpriteAnimation(const std::string& name, const std::string& animation_id);
+   /// \param looped true to loop the animation continuously.
+   void setSpriteAnimation(const std::string& name, const std::string& animation_id, bool looped);
 
    /// \brief shows or hides a managed cutscene sprite.
    /// \param name sprite identifier.

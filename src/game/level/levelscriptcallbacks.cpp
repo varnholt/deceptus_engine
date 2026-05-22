@@ -506,7 +506,7 @@ int32_t playSound(lua_State* state)
 
 int32_t createSprite(lua_State* state)
 {
-   if (lua_gettop(state) != 5)
+   if (lua_gettop(state) != 6)
    {
       return 0;
    }
@@ -516,7 +516,8 @@ int32_t createSprite(lua_State* state)
    const std::string animation_id = lua_tostring(state, 3);
    const auto x_px = static_cast<float>(lua_tonumber(state, 4));
    const auto y_px = static_cast<float>(lua_tonumber(state, 5));
-   LevelScript::getCurrent()->createSprite(name, animation_file, animation_id, x_px, y_px);
+   const bool looped = lua_toboolean(state, 6);
+   LevelScript::getCurrent()->createSprite(name, animation_file, animation_id, x_px, y_px, looped);
    return 0;
 }
 
@@ -533,12 +534,12 @@ int32_t destroySprite(lua_State* state)
 
 int32_t setSpriteAnimation(lua_State* state)
 {
-   if (lua_gettop(state) != 2)
+   if (lua_gettop(state) != 3)
    {
       return 0;
    }
 
-   LevelScript::getCurrent()->setSpriteAnimation(lua_tostring(state, 1), lua_tostring(state, 2));
+   LevelScript::getCurrent()->setSpriteAnimation(lua_tostring(state, 1), lua_tostring(state, 2), lua_toboolean(state, 3));
    return 0;
 }
 

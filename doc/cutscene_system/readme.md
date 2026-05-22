@@ -97,7 +97,7 @@ Cutscene sprites are independent animated characters managed by the engine. They
 
 | Action | Parameters | Description |
 |---|---|---|
-| `create_sprite` | `name`, `animation_file`, `animation`, `x`, `y` | Creates a sprite and starts playing the given animation. `animation_file` is the path to the animation JSON (e.g. `data/sprites/animations.json`). `name` is used in all subsequent operations. |
+| `create_sprite` | `name`, `animation_file`, `animation`, `x`, `y`, `looped` | Creates a sprite and starts playing the given animation. `animation_file` is the path to the animation JSON (e.g. `data/sprites/animations.json`). `name` is used in all subsequent operations. Set `"looped": true` for continuously cycling animations. |
 | `destroy_sprite` | `name` | Removes a sprite. |
 | `set_sprite_animation` | `name`, `animation` | Switches to a different animation on an existing sprite. |
 | `set_sprite_visible` | `name`, `visible` | Shows or hides a sprite without destroying it. |

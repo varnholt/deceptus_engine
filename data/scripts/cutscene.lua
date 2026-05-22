@@ -37,11 +37,11 @@ local function execute(entry)
    elseif action == "play_sound" then
       playSound(entry.id)
    elseif action == "create_sprite" then
-      createSprite(entry.name, entry.animation_file, entry.animation, entry.x, entry.y)
+      createSprite(entry.name, entry.animation_file, entry.animation, entry.x, entry.y, entry.looped or false)
    elseif action == "destroy_sprite" then
       destroySprite(entry.name)
    elseif action == "set_sprite_animation" then
-      setSpriteAnimation(entry.name, entry.animation)
+      setSpriteAnimation(entry.name, entry.animation, entry.looped or false)
    elseif action == "set_sprite_visible" then
       setSpriteVisible(entry.name, entry.visible)
    elseif action == "move_sprite" then

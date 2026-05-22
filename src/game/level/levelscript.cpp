@@ -895,7 +895,8 @@ void LevelScript::createSprite(
    const std::string& animation_file,
    const std::string& animation_id,
    float x_px,
-   float y_px
+   float y_px,
+   bool looped
 )
 {
    auto pool_iter = _cutscene_pools.find(animation_file);
@@ -910,6 +911,7 @@ void LevelScript::createSprite(
    sprite._name = name;
    sprite._pool = pool_iter->second;
    sprite._animation = pool_iter->second->create(animation_id, x_px, y_px, true, false);
+   sprite._animation->_looped = looped;
    sprite._position = {x_px, y_px};
    _cutscene_sprites.push_back(std::move(sprite));
 }
@@ -919,7 +921,7 @@ void LevelScript::destroySprite(const std::string& name)
    std::erase_if(_cutscene_sprites, [&name](const CutsceneSprite& sprite) { return sprite._name == name; });
 }
 
-void LevelScript::setSpriteAnimation(const std::string& name, const std::string& animation_id)
+void LevelScript::setSpriteAnimation(const std::string& name, const std::string& animation_id, bool looped)
 {
    for (auto& sprite : _cutscene_sprites)
    {
@@ -928,6 +930,7 @@ void LevelScript::setSpriteAnimation(const std::string& name, const std::string&
          continue;
       }
       sprite._animation = sprite._pool->create(animation_id, sprite._position.x, sprite._position.y, true, false);
+      sprite._animation->_looped = looped;
       return;
    }
 }
