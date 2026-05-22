@@ -912,6 +912,7 @@ void LevelScript::createSprite(
    sprite._pool = pool_iter->second;
    sprite._animation = pool_iter->second->create(animation_id, x_px, y_px, true, false);
    sprite._animation->_looped = looped;
+   sprite._animation->seekToStart();
    sprite._position = {x_px, y_px};
    _cutscene_sprites.push_back(std::move(sprite));
 }
@@ -931,6 +932,7 @@ void LevelScript::setSpriteAnimation(const std::string& name, const std::string&
       }
       sprite._animation = sprite._pool->create(animation_id, sprite._position.x, sprite._position.y, true, false);
       sprite._animation->_looped = looped;
+      sprite._animation->seekToStart();
       return;
    }
 }

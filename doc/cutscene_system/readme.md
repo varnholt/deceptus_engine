@@ -99,7 +99,7 @@ Cutscene sprites are independent animated characters managed by the engine. They
 |---|---|---|
 | `create_sprite` | `name`, `animation_file`, `animation`, `x`, `y`, `looped` | Creates a sprite and starts playing the given animation. `animation_file` is the path to the animation JSON (e.g. `data/sprites/animations.json`). `name` is used in all subsequent operations. Set `"looped": true` for continuously cycling animations. |
 | `destroy_sprite` | `name` | Removes a sprite. |
-| `set_sprite_animation` | `name`, `animation` | Switches to a different animation on an existing sprite. |
+| `set_sprite_animation` | `name`, `animation`, `looped` | Switches to a different animation on an existing sprite. Set `"looped": true` to loop continuously. |
 | `set_sprite_visible` | `name`, `visible` | Shows or hides a sprite without destroying it. |
 | `move_sprite` | `name`, `x`, `y`, `speed`, `event` | Moves a sprite toward `(x, y)` at `speed` pixels/sec. When it arrives, raises the event named `event` (received via `onEvent` in the level script). |
 
@@ -148,13 +148,13 @@ A minimal scene: show a character, walk it across the screen, then load the next
    { "at": 0.0, "action": "set_hud_visible",     "visible": false },
    { "at": 0.0, "action": "set_player_visible",  "visible": false },
    { "at": 0.0, "action": "set_camera_position", "x": 500, "y": 300 },
-   { "at": 0.0, "action": "create_sprite",        "name": "hero", "animation": "player_idle_r", "animation_file": "data/sprites/animations.json", "x": 400, "y": 300 },
+   { "at": 0.0, "action": "create_sprite",        "name": "hero", "animation": "player_idle_r", "animation_file": "data/sprites/animations.json", "looped": true, "x": 400, "y": 300 },
    { "at": 0.0, "action": "fade_in",              "speed": 1.0 },
 
-   { "at": 2.0, "action": "set_sprite_animation", "name": "hero", "animation": "player_run_r" },
+   { "at": 2.0, "action": "set_sprite_animation", "name": "hero", "animation": "player_run_r", "looped": true },
    { "at": 2.0, "action": "move_sprite",           "name": "hero", "x": 600, "y": 300, "speed": 80, "event": "hero_arrived" },
 
-   { "on": "hero_arrived", "action": "set_sprite_animation", "name": "hero", "animation": "player_idle_r" },
+   { "on": "hero_arrived", "action": "set_sprite_animation", "name": "hero", "animation": "player_idle_r", "looped": true },
    { "on": "hero_arrived", "delay": 1.0, "action": "fade_out", "speed": 1.0 },
 
    { "on": "fade/out_done", "action": "next_level" }
