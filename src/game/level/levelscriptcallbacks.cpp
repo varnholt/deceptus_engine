@@ -2,6 +2,7 @@
 #include "levelscriptcallbacks.h"
 
 #include <cstdlib>
+#include <fstream>
 #include <lua.hpp>
 #include <sstream>
 
@@ -10,6 +11,7 @@
 #include "framework/tools/log.h"
 #include "game/audio/musicplayertypes.h"
 #include "game/level/levelscript.h"
+#include "json/json.hpp"
 
 namespace LevelScriptCallbacks
 {
@@ -379,6 +381,28 @@ int32_t lockPlayerControls(lua_State* state)
    return 0;
 }
 
+int32_t fadeOut(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->fadeOut(static_cast<float>(lua_tonumber(state, 1)));
+   return 0;
+}
+
+int32_t fadeIn(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->fadeIn(static_cast<float>(lua_tonumber(state, 1)));
+   return 0;
+}
+
 int32_t setAmbient(lua_State* state)
 {
    if (lua_gettop(state) != 4)
@@ -420,6 +444,192 @@ int32_t playEventRecording(lua_State* state)
 
    LevelScript::getCurrent()->playEventRecording(std::string(filename));
    return 0;
+}
+
+int32_t setCameraPosition(lua_State* state)
+{
+   if (lua_gettop(state) != 2)
+   {
+      return 0;
+   }
+
+   const auto x_px = static_cast<float>(lua_tonumber(state, 1));
+   const auto y_px = static_cast<float>(lua_tonumber(state, 2));
+   LevelScript::getCurrent()->setCameraPosition(x_px, y_px);
+   return 0;
+}
+
+int32_t unlockCamera(lua_State* /*state*/)
+{
+   LevelScript::getCurrent()->unlockCamera();
+   return 0;
+}
+
+int32_t setPlayerVisible(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->setPlayerVisible(lua_toboolean(state, 1));
+   return 0;
+}
+
+int32_t setHudVisible(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->setHudVisible(lua_toboolean(state, 1));
+   return 0;
+}
+
+int32_t nextLevel(lua_State* /*state*/)
+{
+   LevelScript::getCurrent()->nextLevel();
+   return 0;
+}
+
+int32_t playSound(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->playSound(lua_tostring(state, 1));
+   return 0;
+}
+
+int32_t createSprite(lua_State* state)
+{
+   if (lua_gettop(state) != 5)
+   {
+      return 0;
+   }
+
+   const std::string name = lua_tostring(state, 1);
+   const std::string animation_file = lua_tostring(state, 2);
+   const std::string animation_id = lua_tostring(state, 3);
+   const auto x_px = static_cast<float>(lua_tonumber(state, 4));
+   const auto y_px = static_cast<float>(lua_tonumber(state, 5));
+   LevelScript::getCurrent()->createSprite(name, animation_file, animation_id, x_px, y_px);
+   return 0;
+}
+
+int32_t destroySprite(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->destroySprite(lua_tostring(state, 1));
+   return 0;
+}
+
+int32_t setSpriteAnimation(lua_State* state)
+{
+   if (lua_gettop(state) != 2)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->setSpriteAnimation(lua_tostring(state, 1), lua_tostring(state, 2));
+   return 0;
+}
+
+int32_t setSpriteVisible(lua_State* state)
+{
+   if (lua_gettop(state) != 2)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->setSpriteVisible(lua_tostring(state, 1), lua_toboolean(state, 2));
+   return 0;
+}
+
+int32_t moveSpriteAtSpeed(lua_State* state)
+{
+   if (lua_gettop(state) != 5)
+   {
+      return 0;
+   }
+
+   const std::string name = lua_tostring(state, 1);
+   const auto target_x = static_cast<float>(lua_tonumber(state, 2));
+   const auto target_y = static_cast<float>(lua_tonumber(state, 3));
+   const auto speed_px_per_s = static_cast<float>(lua_tonumber(state, 4));
+   const std::string arrive_event = lua_tostring(state, 5);
+   LevelScript::getCurrent()->moveSpriteAtSpeed(name, target_x, target_y, speed_px_per_s, arrive_event);
+   return 0;
+}
+
+int32_t loadCutscene(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   const std::string path = lua_tostring(state, 1);
+   std::ifstream file_stream(path);
+   if (!file_stream.is_open())
+   {
+      Log::Error() << "loadCutscene: cannot open " << path;
+      return 0;
+   }
+
+   nlohmann::json json_data;
+   try
+   {
+      json_data = nlohmann::json::parse(file_stream);
+   }
+   catch (const std::exception& exception)
+   {
+      Log::Error() << "loadCutscene: parse error in " << path << ": " << exception.what();
+      return 0;
+   }
+
+   lua_newtable(state);
+   int32_t array_index = 1;
+   for (const auto& entry : json_data)
+   {
+      lua_newtable(state);
+      for (const auto& [key, value] : entry.items())
+      {
+         lua_pushstring(state, key.c_str());
+         if (value.is_string())
+         {
+            lua_pushstring(state, value.get<std::string>().c_str());
+         }
+         else if (value.is_number_float())
+         {
+            lua_pushnumber(state, value.get<double>());
+         }
+         else if (value.is_number_integer())
+         {
+            lua_pushinteger(state, value.get<int64_t>());
+         }
+         else if (value.is_boolean())
+         {
+            lua_pushboolean(state, value.get<bool>() ? 1 : 0);
+         }
+         else
+         {
+            lua_pop(state, 1);
+            continue;
+         }
+         lua_settable(state, -3);
+      }
+      lua_rawseti(state, -2, array_index);
+      array_index++;
+   }
+   return 1;
 }
 
 int32_t debug(lua_State* state)

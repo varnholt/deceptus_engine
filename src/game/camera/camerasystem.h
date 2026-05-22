@@ -60,6 +60,14 @@ public:
    /// \brief snaps camera center to the current player position with room-bound correction.
    void syncNow();
 
+   /// \brief snaps camera to an arbitrary world pixel position and locks tracking until unlockCamera is called.
+   /// \param x_px target world x in pixels.
+   /// \param y_px target world y in pixels.
+   void snapTo(float x_px, float y_px);
+
+   /// \brief releases the lock set by snapTo and resumes normal player-tracking behaviour.
+   void unlockCamera();
+
    /// \brief returns the global camera system instance.
    /// \return singleton camera system used by gameplay and rendering.
    static CameraSystem& getInstance();
@@ -96,6 +104,7 @@ private:
 
    bool _focus_x_triggered = false;
    bool _focus_y_triggered = false;
+   bool _locked = false;  //!< when true, update() skips tracking; set by snapTo, cleared by unlockCamera.
 
    bool _no_y_update_triggered = false;
    sf::Time _y_update_start_time;

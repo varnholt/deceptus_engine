@@ -11,8 +11,8 @@
 #include "game/io/texturepool.h"
 #include "game/level/roomupdater.h"
 #include "game/player/extratable.h"
-#include "game/player/playerregistry.h"
 #include "game/player/playerinfo.h"
+#include "game/player/playerregistry.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
@@ -548,6 +548,11 @@ void InfoLayer::drawEventReplay(sf::RenderStates states, sf::RenderTarget& windo
 
 void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
+   if (!DisplayMode::getInstance().isSet(Display::InfoLayer))
+   {
+      return;
+   }
+
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
    const sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
@@ -601,8 +606,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    const auto& layer_health = _layers["console"]->_layer;
    layer_health->draw(window, states);
 
-   sf::View view_screen(
-      sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(console_base_width_px), static_cast<float>(console_base_height_px)})
+   sf::View view_screen(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(console_base_width_px), static_cast<float>(console_base_height_px)})
    );
    window.setView(view_screen);
 

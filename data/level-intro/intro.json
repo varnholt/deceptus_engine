@@ -1,0 +1,37 @@
+[
+   { "at": 0.0, "action": "set_hud_visible",        "visible": false },
+   { "at": 0.0, "action": "set_player_visible",    "visible": false },
+   { "at": 0.0, "action": "set_camera_position",   "x": 100,  "y": 100 },
+   { "at": 0.0, "action": "play_music",             "file": "data/music/level_test_track_muffler_ancestors.ogg", "transition": "crossfade", "duration_ms": 2000, "post_action": "loop" },
+   { "at": 0.0, "action": "create_sprite",          "name": "hero", "animation": "player_idle_r", "animation_file": "data/sprites/animations.json", "x": 100, "y": 100 },
+   { "at": 0.0, "action": "fade_in",                "speed": 1.0 },
+
+   { "at": 2.5, "action": "set_sprite_animation",   "name": "hero", "animation": "player_run_r" },
+   { "at": 2.5, "action": "move_sprite",            "name": "hero", "x": 200, "y": 100, "speed": 80, "event": "hero_walk_right_done" },
+
+   { "on": "hero_walk_right_done",              "action": "set_sprite_animation",  "name": "hero", "animation": "player_idle_r" },
+   { "on": "hero_walk_right_done", "delay": 1.5, "action": "set_sprite_animation", "name": "hero", "animation": "player_run_l" },
+   { "on": "hero_walk_right_done", "delay": 1.5, "action": "move_sprite",          "name": "hero", "x": 100, "y": 100, "speed": 80, "event": "hero_walk_left_done" },
+
+   { "on": "hero_walk_left_done",               "action": "set_sprite_animation",  "name": "hero", "animation": "player_idle_r" },
+   { "on": "hero_walk_left_done", "delay": 0.5, "action": "create_sprite",         "name": "npc",  "animation": "player_idle_l", "animation_file": "data/sprites/animations.json", "x": 160, "y": 100 },
+   { "on": "hero_walk_left_done", "delay": 1.5, "action": "show_dialogue",         "id": "intro_dialogue_1" },
+
+   { "on": "intro_dialogue_1/dismissed", "action": "show_dialogue",                "id": "intro_dialogue_2" },
+
+   { "on": "intro_dialogue_2/dismissed", "delay": 0.5, "action": "fade_out",       "speed": 1.0 },
+
+   { "on": "fade/out_done", "action": "destroy_sprite",        "name": "hero" },
+   { "on": "fade/out_done", "action": "destroy_sprite",        "name": "npc" },
+   { "on": "fade/out_done", "action": "set_camera_position",   "x": 200, "y": 200 },
+   { "on": "fade/out_done", "action": "create_sprite",         "name": "hero", "animation": "player_idle_r", "animation_file": "data/sprites/animations.json", "x": 200, "y": 200 },
+   { "on": "fade/out_done", "action": "create_sprite",         "name": "npc",  "animation": "player_idle_l", "animation_file": "data/sprites/animations.json", "x": 240, "y": 200 },
+   { "on": "fade/out_done", "action": "fade_in",               "speed": 1.0 },
+   { "on": "fade/out_done", "delay": 1.5, "action": "show_dialogue",              "id": "outro_dialogue_1" },
+
+   { "on": "outro_dialogue_1/dismissed", "action": "show_dialogue",               "id": "outro_dialogue_2" },
+
+   { "on": "outro_dialogue_2/dismissed", "delay": 0.5, "action": "fade_out",      "speed": 1.0 },
+
+   { "on": "fade/out_done", "action": "next_level" }
+]

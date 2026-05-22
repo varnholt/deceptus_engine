@@ -1,11 +1,18 @@
 #include "levelscript.h"
 #include "levelscriptcallbacks.h"
 
+#include "framework/tools/callbackmap.h"
 #include "framework/tools/log.h"
+#include "game/audio/audio.h"
 #include "game/audio/musicfilenames.h"
 #include "game/audio/musicplayer.h"
+#include "game/camera/camerasystem.h"
 #include "game/camera/camerazoom.h"
+#include "game/constants.h"
+#include "game/effects/fadetransitioneffect.h"
 #include "game/effects/lightsystem.h"
+#include "game/effects/screentransition.h"
+#include "game/effects/screentransitioneffect.h"
 #include "game/io/eventserializer.h"
 #include "game/level/levelregistry.h"
 #include "game/level/luaconstants.h"
@@ -18,10 +25,14 @@
 #include "game/player/playercontrols.h"
 #include "game/player/playerregistry.h"
 #include "game/player/weaponsystem.h"
+#include "game/state/displaymode.h"
 #include "game/state/savestate.h"
 #include "game/weapons/bow.h"
 #include "game/weapons/weaponfactory.h"
+#include "json/json.hpp"
 
+#include <cmath>
+#include <fstream>
 #include <mutex>
 #include <regex>
 
@@ -65,6 +76,7 @@ void LevelScript::update(const sf::Time& delta_time)
    }
 
    luaUpdate(delta_time);
+   updateCutsceneSprites(delta_time);
 
    const auto player_rect = PlayerRegistry::getFirst()->getPixelRectInt();
    auto id = 0;
@@ -150,6 +162,8 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "isMechanismVisible", LevelScriptCallbacks::isMechanismVisible);
    lua_register(_lua_state, "isPlayerIntersectingSensorRect", LevelScriptCallbacks::isPlayerIntersectingSensorRect);
    lua_register(_lua_state, "lockPlayerControls", LevelScriptCallbacks::lockPlayerControls);
+   lua_register(_lua_state, "fadeOut", LevelScriptCallbacks::fadeOut);
+   lua_register(_lua_state, "fadeIn", LevelScriptCallbacks::fadeIn);
    lua_register(_lua_state, "log", LevelScriptCallbacks::debug);
    lua_register(_lua_state, "playMusic", LevelScriptCallbacks::playMusic);
    lua_register(_lua_state, "removePlayerSkill", LevelScriptCallbacks::removePlayerSkill);
@@ -165,6 +179,18 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "tr", LevelScriptCallbacks::translate);
    lua_register(_lua_state, "writeLuaNodeProperty", LevelScriptCallbacks::writeLuaNodeProperty);
    lua_register(_lua_state, "playEventRecording", LevelScriptCallbacks::playEventRecording);
+   lua_register(_lua_state, "setCameraPosition", LevelScriptCallbacks::setCameraPosition);
+   lua_register(_lua_state, "unlockCamera", LevelScriptCallbacks::unlockCamera);
+   lua_register(_lua_state, "setPlayerVisible", LevelScriptCallbacks::setPlayerVisible);
+   lua_register(_lua_state, "setHudVisible", LevelScriptCallbacks::setHudVisible);
+   lua_register(_lua_state, "nextLevel", LevelScriptCallbacks::nextLevel);
+   lua_register(_lua_state, "playSound", LevelScriptCallbacks::playSound);
+   lua_register(_lua_state, "createSprite", LevelScriptCallbacks::createSprite);
+   lua_register(_lua_state, "destroySprite", LevelScriptCallbacks::destroySprite);
+   lua_register(_lua_state, "setSpriteAnimation", LevelScriptCallbacks::setSpriteAnimation);
+   lua_register(_lua_state, "setSpriteVisible", LevelScriptCallbacks::setSpriteVisible);
+   lua_register(_lua_state, "moveSpriteAtSpeed", LevelScriptCallbacks::moveSpriteAtSpeed);
+   lua_register(_lua_state, "loadCutscene", LevelScriptCallbacks::loadCutscene);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -759,6 +785,250 @@ void LevelScript::showDialogue(const std::string& search_pattern)
 void LevelScript::lockPlayerControls(const std::chrono::milliseconds& duration)
 {
    PlayerRegistry::getFirst()->getControls()->lockAll(PlayerControls::LockedState::Released, duration);
+}
+
+void LevelScript::fadeOut(float speed)
+{
+   auto transition = std::make_unique<ScreenTransition>();
+
+   auto fade_out = std::make_shared<FadeTransitionEffect>();
+   fade_out->_direction = FadeTransitionEffect::Direction::FadeOut;
+   fade_out->_speed = speed;
+
+   _pending_fade_in = std::make_shared<FadeTransitionEffect>();
+   _pending_fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+   _pending_fade_in->_value = 1.0f;
+   _pending_fade_in->_speed = 1.0f;
+
+   transition->_effect_1 = fade_out;
+   transition->_effect_2 = _pending_fade_in;
+   transition->_autostart_effect_2 = false;
+   transition->_callbacks_effect_1_ended.emplace_back([this]() { luaMechanismEvent("fade", "", "out_done", true); });
+   transition->_callbacks_effect_2_ended.emplace_back(
+      [this]()
+      {
+         ScreenTransitionHandler::getInstance().pop();
+         _pending_fade_in = nullptr;
+         luaMechanismEvent("fade", "", "in_done", true);
+      }
+   );
+
+   transition->startEffect1();
+   ScreenTransitionHandler::getInstance().push(std::move(transition));
+}
+
+void LevelScript::fadeIn(float speed)
+{
+   if (_pending_fade_in)
+   {
+      _pending_fade_in->_speed = speed;
+      ScreenTransitionHandler::getInstance().startEffect2();
+   }
+   else
+   {
+      auto transition = std::make_unique<ScreenTransition>();
+      auto null_effect = std::make_shared<ScreenTransitionEffect>();
+      auto fade_in = std::make_shared<FadeTransitionEffect>();
+      fade_in->_direction = FadeTransitionEffect::Direction::FadeIn;
+      fade_in->_value = 1.0f;
+      fade_in->_speed = speed;
+
+      transition->_effect_1 = null_effect;
+      transition->_effect_2 = fade_in;
+      transition->_callbacks_effect_2_ended.emplace_back(
+         [this]()
+         {
+            ScreenTransitionHandler::getInstance().pop();
+            luaMechanismEvent("fade", "", "in_done", true);
+         }
+      );
+
+      transition->startEffect1();
+      ScreenTransitionHandler::getInstance().push(std::move(transition));
+      ScreenTransitionHandler::getInstance().startEffect2();
+   }
+}
+
+void LevelScript::setCameraPosition(float x_px, float y_px)
+{
+   CameraSystem::getInstance().snapTo(x_px, y_px);
+}
+
+void LevelScript::unlockCamera()
+{
+   CameraSystem::getInstance().unlockCamera();
+}
+
+void LevelScript::setPlayerVisible(bool visible)
+{
+   auto player = PlayerRegistry::getFirst();
+   if (player)
+   {
+      player->setVisible(visible);
+   }
+}
+
+void LevelScript::setHudVisible(bool visible)
+{
+   if (visible)
+   {
+      DisplayMode::getInstance().enqueueSet(Display::InfoLayer);
+   }
+   else
+   {
+      DisplayMode::getInstance().enqueueUnset(Display::InfoLayer);
+   }
+}
+
+void LevelScript::nextLevel()
+{
+   CallbackMap::getInstance().call(static_cast<int32_t>(CallbackType::NextLevel));
+}
+
+void LevelScript::playSound(const std::string& sample_name)
+{
+   Audio::getInstance().playSample(Audio::PlayInfo{sample_name});
+}
+
+void LevelScript::createSprite(
+   const std::string& name,
+   const std::string& animation_file,
+   const std::string& animation_id,
+   float x_px,
+   float y_px
+)
+{
+   auto pool_iter = _cutscene_pools.find(animation_file);
+   if (pool_iter == _cutscene_pools.end())
+   {
+      auto new_pool = std::make_shared<AnimationPool>(animation_file);
+      new_pool->initialize();
+      pool_iter = _cutscene_pools.emplace(animation_file, std::move(new_pool)).first;
+   }
+
+   CutsceneSprite sprite;
+   sprite._name = name;
+   sprite._pool = pool_iter->second;
+   sprite._animation = pool_iter->second->create(animation_id, x_px, y_px, true, false);
+   sprite._position = {x_px, y_px};
+   _cutscene_sprites.push_back(std::move(sprite));
+}
+
+void LevelScript::destroySprite(const std::string& name)
+{
+   std::erase_if(_cutscene_sprites, [&name](const CutsceneSprite& sprite) { return sprite._name == name; });
+}
+
+void LevelScript::setSpriteAnimation(const std::string& name, const std::string& animation_id)
+{
+   for (auto& sprite : _cutscene_sprites)
+   {
+      if (sprite._name != name)
+      {
+         continue;
+      }
+      sprite._animation = sprite._pool->create(animation_id, sprite._position.x, sprite._position.y, true, false);
+      return;
+   }
+}
+
+void LevelScript::setSpriteVisible(const std::string& name, bool visible)
+{
+   for (auto& sprite : _cutscene_sprites)
+   {
+      if (sprite._name == name)
+      {
+         sprite._animation->setVisible(visible);
+         return;
+      }
+   }
+}
+
+void LevelScript::moveSpriteAtSpeed(
+   const std::string& name,
+   float target_x,
+   float target_y,
+   float speed_px_per_s,
+   const std::string& arrive_event
+)
+{
+   for (auto& sprite : _cutscene_sprites)
+   {
+      if (sprite._name != name)
+      {
+         continue;
+      }
+      sprite._target = {target_x, target_y};
+      sprite._speed_px_per_s = speed_px_per_s;
+      sprite._arrive_event = arrive_event;
+      sprite._moving = true;
+      return;
+   }
+}
+
+void LevelScript::draw(sf::RenderTarget& target)
+{
+   for (const auto& sprite : _cutscene_sprites)
+   {
+      if (sprite._animation)
+      {
+         target.draw(*sprite._animation);
+      }
+   }
+}
+
+void LevelScript::updateCutsceneSprites(const sf::Time& dt)
+{
+   for (auto& sprite : _cutscene_sprites)
+   {
+      if (!sprite._moving)
+      {
+         continue;
+      }
+
+      const auto direction = sprite._target - sprite._position;
+      const auto distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+      const auto step = sprite._speed_px_per_s * dt.asSeconds();
+
+      if (step >= distance)
+      {
+         sprite._position = sprite._target;
+         sprite._moving = false;
+         sprite._animation->setPosition(sprite._position);
+         if (!sprite._arrive_event.empty())
+         {
+            luaRaiseEvent(sprite._arrive_event);
+         }
+      }
+      else
+      {
+         const auto normalized = direction / distance;
+         sprite._position += normalized * step;
+         sprite._animation->setPosition(sprite._position);
+      }
+   }
+}
+
+void LevelScript::luaRaiseEvent(const std::string& event_name)
+{
+   if (!_initialized)
+   {
+      return;
+   }
+
+   lua_getglobal(_lua_state, "onEvent");
+   if (lua_isfunction(_lua_state, -1))
+   {
+      lua_pushstring(_lua_state, event_name.c_str());
+      if (lua_pcall(_lua_state, 1, 0, 0) != LUA_OK)
+      {
+         LevelScriptCallbacks::error(_lua_state, "onEvent");
+      }
+   }
+   else
+   {
+      lua_pop(_lua_state, 1);
+   }
 }
 
 void LevelScript::addSensorRectCallback(const std::string& search_pattern)
