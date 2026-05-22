@@ -981,6 +981,11 @@ void LevelScript::updateCutsceneSprites(const sf::Time& dt)
 {
    for (auto& sprite : _cutscene_sprites)
    {
+      if (sprite._animation)
+      {
+         sprite._animation->update(dt);
+      }
+
       if (!sprite._moving)
       {
          continue;
