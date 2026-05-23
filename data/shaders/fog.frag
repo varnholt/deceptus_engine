@@ -5,5 +5,5 @@ uniform float u_time;
 void main() {
    vec2 uv = gl_TexCoord[0].xy;
    uv.x += mod(u_time * 0.02, 1.0);
-   gl_FragColor = texture2D(u_texture, uv);	
+   gl_FragColor = texture2D(u_texture, uv);
 }
