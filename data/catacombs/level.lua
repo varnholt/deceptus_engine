@@ -28,6 +28,7 @@ _sword_ring_flash_color = {r = 1.0, g = 0.6, b = 0.2}
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
    -- log("initialize catacombs level script")
+   setHudVisible(true)
 end
 
 

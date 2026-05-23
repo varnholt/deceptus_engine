@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="256" height="256" tilewidth="24" tileheight="24" infinite="0" nextlayerid="93" nextobjectid="256">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="256" height="256" tilewidth="24" tileheight="24" infinite="0" nextlayerid="93" nextobjectid="257">
  <properties>
   <property name="z" type="int" value="36"/>
  </properties>
@@ -2793,6 +2793,16 @@
     <property name="10_text_color" type="color" value="#ffffffff"/>
     <property name="10_x_px" type="int" value="-30"/>
     <property name="10_y_px" type="int" value="-80"/>
+    <property name="pause_game" type="bool" value="false"/>
+   </properties>
+  </object>
+  <object id="256" name="intro_sarcasm" x="440" y="200" width="48" height="48">
+   <properties>
+    <property name="01" value="Sigh."/>
+    <property name="01_background_color" type="color" value="#ffb45a00"/>
+    <property name="01_text_color" type="color" value="#ffffffff"/>
+    <property name="01_x_px" type="int" value="30"/>
+    <property name="01_y_px" type="int" value="-80"/>
     <property name="pause_game" type="bool" value="false"/>
    </properties>
   </object>
