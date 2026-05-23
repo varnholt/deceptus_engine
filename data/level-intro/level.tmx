@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="256" height="256" tilewidth="24" tileheight="24" infinite="0" nextlayerid="92" nextobjectid="252">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="256" height="256" tilewidth="24" tileheight="24" infinite="0" nextlayerid="92" nextobjectid="253">
  <properties>
   <property name="z" type="int" value="36"/>
  </properties>
@@ -2728,7 +2728,63 @@
  <objectgroup id="80" name="spike_balls"/>
  <objectgroup id="79" name="moveable_objects"/>
  <objectgroup id="76" name="smoke"/>
- <objectgroup id="32" name="dialogues"/>
+ <objectgroup id="32" name="dialogues">
+  <object id="252" name="intro_chat" x="200" y="200" width="48" height="48">
+   <properties>
+    <property name="pause_game" type="bool" value="false"/>
+    <property name="01" value="hey man"/>
+    <property name="01_background_color" type="color" value="#ff101ad4"/>
+    <property name="01_text_color" type="color" value="#ffffffff"/>
+    <property name="01_x_px" type="int" value="-30"/>
+    <property name="01_y_px" type="int" value="-80"/>
+    <property name="02" value="why do you look just like me"/>
+    <property name="02_background_color" type="color" value="#ffb45a00"/>
+    <property name="02_text_color" type="color" value="#ffffffff"/>
+    <property name="02_x_px" type="int" value="30"/>
+    <property name="02_y_px" type="int" value="-80"/>
+    <property name="03" value="uuhm.. that&apos;s because of dstar"/>
+    <property name="03_background_color" type="color" value="#ff101ad4"/>
+    <property name="03_text_color" type="color" value="#ffffffff"/>
+    <property name="03_x_px" type="int" value="-30"/>
+    <property name="03_y_px" type="int" value="-80"/>
+    <property name="04" value="what about him?"/>
+    <property name="04_background_color" type="color" value="#ffb45a00"/>
+    <property name="04_text_color" type="color" value="#ffffffff"/>
+    <property name="04_x_px" type="int" value="30"/>
+    <property name="04_y_px" type="int" value="-80"/>
+    <property name="05" value="well.. he never finished the intro sequence.. so this is why we ended up with this shit"/>
+    <property name="05_background_color" type="color" value="#ff101ad4"/>
+    <property name="05_text_color" type="color" value="#ffffffff"/>
+    <property name="05_x_px" type="int" value="-30"/>
+    <property name="05_y_px" type="int" value="-80"/>
+    <property name="06" value="oh man."/>
+    <property name="06_background_color" type="color" value="#ff101ad4"/>
+    <property name="06_text_color" type="color" value="#ffffffff"/>
+    <property name="06_x_px" type="int" value="-30"/>
+    <property name="06_y_px" type="int" value="-80"/>
+    <property name="07" value="i know, right"/>
+    <property name="07_background_color" type="color" value="#ffb45a00"/>
+    <property name="07_text_color" type="color" value="#ffffffff"/>
+    <property name="07_x_px" type="int" value="30"/>
+    <property name="07_y_px" type="int" value="-80"/>
+    <property name="08" value="i hope someone&apos;s gonna kick his butt"/>
+    <property name="08_background_color" type="color" value="#ff101ad4"/>
+    <property name="08_text_color" type="color" value="#ffffffff"/>
+    <property name="08_x_px" type="int" value="-30"/>
+    <property name="08_y_px" type="int" value="-80"/>
+    <property name="09" value="yeah"/>
+    <property name="09_background_color" type="color" value="#ffb45a00"/>
+    <property name="09_text_color" type="color" value="#ffffffff"/>
+    <property name="09_x_px" type="int" value="30"/>
+    <property name="09_y_px" type="int" value="-80"/>
+    <property name="10" value="anyway.. let&apos;s get going with this game now"/>
+    <property name="10_background_color" type="color" value="#ff101ad4"/>
+    <property name="10_text_color" type="color" value="#ffffffff"/>
+    <property name="10_x_px" type="int" value="-30"/>
+    <property name="10_y_px" type="int" value="-80"/>
+   </properties>
+  </object>
+ </objectgroup>
  <objectgroup id="62" name="static_lights"/>
  <objectgroup id="84" name="bubble_cubes"/>
  <objectgroup id="86" name="collapsing_platforms"/>

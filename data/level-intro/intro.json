@@ -1,37 +1,28 @@
 [
-   { "at": 0.0, "action": "set_hud_visible",        "visible": false },
-   { "at": 0.0, "action": "set_player_visible",    "visible": false },
-   { "at": 0.0, "action": "set_camera_position",   "x": 100,  "y": 100 },
-   { "at": 0.0, "action": "play_music",             "file": "data/music/level_test_track_muffler_ancestors.ogg", "transition": "crossfade", "duration_ms": 2000, "post_action": "loop" },
-   { "at": 0.0, "action": "create_sprite",          "name": "hero", "animation": "player_idle_r", "animation_file": "data/sprites/animations.json", "looped": true, "x": 100, "y": 100 },
-   { "at": 0.0, "action": "fade_in",                "speed": 1.0 },
+   { "at": 0.0, "action": "set_hud_visible",     "visible": false },
+   { "at": 0.0, "action": "set_player_visible",  "visible": false },
+   { "at": 0.0, "action": "set_camera_position", "x": 200, "y": 200 },
+   { "at": 0.0, "action": "create_sprite",        "name": "player_left",  "animation": "player_run_r", "animation_file": "data/sprites/animations.json", "looped": true, "x": -200, "y": 200 },
+   { "at": 0.0, "action": "create_sprite",        "name": "player_right", "animation": "player_run_l", "animation_file": "data/sprites/animations.json", "looped": true, "x": 600,  "y": 200 },
+   { "at": 0.0, "action": "fade_in",              "speed": 1.0 },
 
-   { "at": 2.5, "action": "set_sprite_animation",   "name": "hero", "animation": "player_run_r", "looped": true },
-   { "at": 2.5, "action": "move_sprite",            "name": "hero", "x": 200, "y": 100, "speed": 80, "event": "hero_walk_right_done" },
+   { "at": 1.5, "action": "move_sprite", "name": "player_left", "x": 170, "y": 200, "speed": 80, "event": "player_left_arrived" },
 
-   { "on": "hero_walk_right_done",              "action": "set_sprite_animation",  "name": "hero", "animation": "player_idle_r", "looped": true },
-   { "on": "hero_walk_right_done", "delay": 1.5, "action": "set_sprite_animation", "name": "hero", "animation": "player_run_l", "looped": true },
-   { "on": "hero_walk_right_done", "delay": 1.5, "action": "move_sprite",          "name": "hero", "x": 100, "y": 100, "speed": 80, "event": "hero_walk_left_done" },
+   { "on": "player_left_arrived",               "action": "set_sprite_animation", "name": "player_left",  "animation": "player_idle_r", "looped": true },
+   { "on": "player_left_arrived", "delay": 0.5, "action": "move_sprite",           "name": "player_right", "x": 230, "y": 200, "speed": 80, "event": "player_right_arrived" },
 
-   { "on": "hero_walk_left_done",               "action": "set_sprite_animation",  "name": "hero", "animation": "player_idle_r", "looped": true },
-   { "on": "hero_walk_left_done", "delay": 0.5, "action": "create_sprite",         "name": "npc",  "animation": "player_idle_l", "animation_file": "data/sprites/animations.json", "looped": true, "x": 160, "y": 100 },
-   { "on": "hero_walk_left_done", "delay": 1.5, "action": "show_dialogue",         "id": "intro_dialogue_1" },
+   { "on": "player_right_arrived",               "action": "set_sprite_animation", "name": "player_right", "animation": "player_idle_l", "looped": true },
+   { "on": "player_right_arrived", "delay": 1.0, "action": "show_dialogue",        "id": "intro_chat" },
 
-   { "on": "intro_dialogue_1/dismissed", "action": "show_dialogue",                "id": "intro_dialogue_2" },
+   { "on": "intro_chat/dismissed", "delay": 0.5, "action": "set_sprite_animation", "name": "player_left", "animation": "player_run_l", "looped": true },
+   { "on": "intro_chat/dismissed", "delay": 0.5, "action": "move_sprite",           "name": "player_left", "x": -200, "y": 200, "speed": 80, "event": "player_left_exited" },
 
-   { "on": "intro_dialogue_2/dismissed", "delay": 0.5, "action": "fade_out",       "speed": 1.0 },
+   { "on": "player_left_exited", "action": "set_sprite_animation", "name": "player_right", "animation": "player_run_r", "looped": true },
+   { "on": "player_left_exited", "action": "move_sprite",           "name": "player_right", "x": 600,  "y": 200, "speed": 80, "event": "player_right_exited" },
 
-   { "on": "fade/out_done", "action": "destroy_sprite",        "name": "hero" },
-   { "on": "fade/out_done", "action": "destroy_sprite",        "name": "npc" },
-   { "on": "fade/out_done", "action": "set_camera_position",   "x": 200, "y": 200 },
-   { "on": "fade/out_done", "action": "create_sprite",         "name": "hero", "animation": "player_idle_r", "animation_file": "data/sprites/animations.json", "looped": true, "x": 200, "y": 200 },
-   { "on": "fade/out_done", "action": "create_sprite",         "name": "npc",  "animation": "player_idle_l", "animation_file": "data/sprites/animations.json", "looped": true, "x": 240, "y": 200 },
-   { "on": "fade/out_done", "action": "fade_in",               "speed": 1.0 },
-   { "on": "fade/out_done", "delay": 1.5, "action": "show_dialogue",              "id": "outro_dialogue_1" },
+   { "on": "player_right_exited", "delay": 0.3, "action": "fade_out", "speed": 1.0 },
 
-   { "on": "outro_dialogue_1/dismissed", "action": "show_dialogue",               "id": "outro_dialogue_2" },
-
-   { "on": "outro_dialogue_2/dismissed", "delay": 0.5, "action": "fade_out",      "speed": 1.0 },
-
+   { "on": "fade/out_done", "action": "destroy_sprite", "name": "player_left" },
+   { "on": "fade/out_done", "action": "destroy_sprite", "name": "player_right" },
    { "on": "fade/out_done", "action": "next_level" }
 ]
