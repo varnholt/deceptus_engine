@@ -34,7 +34,7 @@ function update(dt)
    cutscene.update(dt)
 end
 
-function onMechanismEvent(object_id, group, event_name, value)
+function mechanismEvent(object_id, group, event_name, value)
    cutscene.notify(object_id .. "/" .. event_name)
 end
 

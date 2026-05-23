@@ -804,14 +804,7 @@ void LevelScript::fadeOut(float speed)
    transition->_effect_2 = _pending_fade_in;
    transition->_autostart_effect_2 = false;
    transition->_callbacks_effect_1_ended.emplace_back([this]() { luaMechanismEvent("fade", "", "out_done", true); });
-   transition->_callbacks_effect_2_ended.emplace_back(
-      [this]()
-      {
-         ScreenTransitionHandler::getInstance().pop();
-         _pending_fade_in = nullptr;
-         luaMechanismEvent("fade", "", "in_done", true);
-      }
-   );
+   transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
 
    transition->startEffect1();
    ScreenTransitionHandler::getInstance().push(std::move(transition));
