@@ -182,7 +182,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setCameraPosition", LevelScriptCallbacks::setCameraPosition);
    lua_register(_lua_state, "unlockCamera", LevelScriptCallbacks::unlockCamera);
    lua_register(_lua_state, "setPlayerVisible", LevelScriptCallbacks::setPlayerVisible);
-   lua_register(_lua_state, "setHudVisible", LevelScriptCallbacks::setHudVisible);
+   lua_register(_lua_state, "setInfoLayerVisible", LevelScriptCallbacks::setInfoLayerVisible);
    lua_register(_lua_state, "nextLevel", LevelScriptCallbacks::nextLevel);
    lua_register(_lua_state, "playSound", LevelScriptCallbacks::playSound);
    lua_register(_lua_state, "createSprite", LevelScriptCallbacks::createSprite);

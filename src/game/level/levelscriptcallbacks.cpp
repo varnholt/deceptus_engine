@@ -476,7 +476,7 @@ int32_t setPlayerVisible(lua_State* state)
    return 0;
 }
 
-int32_t setHudVisible(lua_State* state)
+int32_t setInfoLayerVisible(lua_State* state)
 {
    if (lua_gettop(state) != 1)
    {

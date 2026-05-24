@@ -1,5 +1,5 @@
 [
-   { "at": 0.0, "action": "set_hud_visible",     "visible": false },
+   { "at": 0.0, "action": "set_info_layer_visible",     "visible": false },
    { "at": 0.0, "action": "set_player_visible",  "visible": false },
    { "at": 0.0, "action": "set_camera_position", "x": 440, "y": 164 },
    { "at": 0.0, "action": "create_sprite",        "name": "player_left",  "animation": "player_run_r", "animation_file": "data/sprites/animations.json", "looped": true, "x": 40,  "y": 188 },

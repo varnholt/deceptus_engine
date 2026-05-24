@@ -60,7 +60,7 @@ int32_t playEventRecording(lua_State* state);
 int32_t setCameraPosition(lua_State* state);
 int32_t unlockCamera(lua_State* state);
 int32_t setPlayerVisible(lua_State* state);
-int32_t setHudVisible(lua_State* state);
+int32_t setInfoLayerVisible(lua_State* state);
 int32_t nextLevel(lua_State* state);
 int32_t playSound(lua_State* state);
 
