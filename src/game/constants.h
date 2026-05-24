@@ -121,6 +121,7 @@ enum class Display
    CameraPanorama = 0x40,
    ReplayRecording = 0x80,
    ReplayPlaying = 0x100,
+   InfoLayer = 0x200,
 };
 
 /// \brief high-level runtime state of the game loop.

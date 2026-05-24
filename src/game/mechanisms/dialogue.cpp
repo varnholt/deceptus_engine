@@ -266,6 +266,8 @@ void Dialogue::showNext()
          GameMechanismObserver::onEvent(getObjectId(), "dialogues", "state", "hide");
       }
 
+      GameMechanismObserver::onEvent(getObjectId(), "dialogues", "dismissed", true);
+
       return;
    }
 
