@@ -2,13 +2,13 @@
 
 // game
 #include "framework/math/maptools.h"
+#include "framework/pathmerger/pathmerger.h"
 #include "framework/tmxparser/tmxelement.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobjectgroup.h"
 #include "framework/tmxparser/tmxparser.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/checksum.h"
-#include "framework/pathmerger/pathmerger.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationplayer.h"
@@ -373,7 +373,11 @@ void Level::loadTmx()
 
    // load tilemaps in parallel
 #ifdef __APPLE__
-   std::for_each(layer_load_data.begin(), layer_load_data.end(), [&path](auto& layer_data) { layer_data.tile_map->load(layer_data.layer, layer_data.tileset, path); });
+   std::for_each(
+      layer_load_data.begin(),
+      layer_load_data.end(),
+      [&path](auto& layer_data) { layer_data.tile_map->load(layer_data.layer, layer_data.tileset, path); }
+   );
 #else
    std::for_each(
       std::execution::par,
@@ -1311,6 +1315,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    Gun::drawProjectileHitAnimations(*_render_targets.level.get());
    AnimationPlayer::getInstance().draw(*_render_targets.level.get());
+   _level_script.draw(*_render_targets.level.get());
 
    drawDebugInformation();
 
@@ -1569,8 +1574,8 @@ void Level::regenerateLevelPaths(
       merger.loadObj(path_solid_not_optimized.string());
       const auto stats = merger.saveObj(path_solid_optimized.string());
 
-      Log::Info() << "optimised: points " << stats.points_in << " -> " << stats.points_out
-                  << ", faces " << stats.faces_in << " -> " << stats.faces_out;
+      Log::Info() << "optimised: points " << stats.points_in << " -> " << stats.points_out << ", faces " << stats.faces_in << " -> "
+                  << stats.faces_out;
    }
    else
    {

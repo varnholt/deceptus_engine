@@ -1,0 +1,30 @@
+[
+   { "at": 0.0, "action": "set_info_layer_visible",     "visible": false },
+   { "at": 0.0, "action": "set_player_visible",  "visible": false },
+   { "at": 0.0, "action": "set_camera_position", "x": 440, "y": 164 },
+   { "at": 0.0, "action": "create_sprite",        "name": "player_left",  "animation": "player_run_r", "animation_file": "data/sprites/animations.json", "looped": true, "x": 40,  "y": 188 },
+   { "at": 0.0, "action": "create_sprite",        "name": "player_right", "animation": "player_run_l", "animation_file": "data/sprites/animations.json", "looped": true, "x": 840, "y": 188 },
+
+   { "at": 1.5, "action": "move_sprite", "name": "player_left", "x": 410, "y": 188, "speed": 80, "event": "player_left_arrived" },
+
+   { "on": "player_left_arrived",               "action": "set_sprite_animation", "name": "player_left",  "animation": "player_idle_r", "looped": true },
+   { "on": "player_left_arrived", "delay": 0.5, "action": "move_sprite",           "name": "player_right", "x": 470, "y": 188, "speed": 80, "event": "player_right_arrived" },
+
+   { "on": "player_right_arrived",               "action": "set_sprite_animation", "name": "player_right", "animation": "player_idle_l", "looped": true },
+   { "on": "player_right_arrived", "delay": 1.0, "action": "show_dialogue",        "id": "intro_chat" },
+
+   { "on": "intro_chat/dismissed", "delay": 0.5, "action": "set_sprite_animation", "name": "player_left", "animation": "player_run_l", "looped": true },
+   { "on": "intro_chat/dismissed", "delay": 0.5, "action": "move_sprite",           "name": "player_left", "x": 40,  "y": 188, "speed": 80, "event": "player_left_exited" },
+
+   { "on": "player_left_exited", "action": "show_dialogue", "id": "intro_sarcasm" },
+
+   { "on": "intro_sarcasm/dismissed", "action": "set_sprite_animation", "name": "player_right", "animation": "player_run_r", "looped": true },
+   { "on": "intro_sarcasm/dismissed", "action": "move_sprite",           "name": "player_right", "x": 840, "y": 188, "speed": 80, "event": "player_right_exited" },
+
+   { "on": "player_right_exited", "delay": 0.3, "action": "fade_out", "speed": 1.0 },
+
+   { "on": "fade/out_done", "action": "destroy_sprite",      "name": "player_left" },
+   { "on": "fade/out_done", "action": "destroy_sprite",      "name": "player_right" },
+   { "on": "fade/out_done", "action": "set_player_visible",  "visible": true },
+   { "on": "fade/out_done", "action": "next_level" }
+]

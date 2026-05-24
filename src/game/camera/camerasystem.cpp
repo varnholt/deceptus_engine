@@ -49,6 +49,11 @@ void CameraSystem::update(const sf::Time& dt, float view_width_px, float view_he
    _view_width_px = view_width_px;
    _view_height_px = view_height_px;
 
+   if (_locked)
+   {
+      return;
+   }
+
    updateX(dt);
    updateY(dt);
 }
@@ -208,6 +213,20 @@ void CameraSystem::syncNow()
 
    _x_px = player_x;
    _y_px = player_y;
+}
+
+void CameraSystem::snapTo(float x_px, float y_px)
+{
+   _x_px = x_px;
+   _y_px = y_px;
+   _dx_px = 0.0f;
+   _dy_px = 0.0f;
+   _locked = true;
+}
+
+void CameraSystem::unlockCamera()
+{
+   _locked = false;
 }
 
 float CameraSystem::getX() const

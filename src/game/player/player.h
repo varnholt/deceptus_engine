@@ -180,11 +180,11 @@ public:
 
    /// \brief reports whether player rendering is enabled.
    /// \return true when draw calls should render the player.
-   bool getVisible() const;
+   bool getVisible() const override;
 
    /// \brief enables or disables player rendering.
    /// \param visible true to draw it.
-   void setVisible(bool visible);
+   void setVisible(bool visible) override;
 
    /// \brief starts alpha fade-out animation for the player sprite.
    /// \param fade_out_speed_factor alpha decay speed multiplier per second.
