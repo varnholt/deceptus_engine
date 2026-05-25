@@ -26,6 +26,9 @@ private:
    /// \brief renders the trigger, action-type, and field sections for the selected entry.
    void drawEntryEditor();
 
+   /// \brief renders a horizontal time axis showing all At entries as clickable markers.
+   void drawTimeline();
+
    /// \brief renders only the action-specific field widgets for the given entry.
    /// \param entry the entry whose fields are being edited; modified in place.
    void drawActionFields(CutsceneEntry& entry);

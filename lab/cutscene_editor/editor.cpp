@@ -8,8 +8,10 @@
 #include <imgui.h>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <map>
 #include <vector>
 
 /// \brief shows a Windows open-file dialog filtered to JSON files.
@@ -161,16 +163,24 @@ void Editor::draw()
 
    drawMenuBar();
 
-   const float list_panel_width = ImGui::GetContentRegionAvail().x * 0.35f;
+   const float timeline_height    = 100.0f;
+   const float main_panels_height = ImGui::GetContentRegionAvail().y
+                                    - timeline_height
+                                    - ImGui::GetStyle().ItemSpacing.y;
+   const float list_panel_width   = ImGui::GetContentRegionAvail().x * 0.35f;
 
-   ImGui::BeginChild("##entry_list", {list_panel_width, 0.0f}, true);
+   ImGui::BeginChild("##entry_list", {list_panel_width, main_panels_height}, true);
    drawEntryList();
    ImGui::EndChild();
 
    ImGui::SameLine();
 
-   ImGui::BeginChild("##entry_editor", {0.0f, 0.0f}, true);
+   ImGui::BeginChild("##entry_editor", {0.0f, main_panels_height}, true);
    drawEntryEditor();
+   ImGui::EndChild();
+
+   ImGui::BeginChild("##timeline", {0.0f, 0.0f}, true);
+   drawTimeline();
    ImGui::EndChild();
 
    ImGui::End();
@@ -496,5 +506,147 @@ void Editor::drawActionFields(CutsceneEntry& entry)
          ImGui::TextDisabled("No parameters.");
          break;
       }
+   }
+}
+
+void Editor::drawTimeline()
+{
+   // determine the time range — always show at least 5 seconds
+   float max_time = 5.0f;
+   for (const auto& entry : _document._entries)
+   {
+      if (entry._trigger_type == TriggerType::At)
+      {
+         max_time = std::max(max_time, entry._at_time + 1.0f);
+      }
+   }
+
+   const float  left_margin   = 12.0f;
+   const float  right_margin  = 12.0f;
+   const float  marker_radius = 6.0f;
+   const ImVec2 canvas_pos    = ImGui::GetCursorScreenPos();
+   const ImVec2 canvas_size   = ImGui::GetContentRegionAvail();
+   const float  usable_width  = canvas_size.x - left_margin - right_margin;
+   const float  axis_y        = canvas_pos.y + canvas_size.y * 0.52f;
+
+   auto time_to_x = [&](float time) -> float
+   {
+      return canvas_pos.x + left_margin + (time / max_time) * usable_width;
+   };
+
+   // place the invisible button first so IsItemClicked() works for the full canvas area
+   ImGui::InvisibleButton("##timeline_input", canvas_size);
+   const bool   canvas_clicked = ImGui::IsItemClicked();
+   const ImVec2 mouse_pos      = ImGui::GetMousePos();
+
+   ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+   // axis line
+   draw_list->AddLine(
+      {canvas_pos.x + left_margin, axis_y},
+      {canvas_pos.x + canvas_size.x - right_margin, axis_y},
+      IM_COL32(150, 150, 150, 255), 1.5f
+   );
+
+   // tick marks — minor every 0.5 s, major every 1 s with a time label
+   const float half_second   = 0.5f;
+   const float text_y        = axis_y + 10.0f;
+   const float text_height   = ImGui::GetTextLineHeight();
+   for (int32_t tick_index = 0; tick_index * half_second <= max_time; tick_index++)
+   {
+      const float tick_time  = tick_index * half_second;
+      const float tick_x     = time_to_x(tick_time);
+      const bool  is_major   = (tick_index % 2) == 0;
+      const float tick_half  = is_major ? 6.0f : 3.0f;
+
+      draw_list->AddLine(
+         {tick_x, axis_y - tick_half},
+         {tick_x, axis_y + tick_half},
+         IM_COL32(130, 130, 130, 255)
+      );
+
+      if (is_major)
+      {
+         char time_label[16];
+         std::snprintf(time_label, sizeof(time_label), "%.0fs", tick_time);
+         const ImVec2 label_size = ImGui::CalcTextSize(time_label);
+         draw_list->AddText(
+            {tick_x - label_size.x * 0.5f, text_y},
+            IM_COL32(110, 110, 110, 255),
+            time_label
+         );
+      }
+   }
+
+   // markers for each At entry; entries at the same pixel x are stacked upward
+   // so overlapping actions (e.g. multiple at=0.0 entries) remain individually clickable
+   std::map<int32_t, int32_t> stack_count_at_pixel;
+   int32_t hovered_entry_index = -1;
+
+   for (int32_t entry_index = 0; entry_index < static_cast<int32_t>(_document._entries.size()); entry_index++)
+   {
+      const auto& entry = _document._entries[entry_index];
+      if (entry._trigger_type != TriggerType::At)
+      {
+         continue;
+      }
+
+      const float   marker_x     = time_to_x(entry._at_time);
+      const int32_t pixel_bucket = static_cast<int32_t>(marker_x);
+      const int32_t stack_index  = stack_count_at_pixel[pixel_bucket]++;
+      const float   marker_y     = axis_y - stack_index * (marker_radius * 2.6f);
+
+      const bool is_selected = _selected_entry_index == entry_index;
+      const float dx         = mouse_pos.x - marker_x;
+      const float dy         = mouse_pos.y - marker_y;
+      const bool is_hovered  = (dx * dx + dy * dy) <= (marker_radius * marker_radius * 2.25f);
+
+      if (is_hovered)
+      {
+         hovered_entry_index = entry_index;
+         if (canvas_clicked)
+         {
+            _selected_entry_index = entry_index;
+         }
+      }
+
+      const ImU32 fill_color = is_selected ? IM_COL32(255, 160, 40,  255)
+                             : is_hovered  ? IM_COL32(180, 210, 255, 255)
+                                           : IM_COL32(80,  140, 230, 255);
+
+      // connector line from axis up to a stacked marker
+      if (stack_index > 0)
+      {
+         draw_list->AddLine(
+            {marker_x, axis_y - marker_radius},
+            {marker_x, marker_y + marker_radius},
+            IM_COL32(100, 100, 100, 140)
+         );
+      }
+
+      draw_list->AddCircleFilled({marker_x, marker_y}, marker_radius, fill_color);
+      draw_list->AddCircle({marker_x, marker_y}, marker_radius, IM_COL32(255, 255, 255, 55));
+
+      // entry index label centred above the marker
+      char index_label[8];
+      std::snprintf(index_label, sizeof(index_label), "%02d", entry_index + 1);
+      const ImVec2 label_size = ImGui::CalcTextSize(index_label);
+      draw_list->AddText(
+         {marker_x - label_size.x * 0.5f, marker_y - marker_radius - text_height - 1.0f},
+         is_selected ? IM_COL32(255, 200, 100, 255) : IM_COL32(190, 190, 190, 255),
+         index_label
+      );
+   }
+
+   // tooltip for whichever marker the mouse is over
+   if (hovered_entry_index >= 0)
+   {
+      const auto& hovered_entry = _document._entries[hovered_entry_index];
+      ImGui::SetTooltip(
+         "[%02d] at=%.3fs | %s",
+         hovered_entry_index + 1,
+         hovered_entry._at_time,
+         actionTypeToString(hovered_entry._action_type)
+      );
    }
 }
