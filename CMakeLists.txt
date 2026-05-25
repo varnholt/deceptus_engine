@@ -197,6 +197,8 @@ set(GAME_FILES
     src/game/debug/logui.cpp
     src/game/debug/logui.h
     src/game/debug/mechanismsample.h
+    src/game/debug/mechanismschemawriter.cpp
+    src/game/debug/mechanismschemawriter.h
     src/game/debug/profilingui.cpp
     src/game/debug/profilingui.h
     src/game/effects/boomeffect.cpp
@@ -381,6 +383,7 @@ set(GAME_FILES
     src/game/mechanisms/gamemechanismdeserializerconstants.h
     src/game/mechanisms/gamemechanismdeserializerregistry.cpp
     src/game/mechanisms/gamemechanismdeserializerregistry.h
+    src/game/mechanisms/gamemechanismschema.h
     src/game/mechanisms/gamemechanismobserver.cpp
     src/game/mechanisms/gamemechanismobserver.h
     src/game/mechanisms/gateway.cpp

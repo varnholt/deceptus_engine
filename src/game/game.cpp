@@ -14,6 +14,7 @@
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/debug/debugdraw.h"
 #include "game/debug/debugdrawstates.h"
+#include "game/debug/mechanismschemawriter.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
 #include "game/event/eventdistributor.h"
@@ -533,6 +534,10 @@ void Game::initialize()
 
    GameAudio::getInstance().initialize();
    _audio_callback = [](GameAudio::SoundEffect effect) { GameAudio::getInstance().play(effect); };
+
+#ifdef DEVELOPMENT_MODE
+   writeMechanismSchemas();
+#endif
 }
 
 // frambuffers
