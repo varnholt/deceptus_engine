@@ -4,57 +4,6 @@
 
 #include <nlohmann/json.hpp>
 
-// ---- string conversion helpers ----------------------------------------------
-
-const char* actionTypeToString(ActionType type)
-{
-   switch (type)
-   {
-      case ActionType::SetCameraPosition:   { return "set_camera_position"; }
-      case ActionType::MoveCamera:          { return "move_camera"; }
-      case ActionType::SetZoom:             { return "set_zoom"; }
-      case ActionType::PlayMusic:           { return "play_music"; }
-      case ActionType::PlaySound:           { return "play_sound"; }
-      case ActionType::CreateSprite:        { return "create_sprite"; }
-      case ActionType::DestroySprite:       { return "destroy_sprite"; }
-      case ActionType::SetSpriteAnimation:  { return "set_sprite_animation"; }
-      case ActionType::SetSpriteVisible:    { return "set_sprite_visible"; }
-      case ActionType::MoveSprite:          { return "move_sprite"; }
-      case ActionType::FadeIn:              { return "fade_in"; }
-      case ActionType::FadeOut:             { return "fade_out"; }
-      case ActionType::ShowDialogue:        { return "show_dialogue"; }
-      case ActionType::SetPlayerVisible:    { return "set_player_visible"; }
-      case ActionType::SetInfoLayerVisible: { return "set_info_layer_visible"; }
-      case ActionType::UnlockCamera:        { return "unlock_camera"; }
-      case ActionType::NextLevel:           { return "next_level"; }
-   }
-   return "";
-}
-
-ActionType stringToActionType(const std::string& str)
-{
-   if (str == "set_camera_position")    { return ActionType::SetCameraPosition; }
-   if (str == "move_camera")            { return ActionType::MoveCamera; }
-   if (str == "set_zoom")               { return ActionType::SetZoom; }
-   if (str == "play_music")             { return ActionType::PlayMusic; }
-   if (str == "play_sound")             { return ActionType::PlaySound; }
-   if (str == "create_sprite")          { return ActionType::CreateSprite; }
-   if (str == "destroy_sprite")         { return ActionType::DestroySprite; }
-   if (str == "set_sprite_animation")   { return ActionType::SetSpriteAnimation; }
-   if (str == "set_sprite_visible")     { return ActionType::SetSpriteVisible; }
-   if (str == "move_sprite")            { return ActionType::MoveSprite; }
-   if (str == "fade_in")                { return ActionType::FadeIn; }
-   if (str == "fade_out")               { return ActionType::FadeOut; }
-   if (str == "show_dialogue")          { return ActionType::ShowDialogue; }
-   if (str == "set_player_visible")     { return ActionType::SetPlayerVisible; }
-   if (str == "set_info_layer_visible") { return ActionType::SetInfoLayerVisible; }
-   if (str == "unlock_camera")          { return ActionType::UnlockCamera; }
-   if (str == "next_level")             { return ActionType::NextLevel; }
-   return ActionType::SetCameraPosition;
-}
-
-// ---- Document ---------------------------------------------------------------
-
 bool Document::load(const std::string& path)
 {
    std::ifstream input_file(path);
@@ -82,12 +31,12 @@ bool Document::load(const std::string& path)
       if (json_entry.contains("at"))
       {
          entry._trigger_type = TriggerType::At;
-         entry._at_time = json_entry["at"].get<float>();
+         entry._at_time      = json_entry["at"].get<float>();
       }
       else if (json_entry.contains("on"))
       {
          entry._trigger_type = TriggerType::On;
-         entry._on_event = json_entry["on"].get<std::string>();
+         entry._on_event     = json_entry["on"].get<std::string>();
          if (json_entry.contains("delay"))
          {
             entry._delay = json_entry["delay"].get<float>();

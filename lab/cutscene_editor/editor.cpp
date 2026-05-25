@@ -7,13 +7,14 @@
 
 #include <imgui.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <vector>
 
-// ---- file dialog helpers ----------------------------------------------------
-
-static std::string openFileDialog()
+/// \brief shows a Windows open-file dialog filtered to JSON files.
+/// \return selected absolute path, or empty string if cancelled.
+static std::string showOpenFileDialog()
 {
    OPENFILENAMEA ofn   = {};
    char          filename_buffer[MAX_PATH] = {};
@@ -29,7 +30,10 @@ static std::string openFileDialog()
    return {};
 }
 
-static std::string saveFileDialog(const std::string& current_path)
+/// \brief shows a Windows save-file dialog filtered to JSON files.
+/// \param current_path pre-populated path shown in the dialog; may be empty.
+/// \return chosen absolute path, or empty string if cancelled.
+static std::string showSaveFileDialog(const std::string& current_path)
 {
    OPENFILENAMEA ofn   = {};
    char          filename_buffer[MAX_PATH] = {};
@@ -50,30 +54,11 @@ static std::string saveFileDialog(const std::string& current_path)
    return {};
 }
 
-// ---- action name table (index must match ActionType enum values) -------------
-
-static const char* action_names[action_type_count] = {
-   "set_camera_position",   // 0
-   "move_camera",           // 1
-   "set_zoom",              // 2
-   "play_music",            // 3
-   "play_sound",            // 4
-   "create_sprite",         // 5
-   "destroy_sprite",        // 6
-   "set_sprite_animation",  // 7
-   "set_sprite_visible",    // 8
-   "move_sprite",           // 9
-   "fade_in",               // 10
-   "fade_out",              // 11
-   "show_dialogue",         // 12
-   "set_player_visible",    // 13
-   "set_info_layer_visible",// 14
-   "unlock_camera",         // 15
-   "next_level",            // 16
-};
-
-// ---- helper: find the index of a string in a const char* array --------------
-
+/// \brief returns the index of value in a null-terminated-string array, or 0 if not found.
+/// \param options pointer to an array of const char* of length option_count.
+/// \param option_count number of entries in options.
+/// \param value string to find.
+/// \return zero-based index of the first match, or 0 when value is absent.
 static int32_t findStringIndex(const char* const* options, int32_t option_count, const std::string& value)
 {
    for (int32_t option_index = 0; option_index < option_count; option_index++)
@@ -85,8 +70,6 @@ static int32_t findStringIndex(const char* const* options, int32_t option_count,
    }
    return 0;
 }
-
-// ---- Editor -----------------------------------------------------------------
 
 bool Editor::inputText(const char* label, std::string& value, size_t max_length)
 {
@@ -102,7 +85,7 @@ bool Editor::inputText(const char* label, std::string& value, size_t max_length)
 
 void Editor::openFile()
 {
-   const auto selected_path = openFileDialog();
+   const auto selected_path = showOpenFileDialog();
    if (!selected_path.empty())
    {
       _document.load(selected_path);
@@ -125,7 +108,7 @@ void Editor::saveFile()
 
 void Editor::saveFileAs()
 {
-   const auto selected_path = saveFileDialog(_document._filepath);
+   const auto selected_path = showSaveFileDialog(_document._filepath);
    if (!selected_path.empty())
    {
       _document._filepath = selected_path;
@@ -138,7 +121,7 @@ void Editor::saveFileAs()
 
 void Editor::draw()
 {
-   // keyboard shortcuts
+   // keyboard shortcuts — only when no text field has focus
    const ImGuiIO& io = ImGui::GetIO();
    if (io.KeyCtrl && !io.WantTextInput)
    {
@@ -223,7 +206,7 @@ void Editor::drawMenuBar()
       ImGui::EndMenu();
    }
 
-   // show current file path and modified marker in the menu bar
+   // filepath + unsaved marker displayed inline in the menu bar
    ImGui::Separator();
    if (_document._filepath.empty())
    {
@@ -283,7 +266,6 @@ void Editor::drawEntryList()
 
    ImGui::EndChild();
 
-   // action buttons
    if (ImGui::Button("+ Add"))
    {
       _document._entries.push_back(CutsceneEntry{});
@@ -291,26 +273,34 @@ void Editor::drawEntryList()
       _document._modified   = true;
    }
    ImGui::SameLine();
-   const bool can_remove = _selected_entry_index >= 0 && _selected_entry_index < static_cast<int32_t>(_document._entries.size());
+
+   const bool can_remove = _selected_entry_index >= 0 &&
+                           _selected_entry_index < static_cast<int32_t>(_document._entries.size());
    if (ImGui::Button("- Remove") && can_remove)
    {
       _document._entries.erase(_document._entries.begin() + _selected_entry_index);
-      _selected_entry_index = std::min(_selected_entry_index, static_cast<int32_t>(_document._entries.size()) - 1);
-      _document._modified   = true;
+      _selected_entry_index = std::min(_selected_entry_index,
+                                       static_cast<int32_t>(_document._entries.size()) - 1);
+      _document._modified = true;
    }
    ImGui::SameLine();
+
    const bool can_move_up = _selected_entry_index > 0;
    if (ImGui::Button("^") && can_move_up)
    {
-      std::swap(_document._entries[_selected_entry_index], _document._entries[_selected_entry_index - 1]);
+      std::swap(_document._entries[_selected_entry_index],
+                _document._entries[_selected_entry_index - 1]);
       _selected_entry_index--;
       _document._modified = true;
    }
    ImGui::SameLine();
-   const bool can_move_down = _selected_entry_index >= 0 && _selected_entry_index < static_cast<int32_t>(_document._entries.size()) - 1;
+
+   const bool can_move_down = _selected_entry_index >= 0 &&
+                              _selected_entry_index < static_cast<int32_t>(_document._entries.size()) - 1;
    if (ImGui::Button("v") && can_move_down)
    {
-      std::swap(_document._entries[_selected_entry_index], _document._entries[_selected_entry_index + 1]);
+      std::swap(_document._entries[_selected_entry_index],
+                _document._entries[_selected_entry_index + 1]);
       _selected_entry_index++;
       _document._modified = true;
    }
@@ -328,7 +318,7 @@ void Editor::drawEntryEditor()
 
    auto& entry = _document._entries[_selected_entry_index];
 
-   // ---- trigger section ----
+   // ---- trigger ----
    ImGui::TextUnformatted("Trigger");
    ImGui::Separator();
 
@@ -370,19 +360,19 @@ void Editor::drawEntryEditor()
       }
    }
 
-   // ---- action section ----
+   // ---- action ----
    ImGui::Spacing();
    ImGui::TextUnformatted("Action");
    ImGui::Separator();
 
    int32_t action_index = static_cast<int32_t>(entry._action_type);
-   if (ImGui::Combo("Action type", &action_index, action_names, action_type_count))
+   if (ImGui::Combo("Action type", &action_index, actionTypeNames(), action_type_count))
    {
       entry._action_type  = static_cast<ActionType>(action_index);
       _document._modified = true;
    }
 
-   // ---- fields section ----
+   // ---- fields ----
    ImGui::Spacing();
    ImGui::TextUnformatted("Fields");
    ImGui::Separator();
@@ -400,22 +390,22 @@ void Editor::drawActionFields(CutsceneEntry& entry)
    {
       case ActionType::SetCameraPosition:
       {
-         if (ImGui::InputFloat("X", &entry._x, 1.0f, 10.0f, "%.1f"))    { _document._modified = true; }
-         if (ImGui::InputFloat("Y", &entry._y, 1.0f, 10.0f, "%.1f"))    { _document._modified = true; }
+         if (ImGui::InputFloat("X", &entry._x, 1.0f, 10.0f, "%.1f")) { _document._modified = true; }
+         if (ImGui::InputFloat("Y", &entry._y, 1.0f, 10.0f, "%.1f")) { _document._modified = true; }
          break;
       }
       case ActionType::MoveCamera:
       {
-         if (ImGui::InputFloat("Target X",           &entry._x,          1.0f,  10.0f,  "%.1f")) { _document._modified = true; }
-         if (ImGui::InputFloat("Target Y",           &entry._y,          1.0f,  10.0f,  "%.1f")) { _document._modified = true; }
-         if (ImGui::InputFloat("Duration (seconds)", &entry._duration_s, 0.1f,  1.0f,   "%.2f")) { _document._modified = true; }
+         if (ImGui::InputFloat("Target X",           &entry._x,          1.0f, 10.0f, "%.1f")) { _document._modified = true; }
+         if (ImGui::InputFloat("Target Y",           &entry._y,          1.0f, 10.0f, "%.1f")) { _document._modified = true; }
+         if (ImGui::InputFloat("Duration (seconds)", &entry._duration_s, 0.1f,  1.0f, "%.2f")) { _document._modified = true; }
          int32_t easing_index = findStringIndex(easing_options, 4, entry._easing);
          if (ImGui::Combo("Easing", &easing_index, easing_options, 4))
          {
             entry._easing       = easing_options[easing_index];
             _document._modified = true;
          }
-         if (inputText("Event (optional)", entry._event))                { _document._modified = true; }
+         if (inputText("Event (optional)", entry._event)) { _document._modified = true; }
          break;
       }
       case ActionType::SetZoom:
@@ -425,7 +415,7 @@ void Editor::drawActionFields(CutsceneEntry& entry)
       }
       case ActionType::PlayMusic:
       {
-         if (inputText("File path", entry._file, 512))                   { _document._modified = true; }
+         if (inputText("File path", entry._file, 512)) { _document._modified = true; }
          int32_t transition_index = findStringIndex(transition_options, 4, entry._transition);
          if (ImGui::Combo("Transition", &transition_index, transition_options, 4))
          {
@@ -443,44 +433,44 @@ void Editor::drawActionFields(CutsceneEntry& entry)
       }
       case ActionType::PlaySound:
       {
-         if (inputText("Sound ID", entry._id))                           { _document._modified = true; }
+         if (inputText("Sound ID", entry._id)) { _document._modified = true; }
          break;
       }
       case ActionType::CreateSprite:
       {
-         if (inputText("Sprite name", entry._name))                     { _document._modified = true; }
-         if (inputText("Animation file", entry._animation_file, 512))   { _document._modified = true; }
-         if (inputText("Animation", entry._animation))                  { _document._modified = true; }
-         if (ImGui::InputFloat("X", &entry._x, 1.0f, 10.0f, "%.1f"))   { _document._modified = true; }
-         if (ImGui::InputFloat("Y", &entry._y, 1.0f, 10.0f, "%.1f"))   { _document._modified = true; }
-         if (ImGui::Checkbox("Looped", &entry._looped))                 { _document._modified = true; }
+         if (inputText("Sprite name",     entry._name))                   { _document._modified = true; }
+         if (inputText("Animation file",  entry._animation_file, 512))    { _document._modified = true; }
+         if (inputText("Animation",       entry._animation))              { _document._modified = true; }
+         if (ImGui::InputFloat("X",       &entry._x, 1.0f, 10.0f, "%.1f")) { _document._modified = true; }
+         if (ImGui::InputFloat("Y",       &entry._y, 1.0f, 10.0f, "%.1f")) { _document._modified = true; }
+         if (ImGui::Checkbox("Looped",    &entry._looped))                { _document._modified = true; }
          break;
       }
       case ActionType::DestroySprite:
       {
-         if (inputText("Sprite name", entry._name))                     { _document._modified = true; }
+         if (inputText("Sprite name", entry._name)) { _document._modified = true; }
          break;
       }
       case ActionType::SetSpriteAnimation:
       {
-         if (inputText("Sprite name", entry._name))                     { _document._modified = true; }
-         if (inputText("Animation", entry._animation))                  { _document._modified = true; }
-         if (ImGui::Checkbox("Looped", &entry._looped))                 { _document._modified = true; }
+         if (inputText("Sprite name", entry._name))      { _document._modified = true; }
+         if (inputText("Animation",   entry._animation)) { _document._modified = true; }
+         if (ImGui::Checkbox("Looped", &entry._looped))  { _document._modified = true; }
          break;
       }
       case ActionType::SetSpriteVisible:
       {
-         if (inputText("Sprite name", entry._name))                     { _document._modified = true; }
-         if (ImGui::Checkbox("Visible", &entry._visible))               { _document._modified = true; }
+         if (inputText("Sprite name",    entry._name))    { _document._modified = true; }
+         if (ImGui::Checkbox("Visible",  &entry._visible)) { _document._modified = true; }
          break;
       }
       case ActionType::MoveSprite:
       {
-         if (inputText("Sprite name", entry._name))                     { _document._modified = true; }
-         if (ImGui::InputFloat("Target X", &entry._x, 1.0f, 10.0f, "%.1f")) { _document._modified = true; }
-         if (ImGui::InputFloat("Target Y", &entry._y, 1.0f, 10.0f, "%.1f")) { _document._modified = true; }
+         if (inputText("Sprite name",    entry._name))                            { _document._modified = true; }
+         if (ImGui::InputFloat("Target X",   &entry._x,     1.0f, 10.0f, "%.1f")) { _document._modified = true; }
+         if (ImGui::InputFloat("Target Y",   &entry._y,     1.0f, 10.0f, "%.1f")) { _document._modified = true; }
          if (ImGui::InputFloat("Speed (px/s)", &entry._speed, 1.0f, 10.0f, "%.1f")) { _document._modified = true; }
-         if (inputText("Event (optional)", entry._event))               { _document._modified = true; }
+         if (inputText("Event (optional)", entry._event))                         { _document._modified = true; }
          break;
       }
       case ActionType::FadeIn:
@@ -491,13 +481,13 @@ void Editor::drawActionFields(CutsceneEntry& entry)
       }
       case ActionType::ShowDialogue:
       {
-         if (inputText("Dialogue ID", entry._id))                       { _document._modified = true; }
+         if (inputText("Dialogue ID", entry._id)) { _document._modified = true; }
          break;
       }
       case ActionType::SetPlayerVisible:
       case ActionType::SetInfoLayerVisible:
       {
-         if (ImGui::Checkbox("Visible", &entry._visible))               { _document._modified = true; }
+         if (ImGui::Checkbox("Visible", &entry._visible)) { _document._modified = true; }
          break;
       }
       case ActionType::UnlockCamera:

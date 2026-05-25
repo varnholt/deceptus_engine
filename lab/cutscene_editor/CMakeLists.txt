@@ -34,6 +34,10 @@ FetchContent_MakeAvailable(nlohmann_json)
 
 add_executable(cutscene_editor
    main.cpp
+   triggertype.h
+   actiontype.h
+   actiontype.cpp
+   cutsceneentry.h
    document.h
    document.cpp
    editor.h
