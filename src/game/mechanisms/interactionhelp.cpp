@@ -1,5 +1,6 @@
 #include "interactionhelp.h"
 
+#include <array>
 #include <vector>
 
 #include "framework/tmxparser/tmxobject.h"
@@ -17,6 +18,24 @@ namespace
 const auto registered_interactionhelp = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array interaction_help_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "50"},
+      PropertyInfo{.name = "animation", .type = "string", .default_value = ""},
+      PropertyInfo{.name = "offset_x_px", .type = "int", .default_value = "0"},
+      PropertyInfo{.name = "offset_y_px", .type = "int", .default_value = "0"},
+      PropertyInfo{.name = "button_0", .type = "string", .default_value = "key_cursor_u"},
+      PropertyInfo{.name = "text_0", .type = "string", .default_value = ""},
+   };
+   static constexpr MechanismSchema interaction_help_schema{
+      .type_name = "InteractionHelp",
+      .layer_name = "interaction_help",
+      .default_width = 96,
+      .default_height = 48,
+      .properties = interaction_help_properties,
+   };
+   registry.registerSchema(interaction_help_schema);
+
    registry.mapGroupToLayer("InteractionHelp", "interaction_help");
 
    registry.registerLayerName(

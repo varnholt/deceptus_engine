@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="Fan" width="48" height="96">
+  <properties>
+   <property name="direction" type="string" value="up"/>
+   <property name="speed" type="float" value="1.0"/>
+  </properties>
+ </object>
+</template>

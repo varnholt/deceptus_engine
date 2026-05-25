@@ -1,5 +1,6 @@
 #include "spikeball.h"
 
+#include <array>
 #include <iostream>
 
 #include "framework/math/hermitecurve.h"
@@ -18,6 +19,19 @@ namespace
 const auto registered_spikeball = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   static constexpr std::array spike_ball_properties{
+      PropertyInfo{.name = "push_factor", .type = "float", .default_value = "1.0"},
+      PropertyInfo{.name = "spline_point_count", .type = "int", .default_value = "8"},
+      PropertyInfo{.name = "z", .type = "int", .default_value = "16"},
+   };
+   static constexpr MechanismSchema spike_ball_schema{
+      .type_name = "SpikeBall",
+      .layer_name = "spike_balls",
+      .default_width = 96,
+      .default_height = 96,
+      .properties = spike_ball_properties,
+   };
+   registry.registerSchema(spike_ball_schema);
    registry.mapGroupToLayer("SpikeBall", "spike_balls");
 
    registry.registerLayerName(

@@ -1,5 +1,6 @@
 #include "spikeblock.h"
 
+#include <array>
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -29,6 +30,17 @@ namespace
 const auto registered_spikeblock = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   static constexpr std::array spike_block_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema spike_block_schema{
+      .type_name = "SpikeBlock",
+      .layer_name = "spike_blocks",
+      .default_width = 24,
+      .default_height = 24,
+      .properties = spike_block_properties,
+   };
+   registry.registerSchema(spike_block_schema);
    registry.mapGroupToLayer("SpikeBlock", "spike_blocks");
 
    registry.registerLayerName(

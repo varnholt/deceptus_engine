@@ -6,9 +6,11 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "game/io/gamedeserializedata.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/mechanisms/gamemechanismschema.h"
 
 class GameNode;
 
@@ -75,6 +77,14 @@ public:
    /// \return false when the layer was registered as non-visual.
    bool isVisual(const std::string& layer_name) const;
 
+   /// \brief registers a schema describing a mechanism's tmx properties.
+   /// \param schema schema to store.
+   void registerSchema(const MechanismSchema& schema);
+
+   /// \brief returns all registered mechanism schemas.
+   /// \return vector of all schemas registered so far.
+   const std::vector<MechanismSchema>& schemas() const;
+
 private:
    std::unordered_map<std::string, DeserializerFunction> _layer_name_map;
    std::unordered_map<std::string, DeserializerFunction> _object_group_map;
@@ -83,6 +93,7 @@ private:
    std::map<std::string, std::string> _layer_to_group_name;
 
    std::unordered_set<std::string> _non_visual_layers;
+   std::vector<MechanismSchema> _schemas;
 };
 
 #endif  // GAMEMECHANISMDESERIALIZERREGISTRY_H

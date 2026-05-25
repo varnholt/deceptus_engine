@@ -10,6 +10,8 @@
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 
+#include <array>
+
 // #define DEBUG_DRAW 1
 #ifdef DEBUG_DRAW
 #include "game/debug/debugdraw.h"
@@ -25,6 +27,18 @@ namespace
 const auto registered_deathblock = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array death_block_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema death_block_schema{
+      .type_name = "DeathBlock",
+      .layer_name = "death_blocks",
+      .default_width = 24,
+      .default_height = 24,
+      .properties = death_block_properties,
+   };
+   registry.registerSchema(death_block_schema);
 
    registry.mapGroupToLayer("DeathBlock", "death_blocks");
 

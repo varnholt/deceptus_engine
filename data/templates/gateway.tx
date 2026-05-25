@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="Gateway" width="96" height="96">
+  <properties>
+   <property name="enabled" type="bool" value="true"/>
+   <property name="target_id" type="string" value=""/>
+   <property name="z" type="int" value="20"/>
+   <property name="flowfield_reference_id" type="string" value=""/>
+   <property name="flowfield_texture" type="string" value=""/>
+  </properties>
+ </object>
+</template>

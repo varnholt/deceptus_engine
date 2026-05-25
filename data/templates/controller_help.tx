@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="ControllerHelp" width="96" height="48">
+  <properties>
+   <property name="keys" type="string" value="bt_a"/>
+  </properties>
+ </object>
+</template>

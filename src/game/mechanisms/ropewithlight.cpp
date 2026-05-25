@@ -6,11 +6,26 @@
 #include "game/level/levelregistry.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
+#include <array>
+
 namespace
 {
 const auto registered_ropewithlight = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array rope_with_light_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema rope_with_light_schema{
+      .type_name = "RopeWithLight",
+      .layer_name = "ropes_with_light",
+      .default_width = 24,
+      .default_height = 96,
+      .properties = rope_with_light_properties,
+   };
+   registry.registerSchema(rope_with_light_schema);
+
    registry.mapGroupToLayer("RopeWithLight", "ropes_with_light");
 
    registry.registerLayerName(

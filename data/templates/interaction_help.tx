@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="InteractionHelp" width="96" height="48">
+  <properties>
+   <property name="z" type="int" value="50"/>
+   <property name="animation" type="string" value=""/>
+   <property name="offset_x_px" type="int" value="0"/>
+   <property name="offset_y_px" type="int" value="0"/>
+   <property name="button_0" type="string" value="key_cursor_u"/>
+   <property name="text_0" type="string" value=""/>
+  </properties>
+ </object>
+</template>

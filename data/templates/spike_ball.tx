@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="SpikeBall" width="96" height="96">
+  <properties>
+   <property name="push_factor" type="float" value="1.0"/>
+   <property name="spline_point_count" type="int" value="8"/>
+   <property name="z" type="int" value="16"/>
+  </properties>
+ </object>
+</template>

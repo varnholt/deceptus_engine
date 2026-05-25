@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="ConveyorBelt" width="96" height="24">
+  <properties>
+   <property name="velocity" type="float" value="1.0"/>
+  </properties>
+ </object>
+</template>

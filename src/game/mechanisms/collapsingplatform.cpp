@@ -1,5 +1,6 @@
 #include "collapsingplatform.h"
 
+#include <array>
 #include <iostream>
 
 #include "audio/audio.h"
@@ -19,6 +20,19 @@ namespace
 const auto registered_collapsingplatform = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array collapsing_platform_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema collapsing_platform_schema{
+      .type_name = "CollapsingPlatform",
+      .layer_name = "collapsing_platforms",
+      .default_width = 96,
+      .default_height = 24,
+      .properties = collapsing_platform_properties,
+   };
+   registry.registerSchema(collapsing_platform_schema);
+
    registry.mapGroupToLayer("CollapsingPlatform", "collapsing_platforms");
 
    registry.registerLayerName(

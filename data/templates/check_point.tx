@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="CheckPoint" width="72" height="120">
+  <properties>
+   <property name="index" type="int" value="0"/>
+   <property name="z" type="int" value="20"/>
+   <property name="sprite_pos_x_px" type="int" value="0"/>
+   <property name="sprite_pos_y_px" type="int" value="0"/>
+  </properties>
+ </object>
+</template>

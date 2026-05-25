@@ -7,6 +7,8 @@
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
+#include <array>
+
 namespace
 {
 constexpr auto FRAME_COUNT = 4;
@@ -20,6 +22,19 @@ namespace
 const auto registered_fireflies = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array fireflies_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema fireflies_schema{
+      .type_name = "Fireflies",
+      .layer_name = "fireflies",
+      .default_width = 96,
+      .default_height = 96,
+      .properties = fireflies_properties,
+   };
+   registry.registerSchema(fireflies_schema);
+
    registry.mapGroupToLayer("Fireflies", "fireflies");
 
    registry.registerLayerName(

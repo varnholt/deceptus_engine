@@ -1,4 +1,7 @@
 #include "buttonrect.h"
+
+#include <array>
+
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -10,6 +13,19 @@ namespace
 const auto registered_buttonrect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array button_rect_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema button_rect_schema{
+      .type_name = "ButtonRect",
+      .layer_name = "button_rects",
+      .default_width = 48,
+      .default_height = 24,
+      .properties = button_rect_properties,
+   };
+   registry.registerSchema(button_rect_schema);
+
    registry.markAsNonVisual("button_rects");
    registry.mapGroupToLayer("ButtonRect", "button_rects");
 

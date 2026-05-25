@@ -1,5 +1,7 @@
 #include "crusher.h"
 
+#include <array>
+
 #include "framework/easings/easings.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
@@ -19,6 +21,19 @@ namespace
 const auto registered_crusher = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array crusher_properties{
+      PropertyInfo{.name = "alignment", .type = "string", .default_value = "down"},
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema crusher_schema{
+      .type_name = "Crusher",
+      .layer_name = "crushers",
+      .default_width = 120,
+      .default_height = 24,
+      .properties = crusher_properties,
+   };
+   registry.registerSchema(crusher_schema);
 
    registry.mapGroupToLayer("Crusher", "crushers");
 

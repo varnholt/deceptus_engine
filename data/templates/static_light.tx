@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="StaticLight" width="96" height="96">
+  <properties>
+   <property name="color" type="string" value="#ffffffff"/>
+   <property name="texture" type="string" value="smooth.png"/>
+   <property name="flicker_intensity" type="float" value="0.0"/>
+   <property name="flicker_speed" type="float" value="0.0"/>
+   <property name="flicker_alpha_amount" type="float" value="1.0"/>
+   <property name="z" type="int" value="20"/>
+  </properties>
+ </object>
+</template>

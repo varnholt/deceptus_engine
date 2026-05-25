@@ -1,5 +1,6 @@
 #include "wind.h"
 
+#include <array>
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -12,6 +13,18 @@ namespace
 const auto registered_wind = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   static constexpr std::array wind_properties{
+      PropertyInfo{.name = "direction_x", .type = "float", .default_value = "0.0"},
+      PropertyInfo{.name = "direction_y", .type = "float", .default_value = "-1.0"},
+   };
+   static constexpr MechanismSchema wind_schema{
+      .type_name = "Wind",
+      .layer_name = "wind",
+      .default_width = 192,
+      .default_height = 192,
+      .properties = wind_properties,
+   };
+   registry.registerSchema(wind_schema);
    registry.markAsNonVisual("wind");
    registry.mapGroupToLayer("Wind", "wind");
 

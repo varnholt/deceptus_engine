@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="WaterSurfaceEmitter" width="96" height="24">
+  <properties>
+   <property name="reference" type="string" value=""/>
+   <property name="velocity" type="float" value="2.0"/>
+   <property name="interval_min_s" type="float" value="0.3"/>
+   <property name="interval_max_s" type="float" value="0.6"/>
+   <property name="count" type="int" value="1"/>
+   <property name="x_from_px" type="float" value="0.0"/>
+   <property name="x_to_px" type="float" value="96.0"/>
+   <property name="width_px" type="float" value="96.0"/>
+  </properties>
+ </object>
+</template>

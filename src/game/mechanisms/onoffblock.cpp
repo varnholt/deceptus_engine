@@ -7,6 +7,8 @@
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
+#include <array>
+
 /*
 
    +---+---+---+---+---+---+---+---+
@@ -25,6 +27,24 @@ namespace
 const auto registered_onoffblock = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array on_off_block_properties{
+      PropertyInfo{.name = "enabled", .type = "bool", .default_value = "true"},
+      PropertyInfo{.name = "mode", .type = "string", .default_value = "lever"},
+      PropertyInfo{.name = "inverted", .type = "bool", .default_value = "false"},
+      PropertyInfo{.name = "time_on_ms", .type = "int", .default_value = "1000"},
+      PropertyInfo{.name = "time_off_ms", .type = "int", .default_value = "1000"},
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema on_off_block_schema{
+      .type_name = "OnOffBlock",
+      .layer_name = "on_off_blocks",
+      .default_width = 24,
+      .default_height = 24,
+      .properties = on_off_block_properties,
+   };
+   registry.registerSchema(on_off_block_schema);
+
    registry.mapGroupToLayer("OnOffBlock", "on_off_blocks");
 
    registry.registerLayerName(

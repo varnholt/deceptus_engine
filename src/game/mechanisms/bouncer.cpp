@@ -1,5 +1,7 @@
 #include "bouncer.h"
 
+#include <array>
+
 #include "framework/tools/globalclock.h"
 #include "game/audio/audio.h"
 #include "game/io/texturepool.h"
@@ -30,6 +32,19 @@ namespace
 const auto registered_bouncer = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array bouncer_properties{
+      PropertyInfo{.name = "force", .type = "float", .default_value = "0.6"},
+   };
+   static constexpr MechanismSchema bouncer_schema{
+      .type_name = "Bouncer",
+      .layer_name = "bouncers",
+      .default_width = 96,
+      .default_height = 24,
+      .properties = bouncer_properties,
+   };
+   registry.registerSchema(bouncer_schema);
+
    registry.mapGroupToLayer("Bouncer", "bouncers");
 
    registry.registerLayerName(

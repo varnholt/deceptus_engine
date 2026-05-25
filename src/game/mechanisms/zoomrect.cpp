@@ -1,5 +1,6 @@
 #include "zoomrect.h"
 
+#include <array>
 #include <iostream>
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/camera/camerazoom.h"
@@ -12,6 +13,17 @@ namespace
 const auto registered_zoomrect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   static constexpr std::array zoom_rect_properties{
+      PropertyInfo{.name = "values", .type = "string", .default_value = "0.0:1.5;1.0:1.0"},
+   };
+   static constexpr MechanismSchema zoom_rect_schema{
+      .type_name = "ZoomRect",
+      .layer_name = "zoom_rects",
+      .default_width = 192,
+      .default_height = 192,
+      .properties = zoom_rect_properties,
+   };
+   registry.registerSchema(zoom_rect_schema);
    registry.mapGroupToLayer("ZoomRect", "zoom_rects");
 
    registry.registerLayerName(

@@ -1,5 +1,6 @@
 #include "controllerhelp.h"
 
+#include <array>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -34,6 +35,18 @@ namespace
 const auto registered_controllerhelp = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array controller_help_properties{
+      PropertyInfo{.name = "keys", .type = "string", .default_value = "bt_a"},
+   };
+   static constexpr MechanismSchema controller_help_schema{
+      .type_name = "ControllerHelp",
+      .layer_name = "controller_help",
+      .default_width = 96,
+      .default_height = 48,
+      .properties = controller_help_properties,
+   };
+   registry.registerSchema(controller_help_schema);
 
    registry.mapGroupToLayer("ControllerHelp", "controller_help");
 

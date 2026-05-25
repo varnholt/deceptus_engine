@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="ShaderQuad" width="192" height="192">
+  <properties>
+   <property name="fragment_shader" type="string" value=""/>
+   <property name="vertex_shader" type="string" value=""/>
+   <property name="texture" type="string" value=""/>
+   <property name="z" type="int" value="20"/>
+  </properties>
+ </object>
+</template>

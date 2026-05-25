@@ -9,6 +9,8 @@
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
+
+#include <array>
 #include "game/player/playercontrols.h"
 #include "game/player/playerinfo.h"
 #include "game/state/savestate.h"
@@ -23,6 +25,19 @@ namespace
 const auto registered_extra = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array extra_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema extra_schema{
+      .type_name = "Extra",
+      .layer_name = "extras",
+      .default_width = 24,
+      .default_height = 24,
+      .properties = extra_properties,
+   };
+   registry.registerSchema(extra_schema);
+
    registry.mapGroupToLayer("Extra", "extras");
 
    registry.registerLayerName(

@@ -19,6 +19,19 @@ namespace
 const auto registered_rope = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array rope_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema rope_schema{
+      .type_name = "Rope",
+      .layer_name = "ropes",
+      .default_width = 24,
+      .default_height = 96,
+      .properties = rope_properties,
+   };
+   registry.registerSchema(rope_schema);
+
    registry.mapGroupToLayer("Rope", "ropes");
 
    registry.registerLayerName(
@@ -137,7 +150,7 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    sf::RenderStates states;
    states.texture = _texture.get();
    color.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
-   
+
    // render normal map (same geometry, different texture)
    states.texture = _normal_map.get();
    normal.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
@@ -203,7 +216,7 @@ void Rope::setup(const GameDeserializeData& data)
 {
    const auto path = data._base_path / "tilesets" / "catacombs-level-diffuse.png";
    _texture = TexturePool::getInstance().get(path);
-   
+
    // load default flat normal map
    _normal_map = TexturePool::getInstance().get("data/sprites/default_normal.png");
 

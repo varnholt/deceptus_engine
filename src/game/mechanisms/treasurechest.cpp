@@ -1,5 +1,6 @@
 #include "treasurechest.h"
 
+#include <array>
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/animation/animationpool.h"
@@ -17,6 +18,17 @@ namespace
 const auto registered_treasurechest = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   static constexpr std::array treasure_chest_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema treasure_chest_schema{
+      .type_name = "TreasureChest",
+      .layer_name = "treasure_chests",
+      .default_width = 48,
+      .default_height = 48,
+      .properties = treasure_chest_properties,
+   };
+   registry.registerSchema(treasure_chest_schema);
    registry.mapGroupToLayer("TreasureChest", "treasure_chests");
 
    registry.registerLayerName(

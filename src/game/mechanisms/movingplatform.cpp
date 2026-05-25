@@ -17,6 +17,7 @@
 #include "game/mechanisms/gamemechanismdeserializerregistry.h" 0
 #include "game/player/playerregistry.h"
 
+#include <array>
 #include <cmath>
 #include <numbers>
 
@@ -34,6 +35,21 @@ double cosineInterpolate(double y1, double y2, double mu)
 const auto registered_moving_platform = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array moving_platform_properties{
+      PropertyInfo{.name = "platform_width_tl", .type = "int", .default_value = "4"},
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+      PropertyInfo{.name = "interpolation_time", .type = "float", .default_value = "0"},
+   };
+   static constexpr MechanismSchema moving_platform_schema{
+      .type_name = "MovingPlatform",
+      .layer_name = "moving_platforms",
+      .default_width = 0,
+      .default_height = 0,
+      .properties = moving_platform_properties,
+   };
+   registry.registerSchema(moving_platform_schema);
+
    registry.mapGroupToLayer("MovingPlatform", "moving_platforms");
 
    registry.registerLayerName(
@@ -260,12 +276,10 @@ void MovingPlatform::setup(const GameDeserializeData& data)
       }
 
       sf::Sprite sprite(*_texture_map);
-      sprite.setTextureRect(
-         sf::IntRect(
-            {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
-            // 1 platform tile and one background tile for perspective
-         )
-      );
+      sprite.setTextureRect(sf::IntRect(
+         {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
+         // 1 platform tile and one background tile for perspective
+      ));
 
       addSprite(sprite);
    }

@@ -1,5 +1,7 @@
 #include "checkpoint.h"
 
+#include <array>
+
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -44,6 +46,22 @@ namespace
 const auto registered_checkpoint = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array check_point_properties{
+      PropertyInfo{.name = "index", .type = "int", .default_value = "0"},
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+      PropertyInfo{.name = "sprite_pos_x_px", .type = "int", .default_value = "0"},
+      PropertyInfo{.name = "sprite_pos_y_px", .type = "int", .default_value = "0"},
+   };
+   static constexpr MechanismSchema check_point_schema{
+      .type_name = "CheckPoint",
+      .layer_name = "checkpoints",
+      .default_width = 72,
+      .default_height = 120,
+      .properties = check_point_properties,
+   };
+   registry.registerSchema(check_point_schema);
+
    registry.mapGroupToLayer("CheckPoint", "checkpoints");
 
    registry.registerLayerName(

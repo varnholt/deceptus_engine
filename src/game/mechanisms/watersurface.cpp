@@ -1,5 +1,6 @@
 #include "watersurface.h"
 
+#include <array>
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -16,6 +17,22 @@ namespace
 const auto registered_watersurface = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   static constexpr std::array water_surface_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+      PropertyInfo{.name = "splash_factor", .type = "float", .default_value = "1.0"},
+      PropertyInfo{.name = "spread", .type = "float", .default_value = "1.2"},
+      PropertyInfo{.name = "opacity", .type = "int", .default_value = "255"},
+      PropertyInfo{.name = "clamp_segment_count", .type = "int", .default_value = "0"},
+      PropertyInfo{.name = "pixel_ratio", .type = "float", .default_value = "0.0"},
+   };
+   static constexpr MechanismSchema water_surface_schema{
+      .type_name = "WaterSurface",
+      .layer_name = "water_surface",
+      .default_width = 240,
+      .default_height = 24,
+      .properties = water_surface_properties,
+   };
+   registry.registerSchema(water_surface_schema);
    registry.mapGroupToLayer("WaterSurface", "water_surface");
 
    registry.registerLayerName(

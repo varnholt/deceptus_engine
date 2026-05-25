@@ -11,6 +11,7 @@
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
+#include <array>
 #include <iostream>
 
 namespace
@@ -18,6 +19,19 @@ namespace
 const auto registered_moveablebox = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array moveable_box_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema moveable_box_schema{
+      .type_name = "MoveableObject",
+      .layer_name = "moveable_objects",
+      .default_width = 24,
+      .default_height = 24,
+      .properties = moveable_box_properties,
+   };
+   registry.registerSchema(moveable_box_schema);
+
    registry.mapGroupToLayer("MoveableObject", "moveable_objects");
 
    registry.registerLayerName(

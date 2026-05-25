@@ -1,4 +1,5 @@
 #include "sensorrect.h"
+#include <array>
 #include <ranges>
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -13,6 +14,20 @@ namespace
 const auto registered_sensorrect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   static constexpr std::array sensor_rect_properties{
+      PropertyInfo{.name = "reference_id", .type = "string", .default_value = ""},
+      PropertyInfo{.name = "action", .type = "string", .default_value = "toggle"},
+      PropertyInfo{.name = "event", .type = "string", .default_value = "on_enter"},
+      PropertyInfo{.name = "observed", .type = "bool", .default_value = "false"},
+   };
+   static constexpr MechanismSchema sensor_rect_schema{
+      .type_name = "SensorRect",
+      .layer_name = "sensor_rects",
+      .default_width = 96,
+      .default_height = 96,
+      .properties = sensor_rect_properties,
+   };
+   registry.registerSchema(sensor_rect_schema);
    registry.markAsNonVisual("sensor_rects");
    registry.mapGroupToLayer("SensorRect", "sensor_rects");
 

@@ -10,11 +10,26 @@
 
 // #include <iostream>
 
+#include <array>
+
 namespace
 {
 const auto registered_infooverlay = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array info_overlay_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema info_overlay_schema{
+      .type_name = "InfoOverlay",
+      .layer_name = "info_overlays",
+      .default_width = 96,
+      .default_height = 48,
+      .properties = info_overlay_properties,
+   };
+   registry.registerSchema(info_overlay_schema);
+
    registry.mapGroupToLayer("InfoOverlay", "info_overlays");
 
    registry.registerLayerName(

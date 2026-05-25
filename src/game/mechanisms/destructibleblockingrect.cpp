@@ -10,6 +10,7 @@
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
+#include <array>
 #include <filesystem>
 #include <iostream>
 
@@ -18,6 +19,19 @@ namespace
 const auto registered_destructible_blocking_rect = []()
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array destructible_blocking_rect_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema destructible_blocking_rect_schema{
+      .type_name = "DestructibleBlockingRect",
+      .layer_name = "destructible_blocking_rects",
+      .default_width = 96,
+      .default_height = 24,
+      .properties = destructible_blocking_rect_properties,
+   };
+   registry.registerSchema(destructible_blocking_rect_schema);
+
    registry.mapGroupToLayer("DestructibleBlockingRect", "destructible_blocking_rects");
    registry.registerLayerName(
       "destructible_blocking_rects",
@@ -148,12 +162,10 @@ void DestructibleBlockingRect::update(const sf::Time& dt)
          _state.current_frame = _config.frame_count - 1;
       }
 
-      _sprite->setTextureRect(
-         sf::IntRect{
-            {static_cast<int32_t>(_state.current_frame) * _config.frame_width, _config.row * _config.frame_height},
-            {_config.frame_width, _config.frame_height}
-         }
-      );
+      _sprite->setTextureRect(sf::IntRect{
+         {static_cast<int32_t>(_state.current_frame) * _config.frame_width, _config.row * _config.frame_height},
+         {_config.frame_width, _config.frame_height}
+      });
    }
 }
 

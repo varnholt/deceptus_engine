@@ -1,6 +1,8 @@
 
 #include "bubblecube.h"
 
+#include <array>
+
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -25,6 +27,18 @@ namespace
 const auto registered_bubblecube = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+
+   static constexpr std::array bubble_cube_properties{
+      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
+   };
+   static constexpr MechanismSchema bubble_cube_schema{
+      .type_name = "BubbleCube",
+      .layer_name = "bubble_cubes",
+      .default_width = 48,
+      .default_height = 48,
+      .properties = bubble_cube_properties,
+   };
+   registry.registerSchema(bubble_cube_schema);
 
    registry.mapGroupToLayer("BubbleCube", "bubble_cubes");
 

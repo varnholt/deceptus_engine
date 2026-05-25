@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="WaterSurface" width="240" height="24">
+  <properties>
+   <property name="z" type="int" value="20"/>
+   <property name="splash_factor" type="float" value="1.0"/>
+   <property name="spread" type="float" value="1.2"/>
+   <property name="opacity" type="int" value="255"/>
+   <property name="clamp_segment_count" type="int" value="0"/>
+   <property name="pixel_ratio" type="float" value="0.0"/>
+  </properties>
+ </object>
+</template>

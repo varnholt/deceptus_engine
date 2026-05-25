@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="Wind" width="192" height="192">
+  <properties>
+   <property name="direction_x" type="float" value="0.0"/>
+   <property name="direction_y" type="float" value="-1.0"/>
+  </properties>
+ </object>
+</template>
