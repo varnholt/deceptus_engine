@@ -4,12 +4,13 @@
 #include <cstdint>
 #include <span>
 #include <string_view>
+#include <variant>
 
 struct PropertyInfo
 {
    std::string_view name;
    std::string_view type;
-   std::string_view default_value;
+   std::variant<std::string_view, int32_t, float, bool> default_value;
    bool required = false;
 };
 

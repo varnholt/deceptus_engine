@@ -17,24 +17,23 @@
 
 namespace
 {
+static constexpr std::array lever_properties{
+   PropertyInfo{.name = "enabled", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "serialized", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "handle_available", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "target_ids", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema lever_schema{
+   .type_name = "Lever",
+   .layer_name = "levers",
+   .default_width = 72,
+   .default_height = 72,
+   .properties = lever_properties,
+};
 const auto registered_lever = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array lever_properties{
-      PropertyInfo{.name = "enabled", .type = "bool", .default_value = "false"},
-      PropertyInfo{.name = "serialized", .type = "bool", .default_value = "false"},
-      PropertyInfo{.name = "handle_available", .type = "bool", .default_value = "true"},
-      PropertyInfo{.name = "target_ids", .type = "string", .default_value = ""},
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema lever_schema{
-      .type_name = "Lever",
-      .layer_name = "levers",
-      .default_width = 72,
-      .default_height = 72,
-      .properties = lever_properties,
-   };
    registry.registerSchema(lever_schema);
 
    registry.mapGroupToLayer("Lever", "levers");

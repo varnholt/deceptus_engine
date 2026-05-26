@@ -81,24 +81,23 @@ std::unique_ptr<ScreenTransition> makeFadeTransition()
 
 namespace
 {
+static constexpr std::array gateway_properties{
+   PropertyInfo{.name = "enabled", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "target_id", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "flowfield_reference_id", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "flowfield_texture", .type = "string", .default_value = std::string_view{""}},
+};
+static constexpr MechanismSchema gateway_schema{
+   .type_name = "Gateway",
+   .layer_name = "gateways",
+   .default_width = 96,
+   .default_height = 96,
+   .properties = gateway_properties,
+};
 const auto registered_gateway = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array gateway_properties{
-      PropertyInfo{.name = "enabled", .type = "bool", .default_value = "true"},
-      PropertyInfo{.name = "target_id", .type = "string", .default_value = ""},
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-      PropertyInfo{.name = "flowfield_reference_id", .type = "string", .default_value = ""},
-      PropertyInfo{.name = "flowfield_texture", .type = "string", .default_value = ""},
-   };
-   static constexpr MechanismSchema gateway_schema{
-      .type_name = "Gateway",
-      .layer_name = "gateways",
-      .default_width = 96,
-      .default_height = 96,
-      .properties = gateway_properties,
-   };
    registry.registerSchema(gateway_schema);
 
    registry.mapGroupToLayer("Gateway", "gateways");

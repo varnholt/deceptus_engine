@@ -10,20 +10,19 @@
 
 namespace
 {
+static constexpr std::array blocking_rect_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema blocking_rect_schema{
+   .type_name = "BlockingRect",
+   .layer_name = "blocking_rects",
+   .default_width = 96,
+   .default_height = 48,
+   .properties = blocking_rect_properties,
+};
 const auto registered_blockingrect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array blocking_rect_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema blocking_rect_schema{
-      .type_name = "BlockingRect",
-      .layer_name = "blocking_rects",
-      .default_width = 96,
-      .default_height = 48,
-      .properties = blocking_rect_properties,
-   };
    registry.registerSchema(blocking_rect_schema);
 
    registry.mapGroupToLayer("BlockingRect", "blocking_rects");

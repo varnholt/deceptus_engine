@@ -25,24 +25,23 @@
 
 namespace
 {
+static constexpr std::array dialogue_properties{
+   PropertyInfo{.name = "00", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "00_x_px", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "00_y_px", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "00_text_color", .type = "string", .default_value = std::string_view{"#ffffffff"}},
+   PropertyInfo{.name = "00_background_color", .type = "string", .default_value = std::string_view{"#000000ff"}},
+};
+static constexpr MechanismSchema dialogue_schema{
+   .type_name = "Dialogue",
+   .layer_name = "dialogues",
+   .default_width = 96,
+   .default_height = 48,
+   .properties = dialogue_properties,
+};
 const auto registered_dialogue = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array dialogue_properties{
-      PropertyInfo{.name = "00", .type = "string", .default_value = ""},
-      PropertyInfo{.name = "00_x_px", .type = "int", .default_value = "0"},
-      PropertyInfo{.name = "00_y_px", .type = "int", .default_value = "0"},
-      PropertyInfo{.name = "00_text_color", .type = "string", .default_value = "#ffffffff"},
-      PropertyInfo{.name = "00_background_color", .type = "string", .default_value = "#000000ff"},
-   };
-   static constexpr MechanismSchema dialogue_schema{
-      .type_name = "Dialogue",
-      .layer_name = "dialogues",
-      .default_width = 96,
-      .default_height = 48,
-      .properties = dialogue_properties,
-   };
    registry.registerSchema(dialogue_schema);
 
    registry.mapGroupToLayer("Dialogue", "dialogues");

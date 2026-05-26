@@ -13,20 +13,19 @@
 
 namespace
 {
+static constexpr std::array conveyor_belt_properties{
+   PropertyInfo{.name = "velocity", .type = "float", .default_value = 1.0f},
+};
+static constexpr MechanismSchema conveyor_belt_schema{
+   .type_name = "ConveyorBelt",
+   .layer_name = "conveyorbelts",
+   .default_width = 96,
+   .default_height = 24,
+   .properties = conveyor_belt_properties,
+};
 const auto registered_conveyorbelt = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array conveyor_belt_properties{
-      PropertyInfo{.name = "velocity", .type = "float", .default_value = "1.0"},
-   };
-   static constexpr MechanismSchema conveyor_belt_schema{
-      .type_name = "ConveyorBelt",
-      .layer_name = "conveyorbelts",
-      .default_width = 96,
-      .default_height = 24,
-      .properties = conveyor_belt_properties,
-   };
    registry.registerSchema(conveyor_belt_schema);
 
    registry.mapGroupToLayer("ConveyorBelt", "conveyorbelts");

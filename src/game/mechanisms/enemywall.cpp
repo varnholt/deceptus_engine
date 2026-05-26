@@ -9,20 +9,19 @@
 
 namespace
 {
+static constexpr std::array enemy_wall_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema enemy_wall_schema{
+   .type_name = "EnemyWall",
+   .layer_name = "enemy_walls",
+   .default_width = 24,
+   .default_height = 96,
+   .properties = enemy_wall_properties,
+};
 const auto registered_enemywall = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array enemy_wall_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema enemy_wall_schema{
-      .type_name = "EnemyWall",
-      .layer_name = "enemy_walls",
-      .default_width = 24,
-      .default_height = 96,
-      .properties = enemy_wall_properties,
-   };
    registry.registerSchema(enemy_wall_schema);
 
    registry.mapGroupToLayer("EnemyWall", "enemy_walls");

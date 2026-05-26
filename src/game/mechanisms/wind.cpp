@@ -1,6 +1,7 @@
 #include "wind.h"
 
 #include <array>
+#include <format>
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -10,20 +11,22 @@
 
 namespace
 {
+static constexpr float default_wind_direction_x = 0.0f;
+static constexpr float default_wind_direction_y = 0.0f;
+static constexpr std::array wind_properties{
+   PropertyInfo{.name = "direction_x", .type = "float", .default_value = default_wind_direction_x},
+   PropertyInfo{.name = "direction_y", .type = "float", .default_value = default_wind_direction_y},
+};
+static constexpr MechanismSchema wind_schema{
+   .type_name = "Wind",
+   .layer_name = "wind",
+   .default_width = 192,
+   .default_height = 192,
+   .properties = wind_properties,
+};
 const auto registered_wind = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-   static constexpr std::array wind_properties{
-      PropertyInfo{.name = "direction_x", .type = "float", .default_value = "0.0"},
-      PropertyInfo{.name = "direction_y", .type = "float", .default_value = "-1.0"},
-   };
-   static constexpr MechanismSchema wind_schema{
-      .type_name = "Wind",
-      .layer_name = "wind",
-      .default_width = 192,
-      .default_height = 192,
-      .properties = wind_properties,
-   };
    registry.registerSchema(wind_schema);
    registry.markAsNonVisual("wind");
    registry.mapGroupToLayer("Wind", "wind");
@@ -71,8 +74,8 @@ std::shared_ptr<Wind> Wind::deserialize(GameNode* parent, const GameDeserializeD
    {
       const auto& props = data._tmx_object->_properties->_map;
 
-      wind->_direction.x = ValueReader::readValue<float>("direction_x", props).value_or(0.0f);
-      wind->_direction.y = ValueReader::readValue<float>("direction_y", props).value_or(0.0f);
+      wind->_direction.x = ValueReader::readValue<float>("direction_x", props).value_or(default_wind_direction_x);
+      wind->_direction.y = ValueReader::readValue<float>("direction_y", props).value_or(default_wind_direction_y);
    }
 
    wind->addChunks(wind->_area);

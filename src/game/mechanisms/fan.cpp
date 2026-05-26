@@ -14,21 +14,23 @@
 
 namespace
 {
+static constexpr std::string_view default_fan_direction = "up";
+static constexpr float default_fan_speed = 1.0f;
+
+static constexpr std::array fan_properties{
+   PropertyInfo{.name = "direction", .type = "string", .default_value = default_fan_direction},
+   PropertyInfo{.name = "speed", .type = "float", .default_value = default_fan_speed},
+};
+static constexpr MechanismSchema fan_schema{
+   .type_name = "Fan",
+   .layer_name = "fans",
+   .default_width = 48,
+   .default_height = 96,
+   .properties = fan_properties,
+};
 const auto registered_fan = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array fan_properties{
-      PropertyInfo{.name = "direction", .type = "string", .default_value = "up"},
-      PropertyInfo{.name = "speed", .type = "float", .default_value = "1.0"},
-   };
-   static constexpr MechanismSchema fan_schema{
-      .type_name = "Fan",
-      .layer_name = "fans",
-      .default_width = 48,
-      .default_height = 96,
-      .properties = fan_properties,
-   };
    registry.registerSchema(fan_schema);
 
    registry.mapGroupToLayer("Fan", "fans");
@@ -79,19 +81,19 @@ std::shared_ptr<Fan> Fan::deserialize(GameNode* parent, const GameDeserializeDat
 
    fan->_pixel_rect = {{obj->_x_px, obj->_y_px}, {obj->_width_px, obj->_height_px}};
 
-   std::string dir_str = "up";
+   std::string dir_str = std::string(default_fan_direction);
    if (obj->_properties)
    {
       const auto& map = obj->_properties->_map;
 
       if (auto dir_prop = map.find("direction"); dir_prop != map.end())
       {
-         dir_str = dir_prop->second->_value_string.value_or("up");
+         dir_str = dir_prop->second->_value_string.value_or(std::string(default_fan_direction));
       }
 
       if (auto speed_prop = map.find("speed"); speed_prop != map.end())
       {
-         fan->_speed = speed_prop->second->_value_float.value_or(1.0F);
+         fan->_speed = speed_prop->second->_value_float.value_or(default_fan_speed);
       }
    }
 

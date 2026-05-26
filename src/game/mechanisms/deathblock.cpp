@@ -24,20 +24,32 @@
 
 namespace
 {
+static constexpr float default_death_block_time_off = 2.0f;
+static constexpr float default_death_block_time_on = 0.2f;
+static constexpr float default_death_block_time_offset = 0.0f;
+static constexpr int32_t default_death_block_damage = 100;
+static constexpr std::string_view default_death_block_mode = "always_on";
+static constexpr float default_death_block_velocity = 50.0f;
+
+static constexpr std::array death_block_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "time_off", .type = "float", .default_value = default_death_block_time_off},
+   PropertyInfo{.name = "time_on", .type = "float", .default_value = default_death_block_time_on},
+   PropertyInfo{.name = "time_offset", .type = "float", .default_value = default_death_block_time_offset},
+   PropertyInfo{.name = "damage", .type = "int", .default_value = default_death_block_damage},
+   PropertyInfo{.name = "mode", .type = "string", .default_value = default_death_block_mode},
+   PropertyInfo{.name = "velocity", .type = "float", .default_value = default_death_block_velocity},
+};
+static constexpr MechanismSchema death_block_schema{
+   .type_name = "DeathBlock",
+   .layer_name = "death_blocks",
+   .default_width = 24,
+   .default_height = 24,
+   .properties = death_block_properties,
+};
 const auto registered_deathblock = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array death_block_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema death_block_schema{
-      .type_name = "DeathBlock",
-      .layer_name = "death_blocks",
-      .default_width = 24,
-      .default_height = 24,
-      .properties = death_block_properties,
-   };
    registry.registerSchema(death_block_schema);
 
    registry.mapGroupToLayer("DeathBlock", "death_blocks");
@@ -494,11 +506,11 @@ void DeathBlock::setup(const GameDeserializeData& data)
    _pixel_positions.x = data._tmx_object->_x_px;
    _pixel_positions.y = data._tmx_object->_y_px;
 
-   _time_off = sf::seconds(ValueReader::readValue<float>("time_off", map).value_or(2.0f));
-   _time_on = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(0.2f));
-   _time_offset = sf::seconds(ValueReader::readValue<float>("time_offset", map).value_or(0.0f));
-   _damage = ValueReader::readValue<int32_t>("damage", map).value_or(100);
-   const auto mode = ValueReader::readValue<std::string>("mode", map).value_or("always_on");
+   _time_off = sf::seconds(ValueReader::readValue<float>("time_off", map).value_or(default_death_block_time_off));
+   _time_on = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(default_death_block_time_on));
+   _time_offset = sf::seconds(ValueReader::readValue<float>("time_offset", map).value_or(default_death_block_time_offset));
+   _damage = ValueReader::readValue<int32_t>("damage", map).value_or(default_death_block_damage);
+   const auto mode = ValueReader::readValue<std::string>("mode", map).value_or(std::string(default_death_block_mode));
 
    if (mode == "always_on")
    {
@@ -520,7 +532,7 @@ void DeathBlock::setup(const GameDeserializeData& data)
    setupBody(data._world);
 
    // setup velocity
-   const auto velocity = ValueReader::readValue<float>("velocity", map).value_or(50.0f);
+   const auto velocity = ValueReader::readValue<float>("velocity", map).value_or(default_death_block_velocity);
    auto pixel_path = data._tmx_object->_polyline ? data._tmx_object->_polyline->_path : data._tmx_object->_polygon->_polyline;
    const auto start_pos = pixel_path.at(0);
    pixel_path.push_back(start_pos);

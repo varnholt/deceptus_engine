@@ -7,19 +7,20 @@
 
 namespace
 {
+static constexpr int32_t default_water_damage_z = 20;
+static constexpr std::array water_damage_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_water_damage_z},
+};
+static constexpr MechanismSchema water_damage_schema{
+   .type_name = "WaterDamage",
+   .layer_name = "water_damage",
+   .default_width = 192,
+   .default_height = 192,
+   .properties = water_damage_properties,
+};
 const auto registered_waterdamage = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-   static constexpr std::array water_damage_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema water_damage_schema{
-      .type_name = "WaterDamage",
-      .layer_name = "water_damage",
-      .default_width = 192,
-      .default_height = 192,
-      .properties = water_damage_properties,
-   };
    registry.registerSchema(water_damage_schema);
    registry.mapGroupToLayer("WaterDamage", "water_damage");
 

@@ -22,20 +22,19 @@
 
 namespace
 {
+static constexpr std::array extra_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema extra_schema{
+   .type_name = "Extra",
+   .layer_name = "extras",
+   .default_width = 24,
+   .default_height = 24,
+   .properties = extra_properties,
+};
 const auto registered_extra = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array extra_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema extra_schema{
-      .type_name = "Extra",
-      .layer_name = "extras",
-      .default_width = 24,
-      .default_height = 24,
-      .properties = extra_properties,
-   };
    registry.registerSchema(extra_schema);
 
    registry.mapGroupToLayer("Extra", "extras");

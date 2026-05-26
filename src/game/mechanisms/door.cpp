@@ -25,28 +25,27 @@
 
 namespace
 {
+static constexpr std::array door_properties{
+   PropertyInfo{.name = "open", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "observed", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "key", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "sample_open", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "sample_close", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "animation_open", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "animation_close", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "key_animation", .type = "string", .default_value = std::string_view{""}},
+};
+static constexpr MechanismSchema door_schema{
+   .type_name = "Door",
+   .layer_name = "doors",
+   .default_width = 24,
+   .default_height = 96,
+   .properties = door_properties,
+};
 const auto registered_door = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array door_properties{
-      PropertyInfo{.name = "open", .type = "bool", .default_value = "false"},
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-      PropertyInfo{.name = "observed", .type = "bool", .default_value = "false"},
-      PropertyInfo{.name = "key", .type = "string", .default_value = ""},
-      PropertyInfo{.name = "sample_open", .type = "string", .default_value = ""},
-      PropertyInfo{.name = "sample_close", .type = "string", .default_value = ""},
-      PropertyInfo{.name = "animation_open", .type = "string", .default_value = ""},
-      PropertyInfo{.name = "animation_close", .type = "string", .default_value = ""},
-      PropertyInfo{.name = "key_animation", .type = "string", .default_value = ""},
-   };
-   static constexpr MechanismSchema door_schema{
-      .type_name = "Door",
-      .layer_name = "doors",
-      .default_width = 24,
-      .default_height = 96,
-      .properties = door_properties,
-   };
    registry.registerSchema(door_schema);
 
    registry.mapGroupToLayer("Door", "doors");

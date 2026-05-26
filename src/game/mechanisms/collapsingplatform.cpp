@@ -17,20 +17,20 @@
 
 namespace
 {
+static constexpr int32_t default_collapsing_platform_z = 0;
+static constexpr std::array collapsing_platform_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_collapsing_platform_z},
+};
+static constexpr MechanismSchema collapsing_platform_schema{
+   .type_name = "CollapsingPlatform",
+   .layer_name = "collapsing_platforms",
+   .default_width = 96,
+   .default_height = 24,
+   .properties = collapsing_platform_properties,
+};
 const auto registered_collapsingplatform = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array collapsing_platform_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema collapsing_platform_schema{
-      .type_name = "CollapsingPlatform",
-      .layer_name = "collapsing_platforms",
-      .default_width = 96,
-      .default_height = 24,
-      .properties = collapsing_platform_properties,
-   };
    registry.registerSchema(collapsing_platform_schema);
 
    registry.mapGroupToLayer("CollapsingPlatform", "collapsing_platforms");
@@ -97,7 +97,7 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    readFloatProperty(_settings.fall_speed, "fall_speed");
    readFloatProperty(_settings.time_to_respawn_s, "time_to_respawn_s");
    readFloatProperty(_settings.fade_in_duration_s, "fade_in_duration_s");
-   setZ(ValueReader::readValue<int32_t>("z", map).value_or(0));
+   setZ(ValueReader::readValue<int32_t>("z", map).value_or(default_collapsing_platform_z));
 
    // set up shape
    //

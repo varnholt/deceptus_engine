@@ -24,25 +24,26 @@
 
 namespace
 {
+static constexpr bool default_on_off_block_inverted = false;
+
+static constexpr std::array on_off_block_properties{
+   PropertyInfo{.name = "enabled", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "mode", .type = "string", .default_value = std::string_view{"lever"}},
+   PropertyInfo{.name = "inverted", .type = "bool", .default_value = default_on_off_block_inverted},
+   PropertyInfo{.name = "time_on_ms", .type = "int", .default_value = int32_t{1000}},
+   PropertyInfo{.name = "time_off_ms", .type = "int", .default_value = int32_t{1000}},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema on_off_block_schema{
+   .type_name = "OnOffBlock",
+   .layer_name = "on_off_blocks",
+   .default_width = 24,
+   .default_height = 24,
+   .properties = on_off_block_properties,
+};
 const auto registered_onoffblock = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array on_off_block_properties{
-      PropertyInfo{.name = "enabled", .type = "bool", .default_value = "true"},
-      PropertyInfo{.name = "mode", .type = "string", .default_value = "lever"},
-      PropertyInfo{.name = "inverted", .type = "bool", .default_value = "false"},
-      PropertyInfo{.name = "time_on_ms", .type = "int", .default_value = "1000"},
-      PropertyInfo{.name = "time_off_ms", .type = "int", .default_value = "1000"},
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema on_off_block_schema{
-      .type_name = "OnOffBlock",
-      .layer_name = "on_off_blocks",
-      .default_width = 24,
-      .default_height = 24,
-      .properties = on_off_block_properties,
-   };
    registry.registerSchema(on_off_block_schema);
 
    registry.mapGroupToLayer("OnOffBlock", "on_off_blocks");
@@ -145,7 +146,7 @@ void OnOffBlock::setup(const GameDeserializeData& data)
          _time_off_ms = static_cast<int32_t>(time_off_it->second->_value_int.value());
       }
 
-      _inverted = ValueReader::readValue<bool>("inverted", map).value_or(false);
+      _inverted = ValueReader::readValue<bool>("inverted", map).value_or(default_on_off_block_inverted);
    }
 
    // set up shape

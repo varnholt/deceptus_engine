@@ -18,25 +18,24 @@
 
 namespace
 {
+static constexpr std::array rotating_blade_properties{
+   PropertyInfo{.name = "enabled", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "blade_acceleration", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "blade_deceleration", .type = "float", .default_value = 0.5f},
+   PropertyInfo{.name = "blade_rotation_speed", .type = "float", .default_value = 5.0f},
+   PropertyInfo{.name = "movement_speed", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{30}},
+};
+static constexpr MechanismSchema rotating_blade_schema{
+   .type_name = "RotatingBlade",
+   .layer_name = "rotating_blades",
+   .default_width = 0,
+   .default_height = 0,
+   .properties = rotating_blade_properties,
+};
 const auto registered_rotatingblade = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array rotating_blade_properties{
-      PropertyInfo{.name = "enabled", .type = "bool", .default_value = "true"},
-      PropertyInfo{.name = "blade_acceleration", .type = "float", .default_value = "1.0"},
-      PropertyInfo{.name = "blade_deceleration", .type = "float", .default_value = "0.5"},
-      PropertyInfo{.name = "blade_rotation_speed", .type = "float", .default_value = "5.0"},
-      PropertyInfo{.name = "movement_speed", .type = "float", .default_value = "1.0"},
-      PropertyInfo{.name = "z", .type = "int", .default_value = "30"},
-   };
-   static constexpr MechanismSchema rotating_blade_schema{
-      .type_name = "RotatingBlade",
-      .layer_name = "rotating_blades",
-      .default_width = 0,
-      .default_height = 0,
-      .properties = rotating_blade_properties,
-   };
    registry.registerSchema(rotating_blade_schema);
 
    registry.mapGroupToLayer("RotatingBlade", "rotating_blades");

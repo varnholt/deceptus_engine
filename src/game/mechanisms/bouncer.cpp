@@ -29,20 +29,20 @@ const auto SPRITE_HEIGHT = 24;
 
 namespace
 {
+static constexpr float default_bouncer_force = 0.6f;
+static constexpr std::array bouncer_properties{
+   PropertyInfo{.name = "force", .type = "float", .default_value = default_bouncer_force},
+};
+static constexpr MechanismSchema bouncer_schema{
+   .type_name = "Bouncer",
+   .layer_name = "bouncers",
+   .default_width = 96,
+   .default_height = 24,
+   .properties = bouncer_properties,
+};
 const auto registered_bouncer = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array bouncer_properties{
-      PropertyInfo{.name = "force", .type = "float", .default_value = "0.6"},
-   };
-   static constexpr MechanismSchema bouncer_schema{
-      .type_name = "Bouncer",
-      .layer_name = "bouncers",
-      .default_width = 96,
-      .default_height = 24,
-      .properties = bouncer_properties,
-   };
    registry.registerSchema(bouncer_schema);
 
    registry.mapGroupToLayer("Bouncer", "bouncers");
@@ -81,7 +81,7 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
 
    if (data._tmx_object->_properties)
    {
-      _force_value = ValueReader::readValue<float>("force", data._tmx_object->_properties->_map).value_or(0.6f);
+      _force_value = ValueReader::readValue<float>("force", data._tmx_object->_properties->_map).value_or(default_bouncer_force);
    }
 
    const auto x = data._tmx_object->_x_px;

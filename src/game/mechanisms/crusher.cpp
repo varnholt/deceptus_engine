@@ -18,21 +18,21 @@ int32_t Crusher::__instance_counter = 0;
 
 namespace
 {
+static constexpr std::string_view default_crusher_alignment = "down";
+static constexpr std::array crusher_properties{
+   PropertyInfo{.name = "alignment", .type = "string", .default_value = default_crusher_alignment},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema crusher_schema{
+   .type_name = "Crusher",
+   .layer_name = "crushers",
+   .default_width = 120,
+   .default_height = 24,
+   .properties = crusher_properties,
+};
 const auto registered_crusher = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array crusher_properties{
-      PropertyInfo{.name = "alignment", .type = "string", .default_value = "down"},
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema crusher_schema{
-      .type_name = "Crusher",
-      .layer_name = "crushers",
-      .default_width = 120,
-      .default_height = 24,
-      .properties = crusher_properties,
-   };
    registry.registerSchema(crusher_schema);
 
    registry.mapGroupToLayer("Crusher", "crushers");
@@ -297,7 +297,7 @@ void Crusher::setup(const GameDeserializeData& data)
    if (data._tmx_object->_properties)
    {
       const auto& map = data._tmx_object->_properties->_map;
-      const auto alignment = ValueReader::readValue<std::string>("alignment", map).value_or("down");
+      const auto alignment = ValueReader::readValue<std::string>("alignment", map).value_or(std::string(default_crusher_alignment));
 
       if (alignment == "up")
       {

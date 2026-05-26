@@ -19,20 +19,19 @@ constexpr auto ANIMATION_SPEED = 3.0f;
 
 namespace
 {
+static constexpr std::array fireflies_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema fireflies_schema{
+   .type_name = "Fireflies",
+   .layer_name = "fireflies",
+   .default_width = 96,
+   .default_height = 96,
+   .properties = fireflies_properties,
+};
 const auto registered_fireflies = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array fireflies_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema fireflies_schema{
-      .type_name = "Fireflies",
-      .layer_name = "fireflies",
-      .default_width = 96,
-      .default_height = 96,
-      .properties = fireflies_properties,
-   };
    registry.registerSchema(fireflies_schema);
 
    registry.mapGroupToLayer("Fireflies", "fireflies");

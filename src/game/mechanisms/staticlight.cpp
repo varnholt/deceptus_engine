@@ -15,24 +15,30 @@
 
 namespace
 {
+static constexpr std::string_view default_static_light_color = "#ffffffff";
+static constexpr std::string_view default_static_light_texture = "smooth.png";
+static constexpr float default_static_light_flicker_intensity = 0.0f;
+static constexpr float default_static_light_flicker_speed = 0.0f;
+static constexpr float default_static_light_flicker_alpha_amount = 1.0f;
+static constexpr int32_t default_static_light_z = 20;
+static constexpr std::array static_light_properties{
+   PropertyInfo{.name = "color", .type = "string", .default_value = default_static_light_color},
+   PropertyInfo{.name = "texture", .type = "string", .default_value = default_static_light_texture},
+   PropertyInfo{.name = "flicker_intensity", .type = "float", .default_value = default_static_light_flicker_intensity},
+   PropertyInfo{.name = "flicker_speed", .type = "float", .default_value = default_static_light_flicker_speed},
+   PropertyInfo{.name = "flicker_alpha_amount", .type = "float", .default_value = default_static_light_flicker_alpha_amount},
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_static_light_z},
+};
+static constexpr MechanismSchema static_light_schema{
+   .type_name = "StaticLight",
+   .layer_name = "static_lights",
+   .default_width = 96,
+   .default_height = 96,
+   .properties = static_light_properties,
+};
 const auto registered_staticlight = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-   static constexpr std::array static_light_properties{
-      PropertyInfo{.name = "color", .type = "string", .default_value = "#ffffffff"},
-      PropertyInfo{.name = "texture", .type = "string", .default_value = "smooth.png"},
-      PropertyInfo{.name = "flicker_intensity", .type = "float", .default_value = "0.0"},
-      PropertyInfo{.name = "flicker_speed", .type = "float", .default_value = "0.0"},
-      PropertyInfo{.name = "flicker_alpha_amount", .type = "float", .default_value = "1.0"},
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema static_light_schema{
-      .type_name = "StaticLight",
-      .layer_name = "static_lights",
-      .default_width = 96,
-      .default_height = 96,
-      .properties = static_light_properties,
-   };
    registry.registerSchema(static_light_schema);
    registry.markAsNonVisual("static_lights");
    registry.mapGroupToLayer("StaticLight", "static_lights");

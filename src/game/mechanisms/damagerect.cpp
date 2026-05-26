@@ -9,20 +9,19 @@
 
 namespace
 {
+static constexpr std::array damage_rect_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema damage_rect_schema{
+   .type_name = "DamageRect",
+   .layer_name = "damage_rects",
+   .default_width = 48,
+   .default_height = 48,
+   .properties = damage_rect_properties,
+};
 const auto registered_damagerect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array damage_rect_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema damage_rect_schema{
-      .type_name = "DamageRect",
-      .layer_name = "damage_rects",
-      .default_width = 48,
-      .default_height = 48,
-      .properties = damage_rect_properties,
-   };
    registry.registerSchema(damage_rect_schema);
 
    registry.mapGroupToLayer("DamageRect", "damage_rects");

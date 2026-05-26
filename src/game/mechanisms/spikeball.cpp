@@ -16,21 +16,24 @@
 
 namespace
 {
+static constexpr float default_spike_ball_push_factor = 1.0f;
+static constexpr int32_t default_spike_ball_spline_point_count = 8;
+static constexpr int32_t default_spike_ball_z = 16;
+static constexpr std::array spike_ball_properties{
+   PropertyInfo{.name = "push_factor", .type = "float", .default_value = default_spike_ball_push_factor},
+   PropertyInfo{.name = "spline_point_count", .type = "int", .default_value = default_spike_ball_spline_point_count},
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_spike_ball_z},
+};
+static constexpr MechanismSchema spike_ball_schema{
+   .type_name = "SpikeBall",
+   .layer_name = "spike_balls",
+   .default_width = 96,
+   .default_height = 96,
+   .properties = spike_ball_properties,
+};
 const auto registered_spikeball = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-   static constexpr std::array spike_ball_properties{
-      PropertyInfo{.name = "push_factor", .type = "float", .default_value = "1.0"},
-      PropertyInfo{.name = "spline_point_count", .type = "int", .default_value = "8"},
-      PropertyInfo{.name = "z", .type = "int", .default_value = "16"},
-   };
-   static constexpr MechanismSchema spike_ball_schema{
-      .type_name = "SpikeBall",
-      .layer_name = "spike_balls",
-      .default_width = 96,
-      .default_height = 96,
-      .properties = spike_ball_properties,
-   };
    registry.registerSchema(spike_ball_schema);
    registry.mapGroupToLayer("SpikeBall", "spike_balls");
 

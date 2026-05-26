@@ -16,20 +16,19 @@
 
 namespace
 {
+static constexpr std::array destructible_blocking_rect_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema destructible_blocking_rect_schema{
+   .type_name = "DestructibleBlockingRect",
+   .layer_name = "destructible_blocking_rects",
+   .default_width = 96,
+   .default_height = 24,
+   .properties = destructible_blocking_rect_properties,
+};
 const auto registered_destructible_blocking_rect = []()
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array destructible_blocking_rect_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema destructible_blocking_rect_schema{
-      .type_name = "DestructibleBlockingRect",
-      .layer_name = "destructible_blocking_rects",
-      .default_width = 96,
-      .default_height = 24,
-      .properties = destructible_blocking_rect_properties,
-   };
    registry.registerSchema(destructible_blocking_rect_schema);
 
    registry.mapGroupToLayer("DestructibleBlockingRect", "destructible_blocking_rects");

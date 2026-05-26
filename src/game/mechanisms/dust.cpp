@@ -14,20 +14,19 @@
 
 namespace
 {
+static constexpr std::array dust_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema dust_schema{
+   .type_name = "Dust",
+   .layer_name = "dust",
+   .default_width = 48,
+   .default_height = 48,
+   .properties = dust_properties,
+};
 const auto registered_dust = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array dust_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema dust_schema{
-      .type_name = "Dust",
-      .layer_name = "dust",
-      .default_width = 48,
-      .default_height = 48,
-      .properties = dust_properties,
-   };
    registry.registerSchema(dust_schema);
 
    registry.mapGroupToLayer("Dust", "dust");

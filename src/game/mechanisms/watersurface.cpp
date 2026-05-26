@@ -14,24 +14,30 @@
 
 namespace
 {
+static constexpr int32_t default_water_surface_z = 20;
+static constexpr float default_water_surface_splash_factor = 1.0f;
+static constexpr float default_water_surface_spread = 1.2f;
+static constexpr int32_t default_water_surface_opacity = 255;
+static constexpr int32_t default_water_surface_clamp_segment_count = 0;
+static constexpr float default_water_surface_pixel_ratio = 0.0f;
+static constexpr std::array water_surface_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_water_surface_z},
+   PropertyInfo{.name = "splash_factor", .type = "float", .default_value = default_water_surface_splash_factor},
+   PropertyInfo{.name = "spread", .type = "float", .default_value = default_water_surface_spread},
+   PropertyInfo{.name = "opacity", .type = "int", .default_value = default_water_surface_opacity},
+   PropertyInfo{.name = "clamp_segment_count", .type = "int", .default_value = default_water_surface_clamp_segment_count},
+   PropertyInfo{.name = "pixel_ratio", .type = "float", .default_value = default_water_surface_pixel_ratio},
+};
+static constexpr MechanismSchema water_surface_schema{
+   .type_name = "WaterSurface",
+   .layer_name = "water_surface",
+   .default_width = 240,
+   .default_height = 24,
+   .properties = water_surface_properties,
+};
 const auto registered_watersurface = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-   static constexpr std::array water_surface_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-      PropertyInfo{.name = "splash_factor", .type = "float", .default_value = "1.0"},
-      PropertyInfo{.name = "spread", .type = "float", .default_value = "1.2"},
-      PropertyInfo{.name = "opacity", .type = "int", .default_value = "255"},
-      PropertyInfo{.name = "clamp_segment_count", .type = "int", .default_value = "0"},
-      PropertyInfo{.name = "pixel_ratio", .type = "float", .default_value = "0.0"},
-   };
-   static constexpr MechanismSchema water_surface_schema{
-      .type_name = "WaterSurface",
-      .layer_name = "water_surface",
-      .default_width = 240,
-      .default_height = 24,
-      .properties = water_surface_properties,
-   };
    registry.registerSchema(water_surface_schema);
    registry.mapGroupToLayer("WaterSurface", "water_surface");
 

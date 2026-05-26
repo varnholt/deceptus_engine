@@ -15,25 +15,27 @@
 
 namespace
 {
+static constexpr int32_t default_interaction_help_offset_x_px = 0;
+static constexpr int32_t default_interaction_help_offset_y_px = 0;
+
+static constexpr std::array interaction_help_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{50}},
+   PropertyInfo{.name = "animation", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "offset_x_px", .type = "int", .default_value = default_interaction_help_offset_x_px},
+   PropertyInfo{.name = "offset_y_px", .type = "int", .default_value = default_interaction_help_offset_y_px},
+   PropertyInfo{.name = "button_0", .type = "string", .default_value = std::string_view{"key_cursor_u"}},
+   PropertyInfo{.name = "text_0", .type = "string", .default_value = std::string_view{""}},
+};
+static constexpr MechanismSchema interaction_help_schema{
+   .type_name = "InteractionHelp",
+   .layer_name = "interaction_help",
+   .default_width = 96,
+   .default_height = 48,
+   .properties = interaction_help_properties,
+};
 const auto registered_interactionhelp = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array interaction_help_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "50"},
-      PropertyInfo{.name = "animation", .type = "string", .default_value = ""},
-      PropertyInfo{.name = "offset_x_px", .type = "int", .default_value = "0"},
-      PropertyInfo{.name = "offset_y_px", .type = "int", .default_value = "0"},
-      PropertyInfo{.name = "button_0", .type = "string", .default_value = "key_cursor_u"},
-      PropertyInfo{.name = "text_0", .type = "string", .default_value = ""},
-   };
-   static constexpr MechanismSchema interaction_help_schema{
-      .type_name = "InteractionHelp",
-      .layer_name = "interaction_help",
-      .default_width = 96,
-      .default_height = 48,
-      .properties = interaction_help_properties,
-   };
    registry.registerSchema(interaction_help_schema);
 
    registry.mapGroupToLayer("InteractionHelp", "interaction_help");
@@ -216,8 +218,8 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
    const auto animation = ValueReader::readValue<std::string>("animation", map);
    if (animation.has_value())
    {
-      const auto offset_x_px = ValueReader::readValue<int32_t>("offset_x_px", map).value_or(0);
-      const auto offset_y_px = ValueReader::readValue<int32_t>("offset_y_px", map).value_or(0);
+      const auto offset_x_px = ValueReader::readValue<int32_t>("offset_x_px", map).value_or(default_interaction_help_offset_x_px);
+      const auto offset_y_px = ValueReader::readValue<int32_t>("offset_y_px", map).value_or(default_interaction_help_offset_y_px);
 
       _animation_show = animation_pool.create(
          animation.value(), pos_x_px + static_cast<float>(offset_x_px), pos_y_px + static_cast<float>(offset_y_px), false, false

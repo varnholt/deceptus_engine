@@ -1,6 +1,7 @@
 #include "treasurechest.h"
 
 #include <array>
+#include <format>
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/animation/animationpool.h"
@@ -15,19 +16,20 @@
 
 namespace
 {
+static constexpr int32_t default_treasure_chest_z = 0;
+static constexpr std::array treasure_chest_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_treasure_chest_z},
+};
+static constexpr MechanismSchema treasure_chest_schema{
+   .type_name = "TreasureChest",
+   .layer_name = "treasure_chests",
+   .default_width = 48,
+   .default_height = 48,
+   .properties = treasure_chest_properties,
+};
 const auto registered_treasurechest = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-   static constexpr std::array treasure_chest_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema treasure_chest_schema{
-      .type_name = "TreasureChest",
-      .layer_name = "treasure_chests",
-      .default_width = 48,
-      .default_height = 48,
-      .properties = treasure_chest_properties,
-   };
    registry.registerSchema(treasure_chest_schema);
    registry.mapGroupToLayer("TreasureChest", "treasure_chests");
 
@@ -80,7 +82,7 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
    }
 
    const auto& map = data._tmx_object->_properties->_map;
-   _z_index = ValueReader::readValue<int32_t>("z", map).value_or(0);
+   _z_index = ValueReader::readValue<int32_t>("z", map).value_or(default_treasure_chest_z);
 
    const auto texture_path = ValueReader::readValue<std::string>("texture", map).value_or("data/sprites/treasure_chest.png");
    _texture = TexturePool::getInstance().get(texture_path);

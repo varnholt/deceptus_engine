@@ -16,20 +16,19 @@ int32_t Rope::_instance_counter = 0;
 
 namespace
 {
+static constexpr std::array rope_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema rope_schema{
+   .type_name = "Rope",
+   .layer_name = "ropes",
+   .default_width = 24,
+   .default_height = 96,
+   .properties = rope_properties,
+};
 const auto registered_rope = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array rope_properties{
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-   };
-   static constexpr MechanismSchema rope_schema{
-      .type_name = "Rope",
-      .layer_name = "ropes",
-      .default_width = 24,
-      .default_height = 96,
-      .properties = rope_properties,
-   };
    registry.registerSchema(rope_schema);
 
    registry.mapGroupToLayer("Rope", "ropes");

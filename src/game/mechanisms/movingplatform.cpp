@@ -32,22 +32,23 @@ double cosineInterpolate(double y1, double y2, double mu)
    return ((y1 * (1.0 - mu2)) + (y2 * mu2));
 }
 
+static constexpr int32_t default_moving_platform_platform_width_tl = 4;
+
+static constexpr std::array moving_platform_properties{
+   PropertyInfo{.name = "platform_width_tl", .type = "int", .default_value = default_moving_platform_platform_width_tl},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "interpolation_time", .type = "float", .default_value = 0.0f},
+};
+static constexpr MechanismSchema moving_platform_schema{
+   .type_name = "MovingPlatform",
+   .layer_name = "moving_platforms",
+   .default_width = 0,
+   .default_height = 0,
+   .properties = moving_platform_properties,
+};
 const auto registered_moving_platform = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
-
-   static constexpr std::array moving_platform_properties{
-      PropertyInfo{.name = "platform_width_tl", .type = "int", .default_value = "4"},
-      PropertyInfo{.name = "z", .type = "int", .default_value = "20"},
-      PropertyInfo{.name = "interpolation_time", .type = "float", .default_value = "0"},
-   };
-   static constexpr MechanismSchema moving_platform_schema{
-      .type_name = "MovingPlatform",
-      .layer_name = "moving_platforms",
-      .default_width = 0,
-      .default_height = 0,
-      .properties = moving_platform_properties,
-   };
    registry.registerSchema(moving_platform_schema);
 
    registry.mapGroupToLayer("MovingPlatform", "moving_platforms");
@@ -211,7 +212,7 @@ void MovingPlatform::setup(const GameDeserializeData& data)
    // read properties
    const auto& map = data._tmx_object->_properties->_map;
    setZ(ValueReader::readValue<int32_t>("z", map).value_or(static_cast<int32_t>(ZDepth::ForegroundMin)));
-   _platform_width_tl = ValueReader::readValue<int32_t>("platform_width_tl", map).value_or(4);
+   _platform_width_tl = ValueReader::readValue<int32_t>("platform_width_tl", map).value_or(default_moving_platform_platform_width_tl);
    const auto interpolation_time = ValueReader::readValue<float>("interpolation_time", map);
 
    // animation

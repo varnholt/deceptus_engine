@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <variant>
 
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "json/json.hpp"
@@ -18,10 +19,24 @@ void writeMechanismSchemas()
       auto json_properties = nlohmann::json::array();
       for (const auto& property_info : schema.properties)
       {
+         const auto default_json = std::visit(
+            [](const auto& value) -> nlohmann::json
+            {
+               if constexpr (std::is_same_v<std::decay_t<decltype(value)>, std::string_view>)
+               {
+                  return std::string(value);
+               }
+               else
+               {
+                  return value;
+               }
+            },
+            property_info.default_value
+         );
          json_properties.push_back(
             {{"name", std::string(property_info.name)},
              {"type", std::string(property_info.type)},
-             {"default", std::string(property_info.default_value)},
+             {"default", default_json},
              {"required", property_info.required}}
          );
       }
