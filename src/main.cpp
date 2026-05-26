@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cstdint>
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 #include "framework/tools/gamepaths.h"
@@ -49,9 +50,19 @@ int main(int /*argc*/, char** /*argv*/)
    GamePaths::createGameDirectories();
 
    // setup logging to file
-   LogThread log_thread;
-   Log::registerListenerCallback([&log_thread](const auto& time_point, auto level, const auto& message, const auto& location)
-                                 { log_thread.log(time_point, level, message, location); });
+   // weak_ptr: game threads may still fire log callbacks after main() unwinds and log_thread is destroyed;
+   // lock() returns null once the shared_ptr drops, making the callback a safe no-op instead of a use-after-free.
+   auto log_thread = std::make_shared<LogThread>();
+   std::weak_ptr<LogThread> log_thread_weak(log_thread);
+   Log::registerListenerCallback(
+      [log_thread_weak](const auto& time_point, auto level, const auto& message, const auto& location)
+      {
+         if (auto log_thread = log_thread_weak.lock())
+         {
+            log_thread->log(time_point, level, message, location);
+         }
+      }
+   );
 
 #ifdef DEVELOPMENT_MODE
    Log::registerListenerCallback([](const auto& time_point, auto level, const auto& message, const auto& location)

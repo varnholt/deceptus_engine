@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <fstream>
 #include <memory>
@@ -64,5 +65,5 @@ private:
 
    std::unique_ptr<std::thread> _thread;
    std::unique_ptr<std::ofstream> _out;
-   bool _stopped = false;
+   std::atomic<bool> _stopped = false;
 };

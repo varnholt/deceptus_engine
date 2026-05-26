@@ -35,11 +35,25 @@ Audio& Audio::getInstance()
    return __instance;
 }
 
+Audio::~Audio()
+{
+   std::lock_guard<std::mutex> guard(_mutex);
+   _stopped = true;
+   for (auto& thread : _sound_threads)
+   {
+      if (thread._sound)
+      {
+         thread._sound->stop();
+      }
+   }
+}
+
 std::shared_ptr<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
 {
    // Check if the file exists before attempting to load
    const std::string full_path = sfx_path + filename;
-   if (!std::filesystem::exists(full_path)) {
+   if (!std::filesystem::exists(full_path))
+   {
       Log::Error() << "audio file does not exist: " << filename;
       return nullptr;
    }
@@ -184,18 +198,32 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
 void Audio::stopSample(const std::string& name)
 {
    std::lock_guard<std::mutex> guard(_mutex);
+   if (_stopped)
+   {
+      return;
+   }
 
    auto threads = _sound_threads | std::views::filter([name](const auto& thread) { return thread._filename == name; });
    for (auto& thread : threads)
    {
-      thread._sound->stop();
+      if (thread._sound)
+      {
+         thread._sound->stop();
+      }
    }
 }
 
-void Audio::stopSample(int32_t thread)
+void Audio::stopSample(int32_t thread_index)
 {
    std::lock_guard<std::mutex> guard(_mutex);
-   _sound_threads[thread]._sound->stop();
+   if (_stopped)
+   {
+      return;
+   }
+   if (_sound_threads[thread_index]._sound)
+   {
+      _sound_threads[thread_index]._sound->stop();
+   }
 }
 
 void Audio::setVolume(int32_t thread, float volume)

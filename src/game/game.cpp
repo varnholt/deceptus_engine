@@ -435,6 +435,8 @@ void Game::nextLevel()
 Game::~Game()
 {
    EventSerializer::unregisterInstance("global");
+   LevelRegistry::clearCurrent();
+   _level.reset();
 }
 
 void Game::initialize()
@@ -1190,6 +1192,12 @@ void Game::shutdown()
    {
       _log_ui->close();
    }
+
+   // std::exit skips local destructors in main(), so Level and all its children (LevelScript,
+   // Lever, etc.) would otherwise be torn down during static cleanup — after SaveState::__save_states
+   // may already be gone. Destroy the level explicitly here while all statics are still alive.
+   LevelRegistry::clearCurrent();
+   _level.reset();
 
    std::exit(0);
 }

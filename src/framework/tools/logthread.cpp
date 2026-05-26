@@ -6,7 +6,6 @@
 #include <iomanip>
 #include <iostream>
 
-
 namespace
 {
 int32_t flush_counter = 0;
@@ -33,7 +32,10 @@ LogThread::LogThread()
 
 LogThread::~LogThread()
 {
-   _stopped = true;
+   {
+      std::lock_guard<std::mutex> guard(_mutex);
+      _stopped = true;
+   }
    _thread->join();
    flush();
 }
@@ -41,6 +43,10 @@ LogThread::~LogThread()
 void LogThread::log(const SysClockTimePoint& time_point, Log::Level level, const std::string& message, const std::source_location& location)
 {
    std::lock_guard<std::mutex> guard(_mutex);
+   if (_stopped)
+   {
+      return;
+   }
    _log_items.push_back(LogItem{time_point, level, message, location});
 }
 
@@ -51,7 +57,12 @@ void LogThread::run()
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
       flush_counter++;
 
-      if (flush_counter == 100 || _log_items.size() == 10)
+      bool should_flush = false;
+      {
+         std::lock_guard<std::mutex> guard(_mutex);
+         should_flush = (flush_counter == 100) || (_log_items.size() >= 10);
+      }
+      if (should_flush)
       {
          flush();
          flush_counter = 0;

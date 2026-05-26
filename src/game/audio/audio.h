@@ -2,6 +2,7 @@
 
 #include <SFML/Audio.hpp>
 #include <array>
+#include <atomic>
 #include <functional>
 #include <map>
 #include <memory>
@@ -14,6 +15,9 @@ class Audio
 public:
    /// \brief constructs the audio manager and preloads commonly used sample files.
    Audio();
+
+   /// \brief stops all active sounds and marks the instance as shut down.
+   ~Audio();
 
    /// \brief metadata describing one audio file name.
    struct Track
@@ -70,7 +74,6 @@ public:
       void setPosition(const sf::Vector2f& pos);
    };
 
-
    /// \brief returns the global audio singleton instance.
    /// \return reference to the shared audio manager.
    static Audio& getInstance();
@@ -105,7 +108,6 @@ public:
    /// \param pos world position in pixels.
    void setPosition(int32_t thread, const sf::Vector2f pos);
 
-
 private:
    /// \brief preloads a fixed set of frequently used game sound effects.
    void initializeSamples();
@@ -119,6 +121,7 @@ private:
    void debug();
 
    std::mutex _mutex;
+   std::atomic<bool> _stopped = false;
    std::unordered_map<std::string, std::shared_ptr<sf::SoundBuffer>> _sound_buffers;
    std::array<SoundThread, 50> _sound_threads;
 };
