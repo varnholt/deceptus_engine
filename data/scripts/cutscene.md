@@ -26,6 +26,15 @@ function onEvent(event_name)
 end
 ```
 
+## Cutscene module API
+
+| Function | Description |
+|----------|-------------|
+| `cutscene.load(actions)` | Loads the action table returned by `loadCutscene` and resets all timing state |
+| `cutscene.update(dt)` | Advances the cutscene clock; call every frame from `update(dt)` |
+| `cutscene.notify(event_name)` | Fires a named event, triggering any entries registered with `"on": "<event_name>"` |
+| `cutscene.stop()` | Halts the cutscene; no further time-based or event-based entries are processed |
+
 ## Action scheduling
 
 Each entry in the JSON array is either **time-based** or **event-based**.
@@ -235,6 +244,129 @@ Transitions to the next level defined in `data/config/levels.json`.
 ```json
 { "on": "fade/out_done", "action": "next_level" }
 ```
+
+---
+
+## Level script callbacks
+
+These functions are called by the engine if defined in the level script. All are optional.
+
+| Function | Arguments | Description |
+|----------|-----------|-------------|
+| `initialize()` | — | Called once when the level starts, before the first `update` |
+| `update(dt)` | `dt: number` | Called every frame; `dt` is elapsed seconds |
+| `mechanismEvent(object_id, group, event_name, value)` | strings + value | Fired when a mechanism emits an event (e.g. dialogue dismissed, sensor triggered) |
+| `mechanismEnabled(object_id, group, enabled)` | string, string, bool | Fired when a mechanism's enabled state changes |
+| `onEvent(event_name)` | `event_name: string` | Fired by the engine for raw events (e.g. sprite arrival) |
+| `playerReceivedItem(item)` | `item: string` | Fired when the player gains an inventory item |
+| `playerUsedItem(item)` | `item: string` → `bool` | Fired when the player uses an item; return `true` to consume it |
+| `playerReceivedExtra(extra_name)` | `extra_name: string` | Fired when the player picks up an Extra mechanism |
+| `playerCollidesWithRect(rect_id)` | `rect_id: number` | Fired each frame the player overlaps a rect registered with `addCollisionRect` |
+| `playerCollidesWithSensorRect(rect_id)` | `rect_id: string` | Fired when the player enters a sensor rect registered with `addSensorRectCallback` |
+| `writeProperty(key, value)` | string, string | Called at startup for each property set on the level object in Tiled |
+
+---
+
+## Lua functions
+
+These are available anywhere in a level script.
+
+### Player
+
+```lua
+setPlayerVisible(visible)          -- show or hide the player sprite
+lockPlayerControls(duration_ms)    -- disable all input for the given number of milliseconds
+addPlayerHealth(amount)            -- add health points to the player's current health
+addPlayerHealthMax(amount)         -- increase the player's maximum health
+addPlayerSkill(skill_bitmask)      -- set skill flags (OR into current skills)
+removePlayerSkill(skill_bitmask)   -- clear skill flags (AND NOT into current skills)
+giveWeaponBow()                    -- equip a bow and make it the active weapon
+giveWeaponGun()                    -- equip a gun and make it the active weapon
+giveWeaponSword()                  -- equip a sword and make it the active weapon
+```
+
+### State
+
+```lua
+addAchievement(identifier)         -- mark an achievement as earned
+hasAchievement(identifier)         -- returns true if the achievement has been earned
+addTreasure(identifier)            -- mark a treasure as collected
+hasTreasure(identifier)            -- returns true if the treasure has been collected
+inventoryAdd(item)                 -- add an item to the player's inventory
+inventoryRemove(item)              -- remove an item from the player's inventory
+inventoryHas(item)                 -- returns true if the item is in the inventory
+```
+
+### Mechanisms
+
+The `search_pattern` argument is a regex matched against mechanism object IDs.
+The optional `group` argument restricts the search to a specific layer name (e.g. `"fans"`).
+
+```lua
+setMechanismEnabled(pattern, enabled [, group])   -- enable or disable matching mechanisms
+isMechanismEnabled(pattern [, group])             -- returns enabled state of first match
+setMechanismVisible(pattern, visible [, group])   -- show or hide matching mechanisms
+isMechanismVisible(pattern [, group])             -- returns visible state of first match
+toggle(pattern [, group])                         -- toggle enabled state of matching mechanisms
+flashMechanism(pattern, r, g, b, duration_s)      -- trigger a color flash on matching RingShaderLayer mechanisms
+                                                  -- r/g/b are floats 0.0–1.0
+```
+
+### Lighting
+
+```lua
+setAmbient(r, g, b, a)   -- set the level's ambient light color; each channel is 0–255
+```
+
+### Lua nodes
+
+The `search_pattern` is a regex matched against Lua node names.
+
+```lua
+writeLuaNodeProperty(pattern, key, value)   -- call writeProperty(key, value) on matching nodes
+setLuaNodeVisible(pattern, visible)         -- show or hide matching nodes
+setLuaNodeActive(pattern, active)           -- enable or disable physics on matching nodes
+```
+
+### Sensor rects and collision
+
+```lua
+-- Register a callback so playerCollidesWithSensorRect fires when the player enters the rect.
+addSensorRectCallback(pattern)
+
+-- Returns true if the player is currently inside the named sensor rect.
+isPlayerIntersectingSensorRect(id)
+
+-- Register an axis-aligned collision rect; returns an integer ID.
+-- playerCollidesWithRect(id) fires each frame the player overlaps it.
+addCollisionRect(x, y, width, height)
+```
+
+### Audio and camera
+
+These are available directly and mirror the JSON actions of the same name.
+
+```lua
+playMusic(file, transition, duration_ms, post_action)
+playSound(id)
+setCameraPosition(x, y)
+unlockCamera()
+setZoomFactor(factor)
+```
+
+`transition` and `post_action` take integer values; use the constants in `cutscene.lua`'s
+`_music_transition` / `_music_post_action` tables when calling from your own Lua, or pass
+the JSON string form from the cutscene action.
+
+### Utilities
+
+```lua
+playEventRecording(filename)   -- replay a recorded player input file (.dat)
+tr(string)                     -- return the localized translation of string
+log(message)                   -- write a debug message to the log
+```
+
+---
 
 ## Full example
 
