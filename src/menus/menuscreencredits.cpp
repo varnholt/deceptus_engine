@@ -6,6 +6,30 @@
 MenuScreenCredits::MenuScreenCredits()
 {
    setFilename("data/menus/credits.psd");
+
+   _font.openFromFile("data/fonts/deceptum.ttf");
+   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
+
+   _text_code = std::make_unique<sf::Text>(_font);
+   _text_code->setFont(_font);
+   _text_code->setString("Code: Matthias Varnholt");
+   _text_code->setCharacterSize(12);
+   _text_code->setPosition({220.0f, 155.0f});
+   _text_code->setFillColor(sf::Color{232, 219, 243});
+
+   _text_artwork = std::make_unique<sf::Text>(_font);
+   _text_artwork->setFont(_font);
+   _text_artwork->setString("Artwork: dstar");
+   _text_artwork->setCharacterSize(12);
+   _text_artwork->setPosition({220.0f, 177.0f});
+   _text_artwork->setFillColor(sf::Color{232, 219, 243});
+}
+
+void MenuScreenCredits::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   MenuScreen::draw(window, states);
+   window.draw(*_text_code);
+   window.draw(*_text_artwork);
 }
 
 void MenuScreenCredits::loadingFinished()
