@@ -497,6 +497,7 @@ void Game::initialize()
          [this]()
          {
             initializeWindow();
+            _menu_background = std::make_unique<MenuBackgroundScene>();
             if (!_level)
             {
                return;
@@ -1031,6 +1032,8 @@ void Game::changeResolution(int32_t w, int32_t h)
    config.clampResolutionToDesktop();
 
    initializeWindow();
+
+   _menu_background = std::make_unique<MenuBackgroundScene>();
 
    if (_level)
    {
