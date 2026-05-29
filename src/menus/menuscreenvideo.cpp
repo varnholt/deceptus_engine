@@ -14,6 +14,13 @@ MenuScreenVideo::MenuScreenVideo()
    setFilename("data/menus/video.psd");
 
    _video_modes = {{1024, 576}, {1280, 720}, {1366, 864}, {1536, 864}, {1600, 900}, {1920, 1080}, {3840, 2160}};
+
+   const auto desktop_mode = sf::VideoMode::getDesktopMode();
+   std::erase_if(
+      _video_modes,
+      [&desktop_mode](const std::array<int32_t, 2>& mode)
+      { return mode[0] > static_cast<int32_t>(desktop_mode.size.x) || mode[1] > static_cast<int32_t>(desktop_mode.size.y); }
+   );
 }
 
 void MenuScreenVideo::up()
@@ -58,39 +65,21 @@ void MenuScreenVideo::select(int32_t step)
 
       case Selection::Resolution:
       {
-         auto next = [this, step]() -> std::array<int32_t, 2>
+         auto it = std::find_if(
+            std::begin(_video_modes),
+            std::end(_video_modes),
+            [](const std::array<int32_t, 2> arr) {
+               return arr[0] == GameConfiguration::getInstance()._video_mode_width &&
+                      arr[1] == GameConfiguration::getInstance()._video_mode_height;
+            }
+         );
+
+         const auto current_index = static_cast<int32_t>(it - _video_modes.begin());
+         const auto new_index = std::clamp(current_index + (step < 0 ? -1 : 1), 0, static_cast<int32_t>(_video_modes.size()) - 1);
+         if (new_index != current_index)
          {
-            auto it = std::find_if(
-               std::begin(_video_modes),
-               std::end(_video_modes),
-               [](const std::array<int32_t, 2> arr) {
-                  return arr[0] == GameConfiguration::getInstance()._video_mode_width &&
-                         arr[1] == GameConfiguration::getInstance()._video_mode_height;
-               }
-            );
-
-            auto index = it - _video_modes.begin();
-            if (step < 0)
-            {
-               index--;
-            }
-            else
-            {
-               index++;
-            }
-
-            if (index < 0)
-            {
-               index = _video_modes.size() - 1;
-            }
-            else if (index > static_cast<int32_t>(_video_modes.size() - 1))
-            {
-               index = 0;
-            }
-            return _video_modes[index];
-         }();
-
-         _resolution_callback(next[0], next[1]);
+            _resolution_callback(_video_modes[new_index][0], _video_modes[new_index][1]);
+         }
          break;
       }
 
