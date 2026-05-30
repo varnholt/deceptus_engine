@@ -33,6 +33,11 @@ public:
    /// \brief caches brightness indicator layers after PSD loading.
    void loadingFinished() override;
 
+   /// \brief draws PSD layers then the dynamic resolution text on top.
+   /// \param window render target that receives layer sprites and text.
+   /// \param states render states forwarded to drawing.
+   void draw(sf::RenderTarget& window, sf::RenderStates states) override;
+
    /// \brief updates highlights, prompts, and value indicators for all video settings.
    void updateLayers();
 
@@ -69,4 +74,6 @@ private:
    VSyncCallback _vsync_callback;
    std::vector<std::array<int32_t, 2>> _video_modes;
    std::vector<std::shared_ptr<Layer>> _brightness_value_layers;
+   sf::Font _font;
+   std::unique_ptr<sf::Text> _resolution_text;
 };

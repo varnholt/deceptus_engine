@@ -13,7 +13,7 @@ MenuScreenVideo::MenuScreenVideo()
 {
    setFilename("data/menus/video.psd");
 
-   _video_modes = {{1024, 576}, {1280, 720}, {1366, 864}, {1536, 864}, {1600, 900}, {1920, 1080}, {3840, 2160}};
+   _video_modes = {{640, 360}, {1280, 720}, {1366, 768}, {1600, 900}, {1920, 1080}, {2560, 1440}, {3840, 2160}};
 
    const auto desktop_mode = sf::VideoMode::getDesktopMode();
    std::erase_if(
@@ -177,7 +177,41 @@ void MenuScreenVideo::loadingFinished()
       _brightness_value_layers.push_back(_layers[brightness_value_layer_name]);
    }
 
+   // hide all PSD resolution value layers — replaced by dynamic text
+   for (const auto& layer_name :
+        {"resolution_value_1024x576",
+         "resolution_value_1280x720",
+         "resolution_value_1366x768",
+         "resolution_value_1536x864",
+         "resolution_value_1600x900",
+         "resolution_value_1920x1080",
+         "resolution_value_3840x2160"})
+   {
+      if (_layers.contains(layer_name))
+      {
+         _layers[layer_name]->_visible = false;
+      }
+   }
+
+   _font.openFromFile("data/fonts/deceptum.ttf");
+   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
+   _resolution_text = std::make_unique<sf::Text>(_font);
+   _resolution_text->setCharacterSize(12);
+   _resolution_text->setFillColor(sf::Color::White);
+
+   // const auto pos = _layers["resolution_value_1280x720"]->_sprite->getPosition();
+   _resolution_text->setPosition({382, 154});
+
    updateLayers();
+}
+
+void MenuScreenVideo::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   MenuScreen::draw(window, states);
+   if (_resolution_text)
+   {
+      window.draw(*_resolution_text, states);
+   }
 }
 
 void MenuScreenVideo::updateLayers()
@@ -226,13 +260,11 @@ void MenuScreenVideo::updateLayers()
    _layers["resolution_help"]->_visible = resolution;
    _layers["resolution_highlight"]->_visible = resolution;
    _layers["resolution_arrows"]->_visible = resolution;
-   _layers["resolution_value_1024x576"]->_visible = resolution_selection == 0;
-   _layers["resolution_value_1280x720"]->_visible = resolution_selection == 1;
-   _layers["resolution_value_1366x768"]->_visible = resolution_selection == 2;
-   _layers["resolution_value_1536x864"]->_visible = resolution_selection == 3;
-   _layers["resolution_value_1600x900"]->_visible = resolution_selection == 4;
-   _layers["resolution_value_1920x1080"]->_visible = resolution_selection == 5;
-   _layers["resolution_value_3840x2160"]->_visible = resolution_selection == 6;
+   if (_resolution_text && !_video_modes.empty())
+   {
+      const auto& mode = _video_modes[resolution_selection];
+      _resolution_text->setString(std::format("{}x{}", mode[0], mode[1]));
+   }
 
    _layers["brightness_text_0"]->_visible = !brightness;
    _layers["brightness_text_1"]->_visible = brightness;
