@@ -26,5 +26,6 @@
    { "on": "fade/out_done", "action": "destroy_sprite",      "name": "player_left" },
    { "on": "fade/out_done", "action": "destroy_sprite",      "name": "player_right" },
    { "on": "fade/out_done", "action": "set_player_visible",  "visible": true },
+   { "on": "fade/out_done", "action": "unlock_camera" },
    { "on": "fade/out_done", "action": "next_level" }
 ]
