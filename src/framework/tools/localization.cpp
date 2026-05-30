@@ -53,6 +53,12 @@ const std::string& Localization::getLocale() const
 
 std::string_view Localization::translate(std::string_view source_text) const
 {
+   const auto last_non_space = source_text.find_last_not_of(' ');
+   if (last_non_space != std::string_view::npos)
+   {
+      source_text = source_text.substr(0, last_non_space + 1);
+   }
+
    const auto found = _translations.find(std::string{source_text});
    if (found != _translations.end() && !found->second.empty())
    {
