@@ -105,7 +105,6 @@ private:
    /// \param sdl_button SDL gamepad button index to bind.
    void completeButtonAssignment(int32_t sdl_button);
 
-   sf::Font _font;
    std::unique_ptr<sf::Text> _text;       //!< reused per draw call for all labels and table cells
    sf::RectangleShape _cursor_highlight;  //!< highlight rect drawn behind the selected row
 

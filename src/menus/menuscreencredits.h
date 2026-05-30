@@ -39,7 +39,6 @@ public:
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
 private:
-   sf::Font _font;
    std::unique_ptr<sf::Text> _text_code;
    std::unique_ptr<sf::Text> _text_artwork;
 };

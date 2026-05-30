@@ -1,5 +1,6 @@
 #include "menuscreenoptions.h"
 
+#include "framework/tools/localization.h"
 #include "menu.h"
 #include "menuaudio.h"
 
@@ -49,6 +50,46 @@ void MenuScreenOptions::back()
 
 void MenuScreenOptions::loadingFinished()
 {
+   ensureFontLoaded();
+
+   _row_label_base_rect = _layers["controls_0"]->_sprite->getGlobalBounds();
+   _row_stride = _layers["video_0"]->_sprite->getGlobalBounds().position.y - _row_label_base_rect.position.y;
+
+   _layers["deco_l"]->_visible = false;
+   _layers["deco_r"]->_visible = false;
+
+   for (const auto& layer_name :
+        {"controls_0",
+         "controls_1",
+         "video_0",
+         "video_1",
+         "audio_0",
+         "audio_1",
+         "game_0",
+         "game_1",
+         "achievements_0",
+         "achievements_1",
+         "credits_0",
+         "credits_1"})
+   {
+      _layers[layer_name]->_visible = false;
+   }
+
+   auto make_item_text = [this]() -> std::unique_ptr<sf::Text>
+   {
+      auto text = std::make_unique<sf::Text>(_font);
+      text->setFont(_font);
+      text->setCharacterSize(12);
+      return text;
+   };
+
+   _text_controls_item = make_item_text();
+   _text_video_item = make_item_text();
+   _text_audio_item = make_item_text();
+   _text_game_item = make_item_text();
+   _text_achievements_item = make_item_text();
+   _text_credits_item = make_item_text();
+
    updateLayers();
 }
 
@@ -139,18 +180,71 @@ void MenuScreenOptions::updateLayers()
    _layers["accept_pc_0"]->_visible = !isControllerUsed();
    _layers["accept_pc_1"]->_visible = false;
 
-   _layers["credits_0"]->_visible = (_selection != Selection::Credits);
-   _layers["credits_1"]->_visible = (_selection == Selection::Credits);
-   _layers["achievements_0"]->_visible = (_selection != Selection::Achievements);
-   _layers["achievements_1"]->_visible = (_selection == Selection::Achievements);
-   _layers["game_0"]->_visible = (_selection != Selection::Game);
-   _layers["game_1"]->_visible = (_selection == Selection::Game);
-   _layers["audio_0"]->_visible = (_selection != Selection::Audio);
-   _layers["audio_1"]->_visible = (_selection == Selection::Audio);
-   _layers["video_0"]->_visible = (_selection != Selection::Video);
-   _layers["video_1"]->_visible = (_selection == Selection::Video);
-   _layers["controls_0"]->_visible = (_selection != Selection::Controls);
-   _layers["controls_1"]->_visible = (_selection == Selection::Controls);
+   if (!_text_controls_item)
+   {
+      return;
+   }
+
+   auto update_item = [this](sf::Text& text, const sf::FloatRect& reference_rect, const std::string& label, bool selected)
+   {
+      text.setString(label);
+      text.setFillColor(selected ? color_label_selected : color_label_normal);
+      placeTextCentered(text, reference_rect);
+   };
+
+   update_item(*_text_controls_item, rowRect(_row_label_base_rect, 0), tr("Controls"), _selection == Selection::Controls);
+   update_item(*_text_video_item, rowRect(_row_label_base_rect, 1), tr("Video"), _selection == Selection::Video);
+   update_item(*_text_audio_item, rowRect(_row_label_base_rect, 2), tr("Audio"), _selection == Selection::Audio);
+   update_item(*_text_game_item, rowRect(_row_label_base_rect, 3), tr("Game"), _selection == Selection::Game);
+   // update_item(*_text_achievements_item, rowRect(_row_label_base_rect, 4), tr("Achievements"), _selection == Selection::Achievements);
+   update_item(*_text_credits_item, rowRect(_row_label_base_rect, 4), tr("Credits"), _selection == Selection::Credits);
+
+   sf::Text* active_text = nullptr;
+   switch (_selection)
+   {
+      case Selection::Controls:
+         active_text = _text_controls_item.get();
+         break;
+      case Selection::Video:
+         active_text = _text_video_item.get();
+         break;
+      case Selection::Audio:
+         active_text = _text_audio_item.get();
+         break;
+      case Selection::Game:
+         active_text = _text_game_item.get();
+         break;
+      case Selection::Achievements:
+         active_text = _text_achievements_item.get();
+         break;
+      case Selection::Credits:
+         active_text = _text_credits_item.get();
+         break;
+      case Selection::Count:
+         break;
+   }
+
+   if (active_text)
+   {
+      placeDecorators(active_text->getGlobalBounds());
+   }
+}
+
+void MenuScreenOptions::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   MenuScreen::draw(window, states);
+
+   if (!_text_controls_item)
+   {
+      return;
+   }
+
+   window.draw(*_text_controls_item, states);
+   window.draw(*_text_video_item, states);
+   window.draw(*_text_audio_item, states);
+   window.draw(*_text_game_item, states);
+   // window.draw(*_text_achievements_item, states);
+   window.draw(*_text_credits_item, states);
 }
 
 /*

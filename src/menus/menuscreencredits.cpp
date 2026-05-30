@@ -7,8 +7,7 @@ MenuScreenCredits::MenuScreenCredits()
 {
    setFilename("data/menus/credits.psd");
 
-   _font.openFromFile("data/fonts/deceptum.ttf");
-   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
+   ensureFontLoaded();
 
    _text_code = std::make_unique<sf::Text>(_font);
    _text_code->setFont(_font);

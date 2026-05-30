@@ -44,11 +44,23 @@ public:
    /// \brief captures the back-navigation target when the screen becomes active.
    void showEvent() override;
 
+   /// \brief draws the options screen layers and item text.
+   /// \param window render target receiving the options screen.
+   /// \param states render states forwarded to draw calls.
+   void draw(sf::RenderTarget& window, sf::RenderStates states) override;
+
    /// \brief opens the submenu corresponding to the current selection.
    void select();
 
    Selection _selection = Selection::Controls;
 
 private:
-   Menu::MenuType _back_target = Menu::MenuType::Main; //!< parent menu to return to when pressing back.
+   Menu::MenuType _back_target = Menu::MenuType::Main;  //!< parent menu to return to when pressing back.
+
+   std::unique_ptr<sf::Text> _text_controls_item;
+   std::unique_ptr<sf::Text> _text_video_item;
+   std::unique_ptr<sf::Text> _text_audio_item;
+   std::unique_ptr<sf::Text> _text_game_item;
+   std::unique_ptr<sf::Text> _text_achievements_item;
+   std::unique_ptr<sf::Text> _text_credits_item;
 };

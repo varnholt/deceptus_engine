@@ -74,6 +74,20 @@ private:
    VSyncCallback _vsync_callback;
    std::vector<std::array<int32_t, 2>> _video_modes;
    std::vector<std::shared_ptr<Layer>> _brightness_value_layers;
-   sf::Font _font;
-   std::unique_ptr<sf::Text> _resolution_text;
+
+   std::unique_ptr<sf::Text> _resolution_text;  //!< dynamic "WxH" value, e.g. "1280x720"
+
+   sf::FloatRect _row_help_base_rect;   //!< help text reference rect for row 0 (Resolution)
+   sf::FloatRect _row_value_base_rect;  //!< value text reference rect; row 0 here is Display Mode (first row with a value)
+
+   std::unique_ptr<sf::Text> _resolution_label;
+   std::unique_ptr<sf::Text> _resolution_help_text;
+   std::unique_ptr<sf::Text> _displaymode_label;
+   std::unique_ptr<sf::Text> _displaymode_help_text;
+   std::unique_ptr<sf::Text> _displaymode_value_text;
+   std::unique_ptr<sf::Text> _vsync_label;
+   std::unique_ptr<sf::Text> _vsync_help_text;
+   std::unique_ptr<sf::Text> _vsync_value_text;
+   std::unique_ptr<sf::Text> _brightness_label;
+   std::unique_ptr<sf::Text> _brightness_help_text;
 };

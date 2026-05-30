@@ -37,8 +37,8 @@ const sf::Color color_hint{110, 100, 130};
 
 bool isReadOnlyControllerAction(KeyPressed action)
 {
-   return action == KeyPressedUp || action == KeyPressedDown || action == KeyPressedLeft ||
-          action == KeyPressedRight || action == KeyPressedLook;
+   return action == KeyPressedUp || action == KeyPressedDown || action == KeyPressedLeft || action == KeyPressedRight ||
+          action == KeyPressedLook;
 }
 
 std::string_view controllerReadOnlyLabel(KeyPressed action)
@@ -56,8 +56,7 @@ MenuScreenControls::MenuScreenControls()
 {
    setFilename("data/menus/controls.psd");
 
-   _font.openFromFile("data/fonts/deceptum.ttf");
-   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
+   ensureFontLoaded();
 
    _text = std::make_unique<sf::Text>(_font);
    _text->setFont(_font);
@@ -219,13 +218,11 @@ void MenuScreenControls::up()
 {
    const auto& actions = InputConfiguration::actionList();
    auto candidate = _action_row_index - 1;
-   while (candidate > 0 && _device_mode == DeviceMode::Controller &&
-          isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)]))
+   while (candidate > 0 && _device_mode == DeviceMode::Controller && isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)]))
    {
       candidate--;
    }
-   if (candidate >= 0 &&
-       !(_device_mode == DeviceMode::Controller && isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)])))
+   if (candidate >= 0 && !(_device_mode == DeviceMode::Controller && isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)])))
    {
       _action_row_index = candidate;
       MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
@@ -520,9 +517,9 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    // cursor highlight
    const auto cursor_row_y = assign_row_start_y + static_cast<float>(_action_row_index) * assign_row_height;
    const auto cursor_action_index = static_cast<size_t>(_action_row_index);
-   const auto cursor_on_disabled = (_device_mode == DeviceMode::Controller &&
-                                    cursor_action_index < actions.size() &&
-                                    isReadOnlyControllerAction(actions[cursor_action_index]));
+   const auto cursor_on_disabled =
+      (_device_mode == DeviceMode::Controller && cursor_action_index < actions.size() &&
+       isReadOnlyControllerAction(actions[cursor_action_index]));
    if (!cursor_on_disabled)
    {
       _cursor_highlight.setSize({580.0f, assign_row_height - 1.0f});

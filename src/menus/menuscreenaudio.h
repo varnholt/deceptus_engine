@@ -53,9 +53,24 @@ public:
    /// \brief restores default audio configuration values and refreshes the screen.
    void setDefaults();
 
+   /// \brief draws the audio screen layers and label text.
+   /// \param window render target receiving the audio screen.
+   /// \param states render states forwarded to draw calls.
+   void draw(sf::RenderTarget& window, sf::RenderStates states) override;
+
    Selection _selection = Selection::Master;
 
    std::vector<std::shared_ptr<Layer>> _volume_layers_master;
    std::vector<std::shared_ptr<Layer>> _volume_layers_music;
    std::vector<std::shared_ptr<Layer>> _volume_layers_sfx;
+
+private:
+   sf::FloatRect _row_help_base_rect;  //!< help text reference rect for row 0 (Master)
+
+   std::unique_ptr<sf::Text> _master_label;
+   std::unique_ptr<sf::Text> _master_help_text;
+   std::unique_ptr<sf::Text> _music_label;
+   std::unique_ptr<sf::Text> _music_help_text;
+   std::unique_ptr<sf::Text> _sfx_label;
+   std::unique_ptr<sf::Text> _sfx_help_text;
 };

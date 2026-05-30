@@ -1,5 +1,6 @@
 #include "menus/menuscreenvideo.h"
 
+#include "framework/tools/localization.h"
 #include "game/config/gameconfiguration.h"
 #include "menus/menu.h"
 #include "menus/menuaudio.h"
@@ -171,9 +172,9 @@ void MenuScreenVideo::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenVideo::loadingFinished()
 {
-   for (auto i = 0; i < 11; i++)
+   for (auto index = 0; index < 11; index++)
    {
-      const auto brightness_value_layer_name = std::format("brightness_value_{}", i);
+      const auto brightness_value_layer_name = std::format("brightness_value_{}", index);
       _brightness_value_layers.push_back(_layers[brightness_value_layer_name]);
    }
 
@@ -193,14 +194,67 @@ void MenuScreenVideo::loadingFinished()
       }
    }
 
-   _font.openFromFile("data/fonts/deceptum.ttf");
-   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-   _resolution_text = std::make_unique<sf::Text>(_font);
-   _resolution_text->setCharacterSize(12);
-   _resolution_text->setFillColor(sf::Color::White);
+   ensureFontLoaded();
 
-   // const auto pos = _layers["resolution_value_1280x720"]->_sprite->getPosition();
+   // read reference rects from PSD text layers before hiding them
+   _row_label_base_rect = _layers["resolution_text_0"]->_sprite->getGlobalBounds();
+   _row_help_base_rect = _layers["resolution_help"]->_sprite->getGlobalBounds();
+   _row_value_base_rect = _layers["displayMode_value_windowed"]->_sprite->getGlobalBounds();
+   _row_stride = _layers["displayMode_text_0"]->_sprite->getGlobalBounds().position.y - _row_label_base_rect.position.y;
+
+   for (const auto& layer_name :
+        {"resolution_text_0",
+         "resolution_text_1",
+         "resolution_help",
+         "displayMode_text_0",
+         "displayMode_text_1",
+         "displayMode_help",
+         "displayMode_value_windowed",
+         "displayMode_value_borderless",
+         "displayMode_value_fullscreen",
+         "vSync_text_0",
+         "vSync_text_1",
+         "vSync_help",
+         "vSync_value_0",
+         "vSync_value_1",
+         "brightness_text_0",
+         "brightness_text_1",
+         "brightness_help"})
+   {
+      _layers[layer_name]->_visible = false;
+   }
+
+   auto make_label = [this]() -> std::unique_ptr<sf::Text>
+   {
+      auto text = std::make_unique<sf::Text>(_font);
+      text->setFont(_font);
+      text->setCharacterSize(12);
+      return text;
+   };
+
+   _resolution_text = make_label();
+   _resolution_text->setFillColor(sf::Color::White);
    _resolution_text->setPosition({382, 154});
+
+   _resolution_label = make_label();
+   _resolution_help_text = make_label();
+   _resolution_help_text->setFillColor(color_help_text);
+
+   _displaymode_label = make_label();
+   _displaymode_help_text = make_label();
+   _displaymode_help_text->setFillColor(color_help_text);
+   _displaymode_value_text = make_label();
+   _displaymode_value_text->setFillColor(sf::Color::White);
+
+   _vsync_label = make_label();
+   _vsync_help_text = make_label();
+   _vsync_help_text->setFillColor(color_help_text);
+   _vsync_value_text = make_label();
+   _vsync_value_text->setFillColor(sf::Color::White);
+
+   _brightness_label = make_label();
+   _brightness_help_text = make_label();
+   _brightness_help_text->setFillColor(color_help_text);
 
    updateLayers();
 }
@@ -208,42 +262,70 @@ void MenuScreenVideo::loadingFinished()
 void MenuScreenVideo::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    MenuScreen::draw(window, states);
-   if (_resolution_text)
+
+   if (!_resolution_label)
    {
-      window.draw(*_resolution_text, states);
+      return;
+   }
+
+   window.draw(*_resolution_label, states);
+   if (_selection == Selection::Resolution)
+   {
+      window.draw(*_resolution_help_text, states);
+   }
+   window.draw(*_resolution_text, states);
+
+   window.draw(*_displaymode_label, states);
+   if (_selection == Selection::DisplayMode)
+   {
+      window.draw(*_displaymode_help_text, states);
+   }
+   window.draw(*_displaymode_value_text, states);
+
+   window.draw(*_vsync_label, states);
+   if (_selection == Selection::VSync)
+   {
+      window.draw(*_vsync_help_text, states);
+   }
+   window.draw(*_vsync_value_text, states);
+
+   window.draw(*_brightness_label, states);
+   if (_selection == Selection::Brightness)
+   {
+      window.draw(*_brightness_help_text, states);
    }
 }
 
 void MenuScreenVideo::updateLayers()
 {
-   auto resolution = _selection == Selection::Resolution;
-   auto displayMode = _selection == Selection::DisplayMode;
-   auto vsync = _selection == Selection::VSync;
-   auto brightness = _selection == Selection::Brightness;
+   const auto resolution_selected = _selection == Selection::Resolution;
+   const auto display_mode_selected = _selection == Selection::DisplayMode;
+   const auto vsync_selected = _selection == Selection::VSync;
+   const auto brightness_selected = _selection == Selection::Brightness;
 
-   auto resolution_selection = 0u;
-   auto display_mode_selection = 0;
+   auto resolution_index = 0u;
+   auto display_mode_value_index = 0;
 
-   auto fullscreen = GameConfiguration::getInstance()._fullscreen;
+   const auto fullscreen = GameConfiguration::getInstance()._fullscreen;
    if (fullscreen)
    {
-      display_mode_selection = 2;
+      display_mode_value_index = 2;
    }
 
-   auto resolution_width = GameConfiguration::getInstance()._video_mode_width;
-   auto resolution_height = GameConfiguration::getInstance()._video_mode_height;
+   const auto resolution_width = GameConfiguration::getInstance()._video_mode_width;
+   const auto resolution_height = GameConfiguration::getInstance()._video_mode_height;
 
    for (auto index = 0u; index < _video_modes.size(); index++)
    {
       if (_video_modes[index][0] == resolution_width && _video_modes[index][1] == resolution_height)
       {
-         resolution_selection = index;
+         resolution_index = index;
          break;
       }
    }
 
    const auto brightness_value = GameConfiguration::getInstance()._brightness;
-   const auto vsync_selection = (GameConfiguration::getInstance()._vsync_enabled) ? 1 : 0;
+   const auto vsync_enabled = GameConfiguration::getInstance()._vsync_enabled;
 
    _layers["defaults_xbox_0"]->_visible = isControllerUsed();
    _layers["defaults_xbox_1"]->_visible = false;
@@ -255,52 +337,83 @@ void MenuScreenVideo::updateLayers()
    _layers["back_pc_0"]->_visible = !isControllerUsed();
    _layers["back_pc_1"]->_visible = false;
 
-   _layers["resolution_text_0"]->_visible = !resolution;
-   _layers["resolution_text_1"]->_visible = resolution;
-   _layers["resolution_help"]->_visible = resolution;
-   _layers["resolution_highlight"]->_visible = resolution;
-   _layers["resolution_arrows"]->_visible = resolution;
-   if (_resolution_text && !_video_modes.empty())
-   {
-      const auto& mode = _video_modes[resolution_selection];
-      _resolution_text->setString(std::format("{}x{}", mode[0], mode[1]));
-   }
+   _layers["resolution_highlight"]->_visible = resolution_selected;
+   _layers["resolution_arrows"]->_visible = resolution_selected;
 
-   _layers["brightness_text_0"]->_visible = !brightness;
-   _layers["brightness_text_1"]->_visible = brightness;
-   _layers["brightness_body_0"]->_visible = !brightness;
-   _layers["brightness_body_1"]->_visible = brightness;
-   _layers["brightness_highlight"]->_visible = brightness;
-   _layers["brightness_help"]->_visible = brightness;
-   _layers["brightness_arrows"]->_visible = brightness;
-   _layers["brightness_h_0"]->_visible = !brightness;
-   _layers["brightness_h_1"]->_visible = brightness;
+   _layers["brightness_body_0"]->_visible = !brightness_selected;
+   _layers["brightness_body_1"]->_visible = brightness_selected;
+   _layers["brightness_highlight"]->_visible = brightness_selected;
+   _layers["brightness_arrows"]->_visible = brightness_selected;
+   _layers["brightness_h_0"]->_visible = !brightness_selected;
+   _layers["brightness_h_1"]->_visible = brightness_selected;
 
    _layers["brightness_h_0"]->_sprite->setOrigin({50 - (brightness_value * 100.0f), 0});
    _layers["brightness_h_1"]->_sprite->setOrigin({50 - (brightness_value * 100.0f), 0});
 
-   _layers["displayMode_text_0"]->_visible = !displayMode;
-   _layers["displayMode_text_1"]->_visible = displayMode;
-   _layers["displayMode_highlight"]->_visible = displayMode;
-   _layers["displayMode_help"]->_visible = displayMode;
-   _layers["displayMode_arrows"]->_visible = displayMode;
-   _layers["displayMode_value_windowed"]->_visible = display_mode_selection == 0;
-   _layers["displayMode_value_borderless"]->_visible = display_mode_selection == 1;
-   _layers["displayMode_value_fullscreen"]->_visible = display_mode_selection == 2;
+   _layers["displayMode_highlight"]->_visible = display_mode_selected;
+   _layers["displayMode_arrows"]->_visible = display_mode_selected;
 
-   _layers["vSync_text_0"]->_visible = !vsync;
-   _layers["vSync_text_1"]->_visible = vsync;
-   _layers["vSync_highlight"]->_visible = vsync;
-   _layers["vSync_help"]->_visible = vsync;
-   _layers["vSync_arrows"]->_visible = vsync;
-   _layers["vSync_value_0"]->_visible = vsync_selection == 0;
-   _layers["vSync_value_1"]->_visible = vsync_selection == 1;
+   _layers["vSync_highlight"]->_visible = vsync_selected;
+   _layers["vSync_arrows"]->_visible = vsync_selected;
 
    const auto brightness_index = static_cast<int32_t>(std::ceil((brightness_value * 10.0f) - 0.1f));
-   for (auto i = 0; i < 11; i++)
+   for (auto index = 0; index < 11; index++)
    {
-      _brightness_value_layers[i]->_visible = (i == brightness_index);
+      _brightness_value_layers[index]->_visible = (index == brightness_index);
    }
+
+   if (!_resolution_label)
+   {
+      return;
+   }
+
+   // resolution row
+   _resolution_label->setString(tr("Resolution"));
+   _resolution_label->setFillColor(resolution_selected ? color_label_selected : color_label_normal);
+   placeTextLeft(*_resolution_label, rowRect(_row_label_base_rect, 0));
+
+   _resolution_help_text->setString(tr("Set the display resolution"));
+   placeTextCentered(*_resolution_help_text, _row_help_base_rect);
+
+   if (!_video_modes.empty())
+   {
+      const auto& mode = _video_modes[resolution_index];
+      _resolution_text->setString(std::format("{}x{}", mode[0], mode[1]));
+   }
+
+   // display mode row
+   _displaymode_label->setString(tr("Display Mode"));
+   _displaymode_label->setFillColor(display_mode_selected ? color_label_selected : color_label_normal);
+   placeTextLeft(*_displaymode_label, rowRect(_row_label_base_rect, 1));
+
+   _displaymode_help_text->setString(tr("Change the display render mode of the game"));
+
+   placeTextCentered(*_displaymode_help_text, _row_help_base_rect);
+
+   const std::string display_mode_strings[] = {tr("Windowed"), tr("Borderless"), tr("Fullscreen")};
+   _displaymode_value_text->setString(display_mode_strings[display_mode_value_index]);
+   placeTextLeft(*_displaymode_value_text, rowRect(_row_value_base_rect, 0));
+
+   // vsync row
+   _vsync_label->setString(tr("V-Sync"));
+   _vsync_label->setFillColor(vsync_selected ? color_label_selected : color_label_normal);
+   placeTextLeft(*_vsync_label, rowRect(_row_label_base_rect, 2));
+
+   _vsync_help_text->setString(tr("Adjust the Vertical Synchronization"));
+
+   placeTextCentered(*_vsync_help_text, _row_help_base_rect);
+
+   _vsync_value_text->setString(vsync_enabled ? tr("On") : tr("Off"));
+   placeTextLeft(*_vsync_value_text, rowRect(_row_value_base_rect, 1));
+
+   // brightness row
+   _brightness_label->setString(tr("Brightness"));
+   _brightness_label->setFillColor(brightness_selected ? color_label_selected : color_label_normal);
+   placeTextLeft(*_brightness_label, rowRect(_row_label_base_rect, 3));
+
+   _brightness_help_text->setString(tr("Adjust the screen brightness"));
+
+   placeTextCentered(*_brightness_help_text, _row_help_base_rect);
 }
 
 /*
