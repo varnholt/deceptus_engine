@@ -155,11 +155,11 @@ struct MessageBox
    {
       sf::Text text;
       sf::Color color;
-      std::string plain_text;
+      sf::String plain_text;
    };
 
    std::vector<TextSegment> _segments;
-   std::string _plain_text;
+   sf::String _plain_text;
    uint32_t _char_animate_index = 0;
 
    MessageBoxCallback _callback;

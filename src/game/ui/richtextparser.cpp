@@ -218,9 +218,9 @@ std::vector<Segment> parseRichText(
    return segments;
 }
 
-std::string toString(const std::vector<Segment>& segments)
+sf::String toString(const std::vector<Segment>& segments)
 {
-   std::string result;
+   sf::String result;
 
    for (const auto& seg : segments)
    {
@@ -249,7 +249,7 @@ void testParseRichText()
    const auto plain_text = toString(segments);
 
    std::cout << "Original Message: " << message << std::endl;
-   std::cout << "Extracted Plain Text: " << std::endl << plain_text << std::endl;
+   std::cout << "Extracted Plain Text: " << std::endl << plain_text.toAnsiString() << std::endl;
 }
 
 Segment::Segment(const sf::Font& font)

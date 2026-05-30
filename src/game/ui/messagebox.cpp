@@ -319,7 +319,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
       if (__active->_properties._animate_text)
       {
-         if (__active->_char_animate_index < __active->_plain_text.length())
+         if (__active->_char_animate_index < __active->_plain_text.getSize())
          {
             __active->_properties._animate_text = false;
             return true;
@@ -434,7 +434,7 @@ void MessageBox::updateTextAnimation()
    x = std::max(0.0f, x);
 
    const auto to =
-      !_properties._animate_text ? _plain_text.size() : std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_plain_text.size()));
+      !_properties._animate_text ? _plain_text.getSize() : std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_plain_text.getSize()));
 
    int32_t accumulated_chars_from_segments = 0;
    if (_char_animate_index != to)
@@ -442,17 +442,17 @@ void MessageBox::updateTextAnimation()
       _char_animate_index = to;
       for (auto& segment : _segments)
       {
-         accumulated_chars_from_segments += segment.plain_text.size();
-         if (to < accumulated_chars_from_segments)
+         accumulated_chars_from_segments += static_cast<int32_t>(segment.plain_text.getSize());
+         if (to < static_cast<uint32_t>(accumulated_chars_from_segments))
          {
             // draw only subset of segment
-            const auto chars_to_draw = segment.plain_text.size() - (accumulated_chars_from_segments - to);
-            const auto subset = segment.plain_text.substr(0, chars_to_draw);
-            segment.text.setString(sf::String::fromUtf8(subset.begin(), subset.end()));
+            const auto chars_to_draw = segment.plain_text.getSize() - (static_cast<uint32_t>(accumulated_chars_from_segments) - to);
+            const auto subset = segment.plain_text.substring(0, chars_to_draw);
+            segment.text.setString(subset);
             break;
          }
 
-         segment.text.setString(sf::String::fromUtf8(segment.plain_text.begin(), segment.plain_text.end()));
+         segment.text.setString(segment.plain_text);
       }
    }
 }
