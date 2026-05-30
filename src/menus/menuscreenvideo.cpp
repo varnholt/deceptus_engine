@@ -1,6 +1,7 @@
 #include "menus/menuscreenvideo.h"
 
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlstring.h"
 #include "game/config/gameconfiguration.h"
 #include "menus/menu.h"
 #include "menus/menuaudio.h"
@@ -368,11 +369,11 @@ void MenuScreenVideo::updateLayers()
    }
 
    // resolution row
-   _resolution_label->setString(tr("Resolution"));
+   _resolution_label->setString(sftr("Resolution"));
    _resolution_label->setFillColor(resolution_selected ? color_label_selected : color_label_normal);
    placeTextLeft(*_resolution_label, rowRect(_row_label_base_rect, 0));
 
-   _resolution_help_text->setString(tr("Set the display resolution"));
+   _resolution_help_text->setString(sftr("Set the display resolution"));
    placeTextCentered(*_resolution_help_text, _row_help_base_rect);
 
    if (!_video_modes.empty())
@@ -382,36 +383,36 @@ void MenuScreenVideo::updateLayers()
    }
 
    // display mode row
-   _displaymode_label->setString(tr("Display Mode"));
+   _displaymode_label->setString(sftr("Display Mode"));
    _displaymode_label->setFillColor(display_mode_selected ? color_label_selected : color_label_normal);
    placeTextLeft(*_displaymode_label, rowRect(_row_label_base_rect, 1));
 
-   _displaymode_help_text->setString(tr("Change the display render mode of the game"));
+   _displaymode_help_text->setString(sftr("Change the display render mode of the game"));
 
    placeTextCentered(*_displaymode_help_text, _row_help_base_rect);
 
-   const std::string display_mode_strings[] = {tr("Windowed"), tr("Borderless"), tr("Fullscreen")};
+   const sf::String display_mode_strings[] = {sftr("Windowed"), sftr("Borderless"), sftr("Fullscreen")};
    _displaymode_value_text->setString(display_mode_strings[display_mode_value_index]);
    placeTextLeft(*_displaymode_value_text, rowRect(_row_value_base_rect, 0));
 
    // vsync row
-   _vsync_label->setString(tr("V-Sync"));
+   _vsync_label->setString(sftr("V-Sync"));
    _vsync_label->setFillColor(vsync_selected ? color_label_selected : color_label_normal);
    placeTextLeft(*_vsync_label, rowRect(_row_label_base_rect, 2));
 
-   _vsync_help_text->setString(tr("Adjust the Vertical Synchronization"));
+   _vsync_help_text->setString(sftr("Adjust the Vertical Synchronization"));
 
    placeTextCentered(*_vsync_help_text, _row_help_base_rect);
 
-   _vsync_value_text->setString(vsync_enabled ? tr("On") : tr("Off"));
+   _vsync_value_text->setString(vsync_enabled ? sftr("On") : sftr("Off"));
    placeTextLeft(*_vsync_value_text, rowRect(_row_value_base_rect, 1));
 
    // brightness row
-   _brightness_label->setString(tr("Brightness"));
+   _brightness_label->setString(sftr("Brightness"));
    _brightness_label->setFillColor(brightness_selected ? color_label_selected : color_label_normal);
    placeTextLeft(*_brightness_label, rowRect(_row_label_base_rect, 3));
 
-   _brightness_help_text->setString(tr("Adjust the screen brightness"));
+   _brightness_help_text->setString(sftr("Adjust the screen brightness"));
 
    placeTextCentered(*_brightness_help_text, _row_help_base_rect);
 }

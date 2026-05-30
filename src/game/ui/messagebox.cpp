@@ -447,11 +447,12 @@ void MessageBox::updateTextAnimation()
          {
             // draw only subset of segment
             const auto chars_to_draw = segment.plain_text.size() - (accumulated_chars_from_segments - to);
-            segment.text.setString(segment.plain_text.substr(0, chars_to_draw));
+            const auto subset = segment.plain_text.substr(0, chars_to_draw);
+            segment.text.setString(sf::String::fromUtf8(subset.begin(), subset.end()));
             break;
          }
 
-         segment.text.setString(segment.plain_text);
+         segment.text.setString(sf::String::fromUtf8(segment.plain_text.begin(), segment.plain_text.end()));
       }
    }
 }

@@ -1,6 +1,7 @@
 #include "menuscreengame.h"
 
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlstring.h"
 #include "game/config/gameconfiguration.h"
 #include "menu.h"
 #include "menuaudio.h"
@@ -216,38 +217,38 @@ void MenuScreenGame::updateLayers()
 
    static const std::string text_speed_strings[] = {"Slowest", "Slow", "Normal", "Fast", "Fastest"};
 
-   _textspeed_label->setString(tr("Text Speed"));
+   _textspeed_label->setString(sftr("Text Speed"));
    _textspeed_label->setFillColor(textspeed_selected ? color_label_selected : color_label_normal);
    placeTextLeft(*_textspeed_label, rowRect(_row_label_base_rect, 0));
 
-   _textspeed_help_text->setString(tr("Set how quickly the dialogue messages appear"));
+   _textspeed_help_text->setString(sftr("Set how quickly the dialogue messages appear"));
 
    placeTextCentered(*_textspeed_help_text, _row_help_base_rect);
 
-   _textspeed_value_text->setString(tr(text_speed_strings[std::clamp(text_speed_value, 0, 4)]));
+   _textspeed_value_text->setString(sftr(text_speed_strings[std::clamp(text_speed_value, 0, 4)]));
    placeTextLeft(*_textspeed_value_text, rowRect(_row_value_base_rect, 0));
 
-   _rumble_label->setString(tr("Rumble"));
+   _rumble_label->setString(sftr("Rumble"));
    _rumble_label->setFillColor(rumble_selected ? color_label_selected : color_label_normal);
    placeTextLeft(*_rumble_label, rowRect(_row_label_base_rect, 1));
 
-   _rumble_help_text->setString(tr("Toggle Game Controller Vibration"));
+   _rumble_help_text->setString(sftr("Toggle Game Controller Vibration"));
 
    placeTextCentered(*_rumble_help_text, _row_help_base_rect);
 
-   _rumble_value_text->setString(isRumbleEnabled() ? tr("On") : tr("Off"));
+   _rumble_value_text->setString(isRumbleEnabled() ? sftr("On") : sftr("Off"));
    placeTextLeft(*_rumble_value_text, rowRect(_row_value_base_rect, 1));
 
-   _autopause_label->setString(tr("Automatic Pause"));
+   _autopause_label->setString(sftr("Automatic Pause"));
    _autopause_label->setFillColor(autopause_selected ? color_label_selected : color_label_normal);
    placeTextLeft(*_autopause_label, rowRect(_row_label_base_rect, 2));
 
-   _autopause_help_text->setString(tr("Pause game on focus loss"));
+   _autopause_help_text->setString(sftr("Pause game on focus loss"));
 
    placeTextCentered(*_autopause_help_text, _row_help_base_rect);
 
    const auto autopause_on = (auto_pause_mode == GameConfiguration::PauseMode::AutomaticPause);
-   _autopause_value_text->setString(autopause_on ? tr("Yes") : tr("No"));
+   _autopause_value_text->setString(autopause_on ? sftr("Yes") : sftr("No"));
    placeTextLeft(*_autopause_value_text, rowRect(_row_value_base_rect, 2));
 }
 

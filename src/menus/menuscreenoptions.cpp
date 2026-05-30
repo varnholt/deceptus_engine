@@ -1,6 +1,7 @@
 #include "menuscreenoptions.h"
 
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlstring.h"
 #include "menu.h"
 #include "menuaudio.h"
 
@@ -185,19 +186,19 @@ void MenuScreenOptions::updateLayers()
       return;
    }
 
-   auto update_item = [this](sf::Text& text, const sf::FloatRect& reference_rect, const std::string& label, bool selected)
+   auto update_item = [this](sf::Text& text, const sf::FloatRect& reference_rect, const sf::String& label, bool selected)
    {
       text.setString(label);
       text.setFillColor(selected ? color_label_selected : color_label_normal);
       placeTextCentered(text, reference_rect);
    };
 
-   update_item(*_text_controls_item, rowRect(_row_label_base_rect, 0), tr("Controls"), _selection == Selection::Controls);
-   update_item(*_text_video_item, rowRect(_row_label_base_rect, 1), tr("Video"), _selection == Selection::Video);
-   update_item(*_text_audio_item, rowRect(_row_label_base_rect, 2), tr("Audio"), _selection == Selection::Audio);
-   update_item(*_text_game_item, rowRect(_row_label_base_rect, 3), tr("Game"), _selection == Selection::Game);
-   // update_item(*_text_achievements_item, rowRect(_row_label_base_rect, 4), tr("Achievements"), _selection == Selection::Achievements);
-   update_item(*_text_credits_item, rowRect(_row_label_base_rect, 4), tr("Credits"), _selection == Selection::Credits);
+   update_item(*_text_controls_item, rowRect(_row_label_base_rect, 0), sftr("Controls"), _selection == Selection::Controls);
+   update_item(*_text_video_item, rowRect(_row_label_base_rect, 1), sftr("Video"), _selection == Selection::Video);
+   update_item(*_text_audio_item, rowRect(_row_label_base_rect, 2), sftr("Audio"), _selection == Selection::Audio);
+   update_item(*_text_game_item, rowRect(_row_label_base_rect, 3), sftr("Game"), _selection == Selection::Game);
+   // update_item(*_text_achievements_item, rowRect(_row_label_base_rect, 4), sftr("Achievements"), _selection == Selection::Achievements);
+   update_item(*_text_credits_item, rowRect(_row_label_base_rect, 4), sftr("Credits"), _selection == Selection::Credits);
 
    sf::Text* active_text = nullptr;
    switch (_selection)
