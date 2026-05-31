@@ -68,13 +68,19 @@ std::string_view Localization::translate(std::string_view source_text) const
    // record untranslated strings so flushMissingKeys() can write them back
    if (!_locale_path.empty() && !source_text.empty())
    {
-      _missing_keys.insert(std::string{source_text});
+      const auto insert_result = _missing_keys.insert(std::string{source_text});
+#ifdef DEVELOPMENT_MODE
+      if (insert_result.second)
+      {
+         flushMissingKeys();
+      }
+#endif
    }
 
    return source_text;
 }
 
-void Localization::flushMissingKeys()
+void Localization::flushMissingKeys() const
 {
    if (_locale_path.empty() || _missing_keys.empty())
    {

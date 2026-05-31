@@ -49,7 +49,7 @@ public:
    /// the locale file with empty values so translators can fill them in.
    ///
    /// does nothing when no locale is loaded or the locale file path is unknown.
-   void flushMissingKeys();
+   void flushMissingKeys() const;
 
 private:
    std::unordered_map<std::string, std::string> _translations;
