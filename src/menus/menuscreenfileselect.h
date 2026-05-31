@@ -59,5 +59,9 @@ private:
    sf::Font _font;
    std::array<std::unique_ptr<sf::Text>, 3> _names;
 
+   std::unique_ptr<sf::Text> _text_back_button;
+   std::unique_ptr<sf::Text> _text_delete_button;
+   std::unique_ptr<sf::Text> _text_confirm_button;
+
    Slot _slot = Slot::A;
 };

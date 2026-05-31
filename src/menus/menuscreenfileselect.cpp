@@ -1,6 +1,7 @@
 #include "menuscreenfileselect.h"
 
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlstring.h"
 #include "menu.h"
 #include "menuaudio.h"
 
@@ -34,6 +35,16 @@ MenuScreenFileSelect::MenuScreenFileSelect()
       _names[i]->setCharacterSize(12);
       _names[i]->setFillColor(sf::Color{232, 219, 243});
    }
+
+   _text_back_button = std::make_unique<sf::Text>(_font);
+   _text_back_button->setCharacterSize(12);
+   _text_back_button->setFillColor(color_label_normal);
+   _text_delete_button = std::make_unique<sf::Text>(_font);
+   _text_delete_button->setCharacterSize(12);
+   _text_delete_button->setFillColor(color_label_normal);
+   _text_confirm_button = std::make_unique<sf::Text>(_font);
+   _text_confirm_button->setCharacterSize(12);
+   _text_confirm_button->setFillColor(color_label_normal);
 }
 
 void MenuScreenFileSelect::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -44,6 +55,14 @@ void MenuScreenFileSelect::draw(sf::RenderTarget& window, sf::RenderStates state
    {
       window.draw(*_names[i], states);
    }
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+   window.draw(*_text_back_button, states);
+   window.draw(*_text_delete_button, states);
+   window.draw(*_text_confirm_button, states);
 }
 
 void MenuScreenFileSelect::up()
@@ -238,4 +257,21 @@ void MenuScreenFileSelect::updateLayers()
    _layers["back_xbox_1"]->_visible = false;
    _layers["back_pc_0"]->_visible = !isControllerUsed();
    _layers["back_pc_1"]->_visible = false;
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+
+   const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
+   _text_back_button->setString(sftr("Back"));
+   placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
+
+   const auto& delete_layer = isControllerUsed() ? _layers["delete_xbox_0"] : _layers["delete_pc_0"];
+   _text_delete_button->setString(sftr("Delete"));
+   placeTextRightOf(*_text_delete_button, delete_layer->_sprite->getGlobalBounds());
+
+   const auto& confirm_layer = isControllerUsed() ? _layers["confirm_xbox_0"] : _layers["confirm_pc_0"];
+   _text_confirm_button->setString(sftr("Confirm"));
+   placeTextRightOf(*_text_confirm_button, confirm_layer->_sprite->getGlobalBounds());
 }

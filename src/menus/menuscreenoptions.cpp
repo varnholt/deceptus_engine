@@ -91,6 +91,11 @@ void MenuScreenOptions::loadingFinished()
    _text_achievements_item = make_item_text();
    _text_credits_item = make_item_text();
 
+   _text_back_button = make_item_text();
+   _text_back_button->setFillColor(color_label_normal);
+   _text_accept_button = make_item_text();
+   _text_accept_button->setFillColor(color_label_normal);
+
    updateLayers();
 }
 
@@ -186,6 +191,14 @@ void MenuScreenOptions::updateLayers()
       return;
    }
 
+   const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
+   _text_back_button->setString(sftr("Back"));
+   placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
+
+   const auto& accept_layer = isControllerUsed() ? _layers["accept_xbox_0"] : _layers["accept_pc_0"];
+   _text_accept_button->setString(sftr("Accept"));
+   placeTextRightOf(*_text_accept_button, accept_layer->_sprite->getGlobalBounds());
+
    auto update_item = [this](sf::Text& text, const sf::FloatRect& reference_rect, const sf::String& label, bool selected)
    {
       text.setString(label);
@@ -246,6 +259,9 @@ void MenuScreenOptions::draw(sf::RenderTarget& window, sf::RenderStates states)
    window.draw(*_text_game_item, states);
    // window.draw(*_text_achievements_item, states);
    window.draw(*_text_credits_item, states);
+
+   window.draw(*_text_back_button, states);
+   window.draw(*_text_accept_button, states);
 }
 
 /*

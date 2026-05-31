@@ -80,6 +80,9 @@ private:
    sf::FloatRect _row_help_base_rect;   //!< help text reference rect for row 0 (Resolution)
    sf::FloatRect _row_value_base_rect;  //!< value text reference rect; row 0 here is Display Mode (first row with a value)
 
+   std::unique_ptr<sf::Text> _text_back_button;
+   std::unique_ptr<sf::Text> _text_defaults_button;
+
    std::unique_ptr<sf::Text> _resolution_label;
    std::unique_ptr<sf::Text> _resolution_help_text;
    std::unique_ptr<sf::Text> _displaymode_label;

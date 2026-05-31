@@ -57,6 +57,9 @@ public:
 private:
    Menu::MenuType _back_target = Menu::MenuType::Main;  //!< parent menu to return to when pressing back.
 
+   std::unique_ptr<sf::Text> _text_back_button;
+   std::unique_ptr<sf::Text> _text_accept_button;
+
    std::unique_ptr<sf::Text> _text_controls_item;
    std::unique_ptr<sf::Text> _text_video_item;
    std::unique_ptr<sf::Text> _text_audio_item;

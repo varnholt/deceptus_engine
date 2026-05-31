@@ -174,6 +174,11 @@ void MenuScreenGame::loadingFinished()
    _autopause_value_text = make_label();
    _autopause_value_text->setFillColor(sf::Color::White);
 
+   _text_back_button = make_label();
+   _text_back_button->setFillColor(color_label_normal);
+   _text_defaults_button = make_label();
+   _text_defaults_button->setFillColor(color_label_normal);
+
    updateLayers();
 }
 
@@ -250,6 +255,14 @@ void MenuScreenGame::updateLayers()
    const auto autopause_on = (auto_pause_mode == GameConfiguration::PauseMode::AutomaticPause);
    _autopause_value_text->setString(autopause_on ? sftr("Yes") : sftr("No"));
    placeTextLeft(*_autopause_value_text, rowRect(_row_value_base_rect, 2));
+
+   const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
+   _text_back_button->setString(sftr("Back"));
+   placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
+
+   const auto& defaults_layer = isControllerUsed() ? _layers["defaults_xbox_0"] : _layers["defaults_pc_0"];
+   _text_defaults_button->setString(sftr("Defaults"));
+   placeTextRightOf(*_text_defaults_button, defaults_layer->_sprite->getGlobalBounds());
 }
 
 void MenuScreenGame::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -281,6 +294,9 @@ void MenuScreenGame::draw(sf::RenderTarget& window, sf::RenderStates states)
       window.draw(*_autopause_help_text, states);
    }
    window.draw(*_autopause_value_text, states);
+
+   window.draw(*_text_back_button, states);
+   window.draw(*_text_defaults_button, states);
 }
 
 /*

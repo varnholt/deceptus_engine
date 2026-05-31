@@ -36,6 +36,16 @@ void MenuScreen::placeTextLeft(sf::Text& text, const sf::FloatRect& reference_re
    text.setPosition({static_cast<float>(pixel_x), static_cast<float>(pixel_y)});
 }
 
+void MenuScreen::placeTextRightOf(sf::Text& text, const sf::FloatRect& reference_rect)
+{
+   const auto text_bounds = text.getLocalBounds();
+   const auto pixel_x =
+      static_cast<int32_t>(reference_rect.position.x + reference_rect.size.x + button_text_x_offset - text_bounds.position.x);
+   const auto pixel_y =
+      static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - text_bounds.size.y) / 2.0f - text_bounds.position.y);
+   text.setPosition({static_cast<float>(pixel_x), static_cast<float>(pixel_y)});
+}
+
 void MenuScreen::placeDecorators(sf::Sprite& deco_left, sf::Sprite& deco_right, const sf::FloatRect& reference_rect)
 {
    constexpr float decorator_gap_px = 10.0f;

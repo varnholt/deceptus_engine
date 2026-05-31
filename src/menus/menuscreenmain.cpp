@@ -15,6 +15,8 @@
 namespace
 {
 
+constexpr float build_text_x_offset = 4.0f;
+
 std::string getBuildNumber()
 {
    return std::format("{}", BUILD_NUMBER);
@@ -30,9 +32,9 @@ MenuScreenMain::MenuScreenMain()
 
    _text_build = std::make_unique<sf::Text>(_font);
    _text_build->setFont(_font);
-   _text_build->setString(getBuildNumber());
+   _text_build->setString(sftr("Build Number") + sf::String{": "} + sf::String{getBuildNumber()});
    _text_build->setCharacterSize(12);
-   _text_build->setPosition({70, 341});
+   _text_build->setPosition({build_text_x_offset, 341});
    _text_build->setFillColor(sf::Color{50, 50, 50});
 
    const auto current_year =
@@ -153,6 +155,11 @@ void MenuScreenMain::loadingFinished()
    for (const auto& layer_name : {"continue_0", "continue_1", "start_0", "start_1", "options_0", "options_1", "quit_0", "quit_1"})
    {
       _layers[layer_name]->_visible = false;
+   }
+
+   if (_layers.contains("build"))
+   {
+      _layers["build"]->_visible = false;
    }
 
    _text_continue_item = std::make_unique<sf::Text>(_font);

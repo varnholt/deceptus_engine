@@ -1,5 +1,6 @@
 #include "menuscreenachievements.h"
 
+#include "framework/tools/sfmlstring.h"
 #include "menu.h"
 
 MenuScreenAchievements::MenuScreenAchievements()
@@ -49,6 +50,12 @@ void MenuScreenAchievements::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenAchievements::loadingFinished()
 {
+   ensureFontLoaded();
+
+   _text_back_button = std::make_unique<sf::Text>(_font);
+   _text_back_button->setCharacterSize(12);
+   _text_back_button->setFillColor(color_label_normal);
+
    updateLayers();
 }
 
@@ -59,6 +66,27 @@ void MenuScreenAchievements::updateLayers()
 
    _layers["back_pc_0"]->_visible = !isControllerUsed();
    _layers["back_pc_1"]->_visible = false;
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+
+   const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
+   _text_back_button->setString(sftr("Back"));
+   placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
+}
+
+void MenuScreenAchievements::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   MenuScreen::draw(window, states);
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+
+   window.draw(*_text_back_button, states);
 }
 
 /*

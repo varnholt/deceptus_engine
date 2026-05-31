@@ -189,6 +189,16 @@ void MenuScreenControls::loadingFinished()
       layer_entry.second->_visible = false;
    }
 
+   _text_setkey_button = std::make_unique<sf::Text>(_font);
+   _text_setkey_button->setCharacterSize(12);
+   _text_setkey_button->setFillColor(color_label_normal);
+   _text_defaults_button = std::make_unique<sf::Text>(_font);
+   _text_defaults_button->setCharacterSize(12);
+   _text_defaults_button->setFillColor(color_label_normal);
+   _text_back_button = std::make_unique<sf::Text>(_font);
+   _text_back_button->setCharacterSize(12);
+   _text_back_button->setFillColor(color_label_normal);
+
    updateLayers();
 }
 
@@ -213,6 +223,23 @@ void MenuScreenControls::updateLayers()
 
    _layers["back_pc_0"]->_visible = !isControllerUsed();
    _layers["back_pc_1"]->_visible = false;
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+
+   const auto& setkey_layer = isControllerUsed() ? _layers["setKey_xbox_0"] : _layers["setKey_pc_0"];
+   _text_setkey_button->setString(sftr("Set Key"));
+   placeTextRightOf(*_text_setkey_button, setkey_layer->_sprite->getGlobalBounds());
+
+   const auto& defaults_layer = isControllerUsed() ? _layers["defaults_xbox_0"] : _layers["defaults_pc_0"];
+   _text_defaults_button->setString(sftr("Defaults"));
+   placeTextRightOf(*_text_defaults_button, defaults_layer->_sprite->getGlobalBounds());
+
+   const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
+   _text_back_button->setString(sftr("Back"));
+   placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
 }
 
 void MenuScreenControls::up()
@@ -637,6 +664,13 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    _text->setString(sftr("Left/Right: change device    Esc: save and return"));
    _text->setPosition({assign_column_action_x, assign_hint_2_y});
    window.draw(*_text, states);
+
+   if (_text_back_button)
+   {
+      window.draw(*_text_setkey_button, states);
+      window.draw(*_text_defaults_button, states);
+      window.draw(*_text_back_button, states);
+   }
 }
 
 /*

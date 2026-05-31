@@ -108,6 +108,10 @@ private:
    std::unique_ptr<sf::Text> _text;       //!< reused per draw call for all labels and table cells
    sf::RectangleShape _cursor_highlight;  //!< highlight rect drawn behind the selected row
 
+   std::unique_ptr<sf::Text> _text_setkey_button;
+   std::unique_ptr<sf::Text> _text_defaults_button;
+   std::unique_ptr<sf::Text> _text_back_button;
+
    // device selection state
    std::vector<DeviceEntry> _device_entries;
    int32_t _device_row_index = 0;  //!< selected row in the device list

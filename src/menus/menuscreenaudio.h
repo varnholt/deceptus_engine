@@ -67,6 +67,9 @@ public:
 private:
    sf::FloatRect _row_help_base_rect;  //!< help text reference rect for row 0 (Master)
 
+   std::unique_ptr<sf::Text> _text_back_button;
+   std::unique_ptr<sf::Text> _text_defaults_button;
+
    std::unique_ptr<sf::Text> _master_label;
    std::unique_ptr<sf::Text> _master_help_text;
    std::unique_ptr<sf::Text> _music_label;

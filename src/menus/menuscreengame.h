@@ -61,6 +61,9 @@ private:
    sf::FloatRect _row_help_base_rect;   //!< help text reference rect for row 0 (Text Speed)
    sf::FloatRect _row_value_base_rect;  //!< value text reference rect for row 0 (Text Speed)
 
+   std::unique_ptr<sf::Text> _text_back_button;
+   std::unique_ptr<sf::Text> _text_defaults_button;
+
    std::unique_ptr<sf::Text> _textspeed_label;
    std::unique_ptr<sf::Text> _textspeed_help_text;
    std::unique_ptr<sf::Text> _textspeed_value_text;

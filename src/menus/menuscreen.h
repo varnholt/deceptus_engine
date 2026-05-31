@@ -77,6 +77,11 @@ protected:
    /// \brief positions text left-aligned at reference_rect.position.x, vertically centered.
    static void placeTextLeft(sf::Text& text, const sf::FloatRect& reference_rect);
 
+   /// \brief positions text so its left edge sits button_text_x_offset pixels right of reference_rect's right edge, vertically centered.
+   static void placeTextRightOf(sf::Text& text, const sf::FloatRect& reference_rect);
+
+   static constexpr float button_text_x_offset = 8.0f;  //!< pixel gap between button sprite right edge and button label
+
    /// \brief positions deco_left flush against the left edge of reference_rect and deco_right flush against the right edge, both vertically
    /// centered.
    static void placeDecorators(sf::Sprite& deco_left, sf::Sprite& deco_right, const sf::FloatRect& reference_rect);

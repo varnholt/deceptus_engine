@@ -41,4 +41,5 @@ public:
 private:
    std::unique_ptr<sf::Text> _text_code;
    std::unique_ptr<sf::Text> _text_artwork;
+   std::unique_ptr<sf::Text> _text_back_button;
 };

@@ -1,5 +1,6 @@
 #include "menuscreennameselect.h"
 
+#include "framework/tools/sfmlstring.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "menu.h"
@@ -52,6 +53,16 @@ MenuScreenNameSelect::MenuScreenNameSelect()
       'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
       's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '.', '-',
    };
+
+   _text_cancel_button = std::make_unique<sf::Text>(_font);
+   _text_cancel_button->setCharacterSize(12);
+   _text_cancel_button->setFillColor(color_label_normal);
+   _text_delete_button = std::make_unique<sf::Text>(_font);
+   _text_delete_button->setCharacterSize(12);
+   _text_delete_button->setFillColor(color_label_normal);
+   _text_confirm_button = std::make_unique<sf::Text>(_font);
+   _text_confirm_button->setCharacterSize(12);
+   _text_confirm_button->setFillColor(color_label_normal);
 }
 
 void MenuScreenNameSelect::up()
@@ -260,10 +271,35 @@ void MenuScreenNameSelect::updateLayers()
    _layers["cancel_xbox_1"]->_visible = false;
    _layers["cancel_pc_0"]->_visible = !isControllerUsed();
    _layers["cancel_pc_1"]->_visible = false;
+
+   if (!_text_cancel_button)
+   {
+      return;
+   }
+
+   const auto& cancel_layer = isControllerUsed() ? _layers["cancel_xbox_0"] : _layers["cancel_pc_0"];
+   _text_cancel_button->setString(sftr("Cancel"));
+   placeTextRightOf(*_text_cancel_button, cancel_layer->_sprite->getGlobalBounds());
+
+   const auto& delete_layer = isControllerUsed() ? _layers["delete_xbox_0"] : _layers["delete_pc_0"];
+   _text_delete_button->setString(sftr("Delete"));
+   placeTextRightOf(*_text_delete_button, delete_layer->_sprite->getGlobalBounds());
+
+   const auto& confirm_layer = isControllerUsed() ? _layers["confirm_xbox_0"] : _layers["confirm_pc_0"];
+   _text_confirm_button->setString(sftr("Confirm"));
+   placeTextRightOf(*_text_confirm_button, confirm_layer->_sprite->getGlobalBounds());
 }
 
 void MenuScreenNameSelect::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    MenuScreen::draw(window, states);
    window.draw(*_text, states);
+
+   if (!_text_cancel_button)
+   {
+      return;
+   }
+   window.draw(*_text_cancel_button, states);
+   window.draw(*_text_delete_button, states);
+   window.draw(*_text_confirm_button, states);
 }

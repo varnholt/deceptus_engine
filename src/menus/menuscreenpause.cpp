@@ -1,6 +1,7 @@
 #include "menuscreenpause.h"
 
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlstring.h"
 #include "game/audio/audio.h"
 #include "game/audio/musicfilenames.h"
 #include "game/audio/musicplayer.h"
@@ -41,6 +42,15 @@ void MenuScreenPause::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenPause::loadingFinished()
 {
+   ensureFontLoaded();
+
+   _text_back_button = std::make_unique<sf::Text>(_font);
+   _text_back_button->setCharacterSize(12);
+   _text_back_button->setFillColor(color_label_normal);
+   _text_accept_button = std::make_unique<sf::Text>(_font);
+   _text_accept_button->setCharacterSize(12);
+   _text_accept_button->setFillColor(color_label_normal);
+
    updateLayers();
 }
 
@@ -148,4 +158,30 @@ void MenuScreenPause::updateLayers()
    _layers["back_pc_1"]->_visible = false;
    _layers["accept_pc_0"]->_visible = !isControllerUsed();
    _layers["accept_pc_1"]->_visible = false;
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+
+   const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
+   _text_back_button->setString(sftr("Back"));
+   placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
+
+   const auto& accept_layer = isControllerUsed() ? _layers["accept_xbox_0"] : _layers["accept_pc_0"];
+   _text_accept_button->setString(sftr("Accept"));
+   placeTextRightOf(*_text_accept_button, accept_layer->_sprite->getGlobalBounds());
+}
+
+void MenuScreenPause::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
+   MenuScreen::draw(window, states);
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+
+   window.draw(*_text_back_button, states);
+   window.draw(*_text_accept_button, states);
 }

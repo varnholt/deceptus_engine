@@ -1,5 +1,6 @@
 #include "menuscreencredits.h"
 
+#include "framework/tools/sfmlstring.h"
 #include "menu.h"
 #include "menuaudio.h"
 
@@ -22,6 +23,10 @@ MenuScreenCredits::MenuScreenCredits()
    _text_artwork->setCharacterSize(12);
    _text_artwork->setPosition({220.0f, 177.0f});
    _text_artwork->setFillColor(sf::Color{232, 219, 243});
+
+   _text_back_button = std::make_unique<sf::Text>(_font);
+   _text_back_button->setCharacterSize(12);
+   _text_back_button->setFillColor(color_label_normal);
 }
 
 void MenuScreenCredits::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -29,6 +34,12 @@ void MenuScreenCredits::draw(sf::RenderTarget& window, sf::RenderStates states)
    MenuScreen::draw(window, states);
    window.draw(*_text_code);
    window.draw(*_text_artwork);
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+   window.draw(*_text_back_button, states);
 }
 
 void MenuScreenCredits::loadingFinished()
@@ -43,6 +54,14 @@ void MenuScreenCredits::updateLayers()
 
    _layers["back_pc_0"]->_visible = !isControllerUsed();
    _layers["back_pc_1"]->_visible = false;
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+   const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
+   _text_back_button->setString(sftr("Back"));
+   placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
 }
 
 void MenuScreenCredits::up()

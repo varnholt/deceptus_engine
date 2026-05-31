@@ -257,6 +257,11 @@ void MenuScreenVideo::loadingFinished()
    _brightness_help_text = make_label();
    _brightness_help_text->setFillColor(color_help_text);
 
+   _text_back_button = make_label();
+   _text_back_button->setFillColor(color_label_normal);
+   _text_defaults_button = make_label();
+   _text_defaults_button->setFillColor(color_label_normal);
+
    updateLayers();
 }
 
@@ -295,6 +300,9 @@ void MenuScreenVideo::draw(sf::RenderTarget& window, sf::RenderStates states)
    {
       window.draw(*_brightness_help_text, states);
    }
+
+   window.draw(*_text_back_button, states);
+   window.draw(*_text_defaults_button, states);
 }
 
 void MenuScreenVideo::updateLayers()
@@ -415,6 +423,14 @@ void MenuScreenVideo::updateLayers()
    _brightness_help_text->setString(sftr("Adjust the screen brightness"));
 
    placeTextCentered(*_brightness_help_text, _row_help_base_rect);
+
+   const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
+   _text_back_button->setString(sftr("Back"));
+   placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
+
+   const auto& defaults_layer = isControllerUsed() ? _layers["defaults_xbox_0"] : _layers["defaults_pc_0"];
+   _text_defaults_button->setString(sftr("Defaults"));
+   placeTextRightOf(*_text_defaults_button, defaults_layer->_sprite->getGlobalBounds());
 }
 
 /*
