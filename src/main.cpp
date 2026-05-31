@@ -73,7 +73,7 @@ int main(int /*argc*/, char** /*argv*/)
    XInitThreads();
 #endif
 
-   Localization::getInstance().load("ja");
+   // Localization::getInstance().load("ja");
    debugAuthors();
    Test test;
    Game game;
