@@ -25,6 +25,7 @@
 
 namespace
 {
+
 static constexpr std::array dialogue_properties{
    PropertyInfo{.name = "00", .type = "string", .default_value = std::string_view{""}},
    PropertyInfo{.name = "00_x_px", .type = "int", .default_value = int32_t{0}},
@@ -32,6 +33,7 @@ static constexpr std::array dialogue_properties{
    PropertyInfo{.name = "00_text_color", .type = "string", .default_value = std::string_view{"#ffffffff"}},
    PropertyInfo{.name = "00_background_color", .type = "string", .default_value = std::string_view{"#000000ff"}},
 };
+
 static constexpr MechanismSchema dialogue_schema{
    .type_name = "Dialogue",
    .layer_name = "dialogues",
@@ -39,6 +41,7 @@ static constexpr MechanismSchema dialogue_schema{
    .default_height = 48,
    .properties = dialogue_properties,
 };
+
 const auto registered_dialogue = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();

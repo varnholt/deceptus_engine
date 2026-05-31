@@ -47,7 +47,7 @@ std::vector<Segment> parseRichText(
 /// \brief concatenates segment strings into plain text without formatting tags.
 /// \param segments parsed segments to flatten.
 /// \return concatenated plain-text string.
-std::string toString(const std::vector<Segment>& segments);
+sf::String toString(const std::vector<Segment>& segments);
 
 }  // namespace RichTextParser
 

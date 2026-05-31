@@ -121,7 +121,7 @@ std::vector<Segment> parseRichText(
             const auto text_before_tag = current_view.substr(0, tag_pos);
             Segment segment(font);
             segment.text->setCharacterSize(character_size);
-            segment.text->setString(std::string{text_before_tag});
+            segment.text->setString(sf::String::fromUtf8(text_before_tag.begin(), text_before_tag.end()));
             segment.text->setFillColor(current_text_color);
             segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
             segments.push_back(std::move(segment));
@@ -169,7 +169,7 @@ std::vector<Segment> parseRichText(
          // no more tags; add the rest of the text as a single segment.
          Segment segment(font);
          segment.text->setCharacterSize(character_size);
-         segment.text->setString(std::string{current_view});
+         segment.text->setString(sf::String::fromUtf8(current_view.begin(), current_view.end()));
          segment.text->setFillColor(current_text_color);
          segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
          segments.push_back(std::move(segment));
@@ -218,9 +218,9 @@ std::vector<Segment> parseRichText(
    return segments;
 }
 
-std::string toString(const std::vector<Segment>& segments)
+sf::String toString(const std::vector<Segment>& segments)
 {
-   std::string result;
+   sf::String result;
 
    for (const auto& seg : segments)
    {
@@ -249,7 +249,7 @@ void testParseRichText()
    const auto plain_text = toString(segments);
 
    std::cout << "Original Message: " << message << std::endl;
-   std::cout << "Extracted Plain Text: " << std::endl << plain_text << std::endl;
+   std::cout << "Extracted Plain Text: " << std::endl << plain_text.toAnsiString() << std::endl;
 }
 
 Segment::Segment(const sf::Font& font)

@@ -64,5 +64,5 @@ private:
 /// english fallback when no translation file is loaded or the key is missing.
 ///
 /// \param source_text english text to translate.
-/// \return translated string, or source_text if no translation is available.
+/// \return translated UTF-8 string, or source_text if no translation is available.
 [[nodiscard]] std::string tr(std::string_view source_text);

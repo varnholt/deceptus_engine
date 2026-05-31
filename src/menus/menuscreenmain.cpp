@@ -3,6 +3,7 @@
 #include <chrono>
 #include "framework/easings/easings.h"
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlstring.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/ui/messagebox.h"
@@ -274,19 +275,19 @@ void MenuScreenMain::updateLayers()
    const auto options_color = (_selection == Selection::Options) ? color_label_selected : color_label_normal;
    const auto quit_color = (_selection == Selection::Quit) ? color_label_selected : color_label_normal;
 
-   _text_continue_item->setString(tr("Continue"));
+   _text_continue_item->setString(sftr("Continue"));
    _text_continue_item->setFillColor(start_color);
    placeTextCentered(*_text_continue_item, rowRect(_row_label_base_rect, 0));
 
-   _text_new_game_item->setString(tr("New Game"));
+   _text_new_game_item->setString(sftr("New Game"));
    _text_new_game_item->setFillColor(start_color);
    placeTextCentered(*_text_new_game_item, rowRect(_row_label_base_rect, 0));
 
-   _text_options_item->setString(tr("Options"));
+   _text_options_item->setString(sftr("Options"));
    _text_options_item->setFillColor(options_color);
    placeTextCentered(*_text_options_item, rowRect(_row_label_base_rect, 1));
 
-   _text_quit_item->setString(tr("Quit"));
+   _text_quit_item->setString(sftr("Quit"));
    _text_quit_item->setFillColor(quit_color);
    placeTextCentered(*_text_quit_item, rowRect(_row_label_base_rect, 2));
 

@@ -1,6 +1,7 @@
 #include "menuscreenaudio.h"
 
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlstring.h"
 #include "game/audio/audio.h"
 #include "game/audio/musicplayer.h"
 #include "game/config/gameconfiguration.h"
@@ -294,27 +295,27 @@ void MenuScreenAudio::updateLayers()
       return;
    }
 
-   _master_label->setString(tr("Master Volume"));
+   _master_label->setString(sftr("Master Volume"));
    _master_label->setFillColor(master_selected ? color_label_selected : color_label_normal);
    placeTextLeft(*_master_label, rowRect(_row_label_base_rect, 0));
 
-   _master_help_text->setString(tr("Adjust the Master Volume"));
+   _master_help_text->setString(sftr("Adjust the Master Volume"));
 
    placeTextCentered(*_master_help_text, _row_help_base_rect);
 
-   _music_label->setString(tr("Music Volume"));
+   _music_label->setString(sftr("Music Volume"));
    _music_label->setFillColor(music_selected ? color_label_selected : color_label_normal);
    placeTextLeft(*_music_label, rowRect(_row_label_base_rect, 1));
 
-   _music_help_text->setString(tr("Adjust the Music Volume"));
+   _music_help_text->setString(sftr("Adjust the Music Volume"));
 
    placeTextCentered(*_music_help_text, _row_help_base_rect);
 
-   _sfx_label->setString(tr("Sound FX Volume"));
+   _sfx_label->setString(sftr("Sound FX Volume"));
    _sfx_label->setFillColor(sfx_selected ? color_label_selected : color_label_normal);
    placeTextLeft(*_sfx_label, rowRect(_row_label_base_rect, 2));
 
-   _sfx_help_text->setString(tr("Adjust the Sound FX Volume"));
+   _sfx_help_text->setString(sftr("Adjust the Sound FX Volume"));
 
    placeTextCentered(*_sfx_help_text, _row_help_base_rect);
 }
