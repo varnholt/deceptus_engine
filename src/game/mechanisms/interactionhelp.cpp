@@ -5,6 +5,7 @@
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tools/sfmlstring.h"
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/io/texturepool.h"
@@ -283,7 +284,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 
       help._button_sprite->setTextureRect(help._button_rect_keyboard);
       help._button_sprite->setTexture(*_button_texture);
-      help._text->setString(text_value.value());
+      help._text->setString(sftr(text_value.value()));
 
       // row 0 at bottom, row 1 above
       const auto view_width = GameConfiguration::getInstance()._view_width;
