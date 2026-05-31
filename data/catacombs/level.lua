@@ -1,4 +1,5 @@
 require "data/catacombs/level_constants"
+local cutscene = require "data/scripts/cutscene"
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -29,6 +30,25 @@ _sword_ring_flash_color = {r = 1.0, g = 0.6, b = 0.2}
 function initialize()
    -- log("initialize catacombs level script")
    setInfoLayerVisible(true)
+   local off_block_rect = getMechanismRect("ct-on-off-block-02")
+   if (off_block_rect) then
+      cutscene.load({
+         {
+            on = "lever_spike_01_picked_up",
+            action = "move_camera",
+            x = off_block_rect.x + off_block_rect.width * 0.5,
+            y = off_block_rect.y + off_block_rect.height * 0.5,
+            duration_s = 1.5,
+            easing = "ease_in_out",
+            event = "camera_at_off_blocks"
+         },
+         {
+            on = "camera_at_off_blocks",
+            delay = 2.0,
+            action = "unlock_camera"
+         }
+      })
+   end
 end
 
 
@@ -188,8 +208,9 @@ function update(dt)
       initDrawer()
    end
 
-   updateMonk(dt) 
-   updateSwimAllowed(dt)  
+   updateMonk(dt)
+   updateSwimAllowed(dt)
+   cutscene.update(dt)
 end
 
 
@@ -212,6 +233,11 @@ function mechanismEvent(object_id, group_id, event_name, value)
    if (object_id == "lever_cell" and event_name == "handle_inserted") then
       setMechanismEnabled("lever_cell_dialogue", false, "dialogues")
       setMechanismEnabled("lever_cell_help", false, "interaction_help")
+   end
+
+   -- pan camera to the on/off blocks when lever_spike_01 is inserted
+   if (object_id == "lever_spike_01" and event_name == "handle_inserted") then
+      cutscene.notify("lever_spike_01_picked_up")
    end
 
    -- treasure chest is locked

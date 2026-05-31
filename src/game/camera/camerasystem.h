@@ -68,6 +68,10 @@ public:
    /// \brief releases the lock set by snapTo and resumes normal player-tracking behaviour.
    void unlockCamera();
 
+   /// \brief returns the camera center in world pixel coordinates as tracked by snapTo and syncNow.
+   /// \return world-space center of the camera view.
+   sf::Vector2f getCenterPx() const;
+
    /// \brief returns the global camera system instance.
    /// \return singleton camera system used by gameplay and rendering.
    static CameraSystem& getInstance();

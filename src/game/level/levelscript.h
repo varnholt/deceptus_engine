@@ -203,6 +203,17 @@ public:
    /// \brief releases the camera lock set by setCameraPosition and resumes player tracking.
    void unlockCamera();
 
+   /// \brief returns the camera center in world pixel coordinates.
+   /// \return world-space center of the camera view.
+   sf::Vector2f getCameraCenter() const;
+
+   /// \brief returns the bounding box of the first mechanism that matches the query.
+   /// \param search_pattern regex used to select mechanisms.
+   /// \param group optional mechanism group filter.
+   /// \return bounding rect in world pixels, or nullopt when no match is found.
+   std::optional<sf::FloatRect> getMechanismRect(const std::string& search_pattern, const std::optional<std::string>& group = std::nullopt)
+      const;
+
    /// \brief shows or hides the player sprite.
    /// \param visible false to suppress player rendering.
    void setPlayerVisible(bool visible);
