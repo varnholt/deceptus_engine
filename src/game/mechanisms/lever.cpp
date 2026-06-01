@@ -415,6 +415,8 @@ void Lever::toggle()
    );
 
    updateReceivers();
+
+   GameMechanismObserver::onEvent(getObjectId(), "levers", "state", _target_state == State::Right ? std::string{"on"} : std::string{"off"});
 }
 
 void Lever::addCallback(const Callback& callback)
