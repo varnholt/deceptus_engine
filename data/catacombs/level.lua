@@ -1,4 +1,5 @@
 require "data/catacombs/level_constants"
+local cutscene = require "data/scripts/cutscene"
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -23,6 +24,9 @@ _player_wont_dive_dialogue_shown = false
 _player_intersected_with_zone_rect = false
 
 _sword_ring_flash_color = {r = 1.0, g = 0.6, b = 0.2}
+
+_pixels_per_tile = 24
+_lever_spike_camera_x_offset_tiles = 11
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -186,15 +190,40 @@ function update(dt)
 
       initLocker()
       initDrawer()
+
+      local spike_rect = getMechanismRect("ct-on-off-block-01")
+      if (spike_rect) then
+         log(string.format("bottom spike rect: x=%.0f y=%.0f", spike_rect.x, spike_rect.y))
+         cutscene.load({
+            {
+               on = "lever_spike_01_picked_up",
+               action = "move_camera",
+               x = spike_rect.x + _lever_spike_camera_x_offset_tiles * _pixels_per_tile,
+               y = spike_rect.y + spike_rect.height * 0.5,
+               duration_s = 1.5,
+               easing = "ease_in_out",
+               event = "camera_at_off_blocks"
+            },
+            {
+               on = "camera_at_off_blocks",
+               delay = 2.0,
+               action = "unlock_camera"
+            }
+         })
+      else
+         log("ct-on-off-block column not found, camera pan will not work")
+      end
    end
 
-   updateMonk(dt) 
-   updateSwimAllowed(dt)  
+   updateMonk(dt)
+   updateSwimAllowed(dt)
+   cutscene.update(dt)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function mechanismEvent(object_id, group_id, event_name, value)
+   log(string.format("mechanismEvent: id='%s' group='%s' event='%s' value='%s'", object_id, group_id, event_name, tostring(value)))
 
    -- update door dialogue when open
    if (object_id == "iron_door" and event_name == "state" and value == "opening") then
@@ -212,6 +241,12 @@ function mechanismEvent(object_id, group_id, event_name, value)
    if (object_id == "lever_cell" and event_name == "handle_inserted") then
       setMechanismEnabled("lever_cell_dialogue", false, "dialogues")
       setMechanismEnabled("lever_cell_help", false, "interaction_help")
+   end
+
+   -- pan camera to the on/off blocks when lever_spike_01 is toggled
+   if (object_id == "lever_spike_01" and event_name == "state") then
+      log("lever_spike_01 toggled, notifying cutscene")
+      cutscene.notify("lever_spike_01_picked_up")
    end
 
    -- treasure chest is locked

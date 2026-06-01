@@ -171,6 +171,51 @@ int32_t toggle(lua_State* state)
    return 0;
 }
 
+int32_t getMechanismRect(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc < 1 || argc > 2)
+   {
+      return 0;
+   }
+
+   const std::string search_pattern = lua_tostring(state, 1);
+   std::optional<std::string> group;
+   if (argc == 2)
+   {
+      group = lua_tostring(state, 2);
+   }
+
+   const auto rect = LevelScript::getCurrent()->getMechanismRect(search_pattern, group);
+   if (!rect.has_value())
+   {
+      lua_pushnil(state);
+      return 1;
+   }
+
+   lua_createtable(state, 0, 4);
+   lua_pushnumber(state, rect->position.x);
+   lua_setfield(state, -2, "x");
+   lua_pushnumber(state, rect->position.y);
+   lua_setfield(state, -2, "y");
+   lua_pushnumber(state, rect->size.x);
+   lua_setfield(state, -2, "width");
+   lua_pushnumber(state, rect->size.y);
+   lua_setfield(state, -2, "height");
+   return 1;
+}
+
+int32_t getCameraCenter(lua_State* state)
+{
+   const auto camera_center = LevelScript::getCurrent()->getCameraCenter();
+   lua_createtable(state, 0, 2);
+   lua_pushnumber(state, camera_center.x);
+   lua_setfield(state, -2, "x");
+   lua_pushnumber(state, camera_center.y);
+   lua_setfield(state, -2, "y");
+   return 1;
+}
+
 int32_t showDialogue(lua_State* state)
 {
    if (lua_gettop(state) != 1)

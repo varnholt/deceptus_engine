@@ -40,9 +40,10 @@ local function execute(entry)
       _camera_x = entry.x
       _camera_y = entry.y
    elseif action == "move_camera" then
+      local camera_center = getCameraCenter()
       _active_camera_move = {
-         start_x  = _camera_x,
-         start_y  = _camera_y,
+         start_x  = camera_center.x,
+         start_y  = camera_center.y,
          end_x    = entry.x,
          end_y    = entry.y,
          duration = entry.duration_s,

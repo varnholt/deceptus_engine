@@ -14,6 +14,7 @@ int32_t addSensorRectCallback(lua_State* state);
 int32_t isPlayerIntersectingSensorRect(lua_State* state);
 
 // mechanisms
+int32_t getMechanismRect(lua_State* state);
 int32_t isMechanismEnabled(lua_State* state);
 int32_t isMechanismVisible(lua_State* state);
 int32_t setMechanismEnabled(lua_State* state);
@@ -50,6 +51,7 @@ int32_t setLuaNodeVisible(lua_State* state);
 int32_t setLuaNodeActive(lua_State* state);
 
 // audio / camera / scene
+int32_t getCameraCenter(lua_State* state);
 int32_t playMusic(lua_State* state);
 int32_t lockPlayerControls(lua_State* state);
 int32_t fadeOut(lua_State* state);

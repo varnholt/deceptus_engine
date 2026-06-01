@@ -229,6 +229,11 @@ void CameraSystem::unlockCamera()
    _locked = false;
 }
 
+sf::Vector2f CameraSystem::getCenterPx() const
+{
+   return {_x_px, _y_px};
+}
+
 float CameraSystem::getX() const
 {
    // camera should be in the center of the focus zone

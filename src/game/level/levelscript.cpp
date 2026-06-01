@@ -191,6 +191,8 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setSpriteVisible", LevelScriptCallbacks::setSpriteVisible);
    lua_register(_lua_state, "moveSpriteAtSpeed", LevelScriptCallbacks::moveSpriteAtSpeed);
    lua_register(_lua_state, "loadCutscene", LevelScriptCallbacks::loadCutscene);
+   lua_register(_lua_state, "getCameraCenter", LevelScriptCallbacks::getCameraCenter);
+   lua_register(_lua_state, "getMechanismRect", LevelScriptCallbacks::getMechanismRect);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -850,6 +852,27 @@ void LevelScript::setCameraPosition(float x_px, float y_px)
 void LevelScript::unlockCamera()
 {
    CameraSystem::getInstance().unlockCamera();
+}
+
+sf::Vector2f LevelScript::getCameraCenter() const
+{
+   return CameraSystem::getInstance().getCenterPx();
+}
+
+std::optional<sf::FloatRect> LevelScript::getMechanismRect(const std::string& search_pattern, const std::optional<std::string>& group) const
+{
+   if (!_search_mechanism_callback)
+   {
+      Log::Error() << "search mechanism callback not initialized yet";
+      return std::nullopt;
+   }
+
+   const auto mechanisms = _search_mechanism_callback(search_pattern, group);
+   if (mechanisms.empty())
+   {
+      return std::nullopt;
+   }
+   return mechanisms.front()->getBoundingBoxPx();
 }
 
 void LevelScript::setPlayerVisible(bool visible)
