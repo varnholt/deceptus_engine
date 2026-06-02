@@ -36,6 +36,13 @@ MenuScreenFileSelect::MenuScreenFileSelect()
       _names[i]->setFillColor(sf::Color{232, 219, 243});
    }
 
+   for (auto slot_index = 0u; slot_index < 3; slot_index++)
+   {
+      _new_game_texts[slot_index] = std::make_unique<sf::Text>(_font);
+      _new_game_texts[slot_index]->setCharacterSize(12);
+      _new_game_texts[slot_index]->setFillColor(color_label_normal);
+   }
+
    _text_back_button = std::make_unique<sf::Text>(_font);
    _text_back_button->setCharacterSize(12);
    _text_back_button->setFillColor(color_label_normal);
@@ -54,6 +61,11 @@ void MenuScreenFileSelect::draw(sf::RenderTarget& window, sf::RenderStates state
    for (auto i = 0u; i < 3; i++)
    {
       window.draw(*_names[i], states);
+   }
+
+   for (auto slot_index = 0u; slot_index < 3; slot_index++)
+   {
+      window.draw(*_new_game_texts[slot_index], states);
    }
 
    if (!_text_back_button)
@@ -211,14 +223,25 @@ void MenuScreenFileSelect::updateLayers()
       // no data
       _layers["slot_" + slot_name + "_new_game"]->_visible = empty;
       _layers["slot_" + slot_name + "_new_game_background"]->_visible = empty;
-      _layers["slot_" + slot_name + "_new_game_highlight"]->_visible = empty;
+      _layers["slot_" + slot_name + "_new_game_highlight"]->_visible = empty && selected;
       _layers["slot_" + slot_name + "_new_game_deselected"]->_visible = empty && !selected;
       _layers["slot_" + slot_name + "_new_game_selected"]->_visible = empty && selected;
+
+      if (empty)
+      {
+         _new_game_texts[index]->setString(sftr("New Game"));
+         _new_game_texts[index]->setFillColor(selected ? color_label_selected : color_label_normal);
+         placeTextCentered(*_new_game_texts[index], _layers["slot_" + slot_name + "_new_game_background"]->_sprite->getGlobalBounds());
+      }
+      else
+      {
+         _new_game_texts[index]->setString({});
+      }
       _layers["slot_" + slot_name + "_shadow"]->_visible = empty;
 
       // have data
-      _layers["slot_" + slot_name + "_selected"]->_visible = !empty && selected;
-      _layers["slot_" + slot_name + "_deselected"]->_visible = !empty && !selected;
+      _layers["slot_" + slot_name + "_selected"]->_visible = selected;
+      _layers["slot_" + slot_name + "_deselected"]->_visible = !selected;
       _layers["slot_" + slot_name + "_background"]->_visible = !empty;
       _layers["slot_" + slot_name + "_bar_1"]->_visible = !empty;
       _layers["slot_" + slot_name + "_bar_2"]->_visible = !empty;
