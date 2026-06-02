@@ -35,8 +35,6 @@ static const auto animation_fade_time_hide = sf::seconds(0.5f);
 std::unique_ptr<MessageBox> __active;
 std::unique_ptr<MessageBox> __previous;
 
-const sf::Font& __font = getFont();
-
 std::string replaceAll(std::string str, const std::string& from, const std::string& to)
 {
    size_t start_pos = 0;
@@ -177,7 +175,7 @@ MessageBox::MessageBox(
 
    const auto segments = RichTextParser::parseRichText(
       message,
-      __font,
+      getFont(),
       _properties._text_color,
       properties._centered ? RichTextParser::Alignment::Centered : RichTextParser::Alignment::Left,
       textbox_width_px,
