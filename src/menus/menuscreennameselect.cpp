@@ -39,9 +39,6 @@ std::string extractFirstName(std::string_view username)
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
-   _font.openFromFile(getFontPath());
-   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-
    _text = std::make_unique<sf::Text>(_font);
    _text->setFont(_font);
    _text->setCharacterSize(12);

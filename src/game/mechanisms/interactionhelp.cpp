@@ -68,11 +68,6 @@ InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(InteractionHelp).name());
    _is_overlay = true;
-
-   if (_font.openFromFile(getFontPath()))
-   {
-      const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-   }
 }
 
 std::string_view InteractionHelp::objectName() const
@@ -268,7 +263,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       HelpElement help;
 
       help._button_sprite = std::make_unique<sf::Sprite>(*_button_texture);
-      help._text = std::make_unique<sf::Text>(_font);
+      help._text = std::make_unique<sf::Text>(*_font);
       help._text->setCharacterSize(12);
 
       const auto button_name = button_value.value_or("key_cursor_u");

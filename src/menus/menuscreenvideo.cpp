@@ -195,8 +195,6 @@ void MenuScreenVideo::loadingFinished()
       }
    }
 
-   ensureFontLoaded();
-
    // read reference rects from PSD text layers before hiding them
    _row_label_base_rect = _layers["resolution_text_0"]->_sprite->getGlobalBounds();
    _row_help_base_rect = _layers["resolution_help"]->_sprite->getGlobalBounds();

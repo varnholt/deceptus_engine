@@ -183,8 +183,6 @@ void MenuScreenAudio::loadingFinished()
       _volume_layers_sfx.push_back(_layers[sfx_value_layer]);
    }
 
-   ensureFontLoaded();
-
    _row_label_base_rect = _layers["master_text_0"]->_sprite->getGlobalBounds();
    _row_help_base_rect = _layers["master_help"]->_sprite->getGlobalBounds();
    _row_stride = _layers["mscVolume_text_0"]->_sprite->getGlobalBounds().position.y - _row_label_base_rect.position.y;

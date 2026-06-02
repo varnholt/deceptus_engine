@@ -227,21 +227,13 @@ InGameMenuInventory::InGameMenuInventory()
    _duration_show = config._duration_show;
 
    // load fonts
-   if (_font_title.openFromFile(getFontPath()))
-   {
-      const_cast<sf::Texture&>(_font_title.getTexture(inventory_title_font_size)).setSmooth(false);
-      _text_title = std::make_unique<sf::Text>(_font_title);
-      _text_title->setCharacterSize(inventory_title_font_size);
-      _text_title->setFillColor(sf::Color{232, 219, 243});
-   }
+   _text_title = std::make_unique<sf::Text>(*_font_title);
+   _text_title->setCharacterSize(inventory_title_font_size);
+   _text_title->setFillColor(sf::Color{232, 219, 243});
 
-   if (_font_description.openFromFile(getFontPath()))
-   {
-      const_cast<sf::Texture&>(_font_description.getTexture(inventory_text_font_size)).setSmooth(false);
-      _text_description = std::make_unique<sf::Text>(_font_description);
-      _text_description->setCharacterSize(inventory_text_font_size);
-      _text_description->setFillColor(sf::Color{232, 219, 243});
-   }
+   _text_description = std::make_unique<sf::Text>(*_font_description);
+   _text_description->setCharacterSize(inventory_text_font_size);
+   _text_description->setFillColor(sf::Color{232, 219, 243});
 
    loadInventoryItems();
 }
@@ -266,7 +258,7 @@ void InGameMenuInventory::loadInventoryItems()
 
          // wrap text
          sf::FloatRect rect{{0.0f, 0.0f}, {description_rect_width, description_rect_height}};
-         const auto wrapped_text = wrapTextWithinRect(image._description, rect, _font_description, inventory_text_font_size);
+         const auto wrapped_text = wrapTextWithinRect(image._description, rect, *_font_description, inventory_text_font_size);
          _texts[image._name]._description_wrapped = wrapped_text;
       }
    );

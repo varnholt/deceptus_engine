@@ -14,8 +14,8 @@ public:
    static const sf::Color color_label_normal;    //!< unselected menu item or label text
    static const sf::Color color_label_selected;  //!< selected menu item or label text
    static const sf::Color color_help_text;       //!< description / help line text
-   /// \brief creates an empty menu screen.
-   MenuScreen() = default;
+   /// \brief initializes the font reference from the shared getFont() instance.
+   MenuScreen();
 
    /// \brief destroys the menu screen.
    virtual ~MenuScreen() = default;
@@ -68,9 +68,6 @@ public:
    bool isControllerUsed() const;
 
 protected:
-   /// \brief loads data/fonts/deceptum.ttf at sizes 12 and 14 with smoothing disabled.
-   void ensureFontLoaded();
-
    /// \brief positions text so it is centered horizontally and vertically inside reference_rect.
    static void placeTextCentered(sf::Text& text, const sf::FloatRect& reference_rect);
 
@@ -95,7 +92,7 @@ protected:
    sf::FloatRect _row_label_base_rect;  //!< reference rect for the label column at row 0
    float _row_stride = 0.0f;            //!< vertical pixel distance between consecutive rows
 
-   sf::Font _font;
+   const sf::Font& _font;
 
    std::string _filename;
    std::vector<std::shared_ptr<Layer>> _layer_stack;

@@ -56,7 +56,6 @@ private:
    /// \brief asks for confirmation and deletes the selected save slot when confirmed.
    void remove();
 
-   sf::Font _font;
    std::array<std::unique_ptr<sf::Text>, 3> _names;
    std::array<std::unique_ptr<sf::Text>, 3> _new_game_texts;  //!< localized "New Game" label rendered per empty slot
 

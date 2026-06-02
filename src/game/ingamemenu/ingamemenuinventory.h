@@ -2,6 +2,7 @@
 #define INGAMEMENUINVENTORY_H
 
 #include "framework/joystick/gamecontrollerinfo.h"
+#include "framework/tools/localization.h"
 #include "game/image/layerdata.h"
 #include "game/ingamemenu/ingamemenupage.h"
 #include "game/player/inventory.h"
@@ -180,8 +181,8 @@ private:
    sf::Vector2f _panel_center_offset_px;
    sf::Vector2f _panel_right_offset_px;
 
-   sf::Font _font_title;
-   sf::Font _font_description;
+   const sf::Font* _font_title = &getFont();
+   const sf::Font* _font_description = &getFont();
    std::unique_ptr<sf::Text> _text_title;
    std::unique_ptr<sf::Text> _text_description;
 

@@ -105,18 +105,13 @@ InGameMenuArchives::InGameMenuArchives()
 
    _animation_pool = std::make_unique<AnimationPool>("data/sprites/extra_animations.json");
 
-   if (_font_treasure.openFromFile(getFontPath()))
-   {
-      const_cast<sf::Texture&>(_font_treasure.getTexture(treasure_font_size)).setSmooth(false);
+   _text_treasure_name = std::make_unique<sf::Text>(*_font_treasure);
+   _text_treasure_name->setCharacterSize(treasure_font_size);
+   _text_treasure_name->setFillColor(sf::Color{232, 219, 243});
 
-      _text_treasure_name = std::make_unique<sf::Text>(_font_treasure);
-      _text_treasure_name->setCharacterSize(treasure_font_size);
-      _text_treasure_name->setFillColor(sf::Color{232, 219, 243});
-
-      _text_treasure_description = std::make_unique<sf::Text>(_font_treasure);
-      _text_treasure_description->setCharacterSize(treasure_font_size);
-      _text_treasure_description->setFillColor(sf::Color{232, 219, 243});
-   }
+   _text_treasure_description = std::make_unique<sf::Text>(*_font_treasure);
+   _text_treasure_description->setCharacterSize(treasure_font_size);
+   _text_treasure_description->setFillColor(sf::Color{232, 219, 243});
 }
 
 void InGameMenuArchives::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -316,7 +311,7 @@ void InGameMenuArchives::drawTreasures(sf::RenderTarget& window, sf::RenderState
       window.draw(*_text_treasure_name, states);
 
       const auto description_text = definition ? definition->_description : std::string{};
-      const auto wrapped_description = wrapText(description_text, treasure_description_wrap_width_px, _font_treasure, treasure_font_size);
+      const auto wrapped_description = wrapText(description_text, treasure_description_wrap_width_px, *_font_treasure, treasure_font_size);
       _text_treasure_description->setFillColor(text_color);
       _text_treasure_description->setString(wrapped_description);
       _text_treasure_description->setPosition({text_x_px, row_center_y_px + treasure_description_y_offset_px});

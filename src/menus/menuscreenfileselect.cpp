@@ -24,11 +24,6 @@ MenuScreenFileSelect::MenuScreenFileSelect()
 {
    setFilename("data/menus/fileselect.psd");
 
-   if (_font.openFromFile(getFontPath()))
-   {
-      const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-   }
-
    for (auto i = 0u; i < 3; i++)
    {
       _names[i] = std::make_unique<sf::Text>(_font);

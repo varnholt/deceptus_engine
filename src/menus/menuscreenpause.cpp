@@ -42,8 +42,6 @@ void MenuScreenPause::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenPause::loadingFinished()
 {
-   ensureFontLoaded();
-
    _text_back_button = std::make_unique<sf::Text>(_font);
    _text_back_button->setCharacterSize(12);
    _text_back_button->setFillColor(color_label_normal);

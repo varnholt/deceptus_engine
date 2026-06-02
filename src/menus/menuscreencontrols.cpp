@@ -57,8 +57,6 @@ MenuScreenControls::MenuScreenControls()
 {
    setFilename("data/menus/controls.psd");
 
-   ensureFontLoaded();
-
    _text = std::make_unique<sf::Text>(_font);
    _text->setFont(_font);
    _text->setCharacterSize(12);

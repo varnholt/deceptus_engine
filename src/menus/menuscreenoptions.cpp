@@ -51,8 +51,6 @@ void MenuScreenOptions::back()
 
 void MenuScreenOptions::loadingFinished()
 {
-   ensureFontLoaded();
-
    _row_label_base_rect = _layers["controls_0"]->_sprite->getGlobalBounds();
    _row_stride = _layers["video_0"]->_sprite->getGlobalBounds().position.y - _row_label_base_rect.position.y;
 

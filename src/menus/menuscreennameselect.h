@@ -76,7 +76,6 @@ private:
 
    sf::Rect<float> _name_rect;
 
-   sf::Font _font;
    std::unique_ptr<sf::Text> _text;
 
    std::unique_ptr<sf::Text> _text_cancel_button;

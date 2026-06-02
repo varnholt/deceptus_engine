@@ -35,7 +35,7 @@ static const auto animation_fade_time_hide = sf::seconds(0.5f);
 std::unique_ptr<MessageBox> __active;
 std::unique_ptr<MessageBox> __previous;
 
-sf::Font __font;
+const sf::Font& __font = getFont();
 
 std::string replaceAll(std::string str, const std::string& from, const std::string& to)
 {
@@ -229,12 +229,6 @@ void MessageBox::initializeLayers()
       __psd_loaded = true;
       psd.setColorFormat(PSD::ColorFormat::ABGR);
       psd.load("data/game/messagebox.psd");
-
-      if (!__font.openFromFile(getFontPath()))
-      {
-         Log::Error() << "font load fuckup";
-      }
-      const_cast<sf::Texture&>(__font.getTexture(12)).setSmooth(false);
    }
 
    // load layers

@@ -73,3 +73,15 @@ private:
 ///
 /// \return path to the font file, e.g. "data/fonts/deceptum.ttf".
 [[nodiscard]] std::string getFontPath();
+
+namespace sf
+{
+class Font;
+}
+
+/// \brief returns the single shared font instance, loading it on first call.
+///
+/// the font is loaded from getFontPath() with smoothing disabled for sizes 12 and 14.
+///
+/// \return const reference to the shared font.
+[[nodiscard]] const sf::Font& getFont();

@@ -11,11 +11,8 @@ const sf::Color MenuScreen::color_label_normal{200, 185, 220};
 const sf::Color MenuScreen::color_label_selected{255, 255, 255};
 const sf::Color MenuScreen::color_help_text{130, 120, 150};
 
-void MenuScreen::ensureFontLoaded()
+MenuScreen::MenuScreen() : _font(getFont())
 {
-   _font.openFromFile(getFontPath());
-   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-   const_cast<sf::Texture&>(_font.getTexture(14)).setSmooth(false);
 }
 
 void MenuScreen::placeTextCentered(sf::Text& text, const sf::FloatRect& reference_rect)

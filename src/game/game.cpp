@@ -79,9 +79,7 @@ void showErrorMessage(const std::string& message)
 {
    sf::RenderWindow window(sf::VideoMode({240, 80}), "Error", sf::Style::Titlebar | sf::Style::Close);
 
-   sf::Font font;
-   font.openFromFile(getFontPath());
-   const_cast<sf::Texture&>(font.getTexture(12)).setSmooth(false);
+   const sf::Font& font = getFont();
 
    sf::Text text(font);
    text.setFont(font);

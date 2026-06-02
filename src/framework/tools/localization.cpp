@@ -4,6 +4,7 @@
 
 #include "json/json.hpp"
 
+#include <SFML/Graphics.hpp>
 #include <fstream>
 #include <sstream>
 
@@ -147,4 +148,17 @@ std::string getFontPath()
       return "data/fonts/mona12.ttf";
    }
    return "data/fonts/deceptum.ttf";
+}
+
+const sf::Font& getFont()
+{
+   static sf::Font font = []
+   {
+      sf::Font loaded_font;
+      loaded_font.openFromFile(getFontPath());
+      const_cast<sf::Texture&>(loaded_font.getTexture(12)).setSmooth(false);
+      const_cast<sf::Texture&>(loaded_font.getTexture(14)).setSmooth(false);
+      return loaded_font;
+   }();
+   return font;
 }

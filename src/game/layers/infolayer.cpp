@@ -61,8 +61,6 @@ constexpr auto console_base_font_size_px = 7u;
 InfoLayer::InfoLayer()
 {
    _font.load("data/game/font.png", "data/game/font.map");
-   _console_font.openFromFile(getFontPath());
-   const_cast<sf::Texture&>(_console_font.getTexture(console_base_font_size_px)).setSmooth(false);
 
    const auto player_health_layers = {
       "1",
@@ -611,7 +609,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    );
    window.setView(view_screen);
 
-   sf::Text console_text(_console_font);
+   sf::Text console_text(*_console_font);
    console_text.setCharacterSize(console_base_font_size_px * scale_factor);
 
    // draw command history

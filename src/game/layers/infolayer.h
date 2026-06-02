@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework/image/layer.h"
+#include "framework/tools/localization.h"
 #include "game/animation/animation.h"
 #include "game/animation/animationpool.h"
 #include "game/image/layerdata.h"
@@ -91,7 +92,7 @@ private:
    void updateEventReplayIcons();
 
    BitmapFont _font;
-   sf::Font _console_font;  //!< ttf font used exclusively for console text rendering
+   const sf::Font* _console_font = &getFont();  //!< ttf font used exclusively for console text rendering
 
    std::atomic<bool> _loading;
    std::optional<sf::Time> _show_time_health;

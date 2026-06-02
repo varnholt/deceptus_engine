@@ -8,8 +8,6 @@ MenuScreenCredits::MenuScreenCredits()
 {
    setFilename("data/menus/credits.psd");
 
-   ensureFontLoaded();
-
    _text_code = std::make_unique<sf::Text>(_font);
    _text_code->setFont(_font);
    _text_code->setString("Code: Matthias Varnholt");

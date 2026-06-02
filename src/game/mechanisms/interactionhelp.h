@@ -3,6 +3,7 @@
 #include <array>
 #include <memory>
 
+#include "framework/tools/localization.h"
 #include "game/animation/animationpool.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
@@ -65,5 +66,5 @@ private:
    static constexpr int32_t button_max_count = 2;
    std::shared_ptr<sf::Texture> _button_texture;
    std::vector<HelpElement> _help_elements;
-   sf::Font _font;
+   const sf::Font* _font = &getFont();
 };

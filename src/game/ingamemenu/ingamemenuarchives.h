@@ -1,6 +1,7 @@
 #ifndef INGAMEMENUARCHIVES_H
 #define INGAMEMENUARCHIVES_H
 
+#include "framework/tools/localization.h"
 #include "game/animation/animation.h"
 #include "game/animation/animationpool.h"
 #include "game/image/layerdata.h"
@@ -68,7 +69,7 @@ private:
    std::unique_ptr<AnimationPool> _animation_pool;
    std::map<std::string, std::shared_ptr<SpriteAnimation>> _treasure_animations;
 
-   sf::Font _font_treasure;
+   const sf::Font* _font_treasure = &getFont();
    std::unique_ptr<sf::Text> _text_treasure_name;
    std::unique_ptr<sf::Text> _text_treasure_description;
 };

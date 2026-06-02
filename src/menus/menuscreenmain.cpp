@@ -28,8 +28,6 @@ MenuScreenMain::MenuScreenMain()
 {
    setFilename("data/menus/titlescreen.psd");
 
-   ensureFontLoaded();
-
    _text_build = std::make_unique<sf::Text>(_font);
    _text_build->setFont(_font);
    _text_build->setString(sftr("Build Number") + sf::String{": "} + sf::String{getBuildNumber()});

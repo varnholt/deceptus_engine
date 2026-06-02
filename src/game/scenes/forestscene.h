@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework/image/layer.h"
+#include "framework/tools/localization.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -28,6 +29,6 @@ private:
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;
 
-   sf::Font _font;
+   const sf::Font* _font = &getFont();
    std::unique_ptr<sf::Text> _text;
 };

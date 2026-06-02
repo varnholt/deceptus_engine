@@ -10,19 +10,11 @@
 
 ForestScene::ForestScene()
 {
-   if (_font.openFromFile(getFontPath()))
-   {
-      const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-      _text = std::make_unique<sf::Text>(_font);
-      _text->setCharacterSize(12);
-      // mText.setString("Congratulations!\nYou completed the game!");
-      _text->setString("Geschafft!\nAlles Gute zum Geburtstag, Malte!");
-      _text->setFillColor(sf::Color{232, 219, 243});
-   }
-   else
-   {
-      Log::Error() << "font load fuckup";
-   }
+   _text = std::make_unique<sf::Text>(*_font);
+   _text->setCharacterSize(12);
+   // mText.setString("Congratulations!\nYou completed the game!");
+   _text->setString("Geschafft!\nAlles Gute zum Geburtstag, Malte!");
+   _text->setFillColor(sf::Color{232, 219, 243});
 
    // load ingame psd
    PSD psd;
