@@ -3,6 +3,7 @@
 #include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "game/animation/animationframedata.h"
 #include "game/camera/camerapanorama.h"
@@ -60,7 +61,7 @@ constexpr auto console_base_font_size_px = 7u;
 InfoLayer::InfoLayer()
 {
    _font.load("data/game/font.png", "data/game/font.map");
-   _console_font.openFromFile("data/fonts/deceptum.ttf");
+   _console_font.openFromFile(getFontPath());
    const_cast<sf::Texture&>(_console_font.getTexture(console_base_font_size_px)).setSmooth(false);
 
    const auto player_health_layers = {

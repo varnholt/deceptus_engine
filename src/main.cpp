@@ -13,6 +13,7 @@
 #include "framework/tools/gamepaths.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/logthread.h"
+#include "game/config/localizationloader.h"
 #include "game/constants.h"
 #include "game/debug/logui.h"
 #include "game/io/preloader.h"
@@ -73,7 +74,7 @@ int main(int /*argc*/, char** /*argv*/)
    XInitThreads();
 #endif
 
-   // Localization::getInstance().load("ja");
+   LocalizationLoader::loadFromConfig();
    debugAuthors();
    Test test;
    Game game;

@@ -40,12 +40,16 @@ MenuScreenMain::MenuScreenMain()
    const auto current_year =
       static_cast<int32_t>(std::chrono::year_month_day{std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now())}.year());
 
-   _text_year = std::make_unique<sf::Text>(_font);
-   _text_year->setFont(_font);
-   _text_year->setString(std::to_string(current_year));
-   _text_year->setCharacterSize(12);
-   _text_year->setPosition({344, 341});
-   _text_year->setFillColor(sf::Color{127, 171, 253});
+   _text_copyright = std::make_unique<sf::Text>(_font);
+   _text_copyright->setFont(_font);
+   const auto copyright_string = std::vformat(tr("© {} Matthias Varnholt & dstar"), std::make_format_args(current_year));
+   _text_copyright->setString(sf::String::fromUtf8(copyright_string.begin(), copyright_string.end()));
+   _text_copyright->setCharacterSize(12);
+   _text_copyright->setFillColor(sf::Color{127, 171, 253});
+
+   const auto copyright_bounds = _text_copyright->getLocalBounds();
+   const auto copyright_x = static_cast<int32_t>((640.0f - copyright_bounds.size.x) / 2.0f - copyright_bounds.position.x);
+   _text_copyright->setPosition({static_cast<float>(copyright_x), 341.0f});
 }
 
 void MenuScreenMain::update(const sf::Time& /*dt*/)
@@ -81,7 +85,7 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto draw_all_text = [&](sf::RenderTarget& target)
    {
       target.draw(*_text_build);
-      target.draw(*_text_year);
+      target.draw(*_text_copyright);
       if (can_continue)
       {
          target.draw(*_text_continue_item);
@@ -160,6 +164,11 @@ void MenuScreenMain::loadingFinished()
    if (_layers.contains("build"))
    {
       _layers["build"]->_visible = false;
+   }
+
+   if (_layers.contains("credits"))
+   {
+      _layers["credits"]->_visible = false;
    }
 
    _text_continue_item = std::make_unique<sf::Text>(_font);

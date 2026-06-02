@@ -1,5 +1,6 @@
 #include "menuscreennameselect.h"
 
+#include "framework/tools/localization.h"
 #include "framework/tools/sfmlstring.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
@@ -38,7 +39,7 @@ std::string extractFirstName(std::string_view username)
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
-   _font.openFromFile("data/fonts/deceptum.ttf");
+   _font.openFromFile(getFontPath());
    const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
 
    _text = std::make_unique<sf::Text>(_font);

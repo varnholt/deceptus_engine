@@ -41,7 +41,7 @@
   "Pause game on focus loss": "Metti in pausa quando la finestra perde il focus",
   "Yes": "Sì",
   "No": "No",
-  "Build Number": "",
+  "Build Number": "Numero di build",
   "Are you sure you want to quit?": "Sei sicuro di voler uscire?",
   "Continue": "Continua",
   "New Game": "Nuova Partita",
@@ -179,5 +179,11 @@
   "Weapons": "Armi",
   "Consumables": "Consumabili",
   "Items": "Oggetti",
-  "Various": "Vari"
+  "Various": "Vari",
+  "© {} Matthias Varnholt & dstar": "",
+  "Language": "Lingua",
+  "Applied after restart": "Applicato al riavvio",
+  "English": "Inglese",
+  "Italian": "Italiano",
+  "Japanese": "Giapponese"
 }

@@ -44,6 +44,7 @@ std::string GameConfiguration::serialize()
           {"text_speed", _text_speed},
           {"rumble", _rumble_enabled},
           {"pause_mode", _pause_mode},
+          {"language", _language},
        }}
    };
 
@@ -60,7 +61,7 @@ void GameConfiguration::deserialize(const std::string& data)
    {
       _video_mode_width = config["GameConfiguration"]["video_mode_width"].get<int32_t>();
       _video_mode_height = config["GameConfiguration"]["video_mode_height"].get<int32_t>();
-      
+
       // load windowed dimensions, fallback to video_mode if not present
       const auto& gc = config["GameConfiguration"];
       if (const auto it = gc.find("windowed_width"); it != gc.end())
@@ -73,7 +74,7 @@ void GameConfiguration::deserialize(const std::string& data)
          _windowed_width = _video_mode_width;
          _windowed_height = _video_mode_height;
       }
-      
+
       _view_width = config["GameConfiguration"]["view_width"].get<int32_t>();
       _view_height = config["GameConfiguration"]["view_height"].get<int32_t>();
       _fullscreen = config["GameConfiguration"]["fullscreen"].get<bool>();
@@ -95,6 +96,11 @@ void GameConfiguration::deserialize(const std::string& data)
       _text_speed = config["GameConfiguration"]["text_speed"].get<int32_t>();
       _rumble_enabled = config["GameConfiguration"]["rumble"].get<bool>();
       _pause_mode = static_cast<PauseMode>(config["GameConfiguration"]["pause_mode"].get<int32_t>());
+
+      if (const auto language_it = gc.find("language"); language_it != gc.end())
+      {
+         _language = language_it->get<std::string>();
+      }
    }
    catch (const std::exception& e)
    {
@@ -140,10 +146,10 @@ GameConfiguration& GameConfiguration::getInstance()
    {
       // seed defaults from the actual desktop so first-launch resolution is sensible
       const auto desktop = sf::VideoMode::getDesktopMode();
-      __instance._video_mode_width  = static_cast<int32_t>(desktop.size.x);
+      __instance._video_mode_width = static_cast<int32_t>(desktop.size.x);
       __instance._video_mode_height = static_cast<int32_t>(desktop.size.y);
-      __instance._windowed_width    = __instance._video_mode_width;
-      __instance._windowed_height   = __instance._video_mode_height;
+      __instance._windowed_width = __instance._video_mode_width;
+      __instance._windowed_height = __instance._video_mode_height;
 
       // config file values override the desktop defaults when present
       __instance.deserializeFromFile();
@@ -151,7 +157,7 @@ GameConfiguration& GameConfiguration::getInstance()
       // if the file was missing or corrupt, windowed dimensions may still be zero
       if (__instance._windowed_width == 0 || __instance._windowed_height == 0)
       {
-         __instance._windowed_width  = __instance._video_mode_width;
+         __instance._windowed_width = __instance._video_mode_width;
          __instance._windowed_height = __instance._video_mode_height;
       }
 

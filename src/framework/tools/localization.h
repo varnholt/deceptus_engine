@@ -66,3 +66,10 @@ private:
 /// \param source_text english text to translate.
 /// \return translated UTF-8 string, or source_text if no translation is available.
 [[nodiscard]] std::string tr(std::string_view source_text);
+
+/// \brief returns the font file path suitable for the active locale.
+///
+/// most locales use deceptum.ttf; japanese uses mona12.ttf.
+///
+/// \return path to the font file, e.g. "data/fonts/deceptum.ttf".
+[[nodiscard]] std::string getFontPath();

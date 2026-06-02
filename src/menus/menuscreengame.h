@@ -12,7 +12,8 @@ public:
       TextSpeed = 0,
       Rumble = 1,
       AutomaticPause = 2,
-      Count = 3,
+      Language = 3,
+      Count = 4,
    };
 
    /// \brief initializes the gameplay settings screen with its PSD layout.
@@ -73,4 +74,8 @@ private:
    std::unique_ptr<sf::Text> _autopause_label;
    std::unique_ptr<sf::Text> _autopause_help_text;
    std::unique_ptr<sf::Text> _autopause_value_text;
+
+   std::unique_ptr<sf::Text> _language_label;
+   std::unique_ptr<sf::Text> _language_help_text;
+   std::unique_ptr<sf::Text> _language_value_text;
 };

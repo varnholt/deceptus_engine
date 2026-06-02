@@ -24,7 +24,7 @@ MenuScreenFileSelect::MenuScreenFileSelect()
 {
    setFilename("data/menus/fileselect.psd");
 
-   if (_font.openFromFile("data/fonts/deceptum.ttf"))
+   if (_font.openFromFile(getFontPath()))
    {
       const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
    }

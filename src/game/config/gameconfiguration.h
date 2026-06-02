@@ -31,6 +31,7 @@ struct GameConfiguration
 
    int32_t _text_speed = 2;
    PauseMode _pause_mode = PauseMode::AutomaticPause;
+   std::string _language = "en";  //!< locale identifier loaded at startup, e.g. "en", "it", "ja"
 
    /// \brief loads configuration values from a json file.
    /// \param filename source configuration file path.

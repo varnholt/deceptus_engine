@@ -139,3 +139,12 @@ std::string tr(std::string_view source_text)
 {
    return std::string{Localization::getInstance().translate(source_text)};
 }
+
+std::string getFontPath()
+{
+   if (Localization::getInstance().getLocale() == "ja")
+   {
+      return "data/fonts/mona12.ttf";
+   }
+   return "data/fonts/deceptum.ttf";
+}

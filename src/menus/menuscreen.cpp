@@ -1,6 +1,7 @@
 #include "menuscreen.h"
 
 #include "framework/image/psd.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "game/controller/gamecontrollerintegration.h"
 
@@ -12,7 +13,7 @@ const sf::Color MenuScreen::color_help_text{130, 120, 150};
 
 void MenuScreen::ensureFontLoaded()
 {
-   _font.openFromFile("data/fonts/deceptum.ttf");
+   _font.openFromFile(getFontPath());
    const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
    const_cast<sf::Texture&>(_font.getTexture(14)).setSmooth(false);
 }

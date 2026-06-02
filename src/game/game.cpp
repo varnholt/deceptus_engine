@@ -2,6 +2,7 @@
 
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/callbackmap.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "framework/tools/timer.h"
 #include "game/audio/audio.h"
@@ -79,7 +80,7 @@ void showErrorMessage(const std::string& message)
    sf::RenderWindow window(sf::VideoMode({240, 80}), "Error", sf::Style::Titlebar | sf::Style::Close);
 
    sf::Font font;
-   font.openFromFile("data/fonts/deceptum.ttf");
+   font.openFromFile(getFontPath());
    const_cast<sf::Texture&>(font.getTexture(12)).setSmooth(false);
 
    sf::Text text(font);

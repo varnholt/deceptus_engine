@@ -41,7 +41,7 @@
   "Pause game on focus loss": "フォーカスを失ったときにゲームを一時停止する",
   "Yes": "はい",
   "No": "いいえ",
-  "Build Number": "",
+  "Build Number": "ビルド番号",
   "Are you sure you want to quit?": "終了してもよろしいですか？",
   "Continue": "続ける",
   "New Game": "新しいゲーム",
@@ -179,5 +179,11 @@
   "Weapons": "武器",
   "Consumables": "消耗品",
   "Items": "アイテム",
-  "Various": "その他"
+  "Various": "その他",
+  "© {} Matthias Varnholt & dstar": "",
+  "Language": "言語",
+  "Applied after restart": "再起動後に適用",
+  "English": "英語",
+  "Italian": "イタリア語",
+  "Japanese": "日本語"
 }

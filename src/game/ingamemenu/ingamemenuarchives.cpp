@@ -1,6 +1,7 @@
 #include "ingamemenuarchives.h"
 
 #include "framework/easings/easings.h"
+#include "framework/tools/localization.h"
 #include "game/ingamemenu/menuconfig.h"
 #include "game/player/playerinfo.h"
 #include "game/player/treasures.h"
@@ -104,7 +105,7 @@ InGameMenuArchives::InGameMenuArchives()
 
    _animation_pool = std::make_unique<AnimationPool>("data/sprites/extra_animations.json");
 
-   if (_font_treasure.openFromFile("data/fonts/deceptum.ttf"))
+   if (_font_treasure.openFromFile(getFontPath()))
    {
       const_cast<sf::Texture&>(_font_treasure.getTexture(treasure_font_size)).setSmooth(false);
 

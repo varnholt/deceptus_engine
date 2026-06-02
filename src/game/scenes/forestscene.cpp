@@ -1,6 +1,7 @@
 #include "forestscene.h"
 
 #include "framework/image/psd.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "game/config/gameconfiguration.h"
 
@@ -9,7 +10,7 @@
 
 ForestScene::ForestScene()
 {
-   if (_font.openFromFile("data/fonts/deceptum.ttf"))
+   if (_font.openFromFile(getFontPath()))
    {
       const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
       _text = std::make_unique<sf::Text>(_font);

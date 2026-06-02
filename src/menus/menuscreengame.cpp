@@ -8,6 +8,13 @@
 
 #include <algorithm>
 
+namespace
+{
+constexpr std::string_view language_codes[] = {"en", "it", "ja"};
+constexpr std::string_view language_display_keys[] = {"English", "Italian", "Japanese"};
+constexpr auto language_count = 3;
+}  // namespace
+
 MenuScreenGame::MenuScreenGame()
 {
    setFilename("data/menus/game.psd");
@@ -74,6 +81,21 @@ void MenuScreenGame::set(int32_t x)
          config._pause_mode = (config._pause_mode == GameConfiguration::PauseMode::AutomaticPause)
                                  ? GameConfiguration::PauseMode::ManualPause
                                  : GameConfiguration::PauseMode::AutomaticPause;
+         break;
+      }
+      case Selection::Language:
+      {
+         auto current_index = 0;
+         for (auto index = 0; index < language_count; index++)
+         {
+            if (language_codes[index] == config._language)
+            {
+               current_index = index;
+               break;
+            }
+         }
+         current_index = (current_index + x + language_count) % language_count;
+         config._language = std::string{language_codes[current_index]};
          break;
       }
       default:
@@ -174,6 +196,12 @@ void MenuScreenGame::loadingFinished()
    _autopause_value_text = make_label();
    _autopause_value_text->setFillColor(sf::Color::White);
 
+   _language_label = make_label();
+   _language_help_text = make_label();
+   _language_help_text->setFillColor(color_help_text);
+   _language_value_text = make_label();
+   _language_value_text->setFillColor(sf::Color::White);
+
    _text_back_button = make_label();
    _text_back_button->setFillColor(color_label_normal);
    _text_defaults_button = make_label();
@@ -192,6 +220,7 @@ void MenuScreenGame::updateLayers()
    const auto autopause_selected = _selection == Selection::AutomaticPause;
    const auto textspeed_selected = _selection == Selection::TextSpeed;
    const auto rumble_selected = _selection == Selection::Rumble;
+   const auto language_selected = _selection == Selection::Language;
 
    const auto auto_pause_mode = GameConfiguration::getInstance()._pause_mode;
    const auto text_speed_value = GameConfiguration::getInstance()._text_speed;
@@ -256,6 +285,25 @@ void MenuScreenGame::updateLayers()
    _autopause_value_text->setString(autopause_on ? sftr("Yes") : sftr("No"));
    placeTextLeft(*_autopause_value_text, rowRect(_row_value_base_rect, 2));
 
+   _language_label->setString(sftr("Language"));
+   _language_label->setFillColor(language_selected ? color_label_selected : color_label_normal);
+   placeTextLeft(*_language_label, rowRect(_row_label_base_rect, 3));
+
+   _language_help_text->setString(sftr("Applied after restart"));
+   placeTextCentered(*_language_help_text, _row_help_base_rect);
+
+   auto language_display_index = 0;
+   for (auto index = 0; index < language_count; index++)
+   {
+      if (language_codes[index] == GameConfiguration::getInstance()._language)
+      {
+         language_display_index = index;
+         break;
+      }
+   }
+   _language_value_text->setString(sftr(language_display_keys[language_display_index]));
+   placeTextLeft(*_language_value_text, rowRect(_row_value_base_rect, 3));
+
    const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
    _text_back_button->setString(sftr("Back"));
    placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
@@ -294,6 +342,13 @@ void MenuScreenGame::draw(sf::RenderTarget& window, sf::RenderStates states)
       window.draw(*_autopause_help_text, states);
    }
    window.draw(*_autopause_value_text, states);
+
+   window.draw(*_language_label, states);
+   if (_selection == Selection::Language)
+   {
+      window.draw(*_language_help_text, states);
+   }
+   window.draw(*_language_value_text, states);
 
    window.draw(*_text_back_button, states);
    window.draw(*_text_defaults_button, states);

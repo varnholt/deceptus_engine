@@ -5,6 +5,7 @@
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/sfmlstring.h"
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
@@ -68,7 +69,7 @@ InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
    setClassName(typeid(InteractionHelp).name());
    _is_overlay = true;
 
-   if (_font.openFromFile("data/fonts/deceptum.ttf"))
+   if (_font.openFromFile(getFontPath()))
    {
       const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
    }

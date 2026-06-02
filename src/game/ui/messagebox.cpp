@@ -5,6 +5,7 @@
 #include "framework/image/psd.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "game/audio/audio.h"
 #include "game/config/gameconfiguration.h"
@@ -229,7 +230,7 @@ void MessageBox::initializeLayers()
       psd.setColorFormat(PSD::ColorFormat::ABGR);
       psd.load("data/game/messagebox.psd");
 
-      if (!__font.openFromFile("data/fonts/deceptum.ttf"))
+      if (!__font.openFromFile(getFontPath()))
       {
          Log::Error() << "font load fuckup";
       }

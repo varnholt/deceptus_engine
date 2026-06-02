@@ -60,7 +60,7 @@ private:
    ExitCallback _exit_callback;
 
    std::unique_ptr<sf::Text> _text_build;
-   std::unique_ptr<sf::Text> _text_year;
+   std::unique_ptr<sf::Text> _text_copyright;
 
    std::unique_ptr<sf::Text> _text_continue_item;
    std::unique_ptr<sf::Text> _text_new_game_item;

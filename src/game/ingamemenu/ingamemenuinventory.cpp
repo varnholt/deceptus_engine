@@ -2,6 +2,7 @@
 
 #include "framework/easings/easings.h"
 #include "framework/joystick/gamecontroller.h"
+#include "framework/tools/localization.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/event/eventdistributor.h"
 #include "game/ingamemenu/menuconfig.h"
@@ -226,7 +227,7 @@ InGameMenuInventory::InGameMenuInventory()
    _duration_show = config._duration_show;
 
    // load fonts
-   if (_font_title.openFromFile("data/fonts/deceptum.ttf"))
+   if (_font_title.openFromFile(getFontPath()))
    {
       const_cast<sf::Texture&>(_font_title.getTexture(inventory_title_font_size)).setSmooth(false);
       _text_title = std::make_unique<sf::Text>(_font_title);
@@ -234,7 +235,7 @@ InGameMenuInventory::InGameMenuInventory()
       _text_title->setFillColor(sf::Color{232, 219, 243});
    }
 
-   if (_font_description.openFromFile("data/fonts/deceptum.ttf"))
+   if (_font_description.openFromFile(getFontPath()))
    {
       const_cast<sf::Texture&>(_font_description.getTexture(inventory_text_font_size)).setSmooth(false);
       _text_description = std::make_unique<sf::Text>(_font_description);
