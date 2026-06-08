@@ -11,6 +11,8 @@
 #include "game/player/playerregistry.h"
 
 #include <array>
+#include <cmath>
+#include <numbers>
 #include "game/player/playercontrols.h"
 #include "game/player/playerinfo.h"
 #include "game/state/savestate.h"
@@ -89,6 +91,7 @@ bool Extra::deserialize(const GameDeserializeData& data)
 
    _name = data._tmx_object->_name;
    _rect = {{pos_x_px, pos_y_px}, {width_px, height_px}};
+   _base_y_px = pos_y_px;
 
    if (data._tmx_object->_properties)
    {
@@ -133,6 +136,9 @@ bool Extra::deserialize(const GameDeserializeData& data)
       }
 
       _is_treasure = ValueReader::readValue<bool>("is_treasure", map).value_or(false);
+
+      _sine_amplitude_px = ValueReader::readValue<float>("sine_amplitude_px", map).value_or(0.0f);
+      _sine_frequency = ValueReader::readValue<float>("sine_frequency", map).value_or(0.0f);
 
       // read animations if set up
       const auto offset_x = width_px * 0.5f;
@@ -242,6 +248,26 @@ void Extra::update(const sf::Time& delta_time)
       return;
    }
 
+   // apply sine wave Y movement
+   if (_sine_amplitude_px > 0.0f && _sine_frequency > 0.0f)
+   {
+      _elapsed += delta_time.asSeconds();
+      const auto new_sine_offset_y_px = std::sin(_elapsed * _sine_frequency * 2.0f * std::numbers::pi_v<float>) * _sine_amplitude_px;
+      const auto delta_y_px = new_sine_offset_y_px - _sine_offset_y_px;
+      _sine_offset_y_px = new_sine_offset_y_px;
+
+      const sf::Vector2f sine_delta{0.0f, delta_y_px};
+      for (auto& animation : _animations_main)
+      {
+         animation->move(sine_delta);
+      }
+      if (_sprite)
+      {
+         _sprite->move(sine_delta);
+      }
+      _rect.position.y = _base_y_px + _sine_offset_y_px;
+   }
+
    // update regular animations
    if (!_animations_main.empty())
    {
@@ -322,6 +348,7 @@ void Extra::spawn(sf::Vector2f offset)
    if (offset.x != 0.0f || offset.y != 0.0f)
    {
       _rect.position += offset;
+      _base_y_px += offset.y;  // keep sine wave anchored to spawned position, not the original TMX position
 
       for (auto& animation : _animations_main)
       {

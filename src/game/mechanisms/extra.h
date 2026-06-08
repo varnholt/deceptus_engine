@@ -78,4 +78,10 @@ public:
    std::shared_ptr<Animation> _animation_spawn;
    std::shared_ptr<Animation> _animation_pickup;
    std::vector<std::shared_ptr<Animation>>::iterator _animations_main_it;
+
+   float _base_y_px{0.0f};          //!< original Y position in pixels
+   float _sine_amplitude_px{0.0f};  //!< sine wave amplitude in pixels
+   float _sine_frequency{0.0f};     //!< sine wave frequency in Hz
+   float _elapsed{0.0f};            //!< accumulated time in seconds
+   float _sine_offset_y_px{0.0f};   //!< current sine Y offset in pixels
 };
