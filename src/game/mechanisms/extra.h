@@ -52,6 +52,18 @@ public:
    /// \param offset pixel offset applied to the pickup rect and all animations before becoming collectable.
    void spawn(sf::Vector2f offset = {});
 
+   /// \brief advances the sine wave offset and moves all main animations and the sprite accordingly.
+   /// \param delta_time elapsed frame time.
+   void updateSineWave(const sf::Time& delta_time);
+
+   /// \brief advances the pickup animation while it is still playing.
+   /// \param delta_time elapsed frame time.
+   void updatePickupAnimation(const sf::Time& delta_time);
+
+   /// \brief advances the active main animation and cycles to the next one when it finishes.
+   /// \param delta_time elapsed frame time.
+   void updateMainAnimations(const sf::Time& delta_time);
+
    /// \brief writes the active flag into the save-state json so pickup survives level reloads.
    /// \param json json object that receives the entry keyed by this extra's name.
    void serializeState(nlohmann::json& json) override;

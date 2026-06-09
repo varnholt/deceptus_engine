@@ -144,6 +144,13 @@ bool Extra::deserialize(const GameDeserializeData& data)
       const auto offset_x = width_px * 0.5f;
       const auto offset_y = height_px * 0.5f;
       AnimationPool animation_pool{"data/sprites/extra_animations.json"};
+      const auto animation_spawn_it = data._tmx_object->_properties->_map.find("animation_spawn");
+      if (animation_spawn_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto key = animation_spawn_it->second->_value_string.value();
+         _animation_spawn = animation_pool.create(key, pos_x_px + offset_x, pos_y_px + offset_y, false, false);
+      }
+
       const auto animation_pickup = data._tmx_object->_properties->_map.find("animation_pickup");
       if (animation_pickup != data._tmx_object->_properties->_map.end())
       {
@@ -221,35 +228,10 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 #endif
 }
 
-void Extra::update(const sf::Time& delta_time)
+void Extra::updateSineWave(const sf::Time& delta_time)
 {
-   if (_spawn_required)
-   {
-      if (_animation_spawn && !_animation_spawn->_paused)
-      {
-         _animation_spawn->update(delta_time);
-      }
-
-      // no pick up allowed if not spawned yet
-      if (!_spawned)
-      {
-         return;
-      }
-   }
-
-   // play pickup animation if active
-   if (_animation_pickup && !_animation_pickup->_paused)
-   {
-      _animation_pickup->update(delta_time);
-   }
-
-   if (!_active || !_enabled)
-   {
-      return;
-   }
-
-   // apply sine wave Y movement
-   if (_sine_amplitude_px > 0.0f && _sine_frequency > 0.0f)
+   const auto spawn_animation_playing = _spawn_required && _animation_spawn && !_animation_spawn->_paused;
+   if (_sine_amplitude_px > 0.0f && _sine_frequency > 0.0f && !spawn_animation_playing)
    {
       _elapsed += delta_time.asSeconds();
       const auto new_sine_offset_y_px = std::sin(_elapsed * _sine_frequency * 2.0f * std::numbers::pi_v<float>) * _sine_amplitude_px;
@@ -261,14 +243,26 @@ void Extra::update(const sf::Time& delta_time)
       {
          animation->move(sine_delta);
       }
+
       if (_sprite)
       {
          _sprite->move(sine_delta);
       }
+
       _rect.position.y = _base_y_px + _sine_offset_y_px;
    }
+}
 
-   // update regular animations
+void Extra::updatePickupAnimation(const sf::Time& delta_time)
+{
+   if (_animation_pickup && !_animation_pickup->_paused)
+   {
+      _animation_pickup->update(delta_time);
+   }
+}
+
+void Extra::updateMainAnimations(const sf::Time& delta_time)
+{
    if (!_animations_main.empty())
    {
       (*_animations_main_it)->update(delta_time);
@@ -286,6 +280,33 @@ void Extra::update(const sf::Time& delta_time)
          (*_animations_main_it)->play();
       }
    }
+}
+
+void Extra::update(const sf::Time& delta_time)
+{
+   if (_spawn_required)
+   {
+      if (_animation_spawn && !_animation_spawn->_paused)
+      {
+         _animation_spawn->update(delta_time);
+      }
+
+      // no pick up allowed if not spawned yet
+      if (!_spawned)
+      {
+         return;
+      }
+   }
+
+   updatePickupAnimation(delta_time);
+
+   if (!_active || !_enabled)
+   {
+      return;
+   }
+
+   updateSineWave(delta_time);
+   updateMainAnimations(delta_time);
 
    // if the extra requires a button press, only proceed if the button is down
    if (_requires_button_press)

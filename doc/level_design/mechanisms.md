@@ -561,6 +561,7 @@ end
 |texture_rect_width|int|Width of the sub‑rectangle within the texture (default is `0`, meaning the full width).|
 |texture_rect_height|int|Height of the sub‑rectangle within the texture (default is `0`, meaning the full height).|
 |sample|string|Name of an audio file that is played when the extra is picked up (optional).|
+|animation_spawn|string|Name of the animation played once when the extra spawns (only relevant when `spawn_required` is `true`). The animation cycle is defined inside the file `extra_animations.json`.|
 |animation_pickup|string|Name of the animation shown when the extra is picked up. The animation cycle is defined inside the file `extra_animations.json`.|
 |animation_main_0 to animation_main_99|string|Names of the animation cycles shown when the extra is not picked up yet. The animation cycles are defined inside the file `extra_animations.json`. By allowing multiple cycles here, you can introduce a bit of variety instead of cycling the same idle animation over and over again.|
 |sine_amplitude_px|float|Amplitude of a sine wave applied to the extra's Y position in pixels (default is `0`, meaning no movement). Works correctly for extras spawned by treasure chests.|
