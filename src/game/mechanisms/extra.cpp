@@ -332,6 +332,12 @@ void Extra::update(const sf::Time& delta_time)
          Audio::getInstance().playSample({_sample.value()});
       }
 
+      if (_animation_pickup)
+      {
+         _animation_pickup->seekToStart();
+         _animation_pickup->play();
+      }
+
       if (_is_treasure)
       {
          SaveState::getPlayerInfo()._treasures.add(_name);
