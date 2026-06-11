@@ -144,7 +144,7 @@ protected:
    float _rotation = 0.0f;
    b2Body* _body = nullptr;
    WeaponType _weapon_type = WeaponType::None;
-   std::string _projectile_identifier = default_projectile_identifier;
+   std::string _projectile_identifier;
    std::vector<DestroyedCallback> _destroyed_callbacks;
    sf::Time _time_alive;
 

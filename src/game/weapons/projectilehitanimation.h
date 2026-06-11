@@ -61,6 +61,10 @@ public:
    /// \return const iterator to the matching map entry, or end when missing.
    static std::map<std::string, AnimationFrameData>::const_iterator getReferenceAnimation(const std::string& id);
 
+   /// \brief returns the past-the-end iterator for the reference animation map.
+   /// \return end iterator used to detect a missing identifier.
+   static std::map<std::string, AnimationFrameData>::const_iterator getReferenceAnimationsEnd();
+
    /// \brief ensures a default reference animation exists under the "default" key.
    static void setupDefaultAnimation();
 

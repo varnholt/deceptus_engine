@@ -118,6 +118,11 @@ std::map<std::string, AnimationFrameData>::const_iterator ProjectileHitAnimation
    return __reference_animations.find(id);
 }
 
+std::map<std::string, AnimationFrameData>::const_iterator ProjectileHitAnimation::getReferenceAnimationsEnd()
+{
+   return __reference_animations.cend();
+}
+
 void ProjectileHitAnimation::setupDefaultAnimation()
 {
    // have a default animation in case there are none yet
