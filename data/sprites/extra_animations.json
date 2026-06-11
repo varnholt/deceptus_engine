@@ -62,5 +62,13 @@
       "origin": [24.0, 24.0],
       "sprite_count": 40,
       "texture": "data/sprites/treasures.png"
+   },
+   "treasure_flash": {
+      "frame_durations": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+      "frame_offset": [0, 100],
+      "frame_size": [100, 100],
+      "origin": [50.0, 50.0],
+      "sprite_count": 12,
+      "texture": "data/effects/spawn_orb.png"
    }
 }
