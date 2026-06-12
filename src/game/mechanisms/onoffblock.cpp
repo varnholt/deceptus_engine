@@ -75,9 +75,11 @@ namespace
 constexpr auto width_px = 24;
 constexpr auto height_px = 24;
 constexpr auto bevel_px = 0;
+constexpr auto side_inset_px = 1;
 constexpr auto width_m = width_px * MPP;
 constexpr auto height_m = height_px * MPP;
 constexpr auto bevel_m = bevel_px * MPP;
+constexpr auto side_inset_m = side_inset_px * MPP;
 constexpr auto count_columns = 8;
 constexpr auto animation_speed = 40.0f;
 }  // namespace
@@ -164,10 +166,10 @@ void OnOffBlock::setup(const GameDeserializeData& data)
    std::array<b2Vec2, 8> vertices{
       b2Vec2{bevel_m, 0.0f},
       b2Vec2{0.0f, bevel_m},
-      b2Vec2{0.0f, height_m - bevel_m},
-      b2Vec2{bevel_m, height_m},
-      b2Vec2{width_m - bevel_m, height_m},
-      b2Vec2{width_m, height_m - bevel_m},
+      b2Vec2{0.0f, height_m - bevel_m - side_inset_m},
+      b2Vec2{bevel_m, height_m - side_inset_m},
+      b2Vec2{width_m - bevel_m, height_m - side_inset_m},
+      b2Vec2{width_m, height_m - bevel_m - side_inset_m},
       b2Vec2{width_m, bevel_m},
       b2Vec2{width_m - bevel_m, 0.0f},
    };
