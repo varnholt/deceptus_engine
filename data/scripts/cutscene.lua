@@ -51,6 +51,7 @@ local function execute(entry)
          easing   = entry.easing or "linear",
          event    = entry.event,
       }
+      setCutsceneActive(true)
    elseif action == "set_zoom" then
       setZoomFactor(entry.factor)
    elseif action == "play_music" then
@@ -84,6 +85,7 @@ local function execute(entry)
       setInfoLayerVisible(entry.visible)
    elseif action == "unlock_camera" then
       unlockCamera()
+      setCutsceneActive(false)
    elseif action == "next_level" then
       nextLevel()
    end

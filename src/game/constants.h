@@ -122,6 +122,7 @@ enum class Display
    ReplayRecording = 0x80,
    ReplayPlaying = 0x100,
    InfoLayer = 0x200,
+   CutsceneActive = 0x400,  //!< set while a scripted cutscene is running; blocks pause menu and inventory use
 };
 
 /// \brief high-level runtime state of the game loop.

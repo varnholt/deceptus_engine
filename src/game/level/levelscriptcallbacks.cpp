@@ -11,6 +11,7 @@
 #include "framework/tools/log.h"
 #include "game/audio/musicplayertypes.h"
 #include "game/level/levelscript.h"
+#include "game/state/displaymode.h"
 #include "json/json.hpp"
 
 namespace LevelScriptCallbacks
@@ -423,6 +424,25 @@ int32_t lockPlayerControls(lua_State* state)
    }
 
    LevelScript::getCurrent()->lockPlayerControls(std::chrono::milliseconds{static_cast<int32_t>(lua_tointeger(state, 1))});
+   return 0;
+}
+
+int32_t setCutsceneActive(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   const auto active = lua_toboolean(state, 1);
+   if (active)
+   {
+      DisplayMode::getInstance().enqueueSet(Display::CutsceneActive);
+   }
+   else
+   {
+      DisplayMode::getInstance().enqueueUnset(Display::CutsceneActive);
+   }
    return 0;
 }
 

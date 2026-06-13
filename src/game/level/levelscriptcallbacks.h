@@ -54,6 +54,7 @@ int32_t setLuaNodeActive(lua_State* state);
 int32_t getCameraCenter(lua_State* state);
 int32_t playMusic(lua_State* state);
 int32_t lockPlayerControls(lua_State* state);
+int32_t setCutsceneActive(lua_State* state);
 int32_t fadeOut(lua_State* state);
 int32_t fadeIn(lua_State* state);
 int32_t setAmbient(lua_State* state);

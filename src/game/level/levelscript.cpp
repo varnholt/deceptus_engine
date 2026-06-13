@@ -162,6 +162,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "isMechanismVisible", LevelScriptCallbacks::isMechanismVisible);
    lua_register(_lua_state, "isPlayerIntersectingSensorRect", LevelScriptCallbacks::isPlayerIntersectingSensorRect);
    lua_register(_lua_state, "lockPlayerControls", LevelScriptCallbacks::lockPlayerControls);
+   lua_register(_lua_state, "setCutsceneActive", LevelScriptCallbacks::setCutsceneActive);
    lua_register(_lua_state, "fadeOut", LevelScriptCallbacks::fadeOut);
    lua_register(_lua_state, "fadeIn", LevelScriptCallbacks::fadeIn);
    lua_register(_lua_state, "log", LevelScriptCallbacks::debug);

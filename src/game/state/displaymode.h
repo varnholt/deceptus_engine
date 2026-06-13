@@ -40,6 +40,15 @@ public:
    /// \return true when the given flag bit is set in the current mask.
    bool isSet(Display mode) const;
 
+   /// \brief checks whether any of the given display flags are currently set.
+   /// \param flags display flags to test.
+   /// \return true when at least one of the given flag bits is set in the current mask.
+   template <typename... Flags>
+   bool isAnySet(Flags... flags) const
+   {
+      return (isSet(flags) || ...);
+   }
+
 private:
    /// \brief toggles one display flag immediately.
    /// \param mode display flag to toggle.
