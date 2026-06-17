@@ -61,13 +61,20 @@ In order to create the illusion of depth, some time in the 90s Parallax layers w
 Deceptus supports Parallax layers.<br>
 All Parallax layer names must start with `parallax_`.
 
-They have the properties below:
+### Layer offset (recommended)
+
+The preferred way to set a parallax layer's position anchor is via Tiled's built-in layer offset, which corresponds to the `offsetx` / `offsety` attributes in the TMX file. In Tiled you find these in the layer properties panel under "Offset X" and "Offset Y". The engine reads them directly, so no custom property is required.
+
+### Custom properties
+
+Custom properties are all optional. When `offset_x_px` / `offset_y_px` are present they are added on top of the built-in layer offset, so you can use one, the other, or both together.
+
 |Custom Property|Type|Description|
 |-|-|-|
 |factor_x|float|The horizontal scrolling pace in relation to the foreground [`0..1`]|
 |factor_y|float|The vertical scrolling pace in relation to the foreground [`0..1`]|
-|offset_x_px|int|An x‑offset in pixels used to compensate for the parallax displacement (e.g. `2640`). It defines where your contents begin on the horizontal axis.|
-|offset_y_px|int|A y‑offset in pixels used to compensate for the parallax displacement. See `offset_x_px` for details.|
+|offset_x_px|int|An additional x‑offset in pixels added on top of the layer's built-in offset. Useful for fine-tuning without touching the TMX layer offset.|
+|offset_y_px|int|An additional y‑offset in pixels added on top of the layer's built-in offset. See `offset_x_px` for details.|
 |z|int|As you might want to place something _behind_ your parallax layers, configuring the z index might be useful, too. The default value is `0`.|
 
 
