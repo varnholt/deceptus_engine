@@ -86,11 +86,11 @@ void TileMap::storeAnimation(const std::array<sf::Vertex, 4>& quad, int32_t tx, 
    _animations.push_back(animated_tile);
 }
 
-void TileMap::storeStaticVertices(const std::array<sf::Vertex, 4>& quad, const int32_t tx, const int32_t ty, float parallax_scale)
+void TileMap::storeStaticVertices(const std::array<sf::Vertex, 4>& quad, float parallax_scale)
 {
    // if no animation is available, just store the tile in the static buffer
-   const auto bx = static_cast<int32_t>((tx / parallax_scale) / tile_count_per_block);
-   const auto by = static_cast<int32_t>((ty / parallax_scale) / tile_count_per_block);
+   const auto bx = static_cast<int32_t>((quad[0].position.x / static_cast<float>(_tile_size.x) / parallax_scale) / tile_count_per_block);
+   const auto by = static_cast<int32_t>((quad[0].position.y / static_cast<float>(_tile_size.y) / parallax_scale) / tile_count_per_block);
 
    auto y_it = _vertices_static_blocks.find(by);
    if (y_it == _vertices_static_blocks.end())
@@ -182,8 +182,10 @@ bool TileMap::load(
          // find its position in the tileset texture
          const auto tu = (tile_number - tileset->_first_gid) % (_texture_map->getSize().x / _tile_size.x);
          const auto tv = (tile_number - tileset->_first_gid) / (_texture_map->getSize().x / _tile_size.x);
-         const auto tx = pos_x + layer->_offset_x_px;
-         const auto ty = pos_y + layer->_offset_y_px;
+         const auto tx = static_cast<int32_t>(pos_x);
+         const auto ty = static_cast<int32_t>(pos_y);
+         const auto tile_x_px = tx * static_cast<int32_t>(_tile_size.x) + layer->_position_x_px;
+         const auto tile_y_px = ty * static_cast<int32_t>(_tile_size.y) + layer->_position_y_px;
 
          constexpr auto size = 1;
 
@@ -194,10 +196,10 @@ bool TileMap::load(
          // define its 4 corners
          // clang-format off
          std::array<sf::Vertex, 4> quad;
-         quad[0].position = sf::Vector2f(static_cast<float>(tx * _tile_size.x), static_cast<float>(ty * _tile_size.y));
-         quad[1].position = sf::Vector2f(static_cast<float>((tx + size) * _tile_size.x), static_cast<float>(ty * _tile_size.y));
-         quad[2].position = sf::Vector2f(static_cast<float>((tx + size) * _tile_size.x), static_cast<float>((ty + size) * _tile_size.y));
-         quad[3].position = sf::Vector2f(static_cast<float>(tx * _tile_size.x), static_cast<float>((ty + size) * _tile_size.y));
+         quad[0].position = sf::Vector2f(static_cast<float>(tile_x_px), static_cast<float>(tile_y_px));
+         quad[1].position = sf::Vector2f(static_cast<float>(tile_x_px + static_cast<int32_t>(_tile_size.x) * size), static_cast<float>(tile_y_px));
+         quad[2].position = sf::Vector2f(static_cast<float>(tile_x_px + static_cast<int32_t>(_tile_size.x) * size), static_cast<float>(tile_y_px + static_cast<int32_t>(_tile_size.y) * size));
+         quad[3].position = sf::Vector2f(static_cast<float>(tile_x_px), static_cast<float>(tile_y_px + static_cast<int32_t>(_tile_size.y) * size));
          
          quad[0].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size.x) + tile_eps_x, static_cast<float>(tv * _tile_size.y) + tile_eps_y);
          quad[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>(tv * _tile_size.y) + tile_eps_y);
@@ -218,7 +220,7 @@ bool TileMap::load(
          }
          else
          {
-            storeStaticVertices(quad, tx, ty, parallax_scale);
+            storeStaticVertices(quad, parallax_scale);
          }
       }
    }

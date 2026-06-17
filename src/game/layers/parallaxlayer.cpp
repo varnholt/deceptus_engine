@@ -2,6 +2,7 @@
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "game/io/valuereader.h"
 
 void ParallaxLayer::updateView(float level_view_x, float level_view_y, float view_width, float view_height)
 {
@@ -19,21 +20,18 @@ void ParallaxLayer::resetView(float view_width, float view_height)
 
 std::unique_ptr<ParallaxLayer> ParallaxLayer::deserialize(const std::shared_ptr<TmxLayer>& layer, const std::shared_ptr<TileMap>& tile_map)
 {
-   if (!layer->_properties)
-   {
-      return nullptr;
-   }
-
    auto parallax_layer = std::make_unique<ParallaxLayer>();
 
-   parallax_layer->_settings.deserialize(layer->_properties);
+   parallax_layer->_settings.deserialize(layer->_properties, layer->_position_x_px, layer->_position_y_px);
    parallax_layer->_tile_map = tile_map;
 
-   auto& map = layer->_properties->_map;
-   const auto& it_z_index_value = map.find("z");
-   if (it_z_index_value != map.end())
+   if (layer->_properties)
    {
-      parallax_layer->_z_index = it_z_index_value->second->_value_int.value();
+      const auto& map = layer->_properties->_map;
+      if (const auto z_index = ValueReader::readValue<int32_t>("z", map))
+      {
+         parallax_layer->_z_index = *z_index;
+      }
    }
 
    return parallax_layer;
