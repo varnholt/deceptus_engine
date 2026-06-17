@@ -32,5 +32,8 @@ struct TmxLayer : TmxElement
    int32_t _offset_x_px = 0;
    int32_t _offset_y_px = 0;
 
+   int32_t _position_x_px = 0;  //!< layer position x read from the TMX offsetx attribute, in pixels.
+   int32_t _position_y_px = 0;  //!< layer position y read from the TMX offsety attribute, in pixels.
+
    std::vector<int32_t> _data;
 };

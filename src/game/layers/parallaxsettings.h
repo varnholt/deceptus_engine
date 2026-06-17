@@ -15,7 +15,9 @@ struct ParallaxSettings
 
    /// \brief reads parallax factors and offsets, then precomputes placement correction.
    /// \param properties tmx property map containing factor_x, factor_y, and optional offsets.
-   void deserialize(const std::shared_ptr<TmxProperties>& properties);
+   /// \param layer_offset_x_px built-in x offset of the tmx layer, used as the base parallax anchor.
+   /// \param layer_offset_y_px built-in y offset of the tmx layer, used as the base parallax anchor.
+   void deserialize(const std::shared_ptr<TmxProperties>& properties, int32_t layer_offset_x_px = 0, int32_t layer_offset_y_px = 0);
 };
 
 #endif  // PARALLAXSETTINGS_H

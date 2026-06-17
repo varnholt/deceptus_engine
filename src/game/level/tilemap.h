@@ -96,10 +96,8 @@ private:
 
    /// \brief stores one tile quad inside the static block vertex cache.
    /// \param quad tile quad geometry and uv data.
-   /// \param tx tile x index in tile coordinates.
-   /// \param ty tile y index in tile coordinates.
    /// \param parallax_scale layer parallax factor used for block lookup.
-   void storeStaticVertices(const std::array<sf::Vertex, 4>& quad, const int32_t tx, const int32_t ty, float parallax_scale);
+   void storeStaticVertices(const std::array<sf::Vertex, 4>& quad, float parallax_scale);
 
    /// \brief one animation frame entry inside an animated tile.
    struct AnimatedTileFrame
