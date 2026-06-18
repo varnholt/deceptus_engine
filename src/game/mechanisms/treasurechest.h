@@ -7,6 +7,8 @@
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
+#include <memory>
+
 /// \brief interactive chest that opens with optional key requirements and can spawn rewards.
 class TreasureChest : public GameMechanism, public GameNode
 {
@@ -64,7 +66,8 @@ private:
    std::optional<std::string> _spawn_extra;
    std::optional<std::string> _item_required;
    sf::Vector2f _spawn_offset;
-   bool _extra_spawned{false};  //!< guards against calling spawnExtra more than once
+   bool _extra_spawned{false};                   //!< guards against calling spawnExtra more than once
+   std::weak_ptr<GameMechanism> _spawned_extra;  //!< non-owning reference used to disable pickup during the spawn effect
 
    std::shared_ptr<Animation> _animation_idle_closed;
    std::shared_ptr<Animation> _animation_opening;

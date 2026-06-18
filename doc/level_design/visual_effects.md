@@ -76,6 +76,7 @@ Custom properties are all optional. When `offset_x_px` / `offset_y_px` are prese
 |offset_x_px|int|An additional x‑offset in pixels added on top of the layer's built-in offset. Useful for fine-tuning without touching the TMX layer offset.|
 |offset_y_px|int|An additional y‑offset in pixels added on top of the layer's built-in offset. See `offset_x_px` for details.|
 |z|int|As you might want to place something _behind_ your parallax layers, configuring the z index might be useful, too. The default value is `0`.|
+|post_lighting|bool|When set to `true`, the layer is drawn after the normal-map lighting pass so dynamic lighting does not render on top of it. Use this for front parallax layers that should appear unaffected by in-game lights (default is `false`).|
 
 
 

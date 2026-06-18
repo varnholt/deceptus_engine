@@ -8,6 +8,7 @@
 #include "game/audio/audio.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/extra.h"
 #include "game/mechanisms/extrawrapper.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/gamemechanismobserver.h"
@@ -279,7 +280,21 @@ void TreasureChest::update(const sf::Time& dt)
          _extra_spawned = true;
          if (_spawn_extra.has_value())
          {
-            ExtraWrapper::spawnExtra(_spawn_extra.value(), _spawn_offset);
+            auto spawned_extra = ExtraWrapper::spawnExtra(_spawn_extra.value(), _spawn_offset);
+            if (spawned_extra)
+            {
+               spawned_extra->setEnabled(false);
+               _spawned_extra = spawned_extra;
+            }
+         }
+      }
+
+      if (_spawn_effect->isFinished())
+      {
+         if (auto locked_extra = _spawned_extra.lock())
+         {
+            locked_extra->setEnabled(true);
+            _spawned_extra.reset();
          }
       }
    }

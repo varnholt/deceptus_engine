@@ -3,7 +3,6 @@
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
 #include "game/debug/debugdrawstates.h"
-#include "game/items/itemfactory.h"
 #include "game/level/levelregistry.h"
 #include "game/level/room.h"
 #include "game/mechanisms/checkpoint.h"
@@ -175,7 +174,8 @@ Console::Console()
          if (args.size() == 3)
          {
             const auto& item_name = args.at(2);
-            if (!ItemFactory::create(item_name))
+            const auto known_names = SaveState::getPlayerInfo()._inventory.readItemNames();
+            if (std::ranges::find(known_names, item_name) == known_names.end())
             {
                _log.emplace_back("unknown item: " + item_name);
                return;
