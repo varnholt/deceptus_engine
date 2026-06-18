@@ -7,10 +7,12 @@
 #include <sstream>
 
 #include "SFML/Graphics.hpp"
+#include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "game/audio/musicplayertypes.h"
 #include "game/level/levelscript.h"
+#include "game/mechanisms/dialogue.h"
 #include "game/state/displaymode.h"
 #include "json/json.hpp"
 
@@ -219,12 +221,88 @@ int32_t getCameraCenter(lua_State* state)
 
 int32_t showDialogue(lua_State* state)
 {
-   if (lua_gettop(state) != 1)
+   const auto argument_count = lua_gettop(state);
+   if (argument_count < 1)
    {
       return 0;
    }
 
-   LevelScript::getCurrent()->showDialogue(lua_tostring(state, 1));
+   if (lua_isstring(state, 1))
+   {
+      LevelScript::getCurrent()->showDialogue(lua_tostring(state, 1));
+      return 0;
+   }
+
+   std::vector<Dialogue::DialogueItem> dialogue_items;
+   for (auto argument_index = 1; argument_index <= argument_count; argument_index++)
+   {
+      if (!lua_istable(state, argument_index))
+      {
+         continue;
+      }
+
+      Dialogue::DialogueItem item;
+
+      lua_getfield(state, argument_index, "message");
+      if (lua_isstring(state, -1))
+      {
+         item._message = lua_tostring(state, -1);
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "text_color");
+      if (lua_isstring(state, -1))
+      {
+         const auto rgba = TmxTools::color(lua_tostring(state, -1));
+         item._text_color = sf::Color{rgba[0], rgba[1], rgba[2]};
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "bg_color");
+      if (lua_isstring(state, -1))
+      {
+         const auto rgba = TmxTools::color(lua_tostring(state, -1));
+         item._background_color = sf::Color{rgba[0], rgba[1], rgba[2]};
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "animate");
+      if (lua_isboolean(state, -1))
+      {
+         item._animate_text = lua_toboolean(state, -1);
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "animate_speed");
+      if (lua_isnumber(state, -1))
+      {
+         item._animate_text_speed = static_cast<float>(lua_tonumber(state, -1));
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "x_px");
+      const auto has_x = lua_isnumber(state, -1);
+      const auto x_px = has_x ? static_cast<float>(lua_tonumber(state, -1)) : 0.0f;
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "y_px");
+      const auto has_y = lua_isnumber(state, -1);
+      const auto y_px = has_y ? static_cast<float>(lua_tonumber(state, -1)) : 0.0f;
+      lua_pop(state, 1);
+
+      if (has_x && has_y)
+      {
+         item._pos = sf::Vector2f{x_px, y_px};
+      }
+
+      dialogue_items.push_back(item);
+   }
+
+   if (!dialogue_items.empty())
+   {
+      LevelScript::getCurrent()->showDialogue(std::move(dialogue_items));
+   }
+
    return 0;
 }
 

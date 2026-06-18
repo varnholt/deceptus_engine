@@ -785,6 +785,14 @@ void LevelScript::showDialogue(const std::string& search_pattern)
    dialogue->showNext();
 }
 
+void LevelScript::showDialogue(std::vector<Dialogue::DialogueItem> items)
+{
+   _scripted_dialogue = std::make_shared<Dialogue>();
+   _scripted_dialogue->setItems(std::move(items));
+   _scripted_dialogue->setActive(true);
+   _scripted_dialogue->showNext();
+}
+
 void LevelScript::lockPlayerControls(const std::chrono::milliseconds& duration)
 {
    PlayerRegistry::getFirst()->getControls()->lockAll(PlayerControls::LockedState::Released, duration);

@@ -62,6 +62,13 @@ public:
    void setActive(bool active);
 
    /// \brief shows the next page and finalizes the sequence when the last page was shown.
+   /// \param text_color optional text color override; nullopt uses the per-page TMX color.
+   /// \param background_color optional background color override; nullopt uses the per-page TMX color.
+   /// \brief replaces the full set of dialogue pages with the supplied items.
+   /// \param items pages to show in order; replaces any previously deserialized items.
+   void setItems(std::vector<DialogueItem> items);
+
+   /// \brief shows the next page and finalizes the sequence when the last page was shown.
    void showNext();
 
 private:

@@ -11,6 +11,7 @@
 #include "game/animation/animationpool.h"
 #include "game/audio/musicplayertypes.h"
 #include "game/level/scriptproperty.h"
+#include "game/mechanisms/dialogue.h"
 #include "game/mechanisms/gamemechanism.h"
 #include "game/mechanisms/gamemechanismobserver.h"
 
@@ -124,9 +125,13 @@ public:
    /// \param active true to enable the body, false to disable it.
    void setLuaNodeActive(const std::string& search_pattern, bool active);
 
-   /// \brief activates the first matching dialogue mechanism and advances to its next page.
+   /// \brief activates the first matching dialogue mechanism and advances to its first page.
    /// \param search_pattern regex used to find dialogue mechanisms.
    void showDialogue(const std::string& search_pattern);
+
+   /// \brief creates and shows an inline dialogue from the supplied items without a TMX object.
+   /// \param items pages to display in order.
+   void showDialogue(std::vector<Dialogue::DialogueItem> items);
 
    /// \brief locks player controls for a fixed duration.
    /// \param duration lock duration.
@@ -369,6 +374,8 @@ private:
 
    std::vector<CutsceneSprite> _cutscene_sprites;
    std::map<std::string, std::shared_ptr<AnimationPool>> _cutscene_pools;
+
+   std::shared_ptr<Dialogue> _scripted_dialogue;
 
    std::string _script_name;
    lua_State* _lua_state = nullptr;

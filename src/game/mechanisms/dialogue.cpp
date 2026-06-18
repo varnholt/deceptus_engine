@@ -265,6 +265,11 @@ void Dialogue::replaceTags(std::string& str)
    replace(str, "<br>", "\n");
 }
 
+void Dialogue::setItems(std::vector<DialogueItem> items)
+{
+   _dialogue_items = std::move(items);
+}
+
 void Dialogue::showNext()
 {
    if (_index == _dialogue_items.size())
