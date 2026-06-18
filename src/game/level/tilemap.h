@@ -71,6 +71,10 @@ public:
    /// \param visible true to draw the layer.
    void setVisible(bool visible);
 
+   /// \brief reports whether this layer is rendered after the lighting pass.
+   /// \return true when the layer uses post-lighting rendering.
+   bool isPostLighting() const;
+
    /// \brief hides one tile at tile-grid coordinates.
    /// \param x x coordinate in pixels.
    /// \param y y coordinate in pixels.
@@ -136,6 +140,7 @@ private:
 
    int32_t _z_index = 0;
    bool _visible = true;
+   bool _post_lighting = false;  //!< when true, layer is rendered after the lighting pass
    std::string _layer_name;
    std::string _tileset_name;
    std::optional<sf::BlendMode> _blend_mode;

@@ -154,6 +154,12 @@ bool TileMap::load(
       }
 
       _blend_mode = BlendModeDeserializer::readBlendMode(map);
+
+      const auto post_lighting_it = map.find("post_lighting");
+      if (post_lighting_it != map.end())
+      {
+         _post_lighting = post_lighting_it->second->_value_bool.value();
+      }
    }
 
    // Log::Info() << "TileMap::load: loading tileset: " << tileSet->mName << " with: texture " << path;
@@ -442,6 +448,11 @@ void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Render
       states.texture = _normal_map.get();
       drawVertices(normal, states);
    }
+}
+
+bool TileMap::isPostLighting() const
+{
+   return _post_lighting;
 }
 
 int TileMap::getZ() const

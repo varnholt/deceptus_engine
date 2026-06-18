@@ -930,6 +930,14 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
 
    for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
    {
+      for (const auto& tile_map : _tile_maps)
+      {
+         if (tile_map->getZ() == z_index && tile_map->isPostLighting())
+         {
+            tile_map->draw(target, target, {});
+         }
+      }
+
       drawMechanismsAtZ(
          target,
          target,
@@ -988,7 +996,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw all tile maps
       for (const auto& tile_map : _tile_maps)
       {
-         if (tile_map->getZ() == z_index)
+         if (tile_map->getZ() == z_index && !tile_map->isPostLighting())
          {
             tile_map->draw(target, normal, {});
          }

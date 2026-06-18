@@ -94,6 +94,7 @@ Deceptus could just use the layer order that you define inside your tmx file by 
 |Custom Property|Type|Description|
 |-|-|-|
 |z|int|The z depth of your layer from 0 (far far away) to 50 (frontmost)|
+|post_lighting|bool|When true, the layer is rendered after the lighting pass and is therefore unaffected by the deferred lighting system — useful for overlay effects such as vignettes|
 
 Wait, there's more! The Deceptus Engine supports a bunch of 'custom' layers such as _Parallax_ or _Image Layers_ You won't need any of that during your early design steps but once your gameplay is solid, feel free to move on to the chapter 'Visualization'.
 
