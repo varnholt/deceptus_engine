@@ -200,7 +200,15 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function initDrawer()
-   setMechanismVisible("drawer_open", false, "imagelayers")
+   if (inventoryHas("key")) then
+      setMechanismVisible("drawer_open", true, "imagelayers")
+      setMechanismEnabled("drawer_rect", false, "button_rects")
+      setMechanismEnabled("drawer_interaction_help", false, "interaction_help")
+      setMechanismEnabled("drawer_dialogue_inspect", false, "dialogues")
+      setMechanismEnabled("drawer_dialogue_key", false, "dialogues")
+   else
+      setMechanismVisible("drawer_open", false, "imagelayers")
+   end
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -211,8 +219,11 @@ function openDrawer()
    log("open drawer")
    setMechanismVisible("drawer_open", true, "imagelayers")
    setMechanismEnabled("drawer_rect", false, "button_rects")
-   inventoryAdd("key")   
+   setMechanismEnabled("drawer_interaction_help", false, "interaction_help")
+   setMechanismEnabled("drawer_dialogue_inspect", false, "dialogues")
    showDialogue("drawer_dialogue_key")
+   setMechanismEnabled("drawer_dialogue_key", false, "dialogues")
+   inventoryAdd("key")
 end
 
 
