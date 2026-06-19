@@ -243,6 +243,7 @@ void InGameMenu::processEvent(const sf::Event::KeyPressed* key_event)
       }
       default:
       {
+         _submenu_type_map[static_cast<uint8_t>(_selected_submenu)]->keyboardKeyPressed(key_event->code);
          break;
       }
    }

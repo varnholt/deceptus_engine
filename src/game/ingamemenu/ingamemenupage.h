@@ -64,6 +64,10 @@ public:
    /// \brief handles a down navigation action.
    virtual void down() {};
 
+   /// \brief handles a keyboard key press forwarded from the menu container.
+   /// \param key pressed keyboard key to interpret.
+   virtual void keyboardKeyPressed(sf::Keyboard::Key /*key*/){};
+
    /// \brief starts a transition that slides the page out to the left.
    void moveOutToLeft();
 

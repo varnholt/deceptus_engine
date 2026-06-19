@@ -51,6 +51,8 @@ constexpr auto icon_width = 38;
 constexpr auto icon_height = 38;
 constexpr auto frame_width = 44;
 constexpr auto frame_height = 52;
+constexpr auto item_grid_offset_x_px = 190;
+constexpr auto item_grid_offset_y_px = 107;
 
 constexpr auto description_rect_width = 100;
 constexpr auto description_rect_height = 135;
@@ -436,9 +438,17 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
 {
    const auto& inventory = getInventory();
 
+   const auto move_offset = getMoveOffset();
+   const auto offset_x_px = item_grid_offset_x_px + move_offset.value_or(0.0f);
+   const auto offset_y_px = item_grid_offset_y_px + _panel_center_offset_px.y;
+   int32_t draw_index = 0;
    for (const auto& item_key : inventory._items)
    {
+      const auto x_px = static_cast<float>(offset_x_px + (draw_index % count_columns) * frame_width);
+      const auto y_px = static_cast<float>(offset_y_px + (draw_index / count_columns) * frame_height);
+      _sprites[item_key]._sprite->setPosition({x_px, y_px});
       window.draw(*_sprites[item_key]._sprite, states);
+      draw_index++;
    }
 
    int32_t index = 0;
@@ -503,25 +513,13 @@ void InGameMenuInventory::updateInventoryItems()
    const auto& inventory = getInventory();
    const auto move_offset = getMoveOffset();
 
-   constexpr auto item_grid_offset_x_px = 190;
-   constexpr auto item_grid_offset_y_px = 107;
-
    std::optional<int32_t> slot_0_index;
    std::optional<int32_t> slot_1_index;
 
-   // update grid of items
+   // determine grid indices for selected slots
    int32_t index{0};
    for (const auto& item_key : inventory._items)
    {
-      const auto offset_x_px = item_grid_offset_x_px + move_offset.value_or(0.0f);
-      const auto offset_y_px = item_grid_offset_y_px + _panel_center_offset_px.y;
-
-      const auto x_px = static_cast<float>(offset_x_px + (index % count_columns) * frame_width);
-      const auto y_px = static_cast<float>(offset_y_px + (index / count_columns) * frame_height);
-
-      _sprites[item_key]._sprite->setPosition({x_px, y_px});
-
-      // also determine the indices for the selected slots
       if (item_key == inventory._slots[0])
       {
          slot_0_index = index;
