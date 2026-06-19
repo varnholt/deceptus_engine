@@ -32,6 +32,7 @@ void SaveState::invalidate()
    _player_info = {};
    _level_index = {};
    _checkpoint = {};
+   _level_state = {};
 }
 
 int32_t SaveState::computeProgress() const
