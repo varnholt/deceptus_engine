@@ -880,11 +880,6 @@ else()
     FetchContent_MakeAvailable(SFML LUA GLEW)
 endif()
 
-FetchContent_GetProperties(SFML SOURCE_DIR sfml_SOURCE_DIR)
-message(STATUS "SFML source dir: ${sfml_SOURCE_DIR}")
-get_target_property(sfml_include_dirs SFML::Graphics INTERFACE_INCLUDE_DIRECTORIES)
-message(STATUS "SFML::Graphics includes: ${sfml_include_dirs}")
-
 # ----------------------------------------------------------------------------------------------------
 # lua configuration (lua is not a cmake project)
 # ----------------------------------------------------------------------------------------------------
