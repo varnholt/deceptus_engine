@@ -11,7 +11,7 @@
 #include <numeric>
 #include <sstream>
 
-ProfilingUi::ProfilingUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode({900, 900}), "deceptus profiling"))
+ProfilingUi::ProfilingUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::RenderWindow::create(sf::WindowSettings{.size = {900u, 900u}, .title = "deceptus profiling"}).value()))
 {
    if (!ImGui::SFML::Init(*_render_window.get()))
    {

@@ -81,7 +81,7 @@ void showGpu()
 
 void showErrorMessage(const std::string& message)
 {
-   sf::RenderWindow window(sf::VideoMode({240, 80}), "Error", sf::Style::Titlebar | sf::Style::Close);
+   auto window = sf::RenderWindow::create(sf::WindowSettings{.size = {240u, 80u}, .title = "Error", .resizable = false}).value();
 
    const sf::Font& font = getFont();
 
@@ -217,10 +217,12 @@ void Game::initializeWindow()
 
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
    _window = std::make_shared<sf::RenderWindow>(
-      sf::VideoMode({static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)}),
-      GAME_NAME,
-      game_config._fullscreen ? sf::State::Fullscreen : sf::State::Windowed,
-      context_settings
+      sf::RenderWindow::create(sf::WindowSettings{
+         .size = {static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)},
+         .title = GAME_NAME,
+         .fullscreen = game_config._fullscreen,
+         .contextSettings = context_settings
+      }).value()
    );
 
    SplashScreen::show(*_window);
@@ -986,7 +988,12 @@ void Game::toggleFullScreen()
       config._windowed_height = config._video_mode_height;
 
       auto desktop_mode = sf::VideoMode::getDesktopMode();
-      _window->create(desktop_mode, GAME_NAME, sf::Style::None, sf::State::Fullscreen, context_settings);
+      *_window = sf::RenderWindow::create(sf::WindowSettings{
+         .size = desktop_mode.size,
+         .title = GAME_NAME,
+         .fullscreen = true,
+         .contextSettings = context_settings
+      }).value();
 
       // update active resolution to match desktop
       config._video_mode_width = desktop_mode.size.x;
@@ -998,13 +1005,12 @@ void Game::toggleFullScreen()
       config._video_mode_width = config._windowed_width;
       config._video_mode_height = config._windowed_height;
 
-      _window->create(
-         sf::VideoMode({static_cast<uint32_t>(config._video_mode_width), static_cast<uint32_t>(config._video_mode_height)}),
-         GAME_NAME,
-         sf::Style::Default,
-         sf::State::Windowed,
-         context_settings
-      );
+      *_window = sf::RenderWindow::create(sf::WindowSettings{
+         .size = {static_cast<uint32_t>(config._video_mode_width), static_cast<uint32_t>(config._video_mode_height)},
+         .title = GAME_NAME,
+         .fullscreen = false,
+         .contextSettings = context_settings
+      }).value();
    }
 
    config.serializeToFile();

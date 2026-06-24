@@ -847,6 +847,9 @@ if(EMSCRIPTEN)
     set(SFML_BUILD_NETWORK
         OFF
         CACHE BOOL "" FORCE)
+    set(SFML_BUILD_AUDIO
+        OFF
+        CACHE BOOL "" FORCE)
 else()
     set(SFML_BUILD_SHARED_LIBS
         ON
@@ -854,14 +857,12 @@ else()
 endif()
 
 # fetch dependencies
+# SDL3 is fetched internally by VRSFML master via CPM.
+# Declaring it separately here would create duplicate CMake targets.
 FetchContent_Declare(
     SFML
     GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
-    GIT_TAG 3.1.0)
-FetchContent_Declare(
-    SDL3
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG release-3.2.4)
+    GIT_TAG master)
 FetchContent_Declare(
     LUA
     GIT_REPOSITORY https://github.com/lua/lua.git
@@ -874,10 +875,15 @@ if(NOT EMSCRIPTEN)
 endif()
 
 if(EMSCRIPTEN)
-    FetchContent_MakeAvailable(SFML SDL3 LUA)
+    FetchContent_MakeAvailable(SFML LUA)
 else()
-    FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
+    FetchContent_MakeAvailable(SFML LUA GLEW)
 endif()
+
+FetchContent_GetProperties(SFML SOURCE_DIR sfml_SOURCE_DIR)
+message(STATUS "SFML source dir: ${sfml_SOURCE_DIR}")
+get_target_property(sfml_include_dirs SFML::Graphics INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "SFML::Graphics includes: ${sfml_include_dirs}")
 
 # ----------------------------------------------------------------------------------------------------
 # lua configuration (lua is not a cmake project)
@@ -902,7 +908,7 @@ target_include_directories(
     thirdparty
     thirdparty/box2d/include
     thirdparty/lua
-    ${SFML_INCLUDE_DIR}
+    ${CMAKE_BINARY_DIR}/_deps/sfml-src/include
     ${SDL3_INCLUDE_DIRS})
 
 target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
@@ -918,15 +924,14 @@ endif()
 target_link_libraries(
     deceptus
     PRIVATE
-        sfml-system
-        sfml-audio
-        sfml-graphics
-        sfml-window
+        SFML::System
+        SFML::Graphics
+        SFML::Window
         SDL3::SDL3
         lua
 )
 if(NOT EMSCRIPTEN)
-    target_link_libraries(deceptus PRIVATE libglew_static)
+    target_link_libraries(deceptus PRIVATE SFML::Audio libglew_static)
 endif()
 
 if(WIN32)
