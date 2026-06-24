@@ -752,6 +752,10 @@ set(THIRD_PARTY_FILES
     thirdparty/tinyxml2/tinyxml2.cpp
     thirdparty/tinyxml2/tinyxml2.h)
 
+if(EMSCRIPTEN)
+    list(REMOVE_ITEM GAME_FILES deceptus_resource.rc)
+endif()
+
 add_executable(
     deceptus
     ${GAME_FILES}
@@ -836,15 +840,24 @@ set(SFML_BUILD_NETWORK
 set(SFML_USE_STATIC_STD_LIBS
     OFF
     CACHE BOOL "" FORCE)
-set(SFML_BUILD_SHARED_LIBS
-    ON
-    CACHE BOOL "" FORCE)
+if(EMSCRIPTEN)
+    set(SFML_BUILD_SHARED_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_BUILD_NETWORK
+        OFF
+        CACHE BOOL "" FORCE)
+else()
+    set(SFML_BUILD_SHARED_LIBS
+        ON
+        CACHE BOOL "" FORCE)
+endif()
 
 # fetch dependencies
 FetchContent_Declare(
     SFML
-    GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 3.0.x)
+    GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
+    GIT_TAG 3.1.0)
 FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
@@ -853,12 +866,18 @@ FetchContent_Declare(
     LUA
     GIT_REPOSITORY https://github.com/lua/lua.git
     GIT_TAG v5.4.7)
-FetchContent_Declare(
-    GLEW
-    GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
-    GIT_TAG glew-cmake-2.3.0)
+if(NOT EMSCRIPTEN)
+    FetchContent_Declare(
+        GLEW
+        GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
+        GIT_TAG glew-cmake-2.3.0)
+endif()
 
-FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
+if(EMSCRIPTEN)
+    FetchContent_MakeAvailable(SFML SDL3 LUA)
+else()
+    FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
+endif()
 
 # ----------------------------------------------------------------------------------------------------
 # lua configuration (lua is not a cmake project)
@@ -905,8 +924,10 @@ target_link_libraries(
         sfml-window
         SDL3::SDL3
         lua
-        libglew_static
 )
+if(NOT EMSCRIPTEN)
+    target_link_libraries(deceptus PRIVATE libglew_static)
+endif()
 
 if(WIN32)
     target_link_libraries(deceptus PRIVATE opengl32 glu32)
@@ -939,7 +960,7 @@ if(WIN32)
 
 endif()
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT EMSCRIPTEN)
 
     target_link_libraries(deceptus PRIVATE GL X11 stdc++fs)
 
@@ -959,6 +980,30 @@ if(APPLE)
     set(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_EXE_LINKER_FLAGS} -L${HOMEBREW_LLVM}/lib -Wl,-rpath,${HOMEBREW_LLVM}/lib")
     set(SDKROOT $ENV{SDKROOT})
+endif()
+
+# ----------------------------------------------------------------------------------------------------
+# emscripten / webassembly
+# ----------------------------------------------------------------------------------------------------
+
+if(EMSCRIPTEN)
+    # prepend src/wasm so "#include <opengl/glew.h>" resolves to the GLES3 stub
+    # instead of the desktop GLEW header in src/opengl/
+    target_include_directories(deceptus BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/src/wasm)
+
+    # WebGL 2 (GLES3) flags; allow heap growth for level assets
+    target_link_options(deceptus PRIVATE
+        -sUSE_WEBGL2=1
+        -sMIN_WEBGL_VERSION=2
+        -sMAX_WEBGL_VERSION=2
+        -sFULL_ES3=1
+        -sALLOW_MEMORY_GROWTH=1
+        -sINITIAL_MEMORY=67108864
+        -sEXIT_RUNTIME=0
+        --preload-file ${CMAKE_SOURCE_DIR}/data@data
+    )
+
+    set_target_properties(deceptus PROPERTIES SUFFIX ".html")
 endif()
 
 # ----------------------------------------------------------------------------------------------------

@@ -321,7 +321,7 @@ void GLSLProgram::setUniform(const char* name, bool value)
 
 void GLSLProgram::printActiveUniforms()
 {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
    // For OpenGL 4.1, use glGetActiveUniform
    GLint num_uniforms;
    GLint uniform_size;
@@ -374,7 +374,7 @@ void GLSLProgram::printActiveUniforms()
 
 void GLSLProgram::printActiveUniformBlocks()
 {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
    // For OpenGL 4.1, use glGetActiveUniformBlockiv
    GLint written_count;
    GLint max_name_length;
@@ -460,7 +460,7 @@ void GLSLProgram::printActiveUniformBlocks()
 
 void GLSLProgram::printActiveAttribs()
 {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
    // For OpenGL 4.1, use glGetActiveAttrib
    GLint written_count;
    GLint attrib_size;

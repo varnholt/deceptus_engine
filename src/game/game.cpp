@@ -39,6 +39,10 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include <ctime>
 #include <iomanip>
 #include <iostream>
@@ -352,9 +356,11 @@ void Game::loadLevel(LoadingMode loading_mode)
 {
    const auto level_loader = [this, loading_mode]()
    {
+#ifndef __EMSCRIPTEN__
       // create an opengl context for this thread
       sf::Context loader_context;
       loader_context.setActive(true);
+#endif
 
       _player->resetWorld();  // free the pointer that's shared with the player
       LevelRegistry::clearCurrent();
@@ -407,13 +413,19 @@ void Game::loadLevel(LoadingMode loading_mode)
 
       _level_loaded_callbacks.clear();
 
+#ifndef __EMSCRIPTEN__
       loader_context.setActive(false);
+#endif
    };
 
    _level_loading_finished = false;
    _level_loading_finished_previous = false;
    _info_layer->setLoading(true);
+#ifdef __EMSCRIPTEN__
+   level_loader();
+#else
    _level_loading_thread = std::async(std::launch::async, level_loader);
+#endif
 }
 
 void Game::nextLevel()
@@ -927,6 +939,21 @@ void Game::timedDraw()
 
 int32_t Game::loop()
 {
+#ifdef __EMSCRIPTEN__
+   emscripten_set_main_loop_arg(
+      [](void* arg)
+      {
+         Game* game = static_cast<Game*>(arg);
+         game->processEvents();
+         game->timedUpdate();
+         game->timedDraw();
+      },
+      this,
+      0,
+      1
+   );
+   return 0;
+#else
    while (_window->isOpen())
    {
       processEvents();
@@ -935,6 +962,7 @@ int32_t Game::loop()
    }
 
    return 0;
+#endif
 }
 
 void Game::reset()
