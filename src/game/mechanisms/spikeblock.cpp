@@ -175,7 +175,7 @@ void SpikeBlock::update(const sf::Time& dt)
       }
    }
 
-   if sf::findIntersection((PlayerRegistry::getFirst()->getPixelRectFloat(), _rectangle).hasValue())
+   if (sf::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rectangle).hasValue())
    {
       if (_sprite_index_current >= _sprite_index_deadly_min && _sprite_index_current <= _sprite_index_deadly_max)
       {

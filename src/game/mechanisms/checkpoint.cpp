@@ -197,7 +197,7 @@ void Checkpoint::update(const sf::Time& dt)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
 
-   if sf::findIntersection((player_rect, _rect).hasValue())
+   if (sf::findIntersection(player_rect, _rect).hasValue())
    {
       reached();
    }

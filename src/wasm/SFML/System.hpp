@@ -29,5 +29,19 @@ using Vector3i = Vec3i;
 template <typename T>
 using Rect = Rect2<T>;
 using FloatRect = Rect2f;
-using IntRect = Rect2i;
+
+// IntRect is kept as a struct (not a plain alias) so that it implicitly
+// converts to FloatRect when assigned to sf::Sprite::textureRect, which
+// changed from IntRect to FloatRect in VRSFML.
+struct IntRect : Rect2i
+{
+   using Rect2i::Rect2i;
+   IntRect(const Rect2i& r) : Rect2i(r)
+   {
+   }  //!< construct from base
+   operator FloatRect() const
+   {
+      return toRect2f();
+   }  //!< implicit widening for textureRect
+};
 }  // namespace sf

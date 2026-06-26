@@ -260,7 +260,7 @@ void Fan::collide()
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   if sf::findIntersection((player_rect, _pixel_rect).hasValue())
+   if (sf::findIntersection(player_rect, _pixel_rect).hasValue())
    {
       PlayerRegistry::getFirst()->getBody()->ApplyForceToCenter(b2Vec2(2.0F * _direction.x, _direction.y), true);
    }

@@ -301,7 +301,7 @@ void BubbleCube::updateRespawnCondition()
    {
       // don't respawn while player blocks the area
       const auto player_rect_float = PlayerRegistry::getFirst()->getPixelRectFloat();
-      const auto respawn_area_clear = sf::findIntersection(!player_rect_float, _original_rect_px).hasValue();
+      const auto respawn_area_clear = !sf::findIntersection(player_rect_float, _original_rect_px).hasValue();
       if (respawn_area_clear)
       {
          _popped = false;
