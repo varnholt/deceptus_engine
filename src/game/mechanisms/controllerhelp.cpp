@@ -106,9 +106,9 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    const auto tile_offset_y = sin(_time.asSeconds() * 5.0f) * 8.0f;
 
    // draw background
-   _background->setPosition({_rect_center.x - _background->getTextureRect().size.x / 2, _rect_center.y + tile_offset_y - 11});
-   _background->setColor(color);
-   target.draw(*_background);
+   _background->position = {_rect_center.x - _background->textureRect.size.x / 2, _rect_center.y + tile_offset_y - 11};
+   _background->color = color;
+   target.draw(*_background, sf::RenderStates{.texture = _texture.get()});
 
    const auto is_controller_connected = GameControllerIntegration::getInstance().isControllerConnected();
 
@@ -116,11 +116,11 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    auto index = 0;
    for (auto& sprite : _sprites)
    {
-      sprite.setColor(color);
+      sprite.color = color;
       const auto tile_offset_x = -width_of_tiles_px / 2.0f + index * PIXELS_PER_TILE * 1.5f;
-      sprite.setPosition({_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y});
-      sprite.setTextureRect(is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index]);
-      target.draw(sprite);
+      sprite.position = {_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y};
+      sprite.textureRect = is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index];
+      target.draw(sprite, sf::RenderStates{.texture = _texture.get()});
       index++;
    }
 }
@@ -128,7 +128,7 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
 void ControllerHelp::update(const sf::Time& delta_time)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   _visible = (player_rect.findIntersection(_rect_px)).has_value();
+   _visible = sf::findIntersection(player_rect, _rect_px).hasValue();
 
    if (!_visible)
    {
@@ -189,27 +189,26 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
       const auto sprite_rect_keyboard = sf::IntRect{
          {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
-
       const auto sprite_rect_controller = sf::IntRect{
          {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
 
-      sf::Sprite sprite(*_texture);
-      sprite.setTextureRect(sprite_rect_keyboard);
+      sf::Sprite sprite;
+      sprite.textureRect = sprite_rect_keyboard;
       _sprites.emplace_back(sprite);
       _sprite_rects_controller.emplace_back(sprite_rect_controller);
       _sprite_rects_keyboard.emplace_back(sprite_rect_keyboard);
    }
 
-   _background = std::make_unique<sf::Sprite>(*_texture);
+   _background = std::make_unique<sf::Sprite>();
 
    if (_sprites.size() == 1)
    {
-      _background->setTextureRect({{6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2}});
+      _background->textureRect = {{6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2}};
    }
    else if (_sprites.size() == 2)
    {
-      _background->setTextureRect({{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}});
+      _background->textureRect = {{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}};
    }
 }
 

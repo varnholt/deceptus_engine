@@ -58,7 +58,7 @@ private:
    {
       SmokeParticle(const sf::Texture& texture)
       {
-         _sprite = std::make_unique<sf::Sprite>(texture);
+         _sprite = std::make_unique<sf::Sprite>();
       }
 
       std::unique_ptr<sf::Sprite> _sprite;

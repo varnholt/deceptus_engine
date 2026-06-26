@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <optional>
 
 /// \brief manages the death screen shader and its flow-field resources.
 class DeathShader
@@ -34,7 +35,7 @@ public:
    const std::shared_ptr<sf::RenderTexture>& getRenderTexture() const;
 
 private:
-   sf::Shader _shader;
+   std::optional<sf::Shader> _shader;
 
    std::shared_ptr<sf::RenderTexture> _render_texture;
 

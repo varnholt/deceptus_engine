@@ -72,7 +72,7 @@ struct MessageBox
 
    /// \brief draws the active and fading-out previous dialogs.
    /// \param window render target used for message box rendering.
-   static void draw(sf::RenderTarget& window, const sf::RenderStates& = sf::RenderStates::Default);
+   static void draw(sf::RenderTarget& window, const sf::RenderStates& = sf::RenderStates{});
 
    /// \brief updates animations, button prompts, and deferred controller input.
    /// \param dt frame delta time.
@@ -155,11 +155,11 @@ struct MessageBox
    {
       sf::Text text;
       sf::Color color;
-      sf::String plain_text;
+      std::string plain_text;
    };
 
    std::vector<TextSegment> _segments;
-   sf::String _plain_text;
+   std::string _plain_text;
    uint32_t _char_animate_index = 0;
 
    MessageBoxCallback _callback;

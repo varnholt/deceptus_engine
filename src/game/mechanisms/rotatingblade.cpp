@@ -70,8 +70,8 @@ RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
 
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_rotating_blade.png");
 
-   _sprite = std::make_unique<sf::Sprite>(*_texture_map);
-   _sprite->setOrigin({_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f});
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->origin = {_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f};
 
    _audio_update_data._range = AudioRange{600.0f, 0.0f, 100.0f, 1.0f};
    _has_audio = true;
@@ -219,7 +219,7 @@ void RotatingBlade::updateAudio()
                _sample_accelerate.reset();
             }
 
-            Audio::getInstance().setPosition(_sample_enabled.value(), _pos);
+            Audio::getInstance().position = _sample_enabled.value(), _pos;
          }
       }
       else
@@ -231,7 +231,7 @@ void RotatingBlade::updateAudio()
          }
          else
          {
-            Audio::getInstance().setPosition(_sample_accelerate.value(), _pos);
+            Audio::getInstance().position = _sample_accelerate.value(), _pos;
          }
       }
    }
@@ -257,7 +257,7 @@ void RotatingBlade::updateAudio()
          }
          else
          {
-            Audio::getInstance().setPosition(_sample_decelerate.value(), _pos);
+            Audio::getInstance().position = _sample_decelerate.value(), _pos;
          }
 
          // stop playing enabled sample if it's been playing before
@@ -285,13 +285,13 @@ void RotatingBlade::update(const sf::Time& dt)
    _path_interpolation.updateTime(movement_delta);
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
    _pos = _path_interpolation.computePosition(_path_interpolation.getTime());
-   _sprite->setRotation(sf::degrees(_angle));
-   _sprite->setPosition(_pos);
+   _sprite->rotation = sf::degrees(_angle);
+   _sprite->position = _pos;
 
    updateAudio();
 
    // kill player if he moves into the blade's radius
-   sf::Vector2i blade_position{_sprite->getPosition()};
+   sf::Vector2i blade_position{_sprite->position};
    const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
    if (SfmlMath::intersectCircleRect(blade_position, blade_radius, PlayerRegistry::getFirst()->getPixelRectInt()))
    {
@@ -304,10 +304,10 @@ void RotatingBlade::update(const sf::Time& dt)
 
 void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   target.draw(*_sprite);
+   target.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
 
 #ifdef DEBUG_INTERSECTION
-   sf::Vector2i sprite_center{_sprite->getPosition()};
+   sf::Vector2i sprite_center{_sprite->position};
    const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
 
    b2Color color{1.0f, 1.0f, 1.0f};
@@ -316,7 +316,7 @@ void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       color = b2Color{1.0f, 0.0f, 0.0f};
    }
 
-   DebugDraw::drawCircle(target, _sprite->getPosition(), _sprite->getOrigin().x, color);
+   DebugDraw::drawCircle(target, _sprite->position, _sprite->origin.x, color);
 #endif
 }
 

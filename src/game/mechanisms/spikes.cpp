@@ -173,7 +173,7 @@ void Spikes::updateTrap()
    {
       // trap trigger is done via intersection
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-      if (player_rect.findIntersection(_player_collision_rect_px).has_value())
+      if sf::findIntersection((player_rect, _player_collision_rect_px).hasValue())
       {
          // start extracting once player has intersected
          _elapsed_since_collision_ms = 0;
@@ -250,7 +250,7 @@ void Spikes::updateSpriteRect()
    const auto tu = static_cast<int32_t>(std::floor(_tu));
    for (auto& sprite : _sprite)
    {
-      sprite->setTextureRect({{(tu * PIXELS_PER_TILE) + _tu_offset, _tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+      sprite->textureRect = {{(tu * PIXELS_PER_TILE) + _tu_offset, _tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
    }
 }
 
@@ -295,7 +295,7 @@ void Spikes::update(const sf::Time& dt)
    {
       // check for intersection with player
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-      if (player_rect.findIntersection(_player_collision_rect_px).has_value())
+      if sf::findIntersection((player_rect, _player_collision_rect_px).hasValue())
       {
          PlayerRegistry::getFirst()->damage(100);
       }
@@ -444,11 +444,11 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
       auto texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "spikes.png");
       for (auto i = 0; i < sprite_count; i++)
       {
-         auto sprite = std::make_unique<sf::Sprite>(*texture);
-         sprite->setPosition(sf::Vector2f(
+         auto sprite = std::make_unique<sf::Sprite>();
+         sprite->position = sf::Vector2f(
             data._tmx_object->_x_px + static_cast<float>(i * x_increment_px),
             data._tmx_object->_y_px + static_cast<float>(i * y_increment_px)
-         ));
+         );
 
          instance->_sprite.push_back(std::move(sprite));
       }
@@ -522,8 +522,8 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
             {static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
          };
 
-         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*spikes->_texture);
-         sprite->setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
+         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
+         sprite->position = sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE));
          spikes->_sprite.push_back(std::move(sprite));
          spikes->updateSpriteRect();
 

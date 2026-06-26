@@ -145,19 +145,20 @@ void show(sf::RenderWindow& window)
 
    shown = true;
 
-   sf::Texture loading_texture;
+   auto loaded_splash_texture_opt = sf::Texture::loadFromFile("data/game/splash.png");
    window.clear(sf::Color(30, 30, 30));
-   if (loading_texture.loadFromFile("data/game/splash.png"))
+   if (loaded_splash_texture_opt)
    {
-      sf::Sprite loading_sprite(loading_texture);
+      sf::Texture& loading_texture = loaded_splash_texture_opt.value();
+      sf::Sprite loading_sprite;
 
       const sf::Vector2u window_size = window.getSize();
       const sf::Vector2u texture_size = loading_texture.getSize();
       const auto scale_y = static_cast<float>(window_size.y) / texture_size.y;
       const auto scaled_width = texture_size.x * scale_y;
-      loading_sprite.setScale({scale_y, scale_y});
+      loading_sprite.scale = {scale_y, scale_y};
       const auto position_x = (window_size.x - scaled_width) / 2.0f;
-      loading_sprite.setPosition({position_x, 0.0f});
+      loading_sprite.position = {position_x, 0.0f};
 
       // fade in
       sf::Clock fade_in_clock;
@@ -168,16 +169,16 @@ void show(sf::RenderWindow& window)
          const float normalized_ratio = elapsed / fade_in_duration_ms;
          const float eased_ratio = Easings::easeInOutQuad(normalized_ratio);
          const std::uint8_t alpha = static_cast<std::uint8_t>(255 * eased_ratio);
-         loading_sprite.setColor(sf::Color(255, 255, 255, alpha));
+         loading_sprite.color = sf::Color(255, 255, 255, alpha);
          window.clear(sf::Color(11, 12, 23));
-         window.draw(loading_sprite);
+         window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
          window.display();
       }
 
       // Set fully opaque after fade-in is complete
-      loading_sprite.setColor(sf::Color(255, 255, 255, 255));
+      loading_sprite.color = sf::Color(255, 255, 255, 255);
       window.clear(sf::Color(11, 12, 23));
-      window.draw(loading_sprite);
+      window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
       window.display();
 
       // show the splash screen for a moment after fade in
@@ -193,16 +194,16 @@ void show(sf::RenderWindow& window)
          const float normalized_ratio = 1.0f - (elapsed / fade_out_duration_ms);
          const float eased_ratio = Easings::easeInOutQuad(normalized_ratio);
          const std::uint8_t alpha = static_cast<std::uint8_t>(255 * eased_ratio);
-         loading_sprite.setColor(sf::Color(255, 255, 255, alpha));
+         loading_sprite.color = sf::Color(255, 255, 255, alpha);
          window.clear(sf::Color(11, 12, 23));
-         window.draw(loading_sprite);
+         window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
          window.display();
       }
 
       // Final draw with 0 alpha to ensure complete fade out
-      loading_sprite.setColor(sf::Color(255, 255, 255, 0));
+      loading_sprite.color = sf::Color(255, 255, 255, 0);
       window.clear(sf::Color(11, 12, 23));
-      window.draw(loading_sprite);
+      window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
       window.display();
    }
 

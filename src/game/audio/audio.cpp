@@ -184,7 +184,7 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
    }
 
    thread_it->_sound->setLooping(play_info._looped);
-   thread_it->_sound->setPosition(position);
+   thread_it->_sound->position = position;
    thread_it->_sound->setMinDistance(10000.0f);
    thread_it->_sound->setAttenuation(0.0f);
    thread_it->_filename = play_info._sample_name;
@@ -247,5 +247,5 @@ void Audio::SoundThread::setVolume(float volume)
 
 void Audio::SoundThread::setPosition(const sf::Vector2f& pos)
 {
-   _sound->setPosition({pos.x, pos.y, 0.0f});
+   _sound->position = {pos.x, pos.y, 0.0f};
 }

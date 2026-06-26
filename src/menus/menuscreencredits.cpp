@@ -12,14 +12,14 @@ MenuScreenCredits::MenuScreenCredits()
    _text_code->setFont(_font);
    _text_code->setString("Code: Matthias Varnholt");
    _text_code->setCharacterSize(12);
-   _text_code->setPosition({220.0f, 155.0f});
+   _text_code->position = {220.0f, 155.0f};
    _text_code->setFillColor(sf::Color{232, 219, 243});
 
    _text_artwork = std::make_unique<sf::Text>(_font);
    _text_artwork->setFont(_font);
    _text_artwork->setString("Artwork: dstar");
    _text_artwork->setCharacterSize(12);
-   _text_artwork->setPosition({220.0f, 177.0f});
+   _text_artwork->position = {220.0f, 177.0f};
    _text_artwork->setFillColor(sf::Color{232, 219, 243});
 
    _text_back_button = std::make_unique<sf::Text>(_font);

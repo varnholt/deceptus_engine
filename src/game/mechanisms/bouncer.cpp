@@ -132,8 +132,8 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
 
    // load texture
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bumper.png");
-   _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->position = _position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT));
 }
 
 std::string_view Bouncer::objectName() const
@@ -148,7 +148,7 @@ void Bouncer::preload()
 
 void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   color.draw(*_sprite);
+   color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
 }
 
 void Bouncer::updatePlayerAtBouncer()
@@ -158,7 +158,7 @@ void Bouncer::updatePlayerAtBouncer()
    auto rect = player->getPixelRectFloat();
    rect.size.y *= 3;
 
-   _player_at_bouncer = rect.findIntersection(_rect).has_value();
+   _player_at_bouncer = sf::findIntersection(rect, _rect).hasValue();
 }
 
 void Bouncer::update(const sf::Time& /*dt*/)
@@ -177,7 +177,7 @@ void Bouncer::update(const sf::Time& /*dt*/)
    if (!_previous_step.has_value() || step != _previous_step)
    {
       _previous_step = step;
-      _sprite->setTextureRect(sf::IntRect({step * SPRITE_WIDTH, 0}, {SPRITE_WIDTH, SPRITE_HEIGHT}));
+      _sprite->textureRect = sf::IntRect({step * SPRITE_WIDTH, 0}, {SPRITE_WIDTH, SPRITE_HEIGHT});
    }
 }
 

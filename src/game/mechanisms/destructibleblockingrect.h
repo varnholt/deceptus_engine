@@ -58,8 +58,8 @@ private:
       Right,
    };
 
-    /// \brief serialized configuration read from tmx custom properties.
-    struct Config
+   /// \brief serialized configuration read from tmx custom properties.
+   struct Config
    {
       int32_t frame_width{150};
       int32_t frame_height{163};
@@ -74,24 +74,24 @@ private:
       float animation_speed{40.0f};
    };
 
-    /// \brief mutable runtime state for durability and destruction animation.
-    struct State
+   /// \brief mutable runtime state for durability and destruction animation.
+   struct State
    {
       int32_t damage_left{0};
       float current_frame{0};
       bool dead{false};
    };
 
-    /// \brief creates the static collision body, chunk coverage, and hitbox.
-    /// \param data deserialize context with object geometry and physics world.
-    void setupBody(const GameDeserializeData& data);
+   /// \brief creates the static collision body, chunk coverage, and hitbox.
+   /// \param data deserialize context with object geometry and physics world.
+   void setupBody(const GameDeserializeData& data);
 
-    /// \brief loads and positions the sprite and initial animation row.
-    /// \param data deserialize context with object transform and resources.
-    void setupSprite(const GameDeserializeData& data);
+   /// \brief loads and positions the sprite and initial animation row.
+   /// \param data deserialize context with object transform and resources.
+   void setupSprite(const GameDeserializeData& data);
 
-    /// \brief enters destroyed state, plays destroy audio, and disables collisions.
-    void destroy();
+   /// \brief enters destroyed state, plays destroy audio, and disables collisions.
+   void destroy();
 
    Config _config;
    State _state;
@@ -106,7 +106,9 @@ private:
 
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    std::optional<HighResTimePoint> _hit_time;
+#ifndef __EMSCRIPTEN__
    sf::Shader _flash_shader;
+#endif
    float _hit_flash{0.0f};
    std::vector<Hitbox> _hitboxes;
 };

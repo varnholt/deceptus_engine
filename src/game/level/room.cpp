@@ -70,8 +70,9 @@ std::vector<Room::SubRoom>::const_iterator Room::findSubRoom(const sf::Vector2f&
 
 std::vector<Room::SubRoom>::const_iterator Room::findSubRoom(const sf::FloatRect& rect) const
 {
-   const auto it =
-      std::find_if(_sub_rooms.begin(), _sub_rooms.end(), [rect](const auto& sub_room) { return sub_room._rect.findIntersection(rect); });
+   const auto it = std::find_if(
+      _sub_rooms.begin(), _sub_rooms.end(), [rect](const auto& sub_room) { return sf::findIntersection(sub_room._rect, rect).hasValue(); }
+   );
    return it;
 }
 
@@ -132,7 +133,7 @@ void Room::mergeEnterAreas(const std::vector<std::shared_ptr<Room>>& rooms)
          auto it = std::find_if(
             room->_sub_rooms.begin(),
             room->_sub_rooms.end(),
-            [area](const auto& sub_room) { return sub_room._rect.findIntersection(area._rect); }
+            [area](const auto& sub_room) { return sf::findIntersection(sub_room._rect, area._rect).hasValue(); }
          );
 
          if (it != room->_sub_rooms.end())
@@ -279,7 +280,7 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
    if (!std::any_of(
           room->_sub_rooms.begin(),
           room->_sub_rooms.end(),
-          [sub_room](const auto& room) { return room._rect.findIntersection(sub_room._rect); }
+          [sub_room](const auto& room) { return sf::findIntersection(room._rect, sub_room._rect).hasValue(); }
        ))
    {
       room->_sub_rooms.push_back(sub_room);

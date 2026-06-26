@@ -246,9 +246,9 @@ void MessageBox::initializeLayers()
             std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
-         auto sprite = std::make_shared<sf::Sprite>(*texture);
+         auto sprite = std::make_shared<sf::Sprite>();
 
-         sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
+         sprite->position = {static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;
@@ -272,9 +272,9 @@ void MessageBox::initializeLayers()
    _layers["temp_bg"]->_visible = false;
 
    // initialize positions
-   _window_position_px = _layers["window"]->_sprite->getPosition();
-   _background_position_px = _layers["background"]->_sprite->getPosition();
-   _next_page_position_px = _layers["next_page"]->_sprite->getPosition();
+   _window_position_px = _layers["window"]->_sprite->position;
+   _background_position_px = _layers["background"]->_sprite->position;
+   _next_page_position_px = _layers["next_page"]->_sprite->position;
 }
 
 bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
@@ -523,9 +523,8 @@ void MessageBox::updateNextPageIcon()
    constexpr auto animation_amplitude = 3.0f;
 
    auto next_page_layer = _layers["next_page"];
-   next_page_layer->_sprite->setPosition(
-      _next_page_position_px + offset_px + sf::Vector2f{0.0f, std::sin(_elapsed.asSeconds() * animation_speed) * animation_amplitude}
-   );
+   next_page_layer->_sprite->position =
+      _next_page_position_px + offset_px + sf::Vector2f{0.0f, std::sin(_elapsed.asSeconds() * animation_speed) * animation_amplitude};
 }
 
 void MessageBox::noAnimation()
@@ -536,13 +535,13 @@ void MessageBox::noAnimation()
 
    const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
-   window_layer->_sprite->setColor(sf::Color::White);
-   window_layer->_sprite->setScale({1.0f, 1.0f});
-   window_layer->_sprite->setPosition(_window_position_px + offset_px);
+   window_layer->_sprite->color = sf::Color::White;
+   window_layer->_sprite->scale = {1.0f, 1.0f};
+   window_layer->_sprite->position = _window_position_px + offset_px;
 
-   background_layer->_sprite->setColor(background_color);
-   background_layer->_sprite->setScale({1.0f, 1.0f});
-   background_layer->_sprite->setPosition(_background_position_px + offset_px);
+   background_layer->_sprite->color = background_color;
+   background_layer->_sprite->scale = {1.0f, 1.0f};
+   background_layer->_sprite->position = _background_position_px + offset_px;
 
    updateNextPageIcon();
    updateTextAndButtonColor(1.0f);
@@ -563,7 +562,7 @@ void MessageBox::updateTextAndButtonColor(float contents_alpha)
 
    for (const auto& layer : _box_content_layers)
    {
-      layer->_sprite->setColor(color);
+      layer->_sprite->color = color;
    }
 }
 
@@ -598,23 +597,23 @@ void MessageBox::showAnimation()
       const auto window_pos_y_px = _window_position_px.y + offset.y;
       const auto window_color = sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)};
 
-      window_layer->_sprite->setColor(window_color);
-      window_layer->_sprite->setScale({scale_x, scale_y});
-      window_layer->_sprite->setPosition({window_pos_x_px, window_pos_y_px});
+      window_layer->_sprite->color = window_color;
+      window_layer->_sprite->scale = {scale_x, scale_y};
+      window_layer->_sprite->position = {window_pos_x_px, window_pos_y_px};
 
-      background_layer->_sprite->setColor(background_color);
-      background_layer->_sprite->setScale({scale_x, scale_y});
-      background_layer->_sprite->setPosition({background_pos_x_px, background_pos_y_px});
+      background_layer->_sprite->color = background_color;
+      background_layer->_sprite->scale = {scale_x, scale_y};
+      background_layer->_sprite->position = {background_pos_x_px, background_pos_y_px};
    }
    else  // fade in
    {
-      window_layer->_sprite->setColor(sf::Color::White);
-      window_layer->_sprite->setScale({1.0f, 1.0f});
-      window_layer->_sprite->setPosition(_window_position_px + offset);
+      window_layer->_sprite->color = sf::Color::White;
+      window_layer->_sprite->scale = {1.0f, 1.0f};
+      window_layer->_sprite->position = _window_position_px + offset;
 
-      background_layer->_sprite->setColor(background_color);
-      background_layer->_sprite->setScale({1.0f, 1.0f});
-      background_layer->_sprite->setPosition(_background_position_px + offset);
+      background_layer->_sprite->color = background_color;
+      background_layer->_sprite->scale = {1.0f, 1.0f};
+      background_layer->_sprite->position = _background_position_px + offset;
 
       if (visible_time < animation_scale_time_show + animation_fade_time_show)
       {
@@ -650,12 +649,12 @@ void MessageBox::hideAnimation()
       auto background_color = _properties._background_color;
       background_color.a = contents_alpha_scaled;
 
-      _layers["window"]->_sprite->setColor(window_color);
-      _layers["background"]->_sprite->setColor(background_color);
+      _layers["window"]->_sprite->color = window_color;
+      _layers["background"]->_sprite->color = background_color;
 
       for (const auto& layer : _box_content_layers)
       {
-         layer->_sprite->setColor(window_color);
+         layer->_sprite->color = window_color;
       }
 
       for (auto& segment : _segments)

@@ -4,6 +4,10 @@
 
 #include <SFML/System.hpp>
 
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Mouse.hpp>
+
 #include <SFML/Graphics/BlendMode.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -38,9 +42,73 @@
 
 // sf::Drawable was removed in VRSFML; replaced by the DrawableObject concept.
 // This compat base satisfies that concept for classes that inherit it.
-namespace sf {
-    struct Drawable {
-        virtual void draw(RenderTarget& target, RenderStates states) const = 0;
-        virtual ~Drawable() = default;
-    };
-}
+namespace sf
+{
+struct Drawable
+{
+   virtual void draw(RenderTarget& target, RenderStates states) const = 0;
+   virtual ~Drawable() = default;
+};
+}  // namespace sf
+
+// sf::VertexArray was removed in VRSFML. This compat class wraps a vector of
+// vertices and a primitive type, providing the same interface as SFML2's
+// VertexArray, including draw() so it satisfies the DrawableObject concept.
+#include <span>
+namespace sf
+{
+class VertexArray
+{
+public:
+   explicit VertexArray(PrimitiveType type = PrimitiveType::Points, std::size_t initialCount = 0) : _primitive_type(type)
+   {
+      _vertices.resize(initialCount);
+   }
+
+   void append(const Vertex& vertex)
+   {
+      _vertices.push_back(vertex);
+   }
+   void clear()
+   {
+      _vertices.clear();
+   }
+   void resize(std::size_t count)
+   {
+      _vertices.resize(count);
+   }
+   std::size_t getVertexCount() const
+   {
+      return _vertices.size();
+   }
+   void setPrimitiveType(PrimitiveType type)
+   {
+      _primitive_type = type;
+   }
+   PrimitiveType getPrimitiveType() const
+   {
+      return _primitive_type;
+   }
+
+   Vertex& operator[](std::size_t index)
+   {
+      return _vertices[index];
+   }
+   const Vertex& operator[](std::size_t index) const
+   {
+      return _vertices[index];
+   }
+
+   void draw(RenderTarget& target, RenderStates states) const
+   {
+      if (!_vertices.empty())
+      {
+         target.draw(std::span<const Vertex>(_vertices.data(), _vertices.size()), _primitive_type, states);
+      }
+   }
+
+private:
+   std::vector<Vertex> _vertices;
+   PrimitiveType _primitive_type{};
+};
+}  // namespace sf

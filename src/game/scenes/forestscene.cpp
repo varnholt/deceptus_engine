@@ -37,11 +37,11 @@ ForestScene::ForestScene()
          auto texture =
             std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
 
-         auto sprite = std::make_shared<sf::Sprite>(*texture);
+         auto sprite = std::make_shared<sf::Sprite>();
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
-         sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
-         sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
+         sprite->position = {static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
+         sprite->color = sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())};
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;
@@ -73,7 +73,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    // draw text
    const auto rect = _text->getGlobalBounds();
    const auto left = w / 2 - rect.size.x / 2;
-   _text->setPosition({floor(left), 82});
+   _text->position = {floor(left), 82};
    window.draw(*_text, states);
 }
 

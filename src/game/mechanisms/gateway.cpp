@@ -137,15 +137,15 @@ std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, c
    const auto width_px = static_cast<float>(size_px.x);
    const auto height_px = static_cast<float>(size_px.y);
 
-   sf::RenderTexture render_texture(size_px);
+   auto render_texture = std::move(*sf::RenderTexture::create(size_px));
    render_texture.clear(sf::Color::Transparent);
 
-   sf::Sprite sprite(original);
-   sprite.setOrigin({width_px / 2.0f, height_px / 2.0f});
-   sprite.setRotation(angle);
-   sprite.setPosition({width_px / 2.0f, height_px / 2.0f});
+   sf::Sprite sprite;
+   sprite.origin = {width_px / 2.0f, height_px / 2.0f};
+   sprite.rotation = angle;
+   sprite.position = {width_px / 2.0f, height_px / 2.0f};
 
-   render_texture.draw(sprite);
+   render_texture.draw(sprite, sf::RenderStates{.texture = &original});
    render_texture.display();
 
    auto rotated = std::make_shared<sf::Texture>(render_texture.getTexture());
@@ -231,14 +231,14 @@ void Gateway::drawVoid(sf::RenderTarget& target)
    shader_state.blendMode = sf::BlendNone;
    shader_state.shader = &_shader;
 
-   sf::RectangleShape quad(sf::Vector2f{200.f, 200.f});
+   sf::RectangleShape quad{sf::RectangleShape::Data{.size = {200.f, 200.f}}};
    quad.setFillColor(sf::Color::White);
 
    _shader_texture->draw(quad, shader_state);
    _shader_texture->display();
-   _shader_sprite->setPosition(pos);
+   _shader_sprite->position = pos;
 
-   sf::RenderStates sprite_state(sf::BlendAdd);
+   sf::RenderStates sprite_state{.blendMode = sf::BlendAdd};
    target.draw(*_shader_sprite, sprite_state);
 }
 
@@ -276,7 +276,7 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
 void Gateway::update(const sf::Time& dt)
 {
-   const auto player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
+   const auto player_intersects = sf::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rect).hasValue();
 
    // activate portal when player intersects
    if (!_player_intersects && player_intersects)
@@ -306,7 +306,7 @@ void Gateway::update(const sf::Time& dt)
 
    _elapsed += dt.asSeconds();
 
-   _origin_shape.setPosition(_origin);
+   _origin_shape.position = _origin;
 
    switch (_state)
    {
@@ -548,16 +548,16 @@ void Gateway::update(const sf::Time& dt)
                auto& pi_layer = _pi[i]._layer->_sprite;
                auto& pa_layer = _pa[i]._layer->_sprite;
 
-               auto pi_color = pi_layer->getColor();
-               auto pa_color = pa_layer->getColor();
+               auto pi_color = pi_layer->color;
+               auto pa_color = pa_layer->color;
 
                pi_color.a = static_cast<uint8_t>(255 * fade_out_alpha);
                pa_color.a = static_cast<uint8_t>(255 * fade_in_alpha);
 
-               pi_layer->setColor(pi_color);
-               pa_layer->setColor(pa_color);
-               _layer_background_active->_sprite->setColor(pa_color);
-               _layer_background_inactive->_sprite->setColor(pi_color);
+               pi_layer->color = pi_color;
+               pa_layer->color = pa_color;
+               _layer_background_active->_sprite->color = pa_color;
+               _layer_background_inactive->_sprite->color = pi_color;
             }
 
             std::ranges::for_each(_pi, [](auto& s) { s.update(); });
@@ -568,12 +568,12 @@ void Gateway::update(const sf::Time& dt)
                for (auto& side : _pi)
                {
                   side.reset();
-                  side._layer->_sprite->setColor(sf::Color(255, 255, 255, 255));
+                  side._layer->_sprite->color = sf::Color(255, 255, 255, 255);
                }
 
                for (auto& side : _pa)
                {
-                  side._layer->_sprite->setColor(sf::Color(255, 255, 255, 255));
+                  side._layer->_sprite->color = sf::Color(255, 255, 255, 255);
                }
 
                _activated_state._step = 0;
@@ -640,7 +640,7 @@ void Gateway::setup(const GameDeserializeData& data)
 
    _rect_shape.setFillColor(sf::Color(255, 255, 255, 25));
    _rect_shape.setSize(_rect.size);
-   _rect_shape.setPosition(_rect.position);
+   _rect_shape.position = _rect.position;
 
    _origin_shape.setRadius(1.0f);
    _origin_shape.setFillColor(sf::Color::Red);
@@ -664,7 +664,7 @@ void Gateway::setup(const GameDeserializeData& data)
          const auto texture_size = sf::Vector2u(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
          auto opacity = layer.getOpacity();
 
-         auto texture = std::make_shared<sf::Texture>(texture_size);
+         auto texture = std::make_shared<sf::Texture>(std::move(*sf::Texture::create(texture_size)));
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
          std::shared_ptr<sf::Sprite> sprite;
@@ -676,11 +676,11 @@ void Gateway::setup(const GameDeserializeData& data)
             texture = createRotatedTexture(*texture, -_base_angle);  // rotate ccw
          }
 
-         sprite = std::make_shared<sf::Sprite>(*texture);
+         sprite = std::make_shared<sf::Sprite>();
 
          const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())} + _rect.position;
-         sprite->setPosition(pos);
-         sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
+         sprite->position = pos;
+         sprite->color = sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity));
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;
@@ -692,8 +692,8 @@ void Gateway::setup(const GameDeserializeData& data)
          if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
          {
             const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
-            sprite->setOrigin(origin);
-            sprite->setPosition(origin + pos + sf::Vector2f{0, 0});
+            sprite->origin = origin;
+            sprite->position = origin + pos + sf::Vector2f{0, 0};
          }
       }
       catch (...)
@@ -705,11 +705,11 @@ void Gateway::setup(const GameDeserializeData& data)
    for (int i = 0; i < 4; ++i)
    {
       _pa[i]._layer = _layers[std::format("pa_{}", i)];
-      _pa[i]._pos_px = _pa[i]._layer->_sprite->getPosition();
+      _pa[i]._pos_px = _pa[i]._layer->_sprite->position;
       _pa[i]._angle_offset = sf::degrees(90 * i);
 
       _pi[i]._layer = _layers[std::format("pi_{}", i)];
-      _pi[i]._pos_px = _pi[i]._layer->_sprite->getPosition();
+      _pi[i]._pos_px = _pi[i]._layer->_sprite->position;
       _pi[i]._angle_offset = sf::degrees(90 * i);
    }
 
@@ -717,8 +717,9 @@ void Gateway::setup(const GameDeserializeData& data)
    _layer_background_inactive = _layers["background_inactive"];
    _layer_background_active = _layers["background_active"];
 
-   _origin = _pa[0]._layer->_sprite->getOrigin();
+   _origin = _pa[0]._layer->_sprite->origin;
 
+#ifndef __EMSCRIPTEN__
    // load shader
    if (!_shader.loadFromFile("data/shaders/void_standalone.frag", sf::Shader::Type::Fragment))
    {
@@ -727,9 +728,10 @@ void Gateway::setup(const GameDeserializeData& data)
 
    _shader_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u(200u, 200u));
    _shader_texture->setSmooth(true);
-   _shader_sprite = std::make_unique<sf::Sprite>(_shader_texture->getTexture());
-   _shader_sprite->setPosition(_rect.position);
+   _shader_sprite = std::make_unique<sf::Sprite>();
+   _shader_sprite->position = _rect.position;
    loadNoiseTexture(_default_texture_path);
+#endif
 
    _eye = std::make_unique<Eye>(_rect.getCenter());
 }
@@ -807,8 +809,8 @@ void Gateway::Side::update()
    sf::Vector2f pos_from_angle_and_distance_px;
    pos_from_angle_and_distance_px.x = std::cos(full_angle_sf.asRadians()) * _distance_factor;
    pos_from_angle_and_distance_px.y = std::sin(full_angle_sf.asRadians()) * _distance_factor;
-   _layer->_sprite->setRotation(full_angle_sf);
-   _layer->_sprite->setPosition(_pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f});
+   _layer->_sprite->rotation = full_angle_sf;
+   _layer->_sprite->position = _pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f};
 }
 
 void Gateway::Side::reset()
@@ -829,8 +831,8 @@ Gateway::Eye::Eye(const sf::Vector2f& center)
    _center_pos_px = center;
 
    _texture = TexturePool::getInstance().get("data/sprites/gateway_eye.png");
-   _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setTextureRect({{3547, 93}, {12, 12}});
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->textureRect = {{3547, 93}, {12, 12}};
 
    // load animations
    AnimationPool animation_pool{"data/sprites/gateway_animations.json"};
@@ -891,7 +893,7 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
       _eye_iris_spawn->update(dt);
 
       // no longer needed
-      // _sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(std::clamp(wake_value_normalized * 255.0f, 0.0f, 255.0f))));
+      // _sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(std::clamp(wake_value_normalized * 255.0f, 0.0f, 255.0f)));
    }
 
    if (_iris_state == IrisState::Idle)
@@ -922,11 +924,11 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
 
    const auto eye_pos_error_px = sf::Vector2f{19, 5};
    const auto sprite_pos_px = _center_pos_px + _eye_pos_px + eye_pos_error_px;
-   _sprite->setPosition(sprite_pos_px);
-   _eye_spawn->setPosition(sprite_pos_px);
-   _eye_iris_spawn->setPosition(sprite_pos_px);
-   _eye_iris_idle->setPosition(sprite_pos_px);
-   _eye_iris_idle_blink->setPosition(sprite_pos_px);
+   _sprite->position = sprite_pos_px;
+   _eye_spawn->position = sprite_pos_px;
+   _eye_iris_spawn->position = sprite_pos_px;
+   _eye_iris_idle->position = sprite_pos_px;
+   _eye_iris_idle_blink->position = sprite_pos_px;
 }
 
 void Gateway::Eye::wakeUp()

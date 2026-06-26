@@ -1,7 +1,7 @@
 #include "animation.h"
 
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 #include <numeric>
 
 Animation::Animation(const Animation& anim)
@@ -14,8 +14,8 @@ Animation::Animation(const Animation& anim)
       _overall_time_chrono(anim._overall_time_chrono),
       _frame_times(anim._frame_times)
 {
-   setOrigin(anim.getOrigin());
-   setRotation(anim.getRotation());
+   origin = anim.origin;
+   rotation = anim.rotation;
 
    _vertices[0] = anim._vertices[0];
    _vertices[1] = anim._vertices[1];
@@ -211,7 +211,7 @@ void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
    states.transform *= getTransform();
    states.texture = _color_texture.get();
 
-   target.draw(_vertices, 4, sf::PrimitiveType::TriangleStrip, states);
+   target.draw(_vertices, sf::PrimitiveType::TriangleStrip, states);
 
    for (const auto& child : _children)
    {
@@ -229,12 +229,12 @@ void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Rend
    states.transform *= getTransform();
 
    states.texture = _color_texture.get();
-   color.draw(_vertices, 4, sf::PrimitiveType::TriangleStrip, states);
+   color.draw(_vertices, sf::PrimitiveType::TriangleStrip, states);
 
    if (_normal_texture)
    {
       states.texture = _normal_texture.get();
-      normal.draw(_vertices, 4, sf::PrimitiveType::TriangleStrip, states);
+      normal.draw(_vertices, sf::PrimitiveType::TriangleStrip, states);
    }
 }
 
@@ -297,7 +297,7 @@ void Animation::updateVertices(bool reset_time)
 
    if (reset_time)
    {
-      _current_time = sf::Time::Zero;
+      _current_time = sf::Time{};
    }
 }
 

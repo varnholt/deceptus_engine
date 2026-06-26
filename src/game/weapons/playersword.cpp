@@ -168,7 +168,7 @@ std::vector<std::shared_ptr<GameMechanism>> PlayerSword::impactMechanisms(std::u
       {
          if (std::ranges::any_of(
                 mechanism->getHitboxes(),
-                [&](const auto& hitbox) { return hitbox.getRectTranslated().findIntersection(_hit_rect_px).has_value(); }
+                [&](const auto& hitbox) { return sf::findIntersection(hitbox.getRectTranslated(), _hit_rect_px).hasValue(); }
              ))
          {
             mechanism->hit(sword_damage);

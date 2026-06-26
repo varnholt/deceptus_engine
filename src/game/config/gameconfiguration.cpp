@@ -145,9 +145,14 @@ GameConfiguration& GameConfiguration::getInstance()
    if (!__initialized)
    {
       // seed defaults from the actual desktop so first-launch resolution is sensible
+#ifndef __EMSCRIPTEN__
       const auto desktop = sf::VideoMode::getDesktopMode();
       __instance._video_mode_width = static_cast<int32_t>(desktop.size.x);
       __instance._video_mode_height = static_cast<int32_t>(desktop.size.y);
+#else
+      __instance._video_mode_width = 1920;
+      __instance._video_mode_height = 1080;
+#endif
       __instance._windowed_width = __instance._video_mode_width;
       __instance._windowed_height = __instance._video_mode_height;
 
@@ -192,6 +197,7 @@ bool GameConfiguration::isResolutionChangeApplicable(int32_t new_width, int32_t 
 
 void GameConfiguration::clampResolutionToDesktop()
 {
+#ifndef __EMSCRIPTEN__
    const auto desktop_mode = sf::VideoMode::getDesktopMode();
    const auto desktop_width = static_cast<int32_t>(desktop_mode.size.x);
    const auto desktop_height = static_cast<int32_t>(desktop_mode.size.y);
@@ -205,4 +211,5 @@ void GameConfiguration::clampResolutionToDesktop()
       _video_mode_height = std::min(_video_mode_height, desktop_height);
       serializeToFile();
    }
+#endif
 }

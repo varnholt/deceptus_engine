@@ -7,6 +7,7 @@
 #include "game/mechanisms/gamemechanism.h"
 
 #include <SFML/Graphics.hpp>
+#include <optional>
 
 struct TmxObject;
 
@@ -58,7 +59,7 @@ private:
    std::vector<std::shared_ptr<sf::IntRect>> _bitmap_coords;
 
    std::string _text;
-   sf::Font _truetype_font;
+   std::optional<sf::Font> _truetype_font;
    std::unique_ptr<sf::Text> _truetype_text;
 };
 

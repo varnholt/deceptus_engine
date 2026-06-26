@@ -167,7 +167,7 @@ void Bow::updateRotation(Arrow* arrow)
    if (arrow_velocity.Length() > minimum_velocity)
    {
       arrow_velocity.Normalize();
-      arrow->setRotation(atan2(arrow_velocity.y, arrow_velocity.x));
+      arrow->rotation = sf::degrees(atan2(arrow_velocity.y, arrow_velocity.x));
    }
 }
 

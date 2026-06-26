@@ -37,8 +37,10 @@ bool StencilTileMap::load(
       return false;
    }
 
+#ifndef __EMSCRIPTEN__
    _stencil_shader.loadFromFile("data/shaders/stencil_write.vert", "data/shaders/stencil_write.frag");
    _stencil_shader.setUniform("u_alpha_threshold", _alpha_threshold);
+#endif
 
    return true;
 }
@@ -52,19 +54,21 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    }
 
    // draw the masking geometry (stencil_tilemap) first
+#ifndef __EMSCRIPTEN__
    _stencil_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
+#endif
    const auto use_shader = _alpha_threshold < 0.99f;
 
    auto stencil_render_state = states;
+#ifndef __EMSCRIPTEN__
    stencil_render_state.shader = use_shader ? &_stencil_shader : nullptr;
-   stencil_render_state.stencilMode =  
-         sf::StencilMode( // set up stencil
-            {sf::StencilComparison::Always},  
-            {sf::StencilUpdateOperation::Replace},
-            1,
-            0xff,
-            true
-         );
+   stencil_render_state.stencilMode = sf::StencilMode(  // set up stencil
+      {sf::StencilComparison::Always},
+      {sf::StencilUpdateOperation::Replace},
+      1,
+      0xff,
+      true
+   );
 
    color.clearStencil(0);
 
@@ -75,16 +79,16 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
 
    // then draw the masked content
    auto color_render_state = states;
-   color_render_state.stencilMode =
-         sf::StencilMode(  // set up stencil
-            {sf::StencilComparison::Equal},  
-            {sf::StencilUpdateOperation::Keep},
-            1,
-            0xff,
-            false
-         );
+   color_render_state.stencilMode = sf::StencilMode(  // set up stencil
+      {sf::StencilComparison::Equal},
+      {sf::StencilUpdateOperation::Keep},
+      1,
+      0xff,
+      false
+   );
 
    TileMap::draw(color, normal, color_render_state);
+#endif
 
    // dumpStencilAndColorToPng(color, states);
 }
@@ -101,6 +105,7 @@ const std::string& StencilTileMap::getStencilReference() const
 
 void StencilTileMap::dumpStencilAndColorToPng(sf::RenderTarget& color, const sf::RenderStates& states) const
 {
+#ifndef __EMSCRIPTEN__
    static int32_t _frame_counter{0};
    _frame_counter += 1;
    if ((_frame_counter % 1000) != 0)
@@ -153,7 +158,7 @@ void StencilTileMap::dumpStencilAndColorToPng(sf::RenderTarget& color, const sf:
       const sf::Vector2f topLeft{vcenter.x - 0.5f * vsize.x, vcenter.y - 0.5f * vsize.y};
 
       sf::RectangleShape red_rect(vsize);
-      red_rect.setPosition(topLeft);
+      red_rect.position = topLeft;
       red_rect.setFillColor(sf::Color(255, 0, 0, 128));  // half alpha
 
       sf::RenderStates red_state;
@@ -174,4 +179,5 @@ void StencilTileMap::dumpStencilAndColorToPng(sf::RenderTarget& color, const sf:
    const std::string filename = "debug/composite__" + getLayerName() + "__" + iso8601Date() + ".png";
    sf::Image image = debug_texture.getTexture().copyToImage();
    (void)image.saveToFile(filename);
+#endif
 }

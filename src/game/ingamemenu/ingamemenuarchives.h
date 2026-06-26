@@ -24,7 +24,7 @@ public:
    /// \brief draws the archives page using the base layered page renderer.
    /// \param window render target that receives archive layer rendering.
    /// \param states render states used for drawing.
-   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{}) override;
 
    /// \brief advances show/hide or slide animations for archive panels.
    /// \param dt elapsed frame time, currently unused by this page.

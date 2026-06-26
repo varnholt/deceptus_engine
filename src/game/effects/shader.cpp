@@ -85,7 +85,7 @@ public:
       );
       m_text.setFont(getFont());
       m_text.setCharacterSize(22);
-      m_text.setPosition(30, 20);
+      m_text.position = 30, 20;
 
       // Load the shader
       if (!m_shader.loadFromFile("resources/wave.vert", "resources/blur.frag"))
@@ -190,7 +190,7 @@ public:
 
       // Initialize the background sprite
       m_backgroundSprite.setTexture(m_backgroundTexture);
-      m_backgroundSprite.setPosition(135, 100);
+      m_backgroundSprite.position = 135, 100;
 
       // Load the moving entities
       for (int i = 0; i < 6; ++i)
@@ -217,7 +217,7 @@ public:
          sf::Vector2f position;
          position.x = std::cos(0.25f * (time * i + (m_entities.size() - i))) * 300 + 350;
          position.y = std::sin(0.25f * (time * (m_entities.size() - i) + i)) * 200 + 250;
-         m_entities[i].setPosition(position);
+         m_entities[i].position = position;
       }
 
       // Render the updated scene to the off-screen surface
@@ -355,17 +355,17 @@ int main()
     if (!textBackgroundTexture.loadFromFile("resources/text-background.png"))
         return EXIT_FAILURE;
     sf::Sprite textBackground(textBackgroundTexture);
-    textBackground.setPosition(0, 520);
-    textBackground.setColor(sf::Color(255, 255, 255, 200));
+    textBackground.position = 0, 520;
+    textBackground.color = sf::Color(255, 255, 255, 200);
 
     // Create the description text
     sf::Text description("Current effect: " + effects[current]->getName(), font, 20);
-    description.setPosition(10, 530);
+    description.position = 10, 530;
     description.setFillColor(sf::Color(80, 80, 80));
 
     // Create the instructions text
     sf::Text instructions("Press left and right arrows to change the current shader", font, 20);
-    instructions.setPosition(280, 555);
+    instructions.position = 280, 555;
     instructions.setFillColor(sf::Color(80, 80, 80));
 
     // Start the game loop

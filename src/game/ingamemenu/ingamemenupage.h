@@ -37,7 +37,7 @@ public:
    /// \brief draws all visible PSD-backed layers of the page.
    /// \param window render target that receives the page layers.
    /// \param states render states used for drawing.
-   virtual void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+   virtual void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{});
 
    /// \brief advances page-specific state and animations.
    /// \param dt elapsed frame time passed by the menu manager.

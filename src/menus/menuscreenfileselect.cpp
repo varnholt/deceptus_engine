@@ -256,7 +256,7 @@ void MenuScreenFileSelect::updateLayers()
       // update names
       auto layer_name = _layers["slot_" + slot_name + "_name"];
       _names[index]->setString(save_state._player_info._name);
-      _names[index]->setPosition({layer_name->_sprite->getPosition().x, layer_name->_sprite->getPosition().y + nameOffsetY});
+      _names[index]->position = {layer_name->_sprite->position.x, layer_name->_sprite->position.y + nameOffsetY};
 
       index++;
    }

@@ -54,6 +54,8 @@ private:
 
    std::string _stencil_reference;
    std::shared_ptr<TileMap> _stencil_tilemap = nullptr;
+#ifndef __EMSCRIPTEN__
    mutable sf::Shader _stencil_shader;
+#endif
    float _alpha_threshold{0.5f};
 };

@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <optional>
 
 /// \brief wraps the water post-process shader used for atmosphere distortion.
 class AtmosphereShader
@@ -27,5 +28,5 @@ public:
 private:
    std::shared_ptr<sf::RenderTexture> _render_texture;
    std::shared_ptr<sf::Texture> _distortion_map;
-   sf::Shader _shader;
+   std::optional<sf::Shader> _shader;
 };

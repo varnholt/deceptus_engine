@@ -391,11 +391,7 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \param x center x in pixels.
    /// \param y center y in pixels.
    /// \param rings optional ring setup provided by script.
-   void playDetonationAnimationFromScript(
-      float x,
-      float y,
-      const std::vector<DetonationAnimation::DetonationRing>& rings
-   );
+   void playDetonationAnimationFromScript(float x, float y, const std::vector<DetonationAnimation::DetonationRing>& rings);
 
    /// \brief marks this node dead and destroys its physics body.
    void die();
@@ -506,7 +502,9 @@ struct LuaNode : public GameMechanism, public GameNode
    std::vector<sf::Vector2f> _sprite_offsets_px;
    sf::Vector2f _position_px;
    std::vector<sf::Vector2f> _movement_path_px;
+#ifndef __EMSCRIPTEN__
    sf::Shader _flash_shader;
+#endif
    float _hit_flash{0.0f};
    std::vector<sf::FloatRect> _debug_rects;
 

@@ -70,7 +70,7 @@ std::string_view SensorRect::objectName() const
 
 void SensorRect::update(const sf::Time& /*dt*/)
 {
-   const auto player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
+   const auto player_intersects = sf::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rect).hasValue();
 
    if (player_intersects)
    {

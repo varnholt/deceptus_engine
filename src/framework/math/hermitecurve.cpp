@@ -2,6 +2,7 @@
 #include "hermitecurve.h"
 
 // stl
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 

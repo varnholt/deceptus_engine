@@ -1,4 +1,5 @@
 #include "camerasystemconfigurationui.h"
+
 #include "camerasystemconfiguration.h"
 
 #pragma warning(push, 0)
@@ -10,7 +11,9 @@
 #include <sstream>
 
 CameraSystemConfigurationUi::CameraSystemConfigurationUi()
-    : _render_window(std::make_unique<sf::RenderWindow>(sf::RenderWindow::create(sf::WindowSettings{.size = {800u, 400u}, .title = "deceptus camera configuration"}).value()))
+    : _render_window(std::make_unique<sf::RenderWindow>(
+         sf::RenderWindow::create(sf::WindowSettings{.size = {800u, 400u}, .title = "deceptus camera configuration"}).value()
+      ))
 {
    if (!ImGui::SFML::Init(*_render_window.get()))
    {
@@ -26,7 +29,9 @@ void CameraSystemConfigurationUi::processEvents()
 
       if (event->is<sf::Event::Closed>())
       {
+#ifndef __EMSCRIPTEN__
          _render_window->close();
+#endif
       }
    }
 }

@@ -22,8 +22,8 @@ constexpr auto z_behind = static_cast<int32_t>(ZDepth::Player) - 1;
 PlayerFirefly::PlayerFirefly(GameNode* parent) : GameNode(parent)
 {
    _texture = TexturePool::getInstance().get("data/sprites/firefly.png");
-   _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setTextureRect({{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->textureRect = {{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
    _z_index = z_in_front;
    _enabled = false;
    _visible = false;
@@ -40,7 +40,7 @@ void PlayerFirefly::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    {
       return;
    }
-   target.draw(*_sprite);
+   target.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
 }
 
 void PlayerFirefly::update(const sf::Time& dt)
@@ -80,8 +80,8 @@ void PlayerFirefly::update(const sf::Time& dt)
    _position_px.x = _virtual_center_px.x + raw_x * orbit_radius_x_px;
    _position_px.y = _virtual_center_px.y + orbit_center_offset_y_px + raw_y * orbit_radius_y_px;
 
-   _sprite->setPosition(_position_px);
-   _sprite->setOrigin({static_cast<float>(PIXELS_PER_TILE) * 0.5f, static_cast<float>(PIXELS_PER_TILE) * 0.5f});
+   _sprite->position = _position_px;
+   _sprite->origin = {static_cast<float>(PIXELS_PER_TILE) * 0.5f, static_cast<float>(PIXELS_PER_TILE) * 0.5f};
 
    if (std::abs(raw_x) > z_switch_threshold)
    {
@@ -114,6 +114,6 @@ void PlayerFirefly::updateTextureRect()
    if (new_frame != _current_frame)
    {
       _current_frame = new_frame;
-      _sprite->setTextureRect({{_current_frame * PIXELS_PER_TILE, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+      _sprite->textureRect = {{_current_frame * PIXELS_PER_TILE, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
    }
 }

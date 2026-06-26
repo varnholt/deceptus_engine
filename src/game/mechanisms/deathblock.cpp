@@ -109,7 +109,7 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
 #ifdef DEBUG_DRAW
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectInt();
-      const auto fill_color = player_rect.findIntersection(spike._collision_rect_absolute).has_value() ? sf::Color::Red : sf::Color::Green;
+      const auto fill_color = sf::findIntersection(player_rect, spike._collision_rect_absolute).hasValue() ? sf::Color::Red : sf::Color::Green;
       DebugDraw::drawRect(color, spike._collision_rect_absolute, fill_color);
 #endif
    }
@@ -208,7 +208,8 @@ void DeathBlock::updateCollision()
 
       const auto deadly = (spike._state == Spike::State::Extracted);
 
-      if (player_rect.findIntersection(spike._collision_rect_absolute).has_value() && deadly)
+      const auto spike_intersects_player = sf::findIntersection(player_rect, spike._collision_rect_absolute).hasValue();
+      if (spike_intersects_player && deadly)
       {
          PlayerRegistry::getFirst()->damage(_damage);
       }
@@ -420,15 +421,15 @@ void DeathBlock::updateSprites()
    {
       if (spike.hasChanged())
       {
-         spike._sprite->setTextureRect(sf::IntRect({spike._sprite_index * tl_px, tl_px * row}, {tl_px, tl_px}));
+         spike._sprite->textureRect = sf::IntRect({spike._sprite_index * tl_px, tl_px * row}, {tl_px, tl_px});
       }
 
-      spike._sprite->setPosition({x, y});
+      spike._sprite->position = {x, y};
       row++;
    }
 
-   _center_sprite->setTextureRect(sf::IntRect({_center_sprite_index * tl_px, 0}, {tl_px, tl_px}));
-   _center_sprite->setPosition({x, y});
+   _center_sprite->textureRect = sf::IntRect({_center_sprite_index * tl_px, 0}, {tl_px, tl_px});
+   _center_sprite->position = {x, y};
 }
 
 void DeathBlock::updatePosition(const sf::Time& dt)
@@ -476,7 +477,7 @@ void DeathBlock::setup(const GameDeserializeData& data)
 
    for (auto& spike : _spikes)
    {
-      spike._sprite = std::make_unique<sf::Sprite>(*_texture);
+      spike._sprite = std::make_unique<sf::Sprite>();
    }
 
    _spikes[Spike::Orientation::Up]._collision_rect_relative = sf::IntRect{
@@ -499,7 +500,7 @@ void DeathBlock::setup(const GameDeserializeData& data)
       {PIXELS_PER_TILE - tolerance_px_2, PIXELS_PER_TILE - tolerance_px_2}
    };
 
-   _center_sprite = std::make_unique<sf::Sprite>(*_texture);
+   _center_sprite = std::make_unique<sf::Sprite>();
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 

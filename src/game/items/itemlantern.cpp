@@ -12,14 +12,14 @@
 
 ItemLantern::ItemLantern()
     : _player_texture(TexturePool::getInstance().get("data/sprites/player.png")),
-      _helmet_sprite_r(std::make_unique<sf::Sprite>(*_player_texture)),
-      _helmet_sprite_l(std::make_unique<sf::Sprite>(*_player_texture))
+      _helmet_sprite_r(std::make_unique<sf::Sprite>()),
+      _helmet_sprite_l(std::make_unique<sf::Sprite>())
 {
    _light_circle.setRadius(_light_radius);
-   _light_circle.setOrigin({_light_radius, _light_radius});
+   _light_circle.origin = {_light_radius, _light_radius};
 
-   _helmet_sprite_r->setTextureRect(sf::IntRect({0, 1776}, {24, 24}));
-   _helmet_sprite_l->setTextureRect(sf::IntRect({24, 1776}, {24, 24}));
+   _helmet_sprite_r->textureRect = sf::IntRect({0, 1776}, {24, 24});
+   _helmet_sprite_l->textureRect = sf::IntRect({24, 1776}, {24, 24});
 }
 
 void ItemLantern::draw(sf::RenderTarget& target)
@@ -66,7 +66,7 @@ void ItemLantern::update(const sf::Time& delta_time)
    const auto& current_cycle = player_animation->getCurrentCycle();
 
 #ifdef DEBUG_DRAW
-   _light_circle.setPosition(player->getPixelPositionFloat());
+   _light_circle.position = player->getPixelPositionFloat();
 #endif
 
    // only update the eye position while the animation is actually visible;
@@ -151,19 +151,19 @@ void ItemLantern::update(const sf::Time& delta_time)
    }
 
    // reset origin before updateSpritePosition so it always positions from (0, 0)
-   active_light->_sprite->setOrigin({0.0f, 0.0f});
+   active_light->_sprite->origin = {0.0f, 0.0f};
    active_light->_pos_m = light_pos_m;
    active_light->updateSpritePosition();
 
    // set rotation origin at the lamp end in local texture coords (512x512 texture, scaled to display size)
-   const sf::Vector2f sprite_scale = active_light->_sprite->getScale();
+   const sf::Vector2f sprite_scale = active_light->_sprite->scale;
    const float lamp_origin_y_local = static_cast<float>(active_light->_texture->getSize().y) * 0.5f;
    const float lamp_origin_x_local = pointing_right ? 0.0f : static_cast<float>(active_light->_texture->getSize().x);
-   const sf::Vector2f top_left_pos = active_light->_sprite->getPosition();
-   active_light->_sprite->setOrigin({lamp_origin_x_local, lamp_origin_y_local});
-   active_light->_sprite->setPosition(
-      {top_left_pos.x + lamp_origin_x_local * sprite_scale.x, top_left_pos.y + lamp_origin_y_local * sprite_scale.y}
-   );
+   const sf::Vector2f top_left_pos = active_light->_sprite->position;
+   active_light->_sprite->origin = {lamp_origin_x_local, lamp_origin_y_local};
+   active_light->_sprite->position = {
+      top_left_pos.x + lamp_origin_x_local * sprite_scale.x, top_left_pos.y + lamp_origin_y_local * sprite_scale.y
+   };
 
    // easeOutSine brings the beam smoothly back to neutral after a landing tilt
    sf::Angle tilt_angle = sf::degrees(0.0f);
@@ -174,19 +174,19 @@ void ItemLantern::update(const sf::Time& delta_time)
       const float tilt_direction = pointing_right ? 1.0f : -1.0f;
       tilt_angle = sf::degrees(tilt_degrees * tilt_direction);
    }
-   active_light->_sprite->setRotation(tilt_angle);
+   active_light->_sprite->rotation = sf::degrees(tilt_angle);
    active_light->_color.a = static_cast<uint8_t>(static_cast<float>(_target_alpha) * fade_alpha_factor);
 
    // reset rotation on the inactive light so it is clean when it next becomes active
-   inactive_light->_sprite->setRotation(sf::degrees(0.0f));
+   inactive_light->_sprite->rotation = sf::degrees(0.0f);
 
    sf::Vector2f helmet_offset_px{pointing_right ? -50.0f : -45.0f, -54.0f};
    const auto helmet_position_px = player->getPixelPositionFloat() + _last_valid_eye_position.value() + helmet_offset_px;
-   _helmet_sprite_r->setPosition(helmet_position_px);
-   _helmet_sprite_l->setPosition(helmet_position_px);
+   _helmet_sprite_r->position = helmet_position_px;
+   _helmet_sprite_l->position = helmet_position_px;
    const uint8_t helmet_alpha = static_cast<uint8_t>(255.0f * fade_alpha_factor);
-   _helmet_sprite_r->setColor(sf::Color(255, 255, 255, helmet_alpha));
-   _helmet_sprite_l->setColor(sf::Color(255, 255, 255, helmet_alpha));
+   _helmet_sprite_r->color = sf::Color(255, 255, 255, helmet_alpha);
+   _helmet_sprite_l->color = sf::Color(255, 255, 255, helmet_alpha);
 }
 
 void ItemLantern::onEquipped()
@@ -290,9 +290,9 @@ void ItemLantern::onEquipped()
             shader.setUniform("u_layer_2_size", layer_2_size);
             shader.setUniform("u_layer_2_speed", sf::Glsl::Vec2(layer_2_speed_x, layer_2_speed_y));
             // getPosition() is the lamp-end origin, not the visual top-left; recover top-left for dust coords
-            const sf::Vector2f cb_origin = light_instance._sprite->getOrigin();
-            const sf::Vector2f cb_scale = light_instance._sprite->getScale();
-            const sf::Vector2f cb_lamp_pos = light_instance._sprite->getPosition();
+            const sf::Vector2f cb_origin = light_instance._sprite->origin;
+            const sf::Vector2f cb_scale = light_instance._sprite->scale;
+            const sf::Vector2f cb_lamp_pos = light_instance._sprite->position;
             const sf::Vector2f cb_top_left = {cb_lamp_pos.x - cb_origin.x * cb_scale.x, cb_lamp_pos.y - cb_origin.y * cb_scale.y};
             shader.setUniform("u_sprite_pos_px", sf::Glsl::Vec2(cb_top_left));
             shader.setUniform(

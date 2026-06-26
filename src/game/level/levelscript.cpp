@@ -82,7 +82,7 @@ void LevelScript::update(const sf::Time& delta_time)
    auto id = 0;
    for (const auto& rect : _collision_rects)
    {
-      if (player_rect.findIntersection(rect))
+      if (sf::findIntersection(player_rect, rect))
       {
          luaPlayerCollidesWithRect(id);
       };
@@ -1029,7 +1029,7 @@ void LevelScript::updateCutsceneSprites(const sf::Time& dt)
       {
          sprite._position = sprite._target;
          sprite._moving = false;
-         sprite._animation->setPosition(sprite._position);
+         sprite._animation->position = sprite._position;
          if (!sprite._arrive_event.empty())
          {
             luaRaiseEvent(sprite._arrive_event);
@@ -1039,7 +1039,7 @@ void LevelScript::updateCutsceneSprites(const sf::Time& dt)
       {
          const auto normalized = direction / distance;
          sprite._position += normalized * step;
-         sprite._animation->setPosition(sprite._position);
+         sprite._animation->position = sprite._position;
       }
    }
 }

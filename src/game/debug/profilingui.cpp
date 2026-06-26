@@ -1,6 +1,6 @@
 #include "profilingui.h"
 
-#ifdef DEVELOPMENT_MODE
+#if defined(DEVELOPMENT_MODE) && !defined(__EMSCRIPTEN__)
 
 #pragma warning(push, 0)
 #include "imgui/imgui-SFML.h"
@@ -11,7 +11,10 @@
 #include <numeric>
 #include <sstream>
 
-ProfilingUi::ProfilingUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::RenderWindow::create(sf::WindowSettings{.size = {900u, 900u}, .title = "deceptus profiling"}).value()))
+ProfilingUi::ProfilingUi()
+    : _render_window(std::make_unique<sf::RenderWindow>(
+         sf::RenderWindow::create(sf::WindowSettings{.size = {900u, 900u}, .title = "deceptus profiling"}).value()
+      ))
 {
    if (!ImGui::SFML::Init(*_render_window.get()))
    {
@@ -197,6 +200,32 @@ void ProfilingUi::updateMechanismTimings(std::vector<MechanismSample> timings)
    }
    _mechanism_timings = std::move(timings);
    _mechanism_update_clock.restart();
+}
+
+#elif defined(DEVELOPMENT_MODE)
+
+ProfilingUi::ProfilingUi() = default;
+void ProfilingUi::processEvents()
+{
+}
+void ProfilingUi::draw()
+{
+}
+void ProfilingUi::close()
+{
+}
+bool ProfilingUi::isOpen() const
+{
+   return false;
+}
+void ProfilingUi::recordFrame(sf::Time, sf::Time, sf::Time)
+{
+}
+void ProfilingUi::recordWindowDisplay(sf::Time)
+{
+}
+void ProfilingUi::updateMechanismTimings(std::vector<MechanismSample>)
+{
 }
 
 #endif  // DEVELOPMENT_MODE

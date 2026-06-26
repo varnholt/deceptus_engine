@@ -148,11 +148,11 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    // render color texture
    sf::RenderStates states;
    states.texture = _texture.get();
-   color.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
+   color.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
 
    // render normal map (same geometry, different texture)
    states.texture = _normal_map.get();
-   normal.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
+   normal.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
 }
 
 void Rope::pushChain(float impulse)
@@ -178,7 +178,7 @@ void Rope::update(const sf::Time& dt)
       return;
    }
 
-   if (_player_impulse.has_value() && PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_bounding_box).has_value())
+   if (_player_impulse.has_value() && sf::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _bounding_box).hasValue())
    {
       // using a fix timestep for now, everything else lets box2d go nuts
       const auto impulse = PlayerRegistry::getFirst()->getBody()->GetLinearVelocity().x * _player_impulse.value() * dt.asSeconds();

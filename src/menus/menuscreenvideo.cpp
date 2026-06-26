@@ -233,7 +233,7 @@ void MenuScreenVideo::loadingFinished()
 
    _resolution_text = make_label();
    _resolution_text->setFillColor(sf::Color::White);
-   _resolution_text->setPosition({382, 154});
+   _resolution_text->position = {382, 154};
 
    _resolution_label = make_label();
    _resolution_help_text = make_label();
@@ -354,8 +354,8 @@ void MenuScreenVideo::updateLayers()
    _layers["brightness_h_0"]->_visible = !brightness_selected;
    _layers["brightness_h_1"]->_visible = brightness_selected;
 
-   _layers["brightness_h_0"]->_sprite->setOrigin({50 - (brightness_value * 100.0f), 0});
-   _layers["brightness_h_1"]->_sprite->setOrigin({50 - (brightness_value * 100.0f), 0});
+   _layers["brightness_h_0"]->_sprite->origin = {50 - (brightness_value * 100.0f), 0};
+   _layers["brightness_h_1"]->_sprite->origin = {50 - (brightness_value * 100.0f), 0};
 
    _layers["displayMode_highlight"]->_visible = display_mode_selected;
    _layers["displayMode_arrows"]->_visible = display_mode_selected;
@@ -397,7 +397,7 @@ void MenuScreenVideo::updateLayers()
 
    placeTextCentered(*_displaymode_help_text, _row_help_base_rect);
 
-   const sf::String display_mode_strings[] = {sftr("Windowed"), sftr("Borderless"), sftr("Fullscreen")};
+   const std::string display_mode_strings[] = {sftr("Windowed"), sftr("Borderless"), sftr("Fullscreen")};
    _displaymode_value_text->setString(display_mode_strings[display_mode_value_index]);
    placeTextLeft(*_displaymode_value_text, rowRect(_row_value_base_rect, 0));
 

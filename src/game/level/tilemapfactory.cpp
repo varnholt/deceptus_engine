@@ -42,7 +42,7 @@ void TileMapFactory::merge(const std::vector<std::shared_ptr<TileMap>>& tile_map
    }
 
    // set stencil tilemaps in parallel
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
    std::for_each(
       tile_maps.begin(),
       tile_maps.end(),

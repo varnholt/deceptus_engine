@@ -53,8 +53,8 @@ private:
    {
       std::unique_ptr<sf::Sprite> _button_sprite;
       std::unique_ptr<sf::Text> _text;
-      sf::IntRect _button_rect_keyboard;
-      sf::IntRect _button_rect_controller;
+      sf::FloatRect _button_rect_keyboard;
+      sf::FloatRect _button_rect_controller;
    };
 
    sf::FloatRect _rect_px;

@@ -96,17 +96,22 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*
       ));
 
       target.setView(ortho);
+#endif
 
       std::ranges::for_each(
          _help_elements,
-         [&target](const auto& help)
+         [&target, this](const auto& help)
          {
-            target.draw(*help._button_sprite);
+            target.draw(*help._button_sprite, sf::RenderStates{.texture = _button_texture.get()});
+#ifndef __EMSCRIPTEN__
             target.draw(*help._text);
+#endif
          }
       );
 
+#ifndef __EMSCRIPTEN__
       target.setView(level_view);
+#endif
    }
 }
 
@@ -127,7 +132,7 @@ void InteractionHelp::update(const sf::Time& dt)
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   const auto intersects = player_rect.findIntersection(_rect_px).has_value();
+   const auto intersects = sf::findIntersection(player_rect, _rect_px).hasValue();
 
    if (intersects && !_player_intersected_in_last_frame && _animation_hide->_paused)
    {
@@ -179,17 +184,19 @@ void InteractionHelp::update(const sf::Time& dt)
          if (alpha.has_value())
          {
             const auto alpha_byte = static_cast<uint8_t>(alpha.value() * 255);
+#ifndef __EMSCRIPTEN__
             element._text->setFillColor(sf::Color{232, 219, 243, alpha_byte});
-            element._button_sprite->setColor({255, 255, 255, alpha_byte});
+#endif
+            element._button_sprite->color = {255, 255, 255, alpha_byte};
          }
 
          if (GameControllerIntegration::getInstance().isControllerConnected())
          {
-            element._button_sprite->setTextureRect(element._button_rect_controller);
+            element._button_sprite->textureRect = element._button_rect_controller;
          }
          else
          {
-            element._button_sprite->setTextureRect(element._button_rect_keyboard);
+            element._button_sprite->textureRect = element._button_rect_keyboard;
          }
       }
    );
@@ -262,9 +269,11 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 
       HelpElement help;
 
-      help._button_sprite = std::make_unique<sf::Sprite>(*_button_texture);
+      help._button_sprite = std::make_unique<sf::Sprite>();
+#ifndef __EMSCRIPTEN__
       help._text = std::make_unique<sf::Text>(*_font);
       help._text->setCharacterSize(12);
+#endif
 
       const auto button_name = button_value.value_or("key_cursor_u");
       const auto button_names = ControllerKeyMap::retrieveMappedKey(button_name);
@@ -272,15 +281,19 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_names.second);
 
       help._button_rect_keyboard = {
-         {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
+         {static_cast<float>(pos_index_keyboard.first * PIXELS_PER_TILE), static_cast<float>(pos_index_keyboard.second * PIXELS_PER_TILE)},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
       };
       help._button_rect_controller = {
-         {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
+         {static_cast<float>(pos_index_controller.first * PIXELS_PER_TILE),
+          static_cast<float>(pos_index_controller.second * PIXELS_PER_TILE)},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
       };
 
-      help._button_sprite->setTextureRect(help._button_rect_keyboard);
-      help._button_sprite->setTexture(*_button_texture);
-      help._text->setString(sftr(text_value.value()));
+      help._button_sprite->textureRect = help._button_rect_keyboard;
+#ifndef __EMSCRIPTEN__
+      help._text->setString(sftr(text_value.value()).c_str());
+#endif
 
       // row 0 at bottom, row 1 above
       const auto view_width = GameConfiguration::getInstance()._view_width;
@@ -290,6 +303,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       const auto text_y_px = text_base_y_px - (row_spacing_px * row);
       const auto icon_x_px = view_width - 24.0f;
       const auto icon_y_px = text_y_px - 4.0f;
+#ifndef __EMSCRIPTEN__
       const auto text_local_bounds = help._text->getLocalBounds();
       const auto text_x_px = view_width - text_local_bounds.size.x - 24.0f - 4.0f;
 
@@ -309,8 +323,10 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       //
       // text location: view.width - text.localbounds.x - icon.width - some_offset
 
-      help._button_sprite->setPosition({icon_x_px, icon_y_px});
-      help._text->setPosition({text_x_px, text_y_px});
+      help._button_sprite->position = {icon_x_px, icon_y_px};
+#ifndef __EMSCRIPTEN__
+      help._text->position = {text_x_px, text_y_px};
+#endif
 
       _help_elements.push_back(std::move(help));
    }

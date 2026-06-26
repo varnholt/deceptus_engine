@@ -130,10 +130,10 @@ void Gun::updateProjectiles(const sf::Time& time)
 
       if (projectile->isRotating())
       {
-         projectile_animation.setRotation(sf::radians(projectile->getRotation()));
+         projectile_animation.rotation = sf::degrees(sf::radians(projectile->rotation));
       }
 
-      projectile_animation.setPosition({projectile->getBody()->GetPosition().x * PPM, projectile->getBody()->GetPosition().y * PPM});
+      projectile_animation.position = {projectile->getBody()->GetPosition().x * PPM, projectile->getBody()->GetPosition().y * PPM};
 
       projectile_animation.update(time);
    }
@@ -206,7 +206,7 @@ void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, co
    }
 
    // TODO, SFML3, is the below line really needed?
-   // _projectile_reference_animation._animation.setTextureRect(tmp_rect_px);
+   // _projectile_reference_animation._animation.textureRect = tmp_rect_px;
    _projectile_reference_animation._animation._color_texture = texture;
    _projectile_reference_animation._animation._frames.clear();
    _projectile_reference_animation._animation._frames.push_back(tmp_rect_px);
@@ -216,13 +216,13 @@ void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, co
    // this should move into the luanode; the engine should not 'guess' the origin
    if (_shape->GetType() == b2Shape::e_polygon)
    {
-      _projectile_reference_animation._animation.setOrigin({0, 0});
+      _projectile_reference_animation._animation.origin = {0, 0};
    }
    else if (_shape->GetType() == b2Shape::e_circle)
    {
       const auto origin_x_px = static_cast<float>(tmp_rect_px.size.x / 2);
       const auto origin_y_px = static_cast<float>(tmp_rect_px.size.y / 2);
-      _projectile_reference_animation._animation.setOrigin({origin_x_px, origin_y_px});
+      _projectile_reference_animation._animation.origin = {origin_x_px, origin_y_px};
    }
 }
 
@@ -230,7 +230,7 @@ void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, co
 void Gun::setProjectileAnimation(const AnimationFrameData& frame_data)
 {
    _projectile_reference_animation._animation._color_texture = frame_data._texture;
-   _projectile_reference_animation._animation.setOrigin(frame_data._origin);
+   _projectile_reference_animation._animation.origin = frame_data._origin;
    _projectile_reference_animation._animation._frames = frame_data._frames;
    _projectile_reference_animation._animation.setFrameTimes(frame_data._frame_times);
 }

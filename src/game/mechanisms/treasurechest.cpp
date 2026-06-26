@@ -88,8 +88,8 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
    const auto texture_path = ValueReader::readValue<std::string>("texture", map).value_or("data/sprites/treasure_chest.png");
    _texture = TexturePool::getInstance().get(texture_path);
 
-   _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition({pos_x_px, pos_y_px});
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->position = {pos_x_px, pos_y_px};
 
    _sample_open = ValueReader::readValue<std::string>("sample_open", map).value_or("treasure_chest_open.wav");
    Audio::getInstance().addSample(_sample_open);
@@ -196,7 +196,7 @@ void TreasureChest::update(const sf::Time& dt)
          if (PlayerRegistry::getFirst()->getControls()->isButtonBPressed())
          {
             const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
-            if (player_rect_px.findIntersection(_rect).has_value())
+            if (sf::findIntersection(player_rect_px, _rect).hasValue())
             {
                if (playerHasRequiredKey())
                {

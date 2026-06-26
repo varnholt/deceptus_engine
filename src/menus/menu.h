@@ -34,7 +34,7 @@ public:
    /// \brief draws the active menu screen using a view sized to the configured game resolution.
    /// \param window render target that receives menu layers.
    /// \param states render states forwarded to the active screen.
-   void draw(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
+   void draw(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates{});
 
    /// \brief updates the currently visible menu screen.
    /// \param dt frame delta time passed to the active screen.

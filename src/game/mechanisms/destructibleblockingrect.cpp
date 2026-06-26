@@ -106,6 +106,7 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
 
    _flash_shader.setUniform("texture", sf::Shader::CurrentTexture);
    _flash_shader.setUniform("flash", _hit_flash);
+#endif
 }
 
 std::string_view DestructibleBlockingRect::objectName() const
@@ -130,6 +131,7 @@ bool DestructibleBlockingRect::isDestructible() const
 
 void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+#ifndef __EMSCRIPTEN__
    color.draw(*_sprite, &_flash_shader);
 }
 
@@ -150,6 +152,7 @@ void DestructibleBlockingRect::update(const sf::Time& dt)
       }
 
       _flash_shader.setUniform("flash", _hit_flash);
+#endif
    }
 
    if (_state.dead)
@@ -161,10 +164,11 @@ void DestructibleBlockingRect::update(const sf::Time& dt)
          _state.current_frame = _config.frame_count - 1;
       }
 
-      _sprite->setTextureRect(sf::IntRect{
+#ifndef __EMSCRIPTEN__
+      _sprite->textureRect = sf::IntRect{
          {static_cast<int32_t>(_state.current_frame) * _config.frame_width, _config.row * _config.frame_height},
          {_config.frame_width, _config.frame_height}
-      });
+      };
    }
 }
 
@@ -228,9 +232,9 @@ void DestructibleBlockingRect::setupSprite(const GameDeserializeData& data)
 
    _texture = TexturePool::getInstance().get(_config.texture_path);
 
-   _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition(sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)});
-   _sprite->setTextureRect(sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}});
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->position = sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)};
+   _sprite->textureRect = sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}};
 }
 
 void DestructibleBlockingRect::destroy()

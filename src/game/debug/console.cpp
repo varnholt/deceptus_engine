@@ -433,7 +433,7 @@ Console::Console()
             if (level && level->getPlayerLight())
             {
                level->getPlayerLight()->_color.a = alpha;
-               level->getPlayerLight()->_sprite->setColor(level->getPlayerLight()->_color);
+               level->getPlayerLight()->_sprite->color = level->getPlayerLight()->_color;
             }
             std::ostringstream oss;
             oss << "player light alpha set to " << static_cast<int>(alpha);

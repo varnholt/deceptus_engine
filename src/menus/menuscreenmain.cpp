@@ -30,9 +30,9 @@ MenuScreenMain::MenuScreenMain()
 
    _text_build = std::make_unique<sf::Text>(_font);
    _text_build->setFont(_font);
-   _text_build->setString(sftr("Build Number") + sf::String{": "} + sf::String{getBuildNumber()});
+   _text_build->setString(sftr("Build Number") + std::string{": "} + std::string{getBuildNumber()});
    _text_build->setCharacterSize(12);
-   _text_build->setPosition({build_text_x_offset, 341});
+   _text_build->position = {build_text_x_offset, 341};
    _text_build->setFillColor(sf::Color{50, 50, 50});
 
    const auto current_year =
@@ -41,13 +41,13 @@ MenuScreenMain::MenuScreenMain()
    _text_copyright = std::make_unique<sf::Text>(_font);
    _text_copyright->setFont(_font);
    const auto copyright_string = std::vformat(tr("© {} Matthias Varnholt & dstar"), std::make_format_args(current_year));
-   _text_copyright->setString(sf::String::fromUtf8(copyright_string.begin(), copyright_string.end()));
+   _text_copyright->setString(std::string::fromUtf8(copyright_string.begin(), copyright_string.end()));
    _text_copyright->setCharacterSize(12);
    _text_copyright->setFillColor(sf::Color{127, 171, 253});
 
    const auto copyright_bounds = _text_copyright->getLocalBounds();
    const auto copyright_x = static_cast<int32_t>((640.0f - copyright_bounds.size.x) / 2.0f - copyright_bounds.position.x);
-   _text_copyright->setPosition({static_cast<float>(copyright_x), 341.0f});
+   _text_copyright->position = {static_cast<float>(copyright_x), 341.0f};
 }
 
 void MenuScreenMain::update(const sf::Time& /*dt*/)
@@ -111,11 +111,14 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
       temp_texture.display();
 
       // create a sprite and apply alpha
-      sf::Sprite temp_sprite(temp_texture.getTexture());
-      temp_sprite.setColor(sf::Color(255, 255, 255, _fade_alpha));
+      const sf::Texture& temp_fade_texture = temp_texture.getTexture();
+      sf::Sprite temp_sprite;
+      temp_sprite.color = sf::Color(255, 255, 255, _fade_alpha);
 
       // draw the faded sprite to the main window
-      window.draw(temp_sprite, states);
+      sf::RenderStates faded_states = states;
+      faded_states.texture = &temp_fade_texture;
+      window.draw(temp_sprite, faded_states);
    }
    else
    {

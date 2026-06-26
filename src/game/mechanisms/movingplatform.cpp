@@ -93,26 +93,16 @@ std::string_view MovingPlatform::objectName() const
 
 void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   for (auto& sprite : _sprites)
-   {
-      sprite.setTexture(*_texture_map);
-   }
-
    for (const auto& sprite : _sprites)
    {
-      color.draw(sprite);
+      color.draw(sprite, sf::RenderStates{.texture = _texture_map.get()});
    }
 
    if (_normal_map)
    {
-      for (auto& sprite : _sprites)
-      {
-         sprite.setTexture(*_normal_map);
-      }
-
       for (const auto& sprite : _sprites)
       {
-         normal.draw(sprite);
+         normal.draw(sprite, sf::RenderStates{.texture = _normal_map.get()});
       }
    }
 }
@@ -276,11 +266,11 @@ void MovingPlatform::setup(const GameDeserializeData& data)
          }
       }
 
-      sf::Sprite sprite(*_texture_map);
-      sprite.setTextureRect(sf::IntRect(
+      sf::Sprite sprite;
+      sprite.textureRect = sf::IntRect(
          {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
          // 1 platform tile and one background tile for perspective
-      ));
+      );
 
       addSprite(sprite);
    }
@@ -428,7 +418,7 @@ void MovingPlatform::update(const sf::Time& delta_time)
       const auto pos_body_x_px = (_body->GetPosition().x * PPM) + (horizontal * sprite_index * PIXELS_PER_TILE);
       const auto pos_body_y_px = (_body->GetPosition().y * PPM) - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
 
-      sprite.setPosition({pos_body_x_px, pos_body_y_px});
+      sprite.position = {pos_body_x_px, pos_body_y_px};
       auto update_sprite_rect = false;
       auto texture_u = 0;
       auto texture_v = 0;
@@ -469,7 +459,7 @@ void MovingPlatform::update(const sf::Time& delta_time)
 
       if (update_sprite_rect)
       {
-         sprite.setTextureRect({{texture_u, texture_v}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}});
+         sprite.textureRect = {{texture_u, texture_v}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}};
       }
 
       sprite_index++;

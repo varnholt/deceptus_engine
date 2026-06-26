@@ -6,6 +6,8 @@
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>
+#include <memory>
+#include <optional>
 
 struct TmxObject;
 
@@ -33,15 +35,16 @@ struct ShaderLayer : public GameMechanism, public GameNode
    /// \return layer bounds in pixel space.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-   /// \brief inspects shader source to detect optional uniform support.
-   /// \param shader_path file path to the fragment shader source.
-   virtual void checkUniforms(const std::string& shader_path);
+   /// \brief caches uniform locations for all known shader uniforms.
+   virtual void checkUniforms();
 
    /// \brief called after base deserialization so subclasses can read their own TMX properties.
    /// \param data deserialization data passed through from the factory.
-   virtual void readCustomProperties(const GameDeserializeData& data) {}
+   virtual void readCustomProperties(const GameDeserializeData& data)
+   {
+   }
 
-   sf::Shader _shader;
+   std::unique_ptr<sf::Shader> _shader;
    sf::Vector2f _position;
    sf::Vector2f _size;
    sf::FloatRect _rect;
@@ -51,8 +54,10 @@ struct ShaderLayer : public GameMechanism, public GameNode
    float _uv_height = 1.0f;
    sf::Time _elapsed;
 
-   bool _has_u_resolution = false;
-   bool _has_u_uv_height = false;
+   std::optional<sf::Shader::UniformLocation> _u_texture_loc;
+   std::optional<sf::Shader::UniformLocation> _u_time_loc;
+   std::optional<sf::Shader::UniformLocation> _u_resolution_loc;
+   std::optional<sf::Shader::UniformLocation> _u_uv_height_loc;
 
    /// \brief creates and configures a shader layer from tmx object properties.
    /// \param parent owning game node in the scene graph.

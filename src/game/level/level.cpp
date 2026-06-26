@@ -67,6 +67,7 @@
 #include <iostream>
 #include <ranges>
 #include <regex>
+#include <span>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -164,12 +165,14 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    _gamma_shader = std::make_unique<GammaShader>();
 
    // load alpha-test shader for occluder stencil rendering
+#ifndef __EMSCRIPTEN__
    if (!_occluder_shader.loadFromFile("data/shaders/stencil_write.vert", "data/shaders/stencil_write.frag"))
    {
       Log::Warning() << "failed to load occluder stencil shader";
    }
    _occluder_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
    _occluder_shader.setUniform("u_alpha_threshold", 0.01f);
+#endif
 
    // init world for this level
    const b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
@@ -282,11 +285,8 @@ void Level::loadTmx()
    // preload mechanism data in parallel
    for (auto& [vec_key, vec_values] : _mechanism_registry.getMap())
    {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
       std::for_each(vec_values->begin(), vec_values->end(), [](auto& val) { val->preload(); });
-#else
-      std::for_each(std::execution::par, vec_values->begin(), vec_values->end(), [](auto& val) { val->preload(); });
-#endif
    }
 
    // process everything that's not considered a mechanism
@@ -372,7 +372,7 @@ void Level::loadTmx()
    }
 
    // load tilemaps in parallel
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
    std::for_each(
       layer_load_data.begin(),
       layer_load_data.end(),
@@ -535,6 +535,7 @@ void Level::initialize()
    _atmosphere_shader->initialize(_render_targets.atmosphere);
    _blur_shader->initialize(_render_targets.blur, _render_targets.blur_scaled);
    _gamma_shader->initialize();
+#endif
 
    loadStartPosition();
 
@@ -701,7 +702,7 @@ void Level::drawStaticChains(sf::RenderTarget& target)
 {
    for (auto& path : _atmosphere._outlines)
    {
-      target.draw(&path.at(0), path.size(), sf::PrimitiveType::LineStrip);
+      target.draw(std::span<const sf::Vertex>{&path.at(0), path.size()}, sf::PrimitiveType::LineStrip);
    }
 }
 
@@ -719,6 +720,7 @@ void Level::createViews()
    _view_height = static_cast<float>(game_config._view_height);
 
    _level_view.reset();
+#ifndef __EMSCRIPTEN__
    _level_view = std::make_shared<sf::View>(sf::FloatRect({0.0f, 0.0f}, {_view_width, _view_height}));
    _level_view->setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 
@@ -865,8 +867,11 @@ void Level::drawLightMap()
 {
    _render_targets.lighting->clear();
    _render_targets.lighting->setView(*_level_view);
+#endif
    _render_targets.lighting2->clear();
+#ifndef __EMSCRIPTEN__
    _render_targets.lighting2->setView(*_level_view);
+#endif
    _light_system->draw(*_render_targets.lighting, *_render_targets.lighting2, {});
    _render_targets.lighting->display();
    _render_targets.lighting2->display();
@@ -885,13 +890,17 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
    {
       if (parallax->_z_index == z_index)
       {
+#ifndef __EMSCRIPTEN__
          target.setView(parallax->_view);
+#endif
          target.draw(*parallax->_tile_map);
       }
    }
 
    // restore level view
+#ifndef __EMSCRIPTEN__
    target.setView(*_level_view);
+#endif
 }
 
 void Level::drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t z_index, auto predicate)
@@ -915,7 +924,7 @@ void Level::drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal,
                mechanism->draw(color, normal);
             }
 #else
-            mechanism->draw(color, normal);
+               mechanism->draw(color, normal);
 #endif
          }
       }
@@ -924,8 +933,10 @@ void Level::drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal,
 
 void Level::drawPostLightingLayers(sf::RenderTarget& target)
 {
+#ifndef __EMSCRIPTEN__
    const auto previous_view = target.getView();
    target.setView(*_level_view);
+#endif
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
    for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
@@ -954,13 +965,17 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
       }
    }
 
+#ifndef __EMSCRIPTEN__
    target.setView(previous_view);
+#endif
 }
 
 void Level::drawOverlayLayers(sf::RenderTarget& target)
 {
+#ifndef __EMSCRIPTEN__
    const auto previous_view = target.getView();
    target.setView(*_level_view);
+#endif
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
    for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
@@ -973,7 +988,9 @@ void Level::drawOverlayLayers(sf::RenderTarget& target)
       );
    }
 
+#ifndef __EMSCRIPTEN__
    target.setView(previous_view);
+#endif
 }
 
 void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
@@ -985,8 +1002,10 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 {
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
+#ifndef __EMSCRIPTEN__
    target.setView(*_level_view);
    normal.setView(*_level_view);
+#endif
 
    for (auto z_index = from; z_index <= to; z_index++)
    {
@@ -1052,6 +1071,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 
 void Level::drawAtmosphereLayer()
 {
+#ifndef __EMSCRIPTEN__
    if (!_atmosphere._tile_map)
    {
       return;
@@ -1059,15 +1079,17 @@ void Level::drawAtmosphereLayer()
 
    _atmosphere_shader->getRenderTexture()->clear();
    _atmosphere._tile_map->setVisible(true);
-   _atmosphere_shader->getRenderTexture()->setView(*_level_view);
    _atmosphere_shader->getRenderTexture()->draw(*_atmosphere._tile_map);
    _atmosphere._tile_map->setVisible(false);
    _atmosphere_shader->getRenderTexture()->display();
+#endif
 }
 
 void Level::drawBlurLayer(sf::RenderTarget& target)
 {
+#ifndef __EMSCRIPTEN__
    target.setView(*_level_view);
+#endif
 
    // draw elements that are supposed to glow / to be blurred here
 
@@ -1141,16 +1163,20 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
    // draw all tilemaps at z=24 into the stencil buffer only.
    // stencilOnly=true suppresses color output (replaces the old zero/zero blend mode).
    // the fragment shader's discard still runs so transparent tile regions don't occlude.
+#ifndef __EMSCRIPTEN__
    target.setView(*_level_view);
+#endif
 
    sf::RenderStates states;
+#ifndef __EMSCRIPTEN__
    states.shader = &_occluder_shader;
-   states.stencilMode = {
-      sf::StencilComparison::Always,
-      sf::StencilUpdateOperation::Replace,
-      1,    // reference: mark occluded pixels with 1
-      ~0u,  // mask
-      true  // stencilOnly: no color writes
+#endif
+   states.stencilMode = sf::StencilMode{
+      .stencilComparison = sf::StencilComparison::Always,
+      .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
+      .stencilOnly = true,
+      .stencilReference = sf::StencilValue{1u},
+      .stencilMask = sf::StencilValue{~0u}
    };
 
    for (const auto& tile_map : _tile_maps)
@@ -1165,16 +1191,17 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
 void Level::displayFinalTextures()
 {
    // display the whole texture
-   sf::View view(sf::FloatRect(
-      {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
-   ));
-
-   view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
-
-   _render_targets.level->setView(view);
+#ifndef __EMSCRIPTEN__
+   {
+      sf::View view(sf::FloatRect(
+         {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
+      ));
+      view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
+      _render_targets.level->setView(view);
+      _render_targets.normal->setView(view);
+   }
+#endif
    _render_targets.level->display();
-
-   _render_targets.normal->setView(view);
    _render_targets.normal->display();
 }
 
@@ -1191,29 +1218,33 @@ void Level::drawGlowLayer()
 void Level::drawGlowSprite()
 {
 #ifdef GLOW_ENABLED
-   sf::Sprite blur_sprite(_blur_shader->getRenderTexture()->getTexture());
+   const sf::Texture& blur_texture = _blur_shader->getRenderTexture()->getTexture();
+   sf::Sprite blur_sprite;
    const auto down_scale_x =
       _blur_shader->getRenderTextureScaled()->getSize().x / static_cast<float>(_blur_shader->getRenderTexture()->getSize().x);
    const auto down_scale_y =
       _blur_shader->getRenderTextureScaled()->getSize().y / static_cast<float>(_blur_shader->getRenderTexture()->getSize().y);
-   blur_sprite.scale({down_scale_x, down_scale_y});
+   blur_sprite.scale = {down_scale_x, down_scale_y};
 
    sf::RenderStates states_shader;
+   states_shader.texture = &blur_texture;
    _blur_shader->update();
    states_shader.shader = &_blur_shader->getShader();
    _blur_shader->getRenderTextureScaled()->draw(blur_sprite, states_shader);
 
-   sf::Sprite blur_scale_sprite(_blur_shader->getRenderTextureScaled()->getTexture());
-   blur_scale_sprite.scale(1.0f / down_scale_x, 1.0f / down_scale_y);
-   blur_scale_sprite.setTextureRect(sf::IntRect(
+   const sf::Texture& blur_scale_texture = _blur_shader->getRenderTextureScaled()->getTexture();
+   sf::Sprite blur_scale_sprite;
+   blur_scale_sprite.scale = {1.0f / down_scale_x, 1.0f / down_scale_y};
+   blur_scale_sprite.textureRect = sf::IntRect(
       0,
-      static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y),
-      static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().x),
-      -static_cast<int32_t>(blur_scale_sprite.getTexture()->getSize().y)
-   ));
+      static_cast<int32_t>(blur_scale_texture.getSize().y),
+      static_cast<int32_t>(blur_scale_texture.getSize().x),
+      -static_cast<int32_t>(blur_scale_texture.getSize().y)
+   );
 
    sf::RenderStates states_add;
    states_add.blendMode = sf::BlendAdd;
+   states_add.texture = &blur_scale_texture;
    _render_targets.level->draw(blur_scale_sprite, states_add);
 #endif
 }
@@ -1273,7 +1304,9 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    // render atmosphere to atmosphere texture, that texture is used in the shader only
    drawAtmosphereLayer();
+#ifndef __EMSCRIPTEN__
    takeScreenshot("texture_atmosphere", *_atmosphere_shader->getRenderTexture().get());
+#endif
 
    // render glowing elements
    drawGlowLayer();
@@ -1298,15 +1331,17 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    takeScreenshot("texture_level_background_normal", *_render_targets.normal_tmp.get());
 
    // draw the atmospheric parts into the level texture using the atmosphere shader
-   sf::Sprite tmp_sprite(_render_targets.level_background->getTexture());
+   sf::Sprite tmp_sprite;
+   const sf::Texture* tmp_sprite_texture = &_render_targets.level_background->getTexture();
+#ifndef __EMSCRIPTEN__
    _atmosphere_shader->update();
-   _render_targets.level->draw(tmp_sprite, &_atmosphere_shader->getShader());
+   _render_targets.level->draw(tmp_sprite, sf::RenderStates{.texture = tmp_sprite_texture, .shader = &_atmosphere_shader->getShader()});
    takeScreenshot("texture_level_level_dist", *_render_targets.level.get());
 
    // draw the normal parts into the final normal texture using the atmosphere shader
-   tmp_sprite.setTexture(_render_targets.normal_tmp->getTexture());
+   tmp_sprite_texture = &_render_targets.normal_tmp->getTexture();
    _atmosphere_shader->update();
-   _render_targets.normal->draw(tmp_sprite, &_atmosphere_shader->getShader());
+   _render_targets.normal->draw(tmp_sprite, sf::RenderStates{.texture = tmp_sprite_texture, .shader = &_atmosphere_shader->getShader()});
    takeScreenshot("texture_level_background_normal_dist", *_render_targets.normal.get());
 
    drawGlowSprite();
@@ -1347,14 +1382,16 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    takeScreenshot("texture_map_normal", *_render_targets.normal.get());
    takeScreenshot("texture_map_deferred", *_render_targets.deferred.get());
 
-   auto level_texture_sprite = sf::Sprite(_render_targets.deferred->getTexture());
-   _gamma_shader->setTexture(_render_targets.deferred->getTexture());
+   const sf::Texture& level_deferred_texture = _render_targets.deferred->getTexture();
+   sf::Sprite level_texture_sprite;
 
-   level_texture_sprite.setPosition({_boom_effect._boom_offset_x, _boom_effect._boom_offset_y});
-   level_texture_sprite.scale({_render_targets.view_to_texture_scale, _render_targets.view_to_texture_scale});
+   level_texture_sprite.position = {_boom_effect._boom_offset_x, _boom_effect._boom_offset_y};
+   level_texture_sprite.scale = {_render_targets.view_to_texture_scale, _render_targets.view_to_texture_scale};
 
+   _gamma_shader->setTexture(level_deferred_texture);
    _gamma_shader->update();
-   window->draw(level_texture_sprite, &_gamma_shader->getGammaShader());
+   window->draw(level_texture_sprite, sf::RenderStates{.texture = &level_deferred_texture, .shader = &_gamma_shader->getGammaShader()});
+#endif
 }
 
 void Level::updatePlayerLight()
@@ -1373,7 +1410,7 @@ void Level::updatePlayerLight()
    {
       color.a = 0;
    }
-   _player_light->_sprite->setColor(color);
+   _player_light->_sprite->color = color;
 }
 
 const std::shared_ptr<LightSystem>& Level::getLightSystem() const
@@ -1439,7 +1476,7 @@ void Level::update(const sf::Time& dt)
                mechanism->update(dt);
             }
 #else
-            mechanism->update(dt);
+               mechanism->update(dt);
 #endif
          }
       }

@@ -32,11 +32,19 @@ public:
       auto sp = m_pool[key].lock();
       if (!sp)
       {
+#ifdef __EMSCRIPTEN__
+         sp = createResource(path);
+         if (!sp)
+         {
+            Log::Warning() << "error loading texture: " << path;
+         }
+#else
          sp = std::make_shared<Resource>();
          if (!loadResource(*sp, path))
          {
             Log::Warning() << "error loading texture: " << path;
          }
+#endif
          m_pool[key] = sp;
       }
 
@@ -73,6 +81,18 @@ protected:
    /// \return `true` when loading succeeded; otherwise `false`.
    ///
    virtual bool loadResource(Resource& resource, const std::filesystem::path& path) const = 0;
+
+   ///
+   /// \brief Creates and loads a resource directly from `path` without default construction.
+   ///        Used on EMSCRIPTEN where some resource types (e.g. sf::Texture) have no
+   ///        default constructor and must be constructed through their load factory.
+   /// \param path Source path for loading.
+   /// \return Shared pointer to the loaded resource, or nullptr on failure.
+   ///
+   virtual std::shared_ptr<Resource> createResource(const std::filesystem::path& path) const
+   {
+      return nullptr;
+   }
 
    ///
    /// \brief Computes the memory footprint of one resource.

@@ -163,7 +163,7 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    auto row_index = 0;
    for (auto& block : _blocks)
    {
-      block._sprite = std::make_unique<sf::Sprite>(*_texture);
+      block._sprite = std::make_unique<sf::Sprite>();
       block._x_px = x + sprite_offset_x_px;
       block._y_px = y + sprite_offset_y_px;
       block._sprite_row = row_index % 4;
@@ -194,7 +194,7 @@ void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*norma
 
    for (auto& block : _blocks)
    {
-      color.draw(*block._sprite);
+      color.draw(*block._sprite, sf::RenderStates{.texture = _texture.get()});
    }
 }
 
@@ -209,7 +209,7 @@ void CollapsingPlatform::updateRespawnAnimation()
    {
       for (auto& block : _blocks)
       {
-         block._sprite->setColor(sf::Color{255, 255, 255, 255});
+         block._sprite->color = sf::Color{255, 255, 255, 255};
       }
 
       _respawning = false;
@@ -226,7 +226,7 @@ void CollapsingPlatform::updateRespawnAnimation()
       for (auto& block : _blocks)
       {
          block._alpha = static_cast<uint8_t>(255.0f * alpha_normalized);
-         block._sprite->setColor(sf::Color{255, 255, 255, block._alpha});
+         block._sprite->color = sf::Color{255, 255, 255, block._alpha};
       }
    }
 }
@@ -238,7 +238,9 @@ void CollapsingPlatform::updateRespawn(const sf::Time& dt)
    // bring collapsed blocks back after some time
    if (!_respawning && _time_since_collapse.asSeconds() > _settings.time_to_respawn_s)
    {
-      if (PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect_px).has_value())
+      const auto player_rect_float = PlayerRegistry::getFirst()->getPixelRectFloat();
+      const auto player_intersects_rect = sf::findIntersection(player_rect_float, _rect_px).hasValue();
+      if (player_intersects_rect)
       {
          // shift respawn time while player intersects
          _time_since_collapse = sf::seconds(_settings.time_to_respawn_s);
@@ -393,9 +395,9 @@ void CollapsingPlatform::updateBlockSprites()
 {
    for (auto& block : _blocks)
    {
-      block._sprite->setPosition({block._x_px + block._shake_x_px, block._y_px + block._shake_y_px + block._fall_offset_y_px});
-      block._sprite->setTextureRect(
-         {{block._sprite_column * PIXELS_PER_TILE, block._sprite_row * PIXELS_PER_TILE * 3}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3}}
+      block._sprite->position = {block._x_px + block._shake_x_px, block._y_px + block._shake_y_px + block._fall_offset_y_px};
+      block._sprite->textureRect = sf::IntRect(
+         {block._sprite_column * PIXELS_PER_TILE, block._sprite_row * PIXELS_PER_TILE * 3}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3}
       );
    }
 }

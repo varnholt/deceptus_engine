@@ -197,7 +197,7 @@ void MenuScreenOptions::updateLayers()
    _text_accept_button->setString(sftr("Accept"));
    placeTextRightOf(*_text_accept_button, accept_layer->_sprite->getGlobalBounds());
 
-   auto update_item = [this](sf::Text& text, const sf::FloatRect& reference_rect, const sf::String& label, bool selected)
+   auto update_item = [this](sf::Text& text, const sf::FloatRect& reference_rect, const std::string& label, bool selected)
    {
       text.setString(label);
       text.setFillColor(selected ? color_label_selected : color_label_normal);

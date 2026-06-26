@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <optional>
 
 /// \brief wraps the brightness shader used for gamma-style screen correction.
 class GammaShader
@@ -24,5 +25,5 @@ public:
    const sf::Shader& getGammaShader() const;
 
 private:
-   sf::Shader _gamma_shader;
+   std::optional<sf::Shader> _gamma_shader;
 };

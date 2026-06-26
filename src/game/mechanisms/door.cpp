@@ -107,7 +107,7 @@ void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    }
    else if (_state == State::Closed)
    {
-      color.draw(*_sprite);
+      color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
    }
 
    if (_player_at_door)
@@ -461,8 +461,8 @@ bool Door::setup(const GameDeserializeData& data)
       {
          const auto texture_path = texture_it->second->_value_string.value();
          _texture = TexturePool::getInstance().get(texture_path);
-         _sprite = std::make_unique<sf::Sprite>(*_texture);
-         _sprite->setPosition({x_px, y_px});
+         _sprite = std::make_unique<sf::Sprite>();
+         _sprite->position = {x_px, y_px};
       }
 
       const auto sample_open_it = map.find("sample_open");
@@ -548,7 +548,7 @@ bool Door::setup(const GameDeserializeData& data)
       // the first frame of the open animation should be the texture rect used for drawing
       if (_animation_open)
       {
-         _sprite->setTextureRect(_animation_open->_frames.at(0));
+         _sprite->textureRect = _animation_open->_frames.at(0);
       }
    }
 

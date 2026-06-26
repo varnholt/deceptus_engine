@@ -75,7 +75,7 @@ void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
    for (const auto& firefly : _fireflies)
    {
-      target.draw(*firefly._sprite);
+      target.draw(*firefly._sprite, sf::RenderStates{.texture = _texture.get()});
    }
 }
 
@@ -182,7 +182,7 @@ void Fireflies::deserialize(const GameDeserializeData& data)
    {
       firefly._instance_number = _instance_counter++;
       firefly._rect_px = _rect_px;
-      firefly._sprite->setTextureRect({{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+      firefly._sprite->textureRect = {{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
       firefly._elapsed += sf::seconds(static_cast<float>(std::rand() % 999));
       firefly._angle_x = frand(30.0, 360.0) * FACTOR_DEG_TO_RAD;
       firefly._angle_y = frand(30.0, 360.0) * FACTOR_DEG_TO_RAD;
@@ -211,7 +211,7 @@ void rotate(float& x, float& y, float& z, float angle_x, float angle_y)
 
 Fireflies::Firefly::Firefly(const sf::Texture& texture)
 {
-   _sprite = std::make_unique<sf::Sprite>(texture);
+   _sprite = std::make_unique<sf::Sprite>();
 }
 
 void Fireflies::Firefly::update(const sf::Time& dt)
@@ -234,8 +234,8 @@ void Fireflies::Firefly::update(const sf::Time& dt)
    _position.x = _rect_px.position.x + (_rect_px.size.x * 0.5f) + x_scaled_px;
    _position.y = _rect_px.position.y + (_rect_px.size.y * 0.5f) + y_scaled_px;
 
-   _sprite->setPosition(_position);
-   _sprite->setOrigin({PIXELS_PER_TILE / 2, PIXELS_PER_TILE / 2});
+   _sprite->position = _position;
+   _sprite->origin = {PIXELS_PER_TILE / 2, PIXELS_PER_TILE / 2};
 
    updateTextureRect();
 }
@@ -248,6 +248,9 @@ void Fireflies::Firefly::updateTextureRect()
    if (frame != _current_frame)
    {
       _current_frame = frame;
-      _sprite->setTextureRect({{_current_frame * PIXELS_PER_TILE, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+      _sprite->textureRect = {
+         {static_cast<float>(_current_frame * PIXELS_PER_TILE), 0.0f},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+      };
    }
 }

@@ -25,7 +25,9 @@ DeathShader::~DeathShader()
 
 void DeathShader::initialize()
 {
-   if (!_shader.loadFromFile("data/shaders/death.vert", "data/shaders/death.frag"))
+#ifndef __EMSCRIPTEN__
+   _shader.emplace();
+   if (!_shader->loadFromFile("data/shaders/death.vert", "data/shaders/death.frag"))
    {
       Log::Error() << "error loading shader";
       return;
@@ -39,15 +41,18 @@ void DeathShader::initialize()
    _flow_field_2->setRepeated(true);
    _flow_field_2->setSmooth(true);
 
-   _shader.setUniform("current_texture", sf::Shader::CurrentTexture);
-   _shader.setUniform("flowfield_1", *_flow_field_1);
-   _shader.setUniform("flowfield_2", *_flow_field_2);
+   _shader->setUniform("current_texture", sf::Shader::CurrentTexture);
+   _shader->setUniform("flowfield_1", *_flow_field_1);
+   _shader->setUniform("flowfield_2", *_flow_field_2);
+#endif
 }
 
 void DeathShader::reset()
 {
+#ifndef __EMSCRIPTEN__
    _elapsed = 0.0f;
-   _shader.setUniform("time", _elapsed);
+   _shader->setUniform("time", _elapsed);
+#endif
 }
 
 void DeathShader::update(const sf::Time& dt)
@@ -59,17 +64,19 @@ void DeathShader::update(const sf::Time& dt)
       _elapsed = 1.0f;
    }
 
-   _shader.setUniform("time", _elapsed);
-   _shader.setUniform(
+#ifndef __EMSCRIPTEN__
+   _shader->setUniform("time", _elapsed);
+   _shader->setUniform(
       "flowfield_offset",
       PlayerRegistry::getFirst()->isPointingLeft() ? sf::Glsl::Vec2(0.5f, -0.32f)  // picked randomly
-                                             : sf::Glsl::Vec2(0.8f, 0.8f)
+                                                   : sf::Glsl::Vec2(0.8f, 0.8f)
    );
+#endif
 }
 
 const sf::Shader& DeathShader::getShader() const
 {
-   return _shader;
+   return *_shader;
 }
 
 const std::shared_ptr<sf::RenderTexture>& DeathShader::getRenderTexture() const

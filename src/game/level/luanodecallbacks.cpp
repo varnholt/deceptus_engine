@@ -1395,7 +1395,7 @@ int32_t updateProjectileAnimation(lua_State* state)
    }
 
    const auto weapon_index = static_cast<uint32_t>(lua_tointeger(state, 1));
-   const std::filesystem::path path = lua_tostring(state, 2);
+   const std::string path = lua_tostring(state, 2);
    const auto frame_width = static_cast<uint32_t>(lua_tointeger(state, 3));
    const auto frame_height = static_cast<uint32_t>(lua_tointeger(state, 4));
    const auto frame_origin_x = static_cast<float>(lua_tointeger(state, 5));
@@ -1407,7 +1407,7 @@ int32_t updateProjectileAnimation(lua_State* state)
 
    node->setProjectileAnimation(
       weapon_index,
-      path.string(),
+      path,
       frame_width,
       frame_height,
       frame_origin_x,
@@ -1551,7 +1551,7 @@ int32_t registerHitAnimation(lua_State* state)
    }
 
    const auto weapon_index = static_cast<uint32_t>(lua_tointeger(state, 1));
-   const std::filesystem::path path = lua_tostring(state, 2);
+   const std::string path = lua_tostring(state, 2);
    const auto frame_width = static_cast<uint32_t>(lua_tointeger(state, 3));
    const auto frame_height = static_cast<uint32_t>(lua_tointeger(state, 4));
    const auto time_per_frame_s = static_cast<float>(lua_tonumber(state, 5));
@@ -1561,7 +1561,7 @@ int32_t registerHitAnimation(lua_State* state)
 
    node->registerHitAnimation(
       weapon_index,
-      path.string(),
+      path,
       frame_width,
       frame_height,
       time_per_frame_s,

@@ -22,7 +22,7 @@ void MenuScreen::placeTextCentered(sf::Text& text, const sf::FloatRect& referenc
       static_cast<int32_t>(reference_rect.position.x + (reference_rect.size.x - text_bounds.size.x) / 2.0f - text_bounds.position.x);
    const auto pixel_y =
       static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - text_bounds.size.y) / 2.0f - text_bounds.position.y);
-   text.setPosition({static_cast<float>(pixel_x), static_cast<float>(pixel_y)});
+   text.position = {static_cast<float>(pixel_x), static_cast<float>(pixel_y)};
 }
 
 void MenuScreen::placeTextLeft(sf::Text& text, const sf::FloatRect& reference_rect)
@@ -31,7 +31,7 @@ void MenuScreen::placeTextLeft(sf::Text& text, const sf::FloatRect& reference_re
    const auto pixel_x = static_cast<int32_t>(reference_rect.position.x - text_bounds.position.x);
    const auto pixel_y =
       static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - text_bounds.size.y) / 2.0f - text_bounds.position.y);
-   text.setPosition({static_cast<float>(pixel_x), static_cast<float>(pixel_y)});
+   text.position = {static_cast<float>(pixel_x), static_cast<float>(pixel_y)};
 }
 
 void MenuScreen::placeTextRightOf(sf::Text& text, const sf::FloatRect& reference_rect)
@@ -41,7 +41,7 @@ void MenuScreen::placeTextRightOf(sf::Text& text, const sf::FloatRect& reference
       static_cast<int32_t>(reference_rect.position.x + reference_rect.size.x + button_text_x_offset - text_bounds.position.x);
    const auto pixel_y =
       static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - text_bounds.size.y) / 2.0f - text_bounds.position.y);
-   text.setPosition({static_cast<float>(pixel_x), static_cast<float>(pixel_y)});
+   text.position = {static_cast<float>(pixel_x), static_cast<float>(pixel_y)};
 }
 
 void MenuScreen::placeDecorators(sf::Sprite& deco_left, sf::Sprite& deco_right, const sf::FloatRect& reference_rect)
@@ -51,12 +51,12 @@ void MenuScreen::placeDecorators(sf::Sprite& deco_left, sf::Sprite& deco_right, 
    const auto deco_left_bounds = deco_left.getLocalBounds();
    const auto deco_left_x = static_cast<int32_t>(reference_rect.position.x - deco_left_bounds.size.x - decorator_gap_px);
    const auto deco_left_y = static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - deco_left_bounds.size.y) / 2.0f);
-   deco_left.setPosition({static_cast<float>(deco_left_x), static_cast<float>(deco_left_y)});
+   deco_left.position = {static_cast<float>(deco_left_x), static_cast<float>(deco_left_y)};
 
    const auto deco_right_bounds = deco_right.getLocalBounds();
    const auto deco_right_x = static_cast<int32_t>(reference_rect.position.x + reference_rect.size.x + decorator_gap_px);
    const auto deco_right_y = static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - deco_right_bounds.size.y) / 2.0f);
-   deco_right.setPosition({static_cast<float>(deco_right_x), static_cast<float>(deco_right_y)});
+   deco_right.position = {static_cast<float>(deco_right_x), static_cast<float>(deco_right_y)};
 }
 
 sf::FloatRect MenuScreen::rowRect(const sf::FloatRect& base_rect, int32_t row_index) const
@@ -129,10 +129,10 @@ void MenuScreen::load()
          auto opacity = layer.getOpacity();
 
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
-         auto sprite = std::make_shared<sf::Sprite>(*texture);
+         auto sprite = std::make_shared<sf::Sprite>();
 
-         sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
-         sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
+         sprite->position = {static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
+         sprite->color = sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity));
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;

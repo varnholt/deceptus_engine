@@ -1,6 +1,7 @@
 #include "debugdraw.h"
 
 #include <iostream>
+#include <span>
 
 #include "game/camera/camerasystem.h"
 #include "game/physics/worldquery.h"
@@ -24,7 +25,7 @@ b2Vec2 DebugDraw::vecS2B(const sf::Vector2f& vector)
 
 void DebugDraw::drawPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
 {
-   sf::ConvexShape polygon(vertexCount);
+   sf::ConvexShape polygon{sf::ConvexShape::Data{.pointCount = static_cast<std::size_t>(vertexCount)}};
 
    for (auto i = 0; i < vertexCount; i++)
    {
@@ -40,7 +41,7 @@ void DebugDraw::drawPolygon(sf::RenderTarget& target, const b2Vec2* vertices, in
 
 void DebugDraw::drawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertex_count, const b2Color& color)
 {
-   sf::ConvexShape polygon(vertex_count);
+   sf::ConvexShape polygon{sf::ConvexShape::Data{.pointCount = static_cast<std::size_t>(vertex_count)}};
    for (auto i = 0; i < vertex_count; i++)
    {
       sf::Vector2f transformedVec = DebugDraw::vecB2S(vertices[i]);
@@ -56,9 +57,9 @@ void DebugDraw::drawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertice
 
 void DebugDraw::drawCircle(sf::RenderTarget& target, const b2Vec2& center, float radius, const b2Color& color)
 {
-   sf::CircleShape circle(radius * PPM);
-   circle.setOrigin({radius * PPM, radius * PPM});
-   circle.setPosition(DebugDraw::vecB2S(center));
+   sf::CircleShape circle{sf::CircleShape::Data{.radius = radius * PPM}};
+   circle.origin = {radius * PPM, radius * PPM};
+   circle.position = DebugDraw::vecB2S(center);
    circle.setFillColor(sf::Color::Transparent);
    circle.setOutlineThickness(outline_thickness);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -68,9 +69,9 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const b2Vec2& center, float
 
 void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center, float radius, const b2Color& color)
 {
-   sf::CircleShape circle(radius);
-   circle.setOrigin({radius, radius});
-   circle.setPosition(center);
+   sf::CircleShape circle{sf::CircleShape::Data{.radius = radius}};
+   circle.origin = {radius, radius};
+   circle.position = center;
    circle.setFillColor(sf::Color::Transparent);
    circle.setOutlineThickness(outline_thickness);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -80,9 +81,9 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center,
 
 void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float radius, const b2Vec2& axis, const b2Color& color)
 {
-   sf::CircleShape circle(radius * PPM);
-   circle.setOrigin({radius * PPM, radius * PPM});
-   circle.setPosition(DebugDraw::vecB2S(center));
+   sf::CircleShape circle{sf::CircleShape::Data{.radius = radius * PPM}};
+   circle.origin = {radius * PPM, radius * PPM};
+   circle.position = DebugDraw::vecB2S(center);
    circle.setFillColor(DebugDraw::glColorToSfml(color, 255));
    circle.setOutlineThickness(1.f);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -94,7 +95,7 @@ void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, 
    };
 
    target.draw(circle);
-   target.draw(line, 2, sf::PrimitiveType::Lines);
+   target.draw(line, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const b2Color& color)
@@ -108,7 +109,7 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const
       sf::Vertex(p + sf::Vector2f{0, pointSize}, DebugDraw::glColorToSfml(color))
    };
 
-   target.draw(line, 4, sf::PrimitiveType::Lines);
+   target.draw(line, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color)
@@ -122,7 +123,7 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Col
       sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{0, pointSize}, DebugDraw::glColorToSfml(color))
    };
 
-   target.draw(line, 4, sf::PrimitiveType::Lines);
+   target.draw(line, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
@@ -131,14 +132,14 @@ void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec
       sf::Vertex(DebugDraw::vecB2S(p1), DebugDraw::glColorToSfml(color)), sf::Vertex(DebugDraw::vecB2S(p2), DebugDraw::glColorToSfml(color))
    };
 
-   target.draw(line, 2, sf::PrimitiveType::Lines);
+   target.draw(line, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawLine(sf::RenderTarget& target, const sf::Vector2f& p1, const sf::Vector2f& p2, const b2Color& color)
 {
    sf::Vertex line[] = {sf::Vertex(p1, DebugDraw::glColorToSfml(color)), sf::Vertex(p2, DebugDraw::glColorToSfml(color))};
 
-   target.draw(line, 2, sf::PrimitiveType::Lines);
+   target.draw(line, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& lines, const b2Color& color)
@@ -148,7 +149,7 @@ void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& l
 
    std::transform(lines.begin(), lines.end(), sf_lines.begin(), [sf_color](const auto& val) { return sf::Vertex(vecB2S(val), sf_color); });
 
-   target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
+   target.draw(std::span<const sf::Vertex>{sf_lines.data(), sf_lines.size()}, sf::PrimitiveType::LineStrip);
 }
 
 void DebugDraw::drawLines(
@@ -167,7 +168,7 @@ void DebugDraw::drawLines(
       sf_lines.emplace_back(vecB2S(vertices[i] + offset), sf_color);
    }
 
-   target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
+   target.draw(std::span<const sf::Vertex>{sf_lines.data(), sf_lines.size()}, sf::PrimitiveType::LineStrip);
 }
 
 void DebugDraw::drawLineLoop(
@@ -189,7 +190,7 @@ void DebugDraw::drawLineLoop(
    // close loop
    sf_lines.emplace_back(vecB2S(vertices[0] + offset), sf_color);
 
-   target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
+   target.draw(std::span<const sf::Vertex>{sf_lines.data(), sf_lines.size()}, sf::PrimitiveType::LineStrip);
 }
 
 void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
@@ -207,8 +208,8 @@ void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
       sf::Vertex(DebugDraw::vecB2S(xf.p), sf::Color::Green), sf::Vertex(DebugDraw::vecB2S(y_axis), sf::Color::Green)
    };
 
-   target.draw(line_red, 2, sf::PrimitiveType::Lines);
-   target.draw(line_green, 2, sf::PrimitiveType::Lines);
+   target.draw(line_red, sf::PrimitiveType::Lines);
+   target.draw(line_green, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::Color& color, const sf::Color& fill_color)
@@ -224,9 +225,8 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, cons
    const auto pos = sf::Vector2{static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)};
    const auto size = sf::Vector2f{static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)};
 
-   sf::RectangleShape rs;
-   rs.setSize(size);
-   rs.setPosition(pos);
+   sf::RectangleShape rs{sf::RectangleShape::Data{.size = size}};
+   rs.position = pos;
 
    drawShape(target, rs, color, fill_color);
 }
@@ -236,15 +236,15 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, co
    const auto pos = sf::Vector2{static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)};
    const auto size = sf::Vector2f{static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)};
 
-   sf::RectangleShape rs;
-   rs.setSize(size);
-   rs.setPosition(pos);
+   sf::RectangleShape rs{sf::RectangleShape::Data{.size = size}};
+   rs.position = pos;
 
    drawShape(target, rs, color, fill_color);
 }
 
 sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
 {
+#ifndef __EMSCRIPTEN__
    const auto& screen_view = target.getView();
 
    sf::FloatRect screen = {
@@ -253,6 +253,9 @@ sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
    };
 
    return screen;
+#else
+   return sf::FloatRect{};
+#endif
 }
 
 void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)
@@ -369,10 +372,10 @@ void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
       sf::Vertex{sf::Vector2f{static_cast<float>(target.getSize().x), camera_system.getPanicLineY1()}, sf::Color{0, 50, 255, 100}}
    };
 
-   target.draw(f0, 2, sf::PrimitiveType::Lines);
-   target.draw(f1, 2, sf::PrimitiveType::Lines);
-   target.draw(p0, 2, sf::PrimitiveType::Lines);
-   target.draw(p1, 2, sf::PrimitiveType::Lines);
+   target.draw(f0, sf::PrimitiveType::Lines);
+   target.draw(f1, sf::PrimitiveType::Lines);
+   target.draw(p0, sf::PrimitiveType::Lines);
+   target.draw(p1, sf::PrimitiveType::Lines);
 }
 
 void DebugDraw::debugHitboxes(sf::RenderTarget& target)

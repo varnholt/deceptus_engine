@@ -202,7 +202,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   if (_open_on_intersect && player_rect.findIntersection(_pixel_rect).has_value())
+   if (_open_on_intersect && sf::findIntersection(player_rect, _pixel_rect).hasValue())
    {
       // message boxes might already be marked as inactive, however
       // they might still be fading out. the display mode 'modal', however

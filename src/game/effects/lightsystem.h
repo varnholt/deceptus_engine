@@ -3,6 +3,7 @@
 #include <array>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -61,7 +62,7 @@ public:
    };
 
    std::vector<std::shared_ptr<LightInstance>> _lights;
-   sf::Shader _light_shader;
+   std::optional<sf::Shader> _light_shader;  //!< absent on WASM (setUniform removed in VRSFML)
 
    /// \brief increases all ambient light channels by the same amount.
    /// \param amount value added to each ambient rgba channel.

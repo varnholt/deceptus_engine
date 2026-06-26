@@ -3,8 +3,10 @@
 
 #include <SFML/Audio.hpp>
 #include <array>
+#include <chrono>
 #include <mutex>
 #include <optional>
+#include <vector>
 
 #include "game/audio/musicplayertypes.h"
 

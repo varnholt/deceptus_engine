@@ -86,7 +86,7 @@ void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/)
 
    sf::Color color{_color.r, _color.g, _color.b, static_cast<uint8_t>(lumen)};
 
-   _sprite->setColor(color);
+   _sprite->color = color;
    target.draw(*_sprite, _blend_mode);
 }
 
@@ -165,9 +165,9 @@ void StaticLight::deserialize(const GameDeserializeData& data)
    _flicker_alpha_amount = flicker_alpha_amount;
    _flicker_speed = flicker_speed;
    _texture = TexturePool::getInstance().get(texture);
-   _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setColor(_color);
-   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->color = _color;
+   _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
 
    _rect = sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
    addChunks(_rect);

@@ -171,8 +171,8 @@ void WaterSurface::update(const sf::Time& dt)
 
    if (splash_needed)
    {
-      const auto intersection = player->getPixelRectFloat().findIntersection(_bounding_box);
-      if (intersection.has_value())
+      const auto intersection = sf::findIntersection(player->getPixelRectFloat(), _bounding_box);
+      if (intersection.hasValue())
       {
          const auto velocity = splash_velocity_factor * player->getBody()->GetLinearVelocity().y * _config._splash_factor;
          const auto normalized_intersection =
@@ -512,10 +512,11 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
    {
       try
       {
-         _render_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u(
+         auto created_texture = sf::RenderTexture::create(sf::Vector2u(
             static_cast<int32_t>(_bounding_box.size.x / _pixel_ratio.value()),
             static_cast<int32_t>((_bounding_box.size.y * 2.0f) / _pixel_ratio.value())
          ));
+         _render_texture = std::make_unique<sf::RenderTexture>(std::move(*created_texture));
       }
       catch (...)
       {
@@ -523,9 +524,9 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
       }
 
       _render_texture->setSmooth(false);
-      render_texture_sprite = std::make_unique<sf::Sprite>(_render_texture->getTexture());
-      render_texture_sprite->setPosition({_bounding_box.position.x, _bounding_box.position.y - _bounding_box.size.y});
-      render_texture_sprite->scale({_pixel_ratio.value(), _pixel_ratio.value()});
+      render_texture_sprite = std::make_unique<sf::Sprite>();
+      render_texture_sprite->position = {_bounding_box.position.x, _bounding_box.position.y - _bounding_box.size.y};
+      render_texture_sprite->scale = {_pixel_ratio.value(), _pixel_ratio.value()};
    }
 }
 

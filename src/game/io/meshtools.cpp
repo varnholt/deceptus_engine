@@ -243,7 +243,7 @@ void Mesh::writeVerticesToImage(
    float scale
 )
 {
-   sf::RenderTexture render_texture({static_cast<uint32_t>(texture_size.x), static_cast<uint32_t>(texture_size.y)});
+   auto render_texture = sf::RenderTexture::create(sf::Vector2u{static_cast<uint32_t>(texture_size.x), static_cast<uint32_t>(texture_size.y)}).value();
    render_texture.clear();
 
    for (const auto& face : faces)
@@ -265,7 +265,7 @@ void Mesh::writeVerticesToImage(
       poly[face.size()].color = sf::Color::Red;
       poly[face.size()].position = sf::Vector2f{pos.x * scale, pos.y * scale};
 
-      render_texture.draw(&poly[0], face.size() + 1, sf::PrimitiveType::LineStrip);
+      render_texture.draw(poly, sf::RenderStates{});
    }
 
    render_texture.display();

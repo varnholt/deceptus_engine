@@ -4,28 +4,36 @@
 
 #include <iostream>
 
-void BlurShader::initialize(const std::shared_ptr<sf::RenderTexture>& render_texture, const std::shared_ptr<sf::RenderTexture>& render_texture_scaled)
+void BlurShader::initialize(
+   const std::shared_ptr<sf::RenderTexture>& render_texture,
+   const std::shared_ptr<sf::RenderTexture>& render_texture_scaled
+)
 {
    _render_texture = render_texture;
    _render_texture_scaled = render_texture_scaled;
 
-   if (!_shader.loadFromFile("data/shaders/blur.frag", sf::Shader::Type::Fragment))
+#ifndef __EMSCRIPTEN__
+   _shader.emplace();
+   if (!_shader->loadFromFile("data/shaders/blur.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading blur shader";
       return;
    }
 
-   _shader.setUniform("texture", _render_texture->getTexture());
+   _shader->setUniform("texture", _render_texture->getTexture());
+#endif
 }
 
 void BlurShader::update()
 {
+#ifndef __EMSCRIPTEN__
    // that implicitly scales the effect up by 2
-   _shader.setUniform("texture_width", 960 / 2);
-   _shader.setUniform("texture_height", 540 / 2);
+   _shader->setUniform("texture_width", 960 / 2);
+   _shader->setUniform("texture_height", 540 / 2);
 
-   _shader.setUniform("blur_radius", 20.0f);
-   _shader.setUniform("add_factor", 1.0f);
+   _shader->setUniform("blur_radius", 20.0f);
+   _shader->setUniform("add_factor", 1.0f);
+#endif
 }
 
 void BlurShader::clearTexture()
@@ -45,5 +53,5 @@ const std::shared_ptr<sf::RenderTexture>& BlurShader::getRenderTextureScaled() c
 
 const sf::Shader& BlurShader::getShader() const
 {
-   return _shader;
+   return *_shader;
 }

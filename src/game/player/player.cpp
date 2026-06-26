@@ -262,7 +262,7 @@ void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
    if (damage_color_value > 0)
    {
       const auto damage_color = sf::Color(255, 255 - damage_color_value, 255 - damage_color_value);
-      current_cycle->setColor(damage_color);
+      current_cycle->color = damage_color;
    }
 }
 
@@ -283,7 +283,7 @@ void Player::drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>&
    for (auto i = 0u; i < _last_animations.size(); i++)
    {
       auto& anim = _last_animations[i];
-      anim._animation->setPosition(anim._position);
+      anim._animation->position = anim._position;
       anim._animation->setAlpha(static_cast<uint8_t>(255 / (2 * (_last_animations.size() - i))));
       anim._animation->draw(color);
    }
@@ -325,8 +325,8 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    const auto& current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
    {
-      current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
-      current_cycle->setPosition(draw_position_px);
+      current_cycle->color = sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255));
+      current_cycle->position = draw_position_px;
       drawDash(color, current_cycle, draw_position_px);
       updateHurtColor(current_cycle);
       current_cycle->draw(color, normal);
@@ -335,8 +335,8 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    const auto& auxiliary_cycle = _player_animation->getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
-      auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
-      auxiliary_cycle->setPosition(draw_position_px);
+      auxiliary_cycle->color = sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255));
+      auxiliary_cycle->position = draw_position_px;
       auxiliary_cycle->draw(color, normal);
    }
 
@@ -359,16 +359,16 @@ void Player::drawStencil(sf::RenderTarget& color)
    auto current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
    {
-      current_cycle->setColor(stencil_color);
-      current_cycle->setPosition(draw_position_px);
+      current_cycle->color = stencil_color;
+      current_cycle->position = draw_position_px;
       current_cycle->draw(color);
    }
 
    auto auxiliary_cycle = _player_animation->getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
-      auxiliary_cycle->setColor(stencil_color);
-      auxiliary_cycle->setPosition(draw_position_px);
+      auxiliary_cycle->color = stencil_color;
+      auxiliary_cycle->position = draw_position_px;
       auxiliary_cycle->draw(color);
    }
 }
@@ -1481,7 +1481,7 @@ void Player::updateWallslide(const sf::Time& dt)
 {
    const auto wallslide_animation = _player_animation->getWallslideAnimation();
    const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
-   wallslide_animation->setPosition({_pixel_position_f.x + offset_x_px, _pixel_position_f.y});
+   wallslide_animation->position = {_pixel_position_f.x + offset_x_px, _pixel_position_f.y};
    wallslide_animation->play();
    wallslide_animation->update(dt);
 }

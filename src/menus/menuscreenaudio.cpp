@@ -285,13 +285,13 @@ void MenuScreenAudio::updateLayers()
       _volume_layers_music[index]->_visible = (index == music_volume_layer_index);
    }
 
-   _layers["master_h_0"]->_sprite->setOrigin({50.0f - master_volume, 0.0f});
-   _layers["sfxVolume_h_0"]->_sprite->setOrigin({50.0f - sfx_volume, 0.0f});
-   _layers["mscVolume_h_0"]->_sprite->setOrigin({50.0f - music_volume, 0.0f});
+   _layers["master_h_0"]->_sprite->origin = {50.0f - master_volume, 0.0f};
+   _layers["sfxVolume_h_0"]->_sprite->origin = {50.0f - sfx_volume, 0.0f};
+   _layers["mscVolume_h_0"]->_sprite->origin = {50.0f - music_volume, 0.0f};
 
-   _layers["master_h_1"]->_sprite->setOrigin({50.0f - master_volume, 0.0f});
-   _layers["sfxVolume_h_1"]->_sprite->setOrigin({50.0f - sfx_volume, 0.0f});
-   _layers["mscVolume_h_1"]->_sprite->setOrigin({50.0f - music_volume, 0.0f});
+   _layers["master_h_1"]->_sprite->origin = {50.0f - master_volume, 0.0f};
+   _layers["sfxVolume_h_1"]->_sprite->origin = {50.0f - sfx_volume, 0.0f};
+   _layers["mscVolume_h_1"]->_sprite->origin = {50.0f - music_volume, 0.0f};
 
    if (!_master_label)
    {

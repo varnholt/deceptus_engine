@@ -327,9 +327,9 @@ void Crusher::setup(const GameDeserializeData& data)
    _pixel_position.x = data._tmx_object->_x_px;
    _pixel_position.y = data._tmx_object->_y_px;
 
-   _sprite_mount = std::make_unique<sf::Sprite>(*_texture);
-   _sprite_pusher = std::make_unique<sf::Sprite>(*_texture);
-   _sprite_spike = std::make_unique<sf::Sprite>(*_texture);
+   _sprite_mount = std::make_unique<sf::Sprite>();
+   _sprite_pusher = std::make_unique<sf::Sprite>();
+   _sprite_spike = std::make_unique<sf::Sprite>();
 
    switch (_alignment)
    {
@@ -338,9 +338,9 @@ void Crusher::setup(const GameDeserializeData& data)
          // mount is the socket that attaches the pusher to the wall
          // pusher is the pipe that extracts in length
          // pusher gets only 1px in height as i only want this to be one pixel in height so scaling is easy
-         _sprite_mount->setTextureRect({{9 * PIXELS_PER_TILE, 6 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}});
-         _sprite_pusher->setTextureRect({{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 1}});
-         _sprite_spike->setTextureRect({{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}});
+         _sprite_mount->textureRect = {{9 * PIXELS_PER_TILE, 6 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}};
+         _sprite_pusher->textureRect = {{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 1}};
+         _sprite_spike->textureRect = {{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}};
 
          _pixel_offset_mount.x = 2 * PIXELS_PER_TILE;
          _pixel_offset_pusher.y = 2 * PIXELS_PER_TILE;
@@ -351,9 +351,9 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsUp:
       {
-         _sprite_mount->setTextureRect({{0 * PIXELS_PER_TILE, 9 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}});
-         _sprite_pusher->setTextureRect({{0 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 1}});
-         _sprite_spike->setTextureRect({{0 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}});
+         _sprite_mount->textureRect = {{0 * PIXELS_PER_TILE, 9 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}};
+         _sprite_pusher->textureRect = {{0 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 1}};
+         _sprite_spike->textureRect = {{0 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}};
 
          _pixel_offset_pusher.y = 6 * PIXELS_PER_TILE;
          _pixel_offset_spike.y = 3 * PIXELS_PER_TILE;
@@ -364,9 +364,9 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsLeft:
       {
-         _sprite_mount->setTextureRect({{4 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}});
-         _sprite_pusher->setTextureRect({{2 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE}, {1, 5 * PIXELS_PER_TILE}});
-         _sprite_spike->setTextureRect({{0 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}});
+         _sprite_mount->textureRect = {{4 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}};
+         _sprite_pusher->textureRect = {{2 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE}, {1, 5 * PIXELS_PER_TILE}};
+         _sprite_spike->textureRect = {{0 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}};
 
          _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
          _pixel_offset_pusher.x = 3 * PIXELS_PER_TILE;
@@ -379,9 +379,9 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsRight:
       {
-         _sprite_mount->setTextureRect({{8 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}});
-         _sprite_pusher->setTextureRect({{10 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE}, {1, 5 * PIXELS_PER_TILE}});
-         _sprite_spike->setTextureRect({{10 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}});
+         _sprite_mount->textureRect = {{8 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}};
+         _sprite_pusher->textureRect = {{10 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE}, {1, 5 * PIXELS_PER_TILE}};
+         _sprite_spike->textureRect = {{10 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}};
 
          _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
          _pixel_offset_pusher.x = -1 * PIXELS_PER_TILE;
@@ -533,22 +533,22 @@ void Crusher::updateSpritePositions()
    {
       case Alignment::PointsDown:
       {
-         _sprite_pusher->setScale({1.0f, _blade_offset.y});
+         _sprite_pusher->scale = {1.0f, _blade_offset.y};
          break;
       }
       case Alignment::PointsUp:
       {
-         _sprite_pusher->setScale({1.0f, _blade_offset.y});
+         _sprite_pusher->scale = {1.0f, _blade_offset.y};
          break;
       }
       case Alignment::PointsLeft:
       {
-         _sprite_pusher->setScale({_blade_offset.x, 1.0f});
+         _sprite_pusher->scale = {_blade_offset.x, 1.0f};
          break;
       }
       case Alignment::PointsRight:
       {
-         _sprite_pusher->setScale({_blade_offset.x, 1.0f});
+         _sprite_pusher->scale = {_blade_offset.x, 1.0f};
          break;
       }
       case Alignment::PointsNowhere:
@@ -557,7 +557,7 @@ void Crusher::updateSpritePositions()
       }
    }
 
-   _sprite_mount->setPosition(_pixel_position + _pixel_offset_mount);
-   _sprite_pusher->setPosition(_pixel_position + _pixel_offset_pusher);
-   _sprite_spike->setPosition(_pixel_position + _pixel_offset_spike + _blade_offset);
+   _sprite_mount->position = _pixel_position + _pixel_offset_mount;
+   _sprite_pusher->position = _pixel_position + _pixel_offset_pusher;
+   _sprite_spike->position = _pixel_position + _pixel_offset_spike + _blade_offset;
 }

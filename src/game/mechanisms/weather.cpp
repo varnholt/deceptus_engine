@@ -35,7 +35,7 @@ void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   const auto intersects = _rect.findIntersection(player_rect).has_value();
+   const auto intersects = sf::findIntersection(_rect, player_rect).hasValue();
    if (intersects)
    {
       _overlay->draw(target, normal);
@@ -94,7 +94,7 @@ void Weather::update(const sf::Time& dt)
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   const auto intersects = _rect.findIntersection(player_rect).has_value();
+   const auto intersects = sf::findIntersection(_rect, player_rect).hasValue();
    updateWaitDelay(dt, intersects);
 
    if (intersects && matchesRoom() && !_wait_until_start_delay_elapsed)

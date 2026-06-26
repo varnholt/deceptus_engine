@@ -119,7 +119,7 @@ void MenuScreenNameSelect::updateText()
    const auto text_rect = _text->getLocalBounds();
    const auto x_offset_px = (_name_rect.size.x - text_rect.size.x) * 0.5f;
    const auto x_px = _name_rect.position.x + x_offset_px;
-   _text->setPosition({x_px, _name_rect.position.y});
+   _text->position = {x_px, _name_rect.position.y};
 }
 
 void MenuScreenNameSelect::chop()
@@ -228,12 +228,12 @@ void MenuScreenNameSelect::retrieveUsername()
 void MenuScreenNameSelect::loadingFinished()
 {
    const auto cursor = _layers["cursor"];
-   _char_origin.x = cursor->_sprite->getPosition().x;
-   _char_origin.y = cursor->_sprite->getPosition().y;
+   _char_origin.x = cursor->_sprite->position.x;
+   _char_origin.y = cursor->_sprite->position.y;
 
    const auto player_name = _layers["players-name"];
-   _name_rect.position.x = player_name->_sprite->getPosition().x;
-   _name_rect.position.y = player_name->_sprite->getPosition().y;
+   _name_rect.position.x = player_name->_sprite->position.x;
+   _name_rect.position.y = player_name->_sprite->position.y;
    _name_rect.size.x = static_cast<float>(player_name->_texture->getSize().x);
 
    retrieveUsername();
@@ -243,9 +243,9 @@ void MenuScreenNameSelect::loadingFinished()
 void MenuScreenNameSelect::updateLayers()
 {
    auto cursor = _layers["cursor"];
-   cursor->_sprite->setPosition(
-      {static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)}
-   );
+   cursor->_sprite->position = {
+      static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)
+   };
 
    _layers["players-name"]->_visible = false;
    _layers["temp_bg"]->_visible = true;

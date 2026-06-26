@@ -89,8 +89,8 @@ void BlockingRect::setup(const GameDeserializeData& data)
       {
          const auto texture = texture_it->second->_value_string.value();
          _texture_map = TexturePool::getInstance().get(texture);
-         _sprite = std::make_unique<sf::Sprite>(*_texture_map);
-         _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+         _sprite = std::make_unique<sf::Sprite>();
+         _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
       }
 
       const auto normal_it = data._tmx_object->_properties->_map.find("normal");
@@ -143,19 +143,12 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
       return;
    }
 
-   if (_normal_map)
-   {
-      _sprite->setTexture(*_texture_map);
-   }
-
-   target.draw(*_sprite);
+   target.draw(*_sprite, sf::RenderStates{.texture = _texture_map.get()});
 
    if (_normal_map)
    {
-      _sprite->setTexture(*_normal_map);
+      normal.draw(*_sprite, sf::RenderStates{.texture = _normal_map.get()});
    }
-
-   normal.draw(*_sprite);
 }
 
 void BlockingRect::update(const sf::Time& /*dt*/)

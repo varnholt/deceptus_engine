@@ -176,8 +176,8 @@ private:
    std::shared_ptr<Layer> _layer_background_inactive;
    std::shared_ptr<Layer> _layer_background_active;
 
-   sf::RectangleShape _rect_shape;
-   sf::CircleShape _origin_shape;
+   sf::RectangleShape _rect_shape{sf::RectangleShape::Data{}};
+   sf::CircleShape _origin_shape{sf::CircleShape::Data{}};
 
    std::string _filename;
    std::vector<std::shared_ptr<Layer>> _layer_stack;
@@ -206,7 +206,11 @@ private:
    /// \param target render target.
    void drawVoid(sf::RenderTarget& target);
 
+#ifndef __EMSCRIPTEN__
    sf::Shader _shader;
+   sf::Texture _noise_texture;
+   std::string _default_texture_path{"data/effects/gabor_6.png"};
+#endif
    std::unique_ptr<sf::RenderTexture> _shader_texture;
    std::unique_ptr<sf::Sprite> _shader_sprite;
    float _radius_factor = 1.0f;
@@ -215,8 +219,6 @@ private:
    float _time_factor = 4.0f;
    float _noise_scale = 10.0;
    sf::Vector3f _swirl_color{0.0f, 0.5f, 0.8f};
-   sf::Texture _noise_texture;
-   std::string _default_texture_path{"data/effects/gabor_6.png"};
 
    // flowfield
    std::optional<std::string> _flowfield_reference_id;

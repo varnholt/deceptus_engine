@@ -112,7 +112,7 @@ void InfoOverlay::update(const sf::Time& delta_time)
 
    // std::cout << alpha << std::endl;
 
-   _sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(255 * alpha)));
+   _sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(255 * alpha));
 }
 
 void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
@@ -123,9 +123,12 @@ void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    }
 
    // a copy of the current view is created here on purpose
+#ifndef __EMSCRIPTEN__
    const auto level_view = color.getView();
+#endif
    if (_settings._fullscreen)
    {
+#ifndef __EMSCRIPTEN__
       const sf::View ortho(sf::FloatRect(
          {0.0f, 0.0f},
          {static_cast<float>(GameConfiguration::getInstance()._view_width),
@@ -133,13 +136,16 @@ void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       ));
 
       color.setView(ortho);
+#endif
    }
 
-   color.draw(*_sprite);
+   color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
 
    if (_settings._fullscreen)
    {
+#ifndef __EMSCRIPTEN__
       color.setView(level_view);
+#endif
    }
 }
 
@@ -195,7 +201,7 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
       if (texture_id != data._tmx_object->_properties->_map.end())
       {
          instance->_texture = TexturePool::getInstance().get(texture_id->second->_value_string.value());
-         instance->_sprite = std::make_unique<sf::Sprite>(*instance->_texture);
+         instance->_sprite = std::make_unique<sf::Sprite>();
       }
 
       // read texture rect
@@ -226,7 +232,10 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
 
       if (rect.size.x > 0 && rect.size.y > 0)
       {
-         instance->_sprite->setTextureRect(rect);
+         instance->_sprite->textureRect = sf::FloatRect{
+            {static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)},
+            {static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)}
+         };
       }
    }
 
@@ -235,12 +244,12 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
 
    instance->setObjectId(data._tmx_object->_name);
    instance->_rect = bounding_rect;
-   instance->_sprite->setColor(sf::Color(255, 255, 255, 0));
+   instance->_sprite->color = sf::Color(255, 255, 255, 0);
    instance->addChunks(bounding_rect);
 
    if (!instance->_settings._fullscreen)
    {
-      instance->_sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+      instance->_sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
    }
 
    return instance;

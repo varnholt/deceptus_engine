@@ -106,8 +106,8 @@ bool Extra::deserialize(const GameDeserializeData& data)
       if (!texture_path.empty())
       {
          _texture = TexturePool::getInstance().get(texture_path);
-         _sprite = std::make_unique<sf::Sprite>(*_texture);
-         _sprite->setPosition({pos_x_px, pos_y_px});
+         _sprite = std::make_unique<sf::Sprite>();
+         _sprite->position = {pos_x_px, pos_y_px};
 
          // read texture rect
          sf::IntRect rect;
@@ -118,7 +118,10 @@ bool Extra::deserialize(const GameDeserializeData& data)
 
          if (rect.size.x > 0 && rect.size.y > 0)
          {
-            _sprite->setTextureRect(rect);
+            _sprite->textureRect = sf::FloatRect{
+               {static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)},
+               {static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)}
+            };
          }
       }
 
@@ -220,7 +223,7 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
    // or show static extra texture
    else if (_sprite)
    {
-      target.draw(*_sprite);
+      target.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
    }
 
 #ifdef DRAW_DEBUG
@@ -241,12 +244,12 @@ void Extra::updateSineWave(const sf::Time& delta_time)
       const sf::Vector2f sine_delta{0.0f, delta_y_px};
       for (auto& animation : _animations_main)
       {
-         animation->move(sine_delta);
+         animation->position += sine_delta;
       }
 
       if (_sprite)
       {
-         _sprite->move(sine_delta);
+         _sprite->position += sine_delta;
       }
 
       _rect.position.y = _base_y_px + _sine_offset_y_px;
@@ -318,7 +321,7 @@ void Extra::update(const sf::Time& delta_time)
    }
 
    const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
-   if (player_rect_px.findIntersection(_rect).has_value())
+   if (sf::findIntersection(player_rect_px, _rect))
    {
       _active = false;
 
@@ -379,22 +382,22 @@ void Extra::spawn(sf::Vector2f offset)
 
       for (auto& animation : _animations_main)
       {
-         animation->move(offset);
+         animation->position += offset;
       }
 
       if (_animation_spawn)
       {
-         _animation_spawn->move(offset);
+         _animation_spawn->position += offset;
       }
 
       if (_animation_pickup)
       {
-         _animation_pickup->move(offset);
+         _animation_pickup->position += offset;
       }
 
       if (_sprite)
       {
-         _sprite->move(offset);
+         _sprite->position += offset;
       }
    }
 
