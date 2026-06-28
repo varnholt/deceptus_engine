@@ -244,18 +244,14 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, co
 
 sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
 {
-#ifndef __EMSCRIPTEN__
-   const auto& screen_view = target.getView();
+   const auto screen_view = target.computeView();
 
-   sf::FloatRect screen = {
-      {screen_view.getCenter().x - screen_view.getSize().x / 2.0f, screen_view.getCenter().y - screen_view.getSize().y / 2.0f},
-      {screen_view.getSize().x, screen_view.getSize().y}
+   const sf::FloatRect screen = {
+      {screen_view.center.x - screen_view.size.x / 2.0f, screen_view.center.y - screen_view.size.y / 2.0f},
+      {screen_view.size.x, screen_view.size.y}
    };
 
    return screen;
-#else
-   return sf::FloatRect{};
-#endif
 }
 
 void DebugDraw::debugBodies(sf::RenderTarget& target, Level* level)

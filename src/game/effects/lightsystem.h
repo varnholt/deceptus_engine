@@ -62,7 +62,7 @@ public:
    };
 
    std::vector<std::shared_ptr<LightInstance>> _lights;
-   std::optional<sf::Shader> _light_shader;  //!< absent on WASM (setUniform removed in VRSFML)
+   std::optional<sf::Shader> _light_shader;
 
    /// \brief increases all ambient light channels by the same amount.
    /// \param amount value added to each ambient rgba channel.
@@ -148,4 +148,15 @@ private:
 
    OccluderDrawCallback _occluder_callback;
    sf::Clock _clock;  //!< tracks elapsed time for per-light shader uniforms
+
+   // cached uniform locations for _light_shader
+   std::optional<sf::Shader::UniformLocation> _ul_light_count;
+   std::optional<sf::Shader::UniformLocation> _ul_resolution;
+   std::optional<sf::Shader::UniformLocation> _ul_ambient;
+   std::optional<sf::Shader::UniformLocation> _ul_color_map;
+   std::optional<sf::Shader::UniformLocation> _ul_light_map_1;
+   std::optional<sf::Shader::UniformLocation> _ul_light_map_2;
+   std::optional<sf::Shader::UniformLocation> _ul_normal_map;
+   std::array<std::optional<sf::Shader::UniformLocation>, 6> _ul_light_positions;
+   std::array<std::optional<sf::Shader::UniformLocation>, 6> _ul_light_colors;
 };

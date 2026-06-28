@@ -42,5 +42,11 @@ private:
    std::shared_ptr<sf::Texture> _flow_field_1;
    std::shared_ptr<sf::Texture> _flow_field_2;
 
+   std::optional<sf::Shader::UniformLocation> _uniform_current_texture;
+   std::optional<sf::Shader::UniformLocation> _uniform_flowfield_1;
+   std::optional<sf::Shader::UniformLocation> _uniform_flowfield_2;
+   std::optional<sf::Shader::UniformLocation> _uniform_time;
+   std::optional<sf::Shader::UniformLocation> _uniform_flowfield_offset;
+
    float _elapsed = 0.0f;
 };

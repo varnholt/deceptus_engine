@@ -29,7 +29,8 @@ ControllerOverlay::ControllerOverlay()
       auto tmp = std::make_shared<Layer>();
       tmp->_visible = layer.isVisible();
 
-      auto texture_result = sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
+      auto texture_result =
+         sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
       if (!texture_result)
       {
          continue;
@@ -58,9 +59,7 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
    // draw layers
    auto windowView = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
    windowView.center += sf::Vector2f{-w + _texture_size.x + 10.0f, -h + _texture_size.y + 10.0f};
-#ifndef __EMSCRIPTEN__
-   window.setView(windowView);
-#endif
+   states.view = windowView;
 
    auto controller_bg = _layers["controller_bg"];
    auto analog_l = _layers["analog_l"];

@@ -61,13 +61,13 @@ RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprit
 
 void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-#ifndef __EMSCRIPTEN__
-   const auto& screen_view = target.getView();
-   _screen = {
-      {screen_view.getCenter().x - screen_view.getSize().x / 2.0f, screen_view.getCenter().y - screen_view.getSize().y / 2.0f},
-      {screen_view.getSize().x, screen_view.getSize().y}
-   };
-#endif
+   {
+      const auto screen_view = target.computeView();
+      _screen = {
+         {screen_view.center.x - screen_view.size.x / 2.0f, screen_view.center.y - screen_view.size.y / 2.0f},
+         {screen_view.size.x, screen_view.size.y}
+      };
+   }
 
    // source: foreground
    // dest:   background

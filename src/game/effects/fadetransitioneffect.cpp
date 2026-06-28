@@ -71,10 +71,7 @@ void FadeTransitionEffect::draw(const std::shared_ptr<sf::RenderTexture>& window
    auto w = GameConfiguration::getInstance()._view_width;
    auto h = GameConfiguration::getInstance()._view_height;
 
-   sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
-#ifndef __EMSCRIPTEN__
-   window->setView(view);
-#endif
+   const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
 
    const uint8_t alpha_value = static_cast<uint8_t>(_value * 255);
    for (auto& vertex : _vertices)
@@ -82,5 +79,7 @@ void FadeTransitionEffect::draw(const std::shared_ptr<sf::RenderTexture>& window
       vertex.color.a = alpha_value;
    }
 
-   window->draw(std::span<const sf::Vertex>{_vertices.data(), _vertices.size()}, sf::PrimitiveType::TriangleStrip);
+   window->draw(
+      std::span<const sf::Vertex>{_vertices.data(), _vertices.size()}, sf::PrimitiveType::TriangleStrip, sf::RenderStates{.view = view}
+   );
 }

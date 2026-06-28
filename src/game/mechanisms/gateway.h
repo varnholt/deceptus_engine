@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <map>
+#include <optional>
 
 #include "framework/image/layer.h"
 #include "game/animation/animation.h"
@@ -206,11 +207,16 @@ private:
    /// \param target render target.
    void drawVoid(sf::RenderTarget& target);
 
-#ifndef __EMSCRIPTEN__
-   sf::Shader _shader;
-   sf::Texture _noise_texture;
+   std::optional<sf::Shader> _shader;
+   std::optional<sf::Texture> _noise_texture;
    std::string _default_texture_path{"data/effects/gabor_6.png"};
-#endif
+   std::optional<sf::Shader::UniformLocation> _ul_time;
+   std::optional<sf::Shader::UniformLocation> _ul_alpha;
+   std::optional<sf::Shader::UniformLocation> _ul_radius_factor;
+   std::optional<sf::Shader::UniformLocation> _ul_resolution;
+   std::optional<sf::Shader::UniformLocation> _ul_noise_scale;
+   std::optional<sf::Shader::UniformLocation> _ul_swirl_color;
+   std::optional<sf::Shader::UniformLocation> _ul_ichannel0;
    std::unique_ptr<sf::RenderTexture> _shader_texture;
    std::unique_ptr<sf::Sprite> _shader_sprite;
    float _radius_factor = 1.0f;

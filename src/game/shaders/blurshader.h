@@ -39,4 +39,9 @@ private:
    std::optional<sf::Shader> _shader;
    std::shared_ptr<sf::RenderTexture> _render_texture;
    std::shared_ptr<sf::RenderTexture> _render_texture_scaled;
+   std::optional<sf::Shader::UniformLocation> _uniform_texture;
+   std::optional<sf::Shader::UniformLocation> _uniform_texture_width;
+   std::optional<sf::Shader::UniformLocation> _uniform_texture_height;
+   std::optional<sf::Shader::UniformLocation> _uniform_blur_radius;
+   std::optional<sf::Shader::UniformLocation> _uniform_add_factor;
 };

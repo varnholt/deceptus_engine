@@ -8,33 +8,55 @@ void AtmosphereShader::initialize(const std::shared_ptr<sf::RenderTexture>& rend
 {
    _render_texture = render_texture;
 
-#ifndef __EMSCRIPTEN__
-   _shader.emplace();
-   if (!_shader->loadFromFile("data/shaders/water.frag", sf::Shader::Type::Fragment))
+   auto loaded = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/water.frag"});
+   if (!loaded.hasValue())
    {
       Log::Error() << "error loading water shader";
       return;
    }
+   _shader = std::move(*loaded);
 
    _distortion_map = TexturePool::getInstance().get("data/effects/distortion_map.png");
    _distortion_map->setRepeated(true);
    _distortion_map->setSmooth(true);
 
-   _shader->setUniform("current_texture", sf::Shader::CurrentTexture);
-   _shader->setUniform("distortion_map_texture", *_distortion_map);
-   _shader->setUniform("physics_texture", _render_texture->getTexture());
-#endif
+   _uniform_current_texture        = _shader->getUniformLocation("current_texture");
+   _uniform_distortion_map_texture = _shader->getUniformLocation("distortion_map_texture");
+   _uniform_physics_texture        = _shader->getUniformLocation("physics_texture");
+   _uniform_time                   = _shader->getUniformLocation("time");
+   _uniform_distortion_amplitude   = _shader->getUniformLocation("distortion_amplitude");
+
+   if (_uniform_current_texture.has_value())
+   {
+      _shader->setUniform(*_uniform_current_texture, sf::Shader::CurrentTexture);
+   }
+   if (_uniform_distortion_map_texture.has_value())
+   {
+      (void)_shader->setUniform(*_uniform_distortion_map_texture, *_distortion_map);
+   }
+   if (_uniform_physics_texture.has_value())
+   {
+      (void)_shader->setUniform(*_uniform_physics_texture, _render_texture->getTexture());
+   }
 }
 
 void AtmosphereShader::update()
 {
-#ifndef __EMSCRIPTEN__
+   if (!_shader.has_value())
+   {
+      return;
+   }
    constexpr auto distortion_amplitude = 0.04f;
    constexpr auto time_factor = 1.0f;
 
-   _shader->setUniform("time", GlobalClock::getInstance().getElapsedTimeInS() * time_factor);
-   _shader->setUniform("distortion_amplitude", distortion_amplitude);
-#endif
+   if (_uniform_time.has_value())
+   {
+      _shader->setUniform(*_uniform_time, GlobalClock::getInstance().getElapsedTimeInS() * time_factor);
+   }
+   if (_uniform_distortion_amplitude.has_value())
+   {
+      _shader->setUniform(*_uniform_distortion_amplitude, distortion_amplitude);
+   }
 }
 
 const std::shared_ptr<sf::RenderTexture>& AtmosphereShader::getRenderTexture() const

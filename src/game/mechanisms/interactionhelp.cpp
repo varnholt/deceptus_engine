@@ -87,31 +87,20 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*
 
    if (_button_alpha.has_value())
    {
-      const auto level_view = target.getView();
-
       const sf::View ortho(sf::FloatRect(
          {0.0f, 0.0f},
          {static_cast<float>(GameConfiguration::getInstance()._view_width),
           static_cast<float>(GameConfiguration::getInstance()._view_height)}
       ));
 
-      target.setView(ortho);
-#endif
-
       std::ranges::for_each(
          _help_elements,
-         [&target, this](const auto& help)
+         [&target, &ortho, this](const auto& help)
          {
-            target.draw(*help._button_sprite, sf::RenderStates{.texture = _button_texture.get()});
-#ifndef __EMSCRIPTEN__
-            target.draw(*help._text);
-#endif
+            target.draw(*help._button_sprite, sf::RenderStates{.view = ortho, .texture = _button_texture.get()});
+            target.draw(*help._text, sf::RenderStates{.view = ortho});
          }
       );
-
-#ifndef __EMSCRIPTEN__
-      target.setView(level_view);
-#endif
    }
 }
 
@@ -184,9 +173,7 @@ void InteractionHelp::update(const sf::Time& dt)
          if (alpha.has_value())
          {
             const auto alpha_byte = static_cast<uint8_t>(alpha.value() * 255);
-#ifndef __EMSCRIPTEN__
             element._text->setFillColor(sf::Color{232, 219, 243, alpha_byte});
-#endif
             element._button_sprite->color = {255, 255, 255, alpha_byte};
          }
 
@@ -270,10 +257,8 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       HelpElement help;
 
       help._button_sprite = std::make_unique<sf::Sprite>();
-#ifndef __EMSCRIPTEN__
       help._text = std::make_unique<sf::Text>(*_font);
       help._text->setCharacterSize(12);
-#endif
 
       const auto button_name = button_value.value_or("key_cursor_u");
       const auto button_names = ControllerKeyMap::retrieveMappedKey(button_name);
@@ -291,9 +276,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       };
 
       help._button_sprite->textureRect = help._button_rect_keyboard;
-#ifndef __EMSCRIPTEN__
       help._text->setString(sftr(text_value.value()).c_str());
-#endif
 
       // row 0 at bottom, row 1 above
       const auto view_width = GameConfiguration::getInstance()._view_width;
@@ -303,7 +286,6 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       const auto text_y_px = text_base_y_px - (row_spacing_px * row);
       const auto icon_x_px = view_width - 24.0f;
       const auto icon_y_px = text_y_px - 4.0f;
-#ifndef __EMSCRIPTEN__
       const auto text_local_bounds = help._text->getLocalBounds();
       const auto text_x_px = view_width - text_local_bounds.size.x - 24.0f - 4.0f;
 
@@ -324,9 +306,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       // text location: view.width - text.localbounds.x - icon.width - some_offset
 
       help._button_sprite->position = {icon_x_px, icon_y_px};
-#ifndef __EMSCRIPTEN__
       help._text->position = {text_x_px, text_y_px};
-#endif
 
       _help_elements.push_back(std::move(help));
    }

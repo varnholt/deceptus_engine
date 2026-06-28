@@ -29,4 +29,9 @@ private:
    std::shared_ptr<sf::RenderTexture> _render_texture;
    std::shared_ptr<sf::Texture> _distortion_map;
    std::optional<sf::Shader> _shader;
+   std::optional<sf::Shader::UniformLocation> _uniform_current_texture;
+   std::optional<sf::Shader::UniformLocation> _uniform_distortion_map_texture;
+   std::optional<sf::Shader::UniformLocation> _uniform_physics_texture;
+   std::optional<sf::Shader::UniformLocation> _uniform_time;
+   std::optional<sf::Shader::UniformLocation> _uniform_distortion_amplitude;
 };

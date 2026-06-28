@@ -115,18 +115,11 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       center.x -= 220.0f;
       center.y -= 80.0f;
 
-#ifndef __EMSCRIPTEN__
-      sf::View level_view;
-      level_view.setSize({static_cast<float>(_level_grid_texture->getSize().x), static_cast<float>(_level_grid_texture->getSize().y)});
-      level_view.setCenter(center);
-      level_view.zoom(_zoom);  // 1.5f works well, too
-#else
       sf::View level_view{
          .center = center,
          .size =
             sf::Vector2f{static_cast<float>(_level_grid_texture->getSize().x), static_cast<float>(_level_grid_texture->getSize().y)} * _zoom
       };
-#endif
 
       _level_grid_sprite->color = sf::Color{70, 70, 140, 255};
       _level_outline_sprite->color = sf::Color{255, 255, 255, 80};
@@ -137,11 +130,8 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
          *_level_outline_sprite, sf::RenderStates{.texture = _level_outline_texture.get(), .blendMode = sf::BlendAdd}
       );
 
-      drawLevelItems(*_level_render_texture);
+      drawLevelItems(*_level_render_texture, sf::RenderStates{.view = level_view});
 
-#ifndef __EMSCRIPTEN__
-      _level_render_texture->setView(level_view);
-#endif
       _level_render_texture->display();
 
       // level_texture_sprite is prepared but currently not drawn
@@ -297,11 +287,7 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    // draw player
    auto playerWidth = 5.0f;
    auto playerHeight = 4;
-#ifndef __EMSCRIPTEN__
-   sf::CircleShape square(playerWidth, static_cast<uint32_t>(playerHeight));
-#else
    sf::CircleShape square{sf::CircleShape::Data{.radius = playerWidth, .pointCount = static_cast<uint32_t>(playerHeight)}};
-#endif
    square.position = PlayerRegistry::getFirst()->getPixelPositionFloat() * 0.125f;
    square.position += {-playerWidth, -playerHeight * 2.0f};
    square.setFillColor(sf::Color::White);

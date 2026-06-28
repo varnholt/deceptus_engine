@@ -165,14 +165,28 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    _gamma_shader = std::make_unique<GammaShader>();
 
    // load alpha-test shader for occluder stencil rendering
-#ifndef __EMSCRIPTEN__
-   if (!_occluder_shader.loadFromFile("data/shaders/stencil_write.vert", "data/shaders/stencil_write.frag"))
    {
-      Log::Warning() << "failed to load occluder stencil shader";
+      auto loaded_shader =
+         sf::Shader::loadFromFile({.vertexPath = "data/shaders/stencil_write.vert", .fragmentPath = "data/shaders/stencil_write.frag"});
+      if (loaded_shader.hasValue())
+      {
+         _occluder_shader = std::move(*loaded_shader);
+         const auto ul_texture_sampler = _occluder_shader->getUniformLocation("u_texture_sampler");
+         if (ul_texture_sampler.hasValue())
+         {
+            (void)_occluder_shader->setUniform(*ul_texture_sampler, sf::Shader::CurrentTexture);
+         }
+         _ul_occluder_alpha = _occluder_shader->getUniformLocation("u_alpha_threshold");
+         if (_ul_occluder_alpha.hasValue())
+         {
+            _occluder_shader->setUniform(*_ul_occluder_alpha, 0.01f);
+         }
+      }
+      else
+      {
+         Log::Warning() << "failed to load occluder stencil shader";
+      }
    }
-   _occluder_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
-   _occluder_shader.setUniform("u_alpha_threshold", 0.01f);
-#endif
 
    // init world for this level
    const b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
@@ -1168,9 +1182,10 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
 #endif
 
    sf::RenderStates states;
-#ifndef __EMSCRIPTEN__
-   states.shader = &_occluder_shader;
-#endif
+   if (_occluder_shader.hasValue())
+   {
+      states.shader = &(*_occluder_shader);
+   }
    states.stencilMode = sf::StencilMode{
       .stencilComparison = sf::StencilComparison::Always,
       .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,

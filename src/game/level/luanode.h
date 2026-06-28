@@ -502,9 +502,8 @@ struct LuaNode : public GameMechanism, public GameNode
    std::vector<sf::Vector2f> _sprite_offsets_px;
    sf::Vector2f _position_px;
    std::vector<sf::Vector2f> _movement_path_px;
-#ifndef __EMSCRIPTEN__
-   sf::Shader _flash_shader;
-#endif
+   std::optional<sf::Shader> _flash_shader;
+   std::optional<sf::Shader::UniformLocation> _ul_flash;
    float _hit_flash{0.0f};
    std::vector<sf::FloatRect> _debug_rects;
 

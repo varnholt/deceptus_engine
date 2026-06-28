@@ -106,9 +106,8 @@ private:
 
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    std::optional<HighResTimePoint> _hit_time;
-#ifndef __EMSCRIPTEN__
-   sf::Shader _flash_shader;
-#endif
+   std::optional<sf::Shader> _flash_shader;
+   std::optional<sf::Shader::UniformLocation> _ul_flash;
    float _hit_flash{0.0f};
    std::vector<Hitbox> _hitboxes;
 };

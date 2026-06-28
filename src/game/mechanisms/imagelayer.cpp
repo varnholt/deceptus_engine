@@ -85,9 +85,7 @@ void ImageLayer::updateView(float level_view_x, float level_view_y, float view_w
 void ImageLayer::resetView(float view_width, float view_height)
 {
    _parallax_view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {view_width, view_height}});
-#ifndef __EMSCRIPTEN__
-   _parallax_view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
-#endif
+   _parallax_view.viewport = sf::FloatRect{{0.0f, 0.0f}, {1.0f, 1.0f}};
 }
 
 std::optional<sf::FloatRect> ImageLayer::getBoundingBoxPx()

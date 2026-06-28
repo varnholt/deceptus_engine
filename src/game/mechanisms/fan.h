@@ -74,9 +74,7 @@ private:
       FanInstance(const std::shared_ptr<sf::Texture>& tex)
       {
          sprite = std::make_unique<sf::Sprite>();
-#ifndef __EMSCRIPTEN__
          sprite->setTexture(*tex);
-#endif
       }
    };
 

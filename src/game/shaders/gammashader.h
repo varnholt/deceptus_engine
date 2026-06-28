@@ -26,4 +26,6 @@ public:
 
 private:
    std::optional<sf::Shader> _gamma_shader;
+   std::optional<sf::Shader::UniformLocation> _uniform_gamma;
+   std::optional<sf::Shader::UniformLocation> _uniform_texture;
 };

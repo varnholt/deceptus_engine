@@ -37,10 +37,22 @@ bool StencilTileMap::load(
       return false;
    }
 
-#ifndef __EMSCRIPTEN__
-   _stencil_shader.loadFromFile("data/shaders/stencil_write.vert", "data/shaders/stencil_write.frag");
-   _stencil_shader.setUniform("u_alpha_threshold", _alpha_threshold);
-#endif
+   auto loaded_shader =
+      sf::Shader::loadFromFile({.vertexPath = "data/shaders/stencil_write.vert", .fragmentPath = "data/shaders/stencil_write.frag"});
+   if (loaded_shader.hasValue())
+   {
+      _stencil_shader = std::move(*loaded_shader);
+      _ul_texture_sampler = _stencil_shader->getUniformLocation("u_texture_sampler");
+      const auto ul_alpha_threshold = _stencil_shader->getUniformLocation("u_alpha_threshold");
+      if (ul_alpha_threshold.hasValue())
+      {
+         _stencil_shader->setUniform(*ul_alpha_threshold, _alpha_threshold);
+      }
+   }
+   else
+   {
+      Log::Error() << "failed to load stencil_write shader";
+   }
 
    return true;
 }
@@ -54,14 +66,14 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    }
 
    // draw the masking geometry (stencil_tilemap) first
-#ifndef __EMSCRIPTEN__
-   _stencil_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
-#endif
+   if (_stencil_shader.hasValue() && _ul_texture_sampler.hasValue())
+   {
+      (void)_stencil_shader->setUniform(*_ul_texture_sampler, sf::Shader::CurrentTexture);
+   }
    const auto use_shader = _alpha_threshold < 0.99f;
 
    auto stencil_render_state = states;
-#ifndef __EMSCRIPTEN__
-   stencil_render_state.shader = use_shader ? &_stencil_shader : nullptr;
+   stencil_render_state.shader = (use_shader && _stencil_shader.hasValue()) ? &(*_stencil_shader) : nullptr;
    stencil_render_state.stencilMode = sf::StencilMode(  // set up stencil
       {sf::StencilComparison::Always},
       {sf::StencilUpdateOperation::Replace},
@@ -88,7 +100,6 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    );
 
    TileMap::draw(color, normal, color_render_state);
-#endif
 
    // dumpStencilAndColorToPng(color, states);
 }

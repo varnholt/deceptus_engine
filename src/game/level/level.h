@@ -35,6 +35,7 @@
 // std
 #include <map>
 #include <memory>
+#include <optional>
 
 #ifdef DEVELOPMENT_MODE
 #include <vector>
@@ -351,9 +352,8 @@ protected:
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
    std::unique_ptr<BlurShader> _blur_shader;
    std::unique_ptr<GammaShader> _gamma_shader;
-#ifndef __EMSCRIPTEN__
-   sf::Shader _occluder_shader;  //!< alpha-test shader for light occluder stencil rendering
-#endif
+   std::optional<sf::Shader> _occluder_shader;                     //!< alpha-test shader for light occluder stencil rendering
+   std::optional<sf::Shader::UniformLocation> _ul_occluder_alpha;  //!< uniform location for alpha threshold in occluder shader
    bool _screenshot = false;
 
    // box2d

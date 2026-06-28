@@ -184,18 +184,21 @@ std::string_view Gateway::objectName() const
 
 void Gateway::loadNoiseTexture(const std::string& filename)
 {
-   sf::Texture noise_texture;
-   if (!noise_texture.loadFromFile(filename))
+   auto loaded_texture = sf::Texture::loadFromFile(filename);
+   if (!loaded_texture.hasValue())
    {
       std::cerr << "Failed to load noise texture: " << filename << "\n";
       return;
    }
 
-   noise_texture.setRepeated(true);
-   noise_texture.setSmooth(true);
+   loaded_texture->setRepeated(true);
+   loaded_texture->setSmooth(true);
 
-   _noise_texture = std::move(noise_texture);
-   _shader.setUniform("iChannel0", _noise_texture);
+   _noise_texture = std::move(*loaded_texture);
+   if (_shader.hasValue() && _ul_ichannel0.hasValue())
+   {
+      (void)_shader->setUniform(*_ul_ichannel0, *_noise_texture);
+   }
 }
 
 void Gateway::setSidesVisible(std::array<Side, 4>& sides, bool visible)
@@ -220,16 +223,37 @@ void Gateway::drawVoid(sf::RenderTarget& target)
 
    _shader_texture->clear(sf::Color::Transparent);
 
-   _shader.setUniform("time", _elapsed * _time_factor);
-   _shader.setUniform("alpha", _shader_alpha * _void_alpha);
-   _shader.setUniform("radius_factor", radius * _radius_factor);
-   _shader.setUniform("resolution", sf::Vector2f{200, 200});
-   _shader.setUniform("noise_scale", _noise_scale);
-   _shader.setUniform("swirl_color", _swirl_color);
+   if (_shader.hasValue())
+   {
+      if (_ul_time.hasValue())
+      {
+         _shader->setUniform(*_ul_time, _elapsed * _time_factor);
+      }
+      if (_ul_alpha.hasValue())
+      {
+         _shader->setUniform(*_ul_alpha, _shader_alpha * _void_alpha);
+      }
+      if (_ul_radius_factor.hasValue())
+      {
+         _shader->setUniform(*_ul_radius_factor, radius * _radius_factor);
+      }
+      if (_ul_resolution.hasValue())
+      {
+         _shader->setUniform(*_ul_resolution, sf::Vector2f{200, 200});
+      }
+      if (_ul_noise_scale.hasValue())
+      {
+         _shader->setUniform(*_ul_noise_scale, _noise_scale);
+      }
+      if (_ul_swirl_color.hasValue())
+      {
+         _shader->setUniform(*_ul_swirl_color, _swirl_color);
+      }
+   }
 
    sf::RenderStates shader_state;
    shader_state.blendMode = sf::BlendNone;
-   shader_state.shader = &_shader;
+   shader_state.shader = _shader.hasValue() ? &(*_shader) : nullptr;
 
    sf::RectangleShape quad{sf::RectangleShape::Data{.size = {200.f, 200.f}}};
    quad.setFillColor(sf::Color::White);
@@ -719,11 +743,24 @@ void Gateway::setup(const GameDeserializeData& data)
 
    _origin = _pa[0]._layer->_sprite->origin;
 
-#ifndef __EMSCRIPTEN__
    // load shader
-   if (!_shader.loadFromFile("data/shaders/void_standalone.frag", sf::Shader::Type::Fragment))
    {
-      std::cout << "failed to load shader" << std::endl;
+      auto loaded_shader = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/void_standalone.frag"});
+      if (loaded_shader.hasValue())
+      {
+         _shader = std::move(*loaded_shader);
+         _ul_time = _shader->getUniformLocation("time");
+         _ul_alpha = _shader->getUniformLocation("alpha");
+         _ul_radius_factor = _shader->getUniformLocation("radius_factor");
+         _ul_resolution = _shader->getUniformLocation("resolution");
+         _ul_noise_scale = _shader->getUniformLocation("noise_scale");
+         _ul_swirl_color = _shader->getUniformLocation("swirl_color");
+         _ul_ichannel0 = _shader->getUniformLocation("iChannel0");
+      }
+      else
+      {
+         std::cout << "failed to load shader" << std::endl;
+      }
    }
 
    _shader_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u(200u, 200u));
@@ -731,7 +768,6 @@ void Gateway::setup(const GameDeserializeData& data)
    _shader_sprite = std::make_unique<sf::Sprite>();
    _shader_sprite->position = _rect.position;
    loadNoiseTexture(_default_texture_path);
-#endif
 
    _eye = std::make_unique<Eye>(_rect.getCenter());
 }

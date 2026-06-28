@@ -122,30 +122,19 @@ void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       return;
    }
 
-   // a copy of the current view is created here on purpose
-#ifndef __EMSCRIPTEN__
-   const auto level_view = color.getView();
-#endif
    if (_settings._fullscreen)
    {
-#ifndef __EMSCRIPTEN__
       const sf::View ortho(sf::FloatRect(
          {0.0f, 0.0f},
          {static_cast<float>(GameConfiguration::getInstance()._view_width),
           static_cast<float>(GameConfiguration::getInstance()._view_height)}
       ));
 
-      color.setView(ortho);
-#endif
+      color.draw(*_sprite, sf::RenderStates{.view = ortho, .texture = _texture.get()});
    }
-
-   color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
-
-   if (_settings._fullscreen)
+   else
    {
-#ifndef __EMSCRIPTEN__
-      color.setView(level_view);
-#endif
+      color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
    }
 }
 

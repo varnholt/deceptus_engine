@@ -261,7 +261,10 @@ void InfoLayer::loadInventoryItems()
       {
          // store sprites
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
-         sprite->textureRect = sf::FloatRect{{static_cast<float>(image._x_px), static_cast<float>(image._y_px)}, {static_cast<float>(icon_width), static_cast<float>(icon_height)}};
+         sprite->textureRect = sf::FloatRect{
+            {static_cast<float>(image._x_px), static_cast<float>(image._y_px)},
+            {static_cast<float>(icon_width), static_cast<float>(icon_height)}
+         };
          _sprites[image._name] = std::move(sprite);
       }
    );
@@ -560,9 +563,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
    const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
-#ifndef __EMSCRIPTEN__
-   window.setView(view);
-#endif
+   states.view = view;
 
    drawCameraPanorama(window, states);
    drawHealth(window, states);
@@ -575,10 +576,7 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    auto w = GameConfiguration::getInstance()._view_width;
    auto h = GameConfiguration::getInstance()._view_height;
 
-   sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
-#ifndef __EMSCRIPTEN__
-   window.setView(view);
-#endif
+   const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
 
    std::stringstream stream_tl;
    std::stringstream stream_px;
@@ -608,20 +606,15 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    const auto offset_x_px = 8 * scale_factor;
    const auto offset_y_px = console_base_height_px - 24 * scale_factor;
 
-   sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(view_width_px), static_cast<float>(view_height_px)}});
-#ifndef __EMSCRIPTEN__
-   window.setView(view);
-#endif
+   const sf::View view =
+      sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(view_width_px), static_cast<float>(view_height_px)}});
 
    const auto& layer_health = _layers["console"]->_layer;
-   layer_health->draw(window, states);
+   layer_health->draw(window, sf::RenderStates{.view = view});
 
-   sf::View view_screen = sf::View::fromRect(
+   const sf::View view_screen = sf::View::fromRect(
       sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(console_base_width_px), static_cast<float>(console_base_height_px)}}
    );
-#ifndef __EMSCRIPTEN__
-   window.setView(view_screen);
-#endif
 
    sf::Text console_text(*_console_font, sf::Text::Data{});
    console_text.setCharacterSize(console_base_font_size_px * scale_factor);
@@ -633,7 +626,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
       console_text.setString(it->c_str());
       console_text.setFillColor(sf::Color::White);
       console_text.position = {static_cast<float>(offset_x_px), static_cast<float>(offset_y_px - ((line_index + 1) * line_spacing_px))};
-      window.draw(console_text);
+      window.draw(console_text, sf::RenderStates{.view = view_screen});
       line_index++;
    }
 
@@ -649,7 +642,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
       const auto cursor_position = console_text.findCharacterPos(command.size());
       console_text.setString("_");
       console_text.position = cursor_position;
-      window.draw(console_text);
+      window.draw(console_text, sf::RenderStates{.view = view_screen});
    }
 
    // draw console help
@@ -671,7 +664,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
       console_text.setString(topic.c_str());
       console_text.setFillColor(sf::Color::Green);
       console_text.position = {static_cast<float>(console_base_width_px / 2), static_cast<float>((++line_index) * line_spacing_px)};
-      window.draw(console_text);
+      window.draw(console_text, sf::RenderStates{.view = view_screen});
 
       const auto& commands = help._help_messages.at(topic);
       for (const auto& command : commands)
@@ -681,7 +674,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
          console_text.position = {
             static_cast<float>(console_base_width_px / 2 + indent_px), static_cast<float>((++line_index) * line_spacing_px)
          };
-         window.draw(console_text);
+         window.draw(console_text, sf::RenderStates{.view = view_screen});
 
          for (const auto& example : command.examples)
          {
@@ -690,7 +683,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
             console_text.position = {
                static_cast<float>(console_base_width_px / 2 + indent_px * 2), static_cast<float>((++line_index) * line_spacing_px)
             };
-            window.draw(console_text);
+            window.draw(console_text, sf::RenderStates{.view = view_screen});
          }
       }
    }
