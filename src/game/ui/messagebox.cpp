@@ -190,7 +190,7 @@ MessageBox::MessageBox(
       segments.end(),
       std::back_inserter(_segments),
       [](const RichTextParser::Segment& segment)
-      { return TextSegment{*segment.text, segment.text->getFillColor(), segment.text->getString()}; }
+      { return TextSegment{*segment.text, segment.text->getFillColor(), std::string(segment.text->getString().data())}; }
    );
 
    // can maybe be removed
@@ -242,8 +242,9 @@ void MessageBox::initializeLayers()
 
       try
       {
-         auto texture =
-            std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
+         auto texture = std::make_shared<sf::Texture>(
+            std::move(*sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())}))
+         );
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
          auto sprite = std::make_shared<sf::Sprite>();
@@ -312,7 +313,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
       if (__active->_properties._animate_text)
       {
-         if (__active->_char_animate_index < __active->_plain_text.getSize())
+         if (__active->_char_animate_index < __active->_plain_text.size())
          {
             __active->_properties._animate_text = false;
             return true;
@@ -394,18 +395,19 @@ void MessageBox::draw(sf::RenderTarget& window, const sf::RenderStates& states)
    }
 
    // set up an ortho view with screen dimensions
-   const sf::View pixel_ortho(sf::FloatRect(
+   const sf::View pixel_ortho = sf::View::fromRect(sf::FloatRect(
       {0.0f, 0.0f},
       {static_cast<float>(GameConfiguration::getInstance()._view_width), static_cast<float>(GameConfiguration::getInstance()._view_height)}
    ));
-   states.view = pixel_ortho;
+   sf::RenderStates ortho_states = states;
+   ortho_states.view = pixel_ortho;
 
    for (auto messagebox : messageboxes)
    {
       if (messagebox)
       {
-         messagebox->drawLayers(window, states);
-         messagebox->drawText(window, states);
+         messagebox->drawLayers(window, ortho_states);
+         messagebox->drawText(window, ortho_states);
       }
    }
 }
@@ -426,7 +428,7 @@ void MessageBox::updateTextAnimation()
    x = std::max(0.0f, x);
 
    const auto to =
-      !_properties._animate_text ? _plain_text.getSize() : std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_plain_text.getSize()));
+      !_properties._animate_text ? _plain_text.size() : std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_plain_text.size()));
 
    int32_t accumulated_chars_from_segments = 0;
    if (_char_animate_index != to)
@@ -434,17 +436,17 @@ void MessageBox::updateTextAnimation()
       _char_animate_index = to;
       for (auto& segment : _segments)
       {
-         accumulated_chars_from_segments += static_cast<int32_t>(segment.plain_text.getSize());
+         accumulated_chars_from_segments += static_cast<int32_t>(segment.plain_text.size());
          if (to < static_cast<uint32_t>(accumulated_chars_from_segments))
          {
             // draw only subset of segment
-            const auto chars_to_draw = segment.plain_text.getSize() - (static_cast<uint32_t>(accumulated_chars_from_segments) - to);
-            const auto subset = segment.plain_text.substring(0, chars_to_draw);
-            segment.text.setString(subset);
+            const auto chars_to_draw = segment.plain_text.size() - (static_cast<uint32_t>(accumulated_chars_from_segments) - to);
+            const auto subset = segment.plain_text.substr(0, chars_to_draw);
+            segment.text.setString(subset.c_str());
             break;
          }
 
-         segment.text.setString(segment.plain_text);
+         segment.text.setString(segment.plain_text.c_str());
       }
    }
 }

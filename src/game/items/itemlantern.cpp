@@ -128,12 +128,12 @@ void ItemLantern::update(const sf::Time& delta_time)
    _was_on_ground = currently_on_ground;
 
    // advance all timers
-   _jitter_elapsed = std::max(sf::Time::Zero, _jitter_elapsed - delta_time);
-   _landing_tilt_elapsed = std::max(sf::Time::Zero, _landing_tilt_elapsed - delta_time);
-   _dust_burst_elapsed = std::max(sf::Time::Zero, _dust_burst_elapsed - delta_time);
-   _fade_in_elapsed = std::max(sf::Time::Zero, _fade_in_elapsed - delta_time);
+   _jitter_elapsed = std::max(sf::Time{}, _jitter_elapsed - delta_time);
+   _landing_tilt_elapsed = std::max(sf::Time{}, _landing_tilt_elapsed - delta_time);
+   _dust_burst_elapsed = std::max(sf::Time{}, _dust_burst_elapsed - delta_time);
+   _fade_in_elapsed = std::max(sf::Time{}, _fade_in_elapsed - delta_time);
    const float fade_alpha_factor =
-      (_fade_in_elapsed > sf::Time::Zero)
+      (_fade_in_elapsed > sf::Time{})
          ? static_cast<float>(Easings::easeOutSine(1.0f - _fade_in_elapsed.asSeconds() / _fade_in_duration.asSeconds()))
          : 1.0f;
 
@@ -142,7 +142,7 @@ void ItemLantern::update(const sf::Time& delta_time)
    b2Vec2 light_pos_m = player->getBody()->GetPosition() + b2Vec2(eye_offset_x_m + offset_x_m, eye_offset_y_m + offset_y_m);
 
    // apply jitter: two sine waves at incommensurate frequencies decaying over the animation window
-   if (_jitter_elapsed > sf::Time::Zero)
+   if (_jitter_elapsed > sf::Time{})
    {
       const float jitter_t = _jitter_elapsed.asSeconds() / _jitter_duration.asSeconds();
       const float elapsed_s = _elapsed.asSeconds();
@@ -167,14 +167,14 @@ void ItemLantern::update(const sf::Time& delta_time)
 
    // easeOutSine brings the beam smoothly back to neutral after a landing tilt
    sf::Angle tilt_angle = sf::degrees(0.0f);
-   if (_landing_tilt_elapsed > sf::Time::Zero)
+   if (_landing_tilt_elapsed > sf::Time{})
    {
       const float normalized_t = 1.0f - (_landing_tilt_elapsed.asSeconds() / _landing_tilt_duration.asSeconds());
       const float tilt_degrees = _landing_tilt_max_degrees * (1.0f - static_cast<float>(Easings::easeOutSine(normalized_t)));
       const float tilt_direction = pointing_right ? 1.0f : -1.0f;
       tilt_angle = sf::degrees(tilt_degrees * tilt_direction);
    }
-   active_light->_sprite->rotation = sf::degrees(tilt_angle);
+   active_light->_sprite->rotation = tilt_angle;
    active_light->_color.a = static_cast<uint8_t>(static_cast<float>(_target_alpha) * fade_alpha_factor);
 
    // reset rotation on the inactive light so it is clean when it next becomes active
@@ -259,13 +259,13 @@ void ItemLantern::onEquipped()
    }
 
    _was_hard_landing = false;
-   _jitter_elapsed = sf::Time::Zero;
+   _jitter_elapsed = sf::Time{};
    _was_on_ground = false;
-   _landing_tilt_elapsed = sf::Time::Zero;
-   _dust_burst_elapsed = sf::Time::Zero;
+   _landing_tilt_elapsed = sf::Time{};
+   _dust_burst_elapsed = sf::Time{};
    _last_valid_eye_position.reset();
    _was_eye_position_valid = false;
-   _fade_in_elapsed = sf::Time::Zero;
+   _fade_in_elapsed = sf::Time{};
 
    if (dust_enabled)
    {
@@ -294,7 +294,7 @@ void ItemLantern::onEquipped()
                shader.setUniform(*_ul_time, elapsed_seconds);
             }
             const float burst_factor =
-               (_dust_burst_elapsed > sf::Time::Zero)
+               (_dust_burst_elapsed > sf::Time{})
                   ? (1.0f + (_dust_burst_peak_multiplier - 1.0f) * (_dust_burst_elapsed.asSeconds() / _dust_burst_duration.asSeconds()))
                   : 1.0f;
             if (_ul_intensity.hasValue())

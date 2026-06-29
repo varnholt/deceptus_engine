@@ -18,11 +18,16 @@ void BlurShader::initialize(
    }
    _shader = std::move(*loaded);
 
-   _uniform_texture        = _shader->getUniformLocation("texture");
-   _uniform_texture_width  = _shader->getUniformLocation("texture_width");
-   _uniform_texture_height = _shader->getUniformLocation("texture_height");
-   _uniform_blur_radius    = _shader->getUniformLocation("blur_radius");
-   _uniform_add_factor     = _shader->getUniformLocation("add_factor");
+   auto get_ul = [&](const char* name) -> std::optional<sf::Shader::UniformLocation>
+   {
+      const auto result = _shader->getUniformLocation(name);
+      return result.hasValue() ? std::optional{*result} : std::nullopt;
+   };
+   _uniform_texture        = get_ul("texture");
+   _uniform_texture_width  = get_ul("texture_width");
+   _uniform_texture_height = get_ul("texture_height");
+   _uniform_blur_radius    = get_ul("blur_radius");
+   _uniform_add_factor     = get_ul("add_factor");
 
    if (_uniform_texture.has_value())
    {

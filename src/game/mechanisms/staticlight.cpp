@@ -87,7 +87,7 @@ void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/)
    sf::Color color{_color.r, _color.g, _color.b, static_cast<uint8_t>(lumen)};
 
    _sprite->color = color;
-   target.draw(*_sprite, _blend_mode);
+   target.draw(*_sprite, sf::RenderStates{.blendMode = _blend_mode});
 }
 
 void StaticLight::update(const sf::Time& /*time*/)
@@ -174,7 +174,7 @@ void StaticLight::deserialize(const GameDeserializeData& data)
 
    auto scale_x_px = data._tmx_object->_width_px / _texture->getSize().x;
    auto scale_y_px = data._tmx_object->_height_px / _texture->getSize().y;
-   _sprite->scale({scale_x_px, scale_y_px});
+   _sprite->scale = {scale_x_px, scale_y_px};
 
    // init each light with a different time offset
    // probably passing the position itself to FBM would be enough

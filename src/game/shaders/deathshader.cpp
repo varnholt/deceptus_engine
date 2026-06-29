@@ -10,7 +10,7 @@ DeathShader::DeathShader(uint32_t width, uint32_t height)
 {
    try
    {
-      _render_texture = std::make_shared<sf::RenderTexture>(sf::Vector2u{width, height});
+      _render_texture = std::make_shared<sf::RenderTexture>(std::move(*sf::RenderTexture::create(sf::Vector2u{width, height})));
    }
    catch (...)
    {
@@ -36,16 +36,21 @@ void DeathShader::initialize()
    _flow_field_1 = TexturePool::getInstance().get("data/effects/flowfield_1.png");
    _flow_field_2 = TexturePool::getInstance().get("data/effects/flowfield_3.png");
 
-   _flow_field_1->setRepeated(true);
+   _flow_field_1->setWrapMode(sf::TextureWrapMode::Repeat);
    _flow_field_1->setSmooth(true);
-   _flow_field_2->setRepeated(true);
+   _flow_field_2->setWrapMode(sf::TextureWrapMode::Repeat);
    _flow_field_2->setSmooth(true);
 
-   _uniform_current_texture  = _shader->getUniformLocation("current_texture");
-   _uniform_flowfield_1      = _shader->getUniformLocation("flowfield_1");
-   _uniform_flowfield_2      = _shader->getUniformLocation("flowfield_2");
-   _uniform_time             = _shader->getUniformLocation("time");
-   _uniform_flowfield_offset = _shader->getUniformLocation("flowfield_offset");
+   auto get_ul = [&](const char* name) -> std::optional<sf::Shader::UniformLocation>
+   {
+      const auto result = _shader->getUniformLocation(name);
+      return result.hasValue() ? std::optional{*result} : std::nullopt;
+   };
+   _uniform_current_texture  = get_ul("current_texture");
+   _uniform_flowfield_1      = get_ul("flowfield_1");
+   _uniform_flowfield_2      = get_ul("flowfield_2");
+   _uniform_time             = get_ul("time");
+   _uniform_flowfield_offset = get_ul("flowfield_offset");
 
    if (_uniform_current_texture.has_value())
    {

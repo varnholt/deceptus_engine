@@ -15,8 +15,13 @@ void GammaShader::initialize()
    }
    _gamma_shader = std::move(*loaded);
 
-   _uniform_gamma   = _gamma_shader->getUniformLocation("gamma");
-   _uniform_texture = _gamma_shader->getUniformLocation("texture");
+   auto get_ul = [&](const char* name) -> std::optional<sf::Shader::UniformLocation>
+   {
+      const auto result = _gamma_shader->getUniformLocation(name);
+      return result.hasValue() ? std::optional{*result} : std::nullopt;
+   };
+   _uniform_gamma   = get_ul("gamma");
+   _uniform_texture = get_ul("texture");
 }
 
 void GammaShader::update()

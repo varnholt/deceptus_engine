@@ -25,7 +25,7 @@ void ProjectileHitAnimation::playHitAnimation(float x, float y, float angle, con
    anim->setFrameTimes(frames._frame_times);
    anim->origin = frames._origin;
    anim->position = {x, y};
-   anim->rotation = sf::degrees(sf::radians(angle));
+   anim->rotation = sf::radians(angle);
 
    // stay at the last frame when animation is elapsed
    anim->_reset_to_first_frame = false;

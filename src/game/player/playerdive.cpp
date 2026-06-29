@@ -6,7 +6,7 @@
 
 void PlayerDive::update(const sf::Time& dt, bool in_water)
 {
-   _dive_duration = in_water ? (_dive_duration + dt.toDuration()) : HighResDuration::zero();
+   _dive_duration = in_water ? (_dive_duration + std::chrono::microseconds(dt.asMicroseconds())) : HighResDuration::zero();
 
    using namespace std::chrono_literals;
    if (_dive_duration > 10min)

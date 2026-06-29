@@ -121,9 +121,9 @@ std::vector<Segment> parseRichText(
             const auto text_before_tag = current_view.substr(0, tag_pos);
             Segment segment(font);
             segment.text->setCharacterSize(character_size);
-            segment.text->setString(std::string::fromUtf8(text_before_tag.begin(), text_before_tag.end()));
+            segment.text->setString(std::string(text_before_tag.begin(), text_before_tag.end()).c_str());
             segment.text->setFillColor(current_text_color);
-            segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
+            segment.text->setBold(is_bold);
             segments.push_back(std::move(segment));
          }
 
@@ -169,9 +169,9 @@ std::vector<Segment> parseRichText(
          // no more tags; add the rest of the text as a single segment.
          Segment segment(font);
          segment.text->setCharacterSize(character_size);
-         segment.text->setString(std::string::fromUtf8(current_view.begin(), current_view.end()));
+         segment.text->setString(std::string(current_view.begin(), current_view.end()).c_str());
          segment.text->setFillColor(current_text_color);
-         segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
+         segment.text->setBold(is_bold);
          segments.push_back(std::move(segment));
          break;
       }
@@ -224,7 +224,7 @@ std::string toString(const std::vector<Segment>& segments)
 
    for (const auto& seg : segments)
    {
-      result += seg.text->getString();
+      result += seg.text->getString().data();
    }
 
    return result;
@@ -233,7 +233,7 @@ std::string toString(const std::vector<Segment>& segments)
 void testParseRichText()
 {
    auto font_opt = sf::Font::openFromFile("arial.ttf");
-   if (!font_opt.has_value())
+   if (!font_opt.hasValue())
    {
       std::cerr << "Failed to load font!" << std::endl;
       return;
@@ -250,12 +250,12 @@ void testParseRichText()
    const auto plain_text = toString(segments);
 
    std::cout << "Original Message: " << message << std::endl;
-   std::cout << "Extracted Plain Text: " << std::endl << plain_text.toAnsiString() << std::endl;
+   std::cout << "Extracted Plain Text: " << std::endl << plain_text << std::endl;
 }
 
 Segment::Segment(const sf::Font& font)
 {
-   text = std::make_unique<sf::Text>(font);
+   text = std::make_unique<sf::Text>(font, sf::Text::Data{});
 }
 
 }  // namespace RichTextParser

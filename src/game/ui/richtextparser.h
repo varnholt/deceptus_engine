@@ -2,6 +2,7 @@
 #define RICH_TEXT_PARSER_H
 
 #include <SFML/Graphics.hpp>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>

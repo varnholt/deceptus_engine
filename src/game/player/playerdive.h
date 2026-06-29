@@ -2,6 +2,7 @@
 #define PLAYERDIVE_H
 
 #include <SFML/Graphics.hpp>
+#include <chrono>
 
 /// \brief tracks how long the player has stayed underwater.
 class PlayerDive

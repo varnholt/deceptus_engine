@@ -17,14 +17,19 @@ void AtmosphereShader::initialize(const std::shared_ptr<sf::RenderTexture>& rend
    _shader = std::move(*loaded);
 
    _distortion_map = TexturePool::getInstance().get("data/effects/distortion_map.png");
-   _distortion_map->setRepeated(true);
+   _distortion_map->setWrapMode(sf::TextureWrapMode::Repeat);
    _distortion_map->setSmooth(true);
 
-   _uniform_current_texture        = _shader->getUniformLocation("current_texture");
-   _uniform_distortion_map_texture = _shader->getUniformLocation("distortion_map_texture");
-   _uniform_physics_texture        = _shader->getUniformLocation("physics_texture");
-   _uniform_time                   = _shader->getUniformLocation("time");
-   _uniform_distortion_amplitude   = _shader->getUniformLocation("distortion_amplitude");
+   auto get_ul = [&](const char* name) -> std::optional<sf::Shader::UniformLocation>
+   {
+      const auto result = _shader->getUniformLocation(name);
+      return result.hasValue() ? std::optional{*result} : std::nullopt;
+   };
+   _uniform_current_texture        = get_ul("current_texture");
+   _uniform_distortion_map_texture = get_ul("distortion_map_texture");
+   _uniform_physics_texture        = get_ul("physics_texture");
+   _uniform_time                   = get_ul("time");
+   _uniform_distortion_amplitude   = get_ul("distortion_amplitude");
 
    if (_uniform_current_texture.has_value())
    {

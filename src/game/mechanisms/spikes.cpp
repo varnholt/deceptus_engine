@@ -250,7 +250,10 @@ void Spikes::updateSpriteRect()
    const auto tu = static_cast<int32_t>(std::floor(_tu));
    for (auto& sprite : _sprite)
    {
-      sprite->textureRect = {{(tu * PIXELS_PER_TILE) + _tu_offset, _tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
+      sprite->textureRect = {
+         {static_cast<float>((tu * PIXELS_PER_TILE) + _tu_offset), static_cast<float>(_tv * PIXELS_PER_TILE)},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+      };
    }
 }
 

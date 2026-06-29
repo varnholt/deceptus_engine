@@ -30,7 +30,9 @@ void ProfilingUi::processEvents()
 
       if (event->is<sf::Event::Closed>())
       {
+#ifndef __EMSCRIPTEN__
          _render_window->close();
+#endif
       }
    }
 }

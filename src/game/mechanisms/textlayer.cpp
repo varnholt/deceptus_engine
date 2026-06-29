@@ -82,7 +82,8 @@ std::shared_ptr<TextLayer> TextLayer::deserialize(GameNode* parent, const GameDe
    if (font_truetype.has_value())
    {
       instance->_mode = Mode::TrueType;
-      instance->_truetype_font = sf::Font::openFromFile(font_truetype.value());
+      auto loaded_font = sf::Font::openFromFile(font_truetype.value());
+      instance->_truetype_font = loaded_font.hasValue() ? std::optional{std::move(*loaded_font)} : std::nullopt;
       if (!instance->_truetype_font.has_value())
       {
          Log::Error() << "failed to load font";
@@ -93,7 +94,7 @@ std::shared_ptr<TextLayer> TextLayer::deserialize(GameNode* parent, const GameDe
          const auto color = ValueReader::readValue<std::string>("truetype_font_color", map).value_or("#ffffffff");
          const auto rgba = TmxTools::color(color);
 
-         instance->_truetype_font->setSmooth(false);
+
          instance->_truetype_text = std::make_unique<sf::Text>(*instance->_truetype_font, sf::Text::Data{});
          instance->_truetype_text->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
          instance->_truetype_text->setString(instance->_text.c_str());

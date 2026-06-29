@@ -262,7 +262,7 @@ void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
    if (damage_color_value > 0)
    {
       const auto damage_color = sf::Color(255, 255 - damage_color_value, 255 - damage_color_value);
-      current_cycle->color = damage_color;
+      current_cycle->setColor(damage_color);
    }
 }
 
@@ -325,7 +325,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    const auto& current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
    {
-      current_cycle->color = sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255));
+      current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
       current_cycle->position = draw_position_px;
       drawDash(color, current_cycle, draw_position_px);
       updateHurtColor(current_cycle);
@@ -335,7 +335,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    const auto& auxiliary_cycle = _player_animation->getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
-      auxiliary_cycle->color = sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255));
+      auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
       auxiliary_cycle->position = draw_position_px;
       auxiliary_cycle->draw(color, normal);
    }
@@ -359,7 +359,7 @@ void Player::drawStencil(sf::RenderTarget& color)
    auto current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
    {
-      current_cycle->color = stencil_color;
+      current_cycle->setColor(stencil_color);
       current_cycle->position = draw_position_px;
       current_cycle->draw(color);
    }
@@ -367,7 +367,7 @@ void Player::drawStencil(sf::RenderTarget& color)
    auto auxiliary_cycle = _player_animation->getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
-      auxiliary_cycle->color = stencil_color;
+      auxiliary_cycle->setColor(stencil_color);
       auxiliary_cycle->position = draw_position_px;
       auxiliary_cycle->draw(color);
    }

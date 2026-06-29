@@ -114,6 +114,6 @@ void PlayerFirefly::updateTextureRect()
    if (new_frame != _current_frame)
    {
       _current_frame = new_frame;
-      _sprite->textureRect = {{_current_frame * PIXELS_PER_TILE, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
+      _sprite->textureRect = {{static_cast<float>(_current_frame * PIXELS_PER_TILE), 0.0f}, {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}};
    }
 }

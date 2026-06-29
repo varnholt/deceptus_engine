@@ -130,5 +130,21 @@ struct Music
    }
 };
 
+struct Listener
+{
+   static void setPosition(Vector3f)
+   {
+   }
+   static void setDirection(Vector3f)
+   {
+   }
+   static void setUpVector(Vector3f)
+   {
+   }
+   static void setGlobalVolume(float)
+   {
+   }
+};
+
 }  // namespace sf
 #endif

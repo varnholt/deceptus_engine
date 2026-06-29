@@ -224,7 +224,7 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
       }
 
       vertices.push_back(vertices.at(0));
-      render_texture->draw(&vertices[0], vertices.size(), sf::PrimitiveType::LineStrip);
+      render_texture->draw(std::span<const sf::Vertex>{vertices.data(), vertices.size()}, sf::PrimitiveType::LineStrip);
    }
 
    render_texture->display();

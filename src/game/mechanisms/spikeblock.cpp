@@ -157,7 +157,7 @@ const sf::FloatRect& SpikeBlock::getPixelRect() const
 
 void SpikeBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   target.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+   target.draw(*_sprite, sf::RenderStates{.texture = _texture_map.get()});
 }
 
 void SpikeBlock::update(const sf::Time& dt)

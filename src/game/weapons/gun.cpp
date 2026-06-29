@@ -130,7 +130,7 @@ void Gun::updateProjectiles(const sf::Time& time)
 
       if (projectile->isRotating())
       {
-         projectile_animation.rotation = sf::degrees(sf::radians(projectile->rotation));
+         projectile_animation.rotation = sf::radians(projectile->getRotation());
       }
 
       projectile_animation.position = {projectile->getBody()->GetPosition().x * PPM, projectile->getBody()->GetPosition().y * PPM};
