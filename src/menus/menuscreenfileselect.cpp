@@ -26,25 +26,25 @@ MenuScreenFileSelect::MenuScreenFileSelect()
 
    for (auto i = 0u; i < 3; i++)
    {
-      _names[i] = std::make_unique<sf::Text>(_font);
+      _names[i] = std::make_unique<sf::Text>(_font, sf::Text::Data{});
       _names[i]->setCharacterSize(12);
       _names[i]->setFillColor(sf::Color{232, 219, 243});
    }
 
    for (auto slot_index = 0u; slot_index < 3; slot_index++)
    {
-      _new_game_texts[slot_index] = std::make_unique<sf::Text>(_font);
+      _new_game_texts[slot_index] = std::make_unique<sf::Text>(_font, sf::Text::Data{});
       _new_game_texts[slot_index]->setCharacterSize(12);
       _new_game_texts[slot_index]->setFillColor(color_label_normal);
    }
 
-   _text_back_button = std::make_unique<sf::Text>(_font);
+   _text_back_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_back_button->setCharacterSize(12);
    _text_back_button->setFillColor(color_label_normal);
-   _text_delete_button = std::make_unique<sf::Text>(_font);
+   _text_delete_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_delete_button->setCharacterSize(12);
    _text_delete_button->setFillColor(color_label_normal);
-   _text_confirm_button = std::make_unique<sf::Text>(_font);
+   _text_confirm_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_confirm_button->setCharacterSize(12);
    _text_confirm_button->setFillColor(color_label_normal);
 }
@@ -255,7 +255,7 @@ void MenuScreenFileSelect::updateLayers()
 
       // update names
       auto layer_name = _layers["slot_" + slot_name + "_name"];
-      _names[index]->setString(save_state._player_info._name);
+      _names[index]->setString(save_state._player_info._name.c_str());
       _names[index]->position = {layer_name->_sprite->position.x, layer_name->_sprite->position.y + nameOffsetY};
 
       index++;

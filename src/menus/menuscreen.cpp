@@ -125,7 +125,7 @@ void MenuScreen::load()
       try
       {
          const auto texture_size = sf::Vector2u(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
-         auto texture = std::make_shared<sf::Texture>(texture_size);
+         auto texture = std::make_shared<sf::Texture>(std::move(*sf::Texture::create(texture_size)));
          auto opacity = layer.getOpacity();
 
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));

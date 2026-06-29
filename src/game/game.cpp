@@ -367,7 +367,7 @@ void Game::loadLevel(LoadingMode loading_mode)
 {
    const auto level_loader = [this, loading_mode]()
    {
-      // create an opengl context for this thread
+   // create an opengl context for this thread
 #ifndef __EMSCRIPTEN__
       sf::Context loader_context;
       loader_context.setActive(true);
@@ -705,10 +705,12 @@ void Game::draw()
       _camera_ui->draw();
    }
 
+#ifndef __EMSCRIPTEN__
    if (DebugDrawStates::_draw_log)
    {
       _log_ui->draw();
    }
+#endif
 
 #ifdef DEVELOPMENT_MODE
    if (_profiling_ui)
@@ -1245,10 +1247,12 @@ void Game::shutdown()
       _camera_ui->close();
    }
 
+#ifndef __EMSCRIPTEN__
    if (_log_ui)
    {
       _log_ui->close();
    }
+#endif
 
    // std::exit skips local destructors in main(), so Level and all its children (LevelScript,
    // Lever, etc.) would otherwise be torn down during static cleanup — after SaveState::__save_states
@@ -1369,6 +1373,7 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::F5:
       {
+#ifndef __EMSCRIPTEN__
          DebugDrawStates::_draw_log = !DebugDrawStates::_draw_log;
          if (DebugDrawStates::_draw_log && !_log_ui)
          {
@@ -1379,7 +1384,7 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
             _log_ui->close();
             _log_ui.reset();
          }
-
+#endif
          break;
       }
       case sf::Keyboard::Key::F6:
@@ -1518,10 +1523,12 @@ void Game::processEvents()
       _camera_ui->processEvents();
    }
 
+#ifndef __EMSCRIPTEN__
    if (DebugDrawStates::_draw_log)
    {
       _log_ui->processEvents();
    }
+#endif
 
 #ifdef DEVELOPMENT_MODE
    if (_profiling_ui)

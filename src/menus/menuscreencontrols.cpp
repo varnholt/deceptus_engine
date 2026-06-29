@@ -57,7 +57,7 @@ MenuScreenControls::MenuScreenControls()
 {
    setFilename("data/menus/controls.psd");
 
-   _text = std::make_unique<sf::Text>(_font);
+   _text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text->setFont(_font);
    _text->setCharacterSize(12);
 
@@ -187,13 +187,13 @@ void MenuScreenControls::loadingFinished()
       layer_entry.second->_visible = false;
    }
 
-   _text_setkey_button = std::make_unique<sf::Text>(_font);
+   _text_setkey_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_setkey_button->setCharacterSize(12);
    _text_setkey_button->setFillColor(color_label_normal);
-   _text_defaults_button = std::make_unique<sf::Text>(_font);
+   _text_defaults_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_defaults_button->setCharacterSize(12);
    _text_defaults_button->setFillColor(color_label_normal);
-   _text_back_button = std::make_unique<sf::Text>(_font);
+   _text_back_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_back_button->setCharacterSize(12);
    _text_back_button->setFillColor(color_label_normal);
 
@@ -559,7 +559,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto title_prefix = (_device_row_index > 0) ? "< " : "  ";
    const auto title_suffix = (_device_row_index < static_cast<int32_t>(_device_entries.size()) - 1) ? " >" : "  ";
    const auto full_title = title_prefix + _device_name + title_suffix;
-   _text->setString(std::string::fromUtf8(full_title.begin(), full_title.end()));
+   _text->setString(full_title.c_str());
    const auto title_bounds = _text->getLocalBounds();
    _text->position = {(640.0f - title_bounds.size.x) / 2.0f, assign_title_y};
    window.draw(*_text, states);
@@ -590,7 +590,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
       _text->setFillColor(row_color);
 
       const auto action_display_name = InputConfiguration::actionDisplayName(action);
-      _text->setString(std::string::fromUtf8(action_display_name.begin(), action_display_name.end()));
+      _text->setString(action_display_name.c_str());
       _text->position = {assign_column_action_x, row_y};
       window.draw(*_text, states);
 
@@ -615,7 +615,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
             binding_name = InputConfiguration::buttonName(button_entry->second);
          }
       }
-      _text->setString(binding_name);
+      _text->setString(binding_name.c_str());
       _text->position = {assign_column_keyboard_x, row_y};
       window.draw(*_text, states);
    }

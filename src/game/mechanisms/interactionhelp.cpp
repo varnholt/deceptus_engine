@@ -276,7 +276,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       };
 
       help._button_sprite->textureRect = help._button_rect_keyboard;
-      help._text->setString(sftr(text_value.value()).c_str());
+      help._text->setString(sftr(text_value.value()));
 
       // row 0 at bottom, row 1 above
       const auto view_width = GameConfiguration::getInstance()._view_width;

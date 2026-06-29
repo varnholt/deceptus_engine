@@ -28,9 +28,9 @@ MenuScreenMain::MenuScreenMain()
 {
    setFilename("data/menus/titlescreen.psd");
 
-   _text_build = std::make_unique<sf::Text>(_font);
+   _text_build = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_build->setFont(_font);
-   _text_build->setString(sftr("Build Number") + std::string{": "} + std::string{getBuildNumber()});
+   _text_build->setString((tr("Build Number") + ": " + std::string{getBuildNumber()}).c_str());
    _text_build->setCharacterSize(12);
    _text_build->position = {build_text_x_offset, 341};
    _text_build->setFillColor(sf::Color{50, 50, 50});
@@ -38,10 +38,10 @@ MenuScreenMain::MenuScreenMain()
    const auto current_year =
       static_cast<int32_t>(std::chrono::year_month_day{std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now())}.year());
 
-   _text_copyright = std::make_unique<sf::Text>(_font);
+   _text_copyright = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_copyright->setFont(_font);
    const auto copyright_string = std::vformat(tr("© {} Matthias Varnholt & dstar"), std::make_format_args(current_year));
-   _text_copyright->setString(std::string::fromUtf8(copyright_string.begin(), copyright_string.end()));
+   _text_copyright->setString(copyright_string.c_str());
    _text_copyright->setCharacterSize(12);
    _text_copyright->setFillColor(sf::Color{127, 171, 253});
 
@@ -99,7 +99,7 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
    // fade-in
    if (_fade_in_active)
    {
-      sf::RenderTexture temp_texture(sf::Vector2u{window.getSize()});
+      auto temp_texture = *sf::RenderTexture::create(sf::Vector2u{window.getSize()});
       temp_texture.clear(sf::Color::Transparent);
 
       // draw the base menu content to the temporary texture
@@ -172,19 +172,19 @@ void MenuScreenMain::loadingFinished()
       _layers["credits"]->_visible = false;
    }
 
-   _text_continue_item = std::make_unique<sf::Text>(_font);
+   _text_continue_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_continue_item->setFont(_font);
    _text_continue_item->setCharacterSize(12);
 
-   _text_new_game_item = std::make_unique<sf::Text>(_font);
+   _text_new_game_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_new_game_item->setFont(_font);
    _text_new_game_item->setCharacterSize(12);
 
-   _text_options_item = std::make_unique<sf::Text>(_font);
+   _text_options_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_options_item->setFont(_font);
    _text_options_item->setCharacterSize(12);
 
-   _text_quit_item = std::make_unique<sf::Text>(_font);
+   _text_quit_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_quit_item->setFont(_font);
    _text_quit_item->setCharacterSize(12);
 

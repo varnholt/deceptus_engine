@@ -269,6 +269,7 @@ void ItemLantern::onEquipped()
 
    if (dust_enabled)
    {
+#ifndef __EMSCRIPTEN__
       auto loaded_noise_shader = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/light_noise.frag"});
       if (loaded_noise_shader.hasValue())
       {
@@ -347,6 +348,7 @@ void ItemLantern::onEquipped()
          _player_light_right->_shader = _noise_shader;
          _player_light_right->_shader_update_callback = dust_callback;
       }
+#endif
    }
 
    _enabled = true;

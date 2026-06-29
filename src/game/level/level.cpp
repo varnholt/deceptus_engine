@@ -748,6 +748,7 @@ void Level::createViews()
    {
       image_layer->resetView(_view_width, _view_height);
    }
+#endif  // !__EMSCRIPTEN__
 }
 
 void Level::updateViews()
@@ -765,7 +766,11 @@ void Level::updateViews()
 
    CameraRoomLock::setViewRect(view_rect);
 
-   _level_view = std::make_shared<sf::View>(view_rect);
+#ifdef __EMSCRIPTEN__
+   _level_view = std::make_shared<sf::View>(sf::View::fromRect(view_rect));
+#else
+      _level_view = std::make_shared<sf::View>(view_rect);
+#endif
 
    for (const auto& parallax : _parallax_layers)
    {
@@ -881,6 +886,7 @@ void Level::zoomReset()
 void Level::drawLightMap()
 {
    _render_targets.lighting->clear();
+#ifndef __EMSCRIPTEN__
    _render_targets.lighting->setView(*_level_view);
 #endif
    _render_targets.lighting2->clear();

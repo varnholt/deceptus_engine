@@ -39,7 +39,7 @@ std::string extractFirstName(std::string_view username)
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
-   _text = std::make_unique<sf::Text>(_font);
+   _text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text->setFont(_font);
    _text->setCharacterSize(12);
    _text->setFillColor(sf::Color{232, 219, 243});
@@ -52,13 +52,13 @@ MenuScreenNameSelect::MenuScreenNameSelect()
       's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '.', '-',
    };
 
-   _text_cancel_button = std::make_unique<sf::Text>(_font);
+   _text_cancel_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_cancel_button->setCharacterSize(12);
    _text_cancel_button->setFillColor(color_label_normal);
-   _text_delete_button = std::make_unique<sf::Text>(_font);
+   _text_delete_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_delete_button->setCharacterSize(12);
    _text_delete_button->setFillColor(color_label_normal);
-   _text_confirm_button = std::make_unique<sf::Text>(_font);
+   _text_confirm_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_confirm_button->setCharacterSize(12);
    _text_confirm_button->setFillColor(color_label_normal);
 }
@@ -115,7 +115,7 @@ void MenuScreenNameSelect::back()
 void MenuScreenNameSelect::updateText()
 {
    // draw text
-   _text->setString(_name);
+   _text->setString(_name.c_str());
    const auto text_rect = _text->getLocalBounds();
    const auto x_offset_px = (_name_rect.size.x - text_rect.size.x) * 0.5f;
    const auto x_px = _name_rect.position.x + x_offset_px;

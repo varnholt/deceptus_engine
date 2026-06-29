@@ -146,5 +146,17 @@ struct Listener
    }
 };
 
+struct AudioContext
+{
+   static AudioContext create()
+   {
+      return AudioContext{};
+   }
+   AudioContext value()
+   {
+      return *this;
+   }
+};
+
 }  // namespace sf
 #endif

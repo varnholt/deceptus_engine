@@ -106,7 +106,7 @@ private:
    void completeButtonAssignment(int32_t sdl_button);
 
    std::unique_ptr<sf::Text> _text;       //!< reused per draw call for all labels and table cells
-   sf::RectangleShape _cursor_highlight;  //!< highlight rect drawn behind the selected row
+   sf::RectangleShape _cursor_highlight{sf::RectangleShape::Data{.size = {0.0f, 0.0f}}};  //!< highlight rect drawn behind the selected row
 
    std::unique_ptr<sf::Text> _text_setkey_button;
    std::unique_ptr<sf::Text> _text_defaults_button;

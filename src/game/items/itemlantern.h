@@ -43,16 +43,16 @@ private:
    std::unique_ptr<sf::Sprite> _helmet_sprite_r;
    std::unique_ptr<sf::Sprite> _helmet_sprite_l;
    std::shared_ptr<sf::Shader> _noise_shader;                      //!< shared noise shader applied to both lantern lights
-   std::optional<sf::Shader::UniformLocation> _ul_time;            //!< cached uniform location for u_time
-   std::optional<sf::Shader::UniformLocation> _ul_intensity;       //!< cached uniform location for u_intensity
-   std::optional<sf::Shader::UniformLocation> _ul_flicker_speed;   //!< cached uniform location for u_flicker_speed
-   std::optional<sf::Shader::UniformLocation> _ul_flicker_amount;  //!< cached uniform location for u_flicker_amount
-   std::optional<sf::Shader::UniformLocation> _ul_layer_1_size;    //!< cached uniform location for u_layer_1_size
-   std::optional<sf::Shader::UniformLocation> _ul_layer_1_speed;   //!< cached uniform location for u_layer_1_speed
-   std::optional<sf::Shader::UniformLocation> _ul_layer_2_size;    //!< cached uniform location for u_layer_2_size
-   std::optional<sf::Shader::UniformLocation> _ul_layer_2_speed;   //!< cached uniform location for u_layer_2_speed
-   std::optional<sf::Shader::UniformLocation> _ul_sprite_pos_px;   //!< cached uniform location for u_sprite_pos_px
-   std::optional<sf::Shader::UniformLocation> _ul_sprite_size_px;  //!< cached uniform location for u_sprite_size_px
+   sf::base::Optional<sf::Shader::UniformLocation> _ul_time;            //!< cached uniform location for u_time
+   sf::base::Optional<sf::Shader::UniformLocation> _ul_intensity;       //!< cached uniform location for u_intensity
+   sf::base::Optional<sf::Shader::UniformLocation> _ul_flicker_speed;   //!< cached uniform location for u_flicker_speed
+   sf::base::Optional<sf::Shader::UniformLocation> _ul_flicker_amount;  //!< cached uniform location for u_flicker_amount
+   sf::base::Optional<sf::Shader::UniformLocation> _ul_layer_1_size;    //!< cached uniform location for u_layer_1_size
+   sf::base::Optional<sf::Shader::UniformLocation> _ul_layer_1_speed;   //!< cached uniform location for u_layer_1_speed
+   sf::base::Optional<sf::Shader::UniformLocation> _ul_layer_2_size;    //!< cached uniform location for u_layer_2_size
+   sf::base::Optional<sf::Shader::UniformLocation> _ul_layer_2_speed;   //!< cached uniform location for u_layer_2_speed
+   sf::base::Optional<sf::Shader::UniformLocation> _ul_sprite_pos_px;   //!< cached uniform location for u_sprite_pos_px
+   sf::base::Optional<sf::Shader::UniformLocation> _ul_sprite_size_px;  //!< cached uniform location for u_sprite_size_px
    float _offset_left_x_m{-3.4f};                                  //!< x body offset when facing left, in box2d meters
    float _offset_right_x_m{1.9f};                                  //!< x body offset when facing right, in box2d meters
    float _offset_left_y_m{-1.0f};                                  //!< y body offset when facing left, in box2d meters

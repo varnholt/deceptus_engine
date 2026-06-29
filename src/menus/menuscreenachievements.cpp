@@ -50,7 +50,7 @@ void MenuScreenAchievements::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenAchievements::loadingFinished()
 {
-   _text_back_button = std::make_unique<sf::Text>(_font);
+   _text_back_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
    _text_back_button->setCharacterSize(12);
    _text_back_button->setFillColor(color_label_normal);
 

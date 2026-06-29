@@ -10,7 +10,7 @@ MenuBackgroundScene::MenuBackgroundScene()
    // Initialize the camera
    _camera = std::make_unique<Camera3D>();
    _camera->initialize(800, 600, -10, 10);       // Use same near/far as lab after correction, will be updated before rendering
-   _camera->position = {0.0f, 0.0f, 5.0f};       // Position camera along z-axis                                               │
+   _camera->setPosition({0.0f, 0.0f, 5.0f});     // Position camera along z-axis
    _camera->setLookAtPoint({0.0f, 0.0f, 0.0f});  // Look at origin where starmap is
 
    // create textured starmap
@@ -23,8 +23,8 @@ MenuBackgroundScene::MenuBackgroundScene()
       false  // disable lighting for starmap to use texture-only color
    );
 
-   _starmap->position = {0, 0, 0};
-   _starmap->scale = {1, 1, 1};
+   _starmap->setPosition({0.0f, 0.0f, 0.0f});
+   _starmap->setScale({1.0f, 1.0f, 1.0f});
    _starmap->setRotationSpeed(glm::vec3(0.02f, 0.035f, 0.04f));  // Use lab's rotation speed
 
    addObject(_starmap);
@@ -73,7 +73,7 @@ void MenuBackgroundScene::render(sf::RenderTarget& target)
    _shader->setUniform("useSpecular", false);
    _shader->setUniform("DrawSkyBox", false);
    _shader->setUniform("ReflectFactor", 0.3f);
-   _shader->setUniform("WorldCameraPosition", _camera->position);
+   _shader->setUniform("WorldCameraPosition", _camera->getPosition());
 
    // get matrices from camera
    glm::mat4 view_matrix = _camera->getViewMatrix();

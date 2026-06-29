@@ -170,7 +170,7 @@ void MenuScreenGame::loadingFinished()
 
    auto make_label = [this]() -> std::unique_ptr<sf::Text>
    {
-      auto text = std::make_unique<sf::Text>(_font);
+      auto text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
       text->setFont(_font);
       text->setCharacterSize(12);
       return text;
