@@ -109,7 +109,7 @@ void Dust::update(const sf::Time& dt)
       // remove particles that are too close to the center
       if (_respawn_when_center_reached)
       {
-         const sf::Vector2f center = _clip_rect.getCenter();
+         const sf::Vector2f center = _clip_rect.position + _clip_rect.size / 2.0f;
          const auto dx = p._position.x - center.x;
          const auto dy = p._position.y - center.y;
          const auto dist_sq = dx * dx + dy * dy;

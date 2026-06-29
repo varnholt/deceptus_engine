@@ -176,8 +176,9 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
          {
             (void)_occluder_shader->setUniform(*ul_texture_sampler, sf::Shader::CurrentTexture);
          }
-         _ul_occluder_alpha = _occluder_shader->getUniformLocation("u_alpha_threshold");
-         if (_ul_occluder_alpha.hasValue())
+         const auto ul_alpha = _occluder_shader->getUniformLocation("u_alpha_threshold");
+         _ul_occluder_alpha = ul_alpha.hasValue() ? std::optional{*ul_alpha} : std::nullopt;
+         if (_ul_occluder_alpha.has_value())
          {
             _occluder_shader->setUniform(*_ul_occluder_alpha, 0.01f);
          }
@@ -1182,7 +1183,7 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
 #endif
 
    sf::RenderStates states;
-   if (_occluder_shader.hasValue())
+   if (_occluder_shader.has_value())
    {
       states.shader = &(*_occluder_shader);
    }

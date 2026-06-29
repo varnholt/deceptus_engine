@@ -140,8 +140,9 @@ void LuaNode::initialize()
       {
          (void)_flash_shader->setUniform(*ul_texture, sf::Shader::CurrentTexture);
       }
-      _ul_flash = _flash_shader->getUniformLocation("flash");
-      if (_ul_flash.hasValue())
+      const auto ul_flash = _flash_shader->getUniformLocation("flash");
+      _ul_flash = ul_flash.hasValue() ? std::optional{*ul_flash} : std::nullopt;
+      if (_ul_flash.has_value())
       {
          _flash_shader->setUniform(*_ul_flash, _hit_flash);
       }
@@ -1381,7 +1382,7 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
          _hit_flash = 1.0f - (hit_duration_s.count() / hit_duration_max_s);
       }
 
-      if (_flash_shader.hasValue() && _ul_flash.hasValue())
+      if (_flash_shader.has_value() && _ul_flash.has_value())
       {
          _flash_shader->setUniform(*_ul_flash, _hit_flash);
       }
@@ -1405,9 +1406,9 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       const auto& offset = _sprite_offsets_px[i];
       const auto center = sf::Vector2f(sprite->textureRect.size.x / 2.0f, sprite->textureRect.size.y / 2.0f);
       sprite->position = _position_px - center + offset;
-      if (_flash_shader.hasValue())
+      if (_flash_shader.has_value())
       {
-         target.draw(*sprite, &(*_flash_shader));
+         target.draw(*sprite, sf::RenderStates{.shader = &(*_flash_shader)});
       }
       else
       {

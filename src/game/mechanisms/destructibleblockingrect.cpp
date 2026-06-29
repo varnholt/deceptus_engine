@@ -109,8 +109,9 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
       {
          (void)_flash_shader->setUniform(*ul_texture, sf::Shader::CurrentTexture);
       }
-      _ul_flash = _flash_shader->getUniformLocation("flash");
-      if (_ul_flash.hasValue())
+      const auto ul_flash = _flash_shader->getUniformLocation("flash");
+      _ul_flash = ul_flash.hasValue() ? std::optional{*ul_flash} : std::nullopt;
+      if (_ul_flash.has_value())
       {
          _flash_shader->setUniform(*_ul_flash, _hit_flash);
       }
@@ -143,9 +144,9 @@ bool DestructibleBlockingRect::isDestructible() const
 
 void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
-   if (_flash_shader.hasValue())
+   if (_flash_shader.has_value())
    {
-      color.draw(*_sprite, &(*_flash_shader));
+      color.draw(*_sprite, sf::RenderStates{.shader = &(*_flash_shader)});
    }
    else
    {
@@ -169,7 +170,7 @@ void DestructibleBlockingRect::update(const sf::Time& dt)
          _hit_flash = 1.0f - (hit_duration_s.count() / hit_duration_max_s);
       }
 
-      if (_flash_shader.hasValue() && _ul_flash.hasValue())
+      if (_flash_shader.has_value() && _ul_flash.has_value())
       {
          _flash_shader->setUniform(*_ul_flash, _hit_flash);
       }

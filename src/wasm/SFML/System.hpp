@@ -36,6 +36,9 @@ using FloatRect = Rect2f;
 struct IntRect : Rect2i
 {
    using Rect2i::Rect2i;
+   IntRect(Vec2i position, Vec2i size) : Rect2i{position, size}
+   {
+   }  //!< construct from position + size (SFML2 compat)
    IntRect(const Rect2i& r) : Rect2i(r)
    {
    }  //!< construct from base

@@ -189,7 +189,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    if (texture_id.has_value())
    {
       instance->_texture = TexturePool::getInstance().get(texture_id.value());
-      instance->_texture->setRepeated(true);
+      instance->_texture->setWrapMode(sf::TextureWrapMode::Repeat);
 
       const auto smooth_texture = ValueReader::readValue<bool>("smooth_texture", map).value_or(false);
       instance->_texture->setSmooth(smooth_texture);

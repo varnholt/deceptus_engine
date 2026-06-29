@@ -124,11 +124,11 @@ void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
    if (_settings._fullscreen)
    {
-      const sf::View ortho(sf::FloatRect(
+      const auto ortho = sf::View::fromRect(sf::FloatRect{
          {0.0f, 0.0f},
          {static_cast<float>(GameConfiguration::getInstance()._view_width),
           static_cast<float>(GameConfiguration::getInstance()._view_height)}
-      ));
+      });
 
       color.draw(*_sprite, sf::RenderStates{.view = ortho, .texture = _texture.get()});
    }

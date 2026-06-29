@@ -120,7 +120,7 @@ void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
    if (_version == Version::Version1)
    {
-      color.draw(_door_quad, _texture.get());
+      color.draw(_door_quad, sf::RenderStates{.texture = _texture.get()});
    }
 }
 

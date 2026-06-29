@@ -66,15 +66,15 @@ private:
       sf::Vector2f direction;
       sf::FloatRect rect;
       b2Body* body = nullptr;
+      std::shared_ptr<sf::Texture> texture;
       std::unique_ptr<sf::Sprite> sprite;
       float sprite_offset = 0.0f;
 
       /// \brief creates a fan tile sprite from a shared texture atlas.
       /// \param tex shared texture used for this tile sprite.
       FanInstance(const std::shared_ptr<sf::Texture>& tex)
+         : texture(tex), sprite(std::make_unique<sf::Sprite>())
       {
-         sprite = std::make_unique<sf::Sprite>();
-         sprite->setTexture(*tex);
       }
    };
 

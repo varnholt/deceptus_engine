@@ -97,7 +97,7 @@ void SmokeEffect::update(const sf::Time& dt)
       {
          const auto& sprite = *(_particles[i]._sprite);
          const sf::Transform transform = sprite.getTransform();
-         const sf::Color color = sprite.getColor();
+         const sf::Color color = sprite.color;
 
          const sf::Vector2f quad[4] = {
             transform.transformPoint({0.0f, 0.0f}),
@@ -290,7 +290,7 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
          {static_cast<uint32_t>(rect_width_px / smoke_effect->_pixel_ratio),
           static_cast<uint32_t>(rect_height_px / smoke_effect->_pixel_ratio)}
       );
-      smoke_effect->_render_texture = std::make_unique<sf::RenderTexture>(texture_size);
+      smoke_effect->_render_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create(texture_size)));
    }
    catch (const std::exception& e)
    {

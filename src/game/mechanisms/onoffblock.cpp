@@ -200,7 +200,10 @@ void OnOffBlock::updateSpriteRect()
    _tu_tl = _sprite_index_current % count_columns;
    _tv_tl = _sprite_index_current / count_columns;
 
-   _sprite->textureRect = {{_tu_tl * PIXELS_PER_TILE, _tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
+   _sprite->textureRect = {
+      {static_cast<float>(_tu_tl * PIXELS_PER_TILE), static_cast<float>(_tv_tl * PIXELS_PER_TILE)},
+      {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+   };
 }
 
 const sf::FloatRect& OnOffBlock::getPixelRect() const
@@ -210,7 +213,7 @@ const sf::FloatRect& OnOffBlock::getPixelRect() const
 
 void OnOffBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   target.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+   target.draw(*_sprite, sf::RenderStates{.texture = _texture_map.get()});
 }
 
 void OnOffBlock::update(const sf::Time& dt)

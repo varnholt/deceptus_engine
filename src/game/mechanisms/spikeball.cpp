@@ -181,7 +181,7 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
             sf::Vertex(sf::Vector2f(c2_pos_m.x * PPM, c2_pos_m.y * PPM), vertex_color),
          };
 
-         color.draw(line, 2, sf::PrimitiveType::Lines);
+         color.draw(std::span<const sf::Vertex>{line, 2}, sf::PrimitiveType::Lines);
 
          // printf("draw %d: %f, %f -> %f, %f\n", i, c1Pos.x * PPM, c1Pos.y * PPM, c2Pos.x * PPM, c2Pos.y * PPM);
       }
@@ -219,7 +219,7 @@ void SpikeBall::update(const sf::Time& dt)
    }
 
    const auto angle = sf::radians(_angle);
-   _spike_sprite->rotation = sf::degrees(angle);
+   _spike_sprite->rotation = angle;
 
    // play swoosh sound on every direction change
    if (_audio_enabled)

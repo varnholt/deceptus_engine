@@ -219,7 +219,7 @@ void RotatingBlade::updateAudio()
                _sample_accelerate.reset();
             }
 
-            Audio::getInstance().position = _sample_enabled.value(), _pos;
+            Audio::getInstance().setPosition(_sample_enabled.value(), _pos);
          }
       }
       else
@@ -231,7 +231,7 @@ void RotatingBlade::updateAudio()
          }
          else
          {
-            Audio::getInstance().position = _sample_accelerate.value(), _pos;
+            Audio::getInstance().setPosition(_sample_accelerate.value(), _pos);
          }
       }
    }
@@ -257,7 +257,7 @@ void RotatingBlade::updateAudio()
          }
          else
          {
-            Audio::getInstance().position = _sample_decelerate.value(), _pos;
+            Audio::getInstance().setPosition(_sample_decelerate.value(), _pos);
          }
 
          // stop playing enabled sample if it's been playing before
@@ -291,7 +291,7 @@ void RotatingBlade::update(const sf::Time& dt)
    updateAudio();
 
    // kill player if he moves into the blade's radius
-   sf::Vector2i blade_position{_sprite->position};
+   sf::Vector2i blade_position{static_cast<int32_t>(_sprite->position.x), static_cast<int32_t>(_sprite->position.y)};
    const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
    if (SfmlMath::intersectCircleRect(blade_position, blade_radius, PlayerRegistry::getFirst()->getPixelRectInt()))
    {
@@ -304,7 +304,7 @@ void RotatingBlade::update(const sf::Time& dt)
 
 void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-   target.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+   target.draw(*_sprite, sf::RenderStates{.texture = _texture_map.get()});
 
 #ifdef DEBUG_INTERSECTION
    sf::Vector2i sprite_center{_sprite->position};

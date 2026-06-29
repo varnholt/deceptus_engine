@@ -87,11 +87,11 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*
 
    if (_button_alpha.has_value())
    {
-      const sf::View ortho(sf::FloatRect(
+      const auto ortho = sf::View::fromRect(sf::FloatRect{
          {0.0f, 0.0f},
          {static_cast<float>(GameConfiguration::getInstance()._view_width),
           static_cast<float>(GameConfiguration::getInstance()._view_height)}
-      ));
+      });
 
       std::ranges::for_each(
          _help_elements,
@@ -257,7 +257,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       HelpElement help;
 
       help._button_sprite = std::make_unique<sf::Sprite>();
-      help._text = std::make_unique<sf::Text>(*_font);
+      help._text = std::make_unique<sf::Text>(*_font, sf::Text::Data{});
       help._text->setCharacterSize(12);
 
       const auto button_name = button_value.value_or("key_cursor_u");

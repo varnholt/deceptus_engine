@@ -150,7 +150,7 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& image_path)
    try
    {
       const auto texture_size = sf::Vector2u({static_cast<uint32_t>(_width * factor), static_cast<uint32_t>(_height * factor)});
-      render_texture = std::make_unique<sf::RenderTexture>(texture_size);
+      render_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create(texture_size)));
    }
    catch (...)
    {
@@ -202,7 +202,7 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
 
    try
    {
-      render_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u{_width * factor, _height * factor});
+      render_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create(sf::Vector2u{_width * factor, _height * factor})));
    }
    catch (...)
    {

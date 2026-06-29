@@ -238,7 +238,10 @@ void Fan::update(const sf::Time& dt)
    {
       instance.sprite_offset += dt.asSeconds() * 25.0F * _speed * _lever_lag;
       const auto x_offset = static_cast<int32_t>(instance.sprite_offset) % 8;
-      instance.sprite->textureRect = {{x_offset * PIXELS_PER_TILE, _y_offset_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
+      instance.sprite->textureRect = {
+         {static_cast<float>(x_offset * PIXELS_PER_TILE), static_cast<float>(_y_offset_tl * PIXELS_PER_TILE)},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+      };
    }
 
    collide();
@@ -248,7 +251,7 @@ void Fan::draw(sf::RenderTarget& color, sf::RenderTarget&)
 {
    for (const auto& section : _instances)
    {
-      color.draw(*section.sprite);
+      color.draw(*section.sprite, sf::RenderStates{.texture = section.texture.get()});
    }
 }
 

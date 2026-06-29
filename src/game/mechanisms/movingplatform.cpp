@@ -459,7 +459,10 @@ void MovingPlatform::update(const sf::Time& delta_time)
 
       if (update_sprite_rect)
       {
-         sprite.textureRect = {{texture_u, texture_v}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}};
+         sprite.textureRect = {
+            {static_cast<float>(texture_u), static_cast<float>(texture_v)},
+            {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE * 2)}
+         };
       }
 
       sprite_index++;

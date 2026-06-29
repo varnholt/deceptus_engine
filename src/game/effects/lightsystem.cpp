@@ -48,6 +48,15 @@ const sf::StencilMode stencil_test_mode{
    .stencilReference = sf::StencilValue{0u},
    .stencilMask = sf::StencilValue{~0u}
 };
+
+std::optional<sf::Shader::UniformLocation> toStdOptional(sf::base::Optional<sf::Shader::UniformLocation> opt)
+{
+   if (opt.hasValue())
+   {
+      return {*opt};
+   }
+   return std::nullopt;
+}
 }  // namespace
 
 LightSystem::LightSystem()
@@ -71,13 +80,13 @@ LightSystem::LightSystem()
    }
    _light_shader = std::move(*loaded);
 
-   _ul_light_count  = _light_shader->getUniformLocation("u_light_count");
-   _ul_resolution   = _light_shader->getUniformLocation("u_resolution");
-   _ul_ambient      = _light_shader->getUniformLocation("u_ambient");
-   _ul_color_map    = _light_shader->getUniformLocation("color_map");
-   _ul_light_map_1  = _light_shader->getUniformLocation("light_map_1");
-   _ul_light_map_2  = _light_shader->getUniformLocation("light_map_2");
-   _ul_normal_map   = _light_shader->getUniformLocation("normal_map");
+   _ul_light_count  = toStdOptional(_light_shader->getUniformLocation("u_light_count"));
+   _ul_resolution   = toStdOptional(_light_shader->getUniformLocation("u_resolution"));
+   _ul_ambient      = toStdOptional(_light_shader->getUniformLocation("u_ambient"));
+   _ul_color_map    = toStdOptional(_light_shader->getUniformLocation("color_map"));
+   _ul_light_map_1  = toStdOptional(_light_shader->getUniformLocation("light_map_1"));
+   _ul_light_map_2  = toStdOptional(_light_shader->getUniformLocation("light_map_2"));
+   _ul_normal_map   = toStdOptional(_light_shader->getUniformLocation("normal_map"));
 
    static const std::array<std::string, 6> position_names = {
       "u_lights[0]._position", "u_lights[1]._position", "u_lights[2]._position",
@@ -89,8 +98,8 @@ LightSystem::LightSystem()
    };
    for (auto index = 0u; index < 6u; index++)
    {
-      _ul_light_positions[index] = _light_shader->getUniformLocation(position_names[index]);
-      _ul_light_colors[index]    = _light_shader->getUniformLocation(color_names[index]);
+      _ul_light_positions[index] = toStdOptional(_light_shader->getUniformLocation(position_names[index]));
+      _ul_light_colors[index]    = toStdOptional(_light_shader->getUniformLocation(color_names[index]));
    }
 }
 
@@ -166,7 +175,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{.stencilMode = stencil_write_mode});
+               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, sf::RenderStates{.stencilMode = stencil_write_mode});
             }
          }
          else if (shape_chain)
@@ -196,7 +205,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(vertex_1.x, vertex_1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{.stencilMode = stencil_write_mode});
+               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, sf::RenderStates{.stencilMode = stencil_write_mode});
             }
          }
          else if (shape_polygon)
@@ -230,7 +239,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{.stencilMode = stencil_write_mode});
+               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, sf::RenderStates{.stencilMode = stencil_write_mode});
             }
          }
       }
@@ -250,7 +259,8 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
 {
    sf::Vector2f normalized = view.getTransform().transformPoint(point);
    sf::Vector2f pixel;
-   const auto viewport = view.computePixelViewport(sf::Vec2f(target.getSize()));
+   const auto target_size = target.getSize();
+   const auto viewport = view.computePixelViewport(sf::Vec2f{static_cast<float>(target_size.x), static_cast<float>(target_size.y)});
    pixel.x = ((normalized.x + 1.0f) / (2.0f * static_cast<float>(viewport.size.x))) + static_cast<float>(viewport.position.x);
    pixel.y = ((-normalized.y + 1.0f) / (2.0f * static_cast<float>(viewport.size.y))) + static_cast<float>(viewport.position.y);
    return pixel;

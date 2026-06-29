@@ -62,8 +62,8 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto h = GameConfiguration::getInstance()._view_height;
 
    // draw layers
-   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
-   window.setView(view);
+   const sf::View view(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
+   states.view = view;
 
    for (auto& layer : _layer_stack)
    {

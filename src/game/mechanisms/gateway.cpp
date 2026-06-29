@@ -191,11 +191,11 @@ void Gateway::loadNoiseTexture(const std::string& filename)
       return;
    }
 
-   loaded_texture->setRepeated(true);
+   loaded_texture->setWrapMode(sf::TextureWrapMode::Repeat);
    loaded_texture->setSmooth(true);
 
    _noise_texture = std::move(*loaded_texture);
-   if (_shader.hasValue() && _ul_ichannel0.hasValue())
+   if (_shader.has_value() && _ul_ichannel0.has_value())
    {
       (void)_shader->setUniform(*_ul_ichannel0, *_noise_texture);
    }
@@ -223,29 +223,29 @@ void Gateway::drawVoid(sf::RenderTarget& target)
 
    _shader_texture->clear(sf::Color::Transparent);
 
-   if (_shader.hasValue())
+   if (_shader.has_value())
    {
-      if (_ul_time.hasValue())
+      if (_ul_time.has_value())
       {
          _shader->setUniform(*_ul_time, _elapsed * _time_factor);
       }
-      if (_ul_alpha.hasValue())
+      if (_ul_alpha.has_value())
       {
          _shader->setUniform(*_ul_alpha, _shader_alpha * _void_alpha);
       }
-      if (_ul_radius_factor.hasValue())
+      if (_ul_radius_factor.has_value())
       {
          _shader->setUniform(*_ul_radius_factor, radius * _radius_factor);
       }
-      if (_ul_resolution.hasValue())
+      if (_ul_resolution.has_value())
       {
          _shader->setUniform(*_ul_resolution, sf::Vector2f{200, 200});
       }
-      if (_ul_noise_scale.hasValue())
+      if (_ul_noise_scale.has_value())
       {
          _shader->setUniform(*_ul_noise_scale, _noise_scale);
       }
-      if (_ul_swirl_color.hasValue())
+      if (_ul_swirl_color.has_value())
       {
          _shader->setUniform(*_ul_swirl_color, _swirl_color);
       }
@@ -253,7 +253,7 @@ void Gateway::drawVoid(sf::RenderTarget& target)
 
    sf::RenderStates shader_state;
    shader_state.blendMode = sf::BlendNone;
-   shader_state.shader = _shader.hasValue() ? &(*_shader) : nullptr;
+   shader_state.shader = _shader.has_value() ? &(*_shader) : nullptr;
 
    sf::RectangleShape quad{sf::RectangleShape::Data{.size = {200.f, 200.f}}};
    quad.setFillColor(sf::Color::White);
@@ -749,13 +749,18 @@ void Gateway::setup(const GameDeserializeData& data)
       if (loaded_shader.hasValue())
       {
          _shader = std::move(*loaded_shader);
-         _ul_time = _shader->getUniformLocation("time");
-         _ul_alpha = _shader->getUniformLocation("alpha");
-         _ul_radius_factor = _shader->getUniformLocation("radius_factor");
-         _ul_resolution = _shader->getUniformLocation("resolution");
-         _ul_noise_scale = _shader->getUniformLocation("noise_scale");
-         _ul_swirl_color = _shader->getUniformLocation("swirl_color");
-         _ul_ichannel0 = _shader->getUniformLocation("iChannel0");
+         auto get_ul = [&](const char* name) -> std::optional<sf::Shader::UniformLocation>
+         {
+            const auto result = _shader->getUniformLocation(name);
+            return result.hasValue() ? std::optional{*result} : std::nullopt;
+         };
+         _ul_time          = get_ul("time");
+         _ul_alpha         = get_ul("alpha");
+         _ul_radius_factor = get_ul("radius_factor");
+         _ul_resolution    = get_ul("resolution");
+         _ul_noise_scale   = get_ul("noise_scale");
+         _ul_swirl_color   = get_ul("swirl_color");
+         _ul_ichannel0     = get_ul("iChannel0");
       }
       else
       {
@@ -763,13 +768,13 @@ void Gateway::setup(const GameDeserializeData& data)
       }
    }
 
-   _shader_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u(200u, 200u));
+   _shader_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create({200u, 200u})));
    _shader_texture->setSmooth(true);
    _shader_sprite = std::make_unique<sf::Sprite>();
    _shader_sprite->position = _rect.position;
    loadNoiseTexture(_default_texture_path);
 
-   _eye = std::make_unique<Eye>(_rect.getCenter());
+   _eye = std::make_unique<Eye>(_rect.position + _rect.size / 2.0f);
 }
 
 std::optional<sf::FloatRect> Gateway::getBoundingBoxPx()
@@ -807,7 +812,7 @@ void Gateway::use()
       return;
    }
 
-   const auto target_pos_px = target_gateway->_rect.getCenter();
+   const auto target_pos_px = target_gateway->_rect.position + target_gateway->_rect.size / 2.0f;
 
    auto teleport = [target_pos_px]()
    {
