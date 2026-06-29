@@ -1000,6 +1000,9 @@ if(EMSCRIPTEN)
         -sALLOW_MEMORY_GROWTH=1
         -sINITIAL_MEMORY=67108864
         -sEXIT_RUNTIME=0
+        -sASYNCIFY=1
+        -sASSERTIONS=1
+        "-sEXPORTED_RUNTIME_METHODS=['HEAPU32','HEAPU8','HEAP32','HEAPF32','HEAPU16']"
         --preload-file ${CMAKE_SOURCE_DIR}/data@data
     )
 

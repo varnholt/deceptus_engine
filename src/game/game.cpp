@@ -638,8 +638,11 @@ void Game::draw()
       _menu_background->render(*_window_render_texture);
    }
 
-#ifndef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
+   Menu::getInstance()->draw(*_window_render_texture.get(), sf::RenderStates{.blendMode = sf::BlendAlpha});
+#else
    Menu::getInstance()->draw(*_window_render_texture.get(), {sf::BlendAlpha});
+#endif
    MessageBox::draw(*_window_render_texture.get());
 
    _window_render_texture->display();
@@ -663,6 +666,7 @@ void Game::draw()
    }
 
    _window->draw(window_texture_sprite, sf::RenderStates{.texture = &window_render_texture_ref});
+#ifndef __EMSCRIPTEN__
    _window->popGLStates();
 #endif
 

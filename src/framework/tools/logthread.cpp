@@ -1,18 +1,24 @@
 #include "logthread.h"
+
+#ifndef __EMSCRIPTEN__
 #include "gamepaths.h"
+#endif
 
 #include <ctime>
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
 
+#ifndef __EMSCRIPTEN__
 namespace
 {
 int32_t flush_counter = 0;
 }
+#endif
 
 LogThread::LogThread()
 {
+#ifndef __EMSCRIPTEN__
    // generate filename with current date
    const auto now = std::chrono::system_clock::now();
    const auto now_time = std::chrono::system_clock::to_time_t(now);
@@ -28,28 +34,39 @@ LogThread::LogThread()
       std::cerr << "failed to create log file: " << log_path << "\n";
       return;
    }
+#endif
 }
 
 LogThread::~LogThread()
 {
+#ifndef __EMSCRIPTEN__
    {
       std::lock_guard<std::mutex> guard(_mutex);
       _stopped = true;
    }
    _thread->join();
    flush();
+#endif
 }
 
 void LogThread::log(const SysClockTimePoint& time_point, Log::Level level, const std::string& message, const std::source_location& location)
 {
+#ifndef __EMSCRIPTEN__
    std::lock_guard<std::mutex> guard(_mutex);
    if (_stopped)
    {
       return;
    }
    _log_items.push_back(LogItem{time_point, level, message, location});
+#else
+   (void)time_point;
+   (void)level;
+   (void)message;
+   (void)location;
+#endif
 }
 
+#ifndef __EMSCRIPTEN__
 void LogThread::run()
 {
    while (!_stopped)
@@ -102,3 +119,4 @@ void LogThread::flush()
       *_out << log_ss.str() << std::endl;
    }
 }
+#endif
