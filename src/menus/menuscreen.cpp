@@ -133,6 +133,7 @@ void MenuScreen::load()
 
          sprite->position = {static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
          sprite->color = sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity));
+         sprite->textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(layer.getWidth()), static_cast<float>(layer.getHeight())}};
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;

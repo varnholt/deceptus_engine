@@ -154,6 +154,7 @@ void show(sf::RenderWindow& window)
 
       const sf::Vector2u window_size = window.getSize();
       const sf::Vector2u texture_size = loading_texture.getSize();
+      loading_sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(texture_size.x), static_cast<float>(texture_size.y)}};
       const auto scale_y = static_cast<float>(window_size.y) / texture_size.y;
       const auto scaled_width = texture_size.x * scale_y;
       loading_sprite.scale = {scale_y, scale_y};

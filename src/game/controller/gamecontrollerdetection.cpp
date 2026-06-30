@@ -11,6 +11,7 @@
 
 void GameControllerDetection::start()
 {
+#ifndef __EMSCRIPTEN__
    _thread = std::make_unique<std::thread>(
       [this]()
       {
@@ -21,12 +22,15 @@ void GameControllerDetection::start()
          }
       }
    );
+#endif
 }
 
 void GameControllerDetection::stop()
 {
+#ifndef __EMSCRIPTEN__
    _stopped = true;
    _thread->join();
+#endif
 }
 
 int32_t GameControllerDetection::processEvent(const SDL_Event& event)

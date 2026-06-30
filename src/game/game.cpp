@@ -271,6 +271,11 @@ void Game::initializeWindow()
 #ifndef __EMSCRIPTEN__
    _window_render_texture =
       std::make_shared<sf::RenderTexture>(sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)});
+#else
+   _window_render_texture = std::make_shared<sf::RenderTexture>(
+      std::move(*sf::RenderTexture::create(sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)}))
+   );
+#endif
 
    Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;
 
@@ -286,7 +291,6 @@ void Game::initializeWindow()
          game_config._video_mode_width, game_config._video_mode_height, game_config._view_width, game_config._view_height
       );
    }
-#endif
 }
 
 void Game::initializeController()
@@ -496,8 +500,10 @@ void Game::initialize()
    _info_layer = std::make_unique<InfoLayer>();
    _ingame_menu = std::make_unique<InGameMenu>();
    _controller_overlay = std::make_unique<ControllerOverlay>();
+#ifndef __EMSCRIPTEN__
    _test_scene = std::make_unique<ForestScene>();
    _menu_background = std::make_unique<MenuBackgroundScene>();
+#endif
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
@@ -525,7 +531,9 @@ void Game::initialize()
          [this]()
          {
             initializeWindow();
+#ifndef __EMSCRIPTEN__
             _menu_background = std::make_unique<MenuBackgroundScene>();
+#endif
             if (!_level)
             {
                return;
@@ -628,6 +636,7 @@ void Game::draw()
       _ingame_menu->draw(*_window_render_texture.get());
    }
 
+#ifndef __EMSCRIPTEN__
    if (DebugDrawStates::_draw_test_scene)
    {
       _test_scene->draw(*_window_render_texture.get());
@@ -637,6 +646,7 @@ void Game::draw()
    {
       _menu_background->render(*_window_render_texture);
    }
+#endif
 
 #ifdef __EMSCRIPTEN__
    Menu::getInstance()->draw(*_window_render_texture.get(), sf::RenderStates{.blendMode = sf::BlendAlpha});
@@ -646,8 +656,17 @@ void Game::draw()
    MessageBox::draw(*_window_render_texture.get());
 
    _window_render_texture->display();
+#ifdef __EMSCRIPTEN__
+   _window->setActive(true);
+#endif
    const sf::Texture& window_render_texture_ref = _window_render_texture->getTexture();
    sf::Sprite window_texture_sprite;
+
+#ifdef __EMSCRIPTEN__
+   window_texture_sprite.textureRect = sf::FloatRect{
+      {0.f, 0.f}, {static_cast<float>(window_render_texture_ref.getSize().x), static_cast<float>(window_render_texture_ref.getSize().y)}
+   };
+#endif
 
    if (GameConfiguration::getInstance()._fullscreen)
    {
@@ -885,7 +904,9 @@ void Game::update()
    if (game_mode == ExecutionMode::NotRunning)
    {
       updateGameController();
+#ifndef __EMSCRIPTEN__
       _menu_background->update(dt);
+#endif
    }
 
    _info_layer->update(dt);
@@ -913,10 +934,12 @@ void Game::update()
          _level->update(dt);
          _player->update(dt);
 
+#ifndef __EMSCRIPTEN__
          if (DebugDrawStates::_draw_test_scene)
          {
             _test_scene->update(dt);
          }
+#endif
 
          // this might trigger level-reloading, so this ought to be the last drawing call in the loop
          updateGameState(dt);
@@ -1089,7 +1112,9 @@ void Game::changeResolution(int32_t w, int32_t h)
 
    initializeWindow();
 
+#ifndef __EMSCRIPTEN__
    _menu_background = std::make_unique<MenuBackgroundScene>();
+#endif
 
    if (_level)
    {

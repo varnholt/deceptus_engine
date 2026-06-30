@@ -171,13 +171,15 @@ private:
    sf::Time _profiling_update_elapsed;
 #endif
 
+   std::shared_ptr<EventSerializer> _global_event_serializer;
+
+#ifndef __EMSCRIPTEN__
    // temporarily here for debugging only
    std::unique_ptr<ForestScene> _test_scene;
 
-   std::shared_ptr<EventSerializer> _global_event_serializer;
-
-   // 3D menu background renderer
+   // 3D menu background renderer (desktop only — uses OpenGL 4.3 GLSL)
    std::unique_ptr<MenuBackgroundScene> _menu_background;
+#endif
 
    sf::Clock _delta_clock;
    std::atomic<bool> _level_loading_finished = false;

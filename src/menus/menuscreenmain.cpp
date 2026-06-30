@@ -113,6 +113,8 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
       // create a sprite and apply alpha
       const sf::Texture& temp_fade_texture = temp_texture.getTexture();
       sf::Sprite temp_sprite;
+      temp_sprite.textureRect =
+         sf::FloatRect{{0.f, 0.f}, {static_cast<float>(temp_fade_texture.getSize().x), static_cast<float>(temp_fade_texture.getSize().y)}};
       temp_sprite.color = sf::Color(255, 255, 255, _fade_alpha);
 
       // draw the faded sprite to the main window

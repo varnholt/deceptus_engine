@@ -190,6 +190,7 @@ void InGameMenuPage::load()
       auto sprite = std::make_shared<sf::Sprite>();
       sprite->position = {static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
       sprite->color = sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())};
+      sprite->textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(layer.getWidth()), static_cast<float>(layer.getHeight())}};
 
       tmp->_texture = texture;
       tmp->_sprite = sprite;
