@@ -23,11 +23,11 @@ void BlurShader::initialize(
       const auto result = _shader->getUniformLocation(name);
       return result.hasValue() ? std::optional{*result} : std::nullopt;
    };
-   _uniform_texture        = get_ul("texture");
-   _uniform_texture_width  = get_ul("texture_width");
+   _uniform_texture = get_ul("u_texture");
+   _uniform_texture_width = get_ul("texture_width");
    _uniform_texture_height = get_ul("texture_height");
-   _uniform_blur_radius    = get_ul("blur_radius");
-   _uniform_add_factor     = get_ul("add_factor");
+   _uniform_blur_radius = get_ul("blur_radius");
+   _uniform_add_factor = get_ul("add_factor");
 
    if (_uniform_texture.has_value())
    {

@@ -1,5 +1,5 @@
 // light gradient texture and channel mask color from the sprite
-uniform sampler2D texture;
+uniform sampler2D u_texture;
 
 // time in seconds, used to animate the dust
 uniform float u_time;
@@ -19,6 +19,11 @@ uniform float u_flicker_amount;
 // used to sample noise in world space so dust stays fixed as the player moves
 uniform vec2 u_sprite_pos_px;
 uniform vec2 u_sprite_size_px;
+
+in vec2 sf_v_texCoord;
+in vec4 sf_v_color;
+
+layout(location = 0) out vec4 sf_fragColor;
 
 // turns a 2d coordinate into a pseudo-random number
 float hash(vec2 point)
@@ -43,10 +48,10 @@ float noise(vec2 point)
 
 void main()
 {
-   vec2 uv = gl_TexCoord[0].xy;
+   vec2 uv = sf_v_texCoord;
 
    // sample the light gradient and apply the channel color (red, green, or blue mask)
-   vec4 texel = texture2D(texture, uv) * gl_Color;
+   vec4 texel = texture(u_texture, uv) * sf_v_color;
 
    // convert uv to world pixel position so noise doesn't move with the player
    vec2 world_pos_px = u_sprite_pos_px + uv * u_sprite_size_px;
@@ -67,5 +72,5 @@ void main()
    float flicker_factor = 1.0 - u_flicker_amount * noise(vec2(u_time * u_flicker_speed, 0.42));
 
    // add dust on top of the light in the same channel, then apply flicker to the full beam
-   gl_FragColor = vec4((texel.rgb + gl_Color.rgb * dust_intensity) * flicker_factor, texel.a);
+   sf_fragColor = vec4((texel.rgb + sf_v_color.rgb * dust_intensity) * flicker_factor, texel.a);
 }

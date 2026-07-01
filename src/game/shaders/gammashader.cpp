@@ -20,8 +20,8 @@ void GammaShader::initialize()
       const auto result = _gamma_shader->getUniformLocation(name);
       return result.hasValue() ? std::optional{*result} : std::nullopt;
    };
-   _uniform_gamma   = get_ul("gamma");
-   _uniform_texture = get_ul("texture");
+   _uniform_gamma = get_ul("gamma");
+   _uniform_texture = get_ul("u_texture");
 }
 
 void GammaShader::update()

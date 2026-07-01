@@ -1,10 +1,13 @@
-#version 120
-uniform sampler2D texture;
+uniform sampler2D u_texture;
 
 uniform int texture_width;
 uniform int texture_height;
 uniform float blur_radius;
 uniform float add_factor;
+
+in vec2 sf_v_texCoord;
+
+layout(location = 0) out vec4 sf_fragColor;
 
 
 float scurve(float x)
@@ -27,7 +30,7 @@ vec4 blurV(sampler2D source, vec2 size, vec2 uv, float radius)
 
       for (float y = -radius; y <= radius; y++)
       {
-         a = texture2D(source, uv + vec2(0.0, y * height));
+         a = texture(source, uv + vec2(0.0, y * height));
          weight = scurve(1.0 - (abs(y) * radiusMultiplier));
          c += a * weight;
          divisor += weight;
@@ -36,7 +39,7 @@ vec4 blurV(sampler2D source, vec2 size, vec2 uv, float radius)
       return vec4(c.r / divisor, c.g / divisor, c.b / divisor, 1.0);
    }
 
-   return texture2D(source, uv);
+   return texture(source, uv);
 }
 
 
@@ -53,7 +56,7 @@ vec4 blurH(sampler2D source, vec2 size, vec2 uv, float radius)
 
       for (float x = -radius; x <= radius; x++)
       {
-         a = texture2D(source, uv + vec2(x * width, 0.0));
+         a = texture(source, uv + vec2(x * width, 0.0));
          weight = scurve(1.0 - (abs(x) * radiusMultiplier));
          c += a * weight;
          divisor += weight;
@@ -62,14 +65,14 @@ vec4 blurH(sampler2D source, vec2 size, vec2 uv, float radius)
       return vec4(c.r / divisor, c.g / divisor, c.b / divisor, 1.0);
    }
 
-   return texture2D(source, uv);
+   return texture(source, uv);
 }
 
 
 void main()
 {
-   vec2 uv = gl_TexCoord[0].xy;
-   vec4 h = blurH(texture, vec2(texture_width, texture_height), uv, blur_radius);
-   vec4 v = blurV(texture, vec2(texture_width, texture_height), uv, blur_radius);
-   gl_FragColor = (h + v) * add_factor;
+   vec2 uv = sf_v_texCoord;
+   vec4 h = blurH(u_texture, vec2(texture_width, texture_height), uv, blur_radius);
+   vec4 v = blurV(u_texture, vec2(texture_width, texture_height), uv, blur_radius);
+   sf_fragColor = (h + v) * add_factor;
 }

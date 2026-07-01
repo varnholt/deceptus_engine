@@ -80,26 +80,29 @@ LightSystem::LightSystem()
    }
    _light_shader = std::move(*loaded);
 
-   _ul_light_count  = toStdOptional(_light_shader->getUniformLocation("u_light_count"));
-   _ul_resolution   = toStdOptional(_light_shader->getUniformLocation("u_resolution"));
-   _ul_ambient      = toStdOptional(_light_shader->getUniformLocation("u_ambient"));
-   _ul_color_map    = toStdOptional(_light_shader->getUniformLocation("color_map"));
-   _ul_light_map_1  = toStdOptional(_light_shader->getUniformLocation("light_map_1"));
-   _ul_light_map_2  = toStdOptional(_light_shader->getUniformLocation("light_map_2"));
-   _ul_normal_map   = toStdOptional(_light_shader->getUniformLocation("normal_map"));
+   _ul_light_count = toStdOptional(_light_shader->getUniformLocation("u_light_count"));
+   _ul_resolution = toStdOptional(_light_shader->getUniformLocation("u_resolution"));
+   _ul_ambient = toStdOptional(_light_shader->getUniformLocation("u_ambient"));
+   _ul_color_map = toStdOptional(_light_shader->getUniformLocation("color_map"));
+   _ul_light_map_1 = toStdOptional(_light_shader->getUniformLocation("light_map_1"));
+   _ul_light_map_2 = toStdOptional(_light_shader->getUniformLocation("light_map_2"));
+   _ul_normal_map = toStdOptional(_light_shader->getUniformLocation("normal_map"));
 
    static const std::array<std::string, 6> position_names = {
-      "u_lights[0]._position", "u_lights[1]._position", "u_lights[2]._position",
-      "u_lights[3]._position", "u_lights[4]._position", "u_lights[5]._position"
+      "u_lights[0]._position",
+      "u_lights[1]._position",
+      "u_lights[2]._position",
+      "u_lights[3]._position",
+      "u_lights[4]._position",
+      "u_lights[5]._position"
    };
    static const std::array<std::string, 6> color_names = {
-      "u_lights[0]._color", "u_lights[1]._color", "u_lights[2]._color",
-      "u_lights[3]._color", "u_lights[4]._color", "u_lights[5]._color"
+      "u_lights[0]._color", "u_lights[1]._color", "u_lights[2]._color", "u_lights[3]._color", "u_lights[4]._color", "u_lights[5]._color"
    };
    for (auto index = 0u; index < 6u; index++)
    {
       _ul_light_positions[index] = toStdOptional(_light_shader->getUniformLocation(position_names[index]));
-      _ul_light_colors[index]    = toStdOptional(_light_shader->getUniformLocation(color_names[index]));
+      _ul_light_colors[index] = toStdOptional(_light_shader->getUniformLocation(color_names[index]));
    }
 }
 
@@ -175,7 +178,11 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, sf::RenderStates{.stencilMode = stencil_write_mode});
+               target.draw(
+                  std::span<const sf::Vertex>{quad.data(), quad.size()},
+                  sf::PrimitiveType::Triangles,
+                  sf::RenderStates{.stencilMode = stencil_write_mode}
+               );
             }
          }
          else if (shape_chain)
@@ -205,7 +212,11 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(vertex_1.x, vertex_1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, sf::RenderStates{.stencilMode = stencil_write_mode});
+               target.draw(
+                  std::span<const sf::Vertex>{quad.data(), quad.size()},
+                  sf::PrimitiveType::Triangles,
+                  sf::RenderStates{.stencilMode = stencil_write_mode}
+               );
             }
          }
          else if (shape_polygon)
@@ -239,7 +250,11 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, sf::RenderStates{.stencilMode = stencil_write_mode});
+               target.draw(
+                  std::span<const sf::Vertex>{quad.data(), quad.size()},
+                  sf::PrimitiveType::Triangles,
+                  sf::RenderStates{.stencilMode = stencil_write_mode}
+               );
             }
          }
       }
@@ -294,7 +309,9 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    }
    if (_ul_resolution.has_value())
    {
-      _light_shader->setUniform(*_ul_resolution, sf::Glsl::Vec2(static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)));
+      _light_shader->setUniform(
+         *_ul_resolution, sf::Glsl::Vec2(static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y))
+      );
    }
    if (_ul_ambient.has_value())
    {
@@ -317,11 +334,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
       {
          _light_shader->setUniform(
             *_ul_light_positions[light_id],
-            sf::Glsl::Vec3(
-               static_cast<float>(light_screen_pos.x),
-               static_cast<float>(1.0f - light_screen_pos.y),
-               0.075f
-            )
+            sf::Glsl::Vec3(static_cast<float>(light_screen_pos.x), static_cast<float>(1.0f - light_screen_pos.y), 0.075f)
          );
       }
 
@@ -447,7 +460,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
 
       if (light->_shader && light->_texture)
       {
-         auto texture_loc = light->_shader->getUniformLocation("texture");
+         auto texture_loc = light->_shader->getUniformLocation("u_texture");
          if (texture_loc.hasValue())
          {
             (void)light->_shader->setUniform(*texture_loc, *light->_texture);
@@ -478,8 +491,8 @@ void LightSystem::draw(
       return;
    }
 
-   const auto* color_tex  = &color_map->getTexture();
-   const auto* light_tex  = &light_map->getTexture();
+   const auto* color_tex = &color_map->getTexture();
+   const auto* light_tex = &light_map->getTexture();
    const auto* light2_tex = &light_map2->getTexture();
    const auto* normal_tex = &normal_map->getTexture();
 
@@ -501,8 +514,8 @@ void LightSystem::draw(
       {
          (void)_light_shader->setUniform(*_ul_normal_map, *normal_tex);
       }
-      _last_color_map  = color_tex;
-      _last_light_map  = light_tex;
+      _last_color_map = color_tex;
+      _last_light_map = light_tex;
       _last_light_map2 = light2_tex;
       _last_normal_map = normal_tex;
    }

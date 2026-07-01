@@ -1,12 +1,13 @@
-#version 120
-
 uniform float time;
 uniform vec2 flowfield_offset;
-varying vec2 vUv;
 
 uniform sampler2D flowfield_1;
 uniform sampler2D flowfield_2;
 uniform sampler2D current_texture;
+
+in vec2 sf_v_texCoord;
+
+layout(location = 0) out vec4 sf_fragColor;
 
 void main()
 {
@@ -16,14 +17,14 @@ void main()
    vec2 offset_shift_1 = flowfield_offset;
    vec2 offset_shift_2 = vec2(0.0, 0.1);
 
-   vec2 offset_lookup = vec2(vUv.x, vUv.y);
+   vec2 offset_lookup = vec2(sf_v_texCoord.x, sf_v_texCoord.y);
 
-   vec2 offset_1 = time * speed_1 * texture2D(flowfield_1, (1.0 + time) * offset_lookup + offset_shift_1).xy;
-   vec2 offset_2 = time * speed_2 * texture2D(flowfield_2, (1.0 + time) * offset_lookup + offset_shift_2).xy;
+   vec2 offset_1 = time * speed_1 * texture(flowfield_1, (1.0 + time) * offset_lookup + offset_shift_1).xy;
+   vec2 offset_2 = time * speed_2 * texture(flowfield_2, (1.0 + time) * offset_lookup + offset_shift_2).xy;
 
-   vec4 texelColor = texture2D(
+   vec4 texelColor = texture(
          current_texture,
-           vUv.xy
+           sf_v_texCoord.xy
          + offset_1 * 0.15
          + offset_2 * -0.3
       );
@@ -41,5 +42,5 @@ void main()
       texelColor = mix(texelColor, vec4(1.0, 1.0, 1.0, 1.0 - time), time);
    }
 
-   gl_FragColor = texelColor;
+   sf_fragColor = texelColor;
 }

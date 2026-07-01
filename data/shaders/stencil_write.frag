@@ -1,5 +1,3 @@
-#version 330 compatibility
-
 uniform sampler2D u_texture_sampler;
 uniform float     u_alpha_threshold;
 

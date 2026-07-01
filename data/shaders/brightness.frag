@@ -1,13 +1,15 @@
-#version 120
 uniform float gamma;
-varying vec2 uv;
-uniform sampler2D texture;
+uniform sampler2D u_texture;
+
+in vec2 sf_v_texCoord;
+
+layout(location = 0) out vec4 sf_fragColor;
 
 void main()
 {
    const float invGamma = 1.0 / 2.2;
 
-   vec4 col = texture2D(texture, gl_TexCoord[0].xy);
+   vec4 col = texture(u_texture, sf_v_texCoord);
 
    float x = pow(col.x, invGamma);
    float y = pow(col.y, invGamma);
@@ -17,5 +19,5 @@ void main()
    y = pow(y, gamma);
    z = pow(z, gamma);
 
-   gl_FragColor= vec4(x, y, z, col.w);
+   sf_fragColor = vec4(x, y, z, col.w);
 }

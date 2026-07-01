@@ -1,5 +1,3 @@
-#version 120
-
 uniform float     u_time;
 uniform vec2      u_resolution;
 uniform sampler2D u_texture;
@@ -9,12 +7,16 @@ uniform float     u_pixel_size;   //!< pixel block size in screen pixels; 1.0 = 
 uniform vec3      u_flash_color;  //!< color to flash toward (0-1 per channel)
 uniform float     u_flash_intensity; //!< 0 = no flash, 1 = full flash color
 
+in vec2 sf_v_texCoord;
+
+layout(location = 0) out vec4 sf_fragColor;
+
 #define TIME (u_time * 0.15)
 
 
 float noise(vec2 x)
 {
-    return texture2D(u_texture, x * 0.01).x;
+    return texture(u_texture, x * 0.01).x;
 }
 
 float fbm(vec2 p)
@@ -54,7 +56,7 @@ float circularEffect(vec2 p)
 
 void main()
 {
-    vec2 frag_coord  = gl_TexCoord[0].xy * u_resolution;
+    vec2 frag_coord  = sf_v_texCoord * u_resolution;
     vec2 p_pixelated = floor(frag_coord / u_pixel_size) * u_pixel_size;
     vec2 p           = p_pixelated / u_resolution - 0.5;
 
@@ -75,5 +77,5 @@ void main()
     vec3 output_color = mix(base_color, u_flash_color, u_flash_intensity);
 
     // threshold cuts near-black pixels to fully transparent, preventing colour bleed onto adjacent layers
-    gl_FragColor = vec4(output_color, clamp(brightness - 0.05, 0.0, 1.0));
+    sf_fragColor = vec4(output_color, clamp(brightness - 0.05, 0.0, 1.0));
 }

@@ -4,9 +4,11 @@ uniform sampler2D iChannel0;   // noise texture
 uniform float alpha;
 uniform float radius_factor;
 uniform float noise_scale;
-uniform vec3 swirl_color;  
+uniform vec3 swirl_color;
 
-float pixel_size = 1.0;      
+float pixel_size = 1.0;
+
+layout(location = 0) out vec4 sf_fragColor;
 
 void main()
 {
@@ -33,16 +35,16 @@ void main()
     // Sample first layer of noise
     vec2 noise_uv_1 = fract((sample_pos_1.xy + sample_pos_1.z) / noise_scale);
     vec2 noise_uv_2 = fract((sample_pos_2.xy + sample_pos_2.z) / noise_scale);
-    float noise_1 = texture2D(iChannel0, noise_uv_1).r;
-    float noise_2 = texture2D(iChannel0, noise_uv_2).r;
+    float noise_1 = texture(iChannel0, noise_uv_1).r;
+    float noise_2 = texture(iChannel0, noise_uv_2).r;
 
     // Second noise layer using results from the first
     vec2 noise_uv_3 = fract((vec2(noise_1, noise_2) + radius + t * 0.3) / noise_scale);
-    float refined_noise = texture2D(iChannel0, noise_uv_3).r;
+    float refined_noise = texture(iChannel0, noise_uv_3).r;
 
     // Third noise layer for more depth
     vec2 noise_uv_4 = fract((vec2(refined_noise - noise_1, refined_noise - noise_2) + refined_noise + t * 0.3) / noise_scale);
-    refined_noise = texture2D(iChannel0, noise_uv_4).r;
+    refined_noise = texture(iChannel0, noise_uv_4).r;
 
     // Combine noise and radial offset to compute brightness
     float brightness = (refined_noise + radius * 5.0) / 6.0;
@@ -57,7 +59,7 @@ void main()
     vec3 effect_color = swirl_color;
     vec3 final_color = mix(vec3(0.0), effect_color, ring_alpha);
 
-    // gl_FragColor = vec4(brightness);
-    // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-    gl_FragColor = vec4(final_color * alpha, 1.0);
+    // sf_fragColor = vec4(brightness);
+    // sf_fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    sf_fragColor = vec4(final_color * alpha, 1.0);
 }

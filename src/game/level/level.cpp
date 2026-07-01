@@ -225,11 +225,13 @@ Level::~Level()
       Timer::removeByCaller(enemy);
    }
 
+#ifndef __EMSCRIPTEN__
    _file_watcher_thread_active = false;
    if (_file_watcher_thread.joinable())
    {
       _file_watcher_thread.join();
    }
+#endif
 }
 
 // assign room identifiers to mechanism
@@ -488,6 +490,7 @@ bool Level::load()
    Log::Info() << "level loading complete";
 
    // set up file watcher
+#ifndef __EMSCRIPTEN__
    _file_watcher_thread = std::thread(
       [this]()
       {
@@ -508,6 +511,7 @@ bool Level::load()
          }
       }
    );
+#endif
 
    return true;
 }

@@ -135,7 +135,7 @@ void LuaNode::initialize()
    if (loaded_shader.hasValue())
    {
       _flash_shader = std::move(*loaded_shader);
-      const auto ul_texture = _flash_shader->getUniformLocation("texture");
+      const auto ul_texture = _flash_shader->getUniformLocation("u_texture");
       if (ul_texture.hasValue())
       {
          (void)_flash_shader->setUniform(*ul_texture, sf::Shader::CurrentTexture);
