@@ -80,20 +80,20 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto can_continue = !SaveState::allEmpty();
 
-   auto draw_all_text = [&](sf::RenderTarget& target)
+   auto draw_all_text = [&](sf::RenderTarget& target, const sf::RenderStates& drawStates)
    {
-      target.draw(*_text_build);
-      target.draw(*_text_copyright);
+      target.draw(*_text_build, drawStates);
+      target.draw(*_text_copyright, drawStates);
       if (can_continue)
       {
-         target.draw(*_text_continue_item);
+         target.draw(*_text_continue_item, drawStates);
       }
       else
       {
-         target.draw(*_text_new_game_item);
+         target.draw(*_text_new_game_item, drawStates);
       }
-      target.draw(*_text_options_item);
-      target.draw(*_text_quit_item);
+      target.draw(*_text_options_item, drawStates);
+      target.draw(*_text_quit_item, drawStates);
    };
 
    // fade-in
@@ -106,7 +106,7 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
       MenuScreen::draw(temp_texture, states);
       if (_text_continue_item)
       {
-         draw_all_text(temp_texture);
+         draw_all_text(temp_texture, states);
       }
       temp_texture.display();
 
@@ -117,10 +117,10 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
          sf::FloatRect{{0.f, 0.f}, {static_cast<float>(temp_fade_texture.getSize().x), static_cast<float>(temp_fade_texture.getSize().y)}};
       temp_sprite.color = sf::Color(255, 255, 255, _fade_alpha);
 
-      // draw the faded sprite to the main window
-      sf::RenderStates faded_states = states;
-      faded_states.texture = &temp_fade_texture;
-      window.draw(temp_sprite, faded_states);
+      // composite the 2x-rendered temp texture at 1:1 (no view) so the full canvas is covered
+      sf::RenderStates composite_states{.blendMode = sf::BlendAlpha};
+      composite_states.texture = &temp_fade_texture;
+      window.draw(temp_sprite, composite_states);
    }
    else
    {
@@ -128,7 +128,7 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
       MenuScreen::draw(window, states);
       if (_text_continue_item)
       {
-         draw_all_text(window);
+         draw_all_text(window, states);
       }
    }
 }

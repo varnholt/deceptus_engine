@@ -1,9 +1,11 @@
 #include "layer.h"
 
-void Layer::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) const
+void Layer::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
    // TODO: use layer blendmode
-   target.draw(*_sprite, sf::RenderStates{.texture = _texture.get(), .blendMode = sf::BlendAlpha});
+   states.texture = _texture.get();
+   states.blendMode = sf::BlendAlpha;
+   target.draw(*_sprite, states);
 }
 
 void Layer::show()

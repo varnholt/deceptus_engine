@@ -30,8 +30,8 @@ MenuScreenCredits::MenuScreenCredits()
 void MenuScreenCredits::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    MenuScreen::draw(window, states);
-   window.draw(*_text_code);
-   window.draw(*_text_artwork);
+   window.draw(*_text_code, states);
+   window.draw(*_text_artwork, states);
 
    if (!_text_back_button)
    {

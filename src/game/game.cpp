@@ -234,8 +234,10 @@ void Game::initializeWindow()
 
    SplashScreen::show(*_window);
 
+#ifndef __EMSCRIPTEN__
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
    _window->setFramerateLimit(60);
+#endif
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!game_config._fullscreen);
 
@@ -1059,8 +1061,10 @@ void Game::toggleFullScreen()
 
    config.serializeToFile();
 
+#ifndef __EMSCRIPTEN__
    _window->setVerticalSyncEnabled(config._vsync_enabled);
    _window->setFramerateLimit(60);
+#endif
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!config._fullscreen);
 
