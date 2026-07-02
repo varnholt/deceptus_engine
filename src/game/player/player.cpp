@@ -294,7 +294,7 @@ void Player::drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>&
    }
 }
 
-void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
    _water_bubbles.draw(color, normal);
 
@@ -310,7 +310,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
    if (_jump.isWallSliding())
    {
-      _player_animation->getWallslideAnimation()->draw(color);
+      _player_animation->getWallslideAnimation()->draw(color, states);
    }
 
    const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
@@ -329,7 +329,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
       current_cycle->position = draw_position_px;
       drawDash(color, current_cycle, draw_position_px);
       updateHurtColor(current_cycle);
-      current_cycle->draw(color, normal);
+      current_cycle->draw(color, normal, states);
    }
 
    const auto& auxiliary_cycle = _player_animation->getAuxiliaryCycle();
@@ -337,7 +337,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    {
       auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
       auxiliary_cycle->position = draw_position_px;
-      auxiliary_cycle->draw(color, normal);
+      auxiliary_cycle->draw(color, normal, states);
    }
 
    // draw additional effects such as dust, water splash

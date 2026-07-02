@@ -27,6 +27,7 @@ public:
    /// \param target render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+   using GameMechanism::draw;
 
    /// \brief updates lazy texture chunk loading and creates or removes the sprite as needed.
    /// \param dt elapsed frame time.

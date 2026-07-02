@@ -34,6 +34,12 @@ public:
    /// \param normal normal-map render target.
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
 
+   /// \brief draws the mechanism with explicit render states (used in WASM to carry the level view).
+   /// \param target color render target.
+   /// \param normal normal-map render target.
+   /// \param states render states to apply (carries .view for WASM camera transform).
+   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states);
+
    /// \brief updates mechanism logic for one frame.
    /// \param dt elapsed frame time.
    virtual void update(const sf::Time& dt);

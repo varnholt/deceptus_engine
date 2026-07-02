@@ -938,7 +938,13 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
 #endif
 }
 
-void Level::drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t z_index, auto predicate)
+void Level::drawMechanismsAtZ(
+   sf::RenderTarget& color,
+   sf::RenderTarget& normal,
+   int32_t z_index,
+   auto predicate,
+   const sf::RenderStates& states
+)
 {
    for (auto* mechanism_vector : _mechanism_registry.getList())
    {
@@ -951,15 +957,15 @@ void Level::drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal,
             {
                const auto mechanism_name = std::string{mechanism->objectName()};
                const auto time_start = std::chrono::high_resolution_clock::now();
-               mechanism->draw(color, normal);
+               mechanism->draw(color, normal, states);
                timing_data[mechanism_name].addDrawTime(std::chrono::high_resolution_clock::now() - time_start);
             }
             else
             {
-               mechanism->draw(color, normal);
+               mechanism->draw(color, normal, states);
             }
 #else
-               mechanism->draw(color, normal);
+               mechanism->draw(color, normal, states);
 #endif
          }
       }
@@ -971,6 +977,9 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
 #ifndef __EMSCRIPTEN__
    const auto previous_view = target.getView();
    target.setView(*_level_view);
+   const sf::RenderStates level_view_states{};
+#else
+      const sf::RenderStates level_view_states{.view = *_level_view};
 #endif
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
@@ -980,7 +989,7 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
       {
          if (tile_map->getZ() == z_index && tile_map->isPostLighting())
          {
-            tile_map->draw(target, target, {});
+            tile_map->draw(target, target, level_view_states);
          }
       }
 
@@ -988,14 +997,15 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
          target,
          target,
          z_index,
-         [&player_chunk](const auto& mechanism) { return mechanism->isPostLighting() && checkUpdateMechanism(player_chunk, mechanism); }
+         [&player_chunk](const auto& mechanism) { return mechanism->isPostLighting() && checkUpdateMechanism(player_chunk, mechanism); },
+         level_view_states
       );
 
       for (auto& layer : _mechanism_registry.getImageLayers())
       {
          if (layer->getZ() == z_index && layer->isPostLighting())
          {
-            layer->draw(target, target);
+            layer->draw(target, target, level_view_states);
          }
       }
    }
@@ -1010,6 +1020,9 @@ void Level::drawOverlayLayers(sf::RenderTarget& target)
 #ifndef __EMSCRIPTEN__
    const auto previous_view = target.getView();
    target.setView(*_level_view);
+   const sf::RenderStates level_view_states{};
+#else
+      const sf::RenderStates level_view_states{.view = *_level_view};
 #endif
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
@@ -1019,7 +1032,8 @@ void Level::drawOverlayLayers(sf::RenderTarget& target)
          target,
          target,
          z_index,
-         [&player_chunk](const auto& mechanism) { return mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); }
+         [&player_chunk](const auto& mechanism) { return mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); },
+         level_view_states
       );
    }
 
@@ -1028,9 +1042,9 @@ void Level::drawOverlayLayers(sf::RenderTarget& target)
 #endif
 }
 
-void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
+void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-   std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->draw(color, normal);
+   std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->draw(color, normal, states);
 }
 
 void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32_t from, int32_t to)
@@ -1040,6 +1054,9 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 #ifndef __EMSCRIPTEN__
    target.setView(*_level_view);
    normal.setView(*_level_view);
+   const sf::RenderStates level_view_states{};
+#else
+      const sf::RenderStates level_view_states{.view = *_level_view};
 #endif
 
    for (auto z_index = from; z_index <= to; z_index++)
@@ -1052,11 +1069,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          if (tile_map->getZ() == z_index && !tile_map->isPostLighting())
          {
-#ifdef __EMSCRIPTEN__
-            tile_map->draw(target, normal, sf::RenderStates{.view = *_level_view});
-#else
-               tile_map->draw(target, normal, {});
-#endif
+            tile_map->draw(target, normal, level_view_states);
          }
       }
 
@@ -1066,7 +1079,8 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          normal,
          z_index,
          [&player_chunk](const auto& mechanism)
-         { return !mechanism->isPostLighting() && !mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); }
+         { return !mechanism->isPostLighting() && !mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); },
+         level_view_states
       );
 
       // ambient occlusion
@@ -1082,7 +1096,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          {
             if (checkUpdateMechanism(player_chunk, enemy))
             {
-               enemy->draw(target, normal);
+               enemy->draw(target, normal, level_view_states);
             }
          }
       }
@@ -1090,7 +1104,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw player
       if (z_index == static_cast<int32_t>(ZDepth::Player))
       {
-         drawPlayer(target, normal);
+         drawPlayer(target, normal, level_view_states);
       }
 
       // draw image layers; post-lighting layers are drawn after the lighting pass
@@ -1102,7 +1116,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
             {
                continue;
             }
-            layer->draw(target, normal);
+            layer->draw(target, normal, level_view_states);
          }
       }
    }
@@ -1444,11 +1458,12 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    sf::Sprite level_texture_sprite;
 
    level_texture_sprite.position = {_boom_effect._boom_offset_x, _boom_effect._boom_offset_y};
+#ifndef __EMSCRIPTEN__
    level_texture_sprite.scale = {_render_targets.view_to_texture_scale, _render_targets.view_to_texture_scale};
-
-#ifdef __EMSCRIPTEN__
-   const sf::Vector2u deferred_size = _render_targets.deferred->getSize();
-   level_texture_sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(deferred_size.x), static_cast<float>(deferred_size.y)}};
+#else
+      const sf::Vector2u deferred_size = _render_targets.deferred->getSize();
+      level_texture_sprite.textureRect =
+         sf::FloatRect{{0.f, 0.f}, {static_cast<float>(deferred_size.x), static_cast<float>(deferred_size.y)}};
 #endif
 
    _gamma_shader->setTexture(level_deferred_texture);

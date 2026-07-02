@@ -257,7 +257,13 @@ protected:
    /// \param normal normal-map render target.
    /// \param z_index z layer to draw.
    /// \param predicate returns true for mechanisms that should be drawn.
-   void drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t z_index, auto predicate);
+   void drawMechanismsAtZ(
+      sf::RenderTarget& color,
+      sf::RenderTarget& normal,
+      int32_t z_index,
+      auto predicate,
+      const sf::RenderStates& states = {}
+   );
 
    /// \brief draws parallax tile maps at a specific z layer.
    /// \param target render target.
@@ -294,7 +300,7 @@ protected:
    /// \brief draws the player sprite and normal map contribution.
    /// \param color color render target.
    /// \param normal normal render target.
-   void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);
+   void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states = {});
 
    /// \brief draws cached physics outline chains for debug visualization.
    /// \param target render target.

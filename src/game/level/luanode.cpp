@@ -1361,7 +1361,12 @@ void LuaNode::playDetonationAnimationFromScript(float x, float y, const std::vec
    }
 }
 
-void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (!_visible)
    {
@@ -1408,11 +1413,13 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       sprite->position = _position_px - center + offset;
       if (_flash_shader.has_value())
       {
-         target.draw(*sprite, sf::RenderStates{.shader = &(*_flash_shader)});
+         sf::RenderStates sprite_states = states;
+         sprite_states.shader = &(*_flash_shader);
+         target.draw(*sprite, sprite_states);
       }
       else
       {
-         target.draw(*sprite);
+         target.draw(*sprite, states);
       }
    }
 

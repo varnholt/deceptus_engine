@@ -43,6 +43,8 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \param window color render target.
    /// \param normal normal-map render target.
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
+   void draw(sf::RenderTarget& window, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief returns cached world-space bounding box built from active hitboxes.
    /// \return bounding rectangle in pixels, or std::nullopt when no hitboxes exist.
