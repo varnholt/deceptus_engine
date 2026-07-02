@@ -1411,16 +1411,13 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const
       const auto& offset = _sprite_offsets_px[i];
       const auto center = sf::Vector2f(sprite->textureRect.size.x / 2.0f, sprite->textureRect.size.y / 2.0f);
       sprite->position = _position_px - center + offset;
+      sf::RenderStates sprite_states = states;
+      sprite_states.texture = _texture.get();
       if (_flash_shader.has_value())
       {
-         sf::RenderStates sprite_states = states;
          sprite_states.shader = &(*_flash_shader);
-         target.draw(*sprite, sprite_states);
       }
-      else
-      {
-         target.draw(*sprite, states);
-      }
+      target.draw(*sprite, sprite_states);
    }
 
    // draw debug rectangles if they were added
