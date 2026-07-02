@@ -897,7 +897,15 @@ void Level::drawLightMap()
 #ifndef __EMSCRIPTEN__
    _render_targets.lighting2->setView(*_level_view);
 #endif
-   _light_system->draw(*_render_targets.lighting, *_render_targets.lighting2, {});
+   _light_system->draw(
+      *_render_targets.lighting,
+      *_render_targets.lighting2,
+#ifdef __EMSCRIPTEN__
+      sf::RenderStates{.view = *_level_view}
+#else
+         {}
+#endif
+   );
    _render_targets.lighting->display();
    _render_targets.lighting2->display();
 
@@ -917,8 +925,10 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
       {
 #ifndef __EMSCRIPTEN__
          target.setView(parallax->_view);
-#endif
          target.draw(*parallax->_tile_map);
+#else
+            target.draw(*parallax->_tile_map, sf::RenderStates{.view = parallax->_view});
+#endif
       }
    }
 
@@ -1042,7 +1052,11 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          if (tile_map->getZ() == z_index && !tile_map->isPostLighting())
          {
-            tile_map->draw(target, normal, {});
+#ifdef __EMSCRIPTEN__
+            tile_map->draw(target, normal, sf::RenderStates{.view = *_level_view});
+#else
+               tile_map->draw(target, normal, {});
+#endif
          }
       }
 
@@ -1357,9 +1371,9 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    takeScreenshot("texture_level_background_normal", *_render_targets.normal_tmp.get());
 
    // draw the atmospheric parts into the level texture using the atmosphere shader
+#ifndef __EMSCRIPTEN__
    sf::Sprite tmp_sprite;
    const sf::Texture* tmp_sprite_texture = &_render_targets.level_background->getTexture();
-#ifndef __EMSCRIPTEN__
    _atmosphere_shader->update();
    _render_targets.level->draw(tmp_sprite, sf::RenderStates{.texture = tmp_sprite_texture, .shader = &_atmosphere_shader->getShader()});
    takeScreenshot("texture_level_level_dist", *_render_targets.level.get());
@@ -1371,6 +1385,18 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    takeScreenshot("texture_level_background_normal_dist", *_render_targets.normal.get());
 
    drawGlowSprite();
+#else
+      // WASM: blit level_background to level and normal_tmp to normal without atmosphere distortion
+      {
+         sf::Sprite blit_sprite;
+         const sf::Vector2u blit_size = _render_targets.level_background->getSize();
+         blit_sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(blit_size.x), static_cast<float>(blit_size.y)}};
+         const sf::Texture& blit_bg_texture = _render_targets.level_background->getTexture();
+         _render_targets.level->draw(blit_sprite, sf::RenderStates{.texture = &blit_bg_texture});
+         const sf::Texture& blit_normal_texture = _render_targets.normal_tmp->getTexture();
+         _render_targets.normal->draw(blit_sprite, sf::RenderStates{.texture = &blit_normal_texture});
+      }
+#endif
 
    // draw the level layers into the level texture
    drawLayers(
@@ -1380,13 +1406,17 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       static_cast<int32_t>(ZDepth::ForegroundMax)
    );
 
+#ifndef __EMSCRIPTEN__
    _light_system->drawDebug(*_render_targets.level.get());
+#endif
 
    Gun::drawProjectileHitAnimations(*_render_targets.level.get());
    AnimationPlayer::getInstance().draw(*_render_targets.level.get());
    _level_script.draw(*_render_targets.level.get());
 
+#ifndef __EMSCRIPTEN__
    drawDebugInformation();
+#endif
 
    displayFinalTextures();
 
@@ -1402,11 +1432,13 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    _render_targets.deferred->display();
 
+#ifndef __EMSCRIPTEN__
    takeScreenshot("texture_map_color", *_render_targets.level.get());
    takeScreenshot("texture_map_light", *_render_targets.lighting.get());
    takeScreenshot("texture_map_light2", *_render_targets.lighting2.get());
    takeScreenshot("texture_map_normal", *_render_targets.normal.get());
    takeScreenshot("texture_map_deferred", *_render_targets.deferred.get());
+#endif
 
    const sf::Texture& level_deferred_texture = _render_targets.deferred->getTexture();
    sf::Sprite level_texture_sprite;
@@ -1414,10 +1446,14 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    level_texture_sprite.position = {_boom_effect._boom_offset_x, _boom_effect._boom_offset_y};
    level_texture_sprite.scale = {_render_targets.view_to_texture_scale, _render_targets.view_to_texture_scale};
 
+#ifdef __EMSCRIPTEN__
+   const sf::Vector2u deferred_size = _render_targets.deferred->getSize();
+   level_texture_sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(deferred_size.x), static_cast<float>(deferred_size.y)}};
+#endif
+
    _gamma_shader->setTexture(level_deferred_texture);
    _gamma_shader->update();
    window->draw(level_texture_sprite, sf::RenderStates{.texture = &level_deferred_texture, .shader = &_gamma_shader->getGammaShader()});
-#endif
 }
 
 void Level::updatePlayerLight()
