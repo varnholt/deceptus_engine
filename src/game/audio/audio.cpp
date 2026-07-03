@@ -22,6 +22,11 @@ const std::string music_path = "data/music";
  */
 Audio::Audio()
 {
+   auto handle = sf::AudioContext::getDefaultPlaybackDeviceHandle();
+   if (handle.hasValue())
+   {
+      _playback_device = std::make_unique<sf::PlaybackDevice>(*handle);
+   }
    initializeSamples();
 }
 
@@ -48,36 +53,32 @@ Audio::~Audio()
    }
 }
 
-std::shared_ptr<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
+sf::base::Optional<sf::SoundBuffer> Audio::loadFile(const std::string& filename)
 {
-   // Check if the file exists before attempting to load
    const std::string full_path = sfx_path + filename;
    if (!std::filesystem::exists(full_path))
    {
       Log::Error() << "audio file does not exist: " << filename;
-      return nullptr;
+      return sf::base::nullOpt;
    }
 
-   auto buffer = std::make_shared<sf::SoundBuffer>();
-
-   // Time the audio file loading operation
    auto start_time = std::chrono::high_resolution_clock::now();
-   bool success = buffer->loadFromFile(full_path);
+   auto buffer = sf::SoundBuffer::loadFromFile(sf::Path{full_path});
    auto end_time = std::chrono::high_resolution_clock::now();
 
    auto load_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
-   if (!success)
+   if (!buffer.hasValue())
    {
       Log::Error() << "unable to load file: " << filename;
-      return nullptr;
+      return sf::base::nullOpt;
    }
    else if (load_duration.count() >= 100)
    {
       Log::Info() << "Audio load time for " << filename << ": " << load_duration.count() << " ms (Main thread - may cause hiccups)";
    }
 
-   if (buffer->getChannelCount() < 2)
+   if ((*buffer).getChannelCount() < 2)
    {
       Log::Warning() << filename << " seems to be mono :(";
    }
@@ -96,9 +97,9 @@ void Audio::addSample(const std::string& sample)
 
    auto buffer = loadFile(sample);
 
-   if (buffer != nullptr)
+   if (buffer.hasValue())
    {
-      _sound_buffers[sample] = buffer;
+      _sound_buffers.emplace(sample, std::move(*buffer));
    }
 }
 
@@ -126,10 +127,21 @@ void Audio::debug()
    const auto stopped_thread_count = std::count_if(
       _sound_threads.begin(),
       _sound_threads.end(),
-      [](const auto& thread) { return thread._sound->getStatus() == sf::Sound::Status::Stopped; }
+      [](const auto& thread) { return thread._sound == nullptr || !thread._sound->isPlaying(); }
    );
 
    std::cout << stopped_thread_count << "/" << _sound_threads.size() << " are free" << std::endl;
+}
+
+void Audio::updateListenerPosition(const sf::Vector2f& pos)
+{
+   if (!_playback_device)
+   {
+      return;
+   }
+   sf::Listener listener;
+   listener.position = {pos.x, pos.y, 0.0f};
+   _playback_device->applyListener(listener);
 }
 
 void Audio::adjustActiveSampleVolume()
@@ -137,8 +149,7 @@ void Audio::adjustActiveSampleVolume()
    std::lock_guard<std::mutex> guard(_mutex);
 
    auto threads =
-      _sound_threads | std::views::filter([](const auto& thread)
-                                          { return thread._sound != nullptr && thread._sound->getStatus() != sf::Sound::Status::Stopped; });
+      _sound_threads | std::views::filter([](const auto& thread) { return thread._sound != nullptr && thread._sound->isPlaying(); });
    for (auto& thread : threads)
    {
       thread.setVolume(thread._play_info._volume);
@@ -155,12 +166,17 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
    const auto& thread_it = std::find_if(
       _sound_threads.begin(),
       _sound_threads.end(),
-      [](const auto& thread) { return thread._sound == nullptr || thread._sound->getStatus() == sf::Sound::Status::Stopped; }
+      [](const auto& thread) { return thread._sound == nullptr || !thread._sound->isPlaying(); }
    );
 
    if (thread_it == _sound_threads.cend())
    {
       Log::Error() << "no free thread to play: " << play_info._sample_name;
+      return std::nullopt;
+   }
+
+   if (!_playback_device)
+   {
       return std::nullopt;
    }
 
@@ -172,19 +188,12 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
       return std::nullopt;
    }
 
-   const auto position = play_info._pos.value_or(sf::Vector3f{0.0f, 0.0f, 0.1f});
+   const auto position = play_info._pos.value_or(sf::Vec3f{0.0f, 0.0f, 0.1f});
 
-   if (thread_it->_sound == nullptr)
-   {
-      thread_it->_sound = std::make_unique<sf::Sound>(*it->second);
-   }
-   else
-   {
-      thread_it->_sound->setBuffer(*it->second);
-   }
+   thread_it->_sound = std::make_unique<sf::Sound>(*_playback_device, it->second);
 
    thread_it->_sound->setLooping(play_info._looped);
-   thread_it->_sound->position = position;
+   thread_it->_sound->setPosition(position);
    thread_it->_sound->setMinDistance(10000.0f);
    thread_it->_sound->setAttenuation(0.0f);
    thread_it->_filename = play_info._sample_name;
@@ -242,10 +251,10 @@ void Audio::SoundThread::setVolume(float volume)
 {
    const auto master = (GameConfiguration::getInstance()._audio_volume_master * 0.01f);
    const auto sfx = (GameConfiguration::getInstance()._audio_volume_sfx) * 0.01f;
-   _sound->setVolume(master * sfx * volume * 100.0f);
+   _sound->setVolume(master * sfx * volume);
 }
 
 void Audio::SoundThread::setPosition(const sf::Vector2f& pos)
 {
-   _sound->position = {pos.x, pos.y, 0.0f};
+   _sound->setPosition({pos.x, pos.y, 0.0f});
 }

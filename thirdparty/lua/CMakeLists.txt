@@ -42,6 +42,10 @@ add_library(lua STATIC ${LUA_SOURCES})
 
 target_include_directories(lua PUBLIC ${LUA_SRC_DIR})
 
+if(EMSCRIPTEN)
+    target_compile_options(lua PRIVATE -pthread)
+endif()
+
 set_target_properties(lua PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/_deps/lua-build"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/_deps/lua-build"

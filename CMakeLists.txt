@@ -847,9 +847,6 @@ if(EMSCRIPTEN)
     set(SFML_BUILD_NETWORK
         OFF
         CACHE BOOL "" FORCE)
-    set(SFML_BUILD_AUDIO
-        OFF
-        CACHE BOOL "" FORCE)
 else()
     set(SFML_BUILD_SHARED_LIBS
         ON
@@ -925,8 +922,9 @@ target_link_libraries(
         SDL3::SDL3
         lua
 )
+target_link_libraries(deceptus PRIVATE SFML::Audio)
 if(NOT EMSCRIPTEN)
-    target_link_libraries(deceptus PRIVATE SFML::Audio libglew_static)
+    target_link_libraries(deceptus PRIVATE libglew_static)
 endif()
 
 if(WIN32)
@@ -991,8 +989,14 @@ if(EMSCRIPTEN)
     # instead of the desktop GLEW header in src/opengl/
     target_include_directories(deceptus BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/src/wasm)
 
+    # Required for WASM Workers, AudioWorklet, and std::mutex/std::atomic support.
+    # -pthread implies -matomics -mbulk-memory at compile time and -sUSE_PTHREADS=1 at link time.
+    target_compile_options(deceptus PRIVATE -pthread)
+
     # WebGL 2 (GLES3) flags; allow heap growth for level assets
     target_link_options(deceptus PRIVATE
+        -pthread
+        -sPTHREAD_POOL_SIZE=4
         -sUSE_WEBGL2=1
         -sMIN_WEBGL_VERSION=2
         -sMAX_WEBGL_VERSION=2
@@ -1002,6 +1006,8 @@ if(EMSCRIPTEN)
         -sEXIT_RUNTIME=0
         -sASYNCIFY=1
         -sASSERTIONS=1
+        -sAUDIO_WORKLET=1
+        -sWASM_WORKERS=1
         "-sEXPORTED_RUNTIME_METHODS=['HEAPU32','HEAPU8','HEAP32','HEAPF32','HEAPU16']"
         --preload-file ${CMAKE_SOURCE_DIR}/data@data
     )

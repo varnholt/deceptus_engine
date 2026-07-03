@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Audio.hpp>
+#include <SFML/System.hpp>
 #include <array>
 #include <atomic>
 #include <functional>
@@ -8,6 +9,8 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
+#include <unordered_map>
 
 /// \brief singleton sound-effects manager that caches buffers and plays them on a fixed thread pool of sf::Sound instances.
 class Audio
@@ -81,6 +84,10 @@ public:
    /// \brief reapplies configured volume scaling to all currently playing sample threads.
    void adjustActiveSampleVolume();
 
+   /// \brief updates the listener position on the playback device.
+   /// \param pos world position in pixels (z is set to 0).
+   void updateListenerPosition(const sf::Vector2f& pos);
+
    /// \brief loads and caches a sample buffer if it has not been loaded yet.
    /// \param sample sample filename relative to the sfx directory.
    void addSample(const std::string& sample);
@@ -114,14 +121,15 @@ private:
 
    /// \brief loads an sf::SoundBuffer from the sfx folder and returns it when successful.
    /// \param filename sample filename relative to the sfx directory.
-   /// \return loaded sound buffer, or nullptr when the file is missing or cannot be decoded.
-   std::shared_ptr<sf::SoundBuffer> loadFile(const std::string& filename);
+   /// \return loaded sound buffer, or nullOpt when the file is missing or cannot be decoded.
+   sf::base::Optional<sf::SoundBuffer> loadFile(const std::string& filename);
 
    /// \brief prints how many sound threads are currently free for playback.
    void debug();
 
    std::mutex _mutex;
    std::atomic<bool> _stopped = false;
-   std::unordered_map<std::string, std::shared_ptr<sf::SoundBuffer>> _sound_buffers;
+   std::unique_ptr<sf::PlaybackDevice> _playback_device;             //!< owned playback device; null if audio system is unavailable
+   std::unordered_map<std::string, sf::SoundBuffer> _sound_buffers;  //!< cached sound buffers keyed by filename
    std::array<SoundThread, 50> _sound_threads;
 };

@@ -2,6 +2,7 @@
 #define MUSICPLAYER_H
 
 #include <SFML/Audio.hpp>
+#include <SFML/System.hpp>
 #include <array>
 #include <chrono>
 #include <mutex>
@@ -73,16 +74,16 @@ private:
 
    mutable std::mutex _mutex;
 
-   /// \brief returns the currently active music stream slot.
-   /// \return reference to the active sf::Music instance.
-   sf::Music& current();
+   /// \brief returns a pointer to the currently active music stream slot, or nullptr if not loaded.
+   sf::Music* currentMusic();
 
-   /// \brief returns the inactive music stream slot used for upcoming transitions.
-   /// \return reference to the inactive sf::Music instance.
-   sf::Music& next();
+   /// \brief returns a pointer to the inactive music stream slot used for upcoming transitions, or nullptr if not loaded.
+   sf::Music* nextMusic();
 
-   std::array<sf::Music, 2> _music;
-   int32_t _current_index = 0;  // 0 or 1
+   std::unique_ptr<sf::PlaybackDevice> _playback_device;            //!< owned playback device; null if audio context is unavailable
+   std::array<std::unique_ptr<sf::MusicReader>, 2> _music_readers;  //!< music reader (file source) for each stream slot
+   std::array<std::unique_ptr<sf::Music>, 2> _music;                //!< music stream for each slot; null until first track is loaded
+   int32_t _current_index = 0;                                      // 0 or 1
 
    MusicPlayerTypes::MusicTransitionState _transition_state = MusicPlayerTypes::MusicTransitionState::None;
 
