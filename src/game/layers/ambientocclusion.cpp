@@ -78,12 +78,16 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
    uv_file.close();
 }
 
-void AmbientOcclusion::draw(sf::RenderTarget& window)
+void AmbientOcclusion::draw(sf::RenderTarget& window, const sf::RenderStates& states)
 {
    const auto& player_pos_px = PlayerRegistry::getFirst()->getPixelPositionInt();
 
    const int32_t player_chunk_x = player_pos_px.x >> 8;
    const int32_t player_chunk_y = player_pos_px.y >> 8;
+
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   draw_states.blendMode = sf::BlendAlpha;
 
    for (auto y = player_chunk_y - chunk_range_y_left; y < player_chunk_y + chunk_range_y_right; y++)
    {
@@ -105,7 +109,7 @@ void AmbientOcclusion::draw(sf::RenderTarget& window)
 
          for (const auto& sprite : x_it->second)
          {
-            window.draw(sprite, sf::RenderStates{.texture = _texture.get(), .blendMode = sf::BlendAlpha});
+            window.draw(sprite, draw_states);
          }
       }
    }

@@ -186,9 +186,16 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    return checkpoint;
 }
 
-void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   target.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+   draw(target, normal, {});
+}
+
+void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   target.draw(*_sprite, draw_states);
 
    //   DebugDraw::drawRect(target, _rect);
 }

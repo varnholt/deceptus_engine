@@ -157,6 +157,8 @@ InfoLayer::InfoLayer()
 
          auto sprite = std::make_shared<sf::Sprite>();
          sprite->position = {static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop())};
+         sprite->textureRect =
+            sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(psd_layer.getWidth()), static_cast<float>(psd_layer.getHeight())}};
 
          layer->_visible = psd_layer.isVisible();
          layer->_texture = texture;

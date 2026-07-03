@@ -185,16 +185,23 @@ void CollapsingPlatform::preload()
    Audio::getInstance().addSample("mechanism_collapsing_platform_crumble.wav");
 }
 
-void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (_blocks.empty() || _blocks[0]._sprite_column == sprite_column_count)
    {
       return;
    }
 
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
    for (auto& block : _blocks)
    {
-      color.draw(*block._sprite, sf::RenderStates{.texture = _texture.get()});
+      color.draw(*block._sprite, draw_states);
    }
 }
 

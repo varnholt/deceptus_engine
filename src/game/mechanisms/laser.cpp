@@ -44,14 +44,21 @@ std::string_view Laser::objectName() const
    return "Laser";
 }
 
-void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    _sprite->textureRect = sf::FloatRect{
       {static_cast<float>(_tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE), static_cast<float>(_tv * PIXELS_PER_TILE)},
       {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
    };
 
-   color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite, draw_states);
 }
 
 void Laser::setEnabled(bool enabled)

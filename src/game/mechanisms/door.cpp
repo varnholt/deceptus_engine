@@ -95,32 +95,41 @@ std::string_view Door::objectName() const
    return "Door";
 }
 
-void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Door::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (_animation_open && !_animation_open->_paused)
    {
-      _animation_open->draw(color);
+      _animation_open->draw(color, states);
    }
    else if (_animation_close && !_animation_close->_paused)
    {
-      _animation_close->draw(color);
+      _animation_close->draw(color, states);
    }
    else if (_state == State::Closed)
    {
-      color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+      sf::RenderStates sprite_states = states;
+      sprite_states.texture = _texture.get();
+      color.draw(*_sprite, sprite_states);
    }
 
    if (_player_at_door)
    {
       if (_animation_key)
       {
-         _animation_key->draw(color);
+         _animation_key->draw(color, states);
       }
    }
 
    if (_version == Version::Version1)
    {
-      color.draw(_door_quad, sf::RenderStates{.texture = _texture.get()});
+      sf::RenderStates quad_states = states;
+      quad_states.texture = _texture.get();
+      color.draw(_door_quad, quad_states);
    }
 }
 

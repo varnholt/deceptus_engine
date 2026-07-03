@@ -247,11 +247,18 @@ void Fan::update(const sf::Time& dt)
    collide();
 }
 
-void Fan::draw(sf::RenderTarget& color, sf::RenderTarget&)
+void Fan::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void Fan::draw(sf::RenderTarget& color, sf::RenderTarget&, const sf::RenderStates& states)
 {
    for (const auto& section : _instances)
    {
-      color.draw(*section.sprite, sf::RenderStates{.texture = section.texture.get()});
+      sf::RenderStates draw_states = states;
+      draw_states.texture = section.texture.get();
+      color.draw(*section.sprite, draw_states);
    }
 }
 

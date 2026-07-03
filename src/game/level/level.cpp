@@ -1086,7 +1086,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // ambient occlusion
       if (z_index == _ambient_occlusion->getZ())
       {
-         _ambient_occlusion->draw(target);
+         _ambient_occlusion->draw(target, level_view_states);
       }
 
       // draw enemies
@@ -1218,9 +1218,11 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
    // the fragment shader's discard still runs so transparent tile regions don't occlude.
 #ifndef __EMSCRIPTEN__
    target.setView(*_level_view);
+   sf::RenderStates states;
+#else
+   sf::RenderStates states{.view = *_level_view};
 #endif
 
-   sf::RenderStates states;
    if (_occluder_shader.has_value())
    {
       states.shader = &(*_occluder_shader);

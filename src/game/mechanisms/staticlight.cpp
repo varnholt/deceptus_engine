@@ -80,14 +80,23 @@ std::string_view StaticLight::objectName() const
    return "StaticLight";
 }
 
-void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/)
+void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& color)
+{
+   draw(target, color, {});
+}
+
+void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/, const sf::RenderStates& states)
 {
    auto lumen = fbm::mix(_color.a, _flicker_amount * 255.0f, 1.0f - _flicker_alpha_amount);
 
-   sf::Color color{_color.r, _color.g, _color.b, static_cast<uint8_t>(lumen)};
+   sf::Color light_color{_color.r, _color.g, _color.b, static_cast<uint8_t>(lumen)};
 
-   _sprite->color = color;
-   target.draw(*_sprite, sf::RenderStates{.blendMode = _blend_mode});
+   _sprite->color = light_color;
+
+   sf::RenderStates draw_states = states;
+   draw_states.blendMode = _blend_mode;
+   draw_states.texture = _texture.get();
+   target.draw(*_sprite, draw_states);
 }
 
 void StaticLight::update(const sf::Time& /*time*/)

@@ -225,7 +225,12 @@ std::string_view BubbleCube::objectName() const
 // +---+\#####/+---+---+\#####/+---+---+\#####/+---+---+\#####/+---+ . . .
 // |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |
 // +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+ . . .
-void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    auto sprite_index = 0;
 
@@ -243,7 +248,9 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       {PIXELS_PER_TILE * tiles_per_box_width, PIXELS_PER_TILE * tiles_per_box_height}
    );
 
-   color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite, draw_states);
 
 #ifdef DEBUG_COLLISION_RECTS
    DebugDraw::drawRect(color, _foot_collision_rect_px, sf::Color::Magenta);

@@ -27,7 +27,12 @@ std::string_view SmokeEffect::objectName() const
    return "SmokeEffect";
 }
 
-void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    _render_texture->clear();
 
@@ -55,7 +60,9 @@ void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    rt_sprite.scale = {_pixel_ratio, _pixel_ratio};
    rt_sprite.color = _layer_color;
 
-   color.draw(rt_sprite, sf::RenderStates{.texture = &smoke_render_texture});
+   sf::RenderStates draw_states = states;
+   draw_states.texture = &smoke_render_texture;
+   color.draw(rt_sprite, draw_states);
 }
 
 void SmokeEffect::update(const sf::Time& dt)

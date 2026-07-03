@@ -155,9 +155,16 @@ const sf::FloatRect& SpikeBlock::getPixelRect() const
    return _rectangle;
 }
 
-void SpikeBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void SpikeBlock::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   target.draw(*_sprite, sf::RenderStates{.texture = _texture_map.get()});
+   draw(target, normal, {});
+}
+
+void SpikeBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture_map.get();
+   target.draw(*_sprite, draw_states);
 }
 
 void SpikeBlock::update(const sf::Time& dt)

@@ -70,9 +70,16 @@ void MoveableBox::preload()
    Audio::getInstance().addSample("mechanism_moveable_object_01.wav");
 }
 
-void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+   draw(color, normal, {});
+}
+
+void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite, draw_states);
 }
 
 void MoveableBox::update(const sf::Time& /*dt*/)

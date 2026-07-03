@@ -34,13 +34,20 @@ std::string_view PlayerFirefly::objectName() const
    return "PlayerFirefly";
 }
 
-void PlayerFirefly::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void PlayerFirefly::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void PlayerFirefly::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (!_visible)
    {
       return;
    }
-   target.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   target.draw(*_sprite, draw_states);
 }
 
 void PlayerFirefly::update(const sf::Time& dt)

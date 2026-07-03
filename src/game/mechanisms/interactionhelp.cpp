@@ -75,15 +75,20 @@ std::string_view InteractionHelp::objectName() const
    return "InteractionHelp";
 }
 
-void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (!isEnabled())
    {
       return;
    }
 
-   _animation_show->draw(target);
-   _animation_hide->draw(target);
+   _animation_show->draw(target, states);
+   _animation_hide->draw(target, states);
 
    if (_button_alpha.has_value())
    {

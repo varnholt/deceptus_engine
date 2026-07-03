@@ -78,6 +78,11 @@ std::string_view Rope::objectName() const
 
 void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   draw(color, normal, {});
+}
+
+void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& incoming_states)
+{
    std::optional<b2Vec2> q1_prev;
    std::optional<b2Vec2> q4_prev;
 
@@ -146,7 +151,7 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    }
 
    // render color texture
-   sf::RenderStates states;
+   sf::RenderStates states = incoming_states;
    states.texture = _texture.get();
    color.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
 

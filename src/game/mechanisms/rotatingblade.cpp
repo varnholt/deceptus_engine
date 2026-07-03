@@ -302,9 +302,16 @@ void RotatingBlade::update(const sf::Time& dt)
    }
 }
 
-void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   target.draw(*_sprite, sf::RenderStates{.texture = _texture_map.get()});
+   draw(target, normal, {});
+}
+
+void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture_map.get();
+   target.draw(*_sprite, draw_states);
 
 #ifdef DEBUG_INTERSECTION
    sf::Vector2i sprite_center{_sprite->position};

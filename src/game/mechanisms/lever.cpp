@@ -325,9 +325,16 @@ void Lever::update(const sf::Time& dt)
    }
 }
 
-void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+   draw(color, normal, {});
+}
+
+void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite, draw_states);
 }
 
 std::optional<sf::FloatRect> Lever::getBoundingBoxPx()

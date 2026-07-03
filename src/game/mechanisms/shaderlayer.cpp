@@ -54,7 +54,12 @@ void ShaderLayer::checkUniforms()
    _u_uv_height_loc = get_loc("u_uv_height");
 }
 
-void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (!_shader)
    {
@@ -90,11 +95,10 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       sf::Vertex{.position = {x + w, y + h}, .color = sf::Color::White, .texCoords = {_uv_width, 0.0f}}
    };
 
-   target.draw(
-      std::span<const sf::Vertex>{quad, 4},
-      sf::PrimitiveType::TriangleStrip,
-      sf::RenderStates{.blendMode = sf::BlendAlpha, .shader = _shader.get()}
-   );
+   sf::RenderStates draw_states = states;
+   draw_states.blendMode = sf::BlendAlpha;
+   draw_states.shader = _shader.get();
+   target.draw(std::span<const sf::Vertex>{quad, 4}, sf::PrimitiveType::TriangleStrip, draw_states);
 }
 
 void ShaderLayer::update(const sf::Time& dt)

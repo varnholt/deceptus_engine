@@ -90,11 +90,18 @@ std::string_view Spikes::objectName() const
    return "Spikes";
 }
 
-void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   draw(color, normal, {});
+}
+
+void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
    for (const auto& sprite : _sprite)
    {
-      color.draw(*sprite);
+      color.draw(*sprite, draw_states);
    }
 }
 

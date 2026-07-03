@@ -115,7 +115,12 @@ void InfoOverlay::update(const sf::Time& delta_time)
    _sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(255 * alpha));
 }
 
-void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (!isEnabled())
    {
@@ -134,7 +139,9 @@ void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    }
    else
    {
-      color.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+      sf::RenderStates draw_states = states;
+      draw_states.texture = _texture.get();
+      color.draw(*_sprite, draw_states);
    }
 }
 

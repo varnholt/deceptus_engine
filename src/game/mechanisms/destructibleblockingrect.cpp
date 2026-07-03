@@ -142,16 +142,22 @@ bool DestructibleBlockingRect::isDestructible() const
    return true;
 }
 
-void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   draw(color, normal, {});
+}
+
+void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+
    if (_flash_shader.has_value())
    {
-      color.draw(*_sprite, sf::RenderStates{.shader = &(*_flash_shader)});
+      draw_states.shader = &(*_flash_shader);
    }
-   else
-   {
-      color.draw(*_sprite);
-   }
+
+   color.draw(*_sprite, draw_states);
 }
 
 void DestructibleBlockingRect::update(const sf::Time& dt)

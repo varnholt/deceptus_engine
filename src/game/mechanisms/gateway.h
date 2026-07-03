@@ -28,7 +28,14 @@ public:
    /// \brief draws gateway layers, rotating side parts, void shader effect, and eye animation.
    /// \param target render target.
    /// \param normal normal-map render target (unused).
-   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
+   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
+   /// \brief draws gateway layers, rotating side parts, void shader effect, and eye animation with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply.
+   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief updates activation state, side animations, eye tracking, and optional teleport use.
    /// \param dt elapsed frame time.
@@ -87,7 +94,8 @@ private:
 
       /// \brief draws the currently active eye animation.
       /// \param target render target.
-      void draw(sf::RenderTarget& target);
+      /// \param states render states to apply.
+      void draw(sf::RenderTarget& target, const sf::RenderStates& states = sf::RenderStates{});
 
       /// \brief updates iris state, animation playback, and gaze tracking towards the player.
       /// \param dt elapsed frame time.

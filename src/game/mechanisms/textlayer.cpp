@@ -19,15 +19,22 @@ std::string_view TextLayer::objectName() const
    return "TextLayer";
 }
 
-void TextLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void TextLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void TextLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (_mode == Mode::Bitmap)
    {
-      _bitmap_font.draw(target, _bitmap_coords, static_cast<int32_t>(_rect.position.x), static_cast<int32_t>(_rect.position.y));
+      _bitmap_font.draw(
+         target, _bitmap_coords, static_cast<int32_t>(_rect.position.x), static_cast<int32_t>(_rect.position.y), std::nullopt, states
+      );
    }
    else if (_mode == Mode::TrueType)
    {
-      target.draw(*_truetype_text);
+      target.draw(*_truetype_text, states);
    }
 }
 

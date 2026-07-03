@@ -131,7 +131,7 @@ void SpikeBall::preload()
    Audio::getInstance().addSample("mechanism_spikeball_02.wav");
 }
 
-void SpikeBall::drawChain(sf::RenderTarget& window)
+void SpikeBall::drawChain(sf::RenderTarget& window, const sf::RenderStates& states)
 {
    std::vector<HermiteCurveKey> keys;
 
@@ -158,11 +158,18 @@ void SpikeBall::drawChain(sf::RenderTarget& window)
       auto& element = (i % 2 == 0) ? _chain_element_a : _chain_element_b;
       element->position = point;
 
-      window.draw(*element);
+      sf::RenderStates draw_states = states;
+      draw_states.texture = _texture.get();
+      window.draw(*element, draw_states);
    }
 }
 
-void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    static const auto vertex_color = sf::Color(200, 200, 240);
    static const bool draw_debug_line = false;
@@ -181,7 +188,7 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
             sf::Vertex(sf::Vector2f(c2_pos_m.x * PPM, c2_pos_m.y * PPM), vertex_color),
          };
 
-         color.draw(std::span<const sf::Vertex>{line, 2}, sf::PrimitiveType::Lines);
+         color.draw(std::span<const sf::Vertex>{line, 2}, sf::PrimitiveType::Lines, states);
 
          // printf("draw %d: %f, %f -> %f, %f\n", i, c1Pos.x * PPM, c1Pos.y * PPM, c2Pos.x * PPM, c2Pos.y * PPM);
       }
@@ -190,8 +197,11 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    // dstar doesn't want the box sprite to be drawn
    // color.draw(_box_sprite);
 
-   drawChain(color);
-   color.draw(*_spike_sprite);
+   drawChain(color, states);
+
+   sf::RenderStates spike_states = states;
+   spike_states.texture = _texture.get();
+   color.draw(*_spike_sprite, spike_states);
 }
 
 void SpikeBall::update(const sf::Time& dt)

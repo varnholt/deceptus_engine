@@ -41,6 +41,13 @@ public:
    /// \param normal normal render target.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
 
+   /// \brief draws belt tiles with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal render target.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief updates belt animation timing and lever lag fade.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;

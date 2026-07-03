@@ -19,6 +19,11 @@ std::string_view Weather::objectName() const
 
 void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
+   draw(target, normal, {});
+}
+
+void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
    if (!_enabled)
    {
       return;
@@ -38,7 +43,7 @@ void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
    const auto intersects = sf::findIntersection(_rect, player_rect).hasValue();
    if (intersects)
    {
-      _overlay->draw(target, normal);
+      _overlay->draw(target, normal, states);
    }
 }
 

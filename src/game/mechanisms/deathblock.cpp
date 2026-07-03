@@ -101,11 +101,19 @@ std::string_view DeathBlock::objectName() const
    return "DeathBlock";
 }
 
-void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   draw(color, normal, {});
+}
+
+void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+
    for (auto& spike : _spikes)
    {
-      color.draw(*spike._sprite);
+      color.draw(*spike._sprite, draw_states);
 
 #ifdef DEBUG_DRAW
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectInt();
@@ -114,7 +122,7 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 #endif
    }
 
-   color.draw(*_center_sprite);
+   color.draw(*_center_sprite, draw_states);
 }
 
 void DeathBlock::setupTransform()

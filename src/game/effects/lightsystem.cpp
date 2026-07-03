@@ -109,10 +109,14 @@ LightSystem::LightSystem()
 void LightSystem::drawShadowQuads(
    sf::RenderTarget& target,
    std::shared_ptr<LightSystem::LightInstance> light,
-   const std::vector<b2Body*>& candidates
+   const std::vector<b2Body*>& candidates,
+   const sf::RenderStates& states
 ) const
 {
    const auto light_pos_m = light->_pos_m + light->_center_offset_m;
+
+   sf::RenderStates shadow_states = states;
+   shadow_states.stencilMode = stencil_write_mode;
 
    for (auto* body : candidates)
    {
@@ -178,11 +182,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(
-                  std::span<const sf::Vertex>{quad.data(), quad.size()},
-                  sf::PrimitiveType::Triangles,
-                  sf::RenderStates{.stencilMode = stencil_write_mode}
-               );
+               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
             }
          }
          else if (shape_chain)
@@ -212,11 +212,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(vertex_1.x, vertex_1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(
-                  std::span<const sf::Vertex>{quad.data(), quad.size()},
-                  sf::PrimitiveType::Triangles,
-                  sf::RenderStates{.stencilMode = stencil_write_mode}
-               );
+               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
             }
          }
          else if (shape_polygon)
@@ -250,11 +246,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(
-                  std::span<const sf::Vertex>{quad.data(), quad.size()},
-                  sf::PrimitiveType::Triangles,
-                  sf::RenderStates{.stencilMode = stencil_write_mode}
-               );
+               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
             }
          }
       }
@@ -355,7 +347,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    }
 }
 
-void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates /*states*/)
+void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states)
 {
    _active_lights.clear();
 
@@ -438,7 +430,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       target.clearStencil(sf::StencilValue{0u});
 
       drawOccluders(target);
-      drawShadowQuads(target, light, shadow_candidates);
+      drawShadowQuads(target, light, shadow_candidates, states);
 
       sf::Color channel_color;
       if (local_channel == 0)
@@ -456,7 +448,9 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
 
       light->_sprite->color = channel_color;
 
-      sf::RenderStates render_states{.blendMode = sf::BlendAdd, .stencilMode = stencil_test_mode};
+      sf::RenderStates render_states = states;
+      render_states.blendMode = sf::BlendAdd;
+      render_states.stencilMode = stencil_test_mode;
 
       if (light->_shader && light->_texture)
       {

@@ -89,7 +89,12 @@ std::string_view ControllerHelp::objectName() const
    return "ControllerHelp";
 }
 
-void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (!_visible && _alpha <= alpha_min_threshold)
    {
@@ -108,11 +113,15 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    // draw background
    _background->position = {_rect_center.x - _background->textureRect.size.x / 2, _rect_center.y + tile_offset_y - 11};
    _background->color = color;
-   target.draw(*_background, sf::RenderStates{.texture = _texture.get()});
+   sf::RenderStates background_states = states;
+   background_states.texture = _texture.get();
+   target.draw(*_background, background_states);
 
    const auto is_controller_connected = GameControllerIntegration::getInstance().isControllerConnected();
 
    // draw icons
+   sf::RenderStates icon_states = states;
+   icon_states.texture = _texture.get();
    auto index = 0;
    for (auto& sprite : _sprites)
    {
@@ -120,7 +129,7 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
       const auto tile_offset_x = -width_of_tiles_px / 2.0f + index * PIXELS_PER_TILE * 1.5f;
       sprite.position = {_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y};
       sprite.textureRect = is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index];
-      target.draw(sprite, sf::RenderStates{.texture = _texture.get()});
+      target.draw(sprite, icon_states);
       index++;
    }
 }

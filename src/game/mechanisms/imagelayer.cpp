@@ -26,7 +26,12 @@ std::string_view ImageLayer::objectName() const
    return "ImageLayer";
 }
 
-void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (_sprite == nullptr)
    {
@@ -44,7 +49,9 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    }
    else
    {
-      target.draw(*_sprite, sf::RenderStates{.blendMode = _blend_mode});
+      sf::RenderStates draw_states = states;
+      draw_states.blendMode = _blend_mode;
+      target.draw(*_sprite, draw_states);
    }
 }
 

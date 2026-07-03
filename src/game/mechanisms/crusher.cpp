@@ -86,11 +86,18 @@ std::string_view Crusher::objectName() const
    return "Crusher";
 }
 
-void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   color.draw(*_sprite_spike);
-   color.draw(*_sprite_pusher);
-   color.draw(*_sprite_mount);
+   draw(color, normal, {});
+}
+
+void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite_spike, draw_states);
+   color.draw(*_sprite_pusher, draw_states);
+   color.draw(*_sprite_mount, draw_states);
 }
 
 void Crusher::step(const sf::Time& dt)

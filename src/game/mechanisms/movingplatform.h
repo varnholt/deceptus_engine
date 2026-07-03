@@ -40,6 +40,13 @@ public:
    /// \param normal normal render target.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
 
+   /// \brief draws platform sprites with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal render target.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief updates path movement, enable-ramp lag, player coupling, and wheel animations.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;

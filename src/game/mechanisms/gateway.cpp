@@ -266,12 +266,15 @@ void Gateway::drawVoid(sf::RenderTarget& target)
    target.draw(*_shader_sprite, sprite_state);
 }
 
-void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
+void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   sf::RenderStates states;
+   draw(target, normal, {});
+}
 
+void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&, const sf::RenderStates& states)
+{
    // draw sides
-   auto draw_visible = [&target, states](const auto& side)
+   auto draw_visible = [&target, &states](const auto& side)
    {
       if (side._layer->_visible)
       {
@@ -281,21 +284,23 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
    if (_layer_background_inactive->_visible)
    {
-      target.draw(*_layer_background_inactive);
+      _layer_background_inactive->draw(target, states);
    }
 
    if (_layer_background_active->_visible)
    {
-      target.draw(*_layer_background_active);
+      _layer_background_active->draw(target, states);
    }
 
-   target.draw(*_sprite_socket);
+   sf::RenderStates socket_states = states;
+   socket_states.texture = _layers["base"]->_texture.get();
+   target.draw(*_sprite_socket, socket_states);
 
    std::ranges::for_each(_pa, draw_visible);
    std::ranges::for_each(_pi, draw_visible);
 
    drawVoid(target);
-   _eye->draw(target);
+   _eye->draw(target, states);
 }
 
 void Gateway::update(const sf::Time& dt)
@@ -705,6 +710,9 @@ void Gateway::setup(const GameDeserializeData& data)
          const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())} + _rect.position;
          sprite->position = pos;
          sprite->color = sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity));
+         const auto rotated_texture_size = texture->getSize();
+         sprite->textureRect =
+            sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(rotated_texture_size.x), static_cast<float>(rotated_texture_size.y)}};
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;
@@ -892,19 +900,19 @@ Gateway::Eye::Eye(const sf::Vector2f& center)
    }
 }
 
-void Gateway::Eye::draw(sf::RenderTarget& target)
+void Gateway::Eye::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    switch (_iris_state)
    {
       case IrisState::Awake:
       {
-         _eye_iris_spawn->draw(target);
+         _eye_iris_spawn->draw(target, states);
          // target.draw(*_sprite);
          break;
       }
       case IrisState::Idle:
       {
-         _eye_iris_idle_ref->draw(target);
+         _eye_iris_idle_ref->draw(target, states);
          break;
       }
       case IrisState::Asleep:

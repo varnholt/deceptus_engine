@@ -187,14 +187,19 @@ bool Extra::deserialize(const GameDeserializeData& data)
    return true;
 }
 
-void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
+void Extra::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&, const sf::RenderStates& states)
 {
    if (_spawn_required)
    {
       // draw spawn animation if we have one
       if (_animation_spawn && !_animation_spawn->_paused)
       {
-         _animation_spawn->draw(target);
+         _animation_spawn->draw(target, states);
       }
 
       // don't draw item if not spawned yet
@@ -206,7 +211,7 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
    if (_animation_pickup && !_animation_pickup->_paused)
    {
-      _animation_pickup->draw(target);
+      _animation_pickup->draw(target, states);
    }
 
    if (!_active || !_visible)
@@ -217,13 +222,15 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
    // draw animations
    if (!_animations_main.empty())
    {
-      (*_animations_main_it)->draw(target);
+      (*_animations_main_it)->draw(target, states);
    }
 
    // or show static extra texture
    else if (_sprite)
    {
-      target.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+      sf::RenderStates sprite_states = states;
+      sprite_states.texture = _texture.get();
+      target.draw(*_sprite, sprite_states);
    }
 
 #ifdef DRAW_DEBUG

@@ -131,6 +131,11 @@ const sf::FloatRect& BlockingRect::getPixelRect() const
 
 void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
+   draw(target, normal, {});
+}
+
+void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
    // nothing to paint
    if (_sprite == nullptr)
    {
@@ -143,11 +148,15 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
       return;
    }
 
-   target.draw(*_sprite, sf::RenderStates{.texture = _texture_map.get()});
+   sf::RenderStates color_states = states;
+   color_states.texture = _texture_map.get();
+   target.draw(*_sprite, color_states);
 
    if (_normal_map)
    {
-      normal.draw(*_sprite, sf::RenderStates{.texture = _normal_map.get()});
+      sf::RenderStates normal_states = states;
+      normal_states.texture = _normal_map.get();
+      normal.draw(*_sprite, normal_states);
    }
 }
 

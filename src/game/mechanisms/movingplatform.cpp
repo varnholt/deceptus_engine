@@ -93,16 +93,25 @@ std::string_view MovingPlatform::objectName() const
 
 void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   draw(color, normal, {});
+}
+
+void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+   sf::RenderStates color_states = states;
+   color_states.texture = _texture_map.get();
    for (const auto& sprite : _sprites)
    {
-      color.draw(sprite, sf::RenderStates{.texture = _texture_map.get()});
+      color.draw(sprite, color_states);
    }
 
    if (_normal_map)
    {
+      sf::RenderStates normal_states = states;
+      normal_states.texture = _normal_map.get();
       for (const auto& sprite : _sprites)
       {
-         normal.draw(sprite, sf::RenderStates{.texture = _normal_map.get()});
+         normal.draw(sprite, normal_states);
       }
    }
 }

@@ -155,24 +155,29 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
    _spawn_effect->deserialize(data);
 }
 
-void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&)
+void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&, const sf::RenderStates& states)
 {
    if (_animation_idle_closed && _state == State::Closed)
    {
-      _animation_idle_closed->draw(target);
+      _animation_idle_closed->draw(target, states);
    }
    else if (_animation_opening && _state == State::Opening)
    {
-      _animation_opening->draw(target);
+      _animation_opening->draw(target, states);
    }
    else if (_animation_idle_open && _state == State::Open)
    {
-      _animation_idle_open->draw(target);
+      _animation_idle_open->draw(target, states);
    }
 
    if (_spawn_effect && _spawn_effect->isActive())
    {
-      _spawn_effect->draw(target);
+      _spawn_effect->draw(target, states);
    }
 }
 

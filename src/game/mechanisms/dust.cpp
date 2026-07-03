@@ -124,11 +124,16 @@ void Dust::update(const sf::Time& dt)
    }
 }
 
-void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& incoming_states)
 {
    static const auto alpha_default = 50;
 
-   sf::RenderStates states;
+   sf::RenderStates states = incoming_states;
    states.blendMode = sf::BlendAlpha;
 
    std::size_t vertex_index = 0;

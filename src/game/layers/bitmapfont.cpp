@@ -100,9 +100,13 @@ void BitmapFont::draw(
    const std::vector<std::shared_ptr<sf::IntRect>>& coords,
    int32_t x,
    int32_t y,
-   const std::optional<sf::Color>& color
+   const std::optional<sf::Color>& color,
+   const sf::RenderStates& states
 )
 {
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+
    auto x_offset = 0;
    for (const auto& coord : coords)
    {
@@ -110,7 +114,7 @@ void BitmapFont::draw(
       _sprite->position = {static_cast<float>(x + x_offset), static_cast<float>(y)};
       _sprite->color = color.value_or(sf::Color::White);
 
-      window.draw(*_sprite, sf::RenderStates{.texture = _texture.get()});
+      window.draw(*_sprite, draw_states);
       x_offset += _char_width;
    }
 

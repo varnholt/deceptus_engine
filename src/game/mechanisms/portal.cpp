@@ -32,12 +32,19 @@ std::string_view Portal::objectName() const
    return "Portal";
 }
 
-void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& /*normal*/)
+void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& normal)
+{
+   draw(window, normal, {});
+}
+
+void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    // bump maps are not supported for now
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
    for (const auto& sprite : _sprites)
    {
-      window.draw(sprite);
+      window.draw(sprite, draw_states);
    }
 }
 

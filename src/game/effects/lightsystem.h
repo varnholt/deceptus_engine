@@ -93,7 +93,7 @@ public:
 
    /// \brief renders per-light sprites with stencil-clipped shadow volumes into a light map target.
    /// \param target render target.
-   /// \param states render states passed by caller and currently ignored.
+   /// \param states render states applied to occluder, shadow, and light sprite draws (carries .view for WASM camera transform).
    void draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states);
 
    /// \brief renders light sprites to both textures then composites with shader.
@@ -124,7 +124,10 @@ private:
    /// \param target render target.
    /// \param light active light for which occluder shadows are generated.
    /// \param candidates pre-filtered list of shadow-casting bodies built once per frame.
-   void drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightInstance> light, const std::vector<b2Body*>& candidates) const;
+   /// \param states render states to apply (carries .view for WASM camera transform).
+   void drawShadowQuads(
+      sf::RenderTarget& target, std::shared_ptr<LightInstance> light, const std::vector<b2Body*>& candidates, const sf::RenderStates& states
+   ) const;
 
    /// \brief renders level occluder geometry to the stencil buffer before shadow/light passes.
    /// \param target render target with active stencil context.

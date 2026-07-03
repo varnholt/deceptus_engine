@@ -67,15 +67,22 @@ std::string_view Fireflies::objectName() const
    return "Fireflies";
 }
 
-void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
 #ifdef DEBUG_RECT
    DebugDraw::drawRect(target, _rect_px, sf::Color::Magenta);
 #endif
 
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
    for (const auto& firefly : _fireflies)
    {
-      target.draw(*firefly._sprite, sf::RenderStates{.texture = _texture.get()});
+      target.draw(*firefly._sprite, draw_states);
    }
 }
 

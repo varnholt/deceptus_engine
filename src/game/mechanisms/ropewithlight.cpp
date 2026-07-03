@@ -61,8 +61,16 @@ std::string_view RopeWithLight::objectName() const
 
 void RopeWithLight::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   Rope::draw(color, normal);
-   color.draw(*_lamp_sprite);
+   draw(color, normal, {});
+}
+
+void RopeWithLight::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+   Rope::draw(color, normal, states);
+
+   sf::RenderStates lamp_states = states;
+   lamp_states.texture = _texture.get();
+   color.draw(*_lamp_sprite, lamp_states);
 }
 
 void RopeWithLight::update(const sf::Time& dt)

@@ -77,7 +77,12 @@ std::vector<WaterSurface::SplashEmitter> emitters;
 
 // #define DEBUG_WATERSURFACE 1
 
-void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& incoming_states)
 {
    //
    //         __--4
@@ -103,11 +108,15 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 #endif
       _render_texture->draw(_vertices, states);
       _render_texture->display();
-      states.blendMode = sf::BlendAlpha;
-      color.draw(*render_texture_sprite, states);
+
+      sf::RenderStates composite_states = incoming_states;
+      composite_states.blendMode = sf::BlendAlpha;
+      composite_states.texture = &_render_texture->getTexture();
+      color.draw(*render_texture_sprite, composite_states);
    }
    else
    {
+      states.view = incoming_states.view;
       color.draw(_vertices, states);
    }
 
@@ -527,6 +536,9 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
       render_texture_sprite = std::make_unique<sf::Sprite>();
       render_texture_sprite->position = {_bounding_box.position.x, _bounding_box.position.y - _bounding_box.size.y};
       render_texture_sprite->scale = {_pixel_ratio.value(), _pixel_ratio.value()};
+      const auto render_texture_size = _render_texture->getTexture().getSize();
+      render_texture_sprite->textureRect =
+         sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(render_texture_size.x), static_cast<float>(render_texture_size.y)}};
    }
 }
 

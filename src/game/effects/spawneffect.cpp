@@ -47,15 +47,15 @@ void SpawnEffect::deserialize(const GameDeserializeData& data)
    _orb->_hide_duration_s = _hide_duration_s;
 }
 
-void SpawnEffect::draw(sf::RenderTarget& target)
+void SpawnEffect::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    if (isFinished())
    {
       return;
    }
 
-   _particles->draw(target);
-   _orb->draw(target);
+   _particles->draw(target, states);
+   _orb->draw(target, states);
 }
 
 void SpawnEffect::update(const sf::Time& dt)
@@ -134,12 +134,14 @@ SpawnEffect::ParticleEffect::ParticleEffect(
    }
 }
 
-void SpawnEffect::ParticleEffect::draw(sf::RenderTarget& target)
+void SpawnEffect::ParticleEffect::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
-   static const sf::RenderStates render_states{.blendMode = sf::BlendAdd};
+   sf::RenderStates render_states = states;
+   render_states.blendMode = sf::BlendAdd;
+   render_states.texture = _texture.get();
    std::ranges::for_each(
       _particles,
-      [&target](const auto& particle)
+      [&target, &render_states](const auto& particle)
       {
          if (particle._delay.asMilliseconds() <= 0 && !particle._dead)
          {
@@ -255,21 +257,21 @@ SpawnEffect::Orb::Orb(const sf::Vector2f& pos_px, int32_t idle_cycle_count) : _i
    _animation_show->play();
 }
 
-void SpawnEffect::Orb::draw(sf::RenderTarget& target)
+void SpawnEffect::Orb::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    if (!_animation_show->_paused)
    {
-      _animation_show->draw(target);
+      _animation_show->draw(target, states);
    }
 
    if (!_animation_idle->_paused)
    {
-      _animation_idle->draw(target);
+      _animation_idle->draw(target, states);
    }
 
    if (!_animation_hide->_paused)
    {
-      _animation_hide->draw(target);
+      _animation_hide->draw(target, states);
    }
 }
 

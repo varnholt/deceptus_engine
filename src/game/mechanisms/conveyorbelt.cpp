@@ -68,11 +68,18 @@ void ConveyorBelt::setVelocity(float velocity)
    _points_right = (_velocity > 0.0f);
 }
 
-void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   draw(color, normal, {});
+}
+
+void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
    for (auto& sprite : _belt_sprites)
    {
-      color.draw(sprite, sf::RenderStates{.texture = _texture.get()});
+      color.draw(sprite, draw_states);
    }
 }
 

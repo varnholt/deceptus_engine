@@ -250,6 +250,7 @@ void MessageBox::initializeLayers()
          auto sprite = std::make_shared<sf::Sprite>();
 
          sprite->position = {static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
+         sprite->textureRect = sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(layer.getWidth()), static_cast<float>(layer.getHeight())}};
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;

@@ -47,6 +47,13 @@ public:
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
+   /// \brief draws all particles with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief returns the clip rectangle used for simulation and visibility queries.
    /// \return clip rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
