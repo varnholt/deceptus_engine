@@ -175,6 +175,8 @@ void StaticLight::deserialize(const GameDeserializeData& data)
    _flicker_speed = flicker_speed;
    _texture = TexturePool::getInstance().get(texture);
    _sprite = std::make_unique<sf::Sprite>();
+   _sprite->textureRect =
+      sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(_texture->getSize().x), static_cast<float>(_texture->getSize().y)}};
    _sprite->color = _color;
    _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
 

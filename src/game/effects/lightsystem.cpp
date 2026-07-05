@@ -451,6 +451,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       sf::RenderStates render_states = states;
       render_states.blendMode = sf::BlendAdd;
       render_states.stencilMode = stencil_test_mode;
+      render_states.texture = light->_texture.get();
 
       if (light->_shader && light->_texture)
       {
