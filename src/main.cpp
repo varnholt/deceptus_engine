@@ -77,8 +77,13 @@ int main(int /*argc*/, char** /*argv*/)
    LocalizationLoader::loadFromConfig();
    debugAuthors();
 
+#ifndef __EMSCRIPTEN__
    auto graphics_context = sf::GraphicsContext::create().value();
    auto audio_context = sf::AudioContext::create().value();
+#else
+   auto graphics_context = sf::GraphicsContext::create();
+   auto audio_context = sf::AudioContext::create();
+#endif
 
    Test test;
    Game game;
