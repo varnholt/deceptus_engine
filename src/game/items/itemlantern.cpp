@@ -39,7 +39,7 @@ void ItemLantern::draw(sf::RenderTarget& target)
       return;
    }
 
-   target.draw(player->isPointingRight() ? *_helmet_sprite_r : *_helmet_sprite_l);
+   target.draw(player->isPointingRight() ? *_helmet_sprite_r : *_helmet_sprite_l, sf::RenderStates{.texture = _player_texture.get()});
 }
 
 void ItemLantern::update(const sf::Time& delta_time)
