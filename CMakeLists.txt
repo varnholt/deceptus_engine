@@ -877,6 +877,42 @@ else()
     FetchContent_MakeAvailable(SFML LUA GLEW)
 endif()
 
+# Apply WebGL2 compatibility patch to VRSFML on Emscripten builds.
+# GLSL ES 3.00 forbids layout(location=N) on uniforms; the patch adds #ifdef __EMSCRIPTEN__
+# guards to DefaultShader.hpp and switches RenderTarget.cpp to glGetUniformLocation.
+if(EMSCRIPTEN)
+    execute_process(
+        COMMAND git apply --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
+        WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+        RESULT_VARIABLE vrsfml_patch_check
+        OUTPUT_QUIET ERROR_QUIET)
+    if(vrsfml_patch_check EQUAL 0)
+        execute_process(
+            COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
+            WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+            RESULT_VARIABLE vrsfml_patch_result)
+        if(NOT vrsfml_patch_result EQUAL 0)
+            message(FATAL_ERROR "Failed to apply patches/vrsfml-webgl2-uniforms.patch")
+        endif()
+        message(STATUS "Applied patches/vrsfml-webgl2-uniforms.patch to VRSFML")
+    else()
+        # Forward apply failed - this could mean the patch is already applied, OR that
+        # it no longer matches the fetched VRSFML source (e.g. line-ending mismatch,
+        # upstream changed). Only skip if a reverse-apply confirms it is already applied;
+        # otherwise fail loudly instead of silently building with unpatched shaders.
+        execute_process(
+            COMMAND git apply --reverse --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
+            WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+            RESULT_VARIABLE vrsfml_patch_reverse_check
+            OUTPUT_QUIET ERROR_QUIET)
+        if(vrsfml_patch_reverse_check EQUAL 0)
+            message(STATUS "patches/vrsfml-webgl2-uniforms.patch already applied to VRSFML, skipping")
+        else()
+            message(FATAL_ERROR "patches/vrsfml-webgl2-uniforms.patch does not apply to the fetched VRSFML source and is not already applied - fix the patch")
+        endif()
+    endif()
+endif()
+
 # ----------------------------------------------------------------------------------------------------
 # lua configuration (lua is not a cmake project)
 # ----------------------------------------------------------------------------------------------------
