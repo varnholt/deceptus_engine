@@ -27,7 +27,8 @@ public:
 
    /// \brief draws all managed animations to the provided render target.
    /// \param target render target that receives all active animations.
-   void draw(sf::RenderTarget& target);
+   /// \param states render states applied while drawing (used in WASM to carry the level view).
+   void draw(sf::RenderTarget& target, const sf::RenderStates& states = {});
 
    /// \brief returns the global animation-player singleton instance.
    /// \return reference to the shared animation player.

@@ -139,11 +139,11 @@ void Gun::updateProjectiles(const sf::Time& time)
    }
 }
 
-void Gun::drawProjectiles(sf::RenderTarget& target)
+void Gun::drawProjectiles(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    for (auto projectile : _projectiles)
    {
-      target.draw(projectile->getAnimation());
+      target.draw(projectile->getAnimation(), states);
    }
 }
 
@@ -157,9 +157,9 @@ void Gun::setProjectileIdentifier(const std::string& projectile_identifier)
    _projectile_reference_animation._identifier = projectile_identifier;
 }
 
-void Gun::draw(sf::RenderTarget& target)
+void Gun::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
-   drawProjectiles(target);
+   drawProjectiles(target, states);
 }
 
 void Gun::update(const WeaponUpdateData& data)
@@ -235,12 +235,12 @@ void Gun::setProjectileAnimation(const AnimationFrameData& frame_data)
    _projectile_reference_animation._animation.setFrameTimes(frame_data._frame_times);
 }
 
-void Gun::drawProjectileHitAnimations(sf::RenderTarget& target)
+void Gun::drawProjectileHitAnimations(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    // draw projectile hits
    const auto& hit_animations = ProjectileHitAnimation::getHitAnimations();
    for (auto hit_animation : hit_animations)
    {
-      target.draw(*hit_animation);
+      target.draw(*hit_animation, states);
    }
 }

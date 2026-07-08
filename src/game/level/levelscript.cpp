@@ -996,13 +996,13 @@ void LevelScript::moveSpriteAtSpeed(
    }
 }
 
-void LevelScript::draw(sf::RenderTarget& target)
+void LevelScript::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    for (const auto& sprite : _cutscene_sprites)
    {
       if (sprite._animation)
       {
-         target.draw(*sprite._animation);
+         target.draw(*sprite._animation, states);
       }
    }
 }

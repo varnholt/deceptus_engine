@@ -1426,9 +1426,15 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _light_system->drawDebug(*_render_targets.level.get());
 #endif
 
-   Gun::drawProjectileHitAnimations(*_render_targets.level.get());
-   AnimationPlayer::getInstance().draw(*_render_targets.level.get());
-   _level_script.draw(*_render_targets.level.get());
+#ifndef __EMSCRIPTEN__
+   const sf::RenderStates level_view_states{};
+#else
+      const sf::RenderStates level_view_states{.view = *_level_view};
+#endif
+
+   Gun::drawProjectileHitAnimations(*_render_targets.level.get(), level_view_states);
+   AnimationPlayer::getInstance().draw(*_render_targets.level.get(), level_view_states);
+   _level_script.draw(*_render_targets.level.get(), level_view_states);
 
 #ifndef __EMSCRIPTEN__
    drawDebugInformation();

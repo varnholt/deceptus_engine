@@ -78,11 +78,11 @@ PlayerSword::PlayerSword() : _duration_from_swing_start_to_hit(200ms), _duration
    _type = WeaponType::Sword;
 }
 
-void PlayerSword::draw(sf::RenderTarget& target)
+void PlayerSword::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    for (auto& animation : _animations)
    {
-      animation->draw(target);
+      animation->draw(target, states);
    }
 
    if (!checkHitWindowActive())

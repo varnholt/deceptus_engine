@@ -33,7 +33,8 @@ public:
 
    /// \brief draws weapon-specific visuals.
    /// \param target render target used for weapon rendering.
-   virtual void draw(sf::RenderTarget& target);
+   /// \param states render states applied while drawing (used in WASM to carry the level view).
+   virtual void draw(sf::RenderTarget& target, const sf::RenderStates& states = {});
 
    /// \brief updates weapon state for the current frame.
    /// \param data per-frame timing and world context.

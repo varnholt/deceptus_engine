@@ -275,7 +275,8 @@ public:
 
    /// \brief draws all managed cutscene sprites to the given render target.
    /// \param target render target that receives sprite output.
-   void draw(sf::RenderTarget& target);
+   /// \param states render states applied while drawing (used in WASM to carry the level view).
+   void draw(sf::RenderTarget& target, const sf::RenderStates& states = {});
 
    // functions on the lua end
    /// \brief calls the script initialize function and marks this script as initialized.

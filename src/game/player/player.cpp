@@ -316,7 +316,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
    if (weapon_system._selected)
    {
-      weapon_system._selected->draw(color);
+      weapon_system._selected->draw(color, states);
    }
 
    // that y offset is to compensate the wonky box2d origin
