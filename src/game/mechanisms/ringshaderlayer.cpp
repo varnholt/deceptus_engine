@@ -54,6 +54,11 @@ void RingShaderLayer::readCustomProperties(const GameDeserializeData& data)
 
 void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
+   draw(target, normal, {});
+}
+
+void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
    if (!_shader)
    {
       return;
@@ -61,6 +66,8 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
    if (_u_ring_scale_loc)
    {
+      // NOTE: on WASM the ring renders larger than on desktop for the same ring_scale value;
+      // root cause not yet found (see wasm_port_status.md). Left unmodified for now.
       _shader->setUniform(*_u_ring_scale_loc, _ring_scale);
    }
    if (_u_pixel_size_loc)
@@ -76,7 +83,7 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
       _shader->setUniform(*_u_flash_intensity_loc, _flash_intensity);
    }
 
-   ShaderLayer::draw(target, normal);
+   ShaderLayer::draw(target, normal, states);
 }
 
 void RingShaderLayer::update(const sf::Time& dt)

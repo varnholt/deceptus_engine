@@ -23,6 +23,12 @@ public:
    /// \param normal normal-map render target.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override final;
 
+   /// \brief sets ring-specific uniforms then delegates quad drawing to the base (states-carrying overload).
+   /// \param target render target.
+   /// \param normal normal-map render target.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override final;
+
    /// \brief caches ring-specific uniform locations in addition to the base set.
    void checkUniforms() override;
 
