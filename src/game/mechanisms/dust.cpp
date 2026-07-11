@@ -74,8 +74,13 @@ void Dust::update(const sf::Time& dt)
 {
    const auto dt_s = dt.asSeconds();
 
+#ifdef __EMSCRIPTEN__
+   const auto scale_factor_x = static_cast<float>(_flow_field_image->getSize().x) / _clip_rect.size.x;
+   const auto scale_factor_y = static_cast<float>(_flow_field_image->getSize().y) / _clip_rect.size.y;
+#else
    const auto scale_factor_x = static_cast<float>(_flow_field_image.getSize().x) / _clip_rect.size.x;
    const auto scale_factor_y = static_cast<float>(_flow_field_image.getSize().y) / _clip_rect.size.y;
+#endif
 
    for (auto& p : _particles)
    {
@@ -89,7 +94,11 @@ void Dust::update(const sf::Time& dt)
       }
 
       const auto col =
+#ifdef __EMSCRIPTEN__
+         _flow_field_image->getPixel({static_cast<uint32_t>(x_px * scale_factor_x), static_cast<uint32_t>(y_px * scale_factor_y)});
+#else
          _flow_field_image.getPixel({static_cast<uint32_t>(x_px * scale_factor_x), static_cast<uint32_t>(y_px * scale_factor_y)});
+#endif
       const auto col_x = (static_cast<float>(col.r) / 255.0f) - 0.5f;
       const auto col_y = (static_cast<float>(col.g) / 255.0f) - 0.5f;
       const auto col_z = (static_cast<float>(col.b) / 255.0f) - 0.5f;
@@ -109,7 +118,11 @@ void Dust::update(const sf::Time& dt)
       // remove particles that are too close to the center
       if (_respawn_when_center_reached)
       {
+#ifdef __EMSCRIPTEN__
+         const sf::Vector2f center = _clip_rect.position + _clip_rect.size / 2.0f;
+#else
          const sf::Vector2f center = _clip_rect.getCenter();
+#endif
          const auto dx = p._position.x - center.x;
          const auto dy = p._position.y - center.y;
          const auto dist_sq = dx * dx + dy * dy;
@@ -124,11 +137,16 @@ void Dust::update(const sf::Time& dt)
    }
 }
 
-void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& incoming_states)
 {
    static const auto alpha_default = 50;
 
-   sf::RenderStates states;
+   sf::RenderStates states = incoming_states;
    states.blendMode = sf::BlendAlpha;
 
    std::size_t vertex_index = 0;
@@ -187,7 +205,11 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       // target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
    }
 
+#ifdef __EMSCRIPTEN__
+   target.draw(std::span<const sf::Vertex>(&_vertices[0], vertex_index), sf::PrimitiveType::Triangles, states);
+#else
    target.draw(&_vertices[0], vertex_index, sf::PrimitiveType::Triangles, states);
+#endif
 }
 
 std::optional<sf::FloatRect> Dust::getBoundingBoxPx()

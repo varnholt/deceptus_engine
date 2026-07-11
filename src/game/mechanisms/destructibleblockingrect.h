@@ -27,6 +27,13 @@ public:
    /// \param normal normal render target.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
 
+   /// \brief draws the blocker sprite with hit-flash shader effect and explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal render target.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief updates hit flash timing and death animation frame progression.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
@@ -58,8 +65,8 @@ private:
       Right,
    };
 
-    /// \brief serialized configuration read from tmx custom properties.
-    struct Config
+   /// \brief serialized configuration read from tmx custom properties.
+   struct Config
    {
       int32_t frame_width{150};
       int32_t frame_height{163};
@@ -74,24 +81,24 @@ private:
       float animation_speed{40.0f};
    };
 
-    /// \brief mutable runtime state for durability and destruction animation.
-    struct State
+   /// \brief mutable runtime state for durability and destruction animation.
+   struct State
    {
       int32_t damage_left{0};
       float current_frame{0};
       bool dead{false};
    };
 
-    /// \brief creates the static collision body, chunk coverage, and hitbox.
-    /// \param data deserialize context with object geometry and physics world.
-    void setupBody(const GameDeserializeData& data);
+   /// \brief creates the static collision body, chunk coverage, and hitbox.
+   /// \param data deserialize context with object geometry and physics world.
+   void setupBody(const GameDeserializeData& data);
 
-    /// \brief loads and positions the sprite and initial animation row.
-    /// \param data deserialize context with object transform and resources.
-    void setupSprite(const GameDeserializeData& data);
+   /// \brief loads and positions the sprite and initial animation row.
+   /// \param data deserialize context with object transform and resources.
+   void setupSprite(const GameDeserializeData& data);
 
-    /// \brief enters destroyed state, plays destroy audio, and disables collisions.
-    void destroy();
+   /// \brief enters destroyed state, plays destroy audio, and disables collisions.
+   void destroy();
 
    Config _config;
    State _state;
@@ -106,7 +113,12 @@ private:
 
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    std::optional<HighResTimePoint> _hit_time;
+#ifdef __EMSCRIPTEN__
+   std::optional<sf::Shader> _flash_shader;
+   std::optional<sf::Shader::UniformLocation> _ul_flash;
+#else
    sf::Shader _flash_shader;
+#endif
    float _hit_flash{0.0f};
    std::vector<Hitbox> _hitboxes;
 };

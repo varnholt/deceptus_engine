@@ -19,7 +19,8 @@ public:
 
    /// \brief draws only ao sprite chunks near the player's current chunk.
    /// \param window SFML render target that receives ambient occlusion sprites.
-   void draw(sf::RenderTarget& window);
+   /// \param states render states to apply (carries .view for WASM camera transform).
+   void draw(sf::RenderTarget& window, const sf::RenderStates& states = sf::RenderStates{});
 
    /// \brief gets the render depth configured for this ao layer.
    /// \return z index used to sort the layer in the scene renderer.

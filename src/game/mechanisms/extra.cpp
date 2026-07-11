@@ -106,8 +106,13 @@ bool Extra::deserialize(const GameDeserializeData& data)
       if (!texture_path.empty())
       {
          _texture = TexturePool::getInstance().get(texture_path);
+#ifdef __EMSCRIPTEN__
+         _sprite = std::make_unique<sf::Sprite>();
+         _sprite->position = {pos_x_px, pos_y_px};
+#else
          _sprite = std::make_unique<sf::Sprite>(*_texture);
          _sprite->setPosition({pos_x_px, pos_y_px});
+#endif
 
          // read texture rect
          sf::IntRect rect;
@@ -118,7 +123,14 @@ bool Extra::deserialize(const GameDeserializeData& data)
 
          if (rect.size.x > 0 && rect.size.y > 0)
          {
+#ifdef __EMSCRIPTEN__
+            _sprite->textureRect = sf::FloatRect{
+               {static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)},
+               {static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)}
+            };
+#else
             _sprite->setTextureRect(rect);
+#endif
          }
       }
 
@@ -184,14 +196,19 @@ bool Extra::deserialize(const GameDeserializeData& data)
    return true;
 }
 
-void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
+void Extra::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&, const sf::RenderStates& states)
 {
    if (_spawn_required)
    {
       // draw spawn animation if we have one
       if (_animation_spawn && !_animation_spawn->_paused)
       {
-         _animation_spawn->draw(target);
+         _animation_spawn->draw(target, states);
       }
 
       // don't draw item if not spawned yet
@@ -203,7 +220,7 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
    if (_animation_pickup && !_animation_pickup->_paused)
    {
-      _animation_pickup->draw(target);
+      _animation_pickup->draw(target, states);
    }
 
    if (!_active || !_visible)
@@ -214,13 +231,15 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
    // draw animations
    if (!_animations_main.empty())
    {
-      (*_animations_main_it)->draw(target);
+      (*_animations_main_it)->draw(target, states);
    }
 
    // or show static extra texture
    else if (_sprite)
    {
-      target.draw(*_sprite);
+      sf::RenderStates sprite_states = states;
+      sprite_states.texture = _texture.get();
+      target.draw(*_sprite, sprite_states);
    }
 
 #ifdef DRAW_DEBUG
@@ -241,12 +260,20 @@ void Extra::updateSineWave(const sf::Time& delta_time)
       const sf::Vector2f sine_delta{0.0f, delta_y_px};
       for (auto& animation : _animations_main)
       {
+#ifdef __EMSCRIPTEN__
+         animation->position += sine_delta;
+#else
          animation->move(sine_delta);
+#endif
       }
 
       if (_sprite)
       {
+#ifdef __EMSCRIPTEN__
+         _sprite->position += sine_delta;
+#else
          _sprite->move(sine_delta);
+#endif
       }
 
       _rect.position.y = _base_y_px + _sine_offset_y_px;
@@ -318,7 +345,11 @@ void Extra::update(const sf::Time& delta_time)
    }
 
    const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
+#ifdef __EMSCRIPTEN__
+   if (sf::findIntersection(player_rect_px, _rect))
+#else
    if (player_rect_px.findIntersection(_rect).has_value())
+#endif
    {
       _active = false;
 
@@ -379,22 +410,38 @@ void Extra::spawn(sf::Vector2f offset)
 
       for (auto& animation : _animations_main)
       {
+#ifdef __EMSCRIPTEN__
+         animation->position += offset;
+#else
          animation->move(offset);
+#endif
       }
 
       if (_animation_spawn)
       {
+#ifdef __EMSCRIPTEN__
+         _animation_spawn->position += offset;
+#else
          _animation_spawn->move(offset);
+#endif
       }
 
       if (_animation_pickup)
       {
+#ifdef __EMSCRIPTEN__
+         _animation_pickup->position += offset;
+#else
          _animation_pickup->move(offset);
+#endif
       }
 
       if (_sprite)
       {
+#ifdef __EMSCRIPTEN__
+         _sprite->position += offset;
+#else
          _sprite->move(offset);
+#endif
       }
    }
 

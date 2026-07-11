@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <map>
+#include <optional>
 
 #include "framework/image/layer.h"
 #include "game/animation/animation.h"
@@ -27,7 +28,14 @@ public:
    /// \brief draws gateway layers, rotating side parts, void shader effect, and eye animation.
    /// \param target render target.
    /// \param normal normal-map render target (unused).
-   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
+   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
+   /// \brief draws gateway layers, rotating side parts, void shader effect, and eye animation with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply.
+   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief updates activation state, side animations, eye tracking, and optional teleport use.
    /// \param dt elapsed frame time.
@@ -86,7 +94,8 @@ private:
 
       /// \brief draws the currently active eye animation.
       /// \param target render target.
-      void draw(sf::RenderTarget& target);
+      /// \param states render states to apply.
+      void draw(sf::RenderTarget& target, const sf::RenderStates& states = sf::RenderStates{});
 
       /// \brief updates iris state, animation playback, and gaze tracking towards the player.
       /// \param dt elapsed frame time.
@@ -176,8 +185,13 @@ private:
    std::shared_ptr<Layer> _layer_background_inactive;
    std::shared_ptr<Layer> _layer_background_active;
 
+#ifdef __EMSCRIPTEN__
+   sf::RectangleShape _rect_shape{sf::RectangleShape::Data{}};
+   sf::CircleShape _origin_shape{sf::CircleShape::Data{}};
+#else
    sf::RectangleShape _rect_shape;
    sf::CircleShape _origin_shape;
+#endif
 
    std::string _filename;
    std::vector<std::shared_ptr<Layer>> _layer_stack;
@@ -206,6 +220,26 @@ private:
    /// \param target render target.
    void drawVoid(sf::RenderTarget& target);
 
+#ifdef __EMSCRIPTEN__
+   std::optional<sf::Shader> _shader;
+   std::optional<sf::Texture> _noise_texture;
+   std::string _default_texture_path{"data/effects/gabor_6.png"};
+   std::optional<sf::Shader::UniformLocation> _ul_time;
+   std::optional<sf::Shader::UniformLocation> _ul_alpha;
+   std::optional<sf::Shader::UniformLocation> _ul_radius_factor;
+   std::optional<sf::Shader::UniformLocation> _ul_resolution;
+   std::optional<sf::Shader::UniformLocation> _ul_noise_scale;
+   std::optional<sf::Shader::UniformLocation> _ul_swirl_color;
+   std::optional<sf::Shader::UniformLocation> _ul_ichannel0;
+   std::unique_ptr<sf::RenderTexture> _shader_texture;
+   std::unique_ptr<sf::Sprite> _shader_sprite;
+   float _radius_factor = 1.0f;
+   float _shader_alpha = 0.7f;
+   float _void_alpha = 0.0f;
+   float _time_factor = 4.0f;
+   float _noise_scale = 10.0;
+   sf::Vector3f _swirl_color{0.0f, 0.5f, 0.8f};
+#else
    sf::Shader _shader;
    std::unique_ptr<sf::RenderTexture> _shader_texture;
    std::unique_ptr<sf::Sprite> _shader_sprite;
@@ -217,6 +251,7 @@ private:
    sf::Vector3f _swirl_color{0.0f, 0.5f, 0.8f};
    sf::Texture _noise_texture;
    std::string _default_texture_path{"data/effects/gabor_6.png"};
+#endif
 
    // flowfield
    std::optional<std::string> _flowfield_reference_id;

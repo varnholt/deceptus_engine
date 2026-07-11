@@ -39,6 +39,10 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include <ctime>
 #include <iomanip>
 #include <iostream>
@@ -75,6 +79,7 @@ void showGpu()
    }
 }
 
+#ifndef __EMSCRIPTEN__
 void showErrorMessage(const std::string& message)
 {
    sf::RenderWindow window(sf::VideoMode({240, 80}), "Error", sf::Style::Titlebar | sf::Style::Close);
@@ -102,7 +107,8 @@ void showErrorMessage(const std::string& message)
       window.draw(text);
       window.display();
    }
-};
+}
+#endif
 
 std::unique_ptr<ScreenTransition> makeFadeOutFadeInDeath()
 {
@@ -207,22 +213,40 @@ void Game::initializeWindow()
 
    if (_window)
    {
+#ifndef __EMSCRIPTEN__
       _window->close();
+#endif
       _window.reset();
    }
 
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
+#ifdef __EMSCRIPTEN__
+   _window = std::make_shared<sf::RenderWindow>(
+      sf::RenderWindow::create(
+         sf::WindowSettings{
+            .size = {static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)},
+            .title = GAME_NAME,
+            .fullscreen = game_config._fullscreen,
+            .contextSettings = context_settings
+         }
+      )
+         .value()
+   );
+#else
    _window = std::make_shared<sf::RenderWindow>(
       sf::VideoMode({static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)}),
       GAME_NAME,
       game_config._fullscreen ? sf::State::Fullscreen : sf::State::Windowed,
       context_settings
    );
+#endif
 
    SplashScreen::show(*_window);
 
+#ifndef __EMSCRIPTEN__
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
    _window->setFramerateLimit(60);
+#endif
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!game_config._fullscreen);
 
@@ -255,8 +279,14 @@ void Game::initializeWindow()
    _render_texture_offset.x = static_cast<uint32_t>((game_config._video_mode_width - texture_width) / 2);
    _render_texture_offset.y = static_cast<uint32_t>((game_config._video_mode_height - texture_height) / 2);
 
+#ifndef __EMSCRIPTEN__
    _window_render_texture =
       std::make_shared<sf::RenderTexture>(sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)});
+#else
+   _window_render_texture = std::make_shared<sf::RenderTexture>(
+      std::move(*sf::RenderTexture::create(sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)}))
+   );
+#endif
 
    Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;
 
@@ -352,9 +382,11 @@ void Game::loadLevel(LoadingMode loading_mode)
 {
    const auto level_loader = [this, loading_mode]()
    {
-      // create an opengl context for this thread
+   // create an opengl context for this thread
+#ifndef __EMSCRIPTEN__
       sf::Context loader_context;
       loader_context.setActive(true);
+#endif
 
       _player->resetWorld();  // free the pointer that's shared with the player
       LevelRegistry::clearCurrent();
@@ -407,13 +439,19 @@ void Game::loadLevel(LoadingMode loading_mode)
 
       _level_loaded_callbacks.clear();
 
+#ifndef __EMSCRIPTEN__
       loader_context.setActive(false);
+#endif
    };
 
    _level_loading_finished = false;
    _level_loading_finished_previous = false;
    _info_layer->setLoading(true);
+#ifdef __EMSCRIPTEN__
+   level_loader();
+#else
    _level_loading_thread = std::async(std::launch::async, level_loader);
+#endif
 }
 
 void Game::nextLevel()
@@ -475,8 +513,10 @@ void Game::initialize()
    _info_layer = std::make_unique<InfoLayer>();
    _ingame_menu = std::make_unique<InGameMenu>();
    _controller_overlay = std::make_unique<ControllerOverlay>();
+#ifndef __EMSCRIPTEN__
    _test_scene = std::make_unique<ForestScene>();
    _menu_background = std::make_unique<MenuBackgroundScene>();
+#endif
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
@@ -484,7 +524,14 @@ void Game::initialize()
 
    // initially the game should be in main menu and paused
    std::dynamic_pointer_cast<MenuScreenMain>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Main))
-      ->setExitCallback([this]() { _window->close(); });
+      ->setExitCallback(
+         [this]()
+         {
+#ifndef __EMSCRIPTEN__
+            _window->close();
+#endif
+         }
+      );
 
    std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))
       ->setFullscreenCallback([this]() { toggleFullScreen(); });
@@ -497,7 +544,9 @@ void Game::initialize()
          [this]()
          {
             initializeWindow();
+#ifndef __EMSCRIPTEN__
             _menu_background = std::make_unique<MenuBackgroundScene>();
+#endif
             if (!_level)
             {
                return;
@@ -558,7 +607,9 @@ void Game::draw()
 
    _window_render_texture->clear();
    _window->clear(sf::Color::Black);
+#ifndef __EMSCRIPTEN__
    _window->pushGLStates();
+#endif
 
    _window_render_texture->clear();
 
@@ -598,6 +649,7 @@ void Game::draw()
       _ingame_menu->draw(*_window_render_texture.get());
    }
 
+#ifndef __EMSCRIPTEN__
    if (DebugDrawStates::_draw_test_scene)
    {
       _test_scene->draw(*_window_render_texture.get());
@@ -607,12 +659,28 @@ void Game::draw()
    {
       _menu_background->render(*_window_render_texture);
    }
+#endif
 
+#ifdef __EMSCRIPTEN__
+   Menu::getInstance()->draw(*_window_render_texture.get(), sf::RenderStates{.blendMode = sf::BlendAlpha});
+#else
    Menu::getInstance()->draw(*_window_render_texture.get(), {sf::BlendAlpha});
+#endif
    MessageBox::draw(*_window_render_texture.get());
 
    _window_render_texture->display();
+#ifdef __EMSCRIPTEN__
+   _window->setActive(true);
+#endif
+#ifdef __EMSCRIPTEN__
+   const sf::Texture& window_render_texture_ref = _window_render_texture->getTexture();
+   sf::Sprite window_texture_sprite;
+   window_texture_sprite.textureRect = sf::FloatRect{
+      {0.f, 0.f}, {static_cast<float>(window_render_texture_ref.getSize().x), static_cast<float>(window_render_texture_ref.getSize().y)}
+   };
+#else
    auto window_texture_sprite = sf::Sprite(_window_render_texture->getTexture());
+#endif
 
    if (GameConfiguration::getInstance()._fullscreen)
    {
@@ -622,16 +690,31 @@ void Game::draw()
       const auto scale_minimum = std::min(static_cast<int32_t>(scale_x), static_cast<int32_t>(scale_y));
       const auto dx = (scale_x - scale_minimum) * 0.5f;
       const auto dy = (scale_y - scale_minimum) * 0.5f;
+#ifdef __EMSCRIPTEN__
+      window_texture_sprite.position = {_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy};
+      window_texture_sprite.scale = {static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)};
+#else
       window_texture_sprite.setPosition({_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy});
       window_texture_sprite.scale({static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)});
+#endif
    }
    else
    {
+#ifdef __EMSCRIPTEN__
+      window_texture_sprite.position = {static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y)};
+#else
       window_texture_sprite.setPosition({static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y)});
+#endif
    }
 
+#ifdef __EMSCRIPTEN__
+   _window->draw(window_texture_sprite, sf::RenderStates{.texture = &window_render_texture_ref});
+#else
    _window->draw(window_texture_sprite);
+#endif
+#ifndef __EMSCRIPTEN__
    _window->popGLStates();
+#endif
 
 #ifdef DEVELOPMENT_MODE
    sf::Clock window_display_clock;
@@ -644,6 +727,7 @@ void Game::draw()
    }
 #endif
 
+#ifndef __EMSCRIPTEN__
    if (_recording)
    {
       const auto image = window_texture_sprite.getTexture().copyToImage();
@@ -659,6 +743,7 @@ void Game::draw()
 
       record.detach();
    }
+#endif
 
    if (DebugDrawStates::_draw_physics_config)
    {
@@ -670,10 +755,12 @@ void Game::draw()
       _camera_ui->draw();
    }
 
+#ifndef __EMSCRIPTEN__
    if (DebugDrawStates::_draw_log)
    {
       _log_ui->draw();
    }
+#endif
 
 #ifdef DEVELOPMENT_MODE
    if (_profiling_ui)
@@ -712,7 +799,11 @@ void Game::updateWindowTitle()
 {
    std::ostringstream out_stream;
    out_stream << GAME_NAME << " - " << _fps << "fps";
+#ifdef __EMSCRIPTEN__
+   _window->setTitle(out_stream.str().c_str());
+#else
    _window->setTitle(out_stream.str());
+#endif
    _fps = 0;
 }
 
@@ -844,7 +935,9 @@ void Game::update()
    if (game_mode == ExecutionMode::NotRunning)
    {
       updateGameController();
+#ifndef __EMSCRIPTEN__
       _menu_background->update(dt);
+#endif
    }
 
    _info_layer->update(dt);
@@ -872,10 +965,12 @@ void Game::update()
          _level->update(dt);
          _player->update(dt);
 
+#ifndef __EMSCRIPTEN__
          if (DebugDrawStates::_draw_test_scene)
          {
             _test_scene->update(dt);
          }
+#endif
 
          // this might trigger level-reloading, so this ought to be the last drawing call in the loop
          updateGameState(dt);
@@ -927,6 +1022,21 @@ void Game::timedDraw()
 
 int32_t Game::loop()
 {
+#ifdef __EMSCRIPTEN__
+   emscripten_set_main_loop_arg(
+      [](void* arg)
+      {
+         Game* game = static_cast<Game*>(arg);
+         game->processEvents();
+         game->timedUpdate();
+         game->timedDraw();
+      },
+      this,
+      0,
+      1
+   );
+   return 0;
+#else
    while (_window->isOpen())
    {
       processEvents();
@@ -935,6 +1045,7 @@ int32_t Game::loop()
    }
 
    return 0;
+#endif
 }
 
 void Game::reset()
@@ -944,6 +1055,7 @@ void Game::reset()
 
 void Game::toggleFullScreen()
 {
+#ifndef __EMSCRIPTEN__
    auto& config = GameConfiguration::getInstance();
    config._fullscreen = !config._fullscreen;
 
@@ -981,8 +1093,10 @@ void Game::toggleFullScreen()
 
    config.serializeToFile();
 
+#ifndef __EMSCRIPTEN__
    _window->setVerticalSyncEnabled(config._vsync_enabled);
    _window->setFramerateLimit(60);
+#endif
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!config._fullscreen);
 
@@ -1011,6 +1125,7 @@ void Game::toggleFullScreen()
 
    // recreate the 3D menu background — its GL resources are tied to the old context
    _menu_background = std::make_unique<MenuBackgroundScene>();
+#endif
 }
 
 void Game::changeResolution(int32_t w, int32_t h)
@@ -1033,7 +1148,9 @@ void Game::changeResolution(int32_t w, int32_t h)
 
    initializeWindow();
 
+#ifndef __EMSCRIPTEN__
    _menu_background = std::make_unique<MenuBackgroundScene>();
+#endif
 
    if (_level)
    {
@@ -1062,7 +1179,9 @@ void Game::processEvent(const sf::Event& event)
 
    if (event.is<sf::Event::Closed>())
    {
+#ifndef __EMSCRIPTEN__
       _window->close();
+#endif
    }
    else if (auto* resized_event = event.getIf<sf::Event::Resized>())
    {
@@ -1164,9 +1283,11 @@ void Game::processEvent(const sf::Event& event)
       {
          if (LevelRegistry::getCurrent())
          {
+#ifndef __EMSCRIPTEN__
             const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
             const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *LevelRegistry::getCurrent()->getLevelView());
             PlayerRegistry::getFirst()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
+#endif
          }
       }
    }
@@ -1191,10 +1312,12 @@ void Game::shutdown()
       _camera_ui->close();
    }
 
+#ifndef __EMSCRIPTEN__
    if (_log_ui)
    {
       _log_ui->close();
    }
+#endif
 
    // std::exit skips local destructors in main(), so Level and all its children (LevelScript,
    // Lever, etc.) would otherwise be torn down during static cleanup — after SaveState::__save_states
@@ -1315,6 +1438,7 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::F5:
       {
+#ifndef __EMSCRIPTEN__
          DebugDrawStates::_draw_log = !DebugDrawStates::_draw_log;
          if (DebugDrawStates::_draw_log && !_log_ui)
          {
@@ -1325,7 +1449,7 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
             _log_ui->close();
             _log_ui.reset();
          }
-
+#endif
          break;
       }
       case sf::Keyboard::Key::F6:
@@ -1464,10 +1588,12 @@ void Game::processEvents()
       _camera_ui->processEvents();
    }
 
+#ifndef __EMSCRIPTEN__
    if (DebugDrawStates::_draw_log)
    {
       _log_ui->processEvents();
    }
+#endif
 
 #ifdef DEVELOPMENT_MODE
    if (_profiling_ui)

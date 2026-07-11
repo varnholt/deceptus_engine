@@ -19,6 +19,26 @@ std::string_view TextLayer::objectName() const
    return "TextLayer";
 }
 
+#ifdef __EMSCRIPTEN__
+void TextLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void TextLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   if (_mode == Mode::Bitmap)
+   {
+      _bitmap_font.draw(
+         target, _bitmap_coords, static_cast<int32_t>(_rect.position.x), static_cast<int32_t>(_rect.position.y), std::nullopt, states
+      );
+   }
+   else if (_mode == Mode::TrueType)
+   {
+      target.draw(*_truetype_text, states);
+   }
+}
+#else
 void TextLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    if (_mode == Mode::Bitmap)
@@ -30,6 +50,7 @@ void TextLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       target.draw(*_truetype_text);
    }
 }
+#endif
 
 void TextLayer::update(const sf::Time& /*dt*/)
 {
@@ -82,7 +103,13 @@ std::shared_ptr<TextLayer> TextLayer::deserialize(GameNode* parent, const GameDe
    if (font_truetype.has_value())
    {
       instance->_mode = Mode::TrueType;
+#ifdef __EMSCRIPTEN__
+      auto loaded_font = sf::Font::openFromFile(font_truetype.value());
+      instance->_truetype_font = loaded_font.hasValue() ? std::optional{std::move(*loaded_font)} : std::nullopt;
+      if (!instance->_truetype_font.has_value())
+#else
       if (!instance->_truetype_font.openFromFile(font_truetype.value()))
+#endif
       {
          Log::Error() << "failed to load font";
       }
@@ -92,10 +119,16 @@ std::shared_ptr<TextLayer> TextLayer::deserialize(GameNode* parent, const GameDe
          const auto color = ValueReader::readValue<std::string>("truetype_font_color", map).value_or("#ffffffff");
          const auto rgba = TmxTools::color(color);
 
+#ifdef __EMSCRIPTEN__
+         instance->_truetype_text = std::make_unique<sf::Text>(*instance->_truetype_font, sf::Text::Data{});
+         instance->_truetype_text->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
+         instance->_truetype_text->setString(instance->_text.c_str());
+#else
          instance->_truetype_font.setSmooth(false);
          instance->_truetype_text = std::make_unique<sf::Text>(instance->_truetype_font);
          instance->_truetype_text->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
          instance->_truetype_text->setString(instance->_text);
+#endif
          instance->_truetype_text->setCharacterSize(font_size);
          instance->_truetype_text->setFillColor({rgba[0], rgba[1], rgba[2], rgba[3]});
       }

@@ -1,6 +1,6 @@
 #include "profilingui.h"
 
-#ifdef DEVELOPMENT_MODE
+#if defined(DEVELOPMENT_MODE) && !defined(__EMSCRIPTEN__)
 
 #pragma warning(push, 0)
 #include "imgui/imgui-SFML.h"
@@ -27,7 +27,9 @@ void ProfilingUi::processEvents()
 
       if (event->is<sf::Event::Closed>())
       {
+#ifndef __EMSCRIPTEN__
          _render_window->close();
+#endif
       }
    }
 }
@@ -197,6 +199,32 @@ void ProfilingUi::updateMechanismTimings(std::vector<MechanismSample> timings)
    }
    _mechanism_timings = std::move(timings);
    _mechanism_update_clock.restart();
+}
+
+#elif defined(DEVELOPMENT_MODE)
+
+ProfilingUi::ProfilingUi() = default;
+void ProfilingUi::processEvents()
+{
+}
+void ProfilingUi::draw()
+{
+}
+void ProfilingUi::close()
+{
+}
+bool ProfilingUi::isOpen() const
+{
+   return false;
+}
+void ProfilingUi::recordFrame(sf::Time, sf::Time, sf::Time)
+{
+}
+void ProfilingUi::recordWindowDisplay(sf::Time)
+{
+}
+void ProfilingUi::updateMechanismTimings(std::vector<MechanismSample>)
+{
 }
 
 #endif  // DEVELOPMENT_MODE

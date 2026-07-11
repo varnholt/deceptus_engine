@@ -190,7 +190,13 @@ MessageBox::MessageBox(
       segments.end(),
       std::back_inserter(_segments),
       [](const RichTextParser::Segment& segment)
-      { return TextSegment{*segment.text, segment.text->getFillColor(), segment.text->getString()}; }
+      {
+#ifdef __EMSCRIPTEN__
+         return TextSegment{*segment.text, segment.text->getFillColor(), std::string(segment.text->getString().data())};
+#else
+         return TextSegment{*segment.text, segment.text->getFillColor(), segment.text->getString()};
+#endif
+      }
    );
 
    // can maybe be removed
@@ -242,6 +248,17 @@ void MessageBox::initializeLayers()
 
       try
       {
+#ifdef __EMSCRIPTEN__
+         auto texture = std::make_shared<sf::Texture>(
+            std::move(*sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())}))
+         );
+         texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
+
+         auto sprite = std::make_shared<sf::Sprite>();
+
+         sprite->position = {static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
+         sprite->textureRect = sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(layer.getWidth()), static_cast<float>(layer.getHeight())}};
+#else
          auto texture =
             std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
@@ -249,6 +266,7 @@ void MessageBox::initializeLayers()
          auto sprite = std::make_shared<sf::Sprite>(*texture);
 
          sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
+#endif
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;
@@ -272,9 +290,15 @@ void MessageBox::initializeLayers()
    _layers["temp_bg"]->_visible = false;
 
    // initialize positions
+#ifdef __EMSCRIPTEN__
+   _window_position_px = _layers["window"]->_sprite->position;
+   _background_position_px = _layers["background"]->_sprite->position;
+   _next_page_position_px = _layers["next_page"]->_sprite->position;
+#else
    _window_position_px = _layers["window"]->_sprite->getPosition();
    _background_position_px = _layers["background"]->_sprite->getPosition();
    _next_page_position_px = _layers["next_page"]->_sprite->getPosition();
+#endif
 }
 
 bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
@@ -312,7 +336,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
       if (__active->_properties._animate_text)
       {
+#ifdef __EMSCRIPTEN__
+         if (__active->_char_animate_index < __active->_plain_text.size())
+#else
          if (__active->_char_animate_index < __active->_plain_text.getSize())
+#endif
          {
             __active->_properties._animate_text = false;
             return true;
@@ -394,19 +422,33 @@ void MessageBox::draw(sf::RenderTarget& window, const sf::RenderStates& states)
    }
 
    // set up an ortho view with screen dimensions
+#ifdef __EMSCRIPTEN__
+   const sf::View pixel_ortho = sf::View::fromRect(sf::FloatRect(
+      {0.0f, 0.0f},
+      {static_cast<float>(GameConfiguration::getInstance()._view_width), static_cast<float>(GameConfiguration::getInstance()._view_height)}
+   ));
+   sf::RenderStates ortho_states = states;
+   ortho_states.view = pixel_ortho;
+#else
    sf::View pixel_ortho(sf::FloatRect(
       {0.0f, 0.0f},
       {static_cast<float>(GameConfiguration::getInstance()._view_width), static_cast<float>(GameConfiguration::getInstance()._view_height)}
    ));
 
    window.setView(pixel_ortho);
+#endif
 
    for (auto messagebox : messageboxes)
    {
       if (messagebox)
       {
+#ifdef __EMSCRIPTEN__
+         messagebox->drawLayers(window, ortho_states);
+         messagebox->drawText(window, ortho_states);
+#else
          messagebox->drawLayers(window, states);
          messagebox->drawText(window, states);
+#endif
       }
    }
 }
@@ -426,8 +468,13 @@ void MessageBox::updateTextAnimation()
    // so x might go into negative for that duration.
    x = std::max(0.0f, x);
 
+#ifdef __EMSCRIPTEN__
+   const auto to =
+      !_properties._animate_text ? _plain_text.size() : std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_plain_text.size()));
+#else
    const auto to =
       !_properties._animate_text ? _plain_text.getSize() : std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_plain_text.getSize()));
+#endif
 
    int32_t accumulated_chars_from_segments = 0;
    if (_char_animate_index != to)
@@ -435,6 +482,19 @@ void MessageBox::updateTextAnimation()
       _char_animate_index = to;
       for (auto& segment : _segments)
       {
+#ifdef __EMSCRIPTEN__
+         accumulated_chars_from_segments += static_cast<int32_t>(segment.plain_text.size());
+         if (to < static_cast<uint32_t>(accumulated_chars_from_segments))
+         {
+            // draw only subset of segment
+            const auto chars_to_draw = segment.plain_text.size() - (static_cast<uint32_t>(accumulated_chars_from_segments) - to);
+            const auto subset = segment.plain_text.substr(0, chars_to_draw);
+            segment.text.setString(subset.c_str());
+            break;
+         }
+
+         segment.text.setString(segment.plain_text.c_str());
+#else
          accumulated_chars_from_segments += static_cast<int32_t>(segment.plain_text.getSize());
          if (to < static_cast<uint32_t>(accumulated_chars_from_segments))
          {
@@ -446,6 +506,7 @@ void MessageBox::updateTextAnimation()
          }
 
          segment.text.setString(segment.plain_text);
+#endif
       }
    }
 }
@@ -523,9 +584,14 @@ void MessageBox::updateNextPageIcon()
    constexpr auto animation_amplitude = 3.0f;
 
    auto next_page_layer = _layers["next_page"];
+#ifdef __EMSCRIPTEN__
+   next_page_layer->_sprite->position =
+      _next_page_position_px + offset_px + sf::Vector2f{0.0f, std::sin(_elapsed.asSeconds() * animation_speed) * animation_amplitude};
+#else
    next_page_layer->_sprite->setPosition(
       _next_page_position_px + offset_px + sf::Vector2f{0.0f, std::sin(_elapsed.asSeconds() * animation_speed) * animation_amplitude}
    );
+#endif
 }
 
 void MessageBox::noAnimation()
@@ -536,6 +602,15 @@ void MessageBox::noAnimation()
 
    const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
+#ifdef __EMSCRIPTEN__
+   window_layer->_sprite->color = sf::Color::White;
+   window_layer->_sprite->scale = {1.0f, 1.0f};
+   window_layer->_sprite->position = _window_position_px + offset_px;
+
+   background_layer->_sprite->color = background_color;
+   background_layer->_sprite->scale = {1.0f, 1.0f};
+   background_layer->_sprite->position = _background_position_px + offset_px;
+#else
    window_layer->_sprite->setColor(sf::Color::White);
    window_layer->_sprite->setScale({1.0f, 1.0f});
    window_layer->_sprite->setPosition(_window_position_px + offset_px);
@@ -543,6 +618,7 @@ void MessageBox::noAnimation()
    background_layer->_sprite->setColor(background_color);
    background_layer->_sprite->setScale({1.0f, 1.0f});
    background_layer->_sprite->setPosition(_background_position_px + offset_px);
+#endif
 
    updateNextPageIcon();
    updateTextAndButtonColor(1.0f);
@@ -563,7 +639,11 @@ void MessageBox::updateTextAndButtonColor(float contents_alpha)
 
    for (const auto& layer : _box_content_layers)
    {
+#ifdef __EMSCRIPTEN__
+      layer->_sprite->color = color;
+#else
       layer->_sprite->setColor(color);
+#endif
    }
 }
 
@@ -598,6 +678,15 @@ void MessageBox::showAnimation()
       const auto window_pos_y_px = _window_position_px.y + offset.y;
       const auto window_color = sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)};
 
+#ifdef __EMSCRIPTEN__
+      window_layer->_sprite->color = window_color;
+      window_layer->_sprite->scale = {scale_x, scale_y};
+      window_layer->_sprite->position = {window_pos_x_px, window_pos_y_px};
+
+      background_layer->_sprite->color = background_color;
+      background_layer->_sprite->scale = {scale_x, scale_y};
+      background_layer->_sprite->position = {background_pos_x_px, background_pos_y_px};
+#else
       window_layer->_sprite->setColor(window_color);
       window_layer->_sprite->setScale({scale_x, scale_y});
       window_layer->_sprite->setPosition({window_pos_x_px, window_pos_y_px});
@@ -605,9 +694,19 @@ void MessageBox::showAnimation()
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale({scale_x, scale_y});
       background_layer->_sprite->setPosition({background_pos_x_px, background_pos_y_px});
+#endif
    }
    else  // fade in
    {
+#ifdef __EMSCRIPTEN__
+      window_layer->_sprite->color = sf::Color::White;
+      window_layer->_sprite->scale = {1.0f, 1.0f};
+      window_layer->_sprite->position = _window_position_px + offset;
+
+      background_layer->_sprite->color = background_color;
+      background_layer->_sprite->scale = {1.0f, 1.0f};
+      background_layer->_sprite->position = _background_position_px + offset;
+#else
       window_layer->_sprite->setColor(sf::Color::White);
       window_layer->_sprite->setScale({1.0f, 1.0f});
       window_layer->_sprite->setPosition(_window_position_px + offset);
@@ -615,6 +714,7 @@ void MessageBox::showAnimation()
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale({1.0f, 1.0f});
       background_layer->_sprite->setPosition(_background_position_px + offset);
+#endif
 
       if (visible_time < animation_scale_time_show + animation_fade_time_show)
       {
@@ -650,12 +750,21 @@ void MessageBox::hideAnimation()
       auto background_color = _properties._background_color;
       background_color.a = contents_alpha_scaled;
 
+#ifdef __EMSCRIPTEN__
+      _layers["window"]->_sprite->color = window_color;
+      _layers["background"]->_sprite->color = background_color;
+#else
       _layers["window"]->_sprite->setColor(window_color);
       _layers["background"]->_sprite->setColor(background_color);
+#endif
 
       for (const auto& layer : _box_content_layers)
       {
+#ifdef __EMSCRIPTEN__
+         layer->_sprite->color = window_color;
+#else
          layer->_sprite->setColor(window_color);
+#endif
       }
 
       for (auto& segment : _segments)

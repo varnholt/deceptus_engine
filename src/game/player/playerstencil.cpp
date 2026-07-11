@@ -57,7 +57,16 @@ void PlayerStencil::dump(const std::shared_ptr<sf::RenderTexture>& texture)
    // Read the stencil data from the current rendering context
    glReadPixels(0, 0, w, h, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &stencilBuffer[0]);
 
+#ifdef __EMSCRIPTEN__
+   auto image_opt = sf::Image::create(sf::Vector2u{w, h});
+   if (!image_opt.hasValue())
+   {
+      return;
+   }
+   auto& image = *image_opt;
+#else
    sf::Image image(sf::Vector2u{w, h});
+#endif
    for (auto y = 0u; y < h; ++y)
    {
       for (auto x = 0u; x < w; ++x)

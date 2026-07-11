@@ -78,6 +78,11 @@ std::string_view Rope::objectName() const
 
 void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   draw(color, normal, {});
+}
+
+void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& incoming_states)
+{
    std::optional<b2Vec2> q1_prev;
    std::optional<b2Vec2> q4_prev;
 
@@ -146,13 +151,21 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    }
 
    // render color texture
-   sf::RenderStates states;
+   sf::RenderStates states = incoming_states;
    states.texture = _texture.get();
+#ifdef __EMSCRIPTEN__
+   color.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
+#else
    color.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
+#endif
 
    // render normal map (same geometry, different texture)
    states.texture = _normal_map.get();
+#ifdef __EMSCRIPTEN__
+   normal.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
+#else
    normal.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
+#endif
 }
 
 void Rope::pushChain(float impulse)
@@ -178,7 +191,11 @@ void Rope::update(const sf::Time& dt)
       return;
    }
 
+#ifdef __EMSCRIPTEN__
+   if (_player_impulse.has_value() && sf::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _bounding_box).hasValue())
+#else
    if (_player_impulse.has_value() && PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_bounding_box).has_value())
+#endif
    {
       // using a fix timestep for now, everything else lets box2d go nuts
       const auto impulse = PlayerRegistry::getFirst()->getBody()->GetLinearVelocity().x * _player_impulse.value() * dt.asSeconds();

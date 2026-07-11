@@ -51,7 +51,8 @@ public:
 
    /// \brief draws all active projectile animations.
    /// \param target render target used for projectile rendering.
-   void draw(sf::RenderTarget& target) override;
+   /// \param states render states applied while drawing (used in WASM to carry the level view).
+   void draw(sf::RenderTarget& target, const sf::RenderStates& states = {}) override;
 
    /// \brief updates projectile animations and applies deferred inactivity to physics bodies.
    /// \param time per-frame update context containing delta time and world.
@@ -67,7 +68,8 @@ public:
 
    /// \brief draws globally managed projectile hit animations.
    /// \param target render target used for hit effect rendering.
-   static void drawProjectileHitAnimations(sf::RenderTarget& target);
+   /// \param states render states applied while drawing (used in WASM to carry the level view).
+   static void drawProjectileHitAnimations(sf::RenderTarget& target, const sf::RenderStates& states = {});
 
    /// \brief builds a single-frame reference animation from a texture region.
    /// \param texture texture used by projectile visuals.
@@ -97,7 +99,8 @@ public:
 protected:
    /// \brief draws projectile animations stored by this weapon instance.
    /// \param target render target used for projectile rendering.
-   void drawProjectiles(sf::RenderTarget& target);
+   /// \param states render states applied while drawing (used in WASM to carry the level view).
+   void drawProjectiles(sf::RenderTarget& target, const sf::RenderStates& states = {});
 
    /// \brief updates animation transform and frame state for each projectile.
    /// \param time frame delta time used by animation update.

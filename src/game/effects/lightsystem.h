@@ -3,6 +3,9 @@
 #include <array>
 #include <functional>
 #include <memory>
+#ifdef __EMSCRIPTEN__
+#include <optional>
+#endif
 #include <unordered_set>
 #include <vector>
 
@@ -61,7 +64,11 @@ public:
    };
 
    std::vector<std::shared_ptr<LightInstance>> _lights;
+#ifdef __EMSCRIPTEN__
+   std::optional<sf::Shader> _light_shader;
+#else
    sf::Shader _light_shader;
+#endif
 
    /// \brief increases all ambient light channels by the same amount.
    /// \param amount value added to each ambient rgba channel.
@@ -92,7 +99,7 @@ public:
 
    /// \brief renders per-light sprites with stencil-clipped shadow volumes into a light map target.
    /// \param target render target.
-   /// \param states render states passed by caller and currently ignored.
+   /// \param states render states applied to occluder, shadow, and light sprite draws (carries .view for WASM camera transform).
    void draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states);
 
    /// \brief renders light sprites to both textures then composites with shader.
@@ -123,7 +130,16 @@ private:
    /// \param target render target.
    /// \param light active light for which occluder shadows are generated.
    /// \param candidates pre-filtered list of shadow-casting bodies built once per frame.
-   void drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightInstance> light, const std::vector<b2Body*>& candidates) const;
+   /// \param states render states to apply (carries .view for WASM camera transform).
+   void drawShadowQuads(
+      sf::RenderTarget& target,
+      std::shared_ptr<LightInstance> light,
+      const std::vector<b2Body*>& candidates
+#ifdef __EMSCRIPTEN__
+      ,
+      const sf::RenderStates& states
+#endif
+   ) const;
 
    /// \brief renders level occluder geometry to the stencil buffer before shadow/light passes.
    /// \param target render target with active stencil context.
@@ -147,4 +163,17 @@ private:
 
    OccluderDrawCallback _occluder_callback;
    sf::Clock _clock;  //!< tracks elapsed time for per-light shader uniforms
+
+#ifdef __EMSCRIPTEN__
+   // cached uniform locations for _light_shader
+   std::optional<sf::Shader::UniformLocation> _ul_light_count;
+   std::optional<sf::Shader::UniformLocation> _ul_resolution;
+   std::optional<sf::Shader::UniformLocation> _ul_ambient;
+   std::optional<sf::Shader::UniformLocation> _ul_color_map;
+   std::optional<sf::Shader::UniformLocation> _ul_light_map_1;
+   std::optional<sf::Shader::UniformLocation> _ul_light_map_2;
+   std::optional<sf::Shader::UniformLocation> _ul_normal_map;
+   std::array<std::optional<sf::Shader::UniformLocation>, 6> _ul_light_positions;
+   std::array<std::optional<sf::Shader::UniformLocation>, 6> _ul_light_colors;
+#endif
 };

@@ -103,6 +103,23 @@ SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance
 
    _texture = TexturePool::getInstance().get("data/sprites/enemy_spikeball.png");
 
+#ifdef __EMSCRIPTEN__
+   _spike_sprite = std::make_unique<sf::Sprite>();
+   _box_sprite = std::make_unique<sf::Sprite>();
+   _chain_element_a = std::make_unique<sf::Sprite>();
+   _chain_element_b = std::make_unique<sf::Sprite>();
+
+   _spike_sprite->textureRect = sf::IntRect({118, 24}, {51, 50});
+   _spike_sprite->origin = {25, 25};
+
+   _box_sprite->textureRect = sf::IntRect({168, 93}, {24, 27});
+
+   _chain_element_a->textureRect = sf::IntRect({297, 56}, {8, 8});
+   _chain_element_a->origin = {4, 4};
+
+   _chain_element_b->textureRect = sf::IntRect({320, 56}, {8, 8});
+   _chain_element_b->origin = {4, 4};
+#else
    _spike_sprite = std::make_unique<sf::Sprite>(*_texture);
    _box_sprite = std::make_unique<sf::Sprite>(*_texture);
    _chain_element_a = std::make_unique<sf::Sprite>(*_texture);
@@ -118,6 +135,7 @@ SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance
 
    _chain_element_b->setTextureRect(sf::IntRect({320, 56}, {8, 8}));
    _chain_element_b->setOrigin({4, 4});
+#endif
 }
 
 std::string_view SpikeBall::objectName() const
@@ -131,6 +149,40 @@ void SpikeBall::preload()
    Audio::getInstance().addSample("mechanism_spikeball_02.wav");
 }
 
+#ifdef __EMSCRIPTEN__
+void SpikeBall::drawChain(sf::RenderTarget& window, const sf::RenderStates& states)
+{
+   std::vector<HermiteCurveKey> keys;
+
+   auto t = 0.0f;
+   auto ti = 1.0f / _chain_elements.size();
+   for (auto* c : _chain_elements)
+   {
+      HermiteCurveKey k;
+      k._position = sf::Vector2f{c->GetPosition().x * PPM, c->GetPosition().y * PPM};
+      k._time = (t += ti);
+      keys.push_back(k);
+   }
+
+   HermiteCurve curve;
+   curve.setPositionKeys(keys);
+   curve.compute();
+
+   auto val = 0.0f;
+   auto increment = 1.0f / _config._spline_point_count;
+   for (auto i = 0; i < _config._spline_point_count; i++)
+   {
+      auto point = curve.computePoint(val += increment);
+
+      auto& element = (i % 2 == 0) ? _chain_element_a : _chain_element_b;
+      element->position = point;
+
+      sf::RenderStates draw_states = states;
+      draw_states.texture = _texture.get();
+      window.draw(*element, draw_states);
+   }
+}
+#else
 void SpikeBall::drawChain(sf::RenderTarget& window)
 {
    std::vector<HermiteCurveKey> keys;
@@ -161,7 +213,49 @@ void SpikeBall::drawChain(sf::RenderTarget& window)
       window.draw(*element);
    }
 }
+#endif
 
+#ifdef __EMSCRIPTEN__
+void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   static const auto vertex_color = sf::Color(200, 200, 240);
+   static const bool draw_debug_line = false;
+
+   if (draw_debug_line)
+   {
+      for (auto i = 0u; i < _chain_elements.size() - 1; i++)
+      {
+         auto* chain_element_1 = _chain_elements[i];
+         auto* chain_element_2 = _chain_elements[i + 1];
+         const auto c1_pos_m = chain_element_1->GetPosition();
+         const auto c2_pos_m = chain_element_2->GetPosition();
+
+         sf::Vertex line[] = {
+            sf::Vertex(sf::Vector2f(c1_pos_m.x * PPM, c1_pos_m.y * PPM), vertex_color),
+            sf::Vertex(sf::Vector2f(c2_pos_m.x * PPM, c2_pos_m.y * PPM), vertex_color),
+         };
+
+         color.draw(std::span<const sf::Vertex>{line, 2}, sf::PrimitiveType::Lines, states);
+
+         // printf("draw %d: %f, %f -> %f, %f\n", i, c1Pos.x * PPM, c1Pos.y * PPM, c2Pos.x * PPM, c2Pos.y * PPM);
+      }
+   }
+
+   // dstar doesn't want the box sprite to be drawn
+   // color.draw(_box_sprite);
+
+   drawChain(color, states);
+
+   sf::RenderStates spike_states = states;
+   spike_states.texture = _texture.get();
+   color.draw(*_spike_sprite, spike_states);
+}
+#else
 void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    static const auto vertex_color = sf::Color(200, 200, 240);
@@ -193,6 +287,7 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
    drawChain(color);
    color.draw(*_spike_sprite);
 }
+#endif
 
 void SpikeBall::update(const sf::Time& dt)
 {
@@ -201,7 +296,11 @@ void SpikeBall::update(const sf::Time& dt)
       return;
    }
 
+#ifdef __EMSCRIPTEN__
+   _spike_sprite->position = {_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM};
+#else
    _spike_sprite->setPosition({_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM});
+#endif
 
    static const b2Vec2 up{0.0, 1.0};
 
@@ -219,7 +318,11 @@ void SpikeBall::update(const sf::Time& dt)
    }
 
    const auto angle = sf::radians(_angle);
+#ifdef __EMSCRIPTEN__
+   _spike_sprite->rotation = angle;
+#else
    _spike_sprite->setRotation(angle);
+#endif
 
    // play swoosh sound on every direction change
    if (_audio_enabled)
@@ -368,7 +471,11 @@ void SpikeBall::setup(const GameDeserializeData& data)
    ball_fixture->SetUserData(static_cast<void*>(object_data));
 
    // that box only needs to be set up once
+#ifdef __EMSCRIPTEN__
+   _box_sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px};
+#else
    _box_sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px});
+#endif
 }
 
 sf::Vector2i SpikeBall::getPixelPosition() const

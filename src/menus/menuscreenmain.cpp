@@ -28,26 +28,50 @@ MenuScreenMain::MenuScreenMain()
 {
    setFilename("data/menus/titlescreen.psd");
 
+#ifdef __EMSCRIPTEN__
+   _text_build = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text_build = std::make_unique<sf::Text>(_font);
+#endif
    _text_build->setFont(_font);
+#ifdef __EMSCRIPTEN__
+   _text_build->setString((tr("Build Number") + ": " + std::string{getBuildNumber()}).c_str());
+#else
    _text_build->setString(sftr("Build Number") + sf::String{": "} + sf::String{getBuildNumber()});
+#endif
    _text_build->setCharacterSize(12);
+#ifdef __EMSCRIPTEN__
+   _text_build->position = {build_text_x_offset, 341};
+#else
    _text_build->setPosition({build_text_x_offset, 341});
+#endif
    _text_build->setFillColor(sf::Color{50, 50, 50});
 
    const auto current_year =
       static_cast<int32_t>(std::chrono::year_month_day{std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now())}.year());
 
+#ifdef __EMSCRIPTEN__
+   _text_copyright = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text_copyright = std::make_unique<sf::Text>(_font);
+#endif
    _text_copyright->setFont(_font);
    const auto copyright_string = std::vformat(tr("© {} Matthias Varnholt & dstar"), std::make_format_args(current_year));
+#ifdef __EMSCRIPTEN__
+   _text_copyright->setString(copyright_string.c_str());
+#else
    _text_copyright->setString(sf::String::fromUtf8(copyright_string.begin(), copyright_string.end()));
+#endif
    _text_copyright->setCharacterSize(12);
    _text_copyright->setFillColor(sf::Color{127, 171, 253});
 
    const auto copyright_bounds = _text_copyright->getLocalBounds();
    const auto copyright_x = static_cast<int32_t>((640.0f - copyright_bounds.size.x) / 2.0f - copyright_bounds.position.x);
+#ifdef __EMSCRIPTEN__
+   _text_copyright->position = {static_cast<float>(copyright_x), 341.0f};
+#else
    _text_copyright->setPosition({static_cast<float>(copyright_x), 341.0f});
+#endif
 }
 
 void MenuScreenMain::update(const sf::Time& /*dt*/)
@@ -80,6 +104,59 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto can_continue = !SaveState::allEmpty();
 
+#ifdef __EMSCRIPTEN__
+   auto draw_all_text = [&](sf::RenderTarget& target, const sf::RenderStates& drawStates)
+   {
+      target.draw(*_text_build, drawStates);
+      target.draw(*_text_copyright, drawStates);
+      if (can_continue)
+      {
+         target.draw(*_text_continue_item, drawStates);
+      }
+      else
+      {
+         target.draw(*_text_new_game_item, drawStates);
+      }
+      target.draw(*_text_options_item, drawStates);
+      target.draw(*_text_quit_item, drawStates);
+   };
+
+   // fade-in
+   if (_fade_in_active)
+   {
+      auto temp_texture = *sf::RenderTexture::create(sf::Vector2u{window.getSize()});
+      temp_texture.clear(sf::Color::Transparent);
+
+      // draw the base menu content to the temporary texture
+      MenuScreen::draw(temp_texture, states);
+      if (_text_continue_item)
+      {
+         draw_all_text(temp_texture, states);
+      }
+      temp_texture.display();
+
+      // create a sprite and apply alpha
+      const sf::Texture& temp_fade_texture = temp_texture.getTexture();
+      sf::Sprite temp_sprite;
+      temp_sprite.textureRect =
+         sf::FloatRect{{0.f, 0.f}, {static_cast<float>(temp_fade_texture.getSize().x), static_cast<float>(temp_fade_texture.getSize().y)}};
+      temp_sprite.color = sf::Color(255, 255, 255, _fade_alpha);
+
+      // composite the 2x-rendered temp texture at 1:1 (no view) so the full canvas is covered
+      sf::RenderStates composite_states{.blendMode = sf::BlendAlpha};
+      composite_states.texture = &temp_fade_texture;
+      window.draw(temp_sprite, composite_states);
+   }
+   else
+   {
+      // normal drawing without fade
+      MenuScreen::draw(window, states);
+      if (_text_continue_item)
+      {
+         draw_all_text(window, states);
+      }
+   }
+#else
    auto draw_all_text = [&](sf::RenderTarget& target)
    {
       target.draw(*_text_build);
@@ -126,6 +203,7 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
          draw_all_text(window);
       }
    }
+#endif
 }
 
 void MenuScreenMain::keyboardKeyPressed(sf::Keyboard::Key key)
@@ -169,19 +247,35 @@ void MenuScreenMain::loadingFinished()
       _layers["credits"]->_visible = false;
    }
 
+#ifdef __EMSCRIPTEN__
+   _text_continue_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text_continue_item = std::make_unique<sf::Text>(_font);
+#endif
    _text_continue_item->setFont(_font);
    _text_continue_item->setCharacterSize(12);
 
+#ifdef __EMSCRIPTEN__
+   _text_new_game_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text_new_game_item = std::make_unique<sf::Text>(_font);
+#endif
    _text_new_game_item->setFont(_font);
    _text_new_game_item->setCharacterSize(12);
 
+#ifdef __EMSCRIPTEN__
+   _text_options_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text_options_item = std::make_unique<sf::Text>(_font);
+#endif
    _text_options_item->setFont(_font);
    _text_options_item->setCharacterSize(12);
 
+#ifdef __EMSCRIPTEN__
+   _text_quit_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text_quit_item = std::make_unique<sf::Text>(_font);
+#endif
    _text_quit_item->setFont(_font);
    _text_quit_item->setCharacterSize(12);
 

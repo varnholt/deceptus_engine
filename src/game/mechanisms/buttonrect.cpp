@@ -65,7 +65,14 @@ std::string_view ButtonRect::objectName() const
 
 void ButtonRect::update(const sf::Time& /*dt*/)
 {
+#ifdef __EMSCRIPTEN__
+   {
+      const auto player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+      _player_intersects = sf::findIntersection(player_rect, _rect).hasValue();
+   }
+#else
    _player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
+#endif
 
    if (!isEnabled())
    {

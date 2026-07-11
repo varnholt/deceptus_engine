@@ -35,6 +35,9 @@
 // std
 #include <map>
 #include <memory>
+#ifdef __EMSCRIPTEN__
+#include <optional>
+#endif
 
 #ifdef DEVELOPMENT_MODE
 #include <vector>
@@ -256,7 +259,13 @@ protected:
    /// \param normal normal-map render target.
    /// \param z_index z layer to draw.
    /// \param predicate returns true for mechanisms that should be drawn.
-   void drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t z_index, auto predicate);
+   void drawMechanismsAtZ(
+      sf::RenderTarget& color,
+      sf::RenderTarget& normal,
+      int32_t z_index,
+      auto predicate,
+      const sf::RenderStates& states = {}
+   );
 
    /// \brief draws parallax tile maps at a specific z layer.
    /// \param target render target.
@@ -293,7 +302,7 @@ protected:
    /// \brief draws the player sprite and normal map contribution.
    /// \param color color render target.
    /// \param normal normal render target.
-   void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);
+   void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states = {});
 
    /// \brief draws cached physics outline chains for debug visualization.
    /// \param target render target.
@@ -351,7 +360,12 @@ protected:
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
    std::unique_ptr<BlurShader> _blur_shader;
    std::unique_ptr<GammaShader> _gamma_shader;
+#ifdef __EMSCRIPTEN__
+   std::optional<sf::Shader> _occluder_shader;                     //!< alpha-test shader for light occluder stencil rendering
+   std::optional<sf::Shader::UniformLocation> _ul_occluder_alpha;  //!< uniform location for alpha threshold in occluder shader
+#else
    sf::Shader _occluder_shader;  //!< alpha-test shader for light occluder stencil rendering
+#endif
    bool _screenshot = false;
 
    // box2d

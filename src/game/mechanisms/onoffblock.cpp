@@ -99,8 +99,13 @@ void OnOffBlock::setup(const GameDeserializeData& data)
    setObjectId(data._tmx_object->_name);
 
    _texture_map = TexturePool::getInstance().get("data/sprites/on_off_block.png");
+#ifdef __EMSCRIPTEN__
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture_map);
    _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+#endif
 
    _rectangle = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
@@ -200,7 +205,14 @@ void OnOffBlock::updateSpriteRect()
    _tu_tl = _sprite_index_current % count_columns;
    _tv_tl = _sprite_index_current / count_columns;
 
+#ifdef __EMSCRIPTEN__
+   _sprite->textureRect = {
+      {static_cast<float>(_tu_tl * PIXELS_PER_TILE), static_cast<float>(_tv_tl * PIXELS_PER_TILE)},
+      {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+   };
+#else
    _sprite->setTextureRect({{_tu_tl * PIXELS_PER_TILE, _tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+#endif
 }
 
 const sf::FloatRect& OnOffBlock::getPixelRect() const
@@ -208,9 +220,16 @@ const sf::FloatRect& OnOffBlock::getPixelRect() const
    return _rectangle;
 }
 
-void OnOffBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void OnOffBlock::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   target.draw(*_sprite);
+   draw(target, normal, {});
+}
+
+void OnOffBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture_map.get();
+   target.draw(*_sprite, draw_states);
 }
 
 void OnOffBlock::update(const sf::Time& dt)

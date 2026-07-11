@@ -76,7 +76,11 @@ void MenuScreenOptions::loadingFinished()
 
    auto make_item_text = [this]() -> std::unique_ptr<sf::Text>
    {
+#ifdef __EMSCRIPTEN__
+      auto text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
       auto text = std::make_unique<sf::Text>(_font);
+#endif
       text->setFont(_font);
       text->setCharacterSize(12);
       return text;
@@ -197,7 +201,11 @@ void MenuScreenOptions::updateLayers()
    _text_accept_button->setString(sftr("Accept"));
    placeTextRightOf(*_text_accept_button, accept_layer->_sprite->getGlobalBounds());
 
+#ifdef __EMSCRIPTEN__
+   auto update_item = [this](sf::Text& text, const sf::FloatRect& reference_rect, const auto& label, bool selected)
+#else
    auto update_item = [this](sf::Text& text, const sf::FloatRect& reference_rect, const sf::String& label, bool selected)
+#endif
    {
       text.setString(label);
       text.setFillColor(selected ? color_label_selected : color_label_normal);

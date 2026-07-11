@@ -57,7 +57,11 @@ MenuScreenControls::MenuScreenControls()
 {
    setFilename("data/menus/controls.psd");
 
+#ifdef __EMSCRIPTEN__
+   _text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text = std::make_unique<sf::Text>(_font);
+#endif
    _text->setFont(_font);
    _text->setCharacterSize(12);
 
@@ -187,13 +191,25 @@ void MenuScreenControls::loadingFinished()
       layer_entry.second->_visible = false;
    }
 
+#ifdef __EMSCRIPTEN__
+   _text_setkey_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text_setkey_button = std::make_unique<sf::Text>(_font);
+#endif
    _text_setkey_button->setCharacterSize(12);
    _text_setkey_button->setFillColor(color_label_normal);
+#ifdef __EMSCRIPTEN__
+   _text_defaults_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text_defaults_button = std::make_unique<sf::Text>(_font);
+#endif
    _text_defaults_button->setCharacterSize(12);
    _text_defaults_button->setFillColor(color_label_normal);
+#ifdef __EMSCRIPTEN__
+   _text_back_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text_back_button = std::make_unique<sf::Text>(_font);
+#endif
    _text_back_button->setCharacterSize(12);
    _text_back_button->setFillColor(color_label_normal);
 
@@ -549,7 +565,11 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    if (!cursor_on_disabled)
    {
       _cursor_highlight.setSize({580.0f, assign_row_height - 1.0f});
+#ifdef __EMSCRIPTEN__
+      _cursor_highlight.position = {30.0f, cursor_row_y};
+#else
       _cursor_highlight.setPosition({30.0f, cursor_row_y});
+#endif
       window.draw(_cursor_highlight, states);
    }
 
@@ -559,9 +579,17 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto title_prefix = (_device_row_index > 0) ? "< " : "  ";
    const auto title_suffix = (_device_row_index < static_cast<int32_t>(_device_entries.size()) - 1) ? " >" : "  ";
    const auto full_title = title_prefix + _device_name + title_suffix;
+#ifdef __EMSCRIPTEN__
+   _text->setString(full_title.c_str());
+#else
    _text->setString(sf::String::fromUtf8(full_title.begin(), full_title.end()));
+#endif
    const auto title_bounds = _text->getLocalBounds();
+#ifdef __EMSCRIPTEN__
+   _text->position = {(640.0f - title_bounds.size.x) / 2.0f, assign_title_y};
+#else
    _text->setPosition({(640.0f - title_bounds.size.x) / 2.0f, assign_title_y});
+#endif
    window.draw(*_text, states);
 
    _text->setCharacterSize(12);
@@ -569,11 +597,19 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    // column headers
    _text->setFillColor(color_header);
    _text->setString(sftr("Action"));
+#ifdef __EMSCRIPTEN__
+   _text->position = {assign_column_action_x, assign_header_y};
+#else
    _text->setPosition({assign_column_action_x, assign_header_y});
+#endif
    window.draw(*_text, states);
 
    _text->setString(_device_mode == DeviceMode::Keyboard ? sftr("Keyboard") : sftr("Controller"));
+#ifdef __EMSCRIPTEN__
+   _text->position = {assign_column_keyboard_x, assign_header_y};
+#else
    _text->setPosition({assign_column_keyboard_x, assign_header_y});
+#endif
    window.draw(*_text, states);
 
    // action rows
@@ -590,8 +626,16 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
       _text->setFillColor(row_color);
 
       const auto action_display_name = InputConfiguration::actionDisplayName(action);
+#ifdef __EMSCRIPTEN__
+      _text->setString(action_display_name.c_str());
+#else
       _text->setString(sf::String::fromUtf8(action_display_name.begin(), action_display_name.end()));
+#endif
+#ifdef __EMSCRIPTEN__
+      _text->position = {assign_column_action_x, row_y};
+#else
       _text->setPosition({assign_column_action_x, row_y});
+#endif
       window.draw(*_text, states);
 
       std::string binding_name = "--";
@@ -615,8 +659,16 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
             binding_name = InputConfiguration::buttonName(button_entry->second);
          }
       }
+#ifdef __EMSCRIPTEN__
+      _text->setString(binding_name.c_str());
+#else
       _text->setString(binding_name);
+#endif
+#ifdef __EMSCRIPTEN__
+      _text->position = {assign_column_keyboard_x, row_y};
+#else
       _text->setPosition({assign_column_keyboard_x, row_y});
+#endif
       window.draw(*_text, states);
    }
 
@@ -626,7 +678,11 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
       const auto reset_selected = (_action_row_index == row_count);
       _text->setFillColor(reset_selected ? color_row_reset_selected : color_row_reset_normal);
       _text->setString(sftr("Reset to Defaults"));
+#ifdef __EMSCRIPTEN__
+      _text->position = {assign_column_action_x, reset_row_y};
+#else
       _text->setPosition({assign_column_action_x, reset_row_y});
+#endif
       window.draw(*_text, states);
    }
 
@@ -635,14 +691,22 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    {
       _text->setFillColor(color_waiting);
       _text->setString(sftr("Press a key to assign  (Esc to cancel)"));
+#ifdef __EMSCRIPTEN__
+      _text->position = {assign_column_action_x, assign_status_y};
+#else
       _text->setPosition({assign_column_action_x, assign_status_y});
+#endif
       window.draw(*_text, states);
    }
    else if (_assignment_state == AssignmentState::WaitingForButton)
    {
       _text->setFillColor(color_waiting);
       _text->setString(sftr("Press a face or shoulder button  (Esc to cancel)"));
+#ifdef __EMSCRIPTEN__
+      _text->position = {assign_column_action_x, assign_status_y};
+#else
       _text->setPosition({assign_column_action_x, assign_status_y});
+#endif
       window.draw(*_text, states);
    }
 
@@ -656,11 +720,19 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    {
       _text->setString(sftr("Enter: assign keyboard key    Y button: assign controller button"));
    }
+#ifdef __EMSCRIPTEN__
+   _text->position = {assign_column_action_x, assign_hint_y};
+#else
    _text->setPosition({assign_column_action_x, assign_hint_y});
+#endif
    window.draw(*_text, states);
 
    _text->setString(sftr("Left/Right: change device    Esc: save and return"));
+#ifdef __EMSCRIPTEN__
+   _text->position = {assign_column_action_x, assign_hint_2_y};
+#else
    _text->setPosition({assign_column_action_x, assign_hint_2_y});
+#endif
    window.draw(*_text, states);
 
    if (_text_back_button)

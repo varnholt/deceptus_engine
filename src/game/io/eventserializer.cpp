@@ -264,7 +264,11 @@ void EventSerializer::play()
    Log::Info() << "re-playing " << _events.size() << " events";
 
    _playing = true;
+#ifdef __EMSCRIPTEN__
+   _elapsed_time = sf::Time{};
+#else
    _elapsed_time = sf::Time::Zero;
+#endif
    _current_event_index = 0;
    _playback_start_time = HighResClock::now();  // Record when playback started
 

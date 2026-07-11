@@ -7,8 +7,12 @@
 #include "game/io/valuereader.h"
 
 #include <filesystem>
+#ifdef __EMSCRIPTEN__
+#include <span>
+#else
 #include <fstream>
 #include <sstream>
+#endif
 
 namespace
 {
@@ -34,6 +38,28 @@ std::string_view ShaderLayer::objectName() const
    return "ShaderLayer";
 }
 
+#ifdef __EMSCRIPTEN__
+void ShaderLayer::checkUniforms()
+{
+   if (!_shader)
+   {
+      return;
+   }
+   const auto get_loc = [this](const char* name) -> std::optional<sf::Shader::UniformLocation>
+   {
+      auto result = _shader->getUniformLocation(name);
+      if (result.hasValue())
+      {
+         return *result;
+      }
+      return std::nullopt;
+   };
+   _u_texture_loc = get_loc("u_texture");
+   _u_time_loc = get_loc("u_time");
+   _u_resolution_loc = get_loc("u_resolution");
+   _u_uv_height_loc = get_loc("u_uv_height");
+}
+#else
 void ShaderLayer::checkUniforms(const std::string& shader_path)
 {
    std::ifstream file(shader_path);
@@ -49,7 +75,56 @@ void ShaderLayer::checkUniforms(const std::string& shader_path)
    _has_u_resolution = shader_source.find("u_resolution;") != std::string::npos;
    _has_u_uv_height  = shader_source.find("u_uv_height;")  != std::string::npos;
 }
+#endif
 
+#ifdef __EMSCRIPTEN__
+void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   if (!_shader)
+   {
+      return;
+   }
+
+   const auto x = _position.x;
+   const auto y = _position.y;
+   const auto w = _size.x;
+   const auto h = _size.y;
+
+   if (_u_texture_loc && _texture)
+   {
+      (void)_shader->setUniform(*_u_texture_loc, *_texture.get());
+   }
+   if (_u_time_loc)
+   {
+      _shader->setUniform(*_u_time_loc, _elapsed.asSeconds() + _time_offset);
+   }
+   if (_u_resolution_loc)
+   {
+      _shader->setUniform(*_u_resolution_loc, sf::Glsl::Vec2{w, h});
+   }
+   if (_u_uv_height_loc)
+   {
+      _shader->setUniform(*_u_uv_height_loc, _uv_height);
+   }
+
+   const sf::Vertex quad[] = {
+      sf::Vertex{.position = {x, y}, .color = sf::Color::White, .texCoords = {0.0f, _uv_height}},
+      sf::Vertex{.position = {x, y + h}, .color = sf::Color::White, .texCoords = {0.0f, 0.0f}},
+      sf::Vertex{.position = {x + w, y}, .color = sf::Color::White, .texCoords = {_uv_width, _uv_height}},
+      sf::Vertex{.position = {x + w, y + h}, .color = sf::Color::White, .texCoords = {_uv_width, 0.0f}}
+   };
+
+   sf::RenderStates draw_states = states;
+   draw_states.blendMode = sf::BlendAlpha;
+   draw_states.shader = _shader.get();
+   target.draw(std::span<const sf::Vertex>{quad, 4}, sf::PrimitiveType::TriangleStrip, draw_states);
+}
+#else
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    const auto x = _position.x;
@@ -83,6 +158,7 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 
    target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
 }
+#endif
 
 void ShaderLayer::update(const sf::Time& dt)
 {
@@ -126,12 +202,53 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    instance->setObjectId(data._tmx_object->_name);
    instance->_rect = bounding_rect;
    instance->addChunks(bounding_rect);
-   instance->_z_index    = ValueReader::readValue<int32_t>("z",            map).value_or(instance->_z_index);
-   instance->_uv_width   = ValueReader::readValue<float>  ("uv_width",     map).value_or(instance->_uv_width);
-   instance->_uv_height  = ValueReader::readValue<float>  ("uv_height",    map).value_or(instance->_uv_height);
-   instance->_time_offset = ValueReader::readValue<float> ("time_offset_s", map).value_or(instance->_time_offset);
+   instance->_z_index = ValueReader::readValue<int32_t>("z", map).value_or(instance->_z_index);
+   instance->_uv_width = ValueReader::readValue<float>("uv_width", map).value_or(instance->_uv_width);
+   instance->_uv_height = ValueReader::readValue<float>("uv_height", map).value_or(instance->_uv_height);
+   instance->_time_offset = ValueReader::readValue<float>("time_offset_s", map).value_or(instance->_time_offset);
 
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
+#ifdef __EMSCRIPTEN__
+   const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
+   if (vert_file.has_value() || frag_file.has_value())
+   {
+      sf::Shader::LoadFromFileSettings shader_settings;
+      if (vert_file.has_value())
+      {
+         // Check if vertex shader file exists before attempting to load
+         if (!std::filesystem::exists(vert_file.value()))
+         {
+            Log::Error() << "vertex shader file does not exist: " << vert_file.value();
+         }
+         else
+         {
+            shader_settings.vertexPath = vert_file.value();
+         }
+      }
+      if (frag_file.has_value())
+      {
+         // check if fragment shader file exists before attempting to load
+         if (!std::filesystem::exists(frag_file.value()))
+         {
+            Log::Error() << "fragment shader file does not exist: " << frag_file.value();
+         }
+         else
+         {
+            shader_settings.fragmentPath = frag_file.value();
+         }
+      }
+      auto loaded = sf::Shader::loadFromFile(shader_settings);
+      if (loaded.hasValue())
+      {
+         instance->_shader = std::make_unique<sf::Shader>(std::move(*loaded));
+         instance->checkUniforms();
+      }
+      else
+      {
+         Log::Error() << "error loading shader";
+      }
+   }
+#else
    if (vert_file.has_value())
    {
       // Check if vertex shader file exists before attempting to load
@@ -161,12 +278,17 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
       // analyze the fragment shader source to determine which uniforms are present
       instance->checkUniforms(frag_file.value());
    }
+#endif
 
    const auto texture_id = ValueReader::readValue<std::string>("texture", map);
    if (texture_id.has_value())
    {
       instance->_texture = TexturePool::getInstance().get(texture_id.value());
+#ifdef __EMSCRIPTEN__
+      instance->_texture->setWrapMode(sf::TextureWrapMode::Repeat);
+#else
       instance->_texture->setRepeated(true);
+#endif
 
       const auto smooth_texture = ValueReader::readValue<bool>("smooth_texture", map).value_or(false);
       instance->_texture->setSmooth(smooth_texture);

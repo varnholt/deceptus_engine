@@ -73,7 +73,7 @@ public:
    /// \brief draws player animations, equipped gear, and related visual effects.
    /// \param color color render target.
    /// \param normal normal render target.
-   void draw(sf::RenderTarget& color, sf::RenderTarget& normal);
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states = {});
 
    /// \brief draws a translucent stencil version of current player animations.
    /// \param color color render target.

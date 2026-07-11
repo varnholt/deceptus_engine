@@ -15,6 +15,9 @@
 #include <cmath>
 #include <numbers>
 #include <ranges>
+#ifdef __EMSCRIPTEN__
+#include <span>
+#endif
 
 // #define DEBUG_DRAW_LIGHT_SYSTEM
 
@@ -31,6 +34,15 @@ constexpr auto max_distance_m2 = 400.0f;  // depends on the view dimensions
 
 // write pass: write 1 to stencil for every fragment that should be in shadow.
 // stencilOnly=true suppresses color writes (equivalent to glColorMask(false,...)).
+#ifdef __EMSCRIPTEN__
+const sf::StencilMode stencil_write_mode{
+   .stencilComparison = sf::StencilComparison::Always,
+   .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
+   .stencilOnly = true,
+   .stencilReference = sf::StencilValue{1u},
+   .stencilMask = sf::StencilValue{~0u}
+};
+#else
 const sf::StencilMode stencil_write_mode{
    sf::StencilComparison::Always,
    sf::StencilUpdateOperation::Replace,
@@ -38,8 +50,18 @@ const sf::StencilMode stencil_write_mode{
    ~0u,  // mask
    true  // stencilOnly: no color output
 };
+#endif
 
 // read pass: only draw where stencil == 0 (not occluded by any shadow).
+#ifdef __EMSCRIPTEN__
+const sf::StencilMode stencil_test_mode{
+   .stencilComparison = sf::StencilComparison::Equal,
+   .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
+   .stencilOnly = false,
+   .stencilReference = sf::StencilValue{0u},
+   .stencilMask = sf::StencilValue{~0u}
+};
+#else
 const sf::StencilMode stencil_test_mode{
    sf::StencilComparison::Equal,
    sf::StencilUpdateOperation::Keep,
@@ -47,6 +69,18 @@ const sf::StencilMode stencil_test_mode{
    ~0u,   // mask
    false  // write color
 };
+#endif
+
+#ifdef __EMSCRIPTEN__
+std::optional<sf::Shader::UniformLocation> toStdOptional(sf::base::Optional<sf::Shader::UniformLocation> opt)
+{
+   if (opt.hasValue())
+   {
+      return {*opt};
+   }
+   return std::nullopt;
+}
+#endif
 }  // namespace
 
 LightSystem::LightSystem()
@@ -62,19 +96,65 @@ LightSystem::LightSystem()
       _unit_circle[i] = b2Vec2{x_normalized, y_normalized};
    }
 
+#ifdef __EMSCRIPTEN__
+   auto loaded = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/light.frag"});
+   if (!loaded.hasValue())
+   {
+      Log::Error() << "error loading bump mapping shader";
+      return;
+   }
+   _light_shader = std::move(*loaded);
+
+   _ul_light_count = toStdOptional(_light_shader->getUniformLocation("u_light_count"));
+   _ul_resolution = toStdOptional(_light_shader->getUniformLocation("u_resolution"));
+   _ul_ambient = toStdOptional(_light_shader->getUniformLocation("u_ambient"));
+   _ul_color_map = toStdOptional(_light_shader->getUniformLocation("color_map"));
+   _ul_light_map_1 = toStdOptional(_light_shader->getUniformLocation("light_map_1"));
+   _ul_light_map_2 = toStdOptional(_light_shader->getUniformLocation("light_map_2"));
+   _ul_normal_map = toStdOptional(_light_shader->getUniformLocation("normal_map"));
+
+   static const std::array<std::string, 6> position_names = {
+      "u_lights[0]._position",
+      "u_lights[1]._position",
+      "u_lights[2]._position",
+      "u_lights[3]._position",
+      "u_lights[4]._position",
+      "u_lights[5]._position"
+   };
+   static const std::array<std::string, 6> color_names = {
+      "u_lights[0]._color", "u_lights[1]._color", "u_lights[2]._color", "u_lights[3]._color", "u_lights[4]._color", "u_lights[5]._color"
+   };
+   for (auto index = 0u; index < 6u; index++)
+   {
+      _ul_light_positions[index] = toStdOptional(_light_shader->getUniformLocation(position_names[index]));
+      _ul_light_colors[index] = toStdOptional(_light_shader->getUniformLocation(color_names[index]));
+   }
+#else
    if (!_light_shader.loadFromFile("data/shaders/light.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading bump mapping shader";
    }
+#endif
 }
 
 void LightSystem::drawShadowQuads(
    sf::RenderTarget& target,
    std::shared_ptr<LightSystem::LightInstance> light,
    const std::vector<b2Body*>& candidates
+#ifdef __EMSCRIPTEN__
+   ,
+   const sf::RenderStates& states
+#endif
 ) const
 {
    const auto light_pos_m = light->_pos_m + light->_center_offset_m;
+
+#ifdef __EMSCRIPTEN__
+   sf::RenderStates shadow_states = states;
+   shadow_states.stencilMode = stencil_write_mode;
+#else
+   const sf::RenderStates shadow_states{stencil_write_mode};
+#endif
 
    for (auto* body : candidates)
    {
@@ -148,7 +228,11 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{stencil_write_mode});
+#ifdef __EMSCRIPTEN__
+               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
+#else
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
+#endif
             }
          }
          else if (shape_chain)
@@ -184,7 +268,11 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(vertex_1.x, vertex_1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{stencil_write_mode});
+#ifdef __EMSCRIPTEN__
+               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
+#else
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
+#endif
             }
          }
          else if (shape_polygon)
@@ -219,7 +307,11 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{stencil_write_mode});
+#ifdef __EMSCRIPTEN__
+               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
+#else
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
+#endif
             }
          }
       }
@@ -233,10 +325,8 @@ sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::Vie
 
    // then convert to viewport coordinates
    sf::Vector2f pixel;
-
    pixel.x = (normalized.x + 1.0f) / 2.0f;
    pixel.y = (-normalized.y + 1.0f) / 2.0f;
-
    return pixel;
 }
 
@@ -247,10 +337,14 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
 
    // then convert to viewport coordinates
    sf::Vector2f pixel;
+#ifdef __EMSCRIPTEN__
+   const auto target_size = target.getSize();
+   const auto viewport = view.computePixelViewport(sf::Vec2f{static_cast<float>(target_size.x), static_cast<float>(target_size.y)});
+#else
    const auto viewport = target.getViewport(view);
+#endif
    pixel.x = ((normalized.x + 1.0f) / (2.0f * static_cast<float>(viewport.size.x))) + static_cast<float>(viewport.position.x);
    pixel.y = ((-normalized.y + 1.0f) / (2.0f * static_cast<float>(viewport.size.y))) + static_cast<float>(viewport.position.y);
-
    return pixel;
 }
 
@@ -269,6 +363,65 @@ void LightSystem::setOccluderCallback(OccluderDrawCallback callback)
 
 void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
+#ifdef __EMSCRIPTEN__
+   if (!_light_shader.has_value())
+   {
+      return;
+   }
+
+   int32_t light_id = 0;
+
+   if (_ul_light_count.has_value())
+   {
+      _light_shader->setUniform(*_ul_light_count, static_cast<int32_t>(_active_lights.size()));
+   }
+   if (_ul_resolution.has_value())
+   {
+      _light_shader->setUniform(
+         *_ul_resolution, sf::Glsl::Vec2(static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y))
+      );
+   }
+   if (_ul_ambient.has_value())
+   {
+      _light_shader->setUniform(*_ul_ambient, sf::Glsl::Vec4(_ambient_color[0], _ambient_color[1], _ambient_color[2], _ambient_color[3]));
+   }
+
+   for (auto& light : _active_lights)
+   {
+      if (light_id >= 6)
+      {
+         break;
+      }
+
+      sf::Vector2f light_screen_pos = mapCoordsToPixelNormalized(
+         {light->_pos_m.x * PPM + light->_center_offset_px.x, light->_pos_m.y * PPM + light->_center_offset_px.y},
+         *LevelRegistry::getCurrent()->getLevelView().get()
+      );
+
+      if (_ul_light_positions[light_id].has_value())
+      {
+         _light_shader->setUniform(
+            *_ul_light_positions[light_id],
+            sf::Glsl::Vec3(static_cast<float>(light_screen_pos.x), static_cast<float>(1.0f - light_screen_pos.y), 0.075f)
+         );
+      }
+
+      if (_ul_light_colors[light_id].has_value())
+      {
+         _light_shader->setUniform(
+            *_ul_light_colors[light_id],
+            sf::Glsl::Vec4(
+               static_cast<float>(light->_color.r) / 255.0f,
+               static_cast<float>(light->_color.g) / 255.0f,
+               static_cast<float>(light->_color.b) / 255.0f,
+               static_cast<float>(light->_color.a) / 255.0f
+            )
+         );
+      }
+
+      light_id++;
+   }
+#else
    int32_t light_id = 0;
 
    _light_shader.setUniform("u_light_count", static_cast<int32_t>(_active_lights.size()));
@@ -330,9 +483,10 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
 
       light_id++;
    }
+#endif
 }
 
-void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates /*states*/)
+void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states)
 {
    _active_lights.clear();
 
@@ -422,13 +576,21 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       // clear the stencil buffer for this light via SFML's API.
       // raw glClear(GL_STENCIL_BUFFER_BIT) would be fine here but using the SFML
       // path keeps all stencil management consistent and avoids context surprises.
+#ifdef __EMSCRIPTEN__
+      target.clearStencil(sf::StencilValue{0u});
+#else
       target.clearStencil(0);
+#endif
 
       // draw occluders and shadow quads into the stencil buffer only.
       // each draw call carries stencil_write_mode so SFML enables the stencil test
       // and writes 1 for every occluded pixel instead of disabling it (default behaviour).
       drawOccluders(target);
+#ifdef __EMSCRIPTEN__
+      drawShadowQuads(target, light, shadow_candidates, states);
+#else
       drawShadowQuads(target, light, shadow_candidates);
+#endif
 
       // draw the light sprite only where stencil == 0 (not occluded).
       sf::Color channel_color;
@@ -445,6 +607,28 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
          channel_color = sf::Color(0, 0, 255, 255);  // blue
       }
 
+#ifdef __EMSCRIPTEN__
+      light->_sprite->color = channel_color;
+
+      sf::RenderStates render_states = states;
+      render_states.blendMode = sf::BlendAdd;
+      render_states.stencilMode = stencil_test_mode;
+      render_states.texture = light->_texture.get();
+
+      if (light->_shader && light->_texture)
+      {
+         auto texture_loc = light->_shader->getUniformLocation("u_texture");
+         if (texture_loc.hasValue())
+         {
+            (void)light->_shader->setUniform(*texture_loc, *light->_texture);
+         }
+         if (light->_shader_update_callback)
+         {
+            light->_shader_update_callback(*light->_shader, *light, _clock.getElapsedTime().asSeconds());
+         }
+         render_states.shader = light->_shader.get();
+      }
+#else
       light->_sprite->setColor(channel_color);
 
       sf::RenderStates render_states{sf::BlendAdd};
@@ -459,6 +643,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
          }
          render_states.shader = light->_shader.get();
       }
+#endif
 
       target.draw(*light->_sprite, render_states);
 
@@ -476,18 +661,45 @@ void LightSystem::draw(
    const std::shared_ptr<sf::RenderTexture>& normal_map
 )
 {
+#ifdef __EMSCRIPTEN__
+   if (!_light_shader.has_value())
+   {
+      return;
+   }
+#endif
+
    // texture uniforms only need to be rebound when the render texture objects change
    // (i.e. on resize); skip the setUniform calls when the pointers are unchanged.
    const auto* color_tex = &color_map->getTexture();
    const auto* light_tex = &light_map->getTexture();
    const auto* light2_tex = &light_map2->getTexture();
    const auto* normal_tex = &normal_map->getTexture();
+
    if (color_tex != _last_color_map || light_tex != _last_light_map || light2_tex != _last_light_map2 || normal_tex != _last_normal_map)
    {
+#ifdef __EMSCRIPTEN__
+      if (_ul_color_map.has_value())
+      {
+         (void)_light_shader->setUniform(*_ul_color_map, *color_tex);
+      }
+      if (_ul_light_map_1.has_value())
+      {
+         (void)_light_shader->setUniform(*_ul_light_map_1, *light_tex);
+      }
+      if (_ul_light_map_2.has_value())
+      {
+         (void)_light_shader->setUniform(*_ul_light_map_2, *light2_tex);
+      }
+      if (_ul_normal_map.has_value())
+      {
+         (void)_light_shader->setUniform(*_ul_normal_map, *normal_tex);
+      }
+#else
       _light_shader.setUniform("color_map", *color_tex);
       _light_shader.setUniform("light_map_1", *light_tex);
       _light_shader.setUniform("light_map_2", *light2_tex);
       _light_shader.setUniform("normal_map", *normal_tex);
+#endif
       _last_color_map = color_tex;
       _last_light_map = light_tex;
       _last_light_map2 = light2_tex;
@@ -497,8 +709,13 @@ void LightSystem::draw(
    // update shader uniforms
    updateLightShader(target);
 
+#ifdef __EMSCRIPTEN__
+   const sf::Texture& light_color_texture = color_map->getTexture();
+   target.draw(light_color_texture, sf::RenderStates{.shader = &(*_light_shader)});
+#else
    sf::Sprite sprite(color_map->getTexture());
    target.draw(sprite, &_light_shader);
+#endif
 }
 
 void LightSystem::drawDebug(sf::RenderTarget& target)
@@ -599,18 +816,29 @@ void LightSystem::LightInstance::deserialize(const nlohmann::json& node)
 
    if (_sprite && _texture)
    {
+#ifdef __EMSCRIPTEN__
+      _sprite->textureRect =
+         sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(_texture->getSize().x), static_cast<float>(_texture->getSize().y)}};
+      _sprite->scale = {static_cast<float>(_width_px) / _texture->getSize().x, static_cast<float>(_height_px) / _texture->getSize().y};
+      _sprite->color = _color;
+#else
       _sprite->setTexture(*_texture);
       _sprite->setTextureRect(
          sf::IntRect({0, 0}, {static_cast<int32_t>(_texture->getSize().x), static_cast<int32_t>(_texture->getSize().y)})
       );
       _sprite->setScale({static_cast<float>(_width_px) / _texture->getSize().x, static_cast<float>(_height_px) / _texture->getSize().y});
       _sprite->setColor(_color);
+#endif
    }
 }
 
 void LightSystem::LightInstance::updateSpritePosition() const
 {
+#ifdef __EMSCRIPTEN__
+   _sprite->position = sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f);
+#else
    _sprite->setPosition(sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
+#endif
 }
 
 std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(GameNode* parent, const GameDeserializeData& data)
@@ -693,16 +921,26 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    // light->_sprite.setColor(light->_color);
 
    light->_texture = TexturePool::getInstance().get(texture);
+#ifdef __EMSCRIPTEN__
+   light->_sprite = std::make_unique<sf::Sprite>();
+   light->_sprite->textureRect =
+      sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(light->_texture->getSize().x), static_cast<float>(light->_texture->getSize().y)}};
+#else
    light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
    light->_sprite->setTextureRect(
       sf::IntRect({0, 0}, {static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y)})
    );
+#endif
 
    light->updateSpritePosition();
 
    const auto scale_x = static_cast<float>(light->_width_px) / static_cast<float>(light->_texture->getSize().x);
    const auto scale_y = static_cast<float>(light->_height_px) / static_cast<float>(light->_texture->getSize().y);
+#ifdef __EMSCRIPTEN__
+   light->_sprite->scale = {scale_x, scale_y};
+#else
    light->_sprite->setScale({scale_x, scale_y});
+#endif
 
    return light;
 }
@@ -711,10 +949,16 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 {
    auto light = std::make_shared<LightSystem::LightInstance>(parent);
    light->_texture = TexturePool::getInstance().get("data/light/smooth.png");
+#ifdef __EMSCRIPTEN__
+   light->_sprite = std::make_unique<sf::Sprite>();
+   light->_sprite->textureRect =
+      sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(light->_texture->getSize().x), static_cast<float>(light->_texture->getSize().y)}};
+#else
    light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
    light->_sprite->setTextureRect(
       sf::IntRect({0, 0}, {static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y)})
    );
+#endif
    light->deserialize(node);
    return light;
 }

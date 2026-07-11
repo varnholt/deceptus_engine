@@ -76,6 +76,12 @@ int main(int /*argc*/, char** /*argv*/)
 
    LocalizationLoader::loadFromConfig();
    debugAuthors();
+
+#ifdef __EMSCRIPTEN__
+   auto graphics_context = sf::GraphicsContext::create();
+   auto audio_context = sf::AudioContext::create();
+#endif
+
    Test test;
    Game game;
    game.initialize();

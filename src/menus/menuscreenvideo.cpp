@@ -9,6 +9,11 @@
 #include <cmath>
 #include <format>
 
+#ifdef __EMSCRIPTEN__
+#include <SFML/Window/VideoMode.hpp>
+#include <SFML/Window/VideoModeUtils.hpp>
+#endif
+
 static const auto STEP_SIZE = 10;
 
 MenuScreenVideo::MenuScreenVideo()
@@ -17,7 +22,11 @@ MenuScreenVideo::MenuScreenVideo()
 
    _video_modes = {{640, 360}, {1280, 720}, {1366, 768}, {1600, 900}, {1920, 1080}, {2560, 1440}, {3840, 2160}};
 
+#ifdef __EMSCRIPTEN__
+   const auto desktop_mode = sf::VideoModeUtils::getDesktopMode();
+#else
    const auto desktop_mode = sf::VideoMode::getDesktopMode();
+#endif
    std::erase_if(
       _video_modes,
       [&desktop_mode](const std::array<int32_t, 2>& mode)
@@ -225,7 +234,11 @@ void MenuScreenVideo::loadingFinished()
 
    auto make_label = [this]() -> std::unique_ptr<sf::Text>
    {
+#ifdef __EMSCRIPTEN__
+      auto text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
       auto text = std::make_unique<sf::Text>(_font);
+#endif
       text->setFont(_font);
       text->setCharacterSize(12);
       return text;
@@ -233,7 +246,11 @@ void MenuScreenVideo::loadingFinished()
 
    _resolution_text = make_label();
    _resolution_text->setFillColor(sf::Color::White);
+#ifdef __EMSCRIPTEN__
+   _resolution_text->position = {382, 154};
+#else
    _resolution_text->setPosition({382, 154});
+#endif
 
    _resolution_label = make_label();
    _resolution_help_text = make_label();
@@ -354,8 +371,13 @@ void MenuScreenVideo::updateLayers()
    _layers["brightness_h_0"]->_visible = !brightness_selected;
    _layers["brightness_h_1"]->_visible = brightness_selected;
 
+#ifdef __EMSCRIPTEN__
+   _layers["brightness_h_0"]->_sprite->origin = {50 - (brightness_value * 100.0f), 0};
+   _layers["brightness_h_1"]->_sprite->origin = {50 - (brightness_value * 100.0f), 0};
+#else
    _layers["brightness_h_0"]->_sprite->setOrigin({50 - (brightness_value * 100.0f), 0});
    _layers["brightness_h_1"]->_sprite->setOrigin({50 - (brightness_value * 100.0f), 0});
+#endif
 
    _layers["displayMode_highlight"]->_visible = display_mode_selected;
    _layers["displayMode_arrows"]->_visible = display_mode_selected;
@@ -385,7 +407,11 @@ void MenuScreenVideo::updateLayers()
    if (!_video_modes.empty())
    {
       const auto& mode = _video_modes[resolution_index];
+#ifdef __EMSCRIPTEN__
+      _resolution_text->setString(std::format("{}x{}", mode[0], mode[1]).c_str());
+#else
       _resolution_text->setString(std::format("{}x{}", mode[0], mode[1]));
+#endif
    }
 
    // display mode row
@@ -397,7 +423,11 @@ void MenuScreenVideo::updateLayers()
 
    placeTextCentered(*_displaymode_help_text, _row_help_base_rect);
 
+#ifdef __EMSCRIPTEN__
+   const sf::Utf8String display_mode_strings[] = {sftr("Windowed"), sftr("Borderless"), sftr("Fullscreen")};
+#else
    const sf::String display_mode_strings[] = {sftr("Windowed"), sftr("Borderless"), sftr("Fullscreen")};
+#endif
    _displaymode_value_text->setString(display_mode_strings[display_mode_value_index]);
    placeTextLeft(*_displaymode_value_text, rowRect(_row_value_base_rect, 0));
 

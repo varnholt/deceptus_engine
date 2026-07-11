@@ -52,8 +52,13 @@ void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
 
+#ifdef __EMSCRIPTEN__
+   const auto view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
+   states.view = view;
+#else
    sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
+#endif
 
    for (auto& layer : _layer_stack)
    {
@@ -181,6 +186,18 @@ void InGameMenuPage::load()
       tmp->_visible = true;
       tmp->_name = layer.getName();
 
+#ifdef __EMSCRIPTEN__
+      auto texture = std::make_shared<sf::Texture>(
+         std::move(*sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())}))
+      );
+
+      texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
+
+      auto sprite = std::make_shared<sf::Sprite>();
+      sprite->position = {static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
+      sprite->color = sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())};
+      sprite->textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(layer.getWidth()), static_cast<float>(layer.getHeight())}};
+#else
       auto texture =
          std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
 
@@ -189,6 +206,7 @@ void InGameMenuPage::load()
       auto sprite = std::make_shared<sf::Sprite>(*texture);
       sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
       sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
+#endif
 
       tmp->_texture = texture;
       tmp->_sprite = sprite;

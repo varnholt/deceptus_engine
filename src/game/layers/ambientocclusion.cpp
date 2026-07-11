@@ -66,9 +66,17 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
          y_index_px += height_px;
       }
 
+#ifdef __EMSCRIPTEN__
+      sf::Sprite sprite;
+      sprite.position = {static_cast<float>(x_px - _config._offset_x_px), static_cast<float>(y_px - _config._offset_y_px)};
+      sprite.textureRect = {
+         {static_cast<float>(x_index_px), static_cast<float>(y_index_px)}, {static_cast<float>(width_px), static_cast<float>(height_px)}
+      };
+#else
       sf::Sprite sprite(*_texture);
       sprite.setPosition({static_cast<float>(x_px - _config._offset_x_px), static_cast<float>(y_px - _config._offset_y_px)});
       sprite.setTextureRect({{x_index_px, y_index_px}, {width_px, height_px}});
+#endif
 
       group_x = (x_px >> 8);
       group_y = (y_px >> 8);
@@ -78,12 +86,16 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
    uv_file.close();
 }
 
-void AmbientOcclusion::draw(sf::RenderTarget& window)
+void AmbientOcclusion::draw(sf::RenderTarget& window, const sf::RenderStates& states)
 {
    const auto& player_pos_px = PlayerRegistry::getFirst()->getPixelPositionInt();
 
    const int32_t player_chunk_x = player_pos_px.x >> 8;
    const int32_t player_chunk_y = player_pos_px.y >> 8;
+
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   draw_states.blendMode = sf::BlendAlpha;
 
    for (auto y = player_chunk_y - chunk_range_y_left; y < player_chunk_y + chunk_range_y_right; y++)
    {
@@ -105,7 +117,7 @@ void AmbientOcclusion::draw(sf::RenderTarget& window)
 
          for (const auto& sprite : x_it->second)
          {
-            window.draw(sprite, {sf::BlendAlpha});
+            window.draw(sprite, draw_states);
          }
       }
    }

@@ -37,8 +37,28 @@ bool StencilTileMap::load(
       return false;
    }
 
+#ifdef __EMSCRIPTEN__
+   auto loaded_shader =
+      sf::Shader::loadFromFile({.vertexPath = "data/shaders/stencil_write.vert", .fragmentPath = "data/shaders/stencil_write.frag"});
+   if (loaded_shader.hasValue())
+   {
+      _stencil_shader = std::move(*loaded_shader);
+      const auto ul_tex = _stencil_shader->getUniformLocation("u_texture_sampler");
+      _ul_texture_sampler = ul_tex.hasValue() ? std::optional{*ul_tex} : std::nullopt;
+      const auto ul_alpha_threshold = _stencil_shader->getUniformLocation("u_alpha_threshold");
+      if (ul_alpha_threshold.hasValue())
+      {
+         _stencil_shader->setUniform(*ul_alpha_threshold, _alpha_threshold);
+      }
+   }
+   else
+   {
+      Log::Error() << "failed to load stencil_write shader";
+   }
+#else
    _stencil_shader.loadFromFile("data/shaders/stencil_write.vert", "data/shaders/stencil_write.frag");
    _stencil_shader.setUniform("u_alpha_threshold", _alpha_threshold);
+#endif
 
    return true;
 }
@@ -52,14 +72,33 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    }
 
    // draw the masking geometry (stencil_tilemap) first
+#ifdef __EMSCRIPTEN__
+   if (_stencil_shader.has_value() && _ul_texture_sampler.has_value())
+   {
+      (void)_stencil_shader->setUniform(*_ul_texture_sampler, sf::Shader::CurrentTexture);
+   }
+   const auto use_shader = _alpha_threshold < 0.99f;
+
+   auto stencil_render_state = states;
+   stencil_render_state.shader = (use_shader && _stencil_shader.has_value()) ? &(*_stencil_shader) : nullptr;
+   stencil_render_state.stencilMode = sf::StencilMode{
+      .stencilComparison = sf::StencilComparison::Always,
+      .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
+      .stencilReference = sf::StencilValue{1u},
+      .stencilMask = sf::StencilValue{0xffu},
+      .stencilOnly = true
+   };
+
+   color.clearStencil(sf::StencilValue{0u});
+#else
    _stencil_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
    const auto use_shader = _alpha_threshold < 0.99f;
 
    auto stencil_render_state = states;
    stencil_render_state.shader = use_shader ? &_stencil_shader : nullptr;
-   stencil_render_state.stencilMode =  
+   stencil_render_state.stencilMode =
          sf::StencilMode( // set up stencil
-            {sf::StencilComparison::Always},  
+            {sf::StencilComparison::Always},
             {sf::StencilUpdateOperation::Replace},
             1,
             0xff,
@@ -67,6 +106,7 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
          );
 
    color.clearStencil(0);
+#endif
 
    const auto visible = _stencil_tilemap->isVisible();
    _stencil_tilemap->setVisible(true);
@@ -75,14 +115,24 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
 
    // then draw the masked content
    auto color_render_state = states;
+#ifdef __EMSCRIPTEN__
+   color_render_state.stencilMode = sf::StencilMode{
+      .stencilComparison = sf::StencilComparison::Equal,
+      .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
+      .stencilReference = sf::StencilValue{1u},
+      .stencilMask = sf::StencilValue{0xffu},
+      .stencilOnly = false
+   };
+#else
    color_render_state.stencilMode =
          sf::StencilMode(  // set up stencil
-            {sf::StencilComparison::Equal},  
+            {sf::StencilComparison::Equal},
             {sf::StencilUpdateOperation::Keep},
             1,
             0xff,
             false
          );
+#endif
 
    TileMap::draw(color, normal, color_render_state);
 
@@ -101,6 +151,7 @@ const std::string& StencilTileMap::getStencilReference() const
 
 void StencilTileMap::dumpStencilAndColorToPng(sf::RenderTarget& color, const sf::RenderStates& states) const
 {
+#ifndef __EMSCRIPTEN__
    static int32_t _frame_counter{0};
    _frame_counter += 1;
    if ((_frame_counter % 1000) != 0)
@@ -174,4 +225,5 @@ void StencilTileMap::dumpStencilAndColorToPng(sf::RenderTarget& color, const sf:
    const std::string filename = "debug/composite__" + getLayerName() + "__" + iso8601Date() + ".png";
    sf::Image image = debug_texture.getTexture().copyToImage();
    (void)image.saveToFile(filename);
+#endif
 }

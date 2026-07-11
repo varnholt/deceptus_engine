@@ -24,6 +24,15 @@ public:
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
+#ifdef __EMSCRIPTEN__
+   /// \brief draws the firefly sprite with explicit render states (used in WASM to carry the level view).
+   /// \param target color render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+#endif
+
    /// \brief advances the lemniscate position, virtual-center follow, animation, and render depth.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;

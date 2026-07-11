@@ -36,12 +36,14 @@ struct BitmapFont
    /// \param x left start position in pixels.
    /// \param y top start position in pixels.
    /// \param color optional tint color applied to all glyphs for this draw call.
+   /// \param states render states to apply (carries .view for WASM camera transform).
    void draw(
       sf::RenderTarget& window,
       const std::vector<std::shared_ptr<sf::IntRect>>& coords,
       int32_t x = 0,
       int32_t y = 0,
-      const std::optional<sf::Color>& color = std::nullopt
+      const std::optional<sf::Color>& color = std::nullopt,
+      const sf::RenderStates& states = sf::RenderStates{}
    );
 
    std::shared_ptr<sf::Texture> _texture;

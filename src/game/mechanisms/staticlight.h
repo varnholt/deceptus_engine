@@ -28,6 +28,15 @@ public:
    /// \param color secondary render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& color) override;
 
+#ifdef __EMSCRIPTEN__
+   /// \brief draws the light sprite with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param color secondary render target, unused by this mechanism.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& color, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+#endif
+
    /// \brief updates procedural flicker amount from global time.
    /// \param time elapsed frame time, unused directly.
    void update(const sf::Time& time) override;

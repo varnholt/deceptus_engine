@@ -93,26 +93,25 @@ std::string_view MovingPlatform::objectName() const
 
 void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   for (auto& sprite : _sprites)
-   {
-      sprite.setTexture(*_texture_map);
-   }
+   draw(color, normal, {});
+}
 
+void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+   sf::RenderStates color_states = states;
+   color_states.texture = _texture_map.get();
    for (const auto& sprite : _sprites)
    {
-      color.draw(sprite);
+      color.draw(sprite, color_states);
    }
 
    if (_normal_map)
    {
-      for (auto& sprite : _sprites)
-      {
-         sprite.setTexture(*_normal_map);
-      }
-
+      sf::RenderStates normal_states = states;
+      normal_states.texture = _normal_map.get();
       for (const auto& sprite : _sprites)
       {
-         normal.draw(sprite);
+         normal.draw(sprite, normal_states);
       }
    }
 }
@@ -276,11 +275,19 @@ void MovingPlatform::setup(const GameDeserializeData& data)
          }
       }
 
+#ifdef __EMSCRIPTEN__
+      sf::Sprite sprite;
+      sprite.textureRect = sf::IntRect(
+         {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
+         // 1 platform tile and one background tile for perspective
+      );
+#else
       sf::Sprite sprite(*_texture_map);
       sprite.setTextureRect(sf::IntRect(
          {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
          // 1 platform tile and one background tile for perspective
       ));
+#endif
 
       addSprite(sprite);
    }
@@ -428,7 +435,11 @@ void MovingPlatform::update(const sf::Time& delta_time)
       const auto pos_body_x_px = (_body->GetPosition().x * PPM) + (horizontal * sprite_index * PIXELS_PER_TILE);
       const auto pos_body_y_px = (_body->GetPosition().y * PPM) - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
 
+#ifdef __EMSCRIPTEN__
+      sprite.position = {pos_body_x_px, pos_body_y_px};
+#else
       sprite.setPosition({pos_body_x_px, pos_body_y_px});
+#endif
       auto update_sprite_rect = false;
       auto texture_u = 0;
       auto texture_v = 0;
@@ -469,7 +480,14 @@ void MovingPlatform::update(const sf::Time& delta_time)
 
       if (update_sprite_rect)
       {
+#ifdef __EMSCRIPTEN__
+         sprite.textureRect = {
+            {static_cast<float>(texture_u), static_cast<float>(texture_v)},
+            {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE * 2)}
+         };
+#else
          sprite.setTextureRect({{texture_u, texture_v}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}});
+#endif
       }
 
       sprite_index++;

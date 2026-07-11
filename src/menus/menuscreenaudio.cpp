@@ -203,7 +203,11 @@ void MenuScreenAudio::loadingFinished()
 
    auto make_label = [this]() -> std::unique_ptr<sf::Text>
    {
+#ifdef __EMSCRIPTEN__
+      auto text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
       auto text = std::make_unique<sf::Text>(_font);
+#endif
       text->setFont(_font);
       text->setCharacterSize(12);
       return text;
@@ -285,6 +289,15 @@ void MenuScreenAudio::updateLayers()
       _volume_layers_music[index]->_visible = (index == music_volume_layer_index);
    }
 
+#ifdef __EMSCRIPTEN__
+   _layers["master_h_0"]->_sprite->origin = {50.0f - master_volume, 0.0f};
+   _layers["sfxVolume_h_0"]->_sprite->origin = {50.0f - sfx_volume, 0.0f};
+   _layers["mscVolume_h_0"]->_sprite->origin = {50.0f - music_volume, 0.0f};
+
+   _layers["master_h_1"]->_sprite->origin = {50.0f - master_volume, 0.0f};
+   _layers["sfxVolume_h_1"]->_sprite->origin = {50.0f - sfx_volume, 0.0f};
+   _layers["mscVolume_h_1"]->_sprite->origin = {50.0f - music_volume, 0.0f};
+#else
    _layers["master_h_0"]->_sprite->setOrigin({50.0f - master_volume, 0.0f});
    _layers["sfxVolume_h_0"]->_sprite->setOrigin({50.0f - sfx_volume, 0.0f});
    _layers["mscVolume_h_0"]->_sprite->setOrigin({50.0f - music_volume, 0.0f});
@@ -292,6 +305,7 @@ void MenuScreenAudio::updateLayers()
    _layers["master_h_1"]->_sprite->setOrigin({50.0f - master_volume, 0.0f});
    _layers["sfxVolume_h_1"]->_sprite->setOrigin({50.0f - sfx_volume, 0.0f});
    _layers["mscVolume_h_1"]->_sprite->setOrigin({50.0f - music_volume, 0.0f});
+#endif
 
    if (!_master_label)
    {

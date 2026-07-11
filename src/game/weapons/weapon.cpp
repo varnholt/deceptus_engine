@@ -9,7 +9,7 @@ WeaponType Weapon::getWeaponType() const
    return _type;
 }
 
-void Weapon::draw(sf::RenderTarget& /*target*/)
+void Weapon::draw(sf::RenderTarget& /*target*/, const sf::RenderStates& /*states*/)
 {
 }
 

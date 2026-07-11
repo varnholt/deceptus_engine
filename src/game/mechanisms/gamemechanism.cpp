@@ -122,6 +122,11 @@ void GameMechanism::draw(sf::RenderTarget& /*target*/, sf::RenderTarget& /*norma
 {
 }
 
+void GameMechanism::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& /*states*/)
+{
+   draw(target, normal);
+}
+
 void GameMechanism::update(const sf::Time& /*dt*/)
 {
 }

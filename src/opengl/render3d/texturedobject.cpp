@@ -1,6 +1,6 @@
 #include "texturedobject.h"
-#include <iostream>
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 TexturedObject::TexturedObject(
    const std::string& objFile,
@@ -97,9 +97,16 @@ void TexturedObject::loadTexture(const std::string& texture_file_path)
       _texture_id = 0;
    }
 
+#ifdef __EMSCRIPTEN__
+   auto image_opt = sf::Image::loadFromFile(texture_file_path);
+   if (image_opt.hasValue())
+   {
+      auto& image = *image_opt;
+#else
    sf::Image image;
    if (image.loadFromFile(texture_file_path))
    {
+#endif
       glGenTextures(1, &_texture_id);
       glBindTexture(GL_TEXTURE_2D, _texture_id);
 

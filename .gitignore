@@ -18,3 +18,8 @@ build_*/*
 /doc/doxygen-html
 /lab/patch_tool/target
 /lab/patch_tool/Cargo.lock
+/lab/wasm_browser_test/.venv
+/lab/wasm_browser_test/__pycache__
+/lab/wasm_browser_test/.pytest_cache
+/lab/wasm_browser_test/diag_*.png
+/lab/wasm_browser_test/last_screenshot.png

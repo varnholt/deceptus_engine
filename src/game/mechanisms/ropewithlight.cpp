@@ -61,8 +61,16 @@ std::string_view RopeWithLight::objectName() const
 
 void RopeWithLight::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   Rope::draw(color, normal);
-   color.draw(*_lamp_sprite);
+   draw(color, normal, {});
+}
+
+void RopeWithLight::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+   Rope::draw(color, normal, states);
+
+   sf::RenderStates lamp_states = states;
+   lamp_states.texture = _texture.get();
+   color.draw(*_lamp_sprite, lamp_states);
 }
 
 void RopeWithLight::update(const sf::Time& dt)
@@ -78,8 +86,13 @@ void RopeWithLight::update(const sf::Time& dt)
 
    const auto angle_rad = static_cast<float>(atan2(c_m.y, c_m.x));
 
+#ifdef __EMSCRIPTEN__
+   _lamp_sprite->rotation = sf::degrees(90.0f + FACTOR_RAD_TO_DEG * angle_rad);
+   _lamp_sprite->position = {_light->_pos_m.x * PPM, _light->_pos_m.y * PPM};
+#else
    _lamp_sprite->setRotation(sf::degrees(90.0f + FACTOR_RAD_TO_DEG * angle_rad));
    _lamp_sprite->setPosition({_light->_pos_m.x * PPM, _light->_pos_m.y * PPM});
+#endif
 }
 
 void RopeWithLight::setup(const GameDeserializeData& data)
@@ -87,7 +100,11 @@ void RopeWithLight::setup(const GameDeserializeData& data)
    Rope::setup(data);
 
    // set up texture
+#ifdef __EMSCRIPTEN__
+   _lamp_sprite = std::make_unique<sf::Sprite>();
+#else
    _lamp_sprite = std::make_unique<sf::Sprite>(*_texture);
+#endif
 
    // cut off 1st 4 pixels of the texture rect since there's some rope pixels in the spriteset
    _lamp_sprite_rects = {
@@ -99,10 +116,17 @@ void RopeWithLight::setup(const GameDeserializeData& data)
    const auto& map = data._tmx_object->_properties->_map;
 
    auto sprite_index = std::clamp(ValueReader::readValue<int32_t>("sprite", map).value_or(1) - 1, 0, 3);
+#ifdef __EMSCRIPTEN__
+   _lamp_sprite->textureRect = _lamp_sprite_rects[sprite_index];
+   _lamp_sprite->origin = {
+      static_cast<float>(_lamp_sprite_rects[sprite_index].size.x / 2), static_cast<float>(_lamp_sprite_rects[sprite_index].size.y / 2)
+   };
+#else
    _lamp_sprite->setTextureRect(_lamp_sprite_rects[sprite_index]);
    _lamp_sprite->setOrigin(
       {static_cast<float>(_lamp_sprite_rects[sprite_index].size.x / 2), static_cast<float>(_lamp_sprite_rects[sprite_index].size.y / 2)}
    );
+#endif
 
    // add raycast light; exclude all chain bodies from shadow casting — they are tiny
    // physics proxies that produce degenerate or distracting shadow quads.
@@ -118,10 +142,17 @@ void RopeWithLight::setup(const GameDeserializeData& data)
       _light->_height_px = height.value();
    }
 
+#ifdef __EMSCRIPTEN__
+   _light->_sprite->scale = {
+      static_cast<float>(_light->_width_px) / _light->_texture->getSize().x,
+      static_cast<float>(_light->_height_px) / _light->_texture->getSize().y
+   };
+#else
    _light->_sprite->setScale(
       {static_cast<float>(_light->_width_px) / _light->_texture->getSize().x,
        static_cast<float>(_light->_height_px) / _light->_texture->getSize().y}
    );
+#endif
 
    for (auto* body : _chain_elements)
    {

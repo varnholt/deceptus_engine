@@ -150,8 +150,13 @@ void Lever::setup(const GameDeserializeData& data)
    _rect.size.y = PIXELS_PER_TILE * 2;
 
    _texture = TexturePool::getInstance().get("data/sprites/levers.png");
+#ifdef __EMSCRIPTEN__
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->position = {x, y};
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
    _sprite->setPosition({x, y});
+#endif
    // _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
 
    setObjectId(data._tmx_object->_name);
@@ -165,19 +170,35 @@ void Lever::updateSprite()
 {
    if (_reached && (_target_state == State::Right))
    {
+#ifdef __EMSCRIPTEN__
+      _sprite->textureRect = {
+         {static_cast<float>((static_cast<int32_t>(_idle_time_s * idle_animation_speed) % 6) * PIXELS_PER_TILE * 3),
+          static_cast<float>(PIXELS_PER_TILE * 3 * 2)},
+         {static_cast<float>(PIXELS_PER_TILE * 3), static_cast<float>(PIXELS_PER_TILE * 3)}
+      };
+#else
       _sprite->setTextureRect(
          {{(static_cast<int32_t>(_idle_time_s * idle_animation_speed) % 6) * PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3 * 2},
           {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}}
       );
+#endif
    }
    else
    {
       const auto left = _dir == -1;
 
+#ifdef __EMSCRIPTEN__
+      _sprite->textureRect = {
+         {static_cast<float>(left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE)),
+          static_cast<float>(left ? (3 * PIXELS_PER_TILE) : 0)},
+         {static_cast<float>(PIXELS_PER_TILE * 3), static_cast<float>(PIXELS_PER_TILE * 3)}
+      };
+#else
       _sprite->setTextureRect(
          {{left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE), left ? (3 * PIXELS_PER_TILE) : 0},
           {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}}
       );
+#endif
    }
 }
 
@@ -269,17 +290,30 @@ void Lever::resolveTargets(const std::vector<std::shared_ptr<GameMechanism>>& me
 void Lever::update(const sf::Time& dt)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+#ifdef __EMSCRIPTEN__
+   _player_at_lever = sf::findIntersection(_rect, player_rect).hasValue();
+#else
    _player_at_lever = _rect.findIntersection(player_rect).has_value();
+#endif
 
    if (!_handle_available)
    {
       constexpr auto no_handle_col = 10;
       constexpr auto no_handle_row = 2;
+#ifdef __EMSCRIPTEN__
+      const auto rect = sf::FloatRect{
+         {static_cast<float>(PIXELS_PER_TILE * 3 * no_handle_col), static_cast<float>(PIXELS_PER_TILE * 3 * no_handle_row)},
+         {static_cast<float>(PIXELS_PER_TILE * 3), static_cast<float>(PIXELS_PER_TILE * 3)}
+      };
+
+      _sprite->textureRect = rect;
+#else
       const auto rect = sf::IntRect{
          {PIXELS_PER_TILE * 3 * no_handle_col, PIXELS_PER_TILE * 3 * no_handle_row}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}
       };
 
       _sprite->setTextureRect(rect);
+#endif
       return;
    }
 
@@ -322,9 +356,25 @@ void Lever::update(const sf::Time& dt)
    }
 }
 
-void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+#ifdef __EMSCRIPTEN__
+   draw(color, normal, {});
+#else
    color.draw(*_sprite);
+#endif
+}
+
+void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+#ifdef __EMSCRIPTEN__
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite, draw_states);
+#else
+   (void)states;
+   draw(color, normal);
+#endif
 }
 
 std::optional<sf::FloatRect> Lever::getBoundingBoxPx()

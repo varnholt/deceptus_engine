@@ -2,6 +2,10 @@
 
 #include "game/config/gameconfiguration.h"
 
+#ifdef __EMSCRIPTEN__
+#include <span>
+#endif
+
 FadeTransitionEffect::FadeTransitionEffect(const sf::Color color) : _fade_color(color)
 {
    const auto w = static_cast<float>(GameConfiguration::getInstance()._view_width);
@@ -69,8 +73,12 @@ void FadeTransitionEffect::draw(const std::shared_ptr<sf::RenderTexture>& window
    auto w = GameConfiguration::getInstance()._view_width;
    auto h = GameConfiguration::getInstance()._view_height;
 
+#ifdef __EMSCRIPTEN__
+   const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
+#else
    sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window->setView(view);
+#endif
 
    const uint8_t alpha_value = static_cast<uint8_t>(_value * 255);
    for (auto& vertex : _vertices)
@@ -78,5 +86,11 @@ void FadeTransitionEffect::draw(const std::shared_ptr<sf::RenderTexture>& window
       vertex.color.a = alpha_value;
    }
 
+#ifdef __EMSCRIPTEN__
+   window->draw(
+      std::span<const sf::Vertex>{_vertices.data(), _vertices.size()}, sf::PrimitiveType::TriangleStrip, sf::RenderStates{.view = view}
+   );
+#else
    window->draw(_vertices.data(), _vertices.size(), sf::PrimitiveType::TriangleStrip);
+#endif
 }

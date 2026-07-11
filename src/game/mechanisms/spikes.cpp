@@ -90,6 +90,22 @@ std::string_view Spikes::objectName() const
    return "Spikes";
 }
 
+#ifdef __EMSCRIPTEN__
+void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   for (const auto& sprite : _sprite)
+   {
+      color.draw(*sprite, draw_states);
+   }
+}
+#else
 void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    for (const auto& sprite : _sprite)
@@ -97,6 +113,7 @@ void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       color.draw(*sprite);
    }
 }
+#endif
 
 int32_t Spikes::computeTuIndex()
 {
@@ -173,7 +190,11 @@ void Spikes::updateTrap()
    {
       // trap trigger is done via intersection
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+#ifdef __EMSCRIPTEN__
+      if (sf::findIntersection(player_rect, _player_collision_rect_px).hasValue())
+#else
       if (player_rect.findIntersection(_player_collision_rect_px).has_value())
+#endif
       {
          // start extracting once player has intersected
          _elapsed_since_collision_ms = 0;
@@ -250,7 +271,14 @@ void Spikes::updateSpriteRect()
    const auto tu = static_cast<int32_t>(std::floor(_tu));
    for (auto& sprite : _sprite)
    {
+#ifdef __EMSCRIPTEN__
+      sprite->textureRect = {
+         {static_cast<float>((tu * PIXELS_PER_TILE) + _tu_offset), static_cast<float>(_tv * PIXELS_PER_TILE)},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+      };
+#else
       sprite->setTextureRect({{(tu * PIXELS_PER_TILE) + _tu_offset, _tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+#endif
    }
 }
 
@@ -295,7 +323,11 @@ void Spikes::update(const sf::Time& dt)
    {
       // check for intersection with player
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+#ifdef __EMSCRIPTEN__
+      if (sf::findIntersection(player_rect, _player_collision_rect_px).hasValue())
+#else
       if (player_rect.findIntersection(_player_collision_rect_px).has_value())
+#endif
       {
          PlayerRegistry::getFirst()->damage(100);
       }
@@ -444,11 +476,19 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
       auto texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "spikes.png");
       for (auto i = 0; i < sprite_count; i++)
       {
+#ifdef __EMSCRIPTEN__
+         auto sprite = std::make_unique<sf::Sprite>();
+         sprite->position = sf::Vector2f(
+            data._tmx_object->_x_px + static_cast<float>(i * x_increment_px),
+            data._tmx_object->_y_px + static_cast<float>(i * y_increment_px)
+         );
+#else
          auto sprite = std::make_unique<sf::Sprite>(*texture);
          sprite->setPosition(sf::Vector2f(
             data._tmx_object->_x_px + static_cast<float>(i * x_increment_px),
             data._tmx_object->_y_px + static_cast<float>(i * y_increment_px)
          ));
+#endif
 
          instance->_sprite.push_back(std::move(sprite));
       }
@@ -522,8 +562,13 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
             {static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
          };
 
+#ifdef __EMSCRIPTEN__
+         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
+         sprite->position = sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE));
+#else
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*spikes->_texture);
          sprite->setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
+#endif
          spikes->_sprite.push_back(std::move(sprite));
          spikes->updateSpriteRect();
 

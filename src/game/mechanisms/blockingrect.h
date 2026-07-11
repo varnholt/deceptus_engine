@@ -27,6 +27,13 @@ public:
    /// \param normal normal-map render target.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
+   /// \brief draws the configured texture and normal map with explicit render states (used in WASM to carry the level view).
+   /// \param target color render target.
+   /// \param normal normal-map render target.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief updates runtime logic.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;

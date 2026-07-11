@@ -95,32 +95,41 @@ std::string_view Door::objectName() const
    return "Door";
 }
 
-void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Door::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (_animation_open && !_animation_open->_paused)
    {
-      _animation_open->draw(color);
+      _animation_open->draw(color, states);
    }
    else if (_animation_close && !_animation_close->_paused)
    {
-      _animation_close->draw(color);
+      _animation_close->draw(color, states);
    }
    else if (_state == State::Closed)
    {
-      color.draw(*_sprite);
+      sf::RenderStates sprite_states = states;
+      sprite_states.texture = _texture.get();
+      color.draw(*_sprite, sprite_states);
    }
 
    if (_player_at_door)
    {
       if (_animation_key)
       {
-         _animation_key->draw(color);
+         _animation_key->draw(color, states);
       }
    }
 
    if (_version == Version::Version1)
    {
-      color.draw(_door_quad, _texture.get());
+      sf::RenderStates quad_states = states;
+      quad_states.texture = _texture.get();
+      color.draw(_door_quad, quad_states);
    }
 }
 
@@ -461,8 +470,13 @@ bool Door::setup(const GameDeserializeData& data)
       {
          const auto texture_path = texture_it->second->_value_string.value();
          _texture = TexturePool::getInstance().get(texture_path);
+#ifdef __EMSCRIPTEN__
+         _sprite = std::make_unique<sf::Sprite>();
+         _sprite->position = {x_px, y_px};
+#else
          _sprite = std::make_unique<sf::Sprite>(*_texture);
          _sprite->setPosition({x_px, y_px});
+#endif
       }
 
       const auto sample_open_it = map.find("sample_open");
@@ -548,7 +562,11 @@ bool Door::setup(const GameDeserializeData& data)
       // the first frame of the open animation should be the texture rect used for drawing
       if (_animation_open)
       {
+#ifdef __EMSCRIPTEN__
+         _sprite->textureRect = _animation_open->_frames.at(0);
+#else
          _sprite->setTextureRect(_animation_open->_frames.at(0));
+#endif
       }
    }
 

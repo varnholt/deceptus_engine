@@ -36,6 +36,15 @@ public:
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
 
+#ifdef __EMSCRIPTEN__
+   /// \brief renders all particles and draws the layer with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal-map render target, unused by this mechanism.
+   /// \param states render states to apply to the final layer draw.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+#endif
+
    /// \brief animates particle rotation, offsets, color, and batched vertices.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
@@ -58,7 +67,11 @@ private:
    {
       SmokeParticle(const sf::Texture& texture)
       {
+#ifdef __EMSCRIPTEN__
+         _sprite = std::make_unique<sf::Sprite>();
+#else
          _sprite = std::make_unique<sf::Sprite>(texture);
+#endif
       }
 
       std::unique_ptr<sf::Sprite> _sprite;

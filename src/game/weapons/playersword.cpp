@@ -78,11 +78,11 @@ PlayerSword::PlayerSword() : _duration_from_swing_start_to_hit(200ms), _duration
    _type = WeaponType::Sword;
 }
 
-void PlayerSword::draw(sf::RenderTarget& target)
+void PlayerSword::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    for (auto& animation : _animations)
    {
-      animation->draw(target);
+      animation->draw(target, states);
    }
 
    if (!checkHitWindowActive())
@@ -168,7 +168,11 @@ std::vector<std::shared_ptr<GameMechanism>> PlayerSword::impactMechanisms(std::u
       {
          if (std::ranges::any_of(
                 mechanism->getHitboxes(),
+#ifdef __EMSCRIPTEN__
+                [&](const auto& hitbox) { return sf::findIntersection(hitbox.getRectTranslated(), _hit_rect_px).hasValue(); }
+#else
                 [&](const auto& hitbox) { return hitbox.getRectTranslated().findIntersection(_hit_rect_px).has_value(); }
+#endif
              ))
          {
             mechanism->hit(sword_damage);

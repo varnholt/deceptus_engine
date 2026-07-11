@@ -43,6 +43,8 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \param window color render target.
    /// \param normal normal-map render target.
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
+   void draw(sf::RenderTarget& window, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief returns cached world-space bounding box built from active hitboxes.
    /// \return bounding rectangle in pixels, or std::nullopt when no hitboxes exist.
@@ -391,11 +393,7 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \param x center x in pixels.
    /// \param y center y in pixels.
    /// \param rings optional ring setup provided by script.
-   void playDetonationAnimationFromScript(
-      float x,
-      float y,
-      const std::vector<DetonationAnimation::DetonationRing>& rings
-   );
+   void playDetonationAnimationFromScript(float x, float y, const std::vector<DetonationAnimation::DetonationRing>& rings);
 
    /// \brief marks this node dead and destroys its physics body.
    void die();
@@ -506,7 +504,12 @@ struct LuaNode : public GameMechanism, public GameNode
    std::vector<sf::Vector2f> _sprite_offsets_px;
    sf::Vector2f _position_px;
    std::vector<sf::Vector2f> _movement_path_px;
+#ifdef __EMSCRIPTEN__
+   std::optional<sf::Shader> _flash_shader;
+   std::optional<sf::Shader::UniformLocation> _ul_flash;
+#else
    sf::Shader _flash_shader;
+#endif
    float _hit_flash{0.0f};
    std::vector<sf::FloatRect> _debug_rects;
 

@@ -390,6 +390,7 @@ bool TileMap::dumpToPng(const std::filesystem::path& output_path) const
    const sf::Vector2u render_size = {static_cast<uint32_t>(std::ceil(bounds.size.x)), static_cast<uint32_t>(std::ceil(bounds.size.y))};
 
    // create rendertexture
+#ifndef __EMSCRIPTEN__
    sf::RenderTexture render_texture(render_size);
 
    render_texture.clear(sf::Color::Transparent);
@@ -425,6 +426,9 @@ bool TileMap::dumpToPng(const std::filesystem::path& output_path) const
 
    std::cout << "TileMap::dumpToPng - saved to " << output_path << "\n";
    return true;
+#else
+   return false;
+#endif
 }
 
 void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const

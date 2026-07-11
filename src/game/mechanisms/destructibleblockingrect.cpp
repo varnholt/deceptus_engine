@@ -3,6 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
 
 #include "game/audio/audio.h"
 #include "game/io/texturepool.h"
@@ -99,6 +100,28 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
 
    setZ(_config.z_index);
 
+#ifdef __EMSCRIPTEN__
+   auto loaded_shader = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/flash.frag"});
+   if (loaded_shader.hasValue())
+   {
+      _flash_shader = std::move(*loaded_shader);
+      const auto ul_texture = _flash_shader->getUniformLocation("u_texture");
+      if (ul_texture.hasValue())
+      {
+         (void)_flash_shader->setUniform(*ul_texture, sf::Shader::CurrentTexture);
+      }
+      const auto ul_flash = _flash_shader->getUniformLocation("flash");
+      _ul_flash = ul_flash.hasValue() ? std::optional{*ul_flash} : std::nullopt;
+      if (_ul_flash.has_value())
+      {
+         _flash_shader->setUniform(*_ul_flash, _hit_flash);
+      }
+   }
+   else
+   {
+      Log::Error() << "error loading flash shader";
+   }
+#else
    if (!_flash_shader.loadFromFile("data/shaders/flash.frag", sf::Shader::Type::Fragment))
    {
       Log::Error() << "error loading flash shader";
@@ -106,6 +129,7 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
 
    _flash_shader.setUniform("texture", sf::Shader::CurrentTexture);
    _flash_shader.setUniform("flash", _hit_flash);
+#endif
 }
 
 std::string_view DestructibleBlockingRect::objectName() const
@@ -130,7 +154,24 @@ bool DestructibleBlockingRect::isDestructible() const
 
 void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   color.draw(*_sprite, &_flash_shader);
+   draw(color, normal, {});
+}
+
+void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+
+#ifdef __EMSCRIPTEN__
+   if (_flash_shader.has_value())
+   {
+      draw_states.shader = &(*_flash_shader);
+   }
+#else
+   draw_states.shader = &_flash_shader;
+#endif
+
+   color.draw(*_sprite, draw_states);
 }
 
 void DestructibleBlockingRect::update(const sf::Time& dt)
@@ -149,7 +190,14 @@ void DestructibleBlockingRect::update(const sf::Time& dt)
          _hit_flash = 1.0f - (hit_duration_s.count() / hit_duration_max_s);
       }
 
+#ifdef __EMSCRIPTEN__
+      if (_flash_shader.has_value() && _ul_flash.has_value())
+      {
+         _flash_shader->setUniform(*_ul_flash, _hit_flash);
+      }
+#else
       _flash_shader.setUniform("flash", _hit_flash);
+#endif
    }
 
    if (_state.dead)
@@ -161,10 +209,17 @@ void DestructibleBlockingRect::update(const sf::Time& dt)
          _state.current_frame = _config.frame_count - 1;
       }
 
+#ifdef __EMSCRIPTEN__
+      _sprite->textureRect = sf::IntRect{
+         {static_cast<int32_t>(_state.current_frame) * _config.frame_width, _config.row * _config.frame_height},
+         {_config.frame_width, _config.frame_height}
+      };
+#else
       _sprite->setTextureRect(sf::IntRect{
          {static_cast<int32_t>(_state.current_frame) * _config.frame_width, _config.row * _config.frame_height},
          {_config.frame_width, _config.frame_height}
       });
+#endif
    }
 }
 
@@ -228,9 +283,15 @@ void DestructibleBlockingRect::setupSprite(const GameDeserializeData& data)
 
    _texture = TexturePool::getInstance().get(_config.texture_path);
 
+#ifdef __EMSCRIPTEN__
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->position = sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)};
+   _sprite->textureRect = sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}};
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
    _sprite->setPosition(sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)});
    _sprite->setTextureRect(sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}});
+#endif
 }
 
 void DestructibleBlockingRect::destroy()

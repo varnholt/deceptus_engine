@@ -22,8 +22,30 @@ protected:
    /// \return true when the texture file was loaded successfully.
    bool loadResource(sf::Texture& texture, const std::filesystem::path& path) const override
    {
+#ifdef __EMSCRIPTEN__
+      (void)texture;
+      (void)path;
+      return false;
+#else
       return texture.loadFromFile(path.string());
+#endif
    }
+
+#ifdef __EMSCRIPTEN__
+   /// \brief creates a texture by loading directly from path, bypassing default construction.
+   ///        Required for VRSFML where sf::Texture has no default constructor.
+   /// \param path texture file path.
+   /// \return shared pointer to the loaded texture, or nullptr on failure.
+   std::shared_ptr<sf::Texture> createResource(const std::filesystem::path& path) const override
+   {
+      auto loaded_texture = sf::Texture::loadFromFile(path.string());
+      if (!loaded_texture)
+      {
+         return nullptr;
+      }
+      return std::make_shared<sf::Texture>(std::move(loaded_texture.value()));
+   }
+#endif
 
    /// \brief estimates texture memory footprint in bytes for cache accounting.
    /// \param texture texture whose dimensions are used for estimation.

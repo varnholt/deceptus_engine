@@ -88,8 +88,13 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
    const auto texture_path = ValueReader::readValue<std::string>("texture", map).value_or("data/sprites/treasure_chest.png");
    _texture = TexturePool::getInstance().get(texture_path);
 
+#ifdef __EMSCRIPTEN__
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->position = {pos_x_px, pos_y_px};
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
    _sprite->setPosition({pos_x_px, pos_y_px});
+#endif
 
    _sample_open = ValueReader::readValue<std::string>("sample_open", map).value_or("treasure_chest_open.wav");
    Audio::getInstance().addSample(_sample_open);
@@ -155,24 +160,29 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
    _spawn_effect->deserialize(data);
 }
 
-void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&)
+void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&, const sf::RenderStates& states)
 {
    if (_animation_idle_closed && _state == State::Closed)
    {
-      _animation_idle_closed->draw(target);
+      _animation_idle_closed->draw(target, states);
    }
    else if (_animation_opening && _state == State::Opening)
    {
-      _animation_opening->draw(target);
+      _animation_opening->draw(target, states);
    }
    else if (_animation_idle_open && _state == State::Open)
    {
-      _animation_idle_open->draw(target);
+      _animation_idle_open->draw(target, states);
    }
 
    if (_spawn_effect && _spawn_effect->isActive())
    {
-      _spawn_effect->draw(target);
+      _spawn_effect->draw(target, states);
    }
 }
 
@@ -196,7 +206,11 @@ void TreasureChest::update(const sf::Time& dt)
          if (PlayerRegistry::getFirst()->getControls()->isButtonBPressed())
          {
             const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
+#ifdef __EMSCRIPTEN__
+            if (sf::findIntersection(player_rect_px, _rect).hasValue())
+#else
             if (player_rect_px.findIntersection(_rect).has_value())
+#endif
             {
                if (playerHasRequiredKey())
                {

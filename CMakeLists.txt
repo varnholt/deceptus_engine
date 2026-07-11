@@ -752,6 +752,10 @@ set(THIRD_PARTY_FILES
     thirdparty/tinyxml2/tinyxml2.cpp
     thirdparty/tinyxml2/tinyxml2.h)
 
+if(EMSCRIPTEN)
+    list(REMOVE_ITEM GAME_FILES deceptus_resource.rc)
+endif()
+
 add_executable(
     deceptus
     ${GAME_FILES}
@@ -833,32 +837,95 @@ set(SFML_BUILD_SYSTEM
 set(SFML_BUILD_NETWORK
     ON
     CACHE BOOL "" FORCE)
-set(SFML_USE_STATIC_STD_LIBS
-    OFF
-    CACHE BOOL "" FORCE)
-set(SFML_BUILD_SHARED_LIBS
-    ON
-    CACHE BOOL "" FORCE)
 
 # fetch dependencies
-FetchContent_Declare(
-    SFML
-    GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 3.0.x)
-FetchContent_Declare(
-    SDL3
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG release-3.2.4)
-FetchContent_Declare(
-    LUA
-    GIT_REPOSITORY https://github.com/lua/lua.git
-    GIT_TAG v5.4.7)
-FetchContent_Declare(
-    GLEW
-    GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
-    GIT_TAG glew-cmake-2.3.0)
+if(EMSCRIPTEN)
+    # WASM target: VRSFML (vittorioromeo's SFML rewrite) -- the only SFML fork
+    # with an Emscripten backend.
+    set(SFML_BUILD_NETWORK
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_USE_STATIC_STD_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_BUILD_SHARED_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
+    # SDL3 is fetched internally by VRSFML master via CPM.
+    # Declaring it separately here would create duplicate CMake targets.
+    FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
+        GIT_TAG master)
+    FetchContent_Declare(
+        LUA
+        GIT_REPOSITORY https://github.com/lua/lua.git
+        GIT_TAG v5.4.7)
+
+    FetchContent_MakeAvailable(SFML LUA)
+
+    # Apply WebGL2 compatibility patch to VRSFML on Emscripten builds.
+    # GLSL ES 3.00 forbids layout(location=N) on uniforms; the patch adds #ifdef __EMSCRIPTEN__
+    # guards to DefaultShader.hpp and switches RenderTarget.cpp to glGetUniformLocation.
+    execute_process(
+        COMMAND git apply --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
+        WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+        RESULT_VARIABLE vrsfml_patch_check
+        OUTPUT_QUIET ERROR_QUIET)
+    if(vrsfml_patch_check EQUAL 0)
+        execute_process(
+            COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
+            WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+            RESULT_VARIABLE vrsfml_patch_result)
+        if(NOT vrsfml_patch_result EQUAL 0)
+            message(FATAL_ERROR "Failed to apply patches/vrsfml-webgl2-uniforms.patch")
+        endif()
+        message(STATUS "Applied patches/vrsfml-webgl2-uniforms.patch to VRSFML")
+    else()
+        # Forward apply failed - this could mean the patch is already applied, OR that
+        # it no longer matches the fetched VRSFML source (e.g. line-ending mismatch,
+        # upstream changed). Only skip if a reverse-apply confirms it is already applied;
+        # otherwise fail loudly instead of silently building with unpatched shaders.
+        execute_process(
+            COMMAND git apply --reverse --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
+            WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+            RESULT_VARIABLE vrsfml_patch_reverse_check
+            OUTPUT_QUIET ERROR_QUIET)
+        if(vrsfml_patch_reverse_check EQUAL 0)
+            message(STATUS "patches/vrsfml-webgl2-uniforms.patch already applied to VRSFML, skipping")
+        else()
+            message(FATAL_ERROR "patches/vrsfml-webgl2-uniforms.patch does not apply to the fetched VRSFML source and is not already applied - fix the patch")
+        endif()
+    endif()
+else()
+    # Desktop target: vanilla/official SFML, matching master.
+    set(SFML_USE_STATIC_STD_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_BUILD_SHARED_LIBS
+        ON
+        CACHE BOOL "" FORCE)
+
+    FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.x)
+    FetchContent_Declare(
+        SDL3
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+        GIT_TAG release-3.2.4)
+    FetchContent_Declare(
+        LUA
+        GIT_REPOSITORY https://github.com/lua/lua.git
+        GIT_TAG v5.4.7)
+    FetchContent_Declare(
+        GLEW
+        GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
+        GIT_TAG glew-cmake-2.3.0)
+
+    FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
+endif()
 
 # ----------------------------------------------------------------------------------------------------
 # lua configuration (lua is not a cmake project)
@@ -883,7 +950,7 @@ target_include_directories(
     thirdparty
     thirdparty/box2d/include
     thirdparty/lua
-    ${SFML_INCLUDE_DIR}
+    ${CMAKE_BINARY_DIR}/_deps/sfml-src/include
     ${SDL3_INCLUDE_DIRS})
 
 target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
@@ -899,14 +966,16 @@ endif()
 target_link_libraries(
     deceptus
     PRIVATE
-        sfml-system
-        sfml-audio
-        sfml-graphics
-        sfml-window
+        SFML::System
+        SFML::Graphics
+        SFML::Window
         SDL3::SDL3
         lua
-        libglew_static
 )
+target_link_libraries(deceptus PRIVATE SFML::Audio)
+if(NOT EMSCRIPTEN)
+    target_link_libraries(deceptus PRIVATE libglew_static)
+endif()
 
 if(WIN32)
     target_link_libraries(deceptus PRIVATE opengl32 glu32)
@@ -939,7 +1008,7 @@ if(WIN32)
 
 endif()
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT EMSCRIPTEN)
 
     target_link_libraries(deceptus PRIVATE GL X11 stdc++fs)
 
@@ -959,6 +1028,41 @@ if(APPLE)
     set(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_EXE_LINKER_FLAGS} -L${HOMEBREW_LLVM}/lib -Wl,-rpath,${HOMEBREW_LLVM}/lib")
     set(SDKROOT $ENV{SDKROOT})
+endif()
+
+# ----------------------------------------------------------------------------------------------------
+# emscripten / webassembly
+# ----------------------------------------------------------------------------------------------------
+
+if(EMSCRIPTEN)
+    # prepend src/wasm so "#include <opengl/glew.h>" resolves to the GLES3 stub
+    # instead of the desktop GLEW header in src/opengl/
+    target_include_directories(deceptus BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/src/wasm)
+
+    # Required for WASM Workers, AudioWorklet, and std::mutex/std::atomic support.
+    # -pthread implies -matomics -mbulk-memory at compile time and -sUSE_PTHREADS=1 at link time.
+    target_compile_options(deceptus PRIVATE -pthread)
+
+    # WebGL 2 (GLES3) flags; allow heap growth for level assets
+    target_link_options(deceptus PRIVATE
+        -pthread
+        -sPTHREAD_POOL_SIZE=4
+        -sUSE_WEBGL2=1
+        -sMIN_WEBGL_VERSION=2
+        -sMAX_WEBGL_VERSION=2
+        -sFULL_ES3=1
+        -sALLOW_MEMORY_GROWTH=1
+        -sINITIAL_MEMORY=67108864
+        -sEXIT_RUNTIME=0
+        -sASYNCIFY=1
+        -sASSERTIONS=1
+        -sAUDIO_WORKLET=1
+        -sWASM_WORKERS=1
+        "-sEXPORTED_RUNTIME_METHODS=['HEAPU32','HEAPU8','HEAP32','HEAPF32','HEAPU16']"
+        --preload-file ${CMAKE_SOURCE_DIR}/data@data
+    )
+
+    set_target_properties(deceptus PROPERTIES SUFFIX ".html")
 endif()
 
 # ----------------------------------------------------------------------------------------------------

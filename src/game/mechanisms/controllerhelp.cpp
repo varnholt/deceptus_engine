@@ -89,7 +89,12 @@ std::string_view ControllerHelp::objectName() const
    return "ControllerHelp";
 }
 
-void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (!_visible && _alpha <= alpha_min_threshold)
    {
@@ -106,21 +111,37 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    const auto tile_offset_y = sin(_time.asSeconds() * 5.0f) * 8.0f;
 
    // draw background
+#ifdef __EMSCRIPTEN__
+   _background->position = {_rect_center.x - _background->textureRect.size.x / 2, _rect_center.y + tile_offset_y - 11};
+   _background->color = color;
+#else
    _background->setPosition({_rect_center.x - _background->getTextureRect().size.x / 2, _rect_center.y + tile_offset_y - 11});
    _background->setColor(color);
-   target.draw(*_background);
+#endif
+   sf::RenderStates background_states = states;
+   background_states.texture = _texture.get();
+   target.draw(*_background, background_states);
 
    const auto is_controller_connected = GameControllerIntegration::getInstance().isControllerConnected();
 
    // draw icons
+   sf::RenderStates icon_states = states;
+   icon_states.texture = _texture.get();
    auto index = 0;
    for (auto& sprite : _sprites)
    {
+#ifdef __EMSCRIPTEN__
+      sprite.color = color;
+      const auto tile_offset_x = -width_of_tiles_px / 2.0f + index * PIXELS_PER_TILE * 1.5f;
+      sprite.position = {_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y};
+      sprite.textureRect = is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index];
+#else
       sprite.setColor(color);
       const auto tile_offset_x = -width_of_tiles_px / 2.0f + index * PIXELS_PER_TILE * 1.5f;
       sprite.setPosition({_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y});
       sprite.setTextureRect(is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index]);
-      target.draw(sprite);
+#endif
+      target.draw(sprite, icon_states);
       index++;
    }
 }
@@ -128,7 +149,11 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
 void ControllerHelp::update(const sf::Time& delta_time)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+#ifdef __EMSCRIPTEN__
+   _visible = sf::findIntersection(player_rect, _rect_px).hasValue();
+#else
    _visible = (player_rect.findIntersection(_rect_px)).has_value();
+#endif
 
    if (!_visible)
    {
@@ -189,27 +214,43 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
       const auto sprite_rect_keyboard = sf::IntRect{
          {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
-
       const auto sprite_rect_controller = sf::IntRect{
          {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
 
+#ifdef __EMSCRIPTEN__
+      sf::Sprite sprite;
+      sprite.textureRect = sprite_rect_keyboard;
+#else
       sf::Sprite sprite(*_texture);
       sprite.setTextureRect(sprite_rect_keyboard);
+#endif
       _sprites.emplace_back(sprite);
       _sprite_rects_controller.emplace_back(sprite_rect_controller);
       _sprite_rects_keyboard.emplace_back(sprite_rect_keyboard);
    }
 
+#ifdef __EMSCRIPTEN__
+   _background = std::make_unique<sf::Sprite>();
+#else
    _background = std::make_unique<sf::Sprite>(*_texture);
+#endif
 
    if (_sprites.size() == 1)
    {
+#ifdef __EMSCRIPTEN__
+      _background->textureRect = {{6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2}};
+#else
       _background->setTextureRect({{6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2}});
+#endif
    }
    else if (_sprites.size() == 2)
    {
+#ifdef __EMSCRIPTEN__
+      _background->textureRect = {{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}};
+#else
       _background->setTextureRect({{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}});
+#endif
    }
 }
 
