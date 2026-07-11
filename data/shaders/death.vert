@@ -1,3 +1,4 @@
+#ifdef GL_ES
 uniform float time; // 0..1
 uniform vec3 sf_u_mvpRow0;
 uniform vec3 sf_u_mvpRow1;
@@ -21,3 +22,17 @@ void main()
    gl_Position = vec4(dot(sf_u_mvpRow0, pos), dot(sf_u_mvpRow1, pos), 0.0, 1.0);
    sf_v_color = sf_a_color;
 }
+#else
+uniform float time; // 0..1
+varying vec2 vUv;
+
+void main()
+{
+   vUv = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+
+   vec4 pos = gl_Vertex;
+   pos.y -= (time * 128.0);
+
+   gl_Position = gl_ModelViewProjectionMatrix * pos;
+}
+#endif

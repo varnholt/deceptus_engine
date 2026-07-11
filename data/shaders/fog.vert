@@ -1,3 +1,4 @@
+#ifdef GL_ES
 uniform vec3 sf_u_mvpRow0;
 uniform vec3 sf_u_mvpRow1;
 uniform vec2 sf_u_invTextureSize;
@@ -16,3 +17,11 @@ void main()
    sf_v_color = sf_a_color;
    sf_v_texCoord = sf_a_texCoord * sf_u_invTextureSize;
 }
+#else
+varying vec2 pos;
+
+void main()
+{
+   gl_Position = vec4(pos, 0.0, 1.0);
+}
+#endif

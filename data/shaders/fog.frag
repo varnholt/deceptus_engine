@@ -1,3 +1,4 @@
+#ifdef GL_ES
 uniform sampler2D u_texture;
 uniform float u_time;
 
@@ -10,3 +11,13 @@ void main() {
    uv.x += mod(u_time * 0.02, 1.0);
    sf_fragColor = texture(u_texture, uv);
 }
+#else
+uniform sampler2D u_texture;
+uniform float u_time;
+
+void main() {
+   vec2 uv = gl_TexCoord[0].xy;
+   uv.x += mod(u_time * 0.02, 1.0);
+   gl_FragColor = texture2D(u_texture, uv);
+}
+#endif
