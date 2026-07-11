@@ -7,6 +7,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 #include <iostream>
@@ -145,14 +146,9 @@ void ConveyorBelt::updateSprite()
          offset_y_px = PIXELS_PER_TILE;
       }
 
-#ifdef __EMSCRIPTEN__
-      _belt_sprites[i].textureRect =
-         sf::IntRect({offset_x_px * PIXELS_PER_TILE, static_cast<int32_t>(offset_y_px)}, {PIXELS_PER_TILE, PIXELS_PER_TILE});
-#else
-      _belt_sprites[i].setTextureRect(
-         {{offset_x_px * PIXELS_PER_TILE, static_cast<int32_t>(offset_y_px)}, {PIXELS_PER_TILE, PIXELS_PER_TILE}}
+      sfcompat::setTextureRect(
+         _belt_sprites[i], sf::IntRect({offset_x_px * PIXELS_PER_TILE, static_cast<int32_t>(offset_y_px)}, {PIXELS_PER_TILE, PIXELS_PER_TILE})
       );
-#endif
    }
 }
 
@@ -226,11 +222,10 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
    {
 #ifdef __EMSCRIPTEN__
       sf::Sprite belt_sprite;
-      belt_sprite.position = {x + i * PIXELS_PER_TILE, y + Y_OFFSET};
 #else
       sf::Sprite belt_sprite(*_texture);
-      belt_sprite.setPosition({x + i * PIXELS_PER_TILE, y + Y_OFFSET});
 #endif
+      sfcompat::setPosition(belt_sprite, {x + i * PIXELS_PER_TILE, y + Y_OFFSET});
 
       _belt_sprites.push_back(belt_sprite);
    }
@@ -239,21 +234,18 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
    {
 #ifdef __EMSCRIPTEN__
       sf::Sprite arrow_sprite;
-      arrow_sprite.position = {x + i * PIXELS_PER_TILE + 12, y - 12};
-
-      arrow_sprite.textureRect = sf::IntRect(
-         {ARROW_INDEX_X * PIXELS_PER_TILE, (velocity < -0.0001 ? ARROW_INDEX_LEFT_Y : ARROW_INDEX_RIGHT_Y) * PIXELS_PER_TILE},
-         {PIXELS_PER_TILE, PIXELS_PER_TILE}
-      );
 #else
       sf::Sprite arrow_sprite(*_texture);
-      arrow_sprite.setPosition({x + i * PIXELS_PER_TILE + 12, y - 12});
-
-      arrow_sprite.setTextureRect(
-         {{ARROW_INDEX_X * PIXELS_PER_TILE, (velocity < -0.0001 ? ARROW_INDEX_LEFT_Y : ARROW_INDEX_RIGHT_Y) * PIXELS_PER_TILE},
-          {PIXELS_PER_TILE, PIXELS_PER_TILE}}
-      );
 #endif
+      sfcompat::setPosition(arrow_sprite, {x + i * PIXELS_PER_TILE + 12, y - 12});
+
+      sfcompat::setTextureRect(
+         arrow_sprite,
+         sf::IntRect(
+            {ARROW_INDEX_X * PIXELS_PER_TILE, (velocity < -0.0001 ? ARROW_INDEX_LEFT_Y : ARROW_INDEX_RIGHT_Y) * PIXELS_PER_TILE},
+            {PIXELS_PER_TILE, PIXELS_PER_TILE}
+         )
+      );
 
       _arrow_sprites.push_back(arrow_sprite);
    }

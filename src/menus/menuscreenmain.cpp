@@ -3,6 +3,7 @@
 #include <chrono>
 #include "framework/easings/easings.h"
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/sfmlstring.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
@@ -40,11 +41,7 @@ MenuScreenMain::MenuScreenMain()
    _text_build->setString(sftr("Build Number") + sf::String{": "} + sf::String{getBuildNumber()});
 #endif
    _text_build->setCharacterSize(12);
-#ifdef __EMSCRIPTEN__
-   _text_build->position = {build_text_x_offset, 341};
-#else
-   _text_build->setPosition({build_text_x_offset, 341});
-#endif
+   sfcompat::setPosition(*_text_build, {build_text_x_offset, 341});
    _text_build->setFillColor(sf::Color{50, 50, 50});
 
    const auto current_year =
@@ -67,11 +64,7 @@ MenuScreenMain::MenuScreenMain()
 
    const auto copyright_bounds = _text_copyright->getLocalBounds();
    const auto copyright_x = static_cast<int32_t>((640.0f - copyright_bounds.size.x) / 2.0f - copyright_bounds.position.x);
-#ifdef __EMSCRIPTEN__
-   _text_copyright->position = {static_cast<float>(copyright_x), 341.0f};
-#else
-   _text_copyright->setPosition({static_cast<float>(copyright_x), 341.0f});
-#endif
+   sfcompat::setPosition(*_text_copyright, {static_cast<float>(copyright_x), 341.0f});
 }
 
 void MenuScreenMain::update(const sf::Time& /*dt*/)

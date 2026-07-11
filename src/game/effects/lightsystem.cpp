@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
@@ -816,29 +817,23 @@ void LightSystem::LightInstance::deserialize(const nlohmann::json& node)
 
    if (_sprite && _texture)
    {
-#ifdef __EMSCRIPTEN__
-      _sprite->textureRect =
-         sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(_texture->getSize().x), static_cast<float>(_texture->getSize().y)}};
-      _sprite->scale = {static_cast<float>(_width_px) / _texture->getSize().x, static_cast<float>(_height_px) / _texture->getSize().y};
-      _sprite->color = _color;
-#else
+#ifndef __EMSCRIPTEN__
+      // VRSFML sprites don't store a texture; it's bound via RenderStates at draw time instead.
       _sprite->setTexture(*_texture);
-      _sprite->setTextureRect(
-         sf::IntRect({0, 0}, {static_cast<int32_t>(_texture->getSize().x), static_cast<int32_t>(_texture->getSize().y)})
-      );
-      _sprite->setScale({static_cast<float>(_width_px) / _texture->getSize().x, static_cast<float>(_height_px) / _texture->getSize().y});
-      _sprite->setColor(_color);
 #endif
+      sfcompat::setTextureRect(
+         *_sprite, sf::IntRect({0, 0}, {static_cast<int32_t>(_texture->getSize().x), static_cast<int32_t>(_texture->getSize().y)})
+      );
+      sfcompat::setScale(
+         *_sprite, {static_cast<float>(_width_px) / _texture->getSize().x, static_cast<float>(_height_px) / _texture->getSize().y}
+      );
+      sfcompat::setColor(*_sprite, _color);
    }
 }
 
 void LightSystem::LightInstance::updateSpritePosition() const
 {
-#ifdef __EMSCRIPTEN__
-   _sprite->position = sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f);
-#else
-   _sprite->setPosition(sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
-#endif
+   sfcompat::setPosition(*_sprite, sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
 }
 
 std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(GameNode* parent, const GameDeserializeData& data)
@@ -923,24 +918,19 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    light->_texture = TexturePool::getInstance().get(texture);
 #ifdef __EMSCRIPTEN__
    light->_sprite = std::make_unique<sf::Sprite>();
-   light->_sprite->textureRect =
-      sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(light->_texture->getSize().x), static_cast<float>(light->_texture->getSize().y)}};
 #else
    light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
-   light->_sprite->setTextureRect(
+#endif
+   sfcompat::setTextureRect(
+      *light->_sprite,
       sf::IntRect({0, 0}, {static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y)})
    );
-#endif
 
    light->updateSpritePosition();
 
    const auto scale_x = static_cast<float>(light->_width_px) / static_cast<float>(light->_texture->getSize().x);
    const auto scale_y = static_cast<float>(light->_height_px) / static_cast<float>(light->_texture->getSize().y);
-#ifdef __EMSCRIPTEN__
-   light->_sprite->scale = {scale_x, scale_y};
-#else
-   light->_sprite->setScale({scale_x, scale_y});
-#endif
+   sfcompat::setScale(*light->_sprite, {scale_x, scale_y});
 
    return light;
 }
@@ -951,14 +941,13 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    light->_texture = TexturePool::getInstance().get("data/light/smooth.png");
 #ifdef __EMSCRIPTEN__
    light->_sprite = std::make_unique<sf::Sprite>();
-   light->_sprite->textureRect =
-      sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(light->_texture->getSize().x), static_cast<float>(light->_texture->getSize().y)}};
 #else
    light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
-   light->_sprite->setTextureRect(
+#endif
+   sfcompat::setTextureRect(
+      *light->_sprite,
       sf::IntRect({0, 0}, {static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y)})
    );
-#endif
    light->deserialize(node);
    return light;
 }

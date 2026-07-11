@@ -1,6 +1,7 @@
 #include "ingamemenumap.h"
 
 #include "framework/easings/easings.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/camera/camerapanorama.h"
 #include "game/debug/console.h"
 #include "game/ingamemenu/menuconfig.h"
@@ -207,41 +208,25 @@ void IngameMenuMap::updateMove()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-#ifdef __EMSCRIPTEN__
-      layer._layer->_sprite->position = {x, layer._pos.y};
-#else
-      layer._layer->_sprite->setPosition({x, layer._pos.y});
-#endif
+      sfcompat::setPosition(*layer._layer->_sprite, {x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_center)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-#ifdef __EMSCRIPTEN__
-      layer._layer->_sprite->position = {x, layer._pos.y};
-#else
-      layer._layer->_sprite->setPosition({x, layer._pos.y});
-#endif
+      sfcompat::setPosition(*layer._layer->_sprite, {x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-#ifdef __EMSCRIPTEN__
-      layer._layer->_sprite->position = {x, layer._pos.y};
-#else
-      layer._layer->_sprite->setPosition({x, layer._pos.y});
-#endif
+      sfcompat::setPosition(*layer._layer->_sprite, {x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-#ifdef __EMSCRIPTEN__
-      layer._layer->_sprite->position = {x, layer._pos.y};
-#else
-      layer._layer->_sprite->setPosition({x, layer._pos.y});
-#endif
+      sfcompat::setPosition(*layer._layer->_sprite, {x, layer._pos.y});
    }
 
    if (!move_offset.has_value())
@@ -356,11 +341,13 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    auto playerHeight = 4;
 #ifdef __EMSCRIPTEN__
    sf::CircleShape square{sf::CircleShape::Data{.radius = playerWidth, .pointCount = static_cast<uint32_t>(playerHeight)}};
-   square.position = PlayerRegistry::getFirst()->getPixelPositionFloat() * 0.125f;
-   square.position += {-playerWidth, -playerHeight * 2.0f};
 #else
    sf::CircleShape square(playerWidth, static_cast<uint32_t>(playerHeight));
-   square.setPosition(PlayerRegistry::getFirst()->getPixelPositionFloat() * 0.125f);
+#endif
+   sfcompat::setPosition(square, PlayerRegistry::getFirst()->getPixelPositionFloat() * 0.125f);
+#ifdef __EMSCRIPTEN__
+   square.position += {-playerWidth, -playerHeight * 2.0f};
+#else
    square.move({-playerWidth, -playerHeight * 2.0f});
 #endif
    square.setFillColor(sf::Color::White);
@@ -478,51 +465,31 @@ void IngameMenuMap::updateShowHide()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + panel_left_offset_px.x;
-#ifdef __EMSCRIPTEN__
-      layer._layer->_sprite->position = {x, layer._pos.y};
-#else
-      layer._layer->_sprite->setPosition({x, layer._pos.y});
-#endif
+      sfcompat::setPosition(*layer._layer->_sprite, {x, layer._pos.y});
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + panel_right_offset_px.x;
-#ifdef __EMSCRIPTEN__
-      layer._layer->_sprite->position = {x, layer._pos.y};
-#else
-      layer._layer->_sprite->setPosition({x, layer._pos.y});
-#endif
+      sfcompat::setPosition(*layer._layer->_sprite, {x, layer._pos.y});
    }
 
    // move in y
    for (const auto& layer : _panel_center)
    {
       const auto y = layer._pos.y + panel_center_offset_px.y;
-#ifdef __EMSCRIPTEN__
-      layer._layer->_sprite->position = {layer._pos.x, y};
-#else
-      layer._layer->_sprite->setPosition({layer._pos.x, y});
-#endif
+      sfcompat::setPosition(*layer._layer->_sprite, {layer._pos.x, y});
    }
 
    // fade in/out
    for (const auto& layer : _panel_header)
    {
-#ifdef __EMSCRIPTEN__
-      layer._layer->_sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255));
-#else
-      layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
-#endif
+      sfcompat::setColor(*layer._layer->_sprite, sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
    }
 
    for (const auto& layer : _panel_background)
    {
-#ifdef __EMSCRIPTEN__
-      layer._layer->_sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255));
-#else
-      layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
-#endif
+      sfcompat::setColor(*layer._layer->_sprite, sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
    }
 }
 

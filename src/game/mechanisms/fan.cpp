@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
@@ -214,11 +215,9 @@ void Fan::insertInstance(const std::shared_ptr<Fan>& fan, const GameDeserializeD
    fixture_def.isSensor = false;
    instance.body->CreateFixture(&fixture_def);
 
-#ifdef __EMSCRIPTEN__
-   instance.sprite->position = {static_cast<float>(instance.tile_position_px.x), static_cast<float>(instance.tile_position_px.y)};
-#else
-   instance.sprite->setPosition({static_cast<float>(instance.tile_position_px.x), static_cast<float>(instance.tile_position_px.y)});
-#endif
+   sfcompat::setPosition(
+      *instance.sprite, {static_cast<float>(instance.tile_position_px.x), static_cast<float>(instance.tile_position_px.y)}
+   );
 
    fan->_instances.push_back(std::move(instance));
 }
@@ -282,11 +281,7 @@ void Fan::collide()
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-   if (sf::findIntersection(player_rect, _pixel_rect).hasValue())
-#else
-   if (player_rect.findIntersection(_pixel_rect).has_value())
-#endif
+   if (sfcompat::findIntersection(player_rect, _pixel_rect).has_value())
    {
       PlayerRegistry::getFirst()->getBody()->ApplyForceToCenter(b2Vec2(2.0F * _direction.x, _direction.y), true);
    }

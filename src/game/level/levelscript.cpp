@@ -3,6 +3,7 @@
 
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/audio/musicfilenames.h"
 #include "game/audio/musicplayer.h"
@@ -82,11 +83,7 @@ void LevelScript::update(const sf::Time& delta_time)
    auto id = 0;
    for (const auto& rect : _collision_rects)
    {
-#ifdef __EMSCRIPTEN__
-      if (sf::findIntersection(player_rect, rect))
-#else
-      if (player_rect.findIntersection(rect))
-#endif
+      if (sfcompat::findIntersection(player_rect, rect))
       {
          luaPlayerCollidesWithRect(id);
       };
@@ -1033,11 +1030,7 @@ void LevelScript::updateCutsceneSprites(const sf::Time& dt)
       {
          sprite._position = sprite._target;
          sprite._moving = false;
-#ifdef __EMSCRIPTEN__
-         sprite._animation->position = sprite._position;
-#else
-         sprite._animation->setPosition(sprite._position);
-#endif
+         sfcompat::setPosition(*sprite._animation, sprite._position);
          if (!sprite._arrive_event.empty())
          {
             luaRaiseEvent(sprite._arrive_event);
@@ -1047,11 +1040,7 @@ void LevelScript::updateCutsceneSprites(const sf::Time& dt)
       {
          const auto normalized = direction / distance;
          sprite._position += normalized * step;
-#ifdef __EMSCRIPTEN__
-         sprite._animation->position = sprite._position;
-#else
-         sprite._animation->setPosition(sprite._position);
-#endif
+         sfcompat::setPosition(*sprite._animation, sprite._position);
       }
    }
 }

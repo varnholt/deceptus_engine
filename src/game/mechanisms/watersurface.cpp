@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -244,13 +245,8 @@ void WaterSurface::update(const sf::Time& dt)
 
    if (splash_needed)
    {
-#ifdef __EMSCRIPTEN__
-      const auto intersection = sf::findIntersection(player->getPixelRectFloat(), _bounding_box);
-      if (intersection.hasValue())
-#else
-      const auto intersection = player->getPixelRectFloat().findIntersection(_bounding_box);
+      const auto intersection = sfcompat::findIntersection(player->getPixelRectFloat(), _bounding_box);
       if (intersection.has_value())
-#endif
       {
          const auto velocity = splash_velocity_factor * player->getBody()->GetLinearVelocity().y * _config._splash_factor;
          const auto normalized_intersection =

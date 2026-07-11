@@ -2,6 +2,7 @@
 
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 
@@ -62,12 +63,8 @@ std::string_view DamageRect::objectName() const
 void DamageRect::update(const sf::Time& /*dt*/)
 {
    auto player = PlayerRegistry::getFirst();
-#ifdef __EMSCRIPTEN__
    const auto player_pixel_rect = player->getPixelRectFloat();
-   const auto player_intersects = sf::findIntersection(player_pixel_rect, _rect).hasValue();
-#else
-   const auto player_intersects = player->getPixelRectFloat().findIntersection(_rect).has_value();
-#endif
+   const auto player_intersects = sfcompat::findIntersection(player_pixel_rect, _rect).has_value();
 
    if (player_intersects)
    {

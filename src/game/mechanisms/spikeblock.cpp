@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
@@ -90,11 +91,10 @@ void SpikeBlock::setup(const GameDeserializeData& data)
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_spikeblock.png");
 #ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
-   _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture_map);
-   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
 #endif
+   sfcompat::setPosition(*_sprite, {data._tmx_object->_x_px, data._tmx_object->_y_px});
 
    _rectangle = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
@@ -201,11 +201,7 @@ void SpikeBlock::update(const sf::Time& dt)
       }
    }
 
-#ifdef __EMSCRIPTEN__
-   if (sf::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rectangle).hasValue())
-#else
-   if (PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rectangle).has_value())
-#endif
+   if (sfcompat::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rectangle).has_value())
    {
       if (_sprite_index_current >= _sprite_index_deadly_min && _sprite_index_current <= _sprite_index_deadly_max)
       {

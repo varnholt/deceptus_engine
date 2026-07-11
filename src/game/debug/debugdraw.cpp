@@ -5,6 +5,7 @@
 #include <span>
 #endif
 
+#include "framework/tools/sfmlcompat.h"
 #include "game/camera/camerasystem.h"
 #include "game/physics/worldquery.h"
 
@@ -69,13 +70,11 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const b2Vec2& center, float
 {
 #ifdef __EMSCRIPTEN__
    sf::CircleShape circle{sf::CircleShape::Data{.radius = radius * PPM}};
-   circle.origin = {radius * PPM, radius * PPM};
-   circle.position = DebugDraw::vecB2S(center);
 #else
    sf::CircleShape circle(radius * PPM);
-   circle.setOrigin({radius * PPM, radius * PPM});
-   circle.setPosition(DebugDraw::vecB2S(center));
 #endif
+   sfcompat::setOrigin(circle, {radius * PPM, radius * PPM});
+   sfcompat::setPosition(circle, DebugDraw::vecB2S(center));
    circle.setFillColor(sf::Color::Transparent);
    circle.setOutlineThickness(outline_thickness);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -87,13 +86,11 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center,
 {
 #ifdef __EMSCRIPTEN__
    sf::CircleShape circle{sf::CircleShape::Data{.radius = radius}};
-   circle.origin = {radius, radius};
-   circle.position = center;
 #else
    sf::CircleShape circle(radius);
-   circle.setOrigin({radius, radius});
-   circle.setPosition(center);
 #endif
+   sfcompat::setOrigin(circle, {radius, radius});
+   sfcompat::setPosition(circle, center);
    circle.setFillColor(sf::Color::Transparent);
    circle.setOutlineThickness(outline_thickness);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -105,13 +102,11 @@ void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, 
 {
 #ifdef __EMSCRIPTEN__
    sf::CircleShape circle{sf::CircleShape::Data{.radius = radius * PPM}};
-   circle.origin = {radius * PPM, radius * PPM};
-   circle.position = DebugDraw::vecB2S(center);
 #else
    sf::CircleShape circle(radius * PPM);
-   circle.setOrigin({radius * PPM, radius * PPM});
-   circle.setPosition(DebugDraw::vecB2S(center));
 #endif
+   sfcompat::setOrigin(circle, {radius * PPM, radius * PPM});
+   sfcompat::setPosition(circle, DebugDraw::vecB2S(center));
    circle.setFillColor(DebugDraw::glColorToSfml(color, 255));
    circle.setOutlineThickness(1.f);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -292,12 +287,11 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, cons
 
 #ifdef __EMSCRIPTEN__
    sf::RectangleShape rs{sf::RectangleShape::Data{.size = size}};
-   rs.position = pos;
 #else
    sf::RectangleShape rs;
    rs.setSize(size);
-   rs.setPosition(pos);
 #endif
+   sfcompat::setPosition(rs, pos);
 
    drawShape(target, rs, color, fill_color);
 }
@@ -309,12 +303,11 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, co
 
 #ifdef __EMSCRIPTEN__
    sf::RectangleShape rs{sf::RectangleShape::Data{.size = size}};
-   rs.position = pos;
 #else
    sf::RectangleShape rs;
    rs.setSize(size);
-   rs.setPosition(pos);
 #endif
+   sfcompat::setPosition(rs, pos);
 
    drawShape(target, rs, color, fill_color);
 }

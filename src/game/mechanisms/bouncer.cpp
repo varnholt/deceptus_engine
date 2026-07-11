@@ -3,6 +3,7 @@
 #include <array>
 
 #include "framework/tools/globalclock.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
@@ -170,11 +171,7 @@ void Bouncer::updatePlayerAtBouncer()
    auto rect = player->getPixelRectFloat();
    rect.size.y *= 3;
 
-#ifdef __EMSCRIPTEN__
-   _player_at_bouncer = sf::findIntersection(rect, _rect).hasValue();
-#else
-   _player_at_bouncer = rect.findIntersection(_rect).has_value();
-#endif
+   _player_at_bouncer = sfcompat::findIntersection(rect, _rect).has_value();
 }
 
 void Bouncer::update(const sf::Time& /*dt*/)
@@ -193,11 +190,7 @@ void Bouncer::update(const sf::Time& /*dt*/)
    if (!_previous_step.has_value() || step != _previous_step)
    {
       _previous_step = step;
-#ifdef __EMSCRIPTEN__
-      _sprite->textureRect = sf::IntRect({step * SPRITE_WIDTH, 0}, {SPRITE_WIDTH, SPRITE_HEIGHT});
-#else
-      _sprite->setTextureRect(sf::IntRect({step * SPRITE_WIDTH, 0}, {SPRITE_WIDTH, SPRITE_HEIGHT}));
-#endif
+      sfcompat::setTextureRect(*_sprite, sf::IntRect({step * SPRITE_WIDTH, 0}, {SPRITE_WIDTH, SPRITE_HEIGHT}));
    }
 }
 

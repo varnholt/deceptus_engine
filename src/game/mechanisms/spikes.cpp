@@ -9,6 +9,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 
 #include <iostream>
 
@@ -190,11 +191,7 @@ void Spikes::updateTrap()
    {
       // trap trigger is done via intersection
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-      if (sf::findIntersection(player_rect, _player_collision_rect_px).hasValue())
-#else
-      if (player_rect.findIntersection(_player_collision_rect_px).has_value())
-#endif
+      if (sfcompat::findIntersection(player_rect, _player_collision_rect_px).has_value())
       {
          // start extracting once player has intersected
          _elapsed_since_collision_ms = 0;
@@ -323,11 +320,7 @@ void Spikes::update(const sf::Time& dt)
    {
       // check for intersection with player
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-      if (sf::findIntersection(player_rect, _player_collision_rect_px).hasValue())
-#else
-      if (player_rect.findIntersection(_player_collision_rect_px).has_value())
-#endif
+      if (sfcompat::findIntersection(player_rect, _player_collision_rect_px).has_value())
       {
          PlayerRegistry::getFirst()->damage(100);
       }
@@ -478,17 +471,16 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
       {
 #ifdef __EMSCRIPTEN__
          auto sprite = std::make_unique<sf::Sprite>();
-         sprite->position = sf::Vector2f(
-            data._tmx_object->_x_px + static_cast<float>(i * x_increment_px),
-            data._tmx_object->_y_px + static_cast<float>(i * y_increment_px)
-         );
 #else
          auto sprite = std::make_unique<sf::Sprite>(*texture);
-         sprite->setPosition(sf::Vector2f(
-            data._tmx_object->_x_px + static_cast<float>(i * x_increment_px),
-            data._tmx_object->_y_px + static_cast<float>(i * y_increment_px)
-         ));
 #endif
+         sfcompat::setPosition(
+            *sprite,
+            sf::Vector2f(
+               data._tmx_object->_x_px + static_cast<float>(i * x_increment_px),
+               data._tmx_object->_y_px + static_cast<float>(i * y_increment_px)
+            )
+         );
 
          instance->_sprite.push_back(std::move(sprite));
       }
@@ -564,11 +556,10 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
 
 #ifdef __EMSCRIPTEN__
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
-         sprite->position = sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE));
 #else
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*spikes->_texture);
-         sprite->setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
 #endif
+         sfcompat::setPosition(*sprite, sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
          spikes->_sprite.push_back(std::move(sprite));
          spikes->updateSpriteRect();
 

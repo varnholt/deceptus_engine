@@ -7,6 +7,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
@@ -152,11 +153,10 @@ void Lever::setup(const GameDeserializeData& data)
    _texture = TexturePool::getInstance().get("data/sprites/levers.png");
 #ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
-   _sprite->position = {x, y};
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition({x, y});
 #endif
+   sfcompat::setPosition(*_sprite, {x, y});
    // _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
 
    setObjectId(data._tmx_object->_name);
@@ -290,11 +290,7 @@ void Lever::resolveTargets(const std::vector<std::shared_ptr<GameMechanism>>& me
 void Lever::update(const sf::Time& dt)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-   _player_at_lever = sf::findIntersection(_rect, player_rect).hasValue();
-#else
-   _player_at_lever = _rect.findIntersection(player_rect).has_value();
-#endif
+   _player_at_lever = sfcompat::findIntersection(_rect, player_rect).has_value();
 
    if (!_handle_available)
    {

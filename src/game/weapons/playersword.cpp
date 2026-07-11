@@ -3,6 +3,7 @@
 #include <iostream>
 #include <numbers>
 
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/stopwatch.h"
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
@@ -168,11 +169,7 @@ std::vector<std::shared_ptr<GameMechanism>> PlayerSword::impactMechanisms(std::u
       {
          if (std::ranges::any_of(
                 mechanism->getHitboxes(),
-#ifdef __EMSCRIPTEN__
-                [&](const auto& hitbox) { return sf::findIntersection(hitbox.getRectTranslated(), _hit_rect_px).hasValue(); }
-#else
-                [&](const auto& hitbox) { return hitbox.getRectTranslated().findIntersection(_hit_rect_px).has_value(); }
-#endif
+                [&](const auto& hitbox) { return sfcompat::findIntersection(hitbox.getRectTranslated(), _hit_rect_px).has_value(); }
              ))
          {
             mechanism->hit(sword_damage);

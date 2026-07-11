@@ -6,6 +6,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/sfmlstring.h"
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
@@ -165,11 +166,7 @@ void InteractionHelp::update(const sf::Time& dt)
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-   const auto intersects = sf::findIntersection(player_rect, _rect_px).hasValue();
-#else
-   const auto intersects = player_rect.findIntersection(_rect_px).has_value();
-#endif
+   const auto intersects = sfcompat::findIntersection(player_rect, _rect_px).has_value();
 
    if (intersects && !_player_intersected_in_last_frame && _animation_hide->_paused)
    {
@@ -222,28 +219,16 @@ void InteractionHelp::update(const sf::Time& dt)
          {
             const auto alpha_byte = static_cast<uint8_t>(alpha.value() * 255);
             element._text->setFillColor(sf::Color{232, 219, 243, alpha_byte});
-#ifdef __EMSCRIPTEN__
-            element._button_sprite->color = {255, 255, 255, alpha_byte};
-#else
-            element._button_sprite->setColor({255, 255, 255, alpha_byte});
-#endif
+            sfcompat::setColor(*element._button_sprite, sf::Color{255, 255, 255, alpha_byte});
          }
 
          if (GameControllerIntegration::getInstance().isControllerConnected())
          {
-#ifdef __EMSCRIPTEN__
-            element._button_sprite->textureRect = element._button_rect_controller;
-#else
-            element._button_sprite->setTextureRect(element._button_rect_controller);
-#endif
+            sfcompat::setTextureRect(*element._button_sprite, element._button_rect_controller);
          }
          else
          {
-#ifdef __EMSCRIPTEN__
-            element._button_sprite->textureRect = element._button_rect_keyboard;
-#else
-            element._button_sprite->setTextureRect(element._button_rect_keyboard);
-#endif
+            sfcompat::setTextureRect(*element._button_sprite, element._button_rect_keyboard);
          }
       }
    );
@@ -382,13 +367,8 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       //
       // text location: view.width - text.localbounds.x - icon.width - some_offset
 
-#ifdef __EMSCRIPTEN__
-      help._button_sprite->position = {icon_x_px, icon_y_px};
-      help._text->position = {text_x_px, text_y_px};
-#else
-      help._button_sprite->setPosition({icon_x_px, icon_y_px});
-      help._text->setPosition({text_x_px, text_y_px});
-#endif
+      sfcompat::setPosition(*help._button_sprite, {icon_x_px, icon_y_px});
+      sfcompat::setPosition(*help._text, {text_x_px, text_y_px});
 
       _help_elements.push_back(std::move(help));
    }

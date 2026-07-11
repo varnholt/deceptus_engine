@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/player/playerregistry.h"
 
@@ -68,15 +69,11 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
 
 #ifdef __EMSCRIPTEN__
       sf::Sprite sprite;
-      sprite.position = {static_cast<float>(x_px - _config._offset_x_px), static_cast<float>(y_px - _config._offset_y_px)};
-      sprite.textureRect = {
-         {static_cast<float>(x_index_px), static_cast<float>(y_index_px)}, {static_cast<float>(width_px), static_cast<float>(height_px)}
-      };
 #else
       sf::Sprite sprite(*_texture);
-      sprite.setPosition({static_cast<float>(x_px - _config._offset_x_px), static_cast<float>(y_px - _config._offset_y_px)});
-      sprite.setTextureRect({{x_index_px, y_index_px}, {width_px, height_px}});
 #endif
+      sfcompat::setPosition(sprite, {static_cast<float>(x_px - _config._offset_x_px), static_cast<float>(y_px - _config._offset_y_px)});
+      sfcompat::setTextureRect(sprite, sf::IntRect({x_index_px, y_index_px}, {width_px, height_px}));
 
       group_x = (x_px >> 8);
       group_y = (y_px >> 8);
