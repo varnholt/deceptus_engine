@@ -68,7 +68,11 @@ private:
    std::vector<Particle> _particles;
    sf::FloatRect _clip_rect;
    std::shared_ptr<sf::Texture> _flow_field_texture;
+#ifdef __EMSCRIPTEN__
    std::optional<sf::Image> _flow_field_image;
+#else
+   sf::Image _flow_field_image;
+#endif
    sf::Vector3f _wind_direction;
    sf::Color _particle_color = {255, 255, 255, 255};
    float _particle_velocity = 100.0f;

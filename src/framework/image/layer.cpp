@@ -1,5 +1,6 @@
 #include "layer.h"
 
+#ifdef __EMSCRIPTEN__
 void Layer::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
    // TODO: use layer blendmode
@@ -7,6 +8,13 @@ void Layer::draw(sf::RenderTarget& target, sf::RenderStates states) const
    states.blendMode = sf::BlendAlpha;
    target.draw(*_sprite, states);
 }
+#else
+void Layer::draw(sf::RenderTarget& target, sf::RenderStates /*states*/) const
+{
+   // TODO: use layer blendmode
+   target.draw(*_sprite, {sf::BlendAlpha});
+}
+#endif
 
 void Layer::show()
 {

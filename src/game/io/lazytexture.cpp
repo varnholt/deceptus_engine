@@ -90,11 +90,11 @@ void LazyTexture::loadTexture()
    _loading_thread = std::jthread(
       [this](std::stop_token)
       {
-         auto image_result = sf::Image::loadFromFile(_texture_path);
-         if (image_result)
+         auto image = std::make_unique<sf::Image>();
+         if (image->loadFromFile(_texture_path.string()))
          {
             std::lock_guard lock(_mutex);
-            _pending_image = std::make_unique<sf::Image>(std::move(*image_result));
+            _pending_image = std::move(image);
             _image_ready = true;
          }
       }
@@ -112,6 +112,7 @@ void LazyTexture::uploadTexture()
    std::lock_guard lock(_mutex);
    if (_pending_image)
    {
+#ifdef __EMSCRIPTEN__
       auto texture_result = sf::Texture::loadFromImage(*_pending_image);
       if (texture_result)
       {
@@ -124,6 +125,20 @@ void LazyTexture::uploadTexture()
       {
          Log::Warning() << "failed to upload texture " << _texture_path;
       }
+#else
+      _texture = std::make_shared<sf::Texture>();
+      if (_texture->loadFromImage(*_pending_image))
+      {
+         _pending_image.reset();
+         _image_ready = false;
+         // Log::Info() << "uploaded texture " << _texture_path << " (" << _texture->getSize().x << ", " << _texture->getSize().y << ")";
+      }
+      else
+      {
+         _texture.reset();
+         Log::Warning() << "failed to upload texture " << _texture_path;
+      }
+#endif
 
       _loading.clear();
    }

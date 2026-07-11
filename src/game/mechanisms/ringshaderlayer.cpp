@@ -5,6 +5,10 @@
 #include "game/io/valuereader.h"
 
 #include <algorithm>
+#ifndef __EMSCRIPTEN__
+#include <fstream>
+#include <sstream>
+#endif
 
 namespace
 {
@@ -23,6 +27,7 @@ RingShaderLayer::RingShaderLayer(GameNode* parent) : ShaderLayer(parent)
 {
 }
 
+#ifdef __EMSCRIPTEN__
 void RingShaderLayer::checkUniforms()
 {
    ShaderLayer::checkUniforms();
@@ -44,6 +49,27 @@ void RingShaderLayer::checkUniforms()
    _u_flash_color_loc = get_loc("u_flash_color");
    _u_flash_intensity_loc = get_loc("u_flash_intensity");
 }
+#else
+void RingShaderLayer::checkUniforms(const std::string& shader_path)
+{
+   ShaderLayer::checkUniforms(shader_path);
+
+   std::ifstream file(shader_path);
+   if (!file.is_open())
+   {
+      return;
+   }
+
+   std::stringstream buffer;
+   buffer << file.rdbuf();
+   const auto shader_source = buffer.str();
+
+   _has_u_ring_scale      = shader_source.find("u_ring_scale;")      != std::string::npos;
+   _has_u_pixel_size      = shader_source.find("u_pixel_size;")      != std::string::npos;
+   _has_u_flash_color     = shader_source.find("u_flash_color;")     != std::string::npos;
+   _has_u_flash_intensity = shader_source.find("u_flash_intensity;") != std::string::npos;
+}
+#endif
 
 void RingShaderLayer::readCustomProperties(const GameDeserializeData& data)
 {
@@ -52,6 +78,7 @@ void RingShaderLayer::readCustomProperties(const GameDeserializeData& data)
    _pixel_size = ValueReader::readValue<float>("pixel_size", map).value_or(_pixel_size);
 }
 
+#ifdef __EMSCRIPTEN__
 void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    draw(target, normal, {});
@@ -85,6 +112,32 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, c
 
    ShaderLayer::draw(target, normal, states);
 }
+#else
+void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   if (_has_u_ring_scale)
+   {
+      _shader.setUniform("u_ring_scale", _ring_scale);
+   }
+
+   if (_has_u_pixel_size)
+   {
+      _shader.setUniform("u_pixel_size", _pixel_size);
+   }
+
+   if (_has_u_flash_color)
+   {
+      _shader.setUniform("u_flash_color", _flash_color);
+   }
+
+   if (_has_u_flash_intensity)
+   {
+      _shader.setUniform("u_flash_intensity", _flash_intensity);
+   }
+
+   ShaderLayer::draw(target, normal);
+}
+#endif
 
 void RingShaderLayer::update(const sf::Time& dt)
 {

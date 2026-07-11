@@ -37,6 +37,7 @@ bool StencilTileMap::load(
       return false;
    }
 
+#ifdef __EMSCRIPTEN__
    auto loaded_shader =
       sf::Shader::loadFromFile({.vertexPath = "data/shaders/stencil_write.vert", .fragmentPath = "data/shaders/stencil_write.frag"});
    if (loaded_shader.hasValue())
@@ -54,6 +55,10 @@ bool StencilTileMap::load(
    {
       Log::Error() << "failed to load stencil_write shader";
    }
+#else
+   _stencil_shader.loadFromFile("data/shaders/stencil_write.vert", "data/shaders/stencil_write.frag");
+   _stencil_shader.setUniform("u_alpha_threshold", _alpha_threshold);
+#endif
 
    return true;
 }
@@ -67,6 +72,7 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    }
 
    // draw the masking geometry (stencil_tilemap) first
+#ifdef __EMSCRIPTEN__
    if (_stencil_shader.has_value() && _ul_texture_sampler.has_value())
    {
       (void)_stencil_shader->setUniform(*_ul_texture_sampler, sf::Shader::CurrentTexture);
@@ -84,6 +90,23 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    };
 
    color.clearStencil(sf::StencilValue{0u});
+#else
+   _stencil_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
+   const auto use_shader = _alpha_threshold < 0.99f;
+
+   auto stencil_render_state = states;
+   stencil_render_state.shader = use_shader ? &_stencil_shader : nullptr;
+   stencil_render_state.stencilMode =
+         sf::StencilMode( // set up stencil
+            {sf::StencilComparison::Always},
+            {sf::StencilUpdateOperation::Replace},
+            1,
+            0xff,
+            true
+         );
+
+   color.clearStencil(0);
+#endif
 
    const auto visible = _stencil_tilemap->isVisible();
    _stencil_tilemap->setVisible(true);
@@ -92,6 +115,7 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
 
    // then draw the masked content
    auto color_render_state = states;
+#ifdef __EMSCRIPTEN__
    color_render_state.stencilMode = sf::StencilMode{
       .stencilComparison = sf::StencilComparison::Equal,
       .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
@@ -99,6 +123,16 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
       .stencilMask = sf::StencilValue{0xffu},
       .stencilOnly = false
    };
+#else
+   color_render_state.stencilMode =
+         sf::StencilMode(  // set up stencil
+            {sf::StencilComparison::Equal},
+            {sf::StencilUpdateOperation::Keep},
+            1,
+            0xff,
+            false
+         );
+#endif
 
    TileMap::draw(color, normal, color_render_state);
 
@@ -170,7 +204,7 @@ void StencilTileMap::dumpStencilAndColorToPng(sf::RenderTarget& color, const sf:
       const sf::Vector2f topLeft{vcenter.x - 0.5f * vsize.x, vcenter.y - 0.5f * vsize.y};
 
       sf::RectangleShape red_rect(vsize);
-      red_rect.position = topLeft;
+      red_rect.setPosition(topLeft);
       red_rect.setFillColor(sf::Color(255, 0, 0, 128));  // half alpha
 
       sf::RenderStates red_state;

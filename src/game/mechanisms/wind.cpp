@@ -86,7 +86,11 @@ void Wind::update(const sf::Time& /*dt*/)
 {
    const auto player = PlayerRegistry::getFirst();
    const auto& player_rect = player->getPixelRectFloat();
+#ifdef __EMSCRIPTEN__
    if (!sf::findIntersection(_area, player_rect).hasValue())
+#else
+   if (!_area.findIntersection(player_rect).has_value())
+#endif
    {
       return;
    }

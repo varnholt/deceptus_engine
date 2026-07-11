@@ -29,7 +29,11 @@ public:
    /// \brief builds map view composition and draws the map page layers.
    /// \param window render target that receives map page rendering.
    /// \param states render states used for drawing.
+#ifdef __EMSCRIPTEN__
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{}) override;
+#else
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
+#endif
 
    /// \brief advances panorama camera state and active map page animations.
    /// \param dt elapsed frame time, currently unused by this page.
@@ -47,7 +51,11 @@ private:
    /// \brief draws helper grid lines, doors, portals, and player marker onto the map target.
    /// \param window render target used as the map overlay canvas.
    /// \param states render states used for drawing primitives.
+#ifdef __EMSCRIPTEN__
    void drawLevelItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{});
+#else
+   void drawLevelItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+#endif
 
    /// \brief applies static map button prompt and zoom indicator layer visibility.
    void updateButtons();

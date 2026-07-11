@@ -10,7 +10,11 @@
 #include <sstream>
 
 PhysicsConfigurationUi::PhysicsConfigurationUi()
+#ifdef __EMSCRIPTEN__
     : _render_window(std::make_unique<sf::RenderWindow>(sf::RenderWindow::create(sf::WindowSettings{.size = {800u, 800u}, .title = "deceptus physics configuration"}).value()))
+#else
+    : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode({800, 800}), "deceptus physics configuration"))
+#endif
 {
    if (!ImGui::SFML::Init(*_render_window.get()))
    {

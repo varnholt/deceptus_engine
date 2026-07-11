@@ -2,7 +2,9 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#ifdef __EMSCRIPTEN__
 #include <optional>
+#endif
 
 /// \brief wraps the water post-process shader used for atmosphere distortion.
 class AtmosphereShader
@@ -28,10 +30,14 @@ public:
 private:
    std::shared_ptr<sf::RenderTexture> _render_texture;
    std::shared_ptr<sf::Texture> _distortion_map;
+#ifdef __EMSCRIPTEN__
    std::optional<sf::Shader> _shader;
    std::optional<sf::Shader::UniformLocation> _uniform_current_texture;
    std::optional<sf::Shader::UniformLocation> _uniform_distortion_map_texture;
    std::optional<sf::Shader::UniformLocation> _uniform_physics_texture;
    std::optional<sf::Shader::UniformLocation> _uniform_time;
    std::optional<sf::Shader::UniformLocation> _uniform_distortion_amplitude;
+#else
+   sf::Shader _shader;
+#endif
 };

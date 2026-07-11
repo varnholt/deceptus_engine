@@ -60,8 +60,13 @@ private:
    {
       std::unique_ptr<sf::Sprite> _button_sprite;
       std::unique_ptr<sf::Text> _text;
+#ifdef __EMSCRIPTEN__
       sf::FloatRect _button_rect_keyboard;
       sf::FloatRect _button_rect_controller;
+#else
+      sf::IntRect _button_rect_keyboard;
+      sf::IntRect _button_rect_controller;
+#endif
    };
 
    sf::FloatRect _rect_px;

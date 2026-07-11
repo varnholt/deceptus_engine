@@ -44,7 +44,11 @@ public:
    /// \brief draws menu layers and then item icons and text overlays.
    /// \param window render target that receives inventory page rendering.
    /// \param states render states used for drawing.
+#ifdef __EMSCRIPTEN__
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{}) override;
+#else
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
+#endif
 
    /// \brief advances animation state and recalculates item, slot, and text positions.
    /// \param dt elapsed frame time, currently unused by this page.
@@ -123,12 +127,20 @@ private:
    /// \brief draws item icons in the grid and assigned quick-slot icons.
    /// \param window render target that receives inventory item sprites.
    /// \param states render states used for drawing.
+#ifdef __EMSCRIPTEN__
    void drawInventoryItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{});
+#else
+   void drawInventoryItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+#endif
 
    /// \brief draws selected item title and wrapped description text.
    /// \param window render target that receives inventory text overlays.
    /// \param states render states used for drawing.
+#ifdef __EMSCRIPTEN__
    void drawInventoryTexts(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{});
+#else
+   void drawInventoryTexts(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+#endif
 
    /// \brief returns the currently selected item key when selection points to a valid entry.
    /// \return selected inventory item id, or std::nullopt when selection is out of range.

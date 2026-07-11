@@ -121,9 +121,15 @@ std::vector<Segment> parseRichText(
             const auto text_before_tag = current_view.substr(0, tag_pos);
             Segment segment(font);
             segment.text->setCharacterSize(character_size);
+#ifdef __EMSCRIPTEN__
             segment.text->setString(std::string(text_before_tag.begin(), text_before_tag.end()).c_str());
             segment.text->setFillColor(current_text_color);
             segment.text->setBold(is_bold);
+#else
+            segment.text->setString(sf::String::fromUtf8(text_before_tag.begin(), text_before_tag.end()));
+            segment.text->setFillColor(current_text_color);
+            segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
+#endif
             segments.push_back(std::move(segment));
          }
 
@@ -169,9 +175,15 @@ std::vector<Segment> parseRichText(
          // no more tags; add the rest of the text as a single segment.
          Segment segment(font);
          segment.text->setCharacterSize(character_size);
+#ifdef __EMSCRIPTEN__
          segment.text->setString(std::string(current_view.begin(), current_view.end()).c_str());
          segment.text->setFillColor(current_text_color);
          segment.text->setBold(is_bold);
+#else
+         segment.text->setString(sf::String::fromUtf8(current_view.begin(), current_view.end()));
+         segment.text->setFillColor(current_text_color);
+         segment.text->setStyle((is_italic ? sf::Text::Italic : sf::Text::Regular) | (is_bold ? sf::Text::Bold : sf::Text::Regular));
+#endif
          segments.push_back(std::move(segment));
          break;
       }
@@ -185,13 +197,21 @@ std::vector<Segment> parseRichText(
          if (segment.text->getString() == "\n")
          {
             offset_y_px += segment.text->getLocalBounds().size.y;
+#ifdef __EMSCRIPTEN__
             segment.text->position = {offset_x_px, offset_y_px};
+#else
+            segment.text->setPosition({offset_x_px, offset_y_px});
+#endif
          }
          else
          {
             const auto text_width_px = segment.text->getLocalBounds().size.x;
             const auto offset_x_centered_px = offset_x_px + (window_width_px - text_width_px) / 2.0f;
+#ifdef __EMSCRIPTEN__
             segment.text->position = {offset_x_centered_px, offset_y_px};
+#else
+            segment.text->setPosition({offset_x_centered_px, offset_y_px});
+#endif
          }
       }
    }
@@ -205,11 +225,19 @@ std::vector<Segment> parseRichText(
          {
             segment_offset_x_px = 0.0f;
             offset_y_px += segment.text->getLocalBounds().size.y;
+#ifdef __EMSCRIPTEN__
             segment.text->position = {offset_x_px, offset_y_px};
+#else
+            segment.text->setPosition({offset_x_px, offset_y_px});
+#endif
          }
          else
          {
+#ifdef __EMSCRIPTEN__
             segment.text->position = {offset_x_px + segment_offset_x_px, offset_y_px};
+#else
+            segment.text->setPosition({offset_x_px + segment_offset_x_px, offset_y_px});
+#endif
             segment_offset_x_px += segment.text->getLocalBounds().size.x;
          }
       }
@@ -218,6 +246,7 @@ std::vector<Segment> parseRichText(
    return segments;
 }
 
+#ifdef __EMSCRIPTEN__
 std::string toString(const std::vector<Segment>& segments)
 {
    std::string result;
@@ -229,9 +258,23 @@ std::string toString(const std::vector<Segment>& segments)
 
    return result;
 }
+#else
+sf::String toString(const std::vector<Segment>& segments)
+{
+   sf::String result;
+
+   for (const auto& seg : segments)
+   {
+      result += seg.text->getString();
+   }
+
+   return result;
+}
+#endif
 
 void testParseRichText()
 {
+#ifdef __EMSCRIPTEN__
    auto font_opt = sf::Font::openFromFile("arial.ttf");
    if (!font_opt.hasValue())
    {
@@ -239,6 +282,14 @@ void testParseRichText()
       return;
    }
    auto& font = font_opt.value();
+#else
+   sf::Font font;
+   if (!font.openFromFile("arial.ttf"))
+   {
+      std::cerr << "Failed to load font!" << std::endl;
+      return;
+   }
+#endif
 
    std::string message = "[b]Hello[/b] [color:#FF0000FF]Red[/color] World[br]This is a test in [color:#00FF00FF]green[/color].";
 
@@ -250,12 +301,20 @@ void testParseRichText()
    const auto plain_text = toString(segments);
 
    std::cout << "Original Message: " << message << std::endl;
+#ifdef __EMSCRIPTEN__
    std::cout << "Extracted Plain Text: " << std::endl << plain_text << std::endl;
+#else
+   std::cout << "Extracted Plain Text: " << std::endl << plain_text.toAnsiString() << std::endl;
+#endif
 }
 
 Segment::Segment(const sf::Font& font)
 {
+#ifdef __EMSCRIPTEN__
    text = std::make_unique<sf::Text>(font, sf::Text::Data{});
+#else
+   text = std::make_unique<sf::Text>(font);
+#endif
 }
 
 }  // namespace RichTextParser

@@ -77,6 +77,7 @@ std::vector<WaterSurface::SplashEmitter> emitters;
 
 // #define DEBUG_WATERSURFACE 1
 
+#ifdef __EMSCRIPTEN__
 void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    draw(color, normal, {});
@@ -142,6 +143,69 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, c
    color.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
 #endif
 }
+#else
+void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+{
+   //
+   //         __--4
+   //   __- 2-    |
+   // 0-    |\    |
+   // | \   | \   |
+   // |  \  |  \  |
+   // |   \ |   \ |
+   // +-----+-----+
+   // 1     3     5
+   //
+
+   // draw water gradient
+   sf::RenderStates states;
+   states.texture = _gradient.get();
+
+   if (_pixel_ratio.has_value())
+   {
+      states.blendMode = sf::BlendMode{sf::BlendMode::Factor::One, sf::BlendMode::Factor::OneMinusSrcAlpha};
+      _render_texture->clear({0, 0, 0, 0});
+#ifdef DEBUG_WATERSURFACE
+      _render_texture->clear({255, 0, 0, 200});
+#endif
+      _render_texture->draw(_vertices, states);
+      _render_texture->display();
+      states.blendMode = sf::BlendAlpha;
+      color.draw(*render_texture_sprite, states);
+   }
+   else
+   {
+      color.draw(_vertices, states);
+   }
+
+#ifdef DEBUG_WATERSURFACE
+   DebugDraw::drawRect(color, _bounding_box);
+#endif
+
+#ifdef DEBUG_WATERSURFACE
+   auto index = 0;
+   const auto segment_width = _bounding_box.size.x / (_segments.size() - 1);
+   std::vector<sf::Vertex> sf_lines;
+   const auto x_offset = _bounding_box.position.x;
+   const auto y_offset = _bounding_box.position.y;
+
+   for (const auto& segment : _segments)
+   {
+      const auto x = x_offset + static_cast<float>(index * segment_width);
+      const auto y = y_offset + segment._height;
+      sf_lines.push_back(sf::Vertex{sf::Vector2f{x, y}, sf::Color::White});
+      index++;
+   }
+
+   color.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
+#endif
+}
+
+void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& /*states*/)
+{
+   draw(color, normal);
+}
+#endif
 
 void WaterSurface::update(const sf::Time& dt)
 {
@@ -180,8 +244,13 @@ void WaterSurface::update(const sf::Time& dt)
 
    if (splash_needed)
    {
+#ifdef __EMSCRIPTEN__
       const auto intersection = sf::findIntersection(player->getPixelRectFloat(), _bounding_box);
       if (intersection.hasValue())
+#else
+      const auto intersection = player->getPixelRectFloat().findIntersection(_bounding_box);
+      if (intersection.has_value())
+#endif
       {
          const auto velocity = splash_velocity_factor * player->getBody()->GetLinearVelocity().y * _config._splash_factor;
          const auto normalized_intersection =
@@ -521,11 +590,18 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
    {
       try
       {
+#ifdef __EMSCRIPTEN__
          auto created_texture = sf::RenderTexture::create(sf::Vector2u(
             static_cast<int32_t>(_bounding_box.size.x / _pixel_ratio.value()),
             static_cast<int32_t>((_bounding_box.size.y * 2.0f) / _pixel_ratio.value())
          ));
          _render_texture = std::make_unique<sf::RenderTexture>(std::move(*created_texture));
+#else
+         _render_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u(
+            static_cast<int32_t>(_bounding_box.size.x / _pixel_ratio.value()),
+            static_cast<int32_t>((_bounding_box.size.y * 2.0f) / _pixel_ratio.value())
+         ));
+#endif
       }
       catch (...)
       {
@@ -533,12 +609,18 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
       }
 
       _render_texture->setSmooth(false);
+#ifdef __EMSCRIPTEN__
       render_texture_sprite = std::make_unique<sf::Sprite>();
       render_texture_sprite->position = {_bounding_box.position.x, _bounding_box.position.y - _bounding_box.size.y};
       render_texture_sprite->scale = {_pixel_ratio.value(), _pixel_ratio.value()};
       const auto render_texture_size = _render_texture->getTexture().getSize();
       render_texture_sprite->textureRect =
          sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(render_texture_size.x), static_cast<float>(render_texture_size.y)}};
+#else
+      render_texture_sprite = std::make_unique<sf::Sprite>(_render_texture->getTexture());
+      render_texture_sprite->setPosition({_bounding_box.position.x, _bounding_box.position.y - _bounding_box.size.y});
+      render_texture_sprite->scale({_pixel_ratio.value(), _pixel_ratio.value()});
+#endif
    }
 }
 

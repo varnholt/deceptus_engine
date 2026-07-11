@@ -14,8 +14,13 @@ Animation::Animation(const Animation& anim)
       _overall_time_chrono(anim._overall_time_chrono),
       _frame_times(anim._frame_times)
 {
+#ifdef __EMSCRIPTEN__
    origin = anim.origin;
    rotation = anim.rotation;
+#else
+   setOrigin(anim.getOrigin());
+   setRotation(anim.getRotation());
+#endif
 
    _vertices[0] = anim._vertices[0];
    _vertices[1] = anim._vertices[1];
@@ -211,7 +216,11 @@ void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
    states.transform *= getTransform();
    states.texture = _color_texture.get();
 
+#ifdef __EMSCRIPTEN__
    target.draw(_vertices, sf::PrimitiveType::TriangleStrip, states);
+#else
+   target.draw(_vertices, 4, sf::PrimitiveType::TriangleStrip, states);
+#endif
 
    for (const auto& child : _children)
    {
@@ -229,6 +238,7 @@ void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Rend
    states.transform *= getTransform();
 
    states.texture = _color_texture.get();
+#ifdef __EMSCRIPTEN__
    color.draw(_vertices, sf::PrimitiveType::TriangleStrip, states);
 
    if (_normal_texture)
@@ -236,6 +246,15 @@ void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Rend
       states.texture = _normal_texture.get();
       normal.draw(_vertices, sf::PrimitiveType::TriangleStrip, states);
    }
+#else
+   color.draw(_vertices, 4, sf::PrimitiveType::TriangleStrip, states);
+
+   if (_normal_texture)
+   {
+      states.texture = _normal_texture.get();
+      normal.draw(_vertices, 4, sf::PrimitiveType::TriangleStrip, states);
+   }
+#endif
 }
 
 void Animation::drawTree(sf::RenderTarget& target, sf::RenderStates states) const
@@ -297,7 +316,11 @@ void Animation::updateVertices(bool reset_time)
 
    if (reset_time)
    {
+#ifdef __EMSCRIPTEN__
       _current_time = sf::Time{};
+#else
+      _current_time = sf::Time::Zero;
+#endif
    }
 }
 

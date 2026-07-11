@@ -89,13 +89,22 @@ void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const s
    _level_grid_texture = TexturePool::getInstance().get(grid.string());
    _level_outline_texture = TexturePool::getInstance().get(outlines.string());
 
+#ifdef __EMSCRIPTEN__
    _level_grid_sprite = std::make_unique<sf::Sprite>();
    _level_outline_sprite = std::make_unique<sf::Sprite>();
+#else
+   _level_grid_sprite = std::make_unique<sf::Sprite>(*_level_grid_texture);
+   _level_outline_sprite = std::make_unique<sf::Sprite>(*_level_outline_texture);
+#endif
 
    // that render texture should have the same size as our level textures
    try
    {
+#ifdef __EMSCRIPTEN__
       _level_render_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create(_level_grid_texture->getSize())));
+#else
+      _level_render_texture = std::make_unique<sf::RenderTexture>(_level_grid_texture->getSize());
+#endif
    }
    catch (const std::exception& e)
    {
@@ -107,6 +116,7 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    if (_level_grid_texture)
    {
+#ifdef __EMSCRIPTEN__
       sf::Vector2f center;
       center += PlayerRegistry::getFirst()->getPixelPositionFloat() * 0.125f;
       center += CameraPanorama::getInstance().getLookVector();
@@ -137,6 +147,39 @@ void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
       // level_texture_sprite is prepared but currently not drawn
       sf::Sprite level_texture_sprite;
       level_texture_sprite.position += sf::Vector2f{10.0f, 48.0f};
+#else
+      sf::Vector2f center;
+      center += PlayerRegistry::getFirst()->getPixelPositionFloat() * 0.125f;
+      center += CameraPanorama::getInstance().getLookVector();
+      center.x += _level_grid_sprite->getTexture().getSize().x / 2.0f;
+      center.y += _level_grid_sprite->getTexture().getSize().y / 2.0f;
+      center.x -= 220.0f;
+      center.y -= 80.0f;
+
+      sf::View level_view;
+      level_view.setSize(
+         {static_cast<float>(_level_grid_sprite->getTexture().getSize().x), static_cast<float>(_level_grid_sprite->getTexture().getSize().y)
+         }
+      );
+
+      level_view.setCenter(center);
+      level_view.zoom(_zoom);  // 1.5f works well, too
+
+      _level_grid_sprite->setColor(sf::Color{70, 70, 140, 255});
+      _level_outline_sprite->setColor(sf::Color{255, 255, 255, 80});
+
+      _level_render_texture->clear();
+      _level_render_texture->draw(*_level_grid_sprite, sf::BlendMode{sf::BlendAdd});
+      _level_render_texture->draw(*_level_outline_sprite, sf::BlendMode{sf::BlendAdd});
+
+      drawLevelItems(*_level_render_texture);
+
+      _level_render_texture->setView(level_view);
+      _level_render_texture->display();
+
+      auto level_texture_sprite = sf::Sprite(_level_render_texture->getTexture());
+      level_texture_sprite.move({10.0f, 48.0f});
+#endif
    }
 
    InGameMenuPage::draw(window, states);
@@ -164,25 +207,41 @@ void IngameMenuMap::updateMove()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    for (const auto& layer : _panel_center)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    if (!move_offset.has_value())
@@ -215,7 +274,11 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 
       sf::Vertex line[] = {a, b};
 
+#ifdef __EMSCRIPTEN__
       target.draw(line, sf::PrimitiveType::Lines);
+#else
+      target.draw(line, 2, sf::PrimitiveType::Lines);
+#endif
    }
 
    for (auto x = 0u; x < target.getSize().x; x += 16)
@@ -227,7 +290,11 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
 
       sf::Vertex line[] = {a, b};
 
+#ifdef __EMSCRIPTEN__
       target.draw(line, sf::PrimitiveType::Lines);
+#else
+      target.draw(line, 2, sf::PrimitiveType::Lines);
+#endif
    }
 
    // draw doors
@@ -287,9 +354,15 @@ void IngameMenuMap::drawLevelItems(sf::RenderTarget& target, sf::RenderStates)
    // draw player
    auto playerWidth = 5.0f;
    auto playerHeight = 4;
+#ifdef __EMSCRIPTEN__
    sf::CircleShape square{sf::CircleShape::Data{.radius = playerWidth, .pointCount = static_cast<uint32_t>(playerHeight)}};
    square.position = PlayerRegistry::getFirst()->getPixelPositionFloat() * 0.125f;
    square.position += {-playerWidth, -playerHeight * 2.0f};
+#else
+   sf::CircleShape square(playerWidth, static_cast<uint32_t>(playerHeight));
+   square.setPosition(PlayerRegistry::getFirst()->getPixelPositionFloat() * 0.125f);
+   square.move({-playerWidth, -playerHeight * 2.0f});
+#endif
    square.setFillColor(sf::Color::White);
    target.draw(square);
 }
@@ -405,31 +478,51 @@ void IngameMenuMap::updateShowHide()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + panel_left_offset_px.x;
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + panel_right_offset_px.x;
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    // move in y
    for (const auto& layer : _panel_center)
    {
       const auto y = layer._pos.y + panel_center_offset_px.y;
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {layer._pos.x, y};
+#else
+      layer._layer->_sprite->setPosition({layer._pos.x, y});
+#endif
    }
 
    // fade in/out
    for (const auto& layer : _panel_header)
    {
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255));
+#else
+      layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
+#endif
    }
 
    for (const auto& layer : _panel_background)
    {
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255));
+#else
+      layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
+#endif
    }
 }
 

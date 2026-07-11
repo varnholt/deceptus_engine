@@ -50,7 +50,11 @@ void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& /*normal*/, const 
 
 sf::Vector2f Portal::getPortalPosition()
 {
+#ifdef __EMSCRIPTEN__
    auto portal_pos = _sprites.at(_sprites.size() - 1).position;
+#else
+   auto portal_pos = _sprites.at(_sprites.size() - 1).getPosition();
+#endif
    portal_pos.y--;
    return portal_pos;
 }
@@ -147,7 +151,11 @@ void Portal::setDestination(const std::shared_ptr<Portal>& dst)
 
 void Portal::update(const sf::Time& /*dt*/)
 {
+#ifdef __EMSCRIPTEN__
    const auto player_intersects = sf::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rect).hasValue();
+#else
+   const auto player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
+#endif
 
    // activate portal when player intersects
    if (!_player_intersects && player_intersects)
@@ -174,16 +182,28 @@ void Portal::update(const sf::Time& /*dt*/)
    int32_t i = 0;
    for (auto& sprite : _sprites)
    {
+#ifdef __EMSCRIPTEN__
       sprite.color = sf::Color(
          255,
          255,  // atPortal ? 150 : 255,
          255   // atPortal ? 150 : 255
       );
+#else
+      sprite.setColor(sf::Color(
+         255,
+         255,  // atPortal ? 150 : 255,
+         255   // atPortal ? 150 : 255
+      ));
+#endif
 
       const auto x = static_cast<int32_t>(_tile_positions.x);
       const auto y = static_cast<int32_t>(_tile_positions.y);
 
+#ifdef __EMSCRIPTEN__
       sprite.position = sf::Vector2f(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>((i + y) * PIXELS_PER_TILE));
+#else
+      sprite.setPosition(sf::Vector2f(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>((i + y) * PIXELS_PER_TILE)));
+#endif
 
       i++;
    }
@@ -324,10 +344,17 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
             const int32_t tu = (tile_number - firstId) % (portal->_texture->getSize().x / tilesize.x);
             const int32_t tv = (tile_number - firstId) / (portal->_texture->getSize().x / tilesize.x);
 
+#ifdef __EMSCRIPTEN__
             sf::Sprite sprite;
             sprite.textureRect = sf::IntRect({tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE});
 
             sprite.position = sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE));
+#else
+            sf::Sprite sprite(*portal->_texture);
+            sprite.setTextureRect(sf::IntRect({tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}));
+
+            sprite.setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
+#endif
 
             portal->addSprite(sprite);
          }

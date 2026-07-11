@@ -11,9 +11,13 @@
 #include <sstream>
 
 CameraSystemConfigurationUi::CameraSystemConfigurationUi()
+#ifdef __EMSCRIPTEN__
     : _render_window(std::make_unique<sf::RenderWindow>(
          sf::RenderWindow::create(sf::WindowSettings{.size = {800u, 400u}, .title = "deceptus camera configuration"}).value()
       ))
+#else
+    : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode({800, 400}), "deceptus camera configuration"))
+#endif
 {
    if (!ImGui::SFML::Init(*_render_window.get()))
    {

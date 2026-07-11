@@ -39,7 +39,11 @@ std::string extractFirstName(std::string_view username)
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
+#ifdef __EMSCRIPTEN__
    _text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text = std::make_unique<sf::Text>(_font);
+#endif
    _text->setFont(_font);
    _text->setCharacterSize(12);
    _text->setFillColor(sf::Color{232, 219, 243});
@@ -52,13 +56,25 @@ MenuScreenNameSelect::MenuScreenNameSelect()
       's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '.', '-',
    };
 
+#ifdef __EMSCRIPTEN__
    _text_cancel_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_cancel_button = std::make_unique<sf::Text>(_font);
+#endif
    _text_cancel_button->setCharacterSize(12);
    _text_cancel_button->setFillColor(color_label_normal);
+#ifdef __EMSCRIPTEN__
    _text_delete_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_delete_button = std::make_unique<sf::Text>(_font);
+#endif
    _text_delete_button->setCharacterSize(12);
    _text_delete_button->setFillColor(color_label_normal);
+#ifdef __EMSCRIPTEN__
    _text_confirm_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_confirm_button = std::make_unique<sf::Text>(_font);
+#endif
    _text_confirm_button->setCharacterSize(12);
    _text_confirm_button->setFillColor(color_label_normal);
 }
@@ -115,11 +131,19 @@ void MenuScreenNameSelect::back()
 void MenuScreenNameSelect::updateText()
 {
    // draw text
+#ifdef __EMSCRIPTEN__
    _text->setString(_name.c_str());
+#else
+   _text->setString(_name);
+#endif
    const auto text_rect = _text->getLocalBounds();
    const auto x_offset_px = (_name_rect.size.x - text_rect.size.x) * 0.5f;
    const auto x_px = _name_rect.position.x + x_offset_px;
+#ifdef __EMSCRIPTEN__
    _text->position = {x_px, _name_rect.position.y};
+#else
+   _text->setPosition({x_px, _name_rect.position.y});
+#endif
 }
 
 void MenuScreenNameSelect::chop()
@@ -228,12 +252,22 @@ void MenuScreenNameSelect::retrieveUsername()
 void MenuScreenNameSelect::loadingFinished()
 {
    const auto cursor = _layers["cursor"];
+#ifdef __EMSCRIPTEN__
    _char_origin.x = cursor->_sprite->position.x;
    _char_origin.y = cursor->_sprite->position.y;
+#else
+   _char_origin.x = cursor->_sprite->getPosition().x;
+   _char_origin.y = cursor->_sprite->getPosition().y;
+#endif
 
    const auto player_name = _layers["players-name"];
+#ifdef __EMSCRIPTEN__
    _name_rect.position.x = player_name->_sprite->position.x;
    _name_rect.position.y = player_name->_sprite->position.y;
+#else
+   _name_rect.position.x = player_name->_sprite->getPosition().x;
+   _name_rect.position.y = player_name->_sprite->getPosition().y;
+#endif
    _name_rect.size.x = static_cast<float>(player_name->_texture->getSize().x);
 
    retrieveUsername();
@@ -243,9 +277,15 @@ void MenuScreenNameSelect::loadingFinished()
 void MenuScreenNameSelect::updateLayers()
 {
    auto cursor = _layers["cursor"];
+#ifdef __EMSCRIPTEN__
    cursor->_sprite->position = {
       static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)
    };
+#else
+   cursor->_sprite->setPosition(
+      {static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)}
+   );
+#endif
 
    _layers["players-name"]->_visible = false;
    _layers["temp_bg"]->_visible = true;

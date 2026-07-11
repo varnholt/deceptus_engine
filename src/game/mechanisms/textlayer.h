@@ -7,7 +7,9 @@
 #include "game/mechanisms/gamemechanism.h"
 
 #include <SFML/Graphics.hpp>
+#ifdef __EMSCRIPTEN__
 #include <optional>
+#endif
 
 struct TmxObject;
 
@@ -28,12 +30,14 @@ public:
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
+#ifdef __EMSCRIPTEN__
    /// \brief draws text with explicit render states (used in WASM to carry the level view).
    /// \param target render target.
    /// \param normal normal-map render target, unused by this mechanism.
    /// \param states render states to apply.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
    using GameMechanism::draw;
+#endif
 
    /// \brief updates this mechanism.
    /// \param dt elapsed frame time, unused because text is static.
@@ -66,7 +70,11 @@ private:
    std::vector<std::shared_ptr<sf::IntRect>> _bitmap_coords;
 
    std::string _text;
+#ifdef __EMSCRIPTEN__
    std::optional<sf::Font> _truetype_font;
+#else
+   sf::Font _truetype_font;
+#endif
    std::unique_ptr<sf::Text> _truetype_text;
 };
 

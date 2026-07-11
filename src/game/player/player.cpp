@@ -283,7 +283,11 @@ void Player::drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>&
    for (auto i = 0u; i < _last_animations.size(); i++)
    {
       auto& anim = _last_animations[i];
+#ifdef __EMSCRIPTEN__
       anim._animation->position = anim._position;
+#else
+      anim._animation->setPosition(anim._position);
+#endif
       anim._animation->setAlpha(static_cast<uint8_t>(255 / (2 * (_last_animations.size() - i))));
       anim._animation->draw(color);
    }
@@ -326,7 +330,11 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    if (current_cycle)
    {
       current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
+#ifdef __EMSCRIPTEN__
       current_cycle->position = draw_position_px;
+#else
+      current_cycle->setPosition(draw_position_px);
+#endif
       drawDash(color, current_cycle, draw_position_px);
       updateHurtColor(current_cycle);
       current_cycle->draw(color, normal, states);
@@ -336,7 +344,11 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    if (auxiliary_cycle)
    {
       auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
+#ifdef __EMSCRIPTEN__
       auxiliary_cycle->position = draw_position_px;
+#else
+      auxiliary_cycle->setPosition(draw_position_px);
+#endif
       auxiliary_cycle->draw(color, normal, states);
    }
 
@@ -360,7 +372,11 @@ void Player::drawStencil(sf::RenderTarget& color)
    if (current_cycle)
    {
       current_cycle->setColor(stencil_color);
+#ifdef __EMSCRIPTEN__
       current_cycle->position = draw_position_px;
+#else
+      current_cycle->setPosition(draw_position_px);
+#endif
       current_cycle->draw(color);
    }
 
@@ -368,7 +384,11 @@ void Player::drawStencil(sf::RenderTarget& color)
    if (auxiliary_cycle)
    {
       auxiliary_cycle->setColor(stencil_color);
+#ifdef __EMSCRIPTEN__
       auxiliary_cycle->position = draw_position_px;
+#else
+      auxiliary_cycle->setPosition(draw_position_px);
+#endif
       auxiliary_cycle->draw(color);
    }
 }
@@ -1481,7 +1501,11 @@ void Player::updateWallslide(const sf::Time& dt)
 {
    const auto wallslide_animation = _player_animation->getWallslideAnimation();
    const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
+#ifdef __EMSCRIPTEN__
    wallslide_animation->position = {_pixel_position_f.x + offset_x_px, _pixel_position_f.y};
+#else
+   wallslide_animation->setPosition({_pixel_position_f.x + offset_x_px, _pixel_position_f.y});
+#endif
    wallslide_animation->play();
    wallslide_animation->update(dt);
 }

@@ -147,6 +147,7 @@ InfoLayer::InfoLayer()
       try
       {
          const auto texture_size = sf::Vector2u(psd_layer.getWidth(), psd_layer.getHeight());
+#ifdef __EMSCRIPTEN__
          auto texture_result = sf::Texture::create(texture_size);
          if (!texture_result)
          {
@@ -159,13 +160,24 @@ InfoLayer::InfoLayer()
          sprite->position = {static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop())};
          sprite->textureRect =
             sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(psd_layer.getWidth()), static_cast<float>(psd_layer.getHeight())}};
+#else
+         auto texture = std::make_shared<sf::Texture>(texture_size);
+         texture->update(reinterpret_cast<const uint8_t*>(psd_layer.getImage().getData().data()));
+
+         auto sprite = std::make_shared<sf::Sprite>(*texture);
+         sprite->setPosition({static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop())});
+#endif
 
          layer->_visible = psd_layer.isVisible();
          layer->_texture = texture;
          layer->_sprite = sprite;
 
          auto layer_data = std::make_shared<LayerData>(layer);
+#ifdef __EMSCRIPTEN__
          layer_data->_pos = sprite->position;
+#else
+         layer_data->_pos = sprite->getPosition();
+#endif
          _layers[psd_layer.getName()] = layer_data;
 
          // store all player health related layers
@@ -214,7 +226,11 @@ InfoLayer::InfoLayer()
    _heart_animation._frames = frames._frames;
    _heart_animation._color_texture = frames._texture;
    _heart_animation.setFrameTimes(frames._frame_times);
+#ifdef __EMSCRIPTEN__
    _heart_animation.origin = frames._origin;
+#else
+   _heart_animation.setOrigin(frames._origin);
+#endif
    _heart_animation._reset_to_first_frame = false;
 
    // init min/max durations for randomized animations
@@ -262,21 +278,35 @@ void InfoLayer::loadInventoryItems()
       [this](const auto& image)
       {
          // store sprites
+#ifdef __EMSCRIPTEN__
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
          sprite->textureRect = sf::FloatRect{
             {static_cast<float>(image._x_px), static_cast<float>(image._y_px)},
             {static_cast<float>(icon_width), static_cast<float>(icon_height)}
          };
+#else
+         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*_inventory_texture);
+         sprite->setTextureRect(sf::IntRect({image._x_px, image._y_px}, {icon_width, icon_height}));
+#endif
          _sprites[image._name] = std::move(sprite);
       }
    );
 
+#ifdef __EMSCRIPTEN__
    auto inventory_item_1 = std::make_unique<sf::Sprite>();
    auto inventory_item_2 = std::make_unique<sf::Sprite>();
    inventory_item_1->textureRect = {};
    inventory_item_2->textureRect = {};
    inventory_item_1->position = {frame_0_pos_x_px, frame_0_pos_y_px};
    inventory_item_2->position = {frame_1_pos_x_px, frame_1_pos_y_px};
+#else
+   auto inventory_item_1 = std::make_unique<sf::Sprite>(*_inventory_texture);
+   auto inventory_item_2 = std::make_unique<sf::Sprite>(*_inventory_texture);
+   inventory_item_1->setTextureRect({});
+   inventory_item_2->setTextureRect({});
+   inventory_item_1->setPosition({frame_0_pos_x_px, frame_0_pos_y_px});
+   inventory_item_2->setPosition({frame_1_pos_x_px, frame_1_pos_y_px});
+#endif
    _inventory_sprites[0] = std::move(inventory_item_1);
    _inventory_sprites[1] = std::move(inventory_item_2);
 }
@@ -300,7 +330,11 @@ void InfoLayer::updateInventoryItems()
          Log::Fatal() << "could not find matching item description for '" << slot << "'. please edit inventory_items.json";
       }
 
+#ifdef __EMSCRIPTEN__
       _inventory_sprites[i]->textureRect = sprite->textureRect;
+#else
+      _inventory_sprites[i]->setTextureRect(sprite->getTextureRect());
+#endif
    }
 }
 
@@ -370,10 +404,15 @@ void InfoLayer::updateHealthLayerOffsets()
       [this](const std::shared_ptr<LayerData>& layer_data)
       {
          auto layer = layer_data->_layer;
+#ifdef __EMSCRIPTEN__
          layer->_sprite->position = {layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y};
+#else
+         layer->_sprite->setPosition({layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y});
+#endif
       }
    );
 
+#ifdef __EMSCRIPTEN__
    _animation_heart->position = {heart_pos_x_px + _player_health_x_offset, heart_pos_y_px};
    _animation_stamina->position = {stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px};
    _animation_skull_blink->position = {skull_pos_x_px + _player_health_x_offset, skull_pos_y_px};
@@ -382,6 +421,16 @@ void InfoLayer::updateHealthLayerOffsets()
 
    _inventory_sprites[0]->position = {frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px};
    _inventory_sprites[1]->position = {frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px};
+#else
+   _animation_heart->setPosition({heart_pos_x_px + _player_health_x_offset, heart_pos_y_px});
+   _animation_stamina->setPosition({stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px});
+   _animation_skull_blink->setPosition({skull_pos_x_px + _player_health_x_offset, skull_pos_y_px});
+   _animation_hp_unlock_left->setPosition({_player_health_x_offset, 0.0f});
+   _animation_hp_unlock_right->setPosition({_player_health_x_offset, 0.0f});
+
+   _inventory_sprites[0]->setPosition({frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px});
+   _inventory_sprites[1]->setPosition({frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px});
+#endif
 }
 
 void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
@@ -564,8 +613,13 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
+#ifdef __EMSCRIPTEN__
    const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
    states.view = view;
+#else
+   const sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
+   window.setView(view);
+#endif
 
    drawCameraPanorama(window, states);
    drawHealth(window, states);
@@ -578,7 +632,12 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    auto w = GameConfiguration::getInstance()._view_width;
    auto h = GameConfiguration::getInstance()._view_height;
 
+#ifdef __EMSCRIPTEN__
    const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
+#else
+   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
+   window.setView(view);
+#endif
 
    std::stringstream stream_tl;
    std::stringstream stream_px;
@@ -608,6 +667,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    const auto offset_x_px = 8 * scale_factor;
    const auto offset_y_px = console_base_height_px - 24 * scale_factor;
 
+#ifdef __EMSCRIPTEN__
    const sf::View view =
       sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(view_width_px), static_cast<float>(view_height_px)}});
 
@@ -620,21 +680,52 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
 
    sf::Text console_text(*_console_font, sf::Text::Data{});
    console_text.setCharacterSize(console_base_font_size_px * scale_factor);
+#else
+   sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(view_width_px), static_cast<float>(view_height_px)}));
+   window.setView(view);
+
+   const auto& layer_health = _layers["console"]->_layer;
+   layer_health->draw(window, states);
+
+   sf::View view_screen(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(console_base_width_px), static_cast<float>(console_base_height_px)})
+   );
+   window.setView(view_screen);
+
+   sf::Text console_text(*_console_font);
+   console_text.setCharacterSize(console_base_font_size_px * scale_factor);
+#endif
 
    // draw command history
    auto line_index = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
    {
+#ifdef __EMSCRIPTEN__
       console_text.setString(it->c_str());
+#else
+      console_text.setString(*it);
+#endif
       console_text.setFillColor(sf::Color::White);
+#ifdef __EMSCRIPTEN__
       console_text.position = {static_cast<float>(offset_x_px), static_cast<float>(offset_y_px - ((line_index + 1) * line_spacing_px))};
       window.draw(console_text, sf::RenderStates{.view = view_screen});
+#else
+      console_text.setPosition({static_cast<float>(offset_x_px), static_cast<float>(offset_y_px - ((line_index + 1) * line_spacing_px))});
+      window.draw(console_text);
+#endif
       line_index++;
    }
 
+#ifdef __EMSCRIPTEN__
    console_text.setString(command.c_str());
+#else
+   console_text.setString(command);
+#endif
    console_text.setFillColor(sf::Color::White);
+#ifdef __EMSCRIPTEN__
    console_text.position = {static_cast<float>(offset_x_px), static_cast<float>(console_base_height_px - 14 * scale_factor)};
+#else
+   console_text.setPosition({static_cast<float>(offset_x_px), static_cast<float>(console_base_height_px - 14 * scale_factor)});
+#endif
    window.draw(console_text);
 
    // draw cursor
@@ -643,8 +734,13 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    {
       const auto cursor_position = console_text.findCharacterPos(command.size());
       console_text.setString("_");
+#ifdef __EMSCRIPTEN__
       console_text.position = cursor_position;
       window.draw(console_text, sf::RenderStates{.view = view_screen});
+#else
+      console_text.setPosition(cursor_position);
+      window.draw(console_text);
+#endif
    }
 
    // draw console help
@@ -663,29 +759,60 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    std::ranges::sort(sorted_topics.begin(), sorted_topics.end());
    for (const auto& topic : sorted_topics)
    {
+#ifdef __EMSCRIPTEN__
       console_text.setString(topic.c_str());
+#else
+      console_text.setString(topic);
+#endif
       console_text.setFillColor(sf::Color::Green);
+#ifdef __EMSCRIPTEN__
       console_text.position = {static_cast<float>(console_base_width_px / 2), static_cast<float>((++line_index) * line_spacing_px)};
       window.draw(console_text, sf::RenderStates{.view = view_screen});
+#else
+      console_text.setPosition({static_cast<float>(console_base_width_px / 2), static_cast<float>((++line_index) * line_spacing_px)});
+      window.draw(console_text);
+#endif
 
       const auto& commands = help._help_messages.at(topic);
       for (const auto& command : commands)
       {
+#ifdef __EMSCRIPTEN__
          console_text.setString(command.description.c_str());
+#else
+         console_text.setString(command.description);
+#endif
          console_text.setFillColor(sf::Color::White);
+#ifdef __EMSCRIPTEN__
          console_text.position = {
             static_cast<float>(console_base_width_px / 2 + indent_px), static_cast<float>((++line_index) * line_spacing_px)
          };
          window.draw(console_text, sf::RenderStates{.view = view_screen});
+#else
+         console_text.setPosition(
+            {static_cast<float>(console_base_width_px / 2 + indent_px), static_cast<float>((++line_index) * line_spacing_px)}
+         );
+         window.draw(console_text);
+#endif
 
          for (const auto& example : command.examples)
          {
+#ifdef __EMSCRIPTEN__
             console_text.setString(example.c_str());
+#else
+            console_text.setString(example);
+#endif
             console_text.setFillColor(sf::Color::Red);
+#ifdef __EMSCRIPTEN__
             console_text.position = {
                static_cast<float>(console_base_width_px / 2 + indent_px * 2), static_cast<float>((++line_index) * line_spacing_px)
             };
             window.draw(console_text, sf::RenderStates{.view = view_screen});
+#else
+            console_text.setPosition(
+               {static_cast<float>(console_base_width_px / 2 + indent_px * 2), static_cast<float>((++line_index) * line_spacing_px)}
+            );
+            window.draw(console_text);
+#endif
          }
       }
    }

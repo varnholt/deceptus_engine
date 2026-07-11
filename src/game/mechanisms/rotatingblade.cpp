@@ -70,8 +70,13 @@ RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
 
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_rotating_blade.png");
 
+#ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
    _sprite->origin = {_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f};
+#else
+   _sprite = std::make_unique<sf::Sprite>(*_texture_map);
+   _sprite->setOrigin({_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f});
+#endif
 
    _audio_update_data._range = AudioRange{600.0f, 0.0f, 100.0f, 1.0f};
    _has_audio = true;
@@ -285,13 +290,22 @@ void RotatingBlade::update(const sf::Time& dt)
    _path_interpolation.updateTime(movement_delta);
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
    _pos = _path_interpolation.computePosition(_path_interpolation.getTime());
+#ifdef __EMSCRIPTEN__
    _sprite->rotation = sf::degrees(_angle);
    _sprite->position = _pos;
+#else
+   _sprite->setRotation(sf::degrees(_angle));
+   _sprite->setPosition(_pos);
+#endif
 
    updateAudio();
 
    // kill player if he moves into the blade's radius
+#ifdef __EMSCRIPTEN__
    sf::Vector2i blade_position{static_cast<int32_t>(_sprite->position.x), static_cast<int32_t>(_sprite->position.y)};
+#else
+   sf::Vector2i blade_position{_sprite->getPosition()};
+#endif
    const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
    if (SfmlMath::intersectCircleRect(blade_position, blade_radius, PlayerRegistry::getFirst()->getPixelRectInt()))
    {
@@ -302,6 +316,7 @@ void RotatingBlade::update(const sf::Time& dt)
    }
 }
 
+#ifdef __EMSCRIPTEN__
 void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    draw(target, normal, {});
@@ -326,6 +341,25 @@ void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/,
    DebugDraw::drawCircle(target, _sprite->position, _sprite->origin.x, color);
 #endif
 }
+#else
+void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+{
+   target.draw(*_sprite);
+
+#ifdef DEBUG_INTERSECTION
+   sf::Vector2i sprite_center{_sprite->getPosition()};
+   const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
+
+   b2Color color{1.0f, 1.0f, 1.0f};
+   if (SfmlMath::intersectCircleRect(sprite_center, blade_radius, PlayerRegistry::getFirst()->getPlayerPixelRect()))
+   {
+      color = b2Color{1.0f, 0.0f, 0.0f};
+   }
+
+   DebugDraw::drawCircle(target, _sprite->getPosition(), _sprite->getOrigin().x, color);
+#endif
+}
+#endif
 
 void RotatingBlade::setAudioEnabled(bool enabled)
 {

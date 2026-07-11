@@ -154,8 +154,15 @@ const sf::Font& getFont()
 {
    static sf::Font font = []
    {
+#ifdef __EMSCRIPTEN__
       sf::Font loaded_font = sf::Font::openFromFile(getFontPath()).value();
       loaded_font.getTexture().setSmooth(false);
+#else
+      sf::Font loaded_font;
+      loaded_font.openFromFile(getFontPath());
+      const_cast<sf::Texture&>(loaded_font.getTexture(12)).setSmooth(false);
+      const_cast<sf::Texture&>(loaded_font.getTexture(14)).setSmooth(false);
+#endif
       return loaded_font;
    }();
    return font;

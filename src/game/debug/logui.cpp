@@ -64,10 +64,7 @@ void LogUiBuffer::log(
 
 #ifndef __EMSCRIPTEN__
 
-LogUi::LogUi()
-    : _render_window(std::make_unique<sf::RenderWindow>(
-         sf::RenderWindow::create(sf::WindowSettings{.size = {1200u, 800u}, .title = "deceptus log viewer"}).value()
-      ))
+LogUi::LogUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode({1200, 800}), "deceptus log viewer"))
 {
    if (!ImGui::SFML::Init(*_render_window.get()))
    {

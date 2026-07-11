@@ -130,7 +130,11 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    auto checkpoint = std::make_shared<Checkpoint>(parent);
    checkpoint->setObjectId(data._tmx_object->_name);
    checkpoint->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
+#ifdef __EMSCRIPTEN__
    checkpoint->_sprite = std::make_unique<sf::Sprite>();
+#else
+   checkpoint->_sprite = std::make_unique<sf::Sprite>(*checkpoint->_texture);
+#endif
    checkpoint->_rect = rect;
    checkpoint->_name = data._tmx_object->_name;
    checkpoint->updateSpriteRect();
@@ -163,11 +167,19 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
          sf::Vector2f pos{
             static_cast<float>(sprite_pos_x_it->second->_value_int.value()), static_cast<float>(sprite_pos_y_it->second->_value_int.value())
          };
+#ifdef __EMSCRIPTEN__
          checkpoint->_sprite->position = pos;
+#else
+         checkpoint->_sprite->setPosition(pos);
+#endif
       }
       else
       {
+#ifdef __EMSCRIPTEN__
          checkpoint->_sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
+#else
+         checkpoint->_sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+#endif
       }
    }
 
@@ -204,7 +216,11 @@ void Checkpoint::update(const sf::Time& dt)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
 
+#ifdef __EMSCRIPTEN__
    if (sf::findIntersection(player_rect, _rect).hasValue())
+#else
+   if (player_rect.findIntersection(_rect).has_value())
+#endif
    {
       reached();
    }
@@ -322,5 +338,9 @@ void Checkpoint::updateSpriteRect(float dt_s)
          break;
    }
 
+#ifdef __EMSCRIPTEN__
    _sprite->textureRect = sf::IntRect({x, y}, {w, h});
+#else
+   _sprite->setTextureRect({{x, y}, {w, h}});
+#endif
 }

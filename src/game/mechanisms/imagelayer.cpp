@@ -28,11 +28,39 @@ std::string_view ImageLayer::objectName() const
 
 void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
+#ifdef __EMSCRIPTEN__
    draw(target, normal, {});
+#else
+   if (_sprite == nullptr)
+   {
+      return;
+   }
+
+   if (!_visible)
+   {
+      return;
+   }
+
+   // level view is copied here on purpose
+   const auto level_view = target.getView();
+
+   if (_parallax_settings.has_value())
+   {
+      target.setView(_parallax_view);
+   }
+
+   target.draw(*_sprite, {_blend_mode});
+
+   if (_parallax_settings.has_value())
+   {
+      target.setView(level_view);
+   }
+#endif
 }
 
-void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
+#ifdef __EMSCRIPTEN__
    if (_sprite == nullptr)
    {
       return;
@@ -53,6 +81,10 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, co
       draw_states.blendMode = _blend_mode;
       target.draw(*_sprite, draw_states);
    }
+#else
+   (void)states;
+   draw(target, normal);
+#endif
 }
 
 void ImageLayer::update(const sf::Time& dt)
@@ -64,9 +96,15 @@ void ImageLayer::update(const sf::Time& dt)
    {
       if (_sprite == nullptr)
       {
+#ifdef __EMSCRIPTEN__
          _sprite = std::make_unique<sf::Sprite>();
          _sprite->position = _position;
          _sprite->color = _color;
+#else
+         _sprite = std::make_unique<sf::Sprite>(*_texture->getTexture());
+         _sprite->setPosition(_position);
+         _sprite->setColor(_color);
+#endif
       }
    }
    else
@@ -82,17 +120,30 @@ void ImageLayer::updateView(float level_view_x, float level_view_y, float view_w
       return;
    }
 
+#ifdef __EMSCRIPTEN__
    _parallax_view = sf::View::fromRect(sf::FloatRect{
       {level_view_x * (*_parallax_settings)._factor.x + (*_parallax_settings)._error.x,
        level_view_y * (*_parallax_settings)._factor.y + (*_parallax_settings)._error.y},
       {view_width, view_height}
    });
+#else
+   _parallax_view = sf::View{sf::FloatRect{
+      {level_view_x * (*_parallax_settings)._factor.x + (*_parallax_settings)._error.x,
+       level_view_y * (*_parallax_settings)._factor.y + (*_parallax_settings)._error.y},
+      {view_width, view_height}
+   }};
+#endif
 }
 
 void ImageLayer::resetView(float view_width, float view_height)
 {
+#ifdef __EMSCRIPTEN__
    _parallax_view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {view_width, view_height}});
    _parallax_view.viewport = sf::FloatRect{{0.0f, 0.0f}, {1.0f, 1.0f}};
+#else
+   _parallax_view = sf::View{sf::FloatRect({0.0f, 0.0f}, {view_width, view_height})};
+   _parallax_view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
+#endif
 }
 
 std::optional<sf::FloatRect> ImageLayer::getBoundingBoxPx()

@@ -214,7 +214,11 @@ void Fan::insertInstance(const std::shared_ptr<Fan>& fan, const GameDeserializeD
    fixture_def.isSensor = false;
    instance.body->CreateFixture(&fixture_def);
 
+#ifdef __EMSCRIPTEN__
    instance.sprite->position = {static_cast<float>(instance.tile_position_px.x), static_cast<float>(instance.tile_position_px.y)};
+#else
+   instance.sprite->setPosition({static_cast<float>(instance.tile_position_px.x), static_cast<float>(instance.tile_position_px.y)});
+#endif
 
    fan->_instances.push_back(std::move(instance));
 }
@@ -238,10 +242,14 @@ void Fan::update(const sf::Time& dt)
    {
       instance.sprite_offset += dt.asSeconds() * 25.0F * _speed * _lever_lag;
       const auto x_offset = static_cast<int32_t>(instance.sprite_offset) % 8;
+#ifdef __EMSCRIPTEN__
       instance.sprite->textureRect = {
          {static_cast<float>(x_offset * PIXELS_PER_TILE), static_cast<float>(_y_offset_tl * PIXELS_PER_TILE)},
          {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
       };
+#else
+      instance.sprite->setTextureRect({{x_offset * PIXELS_PER_TILE, _y_offset_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+#endif
    }
 
    collide();
@@ -256,9 +264,13 @@ void Fan::draw(sf::RenderTarget& color, sf::RenderTarget&, const sf::RenderState
 {
    for (const auto& section : _instances)
    {
+#ifdef __EMSCRIPTEN__
       sf::RenderStates draw_states = states;
       draw_states.texture = section.texture.get();
       color.draw(*section.sprite, draw_states);
+#else
+      color.draw(*section.sprite, states);
+#endif
    }
 }
 
@@ -270,7 +282,11 @@ void Fan::collide()
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+#ifdef __EMSCRIPTEN__
    if (sf::findIntersection(player_rect, _pixel_rect).hasValue())
+#else
+   if (player_rect.findIntersection(_pixel_rect).has_value())
+#endif
    {
       PlayerRegistry::getFirst()->getBody()->ApplyForceToCenter(b2Vec2(2.0F * _direction.x, _direction.y), true);
    }

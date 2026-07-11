@@ -89,8 +89,13 @@ void BlockingRect::setup(const GameDeserializeData& data)
       {
          const auto texture = texture_it->second->_value_string.value();
          _texture_map = TexturePool::getInstance().get(texture);
+#ifdef __EMSCRIPTEN__
          _sprite = std::make_unique<sf::Sprite>();
          _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
+#else
+         _sprite = std::make_unique<sf::Sprite>(*_texture_map);
+         _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+#endif
       }
 
       const auto normal_it = data._tmx_object->_properties->_map.find("normal");
@@ -148,6 +153,7 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal, cons
       return;
    }
 
+#ifdef __EMSCRIPTEN__
    sf::RenderStates color_states = states;
    color_states.texture = _texture_map.get();
    target.draw(*_sprite, color_states);
@@ -158,6 +164,21 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal, cons
       normal_states.texture = _normal_map.get();
       normal.draw(*_sprite, normal_states);
    }
+#else
+   if (_normal_map)
+   {
+      _sprite->setTexture(*_texture_map);
+   }
+
+   target.draw(*_sprite, states);
+
+   if (_normal_map)
+   {
+      _sprite->setTexture(*_normal_map);
+   }
+
+   normal.draw(*_sprite, states);
+#endif
 }
 
 void BlockingRect::update(const sf::Time& /*dt*/)

@@ -33,7 +33,11 @@ public:
    /// \brief draws the complete hud pass in view space.
    /// \param window SFML render target used for hud output.
    /// \param RenderStates render state overrides passed to sub-draw calls.
+#ifdef __EMSCRIPTEN__
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{});
+#else
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+#endif
 
    /// \brief draws debug text such as player tile position, pixel position, and room name.
    /// \param window SFML render target used for debug text rendering.
@@ -42,7 +46,11 @@ public:
    /// \brief draws the developer console, command history, and help topics.
    /// \param window SFML render target used for console output.
    /// \param states render state overrides for console background layers.
+#ifdef __EMSCRIPTEN__
    void drawConsole(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates{});
+#else
+   void drawConsole(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);
+#endif
 
    /// \brief toggles loading mode and triggers hud/show hide transitions.
    /// \param loading true to show loading icon and hide health panel, false to reverse it.

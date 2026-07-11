@@ -131,6 +131,7 @@ void LuaNode::initialize()
    setupLua();
    setupBody();
 
+#ifdef __EMSCRIPTEN__
    auto loaded_shader = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/flash.frag"});
    if (loaded_shader.hasValue())
    {
@@ -151,6 +152,15 @@ void LuaNode::initialize()
    {
       Log::Error() << "error loading flash shader";
    }
+#else
+   if (!_flash_shader.loadFromFile("data/shaders/flash.frag", sf::Shader::Type::Fragment))
+   {
+      Log::Error() << "error loading flash shader";
+   }
+
+   _flash_shader.setUniform("texture", sf::Shader::CurrentTexture);
+   _flash_shader.setUniform("flash", _hit_flash);
+#endif
 }
 
 void LuaNode::setupLua()
@@ -748,14 +758,22 @@ void LuaNode::setTransform(const b2Vec2& position, float angle)
 
 void LuaNode::addSprite()
 {
+#ifdef __EMSCRIPTEN__
    auto sprite = std::make_unique<sf::Sprite>();
+#else
+   auto sprite = std::make_unique<sf::Sprite>(*_texture);
+#endif
    _sprites.emplace_back(std::move(sprite));
    _sprite_offsets_px.emplace_back();
 }
 
 void LuaNode::setSpriteOrigin(int32_t id, float x, float y)
 {
+#ifdef __EMSCRIPTEN__
    _sprites[id]->origin = {x, y};
+#else
+   _sprites[id]->setOrigin({x, y});
+#endif
 }
 
 void LuaNode::setSpriteOffset(int32_t id, float x, float y)
@@ -1092,26 +1110,44 @@ void LuaNode::updatePosition()
 
 void LuaNode::updateSpriteRect(int32_t id, int32_t x_px, int32_t y_px, int32_t w_px, int32_t h_px)
 {
+#ifdef __EMSCRIPTEN__
    _sprites[id]->textureRect = sf::IntRect({x_px, y_px}, {w_px, h_px});
+#else
+   _sprites[id]->setTextureRect(sf::IntRect({x_px, y_px}, {w_px, h_px}));
+#endif
 }
 
 void LuaNode::setSpriteScale(int32_t id, float x_scale, float y_scale)
 {
+#ifdef __EMSCRIPTEN__
    _sprites[id]->scale = {x_scale, y_scale};
+#else
+   _sprites[id]->setScale({x_scale, y_scale});
+#endif
 }
 
 void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
+#ifdef __EMSCRIPTEN__
    _sprites[id]->color = {r, g, b, a};
+#else
+   _sprites[id]->setColor({r, g, b, a});
+#endif
 }
 
 void LuaNode::setSpriteVisible(int32_t id, bool visible)
 {
    if (id >= 0 && id < static_cast<int32_t>(_sprites.size()))
    {
+#ifdef __EMSCRIPTEN__
       sf::Color current_color = _sprites[id]->color;
       current_color.a = visible ? 255 : 0;
       _sprites[id]->color = current_color;
+#else
+      sf::Color current_color = _sprites[id]->getColor();
+      current_color.a = visible ? 255 : 0;
+      _sprites[id]->setColor(current_color);
+#endif
    }
 }
 
@@ -1208,7 +1244,11 @@ bool LuaNode::intersectsPlayer(float x, float y, float width, float height)
 {
    sf::FloatRect rect{{x, y}, {width, height}};
    const auto player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+#ifdef __EMSCRIPTEN__
    return sf::findIntersection(player_rect, rect).hasValue();
+#else
+   return player_rect.findIntersection(rect).has_value();
+#endif
 }
 
 bool LuaNode::checkPlayerDead() const
@@ -1387,10 +1427,14 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const
          _hit_flash = 1.0f - (hit_duration_s.count() / hit_duration_max_s);
       }
 
+#ifdef __EMSCRIPTEN__
       if (_flash_shader.has_value() && _ul_flash.has_value())
       {
          _flash_shader->setUniform(*_ul_flash, _hit_flash);
       }
+#else
+      _flash_shader.setUniform("flash", _hit_flash);
+#endif
    }
 
    // draw sprite on top of projectiles
@@ -1403,6 +1447,7 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const
    {
       auto& sprite = _sprites[i];
 
+#ifdef __EMSCRIPTEN__
       if (sprite->color.a == 0)
       {
          continue;
@@ -1418,6 +1463,19 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const
          sprite_states.shader = &(*_flash_shader);
       }
       target.draw(*sprite, sprite_states);
+#else
+      if (sprite->getColor().a == 0)
+      {
+         continue;
+      }
+
+      const auto& offset = _sprite_offsets_px[i];
+      const auto center = sf::Vector2f(sprite->getTextureRect().size.x / 2.0f, sprite->getTextureRect().size.y / 2.0f);
+      sprite->setPosition(_position_px - center + offset);
+      auto sprite_states = states;
+      sprite_states.shader = &_flash_shader;
+      target.draw(*sprite, sprite_states);
+#endif
    }
 
    // draw debug rectangles if they were added

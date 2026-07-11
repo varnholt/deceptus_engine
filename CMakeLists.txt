@@ -837,50 +837,37 @@ set(SFML_BUILD_SYSTEM
 set(SFML_BUILD_NETWORK
     ON
     CACHE BOOL "" FORCE)
-set(SFML_USE_STATIC_STD_LIBS
-    OFF
-    CACHE BOOL "" FORCE)
+
+# fetch dependencies
 if(EMSCRIPTEN)
-    set(SFML_BUILD_SHARED_LIBS
-        OFF
-        CACHE BOOL "" FORCE)
+    # WASM target: VRSFML (vittorioromeo's SFML rewrite) -- the only SFML fork
+    # with an Emscripten backend.
     set(SFML_BUILD_NETWORK
         OFF
         CACHE BOOL "" FORCE)
-else()
-    set(SFML_BUILD_SHARED_LIBS
-        ON
+    set(SFML_USE_STATIC_STD_LIBS
+        OFF
         CACHE BOOL "" FORCE)
-endif()
+    set(SFML_BUILD_SHARED_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
 
-# fetch dependencies
-# SDL3 is fetched internally by VRSFML master via CPM.
-# Declaring it separately here would create duplicate CMake targets.
-FetchContent_Declare(
-    SFML
-    GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
-    GIT_TAG master)
-FetchContent_Declare(
-    LUA
-    GIT_REPOSITORY https://github.com/lua/lua.git
-    GIT_TAG v5.4.7)
-if(NOT EMSCRIPTEN)
+    # SDL3 is fetched internally by VRSFML master via CPM.
+    # Declaring it separately here would create duplicate CMake targets.
     FetchContent_Declare(
-        GLEW
-        GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
-        GIT_TAG glew-cmake-2.3.0)
-endif()
+        SFML
+        GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
+        GIT_TAG master)
+    FetchContent_Declare(
+        LUA
+        GIT_REPOSITORY https://github.com/lua/lua.git
+        GIT_TAG v5.4.7)
 
-if(EMSCRIPTEN)
     FetchContent_MakeAvailable(SFML LUA)
-else()
-    FetchContent_MakeAvailable(SFML LUA GLEW)
-endif()
 
-# Apply WebGL2 compatibility patch to VRSFML on Emscripten builds.
-# GLSL ES 3.00 forbids layout(location=N) on uniforms; the patch adds #ifdef __EMSCRIPTEN__
-# guards to DefaultShader.hpp and switches RenderTarget.cpp to glGetUniformLocation.
-if(EMSCRIPTEN)
+    # Apply WebGL2 compatibility patch to VRSFML on Emscripten builds.
+    # GLSL ES 3.00 forbids layout(location=N) on uniforms; the patch adds #ifdef __EMSCRIPTEN__
+    # guards to DefaultShader.hpp and switches RenderTarget.cpp to glGetUniformLocation.
     execute_process(
         COMMAND git apply --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
         WORKING_DIRECTORY ${sfml_SOURCE_DIR}
@@ -911,6 +898,33 @@ if(EMSCRIPTEN)
             message(FATAL_ERROR "patches/vrsfml-webgl2-uniforms.patch does not apply to the fetched VRSFML source and is not already applied - fix the patch")
         endif()
     endif()
+else()
+    # Desktop target: vanilla/official SFML, matching master.
+    set(SFML_USE_STATIC_STD_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_BUILD_SHARED_LIBS
+        ON
+        CACHE BOOL "" FORCE)
+
+    FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.x)
+    FetchContent_Declare(
+        SDL3
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+        GIT_TAG release-3.2.4)
+    FetchContent_Declare(
+        LUA
+        GIT_REPOSITORY https://github.com/lua/lua.git
+        GIT_TAG v5.4.7)
+    FetchContent_Declare(
+        GLEW
+        GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
+        GIT_TAG glew-cmake-2.3.0)
+
+    FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
 endif()
 
 # ----------------------------------------------------------------------------------------------------

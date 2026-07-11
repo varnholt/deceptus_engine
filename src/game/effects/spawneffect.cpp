@@ -121,7 +121,11 @@ SpawnEffect::ParticleEffect::ParticleEffect(
    for (auto i = 0; i < count; i++)
    {
       Particle particle(*_texture);
+#ifdef __EMSCRIPTEN__
       particle._sprite->origin = {5, 5};
+#else
+      particle._sprite->setOrigin({5, 5});
+#endif
       particle._offset_px = offset_px;
       particle._radius_px = radius_px;
       particle._show_duration_s = show_duration_s;
@@ -138,7 +142,9 @@ void SpawnEffect::ParticleEffect::draw(sf::RenderTarget& target, const sf::Rende
 {
    sf::RenderStates render_states = states;
    render_states.blendMode = sf::BlendAdd;
+#ifdef __EMSCRIPTEN__
    render_states.texture = _texture.get();
+#endif
    std::ranges::for_each(
       _particles,
       [&target, &render_states](const auto& particle)
@@ -184,7 +190,11 @@ void SpawnEffect::Particle::setupPosition(float random_scale)
 
 SpawnEffect::Particle::Particle(const sf::Texture& texture)
 {
+#ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
+#else
+   _sprite = std::make_unique<sf::Sprite>(texture);
+#endif
 }
 
 void SpawnEffect::Particle::spawn()
@@ -194,7 +204,11 @@ void SpawnEffect::Particle::spawn()
    _delay = sf::seconds(frand(0.0f, _show_duration_s));
 
    // each texture rect is 10x10px, 5 particles in 1 row
+#ifdef __EMSCRIPTEN__
    _sprite->textureRect = {{static_cast<float>((std::rand() % 5) * 10), 0.0f}, {10.0f, 10.0f}};
+#else
+   _sprite->setTextureRect({{(std::rand() % 5) * 10, 0}, {10, 10}});
+#endif
 }
 
 void SpawnEffect::Particle::update(const sf::Time& dt)
@@ -224,7 +238,11 @@ void SpawnEffect::Particle::update(const sf::Time& dt)
    const auto alpha_norm_squared = alpha_norm * alpha_norm;
    const auto alpha_squared_and_scaled = 255 - (alpha_norm_squared * 255);
    const auto alpha = static_cast<uint8_t>(alpha_squared_and_scaled * _alpha_all_particles);
+#ifdef __EMSCRIPTEN__
    _sprite->color = {255, 255, 255, alpha};
+#else
+   _sprite->setColor({255, 255, 255, alpha});
+#endif
 
    // compute sprite position
    float speed_factor = 1.0f;
@@ -235,7 +253,11 @@ void SpawnEffect::Particle::update(const sf::Time& dt)
 
    _pos_norm = _pos_norm * (1.0f - speed_factor * _velocity * dt.asMilliseconds());
    _pos_px = _pos_norm * _scale_px;
+#ifdef __EMSCRIPTEN__
    _sprite->position = _pos_px + _offset_px;
+#else
+   _sprite->setPosition(_pos_px + _offset_px);
+#endif
 }
 
 SpawnEffect::Orb::Orb(const sf::Vector2f& pos_px, int32_t idle_cycle_count) : _idle_cycle_count(idle_cycle_count)

@@ -23,6 +23,7 @@ public:
    /// \param normal normal-map render target.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override final;
 
+#ifdef __EMSCRIPTEN__
    /// \brief sets ring-specific uniforms then delegates quad drawing to the base (states-carrying overload).
    /// \param target render target.
    /// \param normal normal-map render target.
@@ -31,6 +32,11 @@ public:
 
    /// \brief caches ring-specific uniform locations in addition to the base set.
    void checkUniforms() override;
+#else
+   /// \brief detects ring-specific uniforms in addition to the base set.
+   /// \param shader_path file path to the fragment shader source.
+   void checkUniforms(const std::string& shader_path) override;
+#endif
 
    /// \brief reads ring-specific TMX properties (ring_scale, pixel_size).
    /// \param data deserialization data passed through from the factory.
@@ -48,11 +54,19 @@ private:
 
    HighResTimePoint _disable_time{};
 
+#ifdef __EMSCRIPTEN__
    // ring-specific uniform location cache
    std::optional<sf::Shader::UniformLocation> _u_ring_scale_loc;
    std::optional<sf::Shader::UniformLocation> _u_pixel_size_loc;
    std::optional<sf::Shader::UniformLocation> _u_flash_color_loc;
    std::optional<sf::Shader::UniformLocation> _u_flash_intensity_loc;
+#else
+   // ring-specific uniforms
+   bool _has_u_ring_scale = false;
+   bool _has_u_pixel_size = false;
+   bool _has_u_flash_color = false;
+   bool _has_u_flash_intensity = false;
+#endif
 
    float _ring_scale = 1.0f / 3.0f;                //!< ring size relative to the quad; TMX property "ring_scale"
    float _pixel_size = 1.0f;                       //!< pixel block size in screen pixels; TMX property "pixel_size"

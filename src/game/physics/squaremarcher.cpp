@@ -150,7 +150,11 @@ void SquareMarcher::writeGridToImage(const std::filesystem::path& image_path)
    try
    {
       const auto texture_size = sf::Vector2u({static_cast<uint32_t>(_width * factor), static_cast<uint32_t>(_height * factor)});
+#ifdef __EMSCRIPTEN__
       render_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create(texture_size)));
+#else
+      render_texture = std::make_unique<sf::RenderTexture>(texture_size);
+#endif
    }
    catch (...)
    {
@@ -202,7 +206,11 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
 
    try
    {
+#ifdef __EMSCRIPTEN__
       render_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create(sf::Vector2u{_width * factor, _height * factor})));
+#else
+      render_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u{_width * factor, _height * factor});
+#endif
    }
    catch (...)
    {
@@ -224,7 +232,11 @@ void SquareMarcher::writePathToImage(const std::filesystem::path& image_path)
       }
 
       vertices.push_back(vertices.at(0));
+#ifdef __EMSCRIPTEN__
       render_texture->draw(std::span<const sf::Vertex>{vertices.data(), vertices.size()}, sf::PrimitiveType::LineStrip);
+#else
+      render_texture->draw(&vertices[0], vertices.size(), sf::PrimitiveType::LineStrip);
+#endif
    }
 
    render_texture->display();

@@ -15,7 +15,9 @@
 #include <cmath>
 #include <numbers>
 #include <ranges>
+#ifdef __EMSCRIPTEN__
 #include <span>
+#endif
 
 // #define DEBUG_DRAW_LIGHT_SYSTEM
 
@@ -32,6 +34,7 @@ constexpr auto max_distance_m2 = 400.0f;  // depends on the view dimensions
 
 // write pass: write 1 to stencil for every fragment that should be in shadow.
 // stencilOnly=true suppresses color writes (equivalent to glColorMask(false,...)).
+#ifdef __EMSCRIPTEN__
 const sf::StencilMode stencil_write_mode{
    .stencilComparison = sf::StencilComparison::Always,
    .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
@@ -39,8 +42,18 @@ const sf::StencilMode stencil_write_mode{
    .stencilReference = sf::StencilValue{1u},
    .stencilMask = sf::StencilValue{~0u}
 };
+#else
+const sf::StencilMode stencil_write_mode{
+   sf::StencilComparison::Always,
+   sf::StencilUpdateOperation::Replace,
+   1,    // reference — writes 1 to mark occluded pixels
+   ~0u,  // mask
+   true  // stencilOnly: no color output
+};
+#endif
 
 // read pass: only draw where stencil == 0 (not occluded by any shadow).
+#ifdef __EMSCRIPTEN__
 const sf::StencilMode stencil_test_mode{
    .stencilComparison = sf::StencilComparison::Equal,
    .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
@@ -48,7 +61,17 @@ const sf::StencilMode stencil_test_mode{
    .stencilReference = sf::StencilValue{0u},
    .stencilMask = sf::StencilValue{~0u}
 };
+#else
+const sf::StencilMode stencil_test_mode{
+   sf::StencilComparison::Equal,
+   sf::StencilUpdateOperation::Keep,
+   0,     // reference — 0 means "lit"
+   ~0u,   // mask
+   false  // write color
+};
+#endif
 
+#ifdef __EMSCRIPTEN__
 std::optional<sf::Shader::UniformLocation> toStdOptional(sf::base::Optional<sf::Shader::UniformLocation> opt)
 {
    if (opt.hasValue())
@@ -57,6 +80,7 @@ std::optional<sf::Shader::UniformLocation> toStdOptional(sf::base::Optional<sf::
    }
    return std::nullopt;
 }
+#endif
 }  // namespace
 
 LightSystem::LightSystem()
@@ -72,6 +96,7 @@ LightSystem::LightSystem()
       _unit_circle[i] = b2Vec2{x_normalized, y_normalized};
    }
 
+#ifdef __EMSCRIPTEN__
    auto loaded = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/light.frag"});
    if (!loaded.hasValue())
    {
@@ -104,19 +129,32 @@ LightSystem::LightSystem()
       _ul_light_positions[index] = toStdOptional(_light_shader->getUniformLocation(position_names[index]));
       _ul_light_colors[index] = toStdOptional(_light_shader->getUniformLocation(color_names[index]));
    }
+#else
+   if (!_light_shader.loadFromFile("data/shaders/light.frag", sf::Shader::Type::Fragment))
+   {
+      Log::Error() << "error loading bump mapping shader";
+   }
+#endif
 }
 
 void LightSystem::drawShadowQuads(
    sf::RenderTarget& target,
    std::shared_ptr<LightSystem::LightInstance> light,
-   const std::vector<b2Body*>& candidates,
+   const std::vector<b2Body*>& candidates
+#ifdef __EMSCRIPTEN__
+   ,
    const sf::RenderStates& states
+#endif
 ) const
 {
    const auto light_pos_m = light->_pos_m + light->_center_offset_m;
 
+#ifdef __EMSCRIPTEN__
    sf::RenderStates shadow_states = states;
    shadow_states.stencilMode = stencil_write_mode;
+#else
+   const sf::RenderStates shadow_states{stencil_write_mode};
+#endif
 
    for (auto* body : candidates)
    {
@@ -182,7 +220,11 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
+#ifdef __EMSCRIPTEN__
                target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
+#else
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
+#endif
             }
          }
          else if (shape_chain)
@@ -212,7 +254,11 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(vertex_1.x, vertex_1.y) * PPM, sf::Color::Black)
                };
 
+#ifdef __EMSCRIPTEN__
                target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
+#else
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
+#endif
             }
          }
          else if (shape_polygon)
@@ -246,7 +292,11 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
+#ifdef __EMSCRIPTEN__
                target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
+#else
+               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
+#endif
             }
          }
       }
@@ -266,8 +316,12 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
 {
    sf::Vector2f normalized = view.getTransform().transformPoint(point);
    sf::Vector2f pixel;
+#ifdef __EMSCRIPTEN__
    const auto target_size = target.getSize();
    const auto viewport = view.computePixelViewport(sf::Vec2f{static_cast<float>(target_size.x), static_cast<float>(target_size.y)});
+#else
+   const auto viewport = target.getViewport(view);
+#endif
    pixel.x = ((normalized.x + 1.0f) / (2.0f * static_cast<float>(viewport.size.x))) + static_cast<float>(viewport.position.x);
    pixel.y = ((-normalized.y + 1.0f) / (2.0f * static_cast<float>(viewport.size.y))) + static_cast<float>(viewport.position.y);
    return pixel;
@@ -288,6 +342,7 @@ void LightSystem::setOccluderCallback(OccluderDrawCallback callback)
 
 void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
+#ifdef __EMSCRIPTEN__
    if (!_light_shader.has_value())
    {
       return;
@@ -345,6 +400,69 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
 
       light_id++;
    }
+#else
+   int32_t light_id = 0;
+
+   _light_shader.setUniform("u_light_count", static_cast<int32_t>(_active_lights.size()));
+   _light_shader.setUniform("u_resolution", sf::Glsl::Vec2(static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)));
+   _light_shader.setUniform("u_ambient", sf::Glsl::Vec4(_ambient_color[0], _ambient_color[1], _ambient_color[2], _ambient_color[3]));
+
+   static const std::array<std::string, 6> position_uniforms = {
+      "u_lights[0]._position",
+      "u_lights[1]._position",
+      "u_lights[2]._position",
+      "u_lights[3]._position",
+      "u_lights[4]._position",
+      "u_lights[5]._position"
+   };
+   static const std::array<std::string, 6> color_uniforms = {
+      "u_lights[0]._color", "u_lights[1]._color", "u_lights[2]._color", "u_lights[3]._color", "u_lights[4]._color", "u_lights[5]._color"
+   };
+
+   for (auto& light : _active_lights)
+   {
+      if (light_id >= static_cast<int32_t>(position_uniforms.size()))
+      {
+         break;
+      }
+
+      // transform light coordinates from box2d to normalized screen coordinates
+      sf::Vector2f light_screen_pos = mapCoordsToPixelNormalized(
+         {light->_pos_m.x * PPM + light->_center_offset_px.x, light->_pos_m.y * PPM + light->_center_offset_px.y},
+         *LevelRegistry::getCurrent()->getLevelView().get()
+      );
+
+      _light_shader.setUniform(
+         position_uniforms[light_id],
+         sf::Glsl::Vec3(
+            static_cast<float>(light_screen_pos.x),
+            static_cast<float>(1.0f - light_screen_pos.y),
+            0.075f  // default z
+         )
+      );
+
+      _light_shader.setUniform(
+         color_uniforms[light_id],
+         sf::Glsl::Vec4(
+            static_cast<float>(light->_color.r) / 255.0f,
+            static_cast<float>(light->_color.g) / 255.0f,
+            static_cast<float>(light->_color.b) / 255.0f,
+            static_cast<float>(light->_color.a) / 255.0f
+         )
+      );
+
+      // Log::Info()
+      //    << "light position on screen "
+      //    << id << ": "
+      //    << light_screen_pos.x << ", "
+      //    << light_screen_pos.y << " | "
+      //    << "render target size is: "
+      //    << target.getSize().x << ", "
+      //    << target.getSize().y;
+
+      light_id++;
+   }
+#endif
 }
 
 void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states)
@@ -427,10 +545,18 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       sf::RenderTarget& target = (channel_index < 3) ? target1 : target2;
       int local_channel = channel_index % 3;
 
+#ifdef __EMSCRIPTEN__
       target.clearStencil(sf::StencilValue{0u});
+#else
+      target.clearStencil(0);
+#endif
 
       drawOccluders(target);
+#ifdef __EMSCRIPTEN__
       drawShadowQuads(target, light, shadow_candidates, states);
+#else
+      drawShadowQuads(target, light, shadow_candidates);
+#endif
 
       sf::Color channel_color;
       if (local_channel == 0)
@@ -446,6 +572,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
          channel_color = sf::Color(0, 0, 255, 255);
       }
 
+#ifdef __EMSCRIPTEN__
       light->_sprite->color = channel_color;
 
       sf::RenderStates render_states = states;
@@ -466,6 +593,22 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
          }
          render_states.shader = light->_shader.get();
       }
+#else
+      light->_sprite->setColor(channel_color);
+
+      sf::RenderStates render_states{sf::BlendAdd};
+      render_states.stencilMode = stencil_test_mode;
+
+      if (light->_shader)
+      {
+         light->_shader->setUniform("texture", *light->_texture);
+         if (light->_shader_update_callback)
+         {
+            light->_shader_update_callback(*light->_shader, *light, _clock.getElapsedTime().asSeconds());
+         }
+         render_states.shader = light->_shader.get();
+      }
+#endif
 
       target.draw(*light->_sprite, render_states);
 
@@ -481,10 +624,12 @@ void LightSystem::draw(
    const std::shared_ptr<sf::RenderTexture>& normal_map
 )
 {
+#ifdef __EMSCRIPTEN__
    if (!_light_shader.has_value())
    {
       return;
    }
+#endif
 
    const auto* color_tex = &color_map->getTexture();
    const auto* light_tex = &light_map->getTexture();
@@ -493,6 +638,7 @@ void LightSystem::draw(
 
    if (color_tex != _last_color_map || light_tex != _last_light_map || light2_tex != _last_light_map2 || normal_tex != _last_normal_map)
    {
+#ifdef __EMSCRIPTEN__
       if (_ul_color_map.has_value())
       {
          (void)_light_shader->setUniform(*_ul_color_map, *color_tex);
@@ -509,6 +655,12 @@ void LightSystem::draw(
       {
          (void)_light_shader->setUniform(*_ul_normal_map, *normal_tex);
       }
+#else
+      _light_shader.setUniform("color_map", *color_tex);
+      _light_shader.setUniform("light_map_1", *light_tex);
+      _light_shader.setUniform("light_map_2", *light2_tex);
+      _light_shader.setUniform("normal_map", *normal_tex);
+#endif
       _last_color_map = color_tex;
       _last_light_map = light_tex;
       _last_light_map2 = light2_tex;
@@ -517,8 +669,13 @@ void LightSystem::draw(
 
    updateLightShader(target);
 
+#ifdef __EMSCRIPTEN__
    const sf::Texture& light_color_texture = color_map->getTexture();
    target.draw(light_color_texture, sf::RenderStates{.shader = &(*_light_shader)});
+#else
+   sf::Sprite sprite(color_map->getTexture());
+   target.draw(sprite, &_light_shader);
+#endif
 }
 
 void LightSystem::drawDebug(sf::RenderTarget& target)
@@ -610,16 +767,29 @@ void LightSystem::LightInstance::deserialize(const nlohmann::json& node)
 
    if (_sprite && _texture)
    {
+#ifdef __EMSCRIPTEN__
       _sprite->textureRect =
          sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(_texture->getSize().x), static_cast<float>(_texture->getSize().y)}};
       _sprite->scale = {static_cast<float>(_width_px) / _texture->getSize().x, static_cast<float>(_height_px) / _texture->getSize().y};
       _sprite->color = _color;
+#else
+      _sprite->setTexture(*_texture);
+      _sprite->setTextureRect(
+         sf::IntRect({0, 0}, {static_cast<int32_t>(_texture->getSize().x), static_cast<int32_t>(_texture->getSize().y)})
+      );
+      _sprite->setScale({static_cast<float>(_width_px) / _texture->getSize().x, static_cast<float>(_height_px) / _texture->getSize().y});
+      _sprite->setColor(_color);
+#endif
    }
 }
 
 void LightSystem::LightInstance::updateSpritePosition() const
 {
+#ifdef __EMSCRIPTEN__
    _sprite->position = sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f);
+#else
+   _sprite->setPosition(sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
+#endif
 }
 
 std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(GameNode* parent, const GameDeserializeData& data)
@@ -677,15 +847,26 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    }
 
    light->_texture = TexturePool::getInstance().get(texture);
+#ifdef __EMSCRIPTEN__
    light->_sprite = std::make_unique<sf::Sprite>();
    light->_sprite->textureRect =
       sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(light->_texture->getSize().x), static_cast<float>(light->_texture->getSize().y)}};
+#else
+   light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
+   light->_sprite->setTextureRect(
+      sf::IntRect({0, 0}, {static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y)})
+   );
+#endif
 
    light->updateSpritePosition();
 
    const auto scale_x = static_cast<float>(light->_width_px) / static_cast<float>(light->_texture->getSize().x);
    const auto scale_y = static_cast<float>(light->_height_px) / static_cast<float>(light->_texture->getSize().y);
+#ifdef __EMSCRIPTEN__
    light->_sprite->scale = {scale_x, scale_y};
+#else
+   light->_sprite->setScale({scale_x, scale_y});
+#endif
 
    return light;
 }
@@ -694,9 +875,16 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 {
    auto light = std::make_shared<LightSystem::LightInstance>(parent);
    light->_texture = TexturePool::getInstance().get("data/light/smooth.png");
+#ifdef __EMSCRIPTEN__
    light->_sprite = std::make_unique<sf::Sprite>();
    light->_sprite->textureRect =
       sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(light->_texture->getSize().x), static_cast<float>(light->_texture->getSize().y)}};
+#else
+   light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
+   light->_sprite->setTextureRect(
+      sf::IntRect({0, 0}, {static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y)})
+   );
+#endif
    light->deserialize(node);
    return light;
 }

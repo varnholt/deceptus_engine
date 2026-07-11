@@ -55,12 +55,14 @@ public:
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
+#ifdef __EMSCRIPTEN__
    /// \brief draws the rotating blade sprite with explicit render states (used in WASM to carry the level view).
    /// \param target render target.
    /// \param normal normal-map render target, unused by this mechanism.
    /// \param states render states to apply.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
    using GameMechanism::draw;
+#endif
 
    /// \brief enables or disables blade sound playback updates.
    /// \param enabled true to allow blade audio.

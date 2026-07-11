@@ -46,11 +46,20 @@ std::string_view Laser::objectName() const
 
 void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+#ifdef __EMSCRIPTEN__
    draw(color, normal, {});
+#else
+   _sprite->setTextureRect(
+      sf::IntRect({_tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE})
+   );
+
+   color.draw(*_sprite);
+#endif
 }
 
-void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
+#ifdef __EMSCRIPTEN__
    _sprite->textureRect = sf::FloatRect{
       {static_cast<float>(_tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE), static_cast<float>(_tv * PIXELS_PER_TILE)},
       {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
@@ -59,6 +68,10 @@ void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf
    sf::RenderStates draw_states = states;
    draw_states.texture = _texture.get();
    color.draw(*_sprite, draw_states);
+#else
+   (void)states;
+   draw(color, normal);
+#endif
 }
 
 void Laser::setEnabled(bool enabled)
@@ -199,7 +212,11 @@ void Laser::update(const sf::Time& dt)
       {
          _path_interpolation.updateTime(_settings._movement_speed * dt.asSeconds());
          _move_offset_px = _path_interpolation.computePosition(_path_interpolation.getTime());
+#ifdef __EMSCRIPTEN__
          _sprite->position = _position_px + _move_offset_px;
+#else
+         _sprite->setPosition(_position_px + _move_offset_px);
+#endif
       }
    }
 
@@ -318,8 +335,13 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
             laser->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
          }
 
+#ifdef __EMSCRIPTEN__
          laser->_sprite = std::make_unique<sf::Sprite>();
          laser->_sprite->position = laser->_position_px;
+#else
+         laser->_sprite = std::make_unique<sf::Sprite>(*laser->_texture);
+         laser->_sprite->setPosition(laser->_position_px);
+#endif
 
          __lasers.push_back(laser);
       }
@@ -389,7 +411,11 @@ void Laser::collide()
          pixel_rect.position.y += static_cast<int32_t>(_move_offset_px.y);
       }
 
+#ifdef __EMSCRIPTEN__
       const auto rough_intersection = sf::findIntersection(player_rect, pixel_rect).hasValue();
+#else
+      const auto rough_intersection = player_rect.findIntersection(pixel_rect).has_value();
+#endif
 
       auto active = false;
 
@@ -430,7 +456,11 @@ void Laser::collide()
                rect.size.x = PIXELS_PER_PHYSICS_TILE;
                rect.size.y = PIXELS_PER_PHYSICS_TILE;
 
+#ifdef __EMSCRIPTEN__
                const auto fine_intersection = sf::findIntersection(player_rect, rect).hasValue();
+#else
+               const auto fine_intersection = player_rect.findIntersection(rect).has_value();
+#endif
 
                if (fine_intersection)
                {

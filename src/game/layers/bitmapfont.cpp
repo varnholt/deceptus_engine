@@ -13,7 +13,11 @@
 void BitmapFont::load(const std::string& texturePath, const std::string& mapPath)
 {
    _texture = TexturePool::getInstance().get(texturePath);
+#ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
+#else
+   _sprite = std::make_unique<sf::Sprite>(*_texture);
+#endif
 
    std::ifstream file(mapPath);
 
@@ -110,9 +114,15 @@ void BitmapFont::draw(
    auto x_offset = 0;
    for (const auto& coord : coords)
    {
+#ifdef __EMSCRIPTEN__
       _sprite->textureRect = sf::FloatRect{{static_cast<float>(coord->position.x), static_cast<float>(coord->position.y)}, {static_cast<float>(coord->size.x), static_cast<float>(coord->size.y)}};
       _sprite->position = {static_cast<float>(x + x_offset), static_cast<float>(y)};
       _sprite->color = color.value_or(sf::Color::White);
+#else
+      _sprite->setTextureRect(sf::IntRect({coord->position.x, coord->position.y}, {coord->size.x, coord->size.y}));
+      _sprite->setPosition({static_cast<float>(x + x_offset), static_cast<float>(y)});
+      _sprite->setColor(color.value_or(sf::Color::White));
+#endif
 
       window.draw(*_sprite, draw_states);
       x_offset += _char_width;

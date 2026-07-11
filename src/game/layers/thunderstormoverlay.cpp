@@ -27,7 +27,11 @@ void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*nor
 
    sf::RenderStates states;
    states.blendMode = sf::BlendAlpha;
+#ifdef __EMSCRIPTEN__
    target.draw(quad, sf::PrimitiveType::Triangles, states);
+#else
+   target.draw(quad, 6, sf::PrimitiveType::Triangles, states);
+#endif
 }
 
 void ThunderstormOverlay::update(const sf::Time& dt)

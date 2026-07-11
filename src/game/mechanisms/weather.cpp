@@ -17,6 +17,7 @@ std::string_view Weather::objectName() const
    return "Weather";
 }
 
+#ifdef __EMSCRIPTEN__
 void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    draw(target, normal, {});
@@ -46,6 +47,37 @@ void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf:
       _overlay->draw(target, normal, states);
    }
 }
+#else
+void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   if (!_enabled)
+   {
+      return;
+   }
+
+   if (_wait_until_start_delay_elapsed)
+   {
+      return;
+   }
+
+   if (_limit_effect_to_room && !RoomUpdater::checkCurrentMatchesIds(getRoomIds()))
+   {
+      return;
+   }
+
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+   const auto intersects = _rect.findIntersection(player_rect).has_value();
+   if (intersects)
+   {
+      _overlay->draw(target, normal);
+   }
+}
+
+void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& /*states*/)
+{
+   draw(target, normal);
+}
+#endif
 
 void Weather::updateWaitDelay(const sf::Time& dt, bool intersects)
 {
@@ -99,7 +131,11 @@ void Weather::update(const sf::Time& dt)
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+#ifdef __EMSCRIPTEN__
    const auto intersects = sf::findIntersection(_rect, player_rect).hasValue();
+#else
+   const auto intersects = _rect.findIntersection(player_rect).has_value();
+#endif
    updateWaitDelay(dt, intersects);
 
    if (intersects && matchesRoom() && !_wait_until_start_delay_elapsed)

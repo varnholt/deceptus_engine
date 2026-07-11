@@ -64,7 +64,11 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
 {
    std::string wrapped_text;
    std::string line;
+#ifdef __EMSCRIPTEN__
    sf::Text temp_text(font, sf::Text::Data{});
+#else
+   sf::Text temp_text(font);
+#endif
    temp_text.setCharacterSize(character_size);
 
    // get words from original text
@@ -76,7 +80,11 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
    {
       // check if the current line exceeds the right boundary
       std::string test_line = line + word + " ";
+#ifdef __EMSCRIPTEN__
       temp_text.setString(test_line.c_str());
+#else
+      temp_text.setString(test_line);
+#endif
 
       if (temp_text.getLocalBounds().size.x <= rect.size.x)  // text fits into boundary
       {
@@ -229,11 +237,19 @@ InGameMenuInventory::InGameMenuInventory()
    _duration_show = config._duration_show;
 
    // load fonts
+#ifdef __EMSCRIPTEN__
    _text_title = std::make_unique<sf::Text>(*_font_title, sf::Text::Data{});
+#else
+   _text_title = std::make_unique<sf::Text>(*_font_title);
+#endif
    _text_title->setCharacterSize(inventory_title_font_size);
    _text_title->setFillColor(sf::Color{232, 219, 243});
 
+#ifdef __EMSCRIPTEN__
    _text_description = std::make_unique<sf::Text>(*_font_description, sf::Text::Data{});
+#else
+   _text_description = std::make_unique<sf::Text>(*_font_description);
+#endif
    _text_description->setCharacterSize(inventory_text_font_size);
    _text_description->setFillColor(sf::Color{232, 219, 243});
 
@@ -250,11 +266,16 @@ void InGameMenuInventory::loadInventoryItems()
       [this](const auto& image)
       {
          // store sprites
+#ifdef __EMSCRIPTEN__
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
          sprite->textureRect = sf::FloatRect(
             {static_cast<float>(image._x_px), static_cast<float>(image._y_px)},
             {static_cast<float>(icon_width), static_cast<float>(icon_height)}
          );
+#else
+         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*_inventory_texture);
+         sprite->setTextureRect(sf::IntRect({image._x_px, image._y_px}, {icon_width, icon_height}));
+#endif
          _sprites[image._name]._sprite = std::move(sprite);
 
          // store texts
@@ -268,7 +289,11 @@ void InGameMenuInventory::loadInventoryItems()
       }
    );
 
+#ifdef __EMSCRIPTEN__
    std::ranges::for_each(_slot_sprites, [this](auto& sprite) { sprite._sprite = std::make_unique<sf::Sprite>(); });
+#else
+   std::ranges::for_each(_slot_sprites, [this](auto& sprite) { sprite._sprite = std::make_unique<sf::Sprite>(*_inventory_texture); });
+#endif
 }
 
 Inventory& InGameMenuInventory::getInventory()
@@ -362,32 +387,52 @@ void InGameMenuInventory::updateShowHide()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + _panel_left_offset_px.x;
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    // move in y
    for (const auto& layer : _panel_center)
    {
       const auto y = layer._pos.y + _panel_center_offset_px.y;
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {layer._pos.x, y};
+#else
+      layer._layer->_sprite->setPosition({layer._pos.x, y});
+#endif
    }
 
    // move in x
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + _panel_right_offset_px.x;
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    // fade in/out
    for (const auto& layer : _panel_header)
    {
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255));
+#else
+      layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
+#endif
    }
 
    for (const auto& layer : _panel_background)
    {
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255));
+#else
+      layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
+#endif
    }
 }
 
@@ -398,25 +443,41 @@ void InGameMenuInventory::updateMove()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    for (const auto& layer : _panel_center)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef __EMSCRIPTEN__
       layer._layer->_sprite->position = {x, layer._pos.y};
+#else
+      layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    if (!move_offset.has_value())
@@ -449,7 +510,11 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
    {
       const auto x_px = static_cast<float>(offset_x_px + (draw_index % count_columns) * frame_width);
       const auto y_px = static_cast<float>(offset_y_px + (draw_index / count_columns) * frame_height);
+#ifdef __EMSCRIPTEN__
       _sprites[item_key]._sprite->position = {x_px, y_px};
+#else
+      _sprites[item_key]._sprite->setPosition({x_px, y_px});
+#endif
       window.draw(*_sprites[item_key]._sprite, states);
       draw_index++;
    }
@@ -549,12 +614,20 @@ void InGameMenuInventory::updateInventoryItems()
       const auto& reference_sprite = _sprites[slot]._sprite;
 
       auto& sprite = _slot_sprites[index];
+#ifdef __EMSCRIPTEN__
       sprite._sprite->textureRect = reference_sprite->textureRect;
+#else
+      sprite._sprite->setTextureRect(reference_sprite->getTextureRect());
+#endif
 
       constexpr auto frame_width_slots = 47;
       const auto pos_x_px = 61 + _panel_left_offset_px.x + move_offset.value_or(0.0f) + index * frame_width_slots;
       constexpr auto pos_y_px = 110;
+#ifdef __EMSCRIPTEN__
       sprite._sprite->position = {pos_x_px, pos_y_px};
+#else
+      sprite._sprite->setPosition({pos_x_px, pos_y_px});
+#endif
       index++;
    };
 
@@ -576,30 +649,51 @@ void InGameMenuInventory::updateInventoryItems()
       const auto& text = _texts[selected_item.value()];
       const sf::FloatRect rect{{text_title_x_offset_px, 0}, {text_title_width_px, 16}};
       const auto title_x_px = getHorizontallyCenteredX(*_text_title, rect);
+#ifdef __EMSCRIPTEN__
       _text_description->setString(text._description_wrapped.c_str());
       _text_description->position = {
          _panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px
       };
       _text_title->setString(text._title.c_str());
       _text_title->position = {_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px};
+#else
+      _text_description->setString(text._description_wrapped);
+      _text_description->setPosition(
+         {_panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px}
+      );
+      _text_title->setString(text._title);
+      _text_title->setPosition({_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px});
+#endif
    }
 
    // update frames
    const auto selected_frame_position = getFramePosition(_frame_selection.get(), _selected_index);
+#ifdef __EMSCRIPTEN__
    _frame_selection->_layer->_sprite->position = selected_frame_position;
+#else
+   _frame_selection->_layer->_sprite->setPosition(selected_frame_position);
+#endif
 
    _frame_slot_0->_layer->_visible = slot_0_index.has_value();
    _frame_slot_1->_layer->_visible = slot_1_index.has_value();
    if (slot_0_index.has_value())
    {
       const auto slot_0_position = getFramePosition(_frame_slot_0.get(), slot_0_index.value());
+#ifdef __EMSCRIPTEN__
       _frame_slot_0->_layer->_sprite->position = slot_0_position;
+#else
+      _frame_slot_0->_layer->_sprite->setPosition(slot_0_position);
+#endif
    }
 
    if (slot_1_index.has_value())
    {
       const auto slot_1_position = getFramePosition(_frame_slot_1.get(), slot_1_index.value());
+#ifdef __EMSCRIPTEN__
       _frame_slot_1->_layer->_sprite->position = slot_1_position;
+#else
+      _frame_slot_1->_layer->_sprite->setPosition(slot_1_position);
+#endif
    }
 }
 

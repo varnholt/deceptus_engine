@@ -35,7 +35,11 @@ public:
 
    /// \brief draws the selected submenu and any still-animating previous submenu.
    /// \param window render target that receives the menu draw calls.
+#ifdef __EMSCRIPTEN__
    void draw(sf::RenderTarget& window, const sf::RenderStates& = sf::RenderStates{});
+#else
+   void draw(sf::RenderTarget& window, const sf::RenderStates& = sf::RenderStates::Default);
+#endif
 
    /// \brief advances controller state and active page animations.
    /// \param dt elapsed frame time passed to menu pages.

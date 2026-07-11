@@ -589,10 +589,53 @@ Desktop keeps `.value()` (crash on failure is correct). WASM stores both as opti
 
 **Build: `[100%] Built target deceptus` — zero errors.**
 
-**Next session TODO:**
+**Next session TODO (superseded by Session 21 below — re-verify these once the dual-SFML port is validated):**
 1. Test that the game starts in browser (no more "not engaged!" crash).
 2. Analyze AO browser console output (look for "AO load complete" / "AO draw" lines) and fix root cause; remove diagnostic logs after fix.
 3. Verify audio plays in browser (SFX + music) — requires COOP/COEP server (port 9080).
+
+---
+
+**Session 21 — MAJOR ARCHITECTURE CHANGE: desktop reverted to vanilla/official SFML 3, VRSFML now WASM-only — desktop build PASSING, WASM build verification in progress:**
+
+**Not pushed. Nothing committed. All of this is local, uncommitted working-tree state — do not push until it has been fully tested on both targets.**
+
+**Why:** MSVC/desktop is the project's actual default build target (WASM is the exception, not the other way around). VRSFML — deliberately GCC/Clang-only in places (raw `__atomic_*` builtins with zero MSVC branch, `cxxabi.h`-based stack traces, an `mbedtls`-fetch-dependent Network module) — was never meant to be desktop's SFML dependency at all; it only ended up there because the WASM porting sessions (1–20) shared source files between both targets and mechanically rewrote them to VRSFML's native member-access API (`.position =` instead of `setPosition()`, aggregate `Data`-struct constructors, etc.) without preserving a working desktop-vanilla-SFML code path, in violation of this doc's own porting principle #1. Confirmed via `git diff`/`git log` that `master` has had **zero** commits since `wasm-vrsfml` branched (`wasm-vrsfml` = `master` + 25 commits) — so there was never a real merge-conflict problem, just an architecture one.
+
+**The fix, in one sentence:** CMake now fetches vanilla/official SFML 3.0.x (`https://github.com/SFML/SFML.git`, tag `3.0.x` — exactly what `master` used) for desktop/non-Emscripten builds, and VRSFML only for `EMSCRIPTEN` builds; every one of the ~212 shared source files touched during the WASM port got `#ifdef __EMSCRIPTEN__` / `#else` / `#endif` guards added at each VRSFML-native-syntax call site, restoring `master`'s original setter/getter-based, traditional-constructor code verbatim in the `#else` (desktop) branch.
+
+**CMakeLists.txt changes:**
+- SFML fetch is now fully split inside `if(EMSCRIPTEN) ... else() ... endif()`: Emscripten branch fetches VRSFML (`GIT_TAG master`, unchanged) plus applies the existing `patches/vrsfml-webgl2-uniforms.patch`; the `else` branch fetches vanilla SFML 3.0.x + SDL3 + GLEW exactly like `master`'s original `CMakeLists.txt` did (SDL3 needs its own top-level `FetchContent_Declare` on desktop since, unlike VRSFML, official SFML doesn't fetch SDL3 internally via CPM).
+- `SFML_BUILD_NETWORK` is `ON` again by default (only forced `OFF` for the Emscripten/VRSFML branch — VRSFML's Network module needs `mbedtls`, which fetches via a GitHub release tarball that fails in this environment; unused by the game either way).
+- Removed: the `if(WIN32) SFML_ENABLE_STACK_TRACES OFF` override and the two MSVC-specific VRSFML compat patches (`patches/vrsfml-msvc-uintptr.patch`, `patches/vrsfml-msvc-atomic.patch`) — all were written earlier this session to make VRSFML itself compile under MSVC, before the architecture pivot made that whole approach obsolete (desktop no longer touches VRSFML at all). Both patch files were deleted from `patches/`; only `patches/vrsfml-webgl2-uniforms.patch` remains (Emscripten-only).
+
+**The ~212-file sweep:** Done via 14 parallel agents (one per ~15-file batch), each instructed to diff every assigned file against `master` (`git diff master wasm-vrsfml -- <path>`), classify each hunk as either a mechanical VRSFML-syntax rewrite (guard it, restore `master`'s line under `#else`) or genuine new WASM-only logic (leave untouched — e.g. thread guards, the deferred-rendering `RenderStates`/view-threading added throughout `level.cpp`/`game.cpp`/every mechanism's new 3-arg `draw(target, normal, states)` overload). The established, repo-wide convention that emerged: **the 2-arg/3-arg `draw()` split and its shared body are usually left completely unconditional** (`sf::RenderStates` with public `.texture`/`.blendMode` members and `target.draw(drawable, states)` are valid on both SFML versions) — only the differing *lines inside* (sprite/shape/text construction, member-vs-setter, `findIntersection` free-function-vs-member, shader uniform lookup-by-location-vs-by-name, `sf::Time::Zero` vs `sf::Time{}`, IntRect-vs-FloatRect `textureRect`, `.move()` vs `.position +=`, etc.) need guarding.
+
+**Real bugs the sweep caught along the way (not just style — these would have silently broken desktop or WASM):**
+- `game.cpp`: `Game::loop()` and `Game::loadLevel()` were missing their entire desktop `#else` branch (main loop / `std::async` level-loading dispatch) — restored from `master`.
+- `level.cpp`: an unclosed `#if defined(__APPLE__) || defined(__EMSCRIPTEN__)` in `loadTmx()`'s mechanism-preload loop was silently swallowing the rest of the 1600+ line file on plain desktop builds (missing `#else`/`std::execution::par` branch/`#endif`) — restored. Also a stray unmatched `#endif` in `initialize()` — removed.
+- `logui.cpp` / `profilingui.cpp`: leftover VRSFML-style constructor syntax had been left *inside* the pre-existing `#ifndef __EMSCRIPTEN__` (desktop-only) branch by an earlier session — restored to `master`'s plain constructor.
+- `itemlantern.cpp`: the dust-shader uniform-location-caching block had its `#ifndef __EMSCRIPTEN__` / `#else` **polarity backwards** — VRSFML-only code (`sf::base::Optional`, `getUniformLocation`, aggregate `loadFromFile({...})`) was sitting under `#ifndef __EMSCRIPTEN__` (desktop!). Flagged as uncertain by the batch agent, confirmed via compile errors, fixed by flipping to `#ifdef __EMSCRIPTEN__`.
+- `main.cpp`: `sf::GraphicsContext`/`sf::AudioContext` don't exist in official SFML 3 at all (VRSFML-only RAII singletons) — the whole `graphics_context`/`audio_context` construction is now `#ifdef __EMSCRIPTEN__`-only, nothing in `#else` (matching `master`, which never had this step).
+- `watersurface.cpp` / `weather.cpp`: their headers declare the 3-arg `draw(..., states)` override unconditionally (correct, matches the repo convention above), but the `.cpp`s only *defined* it under `#ifdef __EMSCRIPTEN__` (the agent chose to duplicate whole function bodies instead of interleaving, since the blend/composite logic differs a lot) — linker errors (`unresolved external symbol`) on desktop. Fixed by adding a trivial forwarding `draw(target, normal, states) { draw(target, normal); }` stub in each `#else` branch.
+- `rotatingblade.h` / `staticlight.h` were missed entirely during manual batch-splitting (my error, not the agents') — `rotatingblade.h`'s 3-arg override was guarded `#ifdef __EMSCRIPTEN__` in isolation while `rotatingblade.cpp` defined it unconditionally (fixed: whole `draw()` pair now split `#ifdef __EMSCRIPTEN__ / #else` per-platform, master's version restored verbatim in `#else`). `staticlight.h` wasn't guarded at all, causing the same unconditional-declaration-vs-emscripten-only-definition mismatch (fixed the header to guard the 3-arg override under `#ifdef __EMSCRIPTEN__`, and removed the now-redundant forwarding stub the agent had added to the `.cpp`'s `#else` branch).
+
+**Toolchain note (unrelated to the port itself, needed to actually test locally):** this machine has two Visual Studio installs — "2022 Community" (MSVC 14.44, older, whose bundled STL lacks `chrono::file_clock::to_sys` and gates on "Clang 19+") and "18 Insiders" (MSVC 14.51, newer, works fine). Desktop builds must be configured via `"C:\Program Files\Microsoft Visual Studio\18\Insiders\VC\Auxiliary\Build\vcvars64.bat"`, not the 2022 Community one, or MSVC-toolchain-internal errors unrelated to this project will surface. Build command used all session:
+```
+cmd.exe /c '"C:\Program Files\Microsoft Visual Studio\18\Insiders\VC\Auxiliary\Build\vcvars64.bat" && cmake -S D:\deceptus\deceptus_engine -B D:\deceptus\deceptus_engine\build_deb -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_C_COMPILER=cl.exe && cmake --build D:\deceptus\deceptus_engine\build_deb --target deceptus -- -j6'
+```
+(`build_deb/_deps` had to be fully wiped once before this worked cleanly — it had stale git-stash state left over from old CPM dependency version bumps across many past sessions, unrelated to this change, causing spurious `FetchContent` update failures on `freetype`/`ogg`/etc.)
+
+**Status at end of session:**
+- **Desktop build against vanilla SFML 3.0.x + MSVC: PASSING.** `[3/3] Linking CXX executable deceptus.exe` — 0 errors.
+- **WASM build against VRSFML: PASSING.** `[100%] Built target deceptus`, `deceptus.html` linked (only the expected benign `-pthread + ALLOW_MEMORY_GROWTH` warning, same as prior sessions).
+- **Both platforms now compile and link cleanly under the new dual-SFML architecture.** Neither has been runtime-tested yet (no smoke test, no manual play-test). Nothing committed, nothing pushed — user explicitly said not to until fully tested on both targets.
+
+**Next session TODO:**
+1. Actually run `deceptus.exe` on desktop (Windows) and confirm the game launches and plays — the build only confirms compile+link, not runtime correctness. Given how large and mechanical this sweep was (~212 files, hundreds of guarded call sites), spot-check a representative sample in-game: menus, a level with mechanisms (bouncer/crusher/rope/etc.), shaders (light, water, gamma), audio.
+2. Run the existing Selenium smoke test (`lab/wasm_browser_test/run.bat`) to confirm the WASM/browser build didn't regress at runtime (same caveat — compiling is not the same as correct).
+3. Only after both platforms are verified working at runtime: decide on committing/pushing (explicitly NOT done this session per instruction — everything is still uncommitted working-tree changes across ~212+ source files, CMakeLists.txt, and patches/).
+4. Once both are green, the original Session 20 TODOs above (AO root cause, audio-in-browser verification) are still outstanding and unrelated to this session's work.
 
 ---
 

@@ -130,10 +130,18 @@ void Gun::updateProjectiles(const sf::Time& time)
 
       if (projectile->isRotating())
       {
+#ifdef __EMSCRIPTEN__
          projectile_animation.rotation = sf::radians(projectile->getRotation());
+#else
+         projectile_animation.setRotation(sf::radians(projectile->getRotation()));
+#endif
       }
 
+#ifdef __EMSCRIPTEN__
       projectile_animation.position = {projectile->getBody()->GetPosition().x * PPM, projectile->getBody()->GetPosition().y * PPM};
+#else
+      projectile_animation.setPosition({projectile->getBody()->GetPosition().x * PPM, projectile->getBody()->GetPosition().y * PPM});
+#endif
 
       projectile_animation.update(time);
    }
@@ -216,13 +224,21 @@ void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, co
    // this should move into the luanode; the engine should not 'guess' the origin
    if (_shape->GetType() == b2Shape::e_polygon)
    {
+#ifdef __EMSCRIPTEN__
       _projectile_reference_animation._animation.origin = {0, 0};
+#else
+      _projectile_reference_animation._animation.setOrigin({0, 0});
+#endif
    }
    else if (_shape->GetType() == b2Shape::e_circle)
    {
       const auto origin_x_px = static_cast<float>(tmp_rect_px.size.x / 2);
       const auto origin_y_px = static_cast<float>(tmp_rect_px.size.y / 2);
+#ifdef __EMSCRIPTEN__
       _projectile_reference_animation._animation.origin = {origin_x_px, origin_y_px};
+#else
+      _projectile_reference_animation._animation.setOrigin({origin_x_px, origin_y_px});
+#endif
    }
 }
 
@@ -230,7 +246,11 @@ void Gun::setProjectileAnimation(const std::shared_ptr<sf::Texture>& texture, co
 void Gun::setProjectileAnimation(const AnimationFrameData& frame_data)
 {
    _projectile_reference_animation._animation._color_texture = frame_data._texture;
+#ifdef __EMSCRIPTEN__
    _projectile_reference_animation._animation.origin = frame_data._origin;
+#else
+   _projectile_reference_animation._animation.setOrigin(frame_data._origin);
+#endif
    _projectile_reference_animation._animation._frames = frame_data._frames;
    _projectile_reference_animation._animation.setFrameTimes(frame_data._frame_times);
 }

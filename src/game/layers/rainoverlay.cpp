@@ -54,13 +54,18 @@ RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprit
    for (auto a = 0; a < _settings._drop_count; a++)
    {
       RainDrop drop;
+#ifdef __EMSCRIPTEN__
       drop._sprite = std::make_unique<sf::Sprite>();
+#else
+      drop._sprite = std::make_unique<sf::Sprite>(*_texture);
+#endif
       _drops.push_back(std::move(drop));
    }
 }
 
 void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
+#ifdef __EMSCRIPTEN__
    {
       const auto screen_view = target.computeView();
       _screen = {
@@ -68,6 +73,14 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
          {screen_view.size.x, screen_view.size.y}
       };
    }
+#else
+   const auto& screen_view = target.getView();
+
+   _screen = {
+      {screen_view.getCenter().x - screen_view.getSize().x / 2.0f, screen_view.getCenter().y - screen_view.getSize().y / 2.0f},
+      {screen_view.getSize().x, screen_view.getSize().y}
+   };
+#endif
 
    // source: foreground
    // dest:   background
@@ -87,7 +100,11 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       if (d._age_s >= 0.0f)
       {
          // DebugDraw::drawLine(target, d._origin_px, d._pos_px + sf::Vector2f{0.0f, 96.0f}, {0, 0, 1});
+#ifdef __EMSCRIPTEN__
          target.draw(*d._sprite, sf::RenderStates{.blendMode = blend_mode});
+#else
+         target.draw(*d._sprite, blend_mode);
+#endif
       }
    }
 
@@ -168,8 +185,13 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto sprite_index = std::rand() % 4;
 
+#ifdef __EMSCRIPTEN__
          p._sprite->textureRect = sf::FloatRect{{static_cast<float>(static_cast<int32_t>(sprite_index) * 11), 0.0f}, {11.0f, 96.0f}};
          p._sprite->origin = {6, 0};
+#else
+         p._sprite->setTextureRect(sf::IntRect({static_cast<int32_t>(sprite_index) * 11, 0}, {11, 96}));
+         p._sprite->setOrigin({6, 0});
+#endif
          p._pos_px.x = _clip_rect.position.x + std::rand() % static_cast<int32_t>(_clip_rect.size.x);
          p._pos_px.y = _clip_rect.position.y + std::rand() % static_cast<int32_t>(_clip_rect.size.y);
          p._age_s = (std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;
@@ -189,7 +211,11 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto step_width_px = p._dir_px * dt.asSeconds();
          p._pos_px += step_width_px;
+#ifdef __EMSCRIPTEN__
          p._sprite->position = p._pos_px;
+#else
+         p._sprite->setPosition(p._pos_px);
+#endif
 
          if (p._age_s > max_age_s)
          {
@@ -210,8 +236,13 @@ void RainOverlay::update(const sf::Time& dt)
                      const sf::Vector2f hit_position{p._pos_px.x, closest_point};
 
                      DropHit hit;
+#ifdef __EMSCRIPTEN__
                      hit._sprite = std::make_unique<sf::Sprite>();
                      hit._sprite->position = hit_position;
+#else
+                     hit._sprite = std::make_unique<sf::Sprite>(*_texture);
+                     hit._sprite->setPosition(hit_position);
+#endif
                      hit._pos_px = hit_position;
                      _hits.push_back(std::move(hit));
 
@@ -246,9 +277,14 @@ void RainOverlay::update(const sf::Time& dt)
             [dt](auto& hit)
             {
                hit._age_s += dt.asSeconds();
+#ifdef __EMSCRIPTEN__
                hit._sprite->origin = {5, 11};
                hit._sprite->textureRect =
                   sf::FloatRect{{static_cast<float>(11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f))), 96.0f}, {11.0f, 12.0f}};
+#else
+               hit._sprite->setOrigin({5, 11});
+               hit._sprite->setTextureRect(sf::IntRect({11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f)), 96}, {11, 12}));
+#endif
                return hit._age_s > 1.0f;
             }
          ),

@@ -31,7 +31,11 @@ public:
    std::string getName() const override;
 
 private:
+#ifdef __EMSCRIPTEN__
    sf::CircleShape _light_circle{sf::CircleShape::Data{.radius = 50.0f}};
+#else
+   sf::CircleShape _light_circle;
+#endif
    float _light_radius{50.0f};
    bool _enabled{false};
    sf::Time _elapsed;
@@ -43,6 +47,7 @@ private:
    std::unique_ptr<sf::Sprite> _helmet_sprite_r;
    std::unique_ptr<sf::Sprite> _helmet_sprite_l;
    std::shared_ptr<sf::Shader> _noise_shader;                      //!< shared noise shader applied to both lantern lights
+#ifdef __EMSCRIPTEN__
    sf::base::Optional<sf::Shader::UniformLocation> _ul_time;            //!< cached uniform location for u_time
    sf::base::Optional<sf::Shader::UniformLocation> _ul_intensity;       //!< cached uniform location for u_intensity
    sf::base::Optional<sf::Shader::UniformLocation> _ul_flicker_speed;   //!< cached uniform location for u_flicker_speed
@@ -53,6 +58,7 @@ private:
    sf::base::Optional<sf::Shader::UniformLocation> _ul_layer_2_speed;   //!< cached uniform location for u_layer_2_speed
    sf::base::Optional<sf::Shader::UniformLocation> _ul_sprite_pos_px;   //!< cached uniform location for u_sprite_pos_px
    sf::base::Optional<sf::Shader::UniformLocation> _ul_sprite_size_px;  //!< cached uniform location for u_sprite_size_px
+#endif
    float _offset_left_x_m{-3.4f};                                  //!< x body offset when facing left, in box2d meters
    float _offset_right_x_m{1.9f};                                  //!< x body offset when facing right, in box2d meters
    float _offset_left_y_m{-1.0f};                                  //!< y body offset when facing left, in box2d meters

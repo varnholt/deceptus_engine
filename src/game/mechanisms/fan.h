@@ -73,6 +73,7 @@ private:
       sf::Vector2f direction;
       sf::FloatRect rect;
       b2Body* body = nullptr;
+#ifdef __EMSCRIPTEN__
       std::shared_ptr<sf::Texture> texture;
       std::unique_ptr<sf::Sprite> sprite;
       float sprite_offset = 0.0f;
@@ -83,6 +84,18 @@ private:
          : texture(tex), sprite(std::make_unique<sf::Sprite>())
       {
       }
+#else
+      std::unique_ptr<sf::Sprite> sprite;
+      float sprite_offset = 0.0f;
+
+      /// \brief creates a fan tile sprite from a shared texture atlas.
+      /// \param tex shared texture used for this tile sprite.
+      FanInstance(const std::shared_ptr<sf::Texture>& tex)
+      {
+         sprite = std::make_unique<sf::Sprite>(*tex);
+         sprite->setTexture(*tex);
+      }
+#endif
    };
 
    /// \brief applies wind force to the player while the player intersects the fan area.

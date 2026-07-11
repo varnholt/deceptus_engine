@@ -470,8 +470,13 @@ bool Door::setup(const GameDeserializeData& data)
       {
          const auto texture_path = texture_it->second->_value_string.value();
          _texture = TexturePool::getInstance().get(texture_path);
+#ifdef __EMSCRIPTEN__
          _sprite = std::make_unique<sf::Sprite>();
          _sprite->position = {x_px, y_px};
+#else
+         _sprite = std::make_unique<sf::Sprite>(*_texture);
+         _sprite->setPosition({x_px, y_px});
+#endif
       }
 
       const auto sample_open_it = map.find("sample_open");
@@ -557,7 +562,11 @@ bool Door::setup(const GameDeserializeData& data)
       // the first frame of the open animation should be the texture rect used for drawing
       if (_animation_open)
       {
+#ifdef __EMSCRIPTEN__
          _sprite->textureRect = _animation_open->_frames.at(0);
+#else
+         _sprite->setTextureRect(_animation_open->_frames.at(0));
+#endif
       }
    }
 

@@ -14,6 +14,7 @@ MusicPlayer& MusicPlayer::getInstance()
 
 MusicPlayer::MusicPlayer()
 {
+#ifdef __EMSCRIPTEN__
    auto handle = sf::AudioContext::getDefaultPlaybackDeviceHandle();
    if (!handle.hasValue())
    {
@@ -31,6 +32,18 @@ MusicPlayer::MusicPlayer()
          _music[music_slot_index]->setRelativeToListener(true);
       }
    }
+#else
+   if (!_music[0].openFromFile("data/music/empty.ogg"))
+   {
+   }
+
+   if (!_music[1].openFromFile("data/music/empty.ogg"))
+   {
+   }
+
+   _music[0].setRelativeToListener(true);
+   _music[1].setRelativeToListener(true);
+#endif
 }
 
 void MusicPlayer::update(const sf::Time& dt)
@@ -68,6 +81,7 @@ void MusicPlayer::updateCrossfade(std::chrono::milliseconds dt)
    _crossfade_elapsed += dt;
    const auto normalized_time = std::min(1.0f, static_cast<float>(_crossfade_elapsed.count()) / _crossfade_duration.count());
 
+#ifdef __EMSCRIPTEN__
    if (auto* next_music = nextMusic())
    {
       next_music->setVolume(volume() * normalized_time);
@@ -88,6 +102,19 @@ void MusicPlayer::updateCrossfade(std::chrono::milliseconds dt)
       _transition_state = MusicPlayerTypes::MusicTransitionState::None;
       _pending_request.reset();
    }
+#else
+   next().setVolume(volume() * normalized_time);
+   current().setVolume(volume() * (1.0f - normalized_time));
+
+   if (_crossfade_elapsed >= _crossfade_duration)
+   {
+      current().stop();
+      current().setVolume(volume());
+      _current_index = 1 - _current_index;  // swap
+      _transition_state = MusicPlayerTypes::MusicTransitionState::None;
+      _pending_request.reset();
+   }
+#endif
 }
 
 void MusicPlayer::updateFadeOut(std::chrono::milliseconds dt)
@@ -95,17 +122,25 @@ void MusicPlayer::updateFadeOut(std::chrono::milliseconds dt)
    _fade_out_elapsed += dt;
    const auto normalized_time = std::min(1.0f, static_cast<float>(_fade_out_elapsed.count()) / _fade_out_duration.count());
 
+#ifdef __EMSCRIPTEN__
    if (auto* cur_music = currentMusic())
    {
       cur_music->setVolume(volume() * (1.0f - normalized_time));
    }
+#else
+   current().setVolume(volume() * (1.0f - normalized_time));
+#endif
 
    if (_fade_out_elapsed >= _fade_out_duration)
    {
+#ifdef __EMSCRIPTEN__
       if (auto* cur_music = currentMusic())
       {
          cur_music->stop();
       }
+#else
+      current().stop();
+#endif
 
       if (_pending_request.has_value())
       {
@@ -139,7 +174,11 @@ void MusicPlayer::processPendingRequest()
 
       case MusicPlayerTypes::TransitionType::LetCurrentFinish:
       {
+#ifdef __EMSCRIPTEN__
          if (currentMusic() == nullptr || !currentMusic()->isPlaying())
+#else
+         if (current().getStatus() != sf::SoundStream::Status::Playing)
+#endif
          {
             beginTransition(request);
             _pending_request.reset();
@@ -171,10 +210,17 @@ void MusicPlayer::processPendingRequest()
 
 void MusicPlayer::handleTrackFinished()
 {
+#ifdef __EMSCRIPTEN__
    if (currentMusic() != nullptr && currentMusic()->isPlaying())
    {
       return;
    }
+#else
+   if (current().getStatus() == sf::SoundStream::Status::Playing)
+   {
+      return;
+   }
+#endif
 
    switch (_post_action)
    {
@@ -185,10 +231,14 @@ void MusicPlayer::handleTrackFinished()
 
       case MusicPlayerTypes::PostPlaybackAction::Loop:
       {
+#ifdef __EMSCRIPTEN__
          if (auto* cur_music = currentMusic())
          {
             cur_music->play();
          }
+#else
+         current().play();
+#endif
          break;
       }
 
@@ -209,6 +259,7 @@ void MusicPlayer::handleTrackFinished()
    }
 }
 
+#ifdef __EMSCRIPTEN__
 sf::Music* MusicPlayer::currentMusic()
 {
    return _music[_current_index].get();
@@ -218,6 +269,17 @@ sf::Music* MusicPlayer::nextMusic()
 {
    return _music[1 - _current_index].get();
 }
+#else
+sf::Music& MusicPlayer::current()
+{
+   return _music[_current_index];
+}
+
+sf::Music& MusicPlayer::next()
+{
+   return _music[1 - _current_index];
+}
+#endif
 
 void MusicPlayer::queueTrack(const TrackRequest& request)
 {
@@ -229,6 +291,7 @@ void MusicPlayer::stop()
 {
    std::scoped_lock lock(_mutex);
 
+#ifdef __EMSCRIPTEN__
    for (auto& music_ptr : _music)
    {
       if (music_ptr)
@@ -236,6 +299,12 @@ void MusicPlayer::stop()
          music_ptr->stop();
       }
    }
+#else
+   for (auto& music : _music)
+   {
+      music.stop();
+   }
+#endif
 
    _pending_request.reset();
    _transition_state = MusicPlayerTypes::MusicTransitionState::None;
@@ -251,14 +320,19 @@ void MusicPlayer::setPlaylist(const std::vector<std::string>& playlist)
 
 void MusicPlayer::adjustActiveMusicVolume()
 {
+#ifdef __EMSCRIPTEN__
    if (auto* cur_music = currentMusic())
    {
       cur_music->setVolume(volume());
    }
+#else
+   current().setVolume(volume());
+#endif
 }
 
 void MusicPlayer::beginTransition(const TrackRequest& request)
 {
+#ifdef __EMSCRIPTEN__
    if (!_playback_device)
    {
       return;
@@ -318,13 +392,63 @@ void MusicPlayer::beginTransition(const TrackRequest& request)
    {
       _current_index = 1 - _current_index;
    }
+#else
+   auto& next_track = next();
+   auto& current_track = current();
+
+   // check if the file exists before attempting to load
+   if (!std::filesystem::exists(request.filename)) {
+      Log::Error() << "music file does not exist: " << request.filename;
+      return;
+   }
+
+   // time the music file loading operation
+   auto start_time = std::chrono::high_resolution_clock::now();
+   bool success = next_track.openFromFile(request.filename);
+   auto end_time = std::chrono::high_resolution_clock::now();
+
+   auto load_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+   if (!success)
+   {
+      Log::Error() << "unable to load music file: " << request.filename;
+      return;
+   }
+   else if (load_duration.count() >= 100)
+   {
+      Log::Info() << "Music load time for " << request.filename << ": " << load_duration.count() << " ms (Main thread - may cause hiccups)";
+   }
+
+   if (request.transition == MusicPlayerTypes::TransitionType::Crossfade)
+   {
+      next_track.setVolume(0.f);
+   }
+   else
+   {
+      next_track.setVolume(100.f);
+      current_track.stop();
+   }
+
+   next_track.play();
+   _post_action = request.post_action;
+
+   if (request.transition == MusicPlayerTypes::TransitionType::ImmediateSwitch ||
+       request.transition == MusicPlayerTypes::TransitionType::LetCurrentFinish)
+   {
+      _current_index = 1 - _current_index;
+   }
+#endif
 }
 
 float MusicPlayer::volume() const
 {
    const auto& config = GameConfiguration::getInstance();
    const auto master = config._audio_volume_master * 0.01f;
+#ifdef __EMSCRIPTEN__
    const auto music = config._audio_volume_music * 0.01f;
+#else
+   const auto music = config._audio_volume_music;
+#endif
    return master * music;
 }
 

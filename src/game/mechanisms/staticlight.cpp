@@ -80,6 +80,7 @@ std::string_view StaticLight::objectName() const
    return "StaticLight";
 }
 
+#ifdef __EMSCRIPTEN__
 void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& color)
 {
    draw(target, color, {});
@@ -98,6 +99,17 @@ void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/, co
    draw_states.texture = _texture.get();
    target.draw(*_sprite, draw_states);
 }
+#else
+void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/)
+{
+   auto lumen = fbm::mix(_color.a, _flicker_amount * 255.0f, 1.0f - _flicker_alpha_amount);
+
+   sf::Color color{_color.r, _color.g, _color.b, static_cast<uint8_t>(lumen)};
+
+   _sprite->setColor(color);
+   target.draw(*_sprite, _blend_mode);
+}
+#endif
 
 void StaticLight::update(const sf::Time& /*time*/)
 {
@@ -174,18 +186,28 @@ void StaticLight::deserialize(const GameDeserializeData& data)
    _flicker_alpha_amount = flicker_alpha_amount;
    _flicker_speed = flicker_speed;
    _texture = TexturePool::getInstance().get(texture);
+#ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
    _sprite->textureRect =
       sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(_texture->getSize().x), static_cast<float>(_texture->getSize().y)}};
    _sprite->color = _color;
    _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
+#else
+   _sprite = std::make_unique<sf::Sprite>(*_texture);
+   _sprite->setColor(_color);
+   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+#endif
 
    _rect = sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
    addChunks(_rect);
 
    auto scale_x_px = data._tmx_object->_width_px / _texture->getSize().x;
    auto scale_y_px = data._tmx_object->_height_px / _texture->getSize().y;
+#ifdef __EMSCRIPTEN__
    _sprite->scale = {scale_x_px, scale_y_px};
+#else
+   _sprite->scale({scale_x_px, scale_y_px});
+#endif
 
    // init each light with a different time offset
    // probably passing the position itself to FBM would be enough

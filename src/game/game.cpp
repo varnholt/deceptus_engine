@@ -82,16 +82,16 @@ void showGpu()
 #ifndef __EMSCRIPTEN__
 void showErrorMessage(const std::string& message)
 {
-   auto window = sf::RenderWindow::create(sf::WindowSettings{.size = {240u, 80u}, .title = "Error", .resizable = false}).value();
+   sf::RenderWindow window(sf::VideoMode({240, 80}), "Error", sf::Style::Titlebar | sf::Style::Close);
 
    const sf::Font& font = getFont();
 
    sf::Text text(font);
    text.setFont(font);
-   text.setString(message.c_str());
+   text.setString(message);
    text.setCharacterSize(12);
    text.setFillColor(sf::Color::Black);
-   text.position = {30.0f, 30.0f};
+   text.setPosition({30.0f, 30.0f});
 
    while (window.isOpen())
    {
@@ -220,6 +220,7 @@ void Game::initializeWindow()
    }
 
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
+#ifdef __EMSCRIPTEN__
    _window = std::make_shared<sf::RenderWindow>(
       sf::RenderWindow::create(
          sf::WindowSettings{
@@ -231,6 +232,14 @@ void Game::initializeWindow()
       )
          .value()
    );
+#else
+   _window = std::make_shared<sf::RenderWindow>(
+      sf::VideoMode({static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)}),
+      GAME_NAME,
+      game_config._fullscreen ? sf::State::Fullscreen : sf::State::Windowed,
+      context_settings
+   );
+#endif
 
    SplashScreen::show(*_window);
 
@@ -440,6 +449,8 @@ void Game::loadLevel(LoadingMode loading_mode)
    _info_layer->setLoading(true);
 #ifdef __EMSCRIPTEN__
    level_loader();
+#else
+   _level_loading_thread = std::async(std::launch::async, level_loader);
 #endif
 }
 
@@ -661,13 +672,14 @@ void Game::draw()
 #ifdef __EMSCRIPTEN__
    _window->setActive(true);
 #endif
+#ifdef __EMSCRIPTEN__
    const sf::Texture& window_render_texture_ref = _window_render_texture->getTexture();
    sf::Sprite window_texture_sprite;
-
-#ifdef __EMSCRIPTEN__
    window_texture_sprite.textureRect = sf::FloatRect{
       {0.f, 0.f}, {static_cast<float>(window_render_texture_ref.getSize().x), static_cast<float>(window_render_texture_ref.getSize().y)}
    };
+#else
+   auto window_texture_sprite = sf::Sprite(_window_render_texture->getTexture());
 #endif
 
    if (GameConfiguration::getInstance()._fullscreen)
@@ -678,15 +690,28 @@ void Game::draw()
       const auto scale_minimum = std::min(static_cast<int32_t>(scale_x), static_cast<int32_t>(scale_y));
       const auto dx = (scale_x - scale_minimum) * 0.5f;
       const auto dy = (scale_y - scale_minimum) * 0.5f;
+#ifdef __EMSCRIPTEN__
       window_texture_sprite.position = {_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy};
       window_texture_sprite.scale = {static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)};
+#else
+      window_texture_sprite.setPosition({_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy});
+      window_texture_sprite.scale({static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)});
+#endif
    }
    else
    {
+#ifdef __EMSCRIPTEN__
       window_texture_sprite.position = {static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y)};
+#else
+      window_texture_sprite.setPosition({static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y)});
+#endif
    }
 
+#ifdef __EMSCRIPTEN__
    _window->draw(window_texture_sprite, sf::RenderStates{.texture = &window_render_texture_ref});
+#else
+   _window->draw(window_texture_sprite);
+#endif
 #ifndef __EMSCRIPTEN__
    _window->popGLStates();
 #endif
@@ -774,7 +799,11 @@ void Game::updateWindowTitle()
 {
    std::ostringstream out_stream;
    out_stream << GAME_NAME << " - " << _fps << "fps";
+#ifdef __EMSCRIPTEN__
    _window->setTitle(out_stream.str().c_str());
+#else
+   _window->setTitle(out_stream.str());
+#endif
    _fps = 0;
 }
 
@@ -1007,6 +1036,15 @@ int32_t Game::loop()
       1
    );
    return 0;
+#else
+   while (_window->isOpen())
+   {
+      processEvents();
+      timedUpdate();
+      timedDraw();
+   }
+
+   return 0;
 #endif
 }
 
@@ -1032,11 +1070,7 @@ void Game::toggleFullScreen()
       config._windowed_height = config._video_mode_height;
 
       auto desktop_mode = sf::VideoMode::getDesktopMode();
-      *_window =
-         sf::RenderWindow::create(
-            sf::WindowSettings{.size = desktop_mode.size, .title = GAME_NAME, .fullscreen = true, .contextSettings = context_settings}
-         )
-            .value();
+      _window->create(desktop_mode, GAME_NAME, sf::Style::None, sf::State::Fullscreen, context_settings);
 
       // update active resolution to match desktop
       config._video_mode_width = desktop_mode.size.x;
@@ -1048,15 +1082,13 @@ void Game::toggleFullScreen()
       config._video_mode_width = config._windowed_width;
       config._video_mode_height = config._windowed_height;
 
-      *_window = sf::RenderWindow::create(
-                    sf::WindowSettings{
-                       .size = {static_cast<uint32_t>(config._video_mode_width), static_cast<uint32_t>(config._video_mode_height)},
-                       .title = GAME_NAME,
-                       .fullscreen = false,
-                       .contextSettings = context_settings
-                    }
-      )
-                    .value();
+      _window->create(
+         sf::VideoMode({static_cast<uint32_t>(config._video_mode_width), static_cast<uint32_t>(config._video_mode_height)}),
+         GAME_NAME,
+         sf::Style::Default,
+         sf::State::Windowed,
+         context_settings
+      );
    }
 
    config.serializeToFile();

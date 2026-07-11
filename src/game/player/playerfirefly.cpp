@@ -22,8 +22,13 @@ constexpr auto z_behind = static_cast<int32_t>(ZDepth::Player) - 1;
 PlayerFirefly::PlayerFirefly(GameNode* parent) : GameNode(parent)
 {
    _texture = TexturePool::getInstance().get("data/sprites/firefly.png");
+#ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
    _sprite->textureRect = {{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
+#else
+   _sprite = std::make_unique<sf::Sprite>(*_texture);
+   _sprite->setTextureRect({{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+#endif
    _z_index = z_in_front;
    _enabled = false;
    _visible = false;
@@ -34,6 +39,7 @@ std::string_view PlayerFirefly::objectName() const
    return "PlayerFirefly";
 }
 
+#ifdef __EMSCRIPTEN__
 void PlayerFirefly::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    draw(target, normal, {});
@@ -49,6 +55,16 @@ void PlayerFirefly::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/,
    draw_states.texture = _texture.get();
    target.draw(*_sprite, draw_states);
 }
+#else
+void PlayerFirefly::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+{
+   if (!_visible)
+   {
+      return;
+   }
+   target.draw(*_sprite);
+}
+#endif
 
 void PlayerFirefly::update(const sf::Time& dt)
 {
@@ -87,8 +103,13 @@ void PlayerFirefly::update(const sf::Time& dt)
    _position_px.x = _virtual_center_px.x + raw_x * orbit_radius_x_px;
    _position_px.y = _virtual_center_px.y + orbit_center_offset_y_px + raw_y * orbit_radius_y_px;
 
+#ifdef __EMSCRIPTEN__
    _sprite->position = _position_px;
    _sprite->origin = {static_cast<float>(PIXELS_PER_TILE) * 0.5f, static_cast<float>(PIXELS_PER_TILE) * 0.5f};
+#else
+   _sprite->setPosition(_position_px);
+   _sprite->setOrigin({static_cast<float>(PIXELS_PER_TILE) * 0.5f, static_cast<float>(PIXELS_PER_TILE) * 0.5f});
+#endif
 
    if (std::abs(raw_x) > z_switch_threshold)
    {
@@ -121,6 +142,10 @@ void PlayerFirefly::updateTextureRect()
    if (new_frame != _current_frame)
    {
       _current_frame = new_frame;
+#ifdef __EMSCRIPTEN__
       _sprite->textureRect = {{static_cast<float>(_current_frame * PIXELS_PER_TILE), 0.0f}, {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}};
+#else
+      _sprite->setTextureRect({{_current_frame * PIXELS_PER_TILE, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+#endif
    }
 }
