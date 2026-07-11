@@ -205,6 +205,14 @@ void LightSystem::drawShadowQuads(
                   pos_next = 0;
                }
 
+               // v0      v0_far
+               //  x------x
+               //  |    / |
+               //  |   /  |
+               //  |  /   |
+               //  x------x
+               // v1      v1_far
+
                const auto& v0 = circle_positions[pos_current];
                const auto& v1 = circle_positions[pos_next];
                const auto v0far = 10000.0f * (v0 - light_pos_m);
@@ -229,6 +237,12 @@ void LightSystem::drawShadowQuads(
          }
          else if (shape_chain)
          {
+            // for now it is assumed that chainshapes are static objects only.
+            // therefore no transform is applied to chainshape based objects.
+            //
+            // iterate m_count - 1 edges: for CreateLoop chains m_vertices[m_count-1] == m_vertices[0]
+            // so the closing edge is naturally covered; for open CreateChain shapes wrapping to 0
+            // would create a phantom closing edge that does not exist.
             for (auto pos_current = 0; pos_current < shape_chain->m_count - 1; pos_current++)
             {
                auto pos_next = pos_current + 1;
@@ -263,6 +277,7 @@ void LightSystem::drawShadowQuads(
          }
          else if (shape_polygon)
          {
+            // use m_count (vertex count), NOT GetChildCount() which always returns 1 for polygons.
             for (auto pos_current = 0; pos_current < shape_polygon->m_count; pos_current++)
             {
                auto pos_next = pos_current + 1;
@@ -305,7 +320,10 @@ void LightSystem::drawShadowQuads(
 
 sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::View& view)
 {
+   // first, transform the point by the view matrix
    sf::Vector2f normalized = view.getTransform().transformPoint(point);
+
+   // then convert to viewport coordinates
    sf::Vector2f pixel;
    pixel.x = (normalized.x + 1.0f) / 2.0f;
    pixel.y = (-normalized.y + 1.0f) / 2.0f;
@@ -314,7 +332,10 @@ sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::Vie
 
 sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf::Vector2f& point, const sf::View& view)
 {
+   // first, transform the point by the view matrix
    sf::Vector2f normalized = view.getTransform().transformPoint(point);
+
+   // then convert to viewport coordinates
    sf::Vector2f pixel;
 #ifdef __EMSCRIPTEN__
    const auto target_size = target.getSize();
@@ -478,6 +499,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
          continue;
       }
 
+      // don't draw lights that are too far away
       auto distanceToPlayer = (player_body->GetWorldCenter() - light->_pos_m).LengthSquared();
       if (distanceToPlayer > max_distance_m2)
       {
@@ -487,6 +509,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       _active_lights.push_back(light);
    }
 
+   // sort by distance so the closest lights always take the available channels
    std::ranges::sort(
       _active_lights,
       [&player_body](const auto& a, const auto& b)
@@ -505,6 +528,8 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       _active_lights.resize(max_lights);
    }
 
+   // pre-build shadow caster candidates once per frame — player, disabled bodies, and
+   // enemies are excluded here so drawShadowQuads only needs to check per-light exclusions.
    std::vector<b2Body*> shadow_candidates;
    const auto& world = LevelRegistry::getCurrent()->getWorld();
    for (auto* body = world->GetBodyList(); body; body = body->GetNext())
@@ -534,23 +559,32 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       }
    }
 
+   // draw sprites to channels (lights 0-2 to target1 RGB, lights 3-5 to target2 RGB)
+   // we skip alpha channels because they're harder to work with
    int32_t channel_index = 0;
    for (const auto& light : _active_lights)
    {
       if (channel_index >= 6)
       {
-         break;
+         break;  // max 6 lights (2 textures × RGB, skip alpha)
       }
 
+      // determine which target and which RGB channel
       sf::RenderTarget& target = (channel_index < 3) ? target1 : target2;
       int local_channel = channel_index % 3;
 
+      // clear the stencil buffer for this light via SFML's API.
+      // raw glClear(GL_STENCIL_BUFFER_BIT) would be fine here but using the SFML
+      // path keeps all stencil management consistent and avoids context surprises.
 #ifdef __EMSCRIPTEN__
       target.clearStencil(sf::StencilValue{0u});
 #else
       target.clearStencil(0);
 #endif
 
+      // draw occluders and shadow quads into the stencil buffer only.
+      // each draw call carries stencil_write_mode so SFML enables the stencil test
+      // and writes 1 for every occluded pixel instead of disabling it (default behaviour).
       drawOccluders(target);
 #ifdef __EMSCRIPTEN__
       drawShadowQuads(target, light, shadow_candidates, states);
@@ -558,18 +592,19 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       drawShadowQuads(target, light, shadow_candidates);
 #endif
 
+      // draw the light sprite only where stencil == 0 (not occluded).
       sf::Color channel_color;
       if (local_channel == 0)
       {
-         channel_color = sf::Color(255, 0, 0, 255);
+         channel_color = sf::Color(255, 0, 0, 255);  // red
       }
       else if (local_channel == 1)
       {
-         channel_color = sf::Color(0, 255, 0, 255);
+         channel_color = sf::Color(0, 255, 0, 255);  // green
       }
       else
       {
-         channel_color = sf::Color(0, 0, 255, 255);
+         channel_color = sf::Color(0, 0, 255, 255);  // blue
       }
 
 #ifdef __EMSCRIPTEN__
@@ -614,6 +649,8 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
 
       channel_index++;
    }
+
+   // Log::Info() << _active_lights.size() << " active light sources";
 }
 
 void LightSystem::draw(
@@ -631,6 +668,8 @@ void LightSystem::draw(
    }
 #endif
 
+   // texture uniforms only need to be rebound when the render texture objects change
+   // (i.e. on resize); skip the setUniform calls when the pointers are unchanged.
    const auto* color_tex = &color_map->getTexture();
    const auto* light_tex = &light_map->getTexture();
    const auto* light2_tex = &light_map2->getTexture();
@@ -667,6 +706,7 @@ void LightSystem::draw(
       _last_normal_map = normal_tex;
    }
 
+   // update shader uniforms
    updateLightShader(target);
 
 #ifdef __EMSCRIPTEN__
@@ -681,27 +721,36 @@ void LightSystem::draw(
 void LightSystem::drawDebug(sf::RenderTarget& target)
 {
 #ifdef DEBUG_DRAW_LIGHT_SYSTEM
+   // debug draw light system:
+   //
+   // red circle = light's base position (_pos_m)
+   // green circle = center position
    for (const auto& light : _lights)
    {
+      // debug draw light texture quad boundaries
       const auto sprite_bounds = light->_sprite->getGlobalBounds();
       DebugDraw::drawRect(target, sprite_bounds, sf::Color::Cyan, sf::Color::Transparent);
 
+      // debug draw light base position (without center offset)
       const auto base_pos = light->_pos_m;
-      DebugDraw::drawPoint(target, base_pos, b2Color(1.0f, 0.0f, 0.0f));
+      DebugDraw::drawPoint(target, base_pos, b2Color(1.0f, 0.0f, 0.0f));  // red point
       DebugDraw::drawCircle(target, base_pos, 0.1f, b2Color(1.0f, 0.0f, 0.0f));
 
+      // debug draw light center position (with center offset)
       const auto center_pos = light->_pos_m + light->_center_offset_m;
-      DebugDraw::drawPoint(target, center_pos, b2Color(0.0f, 1.0f, 0.0f));
+      DebugDraw::drawPoint(target, center_pos, b2Color(0.0f, 1.0f, 0.0f));  // green point
       DebugDraw::drawCircle(target, center_pos, 0.15f, b2Color(0.0f, 1.0f, 0.0f));
 
+      // debug draw line from base position to center position if there's an offset
       if (light->_center_offset_m.x != 0.0f || light->_center_offset_m.y != 0.0f)
       {
-         DebugDraw::drawLine(target, base_pos, center_pos, b2Color(1.0f, 1.0f, 0.0f));
+         DebugDraw::drawLine(target, base_pos, center_pos, b2Color(1.0f, 1.0f, 0.0f));  // yellow line
       }
 
+      // debug draw cross at sprite center
       const auto sprite_center_px =
          sf::Vector2f(sprite_bounds.position.x + sprite_bounds.size.x * 0.5f, sprite_bounds.position.y + sprite_bounds.size.y * 0.5f);
-      DebugDraw::drawPoint(target, sprite_center_px, b2Color(0.0f, 0.0f, 1.0f));
+      DebugDraw::drawPoint(target, sprite_center_px, b2Color(0.0f, 0.0f, 1.0f));  // blue point
    }
 #endif
 }
@@ -832,6 +881,27 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
             texture = (std::filesystem::path("data/light/") / texture_name.value()).string();
          }
 
+         // A) center of the physical light is in the center of the textured quad
+         //
+         //   +----+----+
+         //   |    |    |
+         //   |   \|/   |
+         //   +----+----+
+         //   |   /|\   |
+         //   |    |    |
+         //   +----+----+
+         //
+         // B) center of the physical light is not in the center of the textured quad
+         //    but has some offset to it. here the center is, say -24px, higher
+         //
+         //   +----+----+
+         //   |   \|/   |
+         //   +----+----+ center_offset_x_px = 0
+         //   |   /|\   | center_offset_y_px = -24
+         //   |    |    |
+         //   |    |    |
+         //   +----+----+
+
          if (const auto center_offset_x = ValueReader::readValue<int32_t>("center_offset_x_px", property_map))
          {
             light->_center_offset_px.x = center_offset_x.value();
@@ -845,6 +915,10 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
          }
       }
    }
+
+   // for now the sprite color is left white since it'll be used as attenuation value in the light shader
+   //
+   // light->_sprite.setColor(light->_color);
 
    light->_texture = TexturePool::getInstance().get(texture);
 #ifdef __EMSCRIPTEN__

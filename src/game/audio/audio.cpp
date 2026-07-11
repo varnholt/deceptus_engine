@@ -196,6 +196,8 @@ void Audio::updateListenerPosition(const sf::Vector2f& pos)
    listener.position = {pos.x, pos.y, 0.0f};
    _playback_device->applyListener(listener);
 #else
+   // The default listener's up vector is (0, 1, 0)
+   // sf::Listener::setUpVector
    sf::Listener::setPosition({pos.x, pos.y, 0.0f});
 #endif
 }
