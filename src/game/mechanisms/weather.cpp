@@ -3,6 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/valuereader.h"
 #include "game/level/roomupdater.h"
 #include "game/player/playerregistry.h"
@@ -131,11 +132,7 @@ void Weather::update(const sf::Time& dt)
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-   const auto intersects = sf::findIntersection(_rect, player_rect).hasValue();
-#else
-   const auto intersects = _rect.findIntersection(player_rect).has_value();
-#endif
+   const auto intersects = sfcompat::findIntersection(_rect, player_rect).has_value();
    updateWaitDelay(dt, intersects);
 
    if (intersects && matchesRoom() && !_wait_until_start_delay_elapsed)

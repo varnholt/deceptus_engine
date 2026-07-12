@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
@@ -86,11 +87,7 @@ void Wind::update(const sf::Time& /*dt*/)
 {
    const auto player = PlayerRegistry::getFirst();
    const auto& player_rect = player->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-   if (!sf::findIntersection(_area, player_rect).hasValue())
-#else
-   if (!_area.findIntersection(player_rect).has_value())
-#endif
+   if (!sfcompat::findIntersection(_area, player_rect).has_value())
    {
       return;
    }

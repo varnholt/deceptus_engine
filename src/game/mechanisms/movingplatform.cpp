@@ -10,6 +10,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
@@ -277,17 +278,16 @@ void MovingPlatform::setup(const GameDeserializeData& data)
 
 #ifdef __EMSCRIPTEN__
       sf::Sprite sprite;
-      sprite.textureRect = sf::IntRect(
-         {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
-         // 1 platform tile and one background tile for perspective
-      );
 #else
       sf::Sprite sprite(*_texture_map);
-      sprite.setTextureRect(sf::IntRect(
-         {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
-         // 1 platform tile and one background tile for perspective
-      ));
 #endif
+      sfcompat::setTextureRect(
+         sprite,
+         sf::IntRect(
+            {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
+            // 1 platform tile and one background tile for perspective
+         )
+      );
 
       addSprite(sprite);
    }
@@ -435,11 +435,7 @@ void MovingPlatform::update(const sf::Time& delta_time)
       const auto pos_body_x_px = (_body->GetPosition().x * PPM) + (horizontal * sprite_index * PIXELS_PER_TILE);
       const auto pos_body_y_px = (_body->GetPosition().y * PPM) - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
 
-#ifdef __EMSCRIPTEN__
-      sprite.position = {pos_body_x_px, pos_body_y_px};
-#else
-      sprite.setPosition({pos_body_x_px, pos_body_y_px});
-#endif
+      sfcompat::setPosition(sprite, {pos_body_x_px, pos_body_y_px});
       auto update_sprite_rect = false;
       auto texture_u = 0;
       auto texture_v = 0;

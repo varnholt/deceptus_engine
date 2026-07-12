@@ -8,6 +8,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/controllerkeymap.h"
@@ -111,13 +112,10 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    const auto tile_offset_y = sin(_time.asSeconds() * 5.0f) * 8.0f;
 
    // draw background
-#ifdef __EMSCRIPTEN__
-   _background->position = {_rect_center.x - _background->textureRect.size.x / 2, _rect_center.y + tile_offset_y - 11};
-   _background->color = color;
-#else
-   _background->setPosition({_rect_center.x - _background->getTextureRect().size.x / 2, _rect_center.y + tile_offset_y - 11});
-   _background->setColor(color);
-#endif
+   sfcompat::setPosition(
+      *_background, {_rect_center.x - sfcompat::getTextureRect(*_background).size.x / 2, _rect_center.y + tile_offset_y - 11}
+   );
+   sfcompat::setColor(*_background, color);
    sf::RenderStates background_states = states;
    background_states.texture = _texture.get();
    target.draw(*_background, background_states);
@@ -130,17 +128,10 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    auto index = 0;
    for (auto& sprite : _sprites)
    {
-#ifdef __EMSCRIPTEN__
-      sprite.color = color;
+      sfcompat::setColor(sprite, color);
       const auto tile_offset_x = -width_of_tiles_px / 2.0f + index * PIXELS_PER_TILE * 1.5f;
-      sprite.position = {_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y};
-      sprite.textureRect = is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index];
-#else
-      sprite.setColor(color);
-      const auto tile_offset_x = -width_of_tiles_px / 2.0f + index * PIXELS_PER_TILE * 1.5f;
-      sprite.setPosition({_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y});
-      sprite.setTextureRect(is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index]);
-#endif
+      sfcompat::setPosition(sprite, {_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y});
+      sfcompat::setTextureRect(sprite, is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index]);
       target.draw(sprite, icon_states);
       index++;
    }
@@ -149,11 +140,7 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
 void ControllerHelp::update(const sf::Time& delta_time)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-   _visible = sf::findIntersection(player_rect, _rect_px).hasValue();
-#else
-   _visible = (player_rect.findIntersection(_rect_px)).has_value();
-#endif
+   _visible = sfcompat::findIntersection(player_rect, _rect_px).has_value();
 
    if (!_visible)
    {
@@ -220,11 +207,10 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
 
 #ifdef __EMSCRIPTEN__
       sf::Sprite sprite;
-      sprite.textureRect = sprite_rect_keyboard;
 #else
       sf::Sprite sprite(*_texture);
-      sprite.setTextureRect(sprite_rect_keyboard);
 #endif
+      sfcompat::setTextureRect(sprite, sprite_rect_keyboard);
       _sprites.emplace_back(sprite);
       _sprite_rects_controller.emplace_back(sprite_rect_controller);
       _sprite_rects_keyboard.emplace_back(sprite_rect_keyboard);
@@ -238,19 +224,15 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
 
    if (_sprites.size() == 1)
    {
-#ifdef __EMSCRIPTEN__
-      _background->textureRect = {{6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2}};
-#else
-      _background->setTextureRect({{6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2}});
-#endif
+      sfcompat::setTextureRect(
+         *_background, sf::IntRect{{6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2}}
+      );
    }
    else if (_sprites.size() == 2)
    {
-#ifdef __EMSCRIPTEN__
-      _background->textureRect = {{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}};
-#else
-      _background->setTextureRect({{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}});
-#endif
+      sfcompat::setTextureRect(
+         *_background, sf::IntRect{{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}}
+      );
    }
 }
 

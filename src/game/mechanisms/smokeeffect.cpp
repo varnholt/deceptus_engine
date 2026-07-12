@@ -7,6 +7,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 
 #include <array>
@@ -105,11 +106,7 @@ void SmokeEffect::update(const sf::Time& dt)
    for (auto& particle : _particles)
    {
       particle._rot += dt_scaled * 10.0f * particle._rot_dir;
-#ifdef __EMSCRIPTEN__
-      particle._sprite->rotation = sf::degrees(particle._rot);
-#else
-      particle._sprite->setRotation(sf::degrees(particle._rot));
-#endif
+      sfcompat::setRotation(*particle._sprite, sf::degrees(particle._rot));
 
       // fake z rotation
       const auto x_normalized = 0.5f * (1.0f + sin(particle._time_offset + _elapsed.asSeconds() * _velocity));
@@ -117,33 +114,20 @@ void SmokeEffect::update(const sf::Time& dt)
       const auto x = x_normalized * particle._offset.x;
       const auto y = y_normalized * particle._offset.y;
 
-#ifdef __EMSCRIPTEN__
-      particle._sprite->position = {particle._center.x + x, particle._center.y + y};
-#else
-      particle._sprite->setPosition({particle._center.x + x, particle._center.y + y});
-#endif
+      sfcompat::setPosition(*particle._sprite, {particle._center.x + x, particle._center.y + y});
 
       if (_mode == Mode::Fog)
       {
-#ifdef __EMSCRIPTEN__
-         particle._sprite->color = {
-            _particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(_particle_color.a * fabs(x_normalized))
-         };
-#else
-         particle._sprite->setColor(
+         sfcompat::setColor(
+            *particle._sprite,
             {_particle_color.r, _particle_color.g, _particle_color.b, static_cast<uint8_t>(_particle_color.a * fabs(x_normalized))}
          );
-#endif
       }
 
       // moved here from deserialize code
       // origin should always depend on rotation
       const auto bounds = particle._sprite->getGlobalBounds();
-#ifdef __EMSCRIPTEN__
-      particle._sprite->origin = {bounds.size.x / 2, bounds.size.y / 2};
-#else
-      particle._sprite->setOrigin({bounds.size.x / 2, bounds.size.y / 2});
-#endif
+      sfcompat::setOrigin(*particle._sprite, {bounds.size.x / 2, bounds.size.y / 2});
    }
 
    if (!_particles.empty())
@@ -154,11 +138,7 @@ void SmokeEffect::update(const sf::Time& dt)
       {
          const auto& sprite = *(_particles[i]._sprite);
          const sf::Transform transform = sprite.getTransform();
-#ifdef __EMSCRIPTEN__
-         const sf::Color color = sprite.color;
-#else
-         const sf::Color color = sprite.getColor();
-#endif
+         const sf::Color color = sfcompat::getColor(sprite);
 
          const sf::Vector2f quad[4] = {
             transform.transformPoint({0.0f, 0.0f}),
@@ -335,15 +315,9 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
       particle._offset = sf::Vector2f{offset_x_px, offset_y_px};
       particle._time_offset = static_cast<float>(std::rand() % 100) * 0.02f * std::numbers::pi_v<float>;  // 0 .. 2_PI
 
-#ifdef __EMSCRIPTEN__
-      particle._sprite->scale = {sprite_scale_x, sprite_scale_y};
-      particle._sprite->rotation = sf::degrees(static_cast<float>(std::rand() % 360));
-      particle._sprite->color = smoke_effect->_particle_color;
-#else
-      particle._sprite->setScale({sprite_scale_x, sprite_scale_y});
-      particle._sprite->setRotation(sf::degrees(static_cast<float>(std::rand() % 360)));
-      particle._sprite->setColor(smoke_effect->_particle_color);
-#endif
+      sfcompat::setScale(*particle._sprite, {sprite_scale_x, sprite_scale_y});
+      sfcompat::setRotation(*particle._sprite, sf::degrees(static_cast<float>(std::rand() % 360)));
+      sfcompat::setColor(*particle._sprite, smoke_effect->_particle_color);
 
       smoke_effect->_particles.push_back(std::move(particle));
    }

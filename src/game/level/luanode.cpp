@@ -13,6 +13,7 @@
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationplayer.h"
 #include "game/animation/detonationanimation.h"
@@ -769,11 +770,7 @@ void LuaNode::addSprite()
 
 void LuaNode::setSpriteOrigin(int32_t id, float x, float y)
 {
-#ifdef __EMSCRIPTEN__
-   _sprites[id]->origin = {x, y};
-#else
-   _sprites[id]->setOrigin({x, y});
-#endif
+   sfcompat::setOrigin(*_sprites[id], {x, y});
 }
 
 void LuaNode::setSpriteOffset(int32_t id, float x, float y)
@@ -1110,44 +1107,26 @@ void LuaNode::updatePosition()
 
 void LuaNode::updateSpriteRect(int32_t id, int32_t x_px, int32_t y_px, int32_t w_px, int32_t h_px)
 {
-#ifdef __EMSCRIPTEN__
-   _sprites[id]->textureRect = sf::IntRect({x_px, y_px}, {w_px, h_px});
-#else
-   _sprites[id]->setTextureRect(sf::IntRect({x_px, y_px}, {w_px, h_px}));
-#endif
+   sfcompat::setTextureRect(*_sprites[id], sf::IntRect({x_px, y_px}, {w_px, h_px}));
 }
 
 void LuaNode::setSpriteScale(int32_t id, float x_scale, float y_scale)
 {
-#ifdef __EMSCRIPTEN__
-   _sprites[id]->scale = {x_scale, y_scale};
-#else
-   _sprites[id]->setScale({x_scale, y_scale});
-#endif
+   sfcompat::setScale(*_sprites[id], {x_scale, y_scale});
 }
 
 void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
-#ifdef __EMSCRIPTEN__
-   _sprites[id]->color = {r, g, b, a};
-#else
-   _sprites[id]->setColor({r, g, b, a});
-#endif
+   sfcompat::setColor(*_sprites[id], {r, g, b, a});
 }
 
 void LuaNode::setSpriteVisible(int32_t id, bool visible)
 {
    if (id >= 0 && id < static_cast<int32_t>(_sprites.size()))
    {
-#ifdef __EMSCRIPTEN__
-      sf::Color current_color = _sprites[id]->color;
+      sf::Color current_color = sfcompat::getColor(*_sprites[id]);
       current_color.a = visible ? 255 : 0;
-      _sprites[id]->color = current_color;
-#else
-      sf::Color current_color = _sprites[id]->getColor();
-      current_color.a = visible ? 255 : 0;
-      _sprites[id]->setColor(current_color);
-#endif
+      sfcompat::setColor(*_sprites[id], current_color);
    }
 }
 
@@ -1244,11 +1223,7 @@ bool LuaNode::intersectsPlayer(float x, float y, float width, float height)
 {
    sf::FloatRect rect{{x, y}, {width, height}};
    const auto player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-   return sf::findIntersection(player_rect, rect).hasValue();
-#else
-   return player_rect.findIntersection(rect).has_value();
-#endif
+   return sfcompat::findIntersection(player_rect, rect).has_value();
 }
 
 bool LuaNode::checkPlayerDead() const

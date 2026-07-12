@@ -7,6 +7,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/camera/cameraroomlock.h"
 #include "game/camera/camerasystem.h"
@@ -70,14 +71,11 @@ std::vector<Room::SubRoom>::const_iterator Room::findSubRoom(const sf::Vector2f&
 
 std::vector<Room::SubRoom>::const_iterator Room::findSubRoom(const sf::FloatRect& rect) const
 {
-#ifdef __EMSCRIPTEN__
    const auto it = std::find_if(
-      _sub_rooms.begin(), _sub_rooms.end(), [rect](const auto& sub_room) { return sf::findIntersection(sub_room._rect, rect).hasValue(); }
+      _sub_rooms.begin(),
+      _sub_rooms.end(),
+      [rect](const auto& sub_room) { return sfcompat::findIntersection(sub_room._rect, rect).has_value(); }
    );
-#else
-   const auto it =
-      std::find_if(_sub_rooms.begin(), _sub_rooms.end(), [rect](const auto& sub_room) { return sub_room._rect.findIntersection(rect); });
-#endif
    return it;
 }
 
@@ -135,19 +133,11 @@ void Room::mergeEnterAreas(const std::vector<std::shared_ptr<Room>>& rooms)
    {
       for (auto& room : rooms)
       {
-#ifdef __EMSCRIPTEN__
          auto it = std::find_if(
             room->_sub_rooms.begin(),
             room->_sub_rooms.end(),
-            [area](const auto& sub_room) { return sf::findIntersection(sub_room._rect, area._rect).hasValue(); }
+            [area](const auto& sub_room) { return sfcompat::findIntersection(sub_room._rect, area._rect).has_value(); }
          );
-#else
-         auto it = std::find_if(
-            room->_sub_rooms.begin(),
-            room->_sub_rooms.end(),
-            [area](const auto& sub_room) { return sub_room._rect.findIntersection(area._rect); }
-         );
-#endif
 
          if (it != room->_sub_rooms.end())
          {
@@ -290,19 +280,11 @@ void Room::deserialize(GameNode* parent, const GameDeserializeData& data, std::v
    sub_room.deserialize(data);
 
    // test for overlaps
-#ifdef __EMSCRIPTEN__
    if (!std::any_of(
           room->_sub_rooms.begin(),
           room->_sub_rooms.end(),
-          [sub_room](const auto& room) { return sf::findIntersection(room._rect, sub_room._rect).hasValue(); }
+          [sub_room](const auto& room) { return sfcompat::findIntersection(room._rect, sub_room._rect).has_value(); }
        ))
-#else
-   if (!std::any_of(
-          room->_sub_rooms.begin(),
-          room->_sub_rooms.end(),
-          [sub_room](const auto& room) { return room._rect.findIntersection(sub_room._rect); }
-       ))
-#endif
    {
       room->_sub_rooms.push_back(sub_room);
    }

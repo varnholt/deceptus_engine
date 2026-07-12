@@ -5,6 +5,7 @@
 #include <ranges>
 #include <vector>
 
+#include "framework/tools/sfmlcompat.h"
 #include "game/level/fixturenode.h"
 #include "game/level/luainterface.h"
 
@@ -59,11 +60,7 @@ std::vector<WorldQuery::CollidedNode> WorldQuery::findNodesByHitbox(const sf::Fl
    {
       if (auto intersecting_hitbox = std::ranges::find_if(
              node->_hitboxes,
-#ifdef __EMSCRIPTEN__
-             [&search_rect](const auto& hit_box) { return sf::findIntersection(hit_box.getRectTranslated(), search_rect).hasValue(); }
-#else
-             [&search_rect](const auto& hit_box) { return hit_box.getRectTranslated().findIntersection(search_rect).has_value(); }
-#endif
+             [&search_rect](const auto& hit_box) { return sfcompat::findIntersection(hit_box.getRectTranslated(), search_rect).has_value(); }
           );
           intersecting_hitbox != node->_hitboxes.end())
       {
@@ -88,11 +85,7 @@ std::vector<WorldQuery::CollidedNode> WorldQuery::findNodesByHitbox(const std::v
              {
                 return std::ranges::any_of(
                    attack_rects,
-#ifdef __EMSCRIPTEN__
-                   [&hit_box](const auto& attack_rect) { return sf::findIntersection(hit_box.getRectTranslated(), attack_rect).hasValue(); }
-#else
-                   [&hit_box](const auto& attack_rect) { return hit_box.getRectTranslated().findIntersection(attack_rect).has_value(); }
-#endif
+                   [&hit_box](const auto& attack_rect) { return sfcompat::findIntersection(hit_box.getRectTranslated(), attack_rect).has_value(); }
                 );
              }
           );

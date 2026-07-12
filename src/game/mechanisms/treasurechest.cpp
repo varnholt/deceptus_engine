@@ -4,6 +4,7 @@
 #include <format>
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/animation/animationpool.h"
 #include "game/audio/audio.h"
 #include "game/io/texturepool.h"
@@ -90,11 +91,10 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
 
 #ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
-   _sprite->position = {pos_x_px, pos_y_px};
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition({pos_x_px, pos_y_px});
 #endif
+   sfcompat::setPosition(*_sprite, {pos_x_px, pos_y_px});
 
    _sample_open = ValueReader::readValue<std::string>("sample_open", map).value_or("treasure_chest_open.wav");
    Audio::getInstance().addSample(_sample_open);
@@ -206,11 +206,7 @@ void TreasureChest::update(const sf::Time& dt)
          if (PlayerRegistry::getFirst()->getControls()->isButtonBPressed())
          {
             const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-            if (sf::findIntersection(player_rect_px, _rect).hasValue())
-#else
-            if (player_rect_px.findIntersection(_rect).has_value())
-#endif
+            if (sfcompat::findIntersection(player_rect_px, _rect).has_value())
             {
                if (playerHasRequiredKey())
                {

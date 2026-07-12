@@ -3,6 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -101,11 +102,10 @@ void OnOffBlock::setup(const GameDeserializeData& data)
    _texture_map = TexturePool::getInstance().get("data/sprites/on_off_block.png");
 #ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
-   _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture_map);
-   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
 #endif
+   sfcompat::setPosition(*_sprite, {data._tmx_object->_x_px, data._tmx_object->_y_px});
 
    _rectangle = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 

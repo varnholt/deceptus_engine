@@ -8,6 +8,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationpool.h"
 #include "game/audio/audio.h"
@@ -472,11 +473,10 @@ bool Door::setup(const GameDeserializeData& data)
          _texture = TexturePool::getInstance().get(texture_path);
 #ifdef __EMSCRIPTEN__
          _sprite = std::make_unique<sf::Sprite>();
-         _sprite->position = {x_px, y_px};
 #else
          _sprite = std::make_unique<sf::Sprite>(*_texture);
-         _sprite->setPosition({x_px, y_px});
 #endif
+         sfcompat::setPosition(*_sprite, {x_px, y_px});
       }
 
       const auto sample_open_it = map.find("sample_open");
@@ -562,11 +562,7 @@ bool Door::setup(const GameDeserializeData& data)
       // the first frame of the open animation should be the texture rect used for drawing
       if (_animation_open)
       {
-#ifdef __EMSCRIPTEN__
-         _sprite->textureRect = _animation_open->_frames.at(0);
-#else
-         _sprite->setTextureRect(_animation_open->_frames.at(0));
-#endif
+         sfcompat::setTextureRect(*_sprite, _animation_open->_frames.at(0));
       }
    }
 

@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/animation/animationpool.h"
 #include "game/audio/audio.h"
 #include "game/camera/camerasystem.h"
@@ -392,11 +393,7 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf:
 
 void Gateway::update(const sf::Time& dt)
 {
-#ifdef __EMSCRIPTEN__
-   const auto player_intersects = sf::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rect).hasValue();
-#else
-   const auto player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
-#endif
+   const auto player_intersects = sfcompat::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rect).has_value();
 
    // activate portal when player intersects
    if (!_player_intersects && player_intersects)
@@ -426,11 +423,7 @@ void Gateway::update(const sf::Time& dt)
 
    _elapsed += dt.asSeconds();
 
-#ifdef __EMSCRIPTEN__
-   _origin_shape.position = _origin;
-#else
-   _origin_shape.setPosition(_origin);
-#endif
+   sfcompat::setPosition(_origin_shape, _origin);
 
    switch (_state)
    {
@@ -672,29 +665,16 @@ void Gateway::update(const sf::Time& dt)
                auto& pi_layer = _pi[i]._layer->_sprite;
                auto& pa_layer = _pa[i]._layer->_sprite;
 
-#ifdef __EMSCRIPTEN__
-               auto pi_color = pi_layer->color;
-               auto pa_color = pa_layer->color;
+               auto pi_color = sfcompat::getColor(*pi_layer);
+               auto pa_color = sfcompat::getColor(*pa_layer);
 
                pi_color.a = static_cast<uint8_t>(255 * fade_out_alpha);
                pa_color.a = static_cast<uint8_t>(255 * fade_in_alpha);
 
-               pi_layer->color = pi_color;
-               pa_layer->color = pa_color;
-               _layer_background_active->_sprite->color = pa_color;
-               _layer_background_inactive->_sprite->color = pi_color;
-#else
-               auto pi_color = pi_layer->getColor();
-               auto pa_color = pa_layer->getColor();
-
-               pi_color.a = static_cast<uint8_t>(255 * fade_out_alpha);
-               pa_color.a = static_cast<uint8_t>(255 * fade_in_alpha);
-
-               pi_layer->setColor(pi_color);
-               pa_layer->setColor(pa_color);
-               _layer_background_active->_sprite->setColor(pa_color);
-               _layer_background_inactive->_sprite->setColor(pi_color);
-#endif
+               sfcompat::setColor(*pi_layer, pi_color);
+               sfcompat::setColor(*pa_layer, pa_color);
+               sfcompat::setColor(*_layer_background_active->_sprite, pa_color);
+               sfcompat::setColor(*_layer_background_inactive->_sprite, pi_color);
             }
 
             std::ranges::for_each(_pi, [](auto& s) { s.update(); });
@@ -705,20 +685,12 @@ void Gateway::update(const sf::Time& dt)
                for (auto& side : _pi)
                {
                   side.reset();
-#ifdef __EMSCRIPTEN__
-                  side._layer->_sprite->color = sf::Color(255, 255, 255, 255);
-#else
-                  side._layer->_sprite->setColor(sf::Color(255, 255, 255, 255));
-#endif
+                  sfcompat::setColor(*side._layer->_sprite, sf::Color(255, 255, 255, 255));
                }
 
                for (auto& side : _pa)
                {
-#ifdef __EMSCRIPTEN__
-                  side._layer->_sprite->color = sf::Color(255, 255, 255, 255);
-#else
-                  side._layer->_sprite->setColor(sf::Color(255, 255, 255, 255));
-#endif
+                  sfcompat::setColor(*side._layer->_sprite, sf::Color(255, 255, 255, 255));
                }
 
                _activated_state._step = 0;
@@ -785,11 +757,7 @@ void Gateway::setup(const GameDeserializeData& data)
 
    _rect_shape.setFillColor(sf::Color(255, 255, 255, 25));
    _rect_shape.setSize(_rect.size);
-#ifdef __EMSCRIPTEN__
-   _rect_shape.position = _rect.position;
-#else
-   _rect_shape.setPosition(_rect.position);
-#endif
+   sfcompat::setPosition(_rect_shape, _rect.position);
 
    _origin_shape.setRadius(1.0f);
    _origin_shape.setFillColor(sf::Color::Red);
@@ -857,13 +825,8 @@ void Gateway::setup(const GameDeserializeData& data)
          if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
          {
             const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
-#ifdef __EMSCRIPTEN__
-            sprite->origin = origin;
-            sprite->position = origin + pos + sf::Vector2f{0, 0};
-#else
-            sprite->setOrigin(origin);
-            sprite->setPosition(origin + pos + sf::Vector2f{0, 0});
-#endif
+            sfcompat::setOrigin(*sprite, origin);
+            sfcompat::setPosition(*sprite, origin + pos + sf::Vector2f{0, 0});
          }
       }
       catch (...)
@@ -875,19 +838,11 @@ void Gateway::setup(const GameDeserializeData& data)
    for (int i = 0; i < 4; ++i)
    {
       _pa[i]._layer = _layers[std::format("pa_{}", i)];
-#ifdef __EMSCRIPTEN__
-      _pa[i]._pos_px = _pa[i]._layer->_sprite->position;
-#else
-      _pa[i]._pos_px = _pa[i]._layer->_sprite->getPosition();
-#endif
+      _pa[i]._pos_px = sfcompat::getPosition(*_pa[i]._layer->_sprite);
       _pa[i]._angle_offset = sf::degrees(90 * i);
 
       _pi[i]._layer = _layers[std::format("pi_{}", i)];
-#ifdef __EMSCRIPTEN__
-      _pi[i]._pos_px = _pi[i]._layer->_sprite->position;
-#else
-      _pi[i]._pos_px = _pi[i]._layer->_sprite->getPosition();
-#endif
+      _pi[i]._pos_px = sfcompat::getPosition(*_pi[i]._layer->_sprite);
       _pi[i]._angle_offset = sf::degrees(90 * i);
    }
 
@@ -895,11 +850,7 @@ void Gateway::setup(const GameDeserializeData& data)
    _layer_background_inactive = _layers["background_inactive"];
    _layer_background_active = _layers["background_active"];
 
-#ifdef __EMSCRIPTEN__
-   _origin = _pa[0]._layer->_sprite->origin;
-#else
-   _origin = _pa[0]._layer->_sprite->getOrigin();
-#endif
+   _origin = sfcompat::getOrigin(*_pa[0]._layer->_sprite);
 
    // load shader
 #ifdef __EMSCRIPTEN__
@@ -1029,13 +980,8 @@ void Gateway::Side::update()
    sf::Vector2f pos_from_angle_and_distance_px;
    pos_from_angle_and_distance_px.x = std::cos(full_angle_sf.asRadians()) * _distance_factor;
    pos_from_angle_and_distance_px.y = std::sin(full_angle_sf.asRadians()) * _distance_factor;
-#ifdef __EMSCRIPTEN__
-   _layer->_sprite->rotation = full_angle_sf;
-   _layer->_sprite->position = _pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f};
-#else
-   _layer->_sprite->setRotation(full_angle_sf);
-   _layer->_sprite->setPosition(_pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f});
-#endif
+   sfcompat::setRotation(*_layer->_sprite, full_angle_sf);
+   sfcompat::setPosition(*_layer->_sprite, _pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f});
 }
 
 void Gateway::Side::reset()
@@ -1058,11 +1004,10 @@ Gateway::Eye::Eye(const sf::Vector2f& center)
    _texture = TexturePool::getInstance().get("data/sprites/gateway_eye.png");
 #ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
-   _sprite->textureRect = {{3547, 93}, {12, 12}};
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setTextureRect({{3547, 93}, {12, 12}});
 #endif
+   sfcompat::setTextureRect(*_sprite, sf::IntRect{{3547, 93}, {12, 12}});
 
    // load animations
    AnimationPool animation_pool{"data/sprites/gateway_animations.json"};
@@ -1167,19 +1112,11 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
 
    const auto eye_pos_error_px = sf::Vector2f{19, 5};
    const auto sprite_pos_px = _center_pos_px + _eye_pos_px + eye_pos_error_px;
-#ifdef __EMSCRIPTEN__
-   _sprite->position = sprite_pos_px;
-   _eye_spawn->position = sprite_pos_px;
-   _eye_iris_spawn->position = sprite_pos_px;
-   _eye_iris_idle->position = sprite_pos_px;
-   _eye_iris_idle_blink->position = sprite_pos_px;
-#else
-   _sprite->setPosition(sprite_pos_px);
-   _eye_spawn->setPosition(sprite_pos_px);
-   _eye_iris_spawn->setPosition(sprite_pos_px);
-   _eye_iris_idle->setPosition(sprite_pos_px);
-   _eye_iris_idle_blink->setPosition(sprite_pos_px);
-#endif
+   sfcompat::setPosition(*_sprite, sprite_pos_px);
+   sfcompat::setPosition(*_eye_spawn, sprite_pos_px);
+   sfcompat::setPosition(*_eye_iris_spawn, sprite_pos_px);
+   sfcompat::setPosition(*_eye_iris_idle, sprite_pos_px);
+   sfcompat::setPosition(*_eye_iris_idle_blink, sprite_pos_px);
 }
 
 void Gateway::Eye::wakeUp()

@@ -1,6 +1,7 @@
 #include "menuscreencontrols.h"
 
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/sfmlstring.h"
 #include "menu.h"
 #include "menuaudio.h"
@@ -565,11 +566,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    if (!cursor_on_disabled)
    {
       _cursor_highlight.setSize({580.0f, assign_row_height - 1.0f});
-#ifdef __EMSCRIPTEN__
-      _cursor_highlight.position = {30.0f, cursor_row_y};
-#else
-      _cursor_highlight.setPosition({30.0f, cursor_row_y});
-#endif
+      sfcompat::setPosition(_cursor_highlight, {30.0f, cursor_row_y});
       window.draw(_cursor_highlight, states);
    }
 
@@ -585,11 +582,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    _text->setString(sf::String::fromUtf8(full_title.begin(), full_title.end()));
 #endif
    const auto title_bounds = _text->getLocalBounds();
-#ifdef __EMSCRIPTEN__
-   _text->position = {(640.0f - title_bounds.size.x) / 2.0f, assign_title_y};
-#else
-   _text->setPosition({(640.0f - title_bounds.size.x) / 2.0f, assign_title_y});
-#endif
+   sfcompat::setPosition(*_text, {(640.0f - title_bounds.size.x) / 2.0f, assign_title_y});
    window.draw(*_text, states);
 
    _text->setCharacterSize(12);
@@ -597,19 +590,11 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    // column headers
    _text->setFillColor(color_header);
    _text->setString(sftr("Action"));
-#ifdef __EMSCRIPTEN__
-   _text->position = {assign_column_action_x, assign_header_y};
-#else
-   _text->setPosition({assign_column_action_x, assign_header_y});
-#endif
+   sfcompat::setPosition(*_text, {assign_column_action_x, assign_header_y});
    window.draw(*_text, states);
 
    _text->setString(_device_mode == DeviceMode::Keyboard ? sftr("Keyboard") : sftr("Controller"));
-#ifdef __EMSCRIPTEN__
-   _text->position = {assign_column_keyboard_x, assign_header_y};
-#else
-   _text->setPosition({assign_column_keyboard_x, assign_header_y});
-#endif
+   sfcompat::setPosition(*_text, {assign_column_keyboard_x, assign_header_y});
    window.draw(*_text, states);
 
    // action rows
@@ -631,11 +616,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
 #else
       _text->setString(sf::String::fromUtf8(action_display_name.begin(), action_display_name.end()));
 #endif
-#ifdef __EMSCRIPTEN__
-      _text->position = {assign_column_action_x, row_y};
-#else
-      _text->setPosition({assign_column_action_x, row_y});
-#endif
+      sfcompat::setPosition(*_text, {assign_column_action_x, row_y});
       window.draw(*_text, states);
 
       std::string binding_name = "--";
@@ -664,11 +645,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
 #else
       _text->setString(binding_name);
 #endif
-#ifdef __EMSCRIPTEN__
-      _text->position = {assign_column_keyboard_x, row_y};
-#else
-      _text->setPosition({assign_column_keyboard_x, row_y});
-#endif
+      sfcompat::setPosition(*_text, {assign_column_keyboard_x, row_y});
       window.draw(*_text, states);
    }
 
@@ -678,11 +655,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
       const auto reset_selected = (_action_row_index == row_count);
       _text->setFillColor(reset_selected ? color_row_reset_selected : color_row_reset_normal);
       _text->setString(sftr("Reset to Defaults"));
-#ifdef __EMSCRIPTEN__
-      _text->position = {assign_column_action_x, reset_row_y};
-#else
-      _text->setPosition({assign_column_action_x, reset_row_y});
-#endif
+      sfcompat::setPosition(*_text, {assign_column_action_x, reset_row_y});
       window.draw(*_text, states);
    }
 
@@ -691,22 +664,14 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    {
       _text->setFillColor(color_waiting);
       _text->setString(sftr("Press a key to assign  (Esc to cancel)"));
-#ifdef __EMSCRIPTEN__
-      _text->position = {assign_column_action_x, assign_status_y};
-#else
-      _text->setPosition({assign_column_action_x, assign_status_y});
-#endif
+      sfcompat::setPosition(*_text, {assign_column_action_x, assign_status_y});
       window.draw(*_text, states);
    }
    else if (_assignment_state == AssignmentState::WaitingForButton)
    {
       _text->setFillColor(color_waiting);
       _text->setString(sftr("Press a face or shoulder button  (Esc to cancel)"));
-#ifdef __EMSCRIPTEN__
-      _text->position = {assign_column_action_x, assign_status_y};
-#else
-      _text->setPosition({assign_column_action_x, assign_status_y});
-#endif
+      sfcompat::setPosition(*_text, {assign_column_action_x, assign_status_y});
       window.draw(*_text, states);
    }
 
@@ -720,19 +685,11 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    {
       _text->setString(sftr("Enter: assign keyboard key    Y button: assign controller button"));
    }
-#ifdef __EMSCRIPTEN__
-   _text->position = {assign_column_action_x, assign_hint_y};
-#else
-   _text->setPosition({assign_column_action_x, assign_hint_y});
-#endif
+   sfcompat::setPosition(*_text, {assign_column_action_x, assign_hint_y});
    window.draw(*_text, states);
 
    _text->setString(sftr("Left/Right: change device    Esc: save and return"));
-#ifdef __EMSCRIPTEN__
-   _text->position = {assign_column_action_x, assign_hint_2_y};
-#else
-   _text->setPosition({assign_column_action_x, assign_hint_2_y});
-#endif
+   sfcompat::setPosition(*_text, {assign_column_action_x, assign_hint_2_y});
    window.draw(*_text, states);
 
    if (_text_back_button)

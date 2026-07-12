@@ -4,6 +4,7 @@
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/audio/audio.h"
 #include "game/audio/musicplayer.h"
@@ -690,21 +691,20 @@ void Game::draw()
       const auto scale_minimum = std::min(static_cast<int32_t>(scale_x), static_cast<int32_t>(scale_y));
       const auto dx = (scale_x - scale_minimum) * 0.5f;
       const auto dy = (scale_y - scale_minimum) * 0.5f;
+      sfcompat::setPosition(
+         window_texture_sprite, {_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy}
+      );
 #ifdef __EMSCRIPTEN__
-      window_texture_sprite.position = {_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy};
       window_texture_sprite.scale = {static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)};
 #else
-      window_texture_sprite.setPosition({_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy});
       window_texture_sprite.scale({static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)});
 #endif
    }
    else
    {
-#ifdef __EMSCRIPTEN__
-      window_texture_sprite.position = {static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y)};
-#else
-      window_texture_sprite.setPosition({static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y)});
-#endif
+      sfcompat::setPosition(
+         window_texture_sprite, {static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y)}
+      );
    }
 
 #ifdef __EMSCRIPTEN__

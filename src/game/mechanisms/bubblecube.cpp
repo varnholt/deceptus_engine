@@ -7,6 +7,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/level/levelregistry.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -247,17 +248,13 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, con
       sprite_index = static_cast<int32_t>(_mapped_value_normalized * columns + 6) % columns;
    }
 
-#ifdef __EMSCRIPTEN__
-   _sprite->textureRect = sf::IntRect(
-      {sprite_index * PIXELS_PER_TILE * tiles_per_box_width, (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height},
-      {PIXELS_PER_TILE * tiles_per_box_width, PIXELS_PER_TILE * tiles_per_box_height}
+   sfcompat::setTextureRect(
+      *_sprite,
+      sf::IntRect(
+         {sprite_index * PIXELS_PER_TILE * tiles_per_box_width, (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height},
+         {PIXELS_PER_TILE * tiles_per_box_width, PIXELS_PER_TILE * tiles_per_box_height}
+      )
    );
-#else
-   _sprite->setTextureRect(
-      {{sprite_index * PIXELS_PER_TILE * tiles_per_box_width, (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height},
-       {PIXELS_PER_TILE * tiles_per_box_width, PIXELS_PER_TILE * tiles_per_box_height}}
-   );
-#endif
 
    sf::RenderStates draw_states = states;
    draw_states.texture = _texture.get();
@@ -305,11 +302,7 @@ void BubbleCube::updateSpriteIndex()
 void BubbleCube::updatePosition()
 {
    const auto pos_px = PPM * _body->GetPosition();
-#ifdef __EMSCRIPTEN__
-   _sprite->position = {pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px};
-#else
-   _sprite->setPosition({pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px});
-#endif
+   sfcompat::setPosition(*_sprite, {pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px});
 
    // move translated rect along body position
    _translated_rect_px.position.y = _body->GetPosition().y * PPM;
@@ -341,15 +334,9 @@ void BubbleCube::updateRespawnCondition()
 
    // update alpha
    _alpha = std::min((now - _respawn_time).asSeconds() * respawn_speed, 1.0f);
-#ifdef __EMSCRIPTEN__
-   auto sprite_color = _sprite->color;
-   sprite_color.a = static_cast<uint8_t>(_alpha * 255);
-   _sprite->color = sprite_color;
-#else
-   auto color = _sprite->getColor();
+   auto color = sfcompat::getColor(*_sprite);
    color.a = static_cast<uint8_t>(_alpha * 255);
-   _sprite->setColor(color);
-#endif
+   sfcompat::setColor(*_sprite, color);
 }
 
 void BubbleCube::updateFootSensorContact()
@@ -379,11 +366,7 @@ void BubbleCube::updateFootSensorContact()
 
    const auto foot_sensor_rect = PlayerRegistry::getFirst()->computeFootSensorPixelFloatRect();
    _foot_sensor_rect_intersects_previous = _foot_sensor_rect_intersects;
-#ifdef __EMSCRIPTEN__
-   _foot_sensor_rect_intersects = sf::findIntersection(foot_sensor_rect, _foot_collision_rect_px).hasValue();
-#else
-   _foot_sensor_rect_intersects = foot_sensor_rect.findIntersection(_foot_collision_rect_px).has_value();
-#endif
+   _foot_sensor_rect_intersects = sfcompat::findIntersection(foot_sensor_rect, _foot_collision_rect_px).has_value();
 
 #ifdef DEBUG_COLLISION_RECTS
 #ifdef __EMSCRIPTEN__

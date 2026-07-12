@@ -6,6 +6,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
@@ -72,11 +73,10 @@ RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
 
 #ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
-   _sprite->origin = {_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f};
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture_map);
-   _sprite->setOrigin({_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f});
 #endif
+   sfcompat::setOrigin(*_sprite, {_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f});
 
    _audio_update_data._range = AudioRange{600.0f, 0.0f, 100.0f, 1.0f};
    _has_audio = true;
@@ -290,13 +290,8 @@ void RotatingBlade::update(const sf::Time& dt)
    _path_interpolation.updateTime(movement_delta);
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
    _pos = _path_interpolation.computePosition(_path_interpolation.getTime());
-#ifdef __EMSCRIPTEN__
-   _sprite->rotation = sf::degrees(_angle);
-   _sprite->position = _pos;
-#else
-   _sprite->setRotation(sf::degrees(_angle));
-   _sprite->setPosition(_pos);
-#endif
+   sfcompat::setRotation(*_sprite, sf::degrees(_angle));
+   sfcompat::setPosition(*_sprite, _pos);
 
    updateAudio();
 

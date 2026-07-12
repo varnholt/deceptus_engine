@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 
 #include "game/audio/audio.h"
 #include "game/io/texturepool.h"
@@ -209,17 +210,13 @@ void DestructibleBlockingRect::update(const sf::Time& dt)
          _state.current_frame = _config.frame_count - 1;
       }
 
-#ifdef __EMSCRIPTEN__
-      _sprite->textureRect = sf::IntRect{
-         {static_cast<int32_t>(_state.current_frame) * _config.frame_width, _config.row * _config.frame_height},
-         {_config.frame_width, _config.frame_height}
-      };
-#else
-      _sprite->setTextureRect(sf::IntRect{
-         {static_cast<int32_t>(_state.current_frame) * _config.frame_width, _config.row * _config.frame_height},
-         {_config.frame_width, _config.frame_height}
-      });
-#endif
+      sfcompat::setTextureRect(
+         *_sprite,
+         sf::IntRect{
+            {static_cast<int32_t>(_state.current_frame) * _config.frame_width, _config.row * _config.frame_height},
+            {_config.frame_width, _config.frame_height}
+         }
+      );
    }
 }
 
@@ -285,13 +282,11 @@ void DestructibleBlockingRect::setupSprite(const GameDeserializeData& data)
 
 #ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
-   _sprite->position = sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)};
-   _sprite->textureRect = sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}};
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition(sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)});
-   _sprite->setTextureRect(sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}});
 #endif
+   sfcompat::setPosition(*_sprite, sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)});
+   sfcompat::setTextureRect(*_sprite, sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}});
 }
 
 void DestructibleBlockingRect::destroy()

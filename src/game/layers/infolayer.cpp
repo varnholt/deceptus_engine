@@ -5,6 +5,7 @@
 #include "framework/tools/globalclock.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/animation/animationframedata.h"
 #include "game/camera/camerapanorama.h"
 #include "game/config/gameconfiguration.h"
@@ -173,11 +174,7 @@ InfoLayer::InfoLayer()
          layer->_sprite = sprite;
 
          auto layer_data = std::make_shared<LayerData>(layer);
-#ifdef __EMSCRIPTEN__
-         layer_data->_pos = sprite->position;
-#else
-         layer_data->_pos = sprite->getPosition();
-#endif
+         layer_data->_pos = sfcompat::getPosition(*sprite);
          _layers[psd_layer.getName()] = layer_data;
 
          // store all player health related layers
@@ -226,11 +223,7 @@ InfoLayer::InfoLayer()
    _heart_animation._frames = frames._frames;
    _heart_animation._color_texture = frames._texture;
    _heart_animation.setFrameTimes(frames._frame_times);
-#ifdef __EMSCRIPTEN__
-   _heart_animation.origin = frames._origin;
-#else
-   _heart_animation.setOrigin(frames._origin);
-#endif
+   sfcompat::setOrigin(_heart_animation, frames._origin);
    _heart_animation._reset_to_first_frame = false;
 
    // init min/max durations for randomized animations
@@ -330,11 +323,7 @@ void InfoLayer::updateInventoryItems()
          Log::Fatal() << "could not find matching item description for '" << slot << "'. please edit inventory_items.json";
       }
 
-#ifdef __EMSCRIPTEN__
-      _inventory_sprites[i]->textureRect = sprite->textureRect;
-#else
-      _inventory_sprites[i]->setTextureRect(sprite->getTextureRect());
-#endif
+      sfcompat::setTextureRect(*_inventory_sprites[i], sfcompat::getTextureRect(*sprite));
    }
 }
 
@@ -404,33 +393,18 @@ void InfoLayer::updateHealthLayerOffsets()
       [this](const std::shared_ptr<LayerData>& layer_data)
       {
          auto layer = layer_data->_layer;
-#ifdef __EMSCRIPTEN__
-         layer->_sprite->position = {layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y};
-#else
-         layer->_sprite->setPosition({layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y});
-#endif
+         sfcompat::setPosition(*layer->_sprite, {layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y});
       }
    );
 
-#ifdef __EMSCRIPTEN__
-   _animation_heart->position = {heart_pos_x_px + _player_health_x_offset, heart_pos_y_px};
-   _animation_stamina->position = {stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px};
-   _animation_skull_blink->position = {skull_pos_x_px + _player_health_x_offset, skull_pos_y_px};
-   _animation_hp_unlock_left->position = {_player_health_x_offset, 0.0f};
-   _animation_hp_unlock_right->position = {_player_health_x_offset, 0.0f};
+   sfcompat::setPosition(*_animation_heart, {heart_pos_x_px + _player_health_x_offset, heart_pos_y_px});
+   sfcompat::setPosition(*_animation_stamina, {stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px});
+   sfcompat::setPosition(*_animation_skull_blink, {skull_pos_x_px + _player_health_x_offset, skull_pos_y_px});
+   sfcompat::setPosition(*_animation_hp_unlock_left, {_player_health_x_offset, 0.0f});
+   sfcompat::setPosition(*_animation_hp_unlock_right, {_player_health_x_offset, 0.0f});
 
-   _inventory_sprites[0]->position = {frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px};
-   _inventory_sprites[1]->position = {frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px};
-#else
-   _animation_heart->setPosition({heart_pos_x_px + _player_health_x_offset, heart_pos_y_px});
-   _animation_stamina->setPosition({stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px});
-   _animation_skull_blink->setPosition({skull_pos_x_px + _player_health_x_offset, skull_pos_y_px});
-   _animation_hp_unlock_left->setPosition({_player_health_x_offset, 0.0f});
-   _animation_hp_unlock_right->setPosition({_player_health_x_offset, 0.0f});
-
-   _inventory_sprites[0]->setPosition({frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px});
-   _inventory_sprites[1]->setPosition({frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px});
-#endif
+   sfcompat::setPosition(*_inventory_sprites[0], {frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px});
+   sfcompat::setPosition(*_inventory_sprites[1], {frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px});
 }
 
 void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
@@ -721,11 +695,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    console_text.setString(command);
 #endif
    console_text.setFillColor(sf::Color::White);
-#ifdef __EMSCRIPTEN__
-   console_text.position = {static_cast<float>(offset_x_px), static_cast<float>(console_base_height_px - 14 * scale_factor)};
-#else
-   console_text.setPosition({static_cast<float>(offset_x_px), static_cast<float>(console_base_height_px - 14 * scale_factor)});
-#endif
+   sfcompat::setPosition(console_text, {static_cast<float>(offset_x_px), static_cast<float>(console_base_height_px - 14 * scale_factor)});
    window.draw(console_text);
 
    // draw cursor

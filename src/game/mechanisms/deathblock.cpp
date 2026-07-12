@@ -3,6 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
@@ -117,11 +118,8 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, con
 
 #ifdef DEBUG_DRAW
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectInt();
-#ifdef __EMSCRIPTEN__
-      const auto fill_color = sf::findIntersection(player_rect, spike._collision_rect_absolute).hasValue() ? sf::Color::Red : sf::Color::Green;
-#else
-      const auto fill_color = player_rect.findIntersection(spike._collision_rect_absolute).has_value() ? sf::Color::Red : sf::Color::Green;
-#endif
+      const auto fill_color =
+         sfcompat::findIntersection(player_rect, spike._collision_rect_absolute).has_value() ? sf::Color::Red : sf::Color::Green;
       DebugDraw::drawRect(color, spike._collision_rect_absolute, fill_color);
 #endif
    }
@@ -220,12 +218,8 @@ void DeathBlock::updateCollision()
 
       const auto deadly = (spike._state == Spike::State::Extracted);
 
-#ifdef __EMSCRIPTEN__
-      const auto spike_intersects_player = sf::findIntersection(player_rect, spike._collision_rect_absolute).hasValue();
+      const auto spike_intersects_player = sfcompat::findIntersection(player_rect, spike._collision_rect_absolute).has_value();
       if (spike_intersects_player && deadly)
-#else
-      if (player_rect.findIntersection(spike._collision_rect_absolute).has_value() && deadly)
-#endif
       {
          PlayerRegistry::getFirst()->damage(_damage);
       }
@@ -437,28 +431,15 @@ void DeathBlock::updateSprites()
    {
       if (spike.hasChanged())
       {
-#ifdef __EMSCRIPTEN__
-         spike._sprite->textureRect = sf::IntRect({spike._sprite_index * tl_px, tl_px * row}, {tl_px, tl_px});
-#else
-         spike._sprite->setTextureRect(sf::IntRect({spike._sprite_index * tl_px, tl_px * row}, {tl_px, tl_px}));
-#endif
+         sfcompat::setTextureRect(*spike._sprite, sf::IntRect({spike._sprite_index * tl_px, tl_px * row}, {tl_px, tl_px}));
       }
 
-#ifdef __EMSCRIPTEN__
-      spike._sprite->position = {x, y};
-#else
-      spike._sprite->setPosition({x, y});
-#endif
+      sfcompat::setPosition(*spike._sprite, {x, y});
       row++;
    }
 
-#ifdef __EMSCRIPTEN__
-   _center_sprite->textureRect = sf::IntRect({_center_sprite_index * tl_px, 0}, {tl_px, tl_px});
-   _center_sprite->position = {x, y};
-#else
-   _center_sprite->setTextureRect(sf::IntRect({_center_sprite_index * tl_px, 0}, {tl_px, tl_px}));
-   _center_sprite->setPosition({x, y});
-#endif
+   sfcompat::setTextureRect(*_center_sprite, sf::IntRect({_center_sprite_index * tl_px, 0}, {tl_px, tl_px}));
+   sfcompat::setPosition(*_center_sprite, {x, y});
 }
 
 void DeathBlock::updatePosition(const sf::Time& dt)

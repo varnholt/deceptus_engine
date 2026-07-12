@@ -11,6 +11,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
@@ -212,11 +213,7 @@ void Laser::update(const sf::Time& dt)
       {
          _path_interpolation.updateTime(_settings._movement_speed * dt.asSeconds());
          _move_offset_px = _path_interpolation.computePosition(_path_interpolation.getTime());
-#ifdef __EMSCRIPTEN__
-         _sprite->position = _position_px + _move_offset_px;
-#else
-         _sprite->setPosition(_position_px + _move_offset_px);
-#endif
+         sfcompat::setPosition(*_sprite, _position_px + _move_offset_px);
       }
    }
 
@@ -337,11 +334,10 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
 
 #ifdef __EMSCRIPTEN__
          laser->_sprite = std::make_unique<sf::Sprite>();
-         laser->_sprite->position = laser->_position_px;
 #else
          laser->_sprite = std::make_unique<sf::Sprite>(*laser->_texture);
-         laser->_sprite->setPosition(laser->_position_px);
 #endif
+         sfcompat::setPosition(*laser->_sprite, laser->_position_px);
 
          __lasers.push_back(laser);
       }
@@ -411,11 +407,7 @@ void Laser::collide()
          pixel_rect.position.y += static_cast<int32_t>(_move_offset_px.y);
       }
 
-#ifdef __EMSCRIPTEN__
-      const auto rough_intersection = sf::findIntersection(player_rect, pixel_rect).hasValue();
-#else
-      const auto rough_intersection = player_rect.findIntersection(pixel_rect).has_value();
-#endif
+      const auto rough_intersection = sfcompat::findIntersection(player_rect, pixel_rect).has_value();
 
       auto active = false;
 
@@ -456,11 +448,7 @@ void Laser::collide()
                rect.size.x = PIXELS_PER_PHYSICS_TILE;
                rect.size.y = PIXELS_PER_PHYSICS_TILE;
 
-#ifdef __EMSCRIPTEN__
-               const auto fine_intersection = sf::findIntersection(player_rect, rect).hasValue();
-#else
-               const auto fine_intersection = player_rect.findIntersection(rect).has_value();
-#endif
+               const auto fine_intersection = sfcompat::findIntersection(player_rect, rect).has_value();
 
                if (fine_intersection)
                {

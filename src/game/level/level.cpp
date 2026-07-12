@@ -10,6 +10,7 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/checksum.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationplayer.h"
 #include "game/camera/camerapanorama.h"
@@ -1557,11 +1558,7 @@ void Level::updatePlayerLight()
    {
       color.a = 0;
    }
-#ifdef __EMSCRIPTEN__
-   _player_light->_sprite->color = color;
-#else
-   _player_light->_sprite->setColor(color);
-#endif
+   sfcompat::setColor(*_player_light->_sprite, color);
 }
 
 const std::shared_ptr<LightSystem>& Level::getLightSystem() const

@@ -3,6 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/io/texturepool.h"
@@ -108,11 +109,10 @@ bool Extra::deserialize(const GameDeserializeData& data)
          _texture = TexturePool::getInstance().get(texture_path);
 #ifdef __EMSCRIPTEN__
          _sprite = std::make_unique<sf::Sprite>();
-         _sprite->position = {pos_x_px, pos_y_px};
 #else
          _sprite = std::make_unique<sf::Sprite>(*_texture);
-         _sprite->setPosition({pos_x_px, pos_y_px});
 #endif
+         sfcompat::setPosition(*_sprite, {pos_x_px, pos_y_px});
 
          // read texture rect
          sf::IntRect rect;
@@ -345,11 +345,7 @@ void Extra::update(const sf::Time& delta_time)
    }
 
    const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
-#ifdef __EMSCRIPTEN__
-   if (sf::findIntersection(player_rect_px, _rect))
-#else
-   if (player_rect_px.findIntersection(_rect).has_value())
-#endif
+   if (sfcompat::findIntersection(player_rect_px, _rect).has_value())
    {
       _active = false;
 

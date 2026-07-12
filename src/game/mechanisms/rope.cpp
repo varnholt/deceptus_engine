@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
@@ -191,11 +192,8 @@ void Rope::update(const sf::Time& dt)
       return;
    }
 
-#ifdef __EMSCRIPTEN__
-   if (_player_impulse.has_value() && sf::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _bounding_box).hasValue())
-#else
-   if (_player_impulse.has_value() && PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_bounding_box).has_value())
-#endif
+   if (_player_impulse.has_value() &&
+       sfcompat::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _bounding_box).has_value())
    {
       // using a fix timestep for now, everything else lets box2d go nuts
       const auto impulse = PlayerRegistry::getFirst()->getBody()->GetLinearVelocity().x * _player_impulse.value() * dt.asSeconds();

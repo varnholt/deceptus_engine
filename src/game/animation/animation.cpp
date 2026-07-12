@@ -1,5 +1,7 @@
 #include "animation.h"
 
+#include "framework/tools/sfmlcompat.h"
+
 #include <algorithm>
 #include <iostream>
 #include <numeric>
@@ -14,13 +16,8 @@ Animation::Animation(const Animation& anim)
       _overall_time_chrono(anim._overall_time_chrono),
       _frame_times(anim._frame_times)
 {
-#ifdef __EMSCRIPTEN__
-   origin = anim.origin;
-   rotation = anim.rotation;
-#else
-   setOrigin(anim.getOrigin());
-   setRotation(anim.getRotation());
-#endif
+   sfcompat::setOrigin(*this, sfcompat::getOrigin(anim));
+   sfcompat::setRotation(*this, sfcompat::getRotation(anim));
 
    _vertices[0] = anim._vertices[0];
    _vertices[1] = anim._vertices[1];
@@ -316,11 +313,7 @@ void Animation::updateVertices(bool reset_time)
 
    if (reset_time)
    {
-#ifdef __EMSCRIPTEN__
-      _current_time = sf::Time{};
-#else
-      _current_time = sf::Time::Zero;
-#endif
+      _current_time = sfcompat::timeZero();
    }
 }
 
