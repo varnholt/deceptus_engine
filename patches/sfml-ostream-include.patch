@@ -1,0 +1,12 @@
+diff --git a/src/SFML/Audio/OutputSoundFile.cpp b/src/SFML/Audio/OutputSoundFile.cpp
+index 1111111..2222222 100644
+--- a/src/SFML/Audio/OutputSoundFile.cpp
++++ b/src/SFML/Audio/OutputSoundFile.cpp
+@@ -32,6 +32,7 @@
+ #include <SFML/System/Err.hpp>
+ #include <SFML/System/Exception.hpp>
+
++#include <ostream>
+ #include <cassert>
+
+

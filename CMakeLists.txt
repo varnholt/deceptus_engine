@@ -925,6 +925,42 @@ else()
         GIT_TAG glew-cmake-2.3.0)
 
     FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
+
+    # Apply missing-include patch to vanilla SFML 3.0.x.
+    # Newer libc++ (Xcode 26.5+) no longer transitively includes <ostream>, so
+    # SFML's OutputSoundFile.cpp fails to compile its err() << ... << std::endl
+    # statement (Err.hpp only forward-declares std::ostream via <iosfwd>). The
+    # patch adds an explicit #include <ostream>.
+    execute_process(
+        COMMAND git apply --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/sfml-ostream-include.patch
+        WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+        RESULT_VARIABLE sfml_ostream_patch_check
+        OUTPUT_QUIET ERROR_QUIET)
+    if(sfml_ostream_patch_check EQUAL 0)
+        execute_process(
+            COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/sfml-ostream-include.patch
+            WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+            RESULT_VARIABLE sfml_ostream_patch_result)
+        if(NOT sfml_ostream_patch_result EQUAL 0)
+            message(FATAL_ERROR "Failed to apply patches/sfml-ostream-include.patch")
+        endif()
+        message(STATUS "Applied patches/sfml-ostream-include.patch to SFML")
+    else()
+        # Forward apply failed - this could mean the patch is already applied, OR that
+        # it no longer matches the fetched SFML source (e.g. line-ending mismatch,
+        # upstream changed). Only skip if a reverse-apply confirms it is already applied;
+        # otherwise fail loudly instead of silently building against unpatched source.
+        execute_process(
+            COMMAND git apply --reverse --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/sfml-ostream-include.patch
+            WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+            RESULT_VARIABLE sfml_ostream_patch_reverse_check
+            OUTPUT_QUIET ERROR_QUIET)
+        if(sfml_ostream_patch_reverse_check EQUAL 0)
+            message(STATUS "patches/sfml-ostream-include.patch already applied to SFML, skipping")
+        else()
+            message(FATAL_ERROR "patches/sfml-ostream-include.patch does not apply to the fetched SFML source and is not already applied - fix the patch")
+        endif()
+    endif()
 endif()
 
 # ----------------------------------------------------------------------------------------------------
