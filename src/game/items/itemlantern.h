@@ -1,5 +1,6 @@
 #pragma once
 
+#include "framework/tools/sfmlshader.h"
 #include "game/effects/lightsystem.h"
 #include "game/items/item.h"
 
@@ -32,7 +33,7 @@ public:
 
 private:
 #ifdef __EMSCRIPTEN__
-   sf::CircleShape _light_circle{sf::CircleShape::Data{.radius = 50.0f}};
+   sf::CircleShape _light_circle{sf::CircleShape::Data {.radius = 50.0f }};
 #else
    sf::CircleShape _light_circle;
 #endif
@@ -46,23 +47,11 @@ private:
    std::shared_ptr<sf::Texture> _player_texture;
    std::unique_ptr<sf::Sprite> _helmet_sprite_r;
    std::unique_ptr<sf::Sprite> _helmet_sprite_l;
-   std::shared_ptr<sf::Shader> _noise_shader;                      //!< shared noise shader applied to both lantern lights
-#ifdef __EMSCRIPTEN__
-   sf::base::Optional<sf::Shader::UniformLocation> _ul_time;            //!< cached uniform location for u_time
-   sf::base::Optional<sf::Shader::UniformLocation> _ul_intensity;       //!< cached uniform location for u_intensity
-   sf::base::Optional<sf::Shader::UniformLocation> _ul_flicker_speed;   //!< cached uniform location for u_flicker_speed
-   sf::base::Optional<sf::Shader::UniformLocation> _ul_flicker_amount;  //!< cached uniform location for u_flicker_amount
-   sf::base::Optional<sf::Shader::UniformLocation> _ul_layer_1_size;    //!< cached uniform location for u_layer_1_size
-   sf::base::Optional<sf::Shader::UniformLocation> _ul_layer_1_speed;   //!< cached uniform location for u_layer_1_speed
-   sf::base::Optional<sf::Shader::UniformLocation> _ul_layer_2_size;    //!< cached uniform location for u_layer_2_size
-   sf::base::Optional<sf::Shader::UniformLocation> _ul_layer_2_speed;   //!< cached uniform location for u_layer_2_speed
-   sf::base::Optional<sf::Shader::UniformLocation> _ul_sprite_pos_px;   //!< cached uniform location for u_sprite_pos_px
-   sf::base::Optional<sf::Shader::UniformLocation> _ul_sprite_size_px;  //!< cached uniform location for u_sprite_size_px
-#endif
-   float _offset_left_x_m{-3.4f};                                  //!< x body offset when facing left, in box2d meters
-   float _offset_right_x_m{1.9f};                                  //!< x body offset when facing right, in box2d meters
-   float _offset_left_y_m{-1.0f};                                  //!< y body offset when facing left, in box2d meters
-   float _offset_right_y_m{-1.0f};                                 //!< y body offset when facing right, in box2d meters
+   std::shared_ptr<sfcompat::Shader> _noise_shader;  //!< shared noise shader applied to both lantern lights
+   float _offset_left_x_m{-3.4f};                    //!< x body offset when facing left, in box2d meters
+   float _offset_right_x_m{1.9f};                    //!< x body offset when facing right, in box2d meters
+   float _offset_left_y_m{-1.0f};                    //!< y body offset when facing left, in box2d meters
+   float _offset_right_y_m{-1.0f};                   //!< y body offset when facing right, in box2d meters
 
    float _flicker_speed{3.0f};    //!< noise frequency controlling the organic light flicker
    float _flicker_amount{0.12f};  //!< fractional brightness variation from flicker (0–1)

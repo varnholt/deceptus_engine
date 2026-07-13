@@ -168,38 +168,12 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    _gamma_shader = std::make_unique<GammaShader>();
 
    // load alpha-test shader for occluder stencil rendering
-#ifdef __EMSCRIPTEN__
-   {
-      auto loaded_shader =
-         sf::Shader::loadFromFile({.vertexPath = "data/shaders/stencil_write.vert", .fragmentPath = "data/shaders/stencil_write.frag"});
-      if (loaded_shader.hasValue())
-      {
-         _occluder_shader = std::move(*loaded_shader);
-         const auto ul_texture_sampler = _occluder_shader->getUniformLocation("u_texture_sampler");
-         if (ul_texture_sampler.hasValue())
-         {
-            (void)_occluder_shader->setUniform(*ul_texture_sampler, sf::Shader::CurrentTexture);
-         }
-         const auto ul_alpha = _occluder_shader->getUniformLocation("u_alpha_threshold");
-         _ul_occluder_alpha = ul_alpha.hasValue() ? std::optional{*ul_alpha} : std::nullopt;
-         if (_ul_occluder_alpha.has_value())
-         {
-            _occluder_shader->setUniform(*_ul_occluder_alpha, 0.01f);
-         }
-      }
-      else
-      {
-         Log::Warning() << "failed to load occluder stencil shader";
-      }
-   }
-#else
    if (!_occluder_shader.loadFromFile("data/shaders/stencil_write.vert", "data/shaders/stencil_write.frag"))
    {
       Log::Warning() << "failed to load occluder stencil shader";
    }
    _occluder_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
    _occluder_shader.setUniform("u_alpha_threshold", 0.01f);
-#endif
 
    // init world for this level
    const b2Vec2 gravity(0.f, PhysicsConfiguration::getInstance()._gravity);
@@ -791,7 +765,7 @@ void Level::updateViews()
 #ifdef __EMSCRIPTEN__
    _level_view = std::make_shared<sf::View>(sf::View::fromRect(view_rect));
 #else
-      _level_view = std::make_shared<sf::View>(view_rect);
+   _level_view = std::make_shared<sf::View>(view_rect);
 #endif
 
    for (const auto& parallax : _parallax_layers)
@@ -921,7 +895,7 @@ void Level::drawLightMap()
 #ifdef __EMSCRIPTEN__
       sf::RenderStates{.view = *_level_view}
 #else
-         {}
+      {}
 #endif
    );
    _render_targets.lighting->display();
@@ -945,7 +919,7 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
          target.setView(parallax->_view);
          target.draw(*parallax->_tile_map);
 #else
-            target.draw(*parallax->_tile_map, sf::RenderStates{.view = parallax->_view});
+         target.draw(*parallax->_tile_map, sf::RenderStates{.view = parallax->_view});
 #endif
       }
    }
@@ -983,7 +957,7 @@ void Level::drawMechanismsAtZ(
                mechanism->draw(color, normal, states);
             }
 #else
-               mechanism->draw(color, normal, states);
+            mechanism->draw(color, normal, states);
 #endif
          }
       }
@@ -997,7 +971,7 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
    target.setView(*_level_view);
    const sf::RenderStates level_view_states{};
 #else
-      const sf::RenderStates level_view_states{.view = *_level_view};
+   const sf::RenderStates level_view_states{.view = *_level_view};
 #endif
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
@@ -1040,7 +1014,7 @@ void Level::drawOverlayLayers(sf::RenderTarget& target)
    target.setView(*_level_view);
    const sf::RenderStates level_view_states{};
 #else
-      const sf::RenderStates level_view_states{.view = *_level_view};
+   const sf::RenderStates level_view_states{.view = *_level_view};
 #endif
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
@@ -1074,7 +1048,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
    normal.setView(*_level_view);
    const sf::RenderStates level_view_states{};
 #else
-      const sf::RenderStates level_view_states{.view = *_level_view};
+   const sf::RenderStates level_view_states{.view = *_level_view};
 #endif
 
    for (auto z_index = from; z_index <= to; z_index++)
@@ -1243,9 +1217,9 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
 #endif
 
 #ifdef __EMSCRIPTEN__
-   if (_occluder_shader.has_value())
+   if (_occluder_shader.isLoaded())
    {
-      states.shader = &(*_occluder_shader);
+      states.shader = &_occluder_shader.native();
    }
    states.stencilMode = sf::StencilMode{
       .stencilComparison = sf::StencilComparison::Always,
@@ -1255,7 +1229,7 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
       .stencilMask = sf::StencilValue{~0u}
    };
 #else
-   states.shader = &_occluder_shader;
+   states.shader = &_occluder_shader.native();
    states.stencilMode = {
       sf::StencilComparison::Always,
       sf::StencilUpdateOperation::Replace,
@@ -1458,16 +1432,16 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    drawGlowSprite();
 #else
-      // WASM: blit level_background to level and normal_tmp to normal without atmosphere distortion
-      {
-         sf::Sprite blit_sprite;
-         const sf::Vector2u blit_size = _render_targets.level_background->getSize();
-         blit_sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(blit_size.x), static_cast<float>(blit_size.y)}};
-         const sf::Texture& blit_bg_texture = _render_targets.level_background->getTexture();
-         _render_targets.level->draw(blit_sprite, sf::RenderStates{.texture = &blit_bg_texture});
-         const sf::Texture& blit_normal_texture = _render_targets.normal_tmp->getTexture();
-         _render_targets.normal->draw(blit_sprite, sf::RenderStates{.texture = &blit_normal_texture});
-      }
+   // WASM: blit level_background to level and normal_tmp to normal without atmosphere distortion
+   {
+      sf::Sprite blit_sprite;
+      const sf::Vector2u blit_size = _render_targets.level_background->getSize();
+      blit_sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(blit_size.x), static_cast<float>(blit_size.y)}};
+      const sf::Texture& blit_bg_texture = _render_targets.level_background->getTexture();
+      _render_targets.level->draw(blit_sprite, sf::RenderStates{.texture = &blit_bg_texture});
+      const sf::Texture& blit_normal_texture = _render_targets.normal_tmp->getTexture();
+      _render_targets.normal->draw(blit_sprite, sf::RenderStates{.texture = &blit_normal_texture});
+   }
 #endif
 
    // draw the level layers into the level texture
@@ -1485,7 +1459,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 #ifndef __EMSCRIPTEN__
    const sf::RenderStates level_view_states{};
 #else
-      const sf::RenderStates level_view_states{.view = *_level_view};
+   const sf::RenderStates level_view_states{.view = *_level_view};
 #endif
 
    Gun::drawProjectileHitAnimations(*_render_targets.level.get(), level_view_states);
@@ -1524,8 +1498,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    level_texture_sprite.position = {_boom_effect._boom_offset_x, _boom_effect._boom_offset_y};
    const sf::Vector2u deferred_size = _render_targets.deferred->getSize();
-   level_texture_sprite.textureRect =
-      sf::FloatRect{{0.f, 0.f}, {static_cast<float>(deferred_size.x), static_cast<float>(deferred_size.y)}};
+   level_texture_sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(deferred_size.x), static_cast<float>(deferred_size.y)}};
 
    _gamma_shader->setTexture(level_deferred_texture);
    _gamma_shader->update();
@@ -1624,7 +1597,7 @@ void Level::update(const sf::Time& dt)
                mechanism->update(dt);
             }
 #else
-               mechanism->update(dt);
+            mechanism->update(dt);
 #endif
          }
       }

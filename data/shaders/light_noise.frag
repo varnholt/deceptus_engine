@@ -77,7 +77,7 @@ void main()
 }
 #else
 // light gradient texture and channel mask color from the sprite
-uniform sampler2D texture;
+uniform sampler2D u_texture;
 
 // time in seconds, used to animate the dust
 uniform float u_time;
@@ -124,7 +124,7 @@ void main()
    vec2 uv = gl_TexCoord[0].xy;
 
    // sample the light gradient and apply the channel color (red, green, or blue mask)
-   vec4 texel = texture2D(texture, uv) * gl_Color;
+   vec4 texel = texture2D(u_texture, uv) * gl_Color;
 
    // convert uv to world pixel position so noise doesn't move with the player
    vec2 world_pos_px = u_sprite_pos_px + uv * u_sprite_size_px;

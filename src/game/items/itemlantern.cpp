@@ -172,8 +172,7 @@ void ItemLantern::update(const sf::Time& delta_time)
    const sf::Vector2f top_left_pos = sfcompat::getPosition(*active_light->_sprite);
    sfcompat::setOrigin(*active_light->_sprite, {lamp_origin_x_local, lamp_origin_y_local});
    sfcompat::setPosition(
-      *active_light->_sprite,
-      {top_left_pos.x + lamp_origin_x_local * sprite_scale.x, top_left_pos.y + lamp_origin_y_local * sprite_scale.y}
+      *active_light->_sprite, {top_left_pos.x + lamp_origin_x_local * sprite_scale.x, top_left_pos.y + lamp_origin_y_local * sprite_scale.y}
    );
 
    // easeOutSine brings the beam smoothly back to neutral after a landing tilt
@@ -280,97 +279,17 @@ void ItemLantern::onEquipped()
 
    if (dust_enabled)
    {
-#ifdef __EMSCRIPTEN__
-      auto loaded_noise_shader = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/light_noise.frag"});
-      if (loaded_noise_shader.hasValue())
-      {
-         _noise_shader = std::make_shared<sf::Shader>(std::move(*loaded_noise_shader));
-         _ul_time = _noise_shader->getUniformLocation("u_time");
-         _ul_intensity = _noise_shader->getUniformLocation("u_intensity");
-         _ul_flicker_speed = _noise_shader->getUniformLocation("u_flicker_speed");
-         _ul_flicker_amount = _noise_shader->getUniformLocation("u_flicker_amount");
-         _ul_layer_1_size = _noise_shader->getUniformLocation("u_layer_1_size");
-         _ul_layer_1_speed = _noise_shader->getUniformLocation("u_layer_1_speed");
-         _ul_layer_2_size = _noise_shader->getUniformLocation("u_layer_2_size");
-         _ul_layer_2_speed = _noise_shader->getUniformLocation("u_layer_2_speed");
-         _ul_sprite_pos_px = _noise_shader->getUniformLocation("u_sprite_pos_px");
-         _ul_sprite_size_px = _noise_shader->getUniformLocation("u_sprite_size_px");
-
-         const auto dust_callback =
-            [this, dust_intensity, layer_1_size, layer_1_speed_x, layer_1_speed_y, layer_2_size, layer_2_speed_x, layer_2_speed_y](
-               sf::Shader& shader, const LightSystem::LightInstance& light_instance, float elapsed_seconds
-            )
-         {
-            if (_ul_time.hasValue())
-            {
-               shader.setUniform(*_ul_time, elapsed_seconds);
-            }
-            const float burst_factor =
-               (_dust_burst_elapsed > sf::Time{})
-                  ? (1.0f + (_dust_burst_peak_multiplier - 1.0f) * (_dust_burst_elapsed.asSeconds() / _dust_burst_duration.asSeconds()))
-                  : 1.0f;
-            if (_ul_intensity.hasValue())
-            {
-               shader.setUniform(*_ul_intensity, dust_intensity * burst_factor);
-            }
-            if (_ul_flicker_speed.hasValue())
-            {
-               shader.setUniform(*_ul_flicker_speed, _flicker_speed);
-            }
-            if (_ul_flicker_amount.hasValue())
-            {
-               shader.setUniform(*_ul_flicker_amount, _flicker_amount);
-            }
-            if (_ul_layer_1_size.hasValue())
-            {
-               shader.setUniform(*_ul_layer_1_size, layer_1_size);
-            }
-            if (_ul_layer_1_speed.hasValue())
-            {
-               shader.setUniform(*_ul_layer_1_speed, sf::Glsl::Vec2(layer_1_speed_x, layer_1_speed_y));
-            }
-            if (_ul_layer_2_size.hasValue())
-            {
-               shader.setUniform(*_ul_layer_2_size, layer_2_size);
-            }
-            if (_ul_layer_2_speed.hasValue())
-            {
-               shader.setUniform(*_ul_layer_2_speed, sf::Glsl::Vec2(layer_2_speed_x, layer_2_speed_y));
-            }
-            // the lamp-end origin is not the visual top-left; recover top-left for dust coords
-            const sf::Vector2f cb_origin = light_instance._sprite->origin;
-            const sf::Vector2f cb_scale = light_instance._sprite->scale;
-            const sf::Vector2f cb_lamp_pos = light_instance._sprite->position;
-            const sf::Vector2f cb_top_left = {cb_lamp_pos.x - cb_origin.x * cb_scale.x, cb_lamp_pos.y - cb_origin.y * cb_scale.y};
-            if (_ul_sprite_pos_px.hasValue())
-            {
-               shader.setUniform(*_ul_sprite_pos_px, sf::Glsl::Vec2(cb_top_left));
-            }
-            if (_ul_sprite_size_px.hasValue())
-            {
-               shader.setUniform(
-                  *_ul_sprite_size_px,
-                  sf::Glsl::Vec2(static_cast<float>(light_instance._width_px), static_cast<float>(light_instance._height_px))
-               );
-            }
-         };
-         _player_light_left->_shader = _noise_shader;
-         _player_light_left->_shader_update_callback = dust_callback;
-         _player_light_right->_shader = _noise_shader;
-         _player_light_right->_shader_update_callback = dust_callback;
-      }
-#else
-      _noise_shader = std::make_shared<sf::Shader>();
-      if (_noise_shader->loadFromFile("data/shaders/light_noise.frag", sf::Shader::Type::Fragment))
+      _noise_shader = std::make_shared<sfcompat::Shader>();
+      if (_noise_shader->loadFromFragment("data/shaders/light_noise.frag"))
       {
          const auto dust_callback =
             [this, dust_intensity, layer_1_size, layer_1_speed_x, layer_1_speed_y, layer_2_size, layer_2_speed_x, layer_2_speed_y](
-               sf::Shader& shader, const LightSystem::LightInstance& light_instance, float elapsed_seconds
+               sfcompat::Shader& shader, const LightSystem::LightInstance& light_instance, float elapsed_seconds
             )
          {
             shader.setUniform("u_time", elapsed_seconds);
             const float burst_factor =
-               (_dust_burst_elapsed > sf::Time::Zero)
+               (_dust_burst_elapsed > sfcompat::timeZero())
                   ? (1.0f + (_dust_burst_peak_multiplier - 1.0f) * (_dust_burst_elapsed.asSeconds() / _dust_burst_duration.asSeconds()))
                   : 1.0f;
             shader.setUniform("u_intensity", dust_intensity * burst_factor);
@@ -380,10 +299,10 @@ void ItemLantern::onEquipped()
             shader.setUniform("u_layer_1_speed", sf::Glsl::Vec2(layer_1_speed_x, layer_1_speed_y));
             shader.setUniform("u_layer_2_size", layer_2_size);
             shader.setUniform("u_layer_2_speed", sf::Glsl::Vec2(layer_2_speed_x, layer_2_speed_y));
-            // getPosition() is the lamp-end origin, not the visual top-left; recover top-left for dust coords
-            const sf::Vector2f cb_origin = light_instance._sprite->getOrigin();
-            const sf::Vector2f cb_scale = light_instance._sprite->getScale();
-            const sf::Vector2f cb_lamp_pos = light_instance._sprite->getPosition();
+            // the lamp-end origin is not the visual top-left; recover top-left for dust coords
+            const sf::Vector2f cb_origin = sfcompat::getOrigin(*light_instance._sprite);
+            const sf::Vector2f cb_scale = sfcompat::getScale(*light_instance._sprite);
+            const sf::Vector2f cb_lamp_pos = sfcompat::getPosition(*light_instance._sprite);
             const sf::Vector2f cb_top_left = {cb_lamp_pos.x - cb_origin.x * cb_scale.x, cb_lamp_pos.y - cb_origin.y * cb_scale.y};
             shader.setUniform("u_sprite_pos_px", sf::Glsl::Vec2(cb_top_left));
             shader.setUniform(
@@ -396,7 +315,6 @@ void ItemLantern::onEquipped()
          _player_light_right->_shader = _noise_shader;
          _player_light_right->_shader_update_callback = dust_callback;
       }
-#endif
    }
 
    _enabled = true;

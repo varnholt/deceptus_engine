@@ -72,16 +72,6 @@ const sf::StencilMode stencil_test_mode{
 };
 #endif
 
-#ifdef __EMSCRIPTEN__
-std::optional<sf::Shader::UniformLocation> toStdOptional(sf::base::Optional<sf::Shader::UniformLocation> opt)
-{
-   if (opt.hasValue())
-   {
-      return {*opt};
-   }
-   return std::nullopt;
-}
-#endif
 }  // namespace
 
 LightSystem::LightSystem()
@@ -97,45 +87,10 @@ LightSystem::LightSystem()
       _unit_circle[i] = b2Vec2{x_normalized, y_normalized};
    }
 
-#ifdef __EMSCRIPTEN__
-   auto loaded = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/light.frag"});
-   if (!loaded.hasValue())
-   {
-      Log::Error() << "error loading bump mapping shader";
-      return;
-   }
-   _light_shader = std::move(*loaded);
-
-   _ul_light_count = toStdOptional(_light_shader->getUniformLocation("u_light_count"));
-   _ul_resolution = toStdOptional(_light_shader->getUniformLocation("u_resolution"));
-   _ul_ambient = toStdOptional(_light_shader->getUniformLocation("u_ambient"));
-   _ul_color_map = toStdOptional(_light_shader->getUniformLocation("color_map"));
-   _ul_light_map_1 = toStdOptional(_light_shader->getUniformLocation("light_map_1"));
-   _ul_light_map_2 = toStdOptional(_light_shader->getUniformLocation("light_map_2"));
-   _ul_normal_map = toStdOptional(_light_shader->getUniformLocation("normal_map"));
-
-   static const std::array<std::string, 6> position_names = {
-      "u_lights[0]._position",
-      "u_lights[1]._position",
-      "u_lights[2]._position",
-      "u_lights[3]._position",
-      "u_lights[4]._position",
-      "u_lights[5]._position"
-   };
-   static const std::array<std::string, 6> color_names = {
-      "u_lights[0]._color", "u_lights[1]._color", "u_lights[2]._color", "u_lights[3]._color", "u_lights[4]._color", "u_lights[5]._color"
-   };
-   for (auto index = 0u; index < 6u; index++)
-   {
-      _ul_light_positions[index] = toStdOptional(_light_shader->getUniformLocation(position_names[index]));
-      _ul_light_colors[index] = toStdOptional(_light_shader->getUniformLocation(color_names[index]));
-   }
-#else
-   if (!_light_shader.loadFromFile("data/shaders/light.frag", sf::Shader::Type::Fragment))
+   if (!_light_shader.loadFromFragment("data/shaders/light.frag"))
    {
       Log::Error() << "error loading bump mapping shader";
    }
-#endif
 }
 
 void LightSystem::drawShadowQuads(
@@ -364,65 +319,6 @@ void LightSystem::setOccluderCallback(OccluderDrawCallback callback)
 
 void LightSystem::updateLightShader(sf::RenderTarget& target)
 {
-#ifdef __EMSCRIPTEN__
-   if (!_light_shader.has_value())
-   {
-      return;
-   }
-
-   int32_t light_id = 0;
-
-   if (_ul_light_count.has_value())
-   {
-      _light_shader->setUniform(*_ul_light_count, static_cast<int32_t>(_active_lights.size()));
-   }
-   if (_ul_resolution.has_value())
-   {
-      _light_shader->setUniform(
-         *_ul_resolution, sf::Glsl::Vec2(static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y))
-      );
-   }
-   if (_ul_ambient.has_value())
-   {
-      _light_shader->setUniform(*_ul_ambient, sf::Glsl::Vec4(_ambient_color[0], _ambient_color[1], _ambient_color[2], _ambient_color[3]));
-   }
-
-   for (auto& light : _active_lights)
-   {
-      if (light_id >= 6)
-      {
-         break;
-      }
-
-      sf::Vector2f light_screen_pos = mapCoordsToPixelNormalized(
-         {light->_pos_m.x * PPM + light->_center_offset_px.x, light->_pos_m.y * PPM + light->_center_offset_px.y},
-         *LevelRegistry::getCurrent()->getLevelView().get()
-      );
-
-      if (_ul_light_positions[light_id].has_value())
-      {
-         _light_shader->setUniform(
-            *_ul_light_positions[light_id],
-            sf::Glsl::Vec3(static_cast<float>(light_screen_pos.x), static_cast<float>(1.0f - light_screen_pos.y), 0.075f)
-         );
-      }
-
-      if (_ul_light_colors[light_id].has_value())
-      {
-         _light_shader->setUniform(
-            *_ul_light_colors[light_id],
-            sf::Glsl::Vec4(
-               static_cast<float>(light->_color.r) / 255.0f,
-               static_cast<float>(light->_color.g) / 255.0f,
-               static_cast<float>(light->_color.b) / 255.0f,
-               static_cast<float>(light->_color.a) / 255.0f
-            )
-         );
-      }
-
-      light_id++;
-   }
-#else
    int32_t light_id = 0;
 
    _light_shader.setUniform("u_light_count", static_cast<int32_t>(_active_lights.size()));
@@ -484,7 +380,6 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
 
       light_id++;
    }
-#endif
 }
 
 void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states)
@@ -618,16 +513,12 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
 
       if (light->_shader && light->_texture)
       {
-         auto texture_loc = light->_shader->getUniformLocation("u_texture");
-         if (texture_loc.hasValue())
-         {
-            (void)light->_shader->setUniform(*texture_loc, *light->_texture);
-         }
+         light->_shader->setUniform("u_texture", *light->_texture);
          if (light->_shader_update_callback)
          {
             light->_shader_update_callback(*light->_shader, *light, _clock.getElapsedTime().asSeconds());
          }
-         render_states.shader = light->_shader.get();
+         render_states.shader = &light->_shader->native();
       }
 #else
       light->_sprite->setColor(channel_color);
@@ -637,12 +528,12 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
 
       if (light->_shader)
       {
-         light->_shader->setUniform("texture", *light->_texture);
+         light->_shader->setUniform("u_texture", *light->_texture);
          if (light->_shader_update_callback)
          {
             light->_shader_update_callback(*light->_shader, *light, _clock.getElapsedTime().asSeconds());
          }
-         render_states.shader = light->_shader.get();
+         render_states.shader = &light->_shader->native();
       }
 #endif
 
@@ -662,12 +553,10 @@ void LightSystem::draw(
    const std::shared_ptr<sf::RenderTexture>& normal_map
 )
 {
-#ifdef __EMSCRIPTEN__
-   if (!_light_shader.has_value())
+   if (!_light_shader.isLoaded())
    {
       return;
    }
-#endif
 
    // texture uniforms only need to be rebound when the render texture objects change
    // (i.e. on resize); skip the setUniform calls when the pointers are unchanged.
@@ -678,29 +567,10 @@ void LightSystem::draw(
 
    if (color_tex != _last_color_map || light_tex != _last_light_map || light2_tex != _last_light_map2 || normal_tex != _last_normal_map)
    {
-#ifdef __EMSCRIPTEN__
-      if (_ul_color_map.has_value())
-      {
-         (void)_light_shader->setUniform(*_ul_color_map, *color_tex);
-      }
-      if (_ul_light_map_1.has_value())
-      {
-         (void)_light_shader->setUniform(*_ul_light_map_1, *light_tex);
-      }
-      if (_ul_light_map_2.has_value())
-      {
-         (void)_light_shader->setUniform(*_ul_light_map_2, *light2_tex);
-      }
-      if (_ul_normal_map.has_value())
-      {
-         (void)_light_shader->setUniform(*_ul_normal_map, *normal_tex);
-      }
-#else
       _light_shader.setUniform("color_map", *color_tex);
       _light_shader.setUniform("light_map_1", *light_tex);
       _light_shader.setUniform("light_map_2", *light2_tex);
       _light_shader.setUniform("normal_map", *normal_tex);
-#endif
       _last_color_map = color_tex;
       _last_light_map = light_tex;
       _last_light_map2 = light2_tex;
@@ -712,10 +582,10 @@ void LightSystem::draw(
 
 #ifdef __EMSCRIPTEN__
    const sf::Texture& light_color_texture = color_map->getTexture();
-   target.draw(light_color_texture, sf::RenderStates{.shader = &(*_light_shader)});
+   target.draw(light_color_texture, sf::RenderStates{.shader = &_light_shader.native()});
 #else
    sf::Sprite sprite(color_map->getTexture());
-   target.draw(sprite, &_light_shader);
+   target.draw(sprite, &_light_shader.native());
 #endif
 }
 
