@@ -1,0 +1,40 @@
+name: WASM
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container: emscripten/emsdk
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Cache FetchContent
+        uses: actions/cache@v5
+        with:
+          path: build_wasm/_deps
+          key: fetchcontent-wasm-${{ hashFiles('CMakeLists.txt') }}
+
+      - name: Configure
+        run: emcmake cmake -B build_wasm -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build_wasm --parallel
+
+      - name: Package
+        run: |
+          mkdir -p artifacts
+          cp build_wasm/deceptus.html build_wasm/deceptus.js \
+             build_wasm/deceptus.wasm build_wasm/deceptus.data artifacts/
+          cp build_wasm/index.html artifacts/ 2>/dev/null || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: deceptus-wasm
+          path: artifacts/
