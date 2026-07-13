@@ -799,6 +799,9 @@ void Game::updateWindowTitle()
 {
    std::ostringstream out_stream;
    out_stream << GAME_NAME << " - " << _fps << "fps";
+#ifdef DEVELOPMENT_MODE
+   out_stream << " [" << DECEPTUS_BUILD_TYPE << "]";
+#endif
 #ifdef __EMSCRIPTEN__
    _window->setTitle(out_stream.str().c_str());
 #else
