@@ -132,36 +132,13 @@ void LuaNode::initialize()
    setupLua();
    setupBody();
 
-#ifdef __EMSCRIPTEN__
-   auto loaded_shader = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/flash.frag"});
-   if (loaded_shader.hasValue())
-   {
-      _flash_shader = std::move(*loaded_shader);
-      const auto ul_texture = _flash_shader->getUniformLocation("u_texture");
-      if (ul_texture.hasValue())
-      {
-         (void)_flash_shader->setUniform(*ul_texture, sf::Shader::CurrentTexture);
-      }
-      const auto ul_flash = _flash_shader->getUniformLocation("flash");
-      _ul_flash = ul_flash.hasValue() ? std::optional{*ul_flash} : std::nullopt;
-      if (_ul_flash.has_value())
-      {
-         _flash_shader->setUniform(*_ul_flash, _hit_flash);
-      }
-   }
-   else
-   {
-      Log::Error() << "error loading flash shader";
-   }
-#else
-   if (!_flash_shader.loadFromFile("data/shaders/flash.frag", sf::Shader::Type::Fragment))
+   if (!_flash_shader.loadFromFragment("data/shaders/flash.frag"))
    {
       Log::Error() << "error loading flash shader";
    }
 
-   _flash_shader.setUniform("texture", sf::Shader::CurrentTexture);
+   _flash_shader.setUniform("u_texture", sf::Shader::CurrentTexture);
    _flash_shader.setUniform("flash", _hit_flash);
-#endif
 }
 
 void LuaNode::setupLua()
@@ -1402,14 +1379,7 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const
          _hit_flash = 1.0f - (hit_duration_s.count() / hit_duration_max_s);
       }
 
-#ifdef __EMSCRIPTEN__
-      if (_flash_shader.has_value() && _ul_flash.has_value())
-      {
-         _flash_shader->setUniform(*_ul_flash, _hit_flash);
-      }
-#else
       _flash_shader.setUniform("flash", _hit_flash);
-#endif
    }
 
    // draw sprite on top of projectiles
@@ -1433,9 +1403,9 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const
       sprite->position = _position_px - center + offset;
       sf::RenderStates sprite_states = states;
       sprite_states.texture = _texture.get();
-      if (_flash_shader.has_value())
+      if (_flash_shader.isLoaded())
       {
-         sprite_states.shader = &(*_flash_shader);
+         sprite_states.shader = &_flash_shader.native();
       }
       target.draw(*sprite, sprite_states);
 #else
@@ -1448,7 +1418,7 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const
       const auto center = sf::Vector2f(sprite->getTextureRect().size.x / 2.0f, sprite->getTextureRect().size.y / 2.0f);
       sprite->setPosition(_position_px - center + offset);
       auto sprite_states = states;
-      sprite_states.shader = &_flash_shader;
+      sprite_states.shader = &_flash_shader.native();
       target.draw(*sprite, sprite_states);
 #endif
    }

@@ -210,10 +210,7 @@ void Gateway::loadNoiseTexture(const std::string& filename)
    loaded_texture->setSmooth(true);
 
    _noise_texture = std::move(*loaded_texture);
-   if (_shader.has_value() && _ul_ichannel0.has_value())
-   {
-      (void)_shader->setUniform(*_ul_ichannel0, *_noise_texture);
-   }
+   _shader.setUniform("iChannel0", *_noise_texture);
 #else
    sf::Texture noise_texture;
    if (!noise_texture.loadFromFile(filename))
@@ -252,38 +249,17 @@ void Gateway::drawVoid(sf::RenderTarget& target)
 
    _shader_texture->clear(sf::Color::Transparent);
 
-#ifdef __EMSCRIPTEN__
-   if (_shader.has_value())
-   {
-      if (_ul_time.has_value())
-      {
-         _shader->setUniform(*_ul_time, _elapsed * _time_factor);
-      }
-      if (_ul_alpha.has_value())
-      {
-         _shader->setUniform(*_ul_alpha, _shader_alpha * _void_alpha);
-      }
-      if (_ul_radius_factor.has_value())
-      {
-         _shader->setUniform(*_ul_radius_factor, radius * _radius_factor);
-      }
-      if (_ul_resolution.has_value())
-      {
-         _shader->setUniform(*_ul_resolution, sf::Vector2f{200, 200});
-      }
-      if (_ul_noise_scale.has_value())
-      {
-         _shader->setUniform(*_ul_noise_scale, _noise_scale);
-      }
-      if (_ul_swirl_color.has_value())
-      {
-         _shader->setUniform(*_ul_swirl_color, _swirl_color);
-      }
-   }
+   _shader.setUniform("time", _elapsed * _time_factor);
+   _shader.setUniform("alpha", _shader_alpha * _void_alpha);
+   _shader.setUniform("radius_factor", radius * _radius_factor);
+   _shader.setUniform("resolution", sf::Vector2f{200, 200});
+   _shader.setUniform("noise_scale", _noise_scale);
+   _shader.setUniform("swirl_color", _swirl_color);
 
+#ifdef __EMSCRIPTEN__
    sf::RenderStates shader_state;
    shader_state.blendMode = sf::BlendNone;
-   shader_state.shader = _shader.has_value() ? &(*_shader) : nullptr;
+   shader_state.shader = _shader.isLoaded() ? &_shader.native() : nullptr;
 
    sf::RectangleShape quad{sf::RectangleShape::Data{.size = {200.f, 200.f}}};
    quad.setFillColor(sf::Color::White);
@@ -295,16 +271,9 @@ void Gateway::drawVoid(sf::RenderTarget& target)
    sf::RenderStates sprite_state{.blendMode = sf::BlendAdd};
    target.draw(*_shader_sprite, sprite_state);
 #else
-   _shader.setUniform("time", _elapsed * _time_factor);
-   _shader.setUniform("alpha", _shader_alpha * _void_alpha);
-   _shader.setUniform("radius_factor", radius * _radius_factor);
-   _shader.setUniform("resolution", sf::Vector2f{200, 200});
-   _shader.setUniform("noise_scale", _noise_scale);
-   _shader.setUniform("swirl_color", _swirl_color);
-
    sf::RenderStates shader_state;
    shader_state.blendMode = sf::BlendNone;
-   shader_state.shader = &_shader;
+   shader_state.shader = &_shader.native();
 
    sf::RectangleShape quad(sf::Vector2f{200.f, 200.f});
    quad.setFillColor(sf::Color::White);
@@ -853,36 +822,10 @@ void Gateway::setup(const GameDeserializeData& data)
    _origin = sfcompat::getOrigin(*_pa[0]._layer->_sprite);
 
    // load shader
-#ifdef __EMSCRIPTEN__
-   {
-      auto loaded_shader = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/void_standalone.frag"});
-      if (loaded_shader.hasValue())
-      {
-         _shader = std::move(*loaded_shader);
-         auto get_ul = [&](const char* name) -> std::optional<sf::Shader::UniformLocation>
-         {
-            const auto result = _shader->getUniformLocation(name);
-            return result.hasValue() ? std::optional{*result} : std::nullopt;
-         };
-         _ul_time          = get_ul("time");
-         _ul_alpha         = get_ul("alpha");
-         _ul_radius_factor = get_ul("radius_factor");
-         _ul_resolution    = get_ul("resolution");
-         _ul_noise_scale   = get_ul("noise_scale");
-         _ul_swirl_color   = get_ul("swirl_color");
-         _ul_ichannel0     = get_ul("iChannel0");
-      }
-      else
-      {
-         std::cout << "failed to load shader" << std::endl;
-      }
-   }
-#else
-   if (!_shader.loadFromFile("data/shaders/void_standalone.frag", sf::Shader::Type::Fragment))
+   if (!_shader.loadFromFragment("data/shaders/void_standalone.frag"))
    {
       std::cout << "failed to load shader" << std::endl;
    }
-#endif
 
 #ifdef __EMSCRIPTEN__
    _shader_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create({200u, 200u})));

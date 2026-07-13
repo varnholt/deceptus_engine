@@ -1,5 +1,6 @@
 #pragma once
 
+#include "framework/tools/sfmlshader.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanism.h"
@@ -113,12 +114,7 @@ private:
 
    using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
    std::optional<HighResTimePoint> _hit_time;
-#ifdef __EMSCRIPTEN__
-   std::optional<sf::Shader> _flash_shader;
-   std::optional<sf::Shader::UniformLocation> _ul_flash;
-#else
-   sf::Shader _flash_shader;
-#endif
+   sfcompat::Shader _flash_shader;
    float _hit_flash{0.0f};
    std::vector<Hitbox> _hitboxes;
 };

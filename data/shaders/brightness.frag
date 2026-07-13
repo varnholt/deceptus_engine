@@ -25,13 +25,13 @@ void main()
 #else
 uniform float gamma;
 varying vec2 uv;
-uniform sampler2D texture;
+uniform sampler2D u_texture;
 
 void main()
 {
    const float invGamma = 1.0 / 2.2;
 
-   vec4 col = texture2D(texture, gl_TexCoord[0].xy);
+   vec4 col = texture2D(u_texture, gl_TexCoord[0].xy);
 
    float x = pow(col.x, invGamma);
    float y = pow(col.y, invGamma);

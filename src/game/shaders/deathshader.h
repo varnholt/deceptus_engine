@@ -1,10 +1,9 @@
 #pragma once
 
+#include "framework/tools/sfmlshader.h"
+
 #include <SFML/Graphics.hpp>
 #include <memory>
-#ifdef __EMSCRIPTEN__
-#include <optional>
-#endif
 
 /// \brief manages the death screen shader and its flow-field resources.
 class DeathShader
@@ -37,24 +36,12 @@ public:
    const std::shared_ptr<sf::RenderTexture>& getRenderTexture() const;
 
 private:
-#ifdef __EMSCRIPTEN__
-   std::optional<sf::Shader> _shader;
-#else
-   sf::Shader _shader;
-#endif
+   sfcompat::Shader _shader;
 
    std::shared_ptr<sf::RenderTexture> _render_texture;
 
    std::shared_ptr<sf::Texture> _flow_field_1;
    std::shared_ptr<sf::Texture> _flow_field_2;
-
-#ifdef __EMSCRIPTEN__
-   std::optional<sf::Shader::UniformLocation> _uniform_current_texture;
-   std::optional<sf::Shader::UniformLocation> _uniform_flowfield_1;
-   std::optional<sf::Shader::UniformLocation> _uniform_flowfield_2;
-   std::optional<sf::Shader::UniformLocation> _uniform_time;
-   std::optional<sf::Shader::UniformLocation> _uniform_flowfield_offset;
-#endif
 
    float _elapsed = 0.0f;
 };

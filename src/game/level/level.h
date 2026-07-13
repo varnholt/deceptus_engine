@@ -1,6 +1,7 @@
 #pragma once
 
 // game
+#include "framework/tools/sfmlshader.h"
 #include "game/audio/volumeupdater.h"
 #include "game/constants.h"
 #include "game/effects/boomeffect.h"
@@ -360,12 +361,7 @@ protected:
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
    std::unique_ptr<BlurShader> _blur_shader;
    std::unique_ptr<GammaShader> _gamma_shader;
-#ifdef __EMSCRIPTEN__
-   std::optional<sf::Shader> _occluder_shader;                     //!< alpha-test shader for light occluder stencil rendering
-   std::optional<sf::Shader::UniformLocation> _ul_occluder_alpha;  //!< uniform location for alpha threshold in occluder shader
-#else
-   sf::Shader _occluder_shader;  //!< alpha-test shader for light occluder stencil rendering
-#endif
+   sfcompat::Shader _occluder_shader;  //!< alpha-test shader for light occluder stencil rendering
    bool _screenshot = false;
 
    // box2d

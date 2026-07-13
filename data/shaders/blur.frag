@@ -78,7 +78,7 @@ void main()
    sf_fragColor = (h + v) * add_factor;
 }
 #else
-uniform sampler2D texture;
+uniform sampler2D u_texture;
 
 uniform int texture_width;
 uniform int texture_height;
@@ -148,8 +148,8 @@ vec4 blurH(sampler2D source, vec2 size, vec2 uv, float radius)
 void main()
 {
    vec2 uv = gl_TexCoord[0].xy;
-   vec4 h = blurH(texture, vec2(texture_width, texture_height), uv, blur_radius);
-   vec4 v = blurV(texture, vec2(texture_width, texture_height), uv, blur_radius);
+   vec4 h = blurH(u_texture, vec2(texture_width, texture_height), uv, blur_radius);
+   vec4 v = blurV(u_texture, vec2(texture_width, texture_height), uv, blur_radius);
    gl_FragColor = (h + v) * add_factor;
 }
 #endif

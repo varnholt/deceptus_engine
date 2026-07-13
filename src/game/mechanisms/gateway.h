@@ -5,6 +5,7 @@
 #include <optional>
 
 #include "framework/image/layer.h"
+#include "framework/tools/sfmlshader.h"
 #include "game/animation/animation.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
@@ -30,10 +31,9 @@ public:
    /// \param normal normal-map render target (unused).
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
-   /// \brief draws gateway layers, rotating side parts, void shader effect, and eye animation with explicit render states (used in WASM to carry the level view).
-   /// \param target render target.
-   /// \param normal normal-map render target (unused).
-   /// \param states render states to apply.
+   /// \brief draws gateway layers, rotating side parts, void shader effect, and eye animation with explicit render states (used in WASM to
+   /// carry the level view). \param target render target. \param normal normal-map render target (unused). \param states render states to
+   /// apply.
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
    using GameMechanism::draw;
 
@@ -186,8 +186,8 @@ private:
    std::shared_ptr<Layer> _layer_background_active;
 
 #ifdef __EMSCRIPTEN__
-   sf::RectangleShape _rect_shape{sf::RectangleShape::Data{}};
-   sf::CircleShape _origin_shape{sf::CircleShape::Data{}};
+   sf::RectangleShape _rect_shape{sf::RectangleShape::Data {}};
+   sf::CircleShape _origin_shape{sf::CircleShape::Data {}};
 #else
    sf::RectangleShape _rect_shape;
    sf::CircleShape _origin_shape;
@@ -220,17 +220,10 @@ private:
    /// \param target render target.
    void drawVoid(sf::RenderTarget& target);
 
+   sfcompat::Shader _shader;
 #ifdef __EMSCRIPTEN__
-   std::optional<sf::Shader> _shader;
    std::optional<sf::Texture> _noise_texture;
    std::string _default_texture_path{"data/effects/gabor_6.png"};
-   std::optional<sf::Shader::UniformLocation> _ul_time;
-   std::optional<sf::Shader::UniformLocation> _ul_alpha;
-   std::optional<sf::Shader::UniformLocation> _ul_radius_factor;
-   std::optional<sf::Shader::UniformLocation> _ul_resolution;
-   std::optional<sf::Shader::UniformLocation> _ul_noise_scale;
-   std::optional<sf::Shader::UniformLocation> _ul_swirl_color;
-   std::optional<sf::Shader::UniformLocation> _ul_ichannel0;
    std::unique_ptr<sf::RenderTexture> _shader_texture;
    std::unique_ptr<sf::Sprite> _shader_sprite;
    float _radius_factor = 1.0f;
@@ -240,7 +233,6 @@ private:
    float _noise_scale = 10.0;
    sf::Vector3f _swirl_color{0.0f, 0.5f, 0.8f};
 #else
-   sf::Shader _shader;
    std::unique_ptr<sf::RenderTexture> _shader_texture;
    std::unique_ptr<sf::Sprite> _shader_sprite;
    float _radius_factor = 1.0f;

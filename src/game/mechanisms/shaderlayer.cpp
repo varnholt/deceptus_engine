@@ -38,28 +38,7 @@ std::string_view ShaderLayer::objectName() const
    return "ShaderLayer";
 }
 
-#ifdef __EMSCRIPTEN__
-void ShaderLayer::checkUniforms()
-{
-   if (!_shader)
-   {
-      return;
-   }
-   const auto get_loc = [this](const char* name) -> std::optional<sf::Shader::UniformLocation>
-   {
-      auto result = _shader->getUniformLocation(name);
-      if (result.hasValue())
-      {
-         return *result;
-      }
-      return std::nullopt;
-   };
-   _u_texture_loc = get_loc("u_texture");
-   _u_time_loc = get_loc("u_time");
-   _u_resolution_loc = get_loc("u_resolution");
-   _u_uv_height_loc = get_loc("u_uv_height");
-}
-#else
+#ifndef __EMSCRIPTEN__
 void ShaderLayer::checkUniforms(const std::string& shader_path)
 {
    std::ifstream file(shader_path);
@@ -73,7 +52,7 @@ void ShaderLayer::checkUniforms(const std::string& shader_path)
    const auto shader_source = buffer.str();
 
    _has_u_resolution = shader_source.find("u_resolution;") != std::string::npos;
-   _has_u_uv_height  = shader_source.find("u_uv_height;")  != std::string::npos;
+   _has_u_uv_height = shader_source.find("u_uv_height;") != std::string::npos;
 }
 #endif
 
@@ -85,7 +64,7 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
-   if (!_shader)
+   if (!_shader.isLoaded())
    {
       return;
    }
@@ -95,22 +74,13 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, c
    const auto w = _size.x;
    const auto h = _size.y;
 
-   if (_u_texture_loc && _texture)
+   if (_texture)
    {
-      (void)_shader->setUniform(*_u_texture_loc, *_texture.get());
+      _shader.setUniform("u_texture", *_texture.get());
    }
-   if (_u_time_loc)
-   {
-      _shader->setUniform(*_u_time_loc, _elapsed.asSeconds() + _time_offset);
-   }
-   if (_u_resolution_loc)
-   {
-      _shader->setUniform(*_u_resolution_loc, sf::Glsl::Vec2{w, h});
-   }
-   if (_u_uv_height_loc)
-   {
-      _shader->setUniform(*_u_uv_height_loc, _uv_height);
-   }
+   _shader.setUniform("u_time", _elapsed.asSeconds() + _time_offset);
+   _shader.setUniform("u_resolution", sf::Glsl::Vec2{w, h});
+   _shader.setUniform("u_uv_height", _uv_height);
 
    const sf::Vertex quad[] = {
       sf::Vertex{.position = {x, y}, .color = sf::Color::White, .texCoords = {0.0f, _uv_height}},
@@ -121,7 +91,7 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, c
 
    sf::RenderStates draw_states = states;
    draw_states.blendMode = sf::BlendAlpha;
-   draw_states.shader = _shader.get();
+   draw_states.shader = &_shader.native();
    target.draw(std::span<const sf::Vertex>{quad, 4}, sf::PrimitiveType::TriangleStrip, draw_states);
 }
 #else
@@ -153,7 +123,7 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    };
 
    sf::RenderStates states;
-   states.shader = &_shader;
+   states.shader = &_shader.native();
    states.blendMode = sf::BlendAlpha;
 
    target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
@@ -208,73 +178,42 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    instance->_time_offset = ValueReader::readValue<float>("time_offset_s", map).value_or(instance->_time_offset);
 
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
-#ifdef __EMSCRIPTEN__
    const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
-   if (vert_file.has_value() || frag_file.has_value())
+
+   const auto vertex_exists = vert_file.has_value() && std::filesystem::exists(vert_file.value());
+   const auto fragment_exists = frag_file.has_value() && std::filesystem::exists(frag_file.value());
+
+   if (vert_file.has_value() && !vertex_exists)
    {
-      sf::Shader::LoadFromFileSettings shader_settings;
-      if (vert_file.has_value())
-      {
-         // Check if vertex shader file exists before attempting to load
-         if (!std::filesystem::exists(vert_file.value()))
-         {
-            Log::Error() << "vertex shader file does not exist: " << vert_file.value();
-         }
-         else
-         {
-            shader_settings.vertexPath = vert_file.value();
-         }
-      }
-      if (frag_file.has_value())
-      {
-         // check if fragment shader file exists before attempting to load
-         if (!std::filesystem::exists(frag_file.value()))
-         {
-            Log::Error() << "fragment shader file does not exist: " << frag_file.value();
-         }
-         else
-         {
-            shader_settings.fragmentPath = frag_file.value();
-         }
-      }
-      auto loaded = sf::Shader::loadFromFile(shader_settings);
-      if (loaded.hasValue())
-      {
-         instance->_shader = std::make_unique<sf::Shader>(std::move(*loaded));
-         instance->checkUniforms();
-      }
-      else
-      {
-         Log::Error() << "error loading shader";
-      }
+      Log::Error() << "vertex shader file does not exist: " << vert_file.value();
    }
-#else
-   if (vert_file.has_value())
+   if (frag_file.has_value() && !fragment_exists)
    {
-      // Check if vertex shader file exists before attempting to load
-      if (!std::filesystem::exists(vert_file.value()))
-      {
-         Log::Error() << "vertex shader file does not exist: " << vert_file.value();
-      }
-      else if (!instance->_shader.loadFromFile(vert_file.value(), sf::Shader::Type::Vertex))
-      {
-         Log::Error() << "error compiling " << vert_file.value();
-      }
+      Log::Error() << "fragment shader file does not exist: " << frag_file.value();
    }
 
-   const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
+   bool shader_loaded = false;
+   if (vertex_exists && fragment_exists)
+   {
+      shader_loaded = instance->_shader.loadFromFile(vert_file.value(), frag_file.value());
+   }
+   else if (vertex_exists)
+   {
+      shader_loaded = instance->_shader.loadFromVertex(vert_file.value());
+   }
+   else if (fragment_exists)
+   {
+      shader_loaded = instance->_shader.loadFromFragment(frag_file.value());
+   }
+
+   if (!shader_loaded && (vertex_exists || fragment_exists))
+   {
+      Log::Error() << "error loading shader";
+   }
+
+#ifndef __EMSCRIPTEN__
    if (frag_file.has_value())
    {
-      // check if fragment shader file exists before attempting to load
-      if (!std::filesystem::exists(frag_file.value()))
-      {
-         Log::Error() << "fragment shader file does not exist: " << frag_file.value();
-      }
-      else if (!instance->_shader.loadFromFile(frag_file.value(), sf::Shader::Type::Fragment))
-      {
-         Log::Error() << "error compiling " << frag_file.value();
-      }
-
       // analyze the fragment shader source to determine which uniforms are present
       instance->checkUniforms(frag_file.value());
    }

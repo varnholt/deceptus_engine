@@ -101,36 +101,13 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
 
    setZ(_config.z_index);
 
-#ifdef __EMSCRIPTEN__
-   auto loaded_shader = sf::Shader::loadFromFile({.fragmentPath = "data/shaders/flash.frag"});
-   if (loaded_shader.hasValue())
-   {
-      _flash_shader = std::move(*loaded_shader);
-      const auto ul_texture = _flash_shader->getUniformLocation("u_texture");
-      if (ul_texture.hasValue())
-      {
-         (void)_flash_shader->setUniform(*ul_texture, sf::Shader::CurrentTexture);
-      }
-      const auto ul_flash = _flash_shader->getUniformLocation("flash");
-      _ul_flash = ul_flash.hasValue() ? std::optional{*ul_flash} : std::nullopt;
-      if (_ul_flash.has_value())
-      {
-         _flash_shader->setUniform(*_ul_flash, _hit_flash);
-      }
-   }
-   else
-   {
-      Log::Error() << "error loading flash shader";
-   }
-#else
-   if (!_flash_shader.loadFromFile("data/shaders/flash.frag", sf::Shader::Type::Fragment))
+   if (!_flash_shader.loadFromFragment("data/shaders/flash.frag"))
    {
       Log::Error() << "error loading flash shader";
    }
 
-   _flash_shader.setUniform("texture", sf::Shader::CurrentTexture);
+   _flash_shader.setUniform("u_texture", sf::Shader::CurrentTexture);
    _flash_shader.setUniform("flash", _hit_flash);
-#endif
 }
 
 std::string_view DestructibleBlockingRect::objectName() const
@@ -163,14 +140,10 @@ void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& /
    sf::RenderStates draw_states = states;
    draw_states.texture = _texture.get();
 
-#ifdef __EMSCRIPTEN__
-   if (_flash_shader.has_value())
+   if (_flash_shader.isLoaded())
    {
-      draw_states.shader = &(*_flash_shader);
+      draw_states.shader = &_flash_shader.native();
    }
-#else
-   draw_states.shader = &_flash_shader;
-#endif
 
    color.draw(*_sprite, draw_states);
 }
@@ -191,14 +164,7 @@ void DestructibleBlockingRect::update(const sf::Time& dt)
          _hit_flash = 1.0f - (hit_duration_s.count() / hit_duration_max_s);
       }
 
-#ifdef __EMSCRIPTEN__
-      if (_flash_shader.has_value() && _ul_flash.has_value())
-      {
-         _flash_shader->setUniform(*_ul_flash, _hit_flash);
-      }
-#else
       _flash_shader.setUniform("flash", _hit_flash);
-#endif
    }
 
    if (_state.dead)

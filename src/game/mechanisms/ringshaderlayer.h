@@ -29,9 +29,6 @@ public:
    /// \param normal normal-map render target.
    /// \param states render states to apply.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override final;
-
-   /// \brief caches ring-specific uniform locations in addition to the base set.
-   void checkUniforms() override;
 #else
    /// \brief detects ring-specific uniforms in addition to the base set.
    /// \param shader_path file path to the fragment shader source.
@@ -54,13 +51,7 @@ private:
 
    HighResTimePoint _disable_time{};
 
-#ifdef __EMSCRIPTEN__
-   // ring-specific uniform location cache
-   std::optional<sf::Shader::UniformLocation> _u_ring_scale_loc;
-   std::optional<sf::Shader::UniformLocation> _u_pixel_size_loc;
-   std::optional<sf::Shader::UniformLocation> _u_flash_color_loc;
-   std::optional<sf::Shader::UniformLocation> _u_flash_intensity_loc;
-#else
+#ifndef __EMSCRIPTEN__
    // ring-specific uniforms
    bool _has_u_ring_scale = false;
    bool _has_u_pixel_size = false;

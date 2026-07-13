@@ -1,15 +1,14 @@
 #pragma once
 
+#include "framework/tools/sfmlshader.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>
-#ifdef __EMSCRIPTEN__
 #include <memory>
 #include <optional>
-#endif
 
 struct TmxObject;
 
@@ -46,10 +45,7 @@ struct ShaderLayer : public GameMechanism, public GameNode
    /// \return layer bounds in pixel space.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-#ifdef __EMSCRIPTEN__
-   /// \brief caches uniform locations for all known shader uniforms.
-   virtual void checkUniforms();
-#else
+#ifndef __EMSCRIPTEN__
    /// \brief inspects shader source to detect optional uniform support.
    /// \param shader_path file path to the fragment shader source.
    virtual void checkUniforms(const std::string& shader_path);
@@ -61,11 +57,7 @@ struct ShaderLayer : public GameMechanism, public GameNode
    {
    }
 
-#ifdef __EMSCRIPTEN__
-   std::unique_ptr<sf::Shader> _shader;
-#else
-   sf::Shader _shader;
-#endif
+   sfcompat::Shader _shader;
    sf::Vector2f _position;
    sf::Vector2f _size;
    sf::FloatRect _rect;
@@ -75,12 +67,7 @@ struct ShaderLayer : public GameMechanism, public GameNode
    float _uv_height = 1.0f;
    sf::Time _elapsed;
 
-#ifdef __EMSCRIPTEN__
-   std::optional<sf::Shader::UniformLocation> _u_texture_loc;
-   std::optional<sf::Shader::UniformLocation> _u_time_loc;
-   std::optional<sf::Shader::UniformLocation> _u_resolution_loc;
-   std::optional<sf::Shader::UniformLocation> _u_uv_height_loc;
-#else
+#ifndef __EMSCRIPTEN__
    bool _has_u_resolution = false;
    bool _has_u_uv_height = false;
 #endif

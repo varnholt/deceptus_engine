@@ -1,5 +1,6 @@
 #pragma once
 
+#include "framework/tools/sfmlshader.h"
 #include "tilemap.h"
 
 /// \brief tile layer that renders only inside a stencil mask provided by another tilemap.
@@ -54,11 +55,6 @@ private:
 
    std::string _stencil_reference;
    std::shared_ptr<TileMap> _stencil_tilemap = nullptr;
-#ifdef __EMSCRIPTEN__
-   mutable std::optional<sf::Shader> _stencil_shader;
-   mutable std::optional<sf::Shader::UniformLocation> _ul_texture_sampler;
-#else
-   mutable sf::Shader _stencil_shader;
-#endif
+   mutable sfcompat::Shader _stencil_shader;
    float _alpha_threshold{0.5f};
 };
