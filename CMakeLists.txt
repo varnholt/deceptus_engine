@@ -924,6 +924,18 @@ else()
         GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
         GIT_TAG glew-cmake-2.3.0)
 
+    # we only ever link libglew_static, so don't build the shared glew library at all
+    set(glew-cmake_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+
+    # glew-cmake unconditionally links the legacy AGL framework on APPLE and attaches it PUBLIC to
+    # every glew target. AGL was removed from modern macOS SDKs, so the link fails with
+    # "framework 'AGL' not found". GLEW does not actually need AGL (the OpenGL framework provides
+    # the symbols), so pre-seed the cache to satisfy its find_library(AGL REQUIRED) without adding
+    # a bogus -framework AGL to the link.
+    if(APPLE)
+        set(AGL_LIBRARY "" CACHE FILEPATH "AGL is obsolete on modern macOS SDKs" FORCE)
+    endif()
+
     FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
 
     # Apply missing-include patch to vanilla SFML 3.0.x.
@@ -990,6 +1002,13 @@ target_include_directories(
     ${SDL3_INCLUDE_DIRS})
 
 target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
+
+if(CMAKE_BUILD_TYPE)
+    set(deceptus_build_type "${CMAKE_BUILD_TYPE}")
+else()
+    set(deceptus_build_type "Unknown")
+endif()
+target_compile_definitions(deceptus PRIVATE DECEPTUS_BUILD_TYPE="${deceptus_build_type}")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(deceptus PRIVATE DEBUG)
