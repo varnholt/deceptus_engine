@@ -9,10 +9,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    container: emscripten/emsdk
 
     steps:
       - uses: actions/checkout@v5
+
+      # The final emcc link runs Binaryen wasm-opt (at Release -O3), which needs more RAM than the
+      # ~16 GB runner has and gets OOM-killed (exit 137). Add swap on /mnt (the large scratch disk)
+      # as headroom so the link completes.
+      - name: Add swap space
+        run: |
+          sudo fallocate -l 12G /mnt/swapfile
+          sudo chmod 600 /mnt/swapfile
+          sudo mkswap /mnt/swapfile
+          sudo swapon /mnt/swapfile
+
+      - name: Set up Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+          actions-cache-folder: emsdk-cache
 
       - name: Cache FetchContent
         uses: actions/cache@v5
