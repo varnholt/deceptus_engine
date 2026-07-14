@@ -165,6 +165,34 @@
 
   document.querySelectorAll(".btn").forEach(bindButton);
 
+  // ---- secure-context / SharedArrayBuffer preflight ----
+  // The WASM build is compiled with -pthread (USE_PTHREADS) + WASM_WORKERS +
+  // AUDIO_WORKLET, so it needs SharedArrayBuffer. SharedArrayBuffer is only
+  // exposed when the page is BOTH cross-origin isolated (COOP/COEP headers,
+  // which serve.py sends) AND in a secure context (https:// or http://localhost).
+  // A bare LAN IP over plain http:// is NOT a secure context — that is why this
+  // works on the laptop via localhost but fails on a phone via http://<pc-ip>.
+  var missingSharedArrayBuffer = (typeof SharedArrayBuffer === "undefined");
+  var notCrossOriginIsolated = (typeof crossOriginIsolated !== "undefined" && !crossOriginIsolated);
+  if (missingSharedArrayBuffer || notCrossOriginIsolated) {
+    var startGate = document.getElementById("start");
+    startGate.innerHTML =
+      "CAN'T RUN HERE" +
+      "<small>This build needs SharedArrayBuffer, which browsers only expose " +
+      "over <b>https://</b> (or http://localhost).<br><br>" +
+      "You're on <b>" + location.protocol + "//" + location.host + "</b> — not a secure context, " +
+      "so iOS/Chrome won't enable it.<br><br>" +
+      "Serve over HTTPS (e.g. a cloudflared/ngrok tunnel, or serve.py --https) and " +
+      "open the https URL on the phone.</small>";
+    startGate.style.cursor = "default";
+    startGate.style.pointerEvents = "auto";
+    document.getElementById("status").textContent =
+      "secureContext=" + window.isSecureContext +
+      " crossOriginIsolated=" + (typeof crossOriginIsolated !== "undefined" ? crossOriginIsolated : "n/a") +
+      " SharedArrayBuffer=" + !missingSharedArrayBuffer;
+    throw new Error("SharedArrayBuffer unavailable: not a cross-origin-isolated secure context");
+  }
+
   // ---- emscripten module bootstrap ----
   var statusElement = document.getElementById("status");
   var Module = {
