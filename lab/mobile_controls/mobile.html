@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>deceptus</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: #000; overflow: hidden;
+    touch-action: none; -webkit-user-select: none; user-select: none;
+    overscroll-behavior: none;
+  }
+
+  #game-container {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #000;
+    overflow: hidden;                    /* clip the 16:9 canvas when it's taller than the screen */
+  }
+
+  /* fill the FULL screen width; the game is 16:9, so on a phone wider than 16:9 the
+     canvas is taller than the viewport and the excess is clipped equally top/bottom.
+     (swap to `height: 100vh; width: 177.7778vh` if you'd rather letterbox than crop.) */
+  #canvas {
+    display: block;
+    width: 100vw; height: 56.25vw;
+    background: #000;
+    image-rendering: pixelated;          /* crisp pixel-art upscale */
+    outline: none;
+  }
+
+  /* touch overlay sits above the canvas but only the buttons capture touches */
+  #controls {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .btn {
+    position: absolute;
+    pointer-events: auto;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.45);
+    font: 600 4.2vmin/1 system-ui, sans-serif;
+    background: rgba(255,255,255,0.08);
+    border: 0.4vmin solid rgba(255,255,255,0.28);
+    border-radius: 50%;
+    width: 15vmin; height: 15vmin;
+    transition: background 0.05s, transform 0.05s;
+  }
+  .btn.pressed {
+    background: rgba(255,255,255,0.28);
+    transform: scale(0.92);
+  }
+
+  /* D-pad, bottom-left, plus layout */
+  #dpad { position: absolute; left: 4vmin; bottom: 5vmin; width: 48vmin; height: 48vmin; pointer-events: none; }
+  #dpad .btn { border-radius: 22%; }
+  #btn-up    { left: 16.5vmin; top: 0; }
+  #btn-down  { left: 16.5vmin; bottom: 0; }
+  #btn-left  { left: 0; top: 16.5vmin; }
+  #btn-right { right: 0; top: 16.5vmin; }
+
+  /* action cluster, bottom-right, diamond layout (Y top, A bottom, X left, B right) */
+  #actions { position: absolute; right: 4vmin; bottom: 5vmin; width: 48vmin; height: 48vmin; pointer-events: none; }
+  #btn-y { left: 16.5vmin; top: 0; }
+  #btn-a { left: 16.5vmin; bottom: 0; }
+  #btn-x { left: 0; top: 16.5vmin; }
+  #btn-b { right: 0; top: 16.5vmin; }
+
+  /* tap-to-start / fullscreen gate (fullscreen needs a user gesture) */
+  #start {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #000; color: rgba(255,255,255,0.75);
+    font: 600 5vmin/1.4 system-ui, sans-serif; text-align: center;
+  }
+  #start small { font-weight: 400; font-size: 3vmin; color: rgba(255,255,255,0.4); margin-top: 2vmin; }
+  #status {
+    position: fixed; left: 0; right: 0; bottom: 1vmin; z-index: 101;
+    text-align: center; color: rgba(255,255,255,0.35);
+    font: 400 3vmin/1 system-ui, sans-serif; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+  <div id="controls">
+    <div id="dpad">
+      <div class="btn" id="btn-up"    data-key="up">▲</div>
+      <div class="btn" id="btn-down"  data-key="down">▼</div>
+      <div class="btn" id="btn-left"  data-key="left">◀</div>
+      <div class="btn" id="btn-right" data-key="right">▶</div>
+    </div>
+    <div id="actions">
+      <div class="btn" id="btn-y" data-key="y">Y</div>
+      <div class="btn" id="btn-a" data-key="a">A</div>
+      <div class="btn" id="btn-x" data-key="x">X</div>
+      <div class="btn" id="btn-b" data-key="b">B</div>
+    </div>
+  </div>
+</div>
+
+<div id="start">TAP TO PLAY<small>on-screen controls appear over the game</small></div>
+<div id="status">loading…</div>
+
+<script>
+  // ---- key map: on-screen button -> DOM KeyboardEvent (mirrors data/config/controls.json) ----
+  var KEYS = {
+    up:    { key: "ArrowUp",    code: "ArrowUp",     keyCode: 38 },
+    down:  { key: "ArrowDown",  code: "ArrowDown",   keyCode: 40 },
+    left:  { key: "ArrowLeft",  code: "ArrowLeft",   keyCode: 37 },
+    right: { key: "ArrowRight", code: "ArrowRight",  keyCode: 39 },
+    a:     { key: " ",          code: "Space",       keyCode: 32 },                 // jump
+    b:     { key: "Enter",      code: "Enter",       keyCode: 13 },                 // action
+    x:     { key: "Control",    code: "ControlLeft", keyCode: 17, location: 1 },    // slot 1
+    y:     { key: "Alt",        code: "AltLeft",     keyCode: 18, location: 1 }     // slot 2
+  };
+
+  var canvasElement = document.getElementById("canvas");
+
+  function dispatchKey(type, def) {
+    var event = new KeyboardEvent(type, {
+      key: def.key, code: def.code, location: def.location || 0,
+      bubbles: true, cancelable: true, composed: true
+    });
+    // KeyboardEventInit ignores keyCode/which; emscripten still reads them, so force them on
+    Object.defineProperty(event, "keyCode", { get: function () { return def.keyCode; } });
+    Object.defineProperty(event, "which",   { get: function () { return def.keyCode; } });
+    // dispatch on the canvas; bubbles up to document/window so whichever target the
+    // emscripten backend registered on receives it exactly once
+    canvasElement.dispatchEvent(event);
+  }
+
+  function bindButton(element) {
+    var def = KEYS[element.dataset.key];
+    if (!def) { return; }
+    var down = false;
+    var press = function (e) {
+      if (e) { e.preventDefault(); }
+      if (down) { return; }
+      down = true;
+      element.classList.add("pressed");
+      dispatchKey("keydown", def);
+    };
+    var release = function (e) {
+      if (e) { e.preventDefault(); }
+      if (!down) { return; }
+      down = false;
+      element.classList.remove("pressed");
+      dispatchKey("keyup", def);
+    };
+    element.addEventListener("touchstart", press, { passive: false });
+    element.addEventListener("touchend", release, { passive: false });
+    element.addEventListener("touchcancel", release, { passive: false });
+    // mouse fallback for desktop testing
+    element.addEventListener("mousedown", press);
+    element.addEventListener("mouseup", release);
+    element.addEventListener("mouseleave", release);
+  }
+
+  document.querySelectorAll(".btn").forEach(bindButton);
+
+  // ---- emscripten module bootstrap ----
+  var statusElement = document.getElementById("status");
+  var Module = {
+    canvas: canvasElement,
+    print: function () { console.log.apply(console, arguments); },
+    printErr: function () { console.error.apply(console, arguments); },
+    setStatus: function (text) {
+      if (statusElement) { statusElement.textContent = text || ""; }
+    },
+    onRuntimeInitialized: function () {
+      if (statusElement) { statusElement.textContent = ""; }
+    }
+  };
+  window.onerror = function () {
+    if (statusElement) { statusElement.textContent = "error — see console"; }
+  };
+
+  // ---- tap to start: enter fullscreen + lock landscape (both need a user gesture) ----
+  document.getElementById("start").addEventListener("click", function () {
+    this.style.display = "none";
+    var container = document.getElementById("game-container");
+    var request = container.requestFullscreen || container.webkitRequestFullscreen;
+    if (request) {
+      var result = request.call(container);
+      if (result && result.then) {
+        result.then(function () {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock("landscape").catch(function () {});
+          }
+        }).catch(function () {});
+      }
+    }
+    canvasElement.focus();
+  });
+</script>
+<script async src="deceptus.js"></script>
+</body>
+</html>

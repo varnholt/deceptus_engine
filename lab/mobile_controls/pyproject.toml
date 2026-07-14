@@ -1,0 +1,6 @@
+[project]
+name = "mobile-controls"
+version = "0.1.0"
+description = "Mobile touch-control shell + static server for the deceptus WASM build"
+requires-python = ">=3.11"
+dependencies = []
