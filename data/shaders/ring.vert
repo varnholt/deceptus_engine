@@ -15,7 +15,12 @@ void main()
    vec3 pos = vec3(sf_a_position, 1.0);
    gl_Position = vec4(dot(sf_u_mvpRow0, pos), dot(sf_u_mvpRow1, pos), 0.0, 1.0);
    sf_v_color = sf_a_color;
-   sf_v_texCoord = sf_a_texCoord * sf_u_invTextureSize;
+   // the ring uses its texcoord as a normalized 0..1 screen-space uv for the circular pattern, so it
+   // must NOT be scaled by sf_u_invTextureSize. that built-in reflects whichever texture happens to be
+   // bound for the draw (the layer binds none, so VRSFML falls back to an unrelated texture), which
+   // would shrink the uv range and blow the ring up. the quad already supplies 0..1 texcoords, matching
+   // the desktop gl_TexCoord[0] path.
+   sf_v_texCoord = sf_a_texCoord;
 }
 #else
 void main()

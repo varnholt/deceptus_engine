@@ -69,8 +69,9 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, c
       return;
    }
 
-   // NOTE: on WASM the ring renders larger than on desktop for the same ring_scale value;
-   // root cause not yet found (see wasm_port_status.md). Left unmodified for now.
+   // NOTE: the ring used to render far too large on WASM for the same ring_scale. cause was the
+   // GL_ES branch of ring.vert scaling the screen uv by sf_u_invTextureSize (which reflects an
+   // unrelated bound texture's size); ring.vert now passes the raw 0..1 texcoord, matching desktop.
    _shader.setUniform("u_ring_scale", _ring_scale);
    _shader.setUniform("u_pixel_size", _pixel_size);
    _shader.setUniform("u_flash_color", _flash_color);
