@@ -39,6 +39,16 @@ MenuBackgroundScene::MenuBackgroundScene()
       std::cerr << "Failed to load texture shader!\n";
       return;
    }
+
+   // assign distinct texture units to the samplers. on desktop these come from the shader's
+   // layout(binding=...) qualifiers, but GLSL ES 3.00 (WebGL2) has no binding qualifier, so the
+   // samplerCube and the sampler2D uniforms would all alias texture unit 0 — a combination WebGL
+   // rejects at draw time. mirror the desktop bindings here so both platforms behave identically.
+   _shader->use();
+   _shader->setUniform("Tex1", 0);
+   _shader->setUniform("Specular", 2);
+   _shader->setUniform("AO", 4);
+   _shader->setUniform("CubeMapTex", 6);
 }
 
 MenuBackgroundScene::~MenuBackgroundScene()

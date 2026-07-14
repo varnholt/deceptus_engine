@@ -176,10 +176,10 @@ private:
 #ifndef __EMSCRIPTEN__
    // temporarily here for debugging only
    std::unique_ptr<ForestScene> _test_scene;
-
-   // 3D menu background renderer (desktop only — uses OpenGL 4.3 GLSL)
-   std::unique_ptr<MenuBackgroundScene> _menu_background;
 #endif
+
+   // 3D menu background renderer (raw OpenGL: GLSL 4.30 on desktop, GLSL ES 3.00 on WebGL2)
+   std::unique_ptr<MenuBackgroundScene> _menu_background;
 
    sf::Clock _delta_clock;
    std::atomic<bool> _level_loading_finished = false;

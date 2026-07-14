@@ -26,7 +26,12 @@ void ShaderPool::add(const std::string& key, const std::filesystem::path& vertex
 
       shader->link();
       shader->use();
+#ifndef __EMSCRIPTEN__
+      // glValidateProgram reflects the current GL state; on WebGL2 validating before any
+      // texture units / VAOs are bound reports false failures (e.g. samplers still aliasing
+      // texture unit 0), and with C++ exceptions disabled on WASM a throw aborts the module.
       shader->validate();
+#endif
 
       _shaders[key] = shader;
    }

@@ -516,8 +516,8 @@ void Game::initialize()
    _controller_overlay = std::make_unique<ControllerOverlay>();
 #ifndef __EMSCRIPTEN__
    _test_scene = std::make_unique<ForestScene>();
-   _menu_background = std::make_unique<MenuBackgroundScene>();
 #endif
+   _menu_background = std::make_unique<MenuBackgroundScene>();
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
 
@@ -655,12 +655,25 @@ void Game::draw()
    {
       _test_scene->draw(*_window_render_texture.get());
    }
+#endif
 
    if (GameState::getInstance().getMode() == ExecutionMode::NotRunning)
    {
+#ifdef __EMSCRIPTEN__
+      // raw OpenGL interop under VRSFML: activate the render texture's framebuffer so the 3D
+      // scene draws into it. VRSFML auto-batches draws, so first flush any pending SFML geometry
+      // while its GL-state cache is still valid; issue the raw OpenGL calls; then re-sync the
+      // cache so the subsequent SFML draws rebind their program/buffers correctly.
+      if (_window_render_texture->setActive(true))
+      {
+         _window_render_texture->resetGLStates();
+         _menu_background->render(*_window_render_texture);
+         _window_render_texture->resetGLStates();
+      }
+#else
       _menu_background->render(*_window_render_texture);
-   }
 #endif
+   }
 
 #ifdef __EMSCRIPTEN__
    Menu::getInstance()->draw(*_window_render_texture.get(), sf::RenderStates{.blendMode = sf::BlendAlpha});
@@ -938,9 +951,7 @@ void Game::update()
    if (game_mode == ExecutionMode::NotRunning)
    {
       updateGameController();
-#ifndef __EMSCRIPTEN__
       _menu_background->update(dt);
-#endif
    }
 
    _info_layer->update(dt);

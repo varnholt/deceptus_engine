@@ -27,6 +27,38 @@ struct shader_file_extension extensions[] = {
 };
 }  // namespace GLSLShaderInfo
 
+#ifdef __EMSCRIPTEN__
+namespace
+{
+/// \brief swaps the desktop "#version" directive for the GLSL ES 3.00 one required by WebGL2.
+///
+/// the "#version" directive must be the literal first line of a shader and cannot be selected
+/// via "#ifdef" (the GL_ES macro only becomes visible after the version is parsed), so this one
+/// line has to be substituted from C++. every other desktop-vs-ES difference (precision
+/// qualifiers, sampler binding layout, ...) is handled inside the shader sources via "#ifdef GL_ES".
+std::string prepareShaderSourceForGles(const std::string& source)
+{
+   std::string body = source;
+
+   // drop a leading "#version ..." line if present
+   if (body.rfind("#version", 0) == 0)
+   {
+      const auto newline_position = body.find('\n');
+      if (newline_position != std::string::npos)
+      {
+         body = body.substr(newline_position + 1);
+      }
+      else
+      {
+         body.clear();
+      }
+   }
+
+   return "#version 300 es\n" + body;
+}
+}  // namespace
+#endif
+
 GLSLProgram::~GLSLProgram()
 {
    if (_handle == 0)
@@ -147,7 +179,12 @@ void GLSLProgram::compileShader(const std::string& source, GLSLShader::GLSLShade
 
    GLuint shader_handle = glCreateShader(type);
 
+#ifdef __EMSCRIPTEN__
+   const std::string prepared_source = prepareShaderSourceForGles(source);
+   const char* source_c_str = prepared_source.c_str();
+#else
    const char* source_c_str = source.c_str();
+#endif
    glShaderSource(shader_handle, 1, &source_c_str, nullptr);
 
    // Compile the shader
