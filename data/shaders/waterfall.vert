@@ -18,10 +18,9 @@ void main()
    sf_v_texCoord = sf_a_texCoord * sf_u_invTextureSize;
 }
 #else
-varying vec2 pos;
-
 void main()
 {
-   gl_Position = vec4(pos, 0.0, 1.0);
+   gl_TexCoord[0] = gl_MultiTexCoord0;
+   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 }
 #endif
