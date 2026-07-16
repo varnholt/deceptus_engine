@@ -7,6 +7,10 @@ build/
 app/build/
 local.properties
 
+# Signing (never commit keystores or their passwords)
+*.keystore
+keystore.properties
+
 # IDE
 *.iml
 .idea/

@@ -4,9 +4,14 @@ One-command driver for the Deceptus Android (GeckoView) lab.
 Runs the whole pipeline end to end: copy the WASM build into the app assets, build the debug APK,
 make sure an emulator is running, install, launch, and (optionally) stream the logs.
 
+Builds a signed *release* APK by default (nothing in the native shell needs debugging); pass
+--debug for a debug APK. APKs are ABI-split: app-arm64-v8a-<type>.apk for phones,
+app-x86_64-<type>.apk for the emulator.
+
 Usage (via uv, no manual venv needed):
 
-    uv run deceptus-android                 # copy assets -> build apk -> install -> launch
+    uv run deceptus-android                 # copy assets -> build release apk -> install -> launch
+    uv run deceptus-android --debug         # same, but a debug APK
     uv run deceptus-android --wasm          # also rebuild the WASM first (Docker; slow)
     uv run deceptus-android --emulator      # boot the AVD first if nothing is connected
     uv run deceptus-android --logcat        # after launch, stream the game's console/logs
@@ -32,7 +37,7 @@ REPO_ROOT = SCRIPT_DIR.parent.parent
 BUILD_WASM_DIR = REPO_ROOT / "build_wasm"
 MOBILE_SHELL_HTML = REPO_ROOT / "lab" / "mobile_controls" / "mobile.html"
 ASSET_DIR = SCRIPT_DIR / "app" / "src" / "main" / "assets" / "game"
-APK_PATH = SCRIPT_DIR / "app" / "build" / "outputs" / "apk" / "debug" / "app-debug.apk"
+APK_OUTPUT_DIR = SCRIPT_DIR / "app" / "build" / "outputs" / "apk"
 
 WASM_ARTIFACTS = ("deceptus.js", "deceptus.wasm", "deceptus.data")
 
@@ -114,6 +119,17 @@ def connected_devices() -> list[str]:
     return devices
 
 
+def device_abi() -> str:
+    """Primary ABI of the connected device (e.g. 'x86_64' emulator, 'arm64-v8a' phone)."""
+    abi = adb("shell", "getprop", "ro.product.cpu.abi", capture=True).strip()
+    return abi or "x86_64"
+
+
+def apk_for(build_type: str, abi: str) -> Path:
+    # Matches the ABI-split output names, e.g. app-arm64-v8a-release.apk.
+    return APK_OUTPUT_DIR / build_type / f"app-{abi}-{build_type}.apk"
+
+
 # ----------------------------------------------------------------------------------------------------
 # pipeline stages
 # ----------------------------------------------------------------------------------------------------
@@ -157,16 +173,18 @@ def stage_assets() -> None:
     shutil.copy2(MOBILE_SHELL_HTML, ASSET_DIR / "index.html")
 
 
-def stage_apk() -> None:
-    announce("Building the debug APK (Gradle)")
+def stage_apk(build_type: str) -> None:
+    announce(f"Building the {build_type} APK(s) (Gradle, ABI-split)")
     gradlew = gradlew_path()
     if not gradlew.is_file():
         fail(f"gradle wrapper not found at {gradlew}")
-    run_command([str(gradlew), "assembleDebug", "--console=plain"], cwd=SCRIPT_DIR)
-    if not APK_PATH.is_file():
-        fail(f"expected APK not produced at {APK_PATH}")
-    size_mb = APK_PATH.stat().st_size / (1024 * 1024)
-    print(f"    built {APK_PATH.name} ({size_mb:.0f} MB)")
+    gradle_task = "assembleRelease" if build_type == "release" else "assembleDebug"
+    run_command([str(gradlew), gradle_task, "--console=plain"], cwd=SCRIPT_DIR)
+    produced = sorted((APK_OUTPUT_DIR / build_type).glob(f"app-*-{build_type}.apk"))
+    if not produced:
+        fail(f"no {build_type} APKs produced in {APK_OUTPUT_DIR / build_type}")
+    for apk in produced:
+        print(f"    built {apk.name} ({apk.stat().st_size / (1024 * 1024):.0f} MB)")
 
 
 def stage_emulator(avd_name: str | None) -> None:
@@ -219,14 +237,18 @@ def warn_if_low_storage() -> None:
           "AVD config.ini to 12G and cold-boot with -wipe-data - see README.)")
 
 
-def stage_install() -> None:
+def stage_install(build_type: str) -> None:
     announce("Installing the APK")
-    if not APK_PATH.is_file():
-        fail(f"APK not found at {APK_PATH} — build it first (drop --only, or run 'apk').")
     if not connected_devices():
         fail("no device connected; pass --emulator or start one yourself.")
+    abi = device_abi()
+    apk = apk_for(build_type, abi)
+    if not apk.is_file():
+        fail(f"no {build_type} APK for the device ABI '{abi}' at {apk} — build it first "
+             f"(is '{abi}' in the abi splits in app/build.gradle?).")
+    print(f"    device ABI: {abi} -> {apk.name}")
     warn_if_low_storage()
-    adb("install", "-r", str(APK_PATH))
+    adb("install", "-r", str(apk))
 
 
 def stage_launch() -> None:
@@ -257,6 +279,7 @@ def main() -> None:
         description="Build and run the Deceptus WASM build as an Android (GeckoView) app.",
     )
     parser.add_argument("--wasm", action="store_true", help="rebuild the WASM target first (Docker, slow)")
+    parser.add_argument("--debug", action="store_true", help="build/install the debug APK (default: signed release)")
     parser.add_argument("--emulator", action="store_true", help="boot the AVD if no device is connected")
     parser.add_argument("--logcat", action="store_true", help="stream the game's logs after launch")
     parser.add_argument("--all", action="store_true", help="shorthand for --wasm --emulator --logcat")
@@ -268,13 +291,16 @@ def main() -> None:
     )
     arguments = parser.parse_args()
 
+    # Nothing in the native shell needs debugging, so ship-style release is the default.
+    build_type = "debug" if arguments.debug else "release"
+
     if arguments.only:
         single_stage = {
             "wasm": stage_wasm,
             "assets": stage_assets,
-            "apk": stage_apk,
+            "apk": lambda: stage_apk(build_type),
             "emulator": lambda: stage_emulator(arguments.avd),
-            "install": stage_install,
+            "install": lambda: stage_install(build_type),
             "launch": stage_launch,
             "logcat": stage_logcat,
         }[arguments.only]
@@ -288,10 +314,10 @@ def main() -> None:
     if want_wasm:
         stage_wasm()
     stage_assets()
-    stage_apk()
+    stage_apk(build_type)
     if want_emulator:
         stage_emulator(arguments.avd)
-    stage_install()
+    stage_install(build_type)
     stage_launch()
     if want_logcat:
         stage_logcat()

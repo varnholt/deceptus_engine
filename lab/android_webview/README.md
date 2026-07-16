@@ -64,7 +64,10 @@ Emscripten with no off-switch, so it would mean patching a third-party fork and 
   is fetched from `maven.mozilla.org` on first build.
 - `local.properties` points Gradle at the SDK (`sdk.dir=D:\android_sdk`); it is git-ignored — edit
   if your SDK lives elsewhere.
-- **Emulator storage:** the GeckoView native libs make the debug APK ~340 MB, so the AVD's data
+- **A release keystore** (for the default release build). Both the keystore and its passwords are
+  git-ignored — generate one once (see [Release build & signing](#release-build--signing)). Without
+  it the release build falls back to debug signing so it still produces an installable APK.
+- **Emulator storage:** the GeckoView native libs make each APK ~300 MB, so the AVD's data
   partition must be big enough. The stock `Medium_Phone_API_36.1` ships with `6G` and fills up.
   Grow it once: set `disk.dataPartition.size=12G` in `~/.android/avd/<avd>.avd/config.ini` and
   cold-boot once with `-wipe-data`. (The emulator's `-partition-size` flag is capped at 2047 MB and
@@ -72,16 +75,22 @@ Emscripten with no off-switch, so it would mean patching a third-party fork and 
 
 ## The one command
 
+Builds a **signed release** APK by default (nothing in the native shell needs debugging).
+
 ```bash
 cd lab/android_webview
 
-uv run deceptus-android                 # copy assets -> build APK -> install -> launch
+uv run deceptus-android                 # copy assets -> build RELEASE apk -> install -> launch
+uv run deceptus-android --debug         # same, but a debug APK
 uv run deceptus-android --emulator      # also boot the AVD first if nothing is connected
 uv run deceptus-android --logcat        # also stream the game's console/logs after launch
 uv run deceptus-android --wasm          # also rebuild the WASM target first (Docker; slow)
 uv run deceptus-android --all           # = --wasm --emulator --logcat + the default steps
 uv run deceptus-android --avd NAME      # pick which AVD to boot (default: first available)
 ```
+
+The install stage auto-picks the APK matching the connected device's ABI (`x86_64` emulator vs
+`arm64-v8a` phone).
 
 Run a **single stage** instead of the whole pipeline:
 
@@ -99,14 +108,14 @@ The driver just wraps these steps; run them yourself if you prefer:
 # 1. copy the freshly-built WASM artifacts + touch shell into the app assets (~117 MB)
 bash copy_assets.sh
 
-# 2. build the debug APK (first build downloads the GeckoView AAR)
-./gradlew.bat assembleDebug            # -> app/build/outputs/apk/debug/app-debug.apk
+# 2. build the signed release APKs (first build downloads the GeckoView AAR). ABI-split output:
+./gradlew.bat assembleRelease          # -> app/build/outputs/apk/release/app-{arm64-v8a,x86_64}-release.apk
 
 # 3. boot the emulator (or plug in a device)
 "$ANDROID_HOME/emulator/emulator.exe" -avd Medium_Phone_API_36.1 &
 
-# 4. install + launch
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+# 4. install the APK for the device's ABI + launch  (x86_64 = emulator, arm64-v8a = phone)
+adb install -r app/build/outputs/apk/release/app-x86_64-release.apk
 adb shell am start -n com.deceptus.webview/.MainActivity
 
 # 5. tap the screen once (TAP TO PLAY) — this user gesture also resumes the AudioContext
@@ -114,12 +123,51 @@ adb shell am start -n com.deceptus.webview/.MainActivity
 
 To rebuild the WASM target itself (from the repo root): `build_wasm.bat` (Docker emscripten/emsdk).
 
+## Release build & signing
+
+The default build type is **release**, signed from a keystore that is **never committed**. Generate
+one once (any password; keep it if you want stable app updates):
+
+```bash
+keytool -genkeypair -v -keystore release.keystore -alias deceptus \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -storepass <pw> -keypass <pw> -dname "CN=Deceptus, OU=Lab, O=Deceptus, C=DE"
+```
+
+Then create `keystore.properties` (also git-ignored) next to `build.gradle`:
+
+```properties
+storeFile=release.keystore
+storePassword=<pw>
+keyAlias=deceptus
+keyPassword=<pw>
+```
+
+`app/build.gradle` reads it into `signingConfigs.release`; if `keystore.properties` is missing it
+falls back to debug signing so the build still works.
+
 ## ABI / device notes
 
-- `app/build.gradle` sets `ndk { abiFilters "x86_64" }` to keep only the ABI the emulator needs
-  (GeckoView bundles native libs for every ABI). **For a physical phone, add `"arm64-v8a"`.**
+- `app/build.gradle` uses **ABI splits** (`arm64-v8a`, `x86_64`, `universalApk false`), so each build
+  emits one APK per ABI carrying only that ABI's GeckoView native libs: `app-x86_64-<type>.apk` for
+  the emulator, **`app-arm64-v8a-<type>.apk` for a physical phone**. (A universal APK would bundle
+  both native-lib sets and roughly double in size.)
 - `adb screencap` captures GeckoView's GL surface as **black** — a screencap limitation, not a
   render failure. Use the emulator window itself, or `scrcpy`, to see the game.
+
+## Performance
+
+The Android **emulator** is a poor performance test: the game renders through
+`WASM → WebGL → GeckoView GL → Android GLES → gfxstream translation → host GPU`, and the emulator's
+GL translator can't cache compiled shader binaries (constant `Failed program_binary` recompiles).
+That translation tax pegs Gecko's GPU process and tanks the frame rate — it's *not* software
+rendering (the emulator uses the host GPU) and it does *not* exist on a real device. **Test frame
+rate on a physical phone** (`app-arm64-v8a-release.apk`), where the stack is just
+`WASM → WebGL → GeckoView GL → native GLES → GPU`.
+
+Some overhead follows you everywhere: a WASM+WebGL build in a browser engine runs a bit below the
+native desktop build, and the build's `ASYNCIFY` + pthreads+memory-growth add CPU cost — but that's
+normally very playable on a decent phone.
 
 ## Debugging
 
@@ -136,7 +184,9 @@ To rebuild the WASM target itself (from the repo root): `build_wasm.bat` (Docker
 | `INSTALL_FAILED_INSUFFICIENT_STORAGE` / "not enough space" | AVD data partition too small — grow `disk.dataPartition.size` to `12G` and cold-boot `-wipe-data` (see Prerequisites). |
 | Game hangs on a black screen, logcat shows `crossOriginIsolated=false` | You're on WebView, not GeckoView — this project only works with GeckoView. |
 | No sound | Browser autoplay policy — audio starts on the first tap (TAP TO PLAY). |
-| Gradle "Could not move temporary workspace…" on first build | Transient Windows transform-cache race (antivirus/file lock). Re-run `assembleDebug`. |
+| Gradle "Could not move temporary workspace…" on first build | Transient Windows transform-cache race (antivirus/file lock). Re-run the build. |
+| Terrible frame rate on the emulator | Expected — emulator GL translation tax, not a bug. Test on a real device. See [Performance](#performance). |
+| `INSTALL_FAILED_NO_MATCHING_ABIS` | Installing the wrong ABI's APK — use `app-arm64-v8a-release.apk` on phones, `app-x86_64-release.apk` on the emulator (the driver picks automatically). |
 | `adb screencap` is black | Expected for GeckoView's GL surface; capture the emulator window instead. |
 
 ## Layout
@@ -146,11 +196,13 @@ android_webview/
 ├── run.py                             # uv driver: the one command for the whole pipeline
 ├── pyproject.toml, uv.lock            # uv project (deceptus-android)
 ├── copy_assets.sh                     # bash equivalent of the "assets" stage
+├── release.keystore                   # signing key (git-ignored; you generate it)
+├── keystore.properties               # signing passwords (git-ignored)
 ├── gradlew(.bat), gradle/wrapper/     # committed Gradle wrapper
 ├── settings.gradle                    # adds maven.mozilla.org for GeckoView
 ├── build.gradle
 └── app/
-    ├── build.gradle                   # compileSdk 36, minSdk 26, geckoview + nanohttpd, x86_64
+    ├── build.gradle                   # compileSdk 36, geckoview + nanohttpd, ABI splits, release signing
     └── src/main/
         ├── AndroidManifest.xml        # single landscape, fullscreen activity; cleartext to loopback
         ├── assets/game/               # WASM build (git-ignored, filled by the assets stage)
