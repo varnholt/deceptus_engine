@@ -16,7 +16,7 @@ MenuBackgroundScene::MenuBackgroundScene()
    // create textured starmap
    _starmap = std::make_shared<TexturedObject>(
       "data/meshes/starmap.obj",
-      "data/effects/starmap_color.tga",
+      "data/effects/starmap_color.png",
       1.0f,
       true,
       true,
