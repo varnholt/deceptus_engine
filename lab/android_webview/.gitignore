@@ -1,0 +1,18 @@
+# Bundled WASM build artifacts (copied in by copy_assets.sh; ~127 MB, never commit)
+app/src/main/assets/game/
+
+# Gradle / Android build output
+.gradle/
+build/
+app/build/
+local.properties
+
+# IDE
+*.iml
+.idea/
+captures/
+
+# Python (uv driver)
+.venv/
+__pycache__/
+*.pyc

@@ -1,0 +1,50 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.deceptus.webview'
+    compileSdk 36
+    buildToolsVersion "36.0.0"
+
+    defaultConfig {
+        applicationId "com.deceptus.webview"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        // GeckoView ships native libs for every ABI; keep only what the emulator needs.
+        // Add "arm64-v8a" here when building for a physical phone.
+        ndk {
+            abiFilters "x86_64"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // deceptus.data (~117 MB) and deceptus.wasm are already near-incompressible; storing them
+    // uncompressed keeps the APK from double-compressing them and speeds up asset streaming.
+    androidResources {
+        noCompress 'data', 'wasm'
+    }
+}
+
+dependencies {
+    // GeckoView (Firefox engine) supports crossOriginIsolated / SharedArrayBuffer, which the
+    // stock Android WebView does not — that is the whole reason this lab uses it.
+    implementation 'org.mozilla.geckoview:geckoview:152.0.20260713164047'
+    // Tiny embedded HTTP server: serves the bundled WASM build from 127.0.0.1 (a secure context)
+    // with real COOP/COEP response headers, so Gecko enables cross-origin isolation.
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+}
