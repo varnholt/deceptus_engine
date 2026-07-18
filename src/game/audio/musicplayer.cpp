@@ -5,6 +5,44 @@
 
 #include <chrono>
 #include <filesystem>
+#ifdef __EMSCRIPTEN__
+#include <cstddef>
+#include <fstream>
+#include <string>
+#include <vector>
+#endif
+
+#ifdef __EMSCRIPTEN__
+namespace
+{
+// On Emscripten, miniaudio runs the audio callback on the AudioWorklet thread (a
+// WASM Worker). Streamed music decodes inside that callback, and filesystem
+// syscalls proxied from the worklet thread cannot be awaited, so file-backed
+// sf::Music produces silence. Reading the whole compressed track into memory up
+// front (on the main thread) lets the worklet decode it without touching the
+// filesystem. The returned buffer must outlive the MusicReader because
+// openFromMemory references it rather than copying.
+std::vector<std::byte> readFileBytes(const std::string& path)
+{
+   std::ifstream file(path, std::ios::binary | std::ios::ate);
+   if (!file)
+   {
+      return {};
+   }
+
+   const auto size = static_cast<std::size_t>(file.tellg());
+   file.seekg(0, std::ios::beg);
+
+   std::vector<std::byte> bytes(size);
+   if (size > 0u && !file.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(size)))
+   {
+      return {};
+   }
+
+   return bytes;
+}
+}  // namespace
+#endif
 
 MusicPlayer& MusicPlayer::getInstance()
 {
@@ -24,7 +62,13 @@ MusicPlayer::MusicPlayer()
 
    for (auto music_slot_index = 0u; music_slot_index < _music.size(); ++music_slot_index)
    {
-      auto reader = sf::MusicReader::openFromFile(sf::Path{"data/music/empty.ogg"});
+      _music_data[music_slot_index] = readFileBytes("data/music/empty.ogg");
+      if (_music_data[music_slot_index].empty())
+      {
+         continue;
+      }
+
+      auto reader = sf::MusicReader::openFromMemory(_music_data[music_slot_index].data(), _music_data[music_slot_index].size());
       if (reader.hasValue())
       {
          _music_readers[music_slot_index] = std::make_unique<sf::MusicReader>(std::move(*reader));
@@ -345,7 +389,15 @@ void MusicPlayer::beginTransition(const TrackRequest& request)
    }
 
    auto start_time = std::chrono::high_resolution_clock::now();
-   auto new_reader = sf::MusicReader::openFromFile(sf::Path{request.filename});
+
+   auto track_bytes = readFileBytes(request.filename);
+   if (track_bytes.empty())
+   {
+      Log::Error() << "unable to load music file: " << request.filename;
+      return;
+   }
+
+   auto new_reader = sf::MusicReader::openFromMemory(track_bytes.data(), track_bytes.size());
    auto end_time = std::chrono::high_resolution_clock::now();
 
    auto load_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
@@ -362,11 +414,18 @@ void MusicPlayer::beginTransition(const TrackRequest& request)
 
    const auto next_index = 1 - _current_index;
 
+   // Tear down the slot's existing stream and reader before replacing its backing
+   // bytes: the old reader references _music_data[next_index] via openFromMemory.
    if (_music[next_index])
    {
       _music[next_index]->stop();
    }
    _music[next_index].reset();
+   _music_readers[next_index].reset();
+
+   // Moving the vector transfers the heap allocation without reallocating, so the
+   // pointer captured by new_reader's MemoryInputStream stays valid.
+   _music_data[next_index] = std::move(track_bytes);
    _music_readers[next_index] = std::make_unique<sf::MusicReader>(std::move(*new_reader));
    _music[next_index] = std::make_unique<sf::Music>(*_playback_device, *_music_readers[next_index]);
    _music[next_index]->setRelativeToListener(true);
@@ -397,7 +456,8 @@ void MusicPlayer::beginTransition(const TrackRequest& request)
    auto& current_track = current();
 
    // check if the file exists before attempting to load
-   if (!std::filesystem::exists(request.filename)) {
+   if (!std::filesystem::exists(request.filename))
+   {
       Log::Error() << "music file does not exist: " << request.filename;
       return;
    }

@@ -7,6 +7,7 @@
 #endif
 #include <array>
 #include <chrono>
+#include <cstddef>
 #include <mutex>
 #include <optional>
 #include <vector>
@@ -83,8 +84,10 @@ private:
    /// \brief returns a pointer to the inactive music stream slot used for upcoming transitions, or nullptr if not loaded.
    sf::Music* nextMusic();
 
-   std::unique_ptr<sf::PlaybackDevice> _playback_device;            //!< owned playback device; null if audio context is unavailable
-   std::array<std::unique_ptr<sf::MusicReader>, 2> _music_readers;  //!< music reader (file source) for each stream slot
+   std::unique_ptr<sf::PlaybackDevice> _playback_device;  //!< owned playback device; null if audio context is unavailable
+   std::array<std::vector<std::byte>, 2>
+      _music_data;  //!< compressed track bytes backing each reader; must outlive the MusicReader (openFromMemory references, not copies)
+   std::array<std::unique_ptr<sf::MusicReader>, 2> _music_readers;  //!< music reader (memory source) for each stream slot
    std::array<std::unique_ptr<sf::Music>, 2> _music;                //!< music stream for each slot; null until first track is loaded
 #else
    /// \brief returns the currently active music stream slot.
