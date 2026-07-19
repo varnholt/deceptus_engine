@@ -58,6 +58,11 @@ void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, co
 
    const sf::Texture& smoke_render_texture = _render_texture->getTexture();
    sf::Sprite rt_sprite;
+   // a default-constructed sprite has an empty texture rect (0x0) and would draw nothing; the geometry
+   // must be sized to the render texture explicitly since the texture is supplied via the render states
+   rt_sprite.textureRect = sf::FloatRect{
+      {0.f, 0.f}, {static_cast<float>(smoke_render_texture.getSize().x), static_cast<float>(smoke_render_texture.getSize().y)}
+   };
    rt_sprite.position = _offset_px;
    rt_sprite.scale = {_pixel_ratio, _pixel_ratio};
    rt_sprite.color = _layer_color;
