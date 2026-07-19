@@ -898,6 +898,15 @@ if(EMSCRIPTEN)
             message(FATAL_ERROR "patches/vrsfml-webgl2-uniforms.patch does not apply to the fetched VRSFML source and is not already applied - fix the patch")
         endif()
     endif()
+
+    # VRSFML's miniaudio build does not define MA_ENABLE_AUDIO_WORKLETS, so on
+    # Emscripten miniaudio silently falls back to the deprecated ScriptProcessorNode
+    # backend. ScriptProcessorNode runs on the main browser thread and produces
+    # audio glitches and a phasey "reverb"/"hall" wash on sustained audio under
+    # -pthread. Opting into the AudioWorklet backend moves audio processing onto a
+    # dedicated real-time audio thread and removes the artifact. This requires the
+    # executable to link with -sAUDIO_WORKLET=1 -sWASM_WORKERS=1 (set above).
+    target_compile_definitions(sfml-audio PRIVATE MA_ENABLE_AUDIO_WORKLETS)
 else()
     # Desktop target: vanilla/official SFML, matching master.
     set(SFML_USE_STATIC_STD_LIBS
@@ -1107,7 +1116,7 @@ if(EMSCRIPTEN)
         -sMAX_WEBGL_VERSION=2
         -sFULL_ES3=1
         -sALLOW_MEMORY_GROWTH=1
-        -sINITIAL_MEMORY=67108864
+        -sINITIAL_MEMORY=536870912
         -sEXIT_RUNTIME=0
         -sASYNCIFY=1
         -sASSERTIONS=1
