@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>Deceptus</title>
+
+    <!--
+        Player-facing shell tailored for itch.io. Unlike deceptus.html (the dev
+        shell with the on-page console, output log and emscripten chrome), this
+        page shows only the game canvas and a loading screen. Runtime messages
+        still go to the browser console so problems remain debuggable.
+
+        coi-serviceworker.js must load first: this build uses pthreads, which
+        require SharedArrayBuffer, which the browser only exposes on a
+        cross-origin-isolated page. itch.io does not send the COOP/COEP headers,
+        so the service worker reloads the page once with them applied.
+    -->
+    <script src="coi-serviceworker.js"></script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+        }
+
+        /* center the canvas; the engine sizes it to an integer multiple of the
+           640x360 base view (see GameConfiguration), so the browser never has to
+           resample it. the surrounding area is the letterbox. */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #canvas {
+            background: #000;
+            display: block;
+            outline: none;
+            /* crisp pixels: the display size is an exact integer multiple, so
+               every source pixel becomes a clean NxN block */
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        #loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+            background: #0a0a0c;
+            color: #cfd6c0;
+            font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+            letter-spacing: 0.35em;
+            transition: opacity 0.6s ease;
+            z-index: 10;
+        }
+
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #title {
+            font-size: 30px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #e7ecdc;
+            text-shadow: 0 0 18px rgba(189, 215, 46, 0.25);
+        }
+
+        #track {
+            width: min(320px, 60vw);
+            height: 4px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+        }
+
+        #bar {
+            width: 0%;
+            height: 100%;
+            background: #bdd72e;
+            border-radius: 4px;
+            transition: width 0.2s ease;
+        }
+
+        #label {
+            font-size: 11px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: #7f866f;
+            min-height: 14px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+
+    <div id="loading">
+        <div id="title">Deceptus</div>
+        <div id="track"><div id="bar"></div></div>
+        <div id="label">Loading&hellip;</div>
+    </div>
+
+    <script>
+        var canvasElement = document.getElementById("canvas");
+        var loadingElement = document.getElementById("loading");
+        var barElement = document.getElementById("bar");
+        var labelElement = document.getElementById("label");
+
+        function hideLoadingScreen() {
+            loadingElement.classList.add("hidden");
+        }
+
+        // the engine sizes the canvas drawing buffer to an integer multiple of 640x360 in *device*
+        // pixels. to display it 1:1 on screen (no fractional upscaling on os-scaled displays where
+        // devicePixelRatio != 1, e.g. windows at 125%), the css size must be buffer / dpr. sdl sets the
+        // css size equal to the buffer, so we correct it here whenever the buffer changes.
+        function syncCanvasCssSize() {
+            var devicePixelRatio = window.devicePixelRatio || 1;
+            var cssWidth = (canvasElement.width / devicePixelRatio) + "px";
+            var cssHeight = (canvasElement.height / devicePixelRatio) + "px";
+            if (canvasElement.style.width !== cssWidth) {
+                canvasElement.style.width = cssWidth;
+            }
+            if (canvasElement.style.height !== cssHeight) {
+                canvasElement.style.height = cssHeight;
+            }
+        }
+
+        var canvasSizeObserver = new MutationObserver(syncCanvasCssSize);
+        canvasSizeObserver.observe(canvasElement, {attributes: true, attributeFilter: ["width", "height", "style"]});
+        window.addEventListener("resize", syncCanvasCssSize);
+        syncCanvasCssSize();
+
+        canvasElement.addEventListener(
+            "webglcontextlost",
+            function (event) {
+                event.preventDefault();
+                loadingElement.classList.remove("hidden");
+                labelElement.textContent = "Graphics context lost — please reload";
+            },
+            false
+        );
+
+        var Module = {
+            canvas: canvasElement,
+            // keep diagnostics in the browser console, not on the page
+            print: function () {
+                console.log.apply(console, arguments);
+            },
+            printErr: function () {
+                console.error.apply(console, arguments);
+            },
+            setStatus: function (text) {
+                if (!Module.setStatus.last) {
+                    Module.setStatus.last = { time: Date.now(), text: "" };
+                }
+                if (text === Module.setStatus.last.text) {
+                    return;
+                }
+
+                var progressMatch = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                var now = Date.now();
+                if (progressMatch && now - Module.setStatus.last.time < 30) {
+                    return;
+                }
+                Module.setStatus.last.time = now;
+                Module.setStatus.last.text = text;
+
+                if (progressMatch) {
+                    var value = parseInt(progressMatch[2], 10);
+                    var maximum = parseInt(progressMatch[4], 10);
+                    barElement.style.width = (maximum ? (100 * value / maximum) : 0) + "%";
+                    labelElement.textContent = (progressMatch[1].trim() || "Loading") + "…";
+                } else if (text) {
+                    labelElement.textContent = text;
+                } else {
+                    // empty status = all downloads complete, runtime about to start
+                    barElement.style.width = "100%";
+                    hideLoadingScreen();
+                }
+            },
+            monitorRunDependencies: function () {},
+            // fires once the game has started its main loop
+            postRun: [hideLoadingScreen]
+        };
+
+        Module.setStatus("Downloading…");
+
+        window.onerror = function () {
+            loadingElement.classList.remove("hidden");
+            labelElement.textContent = "Something went wrong — see the browser console";
+        };
+    </script>
+    <script async src="deceptus.js"></script>
+</body>
+</html>

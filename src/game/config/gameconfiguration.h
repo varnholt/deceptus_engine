@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <utility>
 
 /// \brief stores global game settings and handles json persistence.
 struct GameConfiguration
@@ -62,6 +63,14 @@ struct GameConfiguration
    /// clamps _video_mode_width and _video_mode_height to the desktop resolution if needed.
    /// persists changes to disk if the resolution was adjusted.
    void clampResolutionToDesktop();
+
+#ifdef __EMSCRIPTEN__
+   /// \brief computes the largest integer multiple of the base view that fits the browser viewport.
+   /// keeping the render resolution an exact multiple of _view_width x _view_height avoids fractional
+   /// scaling, which would turn the pixel-art fonts into uneven mush.
+   /// \return the video mode width and height as a {width, height} pair.
+   std::pair<int32_t, int32_t> computeViewportVideoMode() const;
+#endif
 
 private:
    /// \brief serializes the current settings into formatted json text.

@@ -1,5 +1,6 @@
 #include "gameconfiguration.h"
 
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -9,6 +10,11 @@
 #include "SFML/Graphics.hpp"
 #include "framework/tools/log.h"
 #include "json/json.hpp"
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/html5.h>
+#endif
 
 using json = nlohmann::json;
 
@@ -166,6 +172,17 @@ GameConfiguration& GameConfiguration::getInstance()
          __instance._windowed_height = __instance._video_mode_height;
       }
 
+#ifdef __EMSCRIPTEN__
+      // on the web the canvas fills the browser/itch viewport, whose size is arbitrary. render at the
+      // largest integer multiple of the 640x360 base view that fits so pixel-art fonts stay crisp.
+      // this overrides the config file's video mode.
+      {
+         const auto [viewport_video_mode_width, viewport_video_mode_height] = __instance.computeViewportVideoMode();
+         __instance._video_mode_width = viewport_video_mode_width;
+         __instance._video_mode_height = viewport_video_mode_height;
+      }
+#endif
+
       __initialized = true;
    }
 
@@ -213,3 +230,19 @@ void GameConfiguration::clampResolutionToDesktop()
    }
 #endif
 }
+
+#ifdef __EMSCRIPTEN__
+std::pair<int32_t, int32_t> GameConfiguration::computeViewportVideoMode() const
+{
+   // work in device pixels (css pixels * device pixel ratio), so the render resolution is an integer
+   // multiple of the base view in *physical* pixels. on displays with os scaling (dpr != 1, e.g. windows
+   // at 125%) the browser upscales the canvas by dpr, so a buffer that is only an integer multiple in css
+   // pixels still gets fractionally resampled to physical pixels, turning the pixel-art fonts into mush.
+   // the shell then sets the canvas css size to buffer/dpr so this device-pixel buffer maps 1:1 on screen.
+   const double device_pixel_ratio = emscripten_get_device_pixel_ratio();
+   const auto available_width = static_cast<int32_t>(EM_ASM_DOUBLE({ return window.innerWidth; }) * device_pixel_ratio);
+   const auto available_height = static_cast<int32_t>(EM_ASM_DOUBLE({ return window.innerHeight; }) * device_pixel_ratio);
+   const auto integer_scale = std::max(1, std::min(available_width / _view_width, available_height / _view_height));
+   return {_view_width * integer_scale, _view_height * integer_scale};
+}
+#endif

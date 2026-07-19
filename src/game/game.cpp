@@ -42,6 +42,7 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #endif
 
 #include <ctime>
@@ -1037,6 +1038,19 @@ void Game::timedDraw()
 int32_t Game::loop()
 {
 #ifdef __EMSCRIPTEN__
+   // re-fit the render resolution whenever the browser/itch viewport changes size (window resize,
+   // fullscreen toggle) so the game keeps filling the window at an integer scale
+   emscripten_set_resize_callback(
+      EMSCRIPTEN_EVENT_TARGET_WINDOW,
+      this,
+      EM_FALSE,
+      [](int, const EmscriptenUiEvent*, void* user_data) -> EM_BOOL
+      {
+         static_cast<Game*>(user_data)->refitToViewport();
+         return EM_FALSE;
+      }
+   );
+
    emscripten_set_main_loop_arg(
       [](void* arg)
       {
@@ -1171,6 +1185,20 @@ void Game::changeResolution(int32_t w, int32_t h)
       _level->createViews();
    }
 }
+
+#ifdef __EMSCRIPTEN__
+void Game::refitToViewport()
+{
+   auto& config = GameConfiguration::getInstance();
+   const auto [new_width, new_height] = config.computeViewportVideoMode();
+   if (new_width == config._video_mode_width && new_height == config._video_mode_height)
+   {
+      return;
+   }
+
+   changeResolution(new_width, new_height);
+}
+#endif
 
 void Game::takeScreenshot()
 {
