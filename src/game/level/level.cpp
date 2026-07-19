@@ -1051,9 +1051,74 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
    const sf::RenderStates level_view_states{.view = *_level_view};
 #endif
 
+   // player silhouette stencil setup: the foreground layers replace the stencil buffer with 1
+   // wherever they render, and the faint transparent-white player silhouette is then drawn only
+   // where the stencil equals 1 - i.e. exactly where the player is hidden behind foreground
+   // geometry. this must go through sf::StencilMode (not raw gl) so the state survives sfml's
+   // per-render-target cache invalidation when tilemaps alternate between the color and normal
+   // targets.
+#ifdef __EMSCRIPTEN__
+   const sf::StencilMode stencil_write_mode{
+      .stencilComparison = sf::StencilComparison::Always,
+      .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
+      .stencilOnly = false,
+      .stencilReference = sf::StencilValue{1u},
+      .stencilMask = sf::StencilValue{0xffu}
+   };
+   const sf::StencilMode stencil_test_mode{
+      .stencilComparison = sf::StencilComparison::Equal,
+      .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
+      .stencilOnly = false,
+      .stencilReference = sf::StencilValue{1u},
+      .stencilMask = sf::StencilValue{0xffu}
+   };
+#else
+   const sf::StencilMode stencil_write_mode{
+      sf::StencilComparison::Always,
+      sf::StencilUpdateOperation::Replace,
+      1,     // reference: mark foreground pixels with 1
+      0xff,  // mask
+      false  // stencilOnly: draw the foreground color too
+   };
+   const sf::StencilMode stencil_test_mode{
+      sf::StencilComparison::Equal,
+      sf::StencilUpdateOperation::Keep,
+      1,     // reference: keep only where stencil equals 1
+      0xff,  // mask
+      false
+   };
+#endif
+
+   const auto stencil_start_layer = PlayerStencil::getStartLayer();
+   const auto stencil_stop_layer = PlayerStencil::getStopLayer();
+
    for (auto z_index = from; z_index <= to; z_index++)
    {
-      PlayerStencil::draw(target, z_index);
+      // reset the stencil mask before the foreground layers start writing into it
+      if (z_index == stencil_start_layer)
+      {
+#ifdef __EMSCRIPTEN__
+         target.clearStencil(sf::StencilValue{0u});
+#else
+         target.clearStencil(0);
+#endif
+      }
+
+      // draw the transparent-white player silhouette wherever the accumulated foreground mask is set
+      if (z_index == stencil_stop_layer)
+      {
+         auto silhouette_states = level_view_states;
+         silhouette_states.stencilMode = stencil_test_mode;
+         std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->drawStencil(target, silhouette_states);
+      }
+
+      // within the foreground range, every drawn layer replaces the stencil buffer with 1
+      auto layer_states = level_view_states;
+      if (z_index >= stencil_start_layer && z_index < stencil_stop_layer)
+      {
+         layer_states.stencilMode = stencil_write_mode;
+      }
+
       drawParallaxMaps(target, z_index);
 
       // draw all tile maps
@@ -1061,7 +1126,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       {
          if (tile_map->getZ() == z_index && !tile_map->isPostLighting())
          {
-            tile_map->draw(target, normal, level_view_states);
+            tile_map->draw(target, normal, layer_states);
          }
       }
 
@@ -1072,13 +1137,13 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          z_index,
          [&player_chunk](const auto& mechanism)
          { return !mechanism->isPostLighting() && !mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); },
-         level_view_states
+         layer_states
       );
 
       // ambient occlusion
       if (z_index == _ambient_occlusion->getZ())
       {
-         _ambient_occlusion->draw(target, level_view_states);
+         _ambient_occlusion->draw(target, layer_states);
       }
 
       // draw enemies
@@ -1088,7 +1153,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          {
             if (checkUpdateMechanism(player_chunk, enemy))
             {
-               enemy->draw(target, normal, level_view_states);
+               enemy->draw(target, normal, layer_states);
             }
          }
       }
@@ -1096,7 +1161,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw player
       if (z_index == static_cast<int32_t>(ZDepth::Player))
       {
-         drawPlayer(target, normal, level_view_states);
+         drawPlayer(target, normal, layer_states);
       }
 
       // draw image layers; post-lighting layers are drawn after the lighting pass
@@ -1108,7 +1173,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
             {
                continue;
             }
-            layer->draw(target, normal, level_view_states);
+            layer->draw(target, normal, layer_states);
          }
       }
    }

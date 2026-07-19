@@ -131,6 +131,11 @@ void Player::initialize()
 {
    _damage_clock.restart();
 
+   if (!_silhouette_shader.loadFromFragment("data/shaders/player_silhouette.frag"))
+   {
+      Log::Error() << "failed to load player silhouette shader";
+   }
+
    _jump._jump_dust_animation_callback = [this](PlayerJump::DustAnimationType animation_type)
    {
       switch (animation_type)
@@ -363,10 +368,20 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    SaveState::getPlayerInfo()._items.draw(color);
 }
 
-void Player::drawStencil(sf::RenderTarget& color)
+void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states)
 {
-   const auto stencil_color = sf::Color{255, 255, 255, 40};
+   const auto stencil_color = sf::Color{255, 255, 255, 25};
    const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
+
+   // the silhouette shader forces the occluded player to transparent white (its rgb comes from the
+   // shader, its alpha from the sprite shape scaled by u_alpha) instead of the dimmed sprite colors
+   auto stencil_states = states;
+   if (_silhouette_shader.isLoaded())
+   {
+      _silhouette_shader.setUniform("u_texture", sf::Shader::CurrentTexture);
+      _silhouette_shader.setUniform("u_alpha", stencil_color.a / 255.f);
+      stencil_states.shader = &_silhouette_shader.native();
+   }
 
    auto current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
@@ -377,7 +392,7 @@ void Player::drawStencil(sf::RenderTarget& color)
 #else
       current_cycle->setPosition(draw_position_px);
 #endif
-      current_cycle->draw(color);
+      current_cycle->draw(color, stencil_states);
    }
 
    auto auxiliary_cycle = _player_animation->getAuxiliaryCycle();
@@ -389,7 +404,7 @@ void Player::drawStencil(sf::RenderTarget& color)
 #else
       auxiliary_cycle->setPosition(draw_position_px);
 #endif
-      auxiliary_cycle->draw(color);
+      auxiliary_cycle->draw(color, stencil_states);
    }
 }
 

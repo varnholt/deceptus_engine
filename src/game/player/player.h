@@ -2,6 +2,7 @@
 
 #include "game/player/playerinterface.h"
 
+#include "framework/tools/sfmlshader.h"
 #include "game/animation/animationpool.h"
 #include "game/constants.h"
 #include "game/effects/waterbubbles.h"
@@ -77,7 +78,7 @@ public:
 
    /// \brief draws a translucent stencil version of current player animations.
    /// \param color color render target.
-   void drawStencil(sf::RenderTarget& color);
+   void drawStencil(sf::RenderTarget& color, const sf::RenderStates& states);
 
    /// \brief runs one full frame of player simulation, including physics interaction, audio, and animations.
    /// \param dt elapsed frame time.
@@ -502,6 +503,8 @@ private:
 
    std::shared_ptr<PlayerAnimation> _player_animation;
    std::deque<PositionedAnimation> _last_animations;
+
+   sfcompat::Shader _silhouette_shader;  //!< tints the occluded-player silhouette to transparent white
 
    Chunk _chunk{0, 0};
    AnimationPool _animation_pool{"data/sprites/animations.json"};

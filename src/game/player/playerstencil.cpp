@@ -6,35 +6,6 @@
 #include "SFML/OpenGL.hpp"
 
 #include "game/constants.h"
-#include "game/player/player.h"
-#include "game/player/playerregistry.h"
-
-void PlayerStencil::replaceAllWithOne()
-{
-   glStencilFunc(GL_ALWAYS, 1, 0xFF);
-   glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-}
-
-void PlayerStencil::keepIfOne()
-{
-   glStencilFunc(GL_EQUAL, 1, 0xFF);
-   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-}
-
-void PlayerStencil::enableTest()
-{
-   glEnable(GL_STENCIL_TEST);
-}
-
-void PlayerStencil::disableTest()
-{
-   glDisable(GL_STENCIL_TEST);
-}
-
-void PlayerStencil::clearStencilBuffer()
-{
-   glClear(GL_STENCIL_BUFFER_BIT);
-}
 
 namespace
 {
@@ -95,22 +66,4 @@ int32_t PlayerStencil::getStartLayer()
 int32_t PlayerStencil::getStopLayer()
 {
    return static_cast<int32_t>(ZDepth::ForegroundMax) - 1;
-}
-
-void PlayerStencil::draw(sf::RenderTarget& target, int32_t z_index)
-{
-   if (z_index == PlayerStencil::getStartLayer())
-   {
-      PlayerStencil::clearStencilBuffer();
-      PlayerStencil::replaceAllWithOne();
-   }
-
-   if (z_index == PlayerStencil::getStopLayer())
-   {
-      PlayerStencil::enableTest();
-      PlayerStencil::keepIfOne();
-      std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->drawStencil(target);
-      PlayerStencil::disableTest();
-      PlayerStencil::clearStencilBuffer();
-   }
 }
