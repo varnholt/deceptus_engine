@@ -224,7 +224,7 @@ Console::Console()
       "item clear",
       [this](const auto&)
       {
-         SaveState::getPlayerInfo()._inventory._items.clear();
+         SaveState::getPlayerInfo()._inventory.clear();
          _log.emplace_back("removed all items");
       }
    );
