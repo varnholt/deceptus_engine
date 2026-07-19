@@ -58,7 +58,7 @@ function initLeverSpike()
       log(string.format("bottom spike rect: x=%.0f y=%.0f", spike_rect.x, spike_rect.y))
       cutscene.load({
          {
-            on = "lever_spike_01_picked_up",
+            on = "lever_spike_cannon_picked_up",
             action = "move_camera",
             x = spike_rect.x + _lever_spike_camera_x_offset_tiles * _pixels_per_tile,
             y = spike_rect.y + spike_rect.height * 0.5,
@@ -92,7 +92,7 @@ function onLeverSpikeEvent()
    if (not _lever_spike_sequence_done) then
       _lever_spike_sequence_done = true
       _disable_on_off_blocks_at = _elapsed + _lever_spike_camera_duration_s + 0.5
-      cutscene.notify("lever_spike_01_picked_up")
+      cutscene.notify("lever_spike_cannon_picked_up")
    else
       _on_off_blocks_enabled = not _on_off_blocks_enabled
       setOnOffBlocksEnabled(_on_off_blocks_enabled)
@@ -305,8 +305,8 @@ function mechanismEvent(object_id, group_id, event_name, value)
       setMechanismEnabled("lever_cell_help", false, "interaction_help")
    end
 
-   -- pan camera to the on/off blocks on first lever_spike_01 toggle, then toggle immediately
-   if (object_id == "lever_spike_01" and event_name == "state") then
+   -- pan camera to the on/off blocks on first lever_spike_cannon toggle, then toggle immediately
+   if (object_id == "lever_spike_cannon" and event_name == "state") then
       onLeverSpikeEvent()
    end
 
