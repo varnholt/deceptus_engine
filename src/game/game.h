@@ -141,6 +141,13 @@ private:
    /// \param h target height in pixels.
    void changeResolution(int32_t w, int32_t h);
 
+#ifdef __EMSCRIPTEN__
+   /// \brief re-fits the render resolution to the current browser viewport (integer multiple of the base
+   /// view), recreating rendering resources only when the size actually changes. invoked on browser resize
+   /// and fullscreen transitions so the game fills the itch/browser window without fractional scaling.
+   void refitToViewport();
+#endif
+
    /// \brief reloads save-state data and loads level at last checkpoint.
    void goToLastCheckpoint();
 
