@@ -154,8 +154,9 @@ set(GAME_FILES
     src/game/audio/audiorange.h
     src/game/audio/audioupdatedata.cpp
     src/game/audio/audioupdatedata.h
-    src/game/audio/musicbackend.cpp
     src/game/audio/musicbackend.h
+    src/game/audio/musicbackenddesktop.cpp
+    src/game/audio/musicbackendemscripten.cpp
     src/game/audio/musicfilenames.cpp
     src/game/audio/musicfilenames.h
     src/game/audio/musicplayer.cpp
