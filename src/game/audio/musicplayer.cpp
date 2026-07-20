@@ -3,46 +3,9 @@
 #include "framework/tools/log.h"
 #include "game/config/gameconfiguration.h"
 
+#include <algorithm>
 #include <chrono>
 #include <filesystem>
-#ifdef __EMSCRIPTEN__
-#include <cstddef>
-#include <fstream>
-#include <string>
-#include <vector>
-#endif
-
-#ifdef __EMSCRIPTEN__
-namespace
-{
-// On Emscripten, miniaudio runs the audio callback on the AudioWorklet thread (a
-// WASM Worker). Streamed music decodes inside that callback, and filesystem
-// syscalls proxied from the worklet thread cannot be awaited, so file-backed
-// sf::Music produces silence. Reading the whole compressed track into memory up
-// front (on the main thread) lets the worklet decode it without touching the
-// filesystem. The returned buffer must outlive the MusicReader because
-// openFromMemory references it rather than copying.
-std::vector<std::byte> readFileBytes(const std::string& path)
-{
-   std::ifstream file(path, std::ios::binary | std::ios::ate);
-   if (!file)
-   {
-      return {};
-   }
-
-   const auto size = static_cast<std::size_t>(file.tellg());
-   file.seekg(0, std::ios::beg);
-
-   std::vector<std::byte> bytes(size);
-   if (size > 0u && !file.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(size)))
-   {
-      return {};
-   }
-
-   return bytes;
-}
-}  // namespace
-#endif
 
 MusicPlayer& MusicPlayer::getInstance()
 {
@@ -50,44 +13,8 @@ MusicPlayer& MusicPlayer::getInstance()
    return instance;
 }
 
-MusicPlayer::MusicPlayer()
+MusicPlayer::MusicPlayer() : _backend(MusicBackend::create())
 {
-#ifdef __EMSCRIPTEN__
-   auto handle = sf::AudioContext::getDefaultPlaybackDeviceHandle();
-   if (!handle.hasValue())
-   {
-      return;
-   }
-   _playback_device = std::make_unique<sf::PlaybackDevice>(*handle);
-
-   for (auto music_slot_index = 0u; music_slot_index < _music.size(); ++music_slot_index)
-   {
-      _music_data[music_slot_index] = readFileBytes("data/music/empty.ogg");
-      if (_music_data[music_slot_index].empty())
-      {
-         continue;
-      }
-
-      auto reader = sf::MusicReader::openFromMemory(_music_data[music_slot_index].data(), _music_data[music_slot_index].size());
-      if (reader.hasValue())
-      {
-         _music_readers[music_slot_index] = std::make_unique<sf::MusicReader>(std::move(*reader));
-         _music[music_slot_index] = std::make_unique<sf::Music>(*_playback_device, *_music_readers[music_slot_index]);
-         _music[music_slot_index]->setRelativeToListener(true);
-      }
-   }
-#else
-   if (!_music[0].openFromFile("data/music/empty.ogg"))
-   {
-   }
-
-   if (!_music[1].openFromFile("data/music/empty.ogg"))
-   {
-   }
-
-   _music[0].setRelativeToListener(true);
-   _music[1].setRelativeToListener(true);
-#endif
 }
 
 void MusicPlayer::update(const sf::Time& dt)
@@ -95,6 +22,20 @@ void MusicPlayer::update(const sf::Time& dt)
    std::scoped_lock lock(_mutex);
 
    const auto dt_ms = std::chrono::milliseconds(dt.asMilliseconds());
+
+   // a track is being opened into the inactive slot; wait for it to finish before
+   // starting playback or any further transition. The desktop backend loads on a worker
+   // thread (so the frame never blocks), the Emscripten backend loads synchronously —
+   // either way the state machine treats it the same.
+   if (_loading_request.has_value())
+   {
+      const auto next_index = 1 - _current_index;
+      if (_backend->isLoadReady(next_index))
+      {
+         activateLoadedTrack(_backend->loadSucceeded(next_index));
+      }
+      return;
+   }
 
    switch (_transition_state)
    {
@@ -125,40 +66,18 @@ void MusicPlayer::updateCrossfade(std::chrono::milliseconds dt)
    _crossfade_elapsed += dt;
    const auto normalized_time = std::min(1.0f, static_cast<float>(_crossfade_elapsed.count()) / _crossfade_duration.count());
 
-#ifdef __EMSCRIPTEN__
-   if (auto* next_music = nextMusic())
-   {
-      next_music->setVolume(volume() * normalized_time);
-   }
-   if (auto* cur_music = currentMusic())
-   {
-      cur_music->setVolume(volume() * (1.0f - normalized_time));
-   }
+   const auto next_index = 1 - _current_index;
+   _backend->setVolume(next_index, volume() * normalized_time);
+   _backend->setVolume(_current_index, volume() * (1.0f - normalized_time));
 
    if (_crossfade_elapsed >= _crossfade_duration)
    {
-      if (auto* cur_music = currentMusic())
-      {
-         cur_music->stop();
-         cur_music->setVolume(volume());
-      }
-      _current_index = 1 - _current_index;  // swap
+      _backend->stop(_current_index);
+      _backend->setVolume(_current_index, volume());
+      _current_index = next_index;  // swap
       _transition_state = MusicPlayerTypes::MusicTransitionState::None;
       _pending_request.reset();
    }
-#else
-   next().setVolume(volume() * normalized_time);
-   current().setVolume(volume() * (1.0f - normalized_time));
-
-   if (_crossfade_elapsed >= _crossfade_duration)
-   {
-      current().stop();
-      current().setVolume(volume());
-      _current_index = 1 - _current_index;  // swap
-      _transition_state = MusicPlayerTypes::MusicTransitionState::None;
-      _pending_request.reset();
-   }
-#endif
 }
 
 void MusicPlayer::updateFadeOut(std::chrono::milliseconds dt)
@@ -166,25 +85,11 @@ void MusicPlayer::updateFadeOut(std::chrono::milliseconds dt)
    _fade_out_elapsed += dt;
    const auto normalized_time = std::min(1.0f, static_cast<float>(_fade_out_elapsed.count()) / _fade_out_duration.count());
 
-#ifdef __EMSCRIPTEN__
-   if (auto* cur_music = currentMusic())
-   {
-      cur_music->setVolume(volume() * (1.0f - normalized_time));
-   }
-#else
-   current().setVolume(volume() * (1.0f - normalized_time));
-#endif
+   _backend->setVolume(_current_index, volume() * (1.0f - normalized_time));
 
    if (_fade_out_elapsed >= _fade_out_duration)
    {
-#ifdef __EMSCRIPTEN__
-      if (auto* cur_music = currentMusic())
-      {
-         cur_music->stop();
-      }
-#else
-      current().stop();
-#endif
+      _backend->stop(_current_index);
 
       if (_pending_request.has_value())
       {
@@ -205,7 +110,7 @@ void MusicPlayer::processPendingRequest()
       return;
    }
 
-   const auto& request = _pending_request.value();
+   const auto request = _pending_request.value();
 
    switch (request.transition)
    {
@@ -218,11 +123,7 @@ void MusicPlayer::processPendingRequest()
 
       case MusicPlayerTypes::TransitionType::LetCurrentFinish:
       {
-#ifdef __EMSCRIPTEN__
-         if (currentMusic() == nullptr || !currentMusic()->isPlaying())
-#else
-         if (current().getStatus() != sf::SoundStream::Status::Playing)
-#endif
+         if (!_backend->isPlaying(_current_index))
          {
             beginTransition(request);
             _pending_request.reset();
@@ -232,10 +133,11 @@ void MusicPlayer::processPendingRequest()
 
       case MusicPlayerTypes::TransitionType::Crossfade:
       {
+         // the crossfade only begins once the track finishes loading; activateLoadedTrack()
+         // sets the Crossfading state. Clear the pending request so it is not re-processed
+         // while the load is in flight.
          beginTransition(request);
-         _transition_state = MusicPlayerTypes::MusicTransitionState::Crossfading;
-         _crossfade_elapsed = std::chrono::milliseconds{0};
-         _crossfade_duration = request.duration;
+         _pending_request.reset();
          break;
       }
 
@@ -254,17 +156,10 @@ void MusicPlayer::processPendingRequest()
 
 void MusicPlayer::handleTrackFinished()
 {
-#ifdef __EMSCRIPTEN__
-   if (currentMusic() != nullptr && currentMusic()->isPlaying())
+   if (_backend->isPlaying(_current_index))
    {
       return;
    }
-#else
-   if (current().getStatus() == sf::SoundStream::Status::Playing)
-   {
-      return;
-   }
-#endif
 
    switch (_post_action)
    {
@@ -275,14 +170,7 @@ void MusicPlayer::handleTrackFinished()
 
       case MusicPlayerTypes::PostPlaybackAction::Loop:
       {
-#ifdef __EMSCRIPTEN__
-         if (auto* cur_music = currentMusic())
-         {
-            cur_music->play();
-         }
-#else
-         current().play();
-#endif
+         _backend->play(_current_index);
          break;
       }
 
@@ -303,28 +191,6 @@ void MusicPlayer::handleTrackFinished()
    }
 }
 
-#ifdef __EMSCRIPTEN__
-sf::Music* MusicPlayer::currentMusic()
-{
-   return _music[_current_index].get();
-}
-
-sf::Music* MusicPlayer::nextMusic()
-{
-   return _music[1 - _current_index].get();
-}
-#else
-sf::Music& MusicPlayer::current()
-{
-   return _music[_current_index];
-}
-
-sf::Music& MusicPlayer::next()
-{
-   return _music[1 - _current_index];
-}
-#endif
-
 void MusicPlayer::queueTrack(const TrackRequest& request)
 {
    std::scoped_lock lock(_mutex);
@@ -335,20 +201,13 @@ void MusicPlayer::stop()
 {
    std::scoped_lock lock(_mutex);
 
-#ifdef __EMSCRIPTEN__
-   for (auto& music_ptr : _music)
-   {
-      if (music_ptr)
-      {
-         music_ptr->stop();
-      }
-   }
-#else
-   for (auto& music : _music)
-   {
-      music.stop();
-   }
-#endif
+   // wait for any in-flight background load to finish so the backend is not opening a
+   // stream while we stop it.
+   _backend->waitForLoad(1 - _current_index);
+   _loading_request.reset();
+
+   _backend->stop(0);
+   _backend->stop(1);
 
    _pending_request.reset();
    _transition_state = MusicPlayerTypes::MusicTransitionState::None;
@@ -364,97 +223,11 @@ void MusicPlayer::setPlaylist(const std::vector<std::string>& playlist)
 
 void MusicPlayer::adjustActiveMusicVolume()
 {
-#ifdef __EMSCRIPTEN__
-   if (auto* cur_music = currentMusic())
-   {
-      cur_music->setVolume(volume());
-   }
-#else
-   current().setVolume(volume());
-#endif
+   _backend->setVolume(_current_index, volume());
 }
 
 void MusicPlayer::beginTransition(const TrackRequest& request)
 {
-#ifdef __EMSCRIPTEN__
-   if (!_playback_device)
-   {
-      return;
-   }
-
-   if (!std::filesystem::exists(request.filename))
-   {
-      Log::Error() << "music file does not exist: " << request.filename;
-      return;
-   }
-
-   auto start_time = std::chrono::high_resolution_clock::now();
-
-   auto track_bytes = readFileBytes(request.filename);
-   if (track_bytes.empty())
-   {
-      Log::Error() << "unable to load music file: " << request.filename;
-      return;
-   }
-
-   auto new_reader = sf::MusicReader::openFromMemory(track_bytes.data(), track_bytes.size());
-   auto end_time = std::chrono::high_resolution_clock::now();
-
-   auto load_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-   if (!new_reader.hasValue())
-   {
-      Log::Error() << "unable to load music file: " << request.filename;
-      return;
-   }
-   else if (load_duration.count() >= 100)
-   {
-      Log::Info() << "Music load time for " << request.filename << ": " << load_duration.count() << " ms (Main thread - may cause hiccups)";
-   }
-
-   const auto next_index = 1 - _current_index;
-
-   // Tear down the slot's existing stream and reader before replacing its backing
-   // bytes: the old reader references _music_data[next_index] via openFromMemory.
-   if (_music[next_index])
-   {
-      _music[next_index]->stop();
-   }
-   _music[next_index].reset();
-   _music_readers[next_index].reset();
-
-   // Moving the vector transfers the heap allocation without reallocating, so the
-   // pointer captured by new_reader's MemoryInputStream stays valid.
-   _music_data[next_index] = std::move(track_bytes);
-   _music_readers[next_index] = std::make_unique<sf::MusicReader>(std::move(*new_reader));
-   _music[next_index] = std::make_unique<sf::Music>(*_playback_device, *_music_readers[next_index]);
-   _music[next_index]->setRelativeToListener(true);
-
-   if (request.transition == MusicPlayerTypes::TransitionType::Crossfade)
-   {
-      _music[next_index]->setVolume(0.f);
-   }
-   else
-   {
-      _music[next_index]->setVolume(volume());
-      if (_music[_current_index])
-      {
-         _music[_current_index]->stop();
-      }
-   }
-
-   _music[next_index]->play();
-   _post_action = request.post_action;
-
-   if (request.transition == MusicPlayerTypes::TransitionType::ImmediateSwitch ||
-       request.transition == MusicPlayerTypes::TransitionType::LetCurrentFinish)
-   {
-      _current_index = 1 - _current_index;
-   }
-#else
-   auto& next_track = next();
-   auto& current_track = current();
-
    // check if the file exists before attempting to load
    if (!std::filesystem::exists(request.filename))
    {
@@ -462,42 +235,55 @@ void MusicPlayer::beginTransition(const TrackRequest& request)
       return;
    }
 
-   // time the music file loading operation
-   auto start_time = std::chrono::high_resolution_clock::now();
-   bool success = next_track.openFromFile(request.filename);
-   auto end_time = std::chrono::high_resolution_clock::now();
+   // Load the track into the inactive slot. beginLoad is asynchronous on desktop and
+   // synchronous on Emscripten; activateLoadedTrack() picks the result up through the
+   // loading branch in update() once the backend reports it ready.
+   _loading_request = request;
+   _backend->beginLoad(1 - _current_index, request.filename);
+}
 
-   auto load_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+void MusicPlayer::activateLoadedTrack(bool load_succeeded)
+{
+   const auto request = _loading_request.value();
+   _loading_request.reset();
 
-   if (!success)
+   if (!load_succeeded)
    {
       Log::Error() << "unable to load music file: " << request.filename;
+      _transition_state = MusicPlayerTypes::MusicTransitionState::None;
       return;
    }
-   else if (load_duration.count() >= 100)
-   {
-      Log::Info() << "Music load time for " << request.filename << ": " << load_duration.count() << " ms (Main thread - may cause hiccups)";
-   }
+
+   const auto next_index = 1 - _current_index;
 
    if (request.transition == MusicPlayerTypes::TransitionType::Crossfade)
    {
-      next_track.setVolume(0.f);
+      _backend->setVolume(next_index, 0.f);
    }
    else
    {
-      next_track.setVolume(100.f);
-      current_track.stop();
+#ifdef __EMSCRIPTEN__
+      _backend->setVolume(next_index, volume());
+#else
+      _backend->setVolume(next_index, 100.f);
+#endif
+      _backend->stop(_current_index);
    }
 
-   next_track.play();
+   _backend->play(next_index);
    _post_action = request.post_action;
 
    if (request.transition == MusicPlayerTypes::TransitionType::ImmediateSwitch ||
        request.transition == MusicPlayerTypes::TransitionType::LetCurrentFinish)
    {
-      _current_index = 1 - _current_index;
+      _current_index = next_index;
    }
-#endif
+   else if (request.transition == MusicPlayerTypes::TransitionType::Crossfade)
+   {
+      _transition_state = MusicPlayerTypes::MusicTransitionState::Crossfading;
+      _crossfade_elapsed = std::chrono::milliseconds{0};
+      _crossfade_duration = request.duration;
+   }
 }
 
 float MusicPlayer::volume() const
