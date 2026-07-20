@@ -38,7 +38,8 @@ _points_left = false
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
    addShapeRect(0.3, 0.15, 0, 0.05)
-   updateSpriteRect(0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT)
+   local y_offset = _points_left and 0 or FLIP_OFFSET
+   updateSpriteRect(0, 0, y_offset, SPRITE_WIDTH, SPRITE_HEIGHT)
 end
 
 
@@ -96,6 +97,12 @@ function writeProperty(parameter, value)
       _frequency = value
    elseif (parameter == "amplitude") then
       _amplitude = value
+   elseif (parameter == "starting_alignment") then
+      if (value == "left") then
+         _points_left = true
+      elseif (value == "right") then
+         _points_left = false
+      end
    end
 end
 
