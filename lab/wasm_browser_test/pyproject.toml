@@ -3,7 +3,7 @@ name = "wasm-browser-test"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "pillow>=12.2.0",
+    "pillow>=12.3.0",
     "pytest>=8.0.0",
     "selenium>=4.20.0",
 ]
