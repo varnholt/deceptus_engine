@@ -150,6 +150,9 @@ set(GAME_FILES
     src/game/animation/framemapper.h
     src/game/audio/audio.cpp
     src/game/audio/audio.h
+    src/game/audio/audiobackend.h
+    src/game/audio/audiobackenddesktop.cpp
+    src/game/audio/audiobackendemscripten.cpp
     src/game/audio/audiorange.cpp
     src/game/audio/audiorange.h
     src/game/audio/audioupdatedata.cpp
