@@ -750,6 +750,63 @@ void Console::nextCommand()
    _command = _history[static_cast<size_t>(_history_index)];
 }
 
+void Console::complete()
+{
+   if (_command.empty())
+   {
+      return;
+   }
+
+   std::vector<std::string> matches;
+   for (const auto& [command_name, callback] : _registered_commands)
+   {
+      if (command_name.size() >= _command.size() && command_name.compare(0, _command.size(), _command) == 0)
+      {
+         matches.push_back(command_name);
+      }
+   }
+
+   if (matches.empty())
+   {
+      return;
+   }
+
+   std::ranges::sort(matches);
+
+   if (matches.size() == 1)
+   {
+      _command = matches.front() + ' ';
+      return;
+   }
+
+   // reduce all matches to their longest common prefix so the input can be extended as far as it is unambiguous
+   std::string common_prefix = matches.front();
+   for (const auto& match : matches)
+   {
+      const auto comparable_length = std::min(common_prefix.size(), match.size());
+      size_t prefix_length = 0;
+      while (prefix_length < comparable_length && common_prefix[prefix_length] == match[prefix_length])
+      {
+         ++prefix_length;
+      }
+      common_prefix.resize(prefix_length);
+   }
+
+   _command = common_prefix;
+
+   // print the remaining candidates so the user can decide how to continue typing
+   std::string candidate_line = "  ";
+   for (size_t index = 0; index < matches.size(); ++index)
+   {
+      if (index > 0)
+      {
+         candidate_line += "  ";
+      }
+      candidate_line += matches[index];
+   }
+   _log.push_back(candidate_line);
+}
+
 void Console::addCommand(const std::string& command, CommandFunction callback)
 {
    _registered_commands[command] = callback;
@@ -842,6 +899,10 @@ void Console::processEvent(sf::Keyboard::Key key)
    else if (key == sf::Keyboard::Key::Down)
    {
       nextCommand();
+   }
+   else if (key == sf::Keyboard::Key::Tab)
+   {
+      complete();
    }
    else if (key == sf::Keyboard::Key::F12)
    {
