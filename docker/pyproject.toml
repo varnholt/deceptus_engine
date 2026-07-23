@@ -1,0 +1,10 @@
+[project]
+name = "deceptus-docker-tools"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "docker",
+]
+
+[project.scripts]
+build-and-package = "build_and_package:main"
