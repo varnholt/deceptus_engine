@@ -1385,7 +1385,7 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const
    // draw sprite on top of projectiles
    for (auto& weapon : _weapons)
    {
-      weapon->draw(target);
+      weapon->draw(target, states);
    }
 
    for (auto i = 0u; i < _sprites.size(); i++)
