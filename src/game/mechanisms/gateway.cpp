@@ -143,6 +143,7 @@ std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, c
    render_texture.clear(sf::Color::Transparent);
 
    sf::Sprite sprite;
+   sprite.textureRect = sf::FloatRect{{0.0f, 0.0f}, {width_px, height_px}};
    sprite.origin = {width_px / 2.0f, height_px / 2.0f};
    sprite.rotation = angle;
    sprite.position = {width_px / 2.0f, height_px / 2.0f};
