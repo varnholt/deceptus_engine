@@ -5,6 +5,7 @@
 
 #include "json/json.hpp"
 
+#include "framework/tools/gamepaths.h"
 #include "game/player/playerinfo.h"
 
 /// \brief stores one save-slot snapshot, including player info and per-level state.
@@ -60,15 +61,15 @@ struct SaveState
 
    /// \brief loads save slots from a json file and deserializes into the static array.
    /// \param filename path to the save json file.
-   static void deserializeFromFile(const std::string& filename = "data/config/savestate.json");
+   static void deserializeFromFile(const std::string& filename = GamePaths::getPreferencesFile("savestate.json").string());
 
    /// \brief serializes all save slots and writes them to a json file.
    /// \param filename path to the destination save json file.
-   static void serializeToFile(const std::string& filename = "data/config/savestate.json");
+   static void serializeToFile(const std::string& filename = GamePaths::getPreferencesFile("savestate.json").string());
 
    /// \brief patches only the current slot's player stats in an existing save file.
    /// \param filename path to the save json file to update.
-   void writePlayerStatsToFile(const std::string& filename = "data/config/savestate.json") const;
+   void writePlayerStatsToFile(const std::string& filename = GamePaths::getPreferencesFile("savestate.json").string()) const;
 
 private:
    /// \brief serializes all slots into formatted json text.

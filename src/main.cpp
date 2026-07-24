@@ -10,6 +10,10 @@
 #include <memory>
 #include <sstream>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include "framework/tools/gamepaths.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/logthread.h"
@@ -48,6 +52,26 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /
 int main(int /*argc*/, char** /*argv*/)
 #endif
 {
+#ifdef __EMSCRIPTEN__
+   // mount a persistent IDBFS-backed filesystem and load its contents from IndexedDB before any
+   // settings or save files are resolved. ASYNCIFY lets us block until the initial load completes,
+   // so GamePaths sees the persisted data on startup.
+   EM_ASM(FS.mkdir('/deceptus'); FS.mount(IDBFS, {}, '/deceptus'); Module.__persistent_fs_synced = 0; FS.syncfs(
+      true,
+      function(error) {
+         if (error)
+         {
+            console.error("initial FS.syncfs failed:", error);
+         }
+         Module.__persistent_fs_synced = 1;
+      }
+   ););
+   while (emscripten_run_script_int("Module.__persistent_fs_synced") == 0)
+   {
+      emscripten_sleep(50);
+   }
+#endif
+
    GamePaths::createGameDirectories();
 
    // setup logging to file

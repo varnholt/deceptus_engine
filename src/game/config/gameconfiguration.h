@@ -4,6 +4,8 @@
 #include <string>
 #include <utility>
 
+#include "framework/tools/gamepaths.h"
+
 /// \brief stores global game settings and handles json persistence.
 struct GameConfiguration
 {
@@ -36,11 +38,11 @@ struct GameConfiguration
 
    /// \brief loads configuration values from a json file.
    /// \param filename source configuration file path.
-   void deserializeFromFile(const std::string& filename = "data/config/game.json");
+   void deserializeFromFile(const std::string& filename = GamePaths::getPreferencesFile("game.json").string());
 
    /// \brief writes current configuration values to a json file.
    /// \param filename destination configuration file path.
-   void serializeToFile(const std::string& filename = "data/config/game.json");
+   void serializeToFile(const std::string& filename = GamePaths::getPreferencesFile("game.json").string());
 
    /// \brief returns the built-in default configuration values.
    /// \return shared default configuration object.

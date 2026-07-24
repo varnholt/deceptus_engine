@@ -1128,6 +1128,8 @@ if(EMSCRIPTEN)
         -sASSERTIONS=1
         -sAUDIO_WORKLET=1
         -sWASM_WORKERS=1
+        # link the IDBFS backend so settings/saves can be persisted to IndexedDB (see src/main.cpp)
+        -lidbfs.js
         "-sEXPORTED_RUNTIME_METHODS=['HEAPU32','HEAPU8','HEAP32','HEAPF32','HEAPU16']"
         --preload-file ${CMAKE_SOURCE_DIR}/data@data
     )
