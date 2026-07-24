@@ -55,6 +55,12 @@ public:
    /// \brief recalls the next command from history into the input line.
    void nextCommand();
 
+   /// \brief completes the current command line against the registered commands.
+   /// on a unique prefix match the command is filled in and a trailing space is appended;
+   /// on multiple matches the input is extended to the longest common prefix and the
+   /// remaining candidates are printed to the console log.
+   void complete();
+
    /// \brief registers an external command callback and exposes it in the help system.
    /// \param command command keyword used to trigger the callback.
    /// \param callback function invoked when the command is entered.
