@@ -108,6 +108,9 @@ void SaveState::serializeToFile(const std::string& filename)
    std::string data = serialize();
    std::ofstream file(filename);
    file << data;
+   file.close();
+
+   GamePaths::flushToPersistentStorage();
 }
 
 std::string SaveState::serialize()
@@ -178,4 +181,6 @@ void SaveState::writePlayerStatsToFile(const std::string& filename) const
 
    output_file << save_states_json.dump(4);
    output_file.close();
+
+   GamePaths::flushToPersistentStorage();
 }

@@ -2,12 +2,20 @@
 #include <cstdlib>
 #include <stdexcept>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 namespace GamePaths
 {
 
 std::filesystem::path getGameDataDir()
 {
-#ifdef _WIN32
+#ifdef __EMSCRIPTEN__
+   // on the web the writable tree lives inside the IDBFS mount created in main(), which is
+   // synchronized to IndexedDB so it survives page reloads
+   return std::filesystem::path("/deceptus");
+#elif defined(_WIN32)
    // on windows, use %APPDATA%\deceptus
    const char* appdata_folder = std::getenv("APPDATA");
    if (appdata_folder)
@@ -41,6 +49,41 @@ std::filesystem::path getSettingsDir()
    auto settings_dir = getGameDataDir() / "settings";
    std::filesystem::create_directories(settings_dir);
    return settings_dir;
+}
+
+std::filesystem::path getPreferencesFile(const std::string& filename)
+{
+   const auto target = getSettingsDir() / filename;
+
+   // seed the writable copy from the bundled default on first access; on desktop this also migrates
+   // progress written by earlier versions that still lived in the read-only data/config tree
+   if (!std::filesystem::exists(target))
+   {
+      const auto bundled_default = std::filesystem::path("data/config") / filename;
+      if (std::filesystem::exists(bundled_default))
+      {
+         std::error_code error_code;
+         std::filesystem::copy_file(bundled_default, target, error_code);
+      }
+   }
+
+   return target;
+}
+
+void flushToPersistentStorage()
+{
+#ifdef __EMSCRIPTEN__
+   // persist the IDBFS mount back to IndexedDB so the write survives a page reload
+   EM_ASM(FS.syncfs(
+      false,
+      function(error) {
+         if (error)
+         {
+            console.error("FS.syncfs failed:", error);
+         }
+      }
+   ););
+#endif
 }
 
 std::filesystem::path getLogDir()

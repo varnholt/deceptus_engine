@@ -137,6 +137,9 @@ void GameConfiguration::serializeToFile(const std::string& filename)
    std::string data = serialize();
    std::ofstream file(filename);
    file << data;
+   file.close();
+
+   GamePaths::flushToPersistentStorage();
 }
 
 GameConfiguration& GameConfiguration::getDefaults()
