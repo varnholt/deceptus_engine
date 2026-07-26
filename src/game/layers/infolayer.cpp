@@ -354,15 +354,16 @@ void InfoLayer::updateHealthLayerOffsets()
       }
    }
 
-   auto effect_elapsed = false;
-
+   // when an effect runs out its offset is snapped to the final value rather than left wherever the
+   // last evaluated frame happened to put it. a single long frame (a fullscreen transition, a level
+   // load) can step the normalized time straight past 1.0, which used to leave the hud parked a few
+   // pixels short of its target for good, since nothing touches the offset afterwards.
    if (_hide_time_health.has_value())
    {
       // evaluate hide time
       const auto time_diff_s = (now - _hide_time_health.value()).asSeconds();
       const auto time_diff_norm = time_diff_s / duration_hide_s;
-      effect_elapsed = time_diff_norm > 1.0f;
-      if (!effect_elapsed)
+      if (time_diff_norm <= 1.0f)
       {
          const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
          const auto time_diff_eased = Easings::easeInQuad<float>(time_diff_norm_clamped);
@@ -370,6 +371,7 @@ void InfoLayer::updateHealthLayerOffsets()
       }
       else
       {
+         _player_health_x_offset = x_offset_hidden;
          _hide_time_health.reset();
       }
    }
@@ -377,9 +379,8 @@ void InfoLayer::updateHealthLayerOffsets()
    {
       // evaluate show time
       const auto time_diff_s = (now - _show_time_health.value()).asSeconds();
-      const auto time_diff_norm = time_diff_s / duration_hide_s;
-      effect_elapsed = time_diff_norm > 1.0f;
-      if (!effect_elapsed)
+      const auto time_diff_norm = time_diff_s / duration_show_s;
+      if (time_diff_norm <= 1.0f)
       {
          const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
          const auto time_diff_eased = Easings::easeOutCubic<float>(time_diff_norm_clamped);
@@ -387,13 +388,9 @@ void InfoLayer::updateHealthLayerOffsets()
       }
       else
       {
+         _player_health_x_offset = 0.0f;
          _show_time_health.reset();
       }
-   }
-
-   if (effect_elapsed)
-   {
-      return;
    }
 
    std::ranges::for_each(
