@@ -89,6 +89,12 @@ public:
    std::optional<Animation> getAnimation() const;
 
 protected:
+   /// \brief applies the page's screen-space view to the given render states.
+   ///        needed because 'draw' takes its states by value, so subclasses drawing after the base
+   ///        implementation would otherwise lose the view (which travels in the states on wasm).
+   /// \param states render states to update; no-op on desktop, where the view lives on the target.
+   void applyPageView(sf::RenderStates& states) const;
+
    /// \brief loads layers from the configured PSD file into drawable page structures.
    void load();
 

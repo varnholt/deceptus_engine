@@ -47,15 +47,22 @@ std::ostream& operator<<(std::ostream& os, InGameMenuPage::Animation animation)
    return os;
 }
 
-void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
+void InGameMenuPage::applyPageView(sf::RenderStates& states) const
 {
+#ifdef __EMSCRIPTEN__
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
+   states.view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
+#endif
+}
 
+void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
+{
 #ifdef __EMSCRIPTEN__
-   const auto view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
-   states.view = view;
+   applyPageView(states);
 #else
+   const auto w = GameConfiguration::getInstance()._view_width;
+   const auto h = GameConfiguration::getInstance()._view_height;
    sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
 #endif

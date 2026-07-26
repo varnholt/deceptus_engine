@@ -133,6 +133,7 @@ InGameMenuArchives::InGameMenuArchives()
 void InGameMenuArchives::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    InGameMenuPage::draw(window, states);
+   applyPageView(states);
 
    if (_selected_index == 2)
    {

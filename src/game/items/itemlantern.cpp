@@ -28,7 +28,7 @@ ItemLantern::ItemLantern()
    sfcompat::setTextureRect(*_helmet_sprite_l, sf::IntRect({24, 1776}, {24, 24}));
 }
 
-void ItemLantern::draw(sf::RenderTarget& target)
+void ItemLantern::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    if (!_enabled)
    {
@@ -46,9 +46,13 @@ void ItemLantern::draw(sf::RenderTarget& target)
    }
 
 #ifdef __EMSCRIPTEN__
-   target.draw(player->isPointingRight() ? *_helmet_sprite_r : *_helmet_sprite_l, sf::RenderStates{.texture = _player_texture.get()});
+   // the incoming states carry the level view; without it the helmet would be drawn with the
+   // render target's default view and end up outside the visible camera rect
+   auto helmet_states = states;
+   helmet_states.texture = _player_texture.get();
+   target.draw(player->isPointingRight() ? *_helmet_sprite_r : *_helmet_sprite_l, helmet_states);
 #else
-   target.draw(player->isPointingRight() ? *_helmet_sprite_r : *_helmet_sprite_l);
+   target.draw(player->isPointingRight() ? *_helmet_sprite_r : *_helmet_sprite_l, states);
 #endif
 }
 
