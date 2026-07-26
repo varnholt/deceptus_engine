@@ -20,13 +20,13 @@ void ItemSystem::update(const sf::Time& dt)
    }
 }
 
-void ItemSystem::draw(sf::RenderTarget& target)
+void ItemSystem::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    for (auto& item : _slots)
    {
       if (item)
       {
-         item->draw(target);
+         item->draw(target, states);
       }
    }
 }

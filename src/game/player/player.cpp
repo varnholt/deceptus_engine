@@ -365,7 +365,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    );
 
    // draw equipped items
-   SaveState::getPlayerInfo()._items.draw(color);
+   SaveState::getPlayerInfo()._items.draw(color, states);
 }
 
 void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states)

@@ -1,6 +1,6 @@
 #include "item.h"
 
-void Item::draw(sf::RenderTarget& /*target*/)
+void Item::draw(sf::RenderTarget& /*target*/, const sf::RenderStates& /*states*/)
 {
 }
 

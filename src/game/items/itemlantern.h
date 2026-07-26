@@ -15,7 +15,8 @@ public:
 
    /// \brief draws the lantern light circle when the item is enabled.
    /// \param target SFML render target that receives the light sprite.
-   void draw(sf::RenderTarget& target) override;
+   /// \param states render states applied to the helmet sprite (carries .view for WASM camera transform).
+   void draw(sf::RenderTarget& target, const sf::RenderStates& states) override;
 
    /// \brief updates the light position to follow the current player.
    /// \param dt elapsed frame time since the previous update.
