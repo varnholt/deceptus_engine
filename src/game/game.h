@@ -70,6 +70,10 @@ private:
    /// \brief creates or recreates window and render textures from configuration.
    void initializeWindow();
 
+   /// \brief creates or recreates the render textures and deferred render targets for the
+   ///        configured video mode, without touching the window itself.
+   void initializeRenderTargets();
+
    /// \brief initializes game controller integration and pause bindings.
    void initializeController();
 
