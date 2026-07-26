@@ -335,16 +335,24 @@ void InfoLayer::updateHealthLayerOffsets()
    // -> move out health bar
    // if game state 'not running' detected
    // -> reset
-   if (GameState::getInstance().getMode() == ExecutionMode::NotRunning)
-   {
-      _hide_time_health.reset();
-      _show_time_health.reset();
-      _player_health_x_offset = x_offset_hidden;
-   }
-
    const auto now = GlobalClock::getInstance().getElapsedTime();
    constexpr auto duration_show_s = 1.0f;
    constexpr auto duration_hide_s = 1.0f;
+
+   if (GameState::getInstance().getMode() == ExecutionMode::NotRunning)
+   {
+      _hide_time_health.reset();
+      _player_health_x_offset = x_offset_hidden;
+
+      // a pending slide-in must be deferred here, not dropped: wasm loads levels synchronously
+      // inside the update loop, so setLoading(false) can land in a frame where the queued
+      // 'running' mode has not been synced yet. re-stamping keeps the effect at its first frame
+      // (fully hidden) until the game actually runs.
+      if (_show_time_health.has_value())
+      {
+         _show_time_health = now;
+      }
+   }
 
    auto effect_elapsed = false;
 
@@ -918,7 +926,14 @@ void InfoLayer::drawInventoryItem(sf::RenderTarget& window, sf::RenderStates sta
          continue;
       }
 
+#ifdef __EMSCRIPTEN__
+      // vrsfml sprites carry no texture and the view travels in the render states
+      auto item_states = states;
+      item_states.texture = _inventory_texture.get();
+      window.draw(*_inventory_sprites[i], item_states);
+#else
       window.draw(*_inventory_sprites[i]);
+#endif
       _slot_item_layers[i]->draw(window, states);
    }
 }

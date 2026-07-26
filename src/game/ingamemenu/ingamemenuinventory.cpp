@@ -304,6 +304,7 @@ Inventory& InGameMenuInventory::getInventory()
 void InGameMenuInventory::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    InGameMenuPage::draw(window, states);
+   applyPageView(states);
    drawInventoryItems(window, states);
    drawInventoryTexts(window, states);
 }
@@ -501,6 +502,11 @@ void InGameMenuInventory::updateButtons()
 void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto& inventory = getInventory();
+
+#ifdef __EMSCRIPTEN__
+   // vrsfml sprites carry no texture, it has to come from the render states
+   states.texture = _inventory_texture.get();
+#endif
 
    const auto move_offset = getMoveOffset();
    const auto offset_x_px = item_grid_offset_x_px + move_offset.value_or(0.0f);
