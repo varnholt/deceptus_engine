@@ -71,14 +71,18 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const 
       return;
    }
 
+   // the texture has to travel in the render states, vrsfml sprites do not own one
+   const auto* texture = _texture->getTexture().get();
+
    if (_parallax_settings.has_value())
    {
-      target.draw(*_sprite, sf::RenderStates{.blendMode = _blend_mode, .view = _parallax_view});
+      target.draw(*_sprite, sf::RenderStates{.blendMode = _blend_mode, .view = _parallax_view, .texture = texture});
    }
    else
    {
       sf::RenderStates draw_states = states;
       draw_states.blendMode = _blend_mode;
+      draw_states.texture = texture;
       target.draw(*_sprite, draw_states);
    }
 #else
@@ -100,6 +104,11 @@ void ImageLayer::update(const sf::Time& dt)
          _sprite = std::make_unique<sf::Sprite>();
          _sprite->position = _position;
          _sprite->color = _color;
+
+         // vrsfml sprites are not constructed from a texture, so the texture rect stays empty
+         // (and nothing is drawn) unless it is set to cover the texture explicitly
+         const auto texture_size = _texture->getTexture()->getSize();
+         _sprite->textureRect = sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(texture_size.x), static_cast<float>(texture_size.y)}};
 #else
          _sprite = std::make_unique<sf::Sprite>(*_texture->getTexture());
          _sprite->setPosition(_position);
