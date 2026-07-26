@@ -254,6 +254,13 @@ void Game::initializeWindow()
 
    showGpu();
 
+   initializeRenderTargets();
+}
+
+void Game::initializeRenderTargets()
+{
+   const auto& game_config = GameConfiguration::getInstance();
+
    // reset render textures if needed
    if (_window_render_texture)
    {
@@ -1174,9 +1181,16 @@ void Game::changeResolution(int32_t w, int32_t h)
    // clamp to desktop limits to prevent SFML errors
    config.clampResolutionToDesktop();
 
+#ifdef __EMSCRIPTEN__
+   // recreating the render window would drop the browser out of fullscreen, since the new window is
+   // created with fullscreen=false. entering fullscreen resizes the viewport, which invokes this via
+   // refitToViewport(), so a recreation here makes the game kick itself straight back to windowed.
+   // resizing the existing canvas keeps the fullscreen state and the gl context intact.
+   _window->setSize({static_cast<uint32_t>(config._video_mode_width), static_cast<uint32_t>(config._video_mode_height)});
+   initializeRenderTargets();
+#else
    initializeWindow();
 
-#ifndef __EMSCRIPTEN__
    _menu_background = std::make_unique<MenuBackgroundScene>();
 #endif
 
@@ -1228,6 +1242,11 @@ void Game::processEvent(const sf::Event& event)
    else if (auto* resized_event = event.getIf<sf::Event::Resized>())
    {
 #ifdef __linux__
+      return;
+#endif
+#ifdef __EMSCRIPTEN__
+      // on the web the canvas is resized by the game itself (refitToViewport), so acting on the
+      // resulting event would feed arbitrary, non-integer-multiple sizes back into changeResolution
       return;
 #endif
       // only handle intentional user resizes, not OS-generated DPI adjustments
