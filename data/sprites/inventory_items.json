@@ -58,7 +58,7 @@
         "title": "Temporal Grimoire",
         "description": "Penned by a Chrono-Scribe, this grimoire unravels time's threads, revealing lost spells. Its pages hold the key to manipulating reality, a coveted tome for seekers of forgotten wisdom."
     },
-    "lantern": {
+    "headtorch": {
         "x_px": 228,
         "y_px": 0,
         "width_px": 38,

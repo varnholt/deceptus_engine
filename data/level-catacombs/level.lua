@@ -328,8 +328,8 @@ function mechanismEvent(object_id, group_id, event_name, value)
    end
 
    -- the sealed cells are pitch black, so the tunnel stays blocked while the head torch is off.
-   -- group_id is checked because the extra the locked box spawns is called "lantern" as well.
-   if (object_id == "lantern" and group_id == "items" and event_name == "state") then
+   -- group_id is checked because the extra the locked box spawns is called "headtorch" as well.
+   if (object_id == "headtorch" and group_id == "items" and event_name == "state") then
       local torch_is_off = (value == "off")
       setMechanismEnabled("tunnel_block", torch_is_off, "blocking_rects")
       setMechanismEnabled("cant_see_here_01", torch_is_off, "dialogues")
@@ -400,8 +400,8 @@ function playerReceivedExtra(extra)
 
    -- head torch spawned by the locked box; Extra already put it in the
    -- inventory, this is just the acquired message
-   if (extra == "lantern") then
-      showDialogue("lantern_acquired")
+   if (extra == "headtorch") then
+      showDialogue("headtorch_acquired")
    end
    
    if extra:match("^heart_") then

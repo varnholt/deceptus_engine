@@ -6,14 +6,14 @@
 
 #include <SFML/Graphics.hpp>
 
-/// \brief lantern item that renders a warm circular player light when equipped.
-class ItemLantern : public Item
+/// \brief head torch item that renders a warm circular player light when equipped.
+class ItemHeadTorch : public Item
 {
 public:
-   /// \brief initializes the lantern light shape and default radius.
-   ItemLantern();
+   /// \brief initializes the head torch light shape and default radius.
+   ItemHeadTorch();
 
-   /// \brief draws the lantern light circle when the item is enabled.
+   /// \brief draws the head torch light circle when the item is enabled.
    /// \param target SFML render target that receives the light sprite.
    /// \param states render states applied to the helmet sprite (carries .view for WASM camera transform).
    void draw(sf::RenderTarget& target, const sf::RenderStates& states) override;
@@ -22,14 +22,14 @@ public:
    /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt) override;
 
-   /// \brief enables lantern rendering and updates while equipped.
+   /// \brief enables head torch rendering and updates while equipped.
    void onEquipped() override;
 
-   /// \brief disables lantern rendering and updates while unequipped.
+   /// \brief disables head torch rendering and updates while unequipped.
    void onUnequipped() override;
 
    /// \brief gets the inventory display name for this item.
-   /// \return the string "Lantern".
+   /// \return the string "HeadTorch".
    std::string getName() const override;
 
 private:
@@ -48,7 +48,7 @@ private:
    std::shared_ptr<sf::Texture> _player_texture;
    std::unique_ptr<sf::Sprite> _helmet_sprite_r;
    std::unique_ptr<sf::Sprite> _helmet_sprite_l;
-   std::shared_ptr<sfcompat::Shader> _noise_shader;  //!< shared noise shader applied to both lantern lights
+   std::shared_ptr<sfcompat::Shader> _noise_shader;  //!< shared noise shader applied to both head torch lights
    float _offset_left_x_m{-3.4f};                    //!< x body offset when facing left, in box2d meters
    float _offset_right_x_m{1.9f};                    //!< x body offset when facing right, in box2d meters
    float _offset_left_y_m{-1.0f};                    //!< y body offset when facing left, in box2d meters
