@@ -8,6 +8,7 @@
 #include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/level/levelregistry.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "game/player/player.h"
 #include "game/player/playerregistry.h"
 
@@ -322,11 +323,16 @@ void ItemLantern::onEquipped()
    }
 
    _enabled = true;
+
+   // emitted here rather than at the top of the function because the early returns above leave the
+   // lantern disabled; level scripts gate on this to know whether the player actually has light
+   GameMechanismObserver::onEvent("lantern", "items", "state", std::string{"on"});
 }
 
 void ItemLantern::onUnequipped()
 {
    _enabled = false;
+   GameMechanismObserver::onEvent("lantern", "items", "state", std::string{"off"});
 
    auto level = LevelRegistry::getCurrent();
    if (level && level->getLightSystem())

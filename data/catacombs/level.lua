@@ -326,6 +326,12 @@ function mechanismEvent(object_id, group_id, event_name, value)
    if (object_id == "diamond_box" and event_name == "state" and value == "open") then
       setMechanismEnabled("diamond_box_interaction_help", false, "interaction_help")
    end
+
+   -- the sealed cells are pitch black, so the tunnel stays blocked while the head torch is off.
+   -- group_id is checked because the extra the locked box spawns is called "lantern" as well.
+   if (object_id == "lantern" and group_id == "items" and event_name == "state") then
+      setMechanismEnabled("tunnel_block", value == "off", "blocking_rects")
+   end
    
    -- open drawer in library
    if (object_id == "drawer_rect" and event_name == "pressed" and value == "true") then
