@@ -212,9 +212,9 @@ impl eframe::App for PatchApp {
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 /// Walk up from the current working directory and the executable location,
-/// looking for a `levels/catacombs/` or `data/catacombs/` subdirectory.
+/// looking for a `levels/catacombs/` or `data/level-catacombs/` subdirectory.
 fn locate_catacombs_dir() -> Option<PathBuf> {
-    let candidates = ["levels/catacombs", "data/catacombs"];
+    let candidates = ["levels/catacombs", "data/level-catacombs"];
 
     if let Ok(working_dir) = std::env::current_dir() {
         for subpath in &candidates {

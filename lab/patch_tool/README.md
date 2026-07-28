@@ -1,6 +1,6 @@
 # Patch Tool
 
-A small Windows GUI tool for applying patches to files in `data/catacombs/`.
+A small Windows GUI tool for applying patches to files in `data/level-catacombs/`.
 Designed for the workflow where an artist makes TMX edits on a separate branch
 and wants to hand those changes to someone on a different branch without a full merge.
 
@@ -14,13 +14,13 @@ You have your changes on a branch and want to produce a patch that can be applie
 on top of whatever is currently on `master`:
 
 ```
-git diff master -- data/catacombs/catacombs.tmx > data/catacombs/my_changes.diff
+git diff master -- data/level-catacombs/catacombs.tmx > data/level-catacombs/my_changes.diff
 ```
 
-To include all changed files under `data/catacombs/` at once:
+To include all changed files under `data/level-catacombs/` at once:
 
 ```
-git diff master -- data/catacombs/ > data/catacombs/my_changes.diff
+git diff master -- data/level-catacombs/ > data/level-catacombs/my_changes.diff
 ```
 
 Give the `.diff` file a descriptive name so the recipient knows what it does,
@@ -41,14 +41,14 @@ unified diff in the same format.
 
 ## Applying a patch
 
-1. Copy the `.diff` or `.patch` file into `data/catacombs/`.
+1. Copy the `.diff` or `.patch` file into `data/level-catacombs/`.
 2. Run `tmx_patcher.exe` (from `lab/patch_tool/target/release/`).
 3. Select the patch from the dropdown (click **⟳** to refresh if you just copied it in).
 4. Click **Apply Patch**.
 5. Check the log — each hunk reports `applied`, `already applied`, or `FAILED`.
 
 On success the original file is backed up as `catacombs.tmx.bak` and the patch
-file is moved to `data/catacombs/applied_patches/` so it won't show up in the
+file is moved to `data/level-catacombs/applied_patches/` so it won't show up in the
 dropdown again.
 
 ---
