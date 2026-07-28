@@ -183,7 +183,7 @@ function checkAttackCondition(next_state)
                _player_position:getY()
             )
          ) then
-            print("Frog: Attack triggered, x_diff: " .. x_diff)
+            -- print("Frog: Attack triggered, x_diff: " .. x_diff)
             next_state = STATE_ATTACK
          end
       end
@@ -226,7 +226,7 @@ function updateState(dt)
       _state = next_state
 
       local state_names = {[STATE_IDLE] = "IDLE", [STATE_ATTACK] = "ATTACK", [STATE_DYING] = "DYING"}
-      print("Frog: State changed from " .. state_names[_prev_state] .. " to " .. state_names[_state])
+      -- print("Frog: State changed from " .. state_names[_prev_state] .. " to " .. state_names[_state])
 
       resetOnStateTransition()
 
@@ -253,12 +253,12 @@ function logSprite(dt)
       local cycle_names = {[CYCLE_IDLE] = "IDLE", [CYCLE_BLINK] = "BLINK", [CYCLE_ATTACK] = "ATTACK"}
 
       if _state == STATE_DYING then
-         print("Frog: Using death animation row " .. current_row .. " for state " .. state_names[_state])
+         -- print("Frog: Using death animation row " .. current_row .. " for state " .. state_names[_state])
       elseif _state == STATE_ATTACK then
-         print("Frog: Using attack animation row " .. current_row .. " for state " .. state_names[_state])
+         -- print("Frog: Using attack animation row " .. current_row .. " for state " .. state_names[_state])
       else  -- IDLE state
          local cycle = _is_blinking and CYCLE_BLINK or CYCLE_IDLE
-         print("Frog: Using " .. cycle_names[cycle] .. " animation row " .. current_row .. " for state " .. state_names[_state])
+         -- print("Frog: Using " .. cycle_names[cycle] .. " animation row " .. current_row .. " for state " .. state_names[_state])
       end
 
    end
@@ -370,7 +370,7 @@ function smashed()
       return
    end
 
-   print("Frog: Smashed, starting to die")
+   -- print("Frog: Smashed, starting to die")
 
    _smashed = true
    startDying()
@@ -399,10 +399,10 @@ function hit(damage_value)
    end
 
    _energy = _energy - damage_value
-   print("Frog: Hit for " .. damage_value .. " damage, remaining energy: " .. _energy)
+   -- print("Frog: Hit for " .. damage_value .. " damage, remaining energy: " .. _energy)
 
    if (_energy <= 0) then
-      print("Frog: Energy depleted, starting to die")
+      -- print("Frog: Energy depleted, starting to die")
       startDying()
    end
 end
@@ -600,7 +600,7 @@ function updateStateDying(dt)
       if not _death_animation_finished then
          _death_animation_finished = true
          _dead = true
-         print("Frog: Death animation finished, frog is now dead")
+         -- print("Frog: Death animation finished, frog is now dead")
       end
    end
    

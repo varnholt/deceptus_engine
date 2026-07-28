@@ -326,6 +326,14 @@ function mechanismEvent(object_id, group_id, event_name, value)
    if (object_id == "diamond_box" and event_name == "state" and value == "open") then
       setMechanismEnabled("diamond_box_interaction_help", false, "interaction_help")
    end
+
+   -- the sealed cells are pitch black, so the tunnel stays blocked while the head torch is off.
+   -- group_id is checked because the extra the locked box spawns is called "lantern" as well.
+   if (object_id == "lantern" and group_id == "items" and event_name == "state") then
+      local torch_is_off = (value == "off")
+      setMechanismEnabled("tunnel_block", torch_is_off, "blocking_rects")
+      setMechanismEnabled("cant_see_here_01", torch_is_off, "dialogues")
+   end
    
    -- open drawer in library
    if (object_id == "drawer_rect" and event_name == "pressed" and value == "true") then
@@ -388,6 +396,12 @@ function playerReceivedExtra(extra)
    
    if (extra == "key") then
       setMechanismEnabled("drawer_dialogue_key", false, "dialogues")
+   end
+
+   -- head torch spawned by the locked box; Extra already put it in the
+   -- inventory, this is just the acquired message
+   if (extra == "lantern") then
+      showDialogue("lantern_acquired")
    end
    
    if extra:match("^heart_") then
