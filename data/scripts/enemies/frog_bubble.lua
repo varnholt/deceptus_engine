@@ -224,7 +224,7 @@ function updateState(dt)
       _state = next_state
 
       local state_names = {[STATE_IDLE] = "IDLE", [STATE_ATTACK] = "ATTACK", [STATE_DYING] = "DYING"}
-      print("FrogBubble: State changed from " .. state_names[_prev_state] .. " to " .. state_names[_state])
+      -- print("FrogBubble: State changed from " .. state_names[_prev_state] .. " to " .. state_names[_state])
 
       resetOnStateTransition()
 
@@ -318,7 +318,7 @@ function smashed()
       return
    end
 
-   print("FrogBubble: Smashed, starting to die")
+   -- print("FrogBubble: Smashed, starting to die")
 
    _smashed = true
    startDying()
@@ -343,10 +343,10 @@ function hit(damage_value)
    end
 
    _energy = _energy - damage_value
-   print("FrogBubble: Hit for " .. damage_value .. " damage, remaining energy: " .. _energy)
+   -- print("FrogBubble: Hit for " .. damage_value .. " damage, remaining energy: " .. _energy)
 
    if (_energy <= 0) then
-      print("FrogBubble: Energy depleted, starting to die")
+      -- print("FrogBubble: Energy depleted, starting to die")
       startDying()
    end
 end
@@ -501,7 +501,7 @@ function updateStateDying(dt)
       if not _death_animation_finished then
          _death_animation_finished = true
          _dead = true
-         print("FrogBubble: Death animation finished")
+         -- print("FrogBubble: Death animation finished")
       end
    end
 
