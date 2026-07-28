@@ -539,6 +539,27 @@ Sets the for linear velocity of this node
 |2|float|Velocity y (in meters)|
 
 
+## `setProjectileZ`
+
+Set the z layer the projectiles of a given weapon are drawn at. By default projectiles are drawn at the z layer of
+the node that fired them (see `setZ`). Assigning an explicit z layer to a weapon lets its projectiles travel in
+front of or behind level layers without moving the enemy itself.
+
+Valid z layers range from 0 to 50. The player is drawn at z layer 20.
+
+```lua
+function initialize()
+   addWeapon(WeaponType["Gun"], 100, 1, 0.0, 0.08)
+   setProjectileZ(0, 40)
+end
+```
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Weapon index|
+|2|int32_t|z layer|
+
+
 ## `setSpriteOffset`
 
 Sets the offset for a given sprite
@@ -580,6 +601,28 @@ Set the visibility of a given sprite
 |-|-|-|
 |1|int32_t|Sprite id|
 |2|bool|Visibility flag (true for visible, false for invisible)|
+
+
+## `setSpriteZ`
+
+Set the z layer of a given sprite. By default every sprite is drawn at the z layer of the node itself (see `setZ`).
+Assigning an explicit z layer to a single sprite lets that sprite be drawn in front of or behind level layers
+without moving the rest of the node. This is useful for sprites that represent something travelling away from
+the enemy, such as a fired orb that should pass in front of foreground tiles while the enemy stays behind them.
+
+Valid z layers range from 0 to 50. The player is drawn at z layer 20.
+
+```lua
+function initialize()
+   addSprite()
+   setSpriteZ(1, 40)
+end
+```
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|int32_t|Sprite id|
+|2|int32_t|z layer|
 
 
 ## `setTransform`

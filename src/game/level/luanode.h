@@ -48,6 +48,28 @@ struct LuaNode : public GameMechanism, public GameNode
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal, const sf::RenderStates& states) override;
    using GameMechanism::draw;
 
+   /// \brief draws only those parts of the node that belong to one z index.
+   /// \param window color render target.
+   /// \param normal normal-map render target.
+   /// \param states render states to use.
+   /// \param z_index z index currently being drawn.
+   void drawAtZ(sf::RenderTarget& window, sf::RenderTarget& normal, const sf::RenderStates& states, int32_t z_index);
+
+   /// \brief checks whether the node draws anything at a given z index.
+   /// \param z_index z index to check.
+   /// \return true when the node itself, one of its sprite layers or one of its weapons draws at that z index.
+   bool hasContentAtZ(int32_t z_index) const;
+
+   /// \brief draws weapons, sprite layers and debug overlays, optionally limited to one z index.
+   /// \param window color render target.
+   /// \param normal normal-map render target.
+   /// \param states render states to use.
+   /// \param z_index z index filter; std::nullopt draws every part regardless of its z index.
+   void drawParts(sf::RenderTarget& window, sf::RenderTarget& normal, const sf::RenderStates& states, std::optional<int32_t> z_index);
+
+   /// \brief rebuilds the lookup of z indices that sprite layers and weapons were explicitly assigned to.
+   void updatePartZIndices();
+
    /// \brief returns cached world-space bounding box built from active hitboxes.
    /// \return bounding rectangle in pixels, or std::nullopt when no hitboxes exist.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -249,6 +271,11 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \param visible true to draw the sprite layer.
    void setSpriteVisible(int32_t id, bool visible);
 
+   /// \brief sets the z index one sprite layer is drawn at, independently of the node z index.
+   /// \param id sprite layer index.
+   /// \param z_index z index to draw this sprite layer at.
+   void setSpriteZ(int32_t id, int32_t z_index);
+
    /// \brief toggles visibility of the whole node.
    /// \param visible true to draw the node.
    void setVisible(bool visible);
@@ -360,6 +387,11 @@ struct LuaNode : public GameMechanism, public GameNode
       uint32_t frames_per_row,
       uint32_t start_frame
    );
+
+   /// \brief sets the z index the projectiles of one weapon slot are drawn at, independently of the node z index.
+   /// \param weapon_index weapon slot index.
+   /// \param z_index z index to draw the projectiles of this weapon slot at.
+   void setProjectileZ(uint32_t weapon_index, int32_t z_index);
 
    /// \brief starts a one-shot timer that calls lua timeout callback.
    /// \param delay delay in milliseconds.
@@ -504,6 +536,11 @@ struct LuaNode : public GameMechanism, public GameNode
    std::shared_ptr<sf::Texture> _texture;
    std::vector<std::unique_ptr<sf::Sprite>> _sprites;
    std::vector<sf::Vector2f> _sprite_offsets_px;
+   std::vector<std::optional<int32_t>> _sprite_z_indices;
+
+   //!< z indices explicitly assigned to sprite layers or weapons; kept as a flat lookup so the
+   //!< per-z-index draw loop does not have to scan all sprite layers and weapons of every enemy
+   std::vector<int32_t> _part_z_indices;
    sf::Vector2f _position_px;
    std::vector<sf::Vector2f> _movement_path_px;
    sfcompat::Shader _flash_shader;
@@ -515,6 +552,7 @@ struct LuaNode : public GameMechanism, public GameNode
    b2BodyDef* _body_def{nullptr};
    std::vector<b2Shape*> _shapes_m;
    std::vector<std::shared_ptr<Weapon>> _weapons;
+   std::vector<std::optional<int32_t>> _weapon_z_indices;
 
    // damage
    std::vector<Hitbox> _hitboxes;

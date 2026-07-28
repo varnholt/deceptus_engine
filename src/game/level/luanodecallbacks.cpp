@@ -1007,6 +1007,34 @@ int32_t setSpriteVisible(lua_State* state)
 }
 
 /**
+ * @brief setSpriteZ sets the z index one sprite is drawn at, independently of the node z index
+ * @param state lua state
+ *    param 1: sprite id
+ *    param 2: z index
+ * @return error code
+ */
+int32_t setSpriteZIndex(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto id = static_cast<int32_t>(lua_tointeger(state, 1));
+   const auto z_index = static_cast<int32_t>(lua_tointeger(state, 2));
+   node->setSpriteZ(id, z_index);
+
+   return 0;
+}
+
+/**
  * @brief boom make the game go booom
  * @param state lua state
  *    param 1: detonation center x
@@ -1422,6 +1450,34 @@ int32_t updateProjectileAnimation(lua_State* state)
 }
 
 /**
+ * @brief setProjectileZ sets the z index the projectiles of one weapon are drawn at, independently of the node z index
+ * @param state lua state
+ *    param 1: weapon index
+ *    param 2: z index
+ * @return error code
+ */
+int32_t setProjectileZIndex(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 2)
+   {
+      return 0;
+   }
+
+   auto node = OBJINSTANCE;
+   if (!node)
+   {
+      return 0;
+   }
+
+   const auto weapon_index = static_cast<uint32_t>(lua_tointeger(state, 1));
+   const auto z_index = static_cast<int32_t>(lua_tointeger(state, 2));
+   node->setProjectileZ(weapon_index, z_index);
+
+   return 0;
+}
+
+/**
  * @brief timer start a timer
  * @param state lua state
  *    param 1: delay of the timer
@@ -1559,16 +1615,7 @@ int32_t registerHitAnimation(lua_State* state)
    const auto frames_per_row = static_cast<uint32_t>(lua_tointeger(state, 7));
    const auto start_frame = static_cast<uint32_t>(lua_tointeger(state, 8));
 
-   node->registerHitAnimation(
-      weapon_index,
-      path,
-      frame_width,
-      frame_height,
-      time_per_frame_s,
-      frame_count,
-      frames_per_row,
-      start_frame
-   );
+   node->registerHitAnimation(weapon_index, path, frame_width, frame_height, time_per_frame_s, frame_count, frames_per_row, start_frame);
 
    return 0;
 }

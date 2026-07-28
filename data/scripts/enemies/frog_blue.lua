@@ -36,6 +36,8 @@ v2d = require "data/scripts/enemies/vectorial2"
 -- orb_path=straight               -- straight or sine
 -- orb_speed=160.0                 -- fireball travel speed
 -- orb_lifetime=3000               -- lifetime in milliseconds before disappearing
+-- orb_z=40                        -- z index the travelling orb is drawn at
+-- orb_collision_size=16           -- edge length of the square hit area centered on the visible orb
 -- wave_strength=24.0              -- vertical size for sine movement
 -- wave_speed=8.0                  -- sine frequency/speed
 -- idle_anim_speed=10.0
@@ -65,6 +67,16 @@ FIREBALL_HEIGHT = 120
 FIREBALL_ROW_Y = 312
 FIREBALL_FRAME_SPACING = 120
 FIREBALL_FRAME_COUNT = 8
+-- The orb graphic does not fill its 120x120 frame; the visible dot sits at (36, 60) inside the frame
+-- while the engine draws the sprite centered on the node position plus the sprite offset.
+-- Both values are needed to place the hit rect on the dot instead of on the frame center.
+FIREBALL_VISUAL_CENTER_X = 36
+FIREBALL_VISUAL_CENTER_Y = 60
+-- Size of the bright core of the orb. The surrounding glow is intentionally not part of the hit area.
+DEFAULT_ORB_COLLISION_SIZE = 16
+-- z index the orb is drawn at. The frog itself stays on its own z index, so the orb can travel
+-- in front of foreground tiles without dragging the frog along.
+DEFAULT_ORB_Z = 40
 -- Shooting animation timing. The blue frog frames are 48x48.
 -- The blue frog starts at grid column 17 on the shared frog sprite sheet.
 -- For the attack row, this maps to these grid cells:
@@ -139,6 +151,8 @@ _orb_speed = DEFAULT_FIREBALL_SPEED
 _orb_lifetime = DEFAULT_ORB_LIFETIME
 _wave_strength = DEFAULT_WAVE_STRENGTH
 _wave_speed = DEFAULT_WAVE_SPEED
+_orb_z = DEFAULT_ORB_Z
+_orb_collision_size = DEFAULT_ORB_COLLISION_SIZE
 
 -- health and death variables
 _energy = 30  -- frog's health points
@@ -175,6 +189,8 @@ properties = {
    orb_path = DEFAULT_ORB_PATH,
    orb_speed = DEFAULT_FIREBALL_SPEED,
    orb_lifetime = DEFAULT_ORB_LIFETIME,
+   orb_z = DEFAULT_ORB_Z,
+   orb_collision_size = DEFAULT_ORB_COLLISION_SIZE,
 
    -- sine path tuning
    wave_strength = DEFAULT_WAVE_STRENGTH,
@@ -195,6 +211,7 @@ function initialize()
    setSpriteOffset(1, 36, -12)
    setSpriteScale(1, 1.0, 1.0)
    setSpriteVisible(1, false)
+   setSpriteZ(1, _orb_z)
 
    updateSprite(0.0)
 end
@@ -380,10 +397,13 @@ function updateFireball(dt)
    setSpriteScale(1, 1.0, 1.0)
    setSpriteVisible(1, true)
 
-   -- Use a smaller hit area inside the orb so the visual feels fair.
-   local hitbox_x = _position:getX() + fireball_offset_x + 18
-   local hitbox_y = _position:getY() + fireball_offset_y + 18
-   if not _fireball_hit_player and intersectsWithPlayer(hitbox_x, hitbox_y, 36, 36) then
+   -- Use a smaller hit area inside the orb so the visual feels fair. The rect is centered on the
+   -- visible dot, which is offset from the center of the 120x120 sprite frame.
+   local orb_center_x = _position:getX() + fireball_offset_x + FIREBALL_VISUAL_CENTER_X - FIREBALL_WIDTH / 2
+   local orb_center_y = _position:getY() + fireball_offset_y + FIREBALL_VISUAL_CENTER_Y - FIREBALL_HEIGHT / 2
+   local hitbox_x = orb_center_x - _orb_collision_size / 2
+   local hitbox_y = orb_center_y - _orb_collision_size / 2
+   if not _fireball_hit_player and intersectsWithPlayer(hitbox_x, hitbox_y, _orb_collision_size, _orb_collision_size) then
       damage(properties.damage, 0, 0)
       _fireball_hit_player = true
    end
@@ -582,6 +602,21 @@ function writeProperty(key, value)
       if (v ~= nil and v > 0) then
          _orb_lifetime = v
          properties.orb_lifetime = v
+      end
+
+   elseif (key == "orb_collision_size") then
+      local collision_size = tonumber(value)
+      if (collision_size ~= nil and collision_size > 0) then
+         _orb_collision_size = collision_size
+         properties.orb_collision_size = collision_size
+      end
+
+   elseif (key == "orb_z") then
+      local z_index = tonumber(value)
+      if (z_index ~= nil) then
+         _orb_z = z_index
+         properties.orb_z = z_index
+         setSpriteZ(1, _orb_z)
       end
 
    elseif (key == "wave_strength") then
