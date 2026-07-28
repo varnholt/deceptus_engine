@@ -389,6 +389,12 @@ function playerReceivedExtra(extra)
    if (extra == "key") then
       setMechanismEnabled("drawer_dialogue_key", false, "dialogues")
    end
+
+   -- head torch spawned by the locked box; Extra already put it in the
+   -- inventory, this is just the acquired message
+   if (extra == "lantern") then
+      showDialogue("lantern_acquired")
+   end
    
    if extra:match("^heart_") then
       addPlayerHealthMax(1)
