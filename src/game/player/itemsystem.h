@@ -38,7 +38,7 @@ public:
 
    /// \brief re-equips all currently slotted items against the active level and player.
    /// call after a level finishes loading so items that require a live level context
-   /// (e.g. lantern lights) are properly initialized regardless of when the inventory was deserialized.
+   /// (e.g. head torch lights) are properly initialized regardless of when the inventory was deserialized.
    void reinitializeEquippedItems();
 
 private:

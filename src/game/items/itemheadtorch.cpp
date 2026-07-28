@@ -1,6 +1,6 @@
 // #define DEBUG_DRAW
 
-#include "itemlantern.h"
+#include "itemheadtorch.h"
 
 #include <fstream>
 
@@ -12,7 +12,7 @@
 #include "game/player/player.h"
 #include "game/player/playerregistry.h"
 
-ItemLantern::ItemLantern()
+ItemHeadTorch::ItemHeadTorch()
     : _player_texture(TexturePool::getInstance().get("data/sprites/player.png")),
 #ifdef __EMSCRIPTEN__
       _helmet_sprite_r(std::make_unique<sf::Sprite>()),
@@ -29,7 +29,7 @@ ItemLantern::ItemLantern()
    sfcompat::setTextureRect(*_helmet_sprite_l, sf::IntRect({24, 1776}, {24, 24}));
 }
 
-void ItemLantern::draw(sf::RenderTarget& target, const sf::RenderStates& states)
+void ItemHeadTorch::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    if (!_enabled)
    {
@@ -57,7 +57,7 @@ void ItemLantern::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 #endif
 }
 
-void ItemLantern::update(const sf::Time& delta_time)
+void ItemHeadTorch::update(const sf::Time& delta_time)
 {
    if (!_enabled)
    {
@@ -204,7 +204,7 @@ void ItemLantern::update(const sf::Time& delta_time)
    sfcompat::setColor(*_helmet_sprite_l, sf::Color(255, 255, 255, helmet_alpha));
 }
 
-void ItemLantern::onEquipped()
+void ItemHeadTorch::onEquipped()
 {
    auto player = std::static_pointer_cast<Player>(PlayerRegistry::getFirst());
    if (!player)
@@ -219,7 +219,7 @@ void ItemLantern::onEquipped()
    }
 
    nlohmann::json config;
-   std::ifstream("data/config/player_lantern.json") >> config;
+   std::ifstream("data/config/player_headtorch.json") >> config;
 
    if (const auto it = config["left"].find("offset_x_px"); it != config["left"].end())
    {
@@ -325,14 +325,14 @@ void ItemLantern::onEquipped()
    _enabled = true;
 
    // emitted here rather than at the top of the function because the early returns above leave the
-   // lantern disabled; level scripts gate on this to know whether the player actually has light
-   GameMechanismObserver::onEvent("lantern", "items", "state", std::string{"on"});
+   // head torch disabled; level scripts gate on this to know whether the player actually has light
+   GameMechanismObserver::onEvent("headtorch", "items", "state", std::string{"on"});
 }
 
-void ItemLantern::onUnequipped()
+void ItemHeadTorch::onUnequipped()
 {
    _enabled = false;
-   GameMechanismObserver::onEvent("lantern", "items", "state", std::string{"off"});
+   GameMechanismObserver::onEvent("headtorch", "items", "state", std::string{"off"});
 
    auto level = LevelRegistry::getCurrent();
    if (level && level->getLightSystem())
@@ -353,7 +353,7 @@ void ItemLantern::onUnequipped()
    }
 }
 
-std::string ItemLantern::getName() const
+std::string ItemHeadTorch::getName() const
 {
-   return "Lantern";
+   return "HeadTorch";
 }

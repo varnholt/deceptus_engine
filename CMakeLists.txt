@@ -591,8 +591,8 @@ set(GAME_FILES
     src/game/items/item.h
     src/game/items/itemfactory.cpp
     src/game/items/itemfactory.h
-    src/game/items/itemlantern.cpp
-    src/game/items/itemlantern.h
+    src/game/items/itemheadtorch.cpp
+    src/game/items/itemheadtorch.h
     src/game/items/itemplayerfirefly.cpp
     src/game/items/itemplayerfirefly.h
     src/menus/menu.cpp
