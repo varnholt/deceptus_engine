@@ -82,6 +82,8 @@ constexpr std::string_view layer_name_lasers_v1{"lasers_1"};
 constexpr std::string_view layer_name_lasers_v2{"lasers_2"};
 
 /// \brief tmx layer name for lever mechanisms.
+constexpr std::string_view layer_name_level_transitions{"level_transitions"};
+
 constexpr std::string_view layer_name_levers{"levers"};
 
 /// \brief tmx layer name for moveable object mechanisms.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="768" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="24" nextobjectid="37">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="768" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="25" nextobjectid="38">
  <tileset firstgid="1" source="graveyard-background-diffuse.tsx"/>
  <tileset firstgid="4097" source="graveyard-level-diffuse.tsx"/>
  <layer id="4" name="bg0" width="768" height="100">
@@ -1746,6 +1746,15 @@
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
     <property name="z" type="int" value="2"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="24" name="level_transitions" visible="0">
+  <object id="37" name="to_catacombs" x="696" y="1632" width="48" height="96">
+   <properties>
+    <property name="level" value="data/level-catacombs/level.json"/>
+    <property name="spawn_position_x_px" type="int" value="706"/>
+    <property name="spawn_position_y_px" type="int" value="1719"/>
    </properties>
   </object>
  </objectgroup>

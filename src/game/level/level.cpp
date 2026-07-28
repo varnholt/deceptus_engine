@@ -27,6 +27,7 @@
 #include "game/level/fixturenode.h"
 #include "game/level/leveldescription.h"
 #include "game/level/levelfiles.h"
+#include "game/level/leveltransitionhandler.h"
 #include "game/level/luainterface.h"
 #include "game/level/parsedata.h"
 #include "game/level/roomupdater.h"
@@ -563,7 +564,7 @@ void Level::initialize()
 void Level::loadSaveState()
 {
    const auto& save_state = SaveState::getCurrent();
-   auto checkpoint_index = save_state._checkpoint;
+   auto checkpoint_index = save_state.getCheckpoint(_description_filename);
    auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, _mechanism_registry.getCheckpoints());
 
    if (checkpoint)
@@ -576,6 +577,14 @@ void Level::loadSaveState()
    else
    {
       Log::Error() << "level doesn't have a start check point set up";
+   }
+
+   // a level transition can ask for a spawn position that is neither the level's start position nor one of its
+   // checkpoints, so it takes precedence over both
+   const auto transition_spawn_position_px = LevelTransitionHandler::getInstance().takeSpawnPosition();
+   if (transition_spawn_position_px.has_value())
+   {
+      _start_position = transition_spawn_position_px.value();
    }
 
    if (save_state._level_state.is_null())

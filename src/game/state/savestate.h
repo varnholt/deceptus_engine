@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <map>
 #include <string>
 
 #include "json/json.hpp"
@@ -26,9 +27,27 @@ struct SaveState
    nlohmann::json _level_state;
 
    int32_t _level_index = 0;
-   int32_t _checkpoint = -1;
+   std::map<std::string, int32_t> _checkpoints;  //!< reached checkpoint index per level description filename
 
    bool _load_level_requested = false;
+
+   /// \brief returns the checkpoint index reached in one level.
+   /// \param level_description_filename path of the level's description json, as listed in levels.json.
+   /// \return checkpoint index, or -1 when no checkpoint has been reached in that level yet.
+   int32_t getCheckpoint(const std::string& level_description_filename) const;
+
+   /// \brief stores the checkpoint index reached in one level.
+   /// \param level_description_filename path of the level's description json, as listed in levels.json.
+   /// \param checkpoint_index checkpoint index to remember for that level.
+   void setCheckpoint(const std::string& level_description_filename, int32_t checkpoint_index);
+
+   /// \brief returns the checkpoint index reached in the level that is currently loaded.
+   /// \return checkpoint index, or -1 when no level is active or no checkpoint has been reached yet.
+   static int32_t getCurrentLevelCheckpoint();
+
+   /// \brief stores the checkpoint index reached in the level that is currently loaded.
+   /// \param checkpoint_index checkpoint index to remember for the active level.
+   static void setCurrentLevelCheckpoint(int32_t checkpoint_index);
 
    /// \brief computes a user-facing progress percentage for this save slot.
    /// \return integer progress percentage in range 0..100.

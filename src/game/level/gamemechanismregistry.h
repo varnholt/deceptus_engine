@@ -97,6 +97,7 @@ private:
    MechanismVector _mechanism_info_overlay;
    MechanismVector _mechanism_interaction_help;
    MechanismVector _mechanism_lasers;
+   MechanismVector _mechanism_level_transitions;
    MechanismVector _mechanism_levers;
    MechanismVector _mechanism_moveable_boxes;
    MechanismVector _mechanism_on_off_blocks;

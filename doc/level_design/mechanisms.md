@@ -735,6 +735,79 @@ All you need to do is to give your laser object a name, and then reference that 
 ---
 
 
+## Level Transitions
+
+Level Transitions connect two levels. They have no visualization. When the player enters the rectangle, the screen fades out, the level that is left behind is written to the save state, the target level is loaded, and the screen fades back in.
+
+Since the state of the level you leave is stored, all its serialized mechanisms are in the same state as you left them when you come back later.
+
+Use these to build the connections between your levels, such as a tunnel that leads out of the catacombs and into the graveyard.
+
+The target level is addressed by the path of its description json, which must also be listed in `data/config/levels.json`. If it is not listed there, the transition logs an error and does nothing.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`LevelTransition`|
+|Object Group|`level_transitions`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|level|string|The path of the target level's description json, e.g. `data/level-graveyard/level.json`. This is required; without it the transition does nothing.|
+|spawn_position_x_px|int|The player's x spawn position inside the target level, in pixels. When omitted, the target level's own start position is used.|
+|spawn_position_y_px|int|The player's y spawn position inside the target level, in pixels. When omitted, the target level's own start position is used.|
+|z|int|The object's z index|
+
+Both `spawn_position_x_px` and `spawn_position_y_px` must be given together; if only one of them is set, both are ignored and the target level's start position is used instead.
+
+The spawn position takes precedence over the target level's start position as well as over any checkpoint the player reached in that level before. Checkpoints are stored per level, so returning to a level you already played does not drag a checkpoint from another level along.
+
+### Choosing the spawn position
+
+The spawn position is the player's position in pixels, following the same convention as a level's `startposition`: for a tile position, `x = tile_x * 24 + 10` and `y = tile_y * 24 + 15`.
+
+**Do not place the spawn position inside the target level's own transition rectangle.** Transitions fire when the player enters the rectangle, and a player who spawns inside one counts as entering it, which sends them straight back where they came from. Leave at least a tile of air between the spawn position and the rectangle that leads back.
+
+### Example
+
+The catacombs side of a tunnel, sending the player to the graveyard's own start position:
+
+```xml
+<objectgroup id="194" name="level_transitions" visible="0">
+ <object id="18261" name="to_graveyard" x="745" y="1632" width="48" height="96">
+  <properties>
+   <property name="level" value="data/level-graveyard/level.json"/>
+  </properties>
+ </object>
+</objectgroup>
+```
+
+The graveyard side of the same tunnel, putting the player back next to the tunnel mouth rather than at the catacombs' start position:
+
+```xml
+<objectgroup id="24" name="level_transitions" visible="0">
+ <object id="37" name="to_catacombs" x="696" y="1632" width="48" height="96">
+  <properties>
+   <property name="level" value="data/level-catacombs/level.json"/>
+   <property name="spawn_position_x_px" type="int" value="706"/>
+   <property name="spawn_position_y_px" type="int" value="1719"/>
+  </properties>
+ </object>
+</objectgroup>
+```
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
 ## Levers
 
 Levers! One of the most important mechanisms. In short, they do what levers do: They switch things on and off. Levers can be used to enable and disable the functionality of these mechanisms:

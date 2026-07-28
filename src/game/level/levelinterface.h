@@ -41,6 +41,10 @@ public:
    /// \return pixel-space start position.
    virtual const sf::Vector2f& getStartPosition() const = 0;
 
+   /// \brief gets the path of the level's description json, as listed in levels.json.
+   /// \return level description filename, used to key per-level data in the save state.
+   virtual std::string getDescriptionFilename() const = 0;
+
    /// \brief gets the level view (camera viewport).
    /// \return shared pointer to the SFML view.
    virtual const std::shared_ptr<sf::View>& getLevelView() const = 0;

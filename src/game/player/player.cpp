@@ -851,7 +851,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._dead = isDead();
    data._death_count_current_level = SaveState::getPlayerInfo()._stats._death_count_current_level;
    data._death_reason = _death_reason.value_or(DeathReason::Invalid);
-   data._checkpoint_index = SaveState::getCurrent()._checkpoint;
+   data._checkpoint_index = SaveState::getCurrentLevelCheckpoint();
    data._in_air = isInAir();
    data._in_water = isInWater();
    data._linear_velocity = _body->GetLinearVelocity();
@@ -1538,7 +1538,7 @@ void Player::updateSpawn()
 {
    using namespace std::chrono_literals;
 
-   const auto checkpoint_valid = SaveState::getCurrent()._checkpoint > 0;
+   const auto checkpoint_valid = SaveState::getCurrentLevelCheckpoint() > 0;
    const auto first_death = SaveState::getPlayerInfo()._stats._death_count_current_level == 0;
    const auto spawning = GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealStartDelay();
 
