@@ -180,7 +180,7 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    // and serialize the save state
    const auto cp_index = checkpoint->getIndex();
    checkpoint->addCallback([]() { LevelRegistry::getCurrent()->saveState(); });
-   checkpoint->addCallback([cp_index]() { SaveState::getCurrent()._checkpoint = cp_index; });
+   checkpoint->addCallback([cp_index]() { SaveState::setCurrentLevelCheckpoint(cp_index); });
    checkpoint->addCallback([]() { SaveState::serializeToFile(); });
 
    // that y offset is a litte dodgy, could have something cleaner in the future
@@ -237,7 +237,7 @@ void Checkpoint::reached()
    _reached = true;
 
    // doesn't make sense to show fancy reveal animation if this is the active checkpoint anyway
-   if (SaveState::getCurrent()._checkpoint != _index)
+   if (SaveState::getCurrentLevelCheckpoint() != _index)
    {
       _state = State::Activating;
 

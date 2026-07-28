@@ -309,6 +309,8 @@ set(GAME_FILES
     src/game/level/levelfiles.h
     src/game/level/levels.cpp
     src/game/level/levels.h
+    src/game/level/leveltransitionhandler.cpp
+    src/game/level/leveltransitionhandler.h
     src/game/level/levelscript.cpp
     src/game/level/levelscript.h
     src/game/level/levelscriptcallbacks.cpp
@@ -404,6 +406,8 @@ set(GAME_FILES
     src/game/mechanisms/interactionhelp.h
     src/game/mechanisms/laser.cpp
     src/game/mechanisms/laser.h
+    src/game/mechanisms/leveltransition.cpp
+    src/game/mechanisms/leveltransition.h
     src/game/mechanisms/lever.cpp
     src/game/mechanisms/lever.h
     src/game/mechanisms/moveablebox.cpp

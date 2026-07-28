@@ -23,6 +23,7 @@
 #include "game/level/level.h"
 #include "game/level/levelregistry.h"
 #include "game/level/levels.h"
+#include "game/level/leveltransitionhandler.h"
 #include "game/player/inventoryconfig.h"
 #include "game/player/player.h"
 #include "game/player/playerregistry.h"
@@ -528,6 +529,7 @@ void Game::initialize()
    _menu_background = std::make_unique<MenuBackgroundScene>();
 
    CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::NextLevel), [this]() { nextLevel(); });
+   CallbackMap::getInstance().addCallback(static_cast<int32_t>(CallbackType::LoadLevel), [this]() { loadLevel(); });
 
    Audio::getInstance();
 
@@ -712,9 +714,7 @@ void Game::draw()
       const auto scale_minimum = std::min(static_cast<int32_t>(scale_x), static_cast<int32_t>(scale_y));
       const auto dx = (scale_x - scale_minimum) * 0.5f;
       const auto dy = (scale_y - scale_minimum) * 0.5f;
-      sfcompat::setPosition(
-         window_texture_sprite, {_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy}
-      );
+      sfcompat::setPosition(window_texture_sprite, {_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy});
 #ifdef __EMSCRIPTEN__
       window_texture_sprite.scale = {static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)};
 #else
@@ -993,6 +993,9 @@ void Game::update()
             _test_scene->update(dt);
          }
 #endif
+
+         // mechanisms file their transition requests while the level updates, so pick them up right after
+         LevelTransitionHandler::getInstance().update();
 
          // this might trigger level-reloading, so this ought to be the last drawing call in the loop
          updateGameState(dt);

@@ -312,7 +312,8 @@ enum class Dash
 enum class CallbackType
 {
    EndGame,
-   NextLevel
+   NextLevel,
+   LoadLevel
 };
 
 /// \brief polygon winding order.

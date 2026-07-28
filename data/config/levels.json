@@ -1,4 +1,5 @@
 [
    {"levelname" : "data/level-catacombs/level.json"},
-   {"levelname" : "data/level-intro/level.json"}
+   {"levelname" : "data/level-intro/level.json"},
+   {"levelname" : "data/level-graveyard/level.json"}
 ]

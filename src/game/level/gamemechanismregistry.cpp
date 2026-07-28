@@ -33,6 +33,7 @@ GameMechanismRegistry::GameMechanismRegistry()
       &_mechanism_info_overlay,
       &_mechanism_interaction_help,
       &_mechanism_lasers,
+      &_mechanism_level_transitions,
       &_mechanism_levers,
       &_mechanism_moveable_boxes,
       &_mechanism_on_off_blocks,
@@ -82,6 +83,7 @@ GameMechanismRegistry::GameMechanismRegistry()
    _mechanisms_map[std::string{layer_name_interaction_help}] = &_mechanism_interaction_help;
    _mechanisms_map[std::string{layer_name_interval_spikes}] = &_mechanism_spikes;
    _mechanisms_map[std::string{layer_name_lasers}] = &_mechanism_lasers;
+   _mechanisms_map[std::string{layer_name_level_transitions}] = &_mechanism_level_transitions;
    _mechanisms_map[std::string{layer_name_levers}] = &_mechanism_levers;
    _mechanisms_map[std::string{layer_name_moveable_objects}] = &_mechanism_moveable_boxes;
    _mechanisms_map[std::string{layer_name_on_off_blocks}] = &_mechanism_on_off_blocks;
