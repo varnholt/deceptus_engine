@@ -92,7 +92,7 @@ fn flush_file(current_file: &mut Option<FilePatch>, patches: &mut Vec<FilePatch>
 }
 
 fn extract_filename(line: &str) -> String {
-    // "+++ b/data/catacombs/foo.tmx\t..." → "foo.tmx"
+    // "+++ b/data/level-catacombs/foo.tmx\t..." → "foo.tmx"
     let without_prefix = line.trim_start_matches('+').trim_start_matches('-').trim();
     // strip the git a/ b/ prefix
     let without_ab = if without_prefix.starts_with("a/") || without_prefix.starts_with("b/") {
