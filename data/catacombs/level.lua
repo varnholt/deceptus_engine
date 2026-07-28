@@ -330,7 +330,9 @@ function mechanismEvent(object_id, group_id, event_name, value)
    -- the sealed cells are pitch black, so the tunnel stays blocked while the head torch is off.
    -- group_id is checked because the extra the locked box spawns is called "lantern" as well.
    if (object_id == "lantern" and group_id == "items" and event_name == "state") then
-      setMechanismEnabled("tunnel_block", value == "off", "blocking_rects")
+      local torch_is_off = (value == "off")
+      setMechanismEnabled("tunnel_block", torch_is_off, "blocking_rects")
+      setMechanismEnabled("cant_see_here_01", torch_is_off, "dialogues")
    end
    
    -- open drawer in library
