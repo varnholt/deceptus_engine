@@ -92,6 +92,11 @@ int32_t setSpriteOffset(lua_State* state);
 /// \return number of lua return values pushed to the stack.
 int32_t setSpriteVisible(lua_State* state);
 
+/// \brief sets the z index one sprite layer is drawn at, independently of the node z index.
+/// \param state active lua state with sprite id and z index.
+/// \return number of lua return values pushed to the stack.
+int32_t setSpriteZIndex(lua_State* state);
+
 // physics queries
 /// \brief checks whether a script-provided rectangle overlaps the player bounds.
 /// \param state active lua state with rectangle coordinates in pixels.
@@ -252,6 +257,11 @@ int32_t updateProjectileTexture(lua_State* state);
 /// \param state active lua state with animation texture and frame timing parameters.
 /// \return number of lua return values pushed to the stack.
 int32_t updateProjectileAnimation(lua_State* state);
+
+/// \brief sets the z index the projectiles of one weapon are drawn at, independently of the node z index.
+/// \param state active lua state with weapon index and z index.
+/// \return number of lua return values pushed to the stack.
+int32_t setProjectileZIndex(lua_State* state);
 
 /// \brief registers impact animation data for projectile collisions.
 /// \param state active lua state with weapon index and animation parameters.

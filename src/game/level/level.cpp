@@ -1155,14 +1155,14 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          _ambient_occlusion->draw(target, layer_states);
       }
 
-      // draw enemies
+      // draw enemies; sprite layers and projectiles may have been assigned their own z index from lua
       for (auto& enemy : LuaInterface::instance().getObjectList())
       {
-         if (enemy->getZ() == z_index)
+         if (enemy->hasContentAtZ(z_index))
          {
             if (checkUpdateMechanism(player_chunk, enemy))
             {
-               enemy->draw(target, normal, layer_states);
+               enemy->drawAtZ(target, normal, layer_states, z_index);
             }
          }
       }
