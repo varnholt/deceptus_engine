@@ -19,30 +19,30 @@ MenuScreen::MenuScreen() : _font(getFont())
 void MenuScreen::placeTextCentered(sf::Text& text, const sf::FloatRect& reference_rect)
 {
    const auto text_bounds = text.getLocalBounds();
-   const auto pixel_x =
+   const auto x_px =
       static_cast<int32_t>(reference_rect.position.x + (reference_rect.size.x - text_bounds.size.x) / 2.0f - text_bounds.position.x);
-   const auto pixel_y =
+   const auto y_px =
       static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - text_bounds.size.y) / 2.0f - text_bounds.position.y);
-   sfcompat::setPosition(text, {static_cast<float>(pixel_x), static_cast<float>(pixel_y)});
+   sfcompat::setPosition(text, {static_cast<float>(x_px), static_cast<float>(y_px)});
 }
 
 void MenuScreen::placeTextLeft(sf::Text& text, const sf::FloatRect& reference_rect)
 {
    const auto text_bounds = text.getLocalBounds();
-   const auto pixel_x = static_cast<int32_t>(reference_rect.position.x - text_bounds.position.x);
-   const auto pixel_y =
+   const auto x_px = static_cast<int32_t>(reference_rect.position.x - text_bounds.position.x);
+   const auto y_px =
       static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - text_bounds.size.y) / 2.0f - text_bounds.position.y);
-   sfcompat::setPosition(text, {static_cast<float>(pixel_x), static_cast<float>(pixel_y)});
+   sfcompat::setPosition(text, {static_cast<float>(x_px), static_cast<float>(y_px)});
 }
 
 void MenuScreen::placeTextRightOf(sf::Text& text, const sf::FloatRect& reference_rect)
 {
    const auto text_bounds = text.getLocalBounds();
-   const auto pixel_x =
+   const auto x_px =
       static_cast<int32_t>(reference_rect.position.x + reference_rect.size.x + button_text_x_offset - text_bounds.position.x);
-   const auto pixel_y =
+   const auto y_px =
       static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - text_bounds.size.y) / 2.0f - text_bounds.position.y);
-   sfcompat::setPosition(text, {static_cast<float>(pixel_x), static_cast<float>(pixel_y)});
+   sfcompat::setPosition(text, {static_cast<float>(x_px), static_cast<float>(y_px)});
 }
 
 void MenuScreen::placeDecorators(sf::Sprite& deco_left, sf::Sprite& deco_right, const sf::FloatRect& reference_rect)

@@ -42,16 +42,16 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 ROW_OFFSET_RIGHT = 3
 FRAME_COUNTS = {8, 8, 6, 19}
-DEBUG_ATTACK_OFFSET = 0 * 48  -- 8x48 px offset when attacking
+DEBUG_ATTACK_OFFSET_PX = 0 * 48  -- 8x48 px offset when attacking
 
 MIN_ATTACK_WAIT = 1.5  -- Minimum wait time in seconds between attacks
 
 MAX_TONGUE_SCALE = 5.0  -- Maximum scale factor for the tongue extension
-SPRITE_WIDTH = 48
-SPRITE_HEIGHT = 48
+SPRITE_WIDTH_PX = 48
+SPRITE_HEIGHT_PX = 48
 
-SPRITE_WIDTH_DYING = 72
-SPRITE_HEIGHT_DYING = 72
+SPRITE_WIDTH_DYING_PX = 72
+SPRITE_HEIGHT_DYING_PX = 72
 SPRITE_ROW_DYING = 6
 
 STATE_IDLE = 1
@@ -67,8 +67,8 @@ CYCLE_DYING = 4
 ------------------------------------------------------------------------------------------------------------------------
 -- member variables
 _done = false
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _elapsed = 0
 _alignment_offset = 0
 _state = STATE_IDLE
@@ -159,8 +159,8 @@ function checkAttackCondition(next_state)
    -- only check for attack transition if we're in a state that allows it
    if next_state == _state and _state ~= STATE_DYING and _state ~= STATE_ATTACK then
       -- check for attack transition
-      x_diff = _player_position:getX() // 24 - _position:getX() // 24
-      y_diff = _player_position:getY() // 24 - _position:getY() // 24
+      x_diff = _player_position_px:getX() // 24 - _position_px:getX() // 24
+      y_diff = _player_position_px:getY() // 24 - _position_px:getY() // 24
 
       x_in_range =
          (_points_left and x_diff >= -5 and x_diff <= 0) or
@@ -177,10 +177,10 @@ function checkAttackCondition(next_state)
       if (y_in_range and x_in_range and tongue_retracted and can_attack) then
          if (
             isPhsyicsPathClear(
-               _position:getX(),
-               _position:getY(),
-               _player_position:getX(),
-               _player_position:getY()
+               _position_px:getX(),
+               _position_px:getY(),
+               _player_position_px:getX(),
+               _player_position_px:getY()
             )
          ) then
             -- print("Frog: Attack triggered, x_diff: " .. x_diff)
@@ -243,7 +243,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function logSprite(dt)
 
-   local current_row = math.floor(y / SPRITE_HEIGHT)
+   local current_row = math.floor(y / SPRITE_HEIGHT_PX)
 
    if _prev_log_sprite_row ~= current_row then
 
@@ -300,7 +300,7 @@ function updateSpriteAttack(dt)
    local current_attack_frame = math.floor(_animation_frame)
 
    -- calculate distance to player to determine tongue length
-   local dist_to_player = math.abs(_player_position:getX() - _position:getX())
+   local dist_to_player = math.abs(_player_position_px:getX() - _position_px:getX())
 
    -- Calculate the current frame index to determine if animation has completed
    local current_frame_index = math.floor(_attack_animation_time * _attack_animation_speed * _attack_anim_speed)
@@ -336,8 +336,8 @@ function updateSpriteAttack(dt)
    local displayed_tongue_width = 24 * _tongue_scale
 
    local base_x, base_y
-   base_x = _position:getX()
-   base_y = _position:getY()
+   base_x = _position_px:getX()
+   base_y = _position_px:getY()
    local tongue_tip_offset_x = 0
    local tongue_base_offset_x = 36
 
@@ -421,7 +421,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -432,8 +432,8 @@ function playerMovedTo(x, y)
       return
    end
 
-   _player_position = v2d.Vector2D(x, y)
-   distance_to_player = (_player_position - _position):getLength()
+   _player_position_px = v2d.Vector2D(x, y)
+   distance_to_player = (_player_position_px - _position_px):getLength()
 end
 
 
@@ -474,7 +474,7 @@ function writeProperty(key, value)
       _tongue_extension_x = 288
 
       if (value == "right") then
-         _alignment_offset = 3 * SPRITE_HEIGHT
+         _alignment_offset = 3 * SPRITE_HEIGHT_PX
          _points_left = false
          _tongue_direction_multiplier = 1  -- 1 for right
          _tongue_extension_y = 264
@@ -526,11 +526,11 @@ function getIdleSpriteCoords()
    end
    
    local frame_index = math.floor(_animation_frame) % max_frames
-   local x = frame_index * SPRITE_WIDTH
-   local y = (cycle - 1) * SPRITE_HEIGHT
+   local x = frame_index * SPRITE_WIDTH_PX
+   local y = (cycle - 1) * SPRITE_HEIGHT_PX
    y = y + _alignment_offset
    
-   return x, y, SPRITE_WIDTH, SPRITE_WIDTH
+   return x, y, SPRITE_WIDTH_PX, SPRITE_WIDTH_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -568,25 +568,25 @@ function getAttackSpriteCoords()
    end
 
    -- calculate sprite coordinates
-   local x = frame_index * SPRITE_WIDTH
-   local y = (cycle - 1) * SPRITE_HEIGHT
+   local x = frame_index * SPRITE_WIDTH_PX
+   local y = (cycle - 1) * SPRITE_HEIGHT_PX
 
    -- Apply attack sprite offset when attacking
-   x = x + DEBUG_ATTACK_OFFSET
+   x = x + DEBUG_ATTACK_OFFSET_PX
 
    -- Apply alignment offset for non-dying states
    y = y + _alignment_offset
 
-   return x, y, SPRITE_WIDTH, SPRITE_HEIGHT
+   return x, y, SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getDyingSpriteCoords()
    local death_frame_index = math.floor(_death_animation_frame)
    
-   local x = death_frame_index * SPRITE_WIDTH_DYING
-   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING
-   return x, y, SPRITE_WIDTH_DYING, SPRITE_HEIGHT_DYING
+   local x = death_frame_index * SPRITE_WIDTH_DYING_PX
+   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING_PX
+   return x, y, SPRITE_WIDTH_DYING_PX, SPRITE_HEIGHT_DYING_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------

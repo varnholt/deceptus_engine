@@ -14,7 +14,7 @@ void TmxEnemy::parse(const std::shared_ptr<TmxObject>& object)
 {
    _id = object->_id;
    _name = object->_name;
-   _pixel_position = {static_cast<int32_t>(object->_x_px), static_cast<int32_t>(object->_y_px)};
+   _position_px = {static_cast<int32_t>(object->_x_px), static_cast<int32_t>(object->_y_px)};
 
    if (object->_properties)
    {
@@ -37,16 +37,16 @@ void TmxEnemy::parse(const std::shared_ptr<TmxObject>& object)
       {
          if (!field.empty())
          {
-            _pixel_path.push_back(std::stoi(field) * PIXELS_PER_TILE);
+            _path_px.push_back(std::stoi(field) * PIXELS_PER_TILE);
          }
       }
 
       // if the path just consists of a single position, add another position which is the
       // pixel position of the tmx object
-      if (_pixel_path.size() == 2)
+      if (_path_px.size() == 2)
       {
-         _pixel_path.insert(_pixel_path.begin(), _pixel_position.y);
-         _pixel_path.insert(_pixel_path.begin(), _pixel_position.x);
+         _path_px.insert(_path_px.begin(), _position_px.y);
+         _path_px.insert(_path_px.begin(), _position_px.x);
       }
    }
 
@@ -69,10 +69,10 @@ void TmxEnemy::parse(const std::shared_ptr<TmxObject>& object)
    top -= PIXELS_PER_TILE / 2;
    left -= PIXELS_PER_TILE / 2;
 
-   _pixel_rect.position.y = top;
-   _pixel_rect.position.x = left;
-   _pixel_rect.size.x = w;
-   _pixel_rect.size.y = h;
+   _rect_px.position.y = top;
+   _rect_px.position.x = left;
+   _rect_px.size.x = w;
+   _rect_px.size.y = h;
 
    _vertices[0].x = left;
    _vertices[0].y = top;
@@ -104,7 +104,7 @@ void TmxEnemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
          sf::Vector2i v0{static_cast<int32_t>(path[i0].x * PPM), static_cast<int32_t>(path[i0].y * PPM)};
 
          // check if rect contains point, then we have a match
-         if (_pixel_rect.contains(v0))
+         if (_rect_px.contains(v0))
          {
             _path = path;
             _has_path = true;
@@ -145,16 +145,16 @@ void TmxEnemy::addPaths(const std::vector<std::vector<b2Vec2>>& paths)
       {
          for (const auto& v : std::ranges::views::reverse(_path))
          {
-            _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
-            _pixel_path.push_back(static_cast<int32_t>(v.y * PPM));
+            _path_px.push_back(static_cast<int32_t>(v.x * PPM));
+            _path_px.push_back(static_cast<int32_t>(v.y * PPM));
          }
       }
       else
       {
          for (const auto& v : _path)
          {
-            _pixel_path.push_back(static_cast<int32_t>(v.x * PPM));
-            _pixel_path.push_back(static_cast<int32_t>(v.y * PPM));
+            _path_px.push_back(static_cast<int32_t>(v.x * PPM));
+            _path_px.push_back(static_cast<int32_t>(v.y * PPM));
          }
       }
    }

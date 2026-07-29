@@ -19,7 +19,6 @@ struct TmxTileSet;
 class DeathBlock : public GameMechanism, public GameNode
 {
 public:
-
    /// \brief creates a death block node.
    /// \param parent parent node in the scene graph.
    DeathBlock(GameNode* parent = nullptr);
@@ -62,8 +61,8 @@ private:
       Rotate
    };
 
-    /// \brief per-side spike animation and collision state for one orientation.
-    struct Spike
+   /// \brief per-side spike animation and collision state for one orientation.
+   struct Spike
    {
       enum class State
       {
@@ -84,30 +83,30 @@ private:
       /// \brief starts a spike in the default retracted state.
       Spike();
 
-       /// \brief checks whether sprite index changed since the previous frame.
-       /// \return true when a new frame should be applied to the sprite.
-       bool hasChanged() const;
+      /// \brief checks whether sprite index changed since the previous frame.
+      /// \return true when a new frame should be applied to the sprite.
+      bool hasChanged() const;
 
-       /// \brief stores previous and current sprite indices from the animation timer.
-       void updateIndex();
+      /// \brief stores previous and current sprite indices from the animation timer.
+      void updateIndex();
 
-       /// \brief advances extracting animation until fully extended.
-       /// \param dt elapsed frame time.
-       void extract(const sf::Time& dt);
+      /// \brief advances extracting animation until fully extended.
+      /// \param dt elapsed frame time.
+      void extract(const sf::Time& dt);
 
-       /// \brief keeps spike extended until on-time expires.
-       /// \param dt elapsed frame time.
-       /// \param time_on duration to keep spikes extended.
-       void extracted(const sf::Time& dt, const sf::Time& time_on);
+      /// \brief keeps spike extended until on-time expires.
+      /// \param dt elapsed frame time.
+      /// \param time_on duration to keep spikes extended.
+      void extracted(const sf::Time& dt, const sf::Time& time_on);
 
-       /// \brief advances retracting animation until fully retracted.
-       /// \param dt elapsed frame time.
-       void retract(const sf::Time& dt);
+      /// \brief advances retracting animation until fully retracted.
+      /// \param dt elapsed frame time.
+      void retract(const sf::Time& dt);
 
-       /// \brief keeps spike retracted until off-time expires.
-       /// \param dt elapsed frame time.
-       /// \param time_off duration to keep spikes retracted.
-       void retracted(const sf::Time& dt, const sf::Time& time_off);
+      /// \brief keeps spike retracted until off-time expires.
+      /// \param dt elapsed frame time.
+      /// \param time_off duration to keep spikes retracted.
+      void retracted(const sf::Time& dt, const sf::Time& time_off);
 
       State _state{State::Retracted};
       sf::Time _wait_time;
@@ -121,41 +120,41 @@ private:
       bool _active{true};
    };
 
-    /// \brief positions the physics body from configured pixel coordinates.
-    void setupTransform();
+   /// \brief positions the physics body from configured pixel coordinates.
+   void setupTransform();
 
-    /// \brief creates the kinematic body and fixture used for trap collisions.
-    /// \param world physics world that owns the body.
-    void setupBody(const std::shared_ptr<b2World>& world);
+   /// \brief creates the kinematic body and fixture used for trap collisions.
+   /// \param world physics world that owns the body.
+   void setupBody(const std::shared_ptr<b2World>& world);
 
-    /// \brief eases lever lag toward enabled or disabled target.
-    /// \param dt elapsed frame time.
-    void updateLeverLag(const sf::Time& dt);
+   /// \brief eases lever lag toward enabled or disabled target.
+   /// \param dt elapsed frame time.
+   void updateLeverLag(const sf::Time& dt);
 
-    /// \brief updates absolute spike hit rects and damages the player on lethal overlap.
-    void updateCollision();
+   /// \brief updates absolute spike hit rects and damages the player on lethal overlap.
+   void updateCollision();
 
-    /// \brief updates spike states according to the selected operating mode.
-    /// \param dt elapsed frame time.
-    void updateStates(const sf::Time& dt);
+   /// \brief updates spike states according to the selected operating mode.
+   /// \param dt elapsed frame time.
+   void updateStates(const sf::Time& dt);
 
-    /// \brief updates cached bounding rectangle from the current body position.
-    void updateBoundingBox();
+   /// \brief updates cached bounding rectangle from the current body position.
+   void updateBoundingBox();
 
-    /// \brief applies current animation frame and position to all sprites.
-    void updateSprites();
+   /// \brief applies current animation frame and position to all sprites.
+   void updateSprites();
 
-    /// \brief moves the trap along its interpolation path and updates platform coupling for the player.
-    /// \param dt elapsed frame time.
-    void updatePosition(const sf::Time& dt);
+   /// \brief moves the trap along its interpolation path and updates platform coupling for the player.
+   /// \param dt elapsed frame time.
+   void updatePosition(const sf::Time& dt);
 
-    /// \brief updates all spikes using the interval mode state machine.
-    /// \param dt elapsed frame time.
-    void updateStatesInterval(const sf::Time& dt);
+   /// \brief updates all spikes using the interval mode state machine.
+   /// \param dt elapsed frame time.
+   void updateStatesInterval(const sf::Time& dt);
 
-    /// \brief updates one active spike at a time and rotates active side after each cycle.
-    /// \param dt elapsed frame time.
-    void updateStatesRotate(const sf::Time& dt);
+   /// \brief updates one active spike at a time and rotates active side after each cycle.
+   /// \param dt elapsed frame time.
+   void updateStatesRotate(const sf::Time& dt);
 
    //     +---+
    //     | 0 |
@@ -165,7 +164,7 @@ private:
    //     | 2 |
    //     +---+
 
-   sf::Vector2f _pixel_positions;
+   sf::Vector2f _positions_px;
    sf::FloatRect _rect;
    b2Body* _body = nullptr;
    std::vector<b2Vec2> _path;

@@ -24,7 +24,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 ROW_OFFSET_RIGHT = 3
 FRAME_COUNTS = {8, 8, 6, 19}
-DEBUG_ATTACK_OFFSET = 0 * 48
+DEBUG_ATTACK_OFFSET_PX = 0 * 48
 
 BURP_MODE_PLAYER_PROXIMITY = 1
 BURP_MODE_FIXED_INTERVAL   = 2
@@ -33,11 +33,11 @@ BURP_MODE     = BURP_MODE_FIXED_INTERVAL
 BURP_INTERVAL = 4.0   -- used by BURP_MODE_FIXED_INTERVAL
 MIN_ATTACK_WAIT = 1.5  -- used by BURP_MODE_PLAYER_PROXIMITY
 
-SPRITE_WIDTH = 48
-SPRITE_HEIGHT = 48
+SPRITE_WIDTH_PX = 48
+SPRITE_HEIGHT_PX = 48
 
-SPRITE_WIDTH_DYING = 72
-SPRITE_HEIGHT_DYING = 72
+SPRITE_WIDTH_DYING_PX = 72
+SPRITE_HEIGHT_DYING_PX = 72
 SPRITE_ROW_DYING = 6
 
 STATE_IDLE = 1
@@ -60,15 +60,15 @@ BUBBLE_SPEED_H        = 0.05  -- base horizontal impulse
 BUBBLE_SPEED_H_SPREAD = 0.015 -- random ± spread on horizontal impulse
 BUBBLE_SPEED_V        = 0.003 -- base upward impulse (~11 deg slope at base speed)
 BUBBLE_SPEED_V_SPREAD = 0.008 -- random spread added to upward impulse (always positive)
-BUBBLE_SPAWN_SPREAD_X = 6     -- random ± pixel spread on spawn x
-BUBBLE_SPAWN_SPREAD_Y = 8     -- random ± pixel spread on spawn y
+BUBBLE_SPAWN_SPREAD_X_PX = 6     -- random ± pixel spread on spawn x
+BUBBLE_SPAWN_SPREAD_Y_PX = 8     -- random ± pixel spread on spawn y
 
 
 ------------------------------------------------------------------------------------------------------------------------
 -- member variables
 _done = false
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _elapsed = 0
 _alignment_offset = 0
 _state = STATE_IDLE
@@ -165,8 +165,8 @@ function checkAttackCondition(next_state)
 
       elseif BURP_MODE == BURP_MODE_PLAYER_PROXIMITY then
 
-         local x_diff = _player_position:getX() // 24 - _position:getX() // 24
-         local y_diff = _player_position:getY() // 24 - _position:getY() // 24
+         local x_diff = _player_position_px:getX() // 24 - _position_px:getX() // 24
+         local y_diff = _player_position_px:getY() // 24 - _position_px:getY() // 24
 
          local x_in_range =
             (_points_left and x_diff >= -5 and x_diff <= 0) or
@@ -176,8 +176,8 @@ function checkAttackCondition(next_state)
 
          if y_in_range and x_in_range and _elapsed - _last_attack_time >= MIN_ATTACK_WAIT then
             if isPhsyicsPathClear(
-               _position:getX(), _position:getY(),
-               _player_position:getX(), _player_position:getY()
+               _position_px:getX(), _position_px:getY(),
+               _player_position_px:getX(), _player_position_px:getY()
             ) then
                next_state = STATE_ATTACK
             end
@@ -266,14 +266,14 @@ end
 -- fires one burst event: all BUBBLE_BURST_SIZE slots simultaneously with randomized
 -- velocities and spawn positions, matching the WaterBubbles scatter pattern.
 local function fireBubble()
-   local spawn_x_base = _position:getX() + _direction_multiplier * 20
-   local spawn_y_base = _position:getY()
+   local spawn_x_base = _position_px:getX() + _direction_multiplier * 20
+   local spawn_y_base = _position_px:getY()
 
    for slot = 0, BUBBLE_BURST_SIZE - 1 do
       local horiz  = BUBBLE_SPEED_H + (math.random() - 0.5) * 2.0 * BUBBLE_SPEED_H_SPREAD
       local upward = BUBBLE_SPEED_V + math.random() * BUBBLE_SPEED_V_SPREAD
-      local spawn_x = spawn_x_base + (math.random() - 0.5) * 2.0 * BUBBLE_SPAWN_SPREAD_X
-      local spawn_y = spawn_y_base + (math.random() - 0.5) * 2.0 * BUBBLE_SPAWN_SPREAD_Y
+      local spawn_x = spawn_x_base + (math.random() - 0.5) * 2.0 * BUBBLE_SPAWN_SPREAD_X_PX
+      local spawn_y = spawn_y_base + (math.random() - 0.5) * 2.0 * BUBBLE_SPAWN_SPREAD_Y_PX
       useWeapon(slot, spawn_x, spawn_y, _direction_multiplier * horiz, -upward)
    end
 end
@@ -365,7 +365,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -376,7 +376,7 @@ function playerMovedTo(x, y)
       return
    end
 
-   _player_position = v2d.Vector2D(x, y)
+   _player_position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -414,7 +414,7 @@ function writeProperty(key, value)
    if (key == "alignment") then
 
       if (value == "right") then
-         _alignment_offset = 3 * SPRITE_HEIGHT
+         _alignment_offset = 3 * SPRITE_HEIGHT_PX
          _points_left = false
          _direction_multiplier = 1
       else
@@ -445,11 +445,11 @@ function getIdleSpriteCoords()
    end
 
    local frame_index = math.floor(_animation_frame) % max_frames
-   local x = frame_index * SPRITE_WIDTH
-   local y = (cycle - 1) * SPRITE_HEIGHT
+   local x = frame_index * SPRITE_WIDTH_PX
+   local y = (cycle - 1) * SPRITE_HEIGHT_PX
    y = y + _alignment_offset
 
-   return x, y, SPRITE_WIDTH, SPRITE_WIDTH
+   return x, y, SPRITE_WIDTH_PX, SPRITE_WIDTH_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -478,18 +478,18 @@ function getAttackSpriteCoords()
       frame_index = math.min(frame_index, max_frames)
    end
 
-   local x = frame_index * SPRITE_WIDTH + DEBUG_ATTACK_OFFSET
-   local y = (cycle - 1) * SPRITE_HEIGHT + _alignment_offset
+   local x = frame_index * SPRITE_WIDTH_PX + DEBUG_ATTACK_OFFSET_PX
+   local y = (cycle - 1) * SPRITE_HEIGHT_PX + _alignment_offset
 
-   return x, y, SPRITE_WIDTH, SPRITE_HEIGHT
+   return x, y, SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getDyingSpriteCoords()
    local death_frame_index = math.floor(_death_animation_frame)
-   local x = death_frame_index * SPRITE_WIDTH_DYING
-   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING
-   return x, y, SPRITE_WIDTH_DYING, SPRITE_HEIGHT_DYING
+   local x = death_frame_index * SPRITE_WIDTH_DYING_PX
+   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING_PX
+   return x, y, SPRITE_WIDTH_DYING_PX, SPRITE_HEIGHT_DYING_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------

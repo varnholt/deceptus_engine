@@ -131,7 +131,7 @@ private:
    // for 'version 1'
    sf::VertexArray _door_quad{sf::PrimitiveType::Triangles, 4};
    sf::Vector2i _tile_position_tl;
-   sf::FloatRect _pixel_rect;
+   sf::FloatRect _rect_px;
    float _bar_offset = 0.0f;
 
    std::optional<std::string> _required_item;

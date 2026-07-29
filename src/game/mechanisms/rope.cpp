@@ -283,9 +283,9 @@ void Rope::setup(const GameDeserializeData& data)
    }
 
    // init segment length
-   std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_path;
-   const auto path_0_px = pixel_path.at(0);
-   const auto path_1_px = pixel_path.at(1);
+   std::vector<sf::Vector2f> path_px = data._tmx_object->_polyline->_path;
+   const auto path_0_px = path_px.at(0);
+   const auto path_1_px = path_px.at(1);
    const auto rope_length_px = path_1_px - path_0_px;
    _segment_length_m = (SfmlMath::length(rope_length_px) * MPP) / static_cast<float>(_segment_count);
 
@@ -345,7 +345,7 @@ sf::Vector2i Rope::getPixelPosition() const
    return _position_px;
 }
 
-void Rope::setPixelPosition(const sf::Vector2i& pixel_position)
+void Rope::setPixelPosition(const sf::Vector2i& position_px)
 {
-   _position_px = pixel_position;
+   _position_px = position_px;
 }

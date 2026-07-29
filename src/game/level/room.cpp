@@ -160,7 +160,7 @@ void Room::RoomEnterArea::deserializeEnterArea(const GameDeserializeData& data)
       if (start_position_x_it != data._tmx_object->_properties->_map.end() &&
           start_position_y_it != data._tmx_object->_properties->_map.end())
       {
-         _start_position = {start_position_x_it->second->_value_int.value(), start_position_y_it->second->_value_int.value()};
+         _start_position_px = {start_position_x_it->second->_value_int.value(), start_position_y_it->second->_value_int.value()};
       }
 
       const auto start_offset_x_it = data._tmx_object->_properties->_map.find("start_offset_x_px");
@@ -333,10 +333,10 @@ void Room::movePlayerToRoomStartPosition()
 
    const auto area = entered_direction.value();
 
-   if (area._start_position.has_value())
+   if (area._start_position_px.has_value())
    {
       PlayerRegistry::getFirst()->setBodyViaPixelPosition(
-         static_cast<float>(area._start_position.value().x), static_cast<float>(area._start_position.value().y)
+         static_cast<float>(area._start_position_px.value().x), static_cast<float>(area._start_position_px.value().y)
       );
    }
 
@@ -442,24 +442,28 @@ void Room::SubRoom::deserialize(const GameDeserializeData& data)
 
       if (start_position_l_x_it != data._tmx_object->_properties->_map.end())
       {
-         area_left._start_position = {start_position_l_x_it->second->_value_int.value(), start_position_l_y_it->second->_value_int.value()};
+         area_left._start_position_px = {
+            start_position_l_x_it->second->_value_int.value(), start_position_l_y_it->second->_value_int.value()
+         };
       }
 
       if (start_position_r_x_it != data._tmx_object->_properties->_map.end())
       {
-         area_right._start_position = {
+         area_right._start_position_px = {
             start_position_r_x_it->second->_value_int.value(), start_position_r_y_it->second->_value_int.value()
          };
       }
 
       if (start_position_t_x_it != data._tmx_object->_properties->_map.end())
       {
-         area_top._start_position = {start_position_t_x_it->second->_value_int.value(), start_position_t_y_it->second->_value_int.value()};
+         area_top._start_position_px = {
+            start_position_t_x_it->second->_value_int.value(), start_position_t_y_it->second->_value_int.value()
+         };
       }
 
       if (start_position_b_x_it != data._tmx_object->_properties->_map.end())
       {
-         area_bottom._start_position = {
+         area_bottom._start_position_px = {
             start_position_b_x_it->second->_value_int.value(), start_position_b_y_it->second->_value_int.value()
          };
       }

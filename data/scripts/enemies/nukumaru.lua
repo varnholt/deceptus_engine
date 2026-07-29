@@ -18,8 +18,8 @@ properties = {
    density = 0.1
 }
 
-SPRITE_WIDTH = 128
-SPRITE_HEIGHT = 128
+SPRITE_WIDTH_PX = 128
+SPRITE_HEIGHT_PX = 128
 SPRITE_COUNT = 60
 ANIMATION_SPEED = 100.0
 
@@ -33,7 +33,7 @@ _impulse_y = 0.1
 function initialize()
 
    addShapeCircle(0.6, 0.0, -0.06)                        -- radius, x, y
-   updateSpriteRect(0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT) -- id, x, y, width, height
+   updateSpriteRect(0, 0, 0, SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX) -- id, x, y, width, height
    addHitbox(-18, -18, 36, 36)                            -- x offset, y offset, width, height
    setZ(30)                                               -- place in foreground
    setGravityScale(0.0)                                   -- nukumaru is not impacted by gravity
@@ -55,10 +55,10 @@ function update(dt)
       _sprite_index = sprite_index
       updateSpriteRect(
          0,
-         _sprite_index * SPRITE_WIDTH,
+         _sprite_index * SPRITE_WIDTH_PX,
          0,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
+         SPRITE_WIDTH_PX,
+         SPRITE_HEIGHT_PX
       ) -- id, x, y, width, height
    end
 end

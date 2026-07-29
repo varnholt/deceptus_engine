@@ -51,8 +51,8 @@ properties = {
 
 
 ------------------------------------------------------------------------------------------------------------------------
-SPRITE_WIDTH = 4 * 24
-SPRITE_HEIGHT = 2 * 24
+SPRITE_WIDTH_PX = 4 * 24
+SPRITE_HEIGHT_PX = 2 * 24
 
 CYCLE_IDLE = 0
 CYCLE_IDLE_BLINK = 1
@@ -75,8 +75,8 @@ THROW_DISTANCE_PX = 300
 
 ------------------------------------------------------------------------------------------------------------------------
 _ready_to_throw = true
-_pos = v2d.Vector2D(0, 0)
-_pos_player = v2d.Vector2D(0, 0)
+_pos_px = v2d.Vector2D(0, 0)
+_pos_player_px = v2d.Vector2D(0, 0)
 
 _sprite_index = 0
 
@@ -162,7 +162,7 @@ function writeProperty(key, value)
          -- print("setting alignment to left")
          _points_to_left = false
          _throw_dir_x = 1.0
-         _alignment_offset = 5 * SPRITE_HEIGHT
+         _alignment_offset = 5 * SPRITE_HEIGHT_PX
       end
    elseif (key == "audio_update_behavior") then
       update_behavior = audioUpdateBehaviorFromString(value)
@@ -191,7 +191,7 @@ function throw()
       velocity = v2d.Vector2D(_velocity_x, _velocity_y)
    else
       velocity = calculateVelocity(
-         math.abs(_pos:getX() - _pos_player:getX()),
+         math.abs(_pos_px:getX() - _pos_player_px:getX()),
          60.0,
          0.0015
       )
@@ -204,8 +204,8 @@ function throw()
 
    useWeapon(
       0,
-      _pos:getX() + _throw_dir_x * (_points_to_left and 32 or 64),
-      _pos:getY(),
+      _pos_px:getX() + _throw_dir_x * (_points_to_left and 32 or 64),
+      _pos_px:getY(),
       _throw_dir_x * (velocity:getX() / 48.0),
       -velocity:getY() / 48.0
    );
@@ -221,13 +221,13 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _pos = v2d.Vector2D(x, y)
+   _pos_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   _pos_player = v2d.Vector2D(x, y)
+   _pos_player_px = v2d.Vector2D(x, y)
 end
 
 
@@ -291,10 +291,10 @@ function updateSprite(dt)
 
       updateSpriteRect(
          0,
-         sprite_index * SPRITE_WIDTH + CYCLE_START_INDEX[_current_cycle + 1] * SPRITE_WIDTH,
-         getSpriteOffsetY() * SPRITE_HEIGHT,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
+         sprite_index * SPRITE_WIDTH_PX + CYCLE_START_INDEX[_current_cycle + 1] * SPRITE_WIDTH_PX,
+         getSpriteOffsetY() * SPRITE_HEIGHT_PX,
+         SPRITE_WIDTH_PX,
+         SPRITE_HEIGHT_PX
       )
    end
 end
@@ -343,10 +343,10 @@ function updateThrowCondition(dt)
          end
 
       -- check if player is nearby
-      elseif (math.abs(_pos:getY() - _pos_player:getY()) < 24) then
-         if (math.abs(_pos:getX() - _pos_player:getX()) < THROW_DISTANCE_PX) then
+      elseif (math.abs(_pos_px:getY() - _pos_player_px:getY()) < 24) then
+         if (math.abs(_pos_px:getX() - _pos_player_px:getX()) < THROW_DISTANCE_PX) then
 
-            player_is_left = (_pos:getX() > _pos_player:getX())
+            player_is_left = (_pos_px:getX() > _pos_player_px:getX())
 
             within_throw_distance = false
             if (player_is_left and _points_to_left) then
@@ -357,19 +357,19 @@ function updateThrowCondition(dt)
 
             -- print(
             --    string.format("pos player: %f %f, pos self: %f, %f",
-            --       _pos_player:getX(),
-            --       _pos_player:getY(),
-            --       _pos:getX(),
-            --       _pos:getY()
+            --       _pos_player_px:getX(),
+            --       _pos_player_px:getY(),
+            --       _pos_px:getX(),
+            --       _pos_px:getY()
             --    )
             -- )
 
             if (within_throw_distance) then
                _can_throw = isPhsyicsPathClear(
-                     _pos:getX(),
-                     _pos:getY(),
-                     _pos_player:getX(),
-                     _pos_player:getY()
+                     _pos_px:getX(),
+                     _pos_px:getY(),
+                     _pos_player_px:getX(),
+                     _pos_player_px:getY()
                   )
             end
          end

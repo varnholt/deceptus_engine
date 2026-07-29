@@ -82,7 +82,7 @@ void Laser::setEnabled(bool enabled)
 
 const sf::FloatRect& Laser::getPixelRect() const
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 void Laser::update(const sf::Time& dt)
@@ -222,7 +222,7 @@ void Laser::update(const sf::Time& dt)
 
 std::optional<sf::FloatRect> Laser::getBoundingBoxPx()
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 void Laser::reset()
@@ -244,7 +244,7 @@ void Laser::resetAll()
 
 const sf::Vector2f& Laser::getTilePosition() const
 {
-   return _tile_position;
+   return _position_tl;
 }
 
 const sf::Vector2f& Laser::getPixelPosition() const
@@ -305,17 +305,17 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
 
          laser->_version = version;
 
-         laser->_tile_position.x = static_cast<float>(i);
-         laser->_tile_position.y = static_cast<float>(j);
+         laser->_position_tl.x = static_cast<float>(i);
+         laser->_position_tl.y = static_cast<float>(j);
 
-         laser->_position_px.x = laser->_tile_position.x * PIXELS_PER_TILE;
-         laser->_position_px.y = laser->_tile_position.y * PIXELS_PER_TILE;
+         laser->_position_px.x = laser->_position_tl.x * PIXELS_PER_TILE;
+         laser->_position_px.y = laser->_position_tl.y * PIXELS_PER_TILE;
 
-         laser->_pixel_rect.position.x = laser->_position_px.x;
-         laser->_pixel_rect.position.y = laser->_position_px.y;
+         laser->_rect_px.position.x = laser->_position_px.x;
+         laser->_rect_px.position.y = laser->_position_px.y;
 
-         laser->_pixel_rect.size.x = PIXELS_PER_TILE;
-         laser->_pixel_rect.size.y = PIXELS_PER_TILE;
+         laser->_rect_px.size.x = PIXELS_PER_TILE;
+         laser->_rect_px.size.y = PIXELS_PER_TILE;
 
          laser->_texture = TexturePool::getInstance().get(data._base_path / data._tmx_tileset->_image->_source);
 
@@ -399,15 +399,15 @@ void Laser::collide()
    auto checkCollision = [this]()
    {
       const sf::FloatRect& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-      auto pixel_rect = _pixel_rect;
+      auto rect_px = _rect_px;
 
       if (_path.has_value())
       {
-         pixel_rect.position.x += static_cast<int32_t>(_move_offset_px.x);
-         pixel_rect.position.y += static_cast<int32_t>(_move_offset_px.y);
+         rect_px.position.x += static_cast<int32_t>(_move_offset_px.x);
+         rect_px.position.y += static_cast<int32_t>(_move_offset_px.y);
       }
 
-      const auto rough_intersection = sfcompat::findIntersection(player_rect, pixel_rect).has_value();
+      const auto rough_intersection = sfcompat::findIntersection(player_rect, rect_px).has_value();
 
       auto active = false;
 
@@ -535,7 +535,7 @@ void Laser::merge()
             {
                for (auto& laser : __lasers)
                {
-                  if (static_cast<int32_t>(laser->_tile_position.x) == xi && static_cast<int32_t>(laser->_tile_position.y) == yi)
+                  if (static_cast<int32_t>(laser->_position_tl.x) == xi && static_cast<int32_t>(laser->_position_tl.y) == yi)
                   {
                      if (on_signal.has_value())
                      {

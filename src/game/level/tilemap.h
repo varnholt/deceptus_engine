@@ -117,8 +117,8 @@ private:
       /// \brief releases owned animation frame pointers.
       virtual ~AnimatedTile();
 
-      int32_t _tile_x = 0;
-      int32_t _tile_y = 0;
+      int32_t _x_tl = 0;
+      int32_t _y_tl = 0;
       std::vector<AnimatedTileFrame*> _frames;
       int32_t _current_frame = 0;
       float _elapsed_ms = 0.0f;
@@ -128,7 +128,7 @@ private:
       std::shared_ptr<TmxAnimation> _animation;
    };
 
-   sf::Vector2u _tile_size;
+   sf::Vector2u _tile_size_px;
 
    mutable std::map<int32_t, std::map<int32_t, sf::VertexArray>> _vertices_static_blocks;
    sf::VertexArray _vertices_animated;

@@ -270,7 +270,7 @@ void Door::setEnabled(bool enabled)
 
 std::optional<sf::FloatRect> Door::getBoundingBoxPx()
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 void Door::updateTransform()
@@ -318,7 +318,7 @@ bool Door::checkPlayerAtDoor() const
 
 const sf::FloatRect& Door::getPixelRect() const
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 void Door::open()
@@ -555,7 +555,7 @@ bool Door::setup(const GameDeserializeData& data)
       _door_quad[2].position = {x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE, y_px};                        // bottom-right
       _door_quad[3].position = {x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE, y_px + 3 * PIXELS_PER_TILE};  // top-right
 
-      _pixel_rect = sf::FloatRect({x_px, y_px}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3});
+      _rect_px = sf::FloatRect({x_px, y_px}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3});
    }
    else
    {

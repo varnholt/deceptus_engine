@@ -2,8 +2,8 @@
 
 #include <filesystem>
 
-#include "box2d/box2d.h"
 #include "SFML/Graphics.hpp"
+#include "box2d/box2d.h"
 #include "game/constants.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/fixturenode.h"
@@ -81,11 +81,11 @@ public:
 
 private:
    b2Body* _body = nullptr;
-   b2Vec2 _position_b2d;
-   sf::Vector2f _position_sfml;
+   b2Vec2 _position_m;
+   sf::Vector2f _position_px;
    b2PolygonShape _shape;
-   sf::FloatRect _belt_pixel_rect;
-   sf::FloatRect _arrow_pixel_rect;
+   sf::FloatRect _belt_rect_px;
+   sf::FloatRect _arrow_rect_px;
    float _elapsed = 0.0f;
    bool _points_right = true;
    float _lever_lag = 1.0f;

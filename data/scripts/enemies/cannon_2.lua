@@ -34,8 +34,8 @@ mProjectileIndex = 0
 mIdle = true
 mFired = false
 
-SPRITE_WIDTH = 6 * 24
-SPRITE_HEIGHT = 3 * 24
+SPRITE_WIDTH_PX = 6 * 24
+SPRITE_HEIGHT_PX = 3 * 24
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -94,8 +94,8 @@ function initialize()
       0,
       0,
       0,
-      SPRITE_WIDTH,
-      SPRITE_HEIGHT
+      SPRITE_WIDTH_PX,
+      SPRITE_HEIGHT_PX
    )
 end
 
@@ -107,7 +107,7 @@ function writeProperty(key, value)
       if (value == "right") then
          -- print("setting alignment to left")
          mX = 1.0
-         mAlignmentOffset = 5 * SPRITE_HEIGHT
+         mAlignmentOffset = 5 * SPRITE_HEIGHT_PX
       end
    elseif (key == "time_offset_s") then
       mElapsedUntilFired = mElapsedUntilFired + tonumber(value)
@@ -227,10 +227,10 @@ function update(dt)
    if (index ~= mSpriteIndex) then
       updateSpriteRect(
          0,
-         col * SPRITE_WIDTH,
-         row * SPRITE_HEIGHT + mAlignmentOffset,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
+         col * SPRITE_WIDTH_PX,
+         row * SPRITE_HEIGHT_PX + mAlignmentOffset,
+         SPRITE_WIDTH_PX,
+         SPRITE_HEIGHT_PX
       )
    end
 

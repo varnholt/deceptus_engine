@@ -44,14 +44,14 @@ CYCLE_LENGTHS =  {12, 12, 12, 15, 4}
 CYCLE_ROWS_LEFT = {0, 2, 4, 6, 4}
 CYCLE_ROWS_RIGHT = {1, 3, 5, 8, 5}
 ANIMATION_SPEEDS = {10.0, 20.0, 10.0, 10.0, 10.0}
-SPRITE_SIZE = 48
+SPRITE_SIZE_PX = 48
 SPRITES_PER_ROW = 12
 
 
 ------------------------------------------------------------------------------------------------------------------------
 _keys_pressed = 0
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _points_to_left = false
 _patrol_time = 0.0
 _current_sprite_elapsed = 99.0
@@ -114,13 +114,13 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   _player_position = v2d.Vector2D(x, y)
+   _player_position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -129,9 +129,9 @@ end
 -- |          p      o          | x
 function followPlayer()
    local epsilon = 5
-   if (_player_position:getX() > _position:getX() + epsilon) then
+   if (_player_position_px:getX() > _position_px:getX() + epsilon) then
       goRight()
-   elseif (_player_position:getX() < _position:getX() - epsilon) then
+   elseif (_player_position_px:getX() < _position_px:getX() - epsilon) then
       goLeft()
    else
       _keys_pressed = 0
@@ -158,10 +158,10 @@ function updateSprite(dt)
 
       updateSpriteRect(
          0,
-         sprite_index * SPRITE_SIZE,
-         getSpriteOffsetY() + wrapped_y * SPRITE_SIZE,
-         SPRITE_SIZE,
-         SPRITE_SIZE
+         sprite_index * SPRITE_SIZE_PX,
+         getSpriteOffsetY() + wrapped_y * SPRITE_SIZE_PX,
+         SPRITE_SIZE_PX,
+         SPRITE_SIZE_PX
       )
    end
 end
@@ -169,7 +169,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getSpriteOffsetY()
-   return _points_to_left and (CYCLE_ROWS_LEFT[_current_cycle + 1] * SPRITE_SIZE) or (CYCLE_ROWS_RIGHT[_current_cycle + 1] * SPRITE_SIZE)
+   return _points_to_left and (CYCLE_ROWS_LEFT[_current_cycle + 1] * SPRITE_SIZE_PX) or (CYCLE_ROWS_RIGHT[_current_cycle + 1] * SPRITE_SIZE_PX)
 end
 
 
@@ -208,9 +208,9 @@ function patrol(dt)
    local key = _patrol_path[_patrol_index]
    local keyVec = v2d.Vector2D(key:getX(), key:getY())
 
-   if (_position:getX() > keyVec:getX() + _patrol_epsilon) then
+   if (_position_px:getX() > keyVec:getX() + _patrol_epsilon) then
       goLeft()
-   elseif (_position:getX() < keyVec:getX() - _patrol_epsilon) then
+   elseif (_position_px:getX() < keyVec:getX() - _patrol_epsilon) then
       goRight()
    else
       keyReleased(Key["KeyLeft"])

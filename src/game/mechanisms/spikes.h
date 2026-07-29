@@ -7,8 +7,8 @@
 
 #include "SFML/Graphics.hpp"
 
-#include "box2d/box2d.h"
 #include <filesystem>
+#include "box2d/box2d.h"
 
 struct TmxLayer;
 struct TmxTileSet;
@@ -137,7 +137,7 @@ private:
    int32_t _dt_ms{0};
    std::optional<int32_t> _elapsed_since_collision_ms;
 
-   sf::Vector2f _pixel_position;
+   sf::Vector2f _position_px;
    sf::FloatRect _player_collision_rect_px;
 
    bool _extracting{false};

@@ -346,7 +346,7 @@ protected:
 
    Atmosphere _atmosphere;
    Physics _physics;
-   sf::Vector2f _start_position;
+   sf::Vector2f _start_position_px;
 
    std::vector<std::unique_ptr<ParallaxLayer>> _parallax_layers;
 

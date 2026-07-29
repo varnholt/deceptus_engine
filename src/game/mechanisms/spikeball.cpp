@@ -421,7 +421,7 @@ void SpikeBall::setup(const GameDeserializeData& data)
       static_cast<int32_t>(data._tmx_object->_y_px) + PIXELS_PER_HALF_TILE
    });
 
-   const auto pos_m = b2Vec2{static_cast<float>(_pixel_position.x * MPP), static_cast<float>(_pixel_position.y * MPP)};
+   const auto pos_m = b2Vec2{static_cast<float>(_position_px.x * MPP), static_cast<float>(_position_px.y * MPP)};
 
    _anchor_body = data._world->CreateBody(&_anchor_def);
    _anchor_shape.SetTwoSided(b2Vec2(pos_m.x - 0.1f, pos_m.y), b2Vec2(pos_m.x + 0.1f, pos_m.y));
@@ -480,10 +480,10 @@ void SpikeBall::setup(const GameDeserializeData& data)
 
 sf::Vector2i SpikeBall::getPixelPosition() const
 {
-   return _pixel_position;
+   return _position_px;
 }
 
-void SpikeBall::setPixelPosition(const sf::Vector2i& pixel_position)
+void SpikeBall::setPixelPosition(const sf::Vector2i& position_px)
 {
-   _pixel_position = pixel_position;
+   _position_px = position_px;
 }

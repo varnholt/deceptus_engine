@@ -11,7 +11,7 @@ struct LevelDescription
    LevelDescription() = default;
 
    std::string _filename;
-   std::vector<int32_t> _start_position;
+   std::vector<int32_t> _start_position_tl;
    std::vector<EnemyDescription> _enemies;
 
    /// \brief reads and parses a level description json file.

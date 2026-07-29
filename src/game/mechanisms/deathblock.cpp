@@ -129,8 +129,8 @@ void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, con
 
 void DeathBlock::setupTransform()
 {
-   auto x = _pixel_positions.x / PPM - (PIXELS_PER_TILE / (2 * PPM));
-   auto y = _pixel_positions.y / PPM;
+   auto x = _positions_px.x / PPM - (PIXELS_PER_TILE / (2 * PPM));
+   auto y = _positions_px.y / PPM;
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 
@@ -522,8 +522,8 @@ void DeathBlock::setup(const GameDeserializeData& data)
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
-   _pixel_positions.x = data._tmx_object->_x_px;
-   _pixel_positions.y = data._tmx_object->_y_px;
+   _positions_px.x = data._tmx_object->_x_px;
+   _positions_px.y = data._tmx_object->_y_px;
 
    _time_off = sf::seconds(ValueReader::readValue<float>("time_off", map).value_or(default_death_block_time_off));
    _time_on = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(default_death_block_time_on));
@@ -552,17 +552,17 @@ void DeathBlock::setup(const GameDeserializeData& data)
 
    // setup velocity
    const auto velocity = ValueReader::readValue<float>("velocity", map).value_or(default_death_block_velocity);
-   auto pixel_path = data._tmx_object->_polyline ? data._tmx_object->_polyline->_path : data._tmx_object->_polygon->_polyline;
-   const auto start_pos = pixel_path.at(0);
-   pixel_path.push_back(start_pos);
-   _velocity = 50.0f / SfmlMath::length(pixel_path);
+   auto path_px = data._tmx_object->_polyline ? data._tmx_object->_polyline->_path : data._tmx_object->_polygon->_polyline;
+   const auto start_pos = path_px.at(0);
+   path_px.push_back(start_pos);
+   _velocity = 50.0f / SfmlMath::length(path_px);
 
    // setup path
    auto pos_index = 0;
-   for (const auto& poly_pos : pixel_path)
+   for (const auto& poly_pos : path_px)
    {
       b2Vec2 world_pos;
-      const auto time = pos_index / static_cast<float>(pixel_path.size() - 1);
+      const auto time = pos_index / static_cast<float>(path_px.size() - 1);
 
       const auto x = (data._tmx_object->_x_px + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
       const auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;

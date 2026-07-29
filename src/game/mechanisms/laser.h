@@ -119,9 +119,9 @@ protected:
    std::shared_ptr<sf::Texture> _texture;
    std::unique_ptr<sf::Sprite> _sprite;
 
-   sf::Vector2f _tile_position;
+   sf::Vector2f _position_tl;
    sf::Vector2f _position_px;
-   sf::FloatRect _pixel_rect;
+   sf::FloatRect _rect_px;
 
    std::optional<std::vector<sf::Vector2f>> _path;
    sf::Vector2f _move_offset_px;

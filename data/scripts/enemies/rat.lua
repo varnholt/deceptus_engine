@@ -30,7 +30,7 @@ properties = {
 -- 6: 7 IDLE 3
 -- 8: 2 UP/DOWN
 
-SPRITE_SIZE = 24
+SPRITE_SIZE_PX = 24
 CYCLE_RUN = 0
 CYCLE_IDLE_1 = 1
 CYCLE_IDLE_2 = 2
@@ -42,8 +42,8 @@ DELAY_BETWEEN_IDLE_FRAMES = 1.0
 
 
 ------------------------------------------------------------------------------------------------------------------------
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _points_left = false
 _current_cycle = CYCLE_IDLE_1
 _current_sprite = 0
@@ -73,7 +73,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   _player_position = v2d.Vector2D(x, y)
+   _player_position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -100,12 +100,12 @@ function patrol()
    local key_vec = v2d.Vector2D(key:getX(), key:getY())
    local count = #_patrol_path
 
-   if (_position:getX() > key_vec:getX() + _patrol_epsilon) then
+   if (_position_px:getX() > key_vec:getX() + _patrol_epsilon) then
       _points_left = true
       _patrol_path_arrived = false
       keyReleased(Key["KeyRight"])
       keyPressed(Key["KeyLeft"])
-   elseif (_position:getX() < key_vec:getX() - _patrol_epsilon) then
+   elseif (_position_px:getX() < key_vec:getX() - _patrol_epsilon) then
       _points_left = false
       _patrol_path_arrived = false
       keyReleased(Key["KeyLeft"])
@@ -122,9 +122,9 @@ function patrol()
       end
 
       -- update to new alignment after reaching a position
-      if (_position:getX() > key_vec:getX() + _patrol_epsilon) then
+      if (_position_px:getX() > key_vec:getX() + _patrol_epsilon) then
          _points_left = true
-      elseif (_position:getX() < key_vec:getX() - _patrol_epsilon) then
+      elseif (_position_px:getX() < key_vec:getX() - _patrol_epsilon) then
          _points_left = false
       end
 
@@ -214,7 +214,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getSpriteOffsetY()
-   return (_current_cycle * 2 + (_points_left and 0 or 1)) * SPRITE_SIZE
+   return (_current_cycle * 2 + (_points_left and 0 or 1)) * SPRITE_SIZE_PX
 end
 
 
@@ -237,14 +237,14 @@ function updateSprite(dt)
          sprite_index = getMaxCycle() - sprite_index - 1
       end
 
-      updateSpriteRect(0, sprite_index * SPRITE_SIZE, getSpriteOffsetY(), SPRITE_SIZE, SPRITE_SIZE)
+      updateSpriteRect(0, sprite_index * SPRITE_SIZE_PX, getSpriteOffsetY(), SPRITE_SIZE_PX, SPRITE_SIZE_PX)
    end
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
+#include "box2d/box2d.h"
 
 #include <array>
 #include <optional>
@@ -30,13 +30,13 @@ struct TmxEnemy
    /// \return matching property, or std::nullopt when not found.
    std::optional<ScriptProperty> findProperty(const std::string& key);
 
-   sf::Vector2i _pixel_position;
+   sf::Vector2i _position_px;
    std::string _id;
    std::string _name;
-   sf::IntRect _pixel_rect;
+   sf::IntRect _rect_px;
    std::array<sf::Vector2i, 4> _vertices;
    std::vector<b2Vec2> _path;
-   std::vector<int32_t> _pixel_path;
+   std::vector<int32_t> _path_px;
    bool _has_path = false;
    bool _inverse_path = false;
    std::vector<ScriptProperty> _properties;

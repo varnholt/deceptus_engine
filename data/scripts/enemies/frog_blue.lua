@@ -46,8 +46,8 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 ROW_OFFSET_RIGHT = 3
 FRAME_COUNTS = {8, 8, 6, 19}
-BLUE_FROG_X_OFFSET = 768  -- Blue frog frames start here on the sprite sheet
-DEBUG_ATTACK_OFFSET = 0 * 48  -- extra debug x offset when attacking
+BLUE_FROG_X_OFFSET_PX = 768  -- Blue frog frames start here on the sprite sheet
+DEBUG_ATTACK_OFFSET_PX = 0 * 48  -- extra debug x offset when attacking
 
 DEFAULT_ATTACK_INTERVAL = 3.0  -- Shoot automatically every 3 seconds, regardless of player range
 
@@ -55,25 +55,25 @@ DEFAULT_FIREBALL_SPEED = 160.0
 DEFAULT_ORB_LIFETIME = 3000  -- lifetime in milliseconds before disappearing
 
 DEFAULT_ORB_PATH = "straight"
-DEFAULT_WAVE_STRENGTH = 24.0
+DEFAULT_WAVE_STRENGTH_PX = 24.0
 DEFAULT_WAVE_SPEED = 8.0
 -- First visible fireball position. Tweaked so the orb appears right at the blue frog mouth,
 -- not one full orb-width away from the body.
-FIREBALL_START_OFFSET_LEFT = 18
-FIREBALL_START_OFFSET_RIGHT =28
-FIREBALL_START_OFFSET_Y = 0
-FIREBALL_WIDTH = 120
-FIREBALL_HEIGHT = 120
-FIREBALL_ROW_Y = 312
-FIREBALL_FRAME_SPACING = 120
+FIREBALL_START_OFFSET_LEFT_PX = 18
+FIREBALL_START_OFFSET_RIGHT_PX =28
+FIREBALL_START_OFFSET_Y_PX = 0
+FIREBALL_WIDTH_PX = 120
+FIREBALL_HEIGHT_PX = 120
+FIREBALL_ROW_Y_PX = 312
+FIREBALL_FRAME_SPACING_PX = 120
 FIREBALL_FRAME_COUNT = 8
 -- The orb graphic does not fill its 120x120 frame; the visible dot sits at (36, 60) inside the frame
 -- while the engine draws the sprite centered on the node position plus the sprite offset.
 -- Both values are needed to place the hit rect on the dot instead of on the frame center.
-FIREBALL_VISUAL_CENTER_X = 36
-FIREBALL_VISUAL_CENTER_Y = 60
+FIREBALL_VISUAL_CENTER_X_PX = 36
+FIREBALL_VISUAL_CENTER_Y_PX = 60
 -- Size of the bright core of the orb. The surrounding glow is intentionally not part of the hit area.
-DEFAULT_ORB_COLLISION_SIZE = 16
+DEFAULT_ORB_COLLISION_SIZE_PX = 16
 -- z index the orb is drawn at. The frog itself stays on its own z index, so the orb can travel
 -- in front of foreground tiles without dragging the frog along.
 DEFAULT_ORB_Z = 40
@@ -92,11 +92,11 @@ ATTACK_CLOSE_FRAME_TIME = 0.10
 ATTACK_WINDUP_FRAMES = {0, 1, 2}
 ATTACK_FIRE_FRAMES = {3, 4, 5}
 ATTACK_CLOSE_FRAMES = {5, 4, 3, 0}
-SPRITE_WIDTH = 48
-SPRITE_HEIGHT = 48
+SPRITE_WIDTH_PX = 48
+SPRITE_HEIGHT_PX = 48
 
-SPRITE_WIDTH_DYING = 72
-SPRITE_HEIGHT_DYING = 72
+SPRITE_WIDTH_DYING_PX = 72
+SPRITE_HEIGHT_DYING_PX = 72
 SPRITE_ROW_DYING = 6
 
 STATE_IDLE = 1
@@ -112,8 +112,8 @@ CYCLE_DYING = 4
 ------------------------------------------------------------------------------------------------------------------------
 -- member variables
 _done = false
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _elapsed = 0
 _alignment_offset = 0
 _state = STATE_IDLE
@@ -133,7 +133,7 @@ _blink_anim_speed = 1.0
 -- attack state variables
 _attack_interval = DEFAULT_ATTACK_INTERVAL
 _fireball_active = false          -- Whether the fireball is currently visible/travelling
-_fireball_distance = 0.0          -- Distance travelled by the current fireball
+_fireball_distance_px = 0.0          -- Distance travelled by the current fireball
 _orb_elapsed_ms = 0.0             -- Current orb lifetime timer in milliseconds
 _fireball_hit_player = false      -- Flag to track if fireball has hit the player
 _retracting_tongue = false        -- Re-used as the attack closing phase flag
@@ -149,10 +149,10 @@ _last_attack_time = 0.0  -- Time of the last attack
 _orb_path = DEFAULT_ORB_PATH
 _orb_speed = DEFAULT_FIREBALL_SPEED
 _orb_lifetime = DEFAULT_ORB_LIFETIME
-_wave_strength = DEFAULT_WAVE_STRENGTH
+_wave_strength_px = DEFAULT_WAVE_STRENGTH_PX
 _wave_speed = DEFAULT_WAVE_SPEED
 _orb_z = DEFAULT_ORB_Z
-_orb_collision_size = DEFAULT_ORB_COLLISION_SIZE
+_orb_collision_size_px = DEFAULT_ORB_COLLISION_SIZE_PX
 
 -- health and death variables
 _energy = 30  -- frog's health points
@@ -171,7 +171,7 @@ _prev_animation_frame = 0
 
 -- fireball sprite dimensions
 _fireball_sprite_x = 0
-_fireball_sprite_y = FIREBALL_ROW_Y
+_fireball_sprite_y = FIREBALL_ROW_Y_PX
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -190,10 +190,10 @@ properties = {
    orb_speed = DEFAULT_FIREBALL_SPEED,
    orb_lifetime = DEFAULT_ORB_LIFETIME,
    orb_z = DEFAULT_ORB_Z,
-   orb_collision_size = DEFAULT_ORB_COLLISION_SIZE,
+   orb_collision_size = DEFAULT_ORB_COLLISION_SIZE_PX,
 
    -- sine path tuning
-   wave_strength = DEFAULT_WAVE_STRENGTH,
+   wave_strength = DEFAULT_WAVE_STRENGTH_PX,
    wave_speed = DEFAULT_WAVE_SPEED
 }
 
@@ -244,7 +244,7 @@ function resetOnStateTransition(next_state, previous_state)
 
    if not keep_fireball then
       _fireball_active = false
-      _fireball_distance = 0.0
+      _fireball_distance_px = 0.0
       _orb_elapsed_ms = 0.0
       _fireball_hit_player = false
       setSpriteVisible(1, false)
@@ -295,7 +295,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function logSprite(dt)
 
-   local current_row = math.floor(y / SPRITE_HEIGHT)
+   local current_row = math.floor(y / SPRITE_HEIGHT_PX)
 
    if _prev_log_sprite_row ~= current_row then
 
@@ -355,10 +355,10 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getFireballPathOffsetY()
-   local base_y = FIREBALL_START_OFFSET_Y
+   local base_y = FIREBALL_START_OFFSET_Y_PX
 
    if _orb_path == "sine" then
-      return base_y + math.sin(_fireball_distance * 0.05 * _wave_speed) * _wave_strength
+      return base_y + math.sin(_fireball_distance_px * 0.05 * _wave_speed) * _wave_strength_px
    end
 
    return base_y
@@ -373,23 +373,23 @@ function updateFireball(dt)
       return
    end
 
-   _fireball_distance = _fireball_distance + dt * _orb_speed
+   _fireball_distance_px = _fireball_distance_px + dt * _orb_speed
    _orb_elapsed_ms = _orb_elapsed_ms + dt * 1000.0
 
    local fireball_frame = math.floor(_elapsed * 18.0) % FIREBALL_FRAME_COUNT
    updateSpriteRect(
       1,
-      _fireball_sprite_x + fireball_frame * FIREBALL_FRAME_SPACING,
+      _fireball_sprite_x + fireball_frame * FIREBALL_FRAME_SPACING_PX,
       _fireball_sprite_y,
-      FIREBALL_WIDTH,
-      FIREBALL_HEIGHT
+      FIREBALL_WIDTH_PX,
+      FIREBALL_HEIGHT_PX
    )
 
    local fireball_offset_x
    if _points_left then
-      fireball_offset_x = FIREBALL_START_OFFSET_LEFT - _fireball_distance
+      fireball_offset_x = FIREBALL_START_OFFSET_LEFT_PX - _fireball_distance_px
    else
-      fireball_offset_x = FIREBALL_START_OFFSET_RIGHT + _fireball_distance
+      fireball_offset_x = FIREBALL_START_OFFSET_RIGHT_PX + _fireball_distance_px
    end
 
    local fireball_offset_y = getFireballPathOffsetY()
@@ -399,11 +399,11 @@ function updateFireball(dt)
 
    -- Use a smaller hit area inside the orb so the visual feels fair. The rect is centered on the
    -- visible dot, which is offset from the center of the 120x120 sprite frame.
-   local orb_center_x = _position:getX() + fireball_offset_x + FIREBALL_VISUAL_CENTER_X - FIREBALL_WIDTH / 2
-   local orb_center_y = _position:getY() + fireball_offset_y + FIREBALL_VISUAL_CENTER_Y - FIREBALL_HEIGHT / 2
-   local hitbox_x = orb_center_x - _orb_collision_size / 2
-   local hitbox_y = orb_center_y - _orb_collision_size / 2
-   if not _fireball_hit_player and intersectsWithPlayer(hitbox_x, hitbox_y, _orb_collision_size, _orb_collision_size) then
+   local orb_center_x = _position_px:getX() + fireball_offset_x + FIREBALL_VISUAL_CENTER_X_PX - FIREBALL_WIDTH_PX / 2
+   local orb_center_y = _position_px:getY() + fireball_offset_y + FIREBALL_VISUAL_CENTER_Y_PX - FIREBALL_HEIGHT_PX / 2
+   local hitbox_x = orb_center_x - _orb_collision_size_px / 2
+   local hitbox_y = orb_center_y - _orb_collision_size_px / 2
+   if not _fireball_hit_player and intersectsWithPlayer(hitbox_x, hitbox_y, _orb_collision_size_px, _orb_collision_size_px) then
       damage(properties.damage, 0, 0)
       _fireball_hit_player = true
    end
@@ -422,7 +422,7 @@ function updateSpriteAttack(dt)
    -- only starts the travelling fireball at the exact transition from windup to fire.
    if _attack_animation_time >= ATTACK_WINDUP_TIME and not _fireball_active and _fireball_fired_time == nil then
       _fireball_active = true
-      _fireball_distance = 0.0
+      _fireball_distance_px = 0.0
       _orb_elapsed_ms = 0.0
       _fireball_hit_player = false
       _fireball_fired_time = _attack_animation_time
@@ -486,7 +486,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -497,8 +497,8 @@ function playerMovedTo(x, y)
       return
    end
 
-   _player_position = v2d.Vector2D(x, y)
-   distance_to_player = (_player_position - _position):getLength()
+   _player_position_px = v2d.Vector2D(x, y)
+   distance_to_player = (_player_position_px - _position_px):getLength()
 end
 
 
@@ -536,7 +536,7 @@ function writeProperty(key, value)
    if (key == "alignment") then
 
       if (value == "right") then
-         _alignment_offset = 3 * SPRITE_HEIGHT
+         _alignment_offset = 3 * SPRITE_HEIGHT_PX
          _points_left = false
          _fireball_direction_multiplier = 1  -- 1 for right
       else
@@ -549,8 +549,8 @@ function writeProperty(key, value)
          1,
          _fireball_sprite_x,
          _fireball_sprite_y,
-         FIREBALL_WIDTH,
-         FIREBALL_HEIGHT
+         FIREBALL_WIDTH_PX,
+         FIREBALL_HEIGHT_PX
       )
       setSpriteVisible(1, false)
 
@@ -607,7 +607,7 @@ function writeProperty(key, value)
    elseif (key == "orb_collision_size") then
       local collision_size = tonumber(value)
       if (collision_size ~= nil and collision_size > 0) then
-         _orb_collision_size = collision_size
+         _orb_collision_size_px = collision_size
          properties.orb_collision_size = collision_size
       end
 
@@ -622,7 +622,7 @@ function writeProperty(key, value)
    elseif (key == "wave_strength") then
       local v = tonumber(value)
       if (v ~= nil) then
-         _wave_strength = v
+         _wave_strength_px = v
          properties.wave_strength = v
       end
 
@@ -649,11 +649,11 @@ function getIdleSpriteCoords()
    end
    
    local frame_index = math.floor(_animation_frame) % max_frames
-   local x = BLUE_FROG_X_OFFSET + frame_index * SPRITE_WIDTH
-   local y = (cycle - 1) * SPRITE_HEIGHT
+   local x = BLUE_FROG_X_OFFSET_PX + frame_index * SPRITE_WIDTH_PX
+   local y = (cycle - 1) * SPRITE_HEIGHT_PX
    y = y + _alignment_offset
    
-   return x, y, SPRITE_WIDTH, SPRITE_WIDTH
+   return x, y, SPRITE_WIDTH_PX, SPRITE_WIDTH_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -699,18 +699,18 @@ function getAttackSpriteCoords()
       frame_index = ATTACK_CLOSE_FRAMES[i]
    end
 
-   local x = BLUE_FROG_X_OFFSET + frame_index * SPRITE_WIDTH + DEBUG_ATTACK_OFFSET
-   local y = (CYCLE_ATTACK - 1) * SPRITE_HEIGHT + _alignment_offset
+   local x = BLUE_FROG_X_OFFSET_PX + frame_index * SPRITE_WIDTH_PX + DEBUG_ATTACK_OFFSET_PX
+   local y = (CYCLE_ATTACK - 1) * SPRITE_HEIGHT_PX + _alignment_offset
 
-   return x, y, SPRITE_WIDTH, SPRITE_HEIGHT
+   return x, y, SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX
 end
 ------------------------------------------------------------------------------------------------------------------------
 function getDyingSpriteCoords()
    local death_frame_index = math.floor(_death_animation_frame)
    
-   local x = death_frame_index * SPRITE_WIDTH_DYING
-   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING
-   return x, y, SPRITE_WIDTH_DYING, SPRITE_HEIGHT_DYING
+   local x = death_frame_index * SPRITE_WIDTH_DYING_PX
+   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING_PX
+   return x, y, SPRITE_WIDTH_DYING_PX, SPRITE_HEIGHT_DYING_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------

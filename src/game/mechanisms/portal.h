@@ -99,7 +99,7 @@ protected:
    sf::Vector2u _tile_size;
    std::shared_ptr<sf::Texture> _texture;
    std::vector<sf::Sprite> _sprites;
-   sf::Vector2f _tile_positions;
+   sf::Vector2f _positions_tl;
    int32_t _height = 0;
    bool _player_at_portal = false;
    std::shared_ptr<Portal> _destination;

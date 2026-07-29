@@ -54,7 +54,7 @@ const auto registered_conveyorbelt = []
 
 namespace
 {
-static const auto Y_OFFSET = -10;
+static const auto Y_OFFSET_PX = -10;
 static const auto BELT_TILE_COUNT = 8;
 static const auto ARROW_INDEX_X = 11;
 static const auto ARROW_INDEX_LEFT_Y = 0;
@@ -119,7 +119,7 @@ void ConveyorBelt::setEnabled(bool enabled)
 
 std::optional<sf::FloatRect> ConveyorBelt::getBoundingBoxPx()
 {
-   return _belt_pixel_rect;
+   return _belt_rect_px;
 }
 
 void ConveyorBelt::updateSprite()
@@ -147,7 +147,8 @@ void ConveyorBelt::updateSprite()
       }
 
       sfcompat::setTextureRect(
-         _belt_sprites[i], sf::IntRect({offset_x_px * PIXELS_PER_TILE, static_cast<int32_t>(offset_y_px)}, {PIXELS_PER_TILE, PIXELS_PER_TILE})
+         _belt_sprites[i],
+         sf::IntRect({offset_x_px * PIXELS_PER_TILE, static_cast<int32_t>(offset_y_px)}, {PIXELS_PER_TILE, PIXELS_PER_TILE})
       );
    }
 }
@@ -177,13 +178,13 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
 
    setVelocity(velocity);
 
-   _position_b2d = b2Vec2(x * MPP, y * MPP);
-   _position_sfml.x = x;
-   _position_sfml.y = y;
+   _position_m = b2Vec2(x * MPP, y * MPP);
+   _position_px.x = x;
+   _position_px.y = y;
 
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
-   body_def.position = _position_b2d;
+   body_def.position = _position_m;
    _body = data._world->CreateBody(&body_def);
 
    const auto width_m = width_px * MPP;
@@ -209,10 +210,10 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
    auto* boundary_fixture = _body->CreateFixture(&boundary_fixture_def);
    boundary_fixture->SetUserData(static_cast<void*>(this));
 
-   _belt_pixel_rect.position.x = x;
-   _belt_pixel_rect.position.y = y;
-   _belt_pixel_rect.size.y = height_px;
-   _belt_pixel_rect.size.x = width_px;
+   _belt_rect_px.position.x = x;
+   _belt_rect_px.position.y = y;
+   _belt_rect_px.size.y = height_px;
+   _belt_rect_px.size.x = width_px;
 
    static auto ROUND_EPSILON = 0.5f;
    auto tile_count = static_cast<uint32_t>((width_px / PIXELS_PER_TILE) + ROUND_EPSILON);
@@ -225,7 +226,7 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
 #else
       sf::Sprite belt_sprite(*_texture);
 #endif
-      sfcompat::setPosition(belt_sprite, {x + i * PIXELS_PER_TILE, y + Y_OFFSET});
+      sfcompat::setPosition(belt_sprite, {x + i * PIXELS_PER_TILE, y + Y_OFFSET_PX});
 
       _belt_sprites.push_back(belt_sprite);
    }
@@ -319,7 +320,7 @@ void ConveyorBelt::processFixtureNode(FixtureNode* fixture_node, b2Body* collidi
 
 sf::FloatRect ConveyorBelt::getPixelRect() const
 {
-   return _belt_pixel_rect;
+   return _belt_rect_px;
 }
 
 void ConveyorBelt::processContact(b2Contact* contact)

@@ -450,14 +450,14 @@ private:
    b2Fixture* _foot_sensor_fixture = nullptr;
    b2Body* _ground_body = nullptr;
    b2Vec2 _ground_normal;
-   b2Vec2 _position_previous;
+   b2Vec2 _position_previous_m;
    b2Vec2 _velocity_previous;
    float _impulse{0.0f};
 
-   sf::Vector2f _pixel_position_f;
-   sf::Vector2i _pixel_position_i;
-   sf::FloatRect _pixel_rect_f;
-   sf::IntRect _pixel_rect_i;
+   sf::Vector2f _position_px_f;
+   sf::Vector2i _position_px_i;
+   sf::FloatRect _rect_px_f;
+   sf::IntRect _rect_px_i;
 
    sf::Time _time;
    sf::Clock _clock;

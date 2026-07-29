@@ -52,8 +52,8 @@ public:
    sf::Vector2i getPixelPosition() const;
 
    /// \brief sets the rope anchor position in pixels.
-   /// \param pixel_position anchor position used for box2d body creation.
-   void setPixelPosition(const sf::Vector2i& pixel_position);
+   /// \param position_px anchor position used for box2d body creation.
+   void setPixelPosition(const sf::Vector2i& position_px);
 
 protected:
    int32_t _segment_count = 7;

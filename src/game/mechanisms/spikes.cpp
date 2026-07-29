@@ -26,7 +26,7 @@ namespace
 //     |
 //     + unused
 constexpr auto SPRITES_PER_CYCLE = 15;
-constexpr auto TOLERANCE_PIXELS = 5;
+constexpr auto TOLERANCE_PX = 5;
 constexpr auto SPIKES_TILE_INDEX_TRAP_START = (SPRITES_PER_CYCLE - 1);
 constexpr auto SPIKES_TILE_INDEX_EXTRACT_START = 1;
 constexpr auto SPIKES_TILE_INDEX_EXTRACT_END = 5;
@@ -347,13 +347,13 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
    auto instance = std::make_shared<Spikes>(parent);
 
    instance->setObjectId(data._tmx_object->_name);
-   instance->_pixel_position.x = data._tmx_object->_x_px;
-   instance->_pixel_position.y = data._tmx_object->_y_px;
+   instance->_position_px.x = data._tmx_object->_x_px;
+   instance->_position_px.y = data._tmx_object->_y_px;
 
    // make the collision rectangle a bit smaller so it's a little more lax
    instance->_player_collision_rect_px = {
-      {data._tmx_object->_x_px + TOLERANCE_PIXELS, data._tmx_object->_y_px + TOLERANCE_PIXELS},
-      {data._tmx_object->_width_px - (2 * TOLERANCE_PIXELS), data._tmx_object->_height_px - (2 * TOLERANCE_PIXELS)}
+      {data._tmx_object->_x_px + TOLERANCE_PX, data._tmx_object->_y_px + TOLERANCE_PX},
+      {data._tmx_object->_width_px - (2 * TOLERANCE_PX), data._tmx_object->_height_px - (2 * TOLERANCE_PX)}
    };
 
    const auto rect =
@@ -546,8 +546,8 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
          }
 
          spikes->_player_collision_rect_px = {
-            {static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS, static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS},
-            {PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS), PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)}
+            {static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PX, static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PX},
+            {PIXELS_PER_TILE - (2 * TOLERANCE_PX), PIXELS_PER_TILE - (2 * TOLERANCE_PX)}
          };
 
          const auto rect = sf::FloatRect{
