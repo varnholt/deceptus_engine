@@ -119,12 +119,12 @@ void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal, con
 
 const std::vector<sf::Vector2f>& MovingPlatform::getPixelPath() const
 {
-   return _pixel_path;
+   return _path_px;
 }
 
 float MovingPlatform::getDx() const
 {
-   return _pos.x - _pos_prev.x;
+   return _pos_m.x - _pos_prev_m.x;
 }
 
 b2Body* MovingPlatform::getBody()
@@ -148,8 +148,8 @@ void MovingPlatform::setEnabled(bool enabled)
 
 void MovingPlatform::setupTransform()
 {
-   auto pos_x_m = static_cast<float>(_tile_positions.x) * PIXELS_PER_TILE / PPM;
-   auto pos_y_m = static_cast<float>(_tile_positions.y) * PIXELS_PER_TILE / PPM;
+   auto pos_x_m = static_cast<float>(_positions_tl.x) * PIXELS_PER_TILE / PPM;
+   auto pos_y_m = static_cast<float>(_positions_tl.y) * PIXELS_PER_TILE / PPM;
    _body->SetTransform(b2Vec2(pos_x_m, pos_y_m), 0);
 }
 
@@ -315,7 +315,7 @@ void MovingPlatform::setup(const GameDeserializeData& data)
       platform_pos_m.y = y_px * MPP;
 
       _interpolation.addKey(platform_pos_m, time);
-      _pixel_path.emplace_back((data._tmx_object->_x_px + poly_pos_px.x), (data._tmx_object->_y_px + poly_pos_px.y));
+      _path_px.emplace_back((data._tmx_object->_x_px + poly_pos_px.x), (data._tmx_object->_y_px + poly_pos_px.y));
 
       platform_x_min_m = std::min(platform_pos_m.x, platform_x_min_m);
       platform_y_min_m = std::min(platform_pos_m.y, platform_y_min_m);
@@ -402,9 +402,9 @@ void MovingPlatform::update(const sf::Time& delta_time)
    }
 
    _body->SetLinearVelocity(_velocity);
-   _pos_prev = _pos;
-   _pos.x = _body->GetPosition().x;
-   _pos.y = _body->GetPosition().y;
+   _pos_prev_m = _pos_m;
+   _pos_m.x = _body->GetPosition().x;
+   _pos_m.y = _body->GetPosition().y;
 
    auto& platform = PlayerRegistry::getFirst()->getPlatform();
    if (platform.getPlatformBody() == _body)

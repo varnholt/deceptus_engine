@@ -58,7 +58,7 @@ sf::Vector2f Portal::getPortalPosition()
 
 const sf::Vector2f& Portal::getTilePosition() const
 {
-   return _tile_positions;
+   return _positions_tl;
 }
 
 void Portal::lock()
@@ -184,8 +184,8 @@ void Portal::update(const sf::Time& /*dt*/)
          )
       );
 
-      const auto x = static_cast<int32_t>(_tile_positions.x);
-      const auto y = static_cast<int32_t>(_tile_positions.y);
+      const auto x = static_cast<int32_t>(_positions_tl.x);
+      const auto y = static_cast<int32_t>(_positions_tl.y);
 
       sfcompat::setPosition(sprite, sf::Vector2f(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>((i + y) * PIXELS_PER_TILE)));
 
@@ -301,7 +301,7 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
             for (auto& p : portals)
             {
                auto tmp = std::dynamic_pointer_cast<Portal>(p);
-               if (static_cast<uint32_t>(tmp->_tile_positions.x) == i && static_cast<uint32_t>(tmp->_tile_positions.y) + 1 == j)
+               if (static_cast<uint32_t>(tmp->_positions_tl.x) == i && static_cast<uint32_t>(tmp->_positions_tl.y) + 1 == j)
                {
                   portal = tmp;
                   break;
@@ -312,8 +312,8 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
             {
                portal = std::make_shared<Portal>(parent);
                portals.push_back(portal);
-               portal->_tile_positions.x = static_cast<float>(i);
-               portal->_tile_positions.y = static_cast<float>(j);
+               portal->_positions_tl.x = static_cast<float>(i);
+               portal->_positions_tl.y = static_cast<float>(j);
                portal->_texture = TexturePool::getInstance().get((data._base_path / data._tmx_tileset->_image->_source).string());
                portal->_rect = sf::FloatRect{{static_cast<float>(i), static_cast<float>(j)}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}};
 

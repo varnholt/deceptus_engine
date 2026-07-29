@@ -67,8 +67,8 @@ CYCLE_DYING = 4
 ------------------------------------------------------------------------------------------------------------------------
 -- member variables
 _done = false
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _elapsed = 0
 _alignment_offset = 0
 _state = STATE_IDLE
@@ -159,8 +159,8 @@ function checkAttackCondition(next_state)
    -- only check for attack transition if we're in a state that allows it
    if next_state == _state and _state ~= STATE_DYING and _state ~= STATE_ATTACK then
       -- check for attack transition
-      x_diff = _player_position:getX() // 24 - _position:getX() // 24
-      y_diff = _player_position:getY() // 24 - _position:getY() // 24
+      x_diff = _player_position_px:getX() // 24 - _position_px:getX() // 24
+      y_diff = _player_position_px:getY() // 24 - _position_px:getY() // 24
 
       x_in_range =
          (_points_left and x_diff >= -5 and x_diff <= 0) or
@@ -177,10 +177,10 @@ function checkAttackCondition(next_state)
       if (y_in_range and x_in_range and tongue_retracted and can_attack) then
          if (
             isPhsyicsPathClear(
-               _position:getX(),
-               _position:getY(),
-               _player_position:getX(),
-               _player_position:getY()
+               _position_px:getX(),
+               _position_px:getY(),
+               _player_position_px:getX(),
+               _player_position_px:getY()
             )
          ) then
             -- print("Frog: Attack triggered, x_diff: " .. x_diff)
@@ -300,7 +300,7 @@ function updateSpriteAttack(dt)
    local current_attack_frame = math.floor(_animation_frame)
 
    -- calculate distance to player to determine tongue length
-   local dist_to_player = math.abs(_player_position:getX() - _position:getX())
+   local dist_to_player = math.abs(_player_position_px:getX() - _position_px:getX())
 
    -- Calculate the current frame index to determine if animation has completed
    local current_frame_index = math.floor(_attack_animation_time * _attack_animation_speed * _attack_anim_speed)
@@ -336,8 +336,8 @@ function updateSpriteAttack(dt)
    local displayed_tongue_width = 24 * _tongue_scale
 
    local base_x, base_y
-   base_x = _position:getX()
-   base_y = _position:getY()
+   base_x = _position_px:getX()
+   base_y = _position_px:getY()
    local tongue_tip_offset_x = 0
    local tongue_base_offset_x = 36
 
@@ -421,7 +421,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -432,8 +432,8 @@ function playerMovedTo(x, y)
       return
    end
 
-   _player_position = v2d.Vector2D(x, y)
-   distance_to_player = (_player_position - _position):getLength()
+   _player_position_px = v2d.Vector2D(x, y)
+   distance_to_player = (_player_position_px - _position_px):getLength()
 end
 
 

@@ -39,7 +39,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
       void deserializeEnterArea(const GameDeserializeData& data);
       std::string _name;
       sf::FloatRect _rect;
-      std::optional<sf::Vector2i> _start_position;
+      std::optional<sf::Vector2i> _start_position_px;
       std::optional<sf::Vector2i> _start_offset;
    };
 

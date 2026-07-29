@@ -80,8 +80,7 @@ private:
 
       /// \brief creates a fan tile sprite from a shared texture atlas.
       /// \param tex shared texture used for this tile sprite.
-      FanInstance(const std::shared_ptr<sf::Texture>& tex)
-         : texture(tex), sprite(std::make_unique<sf::Sprite>())
+      FanInstance(const std::shared_ptr<sf::Texture>& tex) : texture(tex), sprite(std::make_unique<sf::Sprite>())
       {
       }
 #else
@@ -112,7 +111,7 @@ private:
    sf::Vector2f _direction;
    std::string _direction_string;
    TileDirection _direction_enum{TileDirection::Up};
-   sf::FloatRect _pixel_rect;
+   sf::FloatRect _rect_px;
    float _speed = 1.0f;
    float _lever_lag = 1.0f;
    int32_t _y_offset_tl{0};

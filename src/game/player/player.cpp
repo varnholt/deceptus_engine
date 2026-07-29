@@ -142,13 +142,13 @@ void Player::initialize()
       {
          case PlayerJump::DustAnimationType::Ground:
          {
-            _animation_pool.create(_points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _pixel_position_f.x, _pixel_position_f.y);
+            _animation_pool.create(_points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _position_px_f.x, _position_px_f.y);
             break;
          }
          case PlayerJump::DustAnimationType::InAir:
          {
             _animation_pool.create(
-               _points_to_left ? "player_jump_dust_inair_l" : "player_jump_dust_inair_r", _pixel_position_f.x, _pixel_position_f.y
+               _points_to_left ? "player_jump_dust_inair_l" : "player_jump_dust_inair_r", _position_px_f.x, _position_px_f.y
             );
             break;
          }
@@ -329,7 +329,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    }
 
    // that y offset is to compensate the wonky box2d origin
-   const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
+   const auto draw_position_px = _position_px_f + sf::Vector2f(0, 8);
 
    const auto& current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
@@ -371,7 +371,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
 void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states)
 {
    const auto stencil_color = sf::Color{255, 255, 255, 25};
-   const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
+   const auto draw_position_px = _position_px_f + sf::Vector2f(0, 8);
 
    // the silhouette shader forces the occluded player to transparent white (its rgb comes from the
    // shader, its alpha from the sprite shape scaled by u_alpha) instead of the dimmed sprite colors
@@ -410,51 +410,51 @@ void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states
 
 const sf::Vector2f& Player::getPixelPositionFloat() const
 {
-   return _pixel_position_f;
+   return _position_px_f;
 }
 
 const sf::Vector2i& Player::getPixelPositionInt() const
 {
-   return _pixel_position_i;
+   return _position_px_i;
 }
 
 void Player::setPixelPosition(float x, float y)
 {
-   _pixel_position_f.x = x;
-   _pixel_position_f.y = y;
+   _position_px_f.x = x;
+   _position_px_f.y = y;
 
-   _pixel_position_i.x = static_cast<int32_t>(x);
-   _pixel_position_i.y = static_cast<int32_t>(y);
+   _position_px_i.x = static_cast<int32_t>(x);
+   _position_px_i.y = static_cast<int32_t>(y);
 }
 
 const sf::FloatRect& Player::getPixelRectFloat() const
 {
-   return _pixel_rect_f;
+   return _rect_px_f;
 }
 
 void Player::updatePixelRect()
 {
    constexpr auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
 
-   _pixel_rect_f.position.x = _pixel_position_f.x - PLAYER_ACTUAL_WIDTH * 0.5f;
-   _pixel_rect_f.position.y = _pixel_position_f.y - height_diff_px - (height_diff_px * 0.5f);
-   _pixel_rect_f.size.x = PLAYER_ACTUAL_WIDTH;
-   _pixel_rect_f.size.y = PLAYER_ACTUAL_HEIGHT;
+   _rect_px_f.position.x = _position_px_f.x - PLAYER_ACTUAL_WIDTH * 0.5f;
+   _rect_px_f.position.y = _position_px_f.y - height_diff_px - (height_diff_px * 0.5f);
+   _rect_px_f.size.x = PLAYER_ACTUAL_WIDTH;
+   _rect_px_f.size.y = PLAYER_ACTUAL_HEIGHT;
 
-   _pixel_rect_i.position.x = static_cast<int32_t>(_pixel_rect_f.position.x);
-   _pixel_rect_i.position.y = static_cast<int32_t>(_pixel_rect_f.position.y);
-   _pixel_rect_i.size.x = PLAYER_ACTUAL_WIDTH;
-   _pixel_rect_i.size.y = PLAYER_ACTUAL_HEIGHT;
+   _rect_px_i.position.x = static_cast<int32_t>(_rect_px_f.position.x);
+   _rect_px_i.position.y = static_cast<int32_t>(_rect_px_f.position.y);
+   _rect_px_i.size.x = PLAYER_ACTUAL_WIDTH;
+   _rect_px_i.size.y = PLAYER_ACTUAL_HEIGHT;
 }
 
 void Player::updateChunk()
 {
-   _chunk.update(_pixel_position_i.x, _pixel_position_i.y);
+   _chunk.update(_position_px_i.x, _position_px_i.y);
 }
 
 const sf::IntRect& Player::getPixelRectInt() const
 {
-   return _pixel_rect_i;
+   return _rect_px_i;
 }
 
 void Player::setMaskBitsCrouching(bool enabled)
@@ -1268,7 +1268,7 @@ void Player::updateAttack()
    // require a fresh button press each time the sword should be swung
    if (_attack._attack_button_pressed)
    {
-      const auto result = _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
+      const auto result = _attack.attack(_world, _controls, _player_animation, _position_px_f, _points_to_left, isInAir());
 
       // sword attack is combined with a small impulse move forward
       auto uses_sword = []()
@@ -1517,9 +1517,9 @@ void Player::updateWallslide(const sf::Time& dt)
    const auto wallslide_animation = _player_animation->getWallslideAnimation();
    const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
 #ifdef __EMSCRIPTEN__
-   wallslide_animation->position = {_pixel_position_f.x + offset_x_px, _pixel_position_f.y};
+   wallslide_animation->position = {_position_px_f.x + offset_x_px, _position_px_f.y};
 #else
-   wallslide_animation->setPosition({_pixel_position_f.x + offset_x_px, _pixel_position_f.y});
+   wallslide_animation->setPosition({_position_px_f.x + offset_x_px, _position_px_f.y});
 #endif
    wallslide_animation->play();
    wallslide_animation->update(dt);
@@ -1601,7 +1601,7 @@ void Player::update(const sf::Time& dt)
    _climb.update(_body, isInAir());
    _dive.update(dt, isInWater());
    _platform.update(_body, _jump.isJumping());
-   PlayerAudio::updateListenerPosition(_pixel_position_f);
+   PlayerAudio::updateListenerPosition(_position_px_f);
    updateFootsteps();
    updatePreviousBodyState();
    updateWeapons(dt);
@@ -1648,14 +1648,14 @@ void Player::updateAtmosphere()
       _body->SetTransform(_body->GetPosition() + b2Vec2{0.0, 0.4f}, 0.0f);
       _water_entered_time = StopWatch::getInstance().now();
       Audio::getInstance().playSample({"splash.wav"});
-      _animation_pool.create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
+      _animation_pool.create("player_water_splash", _position_px_f.x, _position_px_f.y);
    }
 
    // leaving water
    if (!inside_water && was_inside_water)
    {
       _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_default);
-      _animation_pool.create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
+      _animation_pool.create("player_water_splash", _position_px_f.x, _position_px_f.y);
    }
 
    // not sure if this is just another ugly hack
@@ -1901,6 +1901,6 @@ void Player::updatePixelPosition()
 
 void Player::updatePreviousBodyState()
 {
-   _position_previous = _body->GetPosition();
+   _position_previous_m = _body->GetPosition();
    _velocity_previous = _body->GetLinearVelocity();
 }

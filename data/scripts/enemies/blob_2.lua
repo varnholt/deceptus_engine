@@ -49,8 +49,8 @@ IDLE_CYCLE_COUNT = 3
 
 COLLISION_THRESHOLD = 24
 
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _elapsed = 0.0
 _sprite_index = 0
 _animation_row = 0
@@ -252,13 +252,13 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   _player_position = v2d.Vector2D(x, y)
+   _player_position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -267,9 +267,9 @@ end
 -- |          p      o          | x
 function followPlayer()
    local epsilon = 5
-   if (_player_position:getX() > _position:getX() + epsilon) then
+   if (_player_position_px:getX() > _position_px:getX() + epsilon) then
       goRight()
-   elseif (_player_position:getX() < _position:getX() - epsilon) then
+   elseif (_player_position_px:getX() < _position_px:getX() - epsilon) then
       goLeft()
    else
       _key_pressed = 0
@@ -352,10 +352,10 @@ function updatePatrol()
    local keyVec = v2d.Vector2D(key:getX(), key:getY())
    local count = #_patrol_path
 
-   if     (_position:getX() > keyVec:getX() + _patrol_epsilon) then
+   if     (_position_px:getX() > keyVec:getX() + _patrol_epsilon) then
       -- print(string.format("go left %d", _tick))
       goLeft()
-   elseif (_position:getX() < keyVec:getX() - _patrol_epsilon) then
+   elseif (_position_px:getX() < keyVec:getX() - _patrol_epsilon) then
       -- print(string.format("go right %d", _tick))
       goRight()
    else
@@ -392,7 +392,7 @@ function updateJump(dt)
 
    y = _jump_start_position:getY() - jump_height * jump_value + 12;
 
-   setTransform(_position:getX(), y, 0.0)
+   setTransform(_position_px:getX(), y, 0.0)
 
    index = 0
    row = 0
@@ -434,22 +434,22 @@ function updateDrop(dt)
    -- check if need to drop
    if (not _drop_prepare and _alignment_offset > 0) then
 
-      dx = _position:getX() - _player_position:getX()
+      dx = _position_px:getX() - _player_position_px:getX()
 
       if (dx > -COLLISION_THRESHOLD and dx < COLLISION_THRESHOLD) then
 
          -- make sure stone is not too far away (10 tiles) and above player
-         y_diff = _position:getY() // 24 - _player_position:getY() // 24
+         y_diff = _position_px:getY() // 24 - _player_position_px:getY() // 24
 
          if (y_diff < 0 and y_diff > -10) then
 
             -- make sure there's nothing in the way
             if (
                isPhsyicsPathClear(
-                  _position:getX(),
-                  _position:getY(),
-                  _player_position:getX(),
-                  _player_position:getY()
+                  _position_px:getX(),
+                  _position_px:getY(),
+                  _player_position_px:getX(),
+                  _player_position_px:getY()
                )
             )
             then

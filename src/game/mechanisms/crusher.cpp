@@ -331,8 +331,8 @@ void Crusher::setup(const GameDeserializeData& data)
       _idle_time_max = sf::seconds(idle_time_s);
    }
 
-   _pixel_position.x = data._tmx_object->_x_px;
-   _pixel_position.y = data._tmx_object->_y_px;
+   _position_px.x = data._tmx_object->_x_px;
+   _position_px.y = data._tmx_object->_y_px;
 
 #ifdef __EMSCRIPTEN__
    _sprite_mount = std::make_unique<sf::Sprite>();
@@ -361,9 +361,9 @@ void Crusher::setup(const GameDeserializeData& data)
          _sprite_spike->setTextureRect({{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}});
 #endif
 
-         _pixel_offset_mount.x = 2 * PIXELS_PER_TILE;
-         _pixel_offset_pusher.y = 2 * PIXELS_PER_TILE;
-         _pixel_offset_spike.y = 2 * PIXELS_PER_TILE;
+         _offset_mount_px.x = 2 * PIXELS_PER_TILE;
+         _offset_pusher_px.y = 2 * PIXELS_PER_TILE;
+         _offset_spike_px.y = 2 * PIXELS_PER_TILE;
 
          break;
       }
@@ -380,9 +380,9 @@ void Crusher::setup(const GameDeserializeData& data)
          _sprite_spike->setTextureRect({{0 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}});
 #endif
 
-         _pixel_offset_pusher.y = 6 * PIXELS_PER_TILE;
-         _pixel_offset_spike.y = 3 * PIXELS_PER_TILE;
-         _pixel_offset_mount.y = 6 * PIXELS_PER_TILE;
+         _offset_pusher_px.y = 6 * PIXELS_PER_TILE;
+         _offset_spike_px.y = 3 * PIXELS_PER_TILE;
+         _offset_mount_px.y = 6 * PIXELS_PER_TILE;
 
          break;
       }
@@ -399,11 +399,11 @@ void Crusher::setup(const GameDeserializeData& data)
          _sprite_spike->setTextureRect({{0 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}});
 #endif
 
-         _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_pusher.x = 3 * PIXELS_PER_TILE;
-         _pixel_offset_spike.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_mount.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_mount.x = 3 * PIXELS_PER_TILE;
+         _offset_pusher_px.y = -1 * PIXELS_PER_TILE;
+         _offset_pusher_px.x = 3 * PIXELS_PER_TILE;
+         _offset_spike_px.y = -1 * PIXELS_PER_TILE;
+         _offset_mount_px.y = -1 * PIXELS_PER_TILE;
+         _offset_mount_px.x = 3 * PIXELS_PER_TILE;
 
          break;
       }
@@ -420,12 +420,12 @@ void Crusher::setup(const GameDeserializeData& data)
          _sprite_spike->setTextureRect({{10 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}});
 #endif
 
-         _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_pusher.x = -1 * PIXELS_PER_TILE;
-         _pixel_offset_spike.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_spike.x = -1 * PIXELS_PER_TILE;
-         _pixel_offset_mount.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_mount.x = -3 * PIXELS_PER_TILE;
+         _offset_pusher_px.y = -1 * PIXELS_PER_TILE;
+         _offset_pusher_px.x = -1 * PIXELS_PER_TILE;
+         _offset_spike_px.y = -1 * PIXELS_PER_TILE;
+         _offset_spike_px.x = -1 * PIXELS_PER_TILE;
+         _offset_mount_px.y = -1 * PIXELS_PER_TILE;
+         _offset_mount_px.x = -3 * PIXELS_PER_TILE;
 
          break;
       }
@@ -439,8 +439,8 @@ void Crusher::setup(const GameDeserializeData& data)
 
 void Crusher::updateTransform()
 {
-   const auto x = (_blade_offset.x + _pixel_position.x) / PPM;
-   const auto y = (_blade_offset.y + _pixel_position.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
+   const auto x = (_blade_offset.x + _position_px.x) / PPM;
+   const auto y = (_blade_offset.y + _position_px.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
    const auto target_position = b2Vec2(x, y);
    const auto current_position = _body->GetPosition();
    const auto direction = target_position - current_position;
@@ -611,12 +611,12 @@ void Crusher::updateSpritePositions()
    }
 
 #ifdef __EMSCRIPTEN__
-   _sprite_mount->position = _pixel_position + _pixel_offset_mount;
-   _sprite_pusher->position = _pixel_position + _pixel_offset_pusher;
-   _sprite_spike->position = _pixel_position + _pixel_offset_spike + _blade_offset;
+   _sprite_mount->position = _position_px + _offset_mount_px;
+   _sprite_pusher->position = _position_px + _offset_pusher_px;
+   _sprite_spike->position = _position_px + _offset_spike_px + _blade_offset;
 #else
-   _sprite_mount->setPosition(_pixel_position + _pixel_offset_mount);
-   _sprite_pusher->setPosition(_pixel_position + _pixel_offset_pusher);
-   _sprite_spike->setPosition(_pixel_position + _pixel_offset_spike + _blade_offset);
+   _sprite_mount->setPosition(_position_px + _offset_mount_px);
+   _sprite_pusher->setPosition(_position_px + _offset_pusher_px);
+   _sprite_spike->setPosition(_position_px + _offset_spike_px + _blade_offset);
 #endif
 }

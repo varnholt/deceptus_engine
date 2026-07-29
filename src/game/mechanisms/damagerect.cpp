@@ -63,8 +63,8 @@ std::string_view DamageRect::objectName() const
 void DamageRect::update(const sf::Time& /*dt*/)
 {
    auto player = PlayerRegistry::getFirst();
-   const auto player_pixel_rect = player->getPixelRectFloat();
-   const auto player_intersects = sfcompat::findIntersection(player_pixel_rect, _rect).has_value();
+   const auto player_rect_px = player->getPixelRectFloat();
+   const auto player_intersects = sfcompat::findIntersection(player_rect_px, _rect).has_value();
 
    if (player_intersects)
    {

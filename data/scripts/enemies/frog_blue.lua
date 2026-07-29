@@ -112,8 +112,8 @@ CYCLE_DYING = 4
 ------------------------------------------------------------------------------------------------------------------------
 -- member variables
 _done = false
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _elapsed = 0
 _alignment_offset = 0
 _state = STATE_IDLE
@@ -399,8 +399,8 @@ function updateFireball(dt)
 
    -- Use a smaller hit area inside the orb so the visual feels fair. The rect is centered on the
    -- visible dot, which is offset from the center of the 120x120 sprite frame.
-   local orb_center_x = _position:getX() + fireball_offset_x + FIREBALL_VISUAL_CENTER_X - FIREBALL_WIDTH / 2
-   local orb_center_y = _position:getY() + fireball_offset_y + FIREBALL_VISUAL_CENTER_Y - FIREBALL_HEIGHT / 2
+   local orb_center_x = _position_px:getX() + fireball_offset_x + FIREBALL_VISUAL_CENTER_X - FIREBALL_WIDTH / 2
+   local orb_center_y = _position_px:getY() + fireball_offset_y + FIREBALL_VISUAL_CENTER_Y - FIREBALL_HEIGHT / 2
    local hitbox_x = orb_center_x - _orb_collision_size / 2
    local hitbox_y = orb_center_y - _orb_collision_size / 2
    if not _fireball_hit_player and intersectsWithPlayer(hitbox_x, hitbox_y, _orb_collision_size, _orb_collision_size) then
@@ -486,7 +486,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -497,8 +497,8 @@ function playerMovedTo(x, y)
       return
    end
 
-   _player_position = v2d.Vector2D(x, y)
-   distance_to_player = (_player_position - _position):getLength()
+   _player_position_px = v2d.Vector2D(x, y)
+   distance_to_player = (_player_position_px - _position_px):getLength()
 end
 
 

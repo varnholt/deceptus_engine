@@ -38,16 +38,16 @@ _sprite_indices = {}
 _fired = {false, false, false}
 _load_played = false
 
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _elapsed = 0.0
 _fire_direction = v2d.Vector2D(0, 0)
-_fire_offset = {v2d.Vector2D(0, 0), v2d.Vector2D(0, 0), v2d.Vector2D(0, 0)}
+_fire_offset_px = {v2d.Vector2D(0, 0), v2d.Vector2D(0, 0), v2d.Vector2D(0, 0)}
 _speed = 1.5
-_offset = v2d.Vector2D(0, 0)
+_offset_px = v2d.Vector2D(0, 0)
 _muzzle_width = 0
 _muzzle_height = 0
-_muzzle_offset = v2d.Vector2D(0, 0)
+_muzzle_offset_px = v2d.Vector2D(0, 0)
 
 SPRITE_WIDTH = 3 * 24
 SPRITE_HEIGHT = 3 * 24
@@ -105,62 +105,62 @@ function updateAlignment(alignment)
       offset:setX(5)
       offset:setY(1)
       _fire_direction = v2d.Vector2D(0.0, -1.0)
-      _fire_offset[1] = v2d.Vector2D(3.0, -16.0)
-      _fire_offset[2] = v2d.Vector2D(11.0, -16.0)
-      _fire_offset[3] = v2d.Vector2D(19.0, -16.0)
-      _offset = v2d.Vector2D(0, 9 * 24)
+      _fire_offset_px[1] = v2d.Vector2D(3.0, -16.0)
+      _fire_offset_px[2] = v2d.Vector2D(11.0, -16.0)
+      _fire_offset_px[3] = v2d.Vector2D(19.0, -16.0)
+      _offset_px = v2d.Vector2D(0, 9 * 24)
       _muzzle_width = 8
       _muzzle_height = 24
-      _muzzle_offset:setX(4)
-      _muzzle_offset:setY(-12)
-      setSpriteOffset(1, _muzzle_offset:getX(),                     _muzzle_offset:getY())
-      setSpriteOffset(2, _muzzle_offset:getX() + _muzzle_width,     _muzzle_offset:getY())
-      setSpriteOffset(3, _muzzle_offset:getX() + _muzzle_width * 2, _muzzle_offset:getY())
+      _muzzle_offset_px:setX(4)
+      _muzzle_offset_px:setY(-12)
+      setSpriteOffset(1, _muzzle_offset_px:getX(),                     _muzzle_offset_px:getY())
+      setSpriteOffset(2, _muzzle_offset_px:getX() + _muzzle_width,     _muzzle_offset_px:getY())
+      setSpriteOffset(3, _muzzle_offset_px:getX() + _muzzle_width * 2, _muzzle_offset_px:getY())
    elseif (alignment == Alignment["AlignmentDown"]) then
       offset:setX(5)
       offset:setY(0)
       _fire_direction = v2d.Vector2D(0.0, 1.0)
-      _fire_offset[1] = v2d.Vector2D(4.0, 40.0)
-      _fire_offset[2] = v2d.Vector2D(12.0, 40.0)
-      _fire_offset[3] = v2d.Vector2D(20.0, 40.0)
-      _offset = v2d.Vector2D(0, 8 * 24)
+      _fire_offset_px[1] = v2d.Vector2D(4.0, 40.0)
+      _fire_offset_px[2] = v2d.Vector2D(12.0, 40.0)
+      _fire_offset_px[3] = v2d.Vector2D(20.0, 40.0)
+      _offset_px = v2d.Vector2D(0, 8 * 24)
       _muzzle_width = 8
       _muzzle_height = 24
-      _muzzle_offset:setX(4)
-      _muzzle_offset:setY(36)
-      setSpriteOffset(1, _muzzle_offset:getX(),                     _muzzle_offset:getY())
-      setSpriteOffset(2, _muzzle_offset:getX() + _muzzle_width,     _muzzle_offset:getY())
-      setSpriteOffset(3, _muzzle_offset:getX() + _muzzle_width * 2, _muzzle_offset:getY())
+      _muzzle_offset_px:setX(4)
+      _muzzle_offset_px:setY(36)
+      setSpriteOffset(1, _muzzle_offset_px:getX(),                     _muzzle_offset_px:getY())
+      setSpriteOffset(2, _muzzle_offset_px:getX() + _muzzle_width,     _muzzle_offset_px:getY())
+      setSpriteOffset(3, _muzzle_offset_px:getX() + _muzzle_width * 2, _muzzle_offset_px:getY())
    elseif (alignment == Alignment["AlignmentLeft"]) then
       offset:setX(0)
       offset:setY(0)
       _fire_direction = v2d.Vector2D(-1.0, 0.0)
-      _fire_offset[1] = v2d.Vector2D(-16.0, 3.0)
-      _fire_offset[2] = v2d.Vector2D(-16.0, 11.0)
-      _fire_offset[3] = v2d.Vector2D(-16.0, 19.0)
-      _offset = v2d.Vector2D(0, 6 * 24)
+      _fire_offset_px[1] = v2d.Vector2D(-16.0, 3.0)
+      _fire_offset_px[2] = v2d.Vector2D(-16.0, 11.0)
+      _fire_offset_px[3] = v2d.Vector2D(-16.0, 19.0)
+      _offset_px = v2d.Vector2D(0, 6 * 24)
       _muzzle_width = 24
       _muzzle_height = 8
-      _muzzle_offset:setX(-12)
-      _muzzle_offset:setY(4)
-      setSpriteOffset(1, _muzzle_offset:getX(), _muzzle_offset:getY())
-      setSpriteOffset(2, _muzzle_offset:getX(), _muzzle_offset:getY() + _muzzle_height)
-      setSpriteOffset(3, _muzzle_offset:getX(), _muzzle_offset:getY() + _muzzle_height * 2)
+      _muzzle_offset_px:setX(-12)
+      _muzzle_offset_px:setY(4)
+      setSpriteOffset(1, _muzzle_offset_px:getX(), _muzzle_offset_px:getY())
+      setSpriteOffset(2, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height)
+      setSpriteOffset(3, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height * 2)
    elseif (alignment == Alignment["AlignmentRight"]) then
       offset:setX(0)
       offset:setY(1)
       _fire_direction = v2d.Vector2D(1.0, 0.0)
-      _fire_offset[1] = v2d.Vector2D(36.0, 3.0)
-      _fire_offset[2] = v2d.Vector2D(36.0, 11.0)
-      _fire_offset[3] = v2d.Vector2D(36.0, 19.0)
-      _offset = v2d.Vector2D(0, 7 * 24)
+      _fire_offset_px[1] = v2d.Vector2D(36.0, 3.0)
+      _fire_offset_px[2] = v2d.Vector2D(36.0, 11.0)
+      _fire_offset_px[3] = v2d.Vector2D(36.0, 19.0)
+      _offset_px = v2d.Vector2D(0, 7 * 24)
       _muzzle_width = 24
       _muzzle_height = 8
-      _muzzle_offset:setX(36)
-      _muzzle_offset:setY(4)
-      setSpriteOffset(1, _muzzle_offset:getX(), _muzzle_offset:getY())
-      setSpriteOffset(2, _muzzle_offset:getX(), _muzzle_offset:getY() + _muzzle_height)
-      setSpriteOffset(3, _muzzle_offset:getX(), _muzzle_offset:getY() + _muzzle_height * 2)
+      _muzzle_offset_px:setX(36)
+      _muzzle_offset_px:setY(4)
+      setSpriteOffset(1, _muzzle_offset_px:getX(), _muzzle_offset_px:getY())
+      setSpriteOffset(2, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height)
+      setSpriteOffset(3, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height * 2)
    end
 
    updateSpriteRect(
@@ -175,8 +175,8 @@ function updateAlignment(alignment)
    do
       updateSpriteRect(
          i,
-         _offset.x,
-         _offset.y,
+         _offset_px.x,
+         _offset_px.y,
          _muzzle_width,
          _muzzle_height
       )
@@ -231,8 +231,8 @@ function fire(muzzle_index)
    playSample("arrow_release_1.wav", 1.0)
    useWeapon(
       0,
-      _position:getX() + _fire_offset[muzzle_index]:getX(),
-      _position:getY() + _fire_offset[muzzle_index]:getY(),
+      _position_px:getX() + _fire_offset_px[muzzle_index]:getX(),
+      _position_px:getY() + _fire_offset_px[muzzle_index]:getY(),
       _fire_direction:getX() * _speed,
       _fire_direction:getY() * _speed
    );
@@ -248,14 +248,14 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
    -- print(string.format("moved to: %f, %f", x, y))
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
    -- print(string.format("player moved to: %f, %f", x, y))
-   _player_position = v2d.Vector2D(x, y)
+   _player_position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -328,8 +328,8 @@ function update(dt)
       if (sprite_indices_current[i] ~= _sprite_indices[i]) then
          updateSpriteRect(
             i,
-            _offset:getX() + sprite_indices_current[i] * 24,
-            _offset:getY(),
+            _offset_px:getX() + sprite_indices_current[i] * 24,
+            _offset_px:getY(),
             _muzzle_width,
             _muzzle_height
          )

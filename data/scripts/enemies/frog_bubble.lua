@@ -67,8 +67,8 @@ BUBBLE_SPAWN_SPREAD_Y = 8     -- random ± pixel spread on spawn y
 ------------------------------------------------------------------------------------------------------------------------
 -- member variables
 _done = false
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _elapsed = 0
 _alignment_offset = 0
 _state = STATE_IDLE
@@ -165,8 +165,8 @@ function checkAttackCondition(next_state)
 
       elseif BURP_MODE == BURP_MODE_PLAYER_PROXIMITY then
 
-         local x_diff = _player_position:getX() // 24 - _position:getX() // 24
-         local y_diff = _player_position:getY() // 24 - _position:getY() // 24
+         local x_diff = _player_position_px:getX() // 24 - _position_px:getX() // 24
+         local y_diff = _player_position_px:getY() // 24 - _position_px:getY() // 24
 
          local x_in_range =
             (_points_left and x_diff >= -5 and x_diff <= 0) or
@@ -176,8 +176,8 @@ function checkAttackCondition(next_state)
 
          if y_in_range and x_in_range and _elapsed - _last_attack_time >= MIN_ATTACK_WAIT then
             if isPhsyicsPathClear(
-               _position:getX(), _position:getY(),
-               _player_position:getX(), _player_position:getY()
+               _position_px:getX(), _position_px:getY(),
+               _player_position_px:getX(), _player_position_px:getY()
             ) then
                next_state = STATE_ATTACK
             end
@@ -266,8 +266,8 @@ end
 -- fires one burst event: all BUBBLE_BURST_SIZE slots simultaneously with randomized
 -- velocities and spawn positions, matching the WaterBubbles scatter pattern.
 local function fireBubble()
-   local spawn_x_base = _position:getX() + _direction_multiplier * 20
-   local spawn_y_base = _position:getY()
+   local spawn_x_base = _position_px:getX() + _direction_multiplier * 20
+   local spawn_y_base = _position_px:getY()
 
    for slot = 0, BUBBLE_BURST_SIZE - 1 do
       local horiz  = BUBBLE_SPEED_H + (math.random() - 0.5) * 2.0 * BUBBLE_SPEED_H_SPREAD
@@ -365,7 +365,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -376,7 +376,7 @@ function playerMovedTo(x, y)
       return
    end
 
-   _player_position = v2d.Vector2D(x, y)
+   _player_position_px = v2d.Vector2D(x, y)
 end
 
 

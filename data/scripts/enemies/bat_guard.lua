@@ -55,7 +55,7 @@ STATE_RETURN = 2
 _state = STATE_IDLE
 _state_time = 0.0
 
-_pos = v2d.Vector2D(0, 0)  -- internally driven position
+_pos_px = v2d.Vector2D(0, 0)  -- internally driven position
 _vel = v2d.Vector2D(0, 0)
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ function update(dt)
       updateStateTransitions(dt)
       updateStateBehavior(dt)
       updateSpriteDirection()
-      _position_px = _pos
+      _position_px = _pos_px
    end
 
    if (_dead) then
@@ -184,8 +184,8 @@ function updateStateTransitions(dt)
 
    -- If bat is outside leash already (dt spike / edge case), force return
    local outOfLeash =
-      (math.abs((_pos:getX() // 24) - (_start_position_px:getX() // 24)) > LEASH_X_TILES) or
-      (math.abs((_pos:getY() // 24) - (_start_position_px:getY() // 24)) > LEASH_Y_TILES)
+      (math.abs((_pos_px:getX() // 24) - (_start_position_px:getX() // 24)) > LEASH_X_TILES) or
+      (math.abs((_pos_px:getY() // 24) - (_start_position_px:getY() // 24)) > LEASH_Y_TILES)
 
    -- state transitions
    if (playerInAggro and (not outOfLeash)) then
@@ -223,9 +223,9 @@ function updateStateIdle(dt)
       _start_position_px:getY() + oy * blend
    )
 
-   _pos = _pos:add(target:sub(_pos):mul(clamp(HOVER_EASE * dt, 0.0, 1.0)))
+   _pos_px = _pos_px:add(target:sub(_pos_px):mul(clamp(HOVER_EASE * dt, 0.0, 1.0)))
    _vel = _vel:mul(0.85)
-   setTransform(_pos:getX(), _pos:getY(), 0.0)
+   setTransform(_pos_px:getX(), _pos_px:getY(), 0.0)
 end
 
 -- Follow state behavior
@@ -239,7 +239,7 @@ function updateStateFollow(dt)
 
    -- add orbit/fluter when very close so it doesn't "pin" to a single pixel
    -- compute closeness BEFORE leashing (more natural), then leash final target
-   local toTarget = target:sub(_pos)
+   local toTarget = target:sub(_pos_px)
    local dist = toTarget:len()
 
    if (dist < ORBIT_START_DIST) then
@@ -257,20 +257,20 @@ function updateStateFollow(dt)
    -- leash the target so bat never leaves its base zone
    target = clampToLeash(target)
 
-   local desired = target:sub(_pos):norm():mul(FOLLOW_SPEED)
+   local desired = target:sub(_pos_px):norm():mul(FOLLOW_SPEED)
    _vel = _vel:add(desired:sub(_vel):mul(clamp(FOLLOW_TURN * dt, 0.0, 1.0)))
-   _pos = _pos:add(_vel:mul(dt))
-   setTransform(_pos:getX(), _pos:getY(), 0.0)
+   _pos_px = _pos_px:add(_vel:mul(dt))
+   setTransform(_pos_px:getX(), _pos_px:getY(), 0.0)
 end
 
 -- Return state behavior
 function updateStateReturn(dt)
    local home = v2d.Vector2D(_start_position_px:getX(), _start_position_px:getY())
-   local toHome = home:sub(_pos)
+   local toHome = home:sub(_pos_px)
    local dist = toHome:len()
 
    if (dist <= RETURN_DONE_DIST) then
-      _pos = home
+      _pos_px = home
       _vel = v2d.Vector2D(0, 0)
       enterState(STATE_IDLE)
       _state_time = 0.0
@@ -279,15 +279,15 @@ function updateStateReturn(dt)
       local desired = toHome:norm():mul(RETURN_SPEED * slow)
 
       _vel = _vel:add(desired:sub(_vel):mul(clamp(RETURN_TURN * dt, 0.0, 1.0)))
-      _pos = _pos:add(_vel:mul(dt))
+      _pos_px = _pos_px:add(_vel:mul(dt))
    end
 
-   setTransform(_pos:getX(), _pos:getY(), 0.0)
+   setTransform(_pos_px:getX(), _pos_px:getY(), 0.0)
 end
 
 -- Update sprite direction based on player position
 function updateSpriteDirection()
-   local bx = _pos:getX()
+   local bx = _pos_px:getX()
    local px = _player_position_px:getX()
    if (_can_explode) then
       _sprite_offset_y = (px > bx) and (4 * _sprite_height) or (5 * _sprite_height)
@@ -350,9 +350,9 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function setStartPosition(x, y)
    _start_position_px = v2d.Vector2D(x, y)
-   _pos = v2d.Vector2D(x, y)
+   _pos_px = v2d.Vector2D(x, y)
    _vel = v2d.Vector2D(0, 0)
-   _position_px = _pos
+   _position_px = _pos_px
    _state = STATE_IDLE
    _state_time = 0.0
 end
@@ -365,7 +365,7 @@ function movedTo(x, y)
       _start_position_px = v2d.Vector2D(x, y)
    end
 
-   _pos = v2d.Vector2D(x, y)
+   _pos_px = v2d.Vector2D(x, y)
 end
 
 ------------------------------------------------------------------------------------------------------------------------

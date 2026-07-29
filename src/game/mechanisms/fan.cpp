@@ -65,12 +65,12 @@ void Fan::setEnabled(bool enabled)
 
 const sf::FloatRect& Fan::getPixelRect() const
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 std::optional<sf::FloatRect> Fan::getBoundingBoxPx()
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 std::shared_ptr<Fan> Fan::deserialize(GameNode* parent, const GameDeserializeData& data)
@@ -80,7 +80,7 @@ std::shared_ptr<Fan> Fan::deserialize(GameNode* parent, const GameDeserializeDat
    const auto& obj = data._tmx_object;
    fan->_texture = TexturePool::getInstance().get("data/sprites/fan.png");
 
-   fan->_pixel_rect = {{obj->_x_px, obj->_y_px}, {obj->_width_px, obj->_height_px}};
+   fan->_rect_px = {{obj->_x_px, obj->_y_px}, {obj->_width_px, obj->_height_px}};
 
    std::string dir_str = std::string(default_fan_direction);
    if (obj->_properties)
@@ -106,8 +106,8 @@ std::shared_ptr<Fan> Fan::deserialize(GameNode* parent, const GameDeserializeDat
 
    fan->_direction_string = dir_str;  // Store the string form too
 
-   const auto tiles_x = static_cast<int>(fan->_pixel_rect.size.x) / PIXELS_PER_TILE;
-   const auto tiles_y = static_cast<int>(fan->_pixel_rect.size.y) / PIXELS_PER_TILE;
+   const auto tiles_x = static_cast<int>(fan->_rect_px.size.x) / PIXELS_PER_TILE;
+   const auto tiles_y = static_cast<int>(fan->_rect_px.size.y) / PIXELS_PER_TILE;
 
    if (dir_str == "up")
    {
@@ -163,8 +163,8 @@ void Fan::insertInstance(const std::shared_ptr<Fan>& fan, const GameDeserializeD
 
    instance.sprite_offset = std::rand() % 8;
    instance.tile_position_px = {
-      static_cast<int>(fan->_pixel_rect.position.x) + (x_tl * PIXELS_PER_TILE),
-      static_cast<int>(fan->_pixel_rect.position.y) + (y_tl * PIXELS_PER_TILE)
+      static_cast<int>(fan->_rect_px.position.x) + (x_tl * PIXELS_PER_TILE),
+      static_cast<int>(fan->_rect_px.position.y) + (y_tl * PIXELS_PER_TILE)
    };
 
    instance.direction = fan->_direction;
@@ -281,7 +281,7 @@ void Fan::collide()
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   if (sfcompat::findIntersection(player_rect, _pixel_rect).has_value())
+   if (sfcompat::findIntersection(player_rect, _rect_px).has_value())
    {
       PlayerRegistry::getFirst()->getBody()->ApplyForceToCenter(b2Vec2(2.0F * _direction.x, _direction.y), true);
    }

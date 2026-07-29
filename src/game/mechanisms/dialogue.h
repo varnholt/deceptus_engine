@@ -85,7 +85,7 @@ private:
    std::vector<DialogueItem> _dialogue_items;
    uint32_t _index = 0;
 
-   sf::FloatRect _pixel_rect;
+   sf::FloatRect _rect_px;
    bool _active{false};
    bool _button_required{true};
    bool _pause_game{true};

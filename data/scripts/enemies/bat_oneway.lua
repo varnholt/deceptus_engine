@@ -42,9 +42,9 @@ properties = {
 
 
 ------------------------------------------------------------------------------------------------------------------------
-_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
 _positionAtDeath = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _player_positionPrevious = v2d.Vector2D(0, 0)
 _elapsed = math.random(0, 3)
 _attackTime = 0
@@ -55,7 +55,7 @@ _sprite_offset_x = 0
 _sprite_offset_y = 0 -- 9 * 24
 _sprite_width = 72
 _sprite_height = 72
-_start_position = v2d.Vector2D(0, 0)
+_start_position_px = v2d.Vector2D(0, 0)
 _dying = false
 _dead = false
 _death_time = 0
@@ -100,11 +100,11 @@ function shoot()
 
    _attackTime = _elapsed
 
-   bx = _position:getX()
-   by = _position:getY()
+   bx = _position_px:getX()
+   by = _position_px:getY()
 
-   px = _player_position:getX()
-   py = _player_position:getY()
+   px = _player_position_px:getX()
+   py = _player_position_px:getY()
 
    if (_can_explode) then
       _sprite_offset_y = (px > bx) and (4 * _sprite_height) or (5 * _sprite_height)
@@ -112,8 +112,8 @@ function shoot()
       _sprite_offset_y = (px > bx) and 0 or _sprite_height
    end
 
-   sx = _start_position:getX()
-   sy = _start_position:getY()
+   sx = _start_position_px:getX()
+   sy = _start_position_px:getY()
 
    k1 = Key:create{x = bx, y = by, time = 0.0}
    k2 = Key:create{x = px, y = py, time = 0.5} -- player pos
@@ -142,7 +142,7 @@ function update(dt)
          _sprite_offset_x = 0
          _sprite_offset_y = 2 * _sprite_height
          setActive(false)
-         _positionAtDeath = _position
+         _positionAtDeath = _position_px
       end
    end
 
@@ -162,7 +162,7 @@ function update(dt)
          if (_activated) then
             _transform_x = _transform_x + dt * _speed
          end
-         setTransform(_start_position:getX() + _transform_x, _start_position:getY() + _transform_y, 0.0)
+         setTransform(_start_position_px:getX() + _transform_x, _start_position_px:getY() + _transform_y, 0.0)
       end
    end
 
@@ -190,7 +190,7 @@ function update(dt)
       updateSprite = true
    end
 
-   -- updateDebugRect(0, _position:getX() - 12, _position:getY() + 12, 24, 24)
+   -- updateDebugRect(0, _position_px:getX() - 12, _position_px:getY() + 12, 24, 24)
 
    if (_activated and _can_explode and not _exploded and not _dead) then
 
@@ -203,7 +203,7 @@ function update(dt)
       -- |    |(XX)|    |
       -- +----+----+----+
 
-      intersects = intersectsWithPlayer(_position:getX() - 12, _position:getY() + 12, 24, 24)
+      intersects = intersectsWithPlayer(_position_px:getX() - 12, _position_px:getY() + 12, 24, 24)
 
       if (intersects) then
 
@@ -212,7 +212,7 @@ function update(dt)
 
          boom(0.0, 1.0, 0.5)
          playSample("boom.wav")
-         playDetonationAnimation(_position:getX(), _position:getY())
+         playDetonationAnimation(_position_px:getX(), _position_px:getY())
          damage(10, 0.0, 0.0)
       end
    end
@@ -243,19 +243,19 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function setStartPosition(x, y)
-   _start_position = v2d.Vector2D(x, y)
+   _start_position_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   _player_position = v2d.Vector2D(x, y)
+   _player_position_px = v2d.Vector2D(x, y)
 end
 
 

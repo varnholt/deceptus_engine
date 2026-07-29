@@ -508,8 +508,8 @@ bool Level::load()
 
 void Level::loadStartPosition()
 {
-   _start_position.x = static_cast<float_t>(_description->_start_position.at(0) * PIXELS_PER_TILE + PLAYER_ACTUAL_WIDTH / 2);
-   _start_position.y = static_cast<float_t>(_description->_start_position.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
+   _start_position_px.x = static_cast<float_t>(_description->_start_position_tl.at(0) * PIXELS_PER_TILE + PLAYER_ACTUAL_WIDTH / 2);
+   _start_position_px.y = static_cast<float_t>(_description->_start_position_tl.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
 }
 
 void Level::loadLevelScript()
@@ -570,8 +570,8 @@ void Level::loadSaveState()
    if (checkpoint)
    {
       auto pos = checkpoint->spawnPoint();
-      _start_position.x = static_cast<float>(pos.x);
-      _start_position.y = static_cast<float>(pos.y);
+      _start_position_px.x = static_cast<float>(pos.x);
+      _start_position_px.y = static_cast<float>(pos.y);
       Log::Info() << "move to checkpoint: " << checkpoint_index;
    }
    else
@@ -584,7 +584,7 @@ void Level::loadSaveState()
    const auto transition_spawn_position_px = LevelTransitionHandler::getInstance().takeSpawnPosition();
    if (transition_spawn_position_px.has_value())
    {
-      _start_position = transition_spawn_position_px.value();
+      _start_position_px = transition_spawn_position_px.value();
    }
 
    if (save_state._level_state.is_null())
@@ -677,8 +677,8 @@ void Level::spawnEnemies()
 
       EnemyDescription json_description;
       json_description._position_in_tiles = false;
-      json_description._start_position.push_back(it.second._pixel_position.x);
-      json_description._start_position.push_back(it.second._pixel_position.y);
+      json_description._start_position.push_back(it.second._position_px.x);
+      json_description._start_position.push_back(it.second._position_px.y);
       json_description._id = it.second._id;
       json_description._name = it.second._name;
 
@@ -690,9 +690,9 @@ void Level::spawnEnemies()
          it.second.addPaths(_world_chains);
       }
 
-      if (!it.second._pixel_path.empty())
+      if (!it.second._path_px.empty())
       {
-         json_description._path = it.second._pixel_path;
+         json_description._path = it.second._path_px;
       }
 
       // z index
@@ -1883,7 +1883,7 @@ void Level::parsePhysicsTiles(
 
 const sf::Vector2f& Level::getStartPosition() const
 {
-   return _start_position;
+   return _start_position_px;
 }
 
 #ifdef DEVELOPMENT_MODE

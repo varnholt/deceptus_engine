@@ -88,7 +88,7 @@ private:
    Alignment _alignment = Alignment::PointsDown;
 
    b2Body* _body{nullptr};
-   sf::Vector2f _pixel_position;
+   sf::Vector2f _position_px;
    sf::Vector2f _blade_offset;
    sf::FloatRect _rect;
 
@@ -103,9 +103,9 @@ private:
    std::unique_ptr<sf::Sprite> _sprite_spike;
    std::unique_ptr<sf::Sprite> _sprite_pusher;
    std::unique_ptr<sf::Sprite> _sprite_mount;
-   sf::Vector2f _pixel_offset_mount;
-   sf::Vector2f _pixel_offset_pusher;
-   sf::Vector2f _pixel_offset_spike;
+   sf::Vector2f _offset_mount_px;
+   sf::Vector2f _offset_pusher_px;
+   sf::Vector2f _offset_spike_px;
 
    bool _shake{true};
    bool _shake_shown{false};

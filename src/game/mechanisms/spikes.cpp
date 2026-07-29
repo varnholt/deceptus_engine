@@ -347,8 +347,8 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
    auto instance = std::make_shared<Spikes>(parent);
 
    instance->setObjectId(data._tmx_object->_name);
-   instance->_pixel_position.x = data._tmx_object->_x_px;
-   instance->_pixel_position.y = data._tmx_object->_y_px;
+   instance->_position_px.x = data._tmx_object->_x_px;
+   instance->_position_px.y = data._tmx_object->_y_px;
 
    // make the collision rectangle a bit smaller so it's a little more lax
    instance->_player_collision_rect_px = {

@@ -73,8 +73,8 @@ public:
    sf::Vector2i getPixelPosition() const;
 
    /// \brief sets the anchor position in pixels.
-   /// \param pixel_position position in pixels.
-   void setPixelPosition(const sf::Vector2i& pixel_position);
+   /// \param position_px position in pixels.
+   void setPixelPosition(const sf::Vector2i& position_px);
 
 private:
 #ifdef __EMSCRIPTEN__
@@ -94,7 +94,7 @@ private:
    std::unique_ptr<sf::Sprite> _chain_element_a;
    std::unique_ptr<sf::Sprite> _chain_element_b;
 
-   sf::Vector2i _pixel_position;
+   sf::Vector2i _position_px;
    sf::FloatRect _rect;
 
    b2BodyDef _anchor_def;
