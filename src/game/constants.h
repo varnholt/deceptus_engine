@@ -24,13 +24,13 @@ constexpr auto PIXELS_PER_TILE = 24;
 constexpr auto PIXELS_PER_HALF_TILE = PIXELS_PER_TILE / 2;
 constexpr auto PIXELS_PER_PHYSICS_TILE = 8;  // each tile is 8x8 px
 
-constexpr auto DIFF_PLAYER_TILE_TO_PHYSICS = 15;  // 20
+constexpr auto DIFF_PLAYER_TILE_TO_PHYSICS_PX = 15;  // 20
 
 constexpr auto PLAYER_ANIMATION_CYCLES = 8;
-constexpr auto PLAYER_TILES_WIDTH = 24;
-constexpr auto PLAYER_TILES_HEIGHT = 48;
-constexpr auto PLAYER_ACTUAL_WIDTH = 20;   // the actual width can be smaller than the tile width
-constexpr auto PLAYER_ACTUAL_HEIGHT = 32;  // the actual height can be smaller than the tile height
+constexpr auto PLAYER_TILES_WIDTH_PX = 24;
+constexpr auto PLAYER_TILES_HEIGHT_PX = 48;
+constexpr auto PLAYER_ACTUAL_WIDTH_PX = 20;   // the actual width can be smaller than the tile width
+constexpr auto PLAYER_ACTUAL_HEIGHT_PX = 32;  // the actual height can be smaller than the tile height
 
 constexpr auto FACTOR_DEG_TO_RAD = 0.0174532925199432957f;
 constexpr auto FACTOR_RAD_TO_DEG = 57.295779513082320876f;

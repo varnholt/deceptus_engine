@@ -11,8 +11,8 @@ properties = {
 -- row 2: blink, 20 sprites
 -- row 3: appear 24 sprites
 
-SPRITE_WIDTH = 72
-SPRITE_HEIGHT = 120
+SPRITE_WIDTH_PX = 72
+SPRITE_HEIGHT_PX = 120
 SPRITE_COUNTS = {20, 20, 24}
 ANIMATION_SPEEDS = {13.0, 13.0, 50.0}
 ROW_IDLE = 1
@@ -31,8 +31,8 @@ _animation_dir_forward = true
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
    addShapeRect(0.75, 1.25, 0.75, 0.0)
-   updateSpriteRect(0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT) -- id, x, y, width, height
-   setSpriteOrigin(0, -SPRITE_WIDTH/2, 0)
+   updateSpriteRect(0, 0, 0, SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX) -- id, x, y, width, height
+   setSpriteOrigin(0, -SPRITE_WIDTH_PX/2, 0)
    setZ(19)                                               -- place behind player
    addSample("spawn_01.wav")
    setAudioUpdateBehavior(AudioUpdateBehavior["AlwaysOn"])
@@ -118,10 +118,10 @@ function update(dt)
       _sprite_index = sprite_index
       updateSpriteRect(
          0,
-         _sprite_index * SPRITE_WIDTH,
-         (_current_cycle - 1) * SPRITE_HEIGHT,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
+         _sprite_index * SPRITE_WIDTH_PX,
+         (_current_cycle - 1) * SPRITE_HEIGHT_PX,
+         SPRITE_WIDTH_PX,
+         SPRITE_HEIGHT_PX
       ) -- id, x, y, width, height
    end
 end

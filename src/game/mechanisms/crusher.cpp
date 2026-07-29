@@ -65,11 +65,11 @@ namespace
 constexpr auto BLADE_HORIZONTAL_TILES = 5;
 constexpr auto BLADE_VERTICAL_TILES = 1;
 
-constexpr auto BLADE_SIZE_X = (BLADE_HORIZONTAL_TILES * PIXELS_PER_TILE) / PPM;
-constexpr auto BLADE_SIZE_Y = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
+constexpr auto BLADE_SIZE_X_M = (BLADE_HORIZONTAL_TILES * PIXELS_PER_TILE) / PPM;
+constexpr auto BLADE_SIZE_Y_M = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
 
-constexpr auto BLADE_SHARPNESS = 0.1f;
-constexpr auto BLADE_TOLERANCE = 0.06f;
+constexpr auto BLADE_SHARPNESS_M = 0.1f;
+constexpr auto BLADE_TOLERANCE_M = 0.06f;
 
 }  // namespace
 
@@ -466,34 +466,35 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    {
       case Alignment::PointsLeft:
       {
-         blade_vertices[0] = b2Vec2(0, BLADE_SHARPNESS + BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[1] = b2Vec2(0, BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[2] = b2Vec2(BLADE_SIZE_Y, BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[3] = b2Vec2(BLADE_SIZE_Y, BLADE_SIZE_X - BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[0] = b2Vec2(0, BLADE_SHARPNESS_M + BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[1] = b2Vec2(0, BLADE_SIZE_X_M - BLADE_SHARPNESS_M - BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[2] = b2Vec2(BLADE_SIZE_Y_M, BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[3] = b2Vec2(BLADE_SIZE_Y_M, BLADE_SIZE_X_M - BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
          break;
       }
       case Alignment::PointsRight:
       {
-         blade_vertices[0] = b2Vec2(0 + PIXELS_PER_TILE / PPM, BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[1] = b2Vec2(BLADE_SIZE_Y + PIXELS_PER_TILE / PPM, BLADE_SHARPNESS + BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[2] = b2Vec2(BLADE_SIZE_Y + PIXELS_PER_TILE / PPM, BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[3] = b2Vec2(0 + PIXELS_PER_TILE / PPM, BLADE_SIZE_X - BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[0] = b2Vec2(0 + PIXELS_PER_TILE / PPM, BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[1] = b2Vec2(BLADE_SIZE_Y_M + PIXELS_PER_TILE / PPM, BLADE_SHARPNESS_M + BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[2] =
+            b2Vec2(BLADE_SIZE_Y_M + PIXELS_PER_TILE / PPM, BLADE_SIZE_X_M - BLADE_SHARPNESS_M - BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[3] = b2Vec2(0 + PIXELS_PER_TILE / PPM, BLADE_SIZE_X_M - BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
          break;
       }
       case Alignment::PointsDown:
       {
-         blade_vertices[0] = b2Vec2(BLADE_TOLERANCE, 0);
-         blade_vertices[1] = b2Vec2(BLADE_SHARPNESS + BLADE_TOLERANCE, BLADE_SIZE_Y);
-         blade_vertices[2] = b2Vec2(BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE, BLADE_SIZE_Y);
-         blade_vertices[3] = b2Vec2(BLADE_SIZE_X - BLADE_TOLERANCE, 0);
+         blade_vertices[0] = b2Vec2(BLADE_TOLERANCE_M, 0);
+         blade_vertices[1] = b2Vec2(BLADE_SHARPNESS_M + BLADE_TOLERANCE_M, BLADE_SIZE_Y_M);
+         blade_vertices[2] = b2Vec2(BLADE_SIZE_X_M - BLADE_SHARPNESS_M - BLADE_TOLERANCE_M, BLADE_SIZE_Y_M);
+         blade_vertices[3] = b2Vec2(BLADE_SIZE_X_M - BLADE_TOLERANCE_M, 0);
          break;
       }
       case Alignment::PointsUp:
       {
-         blade_vertices[0] = b2Vec2(BLADE_TOLERANCE, BLADE_SIZE_Y - PIXELS_PER_TILE / PPM);
-         blade_vertices[1] = b2Vec2(BLADE_SHARPNESS + BLADE_TOLERANCE, 0 - PIXELS_PER_TILE / PPM);
-         blade_vertices[2] = b2Vec2(BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE, 0 - PIXELS_PER_TILE / PPM);
-         blade_vertices[3] = b2Vec2(BLADE_SIZE_X - BLADE_TOLERANCE, BLADE_SIZE_Y - PIXELS_PER_TILE / PPM);
+         blade_vertices[0] = b2Vec2(BLADE_TOLERANCE_M, BLADE_SIZE_Y_M - PIXELS_PER_TILE / PPM);
+         blade_vertices[1] = b2Vec2(BLADE_SHARPNESS_M + BLADE_TOLERANCE_M, 0 - PIXELS_PER_TILE / PPM);
+         blade_vertices[2] = b2Vec2(BLADE_SIZE_X_M - BLADE_SHARPNESS_M - BLADE_TOLERANCE_M, 0 - PIXELS_PER_TILE / PPM);
+         blade_vertices[3] = b2Vec2(BLADE_SIZE_X_M - BLADE_TOLERANCE_M, BLADE_SIZE_Y_M - PIXELS_PER_TILE / PPM);
          break;
       }
       case Alignment::PointsNowhere:
@@ -522,32 +523,32 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    {
       case Alignment::PointsLeft:
       {
-         box_width = BLADE_SIZE_Y * 0.5f;
-         box_height = BLADE_SIZE_X * 0.5f;
+         box_width = BLADE_SIZE_Y_M * 0.5f;
+         box_height = BLADE_SIZE_X_M * 0.5f;
          box_center = {box_width, box_height};
          box_center.x += PIXELS_PER_TILE / PPM;
-         box_center.y -= BLADE_SIZE_X;
+         box_center.y -= BLADE_SIZE_X_M;
          break;
       }
       case Alignment::PointsRight:
       {
-         box_width = BLADE_SIZE_Y * 0.5f;
-         box_height = BLADE_SIZE_X * 0.5f;
+         box_width = BLADE_SIZE_Y_M * 0.5f;
+         box_height = BLADE_SIZE_X_M * 0.5f;
          box_center = {box_width, box_height};
-         box_center.y -= BLADE_SIZE_X;
+         box_center.y -= BLADE_SIZE_X_M;
          break;
       }
       case Alignment::PointsUp:
       {
-         box_width = BLADE_SIZE_X * 0.5f;
-         box_height = BLADE_SIZE_Y * 0.5f;
+         box_width = BLADE_SIZE_X_M * 0.5f;
+         box_height = BLADE_SIZE_Y_M * 0.5f;
          box_center = {box_width, box_height};
          break;
       }
       case Alignment::PointsDown:
       {
-         box_width = BLADE_SIZE_X * 0.5f;
-         box_height = BLADE_SIZE_Y * 0.5f;
+         box_width = BLADE_SIZE_X_M * 0.5f;
+         box_height = BLADE_SIZE_Y_M * 0.5f;
          box_center = {box_width, box_height};
          box_center.y -= PIXELS_PER_TILE / PPM;
          break;

@@ -54,7 +54,7 @@ const auto registered_conveyorbelt = []
 
 namespace
 {
-static const auto Y_OFFSET = -10;
+static const auto Y_OFFSET_PX = -10;
 static const auto BELT_TILE_COUNT = 8;
 static const auto ARROW_INDEX_X = 11;
 static const auto ARROW_INDEX_LEFT_Y = 0;
@@ -226,7 +226,7 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
 #else
       sf::Sprite belt_sprite(*_texture);
 #endif
-      sfcompat::setPosition(belt_sprite, {x + i * PIXELS_PER_TILE, y + Y_OFFSET});
+      sfcompat::setPosition(belt_sprite, {x + i * PIXELS_PER_TILE, y + Y_OFFSET_PX});
 
       _belt_sprites.push_back(belt_sprite);
    }

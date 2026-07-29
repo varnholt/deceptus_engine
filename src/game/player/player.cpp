@@ -434,17 +434,17 @@ const sf::FloatRect& Player::getPixelRectFloat() const
 
 void Player::updatePixelRect()
 {
-   constexpr auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
+   constexpr auto height_diff_px = PLAYER_TILES_HEIGHT_PX - PLAYER_ACTUAL_HEIGHT_PX;
 
-   _rect_px_f.position.x = _position_px_f.x - PLAYER_ACTUAL_WIDTH * 0.5f;
+   _rect_px_f.position.x = _position_px_f.x - PLAYER_ACTUAL_WIDTH_PX * 0.5f;
    _rect_px_f.position.y = _position_px_f.y - height_diff_px - (height_diff_px * 0.5f);
-   _rect_px_f.size.x = PLAYER_ACTUAL_WIDTH;
-   _rect_px_f.size.y = PLAYER_ACTUAL_HEIGHT;
+   _rect_px_f.size.x = PLAYER_ACTUAL_WIDTH_PX;
+   _rect_px_f.size.y = PLAYER_ACTUAL_HEIGHT_PX;
 
    _rect_px_i.position.x = static_cast<int32_t>(_rect_px_f.position.x);
    _rect_px_i.position.y = static_cast<int32_t>(_rect_px_f.position.y);
-   _rect_px_i.size.x = PLAYER_ACTUAL_WIDTH;
-   _rect_px_i.size.y = PLAYER_ACTUAL_HEIGHT;
+   _rect_px_i.size.x = PLAYER_ACTUAL_WIDTH_PX;
+   _rect_px_i.size.y = PLAYER_ACTUAL_HEIGHT_PX;
 }
 
 void Player::updateChunk()
@@ -482,8 +482,8 @@ void Player::createFeet()
    //  ^                        ^
    //  count * (dist + radius)
 
-   const auto width_px = PLAYER_ACTUAL_WIDTH;
-   const auto height_px = PLAYER_ACTUAL_HEIGHT;
+   const auto width_px = PLAYER_ACTUAL_WIDTH_PX;
+   const auto height_px = PLAYER_ACTUAL_HEIGHT_PX;
    const auto feet_radius_m = 0.16f / static_cast<float>(__foot_count);
    const auto feet_distance_m = 0.0f;
    const auto feet_offset_m = static_cast<float>(__foot_count) * (feet_radius_m * 2.0f + feet_distance_m) * 0.5f - feet_radius_m;

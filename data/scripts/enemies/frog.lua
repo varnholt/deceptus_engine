@@ -42,16 +42,16 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 ROW_OFFSET_RIGHT = 3
 FRAME_COUNTS = {8, 8, 6, 19}
-DEBUG_ATTACK_OFFSET = 0 * 48  -- 8x48 px offset when attacking
+DEBUG_ATTACK_OFFSET_PX = 0 * 48  -- 8x48 px offset when attacking
 
 MIN_ATTACK_WAIT = 1.5  -- Minimum wait time in seconds between attacks
 
 MAX_TONGUE_SCALE = 5.0  -- Maximum scale factor for the tongue extension
-SPRITE_WIDTH = 48
-SPRITE_HEIGHT = 48
+SPRITE_WIDTH_PX = 48
+SPRITE_HEIGHT_PX = 48
 
-SPRITE_WIDTH_DYING = 72
-SPRITE_HEIGHT_DYING = 72
+SPRITE_WIDTH_DYING_PX = 72
+SPRITE_HEIGHT_DYING_PX = 72
 SPRITE_ROW_DYING = 6
 
 STATE_IDLE = 1
@@ -243,7 +243,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function logSprite(dt)
 
-   local current_row = math.floor(y / SPRITE_HEIGHT)
+   local current_row = math.floor(y / SPRITE_HEIGHT_PX)
 
    if _prev_log_sprite_row ~= current_row then
 
@@ -474,7 +474,7 @@ function writeProperty(key, value)
       _tongue_extension_x = 288
 
       if (value == "right") then
-         _alignment_offset = 3 * SPRITE_HEIGHT
+         _alignment_offset = 3 * SPRITE_HEIGHT_PX
          _points_left = false
          _tongue_direction_multiplier = 1  -- 1 for right
          _tongue_extension_y = 264
@@ -526,11 +526,11 @@ function getIdleSpriteCoords()
    end
    
    local frame_index = math.floor(_animation_frame) % max_frames
-   local x = frame_index * SPRITE_WIDTH
-   local y = (cycle - 1) * SPRITE_HEIGHT
+   local x = frame_index * SPRITE_WIDTH_PX
+   local y = (cycle - 1) * SPRITE_HEIGHT_PX
    y = y + _alignment_offset
    
-   return x, y, SPRITE_WIDTH, SPRITE_WIDTH
+   return x, y, SPRITE_WIDTH_PX, SPRITE_WIDTH_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -568,25 +568,25 @@ function getAttackSpriteCoords()
    end
 
    -- calculate sprite coordinates
-   local x = frame_index * SPRITE_WIDTH
-   local y = (cycle - 1) * SPRITE_HEIGHT
+   local x = frame_index * SPRITE_WIDTH_PX
+   local y = (cycle - 1) * SPRITE_HEIGHT_PX
 
    -- Apply attack sprite offset when attacking
-   x = x + DEBUG_ATTACK_OFFSET
+   x = x + DEBUG_ATTACK_OFFSET_PX
 
    -- Apply alignment offset for non-dying states
    y = y + _alignment_offset
 
-   return x, y, SPRITE_WIDTH, SPRITE_HEIGHT
+   return x, y, SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getDyingSpriteCoords()
    local death_frame_index = math.floor(_death_animation_frame)
    
-   local x = death_frame_index * SPRITE_WIDTH_DYING
-   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING
-   return x, y, SPRITE_WIDTH_DYING, SPRITE_HEIGHT_DYING
+   local x = death_frame_index * SPRITE_WIDTH_DYING_PX
+   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING_PX
+   return x, y, SPRITE_WIDTH_DYING_PX, SPRITE_HEIGHT_DYING_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------

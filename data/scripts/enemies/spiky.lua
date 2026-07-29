@@ -44,7 +44,7 @@ CYCLE_LENGTHS =  {12, 12, 12, 15, 4}
 CYCLE_ROWS_LEFT = {0, 2, 4, 6, 4}
 CYCLE_ROWS_RIGHT = {1, 3, 5, 8, 5}
 ANIMATION_SPEEDS = {10.0, 20.0, 10.0, 10.0, 10.0}
-SPRITE_SIZE = 48
+SPRITE_SIZE_PX = 48
 SPRITES_PER_ROW = 12
 
 
@@ -158,10 +158,10 @@ function updateSprite(dt)
 
       updateSpriteRect(
          0,
-         sprite_index * SPRITE_SIZE,
-         getSpriteOffsetY() + wrapped_y * SPRITE_SIZE,
-         SPRITE_SIZE,
-         SPRITE_SIZE
+         sprite_index * SPRITE_SIZE_PX,
+         getSpriteOffsetY() + wrapped_y * SPRITE_SIZE_PX,
+         SPRITE_SIZE_PX,
+         SPRITE_SIZE_PX
       )
    end
 end
@@ -169,7 +169,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getSpriteOffsetY()
-   return _points_to_left and (CYCLE_ROWS_LEFT[_current_cycle + 1] * SPRITE_SIZE) or (CYCLE_ROWS_RIGHT[_current_cycle + 1] * SPRITE_SIZE)
+   return _points_to_left and (CYCLE_ROWS_LEFT[_current_cycle + 1] * SPRITE_SIZE_PX) or (CYCLE_ROWS_RIGHT[_current_cycle + 1] * SPRITE_SIZE_PX)
 end
 
 

@@ -30,7 +30,7 @@ properties = {
 -- 6: 7 IDLE 3
 -- 8: 2 UP/DOWN
 
-SPRITE_SIZE = 24
+SPRITE_SIZE_PX = 24
 CYCLE_RUN = 0
 CYCLE_IDLE_1 = 1
 CYCLE_IDLE_2 = 2
@@ -214,7 +214,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getSpriteOffsetY()
-   return (_current_cycle * 2 + (_points_left and 0 or 1)) * SPRITE_SIZE
+   return (_current_cycle * 2 + (_points_left and 0 or 1)) * SPRITE_SIZE_PX
 end
 
 
@@ -237,7 +237,7 @@ function updateSprite(dt)
          sprite_index = getMaxCycle() - sprite_index - 1
       end
 
-      updateSpriteRect(0, sprite_index * SPRITE_SIZE, getSpriteOffsetY(), SPRITE_SIZE, SPRITE_SIZE)
+      updateSpriteRect(0, sprite_index * SPRITE_SIZE_PX, getSpriteOffsetY(), SPRITE_SIZE_PX, SPRITE_SIZE_PX)
    end
 end
 

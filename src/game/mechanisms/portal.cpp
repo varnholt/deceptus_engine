@@ -101,7 +101,7 @@ void goToPortal(auto portal)
    auto dst_position_px = portal->getDestination()->getPortalPosition();
 
    PlayerRegistry::getFirst()->setBodyViaPixelPosition(
-      dst_position_px.x + PLAYER_ACTUAL_WIDTH / 2, dst_position_px.y + DIFF_PLAYER_TILE_TO_PHYSICS
+      dst_position_px.x + PLAYER_ACTUAL_WIDTH_PX / 2, dst_position_px.y + DIFF_PLAYER_TILE_TO_PHYSICS_PX
    );
 
    // update the camera system to point to the player position immediately

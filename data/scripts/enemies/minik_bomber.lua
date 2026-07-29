@@ -51,8 +51,8 @@ properties = {
 
 
 ------------------------------------------------------------------------------------------------------------------------
-SPRITE_WIDTH = 4 * 24
-SPRITE_HEIGHT = 2 * 24
+SPRITE_WIDTH_PX = 4 * 24
+SPRITE_HEIGHT_PX = 2 * 24
 
 CYCLE_IDLE = 0
 CYCLE_IDLE_BLINK = 1
@@ -162,7 +162,7 @@ function writeProperty(key, value)
          -- print("setting alignment to left")
          _points_to_left = false
          _throw_dir_x = 1.0
-         _alignment_offset = 5 * SPRITE_HEIGHT
+         _alignment_offset = 5 * SPRITE_HEIGHT_PX
       end
    elseif (key == "audio_update_behavior") then
       update_behavior = audioUpdateBehaviorFromString(value)
@@ -291,10 +291,10 @@ function updateSprite(dt)
 
       updateSpriteRect(
          0,
-         sprite_index * SPRITE_WIDTH + CYCLE_START_INDEX[_current_cycle + 1] * SPRITE_WIDTH,
-         getSpriteOffsetY() * SPRITE_HEIGHT,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
+         sprite_index * SPRITE_WIDTH_PX + CYCLE_START_INDEX[_current_cycle + 1] * SPRITE_WIDTH_PX,
+         getSpriteOffsetY() * SPRITE_HEIGHT_PX,
+         SPRITE_WIDTH_PX,
+         SPRITE_HEIGHT_PX
       )
    end
 end

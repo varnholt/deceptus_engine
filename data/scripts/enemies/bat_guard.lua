@@ -27,10 +27,10 @@ _player_position_previous_px = v2d.Vector2D(0, 0)
 _elapsed = math.random(0, 3) -- also acts as per-bat phase seed
 _activated = false
 
-_sprite_offset_x = 0
-_sprite_offset_y = 0
-_sprite_width = 72
-_sprite_height = 72
+_sprite_offset_x_px = 0
+_sprite_offset_y_px = 0
+_sprite_width_px = 72
+_sprite_height_px = 72
 
 _start_position_px = v2d.Vector2D(0, 0)
 _dying = false
@@ -43,7 +43,7 @@ _energy = 3
 
 ANIMATION_SPEED_IDLE = 20.0
 ANIMATION_SPEED_DEATH = 20.0
-HIT_RADIUS = 0.3
+HIT_RADIUS_M = 0.3
 ATTACK_SPRITE_COUNT = 9
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -60,8 +60,8 @@ _vel = v2d.Vector2D(0, 0)
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Hover tuning (idle)
-HOVER_OX_AMPL = 6.0
-HOVER_OY_AMPL = 12.0
+HOVER_OX_AMPL_PX = 6.0
+HOVER_OY_AMPL_PX = 12.0
 HOVER_OX_FREQ = 1.7
 HOVER_OY_FREQ = 2.3
 HOVER_EASE = 7.0
@@ -80,12 +80,12 @@ LEASH_Y_TILES = 9
 -- Follow tuning (feel)
 FOLLOW_SPEED = 105.0
 FOLLOW_TURN  = 4.5
-FOLLOW_OFFSET_Y = -28.0
+FOLLOW_OFFSET_Y_PX = -28.0
 FOLLOW_LEAD = 3.0
 
 -- When bat gets close to its follow target, make it "orbit" / flutter instead of sticking to 1 pixel
-ORBIT_START_DIST = 18.0    -- start fluttering when closer than this (px)
-ORBIT_RADIUS = 62.0        -- how wide it circles (px)
+ORBIT_START_DIST_PX = 18.0    -- start fluttering when closer than this (px)
+ORBIT_RADIUS_PX = 62.0        -- how wide it circles (px)
 ORBIT_FREQ = 8.4           -- radians/sec-ish (bigger = faster orbit)
 ORBIT_MIX = 0.85           -- 0..1, how much of orbit offset to apply when very close
 
@@ -93,8 +93,8 @@ ORBIT_MIX = 0.85           -- 0..1, how much of orbit offset to apply when very 
 -- Return tuning (smooth drift back, with deceleration near home)
 RETURN_SPEED = 65.0
 RETURN_TURN  = 2.5
-RETURN_SLOW_RADIUS = 18.0
-RETURN_DONE_DIST  = 0.75
+RETURN_SLOW_RADIUS_PX = 18.0
+RETURN_DONE_DIST_PX  = 0.75
 
 ------------------------------------------------------------------------------------------------------------------------
 -- small helper
@@ -127,9 +127,9 @@ end
 function initialize()
    addSample("boom.wav")
    addHitbox(-18, -12, 36, 24)
-   addShapeCircle(HIT_RADIUS, 0.0, 0.0)
+   addShapeCircle(HIT_RADIUS_M, 0.0, 0.0)
 
-   updateSpriteRect(0, 0, 0, _sprite_width, _sprite_height)
+   updateSpriteRect(0, 0, 0, _sprite_width_px, _sprite_height_px)
    setZ(30)
 end
 
@@ -148,8 +148,8 @@ function update(dt)
       if (_energy == 0) then
          _dying = true
          _death_time = _elapsed
-         _sprite_offset_x = 0
-         _sprite_offset_y = 2 * _sprite_height
+         _sprite_offset_x_px = 0
+         _sprite_offset_y_px = 2 * _sprite_height_px
          setActive(false)
          _position_at_death_px = _position_px
          setDamage(0)
@@ -213,8 +213,8 @@ end
 -- Idle state behavior
 function updateStateIdle(dt)
    local t = _elapsed
-   local ox = math.sin(t * HOVER_OX_FREQ) * HOVER_OX_AMPL
-   local oy = math.sin(t * HOVER_OY_FREQ) * HOVER_OY_AMPL
+   local ox = math.sin(t * HOVER_OX_FREQ) * HOVER_OX_AMPL_PX
+   local oy = math.sin(t * HOVER_OY_FREQ) * HOVER_OY_AMPL_PX
 
    local blend = clamp(_state_time / IDLE_HOVER_BLEND_TIME, 0.0, 1.0)
 
@@ -235,21 +235,21 @@ function updateStateFollow(dt)
 
    -- base target: above player with slight lead
    local target = _player_position_px:add(lead)
-   target = v2d.Vector2D(target:getX(), target:getY() + FOLLOW_OFFSET_Y)
+   target = v2d.Vector2D(target:getX(), target:getY() + FOLLOW_OFFSET_Y_PX)
 
    -- add orbit/fluter when very close so it doesn't "pin" to a single pixel
    -- compute closeness BEFORE leashing (more natural), then leash final target
    local toTarget = target:sub(_pos_px)
    local dist = toTarget:len()
 
-   if (dist < ORBIT_START_DIST) then
+   if (dist < ORBIT_START_DIST_PX) then
       -- closeness factor: 0 at startDist, 1 at 0
-      local k = clamp(1.0 - (dist / ORBIT_START_DIST), 0.0, 1.0) * ORBIT_MIX
+      local k = clamp(1.0 - (dist / ORBIT_START_DIST_PX), 0.0, 1.0) * ORBIT_MIX
 
       -- per-bat phase from initial _elapsed seed
       local phase = (_elapsed * ORBIT_FREQ) + (_attack_time or 0.0)
-      local ox = math.cos(phase) * ORBIT_RADIUS
-      local oy = math.sin(phase * 1.3) * (ORBIT_RADIUS * 0.65)
+      local ox = math.cos(phase) * ORBIT_RADIUS_PX
+      local oy = math.sin(phase * 1.3) * (ORBIT_RADIUS_PX * 0.65)
 
       target = v2d.Vector2D(target:getX() + ox * k, target:getY() + oy * k)
    end
@@ -269,13 +269,13 @@ function updateStateReturn(dt)
    local toHome = home:sub(_pos_px)
    local dist = toHome:len()
 
-   if (dist <= RETURN_DONE_DIST) then
+   if (dist <= RETURN_DONE_DIST_PX) then
       _pos_px = home
       _vel = v2d.Vector2D(0, 0)
       enterState(STATE_IDLE)
       _state_time = 0.0
    else
-      local slow = clamp(dist / RETURN_SLOW_RADIUS, 0.15, 1.0)
+      local slow = clamp(dist / RETURN_SLOW_RADIUS_PX, 0.15, 1.0)
       local desired = toHome:norm():mul(RETURN_SPEED * slow)
 
       _vel = _vel:add(desired:sub(_vel):mul(clamp(RETURN_TURN * dt, 0.0, 1.0)))
@@ -290,9 +290,9 @@ function updateSpriteDirection()
    local bx = _pos_px:getX()
    local px = _player_position_px:getX()
    if (_can_explode) then
-      _sprite_offset_y = (px > bx) and (4 * _sprite_height) or (5 * _sprite_height)
+      _sprite_offset_y_px = (px > bx) and (4 * _sprite_height_px) or (5 * _sprite_height_px)
    else
-      _sprite_offset_y = (px > bx) and 0 or _sprite_height
+      _sprite_offset_y_px = (px > bx) and 0 or _sprite_height_px
    end
 end
 
@@ -310,18 +310,18 @@ function updateAnimation(dt)
    end
 
    local update_sprite = false
-   if (sprite_index ~= _sprite_offset_x) then
-      _sprite_offset_x = sprite_index
+   if (sprite_index ~= _sprite_offset_x_px) then
+      _sprite_offset_x_px = sprite_index
       update_sprite = true
    end
 
    if (update_sprite) then
       updateSpriteRect(
          0,
-         _sprite_offset_x * _sprite_width,
-         _sprite_offset_y,
-         _sprite_width,
-         _sprite_height
+         _sprite_offset_x_px * _sprite_width_px,
+         _sprite_offset_y_px,
+         _sprite_width_px,
+         _sprite_height_px
       )
    end
 end
@@ -383,7 +383,7 @@ end
 function writeProperty(key, value)
    if (key == "exploding") then
       _can_explode = true
-      _sprite_offset_y = 4 * 3 * 24
+      _sprite_offset_y_px = 4 * 3 * 24
    elseif (key == "audio_update_behavior") then
       local update_behavior = audioUpdateBehaviorFromString(value)
       setAudioUpdateBehavior(update_behavior)

@@ -12,8 +12,8 @@
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 
-const auto SPRITE_WIDTH = 24;
-const auto SPRITE_HEIGHT = 24;
+const auto SPRITE_WIDTH_PX = 24;
+const auto SPRITE_HEIGHT_PX = 24;
 
 //
 //        +--------------------------------------------------+ <-
@@ -135,10 +135,10 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bumper.png");
 #ifdef __EMSCRIPTEN__
    _sprite = std::make_unique<sf::Sprite>();
-   _sprite->position = _position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT));
+   _sprite->position = _position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT_PX));
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
+   _sprite->setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT_PX)));
 #endif
 }
 
@@ -190,7 +190,7 @@ void Bouncer::update(const sf::Time& /*dt*/)
    if (!_previous_step.has_value() || step != _previous_step)
    {
       _previous_step = step;
-      sfcompat::setTextureRect(*_sprite, sf::IntRect({step * SPRITE_WIDTH, 0}, {SPRITE_WIDTH, SPRITE_HEIGHT}));
+      sfcompat::setTextureRect(*_sprite, sf::IntRect({step * SPRITE_WIDTH_PX, 0}, {SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX}));
    }
 }
 

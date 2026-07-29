@@ -24,7 +24,7 @@ v2d = require "data/scripts/enemies/vectorial2"
 
 ROW_OFFSET_RIGHT = 3
 FRAME_COUNTS = {8, 8, 6, 19}
-DEBUG_ATTACK_OFFSET = 0 * 48
+DEBUG_ATTACK_OFFSET_PX = 0 * 48
 
 BURP_MODE_PLAYER_PROXIMITY = 1
 BURP_MODE_FIXED_INTERVAL   = 2
@@ -33,11 +33,11 @@ BURP_MODE     = BURP_MODE_FIXED_INTERVAL
 BURP_INTERVAL = 4.0   -- used by BURP_MODE_FIXED_INTERVAL
 MIN_ATTACK_WAIT = 1.5  -- used by BURP_MODE_PLAYER_PROXIMITY
 
-SPRITE_WIDTH = 48
-SPRITE_HEIGHT = 48
+SPRITE_WIDTH_PX = 48
+SPRITE_HEIGHT_PX = 48
 
-SPRITE_WIDTH_DYING = 72
-SPRITE_HEIGHT_DYING = 72
+SPRITE_WIDTH_DYING_PX = 72
+SPRITE_HEIGHT_DYING_PX = 72
 SPRITE_ROW_DYING = 6
 
 STATE_IDLE = 1
@@ -60,8 +60,8 @@ BUBBLE_SPEED_H        = 0.05  -- base horizontal impulse
 BUBBLE_SPEED_H_SPREAD = 0.015 -- random ± spread on horizontal impulse
 BUBBLE_SPEED_V        = 0.003 -- base upward impulse (~11 deg slope at base speed)
 BUBBLE_SPEED_V_SPREAD = 0.008 -- random spread added to upward impulse (always positive)
-BUBBLE_SPAWN_SPREAD_X = 6     -- random ± pixel spread on spawn x
-BUBBLE_SPAWN_SPREAD_Y = 8     -- random ± pixel spread on spawn y
+BUBBLE_SPAWN_SPREAD_X_PX = 6     -- random ± pixel spread on spawn x
+BUBBLE_SPAWN_SPREAD_Y_PX = 8     -- random ± pixel spread on spawn y
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -272,8 +272,8 @@ local function fireBubble()
    for slot = 0, BUBBLE_BURST_SIZE - 1 do
       local horiz  = BUBBLE_SPEED_H + (math.random() - 0.5) * 2.0 * BUBBLE_SPEED_H_SPREAD
       local upward = BUBBLE_SPEED_V + math.random() * BUBBLE_SPEED_V_SPREAD
-      local spawn_x = spawn_x_base + (math.random() - 0.5) * 2.0 * BUBBLE_SPAWN_SPREAD_X
-      local spawn_y = spawn_y_base + (math.random() - 0.5) * 2.0 * BUBBLE_SPAWN_SPREAD_Y
+      local spawn_x = spawn_x_base + (math.random() - 0.5) * 2.0 * BUBBLE_SPAWN_SPREAD_X_PX
+      local spawn_y = spawn_y_base + (math.random() - 0.5) * 2.0 * BUBBLE_SPAWN_SPREAD_Y_PX
       useWeapon(slot, spawn_x, spawn_y, _direction_multiplier * horiz, -upward)
    end
 end
@@ -414,7 +414,7 @@ function writeProperty(key, value)
    if (key == "alignment") then
 
       if (value == "right") then
-         _alignment_offset = 3 * SPRITE_HEIGHT
+         _alignment_offset = 3 * SPRITE_HEIGHT_PX
          _points_left = false
          _direction_multiplier = 1
       else
@@ -445,11 +445,11 @@ function getIdleSpriteCoords()
    end
 
    local frame_index = math.floor(_animation_frame) % max_frames
-   local x = frame_index * SPRITE_WIDTH
-   local y = (cycle - 1) * SPRITE_HEIGHT
+   local x = frame_index * SPRITE_WIDTH_PX
+   local y = (cycle - 1) * SPRITE_HEIGHT_PX
    y = y + _alignment_offset
 
-   return x, y, SPRITE_WIDTH, SPRITE_WIDTH
+   return x, y, SPRITE_WIDTH_PX, SPRITE_WIDTH_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -478,18 +478,18 @@ function getAttackSpriteCoords()
       frame_index = math.min(frame_index, max_frames)
    end
 
-   local x = frame_index * SPRITE_WIDTH + DEBUG_ATTACK_OFFSET
-   local y = (cycle - 1) * SPRITE_HEIGHT + _alignment_offset
+   local x = frame_index * SPRITE_WIDTH_PX + DEBUG_ATTACK_OFFSET_PX
+   local y = (cycle - 1) * SPRITE_HEIGHT_PX + _alignment_offset
 
-   return x, y, SPRITE_WIDTH, SPRITE_HEIGHT
+   return x, y, SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------
 function getDyingSpriteCoords()
    local death_frame_index = math.floor(_death_animation_frame)
-   local x = death_frame_index * SPRITE_WIDTH_DYING
-   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING
-   return x, y, SPRITE_WIDTH_DYING, SPRITE_HEIGHT_DYING
+   local x = death_frame_index * SPRITE_WIDTH_DYING_PX
+   local y = SPRITE_ROW_DYING * SPRITE_HEIGHT_DYING_PX
+   return x, y, SPRITE_WIDTH_DYING_PX, SPRITE_HEIGHT_DYING_PX
 end
 
 ------------------------------------------------------------------------------------------------------------------------

@@ -45,12 +45,12 @@ _fire_direction = v2d.Vector2D(0, 0)
 _fire_offset_px = {v2d.Vector2D(0, 0), v2d.Vector2D(0, 0), v2d.Vector2D(0, 0)}
 _speed = 1.5
 _offset_px = v2d.Vector2D(0, 0)
-_muzzle_width = 0
-_muzzle_height = 0
+_muzzle_width_px = 0
+_muzzle_height_px = 0
 _muzzle_offset_px = v2d.Vector2D(0, 0)
 
-SPRITE_WIDTH = 3 * 24
-SPRITE_HEIGHT = 3 * 24
+SPRITE_WIDTH_PX = 3 * 24
+SPRITE_HEIGHT_PX = 3 * 24
 
 
 -- physical box is just 24 * 24px
@@ -109,13 +109,13 @@ function updateAlignment(alignment)
       _fire_offset_px[2] = v2d.Vector2D(11.0, -16.0)
       _fire_offset_px[3] = v2d.Vector2D(19.0, -16.0)
       _offset_px = v2d.Vector2D(0, 9 * 24)
-      _muzzle_width = 8
-      _muzzle_height = 24
+      _muzzle_width_px = 8
+      _muzzle_height_px = 24
       _muzzle_offset_px:setX(4)
       _muzzle_offset_px:setY(-12)
       setSpriteOffset(1, _muzzle_offset_px:getX(),                     _muzzle_offset_px:getY())
-      setSpriteOffset(2, _muzzle_offset_px:getX() + _muzzle_width,     _muzzle_offset_px:getY())
-      setSpriteOffset(3, _muzzle_offset_px:getX() + _muzzle_width * 2, _muzzle_offset_px:getY())
+      setSpriteOffset(2, _muzzle_offset_px:getX() + _muzzle_width_px,     _muzzle_offset_px:getY())
+      setSpriteOffset(3, _muzzle_offset_px:getX() + _muzzle_width_px * 2, _muzzle_offset_px:getY())
    elseif (alignment == Alignment["AlignmentDown"]) then
       offset:setX(5)
       offset:setY(0)
@@ -124,13 +124,13 @@ function updateAlignment(alignment)
       _fire_offset_px[2] = v2d.Vector2D(12.0, 40.0)
       _fire_offset_px[3] = v2d.Vector2D(20.0, 40.0)
       _offset_px = v2d.Vector2D(0, 8 * 24)
-      _muzzle_width = 8
-      _muzzle_height = 24
+      _muzzle_width_px = 8
+      _muzzle_height_px = 24
       _muzzle_offset_px:setX(4)
       _muzzle_offset_px:setY(36)
       setSpriteOffset(1, _muzzle_offset_px:getX(),                     _muzzle_offset_px:getY())
-      setSpriteOffset(2, _muzzle_offset_px:getX() + _muzzle_width,     _muzzle_offset_px:getY())
-      setSpriteOffset(3, _muzzle_offset_px:getX() + _muzzle_width * 2, _muzzle_offset_px:getY())
+      setSpriteOffset(2, _muzzle_offset_px:getX() + _muzzle_width_px,     _muzzle_offset_px:getY())
+      setSpriteOffset(3, _muzzle_offset_px:getX() + _muzzle_width_px * 2, _muzzle_offset_px:getY())
    elseif (alignment == Alignment["AlignmentLeft"]) then
       offset:setX(0)
       offset:setY(0)
@@ -139,13 +139,13 @@ function updateAlignment(alignment)
       _fire_offset_px[2] = v2d.Vector2D(-16.0, 11.0)
       _fire_offset_px[3] = v2d.Vector2D(-16.0, 19.0)
       _offset_px = v2d.Vector2D(0, 6 * 24)
-      _muzzle_width = 24
-      _muzzle_height = 8
+      _muzzle_width_px = 24
+      _muzzle_height_px = 8
       _muzzle_offset_px:setX(-12)
       _muzzle_offset_px:setY(4)
       setSpriteOffset(1, _muzzle_offset_px:getX(), _muzzle_offset_px:getY())
-      setSpriteOffset(2, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height)
-      setSpriteOffset(3, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height * 2)
+      setSpriteOffset(2, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height_px)
+      setSpriteOffset(3, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height_px * 2)
    elseif (alignment == Alignment["AlignmentRight"]) then
       offset:setX(0)
       offset:setY(1)
@@ -154,21 +154,21 @@ function updateAlignment(alignment)
       _fire_offset_px[2] = v2d.Vector2D(36.0, 11.0)
       _fire_offset_px[3] = v2d.Vector2D(36.0, 19.0)
       _offset_px = v2d.Vector2D(0, 7 * 24)
-      _muzzle_width = 24
-      _muzzle_height = 8
+      _muzzle_width_px = 24
+      _muzzle_height_px = 8
       _muzzle_offset_px:setX(36)
       _muzzle_offset_px:setY(4)
       setSpriteOffset(1, _muzzle_offset_px:getX(), _muzzle_offset_px:getY())
-      setSpriteOffset(2, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height)
-      setSpriteOffset(3, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height * 2)
+      setSpriteOffset(2, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height_px)
+      setSpriteOffset(3, _muzzle_offset_px:getX(), _muzzle_offset_px:getY() + _muzzle_height_px * 2)
    end
 
    updateSpriteRect(
       0,
-      offset:getX() * SPRITE_WIDTH,
-      offset:getY() * SPRITE_HEIGHT,
-      SPRITE_WIDTH,
-      SPRITE_HEIGHT
+      offset:getX() * SPRITE_WIDTH_PX,
+      offset:getY() * SPRITE_HEIGHT_PX,
+      SPRITE_WIDTH_PX,
+      SPRITE_HEIGHT_PX
    )
 
    for i = 1, 3, 1
@@ -177,8 +177,8 @@ function updateAlignment(alignment)
          i,
          _offset_px.x,
          _offset_px.y,
-         _muzzle_width,
-         _muzzle_height
+         _muzzle_width_px,
+         _muzzle_height_px
       )
 
    end
@@ -330,8 +330,8 @@ function update(dt)
             i,
             _offset_px:getX() + sprite_indices_current[i] * 24,
             _offset_px:getY(),
-            _muzzle_width,
-            _muzzle_height
+            _muzzle_width_px,
+            _muzzle_height_px
          )
       end
    end

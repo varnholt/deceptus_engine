@@ -893,7 +893,7 @@ void Gateway::use()
       {
          const auto y_tl_to_px = static_cast<int32_t>(target_pos_px.y / PIXELS_PER_TILE) * PIXELS_PER_TILE;
          PlayerRegistry::getFirst()->setBodyViaPixelPosition(
-            target_pos_px.x + PLAYER_ACTUAL_WIDTH / 2, y_tl_to_px + PIXELS_PER_TILE * 3 - 8
+            target_pos_px.x + PLAYER_ACTUAL_WIDTH_PX / 2, y_tl_to_px + PIXELS_PER_TILE * 3 - 8
          );
 
          // update the camera system to point to the player position immediately
@@ -1048,7 +1048,7 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
       _eye_iris_idle_ref->update(dt);
    }
 
-   const auto error_gaze_px = sf::Vector2f(-PLAYER_ACTUAL_WIDTH / 2, 0);
+   const auto error_gaze_px = sf::Vector2f(-PLAYER_ACTUAL_WIDTH_PX / 2, 0);
    const auto player_pos_px = PlayerRegistry::getFirst()->getPixelPositionFloat() + error_gaze_px;
    const auto dir_to_player = player_pos_px - _center_pos_px;
    const auto dir_to_player_normalized = dir_to_player.normalized();

@@ -508,8 +508,8 @@ bool Level::load()
 
 void Level::loadStartPosition()
 {
-   _start_position_px.x = static_cast<float_t>(_description->_start_position_tl.at(0) * PIXELS_PER_TILE + PLAYER_ACTUAL_WIDTH / 2);
-   _start_position_px.y = static_cast<float_t>(_description->_start_position_tl.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
+   _start_position_px.x = static_cast<float_t>(_description->_start_position_tl.at(0) * PIXELS_PER_TILE + PLAYER_ACTUAL_WIDTH_PX / 2);
+   _start_position_px.y = static_cast<float_t>(_description->_start_position_tl.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS_PX);
 }
 
 void Level::loadLevelScript()

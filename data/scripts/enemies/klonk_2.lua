@@ -20,7 +20,7 @@ mCycle = 0
 mSpeed = 35.0
 mRandomizedOffset = math.random(100)/100.0
 
-COLLISION_THRESHOLD = 24
+COLLISION_THRESHOLD_PX = 24
 SPRITE_SIZE_PX = 4 * 24
 CYCLE_IDLE = 0
 CYCLE_WAKE = 1
@@ -77,7 +77,7 @@ function update(dt)
 
       dx = mPosition:getX() - mPlayerPosition:getX()
 
-      if (dx > -COLLISION_THRESHOLD and dx < COLLISION_THRESHOLD) then
+      if (dx > -COLLISION_THRESHOLD_PX and dx < COLLISION_THRESHOLD_PX) then
 
          -- make sure stone is not too far away (10 tiles) and above player
          yDiff = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
