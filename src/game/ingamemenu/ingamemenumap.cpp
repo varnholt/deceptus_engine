@@ -282,10 +282,14 @@ void IngameMenuMap::drawMarker(
    }
 
    const auto size = sfcompat::getTextureRect(*layer->_sprite).size;
+   const auto width = static_cast<int32_t>(size.x);
+   const auto height = static_cast<int32_t>(size.y);
 
-   // snapped to whole map pixels so the icon stays crisp
+   // the icons are odd sized, so half of their size is not a whole pixel. centering them with a
+   // float division would park the sprite on a half pixel and smear every texel across two, which
+   // is what makes pixel art look scaled. integer division keeps it on the pixel grid.
    const auto position = sf::Vector2f{
-      std::round(center_map_px.x) - static_cast<float>(size.x) * 0.5f, std::round(center_map_px.y) - static_cast<float>(size.y) * 0.5f
+      std::round(center_map_px.x) - static_cast<float>(width / 2), std::round(center_map_px.y) - static_cast<float>(height / 2)
    };
 
    sfcompat::setPosition(*layer->_sprite, position);
