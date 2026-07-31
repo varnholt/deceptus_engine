@@ -23,3 +23,7 @@ build_*/*
 /lab/wasm_browser_test/.pytest_cache
 /lab/wasm_browser_test/diag_*.png
 /lab/wasm_browser_test/last_screenshot.png
+/lab/map_render/.venv
+/lab/map_render/__pycache__
+/lab/map_render/.pytest_cache
+/lab/map_render/out

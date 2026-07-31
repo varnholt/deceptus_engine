@@ -4,10 +4,13 @@
 #include "game/effects/lightsystem.h"
 #include "game/level/atmosphere.h"
 #include "game/level/gamemechanismregistry.h"
+#include "game/level/levelmap.h"
 
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <set>
+#include <string>
 #include <vector>
 
 class Room;
@@ -81,4 +84,8 @@ public:
    /// \brief gets all rooms parsed from the level.
    /// \return immutable reference to room list.
    virtual const std::vector<std::shared_ptr<Room>>& getRooms() const = 0;
+
+   /// \brief gets the pixel art overview generated from the level's collision mesh.
+   /// \return immutable reference to the level map.
+   virtual const LevelMap& getLevelMap() const = 0;
 };

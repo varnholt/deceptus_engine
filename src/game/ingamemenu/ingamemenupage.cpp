@@ -109,7 +109,10 @@ std::optional<float> InGameMenuPage::getMoveOffset() const
    // move out to right:    0 ..  width
 
    const auto now = std::chrono::high_resolution_clock::now();
-   const auto duration_since_move_start_s = now - _time_move;
+
+   // the clock's own duration counts nanoseconds, comparing that against a value in seconds would
+   // end the animation after the first tick
+   const FloatSeconds duration_since_move_start_s = now - _time_move;
    constexpr auto duration_move_s = 0.5f;
 
    if (duration_since_move_start_s.count() < duration_move_s)

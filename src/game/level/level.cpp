@@ -122,6 +122,10 @@ std::unordered_map<std::string, MechanismTiming> timing_data;
 namespace
 {
 
+//! key under which the visited rooms are stored inside the per-level save state; it lives next to
+//! the mechanism group keys, so it must not collide with any mechanism layer name
+constexpr auto visited_rooms_key = "__visited_rooms";
+
 bool checkUpdateMechanism(const auto& player_chunk, const auto& mechanism)
 {
    auto update_mechanism = true;
@@ -598,9 +602,20 @@ void Level::loadSaveState()
       return;
    }
 
+   const auto visited_rooms_it = level_json.find(visited_rooms_key);
+   if (visited_rooms_it != level_json.end() && visited_rooms_it->is_array())
+   {
+      Room::applyVisitedSubRoomKeys(visited_rooms_it->get<std::vector<std::string>>(), _rooms);
+   }
+
    const auto& mechanism_map = _mechanism_registry.getMap();
    for (auto& [mechanism_key, mechanism_values] : level_json.items())
    {
+      if (mechanism_key == visited_rooms_key)
+      {
+         continue;
+      }
+
       const auto& mechanism_it = mechanism_map.find(mechanism_key);
       if (mechanism_it == mechanism_map.end())
       {
@@ -649,6 +664,16 @@ void Level::saveState()
          mechanisms_json[key] = mechanism_json;
       }
    }
+
+   // remember which parts of the level have been seen, that is what the ingame map reveals
+   std::vector<std::string> visited_sub_room_keys;
+   for (const auto& room : _rooms)
+   {
+      const auto& keys = room->visitedSubRoomKeys();
+      visited_sub_room_keys.insert(visited_sub_room_keys.end(), keys.cbegin(), keys.cend());
+   }
+
+   mechanisms_json[visited_rooms_key] = visited_sub_room_keys;
 
    j[_description->_filename] = mechanisms_json;
 }
@@ -800,12 +825,19 @@ void Level::updateMechanismVolumes()
 
 void Level::updateRoom()
 {
-   RoomUpdater::setCurrent(Room::find(PlayerRegistry::getFirst()->getPixelPositionFloat(), _rooms));
+   const auto player_position_px = PlayerRegistry::getFirst()->getPixelPositionFloat();
+   const auto& room = Room::find(player_position_px, _rooms);
+   RoomUpdater::setCurrent(room);
+
+   if (room)
+   {
+      room->markVisited(player_position_px);
+   }
 }
 
 void Level::syncRoom()
 {
-   RoomUpdater::setCurrent(Room::find(PlayerRegistry::getFirst()->getPixelPositionFloat(), _rooms));
+   updateRoom();
    CameraRoomLock::setRoom(RoomUpdater::getCurrent());
 }
 
@@ -1415,6 +1447,11 @@ const std::vector<std::shared_ptr<Room>>& Level::getRooms() const
    return _rooms;
 }
 
+const LevelMap& Level::getLevelMap() const
+{
+   return _level_map;
+}
+
 const GameMechanismRegistry& Level::getMechanismRegistry() const
 {
    return _mechanism_registry;
@@ -1876,6 +1913,12 @@ void Level::parsePhysicsTiles(
    else
    {
       regenerateLevelPaths(layer, tileset, base_path, parse_data, path_solid_optimized);
+   }
+
+   // the ingame map is derived from the solid level outlines, the one-sided platforms are not part of it
+   if (layer->_name == "level")
+   {
+      _level_map.build(path_solid_optimized, layer->_width_tl, layer->_height_tl, PIXELS_PER_TILE);
    }
 
    ChainShapeAnalyzer::analyze(_world);
