@@ -301,6 +301,8 @@ set(GAME_FILES
     src/game/level/level.cpp
     src/game/level/level.h
     src/game/level/levelinterface.h
+    src/game/level/levelmap.cpp
+    src/game/level/levelmap.h
     src/game/level/levelregistry.cpp
     src/game/level/levelregistry.h
     src/game/level/leveldescription.cpp

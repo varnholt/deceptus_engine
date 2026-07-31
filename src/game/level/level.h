@@ -13,9 +13,11 @@
 #include "game/level/gamenode.h"
 #include "game/level/leveldescription.h"
 #include "game/level/levelinterface.h"
+#include "game/level/levelmap.h"
 #include "game/level/levelscript.h"
 #include "game/level/room.h"
 #include "game/level/tmxenemy.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "game/mechanisms/imagelayer.h"
 #include "game/mechanisms/portal.h"
 #include "game/physics/physics.h"
@@ -36,6 +38,7 @@
 // std
 #include <map>
 #include <memory>
+#include <set>
 #ifdef __EMSCRIPTEN__
 #include <optional>
 #endif
@@ -185,6 +188,18 @@ public:
    /// \return immutable reference to room list.
    const std::vector<std::shared_ptr<Room>>& getRooms() const override;
 
+   /// \brief returns the pixel art overview generated from the level's collision mesh.
+   /// \return immutable reference to the level map.
+   const LevelMap& getLevelMap() const override;
+
+   /// \brief returns whether the whole level map has been made visible.
+   /// \return true when unvisited areas should be shown as well.
+   bool isMapRevealed() const override;
+
+   /// \brief shows or hides the parts of the map the player has not visited yet.
+   /// \param revealed true to show the whole level map.
+   void setMapRevealed(bool revealed) override;
+
 protected:
    /// \brief loads or regenerates physics paths for a collision tile layer and adds chains to box2d.
    /// \param layer tmx tile layer that defines physics collision tiles.
@@ -254,6 +269,9 @@ protected:
 
    /// \brief refreshes the current room from the player's current position.
    void updateRoom();
+
+   /// \brief subscribes to the mechanism events that drive the ingame map.
+   void registerMapEvents();
 
    /// \brief draws mechanisms from all groups that pass predicate at a specific z layer.
    /// \param color color render target.
@@ -326,6 +344,13 @@ protected:
    void drawGlowSprite();
 
    std::vector<std::shared_ptr<Room>> _rooms;
+   LevelMap _level_map;
+   bool _map_revealed{false};  //!< whole level map visible, set by a map item and persisted in the save state
+
+   std::unique_ptr<
+      GameMechanismObserver::Reference<GameMechanismObserver::EventCallback>,
+      std::function<void(GameMechanismObserver::Reference<GameMechanismObserver::EventCallback>*)>>
+      _map_event_listener;
    LevelScript _level_script;
 
    const RenderTargets& _render_targets;

@@ -446,6 +446,48 @@ Console::Console()
       }
    );
 
+   // ingame map
+   _help.registerCommand(
+      "cheats", "map <reveal/clear>: reveal the whole ingame map, or reset it to completely unexplored", {"map reveal", "map clear"}
+   );
+
+   addCommand(
+      "map reveal",
+      [this](const auto&)
+      {
+         const auto& level = LevelRegistry::getCurrent();
+         if (!level)
+         {
+            _log.emplace_back("no level loaded");
+            return;
+         }
+
+         level->setMapRevealed(true);
+         _log.emplace_back("revealed the whole map");
+      }
+   );
+
+   addCommand(
+      "map clear",
+      [this](const auto&)
+      {
+         const auto& level = LevelRegistry::getCurrent();
+         if (!level)
+         {
+            _log.emplace_back("no level loaded");
+            return;
+         }
+
+         level->setMapRevealed(false);
+         for (const auto& room : level->getRooms())
+         {
+            room->clearVisited();
+         }
+
+         _log.emplace_back("cleared the map");
+      }
+   );
+
    // cheats
    registerCallback(
       "iddqd",

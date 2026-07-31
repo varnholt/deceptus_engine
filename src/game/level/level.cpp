@@ -122,6 +122,15 @@ std::unordered_map<std::string, MechanismTiming> timing_data;
 namespace
 {
 
+//! keys under which the ingame map state is stored inside the per-level save state; they live next
+//! to the mechanism group keys, so they must not collide with any mechanism layer name
+constexpr auto visited_rooms_key = "__visited_rooms";
+constexpr auto map_revealed_key = "__map_revealed";
+
+//! mechanism event that shows the whole ingame map. any mechanism can announce it, a map item
+//! does so through the 'pickup_event' property of its extra.
+constexpr auto map_reveal_event = "reveal_map";
+
 bool checkUpdateMechanism(const auto& player_chunk, const auto& mechanism)
 {
    auto update_mechanism = true;
@@ -558,7 +567,28 @@ void Level::initialize()
 
    loadLevelScript();
 
+   // must come after loadLevelScript, setting up the level script clears all mechanism listeners
+   registerMapEvents();
+
    // dump();
+}
+
+void Level::registerMapEvents()
+{
+   _map_event_listener = GameMechanismObserver::addListener<GameMechanismObserver::EventCallback>(
+      [this](
+         const std::string& /*object_id*/,
+         const std::string& /*group_id*/,
+         const std::string& event_name,
+         const GameMechanismObserver::LuaVariant& /*value*/
+      )
+      {
+         if (event_name == map_reveal_event)
+         {
+            setMapRevealed(true);
+         }
+      }
+   );
 }
 
 void Level::loadSaveState()
@@ -598,9 +628,26 @@ void Level::loadSaveState()
       return;
    }
 
+   const auto visited_rooms_it = level_json.find(visited_rooms_key);
+   if (visited_rooms_it != level_json.end() && visited_rooms_it->is_array())
+   {
+      Room::applyVisitedSubRoomKeys(visited_rooms_it->get<std::vector<std::string>>(), _rooms);
+   }
+
+   const auto map_revealed_it = level_json.find(map_revealed_key);
+   if (map_revealed_it != level_json.end() && map_revealed_it->is_boolean())
+   {
+      _map_revealed = map_revealed_it->get<bool>();
+   }
+
    const auto& mechanism_map = _mechanism_registry.getMap();
    for (auto& [mechanism_key, mechanism_values] : level_json.items())
    {
+      if (mechanism_key == visited_rooms_key || mechanism_key == map_revealed_key)
+      {
+         continue;
+      }
+
       const auto& mechanism_it = mechanism_map.find(mechanism_key);
       if (mechanism_it == mechanism_map.end())
       {
@@ -649,6 +696,17 @@ void Level::saveState()
          mechanisms_json[key] = mechanism_json;
       }
    }
+
+   // remember which parts of the level have been seen, that is what the ingame map reveals
+   std::vector<std::string> visited_sub_room_keys;
+   for (const auto& room : _rooms)
+   {
+      const auto& keys = room->visitedSubRoomKeys();
+      visited_sub_room_keys.insert(visited_sub_room_keys.end(), keys.cbegin(), keys.cend());
+   }
+
+   mechanisms_json[visited_rooms_key] = visited_sub_room_keys;
+   mechanisms_json[map_revealed_key] = _map_revealed;
 
    j[_description->_filename] = mechanisms_json;
 }
@@ -800,12 +858,19 @@ void Level::updateMechanismVolumes()
 
 void Level::updateRoom()
 {
-   RoomUpdater::setCurrent(Room::find(PlayerRegistry::getFirst()->getPixelPositionFloat(), _rooms));
+   const auto player_position_px = PlayerRegistry::getFirst()->getPixelPositionFloat();
+   const auto& room = Room::find(player_position_px, _rooms);
+   RoomUpdater::setCurrent(room);
+
+   if (room)
+   {
+      room->markVisited(player_position_px);
+   }
 }
 
 void Level::syncRoom()
 {
-   RoomUpdater::setCurrent(Room::find(PlayerRegistry::getFirst()->getPixelPositionFloat(), _rooms));
+   updateRoom();
    CameraRoomLock::setRoom(RoomUpdater::getCurrent());
 }
 
@@ -1415,6 +1480,21 @@ const std::vector<std::shared_ptr<Room>>& Level::getRooms() const
    return _rooms;
 }
 
+const LevelMap& Level::getLevelMap() const
+{
+   return _level_map;
+}
+
+bool Level::isMapRevealed() const
+{
+   return _map_revealed;
+}
+
+void Level::setMapRevealed(bool revealed)
+{
+   _map_revealed = revealed;
+}
+
 const GameMechanismRegistry& Level::getMechanismRegistry() const
 {
    return _mechanism_registry;
@@ -1876,6 +1956,12 @@ void Level::parsePhysicsTiles(
    else
    {
       regenerateLevelPaths(layer, tileset, base_path, parse_data, path_solid_optimized);
+   }
+
+   // the ingame map is derived from the solid level outlines, the one-sided platforms are not part of it
+   if (layer->_name == "level")
+   {
+      _level_map.build(path_solid_optimized, layer->_width_tl, layer->_height_tl, PIXELS_PER_TILE);
    }
 
    ChainShapeAnalyzer::analyze(_world);

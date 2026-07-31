@@ -1,6 +1,7 @@
 #include "room.h"
 
 #include <algorithm>
+#include <format>
 #include <iostream>
 #include <sstream>
 
@@ -510,6 +511,66 @@ std::optional<Room::RoomEnterArea> Room::SubRoom::findEnteredArea(const sf::Vect
    }
 
    return std::nullopt;
+}
+
+void Room::markVisited(const sf::Vector2f& player_pos_px)
+{
+   const auto it = std::find_if(
+      _sub_rooms.begin(), _sub_rooms.end(), [player_pos_px](const auto& sub_room) { return sub_room._rect.contains(player_pos_px); }
+   );
+
+   if (it != _sub_rooms.end())
+   {
+      it->_visited = true;
+   }
+}
+
+void Room::clearVisited()
+{
+   for (auto& sub_room : _sub_rooms)
+   {
+      sub_room._visited = false;
+   }
+}
+
+std::vector<std::string> Room::visitedSubRoomKeys() const
+{
+   std::vector<std::string> keys;
+
+   for (auto index = 0u; index < _sub_rooms.size(); index++)
+   {
+      if (_sub_rooms[index]._visited)
+      {
+         keys.push_back(std::format("{}/{}", getObjectId(), index));
+      }
+   }
+
+   return keys;
+}
+
+void Room::applyVisitedSubRoomKeys(const std::vector<std::string>& keys, const std::vector<std::shared_ptr<Room>>& rooms)
+{
+   for (const auto& key : keys)
+   {
+      const auto separator = key.rfind('/');
+      if (separator == std::string::npos)
+      {
+         continue;
+      }
+
+      const auto room_object_id = key.substr(0, separator);
+      const auto sub_room_index = static_cast<size_t>(std::atoi(key.substr(separator + 1).c_str()));
+
+      const auto room_it =
+         std::find_if(rooms.begin(), rooms.end(), [&room_object_id](const auto& room) { return room->getObjectId() == room_object_id; });
+
+      if (room_it == rooms.end() || sub_room_index >= (*room_it)->_sub_rooms.size())
+      {
+         continue;
+      }
+
+      (*room_it)->_sub_rooms[sub_room_index]._visited = true;
+   }
 }
 
 std::optional<Room::SubRoom> Room::activeSubRoom(const sf::Vector2f& player_pos_px) const
