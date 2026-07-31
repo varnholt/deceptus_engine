@@ -8,7 +8,9 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
+#include <array>
 #include <filesystem>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -57,13 +59,6 @@ public:
    void setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals);
 
 private:
-   /// \brief one icon type that can be placed on the map.
-   struct MarkerStyle
-   {
-      const char* const* _rows = nullptr;  //!< 7 rows of 7 characters, '.' is transparent
-      sf::Color _color;
-   };
-
    /// \brief composes the explored level map and blits it into the map page viewport.
    /// \param window render target that receives the composed map.
    /// \param states render states used for drawing.
@@ -77,15 +72,24 @@ private:
    /// \brief draws mechanism markers and the player position on top of the revealed map.
    /// \param level_map map texture and coordinate helpers of the active level.
    /// \param map_states render states carrying the map view; on wasm the view travels in here.
-   void drawMarkers(const LevelMap& level_map, const sf::RenderStates& map_states);
+   void drawMarkers(const LevelMap& level_map, const sf::RenderStates& marker_states, const sf::Vector2f& view_top_left_map_px);
 
-   /// \brief draws one 7x7 icon centered on a map position, one icon pixel per map pixel.
+   /// \brief picks the marker layers out of the psd and hides them from the page layer stack.
+   void collectMarkerLayers();
+
+   /// \brief stamps one marker icon centered on a map position, one icon pixel per map pixel.
    /// \param target render target receiving the icon.
-   /// \param style icon pixel pattern and color.
+   /// \param marker_index cell index inside the marker spriteset.
+   /// \param detail_level zoom step whose icon variant should be used.
    /// \param center_map_px icon center in map pixels.
    /// \param map_states render states carrying the map view; on wasm the view travels in here.
-   void
-   drawMarker(sf::RenderTarget& target, const MarkerStyle& style, const sf::Vector2f& center_map_px, const sf::RenderStates& map_states);
+   void drawMarker(
+      sf::RenderTarget& target,
+      int32_t marker_index,
+      size_t detail_level,
+      const sf::Vector2f& center_viewport_px,
+      const sf::RenderStates& marker_states
+   );
 
    /// \brief recreates the map render texture when the available page area changed.
    /// \param size_px required render texture size in screen pixels.
@@ -116,6 +120,8 @@ private:
 
    /// \brief animates horizontal submenu slide transitions for map panel groups.
    void updateMove();
+
+   std::array<std::shared_ptr<Layer>, 4> _marker_strips;  //!< one marker spriteset per zoom step
 
    BitmapFont _font;
 

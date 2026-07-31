@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <format>
 #include <numbers>
 
 namespace
@@ -49,49 +50,14 @@ constexpr auto unvisited_tint = sf::Color{150, 128, 116};
 
 constexpr auto blink_interval_s = 1.0f;
 
-// clang-format off
-constexpr const char* icon_checkpoint[] = {
-   "..xxx..",
-   ".x...x.",
-   "x..xx.x",
-   "x.x.x.x",
-   "x.xx..x",
-   ".x...x.",
-   "..xxx..",
-};
+//! cell order inside the marker spriteset layers
+constexpr auto marker_index_player = 0;
+constexpr auto marker_index_checkpoint = 1;
+constexpr auto marker_index_portal = 2;
+constexpr auto marker_index_door = 3;
 
-constexpr const char* icon_portal[] = {
-   "..xxx..",
-   ".x...x.",
-   "x..x..x",
-   "x.xxx.x",
-   "x..x..x",
-   ".x...x.",
-   "..xxx..",
-};
-
-constexpr const char* icon_door[] = {
-   ".......",
-   "..xxx..",
-   "..x.x..",
-   "..x.x..",
-   "..x.x..",
-   "..xxx..",
-   ".......",
-};
-
-constexpr const char* icon_player[] = {
-   "...x...",
-   "..xxx..",
-   ".xxxxx.",
-   "xxxxxxx",
-   ".xxxxx.",
-   "..xxx..",
-   "...x...",
-};
-// clang-format on
-
-constexpr auto icon_size = 7;
+//! one marker icon per zoom step, matching the zoom_level_* layers
+constexpr auto marker_detail_level_count = 4u;
 
 }  // namespace
 
@@ -162,6 +128,8 @@ IngameMenuMap::IngameMenuMap()
    _panel_background = {
       _layers["bg"],
    };
+
+   collectMarkerLayers();
 
    MenuConfig config;
    _duration_hide = config._duration_hide;
@@ -260,47 +228,86 @@ void IngameMenuMap::drawExploredRooms(const LevelMap& level_map, const sf::Rende
    _level_render_texture->draw(quads, states);
 }
 
-void IngameMenuMap::drawMarker(
-   sf::RenderTarget& target,
-   const MarkerStyle& style,
-   const sf::Vector2f& center_map_px,
-   const sf::RenderStates& map_states
-)
+void IngameMenuMap::collectMarkerLayers()
 {
-   sf::VertexArray quads(sf::PrimitiveType::Triangles);
-
-   // snapped to whole map pixels so the icon stays crisp
-   const auto origin_x = std::round(center_map_px.x) - icon_size * 0.5f;
-   const auto origin_y = std::round(center_map_px.y) - icon_size * 0.5f;
-
-   for (auto row = 0; row < icon_size; row++)
+   // the marker art lives in the map psd so it can be edited without touching code: one spriteset
+   // layer per zoom step, holding a square cell per marker kind. the layers are parked inside the
+   // canvas for the artist's convenience, so they are taken out of the page layer stack here and
+   // stamped at the marker positions instead.
+   for (auto detail_level = 0u; detail_level < marker_detail_level_count; detail_level++)
    {
-      for (auto column = 0; column < icon_size; column++)
+      const auto layer_name = std::format("markers_{}", detail_level + 1);
+      const auto& layer_it = _layers.find(layer_name);
+
+      if (layer_it == _layers.end() || !layer_it->second)
       {
-         if (style._rows[row][column] == '.')
-         {
-            continue;
-         }
-
-         const auto left = origin_x + static_cast<float>(column);
-         const auto top = origin_y + static_cast<float>(row);
-         const auto right = left + 1.0f;
-         const auto bottom = top + 1.0f;
-
-         quads.append(sf::Vertex{sf::Vector2f{left, top}, style._color});
-         quads.append(sf::Vertex{sf::Vector2f{right, top}, style._color});
-         quads.append(sf::Vertex{sf::Vector2f{right, bottom}, style._color});
-
-         quads.append(sf::Vertex{sf::Vector2f{left, top}, style._color});
-         quads.append(sf::Vertex{sf::Vector2f{right, bottom}, style._color});
-         quads.append(sf::Vertex{sf::Vector2f{left, bottom}, style._color});
+         Log::Warning() << "map is missing marker spriteset '" << layer_name << "'";
+         continue;
       }
-   }
 
-   target.draw(quads, map_states);
+      layer_it->second->_visible = false;
+      _marker_strips[detail_level] = layer_it->second;
+
+      std::erase(_layer_stack, layer_it->second);
+   }
 }
 
-void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderStates& map_states)
+void IngameMenuMap::drawMarker(
+   sf::RenderTarget& target,
+   int32_t marker_index,
+   size_t detail_level,
+   const sf::Vector2f& center_viewport_px,
+   const sf::RenderStates& marker_states
+)
+{
+   // fall back to the most detailed spriteset when the artist has not drawn one for this zoom step
+   auto layer = (detail_level < _marker_strips.size()) ? _marker_strips[detail_level] : nullptr;
+   if (!layer)
+   {
+      layer = _marker_strips[0];
+   }
+
+   if (!layer || !layer->_sprite)
+   {
+      return;
+   }
+
+   // the cells are square, so the strip height is the cell size and the code never has to know
+   // how big the artist drew them. the size comes from the texture rather than from the sprite's
+   // texture rect, because this function overwrites that rect to select a cell.
+   if (!layer->_texture)
+   {
+      return;
+   }
+
+   const auto strip_size = layer->_texture->getSize();
+   const auto cell_size = static_cast<int32_t>(strip_size.y);
+   if (cell_size <= 0 || static_cast<uint32_t>((marker_index + 1) * cell_size) > strip_size.x)
+   {
+      return;
+   }
+
+#ifdef __EMSCRIPTEN__
+   sfcompat::setTextureRect(
+      *layer->_sprite,
+      sf::FloatRect{{static_cast<float>(marker_index * cell_size), 0.0f}, {static_cast<float>(cell_size), static_cast<float>(cell_size)}}
+   );
+#else
+   sfcompat::setTextureRect(*layer->_sprite, sf::IntRect{{marker_index * cell_size, 0}, {cell_size, cell_size}});
+#endif
+
+   // the icons are odd sized, so half of their size is not a whole pixel. integer division keeps
+   // the sprite on the pixel grid, a float halving would park it between two pixels.
+   const auto position = sf::Vector2f{
+      std::round(center_viewport_px.x) - static_cast<float>(cell_size / 2),
+      std::round(center_viewport_px.y) - static_cast<float>(cell_size / 2)
+   };
+
+   sfcompat::setPosition(*layer->_sprite, position);
+   layer->draw(target, marker_states);
+}
+
+void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderStates& marker_states, const sf::Vector2f& view_top_left_map_px)
 {
    const auto level = LevelRegistry::getCurrent();
    const auto& rooms = level->getRooms();
@@ -327,8 +334,8 @@ void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderState
    // step and the icons keep their size on screen without any correction
    const auto detail_level = static_cast<size_t>(_zoom_level);
 
-   const auto draw_mechanisms = [this, &level_map, &is_discovered, detail_level, &map_states](
-                                   const std::vector<std::shared_ptr<GameMechanism>>& mechanisms, const MarkerStyle& style
+   const auto draw_mechanisms = [this, &level_map, &is_discovered, detail_level, &marker_states, &view_top_left_map_px](
+                                   const std::vector<std::shared_ptr<GameMechanism>>& mechanisms, int32_t marker_index
                                 )
    {
       for (const auto& mechanism : mechanisms)
@@ -345,21 +352,31 @@ void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderState
          }
 
          const auto center_px = bounding_box_px->position + bounding_box_px->size * 0.5f;
-         drawMarker(*_level_render_texture, style, level_map.toMap(center_px, detail_level), map_states);
+         drawMarker(
+            *_level_render_texture,
+            marker_index,
+            detail_level,
+            level_map.toMap(center_px, detail_level) - view_top_left_map_px,
+            marker_states
+         );
       }
    };
 
    const auto& mechanism_registry = level->getMechanismRegistry();
-   draw_mechanisms(mechanism_registry.getPortals(), MarkerStyle{icon_portal, sf::Color{86, 200, 255}});
-   draw_mechanisms(mechanism_registry.getCheckpoints(), MarkerStyle{icon_checkpoint, sf::Color{86, 240, 128}});
-   draw_mechanisms(mechanism_registry.getDoors(), MarkerStyle{icon_door, sf::Color{255, 214, 92}});
+   draw_mechanisms(mechanism_registry.getPortals(), marker_index_portal);
+   draw_mechanisms(mechanism_registry.getCheckpoints(), marker_index_checkpoint);
+   draw_mechanisms(mechanism_registry.getDoors(), marker_index_door);
 
    // the player marker blinks so it stays visible against the map fill
    if (std::fmod(_blink_time_s, blink_interval_s) < blink_interval_s * 0.7f)
    {
       const auto player_position_px = PlayerRegistry::getFirst()->getPixelPositionFloat();
       drawMarker(
-         *_level_render_texture, MarkerStyle{icon_player, sf::Color::White}, level_map.toMap(player_position_px, detail_level), map_states
+         *_level_render_texture,
+         marker_index_player,
+         detail_level,
+         level_map.toMap(player_position_px, detail_level) - view_top_left_map_px,
+         marker_states
       );
    }
 }
@@ -440,7 +457,20 @@ void IngameMenuMap::drawLevel(sf::RenderTarget& window, sf::RenderStates states)
 #endif
 
    drawExploredRooms(level_map, map_states);
-   drawMarkers(level_map, map_states);
+
+   // markers are screen space ui, so they are drawn in the render texture's own pixel space rather
+   // than through the panning map view. that way their alignment cannot depend on where the map
+   // view happens to sit, and an icon can never land between two pixels.
+   const auto view_top_left_map_px = center_map_px - view_size * 0.5f;
+
+   sf::RenderStates marker_states;
+#ifdef __EMSCRIPTEN__
+   marker_states.view = sf::View{.center = view_size * 0.5f, .size = view_size};
+#else
+   _level_render_texture->setView(_level_render_texture->getDefaultView());
+#endif
+
+   drawMarkers(level_map, marker_states, view_top_left_map_px);
 
    _level_render_texture->display();
 
