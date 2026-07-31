@@ -127,6 +127,10 @@ namespace
 constexpr auto visited_rooms_key = "__visited_rooms";
 constexpr auto map_revealed_key = "__map_revealed";
 
+//! mechanism event that shows the whole ingame map. any mechanism can announce it, a map item
+//! does so through the 'pickup_event' property of its extra.
+constexpr auto map_reveal_event = "reveal_map";
+
 bool checkUpdateMechanism(const auto& player_chunk, const auto& mechanism)
 {
    auto update_mechanism = true;
@@ -563,7 +567,28 @@ void Level::initialize()
 
    loadLevelScript();
 
+   // must come after loadLevelScript, setting up the level script clears all mechanism listeners
+   registerMapEvents();
+
    // dump();
+}
+
+void Level::registerMapEvents()
+{
+   _map_event_listener = GameMechanismObserver::addListener<GameMechanismObserver::EventCallback>(
+      [this](
+         const std::string& /*object_id*/,
+         const std::string& /*group_id*/,
+         const std::string& event_name,
+         const GameMechanismObserver::LuaVariant& /*value*/
+      )
+      {
+         if (event_name == map_reveal_event)
+         {
+            setMapRevealed(true);
+         }
+      }
+   );
 }
 
 void Level::loadSaveState()

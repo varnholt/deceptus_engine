@@ -8,8 +8,8 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
-#include "game/level/levelregistry.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "game/player/playerregistry.h"
 
 #include <array>
@@ -149,7 +149,7 @@ bool Extra::deserialize(const GameDeserializeData& data)
       }
 
       _is_treasure = ValueReader::readValue<bool>("is_treasure", map).value_or(false);
-      _reveals_map = ValueReader::readValue<bool>("reveals_map", map).value_or(false);
+      _pickup_event = ValueReader::readValue<std::string>("pickup_event", map).value_or("");
 
       _sine_amplitude_px = ValueReader::readValue<float>("sine_amplitude_px", map).value_or(0.0f);
       _sine_frequency = ValueReader::readValue<float>("sine_frequency", map).value_or(0.0f);
@@ -378,13 +378,11 @@ void Extra::update(const sf::Time& delta_time)
          SaveState::getPlayerInfo()._inventory.add(_name);
       }
 
-      if (_reveals_map)
+      // an extra can announce a named event on pickup, whoever implements that feature listens
+      // for it. that keeps the collectible itself free of any knowledge about what it unlocks.
+      if (!_pickup_event.empty())
       {
-         const auto& level = LevelRegistry::getCurrent();
-         if (level)
-         {
-            level->setMapRevealed(true);
-         }
+         GameMechanismObserver::onEvent(getObjectId(), "extras", _pickup_event, true);
       }
    }
 }

@@ -17,6 +17,7 @@
 #include "game/level/levelscript.h"
 #include "game/level/room.h"
 #include "game/level/tmxenemy.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "game/mechanisms/imagelayer.h"
 #include "game/mechanisms/portal.h"
 #include "game/physics/physics.h"
@@ -269,6 +270,9 @@ protected:
    /// \brief refreshes the current room from the player's current position.
    void updateRoom();
 
+   /// \brief subscribes to the mechanism events that drive the ingame map.
+   void registerMapEvents();
+
    /// \brief draws mechanisms from all groups that pass predicate at a specific z layer.
    /// \param color color render target.
    /// \param normal normal-map render target.
@@ -342,6 +346,11 @@ protected:
    std::vector<std::shared_ptr<Room>> _rooms;
    LevelMap _level_map;
    bool _map_revealed{false};  //!< whole level map visible, set by a map item and persisted in the save state
+
+   std::unique_ptr<
+      GameMechanismObserver::Reference<GameMechanismObserver::EventCallback>,
+      std::function<void(GameMechanismObserver::Reference<GameMechanismObserver::EventCallback>*)>>
+      _map_event_listener;
    LevelScript _level_script;
 
    const RenderTargets& _render_targets;
