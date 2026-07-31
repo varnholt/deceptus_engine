@@ -1,6 +1,7 @@
 #include "ingamemenumap.h"
 
 #include "framework/easings/easings.h"
+#include "framework/joystick/gamecontroller.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/camera/camerapanorama.h"
@@ -31,8 +32,15 @@ constexpr auto map_viewport_y_px = 42.0f;
 constexpr auto map_viewport_width_px = 620.0f;
 constexpr auto map_viewport_height_px = 290.0f;
 
-//! how far one navigate key press moves the map view, in menu pixels
-constexpr auto pan_step_px = 40.0f;
+//! top panning speed in menu pixels per second, reached while a direction is held down
+constexpr auto pan_max_speed_px_per_s = 360.0f;
+
+//! time it takes to ease from standstill to the top speed and back again
+constexpr auto pan_acceleration_s = 0.35f;
+constexpr auto pan_deceleration_s = 0.2f;
+
+//! analog stick deflection below this is treated as no input at all
+constexpr auto pan_dead_zone = 0.2f;
 
 //! multiplied onto the map texture for rooms that a map item revealed but the player has not
 //! entered yet. it dims and warms the blue palette, so revealed and visited read as clearly
@@ -470,12 +478,19 @@ void IngameMenuMap::update(const sf::Time& dt)
    {
       updateMove();
    }
+   else
+   {
+      // only pan while the page sits still, a page sliding out must not drift away as well
+      updatePan(dt);
+   }
 }
 
 void IngameMenuMap::show()
 {
    // open the map centered on the player instead of wherever it was left last time
    _pan_world_px = {};
+   _pan_direction = {};
+   _pan_ramp = 0.0f;
    InGameMenuPage::show();
 }
 
@@ -510,7 +525,88 @@ void IngameMenuMap::zoom(int32_t direction)
    updateButtons();
 }
 
-void IngameMenuMap::pan(const sf::Vector2f& direction)
+sf::Vector2f IngameMenuMap::readPanInput() const
+{
+   // the returned vector points into the pan direction, its length is the requested fraction of
+   // the top speed. digital input always asks for the full speed, the analog stick scales it.
+   sf::Vector2f input;
+
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+   {
+      input.x -= 1.0f;
+   }
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+   {
+      input.x += 1.0f;
+   }
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
+   {
+      input.y -= 1.0f;
+   }
+   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+   {
+      input.y += 1.0f;
+   }
+
+   const auto& controller_integration = GameControllerIntegration::getInstance();
+   if (controller_integration.isControllerConnected())
+   {
+      const auto& controller = controller_integration.getController();
+      const auto& joystick_info = controller->getInfo();
+      const auto& axis_values = joystick_info.getAxisValues();
+
+      const auto axis_left_x = controller->getAxisIndex(SDL_GAMEPAD_AXIS_LEFTX);
+      const auto axis_left_y = controller->getAxisIndex(SDL_GAMEPAD_AXIS_LEFTY);
+
+      if (axis_left_x >= 0 && axis_left_y >= 0 && static_cast<size_t>(axis_left_x) < axis_values.size() &&
+          static_cast<size_t>(axis_left_y) < axis_values.size())
+      {
+         const auto stick = sf::Vector2f{axis_values[axis_left_x] / 32767.0f, axis_values[axis_left_y] / 32767.0f};
+         const auto deflection = std::hypot(stick.x, stick.y);
+
+         if (deflection > pan_dead_zone)
+         {
+            // rescale so the speed starts at zero right outside the dead zone instead of jumping
+            const auto scaled = std::min(1.0f, (deflection - pan_dead_zone) / (1.0f - pan_dead_zone));
+            input += (stick / deflection) * scaled;
+         }
+      }
+
+      // the dpad is digital, so it asks for the full speed just like the keyboard does
+      const auto& hat_values = joystick_info.getHatValues();
+      if (!hat_values.empty())
+      {
+         const auto hat = hat_values.at(0);
+         if (static_cast<bool>(hat & SDL_HAT_LEFT))
+         {
+            input.x -= 1.0f;
+         }
+         if (static_cast<bool>(hat & SDL_HAT_RIGHT))
+         {
+            input.x += 1.0f;
+         }
+         if (static_cast<bool>(hat & SDL_HAT_UP))
+         {
+            input.y -= 1.0f;
+         }
+         if (static_cast<bool>(hat & SDL_HAT_DOWN))
+         {
+            input.y += 1.0f;
+         }
+      }
+   }
+
+   const auto length = std::hypot(input.x, input.y);
+   if (length <= 0.0f)
+   {
+      return {};
+   }
+
+   // diagonals must not be faster than the straight directions
+   return (input / length) * std::min(1.0f, length);
+}
+
+void IngameMenuMap::updatePan(const sf::Time& dt)
 {
    const auto level = LevelRegistry::getCurrent();
    if (!level)
@@ -524,14 +620,45 @@ void IngameMenuMap::pan(const sf::Vector2f& direction)
       return;
    }
 
-   // the pan offset is kept in world pixels so it survives a change of the detail level. one key
-   // press always moves the view by the same amount on screen.
+   const auto input = readPanInput();
+   const auto requested_speed = std::hypot(input.x, input.y);
+   const auto elapsed_s = dt.asSeconds();
+
+   // hold a direction and the view eases up to the top speed, let go and it eases back to a stop.
+   // the ramp is a separate value from the direction so releasing keeps gliding the last way.
+   if (requested_speed > 0.0f)
+   {
+      _pan_direction = input / requested_speed;
+      _pan_ramp = std::min(1.0f, _pan_ramp + elapsed_s / pan_acceleration_s);
+   }
+   else
+   {
+      _pan_ramp = std::max(0.0f, _pan_ramp - elapsed_s / pan_deceleration_s);
+   }
+
+   if (_pan_ramp <= 0.0f)
+   {
+      return;
+   }
+
+   // the analog stick scales the top speed, digital input always requests all of it
+   const auto scale = (requested_speed > 0.0f) ? requested_speed : 1.0f;
+   const auto speed_px_per_s = pan_max_speed_px_per_s * Easings::easeInOutCubic(_pan_ramp) * scale;
+
+   // the offset is kept in world pixels so it survives a change of the detail level
    const auto detail_level = static_cast<size_t>(_zoom_level);
    const auto world_px_per_map_px = level_map.getWorldPixelsPerMapPixel(detail_level);
-   _pan_world_px += direction * pan_step_px * world_px_per_map_px;
+   _pan_world_px += _pan_direction * speed_px_per_s * world_px_per_map_px * elapsed_s;
 
+   clampPan(level_map);
+}
+
+void IngameMenuMap::clampPan(const LevelMap& level_map)
+{
    // clamp the whole view rectangle to the level, not just its center, so panning always keeps
    // level content on screen. axes on which the level is smaller than the view stay centered.
+   const auto detail_level = static_cast<size_t>(_zoom_level);
+   const auto world_px_per_map_px = level_map.getWorldPixelsPerMapPixel(detail_level);
    const auto player_position_px = PlayerRegistry::getFirst()->getPixelPositionFloat();
    const auto map_size = level_map.getSize(detail_level);
    const auto level_size_px = sf::Vector2f{static_cast<float>(map_size.x), static_cast<float>(map_size.y)} * world_px_per_map_px;
@@ -546,28 +673,21 @@ void IngameMenuMap::pan(const sf::Vector2f& direction)
       return std::clamp(pan, view_size * 0.5f - player_position, level_size - view_size * 0.5f - player_position);
    };
 
-   _pan_world_px.x = clamp_axis(_pan_world_px.x, player_position_px.x, level_size_px.x, view_size_px.x);
-   _pan_world_px.y = clamp_axis(_pan_world_px.y, player_position_px.y, level_size_px.y, view_size_px.y);
-}
+   const auto clamped_x = clamp_axis(_pan_world_px.x, player_position_px.x, level_size_px.x, view_size_px.x);
+   const auto clamped_y = clamp_axis(_pan_world_px.y, player_position_px.y, level_size_px.y, view_size_px.y);
 
-void IngameMenuMap::left()
-{
-   pan({-1.0f, 0.0f});
-}
+   // running into the level border stops the movement on that axis instead of grinding along it
+   if (clamped_x != _pan_world_px.x)
+   {
+      _pan_world_px.x = clamped_x;
+      _pan_direction.x = 0.0f;
+   }
 
-void IngameMenuMap::right()
-{
-   pan({1.0f, 0.0f});
-}
-
-void IngameMenuMap::up()
-{
-   pan({0.0f, -1.0f});
-}
-
-void IngameMenuMap::down()
-{
-   pan({0.0f, 1.0f});
+   if (clamped_y != _pan_world_px.y)
+   {
+      _pan_world_px.y = clamped_y;
+      _pan_direction.y = 0.0f;
+   }
 }
 
 void IngameMenuMap::updateMove()

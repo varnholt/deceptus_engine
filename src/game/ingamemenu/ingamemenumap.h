@@ -48,18 +48,6 @@ public:
    /// \param key pressed keyboard key to interpret.
    void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
-   /// \brief pans the map view to the left.
-   void left() override;
-
-   /// \brief pans the map view to the right.
-   void right() override;
-
-   /// \brief pans the map view up.
-   void up() override;
-
-   /// \brief pans the map view down.
-   void down() override;
-
    /// \brief stores door mechanisms that are rendered as map markers.
    /// \param doors door mechanism list for map overlay rendering.
    void setDoors(const std::vector<std::shared_ptr<GameMechanism>>& doors);
@@ -103,9 +91,18 @@ private:
    /// \param size_px required render texture size in screen pixels.
    void updateRenderTexture(const sf::Vector2u& size_px);
 
-   /// \brief moves the map view away from the player position and clamps it to the level bounds.
-   /// \param direction pan direction, each component in range -1..1.
-   void pan(const sf::Vector2f& direction);
+   /// \brief collects the current pan request from keyboard, dpad and analog stick.
+   /// \return vector pointing into the pan direction, its length is the requested fraction of the
+   ///         top speed; a zero vector means no input.
+   sf::Vector2f readPanInput() const;
+
+   /// \brief eases the map view towards the requested pan speed and moves it.
+   /// \param dt elapsed frame time.
+   void updatePan(const sf::Time& dt);
+
+   /// \brief keeps the map view rectangle inside the level bounds.
+   /// \param level_map level map providing the level dimensions.
+   void clampPan(const LevelMap& level_map);
 
    /// \brief selects the neighbouring detail level of the level map.
    /// \param direction -1 zooms in, 1 zooms out.
@@ -142,8 +139,10 @@ private:
    FloatSeconds _duration_show;
    FloatSeconds _duration_hide;
 
-   int32_t _zoom_level = 1;     //!< selected level map detail level, mirrored by the zoom_level_* layers
-   sf::Vector2f _pan_world_px;  //!< offset of the map view relative to the player position, in world pixels
+   int32_t _zoom_level = 1;      //!< selected level map detail level, mirrored by the zoom_level_* layers
+   sf::Vector2f _pan_world_px;   //!< offset of the map view relative to the player position, in world pixels
+   sf::Vector2f _pan_direction;  //!< direction the view is currently gliding into
+   float _pan_ramp = 0.0f;       //!< 0..1 acceleration state, eased into the actual pan speed
    float _blink_time_s = 0.0f;
    float _alpha = 1.0f;           //!< page fade factor, applied to the map so it fades in and out with the rest
    float _move_offset_px = 0.0f;  //!< horizontal submenu slide offset, applied to the map as well

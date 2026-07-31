@@ -136,6 +136,16 @@ def send_key(_stale_handle: int, virtual_key: int, hold_s: float = 0.12, settle_
     time.sleep(settle_s)
 
 
+def hold_key(_stale_handle: int, virtual_key: int, down: bool) -> None:
+    """Presses or releases a key without waiting, for testing held-down behaviour."""
+    if not focus_window():
+        return
+
+    scan_code = ctypes.windll.user32.MapVirtualKeyW(virtual_key, 0)
+    flags = 0 if down else win32con.KEYEVENTF_KEYUP
+    win32api.keybd_event(virtual_key, scan_code, flags, 0)
+
+
 def send_text(_stale_handle: int, text: str) -> None:
     handle = focus_window()
     if not handle:
@@ -350,14 +360,33 @@ def run() -> int:
         time.sleep(0.8)
         grab_window(handle, OUTPUT_DIRECTORY / f"24_map_zoom_{index}.png")
 
-    # pan the view with the navigate keys
-    for _ in range(6):
-        send_key(handle, VK_LEFT)
-    grab_window(handle, OUTPUT_DIRECTORY / "25_map_panned_left.png")
+    # zoom back in, at the coarsest level the whole level fits the viewport and panning is
+    # correctly clamped to centered, which would make the pan measurement below meaningless
+    for _ in range(3):
+        send_key(handle, VK_A)
+    time.sleep(0.8)
 
-    for _ in range(6):
-        send_key(handle, VK_DOWN)
-    grab_window(handle, OUTPUT_DIRECTORY / "26_map_panned_down.png")
+    # hold left and sample the view while it accelerates, then keep sampling after release so the
+    # deceleration shows up as well
+    hold_key(handle, VK_LEFT, True)
+    frames = []
+    start = time.perf_counter()
+    released = False
+    while time.perf_counter() - start < 1.6:
+        elapsed = time.perf_counter() - start
+        if not released and elapsed > 0.9:
+            hold_key(handle, VK_LEFT, False)
+            released = True
+        frames.append((elapsed, capture()))
+    if not released:
+        hold_key(handle, VK_LEFT, False)
+
+    for index, (elapsed, frame) in enumerate(frames):
+        if frame is not None:
+            frame.save(OUTPUT_DIRECTORY / f"25_pan_{index:02d}.png")
+    print(f"captured {len(frames)} pan frames over {frames[-1][0]:.2f}s")
+
+    grab_window(handle, OUTPUT_DIRECTORY / "26_map_panned.png")
 
     # close the menu, reveal the whole map from the console, then touch the checkpoint that was
     # kept back so the save state is written while the map is revealed
