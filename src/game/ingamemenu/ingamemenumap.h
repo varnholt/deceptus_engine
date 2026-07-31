@@ -83,17 +83,21 @@ private:
 
    /// \brief draws the explored parts of the level map into the map render texture.
    /// \param level_map map texture and coordinate helpers of the active level.
-   void drawExploredRooms(const LevelMap& level_map);
+   /// \param map_states render states carrying the map view; on wasm the view travels in here.
+   void drawExploredRooms(const LevelMap& level_map, const sf::RenderStates& map_states);
 
    /// \brief draws mechanism markers and the player position on top of the revealed map.
    /// \param level_map map texture and coordinate helpers of the active level.
-   void drawMarkers(const LevelMap& level_map);
+   /// \param map_states render states carrying the map view; on wasm the view travels in here.
+   void drawMarkers(const LevelMap& level_map, const sf::RenderStates& map_states);
 
    /// \brief draws one 7x7 icon centered on a map position, one icon pixel per map pixel.
    /// \param target render target receiving the icon.
    /// \param style icon pixel pattern and color.
    /// \param center_map_px icon center in map pixels.
-   void drawMarker(sf::RenderTarget& target, const MarkerStyle& style, const sf::Vector2f& center_map_px);
+   /// \param map_states render states carrying the map view; on wasm the view travels in here.
+   void
+   drawMarker(sf::RenderTarget& target, const MarkerStyle& style, const sf::Vector2f& center_map_px, const sf::RenderStates& map_states);
 
    /// \brief recreates the map render texture when the available page area changed.
    /// \param size_px required render texture size in screen pixels.

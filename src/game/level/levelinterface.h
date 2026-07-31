@@ -88,4 +88,12 @@ public:
    /// \brief gets the pixel art overview generated from the level's collision mesh.
    /// \return immutable reference to the level map.
    virtual const LevelMap& getLevelMap() const = 0;
+
+   /// \brief checks whether the whole level map has been made visible, e.g. by picking up a map item.
+   /// \return true when unvisited areas should be shown as well.
+   virtual bool isMapRevealed() const = 0;
+
+   /// \brief shows or hides the parts of the map the player has not visited yet.
+   /// \param revealed true to show the whole level map.
+   virtual void setMapRevealed(bool revealed) = 0;
 };

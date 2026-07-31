@@ -122,9 +122,10 @@ std::unordered_map<std::string, MechanismTiming> timing_data;
 namespace
 {
 
-//! key under which the visited rooms are stored inside the per-level save state; it lives next to
-//! the mechanism group keys, so it must not collide with any mechanism layer name
+//! keys under which the ingame map state is stored inside the per-level save state; they live next
+//! to the mechanism group keys, so they must not collide with any mechanism layer name
 constexpr auto visited_rooms_key = "__visited_rooms";
+constexpr auto map_revealed_key = "__map_revealed";
 
 bool checkUpdateMechanism(const auto& player_chunk, const auto& mechanism)
 {
@@ -608,10 +609,16 @@ void Level::loadSaveState()
       Room::applyVisitedSubRoomKeys(visited_rooms_it->get<std::vector<std::string>>(), _rooms);
    }
 
+   const auto map_revealed_it = level_json.find(map_revealed_key);
+   if (map_revealed_it != level_json.end() && map_revealed_it->is_boolean())
+   {
+      _map_revealed = map_revealed_it->get<bool>();
+   }
+
    const auto& mechanism_map = _mechanism_registry.getMap();
    for (auto& [mechanism_key, mechanism_values] : level_json.items())
    {
-      if (mechanism_key == visited_rooms_key)
+      if (mechanism_key == visited_rooms_key || mechanism_key == map_revealed_key)
       {
          continue;
       }
@@ -674,6 +681,7 @@ void Level::saveState()
    }
 
    mechanisms_json[visited_rooms_key] = visited_sub_room_keys;
+   mechanisms_json[map_revealed_key] = _map_revealed;
 
    j[_description->_filename] = mechanisms_json;
 }
@@ -1450,6 +1458,16 @@ const std::vector<std::shared_ptr<Room>>& Level::getRooms() const
 const LevelMap& Level::getLevelMap() const
 {
    return _level_map;
+}
+
+bool Level::isMapRevealed() const
+{
+   return _map_revealed;
+}
+
+void Level::setMapRevealed(bool revealed)
+{
+   _map_revealed = revealed;
 }
 
 const GameMechanismRegistry& Level::getMechanismRegistry() const

@@ -92,6 +92,7 @@ public:
    std::vector<ExtraCallback> _callbacks;
    bool _requires_button_press{false};
    bool _is_treasure{false};  //!< when true, pickup is routed to treasures instead of inventory
+   bool _reveals_map{false};  //!< when true, picking this up shows the whole level on the ingame map
 
    std::vector<std::shared_ptr<Animation>> _animations_main;
    std::shared_ptr<Animation> _animation_spawn;

@@ -89,22 +89,38 @@ def find_window() -> int | None:
 
 
 def focus_window() -> int | None:
-    """Brings the game to the foreground.
+    """Brings the game to the foreground and verifies it got there.
 
     Posted messages are not enough: the game clears its key state on FocusLost, and the inventory
-    opens from that key state rather than from the event itself.
+    opens from that key state rather than from the event itself. Windows also refuses plain
+    SetForegroundWindow calls from a background process, so the input queues are attached first.
     """
     handle = find_window()
     if not handle:
         return None
 
-    if win32gui.GetForegroundWindow() != handle:
+    for _ in range(5):
+        if win32gui.GetForegroundWindow() == handle:
+            return handle
+
         win32gui.ShowWindow(handle, win32con.SW_RESTORE)
+
+        foreground_thread = ctypes.windll.user32.GetWindowThreadProcessId(win32gui.GetForegroundWindow(), None)
+        own_thread = ctypes.windll.kernel32.GetCurrentThreadId()
+        attached = ctypes.windll.user32.AttachThreadInput(foreground_thread, own_thread, True)
         try:
+            win32gui.BringWindowToTop(handle)
             win32gui.SetForegroundWindow(handle)
         except Exception:
             pass
+        finally:
+            if attached:
+                ctypes.windll.user32.AttachThreadInput(foreground_thread, own_thread, False)
+
         time.sleep(0.3)
+
+    if win32gui.GetForegroundWindow() != handle:
+        print("warning: could not bring the game window to the foreground")
 
     return handle
 
@@ -172,18 +188,80 @@ def grab_window(_stale_handle: int, path: Path) -> None:
     print(f"saved {path}")
 
 
-def is_ingame_menu_open() -> bool:
-    """Detects the menu by the magenta pill behind the selected submenu tab.
+def _selected_tab_center_x() -> float | None:
+    """Locates the magenta pill behind the selected submenu tab in the header.
 
     The band starts below the hud health bar, whose red pixels would otherwise match as well.
     """
     image = capture()
     if image is None:
+        return None
+
+    band = image.crop((0, 30, image.width, 80))
+    columns = []
+    for index, (red, green, blue) in enumerate(band.getdata()):
+        if red > 150 and green < 80 and 70 < blue < 170:
+            columns.append(index % band.width)
+
+    if len(columns) < 500:
+        return None
+
+    return sum(columns) / len(columns)
+
+
+def is_ingame_menu_open() -> bool:
+    return _selected_tab_center_x() is not None
+
+
+def selected_submenu() -> str | None:
+    """Returns 'map', 'inventory' or 'archives' based on which tab is highlighted."""
+    center_x = _selected_tab_center_x()
+    if center_x is None:
+        return None
+    if center_x < 560:
+        return "map"
+    if center_x < 720:
+        return "inventory"
+    return "archives"
+
+
+def go_to_map_page(handle: int) -> bool:
+    """Rotates the submenus until the map page is selected."""
+    for _ in range(4):
+        current = selected_submenu()
+        if current == "map":
+            return True
+        if current is None:
+            return False
+        send_key(handle, VK_LSHIFT)
+        time.sleep(2.0)
+    return False
+
+
+def run_console_command(handle: int, command: str) -> None:
+    """Opens the debug console with F12, types a command, executes it and closes the console."""
+    send_key(handle, VK_F12)
+    time.sleep(0.4)
+    send_text(handle, command)
+    time.sleep(0.3)
+    send_key(handle, VK_RETURN)
+    time.sleep(1.5)
+    send_key(handle, VK_F12)
+    time.sleep(1.5)
+
+
+def open_map_page(handle: int) -> bool:
+    """Opens the ingame menu if needed and rotates to the map page."""
+    for _ in range(6):
+        if is_ingame_menu_open():
+            break
+        send_key(handle, VK_TAB)
+        time.sleep(2.0)
+    else:
+        print("could not open the ingame menu")
         return False
 
-    header = image.crop((0, 30, image.width, 80)).getdata()
-    pink_pixels = sum(1 for red, green, blue in header if red > 150 and green < 80 and 70 < blue < 170)
-    return pink_pixels > 500
+    return go_to_map_page(handle)
 
 
 def run() -> int:
@@ -224,16 +302,11 @@ def run() -> int:
     grab_window(handle, OUTPUT_DIRECTORY / "20_ingame.png")
 
     # teleport through the checkpoints so more than the spawn room is discovered, ending inside a
-    # room so the map has something to show around the player
-    for command in ["tpc 1", "tpc 2", "tpc 5", "tpc 4", "tpc 3"]:
-        send_key(handle, VK_F12)
-        time.sleep(0.4)
-        send_text(handle, command)
-        time.sleep(0.3)
-        send_key(handle, VK_RETURN)
-        time.sleep(1.5)
-        send_key(handle, VK_F12)
-        time.sleep(1.5)
+    # room so the map has something to show around the player. checkpoint 3 is kept back: touching
+    # a checkpoint for the first time is what writes the save state, so it is used later to check
+    # that the reveal flag persists.
+    for command in ["tpc 1", "tpc 2", "tpc 5", "tpc 4"]:
+        run_console_command(handle, command)
 
     grab_window(handle, OUTPUT_DIRECTORY / "21_after_teleports.png")
 
@@ -263,6 +336,7 @@ def run() -> int:
     print(f"captured {len(frames)} transition frames, last at {frames[-1][0]:.2f}s")
 
     time.sleep(2.0)
+    go_to_map_page(handle)
     grab_window(handle, OUTPUT_DIRECTORY / "23_map.png")
 
     # zoom all the way in with a, then step back out with s
@@ -285,23 +359,50 @@ def run() -> int:
         send_key(handle, VK_DOWN)
     grab_window(handle, OUTPUT_DIRECTORY / "26_map_panned_down.png")
 
-    print("visited rooms in save state:", read_visited_sub_rooms())
+    # close the menu, reveal the whole map from the console, then touch the checkpoint that was
+    # kept back so the save state is written while the map is revealed
+    send_key(handle, VK_TAB)
+    time.sleep(1.5)
+    run_console_command(handle, "map reveal")
+    run_console_command(handle, "tpc 3")
+
+    if not open_map_page(handle):
+        print("could not get back to the map page")
+    grab_window(handle, OUTPUT_DIRECTORY / "27_map_revealed.png")
+
+    for _ in range(2):
+        send_key(handle, VK_S)
+        time.sleep(0.8)
+    grab_window(handle, OUTPUT_DIRECTORY / "28_map_revealed_zoomed_out.png")
+
+    visited, revealed = read_map_state()
+    print("visited rooms in save state:", visited)
+    print("map revealed in save state:", revealed)
+
+    # map clear resets the whole thing back to unexplored
+    send_key(handle, VK_TAB)
+    time.sleep(1.5)
+    run_console_command(handle, "map clear")
+
+    if not open_map_page(handle):
+        print("could not get back to the map page")
+    grab_window(handle, OUTPUT_DIRECTORY / "29_map_cleared.png")
 
     process.terminate()
     return 0
 
 
-def read_visited_sub_rooms() -> list[str]:
+def read_map_state() -> tuple[list[str], bool | None]:
     """Reads back what the running game persisted, checkpoints trigger a save."""
     if not SAVE_STATE_PATH.exists():
-        return []
+        return [], None
 
     slots = json.loads(SAVE_STATE_PATH.read_text())
     level_state = slots[0].get("levelstate") or {}
     for level_data in level_state.values():
         if "__visited_rooms" in level_data:
-            return level_data["__visited_rooms"]
-    return []
+            return level_data["__visited_rooms"], level_data.get("__map_revealed")
+    return [], None
 
 
 def main() -> int:

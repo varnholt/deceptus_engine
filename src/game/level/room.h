@@ -109,6 +109,9 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    /// \param player_pos_px player position in pixels.
    void markVisited(const sf::Vector2f& player_pos_px);
 
+   /// \brief marks all sub-rooms of this room as not visited again.
+   void clearVisited();
+
    /// \brief builds the save-state keys of all sub-rooms the player has already been inside.
    /// \return one key per visited sub-room, formatted as "<room object id>/<sub-room index>".
    std::vector<std::string> visitedSubRoomKeys() const;

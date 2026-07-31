@@ -191,6 +191,14 @@ public:
    /// \return immutable reference to the level map.
    const LevelMap& getLevelMap() const override;
 
+   /// \brief returns whether the whole level map has been made visible.
+   /// \return true when unvisited areas should be shown as well.
+   bool isMapRevealed() const override;
+
+   /// \brief shows or hides the parts of the map the player has not visited yet.
+   /// \param revealed true to show the whole level map.
+   void setMapRevealed(bool revealed) override;
+
 protected:
    /// \brief loads or regenerates physics paths for a collision tile layer and adds chains to box2d.
    /// \param layer tmx tile layer that defines physics collision tiles.
@@ -333,6 +341,7 @@ protected:
 
    std::vector<std::shared_ptr<Room>> _rooms;
    LevelMap _level_map;
+   bool _map_revealed{false};  //!< whole level map visible, set by a map item and persisted in the save state
    LevelScript _level_script;
 
    const RenderTargets& _render_targets;

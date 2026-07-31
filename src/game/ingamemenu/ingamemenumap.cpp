@@ -34,6 +34,11 @@ constexpr auto map_viewport_height_px = 290.0f;
 //! how far one navigate key press moves the map view, in menu pixels
 constexpr auto pan_step_px = 40.0f;
 
+//! multiplied onto the map texture for rooms that a map item revealed but the player has not
+//! entered yet. it dims and warms the blue palette, so revealed and visited read as clearly
+//! different without needing a second set of textures.
+constexpr auto unvisited_tint = sf::Color{150, 128, 116};
+
 constexpr auto blink_interval_s = 1.0f;
 
 // clang-format off
@@ -196,24 +201,29 @@ void IngameMenuMap::updateRenderTexture(const sf::Vector2u& size_px)
 #endif
 }
 
-void IngameMenuMap::drawExploredRooms(const LevelMap& level_map)
+void IngameMenuMap::drawExploredRooms(const LevelMap& level_map, const sf::RenderStates& map_states)
 {
    const auto level = LevelRegistry::getCurrent();
    const auto detail_level = static_cast<size_t>(_zoom_level);
+   const auto revealed = level->isMapRevealed();
 
-   // one quad per visited sub-room, all textured from the same level map texture. the texture is
+   // one quad per drawn sub-room, all textured from the same level map texture. the texture is
    // opaque, so overlapping sub-rooms simply write the same pixels twice.
+   //
+   // a map item reveals the rooms the player has not been to yet. those are tinted, so the layout
+   // is readable without losing track of where the player has actually been.
    sf::VertexArray quads(sf::PrimitiveType::Triangles);
 
    for (const auto& room : level->getRooms())
    {
       for (const auto& sub_room : room->_sub_rooms)
       {
-         if (!sub_room._visited)
+         if (!sub_room._visited && !revealed)
          {
             continue;
          }
 
+         const auto color = sub_room._visited ? sf::Color::White : unvisited_tint;
          const auto rect = level_map.toMap(sub_room._rect, detail_level);
 
          const auto left = rect.position.x;
@@ -227,22 +237,27 @@ void IngameMenuMap::drawExploredRooms(const LevelMap& level_map)
          const auto bottom_left = sf::Vector2f{left, bottom};
 
          // position and texture coordinate are identical because the map view works in map pixels
-         quads.append(sf::Vertex{top_left, sf::Color::White, top_left});
-         quads.append(sf::Vertex{top_right, sf::Color::White, top_right});
-         quads.append(sf::Vertex{bottom_right, sf::Color::White, bottom_right});
+         quads.append(sf::Vertex{top_left, color, top_left});
+         quads.append(sf::Vertex{top_right, color, top_right});
+         quads.append(sf::Vertex{bottom_right, color, bottom_right});
 
-         quads.append(sf::Vertex{top_left, sf::Color::White, top_left});
-         quads.append(sf::Vertex{bottom_right, sf::Color::White, bottom_right});
-         quads.append(sf::Vertex{bottom_left, sf::Color::White, bottom_left});
+         quads.append(sf::Vertex{top_left, color, top_left});
+         quads.append(sf::Vertex{bottom_right, color, bottom_right});
+         quads.append(sf::Vertex{bottom_left, color, bottom_left});
       }
    }
 
-   sf::RenderStates states;
+   auto states = map_states;
    states.texture = level_map.getTexture(detail_level);
    _level_render_texture->draw(quads, states);
 }
 
-void IngameMenuMap::drawMarker(sf::RenderTarget& target, const MarkerStyle& style, const sf::Vector2f& center_map_px)
+void IngameMenuMap::drawMarker(
+   sf::RenderTarget& target,
+   const MarkerStyle& style,
+   const sf::Vector2f& center_map_px,
+   const sf::RenderStates& map_states
+)
 {
    sf::VertexArray quads(sf::PrimitiveType::Triangles);
 
@@ -274,10 +289,10 @@ void IngameMenuMap::drawMarker(sf::RenderTarget& target, const MarkerStyle& styl
       }
    }
 
-   target.draw(quads);
+   target.draw(quads, map_states);
 }
 
-void IngameMenuMap::drawMarkers(const LevelMap& level_map)
+void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderStates& map_states)
 {
    const auto level = LevelRegistry::getCurrent();
    const auto& rooms = level->getRooms();
@@ -304,7 +319,7 @@ void IngameMenuMap::drawMarkers(const LevelMap& level_map)
    // step and the icons keep their size on screen without any correction
    const auto detail_level = static_cast<size_t>(_zoom_level);
 
-   const auto draw_mechanisms = [this, &level_map, &is_discovered, detail_level](
+   const auto draw_mechanisms = [this, &level_map, &is_discovered, detail_level, &map_states](
                                    const std::vector<std::shared_ptr<GameMechanism>>& mechanisms, const MarkerStyle& style
                                 )
    {
@@ -322,7 +337,7 @@ void IngameMenuMap::drawMarkers(const LevelMap& level_map)
          }
 
          const auto center_px = bounding_box_px->position + bounding_box_px->size * 0.5f;
-         drawMarker(*_level_render_texture, style, level_map.toMap(center_px, detail_level));
+         drawMarker(*_level_render_texture, style, level_map.toMap(center_px, detail_level), map_states);
       }
    };
 
@@ -335,7 +350,9 @@ void IngameMenuMap::drawMarkers(const LevelMap& level_map)
    if (std::fmod(_blink_time_s, blink_interval_s) < blink_interval_s * 0.7f)
    {
       const auto player_position_px = PlayerRegistry::getFirst()->getPixelPositionFloat();
-      drawMarker(*_level_render_texture, MarkerStyle{icon_player, sf::Color::White}, level_map.toMap(player_position_px, detail_level));
+      drawMarker(
+         *_level_render_texture, MarkerStyle{icon_player, sf::Color::White}, level_map.toMap(player_position_px, detail_level), map_states
+      );
    }
 }
 
@@ -397,8 +414,11 @@ void IngameMenuMap::drawLevel(sf::RenderTarget& window, sf::RenderStates states)
       sf::Vector2f{std::round(player_position_map_px.x + pan_map_px.x), std::round(player_position_map_px.y + pan_map_px.y)};
    const auto view_size = sf::Vector2f{map_viewport_width_px, map_viewport_height_px};
 
+   // vrsfml has no RenderTexture::setView, there the view travels in the render states instead
+   sf::RenderStates map_states;
+
 #ifdef __EMSCRIPTEN__
-   const sf::View map_view{.center = center_map_px, .size = view_size};
+   map_states.view = sf::View{.center = center_map_px, .size = view_size};
 #else
    sf::View map_view;
    map_view.setSize(view_size);
@@ -406,10 +426,13 @@ void IngameMenuMap::drawLevel(sf::RenderTarget& window, sf::RenderStates states)
 #endif
 
    _level_render_texture->clear(sf::Color::Transparent);
-   _level_render_texture->setView(map_view);
 
-   drawExploredRooms(level_map);
-   drawMarkers(level_map);
+#ifndef __EMSCRIPTEN__
+   _level_render_texture->setView(map_view);
+#endif
+
+   drawExploredRooms(level_map, map_states);
+   drawMarkers(level_map, map_states);
 
    _level_render_texture->display();
 

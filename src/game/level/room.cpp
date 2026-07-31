@@ -525,6 +525,14 @@ void Room::markVisited(const sf::Vector2f& player_pos_px)
    }
 }
 
+void Room::clearVisited()
+{
+   for (auto& sub_room : _sub_rooms)
+   {
+      sub_room._visited = false;
+   }
+}
+
 std::vector<std::string> Room::visitedSubRoomKeys() const
 {
    std::vector<std::string> keys;
