@@ -1207,6 +1207,73 @@ end
 ---
 
 
+## Skill Gates
+
+Skill Gates are solid rectangles that only let Adam pass once he has unlocked a particular skill. They are the tool to
+express 'you need the double jump to get in here' without writing a single line of Lua: place the rectangle, name the
+skill, done.
+
+The gate keeps checking the player's skill set every frame, so it does not matter how the skill is acquired - a level
+script calling `addPlayerSkill`, an Extra that grants it, or the debug console. The moment the skill is there, the
+collider disappears and the gate's texture dissolves.
+
+Since unlocked skills are already part of the save state, the gate needs no state of its own; it will be closed or open
+again automatically after loading a save game.
+
+To create a Skill Gate, create a rectangle object covering the area that should be blocked.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`SkillGate`|
+|Object Group|`skill_gates`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|skill|string|The skill that opens this gate (see the table below). This property is required; if it is missing or misspelled, the gate stays closed and a warning is written to the log|
+|inverted|bool|If set to `true`, the gate blocks *while* the skill is unlocked instead of while it is missing (default is `false`)|
+|fade_speed|float|Alpha change per second while the gate fades in or out (default is `2.0`, i.e. half a second for a full fade)|
+|enabled|bool|The default enabled state; a disabled gate never blocks and can be switched on from Lua (default is `true`)|
+|texture|string|Optional texture drawn across the gate rectangle|
+|normal|string|Optional normal map for the texture above|
+|z|int|The layer's z index|
+
+### Valid Skill Names
+
+|Value|Skill|
+|-|-|
+|`wall_climb`|Climbing up walls|
+|`dash`|Dashing|
+|`invulnerable`|Invulnerability|
+|`wall_slide`|Sliding down walls in a controlled manner|
+|`wall_jump`|Jumping off walls|
+|`double_jump`|The second jump in mid-air|
+|`crouch`|Crouching, and therefore moving through low passages|
+|`swim`|Swimming instead of drowning|
+
+### Notes
+
+- The collider is removed as soon as the skill condition is satisfied, while the texture is still fading out. That is
+  intentional - it makes sure Adam is never trapped inside a gate that is in the middle of dissolving.
+- A Skill Gate without a `texture` is invisible and acts as a pure collider. That is useful when the level's tile layers
+  already draw something at that position.
+- Skill Gates are silent by design. If you want to tell the player *why* they cannot pass, place an
+  [Interaction Help](#interaction-help) or a [Dialogue](#dialogues) in front of the gate.
+- Since the gate can also be toggled from Lua via its object id, the `inverted` property is mostly useful for
+  'you were faster before you got heavy' style puzzles.
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
 ## Spike Balls
 
 Spike Balls are nasty. They're heavy balls with spikes connected to a chain which move from left to right and back. Adam can either duck or jump to make his way past them, however it requires a little practice to master them.

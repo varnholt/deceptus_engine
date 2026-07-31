@@ -430,6 +430,8 @@ set(GAME_FILES
     src/game/mechanisms/sensorrect.h
     src/game/mechanisms/shaderlayer.cpp
     src/game/mechanisms/shaderlayer.h
+    src/game/mechanisms/skillgate.cpp
+    src/game/mechanisms/skillgate.h
     src/game/mechanisms/smokeeffect.cpp
     src/game/mechanisms/soundemitter.cpp
     src/game/mechanisms/soundemitter.h
