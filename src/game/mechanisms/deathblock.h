@@ -16,6 +16,9 @@ struct TmxObject;
 struct TmxTileSet;
 
 /// \brief moving spike block trap with animated spike states and optional patrol path.
+/// \note deliberately does not call addChunks: the extract and retract intervals are driven by elapsed time in update,
+///       and the block travels along a patrol path. chunk culling would both freeze the interval phase and stop the
+///       movement, so groups of blocks timed against each other would desynchronize.
 class DeathBlock : public GameMechanism, public GameNode
 {
 public:

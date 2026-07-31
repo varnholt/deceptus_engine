@@ -89,4 +89,6 @@ void DamageRect::setup(const GameDeserializeData& data)
          _damage = damage_it->second->_value_int.value();
       }
    }
+
+   addChunks(_rect);
 }

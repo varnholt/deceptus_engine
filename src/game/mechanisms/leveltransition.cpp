@@ -93,6 +93,8 @@ void LevelTransition::setup(const GameDeserializeData& data)
    {
       Log::Error() << "level transition '" << getObjectId() << "' has no 'level' property, it will not do anything";
    }
+
+   addChunks(_rect_px);
 }
 
 void LevelTransition::update(const sf::Time& /*dt*/)

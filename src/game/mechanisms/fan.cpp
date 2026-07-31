@@ -154,6 +154,8 @@ std::shared_ptr<Fan> Fan::deserialize(GameNode* parent, const GameDeserializeDat
       std::cerr << "Warning: Fan direction '" << dir_str << "' not recognized. No tiles placed.\n";
    }
 
+   fan->addChunks(fan->_rect_px);
+
    return fan;
 }
 

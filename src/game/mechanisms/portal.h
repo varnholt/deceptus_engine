@@ -18,6 +18,9 @@ struct TmxObject;
 struct TmxTileSet;
 
 /// \brief teleports the player to a linked destination portal when activated.
+/// \note deliberately does not call addChunks: _rect mixes units, its position is assigned in tile coordinates while
+///       its size is in pixels, and getBoundingBoxPx returns it unchanged. chunks derive from pixel positions, so
+///       culling against this rect would place the portal near the level origin. the rect needs fixing first.
 class Portal : public GameMechanism, public GameNode
 {
 public:

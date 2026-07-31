@@ -6,6 +6,9 @@
 #include "game/mechanisms/gamemechanism.h"
 
 /// \brief simulates and renders a deformable water surface with splash propagation.
+/// \note deliberately does not call addChunks: update runs a spring simulation across all segments and needs to keep
+///       running so the surface can settle. chunk culling would freeze the wave mid-oscillation and the player would
+///       come back to a stale deformation instead of calm water.
 class WaterSurface : public GameMechanism, public GameNode
 {
 public:
@@ -14,13 +17,13 @@ public:
    {
       Segment() = default;
 
-       /// \brief integrates this segment toward its target height.
-       /// \param dampening velocity dampening factor.
-       /// \param tension spring tension factor.
-       void update(float dampening, float tension);
+      /// \brief integrates this segment toward its target height.
+      /// \param dampening velocity dampening factor.
+      /// \param tension spring tension factor.
+      void update(float dampening, float tension);
 
-       /// \brief clears per-step neighbor transfer deltas.
-       void resetDeltas();
+      /// \brief clears per-step neighbor transfer deltas.
+      void resetDeltas();
 
       float _height{0.0f};
       float _target_height{0.0f};

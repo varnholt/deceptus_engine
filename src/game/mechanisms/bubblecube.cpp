@@ -212,6 +212,8 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
 
    _original_rect_px = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {width_px, height_px}};
    _translated_rect_px = _original_rect_px;
+
+   addChunks(_original_rect_px);
 }
 
 std::string_view BubbleCube::objectName() const

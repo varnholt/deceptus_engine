@@ -9,6 +9,9 @@
 #include <optional>
 
 /// \brief applies periodic damage while the player is submerged in water.
+/// \note deliberately does not call addChunks: this mechanism has no position of its own, which is why
+///       getBoundingBoxPx returns std::nullopt. it is a level-wide rule that reacts to the player being submerged
+///       anywhere, so there is no meaningful chunk to attach it to.
 class WaterDamage : public GameNode, public GameMechanism
 {
 public:

@@ -153,6 +153,8 @@ void SensorRect::setup(const GameDeserializeData& data)
 
       _observed = ValueReader::readValue<bool>("observed", data._tmx_object->_properties->_map).value_or(default_sensor_rect_observed);
    }
+
+   addChunks(_rect);
 }
 
 void SensorRect::findReference(const std::vector<std::shared_ptr<GameMechanism>>& mechanisms)

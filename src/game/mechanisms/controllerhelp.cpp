@@ -234,6 +234,8 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
          *_background, sf::IntRect{{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}}
       );
    }
+
+   addChunks(_rect_px);
 }
 
 std::optional<sf::FloatRect> ControllerHelp::getBoundingBoxPx()

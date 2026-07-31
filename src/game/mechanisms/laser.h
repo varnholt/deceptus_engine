@@ -22,6 +22,9 @@ struct TmxObject;
 struct TmxTileSet;
 
 /// \brief controls laser hazard tiles with timed signals and optional path movement.
+/// \note deliberately does not call addChunks: the signal schedule accumulates elapsed time in update. chunk culling
+///       would freeze that clock while the player is away, so lasers meant to fire in unison would drift out of phase
+///       relative to each other as the player moves through the level.
 class Laser : public GameMechanism, public GameNode
 {
 public:

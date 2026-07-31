@@ -372,6 +372,8 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 
       _help_elements.push_back(std::move(help));
    }
+
+   addChunks(_rect_px);
 }
 
 std::optional<sf::FloatRect> InteractionHelp::getBoundingBoxPx()

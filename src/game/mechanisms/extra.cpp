@@ -193,6 +193,8 @@ bool Extra::deserialize(const GameDeserializeData& data)
    // - enable/disable mechanism function to level
    // - add enable/disable mechanism code to levelscript
 
+   addChunks(_rect);
+
    return true;
 }
 

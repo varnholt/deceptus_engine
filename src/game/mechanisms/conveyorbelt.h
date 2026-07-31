@@ -12,6 +12,9 @@
 struct TmxObject;
 
 /// \brief moving belt mechanism that pushes colliding bodies horizontally.
+/// \note deliberately does not call addChunks: the belt accumulates _elapsed in update to drive its scrolling texture
+///       and its lever ramp. chunk culling would freeze both, so a belt would resume with a stale surface offset and a
+///       stale ramp value once the player returns.
 class ConveyorBelt : public FixtureNode, public GameMechanism
 {
 public:
