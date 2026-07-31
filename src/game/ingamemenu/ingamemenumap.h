@@ -79,13 +79,13 @@ private:
 
    /// \brief stamps one marker icon centered on a map position, one icon pixel per map pixel.
    /// \param target render target receiving the icon.
-   /// \param kind marker kind, used to look up the psd layer.
+   /// \param marker_index cell index inside the marker spriteset.
    /// \param detail_level zoom step whose icon variant should be used.
    /// \param center_map_px icon center in map pixels.
    /// \param map_states render states carrying the map view; on wasm the view travels in here.
    void drawMarker(
       sf::RenderTarget& target,
-      const std::string& kind,
+      int32_t marker_index,
       size_t detail_level,
       const sf::Vector2f& center_viewport_px,
       const sf::RenderStates& marker_states
@@ -121,7 +121,7 @@ private:
    /// \brief animates horizontal submenu slide transitions for map panel groups.
    void updateMove();
 
-   std::map<std::string, std::array<std::shared_ptr<Layer>, 4>> _marker_layers;  //!< marker art per kind and zoom step
+   std::array<std::shared_ptr<Layer>, 4> _marker_strips;  //!< one marker spriteset per zoom step
 
    BitmapFont _font;
 
