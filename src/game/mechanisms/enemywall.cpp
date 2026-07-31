@@ -107,6 +107,8 @@ void EnemyWall::setup(const GameDeserializeData& data)
    boundary_fixture_def.filter.categoryBits = category_bits;
 
    _body->CreateFixture(&boundary_fixture_def);
+
+   addChunks(_rectangle);
 }
 
 const sf::FloatRect& EnemyWall::getPixelRect() const
