@@ -258,8 +258,8 @@ void IngameMenuMap::drawMarker(
    sf::RenderTarget& target,
    const std::string& kind,
    size_t detail_level,
-   const sf::Vector2f& center_map_px,
-   const sf::RenderStates& map_states
+   const sf::Vector2f& center_viewport_px,
+   const sf::RenderStates& marker_states
 )
 {
    const auto& kind_it = _marker_layers.find(kind);
@@ -285,18 +285,17 @@ void IngameMenuMap::drawMarker(
    const auto width = static_cast<int32_t>(size.x);
    const auto height = static_cast<int32_t>(size.y);
 
-   // the icons are odd sized, so half of their size is not a whole pixel. centering them with a
-   // float division would park the sprite on a half pixel and smear every texel across two, which
-   // is what makes pixel art look scaled. integer division keeps it on the pixel grid.
+   // the icons are odd sized, so half of their size is not a whole pixel. integer division keeps
+   // the sprite on the pixel grid, a float halving would park it between two pixels.
    const auto position = sf::Vector2f{
-      std::round(center_map_px.x) - static_cast<float>(width / 2), std::round(center_map_px.y) - static_cast<float>(height / 2)
+      std::round(center_viewport_px.x) - static_cast<float>(width / 2), std::round(center_viewport_px.y) - static_cast<float>(height / 2)
    };
 
    sfcompat::setPosition(*layer->_sprite, position);
-   layer->draw(target, map_states);
+   layer->draw(target, marker_states);
 }
 
-void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderStates& map_states)
+void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderStates& marker_states, const sf::Vector2f& view_top_left_map_px)
 {
    const auto level = LevelRegistry::getCurrent();
    const auto& rooms = level->getRooms();
@@ -323,7 +322,7 @@ void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderState
    // step and the icons keep their size on screen without any correction
    const auto detail_level = static_cast<size_t>(_zoom_level);
 
-   const auto draw_mechanisms = [this, &level_map, &is_discovered, detail_level, &map_states](
+   const auto draw_mechanisms = [this, &level_map, &is_discovered, detail_level, &marker_states, &view_top_left_map_px](
                                    const std::vector<std::shared_ptr<GameMechanism>>& mechanisms, const std::string& kind
                                 )
    {
@@ -341,7 +340,9 @@ void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderState
          }
 
          const auto center_px = bounding_box_px->position + bounding_box_px->size * 0.5f;
-         drawMarker(*_level_render_texture, kind, detail_level, level_map.toMap(center_px, detail_level), map_states);
+         drawMarker(
+            *_level_render_texture, kind, detail_level, level_map.toMap(center_px, detail_level) - view_top_left_map_px, marker_states
+         );
       }
    };
 
@@ -354,7 +355,13 @@ void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderState
    if (std::fmod(_blink_time_s, blink_interval_s) < blink_interval_s * 0.7f)
    {
       const auto player_position_px = PlayerRegistry::getFirst()->getPixelPositionFloat();
-      drawMarker(*_level_render_texture, marker_kind_player, detail_level, level_map.toMap(player_position_px, detail_level), map_states);
+      drawMarker(
+         *_level_render_texture,
+         marker_kind_player,
+         detail_level,
+         level_map.toMap(player_position_px, detail_level) - view_top_left_map_px,
+         marker_states
+      );
    }
 }
 
@@ -434,7 +441,20 @@ void IngameMenuMap::drawLevel(sf::RenderTarget& window, sf::RenderStates states)
 #endif
 
    drawExploredRooms(level_map, map_states);
-   drawMarkers(level_map, map_states);
+
+   // markers are screen space ui, so they are drawn in the render texture's own pixel space rather
+   // than through the panning map view. that way their alignment cannot depend on where the map
+   // view happens to sit, and an icon can never land between two pixels.
+   const auto view_top_left_map_px = center_map_px - view_size * 0.5f;
+
+   sf::RenderStates marker_states;
+#ifdef __EMSCRIPTEN__
+   marker_states.view = sf::View{.center = view_size * 0.5f, .size = view_size};
+#else
+   _level_render_texture->setView(_level_render_texture->getDefaultView());
+#endif
+
+   drawMarkers(level_map, marker_states, view_top_left_map_px);
 
    _level_render_texture->display();
 

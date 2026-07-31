@@ -72,7 +72,7 @@ private:
    /// \brief draws mechanism markers and the player position on top of the revealed map.
    /// \param level_map map texture and coordinate helpers of the active level.
    /// \param map_states render states carrying the map view; on wasm the view travels in here.
-   void drawMarkers(const LevelMap& level_map, const sf::RenderStates& map_states);
+   void drawMarkers(const LevelMap& level_map, const sf::RenderStates& marker_states, const sf::Vector2f& view_top_left_map_px);
 
    /// \brief picks the marker layers out of the psd and hides them from the page layer stack.
    void collectMarkerLayers();
@@ -87,8 +87,8 @@ private:
       sf::RenderTarget& target,
       const std::string& kind,
       size_t detail_level,
-      const sf::Vector2f& center_map_px,
-      const sf::RenderStates& map_states
+      const sf::Vector2f& center_viewport_px,
+      const sf::RenderStates& marker_states
    );
 
    /// \brief recreates the map render texture when the available page area changed.
