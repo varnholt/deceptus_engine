@@ -745,6 +745,9 @@ void Gateway::setup(const GameDeserializeData& data)
 
          if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
          {
+            // sampled bilinearly so the sub-pixel movement of the side elements stays smooth
+            texture->setSmooth(true);
+
             const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
             sfcompat::setOrigin(*sprite, origin);
             sfcompat::setPosition(*sprite, origin + pos + sf::Vector2f{0, 0});
