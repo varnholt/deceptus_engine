@@ -43,6 +43,7 @@ GameMechanismRegistry::GameMechanismRegistry()
       &_mechanism_rotating_blades,
       &_mechanism_sensor_rects,
       &_mechanism_shader_layers,
+      &_mechanism_skill_gates,
       &_mechanism_sound_emitters,
       &_mechanism_smoke_effect,
       &_mechanism_spike_balls,
@@ -93,6 +94,7 @@ GameMechanismRegistry::GameMechanismRegistry()
    _mechanisms_map[std::string{layer_name_rotating_blades}] = &_mechanism_rotating_blades;
    _mechanisms_map[std::string{layer_name_sensor_rects}] = &_mechanism_sensor_rects;
    _mechanisms_map[std::string{layer_name_shader_quads}] = &_mechanism_shader_layers;
+   _mechanisms_map[std::string{layer_name_skill_gates}] = &_mechanism_skill_gates;
    _mechanisms_map[std::string{layer_name_smoke_effect}] = &_mechanism_smoke_effect;
    _mechanisms_map[std::string{layer_name_sound_emitters}] = &_mechanism_sound_emitters;
    _mechanisms_map[std::string{layer_name_spike_balls}] = &_mechanism_spike_balls;

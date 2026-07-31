@@ -107,6 +107,7 @@ private:
    MechanismVector _mechanism_rotating_blades;
    MechanismVector _mechanism_sensor_rects;
    MechanismVector _mechanism_shader_layers;
+   MechanismVector _mechanism_skill_gates;
    MechanismVector _mechanism_smoke_effect;
    MechanismVector _mechanism_sound_emitters;
    MechanismVector _mechanism_spike_balls;
