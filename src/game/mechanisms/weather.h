@@ -12,6 +12,9 @@
 struct TmxObject;
 
 /// \brief drives area-based weather overlays such as rain and thunderstorms.
+/// \note deliberately does not call addChunks: the overlay is a screen-space effect with its own start delay and
+///       intersection tracking rather than something anchored to one spot in the level, so a chunk box around it would
+///       not describe where it is actually relevant.
 class Weather : public GameMechanism, public GameNode
 {
 public:

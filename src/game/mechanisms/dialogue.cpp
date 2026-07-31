@@ -165,6 +165,8 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
    dialogue->_rect_px =
       sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
+   dialogue->addChunks(dialogue->_rect_px);
+
    return dialogue;
 }
 

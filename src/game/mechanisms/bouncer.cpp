@@ -140,6 +140,8 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
    _sprite = std::make_unique<sf::Sprite>(*_texture);
    _sprite->setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT_PX)));
 #endif
+
+   addChunks(_rect);
 }
 
 std::string_view Bouncer::objectName() const

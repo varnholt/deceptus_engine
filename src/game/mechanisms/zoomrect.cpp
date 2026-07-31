@@ -186,6 +186,8 @@ void ZoomRect::setup(const GameDeserializeData& data)
    {
       _zoom_factors = {{0.0f, 1.0f}, {1.0, 1.0}};
    }
+
+   addChunks(_rect_px);
 }
 
 std::optional<sf::FloatRect> ZoomRect::getBoundingBoxPx()

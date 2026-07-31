@@ -9,6 +9,9 @@
 #include "SFML/Graphics.hpp"
 
 /// \brief moves and spins a circular blade that damages the player on contact.
+/// \note deliberately does not call addChunks: _rectangle is a fixed 64x64 box at the tmx object position and does not
+///       cover the movement path the blade travels along. culling against it would freeze the blade whenever the player
+///       is near the far end of its path. adding chunks here first requires a bounding box spanning the whole path.
 class RotatingBlade : public GameMechanism, public GameNode
 {
 public:

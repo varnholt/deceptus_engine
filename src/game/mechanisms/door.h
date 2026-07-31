@@ -16,6 +16,9 @@ struct TmxLayer;
 struct TmxTileSet;
 
 /// \brief controls an interactable door that can block or allow passage.
+/// \note deliberately does not call addChunks: the open and close animation advances _bar_offset from update, and a door
+///       can be triggered remotely by a lever. chunk culling would stop those updates while the player is away, so a
+///       door opened from a distance would never finish opening.
 class Door : public GameMechanism, public GameNode
 {
 public:

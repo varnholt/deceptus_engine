@@ -158,6 +158,8 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
 
    _spawn_effect = std::make_unique<SpawnEffect>(sf::Vector2f{_rect.position.x + _rect.size.x / 2, _rect.position.y - _rect.size.y / 2});
    _spawn_effect->deserialize(data);
+
+   addChunks(_rect);
 }
 
 void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget& normal)

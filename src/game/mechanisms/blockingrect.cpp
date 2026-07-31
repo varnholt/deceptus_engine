@@ -127,6 +127,8 @@ void BlockingRect::setup(const GameDeserializeData& data)
    boundaryFixtureDef.density = 1.0f;
 
    _body->CreateFixture(&boundaryFixtureDef);
+
+   addChunks(_rectangle);
 }
 
 const sf::FloatRect& BlockingRect::getPixelRect() const
