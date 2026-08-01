@@ -129,46 +129,6 @@ const auto registered_gateway = []
 }();
 }  // namespace
 
-namespace
-{
-
-std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, const sf::Angle& angle)
-{
-   const auto size_px = original.getSize();
-   const auto width_px = static_cast<float>(size_px.x);
-   const auto height_px = static_cast<float>(size_px.y);
-
-#ifdef __EMSCRIPTEN__
-   auto render_texture = std::move(*sf::RenderTexture::create(size_px));
-   render_texture.clear(sf::Color::Transparent);
-
-   sf::Sprite sprite;
-   sprite.textureRect = sf::FloatRect{{0.0f, 0.0f}, {width_px, height_px}};
-   sprite.origin = {width_px / 2.0f, height_px / 2.0f};
-   sprite.rotation = angle;
-   sprite.position = {width_px / 2.0f, height_px / 2.0f};
-
-   render_texture.draw(sprite, sf::RenderStates{.texture = &original});
-   render_texture.display();
-#else
-   sf::RenderTexture render_texture(size_px);
-   render_texture.clear(sf::Color::Transparent);
-
-   sf::Sprite sprite(original);
-   sprite.setOrigin({width_px / 2.0f, height_px / 2.0f});
-   sprite.setRotation(angle);
-   sprite.setPosition({width_px / 2.0f, height_px / 2.0f});
-
-   render_texture.draw(sprite);
-   render_texture.display();
-#endif
-
-   auto rotated = std::make_shared<sf::Texture>(render_texture.getTexture());
-   return rotated;
-}
-
-}  // namespace
-
 Gateway::Gateway(GameNode* parent) : GameNode(parent)
 {
    _filename = "data/sprites/gateway.psd";
@@ -760,13 +720,6 @@ void Gateway::setup(const GameDeserializeData& data)
 
          std::shared_ptr<sf::Sprite> sprite;
 
-         // rotate texture if this is a pa_ or pi_ layer
-         if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
-         {
-            texture->setSmooth(true);
-            texture = createRotatedTexture(*texture, -_base_angle);  // rotate ccw
-         }
-
 #ifdef __EMSCRIPTEN__
          sprite = std::make_shared<sf::Sprite>();
 #else
@@ -777,9 +730,7 @@ void Gateway::setup(const GameDeserializeData& data)
 #ifdef __EMSCRIPTEN__
          sprite->position = pos;
          sprite->color = sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity));
-         const auto rotated_texture_size = texture->getSize();
-         sprite->textureRect =
-            sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(rotated_texture_size.x), static_cast<float>(rotated_texture_size.y)}};
+         sprite->textureRect = sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(texture_size.x), static_cast<float>(texture_size.y)}};
 #else
          sprite->setPosition(pos);
          sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
@@ -794,6 +745,9 @@ void Gateway::setup(const GameDeserializeData& data)
 
          if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
          {
+            // sampled bilinearly so the sub-pixel movement of the side elements stays smooth
+            texture->setSmooth(true);
+
             const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
             sfcompat::setOrigin(*sprite, origin);
             sfcompat::setPosition(*sprite, origin + pos + sf::Vector2f{0, 0});
@@ -924,7 +878,8 @@ void Gateway::Side::update()
    sf::Vector2f pos_from_angle_and_distance_px;
    pos_from_angle_and_distance_px.x = std::cos(full_angle_sf.asRadians()) * _distance_factor;
    pos_from_angle_and_distance_px.y = std::sin(full_angle_sf.asRadians()) * _distance_factor;
-   sfcompat::setRotation(*_layer->_sprite, full_angle_sf);
+   // the pa_/pi_ artwork is authored at the base angle, compensate for it instead of pre-rotating the texture
+   sfcompat::setRotation(*_layer->_sprite, full_angle_sf - _base_angle);
    sfcompat::setPosition(*_layer->_sprite, _pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f});
 }
 
