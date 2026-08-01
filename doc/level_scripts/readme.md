@@ -391,6 +391,28 @@ Starts music playback with a specified transition and post-playback behaviour.
 |2|`PlayNext`|Play the next track in the list|
 
 
+## `setLevelMusic`
+
+Selects the level music track without starting playback. The engine starts the level music once
+level loading has finished, i.e. after `initialize` but before the first `update`, so calling this
+from `initialize` picks the track the level starts with. Use `playMusic` to change tracks while the
+level is running.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Music filename or identifier|
+
+
+## `getCheckpoint`
+
+Returns the checkpoint index the player has reached in the current level, or `-1` when no
+checkpoint has been reached yet. Takes no parameters.
+
+|Return Value|Type|Description|
+|-|-|-|
+|1|int|Reached checkpoint index, or -1|
+
+
 ## `playSound`
 
 Plays a one-shot sound effect.

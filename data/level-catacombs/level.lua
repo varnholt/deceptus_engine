@@ -1,5 +1,6 @@
 require "data/level-catacombs/level_constants"
 local cutscene = require "data/scripts/cutscene"
+local music_zones = require "data/scripts/music_zones"
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -21,7 +22,6 @@ _monk_hide = false
 _delay_to_show_dive_dialogue = 1.0
 _player_intersected_with_water_block_sensor = false
 _player_wont_dive_dialogue_shown = false
-_player_intersected_with_zone_rect = false
 
 _sword_ring_flash_color = {r = 1.0, g = 0.6, b = 0.2}
 
@@ -104,6 +104,19 @@ end
 function initialize()
    -- log("initialize catacombs level script")
    setInfoLayerVisible(true)
+
+   -- the sewers get their own track. checkpoint 1 sits behind the sewers entrance, so from there
+   -- on the sewers track is what the level starts with - also after dying or reloading the level.
+   music_zones.configure({
+      default_track = "data/music/level_test_track_muffler_awakening.ogg",
+      zones = {
+         {
+            sensor_rect = "zone_rect",
+            track = "data/music/level_test_track_muffler_ancestors.ogg",
+            from_checkpoint = 1
+         }
+      }
+   })
 end
 
 
@@ -266,7 +279,7 @@ function update(dt)
       addSensorRectCallback("water_block_sensor_01")
 
       -- change music on zone enter event
-      addSensorRectCallback("zone_rect")
+      music_zones.registerSensorRects()
 
       addSensorRectCallback("sword_ring_sensor")
 
@@ -416,17 +429,16 @@ end
 function playerCollidesWithSensorRect(rect_id)
    log(string.format("sensor rect collision: %s", rect_id))
    
+   if (music_zones.playerCollidesWithSensorRect(rect_id)) then
+      return
+   end
+
    if (rect_id == "monk_rect") then
       _player_intersected_with_monk_rect = true
    elseif (rect_id == "water_block_sensor_01") then
       _player_intersected_with_water_block_sensor = true
    elseif (rect_id == "sword_ring_sensor") then
       flashMechanism("sword_ring", _sword_ring_flash_color.r, _sword_ring_flash_color.g, _sword_ring_flash_color.b, 0.4)
-   elseif (rect_id == "zone_rect") then
-      if (not _player_intersected_with_zone_rect) then
-         _player_intersected_with_zone_rect = true
-         playMusic("data/music/level_test_track_muffler_ancestors.ogg", MusicTransitionType.Crossfade, 1000, MusicPostPlaybackAction.None)
-      end
    end
 end
 

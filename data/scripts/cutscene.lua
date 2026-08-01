@@ -59,7 +59,7 @@ local function execute(entry)
          entry.file,
          _music_transition[entry.transition] or 0,
          entry.duration_ms or 0,
-         _music_post_action[entry.post_action] or 0
+         _music_post_action[entry.post_action] or 1
       )
    elseif action == "play_sound" then
       playSound(entry.id)

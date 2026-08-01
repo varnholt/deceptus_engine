@@ -168,6 +168,8 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "fadeIn", LevelScriptCallbacks::fadeIn);
    lua_register(_lua_state, "log", LevelScriptCallbacks::debug);
    lua_register(_lua_state, "playMusic", LevelScriptCallbacks::playMusic);
+   lua_register(_lua_state, "setLevelMusic", LevelScriptCallbacks::setLevelMusic);
+   lua_register(_lua_state, "getCheckpoint", LevelScriptCallbacks::getCheckpoint);
    lua_register(_lua_state, "removePlayerSkill", LevelScriptCallbacks::removePlayerSkill);
    lua_register(_lua_state, "setLuaNodeActive", LevelScriptCallbacks::setLuaNodeActive);
    lua_register(_lua_state, "setLuaNodeVisible", LevelScriptCallbacks::setLuaNodeVisible);
@@ -668,6 +670,16 @@ void LevelScript::playMusic(
 {
    MusicFilenames::setLevelMusic(filename);
    MusicPlayer::getInstance().queueTrack({filename, transition_type, transition_duration, post_action});
+}
+
+void LevelScript::setLevelMusic(const std::string& filename)
+{
+   MusicFilenames::setLevelMusic(filename);
+}
+
+int32_t LevelScript::getCheckpoint() const
+{
+   return SaveState::getCurrentLevelCheckpoint();
 }
 
 namespace

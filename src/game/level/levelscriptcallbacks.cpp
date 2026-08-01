@@ -494,6 +494,23 @@ int32_t playMusic(lua_State* state)
    return 0;
 }
 
+int32_t setLevelMusic(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->setLevelMusic(std::string(lua_tostring(state, 1)));
+   return 0;
+}
+
+int32_t getCheckpoint(lua_State* state)
+{
+   lua_pushinteger(state, LevelScript::getCurrent()->getCheckpoint());
+   return 1;
+}
+
 int32_t lockPlayerControls(lua_State* state)
 {
    if (lua_gettop(state) != 1)

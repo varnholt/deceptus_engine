@@ -54,6 +54,11 @@ public:
       return _music[slot].getStatus() == sf::SoundStream::Status::Playing;
    }
 
+   void setLooping(int slot, bool looping) override
+   {
+      _music[slot].setLooping(looping);
+   }
+
    void beginLoad(int slot, const std::string& filename) override
    {
       _load_state[slot] = LoadState::Loading;
