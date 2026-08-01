@@ -120,6 +120,8 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
       _item_required = item_required;
    }
 
+   _item_required_consumed = ValueReader::readValue<bool>("item_required_consumed", map).value_or(true);
+
    _observed = ValueReader::readValue<bool>("observed", map).value_or(false);
 
    // read animations if set up
@@ -326,7 +328,7 @@ bool TreasureChest::playerHasRequiredKey() const
 
 void TreasureChest::consumeRequiredKey()
 {
-   if (!_item_required.has_value())
+   if (!_item_required.has_value() || !_item_required_consumed)
    {
       return;
    }
