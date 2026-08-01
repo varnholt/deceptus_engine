@@ -622,7 +622,15 @@ void Level::loadSaveState()
       return;
    }
 
-   const auto& level_json = save_state._level_state[_description->_filename];
+   // a level that has never been saved has no entry here; the const operator[] would assert in debug and
+   // dereference the end iterator in release, so the key has to be looked up explicitly
+   const auto level_state_it = save_state._level_state.find(_description->_filename);
+   if (level_state_it == save_state._level_state.end())
+   {
+      return;
+   }
+
+   const auto& level_json = *level_state_it;
    if (level_json.is_null())
    {
       return;

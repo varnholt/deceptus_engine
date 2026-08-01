@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
 #include "game/audio/audio.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
@@ -18,6 +19,7 @@ namespace
 {
 static constexpr std::array moveable_box_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "serialized", .type = "bool", .default_value = true},
 };
 static constexpr MechanismSchema moveable_box_schema{
    .type_name = "MoveableObject",
@@ -144,7 +146,11 @@ std::optional<sf::FloatRect> MoveableBox::getBoundingBoxPx()
 
 void MoveableBox::setup(const GameDeserializeData& data)
 {
-   setObjectId(data._tmx_object->_name);
+   // the save state identifies mechanisms by their object id and box names are not necessarily unique
+   // within a level, so the tmx object id is folded in to tell two identically named boxes apart
+   const auto& tmx_name = data._tmx_object->_name;
+   const auto& tmx_id = data._tmx_object->_id;
+   setObjectId(tmx_name.empty() ? tmx_id : tmx_name + "_" + tmx_id);
 
    _texture = TexturePool::getInstance().get("data/sprites/moveable_box.png");
 #ifdef __EMSCRIPTEN__
@@ -167,6 +173,9 @@ void MoveableBox::setup(const GameDeserializeData& data)
 
    addChunks(rect);
 
+   // boxes remember where they were pushed to unless a level opts out of it
+   _serialized = true;
+
    if (data._tmx_object->_properties)
    {
       const auto& map = data._tmx_object->_properties->_map;
@@ -175,6 +184,7 @@ void MoveableBox::setup(const GameDeserializeData& data)
       _settings._friction = ValueReader::readValue<float>("friction", map).value_or(_settings._friction);
       _settings._gravity_scale = ValueReader::readValue<float>("gravity_scale", map).value_or(_settings._gravity_scale);
       setZ(ValueReader::readValue<int32_t>("z", map).value_or(0));
+      _serialized = ValueReader::readValue<bool>("serialized", map).value_or(_serialized);
    }
 
    switch (static_cast<int32_t>(_size.x))
@@ -207,6 +217,40 @@ void MoveableBox::setup(const GameDeserializeData& data)
 
    setupBody(data._world);
    setupTransform();
+}
+
+void MoveableBox::serializeState(nlohmann::json& json_object)
+{
+   if (!_serialized)
+   {
+      return;
+   }
+
+   if (getObjectId().empty())
+   {
+      Log::Warning() << "a moveable box is set up to be serialized but it has neither a name nor a tmx id";
+      return;
+   }
+
+   json_object[getObjectId()] = {{"x_px", _body->GetPosition().x * PPM}, {"y_px", _body->GetPosition().y * PPM}};
+}
+
+void MoveableBox::deserializeState(const nlohmann::json& json_object)
+{
+   const auto x_px = json_object.at("x_px").get<float>();
+   const auto y_px = json_object.at("y_px").get<float>();
+
+   // put the box back where it was pushed to and drop the momentum it had when the level was saved
+   _body->SetTransform(b2Vec2{x_px / PPM, y_px / PPM}, 0.0f);
+   _body->SetLinearVelocity(b2Vec2{0.0f, 0.0f});
+   _body->SetAngularVelocity(0.0f);
+
+   // keep the sprite in sync, update() would otherwise only catch up on the next frame
+#ifdef __EMSCRIPTEN__
+   _sprite->position = {x_px, y_px - 24};
+#else
+   _sprite->setPosition({x_px, y_px - 24});
+#endif
 }
 
 void MoveableBox::setupTransform()

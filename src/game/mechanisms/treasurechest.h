@@ -45,6 +45,14 @@ public:
    /// \return std::nullopt.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   /// \brief writes whether the chest has been opened into save data.
+   /// \param json json object to write state fields into.
+   void serializeState(nlohmann::json& json) override;
+
+   /// \brief restores the opened state from save data.
+   /// \param json json object containing previously serialized state.
+   void deserializeState(const nlohmann::json& json) override;
+
 private:
    enum class Alignment
    {

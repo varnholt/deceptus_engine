@@ -329,17 +329,23 @@ void Gateway::update(const sf::Time& dt)
    if (!_player_intersects && player_intersects)
    {
       _player_intersects = player_intersects;
-      _state = State::Enabling;
 
-      _activated_state._step = 0;
-
-      Audio::getInstance().playSample({"mechanism_gateway_extract_01.wav"});
-
-      for (auto& pa : _pa)
+      // a gateway restored from the save state comes up enabled, so touching it must not replay the
+      // activation sequence and throw it back to the enabling animation
+      if (_state == State::Disabled)
       {
-         pa.reset();
+         _state = State::Enabling;
+
+         _activated_state._step = 0;
+
+         Audio::getInstance().playSample({"mechanism_gateway_extract_01.wav"});
+
+         for (auto& pa : _pa)
+         {
+            pa.reset();
+         }
+         return;
       }
-      return;
    }
 
    // player uses gateway
@@ -649,6 +655,40 @@ void Gateway::update(const sf::Time& dt)
    }
 
    _eye->update(dt, _state);
+}
+
+void Gateway::serializeState(nlohmann::json& json_object)
+{
+   if (getObjectId().empty())
+   {
+      return;
+   }
+
+   // a gateway that is still enabling has already been triggered by the player, so it counts as enabled
+   json_object[getObjectId()] = {{"enabled", _state != State::Disabled}};
+}
+
+void Gateway::deserializeState(const nlohmann::json& json_object)
+{
+   if (!json_object.at("enabled").get<bool>())
+   {
+      return;
+   }
+
+   // skip the activation sequence and bring the gateway up already enabled, mirroring what the transition
+   // from Enabling to Enabled does in update()
+   _state = State::Enabled;
+   _enabled_state.resetTime();
+   _enabled_state._distances_when_activated = _pa[0]._distance_factor;
+
+   _eye->wakeUp();
+
+   if (_flowfield_reference_id.has_value() && _flowfield_texture.has_value())
+   {
+      EventDistributor::event(
+         FlowFieldTextureChangeEvent{._object_id = _flowfield_reference_id.value(), ._texture_id = _flowfield_texture.value()}
+      );
+   }
 }
 
 void Gateway::setup(const GameDeserializeData& data)

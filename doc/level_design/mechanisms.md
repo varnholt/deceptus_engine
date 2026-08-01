@@ -900,6 +900,7 @@ The way to create a moveable object, create a rectangle as usual. So far the spr
 |density|float|Density of the moveable object, default is 1.0f.|
 |gravity_scale|float|Gravity scale of the moveable object, default is 1.0f.|
 |z|int|The layer's z index|
+|serialized|bool|If set to `true`, the box's position is saved and restored when the level is reloaded (default is `true`). Set it to `false` for boxes that should always start from their position in the level.|
 
 
 ---

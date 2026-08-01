@@ -99,9 +99,12 @@ void LevelTransitionHandler::update()
             level->saveState();
          }
 
+         // the level index has to be updated before writing, otherwise the file still points at the level
+         // that is being left and a crash or quit before the next save resumes in the wrong level
+         SaveState::getCurrent()._level_index = target_level_index;
+
          SaveState::serializeToFile();
 
-         SaveState::getCurrent()._level_index = target_level_index;
          LevelTransitionHandler::getInstance()._spawn_position_px = spawn_position_px;
 
          CallbackMap::getInstance().call(static_cast<int32_t>(CallbackType::LoadLevel));
