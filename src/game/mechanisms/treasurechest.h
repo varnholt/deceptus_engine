@@ -63,6 +63,9 @@ private:
    /// \return true when no key is required or when the required inventory item is present.
    bool playerHasRequiredKey() const;
 
+   /// \brief removes the configured key item from the player's inventory after the chest has been unlocked, unless the chest opted out.
+   void consumeRequiredKey();
+
    sf::FloatRect _rect;
    Alignment _alignment{Alignment::Left};
    std::shared_ptr<sf::Texture> _texture;
@@ -72,6 +75,7 @@ private:
    State _state{State::Closed};
    std::optional<std::string> _spawn_extra;
    std::optional<std::string> _item_required;
+   bool _item_required_consumed{true};  //!< when set, the required item is taken out of the inventory once the chest is unlocked
    sf::Vector2f _spawn_offset;
    bool _extra_spawned{false};                   //!< guards against calling spawnExtra more than once
    std::weak_ptr<GameMechanism> _spawned_extra;  //!< non-owning reference used to disable pickup during the spawn effect

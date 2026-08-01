@@ -21,6 +21,18 @@ namespace
 static constexpr int32_t default_treasure_chest_z = 0;
 static constexpr std::array treasure_chest_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = default_treasure_chest_z},
+   PropertyInfo{.name = "texture", .type = "string", .default_value = std::string_view{"data/sprites/treasure_chest.png"}},
+   PropertyInfo{.name = "sample_open", .type = "string", .default_value = std::string_view{"treasure_chest_open.wav"}},
+   PropertyInfo{.name = "sample_locked", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "spawn_extra", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "spawn_offset_x", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "spawn_offset_y", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "item_required", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "item_required_consumed", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "animation_idle_closed", .type = "string", .default_value = std::string_view{"idle"}},
+   PropertyInfo{.name = "animation_opening", .type = "string", .default_value = std::string_view{"opening"}},
+   PropertyInfo{.name = "animation_idle_open", .type = "string", .default_value = std::string_view{"open"}},
+   PropertyInfo{.name = "observed", .type = "bool", .default_value = false},
 };
 static constexpr MechanismSchema treasure_chest_schema{
    .type_name = "TreasureChest",
@@ -120,6 +132,8 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
       _item_required = item_required;
    }
 
+   _item_required_consumed = ValueReader::readValue<bool>("item_required_consumed", map).value_or(true);
+
    _observed = ValueReader::readValue<bool>("observed", map).value_or(false);
 
    // read animations if set up
@@ -212,6 +226,8 @@ void TreasureChest::update(const sf::Time& dt)
             {
                if (playerHasRequiredKey())
                {
+                  consumeRequiredKey();
+
                   _spawn_effect->activate();
                   _state = State::Opening;
                   _animation_opening->seekToStart();
@@ -320,4 +336,14 @@ std::optional<sf::FloatRect> TreasureChest::getBoundingBoxPx()
 bool TreasureChest::playerHasRequiredKey() const
 {
    return !_item_required.has_value() || (_item_required.has_value() && SaveState::getPlayerInfo()._inventory.has(*_item_required));
+}
+
+void TreasureChest::consumeRequiredKey()
+{
+   if (!_item_required.has_value() || !_item_required_consumed)
+   {
+      return;
+   }
+
+   SaveState::getPlayerInfo()._inventory.remove(*_item_required);
 }

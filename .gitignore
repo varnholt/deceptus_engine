@@ -16,6 +16,7 @@ build_*/*
 **/build/
 .idea/*
 /doc/doxygen-html
+/data/schemas/
 /lab/patch_tool/target
 /lab/patch_tool/Cargo.lock
 /lab/wasm_browser_test/.venv
