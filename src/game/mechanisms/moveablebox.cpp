@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
 #include "game/audio/audio.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
@@ -18,6 +19,7 @@ namespace
 {
 static constexpr std::array moveable_box_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "serialized", .type = "bool", .default_value = true},
 };
 static constexpr MechanismSchema moveable_box_schema{
    .type_name = "MoveableObject",
@@ -167,6 +169,9 @@ void MoveableBox::setup(const GameDeserializeData& data)
 
    addChunks(rect);
 
+   // boxes remember where they were pushed to unless a level opts out of it
+   _serialized = true;
+
    if (data._tmx_object->_properties)
    {
       const auto& map = data._tmx_object->_properties->_map;
@@ -175,6 +180,7 @@ void MoveableBox::setup(const GameDeserializeData& data)
       _settings._friction = ValueReader::readValue<float>("friction", map).value_or(_settings._friction);
       _settings._gravity_scale = ValueReader::readValue<float>("gravity_scale", map).value_or(_settings._gravity_scale);
       setZ(ValueReader::readValue<int32_t>("z", map).value_or(0));
+      _serialized = ValueReader::readValue<bool>("serialized", map).value_or(_serialized);
    }
 
    switch (static_cast<int32_t>(_size.x))
@@ -211,8 +217,14 @@ void MoveableBox::setup(const GameDeserializeData& data)
 
 void MoveableBox::serializeState(nlohmann::json& json_object)
 {
+   if (!_serialized)
+   {
+      return;
+   }
+
    if (getObjectId().empty())
    {
+      Log::Warning() << "a moveable box is set up to be serialized but it doesn't have any id";
       return;
    }
 
