@@ -148,6 +148,10 @@ function initialize()
       )
    end
 
+   addSample("splat_01.wav")
+   setReferenceVolume(1.0)
+   setAudioUpdateBehavior(AudioUpdateBehavior["AlwaysOn"])
+
    updateSprite(0.0)
 end
 
@@ -320,6 +324,7 @@ function smashed()
 
    -- print("FrogBubble: Smashed, starting to die")
 
+   playSample("splat_01.wav", 1.0)
    _smashed = true
    startDying()
 end
