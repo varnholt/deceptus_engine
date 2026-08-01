@@ -123,6 +123,10 @@ void MusicPlayer::processPendingRequest()
 
       case MusicPlayerTypes::TransitionType::LetCurrentFinish:
       {
+         // a looping stream repeats forever and never reports that it stopped, so the loop has to
+         // be dropped for the current track to be able to run out.
+         _backend->setLooping(_current_index, false);
+
          if (!_backend->isPlaying(_current_index))
          {
             beginTransition(request);
@@ -255,6 +259,8 @@ void MusicPlayer::activateLoadedTrack(bool load_succeeded)
    }
 
    const auto next_index = 1 - _current_index;
+
+   _backend->setLooping(next_index, request.post_action == MusicPlayerTypes::PostPlaybackAction::Loop);
 
    if (request.transition == MusicPlayerTypes::TransitionType::Crossfade)
    {

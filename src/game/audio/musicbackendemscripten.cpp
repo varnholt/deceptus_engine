@@ -93,6 +93,14 @@ public:
       return _music[slot] && _music[slot]->isPlaying();
    }
 
+   void setLooping(int slot, bool looping) override
+   {
+      if (_music[slot])
+      {
+         _music[slot]->setLooping(looping);
+      }
+   }
+
    void beginLoad(int slot, const std::string& filename) override
    {
       _load_succeeded[slot] = loadIntoSlot(slot, filename);

@@ -37,6 +37,15 @@ public:
    /// \return true if the slot holds a stream that is playing.
    virtual bool isPlaying(int slot) const = 0;
 
+   /// \brief enables or disables seamless looping of the stream in the given slot.
+   ///
+   /// Looping is handled by the stream itself rather than by restarting the track once it
+   /// reports that it stopped: on Emscripten a finished stream keeps reporting that it is
+   /// playing, so a restart-on-finish approach never loops there.
+   /// \param slot stream slot index (0 or 1).
+   /// \param looping true to repeat the track when it reaches its end.
+   virtual void setLooping(int slot, bool looping) = 0;
+
    /// \brief begins loading a track into the given slot.
    ///
    /// The desktop backend opens the file on a background thread so the game loop never

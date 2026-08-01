@@ -26,7 +26,7 @@ public:
       std::string filename;
       MusicPlayerTypes::TransitionType transition;
       std::chrono::milliseconds duration{2000};  // for crossfade or fadeout
-      MusicPlayerTypes::PostPlaybackAction post_action = MusicPlayerTypes::PostPlaybackAction::None;
+      MusicPlayerTypes::PostPlaybackAction post_action = MusicPlayerTypes::PostPlaybackAction::Loop;
    };
 
    /// \brief returns the global music-player singleton instance.

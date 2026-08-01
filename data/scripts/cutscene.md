@@ -213,7 +213,7 @@ Fires `<id>/dismissed` when the player closes it.
 | `file` | string | Path to the audio file |
 | `transition` | string | `let_current_finish`, `crossfade`, `immediate`, or `fade_out_then_new` |
 | `duration_ms` | number | Transition duration in milliseconds |
-| `post_action` | string | `none`, `loop`, or `play_next` |
+| `post_action` | string | `none`, `loop`, or `play_next`; defaults to `loop` when omitted |
 
 #### `play_sound`
 
