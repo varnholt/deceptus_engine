@@ -651,6 +651,40 @@ void Gateway::update(const sf::Time& dt)
    _eye->update(dt, _state);
 }
 
+void Gateway::serializeState(nlohmann::json& json_object)
+{
+   if (getObjectId().empty())
+   {
+      return;
+   }
+
+   // a gateway that is still enabling has already been triggered by the player, so it counts as enabled
+   json_object[getObjectId()] = {{"enabled", _state != State::Disabled}};
+}
+
+void Gateway::deserializeState(const nlohmann::json& json_object)
+{
+   if (!json_object.at("enabled").get<bool>())
+   {
+      return;
+   }
+
+   // skip the activation sequence and bring the gateway up already enabled, mirroring what the transition
+   // from Enabling to Enabled does in update()
+   _state = State::Enabled;
+   _enabled_state.resetTime();
+   _enabled_state._distances_when_activated = _pa[0]._distance_factor;
+
+   _eye->wakeUp();
+
+   if (_flowfield_reference_id.has_value() && _flowfield_texture.has_value())
+   {
+      EventDistributor::event(
+         FlowFieldTextureChangeEvent{._object_id = _flowfield_reference_id.value(), ._texture_id = _flowfield_texture.value()}
+      );
+   }
+}
+
 void Gateway::setup(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);

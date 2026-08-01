@@ -338,6 +338,44 @@ bool TreasureChest::playerHasRequiredKey() const
    return !_item_required.has_value() || (_item_required.has_value() && SaveState::getPlayerInfo()._inventory.has(*_item_required));
 }
 
+void TreasureChest::serializeState(nlohmann::json& json_object)
+{
+   if (getObjectId().empty())
+   {
+      return;
+   }
+
+   // a chest that is opening has already consumed the key, so it counts as open for the save state
+   json_object[getObjectId()] = {{"open", _state != State::Closed}};
+}
+
+void TreasureChest::deserializeState(const nlohmann::json& json_object)
+{
+   if (!json_object.at("open").get<bool>())
+   {
+      return;
+   }
+
+   // skip the opening animation, the chest was already opened in a previous visit
+   _state = State::Open;
+
+   if (_animation_idle_closed)
+   {
+      _animation_idle_closed->pause();
+   }
+
+   if (_animation_opening)
+   {
+      _animation_opening->pause();
+   }
+
+   if (_animation_idle_open)
+   {
+      _animation_idle_open->seekToStart();
+      _animation_idle_open->play();
+   }
+}
+
 void TreasureChest::consumeRequiredKey()
 {
    if (!_item_required.has_value() || !_item_required_consumed)

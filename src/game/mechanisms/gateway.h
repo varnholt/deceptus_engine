@@ -53,6 +53,14 @@ public:
    /// \param destination_gateway_id object id of the destination gateway.
    void setTargetId(const std::string& destination_gateway_id);
 
+   /// \brief writes whether the gateway has been activated into save data.
+   /// \param json json object to write state fields into.
+   void serializeState(nlohmann::json& json) override;
+
+   /// \brief restores the activated state from save data.
+   /// \param json json object containing previously serialized state.
+   void deserializeState(const nlohmann::json& json) override;
+
 private:
    enum class State
    {
