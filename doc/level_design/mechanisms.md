@@ -1468,6 +1468,8 @@ Further, when the extra is spawned, a 'Spawn Animation' is played which introduc
 |sample_open|string|Sample that is played when the chest is opened (default is `treasure_chest_open.wav`)|
 |sample_locked|string|Sample that is played when the player attempts to open the chest without the required item (optional)|
 |spawn_extra|string|The identifier of the extra that's supposed to be spawned when opened (default is an empty string)|
+|spawn_offset_x|float|Horizontal offset in px that is added to the spawned extra's own position when it appears (default is `0`)|
+|spawn_offset_y|float|Vertical offset in px that is added to the spawned extra's own position when it appears (default is `0`). Negative values move the extra up, which is how the extra is usually lifted out of the chest.|
 |item_required|string|The identifier of the item required to open the chest (optional)|
 |item_required_consumed|bool|Whether the item given in `item_required` is removed from the player's inventory once the chest has been unlocked (default is `true`). Set this to `false` for a key that is supposed to stay in the inventory and unlock more than one chest.|
 |animation_idle_closed|string|The closed idle animation loaded from `data/sprites/treasure_chest_animations.json` (default is "idle")|
