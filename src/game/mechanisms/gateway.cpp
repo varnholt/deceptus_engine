@@ -329,17 +329,23 @@ void Gateway::update(const sf::Time& dt)
    if (!_player_intersects && player_intersects)
    {
       _player_intersects = player_intersects;
-      _state = State::Enabling;
 
-      _activated_state._step = 0;
-
-      Audio::getInstance().playSample({"mechanism_gateway_extract_01.wav"});
-
-      for (auto& pa : _pa)
+      // a gateway restored from the save state comes up enabled, so touching it must not replay the
+      // activation sequence and throw it back to the enabling animation
+      if (_state == State::Disabled)
       {
-         pa.reset();
+         _state = State::Enabling;
+
+         _activated_state._step = 0;
+
+         Audio::getInstance().playSample({"mechanism_gateway_extract_01.wav"});
+
+         for (auto& pa : _pa)
+         {
+            pa.reset();
+         }
+         return;
       }
-      return;
    }
 
    // player uses gateway

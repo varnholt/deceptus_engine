@@ -209,6 +209,34 @@ void MoveableBox::setup(const GameDeserializeData& data)
    setupTransform();
 }
 
+void MoveableBox::serializeState(nlohmann::json& json_object)
+{
+   if (getObjectId().empty())
+   {
+      return;
+   }
+
+   json_object[getObjectId()] = {{"x_px", _body->GetPosition().x * PPM}, {"y_px", _body->GetPosition().y * PPM}};
+}
+
+void MoveableBox::deserializeState(const nlohmann::json& json_object)
+{
+   const auto x_px = json_object.at("x_px").get<float>();
+   const auto y_px = json_object.at("y_px").get<float>();
+
+   // put the box back where it was pushed to and drop the momentum it had when the level was saved
+   _body->SetTransform(b2Vec2{x_px / PPM, y_px / PPM}, 0.0f);
+   _body->SetLinearVelocity(b2Vec2{0.0f, 0.0f});
+   _body->SetAngularVelocity(0.0f);
+
+   // keep the sprite in sync, update() would otherwise only catch up on the next frame
+#ifdef __EMSCRIPTEN__
+   _sprite->position = {x_px, y_px - 24};
+#else
+   _sprite->setPosition({x_px, y_px - 24});
+#endif
+}
+
 void MoveableBox::setupTransform()
 {
 #ifdef __EMSCRIPTEN__
