@@ -6,6 +6,7 @@
 #include "menus/menu.h"
 #include "menus/menuaudio.h"
 
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -20,7 +21,7 @@ MenuScreenVideo::MenuScreenVideo()
 {
    setFilename("data/menus/video.psd");
 
-   _video_modes = {{640, 360}, {1280, 720}, {1366, 768}, {1600, 900}, {1920, 1080}, {2560, 1440}, {3840, 2160}};
+   _base_video_modes = {{640, 360}, {1280, 720}, {1366, 768}, {1600, 900}, {1920, 1080}, {2560, 1440}, {3840, 2160}};
 
 #ifdef __EMSCRIPTEN__
    const auto desktop_mode = sf::VideoModeUtils::getDesktopMode();
@@ -28,10 +29,32 @@ MenuScreenVideo::MenuScreenVideo()
    const auto desktop_mode = sf::VideoMode::getDesktopMode();
 #endif
    std::erase_if(
-      _video_modes,
+      _base_video_modes,
       [&desktop_mode](const std::array<int32_t, 2>& mode)
       { return mode[0] > static_cast<int32_t>(desktop_mode.size.x) || mode[1] > static_cast<int32_t>(desktop_mode.size.y); }
    );
+
+   refreshVideoModes();
+}
+
+void MenuScreenVideo::refreshVideoModes()
+{
+   // the active resolution is not necessarily one of the predefined modes: going fullscreen adopts the
+   // desktop mode and resizing the window by dragging its border yields arbitrary sizes. keep the active
+   // resolution in the list so it can be found and stepped away from in either direction.
+   _video_modes = _base_video_modes;
+
+   const std::array<int32_t, 2> current_mode{
+      GameConfiguration::getInstance()._video_mode_width, GameConfiguration::getInstance()._video_mode_height
+   };
+
+   if (std::find(_video_modes.begin(), _video_modes.end(), current_mode) != _video_modes.end())
+   {
+      return;
+   }
+
+   // std::array compares lexicographically, so this keeps the list ordered by width, then height
+   _video_modes.insert(std::lower_bound(_video_modes.begin(), _video_modes.end(), current_mode), current_mode);
 }
 
 void MenuScreenVideo::up()
@@ -76,6 +99,14 @@ void MenuScreenVideo::select(int32_t step)
 
       case Selection::Resolution:
       {
+         // in fullscreen the resolution follows the desktop mode, so the row is a readout and cannot be changed
+         if (GameConfiguration::getInstance()._fullscreen)
+         {
+            return;
+         }
+
+         refreshVideoModes();
+
          auto it = std::find_if(
             std::begin(_video_modes),
             std::end(_video_modes),
@@ -322,12 +353,13 @@ void MenuScreenVideo::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void MenuScreenVideo::updateLayers()
 {
+   refreshVideoModes();
+
    const auto resolution_selected = _selection == Selection::Resolution;
    const auto display_mode_selected = _selection == Selection::DisplayMode;
    const auto vsync_selected = _selection == Selection::VSync;
    const auto brightness_selected = _selection == Selection::Brightness;
 
-   auto resolution_index = 0u;
    auto display_mode_value_index = 0;
 
    const auto fullscreen = GameConfiguration::getInstance()._fullscreen;
@@ -336,17 +368,11 @@ void MenuScreenVideo::updateLayers()
       display_mode_value_index = 2;
    }
 
+   // the resolution is dictated by the desktop mode while fullscreen, so the row turns into a readout
+   const auto resolution_editable = !fullscreen;
+
    const auto resolution_width = GameConfiguration::getInstance()._video_mode_width;
    const auto resolution_height = GameConfiguration::getInstance()._video_mode_height;
-
-   for (auto index = 0u; index < _video_modes.size(); index++)
-   {
-      if (_video_modes[index][0] == resolution_width && _video_modes[index][1] == resolution_height)
-      {
-         resolution_index = index;
-         break;
-      }
-   }
 
    const auto brightness_value = GameConfiguration::getInstance()._brightness;
    const auto vsync_enabled = GameConfiguration::getInstance()._vsync_enabled;
@@ -362,7 +388,7 @@ void MenuScreenVideo::updateLayers()
    _layers["back_pc_1"]->_visible = false;
 
    _layers["resolution_highlight"]->_visible = resolution_selected;
-   _layers["resolution_arrows"]->_visible = resolution_selected;
+   _layers["resolution_arrows"]->_visible = resolution_selected && resolution_editable;
 
    _layers["brightness_body_0"]->_visible = !brightness_selected;
    _layers["brightness_body_1"]->_visible = brightness_selected;
@@ -398,21 +424,26 @@ void MenuScreenVideo::updateLayers()
 
    // resolution row
    _resolution_label->setString(sftr("Resolution"));
-   _resolution_label->setFillColor(resolution_selected ? color_label_selected : color_label_normal);
+   if (resolution_editable)
+   {
+      _resolution_label->setFillColor(resolution_selected ? color_label_selected : color_label_normal);
+   }
+   else
+   {
+      _resolution_label->setFillColor(color_help_text);
+   }
    placeTextLeft(*_resolution_label, rowRect(_row_label_base_rect, 0));
 
-   _resolution_help_text->setString(sftr("Set the display resolution"));
+   _resolution_help_text->setString(
+      resolution_editable ? sftr("Set the display resolution") : sftr("The display resolution is used while in fullscreen mode")
+   );
    placeTextCentered(*_resolution_help_text, _row_help_base_rect);
 
-   if (!_video_modes.empty())
-   {
-      const auto& mode = _video_modes[resolution_index];
 #ifdef __EMSCRIPTEN__
-      _resolution_text->setString(std::format("{}x{}", mode[0], mode[1]).c_str());
+   _resolution_text->setString(std::format("{}x{}", resolution_width, resolution_height).c_str());
 #else
-      _resolution_text->setString(std::format("{}x{}", mode[0], mode[1]));
+   _resolution_text->setString(std::format("{}x{}", resolution_width, resolution_height));
 #endif
-   }
 
    // display mode row
    _displaymode_label->setString(sftr("Display Mode"));
