@@ -58,6 +58,7 @@
   "Do you want to end the game?": "ゲームを終了しますか？",
   "Resolution": "解像度",
   "Set the display resolution": "表示解像度を設定する",
+  "The display resolution is used while in fullscreen mode": "フルスクリーンモードではディスプレイの解像度が使用されます",
   "Display Mode": "表示モード",
   "Change the display render mode of the game": "ゲームの表示レンダリングモードを変更する",
   "Windowed": "ウィンドウ",

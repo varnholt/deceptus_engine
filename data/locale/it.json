@@ -58,6 +58,7 @@
   "Do you want to end the game?": "Vuoi terminare la partita?",
   "Resolution": "Risoluzione",
   "Set the display resolution": "Imposta la risoluzione dello schermo",
+  "The display resolution is used while in fullscreen mode": "In modalità a schermo intero viene usata la risoluzione dello schermo",
   "Display Mode": "Modalità Schermo",
   "Change the display render mode of the game": "Cambia la modalità di rendering dello schermo",
   "Windowed": "Finestra",

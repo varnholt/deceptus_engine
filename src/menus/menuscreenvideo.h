@@ -69,10 +69,14 @@ public:
    Selection _selection = Selection::Resolution;
 
 private:
+   /// \brief rebuilds the selectable resolution list so it contains the active resolution.
+   void refreshVideoModes();
+
    FullscreenCallback _fullscreen_callback;
    ResolutionCallback _resolution_callback;
    VSyncCallback _vsync_callback;
-   std::vector<std::array<int32_t, 2>> _video_modes;
+   std::vector<std::array<int32_t, 2>> _base_video_modes;  //!< predefined modes that fit the desktop resolution
+   std::vector<std::array<int32_t, 2>> _video_modes;       //!< base modes plus the active resolution if it is not one of them
    std::vector<std::shared_ptr<Layer>> _brightness_value_layers;
 
    std::unique_ptr<sf::Text> _resolution_text;  //!< dynamic "WxH" value, e.g. "1280x720"
