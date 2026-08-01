@@ -63,6 +63,9 @@ private:
    /// \return true when no key is required or when the required inventory item is present.
    bool playerHasRequiredKey() const;
 
+   /// \brief removes the configured key item from the player's inventory after the chest has been unlocked.
+   void consumeRequiredKey();
+
    sf::FloatRect _rect;
    Alignment _alignment{Alignment::Left};
    std::shared_ptr<sf::Texture> _texture;

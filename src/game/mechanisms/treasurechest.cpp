@@ -212,6 +212,8 @@ void TreasureChest::update(const sf::Time& dt)
             {
                if (playerHasRequiredKey())
                {
+                  consumeRequiredKey();
+
                   _spawn_effect->activate();
                   _state = State::Opening;
                   _animation_opening->seekToStart();
@@ -320,4 +322,14 @@ std::optional<sf::FloatRect> TreasureChest::getBoundingBoxPx()
 bool TreasureChest::playerHasRequiredKey() const
 {
    return !_item_required.has_value() || (_item_required.has_value() && SaveState::getPlayerInfo()._inventory.has(*_item_required));
+}
+
+void TreasureChest::consumeRequiredKey()
+{
+   if (!_item_required.has_value())
+   {
+      return;
+   }
+
+   SaveState::getPlayerInfo()._inventory.remove(*_item_required);
 }
