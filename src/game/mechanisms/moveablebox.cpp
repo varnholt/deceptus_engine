@@ -146,7 +146,11 @@ std::optional<sf::FloatRect> MoveableBox::getBoundingBoxPx()
 
 void MoveableBox::setup(const GameDeserializeData& data)
 {
-   setObjectId(data._tmx_object->_name);
+   // the save state identifies mechanisms by their object id and box names are not necessarily unique
+   // within a level, so the tmx object id is folded in to tell two identically named boxes apart
+   const auto& tmx_name = data._tmx_object->_name;
+   const auto& tmx_id = data._tmx_object->_id;
+   setObjectId(tmx_name.empty() ? tmx_id : tmx_name + "_" + tmx_id);
 
    _texture = TexturePool::getInstance().get("data/sprites/moveable_box.png");
 #ifdef __EMSCRIPTEN__
@@ -224,16 +228,7 @@ void MoveableBox::serializeState(nlohmann::json& json_object)
 
    if (getObjectId().empty())
    {
-      Log::Warning() << "a moveable box is set up to be serialized but it doesn't have any id";
-      return;
-   }
-
-   // the save state identifies mechanisms by their object id and restores the first one that matches, so
-   // a shared name would move the wrong box; leave the duplicates alone rather than misplace them
-   if (json_object.find(getObjectId()) != json_object.end())
-   {
-      Log::Warning() << "more than one moveable box is named '" << getObjectId()
-                     << "', only the first one keeps its position across save states";
+      Log::Warning() << "a moveable box is set up to be serialized but it has neither a name nor a tmx id";
       return;
    }
 

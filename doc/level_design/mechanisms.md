@@ -900,7 +900,7 @@ The way to create a moveable object, create a rectangle as usual. So far the spr
 |density|float|Density of the moveable object, default is 1.0f.|
 |gravity_scale|float|Gravity scale of the moveable object, default is 1.0f.|
 |z|int|The layer's z index|
-|serialized|bool|If set to `true`, the box's position is saved and restored when the level is reloaded (default is `true`). Set it to `false` for boxes that should always start from their position in the level. Serialized boxes need a name, and that name has to be unique within the level, since the save state identifies mechanisms by it.|
+|serialized|bool|If set to `true`, the box's position is saved and restored when the level is reloaded (default is `true`). Set it to `false` for boxes that should always start from their position in the level. Boxes are identified in the save state by their name combined with their Tiled object id, so two boxes may share a name.|
 
 
 ---
