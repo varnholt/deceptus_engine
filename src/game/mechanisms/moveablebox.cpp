@@ -228,6 +228,15 @@ void MoveableBox::serializeState(nlohmann::json& json_object)
       return;
    }
 
+   // the save state identifies mechanisms by their object id and restores the first one that matches, so
+   // a shared name would move the wrong box; leave the duplicates alone rather than misplace them
+   if (json_object.find(getObjectId()) != json_object.end())
+   {
+      Log::Warning() << "more than one moveable box is named '" << getObjectId()
+                     << "', only the first one keeps its position across save states";
+      return;
+   }
+
    json_object[getObjectId()] = {{"x_px", _body->GetPosition().x * PPM}, {"y_px", _body->GetPosition().y * PPM}};
 }
 
