@@ -196,6 +196,18 @@ public:
       MusicPlayerTypes::PostPlaybackAction post_action
    );
 
+   /// \brief selects the level music track without starting playback.
+   ///
+   /// The engine plays the level music once level loading has finished, so a script can pick the
+   /// track that matches the reached checkpoint from its initialize function and let the regular
+   /// level music playback start it.
+   /// \param filename music filename or id.
+   void setLevelMusic(const std::string& filename);
+
+   /// \brief returns the checkpoint index reached in the current level.
+   /// \return checkpoint index, or -1 when no checkpoint has been reached yet.
+   int32_t getCheckpoint() const;
+
    /// \brief loads and starts playback of a recorded player event stream.
    /// \param filename recording file name with or without .dat extension.
    void playEventRecording(const std::string& filename);
