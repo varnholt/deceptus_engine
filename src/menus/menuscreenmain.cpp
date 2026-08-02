@@ -65,6 +65,15 @@ MenuScreenMain::MenuScreenMain()
    const auto copyright_bounds = _text_copyright->getLocalBounds();
    const auto copyright_x = static_cast<int32_t>((640.0f - copyright_bounds.size.x) / 2.0f - copyright_bounds.position.x);
    sfcompat::setPosition(*_text_copyright, {static_cast<float>(copyright_x), 341.0f});
+
+#ifdef __EMSCRIPTEN__
+   _text_title = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_title = std::make_unique<sf::Text>(_font);
+#endif
+   _text_title->setFont(_font);
+   _text_title->setCharacterSize(12);
+   _text_title->setFillColor(sf::Color{127, 171, 253});
 }
 
 void MenuScreenMain::update(const sf::Time& /*dt*/)
@@ -102,6 +111,7 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
    {
       target.draw(*_text_build, drawStates);
       target.draw(*_text_copyright, drawStates);
+      target.draw(*_text_title, drawStates);
       if (can_continue)
       {
          target.draw(*_text_continue_item, drawStates);
@@ -154,6 +164,7 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
    {
       target.draw(*_text_build);
       target.draw(*_text_copyright);
+      target.draw(*_text_title);
       if (can_continue)
       {
          target.draw(*_text_continue_item);
@@ -238,6 +249,13 @@ void MenuScreenMain::loadingFinished()
    if (_layers.contains("credits"))
    {
       _layers["credits"]->_visible = false;
+   }
+
+   if (_layers.contains("logo"))
+   {
+      _layers["logo"]->_visible = false;
+      _text_title->setString(sftr("Working Title"));
+      placeTextCentered(*_text_title, _layers["logo"]->_sprite->getGlobalBounds());
    }
 
 #ifdef __EMSCRIPTEN__
