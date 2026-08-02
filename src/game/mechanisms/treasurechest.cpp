@@ -349,6 +349,17 @@ void TreasureChest::serializeState(nlohmann::json& json_object)
    json_object[getObjectId()] = {{"open", _state != State::Closed}};
 }
 
+std::optional<GameMechanismObserver::LuaVariant> TreasureChest::getProperty(const std::string& property_name) const
+{
+   if (property_name == "open")
+   {
+      // consistent with serializeState, a chest that is opening already counts as open
+      return _state != State::Closed;
+   }
+
+   return std::nullopt;
+}
+
 void TreasureChest::deserializeState(const nlohmann::json& json_object)
 {
    if (!json_object.at("open").get<bool>())

@@ -24,6 +24,11 @@ bool GameMechanism::isSerialized() const
    return _serialized;
 }
 
+std::optional<GameMechanismObserver::LuaVariant> GameMechanism::getProperty(const std::string&) const
+{
+   return std::nullopt;
+}
+
 bool GameMechanism::isDestructible() const
 {
    return false;

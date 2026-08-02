@@ -197,6 +197,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "loadCutscene", LevelScriptCallbacks::loadCutscene);
    lua_register(_lua_state, "getCameraCenter", LevelScriptCallbacks::getCameraCenter);
    lua_register(_lua_state, "getMechanismRect", LevelScriptCallbacks::getMechanismRect);
+   lua_register(_lua_state, "getMechanismProperty", LevelScriptCallbacks::getMechanismProperty);
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
@@ -535,6 +536,27 @@ bool LevelScript::isMechanismEnabled(const std::string& search_pattern, const st
       return false;
    }
    return mechanisms.front()->isEnabled();
+}
+
+std::optional<GameMechanismObserver::LuaVariant> LevelScript::getMechanismProperty(
+   const std::string& search_pattern,
+   const std::optional<std::string>& group,
+   const std::string& property_name
+) const
+{
+   if (!_search_mechanism_callback)
+   {
+      Log::Error() << "search mechanism callback not initialized yet";
+      return std::nullopt;
+   }
+
+   const auto mechanisms = _search_mechanism_callback(search_pattern, group);
+   if (mechanisms.empty())
+   {
+      return std::nullopt;
+   }
+
+   return mechanisms.front()->getProperty(property_name);
 }
 
 void LevelScript::setMechanismVisible(const std::string& search_pattern, bool visible, const std::optional<std::string>& group)

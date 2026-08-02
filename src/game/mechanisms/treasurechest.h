@@ -53,6 +53,11 @@ public:
    /// \param json json object containing previously serialized state.
    void deserializeState(const nlohmann::json& json) override;
 
+   /// \brief exposes chest state to level scripts. supported property: "open".
+   /// \param property_name name of the property to read.
+   /// \return true when the chest is no longer closed, std::nullopt for unknown properties.
+   std::optional<GameMechanismObserver::LuaVariant> getProperty(const std::string& property_name) const override;
+
 private:
    enum class Alignment
    {

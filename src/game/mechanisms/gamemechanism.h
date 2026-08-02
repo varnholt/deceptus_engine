@@ -5,6 +5,7 @@
 #include "game/constants.h"
 #include "game/level/chunk.h"
 #include "game/level/hitbox.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 
 #include "SFML/Graphics.hpp"
 
@@ -12,6 +13,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <string>
 
 struct Room;
 
@@ -161,6 +163,12 @@ public:
    /// \brief checks whether this mechanism contributes to save-state serialization.
    /// \return true when serializeState and deserializeState are expected to be used.
    virtual bool isSerialized() const;
+
+   /// \brief reads one named runtime property so level scripts can derive their state from this mechanism
+   /// instead of keeping a duplicate copy of it in the save state.
+   /// \param property_name name of the property to read.
+   /// \return property value when this mechanism exposes the property, std::nullopt otherwise.
+   virtual std::optional<GameMechanismObserver::LuaVariant> getProperty(const std::string& property_name) const;
 
    /// \brief checks whether this mechanism can receive damage and be destroyed.
    /// \return true when hit points and destruction are implemented.
