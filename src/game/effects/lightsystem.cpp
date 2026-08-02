@@ -103,7 +103,7 @@ void LightSystem::drawShadowQuads(
 #endif
 ) const
 {
-   const auto light_pos_m = light->_pos_m + light->_center_offset_m;
+   const auto light_pos_m = light->_shadow_origin_m.value_or(light->_pos_m + light->_center_offset_m);
 
 #ifdef __EMSCRIPTEN__
    sf::RenderStates shadow_states = states;

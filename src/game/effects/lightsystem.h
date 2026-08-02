@@ -3,6 +3,7 @@
 #include <array>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -33,6 +34,11 @@ public:
       b2Vec2 _pos_m = b2Vec2{0.0f, 0.0f};            //!< world position of the light in box2d meters
       b2Vec2 _center_offset_m = b2Vec2{0.0f, 0.0f};  //!< offset from the light's box2d position to the center of its sprite
       sf::Vector2i _center_offset_px;                //!< pixel offset used for sprite positioning
+
+      /// \brief world position to cast shadows from, overriding the sprite center. owners whose
+      ///        light sits close to solid geometry can use this to keep the origin outside occluder
+      ///        polygons; an origin inside a polygon leaves that polygon's interior unshadowed.
+      std::optional<b2Vec2> _shadow_origin_m;
 
       sf::Color _color = {255, 255, 255, 80};
 
