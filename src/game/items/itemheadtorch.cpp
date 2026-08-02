@@ -2,6 +2,7 @@
 
 #include "itemheadtorch.h"
 
+#include <algorithm>
 #include <fstream>
 
 #include "framework/easings/easings.h"
@@ -169,6 +170,23 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
    sfcompat::setOrigin(*active_light->_sprite, {0.0f, 0.0f});
    active_light->_pos_m = light_pos_m;
    active_light->updateSpritePosition();
+
+   // the beam casts its shadows from the lamp end, which sits right about on the player's own
+   // collision edge. anything adam presses against - a moveable box he is pushing, or a wall he is
+   // standing at - then has its near face at that very position, and once the origin slips inside
+   // that polygon every edge extrudes away from an interior point, so nothing shadows the polygon's
+   // interior and the box lights up from within. keeping the origin comfortably inside the player's
+   // own collision half width (0.16m, see Player::createBody) means it can never end up inside
+   // something the player is touching.
+   constexpr auto shadow_origin_max_offset_x_m = 0.12f;
+   const auto body_position_m = player->getBody()->GetPosition();
+   const auto sprite_shadow_origin_m = light_pos_m + active_light->_center_offset_m;
+   active_light->_shadow_origin_m = b2Vec2{
+      std::clamp(
+         sprite_shadow_origin_m.x, body_position_m.x - shadow_origin_max_offset_x_m, body_position_m.x + shadow_origin_max_offset_x_m
+      ),
+      sprite_shadow_origin_m.y
+   };
 
    // set rotation origin at the lamp end in local texture coords (512x512 texture, scaled to display size)
    const sf::Vector2f sprite_scale = sfcompat::getScale(*active_light->_sprite);
