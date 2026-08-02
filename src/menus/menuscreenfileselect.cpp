@@ -236,7 +236,7 @@ void MenuScreenFileSelect::updateLayers()
       const auto selected = index == static_cast<int32_t>(_slot);
 
       // no data
-      _layers["slot_" + slot_name + "_new_game"]->_visible = empty;
+      _layers["slot_" + slot_name + "_new_game"]->_visible = false;
       _layers["slot_" + slot_name + "_new_game_background"]->_visible = empty;
       _layers["slot_" + slot_name + "_new_game_highlight"]->_visible = empty && selected;
       _layers["slot_" + slot_name + "_new_game_deselected"]->_visible = empty && !selected;
