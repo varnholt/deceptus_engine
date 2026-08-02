@@ -225,6 +225,19 @@ function initDrawer()
 end
 
 ------------------------------------------------------------------------------------------------------------------------
+function initLockedBox()
+   -- the chest restores its own open state from the save game, so the texts that describe it are derived from
+   -- the chest instead of being remembered separately
+   -- the search group is the tmx layer name, which is not the group id that mechanismEvent reports
+   if (getMechanismProperty("locked_box", "treasure_chests", "open")) then
+      setMechanismEnabled("locked_message", false, "dialogues")
+      setMechanismEnabled("locked_box_interaction_help", false, "interaction_help")
+      setMechanismEnabled("handle_help", false, "interaction_help")
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
 function openDrawer()
    if (inventoryHas("key")) then
       return
@@ -285,6 +298,7 @@ function update(dt)
 
       initLocker()
       initDrawer()
+      initLockedBox()
       initLeverSpike()
    end
 

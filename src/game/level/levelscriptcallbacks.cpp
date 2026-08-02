@@ -5,6 +5,8 @@
 #include <fstream>
 #include <lua.hpp>
 #include <sstream>
+#include <type_traits>
+#include <variant>
 
 #include "SFML/Graphics.hpp"
 #include "framework/tmxparser/tmxtools.h"
@@ -95,6 +97,52 @@ int32_t isMechanismVisible(lua_State* state)
    }
 
    lua_pushboolean(state, LevelScript::getCurrent()->isMechanismVisible(search_pattern, group));
+   return 1;
+}
+
+int32_t getMechanismProperty(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 3)
+   {
+      return 0;
+   }
+
+   const std::string search_pattern = lua_tostring(state, 1);
+   const std::string group = lua_tostring(state, 2);
+   const std::string property_name = lua_tostring(state, 3);
+
+   const auto property = LevelScript::getCurrent()->getMechanismProperty(search_pattern, group, property_name);
+   if (!property.has_value())
+   {
+      lua_pushnil(state);
+      return 1;
+   }
+
+   std::visit(
+      [state](const auto& property_value)
+      {
+         using PropertyType = std::decay_t<decltype(property_value)>;
+         if constexpr (std::is_same_v<PropertyType, bool>)
+         {
+            lua_pushboolean(state, property_value);
+         }
+         else if constexpr (std::is_same_v<PropertyType, int64_t>)
+         {
+            lua_pushinteger(state, property_value);
+         }
+         else if constexpr (std::is_same_v<PropertyType, double>)
+         {
+            lua_pushnumber(state, property_value);
+         }
+         else
+         {
+            lua_pushstring(state, property_value.c_str());
+         }
+      },
+      property.value()
+   );
+
    return 1;
 }
 

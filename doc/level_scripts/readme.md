@@ -263,6 +263,46 @@ Returns the bounding rectangle of the first mechanism matching the search patter
 |return|table or nil|Table with fields `x`, `y`, `width`, `height` in world pixels|
 
 
+## `getMechanismProperty`
+
+Reads a named runtime property from the first mechanism matching the search pattern, or `nil` if
+nothing matches or the mechanism does not expose that property.
+
+Use this to derive script state from a mechanism that already persists it, instead of remembering
+the same fact separately in the level script. A mechanism restores its own state from the save game
+before the level script starts, so a script that reacts to a state change in `mechanismEvent` can
+reproduce the same result on load by querying the mechanism.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Mechanism search pattern (regular expression)|
+|2|string|Mechanism group|
+|3|string|Property name|
+|return|bool, number, string or nil|Property value, or `nil` when unavailable|
+
+The group is the **tmx layer name** the mechanism lives on, for example `treasure_chests`. This is
+not always the same string as the group id that `mechanismEvent` reports for the same mechanism,
+which is `treasurechests` for a treasure chest. A group that does not match a layer name silently
+yields `nil`.
+
+Mechanisms opt in individually, so only the properties listed here are available:
+
+|Mechanism|Group|Property|Type|Description|
+|-|-|-|-|-|
+|`TreasureChest`|`treasure_chests`|`open`|bool|`true` once the chest has been opened, including while the opening animation runs|
+
+```lua
+-- the chest restores its own open state, so the texts that describe it are derived from the chest
+if (getMechanismProperty("locked_box", "treasure_chests", "open")) then
+   setMechanismEnabled("locked_message", false, "dialogues")
+   setMechanismEnabled("locked_box_interaction_help", false, "interaction_help")
+end
+```
+
+To expose a property on another mechanism, override `GameMechanism::getProperty` and return the
+value for the property names it supports.
+
+
 ## `getCameraCenter`
 
 Returns the current camera center in world pixel coordinates.

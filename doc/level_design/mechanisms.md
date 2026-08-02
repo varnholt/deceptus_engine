@@ -1488,6 +1488,28 @@ When the `observed` flag is set to `true`, the treasure chest will emit the foll
 |state|`locked`|Emitted when the player attempts to open the chest without having the required item|
 |state|`open`|Emitted when the chest has fully opened and the spawn effect is shown|
 
+These events are only emitted while the level is running. A chest restores its open state from the
+save game before the level script starts, so the `open` event does not fire again on load. Any
+script state that was set up in reaction to it has to be derived from the chest instead, see below.
+
+### Readable Properties
+
+The chest exposes its state to the level script through `getMechanismProperty`:
+
+|Property|Type|Description|
+|-|-|-|
+|open|bool|`true` once the chest has been opened, including while the opening animation runs|
+
+```lua
+-- reproduce on load what the "open" event did while playing
+if (getMechanismProperty("locked_box", "treasure_chests", "open")) then
+   setMechanismEnabled("locked_message", false, "dialogues")
+end
+```
+
+Note the group is the object group `treasure_chests`, not the `treasurechests` group id that
+`mechanismEvent` reports.
+
 ### Spawn Effect Properties (extension to the Object Properties above)
 
 The spawn effect consists of an orb animation in the center and particles that move towards that orb.

@@ -15,6 +15,7 @@ int32_t isPlayerIntersectingSensorRect(lua_State* state);
 
 // mechanisms
 int32_t getMechanismRect(lua_State* state);
+int32_t getMechanismProperty(lua_State* state);
 int32_t isMechanismEnabled(lua_State* state);
 int32_t isMechanismVisible(lua_State* state);
 int32_t setMechanismEnabled(lua_State* state);

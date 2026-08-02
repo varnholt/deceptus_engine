@@ -54,6 +54,14 @@ public:
    /// \return true when at least one mechanism matches and the first one is enabled.
    bool isMechanismEnabled(const std::string& mechanism_id, const std::optional<std::string>& group) const;
 
+   /// \brief reads a named property from the first mechanism that matches the query.
+   /// \param search_pattern regex used to select mechanisms.
+   /// \param group optional mechanism group filter.
+   /// \param property_name name of the property to read from the matched mechanism.
+   /// \return property value, or nullopt when nothing matches or the mechanism does not expose the property.
+   std::optional<GameMechanismObserver::LuaVariant>
+   getMechanismProperty(const std::string& search_pattern, const std::optional<std::string>& group, const std::string& property_name) const;
+
    /// \brief sets visibility for all matching mechanisms.
    /// \param search_pattern regex used to select mechanisms.
    /// \param visible target visibility state.
