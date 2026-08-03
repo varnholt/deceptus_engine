@@ -1,0 +1,9 @@
+[project]
+name = "media-assets"
+version = "0.1.0"
+description = "Derive publishable media assets from a lossless gameplay master"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv]
+package = false
