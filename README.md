@@ -45,10 +45,25 @@ The complete documentation lives in [doc/readme.md](doc/readme.md). The most tra
 
 # Get a Build
 
-Every push to `master` is built for all four targets by GitHub Actions. Pick the latest run of
-[your platform's workflow](https://github.com/varnholt/deceptus_engine/actions) and grab the
-artifact at the bottom of the summary page. The Linux and macOS artifacts ship the shared
-libraries next to the binary along with a `run.sh` that points the loader at them.
+Every push to `master` is built for all four targets. These links always give you the newest
+successful build and need no GitHub account:
+
+|Platform|Download|
+|-|-|
+|Windows|[deceptus-windows.zip](https://nightly.link/varnholt/deceptus_engine/workflows/windows/master/deceptus-windows.zip)|
+|Linux|[deceptus-linux.zip](https://nightly.link/varnholt/deceptus_engine/workflows/linux/master/deceptus-linux.zip)|
+|macOS|[deceptus-macos.zip](https://nightly.link/varnholt/deceptus_engine/workflows/macos/master/deceptus-macos.zip)|
+|Web|[deceptus-wasm.zip](https://nightly.link/varnholt/deceptus_engine/workflows/wasm/master/deceptus-wasm.zip)|
+
+The desktop archives contain the executable next to the `data/` directory. On Linux and macOS the
+shared libraries come along in `lib/` with a `run.sh` that points the loader at them, so start
+those through `run.sh`. The web archive holds the Emscripten output and needs a server that sends
+the `COOP`/`COEP` headers described under [Web (WebAssembly)](#web-webassembly).
+
+The links resolve through [nightly.link](https://nightly.link), which hands out the artifact of
+the latest successful workflow run. That indirection exists because GitHub only serves Actions
+artifacts to signed-in users. If you are signed in you can equally take them straight from the
+[workflow runs](https://github.com/varnholt/deceptus_engine/actions).
 
 
 # How to Build
