@@ -61,6 +61,30 @@ CAPTURE_FPS = 60
 CAPTURE_DURATION_SECONDS: int = _config.get("capture_duration_seconds", 8)
 GIF_FPS: int = _config.get("gif_fps", 25)
 
+# PlayerControls keeps its pressed key bitmask from sf::Event::KeyPressed and KeyReleased, so a
+# posted WM_KEYDOWN without a matching WM_KEYUP reads as a held key for as long as it is left
+# unreleased. That is what lets the recording show actual movement rather than an idle player.
+# Times are seconds relative to the start of the capture.
+INPUT_KEY_CODES = {
+    "left": win32con.VK_LEFT,
+    "right": win32con.VK_RIGHT,
+    "up": win32con.VK_UP,
+    "down": win32con.VK_DOWN,
+    "jump": win32con.VK_SPACE,
+}
+# Run right and keep hopping. The route out of the configured teleport position crosses water,
+# so the player has to jump the gaps; a steady hop is far more robust than trying to time each
+# take-off against the level geometry.
+DEFAULT_INPUT_SCRIPT: list[dict] = [
+    {"key": "right", "start": 0.4, "duration": 5.0},
+    {"key": "jump", "start": 1.0, "duration": 0.2},
+    {"key": "jump", "start": 1.9, "duration": 0.2},
+    {"key": "jump", "start": 2.8, "duration": 0.2},
+    {"key": "jump", "start": 3.7, "duration": 0.2},
+    {"key": "jump", "start": 4.6, "duration": 0.2},
+]
+INPUT_SCRIPT: list[dict] = _config.get("input_script", DEFAULT_INPUT_SCRIPT)
+
 OUTPUT_DIR = Path(__file__).parent / "output"
 OUTPUT_GIF = OUTPUT_DIR / "gameplay.gif"
 
@@ -146,6 +170,40 @@ def focus_window(hwnd: int) -> None:
     set_window_topmost(hwnd, True)
 
 
+def hold_key(hwnd: int, vk_code: int, duration_seconds: float) -> None:
+    win32api.PostMessage(hwnd, win32con.WM_KEYDOWN, vk_code, 0)
+    time.sleep(duration_seconds)
+    win32api.PostMessage(hwnd, win32con.WM_KEYUP, vk_code, 0)
+
+
+def play_input_script(hwnd: int, input_script: list[dict]) -> None:
+    """Run the scripted key holds against the game window on a wall clock timeline.
+
+    Each entry gets its own thread so overlapping holds work, which is what makes a jump while
+    running possible.
+    """
+    script_start = time.monotonic()
+    threads: list[threading.Thread] = []
+
+    for action in input_script:
+        vk_code = INPUT_KEY_CODES.get(action["key"])
+        if vk_code is None:
+            raise AssertionError(f'unknown input key "{action["key"]}", expected one of {sorted(INPUT_KEY_CODES)}')
+
+        def run_action(vk_code=vk_code, action=action):
+            delay_seconds = action["start"] - (time.monotonic() - script_start)
+            if delay_seconds > 0:
+                time.sleep(delay_seconds)
+            hold_key(hwnd, vk_code, action["duration"])
+
+        thread = threading.Thread(target=run_action, daemon=True)
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()
+
+
 def get_client_rect_on_screen(hwnd: int) -> tuple[int, int, int, int]:
     """Return the client area in screen coordinates as (left, top, right, bottom).
 
@@ -200,9 +258,12 @@ def capture_to_gif(hwnd: int, duration_seconds: float, fps: int, gif_fps: int, o
         "-qp", "0",
         str(OUTPUT_MASTER),
     ]
-    capture_result = subprocess.run(capture_command, capture_output=True, text=True)
+    # the capture has to be running while the input script plays, so it cannot be waited on here
+    capture_process = subprocess.Popen(capture_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    play_input_script(hwnd, INPUT_SCRIPT)
+    _, capture_errors = capture_process.communicate()
     set_window_topmost(hwnd, False)
-    assert capture_result.returncode == 0, f"ffmpeg capture failed:\n{capture_result.stderr}"
+    assert capture_process.returncode == 0, f"ffmpeg capture failed:\n{capture_errors}"
 
     # dither=none keeps the GIF free of ordered dither noise. Dither hides banding but it changes
     # every pixel of every frame, which defeats GIF compression and any downstream re-encode.
