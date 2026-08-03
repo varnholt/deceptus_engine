@@ -5,8 +5,8 @@ pthreads in WASM requires SharedArrayBuffer, which browsers only expose when
 the page is cross-origin isolated. Both headers below must be present.
 
 Usage:
-    python serve.py          # serves on http://localhost:9080/deceptus.html
-    uv run python serve.py
+    uv run --project lab/wasm_browser_test python lab/wasm_browser_test/serve.py
+    server_wasm.bat          # same thing, serves on http://localhost:9080/deceptus.html
 """
 
 import http.server
