@@ -54,7 +54,7 @@ ITCH_GIF_BUDGET_MEGABYTES = 3.0  # itch.io's per-image upload limit
 
 # What README.md references, copied into doc/screenshots/ by --install. Keep this in sync with
 # the README; everything else belongs in the ignored output directory.
-INSTALLED_ASSETS: tuple[str, ...] = ("screenshot.png", "gameplay.mp4")
+INSTALLED_ASSETS: tuple[str, ...] = ("screenshot.png", "gameplay.gif", "gameplay.mp4")
 
 
 @dataclass(frozen=True)
@@ -154,17 +154,20 @@ def next_lower_gif_frame_rate(frames_per_second: int) -> int:
     return max(candidates) if candidates else frames_per_second
 
 
-def build_quality_ladder(frames_per_second: int, fallback_width: int) -> list[QualityStep]:
+def build_quality_ladder(frames_per_second: int, fallback_width: int, start_width: int | None) -> list[QualityStep]:
     """Build the descending list of GIF settings to try.
 
     Palette size goes first because it is the least visible, then the frame rate, and only when
-    neither is enough does the resolution drop to the native view size.
+    neither is enough does the resolution drop to the native view size. `start_width` of None
+    means start at the source resolution.
     """
     halved_frame_rate = next_lower_gif_frame_rate(frames_per_second)
 
-    quality_ladder = [QualityStep(None, frames_per_second, colors) for colors in (256, 192, 128)]
+    quality_ladder = [QualityStep(start_width, frames_per_second, colors) for colors in (256, 192, 128)]
     if halved_frame_rate != frames_per_second:
-        quality_ladder += [QualityStep(None, halved_frame_rate, colors) for colors in (192, 128)]
+        quality_ladder += [QualityStep(start_width, halved_frame_rate, colors) for colors in (192, 128)]
+    if start_width == fallback_width:
+        return quality_ladder
     quality_ladder += [QualityStep(fallback_width, frames_per_second, colors) for colors in (256, 192, 128)]
     if halved_frame_rate != frames_per_second:
         quality_ladder.append(QualityStep(fallback_width, halved_frame_rate, 128))
@@ -236,9 +239,10 @@ def encode_gif_within_budget(
     trim_arguments: list[str],
     frames_per_second: int,
     fallback_width: int,
+    start_width: int | None,
 ) -> None:
     """Walk down the quality ladder until the GIF fits the size budget."""
-    for quality_step in build_quality_ladder(frames_per_second, fallback_width):
+    for quality_step in build_quality_ladder(frames_per_second, fallback_width, start_width):
         print(f"    {quality_step.describe()} ... ", end="", flush=True)
         encode_gif(input_path, output_path, quality_step, crop, scale_flags, dither, trim_arguments)
         print(format_size(output_path))
@@ -350,6 +354,13 @@ def parse_arguments() -> argparse.Namespace:
         default="none",
         help="ffmpeg paletteuse dither mode, dithering looks smoother but changes every pixel of "
         "every frame and so inflates GIFs badly (default: none)",
+    )
+    argument_parser.add_argument(
+        "--gif-width",
+        type=int,
+        default=None,
+        help="width the GIF ladder starts at (default: the source resolution). Set this when the "
+        "clip is known to be too expensive at full resolution, for example a panning camera",
     )
     argument_parser.add_argument(
         "--gif-megabytes",
@@ -469,6 +480,7 @@ def main() -> int:
             trim_arguments,
             arguments.fps,
             NATIVE_VIEW_WIDTH,
+            arguments.gif_width,
         )
         written_assets.append(gif_path)
 
@@ -485,6 +497,7 @@ def main() -> int:
             trim_arguments,
             arguments.fps,
             NATIVE_VIEW_WIDTH,
+            arguments.gif_width,
         )
         written_assets.append(itch_gif_path)
 

@@ -95,6 +95,7 @@ smallest attempt rather than pretending it succeeded.
 | `--crop` | `none` | crop expression, for sources that carry window chrome |
 | `--scale-flags` | `area` | scaler used when downscaling |
 | `--dither` | `none` | `paletteuse` dither mode |
+| `--gif-width` | source width | width the GIF ladder starts at |
 | `--gif-megabytes` | `8.0` | budget for `gameplay.gif` |
 | `--itch-megabytes` | `3.0` | budget for `gameplay_itch.gif` |
 | `--video-crf` | `18` | MP4 and WebM quality, lower is better |
@@ -105,17 +106,30 @@ crop rectangle, so running the script on an already processed file works.
 
 ## Measured on the current master
 
-An 8 second, 1280x720, largely static scene, encoded from a lossless master:
+A 1280x720 clip of the player running and hopping across two rooms, so the
+camera pans throughout:
 
 | Asset | Size |
 |---|---|
-| `screenshot.png`, 1280x720 | 0.33 MB |
-| `gameplay.mp4`, 5 s | 0.62 MB |
-| `gameplay.webm`, 5 s | 0.63 MB |
-| `gameplay.gif`, 5 s, 1280x720, 20 fps, 256 colors | 6.95 MB |
-| `gameplay_itch.gif`, 5 s, 640x360, 20 fps, 256 colors | 2.56 MB |
+| `screenshot.png`, 1280x720 | 0.34 MB |
+| `gameplay.mp4`, 3.5 s, 1280x720 | 0.70 MB |
+| `gameplay.gif`, 3.5 s, 640x360, 20 fps, 256 colors | 6.06 MB |
+| `gameplay.gif`, 5 s, 1280x720, 20 fps, 256 colors | 18.69 MB |
+| `gameplay_itch.gif`, 3.5 s, 640x360, 10 fps, 128 colors | 2.69 MB |
 
-The GIF measures 39 dB PSNR against the master, so at this resolution the 256
-colour quantisation is visually transparent. For reference, the same clip encoded
-from the old dithered capture needed ~31 MB for *four* seconds at that quality —
-the master's encoding matters far more than any GIF flag.
+Two things are worth knowing before picking numbers.
+
+**Camera motion dominates.** The same five seconds costs 6.95 MB as a full
+resolution GIF when the camera holds still and 18.69 MB when it pans, because
+`diff_mode=rectangle` has nothing to reuse once every pixel moves. A panning clip
+is where H.264 wins by a factor of about 18 at equal resolution.
+
+**The master's encoding matters more than any GIF flag.** The same clip cut from
+the old dithered capture needed ~31 MB for *four* seconds at this quality. A
+GIF from the lossless master measures 39 dB PSNR against it, so the 256 colour
+quantisation is visually transparent.
+
+Note that GitHub's markdown sanitiser strips `<video>` tags, verified against
+its rendering API, so an MP4 cannot be embedded in the README no matter how the
+`src` is written. Images are the only medium that renders, which is why the
+front page pairs a full resolution still with a 640x360 GIF.
