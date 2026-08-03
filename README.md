@@ -15,7 +15,9 @@ browser without a plugin.
 
 ![](doc/screenshots/screenshot.png)
 
-<video src="doc/screenshots/gameplay.mp4" controls loop muted playsinline width="1280"></video>
+![](doc/screenshots/gameplay.gif)
+
+The clip above is also available as an [MP4](doc/screenshots/gameplay.mp4) at full resolution.
 
 
 # Documentation
