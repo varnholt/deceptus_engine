@@ -54,7 +54,7 @@ ITCH_GIF_BUDGET_MEGABYTES = 3.0  # itch.io's per-image upload limit
 
 # What README.md references, copied into doc/screenshots/ by --install. Keep this in sync with
 # the README; everything else belongs in the ignored output directory.
-INSTALLED_ASSETS: tuple[str, ...] = ("gameplay.gif",)
+INSTALLED_ASSETS: tuple[str, ...] = ("screenshot.png", "gameplay.mp4")
 
 
 @dataclass(frozen=True)
