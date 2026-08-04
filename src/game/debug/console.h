@@ -132,6 +132,17 @@ private:
    /// \param room_name room object id to search in the current level.
    void teleportToRoom(const std::string& room_name);
 
+   /// \brief prints the levels listed in levels.json together with their indices.
+   void listLevels();
+
+   /// \brief requests a switch to another level listed in levels.json.
+   /// \details the level is identified either by its index in the list or by a case insensitive
+   ///          substring of its description filename, so "level load graveyard" is enough. the
+   ///          switch runs from the game loop like any other level transition, and the player is
+   ///          placed at the target level's own start position or checkpoint.
+   /// \param level_identifier index into levels.json, or part of a level description filename.
+   void loadLevel(const std::string& level_identifier);
+
    bool _active = false;
    std::string _command;
 
