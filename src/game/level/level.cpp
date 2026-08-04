@@ -222,11 +222,7 @@ Level::~Level()
    }
 
 #ifndef __EMSCRIPTEN__
-   _file_watcher_thread_active = false;
-   if (_file_watcher_thread.joinable())
-   {
-      _file_watcher_thread.join();
-   }
+   _file_watcher.stop();
 #endif
 }
 
@@ -489,28 +485,9 @@ bool Level::load()
 
    Log::Info() << "level loading complete";
 
-   // set up file watcher
+   // set up file watcher so a level edited while the game runs is picked up
 #ifndef __EMSCRIPTEN__
-   _file_watcher_thread = std::thread(
-      [this]()
-      {
-         auto first_modified_time = std::filesystem::last_write_time(_description->_filename);
-
-         while (_file_watcher_thread_active)
-         {
-            const auto current_modified_time = std::filesystem::last_write_time(_description->_filename);
-            if (current_modified_time != first_modified_time)
-            {
-               Log::Info() << "level was modified, marking as dirty";
-               first_modified_time = current_modified_time;
-               _dirty = true;
-            }
-
-            using namespace std::chrono_literals;
-            std::this_thread::sleep_for(1s);
-         }
-      }
-   );
+   _file_watcher.start(_description->_filename, "level");
 #endif
 
    return true;
@@ -1516,7 +1493,7 @@ void Level::setLoadingMode(LoadingMode loading_mode)
 
 bool Level::isDirty() const
 {
-   return _dirty;
+   return _file_watcher.modified();
 }
 
 // Level Rendering Flow

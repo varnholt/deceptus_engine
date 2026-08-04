@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <lua.hpp>
 #include <map>
+#include <memory>
 #include <string>
 #include <variant>
 #include <vector>
@@ -420,4 +421,12 @@ private:
       _event_observer_reference;
 
    std::shared_ptr<FadeTransitionEffect> _pending_fade_in;
+
+   //! \brief lifetime token for callbacks handed to objects that outlive this script.
+   //!
+   //! fadeOut()/fadeIn() push a ScreenTransition into ScreenTransitionHandler, a singleton that
+   //! outlives the level. Those transitions call back into the lua state, so a fade still in flight
+   //! when the level is replaced would otherwise run against a closed lua_State. The callbacks hold
+   //! a weak_ptr to this token and do nothing once it has expired.
+   std::shared_ptr<bool> _alive_token{std::make_shared<bool>(true)};
 };

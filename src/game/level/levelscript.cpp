@@ -849,7 +849,18 @@ void LevelScript::fadeOut(float speed)
    transition->_effect_1 = fade_out;
    transition->_effect_2 = _pending_fade_in;
    transition->_autostart_effect_2 = false;
-   transition->_callbacks_effect_1_ended.emplace_back([this]() { luaMechanismEvent("fade", "", "out_done", true); });
+   // the handler outlives this script, so the callback must not touch the lua state once the level
+   // it belongs to has been torn down
+   transition->_callbacks_effect_1_ended.emplace_back(
+      [this, alive = std::weak_ptr<bool>{_alive_token}]()
+      {
+         if (alive.expired())
+         {
+            return;
+         }
+         luaMechanismEvent("fade", "", "out_done", true);
+      }
+   );
    transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
 
    transition->startEffect1();
@@ -875,9 +886,13 @@ void LevelScript::fadeIn(float speed)
       transition->_effect_1 = null_effect;
       transition->_effect_2 = fade_in;
       transition->_callbacks_effect_2_ended.emplace_back(
-         [this]()
+         [this, alive = std::weak_ptr<bool>{_alive_token}]()
          {
             ScreenTransitionHandler::getInstance().pop();
+            if (alive.expired())
+            {
+               return;
+            }
             luaMechanismEvent("fade", "", "in_done", true);
          }
       );

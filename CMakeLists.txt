@@ -100,6 +100,8 @@ set(GAME_FILES
     src/framework/tools/elapsedtimer.h
     src/framework/tools/crashhandler.cpp
     src/framework/tools/crashhandler.h
+    src/framework/tools/filewatcher.cpp
+    src/framework/tools/filewatcher.h
     src/framework/tools/gamepaths.cpp
     src/framework/tools/gamepaths.h
     src/framework/tools/globalclock.cpp
