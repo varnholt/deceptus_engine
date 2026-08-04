@@ -1663,7 +1663,7 @@
   <object id="13" x="6816" y="624" width="83" height="19">
    <text wrap="1">Hello World</text>
   </object>
-  <object id="14" name="gv-room12" x="1536" y="1344" width="720" height="432">
+  <object id="14" name="gv-room12-b" x="1536" y="1344" width="720" height="432">
    <properties>
     <property name="camera_lock_delay_ms" type="int" value="800"/>
     <property name="camera_sync_after_fade_out" type="bool" value="true"/>
@@ -1727,7 +1727,7 @@
     <property name="start_position_y_px" type="int" value="1528"/>
    </properties>
   </object>
-  <object id="22" name="gv-room12" x="744" y="1344" width="792" height="432">
+  <object id="22" name="gv-room12-a" x="744" y="1344" width="792" height="432">
    <properties>
     <property name="camera_lock_delay_ms" type="int" value="800"/>
     <property name="camera_sync_after_fade_out" type="bool" value="true"/>
@@ -1748,7 +1748,7 @@
     <property name="transition" value="fade_out_fade_in"/>
    </properties>
   </object>
-  <object id="24" name="gv-room12" x="2256" y="1344" width="792" height="432">
+  <object id="24" name="gv-room12-c" x="2256" y="1344" width="792" height="432">
    <properties>
     <property name="camera_lock_delay_ms" type="int" value="800"/>
     <property name="camera_sync_after_fade_out" type="bool" value="true"/>
