@@ -46,6 +46,7 @@
 #include <emscripten/html5.h>
 #endif
 
+#include <chrono>
 #include <ctime>
 #include <iomanip>
 #include <iostream>
@@ -398,10 +399,6 @@ void Game::loadLevel(LoadingMode loading_mode)
       loader_context.setActive(true);
 #endif
 
-      _player->resetWorld();  // free the pointer that's shared with the player
-      LevelRegistry::clearCurrent();
-      _level.reset();
-
       // load level
       const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
       _level = std::make_shared<Level>(_render_targets);
@@ -457,6 +454,33 @@ void Game::loadLevel(LoadingMode loading_mode)
    _level_loading_finished = false;
    _level_loading_finished_previous = false;
    _info_layer->setLoading(true);
+
+   // Hand the previous level over to the main thread for destruction instead of letting the loader
+   // thread destroy it.
+   //
+   // The loader runs in its own sf::Context, so destroying the level there deletes its GL objects
+   // (every shader, every texture) from a context other than the one that draws them. Level loading
+   // then recreates those objects and the driver hands out the same GL handles again, while the
+   // drawing context still resolves those handles to the objects it saw before - which have just
+   // been freed. The first draw after a reload then walks freed driver memory and dies inside
+   // glGetUniformLocation.
+   //
+   // The destruction is deferred to the top of the next frame rather than run right here: a level
+   // load can be requested from inside the level's own update (a lua script calling nextLevel()),
+   // and freeing it on the spot would pull the object out from under the call stack still running in
+   // it.
+   _player->resetWorld();  // free the pointer that's shared with the player
+   LevelRegistry::clearCurrent();
+
+#ifdef __EMSCRIPTEN__
+   // single threaded, and the loader below runs synchronously in this very context, so there is no
+   // cross-context handle to protect. Freeing right away also keeps peak memory down, which matters
+   // more in a browser than the deferral would gain.
+   _level.reset();
+#else
+   _level_pending_teardown = std::move(_level);
+#endif
+
 #ifdef __EMSCRIPTEN__
    level_loader();
 #else
@@ -1000,7 +1024,9 @@ void Game::update()
          // this might trigger level-reloading, so this ought to be the last drawing call in the loop
          updateGameState(dt);
 
-         if (_level->isDirty())
+         // a lua script can request a level change from inside the update above, which hands _level
+         // over for teardown, so it is not necessarily still there by the time we get here
+         if (_level && _level->isDirty())
          {
             reloadLevel(LoadingMode::Clean);
          }
@@ -1065,6 +1091,7 @@ int32_t Game::loop()
       [](void* arg)
       {
          Game* game = static_cast<Game*>(arg);
+         game->destroyPendingLevel();
          game->processEvents();
          game->timedUpdate();
          game->timedDraw();
@@ -1077,6 +1104,7 @@ int32_t Game::loop()
 #else
    while (_window->isOpen())
    {
+      destroyPendingLevel();
       processEvents();
       timedUpdate();
       timedDraw();
@@ -1084,6 +1112,27 @@ int32_t Game::loop()
 
    return 0;
 #endif
+}
+
+void Game::destroyPendingLevel()
+{
+   if (!_level_pending_teardown)
+   {
+      return;
+   }
+
+   // runs on the thread that owns the drawing context, and outside any call stack belonging to the
+   // level being destroyed - see the note in loadLevel()
+   const auto teardown_start = std::chrono::steady_clock::now();
+   _level_pending_teardown.reset();
+   const auto teardown_ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - teardown_start).count();
+
+   // only worth mentioning when it actually cost a frame
+   if (teardown_ms > 16)
+   {
+      Log::Info() << "previous level torn down in " << teardown_ms << "ms";
+   }
 }
 
 void Game::reset()

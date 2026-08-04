@@ -1,6 +1,7 @@
 #pragma once
 
 // game
+#include "framework/tools/filewatcher.h"
 #include "framework/tools/sfmlshader.h"
 #include "game/audio/volumeupdater.h"
 #include "game/constants.h"
@@ -394,10 +395,8 @@ protected:
    std::vector<std::vector<b2Vec2>> _world_chains;
    Winding _winding = Winding::Clockwise;
 
-   // file watcher and re-generation
-   std::thread _file_watcher_thread;
-   bool _file_watcher_thread_active{true};
-   bool _dirty{false};
+   // watches the level's tmx so a level edited while the game runs is reloaded
+   FileWatcher _file_watcher;
    LoadingMode _loading_mode{LoadingMode::Standard};
 
 #ifdef DEVELOPMENT_MODE
