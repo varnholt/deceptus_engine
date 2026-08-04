@@ -98,6 +98,8 @@ set(GAME_FILES
     src/framework/tools/checksum.cpp
     src/framework/tools/elapsedtimer.cpp
     src/framework/tools/elapsedtimer.h
+    src/framework/tools/crashhandler.cpp
+    src/framework/tools/crashhandler.h
     src/framework/tools/gamepaths.cpp
     src/framework/tools/gamepaths.h
     src/framework/tools/globalclock.cpp
@@ -1057,6 +1059,9 @@ endif()
 
 if(WIN32)
     target_link_libraries(deceptus PRIVATE opengl32 glu32)
+
+    # MiniDumpWriteDump, used by the crash handler
+    target_link_libraries(deceptus PRIVATE dbghelp)
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set_target_properties(deceptus PROPERTIES WIN32_EXECUTABLE FALSE)
