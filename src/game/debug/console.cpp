@@ -3,8 +3,9 @@
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
 #include "game/debug/debugdrawstates.h"
+#include "framework/tools/callbackmap.h"
+#include "game/constants.h"
 #include "game/level/levelregistry.h"
-#include "game/level/leveltransitionhandler.h"
 #include "game/level/levels.h"
 #include "game/level/room.h"
 #include "game/mechanisms/checkpoint.h"
@@ -801,8 +802,12 @@ void Console::loadLevel(const std::string& level_identifier)
    const auto& level_name = level_items[matched_index.value()]._level_name;
    _log.push_back("loading level " + std::to_string(matched_index.value()) + ": " + level_name);
 
-   // a nullopt spawn position leaves the player at the target level's own start position or checkpoint
-   LevelTransitionHandler::getInstance().request(level_name, std::nullopt);
+   // this is the route the lua scripts and checkpoints take for a level change: point the save
+   // state at the level and let the loader pick it up. LevelTransitionHandler is deliberately not
+   // used - that belongs to the in-level LevelTransition mechanism, which also runs a screen fade
+   // and can carry a spawn position, neither of which applies to loading a level from the console.
+   SaveState::getCurrent()._level_index = matched_index.value();
+   CallbackMap::getInstance().call(static_cast<int32_t>(CallbackType::LoadLevel));
 }
 
 const Console::Help& Console::help() const

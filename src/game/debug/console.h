@@ -135,11 +135,12 @@ private:
    /// \brief prints the levels listed in levels.json together with their indices.
    void listLevels();
 
-   /// \brief requests a switch to another level listed in levels.json.
+   /// \brief switches to another level listed in levels.json.
    /// \details the level is identified either by its index in the list or by a case insensitive
-   ///          substring of its description filename, so "level load graveyard" is enough. the
-   ///          switch runs from the game loop like any other level transition, and the player is
-   ///          placed at the target level's own start position or checkpoint.
+   ///          substring of its description filename, so "level load graveyard" is enough. this
+   ///          takes the same route as a level change requested from a lua script: the save state
+   ///          is pointed at the level and the loader picks it up, leaving the player at the target
+   ///          level's own start position or checkpoint.
    /// \param level_identifier index into levels.json, or part of a level description filename.
    void loadLevel(const std::string& level_identifier);
 
