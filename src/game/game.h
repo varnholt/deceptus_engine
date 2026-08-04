@@ -27,6 +27,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <future>
+#include <optional>
 #include "box2d/box2d.h"
 
 class Level;
@@ -86,13 +87,14 @@ private:
    /// \brief calls draw() and submits frame timings to the profiling ui.
    void timedDraw();
 
-   /// \brief destroys the level handed over by the last loadLevel(), if any.
+   /// \brief carries out a level load requested by loadLevel(), if one is pending.
    ///
-   /// Called at the top of each frame so the previous level is released on the thread that owns the
-   /// drawing context, and never from inside a call stack running in that level.
-   void destroyPendingLevel();
+   /// Called at the top of each frame. Destroys the outgoing level on the thread that owns the
+   /// drawing context and strictly before the loader thread starts, and never from inside a call
+   /// stack running in that level.
+   void processPendingLevelLoad();
 
-   /// \brief asynchronously loads current save-state level and syncs player/world links.
+   /// \brief requests a load of the current save-state level; the work starts on the next frame.
    /// \param loading_mode loading strategy used by Level initialization.
    void loadLevel(LoadingMode loading_mode = LoadingMode::Standard);
 
@@ -176,8 +178,8 @@ private:
    std::shared_ptr<Player> _player;
    std::shared_ptr<Level> _level;
 
-   //! \brief previous level, waiting to be destroyed by destroyPendingLevel() on the main thread
-   std::shared_ptr<Level> _level_pending_teardown;
+   //! \brief load requested by loadLevel(), carried out by processPendingLevelLoad() next frame
+   std::optional<LoadingMode> _pending_level_load;
    std::unique_ptr<InfoLayer> _info_layer;
    std::unique_ptr<InGameMenu> _ingame_menu;
    std::unique_ptr<ControllerOverlay> _controller_overlay;
