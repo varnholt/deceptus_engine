@@ -3,7 +3,10 @@
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
 #include "game/debug/debugdrawstates.h"
+#include "framework/tools/callbackmap.h"
+#include "game/constants.h"
 #include "game/level/levelregistry.h"
+#include "game/level/levels.h"
 #include "game/level/room.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"
@@ -15,6 +18,7 @@
 #include "game/weapons/bow.h"
 #include "game/weapons/weaponfactory.h"
 
+#include <cctype>
 #include <iostream>
 #include <ostream>
 #include <ranges>
@@ -272,6 +276,32 @@ Console::Console()
       "teleportation",
       "tpr <name>: teleport to room by name",
       {"tpr my_room"}
+   );
+
+   // level loading
+   registerCallback(
+      "level list",
+      [this](const auto&) { listLevels(); },
+      "leveldesign",
+      "level list: list the levels from levels.json"
+   );
+
+   registerCallback(
+      "level load",
+      [this](const auto& args)
+      {
+         if (args.size() == 3)
+         {
+            loadLevel(args.at(2));
+         }
+         else
+         {
+            _log.emplace_back("usage: level load <index|name>");
+         }
+      },
+      "leveldesign",
+      "level load <index|name>: load a level listed in levels.json",
+      {"level load 2", "level load graveyard"}
    );
 
    // playback
@@ -703,6 +733,81 @@ void Console::teleportToRoom(const std::string& room_name)
 
    _log.push_back(os.str());
    PlayerRegistry::getFirst()->setBodyViaPixelPosition(target_position.x, target_position.y);
+}
+
+void Console::listLevels()
+{
+   const auto level_items = Levels::readLevelItems();
+   if (level_items.empty())
+   {
+      _log.emplace_back("no levels listed in data/config/levels.json");
+      return;
+   }
+
+   for (auto index = 0; index < static_cast<int32_t>(level_items.size()); index++)
+   {
+      _log.push_back("  " + std::to_string(index) + ": " + level_items[index]._level_name);
+   }
+}
+
+void Console::loadLevel(const std::string& level_identifier)
+{
+   const auto level_items = Levels::readLevelItems();
+   if (level_items.empty())
+   {
+      _log.emplace_back("no levels listed in data/config/levels.json");
+      return;
+   }
+
+   const auto lowercase = [](std::string text)
+   {
+      std::ranges::transform(text, text.begin(), [](char c) { return static_cast<char>(std::tolower(static_cast<unsigned char>(c))); });
+      return text;
+   };
+
+   // an all-digit identifier is an index into levels.json, anything else is matched against the
+   // level description filenames so that "level load graveyard" works without the full path
+   std::optional<int32_t> matched_index;
+   const auto is_index =
+      !level_identifier.empty() && std::ranges::all_of(level_identifier, [](char c) { return std::isdigit(static_cast<unsigned char>(c)) != 0; });
+
+   if (is_index)
+   {
+      const auto index = std::atoi(level_identifier.c_str());
+      if (index >= 0 && index < static_cast<int32_t>(level_items.size()))
+      {
+         matched_index = index;
+      }
+   }
+   else
+   {
+      const auto needle = lowercase(level_identifier);
+      for (auto index = 0; index < static_cast<int32_t>(level_items.size()); index++)
+      {
+         if (lowercase(level_items[index]._level_name).find(needle) != std::string::npos)
+         {
+            matched_index = index;
+            break;
+         }
+      }
+   }
+
+   if (!matched_index.has_value())
+   {
+      _log.push_back("no level matching '" + level_identifier + "', available levels:");
+      listLevels();
+      return;
+   }
+
+   const auto& level_name = level_items[matched_index.value()]._level_name;
+   _log.push_back("loading level " + std::to_string(matched_index.value()) + ": " + level_name);
+
+   // this is the route the lua scripts and checkpoints take for a level change: point the save
+   // state at the level and let the loader pick it up. LevelTransitionHandler is deliberately not
+   // used - that belongs to the in-level LevelTransition mechanism, which also runs a screen fade
+   // and can carry a spawn position, neither of which applies to loading a level from the console.
+   SaveState::getCurrent()._level_index = matched_index.value();
+   CallbackMap::getInstance().call(static_cast<int32_t>(CallbackType::LoadLevel));
 }
 
 const Console::Help& Console::help() const

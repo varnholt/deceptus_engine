@@ -434,6 +434,7 @@ void Level::loadTmx()
 
    TileMapFactory::merge(_tile_maps);
    Room::mergeEnterAreas(_rooms);
+   Room::warnAboutAmbiguousObjectIds(_rooms);
 
    if (!_atmosphere._tile_map)
    {

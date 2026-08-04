@@ -93,6 +93,12 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    /// \param rooms rooms that receive matching enter areas.
    static void mergeEnterAreas(const std::vector<std::shared_ptr<Room>>& rooms);
 
+   /// \brief logs a warning for every object id that more than one room uses.
+   /// \details rooms are looked up by object id from the save state and the console, so a shared
+   ///          id makes every lookup resolve to the first room and silently drops the others.
+   /// \param rooms rooms to check.
+   static void warnAboutAmbiguousObjectIds(const std::vector<std::shared_ptr<Room>>& rooms);
+
    /// \brief starts configured room transition effects and related callbacks.
    void startTransition();
 

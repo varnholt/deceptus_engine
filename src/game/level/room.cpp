@@ -548,6 +548,32 @@ std::vector<std::string> Room::visitedSubRoomKeys() const
    return keys;
 }
 
+void Room::warnAboutAmbiguousObjectIds(const std::vector<std::shared_ptr<Room>>& rooms)
+{
+   // rooms are addressed by object id from the save state and from the console, so two rooms
+   // sharing one is a level design mistake: every lookup resolves to whichever comes first and
+   // the other rooms silently lose their visited state. rects meant to form one larger room
+   // belong in a group instead, which merges them into a single room with several sub-rooms.
+   std::map<std::string, int32_t> counts_by_object_id;
+   for (const auto& room : rooms)
+   {
+      if (room)
+      {
+         counts_by_object_id[room->getObjectId()]++;
+      }
+   }
+
+   for (const auto& [object_id, count] : counts_by_object_id)
+   {
+      if (count > 1)
+      {
+         Log::Warning() << "room object id '" << object_id << "' is used by " << count
+                        << " separate rooms; lookups by name resolve to the first one. give them unique names, or a shared 'group' "
+                           "property if they are meant to be one room";
+      }
+   }
+}
+
 void Room::applyVisitedSubRoomKeys(const std::vector<std::string>& keys, const std::vector<std::shared_ptr<Room>>& rooms)
 {
    for (const auto& key : keys)
@@ -555,17 +581,32 @@ void Room::applyVisitedSubRoomKeys(const std::vector<std::string>& keys, const s
       const auto separator = key.rfind('/');
       if (separator == std::string::npos)
       {
+         Log::Warning() << "ignoring malformed visited sub-room key '" << key << "', expected '<room object id>/<sub-room index>'";
          continue;
       }
 
       const auto room_object_id = key.substr(0, separator);
       const auto sub_room_index = static_cast<size_t>(std::atoi(key.substr(separator + 1).c_str()));
 
-      const auto room_it =
-         std::find_if(rooms.begin(), rooms.end(), [&room_object_id](const auto& room) { return room->getObjectId() == room_object_id; });
+      // the predicate has to tolerate empty entries: this runs against whatever the level
+      // deserialized, and a save state written by an older version of the level may name rooms
+      // that no longer exist. skipping is always better than taking the whole level load down.
+      const auto room_it = std::find_if(
+         rooms.begin(),
+         rooms.end(),
+         [&room_object_id](const auto& room) { return room && room->getObjectId() == room_object_id; }
+      );
 
-      if (room_it == rooms.end() || sub_room_index >= (*room_it)->_sub_rooms.size())
+      if (room_it == rooms.end())
       {
+         Log::Warning() << "visited sub-room key '" << key << "' names a room that is not in this level, ignoring";
+         continue;
+      }
+
+      if (sub_room_index >= (*room_it)->_sub_rooms.size())
+      {
+         Log::Warning() << "visited sub-room key '" << key << "' is out of range, room '" << room_object_id << "' has "
+                        << (*room_it)->_sub_rooms.size() << " sub-room(s), ignoring";
          continue;
       }
 
