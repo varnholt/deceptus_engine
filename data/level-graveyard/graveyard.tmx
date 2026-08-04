@@ -1804,7 +1804,7 @@
  <objectgroup id="13" name="weather" visible="0">
   <object id="31" name="thunderstorm" x="696" y="696" width="14376" height="1080">
    <properties>
-    <property name="z" type="int" value="13"/>
+    <property name="z" type="int" value="9"/>
    </properties>
   </object>
   <object id="32" name="rain" x="696" y="1176" width="2352" height="600">
@@ -1812,7 +1812,7 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
-    <property name="z" type="int" value="13"/>
+    <property name="z" type="int" value="35"/>
    </properties>
   </object>
   <object id="33" name="rain_001" x="-7848" y="1584" width="2304" height="456">
@@ -1820,7 +1820,7 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
-    <property name="z" type="int" value="20"/>
+    <property name="z" type="int" value="35"/>
    </properties>
   </object>
   <object id="34" name="rain" x="3048" y="1152" width="696" height="624">
@@ -1828,7 +1828,7 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
-    <property name="z" type="int" value="13"/>
+    <property name="z" type="int" value="35"/>
    </properties>
   </object>
   <object id="35" name="rain" x="3744" y="960" width="4632" height="648">
@@ -1836,7 +1836,7 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
-    <property name="z" type="int" value="13"/>
+    <property name="z" type="int" value="35"/>
    </properties>
   </object>
   <object id="36" name="rain" x="9288" y="888" width="5784" height="576">
@@ -1844,7 +1844,7 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
-    <property name="z" type="int" value="2"/>
+    <property name="z" type="int" value="35"/>
    </properties>
   </object>
  </objectgroup>
