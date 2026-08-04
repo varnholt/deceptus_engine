@@ -14,6 +14,7 @@
 #include <emscripten.h>
 #endif
 
+#include "framework/tools/crashhandler.h"
 #include "framework/tools/gamepaths.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/logthread.h"
@@ -71,6 +72,8 @@ int main(int /*argc*/, char** /*argv*/)
       emscripten_sleep(50);
    }
 #endif
+
+   CrashHandler::install();
 
    GamePaths::createGameDirectories();
 
