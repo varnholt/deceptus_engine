@@ -1,6 +1,7 @@
 #include "rainoverlay.h"
 
 #include "framework/math/sfmlmath.h"
+#include "game/audio/audio.h"
 #include "game/config/gameconfiguration.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
@@ -61,6 +62,11 @@ RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprit
 #endif
       _drops.push_back(std::move(drop));
    }
+}
+
+RainOverlay::~RainOverlay()
+{
+   stopPlaying();
 }
 
 void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
@@ -369,4 +375,40 @@ void RainOverlay::determineRainSurfaces()
 void RainOverlay::setSettings(const RainSettings& settings)
 {
    _settings = settings;
+}
+
+void RainOverlay::setAudioEnabled(bool audio_enabled)
+{
+   if (_settings._sound.empty())
+   {
+      return;
+   }
+
+   if (audio_enabled == _audio_enabled)
+   {
+      return;
+   }
+
+   _audio_enabled = audio_enabled;
+
+   if (audio_enabled)
+   {
+      // the looped sample keeps its sound thread occupied until it is stopped again
+      _sound_thread_id = Audio::getInstance().playSample({_settings._sound, _settings._sound_volume, true});
+   }
+   else
+   {
+      stopPlaying();
+   }
+}
+
+void RainOverlay::stopPlaying()
+{
+   if (!_sound_thread_id.has_value())
+   {
+      return;
+   }
+
+   Audio::getInstance().stopSample(_sound_thread_id.value());
+   _sound_thread_id.reset();
 }

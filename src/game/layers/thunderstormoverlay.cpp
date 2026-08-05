@@ -2,7 +2,9 @@
 
 #include "framework/math/fbm.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "game/audio/audio.h"
 
+#include <cstdlib>
 #include <iostream>
 
 void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
@@ -71,8 +73,20 @@ void ThunderstormOverlay::update(const sf::Time& dt)
          // start lightning
          _thunderstorm_time_elapsed_s = 0.0f;
          _state = State::Lightning;
+         playThunder();
       }
    }
+}
+
+void ThunderstormOverlay::playThunder()
+{
+   if (_settings._sounds.empty())
+   {
+      return;
+   }
+
+   const auto index = static_cast<size_t>(std::rand()) % _settings._sounds.size();
+   Audio::getInstance().playSample({_settings._sounds[index], _settings._sound_volume});
 }
 
 void ThunderstormOverlay::setRect(const sf::FloatRect& rect)

@@ -4,9 +4,37 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/sfmlcompat.h"
+#include "game/audio/audio.h"
 #include "game/io/valuereader.h"
 #include "game/level/roomupdater.h"
 #include "game/player/playerregistry.h"
+
+#include <sstream>
+#include <string>
+#include <vector>
+
+namespace
+{
+
+// read "sample_1.ogg;sample_2.ogg;sample_3.ogg"
+std::vector<std::string> parseSoundList(const std::string& sounds)
+{
+   std::vector<std::string> result;
+   std::istringstream stream(sounds);
+   std::string sound;
+
+   while (std::getline(stream, sound, ';'))
+   {
+      if (!sound.empty())
+      {
+         result.push_back(sound);
+      }
+   }
+
+   return result;
+}
+
+}  // namespace
 
 Weather::Weather(GameNode* parent) : GameNode(parent)
 {
@@ -128,6 +156,11 @@ void Weather::update(const sf::Time& dt)
 {
    if (!_enabled)
    {
+      if (_overlay)
+      {
+         _overlay->setAudioEnabled(false);
+      }
+
       return;
    }
 
@@ -135,7 +168,13 @@ void Weather::update(const sf::Time& dt)
    const auto intersects = sfcompat::findIntersection(_rect, player_rect).has_value();
    updateWaitDelay(dt, intersects);
 
-   if (intersects && matchesRoom() && !_wait_until_start_delay_elapsed)
+   const auto active = intersects && matchesRoom() && !_wait_until_start_delay_elapsed;
+
+   // driven every frame rather than from the overlay itself: update() below only runs while active,
+   // so the overlay would never see the transition back to inactive
+   _overlay->setAudioEnabled(active);
+
+   if (active)
    {
       _overlay->update(dt);
    }
@@ -210,6 +249,15 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
             settings._fall_through_rate = fall_through_rate_it->second->_value_int.value();
          }
 
+         const auto sound = ValueReader::readValue<std::string>("sound", map);
+         if (sound.has_value())
+         {
+            settings._sound = sound.value();
+            Audio::getInstance().addSample(settings._sound);
+         }
+
+         settings._sound_volume = ValueReader::readValue<float>("sound_volume", map).value_or(1.0f);
+
          std::dynamic_pointer_cast<RainOverlay>(weather->_overlay)->setSettings(settings);
       }
    }
@@ -242,6 +290,18 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
          {
             settings._silence_time_s = silence_time_it->second->_value_float.value();
          }
+
+         const auto sounds = ValueReader::readValue<std::string>("sounds", map);
+         if (sounds.has_value())
+         {
+            settings._sounds = parseSoundList(sounds.value());
+            for (const auto& sound : settings._sounds)
+            {
+               Audio::getInstance().addSample(sound);
+            }
+         }
+
+         settings._sound_volume = ValueReader::readValue<float>("sound_volume", map).value_or(1.0f);
       }
 
       const auto rect =
