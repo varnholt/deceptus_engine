@@ -69,7 +69,7 @@ std::string_view MoveableBox::objectName() const
 
 void MoveableBox::preload()
 {
-   Audio::getInstance().addSample("mechanism_moveable_object_01.wav");
+   Audio::getInstance().addSample("mechanism_moveable_object_01.ogg");
 }
 
 void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
@@ -99,7 +99,7 @@ void MoveableBox::update(const sf::Time& /*dt*/)
    {
       if (!_pushing_sample.has_value())
       {
-         _pushing_sample = Audio::getInstance().playSample({"mechanism_moveable_object_01.wav", 1.0, true});
+         _pushing_sample = Audio::getInstance().playSample({"mechanism_moveable_object_01.ogg", 1.0, true});
       }
    }
    else

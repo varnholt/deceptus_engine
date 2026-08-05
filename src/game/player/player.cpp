@@ -1125,7 +1125,7 @@ void Player::startHardLanding()
       }
    }
 
-   Audio::getInstance().playSample({"player_grunt_01.wav"});
+   Audio::getInstance().playSample({"player_grunt_01.ogg"});
 }
 
 void Player::updateImpulse()
@@ -1198,7 +1198,7 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
    {
       _damage_initialized = true;
 
-      Audio::getInstance().playSample({"hurt.wav"});
+      Audio::getInstance().playSample({"hurt.ogg"});
 
       // not converting this to PPM to make the effect of the applied force more visible
       auto* body = getBody();
@@ -1318,7 +1318,7 @@ void Player::updateFootsteps()
          if (_time.asSeconds() > _next_footstep_time)
          {
             // play footstep
-            Audio::getInstance().playSample({(_step_counter++ & 1) ? "player_footstep_stone_l.wav" : "player_footstep_stone_r.wav", 0.3f});
+            Audio::getInstance().playSample({(_step_counter++ & 1) ? "player_footstep_stone_l.ogg" : "player_footstep_stone_r.ogg", 0.3f});
             _next_footstep_time = _time.asSeconds() + 1.0f / vel;
          }
       }
@@ -1369,7 +1369,7 @@ void Player::updateBendDown()
    if (!_bend._was_bending_down && _bend._bending_down)
    {
       _bend._timepoint_bend_down_start = StopWatch::getInstance().now();
-      Audio::getInstance().playSample({"player_kneel_01.wav"});
+      Audio::getInstance().playSample({"player_kneel_01.ogg"});
    }
 
    // when the player transitions from "was bending down" to "no longer bending down", we want to
@@ -1564,7 +1564,7 @@ void Player::updateSpawn()
    // play reveal sound (but only if player died earlier)
    if (!first_death)
    {
-      Audio::getInstance().playSample({"player_spawn_01.wav"});
+      Audio::getInstance().playSample({"player_spawn_01.ogg"});
    }
 }
 
@@ -1647,7 +1647,7 @@ void Player::updateAtmosphere()
       _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_water);
       _body->SetTransform(_body->GetPosition() + b2Vec2{0.0, 0.4f}, 0.0f);
       _water_entered_time = StopWatch::getInstance().now();
-      Audio::getInstance().playSample({"splash.wav"});
+      Audio::getInstance().playSample({"splash.ogg"});
       _animation_pool.create("player_water_splash", _position_px_f.x, _position_px_f.y);
    }
 
@@ -1727,7 +1727,7 @@ void Player::updateItems(const sf::Time& dt)
 void Player::die()
 {
    _dead = true;
-   Audio::getInstance().playSample({"death.wav"});
+   Audio::getInstance().playSample({"death.ogg"});
 
    auto& stats = SaveState::getPlayerInfo()._stats;
    stats._death_count_overall++;

@@ -51,8 +51,8 @@ function initialize()
    setSpriteOffset(1, -38, -21)
    setSpriteOffset(2, 38, -21)
 
-   addSample("mechanism_klonk_about_to_fall.wav")
-   addSample("mechanism_klonk_impact.wav")
+   addSample("mechanism_klonk_about_to_fall.ogg")
+   addSample("mechanism_klonk_impact.ogg")
    setAudioUpdateBehavior(AudioUpdateBehavior["AlwaysOn"])
    setReferenceVolume(1.0)
 end
@@ -97,7 +97,7 @@ function update(dt)
                -- activate the stone
                mElapsed = 0.0
                mCycle = CYCLE_WAKE
-               playSample("mechanism_klonk_about_to_fall.wav", 1.0)
+               playSample("mechanism_klonk_about_to_fall.ogg", 1.0)
             end
          end
       end
@@ -138,7 +138,7 @@ function update(dt)
       velocity = getLinearVelocity()
 
       if (velocity[2] <= 0.01) then
-         playSample("mechanism_klonk_impact.wav", 1.0)
+         playSample("mechanism_klonk_impact.ogg", 1.0)
          velocity = getLinearVelocity()
          mCycle = CYCLE_COLLIDE
          setActive(false)

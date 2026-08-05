@@ -105,7 +105,7 @@ function initialize()
    updateSpriteRect(0, 0, 0, SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX) -- id, x, y, width, height
    addHitbox(-18, -18, 36, 36)                            -- x offset, y offset, width, height
 
-   addSample("splat_01.wav")
+   addSample("splat_01.ogg")
    setReferenceVolume(1.0)
    setAudioUpdateBehavior(AudioUpdateBehavior["AlwaysOn"])
 
@@ -673,7 +673,7 @@ function smashed()
       return
    end
 
-   playSample("splat_01.wav", 1.0)
+   playSample("splat_01.ogg", 1.0)
    _smashed = true
    startDying()
 end

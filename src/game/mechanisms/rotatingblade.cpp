@@ -172,9 +172,9 @@ void RotatingBlade::setup(const GameDeserializeData& data)
 
 void RotatingBlade::preload()
 {
-   Audio::getInstance().addSample("mechanism_rotating_blade_accelerate.wav");
-   Audio::getInstance().addSample("mechanism_rotating_blade_decelerate.wav");
-   Audio::getInstance().addSample("mechanism_rotating_blade_enabled.wav");
+   Audio::getInstance().addSample("mechanism_rotating_blade_accelerate.ogg");
+   Audio::getInstance().addSample("mechanism_rotating_blade_decelerate.ogg");
+   Audio::getInstance().addSample("mechanism_rotating_blade_enabled.ogg");
 }
 
 void RotatingBlade::updateAudio()
@@ -215,7 +215,7 @@ void RotatingBlade::updateAudio()
          // play regular sample
          if (!_sample_enabled.has_value())
          {
-            _sample_enabled = Audio::getInstance().playSample({"mechanism_rotating_blade_enabled.wav", 1.0f, true});
+            _sample_enabled = Audio::getInstance().playSample({"mechanism_rotating_blade_enabled.ogg", 1.0f, true});
          }
          else
          {
@@ -232,7 +232,7 @@ void RotatingBlade::updateAudio()
          // play acceleration sample
          if (!_sample_accelerate.has_value())
          {
-            _sample_accelerate = Audio::getInstance().playSample({"mechanism_rotating_blade_accelerate.wav"});
+            _sample_accelerate = Audio::getInstance().playSample({"mechanism_rotating_blade_accelerate.ogg"});
          }
          else
          {
@@ -258,7 +258,7 @@ void RotatingBlade::updateAudio()
          // play deceleration sample
          if (!_sample_decelerate.has_value())
          {
-            _sample_decelerate = Audio::getInstance().playSample({"mechanism_rotating_blade_decelerate.wav"});
+            _sample_decelerate = Audio::getInstance().playSample({"mechanism_rotating_blade_decelerate.ogg"});
          }
          else
          {

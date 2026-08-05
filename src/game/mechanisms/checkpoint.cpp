@@ -95,8 +95,8 @@ Checkpoint::Checkpoint(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Checkpoint).name());
 
-   Audio::getInstance().addSample("wallclock_tock.wav");
-   Audio::getInstance().addSample("wallclock_tick.wav");
+   Audio::getInstance().addSample("wallclock_tock.ogg");
+   Audio::getInstance().addSample("wallclock_tick.ogg");
 
    _has_audio = true;
    _audio_update_data._range = AudioRange{12 * PIXELS_PER_TILE, 0.0f, 2 * PIXELS_PER_TILE, 1.0f};
@@ -242,7 +242,7 @@ void Checkpoint::reached()
       _state = State::Activating;
 
       // play reveal sound
-      Audio::getInstance().playSample({"player_spawn_01.wav"});
+      Audio::getInstance().playSample({"player_spawn_01.ogg"});
    }
    else
    {
@@ -311,7 +311,7 @@ void Checkpoint::updateSpriteRect(float dt_s)
             {
                _tick_played = true;
                _tock_played = false;
-               Audio::getInstance().playSample({"wallclock_tock.wav", _reference_volume});
+               Audio::getInstance().playSample({"wallclock_tock.ogg", _reference_volume});
             }
          }
          else if (static_cast<int32_t>(_sprite_index) == tock_index)
@@ -320,7 +320,7 @@ void Checkpoint::updateSpriteRect(float dt_s)
             {
                _tock_played = true;
                _tick_played = false;
-               Audio::getInstance().playSample({"wallclock_tick.wav", _reference_volume});
+               Audio::getInstance().playSample({"wallclock_tick.ogg", _reference_volume});
             }
          }
 

@@ -46,12 +46,12 @@ function initialize()
    -- set up boom and audio distance
    addHitbox(0, 0, 48, 48)
    addAudioRange(400.0, 0.0, 200.0, 1.0)
-   addSample("mechanism_cannon_1.wav")
-   addSample("mechanism_cannon_2.wav")
-   addSample("mechanism_cannon_3.wav")
-   addSample("mechanism_cannon_4.wav")
-   addSample("mechanism_cannon_boom_1.wav")
-   addSample("mechanism_cannon_boom_2.wav")
+   addSample("mechanism_cannon_1.ogg")
+   addSample("mechanism_cannon_2.ogg")
+   addSample("mechanism_cannon_3.ogg")
+   addSample("mechanism_cannon_4.ogg")
+   addSample("mechanism_cannon_boom_1.ogg")
+   addSample("mechanism_cannon_boom_2.ogg")
 
    addWeapon(WeaponType["Gun"], 1000, 60, 0.0, 0.2) -- interval, damage, gravity_scale, radius
 
@@ -68,9 +68,9 @@ function initialize()
 
    registerHitSamples(
       "data/sprites/enemy_pirate_cannon_cannonball.png",
-      "mechanism_cannon_boom_1.wav",
+      "mechanism_cannon_boom_1.ogg",
       0.5,
-      "mechanism_cannon_boom_2.wav",
+      "mechanism_cannon_boom_2.ogg",
       0.5
    )
 
@@ -127,7 +127,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire()
-   playSample(string.format("mechanism_cannon_%d.wav", math.random(1, 4)), 0.5)
+   playSample(string.format("mechanism_cannon_%d.ogg", math.random(1, 4)), 0.5)
 
    useWeapon(
       0,

@@ -133,9 +133,9 @@ Gateway::Gateway(GameNode* parent) : GameNode(parent)
 {
    _filename = "data/sprites/gateway.psd";
 
-   Audio::getInstance().addSample("mechanism_gateway_rotate_01.wav");
-   Audio::getInstance().addSample("mechanism_gateway_extract_01.wav");
-   Audio::getInstance().addSample("mechanism_gateway_warp_01.wav");
+   Audio::getInstance().addSample("mechanism_gateway_rotate_01.ogg");
+   Audio::getInstance().addSample("mechanism_gateway_extract_01.ogg");
+   Audio::getInstance().addSample("mechanism_gateway_warp_01.ogg");
 }
 
 Gateway::~Gateway()
@@ -338,7 +338,7 @@ void Gateway::update(const sf::Time& dt)
 
          _activated_state._step = 0;
 
-         Audio::getInstance().playSample({"mechanism_gateway_extract_01.wav"});
+         Audio::getInstance().playSample({"mechanism_gateway_extract_01.ogg"});
 
          for (auto& pa : _pa)
          {
@@ -449,7 +449,7 @@ void Gateway::update(const sf::Time& dt)
             {
                _activated_state.resetTime();
                _activated_state._step++;
-               Audio::getInstance().playSample({"mechanism_gateway_rotate_01.wav"});
+               Audio::getInstance().playSample({"mechanism_gateway_rotate_01.ogg"});
             }
          }
 
@@ -473,7 +473,7 @@ void Gateway::update(const sf::Time& dt)
 
                   _activated_state._step++;
                   _activated_state.resetTime();
-                  Audio::getInstance().playSample({"mechanism_gateway_rotate_01.wav"});
+                  Audio::getInstance().playSample({"mechanism_gateway_rotate_01.ogg"});
                }
             }
 
@@ -507,7 +507,7 @@ void Gateway::update(const sf::Time& dt)
 
                   _activated_state._step++;
                   _activated_state.resetTime();
-                  Audio::getInstance().playSample({"mechanism_gateway_extract_01.wav"});
+                  Audio::getInstance().playSample({"mechanism_gateway_extract_01.ogg"});
                }
             }
 
@@ -555,7 +555,7 @@ void Gateway::update(const sf::Time& dt)
                _activated_state._step++;
                _activated_state._has_target_angle = false;
                _activated_state.resetTime();
-               Audio::getInstance().playSample({"mechanism_gateway_warp_01.wav"});
+               Audio::getInstance().playSample({"mechanism_gateway_warp_01.ogg"});
             }
 
             break;

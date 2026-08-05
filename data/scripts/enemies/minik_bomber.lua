@@ -109,13 +109,13 @@ function initialize()
    -- set up boom and audio distance
    addHitbox(0, 0, 48, 24)
    addAudioRange(400.0, 0.0, 200.0, 1.0)
-   addSample("throw_01.wav")
-   addSample("throw_02.wav")
-   addSample("throw_03.wav")
-   addSample("throw_04.wav")
-   addSample("throw_05.wav")
-   addSample("mechanism_cannon_boom_1.wav")
-   addSample("mechanism_cannon_boom_2.wav")
+   addSample("throw_01.ogg")
+   addSample("throw_02.ogg")
+   addSample("throw_03.ogg")
+   addSample("throw_04.ogg")
+   addSample("throw_05.ogg")
+   addSample("mechanism_cannon_boom_1.ogg")
+   addSample("mechanism_cannon_boom_2.ogg")
 
    addWeapon(WeaponType["Gun"], 1000, 60, 0.5, 0.2) -- interval, damage, gravity_scale, radius
 
@@ -132,9 +132,9 @@ function initialize()
 
     registerHitSamples(
        "data/sprites/enemy_minik_bomber.png",
-       "mechanism_cannon_boom_1.wav",
+       "mechanism_cannon_boom_1.ogg",
        0.5,
-       "mechanism_cannon_boom_2.wav",
+       "mechanism_cannon_boom_2.ogg",
        0.5
     )
 
@@ -184,7 +184,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function throw()
-   -- playSample(string.format("mechanism_cannon_%d.wav", math.random(1, 4)), 0.5)
+   -- playSample(string.format("mechanism_cannon_%d.ogg", math.random(1, 4)), 0.5)
 
    velocity = v2d.Vector2D(0, 0)
    if (_velocity_x and _velocity_y) then
@@ -379,7 +379,7 @@ function updateThrowCondition(dt)
       -- update projectile index
       cycle = getCurrentCycle(dt)
       if (cycle == 0) then
-         playSample(string.format("throw_%02d.wav", math.random(1, 5)), 0.5)
+         playSample(string.format("throw_%02d.ogg", math.random(1, 5)), 0.5)
          throw()
       end
    end

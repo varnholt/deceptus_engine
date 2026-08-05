@@ -99,7 +99,7 @@ end
 function initialize()
    addShapeRect(0.2, 0.2, 0.0, 0.1)
    updateSprite(0.0)
-   addSample("boom.wav")
+   addSample("boom.ogg")
    -- print("landmine.lua initialized")
 end
 
@@ -158,7 +158,7 @@ end
 function explode()
    playDetonationAnimation(mPosition:getX(), mPosition:getY())
 
-   playSample("boom.wav", 1.0)
+   playSample("boom.ogg", 1.0)
    boom(0.0, 1.0, 1.0)
 
    distanceToPlayer = mPlayerPosition - mPosition;

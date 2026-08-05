@@ -36,7 +36,7 @@ Arrow::Arrow()
 
       ProjectileHitAudio::addReferenceSamples(
          default_bow_projectile_identifier,
-         {ProjectileHitAudio::ProjectileHitSample{"arrow_hit_1.wav", 0.3f}, ProjectileHitAudio::ProjectileHitSample{"arrow_hit_2.wav", 0.3f}
+         {ProjectileHitAudio::ProjectileHitSample{"arrow_hit_1.ogg", 0.3f}, ProjectileHitAudio::ProjectileHitSample{"arrow_hit_2.ogg", 0.3f}
          }
       );
 
