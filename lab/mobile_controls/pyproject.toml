@@ -7,4 +7,4 @@ dependencies = []
 
 [project.optional-dependencies]
 # only needed for `serve.py --https` self-signed cert auto-generation
-https = ["cryptography>=42"]
+https = ["cryptography>=50.0.0"]
