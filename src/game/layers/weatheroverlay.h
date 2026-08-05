@@ -26,4 +26,12 @@ public:
    /// \brief advances weather simulation state for the current frame.
    /// \param dt elapsed frame time since the previous update.
    virtual void update(const sf::Time& dt) = 0;
+
+   /// \brief starts or stops looped audio owned by the overlay.
+   /// \param audio_enabled true while the weather effect is active for the player.
+   /// \note update() is only called while the effect is active, so overlays cannot notice deactivation
+   ///       themselves; the weather mechanism drives this every frame instead.
+   virtual void setAudioEnabled(bool /*audio_enabled*/)
+   {
+   }
 };

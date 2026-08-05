@@ -1,0 +1,63 @@
+Deceptus Engine - sound credits
+===============================
+
+Third party samples shipped in data/sounds, with their original source and
+licence. Sounds released under Creative Commons 0 carry no attribution
+requirement and are listed here for traceability only; the remaining entries
+are listed because their licence requires the author to be credited.
+
+Licences were taken from the sound pages linked below. When adding new
+material, check the licence on the source page before shipping it.
+
+
+Weather
+-------
+
+weather_rain_heavy_loop.ogg
+    Title     Ambiance - Heavy Rain Loop
+    Author    DWOBoyle
+    Source    https://freesound.org/s/136971/
+    Licence   Attribution 4.0
+    Original  136971__dwoboyle__ambiance-heavy-rain-loop.wav
+
+weather_thunder_01.ogg
+    Title     BadWeatherRec.wav
+    Author    Drukalo
+    Source    https://freesound.org/s/334047/
+    Licence   Creative Commons 0
+    Original  334047__drukalo__badweatherrec.wav
+
+weather_thunder_02.ogg
+    Title     thunder.mp3
+    Author    DragishaRambo21
+    Source    https://freesound.org/s/345920/
+    Licence   Attribution NonCommercial 3.0
+    Original  345920__dragisharambo21__thunder.mp3
+    Note      Non-commercial use only, which suits this project. Revisit
+              this entry if the project ever ships commercially.
+
+weather_thunder_03.ogg
+    Title     Thunder sound
+    Author    Raclure
+    Source    https://freesound.org/s/458870/
+    Licence   Creative Commons 0
+    Original  458870__raclure__thunder-sound.wav
+
+weather_thunder_04.ogg
+    Title     straget__thunder (mp3cut.net).wav
+    Author    AENHS
+    Source    https://freesound.org/s/607047/
+    Licence   Creative Commons 0
+    Original  607047__aenhs__straget__thunder-mp3cutnet.wav
+
+weather_thunder_05.ogg
+    Title     thunder11
+    Author    saha213131
+    Source    https://freesound.org/s/696550/
+    Licence   Creative Commons 0
+    Original  696550__saha213131__thunder11.mp3
+
+
+All of the above were re-encoded to Ogg Vorbis (quality 6, 44100 Hz) for
+this project. weather_thunder_03.ogg was additionally converted from mono to
+stereo so that it is not positioned in 3d space during playback.

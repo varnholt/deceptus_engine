@@ -311,6 +311,10 @@ Rain layers have the custom properties below:
 |collide|bool|Set to true if rain drops should collide with the Box2D world; otherwise they will just fall through|
 |drop_count|int|Number of rain drops used inside this layer|
 |fall_through_rate|int|Decides how many nth rain drops are passed through to the collision detection. Set to `0` or `1` to make every rain drop colliding, set to `2` to pass every second drop to the collision detection, and so on. This setting is only relevant when `collide` is set to `true`.|
+|sound|string|A sample from `data/sounds` that is looped for as long as the rain is active, such as `weather_rain_heavy_loop.ogg`. When the property is omitted, the rain stays silent.|
+|sound_volume|float|Volume multiplier for the looped rain sample. The default is `1.0`.|
+
+The rain sample starts when the player enters the rain rectangle (after `effect_start_delay_s` has elapsed and, if enabled, once `limit_effect_to_room` matches) and stops again when the player leaves. Keep in mind that each rain object plays its own loop, so two overlapping rain rectangles will play the sample twice and sound twice as loud. If that becomes an issue, only assign `sound` to one of them.
 
 ![](images/weather_rain.png)
 
@@ -327,6 +331,10 @@ Thunderstorms have the custom properties below:
 |-|-|-|
 |thunderstorm_time_s|float|The duration of the lightning phase. The default is `3s`.|
 |silence_time_s|float|The duration for everything to be 'quiet', i.e. from one lightning phase to the other (given in seconds). The default is `5s`.|
+|sounds|string|A list of samples from `data/sounds`, separated by semicolons, such as `weather_thunder_01.ogg;weather_thunder_02.ogg`. Every time a lightning phase starts, one of them is picked at random. When the property is omitted, the thunderstorm stays silent.|
+|sound_volume|float|Volume multiplier for the picked thunder sample. The default is `1.0`.|
+
+The thunder is played the moment a lightning phase begins, which is roughly 50-70ms before the flash becomes visible on screen, so both land together. Bear in mind that the samples you pick decide how well this works: a sample whose loudest moment is two seconds in will still be building up while the flash is already over. Pick samples that crack right at the start, or trim the build-up from them.
 
 ![](images/weather_thunderstorm_1.png) &nbsp;&nbsp; ![](images/weather_thunderstorm_2.png)
 

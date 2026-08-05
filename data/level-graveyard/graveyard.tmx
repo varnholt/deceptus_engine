@@ -1804,6 +1804,8 @@
  <objectgroup id="13" name="weather" visible="0">
   <object id="31" name="thunderstorm" x="696" y="696" width="14376" height="1080">
    <properties>
+    <property name="sound_volume" type="float" value="0.8"/>
+    <property name="sounds" value="weather_thunder_01.ogg;weather_thunder_02.ogg;weather_thunder_03.ogg;weather_thunder_04.ogg;weather_thunder_05.ogg"/>
     <property name="z" type="int" value="9"/>
    </properties>
   </object>
@@ -1812,6 +1814,8 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
+    <property name="sound" value="weather_rain_heavy_loop.ogg"/>
+    <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
    </properties>
   </object>
@@ -1820,6 +1824,8 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
+    <property name="sound" value="weather_rain_heavy_loop.ogg"/>
+    <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
    </properties>
   </object>
@@ -1828,6 +1834,8 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
+    <property name="sound" value="weather_rain_heavy_loop.ogg"/>
+    <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
    </properties>
   </object>
@@ -1836,6 +1844,8 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
+    <property name="sound" value="weather_rain_heavy_loop.ogg"/>
+    <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
    </properties>
   </object>
@@ -1844,6 +1854,8 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
+    <property name="sound" value="weather_rain_heavy_loop.ogg"/>
+    <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
    </properties>
   </object>
