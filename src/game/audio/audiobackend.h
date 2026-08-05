@@ -6,7 +6,9 @@
 #include <SFML/System.hpp>
 #endif
 
+#include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 
 /// \brief platform-specific sound-effect plumbing for the Audio mixer.
@@ -22,6 +24,20 @@ class AudioBackend
 {
 public:
    virtual ~AudioBackend() = default;
+
+   /// \brief read-only view of the interleaved pcm data of one cached sample buffer.
+   struct SampleData
+   {
+      const std::int16_t* _samples{nullptr};  //!< interleaved 16 bit pcm data owned by the cached buffer
+      std::uint64_t _sample_count{0};         //!< number of samples across all channels
+      std::uint32_t _channel_count{0};        //!< number of interleaved channels
+      std::uint32_t _sample_rate{0};          //!< samples per second and channel
+   };
+
+   /// \brief returns a view of the pcm data of a cached sample.
+   /// \param sample_name key of the cached buffer.
+   /// \return sample data view, or std::nullopt when the buffer is not cached.
+   virtual std::optional<SampleData> getSampleData(const std::string& sample_name) const = 0;
 
    /// \brief returns whether a buffer for the given sample is already cached.
    /// \param sample_name key of the sample buffer.

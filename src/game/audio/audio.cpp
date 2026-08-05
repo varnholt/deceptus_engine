@@ -4,6 +4,7 @@
 #include "game/config/gameconfiguration.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <ranges>
 #include <string>
@@ -11,6 +12,60 @@
 namespace
 {
 const std::string music_path = "data/music";
+
+// resolution of the loudness envelope; 50ms is short enough to follow a wind gust swelling and
+// fading but long enough that the rms of a single bucket is not dominated by the waveform itself
+constexpr auto loudness_bucket_duration_s = 0.05f;
+
+std::vector<float> computeLoudnessEnvelope(const AudioBackend::SampleData& sample_data)
+{
+   const auto frame_count = sample_data._sample_count / sample_data._channel_count;
+   const auto frames_per_bucket = static_cast<uint64_t>(static_cast<float>(sample_data._sample_rate) * loudness_bucket_duration_s);
+   const auto bucket_count = std::max<uint64_t>(1, (frame_count + frames_per_bucket - 1) / frames_per_bucket);
+
+   std::vector<float> envelope;
+   envelope.reserve(static_cast<size_t>(bucket_count));
+
+   auto loudest = 0.0f;
+
+   for (uint64_t bucket = 0; bucket < bucket_count; bucket++)
+   {
+      const auto first_frame = bucket * frames_per_bucket;
+      const auto last_frame = std::min(first_frame + frames_per_bucket, frame_count);
+
+      auto sum_of_squares = 0.0;
+      for (auto frame = first_frame; frame < last_frame; frame++)
+      {
+         // the mean across the channels is enough here, the envelope does not need to be per-channel
+         auto channel_sum = 0.0f;
+         for (uint32_t channel = 0; channel < sample_data._channel_count; channel++)
+         {
+            channel_sum += static_cast<float>(sample_data._samples[frame * sample_data._channel_count + channel]);
+         }
+
+         const auto mean = channel_sum / static_cast<float>(sample_data._channel_count);
+         sum_of_squares += static_cast<double>(mean) * static_cast<double>(mean);
+      }
+
+      const auto frames_in_bucket = last_frame - first_frame;
+      const auto rms = frames_in_bucket > 0 ? std::sqrt(sum_of_squares / static_cast<double>(frames_in_bucket)) : 0.0;
+
+      envelope.push_back(static_cast<float>(rms));
+      loudest = std::max(loudest, envelope.back());
+   }
+
+   // normalize against the sample's own peak so the caller gets a 0..1 value regardless of how hot
+   // the sample was mastered
+   if (loudest > 0.0f)
+   {
+      for (auto& bucket_loudness : envelope)
+      {
+         bucket_loudness /= loudest;
+      }
+   }
+
+   return envelope;
+}
 }  // namespace
 
 /*!
@@ -56,6 +111,70 @@ void Audio::addSample(const std::string& sample)
    }
 
    _backend->loadSample(sample);
+}
+
+std::optional<sf::Time> Audio::getSampleDuration(const std::string& sample_name)
+{
+   std::lock_guard<std::mutex> lock(_mutex);
+
+   const auto sample_data = _backend->getSampleData(sample_name);
+   if (!sample_data.has_value() || sample_data->_sample_rate == 0 || sample_data->_channel_count == 0)
+   {
+      return std::nullopt;
+   }
+
+   const auto frame_count = sample_data->_sample_count / sample_data->_channel_count;
+   return sf::seconds(static_cast<float>(frame_count) / static_cast<float>(sample_data->_sample_rate));
+}
+
+const std::vector<float>* Audio::getLoudnessEnvelope(const std::string& sample_name)
+{
+   const auto cached = _loudness_envelopes.find(sample_name);
+   if (cached != _loudness_envelopes.end())
+   {
+      return cached->second.empty() ? nullptr : &cached->second;
+   }
+
+   const auto sample_data = _backend->getSampleData(sample_name);
+   if (!sample_data.has_value() || sample_data->_samples == nullptr || sample_data->_sample_count == 0 ||
+       sample_data->_channel_count == 0 || sample_data->_sample_rate == 0)
+   {
+      // remember the failure, too, so a broken sample is not analyzed over and over again
+      _loudness_envelopes[sample_name] = {};
+      return nullptr;
+   }
+
+   auto& envelope = _loudness_envelopes[sample_name];
+   envelope = computeLoudnessEnvelope(sample_data.value());
+
+   return envelope.empty() ? nullptr : &envelope;
+}
+
+std::optional<float> Audio::getSampleLoudness(int32_t thread)
+{
+   std::lock_guard<std::mutex> guard(_mutex);
+
+   if (_stopped)
+   {
+      return std::nullopt;
+   }
+
+   auto& sound_thread = _sound_threads[thread];
+   if (!sound_thread._sound || !_backend->isActive(*sound_thread._sound))
+   {
+      return std::nullopt;
+   }
+
+   const auto* envelope = getLoudnessEnvelope(sound_thread._filename);
+   if (envelope == nullptr)
+   {
+      return std::nullopt;
+   }
+
+   const auto playing_offset_s = sound_thread._sound->getPlayingOffset().asSeconds();
+   const auto bucket = static_cast<size_t>(playing_offset_s / loudness_bucket_duration_s);
+
+   return (*envelope)[std::min(bucket, envelope->size() - 1)];
 }
 
 void Audio::initializeSamples()

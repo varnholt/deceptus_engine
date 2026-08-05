@@ -1564,7 +1564,7 @@ end
 
 ## Wind
 
-Wind zones apply a continuous force to the player whenever they are inside the rectangle.  This mechanism can be used to simulate gusts of wind or air currents that push the player along a path.
+Wind zones apply a continuous force to the player whenever they are inside the rectangle. This mechanism can be used to simulate gusts of wind or air currents that push the player along a path. On top of that a wind zone can blow animated leaves through the area and play a set of wind samples while the player is nearby.
 
 ### Object Type / Object Group
 
@@ -1573,14 +1573,47 @@ Wind zones apply a continuous force to the player whenever they are inside the r
 |Object Type|`Wind`|
 |Object Group|`wind`|
 
-### Object Properties
+### Direction and strength
+
+`direction_x` and `direction_y` only describe *where* the wind blows; the vector is normalized when the level is loaded. *How hard* it blows is a separate property, `strength`. That way a wind zone can be re-tuned through a single number, and the same direction drives both the force on the player and the leaves.
 
 |Property|Type|Description|
 |-|-|-|
-|direction_x|float|Horizontal component of the wind force. Positive values push to the right, negative values push to the left (default is `0.0`).|
-|direction_y|float|Vertical component of the wind force. Positive values push upward, negative values push downward (default is `0.0`).|
+|direction_x|float|Horizontal component of the wind direction. Positive values blow to the right, negative values to the left (default is `0.0`).|
+|direction_y|float|Vertical component of the wind direction. Positive values blow upward, negative values downward (default is `0.0`).|
+|strength|float|Force multiplier applied along the normalized direction. `0.3` is roughly a third of gravity. Set it to `0.0` for zones that only carry leaves and should not push the player. When the property is absent it falls back to the length of the direction vector, which is how zones authored before `strength` existed behave — those keep applying exactly the force they always did without needing to be edited.|
+|z|int|The object's z index (default is `20`, i.e. the player's depth). Pick a value below the solid level layer to have the terrain occlude the leaves, or a high value to draw them in front of everything.|
 
-The size and position of the wind zone are defined by the rectangle you draw.  Wind has no visible representation, so there is no z‑index to configure.
+The size and position of the wind zone are defined by the rectangle you draw.
+
+### Sounds
+
+|Property|Type|Description|
+|-|-|-|
+|sounds|string|Semicolon separated list of samples in `data/sounds`, e.g. `wind_draft_loop_01.ogg;wind_draft_loop_02.ogg`. A single sample is looped; with more than one, a random sample is played and replaced by another random one as soon as it has played through. Defaults to silence.|
+|sound_volume|float|Volume of the samples at close range (default is `1.0`).|
+|sound_radius_near_px|float|Distance up to which the samples play at `sound_volume` (default is `200.0`). Measured from the centre of the wind rectangle, so pick at least half the rectangle's size to keep the volume even inside the zone.|
+|sound_radius_far_px|float|Distance at which the samples have faded to silence (default is `800.0`).|
+|sound_strength_influence|float|How much the wind strength follows the loudness of the sample that is currently playing, between `0.0` and `1.0` (default is `0.0`, i.e. constant strength). At `1.0` the force and the leaf velocity follow the gusts you hear one to one. The loudness is normalized against the sample's own loudest passage.|
+
+### Leaves
+
+Leaves travel along the wind direction with a sideways wobble, enter on the border the wind blows in from and fade in and out so they do not pop up at the rectangle's edges. A sprite sheet holds the animation frames next to each other in one row; three sheets ship with the engine: `data/sprites/leaves_fall.png`, `leaves_spring.png` and `leaves_winter.png`.
+
+|Property|Type|Description|
+|-|-|-|
+|leaf_count|int|Number of leaves alive at the same time. `0` (the default) disables the leaves entirely.|
+|leaf_texture|string|Sprite sheet to use (default is `data/sprites/leaves_fall.png`).|
+|leaf_frame_size_px|int|Width and height of one animation frame; the frame count is derived from the sheet's width (default is `16`).|
+|leaf_velocity_px_s|float|Travel speed in pixels per second (default is `60.0`). Randomized per leaf between 60% and 140%.|
+|leaf_jitter_amount|float|Sideways drift relative to the travel speed (default is `0.35`). `0.0` makes the leaves travel in a straight line.|
+|leaf_jitter_frequency_hz|float|How often a leaf wanders from one side to the other per second (default is `0.8`).|
+|leaf_animation_speed|float|Animation frames per second (default is `8.0`).|
+|leaf_scale_min|float|Lower bound of the randomized per-leaf scale (default is `1.0`).|
+|leaf_scale_max|float|Upper bound of the randomized per-leaf scale (default is `1.0`).|
+|leaf_alpha|float|Opacity of the leaf sprites between `0.0` and `1.0` (default is `1.0`).|
+
+Layering two wind zones over the same area gives the wind some depth: a slow, small, dimmed set behind the level layer and a fast, large one in front of it. Give the second zone a `strength` of `0` and no sounds so the force and the audio are not applied twice. A zone drawn in front of the terrain should not reach below the ground, otherwise its leaves drift across the solid tiles.
 
 ---
 

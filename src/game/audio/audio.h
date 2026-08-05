@@ -14,6 +14,7 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include <vector>
 
 /// \brief singleton sound-effects manager that caches buffers and plays them on a fixed thread pool of sf::Sound instances.
 class Audio
@@ -95,6 +96,21 @@ public:
    /// \param sample sample filename relative to the sfx directory.
    void addSample(const std::string& sample);
 
+   /// \brief returns the playback duration of a cached sample.
+   /// \param sample_name sample filename to look up.
+   /// \return duration of the sample, or std::nullopt when the sample is not cached.
+   std::optional<sf::Time> getSampleDuration(const std::string& sample_name);
+
+   /// \brief returns how loud the sample on one sound thread is at its current playback position.
+   ///
+   /// The value comes from a per-sample loudness envelope built from the decoded pcm data on first
+   /// use and normalized to the loudest passage of that sample, so 1.0 is the sample's own peak
+   /// rather than an absolute level. Callers can use this to drive gameplay or visuals from what is
+   /// actually audible right now.
+   /// \param thread index of the sound thread to sample.
+   /// \return normalized loudness in 0..1, or std::nullopt when the thread plays nothing.
+   std::optional<float> getSampleLoudness(int32_t thread);
+
    /// \brief starts sample playback on the first free sound thread.
    /// \param play_info playback request containing sample name, gain, looping, and optional position.
    /// \return thread index used for playback, or std::nullopt when no slot or sample is available.
@@ -125,8 +141,16 @@ private:
    /// \brief prints how many sound threads are currently free for playback.
    void debug();
 
+   /// \brief returns the loudness envelope of a cached sample, building it on first use.
+   ///
+   /// Must be called with _mutex held.
+   /// \param sample_name sample filename to look up.
+   /// \return normalized rms buckets, or nullptr when the sample is not cached or carries no data.
+   const std::vector<float>* getLoudnessEnvelope(const std::string& sample_name);
+
    std::mutex _mutex;
    std::atomic<bool> _stopped = false;
    std::unique_ptr<AudioBackend> _backend;  //!< platform-specific device, buffer cache, and sound plumbing
    std::array<SoundThread, 50> _sound_threads;
+   std::map<std::string, std::vector<float>> _loudness_envelopes;  //!< lazily built rms buckets keyed by sample filename
 };

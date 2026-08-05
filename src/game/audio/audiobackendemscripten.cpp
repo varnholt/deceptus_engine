@@ -42,6 +42,23 @@ public:
       return _sound_buffers.find(sample_name) != _sound_buffers.end();
    }
 
+   std::optional<SampleData> getSampleData(const std::string& sample_name) const override
+   {
+      const auto it = _sound_buffers.find(sample_name);
+      if (it == _sound_buffers.end())
+      {
+         return std::nullopt;
+      }
+
+      const auto& buffer = it->second;
+      return SampleData{
+         ._samples = buffer.getSamples(),
+         ._sample_count = buffer.getSampleCount(),
+         ._channel_count = buffer.getChannelCount(),
+         ._sample_rate = buffer.getSampleRate()
+      };
+   }
+
    bool loadSample(const std::string& sample_name) override
    {
       const std::string full_path = sfx_path + sample_name;
