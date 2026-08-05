@@ -125,7 +125,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   addSample("boom.wav")
+   addSample("boom.ogg")
    addHitbox(-18, -12, 36, 24)
    addShapeCircle(HIT_RADIUS_M, 0.0, 0.0)
 
@@ -335,7 +335,7 @@ function checkForExplosion()
          _dead = true
 
          boom(0.0, 1.0, 0.5)
-         playSample("boom.wav")
+         playSample("boom.ogg")
          playDetonationAnimation(_position_px:getX(), _position_px:getY())
          damage(10, 0.0, 0.0)
       end

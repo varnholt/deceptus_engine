@@ -81,9 +81,9 @@ function initialize()
    addShapeRect(0.25, 0.25, 0.25, 0.25)
    addHitbox(-12, -12, 24, 24)
    addAudioRange(400.0, 0.0, 250.0, 1.0)
-   addSample("arrow_load.wav")
-   addSample("arrow_release_1.wav")
-   addSample("arrow_release_2.wav")
+   addSample("arrow_load.ogg")
+   addSample("arrow_release_1.ogg")
+   addSample("arrow_release_2.ogg")
    addWeapon(WeaponType["Bow"], 50, 60, 0.0, 0.1) -- interval, damage, gravity_scale, radius
    updateAlignment(Alignment["AlignmentRight"])
    setSpriteOffset(0, 12, 12)
@@ -228,7 +228,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire(muzzle_index)
-   playSample("arrow_release_1.wav", 1.0)
+   playSample("arrow_release_1.ogg", 1.0)
    useWeapon(
       0,
       _position_px:getX() + _fire_offset_px[muzzle_index]:getX(),
@@ -280,7 +280,7 @@ function update(dt)
             _fire_delay_elapsed[i]=true
          elseif (not _load_played) then
             _load_played = true
-            playSample("arrow_load.wav", 1.0)
+            playSample("arrow_load.ogg", 1.0)
          end
       end
    end

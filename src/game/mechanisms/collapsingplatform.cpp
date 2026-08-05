@@ -187,7 +187,7 @@ std::string_view CollapsingPlatform::objectName() const
 
 void CollapsingPlatform::preload()
 {
-   Audio::getInstance().addSample("mechanism_collapsing_platform_crumble.wav");
+   Audio::getInstance().addSample("mechanism_collapsing_platform_crumble.ogg");
 }
 
 void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
@@ -335,7 +335,7 @@ void CollapsingPlatform::update(const sf::Time& dt)
    {
       if (!_played_shake_sample)
       {
-         Audio::getInstance().playSample({"mechanism_collapsing_platform_crumble.wav"});
+         Audio::getInstance().playSample({"mechanism_collapsing_platform_crumble.ogg"});
          _played_shake_sample = true;
       }
 
@@ -354,7 +354,7 @@ void CollapsingPlatform::update(const sf::Time& dt)
    {
       if (_played_shake_sample)
       {
-         Audio::getInstance().stopSample("mechanism_collapsing_platform_crumble.wav");
+         Audio::getInstance().stopSample("mechanism_collapsing_platform_crumble.ogg");
          _played_shake_sample = false;
       }
 

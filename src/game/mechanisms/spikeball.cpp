@@ -145,8 +145,8 @@ std::string_view SpikeBall::objectName() const
 
 void SpikeBall::preload()
 {
-   Audio::getInstance().addSample("mechanism_spikeball_01.wav");
-   Audio::getInstance().addSample("mechanism_spikeball_02.wav");
+   Audio::getInstance().addSample("mechanism_spikeball_01.ogg");
+   Audio::getInstance().addSample("mechanism_spikeball_02.ogg");
 }
 
 #ifdef __EMSCRIPTEN__
@@ -330,8 +330,8 @@ void SpikeBall::update(const sf::Time& dt)
       const auto changed_direction = std::signbit(_last_ball_x_velocity) != std::signbit(_ball_body->GetLinearVelocity().x);
       if (changed_direction)
       {
-         const auto sample = (_swing_counter++ & 1) ? Audio::PlayInfo{"mechanism_spikeball_01.wav", _audio_update_data._volume}
-                                                    : Audio::PlayInfo{"mechanism_spikeball_02.wav", _audio_update_data._volume};
+         const auto sample = (_swing_counter++ & 1) ? Audio::PlayInfo{"mechanism_spikeball_01.ogg", _audio_update_data._volume}
+                                                    : Audio::PlayInfo{"mechanism_spikeball_02.ogg", _audio_update_data._volume};
          Audio::getInstance().playSample(sample);
       }
 

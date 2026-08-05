@@ -130,7 +130,7 @@ void Lever::setup(const GameDeserializeData& data)
                if (_player_at_lever && !_handle_available && item == "handle")
                {
                   setHandleAvailable(true);
-                  Audio::getInstance().playSample(Audio::PlayInfo{"mechanism_switch_lever_insert.wav"});
+                  Audio::getInstance().playSample(Audio::PlayInfo{"mechanism_switch_lever_insert.ogg"});
                   GameMechanismObserver::onEvent(getObjectId(), "levers", "handle_inserted", std::string{"true"});
                   return true;
                }
@@ -224,9 +224,9 @@ std::string_view Lever::objectName() const
 
 void Lever::preload()
 {
-   Audio::getInstance().addSample("mechanism_switch_off.wav");
-   Audio::getInstance().addSample("mechanism_switch_on.wav");
-   Audio::getInstance().addSample("mechanism_switch_lever_insert.wav");
+   Audio::getInstance().addSample("mechanism_switch_off.ogg");
+   Audio::getInstance().addSample("mechanism_switch_on.ogg");
+   Audio::getInstance().addSample("mechanism_switch_lever_insert.ogg");
 }
 
 void Lever::updateDirection()
@@ -457,7 +457,7 @@ void Lever::toggle()
    }
 
    Audio::getInstance().playSample(
-      _target_state == State::Left ? Audio::PlayInfo{"mechanism_switch_off.wav"} : Audio::PlayInfo{"mechanism_switch_on.wav"}
+      _target_state == State::Left ? Audio::PlayInfo{"mechanism_switch_off.ogg"} : Audio::PlayInfo{"mechanism_switch_on.ogg"}
    );
 
    updateReceivers();

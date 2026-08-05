@@ -144,7 +144,7 @@ void messageBox(
 {
    if (properties._animate_show_event)
    {
-      Audio::getInstance().playSample({"messagebox_open_01.wav"});
+      Audio::getInstance().playSample({"messagebox_open_01.ogg"});
    }
 
    __active = std::make_unique<MessageBox>(type, message, callback, properties, buttons);
@@ -323,7 +323,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
    // yay
    if (key == sf::Keyboard::Key::Enter)
    {
-      Audio::getInstance().playSample({"messagebox_confirm.wav"});
+      Audio::getInstance().playSample({"messagebox_confirm.ogg"});
 
       if (__active->_buttons & static_cast<int32_t>(Button::Yes))
       {
@@ -351,7 +351,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
    // nay
    if (key == sf::Keyboard::Key::Escape)
    {
-      Audio::getInstance().playSample({"messagebox_cancel.wav"});
+      Audio::getInstance().playSample({"messagebox_cancel.ogg"});
 
       if (__active->_buttons & static_cast<int32_t>(Button::No))
       {

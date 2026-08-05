@@ -34,7 +34,7 @@ function initialize()
    updateSpriteRect(0, 0, 0, SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX) -- id, x, y, width, height
    setSpriteOrigin(0, -SPRITE_WIDTH_PX/2, 0)
    setZ(19)                                               -- place behind player
-   addSample("spawn_01.wav")
+   addSample("spawn_01.ogg")
    setAudioUpdateBehavior(AudioUpdateBehavior["AlwaysOn"])
    setReferenceVolume(1.0)
 end
@@ -74,7 +74,7 @@ function show()
       _current_cycle = ROW_APPEAR
       sprite_index = 0
       _animation_dir_forward = true
-      playSample("spawn_01.wav", 1.0)
+      playSample("spawn_01.ogg", 1.0)
    end
 end
 

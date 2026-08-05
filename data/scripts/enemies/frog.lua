@@ -149,7 +149,7 @@ function initialize()
    setSpriteOffset(2, 36, 12)
    setSpriteVisible(2, false)
 
-   addSample("splat_01.wav")
+   addSample("splat_01.ogg")
    setReferenceVolume(1.0)
    setAudioUpdateBehavior(AudioUpdateBehavior["AlwaysOn"])
 
@@ -376,7 +376,7 @@ function smashed()
 
    -- print("Frog: Smashed, starting to die")
 
-   playSample("splat_01.wav", 1.0)
+   playSample("splat_01.ogg", 1.0)
    _smashed = true
    startDying()
 end

@@ -22,7 +22,7 @@ static constexpr int32_t default_treasure_chest_z = 0;
 static constexpr std::array treasure_chest_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = default_treasure_chest_z},
    PropertyInfo{.name = "texture", .type = "string", .default_value = std::string_view{"data/sprites/treasure_chest.png"}},
-   PropertyInfo{.name = "sample_open", .type = "string", .default_value = std::string_view{"treasure_chest_open.wav"}},
+   PropertyInfo{.name = "sample_open", .type = "string", .default_value = std::string_view{"treasure_chest_open.ogg"}},
    PropertyInfo{.name = "sample_locked", .type = "string", .default_value = std::string_view{""}},
    PropertyInfo{.name = "spawn_extra", .type = "string", .default_value = std::string_view{""}},
    PropertyInfo{.name = "spawn_offset_x", .type = "float", .default_value = 0.0f},
@@ -108,7 +108,7 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
 #endif
    sfcompat::setPosition(*_sprite, {pos_x_px, pos_y_px});
 
-   _sample_open = ValueReader::readValue<std::string>("sample_open", map).value_or("treasure_chest_open.wav");
+   _sample_open = ValueReader::readValue<std::string>("sample_open", map).value_or("treasure_chest_open.ogg");
    Audio::getInstance().addSample(_sample_open);
 
    _sample_locked = ValueReader::readValue<std::string>("sample_locked", map).value_or("");

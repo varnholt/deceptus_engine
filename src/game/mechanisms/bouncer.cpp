@@ -151,7 +151,7 @@ std::string_view Bouncer::objectName() const
 
 void Bouncer::preload()
 {
-   Audio::getInstance().addSample("mechanism_bouncer.wav");
+   Audio::getInstance().addSample("mechanism_bouncer.ogg");
 }
 
 void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
@@ -247,6 +247,6 @@ void Bouncer::activate()
    // aaaaand.. up!
    const auto& pos = body->GetWorldCenter();
    body->ApplyLinearImpulse(force, pos, true);
-   Audio::getInstance().playSample({"mechanism_bouncer.wav"});
+   Audio::getInstance().playSample({"mechanism_bouncer.ogg"});
    BouncerWrapper::bumpLastBouncerTime();
 }

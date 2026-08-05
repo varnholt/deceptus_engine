@@ -75,8 +75,8 @@ private:
       int32_t max_damage{30};
       int32_t row{0};
       std::string texture_path{"data/sprites/wooden_planks.png"};
-      std::string hit_sound{"mechanism_destructible_blocking_rect_damage_1.wav"};
-      std::string destroy_sound{"mechanism_destructible_blocking_rect_destroyed_1.wav"};
+      std::string hit_sound{"mechanism_destructible_blocking_rect_damage_1.ogg"};
+      std::string destroy_sound{"mechanism_destructible_blocking_rect_destroyed_1.ogg"};
       int32_t z_index{0};
       Alignment alignment{Alignment::Left};
       float animation_speed{40.0f};

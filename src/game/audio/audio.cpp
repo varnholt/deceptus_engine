@@ -60,21 +60,21 @@ void Audio::addSample(const std::string& sample)
 
 void Audio::initializeSamples()
 {
-   addSample("coin.wav");
-   addSample("death.wav");
-   addSample("healthup.wav");
-   addSample("hurt.wav");
+   addSample("coin.ogg");
+   addSample("death.ogg");
+   addSample("healthup.ogg");
+   addSample("hurt.ogg");
 
-   addSample("messagebox_open_01.wav");
-   addSample("messagebox_confirm.wav");
-   addSample("messagebox_cancel.wav");
+   addSample("messagebox_open_01.ogg");
+   addSample("messagebox_confirm.ogg");
+   addSample("messagebox_cancel.ogg");
 
-   addSample("arrow_hit_1.wav");
-   addSample("arrow_hit_2.wav");
+   addSample("arrow_hit_1.ogg");
+   addSample("arrow_hit_2.ogg");
 
-   addSample("powerup.wav");
-   addSample("splash.wav");
-   addSample("impact.wav");
+   addSample("powerup.ogg");
+   addSample("splash.ogg");
+   addSample("impact.ogg");
 }
 
 void Audio::debug()

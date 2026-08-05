@@ -27,7 +27,7 @@ float frand(float min = 0.0f, float max = 1.0f)
 
 WaterBubbles::WaterBubbles() : _texture(TexturePool::getInstance().get("data/sprites/player.png"))
 {
-   Audio::getInstance().addSample("underwater_bubbles.wav");
+   Audio::getInstance().addSample("underwater_bubbles.ogg");
 }
 
 void WaterBubbles::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
@@ -107,7 +107,7 @@ void WaterBubbles::spawnSplashBubbles(const WaterBubbleInput& input)
 
 void WaterBubbles::spawnBubblesFromHead(const WaterBubbleInput& input)
 {
-   Audio::getInstance().playSample(Audio::PlayInfo{"underwater_bubbles.wav"});
+   Audio::getInstance().playSample(Audio::PlayInfo{"underwater_bubbles.ogg"});
 
    const auto spawn_bubble_count = std::max(bubble_count_spawn_max / 3, std::rand() % bubble_count_spawn_max);
 
