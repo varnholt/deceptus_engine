@@ -35,14 +35,19 @@ bool SoundRotation::empty() const
    return _samples.empty();
 }
 
+bool SoundRotation::ownsThread() const
+{
+   return _thread_id.has_value() && Audio::getInstance().getPlaybackGeneration(_thread_id.value()) == _generation;
+}
+
 bool SoundRotation::isPlaying() const
 {
-   return _thread_id.has_value();
+   return ownsThread();
 }
 
 void SoundRotation::start(float volume)
 {
-   if (_samples.empty() || _thread_id.has_value())
+   if (_samples.empty() || ownsThread())
    {
       return;
    }
@@ -57,7 +62,7 @@ void SoundRotation::update(const sf::Time& dt, float volume)
       return;
    }
 
-   if (!_thread_id.has_value())
+   if (!ownsThread())
    {
       playNext(volume);
       return;
@@ -100,12 +105,14 @@ void SoundRotation::playNext(float volume)
    _elapsed_in_current_s = 0.0f;
    _current_duration_s = duration.has_value() ? duration->asSeconds() : 0.0f;
    _thread_id = Audio::getInstance().playSample({sample, volume, looped});
+   _generation = _thread_id.has_value() ? Audio::getInstance().getPlaybackGeneration(_thread_id.value()) : 0;
 }
 
 void SoundRotation::stop()
 {
-   if (!_thread_id.has_value())
+   if (!ownsThread())
    {
+      _thread_id.reset();
       return;
    }
 
@@ -115,7 +122,7 @@ void SoundRotation::stop()
 
 void SoundRotation::setVolume(float volume)
 {
-   if (!_thread_id.has_value())
+   if (!ownsThread())
    {
       return;
    }
@@ -125,7 +132,7 @@ void SoundRotation::setVolume(float volume)
 
 std::optional<float> SoundRotation::getLoudness() const
 {
-   if (!_thread_id.has_value())
+   if (!ownsThread())
    {
       return std::nullopt;
    }

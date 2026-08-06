@@ -263,12 +263,19 @@ std::optional<int32_t> Audio::playSample(const PlayInfo& play_info)
    thread_it->_sound->setPosition(position);
    thread_it->_sound->setMinDistance(10000.0f);
    thread_it->_sound->setAttenuation(0.0f);
+   thread_it->_generation++;
    thread_it->_filename = play_info._sample_name;
    thread_it->_play_info = play_info;
    thread_it->setVolume(play_info._volume);
    thread_it->_sound->play();
 
    return static_cast<int32_t>(std::distance(_sound_threads.begin(), thread_it));
+}
+
+uint32_t Audio::getPlaybackGeneration(int32_t thread)
+{
+   std::lock_guard<std::mutex> guard(_mutex);
+   return _sound_threads[thread]._generation;
 }
 
 void Audio::stopSample(const std::string& name)

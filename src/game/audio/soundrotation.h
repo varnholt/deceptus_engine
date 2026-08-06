@@ -72,8 +72,17 @@ private:
    /// \param volume volume to play the sample at.
    void playNext(float volume);
 
+   /// \brief checks whether the remembered sound thread still runs the sample this rotation started.
+   ///
+   /// A non-looped sample frees its slot when it plays out, and Audio hands that slot to whoever asks
+   /// next. Without this check a rotation that has not noticed yet would read another owner's loudness,
+   /// overwrite its volume, or stop it outright.
+   /// \return true while the thread still belongs to this rotation.
+   bool ownsThread() const;
+
    std::vector<std::string> _samples;
    std::optional<int32_t> _thread_id;
+   uint32_t _generation{0};  //!< playback generation of _thread_id, so a recycled slot is not mistaken for ours
    std::optional<size_t> _current_index;
    float _current_duration_s{0.0f};
    float _elapsed_in_current_s{0.0f};

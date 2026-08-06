@@ -8,6 +8,7 @@
 #endif
 #include <array>
 #include <atomic>
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <memory>
@@ -71,6 +72,7 @@ public:
       std::string _filename;
       std::unique_ptr<sf::Sound> _sound;
       PlayInfo _play_info;
+      uint32_t _generation{0};  //!< bumped every time this slot is handed to a new sample
 
       /// \brief applies effective volume to the slot using master and sfx configuration multipliers.
       /// \param volume per-sample volume multiplier in normalized units.
@@ -100,6 +102,16 @@ public:
    /// \param sample_name sample filename to look up.
    /// \return duration of the sample, or std::nullopt when the sample is not cached.
    std::optional<sf::Time> getSampleDuration(const std::string& sample_name);
+
+   /// \brief returns a counter that changes whenever a sound thread is handed to a new sample.
+   ///
+   /// A thread index alone does not identify a playback: once a sample stops, its slot is recycled and
+   /// handed to the next caller, so a stale index would let one owner read, re-volume or even stop
+   /// another owner's sound. Callers that hold on to a thread index across frames should capture this
+   /// counter right after playSample and compare before acting on the thread again.
+   /// \param thread index of the sound thread to query.
+   /// \return current generation of that thread.
+   uint32_t getPlaybackGeneration(int32_t thread);
 
    /// \brief returns how loud the sample on one sound thread is at its current playback position.
    ///
