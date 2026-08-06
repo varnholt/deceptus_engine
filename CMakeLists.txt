@@ -161,6 +161,8 @@ set(GAME_FILES
     src/game/audio/audiorange.h
     src/game/audio/audioupdatedata.cpp
     src/game/audio/audioupdatedata.h
+    src/game/audio/soundrotation.cpp
+    src/game/audio/soundrotation.h
     src/game/audio/musicbackend.h
     src/game/audio/musicbackenddesktop.cpp
     src/game/audio/musicbackendemscripten.cpp

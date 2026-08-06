@@ -58,6 +58,31 @@ weather_thunder_05.ogg
     Original  696550__saha213131__thunder11.mp3
 
 
+Wind
+----
+
+wind_draft_loop_01.ogg
+    Title     wind draft loop 1
+    Author    nsstudios
+    Source    https://freesound.org/s/651541/
+    Licence   Attribution 4.0
+    Original  651541__nsstudios__wind-draft-loop-1.wav
+
+wind_draft_loop_02.ogg
+    Title     wind draft loop 2
+    Author    nsstudios
+    Source    https://freesound.org/s/651540/
+    Licence   Attribution 4.0
+    Original  651540__nsstudios__wind-draft-loop-2.wav
+
+wind_draft_loop_03.ogg
+    Title     wind draft loop 3
+    Author    nsstudios
+    Source    https://freesound.org/s/651545/
+    Licence   Attribution 4.0
+    Original  651545__nsstudios__wind-draft-loop-3.wav
+
+
 All of the above were re-encoded to Ogg Vorbis (quality 6, 44100 Hz) for
 this project. weather_thunder_03.ogg was additionally converted from mono to
 stereo so that it is not positioned in 3d space during playback.

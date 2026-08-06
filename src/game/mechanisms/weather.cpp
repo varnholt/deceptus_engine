@@ -5,36 +5,13 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
+#include "game/audio/soundrotation.h"
 #include "game/io/valuereader.h"
 #include "game/level/roomupdater.h"
 #include "game/player/playerregistry.h"
 
-#include <sstream>
 #include <string>
 #include <vector>
-
-namespace
-{
-
-// read "sample_1.ogg;sample_2.ogg;sample_3.ogg"
-std::vector<std::string> parseSoundList(const std::string& sounds)
-{
-   std::vector<std::string> result;
-   std::istringstream stream(sounds);
-   std::string sound;
-
-   while (std::getline(stream, sound, ';'))
-   {
-      if (!sound.empty())
-      {
-         result.push_back(sound);
-      }
-   }
-
-   return result;
-}
-
-}  // namespace
 
 Weather::Weather(GameNode* parent) : GameNode(parent)
 {
@@ -294,7 +271,7 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
          const auto sounds = ValueReader::readValue<std::string>("sounds", map);
          if (sounds.has_value())
          {
-            settings._sounds = parseSoundList(sounds.value());
+            settings._sounds = SoundList::parse(sounds.value());
             for (const auto& sound : settings._sounds)
             {
                Audio::getInstance().addSample(sound);

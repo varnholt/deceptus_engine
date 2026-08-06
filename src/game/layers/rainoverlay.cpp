@@ -375,6 +375,11 @@ void RainOverlay::determineRainSurfaces()
 void RainOverlay::setSettings(const RainSettings& settings)
 {
    _settings = settings;
+
+   if (!_settings._sound.empty())
+   {
+      _sound.setSamples({_settings._sound});
+   }
 }
 
 void RainOverlay::setAudioEnabled(bool audio_enabled)
@@ -393,22 +398,16 @@ void RainOverlay::setAudioEnabled(bool audio_enabled)
 
    if (audio_enabled)
    {
-      // the looped sample keeps its sound thread occupied until it is stopped again
-      _sound_thread_id = Audio::getInstance().playSample({_settings._sound, _settings._sound_volume, true});
+      // a single sample is looped, so it keeps its sound thread occupied until it is stopped again
+      _sound.start(_settings._sound_volume);
    }
    else
    {
-      stopPlaying();
+      _sound.stop();
    }
 }
 
 void RainOverlay::stopPlaying()
 {
-   if (!_sound_thread_id.has_value())
-   {
-      return;
-   }
-
-   Audio::getInstance().stopSample(_sound_thread_id.value());
-   _sound_thread_id.reset();
+   _sound.stop();
 }
