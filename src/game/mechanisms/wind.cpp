@@ -8,10 +8,10 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
-#include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
+#include "game/audio/soundrotation.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -116,22 +116,6 @@ float randomFloat(float min_value, float max_value)
    return min_value + normalized * (max_value - min_value);
 }
 
-// read "sample_1.ogg;sample_2.ogg;sample_3.ogg"
-std::vector<std::string> parseSoundList(const std::string& sounds)
-{
-   std::vector<std::string> result;
-
-   for (const auto& sound : TmxTools::split(sounds, ';'))
-   {
-      if (!sound.empty())
-      {
-         result.push_back(sound);
-      }
-   }
-
-   return result;
-}
-
 /// \brief returns how far a point inside a rectangle can travel along a direction before it leaves it.
 /// \param rect rectangle the point travels through.
 /// \param position_px point inside the rectangle.
@@ -176,7 +160,7 @@ Wind::Wind(GameNode* parent) : GameNode(parent)
 
 Wind::~Wind()
 {
-   stopPlaying();
+   _sounds.stop();
 }
 
 std::string_view Wind::objectName() const
@@ -225,11 +209,7 @@ std::shared_ptr<Wind> Wind::deserialize(GameNode* parent, const GameDeserializeD
       const auto sounds = ValueReader::readValue<std::string>("sounds", props);
       if (sounds.has_value())
       {
-         wind->_sounds = parseSoundList(sounds.value());
-         for (const auto& sound : wind->_sounds)
-         {
-            Audio::getInstance().addSample(sound);
-         }
+         wind->_sounds.setSamples(SoundList::parse(sounds.value()));
       }
 
       sound_volume = ValueReader::readValue<float>("sound_volume", props).value_or(default_sound_volume);
@@ -353,7 +333,7 @@ void Wind::update(const sf::Time& dt)
    if (!_enabled)
    {
       // a disabled zone must not keep a looping sample alive; playback resumes once it is enabled again
-      stopPlaying();
+      _sounds.stop();
       applyLoudness(1.0f);
       return;
    }
@@ -400,63 +380,8 @@ void Wind::updateSound(const sf::Time& dt)
       return;
    }
 
-   if (!_sound_thread_id.has_value())
-   {
-      playNextSound();
-   }
-   else if (_sounds.size() > 1 && _current_sound_duration_s > 0.0f)
-   {
-      // a single sample is looped, a list of samples keeps being re-randomized
-      _elapsed_in_current_sound_s += dt.asSeconds();
-      if (_elapsed_in_current_sound_s >= _current_sound_duration_s)
-      {
-         playNextSound();
-      }
-   }
-
-   if (!_sound_thread_id.has_value())
-   {
-      applyLoudness(1.0f);
-      return;
-   }
-
-   applyLoudness(Audio::getInstance().getSampleLoudness(_sound_thread_id.value()).value_or(1.0f));
-}
-
-void Wind::playNextSound()
-{
-   stopPlaying();
-
-   auto next_index = size_t{0};
-   const auto looped = (_sounds.size() == 1);
-
-   if (!looped)
-   {
-      // hearing the same gust twice in a row makes the randomization look broken
-      do
-      {
-         next_index = static_cast<size_t>(std::rand()) % _sounds.size();
-      } while (_current_sound_index.has_value() && next_index == _current_sound_index.value());
-   }
-
-   const auto& sound = _sounds[next_index];
-   const auto duration = Audio::getInstance().getSampleDuration(sound);
-
-   _current_sound_index = next_index;
-   _elapsed_in_current_sound_s = 0.0f;
-   _current_sound_duration_s = duration.has_value() ? duration->asSeconds() : 0.0f;
-   _sound_thread_id = Audio::getInstance().playSample({sound, _audio_update_data._volume, looped});
-}
-
-void Wind::stopPlaying()
-{
-   if (!_sound_thread_id.has_value())
-   {
-      return;
-   }
-
-   Audio::getInstance().stopSample(_sound_thread_id.value());
-   _sound_thread_id.reset();
+   _sounds.update(dt, _audio_update_data._volume);
+   applyLoudness(_sounds.getLoudness().value_or(1.0f));
 }
 
 void Wind::setAudioEnabled(bool audio_enabled)
@@ -470,7 +395,7 @@ void Wind::setAudioEnabled(bool audio_enabled)
 
    if (!audio_enabled)
    {
-      stopPlaying();
+      _sounds.stop();
    }
 
    // starting is left to updateSound so the sample choice and its bookkeeping live in one place
@@ -480,12 +405,7 @@ void Wind::setVolume(float volume)
 {
    GameMechanism::setVolume(volume);
 
-   if (!_sound_thread_id.has_value())
-   {
-      return;
-   }
-
-   Audio::getInstance().setVolume(_sound_thread_id.value(), volume);
+   _sounds.setVolume(volume);
 }
 
 void Wind::updateLeaves(const sf::Time& dt)

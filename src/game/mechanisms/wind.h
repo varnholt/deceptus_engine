@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game/audio/soundrotation.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
@@ -108,15 +109,6 @@ public:
    static std::shared_ptr<Wind> deserialize(GameNode* parent, const GameDeserializeData& data);
 
 private:
-   /// \brief picks the next sample and starts playing it.
-   ///
-   /// A single configured sample is looped; with more than one sample a random one is started and
-   /// replaced by another one as soon as it has played through.
-   void playNextSound();
-
-   /// \brief stops the sample that is currently playing, if any.
-   void stopPlaying();
-
    /// \brief keeps the sample playback going and re-reads the loudness the gusts are derived from.
    /// \param dt elapsed frame time.
    void updateSound(const sf::Time& dt);
@@ -150,11 +142,7 @@ private:
    int32_t _leaf_frame_count{1};
 
    // audio
-   std::vector<std::string> _sounds;
-   std::optional<int32_t> _sound_thread_id;
-   std::optional<size_t> _current_sound_index;
-   float _current_sound_duration_s{0.0f};
-   float _elapsed_in_current_sound_s{0.0f};
+   SoundRotation _sounds;
    float _sound_strength_influence{0.0f};  //!< 0 keeps the strength constant, 1 makes it follow the sample loudness
    float _strength_factor{1.0f};           //!< loudness-derived multiplier applied to _strength
    float _leaf_factor{1.0f};               //!< loudness-derived multiplier applied to the leaf velocity

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "constants.h"
+#include "game/audio/soundrotation.h"
 #include "weatheroverlay.h"
 
 #include <cstdint>
@@ -101,6 +102,6 @@ private:
 
    RainSettings _settings;
 
-   bool _audio_enabled{false};               //!< tracks the last audio state so playback only changes on transitions
-   std::optional<int32_t> _sound_thread_id;  //!< sound thread running the looped rain sample
+   bool _audio_enabled{false};  //!< tracks the last audio state so playback only changes on transitions
+   SoundRotation _sound;        //!< runs the looped rain sample
 };
