@@ -1594,7 +1594,9 @@ The size and position of the wind zone are defined by the rectangle you draw.
 |sound_volume|float|Volume of the samples at close range (default is `1.0`).|
 |sound_radius_near_px|float|Distance up to which the samples play at `sound_volume` (default is `200.0`). Measured from the centre of the wind rectangle, so pick at least half the rectangle's size to keep the volume even inside the zone.|
 |sound_radius_far_px|float|Distance at which the samples have faded to silence (default is `800.0`).|
-|sound_strength_influence|float|How much the wind strength follows the loudness of the sample that is currently playing, between `0.0` and `1.0` (default is `0.0`, i.e. constant strength). At `1.0` the force and the leaf velocity follow the gusts you hear one to one. The loudness is normalized against the sample's own loudest passage.|
+|sound_strength_influence|float|How much the **force on the player** follows the loudness of the sample that is currently playing, between `0.0` and `1.0` (default is `0.0`, i.e. constant strength). At `1.0` the force follows the gusts you hear one to one. The loudness is normalized against the sample's own loudest passage.|
+
+The loudness also drives the leaves, through `leaf_sound_influence` below. The two are independent: a zone can push the player constantly while its leaves gust, gust the force while the leaves travel evenly, do both, or neither. Both need at least one entry in `sounds` — with no sample there is no loudness to read and both multipliers stay at `1.0`.
 
 ### Leaves
 
@@ -1612,6 +1614,7 @@ Leaves travel along the wind direction with a sideways wobble, enter on the bord
 |leaf_scale_min|float|Lower bound of the randomized per-leaf scale (default is `1.0`).|
 |leaf_scale_max|float|Upper bound of the randomized per-leaf scale (default is `1.0`).|
 |leaf_alpha|float|Opacity of the leaf sprites between `0.0` and `1.0` (default is `1.0`).|
+|leaf_sound_influence|float|How much the **leaf velocity** follows the loudness of the sample that is currently playing, between `0.0` and `1.0` (default is `0.0`, i.e. constant velocity). At `1.0` the leaves surge and settle with the gusts you hear. Independent of `sound_strength_influence`, so a zone that does not push the player at all can still have its leaves react to the wind.|
 
 Layering two wind zones over the same area gives the wind some depth: a slow, small, dimmed set behind the level layer and a fast, large one in front of it. Give the second zone a `strength` of `0` and no sounds so the force and the audio are not applied twice. A zone drawn in front of the terrain should not reach below the ground, otherwise its leaves drift across the solid tiles.
 

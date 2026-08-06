@@ -1871,14 +1871,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -1892,14 +1892,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -1913,14 +1913,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -1934,14 +1934,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -1955,14 +1955,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -1976,14 +1976,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -1997,14 +1997,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -2018,14 +2018,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -2039,14 +2039,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -2060,14 +2060,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -2081,14 +2081,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -2102,14 +2102,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -2123,14 +2123,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>
@@ -2144,14 +2144,14 @@
     <property name="leaf_jitter_frequency_hz" type="float" value="0.7"/>
     <property name="leaf_scale_max" type="float" value="1"/>
     <property name="leaf_scale_min" type="float" value="0.75"/>
+    <property name="leaf_sound_influence" type="float" value="0.85"/>
     <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
     <property name="leaf_velocity_px_s" type="float" value="90"/>
     <property name="sound_radius_far_px" type="float" value="1800"/>
     <property name="sound_radius_near_px" type="float" value="900"/>
-    <property name="sound_strength_influence" type="float" value="0.8"/>
-    <property name="sound_volume" type="float" value="0.25"/>
+    <property name="sound_volume" type="float" value="0.7"/>
     <property name="sounds" value="wind_draft_loop_01.ogg;wind_draft_loop_02.ogg;wind_draft_loop_03.ogg"/>
-    <property name="strength" type="float" value="0.18"/>
+    <property name="strength" type="float" value="0"/>
     <property name="z" type="int" value="19"/>
    </properties>
   </object>

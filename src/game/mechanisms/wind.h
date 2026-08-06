@@ -16,9 +16,11 @@
 ///
 /// The direction is stored as a normalized vector; how hard the wind pushes is configured separately
 /// through `strength`. That way a level can be re-tuned without having to rebalance the direction, and
-/// the same vector can drive the force and the leaf movement. When `sound_strength_influence` is set,
-/// the strength is additionally modulated by how loud the currently playing sample is, so the gusts the
-/// player hears are the gusts the player feels.
+/// the same vector can drive the force and the leaf movement.
+///
+/// How loud the currently playing sample is can additionally modulate the force and the leaf velocity,
+/// through `sound_strength_influence` and `leaf_sound_influence` respectively. The two are independent,
+/// so a zone that does not push the player at all can still have its leaves surge with the gusts.
 class Wind : public GameMechanism, public GameNode
 {
 public:
@@ -35,6 +37,7 @@ public:
       float _scale_min{1.0f};            //!< lower bound of the randomized per-leaf scale
       float _scale_max{1.0f};            //!< upper bound of the randomized per-leaf scale
       float _alpha{1.0f};                //!< opacity of the leaf sprites
+      float _sound_influence{0.0f};      //!< 0 keeps the velocity constant, 1 makes it follow the sample loudness
    };
 
    /// \brief runtime state of one leaf travelling through the wind area.
@@ -114,9 +117,13 @@ private:
    /// \brief stops the sample that is currently playing, if any.
    void stopPlaying();
 
-   /// \brief keeps the sample playback going and re-reads the loudness the strength is derived from.
+   /// \brief keeps the sample playback going and re-reads the loudness the gusts are derived from.
    /// \param dt elapsed frame time.
    void updateSound(const sf::Time& dt);
+
+   /// \brief turns the loudness of the currently playing sample into the force and leaf multipliers.
+   /// \param loudness normalized loudness in 0..1, or 1 when no sample is audible.
+   void applyLoudness(float loudness);
 
    /// \brief moves all leaves along the wind direction and recycles those that left the area.
    /// \param dt elapsed frame time.
@@ -149,5 +156,6 @@ private:
    float _current_sound_duration_s{0.0f};
    float _elapsed_in_current_sound_s{0.0f};
    float _sound_strength_influence{0.0f};  //!< 0 keeps the strength constant, 1 makes it follow the sample loudness
-   float _strength_factor{1.0f};           //!< loudness-derived multiplier applied to _strength and the leaf velocity
+   float _strength_factor{1.0f};           //!< loudness-derived multiplier applied to _strength
+   float _leaf_factor{1.0f};               //!< loudness-derived multiplier applied to the leaf velocity
 };

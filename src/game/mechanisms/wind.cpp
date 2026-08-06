@@ -36,6 +36,7 @@ static constexpr float default_leaf_jitter_frequency_hz = 0.8f;
 static constexpr float default_leaf_animation_speed = 8.0f;
 static constexpr float default_leaf_scale = 1.0f;
 static constexpr float default_leaf_alpha = 1.0f;
+static constexpr float default_leaf_sound_influence = 0.0f;
 
 static constexpr auto two_pi = 6.283185307179586f;
 
@@ -73,6 +74,7 @@ static constexpr std::array wind_properties{
    PropertyInfo{.name = "leaf_scale_min", .type = "float", .default_value = default_leaf_scale},
    PropertyInfo{.name = "leaf_scale_max", .type = "float", .default_value = default_leaf_scale},
    PropertyInfo{.name = "leaf_alpha", .type = "float", .default_value = default_leaf_alpha},
+   PropertyInfo{.name = "leaf_sound_influence", .type = "float", .default_value = default_leaf_sound_influence},
 };
 static constexpr MechanismSchema wind_schema{
    .type_name = "Wind",
@@ -250,6 +252,8 @@ std::shared_ptr<Wind> Wind::deserialize(GameNode* parent, const GameDeserializeD
       leaf_settings._scale_min = ValueReader::readValue<float>("leaf_scale_min", props).value_or(default_leaf_scale);
       leaf_settings._scale_max = ValueReader::readValue<float>("leaf_scale_max", props).value_or(default_leaf_scale);
       leaf_settings._alpha = ValueReader::readValue<float>("leaf_alpha", props).value_or(default_leaf_alpha);
+      leaf_settings._sound_influence =
+         std::clamp(ValueReader::readValue<float>("leaf_sound_influence", props).value_or(default_leaf_sound_influence), 0.0f, 1.0f);
    }
 
    if (!wind->_sounds.empty())
@@ -350,7 +354,7 @@ void Wind::update(const sf::Time& dt)
    {
       // a disabled zone must not keep a looping sample alive; playback resumes once it is enabled again
       stopPlaying();
-      _strength_factor = 1.0f;
+      applyLoudness(1.0f);
       return;
    }
 
@@ -375,6 +379,14 @@ void Wind::update(const sf::Time& dt)
    body->ApplyForceToCenter(b2Vec2(force.x, -force.y), true);
 }
 
+void Wind::applyLoudness(float loudness)
+{
+   // the force and the leaves read the same loudness through their own influence, so a zone can push
+   // the player constantly while its leaves gust, or the other way round
+   _strength_factor = std::lerp(1.0f, loudness, _sound_strength_influence);
+   _leaf_factor = std::lerp(1.0f, loudness, _leaf_settings._sound_influence);
+}
+
 void Wind::updateSound(const sf::Time& dt)
 {
    if (_sounds.empty())
@@ -384,7 +396,7 @@ void Wind::updateSound(const sf::Time& dt)
 
    if (!_audio_enabled)
    {
-      _strength_factor = 1.0f;
+      applyLoudness(1.0f);
       return;
    }
 
@@ -402,14 +414,13 @@ void Wind::updateSound(const sf::Time& dt)
       }
    }
 
-   if (_sound_strength_influence <= 0.0f || !_sound_thread_id.has_value())
+   if (!_sound_thread_id.has_value())
    {
-      _strength_factor = 1.0f;
+      applyLoudness(1.0f);
       return;
    }
 
-   const auto loudness = Audio::getInstance().getSampleLoudness(_sound_thread_id.value()).value_or(1.0f);
-   _strength_factor = std::lerp(1.0f, loudness, _sound_strength_influence);
+   applyLoudness(Audio::getInstance().getSampleLoudness(_sound_thread_id.value()).value_or(1.0f));
 }
 
 void Wind::playNextSound()
@@ -486,7 +497,7 @@ void Wind::updateLeaves(const sf::Time& dt)
 
    const auto dt_s = dt.asSeconds();
    const auto perpendicular = sf::Vector2f{-_direction_screen.y, _direction_screen.x};
-   const auto velocity_px_s = _leaf_settings._velocity_px_s * _strength_factor;
+   const auto velocity_px_s = _leaf_settings._velocity_px_s * _leaf_factor;
    const auto alpha_max = std::clamp(_leaf_settings._alpha, 0.0f, 1.0f) * 255.0f;
    const auto frame_size_px = static_cast<float>(_leaf_settings._frame_size_px);
 
