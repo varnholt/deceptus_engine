@@ -33,8 +33,6 @@ std::string GameConfiguration::serialize()
    json config = {
       {"GameConfiguration",
        {
-          {"video_mode_width", _video_mode_width},
-          {"video_mode_height", _video_mode_height},
           {"windowed_width", _windowed_width},
           {"windowed_height", _windowed_height},
           {"view_width", _view_width},
@@ -65,30 +63,14 @@ void GameConfiguration::deserialize(const std::string& data)
 
    try
    {
-      _video_mode_width = config["GameConfiguration"]["video_mode_width"].get<int32_t>();
-      _video_mode_height = config["GameConfiguration"]["video_mode_height"].get<int32_t>();
-
-      // load windowed dimensions, fallback to video_mode if not present
-      const auto& gc = config["GameConfiguration"];
-      if (const auto it = gc.find("windowed_width"); it != gc.end())
-      {
-         _windowed_width = it->get<int32_t>();
-         _windowed_height = gc["windowed_height"].get<int32_t>();
-      }
-      else
-      {
-         _windowed_width = _video_mode_width;
-         _windowed_height = _video_mode_height;
-      }
-
+      _windowed_width = config["GameConfiguration"]["windowed_width"].get<int32_t>();
+      _windowed_height = config["GameConfiguration"]["windowed_height"].get<int32_t>();
       _view_width = config["GameConfiguration"]["view_width"].get<int32_t>();
       _view_height = config["GameConfiguration"]["view_height"].get<int32_t>();
       _fullscreen = config["GameConfiguration"]["fullscreen"].get<bool>();
       _brightness = config["GameConfiguration"]["brightness"].get<float>();
       _vsync_enabled = config["GameConfiguration"]["vsync"].get<bool>();
 
-      _video_mode_width = std::max(_video_mode_width, 640);
-      _video_mode_height = std::max(_video_mode_height, 360);
       _windowed_width = std::max(_windowed_width, 640);
       _windowed_height = std::max(_windowed_height, 360);
 
@@ -103,6 +85,7 @@ void GameConfiguration::deserialize(const std::string& data)
       _rumble_enabled = config["GameConfiguration"]["rumble"].get<bool>();
       _pause_mode = static_cast<PauseMode>(config["GameConfiguration"]["pause_mode"].get<int32_t>());
 
+      const auto& gc = config["GameConfiguration"];
       if (const auto language_it = gc.find("language"); language_it != gc.end())
       {
          _language = language_it->get<std::string>();
@@ -222,13 +205,13 @@ void GameConfiguration::clampResolutionToDesktop()
    const auto desktop_width = static_cast<int32_t>(desktop_mode.size.x);
    const auto desktop_height = static_cast<int32_t>(desktop_mode.size.y);
 
-   if (_video_mode_width > desktop_width || _video_mode_height > desktop_height)
+   if (_windowed_width > desktop_width || _windowed_height > desktop_height)
    {
-      Log::Warning() << "configured resolution " << _video_mode_width << "x" << _video_mode_height << " exceeds desktop resolution "
+      Log::Warning() << "configured resolution " << _windowed_width << "x" << _windowed_height << " exceeds desktop resolution "
                      << desktop_width << "x" << desktop_height << ", clamping to desktop size";
 
-      _video_mode_width = std::min(_video_mode_width, desktop_width);
-      _video_mode_height = std::min(_video_mode_height, desktop_height);
+      _windowed_width = std::min(_windowed_width, desktop_width);
+      _windowed_height = std::min(_windowed_height, desktop_height);
       serializeToFile();
    }
 #endif

@@ -209,7 +209,7 @@ std::unique_ptr<ScreenTransition> makeFadeInAfterLoadGame()
 
 void Game::initializeWindow()
 {
-   const auto& game_config = GameConfiguration::getInstance();
+   auto& game_config = GameConfiguration::getInstance();
 
    // since stencil buffers are used, it is required to enable them explicitly
    sf::ContextSettings context_settings;
@@ -237,12 +237,22 @@ void Game::initializeWindow()
          .value()
    );
 #else
+   // fullscreen always runs at the desktop resolution, so it is pulled from the desktop rather than
+   // remembered anywhere. the windowed size is the only one worth persisting
    _window = std::make_shared<sf::RenderWindow>(
-      sf::VideoMode({static_cast<uint32_t>(game_config._video_mode_width), static_cast<uint32_t>(game_config._video_mode_height)}),
+      game_config._fullscreen
+         ? sf::VideoMode::getDesktopMode()
+         : sf::VideoMode({static_cast<uint32_t>(game_config._windowed_width), static_cast<uint32_t>(game_config._windowed_height)}),
       GAME_NAME,
       game_config._fullscreen ? sf::State::Fullscreen : sf::State::Windowed,
       context_settings
    );
+
+   // the window manager is free to hand out a different size than the one requested, so the size that
+   // everything downstream renders against is read back from the window that actually exists
+   const auto window_size = _window->getSize();
+   game_config._video_mode_width = static_cast<int32_t>(window_size.x);
+   game_config._video_mode_height = static_cast<int32_t>(window_size.y);
 #endif
 
    SplashScreen::show(*_window);

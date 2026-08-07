@@ -9,8 +9,8 @@
 /// \brief stores global game settings and handles json persistence.
 struct GameConfiguration
 {
-   int32_t _video_mode_width = 1280;  // current active window width
-   int32_t _video_mode_height = 720;  // current active window height
+   int32_t _video_mode_width = 1280;  // size of the actual window, read back after creation, never serialized
+   int32_t _video_mode_height = 720;  // size of the actual window, read back after creation, never serialized
    int32_t _windowed_width = 1280;    // windowed mode width (serialized)
    int32_t _windowed_height = 720;    // windowed mode height (serialized)
    int32_t _view_width = 640;
@@ -62,7 +62,7 @@ struct GameConfiguration
    bool isResolutionChangeApplicable(int32_t new_width, int32_t new_height) const;
 
    /// \brief ensures the configured resolution fits within desktop limits.
-   /// clamps _video_mode_width and _video_mode_height to the desktop resolution if needed.
+   /// clamps _windowed_width and _windowed_height to the desktop resolution if needed.
    /// persists changes to disk if the resolution was adjusted.
    void clampResolutionToDesktop();
 
