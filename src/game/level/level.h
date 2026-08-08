@@ -25,7 +25,9 @@
 #include "game/physics/squaremarcher.h"
 #include "game/rendering/rendertargets.h"
 #include "game/shaders/atmosphereshader.h"
+#ifdef GLOW_ENABLED
 #include "game/shaders/blurshader.h"
+#endif
 #include "game/shaders/gammashader.h"
 
 // sfml
@@ -393,7 +395,9 @@ protected:
    std::shared_ptr<LightSystem::LightInstance> _player_light;
    std::unique_ptr<AmbientOcclusion> _ambient_occlusion;
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
+#ifdef GLOW_ENABLED
    std::unique_ptr<BlurShader> _blur_shader;
+#endif
    std::unique_ptr<GammaShader> _gamma_shader;
    sfcompat::Shader _occluder_shader;  //!< alpha-test shader for light occluder stencil rendering
    bool _screenshot = false;
