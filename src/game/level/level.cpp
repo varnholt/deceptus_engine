@@ -174,7 +174,9 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
 
    // create shaders (render textures are owned by Game)
    _atmosphere_shader = std::make_unique<AtmosphereShader>();
+#ifdef GLOW_ENABLED
    _blur_shader = std::make_unique<BlurShader>();
+#endif
    _gamma_shader = std::make_unique<GammaShader>();
 
    // load alpha-test shader for occluder stencil rendering
@@ -529,7 +531,9 @@ void Level::initialize()
 
    // initialize shaders with render targets from Game
    _atmosphere_shader->initialize(_render_targets.atmosphere);
+#ifdef GLOW_ENABLED
    _blur_shader->initialize(_render_targets.blur, _render_targets.blur_scaled);
+#endif
    _gamma_shader->initialize();
 
    loadStartPosition();
@@ -1256,6 +1260,7 @@ void Level::drawAtmosphereLayer()
 #endif
 }
 
+#ifdef GLOW_ENABLED
 void Level::drawBlurLayer(sf::RenderTarget& target)
 {
 #ifndef __EMSCRIPTEN__
@@ -1264,7 +1269,6 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
    // draw elements that are supposed to glow / to be blurred here
 
-#ifdef GLOW_ENABLED
    // lasers have been removed here because dstar added the glow to the spriteset
 
    const auto pPos = PlayerRegistry::getFirst()->getPixelPositionf();
@@ -1280,8 +1284,8 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
       laser->draw(target);
    }
-#endif
 }
+#endif
 
 bool Level::isPhysicsPathClear(const sf::Vector2i& a_tl, const sf::Vector2i& b_tl) const
 {
@@ -1390,19 +1394,19 @@ void Level::displayFinalTextures()
    _render_targets.normal->display();
 }
 
+#ifdef GLOW_ENABLED
 void Level::drawGlowLayer()
 {
-#ifdef GLOW_ENABLED
    _blur_shader->clearTexture();
    drawBlurLayer(*_blur_shader->getRenderTexture().get());
    _blur_shader->getRenderTexture()->display();
    takeScreenshot("screenshot_blur", *_blur_shader->getRenderTexture().get());
-#endif
 }
+#endif
 
+#ifdef GLOW_ENABLED
 void Level::drawGlowSprite()
 {
-#ifdef GLOW_ENABLED
 #ifdef __EMSCRIPTEN__
    const sf::Texture& blur_texture = _blur_shader->getRenderTexture()->getTexture();
    sf::Sprite blur_sprite;
@@ -1458,8 +1462,8 @@ void Level::drawGlowSprite()
    states_add.blendMode = sf::BlendAdd;
    _render_targets.level->draw(blur_scale_sprite, states_add);
 #endif
-#endif
 }
+#endif
 
 const std::vector<std::shared_ptr<Room>>& Level::getRooms() const
 {
@@ -1536,7 +1540,9 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 #endif
 
    // render glowing elements
+#ifdef GLOW_ENABLED
    drawGlowLayer();
+#endif
 
    // render layers affected by the atmosphere
    _render_targets.level->clear();
@@ -1570,7 +1576,9 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _render_targets.normal->draw(tmp_sprite, &_atmosphere_shader->getShader());
    takeScreenshot("texture_level_background_normal_dist", *_render_targets.normal.get());
 
+#ifdef GLOW_ENABLED
    drawGlowSprite();
+#endif
 #else
    // WASM: blit level_background to level and normal_tmp to normal without atmosphere distortion
    {
