@@ -280,8 +280,8 @@ void Game::initializeRenderTargets()
       _window_render_texture.reset();
    }
 
-   // dropped rather than resized, createPostProcessingRenderTexture() rebuilds it at the new size
-   _post_processing_render_texture.reset();
+   // dropped rather than resized, the pass rebuilds it at the new size on next use
+   _post_processing_pass.release();
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
@@ -327,31 +327,6 @@ void Game::initializeRenderTargets()
          game_config._video_mode_width, game_config._video_mode_height, game_config._view_width, game_config._view_height
       );
    }
-}
-
-bool Game::createPostProcessingRenderTexture()
-{
-   if (_post_processing_render_texture)
-   {
-      return true;
-   }
-
-   if (!_window_render_texture)
-   {
-      return false;
-   }
-
-   // must match the window render texture exactly, the level blits into it with the same geometry
-   const auto size = _window_render_texture->getSize();
-
-#ifndef __EMSCRIPTEN__
-   _post_processing_render_texture = std::make_shared<sf::RenderTexture>(size);
-#else
-   _post_processing_render_texture = std::make_shared<sf::RenderTexture>(std::move(*sf::RenderTexture::create(size)));
-#endif
-
-   Log::Info() << "created post processing render texture: " << size.x << " x " << size.y;
-   return true;
 }
 
 void Game::initializeController()
@@ -473,6 +448,12 @@ void Game::processPendingLevelLoad()
    // nextLevel().
    _player->resetWorld();  // free the pointer that's shared with the player
    LevelRegistry::clearCurrent();
+
+   // the intermediate post processing target belongs to the outgoing level's effects, so it is
+   // released here rather than kept for a level that may never ask for it. it is deliberately not
+   // released when an effect merely switches off: a trigger area toggling as the player walks in
+   // and out would otherwise reallocate a full screen target on every crossing
+   _post_processing_pass.release();
 
    const auto teardown_start = std::chrono::steady_clock::now();
    _level.reset();
@@ -714,61 +695,18 @@ void Game::draw()
 
    _window_render_texture->clear();
 
-   // with a level-scoped effect the level goes through an intermediate target so the effect can
-   // resolve it into the window render texture before any overlay is drawn on top of it
-   auto& post_processing = PostProcessing::getInstance();
-   post_processing.setLevelEffect(_level_loading_finished && _level ? _level->getActivePostProcessingMechanism() : nullptr);
+   // a level-scoped effect routes the level through an intermediate target so it can be resolved
+   // into the window render texture before any overlay is drawn on top of it
+   PostProcessing::getInstance().setLevelEffect(_level_loading_finished && _level ? _level->getActivePostProcessingMechanism() : nullptr);
 
-   const auto level_scope_active = _level_loading_finished && post_processing.isActive() &&
-                                   post_processing.getScope() == PostProcessing::Scope::Level && createPostProcessingRenderTexture();
+   const auto level_target = _post_processing_pass.selectLevelTarget(_window_render_texture, _level_loading_finished);
 
    if (_level_loading_finished)
    {
-      if (level_scope_active)
-      {
-         // Level::draw blits with view_to_texture_scale, which only fills the target when that
-         // target carries the level view. the window render texture happens to have it left over
-         // from the previous frame's overlays, a freshly created target does not, so it is set
-         // explicitly here rather than relying on that leftover
-#ifndef __EMSCRIPTEN__
-         const auto& game_config = GameConfiguration::getInstance();
-         const sf::View level_view{
-            sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(game_config._view_width), static_cast<float>(game_config._view_height)}}
-         };
-         _post_processing_render_texture->setView(level_view);
-         _window_render_texture->setView(level_view);
-#endif
-
-         _post_processing_render_texture->clear();
-         _level->draw(_post_processing_render_texture, _screenshot);
-         _post_processing_render_texture->display();
-
-         const sf::Texture& post_processing_texture = _post_processing_render_texture->getTexture();
-         const auto* level_post_processing_shader = post_processing.prepare(post_processing_texture);
-
-#ifdef __EMSCRIPTEN__
-         sf::Sprite post_processing_sprite;
-         post_processing_sprite.textureRect = sf::FloatRect{
-            {0.f, 0.f}, {static_cast<float>(post_processing_texture.getSize().x), static_cast<float>(post_processing_texture.getSize().y)}
-         };
-         _window_render_texture->draw(
-            post_processing_sprite, sf::RenderStates{.texture = &post_processing_texture, .shader = level_post_processing_shader}
-         );
-#else
-         // the window render texture still carries the level's 640x360 view, so this blit has to use
-         // the same scale Level::draw uses. without it the sprite covers three times the view, only
-         // a corner of it stays visible and the effect sees texture coordinates spanning 0..1/scale,
-         // which makes anything resolution dependent (the game boy grid) come out far too coarse
-         auto post_processing_sprite = sf::Sprite(post_processing_texture);
-         post_processing_sprite.scale({_render_targets.view_to_texture_scale, _render_targets.view_to_texture_scale});
-         _window_render_texture->draw(post_processing_sprite, level_post_processing_shader);
-#endif
-      }
-      else
-      {
-         _level->draw(_window_render_texture, _screenshot);
-      }
+      _level->draw(level_target, _screenshot);
    }
+
+   _post_processing_pass.resolveLevelTarget(*_window_render_texture.get(), _render_targets.view_to_texture_scale);
 
    _screenshot = false;
 
@@ -870,10 +808,8 @@ void Game::draw()
    }
 
    // a frame-scoped effect runs here, on the fully composited frame, i.e. on top of the level's
-   // gamma pass as well as on all overlays. a level-scoped one has already been resolved above,
-   // and deliberately does nothing at all while no level is running.
-   const sf::Shader* post_processing_shader =
-      (post_processing.getScope() == PostProcessing::Scope::All) ? post_processing.prepare(_window_render_texture->getTexture()) : nullptr;
+   // gamma pass as well as on all overlays. a level-scoped one has already been resolved above.
+   const auto* post_processing_shader = _post_processing_pass.getFrameShader(_window_render_texture->getTexture());
 
 #ifdef __EMSCRIPTEN__
    _window->draw(window_texture_sprite, sf::RenderStates{.texture = &window_render_texture_ref, .shader = post_processing_shader});

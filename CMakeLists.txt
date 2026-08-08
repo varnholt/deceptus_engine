@@ -551,6 +551,8 @@ set(GAME_FILES
     src/game/player/timerlock.h
     src/game/player/weaponsystem.cpp
     src/game/player/weaponsystem.h
+    src/game/rendering/postprocessingpass.cpp
+    src/game/rendering/postprocessingpass.h
     src/game/rendering/rendertargets.cpp
     src/game/rendering/rendertargets.h
     src/game/scenes/forestscene.cpp

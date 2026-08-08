@@ -19,6 +19,7 @@
 #include "game/layers/controlleroverlay.h"
 #include "game/layers/infolayer.h"
 #include "game/physics/physicsconfigurationui.h"
+#include "game/rendering/postprocessingpass.h"
 #include "game/rendering/rendertargets.h"
 #include "game/scenes/forestscene.h"
 #include "game/sfx/gameaudio.h"
@@ -74,14 +75,6 @@ private:
    /// \brief creates or recreates the render textures and deferred render targets for the
    ///        configured video mode, without touching the window itself.
    void initializeRenderTargets();
-
-   /// \brief creates the post processing render texture on first use.
-   ///
-   /// only the level-scoped post processing needs an intermediate target, so this is allocated
-   /// lazily instead of in initializeRenderTargets(): a session that never selects that scope
-   /// never pays for the texture.
-   /// \return true when the texture is available.
-   bool createPostProcessingRenderTexture();
 
    /// \brief initializes game controller integration and pause bindings.
    void initializeController();
@@ -183,9 +176,8 @@ private:
    std::shared_ptr<sf::RenderWindow> _window;
    std::shared_ptr<sf::RenderTexture> _window_render_texture;
 
-   //! \brief intermediate target the level renders into while post processing is level-scoped,
-   //!        created on demand by createPostProcessingRenderTexture()
-   std::shared_ptr<sf::RenderTexture> _post_processing_render_texture;
+   //! \brief owns the render target and blits needed to apply a post processing effect to the frame
+   PostProcessingPass _post_processing_pass;
    RenderTargets _render_targets;
    std::shared_ptr<Player> _player;
    std::shared_ptr<Level> _level;
