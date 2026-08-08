@@ -53,6 +53,7 @@ class Bouncer;
 class IngameMenuMap;
 class TmxParser;
 struct ParseData;
+struct PostProcessingMechanism;
 
 /// \brief manages a playable level including tmx loading, physics, mechanisms, camera, and rendering.
 class Level : public GameNode, public LevelInterface
@@ -184,6 +185,13 @@ public:
    /// \brief returns access to grouped level mechanisms.
    /// \return immutable reference to the mechanism registry.
    const GameMechanismRegistry& getMechanismRegistry() const override;
+
+   /// \brief returns the enabled post processing mechanism that should drive the post processing pass.
+   ///
+   /// When several are enabled at once the one with the highest z wins and the others are logged,
+   /// since stacking would require a second full screen target and an extra pass per effect.
+   /// \return active mechanism, or nullptr when the level has none enabled.
+   std::shared_ptr<PostProcessingMechanism> getActivePostProcessingMechanism();
 
    /// \brief returns all rooms parsed from the level.
    /// \return immutable reference to room list.

@@ -40,6 +40,7 @@
 #include "game/mechanisms/gamemechanismdeserializer.h"
 #include "game/mechanisms/gamemechanismdeserializerconstants.h"
 #include "game/mechanisms/lever.h"
+#include "game/mechanisms/postprocessingmechanism.h"
 #include "game/physics/chainshapeanalyzer.h"
 #include "game/physics/gamecontactlistener.h"
 #include "game/physics/physicsconfiguration.h"
@@ -1479,6 +1480,40 @@ bool Level::isMapRevealed() const
 void Level::setMapRevealed(bool revealed)
 {
    _map_revealed = revealed;
+}
+
+std::shared_ptr<PostProcessingMechanism> Level::getActivePostProcessingMechanism()
+{
+   const auto it = _mechanism_registry.getMap().find(std::string{layer_name_post_processing});
+   if (it == _mechanism_registry.getMap().end() || it->second == nullptr)
+   {
+      return nullptr;
+   }
+
+   std::shared_ptr<PostProcessingMechanism> active;
+   auto enabled_count = 0;
+
+   for (const auto& mechanism : *it->second)
+   {
+      if (!mechanism->isEnabled() || mechanism->getRenderStage() != MechanismRenderStage::PostProcessing)
+      {
+         continue;
+      }
+
+      enabled_count++;
+
+      if (!active || mechanism->getZ() > active->getZ())
+      {
+         active = std::dynamic_pointer_cast<PostProcessingMechanism>(mechanism);
+      }
+   }
+
+   if (enabled_count > 1)
+   {
+      Log::Warning() << enabled_count << " post processing mechanisms are enabled at once, only the highest z is applied";
+   }
+
+   return active;
 }
 
 const GameMechanismRegistry& Level::getMechanismRegistry() const

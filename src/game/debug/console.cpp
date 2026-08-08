@@ -13,6 +13,7 @@
 #include "game/player/playerinfo.h"
 #include "game/player/playerregistry.h"
 #include "game/player/weaponsystem.h"
+#include "game/shaders/postprocessing.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/weapons/bow.h"
@@ -31,6 +32,30 @@ void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
    auto& weapons = SaveState::getPlayerInfo()._weapons;
    weapons._weapons.push_back(weapon);
    weapons._selected = weapon;
+}
+
+std::string joinNames(const std::vector<std::string>& names)
+{
+   std::string joined;
+   for (const auto& name : names)
+   {
+      if (!joined.empty())
+      {
+         joined += '|';
+      }
+      joined += name;
+   }
+   return joined;
+}
+
+std::string joinEffectNames()
+{
+   return joinNames(PostProcessing::getEffectNames());
+}
+
+std::string joinScopeNames()
+{
+   return joinNames(PostProcessing::getScopeNames());
 }
 }  // namespace
 
@@ -583,6 +608,59 @@ Console::Console()
       [](const auto&) { std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->reloadAnimationPool(); },
       "leveldesign",
       "ra: reload animations"
+   );
+
+   // rendering
+   registerCallback(
+      "postfx",
+      [this](const auto& args)
+      {
+         if (args.size() != 2)
+         {
+            _log.emplace_back("usage: postfx <" + joinEffectNames() + ">");
+            return;
+         }
+
+         const auto effect = PostProcessing::effectFromName(args.at(1));
+         if (!effect.has_value())
+         {
+            _log.emplace_back("unknown post processing effect: " + args.at(1));
+            _log.emplace_back("available effects: " + joinEffectNames());
+            return;
+         }
+
+         PostProcessing::getInstance().setEffect(effect.value());
+         _log.emplace_back("post processing effect: " + args.at(1));
+      },
+      "rendering",
+      "postfx <" + joinEffectNames() + ">: set the full screen post processing effect",
+      {"postfx gameboy", "postfx none"}
+   );
+
+   registerCallback(
+      "postfx scope",
+      [this](const auto& args)
+      {
+         if (args.size() != 3)
+         {
+            _log.emplace_back("usage: postfx scope <" + joinScopeNames() + ">");
+            return;
+         }
+
+         const auto scope = PostProcessing::scopeFromName(args.at(2));
+         if (!scope.has_value())
+         {
+            _log.emplace_back("unknown post processing scope: " + args.at(2));
+            _log.emplace_back("available scopes: " + joinScopeNames());
+            return;
+         }
+
+         PostProcessing::getInstance().setScope(scope.value());
+         _log.emplace_back("post processing scope: " + args.at(2));
+      },
+      "rendering",
+      "postfx scope <" + joinScopeNames() + ">: apply the effect to the whole frame or to the level only",
+      {"postfx scope level", "postfx scope all"}
    );
 }
 
