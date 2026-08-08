@@ -12,21 +12,6 @@
 namespace
 {
 
-//! \brief the game boy screen matches the view in each direction, so the quantization snaps to the
-//!        game's own pixel grid and only the palette reduction remains visible. must stay an integer
-//!        divisor of the 640x360 view, otherwise the grid shimmers against the pixel grid
-constexpr auto gameboy_grid_divisor = 1.0f;
-
-//! \brief tone curve mapping scene luminance onto the 4 palette steps of the game boy effect. the
-//!        game is lit far below the palette thresholds, so without it the whole frame collapses
-//!        into the darkest color. the mid grey is the luminance that lands halfway up the palette,
-//!        tuned against the catacombs so the player keeps its shading; raise it to darken
-constexpr auto gameboy_black_point = 0.0f;
-constexpr auto gameboy_mid_grey = 0.17f;
-
-//! \brief horizontal channel separation of the rgb split effect, in game pixels
-constexpr auto rgb_split_offset_px = 2.0f;
-
 struct EffectName
 {
    PostProcessing::Effect _effect;
@@ -51,16 +36,21 @@ constexpr ScopeName scope_names[] = {
    {PostProcessing::Scope::Level, "level"},
 };
 
-//! \brief computes the size of one game pixel in uv space of the composited frame.
-//!        the frame is rendered at an integer multiple of the view, so tying the effect
-//!        parameters to the view keeps them stable across resolutions.
-sf::Glsl::Vec2 getPixelSize()
+}  // namespace
+
+void PostProcessing::applyBuiltInUniforms(sfcompat::Shader& shader, const sf::Texture& texture, float elapsed_s)
 {
    const auto& game_configuration = GameConfiguration::getInstance();
-   return {1.0f / static_cast<float>(game_configuration._view_width), 1.0f / static_cast<float>(game_configuration._view_height)};
-}
+   const auto view_width = static_cast<float>(game_configuration._view_width);
+   const auto view_height = static_cast<float>(game_configuration._view_height);
 
-}  // namespace
+   // set unconditionally: setUniform silently ignores names the shader does not declare, so a
+   // shader only pays for what it actually uses and this stays free of per-effect branching
+   shader.setUniform("u_texture", texture);
+   shader.setUniform("u_time", elapsed_s);
+   shader.setUniform("u_resolution", sf::Glsl::Vec2{view_width, view_height});
+   shader.setUniform("u_pixel_size", sf::Glsl::Vec2{1.0f / view_width, 1.0f / view_height});
+}
 
 PostProcessing& PostProcessing::getInstance()
 {
@@ -170,42 +160,7 @@ const sf::Shader* PostProcessing::prepare(const sf::Texture& texture)
    }
 
    auto& shader = effect_shader->_shader;
-   shader.setUniform("u_texture", texture);
-
-   switch (_effect)
-   {
-      case Effect::GameBoy:
-      {
-         const auto& game_configuration = GameConfiguration::getInstance();
-         shader.setUniform(
-            "u_grid_size",
-            sf::Glsl::Vec2{
-               static_cast<float>(game_configuration._view_width) / gameboy_grid_divisor,
-               static_cast<float>(game_configuration._view_height) / gameboy_grid_divisor
-            }
-         );
-         shader.setUniform("u_black_point", gameboy_black_point);
-         shader.setUniform("u_mid_grey", gameboy_mid_grey);
-         break;
-      }
-      case Effect::RgbSplit:
-      {
-         shader.setUniform("u_pixel_size", getPixelSize());
-         shader.setUniform("u_offset", rgb_split_offset_px);
-         shader.setUniform("u_time", _elapsed_s);
-         break;
-      }
-      case Effect::Glitch:
-      {
-         shader.setUniform("u_pixel_size", getPixelSize());
-         shader.setUniform("u_time", _elapsed_s);
-         break;
-      }
-      case Effect::None:
-      {
-         break;
-      }
-   }
+   applyBuiltInUniforms(shader, texture, _elapsed_s);
 
    return &shader.native();
 }

@@ -8,7 +8,6 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
-#include "game/config/gameconfiguration.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerconstants.h"
@@ -136,15 +135,7 @@ const sf::Shader* PostProcessingMechanism::prepare(const sf::Texture& texture)
       return nullptr;
    }
 
-   const auto& game_configuration = GameConfiguration::getInstance();
-   const auto view_width = static_cast<float>(game_configuration._view_width);
-   const auto view_height = static_cast<float>(game_configuration._view_height);
-
-   // built-ins, set unconditionally: setUniform silently ignores names the shader does not declare
-   _shader.setUniform("u_texture", texture);
-   _shader.setUniform("u_time", _elapsed_s);
-   _shader.setUniform("u_resolution", sf::Glsl::Vec2{view_width, view_height});
-   _shader.setUniform("u_pixel_size", sf::Glsl::Vec2{1.0f / view_width, 1.0f / view_height});
+   PostProcessing::applyBuiltInUniforms(_shader, texture, _elapsed_s);
 
    // anything configured in tmx wins over the built-ins above
    for (const auto& uniform : _uniforms)

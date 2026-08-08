@@ -1,18 +1,26 @@
 // renders the composited frame at game boy resolution and reduces it to the 4 color dmg palette.
-// the grid size arrives in normalized units so the effect looks identical at every window scale.
+// the grid is derived from u_resolution, the size of the game's own pixel grid, so the effect
+// looks identical at every window scale.
 //
 // the tone curve is what makes this readable: the game is lit far below the palette thresholds,
 // so without it almost every pixel collapses into the darkest color. it is a reinhard curve
 // rather than a linear window on purpose - a linear one clips everything above its white point to
 // the lightest color, which turned brightly lit sprites such as the player into flat silhouettes.
 // this one never reaches 1.0, so highlights keep their relative differences and stay shaded.
-// u_mid_grey is the input luminance that lands halfway up the palette.
+// mid_grey is the input luminance that lands halfway up the palette, tuned against the catacombs
+// so the player keeps its shading; raise it to darken the image.
 
 #ifdef GL_ES
 uniform sampler2D u_texture;
-uniform vec2 u_grid_size;
-uniform float u_black_point;
-uniform float u_mid_grey;
+uniform vec2 u_resolution;
+
+// screen size in game boy pixels, expressed as a divisor of the view so it stays an integer
+// divisor of the pixel grid at any window scale. raise it for chunkier pixels
+const float grid_divisor = 1.0;
+
+// tone curve constants, see the note above
+const float black_point = 0.0;
+const float mid_grey = 0.17;
 
 const vec3 dmg_darkest = vec3(0.059, 0.220, 0.059);
 const vec3 dmg_dark = vec3(0.188, 0.384, 0.188);
@@ -45,14 +53,15 @@ float bayer4x4(vec2 pixel_position)
 void main()
 {
    // snap to the low resolution grid and sample the center of each grid cell
-   vec2 grid_position = floor(sf_v_texCoord * u_grid_size);
-   vec2 uv = (grid_position + 0.5) / u_grid_size;
+   vec2 grid_size = u_resolution / grid_divisor;
+   vec2 grid_position = floor(sf_v_texCoord * grid_size);
+   vec2 uv = (grid_position + 0.5) / grid_size;
 
    vec4 color = texture(u_texture, uv);
 
    float luminance = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-   luminance = max(luminance - u_black_point, 0.0);
-   luminance = luminance / (luminance + u_mid_grey);
+   luminance = max(luminance - black_point, 0.0);
+   luminance = luminance / (luminance + mid_grey);
    luminance += (bayer4x4(grid_position) - 0.5) * dither_strength;
 
    vec3 palette_color = dmg_darkest;
@@ -64,9 +73,15 @@ void main()
 }
 #else
 uniform sampler2D u_texture;
-uniform vec2 u_grid_size;
-uniform float u_black_point;
-uniform float u_mid_grey;
+uniform vec2 u_resolution;
+
+// screen size in game boy pixels, expressed as a divisor of the view so it stays an integer
+// divisor of the pixel grid at any window scale. raise it for chunkier pixels
+const float grid_divisor = 1.0;
+
+// tone curve constants, see the note above
+const float black_point = 0.0;
+const float mid_grey = 0.17;
 
 const vec3 dmg_darkest = vec3(0.059, 0.220, 0.059);
 const vec3 dmg_dark = vec3(0.188, 0.384, 0.188);
@@ -95,14 +110,15 @@ float bayer4x4(vec2 pixel_position)
 void main()
 {
    // snap to the low resolution grid and sample the center of each grid cell
-   vec2 grid_position = floor(gl_TexCoord[0].xy * u_grid_size);
-   vec2 uv = (grid_position + 0.5) / u_grid_size;
+   vec2 grid_size = u_resolution / grid_divisor;
+   vec2 grid_position = floor(gl_TexCoord[0].xy * grid_size);
+   vec2 uv = (grid_position + 0.5) / grid_size;
 
    vec4 color = texture2D(u_texture, uv);
 
    float luminance = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-   luminance = max(luminance - u_black_point, 0.0);
-   luminance = luminance / (luminance + u_mid_grey);
+   luminance = max(luminance - black_point, 0.0);
+   luminance = luminance / (luminance + mid_grey);
    luminance += (bayer4x4(grid_position) - 0.5) * dither_strength;
 
    vec3 palette_color = dmg_darkest;

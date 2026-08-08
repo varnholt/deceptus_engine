@@ -98,6 +98,18 @@ public:
    /// \return scope names in selection order, starting with "all".
    static std::vector<std::string> getScopeNames();
 
+   /// \brief writes the uniforms that any post processing shader may declare.
+   ///
+   /// These are the values only the engine can know: the frame being processed, elapsed time and
+   /// the size of the game's pixel grid. Everything else is a property of the effect itself and
+   /// belongs in the shader as a constant, or in tmx when it should be configurable per level.
+   /// Nothing here is specific to a particular shader, so both the console-selected effects and
+   /// the mechanism-configured ones share this one implementation.
+   /// \param shader shader to write the uniforms into.
+   /// \param texture texture the effect samples from.
+   /// \param elapsed_s seconds elapsed, written to u_time.
+   static void applyBuiltInUniforms(sfcompat::Shader& shader, const sf::Texture& texture, float elapsed_s);
+
 private:
    PostProcessing() = default;
 
