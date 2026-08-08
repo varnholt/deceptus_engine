@@ -13,6 +13,7 @@
 #include "game/player/playerinfo.h"
 #include "game/player/playerregistry.h"
 #include "game/player/weaponsystem.h"
+#include "game/shaders/postprocessing.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/weapons/bow.h"
@@ -31,6 +32,44 @@ void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
    auto& weapons = SaveState::getPlayerInfo()._weapons;
    weapons._weapons.push_back(weapon);
    weapons._selected = weapon;
+}
+
+std::string toLowerCase(const std::string& text)
+{
+   std::string lower_case;
+   lower_case.reserve(text.size());
+   for (const auto character : text)
+   {
+      lower_case.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(character))));
+   }
+   return lower_case;
+}
+
+//! \brief console input prefix that switches the help panel into its detailed mode
+constexpr std::string_view help_prefix{"help"};
+
+std::string joinNames(const std::vector<std::string>& names)
+{
+   std::string joined;
+   for (const auto& name : names)
+   {
+      if (!joined.empty())
+      {
+         joined += '|';
+      }
+      joined += name;
+   }
+   return joined;
+}
+
+std::string joinEffectNames()
+{
+   return joinNames(PostProcessing::getEffectNames());
+}
+
+std::string joinScopeNames()
+{
+   return joinNames(PostProcessing::getScopeNames());
 }
 }  // namespace
 
@@ -584,6 +623,79 @@ Console::Console()
       "leveldesign",
       "ra: reload animations"
    );
+
+   // help
+   registerCallback(
+      "help",
+      [this](const auto& args)
+      {
+         // the panel already answers this live while typing, so executing it only needs to leave
+         // something in the log confirming what was looked up
+         if (args.size() < 2)
+         {
+            _log.emplace_back("help: type a command name to see its examples in the panel");
+            return;
+         }
+
+         _log.emplace_back("help: " + args.at(1));
+      },
+      "general",
+      "help <command>: show examples for a command in the help panel",
+      {"help postfx", "help tpp"}
+   );
+
+   // rendering
+   registerCallback(
+      "postfx",
+      [this](const auto& args)
+      {
+         if (args.size() != 2)
+         {
+            _log.emplace_back("usage: postfx <" + joinEffectNames() + ">");
+            return;
+         }
+
+         const auto effect = PostProcessing::effectFromName(args.at(1));
+         if (!effect.has_value())
+         {
+            _log.emplace_back("unknown post processing effect: " + args.at(1));
+            _log.emplace_back("available effects: " + joinEffectNames());
+            return;
+         }
+
+         PostProcessing::getInstance().setEffect(effect.value());
+         _log.emplace_back("post processing effect: " + args.at(1));
+      },
+      "rendering",
+      "postfx <" + joinEffectNames() + ">: set the full screen post processing effect",
+      {"postfx gameboy", "postfx none"}
+   );
+
+   registerCallback(
+      "postfx scope",
+      [this](const auto& args)
+      {
+         if (args.size() != 3)
+         {
+            _log.emplace_back("usage: postfx scope <" + joinScopeNames() + ">");
+            return;
+         }
+
+         const auto scope = PostProcessing::scopeFromName(args.at(2));
+         if (!scope.has_value())
+         {
+            _log.emplace_back("unknown post processing scope: " + args.at(2));
+            _log.emplace_back("available scopes: " + joinScopeNames());
+            return;
+         }
+
+         PostProcessing::getInstance().setScope(scope.value());
+         _log.emplace_back("post processing scope: " + args.at(2));
+      },
+      "rendering",
+      "postfx scope <" + joinScopeNames() + ">: apply the effect to the whole frame or to the level only",
+      {"postfx scope level", "postfx scope all"}
+   );
 }
 
 void Console::setActive(bool active)
@@ -997,6 +1109,97 @@ const std::deque<std::string>& Console::getLog() const
 void Console::Help::registerCommand(const std::string& topic, const std::string& description, const std::vector<std::string>& examples)
 {
    _help_messages[topic].emplace_back(HelpCommand{description, examples});
+}
+
+std::vector<Console::Help::HelpLine> Console::Help::getVisibleLines(const std::string& filter, size_t max_lines) const
+{
+   using Kind = HelpLine::Kind;
+
+   std::vector<std::string> sorted_topics;
+   sorted_topics.reserve(_help_messages.size());
+   for (const auto& entry : _help_messages)
+   {
+      sorted_topics.push_back(entry.first);
+   }
+   std::ranges::sort(sorted_topics);
+
+   // "help <something>" asks for detail about a command, which is the only case where the examples
+   // are worth the lines they cost
+   const auto trimmed = toLowerCase(filter).substr(0, filter.find_last_not_of(' ') + 1);
+   const auto detailed = trimmed.starts_with(help_prefix);
+   const auto search_term = detailed ? trimmed.substr(help_prefix.size()) : trimmed;
+   const auto needle = search_term.substr(std::min(search_term.find_first_not_of(' '), search_term.size()));
+
+   std::vector<HelpLine> lines;
+
+   // nothing to filter by: list the topics only, so the panel keeps its size as commands are added
+   if (needle.empty() && !detailed)
+   {
+      for (const auto& topic : sorted_topics)
+      {
+         lines.push_back({._kind = Kind::Topic, ._text = topic});
+      }
+      lines.push_back({._kind = Kind::Hint, ._text = "type to filter, 'help <command>' for examples"});
+   }
+   else
+   {
+      for (const auto& topic : sorted_topics)
+      {
+         std::vector<HelpLine> topic_lines;
+
+         // the panel offers the topic names as the way in, so typing one has to select that whole
+         // topic rather than being matched against the command descriptions and finding nothing
+         const auto topic_matches = toLowerCase(topic).contains(needle);
+
+         for (const auto& command : _help_messages.at(topic))
+         {
+            if (!needle.empty() && !topic_matches && !toLowerCase(command.description).contains(needle))
+            {
+               continue;
+            }
+
+            topic_lines.push_back({._kind = Kind::Command, ._text = command.description});
+
+            if (detailed)
+            {
+               for (const auto& example : command.examples)
+               {
+                  topic_lines.push_back({._kind = Kind::Example, ._text = example});
+               }
+            }
+         }
+
+         if (topic_lines.empty())
+         {
+            continue;
+         }
+
+         lines.push_back({._kind = Kind::Topic, ._text = topic});
+         lines.insert(lines.end(), topic_lines.begin(), topic_lines.end());
+      }
+
+      if (lines.empty())
+      {
+         lines.push_back({._kind = Kind::Hint, ._text = "no matching command"});
+      }
+   }
+
+   // hard clamp, so the panel cannot outgrow the screen again however many commands are added
+   if (max_lines > 0 && lines.size() > max_lines)
+   {
+      if (max_lines == 1)
+      {
+         lines.resize(1);
+      }
+      else
+      {
+         const auto hidden = lines.size() - (max_lines - 1);
+         lines.resize(max_lines - 1);
+         lines.push_back({._kind = Kind::Hint, ._text = "+" + std::to_string(hidden) + " more, keep typing"});
+      }
+   }
+
+   return lines;
 }
 
 std::string Console::Help::getFormattedHelp() const

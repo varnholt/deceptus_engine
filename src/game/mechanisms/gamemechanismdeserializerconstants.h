@@ -104,6 +104,12 @@ constexpr std::string_view layer_name_platforms{"moving_platforms"};
 /// \brief tmx layer name for portal mechanisms.
 constexpr std::string_view layer_name_portals{"portals"};
 
+/// \brief tmx layer name for post processing mechanisms.
+constexpr std::string_view layer_name_post_processing{"post_processing"};
+
+/// \brief object template type name for post processing mechanisms.
+constexpr std::string_view type_name_post_processing{"PostProcessing"};
+
 /// \brief tmx layer name for rope mechanisms.
 constexpr std::string_view layer_name_ropes{"ropes"};
 

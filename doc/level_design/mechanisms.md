@@ -1072,6 +1072,100 @@ In the screenshot above, Adam enters at the top left, exits at the bottom right,
 
 
 
+## Post Processing
+
+A post processing mechanism applies a full screen shader to the rendered frame. Where a Shader Quad draws a shader inside its own rectangle, this one processes the picture the game has already drawn, so it is the mechanism to use for effects that colour, distort or filter the whole screen: a Game Boy look, a chromatic aberration, a glitch, a heat haze, a nightmare tint.
+
+Unlike every other mechanism it does not draw anything itself. It hands its shader to the post processing stage, which runs after the level has been composited.
+
+Three fragment shaders ship with the engine and can be used as a starting point: `data/shaders/gameboy.frag`, `data/shaders/rgb_split.frag` and `data/shaders/glitch.frag`.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`PostProcessing`|
+|Object Group|`post_processing`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|fragment_shader|string|The relative path to your fragment shader. Without a fragment shader the mechanism is skipped.|
+|vertex_shader|string|The relative path to your vertex shader (optional).|
+|scope|string|`all` processes the whole frame including the HUD and menus (the default), `level` processes only the level so the HUD stays untouched on top.|
+|z|int|Used to pick a winner when several post processing mechanisms are enabled at once; the highest one is applied.|
+|u_*|any|Any property whose name starts with `u_` is passed to the shader as a uniform of that name. See _Shader uniforms_ below.|
+
+### Enabling the effect
+
+If the object rectangle has a size, it acts as a trigger area: the effect is active while the player is inside it and switches itself off again on the way out. This is the simplest way to make a room feel different without writing a single line of script.
+
+If you draw the rectangle with a width and height of `0`, the mechanism starts disabled and stays under the control of the level script:
+
+```lua
+setMechanismEnabled("nightmare_filter", true, "post_processing")
+```
+
+### Shader uniforms
+
+Every property starting with `u_` is forwarded to the shader as a uniform, so an arbitrary shader can be driven straight from Tiled without touching the C++ code. The Tiled property type decides the uniform type:
+
+|Tiled type|Becomes|
+|-|-|
+|float|`float`|
+|int|`int`|
+|bool|`bool`|
+|string with 2, 3 or 4 numbers separated by commas|`vec2`, `vec3`, `vec4`|
+|string holding a path to an existing file|`sampler2D` (the file is loaded as a texture)|
+
+On top of that the engine writes the following uniforms whenever a shader declares them. You do not have to configure these, and a shader that does not use one simply ignores it:
+
+|Uniform|Type|Description|
+|-|-|-|
+|u_texture|sampler2D|The frame being processed.|
+|u_time|float|Seconds since the mechanism was created; use this to animate.|
+|u_resolution|vec2|The size of the game's pixel grid (`640` x `360`), _not_ the window size. Deriving from this keeps an effect looking the same at every resolution.|
+|u_pixel_size|vec2|The size of one game pixel in UV space, i.e. `1.0 / u_resolution`. Multiply by this to express an offset in game pixels.|
+
+A word of warning on resolution: the game renders at an integer multiple of `640` x `360`, so if you work in window pixels your effect will change its look on every monitor. Derive sizes and offsets from `u_resolution` or `u_pixel_size` instead.
+
+### Example
+
+A corrupted room that renders the level in Game Boy colours while leaving the HUD readable:
+
+```xml
+<objectgroup name="post_processing">
+ <object name="corrupt_zone" x="1000" y="2450" width="600" height="500">
+  <properties>
+   <property name="fragment_shader" value="data/shaders/gameboy.frag"/>
+   <property name="scope" value="level"/>
+  </properties>
+ </object>
+</objectgroup>
+```
+
+### Debugging
+
+The debug console (F12) can force an effect regardless of what the level configures, which is handy while authoring a shader:
+
+|Command|Description|
+|-|-|
+|`postfx <none\|gameboy\|rgbsplit\|glitch>`|Select one of the built-in effects, `none` to switch off.|
+|`postfx scope <all\|level>`|Switch the scope of the console-selected effect.|
+
+A console-selected effect overrides the mechanism, so remember to run `postfx none` when you want to see the level's own effect again.
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+
 ## Ropes
 
 The Deceptus Engine is able to connect other objects to ropes attached to mounts. So far this is only used for visual effects, later on - if there is any demand - the Engine can be extended to allow the player to hold on to the rope or attach other objects to it.

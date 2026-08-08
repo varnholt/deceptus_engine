@@ -27,6 +27,7 @@
 #include "game/player/inventoryconfig.h"
 #include "game/player/player.h"
 #include "game/player/playerregistry.h"
+#include "game/shaders/postprocessing.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
@@ -279,6 +280,9 @@ void Game::initializeRenderTargets()
       _window_render_texture.reset();
    }
 
+   // dropped rather than resized, the pass rebuilds it at the new size on next use
+   _post_processing_pass.release();
+
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
    const auto ratio_width = game_config._video_mode_width / game_config._view_width;
@@ -445,6 +449,12 @@ void Game::processPendingLevelLoad()
    _player->resetWorld();  // free the pointer that's shared with the player
    LevelRegistry::clearCurrent();
 
+   // the intermediate post processing target belongs to the outgoing level's effects, so it is
+   // released here rather than kept for a level that may never ask for it. it is deliberately not
+   // released when an effect merely switches off: a trigger area toggling as the player walks in
+   // and out would otherwise reallocate a full screen target on every crossing
+   _post_processing_pass.release();
+
    const auto teardown_start = std::chrono::steady_clock::now();
    _level.reset();
    const auto teardown_ms =
@@ -571,6 +581,8 @@ void Game::initialize()
 
    initializeController();
 
+   PostProcessing::getInstance().initialize();
+
    _player = std::make_shared<Player>();
    PlayerRegistry::add(_player);
    _player->initialize();
@@ -683,10 +695,18 @@ void Game::draw()
 
    _window_render_texture->clear();
 
+   // a level-scoped effect routes the level through an intermediate target so it can be resolved
+   // into the window render texture before any overlay is drawn on top of it
+   PostProcessing::getInstance().setLevelEffect(_level_loading_finished && _level ? _level->getActivePostProcessingMechanism() : nullptr);
+
+   const auto level_target = _post_processing_pass.selectLevelTarget(_window_render_texture, _level_loading_finished);
+
    if (_level_loading_finished)
    {
-      _level->draw(_window_render_texture, _screenshot);
+      _level->draw(level_target, _screenshot);
    }
+
+   _post_processing_pass.resolveLevelTarget(*_window_render_texture.get(), _render_targets.view_to_texture_scale);
 
    _screenshot = false;
 
@@ -787,10 +807,14 @@ void Game::draw()
       );
    }
 
+   // a frame-scoped effect runs here, on the fully composited frame, i.e. on top of the level's
+   // gamma pass as well as on all overlays. a level-scoped one has already been resolved above.
+   const auto* post_processing_shader = _post_processing_pass.getFrameShader(_window_render_texture->getTexture());
+
 #ifdef __EMSCRIPTEN__
-   _window->draw(window_texture_sprite, sf::RenderStates{.texture = &window_render_texture_ref});
+   _window->draw(window_texture_sprite, sf::RenderStates{.texture = &window_render_texture_ref, .shader = post_processing_shader});
 #else
-   _window->draw(window_texture_sprite);
+   _window->draw(window_texture_sprite, post_processing_shader);
 #endif
 #ifndef __EMSCRIPTEN__
    _window->popGLStates();
@@ -1000,6 +1024,7 @@ void Game::update()
    Timer::update(Timer::Scope::UpdateAlways);
    MusicPlayer::getInstance().update(dt);
    MessageBox::update(dt);
+   PostProcessing::getInstance().update(dt);
 
    // update screen transitions here
    ScreenTransitionHandler::getInstance().update(dt);
