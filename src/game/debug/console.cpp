@@ -458,6 +458,31 @@ Console::Console()
       }
    );
 
+   // lighting
+   _help.registerCommand(
+      "leveldesign",
+      "lighting <enable/disable>: bypass the deferred lighting pass and show the level unlit",
+      {"lighting enable", "lighting disable"}
+   );
+
+   addCommand(
+      "lighting enable",
+      [this](const auto&)
+      {
+         DebugDrawStates::_draw_lighting = true;
+         _log.emplace_back("lighting enabled");
+      }
+   );
+
+   addCommand(
+      "lighting disable",
+      [this](const auto&)
+      {
+         DebugDrawStates::_draw_lighting = false;
+         _log.emplace_back("lighting disabled, level is drawn unlit");
+      }
+   );
+
    // playerlight
    _help.registerCommand(
       "leveldesign",
