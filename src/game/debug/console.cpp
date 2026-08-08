@@ -1147,9 +1147,13 @@ std::vector<Console::Help::HelpLine> Console::Help::getVisibleLines(const std::s
       {
          std::vector<HelpLine> topic_lines;
 
+         // the panel offers the topic names as the way in, so typing one has to select that whole
+         // topic rather than being matched against the command descriptions and finding nothing
+         const auto topic_matches = toLowerCase(topic).contains(needle);
+
          for (const auto& command : _help_messages.at(topic))
          {
-            if (!needle.empty() && !toLowerCase(command.description).contains(needle))
+            if (!needle.empty() && !topic_matches && !toLowerCase(command.description).contains(needle))
             {
                continue;
             }
