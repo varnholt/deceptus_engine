@@ -5,6 +5,7 @@
 #include "game/debug/debugdrawstates.h"
 #include "framework/tools/callbackmap.h"
 #include "game/constants.h"
+#include "game/level/gamemechanismregistry.h"
 #include "game/level/levelregistry.h"
 #include "game/level/levels.h"
 #include "game/level/room.h"
@@ -21,6 +22,7 @@
 
 #include <cctype>
 #include <iostream>
+#include <map>
 #include <ostream>
 #include <ranges>
 #include <sstream>
@@ -458,6 +460,45 @@ Console::Console()
       }
    );
 
+   // mechanisms
+   _help.registerCommand(
+      "leveldesign",
+      "mechanism <list/enable/disable> <type>: enable or disable every mechanism of a type",
+      {"mechanism list", "mechanism disable smoke", "mechanism enable smoke"}
+   );
+
+   addCommand("mechanism list", [this](const auto&) { listMechanismTypes(); });
+
+   addCommand(
+      "mechanism enable",
+      [this](const auto& args)
+      {
+         if (args.size() == 3)
+         {
+            setMechanismTypeEnabled(args.at(2), true);
+         }
+         else
+         {
+            _log.emplace_back("usage: mechanism enable <type>");
+         }
+      }
+   );
+
+   addCommand(
+      "mechanism disable",
+      [this](const auto& args)
+      {
+         if (args.size() == 3)
+         {
+            setMechanismTypeEnabled(args.at(2), false);
+         }
+         else
+         {
+            _log.emplace_back("usage: mechanism disable <type>");
+         }
+      }
+   );
+
    // lighting
    _help.registerCommand(
       "leveldesign",
@@ -870,6 +911,88 @@ void Console::teleportToRoom(const std::string& room_name)
 
    _log.push_back(os.str());
    PlayerRegistry::getFirst()->setBodyViaPixelPosition(target_position.x, target_position.y);
+}
+
+void Console::listMechanismTypes()
+{
+   const auto level = LevelRegistry::getCurrent();
+   if (!level)
+   {
+      _log.emplace_back("no level loaded");
+      return;
+   }
+
+   // sorted so the output is stable, the registry map is unordered
+   std::map<std::string, std::pair<int32_t, int32_t>> counts_by_type;
+   for (const auto& [group, mechanisms] : level->getMechanismRegistry().getMap())
+   {
+      if (mechanisms == nullptr || mechanisms->empty())
+      {
+         continue;
+      }
+
+      auto& counts = counts_by_type[group];
+      counts.first = static_cast<int32_t>(mechanisms->size());
+      counts.second =
+         static_cast<int32_t>(std::ranges::count_if(*mechanisms, [](const auto& mechanism) { return mechanism->isEnabled(); }));
+   }
+
+   if (counts_by_type.empty())
+   {
+      _log.emplace_back("this level has no mechanisms");
+      return;
+   }
+
+   // packed a few per line, a level can easily have more types than the console can show
+   constexpr auto types_per_line = 3;
+   std::ostringstream line;
+   auto column = 0;
+   for (const auto& [group, counts] : counts_by_type)
+   {
+      line << group << " " << counts.second << "/" << counts.first << "   ";
+      if (++column == types_per_line)
+      {
+         _log.push_back(line.str());
+         line.str({});
+         column = 0;
+      }
+   }
+
+   if (column > 0)
+   {
+      _log.push_back(line.str());
+   }
+}
+
+void Console::setMechanismTypeEnabled(const std::string& type_filter, bool enabled)
+{
+   const auto level = LevelRegistry::getCurrent();
+   if (!level)
+   {
+      _log.emplace_back("no level loaded");
+      return;
+   }
+
+   const auto needle = toLowerCase(type_filter);
+   const auto mechanisms = level->getMechanismRegistry().searchMechanismsIf(
+      [&needle](const auto& mechanism, std::string_view group)
+      { return toLowerCase(std::string{group}).contains(needle) || toLowerCase(std::string{mechanism->objectName()}).contains(needle); }
+   );
+
+   if (mechanisms.empty())
+   {
+      _log.emplace_back("no mechanism type matching '" + type_filter + "', try 'mechanism list'");
+      return;
+   }
+
+   for (const auto& mechanism : mechanisms)
+   {
+      mechanism->setEnabled(enabled);
+   }
+
+   std::ostringstream message;
+   message << (enabled ? "enabled " : "disabled ") << mechanisms.size() << " mechanism(s) matching '" << type_filter << "'";
+   _log.push_back(message.str());
 }
 
 void Console::listLevels()

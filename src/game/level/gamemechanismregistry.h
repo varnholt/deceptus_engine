@@ -21,6 +21,10 @@ public:
    /// \return mechanism group map used during deserialization and lookup.
    MechanismVectorMap& getMap();
 
+   /// \brief returns the map from mechanism layer names to mechanism vectors for inspection.
+   /// \return mechanism group map, keyed by the tmx layer name.
+   const MechanismVectorMap& getMap() const;
+
    /// \brief returns all mechanism vectors as a flat list of group pointers.
    /// \return list of mechanism groups for bulk iteration.
    std::vector<MechanismVector*>& getList();

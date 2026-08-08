@@ -162,6 +162,17 @@ private:
    /// \brief prints the levels listed in levels.json together with their indices.
    void listLevels();
 
+   /// \brief prints the mechanism types present in the current level with their enabled counts.
+   void listMechanismTypes();
+
+   /// \brief enables or disables every mechanism whose type matches a filter.
+   /// \details the filter is matched case insensitively against both the tmx group name a mechanism
+   ///          was loaded from and its object name, as a substring, so "smoke" reaches the
+   ///          "smoke_effect" group without having to spell it out.
+   /// \param type_filter partial mechanism type name.
+   /// \param enabled true to enable the matching mechanisms, false to disable them.
+   void setMechanismTypeEnabled(const std::string& type_filter, bool enabled);
+
    /// \brief switches to another level listed in levels.json.
    /// \details the level is identified either by its index in the list or by a case insensitive
    ///          substring of its description filename, so "level load graveyard" is enough. this

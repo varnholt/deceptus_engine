@@ -36,6 +36,11 @@ void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
 void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
+   if (!isEnabled())
+   {
+      return;
+   }
+
    _render_texture->clear();
 
    // old expensive approach, instead all particles are now drawn as one huge triangle list
@@ -74,6 +79,11 @@ void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, co
 #else
 void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
+   if (!isEnabled())
+   {
+      return;
+   }
+
    _render_texture->clear();
 
    // old expensive approach, instead all particles are now drawn as one huge triangle list
@@ -105,6 +115,11 @@ void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 
 void SmokeEffect::update(const sf::Time& dt)
 {
+   if (!isEnabled())
+   {
+      return;
+   }
+
    _elapsed += dt;
    const auto dt_scaled = dt.asSeconds() * _velocity;
 
