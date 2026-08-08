@@ -19,6 +19,7 @@
 #include "game/layers/controlleroverlay.h"
 #include "game/layers/infolayer.h"
 #include "game/physics/physicsconfigurationui.h"
+#include "game/rendering/postprocessingpass.h"
 #include "game/rendering/rendertargets.h"
 #include "game/scenes/forestscene.h"
 #include "game/sfx/gameaudio.h"
@@ -174,6 +175,9 @@ private:
 
    std::shared_ptr<sf::RenderWindow> _window;
    std::shared_ptr<sf::RenderTexture> _window_render_texture;
+
+   //! \brief owns the render target and blits needed to apply a post processing effect to the frame
+   PostProcessingPass _post_processing_pass;
    RenderTargets _render_targets;
    std::shared_ptr<Player> _player;
    std::shared_ptr<Level> _level;

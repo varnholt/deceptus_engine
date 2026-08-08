@@ -23,11 +23,38 @@ public:
    /// \brief groups help entries by topic and formats them for display in the console.
    struct Help
    {
+      /// \brief one rendered line of the help panel, classified so the renderer can indent and color it.
+      struct HelpLine
+      {
+         enum class Kind
+         {
+            Topic,
+            Command,
+            Example,
+            Hint
+         };
+
+         Kind _kind{Kind::Command};  //!< how the line should be indented and colored
+         std::string _text;          //!< text to render
+      };
+
       /// \brief adds a command description to a help topic.
       /// \param topic topic name used to group related commands.
       /// \param description one-line command description shown in help output.
       /// \param examples optional usage examples shown below the description.
       void registerCommand(const std::string& topic, const std::string& description, const std::vector<std::string>& examples = {});
+
+      /// \brief builds the help lines to show for the current console input.
+      ///
+      /// With nothing typed only the topic names are listed, so the panel stays a fixed handful of
+      /// lines no matter how many commands exist. Typing narrows the list to the commands matching
+      /// the input and reveals their examples, which are only interesting for the command actually
+      /// being reached for. The result never exceeds max_lines, so the panel cannot outgrow the
+      /// screen again however many commands are added later.
+      /// \param filter current console input, matched case insensitively against the descriptions.
+      /// \param max_lines maximum number of lines the caller is able to display.
+      /// \return lines to render, in display order.
+      std::vector<HelpLine> getVisibleLines(const std::string& filter, size_t max_lines) const;
 
       /// \brief builds a sorted, multi-line help text containing all registered topics and commands.
       /// \return formatted help text ready to print into the console log.

@@ -103,6 +103,7 @@ private:
    MechanismVector _mechanism_on_off_blocks;
    MechanismVector _mechanism_platforms;
    MechanismVector _mechanism_portals;
+   MechanismVector _mechanism_post_processing;
    MechanismVector _mechanism_ropes;
    MechanismVector _mechanism_rotating_blades;
    MechanismVector _mechanism_sensor_rects;

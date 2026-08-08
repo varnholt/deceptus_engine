@@ -39,6 +39,7 @@ GameMechanismRegistry::GameMechanismRegistry()
       &_mechanism_on_off_blocks,
       &_mechanism_platforms,
       &_mechanism_portals,
+      &_mechanism_post_processing,
       &_mechanism_ropes,
       &_mechanism_rotating_blades,
       &_mechanism_sensor_rects,
@@ -90,6 +91,7 @@ GameMechanismRegistry::GameMechanismRegistry()
    _mechanisms_map[std::string{layer_name_on_off_blocks}] = &_mechanism_on_off_blocks;
    _mechanisms_map[std::string{layer_name_platforms}] = &_mechanism_platforms;
    _mechanisms_map[std::string{layer_name_portals}] = &_mechanism_portals;
+   _mechanisms_map[std::string{layer_name_post_processing}] = &_mechanism_post_processing;
    _mechanisms_map[std::string{layer_name_ropes}] = &_mechanism_ropes;
    _mechanisms_map[std::string{layer_name_rotating_blades}] = &_mechanism_rotating_blades;
    _mechanisms_map[std::string{layer_name_sensor_rects}] = &_mechanism_sensor_rects;

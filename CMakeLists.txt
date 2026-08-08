@@ -551,6 +551,8 @@ set(GAME_FILES
     src/game/player/timerlock.h
     src/game/player/weaponsystem.cpp
     src/game/player/weaponsystem.h
+    src/game/rendering/postprocessingpass.cpp
+    src/game/rendering/postprocessingpass.h
     src/game/rendering/rendertargets.cpp
     src/game/rendering/rendertargets.h
     src/game/scenes/forestscene.cpp
@@ -565,6 +567,10 @@ set(GAME_FILES
     src/game/shaders/deathshader.h
     src/game/shaders/gammashader.cpp
     src/game/shaders/gammashader.h
+    src/game/shaders/postprocessing.cpp
+    src/game/shaders/postprocessing.h
+    src/game/mechanisms/postprocessingmechanism.cpp
+    src/game/mechanisms/postprocessingmechanism.h
     src/game/state/displaymode.cpp
     src/game/state/displaymode.h
     src/game/state/gamestate.cpp

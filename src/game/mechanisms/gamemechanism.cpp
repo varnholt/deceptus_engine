@@ -172,6 +172,11 @@ bool GameMechanism::isOverlay() const
    return _is_overlay;
 }
 
+MechanismRenderStage GameMechanism::getRenderStage() const
+{
+   return _render_stage;
+}
+
 void GameMechanism::setVisible(bool visible)
 {
    _visible = visible;

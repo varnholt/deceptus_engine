@@ -270,7 +270,7 @@ void InfoLayer::loadInventoryItems()
       inventory_item_descriptions,
       [this](const auto& image)
       {
-         // store sprites
+   // store sprites
 #ifdef __EMSCRIPTEN__
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
          sprite->textureRect = sf::FloatRect{
@@ -719,77 +719,55 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    }
 
    // draw console help
-   line_index = 0;
+   const auto help_x_px = console_base_width_px / 2;
    const auto indent_px = console_base_width_px / 40;
-   const auto& help = console.help();
-   std::ostringstream oss;
+   // two lines of margin so the last one stays inside the console frame rather than on its border
+   const auto help_line_capacity = static_cast<size_t>(std::max(0, offset_y_px / line_spacing_px - 2));
+   const auto help_lines = console.help().getVisibleLines(command, help_line_capacity);
 
-   std::vector<std::string> sorted_topics;
-   sorted_topics.reserve(help._help_messages.size());
-   for (const auto& entry : help._help_messages)
+   line_index = 0;
+   for (const auto& help_line : help_lines)
    {
-      sorted_topics.push_back(entry.first);
-   }
+      auto text_x_px = help_x_px;
+      auto color = sf::Color::White;
 
-   std::ranges::sort(sorted_topics.begin(), sorted_topics.end());
-   for (const auto& topic : sorted_topics)
-   {
-#ifdef __EMSCRIPTEN__
-      console_text.setString(topic.c_str());
-#else
-      console_text.setString(topic);
-#endif
-      console_text.setFillColor(sf::Color::Green);
-#ifdef __EMSCRIPTEN__
-      console_text.position = {static_cast<float>(console_base_width_px / 2), static_cast<float>((++line_index) * line_spacing_px)};
-      window.draw(console_text, sf::RenderStates{.view = view_screen});
-#else
-      console_text.setPosition({static_cast<float>(console_base_width_px / 2), static_cast<float>((++line_index) * line_spacing_px)});
-      window.draw(console_text);
-#endif
-
-      const auto& commands = help._help_messages.at(topic);
-      for (const auto& command : commands)
+      switch (help_line._kind)
       {
-#ifdef __EMSCRIPTEN__
-         console_text.setString(command.description.c_str());
-#else
-         console_text.setString(command.description);
-#endif
-         console_text.setFillColor(sf::Color::White);
-#ifdef __EMSCRIPTEN__
-         console_text.position = {
-            static_cast<float>(console_base_width_px / 2 + indent_px), static_cast<float>((++line_index) * line_spacing_px)
-         };
-         window.draw(console_text, sf::RenderStates{.view = view_screen});
-#else
-         console_text.setPosition(
-            {static_cast<float>(console_base_width_px / 2 + indent_px), static_cast<float>((++line_index) * line_spacing_px)}
-         );
-         window.draw(console_text);
-#endif
-
-         for (const auto& example : command.examples)
+         case Console::Help::HelpLine::Kind::Topic:
          {
-#ifdef __EMSCRIPTEN__
-            console_text.setString(example.c_str());
-#else
-            console_text.setString(example);
-#endif
-            console_text.setFillColor(sf::Color::Red);
-#ifdef __EMSCRIPTEN__
-            console_text.position = {
-               static_cast<float>(console_base_width_px / 2 + indent_px * 2), static_cast<float>((++line_index) * line_spacing_px)
-            };
-            window.draw(console_text, sf::RenderStates{.view = view_screen});
-#else
-            console_text.setPosition(
-               {static_cast<float>(console_base_width_px / 2 + indent_px * 2), static_cast<float>((++line_index) * line_spacing_px)}
-            );
-            window.draw(console_text);
-#endif
+            color = sf::Color::Green;
+            break;
+         }
+         case Console::Help::HelpLine::Kind::Command:
+         {
+            text_x_px += indent_px;
+            break;
+         }
+         case Console::Help::HelpLine::Kind::Example:
+         {
+            text_x_px += indent_px * 2;
+            color = sf::Color::Red;
+            break;
+         }
+         case Console::Help::HelpLine::Kind::Hint:
+         {
+            color = sf::Color{128, 128, 128};
+            break;
          }
       }
+
+#ifdef __EMSCRIPTEN__
+      console_text.setString(help_line._text.c_str());
+#else
+      console_text.setString(help_line._text);
+#endif
+      console_text.setFillColor(color);
+      sfcompat::setPosition(console_text, {static_cast<float>(text_x_px), static_cast<float>((++line_index) * line_spacing_px)});
+#ifdef __EMSCRIPTEN__
+      window.draw(console_text, sf::RenderStates{.view = view_screen});
+#else
+      window.draw(console_text);
+#endif
    }
 }
 
