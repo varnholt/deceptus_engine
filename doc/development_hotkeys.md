@@ -55,6 +55,19 @@ All hotkeys in this document are only active in `DEVELOPMENT_MODE` builds, excep
 
 ## Developer Console (`F12`)
 
+### Finding commands
+
+The help panel on the right reacts to what you type, so it never lists more than you need:
+
+| Input | Panel shows |
+|-------|-------------|
+| _(nothing typed)_ | The topic names only |
+| any text | Every command whose description contains that text |
+| `help <command>` | The matching commands together with their usage examples |
+
+Examples are deliberately hidden until you ask for them with `help`, and the panel is capped to the
+height of the screen; whatever does not fit is reported as `+n more, keep typing`.
+
 ### Navigation
 
 | Command | Action |
