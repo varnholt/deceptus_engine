@@ -139,6 +139,11 @@ GameMechanismRegistry::MechanismVectorMap& GameMechanismRegistry::getMap()
    return _mechanisms_map;
 }
 
+const GameMechanismRegistry::MechanismVectorMap& GameMechanismRegistry::getMap() const
+{
+   return _mechanisms_map;
+}
+
 const GameMechanismRegistry::MechanismVector& GameMechanismRegistry::getDoors() const
 {
    return _mechanism_doors;

@@ -21,6 +21,7 @@
 #include "game/config/tweaks.h"
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
+#include "game/debug/debugdrawstates.h"
 #include "game/ingamemenu/ingamemenumap.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/io/meshtools.h"
@@ -1655,11 +1656,30 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    displayFinalTextures();
 
-   drawLightMap();
+   if (DebugDrawStates::_draw_lighting)
+   {
+      drawLightMap();
 
-   _light_system->draw(
-      *_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.lighting2, _render_targets.normal
-   );
+      _light_system->draw(
+         *_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.lighting2, _render_targets.normal
+      );
+   }
+   else
+   {
+      // the deferred pass is what puts the level into the deferred target in the first place, so
+      // switching lighting off has to blit the unlit color map instead of merely skipping the pass,
+      // otherwise the frame stays black. the result is the artwork at full brightness.
+      const sf::Texture& unlit_texture = _render_targets.level->getTexture();
+#ifdef __EMSCRIPTEN__
+      sf::Sprite unlit_sprite;
+      unlit_sprite.textureRect =
+         sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(unlit_texture.getSize().x), static_cast<float>(unlit_texture.getSize().y)}};
+      _render_targets.deferred->draw(unlit_sprite, sf::RenderStates{.texture = &unlit_texture});
+#else
+      sf::Sprite unlit_sprite(unlit_texture);
+      _render_targets.deferred->draw(unlit_sprite);
+#endif
+   }
 
    drawPostLightingLayers(*_render_targets.deferred.get());
 
