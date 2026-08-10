@@ -19,6 +19,7 @@
 #include "game/player/playerdash.h"
 #include "game/player/playerdive.h"
 #include "game/player/playereyepositions.h"
+#include "game/player/playerharpoon.h"
 #include "game/player/playerjump.h"
 #include "game/player/playerjumptrace.h"
 #include "game/player/playerplatform.h"
@@ -312,6 +313,10 @@ private:
    /// \brief refreshes weapon attack input and triggers weapon-specific attack behavior.
    void updateAttack();
 
+   /// \brief refreshes the harpoon state machine that shoots, carries, and releases the rope.
+   /// \param dt elapsed frame time.
+   void updateHarpoon(const sf::Time& dt);
+
    /// \brief advances attack-dash force burst applied after successful sword attacks.
    /// \param dt elapsed frame time.
    void updateAttackDash(const sf::Time& dt);
@@ -495,6 +500,7 @@ private:
    PlayerClimb _climb;
    PlayerDash _dash;
    PlayerEyePositions _eye_positions;
+   PlayerHarpoon _harpoon;
    PlayerJump _jump;
    PlayerJumpTrace _jump_trace;
    PlayerPlatform _platform;

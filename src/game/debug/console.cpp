@@ -1,10 +1,10 @@
 #include "console.h"
 
+#include "framework/tools/callbackmap.h"
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
-#include "game/debug/debugdrawstates.h"
-#include "framework/tools/callbackmap.h"
 #include "game/constants.h"
+#include "game/debug/debugdrawstates.h"
 #include "game/level/gamemechanismregistry.h"
 #include "game/level/levelregistry.h"
 #include "game/level/levels.h"
@@ -78,7 +78,9 @@ std::string joinScopeNames()
 Console::Console()
 {
    // weapon
-   _help.registerCommand("inventory", "weapon <add/clear> <sword/bow/gun>: add/clear weapons", {"weapon add sword", "weapon clear"});
+   _help.registerCommand(
+      "inventory", "weapon <add/clear> <sword/bow/gun/harpoon>: add/clear weapons", {"weapon add sword", "weapon clear"}
+   );
 
    addCommand(
       "weapon add gun",
@@ -104,6 +106,15 @@ Console::Console()
       {
          giveWeaponSword();
          _log.emplace_back("given sword to player");
+      }
+   );
+
+   addCommand(
+      "weapon add harpoon",
+      [this](const auto&)
+      {
+         giveWeaponHarpoon();
+         _log.emplace_back("given harpoon to player");
       }
    );
 
@@ -320,12 +331,7 @@ Console::Console()
    );
 
    // level loading
-   registerCallback(
-      "level list",
-      [this](const auto&) { listLevels(); },
-      "leveldesign",
-      "level list: list the levels from levels.json"
-   );
+   registerCallback("level list", [this](const auto&) { listLevels(); }, "leveldesign", "level list: list the levels from levels.json");
 
    registerCallback(
       "level load",
@@ -804,6 +810,11 @@ void Console::giveWeaponSword()
    giveWeaponToPlayer(WeaponFactory::create(WeaponType::Sword));
 }
 
+void Console::giveWeaponHarpoon()
+{
+   giveWeaponToPlayer(WeaponFactory::create(WeaponType::Harpoon));
+}
+
 void Console::teleportToStartPosition()
 {
    auto level = LevelRegistry::getCurrent();
@@ -1028,8 +1039,8 @@ void Console::loadLevel(const std::string& level_identifier)
    // an all-digit identifier is an index into levels.json, anything else is matched against the
    // level description filenames so that "level load graveyard" works without the full path
    std::optional<int32_t> matched_index;
-   const auto is_index =
-      !level_identifier.empty() && std::ranges::all_of(level_identifier, [](char c) { return std::isdigit(static_cast<unsigned char>(c)) != 0; });
+   const auto is_index = !level_identifier.empty() &&
+                         std::ranges::all_of(level_identifier, [](char c) { return std::isdigit(static_cast<unsigned char>(c)) != 0; });
 
    if (is_index)
    {

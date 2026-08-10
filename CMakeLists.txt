@@ -585,7 +585,11 @@ set(GAME_FILES
     src/game/ui/richtextparser.h
     src/game/weapons/arrow.cpp
     src/game/weapons/arrow.h
+    src/game/player/playerharpoon.cpp
+    src/game/player/playerharpoon.h
     src/game/weapons/bow.cpp
+    src/game/weapons/harpoon.cpp
+    src/game/weapons/harpoon.h
     src/game/weapons/bow.h
     src/game/weapons/gun.cpp
     src/game/weapons/gun.h

@@ -265,6 +265,7 @@ enum class WeaponType
    Bow = 1,
    Gun = 2,
    Sword = 3,
+   Harpoon = 4,
 };
 
 // this enum should be removed

@@ -143,6 +143,9 @@ private:
    /// \brief gives the player a sword weapon and selects it.
    void giveWeaponSword();
 
+   /// \brief gives the player a harpoon weapon and selects it.
+   void giveWeaponHarpoon();
+
    /// \brief teleports the player to the level start spawn position.
    void teleportToStartPosition();
 
