@@ -31,6 +31,21 @@ constexpr auto rope_draw_half_thickness_px = 0.025f * PPM;  // same as Rope::dra
 // the hook sprite is centered on its shank, this pulls it back so the point ends up in the surface
 constexpr auto hook_tip_offset_px = 3.0f;
 
+// aiming: the angle is held relative to the facing direction, positive points up. digital input
+// sweeps it, an analogue stick sets it directly. the default is the diagonal a swing starts from.
+constexpr auto aim_angle_default_deg = 45.0f;
+constexpr auto aim_angle_min_deg = -30.0f;
+constexpr auto aim_angle_max_deg = 100.0f;
+constexpr auto aim_sweep_speed_deg_per_s = 120.0f;
+constexpr auto aim_deadzone = 0.35f;
+
+// the indicator: a few dots along the aim ray, fading out. no animation, the angle is the message
+constexpr auto aim_dot_count = 5;
+constexpr auto aim_dot_first_px = 11.0f;
+constexpr auto aim_dot_spacing_px = 7.0f;
+constexpr auto aim_dot_half_size_px = 1.0f;
+constexpr auto aim_dot_alpha_max = 190.0f;
+
 const auto flat_normal_color = sf::Color{128, 128, 255};
 
 // the rope must not collide with the player: the player's solid fixtures collide with
@@ -116,10 +131,7 @@ void PlayerHarpoon::update(const sf::Time& dt, const HarpoonInput& input)
    {
       case State::Idle:
       {
-         if (harpoon_button_just_pressed && !input._in_water)
-         {
-            shoot(input);
-         }
+         updateAiming(dt, input);
          break;
       }
 
@@ -152,6 +164,9 @@ void PlayerHarpoon::update(const sf::Time& dt, const HarpoonInput& input)
          if (harpoon_button_just_pressed || jump_button_just_pressed)
          {
             release();
+
+            // releasing with the fire button must not roll straight into a new aim
+            _fire_locked_until_released = input._harpoon_button_pressed;
             break;
          }
 
@@ -160,32 +175,128 @@ void PlayerHarpoon::update(const sf::Time& dt, const HarpoonInput& input)
          break;
       }
    }
+
+   updateVerticalKeyClaim(input);
 }
 
-b2Vec2 PlayerHarpoon::readShootDirection(const HarpoonInput& input) const
+void PlayerHarpoon::updateVerticalKeyClaim(const HarpoonInput& input)
 {
-   const auto horizontal = input._points_to_left ? -1.0f : 1.0f;
-
-   // shooting diagonally up is the direction a swing is started from, up and forward are the two
-   // useful variations
-   auto direction = b2Vec2{horizontal, -1.0f};
-
-   if (input._up_pressed)
-   {
-      direction = b2Vec2{0.0f, -1.0f};
-   }
-   else if (input._down_pressed)
-   {
-      direction = b2Vec2{horizontal, 0.0f};
-   }
-
-   direction.Normalize();
-   return direction;
+   _hold.syncVerticalKeyClaim(input._controls, _aiming || _state == State::Attached);
 }
 
-b2Vec2 PlayerHarpoon::readPlayerAttachmentPosition(b2Body* player_body) const
+void PlayerHarpoon::updateAiming(const sf::Time& dt, const HarpoonInput& input)
 {
-   return player_body->GetPosition() + b2Vec2{0.0f, player_attachment_offset_m};
+   if (!input._player_body)
+   {
+      return;
+   }
+
+   // after the rope was dropped with the fire button, wait for that button to come up again
+   if (_fire_locked_until_released)
+   {
+      _fire_locked_until_released = input._harpoon_button_pressed;
+      return;
+   }
+
+   if (input._harpoon_button_pressed && !input._in_water && !input._carried_elsewhere)
+   {
+      if (!_aiming)
+      {
+         // up and down are the aim, so an aim cannot start while they belong to something else
+         if (_hold.areVerticalKeysOwnedElsewhere(input._controls))
+         {
+            return;
+         }
+
+         // every aim starts from the default, which keeps the angle predictable
+         _aiming = true;
+         _aim_angle_deg = aim_angle_default_deg;
+
+         // claimed right here rather than at the end of the frame, so the aim can read its own keys
+         // on the very frame it starts instead of sitting at zero for one frame
+         updateVerticalKeyClaim(input);
+      }
+
+      // the stick is only read when a controller is actually the input device
+      const auto stick =
+         input._analogue_aim ? sf::Vector2f{_hold.readHorizontalAxis(), _hold.readVerticalAxis()} : sf::Vector2f{};
+      const auto analogue_aim = (stick.x * stick.x) + (stick.y * stick.y) > aim_deadzone * aim_deadzone;
+
+      if (analogue_aim)
+      {
+         // an analogue stick points at the angle directly, no sweeping needed
+         const auto forward = input._points_to_left ? -stick.x : stick.x;
+         _aim_angle_deg = std::atan2(-stick.y, forward) * FACTOR_RAD_TO_DEG;
+      }
+      else
+      {
+         // digital input sweeps the angle, which is what puts arbitrary angles within its reach
+         const auto sweep_deg = aim_sweep_speed_deg_per_s * dt.asSeconds();
+         _aim_angle_deg += _hold.isUpPressed() ? sweep_deg : 0.0f;
+         _aim_angle_deg -= _hold.isDownPressed() ? sweep_deg : 0.0f;
+      }
+
+      _aim_angle_deg = std::clamp(_aim_angle_deg, aim_angle_min_deg, aim_angle_max_deg);
+
+      // screen space y grows downwards, so a positive aim angle subtracts
+      const auto angle_rad = _aim_angle_deg * FACTOR_DEG_TO_RAD;
+      const auto forward = input._points_to_left ? -1.0f : 1.0f;
+      _aim_direction = b2Vec2{forward * std::cos(angle_rad), -std::sin(angle_rad)};
+      _aim_direction.Normalize();
+
+      const auto attachment_m = PlayerRopeHold::readPlayerAttachmentPosition(input._player_body);
+      _aim_origin_px = sf::Vector2f{attachment_m.x * PPM, attachment_m.y * PPM};
+      return;
+   }
+
+   // the shot leaves when the button comes up
+   if (_aiming)
+   {
+      _aiming = false;
+      shoot(input);
+   }
+}
+
+void PlayerHarpoon::drawAimIndicator(sf::RenderTarget& color, const sf::RenderStates& states)
+{
+   if (!_aiming)
+   {
+      return;
+   }
+
+   std::vector<sf::Vertex> dots;
+
+   for (auto dot_index = 0; dot_index < aim_dot_count; dot_index++)
+   {
+      const auto distance_px = aim_dot_first_px + static_cast<float>(dot_index) * aim_dot_spacing_px;
+      const auto center_px = _aim_origin_px + distance_px * toVector2f(_aim_direction);
+
+      // fading out along the ray is what gives the dots a direction without animating them
+      const auto fade = 1.0f - static_cast<float>(dot_index) / static_cast<float>(aim_dot_count);
+      const auto dot_color = sf::Color{255, 255, 255, static_cast<uint8_t>(aim_dot_alpha_max * fade)};
+
+      const auto top_left_px = center_px + sf::Vector2f{-aim_dot_half_size_px, -aim_dot_half_size_px};
+      const auto bottom_left_px = center_px + sf::Vector2f{-aim_dot_half_size_px, aim_dot_half_size_px};
+      const auto top_right_px = center_px + sf::Vector2f{aim_dot_half_size_px, -aim_dot_half_size_px};
+      const auto bottom_right_px = center_px + sf::Vector2f{aim_dot_half_size_px, aim_dot_half_size_px};
+
+      // one triangle strip per dot would need one draw call each, so they go out as triangles
+      dots.push_back(sf::Vertex{top_left_px, dot_color, sf::Vector2f{}});
+      dots.push_back(sf::Vertex{bottom_left_px, dot_color, sf::Vector2f{}});
+      dots.push_back(sf::Vertex{top_right_px, dot_color, sf::Vector2f{}});
+      dots.push_back(sf::Vertex{bottom_left_px, dot_color, sf::Vector2f{}});
+      dots.push_back(sf::Vertex{bottom_right_px, dot_color, sf::Vector2f{}});
+      dots.push_back(sf::Vertex{top_right_px, dot_color, sf::Vector2f{}});
+   }
+
+   auto dot_states = states;
+   dot_states.texture = nullptr;
+
+#ifdef __EMSCRIPTEN__
+   color.draw(std::span<const sf::Vertex>{dots.data(), dots.size()}, sf::PrimitiveType::Triangles, dot_states);
+#else
+   color.draw(dots.data(), dots.size(), sf::PrimitiveType::Triangles, dot_states);
+#endif
 }
 
 void PlayerHarpoon::shoot(const HarpoonInput& input)
@@ -195,8 +306,8 @@ void PlayerHarpoon::shoot(const HarpoonInput& input)
       return;
    }
 
-   _shoot_position_m = readPlayerAttachmentPosition(input._player_body);
-   _shoot_direction_m = readShootDirection(input);
+   _shoot_position_m = PlayerRopeHold::readPlayerAttachmentPosition(input._player_body);
+   _shoot_direction_m = _aim_direction;
 
    const auto ray_end_m = _shoot_position_m + rope_length_max_m * _shoot_direction_m;
 
@@ -225,7 +336,7 @@ void PlayerHarpoon::createRope(const HarpoonInput& input)
       return;
    }
 
-   const auto player_attachment_m = readPlayerAttachmentPosition(input._player_body);
+   const auto player_attachment_m = PlayerRopeHold::readPlayerAttachmentPosition(input._player_body);
    const auto rope_vector_m = player_attachment_m - _anchor_position_m;
    const auto rope_length_m = rope_vector_m.Length();
 
@@ -311,28 +422,8 @@ b2Body* PlayerHarpoon::createSegment(const b2Vec2& center_m, float angle, bool c
 
 void PlayerHarpoon::attachPlayer(b2Body* player_body)
 {
-   // this last link is what makes reeling smooth: it is a rope-style distance joint whose maximum
-   // length can be changed every frame without recreating the joint, so the rope grows and shrinks
-   // continuously and whole segments are only added or removed when the link passes a segment
-   // boundary. its local anchors are set explicitly rather than through Initialize(), which derives
-   // them from the current positions and would bake the current gap into the joint - leaving a
-   // constraint that is already satisfied and never pulls the player anywhere.
-   b2DistanceJointDef player_joint_def;
-   player_joint_def.bodyA = _rope_bodies.back();
-   player_joint_def.bodyB = player_body;
-   player_joint_def.localAnchorA = b2Vec2{_segment_length_m * 0.5f, 0.0f};
-   player_joint_def.localAnchorB = b2Vec2{0.0f, player_attachment_offset_m};
-   player_joint_def.length = _player_link_length_m;
-   player_joint_def.minLength = 0.0f;
-   player_joint_def.maxLength = _player_link_length_m;
-
-   // a stiffness of zero keeps the limits rigid and skips the spring, which is rope behaviour:
-   // the player can come closer than the link length but never further away
-   player_joint_def.stiffness = 0.0f;
-   player_joint_def.damping = 0.0f;
-   player_joint_def.collideConnected = false;
-
-   _player_joint = static_cast<b2DistanceJoint*>(_world->CreateJoint(&player_joint_def));
+   // the anchor sits at the far end of the last segment, which is where the rope actually ends
+   _hold.attach(_world, _rope_bodies.back(), player_body, b2Vec2{_segment_length_m * 0.5f, 0.0f}, _player_link_length_m);
 }
 
 float PlayerHarpoon::readRopeLength() const
@@ -342,18 +433,21 @@ float PlayerHarpoon::readRopeLength() const
 
 void PlayerHarpoon::updateRopeLength(const sf::Time& dt, const HarpoonInput& input)
 {
-   if (!_world || _rope_bodies.empty() || !_player_joint)
+   if (!_world || _rope_bodies.empty() || !_hold.isAttached())
    {
       return;
    }
 
    // up and down cancel each other out
-   if (input._up_pressed == input._down_pressed)
+   const auto up_pressed = _hold.isUpPressed();
+   const auto down_pressed = _hold.isDownPressed();
+
+   if (up_pressed == down_pressed)
    {
       return;
    }
 
-   const auto reeling_in = input._up_pressed;
+   const auto reeling_in = up_pressed;
    const auto rope_length_m = readRopeLength();
 
    if (reeling_in && rope_length_m <= rope_length_min_m)
@@ -371,7 +465,7 @@ void PlayerHarpoon::updateRopeLength(const sf::Time& dt, const HarpoonInput& inp
    // along the rope is what turns reeling in into climbing.
    if (reeling_in)
    {
-      pullPlayerAlongRope(input);
+      _hold.pullPlayerTowards(input._player_body, _rope_bodies.back()->GetPosition(), reel_pull_acceleration);
    }
 
    const auto reel_speed_mps = reeling_in ? -reel_speed_in_mps : reel_speed_out_mps;
@@ -396,29 +490,12 @@ void PlayerHarpoon::updateRopeLength(const sf::Time& dt, const HarpoonInput& inp
       _player_link_length_m -= _segment_length_m;
    }
 
-   _player_joint->SetLength(_player_link_length_m);
-   _player_joint->SetMaxLength(_player_link_length_m);
-}
-
-void PlayerHarpoon::pullPlayerAlongRope(const HarpoonInput& input)
-{
-   auto pull_direction_m = _rope_bodies.back()->GetPosition() - readPlayerAttachmentPosition(input._player_body);
-
-   if (pull_direction_m.LengthSquared() < 0.0001f)
-   {
-      return;
-   }
-
-   pull_direction_m.Normalize();
-
-   const auto force = reel_pull_acceleration * input._player_body->GetMass();
-   input._player_body->ApplyForceToCenter(force * pull_direction_m, true);
+   _hold.setLinkLength(_player_link_length_m);
 }
 
 void PlayerHarpoon::removeLastSegment(const HarpoonInput& input)
 {
-   _world->DestroyJoint(_player_joint);
-   _player_joint = nullptr;
+   _hold.detach();
 
    // the joint that held the removed segment goes with it
    _world->DestroyJoint(_rope_joints.back());
@@ -435,15 +512,14 @@ void PlayerHarpoon::appendSegment(const HarpoonInput& input)
    auto* previous_body = _rope_bodies.back();
    const auto joint_position_m = previous_body->GetWorldPoint(b2Vec2{_segment_length_m * 0.5f, 0.0f});
 
-   auto segment_direction_m = readPlayerAttachmentPosition(input._player_body) - joint_position_m;
+   auto segment_direction_m = PlayerRopeHold::readPlayerAttachmentPosition(input._player_body) - joint_position_m;
    if (segment_direction_m.LengthSquared() < 0.0001f)
    {
       return;
    }
    segment_direction_m.Normalize();
 
-   _world->DestroyJoint(_player_joint);
-   _player_joint = nullptr;
+   _hold.detach();
 
    auto* segment_body = createSegment(
       joint_position_m + (_segment_length_m * 0.5f) * segment_direction_m, std::atan2(segment_direction_m.y, segment_direction_m.x), true
@@ -476,24 +552,7 @@ void PlayerHarpoon::applySwingControl(const HarpoonInput& input)
       direction += 1.0f;
    }
 
-   if (fabs(direction) < 0.01f || _rope_bodies.empty())
-   {
-      return;
-   }
-
-   // a force pointing along the rope only adds tension, it does not make the player swing faster.
-   // projecting the requested direction onto the tangent of the arc puts all of it into the swing:
-   // full effect at the bottom of the arc, nothing at the point where the rope is horizontal and
-   // pulling sideways would just stretch it. the pivot is taken from the rope segment closest to the
-   // player, so this keeps working while the rope is wrapped around a corner.
-   auto rope_direction_m = _rope_bodies.back()->GetPosition() - input._player_body->GetPosition();
-   rope_direction_m.Normalize();
-
-   const auto tangent_m = b2Vec2{-rope_direction_m.y, rope_direction_m.x};
-   const auto tangent_share = direction * tangent_m.x;
-   const auto force = tangent_share * swing_control_acceleration * input._player_body->GetMass();
-
-   input._player_body->ApplyForceToCenter(force * tangent_m, true);
+   _hold.applySwingControl(input._player_body, direction, swing_control_acceleration);
 }
 
 void PlayerHarpoon::release()
@@ -505,14 +564,11 @@ void PlayerHarpoon::release()
 
 void PlayerHarpoon::destroyRope()
 {
+   // the joints are destroyed first, destroying a body would take its joints with it
+   _hold.detach();
+
    if (_world)
    {
-      // the joints are destroyed first, destroying a body would take its joints with it
-      if (_player_joint)
-      {
-         _world->DestroyJoint(_player_joint);
-      }
-
       for (auto* joint : _rope_joints)
       {
          _world->DestroyJoint(joint);
@@ -529,7 +585,6 @@ void PlayerHarpoon::destroyRope()
       }
    }
 
-   _player_joint = nullptr;
    _rope_joints.clear();
    _rope_bodies.clear();
    _anchor_body = nullptr;
@@ -544,10 +599,13 @@ void PlayerHarpoon::reset()
    _release_grace_remaining_s = 0.0f;
    _harpoon_button_was_pressed = false;
    _jump_button_was_pressed = false;
+   _aiming = false;
+   _fire_locked_until_released = false;
    _target_found = false;
    _flight_length_m = 0.0f;
    _flight_travelled_m = 0.0f;
    _player_link_length_m = 0.0f;
+   _hold.syncVerticalKeyClaim({}, false);
 }
 
 bool PlayerHarpoon::isAttached() const
@@ -563,6 +621,7 @@ bool PlayerHarpoon::isReleaseGraceActive() const
 void PlayerHarpoon::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
    loadTextures();
+   drawAimIndicator(color, states);
 
    if (_state == State::Idle)
    {
@@ -586,9 +645,9 @@ void PlayerHarpoon::draw(sf::RenderTarget& color, sf::RenderTarget& normal, cons
          rope_points_m.push_back(body->GetPosition());
       }
 
-      if (_player_joint)
+      if (const auto player_anchor_m = _hold.readPlayerAnchorPosition())
       {
-         rope_points_m.push_back(_player_joint->GetAnchorB());
+         rope_points_m.push_back(player_anchor_m.value());
       }
    }
 

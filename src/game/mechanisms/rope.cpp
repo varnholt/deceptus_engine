@@ -349,3 +349,8 @@ void Rope::setPixelPosition(const sf::Vector2i& position_px)
 {
    _position_px = position_px;
 }
+
+b2Body* Rope::getAnchorBody() const
+{
+   return _anchor_a_body;
+}

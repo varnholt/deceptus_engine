@@ -428,6 +428,10 @@ set(GAME_FILES
     src/game/mechanisms/portal.h
     src/game/mechanisms/ringshaderlayer.cpp
     src/game/mechanisms/ringshaderlayer.h
+    src/game/mechanisms/grabrope.cpp
+    src/game/mechanisms/grabrope.h
+    src/game/mechanisms/grabropewrapper.cpp
+    src/game/mechanisms/grabropewrapper.h
     src/game/mechanisms/rope.cpp
     src/game/mechanisms/rope.h
     src/game/mechanisms/ropewithlight.cpp
@@ -585,8 +589,14 @@ set(GAME_FILES
     src/game/ui/richtextparser.h
     src/game/weapons/arrow.cpp
     src/game/weapons/arrow.h
+    src/game/player/keyclaim.cpp
+    src/game/player/keyclaim.h
     src/game/player/playerharpoon.cpp
     src/game/player/playerharpoon.h
+    src/game/player/playerropehold.cpp
+    src/game/player/playerropehold.h
+    src/game/player/playerrope.cpp
+    src/game/player/playerrope.h
     src/game/weapons/bow.cpp
     src/game/weapons/harpoon.cpp
     src/game/weapons/harpoon.h

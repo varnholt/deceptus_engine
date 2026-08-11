@@ -981,11 +981,12 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
 }
 
 std::optional<std::shared_ptr<Animation>>
-PlayerAnimation::processHarpoonAnimation(const std::shared_ptr<Animation>& next_cycle, const PlayerAnimationData& data)
+PlayerAnimation::processRopeHangAnimation(const std::shared_ptr<Animation>& next_cycle, const PlayerAnimationData& data)
 {
-   // hanging on the harpoon rope holds the player in the air at a vertical velocity below both jump
-   // thresholds, a state none of the animations above cover
-   if (!data._harpoon_attached || next_cycle)
+   // hanging on a rope holds the player in the air at a vertical velocity below both jump thresholds, a
+   // state none of the animations above cover. the harpoon rope and a grab rope are the same thing here,
+   // which is why this asks whether he hangs rather than what he hangs on.
+   if (!data._hanging_on_rope || next_cycle)
    {
       return std::nullopt;
    }
@@ -1059,7 +1060,7 @@ void PlayerAnimation::update(const sf::Time& dt, const PlayerAnimationData& data
    next_cycle = processWallSlideAnimation(data).value_or(next_cycle);
    next_cycle = processDoubleJumpAnimation(data).value_or(next_cycle);
    next_cycle = processWallJumpAnimation(data).value_or(next_cycle);
-   next_cycle = processHarpoonAnimation(next_cycle, data).value_or(next_cycle);
+   next_cycle = processRopeHangAnimation(next_cycle, data).value_or(next_cycle);
    next_cycle = processScreenTransitionIdleAnimation(data).value_or(next_cycle);
    next_cycle = processAppearAnimation(data).value_or(next_cycle);
    next_cycle = processDeathAnimation(data).value_or(next_cycle);

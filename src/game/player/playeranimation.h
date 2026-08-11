@@ -37,7 +37,7 @@ public:
       bool _points_left = false;
       bool _points_right = false;
       bool _climb_joint_present = false;
-      bool _harpoon_attached = false;
+      bool _hanging_on_rope = false;  //!< true on the harpoon rope and on a grab rope alike
       bool _moving_left = false;
       bool _moving_right = false;
       bool _wall_sliding = false;
@@ -187,7 +187,7 @@ private:
    /// \param data current animation context.
    /// \return mid-air animation while hanging without another candidate, otherwise empty.
    std::optional<std::shared_ptr<Animation>>
-   processHarpoonAnimation(const std::shared_ptr<Animation>& next_cycle, const PlayerAnimationData& data);
+   processRopeHangAnimation(const std::shared_ptr<Animation>& next_cycle, const PlayerAnimationData& data);
 
    /// \brief forces idle/swim animation during screen transition mode.
    /// \param data current animation context.

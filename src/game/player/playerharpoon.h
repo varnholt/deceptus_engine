@@ -4,8 +4,11 @@
 #include <SFML/Graphics.hpp>
 
 #include "box2d/box2d.h"
+#include "game/player/playercontrols.h"
+#include "game/player/playerropehold.h"
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 /// \brief harpoon that is shot into level geometry and carries the player on a simulated rope.
@@ -16,17 +19,20 @@ public:
    struct HarpoonInput
    {
       std::shared_ptr<b2World> _world;
+      std::shared_ptr<PlayerControls> _controls;
       b2Body* _player_body{nullptr};
       bool _points_to_left{false};
       bool _harpoon_button_pressed{false};
       bool _jump_button_pressed{false};
-      bool _up_pressed{false};
-      bool _down_pressed{false};
       bool _move_left_pressed{false};
       bool _move_right_pressed{false};
       bool _in_water{false};
       bool _on_ground{false};
       bool _dead{false};
+      bool _analogue_aim{false};  //!< true while a controller is the input device, so the aim is set directly
+
+      //!< the rope already carries the player, so the harpoon must not carry him as well
+      bool _carried_elsewhere{false};
    };
 
    /// \brief advances the harpoon state machine, shoots or releases the rope and applies swing control.
@@ -59,10 +65,22 @@ private:
       Attached  //!< rope is built and carries the player
    };
 
-   /// \brief reads the shoot direction from facing direction and vertical input.
+   /// \brief holds the aim while the fire button is down and shoots once it is released.
+   /// \param dt elapsed frame time.
    /// \param input current harpoon input.
-   /// \return normalized shoot direction.
-   b2Vec2 readShootDirection(const HarpoonInput& input) const;
+   void updateAiming(const sf::Time& dt, const HarpoonInput& input);
+
+   /// \brief takes up and down away from the rest of the game while the harpoon owns them.
+   /// \param input current harpoon input.
+   /// \note while aiming, up and down sweep the aim angle, while attached they reel the rope. crouching,
+   ///       dropping through platforms and opening dialogues must not happen from the same key then, and
+   ///       none of those need to know that the harpoon exists.
+   void updateVerticalKeyClaim(const HarpoonInput& input);
+
+   /// \brief draws the aim angle indicator around the player.
+   /// \param color color render target.
+   /// \param states render states to apply.
+   void drawAimIndicator(sf::RenderTarget& color, const sf::RenderStates& states);
 
    /// \brief casts a ray into the shoot direction and starts the hook flight.
    /// \param input current harpoon input.
@@ -96,8 +114,9 @@ private:
    /// \return the created segment body.
    b2Body* createSegment(const b2Vec2& center_m, float angle, bool colliding);
 
-   /// \brief joints the current rope end to the player body.
+   /// \brief hangs the player off the current rope end.
    /// \param player_body player body the rope end is jointed to.
+   /// \note the anchor sits at the far end of the last segment, which is where the rope actually ends.
    void attachPlayer(b2Body* player_body);
 
    /// \brief shortens or lengthens the rope while up or down is held.
@@ -117,28 +136,25 @@ private:
    /// \return length of all segments plus the adjustable player link in box2d units.
    float readRopeLength() const;
 
-   /// \brief pulls the player towards the rope end so reeling in lifts him instead of stretching the chain.
-   /// \param input current harpoon input.
-   void pullPlayerAlongRope(const HarpoonInput& input);
-
    /// \brief destroys the rope chain, its joints and the anchor body.
    void destroyRope();
 
    /// \brief releases the rope and starts the momentum grace period.
    void release();
 
-   /// \brief applies the reduced horizontal control the player keeps while swinging.
+   /// \brief turns the left and right input into the swing control the shared hold applies.
    /// \param input current harpoon input.
    void applySwingControl(const HarpoonInput& input);
 
-   /// \brief returns the world position the rope is attached to on the player.
-   /// \param player_body player body the rope end is jointed to.
-   /// \return rope attachment position in box2d world units.
-   b2Vec2 readPlayerAttachmentPosition(b2Body* player_body) const;
-
    State _state{State::Idle};
+   bool _aiming{false};
+   bool _fire_locked_until_released{false};  //!< keeps releasing the rope from starting a new aim right away
+   float _aim_angle_deg{0.0f};               //!< relative to the facing direction, positive points up
+   b2Vec2 _aim_direction{1.0f, 0.0f};        //!< the aim angle resolved against the facing direction
+   sf::Vector2f _aim_origin_px;
    bool _harpoon_button_was_pressed{false};
    bool _jump_button_was_pressed{false};
+   PlayerRopeHold _hold;  //!< carries the player, swings him and owns up and down while the rope is his
 
    b2Vec2 _shoot_position_m{0.0f, 0.0f};
    b2Vec2 _shoot_direction_m{0.0f, 0.0f};
@@ -157,7 +173,6 @@ private:
 
    std::shared_ptr<b2World> _world;
    b2Body* _anchor_body{nullptr};
-   b2DistanceJoint* _player_joint{nullptr};  //!< adjustable last link, kept out of _rope_joints so reeling can replace it
    std::vector<b2Body*> _rope_bodies;
    std::vector<b2Joint*> _rope_joints;
 };

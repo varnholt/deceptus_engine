@@ -39,6 +39,21 @@ ATMOSPHERE_FIRST_GID = 4097  # the diffuse tileset owns 1..4096
 ATMOSPHERE_TILE_WATER_FULL = 48  # AtmosphereTile in constants.h
 ATMOSPHERE_TILE_WATER_TOP = 49
 
+# grab ropes, hung over the gaps between the platforms so reaching the next one means grabbing one.
+# a rope object sits at the LOWER end of the rope and its polyline runs up to the anchor, which is the
+# convention the shipped levels use. x_tl, bottom_y_tl, length_tl, segments
+#
+# the columns are picked to stay clear of the stalactites: a rope hung in one of those would have its
+# upper half buried in rock, and the player climbing it would be pulled into the stone
+# the lower end sits one tile above the base floor: hung any higher, reaching one means catching it at
+# the exact apex of a jump, which makes the level useless for testing everything that comes after
+GRAB_ROPES = [
+    (22, 15, 9, 20),  # gap between platform 1 and 2, two tiles clear of the first stalactite
+    (46, 15, 9, 20),  # over the flooded pit, so letting go above water can be tried
+    (76, 15, 9, 20),  # gap between platform 3 and 4, between the two stalactites there
+    (110, 15, 9, 20),  # over the deep pit near the right end
+]
+
 
 def is_solid(x_tl: int, y_tl: int) -> bool:
     if y_tl <= CEILING_BOTTOM_TL:
@@ -86,6 +101,24 @@ def build_atmosphere_csv() -> str:
     return ",\n".join(rows)
 
 
+def build_grab_ropes_xml() -> str:
+    objects = []
+    for index, (x_tl, bottom_y_tl, length_tl, segments) in enumerate(GRAB_ROPES):
+        x_px = x_tl * 24 + 12
+        y_px = bottom_y_tl * 24
+        length_px = length_tl * 24
+        objects.append(
+            f'  <object id="{100 + index}" x="{x_px}" y="{y_px}">\n'
+            f"   <properties>\n"
+            f'    <property name="push_strength" type="float" value="0"/>\n'
+            f'    <property name="segments" type="int" value="{segments}"/>\n'
+            f"   </properties>\n"
+            f'   <polyline points="0,0 0,-{length_px}"/>\n'
+            f"  </object>"
+        )
+    return "\n".join(objects)
+
+
 TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 <map version="1.8" tiledversion="1.8.4" orientation="orthogonal" renderorder="right-down" width="{width}" height="{height}" tilewidth="24" tileheight="24" infinite="0" nextlayerid="3" nextobjectid="1">
  <tileset firstgid="{first_gid}" source="catacombs-level-diffuse.tsx"/>
@@ -106,6 +139,9 @@ TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 {atmosphere_csv}
 </data>
  </layer>
+ <objectgroup id="3" name="grab_ropes">
+{grab_ropes}
+ </objectgroup>
 </map>
 """
 
@@ -118,6 +154,7 @@ output_path.write_text(
         atmosphere_first_gid=ATMOSPHERE_FIRST_GID,
         csv=build_csv(),
         atmosphere_csv=build_atmosphere_csv(),
+        grab_ropes=build_grab_ropes_xml(),
     ),
     encoding="utf-8",
 )

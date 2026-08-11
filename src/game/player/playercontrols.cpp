@@ -9,6 +9,22 @@
 
 PlayerControls::PlayerControls()
 {
+   // the two readers are handed to the registry rather than exposed here: reading a key past its claim
+   // is meant to be reachable through KeyClaim only
+   _key_claims = std::make_shared<KeyClaimRegistry>(
+      [this]() { return readVerticalAxisRaw(); },
+      [this]()
+      {
+         // readControllerNormalizedHorizontal reads the controller unconditionally
+         if (!GameControllerIntegration::getInstance().isControllerConnected())
+         {
+            return 0.0f;
+         }
+
+         return readControllerNormalizedHorizontal();
+      }
+   );
+
    _event_serializer = std::make_shared<EventSerializer>();
    _event_serializer->setCallback(
       [this](const sf::Event& event)
@@ -52,6 +68,12 @@ void PlayerControls::addKeypressedCallback(const KeypressedCallback& callback)
 
 bool PlayerControls::hasFlag(KeyPressed flag) const
 {
+   // a claimed key belongs to its owner and reads as released for everybody else
+   if (_key_claims->isClaimed(flag))
+   {
+      return false;
+   }
+
    // check if button state is locked
    const auto it = readLockedState(flag);
    if (it != _locked_keys.end())
@@ -344,6 +366,11 @@ bool PlayerControls::isMovingDown(float analog_threshold) const
       return false;
    }
 
+   if (_key_claims->isClaimed(KeyPressedDown))
+   {
+      return false;
+   }
+
    // controller input
    if (GameControllerIntegration::getInstance().isControllerConnected())
    {
@@ -384,6 +411,11 @@ bool PlayerControls::isMovingDown(float analog_threshold) const
 bool PlayerControls::isMovingUp(float analog_threshold) const
 {
    if (!PlayerControlState::checkState())
+   {
+      return false;
+   }
+
+   if (_key_claims->isClaimed(KeyPressedUp))
    {
       return false;
    }
@@ -626,6 +658,11 @@ bool PlayerControls::isBendDownActive() const
       return false;
    }
 
+   if (_key_claims->isClaimed(KeyPressedDown))
+   {
+      return false;
+   }
+
    auto down_pressed = false;
 
    if (GameControllerIntegration::getInstance().isControllerConnected())
@@ -773,6 +810,11 @@ void PlayerControls::lockAll(LockedState state, const std::chrono::milliseconds&
    }
 }
 
+const std::shared_ptr<KeyClaimRegistry>& PlayerControls::getKeyClaims() const
+{
+   return _key_claims;
+}
+
 bool PlayerControls::LockedKey::asBool() const
 {
    if (_state == LockedState::Pressed)
@@ -829,6 +871,61 @@ float PlayerControls::readControllerNormalizedHorizontal() const
    }
 
    return axis_value_normalized;
+}
+
+float PlayerControls::readControllerNormalizedVertical() const
+{
+   if (!PlayerControlState::checkState())
+   {
+      return 0.0f;
+   }
+
+   // analogue input normalized to -1..1, negative points up
+   const auto& axis_values = getJoystickInfo().getAxisValues();
+   const auto axis_value = GameControllerIntegration::getInstance().getController()->getAxisIndex(SDL_GAMEPAD_AXIS_LEFTY);
+   auto axis_value_normalized = axis_values[static_cast<size_t>(axis_value)] / 32767.0f;
+
+   // digital input
+   const auto hat_value = getJoystickInfo().getHatValues().at(0);
+   const auto dpad_up_pressed = hat_value & SDL_HAT_UP;
+   const auto dpad_down_pressed = hat_value & SDL_HAT_DOWN;
+
+   if (dpad_up_pressed)
+   {
+      axis_value_normalized = -1.0f;
+   }
+   else if (dpad_down_pressed)
+   {
+      axis_value_normalized = 1.0f;
+   }
+
+   return axis_value_normalized;
+}
+
+float PlayerControls::readVerticalAxisRaw() const
+{
+   if (!PlayerControlState::checkState())
+   {
+      return 0.0f;
+   }
+
+   // the keyboard is digital, so it wins over an idle stick
+   if (_keys_pressed & KeyPressedUp)
+   {
+      return -1.0f;
+   }
+
+   if (_keys_pressed & KeyPressedDown)
+   {
+      return 1.0f;
+   }
+
+   if (GameControllerIntegration::getInstance().isControllerConnected())
+   {
+      return readControllerNormalizedVertical();
+   }
+
+   return 0.0f;
 }
 
 void PlayerControls::handleEvent(const sf::Event& event)

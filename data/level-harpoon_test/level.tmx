@@ -60,4 +60,34 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="3" name="grab_ropes">
+  <object id="100" x="540" y="360">
+   <properties>
+    <property name="push_strength" type="float" value="0"/>
+    <property name="segments" type="int" value="20"/>
+   </properties>
+   <polyline points="0,0 0,-216"/>
+  </object>
+  <object id="101" x="1116" y="360">
+   <properties>
+    <property name="push_strength" type="float" value="0"/>
+    <property name="segments" type="int" value="20"/>
+   </properties>
+   <polyline points="0,0 0,-216"/>
+  </object>
+  <object id="102" x="1836" y="360">
+   <properties>
+    <property name="push_strength" type="float" value="0"/>
+    <property name="segments" type="int" value="20"/>
+   </properties>
+   <polyline points="0,0 0,-216"/>
+  </object>
+  <object id="103" x="2652" y="360">
+   <properties>
+    <property name="push_strength" type="float" value="0"/>
+    <property name="segments" type="int" value="20"/>
+   </properties>
+   <polyline points="0,0 0,-216"/>
+  </object>
+ </objectgroup>
 </map>
