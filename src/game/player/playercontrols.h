@@ -3,6 +3,7 @@
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "game/constants.h"
 #include "game/io/eventserializer.h"
+#include "game/player/keyclaim.h"
 #include "game/player/playerinput.h"
 
 #include <chrono>
@@ -189,6 +190,11 @@ public:
    /// \param duration lock duration.
    void lockAll(LockedState state, const std::chrono::milliseconds& duration);
 
+   /// \brief gets the registry that decides which keys currently belong to an owner.
+   /// \return shared key claim registry, used to take a claim and to ask whether a key already has one.
+   /// \note while a key is claimed, every query above reads it as released. see keyclaim.h.
+   const std::shared_ptr<KeyClaimRegistry>& getKeyClaims() const;
+
    /// \brief reads horizontal controller input normalized to the range -1 to 1.
    /// \return normalized horizontal input, including dpad and lock-state overrides.
    float readControllerNormalizedHorizontal() const;
@@ -227,6 +233,16 @@ private:
    /// \return true when the mapped controller button is currently pressed.
    bool isControllerActionPressed(KeyPressed action) const;
 
+   /// \brief reads vertical input from keyboard and controller ignoring key claims, negative points up.
+   /// \return normalized vertical input in the range -1 to 1.
+   /// \note private on purpose: reading a key past its claim is reserved for whoever holds the claim, so
+   ///       this is installed into the claim registry and reachable through KeyClaim and nowhere else.
+   float readVerticalAxisRaw() const;
+
+   /// \brief reads vertical controller input normalized to the range -1 to 1, negative points up.
+   /// \return normalized vertical input, including dpad and lock-state overrides.
+   float readControllerNormalizedVertical() const;
+
    GameControllerInfo _joystick_info;
 
    int32_t _keys_pressed = 0;
@@ -244,5 +260,6 @@ private:
    Orientation _locked_orientation = Orientation::Undefined;
    Orientation _last_requested_orientation = Orientation::Undefined;
    std::unordered_map<KeyPressed, LockedKey> _locked_keys;
+   std::shared_ptr<KeyClaimRegistry> _key_claims;
    std::shared_ptr<EventSerializer> _event_serializer;
 };

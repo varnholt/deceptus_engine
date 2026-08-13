@@ -169,6 +169,11 @@ const GameMechanismRegistry::MechanismVector& GameMechanismRegistry::getCheckpoi
    return _mechanism_checkpoints;
 }
 
+const GameMechanismRegistry::MechanismVector& GameMechanismRegistry::getRopes() const
+{
+   return _mechanism_ropes;
+}
+
 GameMechanismRegistry::MechanismVector GameMechanismRegistry::searchMechanismsIf(const MechanismPredicate& predicate) const
 {
    // filter mechanisms by provided function

@@ -122,6 +122,12 @@ PlayerAttack::AttackResult PlayerAttack::attack(
          return AttackResult::Executed;
       }
 
+      case WeaponType::Harpoon:
+      {
+         // the harpoon is fired from PlayerHarpoon, it toggles a rope instead of dealing a hit
+         return AttackResult::Discarded;
+      }
+
       case WeaponType::None:
       {
          return AttackResult::Discarded;

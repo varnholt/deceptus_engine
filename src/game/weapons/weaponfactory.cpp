@@ -5,6 +5,7 @@
 
 #include "bow.h"
 #include "gun.h"
+#include "harpoon.h"
 #include "playersword.h"
 
 std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type)
@@ -26,6 +27,11 @@ std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type)
       case WeaponType::Sword:
       {
          weapon = std::make_shared<PlayerSword>();
+         break;
+      }
+      case WeaponType::Harpoon:
+      {
+         weapon = std::make_shared<Harpoon>();
          break;
       }
       case WeaponType::None:
@@ -61,6 +67,11 @@ std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type, const WeaponPrope
          weapon = std::make_shared<PlayerSword>();
          break;
       }
+      case WeaponType::Harpoon:
+      {
+         weapon = std::make_shared<Harpoon>();
+         break;
+      }
       case WeaponType::None:
       {
          std::unreachable();
@@ -76,9 +87,7 @@ std::shared_ptr<Weapon> WeaponFactory::create(WeaponType type, const WeaponPrope
 std::shared_ptr<Weapon> WeaponFactory::create(const std::string& name)
 {
    static const std::unordered_map<std::string, WeaponType> weapon_map = {
-      {"Sword", WeaponType::Sword},
-      {"Bow", WeaponType::Bow},
-      {"Gun", WeaponType::Gun}
+      {"Sword", WeaponType::Sword}, {"Bow", WeaponType::Bow}, {"Gun", WeaponType::Gun}, {"Harpoon", WeaponType::Harpoon}
    };
 
    if (auto it = weapon_map.find(name); it != weapon_map.end())

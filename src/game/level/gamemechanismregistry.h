@@ -49,6 +49,10 @@ public:
    /// \return vector containing checkpoint mechanisms.
    const MechanismVector& getCheckpoints() const;
 
+   /// \brief returns the rope mechanism group, which holds every rope flavour.
+   /// \return vector containing rope, rope-with-light and grab-rope mechanisms.
+   const MechanismVector& getRopes() const;
+
    /// \brief returns all non-mechanism image layers.
    /// \return copy of image layer instances loaded from TMX image layers.
    std::vector<std::shared_ptr<ImageLayer>> getImageLayers() const;

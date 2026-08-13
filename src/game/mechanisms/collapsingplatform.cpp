@@ -385,7 +385,10 @@ std::optional<sf::FloatRect> CollapsingPlatform::getBoundingBoxPx()
 
 void CollapsingPlatform::beginContact(b2Contact* /*contact*/, FixtureNode* other)
 {
-   if (other->getType() != ObjectTypePlayerFootSensor)
+   // other is whatever touched the platform, and it does not have to carry a FixtureNode at all:
+   // the contact listener hands over whatever the fixture's user data was, so fixtures created
+   // without any - the harpoon rope segments, for one - arrive here as a nullptr
+   if (!other || other->getType() != ObjectTypePlayerFootSensor)
    {
       return;
    }
@@ -395,7 +398,7 @@ void CollapsingPlatform::beginContact(b2Contact* /*contact*/, FixtureNode* other
 
 void CollapsingPlatform::endContact(FixtureNode* other)
 {
-   if (other->getType() != ObjectTypePlayerFootSensor)
+   if (!other || other->getType() != ObjectTypePlayerFootSensor)
    {
       return;
    }
@@ -407,12 +410,12 @@ void CollapsingPlatform::updateBlockSprites()
 {
    for (auto& block : _blocks)
    {
-      sfcompat::setPosition(
-         *block._sprite, {block._x_px + block._shake_x_px, block._y_px + block._shake_y_px + block._fall_offset_y_px}
-      );
+      sfcompat::setPosition(*block._sprite, {block._x_px + block._shake_x_px, block._y_px + block._shake_y_px + block._fall_offset_y_px});
       sfcompat::setTextureRect(
          *block._sprite,
-         sf::IntRect({block._sprite_column * PIXELS_PER_TILE, block._sprite_row * PIXELS_PER_TILE * 3}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3})
+         sf::IntRect(
+            {block._sprite_column * PIXELS_PER_TILE, block._sprite_row * PIXELS_PER_TILE * 3}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3}
+         )
       );
    }
 }

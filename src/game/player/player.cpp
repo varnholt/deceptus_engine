@@ -307,6 +307,9 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
 {
    _water_bubbles.draw(color, normal);
 
+   // drawn before the visibility checks below, the rope should not blink along with the damaged player
+   _harpoon.draw(color, normal, states);
+
    if (!_visible)
    {
       return;
@@ -650,6 +653,10 @@ void Player::setWorld(const std::shared_ptr<b2World>& world)
 
 void Player::resetWorld()
 {
+   // the harpoon and the rope hold own bodies and joints inside that world, they have to go first
+   _harpoon.reset();
+   _rope.reset();
+
    _world.reset();
 }
 
@@ -861,6 +868,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._points_left = _points_to_left;
    data._points_right = !_points_to_left;
    data._climb_joint_present = _climb._climb_joint;
+   data._hanging_on_rope = _harpoon.isAttached() || _rope.isAttached();
    data._jump_frame_count = _jump._jump_frame_count;
    data._dash_frame_count = _dash._frame_count;
    data._moving_left = _controls->isMovingLeft();
@@ -1015,6 +1023,16 @@ void Player::updateVelocity()
    else
    {
       setFriction(0.0f);
+   }
+
+   // a swing is a pendulum, and the momentum it builds up is the whole point of the harpoon; the
+   // input-driven velocity below would cancel everything above walking speed on the very next frame
+   // and the horizontal cap would eat the rest. the harpoon applies its own tangential control
+   // instead, and keeps doing so for a moment after the rope is released so the slingshot survives.
+   // hanging on a grab rope is the same pendulum and needs the same treatment.
+   if (_harpoon.isAttached() || _harpoon.isReleaseGraceActive() || _rope.isAttached() || _rope.isReleaseGraceActive())
+   {
+      return;
    }
 
    auto desired_velocity = readDesiredVelocity();
@@ -1291,6 +1309,53 @@ void Player::updateAttack()
 void Player::updateAttackDash(const sf::Time& dt)
 {
    _attack_dash.update(dt);
+}
+
+void Player::updateHarpoon(const sf::Time& dt)
+{
+   // the harpoon is fired with the regular fire buttons while it is the selected weapon; the attack
+   // path in PlayerAttack ignores it, so the two do not fight over the button
+   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+   const auto harpoon_selected = weapon_system._selected && weapon_system._selected->getWeaponType() == WeaponType::Harpoon;
+   const auto fire_button_pressed = _controls->isButtonXPressed() || _controls->isButtonYPressed();
+
+   // up and down are not passed in: while the harpoon aims or hangs it owns those two keys, and reading
+   // them past that claim is something only the owner can do
+   PlayerHarpoon::HarpoonInput input;
+   input._world = _world;
+   input._controls = _controls;
+   input._player_body = _body;
+   input._points_to_left = _points_to_left;
+   input._harpoon_button_pressed = harpoon_selected && fire_button_pressed;
+   input._jump_button_pressed = _controls->isButtonAPressed();
+   input._move_left_pressed = _controls->isMovingLeft();
+   input._move_right_pressed = _controls->isMovingRight();
+   input._in_water = isInWater();
+   input._on_ground = isOnGround();
+   input._dead = isDead();
+   input._analogue_aim = GameControllerIntegration::getInstance().isControllerConnected() && _controls->isControllerUsedLast();
+   input._carried_elsewhere = _rope.isAttached();
+
+   _harpoon.update(dt, input);
+}
+
+void Player::updateRope(const sf::Time& dt)
+{
+   // up and down are not passed in here either, for the same reason
+   PlayerRope::RopeInput input;
+   input._world = _world;
+   input._controls = _controls;
+   input._player_body = _body;
+   input._player_rect_px = _rect_px_f;
+   input._jump_button_pressed = _controls->isButtonAPressed();
+   input._move_left_pressed = _controls->isMovingLeft();
+   input._move_right_pressed = _controls->isMovingRight();
+   input._in_air = isInAir();
+   input._in_water = isInWater();
+   input._dead = isDead();
+   input._carried_elsewhere = _harpoon.isAttached();
+
+   _rope.update(dt, input);
 }
 
 bool Player::isInWater() const
@@ -1593,6 +1658,8 @@ void Player::update(const sf::Time& dt)
    updateAtmosphere();
    updateAttack();
    updateAttackDash(dt);
+   updateHarpoon(dt);
+   updateRope(dt);
    updateVelocity();
    updateOrientation();
    updateOneWayWallDrop();
@@ -1751,6 +1818,8 @@ void Player::reset()
    }
 
    _climb.removeClimbJoint();
+   _harpoon.reset();
+   _rope.reset();
 
    if (LevelRegistry::getCurrent())
    {

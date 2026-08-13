@@ -55,6 +55,10 @@ public:
    /// \param position_px anchor position used for box2d body creation.
    void setPixelPosition(const sf::Vector2i& position_px);
 
+   /// \brief returns the static body the rope chain hangs from.
+   /// \return anchor body, or nullptr before setup ran.
+   b2Body* getAnchorBody() const;
+
 protected:
    int32_t _segment_count = 7;
    float _segment_length_m = 0.01f;
