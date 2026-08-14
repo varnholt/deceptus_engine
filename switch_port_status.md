@@ -3,7 +3,13 @@
 Living status document. Mirrors the convention of `wasm_port_status.md`.
 
 **Last updated:** 2026-08-14
-**Branch:** `feat/harpoon` (no Switch work committed yet)
+**Branch:** `feat/switch-port` (pushed to origin, branched off `feat/harpoon` —
+rebase onto `master` later, nothing here overlaps other work)
+
+**Verified working:** `build_switch.bat lab/switch_smoke build_switch` produces
+`build_switch/switch_smoke.nro` — valid `NRO0` magic, AArch64 PIE, 5.9 MB.
+Toolchain, EGL/mesa/nouveau link, and `.nro` packaging are all confirmed end to end.
+The smoke test has **not** been run on hardware yet (needs a CFW Switch + `nxlink`).
 
 ---
 
@@ -102,6 +108,62 @@ Doing it at the SDL3 layer (task 5) is what unblocks it.
 
 ---
 
+## SDL3 port plan (tasks 2–5)
+
+### Target the right SDL3 — this one is easy to get wrong
+
+The project's root `CMakeLists.txt` pins `release-3.2.4`, **but that pin only applies to the
+desktop branch.** On the VRSFML path SDL3 is fetched internally by VRSFML via CPM (see the
+comment at `CMakeLists.txt:895`), and VRSFML currently pins:
+
+> **SDL 3.5.0**, git rev `e205361fb` — local checkout at `build_vrsfml/_deps/sdl-src`
+
+Since Switch goes through VRSFML, **the backend must target 3.5.0, not 3.2.4.** Backend
+directory layout is identical between the two, so notes taken against either tree transfer.
+
+Neither version has any `NINTENDO_SWITCH` / `__SWITCH__` support.
+
+### How SDL3 platform support is structured
+
+devkitPro's `Platform/NintendoSwitch.cmake` already sets `NINTENDO_SWITCH TRUE`, which lines
+up exactly with how SDL3 detects the 3DS — also a devkitPro platform, and the closest
+precedent in the tree:
+
+```cmake
+# cmake/sdlplatform.cmake
+elseif(NINTENDO_3DS)
+  set(sdl_cmake_platform n3ds)     # uppercased into N3DS TRUE
+```
+
+So the changes are:
+
+1. `cmake/sdlplatform.cmake` — add `elseif(NINTENDO_SWITCH)` → `set(sdl_cmake_platform switch)`
+2. `CMakeLists.txt` — add an `elseif(SWITCH)` subsystem block, modelled on the `elseif(VITA)`
+   block at ~line 2571 (sets `SDL_VIDEO_DRIVER_*`, `SDL_AUDIO_DRIVER_*`, `SDL_JOYSTICK_*`,
+   `SDL_FILESYSTEM_*`, `SDL_THREAD_*`, `SDL_TIMER_*`), plus `__SWITCH__` compile definition
+3. `include/SDL3/SDL_platform_defines.h` — add `SDL_PLATFORM_SWITCH` keyed off `__SWITCH__`
+4. Backends under `src/video/switch/`, `src/audio/switch/`, `src/joystick/switch/`
+
+**Simplification vs Vita/3DS:** libnx ships newlib with real pthreads, so SDL's generic
+`src/thread/pthread` backend should work as-is rather than needing a custom one — unlike
+Vita and 3DS, which both carry bespoke thread implementations. Same likely applies to
+timers and filesystem.
+
+### Reference backends to copy from
+
+`src/video/vita/` is the closest analog (EGL-based console). SDL 3.5.0 also ships `n3ds`,
+`psp`, `ps2` for video, audio *and* joystick. Video drivers register through the
+`bootstrap[]` array in `src/video/SDL_video.c`.
+
+### Working copy
+
+Develop against a durable clone of SDL at `e205361fb` **outside** the repo, and commit the
+result as `patches/switch-sdl3-backend.patch` — matching how the repo already carries
+`patches/vrsfml-webgl2-uniforms.patch` and `patches/sfml-ostream-include.patch`.
+Do not develop directly in `build_vrsfml/_deps/sdl-src`; it is build output and can be wiped.
+
+---
+
 ## Open questions
 
 - **What GL version/profile does the Switch actually report at runtime?** Static analysis says
@@ -117,7 +179,7 @@ Doing it at the SDL3 layer (task 5) is what unblocks it.
 
 | # | Task | Status |
 |---|---|---|
-| 1 | Add Docker Switch build harness | in progress |
+| 1 | Add Docker Switch build harness | **done** (commit `6a6a28ea`) |
 | 2 | Get SDL3 configuring/building for the Switch toolchain | pending |
 | 3 | Implement SDL3 Switch video backend | pending |
 | 4 | Implement SDL3 Switch joystick backend | pending |
