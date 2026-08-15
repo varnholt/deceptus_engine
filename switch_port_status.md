@@ -559,8 +559,60 @@ because VRSFML sets `SDL_AUDIO OFF` — the Switch audio backend is not compiled
 game at all. That is now asserted as a documented limitation, so it fails loudly if anyone
 wires SDL audio in.
 
-**What these tests cannot tell you:** whether it runs. There is no Switch and no emulator
-in this environment. Nothing here has ever executed.
+**What these tests cannot tell you:** whether it runs. For that, see below.
+
+## Running it in Ryujinx
+
+**Correction to an earlier claim in this document:** I argued an emulator would not be a
+useful test, because emulators implement NVN while this port goes through mesa/nouveau and
+`libdrm_nouveau`. That was wrong. Ryujinx emulates **nvservices**, so the homebrew GL path
+works, and it turned out to be the single most valuable test available.
+
+Setup (Ryujinx 1.3.2 at `D:\games\ryujinx-1.3.2-win_x64\publish`):
+
+- `prod.keys` from `D:\games\nsw_keys_firmware\keys-21\` into `%APPDATA%\Ryujinx\system\`
+- set `"update_checker_type": "Off"` in `%APPDATA%\Ryujinx\Config.json`, otherwise a
+  GitHub 404 dialog blocks startup — the project was removed from GitHub
+- `Ryujinx.exe <path-to-nro>`
+
+**`lab/switch_smoke` renders correctly.** Its clear colour comes out **pixel exact**:
+sampled R=38 G=25 B=64 against the 0.15/0.10/0.25 passed to `glClearColor`. EGL bring-up,
+a desktop-GL context, `glClear` and `eglSwapBuffers` all work.
+
+### Seeing the engine's own log
+
+`stderr` reaches `svcOutputDebugString` through `consoleDebugInit(debugDevice_SVC)` and
+appears in Ryujinx's guest log. **`std::cout` does not** — its filebuf caches the original
+`FILE*`, so the usual `stdout = stderr;` idiom moves `printf` but not the engine's logging,
+which is what `Log::` uses. Startup tracing in `main()` uses `fprintf(stderr, ...)` for
+this reason.
+
+### Three startup bugs it found
+
+All three would have failed on hardware too:
+
+1. **`std::filesystem::copy_file` cannot cross devoptab devices.** Seeding the bundled
+   default config copies `romfs:/data/config/game.json` → `sdmc:/…/settings/game.json`.
+   newlib created the target, copied nothing, and reported it through the `error_code`
+   that call discards. The resulting empty config then killed startup, because
+   `GameConfiguration::deserialize` calls `json::parse` **outside** its try block. Fixed by
+   copying through streams and deleting a truncated target rather than leaving it to
+   poison the next launch.
+2. **`nwindowSetDimensions` failure was treated as fatal.** It overrides a size the NWindow
+   already reports and is rejected in some operation modes. Now falls back to
+   `nwindowGetDimensions`.
+3. **One NWindow, several SDL windows.** EGL allows one surface per native window, and
+   VRSFML creates a context window before the real render window. The second
+   `eglCreateWindowSurface` returned `EGL_NO_SURFACE` while reporting **`EGL_SUCCESS`**,
+   which reads like a driver fault. The surface is now created once, shared, and destroyed
+   with the last window.
+
+### Where it stands
+
+Startup trace reaches `game constructed`, then sits in `game.initialize()` while Ryujinx
+compiles shaders — its progress bar advances, so real GL work is being submitted. Whether
+it reaches the menu is **not yet confirmed**. The remaining `SDL_GetJoystickVendor` warning
+is benign: the Switch joystick backend reports no vendor id.
 
 ## Open questions
 
@@ -586,7 +638,7 @@ in this environment. Nothing here has ever executed.
 | 7 | Add `NINTENDO_SWITCH` branch to project CMakeLists | **done — the engine builds; `deceptus.nro` is produced** |
 | 8 | Audit shaders for GL 4.3 core / GLES 3.2 | pending |
 | 9 | Package `data/` into romfs, produce first `.nro` | **done** — 122.6 MB `.nro`, 24/24 validation tests pass |
-| 11 | Run it on hardware or an emulator | **blocked** — no Switch, no emulator here |
+| 11 | Run it on hardware or an emulator | **partly done** — runs in Ryujinx; reaches asset/shader loading |
 
 ---
 
