@@ -6,6 +6,19 @@ Living status document. Mirrors the convention of `wasm_port_status.md`.
 **Branch:** `feat/switch-port` (pushed to origin, branched off `feat/harpoon` —
 rebase onto `master` later, nothing here overlaps other work)
 
+> ## The engine builds for the Switch
+>
+> ```
+> build_switch.bat . build_switch_engine   ->  build_switch_engine/deceptus.nro
+> ```
+>
+> 15.2 MB, valid `NRO0` magic, AArch64 PIE, with the Switch video/joystick/audio backend
+> symbols linked in. Zero compile errors, clean link.
+>
+> **It has never been run.** There is no hardware here. Everything below is a
+> compile-and-link result, and the two known runtime gaps — silent audio, and the shader
+> audit — are listed in the task table.
+
 **Verified working:** `build_switch.bat lab/switch_smoke build_switch` produces
 `build_switch/switch_smoke.nro` — valid `NRO0` magic, AArch64 PIE, 5.9 MB.
 Toolchain, EGL/mesa/nouveau link, and `.nro` packaging are all confirmed end to end.
@@ -466,15 +479,35 @@ Lua failed with `#error "Compiler does not support 'long long'"`. `luaconf.h` us
 presence of `LLONG_MAX` as its proxy for C99 compliance, and devkitPro's newlib does not
 define it in C++ mode — verified by compiling a probe rather than assumed.
 
-**First attempt was wrong:** setting `-DLUA_INT_TYPE=LUA_INT_LONG` has no effect, because
-`luaconf.h` *unconditionally* defines `LUA_INT_TYPE` in its else branch rather than
-honouring a command-line value, which just produces "redefinition" errors on top.
+**Two attempts failed before the right fix, both for the same reason.** `luaconf.h`
+unconditionally defines these macros a few lines before it tests them, so neither
+`-DLUA_INT_TYPE=LUA_INT_LONG` nor `-DLUA_C89_NUMBERS=1` survives — the command-line value
+is simply overwritten, and the only visible symptom is extra "redefinition" errors on top
+of the original ones. The knob Lua's own error message tells you to set is not settable.
 
-The supported knob is **`LUA_C89_NUMBERS`**, which selects `long` + `double`. On aarch64
-both are 64-bit, so this matches the default `long long` + `double` exactly — nothing is
-narrowed. It is set `PUBLIC` on the `lua` target deliberately: every translation unit
-including `lua.hpp` must agree with the library about `lua_Integer`, or the ABI silently
-disagrees.
+`patches/switch-lua-c89-numbers.patch` makes it overridable; that is the entire patch.
+With it, `LUA_C89_NUMBERS=1` selects `long` + `double`, and on aarch64 both are 64-bit, so
+this matches the default `long long` + `double` exactly — nothing is narrowed. It is set
+`PUBLIC` on the `lua` target deliberately: every translation unit including `lua.hpp` must
+agree with the library about `lua_Integer`, or the ABI silently disagrees.
+
+Unlike the SDL patch, this one is applied *after* `FetchContent_MakeAvailable`, which is
+fine because `luaconf.h` is only read at compile time rather than by CMake.
+
+### Gotcha: never reset a fetched dependency from the Windows host
+
+If a patch needs regenerating, do **not** `git checkout` / `git clean` the fetched tree
+under `build_switch_engine/_deps/` from the host. With `core.autocrlf=true` the host
+rewrites those files as CRLF, and the LF patch then fails to apply *inside the container*
+— while `git apply --check` still passes on the host, which makes it look fine.
+
+Two related traps in the same area:
+
+- `git checkout .` alone is not enough: the patch adds new files (`src/video/switch/` and
+  friends) which are untracked, so they survive and the patch fails as "already exists".
+- The right move is simply `rm -rf build_switch_engine/_deps/SDL
+  build_switch_engine/_deps/switch_sdl-subbuild` and let CMake re-clone it in the
+  container, where the checkout stays LF.
 
 ## Open questions
 
@@ -497,7 +530,7 @@ disagrees.
 | 4 | Implement SDL3 Switch joystick backend | **done** (compiles; unrun) |
 | 5 | Implement SDL3 Switch audio backend | **done** (compiles; unrun) |
 | 6 | Build VRSFML against Switch SDL3 | **done except audio** — all modules build; see `patches/switch-vrsfml-backend.patch` |
-| 7 | Add `NINTENDO_SWITCH` branch to project CMakeLists | pending |
+| 7 | Add `NINTENDO_SWITCH` branch to project CMakeLists | **done — the engine builds; `deceptus.nro` is produced** |
 | 8 | Audit shaders for GL 4.3 core / GLES 3.2 | pending |
 | 9 | Package `data/` into romfs, produce first `.nro` | pending |
 
