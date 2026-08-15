@@ -878,8 +878,87 @@ set(SFML_BUILD_NETWORK
     ON
     CACHE BOOL "" FORCE)
 
+# Applies a patch to a fetched dependency, following the same rule as the inline
+# blocks below: only skip if a reverse-apply confirms it is already applied, otherwise
+# fail loudly rather than silently building unpatched sources.
+function(deceptus_apply_patch patch_file source_dir label)
+    execute_process(
+        COMMAND git apply --check ${patch_file}
+        WORKING_DIRECTORY ${source_dir}
+        RESULT_VARIABLE forward_check
+        OUTPUT_QUIET ERROR_QUIET)
+    if(forward_check EQUAL 0)
+        execute_process(
+            COMMAND git apply ${patch_file}
+            WORKING_DIRECTORY ${source_dir}
+            RESULT_VARIABLE apply_result)
+        if(NOT apply_result EQUAL 0)
+            message(FATAL_ERROR "Failed to apply ${patch_file}")
+        endif()
+        message(STATUS "Applied ${patch_file} to ${label}")
+    else()
+        execute_process(
+            COMMAND git apply --reverse --check ${patch_file}
+            WORKING_DIRECTORY ${source_dir}
+            RESULT_VARIABLE reverse_check
+            OUTPUT_QUIET ERROR_QUIET)
+        if(reverse_check EQUAL 0)
+            message(STATUS "${patch_file} already applied to ${label}, skipping")
+        else()
+            message(FATAL_ERROR "${patch_file} does not apply to the fetched ${label} source and is not already applied - fix the patch")
+        endif()
+    endif()
+endfunction()
+
 # fetch dependencies
-if(EMSCRIPTEN)
+if(NINTENDO_SWITCH)
+    # Switch homebrew target: VRSFML again, because vanilla SFML 3 renders through the
+    # fixed-function pipeline and switch-mesa exposes core profile only. See
+    # switch_port_status.md for the full reasoning.
+    set(SFML_BUILD_NETWORK
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_USE_STATIC_STD_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_BUILD_SHARED_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+
+    # Both dependencies are pinned to the exact revisions the Switch patches were
+    # generated against; master would drift and the patches would stop applying.
+    #
+    # SDL3 is deliberately placed at _deps/SDL rather than left to VRSFML's CPM pin:
+    # VRSFML's src/SFML/Window/CMakeLists.txt prefers a sibling ../SDL directory when
+    # one exists, which gives a place to apply the Switch backend patch *before* VRSFML
+    # configures SDL. Patching afterwards would be too late for SDL's own CMake logic.
+    FetchContent_Declare(
+        SWITCH_SDL
+        GIT_REPOSITORY https://github.com/vittorioromeo/SDL.git
+        GIT_TAG e205361fb67ff53868dbc333eb2c491e11ff1a51
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/_deps/SDL)
+    FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
+        GIT_TAG 9c272d60134d568f35fbad9891f3b436de87cc28)
+    FetchContent_Declare(
+        LUA
+        GIT_REPOSITORY https://github.com/lua/lua.git
+        GIT_TAG v5.4.7)
+
+    # download and patch SDL3 without configuring it; VRSFML adds it as a subdirectory
+    FetchContent_Populate(SWITCH_SDL)
+    deceptus_apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/patches/switch-sdl3-backend.patch
+                         ${CMAKE_BINARY_DIR}/_deps/SDL "SDL3")
+
+    # likewise fetch VRSFML and patch it before it gets configured
+    FetchContent_Populate(SFML)
+    deceptus_apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/patches/switch-vrsfml-backend.patch
+                         ${sfml_SOURCE_DIR} "VRSFML")
+    add_subdirectory(${sfml_SOURCE_DIR} ${sfml_BINARY_DIR})
+
+    FetchContent_MakeAvailable(LUA)
+elseif(EMSCRIPTEN)
     # WASM target: VRSFML (vittorioromeo's SFML rewrite) -- the only SFML fork
     # with an Emscripten backend.
     set(SFML_BUILD_NETWORK
@@ -1077,8 +1156,25 @@ target_link_libraries(
         lua
 )
 target_link_libraries(deceptus PRIVATE SFML::Audio)
-if(NOT EMSCRIPTEN)
+if(NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
     target_link_libraries(deceptus PRIVATE libglew_static)
+endif()
+
+if(NINTENDO_SWITCH)
+    # glad replaces glew as the loader here, and the link order matters: it resolves
+    # through EGL, then mesa's dispatch layer, then the nouveau kernel interface.
+    target_link_libraries(deceptus PRIVATE glad EGL glapi drm_nouveau)
+
+    nx_generate_nacp(
+        deceptus.nacp
+        NAME
+        "Deceptus"
+        AUTHOR
+        "Matthias Varnholt"
+        VERSION
+        "1.0.0")
+
+    nx_create_nro(deceptus NACP ${CMAKE_CURRENT_BINARY_DIR}/deceptus.nacp)
 endif()
 
 if(WIN32)

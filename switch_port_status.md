@@ -374,6 +374,31 @@ nothing else changes. But see the audio correction above before reading that as 
 sound: miniaudio resolves to the null backend on Switch, so it will be silent until
 someone writes a custom miniaudio backend over `audout`.
 
+## Task 7 — `NINTENDO_SWITCH` branch in the project CMakeLists
+
+Added as a third arm alongside `EMSCRIPTEN` and desktop, reusing the VRSFML path.
+
+**Both dependencies are pinned to exact revisions**, not `master`:
+VRSFML `9c272d60134d568f35fbad9891f3b436de87cc28` and SDL
+`e205361fb67ff53868dbc333eb2c491e11ff1a51`. The Switch patches were generated against
+those trees; `master` would drift and they would stop applying.
+
+**The ordering problem, and how it is solved.** The SDL patch changes SDL's *own CMake
+logic* (platform detection, the `elseif(SWITCH)` subsystem block), so it has to land
+before VRSFML configures SDL — patching afterwards would be too late. VRSFML's
+`src/SFML/Window/CMakeLists.txt` prefers a sibling `../SDL` directory over its CPM pin,
+so SDL3 is fetched deliberately into `${CMAKE_BINARY_DIR}/_deps/SDL`, patched there, and
+only then is VRSFML populated, patched and added. Hence `FetchContent_Populate` +
+explicit `add_subdirectory` rather than `FetchContent_MakeAvailable` for those two.
+
+Patch application goes through a new `deceptus_apply_patch()` helper that follows the
+same rule as the existing inline blocks: skip only when a reverse-apply proves the patch
+is already applied, otherwise fail loudly. The two existing inline blocks were left
+untouched.
+
+Linking swaps glew for glad (`glad EGL glapi drm_nouveau`, in that order), and
+`nx_generate_nacp()` / `nx_create_nro()` produce the homebrew binary.
+
 ## Open questions
 
 - **What GL version/profile does the Switch actually report at runtime?** Static analysis says
