@@ -3,7 +3,7 @@
 // u_pixel_size is the size of one game pixel in uv space, so the offset stays a game
 // pixel count and the fringe keeps its width at any window scale.
 
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform sampler2D u_texture;
 uniform vec2 u_pixel_size;
 uniform float u_time;

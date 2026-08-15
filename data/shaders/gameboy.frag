@@ -10,7 +10,7 @@
 // mid_grey is the input luminance that lands halfway up the palette, tuned against the catacombs
 // so the player keeps its shading; raise it to darken the image.
 
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform sampler2D u_texture;
 uniform vec2 u_resolution;
 

@@ -933,6 +933,17 @@ if(NINTENDO_SWITCH)
         OFF
         CACHE BOOL "" FORCE)
 
+    # VRSFML prints a stack trace after every error it logs, through libbacktrace. That
+    # hangs the Switch: libbacktrace is asked to locate the running executable itself
+    # (backtrace_create_state with a null filename), which has no meaning for an NRO, and
+    # the call never returns. The symptom is brutal to read -- the game freezes for good
+    # immediately after an unrelated error message, with the blank line printStackTrace
+    # emits first as the only clue. VRSFML already excludes Emscripten from stack traces
+    # for the same kind of reason.
+    set(SFML_ENABLE_STACK_TRACES
+        OFF
+        CACHE BOOL "" FORCE)
+
     # Both dependencies are pinned to the exact revisions the Switch patches were
     # generated against; master would drift and the patches would stop applying.
     #

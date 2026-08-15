@@ -4,7 +4,7 @@
 // u_pixel_size is the size of one game pixel in uv space, so the channel separation and
 // the scanline spacing stay tied to game pixels rather than to the window resolution.
 
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform sampler2D u_texture;
 uniform vec2 u_pixel_size;
 uniform float u_time;

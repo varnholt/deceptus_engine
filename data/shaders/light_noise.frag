@@ -1,4 +1,4 @@
-#ifdef GL_ES
+#if __VERSION__ >= 300
 // light gradient texture and channel mask color from the sprite
 uniform sampler2D u_texture;
 

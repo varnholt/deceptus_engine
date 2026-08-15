@@ -1,4 +1,4 @@
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform float     u_time;
 uniform vec2      u_resolution;
 uniform sampler2D u_texture;

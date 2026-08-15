@@ -451,10 +451,10 @@ index 15659b8cc..ea36ef9f4 100644
  
 diff --git a/src/joystick/switch/SDL_sysjoystick.c b/src/joystick/switch/SDL_sysjoystick.c
 new file mode 100644
-index 000000000..0ff81cb61
+index 000000000..f76befdf7
 --- /dev/null
 +++ b/src/joystick/switch/SDL_sysjoystick.c
-@@ -0,0 +1,276 @@
+@@ -0,0 +1,286 @@
 +/*
 +  Simple DirectMedia Layer
 +  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
@@ -512,8 +512,6 @@ index 000000000..0ff81cb61
 +
 +    switch_previous_buttons = 0;
 +
-+    // TEMPORARY EXPERIMENT: is the startup stall coming from joystick enumeration?
-+    // SDL_PrivateJoystickAdded(1);
 +    return true;
 +}
 +
@@ -524,19 +522,31 @@ index 000000000..0ff81cb61
 +
 +static int SWITCH_JoystickGetCount(void)
 +{
-+    /* TODO: reporting a device here stalls start-up. Enumerating it makes callers query
-+     * properties this driver does not supply -- SDL_GetJoystickVendor fails first -- and
-+     * something in that path never returns. Reporting none lets the rest of the system
-+     * come up; the cost is that no controller input works yet. The GUID from
-+     * SDL_CreateJoystickGUIDForName carries no vendor or product id, which is the most
-+     * likely thing to fix first. */
-+    return 0;
++    /* libnx presents the Joy-Con pair, a Pro Controller and the handheld unit through one
++     * PadState, so there is always exactly one controller as far as this driver is
++     * concerned, whether or not anything is physically attached. */
++    return 1;
 +}
++
++/* Nintendo's USB vendor id and the Switch Pro Controller product id. They belong in the
++ * GUID rather than being left at zero: SDL decodes the vendor and product back out of the
++ * GUID, so SDL_GetJoystickVendor and SDL_GetJoystickProduct fail outright on a name-only
++ * GUID, and callers that identify a pad that way see no controller at all. These are also
++ * the ids SDL's own HIDAPI driver reports for this hardware, so gamepad databases keyed on
++ * them match. */
++#define SWITCH_VENDOR_ID  0x057E
++#define SWITCH_PRODUCT_ID 0x2009
 +
 +static SDL_GUID SWITCH_JoystickGetDeviceGUID(int device_index)
 +{
-+    SDL_GUID guid = SDL_CreateJoystickGUIDForName("Nintendo Switch Controller");
-+    return guid;
++    return SDL_CreateJoystickGUID(SDL_HARDWARE_BUS_UNKNOWN,
++                                  SWITCH_VENDOR_ID,
++                                  SWITCH_PRODUCT_ID,
++                                  0,
++                                  "Nintendo",
++                                  SWITCH_JoystickGetDeviceName(device_index),
++                                  0,
++                                  0);
 +}
 +
 +static SDL_JoystickID SWITCH_JoystickGetDeviceInstanceID(int device_index)
@@ -871,10 +881,10 @@ index 6786afd90..01da211c9 100644
  #endif
 diff --git a/src/video/switch/SDL_switchopengl.c b/src/video/switch/SDL_switchopengl.c
 new file mode 100644
-index 000000000..875c3f606
+index 000000000..d90c808df
 --- /dev/null
 +++ b/src/video/switch/SDL_switchopengl.c
-@@ -0,0 +1,57 @@
+@@ -0,0 +1,109 @@
 +/*
 +  Simple DirectMedia Layer
 +  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
@@ -911,14 +921,66 @@ index 000000000..875c3f606
 +    return SDL_EGL_LoadLibrary(_this, path, EGL_DEFAULT_DISPLAY);
 +}
 +
-+/* Written out rather than using SDL_EGL_*_impl so the stall during window creation can be
-+ * narrowed down; stderr reaches svcOutputDebugString via consoleDebugInit. */
++/* There is exactly one GL context on this platform, handed out to every caller.
++ *
++ * devkitPro's switch-mesa cannot share contexts. Its EGL driver
++ * (src/egl/drivers/switch/egl_switch.c) accepts the `share_list` argument of
++ * eglCreateContext and then passes NULL as the shared state-tracker context to
++ * st_api->create_context, so a context created with a share list is silently unshared --
++ * no error is reported anywhere. Every devkitPro mesa branch does this. The visible
++ * symptom is that an object created on one context does not exist on the other: a texture
++ * name comes back false from glIsTexture, glFramebufferTexture2D raises
++ * GL_INVALID_OPERATION, and the framebuffer reports GL_FRAMEBUFFER_INCOMPLETE_MISSING_
++ * ATTACHMENT. Callers that create resources on a shared context and use them on a window
++ * context -- which is exactly what VRSFML does for every texture -- break on that.
++ *
++ * Sharing therefore has to be replaced with sameness. This mirrors the single NWindow and
++ * its single EGL surface: one native window, one surface, one context. It is safe because
++ * the context can only be current on one thread at a time and nothing here drives GL from
++ * a second thread.
++ *
++ * Written out rather than using SDL_EGL_*_impl so this can carry traces; stderr reaches
++ * svcOutputDebugString via consoleDebugInit. */
++static SDL_GLContext switch_shared_gl_context;
++static int switch_shared_gl_context_refcount;
++
 +SDL_GLContext SWITCH_GLES_CreateContext(SDL_VideoDevice *_this, SDL_Window *window)
 +{
 +    fprintf(stderr, "[switch-trace] egl: creating context\n");
-+    SDL_GLContext context = SDL_EGL_CreateContext(_this, window->internal->egl_surface);
-+    fprintf(stderr, "[switch-trace] egl: context %s\n", context ? "created" : "FAILED");
-+    return context;
++
++    if (!switch_shared_gl_context) {
++        switch_shared_gl_context = SDL_EGL_CreateContext(_this, window->internal->egl_surface);
++        if (!switch_shared_gl_context) {
++            // SDL_EGL_CreateContext already recorded the specific EGL failure
++            fprintf(stderr, "[switch-trace] egl: context FAILED\n");
++            return NULL;
++        }
++    } else if (!SDL_EGL_MakeCurrent(_this, window->internal->egl_surface, switch_shared_gl_context)) {
++        fprintf(stderr, "[switch-trace] egl: reusing context FAILED\n");
++        return NULL;
++    }
++
++    ++switch_shared_gl_context_refcount;
++    fprintf(stderr, "[switch-trace] egl: context ready (refs %d)\n", switch_shared_gl_context_refcount);
++
++    return switch_shared_gl_context;
++}
++
++bool SWITCH_GLES_DestroyContext(SDL_VideoDevice *_this, SDL_GLContext context)
++{
++    if (context != switch_shared_gl_context) {
++        return SDL_EGL_DestroyContext(_this, context);
++    }
++
++    // shared by every caller on this platform, so only the last one tears it down
++    if (--switch_shared_gl_context_refcount > 0) {
++        return true;
++    }
++
++    switch_shared_gl_context = NULL;
++    switch_shared_gl_context_refcount = 0;
++
++    return SDL_EGL_DestroyContext(_this, context);
 +}
 +
 +bool SWITCH_GLES_MakeCurrent(SDL_VideoDevice *_this, SDL_Window *window, SDL_GLContext context)
@@ -934,7 +996,7 @@ index 000000000..875c3f606
 +#endif // SDL_VIDEO_DRIVER_SWITCH && SDL_VIDEO_OPENGL_EGL
 diff --git a/src/video/switch/SDL_switchopengl.h b/src/video/switch/SDL_switchopengl.h
 new file mode 100644
-index 000000000..9b7ac2421
+index 000000000..e0e37c942
 --- /dev/null
 +++ b/src/video/switch/SDL_switchopengl.h
 @@ -0,0 +1,49 @@
@@ -977,10 +1039,10 @@ index 000000000..9b7ac2421
 +#define SWITCH_GLES_UnloadLibrary   SDL_EGL_UnloadLibrary
 +#define SWITCH_GLES_SetSwapInterval SDL_EGL_SetSwapInterval
 +#define SWITCH_GLES_GetSwapInterval SDL_EGL_GetSwapInterval
-+#define SWITCH_GLES_DestroyContext  SDL_EGL_DestroyContext
 +
 +extern bool SWITCH_GLES_LoadLibrary(SDL_VideoDevice *_this, const char *path);
 +extern SDL_GLContext SWITCH_GLES_CreateContext(SDL_VideoDevice *_this, SDL_Window *window);
++extern bool SWITCH_GLES_DestroyContext(SDL_VideoDevice *_this, SDL_GLContext context);
 +extern bool SWITCH_GLES_SwapWindow(SDL_VideoDevice *_this, SDL_Window *window);
 +extern bool SWITCH_GLES_MakeCurrent(SDL_VideoDevice *_this, SDL_Window *window, SDL_GLContext context);
 +

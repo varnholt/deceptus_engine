@@ -1,4 +1,4 @@
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform sampler2D u_texture;
 uniform float u_alpha;
 

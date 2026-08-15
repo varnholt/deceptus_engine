@@ -1,4 +1,4 @@
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform float time;
 uniform vec2 flowfield_offset;
 

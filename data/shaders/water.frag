@@ -1,4 +1,4 @@
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform sampler2D current_texture;
 uniform sampler2D distortion_map_texture;
 uniform sampler2D physics_texture;
