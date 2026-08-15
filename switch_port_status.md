@@ -284,6 +284,58 @@ until a proper Switch time backend exists. It does not block anything the game n
 
 ---
 
+## Task 6 — VRSFML on Switch
+
+Working copy: **`D:/deceptus/vrsfml_switch`, branch `switch-backend`, based on `9c272d601`**
+(cloned locally from `build_vrsfml/_deps/sfml-src`, no network needed).
+
+**Good news on scope: VRSFML's window layer is entirely SDL-based.** `src/SFML/Window/`
+is `SDLWindowImpl.cpp` / `SDLGlContext.cpp` / `SDLLayer.cpp`, with only Android, iOS,
+Win32 and a `Stub` directory as per-OS extras. So there is no new renderer or window
+backend to write — the Switch inherits everything through the SDL3 work in tasks 2–5.
+
+**Injecting the patched SDL is easy.** `src/SFML/Window/CMakeLists.txt` checks
+`if(EXISTS "${PROJECT_SOURCE_DIR}/../SDL/CMakeLists.txt")` and prefers that over its CPM
+pin. Mounting the patched tree as a sibling `SDL/` directory is all it takes:
+
+```
+docker run --rm \
+  -v "D:/deceptus/vrsfml_switch:/work/VRSFML" \
+  -v "D:/deceptus/sdl3_switch:/work/SDL" \
+  -w /work/VRSFML devkitpro/devkita64 bash -c \
+  'cmake -S /work/VRSFML -B /work/VRSFML/build_switch \
+     -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/Switch.cmake -DCMAKE_BUILD_TYPE=Release \
+     -DSFML_BUILD_AUDIO=OFF -DSFML_BUILD_NETWORK=OFF -DSFML_BUILD_EXAMPLES=OFF -DSFML_BUILD_TEST_SUITE=OFF'
+```
+
+The only source change needed so far is a `NINTENDO_SWITCH` branch in
+`cmake/Config.cmake`, which otherwise hard-fails with "Unsupported operating system or
+environment". It sets `SFML_OS_SWITCH 1` and `OPENGL_ES 0` (desktop GL, per the driver
+findings above).
+
+**Configure succeeds**, and SDL's own summary confirms the backends registered:
+
+```
+Video drivers:    dummy offscreen switch
+Joystick drivers: switch
+Audio drivers:    dummy          <-- SDL_AUDIO OFF, see the audio correction above
+```
+
+### VRSFML changes so far
+
+Each is a platform gate that had no Switch case, not new functionality:
+
+| File | Gate | Change |
+|---|---|---|
+| `cmake/Config.cmake` | falls through to `FATAL_ERROR "Unsupported operating system"` | `elseif(NINTENDO_SWITCH)` → `SFML_OS_SWITCH 1`, `OPENGL_ES 0` |
+| `include/SFML/Config.hpp` | `#error This operating system is not supported` | `#elif defined(__SWITCH__)` → `SFML_SYSTEM_SWITCH`. Note the Switch is **not** a `__unix__` platform despite libnx providing newlib+pthreads, so it needs its own branch rather than joining the UNIX tree |
+| `include/SFML/System/Path.hpp` | `value_type` defaulted to `wchar_t` because Switch matched neither Emscripten nor `LINUX_OR_BSD` | added `SFML_SYSTEM_SWITCH` to the narrow-`char` branch — newlib paths are narrow |
+| `src/SFML/System/Thread.cpp` | `#error "no thread backend implemented for this platform"` | added `SFML_SYSTEM_SWITCH` to the POSIX list; libnx pthreads means the existing backend works unchanged |
+| `extlibs/headers/moodycamel/lightweightsemaphore.h` | `#error Unsupported platform! (No semaphore wrapper available)` | added `__SWITCH__` to the two `__unix__` branches; libnx has `<semaphore.h>` with `sem_t`, already proven by SDL's `HAVE_PTHREADS_SEM` probe |
+
+`libsfml-glutils-s.a` builds, which is the meaningful signal that the GL/EGL path is
+sound on this platform.
+
 ## Open questions
 
 - **What GL version/profile does the Switch actually report at runtime?** Static analysis says
