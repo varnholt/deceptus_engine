@@ -509,6 +509,46 @@ Two related traps in the same area:
   build_switch_engine/_deps/switch_sdl-subbuild` and let CMake re-clone it in the
   container, where the checkout stays LF.
 
+## Assets, and how to check the build
+
+`data/` is embedded in the `.nro` as romfs, so the binary is self-contained at 122.6 MB
+(15 MB code + 104 MB assets).
+
+The engine reaches for assets through relative paths — `"data/sprites/x.png"` and
+similar, 134 literals — so romfs carries a **nested `data/` directory**, not the contents
+of `data/` at its root. CMake stages into `build_switch_engine/romfs/data` using
+`copy_directory_if_different`, so only the first build moves the whole tree. `main()`
+mounts romfs and `chdir("romfs:/")` before anything reads a config or texture. Saves still
+go to `sdmc:/switch/deceptus`, since romfs is read-only.
+
+ImGui is excluded from this build entirely, as on WASM — clean, because the three debug UI
+files were already compiled out on VRSFML targets.
+
+### `lab/switch_smoke/test_switch_build.py`
+
+```
+uv run --with pytest pytest lab/switch_smoke/test_switch_build.py -v
+```
+
+24 tests, all passing. They cover the failures that would otherwise be **silent**:
+
+- romfs really embedded, measured as bytes appended past the NRO image
+- the Switch backends really linked — SDL quietly substitutes dummy drivers when a
+  backend is missing, so a broken port still looks like a clean build
+- romfs nested as `data/` rather than at the root, which would break every asset path
+- the staged tree compared file-by-file against source `data/`, so stale incremental
+  staging cannot ship old assets unnoticed
+
+Two of these caught mistakes in the *tests* rather than the build, both worth remembering:
+`romfsInit()` is an inline wrapper in libnx so it never appears as a symbol (check the
+mount machinery it pulls in instead), and `SWITCHAUD_bootstrap` is legitimately absent
+because VRSFML sets `SDL_AUDIO OFF` — the Switch audio backend is not compiled into the
+game at all. That is now asserted as a documented limitation, so it fails loudly if anyone
+wires SDL audio in.
+
+**What these tests cannot tell you:** whether it runs. There is no Switch and no emulator
+in this environment. Nothing here has ever executed.
+
 ## Open questions
 
 - **What GL version/profile does the Switch actually report at runtime?** Static analysis says
@@ -532,7 +572,8 @@ Two related traps in the same area:
 | 6 | Build VRSFML against Switch SDL3 | **done except audio** — all modules build; see `patches/switch-vrsfml-backend.patch` |
 | 7 | Add `NINTENDO_SWITCH` branch to project CMakeLists | **done — the engine builds; `deceptus.nro` is produced** |
 | 8 | Audit shaders for GL 4.3 core / GLES 3.2 | pending |
-| 9 | Package `data/` into romfs, produce first `.nro` | pending |
+| 9 | Package `data/` into romfs, produce first `.nro` | **done** — 122.6 MB `.nro`, 24/24 validation tests pass |
+| 11 | Run it on hardware or an emulator | **blocked** — no Switch, no emulator here |
 
 ---
 
