@@ -162,6 +162,42 @@ result as `patches/switch-sdl3-backend.patch` — matching how the repo already 
 `patches/vrsfml-webgl2-uniforms.patch` and `patches/sfml-ostream-include.patch`.
 Do not develop directly in `build_vrsfml/_deps/sdl-src`; it is build output and can be wiped.
 
+> **Working copy lives at `D:/deceptus/sdl3_switch`, branch `switch-backend`,
+> based on `e205361fb`.** It is a local clone (no network needed to recreate:
+> `git clone --no-hardlinks build_vrsfml/_deps/sdl-src`). Build it with:
+>
+> ```
+> docker run --rm -v "D:/deceptus/sdl3_switch:/sdl" -w /sdl devkitpro/devkita64 bash -c \
+>   'cmake -S /sdl -B /sdl/build_switch -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/Switch.cmake \
+>    -DCMAKE_BUILD_TYPE=Release -DSDL_SHARED=OFF -DSDL_STATIC=ON && cmake --build /sdl/build_switch -- -j$(nproc)'
+> ```
+
+### Progress on task 2 — SDL3 configures for Switch
+
+**`cmake` configure now completes cleanly** (`Revision: SDL-3.5.0-e205361fb`). Four edits,
+all in the working copy:
+
+1. `include/SDL3/SDL_platform_defines.h` — `SDL_PLATFORM_SWITCH` keyed off `__SWITCH__`
+   (the devkitPro platform module already passes `-D__SWITCH__`)
+2. `cmake/sdlplatform.cmake` — `elseif(NINTENDO_SWITCH)` → `set(sdl_cmake_platform switch)`,
+   which uppercases into `SWITCH TRUE`
+3. `CMakeLists.txt` — an `elseif(SWITCH)` platform block using `src/main/generic`,
+   `CheckPTHREAD()`, POSIX fsops, and the unix time/timer backends
+4. `CMakeLists.txt` + `cmake/sdlchecks.cmake` — two pthread fixes:
+   - `SDL_PTHREADS_DEFAULT` was OFF because Switch is not `UNIX_OR_MAC_SYS`; now
+     `if ((UNIX_OR_MAC_SYS OR SWITCH) AND NOT EMSCRIPTEN)`
+   - `CheckPTHREAD()` fell through to the generic `else()` branch and tried to link
+     `-lpthread`, which does not exist on libnx; added a `SWITCH` branch alongside
+     `ANDROID` for "pthreads are baked into libc"
+
+**The libnx pthread bet paid off:** `HAVE_PTHREADS`, `HAVE_PTHREADS_SEM` and `pthread.h`
+all probe successfully, so SDL uses its stock `src/thread/pthread` backend with no
+Switch-specific thread code. `pthread_setname_np` and `pthread_np.h` are absent, which SDL
+already handles.
+
+Video, audio and joystick currently fall through to SDL's automatic dummy backends — that
+is deliberate, so the library builds and links before tasks 3–5 replace them.
+
 ---
 
 ## Open questions
