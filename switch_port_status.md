@@ -264,18 +264,35 @@ hardware's terms via `SDL_UpdatedAudioDeviceFormat()` and lets SDL convert. Doub
 buffered, both address and size page-aligned to 0x1000 as audout demands, with
 `audoutWaitPlayFinish()` pacing the audio thread. Recording is unimplemented (`audin`).
 
-**Correction — this does *not* automatically give SFML audio.** An earlier note here (and
-commit `423ac4ea`) claimed it did. It doesn't: `src/SFML/Window/CMakeLists.txt` in VRSFML
-sets **`SDL_AUDIO OFF`** and VRSFML brings its own miniaudio (`Audio/MiniaudioUnity.cpp`),
-so SFML audio never travels through SDL's audio driver. Getting sound out on Switch needs
-one of:
+**Correction — this does *not* give SFML audio.** An earlier note here (and commit
+`423ac4ea`) claimed it did. It doesn't: `src/SFML/Window/CMakeLists.txt` in VRSFML sets
+**`SDL_AUDIO OFF`** and VRSFML brings its own miniaudio (`Audio/MiniaudioUnity.cpp`), so
+SFML audio never travels through SDL's audio driver.
 
-- flip `SDL_AUDIO` back ON in VRSFML and point miniaudio at its SDL backend
-  (`ma_backend_sdl`), which is what makes the driver above the actual path; or
-- write a miniaudio Switch backend over `audout`/`audren` directly.
+**Second correction, from actually testing it:** a follow-up note here suggested pointing
+miniaudio at its SDL backend (`ma_backend_sdl`). **That backend does not exist** — this
+miniaudio has zero references to `MA_SUPPORT_SDL` / `ma_backend_sdl`. Do not go looking
+for it.
 
-The SDL audio backend is still worth having — it is what the first option needs — but it
-is not sufficient on its own. **Unresolved, and it is the main open risk in task 6.**
+What the backend-selection block at `extlibs/headers/miniaudio/miniaudio.h:2877` actually
+does on Switch: none of the platform arms match (`MA_WIN32`, `MA_UNIX`, `MA_ANDROID`,
+`MA_APPLE`, `MA_EMSCRIPTEN` are all false), leaving only the two unconditional ones —
+`MA_SUPPORT_CUSTOM` and `MA_SUPPORT_NULL`.
+
+So the state of audio is:
+
+- `libsfml-audio-s.a` **compiles clean** for Switch, and CMake even finds devkitPro's
+  Vorbis and FLAC portlibs — decoding is fine.
+- At runtime miniaudio will have **only the null backend**, so the game will be **silent**.
+  Building is not the same as making sound.
+
+The fix is a **custom miniaudio backend over libnx `audout`**, which is what
+`MA_SUPPORT_CUSTOM` exists for and is available on every platform.
+
+**Consequence for task 5:** the SDL audio backend is likely **unused** by the game, since
+SFML audio bypasses SDL entirely. It stays in the patch because it makes SDL's own audio
+subsystem work on Switch and costs nothing, but it should not be counted as progress
+toward getting sound out of this game.
 
 **Known limitation to revisit:** on Switch the real timezone lives behind libnx's time
 service (`timeGetDeviceLocationName`, `timeToCalendarTimeWithMyRule`), so newlib's
@@ -352,7 +369,10 @@ The entire VRSFML side is **29 added lines across 8 files**, carried as
 `patches/switch-vrsfml-backend.patch`. Nothing needed rewriting — every change was a
 platform gate with no Switch case.
 
-**Audio is still off** and remains the open risk; see the audio correction above.
+**With `SFML_BUILD_AUDIO=ON` it also builds clean** — `libsfml-audio-s.a` appears and
+nothing else changes. But see the audio correction above before reading that as working
+sound: miniaudio resolves to the null backend on Switch, so it will be silent until
+someone writes a custom miniaudio backend over `audout`.
 
 ## Open questions
 
