@@ -333,8 +333,26 @@ Each is a platform gate that had no Switch case, not new functionality:
 | `src/SFML/System/Thread.cpp` | `#error "no thread backend implemented for this platform"` | added `SFML_SYSTEM_SWITCH` to the POSIX list; libnx pthreads means the existing backend works unchanged |
 | `extlibs/headers/moodycamel/lightweightsemaphore.h` | `#error Unsupported platform! (No semaphore wrapper available)` | added `__SWITCH__` to the two `__unix__` branches; libnx has `<semaphore.h>` with `sem_t`, already proven by SDL's `HAVE_PTHREADS_SEM` probe |
 
-`libsfml-glutils-s.a` builds, which is the meaningful signal that the GL/EGL path is
-sound on this platform.
+One more, found later and worth its own note: `SDLWindowImpl::getNativeHandle()` has a
+per-platform `#if` chain that Switch fell off the end of, leaving an empty `static_cast`.
+Rather than stubbing it to `nullptr`, it now works the way every other platform does — a
+`SDL_PROP_WINDOW_SWITCH_NWINDOW_POINTER` property added to SDL's property list, set in
+`SWITCH_CreateWindow` and read back here — so the handle is genuinely the libnx `NWindow`.
+
+### Result: VRSFML builds for the Switch
+
+With `SFML_BUILD_AUDIO=OFF`, the whole library set builds clean:
+
+```
+libsfml-system-s.a   libsfml-window-s.a   libsfml-graphics-s.a
+libsfml-glutils-s.a  libsfml-imgui-s.a    libimgui.a   libSDL3.a
+```
+
+The entire VRSFML side is **29 added lines across 8 files**, carried as
+`patches/switch-vrsfml-backend.patch`. Nothing needed rewriting — every change was a
+platform gate with no Switch case.
+
+**Audio is still off** and remains the open risk; see the audio correction above.
 
 ## Open questions
 
@@ -356,7 +374,7 @@ sound on this platform.
 | 3 | Implement SDL3 Switch video backend | **done** (compiles; unrun) |
 | 4 | Implement SDL3 Switch joystick backend | **done** (compiles; unrun) |
 | 5 | Implement SDL3 Switch audio backend | **done** (compiles; unrun) |
-| 6 | Build VRSFML against Switch SDL3 | pending |
+| 6 | Build VRSFML against Switch SDL3 | **done except audio** — all modules build; see `patches/switch-vrsfml-backend.patch` |
 | 7 | Add `NINTENDO_SWITCH` branch to project CMakeLists | pending |
 | 8 | Audit shaders for GL 4.3 core / GLES 3.2 | pending |
 | 9 | Package `data/` into romfs, produce first `.nro` | pending |

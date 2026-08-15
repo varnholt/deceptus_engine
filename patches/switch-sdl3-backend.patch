@@ -129,6 +129,18 @@ index 23ff34ce1..177b68d71 100644
  #ifdef __NGAGE__
  
  /**
+diff --git a/include/SDL3/SDL_video.h b/include/SDL3/SDL_video.h
+index 6117eceaf..be378f0bd 100644
+--- a/include/SDL3/SDL_video.h
++++ b/include/SDL3/SDL_video.h
+@@ -1656,6 +1656,7 @@ extern SDL_DECLSPEC SDL_PropertiesID SDLCALL SDL_GetWindowProperties(SDL_Window
+ #define SDL_PROP_WINDOW_VIVANTE_DISPLAY_POINTER                     "SDL.window.vivante.display"
+ #define SDL_PROP_WINDOW_VIVANTE_WINDOW_POINTER                      "SDL.window.vivante.window"
+ #define SDL_PROP_WINDOW_VIVANTE_SURFACE_POINTER                     "SDL.window.vivante.surface"
++#define SDL_PROP_WINDOW_SWITCH_NWINDOW_POINTER                      "SDL.window.switch.nwindow"
+ #define SDL_PROP_WINDOW_WIN32_HWND_POINTER                          "SDL.window.win32.hwnd"
+ #define SDL_PROP_WINDOW_WIN32_HDC_POINTER                           "SDL.window.win32.hdc"
+ #define SDL_PROP_WINDOW_WIN32_INSTANCE_POINTER                      "SDL.window.win32.instance"
 diff --git a/include/build_config/SDL_build_config.h.cmake b/include/build_config/SDL_build_config.h.cmake
 index e7d0b34f4..593da710f 100644
 --- a/include/build_config/SDL_build_config.h.cmake
@@ -949,10 +961,10 @@ index 000000000..9b7ac2421
 +#endif // SDL_switchopengl_h_
 diff --git a/src/video/switch/SDL_switchvideo.c b/src/video/switch/SDL_switchvideo.c
 new file mode 100644
-index 000000000..ca97de7fd
+index 000000000..d15991936
 --- /dev/null
 +++ b/src/video/switch/SDL_switchvideo.c
-@@ -0,0 +1,270 @@
+@@ -0,0 +1,272 @@
 +/*
 +  Simple DirectMedia Layer
 +  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
@@ -1144,6 +1156,8 @@ index 000000000..ca97de7fd
 +    if (R_FAILED(nwindowSetDimensions(data->native_window, (u32)window->w, (u32)window->h))) {
 +        return SDL_SetError("SWITCH: nwindowSetDimensions() failed");
 +    }
++
++    SDL_SetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_SWITCH_NWINDOW_POINTER, data->native_window);
 +
 +#ifdef SDL_VIDEO_OPENGL_EGL
 +    if (window->flags & SDL_WINDOW_OPENGL) {
