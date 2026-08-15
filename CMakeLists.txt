@@ -958,6 +958,14 @@ if(NINTENDO_SWITCH)
     add_subdirectory(${sfml_SOURCE_DIR} ${sfml_BINARY_DIR})
 
     FetchContent_MakeAvailable(LUA)
+
+    # luaconf.h hardcodes LUA_C89_NUMBERS to 0, so the knob its own error message tells
+    # you to set cannot actually be set from the command line. The patch makes it
+    # overridable; see the target_compile_definitions call further down for why the
+    # Switch needs it. Safe to apply after MakeAvailable because luaconf.h is only read
+    # at compile time, unlike SDL's CMake logic above.
+    deceptus_apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/patches/switch-lua-c89-numbers.patch
+                         ${lua_SOURCE_DIR} "Lua")
 elseif(EMSCRIPTEN)
     # WASM target: VRSFML (vittorioromeo's SFML rewrite) -- the only SFML fork
     # with an Emscripten backend.
@@ -1114,13 +1122,18 @@ target_link_libraries(deceptus PRIVATE lua)
 if(NINTENDO_SWITCH)
     # luaconf.h uses the presence of LLONG_MAX as its proxy for C99 compliance, and
     # devkitPro's newlib does not define it in C++ mode, so Lua bails out with
-    # "Compiler does not support 'long long'". Point it at long instead: that is
-    # already 64-bit on aarch64, so the integer type is unchanged in practice.
+    # "Compiler does not support 'long long'".
+    #
+    # Setting LUA_INT_TYPE directly does not work: luaconf.h defines it unconditionally
+    # rather than honouring a value from the command line. LUA_C89_NUMBERS is the
+    # supported knob, and it selects long plus double -- on aarch64 both are 64-bit, so
+    # this matches the default long long plus double exactly rather than narrowing
+    # anything.
     #
     # This has to be PUBLIC -- every translation unit including lua.hpp must see the
     # same luaconf configuration as the library itself, or lua_Integer disagrees
     # across the ABI boundary.
-    target_compile_definitions(lua PUBLIC LUA_INT_TYPE=LUA_INT_LONG)
+    target_compile_definitions(lua PUBLIC LUA_C89_NUMBERS=1)
 endif()
 
 # ----------------------------------------------------------------------------------------------------

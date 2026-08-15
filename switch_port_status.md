@@ -460,6 +460,22 @@ Hand-reviewed sites, all four files:
 **Still worth re-verifying the WASM build** before trusting this, even though the table
 above argues it is a no-op there.
 
+### Lua on devkitPro
+
+Lua failed with `#error "Compiler does not support 'long long'"`. `luaconf.h` uses the
+presence of `LLONG_MAX` as its proxy for C99 compliance, and devkitPro's newlib does not
+define it in C++ mode — verified by compiling a probe rather than assumed.
+
+**First attempt was wrong:** setting `-DLUA_INT_TYPE=LUA_INT_LONG` has no effect, because
+`luaconf.h` *unconditionally* defines `LUA_INT_TYPE` in its else branch rather than
+honouring a command-line value, which just produces "redefinition" errors on top.
+
+The supported knob is **`LUA_C89_NUMBERS`**, which selects `long` + `double`. On aarch64
+both are 64-bit, so this matches the default `long long` + `double` exactly — nothing is
+narrowed. It is set `PUBLIC` on the `lua` target deliberately: every translation unit
+including `lua.hpp` must agree with the library about `lua_Integer`, or the ABI silently
+disagrees.
+
 ## Open questions
 
 - **What GL version/profile does the Switch actually report at runtime?** Static analysis says

@@ -1,0 +1,15 @@
+diff --git a/luaconf.h b/luaconf.h
+index 33bb580d..e1401b22 100644
+--- a/luaconf.h
++++ b/luaconf.h
+@@ -131,8 +131,9 @@
+ ** not need to use this case.
+ */
+ #if defined(LUA_USE_C89) && !defined(LUA_USE_WINDOWS)
++#undef LUA_C89_NUMBERS
+ #define LUA_C89_NUMBERS		1
+-#else
++#elif !defined(LUA_C89_NUMBERS)
+ #define LUA_C89_NUMBERS		0
+ #endif
+ 
