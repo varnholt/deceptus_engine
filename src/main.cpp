@@ -73,6 +73,13 @@ int main(int /*argc*/, char** /*argv*/)
       romfsExit();
       return 1;
    }
+
+   // route stdout through svcOutputDebugString so the engine's log is visible to a
+   // debugger or emulator. libnx points stderr at the debug device, and stdout is
+   // aliased onto it so std::cout goes the same way. harmless on real hardware with
+   // nothing attached, and the only way to see why startup fails without nxlink.
+   consoleDebugInit(debugDevice_SVC);
+   stdout = stderr;
 #endif
 
 #ifdef __EMSCRIPTEN__
@@ -95,9 +102,28 @@ int main(int /*argc*/, char** /*argv*/)
    }
 #endif
 
+#ifdef __SWITCH__
+// temporary startup tracing; stderr reaches svcOutputDebugString via consoleDebugInit,
+// which std::cout does not, because its filebuf caches the original FILE*
+#define SWITCH_TRACE(step) \
+   do                      \
+   {                       \
+      fprintf(stderr, "[switch-trace] %s\n", step); \
+   } while (0)
+#else
+#define SWITCH_TRACE(step) \
+   do                      \
+   {                       \
+   } while (0)
+#endif
+
+   SWITCH_TRACE("entered main");
+
    CrashHandler::install();
 
    GamePaths::createGameDirectories();
+
+   SWITCH_TRACE("game directories created");
 
    // setup logging to file
    // weak_ptr: game threads may still fire log callbacks after main() unwinds and log_thread is destroyed;
@@ -123,19 +149,29 @@ int main(int /*argc*/, char** /*argv*/)
    XInitThreads();
 #endif
 
+   SWITCH_TRACE("logging installed");
+
    LocalizationLoader::loadFromConfig();
    debugAuthors();
 
+   SWITCH_TRACE("localization loaded");
+
 #ifdef DECEPTUS_VRSFML
    auto graphics_context = sf::GraphicsContext::create();
+   SWITCH_TRACE("graphics context created");
    auto audio_context = sf::AudioContext::create();
+   SWITCH_TRACE("audio context created");
 #endif
 
    Test test;
    Game game;
+   SWITCH_TRACE("game constructed");
    game.initialize();
+   SWITCH_TRACE("game initialized");
    Preloader::preload();
+   SWITCH_TRACE("preload done, entering loop");
    const auto result = game.loop();
+   SWITCH_TRACE("loop returned");
 
 #ifdef DEVELOPMENT_MODE
    Localization::getInstance().flushMissingKeys();

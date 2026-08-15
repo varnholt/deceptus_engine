@@ -966,10 +966,10 @@ index 000000000..9b7ac2421
 +#endif // SDL_switchopengl_h_
 diff --git a/src/video/switch/SDL_switchvideo.c b/src/video/switch/SDL_switchvideo.c
 new file mode 100644
-index 000000000..d15991936
+index 000000000..72f5ee695
 --- /dev/null
 +++ b/src/video/switch/SDL_switchvideo.c
-@@ -0,0 +1,272 @@
+@@ -0,0 +1,286 @@
 +/*
 +  Simple DirectMedia Layer
 +  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
@@ -1158,8 +1158,20 @@ index 000000000..d15991936
 +        return SDL_SetError("SWITCH: Can't get the default NWindow");
 +    }
 +
++    /* Overriding the dimensions is best-effort. The NWindow already reports a usable
++     * default (1280x720), and the override is rejected in some operation modes, so a
++     * failure here is not fatal -- fall back to whatever libnx actually gives us and
++     * report that size back to SDL rather than refusing to create the window. */
 +    if (R_FAILED(nwindowSetDimensions(data->native_window, (u32)window->w, (u32)window->h))) {
-+        return SDL_SetError("SWITCH: nwindowSetDimensions() failed");
++        u32 actual_width = 0;
++        u32 actual_height = 0;
++
++        if (R_FAILED(nwindowGetDimensions(data->native_window, &actual_width, &actual_height))) {
++            return SDL_SetError("SWITCH: could not determine the native window size");
++        }
++
++        window->w = (int)actual_width;
++        window->h = (int)actual_height;
 +    }
 +
 +    SDL_SetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_SWITCH_NWINDOW_POINTER, data->native_window);
@@ -1168,7 +1180,9 @@ index 000000000..d15991936
 +    if (window->flags & SDL_WINDOW_OPENGL) {
 +        data->egl_surface = SDL_EGL_CreateSurface(_this, window, (NativeWindowType)data->native_window);
 +        if (data->egl_surface == EGL_NO_SURFACE) {
-+            return SDL_SetError("SWITCH: Can't create EGL surface");
++            // SDL_EGL_CreateSurface already recorded the specific EGL failure; replacing it
++            // with a generic message here would throw away the only useful diagnostic
++            return false;
 +        }
 +    } else {
 +        data->egl_surface = EGL_NO_SURFACE;

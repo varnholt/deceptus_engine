@@ -2,6 +2,10 @@
 #include <cstdlib>
 #include <stdexcept>
 
+#ifdef __SWITCH__
+#include <fstream>
+#endif
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
@@ -65,8 +69,31 @@ std::filesystem::path getPreferencesFile(const std::string& filename)
       const auto bundled_default = std::filesystem::path("data/config") / filename;
       if (std::filesystem::exists(bundled_default))
       {
+#ifdef __SWITCH__
+         // the source lives in romfs and the target on the sd card, which are two separate
+         // devoptab devices. newlib's copy_file cannot move data between them: it creates
+         // the target, copies nothing, and reports failure through the error_code that the
+         // desktop path discards. an empty config then takes the game down at startup,
+         // because GameConfiguration::deserialize calls json::parse outside its try block.
+         // copying through streams sidesteps the device boundary entirely.
+         {
+            std::ifstream source(bundled_default, std::ios::binary);
+            std::ofstream destination(target, std::ios::binary | std::ios::trunc);
+            destination << source.rdbuf();
+         }
+
+         // never leave a truncated config behind; the next launch would inherit it and the
+         // failure would look like a corrupt install rather than a failed copy
+         std::error_code size_error;
+         if (std::filesystem::file_size(target, size_error) == 0 || size_error)
+         {
+            std::error_code remove_error;
+            std::filesystem::remove(target, remove_error);
+         }
+#else
          std::error_code error_code;
          std::filesystem::copy_file(bundled_default, target, error_code);
+#endif
       }
    }
 
