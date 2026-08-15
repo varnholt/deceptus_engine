@@ -864,10 +864,10 @@ index 6786afd90..01da211c9 100644
  #endif
 diff --git a/src/video/switch/SDL_switchopengl.c b/src/video/switch/SDL_switchopengl.c
 new file mode 100644
-index 000000000..22551fb45
+index 000000000..875c3f606
 --- /dev/null
 +++ b/src/video/switch/SDL_switchopengl.c
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,57 @@
 +/*
 +  Simple DirectMedia Layer
 +  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
@@ -904,9 +904,25 @@ index 000000000..22551fb45
 +    return SDL_EGL_LoadLibrary(_this, path, EGL_DEFAULT_DISPLAY);
 +}
 +
-+SDL_EGL_CreateContext_impl(SWITCH)
++/* Written out rather than using SDL_EGL_*_impl so the stall during window creation can be
++ * narrowed down; stderr reaches svcOutputDebugString via consoleDebugInit. */
++SDL_GLContext SWITCH_GLES_CreateContext(SDL_VideoDevice *_this, SDL_Window *window)
++{
++    fprintf(stderr, "[switch-trace] egl: creating context\n");
++    SDL_GLContext context = SDL_EGL_CreateContext(_this, window->internal->egl_surface);
++    fprintf(stderr, "[switch-trace] egl: context %s\n", context ? "created" : "FAILED");
++    return context;
++}
++
++bool SWITCH_GLES_MakeCurrent(SDL_VideoDevice *_this, SDL_Window *window, SDL_GLContext context)
++{
++    fprintf(stderr, "[switch-trace] egl: make current\n");
++    const bool result = SDL_EGL_MakeCurrent(_this, window ? window->internal->egl_surface : EGL_NO_SURFACE, context);
++    fprintf(stderr, "[switch-trace] egl: make current %s\n", result ? "ok" : "FAILED");
++    return result;
++}
++
 +SDL_EGL_SwapWindow_impl(SWITCH)
-+SDL_EGL_MakeCurrent_impl(SWITCH)
 +
 +#endif // SDL_VIDEO_DRIVER_SWITCH && SDL_VIDEO_OPENGL_EGL
 diff --git a/src/video/switch/SDL_switchopengl.h b/src/video/switch/SDL_switchopengl.h
@@ -966,10 +982,10 @@ index 000000000..9b7ac2421
 +#endif // SDL_switchopengl_h_
 diff --git a/src/video/switch/SDL_switchvideo.c b/src/video/switch/SDL_switchvideo.c
 new file mode 100644
-index 000000000..72f5ee695
+index 000000000..4bfdde180
 --- /dev/null
 +++ b/src/video/switch/SDL_switchvideo.c
-@@ -0,0 +1,286 @@
+@@ -0,0 +1,308 @@
 +/*
 +  Simple DirectMedia Layer
 +  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
@@ -1071,6 +1087,15 @@ index 000000000..72f5ee695
 +// SDL Video and Display initialization/handling functions
 +/*****************************************************************************/
 +
++/* The Switch has exactly one NWindow, so every SDL_Window ends up pointing at
++ * nwindowGetDefault(). EGL only allows a single window surface per native window --
++ * a second eglCreateWindowSurface returns EGL_NO_SURFACE while reporting EGL_SUCCESS,
++ * which is easy to misread as a driver bug. Applications legitimately create more than
++ * one SDL_Window here (VRSFML makes a context window before the real render window), so
++ * the surface is created once and shared, and torn down when the last window goes. */
++static EGLSurface switch_shared_egl_surface = EGL_NO_SURFACE;
++static int switch_shared_egl_surface_refcount;
++
 +static void SWITCH_GetOperationModeSize(int *width, int *height)
 +{
 +    if (appletGetOperationMode() == AppletOperationMode_Console) {
@@ -1142,6 +1167,8 @@ index 000000000..72f5ee695
 +{
 +    SDL_WindowData *data;
 +
++    fprintf(stderr, "[switch-trace] video: create window %dx%d\n", window->w, window->h);
++
 +    // Allocate window internal data
 +    data = (SDL_WindowData *)SDL_calloc(1, sizeof(SDL_WindowData));
 +    if (!data) {
@@ -1158,39 +1185,47 @@ index 000000000..72f5ee695
 +        return SDL_SetError("SWITCH: Can't get the default NWindow");
 +    }
 +
-+    /* Overriding the dimensions is best-effort. The NWindow already reports a usable
-+     * default (1280x720), and the override is rejected in some operation modes, so a
-+     * failure here is not fatal -- fall back to whatever libnx actually gives us and
-+     * report that size back to SDL rather than refusing to create the window. */
-+    if (R_FAILED(nwindowSetDimensions(data->native_window, (u32)window->w, (u32)window->h))) {
-+        u32 actual_width = 0;
-+        u32 actual_height = 0;
-+
-+        if (R_FAILED(nwindowGetDimensions(data->native_window, &actual_width, &actual_height))) {
-+            return SDL_SetError("SWITCH: could not determine the native window size");
-+        }
-+
-+        window->w = (int)actual_width;
-+        window->h = (int)actual_height;
++    /* The size is dictated by the system here, not by the application: there is one
++     * NWindow and it is already sized to the current scan-out. Deliberately no
++     * nwindowSetDimensions call -- applications legitimately ask for other sizes (VRSFML
++     * creates a 1x1 context window before the real one), and honouring that would resize
++     * the single shared native window, leaving every later window with a 1x1 surface.
++     * Report the real size back to SDL instead. */
++    u32 native_width = 0;
++    u32 native_height = 0;
++    if (R_FAILED(nwindowGetDimensions(data->native_window, &native_width, &native_height))) {
++        return SDL_SetError("SWITCH: could not determine the native window size");
 +    }
++
++    window->w = (int)native_width;
++    window->h = (int)native_height;
 +
 +    SDL_SetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_SWITCH_NWINDOW_POINTER, data->native_window);
 +
 +#ifdef SDL_VIDEO_OPENGL_EGL
 +    if (window->flags & SDL_WINDOW_OPENGL) {
-+        data->egl_surface = SDL_EGL_CreateSurface(_this, window, (NativeWindowType)data->native_window);
-+        if (data->egl_surface == EGL_NO_SURFACE) {
-+            // SDL_EGL_CreateSurface already recorded the specific EGL failure; replacing it
-+            // with a generic message here would throw away the only useful diagnostic
-+            return false;
++        if (switch_shared_egl_surface == EGL_NO_SURFACE) {
++            switch_shared_egl_surface = SDL_EGL_CreateSurface(_this, window, (NativeWindowType)data->native_window);
++            if (switch_shared_egl_surface == EGL_NO_SURFACE) {
++                // SDL_EGL_CreateSurface already recorded the specific EGL failure; replacing
++                // it with a generic message would throw away the only useful diagnostic
++                return false;
++            }
 +        }
++
++        data->egl_surface = switch_shared_egl_surface;
++        ++switch_shared_egl_surface_refcount;
++        fprintf(stderr, "[switch-trace] video: surface ready (refs %d)\n", switch_shared_egl_surface_refcount);
 +    } else {
 +        data->egl_surface = EGL_NO_SURFACE;
 +    }
 +#endif
 +
-+    // the window always covers the whole screen
-+    window->flags |= SDL_WINDOW_FULLSCREEN;
++    /* Deliberately not flagged SDL_WINDOW_FULLSCREEN. The window does always cover the
++     * screen, but claiming fullscreen makes SDL run its fullscreen transition and wait
++     * for an ENTER_FULLSCREEN event that this backend has no window manager to send,
++     * which stalls window creation. The size is already the scan-out size, so there is
++     * nothing for a transition to do. */
 +
 +    return true;
 +}
@@ -1202,7 +1237,12 @@ index 000000000..72f5ee695
 +    if (data) {
 +#ifdef SDL_VIDEO_OPENGL_EGL
 +        if (data->egl_surface != EGL_NO_SURFACE) {
-+            SDL_EGL_DestroySurface(_this, data->egl_surface);
++            // shared across every window on this platform, so only the last one tears it down
++            if (--switch_shared_egl_surface_refcount <= 0) {
++                SDL_EGL_DestroySurface(_this, data->egl_surface);
++                switch_shared_egl_surface = EGL_NO_SURFACE;
++                switch_shared_egl_surface_refcount = 0;
++            }
 +        }
 +#endif
 +        // the NWindow belongs to libnx, so it is deliberately not destroyed here
@@ -1223,17 +1263,15 @@ index 000000000..72f5ee695
 +
 +void SWITCH_SetWindowSize(SDL_VideoDevice *_this, SDL_Window *window)
 +{
-+    SDL_WindowData *data = window->internal;
-+
-+    if (data && data->native_window) {
-+        nwindowSetDimensions(data->native_window, (u32)window->w, (u32)window->h);
-+    }
++    // the scan-out size is fixed by the system; see the note in SWITCH_CreateWindow
 +}
 +
 +void SWITCH_ShowWindow(SDL_VideoDevice *_this, SDL_Window *window)
 +{
++    fprintf(stderr, "[switch-trace] video: show window\n");
 +    SDL_SetMouseFocus(window);
 +    SDL_SetKeyboardFocus(window);
++    fprintf(stderr, "[switch-trace] video: show window done\n");
 +}
 +
 +void SWITCH_HideWindow(SDL_VideoDevice *_this, SDL_Window *window)

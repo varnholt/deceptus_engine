@@ -560,6 +560,13 @@ Game::~Game()
    _level.reset();
 }
 
+#ifdef __SWITCH__
+// stderr reaches svcOutputDebugString via consoleDebugInit, unlike std::cout
+#define SWITCH_TRACE(step) fprintf(stderr, "[switch-trace] %s\n", step)
+#else
+#define SWITCH_TRACE(step) ((void)0)
+#endif
+
 void Game::initialize()
 {
    auto& config = GameConfiguration::getInstance();
@@ -567,7 +574,9 @@ void Game::initialize()
    // clamp resolution to desktop limits on startup
    config.clampResolutionToDesktop();
 
+   SWITCH_TRACE("initialize: before initializeWindow");
    initializeWindow();
+   SWITCH_TRACE("initialize: window done");
 
    // initialize GLEW after the OpenGL context is created but before any OpenGL calls
    if (!_window_render_texture->setActive(true))
@@ -583,13 +592,17 @@ void Game::initialize()
       return;
    }
 
+   SWITCH_TRACE("initialize: glew done");
    initializeController();
+   SWITCH_TRACE("initialize: controller done");
 
    PostProcessing::getInstance().initialize();
+   SWITCH_TRACE("initialize: post processing done");
 
    _player = std::make_shared<Player>();
    PlayerRegistry::add(_player);
    _player->initialize();
+   SWITCH_TRACE("initialize: player done");
 
    _global_event_serializer = std::make_shared<EventSerializer>();
    _global_event_serializer->setCallback([this](const sf::Event& event) { processEvent(event); });
