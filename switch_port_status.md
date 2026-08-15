@@ -23,9 +23,12 @@ rebase onto `master` later, nothing here overlaps other work)
 > (fixed by turning stack traces off for this target), and controller hotplug detection
 > never ran on the VRSFML path at all (fixed by polling the device list from the main loop).
 >
-> Remaining: **audio is silent** (miniaudio resolves to its null backend), **hardware is
-> still untested** — everything here is Ryujinx — and debug scaffolding is still in the
-> tree, all listed under "How to pick this up from scratch".
+> **On real hardware it has been started once and crashed**, during asset loading, in applet
+> mode. The evidence points at the memory pool rather than at anything in the port — see
+> "The first hardware run" below. It has not yet been retried in title takeover mode.
+>
+> Remaining beyond that: **audio is silent** (miniaudio resolves to its null backend), and
+> debug scaffolding is still in the tree, listed under "How to pick this up from scratch".
 
 Read "How to pick this up from scratch" near the bottom first — it has the working-copy
 locations, the build/run commands, and the iteration loop, which is easy to get wrong.
@@ -813,6 +816,65 @@ the queue. The body is `#ifdef DECEPTUS_VRSFML`, so desktop keeps its event thre
 untouched. Note the SDL 3 detail this relies on: `SDL_GetJoysticks` returns *instance* ids,
 which is exactly what `GameController::activate` and the add/remove callbacks want.
 
+## The first hardware run
+
+It crashed. Atmosphère's fatal screen, on firmware 22.5.0 / Atmosphère 1.11.2:
+
+```
+Error Code: 2168-0002 (0x4a8)      <- data abort, i.e. an invalid memory access
+Program:    010000000000100D       <- the Album applet
+```
+
+Two things are readable straight off that screen without a crash report or symbols.
+
+**The program id says how it was launched.** `010000000000100D` is the Album applet, which
+is what the homebrew menu runs inside when it is opened from the album. That is *applet
+mode*, and applet-mode homebrew lives inside that applet's memory pool, which is a fraction
+of the application pool a game gets. Title takeover mode — hold R while starting a game from
+the HOME menu — hands over the full pool instead.
+
+**The register dump says what it was doing.** Decoded little-endian, X6 through X13 spell:
+
+```
+X6  742064656C696146   "Failed t"
+X7  692064616F6C206F   "o load i"
+X8  6F7266206567616D   "mage fro"
+X9  79726F6D656D206D   "m memory"
+X13 203A6E6F73616552   "Reason: "
+```
+
+which is VRSFML's `"Failed to load image from memory. Reason: {}"`, from `Image.cpp:300`,
+where the `{}` is `stbi_failure_reason()`. So an image failed to decode, and the crash is
+immediately after: `TexturePool::createResource` returns `nullptr` on a failed load and the
+caller dereferences it.
+
+Why an image would fail to decode on hardware but not under emulation is answered by the
+number the emulator reports: **3285 MB total**, because Ryujinx runs an NRO as an
+application. Applet mode has nothing like that, `stbi`'s allocation fails with `outofmem`,
+and the null propagates into a data abort. The engine embeds 104 MB of assets and decodes
+much of that to RGBA, so it is not a marginal case.
+
+**Next step is therefore to relaunch in title takeover mode, not to change code.** Two
+changes went in to make the next run conclusive rather than another register dump:
+
+- **The Switch build now writes a log to the SD card**, `sdmc:/switch/deceptus/logs/`.
+  `LogThread` was compiled out for every `DECEPTUS_VRSFML` target because the web build has
+  no filesystem worth logging to; the Switch does, and it is the only artefact a hardware run
+  leaves behind. `stderr` reaches `svcOutputDebugString`, which needs a debugger or an
+  emulator attached, so it is no use on a console by itself.
+- **VRSFML's own errors are routed into that log** through `sf::priv::setErrSink`, installed
+  in `main()` on the VRSFML path. Otherwise exactly the message that mattered here — the one
+  sitting in the registers — would never appear in it.
+- Start-up logs the applet type and the memory pool, and warns explicitly when it is running
+  in applet mode. Under Ryujinx that line reads
+  `switch: applet type 0, memory 3281 MB used of 3285 MB`; applet type 0 is
+  `AppletType_Application`, which is what title takeover looks like.
+
+Still worth fixing regardless of the outcome: a failed texture load should be a logged error,
+not a null dereference. Which callers need hardening is not yet known, and the log now names
+the asset, so the next run says.
+
+
 ## How to pick this up from scratch
 
 Everything below is what a fresh session needs; there is no state left in anyone's head.
@@ -825,8 +887,20 @@ Everything below is what a fresh session needs; there is no state left in anyone
 | VRSFML | `D:/deceptus/vrsfml_switch` | `switch-backend`, based on `9c272d601` |
 
 Both are **outside** the repo on purpose: the committed artefacts are the patches under
-`patches/`. Recreate either without network via
-`git clone --no-hardlinks <build dir>/_deps/<name>-src <target>`.
+`patches/`, which are the single source of truth. The trees are scratch space — about a
+gigabyte of it — and deleting them costs nothing:
+
+```
+powershell -File lab/switch_smoke/setup_working_copies.ps1
+```
+
+clones both at those revisions, puts each on its `switch-backend` branch and applies its
+patch. The round trip is exact: recreating from the patches and regenerating the patches from
+the result gives byte-identical files, which is checked rather than assumed.
+
+Note it clones with `core.autocrlf=false` on purpose. Cloning them normally on this host
+would produce CRLF trees, and everything downstream — patch regeneration, mirroring into
+`_deps/` — then fights the line endings.
 
 ### The iteration loop — this is the part that is easy to get wrong
 
@@ -950,8 +1024,9 @@ can be phrased as "does this combination work here".
 | 12 | Fix the incomplete render texture FBO | **done** — switch-mesa ignores EGL context sharing; the platform now uses one GL context |
 | 13 | Restore controller input | **done** — count back to 1, GUID carries vendor/product, and detection now polls on the VRSFML path |
 | 14 | Play past the menu — start a level and verify gameplay | **done** — menu, file select, catacombs load, walking and jumping all verified in Ryujinx |
-| 15 | Run it on real hardware | pending — needs a CFW Switch; everything so far is emulator-only |
-| 16 | Strip the debug scaffolding | pending — see the list above |
+| 15 | Run it on real hardware | **in progress** — first run crashed in applet mode; retry in title takeover mode |
+| 16 | Strip the debug scaffolding | pending — the per-frame traces are gone, the start-up ones remain |
+| 17 | Make a failed asset load an error rather than a crash | pending — see "The first hardware run" |
 
 ---
 
@@ -966,6 +1041,8 @@ can be phrased as "does this combination work here".
 - `lab/switch_smoke/run_ryujinx.ps1` — launches the emulator, screenshots, dumps the guest log
 - `lab/switch_smoke/sync_switch_patches.ps1` — the iteration loop: regenerates the patches
   from the working copies and mirrors them into `_deps/`, converting to LF
+- `lab/switch_smoke/setup_working_copies.ps1` — recreates both working copies from the patches
+- `doc/switch_build.md` — the how-to: prerequisites, build, run, hardware, iteration loop
 - `lab/switch_smoke/drive_ryujinx.py` — launches the emulator, sends controller input
   through the menus into a level, and captures each step; the counterpart to
   `lab/map_render/drive_desktop.py`

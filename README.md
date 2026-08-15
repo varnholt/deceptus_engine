@@ -142,6 +142,25 @@ headers.
 player-facing page that shows only the canvas, and `coi-serviceworker.js` establishes
 cross-origin isolation on hosts that do not send the headers themselves, itch.io among them.
 
+## Nintendo Switch (homebrew)
+
+The Switch build is an unsigned `.nro` for a console running custom firmware. It reuses the
+web build's rendering stack — VRSFML over SDL 3 — because vanilla SFML 3 renders through the
+fixed-function pipeline and the Switch's mesa/nouveau driver is core profile only. The SDL
+video, joystick and audio backends for the platform are carried as patches under `patches/`.
+
+```bat
+build_switch.bat . build_switch_engine
+```
+
+Everything runs in the official `devkitpro/devkita64` Docker image, so no local devkitPro
+install is needed. The result is a self-contained `deceptus.nro` with the whole `data/`
+directory embedded as romfs.
+
+It boots and plays, audio is silent, and it has so far only been run in an emulator.
+[doc/switch_build.md](doc/switch_build.md) has the full setup, how to run and script it in
+Ryujinx, and how to work on the port itself.
+
 
 # Contribute and Talk to Us!
 If you're a musician, graphic artist, level designer or programmer, or just want to hang out and chat, [please join us on Discord!](https://discord.gg/EZpkbGDaWD)

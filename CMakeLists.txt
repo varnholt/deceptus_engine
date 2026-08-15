@@ -998,12 +998,19 @@ elseif(EMSCRIPTEN)
         OFF
         CACHE BOOL "" FORCE)
 
-    # SDL3 is fetched internally by VRSFML master via CPM.
+    # SDL3 is fetched internally by VRSFML via CPM.
     # Declaring it separately here would create duplicate CMake targets.
+    #
+    # A commit rather than a version, because VRSFML publishes no releases -- its newest tag
+    # is 1662 commits behind this. Everywhere a dependency does have a release tag, this file
+    # names the tag instead. It used to say `master` here, which meant an upstream commit
+    # could break the web build on a clean checkout without anything in this repository
+    # changing. This is the same revision the Switch target pins, and what the last verified
+    # web build was made from.
     FetchContent_Declare(
         SFML
         GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
-        GIT_TAG master)
+        GIT_TAG 9c272d60134d568f35fbad9891f3b436de87cc28)
     FetchContent_Declare(
         LUA
         GIT_REPOSITORY https://github.com/lua/lua.git
@@ -1062,10 +1069,15 @@ else()
         ON
         CACHE BOOL "" FORCE)
 
+    # Every dependency names a release tag, never a branch. This used to say `3.0.x` for
+    # SFML, which is a branch and therefore moves: an upstream commit could change what a
+    # clean checkout builds without anything here changing. 3.0.2 is the release the last
+    # verified desktop build was made from. Freetype, ogg, vorbis and FLAC are not listed
+    # because SFML fetches them itself, so pinning SFML pins those too.
     FetchContent_Declare(
         SFML
         GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 3.0.x)
+        GIT_TAG 3.0.2)
     FetchContent_Declare(
         SDL3
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git

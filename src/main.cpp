@@ -9,6 +9,11 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <string_view>
+
+#ifdef DECEPTUS_VRSFML
+#include <SFML/System/Err.hpp>
+#endif
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -105,9 +110,9 @@ int main(int /*argc*/, char** /*argv*/)
 #ifdef __SWITCH__
 // temporary startup tracing; stderr reaches svcOutputDebugString via consoleDebugInit,
 // which std::cout does not, because its filebuf caches the original FILE*
-#define SWITCH_TRACE(step) \
-   do                      \
-   {                       \
+#define SWITCH_TRACE(step)                          \
+   do                                               \
+   {                                                \
       fprintf(stderr, "[switch-trace] %s\n", step); \
    } while (0)
 #else
@@ -149,7 +154,61 @@ int main(int /*argc*/, char** /*argv*/)
    XInitThreads();
 #endif
 
+#ifdef DECEPTUS_VRSFML
+   // VRSFML writes its own errors straight to stderr, which never reaches the game log. On a
+   // console that means they are invisible: there is no terminal, and stderr only goes to
+   // svcOutputDebugString, which needs a debugger or an emulator attached to read. Routing
+   // them into Log puts them in the same file as everything else -- on the Switch, on the sd
+   // card, which is the only artefact a hardware run leaves behind.
+   sf::priv::setErrSink(
+      [](void*, const char* data, std::size_t size)
+      {
+         // the sink is also called for the lone trailing newline after a message
+         std::string_view text{data, size};
+         while (!text.empty() && (text.back() == '\n' || text.back() == '\r'))
+         {
+            text.remove_suffix(1);
+         }
+
+         if (!text.empty())
+         {
+            Log::error(text);
+         }
+      },
+      nullptr
+   );
+#endif
+
    SWITCH_TRACE("logging installed");
+
+#ifdef __SWITCH__
+   // How much memory homebrew gets depends entirely on how it was launched. Started from the
+   // album, it runs as a library applet inside that applet's small memory pool; started in
+   // title takeover mode -- hold R while launching a game from the home menu -- it gets the
+   // whole application pool instead, which is an order of magnitude larger. This game loads
+   // over a hundred megabytes of assets, so the difference decides whether it runs at all,
+   // and the failure mode is unhelpful: an image fails to decode with "outofmem" somewhere
+   // deep in start-up. Logging the numbers up front turns that into an obvious diagnosis.
+   {
+      u64 total_memory_size = 0;
+      u64 used_memory_size = 0;
+      svcGetInfo(&total_memory_size, InfoType_TotalMemorySize, CUR_PROCESS_HANDLE, 0);
+      svcGetInfo(&used_memory_size, InfoType_UsedMemorySize, CUR_PROCESS_HANDLE, 0);
+
+      const auto applet_type = appletGetAppletType();
+      const auto title_takeover = (applet_type == AppletType_Application || applet_type == AppletType_SystemApplication);
+
+      Log::Info() << "switch: applet type " << static_cast<int32_t>(applet_type) << ", memory " << (used_memory_size / (1024 * 1024))
+                  << " MB used of " << (total_memory_size / (1024 * 1024)) << " MB";
+
+      if (!title_takeover)
+      {
+         Log::Warning() << "switch: running in applet mode, which reserves only a fraction of the console's memory. "
+                           "If asset loading fails, relaunch in title takeover mode: hold R while starting a game "
+                           "from the home menu, then run this from the homebrew menu that opens.";
+      }
+   }
+#endif
 
    LocalizationLoader::loadFromConfig();
    debugAuthors();

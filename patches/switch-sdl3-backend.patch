@@ -881,10 +881,10 @@ index 6786afd90..01da211c9 100644
  #endif
 diff --git a/src/video/switch/SDL_switchopengl.c b/src/video/switch/SDL_switchopengl.c
 new file mode 100644
-index 000000000..d90c808df
+index 000000000..61e9a9819
 --- /dev/null
 +++ b/src/video/switch/SDL_switchopengl.c
-@@ -0,0 +1,109 @@
+@@ -0,0 +1,106 @@
 +/*
 +  Simple DirectMedia Layer
 +  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
@@ -985,10 +985,7 @@ index 000000000..d90c808df
 +
 +bool SWITCH_GLES_MakeCurrent(SDL_VideoDevice *_this, SDL_Window *window, SDL_GLContext context)
 +{
-+    fprintf(stderr, "[switch-trace] egl: make current\n");
-+    const bool result = SDL_EGL_MakeCurrent(_this, window ? window->internal->egl_surface : EGL_NO_SURFACE, context);
-+    fprintf(stderr, "[switch-trace] egl: make current %s\n", result ? "ok" : "FAILED");
-+    return result;
++    return SDL_EGL_MakeCurrent(_this, window ? window->internal->egl_surface : EGL_NO_SURFACE, context);
 +}
 +
 +SDL_EGL_SwapWindow_impl(SWITCH)
