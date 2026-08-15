@@ -47,6 +47,10 @@
 #include <emscripten/html5.h>
 #endif
 
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
+
 #include <chrono>
 #include <ctime>
 #include <iomanip>
@@ -1133,7 +1137,10 @@ void Game::timedDraw()
 
 int32_t Game::loop()
 {
-#ifdef DECEPTUS_VRSFML
+// the browser drives its own main loop, so this branch is genuinely emscripten-specific
+// rather than a question of which SFML flavour is in use; the switch runs the ordinary
+// while loop below
+#ifdef __EMSCRIPTEN__
    // re-fit the render resolution whenever the browser/itch viewport changes size (window resize,
    // fullscreen toggle) so the game keeps filling the window at an integer scale
    emscripten_set_resize_callback(
@@ -1160,6 +1167,19 @@ int32_t Game::loop()
       0,
       1
    );
+   return 0;
+#elif defined(__SWITCH__)
+   // VRSFML dropped sf::RenderWindow::isOpen(), and on the switch the authority on
+   // whether the game should keep running is libnx anyway: appletMainLoop() goes false
+   // when the system wants the applet gone, e.g. the user quitting from the home menu.
+   while (appletMainLoop())
+   {
+      processPendingLevelLoad();
+      processEvents();
+      timedUpdate();
+      timedDraw();
+   }
+
    return 0;
 #else
    while (_window->isOpen())

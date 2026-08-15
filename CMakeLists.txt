@@ -1193,9 +1193,10 @@ if(NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
 endif()
 
 if(NINTENDO_SWITCH)
-    # glad replaces glew as the loader here, and the link order matters: it resolves
-    # through EGL, then mesa's dispatch layer, then the nouveau kernel interface.
-    target_link_libraries(deceptus PRIVATE glad EGL glapi drm_nouveau)
+    # switch-glad is deliberately absent here; VRSFML's bundled glad provides the GL
+    # entry points. Link order still matters for the rest: EGL resolves through mesa's
+    # dispatch layer, which sits on the nouveau kernel interface.
+    target_link_libraries(deceptus PRIVATE EGL glapi drm_nouveau)
 
     nx_generate_nacp(
         deceptus.nacp
@@ -1285,9 +1286,19 @@ if(NINTENDO_SWITCH)
         PRIVATE ${CMAKE_SOURCE_DIR}/src/switch
                 ${CMAKE_SOURCE_DIR}/src/wasm)
 
-    # glad, mesa and the rest of the portlibs headers are not on the include path by
-    # default; the toolchain file only teaches find_package about them
+    # mesa and the rest of the portlibs headers are not on the include path by default;
+    # the toolchain file only teaches find_package about them
     target_include_directories(deceptus PRIVATE ${DEVKITPRO}/portlibs/switch/include)
+
+    # GL entry points come from the glad that VRSFML bundles, which it keeps PRIVATE, so
+    # its include directory has to be added by hand. devkitPro's switch-glad portlib is
+    # deliberately not used: both define gladLoadGL, and VRSFML's is the loader that
+    # actually runs, since it loads GL itself when creating the context.
+    target_include_directories(deceptus SYSTEM PRIVATE ${sfml_SOURCE_DIR}/extlibs/headers/glad/include)
+
+    # upstream imgui's default "open in shell" implementation calls fork/execvp/waitpid,
+    # none of which libnx provides
+    target_compile_definitions(deceptus PRIVATE IMGUI_DISABLE_DEFAULT_SHELL_FUNCTIONS)
 elseif(EMSCRIPTEN)
     # prepend src/wasm so "#include <opengl/glew.h>" resolves to the GLES3 stub
     # instead of the desktop GLEW header in src/opengl/
