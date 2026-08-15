@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e591a011c..b81e32155 100644
+index e591a011c..297bc04db 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -149,7 +149,9 @@ endif()
@@ -13,7 +13,7 @@ index e591a011c..b81e32155 100644
    set(SDL_PTHREADS_DEFAULT ON)
  else()
    set(SDL_PTHREADS_DEFAULT OFF)
-@@ -3350,6 +3352,67 @@ elseif(N3DS)
+@@ -3350,6 +3352,72 @@ elseif(N3DS)
      "${SDL3_SOURCE_DIR}/src/io/n3ds/*.h"
    )
  
@@ -30,9 +30,14 @@ index e591a011c..b81e32155 100644
 +
 +  CheckPTHREAD()
 +
-+  set(SDL_FSOPS_POSIX 1)
-+  sdl_sources("${SDL3_SOURCE_DIR}/src/filesystem/posix/SDL_sysfsops.c")
-+  set(HAVE_SDL_FSOPS TRUE)
++  # Guarded on the option rather than set unconditionally: when a consumer disables
++  # SDL_FSOPS the dummy fallback further down supplies these instead, and both
++  # implementations define SDL_SYS_GetCurrentDirectory.
++  if(SDL_FSOPS)
++    set(SDL_FSOPS_POSIX 1)
++    sdl_sources("${SDL3_SOURCE_DIR}/src/filesystem/posix/SDL_sysfsops.c")
++    set(HAVE_SDL_FSOPS TRUE)
++  endif()
 +
 +  set(SDL_TIME_UNIX 1)
 +  sdl_glob_sources("${SDL3_SOURCE_DIR}/src/time/unix/*.c")
