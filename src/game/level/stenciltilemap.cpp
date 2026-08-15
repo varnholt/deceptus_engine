@@ -61,12 +61,14 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
 
    auto stencil_render_state = states;
    stencil_render_state.shader = (use_shader && _stencil_shader.isLoaded()) ? &_stencil_shader.native() : nullptr;
+   // designator order has to match VRSFML's declaration order, which puts stencilOnly
+   // ahead of the reference and mask fields
    stencil_render_state.stencilMode = sf::StencilMode{
       .stencilComparison = sf::StencilComparison::Always,
       .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
+      .stencilOnly = true,
       .stencilReference = sf::StencilValue{1u},
-      .stencilMask = sf::StencilValue{0xffu},
-      .stencilOnly = true
+      .stencilMask = sf::StencilValue{0xffu}
    };
 
    color.clearStencil(sf::StencilValue{0u});
@@ -98,9 +100,9 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    color_render_state.stencilMode = sf::StencilMode{
       .stencilComparison = sf::StencilComparison::Equal,
       .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
+      .stencilOnly = false,
       .stencilReference = sf::StencilValue{1u},
-      .stencilMask = sf::StencilValue{0xffu},
-      .stencilOnly = false
+      .stencilMask = sf::StencilValue{0xffu}
    };
 #else
    color_render_state.stencilMode = sf::StencilMode(  // set up stencil
