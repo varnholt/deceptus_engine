@@ -2,27 +2,28 @@
 
 Living status document. Mirrors the convention of `wasm_port_status.md`.
 
-**Last updated:** 2026-08-14
+**Last updated:** 2026-08-15
 **Branch:** `feat/switch-port` (pushed to origin, branched off `feat/harpoon` —
 rebase onto `master` later, nothing here overlaps other work)
 
-> ## The engine builds for the Switch
+> ## State in one paragraph
 >
-> ```
-> build_switch.bat . build_switch_engine   ->  build_switch_engine/deceptus.nro
-> ```
+> The engine **builds** for the Switch and **starts** under Ryujinx, but is **not playable
+> yet**. `build_switch.bat . build_switch_engine` produces a 122.6 MB `deceptus.nro` with
+> the full `data/` tree embedded as romfs. Launched in Ryujinx it mounts romfs, reads its
+> config, brings up EGL and a GL context, creates its window — and then fails at the first
+> render target with *"Impossible to create render texture (failed to link the target
+> texture to the framebuffer)"*. **That FBO failure is the current blocker.**
 >
-> 15.2 MB, valid `NRO0` magic, AArch64 PIE, with the Switch video/joystick/audio backend
-> symbols linked in. Zero compile errors, clean link.
+> Two known debts behind it: controller input is disabled (enumerating a joystick stalls
+> start-up) and audio is silent (miniaudio resolves to its null backend). Debug scaffolding
+> is still in the tree and listed under "How to pick this up from scratch".
 >
-> **It has never been run.** There is no hardware here. Everything below is a
-> compile-and-link result, and the two known runtime gaps — silent audio, and the shader
-> audit — are listed in the task table.
+> `lab/switch_smoke.nro` **does** run correctly and renders its clear colour pixel-exact,
+> which is what confirms the toolchain, EGL bring-up and GL context are sound.
 
-**Verified working:** `build_switch.bat lab/switch_smoke build_switch` produces
-`build_switch/switch_smoke.nro` — valid `NRO0` magic, AArch64 PIE, 5.9 MB.
-Toolchain, EGL/mesa/nouveau link, and `.nro` packaging are all confirmed end to end.
-The smoke test has **not** been run on hardware yet (needs a CFW Switch + `nxlink`).
+Read "How to pick this up from scratch" near the bottom first — it has the working-copy
+locations, the build/run commands, and the iteration loop, which is easy to get wrong.
 
 ---
 
@@ -689,6 +690,69 @@ Also seeded the Switch video mode at **1280x720** rather than 1920x1080: that is
 handheld scan-out size and what the NWindow reports by default. Docked mode hands out
 1080p, and the window reports its real size at creation time.
 
+## How to pick this up from scratch
+
+Everything below is what a fresh session needs; there is no state left in anyone's head.
+
+### Working copies
+
+| What | Where | Branch / base |
+|---|---|---|
+| SDL3 (vittorioromeo fork) | `D:/deceptus/sdl3_switch` | `switch-backend`, based on `e205361fb` |
+| VRSFML | `D:/deceptus/vrsfml_switch` | `switch-backend`, based on `9c272d601` |
+
+Both are **outside** the repo on purpose: the committed artefacts are the patches under
+`patches/`. Recreate either without network via
+`git clone --no-hardlinks <build dir>/_deps/<name>-src <target>`.
+
+### The iteration loop — this is the part that is easy to get wrong
+
+The engine build uses its **own** fetched copies under `build_switch_engine/_deps/`, not
+the working copies. Editing `D:/deceptus/sdl3_switch` alone changes nothing. Either:
+
+- **fast loop:** edit the working copy, then mirror the changed files into
+  `build_switch_engine/_deps/SDL/…` and rebuild — this is what the recent debugging did:
+
+  ```
+  Copy-Item "D:\deceptus\sdl3_switch\src\video\switch\*.c" `
+            "D:\deceptus\deceptus_engine\build_switch_engine\_deps\SDL\src\video\switch\" -Force
+  ```
+
+- **clean loop:** regenerate the patch, delete `build_switch_engine/_deps/SDL` and
+  `…/switch_sdl-subbuild`, and let CMake re-clone and re-apply. Slower, but it is what
+  proves the patch actually applies. **Never** reset those trees from the Windows host —
+  see the CRLF gotcha above.
+
+Regenerate a patch with:
+
+```
+cd D:/deceptus/sdl3_switch && git add -A && git diff e205361fb --cached > \
+  D:/deceptus/deceptus_engine/patches/switch-sdl3-backend.patch
+```
+
+### Build and run
+
+```
+build_switch.bat . build_switch_engine          # -> build_switch_engine/deceptus.nro
+uv run --with pytest pytest lab/switch_smoke/test_switch_build.py -v
+powershell -File lab/switch_smoke/run_ryujinx.ps1 `
+  -NroPath D:\deceptus\deceptus_engine\build_switch_engine\deceptus.nro `
+  -OutputPath out.png -SettleSeconds 120
+```
+
+`run_ryujinx.ps1` launches the emulator, waits, screenshots the window, prints the guest
+log and kills it. Guest trace lines appear as
+`KernelSvc OutputDebugString: [switch-trace] …`.
+
+### Debug scaffolding currently in the tree — remove when done
+
+- `SWITCH_TRACE` macros and `fprintf(stderr, …)` calls in `src/main.cpp` and
+  `src/game/game.cpp`
+- `fprintf` traces in `SDL_switchvideo.c` and `SDL_switchopengl.c`
+- `SWITCH_GLES_CreateContext` / `MakeCurrent` written out by hand instead of via
+  `SDL_EGL_*_impl`, purely so they can carry traces
+- `SWITCH_JoystickGetCount` returning 0
+
 ## Open questions
 
 - **What GL version/profile does the Switch actually report at runtime?** Static analysis says
@@ -706,14 +770,17 @@ handheld scan-out size and what the NWindow reports by default. Docked mode hand
 |---|---|---|
 | 1 | Add Docker Switch build harness | **done** (commit `6a6a28ea`) |
 | 2 | Get SDL3 configuring/building for the Switch toolchain | **done** — `libSDL3.a` builds for AArch64; see `patches/switch-sdl3-backend.patch` |
-| 3 | Implement SDL3 Switch video backend | **done** (compiles; unrun) |
-| 4 | Implement SDL3 Switch joystick backend | **done** (compiles; unrun) |
-| 5 | Implement SDL3 Switch audio backend | **done** (compiles; unrun) |
+| 3 | Implement SDL3 Switch video backend | **done and exercised** — window, EGL surface and GL context all work in Ryujinx |
+| 4 | Implement SDL3 Switch joystick backend | **compiles, but disabled** — enumerating a device stalls start-up, see task 12 |
+| 5 | Implement SDL3 Switch audio backend | **compiles, unused** — VRSFML sets `SDL_AUDIO OFF`, see task 10 |
 | 6 | Build VRSFML against Switch SDL3 | **done except audio** — all modules build; see `patches/switch-vrsfml-backend.patch` |
 | 7 | Add `NINTENDO_SWITCH` branch to project CMakeLists | **done — the engine builds; `deceptus.nro` is produced** |
 | 8 | Audit shaders for GL 4.3 core / GLES 3.2 | pending |
 | 9 | Package `data/` into romfs, produce first `.nro` | **done** — 122.6 MB `.nro`, 24/24 validation tests pass |
-| 11 | Run it on hardware or an emulator | **partly done** — runs in Ryujinx; reaches asset/shader loading |
+| 10 | Custom miniaudio backend over libnx `audout` | pending — audio is silent until then |
+| 11 | Run it on hardware or an emulator | **partly done** — starts in Ryujinx, stops at the first render target |
+| 12 | Fix the incomplete render texture FBO | **the current blocker** |
+| 13 | Restore controller input | pending — joystick count forced to 0 |
 
 ---
 
@@ -721,5 +788,13 @@ handheld scan-out size and what the NWindow reports by default. Docked mode hand
 
 - `build_switch.bat` — Docker entry point
 - `docker/build_switch.sh` — in-container CMake build
-- `lab/switch_smoke/` — EGL + core-GL smoke test (also the runtime GL-capability probe)
+- `lab/switch_smoke/source/main.cpp` — EGL + core-GL smoke test; also the runtime
+  GL-capability probe, printing `GL_VERSION`, profile bits and a `#version 430 core`
+  compile result over nxlink
+- `lab/switch_smoke/test_switch_build.py` — 24 structural tests over the built `.nro`
+- `lab/switch_smoke/run_ryujinx.ps1` — launches the emulator, screenshots, dumps the guest log
+- `src/switch/opengl/glew.h`, `src/switch/SFML/OpenGL.hpp` — include shims
+- `patches/switch-sdl3-backend.patch` — the SDL3 Switch backend
+- `patches/switch-vrsfml-backend.patch` — VRSFML platform gates
+- `patches/switch-lua-c89-numbers.patch` — makes Lua's own knob settable
 - `switch_port_status.md` — this file
