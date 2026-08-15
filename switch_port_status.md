@@ -399,6 +399,35 @@ untouched.
 Linking swaps glew for glad (`glad EGL glapi drm_nouveau`, in that order), and
 `nx_generate_nacp()` / `nx_create_nro()` produce the homebrew binary.
 
+### The include shim, and the `__EMSCRIPTEN__` problem behind it
+
+First engine build produced only **4 errors**, all `SFML/Graphics.hpp: No such file or
+directory` — VRSFML has no monolithic umbrella headers. The WASM target already solves
+this with a shim tree at `src/wasm/SFML/`, and **those shims are VRSFML compatibility
+headers, not Emscripten-specific**: they re-export VRSFML's split headers and supply
+`sf::Drawable` and `sf::VertexArray`, both of which VRSFML dropped. So Switch reuses them.
+
+Added `src/switch/opengl/glew.h`, the counterpart to `src/wasm/opengl/glew.h`, mapping
+`glewInit()` onto `gladLoadGL()`. The difference from the WASM stub is that this one
+exposes **desktop** GL via glad rather than GLES3. Both `src/switch` and `src/wasm` go on
+the include path in a **single** `target_include_directories(... BEFORE ...)` call so the
+order holds — two separate `BEFORE` calls would prepend `src/wasm` last and let the GLES3
+stub shadow the glad one.
+
+**The larger issue this exposes.** The dual-SFML architecture selects between VRSFML and
+vanilla SFML APIs with `#ifdef __EMSCRIPTEN__`, across ~161 files. On Switch that macro is
+not defined, so every one of those sites takes the *vanilla SFML* branch while compiling
+against *VRSFML* headers. The first build only surfaced 4 errors because it failed on the
+umbrella headers before reaching any of that.
+
+The correct fix is a project-level macro (something like `DECEPTUS_VRSFML`) defined for
+both Emscripten and Switch, with the API-selection guards migrated onto it — while leaving
+the genuinely Emscripten-specific guards (main loop, filesystem, threading flags) on
+`__EMSCRIPTEN__`. Telling those two apart needs a per-site judgement call, so it is a
+careful pass over ~161 files rather than a search-and-replace. **Not attempted here.**
+Defining `__EMSCRIPTEN__` on Switch would be the wrong shortcut — it would drag in
+emscripten-only code paths.
+
 ## Open questions
 
 - **What GL version/profile does the Switch actually report at runtime?** Static analysis says

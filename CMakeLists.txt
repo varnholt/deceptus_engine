@@ -1237,7 +1237,22 @@ endif()
 # emscripten / webassembly
 # ----------------------------------------------------------------------------------------------------
 
-if(EMSCRIPTEN)
+if(NINTENDO_SWITCH)
+    # prepend src/switch so "#include <opengl/glew.h>" resolves to the glad stub
+    # instead of the desktop GLEW header in src/opengl/
+    #
+    # src/wasm is on the path as well, but only for its SFML/* umbrella headers: those
+    # are VRSFML compatibility shims (VRSFML has no monolithic SFML/Graphics.hpp, and
+    # dropped sf::Drawable and sf::VertexArray), so they apply to any VRSFML target
+    # rather than to Emscripten specifically.
+    #
+    # Both go in a single call so the listed order is preserved -- src/switch has to come
+    # first, or the GLES3 glew stub would shadow the glad one.
+    target_include_directories(
+        deceptus BEFORE
+        PRIVATE ${CMAKE_SOURCE_DIR}/src/switch
+                ${CMAKE_SOURCE_DIR}/src/wasm)
+elseif(EMSCRIPTEN)
     # prepend src/wasm so "#include <opengl/glew.h>" resolves to the GLES3 stub
     # instead of the desktop GLEW header in src/opengl/
     target_include_directories(deceptus BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/src/wasm)
