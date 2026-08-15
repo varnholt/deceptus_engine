@@ -139,7 +139,14 @@ GameConfiguration& GameConfiguration::getInstance()
       // seed defaults from the actual desktop so first-launch resolution is sensible.
       // the switch has no desktop either: it scans out at a fixed 720p handheld or
       // 1080p docked, so it takes the same path as the web build.
-#if !defined(__EMSCRIPTEN__) && !defined(__SWITCH__)
+#if defined(__SWITCH__)
+      // the handheld scan-out size, which is also what the NWindow reports by default.
+      // docked mode hands out 1080p, but the window reports its real size at creation
+      // time, so starting from 720p avoids allocating render targets for a resolution
+      // this session may never run at
+      __instance._video_mode_width = 1280;
+      __instance._video_mode_height = 720;
+#elif !defined(__EMSCRIPTEN__)
       const auto desktop = sf::VideoMode::getDesktopMode();
       __instance._video_mode_width = static_cast<int32_t>(desktop.size.x);
       __instance._video_mode_height = static_cast<int32_t>(desktop.size.y);

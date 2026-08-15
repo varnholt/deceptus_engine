@@ -451,10 +451,10 @@ index 15659b8cc..ea36ef9f4 100644
  
 diff --git a/src/joystick/switch/SDL_sysjoystick.c b/src/joystick/switch/SDL_sysjoystick.c
 new file mode 100644
-index 000000000..fb5dfe692
+index 000000000..0ff81cb61
 --- /dev/null
 +++ b/src/joystick/switch/SDL_sysjoystick.c
-@@ -0,0 +1,269 @@
+@@ -0,0 +1,276 @@
 +/*
 +  Simple DirectMedia Layer
 +  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
@@ -512,7 +512,8 @@ index 000000000..fb5dfe692
 +
 +    switch_previous_buttons = 0;
 +
-+    SDL_PrivateJoystickAdded(1);
++    // TEMPORARY EXPERIMENT: is the startup stall coming from joystick enumeration?
++    // SDL_PrivateJoystickAdded(1);
 +    return true;
 +}
 +
@@ -523,7 +524,13 @@ index 000000000..fb5dfe692
 +
 +static int SWITCH_JoystickGetCount(void)
 +{
-+    return 1;
++    /* TODO: reporting a device here stalls start-up. Enumerating it makes callers query
++     * properties this driver does not supply -- SDL_GetJoystickVendor fails first -- and
++     * something in that path never returns. Reporting none lets the rest of the system
++     * come up; the cost is that no controller input works yet. The GUID from
++     * SDL_CreateJoystickGUIDForName carries no vendor or product id, which is the most
++     * likely thing to fix first. */
++    return 0;
 +}
 +
 +static SDL_GUID SWITCH_JoystickGetDeviceGUID(int device_index)
@@ -982,10 +989,10 @@ index 000000000..9b7ac2421
 +#endif // SDL_switchopengl_h_
 diff --git a/src/video/switch/SDL_switchvideo.c b/src/video/switch/SDL_switchvideo.c
 new file mode 100644
-index 000000000..4bfdde180
+index 000000000..7c191e1c0
 --- /dev/null
 +++ b/src/video/switch/SDL_switchvideo.c
-@@ -0,0 +1,308 @@
+@@ -0,0 +1,318 @@
 +/*
 +  Simple DirectMedia Layer
 +  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
@@ -1269,8 +1276,18 @@ index 000000000..4bfdde180
 +void SWITCH_ShowWindow(SDL_VideoDevice *_this, SDL_Window *window)
 +{
 +    fprintf(stderr, "[switch-trace] video: show window\n");
++
++    /* There is no window manager here to report back, so the backend has to raise these
++     * itself. Callers wait on them before treating the window as usable -- without them
++     * window creation never completes. */
++    SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_SHOWN, 0, 0);
++    SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_EXPOSED, 0, 0);
++
 +    SDL_SetMouseFocus(window);
 +    SDL_SetKeyboardFocus(window);
++
++    SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_FOCUS_GAINED, 0, 0);
++
 +    fprintf(stderr, "[switch-trace] video: show window done\n");
 +}
 +
