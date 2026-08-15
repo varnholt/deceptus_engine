@@ -219,6 +219,54 @@ Build SDL's own `test/` targets are disabled (`-DSDL_TESTS=OFF -DSDL_EXAMPLES=OF
 fail to link because they expect a real video driver and libnx entry point. The library
 target is unaffected.
 
+### Tasks 3–5 — the three real backends
+
+All three compile into `libSDL3.a`. **None has been run**, on hardware or otherwise.
+
+**Video — `src/video/switch/`.** Modelled on `src/video/vivante/`, which is the closest
+analog in the tree: embedded EGL, no window manager, and it drives everything through
+SDL's shared `SDL_EGL_*` helpers. Switch is simpler still, because libnx owns the one
+window — `SWITCH_CreateWindow` takes `nwindowGetDefault()` and sizes it with
+`nwindowSetDimensions()` rather than creating anything, and `SWITCH_DestroyWindow`
+deliberately does not destroy it. `SWITCH_PumpEvents` turns `appletMainLoop()` going
+false (user quitting from the home menu) into `SDL_SendQuit()`. Display modes advertise
+both 1280x720 handheld and 1920x1080 docked.
+
+Three findings worth keeping:
+
+1. **SDL's EGL layer already supports desktop GL.** `SDL_egl.c` binds `EGL_OPENGL_API`
+   with `EGL_OPENGL_BIT` whenever the profile is not ES, chosen at runtime from
+   `gl_config.profile_mask`. So the same backend serves GL 4.3 core and GLES 3.2 — the
+   port never has to pick one at build time.
+2. **Static EGL is a solved problem in SDL — Vita already does it.** `SDL_egl.c` has five
+   `SDL_VIDEO_DRIVER_VITA` guards that swap `dlopen` for direct symbol references; Switch
+   joins four of them. It deliberately does **not** join the fifth (~line 1154), because
+   that one gates desktop-GL support that Vita lacks and the Switch has.
+3. **SDL's bundled Khronos `eglplatform.h` had no Switch branch** and failed with
+   `#error "Platform not recognized"`. The added branch mirrors devkitPro's switch-mesa
+   header exactly — `void *` display and window, `khronos_uint8_t *` pixmap — verified by
+   preprocessing the system header rather than guessed, since SDL calls straight into
+   that statically linked libEGL and the types must agree.
+
+**Joystick — `src/joystick/switch/`.** libnx `pad` API, one controller,
+`HidNpadStyleSet_NpadStandard` so a Joy-Con pair reports as a single gamepad. Sticks come
+out of libnx already in signed 16-bit range, so only the Y axes get flipped (libnx points
+up positive, SDL up negative). Buttons are exposed at their `HidNpadButton` bit positions.
+**Note the A/B and X/Y swap in the gamepad mapping:** SDL's gamepad roles are positional,
+and Nintendo's physical layout puts A where a standard pad puts B, so `.a` maps to
+`HidNpadButton_B` and `.x` to `HidNpadButton_Y`. ZL/ZR are digital here, so they map as
+buttons rather than axes.
+
+**Audio — `src/audio/switch/`.** Built on libnx `audout` rather than `audren`: audout is
+plain PCM out and needs no voice/mempool setup, which is all this game requires. Format is
+not negotiated — audout only ever does 48 kHz stereo S16, so the backend reports the
+hardware's terms via `SDL_UpdatedAudioDeviceFormat()` and lets SDL convert. Double
+buffered, both address and size page-aligned to 0x1000 as audout demands, with
+`audoutWaitPlayFinish()` pacing the audio thread. Recording is unimplemented (`audin`).
+
+**This unblocks SFML audio**, which was the open question earlier: SFML 3 uses miniaudio,
+which has no Switch backend of its own.
+
 **Known limitation to revisit:** on Switch the real timezone lives behind libnx's time
 service (`timeGetDeviceLocationName`, `timeToCalendarTimeWithMyRule`), so newlib's
 `_timezone` will read 0 unless `TZ` is set. Wall-clock UTC offset will therefore be wrong
@@ -243,9 +291,9 @@ until a proper Switch time backend exists. It does not block anything the game n
 |---|---|---|
 | 1 | Add Docker Switch build harness | **done** (commit `6a6a28ea`) |
 | 2 | Get SDL3 configuring/building for the Switch toolchain | **done** — `libSDL3.a` builds for AArch64; see `patches/switch-sdl3-backend.patch` |
-| 3 | Implement SDL3 Switch video backend | pending |
-| 4 | Implement SDL3 Switch joystick backend | pending |
-| 5 | Implement SDL3 Switch audio backend | pending |
+| 3 | Implement SDL3 Switch video backend | **done** (compiles; unrun) |
+| 4 | Implement SDL3 Switch joystick backend | **done** (compiles; unrun) |
+| 5 | Implement SDL3 Switch audio backend | **done** (compiles; unrun) |
 | 6 | Build VRSFML against Switch SDL3 | pending |
 | 7 | Add `NINTENDO_SWITCH` branch to project CMakeLists | pending |
 | 8 | Audit shaders for GL 4.3 core / GLES 3.2 | pending |
