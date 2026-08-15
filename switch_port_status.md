@@ -23,12 +23,14 @@ rebase onto `master` later, nothing here overlaps other work)
 > (fixed by turning stack traces off for this target), and controller hotplug detection
 > never ran on the VRSFML path at all (fixed by polling the device list from the main loop).
 >
-> **On real hardware it has been started once and crashed**, during asset loading, in applet
-> mode. The evidence points at the memory pool rather than at anything in the port — see
-> "The first hardware run" below. It has not yet been retried in title takeover mode.
+> **It runs on real hardware.** The first hardware run crashed during asset loading; the
+> cause was applet mode, not the port. Relaunched in **title takeover mode** — hold R while
+> starting a game from the HOME menu — the same binary works. See "The first hardware run"
+> below; that distinction is the single most important thing to know about running this on a
+> console.
 >
-> Remaining beyond that: **audio is silent** (miniaudio resolves to its null backend), and
-> debug scaffolding is still in the tree, listed under "How to pick this up from scratch".
+> Remaining: **audio is silent** (miniaudio resolves to its null backend), and debug
+> scaffolding is still in the tree, listed under "How to pick this up from scratch".
 
 Read "How to pick this up from scratch" near the bottom first — it has the working-copy
 locations, the build/run commands, and the iteration loop, which is easy to get wrong.
@@ -818,6 +820,11 @@ which is exactly what `GameController::activate` and the add/remove callbacks wa
 
 ## The first hardware run
 
+**Confirmed: it was applet mode.** Relaunching the *same* binary in title takeover mode made
+it work on the console. The diagnosis below is kept because the symptom is so unhelpful that
+anyone hitting it again will need it — and because the whole thing was read off a photo of
+the fatal screen, which is a technique worth reusing.
+
 It crashed. Atmosphère's fatal screen, on firmware 22.5.0 / Atmosphère 1.11.2:
 
 ```
@@ -854,8 +861,9 @@ application. Applet mode has nothing like that, `stbi`'s allocation fails with `
 and the null propagates into a data abort. The engine embeds 104 MB of assets and decodes
 much of that to RGBA, so it is not a marginal case.
 
-**Next step is therefore to relaunch in title takeover mode, not to change code.** Two
-changes went in to make the next run conclusive rather than another register dump:
+**The fix was therefore how it is launched, not a code change** — which is what relaunching
+in title takeover mode confirmed. These changes went in alongside, to make the next hardware
+failure readable rather than another register dump:
 
 - **The Switch build now writes a log to the SD card**, `sdmc:/switch/deceptus/logs/`.
   `LogThread` was compiled out for every `DECEPTUS_VRSFML` target because the web build has
@@ -1024,7 +1032,7 @@ can be phrased as "does this combination work here".
 | 12 | Fix the incomplete render texture FBO | **done** — switch-mesa ignores EGL context sharing; the platform now uses one GL context |
 | 13 | Restore controller input | **done** — count back to 1, GUID carries vendor/product, and detection now polls on the VRSFML path |
 | 14 | Play past the menu — start a level and verify gameplay | **done** — menu, file select, catacombs load, walking and jumping all verified in Ryujinx |
-| 15 | Run it on real hardware | **in progress** — first run crashed in applet mode; retry in title takeover mode |
+| 15 | Run it on real hardware | **done** — runs on a console in title takeover mode; how it plays there is still to be reported |
 | 16 | Strip the debug scaffolding | pending — the per-frame traces are gone, the start-up ones remain |
 | 17 | Make a failed asset load an error rather than a crash | pending — see "The first hardware run" |
 

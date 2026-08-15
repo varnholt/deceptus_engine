@@ -157,7 +157,9 @@ Everything runs in the official `devkitpro/devkita64` Docker image, so no local 
 install is needed. The result is a self-contained `deceptus.nro` with the whole `data/`
 directory embedded as romfs.
 
-It boots and plays, audio is silent, and it has so far only been run in an emulator.
+It boots and plays, on a console as well as in an emulator, and audio is silent so far. On
+hardware it has to be launched in title takeover mode — hold R while starting a game from the
+HOME menu — or it runs out of memory during asset loading.
 [doc/switch_build.md](doc/switch_build.md) has the full setup, how to run and script it in
 Ryujinx, and how to work on the port itself.
 

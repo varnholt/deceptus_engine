@@ -10,10 +10,10 @@ profile only, so the desktop path cannot work there. The Switch therefore runs o
 [VRSFML](https://github.com/vittorioromeo/VRSFML) over SDL 3, the same as the web build, with
 a Switch video, audio and joystick backend added to SDL.
 
-**State:** it builds, boots and plays in Ryujinx — menus, file select, level loading, movement,
-lighting, shaders and controller input all work. **Audio is silent.** On real hardware it has
-been started once and crashed, in a way that points squarely at how it was launched; see
-[Run it on hardware](#run-it-on-hardware).
+**State:** it builds, boots and plays. In Ryujinx menus, file select, level loading, movement,
+lighting, shaders and controller input all work; on a real console it runs too, **provided it
+is launched in title takeover mode** — see [Run it on hardware](#run-it-on-hardware), because
+launching it the usual way fails in a thoroughly misleading way. **Audio is silent.**
 
 The design decisions, the platform traps behind them and the running task list live in
 [`switch_port_status.md`](../switch_port_status.md). This page is only about getting a build
@@ -161,8 +161,9 @@ engine's own logging. The start-up traces use `fprintf(stderr, …)` for that re
 
 Copy `deceptus.nro` to the SD card under `/switch/` and launch it from the homebrew menu.
 
-**Launch it in title takeover mode.** This is not optional for this game. Hold <kbd>R</kbd>
-while starting any *game* from the HOME menu; that opens the homebrew menu with the whole
+**Launch it in title takeover mode.** This is not optional for this game, and it is the
+difference between it running and it crashing on the same binary. Hold <kbd>R</kbd> while
+starting any *game* from the HOME menu; that opens the homebrew menu with the whole
 application memory pool, and anything launched from there inherits it. Opening the homebrew
 menu from the Album instead runs it as a **library applet**, inside that applet's much smaller
 pool — the game loads over a hundred megabytes of assets and does not fit.
@@ -209,7 +210,7 @@ answered in one run — it has only ever been answered under emulation, where th
 |Area|State|
 |-|-|
 |Audio|**Silent.** VRSFML brings its own miniaudio, and miniaudio has no Switch backend, so it resolves to its null backend. Fixing it means writing a custom miniaudio backend over libnx `audout`. Note that SDL's Switch audio backend, which does exist, is *not* the answer: VRSFML builds SDL with `SDL_AUDIO OFF` and never routes audio through it.|
-|Hardware|Started once, crashed during asset loading in applet mode. See [Run it on hardware](#run-it-on-hardware) — it has not yet been retried in title takeover mode.|
+|Hardware|Runs, in title takeover mode. How well it plays there — frame rate, room transitions, long sessions — has not been measured yet.|
 |Failed asset loads|A texture that fails to load returns null and the caller dereferences it. That should be a logged error rather than a crash, but which callers need hardening is not yet known — the log now names the asset, so the next hardware run says.|
 |Debug scaffolding|Start-up traces are still compiled in. Harmless, but they are listed for removal in the status document.|
 
