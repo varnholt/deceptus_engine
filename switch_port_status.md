@@ -198,6 +198,32 @@ already handles.
 Video, audio and joystick currently fall through to SDL's automatic dummy backends — that
 is deliberate, so the library builds and links before tasks 3–5 replace them.
 
+### Compile fixes on top of configure
+
+Everything that broke was in SDL's *generic* backends meeting newlib's limits. Each fix
+follows a precedent already in the tree rather than inventing anything:
+
+| File | Problem | Fix |
+|---|---|---|
+| `src/dynapi/SDL_dynapi.h` | `#error Please define your platform` | `SDL_DYNAMIC_API 0` for Switch, alongside the existing Vita and 3DS entries — devkitA64 has no dynamic linking |
+| `src/thread/pthread/SDL_systhread.c` | libnx has no `pthread_getschedparam` / `pthread_setschedparam` / `sched_get_priority_min`/`max` | added `SDL_PLATFORM_SWITCH` to the existing `SDL_PLATFORM_RISCOS` guard that no-ops `SDL_SYS_SetThreadPriority` |
+| `src/time/unix/SDL_systime.c` | newlib's `struct tm` has no `tm_gmtoff` | route Switch down the strictly POSIX.1-2008 branch, same as Solaris |
+| `src/time/unix/SDL_systime.c` | newlib names the global `_timezone`, not `timezone` | `#ifdef SDL_PLATFORM_SWITCH` → `_timezone` |
+
+**Result: `libSDL3.a` builds for AArch64** (~15.7 MB). The whole of "SDL3 builds for
+Switch" is 57 added lines across 7 files, captured as
+**`patches/switch-sdl3-backend.patch`** — apply it the same way the root `CMakeLists.txt`
+already applies `vrsfml-webgl2-uniforms.patch`.
+
+Build SDL's own `test/` targets are disabled (`-DSDL_TESTS=OFF -DSDL_EXAMPLES=OFF`); they
+fail to link because they expect a real video driver and libnx entry point. The library
+target is unaffected.
+
+**Known limitation to revisit:** on Switch the real timezone lives behind libnx's time
+service (`timeGetDeviceLocationName`, `timeToCalendarTimeWithMyRule`), so newlib's
+`_timezone` will read 0 unless `TZ` is set. Wall-clock UTC offset will therefore be wrong
+until a proper Switch time backend exists. It does not block anything the game needs.
+
 ---
 
 ## Open questions
@@ -216,7 +242,7 @@ is deliberate, so the library builds and links before tasks 3–5 replace them.
 | # | Task | Status |
 |---|---|---|
 | 1 | Add Docker Switch build harness | **done** (commit `6a6a28ea`) |
-| 2 | Get SDL3 configuring/building for the Switch toolchain | pending |
+| 2 | Get SDL3 configuring/building for the Switch toolchain | **done** — `libSDL3.a` builds for AArch64; see `patches/switch-sdl3-backend.patch` |
 | 3 | Implement SDL3 Switch video backend | pending |
 | 4 | Implement SDL3 Switch joystick backend | pending |
 | 5 | Implement SDL3 Switch audio backend | pending |

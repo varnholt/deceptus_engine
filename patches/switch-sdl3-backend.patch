@@ -1,0 +1,151 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e591a011c..2f38fea78 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -149,7 +149,9 @@ endif()
+ #  for the time being. This default will change to ON once this becomes
+ #  commonly supported in browsers or the Emscripten team makes a single
+ #  binary work everywhere.
+-if (UNIX_OR_MAC_SYS AND NOT EMSCRIPTEN)
++# libnx implements pthreads, so the Switch wants the pthread backend even though it is
++# not a UNIX_OR_MAC_SYS platform.
++if ((UNIX_OR_MAC_SYS OR SWITCH) AND NOT EMSCRIPTEN)
+   set(SDL_PTHREADS_DEFAULT ON)
+ else()
+   set(SDL_PTHREADS_DEFAULT OFF)
+@@ -3350,6 +3352,31 @@ elseif(N3DS)
+     "${SDL3_SOURCE_DIR}/src/io/n3ds/*.h"
+   )
+ 
++elseif(SWITCH)
++  # Nintendo Switch homebrew, built with devkitPro/devkitA64 against libnx.
++  #
++  # libnx ships newlib with real pthreads, clock_gettime and the usual POSIX file
++  # entry points, so unlike the Vita and 3DS ports most of SDL's plumbing reuses the
++  # generic backends instead of needing bespoke implementations. Only video, audio and
++  # joystick genuinely need Switch-specific code; until those land, the dummy fallbacks
++  # further down this file fill them in so the rest of the library can be built and
++  # linked.
++  sdl_glob_sources("${SDL3_SOURCE_DIR}/src/main/generic/*.c")
++
++  CheckPTHREAD()
++
++  set(SDL_FSOPS_POSIX 1)
++  sdl_sources("${SDL3_SOURCE_DIR}/src/filesystem/posix/SDL_sysfsops.c")
++  set(HAVE_SDL_FSOPS TRUE)
++
++  set(SDL_TIME_UNIX 1)
++  sdl_glob_sources("${SDL3_SOURCE_DIR}/src/time/unix/*.c")
++  set(HAVE_SDL_TIME TRUE)
++
++  set(SDL_TIMER_UNIX 1)
++  sdl_glob_sources("${SDL3_SOURCE_DIR}/src/timer/unix/*.c")
++  set(HAVE_SDL_TIMERS TRUE)
++
+ elseif(DOS)
+   sdl_glob_sources("${SDL3_SOURCE_DIR}/src/main/dos/*.c")
+   sdl_glob_sources("${SDL3_SOURCE_DIR}/src/core/dos/*.c")
+diff --git a/cmake/sdlchecks.cmake b/cmake/sdlchecks.cmake
+index 055781dde..b1c172c59 100644
+--- a/cmake/sdlchecks.cmake
++++ b/cmake/sdlchecks.cmake
+@@ -969,6 +969,9 @@ macro(CheckPTHREAD)
+     if(ANDROID OR SDL_PTHREADS_PRIVATE)
+       # the android libc provides built-in support for pthreads, so no
+       # additional linking or compile flags are necessary
++    elseif(SWITCH)
++      # libnx implements pthreads itself, so there is no separate libpthread to link
++      # against and no additional compile flags are necessary
+     elseif(LINUX)
+       set(PTHREAD_CFLAGS "-D_REENTRANT")
+       set(PTHREAD_LDFLAGS "-pthread")
+diff --git a/cmake/sdlplatform.cmake b/cmake/sdlplatform.cmake
+index 6c60e0a2b..4e3719c45 100644
+--- a/cmake/sdlplatform.cmake
++++ b/cmake/sdlplatform.cmake
+@@ -22,6 +22,8 @@ function(SDL_DetectCMakePlatform)
+     set(sdl_cmake_platform Haiku)
+   elseif(NINTENDO_3DS)
+     set(sdl_cmake_platform n3ds)
++  elseif(NINTENDO_SWITCH)
++    set(sdl_cmake_platform switch)
+   elseif(CMAKE_SYSTEM_NAME STREQUAL "DOS")
+     set(sdl_cmake_platform dos)
+   elseif(NGAGESDK)
+diff --git a/include/SDL3/SDL_platform_defines.h b/include/SDL3/SDL_platform_defines.h
+index 23ff34ce1..177b68d71 100644
+--- a/include/SDL3/SDL_platform_defines.h
++++ b/include/SDL3/SDL_platform_defines.h
+@@ -473,6 +473,16 @@
+ #define SDL_PLATFORM_3DS 1
+ #endif
+ 
++#ifdef __SWITCH__
++
++/**
++ * A preprocessor macro that is only defined if compiling for Nintendo Switch.
++ *
++ * \since This macro is available since SDL 3.5.0.
++ */
++#define SDL_PLATFORM_SWITCH 1
++#endif
++
+ #ifdef __NGAGE__
+ 
+ /**
+diff --git a/src/dynapi/SDL_dynapi.h b/src/dynapi/SDL_dynapi.h
+index 2713e3f46..705f36f27 100644
+--- a/src/dynapi/SDL_dynapi.h
++++ b/src/dynapi/SDL_dynapi.h
+@@ -63,6 +63,8 @@
+ #define SDL_DYNAMIC_API 0 // vitasdk doesn't support dynamic linking
+ #elif defined(SDL_PLATFORM_3DS)
+ #define SDL_DYNAMIC_API 0 // devkitARM doesn't support dynamic linking
++#elif defined(SDL_PLATFORM_SWITCH)
++#define SDL_DYNAMIC_API 0 // devkitA64 doesn't support dynamic linking
+ #elif defined(SDL_PLATFORM_NGAGE)
+ #define SDL_DYNAMIC_API 0
+ #elif defined(SDL_PLATFORM_DOS)
+diff --git a/src/thread/pthread/SDL_systhread.c b/src/thread/pthread/SDL_systhread.c
+index fd16b2d8e..461be0d91 100644
+--- a/src/thread/pthread/SDL_systhread.c
++++ b/src/thread/pthread/SDL_systhread.c
+@@ -185,8 +185,10 @@ SDL_ThreadID SDL_GetCurrentThreadID(void)
+ 
+ bool SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
+ {
+-#ifdef SDL_PLATFORM_RISCOS
++#if defined(SDL_PLATFORM_RISCOS) || defined(SDL_PLATFORM_SWITCH)
+     // FIXME: Setting thread priority does not seem to be supported
++    // libnx's pthread layer provides no pthread_getschedparam/pthread_setschedparam
++    // and no sched_get_priority_min/max, so there is nothing to drive this with.
+     return true;
+ #else
+     struct sched_param sched;
+diff --git a/src/time/unix/SDL_systime.c b/src/time/unix/SDL_systime.c
+index b5ae56440..27ae40c14 100644
+--- a/src/time/unix/SDL_systime.c
++++ b/src/time/unix/SDL_systime.c
+@@ -195,13 +195,21 @@ bool SDL_TimeToDateTime(SDL_Time ticks, SDL_DateTime *dt, bool localTime)
+          *
+          * The notable exception is Solaris, where the timezone offset must still be retrieved in the strictly POSIX.1-2008
+          * compliant way.
++         *
++         * The newlib that ships with libnx is a second exception: it does not expose
++         * tm_gmtoff either, so the Switch takes the same strictly POSIX.1-2008 path.
+          */
+-#if (_POSIX_VERSION >= 202405L) || (!defined(sun) && !defined(__sun))
++#if ((_POSIX_VERSION >= 202405L) || (!defined(sun) && !defined(__sun))) && !defined(SDL_PLATFORM_SWITCH)
+         dt->utc_offset = (int)tm->tm_gmtoff;
+ #else
+         if (localTime) {
+             tzset();
++#ifdef SDL_PLATFORM_SWITCH
++            // newlib names the offset _timezone rather than timezone
++            dt->utc_offset = (int)_timezone;
++#else
+             dt->utc_offset = (int)timezone;
++#endif
+         } else {
+             dt->utc_offset = 0;
+         }
