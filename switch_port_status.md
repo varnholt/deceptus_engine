@@ -264,8 +264,18 @@ hardware's terms via `SDL_UpdatedAudioDeviceFormat()` and lets SDL convert. Doub
 buffered, both address and size page-aligned to 0x1000 as audout demands, with
 `audoutWaitPlayFinish()` pacing the audio thread. Recording is unimplemented (`audin`).
 
-**This unblocks SFML audio**, which was the open question earlier: SFML 3 uses miniaudio,
-which has no Switch backend of its own.
+**Correction — this does *not* automatically give SFML audio.** An earlier note here (and
+commit `423ac4ea`) claimed it did. It doesn't: `src/SFML/Window/CMakeLists.txt` in VRSFML
+sets **`SDL_AUDIO OFF`** and VRSFML brings its own miniaudio (`Audio/MiniaudioUnity.cpp`),
+so SFML audio never travels through SDL's audio driver. Getting sound out on Switch needs
+one of:
+
+- flip `SDL_AUDIO` back ON in VRSFML and point miniaudio at its SDL backend
+  (`ma_backend_sdl`), which is what makes the driver above the actual path; or
+- write a miniaudio Switch backend over `audout`/`audren` directly.
+
+The SDL audio backend is still worth having — it is what the first option needs — but it
+is not sufficient on its own. **Unresolved, and it is the main open risk in task 6.**
 
 **Known limitation to revisit:** on Switch the real timezone lives behind libnx's time
 service (`timeGetDeviceLocationName`, `timeToCalendarTimeWithMyRule`), so newlib's
