@@ -73,7 +73,7 @@ private:
       sf::Vector2f direction;
       sf::FloatRect rect;
       b2Body* body = nullptr;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       std::shared_ptr<sf::Texture> texture;
       std::unique_ptr<sf::Sprite> sprite;
       float sprite_offset = 0.0f;

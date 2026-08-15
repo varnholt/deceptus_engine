@@ -7,7 +7,7 @@
 //! \brief Free functions that hide the VRSFML (WASM) vs. vanilla SFML3 (desktop) API divide
 //!        behind a single call site.
 //!
-//! Every function here is a trivial template whose body is selected by #ifdef __EMSCRIPTEN__
+//! Every function here is a trivial template whose body is selected by #ifdef DECEPTUS_VRSFML
 //! at compile time. Each platform's build only ever instantiates one branch, so there is no
 //! runtime dispatch of any kind (no virtual calls, no std::function, no branch) — the compiled
 //! output is identical to writing the platform-specific call inline. Call sites should read the
@@ -19,7 +19,7 @@ namespace sfcompat
 template <typename Drawable>
 inline void setPosition(Drawable& drawable, const sf::Vector2f& position)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    drawable.position = position;
 #else
    drawable.setPosition(position);
@@ -30,7 +30,7 @@ inline void setPosition(Drawable& drawable, const sf::Vector2f& position)
 template <typename Drawable>
 inline sf::Vector2f getPosition(const Drawable& drawable)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    return drawable.position;
 #else
    return drawable.getPosition();
@@ -41,7 +41,7 @@ inline sf::Vector2f getPosition(const Drawable& drawable)
 template <typename Drawable>
 inline void setOrigin(Drawable& drawable, const sf::Vector2f& origin)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    drawable.origin = origin;
 #else
    drawable.setOrigin(origin);
@@ -52,7 +52,7 @@ inline void setOrigin(Drawable& drawable, const sf::Vector2f& origin)
 template <typename Drawable>
 inline sf::Vector2f getOrigin(const Drawable& drawable)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    return drawable.origin;
 #else
    return drawable.getOrigin();
@@ -63,7 +63,7 @@ inline sf::Vector2f getOrigin(const Drawable& drawable)
 template <typename Drawable>
 inline void setScale(Drawable& drawable, const sf::Vector2f& scale)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    drawable.scale = scale;
 #else
    drawable.setScale(scale);
@@ -74,7 +74,7 @@ inline void setScale(Drawable& drawable, const sf::Vector2f& scale)
 template <typename Drawable>
 inline sf::Vector2f getScale(const Drawable& drawable)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    return drawable.scale;
 #else
    return drawable.getScale();
@@ -85,7 +85,7 @@ inline sf::Vector2f getScale(const Drawable& drawable)
 template <typename Drawable>
 inline void setRotation(Drawable& drawable, const sf::Angle& angle)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    drawable.rotation = angle;
 #else
    drawable.setRotation(angle);
@@ -96,7 +96,7 @@ inline void setRotation(Drawable& drawable, const sf::Angle& angle)
 template <typename Drawable>
 inline sf::Angle getRotation(const Drawable& drawable)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    return drawable.rotation;
 #else
    return drawable.getRotation();
@@ -107,7 +107,7 @@ inline sf::Angle getRotation(const Drawable& drawable)
 template <typename Drawable>
 inline void setColor(Drawable& drawable, const sf::Color& color)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    drawable.color = color;
 #else
    drawable.setColor(color);
@@ -118,7 +118,7 @@ inline void setColor(Drawable& drawable, const sf::Color& color)
 template <typename Drawable>
 inline sf::Color getColor(const Drawable& drawable)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    return drawable.color;
 #else
    return drawable.getColor();
@@ -129,7 +129,7 @@ inline sf::Color getColor(const Drawable& drawable)
 template <typename Drawable, typename Rect>
 inline void setTextureRect(Drawable& drawable, const Rect& rect)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    drawable.textureRect = rect;
 #else
    drawable.setTextureRect(rect);
@@ -140,7 +140,7 @@ inline void setTextureRect(Drawable& drawable, const Rect& rect)
 template <typename Drawable>
 inline auto getTextureRect(const Drawable& drawable)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    return drawable.textureRect;
 #else
    return drawable.getTextureRect();
@@ -151,7 +151,7 @@ inline auto getTextureRect(const Drawable& drawable)
 template <typename Rect>
 inline std::optional<Rect> findIntersection(const Rect& a, const Rect& b)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto result = sf::findIntersection(a, b);
    return result.hasValue() ? std::optional<Rect>{*result} : std::nullopt;
 #else
@@ -162,7 +162,7 @@ inline std::optional<Rect> findIntersection(const Rect& a, const Rect& b)
 /// \brief returns a zero-length sf::Time.
 inline sf::Time timeZero()
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    return sf::Time{};
 #else
    return sf::Time::Zero;

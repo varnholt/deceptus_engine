@@ -574,7 +574,7 @@ Console::Console()
             if (level && level->getPlayerLight())
             {
                level->getPlayerLight()->_color.a = alpha;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
                level->getPlayerLight()->_sprite->color = level->getPlayerLight()->_color;
 #else
                level->getPlayerLight()->_sprite->setColor(level->getPlayerLight()->_color);

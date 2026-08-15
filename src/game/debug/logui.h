@@ -30,7 +30,7 @@ struct LogItem
 
 }  // namespace LogUiBuffer
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 /// \brief renders a dedicated imgui window that displays recent log messages with severity coloring.
 class LogUi
 {
@@ -50,6 +50,6 @@ public:
    std::unique_ptr<sf::RenderWindow> _render_window;
    sf::Clock _clock;
 };
-#endif  // !__EMSCRIPTEN__
+#endif  // !DECEPTUS_VRSFML
 
 #endif  // LOGUI_H

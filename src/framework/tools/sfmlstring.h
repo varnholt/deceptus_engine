@@ -4,7 +4,7 @@
 
 #include <string_view>
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 #include <SFML/System/String.hpp>
 
 inline sf::String sftr(std::string_view source_text)

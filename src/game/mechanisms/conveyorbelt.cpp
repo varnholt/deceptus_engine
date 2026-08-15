@@ -221,7 +221,7 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
 
    for (auto i = 0u; i < tile_count; i++)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sf::Sprite belt_sprite;
 #else
       sf::Sprite belt_sprite(*_texture);
@@ -233,7 +233,7 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
 
    for (auto i = 0u; i < tile_count - 1; i++)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sf::Sprite arrow_sprite;
 #else
       sf::Sprite arrow_sprite(*_texture);

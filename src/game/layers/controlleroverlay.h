@@ -19,7 +19,7 @@ public:
    /// \brief draws the controller base and highlights currently pressed inputs.
    /// \param window SFML render target used for overlay output.
    /// \param RenderStates render state overrides passed to layer draw calls.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{});
 #else
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);

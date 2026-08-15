@@ -1111,6 +1111,18 @@ add_subdirectory(thirdparty/lua)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/lua)
 target_link_libraries(deceptus PRIVATE lua)
 
+if(NINTENDO_SWITCH)
+    # luaconf.h uses the presence of LLONG_MAX as its proxy for C99 compliance, and
+    # devkitPro's newlib does not define it in C++ mode, so Lua bails out with
+    # "Compiler does not support 'long long'". Point it at long instead: that is
+    # already 64-bit on aarch64, so the integer type is unchanged in practice.
+    #
+    # This has to be PUBLIC -- every translation unit including lua.hpp must see the
+    # same luaconf configuration as the library itself, or lua_Integer disagrees
+    # across the ABI boundary.
+    target_compile_definitions(lua PUBLIC LUA_INT_TYPE=LUA_INT_LONG)
+endif()
+
 # ----------------------------------------------------------------------------------------------------
 # compiler & linker options
 # ----------------------------------------------------------------------------------------------------
@@ -1130,6 +1142,13 @@ target_include_directories(
     ${SDL3_INCLUDE_DIRS})
 
 target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
+
+# Selects the VRSFML API rather than vanilla SFML's. Both the Emscripten and the Switch
+# target build against VRSFML, so this is what the SFML-flavour guards key off; plain
+# __EMSCRIPTEN__ stays reserved for genuinely browser-specific code.
+if(EMSCRIPTEN OR NINTENDO_SWITCH)
+    target_compile_definitions(deceptus PRIVATE DECEPTUS_VRSFML)
+endif()
 
 if(CMAKE_BUILD_TYPE)
     set(deceptus_build_type "${CMAKE_BUILD_TYPE}")
@@ -1252,6 +1271,10 @@ if(NINTENDO_SWITCH)
         deceptus BEFORE
         PRIVATE ${CMAKE_SOURCE_DIR}/src/switch
                 ${CMAKE_SOURCE_DIR}/src/wasm)
+
+    # glad, mesa and the rest of the portlibs headers are not on the include path by
+    # default; the toolchain file only teaches find_package about them
+    target_include_directories(deceptus PRIVATE ${DEVKITPRO}/portlibs/switch/include)
 elseif(EMSCRIPTEN)
     # prepend src/wasm so "#include <opengl/glew.h>" resolves to the GLES3 stub
     # instead of the desktop GLEW header in src/opengl/

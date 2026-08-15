@@ -80,7 +80,7 @@ std::string_view StaticLight::objectName() const
    return "StaticLight";
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& color)
 {
    draw(target, color, {});
@@ -186,7 +186,7 @@ void StaticLight::deserialize(const GameDeserializeData& data)
    _flicker_alpha_amount = flicker_alpha_amount;
    _flicker_speed = flicker_speed;
    _texture = TexturePool::getInstance().get(texture);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
    _sprite->textureRect =
       sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(_texture->getSize().x), static_cast<float>(_texture->getSize().y)}};
@@ -203,7 +203,7 @@ void StaticLight::deserialize(const GameDeserializeData& data)
 
    auto scale_x_px = data._tmx_object->_width_px / _texture->getSize().x;
    auto scale_y_px = data._tmx_object->_height_px / _texture->getSize().y;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite->scale = {scale_x_px, scale_y_px};
 #else
    _sprite->scale({scale_x_px, scale_y_px});

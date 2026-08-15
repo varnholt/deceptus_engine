@@ -36,7 +36,7 @@ public:
    /// \return true on success.
    bool loadFromFile(const std::string& vertex_path, const std::string& fragment_path)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       return assign(sf::Shader::loadFromFile({.vertexPath = vertex_path, .fragmentPath = fragment_path}));
 #else
       return _shader.loadFromFile(vertex_path, fragment_path) && (_loaded = true);
@@ -47,7 +47,7 @@ public:
    /// \return true on success.
    bool loadFromFragment(const std::string& fragment_path)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       return assign(sf::Shader::loadFromFile({.fragmentPath = fragment_path}));
 #else
       return _shader.loadFromFile(fragment_path, sf::Shader::Type::Fragment) && (_loaded = true);
@@ -58,7 +58,7 @@ public:
    /// \return true on success.
    bool loadFromVertex(const std::string& vertex_path)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       return assign(sf::Shader::loadFromFile({.vertexPath = vertex_path}));
 #else
       return _shader.loadFromFile(vertex_path, sf::Shader::Type::Vertex) && (_loaded = true);
@@ -68,7 +68,7 @@ public:
    /// \brief returns whether a shader is currently loaded.
    bool isLoaded() const
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       return _shader.has_value();
 #else
       return _loaded;
@@ -79,7 +79,7 @@ public:
    template <typename Value>
    void setUniform(std::string_view name, const Value& value)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       if (!_shader.has_value())
       {
          return;
@@ -97,7 +97,7 @@ public:
    /// \brief returns the underlying sf::Shader for binding into an sf::RenderStates.
    const sf::Shader& native() const
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       return *_shader;
 #else
       return _shader;
@@ -105,7 +105,7 @@ public:
    }
 
 private:
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    //! \brief transparent hasher so the location cache can be probed with a std::string_view key
    //!        without allocating a std::string on every lookup.
    struct StringViewHash

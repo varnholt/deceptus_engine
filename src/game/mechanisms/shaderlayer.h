@@ -28,7 +28,7 @@ struct ShaderLayer : public GameMechanism, public GameNode
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    /// \brief draws the quad with explicit render states (used in WASM to carry the level view).
    /// \param target render target.
    /// \param normal normal-map render target, unused by this mechanism.
@@ -45,7 +45,7 @@ struct ShaderLayer : public GameMechanism, public GameNode
    /// \return layer bounds in pixel space.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    /// \brief inspects shader source to detect optional uniform support.
    /// \param shader_path file path to the fragment shader source.
    virtual void checkUniforms(const std::string& shader_path);
@@ -67,7 +67,7 @@ struct ShaderLayer : public GameMechanism, public GameNode
    float _uv_height = 1.0f;
    sf::Time _elapsed;
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    bool _has_u_resolution = false;
    bool _has_u_uv_height = false;
 #endif

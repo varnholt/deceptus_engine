@@ -49,7 +49,7 @@ std::ostream& operator<<(std::ostream& os, InGameMenuPage::Animation animation)
 
 void InGameMenuPage::applyPageView(sf::RenderStates& states) const
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
    states.view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
@@ -58,7 +58,7 @@ void InGameMenuPage::applyPageView(sf::RenderStates& states) const
 
 void InGameMenuPage::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    applyPageView(states);
 #else
    const auto w = GameConfiguration::getInstance()._view_width;
@@ -196,7 +196,7 @@ void InGameMenuPage::load()
       tmp->_visible = true;
       tmp->_name = layer.getName();
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       auto texture = std::make_shared<sf::Texture>(
          std::move(*sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())}))
       );

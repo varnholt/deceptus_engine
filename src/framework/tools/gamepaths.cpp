@@ -15,6 +15,9 @@ std::filesystem::path getGameDataDir()
    // on the web the writable tree lives inside the IDBFS mount created in main(), which is
    // synchronized to IndexedDB so it survives page reloads
    return std::filesystem::path("/deceptus");
+#elif defined(__SWITCH__)
+   // romfs is read-only, so saves go to the sd card; libnx mounts it as sdmc:/
+   return std::filesystem::path("sdmc:/switch/deceptus");
 #elif defined(_WIN32)
    // on windows, use %APPDATA%\deceptus
    const char* appdata_folder = std::getenv("APPDATA");

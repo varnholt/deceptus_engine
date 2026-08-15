@@ -1,6 +1,6 @@
 #include "layer.h"
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void Layer::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
    // TODO: use layer blendmode

@@ -328,7 +328,7 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
             const int32_t tu = (tile_number - firstId) % (portal->_texture->getSize().x / tilesize.x);
             const int32_t tv = (tile_number - firstId) / (portal->_texture->getSize().x / tilesize.x);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
             sf::Sprite sprite;
 #else
             sf::Sprite sprite(*portal->_texture);

@@ -108,7 +108,7 @@ bool Extra::deserialize(const GameDeserializeData& data)
       if (!texture_path.empty())
       {
          _texture = TexturePool::getInstance().get(texture_path);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite = std::make_unique<sf::Sprite>();
 #else
          _sprite = std::make_unique<sf::Sprite>(*_texture);
@@ -124,7 +124,7 @@ bool Extra::deserialize(const GameDeserializeData& data)
 
          if (rect.size.x > 0 && rect.size.y > 0)
          {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
             _sprite->textureRect = sf::FloatRect{
                {static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)},
                {static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)}
@@ -264,7 +264,7 @@ void Extra::updateSineWave(const sf::Time& delta_time)
       const sf::Vector2f sine_delta{0.0f, delta_y_px};
       for (auto& animation : _animations_main)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          animation->position += sine_delta;
 #else
          animation->move(sine_delta);
@@ -273,7 +273,7 @@ void Extra::updateSineWave(const sf::Time& delta_time)
 
       if (_sprite)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite->position += sine_delta;
 #else
          _sprite->move(sine_delta);
@@ -417,7 +417,7 @@ void Extra::spawn(sf::Vector2f offset)
 
       for (auto& animation : _animations_main)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          animation->position += offset;
 #else
          animation->move(offset);
@@ -426,7 +426,7 @@ void Extra::spawn(sf::Vector2f offset)
 
       if (_animation_spawn)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _animation_spawn->position += offset;
 #else
          _animation_spawn->move(offset);
@@ -435,7 +435,7 @@ void Extra::spawn(sf::Vector2f offset)
 
       if (_animation_pickup)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _animation_pickup->position += offset;
 #else
          _animation_pickup->move(offset);
@@ -444,7 +444,7 @@ void Extra::spawn(sf::Vector2f offset)
 
       if (_sprite)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite->position += offset;
 #else
          _sprite->move(offset);

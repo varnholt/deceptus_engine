@@ -55,7 +55,7 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    }
 
    // draw the masking geometry (stencil_tilemap) first
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _stencil_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
    const auto use_shader = _alpha_threshold < 0.99f;
 
@@ -94,7 +94,7 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
 
    // then draw the masked content
    auto color_render_state = states;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    color_render_state.stencilMode = sf::StencilMode{
       .stencilComparison = sf::StencilComparison::Equal,
       .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
@@ -129,7 +129,7 @@ const std::string& StencilTileMap::getStencilReference() const
 
 void StencilTileMap::dumpStencilAndColorToPng(sf::RenderTarget& color, const sf::RenderStates& states) const
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    static int32_t _frame_counter{0};
    _frame_counter += 1;
    if ((_frame_counter % 1000) != 0)

@@ -131,7 +131,7 @@ DetonationAnimation::DetonationAnimation(const std::vector<DetonationAnimation::
          frame_data._frame_times[0] = sf::seconds(ring_index * rand_normalized * ring._variance_animation_speed);
 
          auto animation = std::make_shared<Animation>();
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          animation->position = {x, y};
 #else
          animation->setPosition({x, y});
@@ -139,7 +139,7 @@ DetonationAnimation::DetonationAnimation(const std::vector<DetonationAnimation::
          animation->_frames = frame_data._frames;
          animation->_color_texture = frame_data._texture;
          animation->setFrameTimes(frame_data._frame_times);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          animation->origin = frame_data._origin;
 #else
          animation->setOrigin(frame_data._origin);

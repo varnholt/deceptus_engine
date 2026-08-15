@@ -8,7 +8,7 @@
 #include "game/camera/camerasystemconfigurationui.h"
 #include "game/constants.h"
 #include "game/debug/console.h"
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 #include "game/debug/logui.h"
 #endif
 #ifdef DEVELOPMENT_MODE
@@ -154,7 +154,7 @@ private:
    /// \param h target height in pixels.
    void changeResolution(int32_t w, int32_t h);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    /// \brief re-fits the render resolution to the current browser viewport (integer multiple of the base
    /// view), recreating rendering resources only when the size actually changes. invoked on browser resize
    /// and fullscreen transitions so the game fills the itch/browser window without fractional scaling.
@@ -189,7 +189,7 @@ private:
    std::unique_ptr<ControllerOverlay> _controller_overlay;
    std::unique_ptr<CameraSystemConfigurationUi> _camera_ui;
    std::unique_ptr<PhysicsConfigurationUi> _physics_ui;
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    std::unique_ptr<LogUi> _log_ui;
 #endif
 #ifdef DEVELOPMENT_MODE
@@ -199,7 +199,7 @@ private:
 
    std::shared_ptr<EventSerializer> _global_event_serializer;
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    // temporarily here for debugging only
    std::unique_ptr<ForestScene> _test_scene;
 #endif

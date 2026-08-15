@@ -154,7 +154,7 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::Ren
    // render color texture
    sf::RenderStates states = incoming_states;
    states.texture = _texture.get();
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    color.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
 #else
    color.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
@@ -162,7 +162,7 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::Ren
 
    // render normal map (same geometry, different texture)
    states.texture = _normal_map.get();
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    normal.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
 #else
    normal.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);

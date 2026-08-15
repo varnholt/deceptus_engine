@@ -23,7 +23,7 @@ std::string_view Weather::objectName() const
    return "Weather";
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    draw(target, normal, {});

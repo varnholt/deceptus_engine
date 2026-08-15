@@ -71,7 +71,7 @@ void LazyTexture::loadTexture()
 {
    // Log::Info() << "loading " << _texture_path;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto image_result = sf::Image::loadFromFile(_texture_path);
    if (image_result)
    {
@@ -112,7 +112,7 @@ void LazyTexture::uploadTexture()
    std::lock_guard lock(_mutex);
    if (_pending_image)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       auto texture_result = sf::Texture::loadFromImage(*_pending_image);
       if (texture_result)
       {

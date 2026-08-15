@@ -1,6 +1,6 @@
 #include "logui.h"
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 #pragma warning(push, 0)
 #include "imgui/imgui-SFML.h"
 #include "imgui/imgui.h"
@@ -19,7 +19,7 @@ namespace
 std::mutex _mutex;
 std::deque<LogUiBuffer::LogItem> _log_items;
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 ImVec4 getLogLevelColor(Log::Level level)
 {
    switch (level)
@@ -62,7 +62,7 @@ void LogUiBuffer::log(
    }
 }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 
 LogUi::LogUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode({1200, 800}), "deceptus log viewer"))
 {
@@ -80,7 +80,7 @@ void LogUi::processEvents()
 
       if (event->is<sf::Event::Closed>())
       {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
          _render_window->close();
 #endif
       }

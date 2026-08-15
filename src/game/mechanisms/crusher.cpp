@@ -334,7 +334,7 @@ void Crusher::setup(const GameDeserializeData& data)
    _position_px.x = data._tmx_object->_x_px;
    _position_px.y = data._tmx_object->_y_px;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite_mount = std::make_unique<sf::Sprite>();
    _sprite_pusher = std::make_unique<sf::Sprite>();
    _sprite_spike = std::make_unique<sf::Sprite>();
@@ -351,7 +351,7 @@ void Crusher::setup(const GameDeserializeData& data)
          // mount is the socket that attaches the pusher to the wall
          // pusher is the pipe that extracts in length
          // pusher gets only 1px in height as i only want this to be one pixel in height so scaling is easy
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite_mount->textureRect = {{9 * PIXELS_PER_TILE, 6 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}};
          _sprite_pusher->textureRect = {{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 1}};
          _sprite_spike->textureRect = {{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}};
@@ -370,7 +370,7 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsUp:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite_mount->textureRect = {{0 * PIXELS_PER_TILE, 9 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}};
          _sprite_pusher->textureRect = {{0 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 1}};
          _sprite_spike->textureRect = {{0 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}};
@@ -389,7 +389,7 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsLeft:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite_mount->textureRect = {{4 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}};
          _sprite_pusher->textureRect = {{2 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE}, {1, 5 * PIXELS_PER_TILE}};
          _sprite_spike->textureRect = {{0 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}};
@@ -410,7 +410,7 @@ void Crusher::setup(const GameDeserializeData& data)
 
       case Alignment::PointsRight:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite_mount->textureRect = {{8 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}};
          _sprite_pusher->textureRect = {{10 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE}, {1, 5 * PIXELS_PER_TILE}};
          _sprite_spike->textureRect = {{10 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}};
@@ -571,7 +571,7 @@ void Crusher::updateSpritePositions()
    {
       case Alignment::PointsDown:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite_pusher->scale = {1.0f, _blade_offset.y};
 #else
          _sprite_pusher->setScale({1.0f, _blade_offset.y});
@@ -580,7 +580,7 @@ void Crusher::updateSpritePositions()
       }
       case Alignment::PointsUp:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite_pusher->scale = {1.0f, _blade_offset.y};
 #else
          _sprite_pusher->setScale({1.0f, _blade_offset.y});
@@ -589,7 +589,7 @@ void Crusher::updateSpritePositions()
       }
       case Alignment::PointsLeft:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite_pusher->scale = {_blade_offset.x, 1.0f};
 #else
          _sprite_pusher->setScale({_blade_offset.x, 1.0f});
@@ -598,7 +598,7 @@ void Crusher::updateSpritePositions()
       }
       case Alignment::PointsRight:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite_pusher->scale = {_blade_offset.x, 1.0f};
 #else
          _sprite_pusher->setScale({_blade_offset.x, 1.0f});
@@ -611,7 +611,7 @@ void Crusher::updateSpritePositions()
       }
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite_mount->position = _position_px + _offset_mount_px;
    _sprite_pusher->position = _position_px + _offset_pusher_px;
    _sprite_spike->position = _position_px + _offset_spike_px + _blade_offset;

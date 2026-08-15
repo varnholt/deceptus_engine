@@ -243,7 +243,7 @@ void Fan::update(const sf::Time& dt)
    {
       instance.sprite_offset += dt.asSeconds() * 25.0F * _speed * _lever_lag;
       const auto x_offset = static_cast<int32_t>(instance.sprite_offset) % 8;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       instance.sprite->textureRect = {
          {static_cast<float>(x_offset * PIXELS_PER_TILE), static_cast<float>(_y_offset_tl * PIXELS_PER_TILE)},
          {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
@@ -265,7 +265,7 @@ void Fan::draw(sf::RenderTarget& color, sf::RenderTarget&, const sf::RenderState
 {
    for (const auto& section : _instances)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sf::RenderStates draw_states = states;
       draw_states.texture = section.texture.get();
       color.draw(*section.sprite, draw_states);

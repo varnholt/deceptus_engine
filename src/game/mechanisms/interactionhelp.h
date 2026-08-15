@@ -60,7 +60,7 @@ private:
    {
       std::unique_ptr<sf::Sprite> _button_sprite;
       std::unique_ptr<sf::Text> _text;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sf::FloatRect _button_rect_keyboard;
       sf::FloatRect _button_rect_controller;
 #else

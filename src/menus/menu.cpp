@@ -73,7 +73,7 @@ void Menu::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto w = game_config._view_width;
    const auto h = game_config._view_height;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    // pass the ortho view through render states for the VRSFML per-draw-call view API
    states.view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
 #else

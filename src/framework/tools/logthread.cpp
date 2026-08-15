@@ -1,6 +1,6 @@
 #include "logthread.h"
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 #include "gamepaths.h"
 #endif
 
@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <iostream>
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 namespace
 {
 int32_t flush_counter = 0;
@@ -18,7 +18,7 @@ int32_t flush_counter = 0;
 
 LogThread::LogThread()
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    // generate filename with current date
    const auto now = std::chrono::system_clock::now();
    const auto now_time = std::chrono::system_clock::to_time_t(now);
@@ -39,7 +39,7 @@ LogThread::LogThread()
 
 LogThread::~LogThread()
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    {
       std::lock_guard<std::mutex> guard(_mutex);
       _stopped = true;
@@ -51,7 +51,7 @@ LogThread::~LogThread()
 
 void LogThread::log(const SysClockTimePoint& time_point, Log::Level level, const std::string& message, const std::source_location& location)
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    std::lock_guard<std::mutex> guard(_mutex);
    if (_stopped)
    {
@@ -66,7 +66,7 @@ void LogThread::log(const SysClockTimePoint& time_point, Log::Level level, const
 #endif
 }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 void LogThread::run()
 {
    while (!_stopped)

@@ -50,7 +50,7 @@ void MenuScreenAchievements::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenAchievements::loadingFinished()
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_back_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_back_button = std::make_unique<sf::Text>(_font);

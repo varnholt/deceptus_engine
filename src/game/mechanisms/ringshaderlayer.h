@@ -23,7 +23,7 @@ public:
    /// \param normal normal-map render target.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override final;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    /// \brief sets ring-specific uniforms then delegates quad drawing to the base (states-carrying overload).
    /// \param target render target.
    /// \param normal normal-map render target.
@@ -51,7 +51,7 @@ private:
 
    HighResTimePoint _disable_time{};
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    // ring-specific uniforms
    bool _has_u_ring_scale = false;
    bool _has_u_pixel_size = false;

@@ -136,8 +136,10 @@ GameConfiguration& GameConfiguration::getInstance()
 
    if (!__initialized)
    {
-      // seed defaults from the actual desktop so first-launch resolution is sensible
-#ifndef __EMSCRIPTEN__
+      // seed defaults from the actual desktop so first-launch resolution is sensible.
+      // the switch has no desktop either: it scans out at a fixed 720p handheld or
+      // 1080p docked, so it takes the same path as the web build.
+#if !defined(__EMSCRIPTEN__) && !defined(__SWITCH__)
       const auto desktop = sf::VideoMode::getDesktopMode();
       __instance._video_mode_width = static_cast<int32_t>(desktop.size.x);
       __instance._video_mode_height = static_cast<int32_t>(desktop.size.y);
@@ -200,7 +202,8 @@ bool GameConfiguration::isResolutionChangeApplicable(int32_t new_width, int32_t 
 
 void GameConfiguration::clampResolutionToDesktop()
 {
-#ifndef __EMSCRIPTEN__
+   // nothing to clamp against on the web or on the switch; neither has a desktop
+#if !defined(__EMSCRIPTEN__) && !defined(__SWITCH__)
    const auto desktop_mode = sf::VideoMode::getDesktopMode();
    const auto desktop_width = static_cast<int32_t>(desktop_mode.size.x);
    const auto desktop_height = static_cast<int32_t>(desktop_mode.size.y);

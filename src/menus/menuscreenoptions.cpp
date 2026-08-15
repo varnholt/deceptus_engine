@@ -76,7 +76,7 @@ void MenuScreenOptions::loadingFinished()
 
    auto make_item_text = [this]() -> std::unique_ptr<sf::Text>
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       auto text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
       auto text = std::make_unique<sf::Text>(_font);
@@ -201,7 +201,7 @@ void MenuScreenOptions::updateLayers()
    _text_accept_button->setString(sftr("Accept"));
    placeTextRightOf(*_text_accept_button, accept_layer->_sprite->getGlobalBounds());
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto update_item = [this](sf::Text& text, const sf::FloatRect& reference_rect, const auto& label, bool selected)
 #else
    auto update_item = [this](sf::Text& text, const sf::FloatRect& reference_rect, const sf::String& label, bool selected)

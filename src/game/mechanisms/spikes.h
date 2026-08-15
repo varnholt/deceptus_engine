@@ -59,7 +59,7 @@ public:
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    /// \brief draws all spike sprites with explicit render states (used in WASM to carry the level view).
    /// \param color color render target.
    /// \param normal normal-map render target, unused by this mechanism.

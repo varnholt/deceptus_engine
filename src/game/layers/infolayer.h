@@ -33,7 +33,7 @@ public:
    /// \brief draws the complete hud pass in view space.
    /// \param window SFML render target used for hud output.
    /// \param RenderStates render state overrides passed to sub-draw calls.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{});
 #else
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
@@ -46,7 +46,7 @@ public:
    /// \brief draws the developer console, command history, and help topics.
    /// \param window SFML render target used for console output.
    /// \param states render state overrides for console background layers.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    void drawConsole(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates{});
 #else
    void drawConsole(sf::RenderTarget& window, sf::RenderStates states = sf::RenderStates::Default);

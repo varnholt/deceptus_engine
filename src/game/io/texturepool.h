@@ -22,7 +22,7 @@ protected:
    /// \return true when the texture file was loaded successfully.
    bool loadResource(sf::Texture& texture, const std::filesystem::path& path) const override
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       (void)texture;
       (void)path;
       return false;
@@ -31,7 +31,7 @@ protected:
 #endif
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    /// \brief creates a texture by loading directly from path, bypassing default construction.
    ///        Required for VRSFML where sf::Texture has no default constructor.
    /// \param path texture file path.

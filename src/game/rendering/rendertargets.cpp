@@ -6,7 +6,7 @@
 
 void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height, float view_width, float view_height)
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    // since stencil buffers are used, it is required to enable them explicitly
    sf::ContextSettings stencil_context_settings;
    stencil_context_settings.stencilBits = 8;
@@ -21,7 +21,7 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
    const auto texture_width = static_cast<int32_t>(size_ratio * view_width);
    const auto texture_height = static_cast<int32_t>(size_ratio * view_height);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto texture_size = sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)};
    const sf::RenderTextureCreateSettings stencil_settings{.stencilBits = 8u};
 

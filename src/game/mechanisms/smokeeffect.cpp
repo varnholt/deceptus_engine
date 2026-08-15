@@ -28,7 +28,7 @@ std::string_view SmokeEffect::objectName() const
    return "SmokeEffect";
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    draw(color, normal, {});
@@ -351,7 +351,7 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
          {static_cast<uint32_t>(rect_width_px / smoke_effect->_pixel_ratio),
           static_cast<uint32_t>(rect_height_px / smoke_effect->_pixel_ratio)}
       );
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       smoke_effect->_render_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create(texture_size)));
 #else
       smoke_effect->_render_texture = std::make_unique<sf::RenderTexture>(texture_size);

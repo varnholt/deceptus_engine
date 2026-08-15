@@ -135,7 +135,7 @@ private:
       sf::RenderTarget& target,
       std::shared_ptr<LightInstance> light,
       const std::vector<b2Body*>& candidates
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       ,
       const sf::RenderStates& states
 #endif

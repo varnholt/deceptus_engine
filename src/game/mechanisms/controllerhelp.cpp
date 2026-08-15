@@ -205,7 +205,7 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
          {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sf::Sprite sprite;
 #else
       sf::Sprite sprite(*_texture);
@@ -216,7 +216,7 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
       _sprite_rects_keyboard.emplace_back(sprite_rect_keyboard);
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _background = std::make_unique<sf::Sprite>();
 #else
    _background = std::make_unique<sf::Sprite>(*_texture);

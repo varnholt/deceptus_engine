@@ -148,7 +148,7 @@ InfoLayer::InfoLayer()
       try
       {
          const auto texture_size = sf::Vector2u(psd_layer.getWidth(), psd_layer.getHeight());
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          auto texture_result = sf::Texture::create(texture_size);
          if (!texture_result)
          {
@@ -271,7 +271,7 @@ void InfoLayer::loadInventoryItems()
       [this](const auto& image)
       {
    // store sprites
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
          sprite->textureRect = sf::FloatRect{
             {static_cast<float>(image._x_px), static_cast<float>(image._y_px)},
@@ -285,7 +285,7 @@ void InfoLayer::loadInventoryItems()
       }
    );
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto inventory_item_1 = std::make_unique<sf::Sprite>();
    auto inventory_item_2 = std::make_unique<sf::Sprite>();
    inventory_item_1->textureRect = {};
@@ -592,7 +592,7 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
    states.view = view;
 #else
@@ -611,7 +611,7 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    auto w = GameConfiguration::getInstance()._view_width;
    auto h = GameConfiguration::getInstance()._view_height;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
 #else
    sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
@@ -646,7 +646,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    const auto offset_x_px = 8 * scale_factor;
    const auto offset_y_px = console_base_height_px - 24 * scale_factor;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::View view =
       sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(view_width_px), static_cast<float>(view_height_px)}});
 
@@ -678,13 +678,13 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    auto line_index = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       console_text.setString(it->c_str());
 #else
       console_text.setString(*it);
 #endif
       console_text.setFillColor(sf::Color::White);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       console_text.position = {static_cast<float>(offset_x_px), static_cast<float>(offset_y_px - ((line_index + 1) * line_spacing_px))};
       window.draw(console_text, sf::RenderStates{.view = view_screen});
 #else
@@ -694,7 +694,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
       line_index++;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    console_text.setString(command.c_str());
 #else
    console_text.setString(command);
@@ -709,7 +709,7 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    {
       const auto cursor_position = console_text.findCharacterPos(command.size());
       console_text.setString("_");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       console_text.position = cursor_position;
       window.draw(console_text, sf::RenderStates{.view = view_screen});
 #else
@@ -756,14 +756,14 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
          }
       }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       console_text.setString(help_line._text.c_str());
 #else
       console_text.setString(help_line._text);
 #endif
       console_text.setFillColor(color);
       sfcompat::setPosition(console_text, {static_cast<float>(text_x_px), static_cast<float>((++line_index) * line_spacing_px)});
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       window.draw(console_text, sf::RenderStates{.view = view_screen});
 #else
       window.draw(console_text);
@@ -901,7 +901,7 @@ void InfoLayer::drawInventoryItem(sf::RenderTarget& window, sf::RenderStates sta
          continue;
       }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       // vrsfml sprites carry no texture and the view travels in the render states
       auto item_states = states;
       item_states.texture = _inventory_texture.get();

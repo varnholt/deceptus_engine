@@ -33,7 +33,7 @@ public:
    std::string getName() const override;
 
 private:
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::CircleShape _light_circle{sf::CircleShape::Data {.radius = 50.0f }};
 #else
    sf::CircleShape _light_circle;

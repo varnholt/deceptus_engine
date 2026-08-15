@@ -89,7 +89,7 @@ void SpikeBlock::setup(const GameDeserializeData& data)
    setObjectId(data._tmx_object->_name);
 
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_spikeblock.png");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture_map);
@@ -149,7 +149,7 @@ void SpikeBlock::updateSpriteRect()
    _tu_tl = _sprite_index_current % count_columns;
    _tv_tl = _sprite_index_current / count_columns;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite->textureRect = {
       {static_cast<float>(_tu_tl * PIXELS_PER_TILE), static_cast<float>(_tv_tl * PIXELS_PER_TILE)},
       {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
@@ -164,7 +164,7 @@ const sf::FloatRect& SpikeBlock::getPixelRect() const
    return _rectangle;
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void SpikeBlock::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    draw(target, normal, {});

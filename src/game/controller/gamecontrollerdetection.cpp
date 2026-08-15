@@ -11,7 +11,7 @@
 
 void GameControllerDetection::start()
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _thread = std::make_unique<std::thread>(
       [this]()
       {
@@ -27,7 +27,7 @@ void GameControllerDetection::start()
 
 void GameControllerDetection::stop()
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _stopped = true;
    _thread->join();
 #endif

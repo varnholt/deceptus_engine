@@ -133,7 +133,7 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
 
    // load texture
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bumper.png");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
    _sprite->position = _position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT_PX));
 #else

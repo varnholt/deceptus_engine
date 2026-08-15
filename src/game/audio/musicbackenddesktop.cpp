@@ -1,6 +1,6 @@
 #include "musicbackend.h"
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 
 #include <SFML/Audio.hpp>
 

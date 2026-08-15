@@ -16,7 +16,7 @@
 #include <cmath>
 #include <numbers>
 #include <ranges>
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 #include <span>
 #endif
 
@@ -35,7 +35,7 @@ constexpr auto max_distance_m2 = 400.0f;  // depends on the view dimensions
 
 // write pass: write 1 to stencil for every fragment that should be in shadow.
 // stencilOnly=true suppresses color writes (equivalent to glColorMask(false,...)).
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 const sf::StencilMode stencil_write_mode{
    .stencilComparison = sf::StencilComparison::Always,
    .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
@@ -54,7 +54,7 @@ const sf::StencilMode stencil_write_mode{
 #endif
 
 // read pass: only draw where stencil == 0 (not occluded by any shadow).
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 const sf::StencilMode stencil_test_mode{
    .stencilComparison = sf::StencilComparison::Equal,
    .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
@@ -97,7 +97,7 @@ void LightSystem::drawShadowQuads(
    sf::RenderTarget& target,
    std::shared_ptr<LightSystem::LightInstance> light,
    const std::vector<b2Body*>& candidates
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    ,
    const sf::RenderStates& states
 #endif
@@ -105,7 +105,7 @@ void LightSystem::drawShadowQuads(
 {
    const auto light_pos_m = light->_shadow_origin_m.value_or(light->_pos_m + light->_center_offset_m);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::RenderStates shadow_states = states;
    shadow_states.stencilMode = stencil_write_mode;
 #else
@@ -184,7 +184,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
                target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
 #else
                target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
@@ -224,7 +224,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(vertex_1.x, vertex_1.y) * PPM, sf::Color::Black)
                };
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
                target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
 #else
                target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
@@ -263,7 +263,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
                target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
 #else
                target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
@@ -293,7 +293,7 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
 
    // then convert to viewport coordinates
    sf::Vector2f pixel;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto target_size = target.getSize();
    const auto viewport = view.computePixelViewport(sf::Vec2f{static_cast<float>(target_size.x), static_cast<float>(target_size.y)});
 #else
@@ -472,7 +472,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       // clear the stencil buffer for this light via SFML's API.
       // raw glClear(GL_STENCIL_BUFFER_BIT) would be fine here but using the SFML
       // path keeps all stencil management consistent and avoids context surprises.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       target.clearStencil(sf::StencilValue{0u});
 #else
       target.clearStencil(0);
@@ -482,7 +482,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       // each draw call carries stencil_write_mode so SFML enables the stencil test
       // and writes 1 for every occluded pixel instead of disabling it (default behaviour).
       drawOccluders(target);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       drawShadowQuads(target, light, shadow_candidates, states);
 #else
       drawShadowQuads(target, light, shadow_candidates);
@@ -503,7 +503,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
          channel_color = sf::Color(0, 0, 255, 255);  // blue
       }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       light->_sprite->color = channel_color;
 
       sf::RenderStates render_states = states;
@@ -580,7 +580,7 @@ void LightSystem::draw(
    // update shader uniforms
    updateLightShader(target);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::Texture& light_color_texture = color_map->getTexture();
    target.draw(light_color_texture, sf::RenderStates{.shader = &_light_shader.native()});
 #else
@@ -687,7 +687,7 @@ void LightSystem::LightInstance::deserialize(const nlohmann::json& node)
 
    if (_sprite && _texture)
    {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
       // VRSFML sprites don't store a texture; it's bound via RenderStates at draw time instead.
       _sprite->setTexture(*_texture);
 #endif
@@ -786,7 +786,7 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    // light->_sprite.setColor(light->_color);
 
    light->_texture = TexturePool::getInstance().get(texture);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    light->_sprite = std::make_unique<sf::Sprite>();
 #else
    light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
@@ -809,7 +809,7 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 {
    auto light = std::make_shared<LightSystem::LightInstance>(parent);
    light->_texture = TexturePool::getInstance().get("data/light/smooth.png");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    light->_sprite = std::make_unique<sf::Sprite>();
 #else
    light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);

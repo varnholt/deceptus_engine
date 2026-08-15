@@ -145,7 +145,7 @@ void show(sf::RenderWindow& window)
 
    shown = true;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto loaded_splash_texture_opt = sf::Texture::loadFromFile("data/game/splash.png");
    window.clear(sf::Color(30, 30, 30));
    if (loaded_splash_texture_opt)
@@ -186,7 +186,7 @@ void show(sf::RenderWindow& window)
          const float normalized_ratio = elapsed / fade_in_duration_ms;
          const float eased_ratio = Easings::easeInOutQuad(normalized_ratio);
          const std::uint8_t alpha = static_cast<std::uint8_t>(255 * eased_ratio);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          loading_sprite.color = sf::Color(255, 255, 255, alpha);
          window.clear(sf::Color(11, 12, 23));
          window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
@@ -199,7 +199,7 @@ void show(sf::RenderWindow& window)
       }
 
       // Set fully opaque after fade-in is complete
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       loading_sprite.color = sf::Color(255, 255, 255, 255);
       window.clear(sf::Color(11, 12, 23));
       window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
@@ -223,7 +223,7 @@ void show(sf::RenderWindow& window)
          const float normalized_ratio = 1.0f - (elapsed / fade_out_duration_ms);
          const float eased_ratio = Easings::easeInOutQuad(normalized_ratio);
          const std::uint8_t alpha = static_cast<std::uint8_t>(255 * eased_ratio);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          loading_sprite.color = sf::Color(255, 255, 255, alpha);
          window.clear(sf::Color(11, 12, 23));
          window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
@@ -236,7 +236,7 @@ void show(sf::RenderWindow& window)
       }
 
       // Final draw with 0 alpha to ensure complete fade out
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       loading_sprite.color = sf::Color(255, 255, 255, 0);
       window.clear(sf::Color(11, 12, 23));
       window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});

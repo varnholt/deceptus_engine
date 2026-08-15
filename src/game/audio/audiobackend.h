@@ -2,7 +2,7 @@
 #define AUDIOBACKEND_H
 
 #include <SFML/Audio.hpp>
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 #include <SFML/System.hpp>
 #endif
 

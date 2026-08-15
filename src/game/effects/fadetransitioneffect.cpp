@@ -2,7 +2,7 @@
 
 #include "game/config/gameconfiguration.h"
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 #include <span>
 #endif
 
@@ -73,7 +73,7 @@ void FadeTransitionEffect::draw(const std::shared_ptr<sf::RenderTexture>& window
    auto w = GameConfiguration::getInstance()._view_width;
    auto h = GameConfiguration::getInstance()._view_height;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
 #else
    sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
@@ -86,7 +86,7 @@ void FadeTransitionEffect::draw(const std::shared_ptr<sf::RenderTexture>& window
       vertex.color.a = alpha_value;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    window->draw(
       std::span<const sf::Vertex>{_vertices.data(), _vertices.size()}, sf::PrimitiveType::TriangleStrip, sf::RenderStates{.view = view}
    );

@@ -420,13 +420,45 @@ not defined, so every one of those sites takes the *vanilla SFML* branch while c
 against *VRSFML* headers. The first build only surfaced 4 errors because it failed on the
 umbrella headers before reaching any of that.
 
-The correct fix is a project-level macro (something like `DECEPTUS_VRSFML`) defined for
-both Emscripten and Switch, with the API-selection guards migrated onto it — while leaving
-the genuinely Emscripten-specific guards (main loop, filesystem, threading flags) on
-`__EMSCRIPTEN__`. Telling those two apart needs a per-site judgement call, so it is a
-careful pass over ~161 files rather than a search-and-replace. **Not attempted here.**
-Defining `__EMSCRIPTEN__` on Switch would be the wrong shortcut — it would drag in
-emscripten-only code paths.
+Measured with a keep-going build: **1575 errors across 124 files**, and the taxonomy is
+uniform — `Sprite::setPosition` vs VRSFML's `position` member, `Texture()` vs
+`Optional<Texture>`, `Time::Zero`, `RenderStates::Default`, `RenderTarget::setView`,
+`Rect::findIntersection`, `Shader::loadFromFile` signatures. All vanilla-SFML calls
+against VRSFML headers, exactly as predicted.
+
+### The `DECEPTUS_VRSFML` migration
+
+What made this tractable: of the 160 files carrying `__EMSCRIPTEN__` guards, only **4**
+touch genuinely Emscripten-only APIs (`emscripten.h`, `EM_ASM`, `EM_JS`) —
+`gamepaths.cpp`, `gameconfiguration.cpp`, `game.cpp`, `main.cpp`. The other 156 are pure
+SFML-flavour selection.
+
+So `DECEPTUS_VRSFML` is now defined by CMake exactly when `EMSCRIPTEN OR NINTENDO_SWITCH`,
+and the flavour guards were migrated onto it. **This cannot change the existing targets:**
+
+| target | `__EMSCRIPTEN__` | `DECEPTUS_VRSFML` | effect |
+|---|---|---|---|
+| WASM | defined | defined | every guard evaluates identically — no behaviour change |
+| desktop | undefined | undefined | no behaviour change |
+| Switch | undefined | defined | takes the VRSFML branch, which is the point |
+
+Because both macros are defined together on WASM, it does not matter which one any given
+site uses there — which is what makes iterating on this safe rather than risky.
+
+Hand-reviewed sites, all four files:
+
+- `gamepaths.cpp` — guards are genuinely Emscripten (IDBFS mount, `EM_ASM` syncfs), left
+  alone. Added a Switch branch instead: romfs is read-only, so saves go to
+  `sdmc:/switch/deceptus`.
+- `gameconfiguration.cpp` — the `getDesktopMode()` seeding and `clampResolutionToDesktop()`
+  now exclude Switch as well as web: neither has a desktop, the Switch scans out at a fixed
+  720p handheld / 1080p docked.
+- `game.cpp` — 35 of 36 guards migrated; only the `emscripten.h` / `html5.h` include kept.
+- `main.cpp` — 1 of 3 migrated (the `GraphicsContext`/`AudioContext` creation); the IDBFS
+  mount and header include kept.
+
+**Still worth re-verifying the WASM build** before trusting this, even though the table
+above argues it is a no-op there.
 
 ## Open questions
 

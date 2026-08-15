@@ -1,6 +1,6 @@
 #include "audiobackend.h"
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 
 #include "framework/tools/log.h"
 

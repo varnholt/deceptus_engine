@@ -37,7 +37,7 @@ public:
    /// \brief draws all visible PSD-backed layers of the page.
    /// \param window render target that receives the page layers.
    /// \param states render states used for drawing.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    virtual void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{});
 #else
    virtual void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);

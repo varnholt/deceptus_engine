@@ -24,7 +24,7 @@ public:
    /// \brief draws the archives page using the base layered page renderer.
    /// \param window render target that receives archive layer rendering.
    /// \param states render states used for drawing.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{}) override;
 #else
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;

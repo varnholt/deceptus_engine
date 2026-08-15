@@ -85,7 +85,7 @@ public:
       );
       m_text.setFont(getFont());
       m_text.setCharacterSize(22);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       m_text.position = 30, 20;
 #else
       m_text.setPosition(30, 20);
@@ -194,7 +194,7 @@ public:
 
       // Initialize the background sprite
       m_backgroundSprite.setTexture(m_backgroundTexture);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       m_backgroundSprite.position = 135, 100;
 #else
       m_backgroundSprite.setPosition(135, 100);
@@ -225,7 +225,7 @@ public:
          sf::Vector2f position;
          position.x = std::cos(0.25f * (time * i + (m_entities.size() - i))) * 300 + 350;
          position.y = std::sin(0.25f * (time * (m_entities.size() - i) + i)) * 200 + 250;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          m_entities[i].position = position;
 #else
          m_entities[i].setPosition(position);
@@ -367,7 +367,7 @@ int main()
     if (!textBackgroundTexture.loadFromFile("resources/text-background.png"))
         return EXIT_FAILURE;
     sf::Sprite textBackground(textBackgroundTexture);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
     textBackground.position = 0, 520;
     textBackground.color = sf::Color(255, 255, 255, 200);
 #else
@@ -377,7 +377,7 @@ int main()
 
     // Create the description text
     sf::Text description("Current effect: " + effects[current]->getName(), font, 20);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
     description.position = 10, 530;
 #else
     description.setPosition(10, 530);
@@ -386,7 +386,7 @@ int main()
 
     // Create the instructions text
     sf::Text instructions("Press left and right arrows to change the current shader", font, 20);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
     instructions.position = 280, 555;
 #else
     instructions.setPosition(280, 555);

@@ -487,7 +487,7 @@ void DeathBlock::setup(const GameDeserializeData& data)
 
    for (auto& spike : _spikes)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       spike._sprite = std::make_unique<sf::Sprite>();
 #else
       spike._sprite = std::make_unique<sf::Sprite>(*_texture);
@@ -514,7 +514,7 @@ void DeathBlock::setup(const GameDeserializeData& data)
       {PIXELS_PER_TILE - tolerance_px_2, PIXELS_PER_TILE - tolerance_px_2}
    };
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _center_sprite = std::make_unique<sf::Sprite>();
 #else
    _center_sprite = std::make_unique<sf::Sprite>(*_texture);

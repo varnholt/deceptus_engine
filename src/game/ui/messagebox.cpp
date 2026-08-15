@@ -191,7 +191,7 @@ MessageBox::MessageBox(
       std::back_inserter(_segments),
       [](const RichTextParser::Segment& segment)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          return TextSegment{*segment.text, segment.text->getFillColor(), std::string(segment.text->getString().data())};
 #else
          return TextSegment{*segment.text, segment.text->getFillColor(), segment.text->getString()};
@@ -248,7 +248,7 @@ void MessageBox::initializeLayers()
 
       try
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          auto texture = std::make_shared<sf::Texture>(
             std::move(*sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())}))
          );
@@ -290,7 +290,7 @@ void MessageBox::initializeLayers()
    _layers["temp_bg"]->_visible = false;
 
    // initialize positions
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _window_position_px = _layers["window"]->_sprite->position;
    _background_position_px = _layers["background"]->_sprite->position;
    _next_page_position_px = _layers["next_page"]->_sprite->position;
@@ -336,7 +336,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
       if (__active->_properties._animate_text)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          if (__active->_char_animate_index < __active->_plain_text.size())
 #else
          if (__active->_char_animate_index < __active->_plain_text.getSize())
@@ -422,7 +422,7 @@ void MessageBox::draw(sf::RenderTarget& window, const sf::RenderStates& states)
    }
 
    // set up an ortho view with screen dimensions
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::View pixel_ortho = sf::View::fromRect(sf::FloatRect(
       {0.0f, 0.0f},
       {static_cast<float>(GameConfiguration::getInstance()._view_width), static_cast<float>(GameConfiguration::getInstance()._view_height)}
@@ -442,7 +442,7 @@ void MessageBox::draw(sf::RenderTarget& window, const sf::RenderStates& states)
    {
       if (messagebox)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          messagebox->drawLayers(window, ortho_states);
          messagebox->drawText(window, ortho_states);
 #else
@@ -468,7 +468,7 @@ void MessageBox::updateTextAnimation()
    // so x might go into negative for that duration.
    x = std::max(0.0f, x);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto to =
       !_properties._animate_text ? _plain_text.size() : std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_plain_text.size()));
 #else
@@ -482,7 +482,7 @@ void MessageBox::updateTextAnimation()
       _char_animate_index = to;
       for (auto& segment : _segments)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          accumulated_chars_from_segments += static_cast<int32_t>(segment.plain_text.size());
          if (to < static_cast<uint32_t>(accumulated_chars_from_segments))
          {
@@ -584,7 +584,7 @@ void MessageBox::updateNextPageIcon()
    constexpr auto animation_amplitude = 3.0f;
 
    auto next_page_layer = _layers["next_page"];
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    next_page_layer->_sprite->position =
       _next_page_position_px + offset_px + sf::Vector2f{0.0f, std::sin(_elapsed.asSeconds() * animation_speed) * animation_amplitude};
 #else
@@ -602,7 +602,7 @@ void MessageBox::noAnimation()
 
    const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    window_layer->_sprite->color = sf::Color::White;
    window_layer->_sprite->scale = {1.0f, 1.0f};
    window_layer->_sprite->position = _window_position_px + offset_px;
@@ -639,7 +639,7 @@ void MessageBox::updateTextAndButtonColor(float contents_alpha)
 
    for (const auto& layer : _box_content_layers)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       layer->_sprite->color = color;
 #else
       layer->_sprite->setColor(color);
@@ -678,7 +678,7 @@ void MessageBox::showAnimation()
       const auto window_pos_y_px = _window_position_px.y + offset.y;
       const auto window_color = sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)};
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       window_layer->_sprite->color = window_color;
       window_layer->_sprite->scale = {scale_x, scale_y};
       window_layer->_sprite->position = {window_pos_x_px, window_pos_y_px};
@@ -698,7 +698,7 @@ void MessageBox::showAnimation()
    }
    else  // fade in
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       window_layer->_sprite->color = sf::Color::White;
       window_layer->_sprite->scale = {1.0f, 1.0f};
       window_layer->_sprite->position = _window_position_px + offset;
@@ -750,7 +750,7 @@ void MessageBox::hideAnimation()
       auto background_color = _properties._background_color;
       background_color.a = contents_alpha_scaled;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _layers["window"]->_sprite->color = window_color;
       _layers["background"]->_sprite->color = background_color;
 #else
@@ -760,7 +760,7 @@ void MessageBox::hideAnimation()
 
       for (const auto& layer : _box_content_layers)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          layer->_sprite->color = window_color;
 #else
          layer->_sprite->setColor(window_color);

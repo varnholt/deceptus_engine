@@ -246,7 +246,7 @@ void DestructibleBlockingRect::setupSprite(const GameDeserializeData& data)
 
    _texture = TexturePool::getInstance().get(_config.texture_path);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture);

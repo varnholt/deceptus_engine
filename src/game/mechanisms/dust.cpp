@@ -74,7 +74,7 @@ void Dust::update(const sf::Time& dt)
 {
    const auto dt_s = dt.asSeconds();
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto scale_factor_x = static_cast<float>(_flow_field_image->getSize().x) / _clip_rect.size.x;
    const auto scale_factor_y = static_cast<float>(_flow_field_image->getSize().y) / _clip_rect.size.y;
 #else
@@ -94,7 +94,7 @@ void Dust::update(const sf::Time& dt)
       }
 
       const auto col =
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _flow_field_image->getPixel({static_cast<uint32_t>(x_px * scale_factor_x), static_cast<uint32_t>(y_px * scale_factor_y)});
 #else
          _flow_field_image.getPixel({static_cast<uint32_t>(x_px * scale_factor_x), static_cast<uint32_t>(y_px * scale_factor_y)});
@@ -118,7 +118,7 @@ void Dust::update(const sf::Time& dt)
       // remove particles that are too close to the center
       if (_respawn_when_center_reached)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          const sf::Vector2f center = _clip_rect.position + _clip_rect.size / 2.0f;
 #else
          const sf::Vector2f center = _clip_rect.getCenter();
@@ -205,7 +205,7 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf
       // target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    target.draw(std::span<const sf::Vertex>(&_vertices[0], vertex_index), sf::PrimitiveType::Triangles, states);
 #else
    target.draw(&_vertices[0], vertex_index, sf::PrimitiveType::Triangles, states);

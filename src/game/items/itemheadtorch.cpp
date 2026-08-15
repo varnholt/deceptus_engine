@@ -15,7 +15,7 @@
 
 ItemHeadTorch::ItemHeadTorch()
     : _player_texture(TexturePool::getInstance().get("data/sprites/player.png")),
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _helmet_sprite_r(std::make_unique<sf::Sprite>()),
       _helmet_sprite_l(std::make_unique<sf::Sprite>())
 #else
@@ -47,7 +47,7 @@ void ItemHeadTorch::draw(sf::RenderTarget& target, const sf::RenderStates& state
       return;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    // the incoming states carry the level view; without it the helmet would be drawn with the
    // render target's default view and end up outside the visible camera rect
    auto helmet_states = states;

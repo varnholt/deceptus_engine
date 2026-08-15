@@ -141,7 +141,7 @@ void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const s
    _level_grid_texture = TexturePool::getInstance().get(grid.string());
    _level_outline_texture = TexturePool::getInstance().get(outlines.string());
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _level_grid_sprite = std::make_unique<sf::Sprite>();
    _level_outline_sprite = std::make_unique<sf::Sprite>();
 #else
@@ -157,7 +157,7 @@ void IngameMenuMap::updateRenderTexture(const sf::Vector2u& size_px)
       return;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto created_texture = sf::RenderTexture::create(size_px);
    if (!created_texture.hasValue())
    {
@@ -287,7 +287,7 @@ void IngameMenuMap::drawMarker(
       return;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sfcompat::setTextureRect(
       *layer->_sprite,
       sf::FloatRect{{static_cast<float>(marker_index * cell_size), 0.0f}, {static_cast<float>(cell_size), static_cast<float>(cell_size)}}
@@ -383,7 +383,7 @@ void IngameMenuMap::drawMarkers(const LevelMap& level_map, const sf::RenderState
 
 void IngameMenuMap::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    applyPageView(states);
 #else
    const auto view_width = GameConfiguration::getInstance()._view_width;
@@ -442,7 +442,7 @@ void IngameMenuMap::drawLevel(sf::RenderTarget& window, sf::RenderStates states)
    // vrsfml has no RenderTexture::setView, there the view travels in the render states instead
    sf::RenderStates map_states;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    map_states.view = sf::View{.center = center_map_px, .size = view_size};
 #else
    sf::View map_view;
@@ -452,7 +452,7 @@ void IngameMenuMap::drawLevel(sf::RenderTarget& window, sf::RenderStates states)
 
    _level_render_texture->clear(sf::Color::Transparent);
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _level_render_texture->setView(map_view);
 #endif
 
@@ -464,7 +464,7 @@ void IngameMenuMap::drawLevel(sf::RenderTarget& window, sf::RenderStates states)
    const auto view_top_left_map_px = center_map_px - view_size * 0.5f;
 
    sf::RenderStates marker_states;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    marker_states.view = sf::View{.center = view_size * 0.5f, .size = view_size};
 #else
    _level_render_texture->setView(_level_render_texture->getDefaultView());
@@ -478,7 +478,7 @@ void IngameMenuMap::drawLevel(sf::RenderTarget& window, sf::RenderStates states)
    const auto map_color = sf::Color{255, 255, 255, static_cast<uint8_t>(_alpha * 255.0f)};
    const auto map_position = sf::Vector2f{map_viewport_x_px + _move_offset_px, map_viewport_y_px};
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::Sprite map_sprite;
    map_sprite.position = map_position;
    map_sprite.textureRect = sf::FloatRect{{0.0f, 0.0f}, {map_viewport_width_px, map_viewport_height_px}};

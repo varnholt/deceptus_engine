@@ -48,7 +48,7 @@ std::vector<Segment> parseRichText(
 /// \brief concatenates segment strings into plain text without formatting tags.
 /// \param segments parsed segments to flatten.
 /// \return concatenated plain-text string.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 std::string toString(const std::vector<Segment>& segments);
 #else
 sf::String toString(const std::vector<Segment>& segments);

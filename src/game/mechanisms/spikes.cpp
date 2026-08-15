@@ -91,7 +91,7 @@ std::string_view Spikes::objectName() const
    return "Spikes";
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    draw(color, normal, {});
@@ -268,7 +268,7 @@ void Spikes::updateSpriteRect()
    const auto tu = static_cast<int32_t>(std::floor(_tu));
    for (auto& sprite : _sprite)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sprite->textureRect = {
          {static_cast<float>((tu * PIXELS_PER_TILE) + _tu_offset), static_cast<float>(_tv * PIXELS_PER_TILE)},
          {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
@@ -469,7 +469,7 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
       auto texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "spikes.png");
       for (auto i = 0; i < sprite_count; i++)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          auto sprite = std::make_unique<sf::Sprite>();
 #else
          auto sprite = std::make_unique<sf::Sprite>(*texture);
@@ -554,7 +554,7 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
             {static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
          };
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
 #else
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*spikes->_texture);

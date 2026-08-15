@@ -292,7 +292,7 @@ void PlayerHarpoon::drawAimIndicator(sf::RenderTarget& color, const sf::RenderSt
    auto dot_states = states;
    dot_states.texture = nullptr;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    color.draw(std::span<const sf::Vertex>{dots.data(), dots.size()}, sf::PrimitiveType::Triangles, dot_states);
 #else
    color.draw(dots.data(), dots.size(), sf::PrimitiveType::Triangles, dot_states);
@@ -707,7 +707,7 @@ void PlayerHarpoon::draw(sf::RenderTarget& color, sf::RenderTarget& normal, cons
          return;
       }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       target.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, strip_states);
 #else
       target.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, strip_states);
@@ -786,7 +786,7 @@ void PlayerHarpoon::loadTextures()
    _hook_texture = TexturePool::getInstance().get("data/sprites/harpoon_hook.png");
 
    // the rope texture tiles along the rope, its v coordinate runs over the whole rope length
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _rope_texture->setWrapMode(sf::TextureWrapMode::Repeat);
 #else
    _rope_texture->setRepeated(true);
