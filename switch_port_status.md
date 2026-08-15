@@ -8,23 +8,24 @@ rebase onto `master` later, nothing here overlaps other work)
 
 > ## State in one paragraph
 >
-> **The game runs on the Switch and draws its main menu.** `build_switch.bat .
-> build_switch_engine` produces a 122.6 MB `deceptus.nro` with the full `data/` tree
-> embedded as romfs. Launched in Ryujinx it mounts romfs, brings up EGL and a GL context,
-> creates its window, builds every render target, compiles every shader, and reaches its
-> main loop with **no errors logged at all** — the animated 3D starmap background, the
-> title and the menu rows all render correctly. Controller input is wired up and no longer
-> stalls start-up.
+> **The game is playable on the Switch.** `build_switch.bat . build_switch_engine` produces
+> a 122.6 MB `deceptus.nro` with the full `data/` tree embedded as romfs. Driven in Ryujinx
+> by `lab/switch_smoke/drive_ryujinx.py` it boots to the main menu, takes controller input
+> through the menu and the file select screen, loads the catacombs save and plays: the
+> player walks and jumps, the camera follows through room transitions, and the lighting,
+> shadows, parallax background, tilemaps and HUD all render correctly at 60 fps. **No
+> errors are logged at any point.**
 >
-> Three things got it there, each documented in its own section below: the Switch EGL
-> driver silently ignores context sharing (fixed by giving the platform a single GL
-> context), the shaders selected their legacy branch on a core profile (fixed by selecting
-> on `__VERSION__` rather than `GL_ES`), and VRSFML's libbacktrace stack traces hang the
-> console (fixed by turning stack traces off for this target).
+> Four things got it there, each documented in its own section below: the Switch EGL driver
+> silently ignores context sharing (fixed by giving the platform a single GL context), the
+> shaders selected their legacy branch on a core profile (fixed by selecting on
+> `__VERSION__` rather than `GL_ES`), VRSFML's libbacktrace stack traces hang the console
+> (fixed by turning stack traces off for this target), and controller hotplug detection
+> never ran on the VRSFML path at all (fixed by polling the device list from the main loop).
 >
-> Remaining: **audio is silent** (miniaudio resolves to its null backend), gameplay past
-> the menu is **unverified**, and debug scaffolding is still in the tree — all listed under
-> "How to pick this up from scratch".
+> Remaining: **audio is silent** (miniaudio resolves to its null backend), **hardware is
+> still untested** — everything here is Ryujinx — and debug scaffolding is still in the
+> tree, all listed under "How to pick this up from scratch".
 
 Read "How to pick this up from scratch" near the bottom first — it has the working-copy
 locations, the build/run commands, and the iteration loop, which is easy to get wrong.
@@ -795,6 +796,23 @@ With the freeze gone, the joystick backend was re-enabled and works. Two changes
   SDL's own HIDAPI driver reports for this hardware, so gamepad databases keyed on them
   match.
 
+That got input as far as SDL, but the game still ignored it, because **nothing on the
+`DECEPTUS_VRSFML` path ever told the engine a controller existed.** `GameControllerDetection`
+detects hotplug by running `SDL_WaitEvent` on a worker thread, and `start()` is
+`#ifndef DECEPTUS_VRSFML` — reasonably so, since VRSFML owns the SDL event queue and pumps
+it from the main loop, and a second thread would fight it for events. But nothing replaced
+it, so `processEvent` was never called, no controller was ever opened, and
+`isControllerConnected()` was permanently false. On desktop and web that is invisible
+because there is a keyboard; on a console it means no input at all.
+
+`GameControllerDetection::update()` now polls `SDL_GetJoysticks()` once a frame from
+`GameControllerIntegration::update()` and diffs it against the previous frame. Polling
+rather than reading events is deliberate: taking joystick events out of the queue here
+would hide them from VRSFML, and a device-list diff is idempotent and needs no ownership of
+the queue. The body is `#ifdef DECEPTUS_VRSFML`, so desktop keeps its event thread
+untouched. Note the SDL 3 detail this relies on: `SDL_GetJoysticks` returns *instance* ids,
+which is exactly what `GameController::activate` and the add/remove callbacks want.
+
 ## How to pick this up from scratch
 
 Everything below is what a fresh session needs; there is no state left in anyone's head.
@@ -866,6 +884,21 @@ a script. Note the layout: Nintendo's B (which SDL reports as the positional `A`
 and what the game treats as confirm) is bound to **X** on the keyboard; Nintendo's A is
 bound to Z. D-pad is the arrow keys, left stick is WASD.
 
+`lab/switch_smoke/drive_ryujinx.py` does exactly that — launch, wait, confirm through the
+main menu and file select, wait for the level, walk and jump, capturing each step into
+`lab/switch_smoke/out/`:
+
+```
+uv run --with pywin32 --with pillow python lab/switch_smoke/drive_ryujinx.py
+```
+
+Two things it borrows from `lab/map_render/drive_desktop.py` for the same reasons: real
+`keybd_event` presses rather than posted messages, because the emulator reads key state
+rather than window messages, and `PrintWindow` with `PW_RENDERFULLCONTENT`, because a plain
+screen grab of a hardware-accelerated surface comes back blank or cropped. The screenshots
+it produces are also much better than `run_ryujinx.ps1`'s, which captures the screen region
+and therefore only what is not covered.
+
 ### `lab/switch_fbo_probe`
 
 ```
@@ -913,10 +946,12 @@ can be phrased as "does this combination work here".
 | 8 | Audit shaders for GL 4.3 core / GLES 3.2 | **done** — all 21 dual-flavour shaders now select on `__VERSION__`; every one compiles |
 | 9 | Package `data/` into romfs, produce first `.nro` | **done** — 122.6 MB `.nro`, 24/24 validation tests pass |
 | 10 | Custom miniaudio backend over libnx `audout` | pending — audio is silent until then |
-| 11 | Run it on hardware or an emulator | **done for Ryujinx** — boots to the main menu, no errors logged; hardware still untested |
+| 11 | Run it on hardware or an emulator | **done for Ryujinx** — boots, plays, no errors logged; hardware still untested |
 | 12 | Fix the incomplete render texture FBO | **done** — switch-mesa ignores EGL context sharing; the platform now uses one GL context |
-| 13 | Restore controller input | **done** — count back to 1, GUID carries vendor/product |
-| 14 | Play past the menu — start a level and verify gameplay | **the current task** |
+| 13 | Restore controller input | **done** — count back to 1, GUID carries vendor/product, and detection now polls on the VRSFML path |
+| 14 | Play past the menu — start a level and verify gameplay | **done** — menu, file select, catacombs load, walking and jumping all verified in Ryujinx |
+| 15 | Run it on real hardware | pending — needs a CFW Switch; everything so far is emulator-only |
+| 16 | Strip the debug scaffolding | pending — see the list above |
 
 ---
 
@@ -931,6 +966,9 @@ can be phrased as "does this combination work here".
 - `lab/switch_smoke/run_ryujinx.ps1` — launches the emulator, screenshots, dumps the guest log
 - `lab/switch_smoke/sync_switch_patches.ps1` — the iteration loop: regenerates the patches
   from the working copies and mirrors them into `_deps/`, converting to LF
+- `lab/switch_smoke/drive_ryujinx.py` — launches the emulator, sends controller input
+  through the menus into a level, and captures each step; the counterpart to
+  `lab/map_render/drive_desktop.py`
 - `lab/switch_fbo_probe/` — standalone framebuffer-configuration probe; found the
   context-sharing bug
 - `src/switch/opengl/glew.h`, `src/switch/SFML/OpenGL.hpp` — include shims

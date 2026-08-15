@@ -41,6 +41,8 @@ GameControllerIntegration::~GameControllerIntegration()
 
 void GameControllerIntegration::update()
 {
+   _device_detection->update();
+
    const std::lock_guard<std::mutex> lock(_device_changed_mutex);
    for (const auto& cb : _device_changed_callbacks)
    {
