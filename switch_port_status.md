@@ -470,8 +470,21 @@ Hand-reviewed sites, all four files:
 - `main.cpp` — 1 of 3 migrated (the `GraphicsContext`/`AudioContext` creation); the IDBFS
   mount and header include kept.
 
-**Still worth re-verifying the WASM build** before trusting this, even though the table
-above argues it is a no-op there.
+**Desktop is verified — visually, not just by reasoning.** Rebuilt `build/Release` with the
+migration in place and drove it with the existing harness:
+
+```
+cd lab/map_render
+uv run --with pywin32 --with pillow python drive_desktop.py build/Release
+```
+
+It played through the catacombs, teleported, opened the inventory, revealed the map and
+wrote the visited rooms back to the save state. Screenshots in `lab/map_render/out/` show
+correct rendering — lighting and the lantern glow, shadow gradients, HUD, tilemaps, and
+the full map page with legend and fonts. `out/game.log` has **zero errors or warnings**.
+
+**WASM has still not been rebuilt.** The macro table above argues it is a no-op there too,
+but that remains reasoning rather than evidence.
 
 ### Lua on devkitPro
 
