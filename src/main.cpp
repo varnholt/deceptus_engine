@@ -14,6 +14,11 @@
 #include <emscripten.h>
 #endif
 
+#ifdef __SWITCH__
+#include <switch.h>
+#include <unistd.h>
+#endif
+
 #include "framework/tools/crashhandler.h"
 #include "framework/tools/gamepaths.h"
 #include "framework/tools/localization.h"
@@ -53,6 +58,23 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /
 int main(int /*argc*/, char** /*argv*/)
 #endif
 {
+#ifdef __SWITCH__
+   // the assets are baked into the .nro as romfs. mount it and make it the working
+   // directory so the engine's relative "data/..." paths resolve, before anything tries
+   // to read a config or a texture. saves go elsewhere: romfs is read-only, see
+   // GamePaths::getGameDataDir().
+   if (R_FAILED(romfsInit()))
+   {
+      return 1;
+   }
+
+   if (chdir("romfs:/") != 0)
+   {
+      romfsExit();
+      return 1;
+   }
+#endif
+
 #ifdef __EMSCRIPTEN__
    // mount a persistent IDBFS-backed filesystem and load its contents from IndexedDB before any
    // settings or save files are resolved. ASYNCIFY lets us block until the initial load completes,

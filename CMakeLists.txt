@@ -796,6 +796,14 @@ if(EMSCRIPTEN)
     list(REMOVE_ITEM GAME_FILES deceptus_resource.rc)
 endif()
 
+if(NINTENDO_SWITCH)
+    list(REMOVE_ITEM GAME_FILES deceptus_resource.rc)
+
+    # The debug UI is already compiled out on VRSFML targets, so nothing references
+    # ImGui here; dropping its sources keeps them out of the .nro entirely.
+    list(FILTER GAME_FILES EXCLUDE REGEX "thirdparty/imgui/.*\\.cpp$")
+endif()
+
 add_executable(
     deceptus
     ${GAME_FILES}
@@ -1198,6 +1206,25 @@ if(NINTENDO_SWITCH)
     # dispatch layer, which sits on the nouveau kernel interface.
     target_link_libraries(deceptus PRIVATE EGL glapi drm_nouveau)
 
+    # The game resolves its assets through relative paths like "data/sprites/foo.png"
+    # (134 such literals), so romfs has to carry a "data" directory rather than the
+    # contents of data/ at its root. Staging into ${CMAKE_BINARY_DIR}/romfs/data gives
+    # that layout; main() then chdir's to "romfs:/" so the relative paths resolve.
+    #
+    # copy_directory_if_different keeps the incremental cost down: only the first build
+    # moves the full ~104 MB.
+    # nx_create_nro validates the romfs directory at configure time, so it has to exist
+    # before that call even though the staging below only populates it at build time
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/romfs/data)
+
+    add_custom_target(
+        deceptus_romfs
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${CMAKE_SOURCE_DIR}/data
+                ${CMAKE_BINARY_DIR}/romfs/data
+        COMMENT "staging data/ into romfs")
+
+    add_dependencies(deceptus deceptus_romfs)
+
     nx_generate_nacp(
         deceptus.nacp
         NAME
@@ -1207,7 +1234,7 @@ if(NINTENDO_SWITCH)
         VERSION
         "1.0.0")
 
-    nx_create_nro(deceptus NACP ${CMAKE_CURRENT_BINARY_DIR}/deceptus.nacp)
+    nx_create_nro(deceptus NACP ${CMAKE_CURRENT_BINARY_DIR}/deceptus.nacp ROMFS ${CMAKE_BINARY_DIR}/romfs)
 endif()
 
 if(WIN32)
@@ -1296,8 +1323,7 @@ if(NINTENDO_SWITCH)
     # actually runs, since it loads GL itself when creating the context.
     target_include_directories(deceptus SYSTEM PRIVATE ${sfml_SOURCE_DIR}/extlibs/headers/glad/include)
 
-    # upstream imgui's default "open in shell" implementation calls fork/execvp/waitpid,
-    # none of which libnx provides
+    # keeps the ImGui headers inert for any translation unit that still includes them
     target_compile_definitions(deceptus PRIVATE IMGUI_DISABLE_DEFAULT_SHELL_FUNCTIONS)
 elseif(EMSCRIPTEN)
     # prepend src/wasm so "#include <opengl/glew.h>" resolves to the GLES3 stub
