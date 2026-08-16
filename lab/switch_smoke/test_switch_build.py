@@ -30,7 +30,9 @@ NRO_PATH = BUILD_DIRECTORY / "deceptus.nro"
 ELF_PATH = BUILD_DIRECTORY / "deceptus.elf"
 ROMFS_PATH = BUILD_DIRECTORY / "romfs"
 
-DOCKER_IMAGE = "devkitpro/devkita64:latest"
+# same pinned tag build_switch.bat and the CI workflow use, so a developer machine is never
+# asked to pull a second copy of a 2.8 GB image just to read a symbol table
+DOCKER_IMAGE = "devkitpro/devkita64:20260219"
 NM_BINARY = "/opt/devkitpro/devkitA64/bin/aarch64-none-elf-nm"
 
 # assets the game reaches for by hard-coded relative path; if romfs does not carry these,
@@ -51,10 +53,22 @@ def _require(path: Path):
 
 
 def _read_elf_symbols() -> str:
-    """Symbol table of the linked ELF, read through the devkitPro container."""
-    relative_elf = ELF_PATH.relative_to(REPOSITORY_ROOT).as_posix()
-    completed = subprocess.run(
-        [
+    """Symbol table of the linked ELF.
+
+    Uses the devkitPro nm directly whenever the toolchain is present, which is the case when
+    these tests run inside the container -- CI does exactly that. Only when it is absent does
+    this reach for the container through docker, which is how it runs on a developer machine,
+    where devkitPro is deliberately not installed natively.
+
+    The distinction matters: without the local path, every symbol-based test would skip in CI
+    rather than fail, and those are precisely the checks that catch SDL silently substituting
+    its dummy backends for a broken port.
+    """
+    if Path(NM_BINARY).exists():
+        command = [NM_BINARY, str(ELF_PATH)]
+        failure_hint = "could not read symbols with the local devkitPro nm"
+    else:
+        command = [
             "docker",
             "run",
             "--rm",
@@ -64,14 +78,18 @@ def _read_elf_symbols() -> str:
             "/workspace",
             DOCKER_IMAGE,
             NM_BINARY,
-            relative_elf,
-        ],
+            ELF_PATH.relative_to(REPOSITORY_ROOT).as_posix(),
+        ]
+        failure_hint = "could not read symbols via docker"
+
+    completed = subprocess.run(
+        command,
         capture_output=True,
         text=True,
         env={**os.environ, "MSYS_NO_PATHCONV": "1"},
     )
     if completed.returncode != 0:
-        pytest.skip(f"could not read symbols via docker: {completed.stderr[:200]}")
+        pytest.skip(f"{failure_hint}: {completed.stderr[:200]}")
     return completed.stdout
 
 

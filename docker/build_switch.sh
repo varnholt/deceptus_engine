@@ -2,23 +2,31 @@
 set -e
 
 # Builds a CMake project for the Nintendo Switch homebrew target inside the
-# devkitpro/devkita64 container. Defaults to the smoke test until the engine
-# itself builds for Switch (the SDL3 Switch backend is a prerequisite).
+# devkitpro/devkita64 container.
+#
+# Defaults to the smoke test rather than the engine: it is the toolchain canary and builds
+# in seconds. Pass "." to build the game itself.
+#
+# Paths are resolved against the current directory rather than a hardcoded /workspace, so
+# the same script serves both callers. build_switch.bat mounts the repository at /workspace
+# and runs with that as the working directory; GitHub Actions runs the container on its own
+# workspace path, which is somewhere under /__w.
 
 SOURCE_DIRECTORY="${1:-lab/switch_smoke}"
 BUILD_DIRECTORY="${2:-build_switch}"
 
-echo "source directory: /workspace/${SOURCE_DIRECTORY}"
-echo "build directory:  /workspace/${BUILD_DIRECTORY}"
+echo "working directory: $(pwd)"
+echo "source directory:  ${SOURCE_DIRECTORY}"
+echo "build directory:   ${BUILD_DIRECTORY}"
 
 cmake \
-    -S "/workspace/${SOURCE_DIRECTORY}" \
-    -B "/workspace/${BUILD_DIRECTORY}" \
+    -S "${SOURCE_DIRECTORY}" \
+    -B "${BUILD_DIRECTORY}" \
     -DCMAKE_TOOLCHAIN_FILE="${DEVKITPRO}/cmake/Switch.cmake" \
     -DCMAKE_BUILD_TYPE=Release
 
-cmake --build "/workspace/${BUILD_DIRECTORY}" -- -j"$(nproc)"
+cmake --build "${BUILD_DIRECTORY}" -- -j"$(nproc)"
 
 echo
 echo "build artifacts:"
-find "/workspace/${BUILD_DIRECTORY}" -name "*.nro" -o -name "*.elf" | sed 's|^|  |'
+find "${BUILD_DIRECTORY}" -name "*.nro" -o -name "*.elf" | sed 's|^|  |'

@@ -4,6 +4,7 @@
 [![Linux](https://github.com/varnholt/deceptus_engine/actions/workflows/linux.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/linux.yml)
 [![macOS](https://github.com/varnholt/deceptus_engine/actions/workflows/macos.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/macos.yml)
 [![WASM](https://github.com/varnholt/deceptus_engine/actions/workflows/wasm.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/wasm.yml)
+[![Switch](https://github.com/varnholt/deceptus_engine/actions/workflows/switch.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/switch.yml)
 
 A C++23/lua-based platformer game engine<br>
 It utilizes Box2D for game physics, SFML for rendering, and SDL for game controller support.

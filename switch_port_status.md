@@ -883,6 +883,49 @@ not a null dereference. Which callers need hardening is not yet known, and the l
 the asset, so the next run says.
 
 
+## Open: the physics runs slow on hardware
+
+The rendering looks fine on the console but the simulation drags. The coupling is not in
+doubt — `Level::update` is the only place a Box2D world is stepped anywhere in the codebase,
+and it steps a fixed amount exactly once per frame:
+
+```cpp
+_world->Step(PhysicsConfiguration::getInstance()._time_step, 8, 3);   // level.cpp:1762
+```
+
+`data/config/physics.json` sets that step to **1/35**, not the 1/60 the C++ default uses, so
+world speed is `fps x timestep`. Two candidates follow, and they produce the *same* symptom
+in game, because animations, timers and tweens advance on real `dt` and stay correct either
+way:
+
+1. the frame rate is low — at 30 fps the world runs at half
+2. the timestep is not what we think it is on this target
+
+**Ruled out so far**, each checked rather than assumed:
+
+- **Resolution.** It is played handheld, which is 1280x720 — exactly what Ryujinx rendered.
+  Note handheld is also the *lowest* GPU clock mode, so it is not the lighter case.
+- **`setFramerateLimit(60)` fighting vsync.** VRSFML's `ThisThread::sleepFor` returns
+  immediately on a non-positive duration, so under vsync the limiter never sleeps.
+- **A swap interval of 2.** SDL sets `eglSwapInterval(1)`.
+- **The Switch forcing 30 fps.** It does not; it scans out at 60 Hz in both modes.
+- **`physics.json` failing to load.** `levels.json` is read by the *identical* byte-by-byte
+  `ifstream` loop from the same `data/config/` relative path on romfs and demonstrably works,
+  and nothing touches `PhysicsConfiguration` before `main()` runs `chdir("romfs:/")`.
+
+**What it needs next is a measurement, not more theory:** the frame rate, and the update
+versus draw split, which says whether a low one is cpu or gpu bound. The engine already
+measures both under `DEVELOPMENT_MODE`; on a console they simply have nowhere to go, and the
+sd-card log is now the place to put them.
+
+One free check before instrumenting anything: the **main menu** starmap is continuous
+rendering with no physics behind it. If it is visibly less smooth than the desktop build, the
+frame rate is the answer.
+
+**Also worth knowing: Ryujinx is not a performance proxy.** It JIT-recompiles the guest
+AArch64 onto a desktop cpu and translates the Tegra command buffers to Vulkan on a desktop
+gpu. Sixty frames a second there says nothing whatsoever about what the console can do.
+
 ## How to pick this up from scratch
 
 Everything below is what a fresh session needs; there is no state left in anyone's head.
@@ -1035,6 +1078,8 @@ can be phrased as "does this combination work here".
 | 15 | Run it on real hardware | **done** — runs on a console in title takeover mode; how it plays there is still to be reported |
 | 16 | Strip the debug scaffolding | pending — the per-frame traces are gone, the start-up ones remain |
 | 17 | Make a failed asset load an error rather than a crash | pending — see "The first hardware run" |
+| 18 | CI for the Switch target | **done** — `.github/workflows/switch.yml`, builds and validates in the devkitPro container |
+| 19 | Physics runs slow on hardware | open — see the frame-rate note below |
 
 ---
 

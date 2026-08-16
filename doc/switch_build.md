@@ -66,6 +66,19 @@ a config or a texture. Saves cannot go there — romfs is read-only — and land
 it also builds the small diagnostic projects described below.
 
 
+## Continuous integration
+
+`.github/workflows/switch.yml` builds this on every push and pull request against `master`,
+and can be run by hand from the Actions tab on any branch. The job runs **inside**
+`devkitpro/devkita64` rather than shelling out to docker from the runner, which is the same
+arrangement as `build_switch.bat` with one less layer. It builds the smoke test first as a
+toolchain canary, then the engine, then runs the validation suite below, and uploads
+`deceptus.nro` as an artifact.
+
+It does not upload the `.elf`. That is what you would need to symbolise a crash address from
+a console fatal screen, but it is 214 MB — rebuild locally at the same commit if it ever
+comes to that.
+
 ## Verify the build
 
 ```bat
