@@ -193,21 +193,24 @@ class TestSwitchBackendsLinked:
         for symbol in ("romFS_devoptab", "romfsFindMount", "romfs_chdir"):
             assert symbol in elf_symbols, f"{symbol} missing - romfs is never mounted"
 
-    def test_sdl_audio_is_absent(self, elf_symbols):
-        """Documents a real limitation rather than asserting something works.
+    def test_audio_goes_through_audout_not_sdl(self, elf_symbols):
+        """Sound comes from miniaudio's custom backend over libnx audout.
 
-        VRSFML sets SDL_AUDIO OFF and brings its own miniaudio, so SDL's audio subsystem
-        -- including the Switch audio backend in switch-sdl3-backend.patch -- is not
-        compiled into the game at all. The backend stays in the patch because it makes
-        SDL's own audio work for other consumers, but it is not what will produce sound
-        here. See task 10: miniaudio resolves to its null backend on Switch and needs a
-        custom one over libnx audout.
+        VRSFML sets SDL_AUDIO OFF and brings its own miniaudio, so SDL's audio subsystem --
+        including the Switch audio backend in switch-sdl3-backend.patch -- is not compiled into
+        the game at all. That backend stays in the patch because it makes SDL's own audio work
+        for other consumers, but it is not what produces sound here.
 
-        If this test ever starts failing, someone wired SDL audio in and the audio story
-        needs revisiting.
+        The audout symbols are the load-bearing half. Without them miniaudio finds no backend on
+        the console and settles on ma_backend_null, which initializes cleanly, reports a device
+        and plays absolutely nothing -- which is exactly how the port shipped silent, with no
+        error in any log to give it away. A silent regression here would be invisible at runtime,
+        so it is asserted at link time instead.
         """
         assert "SWITCHAUD_bootstrap" not in elf_symbols
-        assert "audoutInitialize" not in elf_symbols
+
+        for symbol in ("audoutInitialize", "audoutAppendAudioOutBuffer", "audoutWaitPlayFinish"):
+            assert symbol in elf_symbols, f"{symbol} missing - audio would fall back to the silent null backend"
 
 
 class TestNoUnsupportedSymbols:
