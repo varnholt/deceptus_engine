@@ -618,7 +618,12 @@ All three would have failed on hardware too:
    which reads like a driver fault. The surface is now created once, shared, and destroyed
    with the last window.
 
-### Where it stands: a startup stall in VRSFML's window setup
+### A startup stall in VRSFML's window setup — and a wrong conclusion
+
+**Superseded, and kept because the wrong turn is instructive.** The stall was real, but the
+diagnosis below blames the joystick backend and it is wrong: what hangs is VRSFML's *error
+path*, through libbacktrace, and the joystick was merely what happened to log an error first.
+See "Solved: an SFML error message freezes the console" further down. Controller input works.
 
 Traces run through the SDL backend now, so the sequence is exact:
 
@@ -1036,15 +1041,34 @@ case that turned out to be the answer. It builds in seconds and runs in seconds,
 122 MB engine build, so reach for it before instrumenting the engine whenever a GL question
 can be phrased as "does this combination work here".
 
-### Debug scaffolding currently in the tree — remove when done
+### Debug scaffolding — removed
 
-- `SWITCH_TRACE` macros and `fprintf(stderr, …)` calls in `src/main.cpp` and
-  `src/game/game.cpp`
-- `fprintf` traces in `SDL_switchvideo.c` and `SDL_switchopengl.c` — the `egl: make current`
-  pair fires every frame and is by far the noisiest thing in the log
-- `SWITCH_GLES_CreateContext` / `MakeCurrent` written out by hand instead of via
-  `SDL_EGL_*_impl`, purely so they can carry traces (`CreateContext` now has to be written
-  out anyway, for the single-context refcount)
+The start-up tracing is gone: the `SWITCH_TRACE` macro and its sixteen call sites across
+`src/main.cpp` and `src/game/game.cpp`, and the eight `fprintf` traces in
+`SDL_switchvideo.c` / `SDL_switchopengl.c`. The sd-card log covers the same ground, persists,
+and works on hardware, which stderr does not. `SWITCH_GLES_MakeCurrent` was only written out
+by hand so it could carry a trace and is back to `SDL_EGL_MakeCurrent_impl(SWITCH)`;
+`CreateContext` and `DestroyContext` stay expanded because they hold the reference count.
+
+What is deliberately kept: `consoleDebugInit(debugDevice_SVC)` and the `stdout = stderr`
+aliasing in `main()`, because they cost nothing and are the only way to see start-up output
+under an emulator, and `lab/switch_fbo_probe`, which earned its place.
+
+### On threading, and what the `DECEPTUS_VRSFML` guards actually mean
+
+Worth stating because the macro's name invites the wrong conclusion: **threads work on the
+Switch.** libnx ships real pthreads, SDL uses its stock pthread backend, and `LogThread` runs
+on a thread there. Three `DECEPTUS_VRSFML` guards look like "this target cannot thread" and
+each is really about something else:
+
+| Site | Why the VRSFML path is single-threaded |
+|---|---|
+| `Game::loadLevel` | The loader brings up an `sf::Context` of its own and needs it to **share GL objects** with the render context. WebGL has no sharing; switch-mesa accepts a share list and ignores it. Hard blocker on both — must stay. |
+| `GameControllerDetection::start` | VRSFML owns the SDL event queue and pumps it from the main loop; a second thread in `SDL_WaitEvent` would fight it for events. Must stay; replaced by polling. |
+| `LazyTexture::loadTexture` | **Only inherited.** That thread decodes an image and does no GL at all — the upload happens on the main thread in `uploadTexture()`. Nothing stops the Switch using it. Left alone for now rather than changed unverified before a merge. |
+
+The last row is the one real opportunity: turning that decode back on for the Switch would
+help texture streaming and costs nothing structurally. It needs runtime on hardware first.
 
 ## Open questions
 

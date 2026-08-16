@@ -107,28 +107,9 @@ int main(int /*argc*/, char** /*argv*/)
    }
 #endif
 
-#ifdef __SWITCH__
-// temporary startup tracing; stderr reaches svcOutputDebugString via consoleDebugInit,
-// which std::cout does not, because its filebuf caches the original FILE*
-#define SWITCH_TRACE(step)                          \
-   do                                               \
-   {                                                \
-      fprintf(stderr, "[switch-trace] %s\n", step); \
-   } while (0)
-#else
-#define SWITCH_TRACE(step) \
-   do                      \
-   {                       \
-   } while (0)
-#endif
-
-   SWITCH_TRACE("entered main");
-
    CrashHandler::install();
 
    GamePaths::createGameDirectories();
-
-   SWITCH_TRACE("game directories created");
 
    // setup logging to file
    // weak_ptr: game threads may still fire log callbacks after main() unwinds and log_thread is destroyed;
@@ -179,8 +160,6 @@ int main(int /*argc*/, char** /*argv*/)
    );
 #endif
 
-   SWITCH_TRACE("logging installed");
-
 #ifdef __SWITCH__
    // How much memory homebrew gets depends entirely on how it was launched. Started from the
    // album, it runs as a library applet inside that applet's small memory pool; started in
@@ -213,24 +192,16 @@ int main(int /*argc*/, char** /*argv*/)
    LocalizationLoader::loadFromConfig();
    debugAuthors();
 
-   SWITCH_TRACE("localization loaded");
-
 #ifdef DECEPTUS_VRSFML
    auto graphics_context = sf::GraphicsContext::create();
-   SWITCH_TRACE("graphics context created");
    auto audio_context = sf::AudioContext::create();
-   SWITCH_TRACE("audio context created");
 #endif
 
    Test test;
    Game game;
-   SWITCH_TRACE("game constructed");
    game.initialize();
-   SWITCH_TRACE("game initialized");
    Preloader::preload();
-   SWITCH_TRACE("preload done, entering loop");
    const auto result = game.loop();
-   SWITCH_TRACE("loop returned");
 
 #ifdef DEVELOPMENT_MODE
    Localization::getInstance().flushMissingKeys();
