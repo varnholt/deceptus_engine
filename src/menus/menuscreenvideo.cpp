@@ -10,7 +10,7 @@
 #include <cmath>
 #include <format>
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Window/VideoModeUtils.hpp>
 #endif
@@ -23,7 +23,7 @@ MenuScreenVideo::MenuScreenVideo()
 
    _base_video_modes = {{640, 360}, {1280, 720}, {1366, 768}, {1600, 900}, {1920, 1080}, {2560, 1440}, {3840, 2160}};
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto desktop_mode = sf::VideoModeUtils::getDesktopMode();
 #else
    const auto desktop_mode = sf::VideoMode::getDesktopMode();
@@ -265,7 +265,7 @@ void MenuScreenVideo::loadingFinished()
 
    auto make_label = [this]() -> std::unique_ptr<sf::Text>
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       auto text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
       auto text = std::make_unique<sf::Text>(_font);
@@ -277,7 +277,7 @@ void MenuScreenVideo::loadingFinished()
 
    _resolution_text = make_label();
    _resolution_text->setFillColor(sf::Color::White);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _resolution_text->position = {382, 154};
 #else
    _resolution_text->setPosition({382, 154});
@@ -397,7 +397,7 @@ void MenuScreenVideo::updateLayers()
    _layers["brightness_h_0"]->_visible = !brightness_selected;
    _layers["brightness_h_1"]->_visible = brightness_selected;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _layers["brightness_h_0"]->_sprite->origin = {50 - (brightness_value * 100.0f), 0};
    _layers["brightness_h_1"]->_sprite->origin = {50 - (brightness_value * 100.0f), 0};
 #else
@@ -439,7 +439,7 @@ void MenuScreenVideo::updateLayers()
    );
    placeTextCentered(*_resolution_help_text, _row_help_base_rect);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _resolution_text->setString(std::format("{}x{}", resolution_width, resolution_height).c_str());
 #else
    _resolution_text->setString(std::format("{}x{}", resolution_width, resolution_height));
@@ -454,7 +454,7 @@ void MenuScreenVideo::updateLayers()
 
    placeTextCentered(*_displaymode_help_text, _row_help_base_rect);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::Utf8String display_mode_strings[] = {sftr("Windowed"), sftr("Borderless"), sftr("Fullscreen")};
 #else
    const sf::String display_mode_strings[] = {sftr("Windowed"), sftr("Borderless"), sftr("Fullscreen")};

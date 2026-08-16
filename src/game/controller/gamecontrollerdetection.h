@@ -5,6 +5,7 @@
 #include <functional>
 #include <memory>
 #include <thread>
+#include <vector>
 
 /// \brief runs an SDL event loop on a worker thread to detect controller hotplug events.
 class GameControllerDetection
@@ -15,6 +16,9 @@ public:
 
    /// \brief stops the event thread and waits until it has terminated.
    void stop();
+
+   /// \brief polls the connected devices once; the VRSFML path has no event thread to do it.
+   void update();
 
    using AddedCallback = std::function<void(int32_t)>;
    using RemovedCallback = std::function<void(int32_t)>;
@@ -37,4 +41,5 @@ private:
    bool _stopped = false;
    AddedCallback _callback_added;
    RemovedCallback _callback_removed;
+   std::vector<SDL_JoystickID> _connected_joystick_ids;  //!< devices seen by the last update(), VRSFML path only
 };

@@ -15,7 +15,7 @@ void AtmosphereShader::initialize(const std::shared_ptr<sf::RenderTexture>& rend
    }
 
    _distortion_map = TexturePool::getInstance().get("data/effects/distortion_map.png");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _distortion_map->setWrapMode(sf::TextureWrapMode::Repeat);
 #else
    _distortion_map->setRepeated(true);

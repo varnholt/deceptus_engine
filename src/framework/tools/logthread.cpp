@@ -1,6 +1,14 @@
 #include "logthread.h"
 
-#ifndef __EMSCRIPTEN__
+// The web build has no filesystem worth logging to, so file logging is compiled out there.
+// The Switch does have one: romfs is read-only but libnx mounts the sd card as sdmc:/, and a
+// log file there is the only way to see what the game did on real hardware -- stderr reaches
+// svcOutputDebugString, which needs a debugger or an emulator attached to read.
+#if !defined(DECEPTUS_VRSFML) || defined(__SWITCH__)
+#define DECEPTUS_LOG_TO_FILE
+#endif
+
+#ifdef DECEPTUS_LOG_TO_FILE
 #include "gamepaths.h"
 #endif
 
@@ -9,7 +17,7 @@
 #include <iomanip>
 #include <iostream>
 
-#ifndef __EMSCRIPTEN__
+#ifdef DECEPTUS_LOG_TO_FILE
 namespace
 {
 int32_t flush_counter = 0;
@@ -18,7 +26,7 @@ int32_t flush_counter = 0;
 
 LogThread::LogThread()
 {
-#ifndef __EMSCRIPTEN__
+#ifdef DECEPTUS_LOG_TO_FILE
    // generate filename with current date
    const auto now = std::chrono::system_clock::now();
    const auto now_time = std::chrono::system_clock::to_time_t(now);
@@ -39,7 +47,7 @@ LogThread::LogThread()
 
 LogThread::~LogThread()
 {
-#ifndef __EMSCRIPTEN__
+#ifdef DECEPTUS_LOG_TO_FILE
    {
       std::lock_guard<std::mutex> guard(_mutex);
       _stopped = true;
@@ -51,7 +59,7 @@ LogThread::~LogThread()
 
 void LogThread::log(const SysClockTimePoint& time_point, Log::Level level, const std::string& message, const std::source_location& location)
 {
-#ifndef __EMSCRIPTEN__
+#ifdef DECEPTUS_LOG_TO_FILE
    std::lock_guard<std::mutex> guard(_mutex);
    if (_stopped)
    {
@@ -66,7 +74,7 @@ void LogThread::log(const SysClockTimePoint& time_point, Log::Level level, const
 #endif
 }
 
-#ifndef __EMSCRIPTEN__
+#ifdef DECEPTUS_LOG_TO_FILE
 void LogThread::run()
 {
    while (!_stopped)

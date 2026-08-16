@@ -471,7 +471,7 @@ bool Door::setup(const GameDeserializeData& data)
       {
          const auto texture_path = texture_it->second->_value_string.value();
          _texture = TexturePool::getInstance().get(texture_path);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite = std::make_unique<sf::Sprite>();
 #else
          _sprite = std::make_unique<sf::Sprite>(*_texture);

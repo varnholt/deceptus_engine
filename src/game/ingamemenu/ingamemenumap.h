@@ -33,7 +33,7 @@ public:
    /// \brief builds map view composition and draws the map page layers.
    /// \param window render target that receives map page rendering.
    /// \param states render states used for drawing.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{}) override;
 #else
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;

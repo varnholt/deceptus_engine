@@ -268,7 +268,7 @@ void MusicPlayer::activateLoadedTrack(bool load_succeeded)
    }
    else
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _backend->setVolume(next_index, volume());
 #else
       _backend->setVolume(next_index, 100.f);
@@ -296,7 +296,7 @@ float MusicPlayer::volume() const
 {
    const auto& config = GameConfiguration::getInstance();
    const auto master = config._audio_volume_master * 0.01f;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto music = config._audio_volume_music * 0.01f;
 #else
    const auto music = config._audio_volume_music;

@@ -2,6 +2,7 @@
 
 #include "framework/tools/log.h"
 
+#include <algorithm>
 #include <iostream>
 
 // SDL treats added and removed events differently and gives different identifiers for the added and removed events.
@@ -11,7 +12,7 @@
 
 void GameControllerDetection::start()
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _thread = std::make_unique<std::thread>(
       [this]()
       {
@@ -27,9 +28,50 @@ void GameControllerDetection::start()
 
 void GameControllerDetection::stop()
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _stopped = true;
    _thread->join();
+#endif
+}
+
+void GameControllerDetection::update()
+{
+#ifdef DECEPTUS_VRSFML
+   // No event thread runs on this path: VRSFML owns the SDL event queue and pumps it from the
+   // main loop, so a second thread blocking in SDL_WaitEvent would fight it for events -- and
+   // taking joystick events out of the queue here would hide them from VRSFML. Comparing the
+   // device list against the previous frame needs neither. Without this nothing ever calls the
+   // added callback, no controller is ever opened, and every gamepad input is silently ignored,
+   // which on a console means no input at all.
+   int32_t joystick_count = 0;
+   SDL_JoystickID* joystick_ids = SDL_GetJoysticks(&joystick_count);
+   if (joystick_ids == nullptr)
+   {
+      return;
+   }
+
+   const std::vector<SDL_JoystickID> current_joystick_ids(joystick_ids, joystick_ids + joystick_count);
+   SDL_free(joystick_ids);
+
+   for (const auto joystick_id : current_joystick_ids)
+   {
+      if (std::ranges::find(_connected_joystick_ids, joystick_id) == _connected_joystick_ids.end())
+      {
+         Log::Info() << "joystick added, instance id: " << joystick_id;
+         _callback_added(joystick_id);
+      }
+   }
+
+   for (const auto joystick_id : _connected_joystick_ids)
+   {
+      if (std::ranges::find(current_joystick_ids, joystick_id) == current_joystick_ids.end())
+      {
+         Log::Info() << "joystick removed, instance id: " << joystick_id;
+         _callback_removed(joystick_id);
+      }
+   }
+
+   _connected_joystick_ids = current_joystick_ids;
 #endif
 }
 

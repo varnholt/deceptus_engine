@@ -1,4 +1,4 @@
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform sampler2D color_map;
 uniform sampler2D light_map_1;
 uniform sampler2D light_map_2;

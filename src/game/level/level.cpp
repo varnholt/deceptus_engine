@@ -71,7 +71,7 @@
 #include <iostream>
 #include <ranges>
 #include <regex>
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 #include <span>
 #endif
 #include <sstream>
@@ -225,7 +225,7 @@ Level::~Level()
       Timer::removeByCaller(enemy);
    }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _file_watcher.stop();
 #endif
 }
@@ -298,7 +298,7 @@ void Level::loadTmx()
    // preload mechanism data in parallel
    for (auto& [vec_key, vec_values] : _mechanism_registry.getMap())
    {
-#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(__APPLE__) || defined(DECEPTUS_VRSFML)
       std::for_each(vec_values->begin(), vec_values->end(), [](auto& val) { val->preload(); });
 #else
       std::for_each(std::execution::par, vec_values->begin(), vec_values->end(), [](auto& val) { val->preload(); });
@@ -388,7 +388,7 @@ void Level::loadTmx()
    }
 
    // load tilemaps in parallel
-#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(__APPLE__) || defined(DECEPTUS_VRSFML)
    std::for_each(
       layer_load_data.begin(),
       layer_load_data.end(),
@@ -490,7 +490,7 @@ bool Level::load()
    Log::Info() << "level loading complete";
 
    // set up file watcher so a level edited while the game runs is picked up
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _file_watcher.start(_description->_filename, "level");
 #endif
 
@@ -768,7 +768,7 @@ void Level::drawStaticChains(sf::RenderTarget& target)
 {
    for (auto& path : _atmosphere._outlines)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       target.draw(std::span<const sf::Vertex>{&path.at(0), path.size()}, sf::PrimitiveType::LineStrip);
 #else
       target.draw(&path.at(0), path.size(), sf::PrimitiveType::LineStrip);
@@ -790,7 +790,7 @@ void Level::createViews()
    _view_height = static_cast<float>(game_config._view_height);
 
    _level_view.reset();
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _level_view = std::make_shared<sf::View>(sf::FloatRect({0.0f, 0.0f}, {_view_width, _view_height}));
    _level_view->setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 
@@ -803,7 +803,7 @@ void Level::createViews()
    {
       image_layer->resetView(_view_width, _view_height);
    }
-#endif  // !__EMSCRIPTEN__
+#endif  // !DECEPTUS_VRSFML
 }
 
 void Level::updateViews()
@@ -821,7 +821,7 @@ void Level::updateViews()
 
    CameraRoomLock::setViewRect(view_rect);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _level_view = std::make_shared<sf::View>(sf::View::fromRect(view_rect));
 #else
    _level_view = std::make_shared<sf::View>(view_rect);
@@ -948,17 +948,17 @@ void Level::zoomReset()
 void Level::drawLightMap()
 {
    _render_targets.lighting->clear();
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _render_targets.lighting->setView(*_level_view);
 #endif
    _render_targets.lighting2->clear();
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _render_targets.lighting2->setView(*_level_view);
 #endif
    _light_system->draw(
       *_render_targets.lighting,
       *_render_targets.lighting2,
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sf::RenderStates{.view = *_level_view}
 #else
       {}
@@ -981,7 +981,7 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
    {
       if (parallax->_z_index == z_index)
       {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
          target.setView(parallax->_view);
          target.draw(*parallax->_tile_map);
 #else
@@ -991,7 +991,7 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
    }
 
    // restore level view
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    target.setView(*_level_view);
 #endif
 }
@@ -1032,7 +1032,7 @@ void Level::drawMechanismsAtZ(
 
 void Level::drawPostLightingLayers(sf::RenderTarget& target)
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    const auto previous_view = target.getView();
    target.setView(*_level_view);
    const sf::RenderStates level_view_states{};
@@ -1068,14 +1068,14 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
       }
    }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    target.setView(previous_view);
 #endif
 }
 
 void Level::drawOverlayLayers(sf::RenderTarget& target)
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    const auto previous_view = target.getView();
    target.setView(*_level_view);
    const sf::RenderStates level_view_states{};
@@ -1095,7 +1095,7 @@ void Level::drawOverlayLayers(sf::RenderTarget& target)
       );
    }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    target.setView(previous_view);
 #endif
 }
@@ -1109,7 +1109,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 {
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    target.setView(*_level_view);
    normal.setView(*_level_view);
    const sf::RenderStates level_view_states{};
@@ -1123,7 +1123,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
    // geometry. this must go through sf::StencilMode (not raw gl) so the state survives sfml's
    // per-render-target cache invalidation when tilemaps alternate between the color and normal
    // targets.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::StencilMode stencil_write_mode{
       .stencilComparison = sf::StencilComparison::Always,
       .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
@@ -1163,7 +1163,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // reset the stencil mask before the foreground layers start writing into it
       if (z_index == stencil_start_layer)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          target.clearStencil(sf::StencilValue{0u});
 #else
          target.clearStencil(0);
@@ -1247,7 +1247,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 
 void Level::drawAtmosphereLayer()
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    if (!_atmosphere._tile_map)
    {
       return;
@@ -1265,7 +1265,7 @@ void Level::drawAtmosphereLayer()
 #ifdef GLOW_ENABLED
 void Level::drawBlurLayer(sf::RenderTarget& target)
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    target.setView(*_level_view);
 #endif
 
@@ -1340,14 +1340,14 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
    // draw all tilemaps at z=24 into the stencil buffer only.
    // stencilOnly=true suppresses color output (replaces the old zero/zero blend mode).
    // the fragment shader's discard still runs so transparent tile regions don't occlude.
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    target.setView(*_level_view);
    sf::RenderStates states;
 #else
    sf::RenderStates states{.view = *_level_view};
 #endif
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    if (_occluder_shader.isLoaded())
    {
       states.shader = &_occluder_shader.native();
@@ -1382,7 +1382,7 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
 void Level::displayFinalTextures()
 {
    // display the whole texture
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    {
       sf::View view(sf::FloatRect(
          {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
@@ -1409,7 +1409,7 @@ void Level::drawGlowLayer()
 #ifdef GLOW_ENABLED
 void Level::drawGlowSprite()
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::Texture& blur_texture = _blur_shader->getRenderTexture()->getTexture();
    sf::Sprite blur_sprite;
    const auto down_scale_x =
@@ -1571,7 +1571,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    // render atmosphere to atmosphere texture, that texture is used in the shader only
    drawAtmosphereLayer();
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    takeScreenshot("texture_atmosphere", *_atmosphere_shader->getRenderTexture().get());
 #endif
 
@@ -1600,7 +1600,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    takeScreenshot("texture_level_background_normal", *_render_targets.normal_tmp.get());
 
    // draw the atmospheric parts into the level texture using the atmosphere shader
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    sf::Sprite tmp_sprite(_render_targets.level_background->getTexture());
    _atmosphere_shader->update();
    _render_targets.level->draw(tmp_sprite, &_atmosphere_shader->getShader());
@@ -1636,11 +1636,11 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       static_cast<int32_t>(ZDepth::ForegroundMax)
    );
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _light_system->drawDebug(*_render_targets.level.get());
 #endif
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    const sf::RenderStates level_view_states{};
 #else
    const sf::RenderStates level_view_states{.view = *_level_view};
@@ -1650,7 +1650,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    AnimationPlayer::getInstance().draw(*_render_targets.level.get(), level_view_states);
    _level_script.draw(*_render_targets.level.get(), level_view_states);
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    drawDebugInformation();
 #endif
 
@@ -1670,7 +1670,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       // switching lighting off has to blit the unlit color map instead of merely skipping the pass,
       // otherwise the frame stays black. the result is the artwork at full brightness.
       const sf::Texture& unlit_texture = _render_targets.level->getTexture();
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sf::Sprite unlit_sprite;
       unlit_sprite.textureRect =
          sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(unlit_texture.getSize().x), static_cast<float>(unlit_texture.getSize().y)}};
@@ -1687,7 +1687,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    _render_targets.deferred->display();
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    takeScreenshot("texture_map_color", *_render_targets.level.get());
    takeScreenshot("texture_map_light", *_render_targets.lighting.get());
    takeScreenshot("texture_map_light2", *_render_targets.lighting2.get());
@@ -1695,7 +1695,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    takeScreenshot("texture_map_deferred", *_render_targets.deferred.get());
 #endif
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::Texture& level_deferred_texture = _render_targets.deferred->getTexture();
    sf::Sprite level_texture_sprite;
 

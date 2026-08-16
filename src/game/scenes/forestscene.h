@@ -19,7 +19,7 @@ public:
    /// \brief draws all scene layers and centers the message text.
    /// \param window SFML render target used for scene rendering.
    /// \param RenderStates render state overrides for layer and text draws.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{});
 #else
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);

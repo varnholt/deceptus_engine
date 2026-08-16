@@ -67,7 +67,7 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
          y_index_px += height_px;
       }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sf::Sprite sprite;
 #else
       sf::Sprite sprite(*_texture);

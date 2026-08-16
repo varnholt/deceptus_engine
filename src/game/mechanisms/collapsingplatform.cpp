@@ -164,7 +164,7 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    auto row_index = 0;
    for (auto& block : _blocks)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       block._sprite = std::make_unique<sf::Sprite>();
 #else
       block._sprite = std::make_unique<sf::Sprite>(*_texture);

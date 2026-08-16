@@ -151,7 +151,7 @@ void Lever::setup(const GameDeserializeData& data)
    _rect.size.y = PIXELS_PER_TILE * 2;
 
    _texture = TexturePool::getInstance().get("data/sprites/levers.png");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
@@ -170,7 +170,7 @@ void Lever::updateSprite()
 {
    if (_reached && (_target_state == State::Right))
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _sprite->textureRect = {
          {static_cast<float>((static_cast<int32_t>(_idle_time_s * idle_animation_speed) % 6) * PIXELS_PER_TILE * 3),
           static_cast<float>(PIXELS_PER_TILE * 3 * 2)},
@@ -187,7 +187,7 @@ void Lever::updateSprite()
    {
       const auto left = _dir == -1;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _sprite->textureRect = {
          {static_cast<float>(left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE)),
           static_cast<float>(left ? (3 * PIXELS_PER_TILE) : 0)},
@@ -296,7 +296,7 @@ void Lever::update(const sf::Time& dt)
    {
       constexpr auto no_handle_col = 10;
       constexpr auto no_handle_row = 2;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       const auto rect = sf::FloatRect{
          {static_cast<float>(PIXELS_PER_TILE * 3 * no_handle_col), static_cast<float>(PIXELS_PER_TILE * 3 * no_handle_row)},
          {static_cast<float>(PIXELS_PER_TILE * 3), static_cast<float>(PIXELS_PER_TILE * 3)}
@@ -354,7 +354,7 @@ void Lever::update(const sf::Time& dt)
 
 void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    draw(color, normal, {});
 #else
    color.draw(*_sprite);
@@ -363,7 +363,7 @@ void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
 void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::RenderStates draw_states = states;
    draw_states.texture = _texture.get();
    color.draw(*_sprite, draw_states);

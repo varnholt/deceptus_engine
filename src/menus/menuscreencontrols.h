@@ -106,7 +106,7 @@ private:
    void completeButtonAssignment(int32_t sdl_button);
 
    std::unique_ptr<sf::Text> _text;       //!< reused per draw call for all labels and table cells
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::RectangleShape _cursor_highlight{sf::RectangleShape::Data{.size = {0.0f, 0.0f}}};  //!< highlight rect drawn behind the selected row
 #else
    sf::RectangleShape _cursor_highlight;  //!< highlight rect drawn behind the selected row

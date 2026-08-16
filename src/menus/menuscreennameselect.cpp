@@ -39,7 +39,7 @@ std::string extractFirstName(std::string_view username)
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text = std::make_unique<sf::Text>(_font);
@@ -56,21 +56,21 @@ MenuScreenNameSelect::MenuScreenNameSelect()
       's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '.', '-',
    };
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_cancel_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_cancel_button = std::make_unique<sf::Text>(_font);
 #endif
    _text_cancel_button->setCharacterSize(12);
    _text_cancel_button->setFillColor(color_label_normal);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_delete_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_delete_button = std::make_unique<sf::Text>(_font);
 #endif
    _text_delete_button->setCharacterSize(12);
    _text_delete_button->setFillColor(color_label_normal);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_confirm_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_confirm_button = std::make_unique<sf::Text>(_font);
@@ -131,7 +131,7 @@ void MenuScreenNameSelect::back()
 void MenuScreenNameSelect::updateText()
 {
    // draw text
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text->setString(_name.c_str());
 #else
    _text->setString(_name);
@@ -139,7 +139,7 @@ void MenuScreenNameSelect::updateText()
    const auto text_rect = _text->getLocalBounds();
    const auto x_offset_px = (_name_rect.size.x - text_rect.size.x) * 0.5f;
    const auto x_px = _name_rect.position.x + x_offset_px;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text->position = {x_px, _name_rect.position.y};
 #else
    _text->setPosition({x_px, _name_rect.position.y});
@@ -252,7 +252,7 @@ void MenuScreenNameSelect::retrieveUsername()
 void MenuScreenNameSelect::loadingFinished()
 {
    const auto cursor = _layers["cursor"];
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _char_origin.x = cursor->_sprite->position.x;
    _char_origin.y = cursor->_sprite->position.y;
 #else
@@ -261,7 +261,7 @@ void MenuScreenNameSelect::loadingFinished()
 #endif
 
    const auto player_name = _layers["players-name"];
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _name_rect.position.x = player_name->_sprite->position.x;
    _name_rect.position.y = player_name->_sprite->position.y;
 #else
@@ -277,7 +277,7 @@ void MenuScreenNameSelect::loadingFinished()
 void MenuScreenNameSelect::updateLayers()
 {
    auto cursor = _layers["cursor"];
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    cursor->_sprite->position = {
       static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)
    };

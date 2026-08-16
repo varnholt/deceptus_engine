@@ -65,7 +65,7 @@ std::string_view ButtonRect::objectName() const
 
 void ButtonRect::update(const sf::Time& /*dt*/)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    {
       const auto player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
       _player_intersects = sf::findIntersection(player_rect, _rect).hasValue();

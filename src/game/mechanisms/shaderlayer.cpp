@@ -7,7 +7,7 @@
 #include "game/io/valuereader.h"
 
 #include <filesystem>
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 #include <span>
 #else
 #include <fstream>
@@ -38,7 +38,7 @@ std::string_view ShaderLayer::objectName() const
    return "ShaderLayer";
 }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 void ShaderLayer::checkUniforms(const std::string& shader_path)
 {
    std::ifstream file(shader_path);
@@ -56,7 +56,7 @@ void ShaderLayer::checkUniforms(const std::string& shader_path)
 }
 #endif
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    draw(target, normal, {});
@@ -211,7 +211,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
       Log::Error() << "error loading shader";
    }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    if (frag_file.has_value())
    {
       // analyze the fragment shader source to determine which uniforms are present
@@ -223,7 +223,7 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    if (texture_id.has_value())
    {
       instance->_texture = TexturePool::getInstance().get(texture_id.value());
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       instance->_texture->setWrapMode(sf::TextureWrapMode::Repeat);
 #else
       instance->_texture->setRepeated(true);

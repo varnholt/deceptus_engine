@@ -11,7 +11,7 @@
 #include <sstream>
 
 CameraSystemConfigurationUi::CameraSystemConfigurationUi()
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
     : _render_window(std::make_unique<sf::RenderWindow>(
          sf::RenderWindow::create(sf::WindowSettings{.size = {800u, 400u}, .title = "deceptus camera configuration"}).value()
       ))
@@ -33,7 +33,7 @@ void CameraSystemConfigurationUi::processEvents()
 
       if (event->is<sf::Event::Closed>())
       {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
          _render_window->close();
 #endif
       }

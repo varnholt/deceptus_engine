@@ -159,7 +159,7 @@ std::string_view Gateway::objectName() const
 
 void Gateway::loadNoiseTexture(const std::string& filename)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto loaded_texture = sf::Texture::loadFromFile(filename);
    if (!loaded_texture.hasValue())
    {
@@ -217,7 +217,7 @@ void Gateway::drawVoid(sf::RenderTarget& target)
    _shader.setUniform("noise_scale", _noise_scale);
    _shader.setUniform("swirl_color", _swirl_color);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::RenderStates shader_state;
    shader_state.blendMode = sf::BlendNone;
    shader_state.shader = _shader.isLoaded() ? &_shader.native() : nullptr;
@@ -250,7 +250,7 @@ void Gateway::drawVoid(sf::RenderTarget& target)
 
 void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    draw(target, normal, {});
 #else
    sf::RenderStates states;
@@ -286,7 +286,7 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
 void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    // draw sides
    auto draw_visible = [&target, &states](const auto& side)
    {
@@ -751,7 +751,7 @@ void Gateway::setup(const GameDeserializeData& data)
          const auto texture_size = sf::Vector2u(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
          auto opacity = layer.getOpacity();
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          auto texture = std::make_shared<sf::Texture>(std::move(*sf::Texture::create(texture_size)));
 #else
          auto texture = std::make_shared<sf::Texture>(texture_size);
@@ -760,14 +760,14 @@ void Gateway::setup(const GameDeserializeData& data)
 
          std::shared_ptr<sf::Sprite> sprite;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          sprite = std::make_shared<sf::Sprite>();
 #else
          sprite = std::make_shared<sf::Sprite>(*texture);
 #endif
 
          const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())} + _rect.position;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          sprite->position = pos;
          sprite->color = sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity));
          sprite->textureRect = sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(texture_size.x), static_cast<float>(texture_size.y)}};
@@ -822,7 +822,7 @@ void Gateway::setup(const GameDeserializeData& data)
       std::cout << "failed to load shader" << std::endl;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _shader_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create({200u, 200u})));
    _shader_texture->setSmooth(true);
    _shader_sprite = std::make_unique<sf::Sprite>();
@@ -876,7 +876,7 @@ void Gateway::use()
       return;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto target_pos_px = target_gateway->_rect.position + target_gateway->_rect.size / 2.0f;
 #else
    const auto target_pos_px = target_gateway->_rect.getCenter();
@@ -941,7 +941,7 @@ Gateway::Eye::Eye(const sf::Vector2f& center)
    _center_pos_px = center;
 
    _texture = TexturePool::getInstance().get("data/sprites/gateway_eye.png");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
@@ -971,7 +971,7 @@ void Gateway::Eye::draw(sf::RenderTarget& target, const sf::RenderStates& states
    {
       case IrisState::Awake:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _eye_iris_spawn->draw(target, states);
 #else
          (void)states;
@@ -982,7 +982,7 @@ void Gateway::Eye::draw(sf::RenderTarget& target, const sf::RenderStates& states
       }
       case IrisState::Idle:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _eye_iris_idle_ref->draw(target, states);
 #else
          _eye_iris_idle_ref->draw(target);
@@ -1016,7 +1016,7 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
       _eye_iris_spawn->update(dt);
 
       // no longer needed
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       // _sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(std::clamp(wake_value_normalized * 255.0f, 0.0f, 255.0f)));
 #else
       // _sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(std::clamp(wake_value_normalized * 255.0f, 0.0f, 255.0f))));

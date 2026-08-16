@@ -22,7 +22,7 @@ constexpr auto z_behind = static_cast<int32_t>(ZDepth::Player) - 1;
 PlayerFirefly::PlayerFirefly(GameNode* parent) : GameNode(parent)
 {
    _texture = TexturePool::getInstance().get("data/sprites/firefly.png");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
    _sprite->textureRect = {{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
 #else
@@ -39,7 +39,7 @@ std::string_view PlayerFirefly::objectName() const
    return "PlayerFirefly";
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void PlayerFirefly::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    draw(target, normal, {});
@@ -103,7 +103,7 @@ void PlayerFirefly::update(const sf::Time& dt)
    _position_px.x = _virtual_center_px.x + raw_x * orbit_radius_x_px;
    _position_px.y = _virtual_center_px.y + orbit_center_offset_y_px + raw_y * orbit_radius_y_px;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite->position = _position_px;
    _sprite->origin = {static_cast<float>(PIXELS_PER_TILE) * 0.5f, static_cast<float>(PIXELS_PER_TILE) * 0.5f};
 #else
@@ -142,7 +142,7 @@ void PlayerFirefly::updateTextureRect()
    if (new_frame != _current_frame)
    {
       _current_frame = new_frame;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _sprite->textureRect = {{static_cast<float>(_current_frame * PIXELS_PER_TILE), 0.0f}, {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}};
 #else
       _sprite->setTextureRect({{_current_frame * PIXELS_PER_TILE, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});

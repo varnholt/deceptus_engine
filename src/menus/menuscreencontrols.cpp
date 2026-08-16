@@ -58,7 +58,7 @@ MenuScreenControls::MenuScreenControls()
 {
    setFilename("data/menus/controls.psd");
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text = std::make_unique<sf::Text>(_font);
@@ -192,21 +192,21 @@ void MenuScreenControls::loadingFinished()
       layer_entry.second->_visible = false;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_setkey_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_setkey_button = std::make_unique<sf::Text>(_font);
 #endif
    _text_setkey_button->setCharacterSize(12);
    _text_setkey_button->setFillColor(color_label_normal);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_defaults_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_defaults_button = std::make_unique<sf::Text>(_font);
 #endif
    _text_defaults_button->setCharacterSize(12);
    _text_defaults_button->setFillColor(color_label_normal);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_back_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_back_button = std::make_unique<sf::Text>(_font);
@@ -576,7 +576,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    const auto title_prefix = (_device_row_index > 0) ? "< " : "  ";
    const auto title_suffix = (_device_row_index < static_cast<int32_t>(_device_entries.size()) - 1) ? " >" : "  ";
    const auto full_title = title_prefix + _device_name + title_suffix;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text->setString(full_title.c_str());
 #else
    _text->setString(sf::String::fromUtf8(full_title.begin(), full_title.end()));
@@ -611,7 +611,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
       _text->setFillColor(row_color);
 
       const auto action_display_name = InputConfiguration::actionDisplayName(action);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _text->setString(action_display_name.c_str());
 #else
       _text->setString(sf::String::fromUtf8(action_display_name.begin(), action_display_name.end()));
@@ -640,7 +640,7 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
             binding_name = InputConfiguration::buttonName(button_entry->second);
          }
       }
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _text->setString(binding_name.c_str());
 #else
       _text->setString(binding_name);

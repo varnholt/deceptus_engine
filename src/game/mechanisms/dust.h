@@ -68,7 +68,7 @@ private:
    std::vector<Particle> _particles;
    sf::FloatRect _clip_rect;
    std::shared_ptr<sf::Texture> _flow_field_texture;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    std::optional<sf::Image> _flow_field_image;
 #else
    sf::Image _flow_field_image;

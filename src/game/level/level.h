@@ -42,7 +42,7 @@
 #include <map>
 #include <memory>
 #include <set>
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 #include <optional>
 #endif
 

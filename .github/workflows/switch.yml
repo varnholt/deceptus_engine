@@ -1,0 +1,72 @@
+name: Switch
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    # The toolchain only exists in this image -- devkitA64, libnx and the switch portlibs are
+    # not installable any other way, and deliberately are not installed natively on developer
+    # machines either. Running the job inside the container is the same arrangement as
+    # build_switch.bat, minus the docker-in-docker.
+    #
+    # Pinned to a dated tag rather than latest, for the same reason every dependency in
+    # CMakeLists names a release: this image carries the compiler, libnx and the portlibs, so
+    # `latest` moving would change what a clean build produces with nothing here changing.
+    # build_switch.bat names the same tag, so local builds and CI agree.
+    container: devkitpro/devkita64:20260219
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # The checkout lands with an owner git does not expect inside the container, which makes
+      # every git call fail with "dubious ownership". FetchContent clones and patches its
+      # dependencies with git, so this has to be settled before configuring.
+      - name: Trust the workspace
+        run: git config --global --add safe.directory '*'
+
+      # No FetchContent cache here, unlike the wasm workflow, and deliberately so. The tree it
+      # would hold is 878 MB -- VRSFML alone is 424 MB with its history -- against a cache
+      # budget shared with every other workflow, and it cannot be narrowed to just the sources
+      # because FetchContent tracks them with stamp files in the -subbuild directories. It
+      # would also carry object files, which have no business surviving a toolchain change.
+      # Cloning costs a minute or so of a job that spends most of its time compiling.
+
+      # Builds in seconds and is the toolchain canary: if EGL, the core GL context or the .nro
+      # packaging break, this says so before the engine spends ten minutes finding out.
+      - name: Build smoke test
+        run: bash docker/build_switch.sh lab/switch_smoke build_switch
+
+      - name: Build engine
+        run: bash docker/build_switch.sh . build_switch_engine
+
+      - name: Install pytest
+        run: apt-get update && apt-get install -y --no-install-recommends python3-pytest
+
+      # These matter more than the build succeeding. SDL quietly substitutes dummy drivers when
+      # a backend is missing, so a port that no longer links its Switch video or joystick
+      # backend still builds perfectly cleanly -- and romfs staging can go stale without a word.
+      #
+      # The existence check is not redundant. These tests skip rather than fail when the build
+      # output is missing, which is the right behaviour for someone running them before a
+      # build, but here it would turn a missing .nro into 24 skips and a green run.
+      - name: Validate the build
+        run: |
+          test -f build_switch_engine/deceptus.nro
+          python3 -m pytest lab/switch_smoke/test_switch_build.py -v
+
+      # Just the .nro: it is self-contained, with the whole data/ tree embedded as romfs. The
+      # .elf from the same build is what you would need to symbolise a crash address from a
+      # console fatal screen, but at 214 MB it is not worth carrying on every run -- rebuild
+      # locally at the same commit if it ever comes to that.
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: deceptus-switch
+          path: build_switch_engine/deceptus.nro

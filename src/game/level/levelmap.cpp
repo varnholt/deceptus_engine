@@ -227,7 +227,7 @@ void LevelMap::addDetailLevel(int32_t block_size)
 
    const auto texture_size = sf::Vector2u{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto created_texture = sf::Texture::create(texture_size);
    if (!created_texture.hasValue())
    {

@@ -71,7 +71,7 @@ RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
 
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_rotating_blade.png");
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture_map);
@@ -296,7 +296,7 @@ void RotatingBlade::update(const sf::Time& dt)
    updateAudio();
 
    // kill player if he moves into the blade's radius
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::Vector2i blade_position{static_cast<int32_t>(_sprite->position.x), static_cast<int32_t>(_sprite->position.y)};
 #else
    sf::Vector2i blade_position{_sprite->getPosition()};
@@ -311,7 +311,7 @@ void RotatingBlade::update(const sf::Time& dt)
    }
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    draw(target, normal, {});

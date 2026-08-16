@@ -89,7 +89,7 @@ void BlockingRect::setup(const GameDeserializeData& data)
       {
          const auto texture = texture_it->second->_value_string.value();
          _texture_map = TexturePool::getInstance().get(texture);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite = std::make_unique<sf::Sprite>();
          _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
 #else
@@ -155,7 +155,7 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal, cons
       return;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::RenderStates color_states = states;
    color_states.texture = _texture_map.get();
    target.draw(*_sprite, color_states);

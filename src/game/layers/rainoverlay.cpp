@@ -55,7 +55,7 @@ RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprit
    for (auto a = 0; a < _settings._drop_count; a++)
    {
       RainDrop drop;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       drop._sprite = std::make_unique<sf::Sprite>();
 #else
       drop._sprite = std::make_unique<sf::Sprite>(*_texture);
@@ -71,7 +71,7 @@ RainOverlay::~RainOverlay()
 
 void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    {
       const auto screen_view = target.computeView();
       _screen = {
@@ -106,7 +106,7 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       if (d._age_s >= 0.0f)
       {
          // DebugDraw::drawLine(target, d._origin_px, d._pos_px + sf::Vector2f{0.0f, 96.0f}, {0, 0, 1});
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          target.draw(*d._sprite, sf::RenderStates{.blendMode = blend_mode});
 #else
          target.draw(*d._sprite, blend_mode);
@@ -191,7 +191,7 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto sprite_index = std::rand() % 4;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          p._sprite->textureRect = sf::FloatRect{{static_cast<float>(static_cast<int32_t>(sprite_index) * 11), 0.0f}, {11.0f, 96.0f}};
          p._sprite->origin = {6, 0};
 #else
@@ -217,7 +217,7 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto step_width_px = p._dir_px * dt.asSeconds();
          p._pos_px += step_width_px;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          p._sprite->position = p._pos_px;
 #else
          p._sprite->setPosition(p._pos_px);
@@ -242,7 +242,7 @@ void RainOverlay::update(const sf::Time& dt)
                      const sf::Vector2f hit_position{p._pos_px.x, closest_point};
 
                      DropHit hit;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
                      hit._sprite = std::make_unique<sf::Sprite>();
                      hit._sprite->position = hit_position;
 #else
@@ -283,7 +283,7 @@ void RainOverlay::update(const sf::Time& dt)
             [dt](auto& hit)
             {
                hit._age_s += dt.asSeconds();
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
                hit._sprite->origin = {5, 11};
                hit._sprite->textureRect =
                   sf::FloatRect{{static_cast<float>(11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f))), 96.0f}, {11.0f, 12.0f}};

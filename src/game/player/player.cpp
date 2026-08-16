@@ -288,7 +288,7 @@ void Player::drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>&
    for (auto i = 0u; i < _last_animations.size(); i++)
    {
       auto& anim = _last_animations[i];
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       anim._animation->position = anim._position;
 #else
       anim._animation->setPosition(anim._position);
@@ -338,7 +338,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    if (current_cycle)
    {
       current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       current_cycle->position = draw_position_px;
 #else
       current_cycle->setPosition(draw_position_px);
@@ -352,7 +352,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    if (auxiliary_cycle)
    {
       auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       auxiliary_cycle->position = draw_position_px;
 #else
       auxiliary_cycle->setPosition(draw_position_px);
@@ -390,7 +390,7 @@ void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states
    if (current_cycle)
    {
       current_cycle->setColor(stencil_color);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       current_cycle->position = draw_position_px;
 #else
       current_cycle->setPosition(draw_position_px);
@@ -402,7 +402,7 @@ void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states
    if (auxiliary_cycle)
    {
       auxiliary_cycle->setColor(stencil_color);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       auxiliary_cycle->position = draw_position_px;
 #else
       auxiliary_cycle->setPosition(draw_position_px);
@@ -1581,7 +1581,7 @@ void Player::updateWallslide(const sf::Time& dt)
 {
    const auto wallslide_animation = _player_animation->getWallslideAnimation();
    const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    wallslide_animation->position = {_position_px_f.x + offset_x_px, _position_px_f.y};
 #else
    wallslide_animation->setPosition({_position_px_f.x + offset_x_px, _position_px_f.y});

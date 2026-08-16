@@ -243,7 +243,7 @@ void Mesh::writeVerticesToImage(
    float scale
 )
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto render_texture = sf::RenderTexture::create(sf::Vector2u{static_cast<uint32_t>(texture_size.x), static_cast<uint32_t>(texture_size.y)}).value();
 #else
    sf::RenderTexture render_texture({static_cast<uint32_t>(texture_size.x), static_cast<uint32_t>(texture_size.y)});
@@ -269,7 +269,7 @@ void Mesh::writeVerticesToImage(
       poly[face.size()].color = sf::Color::Red;
       poly[face.size()].position = sf::Vector2f{pos.x * scale, pos.y * scale};
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       render_texture.draw(poly, sf::RenderStates{});
 #else
       render_texture.draw(&poly[0], face.size() + 1, sf::PrimitiveType::LineStrip);

@@ -204,7 +204,7 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
 
    // set up visualization
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
@@ -317,7 +317,7 @@ void BubbleCube::updateRespawnCondition()
    if (_popped && (now - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
       // don't respawn while player blocks the area
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       const auto player_rect_float = PlayerRegistry::getFirst()->getPixelRectFloat();
       const auto respawn_area_clear = !sf::findIntersection(player_rect_float, _original_rect_px).hasValue();
 #else
@@ -371,7 +371,7 @@ void BubbleCube::updateFootSensorContact()
    _foot_sensor_rect_intersects = sfcompat::findIntersection(foot_sensor_rect, _foot_collision_rect_px).has_value();
 
 #ifdef DEBUG_COLLISION_RECTS
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite.color = sf::Color(255, _foot_sensor_rect_intersects ? 0 : 255, _foot_sensor_rect_intersects ? 0 : 255, _alpha * 255);
 #else
    _sprite.setColor(sf::Color(255, _foot_sensor_rect_intersects ? 0 : 255, _foot_sensor_rect_intersects ? 0 : 255, _alpha * 255));
@@ -387,7 +387,7 @@ void BubbleCube::updateJumpedOffPlatformCondition()
    _jump_off_collision_rect_px.size.x += 8 * 2;
 
    const auto first_jump_frame = (PlayerRegistry::getFirst()->getJump()._jump_frame_count == 9);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto foot_sensor_rect_for_jump = PlayerRegistry::getFirst()->computeFootSensorPixelFloatRect();
    const auto intersects = sf::findIntersection(_jump_off_collision_rect_px, foot_sensor_rect_for_jump).hasValue();
 #else

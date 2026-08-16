@@ -740,7 +740,7 @@ void LuaNode::setTransform(const b2Vec2& position, float angle)
 
 void LuaNode::addSprite()
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto sprite = std::make_unique<sf::Sprite>();
 #else
    auto sprite = std::make_unique<sf::Sprite>(*_texture);
@@ -1486,7 +1486,7 @@ void LuaNode::drawParts(
 
       auto& sprite = _sprites[i];
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       if (sprite->color.a == 0)
       {
          continue;

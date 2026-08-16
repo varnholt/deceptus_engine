@@ -391,7 +391,7 @@ bool TileMap::dumpToPng(const std::filesystem::path& output_path) const
    const sf::Vector2u render_size = {static_cast<uint32_t>(std::ceil(bounds.size.x)), static_cast<uint32_t>(std::ceil(bounds.size.y))};
 
    // create rendertexture
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    sf::RenderTexture render_texture(render_size);
 
    render_texture.clear(sf::Color::Transparent);

@@ -1,4 +1,4 @@
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform vec2 u_resolution;
 uniform float u_time;
 uniform float u_uv_height; // used as a uv stretch factor for the quad height

@@ -32,7 +32,7 @@ public:
       auto sp = m_pool[key].lock();
       if (!sp)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          sp = createResource(path);
          if (!sp)
          {

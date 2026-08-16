@@ -131,7 +131,7 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    auto checkpoint = std::make_shared<Checkpoint>(parent);
    checkpoint->setObjectId(data._tmx_object->_name);
    checkpoint->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    checkpoint->_sprite = std::make_unique<sf::Sprite>();
 #else
    checkpoint->_sprite = std::make_unique<sf::Sprite>(*checkpoint->_texture);

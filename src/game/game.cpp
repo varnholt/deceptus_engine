@@ -47,6 +47,10 @@
 #include <emscripten/html5.h>
 #endif
 
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
+
 #include <chrono>
 #include <ctime>
 #include <iomanip>
@@ -84,7 +88,7 @@ void showGpu()
    }
 }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 void showErrorMessage(const std::string& message)
 {
    sf::RenderWindow window(sf::VideoMode({240, 80}), "Error", sf::Style::Titlebar | sf::Style::Close);
@@ -218,14 +222,14 @@ void Game::initializeWindow()
 
    if (_window)
    {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
       _window->close();
 #endif
       _window.reset();
    }
 
    // the window size is whatever the user sets up or whatever fullscreen resolution the user has
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _window = std::make_shared<sf::RenderWindow>(
       sf::RenderWindow::create(
          sf::WindowSettings{
@@ -258,7 +262,7 @@ void Game::initializeWindow()
 
    SplashScreen::show(*_window);
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
    _window->setFramerateLimit(60);
 #endif
@@ -304,7 +308,7 @@ void Game::initializeRenderTargets()
    _render_texture_offset.x = static_cast<uint32_t>((game_config._video_mode_width - texture_width) / 2);
    _render_texture_offset.y = static_cast<uint32_t>((game_config._video_mode_height - texture_height) / 2);
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _window_render_texture =
       std::make_shared<sf::RenderTexture>(sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)});
 #else
@@ -469,7 +473,7 @@ void Game::processPendingLevelLoad()
    const auto level_loader = [this, loading_mode]()
    {
    // create an opengl context for this thread
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
       sf::Context loader_context;
       loader_context.setActive(true);
 #endif
@@ -521,12 +525,19 @@ void Game::processPendingLevelLoad()
 
       _level_loaded_callbacks.clear();
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
       loader_context.setActive(false);
 #endif
    };
 
-#ifdef __EMSCRIPTEN__
+   // Loading synchronously on the VRSFML targets is not a threading limitation, whatever the
+   // guard's name suggests -- the Switch has real pthreads through libnx and runs the log
+   // thread happily. It is a GL context limitation, and it is hard on both targets: the loader
+   // above brings up an sf::Context of its own and relies on it sharing objects with the render
+   // context. WebGL has no context sharing at all, and devkitPro's switch-mesa accepts a share
+   // list and then silently ignores it, so anything the loader uploaded would be invisible to
+   // the renderer. See switch_port_status.md.
+#ifdef DECEPTUS_VRSFML
    level_loader();
 #else
    _level_loading_thread = std::async(std::launch::async, level_loader);
@@ -594,7 +605,7 @@ void Game::initialize()
    _info_layer = std::make_unique<InfoLayer>();
    _ingame_menu = std::make_unique<InGameMenu>();
    _controller_overlay = std::make_unique<ControllerOverlay>();
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _test_scene = std::make_unique<ForestScene>();
 #endif
    _menu_background = std::make_unique<MenuBackgroundScene>();
@@ -609,7 +620,7 @@ void Game::initialize()
       ->setExitCallback(
          [this]()
          {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
             _window->close();
 #endif
          }
@@ -626,7 +637,7 @@ void Game::initialize()
          [this]()
          {
             initializeWindow();
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
             _menu_background = std::make_unique<MenuBackgroundScene>();
 #endif
             if (!_level)
@@ -689,7 +700,7 @@ void Game::draw()
 
    _window_render_texture->clear();
    _window->clear(sf::Color::Black);
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _window->pushGLStates();
 #endif
 
@@ -739,7 +750,7 @@ void Game::draw()
       _ingame_menu->draw(*_window_render_texture.get());
    }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    if (DebugDrawStates::_draw_test_scene)
    {
       _test_scene->draw(*_window_render_texture.get());
@@ -748,7 +759,7 @@ void Game::draw()
 
    if (GameState::getInstance().getMode() == ExecutionMode::NotRunning)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       // raw OpenGL interop under VRSFML: activate the render texture's framebuffer so the 3D
       // scene draws into it. VRSFML auto-batches draws, so first flush any pending SFML geometry
       // while its GL-state cache is still valid; issue the raw OpenGL calls; then re-sync the
@@ -764,7 +775,7 @@ void Game::draw()
 #endif
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    Menu::getInstance()->draw(*_window_render_texture.get(), sf::RenderStates{.blendMode = sf::BlendAlpha});
 #else
    Menu::getInstance()->draw(*_window_render_texture.get(), {sf::BlendAlpha});
@@ -772,10 +783,10 @@ void Game::draw()
    MessageBox::draw(*_window_render_texture.get());
 
    _window_render_texture->display();
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _window->setActive(true);
 #endif
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::Texture& window_render_texture_ref = _window_render_texture->getTexture();
    sf::Sprite window_texture_sprite;
    window_texture_sprite.textureRect = sf::FloatRect{
@@ -794,7 +805,7 @@ void Game::draw()
       const auto dx = (scale_x - scale_minimum) * 0.5f;
       const auto dy = (scale_y - scale_minimum) * 0.5f;
       sfcompat::setPosition(window_texture_sprite, {_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy});
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       window_texture_sprite.scale = {static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)};
 #else
       window_texture_sprite.scale({static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)});
@@ -811,12 +822,12 @@ void Game::draw()
    // gamma pass as well as on all overlays. a level-scoped one has already been resolved above.
    const auto* post_processing_shader = _post_processing_pass.getFrameShader(_window_render_texture->getTexture());
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _window->draw(window_texture_sprite, sf::RenderStates{.texture = &window_render_texture_ref, .shader = post_processing_shader});
 #else
    _window->draw(window_texture_sprite, post_processing_shader);
 #endif
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _window->popGLStates();
 #endif
 
@@ -831,7 +842,7 @@ void Game::draw()
    }
 #endif
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    if (_recording)
    {
       const auto image = window_texture_sprite.getTexture().copyToImage();
@@ -859,7 +870,7 @@ void Game::draw()
       _camera_ui->draw();
    }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    if (DebugDrawStates::_draw_log)
    {
       _log_ui->draw();
@@ -906,7 +917,7 @@ void Game::updateWindowTitle()
 #ifdef DEVELOPMENT_MODE
    out_stream << " [" << DECEPTUS_BUILD_TYPE << "]";
 #endif
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _window->setTitle(out_stream.str().c_str());
 #else
    _window->setTitle(out_stream.str());
@@ -1071,7 +1082,7 @@ void Game::update()
          _level->update(dt);
          _player->update(dt);
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
          if (DebugDrawStates::_draw_test_scene)
          {
             _test_scene->update(dt);
@@ -1133,6 +1144,9 @@ void Game::timedDraw()
 
 int32_t Game::loop()
 {
+// the browser drives its own main loop, so this branch is genuinely emscripten-specific
+// rather than a question of which SFML flavour is in use; the switch runs the ordinary
+// while loop below
 #ifdef __EMSCRIPTEN__
    // re-fit the render resolution whenever the browser/itch viewport changes size (window resize,
    // fullscreen toggle) so the game keeps filling the window at an integer scale
@@ -1161,6 +1175,19 @@ int32_t Game::loop()
       1
    );
    return 0;
+#elif defined(__SWITCH__)
+   // VRSFML dropped sf::RenderWindow::isOpen(), and on the switch the authority on
+   // whether the game should keep running is libnx anyway: appletMainLoop() goes false
+   // when the system wants the applet gone, e.g. the user quitting from the home menu.
+   while (appletMainLoop())
+   {
+      processPendingLevelLoad();
+      processEvents();
+      timedUpdate();
+      timedDraw();
+   }
+
+   return 0;
 #else
    while (_window->isOpen())
    {
@@ -1181,7 +1208,7 @@ void Game::reset()
 
 void Game::toggleFullScreen()
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    auto& config = GameConfiguration::getInstance();
    config._fullscreen = !config._fullscreen;
 
@@ -1219,7 +1246,7 @@ void Game::toggleFullScreen()
 
    config.serializeToFile();
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _window->setVerticalSyncEnabled(config._vsync_enabled);
    _window->setFramerateLimit(60);
 #endif
@@ -1272,7 +1299,7 @@ void Game::changeResolution(int32_t w, int32_t h)
    // clamp to desktop limits to prevent SFML errors
    config.clampResolutionToDesktop();
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    // recreating the render window would drop the browser out of fullscreen, since the new window is
    // created with fullscreen=false. entering fullscreen resizes the viewport, which invokes this via
    // refitToViewport(), so a recreation here makes the game kick itself straight back to windowed.
@@ -1291,7 +1318,7 @@ void Game::changeResolution(int32_t w, int32_t h)
    }
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void Game::refitToViewport()
 {
    auto& config = GameConfiguration::getInstance();
@@ -1326,7 +1353,7 @@ void Game::processEvent(const sf::Event& event)
 
    if (event.is<sf::Event::Closed>())
    {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
       _window->close();
 #endif
    }
@@ -1335,7 +1362,7 @@ void Game::processEvent(const sf::Event& event)
 #ifdef __linux__
       return;
 #endif
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       // on the web the canvas is resized by the game itself (refitToViewport), so acting on the
       // resulting event would feed arbitrary, non-integer-multiple sizes back into changeResolution
       return;
@@ -1435,7 +1462,7 @@ void Game::processEvent(const sf::Event& event)
       {
          if (LevelRegistry::getCurrent())
          {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
             const auto mouse_pos_px = sf::Mouse::getPosition(*_window);
             const auto game_coords_px = _window->mapPixelToCoords(mouse_pos_px, *LevelRegistry::getCurrent()->getLevelView());
             PlayerRegistry::getFirst()->setBodyViaPixelPosition(game_coords_px.x, game_coords_px.y);
@@ -1464,7 +1491,7 @@ void Game::shutdown()
       _camera_ui->close();
    }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    if (_log_ui)
    {
       _log_ui->close();
@@ -1590,7 +1617,7 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::F5:
       {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
          DebugDrawStates::_draw_log = !DebugDrawStates::_draw_log;
          if (DebugDrawStates::_draw_log && !_log_ui)
          {
@@ -1740,7 +1767,7 @@ void Game::processEvents()
       _camera_ui->processEvents();
    }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    if (DebugDrawStates::_draw_log)
    {
       _log_ui->processEvents();

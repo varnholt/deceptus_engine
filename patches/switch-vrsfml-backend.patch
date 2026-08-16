@@ -1,0 +1,131 @@
+diff --git a/cmake/Config.cmake b/cmake/Config.cmake
+index 631d9e855..bcfc6a884 100644
+--- a/cmake/Config.cmake
++++ b/cmake/Config.cmake
+@@ -60,6 +60,14 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
+     # use the OpenGL ES implementation on Android
+     set(OPENGL_ES 1)
+ 
++elseif(NINTENDO_SWITCH)
++    message(STATUS "Detected Nintendo Switch")
++    set(SFML_OS_SWITCH 1)
++
++    # mesa/nouveau exposes desktop OpenGL 4.3 core on the Switch, not just GLES, and the
++    # desktop path is the one the engine's shaders target
++    set(OPENGL_ES 0)
++
+ # comparing CMAKE_SYSTEM_NAME with "CYGWIN" generates a false warning depending on the CMake version
+ # let's avoid it so the actual error is more visible
+ elseif(${CYGWIN})
+diff --git a/extlibs/headers/moodycamel/lightweightsemaphore.h b/extlibs/headers/moodycamel/lightweightsemaphore.h
+index 4bbba199c..e59cbf83a 100644
+--- a/extlibs/headers/moodycamel/lightweightsemaphore.h
++++ b/extlibs/headers/moodycamel/lightweightsemaphore.h
+@@ -27,7 +27,7 @@ extern "C" {
+ #include <mach/mach.h>
+ #elif defined(__MVS__)
+ #include <zos-semaphore.h>
+-#elif defined(__unix__)
++#elif defined(__unix__) || defined(__SWITCH__)
+ #include <semaphore.h>
+ 
+ #if defined(__GLIBC_PREREQ) && defined(_GNU_SOURCE)
+@@ -168,9 +168,9 @@ public:
+ 		}
+ 	}
+ };
+-#elif defined(__unix__) || defined(__MVS__)
++#elif defined(__unix__) || defined(__MVS__) || defined(__SWITCH__)
+ //---------------------------------------------------------
+-// Semaphore (POSIX, Linux, zOS)
++// Semaphore (POSIX, Linux, zOS, Nintendo Switch)
+ //---------------------------------------------------------
+ class Semaphore
+ {
+diff --git a/include/SFML/Config.hpp b/include/SFML/Config.hpp
+index a03cba5b8..68eaf8d1c 100644
+--- a/include/SFML/Config.hpp
++++ b/include/SFML/Config.hpp
+@@ -74,6 +74,12 @@
+ 
+     #endif
+ 
++#elif defined(__SWITCH__)
++
++    // Nintendo Switch homebrew, built with devkitPro against libnx. Not a __unix__
++    // platform, even though libnx provides newlib with pthreads and most of POSIX.
++    #define SFML_SYSTEM_SWITCH
++
+ #else
+ 
+     // Unsupported system
+diff --git a/include/SFML/System/Path.hpp b/include/SFML/System/Path.hpp
+index 3e6f19cc4..29408848a 100644
+--- a/include/SFML/System/Path.hpp
++++ b/include/SFML/System/Path.hpp
+@@ -35,7 +35,8 @@ namespace sf
+ class [[nodiscard]] SFML_SYSTEM_API Path
+ {
+ public:
+-#if defined(SFML_SYSTEM_EMSCRIPTEN) || defined(SFML_SYSTEM_LINUX_OR_BSD)
++    // libnx uses newlib, whose paths are narrow like every other non-Windows platform
++#if defined(SFML_SYSTEM_EMSCRIPTEN) || defined(SFML_SYSTEM_LINUX_OR_BSD) || defined(SFML_SYSTEM_SWITCH)
+     using value_type = char;
+ #else
+     using value_type = wchar_t;
+diff --git a/include/SFML/Window/WindowHandle.hpp b/include/SFML/Window/WindowHandle.hpp
+index 50aed8d96..58e7962f4 100644
+--- a/include/SFML/Window/WindowHandle.hpp
++++ b/include/SFML/Window/WindowHandle.hpp
+@@ -46,6 +46,11 @@ using WindowHandle = void*;
+ // Window handle is string on Emscripten
+ using WindowHandle = const char*;
+ 
++#elifdef SFML_SYSTEM_SWITCH
++
++// Window handle is libnx's NWindow* (void*) on the Nintendo Switch
++using WindowHandle = void*;
++
+ #elifdef SFML_DOXYGEN
+ 
+ // Define type alias symbol so that Doxygen can attach some documentation to it
+diff --git a/src/SFML/System/Thread.cpp b/src/SFML/System/Thread.cpp
+index 07d6e96b7..5e4938808 100644
+--- a/src/SFML/System/Thread.cpp
++++ b/src/SFML/System/Thread.cpp
+@@ -25,7 +25,8 @@
+ ////////////////////////////////////////////////////////////
+ #if defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_ANDROID) || defined(SFML_SYSTEM_MACOS) || \
+     defined(SFML_SYSTEM_IOS) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || \
+-    defined(SFML_SYSTEM_NETBSD) || defined(SFML_SYSTEM_EMSCRIPTEN)
++    defined(SFML_SYSTEM_NETBSD) || defined(SFML_SYSTEM_EMSCRIPTEN) || defined(SFML_SYSTEM_SWITCH)
++    // libnx implements pthreads, so the Switch uses the POSIX backend unchanged
+     #define SFML_THREAD_POSIX 1
+ #elif defined(SFML_SYSTEM_WINDOWS)
+     #define SFML_THREAD_WIN32 1
+diff --git a/src/SFML/Window/SDLWindowImpl.cpp b/src/SFML/Window/SDLWindowImpl.cpp
+index 381e53497..9a835ec87 100644
+--- a/src/SFML/Window/SDLWindowImpl.cpp
++++ b/src/SFML/Window/SDLWindowImpl.cpp
+@@ -1115,6 +1115,8 @@ WindowHandle SDLWindowImpl::getNativeHandle() const
+         SDL_GetPointerProperty(props, SDL_PROP_WINDOW_ANDROID_WINDOW_POINTER, nullptr)
+ #elif defined(SFML_SYSTEM_EMSCRIPTEN)
+         SDL_GetStringProperty(props, SDL_PROP_WINDOW_EMSCRIPTEN_CANVAS_ID_STRING, nullptr)
++#elif defined(SFML_SYSTEM_SWITCH)
++        SDL_GetPointerProperty(props, SDL_PROP_WINDOW_SWITCH_NWINDOW_POINTER, nullptr)
+ #endif
+     );
+ }
+diff --git a/src/SFML/Window/SensorImpl.hpp b/src/SFML/Window/SensorImpl.hpp
+index 93d5c0114..c3944c04c 100644
+--- a/src/SFML/Window/SensorImpl.hpp
++++ b/src/SFML/Window/SensorImpl.hpp
+@@ -12,7 +12,7 @@
+ 
+ #if defined(SFML_SYSTEM_WINDOWS) || defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || \
+     defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD) || defined(SFML_SYSTEM_MACOS) ||  \
+-    defined(SFML_SYSTEM_EMSCRIPTEN)
++    defined(SFML_SYSTEM_EMSCRIPTEN) || defined(SFML_SYSTEM_SWITCH)
+ 
+     #include "SFML/Window/Stub/StubSensorImpl.hpp"
+ 

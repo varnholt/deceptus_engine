@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
 
 /// \brief renders fixed-size bitmap glyphs mapped from a plain text font map file.
 /// each glyph in the atlas uses the same width and height.

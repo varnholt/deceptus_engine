@@ -78,7 +78,7 @@ std::string_view InteractionHelp::objectName() const
 
 void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    draw(target, normal, {});
 #else
    if (!isEnabled())
@@ -117,7 +117,7 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
 void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    if (!isEnabled())
    {
       return;
@@ -301,7 +301,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 
       HelpElement help;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       help._button_sprite = std::make_unique<sf::Sprite>();
       help._text = std::make_unique<sf::Text>(*_font, sf::Text::Data{});
 #else
@@ -315,7 +315,7 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       const auto pos_index_keyboard = ControllerKeyMap::getArrayPosition(button_names.first);
       const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_names.second);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       help._button_rect_keyboard = {
          {static_cast<float>(pos_index_keyboard.first * PIXELS_PER_TILE), static_cast<float>(pos_index_keyboard.second * PIXELS_PER_TILE)},
          {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}

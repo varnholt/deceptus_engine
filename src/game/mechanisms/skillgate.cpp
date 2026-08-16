@@ -138,7 +138,7 @@ void SkillGate::setup(const GameDeserializeData& data)
       if (texture.has_value())
       {
          _texture_map = TexturePool::getInstance().get(texture.value());
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite = std::make_unique<sf::Sprite>();
 #else
          _sprite = std::make_unique<sf::Sprite>(*_texture_map);
@@ -251,7 +251,7 @@ void SkillGate::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const s
 
    sfcompat::setColor(*_sprite, sf::Color(255, 255, 255, static_cast<uint8_t>(_alpha * 255.0f)));
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::RenderStates color_states = states;
    color_states.texture = _texture_map.get();
    target.draw(*_sprite, color_states);

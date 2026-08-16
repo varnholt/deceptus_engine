@@ -31,3 +31,5 @@ build_*/*
 /lab/record_gameplay/.venv
 /lab/record_gameplay/__pycache__
 /lab/record_gameplay/.pytest_cache
+lab/switch_smoke/out/
+lab/switch_smoke/__pycache__

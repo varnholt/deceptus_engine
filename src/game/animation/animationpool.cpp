@@ -47,7 +47,7 @@ std::shared_ptr<Animation> AnimationPool::create(const std::string& name, float 
 
    auto animation = std::make_shared<Animation>();
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    animation->origin = {settings->_origin[0], settings->_origin[1]};
    animation->position = {x, y};
 #else
@@ -241,7 +241,7 @@ void AnimationPool::recreateAnimationsFromSettings(UpdateFlag flag)
 
       settings->createFrames();
       animation->_frames = settings->_frames;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       animation->origin = {settings->_origin[0], settings->_origin[1]};
 #else
       animation->setOrigin({settings->_origin[0], settings->_origin[1]});

@@ -3,7 +3,7 @@
 #include "game/audio/audiobackend.h"
 
 #include <SFML/Audio.hpp>
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 #include <SFML/System.hpp>
 #endif
 #include <array>

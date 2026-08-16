@@ -55,18 +55,20 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    }
 
    // draw the masking geometry (stencil_tilemap) first
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _stencil_shader.setUniform("u_texture_sampler", sf::Shader::CurrentTexture);
    const auto use_shader = _alpha_threshold < 0.99f;
 
    auto stencil_render_state = states;
    stencil_render_state.shader = (use_shader && _stencil_shader.isLoaded()) ? &_stencil_shader.native() : nullptr;
+   // designator order has to match VRSFML's declaration order, which puts stencilOnly
+   // ahead of the reference and mask fields
    stencil_render_state.stencilMode = sf::StencilMode{
       .stencilComparison = sf::StencilComparison::Always,
       .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
+      .stencilOnly = true,
       .stencilReference = sf::StencilValue{1u},
-      .stencilMask = sf::StencilValue{0xffu},
-      .stencilOnly = true
+      .stencilMask = sf::StencilValue{0xffu}
    };
 
    color.clearStencil(sf::StencilValue{0u});
@@ -94,13 +96,13 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
 
    // then draw the masked content
    auto color_render_state = states;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    color_render_state.stencilMode = sf::StencilMode{
       .stencilComparison = sf::StencilComparison::Equal,
       .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
+      .stencilOnly = false,
       .stencilReference = sf::StencilValue{1u},
-      .stencilMask = sf::StencilValue{0xffu},
-      .stencilOnly = false
+      .stencilMask = sf::StencilValue{0xffu}
    };
 #else
    color_render_state.stencilMode = sf::StencilMode(  // set up stencil
@@ -129,7 +131,7 @@ const std::string& StencilTileMap::getStencilReference() const
 
 void StencilTileMap::dumpStencilAndColorToPng(sf::RenderTarget& color, const sf::RenderStates& states) const
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    static int32_t _frame_counter{0};
    _frame_counter += 1;
    if ((_frame_counter % 1000) != 0)

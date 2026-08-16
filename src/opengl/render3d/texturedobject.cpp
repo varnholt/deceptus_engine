@@ -97,7 +97,7 @@ void TexturedObject::loadTexture(const std::string& texture_file_path)
       _texture_id = 0;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto image_opt = sf::Image::loadFromFile(texture_file_path);
    if (image_opt.hasValue())
    {

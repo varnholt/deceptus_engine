@@ -58,7 +58,7 @@ public:
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    /// \brief draws the rotating blade sprite with explicit render states (used in WASM to carry the level view).
    /// \param target render target.
    /// \param normal normal-map render target, unused by this mechanism.

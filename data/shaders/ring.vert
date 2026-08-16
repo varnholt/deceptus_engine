@@ -1,4 +1,4 @@
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform vec3 sf_u_mvpRow0;
 uniform vec3 sf_u_mvpRow1;
 uniform vec2 sf_u_invTextureSize;

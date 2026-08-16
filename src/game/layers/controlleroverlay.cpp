@@ -29,7 +29,7 @@ ControllerOverlay::ControllerOverlay()
       auto tmp = std::make_shared<Layer>();
       tmp->_visible = layer.isVisible();
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       auto texture_result =
          sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
       if (!texture_result)
@@ -71,7 +71,7 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto h = GameConfiguration::getInstance()._view_height;
 
    // draw layers
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto windowView = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
    windowView.center += sf::Vector2f{-w + _texture_size.x + 10.0f, -h + _texture_size.y + 10.0f};
    states.view = windowView;
@@ -136,7 +136,7 @@ void ControllerOverlay::draw(sf::RenderTarget& window, sf::RenderStates states)
       const auto y1 = axis(SDL_GAMEPAD_AXIS_RIGHTY);
       const auto tl = axis(SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
       const auto tr = axis(SDL_GAMEPAD_AXIS_RIGHT_TRIGGER);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       analog_l->_sprite->origin = {-x0 * analogFactor, -y0 * analogFactor};
       analog_r->_sprite->origin = {-x1 * analogFactor, -y1 * analogFactor};
       analog_l->_sprite->color = pressed(SDL_GAMEPAD_BUTTON_LEFT_STICK) ? sf::Color::Red : sf::Color::White;

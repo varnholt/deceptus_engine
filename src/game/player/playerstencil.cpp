@@ -28,7 +28,7 @@ void PlayerStencil::dump(const std::shared_ptr<sf::RenderTexture>& texture)
    // Read the stencil data from the current rendering context
    glReadPixels(0, 0, w, h, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &stencilBuffer[0]);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto image_opt = sf::Image::create(sf::Vector2u{w, h});
    if (!image_opt.hasValue())
    {

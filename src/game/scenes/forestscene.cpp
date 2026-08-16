@@ -7,13 +7,13 @@
 
 #include <math.h>
 #include <iostream>
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 #include <stdexcept>
 #endif
 
 ForestScene::ForestScene()
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text = std::make_unique<sf::Text>(*_font, sf::Text::Data{});
 #else
    _text = std::make_unique<sf::Text>(*_font);
@@ -41,7 +41,7 @@ ForestScene::ForestScene()
 
       try
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          auto texture_opt = sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
          if (!texture_opt.hasValue())
          {
@@ -84,7 +84,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto h = GameConfiguration::getInstance()._view_height;
 
    // draw layers
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
    states.view = view;
 #else
@@ -100,7 +100,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    // draw text
    const auto rect = _text->getGlobalBounds();
    const auto left = w / 2 - rect.size.x / 2;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text->position = {floor(left), 82};
 #else
    _text->setPosition({floor(left), 82});
@@ -147,7 +147,7 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void ForestScene::update(const sf::Time& time)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _layers["mfog_1"]->_sprite->position += sf::Vector2f{3.0f * time.asSeconds(), 0.0f};
    _layers["mfog_2"]->_sprite->position += sf::Vector2f{2.0f * time.asSeconds(), 0.0f};
    _layers["mfog_3"]->_sprite->position += sf::Vector2f{time.asSeconds(), 0.0f};

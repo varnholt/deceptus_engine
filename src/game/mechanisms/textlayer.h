@@ -7,7 +7,7 @@
 #include "game/mechanisms/gamemechanism.h"
 
 #include <SFML/Graphics.hpp>
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 #include <optional>
 #endif
 
@@ -30,7 +30,7 @@ public:
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    /// \brief draws text with explicit render states (used in WASM to carry the level view).
    /// \param target render target.
    /// \param normal normal-map render target, unused by this mechanism.
@@ -70,7 +70,7 @@ private:
    std::vector<std::shared_ptr<sf::IntRect>> _bitmap_coords;
 
    std::string _text;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    std::optional<sf::Font> _truetype_font;
 #else
    sf::Font _truetype_font;

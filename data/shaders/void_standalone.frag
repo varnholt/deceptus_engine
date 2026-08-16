@@ -1,4 +1,4 @@
-#ifdef GL_ES
+#if __VERSION__ >= 300
 uniform vec2 resolution;       // screen resolution in pixels
 uniform float time;            // time in seconds
 uniform sampler2D iChannel0;   // noise texture

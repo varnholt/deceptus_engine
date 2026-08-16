@@ -88,7 +88,7 @@ void MoveableBox::update(const sf::Time& /*dt*/)
 {
    const auto x = _body->GetPosition().x * PPM;
    const auto y = _body->GetPosition().y * PPM;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite->position = {x, y - 24};
 #else
    _sprite->setPosition({x, y - 24});
@@ -153,7 +153,7 @@ void MoveableBox::setup(const GameDeserializeData& data)
    setObjectId(tmx_name.empty() ? tmx_id : tmx_name + "_" + tmx_id);
 
    _texture = TexturePool::getInstance().get("data/sprites/moveable_box.png");
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
 #else
    _sprite = std::make_unique<sf::Sprite>(*_texture.get());
@@ -162,7 +162,7 @@ void MoveableBox::setup(const GameDeserializeData& data)
    _size.x = data._tmx_object->_width_px;
    _size.y = data._tmx_object->_height_px;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px - 24};
 #else
    _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px - 24});
@@ -191,7 +191,7 @@ void MoveableBox::setup(const GameDeserializeData& data)
    {
       case 24:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite->textureRect = sf::FloatRect{{168.f, 0.f}, {24.f, 2.f * 24.f}};
 #else
          _sprite->setTextureRect(sf::IntRect({168, 0}, {24, 2 * 24}));
@@ -201,7 +201,7 @@ void MoveableBox::setup(const GameDeserializeData& data)
 
       case 48:
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite->textureRect = sf::FloatRect{{72.f, 24.f}, {2.f * 24.f, 3.f * 24.f}};
 #else
          _sprite->setTextureRect(sf::IntRect({72, 24}, {2 * 24, 3 * 24}));
@@ -246,7 +246,7 @@ void MoveableBox::deserializeState(const nlohmann::json& json_object)
    _body->SetAngularVelocity(0.0f);
 
    // keep the sprite in sync, update() would otherwise only catch up on the next frame
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite->position = {x_px, y_px - 24};
 #else
    _sprite->setPosition({x_px, y_px - 24});
@@ -255,7 +255,7 @@ void MoveableBox::deserializeState(const nlohmann::json& json_object)
 
 void MoveableBox::setupTransform()
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto x = _sprite->position.x / PPM;
    auto y = _sprite->position.y / PPM;
 #else

@@ -27,7 +27,7 @@ struct shader_file_extension extensions[] = {
 };
 }  // namespace GLSLShaderInfo
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 namespace
 {
 /// \brief swaps the desktop "#version" directive for the GLSL ES 3.00 one required by WebGL2.
@@ -179,7 +179,7 @@ void GLSLProgram::compileShader(const std::string& source, GLSLShader::GLSLShade
 
    GLuint shader_handle = glCreateShader(type);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const std::string prepared_source = prepareShaderSourceForGles(source);
    const char* source_c_str = prepared_source.c_str();
 #else
@@ -358,7 +358,7 @@ void GLSLProgram::setUniform(const char* name, bool value)
 
 void GLSLProgram::printActiveUniforms()
 {
-#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(__APPLE__) || defined(DECEPTUS_VRSFML)
    // For OpenGL 4.1, use glGetActiveUniform
    GLint num_uniforms;
    GLint uniform_size;
@@ -411,7 +411,7 @@ void GLSLProgram::printActiveUniforms()
 
 void GLSLProgram::printActiveUniformBlocks()
 {
-#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(__APPLE__) || defined(DECEPTUS_VRSFML)
    // For OpenGL 4.1, use glGetActiveUniformBlockiv
    GLint written_count;
    GLint max_name_length;
@@ -497,7 +497,7 @@ void GLSLProgram::printActiveUniformBlocks()
 
 void GLSLProgram::printActiveAttribs()
 {
-#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(__APPLE__) || defined(DECEPTUS_VRSFML)
    // For OpenGL 4.1, use glGetActiveAttrib
    GLint written_count;
    GLint attrib_size;
@@ -556,7 +556,7 @@ const char* GLSLProgram::getTypeString(GLenum type)
          return "vec3";
       case GL_FLOAT_VEC4:
          return "vec4";
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
       case GL_DOUBLE:
          return "double";
 #endif

@@ -1,6 +1,6 @@
 #include "profilingui.h"
 
-#if defined(DEVELOPMENT_MODE) && !defined(__EMSCRIPTEN__)
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 
 #pragma warning(push, 0)
 #include "imgui/imgui-SFML.h"
@@ -27,7 +27,7 @@ void ProfilingUi::processEvents()
 
       if (event->is<sf::Event::Closed>())
       {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
          _render_window->close();
 #endif
       }

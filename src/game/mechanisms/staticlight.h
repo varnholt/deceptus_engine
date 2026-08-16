@@ -28,7 +28,7 @@ public:
    /// \param color secondary render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& color) override;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    /// \brief draws the light sprite with explicit render states (used in WASM to carry the level view).
    /// \param target render target.
    /// \param color secondary render target, unused by this mechanism.

@@ -273,7 +273,7 @@ void Wind::initializeLeaves()
    for (auto index = 0; index < _leaf_settings._count; index++)
    {
       Leaf leaf;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       leaf._sprite = std::make_unique<sf::Sprite>();
 #else
       leaf._sprite = std::make_unique<sf::Sprite>(*_leaf_texture);

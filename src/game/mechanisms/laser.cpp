@@ -47,7 +47,7 @@ std::string_view Laser::objectName() const
 
 void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    draw(color, normal, {});
 #else
    _sprite->setTextureRect(
@@ -60,7 +60,7 @@ void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
 void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite->textureRect = sf::FloatRect{
       {static_cast<float>(_tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE), static_cast<float>(_tv * PIXELS_PER_TILE)},
       {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
@@ -332,7 +332,7 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
             laser->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
          }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          laser->_sprite = std::make_unique<sf::Sprite>();
 #else
          laser->_sprite = std::make_unique<sf::Sprite>(*laser->_texture);

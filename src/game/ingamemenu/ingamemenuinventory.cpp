@@ -64,7 +64,7 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
 {
    std::string wrapped_text;
    std::string line;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::Text temp_text(font, sf::Text::Data{});
 #else
    sf::Text temp_text(font);
@@ -80,7 +80,7 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
    {
       // check if the current line exceeds the right boundary
       std::string test_line = line + word + " ";
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       temp_text.setString(test_line.c_str());
 #else
       temp_text.setString(test_line);
@@ -237,7 +237,7 @@ InGameMenuInventory::InGameMenuInventory()
    _duration_show = config._duration_show;
 
    // load fonts
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_title = std::make_unique<sf::Text>(*_font_title, sf::Text::Data{});
 #else
    _text_title = std::make_unique<sf::Text>(*_font_title);
@@ -245,7 +245,7 @@ InGameMenuInventory::InGameMenuInventory()
    _text_title->setCharacterSize(inventory_title_font_size);
    _text_title->setFillColor(sf::Color{232, 219, 243});
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_description = std::make_unique<sf::Text>(*_font_description, sf::Text::Data{});
 #else
    _text_description = std::make_unique<sf::Text>(*_font_description);
@@ -266,7 +266,7 @@ void InGameMenuInventory::loadInventoryItems()
       [this](const auto& image)
       {
          // store sprites
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
          sprite->textureRect = sf::FloatRect(
             {static_cast<float>(image._x_px), static_cast<float>(image._y_px)},
@@ -289,7 +289,7 @@ void InGameMenuInventory::loadInventoryItems()
       }
    );
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    std::ranges::for_each(_slot_sprites, [this](auto& sprite) { sprite._sprite = std::make_unique<sf::Sprite>(); });
 #else
    std::ranges::for_each(_slot_sprites, [this](auto& sprite) { sprite._sprite = std::make_unique<sf::Sprite>(*_inventory_texture); });
@@ -388,7 +388,7 @@ void InGameMenuInventory::updateShowHide()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + _panel_left_offset_px.x;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       layer._layer->_sprite->position = {x, layer._pos.y};
 #else
       layer._layer->_sprite->setPosition({x, layer._pos.y});
@@ -399,7 +399,7 @@ void InGameMenuInventory::updateShowHide()
    for (const auto& layer : _panel_center)
    {
       const auto y = layer._pos.y + _panel_center_offset_px.y;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       layer._layer->_sprite->position = {layer._pos.x, y};
 #else
       layer._layer->_sprite->setPosition({layer._pos.x, y});
@@ -410,7 +410,7 @@ void InGameMenuInventory::updateShowHide()
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + _panel_right_offset_px.x;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       layer._layer->_sprite->position = {x, layer._pos.y};
 #else
       layer._layer->_sprite->setPosition({x, layer._pos.y});
@@ -420,7 +420,7 @@ void InGameMenuInventory::updateShowHide()
    // fade in/out
    for (const auto& layer : _panel_header)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       layer._layer->_sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255));
 #else
       layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
@@ -429,7 +429,7 @@ void InGameMenuInventory::updateShowHide()
 
    for (const auto& layer : _panel_background)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       layer._layer->_sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255));
 #else
       layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
@@ -444,7 +444,7 @@ void InGameMenuInventory::updateMove()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       layer._layer->_sprite->position = {x, layer._pos.y};
 #else
       layer._layer->_sprite->setPosition({x, layer._pos.y});
@@ -454,7 +454,7 @@ void InGameMenuInventory::updateMove()
    for (const auto& layer : _panel_center)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       layer._layer->_sprite->position = {x, layer._pos.y};
 #else
       layer._layer->_sprite->setPosition({x, layer._pos.y});
@@ -464,7 +464,7 @@ void InGameMenuInventory::updateMove()
    for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       layer._layer->_sprite->position = {x, layer._pos.y};
 #else
       layer._layer->_sprite->setPosition({x, layer._pos.y});
@@ -474,7 +474,7 @@ void InGameMenuInventory::updateMove()
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       layer._layer->_sprite->position = {x, layer._pos.y};
 #else
       layer._layer->_sprite->setPosition({x, layer._pos.y});
@@ -503,7 +503,7 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
 {
    const auto& inventory = getInventory();
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    // vrsfml sprites carry no texture, it has to come from the render states
    states.texture = _inventory_texture.get();
 #endif
@@ -516,7 +516,7 @@ void InGameMenuInventory::drawInventoryItems(sf::RenderTarget& window, sf::Rende
    {
       const auto x_px = static_cast<float>(offset_x_px + (draw_index % count_columns) * frame_width);
       const auto y_px = static_cast<float>(offset_y_px + (draw_index / count_columns) * frame_height);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _sprites[item_key]._sprite->position = {x_px, y_px};
 #else
       _sprites[item_key]._sprite->setPosition({x_px, y_px});
@@ -620,7 +620,7 @@ void InGameMenuInventory::updateInventoryItems()
       const auto& reference_sprite = _sprites[slot]._sprite;
 
       auto& sprite = _slot_sprites[index];
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sprite._sprite->textureRect = reference_sprite->textureRect;
 #else
       sprite._sprite->setTextureRect(reference_sprite->getTextureRect());
@@ -629,7 +629,7 @@ void InGameMenuInventory::updateInventoryItems()
       constexpr auto frame_width_slots = 47;
       const auto pos_x_px = 61 + _panel_left_offset_px.x + move_offset.value_or(0.0f) + index * frame_width_slots;
       constexpr auto pos_y_px = 110;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sprite._sprite->position = {pos_x_px, pos_y_px};
 #else
       sprite._sprite->setPosition({pos_x_px, pos_y_px});
@@ -655,7 +655,7 @@ void InGameMenuInventory::updateInventoryItems()
       const auto& text = _texts[selected_item.value()];
       const sf::FloatRect rect{{text_title_x_offset_px, 0}, {text_title_width_px, 16}};
       const auto title_x_px = getHorizontallyCenteredX(*_text_title, rect);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _text_description->setString(text._description_wrapped.c_str());
       _text_description->position = {
          _panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px
@@ -674,7 +674,7 @@ void InGameMenuInventory::updateInventoryItems()
 
    // update frames
    const auto selected_frame_position = getFramePosition(_frame_selection.get(), _selected_index);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _frame_selection->_layer->_sprite->position = selected_frame_position;
 #else
    _frame_selection->_layer->_sprite->setPosition(selected_frame_position);
@@ -685,7 +685,7 @@ void InGameMenuInventory::updateInventoryItems()
    if (slot_0_index.has_value())
    {
       const auto slot_0_position = getFramePosition(_frame_slot_0.get(), slot_0_index.value());
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _frame_slot_0->_layer->_sprite->position = slot_0_position;
 #else
       _frame_slot_0->_layer->_sprite->setPosition(slot_0_position);
@@ -695,7 +695,7 @@ void InGameMenuInventory::updateInventoryItems()
    if (slot_1_index.has_value())
    {
       const auto slot_1_position = getFramePosition(_frame_slot_1.get(), slot_1_index.value());
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       _frame_slot_1->_layer->_sprite->position = slot_1_position;
 #else
       _frame_slot_1->_layer->_sprite->setPosition(slot_1_position);

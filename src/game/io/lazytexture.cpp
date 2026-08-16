@@ -71,7 +71,12 @@ void LazyTexture::loadTexture()
 {
    // Log::Info() << "loading " << _texture_path;
 
-#ifdef __EMSCRIPTEN__
+   // Unlike the level loader, the thread below only decodes the image -- the upload happens in
+   // uploadTexture() on the main thread -- so no GL context is involved and nothing here rules
+   // it out on the Switch, which has real pthreads. It stays synchronous there only because it
+   // inherited the guard from the web build, where workers are a different proposition. Worth
+   // revisiting once the Switch target has more runtime on it.
+#ifdef DECEPTUS_VRSFML
    auto image_result = sf::Image::loadFromFile(_texture_path);
    if (image_result)
    {
@@ -112,7 +117,7 @@ void LazyTexture::uploadTexture()
    std::lock_guard lock(_mutex);
    if (_pending_image)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       auto texture_result = sf::Texture::loadFromImage(*_pending_image);
       if (texture_result)
       {

@@ -276,7 +276,7 @@ void MovingPlatform::setup(const GameDeserializeData& data)
          }
       }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sf::Sprite sprite;
 #else
       sf::Sprite sprite(*_texture_map);
@@ -476,7 +476,7 @@ void MovingPlatform::update(const sf::Time& delta_time)
 
       if (update_sprite_rect)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          sprite.textureRect = {
             {static_cast<float>(texture_u), static_cast<float>(texture_v)},
             {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE * 2)}

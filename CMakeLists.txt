@@ -796,6 +796,14 @@ if(EMSCRIPTEN)
     list(REMOVE_ITEM GAME_FILES deceptus_resource.rc)
 endif()
 
+if(NINTENDO_SWITCH)
+    list(REMOVE_ITEM GAME_FILES deceptus_resource.rc)
+
+    # The debug UI is already compiled out on VRSFML targets, so nothing references
+    # ImGui here; dropping its sources keeps them out of the .nro entirely.
+    list(FILTER GAME_FILES EXCLUDE REGEX "thirdparty/imgui/.*\\.cpp$")
+endif()
+
 add_executable(
     deceptus
     ${GAME_FILES}
@@ -878,8 +886,106 @@ set(SFML_BUILD_NETWORK
     ON
     CACHE BOOL "" FORCE)
 
+# Applies a patch to a fetched dependency, following the same rule as the inline
+# blocks below: only skip if a reverse-apply confirms it is already applied, otherwise
+# fail loudly rather than silently building unpatched sources.
+function(deceptus_apply_patch patch_file source_dir label)
+    execute_process(
+        COMMAND git apply --check ${patch_file}
+        WORKING_DIRECTORY ${source_dir}
+        RESULT_VARIABLE forward_check
+        OUTPUT_QUIET ERROR_QUIET)
+    if(forward_check EQUAL 0)
+        execute_process(
+            COMMAND git apply ${patch_file}
+            WORKING_DIRECTORY ${source_dir}
+            RESULT_VARIABLE apply_result)
+        if(NOT apply_result EQUAL 0)
+            message(FATAL_ERROR "Failed to apply ${patch_file}")
+        endif()
+        message(STATUS "Applied ${patch_file} to ${label}")
+    else()
+        execute_process(
+            COMMAND git apply --reverse --check ${patch_file}
+            WORKING_DIRECTORY ${source_dir}
+            RESULT_VARIABLE reverse_check
+            OUTPUT_QUIET ERROR_QUIET)
+        if(reverse_check EQUAL 0)
+            message(STATUS "${patch_file} already applied to ${label}, skipping")
+        else()
+            message(FATAL_ERROR "${patch_file} does not apply to the fetched ${label} source and is not already applied - fix the patch")
+        endif()
+    endif()
+endfunction()
+
 # fetch dependencies
-if(EMSCRIPTEN)
+if(NINTENDO_SWITCH)
+    # Switch homebrew target: VRSFML again, because vanilla SFML 3 renders through the
+    # fixed-function pipeline and switch-mesa exposes core profile only. See
+    # switch_port_status.md for the full reasoning.
+    set(SFML_BUILD_NETWORK
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_USE_STATIC_STD_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_BUILD_SHARED_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+
+    # VRSFML prints a stack trace after every error it logs, through libbacktrace. That
+    # hangs the Switch: libbacktrace is asked to locate the running executable itself
+    # (backtrace_create_state with a null filename), which has no meaning for an NRO, and
+    # the call never returns. The symptom is brutal to read -- the game freezes for good
+    # immediately after an unrelated error message, with the blank line printStackTrace
+    # emits first as the only clue. VRSFML already excludes Emscripten from stack traces
+    # for the same kind of reason.
+    set(SFML_ENABLE_STACK_TRACES
+        OFF
+        CACHE BOOL "" FORCE)
+
+    # Both dependencies are pinned to the exact revisions the Switch patches were
+    # generated against; master would drift and the patches would stop applying.
+    #
+    # SDL3 is deliberately placed at _deps/SDL rather than left to VRSFML's CPM pin:
+    # VRSFML's src/SFML/Window/CMakeLists.txt prefers a sibling ../SDL directory when
+    # one exists, which gives a place to apply the Switch backend patch *before* VRSFML
+    # configures SDL. Patching afterwards would be too late for SDL's own CMake logic.
+    FetchContent_Declare(
+        SWITCH_SDL
+        GIT_REPOSITORY https://github.com/vittorioromeo/SDL.git
+        GIT_TAG e205361fb67ff53868dbc333eb2c491e11ff1a51
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/_deps/SDL)
+    FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
+        GIT_TAG 9c272d60134d568f35fbad9891f3b436de87cc28)
+    FetchContent_Declare(
+        LUA
+        GIT_REPOSITORY https://github.com/lua/lua.git
+        GIT_TAG v5.4.7)
+
+    # download and patch SDL3 without configuring it; VRSFML adds it as a subdirectory
+    FetchContent_Populate(SWITCH_SDL)
+    deceptus_apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/patches/switch-sdl3-backend.patch
+                         ${CMAKE_BINARY_DIR}/_deps/SDL "SDL3")
+
+    # likewise fetch VRSFML and patch it before it gets configured
+    FetchContent_Populate(SFML)
+    deceptus_apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/patches/switch-vrsfml-backend.patch
+                         ${sfml_SOURCE_DIR} "VRSFML")
+    add_subdirectory(${sfml_SOURCE_DIR} ${sfml_BINARY_DIR})
+
+    FetchContent_MakeAvailable(LUA)
+
+    # luaconf.h hardcodes LUA_C89_NUMBERS to 0, so the knob its own error message tells
+    # you to set cannot actually be set from the command line. The patch makes it
+    # overridable; see the target_compile_definitions call further down for why the
+    # Switch needs it. Safe to apply after MakeAvailable because luaconf.h is only read
+    # at compile time, unlike SDL's CMake logic above.
+    deceptus_apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/patches/switch-lua-c89-numbers.patch
+                         ${lua_SOURCE_DIR} "Lua")
+elseif(EMSCRIPTEN)
     # WASM target: VRSFML (vittorioromeo's SFML rewrite) -- the only SFML fork
     # with an Emscripten backend.
     set(SFML_BUILD_NETWORK
@@ -892,12 +998,19 @@ if(EMSCRIPTEN)
         OFF
         CACHE BOOL "" FORCE)
 
-    # SDL3 is fetched internally by VRSFML master via CPM.
+    # SDL3 is fetched internally by VRSFML via CPM.
     # Declaring it separately here would create duplicate CMake targets.
+    #
+    # A commit rather than a version, because VRSFML publishes no releases -- its newest tag
+    # is 1662 commits behind this. Everywhere a dependency does have a release tag, this file
+    # names the tag instead. It used to say `master` here, which meant an upstream commit
+    # could break the web build on a clean checkout without anything in this repository
+    # changing. This is the same revision the Switch target pins, and what the last verified
+    # web build was made from.
     FetchContent_Declare(
         SFML
         GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
-        GIT_TAG master)
+        GIT_TAG 9c272d60134d568f35fbad9891f3b436de87cc28)
     FetchContent_Declare(
         LUA
         GIT_REPOSITORY https://github.com/lua/lua.git
@@ -956,10 +1069,15 @@ else()
         ON
         CACHE BOOL "" FORCE)
 
+    # Every dependency names a release tag, never a branch. This used to say `3.0.x` for
+    # SFML, which is a branch and therefore moves: an upstream commit could change what a
+    # clean checkout builds without anything here changing. 3.0.2 is the release the last
+    # verified desktop build was made from. Freetype, ogg, vorbis and FLAC are not listed
+    # because SFML fetches them itself, so pinning SFML pins those too.
     FetchContent_Declare(
         SFML
         GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 3.0.x)
+        GIT_TAG 3.0.2)
     FetchContent_Declare(
         SDL3
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
@@ -1032,6 +1150,23 @@ add_subdirectory(thirdparty/lua)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/lua)
 target_link_libraries(deceptus PRIVATE lua)
 
+if(NINTENDO_SWITCH)
+    # luaconf.h uses the presence of LLONG_MAX as its proxy for C99 compliance, and
+    # devkitPro's newlib does not define it in C++ mode, so Lua bails out with
+    # "Compiler does not support 'long long'".
+    #
+    # Setting LUA_INT_TYPE directly does not work: luaconf.h defines it unconditionally
+    # rather than honouring a value from the command line. LUA_C89_NUMBERS is the
+    # supported knob, and it selects long plus double -- on aarch64 both are 64-bit, so
+    # this matches the default long long plus double exactly rather than narrowing
+    # anything.
+    #
+    # This has to be PUBLIC -- every translation unit including lua.hpp must see the
+    # same luaconf configuration as the library itself, or lua_Integer disagrees
+    # across the ABI boundary.
+    target_compile_definitions(lua PUBLIC LUA_C89_NUMBERS=1)
+endif()
+
 # ----------------------------------------------------------------------------------------------------
 # compiler & linker options
 # ----------------------------------------------------------------------------------------------------
@@ -1051,6 +1186,13 @@ target_include_directories(
     ${SDL3_INCLUDE_DIRS})
 
 target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
+
+# Selects the VRSFML API rather than vanilla SFML's. Both the Emscripten and the Switch
+# target build against VRSFML, so this is what the SFML-flavour guards key off; plain
+# __EMSCRIPTEN__ stays reserved for genuinely browser-specific code.
+if(EMSCRIPTEN OR NINTENDO_SWITCH)
+    target_compile_definitions(deceptus PRIVATE DECEPTUS_VRSFML)
+endif()
 
 if(CMAKE_BUILD_TYPE)
     set(deceptus_build_type "${CMAKE_BUILD_TYPE}")
@@ -1077,8 +1219,45 @@ target_link_libraries(
         lua
 )
 target_link_libraries(deceptus PRIVATE SFML::Audio)
-if(NOT EMSCRIPTEN)
+if(NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
     target_link_libraries(deceptus PRIVATE libglew_static)
+endif()
+
+if(NINTENDO_SWITCH)
+    # switch-glad is deliberately absent here; VRSFML's bundled glad provides the GL
+    # entry points. Link order still matters for the rest: EGL resolves through mesa's
+    # dispatch layer, which sits on the nouveau kernel interface.
+    target_link_libraries(deceptus PRIVATE EGL glapi drm_nouveau)
+
+    # The game resolves its assets through relative paths like "data/sprites/foo.png"
+    # (134 such literals), so romfs has to carry a "data" directory rather than the
+    # contents of data/ at its root. Staging into ${CMAKE_BINARY_DIR}/romfs/data gives
+    # that layout; main() then chdir's to "romfs:/" so the relative paths resolve.
+    #
+    # copy_directory_if_different keeps the incremental cost down: only the first build
+    # moves the full ~104 MB.
+    # nx_create_nro validates the romfs directory at configure time, so it has to exist
+    # before that call even though the staging below only populates it at build time
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/romfs/data)
+
+    add_custom_target(
+        deceptus_romfs
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${CMAKE_SOURCE_DIR}/data
+                ${CMAKE_BINARY_DIR}/romfs/data
+        COMMENT "staging data/ into romfs")
+
+    add_dependencies(deceptus deceptus_romfs)
+
+    nx_generate_nacp(
+        deceptus.nacp
+        NAME
+        "Deceptus"
+        AUTHOR
+        "Matthias Varnholt"
+        VERSION
+        "1.0.0")
+
+    nx_create_nro(deceptus NACP ${CMAKE_CURRENT_BINARY_DIR}/deceptus.nacp ROMFS ${CMAKE_BINARY_DIR}/romfs)
 endif()
 
 if(WIN32)
@@ -1141,7 +1320,35 @@ endif()
 # emscripten / webassembly
 # ----------------------------------------------------------------------------------------------------
 
-if(EMSCRIPTEN)
+if(NINTENDO_SWITCH)
+    # prepend src/switch so "#include <opengl/glew.h>" resolves to the glad stub
+    # instead of the desktop GLEW header in src/opengl/
+    #
+    # src/wasm is on the path as well, but only for its SFML/* umbrella headers: those
+    # are VRSFML compatibility shims (VRSFML has no monolithic SFML/Graphics.hpp, and
+    # dropped sf::Drawable and sf::VertexArray), so they apply to any VRSFML target
+    # rather than to Emscripten specifically.
+    #
+    # Both go in a single call so the listed order is preserved -- src/switch has to come
+    # first, or the GLES3 glew stub would shadow the glad one.
+    target_include_directories(
+        deceptus BEFORE
+        PRIVATE ${CMAKE_SOURCE_DIR}/src/switch
+                ${CMAKE_SOURCE_DIR}/src/wasm)
+
+    # mesa and the rest of the portlibs headers are not on the include path by default;
+    # the toolchain file only teaches find_package about them
+    target_include_directories(deceptus PRIVATE ${DEVKITPRO}/portlibs/switch/include)
+
+    # GL entry points come from the glad that VRSFML bundles, which it keeps PRIVATE, so
+    # its include directory has to be added by hand. devkitPro's switch-glad portlib is
+    # deliberately not used: both define gladLoadGL, and VRSFML's is the loader that
+    # actually runs, since it loads GL itself when creating the context.
+    target_include_directories(deceptus SYSTEM PRIVATE ${sfml_SOURCE_DIR}/extlibs/headers/glad/include)
+
+    # keeps the ImGui headers inert for any translation unit that still includes them
+    target_compile_definitions(deceptus PRIVATE IMGUI_DISABLE_DEFAULT_SHELL_FUNCTIONS)
+elseif(EMSCRIPTEN)
     # prepend src/wasm so "#include <opengl/glew.h>" resolves to the GLES3 stub
     # instead of the desktop GLEW header in src/opengl/
     target_include_directories(deceptus BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/src/wasm)

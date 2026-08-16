@@ -203,7 +203,7 @@ void MenuScreenAudio::loadingFinished()
 
    auto make_label = [this]() -> std::unique_ptr<sf::Text>
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       auto text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
       auto text = std::make_unique<sf::Text>(_font);
@@ -289,7 +289,7 @@ void MenuScreenAudio::updateLayers()
       _volume_layers_music[index]->_visible = (index == music_volume_layer_index);
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _layers["master_h_0"]->_sprite->origin = {50.0f - master_volume, 0.0f};
    _layers["sfxVolume_h_0"]->_sprite->origin = {50.0f - sfx_volume, 0.0f};
    _layers["mscVolume_h_0"]->_sprite->origin = {50.0f - music_volume, 0.0f};

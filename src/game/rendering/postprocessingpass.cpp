@@ -21,7 +21,7 @@ PostProcessingPass::selectLevelTarget(const std::shared_ptr<sf::RenderTexture>& 
    // carries the level view. the frame target happens to have it left over from the previous
    // frame's overlays, a freshly created target does not, so it is set explicitly here rather than
    // relying on that leftover
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    const auto& game_configuration = GameConfiguration::getInstance();
    const sf::View level_view{
       sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(game_configuration._view_width), static_cast<float>(game_configuration._view_height)}}
@@ -46,7 +46,7 @@ void PostProcessingPass::resolveLevelTarget(sf::RenderTexture& frame_target, flo
    const sf::Texture& texture = _render_texture->getTexture();
    const auto* shader = PostProcessing::getInstance().prepare(texture);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::Sprite sprite;
    sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(texture.getSize().x), static_cast<float>(texture.getSize().y)}};
    frame_target.draw(sprite, sf::RenderStates{.texture = &texture, .shader = shader});
@@ -88,7 +88,7 @@ bool PostProcessingPass::createRenderTexture(const sf::Vector2u& size)
       return true;
    }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    _render_texture = std::make_shared<sf::RenderTexture>(size);
 #else
    _render_texture = std::make_shared<sf::RenderTexture>(std::move(*sf::RenderTexture::create(size)));

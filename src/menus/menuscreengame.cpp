@@ -170,7 +170,7 @@ void MenuScreenGame::loadingFinished()
 
    auto make_label = [this]() -> std::unique_ptr<sf::Text>
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       auto text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
       auto text = std::make_unique<sf::Text>(_font);

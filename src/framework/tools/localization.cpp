@@ -154,7 +154,7 @@ const sf::Font& getFont()
 {
    static sf::Font font = []
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       sf::Font loaded_font = sf::Font::openFromFile(getFontPath()).value();
       loaded_font.getTexture().setSmooth(false);
 #else

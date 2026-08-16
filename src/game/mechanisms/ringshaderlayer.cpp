@@ -5,7 +5,7 @@
 #include "game/io/valuereader.h"
 
 #include <algorithm>
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 #include <fstream>
 #include <sstream>
 #endif
@@ -27,7 +27,7 @@ RingShaderLayer::RingShaderLayer(GameNode* parent) : ShaderLayer(parent)
 {
 }
 
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 void RingShaderLayer::checkUniforms(const std::string& shader_path)
 {
    ShaderLayer::checkUniforms(shader_path);
@@ -56,7 +56,7 @@ void RingShaderLayer::readCustomProperties(const GameDeserializeData& data)
    _pixel_size = ValueReader::readValue<float>("pixel_size", map).value_or(_pixel_size);
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    draw(target, normal, {});

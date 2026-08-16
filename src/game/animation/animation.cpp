@@ -213,7 +213,7 @@ void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
    states.transform *= getTransform();
    states.texture = _color_texture.get();
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    target.draw(_vertices, sf::PrimitiveType::TriangleStrip, states);
 #else
    target.draw(_vertices, 4, sf::PrimitiveType::TriangleStrip, states);
@@ -235,7 +235,7 @@ void Animation::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Rend
    states.transform *= getTransform();
 
    states.texture = _color_texture.get();
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    color.draw(_vertices, sf::PrimitiveType::TriangleStrip, states);
 
    if (_normal_texture)

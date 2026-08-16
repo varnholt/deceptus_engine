@@ -27,6 +27,16 @@ namespace sfcompat
 //! A uniform's *name* can still differ per platform: GLSL ES 3.00 (WASM) reserves "texture" as a
 //! builtin, so a sampler called "texture" on desktop is usually "u_texture" in the WASM shader
 //! source. Such names must still be selected per platform at the call site.
+//!
+//! The shader sources under data/shaders carry both flavours and pick between them with
+//! `#if __VERSION__ >= 300`, not with `#ifdef GL_ES`. VRSFML prepends its own `#version` line to
+//! every shader it compiles, and which one depends on the target: "300 es" on WASM, "430 core" on
+//! the Switch. Only the WASM preamble defines GL_ES, so a GL_ES test sends the Switch down the
+//! legacy branch, where gl_TexCoord, gl_FragColor and varying do not exist in a core profile and
+//! nothing compiles. The version test covers both modern targets and still leaves desktop -- which
+//! gets no preamble at all, so __VERSION__ is 110 -- on the legacy branch it has always used.
+//! GL_ES cannot simply be defined for the Switch instead: GLSL reserves the GL_ prefix and the
+//! driver rejects any attempt to define such a macro.
 class Shader
 {
 public:
@@ -36,7 +46,7 @@ public:
    /// \return true on success.
    bool loadFromFile(const std::string& vertex_path, const std::string& fragment_path)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       return assign(sf::Shader::loadFromFile({.vertexPath = vertex_path, .fragmentPath = fragment_path}));
 #else
       return _shader.loadFromFile(vertex_path, fragment_path) && (_loaded = true);
@@ -47,7 +57,7 @@ public:
    /// \return true on success.
    bool loadFromFragment(const std::string& fragment_path)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       return assign(sf::Shader::loadFromFile({.fragmentPath = fragment_path}));
 #else
       return _shader.loadFromFile(fragment_path, sf::Shader::Type::Fragment) && (_loaded = true);
@@ -58,7 +68,7 @@ public:
    /// \return true on success.
    bool loadFromVertex(const std::string& vertex_path)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       return assign(sf::Shader::loadFromFile({.vertexPath = vertex_path}));
 #else
       return _shader.loadFromFile(vertex_path, sf::Shader::Type::Vertex) && (_loaded = true);
@@ -68,7 +78,7 @@ public:
    /// \brief returns whether a shader is currently loaded.
    bool isLoaded() const
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       return _shader.has_value();
 #else
       return _loaded;
@@ -79,7 +89,7 @@ public:
    template <typename Value>
    void setUniform(std::string_view name, const Value& value)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       if (!_shader.has_value())
       {
          return;
@@ -97,7 +107,7 @@ public:
    /// \brief returns the underlying sf::Shader for binding into an sf::RenderStates.
    const sf::Shader& native() const
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       return *_shader;
 #else
       return _shader;
@@ -105,7 +115,7 @@ public:
    }
 
 private:
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    //! \brief transparent hasher so the location cache can be probed with a std::string_view key
    //!        without allocating a std::string on every lookup.
    struct StringViewHash

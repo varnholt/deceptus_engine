@@ -29,13 +29,13 @@ MenuScreenMain::MenuScreenMain()
 {
    setFilename("data/menus/titlescreen.psd");
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_build = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_build = std::make_unique<sf::Text>(_font);
 #endif
    _text_build->setFont(_font);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_build->setString((tr("Build Number") + ": " + std::string{getBuildNumber()}).c_str());
 #else
    _text_build->setString(sftr("Build Number") + sf::String{": "} + sf::String{getBuildNumber()});
@@ -47,14 +47,14 @@ MenuScreenMain::MenuScreenMain()
    const auto current_year =
       static_cast<int32_t>(std::chrono::year_month_day{std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now())}.year());
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_copyright = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_copyright = std::make_unique<sf::Text>(_font);
 #endif
    _text_copyright->setFont(_font);
    const auto copyright_string = std::vformat(tr("© {} Matthias Varnholt & dstar"), std::make_format_args(current_year));
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_copyright->setString(copyright_string.c_str());
 #else
    _text_copyright->setString(sf::String::fromUtf8(copyright_string.begin(), copyright_string.end()));
@@ -66,7 +66,7 @@ MenuScreenMain::MenuScreenMain()
    const auto copyright_x = static_cast<int32_t>((640.0f - copyright_bounds.size.x) / 2.0f - copyright_bounds.position.x);
    sfcompat::setPosition(*_text_copyright, {static_cast<float>(copyright_x), 341.0f});
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_title = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_title = std::make_unique<sf::Text>(_font);
@@ -106,7 +106,7 @@ void MenuScreenMain::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    const auto can_continue = !SaveState::allEmpty();
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto draw_all_text = [&](sf::RenderTarget& target, const sf::RenderStates& drawStates)
    {
       target.draw(*_text_build, drawStates);
@@ -258,7 +258,7 @@ void MenuScreenMain::loadingFinished()
       placeTextCentered(*_text_title, _layers["logo"]->_sprite->getGlobalBounds());
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_continue_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_continue_item = std::make_unique<sf::Text>(_font);
@@ -266,7 +266,7 @@ void MenuScreenMain::loadingFinished()
    _text_continue_item->setFont(_font);
    _text_continue_item->setCharacterSize(12);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_new_game_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_new_game_item = std::make_unique<sf::Text>(_font);
@@ -274,7 +274,7 @@ void MenuScreenMain::loadingFinished()
    _text_new_game_item->setFont(_font);
    _text_new_game_item->setCharacterSize(12);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_options_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_options_item = std::make_unique<sf::Text>(_font);
@@ -282,7 +282,7 @@ void MenuScreenMain::loadingFinished()
    _text_options_item->setFont(_font);
    _text_options_item->setCharacterSize(12);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _text_quit_item = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
    _text_quit_item = std::make_unique<sf::Text>(_font);

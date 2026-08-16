@@ -121,7 +121,7 @@ std::vector<Segment> parseRichText(
             const auto text_before_tag = current_view.substr(0, tag_pos);
             Segment segment(font);
             segment.text->setCharacterSize(character_size);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
             segment.text->setString(std::string(text_before_tag.begin(), text_before_tag.end()).c_str());
             segment.text->setFillColor(current_text_color);
             segment.text->setBold(is_bold);
@@ -175,7 +175,7 @@ std::vector<Segment> parseRichText(
          // no more tags; add the rest of the text as a single segment.
          Segment segment(font);
          segment.text->setCharacterSize(character_size);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          segment.text->setString(std::string(current_view.begin(), current_view.end()).c_str());
          segment.text->setFillColor(current_text_color);
          segment.text->setBold(is_bold);
@@ -197,7 +197,7 @@ std::vector<Segment> parseRichText(
          if (segment.text->getString() == "\n")
          {
             offset_y_px += segment.text->getLocalBounds().size.y;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
             segment.text->position = {offset_x_px, offset_y_px};
 #else
             segment.text->setPosition({offset_x_px, offset_y_px});
@@ -207,7 +207,7 @@ std::vector<Segment> parseRichText(
          {
             const auto text_width_px = segment.text->getLocalBounds().size.x;
             const auto offset_x_centered_px = offset_x_px + (window_width_px - text_width_px) / 2.0f;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
             segment.text->position = {offset_x_centered_px, offset_y_px};
 #else
             segment.text->setPosition({offset_x_centered_px, offset_y_px});
@@ -225,7 +225,7 @@ std::vector<Segment> parseRichText(
          {
             segment_offset_x_px = 0.0f;
             offset_y_px += segment.text->getLocalBounds().size.y;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
             segment.text->position = {offset_x_px, offset_y_px};
 #else
             segment.text->setPosition({offset_x_px, offset_y_px});
@@ -233,7 +233,7 @@ std::vector<Segment> parseRichText(
          }
          else
          {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
             segment.text->position = {offset_x_px + segment_offset_x_px, offset_y_px};
 #else
             segment.text->setPosition({offset_x_px + segment_offset_x_px, offset_y_px});
@@ -246,7 +246,7 @@ std::vector<Segment> parseRichText(
    return segments;
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 std::string toString(const std::vector<Segment>& segments)
 {
    std::string result;
@@ -274,7 +274,7 @@ sf::String toString(const std::vector<Segment>& segments)
 
 void testParseRichText()
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto font_opt = sf::Font::openFromFile("arial.ttf");
    if (!font_opt.hasValue())
    {
@@ -301,7 +301,7 @@ void testParseRichText()
    const auto plain_text = toString(segments);
 
    std::cout << "Original Message: " << message << std::endl;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    std::cout << "Extracted Plain Text: " << std::endl << plain_text << std::endl;
 #else
    std::cout << "Extracted Plain Text: " << std::endl << plain_text.toAnsiString() << std::endl;
@@ -310,7 +310,7 @@ void testParseRichText()
 
 Segment::Segment(const sf::Font& font)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    text = std::make_unique<sf::Text>(font, sf::Text::Data{});
 #else
    text = std::make_unique<sf::Text>(font);

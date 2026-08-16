@@ -66,7 +66,7 @@ struct GameConfiguration
    /// persists changes to disk if the resolution was adjusted.
    void clampResolutionToDesktop();
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    /// \brief computes the largest integer multiple of the base view that fits the browser viewport.
    /// keeping the render resolution an exact multiple of _view_width x _view_height avoids fractional
    /// scaling, which would turn the pixel-art fonts into uneven mush.

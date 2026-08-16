@@ -72,7 +72,7 @@ struct MessageBox
 
    /// \brief draws the active and fading-out previous dialogs.
    /// \param window render target used for message box rendering.
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    static void draw(sf::RenderTarget& window, const sf::RenderStates& = sf::RenderStates{});
 #else
    static void draw(sf::RenderTarget& window, const sf::RenderStates& = sf::RenderStates::Default);
@@ -159,7 +159,7 @@ struct MessageBox
    {
       sf::Text text;
       sf::Color color;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       std::string plain_text;
 #else
       sf::String plain_text;
@@ -167,7 +167,7 @@ struct MessageBox
    };
 
    std::vector<TextSegment> _segments;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    std::string _plain_text;
 #else
    sf::String _plain_text;

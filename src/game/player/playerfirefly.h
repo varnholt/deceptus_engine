@@ -24,7 +24,7 @@ public:
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    /// \brief draws the firefly sprite with explicit render states (used in WASM to carry the level view).
    /// \param target color render target.
    /// \param normal normal-map render target (unused).

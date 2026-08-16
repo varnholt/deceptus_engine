@@ -6,7 +6,7 @@
 
 void PlayerDive::update(const sf::Time& dt, bool in_water)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _dive_duration = in_water ? (_dive_duration + std::chrono::microseconds(dt.asMicroseconds())) : HighResDuration::zero();
 #else
    _dive_duration = in_water ? (_dive_duration + dt.toDuration()) : HighResDuration::zero();

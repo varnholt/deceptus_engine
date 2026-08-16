@@ -166,7 +166,7 @@ struct SpriteTextureData
 
 [[nodiscard]] SpriteTextureData getSpriteTextureData(const sf::Sprite& sprite)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    (void)sprite;
    return {};
 #else
@@ -188,7 +188,7 @@ void RenderDrawLists(ImDrawData* draw_data);  // rendering callback function pro
 void initDefaultJoystickMapping();
 
 // data
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 constexpr unsigned int NULL_JOYSTICK_ID = sf::Joystick::MaxCount;
 #else
 constexpr unsigned int NULL_JOYSTICK_ID = sf::Joystick::Count;
@@ -197,7 +197,7 @@ constexpr unsigned int NULL_JOYSTICK_ID = sf::Joystick::Count;
 // Returns first id of connected joystick
 [[nodiscard]] unsigned int getConnectedJoystickId()
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    for (unsigned int i = 0; i < sf::Joystick::MaxCount; ++i)
    {
       if (sf::Joystick::query(i).hasValue())
@@ -221,7 +221,7 @@ void updateJoystickAxisState(ImGuiIO& io);
 // clipboard functions
 void setClipboardText(ImGuiContext* /*ctx*/, const char* text)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::Clipboard::setString(sf::Utf8String{text});
 #else
    sf::Clipboard::setString(sf::String::fromUtf8(text, text + std::strlen(text)));
@@ -232,7 +232,7 @@ void setClipboardText(ImGuiContext* /*ctx*/, const char* text)
 {
    static std::string s_clipboardText;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    s_clipboardText = sf::Clipboard::getString().data();
 #else
    auto tmp = sf::Clipboard::getString().toUtf8();
@@ -325,7 +325,7 @@ bool Init(sf::RenderWindow& window, bool loadDefaultFont)
 
 bool Init(sf::Window& window, sf::RenderTarget& target, bool loadDefaultFont)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    return Init(window, target.getSize().toVec2f(), loadDefaultFont);
 #else
    return Init(window, sf::Vector2f(target.getSize()), loadDefaultFont);
@@ -358,7 +358,7 @@ bool Init(sf::Window& window, const sf::Vector2f& displaySize, bool loadDefaultF
    platform_io.Platform_GetClipboardTextFn = getClipboardText;
 
    // load mouse cursors
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    const auto loadMouseCursor = [](ImGuiMouseCursor imguiCursorType, sf::Cursor::Type sfmlCursorType)
    {
       auto cursor_opt = sf::Cursor::loadFromSystem(sfmlCursorType);
@@ -410,7 +410,7 @@ void ProcessEvent(const sf::Window& window, const sf::Event& event)
    {
       if (const auto* resized = event.getIf<sf::Event::Resized>())
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          io.DisplaySize = toImVec2(resized->size.toVec2f());
 #else
          io.DisplaySize = toImVec2(sf::Vector2f(resized->size));
@@ -418,7 +418,7 @@ void ProcessEvent(const sf::Window& window, const sf::Event& event)
       }
       else if (const auto* mouseMoved = event.getIf<sf::Event::MouseMoved>())
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          const auto [x, y] = mouseMoved->position.toVec2f();
 #else
          const auto [x, y] = sf::Vector2f(mouseMoved->position);
@@ -544,11 +544,11 @@ void Update(sf::Window& window, sf::RenderTarget& target, sf::Time dt)
 
    if (!s_currWindowCtx->mouseMoved)
    {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
       if (sf::Touch::isDown(0))
          s_currWindowCtx->touchPos = sf::Touch::getPosition(0, window);
 #endif
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       Update(s_currWindowCtx->touchPos, target.getSize().toVec2f(), dt);
 #else
       Update(s_currWindowCtx->touchPos, sf::Vector2f(target.getSize()), dt);
@@ -556,7 +556,7 @@ void Update(sf::Window& window, sf::RenderTarget& target, sf::Time dt)
    }
    else
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       Update(sf::Mouse::getPosition(window), target.getSize().toVec2f(), dt);
 #else
       Update(sf::Mouse::getPosition(window), sf::Vector2f(target.getSize()), dt);
@@ -576,7 +576,7 @@ void Update(const sf::Vector2i& mousePos, const sf::Vector2f& displaySize, sf::T
    {
       if (io.WantSetMousePos)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          sf::Mouse::setPosition(toSfVector2f(io.MousePos).toVec2i());
 #else
          sf::Mouse::setPosition(sf::Vector2i(toSfVector2f(io.MousePos)));
@@ -584,7 +584,7 @@ void Update(const sf::Vector2i& mousePos, const sf::Vector2f& displaySize, sf::T
       }
       else
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          io.MousePos = toImVec2(mousePos.toVec2f());
 #else
          io.MousePos = toImVec2(sf::Vector2f(mousePos));
@@ -592,7 +592,7 @@ void Update(const sf::Vector2i& mousePos, const sf::Vector2f& displaySize, sf::T
       }
       for (unsigned int i = 0; i < 3; i++)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          io.MouseDown[i] =
             s_currWindowCtx->touchDown[i] || s_currWindowCtx->mousePressed[i] || sf::Mouse::isButtonPressed((sf::Mouse::Button)i);
 #else
@@ -643,12 +643,12 @@ void Render(sf::RenderWindow& window)
 void Render(sf::RenderTarget& target)
 {
    target.resetGLStates();
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    target.pushGLStates();
 #endif
    ImGui::Render();
    RenderDrawLists(ImGui::GetDrawData());
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    target.popGLStates();
 #else
    target.resetGLStates();
@@ -712,7 +712,7 @@ bool UpdateFontTexture()
 
    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto newTexture_opt = sf::Texture::create({static_cast<unsigned int>(width), static_cast<unsigned int>(height)});
    if (!newTexture_opt.hasValue())
    {
@@ -749,7 +749,7 @@ std::optional<sf::Texture>& GetFontTexture()
 void SetActiveJoystickId(unsigned int joystickId)
 {
    assert(s_currWindowCtx);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    assert(joystickId < sf::Joystick::MaxCount);
 #else
    assert(joystickId < sf::Joystick::Count);
@@ -861,7 +861,7 @@ void SetRTriggerAxis(sf::Joystick::Axis rTriggerAxis)
 
 void Image(const sf::Texture& texture, const sf::Color& tintColor, const sf::Color& borderColor)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    Image(texture, texture.getSize().toVec2f(), tintColor, borderColor);
 #else
    Image(texture, sf::Vector2f(texture.getSize()), tintColor, borderColor);
@@ -878,7 +878,7 @@ void Image(const sf::Texture& texture, const sf::Vector2f& size, const sf::Color
 /////////////// Image Overloads for sf::RenderTexture
 void Image(const sf::RenderTexture& texture, const sf::Color& tintColor, const sf::Color& borderColor)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    Image(texture, texture.getSize().toVec2f(), tintColor, borderColor);
 #else
    Image(texture, sf::Vector2f(texture.getSize()), tintColor, borderColor);
@@ -906,7 +906,7 @@ void Image(const sf::RenderTexture& texture, const sf::Vector2f& size, const sf:
 
 void Image(const sf::Sprite& sprite, const sf::Color& tintColor, const sf::Color& borderColor)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    (void)sprite;
    (void)tintColor;
    (void)borderColor;
@@ -994,7 +994,7 @@ void DrawRectFilled(const sf::FloatRect& rect, const sf::Color& color, float rou
 namespace
 {
 // copied from imgui/backends/imgui_impl_opengl2.cpp
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
 void SetupRenderState(ImDrawData* draw_data, int fb_width, int fb_height)
 {
    // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor
@@ -1049,12 +1049,12 @@ void SetupRenderState(ImDrawData* draw_data, int fb_width, int fb_height)
    glPushMatrix();
    glLoadIdentity();
 }
-#endif  // !__EMSCRIPTEN__
+#endif  // !DECEPTUS_VRSFML
 
 // Rendering callback
 void RenderDrawLists(ImDrawData* draw_data)
 {
-#ifndef __EMSCRIPTEN__
+#ifndef DECEPTUS_VRSFML
    ImGui::GetDrawData();
    if (draw_data->CmdListsCount == 0)
    {
@@ -1183,7 +1183,7 @@ void RenderDrawLists(ImDrawData* draw_data)
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, last_element_array_buffer);
    glDisable(GL_SCISSOR_TEST);
 #endif
-#endif  // !__EMSCRIPTEN__
+#endif  // !DECEPTUS_VRSFML
 }
 
 void initDefaultJoystickMapping()
@@ -1223,7 +1223,7 @@ void initDefaultJoystickMapping()
 
 void updateJoystickButtonState(ImGuiIO& io)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto joystick_query = sf::Joystick::query(s_currWindowCtx->joystickId);
    if (!joystick_query.hasValue())
       return;
@@ -1257,7 +1257,7 @@ void updateJoystickButtonState(ImGuiIO& io)
 
 void updateJoystickAxis(ImGuiIO& io, ImGuiKey key, sf::Joystick::Axis axis, float threshold, float maxThreshold, bool inverted)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    auto joystick_query = sf::Joystick::query(s_currWindowCtx->joystickId);
    float pos = joystick_query.hasValue() ? joystick_query->getAxisPosition(axis) : 0.0f;
 #else

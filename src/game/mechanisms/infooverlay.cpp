@@ -112,7 +112,7 @@ void InfoOverlay::update(const sf::Time& delta_time)
 
    // std::cout << alpha << std::endl;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(255 * alpha));
 #else
    _sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(255 * alpha)));
@@ -121,7 +121,7 @@ void InfoOverlay::update(const sf::Time& delta_time)
 
 void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    draw(color, normal, {});
 #else
    if (!isEnabled())
@@ -153,7 +153,7 @@ void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
 void InfoOverlay::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    if (!isEnabled())
    {
       return;
@@ -233,7 +233,7 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
       if (texture_id != data._tmx_object->_properties->_map.end())
       {
          instance->_texture = TexturePool::getInstance().get(texture_id->second->_value_string.value());
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          instance->_sprite = std::make_unique<sf::Sprite>();
 #else
          instance->_sprite = std::make_unique<sf::Sprite>(*instance->_texture);
@@ -268,7 +268,7 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
 
       if (rect.size.x > 0 && rect.size.y > 0)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          instance->_sprite->textureRect = sf::FloatRect{
             {static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)},
             {static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)}
@@ -284,7 +284,7 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
 
    instance->setObjectId(data._tmx_object->_name);
    instance->_rect = bounding_rect;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    instance->_sprite->color = sf::Color(255, 255, 255, 0);
 #else
    instance->_sprite->setColor(sf::Color(255, 255, 255, 0));
@@ -293,7 +293,7 @@ std::shared_ptr<InfoOverlay> InfoOverlay::setup(GameNode* parent, const GameDese
 
    if (!instance->_settings._fullscreen)
    {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       instance->_sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
 #else
       instance->_sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});

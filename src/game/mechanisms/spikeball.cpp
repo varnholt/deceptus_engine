@@ -103,7 +103,7 @@ SpikeBall::SpikeBall(GameNode* parent) : GameNode(parent), _instance_id(instance
 
    _texture = TexturePool::getInstance().get("data/sprites/enemy_spikeball.png");
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _spike_sprite = std::make_unique<sf::Sprite>();
    _box_sprite = std::make_unique<sf::Sprite>();
    _chain_element_a = std::make_unique<sf::Sprite>();
@@ -149,7 +149,7 @@ void SpikeBall::preload()
    Audio::getInstance().addSample("mechanism_spikeball_02.ogg");
 }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void SpikeBall::drawChain(sf::RenderTarget& window, const sf::RenderStates& states)
 {
    std::vector<HermiteCurveKey> keys;
@@ -215,7 +215,7 @@ void SpikeBall::drawChain(sf::RenderTarget& window)
 }
 #endif
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    draw(color, normal, {});
@@ -296,7 +296,7 @@ void SpikeBall::update(const sf::Time& dt)
       return;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _spike_sprite->position = {_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM};
 #else
    _spike_sprite->setPosition({_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM});
@@ -318,7 +318,7 @@ void SpikeBall::update(const sf::Time& dt)
    }
 
    const auto angle = sf::radians(_angle);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _spike_sprite->rotation = angle;
 #else
    _spike_sprite->setRotation(angle);
@@ -471,7 +471,7 @@ void SpikeBall::setup(const GameDeserializeData& data)
    ball_fixture->SetUserData(static_cast<void*>(object_data));
 
    // that box only needs to be set up once
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _box_sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px};
 #else
    _box_sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px + box_sprite_y_offset_px});

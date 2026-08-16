@@ -4,12 +4,13 @@
 [![Linux](https://github.com/varnholt/deceptus_engine/actions/workflows/linux.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/linux.yml)
 [![macOS](https://github.com/varnholt/deceptus_engine/actions/workflows/macos.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/macos.yml)
 [![WASM](https://github.com/varnholt/deceptus_engine/actions/workflows/wasm.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/wasm.yml)
+[![Switch](https://github.com/varnholt/deceptus_engine/actions/workflows/switch.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/switch.yml)
 
 A C++23/lua-based platformer game engine<br>
 It utilizes Box2D for game physics, SFML for rendering, and SDL for game controller support.
 
-It builds for Windows, Linux and macOS, and it also compiles to WebAssembly, so it runs in the
-browser without a plugin.
+It builds for Windows, Linux and macOS, it compiles to WebAssembly so it runs in the browser
+without a plugin, and it runs on the Nintendo Switch as unsigned homebrew.
 
 ### [▶ Play it in your browser on itch.io](https://deceptus.itch.io/deceptus)
 
@@ -45,7 +46,7 @@ The complete documentation lives in [doc/readme.md](doc/readme.md). The most tra
 
 # Get a Build
 
-Every push to `master` is built for all four targets. These links always give you the newest
+Every push to `master` is built for all five targets. These links always give you the newest
 successful build and need no GitHub account:
 
 |Platform|Download|
@@ -54,11 +55,15 @@ successful build and need no GitHub account:
 |Linux|[deceptus-linux.zip](https://nightly.link/varnholt/deceptus_engine/workflows/linux/master/deceptus-linux.zip)|
 |macOS|[deceptus-macos.zip](https://nightly.link/varnholt/deceptus_engine/workflows/macos/master/deceptus-macos.zip)|
 |Web|[deceptus-wasm.zip](https://nightly.link/varnholt/deceptus_engine/workflows/wasm/master/deceptus-wasm.zip)|
+|Nintendo Switch|[deceptus-switch.zip](https://nightly.link/varnholt/deceptus_engine/workflows/switch/master/deceptus-switch.zip)|
 
 The desktop archives contain the executable next to the `data/` directory. On Linux and macOS the
 shared libraries come along in `lib/` with a `run.sh` that points the loader at them, so start
 those through `run.sh`. The web archive holds the Emscripten output and needs a server that sends
-the `COOP`/`COEP` headers described under [Web (WebAssembly)](#web-webassembly).
+the `COOP`/`COEP` headers described under [Web (WebAssembly)](#web-webassembly). The Switch
+archive is a single self-contained `deceptus.nro` with the assets embedded as romfs — it needs a
+console running custom firmware, and it has to be started in title takeover mode, as described
+under [Nintendo Switch (homebrew)](#nintendo-switch-homebrew).
 
 The links resolve through [nightly.link](https://nightly.link), which hands out the artifact of
 the latest successful workflow run. That indirection exists because GitHub only serves Actions
@@ -141,6 +146,27 @@ headers.
 `emscripten/` holds the hosting shell for the published build: `itch_index.html` is a
 player-facing page that shows only the canvas, and `coi-serviceworker.js` establishes
 cross-origin isolation on hosts that do not send the headers themselves, itch.io among them.
+
+## Nintendo Switch (homebrew)
+
+The Switch build is an unsigned `.nro` for a console running custom firmware. It reuses the
+web build's rendering stack — VRSFML over SDL 3 — because vanilla SFML 3 renders through the
+fixed-function pipeline and the Switch's mesa/nouveau driver is core profile only. The SDL
+video, joystick and audio backends for the platform are carried as patches under `patches/`.
+
+```bat
+build_switch.bat . build_switch_engine
+```
+
+Everything runs in the official `devkitpro/devkita64` Docker image, so no local devkitPro
+install is needed. The result is a self-contained `deceptus.nro` with the whole `data/`
+directory embedded as romfs.
+
+It boots and plays, on a console as well as in an emulator, and audio is silent so far. On
+hardware it has to be launched in title takeover mode — hold R while starting a game from the
+HOME menu — or it runs out of memory during asset loading.
+[doc/switch_build.md](doc/switch_build.md) has the full setup, how to run and script it in
+Ryujinx, and how to work on the port itself.
 
 
 # Contribute and Talk to Us!

@@ -78,7 +78,7 @@ std::vector<WaterSurface::SplashEmitter> emitters;
 
 // #define DEBUG_WATERSURFACE 1
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
 void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    draw(color, normal, {});
@@ -586,7 +586,7 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
    {
       try
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          auto created_texture = sf::RenderTexture::create(sf::Vector2u(
             static_cast<int32_t>(_bounding_box.size.x / _pixel_ratio.value()),
             static_cast<int32_t>((_bounding_box.size.y * 2.0f) / _pixel_ratio.value())
@@ -605,7 +605,7 @@ WaterSurface::WaterSurface(GameNode* /*parent*/, const GameDeserializeData& data
       }
 
       _render_texture->setSmooth(false);
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
       render_texture_sprite = std::make_unique<sf::Sprite>();
       render_texture_sprite->position = {_bounding_box.position.x, _bounding_box.position.y - _bounding_box.size.y};
       render_texture_sprite->scale = {_pixel_ratio.value(), _pixel_ratio.value()};

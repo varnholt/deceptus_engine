@@ -193,7 +193,7 @@ private:
    std::shared_ptr<Layer> _layer_background_inactive;
    std::shared_ptr<Layer> _layer_background_active;
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    sf::RectangleShape _rect_shape{sf::RectangleShape::Data {}};
    sf::CircleShape _origin_shape{sf::CircleShape::Data {}};
 #else
@@ -229,7 +229,7 @@ private:
    void drawVoid(sf::RenderTarget& target);
 
    sfcompat::Shader _shader;
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    std::optional<sf::Texture> _noise_texture;
    std::string _default_texture_path{"data/effects/gabor_6.png"};
    std::unique_ptr<sf::RenderTexture> _shader_texture;

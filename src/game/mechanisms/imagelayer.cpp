@@ -28,7 +28,7 @@ std::string_view ImageLayer::objectName() const
 
 void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    draw(target, normal, {});
 #else
    if (_sprite == nullptr)
@@ -60,7 +60,7 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
 void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    if (_sprite == nullptr)
    {
       return;
@@ -100,7 +100,7 @@ void ImageLayer::update(const sf::Time& dt)
    {
       if (_sprite == nullptr)
       {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
          _sprite = std::make_unique<sf::Sprite>();
          _sprite->position = _position;
          _sprite->color = _color;
@@ -129,7 +129,7 @@ void ImageLayer::updateView(float level_view_x, float level_view_y, float view_w
       return;
    }
 
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _parallax_view = sf::View::fromRect(sf::FloatRect{
       {level_view_x * (*_parallax_settings)._factor.x + (*_parallax_settings)._error.x,
        level_view_y * (*_parallax_settings)._factor.y + (*_parallax_settings)._error.y},
@@ -146,7 +146,7 @@ void ImageLayer::updateView(float level_view_x, float level_view_y, float view_w
 
 void ImageLayer::resetView(float view_width, float view_height)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef DECEPTUS_VRSFML
    _parallax_view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {view_width, view_height}});
    _parallax_view.viewport = sf::FloatRect{{0.0f, 0.0f}, {1.0f, 1.0f}};
 #else
