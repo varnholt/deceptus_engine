@@ -1,0 +1,9 @@
+[project]
+name = "switch-smoke"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = [
+    "pywin32>=308",
+    "pillow>=10.0.0",
+    "pytest>=8.0.0",
+]

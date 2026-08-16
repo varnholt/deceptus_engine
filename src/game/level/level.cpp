@@ -22,6 +22,7 @@
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
 #include "game/debug/debugdrawstates.h"
+#include "game/debug/drawcallcounter.h"
 #include "game/ingamemenu/ingamemenumap.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/io/meshtools.h"
@@ -996,6 +997,35 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
 #endif
 }
 
+void Level::rebuildMechanismDrawIndex()
+{
+   // Level::draw walks every z index from BackgroundMin to ForegroundMax and used to rescan the whole
+   // mechanism registry at each one, looking for the handful that sit at that z. With the registry
+   // holding a couple of thousand mechanisms and drawLayers, drawPostLightingLayers and
+   // drawOverlayLayers each running their own z loop, that came to over a hundred thousand
+   // candidate checks per frame, every one of them a virtual getZ() and most of them a chunk
+   // distance test on top.
+   //
+   // Bucketing them once per frame turns that into a single pass. The registry is traversed in
+   // exactly the order the z loops used to, so mechanisms sharing a z index keep their relative
+   // draw order - which matters, because they may be drawn with transparency.
+   //
+   // The buckets hold raw pointers and are rebuilt every frame rather than cached, so nothing here
+   // can outlive the registry or go stale when mechanisms are added or removed.
+   for (auto& [z_index, bucket] : _mechanisms_by_z)
+   {
+      bucket.clear();
+   }
+
+   for (auto* mechanism_vector : _mechanism_registry.getList())
+   {
+      for (const auto& mechanism : *mechanism_vector)
+      {
+         _mechanisms_by_z[mechanism->getZ()].push_back(mechanism.get());
+      }
+   }
+}
+
 void Level::drawMechanismsAtZ(
    sf::RenderTarget& color,
    sf::RenderTarget& normal,
@@ -1004,28 +1034,34 @@ void Level::drawMechanismsAtZ(
    const sf::RenderStates& states
 )
 {
-   for (auto* mechanism_vector : _mechanism_registry.getList())
+   const auto bucket_it = _mechanisms_by_z.find(z_index);
+   if (bucket_it == _mechanisms_by_z.end())
    {
-      for (const auto& mechanism : *mechanism_vector)
-      {
-         if (mechanism->getZ() == z_index && predicate(mechanism))
-         {
+      return;
+   }
+
+   for (auto* mechanism : bucket_it->second)
+   {
 #ifdef DEVELOPMENT_MODE
-            if (_mechanism_profiling_enabled)
-            {
-               const auto mechanism_name = std::string{mechanism->objectName()};
-               const auto time_start = std::chrono::high_resolution_clock::now();
-               mechanism->draw(color, normal, states);
-               timing_data[mechanism_name].addDrawTime(std::chrono::high_resolution_clock::now() - time_start);
-            }
-            else
-            {
-               mechanism->draw(color, normal, states);
-            }
-#else
-            mechanism->draw(color, normal, states);
+      DrawCallCounter::layer_scan_steps++;
 #endif
+      if (predicate(mechanism))
+      {
+#ifdef DEVELOPMENT_MODE
+         if (_mechanism_profiling_enabled)
+         {
+            const auto mechanism_name = std::string{mechanism->objectName()};
+            const auto time_start = std::chrono::high_resolution_clock::now();
+            mechanism->draw(color, normal, states);
+            timing_data[mechanism_name].addDrawTime(std::chrono::high_resolution_clock::now() - time_start);
          }
+         else
+         {
+            mechanism->draw(color, normal, states);
+         }
+#else
+         mechanism->draw(color, normal, states);
+#endif
       }
    }
 }
@@ -1190,6 +1226,9 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw all tile maps
       for (const auto& tile_map : _tile_maps)
       {
+#ifdef DEVELOPMENT_MODE
+         DrawCallCounter::layer_scan_steps++;
+#endif
          if (tile_map->getZ() == z_index && !tile_map->isPostLighting())
          {
             tile_map->draw(target, normal, layer_states);
@@ -1215,6 +1254,9 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw enemies; sprite layers and projectiles may have been assigned their own z index from lua
       for (auto& enemy : LuaInterface::instance().getObjectList())
       {
+#ifdef DEVELOPMENT_MODE
+         DrawCallCounter::layer_scan_steps++;
+#endif
          if (enemy->hasContentAtZ(z_index))
          {
             if (checkUpdateMechanism(player_chunk, enemy))
@@ -1233,6 +1275,9 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw image layers; post-lighting layers are drawn after the lighting pass
       for (auto& layer : _mechanism_registry.getImageLayers())
       {
+#ifdef DEVELOPMENT_MODE
+         DrawCallCounter::layer_scan_steps++;
+#endif
          if (layer->getZ() == z_index)
          {
             if (layer->isPostLighting())
@@ -1569,8 +1614,13 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 {
    _screenshot = screenshot;
 
+   rebuildMechanismDrawIndex();
+
+   beginRenderSectionTiming();
+
    // render atmosphere to atmosphere texture, that texture is used in the shader only
    drawAtmosphereLayer();
+   markRenderSection("atmosphere");
 #ifndef DECEPTUS_VRSFML
    takeScreenshot("texture_atmosphere", *_atmosphere_shader->getRenderTexture().get());
 #endif
@@ -1585,6 +1635,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _render_targets.level_background->clear();
    _render_targets.normal_tmp->clear();
    _render_targets.normal->clear();
+   markRenderSection("clear level targets");
 
    drawLayers(
       *_render_targets.level_background.get(),
@@ -1598,6 +1649,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    _render_targets.normal_tmp->display();
    takeScreenshot("texture_level_background_normal", *_render_targets.normal_tmp.get());
+   markRenderSection("background layers");
 
    // draw the atmospheric parts into the level texture using the atmosphere shader
 #ifndef DECEPTUS_VRSFML
@@ -1627,6 +1679,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       _render_targets.normal->draw(blit_sprite, sf::RenderStates{.texture = &blit_normal_texture});
    }
 #endif
+   markRenderSection("atmosphere resolve");
 
    // draw the level layers into the level texture
    drawLayers(
@@ -1635,6 +1688,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       static_cast<int32_t>(ZDepth::ForegroundMin),
       static_cast<int32_t>(ZDepth::ForegroundMax)
    );
+   markRenderSection("foreground layers");
 
 #ifndef DECEPTUS_VRSFML
    _light_system->drawDebug(*_render_targets.level.get());
@@ -1653,8 +1707,10 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 #ifndef DECEPTUS_VRSFML
    drawDebugInformation();
 #endif
+   markRenderSection("animations and scripts");
 
    displayFinalTextures();
+   markRenderSection("display final textures");
 
    if (DebugDrawStates::_draw_lighting)
    {
@@ -1680,12 +1736,15 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       _render_targets.deferred->draw(unlit_sprite);
 #endif
    }
+   markRenderSection("lighting");
 
    drawPostLightingLayers(*_render_targets.deferred.get());
+   markRenderSection("post lighting layers");
 
    drawOverlayLayers(*_render_targets.deferred.get());
 
    _render_targets.deferred->display();
+   markRenderSection("overlay layers");
 
 #ifndef DECEPTUS_VRSFML
    takeScreenshot("texture_map_color", *_render_targets.level.get());
@@ -1716,6 +1775,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _gamma_shader->update();
    window->draw(level_texture_sprite, &_gamma_shader->getGammaShader());
 #endif
+   markRenderSection("gamma blit");
 }
 
 void Level::updatePlayerLight()
@@ -2046,4 +2106,37 @@ void Level::setMechanismProfilingEnabled(bool enabled)
 {
    _mechanism_profiling_enabled = enabled;
 }
+
+std::vector<RenderSectionSample> Level::getRenderSectionTimings() const
+{
+   return _render_section_timings;
+}
 #endif
+
+void Level::beginRenderSectionTiming()
+{
+#ifdef DEVELOPMENT_MODE
+   _render_section_timings.clear();
+   if (!_mechanism_profiling_enabled)
+   {
+      return;
+   }
+   _render_section_mark = std::chrono::high_resolution_clock::now();
+#endif
+}
+
+void Level::markRenderSection(const char* name)
+{
+#ifdef DEVELOPMENT_MODE
+   if (!_mechanism_profiling_enabled)
+   {
+      return;
+   }
+   const auto now = std::chrono::high_resolution_clock::now();
+   const auto elapsed_ms = std::chrono::duration<float, std::milli>(now - _render_section_mark).count();
+   _render_section_timings.push_back({name, elapsed_ms});
+   _render_section_mark = now;
+#else
+   (void)name;
+#endif
+}

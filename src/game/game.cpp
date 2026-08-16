@@ -265,6 +265,12 @@ void Game::initializeWindow()
 #ifndef DECEPTUS_VRSFML
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
    _window->setFramerateLimit(60);
+#elif defined(__SWITCH__)
+   // the console's panel runs at 60 Hz in both modes and paces the loop by itself, so vsync is all
+   // that is wanted here and no frame rate limiter goes on top: a limiter would also cap a profiling
+   // run, and those deliberately switch vsync off to see how much headroom there is above 60.
+   // the browser drives its own loop, which is why the web build gets neither.
+   _window->setVerticalSyncEnabled(game_config._vsync_enabled);
 #endif
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!game_config._fullscreen);
@@ -682,6 +688,13 @@ void Game::initialize()
 
 #ifdef DEVELOPMENT_MODE
    writeMechanismSchemas();
+#endif
+
+#if defined(DEVELOPMENT_MODE) && defined(__SWITCH__)
+   // the console has no F10 to toggle profiling with and no window to show it in, so it is switched
+   // on from the start and reports into the sd card log, which is the only artefact a run on real
+   // hardware leaves behind
+   _profiling_ui = std::make_unique<ProfilingUi>();
 #endif
 }
 
@@ -1133,10 +1146,12 @@ void Game::timedDraw()
    }
    if (_level)
    {
-      _level->setMechanismProfilingEnabled(_profiling_ui != nullptr);
-      if (_profiling_ui)
+      const auto mechanism_profiling_enabled = (_profiling_ui != nullptr) && _profiling_ui->isMechanismProfilingWanted();
+      _level->setMechanismProfilingEnabled(mechanism_profiling_enabled);
+      if (mechanism_profiling_enabled)
       {
          _profiling_ui->updateMechanismTimings(_level->getMechanismTimings(32));
+         _profiling_ui->updateRenderSectionTimings(_level->getRenderSectionTimings());
       }
    }
 #endif
@@ -1249,6 +1264,8 @@ void Game::toggleFullScreen()
 #ifndef DECEPTUS_VRSFML
    _window->setVerticalSyncEnabled(config._vsync_enabled);
    _window->setFramerateLimit(60);
+#elif defined(__SWITCH__)
+   _window->setVerticalSyncEnabled(config._vsync_enabled);
 #endif
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!config._fullscreen);
