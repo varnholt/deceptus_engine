@@ -37,6 +37,26 @@ inline sf::Vector2f getPosition(const Drawable& drawable)
 #endif
 }
 
+/// \brief returns the centre of a view.
+inline sf::Vector2f getViewCenter(const sf::View& view)
+{
+#ifdef DECEPTUS_VRSFML
+   return view.center;
+#else
+   return view.getCenter();
+#endif
+}
+
+/// \brief returns the size of a view.
+inline sf::Vector2f getViewSize(const sf::View& view)
+{
+#ifdef DECEPTUS_VRSFML
+   return view.size;
+#else
+   return view.getSize();
+#endif
+}
+
 /// \brief sets the origin of a transformable object.
 template <typename Drawable>
 inline void setOrigin(Drawable& drawable, const sf::Vector2f& origin)

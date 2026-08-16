@@ -14,6 +14,8 @@
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
+#include "game/debug/drawcallcounter.h"
 #include "game/io/texturepool.h"
 #include "game/level/blendmodedeserializer.h"
 #include "game/player/playerregistry.h"
@@ -23,6 +25,11 @@ namespace
 constexpr auto tile_count_per_block = 16;
 constexpr auto block_range_half_x = 3;
 constexpr auto block_range_half_y = 2;
+
+//! slack added around the view before the block window is derived from it, in pixels. the view used
+//! for culling is the very one being rendered, so this only has to absorb rounding rather than any
+//! camera movement, and is deliberately far smaller than the block size
+constexpr auto block_margin_px = 48.0f;
 
 std::array<int32_t, 2> getPlayerBlock()
 {
@@ -298,27 +305,72 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
 {
    states.transform *= getTransform();
 
-   const auto player_block = getPlayerBlock();
-   const auto bx = player_block[0];
-   const auto by = player_block[1];
-
-   for (auto iy = by - block_range_half_y; iy < by + block_range_half_y; iy++)
+#ifdef DEVELOPMENT_MODE
+   if (DrawCallCounter::tilemap_last_target != &target)
    {
-      const auto y_it = _vertices_static_blocks.find(iy);
-      if (y_it != _vertices_static_blocks.end())
+      DrawCallCounter::tilemap_target_switches++;
+      DrawCallCounter::tilemap_last_target = &target;
+   }
+#endif
+
+   // the block window follows the view that is actually being rendered rather than the player's
+   // position. the two are not the same thing: the camera eases along behind the player, the
+   // panorama pushes it further still, and a parallax layer is drawn through a view of its own that
+   // sits at level_view * factor. culling around the player had to be padded until it covered all of
+   // that, which is how a 640 x 360 view came to draw a 2304 x 1536 px window of tiles.
+#ifdef DECEPTUS_VRSFML
+   const auto& view = states.view;
+#else
+   const auto& view = target.getView();
+#endif
+   const auto view_center = sfcompat::getViewCenter(view);
+   const auto view_size = sfcompat::getViewSize(view);
+
+   // blocks are binned by the tileset's own tile size at load time, so the window has to be measured
+   // in those units too - PIXELS_PER_TILE only happens to match for tilesets that use 24 px tiles
+   // a tile map that never had a tileset assigned reports a zero tile size, and dividing by that
+   // yields infinities that turn into meaningless block bounds
+   if (_tile_size_px.x == 0 || _tile_size_px.y == 0)
+   {
+      return;
+   }
+
+   const auto block_width_px = static_cast<float>(_tile_size_px.x * tile_count_per_block);
+   const auto block_height_px = static_cast<float>(_tile_size_px.y * tile_count_per_block);
+
+   const auto view_left_px = view_center.x - view_size.x * 0.5f - block_margin_px;
+   const auto view_top_px = view_center.y - view_size.y * 0.5f - block_margin_px;
+   const auto view_right_px = view_center.x + view_size.x * 0.5f + block_margin_px;
+   const auto view_bottom_px = view_center.y + view_size.y * 0.5f + block_margin_px;
+
+   const auto first_block_x = static_cast<int32_t>(std::floor(view_left_px / block_width_px));
+   const auto last_block_x = static_cast<int32_t>(std::floor(view_right_px / block_width_px));
+   const auto first_block_y = static_cast<int32_t>(std::floor(view_top_px / block_height_px));
+   const auto last_block_y = static_cast<int32_t>(std::floor(view_bottom_px / block_height_px));
+
+   // walking the blocks that exist inside the range, rather than probing every index in it, keeps
+   // the work proportional to what is on screen instead of to the size of the range. that also makes
+   // the loop immune to a nonsensical range: a degenerate view or tile size can produce bounds
+   // spanning the whole int32 domain, and probing those index by index takes billions of lookups,
+   // which is indistinguishable from a hang
+   const auto row_end = _vertices_static_blocks.upper_bound(last_block_y);
+   for (auto row_it = _vertices_static_blocks.lower_bound(first_block_y); row_it != row_end; ++row_it)
+   {
+      auto& row = row_it->second;
+      const auto column_end = row.upper_bound(last_block_x);
+      for (auto column_it = row.lower_bound(first_block_x); column_it != column_end; ++column_it)
       {
-         for (auto ix = bx - block_range_half_x; ix < bx + block_range_half_x; ix++)
-         {
-            const auto x_it = y_it->second.find(ix);
-            if (x_it != _vertices_static_blocks[iy].end())
-            {
-               target.draw(x_it->second, states);
-            }
-         }
+         target.draw(column_it->second, states);
+#ifdef DEVELOPMENT_MODE
+         DrawCallCounter::tilemap_draw_calls++;
+#endif
       }
    }
 
    target.draw(_vertices_animated, states);
+#ifdef DEVELOPMENT_MODE
+   DrawCallCounter::tilemap_draw_calls++;
+#endif
 }
 
 const std::string& TileMap::getLayerName() const
