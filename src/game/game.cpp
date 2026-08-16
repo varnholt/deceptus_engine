@@ -265,6 +265,12 @@ void Game::initializeWindow()
 #ifndef DECEPTUS_VRSFML
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
    _window->setFramerateLimit(60);
+#elif defined(__SWITCH__)
+   // the console's panel runs at 60 Hz in both modes and paces the loop by itself, so vsync is all
+   // that is wanted here and no frame rate limiter goes on top: a limiter would also cap a profiling
+   // run, and those deliberately switch vsync off to see how much headroom there is above 60.
+   // the browser drives its own loop, which is why the web build gets neither.
+   _window->setVerticalSyncEnabled(game_config._vsync_enabled);
 #endif
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!game_config._fullscreen);
@@ -1258,6 +1264,8 @@ void Game::toggleFullScreen()
 #ifndef DECEPTUS_VRSFML
    _window->setVerticalSyncEnabled(config._vsync_enabled);
    _window->setFramerateLimit(60);
+#elif defined(__SWITCH__)
+   _window->setVerticalSyncEnabled(config._vsync_enabled);
 #endif
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!config._fullscreen);

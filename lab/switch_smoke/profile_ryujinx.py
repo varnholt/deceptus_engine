@@ -19,8 +19,10 @@ apart and the run fails loudly rather than handing back a menu measurement.
 """
 
 import argparse
+import json
 import os
 import re
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -36,7 +38,10 @@ from ryujinx_driver import (  # noqa: E402
     send_key,
 )
 
-RYUJINX_SD_LOG_DIR = Path(os.environ["APPDATA"]) / "Ryujinx" / "sdcard" / "switch" / "deceptus" / "logs"
+RYUJINX_SD_DIR = Path(os.environ["APPDATA"]) / "Ryujinx" / "sdcard" / "switch" / "deceptus"
+RYUJINX_SD_LOG_DIR = RYUJINX_SD_DIR / "logs"
+GUEST_CONFIG_PATH = RYUJINX_SD_DIR / "settings" / "game.json"
+GUEST_CONFIG_BACKUP_PATH = GUEST_CONFIG_PATH.with_suffix(".json.profiling_backup")
 
 FRAME_REPORT = re.compile(
     r"profiling: fps (?P<fps>[\d.]+) over (?P<frames>\d+) frames"
@@ -45,6 +50,35 @@ FRAME_REPORT = re.compile(
 )
 # a menu frame runs no physics and updates in under 0.1 ms, a level frame sits far above this
 IN_LEVEL_UPDATE_MS_MINIMUM = 0.5
+
+
+def disable_guest_vsync() -> bool:
+    """Turns vsync off in the guest's config for the duration of the run.
+
+    vsync belongs on for playing, and the engine now honours it on the console. For profiling it has
+    to come off: with it on, every frame that would have taken less than 16.7 ms reports 16.7 ms, so
+    the numbers pin to 60 fps and any improvement above that line becomes invisible. Worse, a frame
+    that misses the deadline waits for the next one, so the rate quantises to 60/30/20 and a change
+    that removed real work looks like it did nothing at all.
+    """
+    if not GUEST_CONFIG_PATH.exists():
+        print(f"no guest config at {GUEST_CONFIG_PATH}, leaving vsync alone")
+        return False
+
+    if not GUEST_CONFIG_BACKUP_PATH.exists():
+        shutil.copy2(GUEST_CONFIG_PATH, GUEST_CONFIG_BACKUP_PATH)
+
+    config = json.loads(GUEST_CONFIG_PATH.read_text(encoding="utf-8"))
+    config["GameConfiguration"]["vsync"] = False
+    GUEST_CONFIG_PATH.write_text(json.dumps(config, indent=4), encoding="utf-8")
+    print("disabled vsync in the guest config for this run")
+    return True
+
+
+def restore_guest_vsync() -> None:
+    if GUEST_CONFIG_BACKUP_PATH.exists():
+        shutil.move(str(GUEST_CONFIG_BACKUP_PATH), str(GUEST_CONFIG_PATH))
+        print("restored the guest config")
 
 
 def newest_log() -> Path | None:
@@ -83,7 +117,15 @@ def main() -> int:
     args = parser.parse_args()
 
     previous_log = newest_log()
+    disable_guest_vsync()
 
+    try:
+        return run_session(args, previous_log)
+    finally:
+        restore_guest_vsync()
+
+
+def run_session(args, previous_log: Path | None) -> int:
     with RyujinxSession(nro_path=NRO_PATH):
         print(f"waiting {args.boot_seconds:.0f}s for the guest to boot")
         time.sleep(args.boot_seconds)

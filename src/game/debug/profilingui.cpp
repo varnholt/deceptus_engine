@@ -255,6 +255,7 @@ bool ProfilingUi::isMechanismProfilingWanted() const
 // update, in draw or waiting for vsync.
 
 #include "framework/tools/log.h"
+#include "game/config/gameconfiguration.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -328,7 +329,8 @@ void ProfilingUi::draw()
    report << std::fixed << std::setprecision(2) << "profiling: fps " << average_fps << " over " << _samples_written << " frames"
           << " | " << formatSummary("wall", wall_summary) << " | " << formatSummary("frame", frame_summary) << " | "
           << formatSummary("update", update_summary) << " | " << formatSummary("draw", draw_summary) << " | "
-          << formatSummary("swap", display_summary) << " | mechanism timing: " << (_mechanism_profiling_wanted ? "on" : "off");
+          << formatSummary("swap", display_summary) << " | mechanism timing: " << (_mechanism_profiling_wanted ? "on" : "off")
+          << " | vsync: " << (GameConfiguration::getInstance()._vsync_enabled ? "on" : "off");
    Log::Info() << report.str();
 
    const auto draw_call_summary = summarizeSamples(_tilemap_draw_calls.data(), _samples_written);
