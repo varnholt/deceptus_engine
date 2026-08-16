@@ -108,10 +108,7 @@ void LogUi::draw()
       ImVec4 color = getLogLevelColor(item._level);
       ImGui::PushStyleColor(ImGuiCol_Text, color);
 
-      const auto now_time = std::chrono::system_clock::to_time_t(item._timepoint);
-      std::stringstream time_ss;
-      time_ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %H:%M:%S");
-      const auto now_local = time_ss.str();
+      const auto now_local = Log::formatLocalTime(item._timepoint, "%Y-%m-%d %H:%M:%S");
 
       std::stringstream log_ss;
       log_ss << now_local << " " << Log::parseSourceTag(item._source_location) << ": " << item._message;

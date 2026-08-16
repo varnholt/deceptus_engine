@@ -125,11 +125,32 @@ struct Fatal : public Message
 using SysClockTimePoint = std::chrono::time_point<std::chrono::system_clock>;
 using ListenerCallback = std::function<void(const SysClockTimePoint&, Level, const std::string&, const std::source_location&)>;
 
+using FlushCallback = std::function<void()>;
+
 ///
 /// \brief Registers a listener that receives every emitted log message.
 /// \param cb Listener callback.
 ///
 void registerListenerCallback(const ListenerCallback& cb);
+
+///
+/// \brief Registers a sink flush that fatal() runs before terminating the process.
+/// \param cb Flush callback; must complete the write before it returns.
+/// \note Without this an asynchronous sink loses the very message that explains the exit,
+///       because std::exit tears the runtime down underneath the writing thread.
+///
+void registerFlushCallback(const FlushCallback& cb);
+
+///
+/// \brief Formats a time point as local time in a thread-safe way.
+/// \param time_point Time point to format.
+/// \param format strftime-style format string.
+/// \return Formatted time, or an empty string when the conversion fails.
+/// \note std::localtime hands back a pointer to a shared static tm, so two threads formatting a
+///       timestamp at once corrupt each other. Log sinks do exactly that: one formats on the
+///       thread that emitted the message, another on its own writer thread.
+///
+std::string formatLocalTime(const SysClockTimePoint& time_point, const std::string& format);
 
 ///
 /// \brief Builds a compact `file:function:line` source tag.
