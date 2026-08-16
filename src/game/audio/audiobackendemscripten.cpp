@@ -141,7 +141,7 @@ public:
    }
 
 private:
-   sf::PlaybackDevice* _playback_device{nullptr};                    //!< shared with the music backend, see PlaybackDeviceProvider
+   std::shared_ptr<sf::PlaybackDevice> _playback_device;             //!< shared with the music backend, see PlaybackDeviceProvider
    std::unordered_map<std::string, sf::SoundBuffer> _sound_buffers;  //!< cached sound buffers keyed by filename
 };
 }  // namespace

@@ -163,7 +163,7 @@ private:
       return true;
    }
 
-   sf::PlaybackDevice* _playback_device{nullptr};  //!< shared with the sound backend, see PlaybackDeviceProvider
+   std::shared_ptr<sf::PlaybackDevice> _playback_device;  //!< shared with the sound backend, see PlaybackDeviceProvider
    std::array<std::vector<std::byte>, 2>
       _music_data;  //!< compressed track bytes backing each reader; must outlive the MusicReader (openFromMemory references, not copies)
    std::array<std::unique_ptr<sf::MusicReader>, 2> _music_readers;  //!< music reader (memory source) for each stream slot

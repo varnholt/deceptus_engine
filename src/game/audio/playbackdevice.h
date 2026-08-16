@@ -22,20 +22,34 @@ namespace PlaybackDeviceProvider
 ///
 /// \brief Returns the shared playback device, or nullptr when no audio device is available.
 ///
-inline sf::PlaybackDevice* get()
+/// Callers keep the returned pointer for as long as they use the device; the device is destroyed
+/// once the last of them lets go. Only the main thread creates the backends, so no locking is
+/// needed here.
+///
+inline std::shared_ptr<sf::PlaybackDevice> get()
 {
-   static std::unique_ptr<sf::PlaybackDevice> device = []() -> std::unique_ptr<sf::PlaybackDevice>
+   // held weakly rather than as a static shared_ptr on purpose. A static owner would keep the device
+   // alive until static destruction, which runs after the audio context has already shut audout
+   // down, and tearing a playback device down after its backend is gone is not something worth
+   // relying on. Weakly held, the device instead dies with the backends that use it, during ordinary
+   // shutdown.
+   static std::weak_ptr<sf::PlaybackDevice> weak_device;
+
+   if (auto device = weak_device.lock())
    {
-      auto handle = sf::AudioContext::getDefaultPlaybackDeviceHandle();
-      if (!handle.hasValue())
-      {
-         return nullptr;
-      }
+      return device;
+   }
 
-      return std::make_unique<sf::PlaybackDevice>(*handle);
-   }();
+   auto handle = sf::AudioContext::getDefaultPlaybackDeviceHandle();
+   if (!handle.hasValue())
+   {
+      return nullptr;
+   }
 
-   return device.get();
+   auto device = std::make_shared<sf::PlaybackDevice>(*handle);
+   weak_device = device;
+
+   return device;
 }
 
 }  // namespace PlaybackDeviceProvider
