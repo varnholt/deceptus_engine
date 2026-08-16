@@ -47,8 +47,10 @@
 #endif
 
 #ifdef DEVELOPMENT_MODE
+#include <chrono>
 #include <vector>
 #include "game/debug/mechanismsample.h"
+#include "game/debug/rendersectionsample.h"
 #endif
 
 class Bouncer;
@@ -104,6 +106,14 @@ public:
    /// \brief returns a snapshot of per-mechanism cpu costs sorted by total cost descending.
    /// \param top_n maximum number of entries to return.
    std::vector<MechanismSample> getMechanismTimings(int32_t top_n) const;
+
+   /// \brief returns the cpu cost of each render section of the last drawn frame, in draw order.
+   ///
+   /// These are cpu side timings taken between the passes of Level::draw, so they measure how long
+   /// it takes to submit each pass rather than how long the gpu takes to retire it. On a gpu bound
+   /// machine the cost therefore shows up wherever the driver next blocks, not necessarily in the
+   /// pass that caused it.
+   std::vector<RenderSectionSample> getRenderSectionTimings() const;
 #endif
 
    /// \brief advances active room and camera behavior, including room locks, transitions, and zoom.
@@ -411,7 +421,19 @@ protected:
    FileWatcher _file_watcher;
    LoadingMode _loading_mode{LoadingMode::Standard};
 
+   /// \brief starts a render section measurement at the top of Level::draw.
+   ///
+   /// Declared unconditionally so that Level::draw stays free of preprocessor branches between its
+   /// passes; the body collapses to nothing outside DEVELOPMENT_MODE.
+   void beginRenderSectionTiming();
+
+   /// \brief closes the running render section and opens the next one.
+   /// \param name label the elapsed time is recorded under.
+   void markRenderSection(const char* name);
+
 #ifdef DEVELOPMENT_MODE
    bool _mechanism_profiling_enabled{false};
+   std::vector<RenderSectionSample> _render_section_timings;
+   std::chrono::high_resolution_clock::time_point _render_section_mark;
 #endif
 };

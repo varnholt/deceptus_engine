@@ -1569,8 +1569,11 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 {
    _screenshot = screenshot;
 
+   beginRenderSectionTiming();
+
    // render atmosphere to atmosphere texture, that texture is used in the shader only
    drawAtmosphereLayer();
+   markRenderSection("atmosphere");
 #ifndef DECEPTUS_VRSFML
    takeScreenshot("texture_atmosphere", *_atmosphere_shader->getRenderTexture().get());
 #endif
@@ -1585,6 +1588,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _render_targets.level_background->clear();
    _render_targets.normal_tmp->clear();
    _render_targets.normal->clear();
+   markRenderSection("clear level targets");
 
    drawLayers(
       *_render_targets.level_background.get(),
@@ -1598,6 +1602,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    _render_targets.normal_tmp->display();
    takeScreenshot("texture_level_background_normal", *_render_targets.normal_tmp.get());
+   markRenderSection("background layers");
 
    // draw the atmospheric parts into the level texture using the atmosphere shader
 #ifndef DECEPTUS_VRSFML
@@ -1627,6 +1632,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       _render_targets.normal->draw(blit_sprite, sf::RenderStates{.texture = &blit_normal_texture});
    }
 #endif
+   markRenderSection("atmosphere resolve");
 
    // draw the level layers into the level texture
    drawLayers(
@@ -1635,6 +1641,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       static_cast<int32_t>(ZDepth::ForegroundMin),
       static_cast<int32_t>(ZDepth::ForegroundMax)
    );
+   markRenderSection("foreground layers");
 
 #ifndef DECEPTUS_VRSFML
    _light_system->drawDebug(*_render_targets.level.get());
@@ -1653,8 +1660,10 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 #ifndef DECEPTUS_VRSFML
    drawDebugInformation();
 #endif
+   markRenderSection("animations and scripts");
 
    displayFinalTextures();
+   markRenderSection("display final textures");
 
    if (DebugDrawStates::_draw_lighting)
    {
@@ -1680,12 +1689,15 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       _render_targets.deferred->draw(unlit_sprite);
 #endif
    }
+   markRenderSection("lighting");
 
    drawPostLightingLayers(*_render_targets.deferred.get());
+   markRenderSection("post lighting layers");
 
    drawOverlayLayers(*_render_targets.deferred.get());
 
    _render_targets.deferred->display();
+   markRenderSection("overlay layers");
 
 #ifndef DECEPTUS_VRSFML
    takeScreenshot("texture_map_color", *_render_targets.level.get());
@@ -1716,6 +1728,7 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _gamma_shader->update();
    window->draw(level_texture_sprite, &_gamma_shader->getGammaShader());
 #endif
+   markRenderSection("gamma blit");
 }
 
 void Level::updatePlayerLight()
@@ -2046,4 +2059,37 @@ void Level::setMechanismProfilingEnabled(bool enabled)
 {
    _mechanism_profiling_enabled = enabled;
 }
+
+std::vector<RenderSectionSample> Level::getRenderSectionTimings() const
+{
+   return _render_section_timings;
+}
 #endif
+
+void Level::beginRenderSectionTiming()
+{
+#ifdef DEVELOPMENT_MODE
+   _render_section_timings.clear();
+   if (!_mechanism_profiling_enabled)
+   {
+      return;
+   }
+   _render_section_mark = std::chrono::high_resolution_clock::now();
+#endif
+}
+
+void Level::markRenderSection(const char* name)
+{
+#ifdef DEVELOPMENT_MODE
+   if (!_mechanism_profiling_enabled)
+   {
+      return;
+   }
+   const auto now = std::chrono::high_resolution_clock::now();
+   const auto elapsed_ms = std::chrono::duration<float, std::milli>(now - _render_section_mark).count();
+   _render_section_timings.push_back({name, elapsed_ms});
+   _render_section_mark = now;
+#else
+   (void)name;
+#endif
+}

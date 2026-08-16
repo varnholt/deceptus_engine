@@ -683,6 +683,13 @@ void Game::initialize()
 #ifdef DEVELOPMENT_MODE
    writeMechanismSchemas();
 #endif
+
+#if defined(DEVELOPMENT_MODE) && defined(__SWITCH__)
+   // the console has no F10 to toggle profiling with and no window to show it in, so it is switched
+   // on from the start and reports into the sd card log, which is the only artefact a run on real
+   // hardware leaves behind
+   _profiling_ui = std::make_unique<ProfilingUi>();
+#endif
 }
 
 // frambuffers
@@ -1133,10 +1140,12 @@ void Game::timedDraw()
    }
    if (_level)
    {
-      _level->setMechanismProfilingEnabled(_profiling_ui != nullptr);
-      if (_profiling_ui)
+      const auto mechanism_profiling_enabled = (_profiling_ui != nullptr) && _profiling_ui->isMechanismProfilingWanted();
+      _level->setMechanismProfilingEnabled(mechanism_profiling_enabled);
+      if (mechanism_profiling_enabled)
       {
          _profiling_ui->updateMechanismTimings(_level->getMechanismTimings(32));
+         _profiling_ui->updateRenderSectionTimings(_level->getRenderSectionTimings());
       }
    }
 #endif

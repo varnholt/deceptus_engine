@@ -1,5 +1,9 @@
 #include "profilingui.h"
 
+#ifdef DEVELOPMENT_MODE
+#include "game/debug/drawcallcounter.h"
+#endif
+
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 
 #pragma warning(push, 0)
@@ -72,11 +76,16 @@ void ProfilingUi::draw()
 
    const auto last_index = (_write_index + sample_count - 1) % sample_count;
    const auto last_frame_ms = _frame_times_ms[last_index];
-   const auto current_fps = (last_frame_ms > 0.0f) ? 1000.0f / last_frame_ms : 0.0f;
+   const auto last_wall_ms = _wall_times_ms[last_index];
+
+   // update plus draw leaves out whatever the loop waits for outside the two, so the rate is taken
+   // from the wall clock period instead
+   const auto current_fps = (last_wall_ms > 0.0f) ? 1000.0f / last_wall_ms : 0.0f;
 
    ImGui::Text(
-      "fps: %.1f   frame: %.2f ms   update: %.2f ms   draw: %.2f ms   swap: %.2f ms",
+      "fps: %.1f   wall: %.2f ms   frame: %.2f ms   update: %.2f ms   draw: %.2f ms   swap: %.2f ms",
       current_fps,
+      last_wall_ms,
       last_frame_ms,
       _update_times_ms[last_index],
       _draw_times_ms[last_index],
@@ -89,7 +98,11 @@ void ProfilingUi::draw()
    constexpr auto target_draw_ms = 8.333f;
    constexpr auto target_swap_ms = 4.0f;
 
-   ImGui::Text("frame time");
+   ImGui::Text("wall clock frame period");
+   drawTimingGraph("##wall", _wall_times_ms.data(), sample_count, _write_index, target_frame_ms);
+
+   ImGui::Spacing();
+   ImGui::Text("frame time (update + draw)");
    drawTimingGraph("##frame", _frame_times_ms.data(), sample_count, _write_index, target_frame_ms);
 
    ImGui::Spacing();
@@ -103,6 +116,18 @@ void ProfilingUi::draw()
    ImGui::Spacing();
    ImGui::Text("swap time (window->display)");
    drawTimingGraph("##swap", _window_display_times_ms.data(), sample_count, _write_index, target_swap_ms);
+
+   if (!_render_section_timings.empty())
+   {
+      ImGui::Spacing();
+      ImGui::Separator();
+      ImGui::Text("render sections   (cpu side submit cost, in draw order)");
+      ImGui::Spacing();
+      for (const auto& sample : _render_section_timings)
+      {
+         ImGui::Text("%.3f ms  %s", sample.duration_ms, sample.name.c_str());
+      }
+   }
 
    if (!_mechanism_timings.empty())
    {
@@ -180,10 +205,16 @@ bool ProfilingUi::isOpen() const
 
 void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Time draw_time)
 {
+   const auto wall_time = _wall_clock.restart();
+   _wall_times_ms[_write_index] = (_wall_clock_primed ? wall_time.asSeconds() : frame_time.asSeconds()) * 1000.0f;
+   _wall_clock_primed = true;
    _frame_times_ms[_write_index] = frame_time.asSeconds() * 1000.0f;
    _update_times_ms[_write_index] = update_time.asSeconds() * 1000.0f;
    _draw_times_ms[_write_index] = draw_time.asSeconds() * 1000.0f;
+   _tilemap_draw_calls[_write_index] = static_cast<float>(DrawCallCounter::tilemap_draw_calls);
+   DrawCallCounter::tilemap_draw_calls = 0;
    _write_index = (_write_index + 1) % sample_count;
+   _samples_written = std::min(_samples_written + 1, sample_count);
 }
 
 void ProfilingUi::recordWindowDisplay(sf::Time display_time)
@@ -201,30 +232,200 @@ void ProfilingUi::updateMechanismTimings(std::vector<MechanismSample> timings)
    _mechanism_update_clock.restart();
 }
 
+void ProfilingUi::updateRenderSectionTimings(std::vector<RenderSectionSample> timings)
+{
+   _render_section_timings = std::move(timings);
+}
+
+bool ProfilingUi::isMechanismProfilingWanted() const
+{
+   return true;
+}
+
 #elif defined(DEVELOPMENT_MODE)
 
+// there is no imgui window on the VRSFML targets, so the very same samples are summarized into the
+// log instead. on the switch that log is the only artefact a run on real hardware leaves behind
+// (see doc/switch_build.md), which makes this the only way to learn whether a frame is spent in
+// update, in draw or waiting for vsync.
+
+#include "framework/tools/log.h"
+
+#include <algorithm>
+#include <iomanip>
+#include <numeric>
+#include <sstream>
+
+namespace
+{
+
+//! seconds between two reports written to the log
+constexpr auto report_interval_s = 5.0f;
+
+struct TimingSummary
+{
+   float minimum_ms{0.0f};
+   float average_ms{0.0f};
+   float maximum_ms{0.0f};
+};
+
+TimingSummary summarizeSamples(const float* values, int32_t count)
+{
+   if (count <= 0)
+   {
+      return {};
+   }
+
+   const auto sum_ms = std::accumulate(values, values + count, 0.0f);
+   return {*std::min_element(values, values + count), sum_ms / static_cast<float>(count), *std::max_element(values, values + count)};
+}
+
+std::string formatSummary(const char* label, const TimingSummary& summary)
+{
+   std::ostringstream out_stream;
+   out_stream << std::fixed << std::setprecision(2) << label << " min " << summary.minimum_ms << " avg " << summary.average_ms << " max "
+              << summary.maximum_ms;
+   return out_stream.str();
+}
+
+}  // namespace
+
 ProfilingUi::ProfilingUi() = default;
+
 void ProfilingUi::processEvents()
 {
 }
+
 void ProfilingUi::draw()
 {
+   if (_log_clock.getElapsedTime().asSeconds() < report_interval_s)
+   {
+      return;
+   }
+   _log_clock.restart();
+
+   if (_samples_written == 0)
+   {
+      return;
+   }
+
+   const auto wall_summary = summarizeSamples(_wall_times_ms.data(), _samples_written);
+   const auto frame_summary = summarizeSamples(_frame_times_ms.data(), _samples_written);
+   const auto update_summary = summarizeSamples(_update_times_ms.data(), _samples_written);
+   const auto draw_summary = summarizeSamples(_draw_times_ms.data(), _samples_written);
+   const auto display_summary = summarizeSamples(_window_display_times_ms.data(), _samples_written);
+
+   // derived from the wall clock rather than from update plus draw, so that a loop that waits for
+   // vsync somewhere outside the two reports the rate that is really reached
+   const auto average_fps = (wall_summary.average_ms > 0.0f) ? 1000.0f / wall_summary.average_ms : 0.0f;
+
+   std::ostringstream report;
+   report << std::fixed << std::setprecision(2) << "profiling: fps " << average_fps << " over " << _samples_written << " frames"
+          << " | " << formatSummary("wall", wall_summary) << " | " << formatSummary("frame", frame_summary) << " | "
+          << formatSummary("update", update_summary) << " | " << formatSummary("draw", draw_summary) << " | "
+          << formatSummary("swap", display_summary) << " | mechanism timing: " << (_mechanism_profiling_wanted ? "on" : "off");
+   Log::Info() << report.str();
+
+   const auto draw_call_summary = summarizeSamples(_tilemap_draw_calls.data(), _samples_written);
+   std::ostringstream draw_call_line;
+   draw_call_line << std::fixed << std::setprecision(1) << "profiling: tilemap draw calls per frame "
+                  << formatSummary("", draw_call_summary);
+   Log::Info() << draw_call_line.str();
+
+   const auto section_frames = std::max(_render_section_frames, 1);
+   for (const auto& sample : _render_section_timings)
+   {
+      std::ostringstream section_line;
+      section_line << std::fixed << std::setprecision(3) << "profiling: section " << sample.name << " "
+                   << sample.duration_ms / static_cast<float>(section_frames) << " ms avg over " << section_frames << " frames";
+      Log::Info() << section_line.str();
+   }
+
+   for (const auto& sample : _mechanism_timings)
+   {
+      std::ostringstream mechanism_line;
+      mechanism_line << std::fixed << std::setprecision(3) << "profiling: mechanism " << sample.name << " update " << sample.update_ms
+                     << " ms draw " << sample.draw_ms << " ms";
+      Log::Info() << mechanism_line.str();
+   }
+
+   // the next window measures the other way around, so consecutive reports show both the
+   // undistorted frame cost and the per mechanism breakdown that is paid for with some overhead
+   _mechanism_profiling_wanted = !_mechanism_profiling_wanted;
+   _mechanism_timings.clear();
+   _render_section_timings.clear();
+   _render_section_frames = 0;
+
+   _samples_written = 0;
+   _write_index = 0;
 }
+
 void ProfilingUi::close()
 {
 }
+
 bool ProfilingUi::isOpen() const
 {
-   return false;
+   // there is no window that could be closed, so the instance lives until it is explicitly dropped
+   return true;
 }
-void ProfilingUi::recordFrame(sf::Time, sf::Time, sf::Time)
+
+void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Time draw_time)
 {
+   const auto wall_time = _wall_clock.restart();
+   _wall_times_ms[_write_index] = (_wall_clock_primed ? wall_time.asSeconds() : frame_time.asSeconds()) * 1000.0f;
+   _wall_clock_primed = true;
+   _frame_times_ms[_write_index] = frame_time.asSeconds() * 1000.0f;
+   _update_times_ms[_write_index] = update_time.asSeconds() * 1000.0f;
+   _draw_times_ms[_write_index] = draw_time.asSeconds() * 1000.0f;
+   _tilemap_draw_calls[_write_index] = static_cast<float>(DrawCallCounter::tilemap_draw_calls);
+   DrawCallCounter::tilemap_draw_calls = 0;
+   _write_index = (_write_index + 1) % sample_count;
+   _samples_written = std::min(_samples_written + 1, sample_count);
 }
-void ProfilingUi::recordWindowDisplay(sf::Time)
+
+void ProfilingUi::recordWindowDisplay(sf::Time display_time)
 {
+   _window_display_times_ms[_write_index] = display_time.asSeconds() * 1000.0f;
 }
-void ProfilingUi::updateMechanismTimings(std::vector<MechanismSample>)
+
+void ProfilingUi::updateMechanismTimings(std::vector<MechanismSample> timings)
 {
+   if (_mechanism_update_clock.getElapsedTime().asSeconds() < 0.5f)
+   {
+      return;
+   }
+   _mechanism_timings = std::move(timings);
+   _mechanism_update_clock.restart();
+}
+
+void ProfilingUi::updateRenderSectionTimings(std::vector<RenderSectionSample> timings)
+{
+   if (timings.empty())
+   {
+      return;
+   }
+
+   // a single frame's sections are far too noisy to compare against a frame time that is averaged
+   // over the whole window, so they are summed here and divided by the frame count on reporting.
+   // the sections come back in a fixed order, which is what makes accumulating by index safe
+   if (_render_section_timings.size() != timings.size())
+   {
+      _render_section_timings = std::move(timings);
+      _render_section_frames = 1;
+      return;
+   }
+
+   for (size_t section_index = 0; section_index < timings.size(); section_index++)
+   {
+      _render_section_timings[section_index].duration_ms += timings[section_index].duration_ms;
+   }
+   _render_section_frames++;
+}
+
+bool ProfilingUi::isMechanismProfilingWanted() const
+{
+   return _mechanism_profiling_wanted;
 }
 
 #endif  // DEVELOPMENT_MODE
