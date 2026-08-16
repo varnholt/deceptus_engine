@@ -46,6 +46,19 @@ std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& worl
    return WorldQuery::queryBodies(world, aabb);
 }
 
+// source: foreground
+// dest:   background
+
+// BlendMode(Factor sourceFactor, Factor destinationFactor, Equation blendEquation = Equation::Add);
+const sf::BlendMode rain_blend_mode(
+   sf::BlendMode::Factor::SrcAlpha,          // colorSourceFactor
+   sf::BlendMode::Factor::OneMinusSrcAlpha,  // colorDestinationFactor
+   sf::BlendMode::Equation::Add,             // colorBlendEquation
+   sf::BlendMode::Factor::SrcAlpha,          // alphaSourceFactor
+   sf::BlendMode::Factor::OneMinusSrcAlpha,  // alphaDestinationFactor
+   sf::BlendMode::Equation::Add              // alphaBlendEquation
+);
+
 }  // namespace
 
 RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprites/rain.png"))
@@ -69,16 +82,10 @@ RainOverlay::~RainOverlay()
    stopPlaying();
 }
 
-void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
 #ifdef DECEPTUS_VRSFML
-   {
-      const auto screen_view = target.computeView();
-      _screen = {
-         {screen_view.center.x - screen_view.size.x / 2.0f, screen_view.center.y - screen_view.size.y / 2.0f},
-         {screen_view.size.x, screen_view.size.y}
-      };
-   }
+   draw(target, normal, {});
 #else
    const auto& screen_view = target.getView();
 
@@ -86,31 +93,13 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       {screen_view.getCenter().x - screen_view.getSize().x / 2.0f, screen_view.getCenter().y - screen_view.getSize().y / 2.0f},
       {screen_view.getSize().x, screen_view.getSize().y}
    };
-#endif
-
-   // source: foreground
-   // dest:   background
-
-   // BlendMode(Factor sourceFactor, Factor destinationFactor, Equation blendEquation = Equation::Add);
-   static sf::BlendMode blend_mode(
-      sf::BlendMode::Factor::SrcAlpha,          // colorSourceFactor
-      sf::BlendMode::Factor::OneMinusSrcAlpha,  // colorDestinationFactor
-      sf::BlendMode::Equation::Add,             // colorBlendEquation
-      sf::BlendMode::Factor::SrcAlpha,          // alphaSourceFactor
-      sf::BlendMode::Factor::OneMinusSrcAlpha,  // alphaDestinationFactor
-      sf::BlendMode::Equation::Add              // alphaBlendEquation
-   );
 
    for (auto& d : _drops)
    {
       if (d._age_s >= 0.0f)
       {
          // DebugDraw::drawLine(target, d._origin_px, d._pos_px + sf::Vector2f{0.0f, 96.0f}, {0, 0, 1});
-#ifdef DECEPTUS_VRSFML
-         target.draw(*d._sprite, sf::RenderStates{.blendMode = blend_mode});
-#else
-         target.draw(*d._sprite, blend_mode);
-#endif
+         target.draw(*d._sprite, rain_blend_mode);
       }
    }
 
@@ -122,6 +111,46 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
          target.draw(*hit._sprite);
       }
    }
+#endif
+}
+
+void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+#ifdef DECEPTUS_VRSFML
+   // the level view travels in the render states, the render target does not carry one; without it the
+   // drops would be placed with the target's default view and land outside the visible area
+   const auto screen_view = (states.view == sf::View{}) ? target.computeView() : states.view;
+
+   _screen = {
+      {screen_view.center.x - screen_view.size.x / 2.0f, screen_view.center.y - screen_view.size.y / 2.0f},
+      {screen_view.size.x, screen_view.size.y}
+   };
+
+   // the texture has to travel in the render states, vrsfml sprites do not own one
+   const sf::RenderStates drop_states{.blendMode = rain_blend_mode, .view = screen_view, .texture = _texture.get()};
+   const sf::RenderStates hit_states{.view = screen_view, .texture = _texture.get()};
+
+   for (auto& d : _drops)
+   {
+      if (d._age_s >= 0.0f)
+      {
+         // DebugDraw::drawLine(target, d._origin_px, d._pos_px + sf::Vector2f{0.0f, 96.0f}, {0, 0, 1});
+         target.draw(*d._sprite, drop_states);
+      }
+   }
+
+   if (_settings._collide)
+   {
+      for (auto& hit : _hits)
+      {
+         // DebugDraw::drawPoint(target, hit._pos_px, {1, 0, 0});
+         target.draw(*hit._sprite, hit_states);
+      }
+   }
+#else
+   (void)states;
+   draw(target, normal);
+#endif
 }
 
 // rain tileset
