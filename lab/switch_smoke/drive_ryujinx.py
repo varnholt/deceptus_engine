@@ -170,7 +170,7 @@ def main() -> int:
         return 1
 
     if not NRO_PATH.exists():
-        print(f"nro not found at {NRO_PATH} - run build_switch.bat . build_switch_engine first")
+        print(f"nro not found at {NRO_PATH} - run build_switch.bat first")
         return 1
 
     guest_log_path = OUTPUT_DIRECTORY / "ryujinx_stdout.txt"

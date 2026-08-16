@@ -103,4 +103,4 @@ Sync-Dependency -WorkingCopy $VrsfmlWorkingCopy `
                 -PatchPath (Join-Path $RepositoryRoot "patches\switch-vrsfml-backend.patch") `
                 -DependencyDirectory (Join-Path $RepositoryRoot "$BuildDirectory\_deps\sfml-src")
 
-Write-Output "done - now run: build_switch.bat . $BuildDirectory"
+Write-Output "done - now run: build_switch.bat"

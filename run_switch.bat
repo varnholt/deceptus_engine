@@ -27,7 +27,7 @@ if not exist "%RYUJINX%" (
 
 if not exist "%NRO%" (
     echo nro not found at %NRO%
-    echo build it first: build_switch.bat . build_switch_engine
+    echo build it first: build_switch.bat
     exit /b 1
 )
 

@@ -155,7 +155,7 @@ fixed-function pipeline and the Switch's mesa/nouveau driver is core profile onl
 video, joystick and audio backends for the platform are carried as patches under `patches/`.
 
 ```bat
-build_switch.bat . build_switch_engine
+build_switch.bat
 ```
 
 Everything runs in the official `devkitpro/devkita64` Docker image, so no local devkitPro

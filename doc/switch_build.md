@@ -43,7 +43,7 @@ under `patches/`, and the build applies them to its own fetched copies.
 From the repository root:
 
 ```bat
-build_switch.bat . build_switch_engine
+build_switch.bat
 ```
 
 That runs `docker/build_switch.sh` inside the container, which configures with devkitPro's
@@ -62,8 +62,9 @@ folder to ship alongside it. `main()` mounts romfs and changes into it before an
 a config or a texture. Saves cannot go there — romfs is read-only — and land in
 `sdmc:/switch/deceptus` instead.
 
-`build_switch.bat` takes the source directory and the build directory as its two arguments, so
-it also builds the small diagnostic projects described below.
+`build_switch.bat` builds the game into `build_switch_engine` when called without arguments. It
+also takes a source directory and a build directory, which is how it builds the small diagnostic
+projects described below.
 
 
 ## Continuous integration
@@ -278,7 +279,7 @@ editing a working copy alone changes nothing. Both halves of the round trip are 
 
 ```bat
 powershell -File lab/switch_smoke/sync_switch_patches.ps1
-build_switch.bat . build_switch_engine
+build_switch.bat
 ```
 
 `sync_switch_patches.ps1` regenerates the patches from the working copies *and* mirrors the

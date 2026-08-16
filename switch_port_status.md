@@ -8,7 +8,7 @@ rebase onto `master` later, nothing here overlaps other work)
 
 > ## State in one paragraph
 >
-> **The game is playable on the Switch.** `build_switch.bat . build_switch_engine` produces
+> **The game is playable on the Switch.** `build_switch.bat` produces
 > a 122.6 MB `deceptus.nro` with the full `data/` tree embedded as romfs. Driven in Ryujinx
 > by `lab/switch_smoke/drive_ryujinx.py` it boots to the main menu, takes controller input
 > through the menu and the file select screen, loads the catacombs save and plays: the
@@ -969,7 +969,7 @@ Both halves are scripted:
 
 ```
 powershell -File lab/switch_smoke/sync_switch_patches.ps1
-build_switch.bat . build_switch_engine
+build_switch.bat
 ```
 
 `sync_switch_patches.ps1` regenerates `patches/switch-sdl3-backend.patch` and
@@ -991,7 +991,7 @@ re-clone and re-apply. **Never** reset those trees from the Windows host.
 ### Build and run
 
 ```
-build_switch.bat . build_switch_engine          # -> build_switch_engine/deceptus.nro
+build_switch.bat          # -> build_switch_engine/deceptus.nro
 uv run --with pytest pytest lab/switch_smoke/test_switch_build.py -v
 powershell -File lab/switch_smoke/run_ryujinx.ps1 `
   -NroPath D:\deceptus\deceptus_engine\build_switch_engine\deceptus.nro `
