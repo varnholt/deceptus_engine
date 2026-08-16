@@ -89,6 +89,375 @@ index 50aed8d96..58e7962f4 100644
  #elifdef SFML_DOXYGEN
  
  // Define type alias symbol so that Doxygen can attach some documentation to it
+diff --git a/src/SFML/Audio/Unity/AudioContext.cpp b/src/SFML/Audio/Unity/AudioContext.cpp
+index 74780348c..4ad8f9bea 100644
+--- a/src/SFML/Audio/Unity/AudioContext.cpp
++++ b/src/SFML/Audio/Unity/AudioContext.cpp
+@@ -22,6 +22,13 @@
+ 
+ #include <miniaudio.h>
+ 
++#ifdef __SWITCH__
++#include <switch.h>
++
++#include <cstring>
++#include <malloc.h>
++#endif
++
+ 
+ namespace
+ {
+@@ -52,6 +59,331 @@ void maLogCallback(void*, ma_uint32 level, const char* message)
+ }
+ 
+ 
++#ifdef __SWITCH__
++////////////////////////////////////////////////////////////
++// miniaudio has no Nintendo Switch backend. Its default backend list therefore finds no devices on
++// the console, tryCreateMAContext below falls through to ma_backend_null, and the game runs
++// perfectly while playing to nothing at all. libnx exposes the console audio output as audout, a
++// fixed 48 kHz stereo signed 16 bit sink, which is one of the formats miniaudio converts to on its
++// own. So all that is missing is a custom backend handing miniaudio's already mixed output to
++// audoutAppendAudioOutBuffer.
++//
++// This is the blocking onDeviceWrite flavour of a miniaudio backend: miniaudio runs its own audio
++// thread and calls in whenever a period is ready, and the call blocks until the console has a
++// buffer free again. That blocking is what paces the audio thread.
++namespace SwitchAudioOut
++{
++////////////////////////////////////////////////////////////
++// audout does not negotiate, these are the only values it accepts
++constexpr ma_uint32 sampleRate      = 48000;
++constexpr ma_uint32 channelCount    = 2;
++constexpr ma_uint32 bytesPerFrame   = channelCount * sizeof(ma_int16);
++constexpr ma_uint32 bufferCount     = 4;
++constexpr ma_uint64 bufferAlignment = 0x1000; // audout wants address and size page aligned
++
++////////////////////////////////////////////////////////////
++// Buffers are held per device rather than in one global set. The console has a single audio output,
++// so one set looked sufficient, but SFML initializes a replacement playback device *before* tearing
++// the previous one down, and that uninit then freed the buffers the live device was still writing
++// into. The result was a memcpy to a null pointer on the audio thread, which takes the whole process
++// down. Keying the buffers on the device makes each one own its own memory for exactly as long as it
++// exists.
++struct DeviceState
++{
++    ma_device*     device{};
++    AudioOutBuffer buffers[bufferCount]{};
++    ma_uint32      nextBuffer{};
++    ma_uint32      buffersInFlight{};
++};
++
++constexpr ma_uint32 maxDevices = 4;
++
++DeviceState deviceStates[maxDevices];
++
++// audout itself is a single global sink, so starting and stopping it is reference counted: a stale
++// device shutting down must not silence the one that replaced it
++ma_uint32 startedDeviceCount = 0;
++
++
++////////////////////////////////////////////////////////////
++ma_uint64 alignUp(ma_uint64 value, ma_uint64 alignment)
++{
++    return (value + alignment - 1) & ~(alignment - 1);
++}
++
++
++////////////////////////////////////////////////////////////
++DeviceState* findDeviceState(const ma_device* device)
++{
++    for (auto& deviceState : deviceStates)
++        if (deviceState.device == device)
++            return &deviceState;
++
++    return nullptr;
++}
++
++
++////////////////////////////////////////////////////////////
++DeviceState* acquireDeviceState(ma_device* device)
++{
++    if (auto* existing = findDeviceState(device); existing != nullptr)
++        return existing;
++
++    for (auto& deviceState : deviceStates)
++    {
++        if (deviceState.device == nullptr)
++        {
++            deviceState                 = DeviceState{};
++            deviceState.device          = device;
++            return &deviceState;
++        }
++    }
++
++    return nullptr;
++}
++
++
++////////////////////////////////////////////////////////////
++void releaseDeviceState(DeviceState& deviceState)
++{
++    for (auto& buffer : deviceState.buffers)
++    {
++        if (buffer.buffer != nullptr)
++        {
++            ::free(buffer.buffer);
++            buffer.buffer = nullptr;
++        }
++    }
++
++    deviceState = DeviceState{};
++}
++
++
++////////////////////////////////////////////////////////////
++void describeDevice(ma_device_info& deviceInfo)
++{
++    deviceInfo = ma_device_info{};
++    std::strncpy(deviceInfo.name, "audout", sizeof(deviceInfo.name) - 1);
++    deviceInfo.isDefault = MA_TRUE;
++
++    deviceInfo.nativeDataFormatCount           = 1;
++    deviceInfo.nativeDataFormats[0].format     = ma_format_s16;
++    deviceInfo.nativeDataFormats[0].channels   = channelCount;
++    deviceInfo.nativeDataFormats[0].sampleRate = sampleRate;
++    deviceInfo.nativeDataFormats[0].flags      = 0;
++}
++
++
++////////////////////////////////////////////////////////////
++ma_result contextEnumerateDevices(ma_context* context, ma_enum_devices_callback_proc callback, void* userData)
++{
++    ma_device_info deviceInfo;
++    describeDevice(deviceInfo);
++
++    callback(context, ma_device_type_playback, &deviceInfo, userData);
++    return MA_SUCCESS;
++}
++
++
++////////////////////////////////////////////////////////////
++ma_result contextGetDeviceInfo(ma_context*, ma_device_type deviceType, const ma_device_id*, ma_device_info* deviceInfo)
++{
++    if (deviceType != ma_device_type_playback)
++        return MA_NO_DEVICE;
++
++    describeDevice(*deviceInfo);
++    return MA_SUCCESS;
++}
++
++
++////////////////////////////////////////////////////////////
++ma_result deviceInit(ma_device* device, const ma_device_config* config, ma_device_descriptor* playback, ma_device_descriptor*)
++{
++    if (config->deviceType != ma_device_type_playback)
++        return MA_DEVICE_TYPE_NOT_SUPPORTED;
++
++    DeviceState* deviceState = acquireDeviceState(device);
++
++    if (deviceState == nullptr)
++    {
++        sf::priv::errMsg("Too many switch audio devices requested at once");
++        return MA_OUT_OF_MEMORY;
++    }
++
++    playback->format     = ma_format_s16;
++    playback->channels   = channelCount;
++    playback->sampleRate = sampleRate;
++
++    // a blank channel map tells miniaudio to use its default for this channel count, which is what
++    // audout expects anyway
++    for (auto& channel : playback->channelMap)
++        channel = MA_CHANNEL_NONE;
++
++    if (playback->periodSizeInFrames == 0)
++    {
++        const ma_uint32 periodMilliseconds = playback->periodSizeInMilliseconds == 0
++                                                 ? 20u
++                                                 : playback->periodSizeInMilliseconds;
++
++        playback->periodSizeInFrames = (sampleRate * periodMilliseconds) / 1000u;
++    }
++
++    playback->periodCount = bufferCount;
++
++    const ma_uint64 bufferBytes = alignUp(static_cast<ma_uint64>(playback->periodSizeInFrames) * bytesPerFrame,
++                                          bufferAlignment);
++
++    for (auto& buffer : deviceState->buffers)
++    {
++        buffer        = AudioOutBuffer{};
++        buffer.buffer = ::memalign(bufferAlignment, bufferBytes);
++
++        if (buffer.buffer == nullptr)
++        {
++            releaseDeviceState(*deviceState);
++            return MA_OUT_OF_MEMORY;
++        }
++
++        buffer.buffer_size = bufferBytes;
++        buffer.data_size   = 0;
++    }
++
++    return MA_SUCCESS;
++}
++
++
++////////////////////////////////////////////////////////////
++ma_result deviceUninit(ma_device* device)
++{
++    if (auto* deviceState = findDeviceState(device); deviceState != nullptr)
++        releaseDeviceState(*deviceState);
++
++    return MA_SUCCESS;
++}
++
++
++////////////////////////////////////////////////////////////
++ma_result deviceStart(ma_device*)
++{
++    if (startedDeviceCount == 0 && R_FAILED(audoutStartAudioOut()))
++        return MA_FAILED_TO_START_BACKEND_DEVICE;
++
++    ++startedDeviceCount;
++    return MA_SUCCESS;
++}
++
++
++////////////////////////////////////////////////////////////
++ma_result deviceStop(ma_device* device)
++{
++    if (startedDeviceCount > 0)
++        --startedDeviceCount;
++
++    if (startedDeviceCount == 0)
++    {
++        audoutStopAudioOut();
++
++        // whatever was queued is dropped by the stop, so nothing is left in flight
++        bool flushed = false;
++        audoutFlushAudioOutBuffers(&flushed);
++    }
++
++    if (auto* deviceState = findDeviceState(device); deviceState != nullptr)
++    {
++        deviceState->buffersInFlight = 0;
++        deviceState->nextBuffer      = 0;
++    }
++
++    return MA_SUCCESS;
++}
++
++
++////////////////////////////////////////////////////////////
++ma_result deviceWrite(ma_device* device, const void* frames, ma_uint32 frameCount, ma_uint32* framesWritten)
++{
++    *framesWritten = 0;
++
++    DeviceState* deviceState = findDeviceState(device);
++
++    // this runs on miniaudio's audio thread, where dereferencing a stale device would take the whole
++    // process down rather than merely dropping a period
++    if (deviceState == nullptr)
++        return MA_INVALID_OPERATION;
++
++    const ma_uint64 byteCount = static_cast<ma_uint64>(frameCount) * bytesPerFrame;
++
++    AudioOutBuffer& buffer = deviceState->buffers[deviceState->nextBuffer];
++
++    if (buffer.buffer == nullptr || byteCount > buffer.buffer_size)
++        return MA_INVALID_ARGS;
++
++    // block until the console hands a buffer back. this is the only thing pacing miniaudio's audio
++    // thread, so it must never become a spin
++    while (deviceState->buffersInFlight >= bufferCount)
++    {
++        AudioOutBuffer* released      = nullptr;
++        ma_uint32       releasedCount = 0;
++
++        if (R_FAILED(audoutWaitPlayFinish(&released, &releasedCount, AUDOUT_MAX_DELAY)) || releasedCount == 0)
++            return MA_ERROR;
++
++        deviceState->buffersInFlight -= releasedCount < deviceState->buffersInFlight ? releasedCount
++                                                                                    : deviceState->buffersInFlight;
++    }
++
++    deviceState->nextBuffer = (deviceState->nextBuffer + 1) % bufferCount;
++
++    std::memcpy(buffer.buffer, frames, byteCount);
++    buffer.data_size = byteCount;
++
++    if (R_FAILED(audoutAppendAudioOutBuffer(&buffer)))
++        return MA_ERROR;
++
++    ++deviceState->buffersInFlight;
++    *framesWritten = frameCount;
++
++    return MA_SUCCESS;
++}
++
++
++////////////////////////////////////////////////////////////
++ma_result contextUninit(ma_context*)
++{
++    audoutExit();
++    return MA_SUCCESS;
++}
++
++
++////////////////////////////////////////////////////////////
++ma_result contextInit(ma_context*, const ma_context_config*, ma_backend_callbacks* callbacks)
++{
++    if (const Result result = audoutInitialize(); R_FAILED(result))
++    {
++        sf::priv::errMsg("Failed to initialize the switch audout audio service: {}", static_cast<unsigned int>(result));
++        return MA_FAILED_TO_INIT_BACKEND;
++    }
++
++    callbacks->onContextInit             = contextInit;
++    callbacks->onContextUninit           = contextUninit;
++    callbacks->onContextEnumerateDevices = contextEnumerateDevices;
++    callbacks->onContextGetDeviceInfo    = contextGetDeviceInfo;
++    callbacks->onDeviceInit              = deviceInit;
++    callbacks->onDeviceUninit            = deviceUninit;
++    callbacks->onDeviceStart             = deviceStart;
++    callbacks->onDeviceStop              = deviceStop;
++    callbacks->onDeviceRead              = nullptr;
++    callbacks->onDeviceWrite             = deviceWrite;
++    callbacks->onDeviceDataLoop          = nullptr;
++    callbacks->onDeviceDataLoopWakeup    = nullptr;
++    callbacks->onDeviceGetInfo           = nullptr;
++
++    return MA_SUCCESS;
++}
++
++} // namespace SwitchAudioOut
++#endif
++
++
+ ////////////////////////////////////////////////////////////
+ [[nodiscard]] bool tryCreateMAContext(ma_log& maLog, ma_context& maContext)
+ {
+@@ -61,8 +393,18 @@ void maLogCallback(void*, ma_uint32 level, const char* message)
+ 
+     ma_uint32 deviceCount = 0;
+ 
++#ifdef __SWITCH__
++    // the console has exactly one audio path, the custom backend above; there is no default list
++    // worth trying and no null fallback worth having, because a silent game is the bug being fixed
++    contextConfig.custom               = ma_backend_callbacks{};
++    contextConfig.custom.onContextInit = SwitchAudioOut::contextInit;
++
++    const ma_backend  switchBackend = ma_backend_custom;
++    const ma_backend* backendLists[1]{&switchBackend};
++#else
+     const ma_backend  nullBackend = ma_backend_null;
+     const ma_backend* backendLists[2]{nullptr, &nullBackend};
++#endif
+ 
+     for (const auto* backendList : backendLists)
+     {
 diff --git a/src/SFML/System/Thread.cpp b/src/SFML/System/Thread.cpp
 index 07d6e96b7..5e4938808 100644
 --- a/src/SFML/System/Thread.cpp

@@ -34,6 +34,15 @@ public:
       if (handle.hasValue())
       {
          _playback_device = std::make_unique<sf::PlaybackDevice>(*handle);
+
+         // naming the device is the only way to tell a working audio path from a silent one after
+         // the fact: miniaudio's null backend initializes just as happily as a real device and plays
+         // nothing at all, which is precisely how the switch build shipped without sound
+         Log::Info() << "audio playback device: " << _playback_device->getName();
+      }
+      else
+      {
+         Log::Error() << "no audio playback device available, the game will be silent";
       }
    }
 
