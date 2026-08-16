@@ -3,6 +3,7 @@
 #ifdef DECEPTUS_VRSFML
 
 #include "framework/tools/log.h"
+#include "game/audio/playbackdevice.h"
 
 #include <SFML/Audio.hpp>
 #include <SFML/System.hpp>
@@ -30,10 +31,18 @@ class AudioBackendEmscripten : public AudioBackend
 public:
    AudioBackendEmscripten()
    {
-      auto handle = sf::AudioContext::getDefaultPlaybackDeviceHandle();
-      if (handle.hasValue())
+      _playback_device = PlaybackDeviceProvider::get();
+
+      if (_playback_device != nullptr)
       {
-         _playback_device = std::make_unique<sf::PlaybackDevice>(*handle);
+         // naming the device is the only way to tell a working audio path from a silent one after
+         // the fact: miniaudio's null backend initializes just as happily as a real device and plays
+         // nothing at all, which is precisely how the switch build shipped without sound
+         Log::Info() << "audio playback device: " << _playback_device->getName();
+      }
+      else
+      {
+         Log::Error() << "no audio playback device available, the game will be silent";
       }
    }
 
@@ -132,7 +141,7 @@ public:
    }
 
 private:
-   std::unique_ptr<sf::PlaybackDevice> _playback_device;             //!< owned playback device; null if audio system is unavailable
+   std::shared_ptr<sf::PlaybackDevice> _playback_device;             //!< shared with the music backend, see PlaybackDeviceProvider
    std::unordered_map<std::string, sf::SoundBuffer> _sound_buffers;  //!< cached sound buffers keyed by filename
 };
 }  // namespace

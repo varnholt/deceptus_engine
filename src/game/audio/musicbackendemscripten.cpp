@@ -2,6 +2,8 @@
 
 #ifdef DECEPTUS_VRSFML
 
+#include "game/audio/playbackdevice.h"
+
 #include <SFML/Audio.hpp>
 #include <SFML/System.hpp>
 
@@ -52,13 +54,11 @@ class MusicBackendEmscripten : public MusicBackend
 public:
    MusicBackendEmscripten()
    {
-      auto handle = sf::AudioContext::getDefaultPlaybackDeviceHandle();
-      if (!handle.hasValue())
+      _playback_device = PlaybackDeviceProvider::get();
+      if (_playback_device == nullptr)
       {
          return;
       }
-
-      _playback_device = std::make_unique<sf::PlaybackDevice>(*handle);
 
       loadIntoSlot(0, "data/music/empty.ogg");
       loadIntoSlot(1, "data/music/empty.ogg");
@@ -163,7 +163,7 @@ private:
       return true;
    }
 
-   std::unique_ptr<sf::PlaybackDevice> _playback_device;  //!< owned playback device; null if audio context is unavailable
+   std::shared_ptr<sf::PlaybackDevice> _playback_device;  //!< shared with the sound backend, see PlaybackDeviceProvider
    std::array<std::vector<std::byte>, 2>
       _music_data;  //!< compressed track bytes backing each reader; must outlive the MusicReader (openFromMemory references, not copies)
    std::array<std::unique_ptr<sf::MusicReader>, 2> _music_readers;  //!< music reader (memory source) for each stream slot
