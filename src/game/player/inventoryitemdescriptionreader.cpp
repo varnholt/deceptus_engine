@@ -44,6 +44,10 @@ std::vector<InventoryItemDescriptionReader::InventoryItemDescription> InventoryI
 
    if (!std::filesystem::exists(json_path))
    {
+      // returning empty without a word cost an afternoon: the game then ran on for another minute
+      // before an item was picked up that had no icon, and reported that as a fatal blaming the
+      // contents of this file, which was neither missing nor wrong - it simply had not been read
+      Log::Error() << "cannot read " << json_path << " from " << std::filesystem::current_path() << ", inventory items will have no icons";
       return {};
    }
 

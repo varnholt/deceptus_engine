@@ -258,14 +258,14 @@ InGameMenuInventory::InGameMenuInventory()
 
 void InGameMenuInventory::loadInventoryItems()
 {
-   const auto& inventory_item_descriptions = getInventory()._descriptions;
+   const auto& inventory_item_descriptions = getInventory().getDescriptions();
    _inventory_texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
 
    std::ranges::for_each(
       inventory_item_descriptions,
       [this](const auto& image)
       {
-         // store sprites
+   // store sprites
 #ifdef DECEPTUS_VRSFML
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
          sprite->textureRect = sf::FloatRect(
