@@ -212,7 +212,12 @@ void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Tim
    _update_times_ms[_write_index] = update_time.asSeconds() * 1000.0f;
    _draw_times_ms[_write_index] = draw_time.asSeconds() * 1000.0f;
    _tilemap_draw_calls[_write_index] = static_cast<float>(DrawCallCounter::tilemap_draw_calls);
+   _tilemap_target_switches[_write_index] = static_cast<float>(DrawCallCounter::tilemap_target_switches);
    DrawCallCounter::tilemap_draw_calls = 0;
+   _layer_scan_steps[_write_index] = static_cast<float>(DrawCallCounter::layer_scan_steps);
+   DrawCallCounter::tilemap_target_switches = 0;
+   DrawCallCounter::tilemap_last_target = nullptr;
+   DrawCallCounter::layer_scan_steps = 0;
    _write_index = (_write_index + 1) % sample_count;
    _samples_written = std::min(_samples_written + 1, sample_count);
 }
@@ -329,7 +334,9 @@ void ProfilingUi::draw()
    const auto draw_call_summary = summarizeSamples(_tilemap_draw_calls.data(), _samples_written);
    std::ostringstream draw_call_line;
    draw_call_line << std::fixed << std::setprecision(1) << "profiling: tilemap draw calls per frame "
-                  << formatSummary("", draw_call_summary);
+                  << formatSummary("", draw_call_summary) << " | target switches "
+                  << formatSummary("", summarizeSamples(_tilemap_target_switches.data(), _samples_written)) << " | layer scan steps "
+                  << formatSummary("", summarizeSamples(_layer_scan_steps.data(), _samples_written));
    Log::Info() << draw_call_line.str();
 
    const auto section_frames = std::max(_render_section_frames, 1);
@@ -379,7 +386,12 @@ void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Tim
    _update_times_ms[_write_index] = update_time.asSeconds() * 1000.0f;
    _draw_times_ms[_write_index] = draw_time.asSeconds() * 1000.0f;
    _tilemap_draw_calls[_write_index] = static_cast<float>(DrawCallCounter::tilemap_draw_calls);
+   _tilemap_target_switches[_write_index] = static_cast<float>(DrawCallCounter::tilemap_target_switches);
    DrawCallCounter::tilemap_draw_calls = 0;
+   _layer_scan_steps[_write_index] = static_cast<float>(DrawCallCounter::layer_scan_steps);
+   DrawCallCounter::tilemap_target_switches = 0;
+   DrawCallCounter::tilemap_last_target = nullptr;
+   DrawCallCounter::layer_scan_steps = 0;
    _write_index = (_write_index + 1) % sample_count;
    _samples_written = std::min(_samples_written + 1, sample_count);
 }

@@ -305,6 +305,14 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
 {
    states.transform *= getTransform();
 
+#ifdef DEVELOPMENT_MODE
+   if (DrawCallCounter::tilemap_last_target != &target)
+   {
+      DrawCallCounter::tilemap_target_switches++;
+      DrawCallCounter::tilemap_last_target = &target;
+   }
+#endif
+
    // the block window follows the view that is actually being rendered rather than the player's
    // position. the two are not the same thing: the camera eases along behind the player, the
    // panorama pushes it further still, and a parallax layer is drawn through a view of its own that

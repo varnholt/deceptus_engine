@@ -421,6 +421,15 @@ protected:
    FileWatcher _file_watcher;
    LoadingMode _loading_mode{LoadingMode::Standard};
 
+   /// \brief rebuilds the per z index of mechanisms that the z loops in Level::draw walk.
+   void rebuildMechanismDrawIndex();
+
+   //! mechanisms bucketed by their z index, rebuilt once per frame by rebuildMechanismDrawIndex().
+   //! these are raw pointers into the registry and are only valid for the frame they were built in.
+   //! only mechanisms belong here: a mechanism sits at exactly one z, whereas a lua node answers
+   //! hasContentAtZ() for several, so those keep their own scan
+   std::unordered_map<int32_t, std::vector<GameMechanism*>> _mechanisms_by_z;
+
    /// \brief starts a render section measurement at the top of Level::draw.
    ///
    /// Declared unconditionally so that Level::draw stays free of preprocessor branches between its

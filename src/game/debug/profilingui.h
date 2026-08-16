@@ -47,7 +47,9 @@ private:
    std::array<float, sample_count> _update_times_ms{};
    std::array<float, sample_count> _draw_times_ms{};
    std::array<float, sample_count> _window_display_times_ms{};
-   std::array<float, sample_count> _tilemap_draw_calls{};  //!< tile map draw calls issued in that frame
+   std::array<float, sample_count> _tilemap_draw_calls{};       //!< tile map draw calls issued in that frame
+   std::array<float, sample_count> _tilemap_target_switches{};  //!< render target changes between those draws
+   std::array<float, sample_count> _layer_scan_steps{};         //!< candidates the z loop examined that frame
    sf::Clock _wall_clock;
    bool _wall_clock_primed{false};
    int32_t _write_index{0};

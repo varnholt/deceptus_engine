@@ -22,6 +22,7 @@
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
 #include "game/debug/debugdrawstates.h"
+#include "game/debug/drawcallcounter.h"
 #include "game/ingamemenu/ingamemenumap.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/io/meshtools.h"
@@ -996,6 +997,35 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
 #endif
 }
 
+void Level::rebuildMechanismDrawIndex()
+{
+   // Level::draw walks every z index from BackgroundMin to ForegroundMax and used to rescan the whole
+   // mechanism registry at each one, looking for the handful that sit at that z. With the registry
+   // holding a couple of thousand mechanisms and drawLayers, drawPostLightingLayers and
+   // drawOverlayLayers each running their own z loop, that came to over a hundred thousand
+   // candidate checks per frame, every one of them a virtual getZ() and most of them a chunk
+   // distance test on top.
+   //
+   // Bucketing them once per frame turns that into a single pass. The registry is traversed in
+   // exactly the order the z loops used to, so mechanisms sharing a z index keep their relative
+   // draw order - which matters, because they may be drawn with transparency.
+   //
+   // The buckets hold raw pointers and are rebuilt every frame rather than cached, so nothing here
+   // can outlive the registry or go stale when mechanisms are added or removed.
+   for (auto& [z_index, bucket] : _mechanisms_by_z)
+   {
+      bucket.clear();
+   }
+
+   for (auto* mechanism_vector : _mechanism_registry.getList())
+   {
+      for (const auto& mechanism : *mechanism_vector)
+      {
+         _mechanisms_by_z[mechanism->getZ()].push_back(mechanism.get());
+      }
+   }
+}
+
 void Level::drawMechanismsAtZ(
    sf::RenderTarget& color,
    sf::RenderTarget& normal,
@@ -1004,28 +1034,34 @@ void Level::drawMechanismsAtZ(
    const sf::RenderStates& states
 )
 {
-   for (auto* mechanism_vector : _mechanism_registry.getList())
+   const auto bucket_it = _mechanisms_by_z.find(z_index);
+   if (bucket_it == _mechanisms_by_z.end())
    {
-      for (const auto& mechanism : *mechanism_vector)
-      {
-         if (mechanism->getZ() == z_index && predicate(mechanism))
-         {
+      return;
+   }
+
+   for (auto* mechanism : bucket_it->second)
+   {
 #ifdef DEVELOPMENT_MODE
-            if (_mechanism_profiling_enabled)
-            {
-               const auto mechanism_name = std::string{mechanism->objectName()};
-               const auto time_start = std::chrono::high_resolution_clock::now();
-               mechanism->draw(color, normal, states);
-               timing_data[mechanism_name].addDrawTime(std::chrono::high_resolution_clock::now() - time_start);
-            }
-            else
-            {
-               mechanism->draw(color, normal, states);
-            }
-#else
-            mechanism->draw(color, normal, states);
+      DrawCallCounter::layer_scan_steps++;
 #endif
+      if (predicate(mechanism))
+      {
+#ifdef DEVELOPMENT_MODE
+         if (_mechanism_profiling_enabled)
+         {
+            const auto mechanism_name = std::string{mechanism->objectName()};
+            const auto time_start = std::chrono::high_resolution_clock::now();
+            mechanism->draw(color, normal, states);
+            timing_data[mechanism_name].addDrawTime(std::chrono::high_resolution_clock::now() - time_start);
          }
+         else
+         {
+            mechanism->draw(color, normal, states);
+         }
+#else
+         mechanism->draw(color, normal, states);
+#endif
       }
    }
 }
@@ -1190,6 +1226,9 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw all tile maps
       for (const auto& tile_map : _tile_maps)
       {
+#ifdef DEVELOPMENT_MODE
+         DrawCallCounter::layer_scan_steps++;
+#endif
          if (tile_map->getZ() == z_index && !tile_map->isPostLighting())
          {
             tile_map->draw(target, normal, layer_states);
@@ -1215,6 +1254,9 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw enemies; sprite layers and projectiles may have been assigned their own z index from lua
       for (auto& enemy : LuaInterface::instance().getObjectList())
       {
+#ifdef DEVELOPMENT_MODE
+         DrawCallCounter::layer_scan_steps++;
+#endif
          if (enemy->hasContentAtZ(z_index))
          {
             if (checkUpdateMechanism(player_chunk, enemy))
@@ -1233,6 +1275,9 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw image layers; post-lighting layers are drawn after the lighting pass
       for (auto& layer : _mechanism_registry.getImageLayers())
       {
+#ifdef DEVELOPMENT_MODE
+         DrawCallCounter::layer_scan_steps++;
+#endif
          if (layer->getZ() == z_index)
          {
             if (layer->isPostLighting())
@@ -1568,6 +1613,8 @@ bool Level::isDirty() const
 void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screenshot)
 {
    _screenshot = screenshot;
+
+   rebuildMechanismDrawIndex();
 
    beginRenderSectionTiming();
 
