@@ -20,6 +20,7 @@
 #include "game/state/savestate.h"
 
 #include <iostream>
+#include <set>
 #include <sstream>
 
 namespace
@@ -263,7 +264,7 @@ InfoLayer::InfoLayer()
 void InfoLayer::loadInventoryItems()
 {
    const auto& inventory = SaveState::getPlayerInfo()._inventory;
-   const auto& inventory_item_descriptions = inventory._descriptions;
+   const auto& inventory_item_descriptions = inventory.getDescriptions();
    _inventory_texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
 
    std::ranges::for_each(
@@ -316,14 +317,24 @@ void InfoLayer::updateInventoryItems()
          continue;
       }
 
-      const auto& sprite = _sprites[slot];
+      // find rather than operator[], which would insert a null sprite for an unknown slot and leave
+      // the table quietly growing a broken entry every frame
+      const auto sprite_it = _sprites.find(slot);
 
-      if (sprite == nullptr)
+      if (sprite_it == _sprites.end() || sprite_it->second == nullptr)
       {
-         Log::Fatal() << "could not find matching item description for '" << slot << "'. please edit inventory_items.json";
+         // a missing icon is a cosmetic problem, so the item is drawn without one rather than taken
+         // as a reason to end the process. warned once per slot, because this runs every frame
+         static std::set<std::string> warned_slots;
+         if (warned_slots.insert(slot).second)
+         {
+            Log::Error() << "no item description for '" << slot << "', it will have no icon. please edit inventory_items.json";
+         }
+
+         continue;
       }
 
-      sfcompat::setTextureRect(*_inventory_sprites[i], sfcompat::getTextureRect(*sprite));
+      sfcompat::setTextureRect(*_inventory_sprites[i], sfcompat::getTextureRect(*sprite_it->second));
    }
 }
 

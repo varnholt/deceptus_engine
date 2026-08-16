@@ -29,9 +29,16 @@ void removeCallbackFromVector(std::vector<Callback>& callbacks, const Callback& 
 }
 }  // namespace
 
-Inventory::Inventory()
+Inventory::Inventory() = default;
+
+const std::vector<InventoryItemDescriptionReader::InventoryItemDescription>& Inventory::getDescriptions() const
 {
-   _descriptions = InventoryItemDescriptionReader::readItemDescriptions();
+   if (_descriptions.empty())
+   {
+      _descriptions = InventoryItemDescriptionReader::readItemDescriptions();
+   }
+
+   return _descriptions;
 }
 
 void Inventory::add(const std::string& item)
@@ -131,7 +138,7 @@ std::vector<std::string> Inventory::readItemNames() const
 {
    std::vector<std::string> names;
    std::ranges::transform(
-      _descriptions, std::back_inserter(names), [](const auto& description) -> std::string { return description._name; }
+      getDescriptions(), std::back_inserter(names), [](const auto& description) -> std::string { return description._name; }
    );
    return names;
 }
@@ -185,10 +192,12 @@ void Inventory::use(int32_t slot)
          {
             // if the item has a 'consumed after use' property, remove it
             const auto& it = std::find_if(
-               _descriptions.begin(), _descriptions.end(), [item_name](const auto& description) { return description._name == item_name; }
+               getDescriptions().begin(),
+               getDescriptions().end(),
+               [item_name](const auto& description) { return description._name == item_name; }
             );
 
-            if (it != _descriptions.end())
+            if (it != getDescriptions().end())
             {
                if (it->_properties.find("consumed_after_use") != it->_properties.end())
                {
