@@ -31,6 +31,11 @@ inline int32_t layer_scan_steps = 0;
 //! by tile geometry alone. This is a pure count, so it reads the same on hardware as in an emulator,
 //! which makes it the one way to size a fill problem without a console.
 inline int64_t tilemap_pixels_submitted = 0;
+
+//! Of those, the share coming from fully opaque tiles. An early z pass can only reject fragments
+//! hidden behind something opaque, so this is the part of the overdraw that depth culling could
+//! remove; the remainder is alpha blended and has to be drawn either way.
+inline int64_t tilemap_pixels_opaque = 0;
 }  // namespace DrawCallCounter
 
 #endif  // DEVELOPMENT_MODE
