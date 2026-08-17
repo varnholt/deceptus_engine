@@ -51,6 +51,7 @@
 #include <vector>
 #include "game/debug/mechanismsample.h"
 #include "game/debug/rendersectionsample.h"
+#include "game/debug/rendersectiontimer.h"
 #endif
 
 class Bouncer;
@@ -442,7 +443,6 @@ protected:
 
 #ifdef DEVELOPMENT_MODE
    bool _mechanism_profiling_enabled{false};
-   std::vector<RenderSectionSample> _render_section_timings;
-   std::chrono::high_resolution_clock::time_point _render_section_mark;
+   RenderSectionTimer _render_section_timer;
 #endif
 };

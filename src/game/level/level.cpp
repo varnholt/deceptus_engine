@@ -2116,33 +2116,21 @@ void Level::setMechanismProfilingEnabled(bool enabled)
 
 std::vector<RenderSectionSample> Level::getRenderSectionTimings() const
 {
-   return _render_section_timings;
+   return _render_section_timer.samples();
 }
 #endif
 
 void Level::beginRenderSectionTiming()
 {
 #ifdef DEVELOPMENT_MODE
-   _render_section_timings.clear();
-   if (!_mechanism_profiling_enabled)
-   {
-      return;
-   }
-   _render_section_mark = std::chrono::high_resolution_clock::now();
+   _render_section_timer.begin(_mechanism_profiling_enabled);
 #endif
 }
 
 void Level::markRenderSection(const char* name)
 {
 #ifdef DEVELOPMENT_MODE
-   if (!_mechanism_profiling_enabled)
-   {
-      return;
-   }
-   const auto now = std::chrono::high_resolution_clock::now();
-   const auto elapsed_ms = std::chrono::duration<float, std::milli>(now - _render_section_mark).count();
-   _render_section_timings.push_back({name, elapsed_ms});
-   _render_section_mark = now;
+   _render_section_timer.mark(name);
 #else
    (void)name;
 #endif

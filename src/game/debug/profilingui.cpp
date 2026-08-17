@@ -215,9 +215,11 @@ void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Tim
    _tilemap_target_switches[_write_index] = static_cast<float>(DrawCallCounter::tilemap_target_switches);
    DrawCallCounter::tilemap_draw_calls = 0;
    _layer_scan_steps[_write_index] = static_cast<float>(DrawCallCounter::layer_scan_steps);
+   _tilemap_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::tilemap_pixels_submitted);
    DrawCallCounter::tilemap_target_switches = 0;
    DrawCallCounter::tilemap_last_target = nullptr;
    DrawCallCounter::layer_scan_steps = 0;
+   DrawCallCounter::tilemap_pixels_submitted = 0;
    _write_index = (_write_index + 1) % sample_count;
    _samples_written = std::min(_samples_written + 1, sample_count);
 }
@@ -339,14 +341,44 @@ void ProfilingUi::draw()
                   << formatSummary("", draw_call_summary) << " | target switches "
                   << formatSummary("", summarizeSamples(_tilemap_target_switches.data(), _samples_written)) << " | layer scan steps "
                   << formatSummary("", summarizeSamples(_layer_scan_steps.data(), _samples_written));
+
+   // tile pixels submitted against the view area: how many times the average on screen pixel is
+   // written by tile geometry alone. a pure count, so it reads the same here as on hardware
+   const auto view_area = GameConfiguration::getInstance()._view_width * GameConfiguration::getInstance()._view_height;
+   const auto pixel_summary = summarizeSamples(_tilemap_pixels_submitted.data(), _samples_written);
+   if (view_area > 0)
+   {
+      draw_call_line << " | tile overdraw " << std::setprecision(2) << (pixel_summary.average_ms / static_cast<float>(view_area)) << "x";
+   }
    Log::Info() << draw_call_line.str();
 
-   const auto section_frames = std::max(_render_section_frames, 1);
-   for (const auto& sample : _render_section_timings)
+   // one line rather than one per section: on the switch every log line is a write to the sd card,
+   // so a report that grows with the number of sections puts real pressure on that path
+   if (!_render_section_timings.empty())
    {
+      const auto section_frames = std::max(_render_section_frames, 1);
+      auto section_total_ms = 0.0f;
+
       std::ostringstream section_line;
-      section_line << std::fixed << std::setprecision(3) << "profiling: section " << sample.name << " "
-                   << sample.duration_ms / static_cast<float>(section_frames) << " ms avg over " << section_frames << " frames";
+      section_line << std::fixed << std::setprecision(3) << "profiling: sections over " << section_frames << " frames |";
+      for (const auto& sample : _render_section_timings)
+      {
+         const auto average_ms = sample.duration_ms / static_cast<float>(section_frames);
+         section_line << " " << sample.name << " " << average_ms << " |";
+
+         // Level::draw reports its own passes, and "level draw" is the span that contains them, so
+         // counting both would total the level's cost twice and make the remainder come out negative
+         if (sample.name != "level draw")
+         {
+            section_total_ms += average_ms;
+         }
+      }
+
+      // the sections tile the whole of Game::draw, so whatever is left is time the cpu spent inside
+      // a gl call waiting for the gpu rather than submitting work. that distinction decides whether
+      // the frame is worth attacking on the cpu side at all
+      section_line << " TOTAL " << section_total_ms << " | measured draw " << draw_summary.average_ms << " | unaccounted "
+                   << (draw_summary.average_ms - section_total_ms);
       Log::Info() << section_line.str();
    }
 
@@ -391,9 +423,11 @@ void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Tim
    _tilemap_target_switches[_write_index] = static_cast<float>(DrawCallCounter::tilemap_target_switches);
    DrawCallCounter::tilemap_draw_calls = 0;
    _layer_scan_steps[_write_index] = static_cast<float>(DrawCallCounter::layer_scan_steps);
+   _tilemap_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::tilemap_pixels_submitted);
    DrawCallCounter::tilemap_target_switches = 0;
    DrawCallCounter::tilemap_last_target = nullptr;
    DrawCallCounter::layer_scan_steps = 0;
+   DrawCallCounter::tilemap_pixels_submitted = 0;
    _write_index = (_write_index + 1) % sample_count;
    _samples_written = std::min(_samples_written + 1, sample_count);
 }

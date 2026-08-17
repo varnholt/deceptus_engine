@@ -25,6 +25,12 @@ inline const void* tilemap_last_target = nullptr;
 //! runs once per z index and rescans every container each time, so this grows with the z range
 //! multiplied by the level's content rather than with what is actually on screen.
 inline int32_t layer_scan_steps = 0;
+
+//! Tile pixels submitted per frame, counted as drawn tiles multiplied by the tile area. Held against
+//! the view area it gives the overdraw factor: how many times the average pixel on screen is written
+//! by tile geometry alone. This is a pure count, so it reads the same on hardware as in an emulator,
+//! which makes it the one way to size a fill problem without a console.
+inline int64_t tilemap_pixels_submitted = 0;
 }  // namespace DrawCallCounter
 
 #endif  // DEVELOPMENT_MODE

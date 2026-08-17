@@ -711,6 +711,10 @@ void Game::draw()
 {
    _fps++;
 
+#ifdef DEVELOPMENT_MODE
+   _draw_section_timer.begin((_profiling_ui != nullptr) && _profiling_ui->isMechanismProfilingWanted());
+#endif
+
    _window->clear(sf::Color::Black);
 #ifndef DECEPTUS_VRSFML
    _window->pushGLStates();
@@ -724,10 +728,19 @@ void Game::draw()
 
    const auto level_target = _post_processing_pass.selectLevelTarget(_window_render_texture, _level_loading_finished);
 
+#ifdef DEVELOPMENT_MODE
+   _draw_section_timer.mark("game clear targets");
+#endif
+
    if (_level_loading_finished)
    {
       _level->draw(level_target, _screenshot);
    }
+
+#ifdef DEVELOPMENT_MODE
+   // the level's own passes are reported separately, so this mark only closes the gap around them
+   _draw_section_timer.mark("level draw");
+#endif
 
    _post_processing_pass.resolveLevelTarget(*_window_render_texture.get(), _render_targets.view_to_texture_scale);
 
@@ -735,7 +748,15 @@ void Game::draw()
 
    ScreenTransitionHandler::getInstance().draw(_window_render_texture);
 
+#ifdef DEVELOPMENT_MODE
+   _draw_section_timer.mark("post processing resolve");
+#endif
+
    _info_layer->draw(*_window_render_texture.get());
+
+#ifdef DEVELOPMENT_MODE
+   _draw_section_timer.mark("hud");
+#endif
 
    if (DebugDrawStates::_draw_debug_info)
    {
@@ -794,7 +815,15 @@ void Game::draw()
 #endif
    MessageBox::draw(*_window_render_texture.get());
 
+#ifdef DEVELOPMENT_MODE
+   _draw_section_timer.mark("menu and overlays");
+#endif
+
    _window_render_texture->display();
+
+#ifdef DEVELOPMENT_MODE
+   _draw_section_timer.mark("window texture display");
+#endif
 #ifdef DECEPTUS_VRSFML
    _window->setActive(true);
 #endif
@@ -841,6 +870,10 @@ void Game::draw()
 #endif
 #ifndef DECEPTUS_VRSFML
    _window->popGLStates();
+#endif
+
+#ifdef DEVELOPMENT_MODE
+   _draw_section_timer.mark("window blit");
 #endif
 
 #ifdef DEVELOPMENT_MODE
@@ -1147,10 +1180,18 @@ void Game::timedDraw()
    {
       const auto mechanism_profiling_enabled = (_profiling_ui != nullptr) && _profiling_ui->isMechanismProfilingWanted();
       _level->setMechanismProfilingEnabled(mechanism_profiling_enabled);
-      if (mechanism_profiling_enabled)
+      // no level means no passes worth reporting, and the sections would otherwise be written every
+      // few seconds from the menu for nothing
+      if (mechanism_profiling_enabled && _level_loading_finished)
       {
          _profiling_ui->updateMechanismTimings(_level->getMechanismTimings(32));
-         _profiling_ui->updateRenderSectionTimings(_level->getRenderSectionTimings());
+
+         // Level::draw's passes plus everything else Game::draw does, so the report can hold the
+         // total against the measured draw time and show what is left unaccounted for
+         auto section_timings = _level->getRenderSectionTimings();
+         const auto& draw_sections = _draw_section_timer.samples();
+         section_timings.insert(section_timings.end(), draw_sections.begin(), draw_sections.end());
+         _profiling_ui->updateRenderSectionTimings(std::move(section_timings));
       }
    }
 #endif
