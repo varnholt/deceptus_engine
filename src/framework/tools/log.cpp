@@ -1,7 +1,9 @@
 #include "log.h"
 
 #include <chrono>
+#include <ctime>
 #include <filesystem>
+#include <iomanip>
 #include <iostream>
 #include <source_location>
 
@@ -20,6 +22,7 @@ constexpr const char* color_red = "\033[31m";
 constexpr const char* color_bright_red = "\033[91m";
 
 std::vector<Log::ListenerCallback> _log_callbacks;
+std::vector<Log::FlushCallback> _flush_callbacks;
 
 // enable ansi colors on windows console
 void enableWindowsAnsiColors()
@@ -94,6 +97,11 @@ void Log::registerListenerCallback(const ListenerCallback& cb)
    _log_callbacks.push_back(cb);
 }
 
+void Log::registerFlushCallback(const FlushCallback& cb)
+{
+   _flush_callbacks.push_back(cb);
+}
+
 void Log::info(const std::string_view& message, const std::source_location& source_location)
 {
    log(Level::Info, message, source_location);
@@ -112,6 +120,15 @@ void Log::error(const std::string_view& message, const std::source_location& sou
 void Log::fatal(const std::string_view& message, const std::source_location& source_location)
 {
    log(Level::Fatal, message, source_location);
+
+   // flush every sink before leaving. std::exit unwinds the runtime while an asynchronous sink is
+   // still writing, which on the switch surfaces as a null dereference inside armGetTls and loses
+   // the one message that would have explained the exit
+   for (const auto& flush_callback : _flush_callbacks)
+   {
+      flush_callback();
+   }
+
    std::exit(-1);
 }
 
@@ -139,6 +156,28 @@ Log::Error::Error(const std::source_location& source_location) : Message(source_
 
 Log::Fatal::Fatal(const std::source_location& source_location) : Message(source_location, fatal)
 {
+}
+
+std::string Log::formatLocalTime(const SysClockTimePoint& time_point, const std::string& format)
+{
+   const auto time = std::chrono::system_clock::to_time_t(time_point);
+
+   std::tm local_time{};
+#ifdef _WIN32
+   if (localtime_s(&local_time, &time) != 0)
+   {
+      return {};
+   }
+#else
+   if (localtime_r(&time, &local_time) == nullptr)
+   {
+      return {};
+   }
+#endif
+
+   std::ostringstream stream;
+   stream << std::put_time(&local_time, format.c_str());
+   return stream.str();
 }
 
 std::string Log::parseSourceTag(const std::source_location& source_location)

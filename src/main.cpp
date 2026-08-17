@@ -126,6 +126,16 @@ int main(int /*argc*/, char** /*argv*/)
       }
    );
 
+   Log::registerFlushCallback(
+      [log_thread_weak]
+      {
+         if (auto log_thread = log_thread_weak.lock())
+         {
+            log_thread->flushSynchronously();
+         }
+      }
+   );
+
 #ifdef DEVELOPMENT_MODE
    Log::registerListenerCallback([](const auto& time_point, auto level, const auto& message, const auto& location)
                                  { LogUiBuffer::log(time_point, level, message, location); });

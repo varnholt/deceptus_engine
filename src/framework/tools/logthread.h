@@ -38,6 +38,13 @@ public:
    ///
    void log(const SysClockTimePoint& time_point, Log::Level level, const std::string& message, const std::source_location& location);
 
+   ///
+   /// \brief writes every queued record to disk before returning.
+   /// \note registered as Log's flush callback so a fatal message reaches the file before
+   ///       std::exit tears the runtime down under the background thread.
+   ///
+   void flushSynchronously();
+
 private:
    ///
    /// \brief one queued log record.
@@ -61,6 +68,7 @@ private:
    void flush();
 
    std::mutex _mutex;
+   std::mutex _write_mutex;  //!< serializes the file write, which flushSynchronously does from another thread
    std::vector<LogItem> _log_items;
 
    std::unique_ptr<std::thread> _thread;
