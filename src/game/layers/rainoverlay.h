@@ -68,6 +68,12 @@ public:
    /// \param normal unused normal-map target required by the weather overlay interface.
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
 
+   /// \brief draws active rain streaks and optional splash sprites with explicit render states.
+   /// \param target SFML render target used for rain rendering.
+   /// \param normal unused normal-map target required by the weather overlay interface.
+   /// \param states render states carrying the level view and, under vrsfml, the rain texture.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+
    /// \brief updates drop motion, surface intersections, and splash lifetimes.
    /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt) override;

@@ -1292,7 +1292,6 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 
 void Level::drawAtmosphereLayer()
 {
-#ifndef DECEPTUS_VRSFML
    if (!_atmosphere._tile_map)
    {
       return;
@@ -1300,11 +1299,14 @@ void Level::drawAtmosphereLayer()
 
    _atmosphere_shader->getRenderTexture()->clear();
    _atmosphere._tile_map->setVisible(true);
+#ifdef DECEPTUS_VRSFML
+   _atmosphere_shader->getRenderTexture()->draw(*_atmosphere._tile_map, sf::RenderStates{.view = *_level_view});
+#else
    _atmosphere_shader->getRenderTexture()->setView(*_level_view);
    _atmosphere_shader->getRenderTexture()->draw(*_atmosphere._tile_map);
+#endif
    _atmosphere._tile_map->setVisible(false);
    _atmosphere_shader->getRenderTexture()->display();
-#endif
 }
 
 #ifdef GLOW_ENABLED
@@ -1668,15 +1670,20 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    drawGlowSprite();
 #endif
 #else
-   // WASM: blit level_background to level and normal_tmp to normal without atmosphere distortion
    {
-      sf::Sprite blit_sprite;
-      const sf::Vector2u blit_size = _render_targets.level_background->getSize();
-      blit_sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(blit_size.x), static_cast<float>(blit_size.y)}};
-      const sf::Texture& blit_bg_texture = _render_targets.level_background->getTexture();
-      _render_targets.level->draw(blit_sprite, sf::RenderStates{.texture = &blit_bg_texture});
-      const sf::Texture& blit_normal_texture = _render_targets.normal_tmp->getTexture();
-      _render_targets.normal->draw(blit_sprite, sf::RenderStates{.texture = &blit_normal_texture});
+      sf::Sprite atmosphere_sprite;
+      const sf::Vector2u atmosphere_sprite_size = _render_targets.level_background->getSize();
+      atmosphere_sprite.textureRect =
+         sf::FloatRect{{0.f, 0.f}, {static_cast<float>(atmosphere_sprite_size.x), static_cast<float>(atmosphere_sprite_size.y)}};
+
+      _atmosphere_shader->update();
+      const sf::Shader& atmosphere_shader = _atmosphere_shader->getShader();
+
+      const sf::Texture& level_background_texture = _render_targets.level_background->getTexture();
+      _render_targets.level->draw(atmosphere_sprite, sf::RenderStates{.texture = &level_background_texture, .shader = &atmosphere_shader});
+
+      const sf::Texture& normal_tmp_texture = _render_targets.normal_tmp->getTexture();
+      _render_targets.normal->draw(atmosphere_sprite, sf::RenderStates{.texture = &normal_tmp_texture, .shader = &atmosphere_shader});
    }
 #endif
    markRenderSection("atmosphere resolve");

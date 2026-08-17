@@ -7,7 +7,12 @@
 #include <cstdlib>
 #include <iostream>
 
-void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, sf::RenderStates{});
+}
+
+void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    const auto val = static_cast<uint8_t>(_value * 255);
    const auto col = sf::Color{val, val, val, val};
@@ -27,12 +32,16 @@ void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*nor
       sf::Vertex(top_right, col)
    };
 
-   sf::RenderStates states;
-   states.blendMode = sf::BlendAlpha;
+   sf::RenderStates quad_states;
+   quad_states.blendMode = sf::BlendAlpha;
 #ifdef DECEPTUS_VRSFML
-   target.draw(quad, sf::PrimitiveType::Triangles, states);
+   // the level view travels in the render states, the render target does not carry one; without it the
+   // lightning quad would be placed with the target's default view and land outside the visible area
+   quad_states.view = (states.view == sf::View{}) ? target.computeView() : states.view;
+   target.draw(quad, sf::PrimitiveType::Triangles, quad_states);
 #else
-   target.draw(quad, 6, sf::PrimitiveType::Triangles, states);
+   (void)states;
+   target.draw(quad, 6, sf::PrimitiveType::Triangles, quad_states);
 #endif
 }
 

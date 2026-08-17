@@ -28,6 +28,12 @@ public:
    /// \param normal unused normal-map target required by the weather overlay interface.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
+   /// \brief draws the lightning quad with explicit render states.
+   /// \param target SFML render target used for weather output.
+   /// \param normal unused normal-map target required by the weather overlay interface.
+   /// \param states render states carrying the level view.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+
    /// \brief advances lightning/silence state timers and flash intensity factor.
    /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt) override;
