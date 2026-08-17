@@ -216,12 +216,10 @@ void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Tim
    DrawCallCounter::tilemap_draw_calls = 0;
    _layer_scan_steps[_write_index] = static_cast<float>(DrawCallCounter::layer_scan_steps);
    _tilemap_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::tilemap_pixels_submitted);
-   _tilemap_pixels_opaque[_write_index] = static_cast<float>(DrawCallCounter::tilemap_pixels_opaque);
    DrawCallCounter::tilemap_target_switches = 0;
    DrawCallCounter::tilemap_last_target = nullptr;
    DrawCallCounter::layer_scan_steps = 0;
    DrawCallCounter::tilemap_pixels_submitted = 0;
-   DrawCallCounter::tilemap_pixels_opaque = 0;
    _write_index = (_write_index + 1) % sample_count;
    _samples_written = std::min(_samples_written + 1, sample_count);
 }
@@ -350,9 +348,7 @@ void ProfilingUi::draw()
    const auto pixel_summary = summarizeSamples(_tilemap_pixels_submitted.data(), _samples_written);
    if (view_area > 0)
    {
-      const auto opaque_summary = summarizeSamples(_tilemap_pixels_opaque.data(), _samples_written);
-      draw_call_line << " | tile overdraw " << std::setprecision(2) << (pixel_summary.average_ms / static_cast<float>(view_area))
-                     << "x | opaque " << (opaque_summary.average_ms / static_cast<float>(view_area)) << "x";
+      draw_call_line << " | tile overdraw " << std::setprecision(2) << (pixel_summary.average_ms / static_cast<float>(view_area)) << "x";
    }
    Log::Info() << draw_call_line.str();
 
@@ -428,12 +424,10 @@ void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Tim
    DrawCallCounter::tilemap_draw_calls = 0;
    _layer_scan_steps[_write_index] = static_cast<float>(DrawCallCounter::layer_scan_steps);
    _tilemap_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::tilemap_pixels_submitted);
-   _tilemap_pixels_opaque[_write_index] = static_cast<float>(DrawCallCounter::tilemap_pixels_opaque);
    DrawCallCounter::tilemap_target_switches = 0;
    DrawCallCounter::tilemap_last_target = nullptr;
    DrawCallCounter::layer_scan_steps = 0;
    DrawCallCounter::tilemap_pixels_submitted = 0;
-   DrawCallCounter::tilemap_pixels_opaque = 0;
    _write_index = (_write_index + 1) % sample_count;
    _samples_written = std::min(_samples_written + 1, sample_count);
 }

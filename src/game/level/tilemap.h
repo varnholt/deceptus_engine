@@ -134,12 +134,6 @@ private:
    sf::VertexArray _vertices_animated;
 
    std::shared_ptr<sf::Texture> _texture_map;
-#ifdef DEVELOPMENT_MODE
-   //! how many of this layer's tiles are fully opaque. only those can occlude what is behind them,
-   //! so the ratio is what an early z pass could actually reject
-   int64_t _tile_count_total{0};
-   int64_t _tile_count_opaque{0};
-#endif
    std::shared_ptr<sf::Texture> _normal_map;
 
    std::vector<AnimatedTile*> _animations;

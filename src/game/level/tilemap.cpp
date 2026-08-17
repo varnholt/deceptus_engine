@@ -123,37 +123,6 @@ void TileMap::storeStaticVertices(const std::array<sf::Vertex, 4>& quad, float p
    vertex_array.append(quad[3]);
 }
 
-#ifdef DEVELOPMENT_MODE
-namespace
-{
-//! rief true when every pixel of the tile at (tu, tv) is fully opaque.
-bool isTileOpaque(const sf::Image& image, uint32_t tu, uint32_t tv, const sf::Vector2u& tile_size_px)
-{
-   const auto image_size = image.getSize();
-   const auto origin_x = tu * tile_size_px.x;
-   const auto origin_y = tv * tile_size_px.y;
-
-   if (origin_x + tile_size_px.x > image_size.x || origin_y + tile_size_px.y > image_size.y)
-   {
-      return false;
-   }
-
-   for (auto y = origin_y; y < origin_y + tile_size_px.y; y++)
-   {
-      for (auto x = origin_x; x < origin_x + tile_size_px.x; x++)
-      {
-         if (image.getPixel({x, y}).a != 255)
-         {
-            return false;
-         }
-      }
-   }
-
-   return true;
-}
-}  // namespace
-#endif
-
 bool TileMap::load(
    const std::shared_ptr<TmxLayer>& layer,
    const std::shared_ptr<TmxTileSet>& tileset,
@@ -171,11 +140,6 @@ bool TileMap::load(
    auto path = (base_path / tileset->_image->_source);
 
    _texture_map = TexturePool::getInstance().get(path);
-
-#ifdef DEVELOPMENT_MODE
-   // one copy per tile map at load, so the per tile opacity test below stays cheap
-   const auto tileset_image = _texture_map->copyToImage();
-#endif
 
    // check if we have a bumpmap and, if so, load it
    const auto normal_map_filename = (path.stem().string() + "_normals" + path.extension().string());
@@ -232,16 +196,6 @@ bool TileMap::load(
          // find its position in the tileset texture
          const auto tu = (tile_number - tileset->_first_gid) % (_texture_map->getSize().x / _tile_size_px.x);
          const auto tv = (tile_number - tileset->_first_gid) / (_texture_map->getSize().x / _tile_size_px.x);
-
-#ifdef DEVELOPMENT_MODE
-         // only a fully opaque tile can occlude what is behind it, so only those are candidates for
-         // early z rejection. counted here, where the tileset image is already at hand
-         _tile_count_total++;
-         if (isTileOpaque(tileset_image, tu, tv, _tile_size_px))
-         {
-            _tile_count_opaque++;
-         }
-#endif
          const auto tx = static_cast<int32_t>(pos_x);
          const auto ty = static_cast<int32_t>(pos_y);
          const auto tile_x_px = tx * static_cast<int32_t>(_tile_size_px.x) + layer->_position_x_px;
@@ -430,14 +384,8 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
 
          // four vertices per tile, so the quad count is the tile count
          const auto tile_count = static_cast<float>(column_it->second.getVertexCount() / 4);
-         const auto submitted = static_cast<int64_t>(tile_count * visible_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y));
-         DrawCallCounter::tilemap_pixels_submitted += submitted;
-
-         // attributed by this layer's opaque ratio: only opaque pixels can be rejected by an early
-         // z pass, so this is the share of the overdraw that depth culling could actually remove
-         const auto opaque_ratio =
-            (_tile_count_total > 0) ? static_cast<float>(_tile_count_opaque) / static_cast<float>(_tile_count_total) : 0.0f;
-         DrawCallCounter::tilemap_pixels_opaque += static_cast<int64_t>(static_cast<float>(submitted) * opaque_ratio);
+         DrawCallCounter::tilemap_pixels_submitted +=
+            static_cast<int64_t>(tile_count * visible_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y));
 #endif
       }
    }
