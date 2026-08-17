@@ -711,7 +711,6 @@ void Game::draw()
 {
    _fps++;
 
-   _window_render_texture->clear();
    _window->clear(sf::Color::Black);
 #ifndef DECEPTUS_VRSFML
    _window->pushGLStates();
