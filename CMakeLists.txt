@@ -1186,7 +1186,23 @@ target_include_directories(
     ${CMAKE_BINARY_DIR}/_deps/sfml-src/include
     ${SDL3_INCLUDE_DIRS})
 
-target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
+# DEVELOPMENT_MODE carries the whole diagnostic apparatus: the profiling ui, the per mechanism
+# timers, the draw call counters, the render section timers, and on the console a log write to the
+# sd card every five seconds. All of it is useful while measuring and all of it is overhead in a
+# build meant to run fast, so it can be switched off without touching the sources.
+# The console and the web build ship without it: neither has a window to show the profiling ui in,
+# and on the switch every report is a write to the sd card. Both can still be built with it by
+# passing -DDECEPTUS_DEVELOPMENT_MODE=ON, which is what a profiling run does.
+if(EMSCRIPTEN OR NINTENDO_SWITCH)
+    option(DECEPTUS_DEVELOPMENT_MODE "build with the profiling and debug instrumentation" OFF)
+else()
+    option(DECEPTUS_DEVELOPMENT_MODE "build with the profiling and debug instrumentation" ON)
+endif()
+
+target_compile_definitions(deceptus PRIVATE USE_GL _USE_MATH_DEFINES)
+if(DECEPTUS_DEVELOPMENT_MODE)
+    target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE)
+endif()
 
 # Selects the VRSFML API rather than vanilla SFML's. Both the Emscripten and the Switch
 # target build against VRSFML, so this is what the SFML-flavour guards key off; plain
