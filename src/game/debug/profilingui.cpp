@@ -11,7 +11,10 @@
 #include "imgui/imgui.h"
 #pragma warning(pop)
 
+#include "framework/tools/log.h"
+
 #include <algorithm>
+#include <iomanip>
 #include <numeric>
 #include <sstream>
 
@@ -55,6 +58,51 @@ void drawTimingGraph(const char* label, const float* values, int32_t count, int3
       label, values, count, offset, overlay_text.str().c_str(), 0.0f, std::max(target_ms * 2.0f, max_ms * 1.1f), ImVec2(graph_width, 80.0f)
    );
    ImGui::Text("  min: %.2f ms   avg: %.2f ms   max: %.2f ms   target: %.2f ms", min_ms, average_ms, max_ms, target_ms);
+}
+
+constexpr auto section_report_interval_s = 5.0f;
+
+// the imgui window is fine to look at but a benchmark cannot read it, so the same numbers go into
+// the log as one line. that is what makes two desktop runs comparable to each other, and to the
+// line the console build already writes
+void logRenderSections(const std::vector<RenderSectionSample>& samples, int32_t frames)
+{
+   auto section_total_ms = 0.0f;
+
+   std::ostringstream section_line;
+   section_line << std::fixed << std::setprecision(3) << "profiling: sections over " << frames << " frames |";
+   for (const auto& sample : samples)
+   {
+      const auto average_ms = sample.duration_ms / static_cast<float>(frames);
+      section_line << " " << sample.name << " " << average_ms << " |";
+
+      // Level::draw reports its own passes, and "level draw" is the span that contains them, so
+      // counting both would total the level's cost twice
+      if (sample.name != "level draw")
+      {
+         section_total_ms += average_ms;
+      }
+   }
+
+   section_line << " TOTAL " << section_total_ms;
+   Log::Info() << section_line.str();
+}
+
+// draw call counts carry over to other hardware unchanged, unlike a timing, so they belong next to
+// the sections rather than only in the imgui window
+void logDrawCounts(const float* draw_calls, const float* target_switches, const float* scan_steps, int32_t count)
+{
+   if (count <= 0)
+   {
+      return;
+   }
+
+   const auto average = [count](const float* values) { return std::accumulate(values, values + count, 0.0f) / static_cast<float>(count); };
+
+   std::ostringstream counts_line;
+   counts_line << std::fixed << std::setprecision(1) << "profiling: tilemap draw calls per frame " << average(draw_calls)
+               << " | target switches " << average(target_switches) << " | layer scan steps " << average(scan_steps);
+   Log::Info() << counts_line.str();
 }
 }  // namespace
 
@@ -123,9 +171,19 @@ void ProfilingUi::draw()
       ImGui::Separator();
       ImGui::Text("render sections   (cpu side submit cost, in draw order)");
       ImGui::Spacing();
+      const auto section_frames = std::max(_render_section_frames, 1);
       for (const auto& sample : _render_section_timings)
       {
-         ImGui::Text("%.3f ms  %s", sample.duration_ms, sample.name.c_str());
+         ImGui::Text("%.3f ms  %s", sample.duration_ms / static_cast<float>(section_frames), sample.name.c_str());
+      }
+
+      if (_log_clock.getElapsedTime().asSeconds() >= section_report_interval_s)
+      {
+         _log_clock.restart();
+         logRenderSections(_render_section_timings, section_frames);
+         logDrawCounts(_tilemap_draw_calls.data(), _tilemap_target_switches.data(), _layer_scan_steps.data(), _samples_written);
+         _render_section_timings.clear();
+         _render_section_frames = 0;
       }
    }
 
@@ -241,7 +299,20 @@ void ProfilingUi::updateMechanismTimings(std::vector<MechanismSample> timings)
 
 void ProfilingUi::updateRenderSectionTimings(std::vector<RenderSectionSample> timings)
 {
-   _render_section_timings = std::move(timings);
+   // a single frame's sections are far too noisy to compare between two runs, so they are summed
+   // here and divided by the frame count on reporting, the same way the log flavour does it
+   if (_render_section_timings.size() != timings.size())
+   {
+      _render_section_timings = std::move(timings);
+      _render_section_frames = 1;
+      return;
+   }
+
+   for (size_t section_index = 0; section_index < timings.size(); section_index++)
+   {
+      _render_section_timings[section_index].duration_ms += timings[section_index].duration_ms;
+   }
+   _render_section_frames++;
 }
 
 bool ProfilingUi::isMechanismProfilingWanted() const

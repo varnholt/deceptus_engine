@@ -28,6 +28,32 @@ std::string_view SmokeEffect::objectName() const
    return "SmokeEffect";
 }
 
+namespace
+{
+// mechanisms are culled by chunk distance to the player, which is coarse: one a couple of chunks
+// away is still drawn in full even when the camera cannot see any of it. that is worth avoiding
+// here because drawing this mechanism is not cheap, so the bounding box is checked against the
+// view first
+bool isOnScreen(const sf::View& view, const std::optional<sf::FloatRect>& bounding_box)
+{
+   if (!bounding_box.has_value())
+   {
+      return true;
+   }
+
+   const auto view_center = sfcompat::getViewCenter(view);
+   const auto view_size = sfcompat::getViewSize(view);
+   if (view_size.x <= 0.0f || view_size.y <= 0.0f)
+   {
+      return true;
+   }
+
+   const sf::FloatRect view_rect{{view_center.x - view_size.x * 0.5f, view_center.y - view_size.y * 0.5f}, {view_size.x, view_size.y}};
+
+   return sfcompat::findIntersection(view_rect, bounding_box.value()).has_value();
+}
+}  // namespace
+
 #ifdef DECEPTUS_VRSFML
 void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
@@ -36,6 +62,11 @@ void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
 void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
+   if (!isOnScreen(states.view, _bounding_box_px))
+   {
+      return;
+   }
+
    if (!isEnabled())
    {
       return;
@@ -79,6 +110,11 @@ void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, co
 #else
 void SmokeEffect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
+   if (!isOnScreen(color.getView(), _bounding_box_px))
+   {
+      return;
+   }
+
    if (!isEnabled())
    {
       return;
@@ -152,34 +188,30 @@ void SmokeEffect::update(const sf::Time& dt)
 
    if (!_particles.empty())
    {
-      const sf::Vector2f tex_size_f(static_cast<float>(_texture->getSize().x), static_cast<float>(_texture->getSize().y));
-
-      for (auto i = 0u; i < _particles.size(); ++i)
+      for (auto particle_index = 0u; particle_index < _particles.size(); ++particle_index)
       {
-         const auto& sprite = *(_particles[i]._sprite);
+         const auto& sprite = *(_particles[particle_index]._sprite);
          const sf::Transform transform = sprite.getTransform();
          const sf::Color color = sfcompat::getColor(sprite);
 
          const sf::Vector2f quad[4] = {
             transform.transformPoint({0.0f, 0.0f}),
-            transform.transformPoint({tex_size_f.x, 0.0f}),
-            transform.transformPoint({tex_size_f.x, tex_size_f.y}),
-            transform.transformPoint({0.0f, tex_size_f.y})
+            transform.transformPoint({_cached_tex_size_f.x, 0.0f}),
+            transform.transformPoint({_cached_tex_size_f.x, _cached_tex_size_f.y}),
+            transform.transformPoint({0.0f, _cached_tex_size_f.y})
          };
 
-         const sf::Vector2f tex_coords[4] = {{0.f, 0.0f}, {tex_size_f.x, 0.0f}, {tex_size_f.x, tex_size_f.y}, {0.0f, tex_size_f.y}};
-
-         const auto vertex_index = i * 6u;
+         const auto vertex_index = particle_index * 6u;
 
          // triangle indices 0, 1, 2
-         _batched_vertices[vertex_index + 0] = sf::Vertex(quad[0], color, tex_coords[0]);
-         _batched_vertices[vertex_index + 1] = sf::Vertex(quad[1], color, tex_coords[1]);
-         _batched_vertices[vertex_index + 2] = sf::Vertex(quad[2], color, tex_coords[2]);
+         _batched_vertices[vertex_index + 0] = sf::Vertex(quad[0], color, _cached_tex_coords[0]);
+         _batched_vertices[vertex_index + 1] = sf::Vertex(quad[1], color, _cached_tex_coords[1]);
+         _batched_vertices[vertex_index + 2] = sf::Vertex(quad[2], color, _cached_tex_coords[2]);
 
          // triangle indices 0, 2, 3
-         _batched_vertices[vertex_index + 3] = sf::Vertex(quad[0], color, tex_coords[0]);
-         _batched_vertices[vertex_index + 4] = sf::Vertex(quad[2], color, tex_coords[2]);
-         _batched_vertices[vertex_index + 5] = sf::Vertex(quad[3], color, tex_coords[3]);
+         _batched_vertices[vertex_index + 3] = sf::Vertex(quad[0], color, _cached_tex_coords[0]);
+         _batched_vertices[vertex_index + 4] = sf::Vertex(quad[2], color, _cached_tex_coords[2]);
+         _batched_vertices[vertex_index + 5] = sf::Vertex(quad[3], color, _cached_tex_coords[3]);
       }
    }
 }
@@ -341,6 +373,16 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
 
       smoke_effect->_particles.push_back(std::move(particle));
    }
+
+   const auto texture_size_f =
+      sf::Vector2f{static_cast<float>(smoke_effect->_texture->getSize().x), static_cast<float>(smoke_effect->_texture->getSize().y)};
+   smoke_effect->_cached_tex_size_f = texture_size_f;
+   smoke_effect->_cached_tex_coords = {
+      sf::Vector2f{0.0f, 0.0f},
+      sf::Vector2f{texture_size_f.x, 0.0f},
+      sf::Vector2f{texture_size_f.x, texture_size_f.y},
+      sf::Vector2f{0.0f, texture_size_f.y}
+   };
 
    smoke_effect->_batched_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
    smoke_effect->_batched_vertices.resize(smoke_effect->_particles.size() * 6);

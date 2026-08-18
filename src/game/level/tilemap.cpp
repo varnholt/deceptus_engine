@@ -336,6 +336,8 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
       return;
    }
 
+   _batched_vertices.clear();
+
    const auto block_width_px = static_cast<float>(_tile_size_px.x * tile_count_per_block);
    const auto block_height_px = static_cast<float>(_tile_size_px.y * tile_count_per_block);
 
@@ -361,10 +363,13 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
       const auto column_end = row.upper_bound(last_block_x);
       for (auto column_it = row.lower_bound(first_block_x); column_it != column_end; ++column_it)
       {
-         target.draw(column_it->second, states);
+         const auto& block_vertices = column_it->second;
+         const auto block_vertex_count = block_vertices.getVertexCount();
+         if (block_vertex_count > 0)
+         {
+            _batched_vertices.insert(_batched_vertices.end(), &block_vertices[0], &block_vertices[0] + block_vertex_count);
+         }
 #ifdef DEVELOPMENT_MODE
-         DrawCallCounter::tilemap_draw_calls++;
-
          // blocks are drawn whole but only partly on screen, so scale the block's tile area by how
          // much of the block the view actually covers. counting the whole block would report fill
          // that the rasteriser never pays for
@@ -384,14 +389,32 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
 
          // tiles are stored as two triangles, so six vertices make one tile - not four. dividing by
          // four overstated every count by 1.5x
-         const auto tile_count = static_cast<float>(column_it->second.getVertexCount() / 6);
+         const auto tile_count = static_cast<float>(block_vertex_count / 6);
          DrawCallCounter::tilemap_pixels_submitted +=
             static_cast<int64_t>(tile_count * visible_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y));
 #endif
       }
    }
 
-   target.draw(_vertices_animated, states);
+   // the animated tiles carry the same texture and blend mode as the static blocks, so they join
+   // the same batch rather than paying for a call of their own
+   const auto animated_vertex_count = _vertices_animated.getVertexCount();
+   if (animated_vertex_count > 0)
+   {
+      _batched_vertices.insert(_batched_vertices.end(), &_vertices_animated[0], &_vertices_animated[0] + animated_vertex_count);
+   }
+
+   if (_batched_vertices.empty())
+   {
+      return;
+   }
+
+#ifdef DECEPTUS_VRSFML
+   target.draw(std::span<const sf::Vertex>{_batched_vertices.data(), _batched_vertices.size()}, sf::PrimitiveType::Triangles, states);
+#else
+   target.draw(_batched_vertices.data(), _batched_vertices.size(), sf::PrimitiveType::Triangles, states);
+#endif
+
 #ifdef DEVELOPMENT_MODE
    DrawCallCounter::tilemap_draw_calls++;
    // the animated tiles are collected around the player block rather than around the view, so this

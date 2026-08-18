@@ -133,6 +133,11 @@ private:
    mutable std::map<int32_t, std::map<int32_t, sf::VertexArray>> _vertices_static_blocks;
    sf::VertexArray _vertices_animated;
 
+   //!< every visible block plus the animated tiles of one draw, gathered so the lot goes out as a
+   //!< single call. all of it shares one texture and one blend mode, and concatenating in draw
+   //!< order keeps the result identical to drawing the blocks one by one
+   mutable std::vector<sf::Vertex> _batched_vertices;
+
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
 
