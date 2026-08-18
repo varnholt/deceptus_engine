@@ -1,22 +1,28 @@
 #include "console.h"
 
+#include "framework/tools/callbackmap.h"
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
+#include "game/constants.h"
 #include "game/debug/debugdrawstates.h"
-#include "game/items/itemfactory.h"
+#include "game/level/gamemechanismregistry.h"
 #include "game/level/levelregistry.h"
+#include "game/level/levels.h"
 #include "game/level/room.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"
 #include "game/player/playerinfo.h"
 #include "game/player/playerregistry.h"
 #include "game/player/weaponsystem.h"
+#include "game/shaders/postprocessing.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "game/weapons/bow.h"
 #include "game/weapons/weaponfactory.h"
 
+#include <cctype>
 #include <iostream>
+#include <map>
 #include <ostream>
 #include <ranges>
 #include <sstream>
@@ -29,12 +35,52 @@ void giveWeaponToPlayer(const std::shared_ptr<Weapon>& weapon)
    weapons._weapons.push_back(weapon);
    weapons._selected = weapon;
 }
+
+std::string toLowerCase(const std::string& text)
+{
+   std::string lower_case;
+   lower_case.reserve(text.size());
+   for (const auto character : text)
+   {
+      lower_case.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(character))));
+   }
+   return lower_case;
+}
+
+//! \brief console input prefix that switches the help panel into its detailed mode
+constexpr std::string_view help_prefix{"help"};
+
+std::string joinNames(const std::vector<std::string>& names)
+{
+   std::string joined;
+   for (const auto& name : names)
+   {
+      if (!joined.empty())
+      {
+         joined += '|';
+      }
+      joined += name;
+   }
+   return joined;
+}
+
+std::string joinEffectNames()
+{
+   return joinNames(PostProcessing::getEffectNames());
+}
+
+std::string joinScopeNames()
+{
+   return joinNames(PostProcessing::getScopeNames());
+}
 }  // namespace
 
 Console::Console()
 {
    // weapon
-   _help.registerCommand("inventory", "weapon <add/clear> <sword/bow/gun>: add/clear weapons", {"weapon add sword", "weapon clear"});
+   _help.registerCommand(
+      "inventory", "weapon <add/clear> <sword/bow/gun/harpoon>: add/clear weapons", {"weapon add sword", "weapon clear"}
+   );
 
    addCommand(
       "weapon add gun",
@@ -60,6 +106,15 @@ Console::Console()
       {
          giveWeaponSword();
          _log.emplace_back("given sword to player");
+      }
+   );
+
+   addCommand(
+      "weapon add harpoon",
+      [this](const auto&)
+      {
+         giveWeaponHarpoon();
+         _log.emplace_back("given harpoon to player");
       }
    );
 
@@ -175,7 +230,8 @@ Console::Console()
          if (args.size() == 3)
          {
             const auto& item_name = args.at(2);
-            if (!ItemFactory::create(item_name))
+            const auto known_names = SaveState::getPlayerInfo()._inventory.readItemNames();
+            if (std::ranges::find(known_names, item_name) == known_names.end())
             {
                _log.emplace_back("unknown item: " + item_name);
                return;
@@ -224,7 +280,7 @@ Console::Console()
       "item clear",
       [this](const auto&)
       {
-         SaveState::getPlayerInfo()._inventory._items.clear();
+         SaveState::getPlayerInfo()._inventory.clear();
          _log.emplace_back("removed all items");
       }
    );
@@ -272,6 +328,27 @@ Console::Console()
       "teleportation",
       "tpr <name>: teleport to room by name",
       {"tpr my_room"}
+   );
+
+   // level loading
+   registerCallback("level list", [this](const auto&) { listLevels(); }, "leveldesign", "level list: list the levels from levels.json");
+
+   registerCallback(
+      "level load",
+      [this](const auto& args)
+      {
+         if (args.size() == 3)
+         {
+            loadLevel(args.at(2));
+         }
+         else
+         {
+            _log.emplace_back("usage: level load <index|name>");
+         }
+      },
+      "leveldesign",
+      "level load <index|name>: load a level listed in levels.json",
+      {"level load 2", "level load graveyard"}
    );
 
    // playback
@@ -389,6 +466,70 @@ Console::Console()
       }
    );
 
+   // mechanisms
+   _help.registerCommand(
+      "leveldesign",
+      "mechanism <list/enable/disable> <type>: enable or disable every mechanism of a type",
+      {"mechanism list", "mechanism disable smoke", "mechanism enable smoke"}
+   );
+
+   addCommand("mechanism list", [this](const auto&) { listMechanismTypes(); });
+
+   addCommand(
+      "mechanism enable",
+      [this](const auto& args)
+      {
+         if (args.size() == 3)
+         {
+            setMechanismTypeEnabled(args.at(2), true);
+         }
+         else
+         {
+            _log.emplace_back("usage: mechanism enable <type>");
+         }
+      }
+   );
+
+   addCommand(
+      "mechanism disable",
+      [this](const auto& args)
+      {
+         if (args.size() == 3)
+         {
+            setMechanismTypeEnabled(args.at(2), false);
+         }
+         else
+         {
+            _log.emplace_back("usage: mechanism disable <type>");
+         }
+      }
+   );
+
+   // lighting
+   _help.registerCommand(
+      "leveldesign",
+      "lighting <enable/disable>: bypass the deferred lighting pass and show the level unlit",
+      {"lighting enable", "lighting disable"}
+   );
+
+   addCommand(
+      "lighting enable",
+      [this](const auto&)
+      {
+         DebugDrawStates::_draw_lighting = true;
+         _log.emplace_back("lighting enabled");
+      }
+   );
+
+   addCommand(
+      "lighting disable",
+      [this](const auto&)
+      {
+         DebugDrawStates::_draw_lighting = false;
+         _log.emplace_back("lighting disabled, level is drawn unlit");
+      }
+   );
+
    // playerlight
    _help.registerCommand(
       "leveldesign",
@@ -433,12 +574,58 @@ Console::Console()
             if (level && level->getPlayerLight())
             {
                level->getPlayerLight()->_color.a = alpha;
+#ifdef DECEPTUS_VRSFML
+               level->getPlayerLight()->_sprite->color = level->getPlayerLight()->_color;
+#else
                level->getPlayerLight()->_sprite->setColor(level->getPlayerLight()->_color);
+#endif
             }
             std::ostringstream oss;
             oss << "player light alpha set to " << static_cast<int>(alpha);
             _log.push_back(oss.str());
          }
+      }
+   );
+
+   // ingame map
+   _help.registerCommand(
+      "cheats", "map <reveal/clear>: reveal the whole ingame map, or reset it to completely unexplored", {"map reveal", "map clear"}
+   );
+
+   addCommand(
+      "map reveal",
+      [this](const auto&)
+      {
+         const auto& level = LevelRegistry::getCurrent();
+         if (!level)
+         {
+            _log.emplace_back("no level loaded");
+            return;
+         }
+
+         level->setMapRevealed(true);
+         _log.emplace_back("revealed the whole map");
+      }
+   );
+
+   addCommand(
+      "map clear",
+      [this](const auto&)
+      {
+         const auto& level = LevelRegistry::getCurrent();
+         if (!level)
+         {
+            _log.emplace_back("no level loaded");
+            return;
+         }
+
+         level->setMapRevealed(false);
+         for (const auto& room : level->getRooms())
+         {
+            room->clearVisited();
+         }
+
+         _log.emplace_back("cleared the map");
       }
    );
 
@@ -508,6 +695,79 @@ Console::Console()
       "leveldesign",
       "ra: reload animations"
    );
+
+   // help
+   registerCallback(
+      "help",
+      [this](const auto& args)
+      {
+         // the panel already answers this live while typing, so executing it only needs to leave
+         // something in the log confirming what was looked up
+         if (args.size() < 2)
+         {
+            _log.emplace_back("help: type a command name to see its examples in the panel");
+            return;
+         }
+
+         _log.emplace_back("help: " + args.at(1));
+      },
+      "general",
+      "help <command>: show examples for a command in the help panel",
+      {"help postfx", "help tpp"}
+   );
+
+   // rendering
+   registerCallback(
+      "postfx",
+      [this](const auto& args)
+      {
+         if (args.size() != 2)
+         {
+            _log.emplace_back("usage: postfx <" + joinEffectNames() + ">");
+            return;
+         }
+
+         const auto effect = PostProcessing::effectFromName(args.at(1));
+         if (!effect.has_value())
+         {
+            _log.emplace_back("unknown post processing effect: " + args.at(1));
+            _log.emplace_back("available effects: " + joinEffectNames());
+            return;
+         }
+
+         PostProcessing::getInstance().setEffect(effect.value());
+         _log.emplace_back("post processing effect: " + args.at(1));
+      },
+      "rendering",
+      "postfx <" + joinEffectNames() + ">: set the full screen post processing effect",
+      {"postfx gameboy", "postfx none"}
+   );
+
+   registerCallback(
+      "postfx scope",
+      [this](const auto& args)
+      {
+         if (args.size() != 3)
+         {
+            _log.emplace_back("usage: postfx scope <" + joinScopeNames() + ">");
+            return;
+         }
+
+         const auto scope = PostProcessing::scopeFromName(args.at(2));
+         if (!scope.has_value())
+         {
+            _log.emplace_back("unknown post processing scope: " + args.at(2));
+            _log.emplace_back("available scopes: " + joinScopeNames());
+            return;
+         }
+
+         PostProcessing::getInstance().setScope(scope.value());
+         _log.emplace_back("post processing scope: " + args.at(2));
+      },
+      "rendering",
+      "postfx scope <" + joinScopeNames() + ">: apply the effect to the whole frame or to the level only",
+      {"postfx scope level", "postfx scope all"}
+   );
 }
 
 void Console::setActive(bool active)
@@ -548,6 +808,11 @@ void Console::giveWeaponGun()
 void Console::giveWeaponSword()
 {
    giveWeaponToPlayer(WeaponFactory::create(WeaponType::Sword));
+}
+
+void Console::giveWeaponHarpoon()
+{
+   giveWeaponToPlayer(WeaponFactory::create(WeaponType::Harpoon));
 }
 
 void Console::teleportToStartPosition()
@@ -659,6 +924,163 @@ void Console::teleportToRoom(const std::string& room_name)
    PlayerRegistry::getFirst()->setBodyViaPixelPosition(target_position.x, target_position.y);
 }
 
+void Console::listMechanismTypes()
+{
+   const auto level = LevelRegistry::getCurrent();
+   if (!level)
+   {
+      _log.emplace_back("no level loaded");
+      return;
+   }
+
+   // sorted so the output is stable, the registry map is unordered
+   std::map<std::string, std::pair<int32_t, int32_t>> counts_by_type;
+   for (const auto& [group, mechanisms] : level->getMechanismRegistry().getMap())
+   {
+      if (mechanisms == nullptr || mechanisms->empty())
+      {
+         continue;
+      }
+
+      auto& counts = counts_by_type[group];
+      counts.first = static_cast<int32_t>(mechanisms->size());
+      counts.second =
+         static_cast<int32_t>(std::ranges::count_if(*mechanisms, [](const auto& mechanism) { return mechanism->isEnabled(); }));
+   }
+
+   if (counts_by_type.empty())
+   {
+      _log.emplace_back("this level has no mechanisms");
+      return;
+   }
+
+   // packed a few per line, a level can easily have more types than the console can show
+   constexpr auto types_per_line = 3;
+   std::ostringstream line;
+   auto column = 0;
+   for (const auto& [group, counts] : counts_by_type)
+   {
+      line << group << " " << counts.second << "/" << counts.first << "   ";
+      if (++column == types_per_line)
+      {
+         _log.push_back(line.str());
+         line.str({});
+         column = 0;
+      }
+   }
+
+   if (column > 0)
+   {
+      _log.push_back(line.str());
+   }
+}
+
+void Console::setMechanismTypeEnabled(const std::string& type_filter, bool enabled)
+{
+   const auto level = LevelRegistry::getCurrent();
+   if (!level)
+   {
+      _log.emplace_back("no level loaded");
+      return;
+   }
+
+   const auto needle = toLowerCase(type_filter);
+   const auto mechanisms = level->getMechanismRegistry().searchMechanismsIf(
+      [&needle](const auto& mechanism, std::string_view group)
+      { return toLowerCase(std::string{group}).contains(needle) || toLowerCase(std::string{mechanism->objectName()}).contains(needle); }
+   );
+
+   if (mechanisms.empty())
+   {
+      _log.emplace_back("no mechanism type matching '" + type_filter + "', try 'mechanism list'");
+      return;
+   }
+
+   for (const auto& mechanism : mechanisms)
+   {
+      mechanism->setEnabled(enabled);
+   }
+
+   std::ostringstream message;
+   message << (enabled ? "enabled " : "disabled ") << mechanisms.size() << " mechanism(s) matching '" << type_filter << "'";
+   _log.push_back(message.str());
+}
+
+void Console::listLevels()
+{
+   const auto level_items = Levels::readLevelItems();
+   if (level_items.empty())
+   {
+      _log.emplace_back("no levels listed in data/config/levels.json");
+      return;
+   }
+
+   for (auto index = 0; index < static_cast<int32_t>(level_items.size()); index++)
+   {
+      _log.push_back("  " + std::to_string(index) + ": " + level_items[index]._level_name);
+   }
+}
+
+void Console::loadLevel(const std::string& level_identifier)
+{
+   const auto level_items = Levels::readLevelItems();
+   if (level_items.empty())
+   {
+      _log.emplace_back("no levels listed in data/config/levels.json");
+      return;
+   }
+
+   const auto lowercase = [](std::string text)
+   {
+      std::ranges::transform(text, text.begin(), [](char c) { return static_cast<char>(std::tolower(static_cast<unsigned char>(c))); });
+      return text;
+   };
+
+   // an all-digit identifier is an index into levels.json, anything else is matched against the
+   // level description filenames so that "level load graveyard" works without the full path
+   std::optional<int32_t> matched_index;
+   const auto is_index = !level_identifier.empty() &&
+                         std::ranges::all_of(level_identifier, [](char c) { return std::isdigit(static_cast<unsigned char>(c)) != 0; });
+
+   if (is_index)
+   {
+      const auto index = std::atoi(level_identifier.c_str());
+      if (index >= 0 && index < static_cast<int32_t>(level_items.size()))
+      {
+         matched_index = index;
+      }
+   }
+   else
+   {
+      const auto needle = lowercase(level_identifier);
+      for (auto index = 0; index < static_cast<int32_t>(level_items.size()); index++)
+      {
+         if (lowercase(level_items[index]._level_name).find(needle) != std::string::npos)
+         {
+            matched_index = index;
+            break;
+         }
+      }
+   }
+
+   if (!matched_index.has_value())
+   {
+      _log.push_back("no level matching '" + level_identifier + "', available levels:");
+      listLevels();
+      return;
+   }
+
+   const auto& level_name = level_items[matched_index.value()]._level_name;
+   _log.push_back("loading level " + std::to_string(matched_index.value()) + ": " + level_name);
+
+   // this is the route the lua scripts and checkpoints take for a level change: point the save
+   // state at the level and let the loader pick it up. LevelTransitionHandler is deliberately not
+   // used - that belongs to the in-level LevelTransition mechanism, which also runs a screen fade
+   // and can carry a spawn position, neither of which applies to loading a level from the console.
+   SaveState::getCurrent()._level_index = matched_index.value();
+   CallbackMap::getInstance().call(static_cast<int32_t>(CallbackType::LoadLevel));
+}
+
 const Console::Help& Console::help() const
 {
    return _help;
@@ -746,6 +1168,63 @@ void Console::nextCommand()
    _command = _history[static_cast<size_t>(_history_index)];
 }
 
+void Console::complete()
+{
+   if (_command.empty())
+   {
+      return;
+   }
+
+   std::vector<std::string> matches;
+   for (const auto& [command_name, callback] : _registered_commands)
+   {
+      if (command_name.size() >= _command.size() && command_name.compare(0, _command.size(), _command) == 0)
+      {
+         matches.push_back(command_name);
+      }
+   }
+
+   if (matches.empty())
+   {
+      return;
+   }
+
+   std::ranges::sort(matches);
+
+   if (matches.size() == 1)
+   {
+      _command = matches.front() + ' ';
+      return;
+   }
+
+   // reduce all matches to their longest common prefix so the input can be extended as far as it is unambiguous
+   std::string common_prefix = matches.front();
+   for (const auto& match : matches)
+   {
+      const auto comparable_length = std::min(common_prefix.size(), match.size());
+      size_t prefix_length = 0;
+      while (prefix_length < comparable_length && common_prefix[prefix_length] == match[prefix_length])
+      {
+         ++prefix_length;
+      }
+      common_prefix.resize(prefix_length);
+   }
+
+   _command = common_prefix;
+
+   // print the remaining candidates so the user can decide how to continue typing
+   std::string candidate_line = "  ";
+   for (size_t index = 0; index < matches.size(); ++index)
+   {
+      if (index > 0)
+      {
+         candidate_line += "  ";
+      }
+      candidate_line += matches[index];
+   }
+   _log.push_back(candidate_line);
+}
+
 void Console::addCommand(const std::string& command, CommandFunction callback)
 {
    _registered_commands[command] = callback;
@@ -789,6 +1268,97 @@ const std::deque<std::string>& Console::getLog() const
 void Console::Help::registerCommand(const std::string& topic, const std::string& description, const std::vector<std::string>& examples)
 {
    _help_messages[topic].emplace_back(HelpCommand{description, examples});
+}
+
+std::vector<Console::Help::HelpLine> Console::Help::getVisibleLines(const std::string& filter, size_t max_lines) const
+{
+   using Kind = HelpLine::Kind;
+
+   std::vector<std::string> sorted_topics;
+   sorted_topics.reserve(_help_messages.size());
+   for (const auto& entry : _help_messages)
+   {
+      sorted_topics.push_back(entry.first);
+   }
+   std::ranges::sort(sorted_topics);
+
+   // "help <something>" asks for detail about a command, which is the only case where the examples
+   // are worth the lines they cost
+   const auto trimmed = toLowerCase(filter).substr(0, filter.find_last_not_of(' ') + 1);
+   const auto detailed = trimmed.starts_with(help_prefix);
+   const auto search_term = detailed ? trimmed.substr(help_prefix.size()) : trimmed;
+   const auto needle = search_term.substr(std::min(search_term.find_first_not_of(' '), search_term.size()));
+
+   std::vector<HelpLine> lines;
+
+   // nothing to filter by: list the topics only, so the panel keeps its size as commands are added
+   if (needle.empty() && !detailed)
+   {
+      for (const auto& topic : sorted_topics)
+      {
+         lines.push_back({._kind = Kind::Topic, ._text = topic});
+      }
+      lines.push_back({._kind = Kind::Hint, ._text = "type to filter, 'help <command>' for examples"});
+   }
+   else
+   {
+      for (const auto& topic : sorted_topics)
+      {
+         std::vector<HelpLine> topic_lines;
+
+         // the panel offers the topic names as the way in, so typing one has to select that whole
+         // topic rather than being matched against the command descriptions and finding nothing
+         const auto topic_matches = toLowerCase(topic).contains(needle);
+
+         for (const auto& command : _help_messages.at(topic))
+         {
+            if (!needle.empty() && !topic_matches && !toLowerCase(command.description).contains(needle))
+            {
+               continue;
+            }
+
+            topic_lines.push_back({._kind = Kind::Command, ._text = command.description});
+
+            if (detailed)
+            {
+               for (const auto& example : command.examples)
+               {
+                  topic_lines.push_back({._kind = Kind::Example, ._text = example});
+               }
+            }
+         }
+
+         if (topic_lines.empty())
+         {
+            continue;
+         }
+
+         lines.push_back({._kind = Kind::Topic, ._text = topic});
+         lines.insert(lines.end(), topic_lines.begin(), topic_lines.end());
+      }
+
+      if (lines.empty())
+      {
+         lines.push_back({._kind = Kind::Hint, ._text = "no matching command"});
+      }
+   }
+
+   // hard clamp, so the panel cannot outgrow the screen again however many commands are added
+   if (max_lines > 0 && lines.size() > max_lines)
+   {
+      if (max_lines == 1)
+      {
+         lines.resize(1);
+      }
+      else
+      {
+         const auto hidden = lines.size() - (max_lines - 1);
+         lines.resize(max_lines - 1);
+         lines.push_back({._kind = Kind::Hint, ._text = "+" + std::to_string(hidden) + " more, keep typing"});
+      }
+   }
+
+   return lines;
 }
 
 std::string Console::Help::getFormattedHelp() const
@@ -838,6 +1408,10 @@ void Console::processEvent(sf::Keyboard::Key key)
    else if (key == sf::Keyboard::Key::Down)
    {
       nextCommand();
+   }
+   else if (key == sf::Keyboard::Key::Tab)
+   {
+      complete();
    }
    else if (key == sf::Keyboard::Key::F12)
    {

@@ -10,7 +10,11 @@ DeathShader::DeathShader(uint32_t width, uint32_t height)
 {
    try
    {
+#ifdef DECEPTUS_VRSFML
+      _render_texture = std::make_shared<sf::RenderTexture>(std::move(*sf::RenderTexture::create(sf::Vector2u{width, height})));
+#else
       _render_texture = std::make_shared<sf::RenderTexture>(sf::Vector2u{width, height});
+#endif
    }
    catch (...)
    {
@@ -34,10 +38,17 @@ void DeathShader::initialize()
    _flow_field_1 = TexturePool::getInstance().get("data/effects/flowfield_1.png");
    _flow_field_2 = TexturePool::getInstance().get("data/effects/flowfield_3.png");
 
+#ifdef DECEPTUS_VRSFML
+   _flow_field_1->setWrapMode(sf::TextureWrapMode::Repeat);
+   _flow_field_1->setSmooth(true);
+   _flow_field_2->setWrapMode(sf::TextureWrapMode::Repeat);
+   _flow_field_2->setSmooth(true);
+#else
    _flow_field_1->setRepeated(true);
    _flow_field_1->setSmooth(true);
    _flow_field_2->setRepeated(true);
    _flow_field_2->setSmooth(true);
+#endif
 
    _shader.setUniform("current_texture", sf::Shader::CurrentTexture);
    _shader.setUniform("flowfield_1", *_flow_field_1);
@@ -63,13 +74,13 @@ void DeathShader::update(const sf::Time& dt)
    _shader.setUniform(
       "flowfield_offset",
       PlayerRegistry::getFirst()->isPointingLeft() ? sf::Glsl::Vec2(0.5f, -0.32f)  // picked randomly
-                                             : sf::Glsl::Vec2(0.8f, 0.8f)
+                                                   : sf::Glsl::Vec2(0.8f, 0.8f)
    );
 }
 
 const sf::Shader& DeathShader::getShader() const
 {
-   return _shader;
+   return _shader.native();
 }
 
 const std::shared_ptr<sf::RenderTexture>& DeathShader::getRenderTexture() const

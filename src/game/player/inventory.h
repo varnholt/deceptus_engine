@@ -12,6 +12,16 @@ struct Inventory
    /// \brief creates an inventory and loads item descriptions from data files.
    Inventory();
 
+   ///
+   /// \brief Returns the inventory item descriptions, reading them on first use.
+   ///
+   /// Deliberately not read in the constructor. SaveState keeps its save slots in a static array, so
+   /// every Inventory is constructed during static initialization - before main() has mounted romfs
+   /// and changed into it. On the console the relative path therefore resolved against nothing, the
+   /// descriptions came back empty, and the first item picked up had no icon to show for it.
+   ///
+   const std::vector<InventoryItemDescriptionReader::InventoryItemDescription>& getDescriptions() const;
+
    /// \brief adds an item key, auto-fills a free slot, and notifies updated/added callbacks.
    /// \param item item key to append to the inventory list.
    void add(const std::string&);
@@ -85,7 +95,7 @@ struct Inventory
    std::array<std::string, 2> _slots;
 
    // additional inventory data
-   std::vector<InventoryItemDescriptionReader::InventoryItemDescription> _descriptions;
+   mutable std::vector<InventoryItemDescriptionReader::InventoryItemDescription> _descriptions;  //!< see getDescriptions()
 };
 
 /// \brief serializes inventory items and slot assignments to json.

@@ -85,8 +85,8 @@ local aim_hold_duration_s     = 1.0
 local recover_duration_s      = 2.0
 
 -- world-space references (kept here to avoid global lookups and simplify testing)
-local archer_position         = vector2.Vector2D(0, 0)
-local player_position         = vector2.Vector2D(0, 0)
+local archer_position_px         = vector2.Vector2D(0, 0)
+local player_position_px         = vector2.Vector2D(0, 0)
 
 -- visual state (sprite, input, orientation)
 -- we keep rendering and input intent here, separate from ai logic in the state machine.
@@ -218,16 +218,16 @@ function move_right()
 end
 
 function movedTo(x, y)
-   archer_position = vector2.Vector2D(x, y)
+   archer_position_px = vector2.Vector2D(x, y)
 end
 
 function playerMovedTo(x, y)
-   player_position = vector2.Vector2D(x, y)
+   player_position_px = vector2.Vector2D(x, y)
 end
 
 -- align sprite orientation to the player's side (no movement)
 local function align_orientation_towards_player()
-   archer_visual_state.facing_left = (player_position:getX() < archer_position:getX())
+   archer_visual_state.facing_left = (player_position_px:getX() < archer_position_px:getX())
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -235,33 +235,33 @@ end
 -- we keep these pure and reusable so transition rules stay readable.
 
 local function is_facing_player()
-   local player_is_left = player_position:getX() < archer_position:getX()
+   local player_is_left = player_position_px:getX() < archer_position_px:getX()
    return player_is_left == archer_visual_state.facing_left
 end
 
 local function follow_player()
    -- move just enough to bring player into aim range, then stop and face them.
-   local epsilon_pixels = aim_distance_tiles * 24
-   if player_position:getX() > archer_position:getX() + epsilon_pixels then
+   local epsilon_px = aim_distance_tiles * 24
+   if player_position_px:getX() > archer_position_px:getX() + epsilon_px then
       move_right()
-   elseif player_position:getX() < archer_position:getX() - epsilon_pixels then
+   elseif player_position_px:getX() < archer_position_px:getX() - epsilon_px then
       move_left()
    else
-      archer_visual_state.facing_left = player_position:getX() < archer_position:getX()
+      archer_visual_state.facing_left = player_position_px:getX() < archer_position_px:getX()
       archer_visual_state.key_pressed_mask = 0
    end
 end
 
 local function is_player_in_follow_range()
-   local dx_tiles = math.abs(archer_position:getX() // 24 - player_position:getX() // 24)
+   local dx_tiles = math.abs(archer_position_px:getX() // 24 - player_position_px:getX() // 24)
    return dx_tiles < follow_distance_tiles
 end
 
 local function is_player_in_shoot_range()
    if not is_facing_player() then return false end
-   local dx_tiles = (archer_position:getX() - player_position:getX()) / 24.0
+   local dx_tiles = (archer_position_px:getX() - player_position_px:getX()) / 24.0
    if math.abs(dx_tiles) > aim_distance_tiles then return false end
-   local dy_tiles = math.abs(archer_position:getY() // 24 - player_position:getY() // 24)
+   local dy_tiles = math.abs(archer_position_px:getY() // 24 - player_position_px:getY() // 24)
    return dy_tiles <= 1
 end
 
@@ -317,7 +317,7 @@ archer_state_machine
       if is_player_in_follow_range() then
          follow_player()
       else
-         local handled = patrol_behavior:update_move(delta_time, archer_position, move_left, move_right)
+         local handled = patrol_behavior:update_move(delta_time, archer_position_px, move_left, move_right)
          if not handled then
             archer_visual_state.key_pressed_mask = 0
          end
@@ -364,7 +364,7 @@ on_update = function(delta_time, sm)
       archer_visual_state.key_pressed_mask = 0
       if not shot_fired_in_this_cycle and archer_visual_state.sprite_index == 0 then
          local velocity_x = archer_visual_state.facing_left and -arrow_speed_units or arrow_speed_units
-         useWeapon(0, archer_position:getX(), archer_position:getY(), velocity_x, 0.0)
+         useWeapon(0, archer_position_px:getX(), archer_position_px:getY(), velocity_x, 0.0)
          shot_fired_in_this_cycle = true
       end
    end,

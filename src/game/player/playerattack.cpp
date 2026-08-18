@@ -101,12 +101,12 @@ PlayerAttack::AttackResult PlayerAttack::attack(
          if (in_air)
          {
             _timepoint_attack_jumping_start = now;
-            Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
+            Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.ogg", (std::rand() % 9) + 1)});
          }
          else if (controls->isBendDownActive())
          {
             _timepoint_attack_bend_down_start = now;
-            Audio::getInstance().playSample({std::format("player_sword_kneeling_{:02}.wav", (std::rand() % 4) + 1)});
+            Audio::getInstance().playSample({std::format("player_sword_kneeling_{:02}.ogg", (std::rand() % 4) + 1)});
          }
          else
          {
@@ -115,11 +115,17 @@ PlayerAttack::AttackResult PlayerAttack::attack(
             controls->lockOrientation(
                std::chrono::duration_cast<std::chrono::milliseconds>(animation->getSwordAttackDurationStanding(points_to_left))
             );
-            Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.wav", (std::rand() % 9) + 1)});
+            Audio::getInstance().playSample({std::format("player_sword_standing_{:02}.ogg", (std::rand() % 9) + 1)});
          }
 
          dynamic_pointer_cast<PlayerSword>(weapon_system._selected)->use(world, dir);
          return AttackResult::Executed;
+      }
+
+      case WeaponType::Harpoon:
+      {
+         // the harpoon is fired from PlayerHarpoon, it toggles a rope instead of dealing a hit
+         return AttackResult::Discarded;
       }
 
       case WeaponType::None:

@@ -9,6 +9,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/camera/camerasystem.h"
 #include "game/constants.h"
 #include "game/effects/fadetransitioneffect.h"
@@ -32,25 +33,32 @@ std::string_view Portal::objectName() const
    return "Portal";
 }
 
-void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& /*normal*/)
+void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& normal)
+{
+   draw(window, normal, {});
+}
+
+void Portal::draw(sf::RenderTarget& window, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    // bump maps are not supported for now
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
    for (const auto& sprite : _sprites)
    {
-      window.draw(sprite);
+      window.draw(sprite, draw_states);
    }
 }
 
 sf::Vector2f Portal::getPortalPosition()
 {
-   auto portal_pos = _sprites.at(_sprites.size() - 1).getPosition();
+   auto portal_pos = sfcompat::getPosition(_sprites.at(_sprites.size() - 1));
    portal_pos.y--;
    return portal_pos;
 }
 
 const sf::Vector2f& Portal::getTilePosition() const
 {
-   return _tile_positions;
+   return _positions_tl;
 }
 
 void Portal::lock()
@@ -93,7 +101,7 @@ void goToPortal(auto portal)
    auto dst_position_px = portal->getDestination()->getPortalPosition();
 
    PlayerRegistry::getFirst()->setBodyViaPixelPosition(
-      dst_position_px.x + PLAYER_ACTUAL_WIDTH / 2, dst_position_px.y + DIFF_PLAYER_TILE_TO_PHYSICS
+      dst_position_px.x + PLAYER_ACTUAL_WIDTH_PX / 2, dst_position_px.y + DIFF_PLAYER_TILE_TO_PHYSICS_PX
    );
 
    // update the camera system to point to the player position immediately
@@ -140,7 +148,7 @@ void Portal::setDestination(const std::shared_ptr<Portal>& dst)
 
 void Portal::update(const sf::Time& /*dt*/)
 {
-   const auto player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
+   const auto player_intersects = sfcompat::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rect).has_value();
 
    // activate portal when player intersects
    if (!_player_intersects && player_intersects)
@@ -167,16 +175,19 @@ void Portal::update(const sf::Time& /*dt*/)
    int32_t i = 0;
    for (auto& sprite : _sprites)
    {
-      sprite.setColor(sf::Color(
-         255,
-         255,  // atPortal ? 150 : 255,
-         255   // atPortal ? 150 : 255
-      ));
+      sfcompat::setColor(
+         sprite,
+         sf::Color(
+            255,
+            255,  // atPortal ? 150 : 255,
+            255   // atPortal ? 150 : 255
+         )
+      );
 
-      const auto x = static_cast<int32_t>(_tile_positions.x);
-      const auto y = static_cast<int32_t>(_tile_positions.y);
+      const auto x = static_cast<int32_t>(_positions_tl.x);
+      const auto y = static_cast<int32_t>(_positions_tl.y);
 
-      sprite.setPosition(sf::Vector2f(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>((i + y) * PIXELS_PER_TILE)));
+      sfcompat::setPosition(sprite, sf::Vector2f(static_cast<float>(x * PIXELS_PER_TILE), static_cast<float>((i + y) * PIXELS_PER_TILE)));
 
       i++;
    }
@@ -290,7 +301,7 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
             for (auto& p : portals)
             {
                auto tmp = std::dynamic_pointer_cast<Portal>(p);
-               if (static_cast<uint32_t>(tmp->_tile_positions.x) == i && static_cast<uint32_t>(tmp->_tile_positions.y) + 1 == j)
+               if (static_cast<uint32_t>(tmp->_positions_tl.x) == i && static_cast<uint32_t>(tmp->_positions_tl.y) + 1 == j)
                {
                   portal = tmp;
                   break;
@@ -301,8 +312,8 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
             {
                portal = std::make_shared<Portal>(parent);
                portals.push_back(portal);
-               portal->_tile_positions.x = static_cast<float>(i);
-               portal->_tile_positions.y = static_cast<float>(j);
+               portal->_positions_tl.x = static_cast<float>(i);
+               portal->_positions_tl.y = static_cast<float>(j);
                portal->_texture = TexturePool::getInstance().get((data._base_path / data._tmx_tileset->_image->_source).string());
                portal->_rect = sf::FloatRect{{static_cast<float>(i), static_cast<float>(j)}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}};
 
@@ -317,10 +328,14 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
             const int32_t tu = (tile_number - firstId) % (portal->_texture->getSize().x / tilesize.x);
             const int32_t tv = (tile_number - firstId) / (portal->_texture->getSize().x / tilesize.x);
 
+#ifdef DECEPTUS_VRSFML
+            sf::Sprite sprite;
+#else
             sf::Sprite sprite(*portal->_texture);
-            sprite.setTextureRect(sf::IntRect({tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}));
+#endif
+            sfcompat::setTextureRect(sprite, sf::IntRect({tu * PIXELS_PER_TILE, tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}));
 
-            sprite.setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
+            sfcompat::setPosition(sprite, sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
 
             portal->addSprite(sprite);
          }

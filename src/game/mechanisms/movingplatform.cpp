@@ -10,6 +10,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
@@ -17,6 +18,7 @@
 #include "game/mechanisms/gamemechanismdeserializerregistry.h" 0
 #include "game/player/playerregistry.h"
 
+#include <array>
 #include <cmath>
 #include <numbers>
 
@@ -31,9 +33,25 @@ double cosineInterpolate(double y1, double y2, double mu)
    return ((y1 * (1.0 - mu2)) + (y2 * mu2));
 }
 
+static constexpr int32_t default_moving_platform_platform_width_tl = 4;
+
+static constexpr std::array moving_platform_properties{
+   PropertyInfo{.name = "platform_width_tl", .type = "int", .default_value = default_moving_platform_platform_width_tl},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "interpolation_time", .type = "float", .default_value = 0.0f},
+};
+static constexpr MechanismSchema moving_platform_schema{
+   .type_name = "MovingPlatform",
+   .layer_name = "moving_platforms",
+   .default_width = 0,
+   .default_height = 0,
+   .properties = moving_platform_properties,
+};
 const auto registered_moving_platform = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(moving_platform_schema);
+
    registry.mapGroupToLayer("MovingPlatform", "moving_platforms");
 
    registry.registerLayerName(
@@ -76,38 +94,37 @@ std::string_view MovingPlatform::objectName() const
 
 void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   for (auto& sprite : _sprites)
-   {
-      sprite.setTexture(*_texture_map);
-   }
+   draw(color, normal, {});
+}
 
+void MovingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+   sf::RenderStates color_states = states;
+   color_states.texture = _texture_map.get();
    for (const auto& sprite : _sprites)
    {
-      color.draw(sprite);
+      color.draw(sprite, color_states);
    }
 
    if (_normal_map)
    {
-      for (auto& sprite : _sprites)
-      {
-         sprite.setTexture(*_normal_map);
-      }
-
+      sf::RenderStates normal_states = states;
+      normal_states.texture = _normal_map.get();
       for (const auto& sprite : _sprites)
       {
-         normal.draw(sprite);
+         normal.draw(sprite, normal_states);
       }
    }
 }
 
 const std::vector<sf::Vector2f>& MovingPlatform::getPixelPath() const
 {
-   return _pixel_path;
+   return _path_px;
 }
 
 float MovingPlatform::getDx() const
 {
-   return _pos.x - _pos_prev.x;
+   return _pos_m.x - _pos_prev_m.x;
 }
 
 b2Body* MovingPlatform::getBody()
@@ -131,8 +148,8 @@ void MovingPlatform::setEnabled(bool enabled)
 
 void MovingPlatform::setupTransform()
 {
-   auto pos_x_m = static_cast<float>(_tile_positions.x) * PIXELS_PER_TILE / PPM;
-   auto pos_y_m = static_cast<float>(_tile_positions.y) * PIXELS_PER_TILE / PPM;
+   auto pos_x_m = static_cast<float>(_positions_tl.x) * PIXELS_PER_TILE / PPM;
+   auto pos_y_m = static_cast<float>(_positions_tl.y) * PIXELS_PER_TILE / PPM;
    _body->SetTransform(b2Vec2(pos_x_m, pos_y_m), 0);
 }
 
@@ -195,7 +212,7 @@ void MovingPlatform::setup(const GameDeserializeData& data)
    // read properties
    const auto& map = data._tmx_object->_properties->_map;
    setZ(ValueReader::readValue<int32_t>("z", map).value_or(static_cast<int32_t>(ZDepth::ForegroundMin)));
-   _platform_width_tl = ValueReader::readValue<int32_t>("platform_width_tl", map).value_or(4);
+   _platform_width_tl = ValueReader::readValue<int32_t>("platform_width_tl", map).value_or(default_moving_platform_platform_width_tl);
    const auto interpolation_time = ValueReader::readValue<float>("interpolation_time", map);
 
    // animation
@@ -259,8 +276,13 @@ void MovingPlatform::setup(const GameDeserializeData& data)
          }
       }
 
+#ifdef DECEPTUS_VRSFML
+      sf::Sprite sprite;
+#else
       sf::Sprite sprite(*_texture_map);
-      sprite.setTextureRect(
+#endif
+      sfcompat::setTextureRect(
+         sprite,
          sf::IntRect(
             {tu_tl * PIXELS_PER_TILE, tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}
             // 1 platform tile and one background tile for perspective
@@ -293,7 +315,7 @@ void MovingPlatform::setup(const GameDeserializeData& data)
       platform_pos_m.y = y_px * MPP;
 
       _interpolation.addKey(platform_pos_m, time);
-      _pixel_path.emplace_back((data._tmx_object->_x_px + poly_pos_px.x), (data._tmx_object->_y_px + poly_pos_px.y));
+      _path_px.emplace_back((data._tmx_object->_x_px + poly_pos_px.x), (data._tmx_object->_y_px + poly_pos_px.y));
 
       platform_x_min_m = std::min(platform_pos_m.x, platform_x_min_m);
       platform_y_min_m = std::min(platform_pos_m.y, platform_y_min_m);
@@ -380,9 +402,9 @@ void MovingPlatform::update(const sf::Time& delta_time)
    }
 
    _body->SetLinearVelocity(_velocity);
-   _pos_prev = _pos;
-   _pos.x = _body->GetPosition().x;
-   _pos.y = _body->GetPosition().y;
+   _pos_prev_m = _pos_m;
+   _pos_m.x = _body->GetPosition().x;
+   _pos_m.y = _body->GetPosition().y;
 
    auto& platform = PlayerRegistry::getFirst()->getPlatform();
    if (platform.getPlatformBody() == _body)
@@ -413,7 +435,7 @@ void MovingPlatform::update(const sf::Time& delta_time)
       const auto pos_body_x_px = (_body->GetPosition().x * PPM) + (horizontal * sprite_index * PIXELS_PER_TILE);
       const auto pos_body_y_px = (_body->GetPosition().y * PPM) - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
 
-      sprite.setPosition({pos_body_x_px, pos_body_y_px});
+      sfcompat::setPosition(sprite, {pos_body_x_px, pos_body_y_px});
       auto update_sprite_rect = false;
       auto texture_u = 0;
       auto texture_v = 0;
@@ -454,7 +476,14 @@ void MovingPlatform::update(const sf::Time& delta_time)
 
       if (update_sprite_rect)
       {
+#ifdef DECEPTUS_VRSFML
+         sprite.textureRect = {
+            {static_cast<float>(texture_u), static_cast<float>(texture_v)},
+            {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE * 2)}
+         };
+#else
          sprite.setTextureRect({{texture_u, texture_v}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 2}});
+#endif
       }
 
       sprite_index++;

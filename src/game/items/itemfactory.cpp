@@ -1,7 +1,7 @@
 #include "itemfactory.h"
 
 #include "framework/tools/stringutils.h"
-#include "game/items/itemlantern.h"
+#include "game/items/itemheadtorch.h"
 #include "game/items/itemplayerfirefly.h"
 
 #include <unordered_map>
@@ -9,7 +9,7 @@
 std::shared_ptr<Item> ItemFactory::create(const std::string& item_name)
 {
    static const std::unordered_map<std::string, std::shared_ptr<Item>> factory_map = {
-      {"lantern", std::make_shared<ItemLantern>()},
+      {"headtorch", std::make_shared<ItemHeadTorch>()},
       {"playerfirefly", std::make_shared<ItemPlayerFirefly>()},
    };
 

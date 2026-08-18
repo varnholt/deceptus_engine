@@ -2,8 +2,10 @@
 
 #include <SFML/Graphics.hpp>
 #include <map>
+#include <optional>
 
 #include "framework/image/layer.h"
+#include "framework/tools/sfmlshader.h"
 #include "game/animation/animation.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
@@ -27,7 +29,13 @@ public:
    /// \brief draws gateway layers, rotating side parts, void shader effect, and eye animation.
    /// \param target render target.
    /// \param normal normal-map render target (unused).
-   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
+   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
+   /// \brief draws gateway layers, rotating side parts, void shader effect, and eye animation with explicit render states (used in WASM to
+   /// carry the level view). \param target render target. \param normal normal-map render target (unused). \param states render states to
+   /// apply.
+   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief updates activation state, side animations, eye tracking, and optional teleport use.
    /// \param dt elapsed frame time.
@@ -44,6 +52,14 @@ public:
    /// \brief sets the destination gateway object id used by teleport.
    /// \param destination_gateway_id object id of the destination gateway.
    void setTargetId(const std::string& destination_gateway_id);
+
+   /// \brief writes whether the gateway has been activated into save data.
+   /// \param json json object to write state fields into.
+   void serializeState(nlohmann::json& json) override;
+
+   /// \brief restores the activated state from save data.
+   /// \param json json object containing previously serialized state.
+   void deserializeState(const nlohmann::json& json) override;
 
 private:
    enum class State
@@ -86,7 +102,8 @@ private:
 
       /// \brief draws the currently active eye animation.
       /// \param target render target.
-      void draw(sf::RenderTarget& target);
+      /// \param states render states to apply.
+      void draw(sf::RenderTarget& target, const sf::RenderStates& states = sf::RenderStates{});
 
       /// \brief updates iris state, animation playback, and gaze tracking towards the player.
       /// \param dt elapsed frame time.
@@ -176,8 +193,13 @@ private:
    std::shared_ptr<Layer> _layer_background_inactive;
    std::shared_ptr<Layer> _layer_background_active;
 
+#ifdef DECEPTUS_VRSFML
+   sf::RectangleShape _rect_shape{sf::RectangleShape::Data {}};
+   sf::CircleShape _origin_shape{sf::CircleShape::Data {}};
+#else
    sf::RectangleShape _rect_shape;
    sf::CircleShape _origin_shape;
+#endif
 
    std::string _filename;
    std::vector<std::shared_ptr<Layer>> _layer_stack;
@@ -206,7 +228,19 @@ private:
    /// \param target render target.
    void drawVoid(sf::RenderTarget& target);
 
-   sf::Shader _shader;
+   sfcompat::Shader _shader;
+#ifdef DECEPTUS_VRSFML
+   std::optional<sf::Texture> _noise_texture;
+   std::string _default_texture_path{"data/effects/gabor_6.png"};
+   std::unique_ptr<sf::RenderTexture> _shader_texture;
+   std::unique_ptr<sf::Sprite> _shader_sprite;
+   float _radius_factor = 1.0f;
+   float _shader_alpha = 0.7f;
+   float _void_alpha = 0.0f;
+   float _time_factor = 4.0f;
+   float _noise_scale = 10.0;
+   sf::Vector3f _swirl_color{0.0f, 0.5f, 0.8f};
+#else
    std::unique_ptr<sf::RenderTexture> _shader_texture;
    std::unique_ptr<sf::Sprite> _shader_sprite;
    float _radius_factor = 1.0f;
@@ -217,6 +251,7 @@ private:
    sf::Vector3f _swirl_color{0.0f, 0.5f, 0.8f};
    sf::Texture _noise_texture;
    std::string _default_texture_path{"data/effects/gabor_6.png"};
+#endif
 
    // flowfield
    std::optional<std::string> _flowfield_reference_id;

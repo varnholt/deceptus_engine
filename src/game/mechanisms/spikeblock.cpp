@@ -1,8 +1,10 @@
 #include "spikeblock.h"
 
+#include <array>
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
@@ -26,9 +28,21 @@
 
 namespace
 {
+static constexpr int32_t default_spike_block_z = 20;
+static constexpr std::array spike_block_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_spike_block_z},
+};
+static constexpr MechanismSchema spike_block_schema{
+   .type_name = "SpikeBlock",
+   .layer_name = "spike_blocks",
+   .default_width = 24,
+   .default_height = 24,
+   .properties = spike_block_properties,
+};
 const auto registered_spikeblock = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(spike_block_schema);
    registry.mapGroupToLayer("SpikeBlock", "spike_blocks");
 
    registry.registerLayerName(
@@ -75,8 +89,12 @@ void SpikeBlock::setup(const GameDeserializeData& data)
    setObjectId(data._tmx_object->_name);
 
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_spikeblock.png");
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture_map);
-   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+#endif
+   sfcompat::setPosition(*_sprite, {data._tmx_object->_x_px, data._tmx_object->_y_px});
 
    _rectangle = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
@@ -131,7 +149,14 @@ void SpikeBlock::updateSpriteRect()
    _tu_tl = _sprite_index_current % count_columns;
    _tv_tl = _sprite_index_current / count_columns;
 
+#ifdef DECEPTUS_VRSFML
+   _sprite->textureRect = {
+      {static_cast<float>(_tu_tl * PIXELS_PER_TILE), static_cast<float>(_tv_tl * PIXELS_PER_TILE)},
+      {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+   };
+#else
    _sprite->setTextureRect({{_tu_tl * PIXELS_PER_TILE, _tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+#endif
 }
 
 const sf::FloatRect& SpikeBlock::getPixelRect() const
@@ -139,10 +164,24 @@ const sf::FloatRect& SpikeBlock::getPixelRect() const
    return _rectangle;
 }
 
+#ifdef DECEPTUS_VRSFML
+void SpikeBlock::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void SpikeBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture_map.get();
+   target.draw(*_sprite, draw_states);
+}
+#else
 void SpikeBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    target.draw(*_sprite);
 }
+#endif
 
 void SpikeBlock::update(const sf::Time& dt)
 {
@@ -162,7 +201,7 @@ void SpikeBlock::update(const sf::Time& dt)
       }
    }
 
-   if (PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rectangle).has_value())
+   if (sfcompat::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rectangle).has_value())
    {
       if (_sprite_index_current >= _sprite_index_deadly_min && _sprite_index_current <= _sprite_index_deadly_max)
       {

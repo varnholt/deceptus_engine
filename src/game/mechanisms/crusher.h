@@ -39,6 +39,13 @@ public:
    /// \param normal normal render target.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
 
+   /// \brief draws crusher mount, pusher, and spike sprites with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal render target.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief updates crusher state machine, motion, and collision transform.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
@@ -81,7 +88,7 @@ private:
    Alignment _alignment = Alignment::PointsDown;
 
    b2Body* _body{nullptr};
-   sf::Vector2f _pixel_position;
+   sf::Vector2f _position_px;
    sf::Vector2f _blade_offset;
    sf::FloatRect _rect;
 
@@ -96,9 +103,9 @@ private:
    std::unique_ptr<sf::Sprite> _sprite_spike;
    std::unique_ptr<sf::Sprite> _sprite_pusher;
    std::unique_ptr<sf::Sprite> _sprite_mount;
-   sf::Vector2f _pixel_offset_mount;
-   sf::Vector2f _pixel_offset_pusher;
-   sf::Vector2f _pixel_offset_spike;
+   sf::Vector2f _offset_mount_px;
+   sf::Vector2f _offset_pusher_px;
+   sf::Vector2f _offset_spike_px;
 
    bool _shake{true};
    bool _shake_shown{false};

@@ -5,11 +5,11 @@
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
-#include "box2d/box2d.h"
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <filesystem>
+#include "box2d/box2d.h"
 
 struct TmxLayer;
 struct TmxObject;
@@ -39,6 +39,13 @@ public:
    /// \param color color render target.
    /// \param normal normal render target.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
+   /// \brief draws platform sprites with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal render target.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief updates path movement, enable-ramp lag, player coupling, and wheel animations.
    /// \param dt elapsed frame time.
@@ -88,14 +95,14 @@ private:
    int32_t _animated_tile_index_1 = 0;
    float _animation_elapsed = 0.0f;
    b2Body* _body = nullptr;
-   sf::Vector2i _tile_positions;
+   sf::Vector2i _positions_tl;
    int32_t _platform_width_tl = 0;
    float _lever_lag = 0.0f;
    bool _initialized = false;
    PathInterpolation<b2Vec2> _interpolation;
    b2Vec2 _velocity{};
-   std::vector<sf::Vector2f> _pixel_path;
+   std::vector<sf::Vector2f> _path_px;
    sf::FloatRect _rect;
-   sf::Vector2f _pos;
-   sf::Vector2f _pos_prev;
+   sf::Vector2f _pos_m;
+   sf::Vector2f _pos_prev_m;
 };

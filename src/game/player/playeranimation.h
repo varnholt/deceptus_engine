@@ -1,7 +1,7 @@
 #pragma once
 
-#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
+#include "box2d/box2d.h"
 
 #include <array>
 #include <optional>
@@ -37,6 +37,7 @@ public:
       bool _points_left = false;
       bool _points_right = false;
       bool _climb_joint_present = false;
+      bool _hanging_on_rope = false;  //!< true on the harpoon rope and on a grab rope alike
       bool _moving_left = false;
       bool _moving_right = false;
       bool _wall_sliding = false;
@@ -180,6 +181,13 @@ private:
    /// \param data current animation context.
    /// \return double-jump animation while double-jump timing is active, otherwise empty.
    std::optional<std::shared_ptr<Animation>> processDoubleJumpAnimation(const PlayerAnimationData& data);
+
+   /// \brief fills in a mid-air animation while the player hangs on the harpoon rope.
+   /// \param next_cycle animation picked by the previous steps, kept when already set.
+   /// \param data current animation context.
+   /// \return mid-air animation while hanging without another candidate, otherwise empty.
+   std::optional<std::shared_ptr<Animation>>
+   processRopeHangAnimation(const std::shared_ptr<Animation>& next_cycle, const PlayerAnimationData& data);
 
    /// \brief forces idle/swim animation during screen transition mode.
    /// \param data current animation context.

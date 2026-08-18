@@ -37,7 +37,11 @@ public:
    /// \brief draws all visible PSD-backed layers of the page.
    /// \param window render target that receives the page layers.
    /// \param states render states used for drawing.
+#ifdef DECEPTUS_VRSFML
+   virtual void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{});
+#else
    virtual void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+#endif
 
    /// \brief advances page-specific state and animations.
    /// \param dt elapsed frame time passed by the menu manager.
@@ -64,6 +68,10 @@ public:
    /// \brief handles a down navigation action.
    virtual void down() {};
 
+   /// \brief handles a keyboard key press forwarded from the menu container.
+   /// \param key pressed keyboard key to interpret.
+   virtual void keyboardKeyPressed(sf::Keyboard::Key /*key*/){};
+
    /// \brief starts a transition that slides the page out to the left.
    void moveOutToLeft();
 
@@ -81,6 +89,12 @@ public:
    std::optional<Animation> getAnimation() const;
 
 protected:
+   /// \brief applies the page's screen-space view to the given render states.
+   ///        needed because 'draw' takes its states by value, so subclasses drawing after the base
+   ///        implementation would otherwise lose the view (which travels in the states on wasm).
+   /// \param states render states to update; no-op on desktop, where the view lives on the target.
+   void applyPageView(sf::RenderStates& states) const;
+
    /// \brief loads layers from the configured PSD file into drawable page structures.
    void load();
 

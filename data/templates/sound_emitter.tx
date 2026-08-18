@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="SoundEmitter" width="192" height="192">
+  <properties>
+   <property name="filename" type="string" value=""/>
+   <property name="looped" type="bool" value="true"/>
+   <property name="radius_near_px" type="float" value="200"/>
+   <property name="volume_near" type="float" value="1.0"/>
+   <property name="radius_far_px" type="float" value="600"/>
+   <property name="volume_far" type="float" value="0.0"/>
+  </properties>
+ </object>
+</template>

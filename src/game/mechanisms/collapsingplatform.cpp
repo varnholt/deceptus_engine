@@ -1,5 +1,6 @@
 #include "collapsingplatform.h"
 
+#include <array>
 #include <iostream>
 
 #include "audio/audio.h"
@@ -9,6 +10,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -16,9 +18,22 @@
 
 namespace
 {
+static constexpr int32_t default_collapsing_platform_z = 0;
+static constexpr std::array collapsing_platform_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_collapsing_platform_z},
+};
+static constexpr MechanismSchema collapsing_platform_schema{
+   .type_name = "CollapsingPlatform",
+   .layer_name = "collapsing_platforms",
+   .default_width = 96,
+   .default_height = 24,
+   .properties = collapsing_platform_properties,
+};
 const auto registered_collapsingplatform = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(collapsing_platform_schema);
+
    registry.mapGroupToLayer("CollapsingPlatform", "collapsing_platforms");
 
    registry.registerLayerName(
@@ -83,7 +98,7 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    readFloatProperty(_settings.fall_speed, "fall_speed");
    readFloatProperty(_settings.time_to_respawn_s, "time_to_respawn_s");
    readFloatProperty(_settings.fade_in_duration_s, "fade_in_duration_s");
-   setZ(ValueReader::readValue<int32_t>("z", map).value_or(0));
+   setZ(ValueReader::readValue<int32_t>("z", map).value_or(default_collapsing_platform_z));
 
    // set up shape
    //
@@ -149,7 +164,11 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    auto row_index = 0;
    for (auto& block : _blocks)
    {
+#ifdef DECEPTUS_VRSFML
+      block._sprite = std::make_unique<sf::Sprite>();
+#else
       block._sprite = std::make_unique<sf::Sprite>(*_texture);
+#endif
       block._x_px = x + sprite_offset_x_px;
       block._y_px = y + sprite_offset_y_px;
       block._sprite_row = row_index % 4;
@@ -168,19 +187,26 @@ std::string_view CollapsingPlatform::objectName() const
 
 void CollapsingPlatform::preload()
 {
-   Audio::getInstance().addSample("mechanism_collapsing_platform_crumble.wav");
+   Audio::getInstance().addSample("mechanism_collapsing_platform_crumble.ogg");
 }
 
-void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void CollapsingPlatform::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (_blocks.empty() || _blocks[0]._sprite_column == sprite_column_count)
    {
       return;
    }
 
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
    for (auto& block : _blocks)
    {
-      color.draw(*block._sprite);
+      color.draw(*block._sprite, draw_states);
    }
 }
 
@@ -195,7 +221,7 @@ void CollapsingPlatform::updateRespawnAnimation()
    {
       for (auto& block : _blocks)
       {
-         block._sprite->setColor(sf::Color{255, 255, 255, 255});
+         sfcompat::setColor(*block._sprite, sf::Color{255, 255, 255, 255});
       }
 
       _respawning = false;
@@ -212,7 +238,7 @@ void CollapsingPlatform::updateRespawnAnimation()
       for (auto& block : _blocks)
       {
          block._alpha = static_cast<uint8_t>(255.0f * alpha_normalized);
-         block._sprite->setColor(sf::Color{255, 255, 255, block._alpha});
+         sfcompat::setColor(*block._sprite, sf::Color{255, 255, 255, block._alpha});
       }
    }
 }
@@ -224,7 +250,9 @@ void CollapsingPlatform::updateRespawn(const sf::Time& dt)
    // bring collapsed blocks back after some time
    if (!_respawning && _time_since_collapse.asSeconds() > _settings.time_to_respawn_s)
    {
-      if (PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect_px).has_value())
+      const auto player_rect_float = PlayerRegistry::getFirst()->getPixelRectFloat();
+      const auto player_intersects_rect = sfcompat::findIntersection(player_rect_float, _rect_px).has_value();
+      if (player_intersects_rect)
       {
          // shift respawn time while player intersects
          _time_since_collapse = sf::seconds(_settings.time_to_respawn_s);
@@ -307,7 +335,7 @@ void CollapsingPlatform::update(const sf::Time& dt)
    {
       if (!_played_shake_sample)
       {
-         Audio::getInstance().playSample({"mechanism_collapsing_platform_crumble.wav"});
+         Audio::getInstance().playSample({"mechanism_collapsing_platform_crumble.ogg"});
          _played_shake_sample = true;
       }
 
@@ -326,7 +354,7 @@ void CollapsingPlatform::update(const sf::Time& dt)
    {
       if (_played_shake_sample)
       {
-         Audio::getInstance().stopSample("mechanism_collapsing_platform_crumble.wav");
+         Audio::getInstance().stopSample("mechanism_collapsing_platform_crumble.ogg");
          _played_shake_sample = false;
       }
 
@@ -357,7 +385,10 @@ std::optional<sf::FloatRect> CollapsingPlatform::getBoundingBoxPx()
 
 void CollapsingPlatform::beginContact(b2Contact* /*contact*/, FixtureNode* other)
 {
-   if (other->getType() != ObjectTypePlayerFootSensor)
+   // other is whatever touched the platform, and it does not have to carry a FixtureNode at all:
+   // the contact listener hands over whatever the fixture's user data was, so fixtures created
+   // without any - the harpoon rope segments, for one - arrive here as a nullptr
+   if (!other || other->getType() != ObjectTypePlayerFootSensor)
    {
       return;
    }
@@ -367,7 +398,7 @@ void CollapsingPlatform::beginContact(b2Contact* /*contact*/, FixtureNode* other
 
 void CollapsingPlatform::endContact(FixtureNode* other)
 {
-   if (other->getType() != ObjectTypePlayerFootSensor)
+   if (!other || other->getType() != ObjectTypePlayerFootSensor)
    {
       return;
    }
@@ -379,9 +410,12 @@ void CollapsingPlatform::updateBlockSprites()
 {
    for (auto& block : _blocks)
    {
-      block._sprite->setPosition({block._x_px + block._shake_x_px, block._y_px + block._shake_y_px + block._fall_offset_y_px});
-      block._sprite->setTextureRect(
-         {{block._sprite_column * PIXELS_PER_TILE, block._sprite_row * PIXELS_PER_TILE * 3}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3}}
+      sfcompat::setPosition(*block._sprite, {block._x_px + block._shake_x_px, block._y_px + block._shake_y_px + block._fall_offset_y_px});
+      sfcompat::setTextureRect(
+         *block._sprite,
+         sf::IntRect(
+            {block._sprite_column * PIXELS_PER_TILE, block._sprite_row * PIXELS_PER_TILE * 3}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3}
+         )
       );
    }
 }

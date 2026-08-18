@@ -28,8 +28,8 @@ mDirection = "horizontal"
 mElapsed = math.random(0, 3)
 
 -- sprite / animation
-SPRITE_W = 72
-SPRITE_H = 72
+SPRITE_W_PX = 72
+SPRITE_H_PX = 72
 SPRITE_FRAMES = 9
 ANIM_SPEED = 20.0
 
@@ -43,7 +43,7 @@ function initialize()
    addHitbox(-18, -12, 36, 24)
    addShapeCircle(0.3, 0.0, 0.0)
 
-   updateSpriteRect(0, 0, 0, SPRITE_W, SPRITE_H)
+   updateSpriteRect(0, 0, 0, SPRITE_W_PX, SPRITE_H_PX)
    setZ(30)
 end
 
@@ -76,7 +76,7 @@ function update(dt)
          yOffset = 0
       else
          pointsLeft = true
-         yOffset = SPRITE_H
+         yOffset = SPRITE_H_PX
       end      
    end
 
@@ -97,7 +97,7 @@ function update(dt)
    end
 
    if (updateSprite) then
-      updateSpriteRect(0, mSpriteIndex * SPRITE_W, yOffset, SPRITE_W, SPRITE_H)
+      updateSpriteRect(0, mSpriteIndex * SPRITE_W_PX, yOffset, SPRITE_W_PX, SPRITE_H_PX)
    end
 end
 

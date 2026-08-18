@@ -51,8 +51,8 @@ properties = {
 
 
 ------------------------------------------------------------------------------------------------------------------------
-SPRITE_WIDTH = 4 * 24
-SPRITE_HEIGHT = 2 * 24
+SPRITE_WIDTH_PX = 4 * 24
+SPRITE_HEIGHT_PX = 2 * 24
 
 CYCLE_IDLE = 0
 CYCLE_IDLE_BLINK = 1
@@ -75,8 +75,8 @@ THROW_DISTANCE_PX = 300
 
 ------------------------------------------------------------------------------------------------------------------------
 _ready_to_throw = true
-_pos = v2d.Vector2D(0, 0)
-_pos_player = v2d.Vector2D(0, 0)
+_pos_px = v2d.Vector2D(0, 0)
+_pos_player_px = v2d.Vector2D(0, 0)
 
 _sprite_index = 0
 
@@ -109,13 +109,13 @@ function initialize()
    -- set up boom and audio distance
    addHitbox(0, 0, 48, 24)
    addAudioRange(400.0, 0.0, 200.0, 1.0)
-   addSample("throw_01.wav")
-   addSample("throw_02.wav")
-   addSample("throw_03.wav")
-   addSample("throw_04.wav")
-   addSample("throw_05.wav")
-   addSample("mechanism_cannon_boom_1.wav")
-   addSample("mechanism_cannon_boom_2.wav")
+   addSample("throw_01.ogg")
+   addSample("throw_02.ogg")
+   addSample("throw_03.ogg")
+   addSample("throw_04.ogg")
+   addSample("throw_05.ogg")
+   addSample("mechanism_cannon_boom_1.ogg")
+   addSample("mechanism_cannon_boom_2.ogg")
 
    addWeapon(WeaponType["Gun"], 1000, 60, 0.5, 0.2) -- interval, damage, gravity_scale, radius
 
@@ -132,9 +132,9 @@ function initialize()
 
     registerHitSamples(
        "data/sprites/enemy_minik_bomber.png",
-       "mechanism_cannon_boom_1.wav",
+       "mechanism_cannon_boom_1.ogg",
        0.5,
-       "mechanism_cannon_boom_2.wav",
+       "mechanism_cannon_boom_2.ogg",
        0.5
     )
 
@@ -162,7 +162,7 @@ function writeProperty(key, value)
          -- print("setting alignment to left")
          _points_to_left = false
          _throw_dir_x = 1.0
-         _alignment_offset = 5 * SPRITE_HEIGHT
+         _alignment_offset = 5 * SPRITE_HEIGHT_PX
       end
    elseif (key == "audio_update_behavior") then
       update_behavior = audioUpdateBehaviorFromString(value)
@@ -184,14 +184,14 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function throw()
-   -- playSample(string.format("mechanism_cannon_%d.wav", math.random(1, 4)), 0.5)
+   -- playSample(string.format("mechanism_cannon_%d.ogg", math.random(1, 4)), 0.5)
 
    velocity = v2d.Vector2D(0, 0)
    if (_velocity_x and _velocity_y) then
       velocity = v2d.Vector2D(_velocity_x, _velocity_y)
    else
       velocity = calculateVelocity(
-         math.abs(_pos:getX() - _pos_player:getX()),
+         math.abs(_pos_px:getX() - _pos_player_px:getX()),
          60.0,
          0.0015
       )
@@ -204,8 +204,8 @@ function throw()
 
    useWeapon(
       0,
-      _pos:getX() + _throw_dir_x * (_points_to_left and 32 or 64),
-      _pos:getY(),
+      _pos_px:getX() + _throw_dir_x * (_points_to_left and 32 or 64),
+      _pos_px:getY(),
       _throw_dir_x * (velocity:getX() / 48.0),
       -velocity:getY() / 48.0
    );
@@ -221,13 +221,13 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _pos = v2d.Vector2D(x, y)
+   _pos_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   _pos_player = v2d.Vector2D(x, y)
+   _pos_player_px = v2d.Vector2D(x, y)
 end
 
 
@@ -291,10 +291,10 @@ function updateSprite(dt)
 
       updateSpriteRect(
          0,
-         sprite_index * SPRITE_WIDTH + CYCLE_START_INDEX[_current_cycle + 1] * SPRITE_WIDTH,
-         getSpriteOffsetY() * SPRITE_HEIGHT,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
+         sprite_index * SPRITE_WIDTH_PX + CYCLE_START_INDEX[_current_cycle + 1] * SPRITE_WIDTH_PX,
+         getSpriteOffsetY() * SPRITE_HEIGHT_PX,
+         SPRITE_WIDTH_PX,
+         SPRITE_HEIGHT_PX
       )
    end
 end
@@ -343,10 +343,10 @@ function updateThrowCondition(dt)
          end
 
       -- check if player is nearby
-      elseif (math.abs(_pos:getY() - _pos_player:getY()) < 24) then
-         if (math.abs(_pos:getX() - _pos_player:getX()) < THROW_DISTANCE_PX) then
+      elseif (math.abs(_pos_px:getY() - _pos_player_px:getY()) < 24) then
+         if (math.abs(_pos_px:getX() - _pos_player_px:getX()) < THROW_DISTANCE_PX) then
 
-            player_is_left = (_pos:getX() > _pos_player:getX())
+            player_is_left = (_pos_px:getX() > _pos_player_px:getX())
 
             within_throw_distance = false
             if (player_is_left and _points_to_left) then
@@ -357,19 +357,19 @@ function updateThrowCondition(dt)
 
             -- print(
             --    string.format("pos player: %f %f, pos self: %f, %f",
-            --       _pos_player:getX(),
-            --       _pos_player:getY(),
-            --       _pos:getX(),
-            --       _pos:getY()
+            --       _pos_player_px:getX(),
+            --       _pos_player_px:getY(),
+            --       _pos_px:getX(),
+            --       _pos_px:getY()
             --    )
             -- )
 
             if (within_throw_distance) then
                _can_throw = isPhsyicsPathClear(
-                     _pos:getX(),
-                     _pos:getY(),
-                     _pos_player:getX(),
-                     _pos_player:getY()
+                     _pos_px:getX(),
+                     _pos_px:getY(),
+                     _pos_player_px:getX(),
+                     _pos_player_px:getY()
                   )
             end
          end
@@ -379,7 +379,7 @@ function updateThrowCondition(dt)
       -- update projectile index
       cycle = getCurrentCycle(dt)
       if (cycle == 0) then
-         playSample(string.format("throw_%02d.wav", math.random(1, 5)), 0.5)
+         playSample(string.format("throw_%02d.ogg", math.random(1, 5)), 0.5)
          throw()
       end
    end

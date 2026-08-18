@@ -2,18 +2,33 @@
 #include "game/io/texturepool.h"
 #include "game/player/playerregistry.h"
 
+#include <array>
+
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 #include <iostream>
 
 namespace
 {
+static constexpr std::array conveyor_belt_properties{
+   PropertyInfo{.name = "velocity", .type = "float", .default_value = 1.0f},
+};
+static constexpr MechanismSchema conveyor_belt_schema{
+   .type_name = "ConveyorBelt",
+   .layer_name = "conveyorbelts",
+   .default_width = 96,
+   .default_height = 24,
+   .properties = conveyor_belt_properties,
+};
 const auto registered_conveyorbelt = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(conveyor_belt_schema);
+
    registry.mapGroupToLayer("ConveyorBelt", "conveyorbelts");
 
    registry.registerLayerName(
@@ -39,7 +54,7 @@ const auto registered_conveyorbelt = []
 
 namespace
 {
-static const auto Y_OFFSET = -10;
+static const auto Y_OFFSET_PX = -10;
 static const auto BELT_TILE_COUNT = 8;
 static const auto ARROW_INDEX_X = 11;
 static const auto ARROW_INDEX_LEFT_Y = 0;
@@ -54,11 +69,18 @@ void ConveyorBelt::setVelocity(float velocity)
    _points_right = (_velocity > 0.0f);
 }
 
-void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   draw(color, normal, {});
+}
+
+void ConveyorBelt::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
    for (auto& sprite : _belt_sprites)
    {
-      color.draw(sprite);
+      color.draw(sprite, draw_states);
    }
 }
 
@@ -97,7 +119,7 @@ void ConveyorBelt::setEnabled(bool enabled)
 
 std::optional<sf::FloatRect> ConveyorBelt::getBoundingBoxPx()
 {
-   return _belt_pixel_rect;
+   return _belt_rect_px;
 }
 
 void ConveyorBelt::updateSprite()
@@ -124,8 +146,9 @@ void ConveyorBelt::updateSprite()
          offset_y_px = PIXELS_PER_TILE;
       }
 
-      _belt_sprites[i].setTextureRect(
-         {{offset_x_px * PIXELS_PER_TILE, static_cast<int32_t>(offset_y_px)}, {PIXELS_PER_TILE, PIXELS_PER_TILE}}
+      sfcompat::setTextureRect(
+         _belt_sprites[i],
+         sf::IntRect({offset_x_px * PIXELS_PER_TILE, static_cast<int32_t>(offset_y_px)}, {PIXELS_PER_TILE, PIXELS_PER_TILE})
       );
    }
 }
@@ -155,13 +178,13 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
 
    setVelocity(velocity);
 
-   _position_b2d = b2Vec2(x * MPP, y * MPP);
-   _position_sfml.x = x;
-   _position_sfml.y = y;
+   _position_m = b2Vec2(x * MPP, y * MPP);
+   _position_px.x = x;
+   _position_px.y = y;
 
    b2BodyDef body_def;
    body_def.type = b2_staticBody;
-   body_def.position = _position_b2d;
+   body_def.position = _position_m;
    _body = data._world->CreateBody(&body_def);
 
    const auto width_m = width_px * MPP;
@@ -187,10 +210,10 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
    auto* boundary_fixture = _body->CreateFixture(&boundary_fixture_def);
    boundary_fixture->SetUserData(static_cast<void*>(this));
 
-   _belt_pixel_rect.position.x = x;
-   _belt_pixel_rect.position.y = y;
-   _belt_pixel_rect.size.y = height_px;
-   _belt_pixel_rect.size.x = width_px;
+   _belt_rect_px.position.x = x;
+   _belt_rect_px.position.y = y;
+   _belt_rect_px.size.y = height_px;
+   _belt_rect_px.size.x = width_px;
 
    static auto ROUND_EPSILON = 0.5f;
    auto tile_count = static_cast<uint32_t>((width_px / PIXELS_PER_TILE) + ROUND_EPSILON);
@@ -198,20 +221,31 @@ ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : 
 
    for (auto i = 0u; i < tile_count; i++)
    {
+#ifdef DECEPTUS_VRSFML
+      sf::Sprite belt_sprite;
+#else
       sf::Sprite belt_sprite(*_texture);
-      belt_sprite.setPosition({x + i * PIXELS_PER_TILE, y + Y_OFFSET});
+#endif
+      sfcompat::setPosition(belt_sprite, {x + i * PIXELS_PER_TILE, y + Y_OFFSET_PX});
 
       _belt_sprites.push_back(belt_sprite);
    }
 
    for (auto i = 0u; i < tile_count - 1; i++)
    {
+#ifdef DECEPTUS_VRSFML
+      sf::Sprite arrow_sprite;
+#else
       sf::Sprite arrow_sprite(*_texture);
-      arrow_sprite.setPosition({x + i * PIXELS_PER_TILE + 12, y - 12});
+#endif
+      sfcompat::setPosition(arrow_sprite, {x + i * PIXELS_PER_TILE + 12, y - 12});
 
-      arrow_sprite.setTextureRect(
-         {{ARROW_INDEX_X * PIXELS_PER_TILE, (velocity < -0.0001 ? ARROW_INDEX_LEFT_Y : ARROW_INDEX_RIGHT_Y) * PIXELS_PER_TILE},
-          {PIXELS_PER_TILE, PIXELS_PER_TILE}}
+      sfcompat::setTextureRect(
+         arrow_sprite,
+         sf::IntRect(
+            {ARROW_INDEX_X * PIXELS_PER_TILE, (velocity < -0.0001 ? ARROW_INDEX_LEFT_Y : ARROW_INDEX_RIGHT_Y) * PIXELS_PER_TILE},
+            {PIXELS_PER_TILE, PIXELS_PER_TILE}
+         )
       );
 
       _arrow_sprites.push_back(arrow_sprite);
@@ -286,7 +320,7 @@ void ConveyorBelt::processFixtureNode(FixtureNode* fixture_node, b2Body* collidi
 
 sf::FloatRect ConveyorBelt::getPixelRect() const
 {
-   return _belt_pixel_rect;
+   return _belt_rect_px;
 }
 
 void ConveyorBelt::processContact(b2Contact* contact)

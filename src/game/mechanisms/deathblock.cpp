@@ -3,12 +3,15 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
+
+#include <array>
 
 // #define DEBUG_DRAW 1
 #ifdef DEBUG_DRAW
@@ -22,9 +25,33 @@
 
 namespace
 {
+static constexpr float default_death_block_time_off = 2.0f;
+static constexpr float default_death_block_time_on = 0.2f;
+static constexpr float default_death_block_time_offset = 0.0f;
+static constexpr int32_t default_death_block_damage = 100;
+static constexpr std::string_view default_death_block_mode = "always_on";
+static constexpr float default_death_block_velocity = 50.0f;
+
+static constexpr std::array death_block_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "time_off", .type = "float", .default_value = default_death_block_time_off},
+   PropertyInfo{.name = "time_on", .type = "float", .default_value = default_death_block_time_on},
+   PropertyInfo{.name = "time_offset", .type = "float", .default_value = default_death_block_time_offset},
+   PropertyInfo{.name = "damage", .type = "int", .default_value = default_death_block_damage},
+   PropertyInfo{.name = "mode", .type = "string", .default_value = default_death_block_mode},
+   PropertyInfo{.name = "velocity", .type = "float", .default_value = default_death_block_velocity},
+};
+static constexpr MechanismSchema death_block_schema{
+   .type_name = "DeathBlock",
+   .layer_name = "death_blocks",
+   .default_width = 24,
+   .default_height = 24,
+   .properties = death_block_properties,
+};
 const auto registered_deathblock = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(death_block_schema);
 
    registry.mapGroupToLayer("DeathBlock", "death_blocks");
 
@@ -75,26 +102,35 @@ std::string_view DeathBlock::objectName() const
    return "DeathBlock";
 }
 
-void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+   draw(color, normal, {});
+}
+
+void DeathBlock::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+
    for (auto& spike : _spikes)
    {
-      color.draw(*spike._sprite);
+      color.draw(*spike._sprite, draw_states);
 
 #ifdef DEBUG_DRAW
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectInt();
-      const auto fill_color = player_rect.findIntersection(spike._collision_rect_absolute).has_value() ? sf::Color::Red : sf::Color::Green;
+      const auto fill_color =
+         sfcompat::findIntersection(player_rect, spike._collision_rect_absolute).has_value() ? sf::Color::Red : sf::Color::Green;
       DebugDraw::drawRect(color, spike._collision_rect_absolute, fill_color);
 #endif
    }
 
-   color.draw(*_center_sprite);
+   color.draw(*_center_sprite, draw_states);
 }
 
 void DeathBlock::setupTransform()
 {
-   auto x = _pixel_positions.x / PPM - (PIXELS_PER_TILE / (2 * PPM));
-   auto y = _pixel_positions.y / PPM;
+   auto x = _positions_px.x / PPM - (PIXELS_PER_TILE / (2 * PPM));
+   auto y = _positions_px.y / PPM;
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 
@@ -182,7 +218,8 @@ void DeathBlock::updateCollision()
 
       const auto deadly = (spike._state == Spike::State::Extracted);
 
-      if (player_rect.findIntersection(spike._collision_rect_absolute).has_value() && deadly)
+      const auto spike_intersects_player = sfcompat::findIntersection(player_rect, spike._collision_rect_absolute).has_value();
+      if (spike_intersects_player && deadly)
       {
          PlayerRegistry::getFirst()->damage(_damage);
       }
@@ -394,15 +431,15 @@ void DeathBlock::updateSprites()
    {
       if (spike.hasChanged())
       {
-         spike._sprite->setTextureRect(sf::IntRect({spike._sprite_index * tl_px, tl_px * row}, {tl_px, tl_px}));
+         sfcompat::setTextureRect(*spike._sprite, sf::IntRect({spike._sprite_index * tl_px, tl_px * row}, {tl_px, tl_px}));
       }
 
-      spike._sprite->setPosition({x, y});
+      sfcompat::setPosition(*spike._sprite, {x, y});
       row++;
    }
 
-   _center_sprite->setTextureRect(sf::IntRect({_center_sprite_index * tl_px, 0}, {tl_px, tl_px}));
-   _center_sprite->setPosition({x, y});
+   sfcompat::setTextureRect(*_center_sprite, sf::IntRect({_center_sprite_index * tl_px, 0}, {tl_px, tl_px}));
+   sfcompat::setPosition(*_center_sprite, {x, y});
 }
 
 void DeathBlock::updatePosition(const sf::Time& dt)
@@ -450,7 +487,11 @@ void DeathBlock::setup(const GameDeserializeData& data)
 
    for (auto& spike : _spikes)
    {
+#ifdef DECEPTUS_VRSFML
+      spike._sprite = std::make_unique<sf::Sprite>();
+#else
       spike._sprite = std::make_unique<sf::Sprite>(*_texture);
+#endif
    }
 
    _spikes[Spike::Orientation::Up]._collision_rect_relative = sf::IntRect{
@@ -473,18 +514,22 @@ void DeathBlock::setup(const GameDeserializeData& data)
       {PIXELS_PER_TILE - tolerance_px_2, PIXELS_PER_TILE - tolerance_px_2}
    };
 
+#ifdef DECEPTUS_VRSFML
+   _center_sprite = std::make_unique<sf::Sprite>();
+#else
    _center_sprite = std::make_unique<sf::Sprite>(*_texture);
+#endif
 
    setZ(static_cast<int32_t>(ZDepth::ForegroundMin) + 1);
 
-   _pixel_positions.x = data._tmx_object->_x_px;
-   _pixel_positions.y = data._tmx_object->_y_px;
+   _positions_px.x = data._tmx_object->_x_px;
+   _positions_px.y = data._tmx_object->_y_px;
 
-   _time_off = sf::seconds(ValueReader::readValue<float>("time_off", map).value_or(2.0f));
-   _time_on = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(0.2f));
-   _time_offset = sf::seconds(ValueReader::readValue<float>("time_offset", map).value_or(0.0f));
-   _damage = ValueReader::readValue<int32_t>("damage", map).value_or(100);
-   const auto mode = ValueReader::readValue<std::string>("mode", map).value_or("always_on");
+   _time_off = sf::seconds(ValueReader::readValue<float>("time_off", map).value_or(default_death_block_time_off));
+   _time_on = sf::seconds(ValueReader::readValue<float>("time_on", map).value_or(default_death_block_time_on));
+   _time_offset = sf::seconds(ValueReader::readValue<float>("time_offset", map).value_or(default_death_block_time_offset));
+   _damage = ValueReader::readValue<int32_t>("damage", map).value_or(default_death_block_damage);
+   const auto mode = ValueReader::readValue<std::string>("mode", map).value_or(std::string(default_death_block_mode));
 
    if (mode == "always_on")
    {
@@ -506,18 +551,18 @@ void DeathBlock::setup(const GameDeserializeData& data)
    setupBody(data._world);
 
    // setup velocity
-   const auto velocity = ValueReader::readValue<float>("velocity", map).value_or(50.0f);
-   auto pixel_path = data._tmx_object->_polyline ? data._tmx_object->_polyline->_path : data._tmx_object->_polygon->_polyline;
-   const auto start_pos = pixel_path.at(0);
-   pixel_path.push_back(start_pos);
-   _velocity = 50.0f / SfmlMath::length(pixel_path);
+   const auto velocity = ValueReader::readValue<float>("velocity", map).value_or(default_death_block_velocity);
+   auto path_px = data._tmx_object->_polyline ? data._tmx_object->_polyline->_path : data._tmx_object->_polygon->_polyline;
+   const auto start_pos = path_px.at(0);
+   path_px.push_back(start_pos);
+   _velocity = 50.0f / SfmlMath::length(path_px);
 
    // setup path
    auto pos_index = 0;
-   for (const auto& poly_pos : pixel_path)
+   for (const auto& poly_pos : path_px)
    {
       b2Vec2 world_pos;
-      const auto time = pos_index / static_cast<float>(pixel_path.size() - 1);
+      const auto time = pos_index / static_cast<float>(path_px.size() - 1);
 
       const auto x = (data._tmx_object->_x_px + poly_pos.x - (PIXELS_PER_TILE) / 2.0f) * MPP;
       const auto y = (data._tmx_object->_y_px + poly_pos.y - (PIXELS_PER_TILE) / 2.0f) * MPP;

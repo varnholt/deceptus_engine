@@ -26,8 +26,11 @@ std::string_view ImageLayer::objectName() const
    return "ImageLayer";
 }
 
-void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
+#ifdef DECEPTUS_VRSFML
+   draw(target, normal, {});
+#else
    if (_sprite == nullptr)
    {
       return;
@@ -52,6 +55,40 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    {
       target.setView(level_view);
    }
+#endif
+}
+
+void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+#ifdef DECEPTUS_VRSFML
+   if (_sprite == nullptr)
+   {
+      return;
+   }
+
+   if (!_visible)
+   {
+      return;
+   }
+
+   // the texture has to travel in the render states, vrsfml sprites do not own one
+   const auto* texture = _texture->getTexture().get();
+
+   if (_parallax_settings.has_value())
+   {
+      target.draw(*_sprite, sf::RenderStates{.blendMode = _blend_mode, .view = _parallax_view, .texture = texture});
+   }
+   else
+   {
+      sf::RenderStates draw_states = states;
+      draw_states.blendMode = _blend_mode;
+      draw_states.texture = texture;
+      target.draw(*_sprite, draw_states);
+   }
+#else
+   (void)states;
+   draw(target, normal);
+#endif
 }
 
 void ImageLayer::update(const sf::Time& dt)
@@ -63,9 +100,20 @@ void ImageLayer::update(const sf::Time& dt)
    {
       if (_sprite == nullptr)
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite = std::make_unique<sf::Sprite>();
+         _sprite->position = _position;
+         _sprite->color = _color;
+
+         // vrsfml sprites are not constructed from a texture, so the texture rect stays empty
+         // (and nothing is drawn) unless it is set to cover the texture explicitly
+         const auto texture_size = _texture->getTexture()->getSize();
+         _sprite->textureRect = sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(texture_size.x), static_cast<float>(texture_size.y)}};
+#else
          _sprite = std::make_unique<sf::Sprite>(*_texture->getTexture());
          _sprite->setPosition(_position);
          _sprite->setColor(_color);
+#endif
       }
    }
    else
@@ -81,17 +129,30 @@ void ImageLayer::updateView(float level_view_x, float level_view_y, float view_w
       return;
    }
 
+#ifdef DECEPTUS_VRSFML
+   _parallax_view = sf::View::fromRect(sf::FloatRect{
+      {level_view_x * (*_parallax_settings)._factor.x + (*_parallax_settings)._error.x,
+       level_view_y * (*_parallax_settings)._factor.y + (*_parallax_settings)._error.y},
+      {view_width, view_height}
+   });
+#else
    _parallax_view = sf::View{sf::FloatRect{
       {level_view_x * (*_parallax_settings)._factor.x + (*_parallax_settings)._error.x,
        level_view_y * (*_parallax_settings)._factor.y + (*_parallax_settings)._error.y},
       {view_width, view_height}
    }};
+#endif
 }
 
 void ImageLayer::resetView(float view_width, float view_height)
 {
+#ifdef DECEPTUS_VRSFML
+   _parallax_view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {view_width, view_height}});
+   _parallax_view.viewport = sf::FloatRect{{0.0f, 0.0f}, {1.0f, 1.0f}};
+#else
    _parallax_view = sf::View{sf::FloatRect({0.0f, 0.0f}, {view_width, view_height})};
    _parallax_view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
+#endif
 }
 
 std::optional<sf::FloatRect> ImageLayer::getBoundingBoxPx()

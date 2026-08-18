@@ -2,20 +2,21 @@
 
 #include "framework/tools/log.h"
 
-#include <iostream>
-
-void BlurShader::initialize(const std::shared_ptr<sf::RenderTexture>& render_texture, const std::shared_ptr<sf::RenderTexture>& render_texture_scaled)
+void BlurShader::initialize(
+   const std::shared_ptr<sf::RenderTexture>& render_texture,
+   const std::shared_ptr<sf::RenderTexture>& render_texture_scaled
+)
 {
    _render_texture = render_texture;
    _render_texture_scaled = render_texture_scaled;
 
-   if (!_shader.loadFromFile("data/shaders/blur.frag", sf::Shader::Type::Fragment))
+   if (!_shader.loadFromFragment("data/shaders/blur.frag"))
    {
       Log::Error() << "error loading blur shader";
       return;
    }
 
-   _shader.setUniform("texture", _render_texture->getTexture());
+   _shader.setUniform("u_texture", _render_texture->getTexture());
 }
 
 void BlurShader::update()
@@ -45,5 +46,5 @@ const std::shared_ptr<sf::RenderTexture>& BlurShader::getRenderTextureScaled() c
 
 const sf::Shader& BlurShader::getShader() const
 {
-   return _shader;
+   return _shader.native();
 }

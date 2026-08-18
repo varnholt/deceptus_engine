@@ -2,6 +2,7 @@
 
 // game
 #include "framework/math/maptools.h"
+#include "framework/pathmerger/pathmerger.h"
 #include "framework/tmxparser/tmxelement.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobjectgroup.h"
@@ -9,6 +10,7 @@
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/checksum.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationplayer.h"
 #include "game/camera/camerapanorama.h"
@@ -19,12 +21,15 @@
 #include "game/config/tweaks.h"
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
+#include "game/debug/debugdrawstates.h"
+#include "game/debug/drawcallcounter.h"
 #include "game/ingamemenu/ingamemenumap.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/io/meshtools.h"
 #include "game/level/fixturenode.h"
 #include "game/level/leveldescription.h"
 #include "game/level/levelfiles.h"
+#include "game/level/leveltransitionhandler.h"
 #include "game/level/luainterface.h"
 #include "game/level/parsedata.h"
 #include "game/level/roomupdater.h"
@@ -37,6 +42,7 @@
 #include "game/mechanisms/gamemechanismdeserializer.h"
 #include "game/mechanisms/gamemechanismdeserializerconstants.h"
 #include "game/mechanisms/lever.h"
+#include "game/mechanisms/postprocessingmechanism.h"
 #include "game/physics/chainshapeanalyzer.h"
 #include "game/physics/gamecontactlistener.h"
 #include "game/physics/physicsconfiguration.h"
@@ -66,6 +72,9 @@
 #include <iostream>
 #include <ranges>
 #include <regex>
+#ifdef DECEPTUS_VRSFML
+#include <span>
+#endif
 #include <sstream>
 #include <string>
 #include <thread>
@@ -116,6 +125,15 @@ std::unordered_map<std::string, MechanismTiming> timing_data;
 namespace
 {
 
+//! keys under which the ingame map state is stored inside the per-level save state; they live next
+//! to the mechanism group keys, so they must not collide with any mechanism layer name
+constexpr auto visited_rooms_key = "__visited_rooms";
+constexpr auto map_revealed_key = "__map_revealed";
+
+//! mechanism event that shows the whole ingame map. any mechanism can announce it, a map item
+//! does so through the 'pickup_event' property of its extra.
+constexpr auto map_reveal_event = "reveal_map";
+
 bool checkUpdateMechanism(const auto& player_chunk, const auto& mechanism)
 {
    auto update_mechanism = true;
@@ -159,7 +177,9 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
 
    // create shaders (render textures are owned by Game)
    _atmosphere_shader = std::make_unique<AtmosphereShader>();
+#ifdef GLOW_ENABLED
    _blur_shader = std::make_unique<BlurShader>();
+#endif
    _gamma_shader = std::make_unique<GammaShader>();
 
    // load alpha-test shader for occluder stencil rendering
@@ -206,11 +226,9 @@ Level::~Level()
       Timer::removeByCaller(enemy);
    }
 
-   _file_watcher_thread_active = false;
-   if (_file_watcher_thread.joinable())
-   {
-      _file_watcher_thread.join();
-   }
+#ifndef DECEPTUS_VRSFML
+   _file_watcher.stop();
+#endif
 }
 
 // assign room identifiers to mechanism
@@ -281,7 +299,11 @@ void Level::loadTmx()
    // preload mechanism data in parallel
    for (auto& [vec_key, vec_values] : _mechanism_registry.getMap())
    {
+#if defined(__APPLE__) || defined(DECEPTUS_VRSFML)
+      std::for_each(vec_values->begin(), vec_values->end(), [](auto& val) { val->preload(); });
+#else
       std::for_each(std::execution::par, vec_values->begin(), vec_values->end(), [](auto& val) { val->preload(); });
+#endif
    }
 
    // process everything that's not considered a mechanism
@@ -367,12 +389,20 @@ void Level::loadTmx()
    }
 
    // load tilemaps in parallel
+#if defined(__APPLE__) || defined(DECEPTUS_VRSFML)
+   std::for_each(
+      layer_load_data.begin(),
+      layer_load_data.end(),
+      [&path](auto& layer_data) { layer_data.tile_map->load(layer_data.layer, layer_data.tileset, path); }
+   );
+#else
    std::for_each(
       std::execution::par,
       layer_load_data.begin(),
       layer_load_data.end(),
       [&path](auto& layer_data) { layer_data.tile_map->load(layer_data.layer, layer_data.tileset, path); }
    );
+#endif
 
    // process loaded tilemaps sequentially
    for (auto& layer_data : layer_load_data)
@@ -405,6 +435,7 @@ void Level::loadTmx()
 
    TileMapFactory::merge(_tile_maps);
    Room::mergeEnterAreas(_rooms);
+   Room::warnAboutAmbiguousObjectIds(_rooms);
 
    if (!_atmosphere._tile_map)
    {
@@ -459,35 +490,18 @@ bool Level::load()
 
    Log::Info() << "level loading complete";
 
-   // set up file watcher
-   _file_watcher_thread = std::thread(
-      [this]()
-      {
-         auto first_modified_time = std::filesystem::last_write_time(_description->_filename);
-
-         while (_file_watcher_thread_active)
-         {
-            const auto current_modified_time = std::filesystem::last_write_time(_description->_filename);
-            if (current_modified_time != first_modified_time)
-            {
-               Log::Info() << "level was modified, marking as dirty";
-               first_modified_time = current_modified_time;
-               _dirty = true;
-            }
-
-            using namespace std::chrono_literals;
-            std::this_thread::sleep_for(1s);
-         }
-      }
-   );
+   // set up file watcher so a level edited while the game runs is picked up
+#ifndef DECEPTUS_VRSFML
+   _file_watcher.start(_description->_filename, "level");
+#endif
 
    return true;
 }
 
 void Level::loadStartPosition()
 {
-   _start_position.x = static_cast<float_t>(_description->_start_position.at(0) * PIXELS_PER_TILE + PLAYER_ACTUAL_WIDTH / 2);
-   _start_position.y = static_cast<float_t>(_description->_start_position.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS);
+   _start_position_px.x = static_cast<float_t>(_description->_start_position_tl.at(0) * PIXELS_PER_TILE + PLAYER_ACTUAL_WIDTH_PX / 2);
+   _start_position_px.y = static_cast<float_t>(_description->_start_position_tl.at(1) * PIXELS_PER_TILE + DIFF_PLAYER_TILE_TO_PHYSICS_PX);
 }
 
 void Level::loadLevelScript()
@@ -520,7 +534,9 @@ void Level::initialize()
 
    // initialize shaders with render targets from Game
    _atmosphere_shader->initialize(_render_targets.atmosphere);
+#ifdef GLOW_ENABLED
    _blur_shader->initialize(_render_targets.blur, _render_targets.blur_scaled);
+#endif
    _gamma_shader->initialize();
 
    loadStartPosition();
@@ -536,20 +552,41 @@ void Level::initialize()
 
    loadLevelScript();
 
+   // must come after loadLevelScript, setting up the level script clears all mechanism listeners
+   registerMapEvents();
+
    // dump();
+}
+
+void Level::registerMapEvents()
+{
+   _map_event_listener = GameMechanismObserver::addListener<GameMechanismObserver::EventCallback>(
+      [this](
+         const std::string& /*object_id*/,
+         const std::string& /*group_id*/,
+         const std::string& event_name,
+         const GameMechanismObserver::LuaVariant& /*value*/
+      )
+      {
+         if (event_name == map_reveal_event)
+         {
+            setMapRevealed(true);
+         }
+      }
+   );
 }
 
 void Level::loadSaveState()
 {
    const auto& save_state = SaveState::getCurrent();
-   auto checkpoint_index = save_state._checkpoint;
+   auto checkpoint_index = save_state.getCheckpoint(_description_filename);
    auto checkpoint = Checkpoint::getCheckpoint(checkpoint_index, _mechanism_registry.getCheckpoints());
 
    if (checkpoint)
    {
       auto pos = checkpoint->spawnPoint();
-      _start_position.x = static_cast<float>(pos.x);
-      _start_position.y = static_cast<float>(pos.y);
+      _start_position_px.x = static_cast<float>(pos.x);
+      _start_position_px.y = static_cast<float>(pos.y);
       Log::Info() << "move to checkpoint: " << checkpoint_index;
    }
    else
@@ -557,20 +594,53 @@ void Level::loadSaveState()
       Log::Error() << "level doesn't have a start check point set up";
    }
 
+   // a level transition can ask for a spawn position that is neither the level's start position nor one of its
+   // checkpoints, so it takes precedence over both
+   const auto transition_spawn_position_px = LevelTransitionHandler::getInstance().takeSpawnPosition();
+   if (transition_spawn_position_px.has_value())
+   {
+      _start_position_px = transition_spawn_position_px.value();
+   }
+
    if (save_state._level_state.is_null())
    {
       return;
    }
 
-   const auto& level_json = save_state._level_state[_description->_filename];
+   // a level that has never been saved has no entry here; the const operator[] would assert in debug and
+   // dereference the end iterator in release, so the key has to be looked up explicitly
+   const auto level_state_it = save_state._level_state.find(_description->_filename);
+   if (level_state_it == save_state._level_state.end())
+   {
+      return;
+   }
+
+   const auto& level_json = *level_state_it;
    if (level_json.is_null())
    {
       return;
    }
 
+   const auto visited_rooms_it = level_json.find(visited_rooms_key);
+   if (visited_rooms_it != level_json.end() && visited_rooms_it->is_array())
+   {
+      Room::applyVisitedSubRoomKeys(visited_rooms_it->get<std::vector<std::string>>(), _rooms);
+   }
+
+   const auto map_revealed_it = level_json.find(map_revealed_key);
+   if (map_revealed_it != level_json.end() && map_revealed_it->is_boolean())
+   {
+      _map_revealed = map_revealed_it->get<bool>();
+   }
+
    const auto& mechanism_map = _mechanism_registry.getMap();
    for (auto& [mechanism_key, mechanism_values] : level_json.items())
    {
+      if (mechanism_key == visited_rooms_key || mechanism_key == map_revealed_key)
+      {
+         continue;
+      }
+
       const auto& mechanism_it = mechanism_map.find(mechanism_key);
       if (mechanism_it == mechanism_map.end())
       {
@@ -620,6 +690,17 @@ void Level::saveState()
       }
    }
 
+   // remember which parts of the level have been seen, that is what the ingame map reveals
+   std::vector<std::string> visited_sub_room_keys;
+   for (const auto& room : _rooms)
+   {
+      const auto& keys = room->visitedSubRoomKeys();
+      visited_sub_room_keys.insert(visited_sub_room_keys.end(), keys.cbegin(), keys.cend());
+   }
+
+   mechanisms_json[visited_rooms_key] = visited_sub_room_keys;
+   mechanisms_json[map_revealed_key] = _map_revealed;
+
    j[_description->_filename] = mechanisms_json;
 }
 
@@ -639,7 +720,7 @@ void Level::spawnEnemies()
 
       if (!script.has_value())
       {
-         Log::Error() << "missing script definition";
+         Log::Error() << it.first << " does not have any script definition";
          continue;
       }
 
@@ -647,8 +728,8 @@ void Level::spawnEnemies()
 
       EnemyDescription json_description;
       json_description._position_in_tiles = false;
-      json_description._start_position.push_back(it.second._pixel_position.x);
-      json_description._start_position.push_back(it.second._pixel_position.y);
+      json_description._start_position.push_back(it.second._position_px.x);
+      json_description._start_position.push_back(it.second._position_px.y);
       json_description._id = it.second._id;
       json_description._name = it.second._name;
 
@@ -660,9 +741,9 @@ void Level::spawnEnemies()
          it.second.addPaths(_world_chains);
       }
 
-      if (!it.second._pixel_path.empty())
+      if (!it.second._path_px.empty())
       {
-         json_description._path = it.second._pixel_path;
+         json_description._path = it.second._path_px;
       }
 
       // z index
@@ -688,7 +769,11 @@ void Level::drawStaticChains(sf::RenderTarget& target)
 {
    for (auto& path : _atmosphere._outlines)
    {
+#ifdef DECEPTUS_VRSFML
+      target.draw(std::span<const sf::Vertex>{&path.at(0), path.size()}, sf::PrimitiveType::LineStrip);
+#else
       target.draw(&path.at(0), path.size(), sf::PrimitiveType::LineStrip);
+#endif
    }
 }
 
@@ -706,6 +791,7 @@ void Level::createViews()
    _view_height = static_cast<float>(game_config._view_height);
 
    _level_view.reset();
+#ifndef DECEPTUS_VRSFML
    _level_view = std::make_shared<sf::View>(sf::FloatRect({0.0f, 0.0f}, {_view_width, _view_height}));
    _level_view->setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
 
@@ -718,6 +804,7 @@ void Level::createViews()
    {
       image_layer->resetView(_view_width, _view_height);
    }
+#endif  // !DECEPTUS_VRSFML
 }
 
 void Level::updateViews()
@@ -735,7 +822,11 @@ void Level::updateViews()
 
    CameraRoomLock::setViewRect(view_rect);
 
+#ifdef DECEPTUS_VRSFML
+   _level_view = std::make_shared<sf::View>(sf::View::fromRect(view_rect));
+#else
    _level_view = std::make_shared<sf::View>(view_rect);
+#endif
 
    for (const auto& parallax : _parallax_layers)
    {
@@ -760,12 +851,19 @@ void Level::updateMechanismVolumes()
 
 void Level::updateRoom()
 {
-   RoomUpdater::setCurrent(Room::find(PlayerRegistry::getFirst()->getPixelPositionFloat(), _rooms));
+   const auto player_position_px = PlayerRegistry::getFirst()->getPixelPositionFloat();
+   const auto& room = Room::find(player_position_px, _rooms);
+   RoomUpdater::setCurrent(room);
+
+   if (room)
+   {
+      room->markVisited(player_position_px);
+   }
 }
 
 void Level::syncRoom()
 {
-   RoomUpdater::setCurrent(Room::find(PlayerRegistry::getFirst()->getPixelPositionFloat(), _rooms));
+   updateRoom();
    CameraRoomLock::setRoom(RoomUpdater::getCurrent());
 }
 
@@ -851,10 +949,22 @@ void Level::zoomReset()
 void Level::drawLightMap()
 {
    _render_targets.lighting->clear();
+#ifndef DECEPTUS_VRSFML
    _render_targets.lighting->setView(*_level_view);
+#endif
    _render_targets.lighting2->clear();
+#ifndef DECEPTUS_VRSFML
    _render_targets.lighting2->setView(*_level_view);
-   _light_system->draw(*_render_targets.lighting, *_render_targets.lighting2, {});
+#endif
+   _light_system->draw(
+      *_render_targets.lighting,
+      *_render_targets.lighting2,
+#ifdef DECEPTUS_VRSFML
+      sf::RenderStates{.view = *_level_view}
+#else
+      {}
+#endif
+   );
    _render_targets.lighting->display();
    _render_targets.lighting2->display();
 
@@ -872,74 +982,142 @@ void Level::drawParallaxMaps(sf::RenderTarget& target, int32_t z_index)
    {
       if (parallax->_z_index == z_index)
       {
+#ifndef DECEPTUS_VRSFML
          target.setView(parallax->_view);
          target.draw(*parallax->_tile_map);
+#else
+         target.draw(*parallax->_tile_map, sf::RenderStates{.view = parallax->_view});
+#endif
       }
    }
 
    // restore level view
+#ifndef DECEPTUS_VRSFML
    target.setView(*_level_view);
+#endif
 }
 
-void Level::drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t z_index, auto predicate)
+void Level::rebuildMechanismDrawIndex()
 {
+   // Level::draw walks every z index from BackgroundMin to ForegroundMax and used to rescan the whole
+   // mechanism registry at each one, looking for the handful that sit at that z. With the registry
+   // holding a couple of thousand mechanisms and drawLayers, drawPostLightingLayers and
+   // drawOverlayLayers each running their own z loop, that came to over a hundred thousand
+   // candidate checks per frame, every one of them a virtual getZ() and most of them a chunk
+   // distance test on top.
+   //
+   // Bucketing them once per frame turns that into a single pass. The registry is traversed in
+   // exactly the order the z loops used to, so mechanisms sharing a z index keep their relative
+   // draw order - which matters, because they may be drawn with transparency.
+   //
+   // The buckets hold raw pointers and are rebuilt every frame rather than cached, so nothing here
+   // can outlive the registry or go stale when mechanisms are added or removed.
+   for (auto& [z_index, bucket] : _mechanisms_by_z)
+   {
+      bucket.clear();
+   }
+
    for (auto* mechanism_vector : _mechanism_registry.getList())
    {
       for (const auto& mechanism : *mechanism_vector)
       {
-         if (mechanism->getZ() == z_index && predicate(mechanism))
-         {
+         _mechanisms_by_z[mechanism->getZ()].push_back(mechanism.get());
+      }
+   }
+}
+
+void Level::drawMechanismsAtZ(
+   sf::RenderTarget& color,
+   sf::RenderTarget& normal,
+   int32_t z_index,
+   auto predicate,
+   const sf::RenderStates& states
+)
+{
+   const auto bucket_it = _mechanisms_by_z.find(z_index);
+   if (bucket_it == _mechanisms_by_z.end())
+   {
+      return;
+   }
+
+   for (auto* mechanism : bucket_it->second)
+   {
 #ifdef DEVELOPMENT_MODE
-            if (_mechanism_profiling_enabled)
-            {
-               const auto mechanism_name = std::string{mechanism->objectName()};
-               const auto time_start = std::chrono::high_resolution_clock::now();
-               mechanism->draw(color, normal);
-               timing_data[mechanism_name].addDrawTime(std::chrono::high_resolution_clock::now() - time_start);
-            }
-            else
-            {
-               mechanism->draw(color, normal);
-            }
-#else
-            mechanism->draw(color, normal);
+      DrawCallCounter::layer_scan_steps++;
 #endif
+      if (predicate(mechanism))
+      {
+#ifdef DEVELOPMENT_MODE
+         if (_mechanism_profiling_enabled)
+         {
+            const auto mechanism_name = std::string{mechanism->objectName()};
+            const auto time_start = std::chrono::high_resolution_clock::now();
+            mechanism->draw(color, normal, states);
+            timing_data[mechanism_name].addDrawTime(std::chrono::high_resolution_clock::now() - time_start);
          }
+         else
+         {
+            mechanism->draw(color, normal, states);
+         }
+#else
+         mechanism->draw(color, normal, states);
+#endif
       }
    }
 }
 
 void Level::drawPostLightingLayers(sf::RenderTarget& target)
 {
+#ifndef DECEPTUS_VRSFML
    const auto previous_view = target.getView();
    target.setView(*_level_view);
+   const sf::RenderStates level_view_states{};
+#else
+   const sf::RenderStates level_view_states{.view = *_level_view};
+#endif
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
    for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
    {
+      for (const auto& tile_map : _tile_maps)
+      {
+         if (tile_map->getZ() == z_index && tile_map->isPostLighting())
+         {
+            tile_map->draw(target, target, level_view_states);
+         }
+      }
+
       drawMechanismsAtZ(
          target,
          target,
          z_index,
-         [&player_chunk](const auto& mechanism) { return mechanism->isPostLighting() && checkUpdateMechanism(player_chunk, mechanism); }
+         [&player_chunk](const auto& mechanism) { return mechanism->isPostLighting() && checkUpdateMechanism(player_chunk, mechanism); },
+         level_view_states
       );
 
       for (auto& layer : _mechanism_registry.getImageLayers())
       {
          if (layer->getZ() == z_index && layer->isPostLighting())
          {
-            layer->draw(target, target);
+            layer->draw(target, target, level_view_states);
          }
       }
    }
 
+#ifndef DECEPTUS_VRSFML
    target.setView(previous_view);
+#endif
 }
 
 void Level::drawOverlayLayers(sf::RenderTarget& target)
 {
+#ifndef DECEPTUS_VRSFML
    const auto previous_view = target.getView();
    target.setView(*_level_view);
+   const sf::RenderStates level_view_states{};
+#else
+   const sf::RenderStates level_view_states{.view = *_level_view};
+#endif
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
    for (auto z_index = static_cast<int32_t>(ZDepth::BackgroundMin); z_index <= static_cast<int32_t>(ZDepth::ForegroundMax); z_index++)
@@ -948,36 +1126,112 @@ void Level::drawOverlayLayers(sf::RenderTarget& target)
          target,
          target,
          z_index,
-         [&player_chunk](const auto& mechanism) { return mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); }
+         [&player_chunk](const auto& mechanism) { return mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); },
+         level_view_states
       );
    }
 
+#ifndef DECEPTUS_VRSFML
    target.setView(previous_view);
+#endif
 }
 
-void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal)
+void Level::drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-   std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->draw(color, normal);
+   std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->draw(color, normal, states);
 }
 
 void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32_t from, int32_t to)
 {
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
+#ifndef DECEPTUS_VRSFML
    target.setView(*_level_view);
    normal.setView(*_level_view);
+   const sf::RenderStates level_view_states{};
+#else
+   const sf::RenderStates level_view_states{.view = *_level_view};
+#endif
+
+   // player silhouette stencil setup: the foreground layers replace the stencil buffer with 1
+   // wherever they render, and the faint transparent-white player silhouette is then drawn only
+   // where the stencil equals 1 - i.e. exactly where the player is hidden behind foreground
+   // geometry. this must go through sf::StencilMode (not raw gl) so the state survives sfml's
+   // per-render-target cache invalidation when tilemaps alternate between the color and normal
+   // targets.
+#ifdef DECEPTUS_VRSFML
+   const sf::StencilMode stencil_write_mode{
+      .stencilComparison = sf::StencilComparison::Always,
+      .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
+      .stencilOnly = false,
+      .stencilReference = sf::StencilValue{1u},
+      .stencilMask = sf::StencilValue{0xffu}
+   };
+   const sf::StencilMode stencil_test_mode{
+      .stencilComparison = sf::StencilComparison::Equal,
+      .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
+      .stencilOnly = false,
+      .stencilReference = sf::StencilValue{1u},
+      .stencilMask = sf::StencilValue{0xffu}
+   };
+#else
+   const sf::StencilMode stencil_write_mode{
+      sf::StencilComparison::Always,
+      sf::StencilUpdateOperation::Replace,
+      1,     // reference: mark foreground pixels with 1
+      0xff,  // mask
+      false  // stencilOnly: draw the foreground color too
+   };
+   const sf::StencilMode stencil_test_mode{
+      sf::StencilComparison::Equal,
+      sf::StencilUpdateOperation::Keep,
+      1,     // reference: keep only where stencil equals 1
+      0xff,  // mask
+      false
+   };
+#endif
+
+   const auto stencil_start_layer = PlayerStencil::getStartLayer();
+   const auto stencil_stop_layer = PlayerStencil::getStopLayer();
 
    for (auto z_index = from; z_index <= to; z_index++)
    {
-      PlayerStencil::draw(target, z_index);
+      // reset the stencil mask before the foreground layers start writing into it
+      if (z_index == stencil_start_layer)
+      {
+#ifdef DECEPTUS_VRSFML
+         target.clearStencil(sf::StencilValue{0u});
+#else
+         target.clearStencil(0);
+#endif
+      }
+
+      // draw the transparent-white player silhouette wherever the accumulated foreground mask is set
+      if (z_index == stencil_stop_layer)
+      {
+         auto silhouette_states = level_view_states;
+         silhouette_states.stencilMode = stencil_test_mode;
+         std::static_pointer_cast<Player>(PlayerRegistry::getFirst())->drawStencil(target, silhouette_states);
+      }
+
+      // within the foreground range, every drawn layer replaces the stencil buffer with 1
+      auto layer_states = level_view_states;
+      if (z_index >= stencil_start_layer && z_index < stencil_stop_layer)
+      {
+         layer_states.stencilMode = stencil_write_mode;
+      }
+
       drawParallaxMaps(target, z_index);
 
       // draw all tile maps
       for (const auto& tile_map : _tile_maps)
       {
-         if (tile_map->getZ() == z_index)
+#ifdef DEVELOPMENT_MODE
+         DrawCallCounter::layer_scan_steps++;
+#endif
+         if (tile_map->getZ() == z_index && !tile_map->isPostLighting())
          {
-            tile_map->draw(target, normal, {});
+            tile_map->draw(target, normal, layer_states);
          }
       }
 
@@ -987,23 +1241,27 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
          normal,
          z_index,
          [&player_chunk](const auto& mechanism)
-         { return !mechanism->isPostLighting() && !mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); }
+         { return !mechanism->isPostLighting() && !mechanism->isOverlay() && checkUpdateMechanism(player_chunk, mechanism); },
+         layer_states
       );
 
       // ambient occlusion
       if (z_index == _ambient_occlusion->getZ())
       {
-         _ambient_occlusion->draw(target);
+         _ambient_occlusion->draw(target, layer_states);
       }
 
-      // draw enemies
+      // draw enemies; sprite layers and projectiles may have been assigned their own z index from lua
       for (auto& enemy : LuaInterface::instance().getObjectList())
       {
-         if (enemy->getZ() == z_index)
+#ifdef DEVELOPMENT_MODE
+         DrawCallCounter::layer_scan_steps++;
+#endif
+         if (enemy->hasContentAtZ(z_index))
          {
             if (checkUpdateMechanism(player_chunk, enemy))
             {
-               enemy->draw(target, normal);
+               enemy->drawAtZ(target, normal, layer_states, z_index);
             }
          }
       }
@@ -1011,19 +1269,22 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
       // draw player
       if (z_index == static_cast<int32_t>(ZDepth::Player))
       {
-         drawPlayer(target, normal);
+         drawPlayer(target, normal, layer_states);
       }
 
       // draw image layers; post-lighting layers are drawn after the lighting pass
       for (auto& layer : _mechanism_registry.getImageLayers())
       {
+#ifdef DEVELOPMENT_MODE
+         DrawCallCounter::layer_scan_steps++;
+#endif
          if (layer->getZ() == z_index)
          {
             if (layer->isPostLighting())
             {
                continue;
             }
-            layer->draw(target, normal);
+            layer->draw(target, normal, layer_states);
          }
       }
    }
@@ -1038,19 +1299,25 @@ void Level::drawAtmosphereLayer()
 
    _atmosphere_shader->getRenderTexture()->clear();
    _atmosphere._tile_map->setVisible(true);
+#ifdef DECEPTUS_VRSFML
+   _atmosphere_shader->getRenderTexture()->draw(*_atmosphere._tile_map, sf::RenderStates{.view = *_level_view});
+#else
    _atmosphere_shader->getRenderTexture()->setView(*_level_view);
    _atmosphere_shader->getRenderTexture()->draw(*_atmosphere._tile_map);
+#endif
    _atmosphere._tile_map->setVisible(false);
    _atmosphere_shader->getRenderTexture()->display();
 }
 
+#ifdef GLOW_ENABLED
 void Level::drawBlurLayer(sf::RenderTarget& target)
 {
+#ifndef DECEPTUS_VRSFML
    target.setView(*_level_view);
+#endif
 
    // draw elements that are supposed to glow / to be blurred here
 
-#ifdef GLOW_ENABLED
    // lasers have been removed here because dstar added the glow to the spriteset
 
    const auto pPos = PlayerRegistry::getFirst()->getPixelPositionf();
@@ -1066,8 +1333,8 @@ void Level::drawBlurLayer(sf::RenderTarget& target)
 
       laser->draw(target);
    }
-#endif
 }
+#endif
 
 bool Level::isPhysicsPathClear(const sf::Vector2i& a_tl, const sf::Vector2i& b_tl) const
 {
@@ -1120,10 +1387,27 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
    // draw all tilemaps at z=24 into the stencil buffer only.
    // stencilOnly=true suppresses color output (replaces the old zero/zero blend mode).
    // the fragment shader's discard still runs so transparent tile regions don't occlude.
+#ifndef DECEPTUS_VRSFML
    target.setView(*_level_view);
-
    sf::RenderStates states;
-   states.shader = &_occluder_shader;
+#else
+   sf::RenderStates states{.view = *_level_view};
+#endif
+
+#ifdef DECEPTUS_VRSFML
+   if (_occluder_shader.isLoaded())
+   {
+      states.shader = &_occluder_shader.native();
+   }
+   states.stencilMode = sf::StencilMode{
+      .stencilComparison = sf::StencilComparison::Always,
+      .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
+      .stencilOnly = true,
+      .stencilReference = sf::StencilValue{1u},
+      .stencilMask = sf::StencilValue{~0u}
+   };
+#else
+   states.shader = &_occluder_shader.native();
    states.stencilMode = {
       sf::StencilComparison::Always,
       sf::StencilUpdateOperation::Replace,
@@ -1131,6 +1415,7 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
       ~0u,  // mask
       true  // stencilOnly: no color writes
    };
+#endif
 
    for (const auto& tile_map : _tile_maps)
    {
@@ -1144,32 +1429,63 @@ void Level::drawLightOccluders(sf::RenderTarget& target)
 void Level::displayFinalTextures()
 {
    // display the whole texture
-   sf::View view(sf::FloatRect(
-      {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
-   ));
-
-   view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
-
-   _render_targets.level->setView(view);
+#ifndef DECEPTUS_VRSFML
+   {
+      sf::View view(sf::FloatRect(
+         {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
+      ));
+      view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
+      _render_targets.level->setView(view);
+      _render_targets.normal->setView(view);
+   }
+#endif
    _render_targets.level->display();
-
-   _render_targets.normal->setView(view);
    _render_targets.normal->display();
 }
 
+#ifdef GLOW_ENABLED
 void Level::drawGlowLayer()
 {
-#ifdef GLOW_ENABLED
    _blur_shader->clearTexture();
    drawBlurLayer(*_blur_shader->getRenderTexture().get());
    _blur_shader->getRenderTexture()->display();
    takeScreenshot("screenshot_blur", *_blur_shader->getRenderTexture().get());
-#endif
 }
+#endif
 
+#ifdef GLOW_ENABLED
 void Level::drawGlowSprite()
 {
-#ifdef GLOW_ENABLED
+#ifdef DECEPTUS_VRSFML
+   const sf::Texture& blur_texture = _blur_shader->getRenderTexture()->getTexture();
+   sf::Sprite blur_sprite;
+   const auto down_scale_x =
+      _blur_shader->getRenderTextureScaled()->getSize().x / static_cast<float>(_blur_shader->getRenderTexture()->getSize().x);
+   const auto down_scale_y =
+      _blur_shader->getRenderTextureScaled()->getSize().y / static_cast<float>(_blur_shader->getRenderTexture()->getSize().y);
+   blur_sprite.scale = {down_scale_x, down_scale_y};
+
+   sf::RenderStates states_shader;
+   states_shader.texture = &blur_texture;
+   _blur_shader->update();
+   states_shader.shader = &_blur_shader->getShader();
+   _blur_shader->getRenderTextureScaled()->draw(blur_sprite, states_shader);
+
+   const sf::Texture& blur_scale_texture = _blur_shader->getRenderTextureScaled()->getTexture();
+   sf::Sprite blur_scale_sprite;
+   blur_scale_sprite.scale = {1.0f / down_scale_x, 1.0f / down_scale_y};
+   blur_scale_sprite.textureRect = sf::IntRect(
+      0,
+      static_cast<int32_t>(blur_scale_texture.getSize().y),
+      static_cast<int32_t>(blur_scale_texture.getSize().x),
+      -static_cast<int32_t>(blur_scale_texture.getSize().y)
+   );
+
+   sf::RenderStates states_add;
+   states_add.blendMode = sf::BlendAdd;
+   states_add.texture = &blur_scale_texture;
+   _render_targets.level->draw(blur_scale_sprite, states_add);
+#else
    sf::Sprite blur_sprite(_blur_shader->getRenderTexture()->getTexture());
    const auto down_scale_x =
       _blur_shader->getRenderTextureScaled()->getSize().x / static_cast<float>(_blur_shader->getRenderTexture()->getSize().x);
@@ -1196,10 +1512,60 @@ void Level::drawGlowSprite()
    _render_targets.level->draw(blur_scale_sprite, states_add);
 #endif
 }
+#endif
 
 const std::vector<std::shared_ptr<Room>>& Level::getRooms() const
 {
    return _rooms;
+}
+
+const LevelMap& Level::getLevelMap() const
+{
+   return _level_map;
+}
+
+bool Level::isMapRevealed() const
+{
+   return _map_revealed;
+}
+
+void Level::setMapRevealed(bool revealed)
+{
+   _map_revealed = revealed;
+}
+
+std::shared_ptr<PostProcessingMechanism> Level::getActivePostProcessingMechanism()
+{
+   const auto it = _mechanism_registry.getMap().find(std::string{layer_name_post_processing});
+   if (it == _mechanism_registry.getMap().end() || it->second == nullptr)
+   {
+      return nullptr;
+   }
+
+   std::shared_ptr<PostProcessingMechanism> active;
+   auto enabled_count = 0;
+
+   for (const auto& mechanism : *it->second)
+   {
+      if (!mechanism->isEnabled() || mechanism->getRenderStage() != MechanismRenderStage::PostProcessing)
+      {
+         continue;
+      }
+
+      enabled_count++;
+
+      if (!active || mechanism->getZ() > active->getZ())
+      {
+         active = std::dynamic_pointer_cast<PostProcessingMechanism>(mechanism);
+      }
+   }
+
+   if (enabled_count > 1)
+   {
+      Log::Warning() << enabled_count << " post processing mechanisms are enabled at once, only the highest z is applied";
+   }
+
+   return active;
 }
 
 const GameMechanismRegistry& Level::getMechanismRegistry() const
@@ -1214,7 +1580,7 @@ void Level::setLoadingMode(LoadingMode loading_mode)
 
 bool Level::isDirty() const
 {
-   return _dirty;
+   return _file_watcher.modified();
 }
 
 // Level Rendering Flow
@@ -1250,18 +1616,28 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 {
    _screenshot = screenshot;
 
+   rebuildMechanismDrawIndex();
+
+   beginRenderSectionTiming();
+
    // render atmosphere to atmosphere texture, that texture is used in the shader only
    drawAtmosphereLayer();
+   markRenderSection("atmosphere");
+#ifndef DECEPTUS_VRSFML
    takeScreenshot("texture_atmosphere", *_atmosphere_shader->getRenderTexture().get());
+#endif
 
    // render glowing elements
+#ifdef GLOW_ENABLED
    drawGlowLayer();
+#endif
 
    // render layers affected by the atmosphere
    _render_targets.level->clear();
    _render_targets.level_background->clear();
    _render_targets.normal_tmp->clear();
    _render_targets.normal->clear();
+   markRenderSection("clear level targets");
 
    drawLayers(
       *_render_targets.level_background.get(),
@@ -1275,8 +1651,10 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    _render_targets.normal_tmp->display();
    takeScreenshot("texture_level_background_normal", *_render_targets.normal_tmp.get());
+   markRenderSection("background layers");
 
    // draw the atmospheric parts into the level texture using the atmosphere shader
+#ifndef DECEPTUS_VRSFML
    sf::Sprite tmp_sprite(_render_targets.level_background->getTexture());
    _atmosphere_shader->update();
    _render_targets.level->draw(tmp_sprite, &_atmosphere_shader->getShader());
@@ -1288,7 +1666,27 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _render_targets.normal->draw(tmp_sprite, &_atmosphere_shader->getShader());
    takeScreenshot("texture_level_background_normal_dist", *_render_targets.normal.get());
 
+#ifdef GLOW_ENABLED
    drawGlowSprite();
+#endif
+#else
+   {
+      sf::Sprite atmosphere_sprite;
+      const sf::Vector2u atmosphere_sprite_size = _render_targets.level_background->getSize();
+      atmosphere_sprite.textureRect =
+         sf::FloatRect{{0.f, 0.f}, {static_cast<float>(atmosphere_sprite_size.x), static_cast<float>(atmosphere_sprite_size.y)}};
+
+      _atmosphere_shader->update();
+      const sf::Shader& atmosphere_shader = _atmosphere_shader->getShader();
+
+      const sf::Texture& level_background_texture = _render_targets.level_background->getTexture();
+      _render_targets.level->draw(atmosphere_sprite, sf::RenderStates{.texture = &level_background_texture, .shader = &atmosphere_shader});
+
+      const sf::Texture& normal_tmp_texture = _render_targets.normal_tmp->getTexture();
+      _render_targets.normal->draw(atmosphere_sprite, sf::RenderStates{.texture = &normal_tmp_texture, .shader = &atmosphere_shader});
+   }
+#endif
+   markRenderSection("atmosphere resolve");
 
    // draw the level layers into the level texture
    drawLayers(
@@ -1297,34 +1695,84 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
       static_cast<int32_t>(ZDepth::ForegroundMin),
       static_cast<int32_t>(ZDepth::ForegroundMax)
    );
+   markRenderSection("foreground layers");
 
+#ifndef DECEPTUS_VRSFML
    _light_system->drawDebug(*_render_targets.level.get());
+#endif
 
-   Gun::drawProjectileHitAnimations(*_render_targets.level.get());
-   AnimationPlayer::getInstance().draw(*_render_targets.level.get());
+#ifndef DECEPTUS_VRSFML
+   const sf::RenderStates level_view_states{};
+#else
+   const sf::RenderStates level_view_states{.view = *_level_view};
+#endif
 
+   Gun::drawProjectileHitAnimations(*_render_targets.level.get(), level_view_states);
+   AnimationPlayer::getInstance().draw(*_render_targets.level.get(), level_view_states);
+   _level_script.draw(*_render_targets.level.get(), level_view_states);
+
+#ifndef DECEPTUS_VRSFML
    drawDebugInformation();
+#endif
+   markRenderSection("animations and scripts");
 
    displayFinalTextures();
+   markRenderSection("display final textures");
 
-   drawLightMap();
+   if (DebugDrawStates::_draw_lighting)
+   {
+      drawLightMap();
 
-   _light_system->draw(
-      *_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.lighting2, _render_targets.normal
-   );
+      _light_system->draw(
+         *_render_targets.deferred.get(), _render_targets.level, _render_targets.lighting, _render_targets.lighting2, _render_targets.normal
+      );
+   }
+   else
+   {
+      // the deferred pass is what puts the level into the deferred target in the first place, so
+      // switching lighting off has to blit the unlit color map instead of merely skipping the pass,
+      // otherwise the frame stays black. the result is the artwork at full brightness.
+      const sf::Texture& unlit_texture = _render_targets.level->getTexture();
+#ifdef DECEPTUS_VRSFML
+      sf::Sprite unlit_sprite;
+      unlit_sprite.textureRect =
+         sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(unlit_texture.getSize().x), static_cast<float>(unlit_texture.getSize().y)}};
+      _render_targets.deferred->draw(unlit_sprite, sf::RenderStates{.texture = &unlit_texture});
+#else
+      sf::Sprite unlit_sprite(unlit_texture);
+      _render_targets.deferred->draw(unlit_sprite);
+#endif
+   }
+   markRenderSection("lighting");
 
    drawPostLightingLayers(*_render_targets.deferred.get());
+   markRenderSection("post lighting layers");
 
    drawOverlayLayers(*_render_targets.deferred.get());
 
    _render_targets.deferred->display();
+   markRenderSection("overlay layers");
 
+#ifndef DECEPTUS_VRSFML
    takeScreenshot("texture_map_color", *_render_targets.level.get());
    takeScreenshot("texture_map_light", *_render_targets.lighting.get());
    takeScreenshot("texture_map_light2", *_render_targets.lighting2.get());
    takeScreenshot("texture_map_normal", *_render_targets.normal.get());
    takeScreenshot("texture_map_deferred", *_render_targets.deferred.get());
+#endif
 
+#ifdef DECEPTUS_VRSFML
+   const sf::Texture& level_deferred_texture = _render_targets.deferred->getTexture();
+   sf::Sprite level_texture_sprite;
+
+   level_texture_sprite.position = {_boom_effect._boom_offset_x, _boom_effect._boom_offset_y};
+   const sf::Vector2u deferred_size = _render_targets.deferred->getSize();
+   level_texture_sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(deferred_size.x), static_cast<float>(deferred_size.y)}};
+
+   _gamma_shader->setTexture(level_deferred_texture);
+   _gamma_shader->update();
+   window->draw(level_texture_sprite, sf::RenderStates{.texture = &level_deferred_texture, .shader = &_gamma_shader->getGammaShader()});
+#else
    auto level_texture_sprite = sf::Sprite(_render_targets.deferred->getTexture());
    _gamma_shader->setTexture(_render_targets.deferred->getTexture());
 
@@ -1333,6 +1781,8 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    _gamma_shader->update();
    window->draw(level_texture_sprite, &_gamma_shader->getGammaShader());
+#endif
+   markRenderSection("gamma blit");
 }
 
 void Level::updatePlayerLight()
@@ -1351,7 +1801,7 @@ void Level::updatePlayerLight()
    {
       color.a = 0;
    }
-   _player_light->_sprite->setColor(color);
+   sfcompat::setColor(*_player_light->_sprite, color);
 }
 
 const std::shared_ptr<LightSystem>& Level::getLightSystem() const
@@ -1554,26 +2004,14 @@ void Level::regenerateLevelPaths(
    // dump the tileset into an obj file, optimise that and load it
    if (_physics.dumpObj(layer, tileset, path_solid_not_optimized))
    {
-#ifdef __linux__
-      auto cmd = std::string("tools/path_merge/path_merge") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
-#elif defined __APPLE__
-      auto cmd =
-         std::string("tools/path_merge/path_merge_macos") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
-#else
-      auto cmd =
-         std::string("tools\\path_merge\\path_merge.exe") + " " + path_solid_not_optimized.string() + " " + path_solid_optimized.string();
-#endif
+      Log::Info() << "optimising: " << path_solid_not_optimized;
 
-      Log::Info() << "running cmd: " << cmd;
+      PathMerge::PathMerger merger;
+      merger.loadObj(path_solid_not_optimized.string());
+      const auto stats = merger.saveObj(path_solid_optimized.string());
 
-      if (std::system(cmd.c_str()) != 0)
-      {
-         Log::Error() << "command failed";
-      }
-      else
-      {
-         Log::Info() << "command succeeded";
-      }
+      Log::Info() << "optimised: points " << stats.points_in << " -> " << stats.points_out << ", faces " << stats.faces_in << " -> "
+                  << stats.faces_out;
    }
    else
    {
@@ -1636,12 +2074,18 @@ void Level::parsePhysicsTiles(
       regenerateLevelPaths(layer, tileset, base_path, parse_data, path_solid_optimized);
    }
 
+   // the ingame map is derived from the solid level outlines, the one-sided platforms are not part of it
+   if (layer->_name == "level")
+   {
+      _level_map.build(path_solid_optimized, layer->_width_tl, layer->_height_tl, PIXELS_PER_TILE);
+   }
+
    ChainShapeAnalyzer::analyze(_world);
 }
 
 const sf::Vector2f& Level::getStartPosition() const
 {
-   return _start_position;
+   return _start_position_px;
 }
 
 #ifdef DEVELOPMENT_MODE
@@ -1669,4 +2113,37 @@ void Level::setMechanismProfilingEnabled(bool enabled)
 {
    _mechanism_profiling_enabled = enabled;
 }
+
+std::vector<RenderSectionSample> Level::getRenderSectionTimings() const
+{
+   return _render_section_timings;
+}
 #endif
+
+void Level::beginRenderSectionTiming()
+{
+#ifdef DEVELOPMENT_MODE
+   _render_section_timings.clear();
+   if (!_mechanism_profiling_enabled)
+   {
+      return;
+   }
+   _render_section_mark = std::chrono::high_resolution_clock::now();
+#endif
+}
+
+void Level::markRenderSection(const char* name)
+{
+#ifdef DEVELOPMENT_MODE
+   if (!_mechanism_profiling_enabled)
+   {
+      return;
+   }
+   const auto now = std::chrono::high_resolution_clock::now();
+   const auto elapsed_ms = std::chrono::duration<float, std::milli>(now - _render_section_mark).count();
+   _render_section_timings.push_back({name, elapsed_ms});
+   _render_section_mark = now;
+#else
+   (void)name;
+#endif
+}

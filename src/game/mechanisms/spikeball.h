@@ -47,6 +47,15 @@ public:
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
 
+#ifdef DECEPTUS_VRSFML
+   /// \brief draws the chain spline and spike ball sprite with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal-map render target, unused by this mechanism.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+#endif
+
    /// \brief updates ball pose, swing audio, and optional push impulse.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
@@ -64,13 +73,20 @@ public:
    sf::Vector2i getPixelPosition() const;
 
    /// \brief sets the anchor position in pixels.
-   /// \param pixel_position position in pixels.
-   void setPixelPosition(const sf::Vector2i& pixel_position);
+   /// \param position_px position in pixels.
+   void setPixelPosition(const sf::Vector2i& position_px);
 
 private:
+#ifdef DECEPTUS_VRSFML
+   /// \brief draws interpolated chain segments between box2d chain bodies.
+   /// \param window render target window.
+   /// \param states render states to apply.
+   void drawChain(sf::RenderTarget& window, const sf::RenderStates& states);
+#else
    /// \brief draws interpolated chain segments between box2d chain bodies.
    /// \param window render target window.
    void drawChain(sf::RenderTarget& window);
+#endif
 
    std::shared_ptr<sf::Texture> _texture;
    std::unique_ptr<sf::Sprite> _spike_sprite;
@@ -78,7 +94,7 @@ private:
    std::unique_ptr<sf::Sprite> _chain_element_a;
    std::unique_ptr<sf::Sprite> _chain_element_b;
 
-   sf::Vector2i _pixel_position;
+   sf::Vector2i _position_px;
    sf::FloatRect _rect;
 
    b2BodyDef _anchor_def;

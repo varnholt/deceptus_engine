@@ -1,6 +1,8 @@
 #pragma once
 
 // game
+#include "framework/tools/filewatcher.h"
+#include "framework/tools/sfmlshader.h"
 #include "game/audio/volumeupdater.h"
 #include "game/constants.h"
 #include "game/effects/boomeffect.h"
@@ -12,16 +14,20 @@
 #include "game/level/gamenode.h"
 #include "game/level/leveldescription.h"
 #include "game/level/levelinterface.h"
+#include "game/level/levelmap.h"
 #include "game/level/levelscript.h"
 #include "game/level/room.h"
 #include "game/level/tmxenemy.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "game/mechanisms/imagelayer.h"
 #include "game/mechanisms/portal.h"
 #include "game/physics/physics.h"
 #include "game/physics/squaremarcher.h"
 #include "game/rendering/rendertargets.h"
 #include "game/shaders/atmosphereshader.h"
+#ifdef GLOW_ENABLED
 #include "game/shaders/blurshader.h"
+#endif
 #include "game/shaders/gammashader.h"
 
 // sfml
@@ -35,16 +41,23 @@
 // std
 #include <map>
 #include <memory>
+#include <set>
+#ifdef DECEPTUS_VRSFML
+#include <optional>
+#endif
 
 #ifdef DEVELOPMENT_MODE
+#include <chrono>
 #include <vector>
 #include "game/debug/mechanismsample.h"
+#include "game/debug/rendersectionsample.h"
 #endif
 
 class Bouncer;
 class IngameMenuMap;
 class TmxParser;
 struct ParseData;
+struct PostProcessingMechanism;
 
 /// \brief manages a playable level including tmx loading, physics, mechanisms, camera, and rendering.
 class Level : public GameNode, public LevelInterface
@@ -93,6 +106,14 @@ public:
    /// \brief returns a snapshot of per-mechanism cpu costs sorted by total cost descending.
    /// \param top_n maximum number of entries to return.
    std::vector<MechanismSample> getMechanismTimings(int32_t top_n) const;
+
+   /// \brief returns the cpu cost of each render section of the last drawn frame, in draw order.
+   ///
+   /// These are cpu side timings taken between the passes of Level::draw, so they measure how long
+   /// it takes to submit each pass rather than how long the gpu takes to retire it. On a gpu bound
+   /// machine the cost therefore shows up wherever the driver next blocks, not necessarily in the
+   /// pass that caused it.
+   std::vector<RenderSectionSample> getRenderSectionTimings() const;
 #endif
 
    /// \brief advances active room and camera behavior, including room locks, transitions, and zoom.
@@ -177,9 +198,28 @@ public:
    /// \return immutable reference to the mechanism registry.
    const GameMechanismRegistry& getMechanismRegistry() const override;
 
+   /// \brief returns the enabled post processing mechanism that should drive the post processing pass.
+   ///
+   /// When several are enabled at once the one with the highest z wins and the others are logged,
+   /// since stacking would require a second full screen target and an extra pass per effect.
+   /// \return active mechanism, or nullptr when the level has none enabled.
+   std::shared_ptr<PostProcessingMechanism> getActivePostProcessingMechanism();
+
    /// \brief returns all rooms parsed from the level.
    /// \return immutable reference to room list.
    const std::vector<std::shared_ptr<Room>>& getRooms() const override;
+
+   /// \brief returns the pixel art overview generated from the level's collision mesh.
+   /// \return immutable reference to the level map.
+   const LevelMap& getLevelMap() const override;
+
+   /// \brief returns whether the whole level map has been made visible.
+   /// \return true when unvisited areas should be shown as well.
+   bool isMapRevealed() const override;
+
+   /// \brief shows or hides the parts of the map the player has not visited yet.
+   /// \param revealed true to show the whole level map.
+   void setMapRevealed(bool revealed) override;
 
 protected:
    /// \brief loads or regenerates physics paths for a collision tile layer and adds chains to box2d.
@@ -223,7 +263,7 @@ protected:
    /// \brief initializes level.lua and binds mechanism lookup callbacks.
    void loadLevelScript();
 
-   /// \brief generates unoptimized physics geometry, runs path_merge, then loads optimized paths.
+   /// \brief generates unoptimized physics geometry, merges and optimizes paths, then loads them.
    /// \param layer tmx layer used to generate collision geometry.
    /// \param tileset tileset used by physics geometry extraction.
    /// \param base_path base directory for generated intermediate and output files.
@@ -251,12 +291,21 @@ protected:
    /// \brief refreshes the current room from the player's current position.
    void updateRoom();
 
+   /// \brief subscribes to the mechanism events that drive the ingame map.
+   void registerMapEvents();
+
    /// \brief draws mechanisms from all groups that pass predicate at a specific z layer.
    /// \param color color render target.
    /// \param normal normal-map render target.
    /// \param z_index z layer to draw.
    /// \param predicate returns true for mechanisms that should be drawn.
-   void drawMechanismsAtZ(sf::RenderTarget& color, sf::RenderTarget& normal, int32_t z_index, auto predicate);
+   void drawMechanismsAtZ(
+      sf::RenderTarget& color,
+      sf::RenderTarget& normal,
+      int32_t z_index,
+      auto predicate,
+      const sf::RenderStates& states = {}
+   );
 
    /// \brief draws parallax tile maps at a specific z layer.
    /// \param target render target.
@@ -293,7 +342,7 @@ protected:
    /// \brief draws the player sprite and normal map contribution.
    /// \param color color render target.
    /// \param normal normal render target.
-   void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal);
+   void drawPlayer(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states = {});
 
    /// \brief draws cached physics outline chains for debug visualization.
    /// \param target render target.
@@ -316,6 +365,13 @@ protected:
    void drawGlowSprite();
 
    std::vector<std::shared_ptr<Room>> _rooms;
+   LevelMap _level_map;
+   bool _map_revealed{false};  //!< whole level map visible, set by a map item and persisted in the save state
+
+   std::unique_ptr<
+      GameMechanismObserver::Reference<GameMechanismObserver::EventCallback>,
+      std::function<void(GameMechanismObserver::Reference<GameMechanismObserver::EventCallback>*)>>
+      _map_event_listener;
    LevelScript _level_script;
 
    const RenderTargets& _render_targets;
@@ -336,7 +392,7 @@ protected:
 
    Atmosphere _atmosphere;
    Physics _physics;
-   sf::Vector2f _start_position;
+   sf::Vector2f _start_position_px;
 
    std::vector<std::unique_ptr<ParallaxLayer>> _parallax_layers;
 
@@ -349,9 +405,11 @@ protected:
    std::shared_ptr<LightSystem::LightInstance> _player_light;
    std::unique_ptr<AmbientOcclusion> _ambient_occlusion;
    std::unique_ptr<AtmosphereShader> _atmosphere_shader;
+#ifdef GLOW_ENABLED
    std::unique_ptr<BlurShader> _blur_shader;
+#endif
    std::unique_ptr<GammaShader> _gamma_shader;
-   sf::Shader _occluder_shader;  //!< alpha-test shader for light occluder stencil rendering
+   sfcompat::Shader _occluder_shader;  //!< alpha-test shader for light occluder stencil rendering
    bool _screenshot = false;
 
    // box2d
@@ -359,13 +417,32 @@ protected:
    std::vector<std::vector<b2Vec2>> _world_chains;
    Winding _winding = Winding::Clockwise;
 
-   // file watcher and re-generation
-   std::thread _file_watcher_thread;
-   bool _file_watcher_thread_active{true};
-   bool _dirty{false};
+   // watches the level's tmx so a level edited while the game runs is reloaded
+   FileWatcher _file_watcher;
    LoadingMode _loading_mode{LoadingMode::Standard};
+
+   /// \brief rebuilds the per z index of mechanisms that the z loops in Level::draw walk.
+   void rebuildMechanismDrawIndex();
+
+   //! mechanisms bucketed by their z index, rebuilt once per frame by rebuildMechanismDrawIndex().
+   //! these are raw pointers into the registry and are only valid for the frame they were built in.
+   //! only mechanisms belong here: a mechanism sits at exactly one z, whereas a lua node answers
+   //! hasContentAtZ() for several, so those keep their own scan
+   std::unordered_map<int32_t, std::vector<GameMechanism*>> _mechanisms_by_z;
+
+   /// \brief starts a render section measurement at the top of Level::draw.
+   ///
+   /// Declared unconditionally so that Level::draw stays free of preprocessor branches between its
+   /// passes; the body collapses to nothing outside DEVELOPMENT_MODE.
+   void beginRenderSectionTiming();
+
+   /// \brief closes the running render section and opens the next one.
+   /// \param name label the elapsed time is recorded under.
+   void markRenderSection(const char* name);
 
 #ifdef DEVELOPMENT_MODE
    bool _mechanism_profiling_enabled{false};
+   std::vector<RenderSectionSample> _render_section_timings;
+   std::chrono::high_resolution_clock::time_point _render_section_mark;
 #endif
 };

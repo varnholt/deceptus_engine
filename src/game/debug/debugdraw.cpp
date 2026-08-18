@@ -1,7 +1,11 @@
 #include "debugdraw.h"
 
 #include <iostream>
+#ifdef DECEPTUS_VRSFML
+#include <span>
+#endif
 
+#include "framework/tools/sfmlcompat.h"
 #include "game/camera/camerasystem.h"
 #include "game/physics/worldquery.h"
 
@@ -24,7 +28,11 @@ b2Vec2 DebugDraw::vecS2B(const sf::Vector2f& vector)
 
 void DebugDraw::drawPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
 {
+#ifdef DECEPTUS_VRSFML
+   sf::ConvexShape polygon{sf::ConvexShape::Data{.pointCount = static_cast<std::size_t>(vertexCount)}};
+#else
    sf::ConvexShape polygon(vertexCount);
+#endif
 
    for (auto i = 0; i < vertexCount; i++)
    {
@@ -40,7 +48,11 @@ void DebugDraw::drawPolygon(sf::RenderTarget& target, const b2Vec2* vertices, in
 
 void DebugDraw::drawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertex_count, const b2Color& color)
 {
+#ifdef DECEPTUS_VRSFML
+   sf::ConvexShape polygon{sf::ConvexShape::Data{.pointCount = static_cast<std::size_t>(vertex_count)}};
+#else
    sf::ConvexShape polygon(vertex_count);
+#endif
    for (auto i = 0; i < vertex_count; i++)
    {
       sf::Vector2f transformedVec = DebugDraw::vecB2S(vertices[i]);
@@ -56,9 +68,13 @@ void DebugDraw::drawSolidPolygon(sf::RenderTarget& target, const b2Vec2* vertice
 
 void DebugDraw::drawCircle(sf::RenderTarget& target, const b2Vec2& center, float radius, const b2Color& color)
 {
+#ifdef DECEPTUS_VRSFML
+   sf::CircleShape circle{sf::CircleShape::Data{.radius = radius * PPM}};
+#else
    sf::CircleShape circle(radius * PPM);
-   circle.setOrigin({radius * PPM, radius * PPM});
-   circle.setPosition(DebugDraw::vecB2S(center));
+#endif
+   sfcompat::setOrigin(circle, {radius * PPM, radius * PPM});
+   sfcompat::setPosition(circle, DebugDraw::vecB2S(center));
    circle.setFillColor(sf::Color::Transparent);
    circle.setOutlineThickness(outline_thickness);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -68,9 +84,13 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const b2Vec2& center, float
 
 void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center, float radius, const b2Color& color)
 {
+#ifdef DECEPTUS_VRSFML
+   sf::CircleShape circle{sf::CircleShape::Data{.radius = radius}};
+#else
    sf::CircleShape circle(radius);
-   circle.setOrigin({radius, radius});
-   circle.setPosition(center);
+#endif
+   sfcompat::setOrigin(circle, {radius, radius});
+   sfcompat::setPosition(circle, center);
    circle.setFillColor(sf::Color::Transparent);
    circle.setOutlineThickness(outline_thickness);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -80,9 +100,13 @@ void DebugDraw::drawCircle(sf::RenderTarget& target, const sf::Vector2f& center,
 
 void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, float radius, const b2Vec2& axis, const b2Color& color)
 {
+#ifdef DECEPTUS_VRSFML
+   sf::CircleShape circle{sf::CircleShape::Data{.radius = radius * PPM}};
+#else
    sf::CircleShape circle(radius * PPM);
-   circle.setOrigin({radius * PPM, radius * PPM});
-   circle.setPosition(DebugDraw::vecB2S(center));
+#endif
+   sfcompat::setOrigin(circle, {radius * PPM, radius * PPM});
+   sfcompat::setPosition(circle, DebugDraw::vecB2S(center));
    circle.setFillColor(DebugDraw::glColorToSfml(color, 255));
    circle.setOutlineThickness(1.f);
    circle.setOutlineColor(DebugDraw::glColorToSfml(color));
@@ -94,7 +118,11 @@ void DebugDraw::drawSolidCircle(sf::RenderTarget& target, const b2Vec2& center, 
    };
 
    target.draw(circle);
+#ifdef DECEPTUS_VRSFML
+   target.draw(line, sf::PrimitiveType::Lines);
+#else
    target.draw(line, 2, sf::PrimitiveType::Lines);
+#endif
 }
 
 void DebugDraw::drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const b2Color& color)
@@ -108,7 +136,11 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const sf::Vector2f& p, const
       sf::Vertex(p + sf::Vector2f{0, pointSize}, DebugDraw::glColorToSfml(color))
    };
 
+#ifdef DECEPTUS_VRSFML
+   target.draw(line, sf::PrimitiveType::Lines);
+#else
    target.draw(line, 4, sf::PrimitiveType::Lines);
+#endif
 }
 
 void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Color& color)
@@ -122,7 +154,11 @@ void DebugDraw::drawPoint(sf::RenderTarget& target, const b2Vec2& p, const b2Col
       sf::Vertex(DebugDraw::vecB2S(p) + sf::Vector2f{0, pointSize}, DebugDraw::glColorToSfml(color))
    };
 
+#ifdef DECEPTUS_VRSFML
+   target.draw(line, sf::PrimitiveType::Lines);
+#else
    target.draw(line, 4, sf::PrimitiveType::Lines);
+#endif
 }
 
 void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
@@ -131,14 +167,22 @@ void DebugDraw::drawLine(sf::RenderTarget& target, const b2Vec2& p1, const b2Vec
       sf::Vertex(DebugDraw::vecB2S(p1), DebugDraw::glColorToSfml(color)), sf::Vertex(DebugDraw::vecB2S(p2), DebugDraw::glColorToSfml(color))
    };
 
+#ifdef DECEPTUS_VRSFML
+   target.draw(line, sf::PrimitiveType::Lines);
+#else
    target.draw(line, 2, sf::PrimitiveType::Lines);
+#endif
 }
 
 void DebugDraw::drawLine(sf::RenderTarget& target, const sf::Vector2f& p1, const sf::Vector2f& p2, const b2Color& color)
 {
    sf::Vertex line[] = {sf::Vertex(p1, DebugDraw::glColorToSfml(color)), sf::Vertex(p2, DebugDraw::glColorToSfml(color))};
 
+#ifdef DECEPTUS_VRSFML
+   target.draw(line, sf::PrimitiveType::Lines);
+#else
    target.draw(line, 2, sf::PrimitiveType::Lines);
+#endif
 }
 
 void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& lines, const b2Color& color)
@@ -148,7 +192,11 @@ void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& l
 
    std::transform(lines.begin(), lines.end(), sf_lines.begin(), [sf_color](const auto& val) { return sf::Vertex(vecB2S(val), sf_color); });
 
+#ifdef DECEPTUS_VRSFML
+   target.draw(std::span<const sf::Vertex>{sf_lines.data(), sf_lines.size()}, sf::PrimitiveType::LineStrip);
+#else
    target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
+#endif
 }
 
 void DebugDraw::drawLines(
@@ -167,7 +215,11 @@ void DebugDraw::drawLines(
       sf_lines.emplace_back(vecB2S(vertices[i] + offset), sf_color);
    }
 
+#ifdef DECEPTUS_VRSFML
+   target.draw(std::span<const sf::Vertex>{sf_lines.data(), sf_lines.size()}, sf::PrimitiveType::LineStrip);
+#else
    target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
+#endif
 }
 
 void DebugDraw::drawLineLoop(
@@ -189,7 +241,11 @@ void DebugDraw::drawLineLoop(
    // close loop
    sf_lines.emplace_back(vecB2S(vertices[0] + offset), sf_color);
 
+#ifdef DECEPTUS_VRSFML
+   target.draw(std::span<const sf::Vertex>{sf_lines.data(), sf_lines.size()}, sf::PrimitiveType::LineStrip);
+#else
    target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
+#endif
 }
 
 void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
@@ -207,8 +263,13 @@ void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
       sf::Vertex(DebugDraw::vecB2S(xf.p), sf::Color::Green), sf::Vertex(DebugDraw::vecB2S(y_axis), sf::Color::Green)
    };
 
+#ifdef DECEPTUS_VRSFML
+   target.draw(line_red, sf::PrimitiveType::Lines);
+   target.draw(line_green, sf::PrimitiveType::Lines);
+#else
    target.draw(line_red, 2, sf::PrimitiveType::Lines);
    target.draw(line_green, 2, sf::PrimitiveType::Lines);
+#endif
 }
 
 void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::Color& color, const sf::Color& fill_color)
@@ -224,9 +285,13 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, cons
    const auto pos = sf::Vector2{static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)};
    const auto size = sf::Vector2f{static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)};
 
+#ifdef DECEPTUS_VRSFML
+   sf::RectangleShape rs{sf::RectangleShape::Data{.size = size}};
+#else
    sf::RectangleShape rs;
    rs.setSize(size);
-   rs.setPosition(pos);
+#endif
+   sfcompat::setPosition(rs, pos);
 
    drawShape(target, rs, color, fill_color);
 }
@@ -236,21 +301,34 @@ void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, co
    const auto pos = sf::Vector2{static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)};
    const auto size = sf::Vector2f{static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)};
 
+#ifdef DECEPTUS_VRSFML
+   sf::RectangleShape rs{sf::RectangleShape::Data{.size = size}};
+#else
    sf::RectangleShape rs;
    rs.setSize(size);
-   rs.setPosition(pos);
+#endif
+   sfcompat::setPosition(rs, pos);
 
    drawShape(target, rs, color, fill_color);
 }
 
 sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)
 {
+#ifdef DECEPTUS_VRSFML
+   const auto screen_view = target.computeView();
+
+   const sf::FloatRect screen = {
+      {screen_view.center.x - screen_view.size.x / 2.0f, screen_view.center.y - screen_view.size.y / 2.0f},
+      {screen_view.size.x, screen_view.size.y}
+   };
+#else
    const auto& screen_view = target.getView();
 
    sf::FloatRect screen = {
       {screen_view.getCenter().x - screen_view.getSize().x / 2.0f, screen_view.getCenter().y - screen_view.getSize().y / 2.0f},
       {screen_view.getSize().x, screen_view.getSize().y}
    };
+#endif
 
    return screen;
 }
@@ -369,10 +447,17 @@ void DebugDraw::debugCameraSystem(sf::RenderTarget& target)
       sf::Vertex{sf::Vector2f{static_cast<float>(target.getSize().x), camera_system.getPanicLineY1()}, sf::Color{0, 50, 255, 100}}
    };
 
+#ifdef DECEPTUS_VRSFML
+   target.draw(f0, sf::PrimitiveType::Lines);
+   target.draw(f1, sf::PrimitiveType::Lines);
+   target.draw(p0, sf::PrimitiveType::Lines);
+   target.draw(p1, sf::PrimitiveType::Lines);
+#else
    target.draw(f0, 2, sf::PrimitiveType::Lines);
    target.draw(f1, 2, sf::PrimitiveType::Lines);
    target.draw(p0, 2, sf::PrimitiveType::Lines);
    target.draw(p1, 2, sf::PrimitiveType::Lines);
+#endif
 }
 
 void DebugDraw::debugHitboxes(sf::RenderTarget& target)

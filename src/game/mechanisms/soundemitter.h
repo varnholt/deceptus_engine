@@ -6,6 +6,9 @@
 #include "game/mechanisms/gamemechanism.h"
 
 /// \brief plays positional ambient audio configured from a map object.
+/// \note deliberately does not call addChunks: this mechanism has no update override at all, it is driven by
+///       VolumeUpdater. distance attenuation is precisely what has to keep working while the player is far away, which
+///       is the opposite of what chunk culling provides.
 class SoundEmitter : public GameMechanism, public GameNode
 {
 public:

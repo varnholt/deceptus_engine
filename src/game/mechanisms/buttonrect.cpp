@@ -1,4 +1,7 @@
 #include "buttonrect.h"
+
+#include <array>
+
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -7,9 +10,23 @@
 
 namespace
 {
+static constexpr std::string_view default_button_rect_button = "b";
+static constexpr std::array button_rect_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "button", .type = "string", .default_value = default_button_rect_button},
+};
+static constexpr MechanismSchema button_rect_schema{
+   .type_name = "ButtonRect",
+   .layer_name = "button_rects",
+   .default_width = 48,
+   .default_height = 24,
+   .properties = button_rect_properties,
+};
 const auto registered_buttonrect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(button_rect_schema);
+
    registry.markAsNonVisual("button_rects");
    registry.mapGroupToLayer("ButtonRect", "button_rects");
 
@@ -48,7 +65,14 @@ std::string_view ButtonRect::objectName() const
 
 void ButtonRect::update(const sf::Time& /*dt*/)
 {
+#ifdef DECEPTUS_VRSFML
+   {
+      const auto player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+      _player_intersects = sf::findIntersection(player_rect, _rect).hasValue();
+   }
+#else
    _player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
+#endif
 
    if (!isEnabled())
    {
@@ -84,7 +108,7 @@ void ButtonRect::setup(const GameDeserializeData& data)
       static std::unordered_map<std::string, Button> button_map{{"a", Button::A}, {"b", Button::B}, {"x", Button::X}, {"y", Button::Y}};
 
       const auto& map = data._tmx_object->_properties->_map;
-      const auto button_id_str = ValueReader::readValue<std::string>("button", map).value_or("b");
+      const auto button_id_str = ValueReader::readValue<std::string>("button", map).value_or(std::string(default_button_rect_button));
       const auto button_it = button_map.find(button_id_str);
       if (button_it != button_map.end())
       {

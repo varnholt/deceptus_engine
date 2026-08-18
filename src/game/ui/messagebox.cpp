@@ -5,6 +5,7 @@
 #include "framework/image/psd.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "game/audio/audio.h"
 #include "game/config/gameconfiguration.h"
@@ -33,8 +34,6 @@ static const auto animation_fade_time_hide = sf::seconds(0.5f);
 
 std::unique_ptr<MessageBox> __active;
 std::unique_ptr<MessageBox> __previous;
-
-sf::Font __font;
 
 std::string replaceAll(std::string str, const std::string& from, const std::string& to)
 {
@@ -145,7 +144,7 @@ void messageBox(
 {
    if (properties._animate_show_event)
    {
-      Audio::getInstance().playSample({"messagebox_open_01.wav"});
+      Audio::getInstance().playSample({"messagebox_open_01.ogg"});
    }
 
    __active = std::make_unique<MessageBox>(type, message, callback, properties, buttons);
@@ -176,7 +175,7 @@ MessageBox::MessageBox(
 
    const auto segments = RichTextParser::parseRichText(
       message,
-      __font,
+      getFont(),
       _properties._text_color,
       properties._centered ? RichTextParser::Alignment::Centered : RichTextParser::Alignment::Left,
       textbox_width_px,
@@ -191,7 +190,13 @@ MessageBox::MessageBox(
       segments.end(),
       std::back_inserter(_segments),
       [](const RichTextParser::Segment& segment)
-      { return TextSegment{*segment.text, segment.text->getFillColor(), segment.text->getString()}; }
+      {
+#ifdef DECEPTUS_VRSFML
+         return TextSegment{*segment.text, segment.text->getFillColor(), std::string(segment.text->getString().data())};
+#else
+         return TextSegment{*segment.text, segment.text->getFillColor(), segment.text->getString()};
+#endif
+      }
    );
 
    // can maybe be removed
@@ -228,12 +233,6 @@ void MessageBox::initializeLayers()
       __psd_loaded = true;
       psd.setColorFormat(PSD::ColorFormat::ABGR);
       psd.load("data/game/messagebox.psd");
-
-      if (!__font.openFromFile("data/fonts/deceptum.ttf"))
-      {
-         Log::Error() << "font load fuckup";
-      }
-      const_cast<sf::Texture&>(__font.getTexture(12)).setSmooth(false);
    }
 
    // load layers
@@ -249,6 +248,17 @@ void MessageBox::initializeLayers()
 
       try
       {
+#ifdef DECEPTUS_VRSFML
+         auto texture = std::make_shared<sf::Texture>(
+            std::move(*sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())}))
+         );
+         texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
+
+         auto sprite = std::make_shared<sf::Sprite>();
+
+         sprite->position = {static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
+         sprite->textureRect = sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(layer.getWidth()), static_cast<float>(layer.getHeight())}};
+#else
          auto texture =
             std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
@@ -256,6 +266,7 @@ void MessageBox::initializeLayers()
          auto sprite = std::make_shared<sf::Sprite>(*texture);
 
          sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
+#endif
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;
@@ -279,9 +290,15 @@ void MessageBox::initializeLayers()
    _layers["temp_bg"]->_visible = false;
 
    // initialize positions
+#ifdef DECEPTUS_VRSFML
+   _window_position_px = _layers["window"]->_sprite->position;
+   _background_position_px = _layers["background"]->_sprite->position;
+   _next_page_position_px = _layers["next_page"]->_sprite->position;
+#else
    _window_position_px = _layers["window"]->_sprite->getPosition();
    _background_position_px = _layers["background"]->_sprite->getPosition();
    _next_page_position_px = _layers["next_page"]->_sprite->getPosition();
+#endif
 }
 
 bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
@@ -306,7 +323,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
    // yay
    if (key == sf::Keyboard::Key::Enter)
    {
-      Audio::getInstance().playSample({"messagebox_confirm.wav"});
+      Audio::getInstance().playSample({"messagebox_confirm.ogg"});
 
       if (__active->_buttons & static_cast<int32_t>(Button::Yes))
       {
@@ -319,7 +336,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
 
       if (__active->_properties._animate_text)
       {
-         if (__active->_char_animate_index < __active->_plain_text.length())
+#ifdef DECEPTUS_VRSFML
+         if (__active->_char_animate_index < __active->_plain_text.size())
+#else
+         if (__active->_char_animate_index < __active->_plain_text.getSize())
+#endif
          {
             __active->_properties._animate_text = false;
             return true;
@@ -330,7 +351,7 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
    // nay
    if (key == sf::Keyboard::Key::Escape)
    {
-      Audio::getInstance().playSample({"messagebox_cancel.wav"});
+      Audio::getInstance().playSample({"messagebox_cancel.ogg"});
 
       if (__active->_buttons & static_cast<int32_t>(Button::No))
       {
@@ -401,19 +422,33 @@ void MessageBox::draw(sf::RenderTarget& window, const sf::RenderStates& states)
    }
 
    // set up an ortho view with screen dimensions
+#ifdef DECEPTUS_VRSFML
+   const sf::View pixel_ortho = sf::View::fromRect(sf::FloatRect(
+      {0.0f, 0.0f},
+      {static_cast<float>(GameConfiguration::getInstance()._view_width), static_cast<float>(GameConfiguration::getInstance()._view_height)}
+   ));
+   sf::RenderStates ortho_states = states;
+   ortho_states.view = pixel_ortho;
+#else
    sf::View pixel_ortho(sf::FloatRect(
       {0.0f, 0.0f},
       {static_cast<float>(GameConfiguration::getInstance()._view_width), static_cast<float>(GameConfiguration::getInstance()._view_height)}
    ));
 
    window.setView(pixel_ortho);
+#endif
 
    for (auto messagebox : messageboxes)
    {
       if (messagebox)
       {
+#ifdef DECEPTUS_VRSFML
+         messagebox->drawLayers(window, ortho_states);
+         messagebox->drawText(window, ortho_states);
+#else
          messagebox->drawLayers(window, states);
          messagebox->drawText(window, states);
+#endif
       }
    }
 }
@@ -433,8 +468,13 @@ void MessageBox::updateTextAnimation()
    // so x might go into negative for that duration.
    x = std::max(0.0f, x);
 
+#ifdef DECEPTUS_VRSFML
    const auto to =
       !_properties._animate_text ? _plain_text.size() : std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_plain_text.size()));
+#else
+   const auto to =
+      !_properties._animate_text ? _plain_text.getSize() : std::min(static_cast<uint32_t>(x), static_cast<uint32_t>(_plain_text.getSize()));
+#endif
 
    int32_t accumulated_chars_from_segments = 0;
    if (_char_animate_index != to)
@@ -442,16 +482,31 @@ void MessageBox::updateTextAnimation()
       _char_animate_index = to;
       for (auto& segment : _segments)
       {
-         accumulated_chars_from_segments += segment.plain_text.size();
-         if (to < accumulated_chars_from_segments)
+#ifdef DECEPTUS_VRSFML
+         accumulated_chars_from_segments += static_cast<int32_t>(segment.plain_text.size());
+         if (to < static_cast<uint32_t>(accumulated_chars_from_segments))
          {
             // draw only subset of segment
-            const auto chars_to_draw = segment.plain_text.size() - (accumulated_chars_from_segments - to);
-            segment.text.setString(segment.plain_text.substr(0, chars_to_draw));
+            const auto chars_to_draw = segment.plain_text.size() - (static_cast<uint32_t>(accumulated_chars_from_segments) - to);
+            const auto subset = segment.plain_text.substr(0, chars_to_draw);
+            segment.text.setString(subset.c_str());
+            break;
+         }
+
+         segment.text.setString(segment.plain_text.c_str());
+#else
+         accumulated_chars_from_segments += static_cast<int32_t>(segment.plain_text.getSize());
+         if (to < static_cast<uint32_t>(accumulated_chars_from_segments))
+         {
+            // draw only subset of segment
+            const auto chars_to_draw = segment.plain_text.getSize() - (static_cast<uint32_t>(accumulated_chars_from_segments) - to);
+            const auto subset = segment.plain_text.substring(0, chars_to_draw);
+            segment.text.setString(subset);
             break;
          }
 
          segment.text.setString(segment.plain_text);
+#endif
       }
    }
 }
@@ -529,9 +584,14 @@ void MessageBox::updateNextPageIcon()
    constexpr auto animation_amplitude = 3.0f;
 
    auto next_page_layer = _layers["next_page"];
+#ifdef DECEPTUS_VRSFML
+   next_page_layer->_sprite->position =
+      _next_page_position_px + offset_px + sf::Vector2f{0.0f, std::sin(_elapsed.asSeconds() * animation_speed) * animation_amplitude};
+#else
    next_page_layer->_sprite->setPosition(
       _next_page_position_px + offset_px + sf::Vector2f{0.0f, std::sin(_elapsed.asSeconds() * animation_speed) * animation_amplitude}
    );
+#endif
 }
 
 void MessageBox::noAnimation()
@@ -542,6 +602,15 @@ void MessageBox::noAnimation()
 
    const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
 
+#ifdef DECEPTUS_VRSFML
+   window_layer->_sprite->color = sf::Color::White;
+   window_layer->_sprite->scale = {1.0f, 1.0f};
+   window_layer->_sprite->position = _window_position_px + offset_px;
+
+   background_layer->_sprite->color = background_color;
+   background_layer->_sprite->scale = {1.0f, 1.0f};
+   background_layer->_sprite->position = _background_position_px + offset_px;
+#else
    window_layer->_sprite->setColor(sf::Color::White);
    window_layer->_sprite->setScale({1.0f, 1.0f});
    window_layer->_sprite->setPosition(_window_position_px + offset_px);
@@ -549,6 +618,7 @@ void MessageBox::noAnimation()
    background_layer->_sprite->setColor(background_color);
    background_layer->_sprite->setScale({1.0f, 1.0f});
    background_layer->_sprite->setPosition(_background_position_px + offset_px);
+#endif
 
    updateNextPageIcon();
    updateTextAndButtonColor(1.0f);
@@ -569,7 +639,11 @@ void MessageBox::updateTextAndButtonColor(float contents_alpha)
 
    for (const auto& layer : _box_content_layers)
    {
+#ifdef DECEPTUS_VRSFML
+      layer->_sprite->color = color;
+#else
       layer->_sprite->setColor(color);
+#endif
    }
 }
 
@@ -604,6 +678,15 @@ void MessageBox::showAnimation()
       const auto window_pos_y_px = _window_position_px.y + offset.y;
       const auto window_color = sf::Color{255, 255, 255, static_cast<uint8_t>(t_normalized * 255)};
 
+#ifdef DECEPTUS_VRSFML
+      window_layer->_sprite->color = window_color;
+      window_layer->_sprite->scale = {scale_x, scale_y};
+      window_layer->_sprite->position = {window_pos_x_px, window_pos_y_px};
+
+      background_layer->_sprite->color = background_color;
+      background_layer->_sprite->scale = {scale_x, scale_y};
+      background_layer->_sprite->position = {background_pos_x_px, background_pos_y_px};
+#else
       window_layer->_sprite->setColor(window_color);
       window_layer->_sprite->setScale({scale_x, scale_y});
       window_layer->_sprite->setPosition({window_pos_x_px, window_pos_y_px});
@@ -611,9 +694,19 @@ void MessageBox::showAnimation()
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale({scale_x, scale_y});
       background_layer->_sprite->setPosition({background_pos_x_px, background_pos_y_px});
+#endif
    }
    else  // fade in
    {
+#ifdef DECEPTUS_VRSFML
+      window_layer->_sprite->color = sf::Color::White;
+      window_layer->_sprite->scale = {1.0f, 1.0f};
+      window_layer->_sprite->position = _window_position_px + offset;
+
+      background_layer->_sprite->color = background_color;
+      background_layer->_sprite->scale = {1.0f, 1.0f};
+      background_layer->_sprite->position = _background_position_px + offset;
+#else
       window_layer->_sprite->setColor(sf::Color::White);
       window_layer->_sprite->setScale({1.0f, 1.0f});
       window_layer->_sprite->setPosition(_window_position_px + offset);
@@ -621,6 +714,7 @@ void MessageBox::showAnimation()
       background_layer->_sprite->setColor(background_color);
       background_layer->_sprite->setScale({1.0f, 1.0f});
       background_layer->_sprite->setPosition(_background_position_px + offset);
+#endif
 
       if (visible_time < animation_scale_time_show + animation_fade_time_show)
       {
@@ -656,12 +750,21 @@ void MessageBox::hideAnimation()
       auto background_color = _properties._background_color;
       background_color.a = contents_alpha_scaled;
 
+#ifdef DECEPTUS_VRSFML
+      _layers["window"]->_sprite->color = window_color;
+      _layers["background"]->_sprite->color = background_color;
+#else
       _layers["window"]->_sprite->setColor(window_color);
       _layers["background"]->_sprite->setColor(background_color);
+#endif
 
       for (const auto& layer : _box_content_layers)
       {
+#ifdef DECEPTUS_VRSFML
+         layer->_sprite->color = window_color;
+#else
          layer->_sprite->setColor(window_color);
+#endif
       }
 
       for (auto& segment : _segments)

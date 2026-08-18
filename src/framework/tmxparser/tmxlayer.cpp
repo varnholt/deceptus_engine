@@ -41,6 +41,8 @@ void TmxLayer::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<
    _height_tl = element->IntAttribute("height");
    _opacity = element->FloatAttribute("opacity", 1.0f);
    _visible = element->BoolAttribute("visible", true);
+   _position_x_px = element->IntAttribute("offsetx", 0);
+   _position_y_px = element->IntAttribute("offsety", 0);
 
    std::vector<std::shared_ptr<TmxChunk>> chunks;
 

@@ -1,11 +1,15 @@
 #include "treasurechest.h"
 
+#include <array>
+#include <format>
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/animation/animationpool.h"
 #include "game/audio/audio.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/extra.h"
 #include "game/mechanisms/extrawrapper.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/gamemechanismobserver.h"
@@ -14,9 +18,33 @@
 
 namespace
 {
+static constexpr int32_t default_treasure_chest_z = 0;
+static constexpr std::array treasure_chest_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_treasure_chest_z},
+   PropertyInfo{.name = "texture", .type = "string", .default_value = std::string_view{"data/sprites/treasure_chest.png"}},
+   PropertyInfo{.name = "sample_open", .type = "string", .default_value = std::string_view{"treasure_chest_open.ogg"}},
+   PropertyInfo{.name = "sample_locked", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "spawn_extra", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "spawn_offset_x", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "spawn_offset_y", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "item_required", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "item_required_consumed", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "animation_idle_closed", .type = "string", .default_value = std::string_view{"idle"}},
+   PropertyInfo{.name = "animation_opening", .type = "string", .default_value = std::string_view{"opening"}},
+   PropertyInfo{.name = "animation_idle_open", .type = "string", .default_value = std::string_view{"open"}},
+   PropertyInfo{.name = "observed", .type = "bool", .default_value = false},
+};
+static constexpr MechanismSchema treasure_chest_schema{
+   .type_name = "TreasureChest",
+   .layer_name = "treasure_chests",
+   .default_width = 48,
+   .default_height = 48,
+   .properties = treasure_chest_properties,
+};
 const auto registered_treasurechest = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(treasure_chest_schema);
    registry.mapGroupToLayer("TreasureChest", "treasure_chests");
 
    registry.registerLayerName(
@@ -68,15 +96,19 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
    }
 
    const auto& map = data._tmx_object->_properties->_map;
-   _z_index = ValueReader::readValue<int32_t>("z", map).value_or(0);
+   _z_index = ValueReader::readValue<int32_t>("z", map).value_or(default_treasure_chest_z);
 
    const auto texture_path = ValueReader::readValue<std::string>("texture", map).value_or("data/sprites/treasure_chest.png");
    _texture = TexturePool::getInstance().get(texture_path);
 
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition({pos_x_px, pos_y_px});
+#endif
+   sfcompat::setPosition(*_sprite, {pos_x_px, pos_y_px});
 
-   _sample_open = ValueReader::readValue<std::string>("sample_open", map).value_or("treasure_chest_open.wav");
+   _sample_open = ValueReader::readValue<std::string>("sample_open", map).value_or("treasure_chest_open.ogg");
    Audio::getInstance().addSample(_sample_open);
 
    _sample_locked = ValueReader::readValue<std::string>("sample_locked", map).value_or("");
@@ -99,6 +131,8 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
    {
       _item_required = item_required;
    }
+
+   _item_required_consumed = ValueReader::readValue<bool>("item_required_consumed", map).value_or(true);
 
    _observed = ValueReader::readValue<bool>("observed", map).value_or(false);
 
@@ -138,26 +172,33 @@ void TreasureChest::deserialize(const GameDeserializeData& data)
 
    _spawn_effect = std::make_unique<SpawnEffect>(sf::Vector2f{_rect.position.x + _rect.size.x / 2, _rect.position.y - _rect.size.y / 2});
    _spawn_effect->deserialize(data);
+
+   addChunks(_rect);
 }
 
-void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&)
+void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void TreasureChest::draw(sf::RenderTarget& target, sf::RenderTarget&, const sf::RenderStates& states)
 {
    if (_animation_idle_closed && _state == State::Closed)
    {
-      _animation_idle_closed->draw(target);
+      _animation_idle_closed->draw(target, states);
    }
    else if (_animation_opening && _state == State::Opening)
    {
-      _animation_opening->draw(target);
+      _animation_opening->draw(target, states);
    }
    else if (_animation_idle_open && _state == State::Open)
    {
-      _animation_idle_open->draw(target);
+      _animation_idle_open->draw(target, states);
    }
 
    if (_spawn_effect && _spawn_effect->isActive())
    {
-      _spawn_effect->draw(target);
+      _spawn_effect->draw(target, states);
    }
 }
 
@@ -181,10 +222,12 @@ void TreasureChest::update(const sf::Time& dt)
          if (PlayerRegistry::getFirst()->getControls()->isButtonBPressed())
          {
             const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
-            if (player_rect_px.findIntersection(_rect).has_value())
+            if (sfcompat::findIntersection(player_rect_px, _rect).has_value())
             {
                if (playerHasRequiredKey())
                {
+                  consumeRequiredKey();
+
                   _spawn_effect->activate();
                   _state = State::Opening;
                   _animation_opening->seekToStart();
@@ -265,7 +308,21 @@ void TreasureChest::update(const sf::Time& dt)
          _extra_spawned = true;
          if (_spawn_extra.has_value())
          {
-            ExtraWrapper::spawnExtra(_spawn_extra.value(), _spawn_offset);
+            auto spawned_extra = ExtraWrapper::spawnExtra(_spawn_extra.value(), _spawn_offset);
+            if (spawned_extra)
+            {
+               spawned_extra->setEnabled(false);
+               _spawned_extra = spawned_extra;
+            }
+         }
+      }
+
+      if (_spawn_effect->isFinished())
+      {
+         if (auto locked_extra = _spawned_extra.lock())
+         {
+            locked_extra->setEnabled(true);
+            _spawned_extra.reset();
          }
       }
    }
@@ -279,4 +336,63 @@ std::optional<sf::FloatRect> TreasureChest::getBoundingBoxPx()
 bool TreasureChest::playerHasRequiredKey() const
 {
    return !_item_required.has_value() || (_item_required.has_value() && SaveState::getPlayerInfo()._inventory.has(*_item_required));
+}
+
+void TreasureChest::serializeState(nlohmann::json& json_object)
+{
+   if (getObjectId().empty())
+   {
+      return;
+   }
+
+   // a chest that is opening has already consumed the key, so it counts as open for the save state
+   json_object[getObjectId()] = {{"open", _state != State::Closed}};
+}
+
+std::optional<GameMechanismObserver::LuaVariant> TreasureChest::getProperty(const std::string& property_name) const
+{
+   if (property_name == "open")
+   {
+      // consistent with serializeState, a chest that is opening already counts as open
+      return _state != State::Closed;
+   }
+
+   return std::nullopt;
+}
+
+void TreasureChest::deserializeState(const nlohmann::json& json_object)
+{
+   if (!json_object.at("open").get<bool>())
+   {
+      return;
+   }
+
+   // skip the opening animation, the chest was already opened in a previous visit
+   _state = State::Open;
+
+   if (_animation_idle_closed)
+   {
+      _animation_idle_closed->pause();
+   }
+
+   if (_animation_opening)
+   {
+      _animation_opening->pause();
+   }
+
+   if (_animation_idle_open)
+   {
+      _animation_idle_open->seekToStart();
+      _animation_idle_open->play();
+   }
+}
+
+void TreasureChest::consumeRequiredKey()
+{
+   if (!_item_required.has_value() || !_item_required_consumed)
+   {
+      return;
+   }
+
+   SaveState::getPlayerInfo()._inventory.remove(*_item_required);
 }

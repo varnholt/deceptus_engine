@@ -1,8 +1,8 @@
 #pragma once
 
-#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
 #include <optional>
+#include "box2d/box2d.h"
 
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
@@ -30,6 +30,13 @@ public:
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
 
+   /// \brief draws the moveable box sprite with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief syncs sprite position from box2d and starts or stops pushing audio by velocity.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
@@ -41,6 +48,14 @@ public:
    /// \brief initializes sprite, physics settings, and dynamic box2d body from TMX object data.
    /// \param data deserialize context with TMX object and physics world.
    void setup(const GameDeserializeData& data);
+
+   /// \brief writes the current box position into save data.
+   /// \param json json object to write state fields into.
+   void serializeState(nlohmann::json& json) override;
+
+   /// \brief restores the box position from save data.
+   /// \param json json object containing previously serialized state.
+   void deserializeState(const nlohmann::json& json) override;
 
    /// \brief stores configurable physics values read from TMX properties.
    struct Settings

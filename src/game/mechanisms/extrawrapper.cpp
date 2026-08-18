@@ -4,7 +4,7 @@
 #include "game/mechanisms/extra.h"
 #include "game/mechanisms/portal.h"
 
-void ExtraWrapper::spawnExtra(const std::string& id, sf::Vector2f offset)
+std::shared_ptr<Extra> ExtraWrapper::spawnExtra(const std::string& id, sf::Vector2f offset)
 {
    const auto extras = LevelRegistry::getCurrent()->getMechanismRegistry().getExtras();
 
@@ -16,7 +16,8 @@ void ExtraWrapper::spawnExtra(const std::string& id, sf::Vector2f offset)
       if (extra->_name == id)
       {
          extra->spawn(offset);
-         break;
+         return extra;
       }
    }
+   return nullptr;
 }

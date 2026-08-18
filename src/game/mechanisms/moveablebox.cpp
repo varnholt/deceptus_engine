@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
 #include "game/audio/audio.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
@@ -11,13 +12,27 @@
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
+#include <array>
 #include <iostream>
 
 namespace
 {
+static constexpr std::array moveable_box_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "serialized", .type = "bool", .default_value = true},
+};
+static constexpr MechanismSchema moveable_box_schema{
+   .type_name = "MoveableObject",
+   .layer_name = "moveable_objects",
+   .default_width = 24,
+   .default_height = 24,
+   .properties = moveable_box_properties,
+};
 const auto registered_moveablebox = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(moveable_box_schema);
+
    registry.mapGroupToLayer("MoveableObject", "moveable_objects");
 
    registry.registerLayerName(
@@ -54,26 +69,37 @@ std::string_view MoveableBox::objectName() const
 
 void MoveableBox::preload()
 {
-   Audio::getInstance().addSample("mechanism_moveable_object_01.wav");
+   Audio::getInstance().addSample("mechanism_moveable_object_01.ogg");
 }
 
-void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   color.draw(*_sprite);
+   draw(color, normal, {});
+}
+
+void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite, draw_states);
 }
 
 void MoveableBox::update(const sf::Time& /*dt*/)
 {
    const auto x = _body->GetPosition().x * PPM;
    const auto y = _body->GetPosition().y * PPM;
+#ifdef DECEPTUS_VRSFML
+   _sprite->position = {x, y - 24};
+#else
    _sprite->setPosition({x, y - 24});
+#endif
 
    // if the thing is moving, start playing a scratching sound
    if (fabs(_body->GetLinearVelocity().x) > 0.01)
    {
       if (!_pushing_sample.has_value())
       {
-         _pushing_sample = Audio::getInstance().playSample({"mechanism_moveable_object_01.wav", 1.0, true});
+         _pushing_sample = Audio::getInstance().playSample({"mechanism_moveable_object_01.ogg", 1.0, true});
       }
    }
    else
@@ -120,20 +146,35 @@ std::optional<sf::FloatRect> MoveableBox::getBoundingBoxPx()
 
 void MoveableBox::setup(const GameDeserializeData& data)
 {
-   setObjectId(data._tmx_object->_name);
+   // the save state identifies mechanisms by their object id and box names are not necessarily unique
+   // within a level, so the tmx object id is folded in to tell two identically named boxes apart
+   const auto& tmx_name = data._tmx_object->_name;
+   const auto& tmx_id = data._tmx_object->_id;
+   setObjectId(tmx_name.empty() ? tmx_id : tmx_name + "_" + tmx_id);
 
    _texture = TexturePool::getInstance().get("data/sprites/moveable_box.png");
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture.get());
+#endif
 
    _size.x = data._tmx_object->_width_px;
    _size.y = data._tmx_object->_height_px;
 
+#ifdef DECEPTUS_VRSFML
+   _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px - 24};
+#else
    _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px - 24});
+#endif
 
    const auto rect =
       sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
    addChunks(rect);
+
+   // boxes remember where they were pushed to unless a level opts out of it
+   _serialized = true;
 
    if (data._tmx_object->_properties)
    {
@@ -143,19 +184,28 @@ void MoveableBox::setup(const GameDeserializeData& data)
       _settings._friction = ValueReader::readValue<float>("friction", map).value_or(_settings._friction);
       _settings._gravity_scale = ValueReader::readValue<float>("gravity_scale", map).value_or(_settings._gravity_scale);
       setZ(ValueReader::readValue<int32_t>("z", map).value_or(0));
+      _serialized = ValueReader::readValue<bool>("serialized", map).value_or(_serialized);
    }
 
    switch (static_cast<int32_t>(_size.x))
    {
       case 24:
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite->textureRect = sf::FloatRect{{168.f, 0.f}, {24.f, 2.f * 24.f}};
+#else
          _sprite->setTextureRect(sf::IntRect({168, 0}, {24, 2 * 24}));
+#endif
          break;
       }
 
       case 48:
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite->textureRect = sf::FloatRect{{72.f, 24.f}, {2.f * 24.f, 3.f * 24.f}};
+#else
          _sprite->setTextureRect(sf::IntRect({72, 24}, {2 * 24, 3 * 24}));
+#endif
          break;
       }
 
@@ -169,10 +219,49 @@ void MoveableBox::setup(const GameDeserializeData& data)
    setupTransform();
 }
 
+void MoveableBox::serializeState(nlohmann::json& json_object)
+{
+   if (!_serialized)
+   {
+      return;
+   }
+
+   if (getObjectId().empty())
+   {
+      Log::Warning() << "a moveable box is set up to be serialized but it has neither a name nor a tmx id";
+      return;
+   }
+
+   json_object[getObjectId()] = {{"x_px", _body->GetPosition().x * PPM}, {"y_px", _body->GetPosition().y * PPM}};
+}
+
+void MoveableBox::deserializeState(const nlohmann::json& json_object)
+{
+   const auto x_px = json_object.at("x_px").get<float>();
+   const auto y_px = json_object.at("y_px").get<float>();
+
+   // put the box back where it was pushed to and drop the momentum it had when the level was saved
+   _body->SetTransform(b2Vec2{x_px / PPM, y_px / PPM}, 0.0f);
+   _body->SetLinearVelocity(b2Vec2{0.0f, 0.0f});
+   _body->SetAngularVelocity(0.0f);
+
+   // keep the sprite in sync, update() would otherwise only catch up on the next frame
+#ifdef DECEPTUS_VRSFML
+   _sprite->position = {x_px, y_px - 24};
+#else
+   _sprite->setPosition({x_px, y_px - 24});
+#endif
+}
+
 void MoveableBox::setupTransform()
 {
+#ifdef DECEPTUS_VRSFML
+   auto x = _sprite->position.x / PPM;
+   auto y = _sprite->position.y / PPM;
+#else
    auto x = _sprite->getPosition().x / PPM;
    auto y = _sprite->getPosition().y / PPM;
+#endif
    _body->SetTransform(b2Vec2(x, y), 0);
 }
 

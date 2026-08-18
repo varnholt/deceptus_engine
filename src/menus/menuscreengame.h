@@ -12,7 +12,8 @@ public:
       TextSpeed = 0,
       Rumble = 1,
       AutomaticPause = 2,
-      Count = 3,
+      Language = 3,
+      Count = 4,
    };
 
    /// \brief initializes the gameplay settings screen with its PSD layout.
@@ -50,5 +51,31 @@ private:
    /// \param x signed step used for text-speed changes and as toggle trigger for boolean settings.
    void set(int32_t x);
 
+   /// \brief draws the game screen layers and label text.
+   /// \param window render target receiving the game screen.
+   /// \param states render states forwarded to draw calls.
+   void draw(sf::RenderTarget& window, sf::RenderStates states) override;
+
    Selection _selection = Selection::TextSpeed;
+
+private:
+   sf::FloatRect _row_help_base_rect;   //!< help text reference rect for row 0 (Text Speed)
+   sf::FloatRect _row_value_base_rect;  //!< value text reference rect for row 0 (Text Speed)
+
+   std::unique_ptr<sf::Text> _text_back_button;
+   std::unique_ptr<sf::Text> _text_defaults_button;
+
+   std::unique_ptr<sf::Text> _textspeed_label;
+   std::unique_ptr<sf::Text> _textspeed_help_text;
+   std::unique_ptr<sf::Text> _textspeed_value_text;
+   std::unique_ptr<sf::Text> _rumble_label;
+   std::unique_ptr<sf::Text> _rumble_help_text;
+   std::unique_ptr<sf::Text> _rumble_value_text;
+   std::unique_ptr<sf::Text> _autopause_label;
+   std::unique_ptr<sf::Text> _autopause_help_text;
+   std::unique_ptr<sf::Text> _autopause_value_text;
+
+   std::unique_ptr<sf::Text> _language_label;
+   std::unique_ptr<sf::Text> _language_help_text;
+   std::unique_ptr<sf::Text> _language_value_text;
 };

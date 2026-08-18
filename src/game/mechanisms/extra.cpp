@@ -3,12 +3,18 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 #include "game/player/playerregistry.h"
+
+#include <array>
+#include <cmath>
+#include <numbers>
 #include "game/player/playercontrols.h"
 #include "game/player/playerinfo.h"
 #include "game/state/savestate.h"
@@ -20,9 +26,21 @@
 
 namespace
 {
+static constexpr std::array extra_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema extra_schema{
+   .type_name = "Extra",
+   .layer_name = "extras",
+   .default_width = 24,
+   .default_height = 24,
+   .properties = extra_properties,
+};
 const auto registered_extra = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(extra_schema);
+
    registry.mapGroupToLayer("Extra", "extras");
 
    registry.registerLayerName(
@@ -75,6 +93,7 @@ bool Extra::deserialize(const GameDeserializeData& data)
 
    _name = data._tmx_object->_name;
    _rect = {{pos_x_px, pos_y_px}, {width_px, height_px}};
+   _base_y_px = pos_y_px;
 
    if (data._tmx_object->_properties)
    {
@@ -89,8 +108,12 @@ bool Extra::deserialize(const GameDeserializeData& data)
       if (!texture_path.empty())
       {
          _texture = TexturePool::getInstance().get(texture_path);
+#ifdef DECEPTUS_VRSFML
+         _sprite = std::make_unique<sf::Sprite>();
+#else
          _sprite = std::make_unique<sf::Sprite>(*_texture);
-         _sprite->setPosition({pos_x_px, pos_y_px});
+#endif
+         sfcompat::setPosition(*_sprite, {pos_x_px, pos_y_px});
 
          // read texture rect
          sf::IntRect rect;
@@ -101,7 +124,14 @@ bool Extra::deserialize(const GameDeserializeData& data)
 
          if (rect.size.x > 0 && rect.size.y > 0)
          {
+#ifdef DECEPTUS_VRSFML
+            _sprite->textureRect = sf::FloatRect{
+               {static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)},
+               {static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)}
+            };
+#else
             _sprite->setTextureRect(rect);
+#endif
          }
       }
 
@@ -119,11 +149,22 @@ bool Extra::deserialize(const GameDeserializeData& data)
       }
 
       _is_treasure = ValueReader::readValue<bool>("is_treasure", map).value_or(false);
+      _pickup_event = ValueReader::readValue<std::string>("pickup_event", map).value_or("");
+
+      _sine_amplitude_px = ValueReader::readValue<float>("sine_amplitude_px", map).value_or(0.0f);
+      _sine_frequency = ValueReader::readValue<float>("sine_frequency", map).value_or(0.0f);
 
       // read animations if set up
       const auto offset_x = width_px * 0.5f;
       const auto offset_y = height_px * 0.5f;
       AnimationPool animation_pool{"data/sprites/extra_animations.json"};
+      const auto animation_spawn_it = data._tmx_object->_properties->_map.find("animation_spawn");
+      if (animation_spawn_it != data._tmx_object->_properties->_map.end())
+      {
+         const auto key = animation_spawn_it->second->_value_string.value();
+         _animation_spawn = animation_pool.create(key, pos_x_px + offset_x, pos_y_px + offset_y, false, false);
+      }
+
       const auto animation_pickup = data._tmx_object->_properties->_map.find("animation_pickup");
       if (animation_pickup != data._tmx_object->_properties->_map.end())
       {
@@ -154,17 +195,24 @@ bool Extra::deserialize(const GameDeserializeData& data)
    // - enable/disable mechanism function to level
    // - add enable/disable mechanism code to levelscript
 
+   addChunks(_rect);
+
    return true;
 }
 
-void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
+void Extra::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&, const sf::RenderStates& states)
 {
    if (_spawn_required)
    {
       // draw spawn animation if we have one
       if (_animation_spawn && !_animation_spawn->_paused)
       {
-         _animation_spawn->draw(target);
+         _animation_spawn->draw(target, states);
       }
 
       // don't draw item if not spawned yet
@@ -176,7 +224,7 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
    if (_animation_pickup && !_animation_pickup->_paused)
    {
-      _animation_pickup->draw(target);
+      _animation_pickup->draw(target, states);
    }
 
    if (!_active || !_visible)
@@ -187,18 +235,82 @@ void Extra::draw(sf::RenderTarget& target, sf::RenderTarget&)
    // draw animations
    if (!_animations_main.empty())
    {
-      (*_animations_main_it)->draw(target);
+      (*_animations_main_it)->draw(target, states);
    }
 
    // or show static extra texture
    else if (_sprite)
    {
-      target.draw(*_sprite);
+      sf::RenderStates sprite_states = states;
+      sprite_states.texture = _texture.get();
+      target.draw(*_sprite, sprite_states);
    }
 
 #ifdef DRAW_DEBUG
    DebugDraw::drawRect(target, _rect);
 #endif
+}
+
+void Extra::updateSineWave(const sf::Time& delta_time)
+{
+   const auto spawn_animation_playing = _spawn_required && _animation_spawn && !_animation_spawn->_paused;
+   if (_sine_amplitude_px > 0.0f && _sine_frequency > 0.0f && !spawn_animation_playing)
+   {
+      _elapsed += delta_time.asSeconds();
+      const auto new_sine_offset_y_px = std::sin(_elapsed * _sine_frequency * 2.0f * std::numbers::pi_v<float>) * _sine_amplitude_px;
+      const auto delta_y_px = new_sine_offset_y_px - _sine_offset_y_px;
+      _sine_offset_y_px = new_sine_offset_y_px;
+
+      const sf::Vector2f sine_delta{0.0f, delta_y_px};
+      for (auto& animation : _animations_main)
+      {
+#ifdef DECEPTUS_VRSFML
+         animation->position += sine_delta;
+#else
+         animation->move(sine_delta);
+#endif
+      }
+
+      if (_sprite)
+      {
+#ifdef DECEPTUS_VRSFML
+         _sprite->position += sine_delta;
+#else
+         _sprite->move(sine_delta);
+#endif
+      }
+
+      _rect.position.y = _base_y_px + _sine_offset_y_px;
+   }
+}
+
+void Extra::updatePickupAnimation(const sf::Time& delta_time)
+{
+   if (_animation_pickup && !_animation_pickup->_paused)
+   {
+      _animation_pickup->update(delta_time);
+   }
+}
+
+void Extra::updateMainAnimations(const sf::Time& delta_time)
+{
+   if (!_animations_main.empty())
+   {
+      (*_animations_main_it)->update(delta_time);
+      if ((*_animations_main_it)->_paused)
+      {
+         _animations_main_it++;
+
+         // start loop again if needed
+         if (_animations_main_it == _animations_main.end())
+         {
+            _animations_main_it = _animations_main.begin();
+         }
+
+         (*_animations_main_it)->seekToStart();
+         (*_animations_main_it)->play();
+      }
+   }
 }
 
 void Extra::update(const sf::Time& delta_time)
@@ -217,35 +329,15 @@ void Extra::update(const sf::Time& delta_time)
       }
    }
 
-   // play pickup animation if active
-   if (_animation_pickup && !_animation_pickup->_paused)
-   {
-      _animation_pickup->update(delta_time);
-   }
+   updatePickupAnimation(delta_time);
 
    if (!_active || !_enabled)
    {
       return;
    }
 
-   // update regular animations
-   if (!_animations_main.empty())
-   {
-      (*_animations_main_it)->update(delta_time);
-      if ((*_animations_main_it)->_paused)
-      {
-         _animations_main_it++;
-
-         // start loop again if needed
-         if (_animations_main_it == _animations_main.end())
-         {
-            _animations_main_it = _animations_main.begin();
-         }
-
-         (*_animations_main_it)->seekToStart();
-         (*_animations_main_it)->play();
-      }
-   }
+   updateSineWave(delta_time);
+   updateMainAnimations(delta_time);
 
    // if the extra requires a button press, only proceed if the button is down
    if (_requires_button_press)
@@ -257,7 +349,7 @@ void Extra::update(const sf::Time& delta_time)
    }
 
    const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
-   if (player_rect_px.findIntersection(_rect).has_value())
+   if (sfcompat::findIntersection(player_rect_px, _rect).has_value())
    {
       _active = false;
 
@@ -271,6 +363,12 @@ void Extra::update(const sf::Time& delta_time)
          Audio::getInstance().playSample({_sample.value()});
       }
 
+      if (_animation_pickup)
+      {
+         _animation_pickup->seekToStart();
+         _animation_pickup->play();
+      }
+
       if (_is_treasure)
       {
          SaveState::getPlayerInfo()._treasures.add(_name);
@@ -278,6 +376,13 @@ void Extra::update(const sf::Time& delta_time)
       else
       {
          SaveState::getPlayerInfo()._inventory.add(_name);
+      }
+
+      // an extra can announce a named event on pickup, whoever implements that feature listens
+      // for it. that keeps the collectible itself free of any knowledge about what it unlocks.
+      if (!_pickup_event.empty())
+      {
+         GameMechanismObserver::onEvent(getObjectId(), "extras", _pickup_event, true);
       }
    }
 }
@@ -308,25 +413,42 @@ void Extra::spawn(sf::Vector2f offset)
    if (offset.x != 0.0f || offset.y != 0.0f)
    {
       _rect.position += offset;
+      _base_y_px += offset.y;  // keep sine wave anchored to spawned position, not the original TMX position
 
       for (auto& animation : _animations_main)
       {
+#ifdef DECEPTUS_VRSFML
+         animation->position += offset;
+#else
          animation->move(offset);
+#endif
       }
 
       if (_animation_spawn)
       {
+#ifdef DECEPTUS_VRSFML
+         _animation_spawn->position += offset;
+#else
          _animation_spawn->move(offset);
+#endif
       }
 
       if (_animation_pickup)
       {
+#ifdef DECEPTUS_VRSFML
+         _animation_pickup->position += offset;
+#else
          _animation_pickup->move(offset);
+#endif
       }
 
       if (_sprite)
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite->position += offset;
+#else
          _sprite->move(offset);
+#endif
       }
    }
 

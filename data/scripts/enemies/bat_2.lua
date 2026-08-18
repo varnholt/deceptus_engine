@@ -51,15 +51,15 @@ _attack_time = 0
 _idle_time = 0
 _activated = false
 _move_range_y_px = 48
-_sprite_offset_x = 0
-_sprite_offset_y = 0 -- 9 * 24
-_sprite_width = 72
-_sprite_height = 72
+_sprite_offset_x_px = 0
+_sprite_offset_y_px = 0 -- 9 * 24
+_sprite_width_px = 72
+_sprite_height_px = 72
 _start_position_px = v2d.Vector2D(0, 0)
 _dying = false
 _dead = false
 _death_time = 0
-_transform_y = 0
+_transform_y_px = 0
 _attack = false
 _can_explode = false
 _exploded = false
@@ -68,22 +68,22 @@ _energy = 3
 ANIMATION_SPEED = 40.0
 ANIMATION_SPEED_IDLE = 20.0
 ANIMATION_SPEED_DEATH = 20.0
-HIT_RADIUS = 0.3
+HIT_RADIUS_M = 0.3
 ATTACK_DURATION = 2.0
 ATTACK_SPRITE_COUNT = 9
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
-   addSample("boom.wav")
+   addSample("boom.ogg")
    addHitbox(-18, -12, 36, 24)
-   addShapeCircle(HIT_RADIUS, 0.0, 0.0)
+   addShapeCircle(HIT_RADIUS_M, 0.0, 0.0)
    updateSpriteRect(
       0,
       0,
       0,
-      _sprite_width,
-      _sprite_height
+      _sprite_width_px,
+      _sprite_height_px
    )
    setZ(30) -- somewhere in the foreground
 
@@ -104,9 +104,9 @@ function shoot()
    py = _player_position_px:getY()
 
    if (_can_explode) then
-      _sprite_offset_y = (px > bx) and (4 * _sprite_height) or (5 * _sprite_height)
+      _sprite_offset_y_px = (px > bx) and (4 * _sprite_height_px) or (5 * _sprite_height_px)
    else
-      _sprite_offset_y = (px > bx) and 0 or _sprite_height
+      _sprite_offset_y_px = (px > bx) and 0 or _sprite_height_px
    end
 
    sx = _start_position_px:getX()
@@ -136,8 +136,8 @@ function update(dt)
       if (_energy == 0) then
          _dying = true
          _death_time = _elapsed
-         _sprite_offset_x = 0
-         _sprite_offset_y = 2 * _sprite_height
+         _sprite_offset_x_px = 0
+         _sprite_offset_y_px = 2 * _sprite_height_px
          setActive(false)
          _position_at_death_px = _position_px
          setDamage(0)
@@ -165,9 +165,9 @@ function update(dt)
          end
 
          -- update transform
-         -- _transform_y = 0.25 * math.sin(_elapsed) * _move_range_y_px
-         _transform_y = 0
-         setTransform(_start_position_px:getX(), _start_position_px:getY() + _transform_y, 0.0)
+         -- _transform_y_px = 0.25 * math.sin(_elapsed) * _move_range_y_px
+         _transform_y_px = 0
+         setTransform(_start_position_px:getX(), _start_position_px:getY() + _transform_y_px, 0.0)
 
       -- carry out attack
       else
@@ -203,8 +203,8 @@ function update(dt)
    end
 
    -- update sprite index
-   if (index ~= _sprite_offset_x) then
-      _sprite_offset_x = sprite_index
+   if (index ~= _sprite_offset_x_px) then
+      _sprite_offset_x_px = sprite_index
       update_sprite = true
    end
 
@@ -229,7 +229,7 @@ function update(dt)
          _dead = true
 
          boom(0.0, 1.0, 0.5)
-         playSample("boom.wav")
+         playSample("boom.ogg")
          playDetonationAnimation(_position_px:getX(), _position_px:getY())
          damage(10, 0.0, 0.0)
       end
@@ -238,10 +238,10 @@ function update(dt)
    if (update_sprite) then
       updateSpriteRect(
          0,
-         _sprite_offset_x * _sprite_width,
-         _sprite_offset_y,
-         _sprite_width,
-         _sprite_height
+         _sprite_offset_x_px * _sprite_width_px,
+         _sprite_offset_y_px,
+         _sprite_width_px,
+         _sprite_height_px
       ) -- x, y, width, height
    end
 
@@ -290,7 +290,7 @@ function writeProperty(key, value)
 
    if (key == "exploding") then
       _can_explode = true
-      _sprite_offset_y = 4 * 3 * 24
+      _sprite_offset_y_px = 4 * 3 * 24
    elseif (key == "audio_update_behavior") then
       update_behavior = audioUpdateBehaviorFromString(value)
       setAudioUpdateBehavior(update_behavior)

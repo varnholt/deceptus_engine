@@ -2,10 +2,17 @@
 
 #include "framework/math/fbm.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "game/audio/audio.h"
 
+#include <cstdlib>
 #include <iostream>
 
-void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, sf::RenderStates{});
+}
+
+void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    const auto val = static_cast<uint8_t>(_value * 255);
    const auto col = sf::Color{val, val, val, val};
@@ -25,9 +32,17 @@ void ThunderstormOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*nor
       sf::Vertex(top_right, col)
    };
 
-   sf::RenderStates states;
-   states.blendMode = sf::BlendAlpha;
-   target.draw(quad, 6, sf::PrimitiveType::Triangles, states);
+   sf::RenderStates quad_states;
+   quad_states.blendMode = sf::BlendAlpha;
+#ifdef DECEPTUS_VRSFML
+   // the level view travels in the render states, the render target does not carry one; without it the
+   // lightning quad would be placed with the target's default view and land outside the visible area
+   quad_states.view = (states.view == sf::View{}) ? target.computeView() : states.view;
+   target.draw(quad, sf::PrimitiveType::Triangles, quad_states);
+#else
+   (void)states;
+   target.draw(quad, 6, sf::PrimitiveType::Triangles, quad_states);
+#endif
 }
 
 void ThunderstormOverlay::update(const sf::Time& dt)
@@ -67,8 +82,20 @@ void ThunderstormOverlay::update(const sf::Time& dt)
          // start lightning
          _thunderstorm_time_elapsed_s = 0.0f;
          _state = State::Lightning;
+         playThunder();
       }
    }
+}
+
+void ThunderstormOverlay::playThunder()
+{
+   if (_settings._sounds.empty())
+   {
+      return;
+   }
+
+   const auto index = static_cast<size_t>(std::rand()) % _settings._sounds.size();
+   Audio::getInstance().playSample({_settings._sounds[index], _settings._sound_volume});
 }
 
 void ThunderstormOverlay::setRect(const sf::FloatRect& rect)

@@ -1,33 +1,35 @@
 #include "parallaxsettings.h"
 #include "framework/tmxparser/tmxproperties.h"
-#include "framework/tmxparser/tmxproperty.h"
+#include "game/io/valuereader.h"
 
-void ParallaxSettings::deserialize(const std::shared_ptr<TmxProperties>& properties)
+void ParallaxSettings::deserialize(const std::shared_ptr<TmxProperties>& properties, int32_t layer_offset_x_px, int32_t layer_offset_y_px)
 {
-   auto& map = properties->_map;
+   _offset.x = static_cast<float>(layer_offset_x_px);
+   _offset.y = static_cast<float>(layer_offset_y_px);
 
-   const auto& it_parallax_x_value = map.find("factor_x");
-   if (it_parallax_x_value != map.end())
+   if (properties)
    {
-      _factor.x = it_parallax_x_value->second->_value_float.value();
-   }
+      const auto& map = properties->_map;
 
-   const auto& it_parallax_y_value = map.find("factor_y");
-   if (it_parallax_y_value != map.end())
-   {
-      _factor.y = it_parallax_y_value->second->_value_float.value();
-   }
+      if (const auto factor_x = ValueReader::readValue<float>("factor_x", map))
+      {
+         _factor.x = *factor_x;
+      }
 
-   const auto& it_offset_x_value = map.find("offset_x_px");
-   if (it_offset_x_value != map.end())
-   {
-      _offset.x = static_cast<float>(it_offset_x_value->second->_value_int.value());
-   }
+      if (const auto factor_y = ValueReader::readValue<float>("factor_y", map))
+      {
+         _factor.y = *factor_y;
+      }
 
-   const auto& it_offset_y_value = map.find("offset_y_px");
-   if (it_offset_y_value != map.end())
-   {
-      _offset.y = static_cast<float>(it_offset_y_value->second->_value_int.value());
+      if (const auto offset_x_px = ValueReader::readValue<int32_t>("offset_x_px", map))
+      {
+         _offset.x += static_cast<float>(*offset_x_px);
+      }
+
+      if (const auto offset_y_px = ValueReader::readValue<int32_t>("offset_y_px", map))
+      {
+         _offset.y += static_cast<float>(*offset_y_px);
+      }
    }
 
    // determine placement error

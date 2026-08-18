@@ -1,5 +1,6 @@
 #include "controllerhelp.h"
 
+#include <array>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -7,6 +8,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/controllerkeymap.h"
@@ -31,9 +33,20 @@
 
 namespace
 {
+static constexpr std::array controller_help_properties{
+   PropertyInfo{.name = "keys", .type = "string", .default_value = std::string_view{"bt_a"}},
+};
+static constexpr MechanismSchema controller_help_schema{
+   .type_name = "ControllerHelp",
+   .layer_name = "controller_help",
+   .default_width = 96,
+   .default_height = 48,
+   .properties = controller_help_properties,
+};
 const auto registered_controllerhelp = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(controller_help_schema);
 
    registry.mapGroupToLayer("ControllerHelp", "controller_help");
 
@@ -77,7 +90,12 @@ std::string_view ControllerHelp::objectName() const
    return "ControllerHelp";
 }
 
-void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (!_visible && _alpha <= alpha_min_threshold)
    {
@@ -94,21 +112,27 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    const auto tile_offset_y = sin(_time.asSeconds() * 5.0f) * 8.0f;
 
    // draw background
-   _background->setPosition({_rect_center.x - _background->getTextureRect().size.x / 2, _rect_center.y + tile_offset_y - 11});
-   _background->setColor(color);
-   target.draw(*_background);
+   sfcompat::setPosition(
+      *_background, {_rect_center.x - sfcompat::getTextureRect(*_background).size.x / 2, _rect_center.y + tile_offset_y - 11}
+   );
+   sfcompat::setColor(*_background, color);
+   sf::RenderStates background_states = states;
+   background_states.texture = _texture.get();
+   target.draw(*_background, background_states);
 
    const auto is_controller_connected = GameControllerIntegration::getInstance().isControllerConnected();
 
    // draw icons
+   sf::RenderStates icon_states = states;
+   icon_states.texture = _texture.get();
    auto index = 0;
    for (auto& sprite : _sprites)
    {
-      sprite.setColor(color);
+      sfcompat::setColor(sprite, color);
       const auto tile_offset_x = -width_of_tiles_px / 2.0f + index * PIXELS_PER_TILE * 1.5f;
-      sprite.setPosition({_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y});
-      sprite.setTextureRect(is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index]);
-      target.draw(sprite);
+      sfcompat::setPosition(sprite, {_rect_center.x + tile_offset_x, _rect_center.y + tile_offset_y});
+      sfcompat::setTextureRect(sprite, is_controller_connected ? _sprite_rects_controller[index] : _sprite_rects_keyboard[index]);
+      target.draw(sprite, icon_states);
       index++;
    }
 }
@@ -116,7 +140,7 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
 void ControllerHelp::update(const sf::Time& delta_time)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   _visible = (player_rect.findIntersection(_rect_px)).has_value();
+   _visible = sfcompat::findIntersection(player_rect, _rect_px).has_value();
 
    if (!_visible)
    {
@@ -177,28 +201,41 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
       const auto sprite_rect_keyboard = sf::IntRect{
          {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
-
       const auto sprite_rect_controller = sf::IntRect{
          {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
 
+#ifdef DECEPTUS_VRSFML
+      sf::Sprite sprite;
+#else
       sf::Sprite sprite(*_texture);
-      sprite.setTextureRect(sprite_rect_keyboard);
+#endif
+      sfcompat::setTextureRect(sprite, sprite_rect_keyboard);
       _sprites.emplace_back(sprite);
       _sprite_rects_controller.emplace_back(sprite_rect_controller);
       _sprite_rects_keyboard.emplace_back(sprite_rect_keyboard);
    }
 
+#ifdef DECEPTUS_VRSFML
+   _background = std::make_unique<sf::Sprite>();
+#else
    _background = std::make_unique<sf::Sprite>(*_texture);
+#endif
 
    if (_sprites.size() == 1)
    {
-      _background->setTextureRect({{6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2}});
+      sfcompat::setTextureRect(
+         *_background, sf::IntRect{{6 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 2, PIXELS_PER_TILE * 2}}
+      );
    }
    else if (_sprites.size() == 2)
    {
-      _background->setTextureRect({{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}});
+      sfcompat::setTextureRect(
+         *_background, sf::IntRect{{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}}
+      );
    }
+
+   addChunks(_rect_px);
 }
 
 std::optional<sf::FloatRect> ControllerHelp::getBoundingBoxPx()

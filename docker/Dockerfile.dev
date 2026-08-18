@@ -1,0 +1,29 @@
+FROM archlinux:latest
+
+RUN pacman -Syu --noconfirm \
+    base-devel \
+    cmake \
+    ninja \
+    git \
+    gcc \
+    clang \
+    glew \
+    glm \
+    libx11 \
+    libxrandr \
+    libxinerama \
+    libxcursor \
+    libxi \
+    mesa \
+    alsa-lib \
+    pulseaudio \
+    libglvnd \
+    libvorbis \
+    libogg \
+    openal \
+    freetype2 \
+    libpng \
+    && pacman -Scc --noconfirm
+
+WORKDIR /workspace
+CMD ["bash"]

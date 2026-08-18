@@ -2,17 +2,22 @@
 
 #include "game/mechanisms/weather.h"
 
+#include <string>
+#include <vector>
+
 struct TmxObject;
 
 /// \brief weather overlay that flashes screen brightness during thunderstorm phases.
 class ThunderstormOverlay : public WeatherOverlay
 {
 public:
-   /// \brief timings for lightning and silence phases in seconds.
+   /// \brief timings for lightning and silence phases in seconds, plus the thunder samples to pick from.
    struct ThunderstormSettings
    {
       float _thunderstorm_time_s = 3.0;
       float _silence_time_s = 5.0f;
+      std::vector<std::string> _sounds;  //!< thunder samples; one is picked at random per lightning phase, empty disables audio
+      float _sound_volume = 1.0f;        //!< per-sample volume multiplier applied to the picked thunder sample
    };
 
    /// \brief creates a thunderstorm overlay with default phase timings.
@@ -22,6 +27,12 @@ public:
    /// \param target SFML render target used for weather output.
    /// \param normal unused normal-map target required by the weather overlay interface.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
+   /// \brief draws the lightning quad with explicit render states.
+   /// \param target SFML render target used for weather output.
+   /// \param normal unused normal-map target required by the weather overlay interface.
+   /// \param states render states carrying the level view.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
 
    /// \brief advances lightning/silence state timers and flash intensity factor.
    /// \param dt elapsed frame time since the previous update.
@@ -36,6 +47,9 @@ public:
    void setSettings(const ThunderstormSettings& newSettings);
 
 private:
+   /// \brief plays one randomly picked thunder sample, if any are configured.
+   void playThunder();
+
    enum class State
    {
       Lightning,

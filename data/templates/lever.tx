@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="Lever" width="72" height="72">
+  <properties>
+   <property name="enabled" type="bool" value="false"/>
+   <property name="serialized" type="bool" value="false"/>
+   <property name="handle_available" type="bool" value="true"/>
+   <property name="target_ids" type="string" value=""/>
+   <property name="z" type="int" value="20"/>
+  </properties>
+ </object>
+</template>

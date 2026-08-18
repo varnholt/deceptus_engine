@@ -1,14 +1,28 @@
 #include "boxcollider.h"
 
+#include <array>
+
 #include "framework/tmxparser/tmxobject.h"
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 namespace
 {
+static constexpr std::array box_collider_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema box_collider_schema{
+   .type_name = "BoxCollider",
+   .layer_name = "box_colliders",
+   .default_width = 48,
+   .default_height = 48,
+   .properties = box_collider_properties,
+};
 const auto registered_boxcollider = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(box_collider_schema);
+
    registry.markAsNonVisual("box_colliders");
    registry.mapGroupToLayer("BoxCollider", "box_colliders");
 

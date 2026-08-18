@@ -5,6 +5,7 @@
 #include "game/constants.h"
 #include "game/level/chunk.h"
 #include "game/level/hitbox.h"
+#include "game/mechanisms/gamemechanismobserver.h"
 
 #include "SFML/Graphics.hpp"
 
@@ -12,8 +13,21 @@
 
 #include <cstdint>
 #include <optional>
+#include <string>
 
 struct Room;
+
+/// \brief identifies which render stage a mechanism contributes to.
+///
+/// Ordinary mechanisms draw themselves into the level render targets. A post processing mechanism
+/// cannot: its pass runs after the level has been composited, and for the frame-wide scope even
+/// after the hud. Those mechanisms therefore do not draw at all, they hand a shader to the post
+/// processing pass instead.
+enum class MechanismRenderStage
+{
+   Level,          //!< drawn into the level render targets like an ordinary mechanism
+   PostProcessing  //!< contributes a full screen shader pass applied after the level
+};
 
 /// \brief defines the shared interface and common state for all level mechanisms.
 class GameMechanism
@@ -33,6 +47,12 @@ public:
    /// \param target color render target.
    /// \param normal normal-map render target.
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal);
+
+   /// \brief draws the mechanism with explicit render states (used in WASM to carry the level view).
+   /// \param target color render target.
+   /// \param normal normal-map render target.
+   /// \param states render states to apply (carries .view for WASM camera transform).
+   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states);
 
    /// \brief updates mechanism logic for one frame.
    /// \param dt elapsed frame time.
@@ -58,6 +78,10 @@ public:
    /// deferred target afterwards so normal-map lighting does not render on top of it.
    /// \return true when the mechanism opts out of the lighting pass.
    virtual bool isPostLighting() const;
+
+   /// \brief returns the render stage this mechanism contributes to.
+   /// \return stage deciding whether the mechanism draws itself or feeds the post processing pass.
+   virtual MechanismRenderStage getRenderStage() const;
 
    /// \brief checks whether this mechanism is a screen overlay drawn on top of all other layers,
    /// including post-lighting layers, so it is always visible regardless of lighting compositing.
@@ -156,6 +180,12 @@ public:
    /// \return true when serializeState and deserializeState are expected to be used.
    virtual bool isSerialized() const;
 
+   /// \brief reads one named runtime property so level scripts can derive their state from this mechanism
+   /// instead of keeping a duplicate copy of it in the save state.
+   /// \param property_name name of the property to read.
+   /// \return property value when this mechanism exposes the property, std::nullopt otherwise.
+   virtual std::optional<GameMechanismObserver::LuaVariant> getProperty(const std::string& property_name) const;
+
    /// \brief checks whether this mechanism can receive damage and be destroyed.
    /// \return true when hit points and destruction are implemented.
    virtual bool isDestructible() const;
@@ -176,6 +206,8 @@ protected:
    bool _observed{false};
    bool _post_lighting{false};  //!< when true, drawn after the lighting pass so normal-map lighting does not composite on top
    bool _is_overlay{false};     //!< when true, drawn after all other layers including post-lighting layers
+
+   MechanismRenderStage _render_stage{MechanismRenderStage::Level};  //!< render stage this mechanism contributes to
 
    // audio related
    bool _has_audio{false};

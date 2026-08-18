@@ -3,12 +3,14 @@
 #include <array>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
 #include <SFML/Graphics.hpp>
 #include "box2d/box2d.h"
 
+#include "framework/tools/sfmlshader.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "json/json.hpp"
@@ -33,6 +35,11 @@ public:
       b2Vec2 _center_offset_m = b2Vec2{0.0f, 0.0f};  //!< offset from the light's box2d position to the center of its sprite
       sf::Vector2i _center_offset_px;                //!< pixel offset used for sprite positioning
 
+      /// \brief world position to cast shadows from, overriding the sprite center. owners whose
+      ///        light sits close to solid geometry can use this to keep the origin outside occluder
+      ///        polygons; an origin inside a polygon leaves that polygon's interior unshadowed.
+      std::optional<b2Vec2> _shadow_origin_m;
+
       sf::Color _color = {255, 255, 255, 80};
 
       bool _enabled = true;
@@ -47,8 +54,8 @@ public:
       ///        elements whose positions would produce degenerate or unwanted shadow quads).
       std::unordered_set<b2Body*> _excluded_bodies;
 
-      using ShaderUpdateCallback = std::function<void(sf::Shader& shader, const LightInstance& light, float elapsed_seconds)>;
-      std::shared_ptr<sf::Shader> _shader;           //!< optional per-light shader applied when drawing the light sprite
+      using ShaderUpdateCallback = std::function<void(sfcompat::Shader& shader, const LightInstance& light, float elapsed_seconds)>;
+      std::shared_ptr<sfcompat::Shader> _shader;     //!< optional per-light shader applied when drawing the light sprite
       ShaderUpdateCallback _shader_update_callback;  //!< called before drawing to let the owner set shader-specific uniforms
 
       /// \brief repositions the sprite so it remains centered on the light's world position.
@@ -61,7 +68,7 @@ public:
    };
 
    std::vector<std::shared_ptr<LightInstance>> _lights;
-   sf::Shader _light_shader;
+   sfcompat::Shader _light_shader;
 
    /// \brief increases all ambient light channels by the same amount.
    /// \param amount value added to each ambient rgba channel.
@@ -92,7 +99,7 @@ public:
 
    /// \brief renders per-light sprites with stencil-clipped shadow volumes into a light map target.
    /// \param target render target.
-   /// \param states render states passed by caller and currently ignored.
+   /// \param states render states applied to occluder, shadow, and light sprite draws (carries .view for WASM camera transform).
    void draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states);
 
    /// \brief renders light sprites to both textures then composites with shader.
@@ -123,7 +130,16 @@ private:
    /// \param target render target.
    /// \param light active light for which occluder shadows are generated.
    /// \param candidates pre-filtered list of shadow-casting bodies built once per frame.
-   void drawShadowQuads(sf::RenderTarget& target, std::shared_ptr<LightInstance> light, const std::vector<b2Body*>& candidates) const;
+   /// \param states render states to apply (carries .view for WASM camera transform).
+   void drawShadowQuads(
+      sf::RenderTarget& target,
+      std::shared_ptr<LightInstance> light,
+      const std::vector<b2Body*>& candidates
+#ifdef DECEPTUS_VRSFML
+      ,
+      const sf::RenderStates& states
+#endif
+   ) const;
 
    /// \brief renders level occluder geometry to the stencil buffer before shadow/light passes.
    /// \param target render target with active stencil context.
@@ -144,6 +160,10 @@ private:
    std::array<float, 4> _ambient_color = {1.0f, 1.0f, 1.0f, 1.0f};
    static constexpr auto segment_count = 20;
    std::array<b2Vec2, segment_count> _unit_circle;
+
+   //!< every shadow quad of one light, collected so the whole set goes out as a single draw call.
+   //!< kept as a member rather than a local so the frames after the first reuse its capacity
+   mutable std::vector<sf::Vertex> _shadow_vertices;
 
    OccluderDrawCallback _occluder_callback;
    sf::Clock _clock;  //!< tracks elapsed time for per-light shader uniforms

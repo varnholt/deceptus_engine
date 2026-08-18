@@ -14,6 +14,8 @@
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
+#include "game/debug/drawcallcounter.h"
 #include "game/io/texturepool.h"
 #include "game/level/blendmodedeserializer.h"
 #include "game/player/playerregistry.h"
@@ -23,6 +25,11 @@ namespace
 constexpr auto tile_count_per_block = 16;
 constexpr auto block_range_half_x = 3;
 constexpr auto block_range_half_y = 2;
+
+//! slack added around the view before the block window is derived from it, in pixels. the view used
+//! for culling is the very one being rendered, so this only has to absorb rounding rather than any
+//! camera movement, and is deliberately far smaller than the block size
+constexpr auto block_margin_px = 48.0f;
 
 std::array<int32_t, 2> getPlayerBlock()
 {
@@ -61,16 +68,16 @@ void TileMap::storeAnimation(const std::array<sf::Vertex, 4>& quad, int32_t tx, 
    const auto& frames = animation->_frames;
 
    auto animated_tile = new AnimatedTile();
-   animated_tile->_tile_x = tx;
-   animated_tile->_tile_y = ty;
+   animated_tile->_x_tl = tx;
+   animated_tile->_y_tl = ty;
    animated_tile->_animation = animation;
 
    auto duration = 0.0f;
    for (const auto& frame : frames)
    {
       auto offset_frame = new AnimatedTileFrame();
-      offset_frame->_x_px = frame->_tile_id % (_texture_map->getSize().x / _tile_size.x);
-      offset_frame->_y_px = frame->_tile_id / (_texture_map->getSize().x / _tile_size.x);
+      offset_frame->_x_px = frame->_tile_id % (_texture_map->getSize().x / _tile_size_px.x);
+      offset_frame->_y_px = frame->_tile_id / (_texture_map->getSize().x / _tile_size_px.x);
       offset_frame->_duration_ms = frame->_duration_ms;
       animated_tile->_frames.push_back(offset_frame);
       duration += frame->_duration_ms;
@@ -86,11 +93,11 @@ void TileMap::storeAnimation(const std::array<sf::Vertex, 4>& quad, int32_t tx, 
    _animations.push_back(animated_tile);
 }
 
-void TileMap::storeStaticVertices(const std::array<sf::Vertex, 4>& quad, const int32_t tx, const int32_t ty, float parallax_scale)
+void TileMap::storeStaticVertices(const std::array<sf::Vertex, 4>& quad, float parallax_scale)
 {
    // if no animation is available, just store the tile in the static buffer
-   const auto bx = static_cast<int32_t>((tx / parallax_scale) / tile_count_per_block);
-   const auto by = static_cast<int32_t>((ty / parallax_scale) / tile_count_per_block);
+   const auto bx = static_cast<int32_t>((quad[0].position.x / static_cast<float>(_tile_size_px.x) / parallax_scale) / tile_count_per_block);
+   const auto by = static_cast<int32_t>((quad[0].position.y / static_cast<float>(_tile_size_px.y) / parallax_scale) / tile_count_per_block);
 
    auto y_it = _vertices_static_blocks.find(by);
    if (y_it == _vertices_static_blocks.end())
@@ -154,11 +161,17 @@ bool TileMap::load(
       }
 
       _blend_mode = BlendModeDeserializer::readBlendMode(map);
+
+      const auto post_lighting_it = map.find("post_lighting");
+      if (post_lighting_it != map.end())
+      {
+         _post_lighting = post_lighting_it->second->_value_bool.value();
+      }
    }
 
    // Log::Info() << "TileMap::load: loading tileset: " << tileSet->mName << " with: texture " << path;
 
-   _tile_size = sf::Vector2u(tileset->_tile_width_px, tileset->_tile_height_px);
+   _tile_size_px = sf::Vector2u(tileset->_tile_width_px, tileset->_tile_height_px);
    _visible = layer->_visible;
    _z_index = layer->_z;
 
@@ -180,29 +193,31 @@ bool TileMap::load(
          }
 
          // find its position in the tileset texture
-         const auto tu = (tile_number - tileset->_first_gid) % (_texture_map->getSize().x / _tile_size.x);
-         const auto tv = (tile_number - tileset->_first_gid) / (_texture_map->getSize().x / _tile_size.x);
-         const auto tx = pos_x + layer->_offset_x_px;
-         const auto ty = pos_y + layer->_offset_y_px;
+         const auto tu = (tile_number - tileset->_first_gid) % (_texture_map->getSize().x / _tile_size_px.x);
+         const auto tv = (tile_number - tileset->_first_gid) / (_texture_map->getSize().x / _tile_size_px.x);
+         const auto tx = static_cast<int32_t>(pos_x);
+         const auto ty = static_cast<int32_t>(pos_y);
+         const auto tile_x_px = tx * static_cast<int32_t>(_tile_size_px.x) + layer->_position_x_px;
+         const auto tile_y_px = ty * static_cast<int32_t>(_tile_size_px.y) + layer->_position_y_px;
 
          constexpr auto size = 1;
 
          // shrink UV range a TINY bit to avoid fetching data from undefined texture space
-         const auto tile_eps_x = 0.5f * (1.0f / static_cast<float>(_tile_size.x));
-         const auto tile_eps_y = 0.5f * (1.0f / static_cast<float>(_tile_size.y));
+         const auto tile_eps_x = 0.5f * (1.0f / static_cast<float>(_tile_size_px.x));
+         const auto tile_eps_y = 0.5f * (1.0f / static_cast<float>(_tile_size_px.y));
 
          // define its 4 corners
          // clang-format off
          std::array<sf::Vertex, 4> quad;
-         quad[0].position = sf::Vector2f(static_cast<float>(tx * _tile_size.x), static_cast<float>(ty * _tile_size.y));
-         quad[1].position = sf::Vector2f(static_cast<float>((tx + size) * _tile_size.x), static_cast<float>(ty * _tile_size.y));
-         quad[2].position = sf::Vector2f(static_cast<float>((tx + size) * _tile_size.x), static_cast<float>((ty + size) * _tile_size.y));
-         quad[3].position = sf::Vector2f(static_cast<float>(tx * _tile_size.x), static_cast<float>((ty + size) * _tile_size.y));
+         quad[0].position = sf::Vector2f(static_cast<float>(tile_x_px), static_cast<float>(tile_y_px));
+         quad[1].position = sf::Vector2f(static_cast<float>(tile_x_px + static_cast<int32_t>(_tile_size_px.x) * size), static_cast<float>(tile_y_px));
+         quad[2].position = sf::Vector2f(static_cast<float>(tile_x_px + static_cast<int32_t>(_tile_size_px.x) * size), static_cast<float>(tile_y_px + static_cast<int32_t>(_tile_size_px.y) * size));
+         quad[3].position = sf::Vector2f(static_cast<float>(tile_x_px), static_cast<float>(tile_y_px + static_cast<int32_t>(_tile_size_px.y) * size));
          
-         quad[0].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size.x) + tile_eps_x, static_cast<float>(tv * _tile_size.y) + tile_eps_y);
-         quad[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>(tv * _tile_size.y) + tile_eps_y);
-         quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x) - tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
-         quad[3].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size.x) + tile_eps_x, static_cast<float>((tv + 1) * _tile_size.y) - tile_eps_y);
+         quad[0].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size_px.x) + tile_eps_x, static_cast<float>(tv * _tile_size_px.y) + tile_eps_y);
+         quad[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size_px.x) - tile_eps_x, static_cast<float>(tv * _tile_size_px.y) + tile_eps_y);
+         quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size_px.x) - tile_eps_x, static_cast<float>((tv + 1) * _tile_size_px.y) - tile_eps_y);
+         quad[3].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size_px.x) + tile_eps_x, static_cast<float>((tv + 1) * _tile_size_px.y) - tile_eps_y);
 
          const auto alpha = std::clamp(static_cast<int32_t>(layer->_opacity * 255.0f), 0, 255);
          quad[0].color = sf::Color(255, 255, 255, alpha);
@@ -218,7 +233,7 @@ bool TileMap::load(
          }
          else
          {
-            storeStaticVertices(quad, tx, ty, parallax_scale);
+            storeStaticVertices(quad, parallax_scale);
          }
       }
    }
@@ -240,8 +255,8 @@ void TileMap::update(const sf::Time& dt)
       }
 
       // only add those that are close enough to the player
-      const auto bx = static_cast<int32_t>((anim->_tile_x) / tile_count_per_block);
-      const auto by = static_cast<int32_t>((anim->_tile_y) / tile_count_per_block);
+      const auto bx = static_cast<int32_t>((anim->_x_tl) / tile_count_per_block);
+      const auto by = static_cast<int32_t>((anim->_y_tl) / tile_count_per_block);
       if (std::abs(player_block[0] - bx) > block_range_half_x || std::abs(player_block[1] - by) > block_range_half_y)
       {
          continue;
@@ -270,10 +285,11 @@ void TileMap::update(const sf::Time& dt)
       const auto tv = static_cast<uint32_t>(frame->_y_px);
 
       // re-define its 4 texture coordinates
-      anim->_vertices[0].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size.x), static_cast<float>(tv * _tile_size.y));
-      anim->_vertices[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x), static_cast<float>(tv * _tile_size.y));
-      anim->_vertices[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size.x), static_cast<float>((tv + 1) * _tile_size.y));
-      anim->_vertices[3].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size.x), static_cast<float>((tv + 1) * _tile_size.y));
+      anim->_vertices[0].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size_px.x), static_cast<float>(tv * _tile_size_px.y));
+      anim->_vertices[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * _tile_size_px.x), static_cast<float>(tv * _tile_size_px.y));
+      anim->_vertices[2].texCoords =
+         sf::Vector2f(static_cast<float>((tu + 1) * _tile_size_px.x), static_cast<float>((tv + 1) * _tile_size_px.y));
+      anim->_vertices[3].texCoords = sf::Vector2f(static_cast<float>(tu * _tile_size_px.x), static_cast<float>((tv + 1) * _tile_size_px.y));
 
       _vertices_animated.append(anim->_vertices[0]);
       _vertices_animated.append(anim->_vertices[1]);
@@ -289,27 +305,94 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
 {
    states.transform *= getTransform();
 
-   const auto player_block = getPlayerBlock();
-   const auto bx = player_block[0];
-   const auto by = player_block[1];
-
-   for (auto iy = by - block_range_half_y; iy < by + block_range_half_y; iy++)
+#ifdef DEVELOPMENT_MODE
+   if (DrawCallCounter::tilemap_last_target != &target)
    {
-      const auto y_it = _vertices_static_blocks.find(iy);
-      if (y_it != _vertices_static_blocks.end())
+      DrawCallCounter::tilemap_target_switches++;
+      DrawCallCounter::tilemap_last_target = &target;
+   }
+#endif
+
+   // the block window follows the view that is actually being rendered rather than the player's
+   // position. the two are not the same thing: the camera eases along behind the player, the
+   // panorama pushes it further still, and a parallax layer is drawn through a view of its own that
+   // sits at level_view * factor. culling around the player had to be padded until it covered all of
+   // that, which is how a 640 x 360 view came to draw a 2304 x 1536 px window of tiles.
+#ifdef DECEPTUS_VRSFML
+   const auto& view = states.view;
+#else
+   const auto& view = target.getView();
+#endif
+   const auto view_center = sfcompat::getViewCenter(view);
+   const auto view_size = sfcompat::getViewSize(view);
+
+   // blocks are binned by the tileset's own tile size at load time, so the window has to be measured
+   // in those units too - PIXELS_PER_TILE only happens to match for tilesets that use 24 px tiles
+   // a tile map that never had a tileset assigned reports a zero tile size, and dividing by that
+   // yields infinities that turn into meaningless block bounds
+   if (_tile_size_px.x == 0 || _tile_size_px.y == 0)
+   {
+      return;
+   }
+
+   _batched_vertices.clear();
+
+   const auto block_width_px = static_cast<float>(_tile_size_px.x * tile_count_per_block);
+   const auto block_height_px = static_cast<float>(_tile_size_px.y * tile_count_per_block);
+
+   const auto view_left_px = view_center.x - view_size.x * 0.5f - block_margin_px;
+   const auto view_top_px = view_center.y - view_size.y * 0.5f - block_margin_px;
+   const auto view_right_px = view_center.x + view_size.x * 0.5f + block_margin_px;
+   const auto view_bottom_px = view_center.y + view_size.y * 0.5f + block_margin_px;
+
+   const auto first_block_x = static_cast<int32_t>(std::floor(view_left_px / block_width_px));
+   const auto last_block_x = static_cast<int32_t>(std::floor(view_right_px / block_width_px));
+   const auto first_block_y = static_cast<int32_t>(std::floor(view_top_px / block_height_px));
+   const auto last_block_y = static_cast<int32_t>(std::floor(view_bottom_px / block_height_px));
+
+   // walking the blocks that exist inside the range, rather than probing every index in it, keeps
+   // the work proportional to what is on screen instead of to the size of the range. that also makes
+   // the loop immune to a nonsensical range: a degenerate view or tile size can produce bounds
+   // spanning the whole int32 domain, and probing those index by index takes billions of lookups,
+   // which is indistinguishable from a hang
+   const auto row_end = _vertices_static_blocks.upper_bound(last_block_y);
+   for (auto row_it = _vertices_static_blocks.lower_bound(first_block_y); row_it != row_end; ++row_it)
+   {
+      auto& row = row_it->second;
+      const auto column_end = row.upper_bound(last_block_x);
+      for (auto column_it = row.lower_bound(first_block_x); column_it != column_end; ++column_it)
       {
-         for (auto ix = bx - block_range_half_x; ix < bx + block_range_half_x; ix++)
+         const auto& block_vertices = column_it->second;
+         const auto block_vertex_count = block_vertices.getVertexCount();
+         if (block_vertex_count > 0)
          {
-            const auto x_it = y_it->second.find(ix);
-            if (x_it != _vertices_static_blocks[iy].end())
-            {
-               target.draw(x_it->second, states);
-            }
+            _batched_vertices.insert(_batched_vertices.end(), &block_vertices[0], &block_vertices[0] + block_vertex_count);
          }
       }
    }
 
-   target.draw(_vertices_animated, states);
+   // the animated tiles carry the same texture and blend mode as the static blocks, so they join
+   // the same batch rather than paying for a call of their own
+   const auto animated_vertex_count = _vertices_animated.getVertexCount();
+   if (animated_vertex_count > 0)
+   {
+      _batched_vertices.insert(_batched_vertices.end(), &_vertices_animated[0], &_vertices_animated[0] + animated_vertex_count);
+   }
+
+   if (_batched_vertices.empty())
+   {
+      return;
+   }
+
+#ifdef DECEPTUS_VRSFML
+   target.draw(std::span<const sf::Vertex>{_batched_vertices.data(), _batched_vertices.size()}, sf::PrimitiveType::Triangles, states);
+#else
+   target.draw(_batched_vertices.data(), _batched_vertices.size(), sf::PrimitiveType::Triangles, states);
+#endif
+
+#ifdef DEVELOPMENT_MODE
+   DrawCallCounter::tilemap_draw_calls++;
+#endif
 }
 
 const std::string& TileMap::getLayerName() const
@@ -382,6 +465,7 @@ bool TileMap::dumpToPng(const std::filesystem::path& output_path) const
    const sf::Vector2u render_size = {static_cast<uint32_t>(std::ceil(bounds.size.x)), static_cast<uint32_t>(std::ceil(bounds.size.y))};
 
    // create rendertexture
+#ifndef DECEPTUS_VRSFML
    sf::RenderTexture render_texture(render_size);
 
    render_texture.clear(sf::Color::Transparent);
@@ -417,6 +501,9 @@ bool TileMap::dumpToPng(const std::filesystem::path& output_path) const
 
    std::cout << "TileMap::dumpToPng - saved to " << output_path << "\n";
    return true;
+#else
+   return false;
+#endif
 }
 
 void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
@@ -442,6 +529,11 @@ void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Render
    }
 }
 
+bool TileMap::isPostLighting() const
+{
+   return _post_lighting;
+}
+
 int TileMap::getZ() const
 {
    return _z_index;
@@ -454,9 +546,8 @@ void TileMap::setZ(int32_t z)
 
 void TileMap::hideTile(int32_t x, int32_t y)
 {
-   const auto& it = std::find_if(
-      std::begin(_animations), std::end(_animations), [x, y](auto* tile) { return (tile->_tile_x == x && tile->_tile_y == y); }
-   );
+   const auto& it =
+      std::find_if(std::begin(_animations), std::end(_animations), [x, y](auto* tile) { return (tile->_x_tl == x && tile->_y_tl == y); });
 
    if (it != _animations.end())
    {

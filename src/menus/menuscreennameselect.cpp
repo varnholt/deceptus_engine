@@ -1,5 +1,7 @@
 #include "menuscreennameselect.h"
 
+#include "framework/tools/localization.h"
+#include "framework/tools/sfmlstring.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "menu.h"
@@ -37,10 +39,11 @@ std::string extractFirstName(std::string_view username)
 
 MenuScreenNameSelect::MenuScreenNameSelect()
 {
-   _font.openFromFile("data/fonts/deceptum.ttf");
-   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-
+#ifdef DECEPTUS_VRSFML
+   _text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text = std::make_unique<sf::Text>(_font);
+#endif
    _text->setFont(_font);
    _text->setCharacterSize(12);
    _text->setFillColor(sf::Color{232, 219, 243});
@@ -52,6 +55,28 @@ MenuScreenNameSelect::MenuScreenNameSelect()
       'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
       's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '.', '-',
    };
+
+#ifdef DECEPTUS_VRSFML
+   _text_cancel_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_cancel_button = std::make_unique<sf::Text>(_font);
+#endif
+   _text_cancel_button->setCharacterSize(12);
+   _text_cancel_button->setFillColor(color_label_normal);
+#ifdef DECEPTUS_VRSFML
+   _text_delete_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_delete_button = std::make_unique<sf::Text>(_font);
+#endif
+   _text_delete_button->setCharacterSize(12);
+   _text_delete_button->setFillColor(color_label_normal);
+#ifdef DECEPTUS_VRSFML
+   _text_confirm_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_confirm_button = std::make_unique<sf::Text>(_font);
+#endif
+   _text_confirm_button->setCharacterSize(12);
+   _text_confirm_button->setFillColor(color_label_normal);
 }
 
 void MenuScreenNameSelect::up()
@@ -106,11 +131,19 @@ void MenuScreenNameSelect::back()
 void MenuScreenNameSelect::updateText()
 {
    // draw text
+#ifdef DECEPTUS_VRSFML
+   _text->setString(_name.c_str());
+#else
    _text->setString(_name);
+#endif
    const auto text_rect = _text->getLocalBounds();
    const auto x_offset_px = (_name_rect.size.x - text_rect.size.x) * 0.5f;
    const auto x_px = _name_rect.position.x + x_offset_px;
+#ifdef DECEPTUS_VRSFML
+   _text->position = {x_px, _name_rect.position.y};
+#else
    _text->setPosition({x_px, _name_rect.position.y});
+#endif
 }
 
 void MenuScreenNameSelect::chop()
@@ -219,12 +252,22 @@ void MenuScreenNameSelect::retrieveUsername()
 void MenuScreenNameSelect::loadingFinished()
 {
    const auto cursor = _layers["cursor"];
+#ifdef DECEPTUS_VRSFML
+   _char_origin.x = cursor->_sprite->position.x;
+   _char_origin.y = cursor->_sprite->position.y;
+#else
    _char_origin.x = cursor->_sprite->getPosition().x;
    _char_origin.y = cursor->_sprite->getPosition().y;
+#endif
 
    const auto player_name = _layers["players-name"];
+#ifdef DECEPTUS_VRSFML
+   _name_rect.position.x = player_name->_sprite->position.x;
+   _name_rect.position.y = player_name->_sprite->position.y;
+#else
    _name_rect.position.x = player_name->_sprite->getPosition().x;
    _name_rect.position.y = player_name->_sprite->getPosition().y;
+#endif
    _name_rect.size.x = static_cast<float>(player_name->_texture->getSize().x);
 
    retrieveUsername();
@@ -234,9 +277,15 @@ void MenuScreenNameSelect::loadingFinished()
 void MenuScreenNameSelect::updateLayers()
 {
    auto cursor = _layers["cursor"];
+#ifdef DECEPTUS_VRSFML
+   cursor->_sprite->position = {
+      static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)
+   };
+#else
    cursor->_sprite->setPosition(
       {static_cast<float>(_char_origin.x + _char_offset.x * char_width), static_cast<float>(_char_origin.y + _char_offset.y * char_height)}
    );
+#endif
 
    _layers["players-name"]->_visible = false;
    _layers["temp_bg"]->_visible = true;
@@ -260,10 +309,35 @@ void MenuScreenNameSelect::updateLayers()
    _layers["cancel_xbox_1"]->_visible = false;
    _layers["cancel_pc_0"]->_visible = !isControllerUsed();
    _layers["cancel_pc_1"]->_visible = false;
+
+   if (!_text_cancel_button)
+   {
+      return;
+   }
+
+   const auto& cancel_layer = isControllerUsed() ? _layers["cancel_xbox_0"] : _layers["cancel_pc_0"];
+   _text_cancel_button->setString(sftr("Cancel"));
+   placeTextRightOf(*_text_cancel_button, cancel_layer->_sprite->getGlobalBounds());
+
+   const auto& delete_layer = isControllerUsed() ? _layers["delete_xbox_0"] : _layers["delete_pc_0"];
+   _text_delete_button->setString(sftr("Delete"));
+   placeTextRightOf(*_text_delete_button, delete_layer->_sprite->getGlobalBounds());
+
+   const auto& confirm_layer = isControllerUsed() ? _layers["confirm_xbox_0"] : _layers["confirm_pc_0"];
+   _text_confirm_button->setString(sftr("Confirm"));
+   placeTextRightOf(*_text_confirm_button, confirm_layer->_sprite->getGlobalBounds());
 }
 
 void MenuScreenNameSelect::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    MenuScreen::draw(window, states);
    window.draw(*_text, states);
+
+   if (!_text_cancel_button)
+   {
+      return;
+   }
+   window.draw(*_text_cancel_button, states);
+   window.draw(*_text_delete_button, states);
+   window.draw(*_text_confirm_button, states);
 }

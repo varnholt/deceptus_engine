@@ -7,6 +7,8 @@
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
+#include <array>
+
 namespace
 {
 constexpr auto FRAME_COUNT = 4;
@@ -17,9 +19,21 @@ constexpr auto ANIMATION_SPEED = 3.0f;
 
 namespace
 {
+static constexpr std::array fireflies_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema fireflies_schema{
+   .type_name = "Fireflies",
+   .layer_name = "fireflies",
+   .default_width = 96,
+   .default_height = 96,
+   .properties = fireflies_properties,
+};
 const auto registered_fireflies = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(fireflies_schema);
+
    registry.mapGroupToLayer("Fireflies", "fireflies");
 
    registry.registerLayerName(
@@ -53,15 +67,22 @@ std::string_view Fireflies::objectName() const
    return "Fireflies";
 }
 
-void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
 #ifdef DEBUG_RECT
    DebugDraw::drawRect(target, _rect_px, sf::Color::Magenta);
 #endif
 
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
    for (const auto& firefly : _fireflies)
    {
-      target.draw(*firefly._sprite);
+      target.draw(*firefly._sprite, draw_states);
    }
 }
 
@@ -168,7 +189,11 @@ void Fireflies::deserialize(const GameDeserializeData& data)
    {
       firefly._instance_number = _instance_counter++;
       firefly._rect_px = _rect_px;
+#ifdef DECEPTUS_VRSFML
+      firefly._sprite->textureRect = {{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
+#else
       firefly._sprite->setTextureRect({{0, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+#endif
       firefly._elapsed += sf::seconds(static_cast<float>(std::rand() % 999));
       firefly._angle_x = frand(30.0, 360.0) * FACTOR_DEG_TO_RAD;
       firefly._angle_y = frand(30.0, 360.0) * FACTOR_DEG_TO_RAD;
@@ -197,7 +222,11 @@ void rotate(float& x, float& y, float& z, float angle_x, float angle_y)
 
 Fireflies::Firefly::Firefly(const sf::Texture& texture)
 {
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+#else
    _sprite = std::make_unique<sf::Sprite>(texture);
+#endif
 }
 
 void Fireflies::Firefly::update(const sf::Time& dt)
@@ -220,8 +249,13 @@ void Fireflies::Firefly::update(const sf::Time& dt)
    _position.x = _rect_px.position.x + (_rect_px.size.x * 0.5f) + x_scaled_px;
    _position.y = _rect_px.position.y + (_rect_px.size.y * 0.5f) + y_scaled_px;
 
+#ifdef DECEPTUS_VRSFML
+   _sprite->position = _position;
+   _sprite->origin = {PIXELS_PER_TILE / 2, PIXELS_PER_TILE / 2};
+#else
    _sprite->setPosition(_position);
    _sprite->setOrigin({PIXELS_PER_TILE / 2, PIXELS_PER_TILE / 2});
+#endif
 
    updateTextureRect();
 }
@@ -234,6 +268,13 @@ void Fireflies::Firefly::updateTextureRect()
    if (frame != _current_frame)
    {
       _current_frame = frame;
+#ifdef DECEPTUS_VRSFML
+      _sprite->textureRect = {
+         {static_cast<float>(_current_frame * PIXELS_PER_TILE), 0.0f},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+      };
+#else
       _sprite->setTextureRect({{_current_frame * PIXELS_PER_TILE, 0}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+#endif
    }
 }

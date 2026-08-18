@@ -8,14 +8,18 @@ void AtmosphereShader::initialize(const std::shared_ptr<sf::RenderTexture>& rend
 {
    _render_texture = render_texture;
 
-   if (!_shader.loadFromFile("data/shaders/water.frag", sf::Shader::Type::Fragment))
+   if (!_shader.loadFromFragment("data/shaders/water.frag"))
    {
       Log::Error() << "error loading water shader";
       return;
    }
 
    _distortion_map = TexturePool::getInstance().get("data/effects/distortion_map.png");
+#ifdef DECEPTUS_VRSFML
+   _distortion_map->setWrapMode(sf::TextureWrapMode::Repeat);
+#else
    _distortion_map->setRepeated(true);
+#endif
    _distortion_map->setSmooth(true);
 
    _shader.setUniform("current_texture", sf::Shader::CurrentTexture);
@@ -39,5 +43,5 @@ const std::shared_ptr<sf::RenderTexture>& AtmosphereShader::getRenderTexture() c
 
 const sf::Shader& AtmosphereShader::getShader() const
 {
-   return _shader;
+   return _shader.native();
 }

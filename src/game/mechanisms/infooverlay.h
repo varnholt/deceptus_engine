@@ -29,6 +29,13 @@ public:
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
 
+   /// \brief draws the overlay sprite with explicit render states (used in WASM to carry the level view); ignored in fullscreen mode.
+   /// \param color color render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply when not fullscreen.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief returns bounds for mechanism queries.
    /// \return `std::nullopt` because this mechanism has no collision bounds.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

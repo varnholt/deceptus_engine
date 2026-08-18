@@ -1,5 +1,7 @@
 #include "crusher.h"
 
+#include <array>
+
 #include "framework/easings/easings.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
@@ -16,9 +18,22 @@ int32_t Crusher::__instance_counter = 0;
 
 namespace
 {
+static constexpr std::string_view default_crusher_alignment = "down";
+static constexpr std::array crusher_properties{
+   PropertyInfo{.name = "alignment", .type = "string", .default_value = default_crusher_alignment},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema crusher_schema{
+   .type_name = "Crusher",
+   .layer_name = "crushers",
+   .default_width = 120,
+   .default_height = 24,
+   .properties = crusher_properties,
+};
 const auto registered_crusher = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(crusher_schema);
 
    registry.mapGroupToLayer("Crusher", "crushers");
 
@@ -50,11 +65,11 @@ namespace
 constexpr auto BLADE_HORIZONTAL_TILES = 5;
 constexpr auto BLADE_VERTICAL_TILES = 1;
 
-constexpr auto BLADE_SIZE_X = (BLADE_HORIZONTAL_TILES * PIXELS_PER_TILE) / PPM;
-constexpr auto BLADE_SIZE_Y = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
+constexpr auto BLADE_SIZE_X_M = (BLADE_HORIZONTAL_TILES * PIXELS_PER_TILE) / PPM;
+constexpr auto BLADE_SIZE_Y_M = (BLADE_VERTICAL_TILES * PIXELS_PER_TILE) / PPM;
 
-constexpr auto BLADE_SHARPNESS = 0.1f;
-constexpr auto BLADE_TOLERANCE = 0.06f;
+constexpr auto BLADE_SHARPNESS_M = 0.1f;
+constexpr auto BLADE_TOLERANCE_M = 0.06f;
 
 }  // namespace
 
@@ -71,11 +86,18 @@ std::string_view Crusher::objectName() const
    return "Crusher";
 }
 
-void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   color.draw(*_sprite_spike);
-   color.draw(*_sprite_pusher);
-   color.draw(*_sprite_mount);
+   draw(color, normal, {});
+}
+
+void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite_spike, draw_states);
+   color.draw(*_sprite_pusher, draw_states);
+   color.draw(*_sprite_mount, draw_states);
 }
 
 void Crusher::step(const sf::Time& dt)
@@ -282,7 +304,7 @@ void Crusher::setup(const GameDeserializeData& data)
    if (data._tmx_object->_properties)
    {
       const auto& map = data._tmx_object->_properties->_map;
-      const auto alignment = ValueReader::readValue<std::string>("alignment", map).value_or("down");
+      const auto alignment = ValueReader::readValue<std::string>("alignment", map).value_or(std::string(default_crusher_alignment));
 
       if (alignment == "up")
       {
@@ -309,12 +331,18 @@ void Crusher::setup(const GameDeserializeData& data)
       _idle_time_max = sf::seconds(idle_time_s);
    }
 
-   _pixel_position.x = data._tmx_object->_x_px;
-   _pixel_position.y = data._tmx_object->_y_px;
+   _position_px.x = data._tmx_object->_x_px;
+   _position_px.y = data._tmx_object->_y_px;
 
+#ifdef DECEPTUS_VRSFML
+   _sprite_mount = std::make_unique<sf::Sprite>();
+   _sprite_pusher = std::make_unique<sf::Sprite>();
+   _sprite_spike = std::make_unique<sf::Sprite>();
+#else
    _sprite_mount = std::make_unique<sf::Sprite>(*_texture);
    _sprite_pusher = std::make_unique<sf::Sprite>(*_texture);
    _sprite_spike = std::make_unique<sf::Sprite>(*_texture);
+#endif
 
    switch (_alignment)
    {
@@ -323,57 +351,81 @@ void Crusher::setup(const GameDeserializeData& data)
          // mount is the socket that attaches the pusher to the wall
          // pusher is the pipe that extracts in length
          // pusher gets only 1px in height as i only want this to be one pixel in height so scaling is easy
+#ifdef DECEPTUS_VRSFML
+         _sprite_mount->textureRect = {{9 * PIXELS_PER_TILE, 6 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}};
+         _sprite_pusher->textureRect = {{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 1}};
+         _sprite_spike->textureRect = {{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}};
+#else
          _sprite_mount->setTextureRect({{9 * PIXELS_PER_TILE, 6 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}});
          _sprite_pusher->setTextureRect({{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 1}});
          _sprite_spike->setTextureRect({{7 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}});
+#endif
 
-         _pixel_offset_mount.x = 2 * PIXELS_PER_TILE;
-         _pixel_offset_pusher.y = 2 * PIXELS_PER_TILE;
-         _pixel_offset_spike.y = 2 * PIXELS_PER_TILE;
+         _offset_mount_px.x = 2 * PIXELS_PER_TILE;
+         _offset_pusher_px.y = 2 * PIXELS_PER_TILE;
+         _offset_spike_px.y = 2 * PIXELS_PER_TILE;
 
          break;
       }
 
       case Alignment::PointsUp:
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite_mount->textureRect = {{0 * PIXELS_PER_TILE, 9 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}};
+         _sprite_pusher->textureRect = {{0 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 1}};
+         _sprite_spike->textureRect = {{0 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}};
+#else
          _sprite_mount->setTextureRect({{0 * PIXELS_PER_TILE, 9 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}});
          _sprite_pusher->setTextureRect({{0 * PIXELS_PER_TILE, 8 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 1}});
          _sprite_spike->setTextureRect({{0 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}, {5 * PIXELS_PER_TILE, 3 * PIXELS_PER_TILE}});
+#endif
 
-         _pixel_offset_pusher.y = 6 * PIXELS_PER_TILE;
-         _pixel_offset_spike.y = 3 * PIXELS_PER_TILE;
-         _pixel_offset_mount.y = 6 * PIXELS_PER_TILE;
+         _offset_pusher_px.y = 6 * PIXELS_PER_TILE;
+         _offset_spike_px.y = 3 * PIXELS_PER_TILE;
+         _offset_mount_px.y = 6 * PIXELS_PER_TILE;
 
          break;
       }
 
       case Alignment::PointsLeft:
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite_mount->textureRect = {{4 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}};
+         _sprite_pusher->textureRect = {{2 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE}, {1, 5 * PIXELS_PER_TILE}};
+         _sprite_spike->textureRect = {{0 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}};
+#else
          _sprite_mount->setTextureRect({{4 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}});
          _sprite_pusher->setTextureRect({{2 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE}, {1, 5 * PIXELS_PER_TILE}});
          _sprite_spike->setTextureRect({{0 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}});
+#endif
 
-         _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_pusher.x = 3 * PIXELS_PER_TILE;
-         _pixel_offset_spike.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_mount.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_mount.x = 3 * PIXELS_PER_TILE;
+         _offset_pusher_px.y = -1 * PIXELS_PER_TILE;
+         _offset_pusher_px.x = 3 * PIXELS_PER_TILE;
+         _offset_spike_px.y = -1 * PIXELS_PER_TILE;
+         _offset_mount_px.y = -1 * PIXELS_PER_TILE;
+         _offset_mount_px.x = 3 * PIXELS_PER_TILE;
 
          break;
       }
 
       case Alignment::PointsRight:
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite_mount->textureRect = {{8 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}};
+         _sprite_pusher->textureRect = {{10 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE}, {1, 5 * PIXELS_PER_TILE}};
+         _sprite_spike->textureRect = {{10 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}};
+#else
          _sprite_mount->setTextureRect({{8 * PIXELS_PER_TILE, 2 * PIXELS_PER_TILE}, {1 * PIXELS_PER_TILE, 1 * PIXELS_PER_TILE}});
          _sprite_pusher->setTextureRect({{10 * PIXELS_PER_TILE + PIXELS_PER_TILE / 2, 0 * PIXELS_PER_TILE}, {1, 5 * PIXELS_PER_TILE}});
          _sprite_spike->setTextureRect({{10 * PIXELS_PER_TILE, 0 * PIXELS_PER_TILE}, {3 * PIXELS_PER_TILE, 5 * PIXELS_PER_TILE}});
+#endif
 
-         _pixel_offset_pusher.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_pusher.x = -1 * PIXELS_PER_TILE;
-         _pixel_offset_spike.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_spike.x = -1 * PIXELS_PER_TILE;
-         _pixel_offset_mount.y = -1 * PIXELS_PER_TILE;
-         _pixel_offset_mount.x = -3 * PIXELS_PER_TILE;
+         _offset_pusher_px.y = -1 * PIXELS_PER_TILE;
+         _offset_pusher_px.x = -1 * PIXELS_PER_TILE;
+         _offset_spike_px.y = -1 * PIXELS_PER_TILE;
+         _offset_spike_px.x = -1 * PIXELS_PER_TILE;
+         _offset_mount_px.y = -1 * PIXELS_PER_TILE;
+         _offset_mount_px.x = -3 * PIXELS_PER_TILE;
 
          break;
       }
@@ -387,8 +439,8 @@ void Crusher::setup(const GameDeserializeData& data)
 
 void Crusher::updateTransform()
 {
-   const auto x = (_blade_offset.x + _pixel_position.x) / PPM;
-   const auto y = (_blade_offset.y + _pixel_position.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
+   const auto x = (_blade_offset.x + _position_px.x) / PPM;
+   const auto y = (_blade_offset.y + _position_px.y - PIXELS_PER_TILE) / PPM + (5 * PIXELS_PER_TILE) / PPM;
    const auto target_position = b2Vec2(x, y);
    const auto current_position = _body->GetPosition();
    const auto direction = target_position - current_position;
@@ -414,34 +466,35 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    {
       case Alignment::PointsLeft:
       {
-         blade_vertices[0] = b2Vec2(0, BLADE_SHARPNESS + BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[1] = b2Vec2(0, BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[2] = b2Vec2(BLADE_SIZE_Y, BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[3] = b2Vec2(BLADE_SIZE_Y, BLADE_SIZE_X - BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[0] = b2Vec2(0, BLADE_SHARPNESS_M + BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[1] = b2Vec2(0, BLADE_SIZE_X_M - BLADE_SHARPNESS_M - BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[2] = b2Vec2(BLADE_SIZE_Y_M, BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[3] = b2Vec2(BLADE_SIZE_Y_M, BLADE_SIZE_X_M - BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
          break;
       }
       case Alignment::PointsRight:
       {
-         blade_vertices[0] = b2Vec2(0 + PIXELS_PER_TILE / PPM, BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[1] = b2Vec2(BLADE_SIZE_Y + PIXELS_PER_TILE / PPM, BLADE_SHARPNESS + BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[2] = b2Vec2(BLADE_SIZE_Y + PIXELS_PER_TILE / PPM, BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE - BLADE_SIZE_X);
-         blade_vertices[3] = b2Vec2(0 + PIXELS_PER_TILE / PPM, BLADE_SIZE_X - BLADE_TOLERANCE - BLADE_SIZE_X);
+         blade_vertices[0] = b2Vec2(0 + PIXELS_PER_TILE / PPM, BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[1] = b2Vec2(BLADE_SIZE_Y_M + PIXELS_PER_TILE / PPM, BLADE_SHARPNESS_M + BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[2] =
+            b2Vec2(BLADE_SIZE_Y_M + PIXELS_PER_TILE / PPM, BLADE_SIZE_X_M - BLADE_SHARPNESS_M - BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
+         blade_vertices[3] = b2Vec2(0 + PIXELS_PER_TILE / PPM, BLADE_SIZE_X_M - BLADE_TOLERANCE_M - BLADE_SIZE_X_M);
          break;
       }
       case Alignment::PointsDown:
       {
-         blade_vertices[0] = b2Vec2(BLADE_TOLERANCE, 0);
-         blade_vertices[1] = b2Vec2(BLADE_SHARPNESS + BLADE_TOLERANCE, BLADE_SIZE_Y);
-         blade_vertices[2] = b2Vec2(BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE, BLADE_SIZE_Y);
-         blade_vertices[3] = b2Vec2(BLADE_SIZE_X - BLADE_TOLERANCE, 0);
+         blade_vertices[0] = b2Vec2(BLADE_TOLERANCE_M, 0);
+         blade_vertices[1] = b2Vec2(BLADE_SHARPNESS_M + BLADE_TOLERANCE_M, BLADE_SIZE_Y_M);
+         blade_vertices[2] = b2Vec2(BLADE_SIZE_X_M - BLADE_SHARPNESS_M - BLADE_TOLERANCE_M, BLADE_SIZE_Y_M);
+         blade_vertices[3] = b2Vec2(BLADE_SIZE_X_M - BLADE_TOLERANCE_M, 0);
          break;
       }
       case Alignment::PointsUp:
       {
-         blade_vertices[0] = b2Vec2(BLADE_TOLERANCE, BLADE_SIZE_Y - PIXELS_PER_TILE / PPM);
-         blade_vertices[1] = b2Vec2(BLADE_SHARPNESS + BLADE_TOLERANCE, 0 - PIXELS_PER_TILE / PPM);
-         blade_vertices[2] = b2Vec2(BLADE_SIZE_X - BLADE_SHARPNESS - BLADE_TOLERANCE, 0 - PIXELS_PER_TILE / PPM);
-         blade_vertices[3] = b2Vec2(BLADE_SIZE_X - BLADE_TOLERANCE, BLADE_SIZE_Y - PIXELS_PER_TILE / PPM);
+         blade_vertices[0] = b2Vec2(BLADE_TOLERANCE_M, BLADE_SIZE_Y_M - PIXELS_PER_TILE / PPM);
+         blade_vertices[1] = b2Vec2(BLADE_SHARPNESS_M + BLADE_TOLERANCE_M, 0 - PIXELS_PER_TILE / PPM);
+         blade_vertices[2] = b2Vec2(BLADE_SIZE_X_M - BLADE_SHARPNESS_M - BLADE_TOLERANCE_M, 0 - PIXELS_PER_TILE / PPM);
+         blade_vertices[3] = b2Vec2(BLADE_SIZE_X_M - BLADE_TOLERANCE_M, BLADE_SIZE_Y_M - PIXELS_PER_TILE / PPM);
          break;
       }
       case Alignment::PointsNowhere:
@@ -470,32 +523,32 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
    {
       case Alignment::PointsLeft:
       {
-         box_width = BLADE_SIZE_Y * 0.5f;
-         box_height = BLADE_SIZE_X * 0.5f;
+         box_width = BLADE_SIZE_Y_M * 0.5f;
+         box_height = BLADE_SIZE_X_M * 0.5f;
          box_center = {box_width, box_height};
          box_center.x += PIXELS_PER_TILE / PPM;
-         box_center.y -= BLADE_SIZE_X;
+         box_center.y -= BLADE_SIZE_X_M;
          break;
       }
       case Alignment::PointsRight:
       {
-         box_width = BLADE_SIZE_Y * 0.5f;
-         box_height = BLADE_SIZE_X * 0.5f;
+         box_width = BLADE_SIZE_Y_M * 0.5f;
+         box_height = BLADE_SIZE_X_M * 0.5f;
          box_center = {box_width, box_height};
-         box_center.y -= BLADE_SIZE_X;
+         box_center.y -= BLADE_SIZE_X_M;
          break;
       }
       case Alignment::PointsUp:
       {
-         box_width = BLADE_SIZE_X * 0.5f;
-         box_height = BLADE_SIZE_Y * 0.5f;
+         box_width = BLADE_SIZE_X_M * 0.5f;
+         box_height = BLADE_SIZE_Y_M * 0.5f;
          box_center = {box_width, box_height};
          break;
       }
       case Alignment::PointsDown:
       {
-         box_width = BLADE_SIZE_X * 0.5f;
-         box_height = BLADE_SIZE_Y * 0.5f;
+         box_width = BLADE_SIZE_X_M * 0.5f;
+         box_height = BLADE_SIZE_Y_M * 0.5f;
          box_center = {box_width, box_height};
          box_center.y -= PIXELS_PER_TILE / PPM;
          break;
@@ -518,22 +571,38 @@ void Crusher::updateSpritePositions()
    {
       case Alignment::PointsDown:
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite_pusher->scale = {1.0f, _blade_offset.y};
+#else
          _sprite_pusher->setScale({1.0f, _blade_offset.y});
+#endif
          break;
       }
       case Alignment::PointsUp:
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite_pusher->scale = {1.0f, _blade_offset.y};
+#else
          _sprite_pusher->setScale({1.0f, _blade_offset.y});
+#endif
          break;
       }
       case Alignment::PointsLeft:
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite_pusher->scale = {_blade_offset.x, 1.0f};
+#else
          _sprite_pusher->setScale({_blade_offset.x, 1.0f});
+#endif
          break;
       }
       case Alignment::PointsRight:
       {
+#ifdef DECEPTUS_VRSFML
+         _sprite_pusher->scale = {_blade_offset.x, 1.0f};
+#else
          _sprite_pusher->setScale({_blade_offset.x, 1.0f});
+#endif
          break;
       }
       case Alignment::PointsNowhere:
@@ -542,7 +611,13 @@ void Crusher::updateSpritePositions()
       }
    }
 
-   _sprite_mount->setPosition(_pixel_position + _pixel_offset_mount);
-   _sprite_pusher->setPosition(_pixel_position + _pixel_offset_pusher);
-   _sprite_spike->setPosition(_pixel_position + _pixel_offset_spike + _blade_offset);
+#ifdef DECEPTUS_VRSFML
+   _sprite_mount->position = _position_px + _offset_mount_px;
+   _sprite_pusher->position = _position_px + _offset_pusher_px;
+   _sprite_spike->position = _position_px + _offset_spike_px + _blade_offset;
+#else
+   _sprite_mount->setPosition(_position_px + _offset_mount_px);
+   _sprite_pusher->setPosition(_position_px + _offset_pusher_px);
+   _sprite_spike->setPosition(_position_px + _offset_spike_px + _blade_offset);
+#endif
 }

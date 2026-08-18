@@ -12,6 +12,9 @@
 struct TmxObject;
 
 /// \brief drives area-based weather overlays such as rain and thunderstorms.
+/// \note deliberately does not call addChunks: the overlay is a screen-space effect with its own start delay and
+///       intersection tracking rather than something anchored to one spot in the level, so a chunk box around it would
+///       not describe where it is actually relevant.
 class Weather : public GameMechanism, public GameNode
 {
 public:
@@ -27,6 +30,13 @@ public:
    /// \param target render target.
    /// \param normal normal render target.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
+   /// \brief draws the configured weather overlay with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal render target.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief updates start-delay logic and advances overlay animation while active.
    /// \param dt elapsed frame time.

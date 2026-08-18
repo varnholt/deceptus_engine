@@ -2,6 +2,7 @@
 
 #include "game/player/playerinterface.h"
 
+#include "framework/tools/sfmlshader.h"
 #include "game/animation/animationpool.h"
 #include "game/constants.h"
 #include "game/effects/waterbubbles.h"
@@ -18,9 +19,11 @@
 #include "game/player/playerdash.h"
 #include "game/player/playerdive.h"
 #include "game/player/playereyepositions.h"
+#include "game/player/playerharpoon.h"
 #include "game/player/playerjump.h"
 #include "game/player/playerjumptrace.h"
 #include "game/player/playerplatform.h"
+#include "game/player/playerrope.h"
 #include "game/player/playerspeed.h"
 #include "game/player/weaponsystem.h"
 
@@ -73,11 +76,11 @@ public:
    /// \brief draws player animations, equipped gear, and related visual effects.
    /// \param color color render target.
    /// \param normal normal render target.
-   void draw(sf::RenderTarget& color, sf::RenderTarget& normal);
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states = {});
 
    /// \brief draws a translucent stencil version of current player animations.
    /// \param color color render target.
-   void drawStencil(sf::RenderTarget& color);
+   void drawStencil(sf::RenderTarget& color, const sf::RenderStates& states);
 
    /// \brief runs one full frame of player simulation, including physics interaction, audio, and animations.
    /// \param dt elapsed frame time.
@@ -180,11 +183,11 @@ public:
 
    /// \brief reports whether player rendering is enabled.
    /// \return true when draw calls should render the player.
-   bool getVisible() const;
+   bool getVisible() const override;
 
    /// \brief enables or disables player rendering.
    /// \param visible true to draw it.
-   void setVisible(bool visible);
+   void setVisible(bool visible) override;
 
    /// \brief starts alpha fade-out animation for the player sprite.
    /// \param fade_out_speed_factor alpha decay speed multiplier per second.
@@ -310,6 +313,14 @@ private:
 
    /// \brief refreshes weapon attack input and triggers weapon-specific attack behavior.
    void updateAttack();
+
+   /// \brief refreshes the harpoon state machine that shoots, carries, and releases the rope.
+   /// \param dt elapsed frame time.
+   void updateHarpoon(const sf::Time& dt);
+
+   /// \brief drives the grab rope subsystem, which grabs, climbs and swings on level ropes.
+   /// \param dt elapsed frame time.
+   void updateRope(const sf::Time& dt);
 
    /// \brief advances attack-dash force burst applied after successful sword attacks.
    /// \param dt elapsed frame time.
@@ -449,14 +460,14 @@ private:
    b2Fixture* _foot_sensor_fixture = nullptr;
    b2Body* _ground_body = nullptr;
    b2Vec2 _ground_normal;
-   b2Vec2 _position_previous;
+   b2Vec2 _position_previous_m;
    b2Vec2 _velocity_previous;
    float _impulse{0.0f};
 
-   sf::Vector2f _pixel_position_f;
-   sf::Vector2i _pixel_position_i;
-   sf::FloatRect _pixel_rect_f;
-   sf::IntRect _pixel_rect_i;
+   sf::Vector2f _position_px_f;
+   sf::Vector2i _position_px_i;
+   sf::FloatRect _rect_px_f;
+   sf::IntRect _rect_px_i;
 
    sf::Time _time;
    sf::Clock _clock;
@@ -494,6 +505,8 @@ private:
    PlayerClimb _climb;
    PlayerDash _dash;
    PlayerEyePositions _eye_positions;
+   PlayerHarpoon _harpoon;
+   PlayerRope _rope;
    PlayerJump _jump;
    PlayerJumpTrace _jump_trace;
    PlayerPlatform _platform;
@@ -502,6 +515,8 @@ private:
 
    std::shared_ptr<PlayerAnimation> _player_animation;
    std::deque<PositionedAnimation> _last_animations;
+
+   sfcompat::Shader _silhouette_shader;  //!< tints the occluded-player silhouette to transparent white
 
    Chunk _chunk{0, 0};
    AnimationPool _animation_pool{"data/sprites/animations.json"};

@@ -1,10 +1,13 @@
 
 #include "bubblecube.h"
 
+#include <array>
+
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/level/levelregistry.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -22,9 +25,20 @@
 
 namespace
 {
+static constexpr std::array bubble_cube_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema bubble_cube_schema{
+   .type_name = "BubbleCube",
+   .layer_name = "bubble_cubes",
+   .default_width = 48,
+   .default_height = 48,
+   .properties = bubble_cube_properties,
+};
 const auto registered_bubblecube = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(bubble_cube_schema);
 
    registry.mapGroupToLayer("BubbleCube", "bubble_cubes");
 
@@ -190,10 +204,16 @@ BubbleCube::BubbleCube(GameNode* parent, const GameDeserializeData& data) : Fixt
 
    // set up visualization
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bubble_cube.png");
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
+#endif
 
    _original_rect_px = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {width_px, height_px}};
    _translated_rect_px = _original_rect_px;
+
+   addChunks(_original_rect_px);
 }
 
 std::string_view BubbleCube::objectName() const
@@ -212,7 +232,12 @@ std::string_view BubbleCube::objectName() const
 // +---+\#####/+---+---+\#####/+---+---+\#####/+---+---+\#####/+---+ . . .
 // |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |   | ""|"" |   |
 // +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+ . . .
-void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    auto sprite_index = 0;
 
@@ -225,12 +250,17 @@ void BubbleCube::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       sprite_index = static_cast<int32_t>(_mapped_value_normalized * columns + 6) % columns;
    }
 
-   _sprite->setTextureRect(
-      {{sprite_index * PIXELS_PER_TILE * tiles_per_box_width, (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height},
-       {PIXELS_PER_TILE * tiles_per_box_width, PIXELS_PER_TILE * tiles_per_box_height}}
+   sfcompat::setTextureRect(
+      *_sprite,
+      sf::IntRect(
+         {sprite_index * PIXELS_PER_TILE * tiles_per_box_width, (_popped ? 1 : 0) * PIXELS_PER_TILE * tiles_per_box_height},
+         {PIXELS_PER_TILE * tiles_per_box_width, PIXELS_PER_TILE * tiles_per_box_height}
+      )
    );
 
-   color.draw(*_sprite);
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite, draw_states);
 
 #ifdef DEBUG_COLLISION_RECTS
    DebugDraw::drawRect(color, _foot_collision_rect_px, sf::Color::Magenta);
@@ -274,7 +304,7 @@ void BubbleCube::updateSpriteIndex()
 void BubbleCube::updatePosition()
 {
    const auto pos_px = PPM * _body->GetPosition();
-   _sprite->setPosition({pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px});
+   sfcompat::setPosition(*_sprite, {pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px});
 
    // move translated rect along body position
    _translated_rect_px.position.y = _body->GetPosition().y * PPM;
@@ -287,7 +317,13 @@ void BubbleCube::updateRespawnCondition()
    if (_popped && (now - _pop_time).asSeconds() > _pop_time_respawn_s)
    {
       // don't respawn while player blocks the area
-      if (!PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_original_rect_px).has_value())
+#ifdef DECEPTUS_VRSFML
+      const auto player_rect_float = PlayerRegistry::getFirst()->getPixelRectFloat();
+      const auto respawn_area_clear = !sf::findIntersection(player_rect_float, _original_rect_px).hasValue();
+#else
+      const auto respawn_area_clear = !PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_original_rect_px).has_value();
+#endif
+      if (respawn_area_clear)
       {
          _popped = false;
          _body->SetEnabled(true);
@@ -300,9 +336,9 @@ void BubbleCube::updateRespawnCondition()
 
    // update alpha
    _alpha = std::min((now - _respawn_time).asSeconds() * respawn_speed, 1.0f);
-   auto color = _sprite->getColor();
+   auto color = sfcompat::getColor(*_sprite);
    color.a = static_cast<uint8_t>(_alpha * 255);
-   _sprite->setColor(color);
+   sfcompat::setColor(*_sprite, color);
 }
 
 void BubbleCube::updateFootSensorContact()
@@ -332,10 +368,14 @@ void BubbleCube::updateFootSensorContact()
 
    const auto foot_sensor_rect = PlayerRegistry::getFirst()->computeFootSensorPixelFloatRect();
    _foot_sensor_rect_intersects_previous = _foot_sensor_rect_intersects;
-   _foot_sensor_rect_intersects = foot_sensor_rect.findIntersection(_foot_collision_rect_px).has_value();
+   _foot_sensor_rect_intersects = sfcompat::findIntersection(foot_sensor_rect, _foot_collision_rect_px).has_value();
 
 #ifdef DEBUG_COLLISION_RECTS
+#ifdef DECEPTUS_VRSFML
+   _sprite.color = sf::Color(255, _foot_sensor_rect_intersects ? 0 : 255, _foot_sensor_rect_intersects ? 0 : 255, _alpha * 255);
+#else
    _sprite.setColor(sf::Color(255, _foot_sensor_rect_intersects ? 0 : 255, _foot_sensor_rect_intersects ? 0 : 255, _alpha * 255));
+#endif
 #endif
 }
 
@@ -347,8 +387,13 @@ void BubbleCube::updateJumpedOffPlatformCondition()
    _jump_off_collision_rect_px.size.x += 8 * 2;
 
    const auto first_jump_frame = (PlayerRegistry::getFirst()->getJump()._jump_frame_count == 9);
+#ifdef DECEPTUS_VRSFML
+   const auto foot_sensor_rect_for_jump = PlayerRegistry::getFirst()->computeFootSensorPixelFloatRect();
+   const auto intersects = sf::findIntersection(_jump_off_collision_rect_px, foot_sensor_rect_for_jump).hasValue();
+#else
    const auto intersects =
       _jump_off_collision_rect_px.findIntersection(PlayerRegistry::getFirst()->computeFootSensorPixelFloatRect()).has_value();
+#endif
 
    if (first_jump_frame && intersects)
    {

@@ -1,6 +1,7 @@
 #include "ingamemenuarchives.h"
 
 #include "framework/easings/easings.h"
+#include "framework/tools/localization.h"
 #include "game/ingamemenu/menuconfig.h"
 #include "game/player/playerinfo.h"
 #include "game/player/treasures.h"
@@ -26,7 +27,11 @@ std::string wrapText(const std::string& original_text, float wrap_width, const s
 {
    std::string wrapped_text;
    std::string line;
+#ifdef DECEPTUS_VRSFML
+   sf::Text temp_text(font, sf::Text::Data{});
+#else
    sf::Text temp_text(font);
+#endif
    temp_text.setCharacterSize(character_size);
 
    std::vector<std::string> words;
@@ -36,7 +41,11 @@ std::string wrapText(const std::string& original_text, float wrap_width, const s
    for (const auto& word : words)
    {
       const std::string test_line = line + word + " ";
+#ifdef DECEPTUS_VRSFML
+      temp_text.setString(test_line.c_str());
+#else
       temp_text.setString(test_line);
+#endif
       if (temp_text.getLocalBounds().size.x <= wrap_width)
       {
          line = test_line;
@@ -104,23 +113,27 @@ InGameMenuArchives::InGameMenuArchives()
 
    _animation_pool = std::make_unique<AnimationPool>("data/sprites/extra_animations.json");
 
-   if (_font_treasure.openFromFile("data/fonts/deceptum.ttf"))
-   {
-      const_cast<sf::Texture&>(_font_treasure.getTexture(treasure_font_size)).setSmooth(false);
+#ifdef DECEPTUS_VRSFML
+   _text_treasure_name = std::make_unique<sf::Text>(*_font_treasure, sf::Text::Data{});
+#else
+   _text_treasure_name = std::make_unique<sf::Text>(*_font_treasure);
+#endif
+   _text_treasure_name->setCharacterSize(treasure_font_size);
+   _text_treasure_name->setFillColor(sf::Color{232, 219, 243});
 
-      _text_treasure_name = std::make_unique<sf::Text>(_font_treasure);
-      _text_treasure_name->setCharacterSize(treasure_font_size);
-      _text_treasure_name->setFillColor(sf::Color{232, 219, 243});
-
-      _text_treasure_description = std::make_unique<sf::Text>(_font_treasure);
-      _text_treasure_description->setCharacterSize(treasure_font_size);
-      _text_treasure_description->setFillColor(sf::Color{232, 219, 243});
-   }
+#ifdef DECEPTUS_VRSFML
+   _text_treasure_description = std::make_unique<sf::Text>(*_font_treasure, sf::Text::Data{});
+#else
+   _text_treasure_description = std::make_unique<sf::Text>(*_font_treasure);
+#endif
+   _text_treasure_description->setCharacterSize(treasure_font_size);
+   _text_treasure_description->setFillColor(sf::Color{232, 219, 243});
 }
 
 void InGameMenuArchives::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
    InGameMenuPage::draw(window, states);
+   applyPageView(states);
 
    if (_selected_index == 2)
    {
@@ -153,19 +166,31 @@ void InGameMenuArchives::updateMove()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef DECEPTUS_VRSFML
+      layer._layer->_sprite->position = {x, layer._pos.y};
+#else
       layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    for (const auto& layer : _panel_right)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef DECEPTUS_VRSFML
+      layer._layer->_sprite->position = {x, layer._pos.y};
+#else
       layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    for (const auto& layer : _panel_background)
    {
       const auto x = layer._pos.x + move_offset.value_or(0.0f);
+#ifdef DECEPTUS_VRSFML
+      layer._layer->_sprite->position = {x, layer._pos.y};
+#else
       layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    if (!move_offset.has_value())
@@ -237,25 +262,41 @@ void InGameMenuArchives::updateShowHide()
    for (const auto& layer : _panel_left)
    {
       const auto x = layer._pos.x + panel_left_offset_px.x;
+#ifdef DECEPTUS_VRSFML
+      layer._layer->_sprite->position = {x, layer._pos.y};
+#else
       layer._layer->_sprite->setPosition({x, layer._pos.y});
+#endif
    }
 
    // move in y
    for (const auto& layer : _panel_right)
    {
       const auto y = layer._pos.y + panel_center_offset_px.y;
+#ifdef DECEPTUS_VRSFML
+      layer._layer->_sprite->position = {layer._pos.x, y};
+#else
       layer._layer->_sprite->setPosition({layer._pos.x, y});
+#endif
    }
 
    // fade in/out
    for (const auto& layer : _panel_header)
    {
+#ifdef DECEPTUS_VRSFML
+      layer._layer->_sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255));
+#else
       layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
+#endif
    }
 
    for (const auto& layer : _panel_background)
    {
+#ifdef DECEPTUS_VRSFML
+      layer._layer->_sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255));
+#else
       layer._layer->_sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(layer._alpha * alpha * 255)));
+#endif
    }
 
    _content_alpha = alpha;
@@ -277,7 +318,11 @@ void InGameMenuArchives::updateTreasureAnimations(const sf::Time& dt)
       }
 
       const auto row_center_y_px = treasure_row_start_y_px + static_cast<float>(row_index) * treasure_row_spacing_px;
+#ifdef DECEPTUS_VRSFML
+      _treasure_animations[identifier]->position = {treasure_icon_center_x_px + move_offset, row_center_y_px};
+#else
       _treasure_animations[identifier]->setPosition({treasure_icon_center_x_px + move_offset, row_center_y_px});
+#endif
       _treasure_animations[identifier]->update(dt);
 
       row_index++;
@@ -310,15 +355,25 @@ void InGameMenuArchives::drawTreasures(sf::RenderTarget& window, sf::RenderState
       const auto text_color = sf::Color{232, 219, 243, static_cast<uint8_t>(_content_alpha * 255)};
 
       _text_treasure_name->setFillColor(text_color);
+#ifdef DECEPTUS_VRSFML
+      _text_treasure_name->setString((definition ? definition->_name : identifier).c_str());
+      _text_treasure_name->position = {text_x_px, row_center_y_px + treasure_name_y_offset_px};
+#else
       _text_treasure_name->setString(definition ? definition->_name : identifier);
       _text_treasure_name->setPosition({text_x_px, row_center_y_px + treasure_name_y_offset_px});
+#endif
       window.draw(*_text_treasure_name, states);
 
       const auto description_text = definition ? definition->_description : std::string{};
-      const auto wrapped_description = wrapText(description_text, treasure_description_wrap_width_px, _font_treasure, treasure_font_size);
+      const auto wrapped_description = wrapText(description_text, treasure_description_wrap_width_px, *_font_treasure, treasure_font_size);
       _text_treasure_description->setFillColor(text_color);
+#ifdef DECEPTUS_VRSFML
+      _text_treasure_description->setString(wrapped_description.c_str());
+      _text_treasure_description->position = {text_x_px, row_center_y_px + treasure_description_y_offset_px};
+#else
       _text_treasure_description->setString(wrapped_description);
       _text_treasure_description->setPosition({text_x_px, row_center_y_px + treasure_description_y_offset_px});
+#endif
       window.draw(*_text_treasure_description, states);
 
       row_index++;

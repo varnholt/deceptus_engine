@@ -5,6 +5,7 @@
 #include <ranges>
 #include <vector>
 
+#include "framework/tools/sfmlcompat.h"
 #include "game/level/fixturenode.h"
 #include "game/level/luainterface.h"
 
@@ -59,7 +60,7 @@ std::vector<WorldQuery::CollidedNode> WorldQuery::findNodesByHitbox(const sf::Fl
    {
       if (auto intersecting_hitbox = std::ranges::find_if(
              node->_hitboxes,
-             [&search_rect](const auto& hit_box) { return hit_box.getRectTranslated().findIntersection(search_rect).has_value(); }
+             [&search_rect](const auto& hit_box) { return sfcompat::findIntersection(hit_box.getRectTranslated(), search_rect).has_value(); }
           );
           intersecting_hitbox != node->_hitboxes.end())
       {
@@ -84,7 +85,7 @@ std::vector<WorldQuery::CollidedNode> WorldQuery::findNodesByHitbox(const std::v
              {
                 return std::ranges::any_of(
                    attack_rects,
-                   [&hit_box](const auto& attack_rect) { return hit_box.getRectTranslated().findIntersection(attack_rect).has_value(); }
+                   [&hit_box](const auto& attack_rect) { return sfcompat::findIntersection(hit_box.getRectTranslated(), attack_rect).has_value(); }
                 );
              }
           );

@@ -1,49 +1,83 @@
 #include "logthread.h"
+
+// The web build has no filesystem worth logging to, so file logging is compiled out there.
+// The Switch does have one: romfs is read-only but libnx mounts the sd card as sdmc:/, and a
+// log file there is the only way to see what the game did on real hardware -- stderr reaches
+// svcOutputDebugString, which needs a debugger or an emulator attached to read.
+#if !defined(DECEPTUS_VRSFML) || defined(__SWITCH__)
+#define DECEPTUS_LOG_TO_FILE
+#endif
+
+#ifdef DECEPTUS_LOG_TO_FILE
 #include "gamepaths.h"
+#endif
 
 #include <ctime>
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
 
-
+#ifdef DECEPTUS_LOG_TO_FILE
 namespace
 {
 int32_t flush_counter = 0;
 }
+#endif
 
 LogThread::LogThread()
 {
+#ifdef DECEPTUS_LOG_TO_FILE
    // generate filename with current date
-   const auto now = std::chrono::system_clock::now();
-   const auto now_time = std::chrono::system_clock::to_time_t(now);
-   std::stringstream output_stream;
-   output_stream << std::put_time(std::localtime(&now_time), "%Y-%m-%d__%H-%M.log");
-   const auto filename = output_stream.str();
+   const auto filename = Log::formatLocalTime(std::chrono::system_clock::now(), "%Y-%m-%d__%H-%M.log");
    const auto log_path = GamePaths::getLogDir() / filename;
 
-   _thread = std::make_unique<std::thread>(&LogThread::run, this);
+   // the stream has to exist before the thread runs, or the first flush dereferences a null _out
    _out = std::make_unique<std::ofstream>(log_path, std::ios::out | std::ios::app);
    if (!_out->is_open())
    {
       std::cerr << "failed to create log file: " << log_path << "\n";
       return;
    }
+
+   _thread = std::make_unique<std::thread>(&LogThread::run, this);
+#endif
 }
 
 LogThread::~LogThread()
 {
-   _stopped = true;
-   _thread->join();
+#ifdef DECEPTUS_LOG_TO_FILE
+   {
+      std::lock_guard<std::mutex> guard(_mutex);
+      _stopped = true;
+   }
+   // null when the log file could not be opened, in which case the thread was never started
+   if (_thread)
+   {
+      _thread->join();
+   }
+
    flush();
+#endif
 }
 
 void LogThread::log(const SysClockTimePoint& time_point, Log::Level level, const std::string& message, const std::source_location& location)
 {
+#ifdef DECEPTUS_LOG_TO_FILE
    std::lock_guard<std::mutex> guard(_mutex);
+   if (_stopped)
+   {
+      return;
+   }
    _log_items.push_back(LogItem{time_point, level, message, location});
+#else
+   (void)time_point;
+   (void)level;
+   (void)message;
+   (void)location;
+#endif
 }
 
+#ifdef DECEPTUS_LOG_TO_FILE
 void LogThread::run()
 {
    while (!_stopped)
@@ -51,7 +85,12 @@ void LogThread::run()
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
       flush_counter++;
 
-      if (flush_counter == 100 || _log_items.size() == 10)
+      bool should_flush = false;
+      {
+         std::lock_guard<std::mutex> guard(_mutex);
+         should_flush = (flush_counter == 100) || (_log_items.size() >= 10);
+      }
+      if (should_flush)
       {
          flush();
          flush_counter = 0;
@@ -68,6 +107,8 @@ void LogThread::flush()
       _log_items.clear();
    }
 
+   std::lock_guard<std::mutex> write_guard(_write_mutex);
+
    for (const auto& item : copy)
    {
       const auto& timepoint = item._timepoint;
@@ -80,14 +121,19 @@ void LogThread::flush()
                     << ":" << source_location.line();
       const auto source_tag = source_tag_ss.str();
 
-      const auto now_time = std::chrono::system_clock::to_time_t(timepoint);
-      std::stringstream time_ss;
-      time_ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %H:%M:%S");
-      const auto now_local = time_ss.str();
+      const auto now_local = Log::formatLocalTime(timepoint, "%Y-%m-%d %H:%M:%S");
 
       std::stringstream log_ss;
       log_ss << "[" << static_cast<char>(level) << "] " << now_local << " | " << source_tag << ": " << message;
 
       *_out << log_ss.str() << std::endl;
    }
+}
+#endif
+
+void LogThread::flushSynchronously()
+{
+#ifdef DECEPTUS_LOG_TO_FILE
+   flush();
+#endif
 }

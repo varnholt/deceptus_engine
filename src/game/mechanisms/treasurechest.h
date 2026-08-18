@@ -7,6 +7,8 @@
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
+#include <memory>
+
 /// \brief interactive chest that opens with optional key requirements and can spawn rewards.
 class TreasureChest : public GameMechanism, public GameNode
 {
@@ -28,6 +30,13 @@ public:
    /// \param /*normal*/ normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
 
+   /// \brief draws the current chest animation and active spawn effect with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal-map render target, unused by this mechanism.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief handles interaction, state transitions, and reward spawning.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
@@ -35,6 +44,19 @@ public:
    /// \brief reports that this mechanism does not expose a gameplay bounding box.
    /// \return std::nullopt.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
+
+   /// \brief writes whether the chest has been opened into save data.
+   /// \param json json object to write state fields into.
+   void serializeState(nlohmann::json& json) override;
+
+   /// \brief restores the opened state from save data.
+   /// \param json json object containing previously serialized state.
+   void deserializeState(const nlohmann::json& json) override;
+
+   /// \brief exposes chest state to level scripts. supported property: "open".
+   /// \param property_name name of the property to read.
+   /// \return true when the chest is no longer closed, std::nullopt for unknown properties.
+   std::optional<GameMechanismObserver::LuaVariant> getProperty(const std::string& property_name) const override;
 
 private:
    enum class Alignment
@@ -54,6 +76,9 @@ private:
    /// \return true when no key is required or when the required inventory item is present.
    bool playerHasRequiredKey() const;
 
+   /// \brief removes the configured key item from the player's inventory after the chest has been unlocked, unless the chest opted out.
+   void consumeRequiredKey();
+
    sf::FloatRect _rect;
    Alignment _alignment{Alignment::Left};
    std::shared_ptr<sf::Texture> _texture;
@@ -63,8 +88,10 @@ private:
    State _state{State::Closed};
    std::optional<std::string> _spawn_extra;
    std::optional<std::string> _item_required;
+   bool _item_required_consumed{true};  //!< when set, the required item is taken out of the inventory once the chest is unlocked
    sf::Vector2f _spawn_offset;
-   bool _extra_spawned{false};  //!< guards against calling spawnExtra more than once
+   bool _extra_spawned{false};                   //!< guards against calling spawnExtra more than once
+   std::weak_ptr<GameMechanism> _spawned_extra;  //!< non-owning reference used to disable pickup during the spawn effect
 
    std::shared_ptr<Animation> _animation_idle_closed;
    std::shared_ptr<Animation> _animation_opening;

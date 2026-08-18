@@ -7,8 +7,8 @@
 
 #include "SFML/Graphics.hpp"
 
-#include "box2d/box2d.h"
 #include <filesystem>
+#include "box2d/box2d.h"
 
 struct TmxLayer;
 struct TmxTileSet;
@@ -58,6 +58,15 @@ public:
    /// \param color color render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
+#ifdef DECEPTUS_VRSFML
+   /// \brief draws all spike sprites with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal-map render target, unused by this mechanism.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+#endif
 
    /// \brief updates animation state and damages the player while spikes are deadly.
    /// \param dt elapsed frame time.
@@ -128,7 +137,7 @@ private:
    int32_t _dt_ms{0};
    std::optional<int32_t> _elapsed_since_collision_ms;
 
-   sf::Vector2f _pixel_position;
+   sf::Vector2f _position_px;
    sf::FloatRect _player_collision_rect_px;
 
    bool _extracting{false};

@@ -1,7 +1,14 @@
 # record_gameplay
 
 Launches the game, waits for the level to finish loading, captures the window
-via ffmpeg gdigrab at 60 fps, and writes `output/gameplay.gif`.
+via ffmpeg gdigrab at 60 fps, and writes two files:
+
+- `output/master.mkv` — the lossless RGB capture, exactly the pixels the engine
+  drew. This is the master; keep it and derive everything else from it.
+- `output/gameplay.gif` — a straight GIF of the master, no dither.
+
+Web-friendly media for the README and for itch.io is produced from the master by
+[`lab/media_assets`](../media_assets/README.md).
 
 ## Prerequisites
 
@@ -9,7 +16,19 @@ via ffmpeg gdigrab at 60 fps, and writes `output/gameplay.gif`.
 - [ffmpeg](https://ffmpeg.org/download.html) on `PATH` (for capture and GIF encoding)
 - A built `deceptus.exe`
 - Windows (uses `win32gui` and ffmpeg `gdigrab`)
-- The game window must remain visible and unobscured during capture
+
+`gdigrab` records a screen region rather than a window, so the game has to be the
+window on top. The script makes it topmost for the duration of the capture and
+puts it back afterwards, and it verifies that nothing covers the capture region
+before recording a single frame — a covered window aborts the run with the name
+of whatever was in the way instead of quietly recording your desktop.
+
+It captures the client area only, queried through `GetClientRect` and
+`ClientToScreen`, so the title bar and border never make it into the master and
+nothing downstream has to know their size. The process is made DPI aware first,
+because a DPI unaware process is handed scaled window coordinates while `gdigrab`
+works in physical pixels — on a 125% display that mismatch records an entirely
+different part of the screen.
 
 ## Setup
 
@@ -48,7 +67,9 @@ uv run --project lab/record_gameplay pytest lab/record_gameplay -s
 ```
 
 The `-s` flag lets the game's stdout pass through so you can see loading
-progress. The GIF is written to `lab/record_gameplay/output/gameplay.gif`.
+progress. The files land in `lab/record_gameplay/output/`. The lossless master is
+large — expect a few hundred MB for 8 seconds — so the whole `output/` directory
+is git-ignored.
 
 ## Tuning
 

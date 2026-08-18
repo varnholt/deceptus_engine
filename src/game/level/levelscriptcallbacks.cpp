@@ -2,14 +2,21 @@
 #include "levelscriptcallbacks.h"
 
 #include <cstdlib>
+#include <fstream>
 #include <lua.hpp>
 #include <sstream>
+#include <type_traits>
+#include <variant>
 
 #include "SFML/Graphics.hpp"
+#include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "game/audio/musicplayertypes.h"
 #include "game/level/levelscript.h"
+#include "game/mechanisms/dialogue.h"
+#include "game/state/displaymode.h"
+#include "json/json.hpp"
 
 namespace LevelScriptCallbacks
 {
@@ -93,6 +100,52 @@ int32_t isMechanismVisible(lua_State* state)
    return 1;
 }
 
+int32_t getMechanismProperty(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 3)
+   {
+      return 0;
+   }
+
+   const std::string search_pattern = lua_tostring(state, 1);
+   const std::string group = lua_tostring(state, 2);
+   const std::string property_name = lua_tostring(state, 3);
+
+   const auto property = LevelScript::getCurrent()->getMechanismProperty(search_pattern, group, property_name);
+   if (!property.has_value())
+   {
+      lua_pushnil(state);
+      return 1;
+   }
+
+   std::visit(
+      [state](const auto& property_value)
+      {
+         using PropertyType = std::decay_t<decltype(property_value)>;
+         if constexpr (std::is_same_v<PropertyType, bool>)
+         {
+            lua_pushboolean(state, property_value);
+         }
+         else if constexpr (std::is_same_v<PropertyType, int64_t>)
+         {
+            lua_pushinteger(state, property_value);
+         }
+         else if constexpr (std::is_same_v<PropertyType, double>)
+         {
+            lua_pushnumber(state, property_value);
+         }
+         else
+         {
+            lua_pushstring(state, property_value.c_str());
+         }
+      },
+      property.value()
+   );
+
+   return 1;
+}
+
 int32_t setMechanismEnabled(lua_State* state)
 {
    const auto argc = lua_gettop(state);
@@ -169,14 +222,135 @@ int32_t toggle(lua_State* state)
    return 0;
 }
 
-int32_t showDialogue(lua_State* state)
+int32_t getMechanismRect(lua_State* state)
 {
-   if (lua_gettop(state) != 1)
+   const auto argc = lua_gettop(state);
+   if (argc < 1 || argc > 2)
    {
       return 0;
    }
 
-   LevelScript::getCurrent()->showDialogue(lua_tostring(state, 1));
+   const std::string search_pattern = lua_tostring(state, 1);
+   std::optional<std::string> group;
+   if (argc == 2)
+   {
+      group = lua_tostring(state, 2);
+   }
+
+   const auto rect = LevelScript::getCurrent()->getMechanismRect(search_pattern, group);
+   if (!rect.has_value())
+   {
+      lua_pushnil(state);
+      return 1;
+   }
+
+   lua_createtable(state, 0, 4);
+   lua_pushnumber(state, rect->position.x);
+   lua_setfield(state, -2, "x");
+   lua_pushnumber(state, rect->position.y);
+   lua_setfield(state, -2, "y");
+   lua_pushnumber(state, rect->size.x);
+   lua_setfield(state, -2, "width");
+   lua_pushnumber(state, rect->size.y);
+   lua_setfield(state, -2, "height");
+   return 1;
+}
+
+int32_t getCameraCenter(lua_State* state)
+{
+   const auto camera_center = LevelScript::getCurrent()->getCameraCenter();
+   lua_createtable(state, 0, 2);
+   lua_pushnumber(state, camera_center.x);
+   lua_setfield(state, -2, "x");
+   lua_pushnumber(state, camera_center.y);
+   lua_setfield(state, -2, "y");
+   return 1;
+}
+
+int32_t showDialogue(lua_State* state)
+{
+   const auto argument_count = lua_gettop(state);
+   if (argument_count < 1)
+   {
+      return 0;
+   }
+
+   if (lua_isstring(state, 1))
+   {
+      LevelScript::getCurrent()->showDialogue(lua_tostring(state, 1));
+      return 0;
+   }
+
+   std::vector<Dialogue::DialogueItem> dialogue_items;
+   for (auto argument_index = 1; argument_index <= argument_count; argument_index++)
+   {
+      if (!lua_istable(state, argument_index))
+      {
+         continue;
+      }
+
+      Dialogue::DialogueItem item;
+
+      lua_getfield(state, argument_index, "message");
+      if (lua_isstring(state, -1))
+      {
+         item._message = lua_tostring(state, -1);
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "text_color");
+      if (lua_isstring(state, -1))
+      {
+         const auto rgba = TmxTools::color(lua_tostring(state, -1));
+         item._text_color = sf::Color{rgba[0], rgba[1], rgba[2]};
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "bg_color");
+      if (lua_isstring(state, -1))
+      {
+         const auto rgba = TmxTools::color(lua_tostring(state, -1));
+         item._background_color = sf::Color{rgba[0], rgba[1], rgba[2]};
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "animate");
+      if (lua_isboolean(state, -1))
+      {
+         item._animate_text = lua_toboolean(state, -1);
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "animate_speed");
+      if (lua_isnumber(state, -1))
+      {
+         item._animate_text_speed = static_cast<float>(lua_tonumber(state, -1));
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "x_px");
+      const auto has_x = lua_isnumber(state, -1);
+      const auto x_px = has_x ? static_cast<float>(lua_tonumber(state, -1)) : 0.0f;
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "y_px");
+      const auto has_y = lua_isnumber(state, -1);
+      const auto y_px = has_y ? static_cast<float>(lua_tonumber(state, -1)) : 0.0f;
+      lua_pop(state, 1);
+
+      if (has_x && has_y)
+      {
+         item._pos = sf::Vector2f{x_px, y_px};
+      }
+
+      dialogue_items.push_back(item);
+   }
+
+   if (!dialogue_items.empty())
+   {
+      LevelScript::getCurrent()->showDialogue(std::move(dialogue_items));
+   }
+
    return 0;
 }
 
@@ -368,6 +542,23 @@ int32_t playMusic(lua_State* state)
    return 0;
 }
 
+int32_t setLevelMusic(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->setLevelMusic(std::string(lua_tostring(state, 1)));
+   return 0;
+}
+
+int32_t getCheckpoint(lua_State* state)
+{
+   lua_pushinteger(state, LevelScript::getCurrent()->getCheckpoint());
+   return 1;
+}
+
 int32_t lockPlayerControls(lua_State* state)
 {
    if (lua_gettop(state) != 1)
@@ -376,6 +567,47 @@ int32_t lockPlayerControls(lua_State* state)
    }
 
    LevelScript::getCurrent()->lockPlayerControls(std::chrono::milliseconds{static_cast<int32_t>(lua_tointeger(state, 1))});
+   return 0;
+}
+
+int32_t setCutsceneActive(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   const auto active = lua_toboolean(state, 1);
+   if (active)
+   {
+      DisplayMode::getInstance().enqueueSet(Display::CutsceneActive);
+   }
+   else
+   {
+      DisplayMode::getInstance().enqueueUnset(Display::CutsceneActive);
+   }
+   return 0;
+}
+
+int32_t fadeOut(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->fadeOut(static_cast<float>(lua_tonumber(state, 1)));
+   return 0;
+}
+
+int32_t fadeIn(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->fadeIn(static_cast<float>(lua_tonumber(state, 1)));
    return 0;
 }
 
@@ -420,6 +652,193 @@ int32_t playEventRecording(lua_State* state)
 
    LevelScript::getCurrent()->playEventRecording(std::string(filename));
    return 0;
+}
+
+int32_t setCameraPosition(lua_State* state)
+{
+   if (lua_gettop(state) != 2)
+   {
+      return 0;
+   }
+
+   const auto x_px = static_cast<float>(lua_tonumber(state, 1));
+   const auto y_px = static_cast<float>(lua_tonumber(state, 2));
+   LevelScript::getCurrent()->setCameraPosition(x_px, y_px);
+   return 0;
+}
+
+int32_t unlockCamera(lua_State* /*state*/)
+{
+   LevelScript::getCurrent()->unlockCamera();
+   return 0;
+}
+
+int32_t setPlayerVisible(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->setPlayerVisible(lua_toboolean(state, 1));
+   return 0;
+}
+
+int32_t setInfoLayerVisible(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->setHudVisible(lua_toboolean(state, 1));
+   return 0;
+}
+
+int32_t nextLevel(lua_State* /*state*/)
+{
+   LevelScript::getCurrent()->nextLevel();
+   return 0;
+}
+
+int32_t playSound(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->playSound(lua_tostring(state, 1));
+   return 0;
+}
+
+int32_t createSprite(lua_State* state)
+{
+   if (lua_gettop(state) != 6)
+   {
+      return 0;
+   }
+
+   const std::string name = lua_tostring(state, 1);
+   const std::string animation_file = lua_tostring(state, 2);
+   const std::string animation_id = lua_tostring(state, 3);
+   const auto x_px = static_cast<float>(lua_tonumber(state, 4));
+   const auto y_px = static_cast<float>(lua_tonumber(state, 5));
+   const bool looped = lua_toboolean(state, 6);
+   LevelScript::getCurrent()->createSprite(name, animation_file, animation_id, x_px, y_px, looped);
+   return 0;
+}
+
+int32_t destroySprite(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->destroySprite(lua_tostring(state, 1));
+   return 0;
+}
+
+int32_t setSpriteAnimation(lua_State* state)
+{
+   if (lua_gettop(state) != 3)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->setSpriteAnimation(lua_tostring(state, 1), lua_tostring(state, 2), lua_toboolean(state, 3));
+   return 0;
+}
+
+int32_t setSpriteVisible(lua_State* state)
+{
+   if (lua_gettop(state) != 2)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->setSpriteVisible(lua_tostring(state, 1), lua_toboolean(state, 2));
+   return 0;
+}
+
+int32_t moveSpriteAtSpeed(lua_State* state)
+{
+   if (lua_gettop(state) != 5)
+   {
+      return 0;
+   }
+
+   const std::string name = lua_tostring(state, 1);
+   const auto target_x = static_cast<float>(lua_tonumber(state, 2));
+   const auto target_y = static_cast<float>(lua_tonumber(state, 3));
+   const auto speed_px_per_s = static_cast<float>(lua_tonumber(state, 4));
+   const std::string arrive_event = lua_tostring(state, 5);
+   LevelScript::getCurrent()->moveSpriteAtSpeed(name, target_x, target_y, speed_px_per_s, arrive_event);
+   return 0;
+}
+
+int32_t loadCutscene(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   const std::string path = lua_tostring(state, 1);
+   std::ifstream file_stream(path);
+   if (!file_stream.is_open())
+   {
+      Log::Error() << "loadCutscene: cannot open " << path;
+      return 0;
+   }
+
+   nlohmann::json json_data;
+   try
+   {
+      json_data = nlohmann::json::parse(file_stream);
+   }
+   catch (const std::exception& exception)
+   {
+      Log::Error() << "loadCutscene: parse error in " << path << ": " << exception.what();
+      return 0;
+   }
+
+   lua_newtable(state);
+   int32_t array_index = 1;
+   for (const auto& entry : json_data)
+   {
+      lua_newtable(state);
+      for (const auto& [key, value] : entry.items())
+      {
+         lua_pushstring(state, key.c_str());
+         if (value.is_string())
+         {
+            lua_pushstring(state, value.get<std::string>().c_str());
+         }
+         else if (value.is_number_float())
+         {
+            lua_pushnumber(state, value.get<double>());
+         }
+         else if (value.is_number_integer())
+         {
+            lua_pushinteger(state, value.get<int64_t>());
+         }
+         else if (value.is_boolean())
+         {
+            lua_pushboolean(state, value.get<bool>() ? 1 : 0);
+         }
+         else
+         {
+            lua_pop(state, 1);
+            continue;
+         }
+         lua_settable(state, -3);
+      }
+      lua_rawseti(state, -2, array_index);
+      array_index++;
+   }
+   return 1;
 }
 
 int32_t debug(lua_State* state)

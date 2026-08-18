@@ -16,6 +16,9 @@ struct TmxLayer;
 struct TmxTileSet;
 
 /// \brief controls an interactable door that can block or allow passage.
+/// \note deliberately does not call addChunks: the open and close animation advances _bar_offset from update, and a door
+///       can be triggered remotely by a lever. chunk culling would stop those updates while the player is away, so a
+///       door opened from a distance would never finish opening.
 class Door : public GameMechanism, public GameNode
 {
 public:
@@ -50,6 +53,13 @@ public:
    /// \param color color render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
+   /// \brief draws the current door visual state with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief updates animations, body enable state, and player interaction with button b.
    /// \param dt elapsed frame time.
@@ -124,7 +134,7 @@ private:
    // for 'version 1'
    sf::VertexArray _door_quad{sf::PrimitiveType::Triangles, 4};
    sf::Vector2i _tile_position_tl;
-   sf::FloatRect _pixel_rect;
+   sf::FloatRect _rect_px;
    float _bar_offset = 0.0f;
 
    std::optional<std::string> _required_item;

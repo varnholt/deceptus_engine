@@ -30,4 +30,12 @@ public:
 
    /// \brief returns to the options menu.
    void back();
+
+   /// \brief draws achievements layers and button label text.
+   /// \param window render target receiving the achievements screen.
+   /// \param states render states forwarded to draw calls.
+   void draw(sf::RenderTarget& window, sf::RenderStates states) override;
+
+private:
+   std::unique_ptr<sf::Text> _text_back_button;
 };

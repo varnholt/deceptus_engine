@@ -1,9 +1,13 @@
 #include "interactionhelp.h"
 
+#include <array>
 #include <vector>
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tools/localization.h"
+#include "framework/tools/sfmlcompat.h"
+#include "framework/tools/sfmlstring.h"
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/io/texturepool.h"
@@ -14,9 +18,29 @@
 
 namespace
 {
+static constexpr int32_t default_interaction_help_offset_x_px = 0;
+static constexpr int32_t default_interaction_help_offset_y_px = 0;
+
+static constexpr std::array interaction_help_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{50}},
+   PropertyInfo{.name = "animation", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "offset_x_px", .type = "int", .default_value = default_interaction_help_offset_x_px},
+   PropertyInfo{.name = "offset_y_px", .type = "int", .default_value = default_interaction_help_offset_y_px},
+   PropertyInfo{.name = "button_0", .type = "string", .default_value = std::string_view{"key_cursor_u"}},
+   PropertyInfo{.name = "text_0", .type = "string", .default_value = std::string_view{""}},
+};
+static constexpr MechanismSchema interaction_help_schema{
+   .type_name = "InteractionHelp",
+   .layer_name = "interaction_help",
+   .default_width = 96,
+   .default_height = 48,
+   .properties = interaction_help_properties,
+};
 const auto registered_interactionhelp = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(interaction_help_schema);
+
    registry.mapGroupToLayer("InteractionHelp", "interaction_help");
 
    registry.registerLayerName(
@@ -45,11 +69,6 @@ InteractionHelp::InteractionHelp(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(InteractionHelp).name());
    _is_overlay = true;
-
-   if (_font.openFromFile("data/fonts/deceptum.ttf"))
-   {
-      const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-   }
 }
 
 std::string_view InteractionHelp::objectName() const
@@ -57,8 +76,11 @@ std::string_view InteractionHelp::objectName() const
    return "InteractionHelp";
 }
 
-void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
+#ifdef DECEPTUS_VRSFML
+   draw(target, normal, {});
+#else
    if (!isEnabled())
    {
       return;
@@ -90,6 +112,41 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*
 
       target.setView(level_view);
    }
+#endif
+}
+
+void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+#ifdef DECEPTUS_VRSFML
+   if (!isEnabled())
+   {
+      return;
+   }
+
+   _animation_show->draw(target, states);
+   _animation_hide->draw(target, states);
+
+   if (_button_alpha.has_value())
+   {
+      const auto ortho = sf::View::fromRect(sf::FloatRect{
+         {0.0f, 0.0f},
+         {static_cast<float>(GameConfiguration::getInstance()._view_width),
+          static_cast<float>(GameConfiguration::getInstance()._view_height)}
+      });
+
+      std::ranges::for_each(
+         _help_elements,
+         [&target, &ortho, this](const auto& help)
+         {
+            target.draw(*help._button_sprite, sf::RenderStates{.view = ortho, .texture = _button_texture.get()});
+            target.draw(*help._text, sf::RenderStates{.view = ortho});
+         }
+      );
+   }
+#else
+   (void)states;
+   draw(target, normal);
+#endif
 }
 
 // workflow
@@ -109,7 +166,7 @@ void InteractionHelp::update(const sf::Time& dt)
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   const auto intersects = player_rect.findIntersection(_rect_px).has_value();
+   const auto intersects = sfcompat::findIntersection(player_rect, _rect_px).has_value();
 
    if (intersects && !_player_intersected_in_last_frame && _animation_hide->_paused)
    {
@@ -162,16 +219,16 @@ void InteractionHelp::update(const sf::Time& dt)
          {
             const auto alpha_byte = static_cast<uint8_t>(alpha.value() * 255);
             element._text->setFillColor(sf::Color{232, 219, 243, alpha_byte});
-            element._button_sprite->setColor({255, 255, 255, alpha_byte});
+            sfcompat::setColor(*element._button_sprite, sf::Color{255, 255, 255, alpha_byte});
          }
 
          if (GameControllerIntegration::getInstance().isControllerConnected())
          {
-            element._button_sprite->setTextureRect(element._button_rect_controller);
+            sfcompat::setTextureRect(*element._button_sprite, element._button_rect_controller);
          }
          else
          {
-            element._button_sprite->setTextureRect(element._button_rect_keyboard);
+            sfcompat::setTextureRect(*element._button_sprite, element._button_rect_keyboard);
          }
       }
    );
@@ -197,8 +254,8 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
    const auto animation = ValueReader::readValue<std::string>("animation", map);
    if (animation.has_value())
    {
-      const auto offset_x_px = ValueReader::readValue<int32_t>("offset_x_px", map).value_or(0);
-      const auto offset_y_px = ValueReader::readValue<int32_t>("offset_y_px", map).value_or(0);
+      const auto offset_x_px = ValueReader::readValue<int32_t>("offset_x_px", map).value_or(default_interaction_help_offset_x_px);
+      const auto offset_y_px = ValueReader::readValue<int32_t>("offset_y_px", map).value_or(default_interaction_help_offset_y_px);
 
       _animation_show = animation_pool.create(
          animation.value(), pos_x_px + static_cast<float>(offset_x_px), pos_y_px + static_cast<float>(offset_y_px), false, false
@@ -244,8 +301,13 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 
       HelpElement help;
 
+#ifdef DECEPTUS_VRSFML
+      help._button_sprite = std::make_unique<sf::Sprite>();
+      help._text = std::make_unique<sf::Text>(*_font, sf::Text::Data{});
+#else
       help._button_sprite = std::make_unique<sf::Sprite>(*_button_texture);
-      help._text = std::make_unique<sf::Text>(_font);
+      help._text = std::make_unique<sf::Text>(*_font);
+#endif
       help._text->setCharacterSize(12);
 
       const auto button_name = button_value.value_or("key_cursor_u");
@@ -253,6 +315,19 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       const auto pos_index_keyboard = ControllerKeyMap::getArrayPosition(button_names.first);
       const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_names.second);
 
+#ifdef DECEPTUS_VRSFML
+      help._button_rect_keyboard = {
+         {static_cast<float>(pos_index_keyboard.first * PIXELS_PER_TILE), static_cast<float>(pos_index_keyboard.second * PIXELS_PER_TILE)},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+      };
+      help._button_rect_controller = {
+         {static_cast<float>(pos_index_controller.first * PIXELS_PER_TILE),
+          static_cast<float>(pos_index_controller.second * PIXELS_PER_TILE)},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+      };
+
+      help._button_sprite->textureRect = help._button_rect_keyboard;
+#else
       help._button_rect_keyboard = {
          {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
@@ -262,7 +337,8 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 
       help._button_sprite->setTextureRect(help._button_rect_keyboard);
       help._button_sprite->setTexture(*_button_texture);
-      help._text->setString(text_value.value());
+#endif
+      help._text->setString(sftr(text_value.value()));
 
       // row 0 at bottom, row 1 above
       const auto view_width = GameConfiguration::getInstance()._view_width;
@@ -291,11 +367,13 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       //
       // text location: view.width - text.localbounds.x - icon.width - some_offset
 
-      help._button_sprite->setPosition({icon_x_px, icon_y_px});
-      help._text->setPosition({text_x_px, text_y_px});
+      sfcompat::setPosition(*help._button_sprite, {icon_x_px, icon_y_px});
+      sfcompat::setPosition(*help._text, {text_x_px, text_y_px});
 
       _help_elements.push_back(std::move(help));
    }
+
+   addChunks(_rect_px);
 }
 
 std::optional<sf::FloatRect> InteractionHelp::getBoundingBoxPx()

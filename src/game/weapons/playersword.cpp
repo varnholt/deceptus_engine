@@ -3,6 +3,7 @@
 #include <iostream>
 #include <numbers>
 
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/stopwatch.h"
 #include "game/constants.h"
 #include "game/debug/debugdraw.h"
@@ -78,11 +79,11 @@ PlayerSword::PlayerSword() : _duration_from_swing_start_to_hit(200ms), _duration
    _type = WeaponType::Sword;
 }
 
-void PlayerSword::draw(sf::RenderTarget& target)
+void PlayerSword::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    for (auto& animation : _animations)
    {
-      animation->draw(target);
+      animation->draw(target, states);
    }
 
    if (!checkHitWindowActive())
@@ -168,7 +169,7 @@ std::vector<std::shared_ptr<GameMechanism>> PlayerSword::impactMechanisms(std::u
       {
          if (std::ranges::any_of(
                 mechanism->getHitboxes(),
-                [&](const auto& hitbox) { return hitbox.getRectTranslated().findIntersection(_hit_rect_px).has_value(); }
+                [&](const auto& hitbox) { return sfcompat::findIntersection(hitbox.getRectTranslated(), _hit_rect_px).has_value(); }
              ))
          {
             mechanism->hit(sword_damage);

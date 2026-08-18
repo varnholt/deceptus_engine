@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
@@ -15,6 +16,9 @@
 #include <cmath>
 #include <numbers>
 #include <ranges>
+#ifdef DECEPTUS_VRSFML
+#include <span>
+#endif
 
 // #define DEBUG_DRAW_LIGHT_SYSTEM
 
@@ -31,6 +35,15 @@ constexpr auto max_distance_m2 = 400.0f;  // depends on the view dimensions
 
 // write pass: write 1 to stencil for every fragment that should be in shadow.
 // stencilOnly=true suppresses color writes (equivalent to glColorMask(false,...)).
+#ifdef DECEPTUS_VRSFML
+const sf::StencilMode stencil_write_mode{
+   .stencilComparison = sf::StencilComparison::Always,
+   .stencilUpdateOperation = sf::StencilUpdateOperation::Replace,
+   .stencilOnly = true,
+   .stencilReference = sf::StencilValue{1u},
+   .stencilMask = sf::StencilValue{~0u}
+};
+#else
 const sf::StencilMode stencil_write_mode{
    sf::StencilComparison::Always,
    sf::StencilUpdateOperation::Replace,
@@ -38,8 +51,18 @@ const sf::StencilMode stencil_write_mode{
    ~0u,  // mask
    true  // stencilOnly: no color output
 };
+#endif
 
 // read pass: only draw where stencil == 0 (not occluded by any shadow).
+#ifdef DECEPTUS_VRSFML
+const sf::StencilMode stencil_test_mode{
+   .stencilComparison = sf::StencilComparison::Equal,
+   .stencilUpdateOperation = sf::StencilUpdateOperation::Keep,
+   .stencilOnly = false,
+   .stencilReference = sf::StencilValue{0u},
+   .stencilMask = sf::StencilValue{~0u}
+};
+#else
 const sf::StencilMode stencil_test_mode{
    sf::StencilComparison::Equal,
    sf::StencilUpdateOperation::Keep,
@@ -47,6 +70,8 @@ const sf::StencilMode stencil_test_mode{
    ~0u,   // mask
    false  // write color
 };
+#endif
+
 }  // namespace
 
 LightSystem::LightSystem()
@@ -62,7 +87,7 @@ LightSystem::LightSystem()
       _unit_circle[i] = b2Vec2{x_normalized, y_normalized};
    }
 
-   if (!_light_shader.loadFromFile("data/shaders/light.frag", sf::Shader::Type::Fragment))
+   if (!_light_shader.loadFromFragment("data/shaders/light.frag"))
    {
       Log::Error() << "error loading bump mapping shader";
    }
@@ -72,9 +97,25 @@ void LightSystem::drawShadowQuads(
    sf::RenderTarget& target,
    std::shared_ptr<LightSystem::LightInstance> light,
    const std::vector<b2Body*>& candidates
+#ifdef DECEPTUS_VRSFML
+   ,
+   const sf::RenderStates& states
+#endif
 ) const
 {
-   const auto light_pos_m = light->_pos_m + light->_center_offset_m;
+   const auto light_pos_m = light->_shadow_origin_m.value_or(light->_pos_m + light->_center_offset_m);
+
+#ifdef DECEPTUS_VRSFML
+   sf::RenderStates shadow_states = states;
+   shadow_states.stencilMode = stencil_write_mode;
+#else
+   const sf::RenderStates shadow_states{stencil_write_mode};
+#endif
+
+   // every quad used to be a draw call of its own, and the level's solid geometry is one chain
+   // shape, so a light standing next to a wall issued one call per edge in range - times six
+   // lights, every frame. the quads all carry the same state, so they batch into a single call
+   _shadow_vertices.clear();
 
    for (auto* body : candidates)
    {
@@ -148,7 +189,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{stencil_write_mode});
+               _shadow_vertices.insert(_shadow_vertices.end(), quad.begin(), quad.end());
             }
          }
          else if (shape_chain)
@@ -184,7 +225,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(vertex_1.x, vertex_1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{stencil_write_mode});
+               _shadow_vertices.insert(_shadow_vertices.end(), quad.begin(), quad.end());
             }
          }
          else if (shape_polygon)
@@ -219,11 +260,22 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, sf::RenderStates{stencil_write_mode});
+               _shadow_vertices.insert(_shadow_vertices.end(), quad.begin(), quad.end());
             }
          }
       }
    }
+
+   if (_shadow_vertices.empty())
+   {
+      return;
+   }
+
+#ifdef DECEPTUS_VRSFML
+   target.draw(std::span<const sf::Vertex>{_shadow_vertices.data(), _shadow_vertices.size()}, sf::PrimitiveType::Triangles, shadow_states);
+#else
+   target.draw(_shadow_vertices.data(), _shadow_vertices.size(), sf::PrimitiveType::Triangles, shadow_states);
+#endif
 }
 
 sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::View& view)
@@ -233,10 +285,8 @@ sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::Vie
 
    // then convert to viewport coordinates
    sf::Vector2f pixel;
-
    pixel.x = (normalized.x + 1.0f) / 2.0f;
    pixel.y = (-normalized.y + 1.0f) / 2.0f;
-
    return pixel;
 }
 
@@ -247,10 +297,14 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
 
    // then convert to viewport coordinates
    sf::Vector2f pixel;
+#ifdef DECEPTUS_VRSFML
+   const auto target_size = target.getSize();
+   const auto viewport = view.computePixelViewport(sf::Vec2f{static_cast<float>(target_size.x), static_cast<float>(target_size.y)});
+#else
    const auto viewport = target.getViewport(view);
+#endif
    pixel.x = ((normalized.x + 1.0f) / (2.0f * static_cast<float>(viewport.size.x))) + static_cast<float>(viewport.position.x);
    pixel.y = ((-normalized.y + 1.0f) / (2.0f * static_cast<float>(viewport.size.y))) + static_cast<float>(viewport.position.y);
-
    return pixel;
 }
 
@@ -332,7 +386,7 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
    }
 }
 
-void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates /*states*/)
+void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states)
 {
    _active_lights.clear();
 
@@ -422,13 +476,21 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       // clear the stencil buffer for this light via SFML's API.
       // raw glClear(GL_STENCIL_BUFFER_BIT) would be fine here but using the SFML
       // path keeps all stencil management consistent and avoids context surprises.
+#ifdef DECEPTUS_VRSFML
+      target.clearStencil(sf::StencilValue{0u});
+#else
       target.clearStencil(0);
+#endif
 
       // draw occluders and shadow quads into the stencil buffer only.
       // each draw call carries stencil_write_mode so SFML enables the stencil test
       // and writes 1 for every occluded pixel instead of disabling it (default behaviour).
       drawOccluders(target);
+#ifdef DECEPTUS_VRSFML
+      drawShadowQuads(target, light, shadow_candidates, states);
+#else
       drawShadowQuads(target, light, shadow_candidates);
+#endif
 
       // draw the light sprite only where stencil == 0 (not occluded).
       sf::Color channel_color;
@@ -445,6 +507,24 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
          channel_color = sf::Color(0, 0, 255, 255);  // blue
       }
 
+#ifdef DECEPTUS_VRSFML
+      light->_sprite->color = channel_color;
+
+      sf::RenderStates render_states = states;
+      render_states.blendMode = sf::BlendAdd;
+      render_states.stencilMode = stencil_test_mode;
+      render_states.texture = light->_texture.get();
+
+      if (light->_shader && light->_texture)
+      {
+         light->_shader->setUniform("u_texture", *light->_texture);
+         if (light->_shader_update_callback)
+         {
+            light->_shader_update_callback(*light->_shader, *light, _clock.getElapsedTime().asSeconds());
+         }
+         render_states.shader = &light->_shader->native();
+      }
+#else
       light->_sprite->setColor(channel_color);
 
       sf::RenderStates render_states{sf::BlendAdd};
@@ -452,13 +532,14 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
 
       if (light->_shader)
       {
-         light->_shader->setUniform("texture", *light->_texture);
+         light->_shader->setUniform("u_texture", *light->_texture);
          if (light->_shader_update_callback)
          {
             light->_shader_update_callback(*light->_shader, *light, _clock.getElapsedTime().asSeconds());
          }
-         render_states.shader = light->_shader.get();
+         render_states.shader = &light->_shader->native();
       }
+#endif
 
       target.draw(*light->_sprite, render_states);
 
@@ -476,12 +557,18 @@ void LightSystem::draw(
    const std::shared_ptr<sf::RenderTexture>& normal_map
 )
 {
+   if (!_light_shader.isLoaded())
+   {
+      return;
+   }
+
    // texture uniforms only need to be rebound when the render texture objects change
    // (i.e. on resize); skip the setUniform calls when the pointers are unchanged.
    const auto* color_tex = &color_map->getTexture();
    const auto* light_tex = &light_map->getTexture();
    const auto* light2_tex = &light_map2->getTexture();
    const auto* normal_tex = &normal_map->getTexture();
+
    if (color_tex != _last_color_map || light_tex != _last_light_map || light2_tex != _last_light_map2 || normal_tex != _last_normal_map)
    {
       _light_shader.setUniform("color_map", *color_tex);
@@ -497,8 +584,13 @@ void LightSystem::draw(
    // update shader uniforms
    updateLightShader(target);
 
+#ifdef DECEPTUS_VRSFML
+   const sf::Texture& light_color_texture = color_map->getTexture();
+   target.draw(light_color_texture, sf::RenderStates{.shader = &_light_shader.native()});
+#else
    sf::Sprite sprite(color_map->getTexture());
-   target.draw(sprite, &_light_shader);
+   target.draw(sprite, &_light_shader.native());
+#endif
 }
 
 void LightSystem::drawDebug(sf::RenderTarget& target)
@@ -599,18 +691,23 @@ void LightSystem::LightInstance::deserialize(const nlohmann::json& node)
 
    if (_sprite && _texture)
    {
+#ifndef DECEPTUS_VRSFML
+      // VRSFML sprites don't store a texture; it's bound via RenderStates at draw time instead.
       _sprite->setTexture(*_texture);
-      _sprite->setTextureRect(
-         sf::IntRect({0, 0}, {static_cast<int32_t>(_texture->getSize().x), static_cast<int32_t>(_texture->getSize().y)})
+#endif
+      sfcompat::setTextureRect(
+         *_sprite, sf::IntRect({0, 0}, {static_cast<int32_t>(_texture->getSize().x), static_cast<int32_t>(_texture->getSize().y)})
       );
-      _sprite->setScale({static_cast<float>(_width_px) / _texture->getSize().x, static_cast<float>(_height_px) / _texture->getSize().y});
-      _sprite->setColor(_color);
+      sfcompat::setScale(
+         *_sprite, {static_cast<float>(_width_px) / _texture->getSize().x, static_cast<float>(_height_px) / _texture->getSize().y}
+      );
+      sfcompat::setColor(*_sprite, _color);
    }
 }
 
 void LightSystem::LightInstance::updateSpritePosition() const
 {
-   _sprite->setPosition(sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
+   sfcompat::setPosition(*_sprite, sf::Vector2f(_pos_m.x * PPM - _width_px * 0.5f, _pos_m.y * PPM - _height_px * 0.5f));
 }
 
 std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(GameNode* parent, const GameDeserializeData& data)
@@ -693,8 +790,13 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
    // light->_sprite.setColor(light->_color);
 
    light->_texture = TexturePool::getInstance().get(texture);
+#ifdef DECEPTUS_VRSFML
+   light->_sprite = std::make_unique<sf::Sprite>();
+#else
    light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
-   light->_sprite->setTextureRect(
+#endif
+   sfcompat::setTextureRect(
+      *light->_sprite,
       sf::IntRect({0, 0}, {static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y)})
    );
 
@@ -702,7 +804,7 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 
    const auto scale_x = static_cast<float>(light->_width_px) / static_cast<float>(light->_texture->getSize().x);
    const auto scale_y = static_cast<float>(light->_height_px) / static_cast<float>(light->_texture->getSize().y);
-   light->_sprite->setScale({scale_x, scale_y});
+   sfcompat::setScale(*light->_sprite, {scale_x, scale_y});
 
    return light;
 }
@@ -711,8 +813,13 @@ std::shared_ptr<LightSystem::LightInstance> LightSystem::createLightInstance(Gam
 {
    auto light = std::make_shared<LightSystem::LightInstance>(parent);
    light->_texture = TexturePool::getInstance().get("data/light/smooth.png");
+#ifdef DECEPTUS_VRSFML
+   light->_sprite = std::make_unique<sf::Sprite>();
+#else
    light->_sprite = std::make_unique<sf::Sprite>(*light->_texture);
-   light->_sprite->setTextureRect(
+#endif
+   sfcompat::setTextureRect(
+      *light->_sprite,
       sf::IntRect({0, 0}, {static_cast<int32_t>(light->_texture->getSize().x), static_cast<int32_t>(light->_texture->getSize().y)})
    );
    light->deserialize(node);

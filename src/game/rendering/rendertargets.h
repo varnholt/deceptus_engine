@@ -33,11 +33,13 @@ struct RenderTargets
    /// \brief atmosphere distortion pass texture.
    std::shared_ptr<sf::RenderTexture> atmosphere;
 
+#ifdef GLOW_ENABLED
    /// \brief full-size blur/glow pass texture.
    std::shared_ptr<sf::RenderTexture> blur;
 
    /// \brief downscaled blur texture used by glow upsampling.
    std::shared_ptr<sf::RenderTexture> blur_scaled;
+#endif
 
    /// \brief conversion factor from logical view units to texture-space units.
    float view_to_texture_scale = 1.0f;

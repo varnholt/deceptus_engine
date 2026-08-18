@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="RotatingBlade" width="0" height="0">
+  <properties>
+   <property name="enabled" type="bool" value="true"/>
+   <property name="blade_acceleration" type="float" value="1.0"/>
+   <property name="blade_deceleration" type="float" value="0.5"/>
+   <property name="blade_rotation_speed" type="float" value="5.0"/>
+   <property name="movement_speed" type="float" value="1.0"/>
+   <property name="z" type="int" value="30"/>
+  </properties>
+  <polyline points="0,0 48,0 96,0"/>
+ </object>
+</template>

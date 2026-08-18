@@ -6,6 +6,9 @@
 #include "game/mechanisms/gamemechanism.h"
 
 /// \brief simulates and renders a deformable water surface with splash propagation.
+/// \note deliberately does not call addChunks: update runs a spring simulation across all segments and needs to keep
+///       running so the surface can settle. chunk culling would freeze the wave mid-oscillation and the player would
+///       come back to a stale deformation instead of calm water.
 class WaterSurface : public GameMechanism, public GameNode
 {
 public:
@@ -75,6 +78,13 @@ public:
    /// \param color color render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
+   /// \brief draws the animated water gradient strip with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal-map render target, unused by this mechanism.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief updates wave simulation, player splashes, and emitter-generated disturbances.
    /// \param dt elapsed frame time.

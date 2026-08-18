@@ -8,11 +8,15 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
+#include <array>
 #include <filesystem>
+#include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 class GameMechanism;
+class LevelMap;
 
 /// \brief renders the map submenu, including level overlays and world marker primitives.
 class IngameMenuMap : public InGameMenuPage
@@ -29,11 +33,22 @@ public:
    /// \brief builds map view composition and draws the map page layers.
    /// \param window render target that receives map page rendering.
    /// \param states render states used for drawing.
+#ifdef DECEPTUS_VRSFML
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{}) override;
+#else
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
+#endif
 
    /// \brief advances panorama camera state and active map page animations.
    /// \param dt elapsed frame time, currently unused by this page.
    void update(const sf::Time& dt) override;
+
+   /// \brief resets the pan offset so the map opens centered on the player.
+   void show() override;
+
+   /// \brief cycles through the available zoom levels.
+   /// \param key pressed keyboard key to interpret.
+   void keyboardKeyPressed(sf::Keyboard::Key key) override;
 
    /// \brief stores door mechanisms that are rendered as map markers.
    /// \param doors door mechanism list for map overlay rendering.
@@ -44,10 +59,58 @@ public:
    void setPortals(const std::vector<std::shared_ptr<GameMechanism>>& portals);
 
 private:
-   /// \brief draws helper grid lines, doors, portals, and player marker onto the map target.
-   /// \param window render target used as the map overlay canvas.
-   /// \param states render states used for drawing primitives.
-   void drawLevelItems(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default);
+   /// \brief composes the explored level map and blits it into the map page viewport.
+   /// \param window render target that receives the composed map.
+   /// \param states render states used for drawing.
+   void drawLevel(sf::RenderTarget& window, sf::RenderStates states);
+
+   /// \brief draws the explored parts of the level map into the map render texture.
+   /// \param level_map map texture and coordinate helpers of the active level.
+   /// \param map_states render states carrying the map view; on wasm the view travels in here.
+   void drawExploredRooms(const LevelMap& level_map, const sf::RenderStates& map_states);
+
+   /// \brief draws mechanism markers and the player position on top of the revealed map.
+   /// \param level_map map texture and coordinate helpers of the active level.
+   /// \param map_states render states carrying the map view; on wasm the view travels in here.
+   void drawMarkers(const LevelMap& level_map, const sf::RenderStates& marker_states, const sf::Vector2f& view_top_left_map_px);
+
+   /// \brief picks the marker layers out of the psd and hides them from the page layer stack.
+   void collectMarkerLayers();
+
+   /// \brief stamps one marker icon centered on a map position, one icon pixel per map pixel.
+   /// \param target render target receiving the icon.
+   /// \param marker_index cell index inside the marker spriteset.
+   /// \param detail_level zoom step whose icon variant should be used.
+   /// \param center_map_px icon center in map pixels.
+   /// \param map_states render states carrying the map view; on wasm the view travels in here.
+   void drawMarker(
+      sf::RenderTarget& target,
+      int32_t marker_index,
+      size_t detail_level,
+      const sf::Vector2f& center_viewport_px,
+      const sf::RenderStates& marker_states
+   );
+
+   /// \brief recreates the map render texture when the available page area changed.
+   /// \param size_px required render texture size in screen pixels.
+   void updateRenderTexture(const sf::Vector2u& size_px);
+
+   /// \brief collects the current pan request from keyboard, dpad and analog stick.
+   /// \return vector pointing into the pan direction, its length is the requested fraction of the
+   ///         top speed; a zero vector means no input.
+   sf::Vector2f readPanInput() const;
+
+   /// \brief eases the map view towards the requested pan speed and moves it.
+   /// \param dt elapsed frame time.
+   void updatePan(const sf::Time& dt);
+
+   /// \brief keeps the map view rectangle inside the level bounds.
+   /// \param level_map level map providing the level dimensions.
+   void clampPan(const LevelMap& level_map);
+
+   /// \brief selects the neighbouring detail level of the level map.
+   /// \param direction -1 zooms in, 1 zooms out.
+   void zoom(int32_t direction);
 
    /// \brief applies static map button prompt and zoom indicator layer visibility.
    void updateButtons();
@@ -57,6 +120,8 @@ private:
 
    /// \brief animates horizontal submenu slide transitions for map panel groups.
    void updateMove();
+
+   std::array<std::shared_ptr<Layer>, 4> _marker_strips;  //!< one marker spriteset per zoom step
 
    BitmapFont _font;
 
@@ -80,5 +145,11 @@ private:
    FloatSeconds _duration_show;
    FloatSeconds _duration_hide;
 
-   float _zoom = 1.0f;
+   int32_t _zoom_level = 1;      //!< selected level map detail level, mirrored by the zoom_level_* layers
+   sf::Vector2f _pan_world_px;   //!< offset of the map view relative to the player position, in world pixels
+   sf::Vector2f _pan_direction;  //!< direction the view is currently gliding into
+   float _pan_ramp = 0.0f;       //!< 0..1 acceleration state, eased into the actual pan speed
+   float _blink_time_s = 0.0f;
+   float _alpha = 1.0f;           //!< page fade factor, applied to the map so it fades in and out with the rest
+   float _move_offset_px = 0.0f;  //!< horizontal submenu slide offset, applied to the map as well
 };

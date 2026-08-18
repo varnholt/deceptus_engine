@@ -9,6 +9,9 @@
 #include "SFML/Graphics.hpp"
 
 /// \brief moves and spins a circular blade that damages the player on contact.
+/// \note deliberately does not call addChunks: _rectangle is a fixed 64x64 box at the tmx object position and does not
+///       cover the movement path the blade travels along. culling against it would freeze the blade whenever the player
+///       is near the far end of its path. adding chunks here first requires a bounding box spanning the whole path.
 class RotatingBlade : public GameMechanism, public GameNode
 {
 public:
@@ -54,6 +57,15 @@ public:
    /// \param target render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
+#ifdef DECEPTUS_VRSFML
+   /// \brief draws the rotating blade sprite with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal-map render target, unused by this mechanism.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+#endif
 
    /// \brief enables or disables blade sound playback updates.
    /// \param enabled true to allow blade audio.

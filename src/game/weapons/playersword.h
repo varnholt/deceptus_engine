@@ -21,7 +21,8 @@ public:
 
    /// \brief draws active impact animations and optional debug overlays for sword queries.
    /// \param target render target used for sword visuals.
-   void draw(sf::RenderTarget& target) override;
+   /// \param states render states applied while drawing (used in WASM to carry the level view).
+   void draw(sf::RenderTarget& target, const sf::RenderStates& states = {}) override;
 
    /// \brief updates impact animations and applies hit detection while the swing window is active.
    /// \param data per-frame update context containing delta time and world.

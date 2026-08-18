@@ -23,11 +23,11 @@ void AnimationPlayer::update(const sf::Time& dt)
    );
 }
 
-void AnimationPlayer::draw(sf::RenderTarget& target)
+void AnimationPlayer::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    for (const auto& anim : _animations)
    {
-      target.draw(*anim);
+      target.draw(*anim, states);
    }
 }
 

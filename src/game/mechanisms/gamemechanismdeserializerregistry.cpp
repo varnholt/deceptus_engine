@@ -90,3 +90,13 @@ std::optional<GameMechanismDeserializerRegistry::DeserializerFunction> GameMecha
 
    return std::nullopt;
 }
+
+void GameMechanismDeserializerRegistry::registerSchema(const MechanismSchema& schema)
+{
+   _schemas.push_back(schema);
+}
+
+const std::vector<MechanismSchema>& GameMechanismDeserializerRegistry::schemas() const
+{
+   return _schemas;
+}

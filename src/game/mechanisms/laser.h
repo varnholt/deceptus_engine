@@ -22,6 +22,9 @@ struct TmxObject;
 struct TmxTileSet;
 
 /// \brief controls laser hazard tiles with timed signals and optional path movement.
+/// \note deliberately does not call addChunks: the signal schedule accumulates elapsed time in update. chunk culling
+///       would freeze that clock while the player is away, so lasers meant to fire in unison would drift out of phase
+///       relative to each other as the player moves through the level.
 class Laser : public GameMechanism, public GameNode
 {
 public:
@@ -50,6 +53,13 @@ public:
    /// \param color color render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
+
+   /// \brief draws the current laser frame with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief updates signal timing, frame animation, optional movement, and player collision checks.
    /// \param dt elapsed frame time.
@@ -112,9 +122,9 @@ protected:
    std::shared_ptr<sf::Texture> _texture;
    std::unique_ptr<sf::Sprite> _sprite;
 
-   sf::Vector2f _tile_position;
+   sf::Vector2f _position_tl;
    sf::Vector2f _position_px;
-   sf::FloatRect _pixel_rect;
+   sf::FloatRect _rect_px;
 
    std::optional<std::vector<sf::Vector2f>> _path;
    sf::Vector2f _move_offset_px;

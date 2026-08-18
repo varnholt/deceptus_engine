@@ -1,6 +1,7 @@
 #include "rainoverlay.h"
 
 #include "framework/math/sfmlmath.h"
+#include "game/audio/audio.h"
 #include "game/config/gameconfiguration.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
@@ -45,6 +46,19 @@ std::vector<b2Body*> retrieveBodiesOnScreen(const std::shared_ptr<b2World>& worl
    return WorldQuery::queryBodies(world, aabb);
 }
 
+// source: foreground
+// dest:   background
+
+// BlendMode(Factor sourceFactor, Factor destinationFactor, Equation blendEquation = Equation::Add);
+const sf::BlendMode rain_blend_mode(
+   sf::BlendMode::Factor::SrcAlpha,          // colorSourceFactor
+   sf::BlendMode::Factor::OneMinusSrcAlpha,  // colorDestinationFactor
+   sf::BlendMode::Equation::Add,             // colorBlendEquation
+   sf::BlendMode::Factor::SrcAlpha,          // alphaSourceFactor
+   sf::BlendMode::Factor::OneMinusSrcAlpha,  // alphaDestinationFactor
+   sf::BlendMode::Equation::Add              // alphaBlendEquation
+);
+
 }  // namespace
 
 RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprites/rain.png"))
@@ -54,13 +68,25 @@ RainOverlay::RainOverlay() : _texture(TexturePool::getInstance().get("data/sprit
    for (auto a = 0; a < _settings._drop_count; a++)
    {
       RainDrop drop;
+#ifdef DECEPTUS_VRSFML
+      drop._sprite = std::make_unique<sf::Sprite>();
+#else
       drop._sprite = std::make_unique<sf::Sprite>(*_texture);
+#endif
       _drops.push_back(std::move(drop));
    }
 }
 
-void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+RainOverlay::~RainOverlay()
 {
+   stopPlaying();
+}
+
+void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+#ifdef DECEPTUS_VRSFML
+   draw(target, normal, {});
+#else
    const auto& screen_view = target.getView();
 
    _screen = {
@@ -68,25 +94,12 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       {screen_view.getSize().x, screen_view.getSize().y}
    };
 
-   // source: foreground
-   // dest:   background
-
-   // BlendMode(Factor sourceFactor, Factor destinationFactor, Equation blendEquation = Equation::Add);
-   static sf::BlendMode blend_mode(
-      sf::BlendMode::Factor::SrcAlpha,          // colorSourceFactor
-      sf::BlendMode::Factor::OneMinusSrcAlpha,  // colorDestinationFactor
-      sf::BlendMode::Equation::Add,             // colorBlendEquation
-      sf::BlendMode::Factor::SrcAlpha,          // alphaSourceFactor
-      sf::BlendMode::Factor::OneMinusSrcAlpha,  // alphaDestinationFactor
-      sf::BlendMode::Equation::Add              // alphaBlendEquation
-   );
-
    for (auto& d : _drops)
    {
       if (d._age_s >= 0.0f)
       {
          // DebugDraw::drawLine(target, d._origin_px, d._pos_px + sf::Vector2f{0.0f, 96.0f}, {0, 0, 1});
-         target.draw(*d._sprite, blend_mode);
+         target.draw(*d._sprite, rain_blend_mode);
       }
    }
 
@@ -98,6 +111,46 @@ void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
          target.draw(*hit._sprite);
       }
    }
+#endif
+}
+
+void RainOverlay::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+#ifdef DECEPTUS_VRSFML
+   // the level view travels in the render states, the render target does not carry one; without it the
+   // drops would be placed with the target's default view and land outside the visible area
+   const auto screen_view = (states.view == sf::View{}) ? target.computeView() : states.view;
+
+   _screen = {
+      {screen_view.center.x - screen_view.size.x / 2.0f, screen_view.center.y - screen_view.size.y / 2.0f},
+      {screen_view.size.x, screen_view.size.y}
+   };
+
+   // the texture has to travel in the render states, vrsfml sprites do not own one
+   const sf::RenderStates drop_states{.blendMode = rain_blend_mode, .view = screen_view, .texture = _texture.get()};
+   const sf::RenderStates hit_states{.view = screen_view, .texture = _texture.get()};
+
+   for (auto& d : _drops)
+   {
+      if (d._age_s >= 0.0f)
+      {
+         // DebugDraw::drawLine(target, d._origin_px, d._pos_px + sf::Vector2f{0.0f, 96.0f}, {0, 0, 1});
+         target.draw(*d._sprite, drop_states);
+      }
+   }
+
+   if (_settings._collide)
+   {
+      for (auto& hit : _hits)
+      {
+         // DebugDraw::drawPoint(target, hit._pos_px, {1, 0, 0});
+         target.draw(*hit._sprite, hit_states);
+      }
+   }
+#else
+   (void)states;
+   draw(target, normal);
+#endif
 }
 
 // rain tileset
@@ -167,8 +220,13 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto sprite_index = std::rand() % 4;
 
+#ifdef DECEPTUS_VRSFML
+         p._sprite->textureRect = sf::FloatRect{{static_cast<float>(static_cast<int32_t>(sprite_index) * 11), 0.0f}, {11.0f, 96.0f}};
+         p._sprite->origin = {6, 0};
+#else
          p._sprite->setTextureRect(sf::IntRect({static_cast<int32_t>(sprite_index) * 11, 0}, {11, 96}));
          p._sprite->setOrigin({6, 0});
+#endif
          p._pos_px.x = _clip_rect.position.x + std::rand() % static_cast<int32_t>(_clip_rect.size.x);
          p._pos_px.y = _clip_rect.position.y + std::rand() % static_cast<int32_t>(_clip_rect.size.y);
          p._age_s = (std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;
@@ -188,7 +246,11 @@ void RainOverlay::update(const sf::Time& dt)
       {
          const auto step_width_px = p._dir_px * dt.asSeconds();
          p._pos_px += step_width_px;
+#ifdef DECEPTUS_VRSFML
+         p._sprite->position = p._pos_px;
+#else
          p._sprite->setPosition(p._pos_px);
+#endif
 
          if (p._age_s > max_age_s)
          {
@@ -209,8 +271,13 @@ void RainOverlay::update(const sf::Time& dt)
                      const sf::Vector2f hit_position{p._pos_px.x, closest_point};
 
                      DropHit hit;
+#ifdef DECEPTUS_VRSFML
+                     hit._sprite = std::make_unique<sf::Sprite>();
+                     hit._sprite->position = hit_position;
+#else
                      hit._sprite = std::make_unique<sf::Sprite>(*_texture);
                      hit._sprite->setPosition(hit_position);
+#endif
                      hit._pos_px = hit_position;
                      _hits.push_back(std::move(hit));
 
@@ -245,8 +312,14 @@ void RainOverlay::update(const sf::Time& dt)
             [dt](auto& hit)
             {
                hit._age_s += dt.asSeconds();
+#ifdef DECEPTUS_VRSFML
+               hit._sprite->origin = {5, 11};
+               hit._sprite->textureRect =
+                  sf::FloatRect{{static_cast<float>(11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f))), 96.0f}, {11.0f, 12.0f}};
+#else
                hit._sprite->setOrigin({5, 11});
                hit._sprite->setTextureRect(sf::IntRect({11 * std::min(3, static_cast<int32_t>(hit._age_s * 10.0f)), 96}, {11, 12}));
+#endif
                return hit._age_s > 1.0f;
             }
          ),
@@ -331,4 +404,39 @@ void RainOverlay::determineRainSurfaces()
 void RainOverlay::setSettings(const RainSettings& settings)
 {
    _settings = settings;
+
+   if (!_settings._sound.empty())
+   {
+      _sound.setSamples({_settings._sound});
+   }
+}
+
+void RainOverlay::setAudioEnabled(bool audio_enabled)
+{
+   if (_settings._sound.empty())
+   {
+      return;
+   }
+
+   if (audio_enabled == _audio_enabled)
+   {
+      return;
+   }
+
+   _audio_enabled = audio_enabled;
+
+   if (audio_enabled)
+   {
+      // a single sample is looped, so it keeps its sound thread occupied until it is stopped again
+      _sound.start(_settings._sound_volume);
+   }
+   else
+   {
+      _sound.stop();
+   }
+}
+
+void RainOverlay::stopPlaying()
+{
+   _sound.stop();
 }

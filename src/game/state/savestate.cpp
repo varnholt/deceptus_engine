@@ -1,6 +1,7 @@
 #include "savestate.h"
 
 #include "framework/tools/log.h"
+#include "game/level/levelregistry.h"
 
 #include <fstream>
 #include <iomanip>
@@ -31,7 +32,46 @@ void SaveState::invalidate()
 {
    _player_info = {};
    _level_index = {};
-   _checkpoint = {};
+   _checkpoints = {};
+   _level_state = {};
+}
+
+int32_t SaveState::getCheckpoint(const std::string& level_description_filename) const
+{
+   const auto& it = _checkpoints.find(level_description_filename);
+   if (it == _checkpoints.end())
+   {
+      return -1;
+   }
+
+   return it->second;
+}
+
+void SaveState::setCheckpoint(const std::string& level_description_filename, int32_t checkpoint_index)
+{
+   _checkpoints[level_description_filename] = checkpoint_index;
+}
+
+int32_t SaveState::getCurrentLevelCheckpoint()
+{
+   const auto level = LevelRegistry::getCurrent();
+   if (!level)
+   {
+      return -1;
+   }
+
+   return getCurrent().getCheckpoint(level->getDescriptionFilename());
+}
+
+void SaveState::setCurrentLevelCheckpoint(int32_t checkpoint_index)
+{
+   const auto level = LevelRegistry::getCurrent();
+   if (!level)
+   {
+      return;
+   }
+
+   getCurrent().setCheckpoint(level->getDescriptionFilename(), checkpoint_index);
 }
 
 int32_t SaveState::computeProgress() const
@@ -107,6 +147,9 @@ void SaveState::serializeToFile(const std::string& filename)
    std::string data = serialize();
    std::ofstream file(filename);
    file << data;
+   file.close();
+
+   GamePaths::flushToPersistentStorage();
 }
 
 std::string SaveState::serialize()
@@ -121,7 +164,7 @@ void to_json(nlohmann::json& j, const SaveState& data)
 {
    j = json{
       {"levelindex", data._level_index},
-      {"checkpoint", data._checkpoint},
+      {"checkpoints", data._checkpoints},
       {"playerinfo", data._player_info},
       {"levelstate", data._level_state}
    };
@@ -134,9 +177,9 @@ void from_json(const nlohmann::json& j, SaveState& data)
       data._level_index = j.at("levelindex").get<int32_t>();
    }
 
-   if (j.find("checkpoint") != j.end())
+   if (j.find("checkpoints") != j.end())
    {
-      data._checkpoint = j.at("checkpoint").get<int32_t>();
+      data._checkpoints = j.at("checkpoints").get<std::map<std::string, int32_t>>();
    }
 
    if (j.find("playerinfo") != j.end())
@@ -177,4 +220,6 @@ void SaveState::writePlayerStatsToFile(const std::string& filename) const
 
    output_file << save_states_json.dump(4);
    output_file.close();
+
+   GamePaths::flushToPersistentStorage();
 }

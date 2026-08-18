@@ -4,10 +4,13 @@
 #include "game/effects/lightsystem.h"
 #include "game/level/atmosphere.h"
 #include "game/level/gamemechanismregistry.h"
+#include "game/level/levelmap.h"
 
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <set>
+#include <string>
 #include <vector>
 
 class Room;
@@ -40,6 +43,10 @@ public:
    /// \brief gets the player start position in pixels.
    /// \return pixel-space start position.
    virtual const sf::Vector2f& getStartPosition() const = 0;
+
+   /// \brief gets the path of the level's description json, as listed in levels.json.
+   /// \return level description filename, used to key per-level data in the save state.
+   virtual std::string getDescriptionFilename() const = 0;
 
    /// \brief gets the level view (camera viewport).
    /// \return shared pointer to the SFML view.
@@ -77,4 +84,16 @@ public:
    /// \brief gets all rooms parsed from the level.
    /// \return immutable reference to room list.
    virtual const std::vector<std::shared_ptr<Room>>& getRooms() const = 0;
+
+   /// \brief gets the pixel art overview generated from the level's collision mesh.
+   /// \return immutable reference to the level map.
+   virtual const LevelMap& getLevelMap() const = 0;
+
+   /// \brief checks whether the whole level map has been made visible, e.g. by picking up a map item.
+   /// \return true when unvisited areas should be shown as well.
+   virtual bool isMapRevealed() const = 0;
+
+   /// \brief shows or hides the parts of the map the player has not visited yet.
+   /// \param revealed true to show the whole level map.
+   virtual void setMapRevealed(bool revealed) = 0;
 };

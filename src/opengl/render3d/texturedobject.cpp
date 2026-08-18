@@ -1,6 +1,6 @@
 #include "texturedobject.h"
-#include <iostream>
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 TexturedObject::TexturedObject(
    const std::string& objFile,
@@ -69,7 +69,7 @@ void TexturedObject::render(const std::shared_ptr<GLSLProgram>& shader, const gl
    _mesh->render();
 }
 
-void TexturedObject::setRotationSpeed(const vec3& speed)
+void TexturedObject::setRotationSpeed(const glm::vec3& speed)
 {
    _rotation_speed = speed;
 }
@@ -84,7 +84,7 @@ bool TexturedObject::getUseLighting() const
    return _use_lighting;
 }
 
-vec3 TexturedObject::getRotationSpeed() const
+glm::vec3 TexturedObject::getRotationSpeed() const
 {
    return _rotation_speed;
 }
@@ -97,9 +97,16 @@ void TexturedObject::loadTexture(const std::string& texture_file_path)
       _texture_id = 0;
    }
 
+#ifdef DECEPTUS_VRSFML
+   auto image_opt = sf::Image::loadFromFile(texture_file_path);
+   if (image_opt.hasValue())
+   {
+      auto& image = *image_opt;
+#else
    sf::Image image;
    if (image.loadFromFile(texture_file_path))
    {
+#endif
       glGenTextures(1, &_texture_id);
       glBindTexture(GL_TEXTURE_2D, _texture_id);
 

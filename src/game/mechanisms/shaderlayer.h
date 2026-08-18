@@ -1,11 +1,14 @@
 #pragma once
 
+#include "framework/tools/sfmlshader.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
 
 #include <SFML/Graphics.hpp>
 #include <filesystem>
+#include <memory>
+#include <optional>
 
 struct TmxObject;
 
@@ -25,6 +28,15 @@ struct ShaderLayer : public GameMechanism, public GameNode
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
+#ifdef DECEPTUS_VRSFML
+   /// \brief draws the quad with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal-map render target, unused by this mechanism.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+#endif
+
    /// \brief accumulates elapsed time for time-driven shader uniforms.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
@@ -33,15 +45,19 @@ struct ShaderLayer : public GameMechanism, public GameNode
    /// \return layer bounds in pixel space.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+#ifndef DECEPTUS_VRSFML
    /// \brief inspects shader source to detect optional uniform support.
    /// \param shader_path file path to the fragment shader source.
    virtual void checkUniforms(const std::string& shader_path);
+#endif
 
    /// \brief called after base deserialization so subclasses can read their own TMX properties.
    /// \param data deserialization data passed through from the factory.
-   virtual void readCustomProperties(const GameDeserializeData& data) {}
+   virtual void readCustomProperties(const GameDeserializeData& data)
+   {
+   }
 
-   sf::Shader _shader;
+   sfcompat::Shader _shader;
    sf::Vector2f _position;
    sf::Vector2f _size;
    sf::FloatRect _rect;
@@ -51,8 +67,10 @@ struct ShaderLayer : public GameMechanism, public GameNode
    float _uv_height = 1.0f;
    sf::Time _elapsed;
 
+#ifndef DECEPTUS_VRSFML
    bool _has_u_resolution = false;
    bool _has_u_uv_height = false;
+#endif
 
    /// \brief creates and configures a shader layer from tmx object properties.
    /// \param parent owning game node in the scene graph.

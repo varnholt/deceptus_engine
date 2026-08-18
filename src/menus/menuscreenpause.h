@@ -45,9 +45,17 @@ public:
    /// \brief resets selection to resume whenever the pause menu is shown.
    void showEvent() override;
 
+   /// \brief draws pause screen layers and button label text.
+   /// \param window render target receiving the pause screen.
+   /// \param states render states forwarded to draw calls.
+   void draw(sf::RenderTarget& window, sf::RenderStates states) override;
+
    Selection _selection = Selection::Resume;
 
 private:
    /// \brief closes the pause menu, resumes gameplay, and restores level music playback.
    void resume();
+
+   std::unique_ptr<sf::Text> _text_back_button;
+   std::unique_ptr<sf::Text> _text_accept_button;
 };

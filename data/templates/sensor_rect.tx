@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="SensorRect" width="96" height="96">
+  <properties>
+   <property name="reference_id" type="string" value=""/>
+   <property name="action" type="string" value="toggle"/>
+   <property name="event" type="string" value="on_enter"/>
+   <property name="observed" type="bool" value="false"/>
+  </properties>
+ </object>
+</template>

@@ -1,14 +1,22 @@
 #ifndef MUSICPLAYER_H
 #define MUSICPLAYER_H
 
-#include <SFML/Audio.hpp>
-#include <array>
+#include <SFML/System.hpp>
+#include <chrono>
+#include <cstdint>
+#include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
+#include <vector>
 
+#include "game/audio/musicbackend.h"
 #include "game/audio/musicplayertypes.h"
 
 /// \brief singleton music playback controller supporting queued transitions, crossfades, and playlists.
+///
+/// Owns the platform-agnostic transition state machine; all stream mechanics (loading and
+/// per-slot playback control) are delegated to a MusicBackend selected for the build.
 class MusicPlayer
 {
 public:
@@ -18,7 +26,7 @@ public:
       std::string filename;
       MusicPlayerTypes::TransitionType transition;
       std::chrono::milliseconds duration{2000};  // for crossfade or fadeout
-      MusicPlayerTypes::PostPlaybackAction post_action = MusicPlayerTypes::PostPlaybackAction::None;
+      MusicPlayerTypes::PostPlaybackAction post_action = MusicPlayerTypes::PostPlaybackAction::Loop;
    };
 
    /// \brief returns the global music-player singleton instance.
@@ -47,9 +55,13 @@ private:
    /// \brief constructs the player and opens placeholder tracks for both stream slots.
    MusicPlayer();
 
-   /// \brief loads the requested track into the inactive slot and starts the selected transition behavior.
-   /// \param request track request to execute immediately.
+   /// \brief starts loading the requested track into the inactive slot.
+   /// \param request track request to load and eventually activate.
    void beginTransition(const TrackRequest& request);
+
+   /// \brief activates the track loaded into the inactive slot and starts its transition behavior.
+   /// \param load_succeeded whether the backend load succeeded.
+   void activateLoadedTrack(bool load_succeeded);
 
    /// \brief computes effective music volume from master and music configuration values.
    /// \return normalized sf::Music volume value in the 0-100 range.
@@ -71,15 +83,8 @@ private:
 
    mutable std::mutex _mutex;
 
-   /// \brief returns the currently active music stream slot.
-   /// \return reference to the active sf::Music instance.
-   sf::Music& current();
+   std::unique_ptr<MusicBackend> _backend;  //!< platform stream plumbing for both slots
 
-   /// \brief returns the inactive music stream slot used for upcoming transitions.
-   /// \return reference to the inactive sf::Music instance.
-   sf::Music& next();
-
-   std::array<sf::Music, 2> _music;
    int32_t _current_index = 0;  // 0 or 1
 
    MusicPlayerTypes::MusicTransitionState _transition_state = MusicPlayerTypes::MusicTransitionState::None;
@@ -92,6 +97,7 @@ private:
 
    MusicPlayerTypes::PostPlaybackAction _post_action = MusicPlayerTypes::PostPlaybackAction::None;
    std::optional<TrackRequest> _pending_request;
+   std::optional<TrackRequest> _loading_request;  //!< request whose track is being loaded into the inactive slot; empty when idle
 
    std::vector<std::string> _playlist;
    std::size_t _playlist_index = 0;

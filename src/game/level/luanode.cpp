@@ -3,6 +3,8 @@
 
 #include <lua.hpp>
 
+#include <algorithm>
+
 // box2d
 #include "box2d/box2d.h"
 
@@ -13,6 +15,7 @@
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationplayer.h"
 #include "game/animation/detonationanimation.h"
@@ -131,12 +134,12 @@ void LuaNode::initialize()
    setupLua();
    setupBody();
 
-   if (!_flash_shader.loadFromFile("data/shaders/flash.frag", sf::Shader::Type::Fragment))
+   if (!_flash_shader.loadFromFragment("data/shaders/flash.frag"))
    {
       Log::Error() << "error loading flash shader";
    }
 
-   _flash_shader.setUniform("texture", sf::Shader::CurrentTexture);
+   _flash_shader.setUniform("u_texture", sf::Shader::CurrentTexture);
    _flash_shader.setUniform("flash", _hit_flash);
 }
 
@@ -182,12 +185,14 @@ void LuaNode::setupLua()
    lua_register(_lua_state, "setDamage", LuaNodeCallbacks::setDamageToPlayer);
    lua_register(_lua_state, "setGravityScale", LuaNodeCallbacks::setGravityScale);
    lua_register(_lua_state, "setLinearVelocity", LuaNodeCallbacks::setLinearVelocity);
+   lua_register(_lua_state, "setProjectileZ", LuaNodeCallbacks::setProjectileZIndex);
    lua_register(_lua_state, "setReferenceVolume", LuaNodeCallbacks::setReferenceVolume);
    lua_register(_lua_state, "setSpriteColor", LuaNodeCallbacks::setSpriteColor);
    lua_register(_lua_state, "setSpriteOffset", LuaNodeCallbacks::setSpriteOffset);
    lua_register(_lua_state, "setSpriteOrigin", LuaNodeCallbacks::setSpriteOrigin);
    lua_register(_lua_state, "setSpriteScale", LuaNodeCallbacks::setSpriteScale);
    lua_register(_lua_state, "setSpriteVisible", LuaNodeCallbacks::setSpriteVisible);
+   lua_register(_lua_state, "setSpriteZ", LuaNodeCallbacks::setSpriteZIndex);
    lua_register(_lua_state, "setTransform", LuaNodeCallbacks::setTransform);
    lua_register(_lua_state, "setVisible", LuaNodeCallbacks::setVisible);
    lua_register(_lua_state, "setZ", LuaNodeCallbacks::setZIndex);
@@ -735,14 +740,19 @@ void LuaNode::setTransform(const b2Vec2& position, float angle)
 
 void LuaNode::addSprite()
 {
+#ifdef DECEPTUS_VRSFML
+   auto sprite = std::make_unique<sf::Sprite>();
+#else
    auto sprite = std::make_unique<sf::Sprite>(*_texture);
+#endif
    _sprites.emplace_back(std::move(sprite));
    _sprite_offsets_px.emplace_back();
+   _sprite_z_indices.emplace_back();
 }
 
 void LuaNode::setSpriteOrigin(int32_t id, float x, float y)
 {
-   _sprites[id]->setOrigin({x, y});
+   sfcompat::setOrigin(*_sprites[id], {x, y});
 }
 
 void LuaNode::setSpriteOffset(int32_t id, float x, float y)
@@ -954,6 +964,7 @@ void LuaNode::addShapePoly(const b2Vec2* points, int32_t size)
 void LuaNode::addWeapon(const std::shared_ptr<Weapon>& weapon)
 {
    _weapons.push_back(weapon);
+   _weapon_z_indices.emplace_back();
 }
 
 void LuaNode::useWeapon(size_t index, b2Vec2 from, b2Vec2 to)
@@ -1079,26 +1090,35 @@ void LuaNode::updatePosition()
 
 void LuaNode::updateSpriteRect(int32_t id, int32_t x_px, int32_t y_px, int32_t w_px, int32_t h_px)
 {
-   _sprites[id]->setTextureRect(sf::IntRect({x_px, y_px}, {w_px, h_px}));
+   sfcompat::setTextureRect(*_sprites[id], sf::IntRect({x_px, y_px}, {w_px, h_px}));
 }
 
 void LuaNode::setSpriteScale(int32_t id, float x_scale, float y_scale)
 {
-   _sprites[id]->setScale({x_scale, y_scale});
+   sfcompat::setScale(*_sprites[id], {x_scale, y_scale});
 }
 
 void LuaNode::setSpriteColor(int32_t id, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
-   _sprites[id]->setColor({r, g, b, a});
+   sfcompat::setColor(*_sprites[id], {r, g, b, a});
 }
 
 void LuaNode::setSpriteVisible(int32_t id, bool visible)
 {
    if (id >= 0 && id < static_cast<int32_t>(_sprites.size()))
    {
-      sf::Color current_color = _sprites[id]->getColor();
+      sf::Color current_color = sfcompat::getColor(*_sprites[id]);
       current_color.a = visible ? 255 : 0;
-      _sprites[id]->setColor(current_color);
+      sfcompat::setColor(*_sprites[id], current_color);
+   }
+}
+
+void LuaNode::setSpriteZ(int32_t id, int32_t z_index)
+{
+   if (id >= 0 && id < static_cast<int32_t>(_sprite_z_indices.size()))
+   {
+      _sprite_z_indices[id] = z_index;
+      updatePartZIndices();
    }
 }
 
@@ -1195,7 +1215,7 @@ bool LuaNode::intersectsPlayer(float x, float y, float width, float height)
 {
    sf::FloatRect rect{{x, y}, {width, height}};
    const auto player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   return player_rect.findIntersection(rect).has_value();
+   return sfcompat::findIntersection(player_rect, rect).has_value();
 }
 
 bool LuaNode::checkPlayerDead() const
@@ -1295,6 +1315,15 @@ void LuaNode::setProjectileAnimation(
    dynamic_cast<Gun&>(*_weapons[weapon_index]).setProjectileAnimation(frame_data);
 }
 
+void LuaNode::setProjectileZ(uint32_t weapon_index, int32_t z_index)
+{
+   if (weapon_index < _weapon_z_indices.size())
+   {
+      _weapon_z_indices[weapon_index] = z_index;
+      updatePartZIndices();
+   }
+}
+
 void LuaNode::startTimer(int32_t delay, int32_t timer_id)
 {
    Timer::add(
@@ -1348,12 +1377,77 @@ void LuaNode::playDetonationAnimationFromScript(float x, float y, const std::vec
    }
 }
 
-void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+   drawParts(target, normal, states, std::nullopt);
+}
+
+void LuaNode::drawAtZ(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states, int32_t z_index)
+{
+   drawParts(target, normal, states, z_index);
+}
+
+bool LuaNode::hasContentAtZ(int32_t z_index) const
+{
+   if (_z_index == z_index)
+   {
+      return true;
+   }
+
+   return std::find(_part_z_indices.begin(), _part_z_indices.end(), z_index) != _part_z_indices.end();
+}
+
+void LuaNode::updatePartZIndices()
+{
+   _part_z_indices.clear();
+
+   const auto collect = [this](const std::vector<std::optional<int32_t>>& part_z_indices)
+   {
+      for (const auto& part_z_index : part_z_indices)
+      {
+         if (!part_z_index.has_value())
+         {
+            continue;
+         }
+
+         if (std::find(_part_z_indices.begin(), _part_z_indices.end(), part_z_index.value()) == _part_z_indices.end())
+         {
+            _part_z_indices.push_back(part_z_index.value());
+         }
+      }
+   };
+
+   collect(_sprite_z_indices);
+   collect(_weapon_z_indices);
+}
+
+void LuaNode::drawParts(
+   sf::RenderTarget& target,
+   sf::RenderTarget& /*normal*/,
+   const sf::RenderStates& states,
+   std::optional<int32_t> z_index
+)
 {
    if (!_visible)
    {
       return;
    }
+
+   // parts without an explicit z index are drawn at the node's z index
+   const auto matches_z_index = [this, z_index](const std::optional<int32_t>& part_z_index)
+   {
+      if (!z_index.has_value())
+      {
+         return true;
+      }
+
+      return part_z_index.value_or(_z_index) == z_index.value();
+   };
 
    if (_hit_time.has_value())
    {
@@ -1373,15 +1467,42 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    }
 
    // draw sprite on top of projectiles
-   for (auto& weapon : _weapons)
+   for (auto i = 0u; i < _weapons.size(); i++)
    {
-      weapon->draw(target);
+      if (!matches_z_index(_weapon_z_indices[i]))
+      {
+         continue;
+      }
+
+      _weapons[i]->draw(target, states);
    }
 
    for (auto i = 0u; i < _sprites.size(); i++)
    {
+      if (!matches_z_index(_sprite_z_indices[i]))
+      {
+         continue;
+      }
+
       auto& sprite = _sprites[i];
 
+#ifdef DECEPTUS_VRSFML
+      if (sprite->color.a == 0)
+      {
+         continue;
+      }
+
+      const auto& offset = _sprite_offsets_px[i];
+      const auto center = sf::Vector2f(sprite->textureRect.size.x / 2.0f, sprite->textureRect.size.y / 2.0f);
+      sprite->position = _position_px - center + offset;
+      sf::RenderStates sprite_states = states;
+      sprite_states.texture = _texture.get();
+      if (_flash_shader.isLoaded())
+      {
+         sprite_states.shader = &_flash_shader.native();
+      }
+      target.draw(*sprite, sprite_states);
+#else
       if (sprite->getColor().a == 0)
       {
          continue;
@@ -1390,13 +1511,19 @@ void LuaNode::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       const auto& offset = _sprite_offsets_px[i];
       const auto center = sf::Vector2f(sprite->getTextureRect().size.x / 2.0f, sprite->getTextureRect().size.y / 2.0f);
       sprite->setPosition(_position_px - center + offset);
-      target.draw(*sprite, &_flash_shader);
+      auto sprite_states = states;
+      sprite_states.shader = &_flash_shader.native();
+      target.draw(*sprite, sprite_states);
+#endif
    }
 
    // draw debug rectangles if they were added
-   for (const auto& debug_rect : _debug_rects)
+   if (matches_z_index(std::nullopt))
    {
-      DebugDraw::drawRect(target, debug_rect);
+      for (const auto& debug_rect : _debug_rects)
+      {
+         DebugDraw::drawRect(target, debug_rect);
+      }
    }
 }
 

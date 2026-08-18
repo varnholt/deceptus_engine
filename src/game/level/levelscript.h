@@ -3,14 +3,20 @@
 #include <SFML/Graphics.hpp>
 #include <filesystem>
 #include <lua.hpp>
+#include <map>
+#include <memory>
 #include <string>
 #include <variant>
+#include <vector>
 
+#include "game/animation/animationpool.h"
 #include "game/audio/musicplayertypes.h"
 #include "game/level/scriptproperty.h"
+#include "game/mechanisms/dialogue.h"
 #include "game/mechanisms/gamemechanism.h"
 #include "game/mechanisms/gamemechanismobserver.h"
 
+struct FadeTransitionEffect;
 struct LuaNode;
 
 /// \brief runtime bridge between level lua scripts and engine systems.
@@ -48,6 +54,14 @@ public:
    /// \param group optional mechanism group filter.
    /// \return true when at least one mechanism matches and the first one is enabled.
    bool isMechanismEnabled(const std::string& mechanism_id, const std::optional<std::string>& group) const;
+
+   /// \brief reads a named property from the first mechanism that matches the query.
+   /// \param search_pattern regex used to select mechanisms.
+   /// \param group optional mechanism group filter.
+   /// \param property_name name of the property to read from the matched mechanism.
+   /// \return property value, or nullopt when nothing matches or the mechanism does not expose the property.
+   std::optional<GameMechanismObserver::LuaVariant>
+   getMechanismProperty(const std::string& search_pattern, const std::optional<std::string>& group, const std::string& property_name) const;
 
    /// \brief sets visibility for all matching mechanisms.
    /// \param search_pattern regex used to select mechanisms.
@@ -120,13 +134,25 @@ public:
    /// \param active true to enable the body, false to disable it.
    void setLuaNodeActive(const std::string& search_pattern, bool active);
 
-   /// \brief activates the first matching dialogue mechanism and advances to its next page.
+   /// \brief activates the first matching dialogue mechanism and advances to its first page.
    /// \param search_pattern regex used to find dialogue mechanisms.
    void showDialogue(const std::string& search_pattern);
+
+   /// \brief creates and shows an inline dialogue from the supplied items without a TMX object.
+   /// \param items pages to display in order.
+   void showDialogue(std::vector<Dialogue::DialogueItem> items);
 
    /// \brief locks player controls for a fixed duration.
    /// \param duration lock duration.
    void lockPlayerControls(const std::chrono::milliseconds& duration);
+
+   /// \brief fades the screen to black and holds it there until fadeIn is called.
+   /// \param speed fade speed in alpha-per-second (1.0 = one second for a full fade).
+   void fadeOut(float speed);
+
+   /// \brief fades the screen from black back to visible.
+   /// \param speed fade speed in alpha-per-second.
+   void fadeIn(float speed);
 
    /// \brief sets camera zoom factor.
    /// \param zoom_factor absolute zoom multiplier.
@@ -179,9 +205,99 @@ public:
       MusicPlayerTypes::PostPlaybackAction post_action
    );
 
+   /// \brief selects the level music track without starting playback.
+   ///
+   /// The engine plays the level music once level loading has finished, so a script can pick the
+   /// track that matches the reached checkpoint from its initialize function and let the regular
+   /// level music playback start it.
+   /// \param filename music filename or id.
+   void setLevelMusic(const std::string& filename);
+
+   /// \brief returns the checkpoint index reached in the current level.
+   /// \return checkpoint index, or -1 when no checkpoint has been reached yet.
+   int32_t getCheckpoint() const;
+
    /// \brief loads and starts playback of a recorded player event stream.
    /// \param filename recording file name with or without .dat extension.
    void playEventRecording(const std::string& filename);
+
+   /// \brief snaps the camera to an arbitrary world pixel position and locks tracking.
+   /// \param x_px target x in world pixels.
+   /// \param y_px target y in world pixels.
+   void setCameraPosition(float x_px, float y_px);
+
+   /// \brief releases the camera lock set by setCameraPosition and resumes player tracking.
+   void unlockCamera();
+
+   /// \brief returns the camera center in world pixel coordinates.
+   /// \return world-space center of the camera view.
+   sf::Vector2f getCameraCenter() const;
+
+   /// \brief returns the bounding box of the first mechanism that matches the query.
+   /// \param search_pattern regex used to select mechanisms.
+   /// \param group optional mechanism group filter.
+   /// \return bounding rect in world pixels, or nullopt when no match is found.
+   std::optional<sf::FloatRect> getMechanismRect(const std::string& search_pattern, const std::optional<std::string>& group = std::nullopt)
+      const;
+
+   /// \brief shows or hides the player sprite.
+   /// \param visible false to suppress player rendering.
+   void setPlayerVisible(bool visible);
+
+   /// \brief shows or hides the hud layer.
+   /// \param visible false to suppress hud rendering.
+   void setHudVisible(bool visible);
+
+   /// \brief triggers the next-level transition via the global callback map.
+   void nextLevel();
+
+   /// \brief plays a one-shot sound effect.
+   /// \param sample_name audio sample identifier.
+   void playSound(const std::string& sample_name);
+
+   /// \brief creates a managed cutscene sprite and starts playing its animation.
+   /// \param name unique sprite identifier used in subsequent operations.
+   /// \param animation_file path to the animation settings json file.
+   /// \param animation_id animation name as defined in the settings file.
+   /// \param x_px initial x position in world pixels.
+   /// \param y_px initial y position in world pixels.
+   /// \param looped true to loop the animation continuously.
+   void createSprite(
+      const std::string& name,
+      const std::string& animation_file,
+      const std::string& animation_id,
+      float x_px,
+      float y_px,
+      bool looped
+   );
+
+   /// \brief removes a managed cutscene sprite by name.
+   /// \param name sprite identifier passed to createSprite.
+   void destroySprite(const std::string& name);
+
+   /// \brief switches the active animation on a managed cutscene sprite.
+   /// \param name sprite identifier.
+   /// \param animation_id animation name in the sprite's animation file.
+   /// \param looped true to loop the animation continuously.
+   void setSpriteAnimation(const std::string& name, const std::string& animation_id, bool looped);
+
+   /// \brief shows or hides a managed cutscene sprite.
+   /// \param name sprite identifier.
+   /// \param visible false to hide the sprite without destroying it.
+   void setSpriteVisible(const std::string& name, bool visible);
+
+   /// \brief starts moving a managed sprite toward a target at a constant speed.
+   /// \param name sprite identifier.
+   /// \param target_x target x position in world pixels.
+   /// \param target_y target y position in world pixels.
+   /// \param speed_px_per_s movement speed in pixels per second.
+   /// \param arrive_event event name fired via onEvent when the sprite reaches the target.
+   void moveSpriteAtSpeed(const std::string& name, float target_x, float target_y, float speed_px_per_s, const std::string& arrive_event);
+
+   /// \brief draws all managed cutscene sprites to the given render target.
+   /// \param target render target that receives sprite output.
+   /// \param states render states applied while drawing (used in WASM to carry the level view).
+   void draw(sf::RenderTarget& target, const sf::RenderStates& states = {});
 
    // functions on the lua end
    /// \brief calls the script initialize function and marks this script as initialized.
@@ -247,6 +363,18 @@ public:
    static LevelScript* getCurrent();
 
 private:
+   struct CutsceneSprite
+   {
+      std::string _name;
+      std::shared_ptr<AnimationPool> _pool;
+      std::shared_ptr<Animation> _animation;
+      sf::Vector2f _position;
+      sf::Vector2f _target;
+      float _speed_px_per_s{0.0f};
+      std::string _arrive_event;
+      bool _moving{false};
+   };
+
    /// \brief closes the lua state if it is active.
    void stopScript();
 
@@ -255,8 +383,21 @@ private:
    /// \return list of matching LuaNode instances.
    std::vector<std::shared_ptr<LuaNode>> findLuaNodes(const std::string& search_pattern);
 
+   /// \brief advances all moving cutscene sprites toward their targets for one frame.
+   /// \param dt elapsed frame time.
+   void updateCutsceneSprites(const sf::Time& dt);
+
+   /// \brief calls the lua onEvent function with the given event name.
+   /// \param event_name event identifier delivered to onEvent.
+   void luaRaiseEvent(const std::string& event_name);
+
    std::vector<sf::IntRect> _collision_rects;
    std::vector<ScriptProperty> _properties;
+
+   std::vector<CutsceneSprite> _cutscene_sprites;
+   std::map<std::string, std::shared_ptr<AnimationPool>> _cutscene_pools;
+
+   std::shared_ptr<Dialogue> _scripted_dialogue;
 
    std::string _script_name;
    lua_State* _lua_state = nullptr;
@@ -278,4 +419,14 @@ private:
       GameMechanismObserver::Reference<GameMechanismObserver::EventCallback>,
       std::function<void(GameMechanismObserver::Reference<GameMechanismObserver::EventCallback>*)>>
       _event_observer_reference;
+
+   std::shared_ptr<FadeTransitionEffect> _pending_fade_in;
+
+   //! \brief lifetime token for callbacks handed to objects that outlive this script.
+   //!
+   //! fadeOut()/fadeIn() push a ScreenTransition into ScreenTransitionHandler, a singleton that
+   //! outlives the level. Those transitions call back into the lua state, so a fade still in flight
+   //! when the level is replaced would otherwise run against a closed lua_State. The callbacks hold
+   //! a weak_ptr to this token and do nothing once it has expired.
+   std::shared_ptr<bool> _alive_token{std::make_shared<bool>(true)};
 };

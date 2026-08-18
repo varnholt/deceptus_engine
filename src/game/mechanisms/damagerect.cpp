@@ -2,14 +2,28 @@
 
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 
+#include <array>
+
 namespace
 {
+static constexpr std::array damage_rect_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema damage_rect_schema{
+   .type_name = "DamageRect",
+   .layer_name = "damage_rects",
+   .default_width = 48,
+   .default_height = 48,
+   .properties = damage_rect_properties,
+};
 const auto registered_damagerect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(damage_rect_schema);
 
    registry.mapGroupToLayer("DamageRect", "damage_rects");
 
@@ -49,7 +63,8 @@ std::string_view DamageRect::objectName() const
 void DamageRect::update(const sf::Time& /*dt*/)
 {
    auto player = PlayerRegistry::getFirst();
-   const auto player_intersects = player->getPixelRectFloat().findIntersection(_rect).has_value();
+   const auto player_rect_px = player->getPixelRectFloat();
+   const auto player_intersects = sfcompat::findIntersection(player_rect_px, _rect).has_value();
 
    if (player_intersects)
    {
@@ -74,4 +89,6 @@ void DamageRect::setup(const GameDeserializeData& data)
          _damage = damage_it->second->_value_int.value();
       }
    }
+
+   addChunks(_rect);
 }

@@ -1,10 +1,13 @@
 #include "checkpoint.h"
 
+#include <array>
+
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
@@ -41,9 +44,24 @@
 
 namespace
 {
+static constexpr std::array check_point_properties{
+   PropertyInfo{.name = "index", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "sprite_pos_x_px", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "sprite_pos_y_px", .type = "int", .default_value = int32_t{0}},
+};
+static constexpr MechanismSchema check_point_schema{
+   .type_name = "CheckPoint",
+   .layer_name = "checkpoints",
+   .default_width = 72,
+   .default_height = 120,
+   .properties = check_point_properties,
+};
 const auto registered_checkpoint = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(check_point_schema);
+
    registry.mapGroupToLayer("CheckPoint", "checkpoints");
 
    registry.registerLayerName(
@@ -77,8 +95,8 @@ Checkpoint::Checkpoint(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(Checkpoint).name());
 
-   Audio::getInstance().addSample("wallclock_tock.wav");
-   Audio::getInstance().addSample("wallclock_tick.wav");
+   Audio::getInstance().addSample("wallclock_tock.ogg");
+   Audio::getInstance().addSample("wallclock_tick.ogg");
 
    _has_audio = true;
    _audio_update_data._range = AudioRange{12 * PIXELS_PER_TILE, 0.0f, 2 * PIXELS_PER_TILE, 1.0f};
@@ -113,7 +131,11 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    auto checkpoint = std::make_shared<Checkpoint>(parent);
    checkpoint->setObjectId(data._tmx_object->_name);
    checkpoint->_texture = TexturePool::getInstance().get("data/sprites/checkpoint.png");
+#ifdef DECEPTUS_VRSFML
+   checkpoint->_sprite = std::make_unique<sf::Sprite>();
+#else
    checkpoint->_sprite = std::make_unique<sf::Sprite>(*checkpoint->_texture);
+#endif
    checkpoint->_rect = rect;
    checkpoint->_name = data._tmx_object->_name;
    checkpoint->updateSpriteRect();
@@ -146,11 +168,11 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
          sf::Vector2f pos{
             static_cast<float>(sprite_pos_x_it->second->_value_int.value()), static_cast<float>(sprite_pos_y_it->second->_value_int.value())
          };
-         checkpoint->_sprite->setPosition(pos);
+         sfcompat::setPosition(*checkpoint->_sprite, pos);
       }
       else
       {
-         checkpoint->_sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+         sfcompat::setPosition(*checkpoint->_sprite, {data._tmx_object->_x_px, data._tmx_object->_y_px});
       }
    }
 
@@ -158,7 +180,7 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    // and serialize the save state
    const auto cp_index = checkpoint->getIndex();
    checkpoint->addCallback([]() { LevelRegistry::getCurrent()->saveState(); });
-   checkpoint->addCallback([cp_index]() { SaveState::getCurrent()._checkpoint = cp_index; });
+   checkpoint->addCallback([cp_index]() { SaveState::setCurrentLevelCheckpoint(cp_index); });
    checkpoint->addCallback([]() { SaveState::serializeToFile(); });
 
    // that y offset is a litte dodgy, could have something cleaner in the future
@@ -169,9 +191,16 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
    return checkpoint;
 }
 
-void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   target.draw(*_sprite);
+   draw(target, normal, {});
+}
+
+void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   target.draw(*_sprite, draw_states);
 
    //   DebugDraw::drawRect(target, _rect);
 }
@@ -180,7 +209,7 @@ void Checkpoint::update(const sf::Time& dt)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
 
-   if (player_rect.findIntersection(_rect).has_value())
+   if (sfcompat::findIntersection(player_rect, _rect).has_value())
    {
       reached();
    }
@@ -208,12 +237,12 @@ void Checkpoint::reached()
    _reached = true;
 
    // doesn't make sense to show fancy reveal animation if this is the active checkpoint anyway
-   if (SaveState::getCurrent()._checkpoint != _index)
+   if (SaveState::getCurrentLevelCheckpoint() != _index)
    {
       _state = State::Activating;
 
       // play reveal sound
-      Audio::getInstance().playSample({"player_spawn_01.wav"});
+      Audio::getInstance().playSample({"player_spawn_01.ogg"});
    }
    else
    {
@@ -282,7 +311,7 @@ void Checkpoint::updateSpriteRect(float dt_s)
             {
                _tick_played = true;
                _tock_played = false;
-               Audio::getInstance().playSample({"wallclock_tock.wav", _reference_volume});
+               Audio::getInstance().playSample({"wallclock_tock.ogg", _reference_volume});
             }
          }
          else if (static_cast<int32_t>(_sprite_index) == tock_index)
@@ -291,12 +320,12 @@ void Checkpoint::updateSpriteRect(float dt_s)
             {
                _tock_played = true;
                _tick_played = false;
-               Audio::getInstance().playSample({"wallclock_tick.wav", _reference_volume});
+               Audio::getInstance().playSample({"wallclock_tick.ogg", _reference_volume});
             }
          }
 
          break;
    }
 
-   _sprite->setTextureRect({{x, y}, {w, h}});
+   sfcompat::setTextureRect(*_sprite, sf::IntRect({x, y}, {w, h}));
 }

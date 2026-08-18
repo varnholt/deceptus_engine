@@ -1,6 +1,9 @@
 #include "bouncer.h"
 
+#include <array>
+
 #include "framework/tools/globalclock.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
@@ -9,8 +12,8 @@
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 
-const auto SPRITE_WIDTH = 24;
-const auto SPRITE_HEIGHT = 24;
+const auto SPRITE_WIDTH_PX = 24;
+const auto SPRITE_HEIGHT_PX = 24;
 
 //
 //        +--------------------------------------------------+ <-
@@ -27,9 +30,22 @@ const auto SPRITE_HEIGHT = 24;
 
 namespace
 {
+static constexpr float default_bouncer_force = 0.6f;
+static constexpr std::array bouncer_properties{
+   PropertyInfo{.name = "force", .type = "float", .default_value = default_bouncer_force},
+};
+static constexpr MechanismSchema bouncer_schema{
+   .type_name = "Bouncer",
+   .layer_name = "bouncers",
+   .default_width = 96,
+   .default_height = 24,
+   .properties = bouncer_properties,
+};
 const auto registered_bouncer = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(bouncer_schema);
+
    registry.mapGroupToLayer("Bouncer", "bouncers");
 
    registry.registerLayerName(
@@ -66,7 +82,7 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
 
    if (data._tmx_object->_properties)
    {
-      _force_value = ValueReader::readValue<float>("force", data._tmx_object->_properties->_map).value_or(0.6f);
+      _force_value = ValueReader::readValue<float>("force", data._tmx_object->_properties->_map).value_or(default_bouncer_force);
    }
 
    const auto x = data._tmx_object->_x_px;
@@ -117,8 +133,15 @@ Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNod
 
    // load texture
    _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "bumper.png");
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->position = _position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT_PX));
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT)));
+   _sprite->setPosition(_position_sfml - sf::Vector2f(0.0f, static_cast<float>(SPRITE_HEIGHT_PX)));
+#endif
+
+   addChunks(_rect);
 }
 
 std::string_view Bouncer::objectName() const
@@ -128,12 +151,19 @@ std::string_view Bouncer::objectName() const
 
 void Bouncer::preload()
 {
-   Audio::getInstance().addSample("mechanism_bouncer.wav");
+   Audio::getInstance().addSample("mechanism_bouncer.ogg");
 }
 
-void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   color.draw(*_sprite);
+   draw(color, normal, {});
+}
+
+void Bouncer::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite, draw_states);
 }
 
 void Bouncer::updatePlayerAtBouncer()
@@ -143,7 +173,7 @@ void Bouncer::updatePlayerAtBouncer()
    auto rect = player->getPixelRectFloat();
    rect.size.y *= 3;
 
-   _player_at_bouncer = rect.findIntersection(_rect).has_value();
+   _player_at_bouncer = sfcompat::findIntersection(rect, _rect).has_value();
 }
 
 void Bouncer::update(const sf::Time& /*dt*/)
@@ -162,7 +192,7 @@ void Bouncer::update(const sf::Time& /*dt*/)
    if (!_previous_step.has_value() || step != _previous_step)
    {
       _previous_step = step;
-      _sprite->setTextureRect(sf::IntRect({step * SPRITE_WIDTH, 0}, {SPRITE_WIDTH, SPRITE_HEIGHT}));
+      sfcompat::setTextureRect(*_sprite, sf::IntRect({step * SPRITE_WIDTH_PX, 0}, {SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX}));
    }
 }
 
@@ -217,6 +247,6 @@ void Bouncer::activate()
    // aaaaand.. up!
    const auto& pos = body->GetWorldCenter();
    body->ApplyLinearImpulse(force, pos, true);
-   Audio::getInstance().playSample({"mechanism_bouncer.wav"});
+   Audio::getInstance().playSample({"mechanism_bouncer.ogg"});
    BouncerWrapper::bumpLastBouncerTime();
 }

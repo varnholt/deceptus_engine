@@ -3,6 +3,7 @@
 #include <array>
 #include <memory>
 
+#include "framework/tools/localization.h"
 #include "game/animation/animationpool.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
@@ -26,6 +27,13 @@ public:
    /// \param target render target.
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
+
+   /// \brief draws show or hide animations and current hint ui rows with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply to the world-space show/hide animations; the screen-space hint rows keep their own fixed view.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief updates trigger transitions, animation alpha, and keyboard or controller icon selection.
    /// \param dt elapsed frame time.
@@ -52,8 +60,13 @@ private:
    {
       std::unique_ptr<sf::Sprite> _button_sprite;
       std::unique_ptr<sf::Text> _text;
+#ifdef DECEPTUS_VRSFML
+      sf::FloatRect _button_rect_keyboard;
+      sf::FloatRect _button_rect_controller;
+#else
       sf::IntRect _button_rect_keyboard;
       sf::IntRect _button_rect_controller;
+#endif
    };
 
    sf::FloatRect _rect_px;
@@ -65,5 +78,5 @@ private:
    static constexpr int32_t button_max_count = 2;
    std::shared_ptr<sf::Texture> _button_texture;
    std::vector<HelpElement> _help_elements;
-   sf::Font _font;
+   const sf::Font* _font = &getFont();
 };

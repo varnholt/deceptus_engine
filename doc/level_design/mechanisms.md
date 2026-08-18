@@ -561,8 +561,11 @@ end
 |texture_rect_width|int|Width of the sub‑rectangle within the texture (default is `0`, meaning the full width).|
 |texture_rect_height|int|Height of the sub‑rectangle within the texture (default is `0`, meaning the full height).|
 |sample|string|Name of an audio file that is played when the extra is picked up (optional).|
+|animation_spawn|string|Name of the animation played once when the extra spawns (only relevant when `spawn_required` is `true`). The animation cycle is defined inside the file `extra_animations.json`.|
 |animation_pickup|string|Name of the animation shown when the extra is picked up. The animation cycle is defined inside the file `extra_animations.json`.|
 |animation_main_0 to animation_main_99|string|Names of the animation cycles shown when the extra is not picked up yet. The animation cycles are defined inside the file `extra_animations.json`. By allowing multiple cycles here, you can introduce a bit of variety instead of cycling the same idle animation over and over again.|
+|sine_amplitude_px|float|Amplitude of a sine wave applied to the extra's Y position in pixels (default is `0`, meaning no movement). Works correctly for extras spawned by treasure chests.|
+|sine_frequency|float|Frequency of the sine wave in Hz (default is `0`). Only has an effect when `sine_amplitude_px` is also set.|
 
 
 &nbsp;
@@ -732,6 +735,79 @@ All you need to do is to give your laser object a name, and then reference that 
 ---
 
 
+## Level Transitions
+
+Level Transitions connect two levels. They have no visualization. When the player enters the rectangle, the screen fades out, the level that is left behind is written to the save state, the target level is loaded, and the screen fades back in.
+
+Since the state of the level you leave is stored, all its serialized mechanisms are in the same state as you left them when you come back later.
+
+Use these to build the connections between your levels, such as a tunnel that leads out of the catacombs and into the graveyard.
+
+The target level is addressed by the path of its description json, which must also be listed in `data/config/levels.json`. If it is not listed there, the transition logs an error and does nothing.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`LevelTransition`|
+|Object Group|`level_transitions`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|level|string|The path of the target level's description json, e.g. `data/level-graveyard/level.json`. This is required; without it the transition does nothing.|
+|spawn_position_x_px|int|The player's x spawn position inside the target level, in pixels. When omitted, the target level's own start position is used.|
+|spawn_position_y_px|int|The player's y spawn position inside the target level, in pixels. When omitted, the target level's own start position is used.|
+|z|int|The object's z index|
+
+Both `spawn_position_x_px` and `spawn_position_y_px` must be given together; if only one of them is set, both are ignored and the target level's start position is used instead.
+
+The spawn position takes precedence over the target level's start position as well as over any checkpoint the player reached in that level before. Checkpoints are stored per level, so returning to a level you already played does not drag a checkpoint from another level along.
+
+### Choosing the spawn position
+
+The spawn position is the player's position in pixels, following the same convention as a level's `startposition`: for a tile position, `x = tile_x * 24 + 10` and `y = tile_y * 24 + 15`.
+
+**Do not place the spawn position inside the target level's own transition rectangle.** Transitions fire when the player enters the rectangle, and a player who spawns inside one counts as entering it, which sends them straight back where they came from. Leave at least a tile of air between the spawn position and the rectangle that leads back.
+
+### Example
+
+The catacombs side of a tunnel, sending the player to the graveyard's own start position:
+
+```xml
+<objectgroup id="194" name="level_transitions" visible="0">
+ <object id="18261" name="to_graveyard" x="745" y="1632" width="48" height="96">
+  <properties>
+   <property name="level" value="data/level-graveyard/level.json"/>
+  </properties>
+ </object>
+</objectgroup>
+```
+
+The graveyard side of the same tunnel, putting the player back next to the tunnel mouth rather than at the catacombs' start position:
+
+```xml
+<objectgroup id="24" name="level_transitions" visible="0">
+ <object id="37" name="to_catacombs" x="696" y="1632" width="48" height="96">
+  <properties>
+   <property name="level" value="data/level-catacombs/level.json"/>
+   <property name="spawn_position_x_px" type="int" value="706"/>
+   <property name="spawn_position_y_px" type="int" value="1719"/>
+  </properties>
+ </object>
+</objectgroup>
+```
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
 ## Levers
 
 Levers! One of the most important mechanisms. In short, they do what levers do: They switch things on and off. Levers can be used to enable and disable the functionality of these mechanisms:
@@ -824,6 +900,7 @@ The way to create a moveable object, create a rectangle as usual. So far the spr
 |density|float|Density of the moveable object, default is 1.0f.|
 |gravity_scale|float|Gravity scale of the moveable object, default is 1.0f.|
 |z|int|The layer's z index|
+|serialized|bool|If set to `true`, the box's position is saved and restored when the level is reloaded (default is `true`). Set it to `false` for boxes that should always start from their position in the level.|
 
 
 ---
@@ -995,6 +1072,100 @@ In the screenshot above, Adam enters at the top left, exits at the bottom right,
 
 
 
+## Post Processing
+
+A post processing mechanism applies a full screen shader to the rendered frame. Where a Shader Quad draws a shader inside its own rectangle, this one processes the picture the game has already drawn, so it is the mechanism to use for effects that colour, distort or filter the whole screen: a Game Boy look, a chromatic aberration, a glitch, a heat haze, a nightmare tint.
+
+Unlike every other mechanism it does not draw anything itself. It hands its shader to the post processing stage, which runs after the level has been composited.
+
+Three fragment shaders ship with the engine and can be used as a starting point: `data/shaders/gameboy.frag`, `data/shaders/rgb_split.frag` and `data/shaders/glitch.frag`.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`PostProcessing`|
+|Object Group|`post_processing`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|fragment_shader|string|The relative path to your fragment shader. Without a fragment shader the mechanism is skipped.|
+|vertex_shader|string|The relative path to your vertex shader (optional).|
+|scope|string|`all` processes the whole frame including the HUD and menus (the default), `level` processes only the level so the HUD stays untouched on top.|
+|z|int|Used to pick a winner when several post processing mechanisms are enabled at once; the highest one is applied.|
+|u_*|any|Any property whose name starts with `u_` is passed to the shader as a uniform of that name. See _Shader uniforms_ below.|
+
+### Enabling the effect
+
+If the object rectangle has a size, it acts as a trigger area: the effect is active while the player is inside it and switches itself off again on the way out. This is the simplest way to make a room feel different without writing a single line of script.
+
+If you draw the rectangle with a width and height of `0`, the mechanism starts disabled and stays under the control of the level script:
+
+```lua
+setMechanismEnabled("nightmare_filter", true, "post_processing")
+```
+
+### Shader uniforms
+
+Every property starting with `u_` is forwarded to the shader as a uniform, so an arbitrary shader can be driven straight from Tiled without touching the C++ code. The Tiled property type decides the uniform type:
+
+|Tiled type|Becomes|
+|-|-|
+|float|`float`|
+|int|`int`|
+|bool|`bool`|
+|string with 2, 3 or 4 numbers separated by commas|`vec2`, `vec3`, `vec4`|
+|string holding a path to an existing file|`sampler2D` (the file is loaded as a texture)|
+
+On top of that the engine writes the following uniforms whenever a shader declares them. You do not have to configure these, and a shader that does not use one simply ignores it:
+
+|Uniform|Type|Description|
+|-|-|-|
+|u_texture|sampler2D|The frame being processed.|
+|u_time|float|Seconds since the mechanism was created; use this to animate.|
+|u_resolution|vec2|The size of the game's pixel grid (`640` x `360`), _not_ the window size. Deriving from this keeps an effect looking the same at every resolution.|
+|u_pixel_size|vec2|The size of one game pixel in UV space, i.e. `1.0 / u_resolution`. Multiply by this to express an offset in game pixels.|
+
+A word of warning on resolution: the game renders at an integer multiple of `640` x `360`, so if you work in window pixels your effect will change its look on every monitor. Derive sizes and offsets from `u_resolution` or `u_pixel_size` instead.
+
+### Example
+
+A corrupted room that renders the level in Game Boy colours while leaving the HUD readable:
+
+```xml
+<objectgroup name="post_processing">
+ <object name="corrupt_zone" x="1000" y="2450" width="600" height="500">
+  <properties>
+   <property name="fragment_shader" value="data/shaders/gameboy.frag"/>
+   <property name="scope" value="level"/>
+  </properties>
+ </object>
+</objectgroup>
+```
+
+### Debugging
+
+The debug console (F12) can force an effect regardless of what the level configures, which is handy while authoring a shader:
+
+|Command|Description|
+|-|-|
+|`postfx <none\|gameboy\|rgbsplit\|glitch>`|Select one of the built-in effects, `none` to switch off.|
+|`postfx scope <all\|level>`|Switch the scope of the console-selected effect.|
+
+A console-selected effect overrides the mechanism, so remember to run `postfx none` when you want to see the level's own effect again.
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+
 ## Ropes
 
 The Deceptus Engine is able to connect other objects to ropes attached to mounts. So far this is only used for visual effects, later on - if there is any demand - the Engine can be extended to allow the player to hold on to the rope or attach other objects to it.
@@ -1121,6 +1292,73 @@ function mechanismEvent(object_id, group_id, event_name, value)
    end
 end
 ```
+
+---
+
+&nbsp;
+
+&nbsp;
+
+---
+
+
+## Skill Gates
+
+Skill Gates are solid rectangles that only let Adam pass once he has unlocked a particular skill. They are the tool to
+express 'you need the double jump to get in here' without writing a single line of Lua: place the rectangle, name the
+skill, done.
+
+The gate keeps checking the player's skill set every frame, so it does not matter how the skill is acquired - a level
+script calling `addPlayerSkill`, an Extra that grants it, or the debug console. The moment the skill is there, the
+collider disappears and the gate's texture dissolves.
+
+Since unlocked skills are already part of the save state, the gate needs no state of its own; it will be closed or open
+again automatically after loading a save game.
+
+To create a Skill Gate, create a rectangle object covering the area that should be blocked.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`SkillGate`|
+|Object Group|`skill_gates`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|skill|string|The skill that opens this gate (see the table below). This property is required; if it is missing or misspelled, the gate stays closed and a warning is written to the log|
+|inverted|bool|If set to `true`, the gate blocks *while* the skill is unlocked instead of while it is missing (default is `false`)|
+|fade_speed|float|Alpha change per second while the gate fades in or out (default is `2.0`, i.e. half a second for a full fade)|
+|enabled|bool|The default enabled state; a disabled gate never blocks and can be switched on from Lua (default is `true`)|
+|texture|string|Optional texture drawn across the gate rectangle|
+|normal|string|Optional normal map for the texture above|
+|z|int|The layer's z index|
+
+### Valid Skill Names
+
+|Value|Skill|
+|-|-|
+|`wall_climb`|Climbing up walls|
+|`dash`|Dashing|
+|`invulnerable`|Invulnerability|
+|`wall_slide`|Sliding down walls in a controlled manner|
+|`wall_jump`|Jumping off walls|
+|`double_jump`|The second jump in mid-air|
+|`crouch`|Crouching, and therefore moving through low passages|
+|`swim`|Swimming instead of drowning|
+
+### Notes
+
+- The collider is removed as soon as the skill condition is satisfied, while the texture is still fading out. That is
+  intentional - it makes sure Adam is never trapped inside a gate that is in the middle of dissolving.
+- A Skill Gate without a `texture` is invisible and acts as a pure collider. That is useful when the level's tile layers
+  already draw something at that position.
+- Skill Gates are silent by design. If you want to tell the player *why* they cannot pass, place an
+  [Interaction Help](#interaction-help) or a [Dialogue](#dialogues) in front of the gate.
+- Since the gate can also be toggled from Lua via its object id, the `inverted` property is mostly useful for
+  'you were faster before you got heavy' style puzzles.
 
 ---
 
@@ -1325,7 +1563,10 @@ Further, when the extra is spawned, a 'Spawn Animation' is played which introduc
 |sample_open|string|Sample that is played when the chest is opened (default is `treasure_chest_open.wav`)|
 |sample_locked|string|Sample that is played when the player attempts to open the chest without the required item (optional)|
 |spawn_extra|string|The identifier of the extra that's supposed to be spawned when opened (default is an empty string)|
+|spawn_offset_x|float|Horizontal offset in px that is added to the spawned extra's own position when it appears (default is `0`)|
+|spawn_offset_y|float|Vertical offset in px that is added to the spawned extra's own position when it appears (default is `0`). Negative values move the extra up, which is how the extra is usually lifted out of the chest.|
 |item_required|string|The identifier of the item required to open the chest (optional)|
+|item_required_consumed|bool|Whether the item given in `item_required` is removed from the player's inventory once the chest has been unlocked (default is `true`). Set this to `false` for a key that is supposed to stay in the inventory and unlock more than one chest.|
 |animation_idle_closed|string|The closed idle animation loaded from `data/sprites/treasure_chest_animations.json` (default is "idle")|
 |animation_opening|string|The opening animation loaded from `data/sprites/treasure_chest_animations.json` (default is "opening")|
 |animation_idle_open|string|The open idle animation loaded from `data/sprites/treasure_chest_animations.json` (default is "open")|
@@ -1340,6 +1581,28 @@ When the `observed` flag is set to `true`, the treasure chest will emit the foll
 |state|`opening`|Emitted when the player interacts with the chest and it begins opening (only when the player has the required item)|
 |state|`locked`|Emitted when the player attempts to open the chest without having the required item|
 |state|`open`|Emitted when the chest has fully opened and the spawn effect is shown|
+
+These events are only emitted while the level is running. A chest restores its open state from the
+save game before the level script starts, so the `open` event does not fire again on load. Any
+script state that was set up in reaction to it has to be derived from the chest instead, see below.
+
+### Readable Properties
+
+The chest exposes its state to the level script through `getMechanismProperty`:
+
+|Property|Type|Description|
+|-|-|-|
+|open|bool|`true` once the chest has been opened, including while the opening animation runs|
+
+```lua
+-- reproduce on load what the "open" event did while playing
+if (getMechanismProperty("locked_box", "treasure_chests", "open")) then
+   setMechanismEnabled("locked_message", false, "dialogues")
+end
+```
+
+Note the group is the object group `treasure_chests`, not the `treasurechests` group id that
+`mechanismEvent` reports.
 
 ### Spawn Effect Properties (extension to the Object Properties above)
 
@@ -1395,7 +1658,7 @@ end
 
 ## Wind
 
-Wind zones apply a continuous force to the player whenever they are inside the rectangle.  This mechanism can be used to simulate gusts of wind or air currents that push the player along a path.
+Wind zones apply a continuous force to the player whenever they are inside the rectangle. This mechanism can be used to simulate gusts of wind or air currents that push the player along a path. On top of that a wind zone can blow animated leaves through the area and play a set of wind samples while the player is nearby.
 
 ### Object Type / Object Group
 
@@ -1404,14 +1667,50 @@ Wind zones apply a continuous force to the player whenever they are inside the r
 |Object Type|`Wind`|
 |Object Group|`wind`|
 
-### Object Properties
+### Direction and strength
+
+`direction_x` and `direction_y` only describe *where* the wind blows; the vector is normalized when the level is loaded. *How hard* it blows is a separate property, `strength`. That way a wind zone can be re-tuned through a single number, and the same direction drives both the force on the player and the leaves.
 
 |Property|Type|Description|
 |-|-|-|
-|direction_x|float|Horizontal component of the wind force. Positive values push to the right, negative values push to the left (default is `0.0`).|
-|direction_y|float|Vertical component of the wind force. Positive values push upward, negative values push downward (default is `0.0`).|
+|direction_x|float|Horizontal component of the wind direction. Positive values blow to the right, negative values to the left (default is `0.0`).|
+|direction_y|float|Vertical component of the wind direction. Positive values blow upward, negative values downward (default is `0.0`).|
+|strength|float|Force multiplier applied along the normalized direction. `0.3` is roughly a third of gravity. Set it to `0.0` for zones that only carry leaves and should not push the player. When the property is absent it falls back to the length of the direction vector, which is how zones authored before `strength` existed behave — those keep applying exactly the force they always did without needing to be edited.|
+|z|int|The object's z index (default is `20`, i.e. the player's depth). Pick a value below the solid level layer to have the terrain occlude the leaves, or a high value to draw them in front of everything.|
 
-The size and position of the wind zone are defined by the rectangle you draw.  Wind has no visible representation, so there is no z‑index to configure.
+The size and position of the wind zone are defined by the rectangle you draw.
+
+### Sounds
+
+|Property|Type|Description|
+|-|-|-|
+|sounds|string|Semicolon separated list of samples in `data/sounds`, e.g. `wind_draft_loop_01.ogg;wind_draft_loop_02.ogg`. A single sample is looped; with more than one, a random sample is played and replaced by another random one as soon as it has played through. Defaults to silence.|
+|sound_volume|float|Volume of the samples at close range (default is `1.0`).|
+|sound_radius_near_px|float|Distance up to which the samples play at `sound_volume` (default is `200.0`). Measured from the centre of the wind rectangle, so pick at least half the rectangle's size to keep the volume even inside the zone.|
+|sound_radius_far_px|float|Distance at which the samples have faded to silence (default is `800.0`).|
+|sound_strength_influence|float|How much the **force on the player** follows the loudness of the sample that is currently playing, between `0.0` and `1.0` (default is `0.0`, i.e. constant strength). At `1.0` the force follows the gusts you hear one to one. The loudness is normalized against the sample's own loudest passage.|
+
+The loudness also drives the leaves, through `leaf_sound_influence` below. The two are independent: a zone can push the player constantly while its leaves gust, gust the force while the leaves travel evenly, do both, or neither. Both need at least one entry in `sounds` — with no sample there is no loudness to read and both multipliers stay at `1.0`.
+
+### Leaves
+
+Leaves travel along the wind direction with a sideways wobble, enter on the border the wind blows in from and fade in and out so they do not pop up at the rectangle's edges. A sprite sheet holds the animation frames next to each other in one row; three sheets ship with the engine: `data/sprites/leaves_fall.png`, `leaves_spring.png` and `leaves_winter.png`.
+
+|Property|Type|Description|
+|-|-|-|
+|leaf_count|int|Number of leaves alive at the same time. `0` (the default) disables the leaves entirely.|
+|leaf_texture|string|Sprite sheet to use (default is `data/sprites/leaves_fall.png`).|
+|leaf_frame_size_px|int|Width and height of one animation frame; the frame count is derived from the sheet's width (default is `16`).|
+|leaf_velocity_px_s|float|Travel speed in pixels per second (default is `60.0`). Randomized per leaf between 60% and 140%.|
+|leaf_jitter_amount|float|Sideways drift relative to the travel speed (default is `0.35`). `0.0` makes the leaves travel in a straight line.|
+|leaf_jitter_frequency_hz|float|How often a leaf wanders from one side to the other per second (default is `0.8`).|
+|leaf_animation_speed|float|Animation frames per second (default is `8.0`).|
+|leaf_scale_min|float|Lower bound of the randomized per-leaf scale (default is `1.0`).|
+|leaf_scale_max|float|Upper bound of the randomized per-leaf scale (default is `1.0`).|
+|leaf_alpha|float|Opacity of the leaf sprites between `0.0` and `1.0` (default is `1.0`).|
+|leaf_sound_influence|float|How much the **leaf velocity** follows the loudness of the sample that is currently playing, between `0.0` and `1.0` (default is `0.0`, i.e. constant velocity). At `1.0` the leaves surge and settle with the gusts you hear. Independent of `sound_strength_influence`, so a zone that does not push the player at all can still have its leaves react to the wind.|
+
+Layering two wind zones over the same area gives the wind some depth: a slow, small, dimmed set behind the level layer and a fast, large one in front of it. Give the second zone a `strength` of `0` and no sounds so the force and the audio are not applied twice. A zone drawn in front of the terrain should not reach below the ground, otherwise its leaves drift across the solid tiles.
 
 ---
 

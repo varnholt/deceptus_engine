@@ -5,11 +5,25 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
+#include <array>
+
 namespace
 {
+static constexpr std::array enemy_wall_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema enemy_wall_schema{
+   .type_name = "EnemyWall",
+   .layer_name = "enemy_walls",
+   .default_width = 24,
+   .default_height = 96,
+   .properties = enemy_wall_properties,
+};
 const auto registered_enemywall = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(enemy_wall_schema);
+
    registry.mapGroupToLayer("EnemyWall", "enemy_walls");
 
    registry.registerLayerName(
@@ -93,6 +107,8 @@ void EnemyWall::setup(const GameDeserializeData& data)
    boundary_fixture_def.filter.categoryBits = category_bits;
 
    _body->CreateFixture(&boundary_fixture_def);
+
+   addChunks(_rectangle);
 }
 
 const sf::FloatRect& EnemyWall::getPixelRect() const

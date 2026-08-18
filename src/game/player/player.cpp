@@ -131,19 +131,24 @@ void Player::initialize()
 {
    _damage_clock.restart();
 
+   if (!_silhouette_shader.loadFromFragment("data/shaders/player_silhouette.frag"))
+   {
+      Log::Error() << "failed to load player silhouette shader";
+   }
+
    _jump._jump_dust_animation_callback = [this](PlayerJump::DustAnimationType animation_type)
    {
       switch (animation_type)
       {
          case PlayerJump::DustAnimationType::Ground:
          {
-            _animation_pool.create(_points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _pixel_position_f.x, _pixel_position_f.y);
+            _animation_pool.create(_points_to_left ? "player_jump_dust_l" : "player_jump_dust_r", _position_px_f.x, _position_px_f.y);
             break;
          }
          case PlayerJump::DustAnimationType::InAir:
          {
             _animation_pool.create(
-               _points_to_left ? "player_jump_dust_inair_l" : "player_jump_dust_inair_r", _pixel_position_f.x, _pixel_position_f.y
+               _points_to_left ? "player_jump_dust_inair_l" : "player_jump_dust_inair_r", _position_px_f.x, _position_px_f.y
             );
             break;
          }
@@ -283,7 +288,11 @@ void Player::drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>&
    for (auto i = 0u; i < _last_animations.size(); i++)
    {
       auto& anim = _last_animations[i];
+#ifdef DECEPTUS_VRSFML
+      anim._animation->position = anim._position;
+#else
       anim._animation->setPosition(anim._position);
+#endif
       anim._animation->setAlpha(static_cast<uint8_t>(255 / (2 * (_last_animations.size() - i))));
       anim._animation->draw(color);
    }
@@ -294,9 +303,12 @@ void Player::drawDash(sf::RenderTarget& color, const std::shared_ptr<Animation>&
    }
 }
 
-void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
    _water_bubbles.draw(color, normal);
+
+   // drawn before the visibility checks below, the rope should not blink along with the damaged player
+   _harpoon.draw(color, normal, states);
 
    if (!_visible)
    {
@@ -310,34 +322,42 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
    if (_jump.isWallSliding())
    {
-      _player_animation->getWallslideAnimation()->draw(color);
+      _player_animation->getWallslideAnimation()->draw(color, states);
    }
 
    const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
    if (weapon_system._selected)
    {
-      weapon_system._selected->draw(color);
+      weapon_system._selected->draw(color, states);
    }
 
    // that y offset is to compensate the wonky box2d origin
-   const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
+   const auto draw_position_px = _position_px_f + sf::Vector2f(0, 8);
 
    const auto& current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
    {
       current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
+#ifdef DECEPTUS_VRSFML
+      current_cycle->position = draw_position_px;
+#else
       current_cycle->setPosition(draw_position_px);
+#endif
       drawDash(color, current_cycle, draw_position_px);
       updateHurtColor(current_cycle);
-      current_cycle->draw(color, normal);
+      current_cycle->draw(color, normal, states);
    }
 
    const auto& auxiliary_cycle = _player_animation->getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
       auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
+#ifdef DECEPTUS_VRSFML
+      auxiliary_cycle->position = draw_position_px;
+#else
       auxiliary_cycle->setPosition(draw_position_px);
-      auxiliary_cycle->draw(color, normal);
+#endif
+      auxiliary_cycle->draw(color, normal, states);
    }
 
    // draw additional effects such as dust, water splash
@@ -348,78 +368,96 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    );
 
    // draw equipped items
-   SaveState::getPlayerInfo()._items.draw(color);
+   SaveState::getPlayerInfo()._items.draw(color, states);
 }
 
-void Player::drawStencil(sf::RenderTarget& color)
+void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states)
 {
-   const auto stencil_color = sf::Color{255, 255, 255, 40};
-   const auto draw_position_px = _pixel_position_f + sf::Vector2f(0, 8);
+   const auto stencil_color = sf::Color{255, 255, 255, 25};
+   const auto draw_position_px = _position_px_f + sf::Vector2f(0, 8);
+
+   // the silhouette shader forces the occluded player to transparent white (its rgb comes from the
+   // shader, its alpha from the sprite shape scaled by u_alpha) instead of the dimmed sprite colors
+   auto stencil_states = states;
+   if (_silhouette_shader.isLoaded())
+   {
+      _silhouette_shader.setUniform("u_texture", sf::Shader::CurrentTexture);
+      _silhouette_shader.setUniform("u_alpha", stencil_color.a / 255.f);
+      stencil_states.shader = &_silhouette_shader.native();
+   }
 
    auto current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
    {
       current_cycle->setColor(stencil_color);
+#ifdef DECEPTUS_VRSFML
+      current_cycle->position = draw_position_px;
+#else
       current_cycle->setPosition(draw_position_px);
-      current_cycle->draw(color);
+#endif
+      current_cycle->draw(color, stencil_states);
    }
 
    auto auxiliary_cycle = _player_animation->getAuxiliaryCycle();
    if (auxiliary_cycle)
    {
       auxiliary_cycle->setColor(stencil_color);
+#ifdef DECEPTUS_VRSFML
+      auxiliary_cycle->position = draw_position_px;
+#else
       auxiliary_cycle->setPosition(draw_position_px);
-      auxiliary_cycle->draw(color);
+#endif
+      auxiliary_cycle->draw(color, stencil_states);
    }
 }
 
 const sf::Vector2f& Player::getPixelPositionFloat() const
 {
-   return _pixel_position_f;
+   return _position_px_f;
 }
 
 const sf::Vector2i& Player::getPixelPositionInt() const
 {
-   return _pixel_position_i;
+   return _position_px_i;
 }
 
 void Player::setPixelPosition(float x, float y)
 {
-   _pixel_position_f.x = x;
-   _pixel_position_f.y = y;
+   _position_px_f.x = x;
+   _position_px_f.y = y;
 
-   _pixel_position_i.x = static_cast<int32_t>(x);
-   _pixel_position_i.y = static_cast<int32_t>(y);
+   _position_px_i.x = static_cast<int32_t>(x);
+   _position_px_i.y = static_cast<int32_t>(y);
 }
 
 const sf::FloatRect& Player::getPixelRectFloat() const
 {
-   return _pixel_rect_f;
+   return _rect_px_f;
 }
 
 void Player::updatePixelRect()
 {
-   constexpr auto height_diff_px = PLAYER_TILES_HEIGHT - PLAYER_ACTUAL_HEIGHT;
+   constexpr auto height_diff_px = PLAYER_TILES_HEIGHT_PX - PLAYER_ACTUAL_HEIGHT_PX;
 
-   _pixel_rect_f.position.x = _pixel_position_f.x - PLAYER_ACTUAL_WIDTH * 0.5f;
-   _pixel_rect_f.position.y = _pixel_position_f.y - height_diff_px - (height_diff_px * 0.5f);
-   _pixel_rect_f.size.x = PLAYER_ACTUAL_WIDTH;
-   _pixel_rect_f.size.y = PLAYER_ACTUAL_HEIGHT;
+   _rect_px_f.position.x = _position_px_f.x - PLAYER_ACTUAL_WIDTH_PX * 0.5f;
+   _rect_px_f.position.y = _position_px_f.y - height_diff_px - (height_diff_px * 0.5f);
+   _rect_px_f.size.x = PLAYER_ACTUAL_WIDTH_PX;
+   _rect_px_f.size.y = PLAYER_ACTUAL_HEIGHT_PX;
 
-   _pixel_rect_i.position.x = static_cast<int32_t>(_pixel_rect_f.position.x);
-   _pixel_rect_i.position.y = static_cast<int32_t>(_pixel_rect_f.position.y);
-   _pixel_rect_i.size.x = PLAYER_ACTUAL_WIDTH;
-   _pixel_rect_i.size.y = PLAYER_ACTUAL_HEIGHT;
+   _rect_px_i.position.x = static_cast<int32_t>(_rect_px_f.position.x);
+   _rect_px_i.position.y = static_cast<int32_t>(_rect_px_f.position.y);
+   _rect_px_i.size.x = PLAYER_ACTUAL_WIDTH_PX;
+   _rect_px_i.size.y = PLAYER_ACTUAL_HEIGHT_PX;
 }
 
 void Player::updateChunk()
 {
-   _chunk.update(_pixel_position_i.x, _pixel_position_i.y);
+   _chunk.update(_position_px_i.x, _position_px_i.y);
 }
 
 const sf::IntRect& Player::getPixelRectInt() const
 {
-   return _pixel_rect_i;
+   return _rect_px_i;
 }
 
 void Player::setMaskBitsCrouching(bool enabled)
@@ -447,8 +485,8 @@ void Player::createFeet()
    //  ^                        ^
    //  count * (dist + radius)
 
-   const auto width_px = PLAYER_ACTUAL_WIDTH;
-   const auto height_px = PLAYER_ACTUAL_HEIGHT;
+   const auto width_px = PLAYER_ACTUAL_WIDTH_PX;
+   const auto height_px = PLAYER_ACTUAL_HEIGHT_PX;
    const auto feet_radius_m = 0.16f / static_cast<float>(__foot_count);
    const auto feet_distance_m = 0.0f;
    const auto feet_offset_m = static_cast<float>(__foot_count) * (feet_radius_m * 2.0f + feet_distance_m) * 0.5f - feet_radius_m;
@@ -615,6 +653,10 @@ void Player::setWorld(const std::shared_ptr<b2World>& world)
 
 void Player::resetWorld()
 {
+   // the harpoon and the rope hold own bodies and joints inside that world, they have to go first
+   _harpoon.reset();
+   _rope.reset();
+
    _world.reset();
 }
 
@@ -816,7 +858,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._dead = isDead();
    data._death_count_current_level = SaveState::getPlayerInfo()._stats._death_count_current_level;
    data._death_reason = _death_reason.value_or(DeathReason::Invalid);
-   data._checkpoint_index = SaveState::getCurrent()._checkpoint;
+   data._checkpoint_index = SaveState::getCurrentLevelCheckpoint();
    data._in_air = isInAir();
    data._in_water = isInWater();
    data._linear_velocity = _body->GetLinearVelocity();
@@ -826,6 +868,7 @@ void Player::updateAnimation(const sf::Time& dt)
    data._points_left = _points_to_left;
    data._points_right = !_points_to_left;
    data._climb_joint_present = _climb._climb_joint;
+   data._hanging_on_rope = _harpoon.isAttached() || _rope.isAttached();
    data._jump_frame_count = _jump._jump_frame_count;
    data._dash_frame_count = _dash._frame_count;
    data._moving_left = _controls->isMovingLeft();
@@ -982,6 +1025,16 @@ void Player::updateVelocity()
       setFriction(0.0f);
    }
 
+   // a swing is a pendulum, and the momentum it builds up is the whole point of the harpoon; the
+   // input-driven velocity below would cancel everything above walking speed on the very next frame
+   // and the horizontal cap would eat the rest. the harpoon applies its own tangential control
+   // instead, and keeps doing so for a moment after the rope is released so the slingshot survives.
+   // hanging on a grab rope is the same pendulum and needs the same treatment.
+   if (_harpoon.isAttached() || _harpoon.isReleaseGraceActive() || _rope.isAttached() || _rope.isReleaseGraceActive())
+   {
+      return;
+   }
+
    auto desired_velocity = readDesiredVelocity();
    auto current_velocity = _body->GetLinearVelocity();
 
@@ -1090,7 +1143,7 @@ void Player::startHardLanding()
       }
    }
 
-   Audio::getInstance().playSample({"player_grunt_01.wav"});
+   Audio::getInstance().playSample({"player_grunt_01.ogg"});
 }
 
 void Player::updateImpulse()
@@ -1163,7 +1216,7 @@ void Player::damage(int32_t damage, const sf::Vector2f& force)
    {
       _damage_initialized = true;
 
-      Audio::getInstance().playSample({"hurt.wav"});
+      Audio::getInstance().playSample({"hurt.ogg"});
 
       // not converting this to PPM to make the effect of the applied force more visible
       auto* body = getBody();
@@ -1233,7 +1286,7 @@ void Player::updateAttack()
    // require a fresh button press each time the sword should be swung
    if (_attack._attack_button_pressed)
    {
-      const auto result = _attack.attack(_world, _controls, _player_animation, _pixel_position_f, _points_to_left, isInAir());
+      const auto result = _attack.attack(_world, _controls, _player_animation, _position_px_f, _points_to_left, isInAir());
 
       // sword attack is combined with a small impulse move forward
       auto uses_sword = []()
@@ -1256,6 +1309,53 @@ void Player::updateAttack()
 void Player::updateAttackDash(const sf::Time& dt)
 {
    _attack_dash.update(dt);
+}
+
+void Player::updateHarpoon(const sf::Time& dt)
+{
+   // the harpoon is fired with the regular fire buttons while it is the selected weapon; the attack
+   // path in PlayerAttack ignores it, so the two do not fight over the button
+   const auto& weapon_system = SaveState::getPlayerInfo()._weapons;
+   const auto harpoon_selected = weapon_system._selected && weapon_system._selected->getWeaponType() == WeaponType::Harpoon;
+   const auto fire_button_pressed = _controls->isButtonXPressed() || _controls->isButtonYPressed();
+
+   // up and down are not passed in: while the harpoon aims or hangs it owns those two keys, and reading
+   // them past that claim is something only the owner can do
+   PlayerHarpoon::HarpoonInput input;
+   input._world = _world;
+   input._controls = _controls;
+   input._player_body = _body;
+   input._points_to_left = _points_to_left;
+   input._harpoon_button_pressed = harpoon_selected && fire_button_pressed;
+   input._jump_button_pressed = _controls->isButtonAPressed();
+   input._move_left_pressed = _controls->isMovingLeft();
+   input._move_right_pressed = _controls->isMovingRight();
+   input._in_water = isInWater();
+   input._on_ground = isOnGround();
+   input._dead = isDead();
+   input._analogue_aim = GameControllerIntegration::getInstance().isControllerConnected() && _controls->isControllerUsedLast();
+   input._carried_elsewhere = _rope.isAttached();
+
+   _harpoon.update(dt, input);
+}
+
+void Player::updateRope(const sf::Time& dt)
+{
+   // up and down are not passed in here either, for the same reason
+   PlayerRope::RopeInput input;
+   input._world = _world;
+   input._controls = _controls;
+   input._player_body = _body;
+   input._player_rect_px = _rect_px_f;
+   input._jump_button_pressed = _controls->isButtonAPressed();
+   input._move_left_pressed = _controls->isMovingLeft();
+   input._move_right_pressed = _controls->isMovingRight();
+   input._in_air = isInAir();
+   input._in_water = isInWater();
+   input._dead = isDead();
+   input._carried_elsewhere = _harpoon.isAttached();
+
+   _rope.update(dt, input);
 }
 
 bool Player::isInWater() const
@@ -1283,7 +1383,7 @@ void Player::updateFootsteps()
          if (_time.asSeconds() > _next_footstep_time)
          {
             // play footstep
-            Audio::getInstance().playSample({(_step_counter++ & 1) ? "player_footstep_stone_l.wav" : "player_footstep_stone_r.wav", 0.3f});
+            Audio::getInstance().playSample({(_step_counter++ & 1) ? "player_footstep_stone_l.ogg" : "player_footstep_stone_r.ogg", 0.3f});
             _next_footstep_time = _time.asSeconds() + 1.0f / vel;
          }
       }
@@ -1334,7 +1434,7 @@ void Player::updateBendDown()
    if (!_bend._was_bending_down && _bend._bending_down)
    {
       _bend._timepoint_bend_down_start = StopWatch::getInstance().now();
-      Audio::getInstance().playSample({"player_kneel_01.wav"});
+      Audio::getInstance().playSample({"player_kneel_01.ogg"});
    }
 
    // when the player transitions from "was bending down" to "no longer bending down", we want to
@@ -1481,7 +1581,11 @@ void Player::updateWallslide(const sf::Time& dt)
 {
    const auto wallslide_animation = _player_animation->getWallslideAnimation();
    const auto offset_x_px = isPointingLeft() ? -5.0f : 5.0f;
-   wallslide_animation->setPosition({_pixel_position_f.x + offset_x_px, _pixel_position_f.y});
+#ifdef DECEPTUS_VRSFML
+   wallslide_animation->position = {_position_px_f.x + offset_x_px, _position_px_f.y};
+#else
+   wallslide_animation->setPosition({_position_px_f.x + offset_x_px, _position_px_f.y});
+#endif
    wallslide_animation->play();
    wallslide_animation->update(dt);
 }
@@ -1499,7 +1603,7 @@ void Player::updateSpawn()
 {
    using namespace std::chrono_literals;
 
-   const auto checkpoint_valid = SaveState::getCurrent()._checkpoint > 0;
+   const auto checkpoint_valid = SaveState::getCurrentLevelCheckpoint() > 0;
    const auto first_death = SaveState::getPlayerInfo()._stats._death_count_current_level == 0;
    const auto spawning = GameClock::getInstance().durationSinceSpawn() < _player_animation->getRevealStartDelay();
 
@@ -1525,7 +1629,7 @@ void Player::updateSpawn()
    // play reveal sound (but only if player died earlier)
    if (!first_death)
    {
-      Audio::getInstance().playSample({"player_spawn_01.wav"});
+      Audio::getInstance().playSample({"player_spawn_01.ogg"});
    }
 }
 
@@ -1554,6 +1658,8 @@ void Player::update(const sf::Time& dt)
    updateAtmosphere();
    updateAttack();
    updateAttackDash(dt);
+   updateHarpoon(dt);
+   updateRope(dt);
    updateVelocity();
    updateOrientation();
    updateOneWayWallDrop();
@@ -1562,7 +1668,7 @@ void Player::update(const sf::Time& dt)
    _climb.update(_body, isInAir());
    _dive.update(dt, isInWater());
    _platform.update(_body, _jump.isJumping());
-   PlayerAudio::updateListenerPosition(_pixel_position_f);
+   PlayerAudio::updateListenerPosition(_position_px_f);
    updateFootsteps();
    updatePreviousBodyState();
    updateWeapons(dt);
@@ -1608,15 +1714,15 @@ void Player::updateAtmosphere()
       _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_water);
       _body->SetTransform(_body->GetPosition() + b2Vec2{0.0, 0.4f}, 0.0f);
       _water_entered_time = StopWatch::getInstance().now();
-      Audio::getInstance().playSample({"splash.wav"});
-      _animation_pool.create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
+      Audio::getInstance().playSample({"splash.ogg"});
+      _animation_pool.create("player_water_splash", _position_px_f.x, _position_px_f.y);
    }
 
    // leaving water
    if (!inside_water && was_inside_water)
    {
       _body->SetGravityScale(PhysicsConfiguration::getInstance()._gravity_scale_default);
-      _animation_pool.create("player_water_splash", _pixel_position_f.x, _pixel_position_f.y);
+      _animation_pool.create("player_water_splash", _position_px_f.x, _position_px_f.y);
    }
 
    // not sure if this is just another ugly hack
@@ -1688,7 +1794,7 @@ void Player::updateItems(const sf::Time& dt)
 void Player::die()
 {
    _dead = true;
-   Audio::getInstance().playSample({"death.wav"});
+   Audio::getInstance().playSample({"death.ogg"});
 
    auto& stats = SaveState::getPlayerInfo()._stats;
    stats._death_count_overall++;
@@ -1712,6 +1818,8 @@ void Player::reset()
    }
 
    _climb.removeClimbJoint();
+   _harpoon.reset();
+   _rope.reset();
 
    if (LevelRegistry::getCurrent())
    {
@@ -1862,6 +1970,6 @@ void Player::updatePixelPosition()
 
 void Player::updatePreviousBodyState()
 {
-   _position_previous = _body->GetPosition();
+   _position_previous_m = _body->GetPosition();
    _velocity_previous = _body->GetLinearVelocity();
 }

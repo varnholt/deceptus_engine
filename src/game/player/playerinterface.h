@@ -110,6 +110,14 @@ public:
    /// \param y y coordinate in pixels.
    virtual void setBodyViaPixelPosition(float x, float y) = 0;
 
+   /// \brief enables or disables player rendering.
+   /// \param visible true to draw the player.
+   virtual void setVisible(bool visible) = 0;
+
+   /// \brief reports whether player rendering is enabled.
+   /// \return true when draw calls should render the player.
+   virtual bool getVisible() const = 0;
+
    /// \brief starts alpha fade-out animation for the player sprite.
    /// \param fade_out_speed_factor alpha decay speed multiplier per second.
    virtual void fadeOut(float fade_out_speed_factor = 5.0f) = 0;

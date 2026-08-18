@@ -1,6 +1,7 @@
 #ifndef INGAMEMENUARCHIVES_H
 #define INGAMEMENUARCHIVES_H
 
+#include "framework/tools/localization.h"
 #include "game/animation/animation.h"
 #include "game/animation/animationpool.h"
 #include "game/image/layerdata.h"
@@ -23,7 +24,11 @@ public:
    /// \brief draws the archives page using the base layered page renderer.
    /// \param window render target that receives archive layer rendering.
    /// \param states render states used for drawing.
+#ifdef DECEPTUS_VRSFML
+   void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates{}) override;
+#else
    void draw(sf::RenderTarget& window, sf::RenderStates = sf::RenderStates::Default) override;
+#endif
 
    /// \brief advances show/hide or slide animations for archive panels.
    /// \param dt elapsed frame time, currently unused by this page.
@@ -68,7 +73,7 @@ private:
    std::unique_ptr<AnimationPool> _animation_pool;
    std::map<std::string, std::shared_ptr<SpriteAnimation>> _treasure_animations;
 
-   sf::Font _font_treasure;
+   const sf::Font* _font_treasure = &getFont();
    std::unique_ptr<sf::Text> _text_treasure_name;
    std::unique_ptr<sf::Text> _text_treasure_description;
 };

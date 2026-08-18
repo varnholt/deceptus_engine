@@ -3,6 +3,7 @@
 #include "framework/tools/log.h"
 #include "game/config/gameconfiguration.h"
 
+#include <algorithm>
 #include <chrono>
 #include <filesystem>
 
@@ -12,18 +13,8 @@ MusicPlayer& MusicPlayer::getInstance()
    return instance;
 }
 
-MusicPlayer::MusicPlayer()
+MusicPlayer::MusicPlayer() : _backend(MusicBackend::create())
 {
-   if (!_music[0].openFromFile("data/music/empty.ogg"))
-   {
-   }
-
-   if (!_music[1].openFromFile("data/music/empty.ogg"))
-   {
-   }
-
-   _music[0].setRelativeToListener(true);
-   _music[1].setRelativeToListener(true);
 }
 
 void MusicPlayer::update(const sf::Time& dt)
@@ -31,6 +22,20 @@ void MusicPlayer::update(const sf::Time& dt)
    std::scoped_lock lock(_mutex);
 
    const auto dt_ms = std::chrono::milliseconds(dt.asMilliseconds());
+
+   // a track is being opened into the inactive slot; wait for it to finish before
+   // starting playback or any further transition. The desktop backend loads on a worker
+   // thread (so the frame never blocks), the Emscripten backend loads synchronously —
+   // either way the state machine treats it the same.
+   if (_loading_request.has_value())
+   {
+      const auto next_index = 1 - _current_index;
+      if (_backend->isLoadReady(next_index))
+      {
+         activateLoadedTrack(_backend->loadSucceeded(next_index));
+      }
+      return;
+   }
 
    switch (_transition_state)
    {
@@ -61,14 +66,15 @@ void MusicPlayer::updateCrossfade(std::chrono::milliseconds dt)
    _crossfade_elapsed += dt;
    const auto normalized_time = std::min(1.0f, static_cast<float>(_crossfade_elapsed.count()) / _crossfade_duration.count());
 
-   next().setVolume(volume() * normalized_time);
-   current().setVolume(volume() * (1.0f - normalized_time));
+   const auto next_index = 1 - _current_index;
+   _backend->setVolume(next_index, volume() * normalized_time);
+   _backend->setVolume(_current_index, volume() * (1.0f - normalized_time));
 
    if (_crossfade_elapsed >= _crossfade_duration)
    {
-      current().stop();
-      current().setVolume(volume());
-      _current_index = 1 - _current_index;  // swap
+      _backend->stop(_current_index);
+      _backend->setVolume(_current_index, volume());
+      _current_index = next_index;  // swap
       _transition_state = MusicPlayerTypes::MusicTransitionState::None;
       _pending_request.reset();
    }
@@ -79,11 +85,11 @@ void MusicPlayer::updateFadeOut(std::chrono::milliseconds dt)
    _fade_out_elapsed += dt;
    const auto normalized_time = std::min(1.0f, static_cast<float>(_fade_out_elapsed.count()) / _fade_out_duration.count());
 
-   current().setVolume(volume() * (1.0f - normalized_time));
+   _backend->setVolume(_current_index, volume() * (1.0f - normalized_time));
 
    if (_fade_out_elapsed >= _fade_out_duration)
    {
-      current().stop();
+      _backend->stop(_current_index);
 
       if (_pending_request.has_value())
       {
@@ -104,7 +110,7 @@ void MusicPlayer::processPendingRequest()
       return;
    }
 
-   const auto& request = _pending_request.value();
+   const auto request = _pending_request.value();
 
    switch (request.transition)
    {
@@ -117,7 +123,11 @@ void MusicPlayer::processPendingRequest()
 
       case MusicPlayerTypes::TransitionType::LetCurrentFinish:
       {
-         if (current().getStatus() != sf::SoundStream::Status::Playing)
+         // a looping stream repeats forever and never reports that it stopped, so the loop has to
+         // be dropped for the current track to be able to run out.
+         _backend->setLooping(_current_index, false);
+
+         if (!_backend->isPlaying(_current_index))
          {
             beginTransition(request);
             _pending_request.reset();
@@ -127,10 +137,11 @@ void MusicPlayer::processPendingRequest()
 
       case MusicPlayerTypes::TransitionType::Crossfade:
       {
+         // the crossfade only begins once the track finishes loading; activateLoadedTrack()
+         // sets the Crossfading state. Clear the pending request so it is not re-processed
+         // while the load is in flight.
          beginTransition(request);
-         _transition_state = MusicPlayerTypes::MusicTransitionState::Crossfading;
-         _crossfade_elapsed = std::chrono::milliseconds{0};
-         _crossfade_duration = request.duration;
+         _pending_request.reset();
          break;
       }
 
@@ -149,7 +160,7 @@ void MusicPlayer::processPendingRequest()
 
 void MusicPlayer::handleTrackFinished()
 {
-   if (current().getStatus() == sf::SoundStream::Status::Playing)
+   if (_backend->isPlaying(_current_index))
    {
       return;
    }
@@ -163,7 +174,7 @@ void MusicPlayer::handleTrackFinished()
 
       case MusicPlayerTypes::PostPlaybackAction::Loop:
       {
-         current().play();
+         _backend->play(_current_index);
          break;
       }
 
@@ -183,15 +194,6 @@ void MusicPlayer::handleTrackFinished()
       }
    }
 }
-sf::Music& MusicPlayer::current()
-{
-   return _music[_current_index];
-}
-
-sf::Music& MusicPlayer::next()
-{
-   return _music[1 - _current_index];
-}
 
 void MusicPlayer::queueTrack(const TrackRequest& request)
 {
@@ -203,10 +205,13 @@ void MusicPlayer::stop()
 {
    std::scoped_lock lock(_mutex);
 
-   for (auto& music : _music)
-   {
-      music.stop();
-   }
+   // wait for any in-flight background load to finish so the backend is not opening a
+   // stream while we stop it.
+   _backend->waitForLoad(1 - _current_index);
+   _loading_request.reset();
+
+   _backend->stop(0);
+   _backend->stop(1);
 
    _pending_request.reset();
    _transition_state = MusicPlayerTypes::MusicTransitionState::None;
@@ -222,54 +227,68 @@ void MusicPlayer::setPlaylist(const std::vector<std::string>& playlist)
 
 void MusicPlayer::adjustActiveMusicVolume()
 {
-   current().setVolume(volume());
+   _backend->setVolume(_current_index, volume());
 }
 
 void MusicPlayer::beginTransition(const TrackRequest& request)
 {
-   auto& next_track = next();
-   auto& current_track = current();
-
    // check if the file exists before attempting to load
-   if (!std::filesystem::exists(request.filename)) {
+   if (!std::filesystem::exists(request.filename))
+   {
       Log::Error() << "music file does not exist: " << request.filename;
       return;
    }
 
-   // time the music file loading operation
-   auto start_time = std::chrono::high_resolution_clock::now();
-   bool success = next_track.openFromFile(request.filename);
-   auto end_time = std::chrono::high_resolution_clock::now();
+   // Load the track into the inactive slot. beginLoad is asynchronous on desktop and
+   // synchronous on Emscripten; activateLoadedTrack() picks the result up through the
+   // loading branch in update() once the backend reports it ready.
+   _loading_request = request;
+   _backend->beginLoad(1 - _current_index, request.filename);
+}
 
-   auto load_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+void MusicPlayer::activateLoadedTrack(bool load_succeeded)
+{
+   const auto request = _loading_request.value();
+   _loading_request.reset();
 
-   if (!success)
+   if (!load_succeeded)
    {
       Log::Error() << "unable to load music file: " << request.filename;
+      _transition_state = MusicPlayerTypes::MusicTransitionState::None;
       return;
    }
-   else if (load_duration.count() >= 100)
-   {
-      Log::Info() << "Music load time for " << request.filename << ": " << load_duration.count() << " ms (Main thread - may cause hiccups)";
-   }
+
+   const auto next_index = 1 - _current_index;
+
+   _backend->setLooping(next_index, request.post_action == MusicPlayerTypes::PostPlaybackAction::Loop);
 
    if (request.transition == MusicPlayerTypes::TransitionType::Crossfade)
    {
-      next_track.setVolume(0.f);
+      _backend->setVolume(next_index, 0.f);
    }
    else
    {
-      next_track.setVolume(100.f);
-      current_track.stop();
+#ifdef DECEPTUS_VRSFML
+      _backend->setVolume(next_index, volume());
+#else
+      _backend->setVolume(next_index, 100.f);
+#endif
+      _backend->stop(_current_index);
    }
 
-   next_track.play();
+   _backend->play(next_index);
    _post_action = request.post_action;
 
    if (request.transition == MusicPlayerTypes::TransitionType::ImmediateSwitch ||
        request.transition == MusicPlayerTypes::TransitionType::LetCurrentFinish)
    {
-      _current_index = 1 - _current_index;
+      _current_index = next_index;
+   }
+   else if (request.transition == MusicPlayerTypes::TransitionType::Crossfade)
+   {
+      _transition_state = MusicPlayerTypes::MusicTransitionState::Crossfading;
+      _crossfade_elapsed = std::chrono::milliseconds{0};
+      _crossfade_duration = request.duration;
    }
 }
 
@@ -277,7 +296,11 @@ float MusicPlayer::volume() const
 {
    const auto& config = GameConfiguration::getInstance();
    const auto master = config._audio_volume_master * 0.01f;
+#ifdef DECEPTUS_VRSFML
+   const auto music = config._audio_volume_music * 0.01f;
+#else
    const auto music = config._audio_volume_music;
+#endif
    return master * music;
 }
 

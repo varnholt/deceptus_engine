@@ -20,7 +20,8 @@ public:
 
    /// \brief draws all currently equipped item instances.
    /// \param target render target passed to each equipped item.
-   void draw(sf::RenderTarget& target);
+   /// \param states render states passed to each equipped item (carries .view for WASM camera transform).
+   void draw(sf::RenderTarget& target, const sf::RenderStates& states);
 
    /// \brief ensures a runtime item instance exists for an inventory item key.
    /// \param item_name inventory item key to instantiate.
@@ -37,7 +38,7 @@ public:
 
    /// \brief re-equips all currently slotted items against the active level and player.
    /// call after a level finishes loading so items that require a live level context
-   /// (e.g. lantern lights) are properly initialized regardless of when the inventory was deserialized.
+   /// (e.g. head torch lights) are properly initialized regardless of when the inventory was deserialized.
    void reinitializeEquippedItems();
 
 private:

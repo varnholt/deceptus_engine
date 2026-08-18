@@ -59,9 +59,14 @@ public:
 private:
    ExitCallback _exit_callback;
 
-   sf::Font _font;
    std::unique_ptr<sf::Text> _text_build;
-   std::unique_ptr<sf::Text> _text_year;
+   std::unique_ptr<sf::Text> _text_copyright;
+   std::unique_ptr<sf::Text> _text_title;  //!< placeholder title rendered in place of the logo layer
+
+   std::unique_ptr<sf::Text> _text_continue_item;
+   std::unique_ptr<sf::Text> _text_new_game_item;
+   std::unique_ptr<sf::Text> _text_options_item;
+   std::unique_ptr<sf::Text> _text_quit_item;
 
    bool _fade_in_active = false;
    bool _first_time_shown = true;

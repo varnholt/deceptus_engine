@@ -222,7 +222,7 @@ void PlayerClimb::update(b2Body* /*player_body*/, bool /*in_air*/)
    //                // jointDefinition.frequencyHz = 5.0f;
    //                // jointDefinition.length = 0.01f;
    //
-   //                Audio::getInstance().playSample({"impact.wav"});
+   //                Audio::getInstance().playSample({"impact.ogg"});
    //                _climb_joint = player_body->GetWorld()->CreateJoint(&joint_def);
    //             }
    //

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="OnOffBlock" width="24" height="24">
+  <properties>
+   <property name="enabled" type="bool" value="true"/>
+   <property name="mode" type="string" value="lever"/>
+   <property name="inverted" type="bool" value="false"/>
+   <property name="time_on_ms" type="int" value="1000"/>
+   <property name="time_off_ms" type="int" value="1000"/>
+   <property name="z" type="int" value="20"/>
+  </properties>
+ </object>
+</template>

@@ -9,6 +9,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 
 #include <iostream>
 
@@ -25,7 +26,7 @@ namespace
 //     |
 //     + unused
 constexpr auto SPRITES_PER_CYCLE = 15;
-constexpr auto TOLERANCE_PIXELS = 5;
+constexpr auto TOLERANCE_PX = 5;
 constexpr auto SPIKES_TILE_INDEX_TRAP_START = (SPRITES_PER_CYCLE - 1);
 constexpr auto SPIKES_TILE_INDEX_EXTRACT_START = 1;
 constexpr auto SPIKES_TILE_INDEX_EXTRACT_END = 5;
@@ -90,6 +91,22 @@ std::string_view Spikes::objectName() const
    return "Spikes";
 }
 
+#ifdef DECEPTUS_VRSFML
+void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   for (const auto& sprite : _sprite)
+   {
+      color.draw(*sprite, draw_states);
+   }
+}
+#else
 void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
    for (const auto& sprite : _sprite)
@@ -97,6 +114,7 @@ void Spikes::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
       color.draw(*sprite);
    }
 }
+#endif
 
 int32_t Spikes::computeTuIndex()
 {
@@ -173,7 +191,7 @@ void Spikes::updateTrap()
    {
       // trap trigger is done via intersection
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-      if (player_rect.findIntersection(_player_collision_rect_px).has_value())
+      if (sfcompat::findIntersection(player_rect, _player_collision_rect_px).has_value())
       {
          // start extracting once player has intersected
          _elapsed_since_collision_ms = 0;
@@ -250,7 +268,14 @@ void Spikes::updateSpriteRect()
    const auto tu = static_cast<int32_t>(std::floor(_tu));
    for (auto& sprite : _sprite)
    {
+#ifdef DECEPTUS_VRSFML
+      sprite->textureRect = {
+         {static_cast<float>((tu * PIXELS_PER_TILE) + _tu_offset), static_cast<float>(_tv * PIXELS_PER_TILE)},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+      };
+#else
       sprite->setTextureRect({{(tu * PIXELS_PER_TILE) + _tu_offset, _tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+#endif
    }
 }
 
@@ -295,7 +320,7 @@ void Spikes::update(const sf::Time& dt)
    {
       // check for intersection with player
       const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-      if (player_rect.findIntersection(_player_collision_rect_px).has_value())
+      if (sfcompat::findIntersection(player_rect, _player_collision_rect_px).has_value())
       {
          PlayerRegistry::getFirst()->damage(100);
       }
@@ -322,13 +347,13 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
    auto instance = std::make_shared<Spikes>(parent);
 
    instance->setObjectId(data._tmx_object->_name);
-   instance->_pixel_position.x = data._tmx_object->_x_px;
-   instance->_pixel_position.y = data._tmx_object->_y_px;
+   instance->_position_px.x = data._tmx_object->_x_px;
+   instance->_position_px.y = data._tmx_object->_y_px;
 
    // make the collision rectangle a bit smaller so it's a little more lax
    instance->_player_collision_rect_px = {
-      {data._tmx_object->_x_px + TOLERANCE_PIXELS, data._tmx_object->_y_px + TOLERANCE_PIXELS},
-      {data._tmx_object->_width_px - (2 * TOLERANCE_PIXELS), data._tmx_object->_height_px - (2 * TOLERANCE_PIXELS)}
+      {data._tmx_object->_x_px + TOLERANCE_PX, data._tmx_object->_y_px + TOLERANCE_PX},
+      {data._tmx_object->_width_px - (2 * TOLERANCE_PX), data._tmx_object->_height_px - (2 * TOLERANCE_PX)}
    };
 
    const auto rect =
@@ -444,11 +469,18 @@ std::shared_ptr<Spikes> Spikes::deserialize(GameNode* parent, const GameDeserial
       auto texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "spikes.png");
       for (auto i = 0; i < sprite_count; i++)
       {
+#ifdef DECEPTUS_VRSFML
+         auto sprite = std::make_unique<sf::Sprite>();
+#else
          auto sprite = std::make_unique<sf::Sprite>(*texture);
-         sprite->setPosition(sf::Vector2f(
-            data._tmx_object->_x_px + static_cast<float>(i * x_increment_px),
-            data._tmx_object->_y_px + static_cast<float>(i * y_increment_px)
-         ));
+#endif
+         sfcompat::setPosition(
+            *sprite,
+            sf::Vector2f(
+               data._tmx_object->_x_px + static_cast<float>(i * x_increment_px),
+               data._tmx_object->_y_px + static_cast<float>(i * y_increment_px)
+            )
+         );
 
          instance->_sprite.push_back(std::move(sprite));
       }
@@ -514,16 +546,20 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
          }
 
          spikes->_player_collision_rect_px = {
-            {static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PIXELS, static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PIXELS},
-            {PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS), PIXELS_PER_TILE - (2 * TOLERANCE_PIXELS)}
+            {static_cast<float>(i * PIXELS_PER_TILE) + TOLERANCE_PX, static_cast<float>(j * PIXELS_PER_TILE) + TOLERANCE_PX},
+            {PIXELS_PER_TILE - (2 * TOLERANCE_PX), PIXELS_PER_TILE - (2 * TOLERANCE_PX)}
          };
 
          const auto rect = sf::FloatRect{
             {static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
          };
 
+#ifdef DECEPTUS_VRSFML
+         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
+#else
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*spikes->_texture);
-         sprite->setPosition(sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
+#endif
+         sfcompat::setPosition(*sprite, sf::Vector2f(static_cast<float>(i * PIXELS_PER_TILE), static_cast<float>(j * PIXELS_PER_TILE)));
          spikes->_sprite.push_back(std::move(sprite));
          spikes->updateSpriteRect();
 

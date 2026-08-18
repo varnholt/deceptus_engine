@@ -3,7 +3,9 @@
 #include "framework/easings/easings.h"
 #include "framework/image/psd.h"
 #include "framework/tools/globalclock.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/animation/animationframedata.h"
 #include "game/camera/camerapanorama.h"
 #include "game/config/gameconfiguration.h"
@@ -11,13 +13,14 @@
 #include "game/io/texturepool.h"
 #include "game/level/roomupdater.h"
 #include "game/player/extratable.h"
-#include "game/player/playerregistry.h"
 #include "game/player/playerinfo.h"
+#include "game/player/playerregistry.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 
 #include <iostream>
+#include <set>
 #include <sstream>
 
 namespace
@@ -60,8 +63,6 @@ constexpr auto console_base_font_size_px = 7u;
 InfoLayer::InfoLayer()
 {
    _font.load("data/game/font.png", "data/game/font.map");
-   _console_font.openFromFile("data/fonts/deceptum.ttf");
-   const_cast<sf::Texture&>(_console_font.getTexture(console_base_font_size_px)).setSmooth(false);
 
    const auto player_health_layers = {
       "1",
@@ -148,18 +149,33 @@ InfoLayer::InfoLayer()
       try
       {
          const auto texture_size = sf::Vector2u(psd_layer.getWidth(), psd_layer.getHeight());
+#ifdef DECEPTUS_VRSFML
+         auto texture_result = sf::Texture::create(texture_size);
+         if (!texture_result)
+         {
+            throw std::runtime_error("failed to create texture");
+         }
+         auto texture = std::make_shared<sf::Texture>(std::move(*texture_result));
+         texture->update(reinterpret_cast<const uint8_t*>(psd_layer.getImage().getData().data()));
+
+         auto sprite = std::make_shared<sf::Sprite>();
+         sprite->position = {static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop())};
+         sprite->textureRect =
+            sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(psd_layer.getWidth()), static_cast<float>(psd_layer.getHeight())}};
+#else
          auto texture = std::make_shared<sf::Texture>(texture_size);
          texture->update(reinterpret_cast<const uint8_t*>(psd_layer.getImage().getData().data()));
 
          auto sprite = std::make_shared<sf::Sprite>(*texture);
          sprite->setPosition({static_cast<float>(psd_layer.getLeft()), static_cast<float>(psd_layer.getTop())});
+#endif
 
          layer->_visible = psd_layer.isVisible();
          layer->_texture = texture;
          layer->_sprite = sprite;
 
          auto layer_data = std::make_shared<LayerData>(layer);
-         layer_data->_pos = sprite->getPosition();
+         layer_data->_pos = sfcompat::getPosition(*sprite);
          _layers[psd_layer.getName()] = layer_data;
 
          // store all player health related layers
@@ -208,7 +224,7 @@ InfoLayer::InfoLayer()
    _heart_animation._frames = frames._frames;
    _heart_animation._color_texture = frames._texture;
    _heart_animation.setFrameTimes(frames._frame_times);
-   _heart_animation.setOrigin(frames._origin);
+   sfcompat::setOrigin(_heart_animation, frames._origin);
    _heart_animation._reset_to_first_frame = false;
 
    // init min/max durations for randomized animations
@@ -248,26 +264,43 @@ InfoLayer::InfoLayer()
 void InfoLayer::loadInventoryItems()
 {
    const auto& inventory = SaveState::getPlayerInfo()._inventory;
-   const auto& inventory_item_descriptions = inventory._descriptions;
+   const auto& inventory_item_descriptions = inventory.getDescriptions();
    _inventory_texture = TexturePool::getInstance().get("data/sprites/inventory_items.png");
 
    std::ranges::for_each(
       inventory_item_descriptions,
       [this](const auto& image)
       {
-         // store sprites
+   // store sprites
+#ifdef DECEPTUS_VRSFML
+         std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>();
+         sprite->textureRect = sf::FloatRect{
+            {static_cast<float>(image._x_px), static_cast<float>(image._y_px)},
+            {static_cast<float>(icon_width), static_cast<float>(icon_height)}
+         };
+#else
          std::unique_ptr<sf::Sprite> sprite = std::make_unique<sf::Sprite>(*_inventory_texture);
          sprite->setTextureRect(sf::IntRect({image._x_px, image._y_px}, {icon_width, icon_height}));
+#endif
          _sprites[image._name] = std::move(sprite);
       }
    );
 
+#ifdef DECEPTUS_VRSFML
+   auto inventory_item_1 = std::make_unique<sf::Sprite>();
+   auto inventory_item_2 = std::make_unique<sf::Sprite>();
+   inventory_item_1->textureRect = {};
+   inventory_item_2->textureRect = {};
+   inventory_item_1->position = {frame_0_pos_x_px, frame_0_pos_y_px};
+   inventory_item_2->position = {frame_1_pos_x_px, frame_1_pos_y_px};
+#else
    auto inventory_item_1 = std::make_unique<sf::Sprite>(*_inventory_texture);
    auto inventory_item_2 = std::make_unique<sf::Sprite>(*_inventory_texture);
    inventory_item_1->setTextureRect({});
    inventory_item_2->setTextureRect({});
    inventory_item_1->setPosition({frame_0_pos_x_px, frame_0_pos_y_px});
    inventory_item_2->setPosition({frame_1_pos_x_px, frame_1_pos_y_px});
+#endif
    _inventory_sprites[0] = std::move(inventory_item_1);
    _inventory_sprites[1] = std::move(inventory_item_2);
 }
@@ -284,14 +317,24 @@ void InfoLayer::updateInventoryItems()
          continue;
       }
 
-      const auto& sprite = _sprites[slot];
+      // find rather than operator[], which would insert a null sprite for an unknown slot and leave
+      // the table quietly growing a broken entry every frame
+      const auto sprite_it = _sprites.find(slot);
 
-      if (sprite == nullptr)
+      if (sprite_it == _sprites.end() || sprite_it->second == nullptr)
       {
-         Log::Fatal() << "could not find matching item description for '" << slot << "'. please edit inventory_items.json";
+         // a missing icon is a cosmetic problem, so the item is drawn without one rather than taken
+         // as a reason to end the process. warned once per slot, because this runs every frame
+         static std::set<std::string> warned_slots;
+         if (warned_slots.insert(slot).second)
+         {
+            Log::Error() << "no item description for '" << slot << "', it will have no icon. please edit inventory_items.json";
+         }
+
+         continue;
       }
 
-      _inventory_sprites[i]->setTextureRect(sprite->getTextureRect());
+      sfcompat::setTextureRect(*_inventory_sprites[i], sfcompat::getTextureRect(*sprite_it->second));
    }
 }
 
@@ -303,26 +346,35 @@ void InfoLayer::updateHealthLayerOffsets()
    // -> move out health bar
    // if game state 'not running' detected
    // -> reset
-   if (GameState::getInstance().getMode() == ExecutionMode::NotRunning)
-   {
-      _hide_time_health.reset();
-      _show_time_health.reset();
-      _player_health_x_offset = x_offset_hidden;
-   }
-
    const auto now = GlobalClock::getInstance().getElapsedTime();
    constexpr auto duration_show_s = 1.0f;
    constexpr auto duration_hide_s = 1.0f;
 
-   auto effect_elapsed = false;
+   if (GameState::getInstance().getMode() == ExecutionMode::NotRunning)
+   {
+      _hide_time_health.reset();
+      _player_health_x_offset = x_offset_hidden;
 
+      // a pending slide-in must be deferred here, not dropped: wasm loads levels synchronously
+      // inside the update loop, so setLoading(false) can land in a frame where the queued
+      // 'running' mode has not been synced yet. re-stamping keeps the effect at its first frame
+      // (fully hidden) until the game actually runs.
+      if (_show_time_health.has_value())
+      {
+         _show_time_health = now;
+      }
+   }
+
+   // when an effect runs out its offset is snapped to the final value rather than left wherever the
+   // last evaluated frame happened to put it. a single long frame (a fullscreen transition, a level
+   // load) can step the normalized time straight past 1.0, which used to leave the hud parked a few
+   // pixels short of its target for good, since nothing touches the offset afterwards.
    if (_hide_time_health.has_value())
    {
       // evaluate hide time
       const auto time_diff_s = (now - _hide_time_health.value()).asSeconds();
       const auto time_diff_norm = time_diff_s / duration_hide_s;
-      effect_elapsed = time_diff_norm > 1.0f;
-      if (!effect_elapsed)
+      if (time_diff_norm <= 1.0f)
       {
          const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
          const auto time_diff_eased = Easings::easeInQuad<float>(time_diff_norm_clamped);
@@ -330,6 +382,7 @@ void InfoLayer::updateHealthLayerOffsets()
       }
       else
       {
+         _player_health_x_offset = x_offset_hidden;
          _hide_time_health.reset();
       }
    }
@@ -337,9 +390,8 @@ void InfoLayer::updateHealthLayerOffsets()
    {
       // evaluate show time
       const auto time_diff_s = (now - _show_time_health.value()).asSeconds();
-      const auto time_diff_norm = time_diff_s / duration_hide_s;
-      effect_elapsed = time_diff_norm > 1.0f;
-      if (!effect_elapsed)
+      const auto time_diff_norm = time_diff_s / duration_show_s;
+      if (time_diff_norm <= 1.0f)
       {
          const auto time_diff_norm_clamped = std::clamp(time_diff_norm, 0.0f, 1.0f);
          const auto time_diff_eased = Easings::easeOutCubic<float>(time_diff_norm_clamped);
@@ -347,13 +399,9 @@ void InfoLayer::updateHealthLayerOffsets()
       }
       else
       {
+         _player_health_x_offset = 0.0f;
          _show_time_health.reset();
       }
-   }
-
-   if (effect_elapsed)
-   {
-      return;
    }
 
    std::ranges::for_each(
@@ -361,18 +409,18 @@ void InfoLayer::updateHealthLayerOffsets()
       [this](const std::shared_ptr<LayerData>& layer_data)
       {
          auto layer = layer_data->_layer;
-         layer->_sprite->setPosition({layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y});
+         sfcompat::setPosition(*layer->_sprite, {layer_data->_pos.x + _player_health_x_offset, layer_data->_pos.y});
       }
    );
 
-   _animation_heart->setPosition({heart_pos_x_px + _player_health_x_offset, heart_pos_y_px});
-   _animation_stamina->setPosition({stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px});
-   _animation_skull_blink->setPosition({skull_pos_x_px + _player_health_x_offset, skull_pos_y_px});
-   _animation_hp_unlock_left->setPosition({_player_health_x_offset, 0.0f});
-   _animation_hp_unlock_right->setPosition({_player_health_x_offset, 0.0f});
+   sfcompat::setPosition(*_animation_heart, {heart_pos_x_px + _player_health_x_offset, heart_pos_y_px});
+   sfcompat::setPosition(*_animation_stamina, {stamina_pos_x_px + _player_health_x_offset, stamina_pos_y_px});
+   sfcompat::setPosition(*_animation_skull_blink, {skull_pos_x_px + _player_health_x_offset, skull_pos_y_px});
+   sfcompat::setPosition(*_animation_hp_unlock_left, {_player_health_x_offset, 0.0f});
+   sfcompat::setPosition(*_animation_hp_unlock_right, {_player_health_x_offset, 0.0f});
 
-   _inventory_sprites[0]->setPosition({frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px});
-   _inventory_sprites[1]->setPosition({frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px});
+   sfcompat::setPosition(*_inventory_sprites[0], {frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px});
+   sfcompat::setPosition(*_inventory_sprites[1], {frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px});
 }
 
 void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
@@ -548,10 +596,20 @@ void InfoLayer::drawEventReplay(sf::RenderStates states, sf::RenderTarget& windo
 
 void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
 {
+   if (!DisplayMode::getInstance().isSet(Display::InfoLayer))
+   {
+      return;
+   }
+
    const auto w = GameConfiguration::getInstance()._view_width;
    const auto h = GameConfiguration::getInstance()._view_height;
+#ifdef DECEPTUS_VRSFML
+   const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
+   states.view = view;
+#else
    const sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
+#endif
 
    drawCameraPanorama(window, states);
    drawHealth(window, states);
@@ -564,8 +622,12 @@ void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
    auto w = GameConfiguration::getInstance()._view_width;
    auto h = GameConfiguration::getInstance()._view_height;
 
+#ifdef DECEPTUS_VRSFML
+   const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
+#else
    sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
+#endif
 
    std::stringstream stream_tl;
    std::stringstream stream_px;
@@ -595,34 +657,61 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    const auto offset_x_px = 8 * scale_factor;
    const auto offset_y_px = console_base_height_px - 24 * scale_factor;
 
+#ifdef DECEPTUS_VRSFML
+   const sf::View view =
+      sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(view_width_px), static_cast<float>(view_height_px)}});
+
+   const auto& layer_health = _layers["console"]->_layer;
+   layer_health->draw(window, sf::RenderStates{.view = view});
+
+   const sf::View view_screen = sf::View::fromRect(
+      sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(console_base_width_px), static_cast<float>(console_base_height_px)}}
+   );
+
+   sf::Text console_text(*_console_font, sf::Text::Data{});
+   console_text.setCharacterSize(console_base_font_size_px * scale_factor);
+#else
    sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(view_width_px), static_cast<float>(view_height_px)}));
    window.setView(view);
 
    const auto& layer_health = _layers["console"]->_layer;
    layer_health->draw(window, states);
 
-   sf::View view_screen(
-      sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(console_base_width_px), static_cast<float>(console_base_height_px)})
+   sf::View view_screen(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(console_base_width_px), static_cast<float>(console_base_height_px)})
    );
    window.setView(view_screen);
 
-   sf::Text console_text(_console_font);
+   sf::Text console_text(*_console_font);
    console_text.setCharacterSize(console_base_font_size_px * scale_factor);
+#endif
 
    // draw command history
    auto line_index = 0;
    for (auto it = commands.crbegin(); it != commands.crend(); ++it)
    {
+#ifdef DECEPTUS_VRSFML
+      console_text.setString(it->c_str());
+#else
       console_text.setString(*it);
+#endif
       console_text.setFillColor(sf::Color::White);
+#ifdef DECEPTUS_VRSFML
+      console_text.position = {static_cast<float>(offset_x_px), static_cast<float>(offset_y_px - ((line_index + 1) * line_spacing_px))};
+      window.draw(console_text, sf::RenderStates{.view = view_screen});
+#else
       console_text.setPosition({static_cast<float>(offset_x_px), static_cast<float>(offset_y_px - ((line_index + 1) * line_spacing_px))});
       window.draw(console_text);
+#endif
       line_index++;
    }
 
+#ifdef DECEPTUS_VRSFML
+   console_text.setString(command.c_str());
+#else
    console_text.setString(command);
+#endif
    console_text.setFillColor(sf::Color::White);
-   console_text.setPosition({static_cast<float>(offset_x_px), static_cast<float>(console_base_height_px - 14 * scale_factor)});
+   sfcompat::setPosition(console_text, {static_cast<float>(offset_x_px), static_cast<float>(console_base_height_px - 14 * scale_factor)});
    window.draw(console_text);
 
    // draw cursor
@@ -631,51 +720,65 @@ void InfoLayer::drawConsole(sf::RenderTarget& window, sf::RenderStates states)
    {
       const auto cursor_position = console_text.findCharacterPos(command.size());
       console_text.setString("_");
+#ifdef DECEPTUS_VRSFML
+      console_text.position = cursor_position;
+      window.draw(console_text, sf::RenderStates{.view = view_screen});
+#else
       console_text.setPosition(cursor_position);
       window.draw(console_text);
+#endif
    }
 
    // draw console help
-   line_index = 0;
+   const auto help_x_px = console_base_width_px / 2;
    const auto indent_px = console_base_width_px / 40;
-   const auto& help = console.help();
-   std::ostringstream oss;
+   // two lines of margin so the last one stays inside the console frame rather than on its border
+   const auto help_line_capacity = static_cast<size_t>(std::max(0, offset_y_px / line_spacing_px - 2));
+   const auto help_lines = console.help().getVisibleLines(command, help_line_capacity);
 
-   std::vector<std::string> sorted_topics;
-   sorted_topics.reserve(help._help_messages.size());
-   for (const auto& entry : help._help_messages)
+   line_index = 0;
+   for (const auto& help_line : help_lines)
    {
-      sorted_topics.push_back(entry.first);
-   }
+      auto text_x_px = help_x_px;
+      auto color = sf::Color::White;
 
-   std::ranges::sort(sorted_topics.begin(), sorted_topics.end());
-   for (const auto& topic : sorted_topics)
-   {
-      console_text.setString(topic);
-      console_text.setFillColor(sf::Color::Green);
-      console_text.setPosition({static_cast<float>(console_base_width_px / 2), static_cast<float>((++line_index) * line_spacing_px)});
-      window.draw(console_text);
-
-      const auto& commands = help._help_messages.at(topic);
-      for (const auto& command : commands)
+      switch (help_line._kind)
       {
-         console_text.setString(command.description);
-         console_text.setFillColor(sf::Color::White);
-         console_text.setPosition(
-            {static_cast<float>(console_base_width_px / 2 + indent_px), static_cast<float>((++line_index) * line_spacing_px)}
-         );
-         window.draw(console_text);
-
-         for (const auto& example : command.examples)
+         case Console::Help::HelpLine::Kind::Topic:
          {
-            console_text.setString(example);
-            console_text.setFillColor(sf::Color::Red);
-            console_text.setPosition(
-               {static_cast<float>(console_base_width_px / 2 + indent_px * 2), static_cast<float>((++line_index) * line_spacing_px)}
-            );
-            window.draw(console_text);
+            color = sf::Color::Green;
+            break;
+         }
+         case Console::Help::HelpLine::Kind::Command:
+         {
+            text_x_px += indent_px;
+            break;
+         }
+         case Console::Help::HelpLine::Kind::Example:
+         {
+            text_x_px += indent_px * 2;
+            color = sf::Color::Red;
+            break;
+         }
+         case Console::Help::HelpLine::Kind::Hint:
+         {
+            color = sf::Color{128, 128, 128};
+            break;
          }
       }
+
+#ifdef DECEPTUS_VRSFML
+      console_text.setString(help_line._text.c_str());
+#else
+      console_text.setString(help_line._text);
+#endif
+      console_text.setFillColor(color);
+      sfcompat::setPosition(console_text, {static_cast<float>(text_x_px), static_cast<float>((++line_index) * line_spacing_px)});
+#ifdef DECEPTUS_VRSFML
+      window.draw(console_text, sf::RenderStates{.view = view_screen});
+#else
+      window.draw(console_text);
+#endif
    }
 }
 
@@ -809,7 +912,14 @@ void InfoLayer::drawInventoryItem(sf::RenderTarget& window, sf::RenderStates sta
          continue;
       }
 
+#ifdef DECEPTUS_VRSFML
+      // vrsfml sprites carry no texture and the view travels in the render states
+      auto item_states = states;
+      item_states.texture = _inventory_texture.get();
+      window.draw(*_inventory_sprites[i], item_states);
+#else
       window.draw(*_inventory_sprites[i]);
+#endif
       _slot_item_layers[i]->draw(window, states);
    }
 }

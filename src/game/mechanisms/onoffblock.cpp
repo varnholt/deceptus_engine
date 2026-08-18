@@ -3,9 +3,12 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+#include <array>
 
 /*
 
@@ -22,9 +25,28 @@
 
 namespace
 {
+static constexpr bool default_on_off_block_inverted = false;
+
+static constexpr std::array on_off_block_properties{
+   PropertyInfo{.name = "enabled", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "mode", .type = "string", .default_value = std::string_view{"lever"}},
+   PropertyInfo{.name = "inverted", .type = "bool", .default_value = default_on_off_block_inverted},
+   PropertyInfo{.name = "time_on_ms", .type = "int", .default_value = int32_t{1000}},
+   PropertyInfo{.name = "time_off_ms", .type = "int", .default_value = int32_t{1000}},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema on_off_block_schema{
+   .type_name = "OnOffBlock",
+   .layer_name = "on_off_blocks",
+   .default_width = 24,
+   .default_height = 24,
+   .properties = on_off_block_properties,
+};
 const auto registered_onoffblock = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(on_off_block_schema);
+
    registry.mapGroupToLayer("OnOffBlock", "on_off_blocks");
 
    registry.registerLayerName(
@@ -54,9 +76,11 @@ namespace
 constexpr auto width_px = 24;
 constexpr auto height_px = 24;
 constexpr auto bevel_px = 0;
+constexpr auto side_inset_px = 1;
 constexpr auto width_m = width_px * MPP;
 constexpr auto height_m = height_px * MPP;
 constexpr auto bevel_m = bevel_px * MPP;
+constexpr auto side_inset_m = side_inset_px * MPP;
 constexpr auto count_columns = 8;
 constexpr auto animation_speed = 40.0f;
 }  // namespace
@@ -76,8 +100,12 @@ void OnOffBlock::setup(const GameDeserializeData& data)
    setObjectId(data._tmx_object->_name);
 
    _texture_map = TexturePool::getInstance().get("data/sprites/on_off_block.png");
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture_map);
-   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+#endif
+   sfcompat::setPosition(*_sprite, {data._tmx_object->_x_px, data._tmx_object->_y_px});
 
    _rectangle = {{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
 
@@ -125,7 +153,7 @@ void OnOffBlock::setup(const GameDeserializeData& data)
          _time_off_ms = static_cast<int32_t>(time_off_it->second->_value_int.value());
       }
 
-      _inverted = ValueReader::readValue<bool>("inverted", map).value_or(false);
+      _inverted = ValueReader::readValue<bool>("inverted", map).value_or(default_on_off_block_inverted);
    }
 
    // set up shape
@@ -143,10 +171,10 @@ void OnOffBlock::setup(const GameDeserializeData& data)
    std::array<b2Vec2, 8> vertices{
       b2Vec2{bevel_m, 0.0f},
       b2Vec2{0.0f, bevel_m},
-      b2Vec2{0.0f, height_m - bevel_m},
-      b2Vec2{bevel_m, height_m},
-      b2Vec2{width_m - bevel_m, height_m},
-      b2Vec2{width_m, height_m - bevel_m},
+      b2Vec2{0.0f, height_m - bevel_m - side_inset_m},
+      b2Vec2{bevel_m, height_m - side_inset_m},
+      b2Vec2{width_m - bevel_m, height_m - side_inset_m},
+      b2Vec2{width_m, height_m - bevel_m - side_inset_m},
       b2Vec2{width_m, bevel_m},
       b2Vec2{width_m - bevel_m, 0.0f},
    };
@@ -177,7 +205,14 @@ void OnOffBlock::updateSpriteRect()
    _tu_tl = _sprite_index_current % count_columns;
    _tv_tl = _sprite_index_current / count_columns;
 
+#ifdef DECEPTUS_VRSFML
+   _sprite->textureRect = {
+      {static_cast<float>(_tu_tl * PIXELS_PER_TILE), static_cast<float>(_tv_tl * PIXELS_PER_TILE)},
+      {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+   };
+#else
    _sprite->setTextureRect({{_tu_tl * PIXELS_PER_TILE, _tv_tl * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}});
+#endif
 }
 
 const sf::FloatRect& OnOffBlock::getPixelRect() const
@@ -185,9 +220,16 @@ const sf::FloatRect& OnOffBlock::getPixelRect() const
    return _rectangle;
 }
 
-void OnOffBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void OnOffBlock::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   target.draw(*_sprite);
+   draw(target, normal, {});
+}
+
+void OnOffBlock::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture_map.get();
+   target.draw(*_sprite, draw_states);
 }
 
 void OnOffBlock::update(const sf::Time& dt)

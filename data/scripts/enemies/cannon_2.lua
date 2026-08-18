@@ -34,8 +34,8 @@ mProjectileIndex = 0
 mIdle = true
 mFired = false
 
-SPRITE_WIDTH = 6 * 24
-SPRITE_HEIGHT = 3 * 24
+SPRITE_WIDTH_PX = 6 * 24
+SPRITE_HEIGHT_PX = 3 * 24
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -46,12 +46,12 @@ function initialize()
    -- set up boom and audio distance
    addHitbox(0, 0, 48, 48)
    addAudioRange(400.0, 0.0, 200.0, 1.0)
-   addSample("mechanism_cannon_1.wav")
-   addSample("mechanism_cannon_2.wav")
-   addSample("mechanism_cannon_3.wav")
-   addSample("mechanism_cannon_4.wav")
-   addSample("mechanism_cannon_boom_1.wav")
-   addSample("mechanism_cannon_boom_2.wav")
+   addSample("mechanism_cannon_1.ogg")
+   addSample("mechanism_cannon_2.ogg")
+   addSample("mechanism_cannon_3.ogg")
+   addSample("mechanism_cannon_4.ogg")
+   addSample("mechanism_cannon_boom_1.ogg")
+   addSample("mechanism_cannon_boom_2.ogg")
 
    addWeapon(WeaponType["Gun"], 1000, 60, 0.0, 0.2) -- interval, damage, gravity_scale, radius
 
@@ -68,9 +68,9 @@ function initialize()
 
    registerHitSamples(
       "data/sprites/enemy_pirate_cannon_cannonball.png",
-      "mechanism_cannon_boom_1.wav",
+      "mechanism_cannon_boom_1.ogg",
       0.5,
-      "mechanism_cannon_boom_2.wav",
+      "mechanism_cannon_boom_2.ogg",
       0.5
    )
 
@@ -94,8 +94,8 @@ function initialize()
       0,
       0,
       0,
-      SPRITE_WIDTH,
-      SPRITE_HEIGHT
+      SPRITE_WIDTH_PX,
+      SPRITE_HEIGHT_PX
    )
 end
 
@@ -107,7 +107,7 @@ function writeProperty(key, value)
       if (value == "right") then
          -- print("setting alignment to left")
          mX = 1.0
-         mAlignmentOffset = 5 * SPRITE_HEIGHT
+         mAlignmentOffset = 5 * SPRITE_HEIGHT_PX
       end
    elseif (key == "time_offset_s") then
       mElapsedUntilFired = mElapsedUntilFired + tonumber(value)
@@ -127,7 +127,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function fire()
-   playSample(string.format("mechanism_cannon_%d.wav", math.random(1, 4)), 0.5)
+   playSample(string.format("mechanism_cannon_%d.ogg", math.random(1, 4)), 0.5)
 
    useWeapon(
       0,
@@ -227,10 +227,10 @@ function update(dt)
    if (index ~= mSpriteIndex) then
       updateSpriteRect(
          0,
-         col * SPRITE_WIDTH,
-         row * SPRITE_HEIGHT + mAlignmentOffset,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
+         col * SPRITE_WIDTH_PX,
+         row * SPRITE_HEIGHT_PX + mAlignmentOffset,
+         SPRITE_WIDTH_PX,
+         SPRITE_HEIGHT_PX
       )
    end
 

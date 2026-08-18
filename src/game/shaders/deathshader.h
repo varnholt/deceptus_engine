@@ -1,5 +1,7 @@
 #pragma once
 
+#include "framework/tools/sfmlshader.h"
+
 #include <SFML/Graphics.hpp>
 #include <memory>
 
@@ -34,7 +36,7 @@ public:
    const std::shared_ptr<sf::RenderTexture>& getRenderTexture() const;
 
 private:
-   sf::Shader _shader;
+   sfcompat::Shader _shader;
 
    std::shared_ptr<sf::RenderTexture> _render_texture;
 

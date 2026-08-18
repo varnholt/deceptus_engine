@@ -6,26 +6,19 @@
 
 #include "gl_current.h"
 
-#include <string>
-using std::string;
 #include <map>
+#include <stdexcept>
+#include <string>
 
 #include "glm/glm.hpp"
-using glm::mat3;
-using glm::mat4;
-using glm::vec2;
-using glm::vec3;
-using glm::vec4;
-
-#include <stdexcept>
 
 /// \brief exception type thrown for shader compilation, linking and validation failures.
 class GLSLProgramException : public std::runtime_error
 {
 public:
    /// \brief constructs the exception with a descriptive error message.
-   /// \param msg message describing the OpenGL program failure.
-   GLSLProgramException(const string& msg) : std::runtime_error(msg)
+   /// \param message message describing the OpenGL program failure.
+   GLSLProgramException(const std::string& message) : std::runtime_error(message)
    {
    }
 };
@@ -42,7 +35,7 @@ enum GLSLShaderType
    TESS_EVALUATION = GL_TESS_EVALUATION_SHADER,
    COMPUTE = GL_COMPUTE_SHADER
 };
-};
+};  // namespace GLSLShader
 
 /// \brief manages shader compilation, linking, binding and uniform updates.
 class GLSLProgram
@@ -66,7 +59,7 @@ public:
    /// \param source GLSL source code to compile.
    /// \param type shader stage to compile.
    /// \param fileName optional file name used in compiler error messages.
-   void compileShader(const string& source, GLSLShader::GLSLShaderType type, const char* fileName = nullptr);
+   void compileShader(const std::string& source, GLSLShader::GLSLShaderType type, const char* fileName = nullptr);
 
    /// \brief links all attached shaders into a usable program.
    void link();
@@ -105,47 +98,47 @@ public:
    /// \brief sets a vec2 uniform value.
    /// \param name uniform variable name.
    /// \param v vec2 value.
-   void setUniform(const char* name, const vec2& v);
+   void setUniform(const char* name, const glm::vec2& v);
 
    /// \brief sets a vec3 uniform value.
    /// \param name uniform variable name.
    /// \param v vec3 value.
-   void setUniform(const char* name, const vec3& v);
+   void setUniform(const char* name, const glm::vec3& v);
 
    /// \brief sets a vec4 uniform value.
    /// \param name uniform variable name.
    /// \param v vec4 value.
-   void setUniform(const char* name, const vec4& v);
+   void setUniform(const char* name, const glm::vec4& v);
 
    /// \brief sets a mat4 uniform value.
    /// \param name uniform variable name.
    /// \param m matrix data uploaded in column-major order.
-   void setUniform(const char* name, const mat4& m);
+   void setUniform(const char* name, const glm::mat4& m);
 
    /// \brief sets a mat3 uniform value.
    /// \param name uniform variable name.
    /// \param m matrix data uploaded in column-major order.
-   void setUniform(const char* name, const mat3& m);
+   void setUniform(const char* name, const glm::mat3& m);
 
    /// \brief sets a float uniform value.
    /// \param name uniform variable name.
-   /// \param val scalar float value.
-   void setUniform(const char* name, float val);
+   /// \param value scalar float value.
+   void setUniform(const char* name, float value);
 
    /// \brief sets a signed integer uniform value.
    /// \param name uniform variable name.
-   /// \param val scalar integer value.
-   void setUniform(const char* name, int val);
+   /// \param value scalar integer value.
+   void setUniform(const char* name, int value);
 
    /// \brief sets a boolean uniform value as an integer uniform.
    /// \param name uniform variable name.
-   /// \param val boolean value to upload.
-   void setUniform(const char* name, bool val);
+   /// \param value boolean value to upload.
+   void setUniform(const char* name, bool value);
 
    /// \brief sets an unsigned integer uniform value.
    /// \param name uniform variable name.
-   /// \param val scalar unsigned value.
-   void setUniform(const char* name, GLuint val);
+   /// \param value scalar unsigned value.
+   void setUniform(const char* name, GLuint value);
 
    /// \brief prints active non-block uniform names, locations and types.
    void printActiveUniforms();
@@ -163,8 +156,8 @@ public:
 
 private:
    GLint getUniformLocation(const char* name);
-   bool fileExists(const string& fileName);
-   string getExtension(const char* fileName);
+   bool fileExists(const std::string& fileName);
+   std::string getExtension(const char* fileName);
 
    // Make these private in order to make the object non-copyable
    GLSLProgram(const GLSLProgram& /*other*/)
@@ -172,8 +165,8 @@ private:
    }
    GLSLProgram& operator=(const GLSLProgram& /*other*/);
 
-   int32_t mHandle = 0;
-   bool mLinked = false;
-   std::map<string, int> uniformLocations;
+   int32_t _handle = 0;
+   bool _linked = false;
+   std::map<std::string, int> _uniform_locations;
    std::string _filename;
 };

@@ -24,6 +24,11 @@ bool GameMechanism::isSerialized() const
    return _serialized;
 }
 
+std::optional<GameMechanismObserver::LuaVariant> GameMechanism::getProperty(const std::string&) const
+{
+   return std::nullopt;
+}
+
 bool GameMechanism::isDestructible() const
 {
    return false;
@@ -122,6 +127,11 @@ void GameMechanism::draw(sf::RenderTarget& /*target*/, sf::RenderTarget& /*norma
 {
 }
 
+void GameMechanism::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& /*states*/)
+{
+   draw(target, normal);
+}
+
 void GameMechanism::update(const sf::Time& /*dt*/)
 {
 }
@@ -160,6 +170,11 @@ bool GameMechanism::isPostLighting() const
 bool GameMechanism::isOverlay() const
 {
    return _is_overlay;
+}
+
+MechanismRenderStage GameMechanism::getRenderStage() const
+{
+   return _render_stage;
 }
 
 void GameMechanism::setVisible(bool visible)

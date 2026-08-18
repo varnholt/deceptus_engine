@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
@@ -16,9 +17,21 @@ int32_t Rope::_instance_counter = 0;
 
 namespace
 {
+static constexpr std::array rope_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema rope_schema{
+   .type_name = "Rope",
+   .layer_name = "ropes",
+   .default_width = 24,
+   .default_height = 96,
+   .properties = rope_properties,
+};
 const auto registered_rope = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(rope_schema);
+
    registry.mapGroupToLayer("Rope", "ropes");
 
    registry.registerLayerName(
@@ -65,6 +78,11 @@ std::string_view Rope::objectName() const
 }
 
 void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& incoming_states)
 {
    std::optional<b2Vec2> q1_prev;
    std::optional<b2Vec2> q4_prev;
@@ -134,13 +152,21 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    }
 
    // render color texture
-   sf::RenderStates states;
+   sf::RenderStates states = incoming_states;
    states.texture = _texture.get();
+#ifdef DECEPTUS_VRSFML
+   color.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
+#else
    color.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
-   
+#endif
+
    // render normal map (same geometry, different texture)
    states.texture = _normal_map.get();
+#ifdef DECEPTUS_VRSFML
+   normal.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
+#else
    normal.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
+#endif
 }
 
 void Rope::pushChain(float impulse)
@@ -166,7 +192,8 @@ void Rope::update(const sf::Time& dt)
       return;
    }
 
-   if (_player_impulse.has_value() && PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_bounding_box).has_value())
+   if (_player_impulse.has_value() &&
+       sfcompat::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _bounding_box).has_value())
    {
       // using a fix timestep for now, everything else lets box2d go nuts
       const auto impulse = PlayerRegistry::getFirst()->getBody()->GetLinearVelocity().x * _player_impulse.value() * dt.asSeconds();
@@ -203,7 +230,7 @@ void Rope::setup(const GameDeserializeData& data)
 {
    const auto path = data._base_path / "tilesets" / "catacombs-level-diffuse.png";
    _texture = TexturePool::getInstance().get(path);
-   
+
    // load default flat normal map
    _normal_map = TexturePool::getInstance().get("data/sprites/default_normal.png");
 
@@ -256,9 +283,9 @@ void Rope::setup(const GameDeserializeData& data)
    }
 
    // init segment length
-   std::vector<sf::Vector2f> pixel_path = data._tmx_object->_polyline->_path;
-   const auto path_0_px = pixel_path.at(0);
-   const auto path_1_px = pixel_path.at(1);
+   std::vector<sf::Vector2f> path_px = data._tmx_object->_polyline->_path;
+   const auto path_0_px = path_px.at(0);
+   const auto path_1_px = path_px.at(1);
    const auto rope_length_px = path_1_px - path_0_px;
    _segment_length_m = (SfmlMath::length(rope_length_px) * MPP) / static_cast<float>(_segment_count);
 
@@ -318,7 +345,12 @@ sf::Vector2i Rope::getPixelPosition() const
    return _position_px;
 }
 
-void Rope::setPixelPosition(const sf::Vector2i& pixel_position)
+void Rope::setPixelPosition(const sf::Vector2i& position_px)
 {
-   _position_px = pixel_position;
+   _position_px = position_px;
+}
+
+b2Body* Rope::getAnchorBody() const
+{
+   return _anchor_a_body;
 }

@@ -1,7 +1,9 @@
 #include "zoomrect.h"
 
+#include <array>
 #include <iostream>
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/camera/camerazoom.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -9,9 +11,21 @@
 
 namespace
 {
+static constexpr std::string_view default_zoom_rect_values = "0.0:1.0;1.0:1.0";
+static constexpr std::array zoom_rect_properties{
+   PropertyInfo{.name = "values", .type = "string", .default_value = default_zoom_rect_values},
+};
+static constexpr MechanismSchema zoom_rect_schema{
+   .type_name = "ZoomRect",
+   .layer_name = "zoom_rects",
+   .default_width = 192,
+   .default_height = 192,
+   .properties = zoom_rect_properties,
+};
 const auto registered_zoomrect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(zoom_rect_schema);
    registry.mapGroupToLayer("ZoomRect", "zoom_rects");
 
    registry.registerLayerName(
@@ -89,7 +103,7 @@ void ZoomRect::update(const sf::Time& dt)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
    const auto player_position_px = PlayerRegistry::getFirst()->getPixelPositionFloat();
-   const auto within_rect = (player_rect.findIntersection(_rect_px).has_value());
+   const auto within_rect = sfcompat::findIntersection(player_rect, _rect_px).has_value();
 
    if (!within_rect)
    {
@@ -164,7 +178,7 @@ void ZoomRect::setup(const GameDeserializeData& data)
    if (data._tmx_object->_properties)
    {
       const auto& map = data._tmx_object->_properties->_map;
-      const auto values = ValueReader::readValue<std::string>("values", map).value_or("0.0:1.0;1.0:1.0");
+      const auto values = ValueReader::readValue<std::string>("values", map).value_or(std::string(default_zoom_rect_values));
       _zoom_factors = parseZoomFactors(values);
       std::ranges::sort(_zoom_factors, [](const ZoomFactor& a, const ZoomFactor& b) { return a._radius < b._radius; });
    }
@@ -172,6 +186,8 @@ void ZoomRect::setup(const GameDeserializeData& data)
    {
       _zoom_factors = {{0.0f, 1.0f}, {1.0, 1.0}};
    }
+
+   addChunks(_rect_px);
 }
 
 std::optional<sf::FloatRect> ZoomRect::getBoundingBoxPx()

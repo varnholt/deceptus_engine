@@ -21,6 +21,10 @@ public:
    /// \return mechanism group map used during deserialization and lookup.
    MechanismVectorMap& getMap();
 
+   /// \brief returns the map from mechanism layer names to mechanism vectors for inspection.
+   /// \return mechanism group map, keyed by the tmx layer name.
+   const MechanismVectorMap& getMap() const;
+
    /// \brief returns all mechanism vectors as a flat list of group pointers.
    /// \return list of mechanism groups for bulk iteration.
    std::vector<MechanismVector*>& getList();
@@ -44,6 +48,10 @@ public:
    /// \brief returns the checkpoint mechanism group.
    /// \return vector containing checkpoint mechanisms.
    const MechanismVector& getCheckpoints() const;
+
+   /// \brief returns the rope mechanism group, which holds every rope flavour.
+   /// \return vector containing rope, rope-with-light and grab-rope mechanisms.
+   const MechanismVector& getRopes() const;
 
    /// \brief returns all non-mechanism image layers.
    /// \return copy of image layer instances loaded from TMX image layers.
@@ -97,15 +105,18 @@ private:
    MechanismVector _mechanism_info_overlay;
    MechanismVector _mechanism_interaction_help;
    MechanismVector _mechanism_lasers;
+   MechanismVector _mechanism_level_transitions;
    MechanismVector _mechanism_levers;
    MechanismVector _mechanism_moveable_boxes;
    MechanismVector _mechanism_on_off_blocks;
    MechanismVector _mechanism_platforms;
    MechanismVector _mechanism_portals;
+   MechanismVector _mechanism_post_processing;
    MechanismVector _mechanism_ropes;
    MechanismVector _mechanism_rotating_blades;
    MechanismVector _mechanism_sensor_rects;
    MechanismVector _mechanism_shader_layers;
+   MechanismVector _mechanism_skill_gates;
    MechanismVector _mechanism_smoke_effect;
    MechanismVector _mechanism_sound_emitters;
    MechanismVector _mechanism_spike_balls;

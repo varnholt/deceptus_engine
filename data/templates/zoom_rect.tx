@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="ZoomRect" width="192" height="192">
+  <properties>
+   <property name="values" type="string" value="0.0:1.5;1.0:1.0"/>
+  </properties>
+ </object>
+</template>

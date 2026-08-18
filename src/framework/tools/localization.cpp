@@ -4,6 +4,7 @@
 
 #include "json/json.hpp"
 
+#include <SFML/Graphics.hpp>
 #include <fstream>
 #include <sstream>
 
@@ -53,6 +54,12 @@ const std::string& Localization::getLocale() const
 
 std::string_view Localization::translate(std::string_view source_text) const
 {
+   const auto last_non_space = source_text.find_last_not_of(' ');
+   if (last_non_space != std::string_view::npos)
+   {
+      source_text = source_text.substr(0, last_non_space + 1);
+   }
+
    const auto found = _translations.find(std::string{source_text});
    if (found != _translations.end() && !found->second.empty())
    {
@@ -62,13 +69,19 @@ std::string_view Localization::translate(std::string_view source_text) const
    // record untranslated strings so flushMissingKeys() can write them back
    if (!_locale_path.empty() && !source_text.empty())
    {
-      _missing_keys.insert(std::string{source_text});
+      const auto insert_result = _missing_keys.insert(std::string{source_text});
+#ifdef DEVELOPMENT_MODE
+      if (insert_result.second)
+      {
+         flushMissingKeys();
+      }
+#endif
    }
 
    return source_text;
 }
 
-void Localization::flushMissingKeys()
+void Localization::flushMissingKeys() const
 {
    if (_locale_path.empty() || _missing_keys.empty())
    {
@@ -126,4 +139,31 @@ void Localization::flushMissingKeys()
 std::string tr(std::string_view source_text)
 {
    return std::string{Localization::getInstance().translate(source_text)};
+}
+
+std::string getFontPath()
+{
+   if (Localization::getInstance().getLocale() == "ja")
+   {
+      return "data/fonts/mona12.ttf";
+   }
+   return "data/fonts/deceptum.ttf";
+}
+
+const sf::Font& getFont()
+{
+   static sf::Font font = []
+   {
+#ifdef DECEPTUS_VRSFML
+      sf::Font loaded_font = sf::Font::openFromFile(getFontPath()).value();
+      loaded_font.getTexture().setSmooth(false);
+#else
+      sf::Font loaded_font;
+      loaded_font.openFromFile(getFontPath());
+      const_cast<sf::Texture&>(loaded_font.getTexture(12)).setSmooth(false);
+      const_cast<sf::Texture&>(loaded_font.getTexture(14)).setSmooth(false);
+#endif
+      return loaded_font;
+   }();
+   return font;
 }

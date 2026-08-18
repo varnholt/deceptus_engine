@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="Dialogue" width="96" height="48">
+  <properties>
+   <property name="00" type="string" value=""/>
+   <property name="00_x_px" type="int" value="0"/>
+   <property name="00_y_px" type="int" value="0"/>
+   <property name="00_text_color" type="string" value="#ffffffff"/>
+   <property name="00_background_color" type="string" value="#000000ff"/>
+  </properties>
+ </object>
+</template>

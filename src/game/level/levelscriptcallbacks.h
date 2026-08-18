@@ -14,6 +14,8 @@ int32_t addSensorRectCallback(lua_State* state);
 int32_t isPlayerIntersectingSensorRect(lua_State* state);
 
 // mechanisms
+int32_t getMechanismRect(lua_State* state);
+int32_t getMechanismProperty(lua_State* state);
 int32_t isMechanismEnabled(lua_State* state);
 int32_t isMechanismVisible(lua_State* state);
 int32_t setMechanismEnabled(lua_State* state);
@@ -50,11 +52,33 @@ int32_t setLuaNodeVisible(lua_State* state);
 int32_t setLuaNodeActive(lua_State* state);
 
 // audio / camera / scene
+int32_t getCameraCenter(lua_State* state);
 int32_t playMusic(lua_State* state);
+int32_t setLevelMusic(lua_State* state);
+int32_t getCheckpoint(lua_State* state);
 int32_t lockPlayerControls(lua_State* state);
+int32_t setCutsceneActive(lua_State* state);
+int32_t fadeOut(lua_State* state);
+int32_t fadeIn(lua_State* state);
 int32_t setAmbient(lua_State* state);
 int32_t setZoomFactor(lua_State* state);
 int32_t playEventRecording(lua_State* state);
+int32_t setCameraPosition(lua_State* state);
+int32_t unlockCamera(lua_State* state);
+int32_t setPlayerVisible(lua_State* state);
+int32_t setInfoLayerVisible(lua_State* state);
+int32_t nextLevel(lua_State* state);
+int32_t playSound(lua_State* state);
+
+// cutscene sprites
+int32_t createSprite(lua_State* state);
+int32_t destroySprite(lua_State* state);
+int32_t setSpriteAnimation(lua_State* state);
+int32_t setSpriteVisible(lua_State* state);
+int32_t moveSpriteAtSpeed(lua_State* state);
+
+// cutscene data
+int32_t loadCutscene(lua_State* state);
 
 // utilities
 int32_t debug(lua_State* state);

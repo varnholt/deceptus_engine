@@ -6,6 +6,7 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -17,6 +18,7 @@
 #include "game/ui/messagebox.h"
 
 #include <algorithm>
+#include <array>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -24,9 +26,27 @@
 
 namespace
 {
+
+static constexpr std::array dialogue_properties{
+   PropertyInfo{.name = "00", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "00_x_px", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "00_y_px", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "00_text_color", .type = "string", .default_value = std::string_view{"#ffffffff"}},
+   PropertyInfo{.name = "00_background_color", .type = "string", .default_value = std::string_view{"#000000ff"}},
+};
+
+static constexpr MechanismSchema dialogue_schema{
+   .type_name = "Dialogue",
+   .layer_name = "dialogues",
+   .default_width = 96,
+   .default_height = 48,
+   .properties = dialogue_properties,
+};
+
 const auto registered_dialogue = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(dialogue_schema);
 
    registry.mapGroupToLayer("Dialogue", "dialogues");
 
@@ -142,8 +162,10 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
       dialogue->_show_delay_ms = std::chrono::milliseconds{show_delay.value()};
    }
 
-   dialogue->_pixel_rect =
+   dialogue->_rect_px =
       sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
+
+   dialogue->addChunks(dialogue->_rect_px);
 
    return dialogue;
 }
@@ -183,7 +205,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   if (_open_on_intersect && player_rect.findIntersection(_pixel_rect).has_value())
+   if (_open_on_intersect && sfcompat::findIntersection(player_rect, _rect_px).has_value())
    {
       // message boxes might already be marked as inactive, however
       // they might still be fading out. the display mode 'modal', however
@@ -217,7 +239,7 @@ void Dialogue::update(const sf::Time& /*dt*/)
 
 std::optional<sf::FloatRect> Dialogue::getBoundingBoxPx()
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 bool Dialogue::isActive() const
@@ -246,6 +268,11 @@ void Dialogue::replaceTags(std::string& str)
    replace(str, "<br>", "\n");
 }
 
+void Dialogue::setItems(std::vector<DialogueItem> items)
+{
+   _dialogue_items = std::move(items);
+}
+
 void Dialogue::showNext()
 {
    if (_index == _dialogue_items.size())
@@ -265,6 +292,8 @@ void Dialogue::showNext()
       {
          GameMechanismObserver::onEvent(getObjectId(), "dialogues", "state", "hide");
       }
+
+      GameMechanismObserver::onEvent(getObjectId(), "dialogues", "dismissed", true);
 
       return;
    }

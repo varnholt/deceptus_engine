@@ -15,9 +15,31 @@
 
 namespace
 {
+static constexpr std::string_view default_static_light_color = "#ffffffff";
+static constexpr std::string_view default_static_light_texture = "smooth.png";
+static constexpr float default_static_light_flicker_intensity = 0.0f;
+static constexpr float default_static_light_flicker_speed = 0.0f;
+static constexpr float default_static_light_flicker_alpha_amount = 1.0f;
+static constexpr int32_t default_static_light_z = 20;
+static constexpr std::array static_light_properties{
+   PropertyInfo{.name = "color", .type = "string", .default_value = default_static_light_color},
+   PropertyInfo{.name = "texture", .type = "string", .default_value = default_static_light_texture},
+   PropertyInfo{.name = "flicker_intensity", .type = "float", .default_value = default_static_light_flicker_intensity},
+   PropertyInfo{.name = "flicker_speed", .type = "float", .default_value = default_static_light_flicker_speed},
+   PropertyInfo{.name = "flicker_alpha_amount", .type = "float", .default_value = default_static_light_flicker_alpha_amount},
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_static_light_z},
+};
+static constexpr MechanismSchema static_light_schema{
+   .type_name = "StaticLight",
+   .layer_name = "static_lights",
+   .default_width = 96,
+   .default_height = 96,
+   .properties = static_light_properties,
+};
 const auto registered_staticlight = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(static_light_schema);
    registry.markAsNonVisual("static_lights");
    registry.mapGroupToLayer("StaticLight", "static_lights");
 
@@ -58,6 +80,26 @@ std::string_view StaticLight::objectName() const
    return "StaticLight";
 }
 
+#ifdef DECEPTUS_VRSFML
+void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& color)
+{
+   draw(target, color, {});
+}
+
+void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/, const sf::RenderStates& states)
+{
+   auto lumen = fbm::mix(_color.a, _flicker_amount * 255.0f, 1.0f - _flicker_alpha_amount);
+
+   sf::Color light_color{_color.r, _color.g, _color.b, static_cast<uint8_t>(lumen)};
+
+   _sprite->color = light_color;
+
+   sf::RenderStates draw_states = states;
+   draw_states.blendMode = _blend_mode;
+   draw_states.texture = _texture.get();
+   target.draw(*_sprite, draw_states);
+}
+#else
 void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/)
 {
    auto lumen = fbm::mix(_color.a, _flicker_amount * 255.0f, 1.0f - _flicker_alpha_amount);
@@ -67,6 +109,7 @@ void StaticLight::draw(sf::RenderTarget& target, sf::RenderTarget& /*color*/)
    _sprite->setColor(color);
    target.draw(*_sprite, _blend_mode);
 }
+#endif
 
 void StaticLight::update(const sf::Time& /*time*/)
 {
@@ -143,16 +186,28 @@ void StaticLight::deserialize(const GameDeserializeData& data)
    _flicker_alpha_amount = flicker_alpha_amount;
    _flicker_speed = flicker_speed;
    _texture = TexturePool::getInstance().get(texture);
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+   _sprite->textureRect =
+      sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(_texture->getSize().x), static_cast<float>(_texture->getSize().y)}};
+   _sprite->color = _color;
+   _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
    _sprite->setColor(_color);
    _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+#endif
 
    _rect = sf::FloatRect{{data._tmx_object->_x_px, data._tmx_object->_y_px}, {data._tmx_object->_width_px, data._tmx_object->_height_px}};
    addChunks(_rect);
 
    auto scale_x_px = data._tmx_object->_width_px / _texture->getSize().x;
    auto scale_y_px = data._tmx_object->_height_px / _texture->getSize().y;
+#ifdef DECEPTUS_VRSFML
+   _sprite->scale = {scale_x_px, scale_y_px};
+#else
    _sprite->scale({scale_x_px, scale_y_px});
+#endif
 
    // init each light with a different time offset
    // probably passing the position itself to FBM would be enough

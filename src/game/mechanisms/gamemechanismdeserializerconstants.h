@@ -82,6 +82,8 @@ constexpr std::string_view layer_name_lasers_v1{"lasers_1"};
 constexpr std::string_view layer_name_lasers_v2{"lasers_2"};
 
 /// \brief tmx layer name for lever mechanisms.
+constexpr std::string_view layer_name_level_transitions{"level_transitions"};
+
 constexpr std::string_view layer_name_levers{"levers"};
 
 /// \brief tmx layer name for moveable object mechanisms.
@@ -102,6 +104,12 @@ constexpr std::string_view layer_name_platforms{"moving_platforms"};
 /// \brief tmx layer name for portal mechanisms.
 constexpr std::string_view layer_name_portals{"portals"};
 
+/// \brief tmx layer name for post processing mechanisms.
+constexpr std::string_view layer_name_post_processing{"post_processing"};
+
+/// \brief object template type name for post processing mechanisms.
+constexpr std::string_view type_name_post_processing{"PostProcessing"};
+
 /// \brief tmx layer name for rope mechanisms.
 constexpr std::string_view layer_name_ropes{"ropes"};
 
@@ -119,6 +127,9 @@ constexpr std::string_view layer_name_shader_quads{"shader_quads"};
 
 /// \brief tmx layer name for spike ball mechanisms.
 constexpr std::string_view layer_name_spike_balls{"spike_balls"};
+
+/// \brief tmx layer name for skill gate mechanisms.
+constexpr std::string_view layer_name_skill_gates{"skill_gates"};
 
 /// \brief tmx layer name for smoke effects.
 constexpr std::string_view layer_name_smoke_effect{"smoke"};
@@ -269,6 +280,9 @@ constexpr std::string_view type_name_sensor_rect{"SensorRect"};
 
 /// \brief object template type name for shader quads.
 constexpr std::string_view type_name_shader_quad{"ShaderQuad"};
+
+/// \brief object template type name for skill gates.
+constexpr std::string_view type_name_skill_gate{"SkillGate"};
 
 /// \brief object template type name for smoke effects.
 constexpr std::string_view type_name_smoke_effect{"Smoke"};

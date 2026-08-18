@@ -17,8 +17,8 @@ properties = {
 _patrol_timer = 1
 _key_pressed = 0
 
-SPRITE_WIDTH = 72
-SPRITE_HEIGHT = 72
+SPRITE_WIDTH_PX = 72
+SPRITE_HEIGHT_PX = 72
 
 -- idle         row 0    15 sprites
 -- left         row 1    16 sprites
@@ -47,10 +47,10 @@ SPRITE_COUNT_LANDING = 11 -- last one is skipped, that doesn't make sense
 ANIMATION_SPEED = 20.0
 IDLE_CYCLE_COUNT = 3
 
-COLLISION_THRESHOLD = 24
+COLLISION_THRESHOLD_PX = 24
 
-_position = v2d.Vector2D(0, 0)
-_player_position = v2d.Vector2D(0, 0)
+_position_px = v2d.Vector2D(0, 0)
+_player_position_px = v2d.Vector2D(0, 0)
 _elapsed = 0.0
 _sprite_index = 0
 _animation_row = 0
@@ -102,10 +102,10 @@ function initialize()
 
    addShapeCircle(0.12, 0.0, 0.12)                        -- radius, x, y
    addShapeRect(0.2, 0.07, 0.0, 0.1)                      -- width, height, x, y
-   updateSpriteRect(0, 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT) -- id, x, y, width, height
+   updateSpriteRect(0, 0, 0, SPRITE_WIDTH_PX, SPRITE_HEIGHT_PX) -- id, x, y, width, height
    addHitbox(-18, -18, 36, 36)                            -- x offset, y offset, width, height
 
-   addSample("splat_01.wav")
+   addSample("splat_01.ogg")
    setReferenceVolume(1.0)
    setAudioUpdateBehavior(AudioUpdateBehavior["AlwaysOn"])
 
@@ -182,10 +182,10 @@ function goLeft()
 
       updateSpriteRect(
          0,
-         _sprite_index * SPRITE_WIDTH,
-         _animation_row * SPRITE_HEIGHT + _alignment_offset,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
+         _sprite_index * SPRITE_WIDTH_PX,
+         _animation_row * SPRITE_HEIGHT_PX + _alignment_offset,
+         SPRITE_WIDTH_PX,
+         SPRITE_HEIGHT_PX
       )
 
    end
@@ -206,10 +206,10 @@ function goRight()
 
       updateSpriteRect(
          0,
-         _sprite_index * SPRITE_WIDTH,
-         _animation_row * SPRITE_HEIGHT + _alignment_offset,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
+         _sprite_index * SPRITE_WIDTH_PX,
+         _animation_row * SPRITE_HEIGHT_PX + _alignment_offset,
+         SPRITE_WIDTH_PX,
+         SPRITE_HEIGHT_PX
       )
 
    end
@@ -238,10 +238,10 @@ function updateDeath()
 
       updateSpriteRect(
          0,
-         _sprite_index * SPRITE_WIDTH,
-         _animation_row * SPRITE_HEIGHT,
-         SPRITE_WIDTH,
-         SPRITE_HEIGHT
+         _sprite_index * SPRITE_WIDTH_PX,
+         _animation_row * SPRITE_HEIGHT_PX,
+         SPRITE_WIDTH_PX,
+         SPRITE_HEIGHT_PX
       )
 
    end
@@ -252,13 +252,13 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function movedTo(x, y)
-   _position = v2d.Vector2D(x, y)
+   _position_px = v2d.Vector2D(x, y)
 end
 
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerMovedTo(x, y)
-   _player_position = v2d.Vector2D(x, y)
+   _player_position_px = v2d.Vector2D(x, y)
 end
 
 
@@ -267,9 +267,9 @@ end
 -- |          p      o          | x
 function followPlayer()
    local epsilon = 5
-   if (_player_position:getX() > _position:getX() + epsilon) then
+   if (_player_position_px:getX() > _position_px:getX() + epsilon) then
       goRight()
-   elseif (_player_position:getX() < _position:getX() - epsilon) then
+   elseif (_player_position_px:getX() < _position_px:getX() - epsilon) then
       goLeft()
    else
       _key_pressed = 0
@@ -287,10 +287,10 @@ function wait()
             _sprite_index = sprite_index
             updateSpriteRect(
                0,
-               _sprite_index * SPRITE_WIDTH,
-               _animation_row * SPRITE_HEIGHT + _alignment_offset,
-               SPRITE_WIDTH,
-               SPRITE_HEIGHT
+               _sprite_index * SPRITE_WIDTH_PX,
+               _animation_row * SPRITE_HEIGHT_PX + _alignment_offset,
+               SPRITE_WIDTH_PX,
+               SPRITE_HEIGHT_PX
             )
          end
       else
@@ -305,10 +305,10 @@ function wait()
          _sprite_index = sprite_index
          updateSpriteRect(
             0,
-            _sprite_index * SPRITE_WIDTH,
-            _animation_row * SPRITE_HEIGHT + _alignment_offset,
-            SPRITE_WIDTH,
-            SPRITE_HEIGHT
+            _sprite_index * SPRITE_WIDTH_PX,
+            _animation_row * SPRITE_HEIGHT_PX + _alignment_offset,
+            SPRITE_WIDTH_PX,
+            SPRITE_HEIGHT_PX
          )
 
          -- after 1 cycle, go back to business
@@ -352,10 +352,10 @@ function updatePatrol()
    local keyVec = v2d.Vector2D(key:getX(), key:getY())
    local count = #_patrol_path
 
-   if     (_position:getX() > keyVec:getX() + _patrol_epsilon) then
+   if     (_position_px:getX() > keyVec:getX() + _patrol_epsilon) then
       -- print(string.format("go left %d", _tick))
       goLeft()
-   elseif (_position:getX() < keyVec:getX() - _patrol_epsilon) then
+   elseif (_position_px:getX() < keyVec:getX() - _patrol_epsilon) then
       -- print(string.format("go right %d", _tick))
       goRight()
    else
@@ -392,7 +392,7 @@ function updateJump(dt)
 
    y = _jump_start_position:getY() - jump_height * jump_value + 12;
 
-   setTransform(_position:getX(), y, 0.0)
+   setTransform(_position_px:getX(), y, 0.0)
 
    index = 0
    row = 0
@@ -407,10 +407,10 @@ function updateJump(dt)
 
    updateSpriteRect(
       0,
-      index * SPRITE_WIDTH,
-      row * SPRITE_HEIGHT,
-      SPRITE_WIDTH,
-      SPRITE_HEIGHT
+      index * SPRITE_WIDTH_PX,
+      row * SPRITE_HEIGHT_PX,
+      SPRITE_WIDTH_PX,
+      SPRITE_HEIGHT_PX
    )
 
    _jump_time = _jump_time + dt * jump_speed
@@ -434,22 +434,22 @@ function updateDrop(dt)
    -- check if need to drop
    if (not _drop_prepare and _alignment_offset > 0) then
 
-      dx = _position:getX() - _player_position:getX()
+      dx = _position_px:getX() - _player_position_px:getX()
 
-      if (dx > -COLLISION_THRESHOLD and dx < COLLISION_THRESHOLD) then
+      if (dx > -COLLISION_THRESHOLD_PX and dx < COLLISION_THRESHOLD_PX) then
 
          -- make sure stone is not too far away (10 tiles) and above player
-         y_diff = _position:getY() // 24 - _player_position:getY() // 24
+         y_diff = _position_px:getY() // 24 - _player_position_px:getY() // 24
 
          if (y_diff < 0 and y_diff > -10) then
 
             -- make sure there's nothing in the way
             if (
                isPhsyicsPathClear(
-                  _position:getX(),
-                  _position:getY(),
-                  _player_position:getX(),
-                  _player_position:getY()
+                  _position_px:getX(),
+                  _position_px:getY(),
+                  _player_position_px:getX(),
+                  _player_position_px:getY()
                )
             )
             then
@@ -507,10 +507,10 @@ function updateDrop(dt)
             end
             updateSpriteRect(
                0,
-               _sprite_index * SPRITE_WIDTH,
-               _animation_row * SPRITE_HEIGHT - (12 - sprite_offset),
-               SPRITE_WIDTH,
-               SPRITE_HEIGHT
+               _sprite_index * SPRITE_WIDTH_PX,
+               _animation_row * SPRITE_HEIGHT_PX - (12 - sprite_offset),
+               SPRITE_WIDTH_PX,
+               SPRITE_HEIGHT_PX
             )
 
             -- once we reach column 5, the blob is more or less detach from the ceiling,
@@ -562,10 +562,10 @@ function updateDrop(dt)
 
             updateSpriteRect(
                0,
-               _sprite_index * SPRITE_WIDTH,
-               _animation_row * SPRITE_HEIGHT,
-               SPRITE_WIDTH,
-               SPRITE_HEIGHT
+               _sprite_index * SPRITE_WIDTH_PX,
+               _animation_row * SPRITE_HEIGHT_PX,
+               SPRITE_WIDTH_PX,
+               SPRITE_HEIGHT_PX
             )
          end
       end
@@ -673,7 +673,7 @@ function smashed()
       return
    end
 
-   playSample("splat_01.wav", 1.0)
+   playSample("splat_01.ogg", 1.0)
    _smashed = true
    startDying()
 end

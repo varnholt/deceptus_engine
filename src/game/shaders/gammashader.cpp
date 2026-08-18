@@ -7,7 +7,7 @@
 
 void GammaShader::initialize()
 {
-   if (!_gamma_shader.loadFromFile("data/shaders/brightness.frag", sf::Shader::Type::Fragment))
+   if (!_gamma_shader.loadFromFragment("data/shaders/brightness.frag"))
    {
       Log::Error() << "error loading gamma shader";
       return;
@@ -16,16 +16,16 @@ void GammaShader::initialize()
 
 void GammaShader::update()
 {
-   float gamma = 2.2f - (GameConfiguration::getInstance()._brightness - 0.5f);
+   const float gamma = 2.2f - (GameConfiguration::getInstance()._brightness - 0.5f);
    _gamma_shader.setUniform("gamma", gamma);
 }
 
 void GammaShader::setTexture(const sf::Texture& texture)
 {
-   _gamma_shader.setUniform("texture", texture);
+   _gamma_shader.setUniform("u_texture", texture);
 }
 
 const sf::Shader& GammaShader::getGammaShader() const
 {
-   return _gamma_shader;
+   return _gamma_shader.native();
 }

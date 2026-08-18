@@ -47,6 +47,13 @@ public:
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
+   /// \brief draws all particles with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief returns the clip rectangle used for simulation and visibility queries.
    /// \return clip rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -63,7 +70,11 @@ private:
    std::vector<Particle> _particles;
    sf::FloatRect _clip_rect;
    std::shared_ptr<sf::Texture> _flow_field_texture;
+#ifdef DECEPTUS_VRSFML
+   std::optional<sf::Image> _flow_field_image;
+#else
    sf::Image _flow_field_image;
+#endif
    std::vector<sf::Vector3f> _flow_field_cache;  //!< pre-baked direction vectors indexed by pixel_y * image_width + pixel_x
    float _flow_field_scale_factor_x{0.0f};       //!< scale from clip-rect space to flow-field image space, x axis
    float _flow_field_scale_factor_y{0.0f};       //!< scale from clip-rect space to flow-field image space, y axis

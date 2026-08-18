@@ -28,6 +28,13 @@ public:
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& color, sf::RenderTarget& normal) override;
 
+   /// \brief draws the rope as a textured strip with explicit render states (used in WASM to carry the level view).
+   /// \param color color render target.
+   /// \param normal normal-map render target, unused by this mechanism.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief updates wind impulses, player influence, and rope motion.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
@@ -45,8 +52,12 @@ public:
    sf::Vector2i getPixelPosition() const;
 
    /// \brief sets the rope anchor position in pixels.
-   /// \param pixel_position anchor position used for box2d body creation.
-   void setPixelPosition(const sf::Vector2i& pixel_position);
+   /// \param position_px anchor position used for box2d body creation.
+   void setPixelPosition(const sf::Vector2i& position_px);
+
+   /// \brief returns the static body the rope chain hangs from.
+   /// \return anchor body, or nullptr before setup ran.
+   b2Body* getAnchorBody() const;
 
 protected:
    int32_t _segment_count = 7;

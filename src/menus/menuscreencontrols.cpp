@@ -1,6 +1,8 @@
 #include "menuscreencontrols.h"
 
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlcompat.h"
+#include "framework/tools/sfmlstring.h"
 #include "menu.h"
 #include "menuaudio.h"
 
@@ -37,8 +39,8 @@ const sf::Color color_hint{110, 100, 130};
 
 bool isReadOnlyControllerAction(KeyPressed action)
 {
-   return action == KeyPressedUp || action == KeyPressedDown || action == KeyPressedLeft ||
-          action == KeyPressedRight || action == KeyPressedLook;
+   return action == KeyPressedUp || action == KeyPressedDown || action == KeyPressedLeft || action == KeyPressedRight ||
+          action == KeyPressedLook;
 }
 
 std::string_view controllerReadOnlyLabel(KeyPressed action)
@@ -56,10 +58,11 @@ MenuScreenControls::MenuScreenControls()
 {
    setFilename("data/menus/controls.psd");
 
-   _font.openFromFile("data/fonts/deceptum.ttf");
-   const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-
+#ifdef DECEPTUS_VRSFML
+   _text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
    _text = std::make_unique<sf::Text>(_font);
+#endif
    _text->setFont(_font);
    _text->setCharacterSize(12);
 
@@ -189,6 +192,28 @@ void MenuScreenControls::loadingFinished()
       layer_entry.second->_visible = false;
    }
 
+#ifdef DECEPTUS_VRSFML
+   _text_setkey_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_setkey_button = std::make_unique<sf::Text>(_font);
+#endif
+   _text_setkey_button->setCharacterSize(12);
+   _text_setkey_button->setFillColor(color_label_normal);
+#ifdef DECEPTUS_VRSFML
+   _text_defaults_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_defaults_button = std::make_unique<sf::Text>(_font);
+#endif
+   _text_defaults_button->setCharacterSize(12);
+   _text_defaults_button->setFillColor(color_label_normal);
+#ifdef DECEPTUS_VRSFML
+   _text_back_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_back_button = std::make_unique<sf::Text>(_font);
+#endif
+   _text_back_button->setCharacterSize(12);
+   _text_back_button->setFillColor(color_label_normal);
+
    updateLayers();
 }
 
@@ -213,19 +238,34 @@ void MenuScreenControls::updateLayers()
 
    _layers["back_pc_0"]->_visible = !isControllerUsed();
    _layers["back_pc_1"]->_visible = false;
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+
+   const auto& setkey_layer = isControllerUsed() ? _layers["setKey_xbox_0"] : _layers["setKey_pc_0"];
+   _text_setkey_button->setString(sftr("Set Key"));
+   placeTextRightOf(*_text_setkey_button, setkey_layer->_sprite->getGlobalBounds());
+
+   const auto& defaults_layer = isControllerUsed() ? _layers["defaults_xbox_0"] : _layers["defaults_pc_0"];
+   _text_defaults_button->setString(sftr("Defaults"));
+   placeTextRightOf(*_text_defaults_button, defaults_layer->_sprite->getGlobalBounds());
+
+   const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
+   _text_back_button->setString(sftr("Back"));
+   placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
 }
 
 void MenuScreenControls::up()
 {
    const auto& actions = InputConfiguration::actionList();
    auto candidate = _action_row_index - 1;
-   while (candidate > 0 && _device_mode == DeviceMode::Controller &&
-          isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)]))
+   while (candidate > 0 && _device_mode == DeviceMode::Controller && isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)]))
    {
       candidate--;
    }
-   if (candidate >= 0 &&
-       !(_device_mode == DeviceMode::Controller && isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)])))
+   if (candidate >= 0 && !(_device_mode == DeviceMode::Controller && isReadOnlyControllerAction(actions[static_cast<size_t>(candidate)])))
    {
       _action_row_index = candidate;
       MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
@@ -520,13 +560,13 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    // cursor highlight
    const auto cursor_row_y = assign_row_start_y + static_cast<float>(_action_row_index) * assign_row_height;
    const auto cursor_action_index = static_cast<size_t>(_action_row_index);
-   const auto cursor_on_disabled = (_device_mode == DeviceMode::Controller &&
-                                    cursor_action_index < actions.size() &&
-                                    isReadOnlyControllerAction(actions[cursor_action_index]));
+   const auto cursor_on_disabled =
+      (_device_mode == DeviceMode::Controller && cursor_action_index < actions.size() &&
+       isReadOnlyControllerAction(actions[cursor_action_index]));
    if (!cursor_on_disabled)
    {
       _cursor_highlight.setSize({580.0f, assign_row_height - 1.0f});
-      _cursor_highlight.setPosition({30.0f, cursor_row_y});
+      sfcompat::setPosition(_cursor_highlight, {30.0f, cursor_row_y});
       window.draw(_cursor_highlight, states);
    }
 
@@ -535,21 +575,26 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    _text->setFillColor(color_title);
    const auto title_prefix = (_device_row_index > 0) ? "< " : "  ";
    const auto title_suffix = (_device_row_index < static_cast<int32_t>(_device_entries.size()) - 1) ? " >" : "  ";
-   _text->setString(title_prefix + _device_name + title_suffix);
+   const auto full_title = title_prefix + _device_name + title_suffix;
+#ifdef DECEPTUS_VRSFML
+   _text->setString(full_title.c_str());
+#else
+   _text->setString(sf::String::fromUtf8(full_title.begin(), full_title.end()));
+#endif
    const auto title_bounds = _text->getLocalBounds();
-   _text->setPosition({(640.0f - title_bounds.size.x) / 2.0f, assign_title_y});
+   sfcompat::setPosition(*_text, {(640.0f - title_bounds.size.x) / 2.0f, assign_title_y});
    window.draw(*_text, states);
 
    _text->setCharacterSize(12);
 
    // column headers
    _text->setFillColor(color_header);
-   _text->setString(tr("Action"));
-   _text->setPosition({assign_column_action_x, assign_header_y});
+   _text->setString(sftr("Action"));
+   sfcompat::setPosition(*_text, {assign_column_action_x, assign_header_y});
    window.draw(*_text, states);
 
-   _text->setString(_device_mode == DeviceMode::Keyboard ? tr("Keyboard") : tr("Controller"));
-   _text->setPosition({assign_column_keyboard_x, assign_header_y});
+   _text->setString(_device_mode == DeviceMode::Keyboard ? sftr("Keyboard") : sftr("Controller"));
+   sfcompat::setPosition(*_text, {assign_column_keyboard_x, assign_header_y});
    window.draw(*_text, states);
 
    // action rows
@@ -565,8 +610,13 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
 
       _text->setFillColor(row_color);
 
-      _text->setString(InputConfiguration::actionDisplayName(action));
-      _text->setPosition({assign_column_action_x, row_y});
+      const auto action_display_name = InputConfiguration::actionDisplayName(action);
+#ifdef DECEPTUS_VRSFML
+      _text->setString(action_display_name.c_str());
+#else
+      _text->setString(sf::String::fromUtf8(action_display_name.begin(), action_display_name.end()));
+#endif
+      sfcompat::setPosition(*_text, {assign_column_action_x, row_y});
       window.draw(*_text, states);
 
       std::string binding_name = "--";
@@ -590,8 +640,12 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
             binding_name = InputConfiguration::buttonName(button_entry->second);
          }
       }
+#ifdef DECEPTUS_VRSFML
+      _text->setString(binding_name.c_str());
+#else
       _text->setString(binding_name);
-      _text->setPosition({assign_column_keyboard_x, row_y});
+#endif
+      sfcompat::setPosition(*_text, {assign_column_keyboard_x, row_y});
       window.draw(*_text, states);
    }
 
@@ -600,8 +654,8 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
       const auto reset_row_y = assign_row_start_y + static_cast<float>(row_count) * assign_row_height;
       const auto reset_selected = (_action_row_index == row_count);
       _text->setFillColor(reset_selected ? color_row_reset_selected : color_row_reset_normal);
-      _text->setString(tr("Reset to Defaults"));
-      _text->setPosition({assign_column_action_x, reset_row_y});
+      _text->setString(sftr("Reset to Defaults"));
+      sfcompat::setPosition(*_text, {assign_column_action_x, reset_row_y});
       window.draw(*_text, states);
    }
 
@@ -609,15 +663,15 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    if (_assignment_state == AssignmentState::WaitingForKey)
    {
       _text->setFillColor(color_waiting);
-      _text->setString(tr("Press a key to assign  (Esc to cancel)"));
-      _text->setPosition({assign_column_action_x, assign_status_y});
+      _text->setString(sftr("Press a key to assign  (Esc to cancel)"));
+      sfcompat::setPosition(*_text, {assign_column_action_x, assign_status_y});
       window.draw(*_text, states);
    }
    else if (_assignment_state == AssignmentState::WaitingForButton)
    {
       _text->setFillColor(color_waiting);
-      _text->setString(tr("Press a face or shoulder button  (Esc to cancel)"));
-      _text->setPosition({assign_column_action_x, assign_status_y});
+      _text->setString(sftr("Press a face or shoulder button  (Esc to cancel)"));
+      sfcompat::setPosition(*_text, {assign_column_action_x, assign_status_y});
       window.draw(*_text, states);
    }
 
@@ -625,18 +679,25 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    _text->setFillColor(color_hint);
    if (_device_mode == DeviceMode::Controller)
    {
-      _text->setString(tr("Enter / Y button: assign controller button"));
+      _text->setString(sftr("Enter / Y button: assign controller button"));
    }
    else
    {
-      _text->setString(tr("Enter: assign keyboard key    Y button: assign controller button"));
+      _text->setString(sftr("Enter: assign keyboard key    Y button: assign controller button"));
    }
-   _text->setPosition({assign_column_action_x, assign_hint_y});
+   sfcompat::setPosition(*_text, {assign_column_action_x, assign_hint_y});
    window.draw(*_text, states);
 
-   _text->setString(tr("Left/Right: change device    Esc: save and return"));
-   _text->setPosition({assign_column_action_x, assign_hint_2_y});
+   _text->setString(sftr("Left/Right: change device    Esc: save and return"));
+   sfcompat::setPosition(*_text, {assign_column_action_x, assign_hint_2_y});
    window.draw(*_text, states);
+
+   if (_text_back_button)
+   {
+      window.draw(*_text_setkey_button, states);
+      window.draw(*_text_defaults_button, states);
+      window.draw(*_text_back_button, states);
+   }
 }
 
 /*

@@ -61,14 +61,22 @@ In order to create the illusion of depth, some time in the 90s Parallax layers w
 Deceptus supports Parallax layers.<br>
 All Parallax layer names must start with `parallax_`.
 
-They have the properties below:
+### Layer offset (recommended)
+
+The preferred way to set a parallax layer's position anchor is via Tiled's built-in layer offset, which corresponds to the `offsetx` / `offsety` attributes in the TMX file. In Tiled you find these in the layer properties panel under "Offset X" and "Offset Y". The engine reads them directly, so no custom property is required.
+
+### Custom properties
+
+Custom properties are all optional. When `offset_x_px` / `offset_y_px` are present they are added on top of the built-in layer offset, so you can use one, the other, or both together.
+
 |Custom Property|Type|Description|
 |-|-|-|
 |factor_x|float|The horizontal scrolling pace in relation to the foreground [`0..1`]|
 |factor_y|float|The vertical scrolling pace in relation to the foreground [`0..1`]|
-|offset_x_px|int|An x‑offset in pixels used to compensate for the parallax displacement (e.g. `2640`). It defines where your contents begin on the horizontal axis.|
-|offset_y_px|int|A y‑offset in pixels used to compensate for the parallax displacement. See `offset_x_px` for details.|
+|offset_x_px|int|An additional x‑offset in pixels added on top of the layer's built-in offset. Useful for fine-tuning without touching the TMX layer offset.|
+|offset_y_px|int|An additional y‑offset in pixels added on top of the layer's built-in offset. See `offset_x_px` for details.|
 |z|int|As you might want to place something _behind_ your parallax layers, configuring the z index might be useful, too. The default value is `0`.|
+|post_lighting|bool|When set to `true`, the layer is drawn after the normal-map lighting pass so dynamic lighting does not render on top of it. Use this for front parallax layers that should appear unaffected by in-game lights (default is `false`).|
 
 
 
@@ -303,6 +311,10 @@ Rain layers have the custom properties below:
 |collide|bool|Set to true if rain drops should collide with the Box2D world; otherwise they will just fall through|
 |drop_count|int|Number of rain drops used inside this layer|
 |fall_through_rate|int|Decides how many nth rain drops are passed through to the collision detection. Set to `0` or `1` to make every rain drop colliding, set to `2` to pass every second drop to the collision detection, and so on. This setting is only relevant when `collide` is set to `true`.|
+|sound|string|A sample from `data/sounds` that is looped for as long as the rain is active, such as `weather_rain_heavy_loop.ogg`. When the property is omitted, the rain stays silent.|
+|sound_volume|float|Volume multiplier for the looped rain sample. The default is `1.0`.|
+
+The rain sample starts when the player enters the rain rectangle (after `effect_start_delay_s` has elapsed and, if enabled, once `limit_effect_to_room` matches) and stops again when the player leaves. Keep in mind that each rain object plays its own loop, so two overlapping rain rectangles will play the sample twice and sound twice as loud. If that becomes an issue, only assign `sound` to one of them.
 
 ![](images/weather_rain.png)
 
@@ -319,6 +331,10 @@ Thunderstorms have the custom properties below:
 |-|-|-|
 |thunderstorm_time_s|float|The duration of the lightning phase. The default is `3s`.|
 |silence_time_s|float|The duration for everything to be 'quiet', i.e. from one lightning phase to the other (given in seconds). The default is `5s`.|
+|sounds|string|A list of samples from `data/sounds`, separated by semicolons, such as `weather_thunder_01.ogg;weather_thunder_02.ogg`. Every time a lightning phase starts, one of them is picked at random. When the property is omitted, the thunderstorm stays silent.|
+|sound_volume|float|Volume multiplier for the picked thunder sample. The default is `1.0`.|
+
+The thunder is played the moment a lightning phase begins, which is roughly 50-70ms before the flash becomes visible on screen, so both land together. Bear in mind that the samples you pick decide how well this works: a sample whose loudest moment is two seconds in will still be building up while the flash is already over. Pick samples that crack right at the start, or trim the build-up from them.
 
 ![](images/weather_thunderstorm_1.png) &nbsp;&nbsp; ![](images/weather_thunderstorm_2.png)
 

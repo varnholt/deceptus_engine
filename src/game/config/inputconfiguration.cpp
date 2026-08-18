@@ -5,6 +5,7 @@
 #include <ostream>
 #include <sstream>
 
+#include "framework/tools/gamepaths.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "json/json.hpp"
@@ -465,6 +466,9 @@ void InputConfiguration::serializeToFile(const std::string& filename)
    std::string data = serialize();
    std::ofstream output_file(filename);
    output_file << data;
+   output_file.close();
+
+   GamePaths::flushToPersistentStorage();
 }
 
 void InputConfiguration::serializeToFile()
@@ -498,6 +502,9 @@ void InputConfiguration::saveControllerBindingsToFile(const std::string& filenam
    std::string data = serializeControllerSection();
    std::ofstream output_file(filename);
    output_file << data;
+   output_file.close();
+
+   GamePaths::flushToPersistentStorage();
 }
 
 void InputConfiguration::setCurrentFilename(const std::string& filename)
@@ -512,12 +519,12 @@ const std::string& InputConfiguration::getCurrentFilename() const
 
 std::string InputConfiguration::keyboardFilename()
 {
-   return "data/config/controls.json";
+   return GamePaths::getPreferencesFile("controls.json").string();
 }
 
 std::string InputConfiguration::controllerFilename(const std::string& guid)
 {
-   return "data/config/controls_controller_" + guid + ".json";
+   return GamePaths::getPreferencesFile("controls_controller_" + guid + ".json").string();
 }
 
 InputConfiguration& InputConfiguration::getDefaults()

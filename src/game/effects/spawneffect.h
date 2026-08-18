@@ -20,7 +20,8 @@ public:
 
    /// \brief draws active particles and orb animations while the effect is not finished.
    /// \param target render target.
-   void draw(sf::RenderTarget& target);
+   /// \param states render states to apply (carries .view for WASM camera transform).
+   void draw(sf::RenderTarget& target, const sf::RenderStates& states = sf::RenderStates{});
 
    /// \brief advances particle simulation, orb animation state, and show or hide alpha ramps.
    /// \param dt elapsed frame time since the previous update.
@@ -99,7 +100,8 @@ private:
 
       /// \brief draws non-delayed, non-dead particles using additive blending.
       /// \param target render target.
-      void draw(sf::RenderTarget& target);
+      /// \param states render states to apply (carries .view for WASM camera transform).
+      void draw(sf::RenderTarget& target, const sf::RenderStates& states = sf::RenderStates{});
 
       /// \brief forwards alpha and respawn settings to particles and advances all particles.
       /// \param dt elapsed frame time since the previous update.
@@ -135,7 +137,8 @@ private:
 
       /// \brief draws whichever orb animations are currently playing.
       /// \param target render target.
-      void draw(sf::RenderTarget& target);
+      /// \param states render states to apply (carries .view for WASM camera transform).
+      void draw(sf::RenderTarget& target, const sf::RenderStates& states = sf::RenderStates{});
 
       /// \brief advances the orb phase machine and active animations.
       /// \param dt elapsed frame time since the previous update.

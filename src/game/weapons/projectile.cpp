@@ -151,9 +151,12 @@ void Projectile::processHitInformation()
          }
       }
 
-      // play animation
+      // play animation (skip if no hit animation was registered for this projectile type)
       const auto reference_animation = ProjectileHitAnimation::getReferenceAnimation(hit_info._projectile_animation_identifier);
-      ProjectileHitAnimation::playHitAnimation(gx, gy, it->_angle, reference_animation->second);
+      if (reference_animation != ProjectileHitAnimation::getReferenceAnimationsEnd())
+      {
+         ProjectileHitAnimation::playHitAnimation(gx, gy, it->_angle, reference_animation->second);
+      }
    }
 }
 

@@ -49,7 +49,7 @@ public:
    /// the locale file with empty values so translators can fill them in.
    ///
    /// does nothing when no locale is loaded or the locale file path is unknown.
-   void flushMissingKeys();
+   void flushMissingKeys() const;
 
 private:
    std::unordered_map<std::string, std::string> _translations;
@@ -64,5 +64,24 @@ private:
 /// english fallback when no translation file is loaded or the key is missing.
 ///
 /// \param source_text english text to translate.
-/// \return translated string, or source_text if no translation is available.
+/// \return translated UTF-8 string, or source_text if no translation is available.
 [[nodiscard]] std::string tr(std::string_view source_text);
+
+/// \brief returns the font file path suitable for the active locale.
+///
+/// most locales use deceptum.ttf; japanese uses mona12.ttf.
+///
+/// \return path to the font file, e.g. "data/fonts/deceptum.ttf".
+[[nodiscard]] std::string getFontPath();
+
+namespace sf
+{
+class Font;
+}
+
+/// \brief returns the single shared font instance, loading it on first call.
+///
+/// the font is loaded from getFontPath() with smoothing disabled for sizes 12 and 14.
+///
+/// \return const reference to the shared font.
+[[nodiscard]] const sf::Font& getFont();

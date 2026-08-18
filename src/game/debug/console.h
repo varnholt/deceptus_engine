@@ -23,11 +23,38 @@ public:
    /// \brief groups help entries by topic and formats them for display in the console.
    struct Help
    {
+      /// \brief one rendered line of the help panel, classified so the renderer can indent and color it.
+      struct HelpLine
+      {
+         enum class Kind
+         {
+            Topic,
+            Command,
+            Example,
+            Hint
+         };
+
+         Kind _kind{Kind::Command};  //!< how the line should be indented and colored
+         std::string _text;          //!< text to render
+      };
+
       /// \brief adds a command description to a help topic.
       /// \param topic topic name used to group related commands.
       /// \param description one-line command description shown in help output.
       /// \param examples optional usage examples shown below the description.
       void registerCommand(const std::string& topic, const std::string& description, const std::vector<std::string>& examples = {});
+
+      /// \brief builds the help lines to show for the current console input.
+      ///
+      /// With nothing typed only the topic names are listed, so the panel stays a fixed handful of
+      /// lines no matter how many commands exist. Typing narrows the list to the commands matching
+      /// the input and reveals their examples, which are only interesting for the command actually
+      /// being reached for. The result never exceeds max_lines, so the panel cannot outgrow the
+      /// screen again however many commands are added later.
+      /// \param filter current console input, matched case insensitively against the descriptions.
+      /// \param max_lines maximum number of lines the caller is able to display.
+      /// \return lines to render, in display order.
+      std::vector<HelpLine> getVisibleLines(const std::string& filter, size_t max_lines) const;
 
       /// \brief builds a sorted, multi-line help text containing all registered topics and commands.
       /// \return formatted help text ready to print into the console log.
@@ -54,6 +81,12 @@ public:
 
    /// \brief recalls the next command from history into the input line.
    void nextCommand();
+
+   /// \brief completes the current command line against the registered commands.
+   /// on a unique prefix match the command is filled in and a trailing space is appended;
+   /// on multiple matches the input is extended to the longest common prefix and the
+   /// remaining candidates are printed to the console log.
+   void complete();
 
    /// \brief registers an external command callback and exposes it in the help system.
    /// \param command command keyword used to trigger the callback.
@@ -110,6 +143,9 @@ private:
    /// \brief gives the player a sword weapon and selects it.
    void giveWeaponSword();
 
+   /// \brief gives the player a harpoon weapon and selects it.
+   void giveWeaponHarpoon();
+
    /// \brief teleports the player to the level start spawn position.
    void teleportToStartPosition();
 
@@ -125,6 +161,29 @@ private:
    /// \brief teleports the player to the center of the first sub-room of a named room.
    /// \param room_name room object id to search in the current level.
    void teleportToRoom(const std::string& room_name);
+
+   /// \brief prints the levels listed in levels.json together with their indices.
+   void listLevels();
+
+   /// \brief prints the mechanism types present in the current level with their enabled counts.
+   void listMechanismTypes();
+
+   /// \brief enables or disables every mechanism whose type matches a filter.
+   /// \details the filter is matched case insensitively against both the tmx group name a mechanism
+   ///          was loaded from and its object name, as a substring, so "smoke" reaches the
+   ///          "smoke_effect" group without having to spell it out.
+   /// \param type_filter partial mechanism type name.
+   /// \param enabled true to enable the matching mechanisms, false to disable them.
+   void setMechanismTypeEnabled(const std::string& type_filter, bool enabled);
+
+   /// \brief switches to another level listed in levels.json.
+   /// \details the level is identified either by its index in the list or by a case insensitive
+   ///          substring of its description filename, so "level load graveyard" is enough. this
+   ///          takes the same route as a level change requested from a lua script: the save state
+   ///          is pointed at the level and the loader picks it up, leaving the player at the target
+   ///          level's own start position or checkpoint.
+   /// \param level_identifier index into levels.json, or part of a level description filename.
+   void loadLevel(const std::string& level_identifier);
 
    bool _active = false;
    std::string _command;

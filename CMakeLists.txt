@@ -98,6 +98,10 @@ set(GAME_FILES
     src/framework/tools/checksum.cpp
     src/framework/tools/elapsedtimer.cpp
     src/framework/tools/elapsedtimer.h
+    src/framework/tools/crashhandler.cpp
+    src/framework/tools/crashhandler.h
+    src/framework/tools/filewatcher.cpp
+    src/framework/tools/filewatcher.h
     src/framework/tools/gamepaths.cpp
     src/framework/tools/gamepaths.h
     src/framework/tools/globalclock.cpp
@@ -117,6 +121,23 @@ set(GAME_FILES
     src/framework/tools/stopwatch.cpp
     src/framework/tools/stopwatch.h
     src/framework/tools/timer.cpp
+    src/framework/pathmerger/databuffer.h
+    src/framework/pathmerger/linef.h
+    src/framework/pathmerger/mathhelpers.h
+    src/framework/pathmerger/painterpath.cpp
+    src/framework/pathmerger/painterpath.h
+    src/framework/pathmerger/pathclipper.cpp
+    src/framework/pathmerger/pathclipper.h
+    src/framework/pathmerger/pathedge.h
+    src/framework/pathmerger/pathmerger.cpp
+    src/framework/pathmerger/pathmerger.h
+    src/framework/pathmerger/pathsegments.cpp
+    src/framework/pathmerger/pathsegments.h
+    src/framework/pathmerger/pathvertex.h
+    src/framework/pathmerger/pointf.h
+    src/framework/pathmerger/rectf.h
+    src/framework/pathmerger/wingededge.cpp
+    src/framework/pathmerger/wingededge.h
     src/game/animation/animation.cpp
     src/game/animation/animation.h
     src/game/animation/animationframedata.cpp
@@ -133,10 +154,18 @@ set(GAME_FILES
     src/game/animation/framemapper.h
     src/game/audio/audio.cpp
     src/game/audio/audio.h
+    src/game/audio/audiobackend.h
+    src/game/audio/audiobackenddesktop.cpp
+    src/game/audio/audiobackendemscripten.cpp
     src/game/audio/audiorange.cpp
     src/game/audio/audiorange.h
     src/game/audio/audioupdatedata.cpp
     src/game/audio/audioupdatedata.h
+    src/game/audio/soundrotation.cpp
+    src/game/audio/soundrotation.h
+    src/game/audio/musicbackend.h
+    src/game/audio/musicbackenddesktop.cpp
+    src/game/audio/musicbackendemscripten.cpp
     src/game/audio/musicfilenames.cpp
     src/game/audio/musicfilenames.h
     src/game/audio/musicplayer.cpp
@@ -160,6 +189,8 @@ set(GAME_FILES
     src/game/clock/gameclock.h
     src/game/config/gameconfiguration.cpp
     src/game/config/gameconfiguration.h
+    src/game/config/localizationloader.cpp
+    src/game/config/localizationloader.h
     src/game/config/inputconfiguration.cpp
     src/game/config/inputconfiguration.h
     src/game/config/tweaks.cpp
@@ -180,6 +211,8 @@ set(GAME_FILES
     src/game/debug/logui.cpp
     src/game/debug/logui.h
     src/game/debug/mechanismsample.h
+    src/game/debug/mechanismschemawriter.cpp
+    src/game/debug/mechanismschemawriter.h
     src/game/debug/profilingui.cpp
     src/game/debug/profilingui.h
     src/game/effects/boomeffect.cpp
@@ -274,6 +307,8 @@ set(GAME_FILES
     src/game/level/level.cpp
     src/game/level/level.h
     src/game/level/levelinterface.h
+    src/game/level/levelmap.cpp
+    src/game/level/levelmap.h
     src/game/level/levelregistry.cpp
     src/game/level/levelregistry.h
     src/game/level/leveldescription.cpp
@@ -282,6 +317,8 @@ set(GAME_FILES
     src/game/level/levelfiles.h
     src/game/level/levels.cpp
     src/game/level/levels.h
+    src/game/level/leveltransitionhandler.cpp
+    src/game/level/leveltransitionhandler.h
     src/game/level/levelscript.cpp
     src/game/level/levelscript.h
     src/game/level/levelscriptcallbacks.cpp
@@ -364,6 +401,7 @@ set(GAME_FILES
     src/game/mechanisms/gamemechanismdeserializerconstants.h
     src/game/mechanisms/gamemechanismdeserializerregistry.cpp
     src/game/mechanisms/gamemechanismdeserializerregistry.h
+    src/game/mechanisms/gamemechanismschema.h
     src/game/mechanisms/gamemechanismobserver.cpp
     src/game/mechanisms/gamemechanismobserver.h
     src/game/mechanisms/gateway.cpp
@@ -376,6 +414,8 @@ set(GAME_FILES
     src/game/mechanisms/interactionhelp.h
     src/game/mechanisms/laser.cpp
     src/game/mechanisms/laser.h
+    src/game/mechanisms/leveltransition.cpp
+    src/game/mechanisms/leveltransition.h
     src/game/mechanisms/lever.cpp
     src/game/mechanisms/lever.h
     src/game/mechanisms/moveablebox.cpp
@@ -388,6 +428,10 @@ set(GAME_FILES
     src/game/mechanisms/portal.h
     src/game/mechanisms/ringshaderlayer.cpp
     src/game/mechanisms/ringshaderlayer.h
+    src/game/mechanisms/grabrope.cpp
+    src/game/mechanisms/grabrope.h
+    src/game/mechanisms/grabropewrapper.cpp
+    src/game/mechanisms/grabropewrapper.h
     src/game/mechanisms/rope.cpp
     src/game/mechanisms/rope.h
     src/game/mechanisms/ropewithlight.cpp
@@ -398,6 +442,8 @@ set(GAME_FILES
     src/game/mechanisms/sensorrect.h
     src/game/mechanisms/shaderlayer.cpp
     src/game/mechanisms/shaderlayer.h
+    src/game/mechanisms/skillgate.cpp
+    src/game/mechanisms/skillgate.h
     src/game/mechanisms/smokeeffect.cpp
     src/game/mechanisms/soundemitter.cpp
     src/game/mechanisms/soundemitter.h
@@ -509,6 +555,8 @@ set(GAME_FILES
     src/game/player/timerlock.h
     src/game/player/weaponsystem.cpp
     src/game/player/weaponsystem.h
+    src/game/rendering/postprocessingpass.cpp
+    src/game/rendering/postprocessingpass.h
     src/game/rendering/rendertargets.cpp
     src/game/rendering/rendertargets.h
     src/game/scenes/forestscene.cpp
@@ -523,6 +571,10 @@ set(GAME_FILES
     src/game/shaders/deathshader.h
     src/game/shaders/gammashader.cpp
     src/game/shaders/gammashader.h
+    src/game/shaders/postprocessing.cpp
+    src/game/shaders/postprocessing.h
+    src/game/mechanisms/postprocessingmechanism.cpp
+    src/game/mechanisms/postprocessingmechanism.h
     src/game/state/displaymode.cpp
     src/game/state/displaymode.h
     src/game/state/gamestate.cpp
@@ -537,7 +589,17 @@ set(GAME_FILES
     src/game/ui/richtextparser.h
     src/game/weapons/arrow.cpp
     src/game/weapons/arrow.h
+    src/game/player/keyclaim.cpp
+    src/game/player/keyclaim.h
+    src/game/player/playerharpoon.cpp
+    src/game/player/playerharpoon.h
+    src/game/player/playerropehold.cpp
+    src/game/player/playerropehold.h
+    src/game/player/playerrope.cpp
+    src/game/player/playerrope.h
     src/game/weapons/bow.cpp
+    src/game/weapons/harpoon.cpp
+    src/game/weapons/harpoon.h
     src/game/weapons/bow.h
     src/game/weapons/gun.cpp
     src/game/weapons/gun.h
@@ -559,8 +621,8 @@ set(GAME_FILES
     src/game/items/item.h
     src/game/items/itemfactory.cpp
     src/game/items/itemfactory.h
-    src/game/items/itemlantern.cpp
-    src/game/items/itemlantern.h
+    src/game/items/itemheadtorch.cpp
+    src/game/items/itemheadtorch.h
     src/game/items/itemplayerfirefly.cpp
     src/game/items/itemplayerfirefly.h
     src/menus/menu.cpp
@@ -730,6 +792,18 @@ set(THIRD_PARTY_FILES
     thirdparty/tinyxml2/tinyxml2.cpp
     thirdparty/tinyxml2/tinyxml2.h)
 
+if(EMSCRIPTEN)
+    list(REMOVE_ITEM GAME_FILES deceptus_resource.rc)
+endif()
+
+if(NINTENDO_SWITCH)
+    list(REMOVE_ITEM GAME_FILES deceptus_resource.rc)
+
+    # The debug UI is already compiled out on VRSFML targets, so nothing references
+    # ImGui here; dropping its sources keeps them out of the .nro entirely.
+    list(FILTER GAME_FILES EXCLUDE REGEX "thirdparty/imgui/.*\\.cpp$")
+endif()
+
 add_executable(
     deceptus
     ${GAME_FILES}
@@ -811,32 +885,262 @@ set(SFML_BUILD_SYSTEM
 set(SFML_BUILD_NETWORK
     ON
     CACHE BOOL "" FORCE)
-set(SFML_USE_STATIC_STD_LIBS
-    OFF
-    CACHE BOOL "" FORCE)
-set(SFML_BUILD_SHARED_LIBS
-    ON
-    CACHE BOOL "" FORCE)
+
+# Applies a patch to a fetched dependency, following the same rule as the inline
+# blocks below: only skip if a reverse-apply confirms it is already applied, otherwise
+# fail loudly rather than silently building unpatched sources.
+function(deceptus_apply_patch patch_file source_dir label)
+    execute_process(
+        COMMAND git apply --check ${patch_file}
+        WORKING_DIRECTORY ${source_dir}
+        RESULT_VARIABLE forward_check
+        OUTPUT_QUIET ERROR_QUIET)
+    if(forward_check EQUAL 0)
+        execute_process(
+            COMMAND git apply ${patch_file}
+            WORKING_DIRECTORY ${source_dir}
+            RESULT_VARIABLE apply_result)
+        if(NOT apply_result EQUAL 0)
+            message(FATAL_ERROR "Failed to apply ${patch_file}")
+        endif()
+        message(STATUS "Applied ${patch_file} to ${label}")
+    else()
+        execute_process(
+            COMMAND git apply --reverse --check ${patch_file}
+            WORKING_DIRECTORY ${source_dir}
+            RESULT_VARIABLE reverse_check
+            OUTPUT_QUIET ERROR_QUIET)
+        if(reverse_check EQUAL 0)
+            message(STATUS "${patch_file} already applied to ${label}, skipping")
+        else()
+            message(FATAL_ERROR "${patch_file} does not apply to the fetched ${label} source and is not already applied - fix the patch")
+        endif()
+    endif()
+endfunction()
 
 # fetch dependencies
-FetchContent_Declare(
-    SFML
-    GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 3.0.x)
-FetchContent_Declare(
-    SDL3
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG release-3.2.4)
-FetchContent_Declare(
-    LUA
-    GIT_REPOSITORY https://github.com/lua/lua.git
-    GIT_TAG v5.4.7)
-FetchContent_Declare(
-    GLEW
-    GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
-    GIT_TAG glew-cmake-2.3.0)
+if(NINTENDO_SWITCH)
+    # Switch homebrew target: VRSFML again, because vanilla SFML 3 renders through the
+    # fixed-function pipeline and switch-mesa exposes core profile only. See
+    # switch_port_status.md for the full reasoning.
+    set(SFML_BUILD_NETWORK
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_USE_STATIC_STD_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_BUILD_SHARED_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
+    # VRSFML prints a stack trace after every error it logs, through libbacktrace. That
+    # hangs the Switch: libbacktrace is asked to locate the running executable itself
+    # (backtrace_create_state with a null filename), which has no meaning for an NRO, and
+    # the call never returns. The symptom is brutal to read -- the game freezes for good
+    # immediately after an unrelated error message, with the blank line printStackTrace
+    # emits first as the only clue. VRSFML already excludes Emscripten from stack traces
+    # for the same kind of reason.
+    set(SFML_ENABLE_STACK_TRACES
+        OFF
+        CACHE BOOL "" FORCE)
+
+    # Both dependencies are pinned to the exact revisions the Switch patches were
+    # generated against; master would drift and the patches would stop applying.
+    #
+    # SDL3 is deliberately placed at _deps/SDL rather than left to VRSFML's CPM pin:
+    # VRSFML's src/SFML/Window/CMakeLists.txt prefers a sibling ../SDL directory when
+    # one exists, which gives a place to apply the Switch backend patch *before* VRSFML
+    # configures SDL. Patching afterwards would be too late for SDL's own CMake logic.
+    FetchContent_Declare(
+        SWITCH_SDL
+        GIT_REPOSITORY https://github.com/vittorioromeo/SDL.git
+        GIT_TAG e205361fb67ff53868dbc333eb2c491e11ff1a51
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/_deps/SDL)
+    FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
+        GIT_TAG 9c272d60134d568f35fbad9891f3b436de87cc28)
+    FetchContent_Declare(
+        LUA
+        GIT_REPOSITORY https://github.com/lua/lua.git
+        GIT_TAG v5.4.7)
+
+    # download and patch SDL3 without configuring it; VRSFML adds it as a subdirectory
+    FetchContent_Populate(SWITCH_SDL)
+    deceptus_apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/patches/switch-sdl3-backend.patch
+                         ${CMAKE_BINARY_DIR}/_deps/SDL "SDL3")
+
+    # likewise fetch VRSFML and patch it before it gets configured
+    FetchContent_Populate(SFML)
+    deceptus_apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/patches/switch-vrsfml-backend.patch
+                         ${sfml_SOURCE_DIR} "VRSFML")
+    add_subdirectory(${sfml_SOURCE_DIR} ${sfml_BINARY_DIR})
+
+    FetchContent_MakeAvailable(LUA)
+
+    # luaconf.h hardcodes LUA_C89_NUMBERS to 0, so the knob its own error message tells
+    # you to set cannot actually be set from the command line. The patch makes it
+    # overridable; see the target_compile_definitions call further down for why the
+    # Switch needs it. Safe to apply after MakeAvailable because luaconf.h is only read
+    # at compile time, unlike SDL's CMake logic above.
+    deceptus_apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/patches/switch-lua-c89-numbers.patch
+                         ${lua_SOURCE_DIR} "Lua")
+elseif(EMSCRIPTEN)
+    # WASM target: VRSFML (vittorioromeo's SFML rewrite) -- the only SFML fork
+    # with an Emscripten backend.
+    set(SFML_BUILD_NETWORK
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_USE_STATIC_STD_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_BUILD_SHARED_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+
+    # SDL3 is fetched internally by VRSFML via CPM.
+    # Declaring it separately here would create duplicate CMake targets.
+    #
+    # A commit rather than a version, because VRSFML publishes no releases -- its newest tag
+    # is 1662 commits behind this. Everywhere a dependency does have a release tag, this file
+    # names the tag instead. It used to say `master` here, which meant an upstream commit
+    # could break the web build on a clean checkout without anything in this repository
+    # changing. This is the same revision the Switch target pins, and what the last verified
+    # web build was made from.
+    FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
+        GIT_TAG 9c272d60134d568f35fbad9891f3b436de87cc28)
+    FetchContent_Declare(
+        LUA
+        GIT_REPOSITORY https://github.com/lua/lua.git
+        GIT_TAG v5.4.7)
+
+    FetchContent_MakeAvailable(SFML LUA)
+
+    # Apply WebGL2 compatibility patch to VRSFML on Emscripten builds.
+    # GLSL ES 3.00 forbids layout(location=N) on uniforms; the patch adds #ifdef __EMSCRIPTEN__
+    # guards to DefaultShader.hpp and switches RenderTarget.cpp to glGetUniformLocation.
+    execute_process(
+        COMMAND git apply --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
+        WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+        RESULT_VARIABLE vrsfml_patch_check
+        OUTPUT_QUIET ERROR_QUIET)
+    if(vrsfml_patch_check EQUAL 0)
+        execute_process(
+            COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
+            WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+            RESULT_VARIABLE vrsfml_patch_result)
+        if(NOT vrsfml_patch_result EQUAL 0)
+            message(FATAL_ERROR "Failed to apply patches/vrsfml-webgl2-uniforms.patch")
+        endif()
+        message(STATUS "Applied patches/vrsfml-webgl2-uniforms.patch to VRSFML")
+    else()
+        # Forward apply failed - this could mean the patch is already applied, OR that
+        # it no longer matches the fetched VRSFML source (e.g. line-ending mismatch,
+        # upstream changed). Only skip if a reverse-apply confirms it is already applied;
+        # otherwise fail loudly instead of silently building with unpatched shaders.
+        execute_process(
+            COMMAND git apply --reverse --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
+            WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+            RESULT_VARIABLE vrsfml_patch_reverse_check
+            OUTPUT_QUIET ERROR_QUIET)
+        if(vrsfml_patch_reverse_check EQUAL 0)
+            message(STATUS "patches/vrsfml-webgl2-uniforms.patch already applied to VRSFML, skipping")
+        else()
+            message(FATAL_ERROR "patches/vrsfml-webgl2-uniforms.patch does not apply to the fetched VRSFML source and is not already applied - fix the patch")
+        endif()
+    endif()
+
+    # VRSFML's miniaudio build does not define MA_ENABLE_AUDIO_WORKLETS, so on
+    # Emscripten miniaudio silently falls back to the deprecated ScriptProcessorNode
+    # backend. ScriptProcessorNode runs on the main browser thread and produces
+    # audio glitches and a phasey "reverb"/"hall" wash on sustained audio under
+    # -pthread. Opting into the AudioWorklet backend moves audio processing onto a
+    # dedicated real-time audio thread and removes the artifact. This requires the
+    # executable to link with -sAUDIO_WORKLET=1 -sWASM_WORKERS=1 (set above).
+    target_compile_definitions(sfml-audio PRIVATE MA_ENABLE_AUDIO_WORKLETS)
+else()
+    # Desktop target: vanilla/official SFML, matching master.
+    set(SFML_USE_STATIC_STD_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
+    set(SFML_BUILD_SHARED_LIBS
+        ON
+        CACHE BOOL "" FORCE)
+
+    # Every dependency names a release tag, never a branch. This used to say `3.0.x` for
+    # SFML, which is a branch and therefore moves: an upstream commit could change what a
+    # clean checkout builds without anything here changing. 3.0.2 is the release the last
+    # verified desktop build was made from. Freetype, ogg, vorbis and FLAC are not listed
+    # because SFML fetches them itself, so pinning SFML pins those too.
+    FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.2)
+    FetchContent_Declare(
+        SDL3
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+        GIT_TAG release-3.2.4)
+    FetchContent_Declare(
+        LUA
+        GIT_REPOSITORY https://github.com/lua/lua.git
+        GIT_TAG v5.4.7)
+    FetchContent_Declare(
+        GLEW
+        GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
+        GIT_TAG glew-cmake-2.3.0)
+
+    # we only ever link libglew_static, so don't build the shared glew library at all
+    set(glew-cmake_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+
+    # glew-cmake unconditionally links the legacy AGL framework on APPLE and attaches it PUBLIC to
+    # every glew target. AGL was removed from modern macOS SDKs, so the link fails with
+    # "framework 'AGL' not found". GLEW does not actually need AGL (the OpenGL framework provides
+    # the symbols), so pre-seed the cache to satisfy its find_library(AGL REQUIRED) without adding
+    # a bogus -framework AGL to the link.
+    if(APPLE)
+        set(AGL_LIBRARY "" CACHE FILEPATH "AGL is obsolete on modern macOS SDKs" FORCE)
+    endif()
+
+    FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
+
+    # Apply missing-include patch to vanilla SFML 3.0.x.
+    # Newer libc++ (Xcode 26.5+) no longer transitively includes <ostream>, so
+    # SFML's OutputSoundFile.cpp fails to compile its err() << ... << std::endl
+    # statement (Err.hpp only forward-declares std::ostream via <iosfwd>). The
+    # patch adds an explicit #include <ostream>.
+    execute_process(
+        COMMAND git apply --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/sfml-ostream-include.patch
+        WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+        RESULT_VARIABLE sfml_ostream_patch_check
+        OUTPUT_QUIET ERROR_QUIET)
+    if(sfml_ostream_patch_check EQUAL 0)
+        execute_process(
+            COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/sfml-ostream-include.patch
+            WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+            RESULT_VARIABLE sfml_ostream_patch_result)
+        if(NOT sfml_ostream_patch_result EQUAL 0)
+            message(FATAL_ERROR "Failed to apply patches/sfml-ostream-include.patch")
+        endif()
+        message(STATUS "Applied patches/sfml-ostream-include.patch to SFML")
+    else()
+        # Forward apply failed - this could mean the patch is already applied, OR that
+        # it no longer matches the fetched SFML source (e.g. line-ending mismatch,
+        # upstream changed). Only skip if a reverse-apply confirms it is already applied;
+        # otherwise fail loudly instead of silently building against unpatched source.
+        execute_process(
+            COMMAND git apply --reverse --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/sfml-ostream-include.patch
+            WORKING_DIRECTORY ${sfml_SOURCE_DIR}
+            RESULT_VARIABLE sfml_ostream_patch_reverse_check
+            OUTPUT_QUIET ERROR_QUIET)
+        if(sfml_ostream_patch_reverse_check EQUAL 0)
+            message(STATUS "patches/sfml-ostream-include.patch already applied to SFML, skipping")
+        else()
+            message(FATAL_ERROR "patches/sfml-ostream-include.patch does not apply to the fetched SFML source and is not already applied - fix the patch")
+        endif()
+    endif()
+endif()
 
 # ----------------------------------------------------------------------------------------------------
 # lua configuration (lua is not a cmake project)
@@ -845,6 +1149,23 @@ FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
 add_subdirectory(thirdparty/lua)
 include_directories(${CMAKE_SOURCE_DIR}/thirdparty/lua)
 target_link_libraries(deceptus PRIVATE lua)
+
+if(NINTENDO_SWITCH)
+    # luaconf.h uses the presence of LLONG_MAX as its proxy for C99 compliance, and
+    # devkitPro's newlib does not define it in C++ mode, so Lua bails out with
+    # "Compiler does not support 'long long'".
+    #
+    # Setting LUA_INT_TYPE directly does not work: luaconf.h defines it unconditionally
+    # rather than honouring a value from the command line. LUA_C89_NUMBERS is the
+    # supported knob, and it selects long plus double -- on aarch64 both are 64-bit, so
+    # this matches the default long long plus double exactly rather than narrowing
+    # anything.
+    #
+    # This has to be PUBLIC -- every translation unit including lua.hpp must see the
+    # same luaconf configuration as the library itself, or lua_Integer disagrees
+    # across the ABI boundary.
+    target_compile_definitions(lua PUBLIC LUA_C89_NUMBERS=1)
+endif()
 
 # ----------------------------------------------------------------------------------------------------
 # compiler & linker options
@@ -861,10 +1182,24 @@ target_include_directories(
     thirdparty
     thirdparty/box2d/include
     thirdparty/lua
-    ${SFML_INCLUDE_DIR}
+    ${CMAKE_BINARY_DIR}/_deps/sfml-src/include
     ${SDL3_INCLUDE_DIRS})
 
 target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE USE_GL _USE_MATH_DEFINES)
+
+# Selects the VRSFML API rather than vanilla SFML's. Both the Emscripten and the Switch
+# target build against VRSFML, so this is what the SFML-flavour guards key off; plain
+# __EMSCRIPTEN__ stays reserved for genuinely browser-specific code.
+if(EMSCRIPTEN OR NINTENDO_SWITCH)
+    target_compile_definitions(deceptus PRIVATE DECEPTUS_VRSFML)
+endif()
+
+if(CMAKE_BUILD_TYPE)
+    set(deceptus_build_type "${CMAKE_BUILD_TYPE}")
+else()
+    set(deceptus_build_type "Unknown")
+endif()
+target_compile_definitions(deceptus PRIVATE DECEPTUS_BUILD_TYPE="${deceptus_build_type}")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(deceptus PRIVATE DEBUG)
@@ -874,10 +1209,62 @@ endif()
 # platform-specific configurations
 # ----------------------------------------------------------------------------------------------------
 
-target_link_libraries(deceptus PRIVATE sfml-system sfml-audio sfml-graphics sfml-window SDL3::SDL3
-    lua libglew_static opengl32 glu32)
+target_link_libraries(
+    deceptus
+    PRIVATE
+        SFML::System
+        SFML::Graphics
+        SFML::Window
+        SDL3::SDL3
+        lua
+)
+target_link_libraries(deceptus PRIVATE SFML::Audio)
+if(NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
+    target_link_libraries(deceptus PRIVATE libglew_static)
+endif()
+
+if(NINTENDO_SWITCH)
+    # switch-glad is deliberately absent here; VRSFML's bundled glad provides the GL
+    # entry points. Link order still matters for the rest: EGL resolves through mesa's
+    # dispatch layer, which sits on the nouveau kernel interface.
+    target_link_libraries(deceptus PRIVATE EGL glapi drm_nouveau)
+
+    # The game resolves its assets through relative paths like "data/sprites/foo.png"
+    # (134 such literals), so romfs has to carry a "data" directory rather than the
+    # contents of data/ at its root. Staging into ${CMAKE_BINARY_DIR}/romfs/data gives
+    # that layout; main() then chdir's to "romfs:/" so the relative paths resolve.
+    #
+    # copy_directory_if_different keeps the incremental cost down: only the first build
+    # moves the full ~104 MB.
+    # nx_create_nro validates the romfs directory at configure time, so it has to exist
+    # before that call even though the staging below only populates it at build time
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/romfs/data)
+
+    add_custom_target(
+        deceptus_romfs
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${CMAKE_SOURCE_DIR}/data
+                ${CMAKE_BINARY_DIR}/romfs/data
+        COMMENT "staging data/ into romfs")
+
+    add_dependencies(deceptus deceptus_romfs)
+
+    nx_generate_nacp(
+        deceptus.nacp
+        NAME
+        "Deceptus"
+        AUTHOR
+        "Matthias Varnholt"
+        VERSION
+        "1.0.0")
+
+    nx_create_nro(deceptus NACP ${CMAKE_CURRENT_BINARY_DIR}/deceptus.nacp ROMFS ${CMAKE_BINARY_DIR}/romfs)
+endif()
 
 if(WIN32)
+    target_link_libraries(deceptus PRIVATE opengl32 glu32)
+
+    # MiniDumpWriteDump, used by the crash handler
+    target_link_libraries(deceptus PRIVATE dbghelp)
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set_target_properties(deceptus PROPERTIES WIN32_EXECUTABLE FALSE)
@@ -898,9 +1285,16 @@ if(WIN32)
 
     # GLEW is now handled via FetchContent
 
+    add_custom_command(
+        TARGET deceptus POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:SDL3::SDL3>
+            $<TARGET_FILE_DIR:deceptus>
+    )
+
 endif()
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT EMSCRIPTEN)
 
     target_link_libraries(deceptus PRIVATE GL X11 stdc++fs)
 
@@ -911,8 +1305,8 @@ if(APPLE)
     find_library(OPENGL_LIBRARY OpenGL)
     target_link_libraries(deceptus PRIVATE ${OPENGL_LIBRARY} "-framework Cocoa")
 
-    # force use of brew clang (intel)
-    set(HOMEBREW_LLVM "/usr/local/opt/llvm")
+    # force use of brew clang; prefix differs between Intel (/usr/local) and Apple Silicon (/opt/homebrew)
+    execute_process(COMMAND brew --prefix llvm OUTPUT_VARIABLE HOMEBREW_LLVM OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(CMAKE_CXX_COMPILER "${HOMEBREW_LLVM}/bin/clang++")
     set(CMAKE_C_COMPILER "${HOMEBREW_LLVM}/bin/clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
@@ -920,6 +1314,71 @@ if(APPLE)
     set(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_EXE_LINKER_FLAGS} -L${HOMEBREW_LLVM}/lib -Wl,-rpath,${HOMEBREW_LLVM}/lib")
     set(SDKROOT $ENV{SDKROOT})
+endif()
+
+# ----------------------------------------------------------------------------------------------------
+# emscripten / webassembly
+# ----------------------------------------------------------------------------------------------------
+
+if(NINTENDO_SWITCH)
+    # prepend src/switch so "#include <opengl/glew.h>" resolves to the glad stub
+    # instead of the desktop GLEW header in src/opengl/
+    #
+    # src/wasm is on the path as well, but only for its SFML/* umbrella headers: those
+    # are VRSFML compatibility shims (VRSFML has no monolithic SFML/Graphics.hpp, and
+    # dropped sf::Drawable and sf::VertexArray), so they apply to any VRSFML target
+    # rather than to Emscripten specifically.
+    #
+    # Both go in a single call so the listed order is preserved -- src/switch has to come
+    # first, or the GLES3 glew stub would shadow the glad one.
+    target_include_directories(
+        deceptus BEFORE
+        PRIVATE ${CMAKE_SOURCE_DIR}/src/switch
+                ${CMAKE_SOURCE_DIR}/src/wasm)
+
+    # mesa and the rest of the portlibs headers are not on the include path by default;
+    # the toolchain file only teaches find_package about them
+    target_include_directories(deceptus PRIVATE ${DEVKITPRO}/portlibs/switch/include)
+
+    # GL entry points come from the glad that VRSFML bundles, which it keeps PRIVATE, so
+    # its include directory has to be added by hand. devkitPro's switch-glad portlib is
+    # deliberately not used: both define gladLoadGL, and VRSFML's is the loader that
+    # actually runs, since it loads GL itself when creating the context.
+    target_include_directories(deceptus SYSTEM PRIVATE ${sfml_SOURCE_DIR}/extlibs/headers/glad/include)
+
+    # keeps the ImGui headers inert for any translation unit that still includes them
+    target_compile_definitions(deceptus PRIVATE IMGUI_DISABLE_DEFAULT_SHELL_FUNCTIONS)
+elseif(EMSCRIPTEN)
+    # prepend src/wasm so "#include <opengl/glew.h>" resolves to the GLES3 stub
+    # instead of the desktop GLEW header in src/opengl/
+    target_include_directories(deceptus BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/src/wasm)
+
+    # Required for WASM Workers, AudioWorklet, and std::mutex/std::atomic support.
+    # -pthread implies -matomics -mbulk-memory at compile time and -sUSE_PTHREADS=1 at link time.
+    target_compile_options(deceptus PRIVATE -pthread)
+
+    # WebGL 2 (GLES3) flags; allow heap growth for level assets
+    target_link_options(deceptus PRIVATE
+        -pthread
+        -sPTHREAD_POOL_SIZE=4
+        -sUSE_WEBGL2=1
+        -sMIN_WEBGL_VERSION=2
+        -sMAX_WEBGL_VERSION=2
+        -sFULL_ES3=1
+        -sALLOW_MEMORY_GROWTH=1
+        -sINITIAL_MEMORY=536870912
+        -sEXIT_RUNTIME=0
+        -sASYNCIFY=1
+        -sASSERTIONS=1
+        -sAUDIO_WORKLET=1
+        -sWASM_WORKERS=1
+        # link the IDBFS backend so settings/saves can be persisted to IndexedDB (see src/main.cpp)
+        -lidbfs.js
+        "-sEXPORTED_RUNTIME_METHODS=['HEAPU32','HEAPU8','HEAP32','HEAPF32','HEAPU16']"
+        --preload-file ${CMAKE_SOURCE_DIR}/data@data
+    )
+
+    set_target_properties(deceptus PROPERTIES SUFFIX ".html")
 endif()
 
 # ----------------------------------------------------------------------------------------------------
@@ -931,4 +1390,3 @@ install(
     BUNDLE DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(SCRIPT "${CMAKE_SOURCE_DIR}/thirdparty/sdl2/copy_sdl2_dll.cmake")

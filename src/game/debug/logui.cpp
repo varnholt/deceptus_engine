@@ -1,9 +1,11 @@
 #include "logui.h"
 
+#ifndef DECEPTUS_VRSFML
 #pragma warning(push, 0)
 #include "imgui/imgui-SFML.h"
 #include "imgui/imgui.h"
 #pragma warning(pop)
+#endif
 
 #include <ctime>
 #include <deque>
@@ -17,6 +19,7 @@ namespace
 std::mutex _mutex;
 std::deque<LogUiBuffer::LogItem> _log_items;
 
+#ifndef DECEPTUS_VRSFML
 ImVec4 getLogLevelColor(Log::Level level)
 {
    switch (level)
@@ -39,6 +42,7 @@ ImVec4 getLogLevelColor(Log::Level level)
       }
    }
 }
+#endif
 }  // namespace
 
 void LogUiBuffer::log(
@@ -58,6 +62,8 @@ void LogUiBuffer::log(
    }
 }
 
+#ifndef DECEPTUS_VRSFML
+
 LogUi::LogUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode({1200, 800}), "deceptus log viewer"))
 {
    if (!ImGui::SFML::Init(*_render_window.get()))
@@ -74,7 +80,9 @@ void LogUi::processEvents()
 
       if (event->is<sf::Event::Closed>())
       {
+#ifndef DECEPTUS_VRSFML
          _render_window->close();
+#endif
       }
    }
 }
@@ -100,10 +108,7 @@ void LogUi::draw()
       ImVec4 color = getLogLevelColor(item._level);
       ImGui::PushStyleColor(ImGuiCol_Text, color);
 
-      const auto now_time = std::chrono::system_clock::to_time_t(item._timepoint);
-      std::stringstream time_ss;
-      time_ss << std::put_time(std::localtime(&now_time), "%Y-%m-%d %H:%M:%S");
-      const auto now_local = time_ss.str();
+      const auto now_local = Log::formatLocalTime(item._timepoint, "%Y-%m-%d %H:%M:%S");
 
       std::stringstream log_ss;
       log_ss << now_local << " " << Log::parseSourceTag(item._source_location) << ": " << item._message;
@@ -133,3 +138,4 @@ void LogUi::close()
 {
    ImGui::SFML::Shutdown(*_render_window.get());
 }
+#endif

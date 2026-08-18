@@ -1,15 +1,30 @@
 #version 430
 
+#ifdef GL_ES
+// GLSL ES 3.00 (WebGL2) has no default precision for floats/ints in the fragment stage.
+precision highp float;
+precision highp int;
+#endif
+
 in vec3 ReflectDir;
 
 in vec3 Position;
 in vec3 Normal;
 in vec2 TexCoord;
 
+#ifdef GL_ES
+// GLSL ES 3.00 (WebGL2) has no explicit binding layout for samplers; the sampler
+// units are assigned from C++ via glUniform1i (see TexturedObject::render).
+uniform sampler2D Tex1;
+uniform sampler2D Specular;
+uniform sampler2D AO;
+uniform samplerCube CubeMapTex;
+#else
 layout(binding=0) uniform sampler2D Tex1;
 layout(binding=2) uniform sampler2D Specular;
 layout(binding=4) uniform sampler2D AO;
 layout(binding=6) uniform samplerCube CubeMapTex;
+#endif
 
 uniform bool useAO;
 uniform bool useSpecular;

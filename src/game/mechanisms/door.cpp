@@ -8,6 +8,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationpool.h"
 #include "game/audio/audio.h"
@@ -20,13 +21,34 @@
 #include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
 
+#include <array>
 #include <iostream>
 
 namespace
 {
+static constexpr std::array door_properties{
+   PropertyInfo{.name = "open", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "observed", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "key", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "sample_open", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "sample_close", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "animation_open", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "animation_close", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "key_animation", .type = "string", .default_value = std::string_view{""}},
+};
+static constexpr MechanismSchema door_schema{
+   .type_name = "Door",
+   .layer_name = "doors",
+   .default_width = 24,
+   .default_height = 96,
+   .properties = door_properties,
+};
 const auto registered_door = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(door_schema);
+
    registry.mapGroupToLayer("Door", "doors");
 
    registry.registerLayerName(
@@ -74,32 +96,41 @@ std::string_view Door::objectName() const
    return "Door";
 }
 
-void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Door::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
+{
+   draw(color, normal, {});
+}
+
+void Door::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
    if (_animation_open && !_animation_open->_paused)
    {
-      _animation_open->draw(color);
+      _animation_open->draw(color, states);
    }
    else if (_animation_close && !_animation_close->_paused)
    {
-      _animation_close->draw(color);
+      _animation_close->draw(color, states);
    }
    else if (_state == State::Closed)
    {
-      color.draw(*_sprite);
+      sf::RenderStates sprite_states = states;
+      sprite_states.texture = _texture.get();
+      color.draw(*_sprite, sprite_states);
    }
 
    if (_player_at_door)
    {
       if (_animation_key)
       {
-         _animation_key->draw(color);
+         _animation_key->draw(color, states);
       }
    }
 
    if (_version == Version::Version1)
    {
-      color.draw(_door_quad, _texture.get());
+      sf::RenderStates quad_states = states;
+      quad_states.texture = _texture.get();
+      color.draw(_door_quad, quad_states);
    }
 }
 
@@ -239,7 +270,7 @@ void Door::setEnabled(bool enabled)
 
 std::optional<sf::FloatRect> Door::getBoundingBoxPx()
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 void Door::updateTransform()
@@ -287,7 +318,7 @@ bool Door::checkPlayerAtDoor() const
 
 const sf::FloatRect& Door::getPixelRect() const
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 void Door::open()
@@ -440,8 +471,12 @@ bool Door::setup(const GameDeserializeData& data)
       {
          const auto texture_path = texture_it->second->_value_string.value();
          _texture = TexturePool::getInstance().get(texture_path);
+#ifdef DECEPTUS_VRSFML
+         _sprite = std::make_unique<sf::Sprite>();
+#else
          _sprite = std::make_unique<sf::Sprite>(*_texture);
-         _sprite->setPosition({x_px, y_px});
+#endif
+         sfcompat::setPosition(*_sprite, {x_px, y_px});
       }
 
       const auto sample_open_it = map.find("sample_open");
@@ -520,14 +555,14 @@ bool Door::setup(const GameDeserializeData& data)
       _door_quad[2].position = {x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE, y_px};                        // bottom-right
       _door_quad[3].position = {x_px + 3 * PIXELS_PER_TILE - PIXELS_PER_TILE, y_px + 3 * PIXELS_PER_TILE};  // top-right
 
-      _pixel_rect = sf::FloatRect({x_px, y_px}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3});
+      _rect_px = sf::FloatRect({x_px, y_px}, {PIXELS_PER_TILE, PIXELS_PER_TILE * 3});
    }
    else
    {
       // the first frame of the open animation should be the texture rect used for drawing
       if (_animation_open)
       {
-         _sprite->setTextureRect(_animation_open->_frames.at(0));
+         sfcompat::setTextureRect(*_sprite, _animation_open->_frames.at(0));
       }
    }
 

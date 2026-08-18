@@ -1,11 +1,13 @@
 #include "lever.h"
 
+#include <array>
 #include <ranges>
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
@@ -16,9 +18,25 @@
 
 namespace
 {
+static constexpr std::array lever_properties{
+   PropertyInfo{.name = "enabled", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "serialized", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "handle_available", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "target_ids", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema lever_schema{
+   .type_name = "Lever",
+   .layer_name = "levers",
+   .default_width = 72,
+   .default_height = 72,
+   .properties = lever_properties,
+};
 const auto registered_lever = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(lever_schema);
+
    registry.mapGroupToLayer("Lever", "levers");
 
    registry.registerObjectGroup(
@@ -112,7 +130,7 @@ void Lever::setup(const GameDeserializeData& data)
                if (_player_at_lever && !_handle_available && item == "handle")
                {
                   setHandleAvailable(true);
-                  Audio::getInstance().playSample(Audio::PlayInfo{"mechanism_switch_lever_insert.wav"});
+                  Audio::getInstance().playSample(Audio::PlayInfo{"mechanism_switch_lever_insert.ogg"});
                   GameMechanismObserver::onEvent(getObjectId(), "levers", "handle_inserted", std::string{"true"});
                   return true;
                }
@@ -133,8 +151,12 @@ void Lever::setup(const GameDeserializeData& data)
    _rect.size.y = PIXELS_PER_TILE * 2;
 
    _texture = TexturePool::getInstance().get("data/sprites/levers.png");
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition({x, y});
+#endif
+   sfcompat::setPosition(*_sprite, {x, y});
    // _texture = TexturePool::getInstance().get(data._base_path / "tilesets" / "levers.png");
 
    setObjectId(data._tmx_object->_name);
@@ -148,19 +170,35 @@ void Lever::updateSprite()
 {
    if (_reached && (_target_state == State::Right))
    {
+#ifdef DECEPTUS_VRSFML
+      _sprite->textureRect = {
+         {static_cast<float>((static_cast<int32_t>(_idle_time_s * idle_animation_speed) % 6) * PIXELS_PER_TILE * 3),
+          static_cast<float>(PIXELS_PER_TILE * 3 * 2)},
+         {static_cast<float>(PIXELS_PER_TILE * 3), static_cast<float>(PIXELS_PER_TILE * 3)}
+      };
+#else
       _sprite->setTextureRect(
          {{(static_cast<int32_t>(_idle_time_s * idle_animation_speed) % 6) * PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3 * 2},
           {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}}
       );
+#endif
    }
    else
    {
       const auto left = _dir == -1;
 
+#ifdef DECEPTUS_VRSFML
+      _sprite->textureRect = {
+         {static_cast<float>(left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE)),
+          static_cast<float>(left ? (3 * PIXELS_PER_TILE) : 0)},
+         {static_cast<float>(PIXELS_PER_TILE * 3), static_cast<float>(PIXELS_PER_TILE * 3)}
+      };
+#else
       _sprite->setTextureRect(
          {{left ? (left_offset - _offset * 3 * PIXELS_PER_TILE) : (_offset * 3 * PIXELS_PER_TILE), left ? (3 * PIXELS_PER_TILE) : 0},
           {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}}
       );
+#endif
    }
 }
 
@@ -186,9 +224,9 @@ std::string_view Lever::objectName() const
 
 void Lever::preload()
 {
-   Audio::getInstance().addSample("mechanism_switch_off.wav");
-   Audio::getInstance().addSample("mechanism_switch_on.wav");
-   Audio::getInstance().addSample("mechanism_switch_lever_insert.wav");
+   Audio::getInstance().addSample("mechanism_switch_off.ogg");
+   Audio::getInstance().addSample("mechanism_switch_on.ogg");
+   Audio::getInstance().addSample("mechanism_switch_lever_insert.ogg");
 }
 
 void Lever::updateDirection()
@@ -252,17 +290,26 @@ void Lever::resolveTargets(const std::vector<std::shared_ptr<GameMechanism>>& me
 void Lever::update(const sf::Time& dt)
 {
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   _player_at_lever = _rect.findIntersection(player_rect).has_value();
+   _player_at_lever = sfcompat::findIntersection(_rect, player_rect).has_value();
 
    if (!_handle_available)
    {
       constexpr auto no_handle_col = 10;
       constexpr auto no_handle_row = 2;
+#ifdef DECEPTUS_VRSFML
+      const auto rect = sf::FloatRect{
+         {static_cast<float>(PIXELS_PER_TILE * 3 * no_handle_col), static_cast<float>(PIXELS_PER_TILE * 3 * no_handle_row)},
+         {static_cast<float>(PIXELS_PER_TILE * 3), static_cast<float>(PIXELS_PER_TILE * 3)}
+      };
+
+      _sprite->textureRect = rect;
+#else
       const auto rect = sf::IntRect{
          {PIXELS_PER_TILE * 3 * no_handle_col, PIXELS_PER_TILE * 3 * no_handle_row}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}
       };
 
       _sprite->setTextureRect(rect);
+#endif
       return;
    }
 
@@ -305,9 +352,25 @@ void Lever::update(const sf::Time& dt)
    }
 }
 
-void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+#ifdef DECEPTUS_VRSFML
+   draw(color, normal, {});
+#else
    color.draw(*_sprite);
+#endif
+}
+
+void Lever::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+#ifdef DECEPTUS_VRSFML
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite, draw_states);
+#else
+   (void)states;
+   draw(color, normal);
+#endif
 }
 
 std::optional<sf::FloatRect> Lever::getBoundingBoxPx()
@@ -394,10 +457,12 @@ void Lever::toggle()
    }
 
    Audio::getInstance().playSample(
-      _target_state == State::Left ? Audio::PlayInfo{"mechanism_switch_off.wav"} : Audio::PlayInfo{"mechanism_switch_on.wav"}
+      _target_state == State::Left ? Audio::PlayInfo{"mechanism_switch_off.ogg"} : Audio::PlayInfo{"mechanism_switch_on.ogg"}
    );
 
    updateReceivers();
+
+   GameMechanismObserver::onEvent(getObjectId(), "levers", "state", _target_state == State::Right ? std::string{"on"} : std::string{"off"});
 }
 
 void Lever::addCallback(const Callback& callback)

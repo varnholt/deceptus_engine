@@ -10,21 +10,21 @@ MenuBackgroundScene::MenuBackgroundScene()
    // Initialize the camera
    _camera = std::make_unique<Camera3D>();
    _camera->initialize(800, 600, -10, 10);       // Use same near/far as lab after correction, will be updated before rendering
-   _camera->setPosition({0.0f, 0.0f, 5.0f});     // Position camera along z-axis                                               │
+   _camera->setPosition({0.0f, 0.0f, 5.0f});     // Position camera along z-axis
    _camera->setLookAtPoint({0.0f, 0.0f, 0.0f});  // Look at origin where starmap is
 
    // create textured starmap
    _starmap = std::make_shared<TexturedObject>(
       "data/meshes/starmap.obj",
-      "data/effects/starmap_color.tga",
+      "data/effects/starmap_color.png",
       1.0f,
       true,
       true,
       false  // disable lighting for starmap to use texture-only color
    );
 
-   _starmap->setPosition({0, 0, 0});
-   _starmap->setScale({1, 1, 1});
+   _starmap->setPosition({0.0f, 0.0f, 0.0f});
+   _starmap->setScale({1.0f, 1.0f, 1.0f});
    _starmap->setRotationSpeed(glm::vec3(0.02f, 0.035f, 0.04f));  // Use lab's rotation speed
 
    addObject(_starmap);
@@ -39,6 +39,16 @@ MenuBackgroundScene::MenuBackgroundScene()
       std::cerr << "Failed to load texture shader!\n";
       return;
    }
+
+   // assign distinct texture units to the samplers. on desktop these come from the shader's
+   // layout(binding=...) qualifiers, but GLSL ES 3.00 (WebGL2) has no binding qualifier, so the
+   // samplerCube and the sampler2D uniforms would all alias texture unit 0 — a combination WebGL
+   // rejects at draw time. mirror the desktop bindings here so both platforms behave identically.
+   _shader->use();
+   _shader->setUniform("Tex1", 0);
+   _shader->setUniform("Specular", 2);
+   _shader->setUniform("AO", 4);
+   _shader->setUniform("CubeMapTex", 6);
 }
 
 MenuBackgroundScene::~MenuBackgroundScene()

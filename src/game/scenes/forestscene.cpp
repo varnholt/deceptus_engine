@@ -1,27 +1,27 @@
 #include "forestscene.h"
 
 #include "framework/image/psd.h"
+#include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "game/config/gameconfiguration.h"
 
 #include <math.h>
 #include <iostream>
+#ifdef DECEPTUS_VRSFML
+#include <stdexcept>
+#endif
 
 ForestScene::ForestScene()
 {
-   if (_font.openFromFile("data/fonts/deceptum.ttf"))
-   {
-      const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-      _text = std::make_unique<sf::Text>(_font);
-      _text->setCharacterSize(12);
-      // mText.setString("Congratulations!\nYou completed the game!");
-      _text->setString("Geschafft!\nAlles Gute zum Geburtstag, Malte!");
-      _text->setFillColor(sf::Color{232, 219, 243});
-   }
-   else
-   {
-      Log::Error() << "font load fuckup";
-   }
+#ifdef DECEPTUS_VRSFML
+   _text = std::make_unique<sf::Text>(*_font, sf::Text::Data{});
+#else
+   _text = std::make_unique<sf::Text>(*_font);
+#endif
+   _text->setCharacterSize(12);
+   // mText.setString("Congratulations!\nYou completed the game!");
+   _text->setString("Geschafft!\nAlles Gute zum Geburtstag, Malte!");
+   _text->setFillColor(sf::Color{232, 219, 243});
 
    // load ingame psd
    PSD psd;
@@ -41,6 +41,20 @@ ForestScene::ForestScene()
 
       try
       {
+#ifdef DECEPTUS_VRSFML
+         auto texture_opt = sf::Texture::create(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
+         if (!texture_opt.hasValue())
+         {
+            throw std::runtime_error("failed to create texture");
+         }
+         auto texture = std::make_shared<sf::Texture>(std::move(*texture_opt));
+
+         auto sprite = std::make_shared<sf::Sprite>();
+         texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
+
+         sprite->position = {static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())};
+         sprite->color = sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())};
+#else
          auto texture =
             std::make_shared<sf::Texture>(sf::Vector2u{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())});
 
@@ -49,6 +63,7 @@ ForestScene::ForestScene()
 
          sprite->setPosition({static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())});
          sprite->setColor(sf::Color{255, 255, 255, static_cast<uint8_t>(layer.getOpacity())});
+#endif
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;
@@ -69,8 +84,13 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    auto h = GameConfiguration::getInstance()._view_height;
 
    // draw layers
+#ifdef DECEPTUS_VRSFML
+   const sf::View view = sf::View::fromRect(sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}});
+   states.view = view;
+#else
    sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(w), static_cast<float>(h)}));
    window.setView(view);
+#endif
 
    for (auto& layer : _layer_stack)
    {
@@ -80,7 +100,11 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
    // draw text
    const auto rect = _text->getGlobalBounds();
    const auto left = w / 2 - rect.size.x / 2;
+#ifdef DECEPTUS_VRSFML
+   _text->position = {floor(left), 82};
+#else
    _text->setPosition({floor(left), 82});
+#endif
    window.draw(*_text, states);
 }
 
@@ -123,7 +147,13 @@ void ForestScene::draw(sf::RenderTarget& window, sf::RenderStates states)
 
 void ForestScene::update(const sf::Time& time)
 {
+#ifdef DECEPTUS_VRSFML
+   _layers["mfog_1"]->_sprite->position += sf::Vector2f{3.0f * time.asSeconds(), 0.0f};
+   _layers["mfog_2"]->_sprite->position += sf::Vector2f{2.0f * time.asSeconds(), 0.0f};
+   _layers["mfog_3"]->_sprite->position += sf::Vector2f{time.asSeconds(), 0.0f};
+#else
    _layers["mfog_1"]->_sprite->move({3.0f * time.asSeconds(), 0.0f});
    _layers["mfog_2"]->_sprite->move({2.0f * time.asSeconds(), 0.0f});
    _layers["mfog_3"]->_sprite->move({time.asSeconds(), 0.0f});
+#endif
 }

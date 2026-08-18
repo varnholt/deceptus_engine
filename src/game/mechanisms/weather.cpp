@@ -3,9 +3,15 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
+#include "game/audio/audio.h"
+#include "game/audio/soundrotation.h"
 #include "game/io/valuereader.h"
 #include "game/level/roomupdater.h"
 #include "game/player/playerregistry.h"
+
+#include <string>
+#include <vector>
 
 Weather::Weather(GameNode* parent) : GameNode(parent)
 {
@@ -17,6 +23,37 @@ std::string_view Weather::objectName() const
    return "Weather";
 }
 
+#ifdef DECEPTUS_VRSFML
+void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+   if (!_enabled)
+   {
+      return;
+   }
+
+   if (_wait_until_start_delay_elapsed)
+   {
+      return;
+   }
+
+   if (_limit_effect_to_room && !RoomUpdater::checkCurrentMatchesIds(getRoomIds()))
+   {
+      return;
+   }
+
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+   const auto intersects = sf::findIntersection(_rect, player_rect).hasValue();
+   if (intersects)
+   {
+      _overlay->draw(target, normal, states);
+   }
+}
+#else
 void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    if (!_enabled)
@@ -41,6 +78,12 @@ void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
       _overlay->draw(target, normal);
    }
 }
+
+void Weather::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& /*states*/)
+{
+   draw(target, normal);
+}
+#endif
 
 void Weather::updateWaitDelay(const sf::Time& dt, bool intersects)
 {
@@ -90,14 +133,25 @@ void Weather::update(const sf::Time& dt)
 {
    if (!_enabled)
    {
+      if (_overlay)
+      {
+         _overlay->setAudioEnabled(false);
+      }
+
       return;
    }
 
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   const auto intersects = _rect.findIntersection(player_rect).has_value();
+   const auto intersects = sfcompat::findIntersection(_rect, player_rect).has_value();
    updateWaitDelay(dt, intersects);
 
-   if (intersects && matchesRoom() && !_wait_until_start_delay_elapsed)
+   const auto active = intersects && matchesRoom() && !_wait_until_start_delay_elapsed;
+
+   // driven every frame rather than from the overlay itself: update() below only runs while active,
+   // so the overlay would never see the transition back to inactive
+   _overlay->setAudioEnabled(active);
+
+   if (active)
    {
       _overlay->update(dt);
    }
@@ -172,6 +226,15 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
             settings._fall_through_rate = fall_through_rate_it->second->_value_int.value();
          }
 
+         const auto sound = ValueReader::readValue<std::string>("sound", map);
+         if (sound.has_value())
+         {
+            settings._sound = sound.value();
+            Audio::getInstance().addSample(settings._sound);
+         }
+
+         settings._sound_volume = ValueReader::readValue<float>("sound_volume", map).value_or(1.0f);
+
          std::dynamic_pointer_cast<RainOverlay>(weather->_overlay)->setSettings(settings);
       }
    }
@@ -204,6 +267,18 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
          {
             settings._silence_time_s = silence_time_it->second->_value_float.value();
          }
+
+         const auto sounds = ValueReader::readValue<std::string>("sounds", map);
+         if (sounds.has_value())
+         {
+            settings._sounds = SoundList::parse(sounds.value());
+            for (const auto& sound : settings._sounds)
+            {
+               Audio::getInstance().addSample(sound);
+            }
+         }
+
+         settings._sound_volume = ValueReader::readValue<float>("sound_volume", map).value_or(1.0f);
       }
 
       const auto rect =

@@ -11,6 +11,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
@@ -44,13 +45,34 @@ std::string_view Laser::objectName() const
    return "Laser";
 }
 
-void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
+void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
+#ifdef DECEPTUS_VRSFML
+   draw(color, normal, {});
+#else
    _sprite->setTextureRect(
       sf::IntRect({_tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE, _tv * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE})
    );
 
    color.draw(*_sprite);
+#endif
+}
+
+void Laser::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+#ifdef DECEPTUS_VRSFML
+   _sprite->textureRect = sf::FloatRect{
+      {static_cast<float>(_tu * PIXELS_PER_TILE + _tile_index * PIXELS_PER_TILE), static_cast<float>(_tv * PIXELS_PER_TILE)},
+      {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+   };
+
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+   color.draw(*_sprite, draw_states);
+#else
+   (void)states;
+   draw(color, normal);
+#endif
 }
 
 void Laser::setEnabled(bool enabled)
@@ -60,7 +82,7 @@ void Laser::setEnabled(bool enabled)
 
 const sf::FloatRect& Laser::getPixelRect() const
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 void Laser::update(const sf::Time& dt)
@@ -191,7 +213,7 @@ void Laser::update(const sf::Time& dt)
       {
          _path_interpolation.updateTime(_settings._movement_speed * dt.asSeconds());
          _move_offset_px = _path_interpolation.computePosition(_path_interpolation.getTime());
-         _sprite->setPosition(_position_px + _move_offset_px);
+         sfcompat::setPosition(*_sprite, _position_px + _move_offset_px);
       }
    }
 
@@ -200,7 +222,7 @@ void Laser::update(const sf::Time& dt)
 
 std::optional<sf::FloatRect> Laser::getBoundingBoxPx()
 {
-   return _pixel_rect;
+   return _rect_px;
 }
 
 void Laser::reset()
@@ -222,7 +244,7 @@ void Laser::resetAll()
 
 const sf::Vector2f& Laser::getTilePosition() const
 {
-   return _tile_position;
+   return _position_tl;
 }
 
 const sf::Vector2f& Laser::getPixelPosition() const
@@ -283,17 +305,17 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
 
          laser->_version = version;
 
-         laser->_tile_position.x = static_cast<float>(i);
-         laser->_tile_position.y = static_cast<float>(j);
+         laser->_position_tl.x = static_cast<float>(i);
+         laser->_position_tl.y = static_cast<float>(j);
 
-         laser->_position_px.x = laser->_tile_position.x * PIXELS_PER_TILE;
-         laser->_position_px.y = laser->_tile_position.y * PIXELS_PER_TILE;
+         laser->_position_px.x = laser->_position_tl.x * PIXELS_PER_TILE;
+         laser->_position_px.y = laser->_position_tl.y * PIXELS_PER_TILE;
 
-         laser->_pixel_rect.position.x = laser->_position_px.x;
-         laser->_pixel_rect.position.y = laser->_position_px.y;
+         laser->_rect_px.position.x = laser->_position_px.x;
+         laser->_rect_px.position.y = laser->_position_px.y;
 
-         laser->_pixel_rect.size.x = PIXELS_PER_TILE;
-         laser->_pixel_rect.size.y = PIXELS_PER_TILE;
+         laser->_rect_px.size.x = PIXELS_PER_TILE;
+         laser->_rect_px.size.y = PIXELS_PER_TILE;
 
          laser->_texture = TexturePool::getInstance().get(data._base_path / data._tmx_tileset->_image->_source);
 
@@ -310,8 +332,12 @@ std::vector<std::shared_ptr<GameMechanism>> Laser::load(GameNode* parent, const 
             laser->setZ(data._tmx_layer->_properties->_map["z"]->_value_int.value());
          }
 
+#ifdef DECEPTUS_VRSFML
+         laser->_sprite = std::make_unique<sf::Sprite>();
+#else
          laser->_sprite = std::make_unique<sf::Sprite>(*laser->_texture);
-         laser->_sprite->setPosition(laser->_position_px);
+#endif
+         sfcompat::setPosition(*laser->_sprite, laser->_position_px);
 
          __lasers.push_back(laser);
       }
@@ -373,15 +399,15 @@ void Laser::collide()
    auto checkCollision = [this]()
    {
       const sf::FloatRect& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-      auto pixel_rect = _pixel_rect;
+      auto rect_px = _rect_px;
 
       if (_path.has_value())
       {
-         pixel_rect.position.x += static_cast<int32_t>(_move_offset_px.x);
-         pixel_rect.position.y += static_cast<int32_t>(_move_offset_px.y);
+         rect_px.position.x += static_cast<int32_t>(_move_offset_px.x);
+         rect_px.position.y += static_cast<int32_t>(_move_offset_px.y);
       }
 
-      const auto rough_intersection = player_rect.findIntersection(pixel_rect).has_value();
+      const auto rough_intersection = sfcompat::findIntersection(player_rect, rect_px).has_value();
 
       auto active = false;
 
@@ -422,7 +448,7 @@ void Laser::collide()
                rect.size.x = PIXELS_PER_PHYSICS_TILE;
                rect.size.y = PIXELS_PER_PHYSICS_TILE;
 
-               const auto fine_intersection = player_rect.findIntersection(rect).has_value();
+               const auto fine_intersection = sfcompat::findIntersection(player_rect, rect).has_value();
 
                if (fine_intersection)
                {
@@ -509,7 +535,7 @@ void Laser::merge()
             {
                for (auto& laser : __lasers)
                {
-                  if (static_cast<int32_t>(laser->_tile_position.x) == xi && static_cast<int32_t>(laser->_tile_position.y) == yi)
+                  if (static_cast<int32_t>(laser->_position_tl.x) == xi && static_cast<int32_t>(laser->_position_tl.y) == yi)
                   {
                      if (on_signal.has_value())
                      {

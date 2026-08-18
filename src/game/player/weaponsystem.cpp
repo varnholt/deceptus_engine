@@ -24,7 +24,7 @@ void to_json(nlohmann::json& j, const WeaponSystem& d)
 void from_json(const nlohmann::json& j, WeaponSystem& d)
 {
    static const std::unordered_map<std::string, WeaponType> weapon_map = {
-      {"bow", WeaponType::Bow}, {"gun", WeaponType::Gun}, {"sword", WeaponType::Sword}
+      {"bow", WeaponType::Bow}, {"gun", WeaponType::Gun}, {"sword", WeaponType::Sword}, {"harpoon", WeaponType::Harpoon}
    };
 
    // code below does not set the launcher body (of the player) for the bow yet

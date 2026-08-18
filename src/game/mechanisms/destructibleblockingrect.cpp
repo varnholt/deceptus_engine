@@ -1,8 +1,10 @@
-#include "DestructibleBlockingRect.h"
+#include "destructibleblockingrect.h"
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 
 #include "game/audio/audio.h"
 #include "game/io/texturepool.h"
@@ -10,14 +12,27 @@
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/player.h"
 
+#include <array>
 #include <filesystem>
 #include <iostream>
 
 namespace
 {
+static constexpr std::array destructible_blocking_rect_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema destructible_blocking_rect_schema{
+   .type_name = "DestructibleBlockingRect",
+   .layer_name = "destructible_blocking_rects",
+   .default_width = 96,
+   .default_height = 24,
+   .properties = destructible_blocking_rect_properties,
+};
 const auto registered_destructible_blocking_rect = []()
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(destructible_blocking_rect_schema);
+
    registry.mapGroupToLayer("DestructibleBlockingRect", "destructible_blocking_rects");
    registry.registerLayerName(
       "destructible_blocking_rects",
@@ -86,12 +101,12 @@ DestructibleBlockingRect::DestructibleBlockingRect(GameNode* parent, const GameD
 
    setZ(_config.z_index);
 
-   if (!_flash_shader.loadFromFile("data/shaders/flash.frag", sf::Shader::Type::Fragment))
+   if (!_flash_shader.loadFromFragment("data/shaders/flash.frag"))
    {
       Log::Error() << "error loading flash shader";
    }
 
-   _flash_shader.setUniform("texture", sf::Shader::CurrentTexture);
+   _flash_shader.setUniform("u_texture", sf::Shader::CurrentTexture);
    _flash_shader.setUniform("flash", _hit_flash);
 }
 
@@ -117,7 +132,20 @@ bool DestructibleBlockingRect::isDestructible() const
 
 void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
-   color.draw(*_sprite, &_flash_shader);
+   draw(color, normal, {});
+}
+
+void DestructibleBlockingRect::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture.get();
+
+   if (_flash_shader.isLoaded())
+   {
+      draw_states.shader = &_flash_shader.native();
+   }
+
+   color.draw(*_sprite, draw_states);
 }
 
 void DestructibleBlockingRect::update(const sf::Time& dt)
@@ -148,7 +176,8 @@ void DestructibleBlockingRect::update(const sf::Time& dt)
          _state.current_frame = _config.frame_count - 1;
       }
 
-      _sprite->setTextureRect(
+      sfcompat::setTextureRect(
+         *_sprite,
          sf::IntRect{
             {static_cast<int32_t>(_state.current_frame) * _config.frame_width, _config.row * _config.frame_height},
             {_config.frame_width, _config.frame_height}
@@ -217,9 +246,13 @@ void DestructibleBlockingRect::setupSprite(const GameDeserializeData& data)
 
    _texture = TexturePool::getInstance().get(_config.texture_path);
 
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setPosition(sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)});
-   _sprite->setTextureRect(sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}});
+#endif
+   sfcompat::setPosition(*_sprite, sf::Vector2f{static_cast<float>(x_px), static_cast<float>(y_px)});
+   sfcompat::setTextureRect(*_sprite, sf::IntRect{{0, _config.row * _config.frame_height}, {_config.frame_width, _config.frame_height}});
 }
 
 void DestructibleBlockingRect::destroy()

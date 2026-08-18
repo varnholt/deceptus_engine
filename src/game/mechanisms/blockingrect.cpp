@@ -1,5 +1,7 @@
 #include "game/mechanisms/blockingrect.h"
 
+#include <array>
+
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
@@ -8,9 +10,20 @@
 
 namespace
 {
+static constexpr std::array blocking_rect_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema blocking_rect_schema{
+   .type_name = "BlockingRect",
+   .layer_name = "blocking_rects",
+   .default_width = 96,
+   .default_height = 48,
+   .properties = blocking_rect_properties,
+};
 const auto registered_blockingrect = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(blocking_rect_schema);
 
    registry.mapGroupToLayer("BlockingRect", "blocking_rects");
 
@@ -76,8 +89,13 @@ void BlockingRect::setup(const GameDeserializeData& data)
       {
          const auto texture = texture_it->second->_value_string.value();
          _texture_map = TexturePool::getInstance().get(texture);
+#ifdef DECEPTUS_VRSFML
+         _sprite = std::make_unique<sf::Sprite>();
+         _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
+#else
          _sprite = std::make_unique<sf::Sprite>(*_texture_map);
          _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+#endif
       }
 
       const auto normal_it = data._tmx_object->_properties->_map.find("normal");
@@ -109,6 +127,8 @@ void BlockingRect::setup(const GameDeserializeData& data)
    boundaryFixtureDef.density = 1.0f;
 
    _body->CreateFixture(&boundaryFixtureDef);
+
+   addChunks(_rectangle);
 }
 
 const sf::FloatRect& BlockingRect::getPixelRect() const
@@ -117,6 +137,11 @@ const sf::FloatRect& BlockingRect::getPixelRect() const
 }
 
 void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
    // nothing to paint
    if (_sprite == nullptr)
@@ -130,19 +155,32 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
       return;
    }
 
+#ifdef DECEPTUS_VRSFML
+   sf::RenderStates color_states = states;
+   color_states.texture = _texture_map.get();
+   target.draw(*_sprite, color_states);
+
+   if (_normal_map)
+   {
+      sf::RenderStates normal_states = states;
+      normal_states.texture = _normal_map.get();
+      normal.draw(*_sprite, normal_states);
+   }
+#else
    if (_normal_map)
    {
       _sprite->setTexture(*_texture_map);
    }
 
-   target.draw(*_sprite);
+   target.draw(*_sprite, states);
 
    if (_normal_map)
    {
       _sprite->setTexture(*_normal_map);
    }
 
-   normal.draw(*_sprite);
+   normal.draw(*_sprite, states);
+#endif
 }
 
 void BlockingRect::update(const sf::Time& /*dt*/)

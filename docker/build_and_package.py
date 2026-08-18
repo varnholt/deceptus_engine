@@ -5,6 +5,8 @@ import time
 from pathlib import Path
 import docker
 
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 def ts() -> str:
     return time.strftime("%Y-%m-%dT%H-%M-%S", time.gmtime())
 

@@ -10,11 +10,25 @@
 #include "game/mechanisms/flowfieldtexturechangeevent.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
+#include <array>
+
 namespace
 {
+static constexpr std::array dust_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema dust_schema{
+   .type_name = "Dust",
+   .layer_name = "dust",
+   .default_width = 48,
+   .default_height = 48,
+   .properties = dust_properties,
+};
 const auto registered_dust = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(dust_schema);
+
    registry.mapGroupToLayer("Dust", "dust");
 
    registry.registerLayerName(
@@ -58,7 +72,19 @@ std::string_view Dust::objectName() const
 
 void Dust::rebuildFlowFieldCache()
 {
-   const auto image_size = _flow_field_image.getSize();
+   // the vrsfml flavour holds the image in an optional, so both spellings have to be served here
+#ifdef DECEPTUS_VRSFML
+   if (!_flow_field_image.has_value())
+   {
+      return;
+   }
+
+   const auto& flow_field_image = _flow_field_image.value();
+#else
+   const auto& flow_field_image = _flow_field_image;
+#endif
+
+   const auto image_size = flow_field_image.getSize();
    _flow_field_image_width = image_size.x;
    _flow_field_scale_factor_x = static_cast<float>(image_size.x) / _clip_rect.size.x;
    _flow_field_scale_factor_y = static_cast<float>(image_size.y) / _clip_rect.size.y;
@@ -69,7 +95,7 @@ void Dust::rebuildFlowFieldCache()
    {
       for (uint32_t image_pixel_x = 0; image_pixel_x < image_size.x; ++image_pixel_x)
       {
-         const auto image_pixel = _flow_field_image.getPixel({image_pixel_x, image_pixel_y});
+         const auto image_pixel = flow_field_image.getPixel({image_pixel_x, image_pixel_y});
          const auto direction_x = (static_cast<float>(image_pixel.r) / 255.0f) - 0.5f;
          const auto direction_y = (static_cast<float>(image_pixel.g) / 255.0f) - 0.5f;
          const auto direction_z = (static_cast<float>(image_pixel.b) / 255.0f) - 0.5f;
@@ -112,7 +138,11 @@ void Dust::update(const sf::Time& dt)
       // remove particles that are too close to the center
       if (_respawn_when_center_reached)
       {
+#ifdef DECEPTUS_VRSFML
+         const sf::Vector2f center = _clip_rect.position + _clip_rect.size / 2.0f;
+#else
          const sf::Vector2f center = _clip_rect.getCenter();
+#endif
          const auto center_delta_x = particle._position.x - center.x;
          const auto center_delta_y = particle._position.y - center.y;
          const auto center_distance_sq = center_delta_x * center_delta_x + center_delta_y * center_delta_y;
@@ -127,11 +157,16 @@ void Dust::update(const sf::Time& dt)
    }
 }
 
-void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
+void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& incoming_states)
 {
    static const auto alpha_default = 50;
 
-   sf::RenderStates states;
+   sf::RenderStates states = incoming_states;
    states.blendMode = sf::BlendAlpha;
 
    std::size_t vertex_index = 0;
@@ -192,7 +227,11 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
       // target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
    }
 
+#ifdef DECEPTUS_VRSFML
+   target.draw(std::span<const sf::Vertex>(&_vertices[0], vertex_index), sf::PrimitiveType::Triangles, states);
+#else
    target.draw(&_vertices[0], vertex_index, sf::PrimitiveType::Triangles, states);
+#endif
 }
 
 std::optional<sf::FloatRect> Dust::getBoundingBoxPx()

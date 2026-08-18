@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/animation/animationpool.h"
 #include "game/audio/audio.h"
 #include "game/camera/camerasystem.h"
@@ -22,6 +23,7 @@
 #include "gateway.h"
 
 #include <algorithm>
+#include <array>
 #include <memory>
 #include <random>
 #include <string>
@@ -80,9 +82,25 @@ std::unique_ptr<ScreenTransition> makeFadeTransition()
 
 namespace
 {
+static constexpr std::array gateway_properties{
+   PropertyInfo{.name = "enabled", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "target_id", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "flowfield_reference_id", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "flowfield_texture", .type = "string", .default_value = std::string_view{""}},
+};
+static constexpr MechanismSchema gateway_schema{
+   .type_name = "Gateway",
+   .layer_name = "gateways",
+   .default_width = 96,
+   .default_height = 96,
+   .properties = gateway_properties,
+};
 const auto registered_gateway = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(gateway_schema);
+
    registry.mapGroupToLayer("Gateway", "gateways");
 
    registry.registerLayerName(
@@ -111,39 +129,13 @@ const auto registered_gateway = []
 }();
 }  // namespace
 
-namespace
-{
-
-std::shared_ptr<sf::Texture> createRotatedTexture(const sf::Texture& original, const sf::Angle& angle)
-{
-   const auto size_px = original.getSize();
-   const auto width_px = static_cast<float>(size_px.x);
-   const auto height_px = static_cast<float>(size_px.y);
-
-   sf::RenderTexture render_texture(size_px);
-   render_texture.clear(sf::Color::Transparent);
-
-   sf::Sprite sprite(original);
-   sprite.setOrigin({width_px / 2.0f, height_px / 2.0f});
-   sprite.setRotation(angle);
-   sprite.setPosition({width_px / 2.0f, height_px / 2.0f});
-
-   render_texture.draw(sprite);
-   render_texture.display();
-
-   auto rotated = std::make_shared<sf::Texture>(render_texture.getTexture());
-   return rotated;
-}
-
-}  // namespace
-
 Gateway::Gateway(GameNode* parent) : GameNode(parent)
 {
    _filename = "data/sprites/gateway.psd";
 
-   Audio::getInstance().addSample("mechanism_gateway_rotate_01.wav");
-   Audio::getInstance().addSample("mechanism_gateway_extract_01.wav");
-   Audio::getInstance().addSample("mechanism_gateway_warp_01.wav");
+   Audio::getInstance().addSample("mechanism_gateway_rotate_01.ogg");
+   Audio::getInstance().addSample("mechanism_gateway_extract_01.ogg");
+   Audio::getInstance().addSample("mechanism_gateway_warp_01.ogg");
 }
 
 Gateway::~Gateway()
@@ -167,6 +159,20 @@ std::string_view Gateway::objectName() const
 
 void Gateway::loadNoiseTexture(const std::string& filename)
 {
+#ifdef DECEPTUS_VRSFML
+   auto loaded_texture = sf::Texture::loadFromFile(filename);
+   if (!loaded_texture.hasValue())
+   {
+      std::cerr << "Failed to load noise texture: " << filename << "\n";
+      return;
+   }
+
+   loaded_texture->setWrapMode(sf::TextureWrapMode::Repeat);
+   loaded_texture->setSmooth(true);
+
+   _noise_texture = std::move(*loaded_texture);
+   _shader.setUniform("iChannel0", *_noise_texture);
+#else
    sf::Texture noise_texture;
    if (!noise_texture.loadFromFile(filename))
    {
@@ -179,6 +185,7 @@ void Gateway::loadNoiseTexture(const std::string& filename)
 
    _noise_texture = std::move(noise_texture);
    _shader.setUniform("iChannel0", _noise_texture);
+#endif
 }
 
 void Gateway::setSidesVisible(std::array<Side, 4>& sides, bool visible)
@@ -210,9 +217,24 @@ void Gateway::drawVoid(sf::RenderTarget& target)
    _shader.setUniform("noise_scale", _noise_scale);
    _shader.setUniform("swirl_color", _swirl_color);
 
+#ifdef DECEPTUS_VRSFML
    sf::RenderStates shader_state;
    shader_state.blendMode = sf::BlendNone;
-   shader_state.shader = &_shader;
+   shader_state.shader = _shader.isLoaded() ? &_shader.native() : nullptr;
+
+   sf::RectangleShape quad{sf::RectangleShape::Data{.size = {200.f, 200.f}}};
+   quad.setFillColor(sf::Color::White);
+
+   _shader_texture->draw(quad, shader_state);
+   _shader_texture->display();
+   _shader_sprite->position = pos;
+
+   sf::RenderStates sprite_state{.blendMode = sf::BlendAdd};
+   target.draw(*_shader_sprite, sprite_state);
+#else
+   sf::RenderStates shader_state;
+   shader_state.blendMode = sf::BlendNone;
+   shader_state.shader = &_shader.native();
 
    sf::RectangleShape quad(sf::Vector2f{200.f, 200.f});
    quad.setFillColor(sf::Color::White);
@@ -223,10 +245,14 @@ void Gateway::drawVoid(sf::RenderTarget& target)
 
    sf::RenderStates sprite_state(sf::BlendAdd);
    target.draw(*_shader_sprite, sprite_state);
+#endif
 }
 
-void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
+void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
+#ifdef DECEPTUS_VRSFML
+   draw(target, normal, {});
+#else
    sf::RenderStates states;
 
    // draw sides
@@ -255,27 +281,71 @@ void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget&)
 
    drawVoid(target);
    _eye->draw(target);
+#endif
+}
+
+void Gateway::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
+{
+#ifdef DECEPTUS_VRSFML
+   // draw sides
+   auto draw_visible = [&target, &states](const auto& side)
+   {
+      if (side._layer->_visible)
+      {
+         side._layer->draw(target, states);
+      }
+   };
+
+   if (_layer_background_inactive->_visible)
+   {
+      _layer_background_inactive->draw(target, states);
+   }
+
+   if (_layer_background_active->_visible)
+   {
+      _layer_background_active->draw(target, states);
+   }
+
+   sf::RenderStates socket_states = states;
+   socket_states.texture = _layers["base"]->_texture.get();
+   target.draw(*_sprite_socket, socket_states);
+
+   std::ranges::for_each(_pa, draw_visible);
+   std::ranges::for_each(_pi, draw_visible);
+
+   drawVoid(target);
+   _eye->draw(target, states);
+#else
+   (void)states;
+   draw(target, normal);
+#endif
 }
 
 void Gateway::update(const sf::Time& dt)
 {
-   const auto player_intersects = PlayerRegistry::getFirst()->getPixelRectFloat().findIntersection(_rect).has_value();
+   const auto player_intersects = sfcompat::findIntersection(PlayerRegistry::getFirst()->getPixelRectFloat(), _rect).has_value();
 
    // activate portal when player intersects
    if (!_player_intersects && player_intersects)
    {
       _player_intersects = player_intersects;
-      _state = State::Enabling;
 
-      _activated_state._step = 0;
-
-      Audio::getInstance().playSample({"mechanism_gateway_extract_01.wav"});
-
-      for (auto& pa : _pa)
+      // a gateway restored from the save state comes up enabled, so touching it must not replay the
+      // activation sequence and throw it back to the enabling animation
+      if (_state == State::Disabled)
       {
-         pa.reset();
+         _state = State::Enabling;
+
+         _activated_state._step = 0;
+
+         Audio::getInstance().playSample({"mechanism_gateway_extract_01.ogg"});
+
+         for (auto& pa : _pa)
+         {
+            pa.reset();
+         }
+         return;
       }
-      return;
    }
 
    // player uses gateway
@@ -289,7 +359,7 @@ void Gateway::update(const sf::Time& dt)
 
    _elapsed += dt.asSeconds();
 
-   _origin_shape.setPosition(_origin);
+   sfcompat::setPosition(_origin_shape, _origin);
 
    switch (_state)
    {
@@ -379,7 +449,7 @@ void Gateway::update(const sf::Time& dt)
             {
                _activated_state.resetTime();
                _activated_state._step++;
-               Audio::getInstance().playSample({"mechanism_gateway_rotate_01.wav"});
+               Audio::getInstance().playSample({"mechanism_gateway_rotate_01.ogg"});
             }
          }
 
@@ -403,7 +473,7 @@ void Gateway::update(const sf::Time& dt)
 
                   _activated_state._step++;
                   _activated_state.resetTime();
-                  Audio::getInstance().playSample({"mechanism_gateway_rotate_01.wav"});
+                  Audio::getInstance().playSample({"mechanism_gateway_rotate_01.ogg"});
                }
             }
 
@@ -437,7 +507,7 @@ void Gateway::update(const sf::Time& dt)
 
                   _activated_state._step++;
                   _activated_state.resetTime();
-                  Audio::getInstance().playSample({"mechanism_gateway_extract_01.wav"});
+                  Audio::getInstance().playSample({"mechanism_gateway_extract_01.ogg"});
                }
             }
 
@@ -485,7 +555,7 @@ void Gateway::update(const sf::Time& dt)
                _activated_state._step++;
                _activated_state._has_target_angle = false;
                _activated_state.resetTime();
-               Audio::getInstance().playSample({"mechanism_gateway_warp_01.wav"});
+               Audio::getInstance().playSample({"mechanism_gateway_warp_01.ogg"});
             }
 
             break;
@@ -531,16 +601,16 @@ void Gateway::update(const sf::Time& dt)
                auto& pi_layer = _pi[i]._layer->_sprite;
                auto& pa_layer = _pa[i]._layer->_sprite;
 
-               auto pi_color = pi_layer->getColor();
-               auto pa_color = pa_layer->getColor();
+               auto pi_color = sfcompat::getColor(*pi_layer);
+               auto pa_color = sfcompat::getColor(*pa_layer);
 
                pi_color.a = static_cast<uint8_t>(255 * fade_out_alpha);
                pa_color.a = static_cast<uint8_t>(255 * fade_in_alpha);
 
-               pi_layer->setColor(pi_color);
-               pa_layer->setColor(pa_color);
-               _layer_background_active->_sprite->setColor(pa_color);
-               _layer_background_inactive->_sprite->setColor(pi_color);
+               sfcompat::setColor(*pi_layer, pi_color);
+               sfcompat::setColor(*pa_layer, pa_color);
+               sfcompat::setColor(*_layer_background_active->_sprite, pa_color);
+               sfcompat::setColor(*_layer_background_inactive->_sprite, pi_color);
             }
 
             std::ranges::for_each(_pi, [](auto& s) { s.update(); });
@@ -551,12 +621,12 @@ void Gateway::update(const sf::Time& dt)
                for (auto& side : _pi)
                {
                   side.reset();
-                  side._layer->_sprite->setColor(sf::Color(255, 255, 255, 255));
+                  sfcompat::setColor(*side._layer->_sprite, sf::Color(255, 255, 255, 255));
                }
 
                for (auto& side : _pa)
                {
-                  side._layer->_sprite->setColor(sf::Color(255, 255, 255, 255));
+                  sfcompat::setColor(*side._layer->_sprite, sf::Color(255, 255, 255, 255));
                }
 
                _activated_state._step = 0;
@@ -585,6 +655,40 @@ void Gateway::update(const sf::Time& dt)
    }
 
    _eye->update(dt, _state);
+}
+
+void Gateway::serializeState(nlohmann::json& json_object)
+{
+   if (getObjectId().empty())
+   {
+      return;
+   }
+
+   // a gateway that is still enabling has already been triggered by the player, so it counts as enabled
+   json_object[getObjectId()] = {{"enabled", _state != State::Disabled}};
+}
+
+void Gateway::deserializeState(const nlohmann::json& json_object)
+{
+   if (!json_object.at("enabled").get<bool>())
+   {
+      return;
+   }
+
+   // skip the activation sequence and bring the gateway up already enabled, mirroring what the transition
+   // from Enabling to Enabled does in update()
+   _state = State::Enabled;
+   _enabled_state.resetTime();
+   _enabled_state._distances_when_activated = _pa[0]._distance_factor;
+
+   _eye->wakeUp();
+
+   if (_flowfield_reference_id.has_value() && _flowfield_texture.has_value())
+   {
+      EventDistributor::event(
+         FlowFieldTextureChangeEvent{._object_id = _flowfield_reference_id.value(), ._texture_id = _flowfield_texture.value()}
+      );
+   }
 }
 
 void Gateway::setup(const GameDeserializeData& data)
@@ -623,7 +727,7 @@ void Gateway::setup(const GameDeserializeData& data)
 
    _rect_shape.setFillColor(sf::Color(255, 255, 255, 25));
    _rect_shape.setSize(_rect.size);
-   _rect_shape.setPosition(_rect.position);
+   sfcompat::setPosition(_rect_shape, _rect.position);
 
    _origin_shape.setRadius(1.0f);
    _origin_shape.setFillColor(sf::Color::Red);
@@ -647,23 +751,30 @@ void Gateway::setup(const GameDeserializeData& data)
          const auto texture_size = sf::Vector2u(static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight()));
          auto opacity = layer.getOpacity();
 
+#ifdef DECEPTUS_VRSFML
+         auto texture = std::make_shared<sf::Texture>(std::move(*sf::Texture::create(texture_size)));
+#else
          auto texture = std::make_shared<sf::Texture>(texture_size);
+#endif
          texture->update(reinterpret_cast<const uint8_t*>(layer.getImage().getData().data()));
 
          std::shared_ptr<sf::Sprite> sprite;
 
-         // rotate texture if this is a pa_ or pi_ layer
-         if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
-         {
-            texture->setSmooth(true);
-            texture = createRotatedTexture(*texture, -_base_angle);  // rotate ccw
-         }
-
+#ifdef DECEPTUS_VRSFML
+         sprite = std::make_shared<sf::Sprite>();
+#else
          sprite = std::make_shared<sf::Sprite>(*texture);
+#endif
 
          const auto pos = sf::Vector2f{static_cast<float>(layer.getLeft()), static_cast<float>(layer.getTop())} + _rect.position;
+#ifdef DECEPTUS_VRSFML
+         sprite->position = pos;
+         sprite->color = sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity));
+         sprite->textureRect = sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(texture_size.x), static_cast<float>(texture_size.y)}};
+#else
          sprite->setPosition(pos);
          sprite->setColor(sf::Color(255u, 255u, 255u, static_cast<uint8_t>(opacity)));
+#endif
 
          tmp->_texture = texture;
          tmp->_sprite = sprite;
@@ -674,9 +785,12 @@ void Gateway::setup(const GameDeserializeData& data)
 
          if (layer.getName().starts_with("pa_") || layer.getName().starts_with("pi_"))
          {
+            // sampled bilinearly so the sub-pixel movement of the side elements stays smooth
+            texture->setSmooth(true);
+
             const auto origin = sf::Vector2f{texture->getSize().x * 0.5f, texture->getSize().y * 0.5f};
-            sprite->setOrigin(origin);
-            sprite->setPosition(origin + pos + sf::Vector2f{0, 0});
+            sfcompat::setOrigin(*sprite, origin);
+            sfcompat::setPosition(*sprite, origin + pos + sf::Vector2f{0, 0});
          }
       }
       catch (...)
@@ -688,11 +802,11 @@ void Gateway::setup(const GameDeserializeData& data)
    for (int i = 0; i < 4; ++i)
    {
       _pa[i]._layer = _layers[std::format("pa_{}", i)];
-      _pa[i]._pos_px = _pa[i]._layer->_sprite->getPosition();
+      _pa[i]._pos_px = sfcompat::getPosition(*_pa[i]._layer->_sprite);
       _pa[i]._angle_offset = sf::degrees(90 * i);
 
       _pi[i]._layer = _layers[std::format("pi_{}", i)];
-      _pi[i]._pos_px = _pi[i]._layer->_sprite->getPosition();
+      _pi[i]._pos_px = sfcompat::getPosition(*_pi[i]._layer->_sprite);
       _pi[i]._angle_offset = sf::degrees(90 * i);
    }
 
@@ -700,14 +814,23 @@ void Gateway::setup(const GameDeserializeData& data)
    _layer_background_inactive = _layers["background_inactive"];
    _layer_background_active = _layers["background_active"];
 
-   _origin = _pa[0]._layer->_sprite->getOrigin();
+   _origin = sfcompat::getOrigin(*_pa[0]._layer->_sprite);
 
    // load shader
-   if (!_shader.loadFromFile("data/shaders/void_standalone.frag", sf::Shader::Type::Fragment))
+   if (!_shader.loadFromFragment("data/shaders/void_standalone.frag"))
    {
       std::cout << "failed to load shader" << std::endl;
    }
 
+#ifdef DECEPTUS_VRSFML
+   _shader_texture = std::make_unique<sf::RenderTexture>(std::move(*sf::RenderTexture::create({200u, 200u})));
+   _shader_texture->setSmooth(true);
+   _shader_sprite = std::make_unique<sf::Sprite>();
+   _shader_sprite->position = _rect.position;
+   loadNoiseTexture(_default_texture_path);
+
+   _eye = std::make_unique<Eye>(_rect.position + _rect.size / 2.0f);
+#else
    _shader_texture = std::make_unique<sf::RenderTexture>(sf::Vector2u(200u, 200u));
    _shader_texture->setSmooth(true);
    _shader_sprite = std::make_unique<sf::Sprite>(_shader_texture->getTexture());
@@ -715,6 +838,7 @@ void Gateway::setup(const GameDeserializeData& data)
    loadNoiseTexture(_default_texture_path);
 
    _eye = std::make_unique<Eye>(_rect.getCenter());
+#endif
 }
 
 std::optional<sf::FloatRect> Gateway::getBoundingBoxPx()
@@ -752,14 +876,18 @@ void Gateway::use()
       return;
    }
 
+#ifdef DECEPTUS_VRSFML
+   const auto target_pos_px = target_gateway->_rect.position + target_gateway->_rect.size / 2.0f;
+#else
    const auto target_pos_px = target_gateway->_rect.getCenter();
+#endif
 
    auto teleport = [target_pos_px]()
    {
       {
          const auto y_tl_to_px = static_cast<int32_t>(target_pos_px.y / PIXELS_PER_TILE) * PIXELS_PER_TILE;
          PlayerRegistry::getFirst()->setBodyViaPixelPosition(
-            target_pos_px.x + PLAYER_ACTUAL_WIDTH / 2, y_tl_to_px + PIXELS_PER_TILE * 3 - 8
+            target_pos_px.x + PLAYER_ACTUAL_WIDTH_PX / 2, y_tl_to_px + PIXELS_PER_TILE * 3 - 8
          );
 
          // update the camera system to point to the player position immediately
@@ -790,8 +918,9 @@ void Gateway::Side::update()
    sf::Vector2f pos_from_angle_and_distance_px;
    pos_from_angle_and_distance_px.x = std::cos(full_angle_sf.asRadians()) * _distance_factor;
    pos_from_angle_and_distance_px.y = std::sin(full_angle_sf.asRadians()) * _distance_factor;
-   _layer->_sprite->setRotation(full_angle_sf);
-   _layer->_sprite->setPosition(_pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f});
+   // the pa_/pi_ artwork is authored at the base angle, compensate for it instead of pre-rotating the texture
+   sfcompat::setRotation(*_layer->_sprite, full_angle_sf - _base_angle);
+   sfcompat::setPosition(*_layer->_sprite, _pos_px + pos_from_angle_and_distance_px + _offset_px - sf::Vector2f{1.0f, 1.0f});
 }
 
 void Gateway::Side::reset()
@@ -812,8 +941,12 @@ Gateway::Eye::Eye(const sf::Vector2f& center)
    _center_pos_px = center;
 
    _texture = TexturePool::getInstance().get("data/sprites/gateway_eye.png");
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture);
-   _sprite->setTextureRect({{3547, 93}, {12, 12}});
+#endif
+   sfcompat::setTextureRect(*_sprite, sf::IntRect{{3547, 93}, {12, 12}});
 
    // load animations
    AnimationPool animation_pool{"data/sprites/gateway_animations.json"};
@@ -832,19 +965,28 @@ Gateway::Eye::Eye(const sf::Vector2f& center)
    }
 }
 
-void Gateway::Eye::draw(sf::RenderTarget& target)
+void Gateway::Eye::draw(sf::RenderTarget& target, const sf::RenderStates& states)
 {
    switch (_iris_state)
    {
       case IrisState::Awake:
       {
+#ifdef DECEPTUS_VRSFML
+         _eye_iris_spawn->draw(target, states);
+#else
+         (void)states;
          _eye_iris_spawn->draw(target);
+#endif
          // target.draw(*_sprite);
          break;
       }
       case IrisState::Idle:
       {
+#ifdef DECEPTUS_VRSFML
+         _eye_iris_idle_ref->draw(target, states);
+#else
          _eye_iris_idle_ref->draw(target);
+#endif
          break;
       }
       case IrisState::Asleep:
@@ -874,7 +1016,11 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
       _eye_iris_spawn->update(dt);
 
       // no longer needed
+#ifdef DECEPTUS_VRSFML
+      // _sprite->color = sf::Color(255, 255, 255, static_cast<uint8_t>(std::clamp(wake_value_normalized * 255.0f, 0.0f, 255.0f)));
+#else
       // _sprite->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(std::clamp(wake_value_normalized * 255.0f, 0.0f, 255.0f))));
+#endif
    }
 
    if (_iris_state == IrisState::Idle)
@@ -897,7 +1043,7 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
       _eye_iris_idle_ref->update(dt);
    }
 
-   const auto error_gaze_px = sf::Vector2f(-PLAYER_ACTUAL_WIDTH / 2, 0);
+   const auto error_gaze_px = sf::Vector2f(-PLAYER_ACTUAL_WIDTH_PX / 2, 0);
    const auto player_pos_px = PlayerRegistry::getFirst()->getPixelPositionFloat() + error_gaze_px;
    const auto dir_to_player = player_pos_px - _center_pos_px;
    const auto dir_to_player_normalized = dir_to_player.normalized();
@@ -905,11 +1051,11 @@ void Gateway::Eye::update(const sf::Time& dt, State state)
 
    const auto eye_pos_error_px = sf::Vector2f{19, 5};
    const auto sprite_pos_px = _center_pos_px + _eye_pos_px + eye_pos_error_px;
-   _sprite->setPosition(sprite_pos_px);
-   _eye_spawn->setPosition(sprite_pos_px);
-   _eye_iris_spawn->setPosition(sprite_pos_px);
-   _eye_iris_idle->setPosition(sprite_pos_px);
-   _eye_iris_idle_blink->setPosition(sprite_pos_px);
+   sfcompat::setPosition(*_sprite, sprite_pos_px);
+   sfcompat::setPosition(*_eye_spawn, sprite_pos_px);
+   sfcompat::setPosition(*_eye_iris_spawn, sprite_pos_px);
+   sfcompat::setPosition(*_eye_iris_idle, sprite_pos_px);
+   sfcompat::setPosition(*_eye_iris_idle_blink, sprite_pos_px);
 }
 
 void Gateway::Eye::wakeUp()

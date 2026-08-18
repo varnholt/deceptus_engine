@@ -40,6 +40,13 @@ public:
    /// \param normal normal-map render target (unused).
    void draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/) override;
 
+   /// \brief draws spawn and pickup animations with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal-map render target (unused).
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief updates animations and handles pickup checks against the player rectangle.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
@@ -51,6 +58,18 @@ public:
    /// \brief marks the extra as spawned, applies a position offset, and starts spawn animation playback when configured.
    /// \param offset pixel offset applied to the pickup rect and all animations before becoming collectable.
    void spawn(sf::Vector2f offset = {});
+
+   /// \brief advances the sine wave offset and moves all main animations and the sprite accordingly.
+   /// \param delta_time elapsed frame time.
+   void updateSineWave(const sf::Time& delta_time);
+
+   /// \brief advances the pickup animation while it is still playing.
+   /// \param delta_time elapsed frame time.
+   void updatePickupAnimation(const sf::Time& delta_time);
+
+   /// \brief advances the active main animation and cycles to the next one when it finishes.
+   /// \param delta_time elapsed frame time.
+   void updateMainAnimations(const sf::Time& delta_time);
 
    /// \brief writes the active flag into the save-state json so pickup survives level reloads.
    /// \param json json object that receives the entry keyed by this extra's name.
@@ -72,10 +91,17 @@ public:
    sf::FloatRect _rect;
    std::vector<ExtraCallback> _callbacks;
    bool _requires_button_press{false};
-   bool _is_treasure{false};  //!< when true, pickup is routed to treasures instead of inventory
+   bool _is_treasure{false};   //!< when true, pickup is routed to treasures instead of inventory
+   std::string _pickup_event;  //!< optional event name announced on pickup, empty when the extra just collects
 
    std::vector<std::shared_ptr<Animation>> _animations_main;
    std::shared_ptr<Animation> _animation_spawn;
    std::shared_ptr<Animation> _animation_pickup;
    std::vector<std::shared_ptr<Animation>>::iterator _animations_main_it;
+
+   float _base_y_px{0.0f};          //!< original Y position in pixels
+   float _sine_amplitude_px{0.0f};  //!< sine wave amplitude in pixels
+   float _sine_frequency{0.0f};     //!< sine wave frequency in Hz
+   float _elapsed{0.0f};            //!< accumulated time in seconds
+   float _sine_offset_y_px{0.0f};   //!< current sine Y offset in pixels
 };

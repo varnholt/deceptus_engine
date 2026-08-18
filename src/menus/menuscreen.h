@@ -11,8 +11,11 @@
 class MenuScreen
 {
 public:
-   /// \brief creates an empty menu screen.
-   MenuScreen() = default;
+   static const sf::Color color_label_normal;    //!< unselected menu item or label text
+   static const sf::Color color_label_selected;  //!< selected menu item or label text
+   static const sf::Color color_help_text;       //!< description / help line text
+   /// \brief initializes the font reference from the shared getFont() instance.
+   MenuScreen();
 
    /// \brief destroys the menu screen.
    virtual ~MenuScreen() = default;
@@ -65,6 +68,32 @@ public:
    bool isControllerUsed() const;
 
 protected:
+   /// \brief positions text so it is centered horizontally and vertically inside reference_rect.
+   static void placeTextCentered(sf::Text& text, const sf::FloatRect& reference_rect);
+
+   /// \brief positions text left-aligned at reference_rect.position.x, vertically centered.
+   static void placeTextLeft(sf::Text& text, const sf::FloatRect& reference_rect);
+
+   /// \brief positions text so its left edge sits button_text_x_offset pixels right of reference_rect's right edge, vertically centered.
+   static void placeTextRightOf(sf::Text& text, const sf::FloatRect& reference_rect);
+
+   static constexpr float button_text_x_offset = 8.0f;  //!< pixel gap between button sprite right edge and button label
+
+   /// \brief positions deco_left flush against the left edge of reference_rect and deco_right flush against the right edge, both vertically
+   /// centered.
+   static void placeDecorators(sf::Sprite& deco_left, sf::Sprite& deco_right, const sf::FloatRect& reference_rect);
+
+   /// \brief convenience overload that resolves deco_l and deco_r from the screen's own layer map.
+   void placeDecorators(const sf::FloatRect& reference_rect);
+
+   /// \brief returns a copy of base_rect shifted down by row_index * _row_stride.
+   sf::FloatRect rowRect(const sf::FloatRect& base_rect, int32_t row_index) const;
+
+   sf::FloatRect _row_label_base_rect;  //!< reference rect for the label column at row 0
+   float _row_stride = 0.0f;            //!< vertical pixel distance between consecutive rows
+
+   const sf::Font& _font;
+
    std::string _filename;
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;

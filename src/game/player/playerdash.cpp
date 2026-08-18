@@ -86,7 +86,7 @@ void PlayerDash::update(const DashInput& input)
       _direction = dir;
 
       // play dash sound
-      Audio::getInstance().playSample({"player_dash_01.wav"});
+      Audio::getInstance().playSample({"player_dash_01.ogg"});
 
       keepLinearVelocity();
       input.player_body->SetGravityScale(0.0);

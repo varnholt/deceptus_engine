@@ -1,5 +1,7 @@
 #pragma once
 
+#include "framework/tools/sfmlshader.h"
+
 #include <SFML/Graphics.hpp>
 #include <memory>
 
@@ -27,5 +29,5 @@ public:
 private:
    std::shared_ptr<sf::RenderTexture> _render_texture;
    std::shared_ptr<sf::Texture> _distortion_map;
-   sf::Shader _shader;
+   sfcompat::Shader _shader;
 };

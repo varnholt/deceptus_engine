@@ -42,6 +42,7 @@
     - [Ropes](level_design/mechanisms.md#ropes)<br>
     - [Rotating Blades](level_design/mechanisms.md#rotating-blades)<br>
     - [Sensor Rects](level_design/mechanisms.md#sensor-rects)<br>
+    - [Skill Gates](level_design/mechanisms.md#skill-gates)<br>
     - [Spike Balls](level_design/mechanisms.md#spike-balls)<br>
     - [Spike Blocks](level_design/mechanisms.md#spike-blocks)<br>
     - [Spikes](level_design/mechanisms.md#spikes)<br>

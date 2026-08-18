@@ -39,7 +39,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
       void deserializeEnterArea(const GameDeserializeData& data);
       std::string _name;
       sf::FloatRect _rect;
-      std::optional<sf::Vector2i> _start_position;
+      std::optional<sf::Vector2i> _start_position_px;
       std::optional<sf::Vector2i> _start_offset;
    };
 
@@ -58,6 +58,7 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
       std::string _name;
       sf::FloatRect _rect;
       std::vector<RoomEnterArea> _enter_areas;
+      bool _visited{false};  //!< set once the player has been inside, drives what the ingame map reveals
    };
 
    /// \brief creates a room node and assigns a unique room id.
@@ -92,6 +93,12 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
    /// \param rooms rooms that receive matching enter areas.
    static void mergeEnterAreas(const std::vector<std::shared_ptr<Room>>& rooms);
 
+   /// \brief logs a warning for every object id that more than one room uses.
+   /// \details rooms are looked up by object id from the save state and the console, so a shared
+   ///          id makes every lookup resolve to the first room and silently drops the others.
+   /// \param rooms rooms to check.
+   static void warnAboutAmbiguousObjectIds(const std::vector<std::shared_ptr<Room>>& rooms);
+
    /// \brief starts configured room transition effects and related callbacks.
    void startTransition();
 
@@ -103,6 +110,22 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
 
    /// \brief unlocks camera and synchronizes camera constraints to this room immediately.
    void syncCamera();
+
+   /// \brief marks the sub-room containing a position as visited.
+   /// \param player_pos_px player position in pixels.
+   void markVisited(const sf::Vector2f& player_pos_px);
+
+   /// \brief marks all sub-rooms of this room as not visited again.
+   void clearVisited();
+
+   /// \brief builds the save-state keys of all sub-rooms the player has already been inside.
+   /// \return one key per visited sub-room, formatted as "<room object id>/<sub-room index>".
+   std::vector<std::string> visitedSubRoomKeys() const;
+
+   /// \brief restores the visited flags of the sub-rooms listed in a save state.
+   /// \param keys visited sub-room keys as produced by visitedSubRoomKeys.
+   /// \param rooms rooms that receive the restored flags.
+   static void applyVisitedSubRoomKeys(const std::vector<std::string>& keys, const std::vector<std::shared_ptr<Room>>& rooms);
 
    /// \brief returns the sub-room currently containing the player.
    /// \param player_pos_px player position in pixels.

@@ -8,7 +8,9 @@
 #include "game/camera/camerasystemconfigurationui.h"
 #include "game/constants.h"
 #include "game/debug/console.h"
+#ifndef DECEPTUS_VRSFML
 #include "game/debug/logui.h"
+#endif
 #ifdef DEVELOPMENT_MODE
 #include "game/debug/profilingui.h"
 #endif
@@ -17,6 +19,7 @@
 #include "game/layers/controlleroverlay.h"
 #include "game/layers/infolayer.h"
 #include "game/physics/physicsconfigurationui.h"
+#include "game/rendering/postprocessingpass.h"
 #include "game/rendering/rendertargets.h"
 #include "game/scenes/forestscene.h"
 #include "game/sfx/gameaudio.h"
@@ -25,6 +28,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <future>
+#include <optional>
 #include "box2d/box2d.h"
 
 class Level;
@@ -68,6 +72,10 @@ private:
    /// \brief creates or recreates window and render textures from configuration.
    void initializeWindow();
 
+   /// \brief creates or recreates the render textures and deferred render targets for the
+   ///        configured video mode, without touching the window itself.
+   void initializeRenderTargets();
+
    /// \brief initializes game controller integration and pause bindings.
    void initializeController();
 
@@ -80,7 +88,14 @@ private:
    /// \brief calls draw() and submits frame timings to the profiling ui.
    void timedDraw();
 
-   /// \brief asynchronously loads current save-state level and syncs player/world links.
+   /// \brief carries out a level load requested by loadLevel(), if one is pending.
+   ///
+   /// Called at the top of each frame. Destroys the outgoing level on the thread that owns the
+   /// drawing context and strictly before the loader thread starts, and never from inside a call
+   /// stack running in that level.
+   void processPendingLevelLoad();
+
+   /// \brief requests a load of the current save-state level; the work starts on the next frame.
    /// \param loading_mode loading strategy used by Level initialization.
    void loadLevel(LoadingMode loading_mode = LoadingMode::Standard);
 
@@ -139,6 +154,13 @@ private:
    /// \param h target height in pixels.
    void changeResolution(int32_t w, int32_t h);
 
+#ifdef DECEPTUS_VRSFML
+   /// \brief re-fits the render resolution to the current browser viewport (integer multiple of the base
+   /// view), recreating rendering resources only when the size actually changes. invoked on browser resize
+   /// and fullscreen transitions so the game fills the itch/browser window without fractional scaling.
+   void refitToViewport();
+#endif
+
    /// \brief reloads save-state data and loads level at last checkpoint.
    void goToLastCheckpoint();
 
@@ -153,26 +175,36 @@ private:
 
    std::shared_ptr<sf::RenderWindow> _window;
    std::shared_ptr<sf::RenderTexture> _window_render_texture;
+
+   //! \brief owns the render target and blits needed to apply a post processing effect to the frame
+   PostProcessingPass _post_processing_pass;
    RenderTargets _render_targets;
    std::shared_ptr<Player> _player;
    std::shared_ptr<Level> _level;
+
+   //! \brief load requested by loadLevel(), carried out by processPendingLevelLoad() next frame
+   std::optional<LoadingMode> _pending_level_load;
    std::unique_ptr<InfoLayer> _info_layer;
    std::unique_ptr<InGameMenu> _ingame_menu;
    std::unique_ptr<ControllerOverlay> _controller_overlay;
    std::unique_ptr<CameraSystemConfigurationUi> _camera_ui;
    std::unique_ptr<PhysicsConfigurationUi> _physics_ui;
+#ifndef DECEPTUS_VRSFML
    std::unique_ptr<LogUi> _log_ui;
+#endif
 #ifdef DEVELOPMENT_MODE
    std::unique_ptr<ProfilingUi> _profiling_ui;
    sf::Time _profiling_update_elapsed;
 #endif
 
-   // temporarily here for debugging only
-   std::unique_ptr<ForestScene> _test_scene;
-
    std::shared_ptr<EventSerializer> _global_event_serializer;
 
-   // 3D menu background renderer
+#ifndef DECEPTUS_VRSFML
+   // temporarily here for debugging only
+   std::unique_ptr<ForestScene> _test_scene;
+#endif
+
+   // 3D menu background renderer (raw OpenGL: GLSL 4.30 on desktop, GLSL ES 3.00 on WebGL2)
    std::unique_ptr<MenuBackgroundScene> _menu_background;
 
    sf::Clock _delta_clock;

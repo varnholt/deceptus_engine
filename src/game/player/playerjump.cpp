@@ -32,7 +32,7 @@ void PlayerJump::update(const PlayerJumpInfo& info)
       // std::cout << _body->GetLinearVelocity().y << std::endl;
       if (_body->GetLinearVelocity().y > -2.0f)
       {
-         Audio::getInstance().playSample({"player_jump_land.wav", 0.5f});
+         Audio::getInstance().playSample({"player_jump_land.ogg", 0.5f});
       }
    }
 
@@ -195,7 +195,7 @@ void PlayerJump::doubleJump()
    jumpImpulse(b2Vec2(0.0f, _body->GetMass() * PhysicsConfiguration::getInstance()._player_double_jump_factor));
 
    _timepoint_doublejump = StopWatch::now();
-   Audio::getInstance().playSample({"player_doublejump_01.mp3"});
+   Audio::getInstance().playSample({"player_doublejump_01.ogg"});
 }
 
 void PlayerJump::wallJump()
@@ -287,7 +287,7 @@ void PlayerJump::jump()
       else
       {
          _jump_dust_animation_callback(_ground_contact_just_lost ? DustAnimationType::InAir : DustAnimationType::Ground);
-         Audio::getInstance().playSample({"player_jump_liftoff.wav", 0.3f});
+         Audio::getInstance().playSample({"player_jump_liftoff.ogg", 0.3f});
       }
    }
    else
@@ -342,7 +342,7 @@ void PlayerJump::updateWallSlide()
          {
             if (!_wallslide_sample.has_value())
             {
-               _wallslide_sample = Audio::getInstance().playSample({"player_wallslide_01.wav", 1.0, true});
+               _wallslide_sample = Audio::getInstance().playSample({"player_wallslide_01.ogg", 1.0, true});
             }
          }
          else

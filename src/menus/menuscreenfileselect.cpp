@@ -1,6 +1,7 @@
 #include "menuscreenfileselect.h"
 
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlstring.h"
 #include "menu.h"
 #include "menuaudio.h"
 
@@ -23,17 +24,49 @@ MenuScreenFileSelect::MenuScreenFileSelect()
 {
    setFilename("data/menus/fileselect.psd");
 
-   if (_font.openFromFile("data/fonts/deceptum.ttf"))
-   {
-      const_cast<sf::Texture&>(_font.getTexture(12)).setSmooth(false);
-   }
-
    for (auto i = 0u; i < 3; i++)
    {
+#ifdef DECEPTUS_VRSFML
+      _names[i] = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
       _names[i] = std::make_unique<sf::Text>(_font);
+#endif
       _names[i]->setCharacterSize(12);
       _names[i]->setFillColor(sf::Color{232, 219, 243});
    }
+
+   for (auto slot_index = 0u; slot_index < 3; slot_index++)
+   {
+#ifdef DECEPTUS_VRSFML
+      _new_game_texts[slot_index] = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+      _new_game_texts[slot_index] = std::make_unique<sf::Text>(_font);
+#endif
+      _new_game_texts[slot_index]->setCharacterSize(12);
+      _new_game_texts[slot_index]->setFillColor(color_label_normal);
+   }
+
+#ifdef DECEPTUS_VRSFML
+   _text_back_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_back_button = std::make_unique<sf::Text>(_font);
+#endif
+   _text_back_button->setCharacterSize(12);
+   _text_back_button->setFillColor(color_label_normal);
+#ifdef DECEPTUS_VRSFML
+   _text_delete_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_delete_button = std::make_unique<sf::Text>(_font);
+#endif
+   _text_delete_button->setCharacterSize(12);
+   _text_delete_button->setFillColor(color_label_normal);
+#ifdef DECEPTUS_VRSFML
+   _text_confirm_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+#else
+   _text_confirm_button = std::make_unique<sf::Text>(_font);
+#endif
+   _text_confirm_button->setCharacterSize(12);
+   _text_confirm_button->setFillColor(color_label_normal);
 }
 
 void MenuScreenFileSelect::draw(sf::RenderTarget& window, sf::RenderStates states)
@@ -44,6 +77,19 @@ void MenuScreenFileSelect::draw(sf::RenderTarget& window, sf::RenderStates state
    {
       window.draw(*_names[i], states);
    }
+
+   for (auto slot_index = 0u; slot_index < 3; slot_index++)
+   {
+      window.draw(*_new_game_texts[slot_index], states);
+   }
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+   window.draw(*_text_back_button, states);
+   window.draw(*_text_delete_button, states);
+   window.draw(*_text_confirm_button, states);
 }
 
 void MenuScreenFileSelect::up()
@@ -190,16 +236,27 @@ void MenuScreenFileSelect::updateLayers()
       const auto selected = index == static_cast<int32_t>(_slot);
 
       // no data
-      _layers["slot_" + slot_name + "_new_game"]->_visible = empty;
+      _layers["slot_" + slot_name + "_new_game"]->_visible = false;
       _layers["slot_" + slot_name + "_new_game_background"]->_visible = empty;
-      _layers["slot_" + slot_name + "_new_game_highlight"]->_visible = empty;
+      _layers["slot_" + slot_name + "_new_game_highlight"]->_visible = empty && selected;
       _layers["slot_" + slot_name + "_new_game_deselected"]->_visible = empty && !selected;
       _layers["slot_" + slot_name + "_new_game_selected"]->_visible = empty && selected;
+
+      if (empty)
+      {
+         _new_game_texts[index]->setString(sftr("New Game"));
+         _new_game_texts[index]->setFillColor(selected ? color_label_selected : color_label_normal);
+         placeTextCentered(*_new_game_texts[index], _layers["slot_" + slot_name + "_new_game_background"]->_sprite->getGlobalBounds());
+      }
+      else
+      {
+         _new_game_texts[index]->setString({});
+      }
       _layers["slot_" + slot_name + "_shadow"]->_visible = empty;
 
       // have data
-      _layers["slot_" + slot_name + "_selected"]->_visible = !empty && selected;
-      _layers["slot_" + slot_name + "_deselected"]->_visible = !empty && !selected;
+      _layers["slot_" + slot_name + "_selected"]->_visible = selected;
+      _layers["slot_" + slot_name + "_deselected"]->_visible = !selected;
       _layers["slot_" + slot_name + "_background"]->_visible = !empty;
       _layers["slot_" + slot_name + "_bar_1"]->_visible = !empty;
       _layers["slot_" + slot_name + "_bar_2"]->_visible = !empty;
@@ -218,8 +275,13 @@ void MenuScreenFileSelect::updateLayers()
 
       // update names
       auto layer_name = _layers["slot_" + slot_name + "_name"];
+#ifdef DECEPTUS_VRSFML
+      _names[index]->setString(save_state._player_info._name.c_str());
+      _names[index]->position = {layer_name->_sprite->position.x, layer_name->_sprite->position.y + nameOffsetY};
+#else
       _names[index]->setString(save_state._player_info._name);
       _names[index]->setPosition({layer_name->_sprite->getPosition().x, layer_name->_sprite->getPosition().y + nameOffsetY});
+#endif
 
       index++;
    }
@@ -238,4 +300,21 @@ void MenuScreenFileSelect::updateLayers()
    _layers["back_xbox_1"]->_visible = false;
    _layers["back_pc_0"]->_visible = !isControllerUsed();
    _layers["back_pc_1"]->_visible = false;
+
+   if (!_text_back_button)
+   {
+      return;
+   }
+
+   const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
+   _text_back_button->setString(sftr("Back"));
+   placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
+
+   const auto& delete_layer = isControllerUsed() ? _layers["delete_xbox_0"] : _layers["delete_pc_0"];
+   _text_delete_button->setString(sftr("Delete"));
+   placeTextRightOf(*_text_delete_button, delete_layer->_sprite->getGlobalBounds());
+
+   const auto& confirm_layer = isControllerUsed() ? _layers["confirm_xbox_0"] : _layers["confirm_pc_0"];
+   _text_confirm_button->setString(sftr("Confirm"));
+   placeTextRightOf(*_text_confirm_button, confirm_layer->_sprite->getGlobalBounds());
 }

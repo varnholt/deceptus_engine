@@ -33,6 +33,11 @@ public:
    /// \brief caches brightness indicator layers after PSD loading.
    void loadingFinished() override;
 
+   /// \brief draws PSD layers then the dynamic resolution text on top.
+   /// \param window render target that receives layer sprites and text.
+   /// \param states render states forwarded to drawing.
+   void draw(sf::RenderTarget& window, sf::RenderStates states) override;
+
    /// \brief updates highlights, prompts, and value indicators for all video settings.
    void updateLayers();
 
@@ -64,9 +69,32 @@ public:
    Selection _selection = Selection::Resolution;
 
 private:
+   /// \brief rebuilds the selectable resolution list so it contains the active resolution.
+   void refreshVideoModes();
+
    FullscreenCallback _fullscreen_callback;
    ResolutionCallback _resolution_callback;
    VSyncCallback _vsync_callback;
-   std::vector<std::array<int32_t, 2>> _video_modes;
+   std::vector<std::array<int32_t, 2>> _base_video_modes;  //!< predefined modes that fit the desktop resolution
+   std::vector<std::array<int32_t, 2>> _video_modes;       //!< base modes plus the active resolution if it is not one of them
    std::vector<std::shared_ptr<Layer>> _brightness_value_layers;
+
+   std::unique_ptr<sf::Text> _resolution_text;  //!< dynamic "WxH" value, e.g. "1280x720"
+
+   sf::FloatRect _row_help_base_rect;   //!< help text reference rect for row 0 (Resolution)
+   sf::FloatRect _row_value_base_rect;  //!< value text reference rect; row 0 here is Display Mode (first row with a value)
+
+   std::unique_ptr<sf::Text> _text_back_button;
+   std::unique_ptr<sf::Text> _text_defaults_button;
+
+   std::unique_ptr<sf::Text> _resolution_label;
+   std::unique_ptr<sf::Text> _resolution_help_text;
+   std::unique_ptr<sf::Text> _displaymode_label;
+   std::unique_ptr<sf::Text> _displaymode_help_text;
+   std::unique_ptr<sf::Text> _displaymode_value_text;
+   std::unique_ptr<sf::Text> _vsync_label;
+   std::unique_ptr<sf::Text> _vsync_help_text;
+   std::unique_ptr<sf::Text> _vsync_value_text;
+   std::unique_ptr<sf::Text> _brightness_label;
+   std::unique_ptr<sf::Text> _brightness_help_text;
 };

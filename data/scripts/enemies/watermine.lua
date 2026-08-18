@@ -141,7 +141,7 @@ end
 function timeout(id)
    if (id == mDetonationTimer) then
       mDetonating = true
-      playSample("boom.wav", 1.0)
+      playSample("boom.ogg", 1.0)
       damageRadius(200, mPosition:getX(), mPosition:getY(), 48)
    end
 end

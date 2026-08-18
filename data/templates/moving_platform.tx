@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="MovingPlatform" width="0" height="0">
+  <properties>
+   <property name="platform_width_tl" type="int" value="4"/>
+   <property name="z" type="int" value="20"/>
+   <property name="interpolation_time" type="float" value="0"/>
+  </properties>
+  <polyline points="0,0 96,0"/>
+ </object>
+</template>

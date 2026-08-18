@@ -36,6 +36,13 @@ public:
    /// \param normal normal render target.
    void draw(sf::RenderTarget& target, sf::RenderTarget& normal) override;
 
+   /// \brief draws the current bubble animation frame with explicit render states (used in WASM to carry the level view).
+   /// \param target render target.
+   /// \param normal normal render target.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
+
    /// \brief updates motion, contact logic, popping conditions, and respawn state.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;

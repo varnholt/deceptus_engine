@@ -18,6 +18,9 @@ struct TmxObject;
 struct TmxTileSet;
 
 /// \brief teleports the player to a linked destination portal when activated.
+/// \note deliberately does not call addChunks: _rect mixes units, its position is assigned in tile coordinates while
+///       its size is in pixels, and getBoundingBoxPx returns it unchanged. chunks derive from pixel positions, so
+///       culling against this rect would place the portal near the level origin. the rect needs fixing first.
 class Portal : public GameMechanism, public GameNode
 {
 public:
@@ -33,6 +36,13 @@ public:
    /// \param window color render target.
    /// \param normal normal-map render target, unused by this mechanism.
    void draw(sf::RenderTarget& window, sf::RenderTarget& normal) override;
+
+   /// \brief draws all portal tile sprites with explicit render states (used in WASM to carry the level view).
+   /// \param window color render target.
+   /// \param normal normal-map render target, unused by this mechanism.
+   /// \param states render states to apply.
+   void draw(sf::RenderTarget& window, sf::RenderTarget& normal, const sf::RenderStates& states) override;
+   using GameMechanism::draw;
 
    /// \brief updates player interaction state and handles activation input.
    /// \param dt elapsed frame time, unused by this mechanism.
@@ -92,7 +102,7 @@ protected:
    sf::Vector2u _tile_size;
    std::shared_ptr<sf::Texture> _texture;
    std::vector<sf::Sprite> _sprites;
-   sf::Vector2f _tile_positions;
+   sf::Vector2f _positions_tl;
    int32_t _height = 0;
    bool _player_at_portal = false;
    std::shared_ptr<Portal> _destination;

@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <string_view>  // for std::string_view
+#include <memory>
 
 namespace
 {

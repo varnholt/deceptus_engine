@@ -6,19 +6,39 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 
+#include <array>
+
 // #define DEBUG_INTERSECTION
 
 namespace
 {
+static constexpr std::array rotating_blade_properties{
+   PropertyInfo{.name = "enabled", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "blade_acceleration", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "blade_deceleration", .type = "float", .default_value = 0.5f},
+   PropertyInfo{.name = "blade_rotation_speed", .type = "float", .default_value = 5.0f},
+   PropertyInfo{.name = "movement_speed", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{30}},
+};
+static constexpr MechanismSchema rotating_blade_schema{
+   .type_name = "RotatingBlade",
+   .layer_name = "rotating_blades",
+   .default_width = 0,
+   .default_height = 0,
+   .properties = rotating_blade_properties,
+};
 const auto registered_rotatingblade = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
+   registry.registerSchema(rotating_blade_schema);
+
    registry.mapGroupToLayer("RotatingBlade", "rotating_blades");
 
    registry.registerLayerName(
@@ -51,8 +71,12 @@ RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
 
    _texture_map = TexturePool::getInstance().get("data/sprites/enemy_rotating_blade.png");
 
+#ifdef DECEPTUS_VRSFML
+   _sprite = std::make_unique<sf::Sprite>();
+#else
    _sprite = std::make_unique<sf::Sprite>(*_texture_map);
-   _sprite->setOrigin({_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f});
+#endif
+   sfcompat::setOrigin(*_sprite, {_texture_map->getSize().x * 0.5f, _texture_map->getSize().y * 0.5f});
 
    _audio_update_data._range = AudioRange{600.0f, 0.0f, 100.0f, 1.0f};
    _has_audio = true;
@@ -148,9 +172,9 @@ void RotatingBlade::setup(const GameDeserializeData& data)
 
 void RotatingBlade::preload()
 {
-   Audio::getInstance().addSample("mechanism_rotating_blade_accelerate.wav");
-   Audio::getInstance().addSample("mechanism_rotating_blade_decelerate.wav");
-   Audio::getInstance().addSample("mechanism_rotating_blade_enabled.wav");
+   Audio::getInstance().addSample("mechanism_rotating_blade_accelerate.ogg");
+   Audio::getInstance().addSample("mechanism_rotating_blade_decelerate.ogg");
+   Audio::getInstance().addSample("mechanism_rotating_blade_enabled.ogg");
 }
 
 void RotatingBlade::updateAudio()
@@ -191,7 +215,7 @@ void RotatingBlade::updateAudio()
          // play regular sample
          if (!_sample_enabled.has_value())
          {
-            _sample_enabled = Audio::getInstance().playSample({"mechanism_rotating_blade_enabled.wav", 1.0f, true});
+            _sample_enabled = Audio::getInstance().playSample({"mechanism_rotating_blade_enabled.ogg", 1.0f, true});
          }
          else
          {
@@ -208,7 +232,7 @@ void RotatingBlade::updateAudio()
          // play acceleration sample
          if (!_sample_accelerate.has_value())
          {
-            _sample_accelerate = Audio::getInstance().playSample({"mechanism_rotating_blade_accelerate.wav"});
+            _sample_accelerate = Audio::getInstance().playSample({"mechanism_rotating_blade_accelerate.ogg"});
          }
          else
          {
@@ -234,7 +258,7 @@ void RotatingBlade::updateAudio()
          // play deceleration sample
          if (!_sample_decelerate.has_value())
          {
-            _sample_decelerate = Audio::getInstance().playSample({"mechanism_rotating_blade_decelerate.wav"});
+            _sample_decelerate = Audio::getInstance().playSample({"mechanism_rotating_blade_decelerate.ogg"});
          }
          else
          {
@@ -266,13 +290,17 @@ void RotatingBlade::update(const sf::Time& dt)
    _path_interpolation.updateTime(movement_delta);
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
    _pos = _path_interpolation.computePosition(_path_interpolation.getTime());
-   _sprite->setRotation(sf::degrees(_angle));
-   _sprite->setPosition(_pos);
+   sfcompat::setRotation(*_sprite, sf::degrees(_angle));
+   sfcompat::setPosition(*_sprite, _pos);
 
    updateAudio();
 
    // kill player if he moves into the blade's radius
+#ifdef DECEPTUS_VRSFML
+   sf::Vector2i blade_position{static_cast<int32_t>(_sprite->position.x), static_cast<int32_t>(_sprite->position.y)};
+#else
    sf::Vector2i blade_position{_sprite->getPosition()};
+#endif
    const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
    if (SfmlMath::intersectCircleRect(blade_position, blade_radius, PlayerRegistry::getFirst()->getPixelRectInt()))
    {
@@ -283,6 +311,32 @@ void RotatingBlade::update(const sf::Time& dt)
    }
 }
 
+#ifdef DECEPTUS_VRSFML
+void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
+}
+
+void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   sf::RenderStates draw_states = states;
+   draw_states.texture = _texture_map.get();
+   target.draw(*_sprite, draw_states);
+
+#ifdef DEBUG_INTERSECTION
+   sf::Vector2i sprite_center{_sprite->position};
+   const auto blade_radius = static_cast<int32_t>(_texture_map->getSize().x * 0.5f);
+
+   b2Color color{1.0f, 1.0f, 1.0f};
+   if (SfmlMath::intersectCircleRect(sprite_center, blade_radius, PlayerRegistry::getFirst()->getPlayerPixelRect()))
+   {
+      color = b2Color{1.0f, 0.0f, 0.0f};
+   }
+
+   DebugDraw::drawCircle(target, _sprite->position, _sprite->origin.x, color);
+#endif
+}
+#else
 void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    target.draw(*_sprite);
@@ -300,6 +354,7 @@ void RotatingBlade::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    DebugDraw::drawCircle(target, _sprite->getPosition(), _sprite->getOrigin().x, color);
 #endif
 }
+#endif
 
 void RotatingBlade::setAudioEnabled(bool enabled)
 {

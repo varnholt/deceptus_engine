@@ -71,6 +71,10 @@ public:
    /// \param visible true to draw the layer.
    void setVisible(bool visible);
 
+   /// \brief reports whether this layer is rendered after the lighting pass.
+   /// \return true when the layer uses post-lighting rendering.
+   bool isPostLighting() const;
+
    /// \brief hides one tile at tile-grid coordinates.
    /// \param x x coordinate in pixels.
    /// \param y y coordinate in pixels.
@@ -96,10 +100,8 @@ private:
 
    /// \brief stores one tile quad inside the static block vertex cache.
    /// \param quad tile quad geometry and uv data.
-   /// \param tx tile x index in tile coordinates.
-   /// \param ty tile y index in tile coordinates.
    /// \param parallax_scale layer parallax factor used for block lookup.
-   void storeStaticVertices(const std::array<sf::Vertex, 4>& quad, const int32_t tx, const int32_t ty, float parallax_scale);
+   void storeStaticVertices(const std::array<sf::Vertex, 4>& quad, float parallax_scale);
 
    /// \brief one animation frame entry inside an animated tile.
    struct AnimatedTileFrame
@@ -115,8 +117,8 @@ private:
       /// \brief releases owned animation frame pointers.
       virtual ~AnimatedTile();
 
-      int32_t _tile_x = 0;
-      int32_t _tile_y = 0;
+      int32_t _x_tl = 0;
+      int32_t _y_tl = 0;
       std::vector<AnimatedTileFrame*> _frames;
       int32_t _current_frame = 0;
       float _elapsed_ms = 0.0f;
@@ -126,10 +128,15 @@ private:
       std::shared_ptr<TmxAnimation> _animation;
    };
 
-   sf::Vector2u _tile_size;
+   sf::Vector2u _tile_size_px;
 
    mutable std::map<int32_t, std::map<int32_t, sf::VertexArray>> _vertices_static_blocks;
    sf::VertexArray _vertices_animated;
+
+   //!< every visible block plus the animated tiles of one draw, gathered so the lot goes out as a
+   //!< single call. all of it shares one texture and one blend mode, and concatenating in draw
+   //!< order keeps the result identical to drawing the blocks one by one
+   mutable std::vector<sf::Vertex> _batched_vertices;
 
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
@@ -138,6 +145,7 @@ private:
 
    int32_t _z_index = 0;
    bool _visible = true;
+   bool _post_lighting = false;  //!< when true, layer is rendered after the lighting pass
    std::string _layer_name;
    std::string _tileset_name;
    std::optional<sf::BlendMode> _blend_mode;

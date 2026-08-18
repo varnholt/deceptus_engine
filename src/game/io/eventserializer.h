@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <chrono>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <optional>

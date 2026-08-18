@@ -7,8 +7,12 @@
 #include "game/io/valuereader.h"
 
 #include <filesystem>
+#ifdef DECEPTUS_VRSFML
+#include <span>
+#else
 #include <fstream>
 #include <sstream>
+#endif
 
 namespace
 {
@@ -34,6 +38,7 @@ std::string_view ShaderLayer::objectName() const
    return "ShaderLayer";
 }
 
+#ifndef DECEPTUS_VRSFML
 void ShaderLayer::checkUniforms(const std::string& shader_path)
 {
    std::ifstream file(shader_path);
@@ -47,9 +52,49 @@ void ShaderLayer::checkUniforms(const std::string& shader_path)
    const auto shader_source = buffer.str();
 
    _has_u_resolution = shader_source.find("u_resolution;") != std::string::npos;
-   _has_u_uv_height  = shader_source.find("u_uv_height;")  != std::string::npos;
+   _has_u_uv_height = shader_source.find("u_uv_height;") != std::string::npos;
+}
+#endif
+
+#ifdef DECEPTUS_VRSFML
+void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
+{
+   draw(target, normal, {});
 }
 
+void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
+{
+   if (!_shader.isLoaded())
+   {
+      return;
+   }
+
+   const auto x = _position.x;
+   const auto y = _position.y;
+   const auto w = _size.x;
+   const auto h = _size.y;
+
+   if (_texture)
+   {
+      _shader.setUniform("u_texture", *_texture.get());
+   }
+   _shader.setUniform("u_time", _elapsed.asSeconds() + _time_offset);
+   _shader.setUniform("u_resolution", sf::Glsl::Vec2{w, h});
+   _shader.setUniform("u_uv_height", _uv_height);
+
+   const sf::Vertex quad[] = {
+      sf::Vertex{.position = {x, y}, .color = sf::Color::White, .texCoords = {0.0f, _uv_height}},
+      sf::Vertex{.position = {x, y + h}, .color = sf::Color::White, .texCoords = {0.0f, 0.0f}},
+      sf::Vertex{.position = {x + w, y}, .color = sf::Color::White, .texCoords = {_uv_width, _uv_height}},
+      sf::Vertex{.position = {x + w, y + h}, .color = sf::Color::White, .texCoords = {_uv_width, 0.0f}}
+   };
+
+   sf::RenderStates draw_states = states;
+   draw_states.blendMode = sf::BlendAlpha;
+   draw_states.shader = &_shader.native();
+   target.draw(std::span<const sf::Vertex>{quad, 4}, sf::PrimitiveType::TriangleStrip, draw_states);
+}
+#else
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
    const auto x = _position.x;
@@ -78,11 +123,12 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
    };
 
    sf::RenderStates states;
-   states.shader = &_shader;
+   states.shader = &_shader.native();
    states.blendMode = sf::BlendAlpha;
 
    target.draw(quad, 4, sf::PrimitiveType::TriangleStrip, states);
 }
+#endif
 
 void ShaderLayer::update(const sf::Time& dt)
 {
@@ -126,47 +172,62 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    instance->setObjectId(data._tmx_object->_name);
    instance->_rect = bounding_rect;
    instance->addChunks(bounding_rect);
-   instance->_z_index    = ValueReader::readValue<int32_t>("z",            map).value_or(instance->_z_index);
-   instance->_uv_width   = ValueReader::readValue<float>  ("uv_width",     map).value_or(instance->_uv_width);
-   instance->_uv_height  = ValueReader::readValue<float>  ("uv_height",    map).value_or(instance->_uv_height);
-   instance->_time_offset = ValueReader::readValue<float> ("time_offset_s", map).value_or(instance->_time_offset);
+   instance->_z_index = ValueReader::readValue<int32_t>("z", map).value_or(instance->_z_index);
+   instance->_uv_width = ValueReader::readValue<float>("uv_width", map).value_or(instance->_uv_width);
+   instance->_uv_height = ValueReader::readValue<float>("uv_height", map).value_or(instance->_uv_height);
+   instance->_time_offset = ValueReader::readValue<float>("time_offset_s", map).value_or(instance->_time_offset);
 
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
-   if (vert_file.has_value())
+   const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
+
+   const auto vertex_exists = vert_file.has_value() && std::filesystem::exists(vert_file.value());
+   const auto fragment_exists = frag_file.has_value() && std::filesystem::exists(frag_file.value());
+
+   if (vert_file.has_value() && !vertex_exists)
    {
-      // Check if vertex shader file exists before attempting to load
-      if (!std::filesystem::exists(vert_file.value()))
-      {
-         Log::Error() << "vertex shader file does not exist: " << vert_file.value();
-      }
-      else if (!instance->_shader.loadFromFile(vert_file.value(), sf::Shader::Type::Vertex))
-      {
-         Log::Error() << "error compiling " << vert_file.value();
-      }
+      Log::Error() << "vertex shader file does not exist: " << vert_file.value();
+   }
+   if (frag_file.has_value() && !fragment_exists)
+   {
+      Log::Error() << "fragment shader file does not exist: " << frag_file.value();
    }
 
-   const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
+   bool shader_loaded = false;
+   if (vertex_exists && fragment_exists)
+   {
+      shader_loaded = instance->_shader.loadFromFile(vert_file.value(), frag_file.value());
+   }
+   else if (vertex_exists)
+   {
+      shader_loaded = instance->_shader.loadFromVertex(vert_file.value());
+   }
+   else if (fragment_exists)
+   {
+      shader_loaded = instance->_shader.loadFromFragment(frag_file.value());
+   }
+
+   if (!shader_loaded && (vertex_exists || fragment_exists))
+   {
+      Log::Error() << "error loading shader";
+   }
+
+#ifndef DECEPTUS_VRSFML
    if (frag_file.has_value())
    {
-      // check if fragment shader file exists before attempting to load
-      if (!std::filesystem::exists(frag_file.value()))
-      {
-         Log::Error() << "fragment shader file does not exist: " << frag_file.value();
-      }
-      else if (!instance->_shader.loadFromFile(frag_file.value(), sf::Shader::Type::Fragment))
-      {
-         Log::Error() << "error compiling " << frag_file.value();
-      }
-
       // analyze the fragment shader source to determine which uniforms are present
       instance->checkUniforms(frag_file.value());
    }
+#endif
 
    const auto texture_id = ValueReader::readValue<std::string>("texture", map);
    if (texture_id.has_value())
    {
       instance->_texture = TexturePool::getInstance().get(texture_id.value());
+#ifdef DECEPTUS_VRSFML
+      instance->_texture->setWrapMode(sf::TextureWrapMode::Repeat);
+#else
       instance->_texture->setRepeated(true);
+#endif
 
       const auto smooth_texture = ValueReader::readValue<bool>("smooth_texture", map).value_or(false);
       instance->_texture->setSmooth(smooth_texture);

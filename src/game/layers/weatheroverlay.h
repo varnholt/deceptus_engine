@@ -14,7 +14,24 @@ public:
    /// \param normal normal-map render target for weather effects that contribute normals.
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal) = 0;
 
+   /// \brief draws the weather effect with explicit render states (used in WASM to carry the level view).
+   /// \param target primary color render target for weather output.
+   /// \param normal normal-map render target for weather effects that contribute normals.
+   /// \param states render states to apply; weather overlays are screen-space and may ignore the view.
+   virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& /*states*/)
+   {
+      draw(target, normal);
+   }
+
    /// \brief advances weather simulation state for the current frame.
    /// \param dt elapsed frame time since the previous update.
    virtual void update(const sf::Time& dt) = 0;
+
+   /// \brief starts or stops looped audio owned by the overlay.
+   /// \param audio_enabled true while the weather effect is active for the player.
+   /// \note update() is only called while the effect is active, so overlays cannot notice deactivation
+   ///       themselves; the weather mechanism drives this every frame instead.
+   virtual void setAudioEnabled(bool /*audio_enabled*/)
+   {
+   }
 };
