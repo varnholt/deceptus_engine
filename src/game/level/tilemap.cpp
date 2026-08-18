@@ -1,6 +1,7 @@
 #include "tilemap.h"
 
 #include <math.h>
+#include <algorithm>
 #include <iostream>
 #include <map>
 
@@ -368,6 +369,30 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
          {
             _batched_vertices.insert(_batched_vertices.end(), &block_vertices[0], &block_vertices[0] + block_vertex_count);
          }
+#ifdef DEVELOPMENT_MODE
+         // blocks are drawn whole but only partly on screen, so scale the block's tile area by how
+         // much of the block the view actually covers. counting the whole block would report fill
+         // that the rasteriser never pays for
+         const auto block_left_px = static_cast<float>(column_it->first) * block_width_px;
+         const auto block_top_px = static_cast<float>(row_it->first) * block_height_px;
+         const auto visible_width_px = std::max(
+            0.0f,
+            std::min(block_left_px + block_width_px, view_center.x + view_size.x * 0.5f) -
+               std::max(block_left_px, view_center.x - view_size.x * 0.5f)
+         );
+         const auto visible_height_px = std::max(
+            0.0f,
+            std::min(block_top_px + block_height_px, view_center.y + view_size.y * 0.5f) -
+               std::max(block_top_px, view_center.y - view_size.y * 0.5f)
+         );
+         const auto visible_fraction = (visible_width_px * visible_height_px) / (block_width_px * block_height_px);
+
+         // tiles are stored as two triangles, so six vertices make one tile - not four. dividing by
+         // four overstated every count by 1.5x
+         const auto tile_count = static_cast<float>(block_vertex_count / 6);
+         DrawCallCounter::tilemap_pixels_submitted +=
+            static_cast<int64_t>(tile_count * visible_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y));
+#endif
       }
    }
 
@@ -392,6 +417,10 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
 
 #ifdef DEVELOPMENT_MODE
    DrawCallCounter::tilemap_draw_calls++;
+   // the animated tiles are collected around the player block rather than around the view, so this
+   // adds tiles that are off screen. it is an upper bound, unlike the block term above
+   DrawCallCounter::tilemap_pixels_submitted +=
+      static_cast<int64_t>(_vertices_animated.getVertexCount() / 6) * _tile_size_px.x * _tile_size_px.y;
 #endif
 }
 

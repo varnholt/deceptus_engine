@@ -215,6 +215,7 @@ set(GAME_FILES
     src/game/debug/mechanismschemawriter.h
     src/game/debug/profilingui.cpp
     src/game/debug/profilingui.h
+    src/game/debug/rendersectiontimer.h
     src/game/effects/boomeffect.cpp
     src/game/effects/boomeffect.h
     src/game/effects/boomeffectenvelope.cpp
