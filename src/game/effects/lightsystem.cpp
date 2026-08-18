@@ -112,6 +112,11 @@ void LightSystem::drawShadowQuads(
    const sf::RenderStates shadow_states{stencil_write_mode};
 #endif
 
+   // every quad used to be a draw call of its own, and the level's solid geometry is one chain
+   // shape, so a light standing next to a wall issued one call per edge in range - times six
+   // lights, every frame. the quads all carry the same state, so they batch into a single call
+   _shadow_vertices.clear();
+
    for (auto* body : candidates)
    {
       // skip bodies that belong to the light's own mechanism
@@ -184,11 +189,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-#ifdef DECEPTUS_VRSFML
-               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
-#else
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
-#endif
+               _shadow_vertices.insert(_shadow_vertices.end(), quad.begin(), quad.end());
             }
          }
          else if (shape_chain)
@@ -224,11 +225,7 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(vertex_1.x, vertex_1.y) * PPM, sf::Color::Black)
                };
 
-#ifdef DECEPTUS_VRSFML
-               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
-#else
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
-#endif
+               _shadow_vertices.insert(_shadow_vertices.end(), quad.begin(), quad.end());
             }
          }
          else if (shape_polygon)
@@ -263,15 +260,22 @@ void LightSystem::drawShadowQuads(
                   sf::Vertex(sf::Vector2f(v1.x, v1.y) * PPM, sf::Color::Black)
                };
 
-#ifdef DECEPTUS_VRSFML
-               target.draw(std::span<const sf::Vertex>{quad.data(), quad.size()}, sf::PrimitiveType::Triangles, shadow_states);
-#else
-               target.draw(quad.data(), quad.size(), sf::PrimitiveType::Triangles, shadow_states);
-#endif
+               _shadow_vertices.insert(_shadow_vertices.end(), quad.begin(), quad.end());
             }
          }
       }
    }
+
+   if (_shadow_vertices.empty())
+   {
+      return;
+   }
+
+#ifdef DECEPTUS_VRSFML
+   target.draw(std::span<const sf::Vertex>{_shadow_vertices.data(), _shadow_vertices.size()}, sf::PrimitiveType::Triangles, shadow_states);
+#else
+   target.draw(_shadow_vertices.data(), _shadow_vertices.size(), sf::PrimitiveType::Triangles, shadow_states);
+#endif
 }
 
 sf::Vector2f mapCoordsToPixelNormalized(const sf::Vector2f& point, const sf::View& view)

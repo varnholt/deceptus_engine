@@ -161,6 +161,10 @@ private:
    static constexpr auto segment_count = 20;
    std::array<b2Vec2, segment_count> _unit_circle;
 
+   //!< every shadow quad of one light, collected so the whole set goes out as a single draw call.
+   //!< kept as a member rather than a local so the frames after the first reuse its capacity
+   mutable std::vector<sf::Vertex> _shadow_vertices;
+
    OccluderDrawCallback _occluder_callback;
    sf::Clock _clock;  //!< tracks elapsed time for per-light shader uniforms
 };
