@@ -382,8 +382,9 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
          );
          const auto visible_fraction = (visible_width_px * visible_height_px) / (block_width_px * block_height_px);
 
-         // four vertices per tile, so the quad count is the tile count
-         const auto tile_count = static_cast<float>(column_it->second.getVertexCount() / 4);
+         // tiles are stored as two triangles, so six vertices make one tile - not four. dividing by
+         // four overstated every count by 1.5x
+         const auto tile_count = static_cast<float>(column_it->second.getVertexCount() / 6);
          DrawCallCounter::tilemap_pixels_submitted +=
             static_cast<int64_t>(tile_count * visible_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y));
 #endif
@@ -393,8 +394,10 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
    target.draw(_vertices_animated, states);
 #ifdef DEVELOPMENT_MODE
    DrawCallCounter::tilemap_draw_calls++;
+   // the animated tiles are collected around the player block rather than around the view, so this
+   // adds tiles that are off screen. it is an upper bound, unlike the block term above
    DrawCallCounter::tilemap_pixels_submitted +=
-      static_cast<int64_t>(_vertices_animated.getVertexCount() / 4) * _tile_size_px.x * _tile_size_px.y;
+      static_cast<int64_t>(_vertices_animated.getVertexCount() / 6) * _tile_size_px.x * _tile_size_px.y;
 #endif
 }
 

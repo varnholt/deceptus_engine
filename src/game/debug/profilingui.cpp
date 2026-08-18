@@ -342,8 +342,11 @@ void ProfilingUi::draw()
                   << formatSummary("", summarizeSamples(_tilemap_target_switches.data(), _samples_written)) << " | layer scan steps "
                   << formatSummary("", summarizeSamples(_layer_scan_steps.data(), _samples_written));
 
-   // tile pixels submitted against the view area: how many times the average on screen pixel is
-   // written by tile geometry alone. a pure count, so it reads the same here as on hardware
+   // tile pixels submitted against the view area. this is an upper bound rather than a measurement:
+   // it sums the colour and the normal target, and the animated tiles are gathered around the
+   // player block rather than the view, so both inflate it. use it to watch a change move the
+   // number, not as an absolute - lab/tile_opacity/analyze_opacity.py computes the real figure
+   // offline from the tilesets
    const auto view_area = GameConfiguration::getInstance()._view_width * GameConfiguration::getInstance()._view_height;
    const auto pixel_summary = summarizeSamples(_tilemap_pixels_submitted.data(), _samples_written);
    if (view_area > 0)
