@@ -40,6 +40,7 @@ std::string GameConfiguration::serialize()
           {"fullscreen", _fullscreen},
           {"brightness", _brightness},
           {"vsync", _vsync_enabled},
+          {"render_target_profile", _render_target_profile},
 
           {"audio_volume_master", _audio_volume_master},
           {"audio_volume_sfx", _audio_volume_sfx},
@@ -89,6 +90,13 @@ void GameConfiguration::deserialize(const std::string& data)
       if (const auto language_it = gc.find("language"); language_it != gc.end())
       {
          _language = language_it->get<std::string>();
+      }
+
+      // read through find() rather than operator[]: the whole block is one try, so a key an older
+      // settings file does not carry would throw and take every read after it down with it
+      if (const auto profile_it = gc.find("render_target_profile"); profile_it != gc.end())
+      {
+         _render_target_profile = profile_it->get<std::string>();
       }
    }
    catch (const std::exception& e)

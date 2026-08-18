@@ -2,11 +2,41 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <string>
 #include <vector>
 
 /// \brief owns the render textures used by the level's deferred rendering pipeline.
 /// textures are created from window and logical view dimensions and rebuilt on resize.
 /// the level renderer receives references to these targets for each render pass.
+/// \brief how large each group of render targets is, relative to the image the window shows.
+///
+/// The targets fall into groups because the passes between them are pairwise: level_background
+/// resolves into level, normal_tmp into normal, level into deferred, deferred into the window.
+/// Only a whole group can change size.
+///
+/// The image group is what the player actually sees, so shrinking it costs detail on everything
+/// that is not on the pixel grid. The other groups hold low frequency data - light accumulation,
+/// surface normals, atmosphere distortion - which survives being rendered smaller and stretched
+/// back with texture interpolation, and each step down costs a quarter of the fragments.
+struct RenderTargetProfile
+{
+   float image_scale{1.0f};       //!< level, level_background and deferred: the visible picture
+   float lighting_scale{1.0f};    //!< light accumulation and the shadow stencils that mask it
+   float normal_scale{1.0f};      //!< the normals the lighting maths reads
+   float atmosphere_scale{1.0f};  //!< the atmosphere distortion source
+
+   /// \brief every target at the size of the window image.
+   static RenderTargetProfile full();
+
+   /// \brief the console profile: lighting, normals and atmosphere at half size, image untouched.
+   static RenderTargetProfile reduced();
+
+   /// \brief resolves a profile by name, falling back to full() for anything unknown.
+   /// \param name profile identifier, "full" or "reduced".
+   /// \return the matching profile.
+   static RenderTargetProfile fromName(const std::string& name);
+};
+
 struct RenderTargets
 {
    /// \brief foreground world pass with gameplay layers and entities.
@@ -43,6 +73,11 @@ struct RenderTargets
 
    /// \brief conversion factor from logical view units to texture-space units.
    float view_to_texture_scale = 1.0f;
+
+   /// \brief sizes each group of targets relative to the window image.
+   /// only the image group is measured in view units, and that group is never scaled down, so
+   /// view_to_texture_scale stays independent of the profile.
+   RenderTargetProfile profile;
 
    /// \brief allocates all render textures and computes view-to-texture scaling.
    /// \param video_mode_width window width in pixels.

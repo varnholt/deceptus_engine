@@ -4,6 +4,28 @@
 #include "framework/tools/log.h"
 #include "game/config/gameconfiguration.h"
 
+RenderTargetProfile RenderTargetProfile::full()
+{
+   return RenderTargetProfile{};
+}
+
+RenderTargetProfile RenderTargetProfile::reduced()
+{
+   // the image stays at full size: it is what the player looks at, and the art is not all on the
+   // pixel grid. everything else here feeds the lighting maths rather than the eye
+   return RenderTargetProfile{.image_scale = 1.0f, .lighting_scale = 0.5f, .normal_scale = 0.5f, .atmosphere_scale = 0.5f};
+}
+
+RenderTargetProfile RenderTargetProfile::fromName(const std::string& name)
+{
+   if (name == "reduced")
+   {
+      return reduced();
+   }
+
+   return full();
+}
+
 void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height, float view_width, float view_height)
 {
 #ifndef DECEPTUS_VRSFML
@@ -20,6 +42,23 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
 
    const auto texture_width = static_cast<int32_t>(size_ratio * view_width);
    const auto texture_height = static_cast<int32_t>(size_ratio * view_height);
+
+   profile = RenderTargetProfile::fromName(GameConfiguration::getInstance()._render_target_profile);
+
+   // a group rendered smaller is stretched back over the image when it is sampled, so it has to
+   // interpolate rather than pick the nearest texel - otherwise half size lighting reads as blocks
+   const auto scaled_size = [texture_width, texture_height](float scale)
+   {
+      return sf::Vector2u{
+         static_cast<uint32_t>(std::max(1.0f, static_cast<float>(texture_width) * scale)),
+         static_cast<uint32_t>(std::max(1.0f, static_cast<float>(texture_height) * scale))
+      };
+   };
+
+   const auto image_size = scaled_size(profile.image_scale);
+   const auto lighting_size = scaled_size(profile.lighting_scale);
+   const auto normal_size = scaled_size(profile.normal_scale);
+   const auto atmosphere_size = scaled_size(profile.atmosphere_scale);
 
 #ifdef DECEPTUS_VRSFML
    const auto texture_size = sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)};
@@ -80,6 +119,16 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
       Log::Fatal() << "failed to create render textures: " << e.what();
    }
 #endif
+
+   // a group rendered smaller is stretched back over the image when it is sampled, so it has to
+   // interpolate rather than pick the nearest texel
+   for (const auto& scaled_target : {lighting, lighting2, normal, normal_tmp, atmosphere})
+   {
+      if (scaled_target)
+      {
+         scaled_target->setSmooth(true);
+      }
+   }
 
    _all_textures.clear();
    _all_textures.push_back(level);

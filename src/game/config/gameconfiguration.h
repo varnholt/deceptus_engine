@@ -22,6 +22,12 @@ struct GameConfiguration
    bool _vsync_enabled = true;
    bool _rumble_enabled = true;
 
+   //!< sizes the level's render targets by group, see RenderTargetProfile. "full" keeps every
+   //!< target at the size of the window image; "reduced" renders lighting, normals and the
+   //!< atmosphere at half size and stretches them back, which costs a quarter of the fragments
+   //!< in those passes and leaves the visible image untouched
+   std::string _render_target_profile = "full";
+
    int32_t _audio_volume_master = 100;
    int32_t _audio_volume_sfx = 100;
    int32_t _audio_volume_music = 100;
