@@ -82,7 +82,6 @@ private:
 
       sf::Vector2f _offset;
       sf::Vector2f _center;
-      sf::Vector2f _cached_half_size;  //!< local half-size used as the sprite origin, set once at construction
    };
 
    std::vector<SmokeParticle> _particles;

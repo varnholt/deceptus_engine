@@ -335,9 +335,6 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
       sfcompat::setRotation(*particle._sprite, sf::degrees(static_cast<float>(std::rand() % 360)));
       sfcompat::setColor(*particle._sprite, smoke_effect->_particle_color);
 
-      const auto particle_local_bounds = particle._sprite->getLocalBounds();
-      particle._cached_half_size = {particle_local_bounds.size.x / 2.0f, particle_local_bounds.size.y / 2.0f};
-
       smoke_effect->_particles.push_back(std::move(particle));
    }
 
