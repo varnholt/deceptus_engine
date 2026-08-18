@@ -264,7 +264,11 @@ void Game::initializeWindow()
 
 #ifndef DECEPTUS_VRSFML
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
-   _window->setFramerateLimit(60);
+
+   // switching vsync off is how a profiling run asks to see the headroom above 60, so the limiter
+   // has to step aside with it - otherwise it caps the run at the very number being measured. this
+   // matches what the console branch below already does
+   _window->setFramerateLimit(game_config._vsync_enabled ? 60 : 0);
 #elif defined(__SWITCH__)
    // the console's panel runs at 60 Hz in both modes and paces the loop by itself, so vsync is all
    // that is wanted here and no frame rate limiter goes on top: a limiter would also cap a profiling
@@ -1262,7 +1266,7 @@ void Game::toggleFullScreen()
 
 #ifndef DECEPTUS_VRSFML
    _window->setVerticalSyncEnabled(config._vsync_enabled);
-   _window->setFramerateLimit(60);
+   _window->setFramerateLimit(config._vsync_enabled ? 60 : 0);
 #elif defined(__SWITCH__)
    _window->setVerticalSyncEnabled(config._vsync_enabled);
 #endif
