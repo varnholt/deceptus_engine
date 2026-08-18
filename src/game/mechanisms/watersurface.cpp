@@ -78,6 +78,32 @@ std::vector<WaterSurface::SplashEmitter> emitters;
 
 // #define DEBUG_WATERSURFACE 1
 
+namespace
+{
+// mechanisms are culled by chunk distance to the player, which is coarse: one a couple of chunks
+// away is still drawn in full even when the camera cannot see any of it. that is worth avoiding
+// here because drawing this mechanism is not cheap, so the bounding box is checked against the
+// view first
+bool isOnScreen(const sf::View& view, const std::optional<sf::FloatRect>& bounding_box)
+{
+   if (!bounding_box.has_value())
+   {
+      return true;
+   }
+
+   const auto view_center = sfcompat::getViewCenter(view);
+   const auto view_size = sfcompat::getViewSize(view);
+   if (view_size.x <= 0.0f || view_size.y <= 0.0f)
+   {
+      return true;
+   }
+
+   const sf::FloatRect view_rect{{view_center.x - view_size.x * 0.5f, view_center.y - view_size.y * 0.5f}, {view_size.x, view_size.y}};
+
+   return sfcompat::findIntersection(view_rect, bounding_box.value()).has_value();
+}
+}  // namespace
+
 #ifdef DECEPTUS_VRSFML
 void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
@@ -86,6 +112,11 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 
 void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const sf::RenderStates& incoming_states)
 {
+   if (!isOnScreen(incoming_states.view, _bounding_box))
+   {
+      return;
+   }
+
    //
    //         __--4
    //   __- 2-    |
@@ -147,6 +178,11 @@ void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, c
 #else
 void WaterSurface::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 {
+   if (!isOnScreen(color.getView(), _bounding_box))
+   {
+      return;
+   }
+
    //
    //         __--4
    //   __- 2-    |
