@@ -196,11 +196,10 @@ private:
 #ifdef DEVELOPMENT_MODE
    std::unique_ptr<ProfilingUi> _profiling_ui;
    sf::Time _profiling_update_elapsed;
-#ifdef DEVELOPMENT_MODE
+
    //! Level::draw reports its own passes; this covers everything else Game::draw does, so the
    //! sections add up to the measured draw time instead of leaving an unexplained remainder
    RenderSectionTimer _draw_section_timer;
-#endif
 #endif
 
    std::shared_ptr<EventSerializer> _global_event_serializer;
