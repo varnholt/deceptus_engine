@@ -50,8 +50,9 @@ LogThread::~LogThread()
       std::lock_guard<std::mutex> guard(_mutex);
       _stopped = true;
    }
-   // null when the log file could not be opened, in which case the thread was never started
-   if (_thread)
+   // null when the log file could not be opened, in which case the thread was never started, and
+   // already joined when a fatal message came through stop() first
+   if (_thread && _thread->joinable())
    {
       _thread->join();
    }
@@ -134,6 +135,29 @@ void LogThread::flush()
 void LogThread::flushSynchronously()
 {
 #ifdef DECEPTUS_LOG_TO_FILE
+   // Log::fatal calls this and then std::exit, which unwinds the runtime - including the locale
+   // facets basic_filebuf converts through on its way to the file - while this thread is still
+   // looping every 100 ms and flushing into it. Flushing alone left that race open: the sink kept
+   // writing into a half destroyed runtime and died inside the write, taking the queued messages
+   // with it. Stopping and joining the thread first is what closes it.
+   stop();
    flush();
+#endif
+}
+
+void LogThread::stop()
+{
+#ifdef DECEPTUS_LOG_TO_FILE
+   {
+      std::lock_guard<std::mutex> guard(_mutex);
+      _stopped = true;
+   }
+
+   // joining from the logging thread itself would deadlock, and a fatal logged from that thread is
+   // exactly the case where that would happen
+   if (_thread && _thread->joinable() && _thread->get_id() != std::this_thread::get_id())
+   {
+      _thread->join();
+   }
 #endif
 }
