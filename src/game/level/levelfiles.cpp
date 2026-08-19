@@ -1,6 +1,7 @@
 #include "levelfiles.h"
 
 #include <filesystem>
+#include <system_error>
 
 void LevelFiles::clean(const LevelDescription& level_description)
 {
@@ -21,8 +22,14 @@ void LevelFiles::clean(const LevelDescription& level_description)
       crc_path,
    };
 
+   // the error_code overload rather than the throwing one: on the switch and in the browser the
+   // level lives on a read-only filesystem, so every one of these removes fails with EROFS. That
+   // came out as an uncaught filesystem_error which took the whole process down mid level load.
+   // Dropping generated files is best effort anyway - if they cannot be removed there is nothing
+   // stale to remove in the first place.
    for (const auto& filename : filenames)
    {
-      std::filesystem::remove(path / filename);
+      std::error_code remove_error;
+      std::filesystem::remove(path / filename, remove_error);
    }
 }
