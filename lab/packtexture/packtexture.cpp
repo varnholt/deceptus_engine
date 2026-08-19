@@ -154,32 +154,52 @@ void PackTexture::dump()
    auto quad_count = _quads.size();
 
    _log(qApp->tr("quad count: %1").arg(quad_count));
-   std::array<int, 7> texture_sizes = {512, 1024, 2048, 4096, 8192};
+   std::array<int, 5> candidate_texture_widths = {512, 1024, 2048, 4096, 8192};
 
-   auto suitable_texture_size = std::find_if(
-      std::begin(texture_sizes),
-      std::end(texture_sizes),
-      [&](auto texture_size)
+   // the width is chosen as though the atlas were still square, which is what keeps every atlas
+   // packed before the height was trimmed laid out exactly as it was: the runtime derives a quad's
+   // column from (index * quad_width) % texture_width, so changing the width would renumber every
+   // quad and invalidate the uv file that ships next to the texture
+   auto suitable_texture_width = std::find_if(
+      std::begin(candidate_texture_widths),
+      std::end(candidate_texture_widths),
+      [&](auto texture_width)
       {
-         auto tmp = texture_size / _size;
-         tmp *= tmp;
-         return (tmp >= quad_count);
+         const auto quads_per_row = static_cast<std::size_t>(texture_width / _size);
+         return (quads_per_row * quads_per_row >= quad_count);
       }
    );
 
-   if (suitable_texture_size == texture_sizes.end())
+   if (suitable_texture_width == candidate_texture_widths.end())
    {
-      _log(qApp->tr("no suitable texture size for given configuration (%1)").arg(_size));
-      return;
+      // no square would have held them all, but the atlas does not have to be square any more, so
+      // the widest candidate plus however many rows it takes is a perfectly good answer
+      _texture_width = candidate_texture_widths.back();
+      _log(qApp->tr("no square fits %1 quads; using the widest candidate and growing the rows instead").arg(quad_count));
    }
    else
    {
-      _texture_size = *suitable_texture_size;
+      _texture_width = *suitable_texture_width;
    }
 
-   _log(qApp->tr("picking a %1x%1 texture").arg(_texture_size));
+   // the width has to hold a whole number of quads per row, but the height only has to reach the
+   // last row that is actually filled. emitting a square here left the catacombs atlas at
+   // 8192x8192 with just 34 of its 128 rows used - 256 MB of texture for 68 MB of content.
+   // the runtime derives a quad's column from (index * quad_width) % texture_width and its row by
+   // wrapping, so the height never enters the index maths and is free to shrink
+   const auto quads_per_row = _texture_width / _size;
+   const auto row_count = static_cast<int>((quad_count + quads_per_row - 1) / quads_per_row);
+   const auto texture_height = row_count * _size;
+   _texture_height = texture_height;
 
-   QImage out(_texture_size, _texture_size, _image.format());
+   _log(qApp->tr("picking a %1x%2 texture").arg(_texture_width).arg(texture_height));
+
+   QImage out(_texture_width, texture_height, _image.format());
+
+   // QImage leaves its buffer uninitialised, and the slots after the last quad are never painted,
+   // so without this the tail of the atlas is whatever was in memory - different on every run
+   out.fill(Qt::transparent);
+
    QPainter painter(&out);
    painter.setCompositionMode(QPainter::CompositionMode_Source);
 
@@ -197,7 +217,7 @@ void PackTexture::dump()
       x += _size;
 
       // go to next row in target texture
-      if (x == _texture_size)
+      if (x == _texture_width)
       {
          x = 0;
          y += _size;
