@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <numeric>
+#include <ranges>
 #include <sstream>
 
 ProfilingUi::ProfilingUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode({900, 900}), "deceptus profiling"))
@@ -127,6 +128,35 @@ void logDrawCounts(
    }
    Log::Info() << counts_line.str();
 }
+// the per layer fill breakdown, worst first. one line rather than one per layer: on the console
+// every log line is a write to the sd card. the window is the report interval, so the totals
+// are divided by the frames in it before being held against the view
+void logTileMapLayerFill(int32_t frames, float view_area)
+{
+   if (DrawCallCounter::tilemap_layer_pixels.empty() || frames <= 0 || view_area <= 0.0f)
+   {
+      return;
+   }
+
+   auto layers = DrawCallCounter::tilemap_layer_pixels;
+   std::ranges::sort(layers, [](const auto& lhs, const auto& rhs) { return lhs._pixels_submitted > rhs._pixels_submitted; });
+
+   constexpr auto reported_layer_count = 8u;
+   std::ostringstream layer_line;
+   layer_line << std::fixed << std::setprecision(2) << "profiling: tile fill per layer |";
+   for (auto layer_index = 0u; layer_index < std::min<size_t>(reported_layer_count, layers.size()); layer_index++)
+   {
+      const auto& layer = layers[layer_index];
+      const auto overdraw = static_cast<float>(layer._pixels_submitted) / static_cast<float>(frames) / view_area;
+      const auto draws_per_frame = static_cast<float>(layer._draw_count) / static_cast<float>(frames);
+      layer_line << " " << layer._layer_name << " " << overdraw << "x in " << draws_per_frame << " draws |";
+   }
+   layer_line << " " << layers.size() << " layers total";
+   Log::Info() << layer_line.str();
+
+   DrawCallCounter::tilemap_layer_pixels.clear();
+}
+
 }  // namespace
 
 void ProfilingUi::draw()
@@ -214,6 +244,9 @@ void ProfilingUi::draw()
             _image_layer_pixels_submitted.data(),
             _tilemap_normal_pixels_submitted.data(),
             _samples_written
+         );
+         logTileMapLayerFill(
+            section_frames, static_cast<float>(GameConfiguration::getInstance()._view_width * GameConfiguration::getInstance()._view_height)
          );
          _render_section_timings.clear();
          _render_section_frames = 0;
@@ -374,6 +407,7 @@ bool ProfilingUi::isMechanismProfilingWanted() const
 #include <algorithm>
 #include <iomanip>
 #include <numeric>
+#include <ranges>
 #include <sstream>
 
 namespace
@@ -406,6 +440,35 @@ std::string formatSummary(const char* label, const TimingSummary& summary)
    out_stream << std::fixed << std::setprecision(2) << label << " min " << summary.minimum_ms << " avg " << summary.average_ms << " max "
               << summary.maximum_ms;
    return out_stream.str();
+}
+
+// the per layer fill breakdown, worst first. one line rather than one per layer: on the console
+// every log line is a write to the sd card. the window is the report interval, so the totals
+// are divided by the frames in it before being held against the view
+void logTileMapLayerFill(int32_t frames, float view_area)
+{
+   if (DrawCallCounter::tilemap_layer_pixels.empty() || frames <= 0 || view_area <= 0.0f)
+   {
+      return;
+   }
+
+   auto layers = DrawCallCounter::tilemap_layer_pixels;
+   std::ranges::sort(layers, [](const auto& lhs, const auto& rhs) { return lhs._pixels_submitted > rhs._pixels_submitted; });
+
+   constexpr auto reported_layer_count = 8u;
+   std::ostringstream layer_line;
+   layer_line << std::fixed << std::setprecision(2) << "profiling: tile fill per layer |";
+   for (auto layer_index = 0u; layer_index < std::min<size_t>(reported_layer_count, layers.size()); layer_index++)
+   {
+      const auto& layer = layers[layer_index];
+      const auto overdraw = static_cast<float>(layer._pixels_submitted) / static_cast<float>(frames) / view_area;
+      const auto draws_per_frame = static_cast<float>(layer._draw_count) / static_cast<float>(frames);
+      layer_line << " " << layer._layer_name << " " << overdraw << "x in " << draws_per_frame << " draws |";
+   }
+   layer_line << " " << layers.size() << " layers total";
+   Log::Info() << layer_line.str();
+
+   DrawCallCounter::tilemap_layer_pixels.clear();
 }
 
 }  // namespace
@@ -510,6 +573,8 @@ void ProfilingUi::draw()
                    << (draw_summary.average_ms - section_total_ms);
       Log::Info() << section_line.str();
    }
+
+   logTileMapLayerFill(std::max(_render_section_frames, 1), static_cast<float>(view_area));
 
    for (const auto& sample : _mechanism_timings)
    {

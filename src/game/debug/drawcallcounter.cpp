@@ -3,6 +3,7 @@
 #ifdef DEVELOPMENT_MODE
 
 #include <algorithm>
+#include <ranges>
 
 #include "framework/tools/sfmlcompat.h"
 
@@ -56,7 +57,51 @@ visibleArea(const sf::Vector2f& view_center, const sf::Vector2f& view_size, floa
 //! without threading a flag through TileMap::drawVertices
 int64_t tilemap_pixels_before_normal_pass = 0;
 
+//! the same trick one level up, for the layer currently being drawn. held by value: the caller
+//! may well pass a temporary, and a pointer to one dangles the moment the call returns
+int64_t tilemap_pixels_before_layer = 0;
+std::string current_layer_name;
+bool layer_attribution_active = false;
+
 }  // namespace
+
+void DrawCallCounter::beginTileMapLayer(const std::string& layer_name)
+{
+   current_layer_name = layer_name;
+   layer_attribution_active = true;
+   tilemap_pixels_before_layer = tilemap_pixels_submitted;
+}
+
+void DrawCallCounter::endTileMapLayer()
+{
+   if (!layer_attribution_active)
+   {
+      return;
+   }
+
+   const auto layer_name = current_layer_name;
+   layer_attribution_active = false;
+
+   const auto submitted = tilemap_pixels_submitted - tilemap_pixels_before_layer;
+   if (submitted == 0)
+   {
+      return;
+   }
+
+   // a level has a few dozen layers, so a linear scan beats a map, and appending in first-drawn
+   // order keeps two reports comparable line by line
+   const auto layer_it =
+      std::ranges::find_if(tilemap_layer_pixels, [&layer_name](const auto& entry) { return entry._layer_name == layer_name; });
+
+   if (layer_it == tilemap_layer_pixels.end())
+   {
+      tilemap_layer_pixels.push_back({layer_name, submitted, 1});
+      return;
+   }
+
+   layer_it->_pixels_submitted += submitted;
+   layer_it->_draw_count++;
+}
 
 void DrawCallCounter::beginTileMapNormalPass()
 {

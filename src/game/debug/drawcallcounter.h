@@ -5,6 +5,7 @@
 #include "SFML/Graphics.hpp"
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 ///
@@ -54,6 +55,32 @@ inline int64_t image_layer_pixels_submitted = 0;
 //! map are drawn a second time, so these pixels are shaded twice for one visible result - on a fill
 //! bound machine that is the difference between the two passes, whatever the draw call count says.
 inline int64_t tilemap_normal_pixels_submitted = 0;
+
+///
+/// \brief One tile map layer and the pixels it has submitted since the last report.
+///
+struct TileMapLayerPixels
+{
+   std::string _layer_name;
+   int64_t _pixels_submitted{0};
+   int32_t _draw_count{0};  //!< times the layer was drawn over the window, colour and normal pass each counting once
+};
+
+//! Per layer breakdown of the tile fill, accumulated across the report window rather than reset
+//! every frame. Answers whether a handful of layers own the overdraw or it is spread evenly across
+//! all of them, which is what decides between dropping layers and rejecting hidden fragments.
+inline std::vector<TileMapLayerPixels> tilemap_layer_pixels;
+
+///
+/// \brief Starts attributing submitted tile pixels to one layer.
+/// \param layer_name name of the tile map layer being drawn.
+///
+void beginTileMapLayer(const std::string& layer_name);
+
+///
+/// \brief Stops attributing submitted tile pixels to a layer.
+///
+void endTileMapLayer();
 
 ///
 /// \brief Starts attributing submitted tile pixels to the normal pass.
