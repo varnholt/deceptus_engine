@@ -90,7 +90,13 @@ void logRenderSections(const std::vector<RenderSectionSample>& samples, int32_t 
 
 // draw call counts carry over to other hardware unchanged, unlike a timing, so they belong next to
 // the sections rather than only in the imgui window
-void logDrawCounts(const float* draw_calls, const float* target_switches, const float* scan_steps, int32_t count)
+void logDrawCounts(
+   const float* draw_calls,
+   const float* ambient_occlusion_draw_calls,
+   const float* target_switches,
+   const float* scan_steps,
+   int32_t count
+)
 {
    if (count <= 0)
    {
@@ -101,7 +107,8 @@ void logDrawCounts(const float* draw_calls, const float* target_switches, const 
 
    std::ostringstream counts_line;
    counts_line << std::fixed << std::setprecision(1) << "profiling: tilemap draw calls per frame " << average(draw_calls)
-               << " | target switches " << average(target_switches) << " | layer scan steps " << average(scan_steps);
+               << " | ao draw calls " << average(ambient_occlusion_draw_calls) << " | target switches " << average(target_switches)
+               << " | layer scan steps " << average(scan_steps);
    Log::Info() << counts_line.str();
 }
 }  // namespace
@@ -181,7 +188,13 @@ void ProfilingUi::draw()
       {
          _log_clock.restart();
          logRenderSections(_render_section_timings, section_frames);
-         logDrawCounts(_tilemap_draw_calls.data(), _tilemap_target_switches.data(), _layer_scan_steps.data(), _samples_written);
+         logDrawCounts(
+            _tilemap_draw_calls.data(),
+            _ambient_occlusion_draw_calls.data(),
+            _tilemap_target_switches.data(),
+            _layer_scan_steps.data(),
+            _samples_written
+         );
          _render_section_timings.clear();
          _render_section_frames = 0;
       }
@@ -270,6 +283,8 @@ void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Tim
    _update_times_ms[_write_index] = update_time.asSeconds() * 1000.0f;
    _draw_times_ms[_write_index] = draw_time.asSeconds() * 1000.0f;
    _tilemap_draw_calls[_write_index] = static_cast<float>(DrawCallCounter::tilemap_draw_calls);
+   _ambient_occlusion_draw_calls[_write_index] = static_cast<float>(DrawCallCounter::ambient_occlusion_draw_calls);
+   DrawCallCounter::ambient_occlusion_draw_calls = 0;
    _tilemap_target_switches[_write_index] = static_cast<float>(DrawCallCounter::tilemap_target_switches);
    DrawCallCounter::tilemap_draw_calls = 0;
    _layer_scan_steps[_write_index] = static_cast<float>(DrawCallCounter::layer_scan_steps);
@@ -409,7 +424,8 @@ void ProfilingUi::draw()
    const auto draw_call_summary = summarizeSamples(_tilemap_draw_calls.data(), _samples_written);
    std::ostringstream draw_call_line;
    draw_call_line << std::fixed << std::setprecision(1) << "profiling: tilemap draw calls per frame "
-                  << formatSummary("", draw_call_summary) << " | target switches "
+                  << formatSummary("", draw_call_summary) << " | ao draw calls "
+                  << formatSummary("", summarizeSamples(_ambient_occlusion_draw_calls.data(), _samples_written)) << " | target switches "
                   << formatSummary("", summarizeSamples(_tilemap_target_switches.data(), _samples_written)) << " | layer scan steps "
                   << formatSummary("", summarizeSamples(_layer_scan_steps.data(), _samples_written));
 
@@ -494,6 +510,8 @@ void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Tim
    _update_times_ms[_write_index] = update_time.asSeconds() * 1000.0f;
    _draw_times_ms[_write_index] = draw_time.asSeconds() * 1000.0f;
    _tilemap_draw_calls[_write_index] = static_cast<float>(DrawCallCounter::tilemap_draw_calls);
+   _ambient_occlusion_draw_calls[_write_index] = static_cast<float>(DrawCallCounter::ambient_occlusion_draw_calls);
+   DrawCallCounter::ambient_occlusion_draw_calls = 0;
    _tilemap_target_switches[_write_index] = static_cast<float>(DrawCallCounter::tilemap_target_switches);
    DrawCallCounter::tilemap_draw_calls = 0;
    _layer_scan_steps[_write_index] = static_cast<float>(DrawCallCounter::layer_scan_steps);

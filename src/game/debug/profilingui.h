@@ -47,10 +47,11 @@ private:
    std::array<float, sample_count> _update_times_ms{};
    std::array<float, sample_count> _draw_times_ms{};
    std::array<float, sample_count> _window_display_times_ms{};
-   std::array<float, sample_count> _tilemap_draw_calls{};        //!< tile map draw calls issued in that frame
-   std::array<float, sample_count> _tilemap_target_switches{};   //!< render target changes between those draws
-   std::array<float, sample_count> _layer_scan_steps{};          //!< candidates the z loop examined that frame
-   std::array<float, sample_count> _tilemap_pixels_submitted{};  //!< tile pixels submitted that frame, for the overdraw factor
+   std::array<float, sample_count> _tilemap_draw_calls{};            //!< tile map draw calls issued in that frame
+   std::array<float, sample_count> _tilemap_target_switches{};       //!< render target changes between those draws
+   std::array<float, sample_count> _ambient_occlusion_draw_calls{};  //!< ao draw calls issued in that frame
+   std::array<float, sample_count> _layer_scan_steps{};              //!< candidates the z loop examined that frame
+   std::array<float, sample_count> _tilemap_pixels_submitted{};      //!< tile pixels submitted that frame, for the overdraw factor
    sf::Clock _wall_clock;
    bool _wall_clock_primed{false};
    int32_t _write_index{0};
