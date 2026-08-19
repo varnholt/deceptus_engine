@@ -51,5 +51,12 @@ public:
 private:
    Config _config;
    std::shared_ptr<sf::Texture> _texture;
-   std::map<int32_t, std::map<int32_t, std::vector<sf::Sprite>>> _sprite_map;
+
+   //!< two triangles per ao quad, bucketed by chunk. built once at load rather than kept as
+   //!< sprites, because every quad shares one texture and one blend mode and so the whole visible
+   //!< set can go out as a single draw call
+   std::map<int32_t, std::map<int32_t, std::vector<sf::Vertex>>> _vertex_map;
+
+   //!< the visible chunks of one frame, gathered so the lot goes out as one call
+   std::vector<sf::Vertex> _batched_vertices;
 };

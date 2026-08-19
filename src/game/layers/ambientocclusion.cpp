@@ -1,12 +1,12 @@
 #include "ambientocclusion.h"
 
+#include <array>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
 #include "framework/tools/log.h"
-#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/player/playerregistry.h"
 
@@ -67,17 +67,45 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
          y_index_px += height_px;
       }
 
-#ifdef DECEPTUS_VRSFML
-      sf::Sprite sprite;
-#else
-      sf::Sprite sprite(*_texture);
-#endif
-      sfcompat::setPosition(sprite, {static_cast<float>(x_px - _config._offset_x_px), static_cast<float>(y_px - _config._offset_y_px)});
-      sfcompat::setTextureRect(sprite, sf::IntRect({x_index_px, y_index_px}, {width_px, height_px}));
+      const auto left_px = static_cast<float>(x_px - _config._offset_x_px);
+      const auto top_px = static_cast<float>(y_px - _config._offset_y_px);
+      const auto right_px = left_px + static_cast<float>(width_px);
+      const auto bottom_px = top_px + static_cast<float>(height_px);
+
+      const auto texture_left_px = static_cast<float>(x_index_px);
+      const auto texture_top_px = static_cast<float>(y_index_px);
+      const auto texture_right_px = texture_left_px + static_cast<float>(width_px);
+      const auto texture_bottom_px = texture_top_px + static_cast<float>(height_px);
+
+      // clang-format off
+      std::array<sf::Vertex, 4> quad;
+      quad[0].position = sf::Vector2f(left_px,  top_px);
+      quad[1].position = sf::Vector2f(right_px, top_px);
+      quad[2].position = sf::Vector2f(right_px, bottom_px);
+      quad[3].position = sf::Vector2f(left_px,  bottom_px);
+
+      quad[0].texCoords = sf::Vector2f(texture_left_px,  texture_top_px);
+      quad[1].texCoords = sf::Vector2f(texture_right_px, texture_top_px);
+      quad[2].texCoords = sf::Vector2f(texture_right_px, texture_bottom_px);
+      quad[3].texCoords = sf::Vector2f(texture_left_px,  texture_bottom_px);
+
+      quad[0].color = sf::Color::White;
+      quad[1].color = sf::Color::White;
+      quad[2].color = sf::Color::White;
+      quad[3].color = sf::Color::White;
+      // clang-format on
 
       group_x = (x_px >> 8);
       group_y = (y_px >> 8);
-      _sprite_map[group_y][group_x].push_back(sprite);
+
+      auto& chunk_vertices = _vertex_map[group_y][group_x];
+      chunk_vertices.push_back(quad[0]);
+      chunk_vertices.push_back(quad[1]);
+      chunk_vertices.push_back(quad[2]);
+
+      chunk_vertices.push_back(quad[0]);
+      chunk_vertices.push_back(quad[2]);
+      chunk_vertices.push_back(quad[3]);
    }
 
    uv_file.close();
@@ -94,10 +122,15 @@ void AmbientOcclusion::draw(sf::RenderTarget& window, const sf::RenderStates& st
    draw_states.texture = _texture.get();
    draw_states.blendMode = sf::BlendAlpha;
 
+   // every quad carries the same texture, blend mode and transform, so the visible chunks
+   // concatenate into a single call. drawing them one sprite at a time cost a draw call per quad -
+   // a median of 230 per frame in the catacombs, and up to 444
+   _batched_vertices.clear();
+
    for (auto y = player_chunk_y - chunk_range_y_left; y < player_chunk_y + chunk_range_y_right; y++)
    {
-      const auto& y_it = _sprite_map.find(y);
-      if (y_it == _sprite_map.end())
+      const auto& y_it = _vertex_map.find(y);
+      if (y_it == _vertex_map.end())
       {
          continue;
       }
@@ -112,12 +145,21 @@ void AmbientOcclusion::draw(sf::RenderTarget& window, const sf::RenderStates& st
 
          // Log::Info() << "draw " << x_it->second.size() << " sprites";
 
-         for (const auto& sprite : x_it->second)
-         {
-            window.draw(sprite, draw_states);
-         }
+         const auto& chunk_vertices = x_it->second;
+         _batched_vertices.insert(_batched_vertices.end(), chunk_vertices.begin(), chunk_vertices.end());
       }
    }
+
+   if (_batched_vertices.empty())
+   {
+      return;
+   }
+
+#ifdef DECEPTUS_VRSFML
+   window.draw(std::span<const sf::Vertex>{_batched_vertices.data(), _batched_vertices.size()}, sf::PrimitiveType::Triangles, draw_states);
+#else
+   window.draw(_batched_vertices.data(), _batched_vertices.size(), sf::PrimitiveType::Triangles, draw_states);
+#endif
 }
 
 int32_t AmbientOcclusion::getZ() const
