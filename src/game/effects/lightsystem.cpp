@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <numbers>
+#include <optional>
 #include <ranges>
 #ifdef DECEPTUS_VRSFML
 #include <span>
@@ -308,11 +309,11 @@ sf::Vector2f mapCoordsToPixelScreenDimension(sf::RenderTarget& target, const sf:
    return pixel;
 }
 
-void LightSystem::drawOccluders(sf::RenderTarget& target) const
+void LightSystem::drawOccluders(sf::RenderTarget& target, const sf::View& view) const
 {
    if (_occluder_callback)
    {
-      _occluder_callback(target);
+      _occluder_callback(target, view);
    }
 }
 
@@ -385,6 +386,53 @@ void LightSystem::updateLightShader(sf::RenderTarget& target)
       light_id++;
    }
 }
+
+namespace
+{
+///
+/// \brief Restricts a view to the part of the screen one light can reach.
+/// \param full_view the view the level is being rendered through.
+/// \param light_bounds_px the light sprite bounds, in world pixels.
+/// \return the same view with a scissor around the light, or nothing when it is off screen.
+/// \note the occluder pass rasterises the whole visible level layer once per light, and the
+///       shadow quads project to the edge of the world, but neither can change a pixel outside
+///       the light sprite: the sprite is what the stencil is tested against. A scissor clips the
+///       rasteriser without touching the projection, so the geometry lands on exactly the same
+///       pixels it would have, and everything outside the light is never shaded.
+///
+std::optional<sf::View> clipViewToLight(const sf::View& full_view, const sf::FloatRect& light_bounds_px)
+{
+   const auto view_center = sfcompat::getViewCenter(full_view);
+   const auto view_size = sfcompat::getViewSize(full_view);
+   if (view_size.x <= 0.0f || view_size.y <= 0.0f)
+   {
+      return std::nullopt;
+   }
+
+   const auto view_left_px = view_center.x - view_size.x * 0.5f;
+   const auto view_top_px = view_center.y - view_size.y * 0.5f;
+
+   const auto left_px = std::max(light_bounds_px.position.x, view_left_px);
+   const auto top_px = std::max(light_bounds_px.position.y, view_top_px);
+   const auto right_px = std::min(light_bounds_px.position.x + light_bounds_px.size.x, view_left_px + view_size.x);
+   const auto bottom_px = std::min(light_bounds_px.position.y + light_bounds_px.size.y, view_top_px + view_size.y);
+
+   if (right_px <= left_px || bottom_px <= top_px)
+   {
+      return std::nullopt;
+   }
+
+   auto clipped_view = full_view;
+   sfcompat::setViewScissor(
+      clipped_view,
+      sf::FloatRect{
+         {(left_px - view_left_px) / view_size.x, (top_px - view_top_px) / view_size.y},
+         {(right_px - left_px) / view_size.x, (bottom_px - top_px) / view_size.y}
+      }
+   );
+   return clipped_view;
+}
+}  // namespace
 
 void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states)
 {
@@ -485,11 +533,39 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       // draw occluders and shadow quads into the stencil buffer only.
       // each draw call carries stencil_write_mode so SFML enables the stencil test
       // and writes 1 for every occluded pixel instead of disabling it (default behaviour).
-      drawOccluders(target);
+      // the occluder pass redraws the whole visible level layer and the shadow quads project to
+      // the edge of the world, but the stencil they write is only ever tested where this light
+      // sprite is drawn. clipping both to the sprite turns six full screen passes over the level
+      // geometry into six small ones - it was 7.06x of the frame's 13.82x tile overdraw
 #ifdef DECEPTUS_VRSFML
-      drawShadowQuads(target, light, shadow_candidates, states);
+      const auto& full_view = states.view;
 #else
+      const auto& full_view = target.getView();
+#endif
+      const auto clipped_view = clipViewToLight(full_view, light->_sprite->getGlobalBounds());
+      if (!clipped_view.has_value())
+      {
+         channel_index++;
+         continue;
+      }
+
+#ifndef DECEPTUS_VRSFML
+      // captured before the occluder pass, which sets the clipped view on the target itself.
+      // taking it afterwards would restore the scissored view and leak it into the light sprite
+      // and everything drawn after the loop
+      const auto restore_view = target.getView();
+#endif
+
+      drawOccluders(target, clipped_view.value());
+
+#ifdef DECEPTUS_VRSFML
+      auto shadow_states = states;
+      shadow_states.view = clipped_view.value();
+      drawShadowQuads(target, light, shadow_candidates, shadow_states);
+#else
+      target.setView(clipped_view.value());
       drawShadowQuads(target, light, shadow_candidates);
+      target.setView(restore_view);
 #endif
 
       // draw the light sprite only where stencil == 0 (not occluded).
