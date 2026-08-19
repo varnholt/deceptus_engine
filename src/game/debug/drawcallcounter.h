@@ -21,6 +21,12 @@ inline int32_t tilemap_draw_calls = 0;  //!< reset once per frame by the profile
 inline int32_t tilemap_target_switches = 0;
 inline const void* tilemap_last_target = nullptr;
 
+//! Draw calls the ambient occlusion layer issues. Kept apart from the tile map count because they
+//! come from a different system: ao is a chunked set of quads sharing one atlas, and it used to
+//! submit one call per quad - a median of 230 per frame in the catacombs against 50 for every tile
+//! map put together. That went unnoticed for as long as the counter only described tile maps.
+inline int32_t ambient_occlusion_draw_calls = 0;
+
 //! Candidates examined by Level::drawLayers while looking for things to draw at a z index. The loop
 //! runs once per z index and rescans every container each time, so this grows with the z range
 //! multiplied by the level's content rather than with what is actually on screen.
