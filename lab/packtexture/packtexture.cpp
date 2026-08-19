@@ -177,9 +177,23 @@ void PackTexture::dump()
       _texture_size = *suitable_texture_size;
    }
 
-   _log(qApp->tr("picking a %1x%1 texture").arg(_texture_size));
+   // the width has to hold a whole number of quads per row, but the height only has to reach the
+   // last row that is actually filled. emitting a square here left the catacombs atlas at
+   // 8192x8192 with just 34 of its 128 rows used - 256 MB of texture for 68 MB of content.
+   // the runtime derives a quad's column from (index * quad_width) % texture_width and its row by
+   // wrapping, so the height never enters the index maths and is free to shrink
+   const auto quads_per_row = _texture_size / _size;
+   const auto row_count = static_cast<int>((quad_count + quads_per_row - 1) / quads_per_row);
+   const auto texture_height = row_count * _size;
 
-   QImage out(_texture_size, _texture_size, _image.format());
+   _log(qApp->tr("picking a %1x%2 texture").arg(_texture_size).arg(texture_height));
+
+   QImage out(_texture_size, texture_height, _image.format());
+
+   // QImage leaves its buffer uninitialised, and the slots after the last quad are never painted,
+   // so without this the tail of the atlas is whatever was in memory - different on every run
+   out.fill(Qt::transparent);
+
    QPainter painter(&out);
    painter.setCompositionMode(QPainter::CompositionMode_Source);
 
