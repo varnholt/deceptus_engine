@@ -185,6 +185,7 @@ void PackTexture::dump()
    const auto quads_per_row = _texture_size / _size;
    const auto row_count = static_cast<int>((quad_count + quads_per_row - 1) / quads_per_row);
    const auto texture_height = row_count * _size;
+   _texture_height = texture_height;
 
    _log(qApp->tr("picking a %1x%2 texture").arg(_texture_size).arg(texture_height));
 

@@ -105,7 +105,10 @@ void MainWindow::pack()
 
    if (_pack_texture->_texture_size != 0)
    {
-      log(tr("created %1x%1px texture (%2)").arg(_pack_texture->_texture_size).arg(_pack_texture->_filename));
+      log(tr("created %1x%2px texture (%3)")
+             .arg(_pack_texture->_texture_size)
+             .arg(_pack_texture->_texture_height)
+             .arg(_pack_texture->_filename));
    }
    else
    {

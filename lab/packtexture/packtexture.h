@@ -16,6 +16,7 @@ struct PackTexture
 
    int _size = 512;
    int _texture_size = 0;
+   int _texture_height = 0;  //!< only the rows that actually hold quads, so the atlas is not square
    QImage _image;
    QString _filename;
    std::map<uint32_t, Quad> _quads;
