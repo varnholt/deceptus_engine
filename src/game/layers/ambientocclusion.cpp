@@ -8,6 +8,9 @@
 
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
+#ifdef DEVELOPMENT_MODE
+#include "game/debug/drawcallcounter.h"
+#endif
 #include "game/player/playerregistry.h"
 
 namespace
@@ -159,6 +162,10 @@ void AmbientOcclusion::draw(sf::RenderTarget& window, const sf::RenderStates& st
    window.draw(std::span<const sf::Vertex>{_batched_vertices.data(), _batched_vertices.size()}, sf::PrimitiveType::Triangles, draw_states);
 #else
    window.draw(_batched_vertices.data(), _batched_vertices.size(), sf::PrimitiveType::Triangles, draw_states);
+#endif
+
+#ifdef DEVELOPMENT_MODE
+   DrawCallCounter::ambient_occlusion_draw_calls++;
 #endif
 }
 
