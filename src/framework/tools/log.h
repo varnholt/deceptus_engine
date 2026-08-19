@@ -142,6 +142,13 @@ void registerListenerCallback(const ListenerCallback& cb);
 void registerFlushCallback(const FlushCallback& cb);
 
 ///
+/// \brief Runs every registered sink flush.
+/// \note Anything that leaves through std::exit has to call this first, or the process tears the
+///       runtime down while an asynchronous sink is still writing into it.
+///
+void flush();
+
+///
 /// \brief Formats a time point as local time in a thread-safe way.
 /// \param time_point Time point to format.
 /// \param format strftime-style format string.

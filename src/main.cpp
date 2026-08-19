@@ -6,6 +6,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -135,6 +136,16 @@ int main(int /*argc*/, char** /*argv*/)
          }
       }
    );
+
+   // main() is not the only way out: Game::shutdown, the lua error handlers and a handful of
+   // unrecoverable asset failures all call exit() directly. That skips log_thread's destructor,
+   // so the writer thread is still flushing every 100 ms while the runtime tears itself down
+   // around it - and on the switch it dies inside that write, taking every queued message with
+   // it. The log then ends mid-startup and the reason for the exit is never written, which is
+   // exactly the situation the log exists for. Registering here rather than at static init time
+   // is deliberate: exit handlers run in reverse order of registration, so this one runs before
+   // the statics that logging itself depends on are gone.
+   std::atexit([] { Log::flush(); });
 
 #ifdef DEVELOPMENT_MODE
    Log::registerListenerCallback([](const auto& time_point, auto level, const auto& message, const auto& location)
