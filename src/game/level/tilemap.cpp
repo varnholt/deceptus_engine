@@ -442,7 +442,13 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
    }
 
    states.texture = _texture_map.get();
+#ifdef DEVELOPMENT_MODE
+   DrawCallCounter::beginTileMapLayer(_layer_name + "/" + _tileset_name);
+#endif
    drawVertices(target, states);
+#ifdef DEVELOPMENT_MODE
+   DrawCallCounter::endTileMapLayer();
+#endif
 }
 
 bool TileMap::dumpToPng(const std::filesystem::path& output_path) const
@@ -549,13 +555,26 @@ void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Render
       states.blendMode = _blend_mode.value();
    }
 
+#ifdef DEVELOPMENT_MODE
+   DrawCallCounter::beginTileMapLayer(_layer_name + "/" + _tileset_name);
+#endif
    drawVertices(color, states);
 
    if (_normal_map)
    {
       states.texture = _normal_map.get();
+#ifdef DEVELOPMENT_MODE
+      DrawCallCounter::beginTileMapNormalPass();
+#endif
       drawVertices(normal, states);
+#ifdef DEVELOPMENT_MODE
+      DrawCallCounter::endTileMapNormalPass();
+#endif
    }
+
+#ifdef DEVELOPMENT_MODE
+   DrawCallCounter::endTileMapLayer();
+#endif
 }
 
 bool TileMap::isPostLighting() const

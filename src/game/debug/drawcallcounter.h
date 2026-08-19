@@ -2,7 +2,11 @@
 
 #ifdef DEVELOPMENT_MODE
 
+#include "SFML/Graphics.hpp"
+
 #include <cstdint>
+#include <string>
+#include <vector>
 
 ///
 /// \brief Counts the draw calls tile maps issue, so the profiler can report them per frame.
@@ -37,6 +41,76 @@ inline int32_t layer_scan_steps = 0;
 //! by tile geometry alone. This is a pure count, so it reads the same on hardware as in an emulator,
 //! which makes it the one way to size a fill problem without a console.
 inline int64_t tilemap_pixels_submitted = 0;
+
+//! Ambient occlusion pixels submitted per frame, each quad clipped to the view. Kept apart from the
+//! tile count because ao is a full screen overlay of thousands of alpha blended quads, so it costs
+//! fill out of proportion to the single draw call it now takes.
+inline int64_t ambient_occlusion_pixels_submitted = 0;
+
+//! Image layer pixels submitted per frame. The parallax backdrops are drawn to fill the view, so
+//! each one that is visible writes roughly a whole screen; the catacombs carry 21 of them.
+inline int64_t image_layer_pixels_submitted = 0;
+
+//! The part of tilemap_pixels_submitted that went to the normal target. Tile maps carrying a normal
+//! map are drawn a second time, so these pixels are shaded twice for one visible result - on a fill
+//! bound machine that is the difference between the two passes, whatever the draw call count says.
+inline int64_t tilemap_normal_pixels_submitted = 0;
+
+///
+/// \brief One tile map layer and the pixels it has submitted since the last report.
+///
+struct TileMapLayerPixels
+{
+   std::string _layer_name;
+   int64_t _pixels_submitted{0};
+   int32_t _draw_count{0};  //!< times the layer was drawn over the window, colour and normal pass each counting once
+};
+
+//! Per layer breakdown of the tile fill, accumulated across the report window rather than reset
+//! every frame. Answers whether a handful of layers own the overdraw or it is spread evenly across
+//! all of them, which is what decides between dropping layers and rejecting hidden fragments.
+inline std::vector<TileMapLayerPixels> tilemap_layer_pixels;
+
+///
+/// \brief Starts attributing submitted tile pixels to one layer.
+/// \param layer_name name of the tile map layer being drawn.
+///
+void beginTileMapLayer(const std::string& layer_name);
+
+///
+/// \brief Stops attributing submitted tile pixels to a layer.
+///
+void endTileMapLayer();
+
+///
+/// \brief Starts attributing submitted tile pixels to the normal pass.
+///
+void beginTileMapNormalPass();
+
+///
+/// \brief Stops attributing submitted tile pixels to the normal pass.
+///
+void endTileMapNormalPass();
+
+///
+/// \brief Adds the on-screen area of a batch of ambient occlusion quads.
+/// \param target render target the batch went to.
+/// \param states render states the batch was drawn with.
+/// \param batched_vertices the batch itself, two triangles per quad.
+///
+void countAmbientOcclusionPixels(
+   const sf::RenderTarget& target,
+   const sf::RenderStates& states,
+   const std::vector<sf::Vertex>& batched_vertices
+);
+
+///
+/// \brief Adds the on-screen area of one image layer sprite.
+/// \param target render target the sprite went to.
+/// \param states render states the sprite was drawn with; carries the parallax view when there is one.
+/// \param sprite the sprite that was drawn.
+///
+void countImageLayerPixels(const sf::RenderTarget& target, const sf::RenderStates& states, const sf::Sprite& sprite);
 }  // namespace DrawCallCounter
 
 #endif  // DEVELOPMENT_MODE

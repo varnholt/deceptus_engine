@@ -166,6 +166,7 @@ void AmbientOcclusion::draw(sf::RenderTarget& window, const sf::RenderStates& st
 
 #ifdef DEVELOPMENT_MODE
    DrawCallCounter::ambient_occlusion_draw_calls++;
+   DrawCallCounter::countAmbientOcclusionPixels(window, draw_states, _batched_vertices);
 #endif
 }
 

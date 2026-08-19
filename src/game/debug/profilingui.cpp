@@ -12,10 +12,12 @@
 #pragma warning(pop)
 
 #include "framework/tools/log.h"
+#include "game/config/gameconfiguration.h"
 
 #include <algorithm>
 #include <iomanip>
 #include <numeric>
+#include <ranges>
 #include <sstream>
 
 ProfilingUi::ProfilingUi() : _render_window(std::make_unique<sf::RenderWindow>(sf::VideoMode({900, 900}), "deceptus profiling"))
@@ -95,6 +97,10 @@ void logDrawCounts(
    const float* ambient_occlusion_draw_calls,
    const float* target_switches,
    const float* scan_steps,
+   const float* tilemap_pixels,
+   const float* ambient_occlusion_pixels,
+   const float* image_layer_pixels,
+   const float* tilemap_normal_pixels,
    int32_t count
 )
 {
@@ -109,8 +115,48 @@ void logDrawCounts(
    counts_line << std::fixed << std::setprecision(1) << "profiling: tilemap draw calls per frame " << average(draw_calls)
                << " | ao draw calls " << average(ambient_occlusion_draw_calls) << " | target switches " << average(target_switches)
                << " | layer scan steps " << average(scan_steps);
+
+   // a pixel count is machine independent, so the overdraw split reads the same here as on the
+   // console. that is what makes a fill cut measurable on a desktop that is not fill bound
+   const auto view_area = static_cast<float>(GameConfiguration::getInstance()._view_width * GameConfiguration::getInstance()._view_height);
+   if (view_area > 0.0f)
+   {
+      counts_line << std::setprecision(2) << " | overdraw tiles " << (average(tilemap_pixels) / view_area) << "x (normal pass "
+                  << (average(tilemap_normal_pixels) / view_area) << "x), ao " << (average(ambient_occlusion_pixels) / view_area)
+                  << "x, image layers " << (average(image_layer_pixels) / view_area) << "x, total "
+                  << ((average(tilemap_pixels) + average(ambient_occlusion_pixels) + average(image_layer_pixels)) / view_area) << "x";
+   }
    Log::Info() << counts_line.str();
 }
+// the per layer fill breakdown, worst first. one line rather than one per layer: on the console
+// every log line is a write to the sd card. the window is the report interval, so the totals
+// are divided by the frames in it before being held against the view
+void logTileMapLayerFill(int32_t frames, float view_area)
+{
+   if (DrawCallCounter::tilemap_layer_pixels.empty() || frames <= 0 || view_area <= 0.0f)
+   {
+      return;
+   }
+
+   auto layers = DrawCallCounter::tilemap_layer_pixels;
+   std::ranges::sort(layers, [](const auto& lhs, const auto& rhs) { return lhs._pixels_submitted > rhs._pixels_submitted; });
+
+   constexpr auto reported_layer_count = 8u;
+   std::ostringstream layer_line;
+   layer_line << std::fixed << std::setprecision(2) << "profiling: tile fill per layer |";
+   for (auto layer_index = 0u; layer_index < std::min<size_t>(reported_layer_count, layers.size()); layer_index++)
+   {
+      const auto& layer = layers[layer_index];
+      const auto overdraw = static_cast<float>(layer._pixels_submitted) / static_cast<float>(frames) / view_area;
+      const auto draws_per_frame = static_cast<float>(layer._draw_count) / static_cast<float>(frames);
+      layer_line << " " << layer._layer_name << " " << overdraw << "x in " << draws_per_frame << " draws |";
+   }
+   layer_line << " " << layers.size() << " layers total";
+   Log::Info() << layer_line.str();
+
+   DrawCallCounter::tilemap_layer_pixels.clear();
+}
+
 }  // namespace
 
 void ProfilingUi::draw()
@@ -193,7 +239,14 @@ void ProfilingUi::draw()
             _ambient_occlusion_draw_calls.data(),
             _tilemap_target_switches.data(),
             _layer_scan_steps.data(),
+            _tilemap_pixels_submitted.data(),
+            _ambient_occlusion_pixels_submitted.data(),
+            _image_layer_pixels_submitted.data(),
+            _tilemap_normal_pixels_submitted.data(),
             _samples_written
+         );
+         logTileMapLayerFill(
+            section_frames, static_cast<float>(GameConfiguration::getInstance()._view_width * GameConfiguration::getInstance()._view_height)
          );
          _render_section_timings.clear();
          _render_section_frames = 0;
@@ -289,10 +342,16 @@ void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Tim
    DrawCallCounter::tilemap_draw_calls = 0;
    _layer_scan_steps[_write_index] = static_cast<float>(DrawCallCounter::layer_scan_steps);
    _tilemap_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::tilemap_pixels_submitted);
+   _ambient_occlusion_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::ambient_occlusion_pixels_submitted);
+   _tilemap_normal_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::tilemap_normal_pixels_submitted);
+   _image_layer_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::image_layer_pixels_submitted);
    DrawCallCounter::tilemap_target_switches = 0;
    DrawCallCounter::tilemap_last_target = nullptr;
    DrawCallCounter::layer_scan_steps = 0;
    DrawCallCounter::tilemap_pixels_submitted = 0;
+   DrawCallCounter::ambient_occlusion_pixels_submitted = 0;
+   DrawCallCounter::tilemap_normal_pixels_submitted = 0;
+   DrawCallCounter::image_layer_pixels_submitted = 0;
    _write_index = (_write_index + 1) % sample_count;
    _samples_written = std::min(_samples_written + 1, sample_count);
 }
@@ -348,6 +407,7 @@ bool ProfilingUi::isMechanismProfilingWanted() const
 #include <algorithm>
 #include <iomanip>
 #include <numeric>
+#include <ranges>
 #include <sstream>
 
 namespace
@@ -380,6 +440,35 @@ std::string formatSummary(const char* label, const TimingSummary& summary)
    out_stream << std::fixed << std::setprecision(2) << label << " min " << summary.minimum_ms << " avg " << summary.average_ms << " max "
               << summary.maximum_ms;
    return out_stream.str();
+}
+
+// the per layer fill breakdown, worst first. one line rather than one per layer: on the console
+// every log line is a write to the sd card. the window is the report interval, so the totals
+// are divided by the frames in it before being held against the view
+void logTileMapLayerFill(int32_t frames, float view_area)
+{
+   if (DrawCallCounter::tilemap_layer_pixels.empty() || frames <= 0 || view_area <= 0.0f)
+   {
+      return;
+   }
+
+   auto layers = DrawCallCounter::tilemap_layer_pixels;
+   std::ranges::sort(layers, [](const auto& lhs, const auto& rhs) { return lhs._pixels_submitted > rhs._pixels_submitted; });
+
+   constexpr auto reported_layer_count = 8u;
+   std::ostringstream layer_line;
+   layer_line << std::fixed << std::setprecision(2) << "profiling: tile fill per layer |";
+   for (auto layer_index = 0u; layer_index < std::min<size_t>(reported_layer_count, layers.size()); layer_index++)
+   {
+      const auto& layer = layers[layer_index];
+      const auto overdraw = static_cast<float>(layer._pixels_submitted) / static_cast<float>(frames) / view_area;
+      const auto draws_per_frame = static_cast<float>(layer._draw_count) / static_cast<float>(frames);
+      layer_line << " " << layer._layer_name << " " << overdraw << "x in " << draws_per_frame << " draws |";
+   }
+   layer_line << " " << layers.size() << " layers total";
+   Log::Info() << layer_line.str();
+
+   DrawCallCounter::tilemap_layer_pixels.clear();
 }
 
 }  // namespace
@@ -436,9 +525,22 @@ void ProfilingUi::draw()
    // offline from the tilesets
    const auto view_area = GameConfiguration::getInstance()._view_width * GameConfiguration::getInstance()._view_height;
    const auto pixel_summary = summarizeSamples(_tilemap_pixels_submitted.data(), _samples_written);
+   const auto ambient_occlusion_pixel_summary = summarizeSamples(_ambient_occlusion_pixels_submitted.data(), _samples_written);
+   const auto tilemap_normal_pixel_summary = summarizeSamples(_tilemap_normal_pixels_submitted.data(), _samples_written);
+   const auto image_layer_pixel_summary = summarizeSamples(_image_layer_pixels_submitted.data(), _samples_written);
    if (view_area > 0)
    {
-      draw_call_line << " | tile overdraw " << std::setprecision(2) << (pixel_summary.average_ms / static_cast<float>(view_area)) << "x";
+      // one screen written once is 1.0x, so these add up to how many times the frame pays for the
+      // average pixel. splitting them by source is what turns "the frame is fill bound" into a
+      // sorted list of what to cut
+      const auto view_area_f = static_cast<float>(view_area);
+      draw_call_line << std::setprecision(2) << " | overdraw tiles " << (pixel_summary.average_ms / view_area_f) << "x (normal pass "
+                     << (tilemap_normal_pixel_summary.average_ms / view_area_f) << "x), ao "
+                     << (ambient_occlusion_pixel_summary.average_ms / view_area_f) << "x, image layers "
+                     << (image_layer_pixel_summary.average_ms / view_area_f) << "x, total "
+                     << ((pixel_summary.average_ms + ambient_occlusion_pixel_summary.average_ms + image_layer_pixel_summary.average_ms) /
+                         view_area_f)
+                     << "x";
    }
    Log::Info() << draw_call_line.str();
 
@@ -471,6 +573,8 @@ void ProfilingUi::draw()
                    << (draw_summary.average_ms - section_total_ms);
       Log::Info() << section_line.str();
    }
+
+   logTileMapLayerFill(std::max(_render_section_frames, 1), static_cast<float>(view_area));
 
    for (const auto& sample : _mechanism_timings)
    {
@@ -516,10 +620,16 @@ void ProfilingUi::recordFrame(sf::Time frame_time, sf::Time update_time, sf::Tim
    DrawCallCounter::tilemap_draw_calls = 0;
    _layer_scan_steps[_write_index] = static_cast<float>(DrawCallCounter::layer_scan_steps);
    _tilemap_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::tilemap_pixels_submitted);
+   _ambient_occlusion_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::ambient_occlusion_pixels_submitted);
+   _tilemap_normal_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::tilemap_normal_pixels_submitted);
+   _image_layer_pixels_submitted[_write_index] = static_cast<float>(DrawCallCounter::image_layer_pixels_submitted);
    DrawCallCounter::tilemap_target_switches = 0;
    DrawCallCounter::tilemap_last_target = nullptr;
    DrawCallCounter::layer_scan_steps = 0;
    DrawCallCounter::tilemap_pixels_submitted = 0;
+   DrawCallCounter::ambient_occlusion_pixels_submitted = 0;
+   DrawCallCounter::tilemap_normal_pixels_submitted = 0;
+   DrawCallCounter::image_layer_pixels_submitted = 0;
    _write_index = (_write_index + 1) % sample_count;
    _samples_written = std::min(_samples_written + 1, sample_count);
 }
