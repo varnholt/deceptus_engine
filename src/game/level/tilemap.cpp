@@ -554,7 +554,13 @@ void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Render
    if (_normal_map)
    {
       states.texture = _normal_map.get();
+#ifdef DEVELOPMENT_MODE
+      DrawCallCounter::beginTileMapNormalPass();
+#endif
       drawVertices(normal, states);
+#ifdef DEVELOPMENT_MODE
+      DrawCallCounter::endTileMapNormalPass();
+#endif
    }
 }
 

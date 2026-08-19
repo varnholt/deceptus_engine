@@ -52,7 +52,21 @@ visibleArea(const sf::Vector2f& view_center, const sf::Vector2f& view_size, floa
    return static_cast<int64_t>(visible_width_px * visible_height_px);
 }
 
+//! tilemap_pixels_submitted as it stood when the normal pass started, so the pass can be measured
+//! without threading a flag through TileMap::drawVertices
+int64_t tilemap_pixels_before_normal_pass = 0;
+
 }  // namespace
+
+void DrawCallCounter::beginTileMapNormalPass()
+{
+   tilemap_pixels_before_normal_pass = tilemap_pixels_submitted;
+}
+
+void DrawCallCounter::endTileMapNormalPass()
+{
+   tilemap_normal_pixels_submitted += tilemap_pixels_submitted - tilemap_pixels_before_normal_pass;
+}
 
 void DrawCallCounter::countAmbientOcclusionPixels(
    const sf::RenderTarget& target,

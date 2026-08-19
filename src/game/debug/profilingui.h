@@ -53,6 +53,7 @@ private:
    std::array<float, sample_count> _layer_scan_steps{};                    //!< candidates the z loop examined that frame
    std::array<float, sample_count> _tilemap_pixels_submitted{};            //!< tile pixels submitted that frame, for the overdraw factor
    std::array<float, sample_count> _ambient_occlusion_pixels_submitted{};  //!< ao pixels submitted that frame
+   std::array<float, sample_count> _tilemap_normal_pixels_submitted{};     //!< the normal pass share of the tile pixels
    std::array<float, sample_count> _image_layer_pixels_submitted{};        //!< image layer pixels submitted that frame
    sf::Clock _wall_clock;
    bool _wall_clock_primed{false};

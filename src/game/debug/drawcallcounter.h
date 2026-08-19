@@ -50,6 +50,21 @@ inline int64_t ambient_occlusion_pixels_submitted = 0;
 //! each one that is visible writes roughly a whole screen; the catacombs carry 21 of them.
 inline int64_t image_layer_pixels_submitted = 0;
 
+//! The part of tilemap_pixels_submitted that went to the normal target. Tile maps carrying a normal
+//! map are drawn a second time, so these pixels are shaded twice for one visible result - on a fill
+//! bound machine that is the difference between the two passes, whatever the draw call count says.
+inline int64_t tilemap_normal_pixels_submitted = 0;
+
+///
+/// \brief Starts attributing submitted tile pixels to the normal pass.
+///
+void beginTileMapNormalPass();
+
+///
+/// \brief Stops attributing submitted tile pixels to the normal pass.
+///
+void endTileMapNormalPass();
+
 ///
 /// \brief Adds the on-screen area of a batch of ambient occlusion quads.
 /// \param target render target the batch went to.
