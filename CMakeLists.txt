@@ -208,6 +208,8 @@ set(GAME_FILES
     src/game/debug/debugdraw.h
     src/game/debug/debugdrawstates.cpp
     src/game/debug/debugdrawstates.h
+    src/game/debug/drawcallcounter.cpp
+    src/game/debug/drawcallcounter.h
     src/game/debug/logui.cpp
     src/game/debug/logui.h
     src/game/debug/mechanismsample.h

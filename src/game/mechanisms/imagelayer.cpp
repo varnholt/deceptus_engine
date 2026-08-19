@@ -7,6 +7,10 @@
 #include "game/io/texturepool.h"
 #include "game/player/playerregistry.h"
 
+#ifdef DEVELOPMENT_MODE
+#include "game/debug/drawcallcounter.h"
+#endif
+
 ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 {
 }
@@ -51,6 +55,10 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
    target.draw(*_sprite, {_blend_mode});
 
+#ifdef DEVELOPMENT_MODE
+   DrawCallCounter::countImageLayerPixels(target, {_blend_mode}, *_sprite);
+#endif
+
    if (_parallax_settings.has_value())
    {
       target.setView(level_view);
@@ -76,7 +84,11 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const 
 
    if (_parallax_settings.has_value())
    {
-      target.draw(*_sprite, sf::RenderStates{.blendMode = _blend_mode, .view = _parallax_view, .texture = texture});
+      const sf::RenderStates parallax_states{.blendMode = _blend_mode, .view = _parallax_view, .texture = texture};
+      target.draw(*_sprite, parallax_states);
+#ifdef DEVELOPMENT_MODE
+      DrawCallCounter::countImageLayerPixels(target, parallax_states, *_sprite);
+#endif
    }
    else
    {
@@ -84,6 +96,9 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const 
       draw_states.blendMode = _blend_mode;
       draw_states.texture = texture;
       target.draw(*_sprite, draw_states);
+#ifdef DEVELOPMENT_MODE
+      DrawCallCounter::countImageLayerPixels(target, draw_states, *_sprite);
+#endif
    }
 #else
    (void)states;
