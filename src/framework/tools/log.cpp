@@ -117,6 +117,14 @@ void Log::error(const std::string_view& message, const std::source_location& sou
    log(Level::Error, message, source_location);
 }
 
+void Log::flush()
+{
+   for (const auto& flush_callback : _flush_callbacks)
+   {
+      flush_callback();
+   }
+}
+
 void Log::fatal(const std::string_view& message, const std::source_location& source_location)
 {
    log(Level::Fatal, message, source_location);
@@ -124,10 +132,7 @@ void Log::fatal(const std::string_view& message, const std::source_location& sou
    // flush every sink before leaving. std::exit unwinds the runtime while an asynchronous sink is
    // still writing, which on the switch surfaces as a null dereference inside armGetTls and loses
    // the one message that would have explained the exit
-   for (const auto& flush_callback : _flush_callbacks)
-   {
-      flush_callback();
-   }
+   flush();
 
    std::exit(-1);
 }
