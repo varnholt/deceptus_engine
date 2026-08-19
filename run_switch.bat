@@ -40,7 +40,6 @@ if not exist "%LOG_DIRECTORY%" mkdir "%LOG_DIRECTORY%"
 
 for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd__HH-mm-ss"') do set STAMP=%%t
 set LOG_FILE=%LOG_DIRECTORY%\ryujinx_%STAMP%.txt
-yujinx_%STAMP%.txt
 
 echo launching %NRO%
 echo emulator output: %LOG_FILE%
