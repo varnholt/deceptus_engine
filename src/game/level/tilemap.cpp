@@ -392,6 +392,9 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
          const auto tile_count = static_cast<float>(block_vertex_count / 6);
          DrawCallCounter::tilemap_pixels_submitted +=
             static_cast<int64_t>(tile_count * visible_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y));
+         DrawCallCounter::tilemap_tiles_submitted += static_cast<int64_t>(tile_count * visible_fraction);
+         DrawCallCounter::tilemap_blocks_drawn++;
+         DrawCallCounter::tilemap_visible_fraction_sum += visible_fraction;
 #endif
       }
    }
@@ -417,10 +420,10 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
 
 #ifdef DEVELOPMENT_MODE
    DrawCallCounter::tilemap_draw_calls++;
-   // the animated tiles are collected around the player block rather than around the view, so this
-   // adds tiles that are off screen. it is an upper bound, unlike the block term above
-   DrawCallCounter::tilemap_pixels_submitted +=
-      static_cast<int64_t>(_vertices_animated.getVertexCount() / 6) * _tile_size_px.x * _tile_size_px.y;
+   if (animated_vertex_count > 0)
+   {
+      DrawCallCounter::countAnimatedTilePixels(view, &_vertices_animated[0], animated_vertex_count);
+   }
 #endif
 }
 

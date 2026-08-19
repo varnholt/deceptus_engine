@@ -53,6 +53,30 @@ visibleArea(const sf::Vector2f& view_center, const sf::Vector2f& view_size, floa
    return static_cast<int64_t>(visible_width_px * visible_height_px);
 }
 
+///
+/// \brief Sums the on-screen area of a run of axis aligned quads.
+/// \param view_center centre of the view the quads were drawn through.
+/// \param view_size size of that view.
+/// \param vertices first vertex of the run.
+/// \param vertex_count how many vertices the run holds.
+/// \return the visible area of every whole quad in the run.
+/// \note two triangles per quad, so six vertices: top left, top right, bottom right, then top
+///       left, bottom right, bottom left. Both the ao atlas and the animated tiles build them
+///       that way.
+///
+int64_t
+sumVisibleQuadArea(const sf::Vector2f& view_center, const sf::Vector2f& view_size, const sf::Vertex* vertices, std::size_t vertex_count)
+{
+   int64_t visible_px = 0;
+   for (std::size_t vertex_index = 0; vertex_index + 6 <= vertex_count; vertex_index += 6)
+   {
+      const auto& top_left = vertices[vertex_index].position;
+      const auto& bottom_right = vertices[vertex_index + 2].position;
+      visible_px += visibleArea(view_center, view_size, top_left.x, top_left.y, bottom_right.x, bottom_right.y);
+   }
+   return visible_px;
+}
+
 //! tilemap_pixels_submitted as it stood when the normal pass started, so the pass can be measured
 //! without threading a flag through TileMap::drawVertices
 int64_t tilemap_pixels_before_normal_pass = 0;
@@ -60,6 +84,9 @@ int64_t tilemap_pixels_before_normal_pass = 0;
 //! the same trick one level up, for the layer currently being drawn. held by value: the caller
 //! may well pass a temporary, and a pointer to one dangles the moment the call returns
 int64_t tilemap_pixels_before_layer = 0;
+int64_t tilemap_tiles_before_layer = 0;
+int32_t tilemap_blocks_before_layer = 0;
+double tilemap_fraction_before_layer = 0.0;
 std::string current_layer_name;
 bool layer_attribution_active = false;
 
@@ -70,6 +97,9 @@ void DrawCallCounter::beginTileMapLayer(const std::string& layer_name)
    current_layer_name = layer_name;
    layer_attribution_active = true;
    tilemap_pixels_before_layer = tilemap_pixels_submitted;
+   tilemap_tiles_before_layer = tilemap_tiles_submitted;
+   tilemap_blocks_before_layer = tilemap_blocks_drawn;
+   tilemap_fraction_before_layer = tilemap_visible_fraction_sum;
 }
 
 void DrawCallCounter::endTileMapLayer()
@@ -83,6 +113,9 @@ void DrawCallCounter::endTileMapLayer()
    layer_attribution_active = false;
 
    const auto submitted = tilemap_pixels_submitted - tilemap_pixels_before_layer;
+   const auto tiles = tilemap_tiles_submitted - tilemap_tiles_before_layer;
+   const auto blocks = tilemap_blocks_drawn - tilemap_blocks_before_layer;
+   const auto fraction = tilemap_visible_fraction_sum - tilemap_fraction_before_layer;
    if (submitted == 0)
    {
       return;
@@ -95,12 +128,15 @@ void DrawCallCounter::endTileMapLayer()
 
    if (layer_it == tilemap_layer_pixels.end())
    {
-      tilemap_layer_pixels.push_back({layer_name, submitted, 1});
+      tilemap_layer_pixels.push_back({layer_name, submitted, 1, tiles, blocks, fraction});
       return;
    }
 
    layer_it->_pixels_submitted += submitted;
    layer_it->_draw_count++;
+   layer_it->_tiles_submitted += tiles;
+   layer_it->_blocks_drawn += blocks;
+   layer_it->_visible_fraction_sum += fraction;
 }
 
 void DrawCallCounter::beginTileMapNormalPass()
@@ -111,6 +147,11 @@ void DrawCallCounter::beginTileMapNormalPass()
 void DrawCallCounter::endTileMapNormalPass()
 {
    tilemap_normal_pixels_submitted += tilemap_pixels_submitted - tilemap_pixels_before_normal_pass;
+}
+
+void DrawCallCounter::countAnimatedTilePixels(const sf::View& view, const sf::Vertex* vertices, std::size_t vertex_count)
+{
+   tilemap_pixels_submitted += sumVisibleQuadArea(sfcompat::getViewCenter(view), sfcompat::getViewSize(view), vertices, vertex_count);
 }
 
 void DrawCallCounter::countAmbientOcclusionPixels(
@@ -125,17 +166,8 @@ void DrawCallCounter::countAmbientOcclusionPixels(
 
    // the chunks are gathered around the player rather than around the view, so a good part of the
    // batch never reaches the screen. clipping each quad is what keeps this comparable to the tile
-   // count, which is measured the same way.
-   //
-   // two triangles per quad, so six vertices: top left, top right, bottom right, then top left,
-   // bottom right, bottom left - see how AmbientOcclusion::load builds them
-   for (auto vertex_index = 0u; vertex_index + 6 <= batched_vertices.size(); vertex_index += 6)
-   {
-      const auto& top_left = batched_vertices[vertex_index].position;
-      const auto& bottom_right = batched_vertices[vertex_index + 2].position;
-
-      ambient_occlusion_pixels_submitted += visibleArea(view_center, view_size, top_left.x, top_left.y, bottom_right.x, bottom_right.y);
-   }
+   // count, which is measured the same way
+   ambient_occlusion_pixels_submitted += sumVisibleQuadArea(view_center, view_size, batched_vertices.data(), batched_vertices.size());
 }
 
 void DrawCallCounter::countImageLayerPixels(const sf::RenderTarget& target, const sf::RenderStates& states, const sf::Sprite& sprite)

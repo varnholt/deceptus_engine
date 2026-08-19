@@ -42,6 +42,16 @@ inline int32_t layer_scan_steps = 0;
 //! which makes it the one way to size a fill problem without a console.
 inline int64_t tilemap_pixels_submitted = 0;
 
+//! tiles submitted this frame, the same count without the per tile area factor
+inline int64_t tilemap_tiles_submitted = 0;
+
+//! blocks handed to the rasteriser this frame, and the sum of how much of each the view covers.
+//! the fractions have to add up to view area over block area - about 1.56 for a 640x360 view and
+//! 384 px blocks. anything above that means block rectangles are overlapping, i.e. the bounds the
+//! cull derives do not match where the block content actually is
+inline int32_t tilemap_blocks_drawn = 0;
+inline double tilemap_visible_fraction_sum = 0.0;
+
 //! Ambient occlusion pixels submitted per frame, each quad clipped to the view. Kept apart from the
 //! tile count because ao is a full screen overlay of thousands of alpha blended quads, so it costs
 //! fill out of proportion to the single draw call it now takes.
@@ -63,7 +73,10 @@ struct TileMapLayerPixels
 {
    std::string _layer_name;
    int64_t _pixels_submitted{0};
-   int32_t _draw_count{0};  //!< times the layer was drawn over the window, colour and normal pass each counting once
+   int32_t _draw_count{0};             //!< times the layer was drawn over the window, colour and normal pass each counting once
+   int64_t _tiles_submitted{0};        //!< tiles handed to the rasteriser, before any per tile area
+   int32_t _blocks_drawn{0};           //!< blocks this layer submitted over the window
+   double _visible_fraction_sum{0.0};  //!< how much of each of them the view covered, summed
 };
 
 //! Per layer breakdown of the tile fill, accumulated across the report window rather than reset
@@ -91,6 +104,17 @@ void beginTileMapNormalPass();
 /// \brief Stops attributing submitted tile pixels to the normal pass.
 ///
 void endTileMapNormalPass();
+
+///
+/// \brief Adds the on-screen area of the animated tiles submitted with a tile map batch.
+/// \param view the view the batch was drawn through.
+/// \param vertices first vertex of the animated run, two triangles per tile.
+/// \param vertex_count how many vertices the run holds.
+/// \note the animated tiles are gathered around the player block rather than around the view, so
+///       unlike the static blocks they are not culled before submission. Clipping them here is what
+///       keeps the layer totals comparable to each other.
+///
+void countAnimatedTilePixels(const sf::View& view, const sf::Vertex* vertices, std::size_t vertex_count);
 
 ///
 /// \brief Adds the on-screen area of a batch of ambient occlusion quads.
