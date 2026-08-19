@@ -149,7 +149,9 @@ void logTileMapLayerFill(int32_t frames, float view_area)
       const auto& layer = layers[layer_index];
       const auto overdraw = static_cast<float>(layer._pixels_submitted) / static_cast<float>(frames) / view_area;
       const auto draws_per_frame = static_cast<float>(layer._draw_count) / static_cast<float>(frames);
-      layer_line << " " << layer._layer_name << " " << overdraw << "x in " << draws_per_frame << " draws |";
+      const auto tiles_per_frame = static_cast<float>(layer._tiles_submitted) / static_cast<float>(frames);
+      layer_line << " " << layer._layer_name << " " << overdraw << "x in " << draws_per_frame << " draws, "
+                 << static_cast<int32_t>(tiles_per_frame) << " tiles |";
    }
    layer_line << " " << layers.size() << " layers total";
    Log::Info() << layer_line.str();
@@ -463,7 +465,9 @@ void logTileMapLayerFill(int32_t frames, float view_area)
       const auto& layer = layers[layer_index];
       const auto overdraw = static_cast<float>(layer._pixels_submitted) / static_cast<float>(frames) / view_area;
       const auto draws_per_frame = static_cast<float>(layer._draw_count) / static_cast<float>(frames);
-      layer_line << " " << layer._layer_name << " " << overdraw << "x in " << draws_per_frame << " draws |";
+      const auto tiles_per_frame = static_cast<float>(layer._tiles_submitted) / static_cast<float>(frames);
+      layer_line << " " << layer._layer_name << " " << overdraw << "x in " << draws_per_frame << " draws, "
+                 << static_cast<int32_t>(tiles_per_frame) << " tiles |";
    }
    layer_line << " " << layers.size() << " layers total";
    Log::Info() << layer_line.str();
