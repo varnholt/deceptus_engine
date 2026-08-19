@@ -58,6 +58,13 @@ private:
    };
 
    ///
+   /// \brief stops the background loop and joins it.
+   /// \note called before std::exit so the runtime cannot be torn down under a thread that is
+   ///       still writing to the file.
+   ///
+   void stop();
+
+   ///
    /// \brief runs the background loop and flushes periodically.
    ///
    void run();
