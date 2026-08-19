@@ -393,6 +393,8 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
          DrawCallCounter::tilemap_pixels_submitted +=
             static_cast<int64_t>(tile_count * visible_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y));
          DrawCallCounter::tilemap_tiles_submitted += static_cast<int64_t>(tile_count * visible_fraction);
+         DrawCallCounter::tilemap_blocks_drawn++;
+         DrawCallCounter::tilemap_visible_fraction_sum += visible_fraction;
 #endif
       }
    }

@@ -45,6 +45,13 @@ inline int64_t tilemap_pixels_submitted = 0;
 //! tiles submitted this frame, the same count without the per tile area factor
 inline int64_t tilemap_tiles_submitted = 0;
 
+//! blocks handed to the rasteriser this frame, and the sum of how much of each the view covers.
+//! the fractions have to add up to view area over block area - about 1.56 for a 640x360 view and
+//! 384 px blocks. anything above that means block rectangles are overlapping, i.e. the bounds the
+//! cull derives do not match where the block content actually is
+inline int32_t tilemap_blocks_drawn = 0;
+inline double tilemap_visible_fraction_sum = 0.0;
+
 //! Ambient occlusion pixels submitted per frame, each quad clipped to the view. Kept apart from the
 //! tile count because ao is a full screen overlay of thousands of alpha blended quads, so it costs
 //! fill out of proportion to the single draw call it now takes.
@@ -66,8 +73,10 @@ struct TileMapLayerPixels
 {
    std::string _layer_name;
    int64_t _pixels_submitted{0};
-   int32_t _draw_count{0};       //!< times the layer was drawn over the window, colour and normal pass each counting once
-   int64_t _tiles_submitted{0};  //!< tiles handed to the rasteriser, before any per tile area
+   int32_t _draw_count{0};             //!< times the layer was drawn over the window, colour and normal pass each counting once
+   int64_t _tiles_submitted{0};        //!< tiles handed to the rasteriser, before any per tile area
+   int32_t _blocks_drawn{0};           //!< blocks this layer submitted over the window
+   double _visible_fraction_sum{0.0};  //!< how much of each of them the view covered, summed
 };
 
 //! Per layer breakdown of the tile fill, accumulated across the report window rather than reset

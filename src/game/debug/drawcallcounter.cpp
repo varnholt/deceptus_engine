@@ -85,6 +85,8 @@ int64_t tilemap_pixels_before_normal_pass = 0;
 //! may well pass a temporary, and a pointer to one dangles the moment the call returns
 int64_t tilemap_pixels_before_layer = 0;
 int64_t tilemap_tiles_before_layer = 0;
+int32_t tilemap_blocks_before_layer = 0;
+double tilemap_fraction_before_layer = 0.0;
 std::string current_layer_name;
 bool layer_attribution_active = false;
 
@@ -96,6 +98,8 @@ void DrawCallCounter::beginTileMapLayer(const std::string& layer_name)
    layer_attribution_active = true;
    tilemap_pixels_before_layer = tilemap_pixels_submitted;
    tilemap_tiles_before_layer = tilemap_tiles_submitted;
+   tilemap_blocks_before_layer = tilemap_blocks_drawn;
+   tilemap_fraction_before_layer = tilemap_visible_fraction_sum;
 }
 
 void DrawCallCounter::endTileMapLayer()
@@ -110,6 +114,8 @@ void DrawCallCounter::endTileMapLayer()
 
    const auto submitted = tilemap_pixels_submitted - tilemap_pixels_before_layer;
    const auto tiles = tilemap_tiles_submitted - tilemap_tiles_before_layer;
+   const auto blocks = tilemap_blocks_drawn - tilemap_blocks_before_layer;
+   const auto fraction = tilemap_visible_fraction_sum - tilemap_fraction_before_layer;
    if (submitted == 0)
    {
       return;
@@ -122,13 +128,15 @@ void DrawCallCounter::endTileMapLayer()
 
    if (layer_it == tilemap_layer_pixels.end())
    {
-      tilemap_layer_pixels.push_back({layer_name, submitted, 1, tiles});
+      tilemap_layer_pixels.push_back({layer_name, submitted, 1, tiles, blocks, fraction});
       return;
    }
 
    layer_it->_pixels_submitted += submitted;
    layer_it->_draw_count++;
    layer_it->_tiles_submitted += tiles;
+   layer_it->_blocks_drawn += blocks;
+   layer_it->_visible_fraction_sum += fraction;
 }
 
 void DrawCallCounter::beginTileMapNormalPass()
