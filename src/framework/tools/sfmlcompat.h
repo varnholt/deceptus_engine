@@ -57,6 +57,18 @@ inline sf::Vector2f getViewSize(const sf::View& view)
 #endif
 }
 
+/// \brief restricts a view's rendering to part of the target, as a fraction of it.
+/// \note the scissor clips the rasteriser without touching the projection, so geometry lands on
+///       exactly the same pixels as it would through the unrestricted view.
+inline void setViewScissor(sf::View& view, const sf::FloatRect& scissor)
+{
+#ifdef DECEPTUS_VRSFML
+   view.scissor = scissor;
+#else
+   view.setScissor(scissor);
+#endif
+}
+
 /// \brief sets the origin of a transformable object.
 template <typename Drawable>
 inline void setOrigin(Drawable& drawable, const sf::Vector2f& origin)

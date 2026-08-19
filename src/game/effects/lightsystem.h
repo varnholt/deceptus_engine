@@ -22,7 +22,7 @@ class LightSystem
 {
 public:
    /// \brief callback to render geometry that occludes lights into the stencil buffer.
-   using OccluderDrawCallback = std::function<void(sf::RenderTarget& target)>;
+   using OccluderDrawCallback = std::function<void(sf::RenderTarget& target, const sf::View& view)>;
    /// \brief represents one light source instance loaded from level data.
    struct LightInstance : public GameNode
    {
@@ -143,7 +143,7 @@ private:
 
    /// \brief renders level occluder geometry to the stencil buffer before shadow/light passes.
    /// \param target render target with active stencil context.
-   void drawOccluders(sf::RenderTarget& target) const;
+   void drawOccluders(sf::RenderTarget& target, const sf::View& view) const;
 
    /// \brief refreshes shader uniforms for active lights, ambient color, and target resolution.
    /// \param target render target.

@@ -354,7 +354,7 @@ protected:
 
    /// \brief draws z=24 tilemap geometry to the stencil buffer for light occlusion.
    /// \param target render target with active stencil context.
-   void drawLightOccluders(sf::RenderTarget& target);
+   void drawLightOccluders(sf::RenderTarget& target, const sf::View& view);
 
    /// \brief finalizes and displays intermediate level and normal render textures.
    void displayFinalTextures();

@@ -206,7 +206,7 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    _light_system = std::make_shared<LightSystem>();
 
    // set up occluder callback for light occlusion (z=24 "level" layer)
-   _light_system->setOccluderCallback([this](sf::RenderTarget& target) { drawLightOccluders(target); });
+   _light_system->setOccluderCallback([this](sf::RenderTarget& target, const sf::View& view) { drawLightOccluders(target, view); });
 
    // add raycast light for player
    nlohmann::json player_light_config;
@@ -1382,16 +1382,20 @@ void Level::drawDebugInformation()
    }
 }
 
-void Level::drawLightOccluders(sf::RenderTarget& target)
+void Level::drawLightOccluders(sf::RenderTarget& target, const sf::View& view)
 {
    // draw all tilemaps at z=24 into the stencil buffer only.
    // stencilOnly=true suppresses color output (replaces the old zero/zero blend mode).
    // the fragment shader's discard still runs so transparent tile regions don't occlude.
+   //
+   // the view comes from the light system rather than being _level_view directly: it is that
+   // view with a scissor around the light being drawn, so this pass only rasterises where the
+   // light can reach. same projection, a fraction of the fragments
 #ifndef DECEPTUS_VRSFML
-   target.setView(*_level_view);
+   target.setView(view);
    sf::RenderStates states;
 #else
-   sf::RenderStates states{.view = *_level_view};
+   sf::RenderStates states{.view = view};
 #endif
 
 #ifdef DECEPTUS_VRSFML
