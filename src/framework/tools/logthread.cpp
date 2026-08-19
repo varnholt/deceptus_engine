@@ -12,6 +12,7 @@
 #include "gamepaths.h"
 #endif
 
+#include <cstdlib>
 #include <ctime>
 #include <filesystem>
 #include <iomanip>
@@ -21,7 +22,11 @@
 namespace
 {
 int32_t flush_counter = 0;
-}
+
+//!< the instance an exit handler has to stop. only ever one log thread exists, and the handler
+//!< needs to reach it without capturing state, which std::atexit does not allow
+LogThread* instance_to_stop_at_exit = nullptr;
+}  // namespace
 #endif
 
 LogThread::LogThread()
@@ -39,13 +44,32 @@ LogThread::LogThread()
       return;
    }
 
-   _thread = std::make_unique<std::thread>(&LogThread::run, this);
+   // the console's applet exit calls exit() without unwinding main, so this object - which lives
+   // as a local there - is never destroyed and nothing joins the thread. exit() then runs the
+   // static destructors, the stream's locale facets among them, while the thread is still
+   // converting a line through those facets on its way to the file, and it dies inside the write.
+   // handlers registered here run before those destructors, because the iostream statics were
+   // constructed before this object was.
+   instance_to_stop_at_exit = this;
+   std::atexit(
+      []()
+      {
+         if (instance_to_stop_at_exit != nullptr)
+         {
+            // stops and joins, then writes what is still queued - which is also what stops a
+            // crashed or closed run's log from ending several lines short of the truth
+            instance_to_stop_at_exit->flushSynchronously();
+         }
+      }
+   );
 #endif
 }
 
 LogThread::~LogThread()
 {
 #ifdef DECEPTUS_LOG_TO_FILE
+   instance_to_stop_at_exit = nullptr;
+
    {
       std::lock_guard<std::mutex> guard(_mutex);
       _stopped = true;
@@ -64,12 +88,21 @@ LogThread::~LogThread()
 void LogThread::log(const SysClockTimePoint& time_point, Log::Level level, const std::string& message, const std::source_location& location)
 {
 #ifdef DECEPTUS_LOG_TO_FILE
-   std::lock_guard<std::mutex> guard(_mutex);
-   if (_stopped)
    {
-      return;
+      std::lock_guard<std::mutex> guard(_mutex);
+      if (_stopped)
+      {
+         return;
+      }
+      _log_items.push_back(LogItem{time_point, level, message, location});
    }
-   _log_items.push_back(LogItem{time_point, level, message, location});
+
+   // written here rather than handed to a background thread. that thread faulted inside the write
+   // itself - std::__basic_file::xsputn, reached through the stream's locale facets - while the
+   // main thread was loading assets, and it took the queued messages with it, which is why a run
+   // that died left a log ending several lines short of where it actually got to. the console
+   // writes few enough lines for the cost of doing it inline to be worth the certainty.
+   flush();
 #else
    (void)time_point;
    (void)level;
