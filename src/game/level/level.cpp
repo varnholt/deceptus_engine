@@ -838,17 +838,28 @@ void Level::updateSpritePositions()
    // that lands on screen, so the two have to be derived from the same interpolated camera
    updateViewsForDraw();
 
+   // filtered the same way update is: placing a sprite that is nowhere near the player is work with
+   // no result, and some of these rebuild real geometry - the rope its strip, the spike ball its
+   // spline. Unfiltered, an uncapped frame rate would rebuild all of them several times per step
+   const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
+
    for (auto& mechanism_vector : _mechanism_registry.getList())
    {
       for (auto& mechanism : *mechanism_vector)
       {
-         mechanism->updateSpritePositions();
+         if (checkUpdateMechanism(player_chunk, mechanism))
+         {
+            mechanism->updateSpritePositions();
+         }
       }
    }
 
    for (const auto& enemy : LuaInterface::instance().getObjectList())
    {
-      enemy->updateSpritePositions();
+      if (checkUpdateMechanism(player_chunk, enemy))
+      {
+         enemy->updateSpritePositions();
+      }
    }
 }
 

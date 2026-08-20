@@ -1,6 +1,5 @@
 #include "fixedtimestep.h"
 
-#include "game/physics/physicsconfiguration.h"
 #include "game/physics/renderinterpolation.h"
 
 int32_t FixedTimeStep::consumeSteps(const sf::Time& dt)
@@ -36,7 +35,7 @@ int32_t FixedTimeStep::consumeSteps(const sf::Time& dt)
 
 float FixedTimeStep::getStepDurationInS() const
 {
-   return PhysicsConfiguration::getInstance()._time_step;
+   return 1.0f / steps_per_second;
 }
 
 sf::Time FixedTimeStep::getStepDuration() const

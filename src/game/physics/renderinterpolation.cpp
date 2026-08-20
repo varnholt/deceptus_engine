@@ -1,7 +1,6 @@
 #include "renderinterpolation.h"
 
 #include <algorithm>
-#include <cmath>
 
 namespace
 {
@@ -29,7 +28,7 @@ sf::Vector2f positionPx(const sf::Vector2f& previous_px, const sf::Vector2f& cur
 
 float valuePx(float previous_px, float current_px)
 {
-   return std::round(previous_px + (current_px - previous_px) * __alpha);
+   return previous_px + (current_px - previous_px) * __alpha;
 }
 
 }  // namespace RenderInterpolation

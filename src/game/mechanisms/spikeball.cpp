@@ -1,5 +1,7 @@
 #include "spikeball.h"
 
+#include <cmath>
+
 #include <array>
 #include <iostream>
 

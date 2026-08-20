@@ -12,11 +12,13 @@
 /// The frame therefore draws where things are *between* two steps: the caller keeps the position a
 /// body had before the last step alongside its current one, and asks for the point in between.
 ///
-/// The interpolated position is rounded to whole pixels. The game is pixel art rendered at an
-/// integer scale (see GameConfiguration::computeViewScale), and a sprite at a fractional position
-/// samples its texels across a screen pixel boundary - the same smearing an unfloored view scale
-/// produced. Rounding keeps every sprite exact and still yields one distinct position per pixel of
-/// travel, which is what makes the motion read as smooth.
+/// The interpolated position is deliberately NOT rounded to whole pixels. Rounding it looks like the
+/// right thing for pixel art, and it is not: the camera and the things it follows would each be
+/// rounded on their own, so a sprite's screen position - the difference between the two - flips by a
+/// pixel whenever one rounds up and the other does not. That happens once per distinct interpolation
+/// fraction, so the higher the frame rate the more often the whole scene shivers. Sprites sat on
+/// fractional positions before any of this existed; what needed to be exact was the view scale, see
+/// GameConfiguration::computeViewScale.
 namespace RenderInterpolation
 {
 
