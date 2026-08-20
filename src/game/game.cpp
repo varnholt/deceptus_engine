@@ -299,15 +299,7 @@ void Game::initializeRenderTargets()
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
-   const auto ratio_width = game_config._video_mode_width / game_config._view_width;
-   const auto ratio_height = game_config._video_mode_height / game_config._view_height;
-
-   auto size_ratio = std::min(ratio_width, ratio_height);
-   if (size_ratio < std::numeric_limits<float>::epsilon())
-   {
-      Log::Warning() << "invalid video mode dimensions";
-      size_ratio = 1.0f;
-   }
+   const auto size_ratio = game_config.getViewScale();
 
    const int32_t texture_width = size_ratio * game_config._view_width;
    const int32_t texture_height = size_ratio * game_config._view_height;
@@ -1315,9 +1307,7 @@ void Game::toggleFullScreen()
    _window->setMouseCursorVisible(!config._fullscreen);
 
    // recalculate render texture dimensions and offsets
-   const auto ratio_width = config._video_mode_width / config._view_width;
-   const auto ratio_height = config._video_mode_height / config._view_height;
-   auto size_ratio = std::min(ratio_width, ratio_height);
+   const auto size_ratio = config.getViewScale();
 
    const int32_t texture_width = size_ratio * config._view_width;
    const int32_t texture_height = size_ratio * config._view_height;
