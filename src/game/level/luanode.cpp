@@ -28,6 +28,7 @@
 #include "game/level/luainterface.h"
 #include "game/level/luanodecallbacks.h"
 #include "game/physics/physicsconfiguration.h"
+#include "game/physics/renderinterpolation.h"
 #include "game/player/player.h"
 #include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
@@ -1082,10 +1083,32 @@ void LuaNode::updatePosition()
    auto x_px = _body->GetPosition().x * PPM;
    auto y_px = _body->GetPosition().y * PPM;
 
+   _position_px_previous = _position_px;
    _position_px.x = x_px;
    _position_px.y = y_px;
 
    updateHitboxOffsets();
+}
+
+void LuaNode::updateSpritePositions()
+{
+   // between the position this node had before the last simulation step and the one it has now, so a
+   // frame drawn in between does not repeat a position it has already shown
+   const auto interpolated_position_px = RenderInterpolation::positionPx(_position_px_previous, _position_px);
+
+   for (auto i = 0u; i < _sprites.size(); i++)
+   {
+      auto& sprite = _sprites[i];
+      const auto& offset = _sprite_offsets_px[i];
+
+#ifdef DECEPTUS_VRSFML
+      const auto center = sf::Vector2f(sprite->textureRect.size.x / 2.0f, sprite->textureRect.size.y / 2.0f);
+      sprite->position = interpolated_position_px - center + offset;
+#else
+      const auto center = sf::Vector2f(sprite->getTextureRect().size.x / 2.0f, sprite->getTextureRect().size.y / 2.0f);
+      sprite->setPosition(interpolated_position_px - center + offset);
+#endif
+   }
 }
 
 void LuaNode::updateSpriteRect(int32_t id, int32_t x_px, int32_t y_px, int32_t w_px, int32_t h_px)
@@ -1492,9 +1515,6 @@ void LuaNode::drawParts(
          continue;
       }
 
-      const auto& offset = _sprite_offsets_px[i];
-      const auto center = sf::Vector2f(sprite->textureRect.size.x / 2.0f, sprite->textureRect.size.y / 2.0f);
-      sprite->position = _position_px - center + offset;
       sf::RenderStates sprite_states = states;
       sprite_states.texture = _texture.get();
       if (_flash_shader.isLoaded())
@@ -1508,9 +1528,6 @@ void LuaNode::drawParts(
          continue;
       }
 
-      const auto& offset = _sprite_offsets_px[i];
-      const auto center = sf::Vector2f(sprite->getTextureRect().size.x / 2.0f, sprite->getTextureRect().size.y / 2.0f);
-      sprite->setPosition(_position_px - center + offset);
       auto sprite_states = states;
       sprite_states.shader = &_flash_shader.native();
       target.draw(*sprite, sprite_states);

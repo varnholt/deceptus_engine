@@ -18,6 +18,9 @@ public:
    /// \param dt elapsed frame time forwarded to each equipped item.
    void update(const sf::Time& dt);
 
+   /// \brief places every equipped item's sprites for the frame about to be drawn.
+   void updateSpritePositions();
+
    /// \brief draws all currently equipped item instances.
    /// \param target render target passed to each equipped item.
    /// \param states render states passed to each equipped item (carries .view for WASM camera transform).

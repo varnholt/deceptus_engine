@@ -6,6 +6,7 @@ struct TmxObject;
 #include "game/io/gamedeserializedata.h"
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/physics/renderinterpolation.h"
 
 #include "box2d/box2d.h"
 
@@ -34,6 +35,9 @@ public:
       float _shake_x_px = 0.0f;
       float _shake_y_px = 0.0f;
       float _fall_offset_y_px = 0.0f;
+
+      //!< where this block sat before the last simulation step
+      InterpolatedPosition _interpolated_position;
       float _elapsed_s = 0.0f;
       float _fall_speed = 0.0f;
       float _destruction_speed = 0.0f;
@@ -80,6 +84,7 @@ public:
    /// \brief updates collapse timing, block animation, and respawn behavior.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   void updateSpritePositions() override;
 
    /// \brief returns the platform bounds in pixel coordinates.
    /// \return rectangle used for culling and respawn overlap checks.

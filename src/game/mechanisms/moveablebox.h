@@ -7,6 +7,7 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/physics/renderinterpolation.h"
 
 struct TmxObject;
 
@@ -40,6 +41,7 @@ public:
    /// \brief syncs sprite position from box2d and starts or stops pushing audio by velocity.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   void updateSpritePositions() override;
 
    /// \brief returns the current sprite bounds.
    /// \return box bounds in pixels.
@@ -75,6 +77,10 @@ private:
 
    std::shared_ptr<sf::Texture> _texture;
    std::unique_ptr<sf::Sprite> _sprite;
+
+   //!< where this was before the last simulation step, so a frame drawn between two steps is
+   //!< placed between the two rather than on the newest one
+   InterpolatedPosition _interpolated_position;
    sf::Vector2f _size;
    b2Body* _body = nullptr;
    std::optional<int32_t> _pushing_sample;

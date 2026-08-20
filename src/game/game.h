@@ -19,6 +19,7 @@
 #include "game/io/eventserializer.h"
 #include "game/layers/controlleroverlay.h"
 #include "game/layers/infolayer.h"
+#include "game/physics/fixedtimestep.h"
 #include "game/physics/physicsconfigurationui.h"
 #include "game/rendering/postprocessingpass.h"
 #include "game/rendering/rendertargets.h"
@@ -182,6 +183,9 @@ private:
    RenderTargets _render_targets;
    std::shared_ptr<Player> _player;
    std::shared_ptr<Level> _level;
+
+   //! \brief banks frame time so the simulation is stepped at a fixed rate whatever the frame rate
+   FixedTimeStep _fixed_time_step;
 
    //! \brief load requested by loadLevel(), carried out by processPendingLevelLoad() next frame
    std::optional<LoadingMode> _pending_level_load;

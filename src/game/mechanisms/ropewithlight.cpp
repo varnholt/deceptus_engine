@@ -86,12 +86,30 @@ void RopeWithLight::update(const sf::Time& dt)
 
    const auto angle_rad = static_cast<float>(atan2(c_m.y, c_m.x));
 
+   _lamp_position_px_previous = _lamp_position_px_current;
+   _lamp_position_px_current = sf::Vector2f{_light->_pos_m.x * PPM, _light->_pos_m.y * PPM};
+
+   _lamp_rotation_deg_previous = _lamp_rotation_deg_current;
+   _lamp_rotation_deg_current = 90.0f + FACTOR_RAD_TO_DEG * angle_rad;
+}
+
+void RopeWithLight::updateSpritePositions()
+{
+   Rope::updateSpritePositions();
+
+   const auto position_px = RenderInterpolation::positionPx(_lamp_position_px_previous, _lamp_position_px_current);
+
+   // the rotation is interpolated too, otherwise the lamp swings in steps while it travels smoothly.
+   // it is not rounded: an angle has no pixel grid to sit on
+   const auto alpha = RenderInterpolation::getAlpha();
+   const auto rotation_deg = _lamp_rotation_deg_previous + (_lamp_rotation_deg_current - _lamp_rotation_deg_previous) * alpha;
+
 #ifdef DECEPTUS_VRSFML
-   _lamp_sprite->rotation = sf::degrees(90.0f + FACTOR_RAD_TO_DEG * angle_rad);
-   _lamp_sprite->position = {_light->_pos_m.x * PPM, _light->_pos_m.y * PPM};
+   _lamp_sprite->rotation = sf::degrees(rotation_deg);
+   _lamp_sprite->position = position_px;
 #else
-   _lamp_sprite->setRotation(sf::degrees(90.0f + FACTOR_RAD_TO_DEG * angle_rad));
-   _lamp_sprite->setPosition({_light->_pos_m.x * PPM, _light->_pos_m.y * PPM});
+   _lamp_sprite->setRotation(sf::degrees(rotation_deg));
+   _lamp_sprite->setPosition(position_px);
 #endif
 }
 

@@ -1,5 +1,7 @@
 #include "spikeball.h"
 
+#include <cmath>
+
 #include <array>
 #include <iostream>
 
@@ -152,30 +154,12 @@ void SpikeBall::preload()
 #ifdef DECEPTUS_VRSFML
 void SpikeBall::drawChain(sf::RenderTarget& window, const sf::RenderStates& states)
 {
-   std::vector<HermiteCurveKey> keys;
-
-   auto t = 0.0f;
-   auto ti = 1.0f / _chain_elements.size();
-   for (auto* c : _chain_elements)
+   for (auto i = 0u; i < _chain_spline_points_px.size(); i++)
    {
-      HermiteCurveKey k;
-      k._position = sf::Vector2f{c->GetPosition().x * PPM, c->GetPosition().y * PPM};
-      k._time = (t += ti);
-      keys.push_back(k);
-   }
-
-   HermiteCurve curve;
-   curve.setPositionKeys(keys);
-   curve.compute();
-
-   auto val = 0.0f;
-   auto increment = 1.0f / _config._spline_point_count;
-   for (auto i = 0; i < _config._spline_point_count; i++)
-   {
-      auto point = curve.computePoint(val += increment);
-
+      // one sprite is reused for every point along the chain, so it is moved as it is submitted -
+      // the positions themselves come from updateSpritePositions
       auto& element = (i % 2 == 0) ? _chain_element_a : _chain_element_b;
-      element->position = point;
+      element->position = _chain_spline_points_px[i];
 
       sf::RenderStates draw_states = states;
       draw_states.texture = _texture.get();
@@ -185,30 +169,12 @@ void SpikeBall::drawChain(sf::RenderTarget& window, const sf::RenderStates& stat
 #else
 void SpikeBall::drawChain(sf::RenderTarget& window)
 {
-   std::vector<HermiteCurveKey> keys;
-
-   auto t = 0.0f;
-   auto ti = 1.0f / _chain_elements.size();
-   for (auto* c : _chain_elements)
+   for (auto i = 0u; i < _chain_spline_points_px.size(); i++)
    {
-      HermiteCurveKey k;
-      k._position = sf::Vector2f{c->GetPosition().x * PPM, c->GetPosition().y * PPM};
-      k._time = (t += ti);
-      keys.push_back(k);
-   }
-
-   HermiteCurve curve;
-   curve.setPositionKeys(keys);
-   curve.compute();
-
-   auto val = 0.0f;
-   auto increment = 1.0f / _config._spline_point_count;
-   for (auto i = 0; i < _config._spline_point_count; i++)
-   {
-      auto point = curve.computePoint(val += increment);
-
+      // one sprite is reused for every point along the chain, so it is moved as it is submitted -
+      // the positions themselves come from updateSpritePositions
       auto& element = (i % 2 == 0) ? _chain_element_a : _chain_element_b;
-      element->setPosition(point);
+      element->setPosition(_chain_spline_points_px[i]);
 
       window.draw(*element);
    }
@@ -289,6 +255,56 @@ void SpikeBall::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/)
 }
 #endif
 
+void SpikeBall::updateSpritePositions()
+{
+   const auto ball_position_px = _interpolated_ball_position.getPositionPx();
+#ifdef DECEPTUS_VRSFML
+   _spike_sprite->position = ball_position_px;
+#else
+   _spike_sprite->setPosition(ball_position_px);
+#endif
+
+   if (_chain_positions_current_m.empty())
+   {
+      return;
+   }
+
+   // the chain runs along a spline through the elements, so the elements are interpolated first and
+   // the spline is computed from the result
+   const auto alpha = RenderInterpolation::getAlpha();
+
+   std::vector<HermiteCurveKey> keys;
+   auto time = 0.0f;
+   const auto time_increment = 1.0f / static_cast<float>(_chain_positions_current_m.size());
+   for (auto i = 0u; i < _chain_positions_current_m.size(); i++)
+   {
+      const auto& current_m = _chain_positions_current_m[i];
+      const auto position_m = (i < _chain_positions_previous_m.size())
+                                 ? b2Vec2{
+                                      _chain_positions_previous_m[i].x + (current_m.x - _chain_positions_previous_m[i].x) * alpha,
+                                      _chain_positions_previous_m[i].y + (current_m.y - _chain_positions_previous_m[i].y) * alpha
+                                   }
+                                 : current_m;
+
+      HermiteCurveKey key;
+      key._position = sf::Vector2f{position_m.x * PPM, position_m.y * PPM};
+      key._time = (time += time_increment);
+      keys.push_back(key);
+   }
+
+   HermiteCurve curve;
+   curve.setPositionKeys(keys);
+   curve.compute();
+
+   _chain_spline_points_px.clear();
+   auto value = 0.0f;
+   const auto increment = 1.0f / _config._spline_point_count;
+   for (auto i = 0; i < _config._spline_point_count; i++)
+   {
+      _chain_spline_points_px.push_back(curve.computePoint(value += increment));
+   }
+}
+
 void SpikeBall::update(const sf::Time& dt)
 {
    if (dt.asMilliseconds() > 16 * 2)
@@ -296,11 +312,16 @@ void SpikeBall::update(const sf::Time& dt)
       return;
    }
 
-#ifdef DECEPTUS_VRSFML
-   _spike_sprite->position = {_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM};
-#else
-   _spike_sprite->setPosition({_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM});
-#endif
+   _interpolated_ball_position.step(_ball_body->GetPosition().x * PPM, _ball_body->GetPosition().y * PPM);
+
+   // mechanisms update after the world has stepped, so the chain pair is kept by shifting rather than
+   // by reading the bodies at two different times
+   _chain_positions_previous_m = _chain_positions_current_m;
+   _chain_positions_current_m.clear();
+   for (auto* element : _chain_elements)
+   {
+      _chain_positions_current_m.push_back(element->GetPosition());
+   }
 
    static const b2Vec2 up{0.0, 1.0};
 

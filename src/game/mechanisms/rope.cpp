@@ -82,20 +82,43 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
    draw(color, normal, {});
 }
 
-void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& incoming_states)
+void Rope::updateSpritePositions()
 {
+   if (_chain_elements.size() < 2)
+   {
+      return;
+   }
+
+   // the chain positions this frame is drawn at, between the last two simulation steps. They are
+   // interpolated in meters and converted to pixels when the vertex is built, so the rounding to
+   // whole pixels happens once, on the vertex itself
+   const auto alpha = RenderInterpolation::getAlpha();
+   const auto interpolated = [this, alpha](std::size_t index)
+   {
+      if (index >= _chain_positions_current_m.size())
+      {
+         return _chain_elements[index]->GetPosition();
+      }
+
+      const auto& current_m = _chain_positions_current_m[index];
+      if (index >= _chain_positions_previous_m.size())
+      {
+         return current_m;
+      }
+
+      const auto& previous_m = _chain_positions_previous_m[index];
+      return b2Vec2{previous_m.x + (current_m.x - previous_m.x) * alpha, previous_m.y + (current_m.y - previous_m.y) * alpha};
+   };
+
    std::optional<b2Vec2> q1_prev;
    std::optional<b2Vec2> q4_prev;
 
-   std::vector<sf::Vertex> strip;
+   _strip.clear();
 
    for (auto i = 0u; i < _chain_elements.size() - 1; i++)
    {
-      auto* c1 = _chain_elements[i];
-      auto* c2 = _chain_elements[i + 1];
-
-      const auto c1_pos_m = c1->GetPosition();
-      const auto c2_pos_m = c2->GetPosition();
+      const auto c1_pos_m = interpolated(i);
+      const auto c2_pos_m = interpolated(i + 1);
 
       constexpr auto thickness_m = 0.025f;
 
@@ -145,27 +168,35 @@ void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::Ren
          )
       );
 
-      strip.push_back(v1);
-      strip.push_back(v2);
-      strip.push_back(v4);
-      strip.push_back(v3);
+      _strip.push_back(v1);
+      _strip.push_back(v2);
+      _strip.push_back(v4);
+      _strip.push_back(v3);
+   }
+}
+
+void Rope::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::RenderStates& incoming_states)
+{
+   if (_strip.empty())
+   {
+      return;
    }
 
    // render color texture
    sf::RenderStates states = incoming_states;
    states.texture = _texture.get();
 #ifdef DECEPTUS_VRSFML
-   color.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
+   color.draw(std::span<const sf::Vertex>{_strip.data(), _strip.size()}, sf::PrimitiveType::TriangleStrip, states);
 #else
-   color.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
+   color.draw(_strip.data(), _strip.size(), sf::PrimitiveType::TriangleStrip, states);
 #endif
 
    // render normal map (same geometry, different texture)
    states.texture = _normal_map.get();
 #ifdef DECEPTUS_VRSFML
-   normal.draw(std::span<const sf::Vertex>{strip.data(), strip.size()}, sf::PrimitiveType::TriangleStrip, states);
+   normal.draw(std::span<const sf::Vertex>{_strip.data(), _strip.size()}, sf::PrimitiveType::TriangleStrip, states);
 #else
-   normal.draw(strip.data(), strip.size(), sf::PrimitiveType::TriangleStrip, states);
+   normal.draw(_strip.data(), _strip.size(), sf::PrimitiveType::TriangleStrip, states);
 #endif
 }
 
@@ -180,6 +211,15 @@ void Rope::pushChain(float impulse)
 
 void Rope::update(const sf::Time& dt)
 {
+   // mechanisms update after the world has stepped, so the pair is kept by shifting rather than by
+   // reading the bodies at two different times
+   _chain_positions_previous_m = _chain_positions_current_m;
+   _chain_positions_current_m.clear();
+   for (auto* element : _chain_elements)
+   {
+      _chain_positions_current_m.push_back(element->GetPosition());
+   }
+
    // prevent glitches
    // it might make sense to come up with a more high level concept for this
    if (dt.asMilliseconds() > 500)

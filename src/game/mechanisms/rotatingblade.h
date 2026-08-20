@@ -4,6 +4,7 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/physics/renderinterpolation.h"
 
 #include <vector>
 #include "SFML/Graphics.hpp"
@@ -52,6 +53,7 @@ public:
    /// \brief advances blade speed, movement, rotation, audio state, and hit detection.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   void updateSpritePositions() override;
 
    /// \brief draws the rotating blade sprite.
    /// \param target render target.
@@ -97,6 +99,10 @@ private:
    sf::FloatRect _rectangle;
    std::vector<sf::Vector2f> _path;
    sf::Vector2f _pos;
+
+   //!< where the blade sat and how far it had turned before the last simulation step
+   InterpolatedPosition _interpolated_position;
+   float _angle_previous = 0.0f;
    PathInterpolation<sf::Vector2f> _path_interpolation;
    PathType _path_type = PathType::Polygon;
    Settings _settings;

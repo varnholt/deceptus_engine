@@ -34,12 +34,22 @@ public:
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
 
+   /// \brief places the lamp for the frame about to be drawn.
+   void updateSpritePositions() override;
+
    /// \brief initializes rope physics, lamp visuals, and light properties from tmx data.
    /// \param data deserialization data with rope and lamp configuration.
    void setup(const GameDeserializeData& data) override;
 
 private:
    std::unique_ptr<sf::Sprite> _lamp_sprite;
+
+   //!< where the lamp hung before the last simulation step, and where it hangs now, so the frames in
+   //!< between can be placed between the two
+   sf::Vector2f _lamp_position_px_previous;
+   sf::Vector2f _lamp_position_px_current;
+   float _lamp_rotation_deg_previous{0.0f};
+   float _lamp_rotation_deg_current{0.0f};
    std::array<sf::IntRect, 3> _lamp_sprite_rects;
    std::shared_ptr<LightSystem::LightInstance> _light;
 };

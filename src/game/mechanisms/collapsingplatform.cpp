@@ -406,11 +406,19 @@ void CollapsingPlatform::endContact(FixtureNode* other)
    _foot_sensor_contact = false;
 }
 
+void CollapsingPlatform::updateSpritePositions()
+{
+   for (auto& block : _blocks)
+   {
+      sfcompat::setPosition(*block._sprite, block._interpolated_position.getPositionPx());
+   }
+}
+
 void CollapsingPlatform::updateBlockSprites()
 {
    for (auto& block : _blocks)
    {
-      sfcompat::setPosition(*block._sprite, {block._x_px + block._shake_x_px, block._y_px + block._shake_y_px + block._fall_offset_y_px});
+      block._interpolated_position.step(block._x_px + block._shake_x_px, block._y_px + block._shake_y_px + block._fall_offset_y_px);
       sfcompat::setTextureRect(
          *block._sprite,
          sf::IntRect(

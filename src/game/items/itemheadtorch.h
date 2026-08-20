@@ -22,6 +22,11 @@ public:
    /// \param dt elapsed frame time since the previous update.
    void update(const sf::Time& dt) override;
 
+   /// \brief places the helmet for the frame about to be drawn.
+   /// \note the body is placed once per frame from an interpolated position, so a helmet placed once
+   ///       per simulation step sat a step behind the head it belongs to.
+   void updateSpritePositions() override;
+
    /// \brief enables head torch rendering and updates while equipped.
    void onEquipped() override;
 
@@ -45,6 +50,17 @@ private:
    std::shared_ptr<LightSystem::LightInstance> _player_light_right;
    std::optional<sf::Vector2f>
       _last_valid_eye_position;  //!< set once a valid eye position is received since the last onEquipped; empty until then
+
+   //!< where the helmet sits relative to the player. Worked out per simulation step and applied to
+   //!< the player's drawn position per frame
+   std::optional<sf::Vector2f> _helmet_offset_px;
+
+   //!< where the light sits relative to the player, in box2d meters, and which of the two lights is
+   //!< the live one. Applied per frame for the same reason the helmet offset is
+   //!< where the light sprite ended up relative to the player, after update has shifted it to put
+   //!< its origin on the lamp. Applied per frame, without touching that origin again
+   std::optional<sf::Vector2f> _light_sprite_offset_px;
+   bool _light_points_right{false};
    std::shared_ptr<sf::Texture> _player_texture;
    std::unique_ptr<sf::Sprite> _helmet_sprite_r;
    std::unique_ptr<sf::Sprite> _helmet_sprite_l;

@@ -58,6 +58,34 @@ void ItemHeadTorch::draw(sf::RenderTarget& target, const sf::RenderStates& state
 #endif
 }
 
+void ItemHeadTorch::updateSpritePositions()
+{
+   if (!_enabled || !_helmet_offset_px.has_value())
+   {
+      return;
+   }
+
+   const auto& player_position_px = PlayerRegistry::getFirst()->getSpritePositionPx();
+
+   const auto helmet_position_px = player_position_px + _helmet_offset_px.value();
+   sfcompat::setPosition(*_helmet_sprite_r, helmet_position_px);
+   sfcompat::setPosition(*_helmet_sprite_l, helmet_position_px);
+
+   // the beam comes out of the lamp on that helmet, so it is placed from the same position. Its
+   // shadow origin is left alone: that decides which polygons the beam extrudes shadows from, and
+   // that belongs to the simulation rather than to where the frame happens to draw things
+   if (!_light_sprite_offset_px.has_value())
+   {
+      return;
+   }
+
+   auto& active_light = _light_points_right ? _player_light_right : _player_light_left;
+   if (active_light && active_light->_sprite)
+   {
+      sfcompat::setPosition(*active_light->_sprite, player_position_px + _light_sprite_offset_px.value());
+   }
+}
+
 void ItemHeadTorch::update(const sf::Time& delta_time)
 {
    if (!_enabled)
@@ -171,6 +199,8 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
    active_light->_pos_m = light_pos_m;
    active_light->updateSpritePosition();
 
+   _light_points_right = pointing_right;
+
    // the beam casts its shadows from the lamp end, which sits right about on the player's own
    // collision edge. anything adam presses against - a moveable box he is pushing, or a wall he is
    // standing at - then has its near face at that very position, and once the origin slips inside
@@ -198,6 +228,10 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
       *active_light->_sprite, {top_left_pos.x + lamp_origin_x_local * sprite_scale.x, top_left_pos.y + lamp_origin_y_local * sprite_scale.y}
    );
 
+   // recorded after the origin shift, so the per frame pass can move the sprite without having to
+   // redo - or undo - any of it
+   _light_sprite_offset_px = sfcompat::getPosition(*active_light->_sprite) - player->getPixelPositionFloat();
+
    // easeOutSine brings the beam smoothly back to neutral after a landing tilt
    sf::Angle tilt_angle = sf::degrees(0.0f);
    if (_landing_tilt_elapsed > sf::Time{})
@@ -214,9 +248,7 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
    sfcompat::setRotation(*inactive_light->_sprite, sf::degrees(0.0f));
 
    sf::Vector2f helmet_offset_px{pointing_right ? -50.0f : -45.0f, -54.0f};
-   const auto helmet_position_px = player->getPixelPositionFloat() + _last_valid_eye_position.value() + helmet_offset_px;
-   sfcompat::setPosition(*_helmet_sprite_r, helmet_position_px);
-   sfcompat::setPosition(*_helmet_sprite_l, helmet_position_px);
+   _helmet_offset_px = _last_valid_eye_position.value() + helmet_offset_px;
    const uint8_t helmet_alpha = static_cast<uint8_t>(255.0f * fade_alpha_factor);
    sfcompat::setColor(*_helmet_sprite_r, sf::Color(255, 255, 255, helmet_alpha));
    sfcompat::setColor(*_helmet_sprite_l, sf::Color(255, 255, 255, helmet_alpha));

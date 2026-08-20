@@ -7,6 +7,7 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/physics/renderinterpolation.h"
 
 struct TmxObject;
 
@@ -60,6 +61,9 @@ public:
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
 
+   /// \brief places the ball and computes the chain spline for the frame about to be drawn.
+   void updateSpritePositions() override;
+
    /// \brief returns the map-defined mechanism bounds in pixel space.
    /// \return rectangle used for chunk activation.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
@@ -91,6 +95,15 @@ private:
    std::shared_ptr<sf::Texture> _texture;
    std::unique_ptr<sf::Sprite> _spike_sprite;
    std::unique_ptr<sf::Sprite> _box_sprite;
+   //!< where the ball and each chain element sat before the last simulation step, and where they
+   //!< sit now. Mechanisms update after the world has stepped, so the pairs are kept by shifting
+   InterpolatedPosition _interpolated_ball_position;
+   std::vector<b2Vec2> _chain_positions_previous_m;
+   std::vector<b2Vec2> _chain_positions_current_m;
+
+   //!< the spline the chain is drawn along, computed once per frame by updateSpritePositions
+   std::vector<sf::Vector2f> _chain_spline_points_px;
+
    std::unique_ptr<sf::Sprite> _chain_element_a;
    std::unique_ptr<sf::Sprite> _chain_element_b;
 

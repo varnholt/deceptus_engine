@@ -50,6 +50,7 @@ public:
    /// \brief updates path movement, enable-ramp lag, player coupling, and wheel animations.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   void updateSpritePositions() override;
 
    /// \brief returns the precomputed area covered by this platform path.
    /// \return platform bounds in pixels.

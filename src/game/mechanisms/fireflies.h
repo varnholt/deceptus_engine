@@ -5,6 +5,7 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/physics/renderinterpolation.h"
 
 /// \brief spawns animated fireflies that orbit inside a configured rectangle.
 class Fireflies : public GameMechanism, public GameNode
@@ -24,8 +25,15 @@ public:
       /// \brief updates the sprite texture rectangle for the current animation frame.
       void updateTextureRect();
 
+      /// \brief places this firefly's sprite for the frame about to be drawn.
+      void updateSpritePosition();
+
       sf::Vector3f _position_3d;
       sf::Vector2f _position;
+
+      //!< where this firefly was before the last simulation step. It flies a path driven by
+      //!< simulated time rather than by a body, but it still only advances once per step
+      InterpolatedPosition _interpolated_position;
       std::unique_ptr<sf::Sprite> _sprite;
       sf::Time _elapsed;
       sf::FloatRect _rect_px;
@@ -63,6 +71,7 @@ public:
    /// \brief updates all firefly instances.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   void updateSpritePositions() override;
 
    /// \brief returns bounds for mechanism queries.
    /// \return `std::nullopt` because this mechanism does not expose collision bounds.

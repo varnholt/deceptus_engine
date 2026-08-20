@@ -96,6 +96,24 @@ public:
    /// \brief recalculates level, parallax, and image-layer views from camera position, panorama, and zoom.
    void updateViews();
 
+   /// \brief places every sprite in the level for the frame about to be drawn.
+   /// \note called once per frame after that frame's simulation steps, unlike update which runs once
+   ///       per step. The simulation advances at a fixed rate, so this is where the interpolation
+   ///       between the last two steps happens - and it is where sprite positions belong, because
+   ///       draw draws.
+   void updateSpritePositions();
+
+   /// \brief rebuilds the views the frame is drawn through, from the interpolated camera position.
+   /// \note separate from updateViews because that one also feeds the room lock, which must see the
+   ///       simulation's camera rather than an interpolated one.
+   void updateViewsForDraw();
+
+   /// \brief builds the view rectangle for a camera position, applying panorama and zoom.
+   /// \param camera_x_px camera x position in pixels.
+   /// \param camera_y_px camera y position in pixels.
+   /// \return the view rectangle to render through.
+   sf::FloatRect computeViewRect(float camera_x_px, float camera_y_px) const;
+
    /// \brief refreshes mechanism audio volume inputs with the current player position.
    void updateMechanismVolumes();
 

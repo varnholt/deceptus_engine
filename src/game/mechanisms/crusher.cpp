@@ -13,6 +13,7 @@
 #include "game/level/levelregistry.h"
 #include "game/level/roomupdater.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
+#include "game/physics/renderinterpolation.h"
 
 int32_t Crusher::__instance_counter = 0;
 
@@ -169,8 +170,8 @@ void Crusher::step(const sf::Time& dt)
 void Crusher::update(const sf::Time& dt)
 {
    updateState();
+   _blade_offset_previous = _blade_offset;
    step(dt);
-   updateSpritePositions();
    updateTransform();
 }
 
@@ -567,41 +568,43 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
 
 void Crusher::updateSpritePositions()
 {
+   const auto blade_offset = RenderInterpolation::positionPx(_blade_offset_previous, _blade_offset);
+
    switch (_alignment)
    {
       case Alignment::PointsDown:
       {
 #ifdef DECEPTUS_VRSFML
-         _sprite_pusher->scale = {1.0f, _blade_offset.y};
+         _sprite_pusher->scale = {1.0f, blade_offset.y};
 #else
-         _sprite_pusher->setScale({1.0f, _blade_offset.y});
+         _sprite_pusher->setScale({1.0f, blade_offset.y});
 #endif
          break;
       }
       case Alignment::PointsUp:
       {
 #ifdef DECEPTUS_VRSFML
-         _sprite_pusher->scale = {1.0f, _blade_offset.y};
+         _sprite_pusher->scale = {1.0f, blade_offset.y};
 #else
-         _sprite_pusher->setScale({1.0f, _blade_offset.y});
+         _sprite_pusher->setScale({1.0f, blade_offset.y});
 #endif
          break;
       }
       case Alignment::PointsLeft:
       {
 #ifdef DECEPTUS_VRSFML
-         _sprite_pusher->scale = {_blade_offset.x, 1.0f};
+         _sprite_pusher->scale = {blade_offset.x, 1.0f};
 #else
-         _sprite_pusher->setScale({_blade_offset.x, 1.0f});
+         _sprite_pusher->setScale({blade_offset.x, 1.0f});
 #endif
          break;
       }
       case Alignment::PointsRight:
       {
 #ifdef DECEPTUS_VRSFML
-         _sprite_pusher->scale = {_blade_offset.x, 1.0f};
+         _sprite_pusher->scale = {blade_offset.x, 1.0f};
 #else
-         _sprite_pusher->setScale({_blade_offset.x, 1.0f});
+         _sprite_pusher->setScale({blade_offset.x, 1.0f});
 #endif
          break;
       }
@@ -614,10 +617,10 @@ void Crusher::updateSpritePositions()
 #ifdef DECEPTUS_VRSFML
    _sprite_mount->position = _position_px + _offset_mount_px;
    _sprite_pusher->position = _position_px + _offset_pusher_px;
-   _sprite_spike->position = _position_px + _offset_spike_px + _blade_offset;
+   _sprite_spike->position = _position_px + _offset_spike_px + blade_offset;
 #else
    _sprite_mount->setPosition(_position_px + _offset_mount_px);
    _sprite_pusher->setPosition(_position_px + _offset_pusher_px);
-   _sprite_spike->setPosition(_position_px + _offset_spike_px + _blade_offset);
+   _sprite_spike->setPosition(_position_px + _offset_spike_px + blade_offset);
 #endif
 }

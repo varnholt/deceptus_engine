@@ -1,5 +1,7 @@
 #include "console.h"
 
+#include "game/physics/renderinterpolation.h"
+
 #include "framework/tools/callbackmap.h"
 #include "framework/tools/log.h"
 #include "game/config/tweaks.h"
@@ -287,6 +289,42 @@ Console::Console()
 
    // teleportation
    registerCallback("tps", [this](const auto&) { teleportToStartPosition(); }, "teleportation", "tps: teleport to start position");
+
+   registerCallback(
+      "interpolate",
+      [this](const auto& args)
+      {
+         if (args.size() == 2)
+         {
+            RenderInterpolation::setEnabled(std::atoi(args.at(1).c_str()) != 0);
+         }
+
+         std::ostringstream os;
+         os << "interpolation: " << (RenderInterpolation::isEnabled() ? "on" : "off");
+         _log.push_back(os.str());
+      },
+      "rendering",
+      "interpolate <0|1>: draw between simulation steps, or snap to the newest one",
+      {"interpolate 0"}
+   );
+
+   registerCallback(
+      "lead",
+      [this](const auto& args)
+      {
+         if (args.size() == 2)
+         {
+            RenderInterpolation::setLead(static_cast<float>(std::atof(args.at(1).c_str())));
+         }
+
+         std::ostringstream os;
+         os << "interpolation lead: " << RenderInterpolation::getLead();
+         _log.push_back(os.str());
+      },
+      "rendering",
+      "lead <0..1>: how far ahead of the simulation the picture is aimed. 0 lags by up to a step, 1 overshoots by one",
+      {"lead 0.5"}
+   );
 
    registerCallback(
       "tpp",
