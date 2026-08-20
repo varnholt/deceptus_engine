@@ -154,6 +154,10 @@ GameConfiguration& GameConfiguration::getInstance()
       // this session may never run at
       __instance._video_mode_width = 1280;
       __instance._video_mode_height = 720;
+
+      // the console is fragment bound at its scan-out resolution, so the lighting, normal and
+      // atmosphere passes run at half size by default here. the config file still overrides it
+      __instance._render_target_profile = "reduced";
 #elif !defined(__EMSCRIPTEN__)
       const auto desktop = sf::VideoMode::getDesktopMode();
       __instance._video_mode_width = static_cast<int32_t>(desktop.size.x);
