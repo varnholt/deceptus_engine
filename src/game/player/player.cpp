@@ -336,7 +336,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    if (current_cycle)
    {
       current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
-      drawDash(color, current_cycle, _sprite_position_px);
+      drawDash(color, current_cycle, _sprite_position_px + sf::Vector2f(0, 8));
       updateHurtColor(current_cycle);
       current_cycle->draw(color, normal, states);
    }
@@ -414,16 +414,20 @@ const sf::FloatRect& Player::getPixelRectFloat() const
 
 void Player::updateSpritePositions()
 {
-   // the y offset compensates the wonky box2d origin
-   _sprite_position_px = RenderInterpolation::positionPx(_position_px_f_previous, _position_px_f) + sf::Vector2f(0, 8);
+   _sprite_position_px = RenderInterpolation::positionPx(_position_px_f_previous, _position_px_f);
+
+   // that y offset compensates the wonky box2d origin. It belongs to these sprites rather than to
+   // the position: anything else riding on the player, the head torch helmet for one, has its own
+   // offset from the player and would be pushed down by this one
+   const auto body_position_px = _sprite_position_px + sf::Vector2f(0, 8);
 
    const auto& current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
    {
 #ifdef DECEPTUS_VRSFML
-      current_cycle->position = _sprite_position_px;
+      current_cycle->position = body_position_px;
 #else
-      current_cycle->setPosition(_sprite_position_px);
+      current_cycle->setPosition(body_position_px);
 #endif
    }
 
@@ -431,9 +435,9 @@ void Player::updateSpritePositions()
    if (auxiliary_cycle)
    {
 #ifdef DECEPTUS_VRSFML
-      auxiliary_cycle->position = _sprite_position_px;
+      auxiliary_cycle->position = body_position_px;
 #else
-      auxiliary_cycle->setPosition(_sprite_position_px);
+      auxiliary_cycle->setPosition(body_position_px);
 #endif
    }
 
