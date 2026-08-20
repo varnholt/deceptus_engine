@@ -10,8 +10,10 @@ float __alpha = 0.0f;
 //!< how far past that the picture is aimed, in steps. see setLead
 float __lead = 0.0f;
 
-//!< whether the frame is drawn between two simulation states at all. see setEnabled
-bool __enabled = true;
+//!< whether the frame is drawn between two simulation states at all. see setEnabled.
+//!< off by default: 60 steps a second reads as smooth on its own, and this way the frame is never
+//!< behind the simulation
+bool __enabled = false;
 }  // namespace
 
 namespace RenderInterpolation
