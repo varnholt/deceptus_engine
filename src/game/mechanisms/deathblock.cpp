@@ -422,8 +422,8 @@ void DeathBlock::updateBoundingBox()
 
 void DeathBlock::updateSprites()
 {
-   const auto x = _body->GetPosition().x * PPM - PIXELS_PER_TILE;
-   const auto y = _body->GetPosition().y * PPM - PIXELS_PER_TILE;
+   _interpolated_position.step(_body->GetPosition().x * PPM - PIXELS_PER_TILE, _body->GetPosition().y * PPM - PIXELS_PER_TILE);
+
    const auto tl_px = PIXELS_PER_TILE * 3;
 
    int32_t row = 1;  // first row is reserved for center
@@ -434,12 +434,22 @@ void DeathBlock::updateSprites()
          sfcompat::setTextureRect(*spike._sprite, sf::IntRect({spike._sprite_index * tl_px, tl_px * row}, {tl_px, tl_px}));
       }
 
-      sfcompat::setPosition(*spike._sprite, {x, y});
       row++;
    }
 
    sfcompat::setTextureRect(*_center_sprite, sf::IntRect({_center_sprite_index * tl_px, 0}, {tl_px, tl_px}));
-   sfcompat::setPosition(*_center_sprite, {x, y});
+}
+
+void DeathBlock::updateSpritePositions()
+{
+   const auto position_px = _interpolated_position.getPositionPx();
+
+   for (auto& spike : _spikes)
+   {
+      sfcompat::setPosition(*spike._sprite, position_px);
+   }
+
+   sfcompat::setPosition(*_center_sprite, position_px);
 }
 
 void DeathBlock::updatePosition(const sf::Time& dt)

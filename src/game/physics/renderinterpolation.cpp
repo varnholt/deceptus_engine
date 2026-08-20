@@ -33,3 +33,14 @@ float valuePx(float previous_px, float current_px)
 }
 
 }  // namespace RenderInterpolation
+
+void InterpolatedPosition::step(float x_px, float y_px)
+{
+   _previous_px = _current_px;
+   _current_px = sf::Vector2f{x_px, y_px};
+}
+
+sf::Vector2f InterpolatedPosition::getPositionPx() const
+{
+   return RenderInterpolation::positionPx(_previous_px, _current_px);
+}

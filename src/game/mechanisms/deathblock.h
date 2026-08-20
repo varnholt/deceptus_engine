@@ -5,6 +5,7 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/physics/renderinterpolation.h"
 
 #include "box2d/box2d.h"
 
@@ -45,6 +46,7 @@ public:
    /// \brief updates lever lag, spike animation states, movement, and player damage checks.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   void updateSpritePositions() override;
 
    /// \brief returns current block bounds in pixel coordinates.
    /// \return bounding rectangle around the 3x3 tile trap.
@@ -178,6 +180,10 @@ private:
    sf::Time _time_off;
    sf::Time _time_offset;
    std::array<Spike, 4> _spikes;
+
+   //!< where this was before the last simulation step, so a frame drawn between two steps is
+   //!< placed between the two rather than on the newest one
+   InterpolatedPosition _interpolated_position;
    std::unique_ptr<sf::Sprite> _center_sprite;
    float _center_sprite_time_s{0.0f};
    int32_t _center_sprite_index{0};

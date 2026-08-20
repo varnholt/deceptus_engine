@@ -165,6 +165,11 @@ public:
    /// \brief recomputes cached player pixel-space rectangles from current position.
    void updatePixelRect();
 
+   /// \brief places the player's sprites for the frame about to be drawn.
+   /// \note called once per frame after that frame's simulation steps, so it can place the sprites
+   ///       between the last two of them. Sprite positions belong in update; draw draws.
+   void updateSpritePositions();
+
    /// \brief refreshes current world chunk based on player pixel position.
    void updateChunk();
 
@@ -467,9 +472,13 @@ private:
    sf::Vector2f _position_px_f;
 
    //!< where the player was before the last simulation step. the simulation runs at a fixed rate,
-   //!< so a frame drawn between two steps has to draw between these two positions or it repeats a
-   //!< state it has already shown - see RenderInterpolation
+   //!< so a frame drawn between two steps has to be placed between these two positions or it repeats
+   //!< a state it has already shown - see RenderInterpolation
    sf::Vector2f _position_px_f_previous;
+
+   //!< where the sprites are placed for the frame about to be drawn, i.e. the interpolated position
+   //!< plus the box2d origin offset. Set by updateSpritePositions once per frame
+   sf::Vector2f _sprite_position_px;
    sf::Vector2i _position_px_i;
    sf::FloatRect _rect_px_f;
    sf::IntRect _rect_px_i;

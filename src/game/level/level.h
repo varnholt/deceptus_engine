@@ -96,6 +96,13 @@ public:
    /// \brief recalculates level, parallax, and image-layer views from camera position, panorama, and zoom.
    void updateViews();
 
+   /// \brief places every sprite in the level for the frame about to be drawn.
+   /// \note called once per frame after that frame's simulation steps, unlike update which runs once
+   ///       per step. The simulation advances at a fixed rate, so this is where the interpolation
+   ///       between the last two steps happens - and it is where sprite positions belong, because
+   ///       draw draws.
+   void updateSpritePositions();
+
    /// \brief rebuilds the views the frame is drawn through, from the interpolated camera position.
    /// \note separate from updateViews because that one also feeds the room lock, which must see the
    ///       simulation's camera rather than an interpolated one.

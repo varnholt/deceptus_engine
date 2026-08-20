@@ -97,6 +97,11 @@ struct LuaNode : public GameMechanism, public GameNode
    /// \brief syncs rendered position from box2d body coordinates.
    void updatePosition();
 
+   /// \brief places this node's sprites for the frame about to be drawn.
+   /// \note called once per frame after that frame's simulation steps, so it can place them between
+   ///       the last two. Sprite positions belong in update; draw draws.
+   void updateSpritePositions() override;
+
    /// \brief applies script-facing velocity constraints and friction behavior.
    void updateVelocity();
 

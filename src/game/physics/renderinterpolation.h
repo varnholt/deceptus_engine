@@ -42,3 +42,26 @@ sf::Vector2f positionPx(const sf::Vector2f& previous_px, const sf::Vector2f& cur
 float valuePx(float previous_px, float current_px);
 
 }  // namespace RenderInterpolation
+
+/// \brief remembers where something was across simulation steps, so it can be drawn in between.
+///
+/// Every mechanism that moves shares the same shape: a physics body advances once per simulation
+/// step, and a sprite is placed at its position plus an offset. Rather than each of them keeping its
+/// own pair of positions, they hold one of these: step() during update, getPositionPx() where the
+/// sprite is placed.
+class InterpolatedPosition
+{
+public:
+   /// \brief records the position this simulation step moved to.
+   /// \param x_px position along x, in pixels.
+   /// \param y_px position along y, in pixels.
+   void step(float x_px, float y_px);
+
+   /// \brief where to place the sprite for the frame about to be drawn.
+   /// \return the position between the last two steps, rounded to whole pixels.
+   sf::Vector2f getPositionPx() const;
+
+private:
+   sf::Vector2f _previous_px;
+   sf::Vector2f _current_px;
+};

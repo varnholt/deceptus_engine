@@ -332,19 +332,11 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
       weapon_system._selected->draw(color, states);
    }
 
-   // that y offset is to compensate the wonky box2d origin
-   const auto draw_position_px = RenderInterpolation::positionPx(_position_px_f_previous, _position_px_f) + sf::Vector2f(0, 8);
-
    const auto& current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
    {
       current_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
-#ifdef DECEPTUS_VRSFML
-      current_cycle->position = draw_position_px;
-#else
-      current_cycle->setPosition(draw_position_px);
-#endif
-      drawDash(color, current_cycle, draw_position_px);
+      drawDash(color, current_cycle, _sprite_position_px);
       updateHurtColor(current_cycle);
       current_cycle->draw(color, normal, states);
    }
@@ -353,11 +345,6 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    if (auxiliary_cycle)
    {
       auxiliary_cycle->setColor(sf::Color(255, 255, 255, static_cast<uint8_t>(_fade_out_alpha * 255)));
-#ifdef DECEPTUS_VRSFML
-      auxiliary_cycle->position = draw_position_px;
-#else
-      auxiliary_cycle->setPosition(draw_position_px);
-#endif
       auxiliary_cycle->draw(color, normal, states);
    }
 
@@ -375,7 +362,6 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
 void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states)
 {
    const auto stencil_color = sf::Color{255, 255, 255, 25};
-   const auto draw_position_px = RenderInterpolation::positionPx(_position_px_f_previous, _position_px_f) + sf::Vector2f(0, 8);
 
    // the silhouette shader forces the occluded player to transparent white (its rgb comes from the
    // shader, its alpha from the sprite shape scaled by u_alpha) instead of the dimmed sprite colors
@@ -391,11 +377,6 @@ void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states
    if (current_cycle)
    {
       current_cycle->setColor(stencil_color);
-#ifdef DECEPTUS_VRSFML
-      current_cycle->position = draw_position_px;
-#else
-      current_cycle->setPosition(draw_position_px);
-#endif
       current_cycle->draw(color, stencil_states);
    }
 
@@ -403,11 +384,6 @@ void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states
    if (auxiliary_cycle)
    {
       auxiliary_cycle->setColor(stencil_color);
-#ifdef DECEPTUS_VRSFML
-      auxiliary_cycle->position = draw_position_px;
-#else
-      auxiliary_cycle->setPosition(draw_position_px);
-#endif
       auxiliary_cycle->draw(color, stencil_states);
    }
 }
@@ -434,6 +410,32 @@ void Player::setPixelPosition(float x, float y)
 const sf::FloatRect& Player::getPixelRectFloat() const
 {
    return _rect_px_f;
+}
+
+void Player::updateSpritePositions()
+{
+   // the y offset compensates the wonky box2d origin
+   _sprite_position_px = RenderInterpolation::positionPx(_position_px_f_previous, _position_px_f) + sf::Vector2f(0, 8);
+
+   const auto& current_cycle = _player_animation->getCurrentCycle();
+   if (current_cycle)
+   {
+#ifdef DECEPTUS_VRSFML
+      current_cycle->position = _sprite_position_px;
+#else
+      current_cycle->setPosition(_sprite_position_px);
+#endif
+   }
+
+   const auto& auxiliary_cycle = _player_animation->getAuxiliaryCycle();
+   if (auxiliary_cycle)
+   {
+#ifdef DECEPTUS_VRSFML
+      auxiliary_cycle->position = _sprite_position_px;
+#else
+      auxiliary_cycle->setPosition(_sprite_position_px);
+#endif
+   }
 }
 
 void Player::updatePixelRect()

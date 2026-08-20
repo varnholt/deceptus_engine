@@ -3,6 +3,7 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/physics/renderinterpolation.h"
 
 #include "box2d/box2d.h"
 
@@ -38,6 +39,7 @@ public:
    /// \brief updates wind impulses, player influence, and rope motion.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   void updateSpritePositions() override;
 
    /// \brief returns the interaction area used for player impulse transfer.
    /// \return rope bounding rectangle in pixel space.
@@ -64,6 +66,15 @@ protected:
    float _segment_length_m = 0.01f;
 
    std::vector<b2Body*> _chain_elements;
+
+   //!< where each chain element sat before the last simulation step, and where it sits now, so the
+   //!< strip can be built between the two rather than jumping once per step. Mechanisms update after
+   //!< the world has stepped, so the pair is kept by shifting rather than by reading the bodies twice
+   std::vector<b2Vec2> _chain_positions_previous_m;
+   std::vector<b2Vec2> _chain_positions_current_m;
+
+   //!< the strip the rope is drawn as, rebuilt once per frame by updateSpritePositions
+   std::vector<sf::Vertex> _strip;
    std::shared_ptr<sf::Texture> _texture;
    std::shared_ptr<sf::Texture> _normal_map;
 

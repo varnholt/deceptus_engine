@@ -16,6 +16,7 @@
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h" 0
+#include "game/physics/renderinterpolation.h"
 #include "game/player/playerregistry.h"
 
 #include <array>
@@ -384,6 +385,23 @@ void MovingPlatform::updateLeverLag(const sf::Time& delta_time)
    }
 }
 
+void MovingPlatform::updateSpritePositions()
+{
+   // the platform carries the player, so it has to be placed between the same two simulation steps
+   // the player is - otherwise the player appears to slide along it
+   const auto horizontal = (_platform_width_tl > 1) ? 1 : 0;
+   const auto position_px =
+      RenderInterpolation::positionPx(sf::Vector2f{_pos_prev_m.x * PPM, _pos_prev_m.y * PPM}, sf::Vector2f{_pos_m.x * PPM, _pos_m.y * PPM});
+
+   auto sprite_index = 0;
+   for (auto& sprite : _sprites)
+   {
+      // there is one tile offset for the perspective tile
+      sfcompat::setPosition(sprite, {position_px.x + (horizontal * sprite_index * PIXELS_PER_TILE), position_px.y - PIXELS_PER_TILE});
+      sprite_index++;
+   }
+}
+
 void MovingPlatform::update(const sf::Time& delta_time)
 {
    updateLeverLag(delta_time);
@@ -432,10 +450,6 @@ void MovingPlatform::update(const sf::Time& delta_time)
 
    for (auto& sprite : _sprites)
    {
-      const auto pos_body_x_px = (_body->GetPosition().x * PPM) + (horizontal * sprite_index * PIXELS_PER_TILE);
-      const auto pos_body_y_px = (_body->GetPosition().y * PPM) - PIXELS_PER_TILE;  // there's one tile offset for the perspective tile
-
-      sfcompat::setPosition(sprite, {pos_body_x_px, pos_body_y_px});
       auto update_sprite_rect = false;
       auto texture_u = 0;
       auto texture_v = 0;

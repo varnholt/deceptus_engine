@@ -132,6 +132,10 @@ void GameMechanism::draw(sf::RenderTarget& target, sf::RenderTarget& normal, con
    draw(target, normal);
 }
 
+void GameMechanism::updateSpritePositions()
+{
+}
+
 void GameMechanism::update(const sf::Time& /*dt*/)
 {
 }

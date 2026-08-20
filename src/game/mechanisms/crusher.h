@@ -74,7 +74,7 @@ private:
    void updateState();
 
    /// \brief updates sprite scaling and positions to match current blade offset.
-   void updateSpritePositions();
+   void updateSpritePositions() override;
 
    /// \brief triggers a camera shake boom once during extraction when allowed.
    void startBoomEffect();
@@ -90,6 +90,11 @@ private:
    b2Body* _body{nullptr};
    sf::Vector2f _position_px;
    sf::Vector2f _blade_offset;
+
+   //!< how far the blade had travelled before the last simulation step. The blade is driven by an
+   //!< easing over simulated time rather than by a body, but it still only advances once per step,
+   //!< so a frame drawn in between is placed between the two - see RenderInterpolation
+   sf::Vector2f _blade_offset_previous;
    sf::FloatRect _rect;
 
    sf::Time _idle_time;

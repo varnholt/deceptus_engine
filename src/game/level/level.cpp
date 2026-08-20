@@ -832,6 +832,26 @@ void Level::updateViews()
    updateViewsForDraw();
 }
 
+void Level::updateSpritePositions()
+{
+   // the views first: everything below is placed in world space, and the view is what decides where
+   // that lands on screen, so the two have to be derived from the same interpolated camera
+   updateViewsForDraw();
+
+   for (auto& mechanism_vector : _mechanism_registry.getList())
+   {
+      for (auto& mechanism : *mechanism_vector)
+      {
+         mechanism->updateSpritePositions();
+      }
+   }
+
+   for (const auto& enemy : LuaInterface::instance().getObjectList())
+   {
+      enemy->updateSpritePositions();
+   }
+}
+
 void Level::updateViewsForDraw()
 {
    // the view is built from where the camera sits between the last two simulation steps, matching
@@ -1653,10 +1673,6 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _screenshot = screenshot;
 
    rebuildMechanismDrawIndex();
-
-   // a frame drawn between two simulation steps needs its own view, or the whole scene would only
-   // move once per step while everything drawn in it interpolates
-   updateViewsForDraw();
 
    // the distortion shader reads the atmosphere map at each fragment's own position, so atmosphere
    // tiles that are off screen cannot bend a pixel on it. With none on screen the shader reduces to

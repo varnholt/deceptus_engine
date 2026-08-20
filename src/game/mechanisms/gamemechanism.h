@@ -54,6 +54,16 @@ public:
    /// \param states render states to apply (carries .view for WASM camera transform).
    virtual void draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states);
 
+   /// \brief places this mechanism's sprites for the frame about to be drawn.
+   ///
+   /// Called once per frame, after the simulation steps for that frame have run. Mechanisms that move
+   /// override it and position their sprites between the state they had before the last step and the
+   /// state they have now, via RenderInterpolation - the simulation advances at a fixed rate, so a
+   /// frame drawn between two steps would otherwise repeat a position it has already shown.
+   ///
+   /// Sprite positions belong here rather than in draw: draw draws.
+   virtual void updateSpritePositions();
+
    /// \brief updates mechanism logic for one frame.
    /// \param dt elapsed frame time.
    virtual void update(const sf::Time& dt);

@@ -13,6 +13,7 @@ struct TmxObject;
 #include "game/io/gamedeserializedata.h"
 #include "game/level/fixturenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/physics/renderinterpolation.h"
 
 #include "box2d/box2d.h"
 
@@ -46,6 +47,7 @@ public:
    /// \brief updates motion, contact logic, popping conditions, and respawn state.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   void updateSpritePositions() override;
 
    /// \brief returns the original platform bounds in pixel coordinates.
    /// \return rectangle for culling and gameplay checks.
@@ -124,6 +126,10 @@ private:
    // sf
    std::shared_ptr<sf::Texture> _texture;
    std::unique_ptr<sf::Sprite> _sprite;
+
+   //!< where this was before the last simulation step, so a frame drawn between two steps is
+   //!< placed between the two rather than on the newest one
+   InterpolatedPosition _interpolated_position;
 
    // b2d
    b2Body* _body = nullptr;

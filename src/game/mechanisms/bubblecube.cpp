@@ -304,10 +304,16 @@ void BubbleCube::updateSpriteIndex()
 void BubbleCube::updatePosition()
 {
    const auto pos_px = PPM * _body->GetPosition();
-   sfcompat::setPosition(*_sprite, {pos_px.x + sprite_offset_x_px, pos_px.y + sprite_offset_y_px});
+   _interpolated_position.step(pos_px.x, pos_px.y);
 
    // move translated rect along body position
    _translated_rect_px.position.y = _body->GetPosition().y * PPM;
+}
+
+void BubbleCube::updateSpritePositions()
+{
+   const auto position_px = _interpolated_position.getPositionPx();
+   sfcompat::setPosition(*_sprite, {position_px.x + sprite_offset_x_px, position_px.y + sprite_offset_y_px});
 }
 
 void BubbleCube::updateRespawnCondition()

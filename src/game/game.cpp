@@ -1157,6 +1157,14 @@ void Game::update()
             }
          }
 
+         // once per frame, after the steps: the simulation has moved, so the sprites are placed
+         // where they sit between the last two steps. Positions belong in update, draw draws
+         if (_level)
+         {
+            _level->updateSpritePositions();
+            _player->updateSpritePositions();
+         }
+
 #ifndef DECEPTUS_VRSFML
          if (DebugDrawStates::_draw_test_scene)
          {

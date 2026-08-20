@@ -84,15 +84,19 @@ void MoveableBox::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, co
    color.draw(*_sprite, draw_states);
 }
 
+void MoveableBox::updateSpritePositions()
+{
+   const auto position_px = _interpolated_position.getPositionPx();
+#ifdef DECEPTUS_VRSFML
+   _sprite->position = {position_px.x, position_px.y - 24};
+#else
+   _sprite->setPosition({position_px.x, position_px.y - 24});
+#endif
+}
+
 void MoveableBox::update(const sf::Time& /*dt*/)
 {
-   const auto x = _body->GetPosition().x * PPM;
-   const auto y = _body->GetPosition().y * PPM;
-#ifdef DECEPTUS_VRSFML
-   _sprite->position = {x, y - 24};
-#else
-   _sprite->setPosition({x, y - 24});
-#endif
+   _interpolated_position.step(_body->GetPosition().x * PPM, _body->GetPosition().y * PPM);
 
    // if the thing is moving, start playing a scratching sound
    if (fabs(_body->GetLinearVelocity().x) > 0.01)
