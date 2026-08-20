@@ -1083,7 +1083,7 @@ void Level::drawPostLightingLayers(sf::RenderTarget& target)
       {
          if (tile_map->getZ() == z_index && tile_map->isPostLighting())
          {
-            tile_map->draw(target, target, level_view_states);
+            tile_map->draw(target, target, level_view_states, std::nullopt, {});
          }
       }
 
@@ -1194,6 +1194,17 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
    const auto stencil_start_layer = PlayerStencil::getStartLayer();
    const auto stencil_stop_layer = PlayerStencil::getStopLayer();
 
+   // the normal pass only feeds the deferred lighting shader, which multiplies every normal by a
+   // light's sprite mask before it can contribute anything. so the pass is worth exactly the region
+   // the active lights reach: a scissor around that leaves the frame identical and takes the second
+   // tile pass off the rest of the screen, and no light on screen takes it off the frame entirely
+   const auto normal_view = _light_system->clipViewToActiveLights(*_level_view);
+
+   // one rectangle around six scattered lights is the whole view, so the scissor above rarely
+   // narrows anything on its own. the per light rectangles do: a tile block none of them touches is
+   // dropped from the normal batch entirely
+   const auto& normal_clip_rects_px = _light_system->getActiveLightBoundsPx();
+
    for (auto z_index = from; z_index <= to; z_index++)
    {
       // reset the stencil mask before the foreground layers start writing into it
@@ -1231,7 +1242,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 #endif
          if (tile_map->getZ() == z_index && !tile_map->isPostLighting())
          {
-            tile_map->draw(target, normal, layer_states);
+            tile_map->draw(target, normal, layer_states, normal_view, normal_clip_rects_px);
          }
       }
 
@@ -1292,7 +1303,7 @@ void Level::drawLayers(sf::RenderTarget& target, sf::RenderTarget& normal, int32
 
 void Level::drawAtmosphereLayer()
 {
-   if (!_atmosphere._tile_map)
+   if (!_atmosphere._tile_map || !_atmosphere_visible)
    {
       return;
    }
@@ -1622,6 +1633,19 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
 
    rebuildMechanismDrawIndex();
 
+   // the distortion shader reads the atmosphere map at each fragment's own position, so atmosphere
+   // tiles that are off screen cannot bend a pixel on it. With none on screen the shader reduces to
+   // a plain copy of what it samples, and rendering the atmosphere map plus running the shader over
+   // two full screen resolves is work with no result at all
+   const auto view_center = sfcompat::getViewCenter(*_level_view);
+   const auto view_size = sfcompat::getViewSize(*_level_view);
+   const auto view_rect_px = sf::FloatRect{{view_center.x - view_size.x * 0.5f, view_center.y - view_size.y * 0.5f}, view_size};
+   _atmosphere_visible = _atmosphere._tile_map && _atmosphere.hasTileInRect(view_rect_px);
+
+   // the light map is rendered after the level layers, but the layers already need to know which
+   // lights are live: the normal pass is clipped to the region they reach
+   _light_system->updateActiveLights();
+
    beginRenderSectionTiming();
 
    // render atmosphere to atmosphere texture, that texture is used in the shader only
@@ -1636,44 +1660,62 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    drawGlowLayer();
 #endif
 
+   // the background layers only need a detour through level_background and normal_tmp so the
+   // distortion shader has something to read that is not the target it writes. with no atmosphere on
+   // screen there is no distortion, so they can go straight into the final targets - which drops two
+   // clears and two full screen blits from the frame
+   auto& background_color_target = _atmosphere_visible ? *_render_targets.level_background.get() : *_render_targets.level.get();
+   auto& background_normal_target = _atmosphere_visible ? *_render_targets.normal_tmp.get() : *_render_targets.normal.get();
+
    // render layers affected by the atmosphere
    _render_targets.level->clear();
-   _render_targets.level_background->clear();
-   _render_targets.normal_tmp->clear();
    _render_targets.normal->clear();
+   if (_atmosphere_visible)
+   {
+      _render_targets.level_background->clear();
+      _render_targets.normal_tmp->clear();
+   }
    markRenderSection("clear level targets");
 
    drawLayers(
-      *_render_targets.level_background.get(),
-      *_render_targets.normal_tmp.get(),
+      background_color_target,
+      background_normal_target,
       static_cast<int32_t>(ZDepth::BackgroundMin),
       static_cast<int32_t>(ZDepth::BackgroundMax)
    );
 
-   _render_targets.level_background->display();
-   takeScreenshot("texture_level_background", *_render_targets.level_background.get());
+   if (_atmosphere_visible)
+   {
+      _render_targets.level_background->display();
+      takeScreenshot("texture_level_background", *_render_targets.level_background.get());
 
-   _render_targets.normal_tmp->display();
-   takeScreenshot("texture_level_background_normal", *_render_targets.normal_tmp.get());
+      _render_targets.normal_tmp->display();
+      takeScreenshot("texture_level_background_normal", *_render_targets.normal_tmp.get());
+   }
    markRenderSection("background layers");
 
    // draw the atmospheric parts into the level texture using the atmosphere shader
 #ifndef DECEPTUS_VRSFML
-   sf::Sprite tmp_sprite(_render_targets.level_background->getTexture());
-   _atmosphere_shader->update();
-   _render_targets.level->draw(tmp_sprite, &_atmosphere_shader->getShader());
-   takeScreenshot("texture_level_level_dist", *_render_targets.level.get());
+   if (_atmosphere_visible)
+   {
+      sf::Sprite tmp_sprite(_render_targets.level_background->getTexture());
+      _atmosphere_shader->update();
+      const auto* atmosphere_shader = &_atmosphere_shader->getShader();
 
-   // draw the normal parts into the final normal texture using the atmosphere shader
-   tmp_sprite.setTexture(_render_targets.normal_tmp->getTexture());
-   _atmosphere_shader->update();
-   _render_targets.normal->draw(tmp_sprite, &_atmosphere_shader->getShader());
-   takeScreenshot("texture_level_background_normal_dist", *_render_targets.normal.get());
+      _render_targets.level->draw(tmp_sprite, atmosphere_shader);
+      takeScreenshot("texture_level_level_dist", *_render_targets.level.get());
+
+      // draw the normal parts into the final normal texture using the atmosphere shader
+      tmp_sprite.setTexture(_render_targets.normal_tmp->getTexture());
+      _render_targets.normal->draw(tmp_sprite, atmosphere_shader);
+      takeScreenshot("texture_level_background_normal_dist", *_render_targets.normal.get());
+   }
 
 #ifdef GLOW_ENABLED
    drawGlowSprite();
 #endif
 #else
+   if (_atmosphere_visible)
    {
       sf::Sprite atmosphere_sprite;
       const sf::Vector2u atmosphere_sprite_size = _render_targets.level_background->getSize();
@@ -1681,13 +1723,13 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
          sf::FloatRect{{0.f, 0.f}, {static_cast<float>(atmosphere_sprite_size.x), static_cast<float>(atmosphere_sprite_size.y)}};
 
       _atmosphere_shader->update();
-      const sf::Shader& atmosphere_shader = _atmosphere_shader->getShader();
+      const auto* atmosphere_shader = &_atmosphere_shader->getShader();
 
       const sf::Texture& level_background_texture = _render_targets.level_background->getTexture();
-      _render_targets.level->draw(atmosphere_sprite, sf::RenderStates{.texture = &level_background_texture, .shader = &atmosphere_shader});
+      _render_targets.level->draw(atmosphere_sprite, sf::RenderStates{.texture = &level_background_texture, .shader = atmosphere_shader});
 
       const sf::Texture& normal_tmp_texture = _render_targets.normal_tmp->getTexture();
-      _render_targets.normal->draw(atmosphere_sprite, sf::RenderStates{.texture = &normal_tmp_texture, .shader = &atmosphere_shader});
+      _render_targets.normal->draw(atmosphere_sprite, sf::RenderStates{.texture = &normal_tmp_texture, .shader = atmosphere_shader});
    }
 #endif
    markRenderSection("atmosphere resolve");

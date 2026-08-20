@@ -1,5 +1,7 @@
 #include "atmosphere.h"
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 
 #include "framework/tmxparser/tmxlayer.h"
@@ -48,6 +50,34 @@ void Atmosphere::parse(const std::shared_ptr<TmxLayer>& layer, const std::shared
          _map[y_tl * width_tl + x_tl] = tile_relative;
       }
    }
+}
+
+bool Atmosphere::hasTileInRect(const sf::FloatRect& rect_px) const
+{
+   if (_map.empty())
+   {
+      return false;
+   }
+
+   const auto first_x_tl = std::max(0, static_cast<int32_t>(std::floor(rect_px.position.x / PIXELS_PER_TILE)));
+   const auto first_y_tl = std::max(0, static_cast<int32_t>(std::floor(rect_px.position.y / PIXELS_PER_TILE)));
+   const auto last_x_tl =
+      std::min(_map_width_tl - 1, static_cast<int32_t>(std::floor((rect_px.position.x + rect_px.size.x) / PIXELS_PER_TILE)));
+   const auto last_y_tl =
+      std::min(_map_height_tl - 1, static_cast<int32_t>(std::floor((rect_px.position.y + rect_px.size.y) / PIXELS_PER_TILE)));
+
+   for (auto y_tl = first_y_tl; y_tl <= last_y_tl; y_tl++)
+   {
+      for (auto x_tl = first_x_tl; x_tl <= last_x_tl; x_tl++)
+      {
+         if (_map[y_tl * _map_width_tl + x_tl] != static_cast<int32_t>(AtmosphereTileInvalid))
+         {
+            return true;
+         }
+      }
+   }
+
+   return false;
 }
 
 AtmosphereTile Atmosphere::getTileForPosition(const b2Vec2& pos_m) const
