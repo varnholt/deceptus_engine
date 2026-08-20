@@ -291,6 +291,24 @@ Console::Console()
    registerCallback("tps", [this](const auto&) { teleportToStartPosition(); }, "teleportation", "tps: teleport to start position");
 
    registerCallback(
+      "interpolate",
+      [this](const auto& args)
+      {
+         if (args.size() == 2)
+         {
+            RenderInterpolation::setEnabled(std::atoi(args.at(1).c_str()) != 0);
+         }
+
+         std::ostringstream os;
+         os << "interpolation: " << (RenderInterpolation::isEnabled() ? "on" : "off");
+         _log.push_back(os.str());
+      },
+      "rendering",
+      "interpolate <0|1>: draw between simulation steps, or snap to the newest one",
+      {"interpolate 0"}
+   );
+
+   registerCallback(
       "lead",
       [this](const auto& args)
       {

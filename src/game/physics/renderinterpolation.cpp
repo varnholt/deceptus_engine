@@ -9,6 +9,9 @@ float __alpha = 0.0f;
 
 //!< how far past that the picture is aimed, in steps. see setLead
 float __lead = 0.0f;
+
+//!< whether the frame is drawn between two simulation states at all. see setEnabled
+bool __enabled = true;
 }  // namespace
 
 namespace RenderInterpolation
@@ -34,6 +37,16 @@ float getLead()
    return __lead;
 }
 
+void setEnabled(bool enabled)
+{
+   __enabled = enabled;
+}
+
+bool isEnabled()
+{
+   return __enabled;
+}
+
 sf::Vector2f positionPx(const sf::Vector2f& previous_px, const sf::Vector2f& current_px)
 {
    return sf::Vector2f{valuePx(previous_px.x, current_px.x), valuePx(previous_px.y, current_px.y)};
@@ -41,6 +54,11 @@ sf::Vector2f positionPx(const sf::Vector2f& previous_px, const sf::Vector2f& cur
 
 float valuePx(float previous_px, float current_px)
 {
+   if (!__enabled)
+   {
+      return current_px;
+   }
+
    return previous_px + (current_px - previous_px) * (__alpha + __lead);
 }
 

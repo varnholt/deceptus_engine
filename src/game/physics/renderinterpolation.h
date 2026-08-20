@@ -41,6 +41,16 @@ float getAlpha();
 ///       because the camera follows the player and the scenery does not.
 void setLead(float lead);
 
+/// \brief turns the interpolation off, so every frame draws the newest simulation state.
+/// \param enabled false snaps to the last step instead of drawing between the last two.
+/// \note off is what the game did before any of this: correct speed, but a frame rate above
+///       the step rate repeats a position it has already shown. Here to be able to feel the
+///       difference rather than argue about it.
+void setEnabled(bool enabled);
+
+/// \brief whether the frame is drawn between two simulation states.
+bool isEnabled();
+
 /// \brief how far past the frame's own point in time the picture is aimed, in steps.
 float getLead();
 
