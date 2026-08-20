@@ -170,6 +170,12 @@ public:
    ///       between the last two of them. Sprite positions belong in update; draw draws.
    void updateSpritePositions();
 
+   /// \brief where the player's sprites are placed for the frame being drawn.
+   /// \return the interpolated position, i.e. not the simulation position from getPixelPositionFloat.
+   /// \note anything drawn on the player - the head torch, its helmet - has to use this, or it ends
+   ///       up a step away from the body it is supposed to sit on.
+   const sf::Vector2f& getSpritePositionPx() const override;
+
    /// \brief refreshes current world chunk based on player pixel position.
    void updateChunk();
 

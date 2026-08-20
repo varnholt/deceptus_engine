@@ -9,6 +9,17 @@
 // Items have their own update and draw functions, so they can have their own behavior and
 // visuals while being equipped.
 
+void ItemSystem::updateSpritePositions()
+{
+   for (auto& item : _slots)
+   {
+      if (item)
+      {
+         item->updateSpritePositions();
+      }
+   }
+}
+
 void ItemSystem::update(const sf::Time& dt)
 {
    for (auto& item : _slots)

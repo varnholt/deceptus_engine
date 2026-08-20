@@ -22,6 +22,11 @@ public:
    /// \param dt elapsed frame time since the previous update.
    virtual void update(const sf::Time& dt);
 
+   /// \brief places this item's sprites for the frame about to be drawn.
+   /// \note items ride on the player, which is placed once per frame from an interpolated position,
+   ///       so an item placed once per simulation step would sit a step away from it.
+   virtual void updateSpritePositions();
+
    /// \brief handles the item being equipped by the player.
    virtual void onEquipped();
 

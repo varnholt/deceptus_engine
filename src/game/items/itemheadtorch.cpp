@@ -58,6 +58,18 @@ void ItemHeadTorch::draw(sf::RenderTarget& target, const sf::RenderStates& state
 #endif
 }
 
+void ItemHeadTorch::updateSpritePositions()
+{
+   if (!_enabled || !_helmet_offset_px.has_value())
+   {
+      return;
+   }
+
+   const auto helmet_position_px = PlayerRegistry::getFirst()->getSpritePositionPx() + _helmet_offset_px.value();
+   sfcompat::setPosition(*_helmet_sprite_r, helmet_position_px);
+   sfcompat::setPosition(*_helmet_sprite_l, helmet_position_px);
+}
+
 void ItemHeadTorch::update(const sf::Time& delta_time)
 {
    if (!_enabled)
@@ -214,9 +226,7 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
    sfcompat::setRotation(*inactive_light->_sprite, sf::degrees(0.0f));
 
    sf::Vector2f helmet_offset_px{pointing_right ? -50.0f : -45.0f, -54.0f};
-   const auto helmet_position_px = player->getPixelPositionFloat() + _last_valid_eye_position.value() + helmet_offset_px;
-   sfcompat::setPosition(*_helmet_sprite_r, helmet_position_px);
-   sfcompat::setPosition(*_helmet_sprite_l, helmet_position_px);
+   _helmet_offset_px = _last_valid_eye_position.value() + helmet_offset_px;
    const uint8_t helmet_alpha = static_cast<uint8_t>(255.0f * fade_alpha_factor);
    sfcompat::setColor(*_helmet_sprite_r, sf::Color(255, 255, 255, helmet_alpha));
    sfcompat::setColor(*_helmet_sprite_l, sf::Color(255, 255, 255, helmet_alpha));

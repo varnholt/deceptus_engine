@@ -32,6 +32,12 @@ public:
    /// \return pixel-space player position.
    virtual const sf::Vector2f& getPixelPositionFloat() const = 0;
 
+   /// \brief where the player's sprites are placed for the frame being drawn.
+   /// \return the interpolated position, as opposed to the simulation position above.
+   /// \note anything drawn on the player has to use this one, or it ends up a step away from the
+   ///       body it is supposed to sit on.
+   virtual const sf::Vector2f& getSpritePositionPx() const = 0;
+
    /// \brief gets current player position in integer pixel coordinates.
    /// \return pixel-space player position rounded to integers.
    virtual const sf::Vector2i& getPixelPositionInt() const = 0;

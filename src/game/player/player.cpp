@@ -436,6 +436,14 @@ void Player::updateSpritePositions()
       auxiliary_cycle->setPosition(_sprite_position_px);
 #endif
    }
+
+   // the equipped items ride on the player, so they are placed from the same position the body is
+   SaveState::getPlayerInfo()._items.updateSpritePositions();
+}
+
+const sf::Vector2f& Player::getSpritePositionPx() const
+{
+   return _sprite_position_px;
 }
 
 void Player::updatePixelRect()
