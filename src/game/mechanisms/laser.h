@@ -4,6 +4,7 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/physics/renderinterpolation.h"
 
 // sfml
 #include "SFML/Graphics.hpp"
@@ -64,6 +65,7 @@ public:
    /// \brief updates signal timing, frame animation, optional movement, and player collision checks.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+   void updateSpritePositions() override;
 
    /// \brief returns the base laser tile rectangle.
    /// \return laser rectangle in pixels.
@@ -128,6 +130,10 @@ protected:
 
    std::optional<std::vector<sf::Vector2f>> _path;
    sf::Vector2f _move_offset_px;
+
+   //!< where the laser sat before the last simulation step. It travels along a path over simulated
+   //!< time rather than from a body, but it still only advances once per step
+   InterpolatedPosition _interpolated_position;
    PathInterpolation<sf::Vector2f> _path_interpolation;
 
    bool _on = true;

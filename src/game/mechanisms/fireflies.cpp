@@ -3,6 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
@@ -83,6 +84,14 @@ void Fireflies::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, con
    for (const auto& firefly : _fireflies)
    {
       target.draw(*firefly._sprite, draw_states);
+   }
+}
+
+void Fireflies::updateSpritePositions()
+{
+   for (auto& firefly : _fireflies)
+   {
+      firefly.updateSpritePosition();
    }
 }
 
@@ -249,15 +258,20 @@ void Fireflies::Firefly::update(const sf::Time& dt)
    _position.x = _rect_px.position.x + (_rect_px.size.x * 0.5f) + x_scaled_px;
    _position.y = _rect_px.position.y + (_rect_px.size.y * 0.5f) + y_scaled_px;
 
+   _interpolated_position.step(_position.x, _position.y);
+
 #ifdef DECEPTUS_VRSFML
-   _sprite->position = _position;
    _sprite->origin = {PIXELS_PER_TILE / 2, PIXELS_PER_TILE / 2};
 #else
-   _sprite->setPosition(_position);
    _sprite->setOrigin({PIXELS_PER_TILE / 2, PIXELS_PER_TILE / 2});
 #endif
 
    updateTextureRect();
+}
+
+void Fireflies::Firefly::updateSpritePosition()
+{
+   sfcompat::setPosition(*_sprite, _interpolated_position.getPositionPx());
 }
 
 void Fireflies::Firefly::updateTextureRect()

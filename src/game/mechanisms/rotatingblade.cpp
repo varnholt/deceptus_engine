@@ -274,6 +274,14 @@ void RotatingBlade::updateAudio()
    }
 }
 
+void RotatingBlade::updateSpritePositions()
+{
+   // the rotation is interpolated too, otherwise the blade turns in steps while it travels smoothly
+   const auto alpha = RenderInterpolation::getAlpha();
+   sfcompat::setRotation(*_sprite, sf::degrees(_angle_previous + (_angle - _angle_previous) * alpha));
+   sfcompat::setPosition(*_sprite, _interpolated_position.getPositionPx());
+}
+
 void RotatingBlade::update(const sf::Time& dt)
 {
    if (_enabled)
@@ -288,10 +296,10 @@ void RotatingBlade::update(const sf::Time& dt)
    // update position and rotation along path
    const auto movement_delta = dt.asSeconds() * _velocity * _settings._movement_speed;
    _path_interpolation.updateTime(movement_delta);
+   _angle_previous = _angle;
    _angle += dt.asSeconds() * _velocity * _direction * _settings._blade_rotation_speed;
    _pos = _path_interpolation.computePosition(_path_interpolation.getTime());
-   sfcompat::setRotation(*_sprite, sf::degrees(_angle));
-   sfcompat::setPosition(*_sprite, _pos);
+   _interpolated_position.step(_pos.x, _pos.y);
 
    updateAudio();
 

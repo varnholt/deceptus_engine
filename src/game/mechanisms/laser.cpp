@@ -85,6 +85,16 @@ const sf::FloatRect& Laser::getPixelRect() const
    return _rect_px;
 }
 
+void Laser::updateSpritePositions()
+{
+   if (!_path.has_value())
+   {
+      return;
+   }
+
+   sfcompat::setPosition(*_sprite, _interpolated_position.getPositionPx());
+}
+
 void Laser::update(const sf::Time& dt)
 {
    _time += dt.asMilliseconds();
@@ -213,7 +223,7 @@ void Laser::update(const sf::Time& dt)
       {
          _path_interpolation.updateTime(_settings._movement_speed * dt.asSeconds());
          _move_offset_px = _path_interpolation.computePosition(_path_interpolation.getTime());
-         sfcompat::setPosition(*_sprite, _position_px + _move_offset_px);
+         _interpolated_position.step(_position_px.x + _move_offset_px.x, _position_px.y + _move_offset_px.y);
       }
    }
 
