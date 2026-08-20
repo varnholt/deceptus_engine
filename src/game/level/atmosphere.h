@@ -3,8 +3,8 @@
 #include "game/constants.h"
 #include "level/tilemap.h"
 
-#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
+#include "box2d/box2d.h"
 
 #include <cstdint>
 #include <vector>
@@ -35,6 +35,15 @@ struct Atmosphere
    /// \param pos_px world position in pixels.
    /// \return atmosphere tile at the queried location, or AtmosphereTileInvalid when out of bounds.
    AtmosphereTile getTileForPosition(const sf::Vector2f& pos_px) const;
+
+   /// \brief whether any atmosphere tile falls inside a rectangle given in pixels.
+   /// \param rect_px region to test, in world pixels.
+   /// \return true as soon as one atmosphere tile is found inside it.
+   /// \note the distortion shader decides per fragment, from the atmosphere map at that fragment's
+   ///       own position, so an atmosphere tile off screen cannot distort anything on it. With none
+   ///       on screen the shader is an exact copy of what it samples, which is what lets the whole
+   ///       atmosphere pass be skipped rather than run to no effect.
+   bool hasTileInRect(const sf::FloatRect& rect_px) const;
 
    std::vector<int32_t> _map;
 

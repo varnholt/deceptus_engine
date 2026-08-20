@@ -69,6 +69,17 @@ inline void setViewScissor(sf::View& view, const sf::FloatRect& scissor)
 #endif
 }
 
+/// \brief returns a view's scissor rectangle, as a fraction of the target.
+/// \note an unscissored view reports the whole target, i.e. position 0,0 and size 1,1.
+inline sf::FloatRect getViewScissor(const sf::View& view)
+{
+#ifdef DECEPTUS_VRSFML
+   return view.scissor;
+#else
+   return view.getScissor();
+#endif
+}
+
 /// \brief sets the origin of a transformable object.
 template <typename Drawable>
 inline void setOrigin(Drawable& drawable, const sf::Vector2f& origin)

@@ -46,7 +46,13 @@ bool StencilTileMap::load(
    return true;
 }
 
-void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
+void StencilTileMap::draw(
+   sf::RenderTarget& color,
+   sf::RenderTarget& normal,
+   sf::RenderStates states,
+   const std::optional<sf::View>& normal_view,
+   const std::vector<sf::FloatRect>& normal_clip_rects_px
+) const
 {
    if (!_stencil_tilemap)
    {
@@ -114,7 +120,7 @@ void StencilTileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf:
    );
 #endif
 
-   TileMap::draw(color, normal, color_render_state);
+   TileMap::draw(color, normal, color_render_state, normal_view, normal_clip_rects_px);
 
    // dumpStencilAndColorToPng(color, states);
 }

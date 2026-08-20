@@ -392,6 +392,10 @@ protected:
    std::unordered_map<std::string, TmxEnemy> _enemy_data_from_tmx_layer;
 
    Atmosphere _atmosphere;
+
+   //!< whether any atmosphere tile is on screen this frame. false makes the distortion shader an
+   //!< exact copy of what it samples, so the atmosphere map and both resolves can be skipped
+   bool _atmosphere_visible{false};
    Physics _physics;
    sf::Vector2f _start_position_px;
 
