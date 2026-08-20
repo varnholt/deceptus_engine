@@ -106,6 +106,16 @@ void beginTileMapNormalPass();
 void endTileMapNormalPass();
 
 ///
+/// \brief Returns the region of the view a draw through it is actually rasterised into.
+/// \param view the view the draw goes through.
+/// \return the view rectangle narrowed by the view's scissor, in view pixels.
+/// \note the counter works in view space, so a pass clipped to part of the view would otherwise be
+///       priced as the full screen pass it replaced. Folding the scissor in here is what makes the
+///       occluder and normal clipping visible in the numbers.
+///
+sf::FloatRect getClipRectPx(const sf::View& view);
+
+///
 /// \brief Adds the on-screen area of the animated tiles submitted with a tile map batch.
 /// \param view the view the batch was drawn through.
 /// \param vertices first vertex of the animated run, two triangles per tile.
