@@ -46,6 +46,11 @@
 
 void CameraSystem::update(const sf::Time& dt, float view_width_px, float view_height_px)
 {
+   // where the camera stood going into this step, so the frames drawn before the next one can be
+   // placed between the two
+   _previous_x_px = getX();
+   _previous_y_px = getY();
+
    _view_width_px = view_width_px;
    _view_height_px = view_height_px;
 
@@ -243,6 +248,16 @@ float CameraSystem::getX() const
 float CameraSystem::getY() const
 {
    return _y_px - (_view_height_px / CameraSystemConfiguration::getInstance().getViewRatioY());
+}
+
+float CameraSystem::getPreviousX() const
+{
+   return _previous_x_px;
+}
+
+float CameraSystem::getPreviousY() const
+{
+   return _previous_y_px;
 }
 
 float CameraSystem::getFocusZoneX0() const

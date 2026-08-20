@@ -28,6 +28,7 @@
 #include "game/level/luainterface.h"
 #include "game/level/luanodecallbacks.h"
 #include "game/physics/physicsconfiguration.h"
+#include "game/physics/renderinterpolation.h"
 #include "game/player/player.h"
 #include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
@@ -1082,6 +1083,7 @@ void LuaNode::updatePosition()
    auto x_px = _body->GetPosition().x * PPM;
    auto y_px = _body->GetPosition().y * PPM;
 
+   _position_px_previous = _position_px;
    _position_px.x = x_px;
    _position_px.y = y_px;
 
@@ -1494,7 +1496,7 @@ void LuaNode::drawParts(
 
       const auto& offset = _sprite_offsets_px[i];
       const auto center = sf::Vector2f(sprite->textureRect.size.x / 2.0f, sprite->textureRect.size.y / 2.0f);
-      sprite->position = _position_px - center + offset;
+      sprite->position = RenderInterpolation::positionPx(_position_px_previous, _position_px) - center + offset;
       sf::RenderStates sprite_states = states;
       sprite_states.texture = _texture.get();
       if (_flash_shader.isLoaded())
@@ -1510,7 +1512,7 @@ void LuaNode::drawParts(
 
       const auto& offset = _sprite_offsets_px[i];
       const auto center = sf::Vector2f(sprite->getTextureRect().size.x / 2.0f, sprite->getTextureRect().size.y / 2.0f);
-      sprite->setPosition(_position_px - center + offset);
+      sprite->setPosition(RenderInterpolation::positionPx(_position_px_previous, _position_px) - center + offset);
       auto sprite_states = states;
       sprite_states.shader = &_flash_shader.native();
       target.draw(*sprite, sprite_states);

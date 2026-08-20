@@ -482,6 +482,8 @@ set(GAME_FILES
     src/game/physics/physics.h
     src/game/physics/fixedtimestep.cpp
     src/game/physics/fixedtimestep.h
+    src/game/physics/renderinterpolation.cpp
+    src/game/physics/renderinterpolation.h
     src/game/physics/physicsconfiguration.cpp
     src/game/physics/physicsconfiguration.h
     src/game/physics/physicsconfigurationui.cpp

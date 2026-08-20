@@ -19,6 +19,7 @@
 #include "game/physics/gamecontactlistener.h"
 #include "game/physics/onewaywall.h"
 #include "game/physics/physicsconfiguration.h"
+#include "game/physics/renderinterpolation.h"
 #include "game/player/inventorybasedcontrols.h"
 #include "game/player/itemsystem.h"
 #include "game/player/playeraudio.h"
@@ -332,7 +333,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
    }
 
    // that y offset is to compensate the wonky box2d origin
-   const auto draw_position_px = _position_px_f + sf::Vector2f(0, 8);
+   const auto draw_position_px = RenderInterpolation::positionPx(_position_px_f_previous, _position_px_f) + sf::Vector2f(0, 8);
 
    const auto& current_cycle = _player_animation->getCurrentCycle();
    if (current_cycle)
@@ -374,7 +375,7 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
 void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states)
 {
    const auto stencil_color = sf::Color{255, 255, 255, 25};
-   const auto draw_position_px = _position_px_f + sf::Vector2f(0, 8);
+   const auto draw_position_px = RenderInterpolation::positionPx(_position_px_f_previous, _position_px_f) + sf::Vector2f(0, 8);
 
    // the silhouette shader forces the occluded player to transparent white (its rgb comes from the
    // shader, its alpha from the sprite shape scaled by u_alpha) instead of the dimmed sprite colors
@@ -1641,6 +1642,10 @@ void Player::updateHealth(const sf::Time& dt)
 void Player::update(const sf::Time& dt)
 {
    _time += dt;
+
+   // the position this step starts from, kept so the frames drawn before the next step can be placed
+   // between the two rather than all on the newest one
+   _position_px_f_previous = _position_px_f;
 
    // a lot depends on an up-to-date pixel position and the hitbox that's generated out of it
    updatePixelPosition();

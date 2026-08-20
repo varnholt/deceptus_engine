@@ -46,6 +46,7 @@
 #include "game/physics/chainshapeanalyzer.h"
 #include "game/physics/gamecontactlistener.h"
 #include "game/physics/physicsconfiguration.h"
+#include "game/physics/renderinterpolation.h"
 #include "game/physics/squaremarcher.h"
 #include "game/player/player.h"
 #include "game/player/playerfirefly.h"
@@ -807,20 +808,40 @@ void Level::createViews()
 #endif  // !DECEPTUS_VRSFML
 }
 
+sf::FloatRect Level::computeViewRect(float camera_x_px, float camera_y_px) const
+{
+   const auto& look_vector = CameraPanorama::getInstance().getLookVector();
+
+   auto view_rect = sf::FloatRect{{camera_x_px + look_vector.x, camera_y_px + look_vector.y}, {_view_width, _view_height}};
+   CameraZoom::getInstance().adjust(view_rect);
+   return view_rect;
+}
+
 void Level::updateViews()
 {
    // this should really just fetch the camera position and the camera panorama vectors and
    // update the views with them; no camera or camera panorama correction must be done here
-   const auto& look_vector = CameraPanorama::getInstance().getLookVector();
    const auto& camera_system = CameraSystem::getInstance();
-   const auto level_view_x = camera_system.getX() + look_vector.x;
-   const auto level_view_y = camera_system.getY() + look_vector.y;
+   const auto view_rect = computeViewRect(camera_system.getX(), camera_system.getY());
 
-   auto& zoom = CameraZoom::getInstance();
-   auto view_rect = sf::FloatRect{{level_view_x, level_view_y}, {_view_width, _view_height}};
-   zoom.adjust(view_rect);
-
+   // the room lock reads this back on the next step, so it has to see where the simulation actually
+   // put the camera. Feeding it the interpolated rect instead would make room locking depend on the
+   // frame rate, which is the very thing the fixed step exists to prevent
    CameraRoomLock::setViewRect(view_rect);
+
+   updateViewsForDraw();
+}
+
+void Level::updateViewsForDraw()
+{
+   // the view is built from where the camera sits between the last two simulation steps, matching
+   // what the player and the mechanisms are drawn at. Rounding to whole pixels keeps the tile art on
+   // the pixel grid, which is the other half of what makes an uncapped frame rate look right
+   const auto& camera_system = CameraSystem::getInstance();
+   const auto view_rect = computeViewRect(
+      RenderInterpolation::valuePx(camera_system.getPreviousX(), camera_system.getX()),
+      RenderInterpolation::valuePx(camera_system.getPreviousY(), camera_system.getY())
+   );
 
 #ifdef DECEPTUS_VRSFML
    _level_view = std::make_shared<sf::View>(sf::View::fromRect(view_rect));
@@ -1632,6 +1653,10 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    _screenshot = screenshot;
 
    rebuildMechanismDrawIndex();
+
+   // a frame drawn between two simulation steps needs its own view, or the whole scene would only
+   // move once per step while everything drawn in it interpolates
+   updateViewsForDraw();
 
    // the distortion shader reads the atmosphere map at each fragment's own position, so atmosphere
    // tiles that are off screen cannot bend a pixel on it. With none on screen the shader reduces to

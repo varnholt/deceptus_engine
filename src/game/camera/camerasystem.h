@@ -25,6 +25,16 @@ public:
    /// \return world y coordinate in pixels adjusted by the configured vertical view ratio.
    float getY() const;
 
+   /// \brief the x position the camera had before the last simulation step.
+   /// \return what getX returned then.
+   /// \note the camera has to be interpolated by exactly the same amount as the things it follows,
+   ///       or they slide against the scenery instead of moving with it - see RenderInterpolation.
+   float getPreviousX() const;
+
+   /// \brief the y position the camera had before the last simulation step.
+   /// \return what getY returned then.
+   float getPreviousY() const;
+
    /// \brief returns the left edge of the horizontal focus zone in view space.
    /// \return focus-zone left boundary in pixels.
    float getFocusZoneX0() const;
@@ -90,6 +100,12 @@ private:
 
    float _x_px = 0.0f;
    float _y_px = 0.0f;
+
+   //!< what getX and getY returned before the last simulation step. Held as the finished result
+   //!< rather than as the raw position, so the focus zone and view ratio corrections do not have to
+   //!< be reproduced for the previous state
+   float _previous_x_px = 0.0f;
+   float _previous_y_px = 0.0f;
 
    float _dx_px = 0.0f;
    float _dy_px = 0.0f;

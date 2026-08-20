@@ -465,6 +465,11 @@ private:
    float _impulse{0.0f};
 
    sf::Vector2f _position_px_f;
+
+   //!< where the player was before the last simulation step. the simulation runs at a fixed rate,
+   //!< so a frame drawn between two steps has to draw between these two positions or it repeats a
+   //!< state it has already shown - see RenderInterpolation
+   sf::Vector2f _position_px_f_previous;
    sf::Vector2i _position_px_i;
    sf::FloatRect _rect_px_f;
    sf::IntRect _rect_px_i;

@@ -542,6 +542,11 @@ struct LuaNode : public GameMechanism, public GameNode
    //!< per-z-index draw loop does not have to scan all sprite layers and weapons of every enemy
    std::vector<int32_t> _part_z_indices;
    sf::Vector2f _position_px;
+
+   //!< where this node was before the last simulation step, so a frame drawn between two steps can
+   //!< be placed between the two positions rather than on the newest one - see RenderInterpolation.
+   //!< without it an enemy steps at the simulation rate while the scenery around it moves smoothly
+   sf::Vector2f _position_px_previous;
    std::vector<sf::Vector2f> _movement_path_px;
    sfcompat::Shader _flash_shader;
    float _hit_flash{0.0f};
