@@ -43,7 +43,13 @@ public:
    /// \param color color render target.
    /// \param normal normal render target.
    /// \param states render states forwarded to draw calls.
-   virtual void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const;
+   virtual void draw(
+      sf::RenderTarget& color,
+      sf::RenderTarget& normal,
+      sf::RenderStates states,
+      const std::optional<sf::View>& normal_view,
+      const std::vector<sf::FloatRect>& normal_clip_rects_px
+   ) const;
 
    /// \brief draws this layer to a single render target.
    /// \param target render target.
@@ -88,7 +94,13 @@ protected:
    /// \brief draws static and animated vertex buffers near the player.
    /// \param target render target.
    /// \param states render states forwarded to draw calls.
-   void drawVertices(sf::RenderTarget& target, sf::RenderStates states) const;
+   ///
+   /// \brief submits the visible blocks of this layer as one batch.
+   /// \param target render target.
+   /// \param states render states for the batch.
+   /// \param clip_rects_px blocks touching none of these are dropped; empty means keep everything.
+   ///
+   void drawVertices(sf::RenderTarget& target, sf::RenderStates states, const std::vector<sf::FloatRect>& clip_rects_px = {}) const;
 
 private:
    /// \brief stores one tile quad as an animated tile entry.

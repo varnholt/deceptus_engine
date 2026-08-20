@@ -37,7 +37,13 @@ public:
    /// \param color color render target.
    /// \param normal normal render target.
    /// \param states render states forwarded to draw calls.
-   void draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const override;
+   void draw(
+      sf::RenderTarget& color,
+      sf::RenderTarget& normal,
+      sf::RenderStates states,
+      const std::optional<sf::View>& normal_view,
+      const std::vector<sf::FloatRect>& normal_clip_rects_px
+   ) const override;
 
    /// \brief returns TMX layer name of the mask tilemap.
    /// \return stencil reference string.

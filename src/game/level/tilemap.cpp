@@ -1,5 +1,7 @@
 #include "tilemap.h"
 
+#include <ranges>
+
 #include <math.h>
 #include <algorithm>
 #include <iostream>
@@ -302,7 +304,7 @@ void TileMap::update(const sf::Time& dt)
    }
 }
 
-void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) const
+void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states, const std::vector<sf::FloatRect>& clip_rects_px) const
 {
    states.transform *= getTransform();
 
@@ -326,6 +328,18 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
 #endif
    const auto view_center = sfcompat::getViewCenter(view);
    const auto view_size = sfcompat::getViewSize(view);
+
+#ifdef DEVELOPMENT_MODE
+   // the scissor is what a clipped pass actually pays for. the fill counter works in view space, so
+   // without folding it in here a pass clipped to a light sprite reports the same overdraw as the
+   // full screen pass it replaced - which is exactly what made the occluder clipping saving
+   // invisible on the desktop instrument
+   const auto clip_rect_px = DrawCallCounter::getClipRectPx(view);
+   const auto clip_left_px = clip_rect_px.position.x;
+   const auto clip_top_px = clip_rect_px.position.y;
+   const auto clip_right_px = clip_left_px + clip_rect_px.size.x;
+   const auto clip_bottom_px = clip_top_px + clip_rect_px.size.y;
+#endif
 
    // blocks are binned by the tileset's own tile size at load time, so the window has to be measured
    // in those units too - PIXELS_PER_TILE only happens to match for tilesets that use 24 px tiles
@@ -365,6 +379,34 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
       {
          const auto& block_vertices = column_it->second;
          const auto block_vertex_count = block_vertices.getVertexCount();
+
+         // a block the caller cannot use is dropped before it is copied into the batch, so it costs
+         // neither the copy nor the fill. the normal pass uses this: a block no light reaches
+         // produces normals the deferred shader multiplies by a zero mask
+         if (!clip_rects_px.empty())
+         {
+            const auto block_rect_px = sf::FloatRect{
+               {static_cast<float>(column_it->first) * block_width_px, static_cast<float>(row_it->first) * block_height_px},
+               {block_width_px, block_height_px}
+            };
+
+            const auto touches_clip_rect = std::ranges::any_of(
+               clip_rects_px,
+               [&block_rect_px](const auto& clip_rect_px)
+               {
+                  return block_rect_px.position.x < clip_rect_px.position.x + clip_rect_px.size.x &&
+                         clip_rect_px.position.x < block_rect_px.position.x + block_rect_px.size.x &&
+                         block_rect_px.position.y < clip_rect_px.position.y + clip_rect_px.size.y &&
+                         clip_rect_px.position.y < block_rect_px.position.y + block_rect_px.size.y;
+               }
+            );
+
+            if (!touches_clip_rect)
+            {
+               continue;
+            }
+         }
+
          if (block_vertex_count > 0)
          {
             _batched_vertices.insert(_batched_vertices.end(), &block_vertices[0], &block_vertices[0] + block_vertex_count);
@@ -387,12 +429,22 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states) co
          );
          const auto visible_fraction = (visible_width_px * visible_height_px) / (block_width_px * block_height_px);
 
+         // the fraction the rasteriser is charged for, i.e. the block clipped to the scissor rather
+         // than to the whole view. it stays separate from visible_fraction on purpose: that one is
+         // the self check on the cull bounds and has to keep summing to view area over block area,
+         // whatever a pass happens to be clipped to
+         const auto rasterised_width_px =
+            std::max(0.0f, std::min(block_left_px + block_width_px, clip_right_px) - std::max(block_left_px, clip_left_px));
+         const auto rasterised_height_px =
+            std::max(0.0f, std::min(block_top_px + block_height_px, clip_bottom_px) - std::max(block_top_px, clip_top_px));
+         const auto rasterised_fraction = (rasterised_width_px * rasterised_height_px) / (block_width_px * block_height_px);
+
          // tiles are stored as two triangles, so six vertices make one tile - not four. dividing by
          // four overstated every count by 1.5x
          const auto tile_count = static_cast<float>(block_vertex_count / 6);
          DrawCallCounter::tilemap_pixels_submitted +=
-            static_cast<int64_t>(tile_count * visible_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y));
-         DrawCallCounter::tilemap_tiles_submitted += static_cast<int64_t>(tile_count * visible_fraction);
+            static_cast<int64_t>(tile_count * rasterised_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y));
+         DrawCallCounter::tilemap_tiles_submitted += static_cast<int64_t>(tile_count * rasterised_fraction);
          DrawCallCounter::tilemap_blocks_drawn++;
          DrawCallCounter::tilemap_visible_fraction_sum += visible_fraction;
 #endif
@@ -544,7 +596,13 @@ bool TileMap::dumpToPng(const std::filesystem::path& output_path) const
 #endif
 }
 
-void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::RenderStates states) const
+void TileMap::draw(
+   sf::RenderTarget& color,
+   sf::RenderTarget& normal,
+   sf::RenderStates states,
+   const std::optional<sf::View>& normal_view,
+   const std::vector<sf::FloatRect>& normal_clip_rects_px
+) const
 {
    if (!_visible)
    {
@@ -563,15 +621,35 @@ void TileMap::draw(sf::RenderTarget& color, sf::RenderTarget& normal, sf::Render
 #endif
    drawVertices(color, states);
 
-   if (_normal_map)
+   // the normal pass writes the same geometry a second time, and the deferred shader only ever
+   // multiplies a normal by a light's sprite mask - so a normal the lights cannot reach is shaded
+   // for nothing. an empty normal_view means no light reaches the screen at all, which makes the
+   // whole second pass dead rather than merely oversized
+   if (_normal_map && normal_view.has_value())
    {
       states.texture = _normal_map.get();
+
+      auto normal_states = states;
+#ifdef DECEPTUS_VRSFML
+      normal_states.view = normal_view.value();
+#else
+      // the view lives on the target rather than in the states here, so it has to be put back:
+      // the normal target is also blitted into outside this pass, and a leftover scissor would
+      // clip that too
+      const auto restore_view = normal.getView();
+      normal.setView(normal_view.value());
+#endif
+
 #ifdef DEVELOPMENT_MODE
       DrawCallCounter::beginTileMapNormalPass();
 #endif
-      drawVertices(normal, states);
+      drawVertices(normal, normal_states, normal_clip_rects_px);
 #ifdef DEVELOPMENT_MODE
       DrawCallCounter::endTileMapNormalPass();
+#endif
+
+#ifndef DECEPTUS_VRSFML
+      normal.setView(restore_view);
 #endif
    }
 

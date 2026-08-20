@@ -434,7 +434,7 @@ std::optional<sf::View> clipViewToLight(const sf::View& full_view, const sf::Flo
 }
 }  // namespace
 
-void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states)
+void LightSystem::updateActiveLights()
 {
    _active_lights.clear();
 
@@ -475,6 +475,52 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       }
       _active_lights.resize(max_lights);
    }
+
+   _active_light_bounds_px.clear();
+   for (const auto& light : _active_lights)
+   {
+      if (light->_sprite)
+      {
+         _active_light_bounds_px.push_back(light->_sprite->getGlobalBounds());
+      }
+   }
+}
+
+const std::vector<sf::FloatRect>& LightSystem::getActiveLightBoundsPx() const
+{
+   return _active_light_bounds_px;
+}
+
+std::optional<sf::View> LightSystem::clipViewToActiveLights(const sf::View& full_view) const
+{
+   std::optional<sf::FloatRect> bounds;
+
+   for (const auto& sprite_bounds : _active_light_bounds_px)
+   {
+      if (!bounds.has_value())
+      {
+         bounds = sprite_bounds;
+         continue;
+      }
+
+      const auto left_px = std::min(bounds->position.x, sprite_bounds.position.x);
+      const auto top_px = std::min(bounds->position.y, sprite_bounds.position.y);
+      const auto right_px = std::max(bounds->position.x + bounds->size.x, sprite_bounds.position.x + sprite_bounds.size.x);
+      const auto bottom_px = std::max(bounds->position.y + bounds->size.y, sprite_bounds.position.y + sprite_bounds.size.y);
+      bounds = sf::FloatRect{{left_px, top_px}, {right_px - left_px, bottom_px - top_px}};
+   }
+
+   if (!bounds.has_value())
+   {
+      return std::nullopt;
+   }
+
+   return clipViewToLight(full_view, bounds.value());
+}
+
+void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states)
+{
+   auto* player_body = PlayerRegistry::getFirst()->getBody();
 
    // pre-build shadow caster candidates once per frame — player, disabled bodies, and
    // enemies are excluded here so drawShadowQuads only needs to check per-light exclusions.

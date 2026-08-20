@@ -97,9 +97,36 @@ public:
    /// \return newly created light instance with default smooth texture overridden by json values.
    static std::shared_ptr<LightSystem::LightInstance> createLightInstance(GameNode* parent, const nlohmann::json& node);
 
+   /// \brief picks the lights that will be drawn this frame, closest to the player first.
+   ///
+   /// Split out of draw so the rest of the frame can ask which lights are live before the light map
+   /// is rendered: the light map pass runs after the level layers, but the layers already need to
+   /// know where the lights are to clip the normal pass to them.
+   void updateActiveLights();
+
+   /// \brief narrows a view to the part of the screen the active lights can reach.
+   /// \param full_view the view the level is being rendered through.
+   /// \return the view with a scissor around every active light, or nothing when no light reaches
+   ///         the screen at all.
+   /// \note the deferred shader multiplies the normal map by each light's sprite mask, so a normal
+   ///       outside every light sprite cannot change a single pixel of the frame. That makes this
+   ///       rectangle the only part of the normal target worth rendering, and nothing at all worth
+   ///       rendering when it comes back empty.
+   /// \note one rectangle around six scattered lights is usually the whole view, so this alone
+   ///       saves nothing at a lit spot. getActiveLightBoundsPx is the per-light version, and the
+   ///       one that does the work.
+   std::optional<sf::View> clipViewToActiveLights(const sf::View& full_view) const;
+
+   /// \brief the sprite bounds of each active light, in level pixels.
+   /// \return one rectangle per active light, in the order the light map channels are assigned.
+   /// \note geometry outside every one of these cannot contribute a normal that survives the
+   ///       deferred pass, so a caller drawing into the normal target can drop it.
+   const std::vector<sf::FloatRect>& getActiveLightBoundsPx() const;
+
    /// \brief renders per-light sprites with stencil-clipped shadow volumes into a light map target.
    /// \param target render target.
    /// \param states render states applied to occluder, shadow, and light sprite draws (carries .view for WASM camera transform).
+   /// \note expects updateActiveLights to have run for this frame.
    void draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf::RenderStates states);
 
    /// \brief renders light sprites to both textures then composites with shader.
@@ -150,6 +177,10 @@ private:
    void updateLightShader(sf::RenderTarget& target);
 
    mutable std::vector<std::shared_ptr<LightInstance>> _active_lights;
+
+   //!< the sprite bounds of the active lights, rebuilt with them once per frame. kept as a member
+   //!< so the layer passes can read it without walking the light list again for every tile map
+   std::vector<sf::FloatRect> _active_light_bounds_px;
 
    // cached texture pointers to avoid redundant setUniform calls each frame
    const sf::Texture* _last_color_map{nullptr};
