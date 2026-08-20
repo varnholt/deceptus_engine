@@ -6,6 +6,9 @@ namespace
 {
 //!< how far the frame being drawn sits past the last simulation step
 float __alpha = 0.0f;
+
+//!< how far past that the picture is aimed, in steps. see setLead
+float __lead = 0.0f;
 }  // namespace
 
 namespace RenderInterpolation
@@ -21,6 +24,16 @@ float getAlpha()
    return __alpha;
 }
 
+void setLead(float lead)
+{
+   __lead = std::clamp(lead, 0.0f, 1.0f);
+}
+
+float getLead()
+{
+   return __lead;
+}
+
 sf::Vector2f positionPx(const sf::Vector2f& previous_px, const sf::Vector2f& current_px)
 {
    return sf::Vector2f{valuePx(previous_px.x, current_px.x), valuePx(previous_px.y, current_px.y)};
@@ -28,7 +41,7 @@ sf::Vector2f positionPx(const sf::Vector2f& previous_px, const sf::Vector2f& cur
 
 float valuePx(float previous_px, float current_px)
 {
-   return previous_px + (current_px - previous_px) * __alpha;
+   return previous_px + (current_px - previous_px) * (__alpha + __lead);
 }
 
 }  // namespace RenderInterpolation
