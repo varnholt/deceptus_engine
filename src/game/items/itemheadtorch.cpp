@@ -65,9 +65,28 @@ void ItemHeadTorch::updateSpritePositions()
       return;
    }
 
-   const auto helmet_position_px = PlayerRegistry::getFirst()->getSpritePositionPx() + _helmet_offset_px.value();
+   const auto& player_position_px = PlayerRegistry::getFirst()->getSpritePositionPx();
+
+   const auto helmet_position_px = player_position_px + _helmet_offset_px.value();
    sfcompat::setPosition(*_helmet_sprite_r, helmet_position_px);
    sfcompat::setPosition(*_helmet_sprite_l, helmet_position_px);
+
+   // the beam comes out of the lamp on that helmet, so it is placed from the same position. Its
+   // shadow origin is left alone: that decides which polygons the beam extrudes shadows from, and
+   // that belongs to the simulation rather than to where the frame happens to draw things
+   if (!_light_offset_m.has_value())
+   {
+      return;
+   }
+
+   auto& active_light = _light_points_right ? _player_light_right : _player_light_left;
+   if (active_light)
+   {
+      const auto player_position_m = b2Vec2{player_position_px.x * MPP, player_position_px.y * MPP};
+      sfcompat::setOrigin(*active_light->_sprite, {0.0f, 0.0f});
+      active_light->_pos_m = player_position_m + _light_offset_m.value();
+      active_light->updateSpritePosition();
+   }
 }
 
 void ItemHeadTorch::update(const sf::Time& delta_time)
@@ -182,6 +201,10 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
    sfcompat::setOrigin(*active_light->_sprite, {0.0f, 0.0f});
    active_light->_pos_m = light_pos_m;
    active_light->updateSpritePosition();
+
+   // kept as an offset from the player so the per frame pass can put the beam where the helmet is
+   _light_offset_m = light_pos_m - player->getBody()->GetPosition();
+   _light_points_right = pointing_right;
 
    // the beam casts its shadows from the lamp end, which sits right about on the player's own
    // collision edge. anything adam presses against - a moveable box he is pushing, or a wall he is
