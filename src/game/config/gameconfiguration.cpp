@@ -196,6 +196,26 @@ GameConfiguration& GameConfiguration::getInstance()
    return __instance;
 }
 
+int32_t GameConfiguration::computeViewScale(int32_t video_mode_width, int32_t video_mode_height, int32_t view_width, int32_t view_height)
+{
+   if (view_width <= 0 || view_height <= 0)
+   {
+      Log::Warning() << "invalid view dimensions " << view_width << " x " << view_height;
+      return 1;
+   }
+
+   // integer division is the flooring
+   const auto scale_width = video_mode_width / view_width;
+   const auto scale_height = video_mode_height / view_height;
+
+   return std::max(1, std::min(scale_width, scale_height));
+}
+
+int32_t GameConfiguration::getViewScale() const
+{
+   return computeViewScale(_video_mode_width, _video_mode_height, _view_width, _view_height);
+}
+
 void GameConfiguration::resetAudioDefaults()
 {
    getInstance()._audio_volume_master = getDefaults()._audio_volume_master;
