@@ -517,6 +517,10 @@ void Game::processPendingLevelLoad()
 
       _level_loading_finished = true;
 
+      // loading took seconds of real time that the simulation must not make up for, or the first
+      // frame back would run its whole catch-up allowance at once
+      _fixed_time_step.reset();
+
       playLevelMusic();
 
       // before synchronizing the camera with the player position, the camera needs to know its room limitations
@@ -1126,10 +1130,32 @@ void Game::update()
          updateGameController();
          updateGameControllerForGame();
 
-         EventSerializer::updateAll(dt);
+         // the simulation is stepped at a fixed rate rather than once per frame. everything below
+         // this line was written expecting to run exactly once per physics step, with a delta of
+         // PhysicsConfiguration::_time_step - the player's jump and dash forces, the conveyor belt
+         // state, the contact events. Feeding it the frame time instead made the world run at double
+         // speed at 120 fps and in slow motion below 60, so the fix is to restore that expectation
+         // in this one place rather than to teach every one of those about the frame rate.
+         //
+         // A frame faster than one step runs the loop zero times and draws the same state again.
+         const auto simulation_step_count = _fixed_time_step.consumeSteps(dt);
+         const auto simulation_dt = _fixed_time_step.getStepDuration();
 
-         _level->update(dt);
-         _player->update(dt);
+         for (auto simulation_step = 0; simulation_step < simulation_step_count; simulation_step++)
+         {
+            EventSerializer::updateAll(simulation_dt);
+
+            _level->update(simulation_dt);
+            _player->update(simulation_dt);
+
+            // a lua script can request a level change from inside the update above, which hands
+            // _level over for teardown. Stepping it again would run a level that is already gone or
+            // already asking to be replaced
+            if (!_level || _level->isDirty())
+            {
+               break;
+            }
+         }
 
 #ifndef DECEPTUS_VRSFML
          if (DebugDrawStates::_draw_test_scene)
