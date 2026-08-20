@@ -50,6 +50,22 @@ struct GameConfiguration
    /// \param filename destination configuration file path.
    void serializeToFile(const std::string& filename = GamePaths::getPreferencesFile("game.json").string());
 
+   /// \brief largest whole number of screen pixels one view pixel may occupy.
+   /// \param video_mode_width width of the target the view is scaled into.
+   /// \param video_mode_height height of that target.
+   /// \param view_width width of the view, in view pixels.
+   /// \param view_height height of the view, in view pixels.
+   /// \return the scale, floored to a whole number and never below one.
+   /// \note the view is pixel art, so the scale must never be fractional. A window of 2560x1369 has
+   ///       a vertical ratio of 3.8, and rasterising the art at 3.8 puts a one pixel eye across 3.8
+   ///       screen pixels - it comes out as a smear. Flooring to 3 letterboxes the difference
+   ///       instead, and every pixel stays exact.
+   static int32_t computeViewScale(int32_t video_mode_width, int32_t video_mode_height, int32_t view_width, int32_t view_height);
+
+   /// \brief the view scale for the configured video mode and view.
+   /// \return the scale, floored to a whole number and never below one.
+   int32_t getViewScale() const;
+
    /// \brief returns the built-in default configuration values.
    /// \return shared default configuration object.
    static GameConfiguration& getDefaults();

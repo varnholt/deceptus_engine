@@ -34,10 +34,15 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
    stencil_context_settings.stencilBits = 8;
 #endif
 
-   // calculate texture size based on view dimensions
-   const auto ratio_width = video_mode_width / view_width;
-   const auto ratio_height = video_mode_height / view_height;
-   const auto size_ratio = std::min(ratio_width, ratio_height);
+   // calculate texture size based on view dimensions. the scale has to be a whole number: the view
+   // is pixel art, and rasterising it at a fractional multiple lands single art pixels across screen
+   // pixel boundaries, which reads as a blurred edge rather than as a pixel
+   const auto size_ratio = static_cast<float>(GameConfiguration::computeViewScale(
+      static_cast<int32_t>(video_mode_width),
+      static_cast<int32_t>(video_mode_height),
+      static_cast<int32_t>(view_width),
+      static_cast<int32_t>(view_height)
+   ));
    view_to_texture_scale = 1.0f / size_ratio;
 
    const auto texture_width = static_cast<int32_t>(size_ratio * view_width);
