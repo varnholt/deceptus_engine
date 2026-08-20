@@ -57,7 +57,9 @@ private:
 
    //!< where the light sits relative to the player, in box2d meters, and which of the two lights is
    //!< the live one. Applied per frame for the same reason the helmet offset is
-   std::optional<b2Vec2> _light_offset_m;
+   //!< where the light sprite ended up relative to the player, after update has shifted it to put
+   //!< its origin on the lamp. Applied per frame, without touching that origin again
+   std::optional<sf::Vector2f> _light_sprite_offset_px;
    bool _light_points_right{false};
    std::shared_ptr<sf::Texture> _player_texture;
    std::unique_ptr<sf::Sprite> _helmet_sprite_r;

@@ -74,18 +74,15 @@ void ItemHeadTorch::updateSpritePositions()
    // the beam comes out of the lamp on that helmet, so it is placed from the same position. Its
    // shadow origin is left alone: that decides which polygons the beam extrudes shadows from, and
    // that belongs to the simulation rather than to where the frame happens to draw things
-   if (!_light_offset_m.has_value())
+   if (!_light_sprite_offset_px.has_value())
    {
       return;
    }
 
    auto& active_light = _light_points_right ? _player_light_right : _player_light_left;
-   if (active_light)
+   if (active_light && active_light->_sprite)
    {
-      const auto player_position_m = b2Vec2{player_position_px.x * MPP, player_position_px.y * MPP};
-      sfcompat::setOrigin(*active_light->_sprite, {0.0f, 0.0f});
-      active_light->_pos_m = player_position_m + _light_offset_m.value();
-      active_light->updateSpritePosition();
+      sfcompat::setPosition(*active_light->_sprite, player_position_px + _light_sprite_offset_px.value());
    }
 }
 
@@ -202,8 +199,6 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
    active_light->_pos_m = light_pos_m;
    active_light->updateSpritePosition();
 
-   // kept as an offset from the player so the per frame pass can put the beam where the helmet is
-   _light_offset_m = light_pos_m - player->getBody()->GetPosition();
    _light_points_right = pointing_right;
 
    // the beam casts its shadows from the lamp end, which sits right about on the player's own
@@ -232,6 +227,10 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
    sfcompat::setPosition(
       *active_light->_sprite, {top_left_pos.x + lamp_origin_x_local * sprite_scale.x, top_left_pos.y + lamp_origin_y_local * sprite_scale.y}
    );
+
+   // recorded after the origin shift, so the per frame pass can move the sprite without having to
+   // redo - or undo - any of it
+   _light_sprite_offset_px = sfcompat::getPosition(*active_light->_sprite) - player->getPixelPositionFloat();
 
    // easeOutSine brings the beam smoothly back to neutral after a landing tilt
    sf::Angle tilt_angle = sf::degrees(0.0f);
