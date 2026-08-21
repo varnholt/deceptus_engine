@@ -1372,7 +1372,24 @@ void Game::applyScalingOptions()
    // keypress even though not one of them depends on these options - their sizes come from the whole
    // number view scale, which the options do not touch. doing that under the menu, whose background holds
    // raw gl state of its own, crashed the game after a handful of toggles
-   _window_render_texture->setSmooth(!GameConfiguration::getInstance()._preserve_pixel_precision);
+   auto& config = GameConfiguration::getInstance();
+
+   // switching pixel precision on tightens the window down onto the image, so there is nothing left over
+   // to put bars in. it is done here and not from the resize handler on purpose: re-snapping on every
+   // border drag would make the window impossible to size by hand, and dragging it afterwards simply
+   // letterboxes again until the option is switched on afresh.
+   //
+   // fullscreen has no window of its own to tighten - it runs at whatever the desktop hands out - so it
+   // keeps letterboxing. the snapped size is a whole multiple of the view by construction, so the whole
+   // number scale cannot change and no render target is ever rebuilt by this
+   if (config._preserve_pixel_precision && !config._fullscreen)
+   {
+      const auto placement = config.computeWindowImagePlacement();
+      _window->setSize({static_cast<uint32_t>(placement.texture_width), static_cast<uint32_t>(placement.texture_height)});
+      adoptWindowSize(placement.texture_width, placement.texture_height);
+   }
+
+   _window_render_texture->setSmooth(!config._preserve_pixel_precision);
 #endif
 }
 
