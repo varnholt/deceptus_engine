@@ -66,11 +66,11 @@ private:
    /// \brief centers the rendered name text inside the name field.
    void updateText();
 
-   /// \brief seeds the entered name from the console account nickname or environment username heuristics.
+   /// \brief seeds the entered name from the platform's user name.
    void retrieveUsername();
 
    /// \brief strips every character the on-screen character grid cannot produce and clamps the length.
-   /// \param raw_name name as it came from the console account or from the environment.
+   /// \param raw_name name as it came from the platform.
    /// \return name reduced to characters of the on-screen character grid.
    std::string keepSupportedChars(std::string_view raw_name) const;
 
