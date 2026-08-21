@@ -16,11 +16,13 @@ public:
       DisplayMode = 1,
       VSync = 2,
       Brightness = 3,
-      Count = 4
+      Scaling = 4,
+      Count = 5
    };
 
    using FullscreenCallback = std::function<void(void)>;
    using VSyncCallback = std::function<void(void)>;
+   using ScalingCallback = std::function<void(void)>;
    using ResolutionCallback = std::function<void(int32_t, int32_t)>;
 
    /// \brief initializes the video settings screen and supported resolution list.
@@ -66,6 +68,10 @@ public:
    /// \param callback function called after vsync state changes.
    void setVSyncCallback(VSyncCallback callback);
 
+   /// \brief installs the callback invoked when a scaling option toggles.
+   /// \param callback function called after pixel precision or aspect preservation changes.
+   void setScalingCallback(ScalingCallback callback);
+
    Selection _selection = Selection::Resolution;
 
 private:
@@ -75,6 +81,7 @@ private:
    FullscreenCallback _fullscreen_callback;
    ResolutionCallback _resolution_callback;
    VSyncCallback _vsync_callback;
+   ScalingCallback _scaling_callback;
    std::vector<std::array<int32_t, 2>> _base_video_modes;  //!< predefined modes that fit the desktop resolution
    std::vector<std::array<int32_t, 2>> _video_modes;       //!< base modes plus the active resolution if it is not one of them
    std::vector<std::shared_ptr<Layer>> _brightness_value_layers;
@@ -97,4 +104,7 @@ private:
    std::unique_ptr<sf::Text> _vsync_value_text;
    std::unique_ptr<sf::Text> _brightness_label;
    std::unique_ptr<sf::Text> _brightness_help_text;
+   std::unique_ptr<sf::Text> _scaling_label;
+   std::unique_ptr<sf::Text> _scaling_help_text;
+   std::unique_ptr<sf::Text> _scaling_value_text;
 };
