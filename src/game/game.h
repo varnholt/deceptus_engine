@@ -156,6 +156,9 @@ private:
    /// \param h target height in pixels.
    void changeResolution(int32_t w, int32_t h);
 
+   /// \brief applies the scaling options to the render texture filtering.
+   void applyScalingOptions();
+
    /// \brief takes on a size the window already has, without recreating the window.
    /// \param width new window width in pixels.
    /// \param height new window height in pixels.

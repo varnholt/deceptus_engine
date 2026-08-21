@@ -648,10 +648,8 @@ void Game::initialize()
    std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))
       ->setResolutionCallback([this](int32_t w, int32_t h) { changeResolution(w, h); });
 
-   // the render texture keeps its size across all of these, only the blit that puts it on screen changes,
-   // so the window itself is left alone and just the targets and their filtering are set up again
    std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))
-      ->setScalingCallback([this]() { initializeRenderTargets(); });
+      ->setScalingCallback([this]() { applyScalingOptions(); });
 
    std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))
       ->setVSyncCallback(
@@ -1360,6 +1358,21 @@ void Game::toggleFullScreen()
 
    // recreate the 3D menu background — its GL resources are tied to the old context
    _menu_background = std::make_unique<MenuBackgroundScene>();
+#endif
+}
+
+void Game::applyScalingOptions()
+{
+#ifndef DECEPTUS_VRSFML
+   // the scaling options move nothing but the blit, and the blit reads them fresh out of the config every
+   // frame, so there is nothing to rebuild here. the one piece of state that has to follow them is the
+   // filtering: a fractional blit has to interpolate and a pixel precise one must not.
+   //
+   // this used to call initializeRenderTargets, which tore down and rebuilt every render texture on each
+   // keypress even though not one of them depends on these options - their sizes come from the whole
+   // number view scale, which the options do not touch. doing that under the menu, whose background holds
+   // raw gl state of its own, crashed the game after a handful of toggles
+   _window_render_texture->setSmooth(!GameConfiguration::getInstance()._preserve_pixel_precision);
 #endif
 }
 
