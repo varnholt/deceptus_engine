@@ -6,8 +6,14 @@
 #include "game/state/savestate.h"
 #include "menu.h"
 
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
+
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
+#include <string_view>
 
 namespace
 {
@@ -15,6 +21,7 @@ static const int32_t char_width = 19;
 static const int32_t char_height = 24;
 static const size_t max_length = 11;
 
+#ifndef __SWITCH__
 std::string extractFirstName(std::string_view username)
 {
    // heuristic 1: split CamelCase
@@ -35,6 +42,58 @@ std::string extractFirstName(std::string_view username)
    // fallback: return full username
    return std::string(username);
 }
+#endif
+
+#ifdef __SWITCH__
+/// \brief reads the nickname of the console account the game was launched with.
+/// \return the account nickname, or an empty string if the account service is unavailable.
+std::string retrieveConsoleNickname()
+{
+   if (R_FAILED(accountInitialize(AccountServiceType_Application)))
+   {
+      return {};
+   }
+
+   AccountUid account_uid{};
+
+   // a title started from the home menu carries a preselected user; a homebrew title takeover
+   // does not, so fall back to whoever unlocked the console last
+   if (R_FAILED(accountGetPreselectedUser(&account_uid)) && R_FAILED(accountGetLastOpenedUser(&account_uid)))
+   {
+      accountExit();
+      return {};
+   }
+
+   if (account_uid.uid[0] == 0 && account_uid.uid[1] == 0)
+   {
+      accountExit();
+      return {};
+   }
+
+   AccountProfile account_profile{};
+   if (R_FAILED(accountGetProfile(&account_profile, account_uid)))
+   {
+      accountExit();
+      return {};
+   }
+
+   AccountProfileBase account_profile_base{};
+   const auto profile_result = accountProfileGet(&account_profile, nullptr, &account_profile_base);
+   accountProfileClose(&account_profile);
+   accountExit();
+
+   if (R_FAILED(profile_result))
+   {
+      return {};
+   }
+
+   // the nickname field is a fixed size buffer and is not guaranteed to be null terminated
+   const std::string_view nickname(account_profile_base.nickname, sizeof(account_profile_base.nickname));
+   const auto terminator_position = nickname.find('\0');
+
+   return std::string(terminator_position == std::string_view::npos ? nickname : nickname.substr(0, terminator_position));
+}
+#endif
 }  // namespace
 
 MenuScreenNameSelect::MenuScreenNameSelect()
@@ -234,13 +293,44 @@ void MenuScreenNameSelect::controllerButtonY()
    appendChar(c);
 }
 
+std::string MenuScreenNameSelect::keepSupportedChars(std::string_view raw_name) const
+{
+   std::string supported_name;
+
+   for (const auto raw_char : raw_name)
+   {
+      if (supported_name.size() == max_length)
+      {
+         break;
+      }
+
+      if (std::find(_chars.begin(), _chars.end(), raw_char) != _chars.end())
+      {
+         supported_name += raw_char;
+      }
+   }
+
+   return supported_name;
+}
+
 void MenuScreenNameSelect::retrieveUsername()
 {
+#ifdef __SWITCH__
+   // the console nickname is already a display name the player picked, so it is taken as-is
+   // instead of being run through the first-name heuristics that desktop account names need
+   std::string raw_name = retrieveConsoleNickname();
+#else
    // probably requires a regular expression to filter out the unicode crap
    auto* u1 = std::getenv("USERNAME");
    auto* u2 = std::getenv("USER");
    std::string raw_name = u1 ? u1 : (u2 ? u2 : "");
-   _name = extractFirstName(raw_name);
+   raw_name = extractFirstName(raw_name);
+#endif
+
+   // the name is edited with the on-screen character grid, so the suggestion has to consist of
+   // characters that grid can produce: anything else has no glyph in the menu font and could
+   // not be typed back in after a delete
+   _name = keepSupportedChars(raw_name);
 
    if (!_name.empty())
    {
