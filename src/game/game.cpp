@@ -1377,6 +1377,15 @@ void Game::adoptWindowSize(int32_t width, int32_t height)
    config._video_mode_width = width;
    config._video_mode_height = height;
 
+#ifndef DECEPTUS_VRSFML
+   // sfml leaves a window's view alone across a resize - RenderWindow::onResize only recomputes the
+   // viewport, which is stored in relative coordinates, and the view keeps the world size it was built
+   // with. so it goes on mapping the old size onto the new window, which draws the composited frame too
+   // small when the border is dragged inwards and too large when it is dragged outwards. recreating the
+   // window used to hide this behind a brand new default view
+   _window->setView(sf::View{sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(width), static_cast<float>(height)}}});
+#endif
+
    // fullscreen runs at whatever the desktop hands out, so only a windowed size is worth remembering.
    // this is not written to disk here: dragging a window border fires an event per step, and the file
    // would be rewritten for every one of them. it goes out when the game closes instead
