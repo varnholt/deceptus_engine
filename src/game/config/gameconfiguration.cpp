@@ -1,6 +1,7 @@
 #include "gameconfiguration.h"
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -256,7 +257,7 @@ GameConfiguration::WindowImagePlacement GameConfiguration::computeWindowImagePla
    // rather than deriving it from the flags matters: a window whose height is an exact multiple of the
    // view pins the uniform factor to exactly 1, so keep aspect ends up blitting 1:1 just as pixel
    // precision does, and smoothing a 1:1 blit can only make a scrolling image crawl
-   const auto is_whole_number = [](float value) { return static_cast<float>(static_cast<int32_t>(value)) == value; };
+   const auto is_whole_number = [](float value) { return value == std::floor(value); };
 
    // both remaining modes resample, so here sub-pixel centring is the more accurate answer rather than
    // the thing to avoid, and the arithmetic runs in float
