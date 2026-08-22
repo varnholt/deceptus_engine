@@ -226,7 +226,7 @@ GameConfiguration::WindowImagePlacement GameConfiguration::computeWindowImagePla
 {
    // the render texture is a whole multiple of the view in every mode, not just the pixel precise one.
    // the view is pixel art and rasterising it at a fraction of a pixel is what turns it to mush, so the
-   // fractional part of the fit is left to the blit, where it resamples an already finished image
+   // fractional part of the fit is left to the copy, where it resamples an already finished image
    const auto integer_scale = getViewScale();
    const auto texture_width = integer_scale * _view_width;
    const auto texture_height = integer_scale * _view_height;
@@ -236,7 +236,7 @@ GameConfiguration::WindowImagePlacement GameConfiguration::computeWindowImagePla
    if (_preserve_pixel_precision)
    {
       // whole numbers the entire way through. the offset has to land on a whole pixel as well: a window
-      // with an odd amount of space left over puts the true centre at x.5, and blitting a texture there
+      // with an odd amount of space left over puts the true centre at x.5, and copying a texture there
       // resamples every pixel of the frame - the one thing this mode exists to prevent. integer division
       // floors it instead, which leaves one bar a single pixel wider than the other
       const auto offset_x = (_video_mode_width - texture_width) / 2;
@@ -255,8 +255,8 @@ GameConfiguration::WindowImagePlacement GameConfiguration::computeWindowImagePla
 
    // a scale is only worth interpolating when it is not a whole number. keeping this with the placement
    // rather than deriving it from the flags matters: a window whose height is an exact multiple of the
-   // view pins the uniform factor to exactly 1, so keep aspect ends up blitting 1:1 just as pixel
-   // precision does, and smoothing a 1:1 blit can only make a scrolling image crawl
+   // view pins the uniform factor to exactly 1, so keep aspect ends up copying 1:1 just as pixel
+   // precision does, and smoothing a 1:1 copy can only make a scrolling image crawl
    const auto is_whole_number = [](float value) { return value == std::floor(value); };
 
    // both remaining modes resample, so here sub-pixel centring is the more accurate answer rather than

@@ -324,10 +324,10 @@ void Game::initializeRenderTargets()
    Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;
 
 #ifndef DECEPTUS_VRSFML
-   // once the blit scale is not a whole number, nearest neighbour hands some view pixels one more screen
+   // once the copy scale is not a whole number, nearest neighbour hands some view pixels one more screen
    // pixel than their neighbours, and that uneven pattern crawls across the image as the camera moves.
-   // smoothing spreads the remainder out instead. a whole-number blit has nothing between texels to
-   // interpolate, so smoothing it can only smear a moving image - which is why this follows the blit and
+   // smoothing spreads the remainder out instead. a whole-number copy has nothing between texels to
+   // interpolate, so smoothing it can only smear a moving image - which is why this follows the copy and
    // not the option: keep aspect lands on 1:1 whenever one axis is an exact multiple of the view
    _window_render_texture->setSmooth(placement.resamples);
 #endif
@@ -923,7 +923,7 @@ void Game::draw()
 #endif
 
 #ifdef DEVELOPMENT_MODE
-   _draw_section_timer.mark("window blit");
+   _draw_section_timer.mark("window copy");
 #endif
 
 #ifdef DEVELOPMENT_MODE
@@ -1411,9 +1411,9 @@ void Game::toggleFullScreen()
 void Game::applyScalingOptions()
 {
 #ifndef DECEPTUS_VRSFML
-   // the scaling options move nothing but the blit, and the blit reads them fresh out of the config every
+   // the scaling options move nothing but the copy, and the copy reads them fresh out of the config every
    // frame, so there is nothing to rebuild here. the one piece of state that has to follow them is the
-   // filtering: a fractional blit has to interpolate and a pixel precise one must not.
+   // filtering: a fractional copy has to interpolate and a pixel precise one must not.
    //
    // this used to call initializeRenderTargets, which tore down and rebuilt every render texture on each
    // keypress even though not one of them depends on these options - their sizes come from the whole
@@ -1481,7 +1481,7 @@ void Game::adoptWindowSize(int32_t width, int32_t height)
    }
 
    // every render target is sized as a whole multiple of the view rather than to the window, so dragging
-   // a border around within one multiple leaves all of them at the right size and only moves the blit.
+   // a border around within one multiple leaves all of them at the right size and only moves the copy.
    // rebuilding the whole set per resize event would make dragging stutter for nothing
    if (config.getViewScale() == previous_view_scale)
    {
