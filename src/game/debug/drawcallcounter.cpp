@@ -143,6 +143,18 @@ void DrawCallCounter::endTileMapNormalPass()
    tilemap_normal_pixels_submitted += tilemap_pixels_submitted - tilemap_pixels_before_normal_pass;
 }
 
+double DrawCallCounter::getTargetFillScale(const sf::RenderTarget& target)
+{
+   const auto reference_area = static_cast<double>(reference_target_size.x) * static_cast<double>(reference_target_size.y);
+   if (reference_area <= 0.0)
+   {
+      return 1.0;
+   }
+
+   const auto target_size = target.getSize();
+   return (static_cast<double>(target_size.x) * static_cast<double>(target_size.y)) / reference_area;
+}
+
 sf::FloatRect DrawCallCounter::getClipRectPx(const sf::View& view)
 {
    const auto view_center = sfcompat::getViewCenter(view);
@@ -155,9 +167,16 @@ sf::FloatRect DrawCallCounter::getClipRectPx(const sf::View& view)
    };
 }
 
-void DrawCallCounter::countAnimatedTilePixels(const sf::View& view, const sf::Vertex* vertices, std::size_t vertex_count)
+void DrawCallCounter::countAnimatedTilePixels(
+   const sf::RenderTarget& target,
+   const sf::View& view,
+   const sf::Vertex* vertices,
+   std::size_t vertex_count
+)
 {
-   tilemap_pixels_submitted += sumVisibleQuadArea(getClipRectPx(view), vertices, vertex_count);
+   tilemap_pixels_submitted += static_cast<int64_t>(
+      static_cast<double>(sumVisibleQuadArea(getClipRectPx(view), vertices, vertex_count)) * getTargetFillScale(target)
+   );
 }
 
 void DrawCallCounter::countAmbientOcclusionPixels(
@@ -171,7 +190,10 @@ void DrawCallCounter::countAmbientOcclusionPixels(
    // the chunks are gathered around the player rather than around the view, so a good part of the
    // batch never reaches the screen. clipping each quad is what keeps this comparable to the tile
    // count, which is measured the same way
-   ambient_occlusion_pixels_submitted += sumVisibleQuadArea(getClipRectPx(view), batched_vertices.data(), batched_vertices.size());
+   ambient_occlusion_pixels_submitted += static_cast<int64_t>(
+      static_cast<double>(sumVisibleQuadArea(getClipRectPx(view), batched_vertices.data(), batched_vertices.size())) *
+      getTargetFillScale(target)
+   );
 }
 
 void DrawCallCounter::countImageLayerPixels(const sf::RenderTarget& target, const sf::RenderStates& states, const sf::Sprite& sprite)
@@ -179,8 +201,11 @@ void DrawCallCounter::countImageLayerPixels(const sf::RenderTarget& target, cons
    const auto& view = resolveView(target, states);
    const auto bounds = sprite.getGlobalBounds();
 
-   image_layer_pixels_submitted += visibleArea(
-      getClipRectPx(view), bounds.position.x, bounds.position.y, bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y
+   image_layer_pixels_submitted += static_cast<int64_t>(
+      static_cast<double>(visibleArea(
+         getClipRectPx(view), bounds.position.x, bounds.position.y, bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y
+      )) *
+      getTargetFillScale(target)
    );
 }
 

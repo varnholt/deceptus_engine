@@ -335,6 +335,9 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states, co
    // full screen pass it replaced - which is exactly what made the occluder clipping saving
    // invisible on the desktop instrument
    const auto clip_rect_px = DrawCallCounter::getClipRectPx(view);
+   // and the target is what decides how many fragments a view pixel becomes: the same art drawn
+   // into a half size normal target costs a quarter of the fill it costs in the colour target
+   const auto target_fill_scale = DrawCallCounter::getTargetFillScale(target);
    const auto clip_left_px = clip_rect_px.position.x;
    const auto clip_top_px = clip_rect_px.position.y;
    const auto clip_right_px = clip_left_px + clip_rect_px.size.x;
@@ -442,8 +445,10 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states, co
          // tiles are stored as two triangles, so six vertices make one tile - not four. dividing by
          // four overstated every count by 1.5x
          const auto tile_count = static_cast<float>(block_vertex_count / 6);
-         DrawCallCounter::tilemap_pixels_submitted +=
-            static_cast<int64_t>(tile_count * rasterised_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y));
+         DrawCallCounter::tilemap_pixels_submitted += static_cast<int64_t>(
+            static_cast<double>(tile_count * rasterised_fraction * static_cast<float>(_tile_size_px.x * _tile_size_px.y)) *
+            target_fill_scale
+         );
          DrawCallCounter::tilemap_tiles_submitted += static_cast<int64_t>(tile_count * rasterised_fraction);
          DrawCallCounter::tilemap_blocks_drawn++;
          DrawCallCounter::tilemap_visible_fraction_sum += visible_fraction;
@@ -474,7 +479,7 @@ void TileMap::drawVertices(sf::RenderTarget& target, sf::RenderStates states, co
    DrawCallCounter::tilemap_draw_calls++;
    if (animated_vertex_count > 0)
    {
-      DrawCallCounter::countAnimatedTilePixels(view, &_vertices_animated[0], animated_vertex_count);
+      DrawCallCounter::countAnimatedTilePixels(target, view, &_vertices_animated[0], animated_vertex_count);
    }
 #endif
 }

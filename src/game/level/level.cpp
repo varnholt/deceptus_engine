@@ -1498,12 +1498,19 @@ void Level::displayFinalTextures()
    // display the whole texture
 #ifndef DECEPTUS_VRSFML
    {
-      sf::View view(sf::FloatRect(
-         {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
-      ));
-      view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
-      _render_targets.level->setView(view);
-      _render_targets.normal->setView(view);
+      // one view per target, sized to that target: the next frame's atmosphere resolve blits into
+      // these two through whatever view is left over here, and the normal target does not have to be
+      // the size of the level one - under a render target profile that halves the normal group, a
+      // view spanning the level size would land the resolved background normals in a quarter of it
+      const auto whole_target_view = [](const sf::RenderTexture& target)
+      {
+         sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)}));
+         view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
+         return view;
+      };
+
+      _render_targets.level->setView(whole_target_view(*_render_targets.level.get()));
+      _render_targets.normal->setView(whole_target_view(*_render_targets.normal.get()));
    }
 #endif
    _render_targets.level->display();

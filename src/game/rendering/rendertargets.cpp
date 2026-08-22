@@ -3,6 +3,9 @@
 // game
 #include "framework/tools/log.h"
 #include "game/config/gameconfiguration.h"
+#ifdef DEVELOPMENT_MODE
+#include "game/debug/drawcallcounter.h"
+#endif
 
 RenderTargetProfile RenderTargetProfile::full()
 {
@@ -65,8 +68,19 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
    const auto normal_size = scaled_size(profile.normal_scale);
    const auto atmosphere_size = scaled_size(profile.atmosphere_scale);
 
+#ifdef DEVELOPMENT_MODE
+   // the fill counter prices every pass against the image group, so it has to know how large that
+   // group is before a pass running at a different size can read as anything but full price
+   DrawCallCounter::reference_target_size = image_size;
+#endif
+
+   // the sd card log is the only artefact a run on real hardware leaves behind, so the sizes the
+   // profile actually produced are logged rather than inferred from the profile name
+   Log::Info() << "render target profile '" << GameConfiguration::getInstance()._render_target_profile << "': image " << image_size.x
+               << " x " << image_size.y << ", lighting " << lighting_size.x << " x " << lighting_size.y << ", normal " << normal_size.x
+               << " x " << normal_size.y << ", atmosphere " << atmosphere_size.x << " x " << atmosphere_size.y;
+
 #ifdef DECEPTUS_VRSFML
-   const auto texture_size = sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)};
    const sf::RenderTextureCreateSettings stencil_settings{.stencilBits = 8u};
 
    auto make_rt = [](sf::Vector2u size) -> std::shared_ptr<sf::RenderTexture>
@@ -74,10 +88,10 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
    auto make_rt_stencil = [&stencil_settings](sf::Vector2u size) -> std::shared_ptr<sf::RenderTexture>
    { return std::make_shared<sf::RenderTexture>(std::move(*sf::RenderTexture::create(size, stencil_settings))); };
 
-   level_background = make_rt(texture_size);
-   level = make_rt_stencil(texture_size);
-   lighting = make_rt_stencil(texture_size);
-   lighting2 = make_rt_stencil(texture_size);
+   level_background = make_rt(image_size);
+   level = make_rt_stencil(image_size);
+   lighting = make_rt_stencil(lighting_size);
+   lighting2 = make_rt_stencil(lighting_size);
 
    // explicitly clear lighting textures to black on creation
    lighting->clear(sf::Color::Black);
@@ -85,23 +99,22 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
    lighting2->clear(sf::Color::Black);
    lighting2->display();
 
-   normal = make_rt(texture_size);
-   normal_tmp = make_rt(texture_size);
-   deferred = make_rt(texture_size);
-   atmosphere = make_rt(texture_size);
+   normal = make_rt(normal_size);
+   normal_tmp = make_rt(normal_size);
+   deferred = make_rt(image_size);
+   atmosphere = make_rt(atmosphere_size);
 #ifdef GLOW_ENABLED
-   blur = make_rt_stencil(texture_size);
+   blur = make_rt_stencil(image_size);
    blur_scaled = make_rt_stencil(sf::Vector2u{960u, 540u});
    blur_scaled->setSmooth(true);
 #endif
 #else
    try
    {
-      const auto texture_size = sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)};
-      level_background = std::make_shared<sf::RenderTexture>(texture_size);
-      level = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
-      lighting = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
-      lighting2 = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
+      level_background = std::make_shared<sf::RenderTexture>(image_size);
+      level = std::make_shared<sf::RenderTexture>(image_size, stencil_context_settings);
+      lighting = std::make_shared<sf::RenderTexture>(lighting_size, stencil_context_settings);
+      lighting2 = std::make_shared<sf::RenderTexture>(lighting_size, stencil_context_settings);
 
       // explicitly clear lighting textures to black on creation
       lighting->clear(sf::Color::Black);
@@ -109,12 +122,12 @@ void RenderTargets::create(uint32_t video_mode_width, uint32_t video_mode_height
       lighting2->clear(sf::Color::Black);
       lighting2->display();
 
-      normal = std::make_shared<sf::RenderTexture>(texture_size);
-      normal_tmp = std::make_shared<sf::RenderTexture>(texture_size);
-      deferred = std::make_shared<sf::RenderTexture>(texture_size);
-      atmosphere = std::make_shared<sf::RenderTexture>(texture_size);
+      normal = std::make_shared<sf::RenderTexture>(normal_size);
+      normal_tmp = std::make_shared<sf::RenderTexture>(normal_size);
+      deferred = std::make_shared<sf::RenderTexture>(image_size);
+      atmosphere = std::make_shared<sf::RenderTexture>(atmosphere_size);
 #ifdef GLOW_ENABLED
-      blur = std::make_shared<sf::RenderTexture>(texture_size, stencil_context_settings);
+      blur = std::make_shared<sf::RenderTexture>(image_size, stencil_context_settings);
       blur_scaled = std::make_shared<sf::RenderTexture>(sf::Vector2u{960, 540}, stencil_context_settings);
       blur_scaled->setSmooth(true);
 #endif
