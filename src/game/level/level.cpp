@@ -1726,13 +1726,20 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    auto& background_color_target = _atmosphere_visible ? *_render_targets.level_background.get() : *_render_targets.level.get();
    auto& background_normal_target = _atmosphere_visible ? *_render_targets.normal_tmp.get() : *_render_targets.normal.get();
 
-   // render layers affected by the atmosphere
-   _render_targets.level->clear();
-   _render_targets.normal->clear();
+   // whichever pair the background layers go into is the pair that has to start empty: they do not
+   // cover the whole screen, so anything they leave uncovered would otherwise show the frame before.
+   // the other pair needs no clear - with the atmosphere on screen the resolve below blits a full
+   // screen sprite of an opaque target over the whole of level and normal, and with it off screen
+   // there is no second pair at all. so the frame pays for two clears either way rather than four
    if (_atmosphere_visible)
    {
       _render_targets.level_background->clear();
       _render_targets.normal_tmp->clear();
+   }
+   else
+   {
+      _render_targets.level->clear();
+      _render_targets.normal->clear();
    }
    markRenderSection("clear level targets");
 

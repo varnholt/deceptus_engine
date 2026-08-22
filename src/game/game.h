@@ -227,6 +227,7 @@ private:
    int32_t _fps = 0;
    bool _screenshot = false;
    sf::Vector2u _render_texture_offset;
+   bool _window_blit_covers_window{false};  //!< the final blit leaves no part of the window uncovered, so it needs no clear
    int32_t _death_wait_time_ms = 0;
 
    bool _recording = false;
