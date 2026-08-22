@@ -3,12 +3,12 @@ WASM browser smoke test — connects to the local dev server and captures
 any SEVERE/WARNING console messages from the browser.
 
 Usage:
-    uv run pytest test_wasm_browser.py -v -s
+    uv run --project tests pytest tests/wasm/test_wasm_browser.py -v -s
 
 Requirements:
     - The HTTP server must be running:
           python -m http.server 9080 --directory ../../build_wasm
-      (or the run.bat in this directory handles it automatically)
+      (or lab/wasm_browser_test/run.bat handles it automatically)
     - Google Chrome must be installed.
 
 The test waits up to WAIT_SECONDS for the WASM module to initialize, then

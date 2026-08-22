@@ -63,7 +63,7 @@ Available teleport commands (opened via F12 in-game):
 From anywhere:
 
 ```powershell
-uv run --project lab/record_gameplay pytest lab/record_gameplay -s
+uv run --project lab/record_gameplay pytest ../../tests/desktop/test_record_gameplay.py -s
 ```
 
 The `-s` flag lets the game's stdout pass through so you can see loading

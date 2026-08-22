@@ -6,6 +6,11 @@ Both binaries accept: path_merge.exe <input.obj> <output.obj>
 Test strategy:
   - Run each binary on each *_not_optimised.obj input.
   - Assert the outputs are identical after trimming trailing whitespace per line.
+
+The binaries and the .obj inputs stay in lab/path_merge_tests: they are fixtures of the tool
+rather than of this test.
+
+    uv run --project tests pytest tests/tools/test_path_merge.py
 """
 
 import re
@@ -14,15 +19,15 @@ from pathlib import Path
 
 import pytest
 
-HERE = Path(__file__).parent
-OUTPUT_DIR = HERE / "test_output"
+FIXTURE_DIRECTORY = Path(__file__).resolve().parents[2] / "lab" / "path_merge_tests"
+OUTPUT_DIR = FIXTURE_DIRECTORY / "test_output"
 
-BINARY_QT5 = HERE / "binary_qt5" / "path_merge.exe"
-BINARY_STANDALONE = HERE / "binary_standalone" / "path_merge.exe"
+BINARY_QT5 = FIXTURE_DIRECTORY / "binary_qt5" / "path_merge.exe"
+BINARY_STANDALONE = FIXTURE_DIRECTORY / "binary_standalone" / "path_merge.exe"
 
 TEST_INPUTS = [
-    HERE / "test_data" / "layer_level_solid_not_optimised.obj",
-    HERE / "test_data" / "layer_level_solid_onesided_solid_onesided_not_optimised.obj",
+    FIXTURE_DIRECTORY / "test_data" / "layer_level_solid_not_optimised.obj",
+    FIXTURE_DIRECTORY / "test_data" / "layer_level_solid_onesided_solid_onesided_not_optimised.obj",
 ]
 
 

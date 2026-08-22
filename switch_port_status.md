@@ -548,10 +548,10 @@ go to `sdmc:/switch/deceptus`, since romfs is read-only.
 ImGui is excluded from this build entirely, as on WASM — clean, because the three debug UI
 files were already compiled out on VRSFML targets.
 
-### `lab/switch_smoke/test_switch_build.py`
+### `tests/switch/test_switch_build.py`
 
 ```
-uv run --with pytest pytest lab/switch_smoke/test_switch_build.py -v
+uv run --project tests pytest tests/switch/test_switch_build.py -v
 ```
 
 24 tests, all passing. They cover the failures that would otherwise be **silent**:
@@ -992,7 +992,7 @@ re-clone and re-apply. **Never** reset those trees from the Windows host.
 
 ```
 build_switch.bat          # -> build_switch_engine/deceptus.nro
-uv run --with pytest pytest lab/switch_smoke/test_switch_build.py -v
+uv run --project tests pytest tests/switch/test_switch_build.py -v
 powershell -File lab/switch_smoke/run_ryujinx.ps1 `
   -NroPath D:\deceptus\deceptus_engine\build_switch_engine\deceptus.nro `
   -OutputPath out.png -SettleSeconds 60

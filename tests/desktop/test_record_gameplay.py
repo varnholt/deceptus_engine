@@ -3,9 +3,10 @@ Launches the game, waits for the "level loading finished" line on stdout,
 then captures the window via ffmpeg gdigrab and saves a lossless master plus a GIF.
 
 Run from anywhere:
-    uv run --project lab/record_gameplay pytest lab/record_gameplay -s
+    uv run --project lab/record_gameplay pytest tests/desktop/test_record_gameplay.py -s
+    lab/record_gameplay/record.bat
 
-Paths are read from lab/record_gameplay/config.json.
+Paths are read from lab/record_gameplay/config.json, and the captures are written next to it.
 """
 
 import ctypes
@@ -36,7 +37,8 @@ def enable_dpi_awareness() -> None:
 
 enable_dpi_awareness()
 
-CONFIG_FILE = Path(__file__).parent / "config.json"
+RECORDER_DIRECTORY = Path(__file__).resolve().parents[2] / "lab" / "record_gameplay"
+CONFIG_FILE = RECORDER_DIRECTORY / "config.json"
 
 _config = json.loads(CONFIG_FILE.read_text())
 GAME_EXECUTABLE = Path(_config["game_executable"])
@@ -85,7 +87,7 @@ DEFAULT_INPUT_SCRIPT: list[dict] = [
 ]
 INPUT_SCRIPT: list[dict] = _config.get("input_script", DEFAULT_INPUT_SCRIPT)
 
-OUTPUT_DIR = Path(__file__).parent / "output"
+OUTPUT_DIR = RECORDER_DIRECTORY / "output"
 OUTPUT_GIF = OUTPUT_DIR / "gameplay.gif"
 
 # The capture is kept as a lossless RGB master. Anything derived from it (the GIF here, the
