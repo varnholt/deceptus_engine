@@ -17,8 +17,8 @@ struct GameConfiguration
    int32_t _view_height = 360;
    bool _fullscreen = false;
 
-   //!< blits the view at a whole number scale, so one view pixel always covers a whole number of screen
-   //!< pixels and nothing is resampled. whatever space is left over in the window becomes bars
+   //!< copies the view onto the window at a whole number scale, so one view pixel always covers a
+   //!< whole number of screen pixels and nothing is resampled. the space left over becomes bars
    bool _preserve_pixel_precision = false;
 
    //!< scales both axes by the same factor, so the view keeps its shape instead of being stretched to the
@@ -80,19 +80,19 @@ struct GameConfiguration
    {
       int32_t texture_width = 0;   //!< width of the render texture, always a whole multiple of the view
       int32_t texture_height = 0;  //!< height of the render texture, always a whole multiple of the view
-      float scale_x = 1.0f;        //!< horizontal factor the render texture is blitted with
-      float scale_y = 1.0f;        //!< vertical factor the render texture is blitted with
-      float offset_x = 0.0f;       //!< distance from the left window edge to the left edge of the blit
-      float offset_y = 0.0f;       //!< distance from the top window edge to the top edge of the blit
+      float scale_x = 1.0f;        //!< horizontal factor the render texture is copied with
+      float scale_y = 1.0f;        //!< vertical factor the render texture is copied with
+      float offset_x = 0.0f;       //!< distance from the left window edge to the left edge of the copy
+      float offset_y = 0.0f;       //!< distance from the top window edge to the top edge of the copy
 
-      //!< whether the blit lands view pixels on fractions of a screen pixel. only then is there
+      //!< whether the copy lands view pixels on fractions of a screen pixel. only then is there
       //!< anything between texels to interpolate, and only then is smoothing worth having
       bool resamples = false;
    };
 
-   /// \brief sizes the window render texture and works out the blit that puts it into the window.
-   /// \return the texture size together with the scale and offset the blit runs at.
-   /// \note the render texture is a whole multiple of the view in every behavior. only the blit differs,
+   /// \brief sizes the window render texture and works out the copy that puts it onto the window.
+   /// \return the texture size together with the scale and offset the copy runs at.
+   /// \note the render texture is a whole multiple of the view in every behavior. only the copy differs,
    ///       so switching behavior never resizes a render target or changes what the level draws.
    WindowImagePlacement computeWindowImagePlacement() const;
 
