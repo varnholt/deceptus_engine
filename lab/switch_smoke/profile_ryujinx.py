@@ -34,7 +34,9 @@ from ryujinx_driver import (  # noqa: E402
     VK_X,
     NRO_PATH,
     RyujinxSession,
+    find_window,
     hold_key,
+    move_window_to_monitor,
     send_key,
 )
 
@@ -52,14 +54,17 @@ FRAME_REPORT = re.compile(
 IN_LEVEL_UPDATE_MS_MINIMUM = 0.5
 
 
-def disable_guest_vsync() -> bool:
-    """Turns vsync off in the guest's config for the duration of the run.
+def prepare_guest_config(render_target_profile: str | None = None) -> bool:
+    """Turns vsync off in the guest's config for the duration of the run, and picks a target profile.
 
     vsync belongs on for playing, and the engine now honours it on the console. For profiling it has
     to come off: with it on, every frame that would have taken less than 16.7 ms reports 16.7 ms, so
     the numbers pin to 60 fps and any improvement above that line becomes invisible. Worse, a frame
     that misses the deadline waits for the next one, so the rate quantises to 60/30/20 and a change
     that removed real work looks like it did nothing at all.
+
+    The render target profile goes in the same file, which is what makes an A/B of it one NRO and two
+    runs rather than two builds.
     """
     if not GUEST_CONFIG_PATH.exists():
         print(f"no guest config at {GUEST_CONFIG_PATH}, leaving vsync alone")
@@ -70,8 +75,12 @@ def disable_guest_vsync() -> bool:
 
     config = json.loads(GUEST_CONFIG_PATH.read_text(encoding="utf-8"))
     config["GameConfiguration"]["vsync"] = False
+    if render_target_profile:
+        config["GameConfiguration"]["render_target_profile"] = render_target_profile
     GUEST_CONFIG_PATH.write_text(json.dumps(config, indent=4), encoding="utf-8")
     print("disabled vsync in the guest config for this run")
+    if render_target_profile:
+        print(f"render target profile: {render_target_profile}")
     return True
 
 
@@ -114,10 +123,22 @@ def main() -> int:
     parser.add_argument("--load-seconds", type=float, default=45.0, help="time to wait for the level to finish loading")
     parser.add_argument("--sample-seconds", type=float, default=60.0, help="how long to leave the game running in the level")
     parser.add_argument("--walk", action="store_true", help="hold right while sampling instead of standing still")
+    parser.add_argument("--monitor", type=int, default=None, help="index of the monitor to park the emulator on")
+    parser.add_argument(
+        "--nro",
+        default=None,
+        help="nro to boot instead of build_switch_engine/deceptus.nro, so two builds can be compared",
+    )
+    parser.add_argument(
+        "--render-target-profile",
+        default=None,
+        choices=["full", "reduced"],
+        help="render target profile to write into the guest config before the run",
+    )
     args = parser.parse_args()
 
     previous_log = newest_log()
-    disable_guest_vsync()
+    prepare_guest_config(args.render_target_profile)
 
     try:
         return run_session(args, previous_log)
@@ -126,9 +147,17 @@ def main() -> int:
 
 
 def run_session(args, previous_log: Path | None) -> int:
-    with RyujinxSession(nro_path=NRO_PATH):
+    with RyujinxSession(nro_path=Path(args.nro) if args.nro else NRO_PATH):
         print(f"waiting {args.boot_seconds:.0f}s for the guest to boot")
         time.sleep(args.boot_seconds)
+
+        # park the emulator on the secondary screen so a run does not sit on top of the main one
+        if args.monitor is not None:
+            emulator_window = find_window()
+            if emulator_window and move_window_to_monitor(emulator_window, args.monitor):
+                print(f"moved the emulator to monitor {args.monitor}")
+            else:
+                print(f"could not move the emulator to monitor {args.monitor}")
 
         log_path = newest_log()
         if log_path is None or log_path == previous_log:
@@ -170,6 +199,15 @@ def run_session(args, previous_log: Path | None) -> int:
     level_reports = in_level(reports)
 
     print(f"\n--- {log_path} ---")
+    for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if "render target profile" in line:
+            print(line.rstrip())
+
+    # the section line is where a change to the draw path shows up; the frame rate alone cannot say
+    # which pass moved
+    section_lines = [line for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines() if "sections over" in line]
+    if section_lines:
+        print(section_lines[-1].rstrip())
     if not level_reports:
         print("no in-level reports were collected while sampling")
         return 1

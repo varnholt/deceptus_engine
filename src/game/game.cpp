@@ -742,18 +742,51 @@ void Game::draw()
    _draw_section_timer.begin((_profiling_ui != nullptr) && _profiling_ui->isMechanismProfilingWanted());
 #endif
 
-   _window->clear(sf::Color::Black);
+   // the window render texture is composited opaque and blitted over the window at the end of the
+   // frame, so wherever that blit lands the cleared pixels are overwritten and the clear was a full
+   // screen write with no result. it is only needed where the blit does not reach - the bars a
+   // letterboxing scaling behavior leaves - or where it can come out translucent, which a frame
+   // scoped post processing effect can do. the scope alone does not say that: All is the default and
+   // means nothing until an effect is actually selected.
+   //
+   // this asks the placement rather than remembering an answer: only a change of the whole number
+   // scale rebuilds the render targets, so a resize within one multiple would leave a cached flag
+   // claiming the blit still reaches the window edge it has just left
+   const auto window_placement = GameConfiguration::getInstance().computeWindowImagePlacement();
+   const auto window_size = _window->getSize();
+   const auto blit_covers_window =
+      window_placement.offset_x <= 0.0f && window_placement.offset_y <= 0.0f &&
+      static_cast<float>(window_placement.texture_width) * window_placement.scale_x >= static_cast<float>(window_size.x) &&
+      static_cast<float>(window_placement.texture_height) * window_placement.scale_y >= static_cast<float>(window_size.y);
+
+   const auto& post_processing = PostProcessing::getInstance();
+   const auto frame_effect_active = post_processing.isActive() && post_processing.getScope() == PostProcessing::Scope::All;
+   if (!blit_covers_window || frame_effect_active)
+   {
+      _window->clear(sf::Color::Black);
+   }
 #ifndef DECEPTUS_VRSFML
    _window->pushGLStates();
 #endif
-
-   _window_render_texture->clear();
 
    // a level-scoped effect routes the level through an intermediate target so it can be resolved
    // into the window render texture before any overlay is drawn on top of it
    PostProcessing::getInstance().setLevelEffect(_level_loading_finished && _level ? _level->getActivePostProcessingMechanism() : nullptr);
 
    const auto level_target = _post_processing_pass.selectLevelTarget(_window_render_texture, _level_loading_finished);
+
+   // the same argument one target down: the level's gamma blit covers the whole window render
+   // texture and carries the level target's alpha, which is opaque everywhere. what does not cover
+   // it is a boom offsetting that blit, which uncovers a strip along two edges, and a level scoped
+   // effect resolving through a target of its own
+   const auto level_covers_window_texture = _level_loading_finished && _level && level_target == _window_render_texture &&
+                                            _level->getBoomEffect()._boom_offset_x == 0.0f &&
+                                            _level->getBoomEffect()._boom_offset_y == 0.0f;
+
+   if (!level_covers_window_texture)
+   {
+      _window_render_texture->clear();
+   }
 
 #ifdef DEVELOPMENT_MODE
    _draw_section_timer.mark("game clear targets");

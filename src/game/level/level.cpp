@@ -1498,12 +1498,19 @@ void Level::displayFinalTextures()
    // display the whole texture
 #ifndef DECEPTUS_VRSFML
    {
-      sf::View view(sf::FloatRect(
-         {0.0f, 0.0f}, {static_cast<float>(_render_targets.level->getSize().x), static_cast<float>(_render_targets.level->getSize().y)}
-      ));
-      view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
-      _render_targets.level->setView(view);
-      _render_targets.normal->setView(view);
+      // one view per target, sized to that target: the next frame's atmosphere resolve blits into
+      // these two through whatever view is left over here, and the normal target does not have to be
+      // the size of the level one - under a render target profile that halves the normal group, a
+      // view spanning the level size would land the resolved background normals in a quarter of it
+      const auto whole_target_view = [](const sf::RenderTexture& target)
+      {
+         sf::View view(sf::FloatRect({0.0f, 0.0f}, {static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)}));
+         view.setViewport(sf::FloatRect({0.0f, 0.0f}, {1.0f, 1.0f}));
+         return view;
+      };
+
+      _render_targets.level->setView(whole_target_view(*_render_targets.level.get()));
+      _render_targets.normal->setView(whole_target_view(*_render_targets.normal.get()));
    }
 #endif
    _render_targets.level->display();
@@ -1719,13 +1726,20 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    auto& background_color_target = _atmosphere_visible ? *_render_targets.level_background.get() : *_render_targets.level.get();
    auto& background_normal_target = _atmosphere_visible ? *_render_targets.normal_tmp.get() : *_render_targets.normal.get();
 
-   // render layers affected by the atmosphere
-   _render_targets.level->clear();
-   _render_targets.normal->clear();
+   // whichever pair the background layers go into is the pair that has to start empty: they do not
+   // cover the whole screen, so anything they leave uncovered would otherwise show the frame before.
+   // the other pair needs no clear - with the atmosphere on screen the resolve below blits a full
+   // screen sprite of an opaque target over the whole of level and normal, and with it off screen
+   // there is no second pair at all. so the frame pays for two clears either way rather than four
    if (_atmosphere_visible)
    {
       _render_targets.level_background->clear();
       _render_targets.normal_tmp->clear();
+   }
+   else
+   {
+      _render_targets.level->clear();
+      _render_targets.normal->clear();
    }
    markRenderSection("clear level targets");
 

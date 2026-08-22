@@ -79,6 +79,14 @@ struct TileMapLayerPixels
    double _visible_fraction_sum{0.0};  //!< how much of each of them the view covered, summed
 };
 
+//! Size of the render target the overdraw factors are expressed in, i.e. the image group's. A
+//! pass into a smaller target rasterises fewer fragments for the same art, so every count is
+//! scaled by its target's area relative to this one. Without that, the "full" and "reduced"
+//! render target profiles produce byte identical overdraw lines - which is exactly what hid the
+//! profile never reaching the targets at all. Zero until the render targets are created, and
+//! the counts stay unscaled while it is.
+inline sf::Vector2u reference_target_size{0, 0};
+
 //! Per layer breakdown of the tile fill, accumulated across the report window rather than reset
 //! every frame. Answers whether a handful of layers own the overdraw or it is spread evenly across
 //! all of them, which is what decides between dropping layers and rejecting hidden fragments.
@@ -106,6 +114,15 @@ void beginTileMapNormalPass();
 void endTileMapNormalPass();
 
 ///
+/// \brief What a draw into this target costs in fragments, against a draw into the image group.
+/// \param target render target the draw goes to.
+/// \return the target area over reference_target_size, or 1.0 while that size is unknown.
+/// \note this is what prices a render target profile: the art submitted does not change when a
+///       pass is moved to a half size target, the fragments it costs do.
+///
+double getTargetFillScale(const sf::RenderTarget& target);
+
+///
 /// \brief Returns the region of the view a draw through it is actually rasterised into.
 /// \param view the view the draw goes through.
 /// \return the view rectangle narrowed by the view's scissor, in view pixels.
@@ -117,6 +134,7 @@ sf::FloatRect getClipRectPx(const sf::View& view);
 
 ///
 /// \brief Adds the on-screen area of the animated tiles submitted with a tile map batch.
+/// \param target render target the batch went to.
 /// \param view the view the batch was drawn through.
 /// \param vertices first vertex of the animated run, two triangles per tile.
 /// \param vertex_count how many vertices the run holds.
@@ -124,7 +142,7 @@ sf::FloatRect getClipRectPx(const sf::View& view);
 ///       unlike the static blocks they are not culled before submission. Clipping them here is what
 ///       keeps the layer totals comparable to each other.
 ///
-void countAnimatedTilePixels(const sf::View& view, const sf::Vertex* vertices, std::size_t vertex_count);
+void countAnimatedTilePixels(const sf::RenderTarget& target, const sf::View& view, const sf::Vertex* vertices, std::size_t vertex_count);
 
 ///
 /// \brief Adds the on-screen area of a batch of ambient occlusion quads.

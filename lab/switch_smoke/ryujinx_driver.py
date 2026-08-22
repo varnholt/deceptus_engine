@@ -66,6 +66,47 @@ def find_window() -> int | None:
     return result[0] if result else None
 
 
+LAPTOP_MONITOR_INDEX = 0  #!< the secondary screen, so a run does not occupy the main one
+
+
+def list_monitors() -> list[tuple[int, int, int, int]]:
+    """Returns every monitor's work area as (left, top, right, bottom) in virtual desktop pixels."""
+    import ctypes.wintypes
+
+    ctypes.windll.user32.SetProcessDPIAware()
+    monitors: list[tuple[int, int, int, int]] = []
+
+    enum_proc = ctypes.WINFUNCTYPE(
+        ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong, ctypes.POINTER(ctypes.wintypes.RECT), ctypes.c_double
+    )
+
+    def callback(monitor_handle, device_context, rect_pointer, data):
+        rect = rect_pointer.contents
+        monitors.append((rect.left, rect.top, rect.right, rect.bottom))
+        return 1
+
+    ctypes.windll.user32.EnumDisplayMonitors(0, 0, enum_proc(callback), 0)
+    return monitors
+
+
+def move_window_to_monitor(handle: int, monitor_index: int = LAPTOP_MONITOR_INDEX) -> bool:
+    """Parks the emulator on another screen so the main one stays usable during a run."""
+    monitors = list_monitors()
+    if monitor_index >= len(monitors):
+        return False
+
+    left, top, right, bottom = monitors[monitor_index]
+    window_left, window_top, window_right, window_bottom = win32gui.GetWindowRect(handle)
+    width = min(window_right - window_left, right - left)
+    height = min(window_bottom - window_top, bottom - top)
+
+    # centred on that monitor, so nothing hangs off the edge and the capture stays complete
+    x = left + ((right - left) - width) // 2
+    y = top + ((bottom - top) - height) // 2
+    win32gui.SetWindowPos(handle, 0, x, y, width, height, win32con.SWP_NOZORDER | win32con.SWP_NOACTIVATE)
+    return True
+
+
 def focus_window() -> int | None:
     """Brings the emulator to the foreground and verifies it got there.
 
