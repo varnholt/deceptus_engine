@@ -3,6 +3,7 @@
 #include "menuscreen.h"
 
 #include <array>
+#include <string_view>
 
 /// \brief name-entry screen that edits the player name before starting a new save slot.
 class MenuScreenNameSelect : public MenuScreen
@@ -65,8 +66,13 @@ private:
    /// \brief centers the rendered name text inside the name field.
    void updateText();
 
-   /// \brief seeds the entered name from environment username heuristics.
+   /// \brief seeds the entered name from the platform's user name.
    void retrieveUsername();
+
+   /// \brief strips every character the on-screen character grid cannot produce and clamps the length.
+   /// \param raw_name name as it came from the platform.
+   /// \return name reduced to characters of the on-screen character grid.
+   std::string keepSupportedChars(std::string_view raw_name) const;
 
    std::string _name;
    std::array<char, 13 * 5> _chars;

@@ -1,11 +1,13 @@
 #include "menuscreennameselect.h"
 
 #include "framework/tools/localization.h"
+#include "framework/tools/platformuser.h"
 #include "framework/tools/sfmlstring.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
 #include "menu.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 
@@ -14,27 +16,6 @@ namespace
 static const int32_t char_width = 19;
 static const int32_t char_height = 24;
 static const size_t max_length = 11;
-
-std::string extractFirstName(std::string_view username)
-{
-   // heuristic 1: split CamelCase
-   for (std::size_t i = 1; i < username.size(); ++i)
-   {
-      if (std::isupper(static_cast<unsigned char>(username[i])))
-      {
-         return std::string(username.substr(0, i));
-      }
-   }
-
-   // heuristic 2: try underscores or dots
-   if (auto pos = username.find_first_of("._"); pos != std::string_view::npos)
-   {
-      return std::string(username.substr(0, pos));
-   }
-
-   // fallback: return full username
-   return std::string(username);
-}
 }  // namespace
 
 MenuScreenNameSelect::MenuScreenNameSelect()
@@ -234,13 +215,32 @@ void MenuScreenNameSelect::controllerButtonY()
    appendChar(c);
 }
 
+std::string MenuScreenNameSelect::keepSupportedChars(std::string_view raw_name) const
+{
+   std::string supported_name;
+
+   for (const auto raw_char : raw_name)
+   {
+      if (supported_name.size() == max_length)
+      {
+         break;
+      }
+
+      if (std::find(_chars.begin(), _chars.end(), raw_char) != _chars.end())
+      {
+         supported_name += raw_char;
+      }
+   }
+
+   return supported_name;
+}
+
 void MenuScreenNameSelect::retrieveUsername()
 {
-   // probably requires a regular expression to filter out the unicode crap
-   auto* u1 = std::getenv("USERNAME");
-   auto* u2 = std::getenv("USER");
-   std::string raw_name = u1 ? u1 : (u2 ? u2 : "");
-   _name = extractFirstName(raw_name);
+   // the name is edited with the on-screen character grid, so the suggestion has to consist of
+   // characters that grid can produce: anything else has no glyph in the menu font and could
+   // not be typed back in after a delete
+   _name = keepSupportedChars(PlatformUser::getUserName());
 
    if (!_name.empty())
    {

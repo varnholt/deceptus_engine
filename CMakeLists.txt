@@ -113,6 +113,8 @@ set(GAME_FILES
     src/framework/tools/log.h
     src/framework/tools/logthread.cpp
     src/framework/tools/logthread.h
+    src/framework/tools/platformuser.cpp
+    src/framework/tools/platformuser.h
     src/framework/tools/resourcepool.h
     src/framework/tools/scopeexit.cpp
     src/framework/tools/scopeexit.h
