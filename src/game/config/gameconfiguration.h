@@ -84,6 +84,10 @@ struct GameConfiguration
       float scale_y = 1.0f;        //!< vertical factor the render texture is blitted with
       float offset_x = 0.0f;       //!< distance from the left window edge to the left edge of the blit
       float offset_y = 0.0f;       //!< distance from the top window edge to the top edge of the blit
+
+      //!< whether the blit lands view pixels on fractions of a screen pixel. only then is there
+      //!< anything between texels to interpolate, and only then is smoothing worth having
+      bool resamples = false;
    };
 
    /// \brief sizes the window render texture and works out the blit that puts it into the window.

@@ -326,9 +326,10 @@ void Game::initializeRenderTargets()
 #ifndef DECEPTUS_VRSFML
    // once the blit scale is not a whole number, nearest neighbour hands some view pixels one more screen
    // pixel than their neighbours, and that uneven pattern crawls across the image as the camera moves.
-   // smoothing spreads the remainder out instead. a pixel precise blit runs at scale 1 and must not be
-   // smoothed at all, or every pixel of the frame gets resampled for nothing
-   _window_render_texture->setSmooth(!game_config._preserve_pixel_precision);
+   // smoothing spreads the remainder out instead. a whole-number blit has nothing between texels to
+   // interpolate, so smoothing it can only smear a moving image - which is why this follows the blit and
+   // not the option: keep aspect lands on 1:1 whenever one axis is an exact multiple of the view
+   _window_render_texture->setSmooth(placement.resamples);
 #endif
 
    if (_level)
@@ -1402,7 +1403,7 @@ void Game::applyScalingOptions()
       adoptWindowSize(placement.texture_width, placement.texture_height);
    }
 
-   _window_render_texture->setSmooth(!config._preserve_pixel_precision);
+   _window_render_texture->setSmooth(config.computeWindowImagePlacement().resamples);
 #endif
 }
 

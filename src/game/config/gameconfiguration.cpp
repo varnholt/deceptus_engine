@@ -1,6 +1,7 @@
 #include "gameconfiguration.h"
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -247,9 +248,16 @@ GameConfiguration::WindowImagePlacement GameConfiguration::computeWindowImagePla
          .scale_x = 1.0f,
          .scale_y = 1.0f,
          .offset_x = static_cast<float>(offset_x),
-         .offset_y = static_cast<float>(offset_y)
+         .offset_y = static_cast<float>(offset_y),
+         .resamples = false
       };
    }
+
+   // a scale is only worth interpolating when it is not a whole number. keeping this with the placement
+   // rather than deriving it from the flags matters: a window whose height is an exact multiple of the
+   // view pins the uniform factor to exactly 1, so keep aspect ends up blitting 1:1 just as pixel
+   // precision does, and smoothing a 1:1 blit can only make a scrolling image crawl
+   const auto is_whole_number = [](float value) { return value == std::floor(value); };
 
    // both remaining modes resample, so here sub-pixel centring is the more accurate answer rather than
    // the thing to avoid, and the arithmetic runs in float
@@ -268,7 +276,8 @@ GameConfiguration::WindowImagePlacement GameConfiguration::computeWindowImagePla
          .scale_x = fill_scale_x,
          .scale_y = fill_scale_y,
          .offset_x = 0.0f,
-         .offset_y = 0.0f
+         .offset_y = 0.0f,
+         .resamples = !is_whole_number(fill_scale_x) || !is_whole_number(fill_scale_y)
       };
    }
 
@@ -284,7 +293,8 @@ GameConfiguration::WindowImagePlacement GameConfiguration::computeWindowImagePla
       .scale_x = uniform_scale,
       .scale_y = uniform_scale,
       .offset_x = (window_width - image_width) * 0.5f,
-      .offset_y = (window_height - image_height) * 0.5f
+      .offset_y = (window_height - image_height) * 0.5f,
+      .resamples = !is_whole_number(uniform_scale)
    };
 }
 
