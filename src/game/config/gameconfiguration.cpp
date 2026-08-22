@@ -18,13 +18,6 @@
 
 using json = nlohmann::json;
 
-namespace
-{
-// minimum pixel difference required to trigger window recreation
-// filters out small DPI adjustments when moving windows between monitors
-constexpr int32_t min_resolution_change_threshold = 10;
-}  // namespace
-
 bool GameConfiguration::__initialized = false;
 GameConfiguration GameConfiguration::__defaults;
 
@@ -40,6 +33,8 @@ std::string GameConfiguration::serialize()
           {"fullscreen", _fullscreen},
           {"brightness", _brightness},
           {"vsync", _vsync_enabled},
+          {"preserve_pixel_precision", _preserve_pixel_precision},
+          {"preserve_aspect_ratio", _preserve_aspect_ratio},
           {"render_target_profile", _render_target_profile},
 
           {"audio_volume_master", _audio_volume_master},
@@ -97,6 +92,16 @@ void GameConfiguration::deserialize(const std::string& data)
       if (const auto profile_it = gc.find("render_target_profile"); profile_it != gc.end())
       {
          _render_target_profile = profile_it->get<std::string>();
+      }
+
+      if (const auto pixel_precision_it = gc.find("preserve_pixel_precision"); pixel_precision_it != gc.end())
+      {
+         _preserve_pixel_precision = pixel_precision_it->get<bool>();
+      }
+
+      if (const auto aspect_ratio_it = gc.find("preserve_aspect_ratio"); aspect_ratio_it != gc.end())
+      {
+         _preserve_aspect_ratio = aspect_ratio_it->get<bool>();
       }
    }
    catch (const std::exception& e)
@@ -216,27 +221,78 @@ int32_t GameConfiguration::getViewScale() const
    return computeViewScale(_video_mode_width, _video_mode_height, _view_width, _view_height);
 }
 
+GameConfiguration::WindowImagePlacement GameConfiguration::computeWindowImagePlacement() const
+{
+   // the render texture is a whole multiple of the view in every mode, not just the pixel precise one.
+   // the view is pixel art and rasterising it at a fraction of a pixel is what turns it to mush, so the
+   // fractional part of the fit is left to the blit, where it resamples an already finished image
+   const auto integer_scale = getViewScale();
+   const auto texture_width = integer_scale * _view_width;
+   const auto texture_height = integer_scale * _view_height;
+
+   // pixel precision takes precedence when both are on: a whole number scale applied to both axes alike
+   // already keeps the aspect ratio, so the two ask for the same thing and this is the stricter of them
+   if (_preserve_pixel_precision)
+   {
+      // whole numbers the entire way through. the offset has to land on a whole pixel as well: a window
+      // with an odd amount of space left over puts the true centre at x.5, and blitting a texture there
+      // resamples every pixel of the frame - the one thing this mode exists to prevent. integer division
+      // floors it instead, which leaves one bar a single pixel wider than the other
+      const auto offset_x = (_video_mode_width - texture_width) / 2;
+      const auto offset_y = (_video_mode_height - texture_height) / 2;
+
+      return {
+         .texture_width = texture_width,
+         .texture_height = texture_height,
+         .scale_x = 1.0f,
+         .scale_y = 1.0f,
+         .offset_x = static_cast<float>(offset_x),
+         .offset_y = static_cast<float>(offset_y)
+      };
+   }
+
+   // both remaining modes resample, so here sub-pixel centring is the more accurate answer rather than
+   // the thing to avoid, and the arithmetic runs in float
+   const auto window_width = static_cast<float>(_video_mode_width);
+   const auto window_height = static_cast<float>(_video_mode_height);
+   const auto fill_scale_x = window_width / static_cast<float>(texture_width);
+   const auto fill_scale_y = window_height / static_cast<float>(texture_height);
+
+   if (!_preserve_aspect_ratio)
+   {
+      // each axis takes whatever factor reaches its window edge, which fills the window completely and
+      // distorts the view by however much the window disagrees with 16:9
+      return {
+         .texture_width = texture_width,
+         .texture_height = texture_height,
+         .scale_x = fill_scale_x,
+         .scale_y = fill_scale_y,
+         .offset_x = 0.0f,
+         .offset_y = 0.0f
+      };
+   }
+
+   // one factor for both axes keeps the view's shape, and taking the smaller of the two keeps the result
+   // inside the window. the axis that then falls short of its edge is the one that ends up with bars
+   const auto uniform_scale = std::min(fill_scale_x, fill_scale_y);
+   const auto image_width = static_cast<float>(texture_width) * uniform_scale;
+   const auto image_height = static_cast<float>(texture_height) * uniform_scale;
+
+   return {
+      .texture_width = texture_width,
+      .texture_height = texture_height,
+      .scale_x = uniform_scale,
+      .scale_y = uniform_scale,
+      .offset_x = (window_width - image_width) * 0.5f,
+      .offset_y = (window_height - image_height) * 0.5f
+   };
+}
+
 void GameConfiguration::resetAudioDefaults()
 {
    getInstance()._audio_volume_master = getDefaults()._audio_volume_master;
    getInstance()._audio_volume_music = getDefaults()._audio_volume_music;
    getInstance()._audio_volume_sfx = getDefaults()._audio_volume_sfx;
-}
-
-bool GameConfiguration::isResolutionChangeApplicable(int32_t new_width, int32_t new_height) const
-{
-   // in fullscreen mode, the OS manages the window size
-   if (_fullscreen)
-   {
-      return false;
-   }
-
-   // only apply resolution changes that exceed the threshold
-   // this filters out DPI scaling adjustments when moving windows between monitors
-   const auto width_diff = std::abs(new_width - _video_mode_width);
-   const auto height_diff = std::abs(new_height - _video_mode_height);
-
-   return (width_diff > min_resolution_change_threshold || height_diff > min_resolution_change_threshold);
 }
 
 void GameConfiguration::clampResolutionToDesktop()

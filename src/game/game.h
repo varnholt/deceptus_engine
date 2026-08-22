@@ -156,6 +156,14 @@ private:
    /// \param h target height in pixels.
    void changeResolution(int32_t w, int32_t h);
 
+   /// \brief applies the scaling options to the render texture filtering.
+   void applyScalingOptions();
+
+   /// \brief takes on a size the window already has, without recreating the window.
+   /// \param width new window width in pixels.
+   /// \param height new window height in pixels.
+   void adoptWindowSize(int32_t width, int32_t height);
+
 #ifdef DECEPTUS_VRSFML
    /// \brief re-fits the render resolution to the current browser viewport (integer multiple of the base
    /// view), recreating rendering resources only when the size actually changes. invoked on browser resize
@@ -226,8 +234,6 @@ private:
 
    int32_t _fps = 0;
    bool _screenshot = false;
-   sf::Vector2u _render_texture_offset;
-   bool _window_blit_covers_window{false};  //!< the final blit leaves no part of the window uncovered, so it needs no clear
    int32_t _death_wait_time_ms = 0;
 
    bool _recording = false;
