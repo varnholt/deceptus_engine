@@ -474,66 +474,79 @@ void Game::processPendingLevelLoad()
 
    const auto level_loader = [this, loading_mode]()
    {
-   // create an opengl context for this thread
+      // the loader context lives in a scope of its own so that it is gone - deactivated *and*
+      // destroyed - before _level_loading_finished lets the main thread start drawing. see the note
+      // at the end of the scope
+      {
+         // create an opengl context for this thread
 #ifndef DECEPTUS_VRSFML
-      sf::Context loader_context;
-      loader_context.setActive(true);
+         sf::Context loader_context;
+         loader_context.setActive(true);
 #endif
 
-      // load level
-      const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
-      _level = std::make_shared<Level>(_render_targets);
-      LevelRegistry::setCurrent(_level);
-      _level->setDescriptionFilename(level_item._level_name);
-      _level->setLoadingMode(loading_mode);
-      _level->initialize();
+         // load level
+         const auto level_item = Levels::readLevelItem(SaveState::getCurrent()._level_index);
+         _level = std::make_shared<Level>(_render_targets);
+         LevelRegistry::setCurrent(_level);
+         _level->setDescriptionFilename(level_item._level_name);
+         _level->setLoadingMode(loading_mode);
+         _level->initialize();
 
-      // put the player in there
-      _player->setWorld(_level->getWorld());
-      _player->initializeLevel();
+         // put the player in there
+         _player->setWorld(_level->getWorld());
+         _player->initializeLevel();
 
-      // re-equip items now that level and player are both live; items deserialized before the
-      // level was ready (e.g. head torch) had their onEquipped() silently no-op at that point
-      SaveState::getPlayerInfo()._items.reinitializeEquippedItems();
+         // re-equip items now that level and player are both live; items deserialized before the
+         // level was ready (e.g. head torch) had their onEquipped() silently no-op at that point
+         SaveState::getPlayerInfo()._items.reinitializeEquippedItems();
 
-      // jump back to stored position, that's only for debugging purposes, not for checkpoints
-      if (_restore_previous_position)
-      {
-         _restore_previous_position = false;
-         _player->setBodyViaPixelPosition(_stored_position.x, _stored_position.y);
+         // jump back to stored position, that's only for debugging purposes, not for checkpoints
+         if (_restore_previous_position)
+         {
+            _restore_previous_position = false;
+            _player->setBodyViaPixelPosition(_stored_position.x, _stored_position.y);
+         }
+
+         _player->updatePixelRect();
+
+         Log::Info() << "level loading finished: " << level_item._level_name;
+
+         // loading took seconds of real time that the simulation must not make up for, or the first
+         // frame back would run its whole catch-up allowance at once
+         _fixed_time_step.reset();
+
+         playLevelMusic();
+
+         // before synchronizing the camera with the player position, the camera needs to know its room limitations
+         _level->syncRoom();
+
+         CameraSystem::getInstance().syncNow();
+         GameClock::getInstance().reset();
+
+         _info_layer->setLoading(false);
+
+         // notify listeners
+         for (const auto& callback : _level_loaded_callbacks)
+         {
+            callback();
+         }
+
+         _level_loaded_callbacks.clear();
+
+#ifndef DECEPTUS_VRSFML
+         loader_context.setActive(false);
+#endif
       }
 
-      _player->updatePixelRect();
-
-      Log::Info() << "level loading finished: " << level_item._level_name;
-
+      // only now is the loader out of the driver, and only now may the main thread draw.
+      //
+      // raising this flag is what releases Game::update and Game::draw onto the new level, so raising
+      // it while the loader was still inside its scope let the main thread draw at the same moment the
+      // context destructor ran. ~WglContext calls wglMakeCurrent and wglDeleteContext, both of which
+      // take the driver's own lock, and a draw already inside that lock never gets out: the main thread
+      // sits in sf::RenderTarget::drawPrimitives, the loader in sf::Context::~Context, and whichever got
+      // there first decides whether the frame lives. It hung about half of the time on an Intel iGPU.
       _level_loading_finished = true;
-
-      // loading took seconds of real time that the simulation must not make up for, or the first
-      // frame back would run its whole catch-up allowance at once
-      _fixed_time_step.reset();
-
-      playLevelMusic();
-
-      // before synchronizing the camera with the player position, the camera needs to know its room limitations
-      _level->syncRoom();
-
-      CameraSystem::getInstance().syncNow();
-      GameClock::getInstance().reset();
-
-      _info_layer->setLoading(false);
-
-      // notify listeners
-      for (const auto& callback : _level_loaded_callbacks)
-      {
-         callback();
-      }
-
-      _level_loaded_callbacks.clear();
-
-#ifndef DECEPTUS_VRSFML
-      loader_context.setActive(false);
-#endif
    };
 
    // Loading synchronously on the VRSFML targets is not a threading limitation, whatever the
