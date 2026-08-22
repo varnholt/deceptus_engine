@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <format>
+#include <utility>
 
 #ifdef DECEPTUS_VRSFML
 #include <SFML/Window/VideoMode.hpp>
@@ -16,6 +17,34 @@
 #endif
 
 static const auto STEP_SIZE = 10;
+
+namespace
+{
+
+//! the states the scaling row cycles through, in order, as {pixel precision, keep aspect} pairs. a
+//! whole number scale is applied to both axes alike and so keeps the aspect ratio by construction,
+//! which is why the last entry sets both flags rather than leaving the config in the one combination
+//! that reads as a contradiction
+constexpr std::array<std::pair<bool, bool>, 3> scaling_states{{{false, false}, {false, true}, {true, true}}};
+
+int32_t currentScalingStateIndex()
+{
+   const auto& config = GameConfiguration::getInstance();
+
+   for (auto index = 0; index < static_cast<int32_t>(scaling_states.size()); index++)
+   {
+      if (scaling_states[index].first == config._preserve_pixel_precision && scaling_states[index].second == config._preserve_aspect_ratio)
+      {
+         return index;
+      }
+   }
+
+   // a hand edited config can ask for pixel precision without keeping the aspect ratio, which comes out
+   // as pixel precision either way, so that is the state the row reports
+   return config._preserve_pixel_precision ? static_cast<int32_t>(scaling_states.size()) - 1 : 0;
+}
+
+}  // namespace
 
 MenuScreenVideo::MenuScreenVideo()
 {
@@ -150,6 +179,18 @@ void MenuScreenVideo::select(int32_t step)
          break;
       }
 
+      case Selection::Scaling:
+      {
+         const auto state_count = static_cast<int32_t>(scaling_states.size());
+         const auto next_index = (currentScalingStateIndex() + (step < 0 ? state_count - 1 : 1)) % state_count;
+
+         GameConfiguration::getInstance()._preserve_pixel_precision = scaling_states[next_index].first;
+         GameConfiguration::getInstance()._preserve_aspect_ratio = scaling_states[next_index].second;
+
+         _scaling_callback();
+         break;
+      }
+
       case Selection::Count:
       {
          break;
@@ -181,6 +222,11 @@ void MenuScreenVideo::setResolutionCallback(MenuScreenVideo::ResolutionCallback 
 void MenuScreenVideo::setVSyncCallback(VSyncCallback callback)
 {
    _vsync_callback = callback;
+}
+
+void MenuScreenVideo::setScalingCallback(ScalingCallback callback)
+{
+   _scaling_callback = callback;
 }
 
 void MenuScreenVideo::keyboardKeyPressed(sf::Keyboard::Key key)
@@ -303,6 +349,12 @@ void MenuScreenVideo::loadingFinished()
    _brightness_help_text = make_label();
    _brightness_help_text->setFillColor(color_help_text);
 
+   _scaling_label = make_label();
+   _scaling_help_text = make_label();
+   _scaling_help_text->setFillColor(color_help_text);
+   _scaling_value_text = make_label();
+   _scaling_value_text->setFillColor(sf::Color::White);
+
    _text_back_button = make_label();
    _text_back_button->setFillColor(color_label_normal);
    _text_defaults_button = make_label();
@@ -347,6 +399,13 @@ void MenuScreenVideo::draw(sf::RenderTarget& window, sf::RenderStates states)
       window.draw(*_brightness_help_text, states);
    }
 
+   window.draw(*_scaling_label, states);
+   if (_selection == Selection::Scaling)
+   {
+      window.draw(*_scaling_help_text, states);
+   }
+   window.draw(*_scaling_value_text, states);
+
    window.draw(*_text_back_button, states);
    window.draw(*_text_defaults_button, states);
 }
@@ -359,6 +418,7 @@ void MenuScreenVideo::updateLayers()
    const auto display_mode_selected = _selection == Selection::DisplayMode;
    const auto vsync_selected = _selection == Selection::VSync;
    const auto brightness_selected = _selection == Selection::Brightness;
+   const auto scaling_selected = _selection == Selection::Scaling;
 
    auto display_mode_value_index = 0;
 
@@ -408,8 +468,25 @@ void MenuScreenVideo::updateLayers()
    _layers["displayMode_highlight"]->_visible = display_mode_selected;
    _layers["displayMode_arrows"]->_visible = display_mode_selected;
 
-   _layers["vSync_highlight"]->_visible = vsync_selected;
-   _layers["vSync_arrows"]->_visible = vsync_selected;
+   // the psd carries highlight and arrow art for the four rows it was drawn with, so the scaling row has
+   // none of its own. the vsync pair is the same shape it needs - a bar with a value and arrows either
+   // side - so it is shifted down onto the scaling row while that one is selected and sits back on its
+   // own row otherwise. only ever one row is highlighted, so a single pair covers both
+   const auto highlighted_row = scaling_selected ? static_cast<int32_t>(Selection::Scaling) : static_cast<int32_t>(Selection::VSync);
+
+   // a sprite is drawn at its position minus its origin, so a negative origin shifts it down the screen
+   const auto highlight_shift = static_cast<float>(highlighted_row - static_cast<int32_t>(Selection::VSync)) * _row_stride;
+
+   _layers["vSync_highlight"]->_visible = vsync_selected || scaling_selected;
+   _layers["vSync_arrows"]->_visible = _layers["vSync_highlight"]->_visible;
+
+#ifdef DECEPTUS_VRSFML
+   _layers["vSync_highlight"]->_sprite->origin = {0.0f, -highlight_shift};
+   _layers["vSync_arrows"]->_sprite->origin = {0.0f, -highlight_shift};
+#else
+   _layers["vSync_highlight"]->_sprite->setOrigin({0.0f, -highlight_shift});
+   _layers["vSync_arrows"]->_sprite->setOrigin({0.0f, -highlight_shift});
+#endif
 
    const auto brightness_index = static_cast<int32_t>(std::ceil((brightness_value * 10.0f) - 0.1f));
    for (auto index = 0; index < 11; index++)
@@ -482,6 +559,22 @@ void MenuScreenVideo::updateLayers()
    _brightness_help_text->setString(sftr("Adjust the screen brightness"));
 
    placeTextCentered(*_brightness_help_text, _row_help_base_rect);
+
+   // scaling row
+   _scaling_label->setString(sftr("Scaling"));
+   _scaling_label->setFillColor(scaling_selected ? color_label_selected : color_label_normal);
+   placeTextLeft(*_scaling_label, rowRect(_row_label_base_rect, static_cast<int32_t>(Selection::Scaling)));
+
+   _scaling_help_text->setString(sftr("Set how the image is fitted into the window"));
+   placeTextCentered(*_scaling_help_text, _row_help_base_rect);
+
+#ifdef DECEPTUS_VRSFML
+   const sf::Utf8String scaling_strings[] = {sftr("Stretch"), sftr("Keep Aspect"), sftr("Pixel Precision")};
+#else
+   const sf::String scaling_strings[] = {sftr("Stretch"), sftr("Keep Aspect"), sftr("Pixel Precision")};
+#endif
+   _scaling_value_text->setString(scaling_strings[currentScalingStateIndex()]);
+   placeTextLeft(*_scaling_value_text, rowRect(_row_value_base_rect, static_cast<int32_t>(Selection::Scaling) - 1));
 
    const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
    _text_back_button->setString(sftr("Back"));

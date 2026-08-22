@@ -16,6 +16,15 @@ struct GameConfiguration
    int32_t _view_width = 640;
    int32_t _view_height = 360;
    bool _fullscreen = false;
+
+   //!< blits the view at a whole number scale, so one view pixel always covers a whole number of screen
+   //!< pixels and nothing is resampled. whatever space is left over in the window becomes bars
+   bool _preserve_pixel_precision = false;
+
+   //!< scales both axes by the same factor, so the view keeps its shape instead of being stretched to the
+   //!< window. the axis that falls short of the window edge ends up with bars
+   bool _preserve_aspect_ratio = false;
+
    float _view_scale_width = 1.0f;
    float _view_scale_height = 1.0f;
    float _brightness = 0.5f;
@@ -66,6 +75,23 @@ struct GameConfiguration
    /// \return the scale, floored to a whole number and never below one.
    int32_t getViewScale() const;
 
+   /// \brief where the window render texture goes inside the window, and how big it is drawn.
+   struct WindowImagePlacement
+   {
+      int32_t texture_width = 0;   //!< width of the render texture, always a whole multiple of the view
+      int32_t texture_height = 0;  //!< height of the render texture, always a whole multiple of the view
+      float scale_x = 1.0f;        //!< horizontal factor the render texture is blitted with
+      float scale_y = 1.0f;        //!< vertical factor the render texture is blitted with
+      float offset_x = 0.0f;       //!< distance from the left window edge to the left edge of the blit
+      float offset_y = 0.0f;       //!< distance from the top window edge to the top edge of the blit
+   };
+
+   /// \brief sizes the window render texture and works out the blit that puts it into the window.
+   /// \return the texture size together with the scale and offset the blit runs at.
+   /// \note the render texture is a whole multiple of the view in every behavior. only the blit differs,
+   ///       so switching behavior never resizes a render target or changes what the level draws.
+   WindowImagePlacement computeWindowImagePlacement() const;
+
    /// \brief returns the built-in default configuration values.
    /// \return shared default configuration object.
    static GameConfiguration& getDefaults();
@@ -76,12 +102,6 @@ struct GameConfiguration
 
    /// \brief restores all runtime audio volume settings to their default values.
    static void resetAudioDefaults();
-
-   /// \brief checks if a resolution change is significant enough to warrant window recreation.
-   /// \param new_width proposed new width in pixels.
-   /// \param new_height proposed new height in pixels.
-   /// \return true if the size change is significant and should be applied.
-   bool isResolutionChangeApplicable(int32_t new_width, int32_t new_height) const;
 
    /// \brief ensures the configured resolution fits within desktop limits.
    /// clamps _windowed_width and _windowed_height to the desktop resolution if needed.

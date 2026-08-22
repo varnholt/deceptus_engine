@@ -258,6 +258,10 @@ void Game::initializeWindow()
    const auto window_size = _window->getSize();
    game_config._video_mode_width = static_cast<int32_t>(window_size.x);
    game_config._video_mode_height = static_cast<int32_t>(window_size.y);
+
+   // the view is the smallest thing the game can sensibly show, and the menus are laid out for exactly
+   // that size, so dragging the border further in than one view is not something to support
+   _window->setMinimumSize(sf::Vector2u{static_cast<uint32_t>(game_config._view_width), static_cast<uint32_t>(game_config._view_height)});
 #endif
 
    SplashScreen::show(*_window);
@@ -299,16 +303,14 @@ void Game::initializeRenderTargets()
 
    // this the render texture size derived from the window dimensions. as opposed to the window
    // dimensions this one takes the view dimensions into regard and preserves an integer multiplier
-   const auto size_ratio = game_config.getViewScale();
+   const auto placement = game_config.computeWindowImagePlacement();
 
-   const int32_t texture_width = size_ratio * game_config._view_width;
-   const int32_t texture_height = size_ratio * game_config._view_height;
+   const int32_t texture_width = placement.texture_width;
+   const int32_t texture_height = placement.texture_height;
 
    Log::Info() << "video mode: " << game_config._video_mode_width << " x " << game_config._video_mode_height
-               << ", view size: " << game_config._view_width << " x " << game_config._view_height << ", ratio: " << size_ratio;
-
-   _render_texture_offset.x = static_cast<uint32_t>((game_config._video_mode_width - texture_width) / 2);
-   _render_texture_offset.y = static_cast<uint32_t>((game_config._video_mode_height - texture_height) / 2);
+               << ", view size: " << game_config._view_width << " x " << game_config._view_height
+               << ", ratio: " << game_config.getViewScale();
 
 #ifndef DECEPTUS_VRSFML
    _window_render_texture =
@@ -320,6 +322,14 @@ void Game::initializeRenderTargets()
 #endif
 
    Log::Info() << "created window render texture: " << texture_width << " x " << texture_height;
+
+#ifndef DECEPTUS_VRSFML
+   // once the blit scale is not a whole number, nearest neighbour hands some view pixels one more screen
+   // pixel than their neighbours, and that uneven pattern crawls across the image as the camera moves.
+   // smoothing spreads the remainder out instead. a pixel precise blit runs at scale 1 and must not be
+   // smoothed at all, or every pixel of the frame gets resampled for nothing
+   _window_render_texture->setSmooth(!game_config._preserve_pixel_precision);
+#endif
 
    if (_level)
    {
@@ -652,6 +662,9 @@ void Game::initialize()
       ->setResolutionCallback([this](int32_t w, int32_t h) { changeResolution(w, h); });
 
    std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))
+      ->setScalingCallback([this]() { applyScalingOptions(); });
+
+   std::dynamic_pointer_cast<MenuScreenVideo>(Menu::getInstance()->getMenuScreen(Menu::MenuType::Video))
       ->setVSyncCallback(
          [this]()
          {
@@ -850,27 +863,17 @@ void Game::draw()
    auto window_texture_sprite = sf::Sprite(_window_render_texture->getTexture());
 #endif
 
-   if (GameConfiguration::getInstance()._fullscreen)
-   {
-      // scale window texture up to available window size
-      const auto scale_x = _window->getSize().x / static_cast<float>(_window_render_texture->getSize().x);
-      const auto scale_y = _window->getSize().y / static_cast<float>(_window_render_texture->getSize().y);
-      const auto scale_minimum = std::min(static_cast<int32_t>(scale_x), static_cast<int32_t>(scale_y));
-      const auto dx = (scale_x - scale_minimum) * 0.5f;
-      const auto dy = (scale_y - scale_minimum) * 0.5f;
-      sfcompat::setPosition(window_texture_sprite, {_window_render_texture->getSize().x * dx, _window_render_texture->getSize().y * dy});
+   // fullscreen and windowed pose the same question - where does a whole multiple of the view sit inside a
+   // window that is not itself a multiple of it - so both go through the same placement now. the branch
+   // that used to be here derived the leftover space from the window size rather than the video mode,
+   // which are kept equal, and so arrived at the same numbers by a longer route
+   const auto placement = GameConfiguration::getInstance().computeWindowImagePlacement();
+   sfcompat::setPosition(window_texture_sprite, {placement.offset_x, placement.offset_y});
 #ifdef DECEPTUS_VRSFML
-      window_texture_sprite.scale = {static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)};
+   window_texture_sprite.scale = {placement.scale_x, placement.scale_y};
 #else
-      window_texture_sprite.scale({static_cast<float>(scale_minimum), static_cast<float>(scale_minimum)});
+   window_texture_sprite.scale({placement.scale_x, placement.scale_y});
 #endif
-   }
-   else
-   {
-      sfcompat::setPosition(
-         window_texture_sprite, {static_cast<float>(_render_texture_offset.x), static_cast<float>(_render_texture_offset.y)}
-      );
-   }
 
    // a frame-scoped effect runs here, on the fully composited frame, i.e. on top of the level's
    // gamma pass as well as on all overlays. a level-scoped one has already been resolved above.
@@ -1342,6 +1345,9 @@ void Game::toggleFullScreen()
       );
    }
 
+   // a freshly created window does not carry the constraint the previous one was given
+   _window->setMinimumSize(sf::Vector2u{static_cast<uint32_t>(config._view_width), static_cast<uint32_t>(config._view_height)});
+
    config.serializeToFile();
 
 #ifndef DECEPTUS_VRSFML
@@ -1353,30 +1359,111 @@ void Game::toggleFullScreen()
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!config._fullscreen);
 
-   // recalculate render texture dimensions and offsets
-   const auto size_ratio = config.getViewScale();
+   // the new window needs a render texture and level targets sized for it, which is what this does. it
+   // also picks the texture filtering that goes with the current scaling options, which a hand rolled
+   // copy of it here would have to remember to keep in step
+   initializeRenderTargets();
 
-   const int32_t texture_width = size_ratio * config._view_width;
-   const int32_t texture_height = size_ratio * config._view_height;
-
-   _render_texture_offset.x = static_cast<uint32_t>((config._video_mode_width - texture_width) / 2);
-   _render_texture_offset.y = static_cast<uint32_t>((config._video_mode_height - texture_height) / 2);
-
-   // recreate window render texture with new dimensions
-   _window_render_texture.reset();
-   _window_render_texture =
-      std::make_shared<sf::RenderTexture>(sf::Vector2u{static_cast<uint32_t>(texture_width), static_cast<uint32_t>(texture_height)});
-
-   // recreate level render targets
    if (_level)
    {
-      _render_targets.recreateOnResize(config._video_mode_width, config._video_mode_height, config._view_width, config._view_height);
       _level->createViews();
    }
 
    // recreate the 3D menu background — its GL resources are tied to the old context
    _menu_background = std::make_unique<MenuBackgroundScene>();
 #endif
+}
+
+void Game::applyScalingOptions()
+{
+#ifndef DECEPTUS_VRSFML
+   // the scaling options move nothing but the blit, and the blit reads them fresh out of the config every
+   // frame, so there is nothing to rebuild here. the one piece of state that has to follow them is the
+   // filtering: a fractional blit has to interpolate and a pixel precise one must not.
+   //
+   // this used to call initializeRenderTargets, which tore down and rebuilt every render texture on each
+   // keypress even though not one of them depends on these options - their sizes come from the whole
+   // number view scale, which the options do not touch. doing that under the menu, whose background holds
+   // raw gl state of its own, crashed the game after a handful of toggles
+   auto& config = GameConfiguration::getInstance();
+
+   // switching pixel precision on tightens the window down onto the image, so there is nothing left over
+   // to put bars in. it is done here and not from the resize handler on purpose: re-snapping on every
+   // border drag would make the window impossible to size by hand, and dragging it afterwards simply
+   // letterboxes again until the option is switched on afresh.
+   //
+   // fullscreen has no window of its own to tighten - it runs at whatever the desktop hands out - so it
+   // keeps letterboxing. the snapped size is a whole multiple of the view by construction, so the whole
+   // number scale cannot change and no render target is ever rebuilt by this
+   if (config._preserve_pixel_precision && !config._fullscreen)
+   {
+      const auto placement = config.computeWindowImagePlacement();
+      _window->setSize({static_cast<uint32_t>(placement.texture_width), static_cast<uint32_t>(placement.texture_height)});
+      adoptWindowSize(placement.texture_width, placement.texture_height);
+   }
+
+   _window_render_texture->setSmooth(!config._preserve_pixel_precision);
+#endif
+}
+
+void Game::adoptWindowSize(int32_t width, int32_t height)
+{
+   auto& config = GameConfiguration::getInstance();
+
+   // minimising a window makes windows report a size of 0x0, and a view built at that size divides by
+   // its own size to make its transform, which puts NaN into every vertex drawn through it. there is
+   // nothing to show at that size anyway
+   if (width <= 0 || height <= 0)
+   {
+      return;
+   }
+
+   if (width == config._video_mode_width && height == config._video_mode_height)
+   {
+      return;
+   }
+
+   const auto previous_view_scale = config.getViewScale();
+
+   config._video_mode_width = width;
+   config._video_mode_height = height;
+
+#ifndef DECEPTUS_VRSFML
+   // sfml leaves a window's view alone across a resize - RenderWindow::onResize only recomputes the
+   // viewport, which is stored in relative coordinates, and the view keeps the world size it was built
+   // with. so it goes on mapping the old size onto the new window, which draws the composited frame too
+   // small when the border is dragged inwards and too large when it is dragged outwards. recreating the
+   // window used to hide this behind a brand new default view
+   _window->setView(sf::View{sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(width), static_cast<float>(height)}}});
+#endif
+
+   // fullscreen runs at whatever the desktop hands out, so only a windowed size is worth remembering.
+   // this is not written to disk here: dragging a window border fires an event per step, and the file
+   // would be rewritten for every one of them. it goes out when the game closes instead
+   if (!config._fullscreen)
+   {
+      config._windowed_width = width;
+      config._windowed_height = height;
+   }
+
+   // every render target is sized as a whole multiple of the view rather than to the window, so dragging
+   // a border around within one multiple leaves all of them at the right size and only moves the blit.
+   // rebuilding the whole set per resize event would make dragging stutter for nothing
+   if (config.getViewScale() == previous_view_scale)
+   {
+      return;
+   }
+
+   // the window already has this size, and it already sits on the monitor it was dragged to. going
+   // through changeResolution would recreate it, and a freshly created window gets default placement -
+   // the primary monitor - which is what threw the window back onto the first screen when it was dragged
+   // onto a second one. nothing here needs a new window, only render targets that match the new size
+   initializeRenderTargets();
+
+   if (_level)
+   {
+      _level->createViews();
+   }
 }
 
 void Game::changeResolution(int32_t w, int32_t h)
@@ -1451,6 +1538,9 @@ void Game::processEvent(const sf::Event& event)
 
    if (event.is<sf::Event::Closed>())
    {
+      // resizes deliberately do not write the file, so this is where a dragged window size is kept
+      GameConfiguration::getInstance().serializeToFile();
+
 #ifndef DECEPTUS_VRSFML
       _window->close();
 #endif
@@ -1465,11 +1555,7 @@ void Game::processEvent(const sf::Event& event)
       // resulting event would feed arbitrary, non-integer-multiple sizes back into changeResolution
       return;
 #endif
-      // only handle intentional user resizes, not OS-generated DPI adjustments
-      if (GameConfiguration::getInstance().isResolutionChangeApplicable(resized_event->size.x, resized_event->size.y))
-      {
-         changeResolution(resized_event->size.x, resized_event->size.y);
-      }
+      adoptWindowSize(static_cast<int32_t>(resized_event->size.x), static_cast<int32_t>(resized_event->size.y));
    }
    else if (event.is<sf::Event::FocusLost>())
    {
@@ -1579,6 +1665,9 @@ void Game::processEvent(const sf::Event& event)
 
 void Game::shutdown()
 {
+   // quitting from the menu never goes past a Closed event, so the window size is written out here too
+   GameConfiguration::getInstance().serializeToFile();
+
    if (_physics_ui)
    {
       _physics_ui->close();
