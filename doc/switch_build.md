@@ -83,7 +83,7 @@ comes to that.
 ## Verify the build
 
 ```bat
-uv run --with pytest pytest lab/switch_smoke/test_switch_build.py -v
+uv run --project tests pytest tests/switch/test_switch_build.py -v
 ```
 
 24 structural tests over the produced `.nro`. They exist because the interesting failures here
