@@ -110,6 +110,18 @@ private:
    float _dx_px = 0.0f;
    float _dy_px = 0.0f;
 
+   //!< where the player stood at the previous step, so how fast they are moving can be read off the
+   //!< two. Taken from the player's own position rather than from the physics body on purpose: the
+   //!< box2d delta is not the step duration, see FixedTimeStep, so a velocity in box2d units would
+   //!< have to be converted by a factor that has nothing to do with the camera
+   float _previous_player_x_px = 0.0f;
+
+   //!< the speed the lead is built from: the player's own, but taking the same time to catch up that
+   //!< the camera does. Holding it rather than using the player's current speed is what keeps the
+   //!< camera's acceleration - a lead built from the current speed cancels the follow at every speed
+   //!< alike and leaves the camera welded to the player
+   float _lead_velocity_px_per_s = 0.0f;
+
    float _focus_zone_x0_px = 0.0f;
    float _focus_zone_x1_px = 0.0f;
    float _focus_zone_center_px = 0.0f;

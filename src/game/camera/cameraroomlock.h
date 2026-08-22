@@ -2,10 +2,28 @@
 
 #include <array>
 #include <memory>
+#include <optional>
 #include "game/level/room.h"
 
 namespace CameraRoomLock
 {
+
+/// \brief the range a camera center may take without the view reaching outside the room.
+struct HorizontalLimits
+{
+   float _left_px{0.0f};   //!< leftmost camera center that still keeps the view inside the room
+   float _right_px{0.0f};  //!< rightmost camera center that still keeps the view inside the room
+};
+
+/// \brief returns the horizontal range the camera center may take inside the player's sub-room.
+/// \param player_position_px player position, used to pick the sub-room to measure against.
+/// \param focus_offset horizontal focus-zone shift applied by the camera system.
+/// \return the range, or nothing when there is no room or no sub-room holding the player.
+/// \note deliberately looked up at the player rather than at the position being limited. The point
+///       being limited is by definition the one that may already be outside, and a lookup there finds
+///       no sub-room and would report no limits at all - exactly when they are needed.
+std::optional<HorizontalLimits> horizontalCameraLimits(const sf::Vector2f& player_position_px, float focus_offset);
+
 /// \brief checks whether the current camera view extends beyond the active sub-room bounds.
 /// \return boundary flags ordered as up, down, left, right; true means the view crosses that side.
 std::array<bool, 4> checkRoomBoundaries();

@@ -149,6 +149,29 @@ bool CameraRoomLock::correctedCamera(float& x, float& y, float focus_offset)
    return _locked_left || _locked_right || _locked_top || _locked_bottom;
 }
 
+std::optional<CameraRoomLock::HorizontalLimits>
+CameraRoomLock::horizontalCameraLimits(const sf::Vector2f& player_position_px, float focus_offset)
+{
+   if (!_room || _room->_sub_rooms.empty())
+   {
+      return std::nullopt;
+   }
+
+   const auto sub_room_it = _room->findSubRoom(player_position_px);
+   if (sub_room_it == _room->_sub_rooms.end())
+   {
+      return std::nullopt;
+   }
+
+   const auto& sub_room = *sub_room_it;
+   const auto half_width = static_cast<float>(GameConfiguration::getInstance()._view_width / 2.0f);
+
+   return HorizontalLimits{
+      ._left_px = sub_room._rect.position.x + half_width + focus_offset,
+      ._right_px = sub_room._rect.position.x + sub_room._rect.size.x - half_width + focus_offset
+   };
+}
+
 void CameraRoomLock::setRoom(const std::shared_ptr<Room>& room)
 {
    _room = room;
