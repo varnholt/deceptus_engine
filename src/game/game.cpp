@@ -890,7 +890,7 @@ void Game::draw()
 #endif
 
 #ifdef DEVELOPMENT_MODE
-   _draw_section_timer.mark("window blit");
+   _draw_section_timer.mark("window copy");
 #endif
 
 #ifdef DEVELOPMENT_MODE
