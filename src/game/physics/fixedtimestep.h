@@ -28,6 +28,9 @@ public:
    /// \brief adds a frame's worth of time and reports how many steps it pays for.
    /// \param dt time elapsed since the previous frame.
    /// \return number of simulation steps to run this frame, never more than the catch-up limit.
+   /// \note a frame time that is nearly a whole number of steps is taken to be exactly that many
+   ///       rather than banked to the microsecond, so a run at the step rate takes one step per frame
+   ///       instead of alternating between none and two. See snapToWholeSteps.
    /// \note the time behind the limit is discarded rather than banked. Keeping it would leave the
    ///       simulation permanently in catch-up after a single long frame - a level load, a breakpoint
    ///       - and each frame of catch-up costs more time, so it never gets out.
