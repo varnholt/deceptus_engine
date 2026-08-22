@@ -1,0 +1,12 @@
+[project]
+name = "deceptus-tests"
+version = "0.1.0"
+requires-python = ">=3.9"
+
+# the union of what the suites here import, so one project runs all of them:
+# pytest everywhere, selenium for the browser suite, pywin32 for the one that drives a window
+dependencies = [
+    "pytest>=8.0.0",
+    "pywin32>=308",
+    "selenium>=4.20",
+]

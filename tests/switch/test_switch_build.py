@@ -8,7 +8,7 @@ symbol libnx cannot provide slipped into the link.
 
 Run from the repo root after a Switch build:
 
-    uv run pytest lab/switch_smoke/test_switch_build.py -v
+    uv run --project tests pytest tests/switch/test_switch_build.py -v
 
 Override the build directory with DECEPTUS_SWITCH_BUILD_DIR if it is not
 build_switch_engine.
