@@ -125,6 +125,11 @@ float CameraSystemConfiguration::getPanicLineDivider() const
    return _panic_line_divider;
 }
 
+float CameraSystemConfiguration::getPanicAccelerationFactorY() const
+{
+   return _panic_acceleration_factor_y;
+}
+
 float CameraSystemConfiguration::getCameraVelocityFactorY() const
 {
    return _camera_velocity_factor_y;

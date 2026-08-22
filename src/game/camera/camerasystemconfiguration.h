@@ -42,6 +42,10 @@ struct CameraSystemConfiguration
    /// \return panic-line divider value.
    float getPanicLineDivider() const;
 
+   /// \brief returns how much faster the camera follows the player vertically while panicking.
+   /// \return multiplier applied to the vertical follow speed while panic mode is active.
+   float getPanicAccelerationFactorY() const;
+
    /// \brief returns the vertical anchor ratio used for camera top-left conversion.
    /// \return view ratio used by CameraSystem::getY().
    float getViewRatioY() const;
