@@ -40,7 +40,7 @@ A typical full pass — record, look at what you caught, then cut the assets fro
 the best window:
 
 ```powershell
-uv run --project lab/record_gameplay pytest lab/record_gameplay -s
+uv run --project lab/record_gameplay pytest tests/desktop/test_record_gameplay.py -s
 
 ffmpeg -i lab/record_gameplay/output/master.mkv -vf "scale=426:-2,fps=2,tile=4x4" -frames:v 1 contact.png
 
