@@ -876,6 +876,16 @@ add_executable(
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
 
 # set up third party libraries
+# release builds keep their debug info, or a crash dump is just a list of raw offsets. this sits ahead
+# of the dependencies so sfml's frames get line numbers too, which is usually where the interesting
+# ones are. /Zi does not affect optimisation. windows only, the other targets bring their own toolchains
+if(MSVC)
+    string(APPEND CMAKE_C_FLAGS_RELEASE " /Zi /FS")
+    string(APPEND CMAKE_CXX_FLAGS_RELEASE " /Zi /FS")
+    string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /DEBUG")
+    string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /DEBUG")
+endif()
+
 include(FetchContent)
 
 # SFML configuration
