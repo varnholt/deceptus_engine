@@ -1397,6 +1397,14 @@ void Game::adoptWindowSize(int32_t width, int32_t height)
 {
    auto& config = GameConfiguration::getInstance();
 
+   // minimising a window makes windows report a size of 0x0, and a view built at that size divides by
+   // its own size to make its transform, which puts NaN into every vertex drawn through it. there is
+   // nothing to show at that size anyway
+   if (width <= 0 || height <= 0)
+   {
+      return;
+   }
+
    if (width == config._video_mode_width && height == config._video_mode_height)
    {
       return;
