@@ -93,6 +93,10 @@ void PlayerControls::forceSync()
       {
          _keys_pressed |= action_flag;
       }
+      else
+      {
+         _keys_pressed &= ~action_flag;
+      }
    }
 }
 
