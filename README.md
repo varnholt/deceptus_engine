@@ -6,7 +6,7 @@
 [![WASM](https://github.com/varnholt/deceptus_engine/actions/workflows/wasm.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/wasm.yml)
 [![Switch](https://github.com/varnholt/deceptus_engine/actions/workflows/switch.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/switch.yml)
 
-A C++23/lua-based platformer game engine<br>
+A C++23/Lua-based platformer game engine<br>
 Levels are drawn in Tiled, enemies and cutscenes are scripted in Lua, and the engine renders them
 with deferred lighting, baked ambient occlusion, water, weather and parallax. Box2D does the game
 physics, SFML the rendering, SDL the game controller support.
@@ -24,7 +24,7 @@ The clip is also available as an [MP4](doc/screenshots/gameplay.mp4) at full res
 
 # Get a Build
 
-Every push to `master` is built for all five targets. These links always give you the newest
+Every push to `master` is built for all five platforms. These links always give you the newest
 successful build and need no GitHub account:
 
 |Platform|Download|
@@ -111,8 +111,9 @@ gravity flip, ambient light, zoom, and recording and replaying player input — 
 [development_hotkeys.md](doc/development_hotkeys.md).
 
 All of this instrumentation is compiled into the desktop builds by default. The web and Switch
-builds leave it out, since neither has a window to put it in; `-DDECEPTUS_DEVELOPMENT_MODE=ON`
-puts it back for a profiling run.
+builds ship without it, because it is overhead in a build meant to run fast and on the Switch
+every report is a write to the sd card. `-DDECEPTUS_DEVELOPMENT_MODE=ON` puts it back for a
+profiling run.
 
 
 # Documentation
@@ -130,25 +131,23 @@ The complete documentation lives in [doc/readme.md](doc/readme.md). The most tra
 |Development hotkeys|[development_hotkeys.md](doc/development_hotkeys.md)|
 
 
-# Credits
-
-|What|Who|
-|-|-|
-|Artwork|dstar|
-|Code|mueslee (Matthias Varnholt)|
-
-
 # How to Build
 
-Only a compiler, CMake and the platform's development headers are needed. SFML 3, SDL 3,
-Lua 5.4 and GLEW are downloaded and built by CMake via `FetchContent`; Box2D, ImGui, tinyxml2
-and glm are vendored in the source tree.
+For the three desktop platforms, only a compiler, CMake and the platform's development headers are
+needed. SFML 3, SDL 3, Lua 5.4 and GLEW are downloaded and built by CMake via `FetchContent`;
+Box2D, ImGui, tinyxml2 and glm are vendored in the source tree.
 
 The engine uses C++23, so the compiler has to be recent. CI builds with gcc 14, MSVC 2022,
-Homebrew LLVM and the latest Emscripten. Anything older than gcc 13 or Clang 15 will not do.
+Homebrew LLVM, the latest Emscripten and devkitPro's aarch64 toolchain. Anything older than
+gcc 13 or Clang 15 will not do.
+
+[Web](#web-webassembly) and [Nintendo Switch](#nintendo-switch-homebrew) come out of the same
+CMake project as the rest, with `EMSCRIPTEN` and `NINTENDO_SWITCH` branches where the platforms
+differ. Their cross compilers are not something you install next to a system compiler, so both
+builds wrap a container and there is nothing to set up locally.
 
 ## Windows
-```bash
+```bat
 cmake -B build -A x64 -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release --parallel
 ```
@@ -177,15 +176,6 @@ brew install llvm glm ninja
 
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
-```
-
-## Running
-
-The game reads `data/` relative to the working directory, so run it from the repository root:
-
-```bash
-./build/deceptus            # Linux, macOS
-build\Release\deceptus.exe  # Windows
 ```
 
 ## Web (WebAssembly)
@@ -236,8 +226,18 @@ HOME menu — or it runs out of memory during asset loading.
 Ryujinx, and how to work on the port itself.
 
 
-# Contribute and Talk to Us!
-If you're a musician, graphic artist, level designer or programmer, or just want to hang out and chat, [please join us on Discord!](https://discord.gg/EZpkbGDaWD)
+# Contributing
+
+If you're a musician, graphic artist, level designer or programmer, or just want to hang out and
+chat, [please join us on Discord!](https://discord.gg/EZpkbGDaWD)
+
+
+# Credits
+
+|What|Who|
+|-|-|
+|Artwork|dstar|
+|Code|Matthias Varnholt|
 
 
 # License
