@@ -138,9 +138,23 @@ void LightSystem::drawShadowQuads(
 
          auto* shape = fixture->GetShape();
 
-         auto* shape_polygon = dynamic_cast<b2PolygonShape*>(shape);
-         auto* shape_chain = dynamic_cast<b2ChainShape*>(shape);
-         auto* shape_circle = dynamic_cast<b2CircleShape*>(shape);
+         // b2Shape carries its own type tag, so this is a member read where three dynamic_casts used
+         // to walk the rtti tables. What made that expensive is not the line, it is where the line
+         // sits - three loops deep:
+         //
+         //     for each active light                 (up to 6)
+         //       for each candidate body             (the level's whole body list)
+         //         for each fixture on that body
+         //           dynamic_cast x3                 <- here
+         //
+         // so the count is 6 x bodies x fixtures x 3 rtti walks every frame, and rtti is one of the
+         // things an aarch64 console is disproportionately slower at than this desktop. The type tag
+         // gives identical pointers, null cases included: an edge shape yields null from all three
+         // either way
+         const auto shape_type = shape->GetType();
+         auto* shape_polygon = (shape_type == b2Shape::e_polygon) ? static_cast<b2PolygonShape*>(shape) : nullptr;
+         auto* shape_chain = (shape_type == b2Shape::e_chain) ? static_cast<b2ChainShape*>(shape) : nullptr;
+         auto* shape_circle = (shape_type == b2Shape::e_circle) ? static_cast<b2CircleShape*>(shape) : nullptr;
 
          if (shape_circle)
          {
@@ -524,7 +538,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
 
    // pre-build shadow caster candidates once per frame — player, disabled bodies, and
    // enemies are excluded here so drawShadowQuads only needs to check per-light exclusions.
-   std::vector<b2Body*> shadow_candidates;
+   _shadow_candidates.clear();
    const auto& world = LevelRegistry::getCurrent()->getWorld();
    for (auto* body = world->GetBodyList(); body; body = body->GetNext())
    {
@@ -549,7 +563,7 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
       }
       if (!skip)
       {
-         shadow_candidates.push_back(body);
+         _shadow_candidates.push_back(body);
       }
    }
 
@@ -607,10 +621,10 @@ void LightSystem::draw(sf::RenderTarget& target1, sf::RenderTarget& target2, sf:
 #ifdef DECEPTUS_VRSFML
       auto shadow_states = states;
       shadow_states.view = clipped_view.value();
-      drawShadowQuads(target, light, shadow_candidates, shadow_states);
+      drawShadowQuads(target, light, _shadow_candidates, shadow_states);
 #else
       target.setView(clipped_view.value());
-      drawShadowQuads(target, light, shadow_candidates);
+      drawShadowQuads(target, light, _shadow_candidates);
       target.setView(restore_view);
 #endif
 
