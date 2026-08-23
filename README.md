@@ -14,7 +14,8 @@ physics, SFML the rendering, SDL the game controller support.
 **Five platforms from one code base:** Windows, Linux and macOS as native builds, the browser as
 WebAssembly without a plugin, and the Nintendo Switch as unsigned homebrew.
 
-### [▶ Play it in your browser on itch.io](https://deceptus.itch.io/deceptus)
+[Play it in your browser on itch.io](https://deceptus.itch.io/deceptus), or
+[grab a build](#get-a-build) for your platform.
 
 ![](doc/screenshots/gameplay.gif)
 
