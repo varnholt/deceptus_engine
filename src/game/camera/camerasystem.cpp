@@ -237,7 +237,8 @@ void CameraSystem::updateY(const sf::Time& delta_time)
 
    // have some acceleration in the y update velocity so it doesn't got at full speed instantly
    const auto y_update_start_time_s = _y_update_start_time.asSeconds();
-   const auto y_update_acceleration = _panic ? 2.0f : std::min(Easings::easeOutQuint(y_update_start_time_s), 1.0f);
+   const auto y_update_acceleration =
+      _panic ? camera_config.getPanicAccelerationFactorY() : std::min(Easings::easeOutQuint(y_update_start_time_s), 1.0f);
 
    _dy_px = player_y - _y_px;
    const auto dy = _dy_px * delta_time.asSeconds() * camera_config.getCameraVelocityFactorY() * y_update_acceleration;

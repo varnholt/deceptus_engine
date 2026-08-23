@@ -59,8 +59,8 @@ std::string PhysicsConfiguration::serialize()
           {"player_wall_slide_friction", _player_wall_slide_friction},
 
           {"player_wall_jump_frame_count", _player_wall_jump_frame_count},
-          {"player_wall_jump_vector_x", _player_wall_jump_vector_y},
-          {"player_wall_jump_vector_y", _player_wall_jump_vector_x},
+          {"player_wall_jump_vector_x", _player_wall_jump_vector_x},
+          {"player_wall_jump_vector_y", _player_wall_jump_vector_y},
           {"player_wall_jump_multiplier", _player_wall_jump_multiplier},
           {"player_wall_jump_multiplier_increment_per_frame", _player_wall_jump_multiplier_increment_per_frame},
           {"player_wall_jump_multiplier_scale_per_frame", _player_wall_jump_multiplier_scale_per_frame},

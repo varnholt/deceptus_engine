@@ -214,6 +214,8 @@ set(GAME_FILES
     src/game/debug/drawcallcounter.h
     src/game/debug/logui.cpp
     src/game/debug/logui.h
+    src/game/debug/settingsui.cpp
+    src/game/debug/settingsui.h
     src/game/debug/mechanismsample.h
     src/game/debug/mechanismschemawriter.cpp
     src/game/debug/mechanismschemawriter.h

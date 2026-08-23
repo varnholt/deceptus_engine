@@ -36,3 +36,6 @@ lab/switch_smoke/__pycache__
 
 # emulator stdout captured by run_switch.bat
 logs/
+
+# written by imgui in the working directory whenever a debug editor is opened
+imgui.ini
