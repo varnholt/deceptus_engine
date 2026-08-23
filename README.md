@@ -14,7 +14,8 @@ physics, SFML the rendering, SDL the game controller support.
 **Five platforms from one code base:** Windows, Linux and macOS as native builds, the browser as
 WebAssembly without a plugin, and the Nintendo Switch as unsigned homebrew.
 
-### [▶ Play it in your browser on itch.io](https://deceptus.itch.io/deceptus)
+[Play it in your browser on itch.io](https://deceptus.itch.io/deceptus), or
+[grab a build](#get-a-build) for your platform.
 
 ![](doc/screenshots/gameplay.gif)
 
@@ -54,9 +55,9 @@ artifacts to signed-in users. If you are signed in you can equally take them str
 
 Levels are drawn in [Tiled](https://www.mapeditor.org). Tile layers carry the art, object layers
 carry everything else: rooms, enemies, lights, doors, ropes, dialogues, conveyor belts, dust
-emitters — every one of the 39 mechanisms is a rectangle with a handful of custom properties. The
-engine parses the `.tmx` when it loads the level, so saving in Tiled and pressing `L` in the
-running game is the whole iteration loop.
+emitters — every one of the 39 mechanisms is a rectangle with a handful of custom properties. There
+is no export step: the engine parses the `.tmx` when it loads the level and keeps watching the file
+while it runs, so saving in Tiled reloads the running game on its own.
 
 ![](doc/screenshots/tiled_level.png)
 
@@ -65,6 +66,19 @@ in the file, deferred lighting on top of ambient occlusion baked per level, anim
 waterfalls, weather, and parallax layers front and back.
 
 ![](doc/screenshots/screenshot.png)
+
+## The Box2D Debug View
+
+`F1` draws the Box2D world straight over the running game: the static collision chains the level
+is built from, every body and fixture currently on screen, hitboxes, the sensor rects enemies
+watch through, and the room rectangles the camera clamps itself to. Each body also carries a
+velocity vector that runs from red at a standstill to yellow at full tilt.
+
+![](doc/screenshots/debug_physics_bodies.png)
+
+Joints are drawn as well, so a spike ball on a chain shows the anchors it swings around.
+
+![](doc/screenshots/debug_physics_joints.png)
 
 ## Tuning the Game While It Runs
 
@@ -228,5 +242,9 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 
 # License
 
-The engine and its assets are released under
-[Creative Commons Attribution-NonCommercial 4.0 International](LICENSE.md).
+The engine is released under
+[Creative Commons Attribution-NonCommercial 4.0 International](LICENSE.md) and is free to use on
+those terms.
+
+The artwork is not. It is copyright dstar and is in this repository so that the engine has a game
+to run, not for reuse. If you want to use any of it, ask first.
