@@ -237,7 +237,7 @@ chat, [please join us on Discord!](https://discord.gg/EZpkbGDaWD)
 |What|Who|
 |-|-|
 |Artwork|dstar|
-|Code|mueslee (Matthias Varnholt)|
+|Code|Matthias Varnholt|
 
 
 # License
