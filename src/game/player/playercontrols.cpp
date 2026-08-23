@@ -520,8 +520,6 @@ int PlayerControls::getKeysPressed() const
 
 void PlayerControls::setKeysPressed(int32_t keysPressed)
 {
-   Log::Info() << "setKeysPressed";
-
    _keys_pressed = keysPressed;
 }
 
