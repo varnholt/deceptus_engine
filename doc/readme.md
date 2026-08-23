@@ -100,14 +100,7 @@
 ## Development
 
 - [Development Hotkeys](development_hotkeys.md)<br>
-- [Building and Running for the Nintendo Switch](switch_build.md#building-and-running-for-the-nintendo-switch)<br>
-    - [Prerequisites](switch_build.md#prerequisites)<br>
-    - [Build](switch_build.md#build)<br>
-    - [Verify the build](switch_build.md#verify-the-build)<br>
-    - [Run it in Ryujinx](switch_build.md#run-it-in-ryujinx)<br>
-    - [Run it on hardware](switch_build.md#run-it-on-hardware)<br>
-    - [Diagnostic builds](switch_build.md#diagnostic-builds)<br>
-    - [Working on the port itself](switch_build.md#working-on-the-port-itself)<br>
+- [Building and Running for the Nintendo Switch](switch_build.md)<br>
 
 
 ## Creating Your Own Enemies
