@@ -95,8 +95,9 @@ void PhysicsConfigurationUi::draw()
          0.1f,
          3.0f,
          "How much of the world's gravity the player feels normally.",
-         "1 is the world value. This is also what the player is put back to on leaving water and on "
-         "landing, so it is the value the other two scales are departures from."
+         "NOT SAVED - it is missing from the json, so it returns to 1 on the next reload. This is also "
+         "what the player is put back to on leaving water and on landing, so the other two scales are "
+         "departures from it."
       );
       SettingsUi::drawFloat(
          "gravity scale water",
@@ -104,8 +105,9 @@ void PhysicsConfigurationUi::draw()
          0.1f,
          1.0f,
          "How much gravity the player feels while in water, so how quickly they sink.",
-         "Works together with the buoyancy force under swimming, which pushes the other way. Lowering "
-         "this and raising that both make the player float, but only buoyancy also carries them upward."
+         "NOT SAVED, like the other two scales. Works against the buoyancy force under swimming, which "
+         "pushes the other way: lowering this and raising that both make the player float, but only "
+         "buoyancy also carries them upward."
       );
       SettingsUi::drawFloat(
          "gravity scale jump downward",
@@ -114,8 +116,9 @@ void PhysicsConfigurationUi::draw()
          3.0f,
          "How much gravity the player feels once a jump has used up its upward frames, so how sharply "
          "the arc turns over into the fall.",
-         "Above 1 is the point: the fall is faster than the rise, which is what stops a jump feeling "
-         "floaty at the top. Reset to the default scale on landing."
+         "NOT SAVED, like the other two scales. Above 1 is the point - the fall is faster than the "
+         "rise, which is what stops a jump feeling floaty at the top. Reset to the default scale on "
+         "landing."
       );
    }
 
@@ -154,8 +157,8 @@ void PhysicsConfigurationUi::draw()
          0.1f,
          20.0f,
          "Top horizontal speed while airborne.",
-         "Above the walk speed it lets the player gain ground by jumping, which is usually not what is "
-         "wanted; the default sits above it, so a run-and-jump does travel faster than a run."
+         "Above the walk speed it would let the player gain ground by jumping. It currently ships just "
+         "below it, 2.4 against 2.5, so a jump costs a sliver of speed rather than buying any."
       );
       SettingsUi::drawFloat(
          "friction",
@@ -181,8 +184,8 @@ void PhysicsConfigurationUi::draw()
          0.01f,
          1.0f,
          "How much speed a held direction key adds each simulation step on the ground.",
-         "Per step, and the simulation runs 60 of them a second, so 0.1 reaches a walk speed of 2.5 in "
-         "about 25 steps. Capped by speed max walk."
+         "Per step, and the simulation runs 60 of them a second, so the shipped 0.5 reaches the walk "
+         "speed of 2.5 in five steps, under a tenth of a second. Capped by speed max walk."
       );
       SettingsUi::drawFloat(
          "deceleration ground",
@@ -190,8 +193,9 @@ void PhysicsConfigurationUi::draw()
          0.01f,
          1.0f,
          "How much of the current speed is kept each step once no direction is held, on the ground.",
-         "A survival fraction, not a subtraction: 0.6 keeps 60% per step and stops almost at once, "
-         "while 0.95 slides. Also applied when the player turns against their own momentum."
+         "A survival fraction, not a subtraction. The shipped 0.1 keeps a tenth of the speed per step, "
+         "so the player stops within a few frames; 0.95 would slide. Also applied when they turn "
+         "against their own momentum."
       );
       SettingsUi::drawFloat(
          "acceleration air",
@@ -199,8 +203,8 @@ void PhysicsConfigurationUi::draw()
          0.01f,
          1.0f,
          "How much speed a held direction key adds each step while airborne.",
-         "Lower than the ground value gives the jump commitment: the lower this is, the less the arc "
-         "can be steered once it has started."
+         "Currently the same as the ground value, so the arc can be steered as freely as a walk. "
+         "Lowering it below the ground value is what would give a jump commitment."
       );
       SettingsUi::drawFloat(
          "deceleration air",
@@ -208,8 +212,9 @@ void PhysicsConfigurationUi::draw()
          0.01f,
          1.0f,
          "How much of the current speed is kept each step with no direction held, while airborne.",
-         "Same survival fraction as the ground value. Keeping it high preserves the jump's momentum "
-         "when the key is let go mid-air."
+         "Same survival fraction as on the ground, and shipped lower - 0.05 against 0.1 - so letting "
+         "go mid-air kills horizontal speed faster than it does on the ground. Raise it to keep the "
+         "jump's momentum."
       );
       SettingsUi::drawFloat(
          "deceleration sword attack",
@@ -425,8 +430,9 @@ void PhysicsConfigurationUi::draw()
          -10.0f,
          -0.1f,
          "How much the dash's strength changes each step. Negative, so it fades.",
-         "If it reaches zero before the frame count is up, the rest of the dash pushes backwards. Keep "
-         "frame count times this below the starting multiplier."
+         "If it reaches zero before the frame count is up, the rest of the dash pushes backwards. The "
+         "shipped values are tuned to land on zero exactly as the dash ends: 40 strength losing 1 over "
+         "40 frames."
       );
       SettingsUi::drawFloat(
          "dash multiplier scale per frame",
@@ -503,7 +509,8 @@ void PhysicsConfigurationUi::draw()
          -10.0f,
          -0.1f,
          "How much the wall jump's strength changes each step. Negative, so it fades.",
-         "As with the dash, letting it cross zero inside the frame count turns the push around."
+         "As with the dash, letting it cross zero inside the frame count turns the push around, and the "
+         "shipped values land on zero exactly as the jump ends: 20 losing 1 over 20 frames."
       );
       SettingsUi::drawFloat(
          "wall jump multiplier scale per frame",
