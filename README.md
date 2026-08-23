@@ -67,6 +67,19 @@ waterfalls, weather, and parallax layers front and back.
 
 ![](doc/screenshots/screenshot.png)
 
+## The Box2D Debug View
+
+`F1` draws the Box2D world straight over the running game: the static collision chains the level
+is built from, every body and fixture currently on screen, hitboxes, the sensor rects enemies
+watch through, and the room rectangles the camera clamps itself to. Each body also carries a
+velocity vector that runs from red at a standstill to yellow at full tilt.
+
+![](doc/screenshots/debug_physics_bodies.png)
+
+Joints are drawn as well, so a spike ball on a chain shows the anchors it swings around.
+
+![](doc/screenshots/debug_physics_joints.png)
+
 ## Tuning the Game While It Runs
 
 Physics and camera behaviour are not compiled in. `F7` and `F3` open configuration windows beside
