@@ -150,9 +150,8 @@ gcc 13 or Clang 15 will not do.
 
 [Web](#web-webassembly) and [Nintendo Switch](#nintendo-switch-homebrew) come out of the same
 CMake project as the rest, with `EMSCRIPTEN` and `NINTENDO_SWITCH` branches where the platforms
-differ. They have sections of their own further down only because their cross compilers are not
-something you install next to a system compiler — each build wraps a container instead, so there
-is nothing to set up locally.
+differ. Their cross compilers are not something you install next to a system compiler, so both
+builds wrap a container and there is nothing to set up locally.
 
 ## Windows
 ```bash
@@ -184,15 +183,6 @@ brew install llvm glm ninja
 
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
-```
-
-## Running
-
-The game reads `data/` relative to the working directory, so run it from the repository root:
-
-```bash
-./build/deceptus            # Linux, macOS
-build\Release\deceptus.exe  # Windows
 ```
 
 ## Web (WebAssembly)
