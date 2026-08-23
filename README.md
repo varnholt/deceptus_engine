@@ -54,9 +54,9 @@ artifacts to signed-in users. If you are signed in you can equally take them str
 
 Levels are drawn in [Tiled](https://www.mapeditor.org). Tile layers carry the art, object layers
 carry everything else: rooms, enemies, lights, doors, ropes, dialogues, conveyor belts, dust
-emitters — every one of the 39 mechanisms is a rectangle with a handful of custom properties. The
-engine parses the `.tmx` when it loads the level, so saving in Tiled and pressing `L` in the
-running game is the whole iteration loop.
+emitters — every one of the 39 mechanisms is a rectangle with a handful of custom properties. There
+is no export step: the engine parses the `.tmx` when it loads the level and keeps watching the file
+while it runs, so saving in Tiled reloads the running game on its own.
 
 ![](doc/screenshots/tiled_level.png)
 
@@ -228,5 +228,9 @@ If you're a musician, graphic artist, level designer or programmer, or just want
 
 # License
 
-The engine and its assets are released under
-[Creative Commons Attribution-NonCommercial 4.0 International](LICENSE.md).
+The engine is released under
+[Creative Commons Attribution-NonCommercial 4.0 International](LICENSE.md) and is free to use on
+those terms.
+
+The artwork is not. It is copyright dstar and is in this repository so that the engine has a game
+to run, not for reuse. If you want to use any of it, ask first.
