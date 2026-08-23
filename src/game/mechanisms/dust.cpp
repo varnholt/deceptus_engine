@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/event/eventdistributor.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
@@ -14,6 +15,21 @@
 
 namespace
 {
+// the same test SmokeEffect and WaterSurface make before drawing, kept local to match them
+bool isOnScreen(const sf::View& view, const sf::FloatRect& bounding_box)
+{
+   const auto view_center = sfcompat::getViewCenter(view);
+   const auto view_size = sfcompat::getViewSize(view);
+   if (view_size.x <= 0.0f || view_size.y <= 0.0f)
+   {
+      return true;
+   }
+
+   const sf::FloatRect view_rect{{view_center.x - view_size.x * 0.5f, view_center.y - view_size.y * 0.5f}, {view_size.x, view_size.y}};
+
+   return sfcompat::findIntersection(view_rect, bounding_box).has_value();
+}
+
 static constexpr std::array dust_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
 };
@@ -168,6 +184,42 @@ void Dust::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf
 
    sf::RenderStates states = incoming_states;
    states.blendMode = sf::BlendAlpha;
+
+   // an effect whose particles cannot reach the view contributes nothing, and building its quads is
+   // the most expensive mechanism draw in the frame. mechanisms are only culled by chunk distance to
+   // the player, which admits six of these against a 640 x 360 view (SmokeEffect and WaterSurface
+   // already check the view for the same reason).
+   //
+   // The clip rect is grown rather than used as it is, because a particle can be drawn outside it:
+   //
+   //     _clip_rect
+   //     +---------------------------+
+   //     |                           |
+   //     |                        o--|-->  update() moves the particle first and only respawns it
+   //     |                           | \    on the NEXT step, once it is already outside. So it
+   //     +---------------------------+  \   spends one step out here...
+   //                                  [##]  ...and is drawn as a _particle_size_px quad reaching
+   //     |<-- reachable_rect adds ----->|    further still from its position.
+   //          _particle_size_px + 16
+   //
+   // Without the slack there is a sliver a few pixels wide - where the clip rect is just off screen
+   // but a drifted particle is just on it - in which one particle would be dropped. Two pixels of
+   // alpha-50 dust, so imperceptible either way; with the slack the cull is exact instead of merely
+   // unnoticeable, which is a better thing to be able to say about it
+   const auto slack_px = static_cast<float>(_particle_size_px) + 16.0f;
+   const auto reachable_rect = sf::FloatRect{
+      {_clip_rect.position.x - slack_px, _clip_rect.position.y - slack_px},
+      {_clip_rect.size.x + slack_px * 2.0f, _clip_rect.size.y + slack_px * 2.0f}
+   };
+
+#ifdef DECEPTUS_VRSFML
+   if (!isOnScreen(states.view, reachable_rect))
+#else
+   if (!isOnScreen(target.getView(), reachable_rect))
+#endif
+   {
+      return;
+   }
 
    std::size_t vertex_index = 0;
 

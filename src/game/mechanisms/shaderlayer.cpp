@@ -3,6 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 
@@ -16,6 +17,23 @@
 
 namespace
 {
+// the same test SmokeEffect, WaterSurface and Dust make before drawing, kept local to match them.
+// worth it here for the state changes rather than the fill: each layer binds its shader and uploads
+// three or four uniforms, and a layer the camera cannot see pays all of that for nothing
+bool isOnScreen(const sf::View& view, const sf::FloatRect& bounding_box)
+{
+   const auto view_center = sfcompat::getViewCenter(view);
+   const auto view_size = sfcompat::getViewSize(view);
+   if (view_size.x <= 0.0f || view_size.y <= 0.0f)
+   {
+      return true;
+   }
+
+   const sf::FloatRect view_rect{{view_center.x - view_size.x * 0.5f, view_center.y - view_size.y * 0.5f}, {view_size.x, view_size.y}};
+
+   return sfcompat::findIntersection(view_rect, bounding_box).has_value();
+}
+
 std::map<std::string, std::function<ShaderLayer::FactoryFunction>>& getCustomizations()
 {
    static std::map<std::string, std::function<ShaderLayer::FactoryFunction>> __customizations;
@@ -69,6 +87,11 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, c
       return;
    }
 
+   if (!isOnScreen(states.view, _rect))
+   {
+      return;
+   }
+
    const auto x = _position.x;
    const auto y = _position.y;
    const auto w = _size.x;
@@ -97,6 +120,11 @@ void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, c
 #else
 void ShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/)
 {
+   if (!isOnScreen(target.getView(), _rect))
+   {
+      return;
+   }
+
    const auto x = _position.x;
    const auto y = _position.y;
    const auto w = _size.x;
