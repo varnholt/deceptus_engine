@@ -28,11 +28,8 @@ void GameMechanismObserver::onEvent(
    const LuaVariant& value
 )
 {
-   Log::Info() << _event_listeners.size();
-
    for (const auto& listener : _event_listeners)
    {
-      Log::Info() << "notifying event receiver";
       listener(object_id, object_group, event_name, value);
    }
 }
