@@ -140,12 +140,19 @@ The complete documentation lives in [doc/readme.md](doc/readme.md). The most tra
 
 # How to Build
 
-Only a compiler, CMake and the platform's development headers are needed. SFML 3, SDL 3,
-Lua 5.4 and GLEW are downloaded and built by CMake via `FetchContent`; Box2D, ImGui, tinyxml2
-and glm are vendored in the source tree.
+For the three desktop targets, only a compiler, CMake and the platform's development headers are
+needed. SFML 3, SDL 3, Lua 5.4 and GLEW are downloaded and built by CMake via `FetchContent`;
+Box2D, ImGui, tinyxml2 and glm are vendored in the source tree.
 
 The engine uses C++23, so the compiler has to be recent. CI builds with gcc 14, MSVC 2022,
-Homebrew LLVM and the latest Emscripten. Anything older than gcc 13 or Clang 15 will not do.
+Homebrew LLVM, the latest Emscripten and devkitPro's aarch64 toolchain. Anything older than
+gcc 13 or Clang 15 will not do.
+
+[Web](#web-webassembly) and [Nintendo Switch](#nintendo-switch-homebrew) come out of the same
+CMake project as the rest, with `EMSCRIPTEN` and `NINTENDO_SWITCH` branches where the platforms
+differ. They have sections of their own further down only because their cross compilers are not
+something you install next to a system compiler — each build wraps a container instead, so there
+is nothing to set up locally.
 
 ## Windows
 ```bash
