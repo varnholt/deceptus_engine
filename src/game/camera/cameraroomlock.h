@@ -49,4 +49,12 @@ void setRoom(const std::shared_ptr<Room>& room);
 /// \brief updates the current camera view rectangle used by boundary probing.
 /// \param rect current view rectangle in world pixel coordinates.
 void setViewRect(const sf::FloatRect& rect);
+
+/// \brief returns the view rectangle the level last computed, in world pixel coordinates.
+///
+/// Level::updateViews publishes it here at the top of every simulation step, so anything updating
+/// later in the same step can ask what the camera is about to show. That is not the same as the
+/// rectangle the frame is drawn through - draw uses the interpolated camera - so a caller deciding
+/// whether to skip work needs a margin rather than treating this as the exact visible region.
+const sf::FloatRect& getViewRect();
 }  // namespace CameraRoomLock
