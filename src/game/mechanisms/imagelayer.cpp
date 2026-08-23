@@ -56,7 +56,7 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
    target.draw(*_sprite, {_blend_mode});
 
 #ifdef DEVELOPMENT_MODE
-   DrawCallCounter::countImageLayerPixels(target, {_blend_mode}, *_sprite);
+   DrawCallCounter::countImageLayerPixels(target, {_blend_mode}, *_sprite, getObjectId());
 #endif
 
    if (_parallax_settings.has_value())
@@ -87,7 +87,7 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const 
       const sf::RenderStates parallax_states{.blendMode = _blend_mode, .view = _parallax_view, .texture = texture};
       target.draw(*_sprite, parallax_states);
 #ifdef DEVELOPMENT_MODE
-      DrawCallCounter::countImageLayerPixels(target, parallax_states, *_sprite);
+      DrawCallCounter::countImageLayerPixels(target, parallax_states, *_sprite, getObjectId());
 #endif
    }
    else
@@ -97,7 +97,7 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const 
       draw_states.texture = texture;
       target.draw(*_sprite, draw_states);
 #ifdef DEVELOPMENT_MODE
-      DrawCallCounter::countImageLayerPixels(target, draw_states, *_sprite);
+      DrawCallCounter::countImageLayerPixels(target, draw_states, *_sprite, getObjectId());
 #endif
    }
 #else

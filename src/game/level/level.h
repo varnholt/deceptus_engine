@@ -52,6 +52,7 @@
 #include "game/debug/mechanismsample.h"
 #include "game/debug/rendersectionsample.h"
 #include "game/debug/rendersectiontimer.h"
+#include "game/debug/updatesectiontimer.h"
 #endif
 
 class Bouncer;
@@ -133,6 +134,18 @@ public:
    /// machine the cost therefore shows up wherever the driver next blocks, not necessarily in the
    /// pass that caused it.
    std::vector<RenderSectionSample> getRenderSectionTimings() const;
+
+   /// \brief returns the cpu cost of each phase of Level::update, summed over the frame.
+   ///
+   /// The simulation runs a whole number of fixed steps per frame, so a section entered twice in
+   /// one frame reports both entries added together. That makes these directly comparable to the
+   /// measured update time, and it is why a frame below the step rate shows a higher figure: it
+   /// really does pay for the phase twice.
+   std::vector<RenderSectionSample> getUpdateSectionTimings() const;
+
+   /// \brief starts an update section measurement for one frame.
+   /// \param enabled true to collect; false leaves every mark inert.
+   void beginUpdateSectionTiming(bool enabled);
 #endif
 
    /// \brief advances active room and camera behavior, including room locks, transitions, and zoom.
@@ -463,8 +476,19 @@ protected:
    /// \param name label the elapsed time is recorded under.
    void markRenderSection(const char* name);
 
+   /// \brief opens the first update section of one simulation step.
+   ///
+   /// Unlike the draw sections this is entered once per simulation step rather than once per frame,
+   /// so it restarts the clock without dropping what earlier steps of the same frame accumulated.
+   void beginUpdateSectionPass();
+
+   /// \brief closes the running update section and opens the next one.
+   /// \param name label the elapsed time is added to.
+   void markUpdateSection(const char* name);
+
 #ifdef DEVELOPMENT_MODE
    bool _mechanism_profiling_enabled{false};
    RenderSectionTimer _render_section_timer;
+   UpdateSectionTimer _update_section_timer;
 #endif
 };

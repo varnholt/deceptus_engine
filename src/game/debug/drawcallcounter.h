@@ -87,6 +87,23 @@ struct TileMapLayerPixels
 //! the counts stay unscaled while it is.
 inline sf::Vector2u reference_target_size{0, 0};
 
+///
+/// \brief One image layer and the pixels it has submitted since the last report.
+///
+struct ImageLayerPixels
+{
+   std::string _layer_name;
+   int64_t _pixels_submitted{0};
+   int32_t _draw_count{0};  //!< times the layer was drawn over the window
+};
+
+//! Per layer breakdown of the image layer fill. Image layers turned out to be the second biggest
+//! fill item in the catacombs after the tiles - 2.01x of the frame against 5.46x - and unlike the
+//! tiles they are unaffected by the render target profile, because they draw into the image group.
+//! A total that size is either a couple of full screen room overlays, which is art and has to stay,
+//! or a pile of layers nobody meant to be on screen at once; the names are what tells those apart.
+inline std::vector<ImageLayerPixels> image_layer_pixels;
+
 //! Per layer breakdown of the tile fill, accumulated across the report window rather than reset
 //! every frame. Answers whether a handful of layers own the overdraw or it is spread evenly across
 //! all of them, which is what decides between dropping layers and rejecting hidden fragments.
@@ -161,8 +178,14 @@ void countAmbientOcclusionPixels(
 /// \param target render target the sprite went to.
 /// \param states render states the sprite was drawn with; carries the parallax view when there is one.
 /// \param sprite the sprite that was drawn.
+/// \param layer_name the layer's TMX name, so the fill can be attributed to it by name.
 ///
-void countImageLayerPixels(const sf::RenderTarget& target, const sf::RenderStates& states, const sf::Sprite& sprite);
+void countImageLayerPixels(
+   const sf::RenderTarget& target,
+   const sf::RenderStates& states,
+   const sf::Sprite& sprite,
+   const std::string& layer_name
+);
 }  // namespace DrawCallCounter
 
 #endif  // DEVELOPMENT_MODE
