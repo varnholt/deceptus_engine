@@ -68,11 +68,58 @@ void CameraSystem::updateX(const sf::Time& delta_time)
    const auto& camera_config = CameraSystemConfiguration::getInstance();
 
    auto player = PlayerRegistry::getFirst();
-   auto player_x_px = player->getPixelPositionFloat().x;
-   auto player_y_px = player->getPixelPositionFloat().y;
-   const auto room_corrected = CameraRoomLock::correctedCamera(player_x_px, player_y_px, _focus_offset_px);
-   _dx_px = (player_x_px - _x_px);
-   const auto dx_px = (_dx_px)*delta_time.asSeconds() * camera_config.getCameraVelocityFactorX();
+   const auto player_position_px = player->getPixelPositionFloat();
+   const auto velocity_factor = camera_config.getCameraVelocityFactorX();
+
+   // how fast the player is moving, in the camera's own units and time base. Read off two positions
+   // rather than taken from the physics body on purpose: the box2d delta is not the step duration, see
+   // FixedTimeStep, so a velocity in box2d units would need a conversion that has nothing to do with
+   // the camera
+   const auto player_velocity_px_per_s = (player_position_px.x - _previous_player_x_px) / delta_time.asSeconds();
+   _previous_player_x_px = player_position_px.x;
+
+   // the aim point is carried ahead of the player by the distance the camera needs in order to travel
+   // at the player's speed. The camera closes a fraction of its distance to the aim point every step,
+   // so its speed *is* that distance times the factor - aim straight at the player and the camera is
+   // left behind by exactly that distance for as long as the player keeps moving.
+   //
+   // The lead is built from a speed that takes a moment to catch up, and that is where the camera's own
+   // acceleration comes from. Leading by the full distance against the *current* speed would cancel the
+   // follow at every speed alike: no lag left, but no easing either, and the camera is welded to the
+   // player. Letting the lead's speed catch up at the same rate the camera does puts the easing back
+   // where it belongs - while the player is speeding up or slowing down the lead is still short and the
+   // camera eases towards the new speed, and once the speed is steady the lead is the whole distance
+   // and the camera sits on the player with nothing left over
+   _lead_velocity_px_per_s += (player_velocity_px_per_s - _lead_velocity_px_per_s) * delta_time.asSeconds() * velocity_factor;
+
+   const auto lead_px =
+      (velocity_factor > 0.0f) ? (_lead_velocity_px_per_s * camera_config.getCameraLeadFactorX() / velocity_factor) : 0.0f;
+
+   // the room lock still supplies the y target and reports whether any side is clamped, unchanged. It
+   // is handed the player's own position, never a led one: it looks the player up in a sub-room to find
+   // the rectangle to work against, and a lead can push that lookup outside the room, where it finds
+   // nothing and skips the clamp altogether
+   auto corrected_x_px = player_position_px.x;
+   auto corrected_y_px = player_position_px.y;
+   const auto room_corrected = CameraRoomLock::correctedCamera(corrected_x_px, corrected_y_px, _focus_offset_px);
+
+   // holding the aim point inside the room is what shapes both ends of a room crossing, and it does it
+   // without a special case at either end. Leaving a clamp, the aim point comes off the wall while the
+   // player is still a lead short of it, so the camera is already up to speed by the time the player
+   // passes - instead of standing on the clamp with nothing to move towards and needing the better part
+   // of a second to get going. Arriving at the far wall, the aim point reaches it a lead early, so the
+   // camera runs out of distance and decelerates into it
+   auto target_x_px = player_position_px.x + lead_px;
+   const auto limits = CameraRoomLock::horizontalCameraLimits(player_position_px, _focus_offset_px);
+   if (limits.has_value())
+   {
+      // a room narrower than the view cannot satisfy both ends at once, and correctedCamera settles
+      // that in favour of the left one, so settle it the same way here
+      target_x_px = std::max(limits->_left_px, std::min(target_x_px, limits->_right_px));
+   }
+
+   _dx_px = (target_x_px - _x_px);
+   const auto dx_px = (_dx_px)*delta_time.asSeconds() * velocity_factor;
    const auto f_center = _view_width_px / 2.0f;
    const auto f_range = _view_width_px / camera_config.getFocusZoneDivider();
 
@@ -97,8 +144,11 @@ void CameraSystem::updateX(const sf::Time& delta_time)
    _focus_zone_x1_px += _focus_offset_px;
    _focus_zone_center_px = ((_focus_zone_x0_px + _focus_zone_x1_px) / 2.0f);
 
-   // test if out of focus zone boundaries
-   const auto test = player_x_px - _focus_zone_center_px;
+   // test if out of focus zone boundaries. Measured against the point the camera is aiming at rather
+   // than the player: now that the lead cancels the trailing distance, a running player sits on the
+   // centre, so testing the player would find them inside the zone and stop the camera every few
+   // frames - the camera would judder along instead of running with them
+   const auto test = target_x_px - _focus_zone_center_px;
    const auto f0_px = _x_px - _focus_zone_x1_px;
    const auto f1_px = _x_px - _focus_zone_x0_px;
 
@@ -116,6 +166,14 @@ void CameraSystem::updateX(const sf::Time& delta_time)
    if (_focus_x_triggered || room_corrected)
    {
       _x_px += dx_px;
+   }
+
+   // and the same limits on the camera itself, not only on what it is aiming at. A room can change
+   // under a camera that is standing still, and the focus zone gate can hold it where it is, so being
+   // aimed inside the room is not on its own enough to have never been outside it
+   if (limits.has_value())
+   {
+      _x_px = std::max(limits->_left_px, std::min(_x_px, limits->_right_px));
    }
 }
 
@@ -218,6 +276,11 @@ void CameraSystem::syncNow()
 
    _x_px = player_x;
    _y_px = player_y;
+
+   // a teleport is not movement. Left alone, the jump would read as an enormous speed for one step and
+   // the lead would fling the camera across the room
+   _previous_player_x_px = player->getPixelPositionFloat().x;
+   _lead_velocity_px_per_s = 0.0f;
 }
 
 void CameraSystem::snapTo(float x_px, float y_px)
@@ -227,6 +290,8 @@ void CameraSystem::snapTo(float x_px, float y_px)
    _dx_px = 0.0f;
    _dy_px = 0.0f;
    _locked = true;
+   _previous_player_x_px = PlayerRegistry::getFirst()->getPixelPositionFloat().x;
+   _lead_velocity_px_per_s = 0.0f;
 }
 
 void CameraSystem::unlockCamera()

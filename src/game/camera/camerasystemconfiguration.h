@@ -14,6 +14,10 @@ struct CameraSystemConfiguration
    /// \return velocity factor applied during x-axis camera updates.
    float getCameraVelocityFactorX() const;
 
+   /// \brief returns how much of the player's speed the camera is aimed ahead by.
+   /// \return fraction of the follow's own time constant, 0 aims at the player, 1 cancels the easing.
+   float getCameraLeadFactorX() const;
+
    /// \brief returns the divisor used to derive horizontal focus-zone half-width from view width.
    /// \return focus-zone divider value.
    float getFocusZoneDivider() const;
@@ -68,6 +72,13 @@ struct CameraSystemConfiguration
 
    // x
    float _camera_velocity_factor_x = 4.0f;
+
+   //!< how far ahead of the player the camera aims, as a fraction of the follow's own time constant.
+   //!< 0 aims straight at the player, which leaves the camera standing still whenever a room clamp
+   //!< lets go of it; 1 aims exactly the distance the camera needs to keep up, which cancels the
+   //!< easing entirely and glues the camera to the player. In between it keeps its easing but starts
+   //!< the hand-off out of a clamp at this fraction of the player's speed instead of at nothing
+   float _camera_lead_factor_x = 0.8f;
    float _focus_zone_divider = 6.0f;
    float _target_shift_factor = 0.75f;
    int32_t _back_in_bounds_tolerance_x = 10;

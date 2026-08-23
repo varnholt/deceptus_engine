@@ -31,6 +31,7 @@ std::string CameraSystemConfiguration::serialize()
    json config = {
       {"CameraSystemConfiguration",
        {{"velocity_factor_x", _camera_velocity_factor_x},
+        {"lead_factor_x", _camera_lead_factor_x},
         {"focus_zone_divider", _focus_zone_divider},
         {"target_shift_factor", _target_shift_factor},
         {"back_in_bounds_tolerance_x", _back_in_bounds_tolerance_x},
@@ -56,6 +57,7 @@ void CameraSystemConfiguration::deserialize(const std::string& data)
    const auto camera_config = config["CameraSystemConfiguration"];
 
    _camera_velocity_factor_x = camera_config["velocity_factor_x"].get<float>();
+   _camera_lead_factor_x = camera_config["lead_factor_x"].get<float>();
    _focus_zone_divider = camera_config["focus_zone_divider"].get<float>();
    _target_shift_factor = camera_config["target_shift_factor"].get<float>();
    _back_in_bounds_tolerance_x = camera_config["back_in_bounds_tolerance_x"].get<int32_t>();
@@ -146,4 +148,9 @@ float CameraSystemConfiguration::getFocusZoneDivider() const
 float CameraSystemConfiguration::getCameraVelocityFactorX() const
 {
    return _camera_velocity_factor_x;
+}
+
+float CameraSystemConfiguration::getCameraLeadFactorX() const
+{
+   return _camera_lead_factor_x;
 }
