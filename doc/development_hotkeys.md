@@ -13,6 +13,7 @@ All hotkeys in this document are only active in `DEVELOPMENT_MODE` builds, excep
 | `F5` | Toggle log viewer |
 | `F6` | Toggle test scene |
 | `F7` | Toggle physics config UI |
+| `F10` | Toggle profiling window |
 | `F12` | Toggle developer console |
 
 ## Player Event Recording
