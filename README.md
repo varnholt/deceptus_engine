@@ -7,41 +7,18 @@
 [![Switch](https://github.com/varnholt/deceptus_engine/actions/workflows/switch.yml/badge.svg)](https://github.com/varnholt/deceptus_engine/actions/workflows/switch.yml)
 
 A C++23/lua-based platformer game engine<br>
-It utilizes Box2D for game physics, SFML for rendering, and SDL for game controller support.
+Levels are drawn in Tiled, enemies and cutscenes are scripted in Lua, and the engine renders them
+with deferred lighting, baked ambient occlusion, water, weather and parallax. Box2D does the game
+physics, SFML the rendering, SDL the game controller support.
 
-It builds for Windows, Linux and macOS, it compiles to WebAssembly so it runs in the browser
-without a plugin, and it runs on the Nintendo Switch as unsigned homebrew.
+**Five platforms from one code base:** Windows, Linux and macOS as native builds, the browser as
+WebAssembly without a plugin, and the Nintendo Switch as unsigned homebrew.
 
 ### [▶ Play it in your browser on itch.io](https://deceptus.itch.io/deceptus)
 
-![](doc/screenshots/screenshot.png)
-
 ![](doc/screenshots/gameplay.gif)
 
-The clip above is also available as an [MP4](doc/screenshots/gameplay.mp4) at full resolution.
-
-
-# Documentation
-
-The complete documentation lives in [doc/readme.md](doc/readme.md). The most travelled paths:
-
-|Topic|Where|
-|-|-|
-|Designing a level|[designing_a_level.md](doc/level_design/designing_a_level.md)|
-|Mechanisms, all 39 of them|[mechanisms.md](doc/level_design/mechanisms.md)|
-|Enemies|[enemies.md](doc/level_design/enemies.md)|
-|Visual effects, lighting and weather|[visual_effects.md](doc/level_design/visual_effects.md)|
-|Writing your own enemies in Lua|[lua_interface/readme.md](doc/lua_interface/readme.md)|
-|Cutscenes|[cutscene.md](data/scripts/cutscene.md)|
-|Development hotkeys|[development_hotkeys.md](doc/development_hotkeys.md)|
-
-
-# Credits
-
-|What|Who|
-|-|-|
-|Artwork|dstar|
-|Code|mueslee (Matthias Varnholt)|
+The clip is also available as an [MP4](doc/screenshots/gameplay.mp4) at full resolution.
 
 
 # Get a Build
@@ -69,6 +46,82 @@ The links resolve through [nightly.link](https://nightly.link), which hands out 
 the latest successful workflow run. That indirection exists because GitHub only serves Actions
 artifacts to signed-in users. If you are signed in you can equally take them straight from the
 [workflow runs](https://github.com/varnholt/deceptus_engine/actions).
+
+
+# Inside the Engine
+
+## From Tiled to a Rendered Level
+
+Levels are drawn in [Tiled](https://www.mapeditor.org). Tile layers carry the art, object layers
+carry everything else: rooms, enemies, lights, doors, ropes, dialogues, conveyor belts, dust
+emitters — every one of the 39 mechanisms is a rectangle with a handful of custom properties. The
+engine parses the `.tmx` when it loads the level, so saving in Tiled and pressing `L` in the
+running game is the whole iteration loop.
+
+![](doc/screenshots/tiled_level.png)
+
+What the engine makes of it: tile layers sorted by their `z` property rather than by their order
+in the file, deferred lighting on top of ambient occlusion baked per level, animated water and
+waterfalls, weather, and parallax layers front and back.
+
+![](doc/screenshots/screenshot.png)
+
+## Tuning the Game While It Runs
+
+Physics and camera behaviour are not compiled in. `F7` and `F3` open configuration windows beside
+the game; every value takes effect on the next frame, pointing at a setting explains what it does,
+and the `File` menu writes the values back to the json the game reads at startup.
+
+|Physics (`F7`)|Camera (`F3`)|
+|-|-|
+|![](doc/screenshots/physics_configuration.png)|![](doc/screenshots/camera_configuration.png)|
+
+## Seeing What a Frame Costs
+
+`F10` opens the profiler: wall clock frame period, the split between update and draw, the time
+spent handing the frame to the display, and the cpu side submit cost of every render section in
+draw order.
+
+![](doc/screenshots/profiling.png)
+
+## The Developer Console
+
+`F12` opens a console that teleports the player to a checkpoint, tile position or room by name,
+hands out weapons, items and abilities, and drives the player event recorder. The help panel on
+the right narrows down as you type, so it never lists more than you need.
+
+![](doc/screenshots/developer_console.png)
+
+The rest of the development hotkeys — debug overlays, the controller overlay, the log viewer,
+gravity flip, ambient light, zoom, and recording and replaying player input — are listed in
+[development_hotkeys.md](doc/development_hotkeys.md).
+
+All of this instrumentation is compiled into the desktop builds by default. The web and Switch
+builds leave it out, since neither has a window to put it in; `-DDECEPTUS_DEVELOPMENT_MODE=ON`
+puts it back for a profiling run.
+
+
+# Documentation
+
+The complete documentation lives in [doc/readme.md](doc/readme.md). The most travelled paths:
+
+|Topic|Where|
+|-|-|
+|Designing a level|[designing_a_level.md](doc/level_design/designing_a_level.md)|
+|Mechanisms, all 39 of them|[mechanisms.md](doc/level_design/mechanisms.md)|
+|Enemies|[enemies.md](doc/level_design/enemies.md)|
+|Visual effects, lighting and weather|[visual_effects.md](doc/level_design/visual_effects.md)|
+|Writing your own enemies in Lua|[lua_interface/readme.md](doc/lua_interface/readme.md)|
+|Cutscenes|[cutscene.md](data/scripts/cutscene.md)|
+|Development hotkeys|[development_hotkeys.md](doc/development_hotkeys.md)|
+
+
+# Credits
+
+|What|Who|
+|-|-|
+|Artwork|dstar|
+|Code|mueslee (Matthias Varnholt)|
 
 
 # How to Build
