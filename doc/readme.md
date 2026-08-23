@@ -100,6 +100,7 @@
 ## Development
 
 - [Development Hotkeys](development_hotkeys.md)<br>
+- [Building and Running for the Nintendo Switch](switch_build.md)<br>
 
 
 ## Creating Your Own Enemies
