@@ -4,12 +4,35 @@
 #include "framework/tmxparser/tmximagelayer.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/player/playerregistry.h"
 
 #ifdef DEVELOPMENT_MODE
 #include "game/debug/drawcallcounter.h"
 #endif
+
+namespace
+{
+///
+/// \brief Tells whether a sprite reaches into the region a view shows.
+/// \param view the view the sprite would be drawn through.
+/// \param sprite the sprite in question.
+/// \return true when the two rectangles overlap.
+///
+bool reachesView(const sf::View& view, const sf::Sprite& sprite)
+{
+   const auto view_center = sfcompat::getViewCenter(view);
+   const auto view_size = sfcompat::getViewSize(view);
+   const auto bounds = sprite.getGlobalBounds();
+
+   const auto view_left = view_center.x - view_size.x * 0.5f;
+   const auto view_top = view_center.y - view_size.y * 0.5f;
+
+   return bounds.position.x < view_left + view_size.x && view_left < bounds.position.x + bounds.size.x &&
+          bounds.position.y < view_top + view_size.y && view_top < bounds.position.y + bounds.size.y;
+}
+}  // namespace
 
 ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 {
@@ -48,6 +71,12 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
    // level view is copied here on purpose
    const auto level_view = target.getView();
 
+   // a layer sharing no area with the view rasterises nothing, so it is skipped
+   if (!reachesView(_parallax_settings.has_value() ? _parallax_view : level_view, *_sprite))
+   {
+      return;
+   }
+
    if (_parallax_settings.has_value())
    {
       target.setView(_parallax_view);
@@ -81,6 +110,12 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const 
 
    // the texture has to travel in the render states, vrsfml sprites do not own one
    const auto* texture = _texture->getTexture().get();
+
+   // a layer sharing no area with the view rasterises nothing, so it is skipped
+   if (!reachesView(_parallax_settings.has_value() ? _parallax_view : states.view, *_sprite))
+   {
+      return;
+   }
 
    if (_parallax_settings.has_value())
    {
