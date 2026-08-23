@@ -246,5 +246,5 @@ The engine is released under
 [Creative Commons Attribution-NonCommercial 4.0 International](LICENSE.md) and is free to use on
 those terms.
 
-The artwork is not. It is copyright dstar and is in this repository so that the engine has a game
-to run, not for reuse. If you want to use any of it, ask first.
+The artwork is not. dstar owns it. It is in this repository so that the engine has a game to run,
+and it is not licensed for reuse, so ask first if you want to use any of it.
