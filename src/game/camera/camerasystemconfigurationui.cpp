@@ -79,8 +79,10 @@ void CameraSystemConfigurationUi::draw()
 
    SettingsUi::beginSettings();
 
+   // scopes the widget ids per section, so rows sharing a label stay distinct
    if (ImGui::CollapsingHeader("horizontal", header_flags))
    {
+      ImGui::PushID("horizontal");
       SettingsUi::drawFloat(
          "camera velocity factor",
          &config._camera_velocity_factor_x,
@@ -139,10 +141,12 @@ void CameraSystemConfigurationUi::draw()
          "view rather than leaving the player centred.",
          "Turning it on is what gives the target shift factor above something to do."
       );
+      ImGui::PopID();
    }
 
    if (ImGui::CollapsingHeader("vertical", header_flags))
    {
+      ImGui::PushID("vertical");
       SettingsUi::drawFloat(
          "camera velocity factor",
          &config._camera_velocity_factor_y,
@@ -201,6 +205,7 @@ void CameraSystemConfigurationUi::draw()
          "Multiplies the vertical velocity factor, and replaces the gentle ease-in the normal follow "
          "uses, so it takes hold immediately."
       );
+      ImGui::PopID();
    }
 
    if (ImGui::CollapsingHeader("various", header_flags))
