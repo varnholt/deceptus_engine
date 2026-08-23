@@ -92,6 +92,13 @@ void CameraSystem::updateX(const sf::Time& delta_time)
    // and the camera sits on the player with nothing left over
    _lead_velocity_px_per_s += (player_velocity_px_per_s - _lead_velocity_px_per_s) * delta_time.asSeconds() * velocity_factor;
 
+   // the catch-up is only allowed to lag behind a player who is speeding up. Slowing down, the lead
+   // is held to the speed the player actually has, so it never aims past one who has already stopped
+   if (fabs(_lead_velocity_px_per_s) > fabs(player_velocity_px_per_s))
+   {
+      _lead_velocity_px_per_s = player_velocity_px_per_s;
+   }
+
    const auto lead_px =
       (velocity_factor > 0.0f) ? (_lead_velocity_px_per_s * camera_config.getCameraLeadFactorX() / velocity_factor) : 0.0f;
 
