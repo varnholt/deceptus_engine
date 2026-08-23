@@ -4,12 +4,58 @@
 #include "framework/tmxparser/tmximagelayer.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/player/playerregistry.h"
 
 #ifdef DEVELOPMENT_MODE
 #include "game/debug/drawcallcounter.h"
 #endif
+
+namespace
+{
+///
+/// \brief Tells whether a sprite reaches into the region a view shows.
+/// \param view the view the sprite would be drawn through.
+/// \param sprite the sprite in question.
+/// \return true when the two rectangles overlap.
+///
+/// The layers are only ever unloaded by chunk. LazyTexture keeps a texture while any of its chunks is
+/// within one 512 px chunk of the player's, which is a very loose fence around a 640 x 360 view:
+///
+///                  <----------- chunk keep-alive, ~1024 px ----------->
+///     +-----------+-----------+-----------+-----------+-----------+     each cell = one 512 px chunk
+///     |           |           |           |           |           |
+///     |  fp-the   |  es-the   |  +----------------+   |  ct-the   |     the view is barely wider
+///     |  -hall    |  -cellar  |  |     view       |   |  -loop    |     than one chunk, so four or
+///     |  loaded   |  loaded   |  |   640 x 360    |   |  loaded   |     five rooms' worth of
+///     |  DRAWN    |  DRAWN    |  +----------------+   |  DRAWN    |     overlays are resident and
+///     |  0 px     |  0 px     |   es/fp-widow-maker   |  0 px     |     every one of them drew
+///     |           |           |   DRAWN, 1.00x each   |           |
+///     +-----------+-----------+-----------+-----------+-----------+
+///
+/// Measured in the catacombs: 24 image layers drawn per frame, and exactly two of them putting a
+/// pixel on screen. The other 22 cost a draw call each, and the parallax ones a view change on top,
+/// which flushes the batch under VRSFML.
+///
+/// Dropping them is exact rather than a trade: a sprite that shares no area with the view rasterises
+/// nothing, whatever its blend mode. The views here are built from a rectangle and never rotated, so
+/// comparing world space rectangles is the whole test. The proof it is exact is in the counters -
+/// after this, 24 draws became 3 and every overdraw figure stayed byte identical.
+///
+bool reachesView(const sf::View& view, const sf::Sprite& sprite)
+{
+   const auto view_center = sfcompat::getViewCenter(view);
+   const auto view_size = sfcompat::getViewSize(view);
+   const auto bounds = sprite.getGlobalBounds();
+
+   const auto view_left = view_center.x - view_size.x * 0.5f;
+   const auto view_top = view_center.y - view_size.y * 0.5f;
+
+   return bounds.position.x < view_left + view_size.x && view_left < bounds.position.x + bounds.size.x &&
+          bounds.position.y < view_top + view_size.y && view_top < bounds.position.y + bounds.size.y;
+}
+}  // namespace
 
 ImageLayer::ImageLayer(GameNode* parent) : GameNode(parent)
 {
@@ -48,6 +94,13 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
    // level view is copied here on purpose
    const auto level_view = target.getView();
 
+   // a layer that shares no area with the view rasterises nothing, so it is dropped before it costs
+   // a draw call and, for the parallax ones, two view changes
+   if (!reachesView(_parallax_settings.has_value() ? _parallax_view : level_view, *_sprite))
+   {
+      return;
+   }
+
    if (_parallax_settings.has_value())
    {
       target.setView(_parallax_view);
@@ -56,7 +109,7 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
    target.draw(*_sprite, {_blend_mode});
 
 #ifdef DEVELOPMENT_MODE
-   DrawCallCounter::countImageLayerPixels(target, {_blend_mode}, *_sprite);
+   DrawCallCounter::countImageLayerPixels(target, {_blend_mode}, *_sprite, getObjectId());
 #endif
 
    if (_parallax_settings.has_value())
@@ -82,12 +135,19 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const 
    // the texture has to travel in the render states, vrsfml sprites do not own one
    const auto* texture = _texture->getTexture().get();
 
+   // a layer that shares no area with the view rasterises nothing, so it is dropped before it costs
+   // a draw call and, for the parallax ones, a view change - which flushes the batch here
+   if (!reachesView(_parallax_settings.has_value() ? _parallax_view : states.view, *_sprite))
+   {
+      return;
+   }
+
    if (_parallax_settings.has_value())
    {
       const sf::RenderStates parallax_states{.blendMode = _blend_mode, .view = _parallax_view, .texture = texture};
       target.draw(*_sprite, parallax_states);
 #ifdef DEVELOPMENT_MODE
-      DrawCallCounter::countImageLayerPixels(target, parallax_states, *_sprite);
+      DrawCallCounter::countImageLayerPixels(target, parallax_states, *_sprite, getObjectId());
 #endif
    }
    else
@@ -97,7 +157,7 @@ void ImageLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const 
       draw_states.texture = texture;
       target.draw(*_sprite, draw_states);
 #ifdef DEVELOPMENT_MODE
-      DrawCallCounter::countImageLayerPixels(target, draw_states, *_sprite);
+      DrawCallCounter::countImageLayerPixels(target, draw_states, *_sprite, getObjectId());
 #endif
    }
 #else

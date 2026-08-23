@@ -2,6 +2,36 @@
 
 #ifdef DEVELOPMENT_MODE
 #include "game/debug/drawcallcounter.h"
+
+#include <algorithm>
+#include <ranges>
+
+namespace
+{
+///
+/// \brief Adds one frame's sections into a running total, matching them up by name.
+///
+/// The draw sections can be accumulated by index because Game::draw runs its passes exactly once
+/// per frame. The update sections cannot: the simulation runs a whole number of fixed steps per
+/// frame, so the list changes length from frame to frame and a section that only exists on a two
+/// step frame would otherwise shift every later entry into the wrong slot.
+///
+void accumulateSectionsByName(std::vector<RenderSectionSample>& total, const std::vector<RenderSectionSample>& frame)
+{
+   for (const auto& sample : frame)
+   {
+      const auto match = std::ranges::find_if(total, [&sample](const auto& entry) { return entry.name == sample.name; });
+      if (match != total.end())
+      {
+         match->duration_ms += sample.duration_ms;
+      }
+      else
+      {
+         total.push_back(sample);
+      }
+   }
+}
+}  // namespace
 #endif
 
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
@@ -90,6 +120,69 @@ void logRenderSections(const std::vector<RenderSectionSample>& samples, int32_t 
    Log::Info() << section_line.str();
 }
 
+// the update half of the frame, which the report only ever showed as one number. worth its own line
+// because a section here can be entered more than once per frame: the simulation runs whole fixed
+// steps, so below the step rate a frame really does pay for every phase twice
+void logUpdateSections(const std::vector<RenderSectionSample>& samples, int32_t frames)
+{
+   auto section_total_ms = 0.0f;
+
+   std::ostringstream update_line;
+   update_line << std::fixed << std::setprecision(3) << "profiling: update sections over " << frames << " frames |";
+   for (const auto& sample : samples)
+   {
+      const auto average_ms = sample.duration_ms / static_cast<float>(frames);
+      update_line << " " << sample.name << " " << average_ms << " |";
+
+      // Level::update reports its own phases and "level update" is the span that contains them, so
+      // counting both would total the level's cost twice
+      if (sample.name != "level update")
+      {
+         section_total_ms += average_ms;
+      }
+   }
+
+   update_line << " TOTAL " << section_total_ms;
+   Log::Info() << update_line.str();
+}
+
+// the imgui window has shown these all along, but nothing wrote them to the log, so a benchmark run
+// could not read them - and "mechanisms" is the biggest single phase of the update once the lua
+// nodes are dealt with. worst first, totals rather than per instance averages
+void logMechanismTimings(const std::vector<MechanismSample>& samples)
+{
+   if (samples.empty())
+   {
+      return;
+   }
+
+   constexpr auto reported_count = 8u;
+   std::ostringstream mechanism_line;
+   mechanism_line << std::fixed << std::setprecision(3) << "profiling: mechanism totals |";
+   for (auto sample_index = 0u; sample_index < std::min<size_t>(reported_count, samples.size()); sample_index++)
+   {
+      const auto& sample = samples[sample_index];
+      mechanism_line << " " << sample.name << " x" << sample.count << " update " << sample.update_ms << " draw " << sample.draw_ms << " |";
+   }
+   mechanism_line << " " << samples.size() << " types";
+   Log::Info() << mechanism_line.str();
+}
+
+// the step count belongs next to the update phases: it is what says whether a high update figure is
+// a phase getting slower or the frame merely dropping below the step rate and paying for the
+// simulation twice
+void logSimulationSteps(const float* steps, int32_t count)
+{
+   if (count <= 0)
+   {
+      return;
+   }
+
+   const auto average = std::accumulate(steps, steps + count, 0.0f) / static_cast<float>(count);
+   Log::Info() << std::fixed << "profiling: simulation steps per frame min " << *std::min_element(steps, steps + count) << " avg "
+               << average << " max " << *std::max_element(steps, steps + count);
+}
+
 // draw call counts carry over to other hardware unchanged, unlike a timing, so they belong next to
 // the sections rather than only in the imgui window
 void logDrawCounts(
@@ -161,6 +254,35 @@ void logTileMapLayerFill(int32_t frames, float view_area)
    DrawCallCounter::tilemap_layer_pixels.clear();
 }
 
+// the same breakdown for the image layers, which turned out to be the second biggest fill item after
+// the tiles and are the one the render target profile cannot touch. worst first, so the answer to
+// "which of the forty seven is that" is the front of the line
+void logImageLayerFill(int32_t frames, float view_area)
+{
+   if (DrawCallCounter::image_layer_pixels.empty() || frames <= 0 || view_area <= 0.0f)
+   {
+      return;
+   }
+
+   auto layers = DrawCallCounter::image_layer_pixels;
+   std::ranges::sort(layers, [](const auto& lhs, const auto& rhs) { return lhs._pixels_submitted > rhs._pixels_submitted; });
+
+   constexpr auto reported_layer_count = 8u;
+   std::ostringstream layer_line;
+   layer_line << std::fixed << std::setprecision(2) << "profiling: image layer fill |";
+   for (auto layer_index = 0u; layer_index < std::min<size_t>(reported_layer_count, layers.size()); layer_index++)
+   {
+      const auto& layer = layers[layer_index];
+      const auto overdraw = static_cast<float>(layer._pixels_submitted) / static_cast<float>(frames) / view_area;
+      const auto draws_per_frame = static_cast<float>(layer._draw_count) / static_cast<float>(frames);
+      layer_line << " " << layer._layer_name << " " << overdraw << "x in " << draws_per_frame << " draws |";
+   }
+   layer_line << " " << layers.size() << " layers drawn";
+   Log::Info() << layer_line.str();
+
+   DrawCallCounter::image_layer_pixels.clear();
+}
+
 }  // namespace
 
 void ProfilingUi::draw()
@@ -214,6 +336,17 @@ void ProfilingUi::draw()
    ImGui::Text("update time");
    drawTimingGraph("##update", _update_times_ms.data(), sample_count, _write_index, target_update_ms);
 
+   if (!_update_section_timings.empty())
+   {
+      ImGui::Spacing();
+      ImGui::Text("update sections   (summed over the frame's simulation steps)");
+      const auto update_frames = std::max(_update_section_frames, 1);
+      for (const auto& sample : _update_section_timings)
+      {
+         ImGui::Text("%.3f ms  %s", sample.duration_ms / static_cast<float>(update_frames), sample.name.c_str());
+      }
+   }
+
    ImGui::Spacing();
    ImGui::Text("draw time (scene + swap)");
    drawTimingGraph("##draw", _draw_times_ms.data(), sample_count, _write_index, target_draw_ms);
@@ -252,6 +385,17 @@ void ProfilingUi::draw()
          logTileMapLayerFill(
             section_frames, static_cast<float>(GameConfiguration::getInstance()._view_width * GameConfiguration::getInstance()._view_height)
          );
+         logImageLayerFill(
+            section_frames, static_cast<float>(GameConfiguration::getInstance()._view_width * GameConfiguration::getInstance()._view_height)
+         );
+         logSimulationSteps(_simulation_steps.data(), _samples_written);
+         logMechanismTimings(_mechanism_timings);
+         if (!_update_section_timings.empty())
+         {
+            logUpdateSections(_update_section_timings, std::max(_update_section_frames, 1));
+            _update_section_timings.clear();
+            _update_section_frames = 0;
+         }
          _render_section_timings.clear();
          _render_section_frames = 0;
       }
@@ -308,7 +452,7 @@ void ProfilingUi::draw()
 
          ImGui::Dummy(ImVec2(max_bar_width, bar_height));
          ImGui::SameLine(0.0f, 8.0f);
-         ImGui::Text("%.3f ms  %s", total_ms, sample.name.c_str());
+         ImGui::Text("%.3f ms  %s x%d", total_ms, sample.name.c_str(), sample.count);
          ImGui::SetCursorPosY(ImGui::GetCursorPosY() + bar_row_spacing);
       }
       ImGui::EndChild();
@@ -365,6 +509,11 @@ void ProfilingUi::recordWindowDisplay(sf::Time display_time)
    _window_display_times_ms[_write_index] = display_time.asSeconds() * 1000.0f;
 }
 
+void ProfilingUi::recordSimulationSteps(int32_t step_count)
+{
+   _simulation_steps[_write_index] = static_cast<float>(step_count);
+}
+
 void ProfilingUi::updateMechanismTimings(std::vector<MechanismSample> timings)
 {
    if (_mechanism_update_clock.getElapsedTime().asSeconds() < 0.5f)
@@ -391,6 +540,17 @@ void ProfilingUi::updateRenderSectionTimings(std::vector<RenderSectionSample> ti
       _render_section_timings[section_index].duration_ms += timings[section_index].duration_ms;
    }
    _render_section_frames++;
+}
+
+void ProfilingUi::updateUpdateSectionTimings(std::vector<RenderSectionSample> timings)
+{
+   if (timings.empty())
+   {
+      return;
+   }
+
+   accumulateSectionsByName(_update_section_timings, timings);
+   _update_section_frames++;
 }
 
 bool ProfilingUi::isMechanismProfilingWanted() const
@@ -479,6 +639,35 @@ void logTileMapLayerFill(int32_t frames, float view_area)
    DrawCallCounter::tilemap_layer_pixels.clear();
 }
 
+// the same breakdown for the image layers, which turned out to be the second biggest fill item after
+// the tiles and are the one the render target profile cannot touch, because they draw into the image
+// group. worst first, so the answer to "which of the forty seven is that" is the front of the line
+void logImageLayerFill(int32_t frames, float view_area)
+{
+   if (DrawCallCounter::image_layer_pixels.empty() || frames <= 0 || view_area <= 0.0f)
+   {
+      return;
+   }
+
+   auto layers = DrawCallCounter::image_layer_pixels;
+   std::ranges::sort(layers, [](const auto& lhs, const auto& rhs) { return lhs._pixels_submitted > rhs._pixels_submitted; });
+
+   constexpr auto reported_layer_count = 8u;
+   std::ostringstream layer_line;
+   layer_line << std::fixed << std::setprecision(2) << "profiling: image layer fill |";
+   for (auto layer_index = 0u; layer_index < std::min<size_t>(reported_layer_count, layers.size()); layer_index++)
+   {
+      const auto& layer = layers[layer_index];
+      const auto overdraw = static_cast<float>(layer._pixels_submitted) / static_cast<float>(frames) / view_area;
+      const auto draws_per_frame = static_cast<float>(layer._draw_count) / static_cast<float>(frames);
+      layer_line << " " << layer._layer_name << " " << overdraw << "x in " << draws_per_frame << " draws |";
+   }
+   layer_line << " " << layers.size() << " layers drawn";
+   Log::Info() << layer_line.str();
+
+   DrawCallCounter::image_layer_pixels.clear();
+}
+
 }  // namespace
 
 ProfilingUi::ProfilingUi() = default;
@@ -514,7 +703,9 @@ void ProfilingUi::draw()
    report << std::fixed << std::setprecision(2) << "profiling: fps " << average_fps << " over " << _samples_written << " frames"
           << " | " << formatSummary("wall", wall_summary) << " | " << formatSummary("frame", frame_summary) << " | "
           << formatSummary("update", update_summary) << " | " << formatSummary("draw", draw_summary) << " | "
-          << formatSummary("swap", display_summary) << " | mechanism timing: " << (_mechanism_profiling_wanted ? "on" : "off")
+          << formatSummary("swap", display_summary) << " | "
+          << formatSummary("steps", summarizeSamples(_simulation_steps.data(), _samples_written))
+          << " | mechanism timing: " << (_mechanism_profiling_wanted ? "on" : "off")
           << " | vsync: " << (GameConfiguration::getInstance()._vsync_enabled ? "on" : "off");
    Log::Info() << report.str();
 
@@ -582,13 +773,39 @@ void ProfilingUi::draw()
       Log::Info() << section_line.str();
    }
 
+   if (!_update_section_timings.empty())
+   {
+      const auto update_frames = std::max(_update_section_frames, 1);
+      auto update_total_ms = 0.0f;
+
+      std::ostringstream update_line;
+      update_line << std::fixed << std::setprecision(3) << "profiling: update sections over " << update_frames << " frames |";
+      for (const auto& sample : _update_section_timings)
+      {
+         const auto average_ms = sample.duration_ms / static_cast<float>(update_frames);
+         update_line << " " << sample.name << " " << average_ms << " |";
+
+         // Level::update reports its own phases and "level update" is the span that contains them,
+         // so counting both would total the level's cost twice
+         if (sample.name != "level update")
+         {
+            update_total_ms += average_ms;
+         }
+      }
+
+      update_line << " TOTAL " << update_total_ms << " | measured update " << update_summary.average_ms << " | unaccounted "
+                  << (update_summary.average_ms - update_total_ms);
+      Log::Info() << update_line.str();
+   }
+
    logTileMapLayerFill(std::max(_render_section_frames, 1), static_cast<float>(view_area));
+   logImageLayerFill(std::max(_render_section_frames, 1), static_cast<float>(view_area));
 
    for (const auto& sample : _mechanism_timings)
    {
       std::ostringstream mechanism_line;
-      mechanism_line << std::fixed << std::setprecision(3) << "profiling: mechanism " << sample.name << " update " << sample.update_ms
-                     << " ms draw " << sample.draw_ms << " ms";
+      mechanism_line << std::fixed << std::setprecision(3) << "profiling: mechanism " << sample.name << " x" << sample.count << " update "
+                     << sample.update_ms << " ms draw " << sample.draw_ms << " ms (totals, not per instance)";
       Log::Info() << mechanism_line.str();
    }
 
@@ -598,6 +815,8 @@ void ProfilingUi::draw()
    _mechanism_timings.clear();
    _render_section_timings.clear();
    _render_section_frames = 0;
+   _update_section_timings.clear();
+   _update_section_frames = 0;
 
    _samples_written = 0;
    _write_index = 0;
@@ -647,6 +866,11 @@ void ProfilingUi::recordWindowDisplay(sf::Time display_time)
    _window_display_times_ms[_write_index] = display_time.asSeconds() * 1000.0f;
 }
 
+void ProfilingUi::recordSimulationSteps(int32_t step_count)
+{
+   _simulation_steps[_write_index] = static_cast<float>(step_count);
+}
+
 void ProfilingUi::updateMechanismTimings(std::vector<MechanismSample> timings)
 {
    if (_mechanism_update_clock.getElapsedTime().asSeconds() < 0.5f)
@@ -679,6 +903,17 @@ void ProfilingUi::updateRenderSectionTimings(std::vector<RenderSectionSample> ti
       _render_section_timings[section_index].duration_ms += timings[section_index].duration_ms;
    }
    _render_section_frames++;
+}
+
+void ProfilingUi::updateUpdateSectionTimings(std::vector<RenderSectionSample> timings)
+{
+   if (timings.empty())
+   {
+      return;
+   }
+
+   accumulateSectionsByName(_update_section_timings, timings);
+   _update_section_frames++;
 }
 
 bool ProfilingUi::isMechanismProfilingWanted() const

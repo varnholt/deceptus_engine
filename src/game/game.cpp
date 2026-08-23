@@ -1153,6 +1153,7 @@ void Game::update()
    }
 
    _info_layer->update(dt);
+   markUpdateSection("game systems");
 
    if (game_mode == ExecutionMode::Paused)
    {
@@ -1171,6 +1172,7 @@ void Game::update()
       {
          updateGameController();
          updateGameControllerForGame();
+         markUpdateSection("game controller");
 
          // the simulation is stepped at a fixed rate rather than once per frame. everything below
          // this line was written expecting to run exactly once per physics step, with a delta of
@@ -1183,12 +1185,41 @@ void Game::update()
          const auto simulation_step_count = _fixed_time_step.consumeSteps(dt);
          const auto simulation_dt = _fixed_time_step.getStepDuration();
 
+         // The step count is recorded because without it the update timings cannot be read at all,
+         // and because it is the mechanism behind the frame rate cliff on the console:
+         //
+         //   frame time                     steps run   update cost   what it does to the next frame
+         //   ---------------------------    ---------   -----------   ------------------------------
+         //   under 16.67 ms  (>= 60 fps)        1          1 x s      stays there
+         //   16.67 - 33.3 ms (30-60 fps)      1 or 2     1-2 x s      the 2-step frames are slower
+         //                                                           still, which buys more 2-step
+         //                                                           frames -> it settles below 60
+         //
+         //   |<-- 16.67 -->|<-- 16.67 -->|          s = cost of one simulation step, ~7.9 ms on
+         //   +------+------+------+------+              hardware
+         //   | step |      | step | step |
+         //   +------+------+------+------+          A frame just over the line pays for two steps,
+         //    ^frame N      ^frame N+1              i.e. ~7.9 ms more than one just under it.
+         //
+         // So a saving near the boundary is worth far more than its face value: crossing back under
+         // 16.67 ms removes a whole step. It also means a high "update" figure in a report can mean
+         // either a slow phase or merely a slow frame, and the step count is the only way to tell.
+#ifdef DEVELOPMENT_MODE
+         if (_profiling_ui)
+         {
+            _profiling_ui->recordSimulationSteps(simulation_step_count);
+         }
+#endif
+
          for (auto simulation_step = 0; simulation_step < simulation_step_count; simulation_step++)
          {
             EventSerializer::updateAll(simulation_dt);
 
             _level->update(simulation_dt);
+            markUpdateSection("level update");
+
             _player->update(simulation_dt);
+            markUpdateSection("player update");
 
             // a lua script can request a level change from inside the update above, which hands
             // _level over for teardown. Stepping it again would run a level that is already gone or
@@ -1206,6 +1237,7 @@ void Game::update()
             _level->updateSpritePositions();
             _player->updateSpritePositions();
          }
+         markUpdateSection("sprite positions");
 
 #ifndef DECEPTUS_VRSFML
          if (DebugDrawStates::_draw_test_scene)
@@ -1219,6 +1251,7 @@ void Game::update()
 
          // this might trigger level-reloading, so this ought to be the last drawing call in the loop
          updateGameState(dt);
+         markUpdateSection("game state");
 
          // a lua script can request a level change from inside the update above, which hands _level
          // over for teardown, so it is not necessarily still there by the time we get here
@@ -1237,10 +1270,35 @@ void Game::timedUpdate()
 {
 #ifdef DEVELOPMENT_MODE
    sf::Clock update_clock;
+   const auto update_profiling_enabled = (_profiling_ui != nullptr) && _profiling_ui->isMechanismProfilingWanted();
+   _update_section_timer.beginFrame(update_profiling_enabled);
+   if (_level)
+   {
+      _level->beginUpdateSectionTiming(update_profiling_enabled);
+   }
 #endif
    update();
 #ifdef DEVELOPMENT_MODE
    _profiling_update_elapsed = update_clock.getElapsedTime();
+
+   if (_profiling_ui && _level && _level_loading_finished)
+   {
+      // Level::update reports its own phases and "level update" is the span that contains them, the
+      // same relationship the draw sections already have between "level draw" and its passes
+      auto section_timings = _update_section_timer.samples();
+      const auto level_sections = _level->getUpdateSectionTimings();
+      section_timings.insert(section_timings.end(), level_sections.begin(), level_sections.end());
+      _profiling_ui->updateUpdateSectionTimings(std::move(section_timings));
+   }
+#endif
+}
+
+void Game::markUpdateSection(const char* name)
+{
+#ifdef DEVELOPMENT_MODE
+   _update_section_timer.mark(name);
+#else
+   (void)name;
 #endif
 }
 

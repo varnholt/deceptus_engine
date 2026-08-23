@@ -14,6 +14,7 @@
 #ifdef DEVELOPMENT_MODE
 #include "game/debug/profilingui.h"
 #include "game/debug/rendersectiontimer.h"
+#include "game/debug/updatesectiontimer.h"
 #endif
 #include "game/ingamemenu/ingamemenu.h"
 #include "game/io/eventserializer.h"
@@ -89,6 +90,10 @@ private:
 
    /// \brief calls draw() and submits frame timings to the profiling ui.
    void timedDraw();
+
+   /// \brief closes the running update section and opens the next one.
+   /// \param name label the elapsed time is added to.
+   void markUpdateSection(const char* name);
 
    /// \brief carries out a level load requested by loadLevel(), if one is pending.
    ///
@@ -212,6 +217,11 @@ private:
    //! Level::draw reports its own passes; this covers everything else Game::draw does, so the
    //! sections add up to the measured draw time instead of leaving an unexplained remainder
    RenderSectionTimer _draw_section_timer;
+
+   //! the same accounting for the update half of the frame, which the report only ever showed as a
+   //! single number. it accumulates by name rather than by position because the simulation runs a
+   //! whole number of fixed steps per frame, so a section can be entered more than once
+   UpdateSectionTimer _update_section_timer;
 #endif
 
    std::shared_ptr<EventSerializer> _global_event_serializer;

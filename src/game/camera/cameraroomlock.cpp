@@ -166,3 +166,8 @@ void CameraRoomLock::setViewRect(const sf::FloatRect& rect)
 {
    _view_rect = rect;
 }
+
+const sf::FloatRect& CameraRoomLock::getViewRect()
+{
+   return _view_rect;
+}

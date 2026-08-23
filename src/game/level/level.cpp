@@ -78,6 +78,7 @@
 #endif
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <thread>
 
 // #define MECHANISM_TIMING_ENABLED 1
@@ -106,19 +107,21 @@ struct MechanismTiming
       draw_count++;
    }
 
-   float getAverageUpdateMs() const
+   float getTotalUpdateMs() const
    {
-      return (update_count > 0) ? std::chrono::duration<float, std::milli>(update_duration).count() / static_cast<float>(update_count)
-                                : 0.0f;
+      return std::chrono::duration<float, std::milli>(update_duration).count();
    }
 
-   float getAverageDrawMs() const
+   float getTotalDrawMs() const
    {
-      return (draw_count > 0) ? std::chrono::duration<float, std::milli>(draw_duration).count() / static_cast<float>(draw_count) : 0.0f;
+      return std::chrono::duration<float, std::milli>(draw_duration).count();
    }
 };
 
-std::unordered_map<std::string, MechanismTiming> timing_data;
+// keyed on the view rather than on a string: objectName() hands back a literal, so keying on
+// std::string meant a heap allocation and a free for every mechanism, every frame, purely to look
+// up the slot it goes in. that is instrumentation cost showing up inside the numbers being measured
+std::unordered_map<std::string_view, MechanismTiming> timing_data;
 
 }  // namespace
 #endif
@@ -1102,7 +1105,7 @@ void Level::drawMechanismsAtZ(
 #ifdef DEVELOPMENT_MODE
          if (_mechanism_profiling_enabled)
          {
-            const auto mechanism_name = std::string{mechanism->objectName()};
+            const auto mechanism_name = mechanism->objectName();
             const auto time_start = std::chrono::high_resolution_clock::now();
             mechanism->draw(color, normal, states);
             timing_data[mechanism_name].addDrawTime(std::chrono::high_resolution_clock::now() - time_start);
@@ -1928,28 +1931,40 @@ const std::shared_ptr<LightSystem::LightInstance>& Level::getPlayerLight() const
 
 void Level::update(const sf::Time& dt)
 {
+   beginUpdateSectionPass();
+
    Projectile::update(dt);
+   markUpdateSection("projectiles");
 
    updateMechanismVolumes();
+   markUpdateSection("mechanism volumes");
+
    updateCameraSystem(dt);
    updateViews();
+   markUpdateSection("camera");
 
    // clear conveyor belt state BEFORE updating the world
    // i.e. all objects on the belt are cleared here, then in Step() they are re-collected
    ConveyorBelt::resetBeltState();
 
    _world->Step(PhysicsConfiguration::getInstance()._time_step, 8, 3);
+   markUpdateSection("physics step");
+
    GameContactListener::getInstance().processEvents();
+   markUpdateSection("contact events");
 
    CameraPanorama::getInstance().update();
    _boom_effect.update(dt);
+   markUpdateSection("panorama and boom");
 
    AnimationPlayer::getInstance().update(dt);
+   markUpdateSection("animation player");
 
    for (auto& tile_map : _tile_maps)
    {
       tile_map->update(dt);
    }
+   markUpdateSection("tile map animations");
 
    const auto& player_chunk = PlayerRegistry::getFirst()->getChunk();
 
@@ -1969,7 +1984,7 @@ void Level::update(const sf::Time& dt)
 #ifdef DEVELOPMENT_MODE
             if (_mechanism_profiling_enabled)
             {
-               const auto mechanism_name = std::string{mechanism->objectName()};
+               const auto mechanism_name = mechanism->objectName();
                const auto time_start = std::chrono::high_resolution_clock::now();
                mechanism->update(dt);
                timing_data[mechanism_name].addUpdateTime(std::chrono::high_resolution_clock::now() - time_start);
@@ -1985,22 +2000,29 @@ void Level::update(const sf::Time& dt)
       }
    }
 
+   markUpdateSection("mechanisms");
+
    for (auto& layer : _mechanism_registry.getImageLayers())
    {
       layer->update(dt);
    }
+   markUpdateSection("image layers");
 
    _level_script.update(dt);
+   markUpdateSection("level script");
 
    LuaInterface::instance().update(
       dt, [&player_chunk](const std::shared_ptr<GameMechanism>& mechanism) { return checkUpdateMechanism(player_chunk, mechanism); }
    );
+   markUpdateSection("lua nodes");
 
    updatePlayerLight();
+   markUpdateSection("player light");
 
    _volume_updater->setRoomId(RoomUpdater::getCurrentId());
    _volume_updater->update();
    _volume_updater->updateProjectiles(Projectile::getProjectiles());
+   markUpdateSection("volume updater");
 }
 
 const std::shared_ptr<b2World>& Level::getWorld() const
@@ -2207,7 +2229,7 @@ std::vector<MechanismSample> Level::getMechanismTimings(int32_t top_n) const
    samples.reserve(timing_data.size());
    for (const auto& [name, timing] : timing_data)
    {
-      samples.push_back({name, timing.getAverageUpdateMs(), timing.getAverageDrawMs()});
+      samples.push_back({std::string{name}, timing.getTotalUpdateMs(), timing.getTotalDrawMs(), timing.update_count});
    }
    std::ranges::sort(
       samples,
@@ -2230,7 +2252,33 @@ std::vector<RenderSectionSample> Level::getRenderSectionTimings() const
 {
    return _render_section_timer.samples();
 }
+
+std::vector<RenderSectionSample> Level::getUpdateSectionTimings() const
+{
+   return _update_section_timer.samples();
+}
+
+void Level::beginUpdateSectionTiming(bool enabled)
+{
+   _update_section_timer.beginFrame(enabled);
+}
 #endif
+
+void Level::beginUpdateSectionPass()
+{
+#ifdef DEVELOPMENT_MODE
+   _update_section_timer.beginPass();
+#endif
+}
+
+void Level::markUpdateSection(const char* name)
+{
+#ifdef DEVELOPMENT_MODE
+   _update_section_timer.mark(name);
+#else
+   (void)name;
+#endif
+}
 
 void Level::beginRenderSectionTiming()
 {

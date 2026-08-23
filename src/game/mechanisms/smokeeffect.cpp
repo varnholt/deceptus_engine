@@ -8,6 +8,7 @@
 #include "framework/tmxparser/tmxtools.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
+#include "game/camera/cameraroomlock.h"
 #include "game/io/texturepool.h"
 
 #include <array>
@@ -159,9 +160,62 @@ void SmokeEffect::update(const sf::Time& dt)
    _elapsed += dt;
    const auto dt_scaled = dt.asSeconds() * _velocity;
 
+   // the rotation is the one piece of particle state that integrates; everything else below is a
+   // pure function of _elapsed. So it has to keep advancing even when the rest is skipped, or the
+   // smoke would jump the moment it comes back into view
    for (auto& particle : _particles)
    {
       particle._rot += dt_scaled * 10.0f * particle._rot_dir;
+   }
+
+   // draw already drops this effect when its bounding box misses the view, so recomputing 80-100
+   // particles' transforms and rebuilding their vertices for it is work with no result. Six effects
+   // pass the chunk filter in the catacombs against a 640 x 360 view, and they were the whole of the
+   // frame's mechanism update cost.
+   //
+   // The three regions, and why the middle one has to exist:
+   //
+   //     +-------------------------------------------------------+
+   //     |  chunk range: what checkUpdateMechanism admits,       |
+   //     |  ~1024 px around the player. Six smoke effects.       |
+   //     |                                                       |
+   //     |      +---------------------------------------+        |
+   //     |      |  update_rect: view + 25% margin.      |        |
+   //     |      |  THIS is what gates the work below.   |        |
+   //     |      |                                       |        |
+   //     |      |      +-------------------------+      |        |
+   //     |      |      |  view: what draw()      |      |        |
+   //     |      |      |  already culls against  |      |        |
+   //     |      |      +-------------------------+      |        |
+   //     |      |                                       |        |
+   //     |      +---------------------------------------+        |
+   //     |                                                       |
+   //     +-------------------------------------------------------+
+   //
+   // The margin is not slop, it is the correctness argument. Two reasons the update cull must sit
+   // strictly outside the draw cull:
+   //
+   //   - update runs against the view the simulation just computed; draw runs against the
+   //     interpolated camera a moment later, so the two rectangles never match exactly.
+   //   - consumeSteps() can return ZERO on a fast frame, so mechanisms do not update every frame.
+   //     An effect entering the view on a zero-step frame would draw with whatever vertices it last
+   //     had. With 25% of the view (160 px) of margin and a camera moving a few px per frame, an
+   //     effect gets dozens of steps of updating before it is ever drawn, so that cannot bite.
+   //     Shrink the margin and this stops holding.
+   const auto& view_rect = CameraRoomLock::getViewRect();
+   const auto margin_px = sf::Vector2f{view_rect.size.x * 0.25f, view_rect.size.y * 0.25f};
+   const auto update_rect = sf::FloatRect{
+      {view_rect.position.x - margin_px.x, view_rect.position.y - margin_px.y},
+      {view_rect.size.x + margin_px.x * 2.0f, view_rect.size.y + margin_px.y * 2.0f}
+   };
+
+   if (view_rect.size.x > 0.0f && !sfcompat::findIntersection(update_rect, _bounding_box_px).has_value())
+   {
+      return;
+   }
+
+   for (auto& particle : _particles)
+   {
       sfcompat::setRotation(*particle._sprite, sf::degrees(particle._rot));
 
       // fake z rotation

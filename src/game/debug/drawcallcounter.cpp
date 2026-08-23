@@ -196,17 +196,39 @@ void DrawCallCounter::countAmbientOcclusionPixels(
    );
 }
 
-void DrawCallCounter::countImageLayerPixels(const sf::RenderTarget& target, const sf::RenderStates& states, const sf::Sprite& sprite)
+void DrawCallCounter::countImageLayerPixels(
+   const sf::RenderTarget& target,
+   const sf::RenderStates& states,
+   const sf::Sprite& sprite,
+   const std::string& layer_name
+)
 {
    const auto& view = resolveView(target, states);
    const auto bounds = sprite.getGlobalBounds();
 
-   image_layer_pixels_submitted += static_cast<int64_t>(
+   const auto pixels = static_cast<int64_t>(
       static_cast<double>(visibleArea(
          getClipRectPx(view), bounds.position.x, bounds.position.y, bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y
       )) *
       getTargetFillScale(target)
    );
+
+   image_layer_pixels_submitted += pixels;
+
+   // accumulated by name across the report window, like the tile map layers are. a layer that is
+   // loaded but entirely off screen lands here with zero pixels and a draw count, which is worth
+   // seeing on its own: it costs a draw call and a view change without putting anything on screen
+   const auto entry =
+      std::ranges::find_if(image_layer_pixels, [&layer_name](const auto& layer) { return layer._layer_name == layer_name; });
+   if (entry != image_layer_pixels.end())
+   {
+      entry->_pixels_submitted += pixels;
+      entry->_draw_count++;
+   }
+   else
+   {
+      image_layer_pixels.push_back({layer_name, pixels, 1});
+   }
 }
 
 #endif  // DEVELOPMENT_MODE

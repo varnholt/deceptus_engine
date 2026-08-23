@@ -196,6 +196,11 @@ private:
    //!< kept as a member rather than a local so the frames after the first reuse its capacity
    mutable std::vector<sf::Vertex> _shadow_vertices;
 
+   //!< the bodies that may cast a shadow, gathered once per frame and reused by every light. a
+   //!< member for the same reason as _shadow_vertices: as a local it allocated and freed a vector
+   //!< the size of the level's body list on every single frame
+   std::vector<b2Body*> _shadow_candidates;
+
    OccluderDrawCallback _occluder_callback;
    sf::Clock _clock;  //!< tracks elapsed time for per-light shader uniforms
 };

@@ -23,8 +23,27 @@ struct ProfilingUi
    bool isOpen() const;
    void recordFrame(sf::Time frame_time, sf::Time update_time, sf::Time draw_time);
    void recordWindowDisplay(sf::Time display_time);
+
+   ///
+   /// \brief Records how many fixed simulation steps the frame being measured ran.
+   ///
+   /// Without this the update time cannot be read at all: a frame below the step rate runs the whole
+   /// simulation twice, so a doubled update figure means the frame was slow rather than that a phase
+   /// got more expensive. It is also what tells a real regression apart from the feedback the fixed
+   /// step introduces, where a slower frame buys itself more steps and so more update.
+   ///
+   void recordSimulationSteps(int32_t step_count);
    void updateMechanismTimings(std::vector<MechanismSample> timings);
    void updateRenderSectionTimings(std::vector<RenderSectionSample> timings);
+
+   ///
+   /// \brief Accumulates the phases of one frame's update, so they can be averaged over the window.
+   ///
+   /// Accumulated by name rather than by index: the simulation runs a whole number of fixed steps
+   /// per frame, so the same phase appears once on one frame and twice on the next, and the list
+   /// even changes length when a frame runs a different number of steps.
+   ///
+   void updateUpdateSectionTimings(std::vector<RenderSectionSample> timings);
 
    ///
    /// \brief Tells whether the level should time each mechanism separately this frame.
@@ -47,6 +66,7 @@ private:
    std::array<float, sample_count> _update_times_ms{};
    std::array<float, sample_count> _draw_times_ms{};
    std::array<float, sample_count> _window_display_times_ms{};
+   std::array<float, sample_count> _simulation_steps{};                    //!< fixed simulation steps that frame ran
    std::array<float, sample_count> _tilemap_draw_calls{};                  //!< tile map draw calls issued in that frame
    std::array<float, sample_count> _tilemap_target_switches{};             //!< render target changes between those draws
    std::array<float, sample_count> _ambient_occlusion_draw_calls{};        //!< ao draw calls issued in that frame
@@ -62,6 +82,8 @@ private:
    std::vector<MechanismSample> _mechanism_timings;
    std::vector<RenderSectionSample> _render_section_timings;
    int32_t _render_section_frames{0};  //!< frames accumulated into _render_section_timings so far
+   std::vector<RenderSectionSample> _update_section_timings;
+   int32_t _update_section_frames{0};  //!< frames accumulated into _update_section_timings so far
    sf::Clock _mechanism_update_clock;
    sf::Clock _log_clock;                    //!< paces the reports the log-based flavour writes
    bool _mechanism_profiling_wanted{true};  //!< alternated after every report, see isMechanismProfilingWanted()
