@@ -3,6 +3,7 @@
 #include "framework/tools/localization.h"
 #include "framework/tools/sfmlstring.h"
 #include "game/config/gameconfiguration.h"
+#include "game/config/gpupreference.h"
 #include "menus/menu.h"
 #include "menus/menuaudio.h"
 
@@ -86,14 +87,27 @@ void MenuScreenVideo::refreshVideoModes()
    _video_modes.insert(std::lower_bound(_video_modes.begin(), _video_modes.end(), current_mode), current_mode);
 }
 
+bool MenuScreenVideo::isRowAvailable(Selection selection) const
+{
+   if (selection == Selection::GpuPreference)
+   {
+      return ::GpuPreference::isSupported();
+   }
+
+   return true;
+}
+
 void MenuScreenVideo::up()
 {
    auto next = static_cast<int32_t>(_selection);
-   next--;
-   if (next < 0)
+   do
    {
-      next = static_cast<int32_t>(Selection::Count) - 1;
-   }
+      next--;
+      if (next < 0)
+      {
+         next = static_cast<int32_t>(Selection::Count) - 1;
+      }
+   } while (!isRowAvailable(static_cast<Selection>(next)));
 
    _selection = static_cast<Selection>(next);
    updateLayers();
@@ -104,11 +118,14 @@ void MenuScreenVideo::up()
 void MenuScreenVideo::down()
 {
    auto next = static_cast<int32_t>(_selection);
-   next++;
-   if (next == static_cast<int32_t>(Selection::Count))
+   do
    {
-      next = 0;
-   }
+      next++;
+      if (next == static_cast<int32_t>(Selection::Count))
+      {
+         next = 0;
+      }
+   } while (!isRowAvailable(static_cast<Selection>(next)));
 
    _selection = static_cast<Selection>(next);
    updateLayers();
@@ -188,6 +205,16 @@ void MenuScreenVideo::select(int32_t step)
          GameConfiguration::getInstance()._preserve_aspect_ratio = scaling_states[next_index].second;
 
          _scaling_callback();
+         break;
+      }
+
+      case Selection::GpuPreference:
+      {
+         // the enumerators are numbered in the order the row cycles through them
+         constexpr auto preference_count = 3;
+         const auto current = static_cast<int32_t>(::GpuPreference::read());
+         const auto next = (current + (step < 0 ? preference_count - 1 : 1)) % preference_count;
+         ::GpuPreference::write(static_cast<::GpuPreference::Preference>(next));
          break;
       }
 
@@ -355,6 +382,12 @@ void MenuScreenVideo::loadingFinished()
    _scaling_value_text = make_label();
    _scaling_value_text->setFillColor(sf::Color::White);
 
+   _gpu_label = make_label();
+   _gpu_help_text = make_label();
+   _gpu_help_text->setFillColor(color_help_text);
+   _gpu_value_text = make_label();
+   _gpu_value_text->setFillColor(sf::Color::White);
+
    _text_back_button = make_label();
    _text_back_button->setFillColor(color_label_normal);
    _text_defaults_button = make_label();
@@ -406,6 +439,16 @@ void MenuScreenVideo::draw(sf::RenderTarget& window, sf::RenderStates states)
    }
    window.draw(*_scaling_value_text, states);
 
+   if (isRowAvailable(Selection::GpuPreference))
+   {
+      window.draw(*_gpu_label, states);
+      if (_selection == Selection::GpuPreference)
+      {
+         window.draw(*_gpu_help_text, states);
+      }
+      window.draw(*_gpu_value_text, states);
+   }
+
    window.draw(*_text_back_button, states);
    window.draw(*_text_defaults_button, states);
 }
@@ -419,6 +462,7 @@ void MenuScreenVideo::updateLayers()
    const auto vsync_selected = _selection == Selection::VSync;
    const auto brightness_selected = _selection == Selection::Brightness;
    const auto scaling_selected = _selection == Selection::Scaling;
+   const auto gpu_selected = _selection == Selection::GpuPreference;
 
    auto display_mode_value_index = 0;
 
@@ -468,16 +512,24 @@ void MenuScreenVideo::updateLayers()
    _layers["displayMode_highlight"]->_visible = display_mode_selected;
    _layers["displayMode_arrows"]->_visible = display_mode_selected;
 
-   // the psd carries highlight and arrow art for the four rows it was drawn with, so the scaling row has
-   // none of its own. the vsync pair is the same shape it needs - a bar with a value and arrows either
-   // side - so it is shifted down onto the scaling row while that one is selected and sits back on its
-   // own row otherwise. only ever one row is highlighted, so a single pair covers both
-   const auto highlighted_row = scaling_selected ? static_cast<int32_t>(Selection::Scaling) : static_cast<int32_t>(Selection::VSync);
+   // the psd carries highlight and arrow art for the four rows it was drawn with, so the scaling and gpu
+   // rows have none of their own. the vsync pair is the same shape they need - a bar with a value and
+   // arrows either side - so it is shifted down onto whichever of them is selected and sits back on its
+   // own row otherwise. only ever one row is highlighted, so a single pair covers all three
+   auto highlighted_row = static_cast<int32_t>(Selection::VSync);
+   if (scaling_selected)
+   {
+      highlighted_row = static_cast<int32_t>(Selection::Scaling);
+   }
+   else if (gpu_selected)
+   {
+      highlighted_row = static_cast<int32_t>(Selection::GpuPreference);
+   }
 
    // a sprite is drawn at its position minus its origin, so a negative origin shifts it down the screen
    const auto highlight_shift = static_cast<float>(highlighted_row - static_cast<int32_t>(Selection::VSync)) * _row_stride;
 
-   _layers["vSync_highlight"]->_visible = vsync_selected || scaling_selected;
+   _layers["vSync_highlight"]->_visible = vsync_selected || scaling_selected || gpu_selected;
    _layers["vSync_arrows"]->_visible = _layers["vSync_highlight"]->_visible;
 
 #ifdef DECEPTUS_VRSFML
@@ -499,6 +551,14 @@ void MenuScreenVideo::updateLayers()
       return;
    }
 
+   // the psd's help line sits just below the five rows it was drawn for, so a sixth row lands on top
+   // of it. it is one shared line for every row, so moving it down by one row keeps them apart
+   auto help_rect = _row_help_base_rect;
+   if (isRowAvailable(Selection::GpuPreference))
+   {
+      help_rect.position.y += _row_stride;
+   }
+
    // resolution row
    _resolution_label->setString(sftr("Resolution"));
    if (resolution_editable)
@@ -514,7 +574,7 @@ void MenuScreenVideo::updateLayers()
    _resolution_help_text->setString(
       resolution_editable ? sftr("Set the display resolution") : sftr("The display resolution is used while in fullscreen mode")
    );
-   placeTextCentered(*_resolution_help_text, _row_help_base_rect);
+   placeTextCentered(*_resolution_help_text, help_rect);
 
 #ifdef DECEPTUS_VRSFML
    _resolution_text->setString(std::format("{}x{}", resolution_width, resolution_height).c_str());
@@ -529,7 +589,7 @@ void MenuScreenVideo::updateLayers()
 
    _displaymode_help_text->setString(sftr("Change the display render mode of the game"));
 
-   placeTextCentered(*_displaymode_help_text, _row_help_base_rect);
+   placeTextCentered(*_displaymode_help_text, help_rect);
 
 #ifdef DECEPTUS_VRSFML
    const sf::Utf8String display_mode_strings[] = {sftr("Windowed"), sftr("Borderless"), sftr("Fullscreen")};
@@ -546,7 +606,7 @@ void MenuScreenVideo::updateLayers()
 
    _vsync_help_text->setString(sftr("Adjust the Vertical Synchronization"));
 
-   placeTextCentered(*_vsync_help_text, _row_help_base_rect);
+   placeTextCentered(*_vsync_help_text, help_rect);
 
    _vsync_value_text->setString(vsync_enabled ? sftr("On") : sftr("Off"));
    placeTextLeft(*_vsync_value_text, rowRect(_row_value_base_rect, 1));
@@ -558,7 +618,7 @@ void MenuScreenVideo::updateLayers()
 
    _brightness_help_text->setString(sftr("Adjust the screen brightness"));
 
-   placeTextCentered(*_brightness_help_text, _row_help_base_rect);
+   placeTextCentered(*_brightness_help_text, help_rect);
 
    // scaling row
    _scaling_label->setString(sftr("Scaling"));
@@ -566,7 +626,7 @@ void MenuScreenVideo::updateLayers()
    placeTextLeft(*_scaling_label, rowRect(_row_label_base_rect, static_cast<int32_t>(Selection::Scaling)));
 
    _scaling_help_text->setString(sftr("Set how the image is fitted into the window"));
-   placeTextCentered(*_scaling_help_text, _row_help_base_rect);
+   placeTextCentered(*_scaling_help_text, help_rect);
 
 #ifdef DECEPTUS_VRSFML
    const sf::Utf8String scaling_strings[] = {sftr("Stretch"), sftr("Keep Aspect"), sftr("Pixel Precision")};
@@ -575,6 +635,27 @@ void MenuScreenVideo::updateLayers()
 #endif
    _scaling_value_text->setString(scaling_strings[currentScalingStateIndex()]);
    placeTextLeft(*_scaling_value_text, rowRect(_row_value_base_rect, static_cast<int32_t>(Selection::Scaling) - 1));
+
+   // gpu row
+   if (isRowAvailable(Selection::GpuPreference))
+   {
+      _gpu_label->setString(sftr("Graphics Card"));
+      _gpu_label->setFillColor(gpu_selected ? color_label_selected : color_label_normal);
+      placeTextLeft(*_gpu_label, rowRect(_row_label_base_rect, static_cast<int32_t>(Selection::GpuPreference)));
+
+      _gpu_help_text->setString(sftr("Pick the graphics card to run on, applies after a restart"));
+      placeTextCentered(*_gpu_help_text, help_rect);
+
+#ifdef DECEPTUS_VRSFML
+      // the value box is only as wide as the psd drew it, so these have to stay about as short as
+      // the longest of the other rows ("Pixel Precision")
+      const sf::Utf8String gpu_strings[] = {sftr("Automatic"), sftr("Performance"), sftr("Power Saving")};
+#else
+      const sf::String gpu_strings[] = {sftr("Automatic"), sftr("Performance"), sftr("Power Saving")};
+#endif
+      _gpu_value_text->setString(gpu_strings[static_cast<int32_t>(::GpuPreference::read())]);
+      placeTextLeft(*_gpu_value_text, rowRect(_row_value_base_rect, static_cast<int32_t>(Selection::GpuPreference) - 1));
+   }
 
    const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
    _text_back_button->setString(sftr("Back"));

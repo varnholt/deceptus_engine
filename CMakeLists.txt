@@ -191,6 +191,8 @@ set(GAME_FILES
     src/game/clock/gameclock.h
     src/game/config/gameconfiguration.cpp
     src/game/config/gameconfiguration.h
+    src/game/config/gpupreference.cpp
+    src/game/config/gpupreference.h
     src/game/config/localizationloader.cpp
     src/game/config/localizationloader.h
     src/game/config/inputconfiguration.cpp

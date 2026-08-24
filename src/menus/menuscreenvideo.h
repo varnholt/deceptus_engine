@@ -17,7 +17,8 @@ public:
       VSync = 2,
       Brightness = 3,
       Scaling = 4,
-      Count = 5
+      GpuPreference = 5,
+      Count = 6
    };
 
    using FullscreenCallback = std::function<void(void)>;
@@ -78,6 +79,11 @@ private:
    /// \brief rebuilds the selectable resolution list so it contains the active resolution.
    void refreshVideoModes();
 
+   /// \brief tells whether a row can be selected at all.
+   /// \param selection the row in question.
+   /// \return false for the GPU row on platforms that have no GPU preference to set.
+   bool isRowAvailable(Selection selection) const;
+
    FullscreenCallback _fullscreen_callback;
    ResolutionCallback _resolution_callback;
    VSyncCallback _vsync_callback;
@@ -107,4 +113,7 @@ private:
    std::unique_ptr<sf::Text> _scaling_label;
    std::unique_ptr<sf::Text> _scaling_help_text;
    std::unique_ptr<sf::Text> _scaling_value_text;
+   std::unique_ptr<sf::Text> _gpu_label;
+   std::unique_ptr<sf::Text> _gpu_help_text;
+   std::unique_ptr<sf::Text> _gpu_value_text;
 };
