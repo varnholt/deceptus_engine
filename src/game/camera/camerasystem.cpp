@@ -44,6 +44,14 @@
 
 */
 
+namespace
+{
+//!< how much faster the lead's speed collapses than it builds. A player slows down faster than the
+//!< catch-up can follow at its own rate, and an aim point still carrying the old speed would sit
+//!< ahead of one who has already stopped
+constexpr auto lead_decay_factor = 3.0f;
+}  // namespace
+
 void CameraSystem::update(const sf::Time& dt, float view_width_px, float view_height_px)
 {
    // where the camera stood going into this step, so the frames drawn before the next one can be
@@ -90,7 +98,16 @@ void CameraSystem::updateX(const sf::Time& delta_time)
    // where it belongs - while the player is speeding up or slowing down the lead is still short and the
    // camera eases towards the new speed, and once the speed is steady the lead is the whole distance
    // and the camera sits on the player with nothing left over
-   _lead_velocity_px_per_s += (player_velocity_px_per_s - _lead_velocity_px_per_s) * delta_time.asSeconds() * velocity_factor;
+   //
+   // The catch-up runs at that rate only while the player is speeding up. Slowing down, the lead
+   // collapses faster, so the aim point stays behind a player who has stopped rather than hanging on
+   // ahead of them and having to come back. Collapsing it faster rather than snapping it to their
+   // current speed is what keeps the follow's ease out: the camera still glides to a halt instead of
+   // running out of distance to cover all at once
+   const auto catch_up_rate =
+      (fabs(player_velocity_px_per_s) >= fabs(_lead_velocity_px_per_s)) ? velocity_factor : (velocity_factor * lead_decay_factor);
+
+   _lead_velocity_px_per_s += (player_velocity_px_per_s - _lead_velocity_px_per_s) * delta_time.asSeconds() * catch_up_rate;
 
    const auto lead_px =
       (velocity_factor > 0.0f) ? (_lead_velocity_px_per_s * camera_config.getCameraLeadFactorX() / velocity_factor) : 0.0f;
