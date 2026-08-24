@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="768" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="35" nextobjectid="54">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="768" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="45" nextobjectid="54">
  <tileset firstgid="1" source="graveyard-background-diffuse.tsx"/>
  <tileset firstgid="4097" source="graveyard-level-diffuse.tsx"/>
  <layer id="4" name="bg0" width="768" height="100">
@@ -1508,8 +1508,8 @@
    <property name="z" type="int" value="8"/>
   </properties>
  </imagelayer>
- <imagelayer id="26" name="gv-bg-forest" offsetx="613" offsety="1372">
-  <image source="tilesets/parallax-back/1-forest.png" width="1280" height="404"/>
+ <imagelayer id="26" name="gv-bg-forest" offsetx="613" offsety="1441">
+  <image source="tilesets/parallax-back/1-forest.png" width="1280" height="335"/>
   <properties>
    <property name="factor_x" type="float" value="0.09"/>
    <property name="factor_y" type="float" value="0.07"/>
@@ -1519,8 +1519,8 @@
    <property name="z" type="int" value="9"/>
   </properties>
  </imagelayer>
- <imagelayer id="27" name="gv-bg-trees-far-a" offsetx="245" offsety="1328">
-  <image source="tilesets/parallax-back/2-trees.png" width="1280" height="448"/>
+ <imagelayer id="27" name="gv-bg-trees-back-a" offsetx="245" offsety="1328">
+  <image source="tilesets/parallax-back/2-trees-b.png" width="1280" height="448"/>
   <properties>
    <property name="factor_x" type="float" value="0.22"/>
    <property name="factor_y" type="float" value="0.13"/>
@@ -1530,8 +1530,8 @@
    <property name="z" type="int" value="10"/>
   </properties>
  </imagelayer>
- <imagelayer id="28" name="gv-bg-trees-far-b" offsetx="1525" offsety="1328">
-  <image source="tilesets/parallax-back/2-trees.png" width="1280" height="448"/>
+ <imagelayer id="28" name="gv-bg-trees-back-b" offsetx="1525" offsety="1328">
+  <image source="tilesets/parallax-back/2-trees-b.png" width="1280" height="448"/>
   <properties>
    <property name="factor_x" type="float" value="0.22"/>
    <property name="factor_y" type="float" value="0.13"/>
@@ -1541,59 +1541,185 @@
    <property name="z" type="int" value="10"/>
   </properties>
  </imagelayer>
- <imagelayer id="29" name="gv-bg-tombs-a" offsetx="579" offsety="1328">
-  <image source="tilesets/parallax-back/3-tombs.png" width="1280" height="448"/>
+ <imagelayer id="29" name="gv-bg-fog-back-a" offsetx="400" offsety="1552">
+  <image source="tilesets/parallax-back/3-fog-b.png" width="1279" height="224"/>
   <properties>
-   <property name="factor_x" type="float" value="0.38"/>
-   <property name="factor_y" type="float" value="0.2"/>
+   <property name="factor_x" type="float" value="0.28"/>
+   <property name="factor_y" type="float" value="0.155"/>
    <property name="offset_x_px" type="int" value="744"/>
    <property name="offset_y_px" type="int" value="1416"/>
+   <property name="scroll_x_px_s" type="float" value="6.0"/>
    <property name="use_parallax" type="bool" value="true"/>
    <property name="z" type="int" value="11"/>
   </properties>
  </imagelayer>
- <imagelayer id="30" name="gv-bg-tombs-b" offsetx="1859" offsety="1328">
-  <image source="tilesets/parallax-back/3-tombs.png" width="1280" height="448"/>
+ <imagelayer id="30" name="gv-bg-fog-back-b" offsetx="1679" offsety="1552">
+  <image source="tilesets/parallax-back/3-fog-b.png" width="1279" height="224"/>
   <properties>
-   <property name="factor_x" type="float" value="0.38"/>
-   <property name="factor_y" type="float" value="0.2"/>
+   <property name="factor_x" type="float" value="0.28"/>
+   <property name="factor_y" type="float" value="0.155"/>
    <property name="offset_x_px" type="int" value="744"/>
    <property name="offset_y_px" type="int" value="1416"/>
+   <property name="scroll_x_px_s" type="float" value="6.0"/>
    <property name="use_parallax" type="bool" value="true"/>
    <property name="z" type="int" value="11"/>
   </properties>
  </imagelayer>
- <imagelayer id="31" name="gv-bg-trees-near-a" offsetx="358" offsety="1328">
-  <image source="tilesets/parallax-back/4-trees.png" width="1280" height="448"/>
+ <imagelayer id="31" name="gv-bg-tombs-a" offsetx="579" offsety="1328">
+  <image source="tilesets/parallax-back/3-tombs.png" width="1280" height="448"/>
   <properties>
-   <property name="factor_x" type="float" value="0.58"/>
-   <property name="factor_y" type="float" value="0.28"/>
+   <property name="factor_x" type="float" value="0.34"/>
+   <property name="factor_y" type="float" value="0.18"/>
    <property name="offset_x_px" type="int" value="744"/>
    <property name="offset_y_px" type="int" value="1416"/>
    <property name="use_parallax" type="bool" value="true"/>
    <property name="z" type="int" value="12"/>
   </properties>
  </imagelayer>
- <imagelayer id="32" name="gv-bg-trees-near-b" offsetx="1638" offsety="1328">
-  <image source="tilesets/parallax-back/4-trees.png" width="1280" height="448"/>
+ <imagelayer id="32" name="gv-bg-tombs-b" offsetx="1859" offsety="1328">
+  <image source="tilesets/parallax-back/3-tombs.png" width="1280" height="448"/>
   <properties>
-   <property name="factor_x" type="float" value="0.58"/>
-   <property name="factor_y" type="float" value="0.28"/>
+   <property name="factor_x" type="float" value="0.34"/>
+   <property name="factor_y" type="float" value="0.18"/>
    <property name="offset_x_px" type="int" value="744"/>
    <property name="offset_y_px" type="int" value="1416"/>
    <property name="use_parallax" type="bool" value="true"/>
    <property name="z" type="int" value="12"/>
   </properties>
  </imagelayer>
- <imagelayer id="33" name="gv-bg-trees-near-c" offsetx="2918" offsety="1328">
-  <image source="tilesets/parallax-back/4-trees.png" width="1280" height="448"/>
+ <imagelayer id="33" name="gv-bg-trees-mid-a" offsetx="100" offsety="1328">
+  <image source="tilesets/parallax-back/3-trees-m.png" width="1280" height="448"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.4"/>
+   <property name="factor_y" type="float" value="0.21"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="13"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="34" name="gv-bg-trees-mid-b" offsetx="1380" offsety="1328">
+  <image source="tilesets/parallax-back/3-trees-m.png" width="1280" height="448"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.4"/>
+   <property name="factor_y" type="float" value="0.21"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="13"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="35" name="gv-bg-trees-mid-c" offsetx="2660" offsety="1328">
+  <image source="tilesets/parallax-back/3-trees-m.png" width="1280" height="448"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.4"/>
+   <property name="factor_y" type="float" value="0.21"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="13"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="36" name="gv-bg-graveyard-mid-a" offsetx="512" offsety="1503">
+  <image source="tilesets/parallax-back/4-graveyard-m.png" width="1280" height="273"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.46"/>
+   <property name="factor_y" type="float" value="0.235"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="14"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="37" name="gv-bg-graveyard-mid-b" offsetx="1792" offsety="1503">
+  <image source="tilesets/parallax-back/4-graveyard-m.png" width="1280" height="273"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.46"/>
+   <property name="factor_y" type="float" value="0.235"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="14"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="38" name="gv-bg-graveyard-mid-c" offsetx="3072" offsety="1503">
+  <image source="tilesets/parallax-back/4-graveyard-m.png" width="1280" height="273"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.46"/>
+   <property name="factor_y" type="float" value="0.235"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="14"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="39" name="gv-bg-fog-front-a" offsetx="300" offsety="1606">
+  <image source="tilesets/parallax-back/5-fog-f.png" width="1275" height="170"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.52"/>
+   <property name="factor_y" type="float" value="0.26"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="scroll_x_px_s" type="float" value="11.0"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="15"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="40" name="gv-bg-fog-front-b" offsetx="1575" offsety="1606">
+  <image source="tilesets/parallax-back/5-fog-f.png" width="1275" height="170"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.52"/>
+   <property name="factor_y" type="float" value="0.26"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="scroll_x_px_s" type="float" value="11.0"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="15"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="41" name="gv-bg-fog-front-c" offsetx="2850" offsety="1606">
+  <image source="tilesets/parallax-back/5-fog-f.png" width="1275" height="170"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.52"/>
+   <property name="factor_y" type="float" value="0.26"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="scroll_x_px_s" type="float" value="11.0"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="15"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="42" name="gv-bg-trees-front-a" offsetx="358" offsety="1328">
+  <image source="tilesets/parallax-back/6-trees-f.png" width="1280" height="448"/>
   <properties>
    <property name="factor_x" type="float" value="0.58"/>
    <property name="factor_y" type="float" value="0.28"/>
    <property name="offset_x_px" type="int" value="744"/>
    <property name="offset_y_px" type="int" value="1416"/>
    <property name="use_parallax" type="bool" value="true"/>
-   <property name="z" type="int" value="12"/>
+   <property name="z" type="int" value="16"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="43" name="gv-bg-trees-front-b" offsetx="1638" offsety="1328">
+  <image source="tilesets/parallax-back/6-trees-f.png" width="1280" height="448"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.58"/>
+   <property name="factor_y" type="float" value="0.28"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="16"/>
+  </properties>
+ </imagelayer>
+ <imagelayer id="44" name="gv-bg-trees-front-c" offsetx="2918" offsety="1328">
+  <image source="tilesets/parallax-back/6-trees-f.png" width="1280" height="448"/>
+  <properties>
+   <property name="factor_x" type="float" value="0.58"/>
+   <property name="factor_y" type="float" value="0.28"/>
+   <property name="offset_x_px" type="int" value="744"/>
+   <property name="offset_y_px" type="int" value="1416"/>
+   <property name="use_parallax" type="bool" value="true"/>
+   <property name="z" type="int" value="16"/>
   </properties>
  </imagelayer>
  <objectgroup id="2" name="rooms">

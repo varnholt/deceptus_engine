@@ -69,11 +69,22 @@ public:
    static std::shared_ptr<ImageLayer> deserialize(const std::shared_ptr<TmxElement>& element, const std::filesystem::path& level_path);
 
 private:
+   /// \brief tells whether this layer drifts its texture.
+   /// \return true when a non-zero scroll speed was configured.
+   bool scrolls() const;
+
+   /// \brief advances the texture scroll offset and moves the sprite's texture rect along with it.
+   /// \param dt elapsed frame time.
+   void updateScroll(const sf::Time& dt);
+
    std::unique_ptr<sf::Sprite> _sprite;
    std::shared_ptr<LazyTexture> _texture;
    sf::BlendMode _blend_mode = sf::BlendAlpha;
    sf::Vector2f _position;
    sf::Color _color;
+
+   sf::Vector2f _scroll_speed_px_s{0.0f, 0.0f};  //!< texture scroll speed, drives drifting layers such as fog banks
+   sf::Vector2f _scroll_offset_px{0.0f, 0.0f};   //!< texture scroll offset accumulated over the layer's lifetime
 
    sf::View _parallax_view;
    std::optional<ParallaxSettings> _parallax_settings;

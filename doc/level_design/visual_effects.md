@@ -94,7 +94,47 @@ They have the properties below:
 |use_parallax|bool|When set to `true`, the image layer scrolls at a different speed than the camera. Requires `factor_x` and `factor_y` to be set (default is `false`).|
 |factor_x|float|Horizontal parallax scroll factor. `0.0` means the layer does not move horizontally; `1.0` moves with the camera. Only relevant when `use_parallax` is `true`.|
 |factor_y|float|Vertical parallax scroll factor. Same scale as `factor_x`. Only relevant when `use_parallax` is `true`.|
+|offset_x_px|int|The x position where the layer lines up with the world, in pixels. Only relevant when `use_parallax` is `true`. Careful: unlike parallax _tile_ layers, this is **not** added to the layer's built-in offset, it replaces it as the anchor (see below).|
+|offset_y_px|int|The y anchor in pixels. See `offset_x_px`.|
+|scroll_x_px_s|float|Drifts the layer's texture horizontally, in pixels per second. Use it for fog banks, cloud bands and anything that should keep moving while the player stands still (default is `0`, meaning no drift).|
+|scroll_y_px_s|float|Drifts the layer's texture vertically. Same scale as `scroll_x_px_s`.|
 |post_lighting|bool|When set to `true`, the layer is drawn after the normal-map lighting pass so dynamic lighting does not render on top of it. Use this for front parallax layers and overlays that should appear unaffected by in-game lights (default is `false`).|
+
+### Parallax anchor
+
+Where a parallax image layer ends up on screen is decided by two separate things:
+
+- Tiled's built-in layer offset (`offsetx` / `offsety`) places the image itself.
+- `offset_x_px` / `offset_y_px` say at which camera position the layer lines up with the world.
+
+```
+screen_x = offsetx - (camera_x * factor_x + offset_x_px * (1 - factor_x))
+```
+
+So when the camera's left edge sits at `offset_x_px`, the layer is drawn exactly at its `offsetx`.
+Give every layer of one backdrop the same anchor: then they all line up with the world at the same
+camera position, and the arrangement you see in Tiled is the one you get in the game. A layer with a
+different anchor is shifted by a constant amount, so the editor stops telling you the truth. This
+differs from parallax _tile_ layers, where `offset_x_px` is added on top of the built-in layer
+offset.
+
+### Drifting layers
+
+`scroll_x_px_s` and `scroll_y_px_s` walk the layer's texture underneath the sprite instead of moving
+the sprite. That means the layer never runs out of image, and it combines with parallax: the layer
+still scrolls with the camera, and drifts on top of that.
+
+Two things to keep in mind:
+
+- **The image must tile.** Its right edge is sampled straight into its left edge, so any mismatch
+  shows up as a hard line sliding across the screen. This bites hardest on soft artwork like fog,
+  where a single stray column from an export is enough to make a visible seam.
+- **Drift is snapped to whole texels.** The level rasterises at its native resolution, so fractional
+  offsets would only cost the layer its crisp edges. Slow speeds therefore step rather than glide,
+  which is the same quantisation everything else in the game moves at.
+
+When a backdrop is built from several copies of the same image placed side by side, each copy drifts
+by the same amount, so they stay continuous as long as the image tiles.
 
 
 ## Info Overlays

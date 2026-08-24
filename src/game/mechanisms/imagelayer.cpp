@@ -6,7 +6,10 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/player/playerregistry.h"
+
+#include <cmath>
 
 #ifdef DEVELOPMENT_MODE
 #include "game/debug/drawcallcounter.h"
@@ -164,12 +167,57 @@ void ImageLayer::update(const sf::Time& dt)
          _sprite->setPosition(_position);
          _sprite->setColor(_color);
 #endif
+
+         if (scrolls())
+         {
+            // a scrolling layer samples past the right edge of its texture, so the wrapped
+            // texels have to come from the left edge instead of from the clamped border
+#ifdef DECEPTUS_VRSFML
+            _texture->getTexture()->setWrapMode(sf::TextureWrapMode::Repeat);
+#else
+            _texture->getTexture()->setRepeated(true);
+#endif
+         }
+      }
+
+      if (scrolls())
+      {
+         updateScroll(dt);
       }
    }
    else
    {
       _sprite.reset();
    }
+}
+
+bool ImageLayer::scrolls() const
+{
+   return _scroll_speed_px_s.x != 0.0f || _scroll_speed_px_s.y != 0.0f;
+}
+
+void ImageLayer::updateScroll(const sf::Time& dt)
+{
+   const auto texture_size = _texture->getTexture()->getSize();
+   const auto texture_width = static_cast<float>(texture_size.x);
+   const auto texture_height = static_cast<float>(texture_size.y);
+
+   _scroll_offset_px.x = std::fmod(_scroll_offset_px.x + _scroll_speed_px_s.x * dt.asSeconds(), texture_width);
+   _scroll_offset_px.y = std::fmod(_scroll_offset_px.y + _scroll_speed_px_s.y * dt.asSeconds(), texture_height);
+
+   // the offset is snapped to whole texels: the level is rasterised at its native resolution, so a
+   // fractional offset would land on the same texel anyway and only cost the layer its crisp edges
+   const auto offset_x = std::floor(_scroll_offset_px.x);
+   const auto offset_y = std::floor(_scroll_offset_px.y);
+
+#ifdef DECEPTUS_VRSFML
+   _sprite->textureRect = sf::FloatRect{{offset_x, offset_y}, {texture_width, texture_height}};
+#else
+   _sprite->setTextureRect(sf::IntRect{
+      {static_cast<int32_t>(offset_x), static_cast<int32_t>(offset_y)},
+      {static_cast<int32_t>(texture_width), static_cast<int32_t>(texture_height)}
+   });
+#endif
 }
 
 void ImageLayer::updateView(float level_view_x, float level_view_y, float view_width, float view_height)
@@ -262,6 +310,10 @@ std::shared_ptr<ImageLayer> ImageLayer::deserialize(const std::shared_ptr<TmxEle
             image->_parallax_settings = settings;
          }
       }
+
+      const auto& property_map = image_layer->_properties->_map;
+      image->_scroll_speed_px_s.x = ValueReader::readValue<float>("scroll_x_px_s", property_map).value_or(0.0f);
+      image->_scroll_speed_px_s.y = ValueReader::readValue<float>("scroll_y_px_s", property_map).value_or(0.0f);
 
       const auto& post_lighting_it = image_layer->_properties->_map.find("post_lighting");
       if (post_lighting_it != image_layer->_properties->_map.end())
