@@ -81,6 +81,8 @@ local function execute(entry)
       showDialogue(entry.id)
    elseif action == "set_player_visible" then
       setPlayerVisible(entry.visible)
+   elseif action == "lock_player_controls" then
+      lockPlayerControls(math.floor((entry.duration_s or 0.0) * 1000.0))
    elseif action == "set_info_layer_visible" then
       setInfoLayerVisible(entry.visible)
    elseif action == "unlock_camera" then

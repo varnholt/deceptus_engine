@@ -28,6 +28,13 @@ _sword_ring_flash_color = {r = 1.0, g = 0.6, b = 0.2}
 _pixels_per_tile = 24
 _lever_spike_camera_x_offset_tiles = 11
 _lever_spike_camera_duration_s = 1.5
+_lever_spike_camera_hold_s = 2.0
+_lever_spike_camera_return_s = 1.0
+
+-- the player is held in place until the camera is back on him, otherwise he can walk off the ledge
+-- while the camera is showing the blocks somewhere else
+_lever_spike_player_lock_duration_s =
+   _lever_spike_camera_duration_s + _lever_spike_camera_hold_s + _lever_spike_camera_return_s
 
 _on_off_block_ids = {
    "ct-on-off-block-01", "ct-on-off-block-02", "ct-on-off-block-03",
@@ -59,6 +66,11 @@ function initLeverSpike()
       cutscene.load({
          {
             on = "lever_spike_cannon_picked_up",
+            action = "lock_player_controls",
+            duration_s = _lever_spike_player_lock_duration_s
+         },
+         {
+            on = "lever_spike_cannon_picked_up",
             action = "move_camera",
             x = spike_rect.x + _lever_spike_camera_x_offset_tiles * _pixels_per_tile,
             y = spike_rect.y + spike_rect.height * 0.5,
@@ -68,7 +80,7 @@ function initLeverSpike()
          },
          {
             on = "camera_at_off_blocks",
-            delay = 2.0,
+            delay = _lever_spike_camera_hold_s,
             action = "unlock_camera"
          }
       })

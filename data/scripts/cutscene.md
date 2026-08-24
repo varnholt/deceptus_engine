@@ -221,6 +221,24 @@ Fires `<id>/dismissed` when the player closes it.
 { "on": "some_event", "action": "play_sound", "id": "coin_pickup" }
 ```
 
+### Player
+
+#### `lock_player_controls`
+Holds the player still for a while by releasing all of his keys. Use it whenever the camera leaves
+the player: without it he keeps walking wherever he was heading and can drop off a ledge while the
+camera is showing something else.
+
+Give it the full length of the sequence, including the time the camera needs to travel back after
+`unlock_camera` — control returns the moment the lock expires, not when the camera arrives.
+
+```json
+{ "on": "some_event", "action": "lock_player_controls", "duration_s": 4.5 }
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `duration_s` | number | How long the player stays locked, in seconds |
+
 ### Visibility
 
 #### `set_player_visible`
