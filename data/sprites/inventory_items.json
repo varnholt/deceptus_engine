@@ -66,8 +66,32 @@
         "title": "Head Torch",
         "description": "A miner's helm lamp, its beam narrow and honest. It follows wherever you look and gutters when you land hard, which is more warning than the catacombs usually give."
     },
-    "playerfirefly": {
+    "gems": {
         "x_px": 266,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38,
+        "title": "Rubies",
+        "description": "Two cut stones, still warm from whoever carried them last. Worth a great deal to someone who is not down here."
+    },
+    "solar_seal": {
+        "x_px": 304,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38,
+        "title": "Solar Seal",
+        "description": "A gilded seal stamped with a rayed sun. Someone pressed it into a lid once and took it with them afterwards."
+    },
+    "lunar_seal": {
+        "x_px": 342,
+        "y_px": 0,
+        "width_px": 38,
+        "height_px": 38,
+        "title": "Lunar Seal",
+        "description": "A pewter seal stamped with a waning moon. The twin of the sun seal, and colder to hold than the tunnels explain."
+    },
+    "playerfirefly": {
+        "x_px": 380,
         "y_px": 0,
         "width_px": 38,
         "height_px": 38,
