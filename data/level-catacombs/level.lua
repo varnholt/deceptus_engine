@@ -225,7 +225,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function initDrawer()
-   if (inventoryHas("key")) then
+   if (inventoryHas("solar_seal")) then
       setMechanismVisible("drawer_open", true, "imagelayers")
       setMechanismEnabled("drawer_rect", false, "button_rects")
       setMechanismEnabled("drawer_interaction_help", false, "interaction_help")
@@ -251,7 +251,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function openDrawer()
-   if (inventoryHas("key")) then
+   if (inventoryHas("solar_seal")) then
       return
    end
    log("open drawer")
@@ -261,7 +261,7 @@ function openDrawer()
    setMechanismEnabled("drawer_dialogue_inspect", false, "dialogues")
    showDialogue("drawer_dialogue_key")
    setMechanismEnabled("drawer_dialogue_key", false, "dialogues")
-   inventoryAdd("key")
+   inventoryAdd("solar_seal")
 end
 
 
@@ -433,7 +433,7 @@ function playerReceivedExtra(extra)
       setMechanismEnabled("d_locker_key", false, "dialogues")
    end
    
-   if (extra == "key") then
+   if (extra == "solar_seal") then
       setMechanismEnabled("drawer_dialogue_key", false, "dialogues")
    end
 
