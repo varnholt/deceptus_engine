@@ -60,6 +60,9 @@ private:
    /// \brief loads inventory icon atlas sprites and initializes two item slot sprites.
    void loadInventoryItems();
 
+   /// \brief loads the ui icon atlas and initializes the two slot button icon sprites.
+   void loadSlotButtonIcons();
+
    /// \brief draws the legacy heart animation strip.
    /// \param window SFML render target used for animation output.
    /// \param states render state overrides for the animation draw.
@@ -92,6 +95,9 @@ private:
 
    /// \brief updates slot texture rects from the current saved inventory entries.
    void updateInventoryItems();
+
+   /// \brief points the slot button icons at the keys or buttons the slot actions are bound to.
+   void updateSlotButtonIcons();
 
    /// \brief animates health panel x-offset for hide/show transitions and applies it to hud layers.
    void updateHealthLayerOffsets();
@@ -170,10 +176,11 @@ private:
    std::shared_ptr<Animation> _animation_loading;
 
    // inventory
-   std::array<std::shared_ptr<Layer>, 2> _slot_item_layers{};
+   std::array<std::unique_ptr<sf::Sprite>, 2> _slot_button_sprites{};
    std::array<std::unique_ptr<sf::Sprite>, 2> _inventory_sprites{};
    std::map<std::string, std::unique_ptr<sf::Sprite>> _sprites;
    std::shared_ptr<sf::Texture> _inventory_texture;
+   std::shared_ptr<sf::Texture> _slot_button_texture;  //!< ui icon atlas holding the keycap and controller button glyphs
 
    // event replay
    std::shared_ptr<Layer> _event_replay_recording;

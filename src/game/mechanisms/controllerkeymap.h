@@ -1,6 +1,8 @@
 #ifndef CONTROLLERKEYMAP_H
 #define CONTROLLERKEYMAP_H
 
+#include <SFML/Window/Keyboard.hpp>
+
 #include <array>
 #include <cstdint>
 #include <map>
@@ -45,6 +47,16 @@ std::pair<int32_t, int32_t> getArrayPosition(const std::string& key);
 /// \param key keyboard key id to map.
 /// \return pair {keyboard_key, controller_key}; falls back to {key, key} when no mapping exists.
 std::pair<std::string, std::string> retrieveMappedKey(const std::string& key);
+
+/// \brief resolves a keyboard key to the icon id that depicts its keycap.
+/// \param key keyboard key to depict.
+/// \return icon id such as "key_ctrl", or an empty string when the atlas has no keycap for the key.
+std::string iconNameForKeyboardKey(sf::Keyboard::Key key);
+
+/// \brief resolves a controller button to the icon id that depicts it.
+/// \param sdl_button SDL gamepad button index to depict.
+/// \return icon id such as "bt_x", or an empty string when the atlas has no icon for the button.
+std::string iconNameForControllerButton(int32_t sdl_button);
 
 }  // namespace ControllerKeyMap
 
