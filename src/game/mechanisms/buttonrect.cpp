@@ -11,9 +11,15 @@
 namespace
 {
 static constexpr std::string_view default_button_rect_button = "b";
+static constexpr std::array button_rect_buttons{
+   std::string_view{"a"},
+   std::string_view{"b"},
+   std::string_view{"x"},
+   std::string_view{"y"},
+};
 static constexpr std::array button_rect_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
-   PropertyInfo{.name = "button", .type = "string", .default_value = default_button_rect_button},
+   PropertyInfo{.name = "button", .type = "string", .default_value = default_button_rect_button, .allowed_values = button_rect_buttons},
 };
 static constexpr MechanismSchema button_rect_schema{
    .type_name = "ButtonRect",

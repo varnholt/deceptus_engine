@@ -713,7 +713,7 @@ void Game::initialize()
    GameAudio::getInstance().initialize();
    _audio_callback = [](GameAudio::SoundEffect effect) { GameAudio::getInstance().play(effect); };
 
-#ifdef DEVELOPMENT_MODE
+#ifdef MECHANISM_SCHEMA_WRITER_ENABLED
    writeMechanismSchemas();
 #endif
 

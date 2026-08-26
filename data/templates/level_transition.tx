@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="LevelTransition" width="48" height="96">
+  <properties>
+   <property name="level" value=""/>
+   <property name="spawn_position_x_px" type="int" value="0"/>
+   <property name="spawn_position_y_px" type="int" value="0"/>
+  </properties>
+ </object>
+</template>

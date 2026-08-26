@@ -18,8 +18,15 @@ namespace
 static constexpr std::string_view default_fan_direction = "up";
 static constexpr float default_fan_speed = 1.0f;
 
+static constexpr std::array fan_directions{
+   std::string_view{"up"},
+   std::string_view{"down"},
+   std::string_view{"left"},
+   std::string_view{"right"},
+};
+
 static constexpr std::array fan_properties{
-   PropertyInfo{.name = "direction", .type = "string", .default_value = default_fan_direction},
+   PropertyInfo{.name = "direction", .type = "string", .default_value = default_fan_direction, .allowed_values = fan_directions},
    PropertyInfo{.name = "speed", .type = "float", .default_value = default_fan_speed},
 };
 static constexpr MechanismSchema fan_schema{

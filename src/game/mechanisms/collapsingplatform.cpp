@@ -20,7 +20,7 @@ namespace
 {
 static constexpr int32_t default_collapsing_platform_z = 0;
 static constexpr std::array collapsing_platform_properties{
-   PropertyInfo{.name = "z", .type = "int", .default_value = default_collapsing_platform_z},
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_collapsing_platform_z, .template_value = int32_t{20}},
 };
 static constexpr MechanismSchema collapsing_platform_schema{
    .type_name = "CollapsingPlatform",

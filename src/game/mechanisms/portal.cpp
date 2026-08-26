@@ -15,6 +15,9 @@
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+#include <array>
 #include "game/player/playerregistry.h"
 #include "game/state/displaymode.h"
 
@@ -344,3 +347,23 @@ std::vector<std::shared_ptr<GameMechanism>> Portal::load(GameNode* parent, const
 
    return portals;
 }
+
+namespace
+{
+static constexpr std::array portal_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema portal_schema{
+   .type_name = "Portal",
+   .layer_name = "portals",
+   .default_width = 0,
+   .default_height = 0,
+   .properties = portal_properties,
+   .default_polyline = "0,0 96,0",
+};
+const auto registered_portal = []
+{
+   GameMechanismDeserializerRegistry::instance().registerSchema(portal_schema);
+   return true;
+}();
+}  // namespace

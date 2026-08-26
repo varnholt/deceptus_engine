@@ -1,12 +1,37 @@
 #include "tmxobject.h"
 
 #include "framework/tools/log.h"
+#include "tmxparsedata.h"
 #include "tmxpolygon.h"
 #include "tmxpolyline.h"
 #include "tmxproperties.h"
 #include "tmxtemplate.h"
 
 #include <iostream>
+
+namespace
+{
+
+///
+/// \brief Loads the object stored in a tmx template, reusing the one already parsed for this map.
+/// \param template_name Template path as written in the map.
+/// \param parse_data Shared TMX parse context that holds the template cache.
+/// \return Template object, or nullptr when the template could not be loaded.
+///
+std::shared_ptr<TmxObject> loadTemplateObject(const std::string& template_name, const std::shared_ptr<TmxParseData>& parse_data)
+{
+   const auto it = parse_data->_template_objects.find(template_name);
+   if (it != parse_data->_template_objects.end())
+   {
+      return it->second;
+   }
+
+   TmxTemplate object_template(template_name, parse_data);
+   parse_data->_template_objects[template_name] = object_template._object;
+   return object_template._object;
+}
+
+}  // namespace
 
 void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data)
 {
@@ -26,6 +51,9 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr
 
    _x_px = static_cast<float>(element->IntAttribute("x"));
    _y_px = static_cast<float>(element->IntAttribute("y"));
+
+   auto* width_attribute = element->Attribute("width");
+   auto* height_attribute = element->Attribute("height");
    _width_px = element->FloatAttribute("width");
    _height_px = element->FloatAttribute("height");
 
@@ -35,18 +63,10 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr
       _template_type = type_attribute;
    }
 
-   // inherit object type from template
    auto* template_name = element->Attribute("template");
    if (template_name)
    {
       _template_name = template_name;
-
-      // if we don't have an object type yet, try to derive it from the template
-      if (!_template_type.has_value())
-      {
-         TmxTemplate t(template_name, parse_data);
-         _template_type = t._object->_template_type;
-      }
    }
 
    auto* node = element->FirstChild();
@@ -89,6 +109,74 @@ void TmxObject::deserialize(tinyxml2::XMLElement* element, const std::shared_ptr
       }
 
       node = node->NextSibling();
+   }
+
+   // tiled stores a template instance as the reference plus whatever the instance changed, so
+   // everything the object did not spell out here is inherited from the template:
+   //
+   //    template (crusher.tx)            instance in the map              merged object
+   //    +------------------------+       +----------------------+       +----------------------+
+   //    | type    = Crusher      |       | template = crusher.tx|       | type   = Crusher     |
+   //    | 120 x 24               |  -->  | x, y                 |  -->  | 120 x 24             |
+   //    | alignment = down       |       | alignment = left     |       | alignment = left     |
+   //    | z         = 20         |       |                      |       | z         = 20       |
+   //    +------------------------+       +----------------------+       +----------------------+
+   //
+   if (_template_name.has_value())
+   {
+      const auto template_object = loadTemplateObject(_template_name.value(), parse_data);
+      if (template_object)
+      {
+         // inherit object type from template
+         // if we don't have an object type yet, try to derive it from the template
+         if (!_template_type.has_value())
+         {
+            _template_type = template_object->_template_type;
+         }
+
+         if (!_gid.has_value())
+         {
+            _gid = template_object->_gid;
+         }
+
+         if (_name.empty())
+         {
+            _name = template_object->_name;
+         }
+
+         if (width_attribute == nullptr)
+         {
+            _width_px = template_object->_width_px;
+         }
+
+         if (height_attribute == nullptr)
+         {
+            _height_px = template_object->_height_px;
+         }
+
+         if (!_polyline && template_object->_polyline)
+         {
+            _polyline = std::make_shared<TmxPolyLine>(*template_object->_polyline);
+         }
+
+         if (!_polygon && template_object->_polygon)
+         {
+            _polygon = std::make_shared<TmxPolygon>(*template_object->_polygon);
+         }
+
+         if (template_object->_properties)
+         {
+            if (!_properties)
+            {
+               _properties = std::make_shared<TmxProperties>();
+            }
+
+            for (const auto& [property_name, property] : template_object->_properties->_map)
+            {
+               _properties->_map.try_emplace(property_name, property);
+            }
+         }
+      }
    }
 }
 

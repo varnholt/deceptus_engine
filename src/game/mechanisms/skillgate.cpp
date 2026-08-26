@@ -21,8 +21,25 @@ static constexpr bool default_skill_gate_inverted = false;
 static constexpr float default_skill_gate_fade_speed = 2.0f;
 static constexpr auto default_skill_gate_skill = std::string_view{"double_jump"};
 
+static constexpr std::array skill_gate_skills{
+   std::string_view{"wall_climb"},
+   std::string_view{"dash"},
+   std::string_view{"invulnerable"},
+   std::string_view{"wall_slide"},
+   std::string_view{"wall_jump"},
+   std::string_view{"double_jump"},
+   std::string_view{"crouch"},
+   std::string_view{"swim"},
+};
+
 static constexpr std::array skill_gate_properties{
-   PropertyInfo{.name = "skill", .type = "string", .default_value = default_skill_gate_skill, .required = true},
+   PropertyInfo{
+      .name = "skill",
+      .type = "string",
+      .default_value = default_skill_gate_skill,
+      .required = true,
+      .allowed_values = skill_gate_skills
+   },
    PropertyInfo{.name = "inverted", .type = "bool", .default_value = default_skill_gate_inverted},
    PropertyInfo{.name = "fade_speed", .type = "float", .default_value = default_skill_gate_fade_speed},
    PropertyInfo{.name = "enabled", .type = "bool", .default_value = true},

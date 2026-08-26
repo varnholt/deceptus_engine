@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <template>
- <object type="ButtonRect" width="48" height="24">
+ <object type="GrabRope" width="24" height="96">
   <properties>
-   <property name="button" propertytype="ButtonRectButton" value="b"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

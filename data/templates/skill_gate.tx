@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <template>
- <object type="OnOffBlock" width="24" height="24">
+ <object type="SkillGate" width="48" height="96">
   <properties>
    <property name="enabled" type="bool" value="true"/>
+   <property name="fade_speed" type="float" value="2"/>
    <property name="inverted" type="bool" value="false"/>
-   <property name="mode" propertytype="OnOffBlockMode" value="lever"/>
-   <property name="time_off_ms" type="int" value="1000"/>
-   <property name="time_on_ms" type="int" value="1000"/>
+   <property name="normal" value=""/>
+   <property name="skill" propertytype="SkillGateSkill" value="double_jump"/>
+   <property name="texture" value=""/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

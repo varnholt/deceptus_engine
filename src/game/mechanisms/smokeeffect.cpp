@@ -10,6 +10,7 @@
 #include "framework/tools/sfmlcompat.h"
 #include "game/camera/cameraroomlock.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
 #include <array>
 #include <cmath>
@@ -460,3 +461,42 @@ std::shared_ptr<SmokeEffect> SmokeEffect::deserialize(GameNode* parent, const Ga
 
    return smoke_effect;
 }
+
+namespace
+{
+static constexpr std::array smoke_modes{
+   std::string_view{"smoke"},
+   std::string_view{"fog"},
+};
+static constexpr std::array smoke_blend_modes{
+   std::string_view{"alpha"},
+   std::string_view{"add"},
+   std::string_view{"multiply"},
+};
+static constexpr std::array smoke_properties{
+   PropertyInfo{.name = "mode", .type = "string", .default_value = std::string_view{"smoke"}, .allowed_values = smoke_modes},
+   PropertyInfo{.name = "blend_mode", .type = "string", .default_value = std::string_view{"add"}, .allowed_values = smoke_blend_modes},
+   PropertyInfo{.name = "particle_count", .type = "int", .default_value = int32_t{50}},
+   PropertyInfo{.name = "particle_color", .type = "string", .default_value = std::string_view{"#ffffff19"}},
+   PropertyInfo{.name = "layer_color", .type = "string", .default_value = std::string_view{"#ffffffff"}},
+   PropertyInfo{.name = "spread_factor", .type = "float", .default_value = 0.6666667f},
+   PropertyInfo{.name = "velocity", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "sprite_scale", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "pixel_ratio", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "center_offset_x_px", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "center_offset_y_px", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema smoke_schema{
+   .type_name = "Smoke",
+   .layer_name = "smoke",
+   .default_width = 96,
+   .default_height = 96,
+   .properties = smoke_properties,
+};
+const auto registered_smoke = []
+{
+   GameMechanismDeserializerRegistry::instance().registerSchema(smoke_schema);
+   return true;
+}();
+}  // namespace

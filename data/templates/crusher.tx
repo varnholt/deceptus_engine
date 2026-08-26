@@ -2,7 +2,7 @@
 <template>
  <object type="Crusher" width="120" height="24">
   <properties>
-   <property name="alignment" type="string" value="down"/>
+   <property name="alignment" propertytype="CrusherAlignment" value="down"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

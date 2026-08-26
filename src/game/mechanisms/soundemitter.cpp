@@ -3,6 +3,9 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "game/audio/audio.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+#include <array>
 
 SoundEmitter::SoundEmitter(GameNode* parent) : GameNode(parent)
 {
@@ -129,3 +132,27 @@ std::optional<sf::FloatRect> SoundEmitter::getBoundingBoxPx()
 {
    return _rect;
 }
+
+namespace
+{
+static constexpr std::array sound_emitter_properties{
+   PropertyInfo{.name = "filename", .type = "string", .default_value = std::string_view{""}, .required = true},
+   PropertyInfo{.name = "looped", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "radius_near_px", .type = "float", .default_value = 200.0f},
+   PropertyInfo{.name = "volume_near", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "radius_far_px", .type = "float", .default_value = 600.0f},
+   PropertyInfo{.name = "volume_far", .type = "float", .default_value = 0.0f},
+};
+static constexpr MechanismSchema sound_emitter_schema{
+   .type_name = "SoundEmitter",
+   .layer_name = "sound_emitters",
+   .default_width = 192,
+   .default_height = 192,
+   .properties = sound_emitter_properties,
+};
+const auto registered_sound_emitter = []
+{
+   GameMechanismDeserializerRegistry::instance().registerSchema(sound_emitter_schema);
+   return true;
+}();
+}  // namespace

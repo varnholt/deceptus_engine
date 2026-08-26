@@ -2,6 +2,14 @@
 <template>
  <object type="Laser" width="24" height="24">
   <properties>
+   <property name="easing_function" propertytype="LaserEasingFunction" value="ease_none"/>
+   <property name="easing_subdivision_count" type="int" value="10"/>
+   <property name="enabled" type="bool" value="true"/>
+   <property name="move_offset_s" type="float" value="0"/>
+   <property name="movement_speed" type="float" value="1"/>
+   <property name="off_time" type="int" value="3000"/>
+   <property name="on_time" type="int" value="3000"/>
+   <property name="reference_id" value=""/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

@@ -33,6 +33,7 @@ static constexpr MechanismSchema rotating_blade_schema{
    .default_width = 0,
    .default_height = 0,
    .properties = rotating_blade_properties,
+   .default_polyline = "0,0 48,0 96,0",
 };
 const auto registered_rotatingblade = []
 {

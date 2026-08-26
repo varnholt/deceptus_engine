@@ -2,6 +2,12 @@
 <template>
  <object type="DeathBlock" width="24" height="24">
   <properties>
+   <property name="damage" type="int" value="100"/>
+   <property name="mode" propertytype="DeathBlockMode" value="always_on"/>
+   <property name="time_off" type="float" value="2"/>
+   <property name="time_offset" type="float" value="0"/>
+   <property name="time_on" type="float" value="0.2"/>
+   <property name="velocity" type="float" value="50"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

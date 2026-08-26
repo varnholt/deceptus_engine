@@ -15,6 +15,9 @@
 #include "game/constants.h"
 #include "game/io/texturepool.h"
 #include "game/level/fixturenode.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+#include <array>
 #include "game/player/playerregistry.h"
 
 #include <iostream>
@@ -655,3 +658,53 @@ void Laser::merge()
       }
    }
 }
+
+namespace
+{
+static constexpr std::array laser_easing_functions{
+   std::string_view{"ease_in_sine"},
+   std::string_view{"ease_in_cubic"},
+   std::string_view{"ease_in_quint"},
+   std::string_view{"ease_in_circ"},
+   std::string_view{"ease_in_elastic"},
+   std::string_view{"ease_out_sine"},
+   std::string_view{"ease_out_cubic"},
+   std::string_view{"ease_out_quint"},
+   std::string_view{"ease_out_circ"},
+   std::string_view{"ease_out_elastic"},
+   std::string_view{"ease_in_out_sine"},
+   std::string_view{"ease_in_out_cubic"},
+   std::string_view{"ease_in_out_quint"},
+   std::string_view{"ease_in_out_circ"},
+   std::string_view{"ease_in_out_elastic"},
+   std::string_view{"ease_none"},
+};
+static constexpr std::array laser_properties{
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "enabled", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "on_time", .type = "int", .default_value = int32_t{3000}},
+   PropertyInfo{.name = "off_time", .type = "int", .default_value = int32_t{3000}},
+   PropertyInfo{.name = "reference_id", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "movement_speed", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "move_offset_s", .type = "float", .default_value = 0.0f},
+   PropertyInfo{
+      .name = "easing_function",
+      .type = "string",
+      .default_value = std::string_view{"ease_none"},
+      .allowed_values = laser_easing_functions
+   },
+   PropertyInfo{.name = "easing_subdivision_count", .type = "int", .default_value = int32_t{10}},
+};
+static constexpr MechanismSchema laser_schema{
+   .type_name = "Laser",
+   .layer_name = "lasers",
+   .default_width = 24,
+   .default_height = 24,
+   .properties = laser_properties,
+};
+const auto registered_laser = []
+{
+   GameMechanismDeserializerRegistry::instance().registerSchema(laser_schema);
+   return true;
+}();
+}  // namespace

@@ -20,8 +20,14 @@ int32_t Crusher::__instance_counter = 0;
 namespace
 {
 static constexpr std::string_view default_crusher_alignment = "down";
+static constexpr std::array crusher_alignments{
+   std::string_view{"up"},
+   std::string_view{"down"},
+   std::string_view{"left"},
+   std::string_view{"right"},
+};
 static constexpr std::array crusher_properties{
-   PropertyInfo{.name = "alignment", .type = "string", .default_value = default_crusher_alignment},
+   PropertyInfo{.name = "alignment", .type = "string", .default_value = default_crusher_alignment, .allowed_values = crusher_alignments},
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
 };
 static constexpr MechanismSchema crusher_schema{

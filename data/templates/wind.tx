@@ -2,12 +2,26 @@
 <template>
  <object type="Wind" width="192" height="192">
   <properties>
-   <property name="direction_x" type="float" value="0.0"/>
-   <property name="direction_y" type="float" value="-1.0"/>
-   <property name="strength" type="float" value="1.0"/>
-   <property name="z" type="int" value="20"/>
+   <property name="direction_x" type="float" value="0"/>
+   <property name="direction_y" type="float" value="-1"/>
+   <property name="leaf_alpha" type="float" value="1"/>
+   <property name="leaf_animation_speed" type="float" value="8"/>
    <property name="leaf_count" type="int" value="0"/>
-   <property name="sounds" type="string" value=""/>
+   <property name="leaf_frame_size_px" type="int" value="16"/>
+   <property name="leaf_jitter_amount" type="float" value="0.35"/>
+   <property name="leaf_jitter_frequency_hz" type="float" value="0.8"/>
+   <property name="leaf_scale_max" type="float" value="1"/>
+   <property name="leaf_scale_min" type="float" value="1"/>
+   <property name="leaf_sound_influence" type="float" value="0"/>
+   <property name="leaf_texture" value="data/sprites/leaves_fall.png"/>
+   <property name="leaf_velocity_px_s" type="float" value="60"/>
+   <property name="sound_radius_far_px" type="float" value="800"/>
+   <property name="sound_radius_near_px" type="float" value="200"/>
+   <property name="sound_strength_influence" type="float" value="0"/>
+   <property name="sound_volume" type="float" value="1"/>
+   <property name="sounds" value=""/>
+   <property name="strength" type="float" value="1"/>
+   <property name="z" type="int" value="20"/>
   </properties>
  </object>
 </template>

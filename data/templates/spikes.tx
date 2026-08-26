@@ -2,6 +2,15 @@
 <template>
  <object type="Spikes" width="24" height="24">
   <properties>
+   <property name="down_time_ms" type="int" value="2000"/>
+   <property name="mode" propertytype="SpikesMode" value="trap"/>
+   <property name="orientation" propertytype="SpikesOrientation" value="up"/>
+   <property name="speed_down" type="float" value="35"/>
+   <property name="speed_up" type="float" value="35"/>
+   <property name="time_offset_ms" type="int" value="0"/>
+   <property name="trap_time_ms" type="int" value="250"/>
+   <property name="under_water" type="bool" value="false"/>
+   <property name="up_time_ms" type="int" value="2000"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

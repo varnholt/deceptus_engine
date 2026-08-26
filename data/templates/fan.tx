@@ -2,8 +2,8 @@
 <template>
  <object type="Fan" width="48" height="96">
   <properties>
-   <property name="direction" type="string" value="up"/>
-   <property name="speed" type="float" value="1.0"/>
+   <property name="direction" propertytype="FanDirection" value="up"/>
+   <property name="speed" type="float" value="1"/>
   </properties>
  </object>
 </template>

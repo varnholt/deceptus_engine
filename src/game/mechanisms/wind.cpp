@@ -56,8 +56,8 @@ static constexpr auto leaf_jitter_frequency_factor_max = 1.25f;
 
 static constexpr std::array wind_properties{
    PropertyInfo{.name = "direction_x", .type = "float", .default_value = default_wind_direction_x},
-   PropertyInfo{.name = "direction_y", .type = "float", .default_value = default_wind_direction_y},
-   PropertyInfo{.name = "strength", .type = "float", .default_value = default_wind_strength},
+   PropertyInfo{.name = "direction_y", .type = "float", .default_value = default_wind_direction_y, .template_value = -1.0f},
+   PropertyInfo{.name = "strength", .type = "float", .default_value = default_wind_strength, .template_value = 1.0f},
    PropertyInfo{.name = "z", .type = "int", .default_value = default_wind_z},
    PropertyInfo{.name = "sounds", .type = "string", .default_value = std::string_view{}},
    PropertyInfo{.name = "sound_volume", .type = "float", .default_value = default_sound_volume},

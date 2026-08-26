@@ -27,9 +27,14 @@ namespace
 {
 static constexpr bool default_on_off_block_inverted = false;
 
+static constexpr std::array on_off_block_modes{
+   std::string_view{"lever"},
+   std::string_view{"interval"},
+};
+
 static constexpr std::array on_off_block_properties{
    PropertyInfo{.name = "enabled", .type = "bool", .default_value = true},
-   PropertyInfo{.name = "mode", .type = "string", .default_value = std::string_view{"lever"}},
+   PropertyInfo{.name = "mode", .type = "string", .default_value = std::string_view{"lever"}, .allowed_values = on_off_block_modes},
    PropertyInfo{.name = "inverted", .type = "bool", .default_value = default_on_off_block_inverted},
    PropertyInfo{.name = "time_on_ms", .type = "int", .default_value = int32_t{1000}},
    PropertyInfo{.name = "time_off_ms", .type = "int", .default_value = int32_t{1000}},

@@ -2,6 +2,12 @@
 <template>
  <object type="TextLayer" width="192" height="48">
   <properties>
+   <property name="bitmap_font_map" value=""/>
+   <property name="bitmap_font_texture" value=""/>
+   <property name="text" value="undefined"/>
+   <property name="truetype_font" value=""/>
+   <property name="truetype_font_color" value="#ffffffff"/>
+   <property name="truetype_font_size" type="int" value="12"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

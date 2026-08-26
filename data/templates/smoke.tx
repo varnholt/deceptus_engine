@@ -2,6 +2,17 @@
 <template>
  <object type="Smoke" width="96" height="96">
   <properties>
+   <property name="blend_mode" propertytype="SmokeBlendMode" value="add"/>
+   <property name="center_offset_x_px" type="int" value="0"/>
+   <property name="center_offset_y_px" type="int" value="0"/>
+   <property name="layer_color" value="#ffffffff"/>
+   <property name="mode" propertytype="SmokeMode" value="smoke"/>
+   <property name="particle_color" value="#ffffff19"/>
+   <property name="particle_count" type="int" value="50"/>
+   <property name="pixel_ratio" type="float" value="1"/>
+   <property name="spread_factor" type="float" value="0.666667"/>
+   <property name="sprite_scale" type="float" value="1"/>
+   <property name="velocity" type="float" value="1"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>
