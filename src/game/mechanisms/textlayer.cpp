@@ -8,6 +8,9 @@
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/layers/bitmapfont.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+#include <array>
 
 TextLayer::TextLayer(GameNode* parent) : GameNode(parent)
 {
@@ -136,3 +139,28 @@ std::shared_ptr<TextLayer> TextLayer::deserialize(GameNode* parent, const GameDe
 
    return instance;
 }
+
+namespace
+{
+static constexpr std::array text_layer_properties{
+   PropertyInfo{.name = "text", .type = "string", .default_value = std::string_view{"undefined"}, .required = true},
+   PropertyInfo{.name = "bitmap_font_texture", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "bitmap_font_map", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "truetype_font", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "truetype_font_size", .type = "int", .default_value = int32_t{12}},
+   PropertyInfo{.name = "truetype_font_color", .type = "string", .default_value = std::string_view{"#ffffffff"}},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{0}, .template_value = int32_t{20}},
+};
+static constexpr MechanismSchema text_layer_schema{
+   .type_name = "TextLayer",
+   .layer_name = "text_layers",
+   .default_width = 192,
+   .default_height = 48,
+   .properties = text_layer_properties,
+};
+const auto registered_text_layer = []
+{
+   GameMechanismDeserializerRegistry::instance().registerSchema(text_layer_schema);
+   return true;
+}();
+}  // namespace

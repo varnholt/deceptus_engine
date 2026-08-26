@@ -2,6 +2,9 @@
 
 #include "constants.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+#include <array>
 #include "game/player/playerregistry.h"
 
 #include "framework/tmxparser/tmxlayer.h"
@@ -569,3 +572,42 @@ std::vector<std::shared_ptr<Spikes>> Spikes::load(GameNode* parent, const GameDe
 
    return all_spikes;
 }
+
+namespace
+{
+static constexpr std::array spikes_modes{
+   std::string_view{"trap"},
+   std::string_view{"interval"},
+   std::string_view{"toggled"},
+};
+static constexpr std::array spikes_orientations{
+   std::string_view{"up"},
+   std::string_view{"down"},
+   std::string_view{"left"},
+   std::string_view{"right"},
+};
+static constexpr std::array spikes_properties{
+   PropertyInfo{.name = "mode", .type = "string", .default_value = std::string_view{"trap"}, .allowed_values = spikes_modes},
+   PropertyInfo{.name = "orientation", .type = "string", .default_value = std::string_view{"up"}, .allowed_values = spikes_orientations},
+   PropertyInfo{.name = "up_time_ms", .type = "int", .default_value = int32_t{2000}},
+   PropertyInfo{.name = "down_time_ms", .type = "int", .default_value = int32_t{2000}},
+   PropertyInfo{.name = "trap_time_ms", .type = "int", .default_value = int32_t{250}},
+   PropertyInfo{.name = "speed_up", .type = "float", .default_value = 35.0f},
+   PropertyInfo{.name = "speed_down", .type = "float", .default_value = 35.0f},
+   PropertyInfo{.name = "time_offset_ms", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "under_water", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema spikes_schema{
+   .type_name = "Spikes",
+   .layer_name = "interval_spikes",
+   .default_width = 24,
+   .default_height = 24,
+   .properties = spikes_properties,
+};
+const auto registered_spikes = []
+{
+   GameMechanismDeserializerRegistry::instance().registerSchema(spikes_schema);
+   return true;
+}();
+}  // namespace

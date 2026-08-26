@@ -2,6 +2,7 @@
 <template>
  <object type="MoveableObject" width="24" height="24">
   <properties>
+   <property name="serialized" type="bool" value="true"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="PostProcessing" width="480" height="270">
+  <properties>
+   <property name="fragment_shader" value=""/>
+   <property name="scope" propertytype="PostProcessingScope" value="all"/>
+   <property name="vertex_shader" value=""/>
+   <property name="z" type="int" value="0"/>
+  </properties>
+ </object>
+</template>

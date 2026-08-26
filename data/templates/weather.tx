@@ -2,6 +2,10 @@
 <template>
  <object type="Weather" width="192" height="192">
   <properties>
+   <property name="effect_start_delay_s" type="float" value="0"/>
+   <property name="enabled" type="bool" value="true"/>
+   <property name="limit_effect_to_room" type="bool" value="false"/>
+   <property name="sound_volume" type="float" value="1"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

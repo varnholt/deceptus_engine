@@ -13,7 +13,12 @@ namespace
 {
 static constexpr std::string_view default_zoom_rect_values = "0.0:1.0;1.0:1.0";
 static constexpr std::array zoom_rect_properties{
-   PropertyInfo{.name = "values", .type = "string", .default_value = default_zoom_rect_values},
+   PropertyInfo{
+      .name = "values",
+      .type = "string",
+      .default_value = default_zoom_rect_values,
+      .template_value = std::string_view{"0.0:1.5;1.0:1.0"}
+   },
 };
 static constexpr MechanismSchema zoom_rect_schema{
    .type_name = "ZoomRect",

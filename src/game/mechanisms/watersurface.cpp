@@ -29,6 +29,23 @@ static constexpr std::array water_surface_properties{
    PropertyInfo{.name = "clamp_segment_count", .type = "int", .default_value = default_water_surface_clamp_segment_count},
    PropertyInfo{.name = "pixel_ratio", .type = "float", .default_value = default_water_surface_pixel_ratio},
 };
+static constexpr std::array water_surface_emitter_properties{
+   PropertyInfo{.name = "reference", .type = "string", .default_value = std::string_view{""}, .required = true},
+   PropertyInfo{.name = "velocity", .type = "float", .default_value = 2.0f},
+   PropertyInfo{.name = "interval_min_s", .type = "float", .default_value = 0.3f},
+   PropertyInfo{.name = "interval_max_s", .type = "float", .default_value = 0.6f},
+   PropertyInfo{.name = "count", .type = "int", .default_value = int32_t{1}},
+   PropertyInfo{.name = "x_from_px", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "x_to_px", .type = "float", .default_value = 96.0f},
+   PropertyInfo{.name = "width_px", .type = "float", .default_value = 96.0f},
+};
+static constexpr MechanismSchema water_surface_emitter_schema{
+   .type_name = "WaterSurfaceEmitter",
+   .layer_name = "water_surface_emitter",
+   .default_width = 96,
+   .default_height = 24,
+   .properties = water_surface_emitter_properties,
+};
 static constexpr MechanismSchema water_surface_schema{
    .type_name = "WaterSurface",
    .layer_name = "water_surface",
@@ -40,6 +57,7 @@ const auto registered_watersurface = []
 {
    auto& registry = GameMechanismDeserializerRegistry::instance();
    registry.registerSchema(water_surface_schema);
+   registry.registerSchema(water_surface_emitter_schema);
    registry.mapGroupToLayer("WaterSurface", "water_surface");
 
    registry.registerLayerName(

@@ -6,6 +6,9 @@
 #include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+#include <array>
 
 #include <filesystem>
 #ifdef DECEPTUS_VRSFML
@@ -265,3 +268,30 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
 
    return instance;
 }
+
+namespace
+{
+static constexpr std::array shader_quad_properties{
+   PropertyInfo{.name = "fragment_shader", .type = "string", .default_value = std::string_view{""}, .required = true},
+   PropertyInfo{.name = "vertex_shader", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "texture", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "smooth_texture", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "customization", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "uv_width", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "uv_height", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "time_offset_s", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema shader_quad_schema{
+   .type_name = "ShaderQuad",
+   .layer_name = "shader_quads",
+   .default_width = 192,
+   .default_height = 192,
+   .properties = shader_quad_properties,
+};
+const auto registered_shader_quad = []
+{
+   GameMechanismDeserializerRegistry::instance().registerSchema(shader_quad_schema);
+   return true;
+}();
+}  // namespace

@@ -2,9 +2,14 @@
 <template>
  <object type="ShaderQuad" width="192" height="192">
   <properties>
-   <property name="fragment_shader" type="string" value=""/>
-   <property name="vertex_shader" type="string" value=""/>
-   <property name="texture" type="string" value=""/>
+   <property name="customization" value=""/>
+   <property name="fragment_shader" value=""/>
+   <property name="smooth_texture" type="bool" value="false"/>
+   <property name="texture" value=""/>
+   <property name="time_offset_s" type="float" value="0"/>
+   <property name="uv_height" type="float" value="1"/>
+   <property name="uv_width" type="float" value="1"/>
+   <property name="vertex_shader" value=""/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

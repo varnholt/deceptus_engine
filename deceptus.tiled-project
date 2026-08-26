@@ -1,0 +1,1972 @@
+{
+    "automappingRulesFile": "",
+    "commands": [],
+    "extensionsPath": "extensions",
+    "folders": [
+        "data"
+    ],
+    "properties": [],
+    "propertyTypes": [
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 1,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "BlockingRect",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 2,
+            "members": [
+                {
+                    "name": "force",
+                    "type": "float",
+                    "value": 0.6000000238418579
+                }
+            ],
+            "name": "Bouncer",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 3,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "BoxCollider",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 4,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "BubbleCube",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 5,
+            "members": [
+                {
+                    "name": "button",
+                    "propertyType": "ButtonRectButton",
+                    "type": "string",
+                    "value": "b"
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "ButtonRect",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 6,
+            "name": "ButtonRectButton",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "a",
+                "b",
+                "x",
+                "y"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 7,
+            "members": [
+                {
+                    "name": "index",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "sprite_pos_x_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "sprite_pos_y_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "CheckPoint",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 8,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "CollapsingPlatform",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 9,
+            "members": [
+                {
+                    "name": "keys",
+                    "type": "string",
+                    "value": "bt_a"
+                }
+            ],
+            "name": "ControllerHelp",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 10,
+            "members": [
+                {
+                    "name": "velocity",
+                    "type": "float",
+                    "value": 1.0
+                }
+            ],
+            "name": "ConveyorBelt",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 11,
+            "members": [
+                {
+                    "name": "alignment",
+                    "propertyType": "CrusherAlignment",
+                    "type": "string",
+                    "value": "down"
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Crusher",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 12,
+            "name": "CrusherAlignment",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "up",
+                "down",
+                "left",
+                "right"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 13,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "DamageRect",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 14,
+            "members": [
+                {
+                    "name": "damage",
+                    "type": "int",
+                    "value": 100
+                },
+                {
+                    "name": "mode",
+                    "propertyType": "DeathBlockMode",
+                    "type": "string",
+                    "value": "always_on"
+                },
+                {
+                    "name": "time_off",
+                    "type": "float",
+                    "value": 2.0
+                },
+                {
+                    "name": "time_offset",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "time_on",
+                    "type": "float",
+                    "value": 0.20000000298023224
+                },
+                {
+                    "name": "velocity",
+                    "type": "float",
+                    "value": 50.0
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "DeathBlock",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 15,
+            "name": "DeathBlockMode",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "always_on",
+                "interval",
+                "rotate"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 16,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "DestructibleBlockingRect",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 17,
+            "members": [
+                {
+                    "name": "00",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "00_background_color",
+                    "type": "string",
+                    "value": "#000000ff"
+                },
+                {
+                    "name": "00_text_color",
+                    "type": "string",
+                    "value": "#ffffffff"
+                },
+                {
+                    "name": "00_x_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "00_y_px",
+                    "type": "int",
+                    "value": 0
+                }
+            ],
+            "name": "Dialogue",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 18,
+            "members": [
+                {
+                    "name": "animation_close",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "animation_open",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "key",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "key_animation",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "observed",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "open",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "sample_close",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "sample_open",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Door",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 19,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Dust",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 20,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "EnemyWall",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 21,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Extra",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 22,
+            "members": [
+                {
+                    "name": "direction",
+                    "propertyType": "FanDirection",
+                    "type": "string",
+                    "value": "up"
+                },
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "value": 1.0
+                }
+            ],
+            "name": "Fan",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 23,
+            "name": "FanDirection",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "up",
+                "down",
+                "left",
+                "right"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 24,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Fireflies",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 25,
+            "members": [
+                {
+                    "name": "enabled",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "flowfield_reference_id",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "flowfield_texture",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "target_id",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Gateway",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 26,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "GrabRope",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 27,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "InfoOverlay",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 28,
+            "members": [
+                {
+                    "name": "animation",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "button_0",
+                    "type": "string",
+                    "value": "key_cursor_u"
+                },
+                {
+                    "name": "offset_x_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "offset_y_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "text_0",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 50
+                }
+            ],
+            "name": "InteractionHelp",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 29,
+            "members": [
+                {
+                    "name": "easing_function",
+                    "propertyType": "LaserEasingFunction",
+                    "type": "string",
+                    "value": "ease_none"
+                },
+                {
+                    "name": "easing_subdivision_count",
+                    "type": "int",
+                    "value": 10
+                },
+                {
+                    "name": "enabled",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "move_offset_s",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "movement_speed",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "off_time",
+                    "type": "int",
+                    "value": 3000
+                },
+                {
+                    "name": "on_time",
+                    "type": "int",
+                    "value": 3000
+                },
+                {
+                    "name": "reference_id",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Laser",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 30,
+            "name": "LaserEasingFunction",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "ease_in_sine",
+                "ease_in_cubic",
+                "ease_in_quint",
+                "ease_in_circ",
+                "ease_in_elastic",
+                "ease_out_sine",
+                "ease_out_cubic",
+                "ease_out_quint",
+                "ease_out_circ",
+                "ease_out_elastic",
+                "ease_in_out_sine",
+                "ease_in_out_cubic",
+                "ease_in_out_quint",
+                "ease_in_out_circ",
+                "ease_in_out_elastic",
+                "ease_none"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 31,
+            "members": [
+                {
+                    "name": "level",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "spawn_position_x_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "spawn_position_y_px",
+                    "type": "int",
+                    "value": 0
+                }
+            ],
+            "name": "LevelTransition",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 32,
+            "members": [
+                {
+                    "name": "enabled",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "handle_available",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "serialized",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "target_ids",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Lever",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 33,
+            "members": [
+                {
+                    "name": "serialized",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "MoveableObject",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 34,
+            "members": [
+                {
+                    "name": "interpolation_time",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "platform_width_tl",
+                    "type": "int",
+                    "value": 4
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "MovingPlatform",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 35,
+            "members": [
+                {
+                    "name": "enabled",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "inverted",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "mode",
+                    "propertyType": "OnOffBlockMode",
+                    "type": "string",
+                    "value": "lever"
+                },
+                {
+                    "name": "time_off_ms",
+                    "type": "int",
+                    "value": 1000
+                },
+                {
+                    "name": "time_on_ms",
+                    "type": "int",
+                    "value": 1000
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "OnOffBlock",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 36,
+            "name": "OnOffBlockMode",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "lever",
+                "interval"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 37,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Portal",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 38,
+            "members": [
+                {
+                    "name": "fragment_shader",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "scope",
+                    "propertyType": "PostProcessingScope",
+                    "type": "string",
+                    "value": "all"
+                },
+                {
+                    "name": "vertex_shader",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 0
+                }
+            ],
+            "name": "PostProcessing",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 39,
+            "name": "PostProcessingScope",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "all",
+                "level"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 40,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Rope",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 41,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "RopeWithLight",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 42,
+            "members": [
+                {
+                    "name": "blade_acceleration",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "blade_deceleration",
+                    "type": "float",
+                    "value": 0.5
+                },
+                {
+                    "name": "blade_rotation_speed",
+                    "type": "float",
+                    "value": 5.0
+                },
+                {
+                    "name": "enabled",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "movement_speed",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 30
+                }
+            ],
+            "name": "RotatingBlade",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 43,
+            "members": [
+                {
+                    "name": "action",
+                    "propertyType": "SensorRectAction",
+                    "type": "string",
+                    "value": "toggle"
+                },
+                {
+                    "name": "event",
+                    "propertyType": "SensorRectEvent",
+                    "type": "string",
+                    "value": "on_enter"
+                },
+                {
+                    "name": "observed",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "reference_id",
+                    "type": "string",
+                    "value": ""
+                }
+            ],
+            "name": "SensorRect",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 44,
+            "name": "SensorRectAction",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "enable",
+                "disable",
+                "toggle"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 45,
+            "name": "SensorRectEvent",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "on_enter",
+                "on_leave"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 46,
+            "members": [
+                {
+                    "name": "customization",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "fragment_shader",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "smooth_texture",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "texture",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "time_offset_s",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "uv_height",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "uv_width",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "vertex_shader",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "ShaderQuad",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 47,
+            "members": [
+                {
+                    "name": "enabled",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "fade_speed",
+                    "type": "float",
+                    "value": 2.0
+                },
+                {
+                    "name": "inverted",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "normal",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "skill",
+                    "propertyType": "SkillGateSkill",
+                    "type": "string",
+                    "value": "double_jump"
+                },
+                {
+                    "name": "texture",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "SkillGate",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 48,
+            "name": "SkillGateSkill",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "wall_climb",
+                "dash",
+                "invulnerable",
+                "wall_slide",
+                "wall_jump",
+                "double_jump",
+                "crouch",
+                "swim"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 49,
+            "members": [
+                {
+                    "name": "blend_mode",
+                    "propertyType": "SmokeBlendMode",
+                    "type": "string",
+                    "value": "add"
+                },
+                {
+                    "name": "center_offset_x_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "center_offset_y_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "layer_color",
+                    "type": "string",
+                    "value": "#ffffffff"
+                },
+                {
+                    "name": "mode",
+                    "propertyType": "SmokeMode",
+                    "type": "string",
+                    "value": "smoke"
+                },
+                {
+                    "name": "particle_color",
+                    "type": "string",
+                    "value": "#ffffff19"
+                },
+                {
+                    "name": "particle_count",
+                    "type": "int",
+                    "value": 50
+                },
+                {
+                    "name": "pixel_ratio",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "spread_factor",
+                    "type": "float",
+                    "value": 0.6666666865348816
+                },
+                {
+                    "name": "sprite_scale",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "velocity",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Smoke",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 50,
+            "name": "SmokeBlendMode",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "alpha",
+                "add",
+                "multiply"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 51,
+            "name": "SmokeMode",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "smoke",
+                "fog"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 52,
+            "members": [
+                {
+                    "name": "filename",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "looped",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "radius_far_px",
+                    "type": "float",
+                    "value": 600.0
+                },
+                {
+                    "name": "radius_near_px",
+                    "type": "float",
+                    "value": 200.0
+                },
+                {
+                    "name": "volume_far",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "volume_near",
+                    "type": "float",
+                    "value": 1.0
+                }
+            ],
+            "name": "SoundEmitter",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 53,
+            "members": [
+                {
+                    "name": "push_factor",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "spline_point_count",
+                    "type": "int",
+                    "value": 8
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 16
+                }
+            ],
+            "name": "SpikeBall",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 54,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "SpikeBlock",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 55,
+            "members": [
+                {
+                    "name": "down_time_ms",
+                    "type": "int",
+                    "value": 2000
+                },
+                {
+                    "name": "mode",
+                    "propertyType": "SpikesMode",
+                    "type": "string",
+                    "value": "trap"
+                },
+                {
+                    "name": "orientation",
+                    "propertyType": "SpikesOrientation",
+                    "type": "string",
+                    "value": "up"
+                },
+                {
+                    "name": "speed_down",
+                    "type": "float",
+                    "value": 35.0
+                },
+                {
+                    "name": "speed_up",
+                    "type": "float",
+                    "value": 35.0
+                },
+                {
+                    "name": "time_offset_ms",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "trap_time_ms",
+                    "type": "int",
+                    "value": 250
+                },
+                {
+                    "name": "under_water",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "up_time_ms",
+                    "type": "int",
+                    "value": 2000
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Spikes",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "id": 56,
+            "name": "SpikesMode",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "trap",
+                "interval",
+                "toggled"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 57,
+            "name": "SpikesOrientation",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "up",
+                "down",
+                "left",
+                "right"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 58,
+            "members": [
+                {
+                    "name": "color",
+                    "type": "string",
+                    "value": "#ffffffff"
+                },
+                {
+                    "name": "flicker_alpha_amount",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "flicker_intensity",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "flicker_speed",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "texture",
+                    "type": "string",
+                    "value": "smooth.png"
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "StaticLight",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 59,
+            "members": [
+                {
+                    "name": "bitmap_font_map",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "bitmap_font_texture",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "text",
+                    "type": "string",
+                    "value": "undefined"
+                },
+                {
+                    "name": "truetype_font",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "truetype_font_color",
+                    "type": "string",
+                    "value": "#ffffffff"
+                },
+                {
+                    "name": "truetype_font_size",
+                    "type": "int",
+                    "value": 12
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "TextLayer",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 60,
+            "members": [
+                {
+                    "name": "animation_idle_closed",
+                    "type": "string",
+                    "value": "idle"
+                },
+                {
+                    "name": "animation_idle_open",
+                    "type": "string",
+                    "value": "open"
+                },
+                {
+                    "name": "animation_opening",
+                    "type": "string",
+                    "value": "opening"
+                },
+                {
+                    "name": "item_required",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "item_required_consumed",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "observed",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "sample_locked",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "sample_open",
+                    "type": "string",
+                    "value": "treasure_chest_open.ogg"
+                },
+                {
+                    "name": "spawn_extra",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "spawn_offset_x",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "spawn_offset_y",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "texture",
+                    "type": "string",
+                    "value": "data/sprites/treasure_chest.png"
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "TreasureChest",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 61,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "WaterDamage",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 62,
+            "members": [
+                {
+                    "name": "clamp_segment_count",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "opacity",
+                    "type": "int",
+                    "value": 255
+                },
+                {
+                    "name": "pixel_ratio",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "splash_factor",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "spread",
+                    "type": "float",
+                    "value": 1.2000000476837158
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "WaterSurface",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 63,
+            "members": [
+                {
+                    "name": "count",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "interval_max_s",
+                    "type": "float",
+                    "value": 0.6000000238418579
+                },
+                {
+                    "name": "interval_min_s",
+                    "type": "float",
+                    "value": 0.30000001192092896
+                },
+                {
+                    "name": "reference",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "velocity",
+                    "type": "float",
+                    "value": 2.0
+                },
+                {
+                    "name": "width_px",
+                    "type": "float",
+                    "value": 96.0
+                },
+                {
+                    "name": "x_from_px",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "x_to_px",
+                    "type": "float",
+                    "value": 96.0
+                }
+            ],
+            "name": "WaterSurfaceEmitter",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 64,
+            "members": [
+                {
+                    "name": "effect_start_delay_s",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "enabled",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "limit_effect_to_room",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "sound_volume",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Weather",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 65,
+            "members": [
+                {
+                    "name": "direction_x",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "direction_y",
+                    "type": "float",
+                    "value": -1.0
+                },
+                {
+                    "name": "leaf_alpha",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "leaf_animation_speed",
+                    "type": "float",
+                    "value": 8.0
+                },
+                {
+                    "name": "leaf_count",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "leaf_frame_size_px",
+                    "type": "int",
+                    "value": 16
+                },
+                {
+                    "name": "leaf_jitter_amount",
+                    "type": "float",
+                    "value": 0.3499999940395355
+                },
+                {
+                    "name": "leaf_jitter_frequency_hz",
+                    "type": "float",
+                    "value": 0.800000011920929
+                },
+                {
+                    "name": "leaf_scale_max",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "leaf_scale_min",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "leaf_sound_influence",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "leaf_texture",
+                    "type": "string",
+                    "value": "data/sprites/leaves_fall.png"
+                },
+                {
+                    "name": "leaf_velocity_px_s",
+                    "type": "float",
+                    "value": 60.0
+                },
+                {
+                    "name": "sound_radius_far_px",
+                    "type": "float",
+                    "value": 800.0
+                },
+                {
+                    "name": "sound_radius_near_px",
+                    "type": "float",
+                    "value": 200.0
+                },
+                {
+                    "name": "sound_strength_influence",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "sound_volume",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "sounds",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "strength",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "Wind",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 66,
+            "members": [
+                {
+                    "name": "values",
+                    "type": "string",
+                    "value": "0.0:1.5;1.0:1.0"
+                }
+            ],
+            "name": "ZoomRect",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        }
+    ]
+}

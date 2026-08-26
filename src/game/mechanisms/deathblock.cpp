@@ -32,13 +32,19 @@ static constexpr int32_t default_death_block_damage = 100;
 static constexpr std::string_view default_death_block_mode = "always_on";
 static constexpr float default_death_block_velocity = 50.0f;
 
+static constexpr std::array death_block_modes{
+   std::string_view{"always_on"},
+   std::string_view{"interval"},
+   std::string_view{"rotate"},
+};
+
 static constexpr std::array death_block_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
    PropertyInfo{.name = "time_off", .type = "float", .default_value = default_death_block_time_off},
    PropertyInfo{.name = "time_on", .type = "float", .default_value = default_death_block_time_on},
    PropertyInfo{.name = "time_offset", .type = "float", .default_value = default_death_block_time_offset},
    PropertyInfo{.name = "damage", .type = "int", .default_value = default_death_block_damage},
-   PropertyInfo{.name = "mode", .type = "string", .default_value = default_death_block_mode},
+   PropertyInfo{.name = "mode", .type = "string", .default_value = default_death_block_mode, .allowed_values = death_block_modes},
    PropertyInfo{.name = "velocity", .type = "float", .default_value = default_death_block_velocity},
 };
 static constexpr MechanismSchema death_block_schema{

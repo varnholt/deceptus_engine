@@ -17,10 +17,19 @@ static constexpr std::string_view default_sensor_rect_reference_id = "";
 static constexpr std::string_view default_sensor_rect_action = "toggle";
 static constexpr std::string_view default_sensor_rect_event = "on_enter";
 static constexpr bool default_sensor_rect_observed = false;
+static constexpr std::array sensor_rect_actions{
+   std::string_view{"enable"},
+   std::string_view{"disable"},
+   std::string_view{"toggle"},
+};
+static constexpr std::array sensor_rect_events{
+   std::string_view{"on_enter"},
+   std::string_view{"on_leave"},
+};
 static constexpr std::array sensor_rect_properties{
    PropertyInfo{.name = "reference_id", .type = "string", .default_value = default_sensor_rect_reference_id},
-   PropertyInfo{.name = "action", .type = "string", .default_value = default_sensor_rect_action},
-   PropertyInfo{.name = "event", .type = "string", .default_value = default_sensor_rect_event},
+   PropertyInfo{.name = "action", .type = "string", .default_value = default_sensor_rect_action, .allowed_values = sensor_rect_actions},
+   PropertyInfo{.name = "event", .type = "string", .default_value = default_sensor_rect_event, .allowed_values = sensor_rect_events},
    PropertyInfo{.name = "observed", .type = "bool", .default_value = default_sensor_rect_observed},
 };
 static constexpr MechanismSchema sensor_rect_schema{

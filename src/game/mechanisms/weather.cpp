@@ -8,6 +8,9 @@
 #include "game/audio/soundrotation.h"
 #include "game/io/valuereader.h"
 #include "game/level/roomupdater.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
+
+#include <array>
 #include "game/player/playerregistry.h"
 
 #include <string>
@@ -291,3 +294,26 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
 
    return weather;
 }
+
+namespace
+{
+static constexpr std::array weather_properties{
+   PropertyInfo{.name = "enabled", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "limit_effect_to_room", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "effect_start_delay_s", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "sound_volume", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+};
+static constexpr MechanismSchema weather_schema{
+   .type_name = "Weather",
+   .layer_name = "weather",
+   .default_width = 192,
+   .default_height = 192,
+   .properties = weather_properties,
+};
+const auto registered_weather = []
+{
+   GameMechanismDeserializerRegistry::instance().registerSchema(weather_schema);
+   return true;
+}();
+}  // namespace

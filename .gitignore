@@ -39,3 +39,6 @@ logs/
 
 # written by imgui in the working directory whenever a debug editor is opened
 imgui.ini
+
+# tiled writes one of these next to the project file, it holds per user editor state
+deceptus.tiled-session

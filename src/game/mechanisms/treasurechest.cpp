@@ -20,7 +20,7 @@ namespace
 {
 static constexpr int32_t default_treasure_chest_z = 0;
 static constexpr std::array treasure_chest_properties{
-   PropertyInfo{.name = "z", .type = "int", .default_value = default_treasure_chest_z},
+   PropertyInfo{.name = "z", .type = "int", .default_value = default_treasure_chest_z, .template_value = int32_t{20}},
    PropertyInfo{.name = "texture", .type = "string", .default_value = std::string_view{"data/sprites/treasure_chest.png"}},
    PropertyInfo{.name = "sample_open", .type = "string", .default_value = std::string_view{"treasure_chest_open.ogg"}},
    PropertyInfo{.name = "sample_locked", .type = "string", .default_value = std::string_view{""}},

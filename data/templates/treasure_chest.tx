@@ -2,6 +2,18 @@
 <template>
  <object type="TreasureChest" width="48" height="48">
   <properties>
+   <property name="animation_idle_closed" value="idle"/>
+   <property name="animation_idle_open" value="open"/>
+   <property name="animation_opening" value="opening"/>
+   <property name="item_required" value=""/>
+   <property name="item_required_consumed" type="bool" value="true"/>
+   <property name="observed" type="bool" value="false"/>
+   <property name="sample_locked" value=""/>
+   <property name="sample_open" value="treasure_chest_open.ogg"/>
+   <property name="spawn_extra" value=""/>
+   <property name="spawn_offset_x" type="float" value="0"/>
+   <property name="spawn_offset_y" type="float" value="0"/>
+   <property name="texture" value="data/sprites/treasure_chest.png"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

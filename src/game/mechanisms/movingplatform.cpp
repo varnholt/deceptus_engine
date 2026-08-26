@@ -47,6 +47,7 @@ static constexpr MechanismSchema moving_platform_schema{
    .default_width = 0,
    .default_height = 0,
    .properties = moving_platform_properties,
+   .default_polyline = "0,0 96,0",
 };
 const auto registered_moving_platform = []
 {

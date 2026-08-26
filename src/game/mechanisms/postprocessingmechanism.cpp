@@ -19,10 +19,15 @@ namespace
 //! \brief prefix marking a tmx property as a shader uniform
 constexpr std::string_view uniform_prefix{"u_"};
 
+static constexpr std::array post_processing_scopes{
+   std::string_view{"all"},
+   std::string_view{"level"},
+};
+
 static constexpr std::array post_processing_properties{
    PropertyInfo{.name = "fragment_shader", .type = "string", .default_value = "", .required = true},
    PropertyInfo{.name = "vertex_shader", .type = "string", .default_value = ""},
-   PropertyInfo{.name = "scope", .type = "string", .default_value = "all"},
+   PropertyInfo{.name = "scope", .type = "string", .default_value = "all", .allowed_values = post_processing_scopes},
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{0}},
 };
 
