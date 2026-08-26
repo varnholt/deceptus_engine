@@ -12,6 +12,41 @@ const sf::Color MenuScreen::color_label_normal{200, 185, 220};
 const sf::Color MenuScreen::color_label_selected{255, 255, 255};
 const sf::Color MenuScreen::color_help_text{130, 120, 150};
 
+namespace
+{
+
+//! codepoint whose ink height is used as the vertical reference for every placed label
+constexpr char32_t reference_codepoint{U'A'};
+
+///
+/// \brief Returns the y that vertically centers text inside reference_rect.
+///
+/// getLocalBounds() reports the ink the string actually covers, so a value carrying a descender
+/// measures taller than one without, and centering on that would place the two at different
+/// heights:
+///
+///     rect  +----------------+   +----------------+
+///           |   Automatic    |   |  Power Saving  |   <- taller ink, so centering lifts it
+///           +----------------+   +----------------+
+///
+/// The ink height of a capital is used instead. It is the same for every string, so cycling an
+/// option leaves the text where it was.
+///
+/// \param text text whose character size and ink offset are read.
+/// \param reference_rect rect to center in.
+/// \return y position in whole pixels.
+///
+float centeredY(const sf::Text& text, const sf::FloatRect& reference_rect)
+{
+   const auto reference_height = getFont().getGlyph(reference_codepoint, text.getCharacterSize(), false, 0.0f).bounds.size.y;
+   const auto ink_offset_y = text.getLocalBounds().position.y;
+   return static_cast<float>(
+      static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - reference_height) / 2.0f - ink_offset_y)
+   );
+}
+
+}  // namespace
+
 MenuScreen::MenuScreen() : _font(getFont())
 {
 }
@@ -21,18 +56,14 @@ void MenuScreen::placeTextCentered(sf::Text& text, const sf::FloatRect& referenc
    const auto text_bounds = text.getLocalBounds();
    const auto x_px =
       static_cast<int32_t>(reference_rect.position.x + (reference_rect.size.x - text_bounds.size.x) / 2.0f - text_bounds.position.x);
-   const auto y_px =
-      static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - text_bounds.size.y) / 2.0f - text_bounds.position.y);
-   sfcompat::setPosition(text, {static_cast<float>(x_px), static_cast<float>(y_px)});
+   sfcompat::setPosition(text, {static_cast<float>(x_px), centeredY(text, reference_rect)});
 }
 
 void MenuScreen::placeTextLeft(sf::Text& text, const sf::FloatRect& reference_rect)
 {
    const auto text_bounds = text.getLocalBounds();
    const auto x_px = static_cast<int32_t>(reference_rect.position.x - text_bounds.position.x);
-   const auto y_px =
-      static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - text_bounds.size.y) / 2.0f - text_bounds.position.y);
-   sfcompat::setPosition(text, {static_cast<float>(x_px), static_cast<float>(y_px)});
+   sfcompat::setPosition(text, {static_cast<float>(x_px), centeredY(text, reference_rect)});
 }
 
 void MenuScreen::placeTextRightOf(sf::Text& text, const sf::FloatRect& reference_rect)
@@ -40,9 +71,7 @@ void MenuScreen::placeTextRightOf(sf::Text& text, const sf::FloatRect& reference
    const auto text_bounds = text.getLocalBounds();
    const auto x_px =
       static_cast<int32_t>(reference_rect.position.x + reference_rect.size.x + button_text_x_offset - text_bounds.position.x);
-   const auto y_px =
-      static_cast<int32_t>(reference_rect.position.y + (reference_rect.size.y - text_bounds.size.y) / 2.0f - text_bounds.position.y);
-   sfcompat::setPosition(text, {static_cast<float>(x_px), static_cast<float>(y_px)});
+   sfcompat::setPosition(text, {static_cast<float>(x_px), centeredY(text, reference_rect)});
 }
 
 void MenuScreen::placeDecorators(sf::Sprite& deco_left, sf::Sprite& deco_right, const sf::FloatRect& reference_rect)
