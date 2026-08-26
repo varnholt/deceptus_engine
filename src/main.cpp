@@ -58,6 +58,19 @@ void debugAuthors()
    std::cout << std::endl;
 }
 
+#ifdef _WIN32
+// On a laptop with both an integrated and a discrete GPU, Windows hands an OpenGL process the
+// integrated one unless it is told otherwise. Both vendors look for these exported symbols while the
+// process is loaded, before any context exists, and give it the discrete GPU when they are set.
+// A per application preference in the windows graphics settings still overrides this, which is what
+// the GPU row in the video options writes.
+extern "C"
+{
+   __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+   __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#endif
+
 #if defined(_WIN32) && !defined(DEBUG)
 int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/)
 #else
