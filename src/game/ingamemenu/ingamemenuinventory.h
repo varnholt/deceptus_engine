@@ -151,9 +151,10 @@ private:
    /// \param slot quick slot index to update.
    void assign(const std::string& item, int32_t slot);
 
-   /// \brief assigns the currently selected item to the requested quick-access slot.
+   /// \brief equips the currently selected item in the requested quick-access slot, or unequips it when it is already
+   ///        equipped there.
    /// \param slot quick slot index to update.
-   void assignSelectedItemToSlot(int32_t slot);
+   void toggleSelectedItemInSlot(int32_t slot);
 
    /// \brief computes grid-aligned frame position including active submenu move offsets.
    /// \param layer_data frame layer baseline position data.
@@ -198,8 +199,10 @@ private:
    std::unique_ptr<sf::Text> _text_title;
    std::unique_ptr<sf::Text> _text_description;
 
-   std::function<void(void)> _controller_button_x_pressed_callback;
-   std::function<void(void)> _controller_button_y_pressed_callback;
+   std::optional<int32_t> _controller_slot_0_button;  //!< controller button bound to slot 1, resolved on show()
+   std::optional<int32_t> _controller_slot_1_button;  //!< controller button bound to slot 2, resolved on show()
+   std::function<void(void)> _controller_slot_0_pressed_callback;
+   std::function<void(void)> _controller_slot_1_pressed_callback;
 
    using EventCallback = std::function<void(const sf::Event&)>;
    EventCallback _keyboard_event_handler;

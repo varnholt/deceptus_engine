@@ -3,6 +3,7 @@
 #include "framework/easings/easings.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/localization.h"
+#include "game/config/inputconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/event/eventdistributor.h"
 #include "game/ingamemenu/menuconfig.h"
@@ -100,6 +101,34 @@ std::string wrapTextWithinRect(const std::string& original_text, const sf::Float
    // add remaining text to the last line
    wrapped_text = wrapped_text + line;
    return wrapped_text;
+}
+
+std::optional<int32_t> getSlotForAction(KeyPressed action)
+{
+   if (action == KeyPressedSlot1)
+   {
+      return 0;
+   }
+
+   if (action == KeyPressedSlot2)
+   {
+      return 1;
+   }
+
+   return std::nullopt;
+}
+
+std::optional<int32_t> getControllerButtonForSlot(int32_t slot)
+{
+   const auto& action_to_controller_button = InputConfiguration::getInstance()._action_to_controller_button;
+   const auto& button_it = action_to_controller_button.find((slot == 0) ? KeyPressedSlot1 : KeyPressedSlot2);
+
+   if (button_it == action_to_controller_button.end())
+   {
+      return std::nullopt;
+   }
+
+   return button_it->second;
 }
 
 float getHorizontallyCenteredX(const sf::Text& text, const sf::FloatRect& rect)
@@ -570,12 +599,19 @@ void InGameMenuInventory::assign(const std::string& item, int32_t slot)
 #endif
 }
 
-void InGameMenuInventory::assignSelectedItemToSlot(int32_t slot)
+void InGameMenuInventory::toggleSelectedItemInSlot(int32_t slot)
 {
    const auto item = getSelectedItem();
 
    if (!item.has_value())
    {
+      return;
+   }
+
+   // pressing the slot button while the item is already equipped unequips it
+   if (getInventory()._slots[slot] == item.value())
+   {
+      assign("", slot);
       return;
    }
 
@@ -782,11 +818,25 @@ void InGameMenuInventory::show()
    const auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())
    {
-      _controller_button_x_pressed_callback = [this]() { assignSelectedItemToSlot(0); };
-      _controller_button_y_pressed_callback = [this]() { assignSelectedItemToSlot(1); };
+      _controller_slot_0_button = getControllerButtonForSlot(0);
+      _controller_slot_1_button = getControllerButtonForSlot(1);
 
-      gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_WEST, _controller_button_x_pressed_callback);
-      gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_NORTH, _controller_button_y_pressed_callback);
+      _controller_slot_0_pressed_callback = [this]() { toggleSelectedItemInSlot(0); };
+      _controller_slot_1_pressed_callback = [this]() { toggleSelectedItemInSlot(1); };
+
+      if (_controller_slot_0_button.has_value())
+      {
+         gji.getController()->addButtonPressedCallback(
+            static_cast<SDL_GamepadButton>(_controller_slot_0_button.value()), _controller_slot_0_pressed_callback
+         );
+      }
+
+      if (_controller_slot_1_button.has_value())
+      {
+         gji.getController()->addButtonPressedCallback(
+            static_cast<SDL_GamepadButton>(_controller_slot_1_button.value()), _controller_slot_1_pressed_callback
+         );
+      }
    }
 
    InGameMenuPage::show();
@@ -803,8 +853,22 @@ void InGameMenuInventory::hide()
    const auto& gji = GameControllerIntegration::getInstance();
    if (gji.isControllerConnected())
    {
-      gji.getController()->removeButtonPressedCallback(SDL_GAMEPAD_BUTTON_WEST, _controller_button_x_pressed_callback);
-      gji.getController()->removeButtonPressedCallback(SDL_GAMEPAD_BUTTON_NORTH, _controller_button_y_pressed_callback);
+      if (_controller_slot_0_button.has_value())
+      {
+         gji.getController()->removeButtonPressedCallback(
+            static_cast<SDL_GamepadButton>(_controller_slot_0_button.value()), _controller_slot_0_pressed_callback
+         );
+      }
+
+      if (_controller_slot_1_button.has_value())
+      {
+         gji.getController()->removeButtonPressedCallback(
+            static_cast<SDL_GamepadButton>(_controller_slot_1_button.value()), _controller_slot_1_pressed_callback
+         );
+      }
+
+      _controller_slot_0_button.reset();
+      _controller_slot_1_button.reset();
    }
 
    InGameMenuPage::hide();
@@ -830,21 +894,20 @@ sf::Vector2f InGameMenuInventory::getFramePosition(LayerData* layer_data, int32_
 
 void InGameMenuInventory::keyboardKeyPressed(sf::Keyboard::Key key)
 {
-   std::optional<int32_t> slot;
+   const auto& key_to_action = InputConfiguration::getInstance()._key_to_action;
+   const auto& action_it = key_to_action.find(key);
 
-   if (key == sf::Keyboard::Key::LControl)
+   if (action_it == key_to_action.end())
    {
-      slot = 0;
+      return;
    }
-   else if (key == sf::Keyboard::Key::LAlt)
-   {
-      slot = 1;
-   }
+
+   const auto slot = getSlotForAction(action_it->second);
 
    if (!slot.has_value())
    {
       return;
    }
 
-   assignSelectedItemToSlot(slot.value());
+   toggleSelectedItemInSlot(slot.value());
 }
