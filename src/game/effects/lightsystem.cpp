@@ -453,17 +453,22 @@ void LightSystem::updateActiveLights()
    _active_lights.clear();
 
    auto* player_body = PlayerRegistry::getFirst()->getBody();
+   const auto& level_view = *LevelRegistry::getCurrent()->getLevelView();
 
    for (const auto& light : _lights)
    {
-      if (!light->_enabled)
+      if (!light->_enabled || !light->_sprite)
       {
          continue;
       }
 
-      // don't draw lights that are too far away
-      auto distanceToPlayer = (player_body->GetWorldCenter() - light->_pos_m).LengthSquared();
-      if (distanceToPlayer > max_distance_m2)
+      // a light can only change a pixel where its own sprite lands, so whether that sprite reaches
+      // the view is what decides if it is live. clipViewToLight is the same test draw runs per
+      // light, which is the point of reusing it: anything that fails here would have been skipped
+      // there anyway, except there it has already taken one of the six channels and drawn nothing.
+      // distance to the player is not a substitute - the camera leads the player and clamps to
+      // rooms, so a light behind the camera can sit closer than one that is actually on screen
+      if (!clipViewToLight(level_view, light->_sprite->getGlobalBounds()).has_value())
       {
          continue;
       }

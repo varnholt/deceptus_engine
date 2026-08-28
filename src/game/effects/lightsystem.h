@@ -97,7 +97,8 @@ public:
    /// \return newly created light instance with default smooth texture overridden by json values.
    static std::shared_ptr<LightSystem::LightInstance> createLightInstance(GameNode* parent, const nlohmann::json& node);
 
-   /// \brief picks the lights that will be drawn this frame, closest to the player first.
+   /// \brief picks the lights that will be drawn this frame: those whose sprite reaches the view,
+   ///        closest to the player first.
    ///
    /// Split out of draw so the rest of the frame can ask which lights are live before the light map
    /// is rendered: the light map pass runs after the level layers, but the layers already need to
