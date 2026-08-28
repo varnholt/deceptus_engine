@@ -135,6 +135,11 @@ constexpr auto map_revealed_key = "__map_revealed";
 //! does so through the 'pickup_event' property of its extra.
 constexpr auto map_reveal_event = "reveal_map";
 
+//! a tangent space normal pointing straight at the viewer, i.e. the encoding of (0, 0, 1). it is
+//! what the normal target starts every frame as, so surfaces that never write a normal of their own
+//! are still lit as if they faced the camera.
+constexpr auto flat_normal_color = sf::Color{128, 128, 255, 255};
+
 bool checkUpdateMechanism(const auto& player_chunk, const auto& mechanism)
 {
    auto update_mechanism = true;
@@ -1731,15 +1736,22 @@ void Level::draw(const std::shared_ptr<sf::RenderTexture>& window, bool screensh
    // the other pair needs no clear - with the atmosphere on screen the resolve below blits a full
    // screen sprite of an opaque target over the whole of level and normal, and with it off screen
    // there is no second pair at all. so the frame pays for two clears either way rather than four
+   //
+   // the normal target starts flat rather than black. the deferred shader decodes every normal it
+   // reads as normalize(rgb * 2 - 1), so a black pixel is not "no normal" but normalize(-1, -1, -1)
+   // - one fixed direction that lights whatever sits on it from a single side. image layers and
+   // anything else without a normal map write nothing at all, so that is exactly what they would be
+   // shaded with. flat leaves them facing the viewer, which is the surface the light falls off
+   // around evenly.
    if (_atmosphere_visible)
    {
       _render_targets.level_background->clear();
-      _render_targets.normal_tmp->clear();
+      _render_targets.normal_tmp->clear(flat_normal_color);
    }
    else
    {
       _render_targets.level->clear();
-      _render_targets.normal->clear();
+      _render_targets.normal->clear(flat_normal_color);
    }
    markRenderSection("clear level targets");
 
