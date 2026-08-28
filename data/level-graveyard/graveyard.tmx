@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="768" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="51" nextobjectid="68">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="768" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="52" nextobjectid="71">
  <tileset firstgid="1" source="graveyard-background-diffuse.tsx"/>
  <tileset firstgid="4097" source="graveyard-level-diffuse.tsx"/>
  <imagelayer id="25" name="gv-bg-sky" offsetx="576" offsety="1320">
@@ -1903,7 +1903,18 @@
   </object>
  </objectgroup>
  <objectgroup id="50" name="interaction_help">
-  <object id="66" x="5489.33" y="1436.5" width="85.6667" height="75.5">
+  <object id="66" name="shrine_help_take" x="5489.33" y="1436.5" width="85.6667" height="75.5">
+   <properties>
+    <property name="animation" value="read"/>
+    <property name="button_1" value="key_return"/>
+    <property name="offset_x_px" type="int" value="44"/>
+    <property name="offset_y_px" type="int" value="-10"/>
+    <property name="text" value="Examine"/>
+    <property name="text_1" value="Take"/>
+    <property name="z" type="int" value="50"/>
+   </properties>
+  </object>
+  <object id="68" name="shrine_help_examine" x="5489.33" y="1436.5" width="85.6667" height="75.5">
    <properties>
     <property name="animation" value="read"/>
     <property name="offset_x_px" type="int" value="44"/>
@@ -1915,7 +1926,7 @@
  </objectgroup>
  <objectgroup id="15" name="fireflies" visible="0"/>
  <objectgroup id="14" name="dialogues">
-  <object id="67" x="5489.33" y="1436.46" width="86" height="76.0769">
+  <object id="67" name="shrine_dialogue" x="5489.33" y="1436.46" width="86" height="76.0769">
    <properties>
     <property name="01" value="A stone shrine with an owl. "/>
     <property name="01_background_color" type="color" value="#ff101ad4"/>
@@ -1930,10 +1941,25 @@
     <property name="pause_game" type="bool" value="false"/>
    </properties>
   </object>
+  <object id="69" name="rubies_acquired" x="5520" y="1464" width="24" height="24">
+   <properties>
+    <property name="01" value="You have acquired the [color:#FEBA00FF] Rubies [/color]"/>
+    <property name="01_background_color" type="color" value="#ff8826ff"/>
+    <property name="01_text_color" type="color" value="#ffffffff"/>
+    <property name="01_x_px" type="int" value="0"/>
+    <property name="01_y_px" type="int" value="-70"/>
+    <property name="open_on_intersect" type="bool" value="false"/>
+    <property name="pause_game" type="bool" value="false"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="51" name="button_rects">
+  <object id="70" name="shrine_rect" x="5472" y="1440" width="96" height="48"/>
  </objectgroup>
  <objectgroup id="13" name="weather" visible="0">
   <object id="31" name="thunderstorm" x="696" y="696" width="14376" height="1080">
    <properties>
+    <property name="enabled" type="bool" value="false"/>
     <property name="sound_volume" type="float" value="0.8"/>
     <property name="sounds" value="weather_thunder_01.ogg;weather_thunder_02.ogg;weather_thunder_03.ogg;weather_thunder_04.ogg;weather_thunder_05.ogg"/>
     <property name="z" type="int" value="2"/>
