@@ -239,6 +239,28 @@ Shows or hides all mechanisms matching the search pattern.
 |3|string|Mechanism group (optional)|
 
 
+## `flashScreen`
+
+Flashes the whole screen in a given colour, at full strength on the triggering
+frame and then eased out.
+
+This is not a screen transition. `ScreenTransition` sets
+`Display::ScreenTransition`, which forces the player into an idle pose for as
+long as it runs, so a short flash would snap him out of a run mid-stride.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|number|Red, 0-255|
+|2|number|Green, 0-255|
+|3|number|Blue, 0-255|
+|4|number|Peak opacity, 0-1|
+|5|number|Seconds the flash needs to fade out|
+
+```lua
+flashScreen(255, 244, 214, 0.55, 0.45)
+```
+
+
 ## `flashMechanism`
 
 Triggers a colour flash on all matching `RingShaderLayer` mechanisms.
@@ -453,9 +475,30 @@ checkpoint has been reached yet. Takes no parameters.
 |1|int|Reached checkpoint index, or -1|
 
 
+## `addSample`
+
+Loads a sound sample so it can be played later.
+
+Samples are not loaded just because the file sits in the sound directory. A
+sample that has not been added is silently skipped by `playSound`, with
+`sample not found` in the log. Load a level's own samples from `initialize()`;
+samples used across the whole game live in `Audio::initializeSamples` instead.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Audio sample identifier|
+
+```lua
+function initialize()
+   addSample("owl_eyes_insert.ogg")
+end
+```
+
+
 ## `playSound`
 
-Plays a one-shot sound effect.
+Plays a one-shot sound effect. The sample must have been loaded with
+`addSample` first.
 
 |Parameter Position|Type|Description|
 |-|-|-|
