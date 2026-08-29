@@ -80,30 +80,27 @@ float evaluateHeartbeat(float phase, float second_beat_strength, float beat_widt
    return std::min(first_beat + second_beat, 1.0f);
 }
 
-// disabling the ring cuts its power rather than hiding it. it stutters the way a tube does when
-// the plug comes out, then whips shut onto the sword.
+// a released ring does not collapse onto the sword, it lets go outwards: the band accelerates
+// away across the whole screen and thins out as it goes, so the last of it passes the player
+// rather than disappearing in front of him. nothing is ever cut.
 //
-//   drawn    |###  ## ####################
-//   hidden   |   ##  #
-//            +----------------------------+
-//            0                            1   progress
+//   scale    |                 _--
+//            |           __--''
+//            |'''-----'''
+//   dissolve |               __--''
+//            |''''''''---.--'
+//            +------------------------+
+//            0                        1   progress
 //
+// the dissolve has to be finished before the band's glow reaches the quad's edge or it would be
+// cut off in a straight line, which is what ties the ceiling below to the size of the tmx object.
+constexpr auto power_down_scale_ceiling = 10.0f;
+constexpr auto power_down_dissolve_ceiling = 1.05f;
+constexpr auto power_down_dissolve_end = 0.85f;
+
 // the nearest point on the player rect hops between the rect's edges as he moves, and the
 // physics resolution jitters it further, so the contact angle is eased rather than followed.
 constexpr auto touch_angle_smoothing_s = 0.08f;
-
-constexpr auto power_down_first_gap_start = 0.08f;
-constexpr auto power_down_first_gap_end = 0.15f;
-constexpr auto power_down_second_gap_start = 0.22f;
-constexpr auto power_down_second_gap_end = 0.25f;
-
-bool isPowerDownFlickerHidden(float progress)
-{
-   const auto in_first_gap = (progress >= power_down_first_gap_start && progress < power_down_first_gap_end);
-   const auto in_second_gap = (progress >= power_down_second_gap_start && progress < power_down_second_gap_end);
-
-   return in_first_gap || in_second_gap;
-}
 
 float evaluateFlashEnvelope(float elapsed_s, float duration_s)
 {
@@ -152,6 +149,7 @@ void RingShaderLayer::checkUniforms(const std::string& shader_path)
    _has_u_flash_intensity = shader_source.find("u_flash_intensity;") != std::string::npos;
    _has_u_touch = shader_source.find("u_touch_intensity;") != std::string::npos;
    _has_u_push = shader_source.find("u_push;") != std::string::npos;
+   _has_u_dissolve = shader_source.find("u_dissolve;") != std::string::npos;
 }
 #endif
 
@@ -182,7 +180,7 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
 void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-   if (!_shader.isLoaded() || _power_down_progress >= 1.0f || isPowerDownFlickerHidden(_power_down_progress))
+   if (!_shader.isLoaded() || _power_down_progress >= 1.0f)
    {
       return;
    }
@@ -198,13 +196,14 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, c
    _shader.setUniform("u_touch_intensity", _touch_intensity);
    _shader.setUniform("u_touch_width", _touch_width);
    _shader.setUniform("u_push", sf::Glsl::Vec2{_push_offset_px.x / _size.x, _push_offset_px.y / _size.y});
+   _shader.setUniform("u_dissolve", currentDissolve());
 
    ShaderLayer::draw(target, normal, states);
 }
 #else
 void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
-   if (_power_down_progress >= 1.0f || isPowerDownFlickerHidden(_power_down_progress))
+   if (_power_down_progress >= 1.0f)
    {
       return;
    }
@@ -239,6 +238,11 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
    if (_has_u_push)
    {
       _shader.setUniform("u_push", sf::Glsl::Vec2{_push_offset_px.x / _size.x, _push_offset_px.y / _size.y});
+   }
+
+   if (_has_u_dissolve)
+   {
+      _shader.setUniform("u_dissolve", currentDissolve());
    }
 
    ShaderLayer::draw(target, normal);
@@ -289,12 +293,19 @@ void RingShaderLayer::update(const sf::Time& dt)
    }
 }
 
+float RingShaderLayer::currentDissolve() const
+{
+   const auto dissolve_progress = std::min(_power_down_progress / power_down_dissolve_end, 1.0f);
+
+   return power_down_dissolve_ceiling * Easings::easeInCubic<float>(dissolve_progress);
+}
+
 float RingShaderLayer::currentRingScale() const
 {
    const auto beat_scale = std::lerp(1.0f, _heartbeat_scale, _heartbeat_pulse);
 
-   // once the power is cut the band whips shut onto the sword
-   const auto power_down_scale = 1.0f - Easings::easeInCubic<float>(_power_down_progress);
+   // accelerating rather than easing, so it reads as leaving instead of growing
+   const auto power_down_scale = std::lerp(1.0f, power_down_scale_ceiling, Easings::easeInCubic<float>(_power_down_progress));
 
    return _ring_scale * beat_scale * power_down_scale;
 }

@@ -11,6 +11,7 @@ uniform float     u_touch_angle;     //!< angle the player is pressing against t
 uniform float     u_touch_intensity; //!< how deep the band is pushed in there; 0 = untouched
 uniform float     u_touch_width;     //!< angular falloff of the dent, radians
 uniform vec2      u_push;            //!< whole-ring displacement in uv units, away from the last hit
+uniform float     u_dissolve;        //!< raises the alpha cutoff; 0 = powered, 1 = gone
 
 in vec2 sf_v_texCoord;
 
@@ -80,6 +81,16 @@ void main()
     float touch_falloff     = exp(-(angular_distance * angular_distance) / (u_touch_width * u_touch_width));
     p *= (1.0 + u_touch_intensity * touch_falloff);
 
+    // the band only ever lives in a thin annulus around length 14/12, however large the quad is.
+    // everything outside it costs twelve texture fetches to produce nothing, so skip it: this is
+    // what lets the quad be screen sized without paying for a screen of fbm every frame.
+    float ring_space_radius = length(p);
+    if (ring_space_radius < 0.6 || ring_space_radius > 2.2)
+    {
+        sf_fragColor = vec4(0.0);
+        return;
+    }
+
     float fbm_value = fbm(p);
     vec2  offset    = vec2(p.x / 14.0, p.y / 14.0);
     float effect    = abs(-circularEffect(offset));
@@ -93,7 +104,7 @@ void main()
     vec3 output_color = mix(base_color, u_flash_color, u_flash_intensity);
 
     // threshold cuts near-black pixels to fully transparent, preventing colour bleed onto adjacent layers
-    sf_fragColor = vec4(output_color, clamp(brightness - 0.05, 0.0, 1.0));
+    sf_fragColor = vec4(output_color, clamp(brightness - 0.05 - u_dissolve, 0.0, 1.0));
 }
 #else
 uniform float     u_time;
@@ -108,6 +119,7 @@ uniform float     u_touch_angle;     //!< angle the player is pressing against t
 uniform float     u_touch_intensity; //!< how deep the band is pushed in there; 0 = untouched
 uniform float     u_touch_width;     //!< angular falloff of the dent, radians
 uniform vec2      u_push;            //!< whole-ring displacement in uv units, away from the last hit
+uniform float     u_dissolve;        //!< raises the alpha cutoff; 0 = powered, 1 = gone
 
 #define TIME (u_time * 0.15)
 
@@ -173,6 +185,16 @@ void main()
     float touch_falloff     = exp(-(angular_distance * angular_distance) / (u_touch_width * u_touch_width));
     p *= (1.0 + u_touch_intensity * touch_falloff);
 
+    // the band only ever lives in a thin annulus around length 14/12, however large the quad is.
+    // everything outside it costs twelve texture fetches to produce nothing, so skip it: this is
+    // what lets the quad be screen sized without paying for a screen of fbm every frame.
+    float ring_space_radius = length(p);
+    if (ring_space_radius < 0.6 || ring_space_radius > 2.2)
+    {
+        gl_FragColor = vec4(0.0);
+        return;
+    }
+
     float fbm_value = fbm(p);
     vec2  offset    = vec2(p.x / 14.0, p.y / 14.0);
     float effect    = abs(-circularEffect(offset));
@@ -186,6 +208,6 @@ void main()
     vec3 output_color = mix(base_color, u_flash_color, u_flash_intensity);
 
     // threshold cuts near-black pixels to fully transparent, preventing colour bleed onto adjacent layers
-    gl_FragColor = vec4(output_color, clamp(brightness - 0.05, 0.0, 1.0));
+    gl_FragColor = vec4(output_color, clamp(brightness - 0.05 - u_dissolve, 0.0, 1.0));
 }
 #endif
