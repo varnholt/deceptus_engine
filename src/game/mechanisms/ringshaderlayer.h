@@ -66,6 +66,7 @@ private:
    bool _has_u_flash_color = false;
    bool _has_u_flash_intensity = false;
    bool _has_u_touch = false;
+   bool _has_u_push = false;
 #endif
 
    float _ring_scale = 1.0f / 3.0f;                //!< ring size relative to the quad; TMX property "ring_scale"
@@ -89,6 +90,10 @@ private:
    float _touch_angle = 0.0f;       //!< angle the player is currently pressing against
    float _touch_intensity = 0.0f;   //!< current dent strength, 0 when nothing is touching
    bool _touched = false;           //!< whether the player was against the band last frame
+
+   float _push_px = 7.0f;           //!< how far the whole ring recoils from a hit; TMX property "push_px"
+   float _push_release_s = 0.6f;    //!< time the ring needs to drift back onto the sword; TMX property "push_release_s"
+   sf::Vector2f _push_offset_px{};  //!< current displacement of the whole ring, away from the last hit
 
    float _power_down_s = 0.35f;        //!< time the ring needs to die after being disabled; TMX property "power_down_s"
    float _power_down_progress = 0.0f;  //!< 0 while powered, 1 once the ring has gone out for good

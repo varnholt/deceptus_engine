@@ -151,6 +151,7 @@ void RingShaderLayer::checkUniforms(const std::string& shader_path)
    _has_u_flash_color = shader_source.find("u_flash_color;") != std::string::npos;
    _has_u_flash_intensity = shader_source.find("u_flash_intensity;") != std::string::npos;
    _has_u_touch = shader_source.find("u_touch_intensity;") != std::string::npos;
+   _has_u_push = shader_source.find("u_push;") != std::string::npos;
 }
 #endif
 
@@ -168,6 +169,8 @@ void RingShaderLayer::readCustomProperties(const GameDeserializeData& data)
    _touch_width = ValueReader::readValue<float>("touch_width", map).value_or(_touch_width);
    _touch_release_s = ValueReader::readValue<float>("touch_release_s", map).value_or(_touch_release_s);
    _power_down_s = ValueReader::readValue<float>("power_down_s", map).value_or(_power_down_s);
+   _push_px = ValueReader::readValue<float>("push_px", map).value_or(_push_px);
+   _push_release_s = ValueReader::readValue<float>("push_release_s", map).value_or(_push_release_s);
 }
 
 #ifdef DECEPTUS_VRSFML
@@ -193,6 +196,7 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, c
    _shader.setUniform("u_touch_angle", _touch_angle);
    _shader.setUniform("u_touch_intensity", _touch_intensity);
    _shader.setUniform("u_touch_width", _touch_width);
+   _shader.setUniform("u_push", sf::Glsl::Vec2{_push_offset_px.x / _size.x, _push_offset_px.y / _size.y});
 
    ShaderLayer::draw(target, normal, states);
 }
@@ -231,6 +235,11 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
       _shader.setUniform("u_touch_width", _touch_width);
    }
 
+   if (_has_u_push)
+   {
+      _shader.setUniform("u_push", sf::Glsl::Vec2{_push_offset_px.x / _size.x, _push_offset_px.y / _size.y});
+   }
+
    ShaderLayer::draw(target, normal);
 }
 #endif
@@ -248,6 +257,7 @@ void RingShaderLayer::update(const sf::Time& dt)
       _heartbeat_pulse = 0.0f;
       _touch_intensity = 0.0f;
       _touched = false;
+      _push_offset_px = {};
       return;
    }
 
@@ -332,6 +342,10 @@ void RingShaderLayer::updateTouch(const sf::Time& dt)
 
          // and the ward beats the moment it is touched
          _heartbeat_elapsed_s = 0.0f;
+
+         // the whole ring gives ground, away from the side it was hit from. set rather than
+         // accumulated, so leaning on it cannot walk the ring off the sword.
+         _push_offset_px = {-std::cos(target_angle) * _push_px, -std::sin(target_angle) * _push_px};
       }
 
       _touch_intensity = _touch_depth;
@@ -342,6 +356,13 @@ void RingShaderLayer::updateTouch(const sf::Time& dt)
    }
 
    _touched = touching;
+
+   // it drifts back onto the sword whether or not he is still against it. the ring has a job.
+   if (_push_release_s > 0.0f)
+   {
+      const auto recovered = std::max(1.0f - dt.asSeconds() / _push_release_s, 0.0f);
+      _push_offset_px = {_push_offset_px.x * recovered, _push_offset_px.y * recovered};
+   }
 }
 
 void RingShaderLayer::setEnabled(bool enabled)

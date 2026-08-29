@@ -10,6 +10,7 @@ uniform float     u_flash_intensity; //!< 0 = no flash, 1 = full flash color
 uniform float     u_touch_angle;     //!< angle the player is pressing against the band, radians
 uniform float     u_touch_intensity; //!< how deep the band is pushed in there; 0 = untouched
 uniform float     u_touch_width;     //!< angular falloff of the dent, radians
+uniform vec2      u_push;            //!< whole-ring displacement in uv units, away from the last hit
 
 in vec2 sf_v_texCoord;
 
@@ -64,6 +65,9 @@ void main()
     vec2 p_pixelated = floor(frag_coord / u_pixel_size) * u_pixel_size;
     vec2 p           = p_pixelated / u_resolution - 0.5;
 
+    // the whole ring recoils away from whatever last hit it, then drifts back onto the sword
+    p -= u_push;
+
     p += vec2(sin(TIME * 15.0) * 0.01, 0.0);
     p.x *= u_resolution.x / u_resolution.y;
     p   /= u_ring_scale;    // Shadertoy used p *= 5.0; equivalent when u_ring_scale = 0.2
@@ -103,6 +107,7 @@ uniform float     u_flash_intensity; //!< 0 = no flash, 1 = full flash color
 uniform float     u_touch_angle;     //!< angle the player is pressing against the band, radians
 uniform float     u_touch_intensity; //!< how deep the band is pushed in there; 0 = untouched
 uniform float     u_touch_width;     //!< angular falloff of the dent, radians
+uniform vec2      u_push;            //!< whole-ring displacement in uv units, away from the last hit
 
 #define TIME (u_time * 0.15)
 
@@ -152,6 +157,9 @@ void main()
     vec2 frag_coord  = gl_TexCoord[0].xy * u_resolution;
     vec2 p_pixelated = floor(frag_coord / u_pixel_size) * u_pixel_size;
     vec2 p           = p_pixelated / u_resolution - 0.5;
+
+    // the whole ring recoils away from whatever last hit it, then drifts back onto the sword
+    p -= u_push;
 
     p += vec2(sin(TIME * 15.0) * 0.01, 0.0);
     p.x *= u_resolution.x / u_resolution.y;
