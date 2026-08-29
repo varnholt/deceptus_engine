@@ -34,6 +34,11 @@ _sword_cage_ids = {"sword_cage_01", "sword_cage_02", "sword_cage_03", "sword_cag
 _shrine_inserted_last = nil
 _shrine_carrying_last = nil
 
+-- the rubies seat with a sound, and the ward only lets go once that has landed
+_shrine_insert_sample = "mechanism_switch_lever_insert.ogg"
+_shrine_release_delay_s = 0.45
+_release_sword_ring_at = -1.0
+
 _sword_pickup_flash_color = {r = 255, g = 244, b = 214}
 _sword_pickup_flash_intensity = 0.55
 _sword_pickup_flash_duration_s = 0.45
@@ -87,9 +92,25 @@ end
 --
 function setOwlEyesInserted(inserted)
    setMechanismVisible("owl-eyes", inserted, "imagelayers")
-   setMechanismEnabled("sword_ring", not inserted, "shader_quads")
-   setSwordCageEnabled(not inserted)
    setMechanismEnabled("shrine_dialogue", not inserted, "dialogues")
+   releaseSwordRing(inserted)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- the ring expanding away and the cage opening are the same moment: the ward stops holding on
+function releaseSwordRing(released)
+   setMechanismEnabled("sword_ring", not released, "shader_quads")
+   setSwordCageEnabled(not released)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function updateShrineRelease()
+   if (_release_sword_ring_at >= 0.0 and _elapsed >= _release_sword_ring_at) then
+      _release_sword_ring_at = -1.0
+      releaseSwordRing(true)
+   end
 end
 
 
@@ -123,8 +144,12 @@ function insertOwlEyes()
    addTreasure(_owl_eyes_inserted_treasure)
    inventoryRemove(_owl_eye_item)
 
-   setOwlEyesInserted(true)
+   setMechanismVisible("owl-eyes", true, "imagelayers")
+   setMechanismEnabled("shrine_dialogue", false, "dialogues")
    updateShrineHelp(true)
+
+   playSound(_shrine_insert_sample)
+   _release_sword_ring_at = _elapsed + _shrine_release_delay_s
 end
 
 
@@ -401,6 +426,7 @@ function update(dt)
 
    updateLeverSpike()
    updateShrine()
+   updateShrineRelease()
 
    updateMonk(dt)
    updateSwimAllowed(dt)
