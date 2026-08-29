@@ -1222,7 +1222,11 @@ does not cost a large amount of fill.
 |power_down_s|float|Seconds the ring takes to expand away and fade once the mechanism is disabled.|
 
 The usual shader quad properties apply as well: `fragment_shader`, `vertex_shader`, `texture`,
-`smooth_texture` and `z`.
+`smooth_texture`, `time_offset_s` and `z`.
+
+`uv_width` and `uv_height` are deliberately not offered here. A ring reads its texture coordinate
+as a normalised screen position rather than as a lookup into a texture, so scaling it moves and
+stretches the ring instead of doing anything useful.
 
 ### Contact
 

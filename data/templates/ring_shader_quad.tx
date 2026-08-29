@@ -17,6 +17,7 @@
    <property name="ring_scale" type="float" value="0.052083"/>
    <property name="smooth_texture" type="bool" value="true"/>
    <property name="texture" value="data/effects/grainy.png"/>
+   <property name="time_offset_s" type="float" value="0"/>
    <property name="touch_depth" type="float" value="0.22"/>
    <property name="touch_release_s" type="float" value="0.35"/>
    <property name="touch_width" type="float" value="0.55"/>

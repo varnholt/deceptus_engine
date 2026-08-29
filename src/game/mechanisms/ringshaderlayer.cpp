@@ -59,6 +59,7 @@ static constexpr std::array ring_shader_quad_properties{
       .template_value = std::string_view{"data/effects/grainy.png"}
    },
    PropertyInfo{.name = "smooth_texture", .type = "bool", .default_value = false, .template_value = true},
+   PropertyInfo{.name = "time_offset_s", .type = "float", .default_value = 0.0f},
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
 
    // the band sits at 14/12 in ring space, so its radius on screen is
