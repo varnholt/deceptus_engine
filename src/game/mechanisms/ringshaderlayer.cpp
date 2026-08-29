@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 #ifndef DECEPTUS_VRSFML
 #include <fstream>
 #include <sstream>
@@ -87,6 +88,10 @@ float evaluateHeartbeat(float phase, float second_beat_strength, float beat_widt
 //            +----------------------------+
 //            0                            1   progress
 //
+// the nearest point on the player rect hops between the rect's edges as he moves, and the
+// physics resolution jitters it further, so the contact angle is eased rather than followed.
+constexpr auto touch_angle_smoothing_s = 0.08f;
+
 constexpr auto power_down_first_gap_start = 0.08f;
 constexpr auto power_down_first_gap_end = 0.15f;
 constexpr auto power_down_second_gap_start = 0.22f;
@@ -287,9 +292,12 @@ void RingShaderLayer::updateTouch(const sf::Time& dt)
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
    const auto center = sf::Vector2f{_position.x + _size.x * 0.5f, _position.y + _size.y * 0.5f};
 
-   // the band sits where circularEffect crosses zero, i.e. at a length of 14/12 in ring space
+   // the band sits where circularEffect crosses zero, i.e. at a length of 14/12 in ring space.
+   // deliberately the resting radius, without the beat: a band that moves with the heartbeat would
+   // slide past a player standing at its edge, and since contact restarts the beat that feeds back
+   // into itself and the ring shakes.
    constexpr auto band_length = 14.0f / 12.0f;
-   const auto band_radius_px = band_length * _ring_scale * std::lerp(1.0f, _heartbeat_scale, _heartbeat_pulse) * _size.x;
+   const auto band_radius_px = band_length * _ring_scale * _size.x;
 
    // nearest and farthest corner of the player rect decide whether the circle cuts through it
    const auto clamped_x = std::clamp(center.x, player_rect.position.x, player_rect.position.x + player_rect.size.x);
@@ -308,11 +316,21 @@ void RingShaderLayer::updateTouch(const sf::Time& dt)
    if (touching)
    {
       // the shader works in texture space, where y points up, so the world offset is flipped
-      _touch_angle = std::atan2(-nearest.y, nearest.x);
+      const auto target_angle = std::atan2(-nearest.y, nearest.x);
 
-      // the ward beats the moment it is touched
-      if (!_touched)
+      if (_touched)
       {
+         // ease around the ring the short way, so crossing the wrap point does not spin the dent
+         auto angle_delta = target_angle - _touch_angle;
+         angle_delta = std::remainder(angle_delta, 2.0f * std::numbers::pi_v<float>);
+         _touch_angle += angle_delta * std::min(dt.asSeconds() / touch_angle_smoothing_s, 1.0f);
+      }
+      else
+      {
+         // first frame of contact, the dent belongs where he actually is
+         _touch_angle = target_angle;
+
+         // and the ward beats the moment it is touched
          _heartbeat_elapsed_s = 0.0f;
       }
 
