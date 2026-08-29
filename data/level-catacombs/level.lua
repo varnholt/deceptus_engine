@@ -215,6 +215,10 @@ function initialize()
    -- log("initialize catacombs level script")
    setInfoLayerVisible(true)
 
+   -- samples have to be loaded before they can be played
+   addSample(_shrine_insert_sample)
+   addSample(_shrine_release_sample)
+
    -- the sewers get their own track. checkpoint 1 sits behind the sewers entrance, so from there
    -- on the sewers track is what the level starts with - also after dying or reloading the level.
    music_zones.configure({

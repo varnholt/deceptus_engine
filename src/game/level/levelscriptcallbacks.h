@@ -69,6 +69,7 @@ int32_t unlockCamera(lua_State* state);
 int32_t setPlayerVisible(lua_State* state);
 int32_t setInfoLayerVisible(lua_State* state);
 int32_t nextLevel(lua_State* state);
+int32_t addSample(lua_State* state);
 int32_t playSound(lua_State* state);
 
 // cutscene sprites
