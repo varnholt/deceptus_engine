@@ -1059,6 +1059,11 @@
                     "value": "data/effects/grainy.png"
                 },
                 {
+                    "name": "time_offset_s",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
                     "name": "touch_depth",
                     "type": "float",
                     "value": 0.2199999988079071
