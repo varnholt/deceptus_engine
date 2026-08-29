@@ -238,6 +238,8 @@ set(GAME_FILES
     src/game/effects/fadetransitioneffect.h
     src/game/effects/lightsystem.cpp
     src/game/effects/lightsystem.h
+    src/game/effects/screenflash.cpp
+    src/game/effects/screenflash.h
     src/game/effects/screentransition.cpp
     src/game/effects/screentransition.h
     src/game/effects/screentransitioneffect.cpp

@@ -18,6 +18,7 @@
 #include "game/debug/debugdrawstates.h"
 #include "game/debug/mechanismschemawriter.h"
 #include "game/effects/fadetransitioneffect.h"
+#include "game/effects/screenflash.h"
 #include "game/effects/screentransition.h"
 #include "game/event/eventdistributor.h"
 #include "game/level/level.h"
@@ -807,6 +808,7 @@ void Game::draw()
    _screenshot = false;
 
    ScreenTransitionHandler::getInstance().draw(_window_render_texture);
+   ScreenFlash::getInstance().draw(_window_render_texture);
 
 #ifdef DEVELOPMENT_MODE
    _draw_section_timer.mark("post processing resolve");
@@ -1134,6 +1136,7 @@ void Game::update()
 
    // update screen transitions here
    ScreenTransitionHandler::getInstance().update(dt);
+   ScreenFlash::getInstance().update(dt);
 
    // reload the level when the save state has been invalidated, that means when a state is selected from the menu
    if (SaveState::getCurrent()._load_level_requested)
