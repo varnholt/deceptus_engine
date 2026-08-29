@@ -96,7 +96,7 @@ float evaluateHeartbeat(float phase, float second_beat_strength, float beat_widt
 // cut off in a straight line, which is what ties the ceiling below to the size of the tmx object.
 constexpr auto power_down_scale_ceiling = 10.0f;
 constexpr auto power_down_dissolve_ceiling = 1.05f;
-constexpr auto power_down_dissolve_end = 0.85f;
+constexpr auto power_down_dissolve_end = 0.7f;
 
 // the nearest point on the player rect hops between the rect's edges as he moves, and the
 // physics resolution jitters it further, so the contact angle is eased rather than followed.
@@ -304,8 +304,9 @@ float RingShaderLayer::currentRingScale() const
 {
    const auto beat_scale = std::lerp(1.0f, _heartbeat_scale, _heartbeat_pulse);
 
-   // accelerating rather than easing, so it reads as leaving instead of growing
-   const auto power_down_scale = std::lerp(1.0f, power_down_scale_ceiling, Easings::easeInCubic<float>(_power_down_progress));
+   // quadratic rather than cubic: it still builds, but it creeps for a moment first instead of
+   // sitting still and then bolting
+   const auto power_down_scale = std::lerp(1.0f, power_down_scale_ceiling, Easings::easeInQuad<float>(_power_down_progress));
 
    return _ring_scale * beat_scale * power_down_scale;
 }

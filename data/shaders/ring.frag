@@ -71,7 +71,7 @@ void main()
 
     // the sway is a fixed distance on screen, not a fraction of the quad: the quad is sized for
     // the release to expand into, and a fraction of it would sway the ring several pixels
-    p += vec2(sin(TIME * 15.0) * (1.7 / u_resolution.x), 0.0);
+    p += vec2(sin(TIME * 15.0) * (0.6 / u_resolution.x), 0.0);
     p.x *= u_resolution.x / u_resolution.y;
     p   /= u_ring_scale;    // Shadertoy used p *= 5.0; equivalent when u_ring_scale = 0.2
 
@@ -177,7 +177,7 @@ void main()
 
     // the sway is a fixed distance on screen, not a fraction of the quad: the quad is sized for
     // the release to expand into, and a fraction of it would sway the ring several pixels
-    p += vec2(sin(TIME * 15.0) * (1.7 / u_resolution.x), 0.0);
+    p += vec2(sin(TIME * 15.0) * (0.6 / u_resolution.x), 0.0);
     p.x *= u_resolution.x / u_resolution.y;
     p   /= u_ring_scale;    // Shadertoy used p *= 5.0; equivalent when u_ring_scale = 0.2
 
