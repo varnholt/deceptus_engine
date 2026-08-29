@@ -91,9 +91,11 @@ private:
    float _touch_intensity = 0.0f;   //!< current dent strength, 0 when nothing is touching
    bool _touched = false;           //!< whether the player was against the band last frame
 
-   float _push_px = 7.0f;           //!< how far the whole ring recoils from a hit; TMX property "push_px"
+   float _push_px = 10.0f;          //!< how far the whole ring recoils from a hit; TMX property "push_px"
+   float _hit_attack_s = 0.09f;     //!< time the ring takes to react to a hit; TMX property "hit_attack_s"
    float _push_release_s = 0.6f;    //!< time the ring needs to drift back onto the sword; TMX property "push_release_s"
-   sf::Vector2f _push_offset_px{};  //!< current displacement of the whole ring, away from the last hit
+   sf::Vector2f _push_target_px{};  //!< where the recoil is aimed, falls back toward zero on its own
+   sf::Vector2f _push_offset_px{};  //!< current displacement of the whole ring, chases the aim point
 
    float _power_down_s = 0.35f;        //!< time the ring needs to die after being disabled; TMX property "power_down_s"
    float _power_down_progress = 0.0f;  //!< 0 while powered, 1 once the ring has gone out for good

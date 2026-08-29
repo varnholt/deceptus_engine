@@ -171,6 +171,7 @@ void RingShaderLayer::readCustomProperties(const GameDeserializeData& data)
    _power_down_s = ValueReader::readValue<float>("power_down_s", map).value_or(_power_down_s);
    _push_px = ValueReader::readValue<float>("push_px", map).value_or(_push_px);
    _push_release_s = ValueReader::readValue<float>("push_release_s", map).value_or(_push_release_s);
+   _hit_attack_s = ValueReader::readValue<float>("hit_attack_s", map).value_or(_hit_attack_s);
 }
 
 #ifdef DECEPTUS_VRSFML
@@ -257,6 +258,7 @@ void RingShaderLayer::update(const sf::Time& dt)
       _heartbeat_pulse = 0.0f;
       _touch_intensity = 0.0f;
       _touched = false;
+      _push_target_px = {};
       _push_offset_px = {};
       return;
    }
@@ -343,12 +345,15 @@ void RingShaderLayer::updateTouch(const sf::Time& dt)
          // and the ward beats the moment it is touched
          _heartbeat_elapsed_s = 0.0f;
 
-         // the whole ring gives ground, away from the side it was hit from. set rather than
-         // accumulated, so leaning on it cannot walk the ring off the sword.
-         _push_offset_px = {-std::cos(target_angle) * _push_px, -std::sin(target_angle) * _push_px};
+         // the whole ring gives ground, away from the side it was hit from. this only aims the
+         // recoil, the ring travels there over hit_attack_s. set rather than accumulated, so
+         // leaning on it cannot walk the ring off the sword.
+         _push_target_px = {-std::cos(target_angle) * _push_px, -std::sin(target_angle) * _push_px};
       }
 
-      _touch_intensity = _touch_depth;
+      // eased in rather than set, or the dent appears fully formed in a single frame
+      const auto attack = (_hit_attack_s > 0.0f) ? std::min(dt.asSeconds() / _hit_attack_s, 1.0f) : 1.0f;
+      _touch_intensity += (_touch_depth - _touch_intensity) * attack;
    }
    else if (_touch_intensity > 0.0f && _touch_release_s > 0.0f)
    {
@@ -357,12 +362,25 @@ void RingShaderLayer::updateTouch(const sf::Time& dt)
 
    _touched = touching;
 
-   // it drifts back onto the sword whether or not he is still against it. the ring has a job.
+   // the aim point falls back toward the sword whether or not he is still against it, and the
+   // ring chases the aim point rather than being placed on it. the chase is what gives the recoil
+   // some travel instead of a jump; the falling aim point is what brings it home.
+   //
+   //   push |    ,--.
+   //        |   /    `--.
+   //        |  /         `-----.
+   //      0 +-'                 `--------
+   //        |<-->| hit_attack_s
+   //
    if (_push_release_s > 0.0f)
    {
       const auto recovered = std::max(1.0f - dt.asSeconds() / _push_release_s, 0.0f);
-      _push_offset_px = {_push_offset_px.x * recovered, _push_offset_px.y * recovered};
+      _push_target_px = {_push_target_px.x * recovered, _push_target_px.y * recovered};
    }
+
+   const auto chase = (_hit_attack_s > 0.0f) ? std::min(dt.asSeconds() / _hit_attack_s, 1.0f) : 1.0f;
+   _push_offset_px.x += (_push_target_px.x - _push_offset_px.x) * chase;
+   _push_offset_px.y += (_push_target_px.y - _push_offset_px.y) * chase;
 }
 
 void RingShaderLayer::setEnabled(bool enabled)
