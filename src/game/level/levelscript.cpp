@@ -12,6 +12,7 @@
 #include "game/constants.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/lightsystem.h"
+#include "game/effects/screenflash.h"
 #include "game/effects/screentransition.h"
 #include "game/effects/screentransitioneffect.h"
 #include "game/io/eventserializer.h"
@@ -176,6 +177,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setMechanismEnabled", LevelScriptCallbacks::setMechanismEnabled);
    lua_register(_lua_state, "setMechanismVisible", LevelScriptCallbacks::setMechanismVisible);
    lua_register(_lua_state, "flashMechanism", LevelScriptCallbacks::flashMechanism);
+   lua_register(_lua_state, "flashScreen", LevelScriptCallbacks::flashScreen);
    lua_register(_lua_state, "setAmbient", LevelScriptCallbacks::setAmbient);
    lua_register(_lua_state, "setZoomFactor", LevelScriptCallbacks::setZoomFactor);
    lua_register(_lua_state, "showDialogue", LevelScriptCallbacks::showDialogue);
@@ -638,6 +640,11 @@ void LevelScript::addPlayerHealthMax(int32_t health_points_to_add)
 void LevelScript::setZoomFactor(float zoom_factor)
 {
    CameraZoom::getInstance().setZoomFactor(zoom_factor);
+}
+
+void LevelScript::flashScreen(uint8_t red, uint8_t green, uint8_t blue, float peak_intensity, float duration_s)
+{
+   ScreenFlash::getInstance().flash(sf::Color{red, green, blue}, peak_intensity, duration_s);
 }
 
 void LevelScript::setAmbient(sf::Color color)

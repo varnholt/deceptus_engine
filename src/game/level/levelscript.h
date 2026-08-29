@@ -158,6 +158,14 @@ public:
    /// \param zoom_factor absolute zoom multiplier.
    void setZoomFactor(float zoom_factor);
 
+   /// \brief flashes the whole screen in a given color.
+   /// \param red red component 0-255.
+   /// \param green green component 0-255.
+   /// \param blue blue component 0-255.
+   /// \param peak_intensity opacity the flash starts at, 0-1.
+   /// \param duration_s time the flash needs to fade out completely.
+   void flashScreen(uint8_t red, uint8_t green, uint8_t blue, float peak_intensity, float duration_s);
+
    /// \brief sets the ambient light color for the current level.
    /// \param color rgba color (0–255 per channel).
    void setAmbient(sf::Color color);

@@ -611,6 +611,23 @@ int32_t fadeIn(lua_State* state)
    return 0;
 }
 
+int32_t flashScreen(lua_State* state)
+{
+   if (lua_gettop(state) != 5)
+   {
+      return 0;
+   }
+
+   const auto red = static_cast<uint8_t>(lua_tointeger(state, 1));
+   const auto green = static_cast<uint8_t>(lua_tointeger(state, 2));
+   const auto blue = static_cast<uint8_t>(lua_tointeger(state, 3));
+   const auto peak_intensity = static_cast<float>(lua_tonumber(state, 4));
+   const auto duration_s = static_cast<float>(lua_tonumber(state, 5));
+
+   LevelScript::getCurrent()->flashScreen(red, green, blue, peak_intensity, duration_s);
+   return 0;
+}
+
 int32_t setAmbient(lua_State* state)
 {
    if (lua_gettop(state) != 4)
