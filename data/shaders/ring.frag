@@ -7,6 +7,9 @@ uniform float     u_ring_scale;
 uniform float     u_pixel_size;   //!< pixel block size in screen pixels; 1.0 = no pixelation, 4.0 = coarse retro look
 uniform vec3      u_flash_color;  //!< color to flash toward (0-1 per channel)
 uniform float     u_flash_intensity; //!< 0 = no flash, 1 = full flash color
+uniform float     u_touch_angle;     //!< angle the player is pressing against the band, radians
+uniform float     u_touch_intensity; //!< how deep the band is pushed in there; 0 = untouched
+uniform float     u_touch_width;     //!< angular falloff of the dent, radians
 
 in vec2 sf_v_texCoord;
 
@@ -65,6 +68,14 @@ void main()
     p.x *= u_resolution.x / u_resolution.y;
     p   /= u_ring_scale;    // Shadertoy used p *= 5.0; equivalent when u_ring_scale = 0.2
 
+    // the player pressing against the ring dents the band inward at that angle. scaling p up
+    // means the band, which sits at a fixed length in p, lands at a smaller radius on screen.
+    float fragment_angle    = atan(p.y, p.x);
+    float angular_distance  = abs(fragment_angle - u_touch_angle);
+    angular_distance        = min(angular_distance, 6.28318530718 - angular_distance);
+    float touch_falloff     = exp(-(angular_distance * angular_distance) / (u_touch_width * u_touch_width));
+    p *= (1.0 + u_touch_intensity * touch_falloff);
+
     float fbm_value = fbm(p);
     vec2  offset    = vec2(p.x / 14.0, p.y / 14.0);
     float effect    = abs(-circularEffect(offset));
@@ -89,6 +100,9 @@ uniform float     u_ring_scale;
 uniform float     u_pixel_size;   //!< pixel block size in screen pixels; 1.0 = no pixelation, 4.0 = coarse retro look
 uniform vec3      u_flash_color;  //!< color to flash toward (0-1 per channel)
 uniform float     u_flash_intensity; //!< 0 = no flash, 1 = full flash color
+uniform float     u_touch_angle;     //!< angle the player is pressing against the band, radians
+uniform float     u_touch_intensity; //!< how deep the band is pushed in there; 0 = untouched
+uniform float     u_touch_width;     //!< angular falloff of the dent, radians
 
 #define TIME (u_time * 0.15)
 
@@ -142,6 +156,14 @@ void main()
     p += vec2(sin(TIME * 15.0) * 0.01, 0.0);
     p.x *= u_resolution.x / u_resolution.y;
     p   /= u_ring_scale;    // Shadertoy used p *= 5.0; equivalent when u_ring_scale = 0.2
+
+    // the player pressing against the ring dents the band inward at that angle. scaling p up
+    // means the band, which sits at a fixed length in p, lands at a smaller radius on screen.
+    float fragment_angle    = atan(p.y, p.x);
+    float angular_distance  = abs(fragment_angle - u_touch_angle);
+    angular_distance        = min(angular_distance, 6.28318530718 - angular_distance);
+    float touch_falloff     = exp(-(angular_distance * angular_distance) / (u_touch_width * u_touch_width));
+    p *= (1.0 + u_touch_intensity * touch_falloff);
 
     float fbm_value = fbm(p);
     vec2  offset    = vec2(p.x / 14.0, p.y / 14.0);

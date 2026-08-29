@@ -39,6 +39,10 @@ public:
    /// \param data deserialization data passed through from the factory.
    void readCustomProperties(const GameDeserializeData& data) override;
 
+   /// \brief checks whether the player is pushing against the band and updates the dent.
+   /// \param dt elapsed frame time.
+   void updateTouch(const sf::Time& dt);
+
    /// \brief triggers a colour flash that fades out over the given duration.
    /// \param red red component 0-1.
    /// \param green green component 0-1.
@@ -57,6 +61,7 @@ private:
    bool _has_u_pixel_size = false;
    bool _has_u_flash_color = false;
    bool _has_u_flash_intensity = false;
+   bool _has_u_touch = false;
 #endif
 
    float _ring_scale = 1.0f / 3.0f;                //!< ring size relative to the quad; TMX property "ring_scale"
@@ -72,6 +77,13 @@ private:
    float _heartbeat_second_beat = 0.7f;  //!< strength of the weaker second beat; TMX property "heartbeat_second_beat"
    float _heartbeat_turbulence = 1.0f;   //!< extra churn speed at the peak of a beat; TMX property "heartbeat_turbulence"
    float _heartbeat_beat_width = 0.12f;  //!< width of one sine hump as a fraction of the period; TMX property "heartbeat_beat_width"
-   float _heartbeat_elapsed_s = 0.0f;    //!< time since the current beat cycle started
-   float _heartbeat_pulse = 0.0f;        //!< current beat strength, 0 between beats and 1 at the peak of the first
+
+   float _touch_depth = 0.22f;         //!< how far the band is dented where the player pushes; TMX property "touch_depth"
+   float _touch_width = 0.55f;         //!< angular falloff of the dent in radians; TMX property "touch_width"
+   float _touch_release_s = 0.35f;     //!< time the dent needs to smooth out again; TMX property "touch_release_s"
+   float _touch_angle = 0.0f;          //!< angle the player is currently pressing against
+   float _touch_intensity = 0.0f;      //!< current dent strength, 0 when nothing is touching
+   bool _touched = false;              //!< whether the player was against the band last frame
+   float _heartbeat_elapsed_s = 0.0f;  //!< time since the current beat cycle started
+   float _heartbeat_pulse = 0.0f;      //!< current beat strength, 0 between beats and 1 at the peak of the first
 };

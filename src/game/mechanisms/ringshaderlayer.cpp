@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/io/valuereader.h"
+#include "game/player/playerregistry.h"
 
 #include <algorithm>
 #include <cmath>
@@ -124,6 +125,7 @@ void RingShaderLayer::checkUniforms(const std::string& shader_path)
    _has_u_pixel_size = shader_source.find("u_pixel_size;") != std::string::npos;
    _has_u_flash_color = shader_source.find("u_flash_color;") != std::string::npos;
    _has_u_flash_intensity = shader_source.find("u_flash_intensity;") != std::string::npos;
+   _has_u_touch = shader_source.find("u_touch_intensity;") != std::string::npos;
 }
 #endif
 
@@ -137,6 +139,9 @@ void RingShaderLayer::readCustomProperties(const GameDeserializeData& data)
    _heartbeat_second_beat = ValueReader::readValue<float>("heartbeat_second_beat", map).value_or(_heartbeat_second_beat);
    _heartbeat_turbulence = ValueReader::readValue<float>("heartbeat_turbulence", map).value_or(_heartbeat_turbulence);
    _heartbeat_beat_width = ValueReader::readValue<float>("heartbeat_beat_width", map).value_or(_heartbeat_beat_width);
+   _touch_depth = ValueReader::readValue<float>("touch_depth", map).value_or(_touch_depth);
+   _touch_width = ValueReader::readValue<float>("touch_width", map).value_or(_touch_width);
+   _touch_release_s = ValueReader::readValue<float>("touch_release_s", map).value_or(_touch_release_s);
 }
 
 #ifdef DECEPTUS_VRSFML
@@ -159,6 +164,9 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, c
    _shader.setUniform("u_pixel_size", _pixel_size);
    _shader.setUniform("u_flash_color", _flash_color);
    _shader.setUniform("u_flash_intensity", _flash_intensity);
+   _shader.setUniform("u_touch_angle", _touch_angle);
+   _shader.setUniform("u_touch_intensity", _touch_intensity);
+   _shader.setUniform("u_touch_width", _touch_width);
 
    ShaderLayer::draw(target, normal, states);
 }
@@ -185,6 +193,13 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
       _shader.setUniform("u_flash_intensity", _flash_intensity);
    }
 
+   if (_has_u_touch)
+   {
+      _shader.setUniform("u_touch_angle", _touch_angle);
+      _shader.setUniform("u_touch_intensity", _touch_intensity);
+      _shader.setUniform("u_touch_width", _touch_width);
+   }
+
    ShaderLayer::draw(target, normal);
 }
 #endif
@@ -192,6 +207,8 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 void RingShaderLayer::update(const sf::Time& dt)
 {
    ShaderLayer::update(dt);
+
+   updateTouch(dt);
 
    if (_heartbeat_period_s > 0.0f)
    {
@@ -213,6 +230,50 @@ void RingShaderLayer::update(const sf::Time& dt)
          _flash_intensity = 0.0f;
       }
    }
+}
+
+void RingShaderLayer::updateTouch(const sf::Time& dt)
+{
+   const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
+   const auto center = sf::Vector2f{_position.x + _size.x * 0.5f, _position.y + _size.y * 0.5f};
+
+   // the band sits where circularEffect crosses zero, i.e. at a length of 14/12 in ring space
+   constexpr auto band_length = 14.0f / 12.0f;
+   const auto band_radius_px = band_length * _ring_scale * std::lerp(1.0f, _heartbeat_scale, _heartbeat_pulse) * _size.x;
+
+   // nearest and farthest corner of the player rect decide whether the circle cuts through it
+   const auto clamped_x = std::clamp(center.x, player_rect.position.x, player_rect.position.x + player_rect.size.x);
+   const auto clamped_y = std::clamp(center.y, player_rect.position.y, player_rect.position.y + player_rect.size.y);
+   const auto nearest = sf::Vector2f{clamped_x - center.x, clamped_y - center.y};
+   const auto nearest_distance = std::hypot(nearest.x, nearest.y);
+
+   const auto farthest_x =
+      std::max(std::abs(player_rect.position.x - center.x), std::abs(player_rect.position.x + player_rect.size.x - center.x));
+   const auto farthest_y =
+      std::max(std::abs(player_rect.position.y - center.y), std::abs(player_rect.position.y + player_rect.size.y - center.y));
+   const auto farthest_distance = std::hypot(farthest_x, farthest_y);
+
+   const auto touching = (nearest_distance <= band_radius_px && farthest_distance >= band_radius_px);
+
+   if (touching)
+   {
+      // the shader works in texture space, where y points up, so the world offset is flipped
+      _touch_angle = std::atan2(-nearest.y, nearest.x);
+
+      // the ward beats the moment it is touched
+      if (!_touched)
+      {
+         _heartbeat_elapsed_s = 0.0f;
+      }
+
+      _touch_intensity = _touch_depth;
+   }
+   else if (_touch_intensity > 0.0f && _touch_release_s > 0.0f)
+   {
+      _touch_intensity = std::max(_touch_intensity - _touch_depth * dt.asSeconds() / _touch_release_s, 0.0f);
+   }
+
+   _touched = touching;
 }
 
 void RingShaderLayer::setEnabled(bool enabled)
