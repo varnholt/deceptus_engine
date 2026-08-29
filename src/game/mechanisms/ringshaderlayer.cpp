@@ -1,10 +1,13 @@
 #include "ringshaderlayer.h"
 
+#include "framework/easings/easings.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/io/valuereader.h"
 
 #include <algorithm>
+#include <cmath>
+#include <numbers>
 #ifndef DECEPTUS_VRSFML
 #include <fstream>
 #include <sstream>
@@ -21,6 +24,81 @@ struct RingShaderLayerRegister
 };
 
 static RingShaderLayerRegister reg;
+
+// the flash swells over its duration instead of jumping to full on the first frame and fading out
+// linearly. the three phases are fixed proportions of the duration handed to flash(), so callers
+// still pass a single value.
+//
+//   1.00 |     ,-----.
+//        |    /       `--.
+//   0.75 |   /            `---.
+//        |  /                  `-------.
+//   0.00 | /                            `----------
+//        +--+---------+--------------------------+
+//         attack   sustain         release
+//
+constexpr auto flash_attack_ratio = 0.09f;
+constexpr auto flash_sustain_ratio = 0.32f;
+constexpr auto flash_plateau_intensity = 0.75f;
+
+// each beat is a single sine hump. the second one starts behind the first and is slightly weaker,
+// so the two overlap into a lub-dub. a hump leaves and returns to zero with no corner at either
+// end, which an eased attack/release pair does not.
+//
+//   1.0 |    .-.
+//       |   /   \   .-.
+//       |  /     \ /   \
+//   0.0 +-'       '     '----------------
+//       0        0.16                   1     phase
+//
+constexpr auto heartbeat_second_beat_phase = 0.16f;
+
+float evaluateSineBeat(float phase, float start_phase, float width_phase)
+{
+   const auto local_phase = phase - start_phase;
+
+   if (local_phase < 0.0f || local_phase > width_phase)
+   {
+      return 0.0f;
+   }
+
+   return std::sin(std::numbers::pi_v<float> * local_phase / width_phase);
+}
+
+float evaluateHeartbeat(float phase, float second_beat_strength, float beat_width_phase)
+{
+   if (beat_width_phase <= 0.0f)
+   {
+      return 0.0f;
+   }
+
+   const auto first_beat = evaluateSineBeat(phase, 0.0f, beat_width_phase);
+   const auto second_beat = evaluateSineBeat(phase, heartbeat_second_beat_phase, beat_width_phase) * second_beat_strength;
+
+   // where the humps overlap they add up, which keeps the join between them smooth
+   return std::min(first_beat + second_beat, 1.0f);
+}
+
+float evaluateFlashEnvelope(float elapsed_s, float duration_s)
+{
+   const auto attack_duration_s = duration_s * flash_attack_ratio;
+   const auto sustain_duration_s = duration_s * flash_sustain_ratio;
+   const auto release_duration_s = duration_s - attack_duration_s - sustain_duration_s;
+
+   if (elapsed_s < attack_duration_s)
+   {
+      return Easings::easeOutCubic<float>(elapsed_s / attack_duration_s);
+   }
+
+   if (elapsed_s < attack_duration_s + sustain_duration_s)
+   {
+      const auto normalized = (elapsed_s - attack_duration_s) / sustain_duration_s;
+      return std::lerp(1.0f, flash_plateau_intensity, Easings::easeInOutCubic<float>(normalized));
+   }
+
+   const auto normalized = std::min((elapsed_s - attack_duration_s - sustain_duration_s) / release_duration_s, 1.0f);
+   return flash_plateau_intensity * (1.0f - Easings::easeInOutCubic<float>(normalized));
+}
 }  // namespace
 
 RingShaderLayer::RingShaderLayer(GameNode* parent) : ShaderLayer(parent)
@@ -54,6 +132,11 @@ void RingShaderLayer::readCustomProperties(const GameDeserializeData& data)
    const auto& map = data._tmx_object->_properties->_map;
    _ring_scale = ValueReader::readValue<float>("ring_scale", map).value_or(_ring_scale);
    _pixel_size = ValueReader::readValue<float>("pixel_size", map).value_or(_pixel_size);
+   _heartbeat_period_s = ValueReader::readValue<float>("heartbeat_period_s", map).value_or(_heartbeat_period_s);
+   _heartbeat_scale = ValueReader::readValue<float>("heartbeat_scale", map).value_or(_heartbeat_scale);
+   _heartbeat_second_beat = ValueReader::readValue<float>("heartbeat_second_beat", map).value_or(_heartbeat_second_beat);
+   _heartbeat_turbulence = ValueReader::readValue<float>("heartbeat_turbulence", map).value_or(_heartbeat_turbulence);
+   _heartbeat_beat_width = ValueReader::readValue<float>("heartbeat_beat_width", map).value_or(_heartbeat_beat_width);
 }
 
 #ifdef DECEPTUS_VRSFML
@@ -72,7 +155,7 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, c
    // NOTE: the ring used to render far too large on WASM for the same ring_scale. cause was the
    // GL_ES branch of ring.vert scaling the screen uv by sf_u_invTextureSize (which reflects an
    // unrelated bound texture's size); ring.vert now passes the raw 0..1 texcoord, matching desktop.
-   _shader.setUniform("u_ring_scale", _ring_scale);
+   _shader.setUniform("u_ring_scale", _ring_scale * std::lerp(1.0f, _heartbeat_scale, _heartbeat_pulse));
    _shader.setUniform("u_pixel_size", _pixel_size);
    _shader.setUniform("u_flash_color", _flash_color);
    _shader.setUniform("u_flash_intensity", _flash_intensity);
@@ -84,7 +167,7 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
    if (_has_u_ring_scale)
    {
-      _shader.setUniform("u_ring_scale", _ring_scale);
+      _shader.setUniform("u_ring_scale", _ring_scale * std::lerp(1.0f, _heartbeat_scale, _heartbeat_pulse));
    }
 
    if (_has_u_pixel_size)
@@ -110,10 +193,20 @@ void RingShaderLayer::update(const sf::Time& dt)
 {
    ShaderLayer::update(dt);
 
+   if (_heartbeat_period_s > 0.0f)
+   {
+      _heartbeat_elapsed_s = std::fmod(_heartbeat_elapsed_s + dt.asSeconds(), _heartbeat_period_s);
+      _heartbeat_pulse = evaluateHeartbeat(_heartbeat_elapsed_s / _heartbeat_period_s, _heartbeat_second_beat, _heartbeat_beat_width);
+
+      // the beat drives the turbulence too. advancing the time offset speeds up the churn without
+      // the phase jump a scaled u_time would produce.
+      _time_offset += dt.asSeconds() * _heartbeat_pulse * _heartbeat_turbulence;
+   }
+
    if (_flash_duration > 0.0f)
    {
       _flash_elapsed += dt.asSeconds();
-      _flash_intensity = std::max(1.0f - _flash_elapsed / _flash_duration, 0.0f);
+      _flash_intensity = evaluateFlashEnvelope(_flash_elapsed, _flash_duration);
       if (_flash_elapsed >= _flash_duration)
       {
          _flash_duration = 0.0f;
