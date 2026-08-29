@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <numbers>
 #ifndef DECEPTUS_VRSFML
 #include <fstream>
 #include <sstream>
@@ -42,28 +41,28 @@ constexpr auto flash_attack_ratio = 0.09f;
 constexpr auto flash_sustain_ratio = 0.32f;
 constexpr auto flash_plateau_intensity = 0.75f;
 
-// each beat is a single sine hump. the second one starts behind the first and is slightly weaker,
-// so the two overlap into a lub-dub. a hump leaves and returns to zero with no corner at either
-// end, which an eased attack/release pair does not.
+// each beat is a gaussian centred on its own phase, the second one weaker than the first, so the
+// two together read as a lub-dub. a gaussian has no discontinuity anywhere, not even in its
+// derivative, which neither an eased ramp nor a sine hump can say.
 //
-//   1.0 |    .-.
-//       |   /   \   .-.
-//       |  /     \ /   \
-//   0.0 +-'       '     '----------------
-//       0        0.16                   1     phase
+//   1.0 |     _
+//       |    / \      _
+//       |   /   \    / \
+//   0.0 +__/     \__/   \______________
+//       0        0.16                 1     phase
 //
 constexpr auto heartbeat_second_beat_phase = 0.16f;
 
-float evaluateSineBeat(float phase, float start_phase, float width_phase)
+float evaluateGaussianBeat(float phase, float center_phase, float width_phase)
 {
-   const auto local_phase = phase - start_phase;
+   auto distance = std::abs(phase - center_phase);
 
-   if (local_phase < 0.0f || local_phase > width_phase)
-   {
-      return 0.0f;
-   }
+   // the phase wraps, so a beat centred on 0 is still felt at the end of the previous period
+   distance = std::min(distance, 1.0f - distance);
 
-   return std::sin(std::numbers::pi_v<float> * local_phase / width_phase);
+   const auto normalized_distance = distance / width_phase;
+
+   return std::exp(-0.5f * normalized_distance * normalized_distance);
 }
 
 float evaluateHeartbeat(float phase, float second_beat_strength, float beat_width_phase)
@@ -73,10 +72,10 @@ float evaluateHeartbeat(float phase, float second_beat_strength, float beat_widt
       return 0.0f;
    }
 
-   const auto first_beat = evaluateSineBeat(phase, 0.0f, beat_width_phase);
-   const auto second_beat = evaluateSineBeat(phase, heartbeat_second_beat_phase, beat_width_phase) * second_beat_strength;
+   const auto first_beat = evaluateGaussianBeat(phase, 0.0f, beat_width_phase);
+   const auto second_beat = evaluateGaussianBeat(phase, heartbeat_second_beat_phase, beat_width_phase) * second_beat_strength;
 
-   // where the humps overlap they add up, which keeps the join between them smooth
+   // where the curves overlap they add up, which keeps the join between them smooth
    return std::min(first_beat + second_beat, 1.0f);
 }
 

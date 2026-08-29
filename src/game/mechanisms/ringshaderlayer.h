@@ -77,10 +77,11 @@ private:
    float _flash_elapsed = 0.0f;   //!< time elapsed since flash was triggered
 
    float _heartbeat_period_s = 2.0f;     //!< time from one beat to the next; TMX property "heartbeat_period_s"
-   float _heartbeat_scale = 1.14f;       //!< ring size at the peak of a beat, 1.0 disables it; TMX property "heartbeat_scale"
+   float _heartbeat_scale = 1.1f;        //!< ring size at the peak of a beat, 1.0 disables it; TMX property "heartbeat_scale"
    float _heartbeat_second_beat = 0.7f;  //!< strength of the weaker second beat; TMX property "heartbeat_second_beat"
    float _heartbeat_turbulence = 1.0f;   //!< extra churn speed at the peak of a beat; TMX property "heartbeat_turbulence"
-   float _heartbeat_beat_width = 0.12f;  //!< width of one sine hump as a fraction of the period; TMX property "heartbeat_beat_width"
+   float _heartbeat_beat_width =
+      0.035f;  //!< standard deviation of one beat as a fraction of the period; TMX property "heartbeat_beat_width"
 
    float _touch_depth = 0.22f;      //!< how far the band is dented where the player pushes; TMX property "touch_depth"
    float _touch_width = 0.55f;      //!< angular falloff of the dent in radians; TMX property "touch_width"
