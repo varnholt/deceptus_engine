@@ -20,6 +20,13 @@ owl_eyes_insert.ogg
     Licence   Creative Commons 0
     Original  854249__diim_1__caida-moneda-1-coin-drop.wav
 
+sword_ring_release.ogg
+    Title     Warp Drive Initiate
+    Author    el_boss
+    Source    https://freesound.org/s/630037/
+    Licence   Creative Commons 0
+    Original  630037__el_boss__warp-drive-initiate.wav
+
 
 Weather
 -------
