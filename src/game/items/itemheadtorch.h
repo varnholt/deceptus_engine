@@ -50,6 +50,7 @@ private:
    std::shared_ptr<LightSystem::LightInstance> _player_light_right;
    std::optional<sf::Vector2f>
       _last_valid_eye_position;  //!< set once a valid eye position is received since the last onEquipped; empty until then
+   std::optional<sf::Vector2f> _last_valid_cycle_origin_px;  //!< origin of the cycle _last_valid_eye_position was read from
 
    //!< where the helmet sits relative to the player. Worked out per simulation step and applied to
    //!< the player's drawn position per frame

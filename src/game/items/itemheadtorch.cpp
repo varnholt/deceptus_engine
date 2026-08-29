@@ -13,6 +13,14 @@
 #include "game/player/player.h"
 #include "game/player/playerregistry.h"
 
+namespace
+{
+
+//! the origin of the 72x48 animation cycles, which the configured light offsets were tuned against
+constexpr auto REFERENCE_CYCLE_ORIGIN_PX = sf::Vector2f{36.0f, 48.0f};
+
+}  // namespace
+
 ItemHeadTorch::ItemHeadTorch()
     : _player_texture(TexturePool::getInstance().get("data/sprites/player.png")),
 #ifdef DECEPTUS_VRSFML
@@ -102,12 +110,19 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
       _player_light_left->_enabled = false;
       _player_light_right->_enabled = false;
       _last_valid_eye_position.reset();
+      _last_valid_cycle_origin_px.reset();
       _was_eye_position_valid = false;
       return;
    }
 
    const auto& player_animation = player->getPlayerAnimation();
    const auto& current_cycle = player_animation->getCurrentCycle();
+
+   // the auxiliary cycle is the in-air sword attack, which draws head and torso over a current
+   // cycle that is just a pair of legs. The head torch belongs to the head, so it has to follow
+   // whichever of the two actually draws one
+   const auto& auxiliary_cycle = player_animation->getAuxiliaryCycle();
+   const auto& head_cycle = auxiliary_cycle ? auxiliary_cycle : current_cycle;
 
 #ifdef DEBUG_DRAW
    sfcompat::setPosition(_light_circle, player->getPixelPositionFloat());
@@ -116,13 +131,14 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
    // only update the eye position while the animation is actually visible;
    // when invisible (hidden delay before appear animation), keep _last_valid_eye_position
    // as nullopt so the lights stay off via the has_value() check below
-   if (current_cycle && current_cycle->isVisible())
+   if (head_cycle && head_cycle->isVisible())
    {
       const auto& eye_positions = player->getEyePositions();
-      const auto eye_pos_opt = eye_positions.getEyePosition(current_cycle);
+      const auto eye_pos_opt = eye_positions.getEyePosition(head_cycle);
       if (eye_pos_opt.has_value())
       {
          _last_valid_eye_position = eye_pos_opt.value();
+         _last_valid_cycle_origin_px = sfcompat::getOrigin(*head_cycle);
       }
    }
 
@@ -148,9 +164,17 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
       return;
    }
 
+   // the eye position is measured from the top left of the animation frame, and the frame is drawn
+   // shifted by its cycle's own origin, so that origin has to be taken out of it before anything is
+   // placed from it. Most cycles are 72x48 with an origin of (36, 48) - that one stays folded into
+   // the configured light offsets, which were tuned against it - but the attack and appear cycles
+   // are wider and pick their own
+   const auto head_cycle_origin_px = _last_valid_cycle_origin_px.value_or(REFERENCE_CYCLE_ORIGIN_PX);
+   const auto eye_position_px = _last_valid_eye_position.value() + REFERENCE_CYCLE_ORIGIN_PX - head_cycle_origin_px;
+
    // convert to meters
-   const float eye_offset_x_m = _last_valid_eye_position->x * MPP;
-   const float eye_offset_y_m = _last_valid_eye_position->y * MPP;
+   const float eye_offset_x_m = eye_position_px.x * MPP;
+   const float eye_offset_y_m = eye_position_px.y * MPP;
 
    active_light->_enabled = !PlayerRegistry::getFirst()->isDead();
    inactive_light->_enabled = false;
@@ -247,8 +271,13 @@ void ItemHeadTorch::update(const sf::Time& delta_time)
    // reset rotation on the inactive light so it is clean when it next becomes active
    sfcompat::setRotation(*inactive_light->_sprite, sf::degrees(0.0f));
 
-   sf::Vector2f helmet_offset_px{pointing_right ? -50.0f : -45.0f, -54.0f};
-   _helmet_offset_px = _last_valid_eye_position.value() + helmet_offset_px;
+   // the body is drawn 8px below the player's sprite position, see Player::updateSpritePositions
+   constexpr auto body_offset_px = sf::Vector2f{0.0f, 8.0f};
+
+   // where the helmet sits relative to the eye inside the animation frame
+   const sf::Vector2f helmet_eye_offset_px{pointing_right ? -14.0f : -9.0f, -14.0f};
+
+   _helmet_offset_px = body_offset_px - REFERENCE_CYCLE_ORIGIN_PX + eye_position_px + helmet_eye_offset_px;
    const uint8_t helmet_alpha = static_cast<uint8_t>(255.0f * fade_alpha_factor);
    sfcompat::setColor(*_helmet_sprite_r, sf::Color(255, 255, 255, helmet_alpha));
    sfcompat::setColor(*_helmet_sprite_l, sf::Color(255, 255, 255, helmet_alpha));
