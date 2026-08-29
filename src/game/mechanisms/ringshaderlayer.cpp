@@ -80,6 +80,27 @@ float evaluateHeartbeat(float phase, float second_beat_strength, float beat_widt
    return std::min(first_beat + second_beat, 1.0f);
 }
 
+// disabling the ring cuts its power rather than hiding it. it stutters the way a tube does when
+// the plug comes out, then whips shut onto the sword.
+//
+//   drawn    |###  ## ####################
+//   hidden   |   ##  #
+//            +----------------------------+
+//            0                            1   progress
+//
+constexpr auto power_down_first_gap_start = 0.08f;
+constexpr auto power_down_first_gap_end = 0.15f;
+constexpr auto power_down_second_gap_start = 0.22f;
+constexpr auto power_down_second_gap_end = 0.25f;
+
+bool isPowerDownFlickerHidden(float progress)
+{
+   const auto in_first_gap = (progress >= power_down_first_gap_start && progress < power_down_first_gap_end);
+   const auto in_second_gap = (progress >= power_down_second_gap_start && progress < power_down_second_gap_end);
+
+   return in_first_gap || in_second_gap;
+}
+
 float evaluateFlashEnvelope(float elapsed_s, float duration_s)
 {
    const auto attack_duration_s = duration_s * flash_attack_ratio;
@@ -142,6 +163,7 @@ void RingShaderLayer::readCustomProperties(const GameDeserializeData& data)
    _touch_depth = ValueReader::readValue<float>("touch_depth", map).value_or(_touch_depth);
    _touch_width = ValueReader::readValue<float>("touch_width", map).value_or(_touch_width);
    _touch_release_s = ValueReader::readValue<float>("touch_release_s", map).value_or(_touch_release_s);
+   _power_down_s = ValueReader::readValue<float>("power_down_s", map).value_or(_power_down_s);
 }
 
 #ifdef DECEPTUS_VRSFML
@@ -152,7 +174,7 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
 void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-   if (!_shader.isLoaded())
+   if (!_shader.isLoaded() || _power_down_progress >= 1.0f || isPowerDownFlickerHidden(_power_down_progress))
    {
       return;
    }
@@ -160,7 +182,7 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, c
    // NOTE: the ring used to render far too large on WASM for the same ring_scale. cause was the
    // GL_ES branch of ring.vert scaling the screen uv by sf_u_invTextureSize (which reflects an
    // unrelated bound texture's size); ring.vert now passes the raw 0..1 texcoord, matching desktop.
-   _shader.setUniform("u_ring_scale", _ring_scale * std::lerp(1.0f, _heartbeat_scale, _heartbeat_pulse));
+   _shader.setUniform("u_ring_scale", currentRingScale());
    _shader.setUniform("u_pixel_size", _pixel_size);
    _shader.setUniform("u_flash_color", _flash_color);
    _shader.setUniform("u_flash_intensity", _flash_intensity);
@@ -173,9 +195,14 @@ void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal, c
 #else
 void RingShaderLayer::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 {
+   if (_power_down_progress >= 1.0f || isPowerDownFlickerHidden(_power_down_progress))
+   {
+      return;
+   }
+
    if (_has_u_ring_scale)
    {
-      _shader.setUniform("u_ring_scale", _ring_scale * std::lerp(1.0f, _heartbeat_scale, _heartbeat_pulse));
+      _shader.setUniform("u_ring_scale", currentRingScale());
    }
 
    if (_has_u_pixel_size)
@@ -208,6 +235,20 @@ void RingShaderLayer::update(const sf::Time& dt)
 {
    ShaderLayer::update(dt);
 
+   if (!isEnabled())
+   {
+      const auto elapsed_s = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - _disable_time).count();
+      _power_down_progress = (_power_down_s > 0.0f) ? std::min(elapsed_s / _power_down_s, 1.0f) : 1.0f;
+
+      // a ring that has lost its power neither beats nor answers the player
+      _heartbeat_pulse = 0.0f;
+      _touch_intensity = 0.0f;
+      _touched = false;
+      return;
+   }
+
+   _power_down_progress = 0.0f;
+
    updateTouch(dt);
 
    if (_heartbeat_period_s > 0.0f)
@@ -230,6 +271,16 @@ void RingShaderLayer::update(const sf::Time& dt)
          _flash_intensity = 0.0f;
       }
    }
+}
+
+float RingShaderLayer::currentRingScale() const
+{
+   const auto beat_scale = std::lerp(1.0f, _heartbeat_scale, _heartbeat_pulse);
+
+   // once the power is cut the band whips shut onto the sword
+   const auto power_down_scale = 1.0f - Easings::easeInCubic<float>(_power_down_progress);
+
+   return _ring_scale * beat_scale * power_down_scale;
 }
 
 void RingShaderLayer::updateTouch(const sf::Time& dt)
