@@ -2,11 +2,15 @@
 uniform float     u_time;
 uniform vec2      u_resolution;
 uniform sampler2D u_texture;
-uniform float     u_uv_height;
 uniform float     u_ring_scale;
 uniform float     u_pixel_size;   //!< pixel block size in screen pixels; 1.0 = no pixelation, 4.0 = coarse retro look
 uniform vec3      u_flash_color;  //!< color to flash toward (0-1 per channel)
 uniform float     u_flash_intensity; //!< 0 = no flash, 1 = full flash color
+uniform float     u_touch_angle;     //!< angle the player is pressing against the band, radians
+uniform float     u_touch_intensity; //!< how deep the band is pushed in there; 0 = untouched
+uniform float     u_touch_width;     //!< angular falloff of the dent, radians
+uniform vec2      u_push;            //!< whole-ring displacement in uv units, away from the last hit
+uniform float     u_dissolve;        //!< raises the alpha cutoff; 0 = powered, 1 = gone
 
 in vec2 sf_v_texCoord;
 
@@ -61,9 +65,32 @@ void main()
     vec2 p_pixelated = floor(frag_coord / u_pixel_size) * u_pixel_size;
     vec2 p           = p_pixelated / u_resolution - 0.5;
 
-    p += vec2(sin(TIME * 15.0) * 0.01, 0.0);
+    // the whole ring recoils away from whatever last hit it, then drifts back onto the sword
+    p -= u_push;
+
+    // the sway is a fixed distance on screen, not a fraction of the quad: the quad is sized for
+    // the release to expand into, and a fraction of it would sway the ring several pixels
+    p += vec2(sin(TIME * 15.0) * (0.6 / u_resolution.x), 0.0);
     p.x *= u_resolution.x / u_resolution.y;
     p   /= u_ring_scale;    // Shadertoy used p *= 5.0; equivalent when u_ring_scale = 0.2
+
+    // the player pressing against the ring dents the band inward at that angle. scaling p up
+    // means the band, which sits at a fixed length in p, lands at a smaller radius on screen.
+    float fragment_angle    = atan(p.y, p.x);
+    float angular_distance  = abs(fragment_angle - u_touch_angle);
+    angular_distance        = min(angular_distance, 6.28318530718 - angular_distance);
+    float touch_falloff     = exp(-(angular_distance * angular_distance) / (u_touch_width * u_touch_width));
+    p *= (1.0 + u_touch_intensity * touch_falloff);
+
+    // the band only ever lives in a thin annulus around length 14/12, however large the quad is.
+    // everything outside it costs twelve texture fetches to produce nothing, so skip it: this is
+    // what lets the quad be screen sized without paying for a screen of fbm every frame.
+    float ring_space_radius = length(p);
+    if (ring_space_radius < 0.6 || ring_space_radius > 2.2)
+    {
+        sf_fragColor = vec4(0.0);
+        return;
+    }
 
     float fbm_value = fbm(p);
     vec2  offset    = vec2(p.x / 14.0, p.y / 14.0);
@@ -78,17 +105,21 @@ void main()
     vec3 output_color = mix(base_color, u_flash_color, u_flash_intensity);
 
     // threshold cuts near-black pixels to fully transparent, preventing colour bleed onto adjacent layers
-    sf_fragColor = vec4(output_color, clamp(brightness - 0.05, 0.0, 1.0));
+    sf_fragColor = vec4(output_color, clamp(brightness - 0.05 - u_dissolve, 0.0, 1.0));
 }
 #else
 uniform float     u_time;
 uniform vec2      u_resolution;
 uniform sampler2D u_texture;
-uniform float     u_uv_height;
 uniform float     u_ring_scale;
 uniform float     u_pixel_size;   //!< pixel block size in screen pixels; 1.0 = no pixelation, 4.0 = coarse retro look
 uniform vec3      u_flash_color;  //!< color to flash toward (0-1 per channel)
 uniform float     u_flash_intensity; //!< 0 = no flash, 1 = full flash color
+uniform float     u_touch_angle;     //!< angle the player is pressing against the band, radians
+uniform float     u_touch_intensity; //!< how deep the band is pushed in there; 0 = untouched
+uniform float     u_touch_width;     //!< angular falloff of the dent, radians
+uniform vec2      u_push;            //!< whole-ring displacement in uv units, away from the last hit
+uniform float     u_dissolve;        //!< raises the alpha cutoff; 0 = powered, 1 = gone
 
 #define TIME (u_time * 0.15)
 
@@ -139,9 +170,32 @@ void main()
     vec2 p_pixelated = floor(frag_coord / u_pixel_size) * u_pixel_size;
     vec2 p           = p_pixelated / u_resolution - 0.5;
 
-    p += vec2(sin(TIME * 15.0) * 0.01, 0.0);
+    // the whole ring recoils away from whatever last hit it, then drifts back onto the sword
+    p -= u_push;
+
+    // the sway is a fixed distance on screen, not a fraction of the quad: the quad is sized for
+    // the release to expand into, and a fraction of it would sway the ring several pixels
+    p += vec2(sin(TIME * 15.0) * (0.6 / u_resolution.x), 0.0);
     p.x *= u_resolution.x / u_resolution.y;
     p   /= u_ring_scale;    // Shadertoy used p *= 5.0; equivalent when u_ring_scale = 0.2
+
+    // the player pressing against the ring dents the band inward at that angle. scaling p up
+    // means the band, which sits at a fixed length in p, lands at a smaller radius on screen.
+    float fragment_angle    = atan(p.y, p.x);
+    float angular_distance  = abs(fragment_angle - u_touch_angle);
+    angular_distance        = min(angular_distance, 6.28318530718 - angular_distance);
+    float touch_falloff     = exp(-(angular_distance * angular_distance) / (u_touch_width * u_touch_width));
+    p *= (1.0 + u_touch_intensity * touch_falloff);
+
+    // the band only ever lives in a thin annulus around length 14/12, however large the quad is.
+    // everything outside it costs twelve texture fetches to produce nothing, so skip it: this is
+    // what lets the quad be screen sized without paying for a screen of fbm every frame.
+    float ring_space_radius = length(p);
+    if (ring_space_radius < 0.6 || ring_space_radius > 2.2)
+    {
+        gl_FragColor = vec4(0.0);
+        return;
+    }
 
     float fbm_value = fbm(p);
     vec2  offset    = vec2(p.x / 14.0, p.y / 14.0);
@@ -156,6 +210,6 @@ void main()
     vec3 output_color = mix(base_color, u_flash_color, u_flash_intensity);
 
     // threshold cuts near-black pixels to fully transparent, preventing colour bleed onto adjacent layers
-    gl_FragColor = vec4(output_color, clamp(brightness - 0.05, 0.0, 1.0));
+    gl_FragColor = vec4(output_color, clamp(brightness - 0.05 - u_dissolve, 0.0, 1.0));
 }
 #endif

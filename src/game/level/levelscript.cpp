@@ -190,6 +190,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setPlayerVisible", LevelScriptCallbacks::setPlayerVisible);
    lua_register(_lua_state, "setInfoLayerVisible", LevelScriptCallbacks::setInfoLayerVisible);
    lua_register(_lua_state, "nextLevel", LevelScriptCallbacks::nextLevel);
+   lua_register(_lua_state, "addSample", LevelScriptCallbacks::addSample);
    lua_register(_lua_state, "playSound", LevelScriptCallbacks::playSound);
    lua_register(_lua_state, "createSprite", LevelScriptCallbacks::createSprite);
    lua_register(_lua_state, "destroySprite", LevelScriptCallbacks::destroySprite);
@@ -965,6 +966,11 @@ void LevelScript::setHudVisible(bool visible)
 void LevelScript::nextLevel()
 {
    CallbackMap::getInstance().call(static_cast<int32_t>(CallbackType::NextLevel));
+}
+
+void LevelScript::addSample(const std::string& sample_name)
+{
+   Audio::getInstance().addSample(sample_name);
 }
 
 void LevelScript::playSound(const std::string& sample_name)

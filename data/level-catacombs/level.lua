@@ -23,6 +23,23 @@ _delay_to_show_dive_dialogue = 1.0
 _player_intersected_with_water_block_sensor = false
 _player_wont_dive_dialogue_shown = false
 
+-- the rubies the player takes from the owl in the graveyard
+_owl_eye_item = "gems"
+
+-- inserting them is remembered in the save game, the inventory cannot say it: the gems are gone
+-- afterwards, which looks the same as never having had them
+_owl_eyes_inserted_treasure = "catacombs_owl_eyes_inserted"
+
+_sword_cage_ids = {"sword_cage_01", "sword_cage_02", "sword_cage_03", "sword_cage_04"}
+_shrine_inserted_last = nil
+_shrine_carrying_last = nil
+
+-- the rubies seat with a sound, and the ward only lets go once that has landed
+_shrine_insert_sample = "owl_eyes_insert.ogg"
+_shrine_release_sample = "sword_ring_release.ogg"
+_shrine_release_delay_s = 0.45
+_release_sword_ring_at = -1.0
+
 _sword_pickup_flash_color = {r = 255, g = 244, b = 214}
 _sword_pickup_flash_intensity = 0.55
 _sword_pickup_flash_duration_s = 0.45
@@ -56,6 +73,85 @@ function setOnOffBlocksEnabled(enabled)
       setMechanismEnabled(block_id, enabled, "on_off_blocks")
    end
    _on_off_blocks_enabled = enabled
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function setSwordCageEnabled(enabled)
+   for _, cage_id in ipairs(_sword_cage_ids) do
+      setMechanismEnabled(cage_id, enabled, "blocking_rects")
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- the owl is drawn with hollow sockets in the decoration-b tiles; the "owl-eyes" image layer is
+-- what paints the rubies into them, so showing the eyes is all it takes to fill the sockets.
+--
+--   owl-eyes image layer   ->  rubies in the sockets, ring dead, cage open
+--   decoration-b tiles     ->  the same owl with empty sockets, ring alive, sword caged
+--
+function setOwlEyesInserted(inserted)
+   setMechanismVisible("owl-eyes", inserted, "imagelayers")
+   setMechanismEnabled("shrine_dialogue", not inserted, "dialogues")
+   releaseSwordRing(inserted)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- the ring expanding away and the cage opening are the same moment: the ward stops holding on
+function releaseSwordRing(released)
+   setMechanismEnabled("sword_ring", not released, "shader_quads")
+   setSwordCageEnabled(not released)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function updateShrineRelease()
+   if (_release_sword_ring_at >= 0.0 and _elapsed >= _release_sword_ring_at) then
+      _release_sword_ring_at = -1.0
+      playSound(_shrine_release_sample)
+      releaseSwordRing(true)
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- which prompt the shrine offers depends on whether the player is carrying the rubies
+function updateShrineHelp(inserted)
+   local can_insert = (not inserted) and inventoryHas(_owl_eye_item)
+   setMechanismEnabled("shrine_help_insert", can_insert, "interaction_help")
+   setMechanismEnabled("shrine_help_examine", not can_insert and not inserted, "interaction_help")
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function initShrine()
+   local inserted = hasTreasure(_owl_eyes_inserted_treasure)
+   setOwlEyesInserted(inserted)
+   updateShrineHelp(inserted)
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function insertOwlEyes()
+   if (hasTreasure(_owl_eyes_inserted_treasure)) then
+      return
+   end
+
+   if (not inventoryHas(_owl_eye_item)) then
+      return
+   end
+
+   addTreasure(_owl_eyes_inserted_treasure)
+   inventoryRemove(_owl_eye_item)
+
+   setMechanismVisible("owl-eyes", true, "imagelayers")
+   setMechanismEnabled("shrine_dialogue", false, "dialogues")
+   updateShrineHelp(true)
+
+   playSound(_shrine_insert_sample)
+   _release_sword_ring_at = _elapsed + _shrine_release_delay_s
 end
 
 
@@ -118,6 +214,10 @@ end
 function initialize()
    -- log("initialize catacombs level script")
    setInfoLayerVisible(true)
+
+   -- samples have to be loaded before they can be played
+   addSample(_shrine_insert_sample)
+   addSample(_shrine_release_sample)
 
    -- the sewers get their own track. checkpoint 1 sits behind the sewers entrance, so from there
    -- on the sewers track is what the level starts with - also after dying or reloading the level.
@@ -291,6 +391,19 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
+-- the player can equip or drop the rubies while standing at the shrine, and there is no callback
+-- for the inventory changing, so the prompt is re-derived every frame
+function updateShrine()
+   local inserted = hasTreasure(_owl_eyes_inserted_treasure)
+   if (inserted ~= _shrine_inserted_last or inventoryHas(_owl_eye_item) ~= _shrine_carrying_last) then
+      _shrine_inserted_last = inserted
+      _shrine_carrying_last = inventoryHas(_owl_eye_item)
+      updateShrineHelp(inserted)
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
 function update(dt)
    _elapsed = _elapsed + dt
 
@@ -310,6 +423,7 @@ function update(dt)
 
       addSensorRectCallback("sword_ring_sensor")
 
+      initShrine()
       initLocker()
       initDrawer()
       initLockedBox()
@@ -317,6 +431,8 @@ function update(dt)
    end
 
    updateLeverSpike()
+   updateShrine()
+   updateShrineRelease()
 
    updateMonk(dt)
    updateSwimAllowed(dt)
@@ -327,6 +443,11 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function mechanismEvent(object_id, group_id, event_name, value)
    log(string.format("mechanismEvent: id='%s' group='%s' event='%s' value='%s'", object_id, group_id, event_name, tostring(value)))
+
+   -- player pressed the action button in front of the shrine
+   if (object_id == "shrine_rect" and event_name == "pressed" and value == "true") then
+      insertOwlEyes()
+   end
 
    -- update door dialogue when open
    if (object_id == "iron_door" and event_name == "state" and value == "opening") then
@@ -472,6 +593,10 @@ function playerCollidesWithSensorRect(rect_id)
       _player_intersected_with_monk_rect = true
    elseif (rect_id == "water_block_sensor_01") then
       _player_intersected_with_water_block_sensor = true
+   elseif (rect_id == "sword_ring_sensor") then
+      -- the ring reacts to the player on its own, from RingShaderLayer::updateTouch. this hook is
+      -- kept for whatever wants to know he reached the ring.
+      -- log("player entered the sword ring")
    end
 end
 

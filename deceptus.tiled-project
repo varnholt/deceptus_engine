@@ -984,12 +984,107 @@
             "id": 40,
             "members": [
                 {
+                    "name": "customization",
+                    "type": "string",
+                    "value": "ring"
+                },
+                {
+                    "name": "fragment_shader",
+                    "type": "string",
+                    "value": "data/shaders/ring.frag"
+                },
+                {
+                    "name": "heartbeat_beat_width",
+                    "type": "float",
+                    "value": 0.03500000014901161
+                },
+                {
+                    "name": "heartbeat_period_s",
+                    "type": "float",
+                    "value": 2.0
+                },
+                {
+                    "name": "heartbeat_scale",
+                    "type": "float",
+                    "value": 1.100000023841858
+                },
+                {
+                    "name": "heartbeat_second_beat",
+                    "type": "float",
+                    "value": 0.699999988079071
+                },
+                {
+                    "name": "heartbeat_turbulence",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "hit_attack_s",
+                    "type": "float",
+                    "value": 0.09000000357627869
+                },
+                {
+                    "name": "pixel_size",
+                    "type": "float",
+                    "value": 1.0
+                },
+                {
+                    "name": "power_down_s",
+                    "type": "float",
+                    "value": 1.2000000476837158
+                },
+                {
+                    "name": "push_px",
+                    "type": "float",
+                    "value": 10.0
+                },
+                {
+                    "name": "push_release_s",
+                    "type": "float",
+                    "value": 0.6000000238418579
+                },
+                {
+                    "name": "ring_scale",
+                    "type": "float",
+                    "value": 0.05208300054073334
+                },
+                {
+                    "name": "smooth_texture",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "texture",
+                    "type": "string",
+                    "value": "data/effects/grainy.png"
+                },
+                {
+                    "name": "touch_depth",
+                    "type": "float",
+                    "value": 0.2199999988079071
+                },
+                {
+                    "name": "touch_release_s",
+                    "type": "float",
+                    "value": 0.3499999940395355
+                },
+                {
+                    "name": "touch_width",
+                    "type": "float",
+                    "value": 0.550000011920929
+                },
+                {
+                    "name": "vertex_shader",
+                    "type": "string",
+                    "value": "data/shaders/ring.vert"
+                },
+                {
                     "name": "z",
                     "type": "int",
                     "value": 20
                 }
             ],
-            "name": "Rope",
+            "name": "RingShaderQuad",
             "type": "class",
             "useAs": [
                 "property",
@@ -1007,7 +1102,7 @@
                     "value": 20
                 }
             ],
-            "name": "RopeWithLight",
+            "name": "Rope",
             "type": "class",
             "useAs": [
                 "property",
@@ -1018,6 +1113,24 @@
             "color": "#ffa0a0a4",
             "drawFill": true,
             "id": 42,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 20
+                }
+            ],
+            "name": "RopeWithLight",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 43,
             "members": [
                 {
                     "name": "blade_acceleration",
@@ -1060,7 +1173,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 43,
+            "id": 44,
             "members": [
                 {
                     "name": "action",
@@ -1093,7 +1206,7 @@
             ]
         },
         {
-            "id": 44,
+            "id": 45,
             "name": "SensorRectAction",
             "storageType": "string",
             "type": "enum",
@@ -1105,7 +1218,7 @@
             "valuesAsFlags": false
         },
         {
-            "id": 45,
+            "id": 46,
             "name": "SensorRectEvent",
             "storageType": "string",
             "type": "enum",
@@ -1118,7 +1231,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 46,
+            "id": 47,
             "members": [
                 {
                     "name": "customization",
@@ -1176,7 +1289,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 47,
+            "id": 48,
             "members": [
                 {
                     "name": "enabled",
@@ -1223,7 +1336,7 @@
             ]
         },
         {
-            "id": 48,
+            "id": 49,
             "name": "SkillGateSkill",
             "storageType": "string",
             "type": "enum",
@@ -1242,7 +1355,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 49,
+            "id": 50,
             "members": [
                 {
                     "name": "blend_mode",
@@ -1315,7 +1428,7 @@
             ]
         },
         {
-            "id": 50,
+            "id": 51,
             "name": "SmokeBlendMode",
             "storageType": "string",
             "type": "enum",
@@ -1327,7 +1440,7 @@
             "valuesAsFlags": false
         },
         {
-            "id": 51,
+            "id": 52,
             "name": "SmokeMode",
             "storageType": "string",
             "type": "enum",
@@ -1340,7 +1453,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 52,
+            "id": 53,
             "members": [
                 {
                     "name": "filename",
@@ -1383,7 +1496,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 53,
+            "id": 54,
             "members": [
                 {
                     "name": "push_factor",
@@ -1411,7 +1524,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 54,
+            "id": 55,
             "members": [
                 {
                     "name": "z",
@@ -1429,7 +1542,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 55,
+            "id": 56,
             "members": [
                 {
                     "name": "down_time_ms",
@@ -1492,7 +1605,7 @@
             ]
         },
         {
-            "id": 56,
+            "id": 57,
             "name": "SpikesMode",
             "storageType": "string",
             "type": "enum",
@@ -1504,7 +1617,7 @@
             "valuesAsFlags": false
         },
         {
-            "id": 57,
+            "id": 58,
             "name": "SpikesOrientation",
             "storageType": "string",
             "type": "enum",
@@ -1519,7 +1632,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 58,
+            "id": 59,
             "members": [
                 {
                     "name": "color",
@@ -1562,7 +1675,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 59,
+            "id": 60,
             "members": [
                 {
                     "name": "bitmap_font_map",
@@ -1610,7 +1723,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 60,
+            "id": 61,
             "members": [
                 {
                     "name": "animation_idle_closed",
@@ -1688,7 +1801,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 61,
+            "id": 62,
             "members": [
                 {
                     "name": "z",
@@ -1706,7 +1819,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 62,
+            "id": 63,
             "members": [
                 {
                     "name": "clamp_segment_count",
@@ -1749,7 +1862,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 63,
+            "id": 64,
             "members": [
                 {
                     "name": "count",
@@ -1802,7 +1915,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 64,
+            "id": 65,
             "members": [
                 {
                     "name": "effect_start_delay_s",
@@ -1840,7 +1953,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 65,
+            "id": 66,
             "members": [
                 {
                     "name": "direction_x",
@@ -1953,7 +2066,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 66,
+            "id": 67,
             "members": [
                 {
                     "name": "values",

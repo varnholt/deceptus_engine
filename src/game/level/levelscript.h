@@ -259,6 +259,10 @@ public:
    /// \brief triggers the next-level transition via the global callback map.
    void nextLevel();
 
+   /// \brief loads a sound sample so it can be played later.
+   /// \param sample_name audio sample identifier.
+   void addSample(const std::string& sample_name);
+
    /// \brief plays a one-shot sound effect.
    /// \param sample_name audio sample identifier.
    void playSound(const std::string& sample_name);

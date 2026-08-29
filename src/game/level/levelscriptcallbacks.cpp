@@ -718,6 +718,17 @@ int32_t nextLevel(lua_State* /*state*/)
    return 0;
 }
 
+int32_t addSample(lua_State* state)
+{
+   if (lua_gettop(state) != 1)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->addSample(lua_tostring(state, 1));
+   return 0;
+}
+
 int32_t playSound(lua_State* state)
 {
    if (lua_gettop(state) != 1)
