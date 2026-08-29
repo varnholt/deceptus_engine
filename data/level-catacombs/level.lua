@@ -23,7 +23,9 @@ _delay_to_show_dive_dialogue = 1.0
 _player_intersected_with_water_block_sensor = false
 _player_wont_dive_dialogue_shown = false
 
-_sword_ring_flash_color = {r = 1.0, g = 0.6, b = 0.2}
+_sword_pickup_flash_color = {r = 255, g = 244, b = 214}
+_sword_pickup_flash_intensity = 0.55
+_sword_pickup_flash_duration_s = 0.45
 
 _pixels_per_tile = 24
 _lever_spike_camera_x_offset_tiles = 11
@@ -417,6 +419,13 @@ function playerReceivedExtra(extra)
    -- enable all blocking rects once player picked up diving suit
    if (extra == "sword") then
       giveWeaponSword()
+      flashScreen(
+         _sword_pickup_flash_color.r,
+         _sword_pickup_flash_color.g,
+         _sword_pickup_flash_color.b,
+         _sword_pickup_flash_intensity,
+         _sword_pickup_flash_duration_s
+      )
    end
    
    if (extra == "handle") then
@@ -463,8 +472,6 @@ function playerCollidesWithSensorRect(rect_id)
       _player_intersected_with_monk_rect = true
    elseif (rect_id == "water_block_sensor_01") then
       _player_intersected_with_water_block_sensor = true
-   elseif (rect_id == "sword_ring_sensor") then
-      flashMechanism("sword_ring", _sword_ring_flash_color.r, _sword_ring_flash_color.g, _sword_ring_flash_color.b, 0.4)
    end
 end
 
