@@ -1166,6 +1166,82 @@ A console-selected effect overrides the mechanism, so remember to run `postfx no
 
 
 
+## Ring Shader Quads
+
+A ring shader quad is a shader quad running `data/shaders/ring.frag`, with a C++ side that gives
+it behaviour a plain quad does not have. It is used for the ward around the sword in the
+catacombs: a band of turbulence that beats, dents where the player leans on it, recoils from a
+hit, and expands away across the screen once it is disabled.
+
+It is selected with `customization` = `ring`, which is why it shares the `shader_quads` object
+group with ordinary quads while having its own object type and its own properties.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`RingShaderQuad`|
+|Object Group|`shader_quads`|
+
+### Size and ring_scale
+
+These two are tied together and neither means much alone. The band sits at a fixed length in the
+shader's own coordinates, so its radius on screen is
+
+```
+band_radius_px = (14 / 12) * ring_scale * object_width_px
+```
+
+Changing the object's size without changing `ring_scale` by the inverse factor moves the ring.
+The object also has to be considerably larger than the ring, for two reasons: the band's glow
+extends about 20% beyond it and is cut off in a straight line at the object's edge, and the
+release expands the band far past its resting size. The shipped values are a 768x768 object with
+`ring_scale` 0.052083, giving a 46.7px band with room to expand across the screen.
+
+Everything outside the thin annulus the band occupies is skipped by the shader, so a large object
+does not cost a large amount of fill.
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|customization|string|Must be `ring`. Without it the object is an ordinary shader quad.|
+|ring_scale|float|Ring size relative to the object. See the formula above.|
+|pixel_size|float|Size of the blocks the ring is quantised into, in pixels. `1` keeps it on the pixel grid; larger values give a coarser look. Do not remove it, `1` is not a no-op.|
+|heartbeat_period_s|float|Seconds from one beat to the next.|
+|heartbeat_scale|float|Ring size at the peak of a beat. `1.0` disables the beat.|
+|heartbeat_second_beat|float|Strength of the weaker second beat, relative to the first. Without it the beat is a metronome rather than a heart.|
+|heartbeat_beat_width|float|Standard deviation of one beat, as a fraction of the period. Each beat is a gaussian, so widening it past the offset between the two merges them into one swell.|
+|heartbeat_turbulence|float|How much faster the ring churns at the peak of a beat.|
+|touch_depth|float|How far the band is pushed in where the player leans on it. Negative bulges it outward instead.|
+|touch_width|float|Angular falloff of that dent, in radians.|
+|touch_release_s|float|Seconds the dent needs to smooth out once he steps away.|
+|push_px|float|How far the whole ring recoils from a hit. Set rather than accumulated, so repeated hits cannot walk the ring off what it is protecting.|
+|push_release_s|float|Seconds the ring needs to drift back to its centre. It recovers whether or not the player is still touching it.|
+|hit_attack_s|float|Seconds the ring takes to reach its reaction to a hit. Applies to both the dent and the recoil. Near zero it snaps rather than travels.|
+|power_down_s|float|Seconds the ring takes to expand away and fade once the mechanism is disabled.|
+
+The usual shader quad properties apply as well: `fragment_shader`, `vertex_shader`, `texture`,
+`smooth_texture` and `z`.
+
+### Contact
+
+The ring finds the player itself, by testing his rectangle against the band, and derives the exact
+angle of contact from that. It needs no sensor rect, and a sensor rect could not provide the angle
+anyway. Contact is measured against the resting band radius rather than the beating one: a
+boundary that moves with the beat lets a player standing at the edge slide in and out of contact,
+and since contact restarts the beat that feeds back into itself.
+
+Nothing about this touches the player. If something has to stop him reaching what the ring
+protects, that is a blocking rect's job.
+
+### Disabling
+
+`setMechanismEnabled` with the `shader_quads` group releases the ring: it accelerates outwards
+across the screen and thins out as it goes, over `power_down_s`, and then stops drawing. A ring
+that has lost its power stops beating and stops answering the player.
+
+
 ## Ropes
 
 The Deceptus Engine is able to connect other objects to ropes attached to mounts. So far this is only used for visual effects, later on - if there is any demand - the Engine can be extended to allow the player to hold on to the rope or attach other objects to it.

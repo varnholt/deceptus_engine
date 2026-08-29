@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="RingShaderQuad" width="768" height="768">
+  <properties>
+   <property name="customization" value="ring"/>
+   <property name="fragment_shader" value="data/shaders/ring.frag"/>
+   <property name="heartbeat_beat_width" type="float" value="0.035"/>
+   <property name="heartbeat_period_s" type="float" value="2"/>
+   <property name="heartbeat_scale" type="float" value="1.1"/>
+   <property name="heartbeat_second_beat" type="float" value="0.7"/>
+   <property name="heartbeat_turbulence" type="float" value="1"/>
+   <property name="hit_attack_s" type="float" value="0.09"/>
+   <property name="pixel_size" type="float" value="1"/>
+   <property name="power_down_s" type="float" value="1.2"/>
+   <property name="push_px" type="float" value="10"/>
+   <property name="push_release_s" type="float" value="0.6"/>
+   <property name="ring_scale" type="float" value="0.052083"/>
+   <property name="smooth_texture" type="bool" value="true"/>
+   <property name="texture" value="data/effects/grainy.png"/>
+   <property name="touch_depth" type="float" value="0.22"/>
+   <property name="touch_release_s" type="float" value="0.35"/>
+   <property name="touch_width" type="float" value="0.55"/>
+   <property name="vertex_shader" value="data/shaders/ring.vert"/>
+   <property name="z" type="int" value="20"/>
+  </properties>
+ </object>
+</template>

@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "game/io/valuereader.h"
+#include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 
 #include <algorithm>
@@ -25,6 +26,76 @@ struct RingShaderLayerRegister
 };
 
 static RingShaderLayerRegister reg;
+
+// the ring is a customization inside the shader_quads layer, so it shares the layer with the plain
+// quads but needs its own type: tiled gets a separate template and property list, and a fog quad
+// is not offered a heartbeat. customization is a template_value because inserting the template has
+// to produce a ring, not a blank quad.
+static constexpr std::array ring_shader_quad_properties{
+   PropertyInfo{
+      .name = "customization",
+      .type = "string",
+      .default_value = std::string_view{""},
+      .required = true,
+      .template_value = std::string_view{"ring"}
+   },
+   PropertyInfo{
+      .name = "fragment_shader",
+      .type = "string",
+      .default_value = std::string_view{""},
+      .required = true,
+      .template_value = std::string_view{"data/shaders/ring.frag"}
+   },
+   PropertyInfo{
+      .name = "vertex_shader",
+      .type = "string",
+      .default_value = std::string_view{""},
+      .template_value = std::string_view{"data/shaders/ring.vert"}
+   },
+   PropertyInfo{
+      .name = "texture",
+      .type = "string",
+      .default_value = std::string_view{""},
+      .template_value = std::string_view{"data/effects/grainy.png"}
+   },
+   PropertyInfo{.name = "smooth_texture", .type = "bool", .default_value = false, .template_value = true},
+   PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+
+   // the band sits at 14/12 in ring space, so its radius on screen is
+   // (14/12) * ring_scale * object width. the object has to be wide enough to hold the release.
+   PropertyInfo{.name = "ring_scale", .type = "float", .default_value = 1.0f / 3.0f, .template_value = 0.052083f},
+   PropertyInfo{.name = "pixel_size", .type = "float", .default_value = 1.0f},
+
+   PropertyInfo{.name = "heartbeat_period_s", .type = "float", .default_value = 2.0f},
+   PropertyInfo{.name = "heartbeat_scale", .type = "float", .default_value = 1.1f},
+   PropertyInfo{.name = "heartbeat_second_beat", .type = "float", .default_value = 0.7f},
+   PropertyInfo{.name = "heartbeat_beat_width", .type = "float", .default_value = 0.035f},
+   PropertyInfo{.name = "heartbeat_turbulence", .type = "float", .default_value = 1.0f},
+
+   PropertyInfo{.name = "touch_depth", .type = "float", .default_value = 0.22f},
+   PropertyInfo{.name = "touch_width", .type = "float", .default_value = 0.55f},
+   PropertyInfo{.name = "touch_release_s", .type = "float", .default_value = 0.35f},
+
+   PropertyInfo{.name = "push_px", .type = "float", .default_value = 10.0f},
+   PropertyInfo{.name = "push_release_s", .type = "float", .default_value = 0.6f},
+   PropertyInfo{.name = "hit_attack_s", .type = "float", .default_value = 0.09f},
+
+   PropertyInfo{.name = "power_down_s", .type = "float", .default_value = 1.2f},
+};
+
+static constexpr MechanismSchema ring_shader_quad_schema{
+   .type_name = "RingShaderQuad",
+   .layer_name = "shader_quads",
+   .default_width = 768,
+   .default_height = 768,
+   .properties = ring_shader_quad_properties,
+};
+
+const auto registered_ring_shader_quad = []
+{
+   GameMechanismDeserializerRegistry::instance().registerSchema(ring_shader_quad_schema);
+   return true;
+}();
 
 // the flash swells over its duration instead of jumping to full on the first frame and fading out
 // linearly. the three phases are fixed proportions of the duration handed to flash(), so callers
