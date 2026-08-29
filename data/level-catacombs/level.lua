@@ -35,7 +35,7 @@ _shrine_inserted_last = nil
 _shrine_carrying_last = nil
 
 -- the rubies seat with a sound, and the ward only lets go once that has landed
-_shrine_insert_sample = "mechanism_switch_lever_insert.ogg"
+_shrine_insert_sample = "owl_eyes_insert.ogg"
 _shrine_release_delay_s = 0.45
 _release_sword_ring_at = -1.0
 

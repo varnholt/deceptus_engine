@@ -10,6 +10,17 @@ Licences were taken from the sound pages linked below. When adding new
 material, check the licence on the source page before shipping it.
 
 
+Mechanisms
+----------
+
+owl_eyes_insert.ogg
+    Title     Caida Moneda 1 - Coin Drop
+    Author    Diim_1
+    Source    https://freesound.org/s/854249/
+    Licence   Creative Commons 0
+    Original  854249__diim_1__caida-moneda-1-coin-drop.wav
+
+
 Weather
 -------
 
