@@ -437,6 +437,19 @@ void Game::loadLevel(LoadingMode loading_mode)
 
 void Game::processPendingLevelLoad()
 {
+   // Re-equip items now that level and player are both live; items deserialized before the level was
+   // ready (e.g. head torch) had their onEquipped() silently no-op at that point.
+   //
+   // Equipping an item creates and destroys GL objects of its own, and unlike a mechanism's those
+   // belong to the item rather than to the level, so they outlive it. That puts them under the same
+   // rule as the teardown below: the thread that owns the drawing context does that work, never the
+   // loader thread with its own context.
+   if (_level_loading_finished && _equipped_items_reinit_pending)
+   {
+      _equipped_items_reinit_pending = false;
+      SaveState::getPlayerInfo()._items.reinitializeEquippedItems();
+   }
+
    if (!_pending_level_load.has_value())
    {
       return;
@@ -508,9 +521,8 @@ void Game::processPendingLevelLoad()
          _player->setWorld(_level->getWorld());
          _player->initializeLevel();
 
-         // re-equip items now that level and player are both live; items deserialized before the
-         // level was ready (e.g. head torch) had their onEquipped() silently no-op at that point
-         SaveState::getPlayerInfo()._items.reinitializeEquippedItems();
+         // the re-equip itself runs on the drawing thread, see processPendingLevelLoad
+         _equipped_items_reinit_pending = true;
 
          // jump back to stored position, that's only for debugging purposes, not for checkpoints
          if (_restore_previous_position)
