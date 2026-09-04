@@ -1007,20 +1007,24 @@ void InGameMenuInventory::updateInventoryItems()
 
       const auto& text = _texts[selected_item.value()];
       const sf::FloatRect rect{{text_title_x_offset_px, 0}, {text_title_width_px, 16}};
+
+      // the title is centred on the width of its own text, so the new string has to be in place
+      // before that width is read. computing it first centred every title on the one before it for a
+      // frame, which showed as a jump each time the selection moved
+      _text_title->setString(toSfmlString(text._title));
       const auto title_x_px = getHorizontallyCenteredX(*_text_title, rect);
+
 #ifdef DECEPTUS_VRSFML
       _text_description->setString(toSfmlString(text._description_wrapped));
       _text_description->position = {
          _panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px
       };
-      _text_title->setString(toSfmlString(text._title));
       _text_title->position = {_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px};
 #else
       _text_description->setString(toSfmlString(text._description_wrapped));
       _text_description->setPosition(
          {_panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px}
       );
-      _text_title->setString(toSfmlString(text._title));
       _text_title->setPosition({_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px});
 #endif
    }
