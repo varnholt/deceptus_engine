@@ -164,18 +164,22 @@ const sf::Font& getFont()
    {
 #ifdef DECEPTUS_VRSFML
       sf::Font loaded_font = sf::Font::openFromFile(getFontPath()).value();
+
+      // vrsfml holds a single glyph atlas of a fixed size that is never reallocated, so the filter
+      // set on the texture here is the one it keeps. it also has no Font::setSmooth to set instead
+      loaded_font.getTexture().setSmooth(false);
 #else
       sf::Font loaded_font;
       loaded_font.openFromFile(getFontPath());
-#endif
 
-      // sf::Font keeps a glyph atlas per character size and grows it as glyphs are rasterized. when
-      // an atlas outgrows itself the replacement takes its filter from the font's own flag, so
+      // vanilla sfml keeps a glyph atlas per character size and grows it as glyphs are rasterized.
+      // when an atlas outgrows itself the replacement takes its filter from the font's own flag, so
       // clearing the flag on the page texture only held until the first reallocation. japanese
       // reached that within moments -- it needs hundreds of large glyphs where latin needs a few
       // dozen small ones -- and the text turned blurry a moment after it appeared. setting the flag
       // on the font covers every page it has and every page it will make, at any character size
       loaded_font.setSmooth(false);
+#endif
 
       return loaded_font;
    }();
