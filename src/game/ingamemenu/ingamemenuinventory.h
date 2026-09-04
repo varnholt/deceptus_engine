@@ -5,6 +5,7 @@
 #include "framework/tools/localization.h"
 #include "game/image/layerdata.h"
 #include "game/ingamemenu/ingamemenupage.h"
+#include "game/ingamemenu/menuconfig.h"
 #include "game/player/inventory.h"
 
 #include <SFML/Graphics.hpp>
@@ -183,6 +184,7 @@ private:
    std::unique_ptr<LayerData> _frame_slot_0;
    std::unique_ptr<LayerData> _frame_slot_1;
 
+   MenuConfig::InventoryLayout _inventory_layout;                   //!< positions read from data/config/menus.json
    std::shared_ptr<sf::Texture> _slot_button_texture;               //!< ui icon atlas holding keycap and button glyphs
    std::array<std::unique_ptr<sf::Sprite>, 2> _slot_badge_sprites;  //!< small icons, on the profile panel slots
    std::array<std::unique_ptr<sf::Sprite>, 2> _equip_hint_sprites;  //!< large icons, next to the equip label

@@ -35,6 +35,14 @@ void Localization::load(const std::string& locale)
       const auto json = nlohmann::json::parse(json_text);
       for (const auto& [key, value] : json.items())
       {
+         // a locale file may also carry sections that are not translations, such as the line break
+         // rules of its script. those are objects rather than strings and belong to whoever reads
+         // them, so they are skipped here rather than breaking the whole table
+         if (!value.is_string())
+         {
+            continue;
+         }
+
          _translations[key] = value.get<std::string>();
       }
    }

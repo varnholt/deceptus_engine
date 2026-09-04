@@ -108,7 +108,9 @@ set(GAME_FILES
     src/framework/tools/jsonconfiguration.cpp
     src/framework/tools/jsonconfiguration.h
     src/framework/tools/localization.cpp
+    src/framework/tools/localizedtext.cpp
     src/framework/tools/localization.h
+    src/framework/tools/localizedtext.h
     src/framework/tools/log.cpp
     src/framework/tools/log.h
     src/framework/tools/logthread.cpp

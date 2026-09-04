@@ -3,6 +3,7 @@
 #include "framework/easings/easings.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/localization.h"
+#include "framework/tools/localizedtext.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/config/inputconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
@@ -83,215 +84,6 @@ constexpr auto description_rect_height = 135;
 constexpr auto inventory_text_font_size = 12;
 constexpr auto inventory_title_font_size = 12;
 
-/// \brief converts a utf-8 string into the string type sf::Text renders correctly.
-///
-/// sf::Text::setString takes an sf::String, and the implicit conversion from std::string treats the
-/// bytes as latin-1. that turns every multi-byte character into a run of wrong glyphs, so japanese
-/// came out as mojibake and italian accents as two characters each. it also measures far too wide,
-/// which is why the wrapper has to use this too.
-///
-/// \param utf8_text translated text as stored in the item descriptions.
-/// \return the same text as an sfml string.
-#ifdef DECEPTUS_VRSFML
-sf::Utf8String toSfmlString(const std::string& utf8_text)
-{
-   return sf::Utf8String(utf8_text.c_str());
-}
-#else
-sf::String toSfmlString(const std::string& utf8_text)
-{
-   return sf::String::fromUtf8(utf8_text.begin(), utf8_text.end());
-}
-#endif
-
-/// \brief returns the byte length of the utf-8 sequence a lead byte opens.
-/// \param lead_byte first byte of the sequence.
-/// \return sequence length in bytes; 1 for a byte that is not a valid lead, so callers always advance.
-size_t utf8SequenceLength(unsigned char lead_byte)
-{
-   if ((lead_byte & 0x80u) == 0x00u)
-   {
-      return 1;
-   }
-   if ((lead_byte & 0xe0u) == 0xc0u)
-   {
-      return 2;
-   }
-   if ((lead_byte & 0xf0u) == 0xe0u)
-   {
-      return 3;
-   }
-   if ((lead_byte & 0xf8u) == 0xf0u)
-   {
-      return 4;
-   }
-   return 1;
-}
-
-/// \brief decodes one utf-8 sequence.
-/// \param text string to read from.
-/// \param position byte offset of the sequence.
-/// \param length sequence length in bytes.
-/// \return the code point, or 0 when the sequence runs past the end of the string.
-char32_t utf8CodePoint(const std::string& text, size_t position, size_t length)
-{
-   if (position + length > text.size())
-   {
-      return 0;
-   }
-
-   static constexpr std::array<unsigned char, 5> lead_masks{0x00u, 0x7fu, 0x1fu, 0x0fu, 0x07u};
-   auto code_point = static_cast<char32_t>(static_cast<unsigned char>(text[position]) & lead_masks[length]);
-
-   for (auto index = size_t{1}; index < length; index++)
-   {
-      code_point = (code_point << 6) | static_cast<char32_t>(static_cast<unsigned char>(text[position + index]) & 0x3fu);
-   }
-
-   return code_point;
-}
-
-/// \brief tells whether a line may break on either side of a character.
-///
-/// japanese and chinese are written without spaces, so a wrapper that only breaks on whitespace
-/// renders them as a single line that runs off the panel.
-///
-/// \param code_point character to test.
-/// \return true for the cjk ranges the game's fonts cover.
-bool breaksBetweenCharacters(char32_t code_point)
-{
-   return (code_point >= 0x3040 && code_point <= 0x30ff)    // hiragana and katakana
-          || (code_point >= 0x3400 && code_point <= 0x4dbf)  // cjk unified ideographs extension a
-          || (code_point >= 0x4e00 && code_point <= 0x9fff)  // cjk unified ideographs
-          || (code_point >= 0xf900 && code_point <= 0xfaff)  // cjk compatibility ideographs
-          || (code_point >= 0xff00 && code_point <= 0xff60)  // fullwidth forms
-          || (code_point >= 0x3000 && code_point <= 0x303f);  // cjk punctuation
-}
-
-/// \brief tells whether a character is not allowed to open a line.
-///
-/// this is the small part of the japanese kinsoku rules that is worth having: closing brackets and
-/// trailing punctuation stay with the character they follow rather than starting the next line.
-///
-/// \param code_point character to test.
-/// \return true when the character must not be the first on a line.
-bool forbiddenAtLineStart(char32_t code_point)
-{
-   static constexpr std::array<char32_t, 18> forbidden{
-      U'、', U'。', U'，', U'．', U'！', U'？', U'ー', U'゛', U'゜',
-      U'）', U'」', U'』', U'】', U'〕', U'］', U'｝', U'・', U'：',
-   };
-
-   return std::ranges::find(forbidden, code_point) != forbidden.cend();
-}
-
-/// \brief splits text into the smallest pieces a line break may separate.
-///
-/// a latin word carries its own trailing space, so pieces can simply be concatenated. every cjk
-/// character becomes a piece of its own.
-///
-/// \param text text to split.
-/// \return pieces in reading order.
-std::vector<std::string> splitIntoBreakUnits(const std::string& text)
-{
-   std::vector<std::string> units;
-   std::string pending_word;
-
-   const auto flush_pending_word = [&units, &pending_word](bool with_trailing_space)
-   {
-      if (pending_word.empty())
-      {
-         return;
-      }
-      units.push_back(with_trailing_space ? pending_word + " " : pending_word);
-      pending_word.clear();
-   };
-
-   for (auto position = size_t{0}; position < text.size();)
-   {
-      const auto length = utf8SequenceLength(static_cast<unsigned char>(text[position]));
-      const auto code_point = utf8CodePoint(text, position, length);
-      const auto sequence = text.substr(position, length);
-      position += length;
-
-      if (length == 1 && std::isspace(static_cast<unsigned char>(sequence[0])) != 0)
-      {
-         flush_pending_word(true);
-         continue;
-      }
-
-      if (breaksBetweenCharacters(code_point))
-      {
-         flush_pending_word(false);
-         units.push_back(sequence);
-         continue;
-      }
-
-      pending_word += sequence;
-   }
-
-   flush_pending_word(false);
-   return units;
-}
-
-std::string wrapTextWithinRect(const std::string& original_text, const sf::FloatRect& rect, const sf::Font& font, int32_t character_size)
-{
-   std::string wrapped_text;
-   std::string line;
-#ifdef DECEPTUS_VRSFML
-   sf::Text temp_text(font, sf::Text::Data{});
-#else
-   sf::Text temp_text(font);
-#endif
-   temp_text.setCharacterSize(character_size);
-
-   // get the pieces a break may separate: whole words for latin, single characters for cjk
-   const auto units = splitIntoBreakUnits(original_text);
-
-   std::string last_unit;
-
-   for (const auto& unit : units)
-   {
-      // check if the current line exceeds the right boundary
-      std::string test_line = line + unit;
-      temp_text.setString(toSfmlString(test_line));
-
-      if (temp_text.getLocalBounds().size.x <= rect.size.x)  // text fits into boundary
-      {
-         line = test_line;
-         last_unit = unit;
-         continue;
-      }
-
-      // boundary is exceeded
-      if (line.empty())
-      {
-         // a single unit wider than the box would loop forever, so it gets a line of its own
-         wrapped_text = wrapped_text + unit + "\n";
-         continue;
-      }
-
-      // a character that may not open a line takes the character before it along, rather than
-      // staying on a line it no longer fits into
-      const auto unit_length = utf8SequenceLength(static_cast<unsigned char>(unit[0]));
-      if (forbiddenAtLineStart(utf8CodePoint(unit, 0, unit_length)) && !last_unit.empty() && line.size() > last_unit.size())
-      {
-         line.erase(line.size() - last_unit.size());
-         wrapped_text = wrapped_text + line + "\n";
-         line = last_unit + unit;
-         last_unit = unit;
-         continue;
-      }
-
-      wrapped_text = wrapped_text + line + "\n";
-      line = unit;
-      last_unit = unit;
-   }
-
-   // add remaining text to the last line
-   wrapped_text = wrapped_text + line;
-   return wrapped_text;
-}
 
 std::optional<int32_t> getSlotForAction(KeyPressed action)
 {
@@ -497,6 +289,7 @@ InGameMenuInventory::InGameMenuInventory()
    MenuConfig config;
    _duration_hide = config._duration_hide;
    _duration_show = config._duration_show;
+   _inventory_layout = config._inventory;
 
    // load fonts
 #ifdef DECEPTUS_VRSFML
@@ -545,8 +338,8 @@ void InGameMenuInventory::loadInventoryItems()
          _texts[image._name]._description = image._description;
 
          // wrap text
-         sf::FloatRect rect{{0.0f, 0.0f}, {description_rect_width, description_rect_height}};
-         const auto wrapped_text = wrapTextWithinRect(image._description, rect, *_font_description, inventory_text_font_size);
+         const auto wrapped_text =
+            LocalizedText::wrapToWidth(image._description, description_rect_width, *_font_description, inventory_text_font_size);
          _texts[image._name]._description_wrapped = wrapped_text;
       }
    );
@@ -624,18 +417,17 @@ void InGameMenuInventory::drawSlotButtonIcons(sf::RenderTarget& window, sf::Rend
 
    const auto move_offset = getMoveOffset().value_or(0.0f);
 
-   constexpr std::array<float, 2> badge_x_px{slot_badge_0_pos_x_px, slot_badge_1_pos_x_px};
-   constexpr std::array<float, 2> hint_x_px{equip_hint_0_pos_x_px, equip_hint_1_pos_x_px};
-
    for (auto slot_index = 0u; slot_index < _slot_badge_sprites.size(); slot_index++)
    {
-      const auto badge_position =
-         sf::Vector2f{badge_x_px[slot_index] + _panel_left_offset_px.x + move_offset, slot_badge_pos_y_px};
+      const auto badge_position = sf::Vector2f{
+         _inventory_layout._slot_badge_x_px[slot_index] + _panel_left_offset_px.x + move_offset, _inventory_layout._slot_badge_y_px
+      };
       sfcompat::setPosition(*_slot_badge_sprites[slot_index], badge_position);
       window.draw(*_slot_badge_sprites[slot_index], states);
 
-      const auto hint_position =
-         sf::Vector2f{hint_x_px[slot_index] + _panel_right_offset_px.x + move_offset, equip_hint_pos_y_px};
+      const auto hint_position = sf::Vector2f{
+         _inventory_layout._equip_hint_x_px[slot_index] + _panel_right_offset_px.x + move_offset, _inventory_layout._equip_hint_y_px
+      };
       sfcompat::setPosition(*_equip_hint_sprites[slot_index], hint_position);
       window.draw(*_equip_hint_sprites[slot_index], states);
    }
@@ -1011,17 +803,17 @@ void InGameMenuInventory::updateInventoryItems()
       // the title is centred on the width of its own text, so the new string has to be in place
       // before that width is read. computing it first centred every title on the one before it for a
       // frame, which showed as a jump each time the selection moved
-      _text_title->setString(toSfmlString(text._title));
+      _text_title->setString(LocalizedText::toSfmlString(text._title));
       const auto title_x_px = getHorizontallyCenteredX(*_text_title, rect);
 
 #ifdef DECEPTUS_VRSFML
-      _text_description->setString(toSfmlString(text._description_wrapped));
+      _text_description->setString(LocalizedText::toSfmlString(text._description_wrapped));
       _text_description->position = {
          _panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px
       };
       _text_title->position = {_panel_right_offset_px.x + title_x_px + move_offset.value_or(0.0f), text_title_y_offset_px};
 #else
-      _text_description->setString(toSfmlString(text._description_wrapped));
+      _text_description->setString(LocalizedText::toSfmlString(text._description_wrapped));
       _text_description->setPosition(
          {_panel_right_offset_px.x + text_description_x_offset_px + move_offset.value_or(0.0f), text_description_y_offset_px}
       );
