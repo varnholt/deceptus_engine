@@ -1,6 +1,7 @@
 #include "controllerkeymap.h"
 
 #include <algorithm>
+#include <span>
 
 #include "framework/joystick/gamecontroller.h"
 #include "game/controller/gamecontrollerintegration.h"
@@ -116,19 +117,15 @@ constexpr auto key_map_column_count = 16;
 
 /// \brief looks one icon id up in a brand table.
 /// \param icon_id logical icon name to find.
-/// \param cells brand table to search.
+/// \param cells brand table to search; an empty span never matches.
 /// \return {column, row} of the matching cell, or nothing when the table has no such id.
-template <std::size_t cell_count>
-std::optional<std::pair<int32_t, int32_t>> findInBrandTable(
-   const std::string& icon_id,
-   const std::array<ControllerKeyMap::IconCell, cell_count>& cells
-)
+std::optional<std::pair<int32_t, int32_t>>
+findInBrandTable(const std::string& icon_id, std::span<const ControllerKeyMap::IconCell> cells)
 {
-   const auto matching_cell = std::find_if(
-      cells.cbegin(), cells.cend(), [&icon_id](const auto& cell) { return cell._icon_id == icon_id; }
-   );
+   const auto matching_cell =
+      std::find_if(cells.begin(), cells.end(), [&icon_id](const auto& cell) { return cell._icon_id == icon_id; });
 
-   if (matching_cell == cells.cend())
+   if (matching_cell == cells.end())
    {
       return std::nullopt;
    }
@@ -183,6 +180,44 @@ std::optional<std::pair<int32_t, int32_t>> findInSmallKeyboardBlock(const std::s
    return std::make_pair(large_position->first, large_position->second + ControllerKeyMap::keyboard_small_row_offset);
 }
 
+/// \brief the two artwork blocks of one brand.
+struct BrandTables
+{
+   std::span<const ControllerKeyMap::IconCell> _small;  //!< small block, empty when the brand has none
+   std::span<const ControllerKeyMap::IconCell> _large;  //!< large block, empty when key_map already holds it
+};
+
+/// \brief returns the artwork blocks belonging to one brand.
+/// \param brand controller family to look up.
+/// \return the brand's small and large tables, either of which may be empty.
+BrandTables tablesForBrand(ControllerKeyMap::IconBrand brand)
+{
+   using ControllerKeyMap::IconBrand;
+
+   switch (brand)
+   {
+      // the large xbox artwork is row 5 of key_map, so this brand has no large table of its own
+      case IconBrand::Xbox:
+      {
+         return {ControllerKeyMap::xbox_small_map, {}};
+      }
+      case IconBrand::PlayStation:
+      {
+         return {ControllerKeyMap::playstation_small_map, ControllerKeyMap::playstation_large_map};
+      }
+      case IconBrand::Switch:
+      {
+         return {ControllerKeyMap::switch_small_map, ControllerKeyMap::switch_large_map};
+      }
+      case IconBrand::SteamDeck:
+      {
+         return {ControllerKeyMap::steam_deck_small_map, ControllerKeyMap::steam_deck_large_map};
+      }
+   }
+
+   return {};
+}
+
 /// \brief looks one icon id up in the tables of a single brand.
 /// \param icon_id logical icon name to find.
 /// \param brand controller family whose tables are searched.
@@ -191,58 +226,18 @@ std::optional<std::pair<int32_t, int32_t>> findInSmallKeyboardBlock(const std::s
 std::optional<std::pair<int32_t, int32_t>>
 findInBrand(const std::string& icon_id, ControllerKeyMap::IconBrand brand, ControllerKeyMap::IconSize size)
 {
-   const auto want_small = (size == ControllerKeyMap::IconSize::Small);
+   const auto tables = tablesForBrand(brand);
 
-   switch (brand)
+   if (size == ControllerKeyMap::IconSize::Small)
    {
-      case ControllerKeyMap::IconBrand::Xbox:
+      const auto small_position = findInBrandTable(icon_id, tables._small);
+      if (small_position.has_value())
       {
-         // the large xbox artwork is row 5 of key_map, so there is no large table to fall back to here
-         if (want_small)
-         {
-            return findInBrandTable(icon_id, ControllerKeyMap::xbox_small_map);
-         }
-         return std::nullopt;
-      }
-      case ControllerKeyMap::IconBrand::PlayStation:
-      {
-         if (want_small)
-         {
-            const auto small_position = findInBrandTable(icon_id, ControllerKeyMap::playstation_small_map);
-            if (small_position.has_value())
-            {
-               return small_position;
-            }
-         }
-         return findInBrandTable(icon_id, ControllerKeyMap::playstation_large_map);
-      }
-      case ControllerKeyMap::IconBrand::Switch:
-      {
-         if (want_small)
-         {
-            const auto small_position = findInBrandTable(icon_id, ControllerKeyMap::switch_small_map);
-            if (small_position.has_value())
-            {
-               return small_position;
-            }
-         }
-         return findInBrandTable(icon_id, ControllerKeyMap::switch_large_map);
-      }
-      case ControllerKeyMap::IconBrand::SteamDeck:
-      {
-         if (want_small)
-         {
-            const auto small_position = findInBrandTable(icon_id, ControllerKeyMap::steam_deck_small_map);
-            if (small_position.has_value())
-            {
-               return small_position;
-            }
-         }
-         return findInBrandTable(icon_id, ControllerKeyMap::steam_deck_large_map);
+         return small_position;
       }
    }
 
-   return std::nullopt;
+   return findInBrandTable(icon_id, tables._large);
 }
 
 }  // namespace
