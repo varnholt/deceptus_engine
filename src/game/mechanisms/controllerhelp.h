@@ -2,9 +2,13 @@
 
 #include <array>
 #include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
+#include "game/mechanisms/controllerkeymap.h"
 #include "game/mechanisms/gamemechanism.h"
 
 struct TmxObject;
@@ -46,6 +50,11 @@ public:
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
 private:
+   /// \brief points the controller icons at the artwork of the pad that is currently plugged in.
+   ///
+   /// this is a no-op while the brand does not change, so it is cheap to call every frame.
+   void updateControllerIconRects();
+
    std::shared_ptr<sf::Texture> _texture;
    sf::FloatRect _rect_px;
    sf::Vector2f _rect_center;
@@ -53,6 +62,8 @@ private:
    std::vector<sf::Sprite> _sprites;
    std::vector<sf::IntRect> _sprite_rects_keyboard;
    std::vector<sf::IntRect> _sprite_rects_controller;
+   std::vector<std::string> _icon_ids_controller;           //!< controller icon id per sprite, re-resolved when the brand changes
+   std::optional<ControllerKeyMap::IconBrand> _icon_brand;  //!< brand the controller rects currently hold artwork for
 
    std::unique_ptr<sf::Sprite> _background;
    float _alpha = 0.0f;

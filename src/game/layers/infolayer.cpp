@@ -9,9 +9,11 @@
 #include "game/animation/animationframedata.h"
 #include "game/camera/camerapanorama.h"
 #include "game/config/gameconfiguration.h"
+#include "game/config/inputconfiguration.h"
 #include "game/debug/console.h"
 #include "game/io/texturepool.h"
 #include "game/level/roomupdater.h"
+#include "game/mechanisms/controllerkeymap.h"
 #include "game/player/extratable.h"
 #include "game/player/playerinfo.h"
 #include "game/player/playerregistry.h"
@@ -50,6 +52,15 @@ constexpr auto frame_0_pos_x_px = 5;
 constexpr auto frame_0_pos_y_px = 16;
 constexpr auto frame_1_pos_x_px = 43;
 constexpr auto frame_1_pos_y_px = 16;
+
+// the ui icon atlas is a grid of PIXELS_PER_TILE sized cells, so the button icons are placed by their
+// cell rather than by their visible pixels. a small icon draws its artwork at cell offset 5, 4, so the
+// two positions below put those pixels exactly where the old fixed x/y badges of the psd used to sit,
+// at the bottom right of each item frame
+constexpr auto slot_button_0_pos_x_px = 23;
+constexpr auto slot_button_0_pos_y_px = 41;
+constexpr auto slot_button_1_pos_x_px = 62;
+constexpr auto slot_button_1_pos_y_px = 41;
 
 constexpr auto heart_pos_x_px = 81.0f;
 constexpr auto heart_pos_y_px = 19.0f;
@@ -127,8 +138,6 @@ InfoLayer::InfoLayer()
       "energy_6",
       "character_window",
       "weapon_none_icon",
-      "item_slot_X",
-      "item_slot_Y",
    };
 
    // load ingame psd
@@ -205,8 +214,7 @@ InfoLayer::InfoLayer()
 
    _character_window_layer = _layers["character_window"]->_layer;
 
-   _slot_item_layers[0] = _layers["item_slot_X"]->_layer;
-   _slot_item_layers[1] = _layers["item_slot_Y"]->_layer;
+   loadSlotButtonIcons();
 
    // load heart animation
    const auto heart_animation_interval_ms = sf::milliseconds(100);
@@ -303,6 +311,95 @@ void InfoLayer::loadInventoryItems()
 #endif
    _inventory_sprites[0] = std::move(inventory_item_1);
    _inventory_sprites[1] = std::move(inventory_item_2);
+}
+
+void InfoLayer::loadSlotButtonIcons()
+{
+   _slot_button_texture = TexturePool::getInstance().get("data/game/ui_icons.png");
+
+#ifdef DECEPTUS_VRSFML
+   auto slot_button_0 = std::make_unique<sf::Sprite>();
+   auto slot_button_1 = std::make_unique<sf::Sprite>();
+   slot_button_0->textureRect = {};
+   slot_button_1->textureRect = {};
+   slot_button_0->position = {slot_button_0_pos_x_px, slot_button_0_pos_y_px};
+   slot_button_1->position = {slot_button_1_pos_x_px, slot_button_1_pos_y_px};
+#else
+   auto slot_button_0 = std::make_unique<sf::Sprite>(*_slot_button_texture);
+   auto slot_button_1 = std::make_unique<sf::Sprite>(*_slot_button_texture);
+   slot_button_0->setTextureRect({});
+   slot_button_1->setTextureRect({});
+   slot_button_0->setPosition({slot_button_0_pos_x_px, slot_button_0_pos_y_px});
+   slot_button_1->setPosition({slot_button_1_pos_x_px, slot_button_1_pos_y_px});
+#endif
+
+   _slot_button_sprites[0] = std::move(slot_button_0);
+   _slot_button_sprites[1] = std::move(slot_button_1);
+}
+
+void InfoLayer::updateSlotButtonIcons()
+{
+   const auto& player = PlayerRegistry::getFirst();
+   const auto controller_used = player && player->getControls()->isControllerUsedLast();
+
+   constexpr std::array<KeyPressed, 2> slot_actions{KeyPressedSlot1, KeyPressedSlot2};
+   const auto& input_configuration = InputConfiguration::getInstance();
+   const auto icon_brand = ControllerKeyMap::brandForConnectedController();
+
+   for (auto slot_index = 0u; slot_index < slot_actions.size(); slot_index++)
+   {
+      const auto action = slot_actions[slot_index];
+
+      std::string icon_name;
+      if (controller_used)
+      {
+         const auto button_it = input_configuration._action_to_controller_button.find(action);
+         if (button_it != input_configuration._action_to_controller_button.cend())
+         {
+            icon_name = ControllerKeyMap::iconNameForControllerButton(button_it->second);
+         }
+      }
+      else
+      {
+         const auto key_it = input_configuration._action_to_key.find(action);
+         if (key_it != input_configuration._action_to_key.cend())
+         {
+            icon_name = ControllerKeyMap::iconNameForKeyboardKey(key_it->second);
+         }
+      }
+
+      std::optional<std::pair<int32_t, int32_t>> icon_position;
+      if (!icon_name.empty())
+      {
+         icon_position = ControllerKeyMap::getArrayPosition(icon_name, icon_brand, ControllerKeyMap::IconSize::Small);
+      }
+
+      if (!icon_position.has_value())
+      {
+         // the icon atlas covers the keys and buttons the game ships with, but a player is free to
+         // bind a slot to something it has no artwork for, and a pad brand does not necessarily draw
+         // every button either. that is a cosmetic gap, so the slot is drawn without a button hint
+         // rather than with a wrong one
+#ifdef DECEPTUS_VRSFML
+         sfcompat::setTextureRect(*_slot_button_sprites[slot_index], sf::FloatRect{});
+#else
+         sfcompat::setTextureRect(*_slot_button_sprites[slot_index], sf::IntRect{});
+#endif
+         continue;
+      }
+
+#ifdef DECEPTUS_VRSFML
+      const auto icon_rect = sf::FloatRect{
+         {static_cast<float>(icon_position->first * PIXELS_PER_TILE), static_cast<float>(icon_position->second * PIXELS_PER_TILE)},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+      };
+#else
+      const auto icon_rect =
+         sf::IntRect{{icon_position->first * PIXELS_PER_TILE, icon_position->second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
+#endif
+
+      sfcompat::setTextureRect(*_slot_button_sprites[slot_index], icon_rect);
+   }
 }
 
 void InfoLayer::updateInventoryItems()
@@ -421,6 +518,9 @@ void InfoLayer::updateHealthLayerOffsets()
 
    sfcompat::setPosition(*_inventory_sprites[0], {frame_0_pos_x_px + _player_health_x_offset, frame_0_pos_y_px});
    sfcompat::setPosition(*_inventory_sprites[1], {frame_1_pos_x_px + _player_health_x_offset, frame_1_pos_y_px});
+
+   sfcompat::setPosition(*_slot_button_sprites[0], {slot_button_0_pos_x_px + _player_health_x_offset, slot_button_0_pos_y_px});
+   sfcompat::setPosition(*_slot_button_sprites[1], {slot_button_1_pos_x_px + _player_health_x_offset, slot_button_1_pos_y_px});
 }
 
 void InfoLayer::drawHealth(sf::RenderTarget& window, sf::RenderStates states)
@@ -809,6 +909,7 @@ void InfoLayer::update(const sf::Time& delta_time)
    _loading_anim.update(delta_time);
    updateHealthLayerOffsets();
    updateInventoryItems();
+   updateSlotButtonIcons();
    updateAnimations(delta_time);
    updateEventReplayIcons();
 
@@ -917,9 +1018,13 @@ void InfoLayer::drawInventoryItem(sf::RenderTarget& window, sf::RenderStates sta
       auto item_states = states;
       item_states.texture = _inventory_texture.get();
       window.draw(*_inventory_sprites[i], item_states);
+
+      auto slot_button_states = states;
+      slot_button_states.texture = _slot_button_texture.get();
+      window.draw(*_slot_button_sprites[i], slot_button_states);
 #else
       window.draw(*_inventory_sprites[i]);
+      window.draw(*_slot_button_sprites[i]);
 #endif
-      _slot_item_layers[i]->draw(window, states);
    }
 }

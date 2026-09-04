@@ -6,6 +6,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tools/localization.h"
+#include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 #include "framework/tools/sfmlstring.h"
 #include "game/config/gameconfiguration.h"
@@ -211,6 +212,8 @@ void InteractionHelp::update(const sf::Time& dt)
 
    _button_alpha = alpha;
 
+   updateControllerIconRects();
+
    std::ranges::for_each(
       _help_elements,
       [&alpha](auto& element)
@@ -313,27 +316,30 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       const auto button_name = button_value.value_or("key_cursor_u");
       const auto button_names = ControllerKeyMap::retrieveMappedKey(button_name);
       const auto pos_index_keyboard = ControllerKeyMap::getArrayPosition(button_names.first);
-      const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_names.second);
+
+      if (!pos_index_keyboard.has_value())
+      {
+         Log::Error() << "no icon for '" << button_name << "', it will not be shown. please check the 'button_" << row << "' property";
+         break;
+      }
+
+      // the controller rect depends on the brand of the pad that is plugged in right now, so it is
+      // resolved in updateControllerIconRects rather than here
+      help._icon_id_controller = button_names.second;
 
 #ifdef DECEPTUS_VRSFML
       help._button_rect_keyboard = {
-         {static_cast<float>(pos_index_keyboard.first * PIXELS_PER_TILE), static_cast<float>(pos_index_keyboard.second * PIXELS_PER_TILE)},
+         {static_cast<float>(pos_index_keyboard->first * PIXELS_PER_TILE), static_cast<float>(pos_index_keyboard->second * PIXELS_PER_TILE)},
          {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
       };
-      help._button_rect_controller = {
-         {static_cast<float>(pos_index_controller.first * PIXELS_PER_TILE),
-          static_cast<float>(pos_index_controller.second * PIXELS_PER_TILE)},
-         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
-      };
+      help._button_rect_controller = help._button_rect_keyboard;
 
       help._button_sprite->textureRect = help._button_rect_keyboard;
 #else
       help._button_rect_keyboard = {
-         {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
+         {pos_index_keyboard->first * PIXELS_PER_TILE, pos_index_keyboard->second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
-      help._button_rect_controller = {
-         {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
-      };
+      help._button_rect_controller = help._button_rect_keyboard;
 
       help._button_sprite->setTextureRect(help._button_rect_keyboard);
       help._button_sprite->setTexture(*_button_texture);
@@ -373,7 +379,43 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
       _help_elements.push_back(std::move(help));
    }
 
+   updateControllerIconRects();
+
    addChunks(_rect_px);
+}
+
+void InteractionHelp::updateControllerIconRects()
+{
+   const auto brand = ControllerKeyMap::brandForConnectedController();
+   if (_icon_brand.has_value() && _icon_brand.value() == brand)
+   {
+      return;
+   }
+
+   _icon_brand = brand;
+
+   for (auto& help : _help_elements)
+   {
+      const auto position = ControllerKeyMap::getArrayPosition(help._icon_id_controller, brand, ControllerKeyMap::IconSize::Large);
+
+      // a pad that has no artwork for this icon keeps showing the keyboard keycap
+      if (!position.has_value())
+      {
+         help._button_rect_controller = help._button_rect_keyboard;
+         continue;
+      }
+
+#ifdef DECEPTUS_VRSFML
+      help._button_rect_controller = {
+         {static_cast<float>(position->first * PIXELS_PER_TILE), static_cast<float>(position->second * PIXELS_PER_TILE)},
+         {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+      };
+#else
+      help._button_rect_controller = {
+         {position->first * PIXELS_PER_TILE, position->second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
+      };
+#endif
+   }
 }
 
 std::optional<sf::FloatRect> InteractionHelp::getBoundingBoxPx()

@@ -132,6 +132,24 @@ public:
    int32_t getAxisIndex(SDL_GamepadAxis axis) const;
 
    ///
+   /// \brief Returns the gamepad type SDL reports for the active gamepad.
+   /// \return Gamepad type, or `SDL_GAMEPAD_TYPE_UNKNOWN` when no gamepad is open.
+   ///
+   SDL_GamepadType getGamepadType() const;
+
+   ///
+   /// \brief Returns the usb vendor id of the active gamepad.
+   /// \return Vendor id, or `0` when no gamepad is open.
+   ///
+   uint16_t getVendorId() const;
+
+   ///
+   /// \brief Returns the usb product id of the active gamepad.
+   /// \return Product id, or `0` when no gamepad is open.
+   ///
+   uint16_t getProductId() const;
+
+   ///
    /// \brief Returns the most recently sampled controller state snapshot.
    /// \return Cached controller info.
    ///
