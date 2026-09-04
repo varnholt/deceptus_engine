@@ -3,12 +3,16 @@
 #include "framework/easings/easings.h"
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/localization.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/config/inputconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/event/eventdistributor.h"
 #include "game/ingamemenu/menuconfig.h"
 #include "game/io/texturepool.h"
+#include "game/mechanisms/controllerkeymap.h"
+#include "game/player/player.h"
 #include "game/player/playerinfo.h"
+#include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
 
 #include <numbers>
@@ -52,6 +56,18 @@ constexpr auto icon_width = 38;
 constexpr auto icon_height = 38;
 constexpr auto frame_width = 44;
 constexpr auto frame_height = 52;
+// the equip layer of the psd bakes two 18x19 button plates at x 546 and 573, y 249. a large icon
+// carries its artwork at cell offset 3, 3, so a cell placed 3px up and left of a plate covers it
+constexpr auto equip_hint_0_pos_x_px = 543.0f;
+constexpr auto equip_hint_1_pos_x_px = 570.0f;
+constexpr auto equip_hint_pos_y_px = 246.0f;
+
+// the two slot badges of the profile panel. a small icon carries its 14x15 artwork at cell offset
+// 5, 4, so these cells centre it on the recesses at 74,146 and 122,146 of profile_panel
+constexpr auto slot_badge_0_pos_x_px = 65.0f;
+constexpr auto slot_badge_1_pos_x_px = 113.0f;
+constexpr auto slot_badge_pos_y_px = 138.0f;
+
 constexpr auto item_grid_offset_x_px = 190;
 constexpr auto item_grid_offset_y_px = 107;
 
@@ -129,6 +145,49 @@ std::optional<int32_t> getControllerButtonForSlot(int32_t slot)
    }
 
    return button_it->second;
+}
+
+/// \brief points one sprite at the atlas cell that depicts a bound key or button.
+/// \param sprite sprite to update.
+/// \param icon_name logical icon id, empty when the action has no binding.
+/// \param brand controller family whose artwork is preferred.
+/// \param size size variant to use.
+void applySlotIcon(
+   sf::Sprite& sprite,
+   const std::string& icon_name,
+   ControllerKeyMap::IconBrand brand,
+   ControllerKeyMap::IconSize size
+)
+{
+   std::optional<std::pair<int32_t, int32_t>> icon_position;
+   if (!icon_name.empty())
+   {
+      icon_position = ControllerKeyMap::getArrayPosition(icon_name, brand, size);
+   }
+
+   // the atlas has no artwork for every key a player may bind, and a pad brand does not necessarily
+   // draw every button either. an empty rect draws nothing, which beats drawing the wrong glyph
+   if (!icon_position.has_value())
+   {
+#ifdef DECEPTUS_VRSFML
+      sfcompat::setTextureRect(sprite, sf::FloatRect{});
+#else
+      sfcompat::setTextureRect(sprite, sf::IntRect{});
+#endif
+      return;
+   }
+
+#ifdef DECEPTUS_VRSFML
+   const auto icon_rect = sf::FloatRect{
+      {static_cast<float>(icon_position->first * PIXELS_PER_TILE), static_cast<float>(icon_position->second * PIXELS_PER_TILE)},
+      {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
+   };
+#else
+   const auto icon_rect =
+      sf::IntRect{{icon_position->first * PIXELS_PER_TILE, icon_position->second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
+#endif
+
+   sfcompat::setTextureRect(sprite, icon_rect);
 }
 
 float getHorizontallyCenteredX(const sf::Text& text, const sf::FloatRect& rect)
@@ -323,6 +382,89 @@ void InGameMenuInventory::loadInventoryItems()
 #else
    std::ranges::for_each(_slot_sprites, [this](auto& sprite) { sprite._sprite = std::make_unique<sf::Sprite>(*_inventory_texture); });
 #endif
+
+   loadSlotButtonIcons();
+}
+
+void InGameMenuInventory::loadSlotButtonIcons()
+{
+   _slot_button_texture = TexturePool::getInstance().get("data/game/ui_icons.png");
+
+   const auto create_sprite = [this](auto& sprite)
+   {
+#ifdef DECEPTUS_VRSFML
+      sprite = std::make_unique<sf::Sprite>();
+      sprite->textureRect = {};
+#else
+      sprite = std::make_unique<sf::Sprite>(*_slot_button_texture);
+      sprite->setTextureRect({});
+#endif
+   };
+
+   std::ranges::for_each(_slot_badge_sprites, create_sprite);
+   std::ranges::for_each(_equip_hint_sprites, create_sprite);
+}
+
+void InGameMenuInventory::updateSlotButtonIcons()
+{
+   const auto& player = PlayerRegistry::getFirst();
+   const auto controller_used = player && player->getControls()->isControllerUsedLast();
+
+   constexpr std::array<KeyPressed, 2> slot_actions{KeyPressedSlot1, KeyPressedSlot2};
+   const auto& input_configuration = InputConfiguration::getInstance();
+   const auto icon_brand = ControllerKeyMap::brandForConnectedController();
+
+   for (auto slot_index = 0u; slot_index < slot_actions.size(); slot_index++)
+   {
+      const auto action = slot_actions[slot_index];
+
+      std::string icon_name;
+      if (controller_used)
+      {
+         const auto button_it = input_configuration._action_to_controller_button.find(action);
+         if (button_it != input_configuration._action_to_controller_button.cend())
+         {
+            icon_name = ControllerKeyMap::iconNameForControllerButton(button_it->second);
+         }
+      }
+      else
+      {
+         const auto key_it = input_configuration._action_to_key.find(action);
+         if (key_it != input_configuration._action_to_key.cend())
+         {
+            icon_name = ControllerKeyMap::iconNameForKeyboardKey(key_it->second);
+         }
+      }
+
+      applySlotIcon(*_slot_badge_sprites[slot_index], icon_name, icon_brand, ControllerKeyMap::IconSize::Small);
+      applySlotIcon(*_equip_hint_sprites[slot_index], icon_name, icon_brand, ControllerKeyMap::IconSize::Large);
+   }
+}
+
+void InGameMenuInventory::drawSlotButtonIcons(sf::RenderTarget& window, sf::RenderStates states)
+{
+#ifdef DECEPTUS_VRSFML
+   // vrsfml sprites carry no texture, it has to come from the render states
+   states.texture = _slot_button_texture.get();
+#endif
+
+   const auto move_offset = getMoveOffset().value_or(0.0f);
+
+   constexpr std::array<float, 2> badge_x_px{slot_badge_0_pos_x_px, slot_badge_1_pos_x_px};
+   constexpr std::array<float, 2> hint_x_px{equip_hint_0_pos_x_px, equip_hint_1_pos_x_px};
+
+   for (auto slot_index = 0u; slot_index < _slot_badge_sprites.size(); slot_index++)
+   {
+      const auto badge_position =
+         sf::Vector2f{badge_x_px[slot_index] + _panel_left_offset_px.x + move_offset, slot_badge_pos_y_px};
+      sfcompat::setPosition(*_slot_badge_sprites[slot_index], badge_position);
+      window.draw(*_slot_badge_sprites[slot_index], states);
+
+      const auto hint_position =
+         sf::Vector2f{hint_x_px[slot_index] + _panel_right_offset_px.x + move_offset, equip_hint_pos_y_px};
+      sfcompat::setPosition(*_equip_hint_sprites[slot_index], hint_position);
+      window.draw(*_equip_hint_sprites[slot_index], states);
+   }
 }
 
 Inventory& InGameMenuInventory::getInventory()
@@ -336,6 +478,7 @@ void InGameMenuInventory::draw(sf::RenderTarget& window, sf::RenderStates states
    applyPageView(states);
    drawInventoryItems(window, states);
    drawInventoryTexts(window, states);
+   drawSlotButtonIcons(window, states);
 }
 
 std::shared_ptr<Layer> InGameMenuInventory::getFilterLayer(Filter filter) const
@@ -752,6 +895,7 @@ void InGameMenuInventory::update(const sf::Time& /*dt*/)
    }
 
    updateInventoryItems();
+   updateSlotButtonIcons();
 }
 
 void InGameMenuInventory::clampIndex()
