@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <functional>
 #include <map>
+#include <vector>
 
 ///
 /// \brief Stores callback lists keyed by integer id.
