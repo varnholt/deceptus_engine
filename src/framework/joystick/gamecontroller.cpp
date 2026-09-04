@@ -335,6 +335,36 @@ int32_t GameController::getAxisIndex(SDL_GamepadAxis axis) const
    return -1;
 }
 
+SDL_GamepadType GameController::getGamepadType() const
+{
+   if (!_gamepad)
+   {
+      return SDL_GAMEPAD_TYPE_UNKNOWN;
+   }
+
+   return SDL_GetGamepadType(_gamepad);
+}
+
+uint16_t GameController::getVendorId() const
+{
+   if (!_gamepad)
+   {
+      return 0;
+   }
+
+   return SDL_GetGamepadVendor(_gamepad);
+}
+
+uint16_t GameController::getProductId() const
+{
+   if (!_gamepad)
+   {
+      return 0;
+   }
+
+   return SDL_GetGamepadProduct(_gamepad);
+}
+
 const GameControllerInfo& GameController::getInfo() const
 {
    return _info;

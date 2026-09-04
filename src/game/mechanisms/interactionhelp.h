@@ -2,11 +2,15 @@
 
 #include <array>
 #include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
 #include "framework/tools/localization.h"
 #include "game/animation/animationpool.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
+#include "game/mechanisms/controllerkeymap.h"
 #include "game/mechanisms/gamemechanism.h"
 
 struct TmxObject;
@@ -48,6 +52,11 @@ public:
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
 private:
+   /// rief points the controller icons at the artwork of the pad that is currently plugged in.
+   ///
+   /// this is a no-op while the brand does not change, so it is cheap to call every frame.
+   void updateControllerIconRects();
+
    enum class InteractionType
    {
       Read,
@@ -67,6 +76,7 @@ private:
       sf::IntRect _button_rect_keyboard;
       sf::IntRect _button_rect_controller;
 #endif
+      std::string _icon_id_controller;  //!< controller icon id, re-resolved when the brand changes
    };
 
    sf::FloatRect _rect_px;
@@ -78,5 +88,6 @@ private:
    static constexpr int32_t button_max_count = 2;
    std::shared_ptr<sf::Texture> _button_texture;
    std::vector<HelpElement> _help_elements;
+   std::optional<ControllerKeyMap::IconBrand> _icon_brand;  //!< brand the controller rects currently hold artwork for
    const sf::Font* _font = &getFont();
 };

@@ -54,11 +54,12 @@ constexpr auto frame_1_pos_x_px = 43;
 constexpr auto frame_1_pos_y_px = 16;
 
 // the ui icon atlas is a grid of PIXELS_PER_TILE sized cells, so the button icons are placed by their
-// cell rather than by their visible pixels. the two positions below center a cell on the spot where
-// the old fixed x/y badges used to sit, at the bottom right of each item frame
-constexpr auto slot_button_0_pos_x_px = 24;
+// cell rather than by their visible pixels. a small icon draws its artwork at cell offset 5, 4, so the
+// two positions below put those pixels exactly where the old fixed x/y badges of the psd used to sit,
+// at the bottom right of each item frame
+constexpr auto slot_button_0_pos_x_px = 23;
 constexpr auto slot_button_0_pos_y_px = 41;
-constexpr auto slot_button_1_pos_x_px = 63;
+constexpr auto slot_button_1_pos_x_px = 62;
 constexpr auto slot_button_1_pos_y_px = 41;
 
 constexpr auto heart_pos_x_px = 81.0f;
@@ -343,6 +344,7 @@ void InfoLayer::updateSlotButtonIcons()
 
    constexpr std::array<KeyPressed, 2> slot_actions{KeyPressedSlot1, KeyPressedSlot2};
    const auto& input_configuration = InputConfiguration::getInstance();
+   const auto icon_brand = ControllerKeyMap::brandForConnectedController();
 
    for (auto slot_index = 0u; slot_index < slot_actions.size(); slot_index++)
    {
@@ -366,11 +368,18 @@ void InfoLayer::updateSlotButtonIcons()
          }
       }
 
-      if (icon_name.empty())
+      std::optional<std::pair<int32_t, int32_t>> icon_position;
+      if (!icon_name.empty())
+      {
+         icon_position = ControllerKeyMap::getArrayPosition(icon_name, icon_brand, ControllerKeyMap::IconSize::Small);
+      }
+
+      if (!icon_position.has_value())
       {
          // the icon atlas covers the keys and buttons the game ships with, but a player is free to
-         // bind a slot to something it has no artwork for. that is a cosmetic gap, so the slot is
-         // drawn without a button hint rather than with a wrong one
+         // bind a slot to something it has no artwork for, and a pad brand does not necessarily draw
+         // every button either. that is a cosmetic gap, so the slot is drawn without a button hint
+         // rather than with a wrong one
 #ifdef DECEPTUS_VRSFML
          sfcompat::setTextureRect(*_slot_button_sprites[slot_index], sf::FloatRect{});
 #else
@@ -379,16 +388,14 @@ void InfoLayer::updateSlotButtonIcons()
          continue;
       }
 
-      const auto icon_position = ControllerKeyMap::getArrayPosition(icon_name);
-
 #ifdef DECEPTUS_VRSFML
       const auto icon_rect = sf::FloatRect{
-         {static_cast<float>(icon_position.first * PIXELS_PER_TILE), static_cast<float>(icon_position.second * PIXELS_PER_TILE)},
+         {static_cast<float>(icon_position->first * PIXELS_PER_TILE), static_cast<float>(icon_position->second * PIXELS_PER_TILE)},
          {static_cast<float>(PIXELS_PER_TILE), static_cast<float>(PIXELS_PER_TILE)}
       };
 #else
       const auto icon_rect =
-         sf::IntRect{{icon_position.first * PIXELS_PER_TILE, icon_position.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
+         sf::IntRect{{icon_position->first * PIXELS_PER_TILE, icon_position->second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}};
 #endif
 
       sfcompat::setTextureRect(*_slot_button_sprites[slot_index], icon_rect);

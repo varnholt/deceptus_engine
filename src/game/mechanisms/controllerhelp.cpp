@@ -8,6 +8,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/io/texturepool.h"
@@ -27,9 +28,14 @@
 // 5 |bt_a     |bt_b   |bt_x   |bt_y     |bt_list |bt_menu |bt_rt     |bt_lt|bt_lb|bt_rb       |             |              |             |     |      |     |
 // 6 |dpad_u   |dpad_d |dpad_l |dpad_r   |bt_u    |bt_d    |bt_l      |bt_r |bt_1 |bt_2        |bt_3         |bt_4          |bt_5         |bt_6 | bt_7 |bt_8 |
 // 7 |bt_r_u   |bt_r_d |bt_r_l |bt_r_r   |bt_r_u_d|bt_r_l_r|dpad_empty|bt_0 |bt_9 |bt_10       |bt_11        |bt_12         |bt_13        |bt_14| bt_15|bt_16|
-// 8 |bt_l_u   |bt_l_d |bt_l_l |bt_l_r   |bt_l_u_d|bt_l_l_r|key_door  |     |     |            |             |              |             |     |      |     |
+// 8 |bt_l_u   |bt_l_d |bt_l_l |bt_l_r   |bt_l_u_d|bt_l_l_r|key_door  | *   | *   | *          | *           |              |             |     |      |     |
 //   +---------+-------+-------+---------+--------+--------+----------+-----+-----+------------+-------------+--------------+-------------+-----+------+-----+
 // clang-format on
+//
+// the four cells marked * in row 8 hold bt_r_stick, bt_l_stick, bt_r_stick_press and
+// bt_l_stick_press, whose names do not fit the column widths above. see controllerkeymap.h for the
+// complete map of the 20x22 atlas, including the per brand blocks that sit outside the 16 column
+// stride this table covers.
 
 namespace
 {
@@ -137,8 +143,37 @@ void ControllerHelp::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/
    }
 }
 
+void ControllerHelp::updateControllerIconRects()
+{
+   const auto brand = ControllerKeyMap::brandForConnectedController();
+   if (_icon_brand.has_value() && _icon_brand.value() == brand)
+   {
+      return;
+   }
+
+   _icon_brand = brand;
+
+   for (auto icon_index = 0u; icon_index < _icon_ids_controller.size(); icon_index++)
+   {
+      const auto position = ControllerKeyMap::getArrayPosition(_icon_ids_controller[icon_index], brand, ControllerKeyMap::IconSize::Large);
+
+      // a pad that has no artwork for this icon keeps showing the keyboard keycap
+      if (!position.has_value())
+      {
+         _sprite_rects_controller[icon_index] = _sprite_rects_keyboard[icon_index];
+         continue;
+      }
+
+      _sprite_rects_controller[icon_index] = sf::IntRect{
+         {position->first * PIXELS_PER_TILE, position->second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
+      };
+   }
+}
+
 void ControllerHelp::update(const sf::Time& delta_time)
 {
+   updateControllerIconRects();
+
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
    _visible = sfcompat::findIntersection(player_rect, _rect_px).has_value();
 
@@ -196,13 +231,15 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
    {
       const auto button_key_pair = ControllerKeyMap::retrieveMappedKey(unmapped_button_key);
       const auto pos_index_keyboard = ControllerKeyMap::getArrayPosition(button_key_pair.first);
-      const auto pos_index_controller = ControllerKeyMap::getArrayPosition(button_key_pair.second);
+
+      if (!pos_index_keyboard.has_value())
+      {
+         Log::Error() << "no icon for '" << unmapped_button_key << "', it will not be shown. please check the 'keys' property";
+         continue;
+      }
 
       const auto sprite_rect_keyboard = sf::IntRect{
-         {pos_index_keyboard.first * PIXELS_PER_TILE, pos_index_keyboard.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
-      };
-      const auto sprite_rect_controller = sf::IntRect{
-         {pos_index_controller.first * PIXELS_PER_TILE, pos_index_controller.second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
+         {pos_index_keyboard->first * PIXELS_PER_TILE, pos_index_keyboard->second * PIXELS_PER_TILE}, {PIXELS_PER_TILE, PIXELS_PER_TILE}
       };
 
 #ifdef DECEPTUS_VRSFML
@@ -212,9 +249,15 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
 #endif
       sfcompat::setTextureRect(sprite, sprite_rect_keyboard);
       _sprites.emplace_back(sprite);
-      _sprite_rects_controller.emplace_back(sprite_rect_controller);
       _sprite_rects_keyboard.emplace_back(sprite_rect_keyboard);
+
+      // the controller rect depends on the brand of the pad that is plugged in right now, so it is
+      // resolved in update rather than here
+      _icon_ids_controller.emplace_back(button_key_pair.second);
+      _sprite_rects_controller.emplace_back(sprite_rect_keyboard);
    }
+
+   updateControllerIconRects();
 
 #ifdef DECEPTUS_VRSFML
    _background = std::make_unique<sf::Sprite>();
@@ -230,8 +273,10 @@ void ControllerHelp::deserialize(const GameDeserializeData& data)
    }
    else if (_sprites.size() == 2)
    {
+      // the wide bubble is 3 tiles across but only 2 tiles tall. reading a third tile row would reach
+      // into the switch button artwork that sits below it in the atlas
       sfcompat::setTextureRect(
-         *_background, sf::IntRect{{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 3}}
+         *_background, sf::IntRect{{9 * PIXELS_PER_TILE, 10 * PIXELS_PER_TILE}, {PIXELS_PER_TILE * 3, PIXELS_PER_TILE * 2}}
       );
    }
 
