@@ -4,7 +4,6 @@
 #include <array>
 #include <cctype>
 #include <fstream>
-#include <ranges>
 
 #include <SFML/Graphics/Text.hpp>
 
