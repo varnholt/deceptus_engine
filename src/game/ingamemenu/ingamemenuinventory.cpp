@@ -16,13 +16,11 @@
 #include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
 
-#include <algorithm>
 #include <array>
-#include <cctype>
+#include <numbers>
+#include <ranges>
 #include <string>
 #include <vector>
-#include <ranges>
-#include <numbers>
 
 // ---------------------------------------------------------------
 //               <LT>   MAP   INVENTORY   VAULT   <RT>
@@ -78,8 +76,10 @@ constexpr auto slot_badge_pos_y_px = 138.0f;
 constexpr auto item_grid_offset_x_px = 190;
 constexpr auto item_grid_offset_y_px = 107;
 
+// the description panel gives the text 100px of width and, between its top edge and the equip row,
+// 135px of height. at the 16px line spacing of deceptum that is seven lines, and eight at the 14px
+// of mona12, which is what the wording of the item descriptions is kept within
 constexpr auto description_rect_width = 100;
-constexpr auto description_rect_height = 135;
 
 constexpr auto inventory_text_font_size = 12;
 constexpr auto inventory_title_font_size = 12;
