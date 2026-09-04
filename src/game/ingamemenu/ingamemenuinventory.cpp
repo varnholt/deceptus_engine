@@ -381,7 +381,7 @@ void InGameMenuInventory::updateSlotButtonIcons()
    const auto& input_configuration = InputConfiguration::getInstance();
    const auto icon_brand = ControllerKeyMap::brandForConnectedController();
 
-   for (auto slot_index = 0u; slot_index < slot_actions.size(); slot_index++)
+   for (auto slot_index = size_t{0}; slot_index < slot_actions.size(); slot_index++)
    {
       const auto action = slot_actions[slot_index];
 
@@ -417,7 +417,7 @@ void InGameMenuInventory::drawSlotButtonIcons(sf::RenderTarget& window, sf::Rend
 
    const auto move_offset = getMoveOffset().value_or(0.0f);
 
-   for (auto slot_index = 0u; slot_index < _slot_badge_sprites.size(); slot_index++)
+   for (auto slot_index = size_t{0}; slot_index < _slot_badge_sprites.size(); slot_index++)
    {
       const auto badge_position = sf::Vector2f{
          _inventory_layout._slot_badge_x_px[slot_index] + _panel_left_offset_px.x + move_offset, _inventory_layout._slot_badge_y_px

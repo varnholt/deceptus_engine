@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cstdint>
 #include <fstream>
 
 #include <SFML/Graphics/Text.hpp>
@@ -17,7 +18,7 @@ namespace
 /// \brief returns the byte length of the utf-8 sequence a lead byte opens.
 /// \param lead_byte first byte of the sequence.
 /// \return sequence length in bytes; 1 for a byte that is not a valid lead, so callers always advance.
-size_t utf8SequenceLength(unsigned char lead_byte)
+size_t utf8SequenceLength(uint8_t lead_byte)
 {
    if ((lead_byte & 0x80u) == 0x00u)
    {
@@ -50,12 +51,12 @@ char32_t utf8CodePoint(const std::string& text, size_t position, size_t length)
       return 0;
    }
 
-   static constexpr std::array<unsigned char, 5> lead_masks{0x00u, 0x7fu, 0x1fu, 0x0fu, 0x07u};
-   auto code_point = static_cast<char32_t>(static_cast<unsigned char>(text[position]) & lead_masks[length]);
+   static constexpr std::array<uint8_t, 5> lead_masks{0x00u, 0x7fu, 0x1fu, 0x0fu, 0x07u};
+   auto code_point = static_cast<char32_t>(static_cast<uint8_t>(text[position]) & lead_masks[length]);
 
    for (auto index = size_t{1}; index < length; index++)
    {
-      code_point = (code_point << 6) | static_cast<char32_t>(static_cast<unsigned char>(text[position + index]) & 0x3fu);
+      code_point = (code_point << 6) | static_cast<char32_t>(static_cast<uint8_t>(text[position + index]) & 0x3fu);
    }
 
    return code_point;
@@ -184,7 +185,7 @@ std::u32string LocalizedText::decodeUtf8(const std::string& utf8_text)
 
    for (auto position = size_t{0}; position < utf8_text.size();)
    {
-      const auto length = utf8SequenceLength(static_cast<unsigned char>(utf8_text[position]));
+      const auto length = utf8SequenceLength(static_cast<uint8_t>(utf8_text[position]));
       code_points.push_back(utf8CodePoint(utf8_text, position, length));
       position += length;
    }
@@ -209,12 +210,12 @@ std::vector<std::string> LocalizedText::splitIntoBreakUnits(const std::string& u
 
    for (auto position = size_t{0}; position < utf8_text.size();)
    {
-      const auto length = utf8SequenceLength(static_cast<unsigned char>(utf8_text[position]));
+      const auto length = utf8SequenceLength(static_cast<uint8_t>(utf8_text[position]));
       const auto code_point = utf8CodePoint(utf8_text, position, length);
       const auto sequence = utf8_text.substr(position, length);
       position += length;
 
-      if (length == 1 && std::isspace(static_cast<unsigned char>(sequence[0])) != 0)
+      if (length == 1 && std::isspace(static_cast<uint8_t>(sequence[0])) != 0)
       {
          flush_pending_word(true);
          continue;
@@ -273,7 +274,7 @@ LocalizedText::wrapToWidth(const std::string& utf8_text, float width_px, const s
 
       // a character that may not open a line takes the character before it along, rather than
       // staying on a line it no longer fits into
-      const auto unit_length = utf8SequenceLength(static_cast<unsigned char>(unit[0]));
+      const auto unit_length = utf8SequenceLength(static_cast<uint8_t>(unit[0]));
       if (forbiddenAtLineStart(utf8CodePoint(unit, 0, unit_length)) && !last_unit.empty() && line.size() > last_unit.size())
       {
          line.erase(line.size() - last_unit.size());
