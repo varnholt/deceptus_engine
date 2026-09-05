@@ -11,6 +11,7 @@
 #include "box2d/box2d.h"
 
 // std
+#include <atomic>
 #include <filesystem>
 
 struct TmxLayer;
