@@ -283,5 +283,7 @@
   "Continues": "コンティニュー回数",
   "File Select": "ファイル選択",
   "Please enter your name": "名前を入力してください",
-  "The name must be between 2-12 characters long.": "名前は2〜12文字で入力してください。"
+  "The name must be between 2-12 characters long.": "名前は2〜12文字で入力してください。",
+  "Code: Matthias Varnholt": "プログラム：Matthias Varnholt",
+  "Artwork: dstar": "アートワーク：dstar"
 }
