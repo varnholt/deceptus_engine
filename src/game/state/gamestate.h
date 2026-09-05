@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <mutex>
+#include <vector>
 
 /// \brief tracks current and queued game execution modes and notifies listeners on changes.
 class GameState
