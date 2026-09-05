@@ -35,6 +35,14 @@ void Localization::load(const std::string& locale)
       const auto json = nlohmann::json::parse(json_text);
       for (const auto& [key, value] : json.items())
       {
+         // a locale file may also carry sections that are not translations, such as the line break
+         // rules of its script. those are objects rather than strings and belong to whoever reads
+         // them, so they are skipped here rather than breaking the whole table
+         if (!value.is_string())
+         {
+            continue;
+         }
+
          _translations[key] = value.get<std::string>();
       }
    }
@@ -156,13 +164,23 @@ const sf::Font& getFont()
    {
 #ifdef DECEPTUS_VRSFML
       sf::Font loaded_font = sf::Font::openFromFile(getFontPath()).value();
+
+      // vrsfml holds a single glyph atlas of a fixed size that is never reallocated, so the filter
+      // set on the texture here is the one it keeps. it also has no Font::setSmooth to set instead
       loaded_font.getTexture().setSmooth(false);
 #else
       sf::Font loaded_font;
       loaded_font.openFromFile(getFontPath());
-      const_cast<sf::Texture&>(loaded_font.getTexture(12)).setSmooth(false);
-      const_cast<sf::Texture&>(loaded_font.getTexture(14)).setSmooth(false);
+
+      // vanilla sfml keeps a glyph atlas per character size and grows it as glyphs are rasterized.
+      // when an atlas outgrows itself the replacement takes its filter from the font's own flag, so
+      // clearing the flag on the page texture only held until the first reallocation. japanese
+      // reached that within moments -- it needs hundreds of large glyphs where latin needs a few
+      // dozen small ones -- and the text turned blurry a moment after it appeared. setting the flag
+      // on the font covers every page it has and every page it will make, at any character size
+      loaded_font.setSmooth(false);
 #endif
+
       return loaded_font;
    }();
    return font;

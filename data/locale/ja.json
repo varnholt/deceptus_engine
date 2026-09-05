@@ -1,4 +1,39 @@
 {
+  "@line_break": {
+    "break_between_characters": [
+      {
+        "from": "3000",
+        "name": "cjk symbols and punctuation",
+        "to": "303F"
+      },
+      {
+        "from": "3040",
+        "name": "hiragana and katakana",
+        "to": "30FF"
+      },
+      {
+        "from": "3400",
+        "name": "cjk unified ideographs extension a",
+        "to": "4DBF"
+      },
+      {
+        "from": "4E00",
+        "name": "cjk unified ideographs",
+        "to": "9FFF"
+      },
+      {
+        "from": "F900",
+        "name": "cjk compatibility ideographs",
+        "to": "FAFF"
+      },
+      {
+        "from": "FF00",
+        "name": "fullwidth forms",
+        "to": "FF60"
+      }
+    ],
+    "forbidden_at_line_start": "、。，．！？ー゛゜）」』】〕］｝・："
+  },
   "Up": "上",
   "Down": "下",
   "Left": "左",
@@ -149,21 +184,21 @@
   "Anyway.. Let's get going with this game now.": "まあいいや…さあゲームを始めよう。",
   "Sigh.": "はあ。",
   "Whisperwood Lever-Grip": "ウィスパーウッドのレバーグリップ",
-  "Carved from ancient Whisperwood, this lever-grip activates forgotten mechanisms. It resonates with the past, breathing life into dormant contraptions that guard the mysteries of bygone eras.": "古代のウィスパーウッドから彫られたこのレバーグリップは、忘れられた機構を作動させる。過去と共鳴し、過ぎ去りし時代の謎を守る眠れる仕掛けに命を吹き込む。",
+  "Carved from ancient Whisperwood. It wakes mechanisms that have not turned in a long age, and rarely survives the effort.": "古いウィスパーウッドの握り。長く動かぬ機構を目覚めさせるが、たいてい壊れる。",
   "Chrono-Skeleton Key": "クロノスケルトンキー",
-  "Crafted by Chrono-Smiths, this key unlocks doors frozen in time. Its intricate design hints at mysteries, allowing passage to hidden realms where echoes of history linger. The surprise lies in its seamless compatibility with locks guarding yesteryear's secrets.": "クロノ鍛冶師たちによって作られたこの鍵は、時間の中で凍りついた扉を開く。その精巧な意匠は謎を示唆し、歴史の残響が漂う隠された領域への通路を与える。驚くべきは、昨日の秘密を守る錠前との完璧な適合性だ。",
+  "Chrono-Smith work. It opens doors that time has locked, and fits yesterday's wards as though it were cut for them.": "クロノ鍛冇師の作。時が閉ざした扉を開き、古い錠にも合う。",
   "Locker Key": "ロッカーの鍵",
-  "I shiny key.": "光る鍵。",
+  "A shiny key.": "光る鍵。",
   "Echoing Blade": "残響の刃",
-  "Forged in a lost forge, this blade sings forgotten battles' songs. It thirsts for steel clashes, yearning to carve a new legend in the ancient tapestry of a world long gone.": "失われた鍛冶場で鍛えられたこの刃は、忘れられた戦いの歌を歌う。鋼の激突を渇望し、遙か昔に失われた世界の古い織物に新たな伝説を刻もうとする。",
+  "Forged where the fires went out long ago. It rings with battles nobody remembers, and wants one more.": "火の絶えた鍛冇場の刃。誰も覚えぬ戦いの音が鑑き、次を待つ。",
   "Phoenix Elixir": "フェニックスのエリクサー",
-  "Brewed from Phoenix feathers, this elixir promises rebirth. Its crimson hue rekindles resilience, offering renewed strength and vitality to those who dare sip from its ethereal chalice.": "フェニックスの羽根から醸造されたこのエリクサーは再生を約束する。その深紅の色合いは回復力を再点火し、その幽玄の聖杯から飲む勇気ある者に新たな力と活力を与える。",
+  "Brewed from phoenix feathers. Crimson, faintly warm, and it gives strength back to anyone brave enough to drink it.": "フェニックスの羽で醸した秘薬。深紅で微かに温かく、飲む者に力を返す。",
   "Sylvan Essence Draught": "シルヴァンの精髄の水薬",
-  "Distilled from Sylvan Grove essence, this potion whispers nature's language. It bestows forest wisdom, unveiling flora and fauna secrets to navigate the labyrinth of time.": "シルヴァンの森の精髄から蒸留されたこの霊薬は、自然の言葉をささやく。森の知恵を授け、時の迷宮を進むための草木と動物の秘密を明かす。",
+  "Distilled from Sylvan Grove essence. It lends the patience of old woodland, and tells you which growing things to trust.": "シルヴァンの森の精髄。古い森の忍耐を貸し、信じてよい草木を教える。",
   "Temporal Grimoire": "時の魔道書",
-  "Penned by a Chrono-Scribe, this grimoire unravels time's threads, revealing lost spells. Its pages hold the key to manipulating reality, a coveted tome for seekers of forgotten wisdom.": "クロノ書記によって記されたこの魔道書は時の糸を解き明かし、失われた呪文を明らかにする。そのページには現実を操る鍵が秘められており、忘れられた知恵を求める者が渇望する書物だ。",
+  "A Chrono-Scribe's work. Its pages pull threads out of time and hand back spells that were meant to stay lost.": "クロノ書記の手による書。頁は時から糸を引き出し、失われた呪文を返す。",
   "Firefly": "",
-  "A friendly firefly that orbits you through the dark.": "",
+  "A friendly firefly that orbits you through the dark.": "暗闇であなたの周りを回る、人懐こい蛍。",
   "Slowest": "最も遅い",
   "Slow": "遅い",
   "Normal": "普通",
@@ -185,6 +220,9 @@
   "Italian": "イタリア語",
   "Japanese": "日本語",
   "Head Torch": "ヘッドトーチ",
-  "A miner's helm lamp, its beam narrow and honest. It follows wherever you look and gutters when you land hard, which is more warning than the catacombs usually give.": "",
-  "You have acquired the [color:#FEBA00FF] Head Torch [/color]": ""
+  "A miner's helm lamp, its beam narrow and honest. It follows wherever you look, and gutters when you land hard.": "坑夫の兜灯。細く正直な光が視線を追い、硬く着地すると揺らぐ。",
+  "You have acquired the [color:#FEBA00FF] Head Torch [/color]": "",
+  "Two cut stones, still warm from whoever carried them last. Worth a great deal to someone who is not down here.": "切り出された二つの石。まだ温かい。ここにいない者には大金になる。",
+  "A gilded seal stamped with a rayed sun. Someone pressed it into a lid once and took it with them afterwards.": "光条の太陽を刻んだ金の封印。誰かが蓋に押し、持ち去った。",
+  "A pewter seal stamped with a waning moon. The twin of the sun seal, and colder to hold than the tunnels explain.": "欠ける月を刻んだ錫の封印。太陽の対で、坑道より冷たい。"
 }

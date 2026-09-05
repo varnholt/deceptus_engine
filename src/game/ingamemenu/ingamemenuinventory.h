@@ -1,10 +1,11 @@
-#ifndef INGAMEMENUINVENTORY_H
+﻿#ifndef INGAMEMENUINVENTORY_H
 #define INGAMEMENUINVENTORY_H
 
 #include "framework/joystick/gamecontrollerinfo.h"
 #include "framework/tools/localization.h"
 #include "game/image/layerdata.h"
 #include "game/ingamemenu/ingamemenupage.h"
+#include "game/ingamemenu/menuconfig.h"
 #include "game/player/inventory.h"
 
 #include <SFML/Graphics.hpp>
@@ -162,6 +163,17 @@ private:
    /// \return destination position in menu pixel space.
    sf::Vector2f getFramePosition(LayerData* layer_data, int32_t index) const;
 
+   /// \brief loads the ui icon atlas and initializes the slot button sprites.
+   void loadSlotButtonIcons();
+
+   /// \brief points the slot button icons at the keys or buttons the slot actions are bound to.
+   void updateSlotButtonIcons();
+
+   /// \brief draws the slot button icons: small ones on the profile panel, large ones by the equip label.
+   /// \param window render target.
+   /// \param states render state overrides.
+   void drawSlotButtonIcons(sf::RenderTarget& window, sf::RenderStates states);
+
    std::unordered_map<Filter, std::shared_ptr<Layer>> _filter_map;
    std::array<Filter, 5> _filters;
 
@@ -171,6 +183,11 @@ private:
    std::unique_ptr<LayerData> _frame_selection;
    std::unique_ptr<LayerData> _frame_slot_0;
    std::unique_ptr<LayerData> _frame_slot_1;
+
+   MenuConfig::InventoryLayout _inventory_layout;                   //!< positions read from data/config/menus.json
+   std::shared_ptr<sf::Texture> _slot_button_texture;               //!< ui icon atlas holding keycap and button glyphs
+   std::array<std::unique_ptr<sf::Sprite>, 2> _slot_badge_sprites;  //!< small icons, on the profile panel slots
+   std::array<std::unique_ptr<sf::Sprite>, 2> _equip_hint_sprites;  //!< large icons, next to the equip label
 
    std::map<std::string, ItemSprite> _sprites;
    std::map<std::string, ItemText> _texts;

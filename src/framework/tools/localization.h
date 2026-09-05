@@ -81,7 +81,7 @@ class Font;
 
 /// \brief returns the single shared font instance, loading it on first call.
 ///
-/// the font is loaded from getFontPath() with smoothing disabled for sizes 12 and 14.
+/// the font is loaded from getFontPath() with smoothing disabled, at every character size.
 ///
 /// \return const reference to the shared font.
 [[nodiscard]] const sf::Font& getFont();

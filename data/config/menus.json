@@ -1,4 +1,16 @@
 {
     "duration_hide": 1,
-    "duration_show": 0.5
+    "duration_show": 0.5,
+    "inventory": {
+        "slot_badge_x_px": [
+            65,
+            113
+        ],
+        "slot_badge_y_px": 138,
+        "equip_hint_x_px": [
+            543,
+            570
+        ],
+        "equip_hint_y_px": 246
+    }
 }
