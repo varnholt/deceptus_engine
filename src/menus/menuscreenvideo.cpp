@@ -286,6 +286,9 @@ void MenuScreenVideo::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenVideo::loadingFinished()
 {
+   setTitle("header", "Video", 41);
+   setCaption("video_window-main", "Video", sf::Color{127, 171, 253});
+
    for (auto index = 0; index < 11; index++)
    {
       const auto brightness_value_layer_name = std::format("brightness_value_{}", index);

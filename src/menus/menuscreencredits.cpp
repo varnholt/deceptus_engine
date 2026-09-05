@@ -14,7 +14,7 @@ MenuScreenCredits::MenuScreenCredits()
    _text_code = std::make_unique<sf::Text>(_font);
 #endif
    _text_code->setFont(_font);
-   _text_code->setString("Code: Matthias Varnholt");
+   _text_code->setString(sftr("Code: Matthias Varnholt"));
    _text_code->setCharacterSize(12);
 #ifdef DECEPTUS_VRSFML
    _text_code->position = {220.0f, 155.0f};
@@ -29,7 +29,7 @@ MenuScreenCredits::MenuScreenCredits()
    _text_artwork = std::make_unique<sf::Text>(_font);
 #endif
    _text_artwork->setFont(_font);
-   _text_artwork->setString("Artwork: dstar");
+   _text_artwork->setString(sftr("Artwork: dstar"));
    _text_artwork->setCharacterSize(12);
 #ifdef DECEPTUS_VRSFML
    _text_artwork->position = {220.0f, 177.0f};

@@ -251,6 +251,10 @@ void MenuScreenNameSelect::retrieveUsername()
 
 void MenuScreenNameSelect::loadingFinished()
 {
+   setTitle("title", "New Game", 34);
+   setCaption("Please enter your name", "Please enter your name", sf::Color{106, 105, 141});
+   setCaption("name-error-msg", "The name must be between 2-12 characters long.", sf::Color{106, 105, 141});
+
    const auto cursor = _layers["cursor"];
 #ifdef DECEPTUS_VRSFML
    _char_origin.x = cursor->_sprite->position.x;

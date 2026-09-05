@@ -209,6 +209,8 @@ void MenuScreenFileSelect::controllerButtonX()
 
 void MenuScreenFileSelect::loadingFinished()
 {
+   setTitle("title", "File Select", 21);
+
    SaveState::deserializeFromFile();
    updateLayers();
 }

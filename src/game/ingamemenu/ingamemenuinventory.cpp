@@ -8,6 +8,7 @@
 #include "game/config/inputconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/event/eventdistributor.h"
+#include "game/ingamemenu/ingamemenulabels.h"
 #include "game/ingamemenu/menuconfig.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/controllerkeymap.h"
@@ -15,8 +16,11 @@
 #include "game/player/playerinfo.h"
 #include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
+#include "game/ui/menulabel.h"
 
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <numbers>
 #include <ranges>
 #include <string>
@@ -83,6 +87,39 @@ constexpr auto description_rect_width = 100;
 
 constexpr auto inventory_text_font_size = 12;
 constexpr auto inventory_title_font_size = 12;
+
+//! the magenta pill of the tab strip sits behind 'Inventory' in this page's artwork
+constexpr auto header_pill_left_px = 48;
+constexpr auto header_pill_width_px = 73;
+
+//! columns the close button icons occupy inside their own layer image
+constexpr auto icon_width_close_pc_px = 42;
+constexpr auto icon_width_close_xbox_px = 12;
+
+//! the two button plates of the equip hint sit in the last 45 columns of its layer image, and the
+//! slot icons drawn over them are placed by absolute screen position, so the hint keeps its right
+//! edge and grows to the left instead
+constexpr auto equip_button_width_px = 45;
+constexpr auto equip_text_gap_px = 8;
+constexpr auto equip_right_edge_px = 591;
+
+//! the item description panel the equip hint has to stay inside
+constexpr auto description_panel_left_px = 472;
+
+//! the filter strip and the slots inside it, as offsets into the 'filters' layer image
+constexpr auto filter_strip_center_x_px = 320;
+constexpr auto filter_slot_all_x_px = 3;
+constexpr auto filter_slot_all_width_px = 29;
+constexpr auto filter_slot_cap_width_px = 8;
+constexpr auto filter_slot_weapons_x_px = 37;
+constexpr auto filter_slot_consumables_x_px = 61;
+constexpr auto filter_slot_items_x_px = 84;
+constexpr auto filter_slot_various_x_px = 108;
+constexpr auto filter_arrow_previous_x_px = -21;
+constexpr auto filter_arrow_next_x_px = 132;
+
+const sf::Color color_equip{255, 255, 255};
+const sf::Color color_filter_all{193, 193, 193};
 
 
 std::optional<int32_t> getSlotForAction(KeyPressed action)
@@ -181,6 +218,7 @@ InGameMenuInventory::InGameMenuInventory()
    _filename = "data/game/inventory.psd";
 
    load();
+   updateLabels();
 
    // ---------------------------------------------------------------
    //               <LT>   MAP   INVENTORY   VAULT   <RT>
@@ -309,6 +347,148 @@ InGameMenuInventory::InGameMenuInventory()
    _text_description->setFillColor(sf::Color{232, 219, 243});
 
    loadInventoryItems();
+}
+
+void InGameMenuInventory::updateLabels()
+{
+   InGameMenuLabels::updateHeaderLabels(*_layers["header"], InGameMenuLabels::Tab::Inventory, header_pill_left_px, header_pill_width_px);
+
+   InGameMenuLabels::updateFooterLabels({
+      {._layer_plain = _layers["close_xbox_0"],
+       ._layer_pressed = _layers["close_xbox_1"],
+       ._icon_width_px = icon_width_close_xbox_px,
+       ._text = "Close"},
+   });
+
+   InGameMenuLabels::updateFooterLabels({
+      {._layer_plain = _layers["close_pc_0"],
+       ._layer_pressed = _layers["close_pc_1"],
+       ._icon_width_px = icon_width_close_pc_px,
+       ._text = "Close"},
+   });
+
+   updateEquipLabel();
+   updateFilterStripLabel();
+}
+
+void InGameMenuInventory::updateEquipLabel()
+{
+   auto& equip_layer = *_layers["equip"];
+   if (!equip_layer._texture || !equip_layer._sprite)
+   {
+      return;
+   }
+
+   const auto layer_size = equip_layer._texture->getSize();
+   const auto original_width_px = static_cast<int32_t>(layer_size.x);
+   const auto height_px = static_cast<int32_t>(layer_size.y);
+
+   const auto text_width_px = MenuLabel::measureWidth("Equip", inventory_text_font_size);
+   const auto width_px = text_width_px + equip_text_gap_px + equip_button_width_px;
+   const auto x_px = std::max(description_panel_left_px, equip_right_edge_px - width_px);
+
+   MenuLabel::compose(
+      equip_layer,
+      {width_px, height_px},
+      {MenuLabel::KeptRegion{
+         ._source =
+            sf::IntRect{{original_width_px - equip_button_width_px, 0}, {equip_button_width_px, height_px}},
+         ._target = sf::Vector2i{width_px - equip_button_width_px, 0}
+      }},
+      {MenuLabel::Label{
+         ._text = "Equip",
+         ._box = sf::IntRect{{0, 0}, {text_width_px, height_px}},
+         ._align = MenuLabel::Align::Left,
+         ._character_size = inventory_text_font_size,
+         ._color = color_equip
+      }}
+   );
+
+   const auto position = sfcompat::getPosition(*equip_layer._sprite);
+   sfcompat::setPosition(*equip_layer._sprite, {static_cast<float>(x_px), position.y});
+}
+
+void InGameMenuInventory::updateFilterStripLabel()
+{
+   auto& strip_layer = *_layers["filters"];
+   auto& all_layer = *_layers["item_filter_all"];
+   if (!strip_layer._texture || !strip_layer._sprite || !all_layer._texture || !all_layer._sprite)
+   {
+      return;
+   }
+
+   const auto strip_size = strip_layer._texture->getSize();
+   const auto strip_width_px = static_cast<int32_t>(strip_size.x);
+   const auto strip_height_px = static_cast<int32_t>(strip_size.y);
+
+   // the 'All' slot is the only one carrying a word. a translation wider than the english one makes
+   // the slot grow, and everything to the right of it in the strip moves along
+   const auto text_width_px = MenuLabel::measureWidth("All", inventory_text_font_size);
+   const auto slot_width_px = std::max(filter_slot_all_width_px, text_width_px + 2 * filter_slot_cap_width_px);
+   const auto grown_px = slot_width_px - filter_slot_all_width_px;
+
+   const auto slot_end_px = filter_slot_all_x_px + filter_slot_all_width_px;
+   const auto new_strip_width_px = strip_width_px + grown_px;
+
+   const auto slot_regions = [](int32_t plate_x_px, int32_t target_x_px, int32_t width_px, int32_t height_px)
+   {
+      return MenuLabel::stretchedPlate(
+         sf::IntRect{{plate_x_px, 0}, {filter_slot_all_width_px, height_px}}, target_x_px, width_px, filter_slot_cap_width_px
+      );
+   };
+
+   auto strip_regions = slot_regions(filter_slot_all_x_px, filter_slot_all_x_px, slot_width_px, strip_height_px);
+   strip_regions.insert(
+      strip_regions.begin(),
+      MenuLabel::KeptRegion{
+         ._source = sf::IntRect{{0, 0}, {filter_slot_all_x_px, strip_height_px}},  //
+         ._target = sf::Vector2i{0, 0}
+      }
+   );
+   strip_regions.push_back(MenuLabel::KeptRegion{
+      ._source = sf::IntRect{{slot_end_px, 0}, {strip_width_px - slot_end_px, strip_height_px}},
+      ._target = sf::Vector2i{slot_end_px + grown_px, 0}
+   });
+
+   const MenuLabel::Label all_label{
+      ._text = "All",
+      ._box = sf::IntRect{{filter_slot_all_x_px, 0}, {slot_width_px, strip_height_px}},
+      ._align = MenuLabel::Align::Centered,
+      ._character_size = inventory_text_font_size,
+      ._color = color_filter_all
+   };
+
+   MenuLabel::compose(strip_layer, {new_strip_width_px, strip_height_px}, strip_regions, {all_label});
+
+   const auto all_height_px = static_cast<int32_t>(all_layer._texture->getSize().y);
+   auto highlight_label = all_label;
+   highlight_label._box = sf::IntRect{{0, 0}, {slot_width_px, all_height_px}};
+   MenuLabel::compose(all_layer, {slot_width_px, all_height_px}, slot_regions(0, 0, slot_width_px, all_height_px), {highlight_label});
+
+   // move the strip and everything that lines up with a slot inside it
+   const auto strip_x_px = filter_strip_center_x_px - new_strip_width_px / 2;
+
+   const auto move_layer = [this, strip_x_px](const std::string& layer_name, int32_t offset_px)
+   {
+      const auto& layer = _layers[layer_name];
+      if (!layer || !layer->_sprite)
+      {
+         return;
+      }
+      const auto position = sfcompat::getPosition(*layer->_sprite);
+      sfcompat::setPosition(*layer->_sprite, {static_cast<float>(strip_x_px + offset_px), position.y});
+   };
+
+   move_layer("filters", 0);
+   move_layer("item_filter_all", filter_slot_all_x_px);
+   move_layer("item_filter_weapons", filter_slot_weapons_x_px + grown_px);
+   move_layer("item_filter_consumables", filter_slot_consumables_x_px + grown_px);
+   move_layer("item_filter_items", filter_slot_items_x_px + grown_px);
+   move_layer("item_filter_various", filter_slot_various_x_px + grown_px);
+   move_layer("item_filter_previous_0", filter_arrow_previous_x_px);
+   move_layer("item_filter_previous_1", filter_arrow_previous_x_px);
+   move_layer("item_filter_next_0", filter_arrow_next_x_px + grown_px);
+   move_layer("item_filter_next_1", filter_arrow_next_x_px + grown_px);
 }
 
 void InGameMenuInventory::loadInventoryItems()
