@@ -52,6 +52,10 @@ using SfmlString = sf::String;
 /// the only place where the rules of a script come into it. the wrapper adds units to a line until
 /// the next one no longer fits and breaks there, without knowing which language it is laying out.
 ///
+/// english breaks between words. japanese, chinese and korean break between characters instead, and
+/// are abbreviated cjk below and in the "@line_break" section of the locale files, which is also
+/// what unicode calls the blocks those characters live in.
+///
 /// "Hello world 日本語" splits into five of them:
 ///
 ///     "Hello "  "world "  "日"  "本"  "語"

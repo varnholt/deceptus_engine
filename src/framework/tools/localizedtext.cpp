@@ -169,7 +169,7 @@ bool forbiddenAtLineStart(char32_t code_point)
 }
 
 /// \brief one piece of text a line is built from, as splitIntoBreakUnits() cuts them: a latin word
-///        with its trailing space, or a single cjk character.
+///        with its trailing space, or a single japanese, chinese or korean character.
 ///
 /// wrapping rich text needs two more kinds that are not text the player sees, which is what the two
 /// flags are for. markup such as `[color:#09e522FF]` is a unit that is not measured, so it adds no
