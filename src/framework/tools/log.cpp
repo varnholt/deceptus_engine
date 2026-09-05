@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <iostream>
 #include <source_location>
+#include <vector>
 
 #ifdef _WIN32
 #include <windows.h>

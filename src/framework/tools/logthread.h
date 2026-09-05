@@ -8,6 +8,7 @@
 #include <source_location>
 #include <string>
 #include <thread>
+#include <vector>
 
 #include "log.h"
 
