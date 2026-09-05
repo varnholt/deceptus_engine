@@ -48,6 +48,14 @@ using SfmlString = sf::String;
 
 /// \brief splits utf-8 text into the smallest pieces a line break may separate.
 ///
+/// such a piece is called a break unit: it is the atom the wrapping below builds a line out of, and
+/// the only place where the rules of a script come into it. the wrapper adds units to a line until
+/// the next one no longer fits and breaks there, without knowing which language it is laying out.
+///
+/// "Hello world 日本語" splits into five of them:
+///
+///     "Hello "  "world "  "日"  "本"  "語"
+///
 /// a latin word carries its own trailing space, so the pieces can simply be concatenated back
 /// together. every cjk character becomes a piece of its own, since those scripts break between
 /// characters rather than between words.

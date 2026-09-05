@@ -168,7 +168,15 @@ bool forbiddenAtLineStart(char32_t code_point)
    return forbidden.find(code_point) != std::u32string::npos;
 }
 
-/// \brief one piece of text a line is built from.
+/// \brief one piece of text a line is built from, as splitIntoBreakUnits() cuts them: a latin word
+///        with its trailing space, or a single cjk character.
+///
+/// wrapping rich text needs two more kinds that are not text the player sees, which is what the two
+/// flags are for. markup such as `[color:#09e522FF]` is a unit that is not measured, so it adds no
+/// width and cannot be split down the middle, and `[br]` is a unit that forces a break rather than
+/// filling one. "私は[color:#09e522FF]鋼[/color]を" becomes six units, of which two are markup:
+///
+///     "私"  "は"  "[color:#09e522FF]"  "鋼"  "[/color]"  "を"
 struct BreakUnit
 {
    std::string _text;          //!< the piece as it has to appear in the output
