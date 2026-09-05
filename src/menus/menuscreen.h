@@ -78,7 +78,10 @@ protected:
    /// \param word_band_height_px rows of the layer image the word occupies.
    void setTitle(const std::string& layer_name, const std::string& source_text, int32_t word_band_height_px);
 
-   static constexpr uint32_t title_character_size = 24;  //!< character size every screen title is drawn at
+   //!< a screen title is the font's own 12px glyphs at twice the size, not 24px glyphs. see
+   //!< MenuLabel::measureWidth() on why
+   static constexpr uint32_t title_character_size = 12;
+   static constexpr int32_t title_scale = 2;
 
    /// \brief draws a caption from the translation table and centers it where the artwork had it.
    ///

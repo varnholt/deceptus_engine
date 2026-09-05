@@ -69,11 +69,9 @@ void MenuScreen::setTitle(const std::string& layer_name, const std::string& sour
    const auto width_px = static_cast<int32_t>(layer_size.x);
    const auto height_px = static_cast<int32_t>(layer_size.y);
 
-   // a band cut to the height of a latin capital leaves a japanese glyph hanging into the ornament
-   // below it, so a band that cannot hold one grows, and the layer moves up by as much as it grew.
-   // that leaves the ornament on the pixel row it was drawn on
-   constexpr auto padding_px = 2;
-   const auto band_px = std::max(word_band_height_px, static_cast<int32_t>(title_character_size) + padding_px);
+   // a band that cannot hold the title grows, and the layer moves up by as much as it grew. that
+   // leaves the ornament below the band on the pixel row it was drawn on
+   const auto band_px = std::max(word_band_height_px, MenuLabel::measureBoxHeight(title_character_size, title_scale));
    const auto grown_px = band_px - word_band_height_px;
 
    const auto position = sfcompat::getPosition(*layer->_sprite);
@@ -90,6 +88,7 @@ void MenuScreen::setTitle(const std::string& layer_name, const std::string& sour
          ._box = sf::IntRect{{0, 0}, {width_px, band_px}},
          ._align = MenuLabel::Align::Centered,
          ._character_size = title_character_size,
+         ._scale = title_scale,
          ._color = color_title
       }}
    );
@@ -106,14 +105,13 @@ void MenuScreen::setCaption(const std::string& layer_name, const std::string& so
    }
 
    constexpr auto caption_character_size = 12u;
-   constexpr auto padding_px = 4;
 
    const auto layer_size = layer->_texture->getSize();
    const auto position = sfcompat::getPosition(*layer->_sprite);
    const auto center = position + sf::Vector2f{static_cast<float>(layer_size.x), static_cast<float>(layer_size.y)} / 2.0f;
 
    const auto width_px = MenuLabel::measureWidth(source_text, caption_character_size);
-   const auto height_px = std::max(static_cast<int32_t>(layer_size.y), static_cast<int32_t>(caption_character_size) + padding_px);
+   const auto height_px = std::max(static_cast<int32_t>(layer_size.y), MenuLabel::measureBoxHeight(caption_character_size));
 
    MenuLabel::compose(
       *layer,

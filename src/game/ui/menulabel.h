@@ -48,6 +48,7 @@ struct Label
    sf::IntRect _box;              //!< region of the new image the word is placed in
    Align _align{Align::Centered};
    uint32_t _character_size{12};
+   int32_t _scale{1};  //!< see measureWidth() on why a title is magnified rather than rendered big
    sf::Color _color{255, 255, 255};
 };
 
@@ -56,10 +57,30 @@ struct Label
 /// rounded up, and never zero: a caller sizes an image with this, and an image of no width is not a
 /// thing that can be created.
 ///
+/// the fonts are pixel fonts drawn for one size. asking freetype for a bigger one rasterizes their
+/// outlines off the pixel grid and the result is soft, so a title is the glyphs of the size the font
+/// was drawn at, magnified by a whole number, which keeps every edge hard.
+///
 /// \param source_text english source text, looked up through tr().
 /// \param character_size character size the label will be rendered at.
+/// \param scale whole-number magnification applied to it.
 /// \return width in pixels, at least one.
-[[nodiscard]] int32_t measureWidth(const std::string& source_text, uint32_t character_size);
+[[nodiscard]] int32_t measureWidth(const std::string& source_text, uint32_t character_size, int32_t scale = 1);
+
+/// \brief returns the height a box needs so a label of this size is not clipped inside it.
+///
+/// a label is centered on the height of a capital, so that a word with a descender and one without
+/// share a baseline. japanese characters are taller than a latin capital and hang out of the bottom
+/// of a box cut to one, into whatever the artwork has below it. this is the height at which they
+/// stop doing that.
+///
+/// the answer depends on the font of the active locale, so a latin one gets back the height of its
+/// own capital and nothing moves.
+///
+/// \param character_size character size the label will be rendered at.
+/// \param scale whole-number magnification applied to it.
+/// \return height in pixels.
+[[nodiscard]] int32_t measureBoxHeight(uint32_t character_size, int32_t scale = 1);
 
 /// \brief builds the three regions that redraw a plate at a width it was not drawn at.
 ///

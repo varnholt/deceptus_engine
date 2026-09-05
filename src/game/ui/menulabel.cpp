@@ -14,6 +14,13 @@ namespace
 //! with a descender and one without end up on the same baseline
 constexpr char32_t reference_codepoint{U'A'};
 
+//! a character of a script that fills its whole square, used to work out how much room a label
+//! really needs. a font that has no such character reports an empty glyph and the capital above is
+//! used instead, which is what a latin-only font wants.
+//! written as a code point rather than as the character itself, since the compiler is not told that
+//! these sources are utf-8 and reads a multi-byte character literal as several characters
+constexpr char32_t tall_reference_codepoint{0x56fd};  // U+56FD, the ideograph for 'country'
+
 /// \brief creates a text carrying the translation of source_text.
 /// \param source_text english source text, looked up through tr().
 /// \param character_size character size to render at.
@@ -39,9 +46,11 @@ sf::Text createText(const std::string& source_text, uint32_t character_size, con
 /// \param box region the text is placed in.
 /// \param alignment horizontal placement inside the box.
 /// \return position in whole pixels.
-sf::Vector2f placement(const sf::Text& text, const sf::IntRect& box, MenuLabel::Align alignment)
+sf::Vector2f placement(const sf::Text& text, const sf::IntRect& box, MenuLabel::Align alignment, int32_t scale)
 {
-   const auto text_bounds = text.getLocalBounds();
+   auto text_bounds = text.getLocalBounds();
+   text_bounds.position *= static_cast<float>(scale);
+   text_bounds.size *= static_cast<float>(scale);
    const auto box_position = sf::Vector2f{static_cast<float>(box.position.x), static_cast<float>(box.position.y)};
    const auto box_size = sf::Vector2f{static_cast<float>(box.size.x), static_cast<float>(box.size.y)};
 
@@ -64,7 +73,8 @@ sf::Vector2f placement(const sf::Text& text, const sf::IntRect& box, MenuLabel::
       }
    }
 
-   const auto reference_height = getFont().getGlyph(reference_codepoint, text.getCharacterSize(), false, 0.0f).bounds.size.y;
+   const auto reference_height =
+      getFont().getGlyph(reference_codepoint, text.getCharacterSize(), false, 0.0f).bounds.size.y * static_cast<float>(scale);
    const auto y_px = box_position.y + (box_size.y - reference_height) / 2.0f - text_bounds.position.y;
 
    return {static_cast<float>(static_cast<int32_t>(x_px - text_bounds.position.x)), static_cast<float>(static_cast<int32_t>(y_px))};
@@ -72,10 +82,21 @@ sf::Vector2f placement(const sf::Text& text, const sf::IntRect& box, MenuLabel::
 
 }  // namespace
 
-int32_t MenuLabel::measureWidth(const std::string& source_text, uint32_t character_size)
+int32_t MenuLabel::measureWidth(const std::string& source_text, uint32_t character_size, int32_t scale)
 {
    const auto width_px = createText(source_text, character_size, sf::Color::White).getLocalBounds().size.x;
-   return std::max(1, static_cast<int32_t>(std::ceil(width_px)));
+   return std::max(1, static_cast<int32_t>(std::ceil(width_px)) * scale);
+}
+
+int32_t MenuLabel::measureBoxHeight(uint32_t character_size, int32_t scale)
+{
+   const auto& font = getFont();
+   const auto capital_height = font.getGlyph(reference_codepoint, character_size, false, 0.0f).bounds.size.y;
+   const auto tallest_height = font.getGlyph(tall_reference_codepoint, character_size, false, 0.0f).bounds.size.y;
+
+   // the label is centered on the capital, so a taller character hangs half of what it has over the
+   // capital out of the bottom. the box has to grow by that much at both ends for it to fit
+   return static_cast<int32_t>(std::ceil(2.0f * std::max(capital_height, tallest_height) - capital_height)) * scale;
 }
 
 std::vector<MenuLabel::KeptRegion> MenuLabel::stretchedPlate(const sf::IntRect& source, int32_t target_x_px, int32_t width_px, int32_t cap_width_px)
@@ -167,7 +188,8 @@ void MenuLabel::compose(Layer& layer, const sf::Vector2i& size, const std::vecto
    for (const auto& label : labels)
    {
       auto text = createText(label._text, label._character_size, label._color);
-      sfcompat::setPosition(text, placement(text, label._box, label._align));
+      sfcompat::setScale(text, {static_cast<float>(label._scale), static_cast<float>(label._scale)});
+      sfcompat::setPosition(text, placement(text, label._box, label._align, label._scale));
       render_texture->draw(text);
    }
 

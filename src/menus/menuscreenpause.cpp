@@ -46,8 +46,7 @@ const sf::Color color_row_selected{127, 171, 253};
 /// \return height to build the row image at.
 int32_t rowHeight(int32_t original_height_px, uint32_t character_size)
 {
-   constexpr auto padding_px = 4;
-   return std::max(original_height_px, static_cast<int32_t>(character_size) + padding_px);
+   return std::max(original_height_px, MenuLabel::measureBoxHeight(character_size));
 }
 
 /// \brief redraws one pause menu row so its word comes from the translation table.
