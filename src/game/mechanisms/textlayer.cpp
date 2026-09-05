@@ -123,6 +123,10 @@ std::shared_ptr<TextLayer> TextLayer::deserialize(GameNode* parent, const GameDe
          const auto rgba = TmxTools::color(color);
 
 #ifdef DECEPTUS_VRSFML
+         // vrsfml creates its glyph atlas smoothed and has no Font::setSmooth to clear it with, so
+         // the texture is cleared directly. it holds one atlas of a fixed size that is never
+         // reallocated, so the filter set here is the one it keeps
+         instance->_truetype_font->getTexture().setSmooth(false);
          instance->_truetype_text = std::make_unique<sf::Text>(*instance->_truetype_font, sf::Text::Data{});
          instance->_truetype_text->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
          instance->_truetype_text->setString(instance->_text.c_str());
