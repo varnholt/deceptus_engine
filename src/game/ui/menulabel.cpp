@@ -5,6 +5,8 @@
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 
+#include <algorithm>
+#include <cmath>
 #include <memory>
 
 namespace
