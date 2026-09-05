@@ -383,14 +383,14 @@ void InGameMenuInventory::updateEquipLabel()
    const auto original_width_px = static_cast<int32_t>(layer_size.x);
    const auto height_px = static_cast<int32_t>(layer_size.y);
 
-   const auto text_width_px = std::max(1, static_cast<int32_t>(std::ceil(MenuLabel::measure("Equip", inventory_text_font_size))));
+   const auto text_width_px = MenuLabel::measureWidth("Equip", inventory_text_font_size);
    const auto width_px = text_width_px + equip_text_gap_px + equip_button_width_px;
    const auto x_px = std::max(description_panel_left_px, equip_right_edge_px - width_px);
 
    MenuLabel::compose(
       equip_layer,
       {width_px, height_px},
-      {MenuLabel::Piece{
+      {MenuLabel::KeptRegion{
          ._source =
             sf::IntRect{{original_width_px - equip_button_width_px, 0}, {equip_button_width_px, height_px}},
          ._target = sf::Vector2i{width_px - equip_button_width_px, 0}
@@ -423,45 +423,29 @@ void InGameMenuInventory::updateFilterStripLabel()
 
    // the 'All' slot is the only one carrying a word. a translation wider than the english one makes
    // the slot grow, and everything to the right of it in the strip moves along
-   const auto text_width_px = std::max(1, static_cast<int32_t>(std::ceil(MenuLabel::measure("All", inventory_text_font_size))));
+   const auto text_width_px = MenuLabel::measureWidth("All", inventory_text_font_size);
    const auto slot_width_px = std::max(filter_slot_all_width_px, text_width_px + 2 * filter_slot_cap_width_px);
    const auto grown_px = slot_width_px - filter_slot_all_width_px;
 
    const auto slot_end_px = filter_slot_all_x_px + filter_slot_all_width_px;
    const auto new_strip_width_px = strip_width_px + grown_px;
 
-   // three slices of the slot plate: its two caps with the middle stretched between them
-   const auto slot_pieces = [](int32_t plate_x_px, int32_t target_x_px, int32_t width_px, int32_t height_px)
+   const auto slot_regions = [](int32_t plate_x_px, int32_t target_x_px, int32_t width_px, int32_t height_px)
    {
-      return std::vector<MenuLabel::Piece>{
-         MenuLabel::Piece{
-            ._source = sf::IntRect{{plate_x_px, 0}, {filter_slot_cap_width_px, height_px}},  //
-            ._target = sf::Vector2i{target_x_px, 0}
-         },
-         MenuLabel::Piece{
-            ._source = sf::IntRect{{plate_x_px + filter_slot_cap_width_px, 0}, {1, height_px}},
-            ._target = sf::Vector2i{target_x_px + filter_slot_cap_width_px, 0},
-            ._size = sf::Vector2i{width_px - 2 * filter_slot_cap_width_px, height_px}
-         },
-         MenuLabel::Piece{
-            ._source =
-               sf::IntRect{
-                  {plate_x_px + filter_slot_all_width_px - filter_slot_cap_width_px, 0}, {filter_slot_cap_width_px, height_px}
-               },
-            ._target = sf::Vector2i{target_x_px + width_px - filter_slot_cap_width_px, 0}
-         },
-      };
+      return MenuLabel::stretchedPlate(
+         sf::IntRect{{plate_x_px, 0}, {filter_slot_all_width_px, height_px}}, target_x_px, width_px, filter_slot_cap_width_px
+      );
    };
 
-   auto strip_pieces = slot_pieces(filter_slot_all_x_px, filter_slot_all_x_px, slot_width_px, strip_height_px);
-   strip_pieces.insert(
-      strip_pieces.begin(),
-      MenuLabel::Piece{
+   auto strip_regions = slot_regions(filter_slot_all_x_px, filter_slot_all_x_px, slot_width_px, strip_height_px);
+   strip_regions.insert(
+      strip_regions.begin(),
+      MenuLabel::KeptRegion{
          ._source = sf::IntRect{{0, 0}, {filter_slot_all_x_px, strip_height_px}},  //
          ._target = sf::Vector2i{0, 0}
       }
    );
-   strip_pieces.push_back(MenuLabel::Piece{
+   strip_regions.push_back(MenuLabel::KeptRegion{
       ._source = sf::IntRect{{slot_end_px, 0}, {strip_width_px - slot_end_px, strip_height_px}},
       ._target = sf::Vector2i{slot_end_px + grown_px, 0}
    });
@@ -474,12 +458,12 @@ void InGameMenuInventory::updateFilterStripLabel()
       ._color = color_filter_all
    };
 
-   MenuLabel::compose(strip_layer, {new_strip_width_px, strip_height_px}, strip_pieces, {all_label});
+   MenuLabel::compose(strip_layer, {new_strip_width_px, strip_height_px}, strip_regions, {all_label});
 
    const auto all_height_px = static_cast<int32_t>(all_layer._texture->getSize().y);
    auto highlight_label = all_label;
    highlight_label._box = sf::IntRect{{0, 0}, {slot_width_px, all_height_px}};
-   MenuLabel::compose(all_layer, {slot_width_px, all_height_px}, slot_pieces(0, 0, slot_width_px, all_height_px), {highlight_label});
+   MenuLabel::compose(all_layer, {slot_width_px, all_height_px}, slot_regions(0, 0, slot_width_px, all_height_px), {highlight_label});
 
    // move the strip and everything that lines up with a slot inside it
    const auto strip_x_px = filter_strip_center_x_px - new_strip_width_px / 2;

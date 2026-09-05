@@ -81,7 +81,7 @@ void MenuScreen::setTitle(const std::string& layer_name, const std::string& sour
    MenuLabel::compose(
       *layer,
       {width_px, height_px + grown_px},
-      {MenuLabel::Piece{
+      {MenuLabel::KeptRegion{
          ._source = sf::IntRect{{0, word_band_height_px}, {width_px, height_px - word_band_height_px}},
          ._target = sf::Vector2i{0, band_px}
       }},
@@ -112,7 +112,7 @@ void MenuScreen::setCaption(const std::string& layer_name, const std::string& so
    const auto position = sfcompat::getPosition(*layer->_sprite);
    const auto center = position + sf::Vector2f{static_cast<float>(layer_size.x), static_cast<float>(layer_size.y)} / 2.0f;
 
-   const auto width_px = std::max(1, static_cast<int32_t>(std::ceil(MenuLabel::measure(source_text, caption_character_size))));
+   const auto width_px = MenuLabel::measureWidth(source_text, caption_character_size);
    const auto height_px = std::max(static_cast<int32_t>(layer_size.y), static_cast<int32_t>(caption_character_size) + padding_px);
 
    MenuLabel::compose(

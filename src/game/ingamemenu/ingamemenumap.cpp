@@ -236,18 +236,18 @@ void IngameMenuMap::updateLegendLabels()
    constexpr auto legend_text_x_px = 21;
 
    const auto layer_size = legend_layer._texture->getSize();
-   const auto teleport_width_px = static_cast<int32_t>(std::ceil(MenuLabel::measure("Teleport", 12)));
-   const auto checkpoint_width_px = static_cast<int32_t>(std::ceil(MenuLabel::measure("Checkpoint", 12)));
+   const auto teleport_width_px = MenuLabel::measureWidth("Teleport", 12);
+   const auto checkpoint_width_px = MenuLabel::measureWidth("Checkpoint", 12);
    const auto width_px = legend_text_x_px + std::max({teleport_width_px, checkpoint_width_px, 1});
 
    MenuLabel::compose(
       legend_layer,
       {width_px, static_cast<int32_t>(layer_size.y)},
-      {MenuLabel::Piece{
+      {MenuLabel::KeptRegion{
           ._source = sf::IntRect{{0, 0}, {legend_icon_width_px, legend_row_height_px}},  //
           ._target = sf::Vector2i{0, 0}
        },
-       MenuLabel::Piece{
+       MenuLabel::KeptRegion{
           ._source = sf::IntRect{{0, legend_row_stride_px}, {legend_icon_width_px, legend_row_height_px}},
           ._target = sf::Vector2i{0, legend_row_stride_px}
        }},
@@ -281,7 +281,7 @@ void IngameMenuMap::updateZoneNameLabel()
    const auto layer_size = zone_layer._texture->getSize();
    const auto original_width_px = static_cast<int32_t>(layer_size.x);
    const auto height_px = static_cast<int32_t>(layer_size.y);
-   const auto name_width_px = static_cast<int32_t>(std::ceil(MenuLabel::measure("The Forgotten Crypts", 12)));
+   const auto name_width_px = MenuLabel::measureWidth("The Forgotten Crypts", 12);
    const auto width_px = std::max(original_width_px, name_width_px + 16);
    const auto flourish_x_px = (width_px - original_width_px) / 2;
 
@@ -290,7 +290,7 @@ void IngameMenuMap::updateZoneNameLabel()
    MenuLabel::compose(
       zone_layer,
       {width_px, height_px},
-      {MenuLabel::Piece{
+      {MenuLabel::KeptRegion{
          ._source = sf::IntRect{{0, zone_name_band_height_px}, {original_width_px, height_px - zone_name_band_height_px}},
          ._target = sf::Vector2i{flourish_x_px, zone_name_band_height_px}
       }},

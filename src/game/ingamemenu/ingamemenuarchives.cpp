@@ -512,7 +512,7 @@ void InGameMenuArchives::updateNavigationLabels()
 
       MenuLabel::compose(
          *layer,
-         {MenuLabel::Piece{
+         {MenuLabel::KeptRegion{
             ._source = sf::IntRect{{0, 0}, {static_cast<int32_t>(layer_size.x), static_cast<int32_t>(layer_size.y)}},
             ._target = sf::Vector2i{0, 0}
          }},
@@ -563,7 +563,7 @@ void InGameMenuArchives::updateStatisticsLabels()
 
    MenuLabel::compose(
       *layer,
-      {MenuLabel::Piece{
+      {MenuLabel::KeptRegion{
          ._source = sf::IntRect{{0, 0}, {static_cast<int32_t>(layer_size.x), static_cast<int32_t>(layer_size.y)}},
          ._target = sf::Vector2i{0, 0}
       }},

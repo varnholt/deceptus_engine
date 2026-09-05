@@ -347,13 +347,13 @@ void MessageBox::updateButtonLabels()
 
       const auto layer_size = layer->_texture->getSize();
       const auto height_px = static_cast<int32_t>(layer_size.y);
-      const auto text_width_px = std::max(1, static_cast<int32_t>(std::ceil(MenuLabel::measure(button._text, text_character_size))));
+      const auto text_width_px = MenuLabel::measureWidth(button._text, text_character_size);
       const auto width_px = button._icon_width_px + icon_gap_px + text_width_px;
 
       MenuLabel::compose(
          *layer,
          {width_px, height_px},
-         {MenuLabel::Piece{
+         {MenuLabel::KeptRegion{
             ._source = sf::IntRect{{0, 0}, {button._icon_width_px, height_px}},  //
             ._target = sf::Vector2i{0, 0}
          }},

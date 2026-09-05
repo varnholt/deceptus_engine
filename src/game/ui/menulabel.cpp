@@ -72,12 +72,35 @@ sf::Vector2f placement(const sf::Text& text, const sf::IntRect& box, MenuLabel::
 
 }  // namespace
 
-float MenuLabel::measure(const std::string& source_text, uint32_t character_size)
+int32_t MenuLabel::measureWidth(const std::string& source_text, uint32_t character_size)
 {
-   return createText(source_text, character_size, sf::Color::White).getLocalBounds().size.x;
+   const auto width_px = createText(source_text, character_size, sf::Color::White).getLocalBounds().size.x;
+   return std::max(1, static_cast<int32_t>(std::ceil(width_px)));
 }
 
-void MenuLabel::compose(Layer& layer, const sf::Vector2i& size, const std::vector<Piece>& pieces, const std::vector<Label>& labels)
+std::vector<MenuLabel::KeptRegion> MenuLabel::stretchedPlate(const sf::IntRect& source, int32_t target_x_px, int32_t width_px, int32_t cap_width_px)
+{
+   const auto height_px = source.size.y;
+   const auto source_x_px = source.position.x;
+
+   return {
+      KeptRegion{
+         ._source = sf::IntRect{{source_x_px, source.position.y}, {cap_width_px, height_px}},  //
+         ._target = sf::Vector2i{target_x_px, 0}
+      },
+      KeptRegion{
+         ._source = sf::IntRect{{source_x_px + cap_width_px, source.position.y}, {1, height_px}},
+         ._target = sf::Vector2i{target_x_px + cap_width_px, 0},
+         ._size = sf::Vector2i{width_px - 2 * cap_width_px, height_px}
+      },
+      KeptRegion{
+         ._source = sf::IntRect{{source_x_px + source.size.x - cap_width_px, source.position.y}, {cap_width_px, height_px}},
+         ._target = sf::Vector2i{target_x_px + width_px - cap_width_px, 0}
+      },
+   };
+}
+
+void MenuLabel::compose(Layer& layer, const sf::Vector2i& size, const std::vector<KeptRegion>& kept_regions, const std::vector<Label>& labels)
 {
    if (!layer._texture || !layer._sprite)
    {
@@ -110,13 +133,13 @@ void MenuLabel::compose(Layer& layer, const sf::Vector2i& size, const std::vecto
 
    render_texture->clear(sf::Color::Transparent);
 
-   for (const auto& piece : pieces)
+   for (const auto& kept : kept_regions)
    {
       const auto source = sf::FloatRect{
-         {static_cast<float>(piece._source.position.x), static_cast<float>(piece._source.position.y)},
-         {static_cast<float>(piece._source.size.x), static_cast<float>(piece._source.size.y)}
+         {static_cast<float>(kept._source.position.x), static_cast<float>(kept._source.position.y)},
+         {static_cast<float>(kept._source.size.x), static_cast<float>(kept._source.size.y)}
       };
-      const auto target_size = piece._size.value_or(piece._source.size);
+      const auto target_size = kept._size.value_or(kept._source.size);
       const auto scale = sf::Vector2f{
          static_cast<float>(target_size.x) / source.size.x,  //
          static_cast<float>(target_size.y) / source.size.y
@@ -125,7 +148,7 @@ void MenuLabel::compose(Layer& layer, const sf::Vector2i& size, const std::vecto
 #ifdef DECEPTUS_VRSFML
       sf::Sprite sprite;
       sprite.textureRect = source;
-      sprite.position = {static_cast<float>(piece._target.x), static_cast<float>(piece._target.y)};
+      sprite.position = {static_cast<float>(kept._target.x), static_cast<float>(kept._target.y)};
       sprite.scale = scale;
 
       sf::RenderStates states;
@@ -134,8 +157,8 @@ void MenuLabel::compose(Layer& layer, const sf::Vector2i& size, const std::vecto
       render_texture->draw(sprite, states);
 #else
       sf::Sprite sprite(*layer._texture);
-      sprite.setTextureRect(piece._source);
-      sprite.setPosition({static_cast<float>(piece._target.x), static_cast<float>(piece._target.y)});
+      sprite.setTextureRect(kept._source);
+      sprite.setPosition({static_cast<float>(kept._target.x), static_cast<float>(kept._target.y)});
       sprite.setScale(scale);
       render_texture->draw(sprite, sf::RenderStates{sf::BlendAlpha});
 #endif
@@ -181,7 +204,7 @@ void MenuLabel::compose(Layer& layer, const sf::Vector2i& size, const std::vecto
    layer._sprite = sprite;
 }
 
-void MenuLabel::compose(Layer& layer, const std::vector<Piece>& pieces, const std::vector<Label>& labels)
+void MenuLabel::compose(Layer& layer, const std::vector<KeptRegion>& kept_regions, const std::vector<Label>& labels)
 {
    if (!layer._texture)
    {
@@ -190,5 +213,5 @@ void MenuLabel::compose(Layer& layer, const std::vector<Piece>& pieces, const st
    }
 
    const auto texture_size = layer._texture->getSize();
-   compose(layer, {static_cast<int32_t>(texture_size.x), static_cast<int32_t>(texture_size.y)}, pieces, labels);
+   compose(layer, {static_cast<int32_t>(texture_size.x), static_cast<int32_t>(texture_size.y)}, kept_regions, labels);
 }

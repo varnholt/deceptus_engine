@@ -61,7 +61,7 @@ int32_t rowHeight(int32_t original_height_px, uint32_t character_size)
 /// \param source_text english source text of the row.
 void updateRowLabel(Layer& plain_layer, Layer& selected_layer, const std::string& source_text)
 {
-   const auto word_width_px = std::max(1, static_cast<int32_t>(std::ceil(MenuLabel::measure(source_text, row_character_size))));
+   const auto word_width_px = MenuLabel::measureWidth(source_text, row_character_size);
 
    const auto plain_size = plain_layer._texture->getSize();
    const auto plain_height_px = rowHeight(static_cast<int32_t>(plain_size.y), row_character_size);
@@ -96,11 +96,11 @@ void updateRowLabel(Layer& plain_layer, Layer& selected_layer, const std::string
    MenuLabel::compose(
       selected_layer,
       {selected_width_px, selected_height_px},
-      {MenuLabel::Piece{
+      {MenuLabel::KeptRegion{
           ._source = sf::IntRect{{0, 0}, {decorator_left_width_px, decorator_source_height_px}},
           ._target = sf::Vector2i{0, selected_y_offset_px}
        },
-       MenuLabel::Piece{
+       MenuLabel::KeptRegion{
           ._source =
              sf::IntRect{
                 {static_cast<int32_t>(selected_size.x) - decorator_right_width_px, 0},
