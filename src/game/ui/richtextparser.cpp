@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <charconv>
 #include <iostream>
+#include <limits>
 #include <numeric>
 #include <string>
 #include <string_view>
@@ -14,17 +15,35 @@ namespace RichTextParser
 
 sf::Color readColorTag(std::string_view current_view, size_t tag_pos)
 {
-   const auto color_code = current_view.substr(tag_pos + 8, 8);  // extract 'RRGGBBAA'
-   uint32_t color_value;
-   auto [ptr, ec] = std::from_chars(color_code.data(), color_code.data() + 8, color_value, 16);
-   if (ec == std::errc{})
+   constexpr auto color_tag_prefix_length = size_t{8};  // "[color:#"
+
+   const auto tag_end_pos = current_view.find(']', tag_pos);
+   if (tag_end_pos != std::string_view::npos && tag_end_pos > tag_pos + color_tag_prefix_length)
    {
-      return sf::Color(
-         (color_value >> 24) & 0xFF,  // r
-         (color_value >> 16) & 0xFF,  // g
-         (color_value >> 8) & 0xFF,   // b
-         color_value & 0xFF           // a
-      );
+      // the level data carries both spellings, 'RRGGBBAA' and 'RRGGBB' with the alpha left out.
+      // reading a fixed eight characters swallowed the ']' of the short one and whatever followed
+      // it, which turned the checkpoint green of '[color:#bddc32]' into a near-transparent cyan
+      const auto color_code = current_view.substr(tag_pos + color_tag_prefix_length, tag_end_pos - tag_pos - color_tag_prefix_length);
+
+      if (color_code.size() == 8 || color_code.size() == 6)
+      {
+         uint32_t color_value;
+         auto [ptr, ec] = std::from_chars(color_code.data(), color_code.data() + color_code.size(), color_value, 16);
+         if (ec == std::errc{})
+         {
+            if (color_code.size() == 6)
+            {
+               color_value = (color_value << 8) | 0xFF;
+            }
+
+            return sf::Color(
+               (color_value >> 24) & 0xFF,  // r
+               (color_value >> 16) & 0xFF,  // g
+               (color_value >> 8) & 0xFF,   // b
+               color_value & 0xFF           // a
+            );
+         }
+      }
    }
 
    // torture designer when badly formatted text is provided
@@ -238,7 +257,14 @@ std::vector<Segment> parseRichText(
 #else
             segment.text->setPosition({offset_x_px + segment_offset_x_px, offset_y_px});
 #endif
-            segment_offset_x_px += segment.text->getLocalBounds().size.x;
+
+            // the next segment starts where writing this one stopped, which is further right than
+            // the rightmost pixel it drew: a segment ending in a space draws nothing over that
+            // space, so measuring how wide the segment looks let the next one start on top of it.
+            // text around a [color] tag has a space on either side, which is why a coloured word
+            // used to overlap the words next to it
+            constexpr auto past_the_end = std::numeric_limits<size_t>::max();
+            segment_offset_x_px += segment.text->findCharacterPos(past_the_end).x - segment.text->findCharacterPos(0).x;
          }
       }
    }

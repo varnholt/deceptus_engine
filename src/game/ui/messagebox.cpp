@@ -6,14 +6,19 @@
 #include "framework/joystick/gamecontroller.h"
 #include "framework/tools/globalclock.h"
 #include "framework/tools/localization.h"
+#include "framework/tools/localizedtext.h"
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/audio/audio.h"
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/state/displaymode.h"
+#include "game/ui/menulabel.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
+#include <string>
 #include <vector>
 
 namespace
@@ -27,6 +32,7 @@ constexpr auto y_offset_bottom_px = 216.0f;
 constexpr auto text_margin_x_px = 8.0f;
 constexpr auto textbox_width_px = 324.0f;
 constexpr auto background_width_px = 318.0f;
+constexpr auto text_character_size = 12;
 
 static const auto animation_scale_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_show = sf::seconds(0.7f);
@@ -173,14 +179,20 @@ MessageBox::MessageBox(
    const auto pos = pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f}) +
                     sf::Vector2f{properties._centered ? 0.0f : text_margin_x_px, 0.0f};
 
+   // the hand-placed breaks in the source text were measured against english. every other locale is
+   // a different length -- japanese is roughly one glyph per english word -- so the lines have to be
+   // laid out against the box the text actually goes into rather than against the english ones
+   constexpr auto text_width_px = background_width_px - 2.0f * text_margin_x_px;
+   const auto wrapped_message = LocalizedText::wrapRichTextToWidth(message, text_width_px, getFont(), text_character_size);
+
    const auto segments = RichTextParser::parseRichText(
-      message,
+      wrapped_message,
       getFont(),
       _properties._text_color,
       properties._centered ? RichTextParser::Alignment::Centered : RichTextParser::Alignment::Left,
       textbox_width_px,
       pos,
-      12
+      text_character_size
    );
 
    _plain_text = RichTextParser::toString(segments);
@@ -280,6 +292,8 @@ void MessageBox::initializeLayers()
       _layers[layer.getName()] = tmp;
    }
 
+   updateButtonLabels();
+
    _box_content_layers.push_back(_layers["yes_xbox_1"]);
    _box_content_layers.push_back(_layers["no_xbox_1"]);
    _box_content_layers.push_back(_layers["yes_pc_1"]);
@@ -299,6 +313,64 @@ void MessageBox::initializeLayers()
    _background_position_px = _layers["background"]->_sprite->getPosition();
    _next_page_position_px = _layers["next_page"]->_sprite->getPosition();
 #endif
+}
+
+void MessageBox::updateButtonLabels()
+{
+   // each button layer is a key or pad icon with a word next to it. the icon is kept and the word
+   // comes from the translation table, which makes the layer as wide as the translation needs, so
+   // the two buttons are placed again at the offsets from the box center that the artwork has
+   struct ButtonLayout
+   {
+      std::string _layer_name;
+      int32_t _icon_width_px;
+      std::string _text;
+      int32_t _center_offset_x_px;
+   };
+
+   constexpr auto icon_gap_px = 5;
+
+   const std::vector<ButtonLayout> buttons{
+      {._layer_name = "yes_xbox_1", ._icon_width_px = 20, ._text = "Yes", ._center_offset_x_px = 67},
+      {._layer_name = "yes_pc_1", ._icon_width_px = 25, ._text = "Yes", ._center_offset_x_px = 67},
+      {._layer_name = "no_xbox_1", ._icon_width_px = 19, ._text = "No", ._center_offset_x_px = -67},
+      {._layer_name = "no_pc_1", ._icon_width_px = 21, ._text = "No", ._center_offset_x_px = -67},
+   };
+
+   for (const auto& button : buttons)
+   {
+      const auto& layer = _layers[button._layer_name];
+      if (!layer || !layer->_texture || !layer->_sprite)
+      {
+         continue;
+      }
+
+      const auto layer_size = layer->_texture->getSize();
+      const auto height_px = static_cast<int32_t>(layer_size.y);
+      const auto text_width_px = std::max(1, static_cast<int32_t>(std::ceil(MenuLabel::measure(button._text, text_character_size))));
+      const auto width_px = button._icon_width_px + icon_gap_px + text_width_px;
+
+      MenuLabel::compose(
+         *layer,
+         {width_px, height_px},
+         {MenuLabel::Piece{
+            ._source = sf::IntRect{{0, 0}, {button._icon_width_px, height_px}},  //
+            ._target = sf::Vector2i{0, 0}
+         }},
+         {MenuLabel::Label{
+            ._text = button._text,
+            ._box = sf::IntRect{{button._icon_width_px + icon_gap_px, 0}, {text_width_px, height_px}},
+            ._align = MenuLabel::Align::Left,
+            ._character_size = text_character_size,
+            ._color = sf::Color{232, 219, 243}
+         }}
+      );
+
+      const auto position = sfcompat::getPosition(*layer->_sprite);
+      const auto box_center_x_px = static_cast<float>(GameConfiguration::getInstance()._view_width) / 2.0f;
+      const auto x_px = box_center_x_px + static_cast<float>(button._center_offset_x_px) - static_cast<float>(width_px) / 2.0f;
+      sfcompat::setPosition(*layer->_sprite, {static_cast<float>(static_cast<int32_t>(x_px)), position.y});
+   }
 }
 
 bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)

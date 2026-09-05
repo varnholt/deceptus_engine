@@ -5,7 +5,10 @@
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/controller/gamecontrollerintegration.h"
+#include "game/ui/menulabel.h"
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 
 const sf::Color MenuScreen::color_label_normal{200, 185, 220};
@@ -14,6 +17,9 @@ const sf::Color MenuScreen::color_help_text{130, 120, 150};
 
 namespace
 {
+
+//! the colour every screen title is drawn in, taken from the artwork it replaces
+const sf::Color color_title{165, 170, 237};
 
 //! codepoint whose ink height is used as the vertical reference for every placed label
 constexpr char32_t reference_codepoint{U'A'};
@@ -49,6 +55,83 @@ float centeredY(const sf::Text& text, const sf::FloatRect& reference_rect)
 
 MenuScreen::MenuScreen() : _font(getFont())
 {
+}
+
+void MenuScreen::setTitle(const std::string& layer_name, const std::string& source_text, int32_t word_band_height_px)
+{
+   const auto& layer = _layers[layer_name];
+   if (!layer || !layer->_texture || !layer->_sprite)
+   {
+      return;
+   }
+
+   const auto layer_size = layer->_texture->getSize();
+   const auto width_px = static_cast<int32_t>(layer_size.x);
+   const auto height_px = static_cast<int32_t>(layer_size.y);
+
+   // a band cut to the height of a latin capital leaves a japanese glyph hanging into the ornament
+   // below it, so a band that cannot hold one grows, and the layer moves up by as much as it grew.
+   // that leaves the ornament on the pixel row it was drawn on
+   constexpr auto padding_px = 2;
+   const auto band_px = std::max(word_band_height_px, static_cast<int32_t>(title_character_size) + padding_px);
+   const auto grown_px = band_px - word_band_height_px;
+
+   const auto position = sfcompat::getPosition(*layer->_sprite);
+
+   MenuLabel::compose(
+      *layer,
+      {width_px, height_px + grown_px},
+      {MenuLabel::Piece{
+         ._source = sf::IntRect{{0, word_band_height_px}, {width_px, height_px - word_band_height_px}},
+         ._target = sf::Vector2i{0, band_px}
+      }},
+      {MenuLabel::Label{
+         ._text = source_text,
+         ._box = sf::IntRect{{0, 0}, {width_px, band_px}},
+         ._align = MenuLabel::Align::Centered,
+         ._character_size = title_character_size,
+         ._color = color_title
+      }}
+   );
+
+   sfcompat::setPosition(*layer->_sprite, {position.x, position.y - static_cast<float>(grown_px)});
+}
+
+void MenuScreen::setCaption(const std::string& layer_name, const std::string& source_text, const sf::Color& color)
+{
+   const auto& layer = _layers[layer_name];
+   if (!layer || !layer->_texture || !layer->_sprite)
+   {
+      return;
+   }
+
+   constexpr auto caption_character_size = 12u;
+   constexpr auto padding_px = 4;
+
+   const auto layer_size = layer->_texture->getSize();
+   const auto position = sfcompat::getPosition(*layer->_sprite);
+   const auto center = position + sf::Vector2f{static_cast<float>(layer_size.x), static_cast<float>(layer_size.y)} / 2.0f;
+
+   const auto width_px = std::max(1, static_cast<int32_t>(std::ceil(MenuLabel::measure(source_text, caption_character_size))));
+   const auto height_px = std::max(static_cast<int32_t>(layer_size.y), static_cast<int32_t>(caption_character_size) + padding_px);
+
+   MenuLabel::compose(
+      *layer,
+      {width_px, height_px},
+      {},
+      {MenuLabel::Label{
+         ._text = source_text,
+         ._box = sf::IntRect{{0, 0}, {width_px, height_px}},
+         ._align = MenuLabel::Align::Centered,
+         ._character_size = caption_character_size,
+         ._color = color
+      }}
+   );
+
+   sfcompat::setPosition(
+      *layer->_sprite,
+      {static_cast<float>(static_cast<int32_t>(center.x) - width_px / 2), static_cast<float>(static_cast<int32_t>(center.y) - height_px / 2)}
+   );
 }
 
 void MenuScreen::placeTextCentered(sf::Text& text, const sf::FloatRect& reference_rect)

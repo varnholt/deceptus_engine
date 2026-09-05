@@ -110,6 +110,15 @@ private:
    /// \brief shows only the active filter layer and hides all others.
    void updateFilterLayers();
 
+   /// \brief redraws every layer of the page whose artwork carried an english word.
+   void updateLabels();
+
+   /// \brief redraws the equip hint, keeping the button plates where they are on screen.
+   void updateEquipLabel();
+
+   /// \brief redraws the 'All' filter and moves the rest of the filter strip out of its way.
+   void updateFilterStripLabel();
+
    /// \brief animates panel offsets and alpha during show and hide transitions.
    void updateShowHide();
 

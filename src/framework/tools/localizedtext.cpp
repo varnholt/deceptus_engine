@@ -5,6 +5,7 @@
 #include <cctype>
 #include <cstdint>
 #include <fstream>
+#include <string_view>
 
 #include <SFML/Graphics/Text.hpp>
 
@@ -167,6 +168,194 @@ bool forbiddenAtLineStart(char32_t code_point)
    return forbidden.find(code_point) != std::u32string::npos;
 }
 
+/// \brief one piece of text a line is built from.
+struct BreakUnit
+{
+   std::string _text;          //!< the piece as it has to appear in the output
+   bool _measured{true};       //!< false for markup, which the player never sees and which takes no room on the line
+   bool _forces_break{false};  //!< true for a line break the author asked for
+};
+
+/// \brief joins the text of a range of units.
+/// \param units units to join, in reading order.
+/// \param measured_only when true, markup is left out so the result is what the player actually sees.
+/// \return the concatenated text.
+std::string joinBreakUnits(const std::vector<BreakUnit>& units, bool measured_only)
+{
+   std::string joined;
+   for (const auto& unit : units)
+   {
+      if (measured_only && !unit._measured)
+      {
+         continue;
+      }
+      joined += unit._text;
+   }
+   return joined;
+}
+
+/// \brief tells whether a line holds anything the player would see.
+/// \param units units making up the line.
+/// \return true when at least one unit counts towards the width.
+bool holdsMeasuredUnit(const std::vector<BreakUnit>& units)
+{
+   return std::ranges::any_of(units, [](const auto& unit) { return unit._measured; });
+}
+
+/// \brief breaks a unit list into lines that each fit a pixel width.
+///
+/// this is the part wrapToWidth() and wrapRichTextToWidth() have in common. the two differ only in
+/// how they cut their input into units and in what they write at a break.
+///
+/// \param units the text as the smallest pieces a line may be separated at.
+/// \param width_px width available for one line.
+/// \param font font the text will be rendered with.
+/// \param character_size character size the text will be rendered at.
+/// \param break_marker text written wherever a line ends, such as "\n" or "[br]".
+/// \return the units joined back together with break markers at the chosen break points.
+std::string wrapBreakUnits(
+   const std::vector<BreakUnit>& units,
+   float width_px,
+   const sf::Font& font,
+   uint32_t character_size,
+   std::string_view break_marker
+)
+{
+#ifdef DECEPTUS_VRSFML
+   sf::Text measured_text(font, sf::Text::Data{});
+#else
+   sf::Text measured_text(font);
+#endif
+   measured_text.setCharacterSize(character_size);
+
+   std::string wrapped_text;
+   std::vector<BreakUnit> line;
+
+   const auto end_line = [&wrapped_text, &line, break_marker]
+   {
+      wrapped_text += joinBreakUnits(line, false);
+      wrapped_text += break_marker;
+      line.clear();
+   };
+
+   for (const auto& unit : units)
+   {
+      if (unit._forces_break)
+      {
+         end_line();
+         continue;
+      }
+
+      // markup neither takes room on the line nor offers a place to break, so it simply travels
+      // with the text around it
+      if (!unit._measured)
+      {
+         line.push_back(unit);
+         continue;
+      }
+
+      // check if the current line exceeds the right boundary
+      const auto test_line = joinBreakUnits(line, true) + unit._text;
+      measured_text.setString(LocalizedText::toSfmlString(test_line));
+
+      if (measured_text.getLocalBounds().size.x <= width_px)  // text fits into boundary
+      {
+         line.push_back(unit);
+         continue;
+      }
+
+      // boundary is exceeded
+      if (!holdsMeasuredUnit(line))
+      {
+         // a single unit wider than the box would loop forever, so it gets a line of its own
+         line.push_back(unit);
+         end_line();
+         continue;
+      }
+
+      // a character that may not open a line takes the character before it along, rather than
+      // staying on a line it no longer fits into
+      auto carry_from = line.size();
+      const auto unit_length = utf8SequenceLength(static_cast<uint8_t>(unit._text[0]));
+      if (forbiddenAtLineStart(utf8CodePoint(unit._text, 0, unit_length)))
+      {
+         const auto last_measured = std::ranges::find_if(line.rbegin(), line.rend(), [](const auto& line_unit) { return line_unit._measured; });
+         const auto carry_candidate = static_cast<size_t>(std::distance(line.begin(), last_measured.base()) - 1);
+
+         // the line has to keep something of its own, otherwise the break makes no progress
+         const std::vector<BreakUnit> kept(line.begin(), line.begin() + carry_candidate);
+         if (holdsMeasuredUnit(kept))
+         {
+            carry_from = carry_candidate;
+         }
+      }
+
+      std::vector<BreakUnit> carried(line.begin() + carry_from, line.end());
+      line.erase(line.begin() + carry_from, line.end());
+      end_line();
+      line = std::move(carried);
+      line.push_back(unit);
+   }
+
+   // add remaining text to the last line
+   return wrapped_text + joinBreakUnits(line, false);
+}
+
+/// \brief cuts rich text into the smallest pieces a line may be separated at.
+///
+/// a `[...]` tag becomes a unit of its own that is never measured, so it can neither be split nor
+/// push a line over the boundary. `[br]` and a literal newline become units that force a break.
+///
+/// \param utf8_text text to split, including any rich-text tags.
+/// \return units in reading order.
+std::vector<BreakUnit> splitRichTextIntoBreakUnits(const std::string& utf8_text)
+{
+   std::vector<BreakUnit> units;
+   std::string visible_run;
+
+   const auto flush_visible_run = [&units, &visible_run]
+   {
+      for (auto& piece : LocalizedText::splitIntoBreakUnits(visible_run))
+      {
+         units.push_back({._text = std::move(piece), ._measured = true, ._forces_break = false});
+      }
+      visible_run.clear();
+   };
+
+   for (auto position = size_t{0}; position < utf8_text.size();)
+   {
+      // dialogue authored with <br> reaches the message box with the tag already turned into a
+      // newline, so both spellings of a break have to be understood here
+      if (utf8_text[position] == '\n')
+      {
+         flush_visible_run();
+         units.push_back({._text = {}, ._measured = false, ._forces_break = true});
+         position++;
+         continue;
+      }
+
+      if (utf8_text[position] == '[')
+      {
+         const auto tag_end = utf8_text.find(']', position);
+         if (tag_end != std::string::npos)
+         {
+            auto tag = utf8_text.substr(position, tag_end - position + 1);
+            const auto is_break = (tag == "[br]");
+            flush_visible_run();
+            units.push_back({._text = is_break ? std::string{} : std::move(tag), ._measured = false, ._forces_break = is_break});
+            position = tag_end + 1;
+            continue;
+         }
+      }
+
+      visible_run += utf8_text[position];
+      position++;
+   }
+
+   flush_visible_run();
+   return units;
+}
+
 }  // namespace
 
 LocalizedText::SfmlString LocalizedText::toSfmlString(const std::string& utf8_text)
@@ -238,57 +427,17 @@ std::vector<std::string> LocalizedText::splitIntoBreakUnits(const std::string& u
 std::string
 LocalizedText::wrapToWidth(const std::string& utf8_text, float width_px, const sf::Font& font, uint32_t character_size)
 {
-   std::string wrapped_text;
-   std::string line;
-   std::string last_unit;
-
-#ifdef DECEPTUS_VRSFML
-   sf::Text measured_text(font, sf::Text::Data{});
-#else
-   sf::Text measured_text(font);
-#endif
-   measured_text.setCharacterSize(character_size);
-
-   const auto units = splitIntoBreakUnits(utf8_text);
-
-   for (const auto& unit : units)
+   std::vector<BreakUnit> units;
+   for (auto& piece : splitIntoBreakUnits(utf8_text))
    {
-      // check if the current line exceeds the right boundary
-      const auto test_line = line + unit;
-      measured_text.setString(toSfmlString(test_line));
-
-      if (measured_text.getLocalBounds().size.x <= width_px)  // text fits into boundary
-      {
-         line = test_line;
-         last_unit = unit;
-         continue;
-      }
-
-      // boundary is exceeded
-      if (line.empty())
-      {
-         // a single unit wider than the box would loop forever, so it gets a line of its own
-         wrapped_text = wrapped_text + unit + "\n";
-         continue;
-      }
-
-      // a character that may not open a line takes the character before it along, rather than
-      // staying on a line it no longer fits into
-      const auto unit_length = utf8SequenceLength(static_cast<uint8_t>(unit[0]));
-      if (forbiddenAtLineStart(utf8CodePoint(unit, 0, unit_length)) && !last_unit.empty() && line.size() > last_unit.size())
-      {
-         line.erase(line.size() - last_unit.size());
-         wrapped_text = wrapped_text + line + "\n";
-         line = last_unit + unit;
-         last_unit = unit;
-         continue;
-      }
-
-      wrapped_text = wrapped_text + line + "\n";
-      line = unit;
-      last_unit = unit;
+      units.push_back({._text = std::move(piece), ._measured = true, ._forces_break = false});
    }
 
-   // add remaining text to the last line
-   return wrapped_text + line;
+   return wrapBreakUnits(units, width_px, font, character_size, "\n");
+}
+
+std::string
+LocalizedText::wrapRichTextToWidth(const std::string& utf8_text, float width_px, const sf::Font& font, uint32_t character_size)
+{
+   return wrapBreakUnits(splitRichTextIntoBreakUnits(utf8_text), width_px, font, character_size, "[br]");
 }

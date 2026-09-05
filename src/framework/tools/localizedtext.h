@@ -70,4 +70,24 @@ using SfmlString = sf::String;
 [[nodiscard]] std::string
 wrapToWidth(const std::string& utf8_text, float width_px, const sf::Font& font, uint32_t character_size);
 
+/// \brief breaks rich text into lines that each fit a pixel width.
+///
+/// works like wrapToWidth(), but for text carrying the markup RichTextParser understands. a tag such
+/// as `[color:#09e522FF]` is not text the player sees, so it neither counts towards the width of a
+/// line nor offers a place to break; a line that broke inside one would print the tag and lose the
+/// colour. `[br]` and a literal newline are kept as breaks the author asked for.
+///
+/// the breaks it inserts are `[br]`, so the result goes straight into RichTextParser::parseRichText.
+/// this is what keeps a translation inside the message box: the english source carries hand-placed
+/// `[br]`s that fit english, and japanese, which is roughly one glyph per english word, ran off the
+/// right edge of the box with them.
+///
+/// \param utf8_text text to wrap, including any rich-text tags.
+/// \param width_px width available for one line.
+/// \param font font the text will be rendered with.
+/// \param character_size character size the text will be rendered at.
+/// \return the text with `[br]` inserted at the chosen break points.
+[[nodiscard]] std::string
+wrapRichTextToWidth(const std::string& utf8_text, float width_px, const sf::Font& font, uint32_t character_size);
+
 }  // namespace LocalizedText

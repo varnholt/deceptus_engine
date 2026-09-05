@@ -8,6 +8,7 @@
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
 #include "game/debug/console.h"
+#include "game/ingamemenu/ingamemenulabels.h"
 #include "game/ingamemenu/menuconfig.h"
 #include "game/io/texturepool.h"
 #include "game/level/levelmap.h"
@@ -16,6 +17,7 @@
 #include "game/mechanisms/door.h"
 #include "game/mechanisms/portal.h"
 #include "game/player/playerregistry.h"
+#include "game/ui/menulabel.h"
 
 #include <algorithm>
 #include <array>
@@ -50,6 +52,36 @@ constexpr auto unvisited_tint = sf::Color{150, 128, 116};
 
 constexpr auto blink_interval_s = 1.0f;
 
+//! the magenta pill of the tab strip sits behind 'Map' in this page's artwork
+constexpr auto header_pill_left_px = 0;
+constexpr auto header_pill_width_px = 73;
+
+//! columns each button icon of the footer occupies inside its own layer image
+constexpr auto icon_width_navigate_pc_px = 23;
+constexpr auto icon_width_navigate_xbox_px = 18;
+constexpr auto icon_width_zoom_pc_px = 34;
+constexpr auto icon_width_zoom_xbox_px = 18;
+constexpr auto icon_width_world_pc_px = 16;
+constexpr auto icon_width_world_xbox_px = 18;
+constexpr auto icon_width_legend_pc_px = 16;
+constexpr auto icon_width_legend_xbox_px = 16;
+constexpr auto icon_width_close_pc_px = 16;
+constexpr auto icon_width_close_xbox_px = 12;
+
+//! columns the two badges of the legend occupy inside the 'map_keys' layer image
+constexpr auto legend_icon_width_px = 11;
+
+//! rows of the legend layer image the first entry occupies; the second follows below
+constexpr auto legend_row_height_px = 13;
+constexpr auto legend_row_stride_px = 16;
+
+//! rows of the zone name layer holding the name; everything below is the flourish under it
+constexpr auto zone_name_band_height_px = 17;
+
+const sf::Color color_legend_teleport{0, 198, 221};
+const sf::Color color_legend_checkpoint{0, 221, 16};
+const sf::Color color_zone_name{160, 173, 203};
+
 //! cell order inside the marker spriteset layers
 constexpr auto marker_index_player = 0;
 constexpr auto marker_index_checkpoint = 1;
@@ -67,6 +99,7 @@ IngameMenuMap::IngameMenuMap()
    _filename = "data/game/map.psd";
 
    load();
+   updateLabels();
    updateButtons();
 
    _panel_left = {
@@ -134,6 +167,143 @@ IngameMenuMap::IngameMenuMap()
    MenuConfig config;
    _duration_hide = config._duration_hide;
    _duration_show = config._duration_show;
+}
+
+void IngameMenuMap::updateLabels()
+{
+   InGameMenuLabels::updateHeaderLabels(*_layers["header"], InGameMenuLabels::Tab::Map, header_pill_left_px, header_pill_width_px);
+
+   // both rows are laid out, since only one of them is ever visible and the page switches between
+   // them as a controller comes and goes
+   InGameMenuLabels::updateFooterLabels({
+      {._layer_plain = _layers["navigate_xbox_0"].get(),
+       ._layer_pressed = _layers["navigate_xbox_1"].get(),
+       ._icon_width_px = icon_width_navigate_xbox_px,
+       ._text = "Navigate"},
+      {._layer_plain = _layers["zoom_xbox_0"].get(),
+       ._layer_pressed = _layers["zoom_xbox_1"].get(),
+       ._icon_width_px = icon_width_zoom_xbox_px,
+       ._text = "Zoom"},
+      {._layer_plain = _layers["world_xbox_0"].get(),
+       ._layer_pressed = _layers["world_xbox_1"].get(),
+       ._icon_width_px = icon_width_world_xbox_px,
+       ._text = "World Map"},
+      {._layer_plain = _layers["legend_xbox_0"].get(),
+       ._layer_pressed = _layers["legend_xbox_1"].get(),
+       ._icon_width_px = icon_width_legend_xbox_px,
+       ._text = "Legend"},
+      {._layer_plain = _layers["close_xbox_0"].get(),
+       ._layer_pressed = _layers["close_xbox_1"].get(),
+       ._icon_width_px = icon_width_close_xbox_px,
+       ._text = "Close"},
+   });
+
+   InGameMenuLabels::updateFooterLabels({
+      {._layer_plain = _layers["navigate_pc_0"].get(),
+       ._layer_pressed = _layers["navigate_pc_1"].get(),
+       ._icon_width_px = icon_width_navigate_pc_px,
+       ._text = "Navigate"},
+      {._layer_plain = _layers["zoom_pc_0"].get(),
+       ._layer_pressed = _layers["zoom_pc_1"].get(),
+       ._icon_width_px = icon_width_zoom_pc_px,
+       ._text = "Zoom"},
+      {._layer_plain = _layers["world_pc_0"].get(),
+       ._layer_pressed = _layers["world_pc_1"].get(),
+       ._icon_width_px = icon_width_world_pc_px,
+       ._text = "World Map"},
+      {._layer_plain = _layers["legend_pc_0"].get(),
+       ._layer_pressed = _layers["legend_pc_1"].get(),
+       ._icon_width_px = icon_width_legend_pc_px,
+       ._text = "Legend"},
+      {._layer_plain = _layers["close_pc_0"].get(),
+       ._layer_pressed = _layers["close_pc_1"].get(),
+       ._icon_width_px = icon_width_close_pc_px,
+       ._text = "Close"},
+   });
+
+   updateLegendLabels();
+   updateZoneNameLabel();
+}
+
+void IngameMenuMap::updateLegendLabels()
+{
+   auto& legend_layer = *_layers["map_keys"];
+   if (!legend_layer._texture)
+   {
+      return;
+   }
+
+   constexpr auto legend_text_x_px = 21;
+
+   const auto layer_size = legend_layer._texture->getSize();
+   const auto teleport_width_px = static_cast<int32_t>(std::ceil(MenuLabel::measure("Teleport", 12)));
+   const auto checkpoint_width_px = static_cast<int32_t>(std::ceil(MenuLabel::measure("Checkpoint", 12)));
+   const auto width_px = legend_text_x_px + std::max({teleport_width_px, checkpoint_width_px, 1});
+
+   MenuLabel::compose(
+      legend_layer,
+      {width_px, static_cast<int32_t>(layer_size.y)},
+      {MenuLabel::Piece{
+          ._source = sf::IntRect{{0, 0}, {legend_icon_width_px, legend_row_height_px}},  //
+          ._target = sf::Vector2i{0, 0}
+       },
+       MenuLabel::Piece{
+          ._source = sf::IntRect{{0, legend_row_stride_px}, {legend_icon_width_px, legend_row_height_px}},
+          ._target = sf::Vector2i{0, legend_row_stride_px}
+       }},
+      {MenuLabel::Label{
+          ._text = "Teleport",
+          ._box = sf::IntRect{{legend_text_x_px, 0}, {width_px - legend_text_x_px, legend_row_height_px}},
+          ._align = MenuLabel::Align::Left,
+          ._character_size = 12,
+          ._color = color_legend_teleport
+       },
+       MenuLabel::Label{
+          ._text = "Checkpoint",
+          ._box = sf::IntRect{{legend_text_x_px, legend_row_stride_px}, {width_px - legend_text_x_px, legend_row_height_px}},
+          ._align = MenuLabel::Align::Left,
+          ._character_size = 12,
+          ._color = color_legend_checkpoint
+       }}
+   );
+}
+
+void IngameMenuMap::updateZoneNameLabel()
+{
+   auto& zone_layer = *_layers["zone_name_label_crypts"];
+   if (!zone_layer._texture || !zone_layer._sprite)
+   {
+      return;
+   }
+
+   // the zone name and the flourish under it are one image, so the flourish is kept and only the
+   // band the name sat in is redrawn
+   const auto layer_size = zone_layer._texture->getSize();
+   const auto original_width_px = static_cast<int32_t>(layer_size.x);
+   const auto height_px = static_cast<int32_t>(layer_size.y);
+   const auto name_width_px = static_cast<int32_t>(std::ceil(MenuLabel::measure("The Forgotten Crypts", 12)));
+   const auto width_px = std::max(original_width_px, name_width_px + 16);
+   const auto flourish_x_px = (width_px - original_width_px) / 2;
+
+   const auto position = sfcompat::getPosition(*zone_layer._sprite);
+
+   MenuLabel::compose(
+      zone_layer,
+      {width_px, height_px},
+      {MenuLabel::Piece{
+         ._source = sf::IntRect{{0, zone_name_band_height_px}, {original_width_px, height_px - zone_name_band_height_px}},
+         ._target = sf::Vector2i{flourish_x_px, zone_name_band_height_px}
+      }},
+      {MenuLabel::Label{
+         ._text = "The Forgotten Crypts",
+         ._box = sf::IntRect{{0, 0}, {width_px, zone_name_band_height_px}},
+         ._align = MenuLabel::Align::Centered,
+         ._character_size = 12,
+         ._color = color_zone_name
+      }}
+   );
+
+   sfcompat::setPosition(*zone_layer._sprite, {position.x - static_cast<float>(flourish_x_px), position.y});
 }
 
 void IngameMenuMap::loadLevelTextures(const std::filesystem::path& grid, const std::filesystem::path& outlines)
