@@ -354,15 +354,15 @@ void InGameMenuInventory::updateLabels()
    InGameMenuLabels::updateHeaderLabels(*_layers["header"], InGameMenuLabels::Tab::Inventory, header_pill_left_px, header_pill_width_px);
 
    InGameMenuLabels::updateFooterLabels({
-      {._layer_plain = _layers["close_xbox_0"].get(),
-       ._layer_pressed = _layers["close_xbox_1"].get(),
+      {._layer_plain = _layers["close_xbox_0"],
+       ._layer_pressed = _layers["close_xbox_1"],
        ._icon_width_px = icon_width_close_xbox_px,
        ._text = "Close"},
    });
 
    InGameMenuLabels::updateFooterLabels({
-      {._layer_plain = _layers["close_pc_0"].get(),
-       ._layer_pressed = _layers["close_pc_1"].get(),
+      {._layer_plain = _layers["close_pc_0"],
+       ._layer_pressed = _layers["close_pc_1"],
        ._icon_width_px = icon_width_close_pc_px,
        ._text = "Close"},
    });

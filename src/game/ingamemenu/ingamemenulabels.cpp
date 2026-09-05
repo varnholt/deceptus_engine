@@ -50,15 +50,22 @@ int32_t centeredRowX(int32_t width_px)
 }
 
 /// \brief redraws one footer hint so its word comes from the translation table.
-/// \param layer layer to redraw; nothing happens when it is not there.
+/// \param layer layer to redraw; nothing happens when the page has no such layer.
 /// \param icon_width_px columns of the layer image the icon occupies.
 /// \param source_text english source text of the word.
 /// \param color color of the word.
 /// \param item_width_px width of the new layer image.
 /// \param x_px x the layer is moved to.
-void updateHintLabel(Layer* layer, int32_t icon_width_px, const std::string& source_text, const sf::Color& color, int32_t item_width_px, int32_t x_px)
+void updateHintLabel(
+   const std::shared_ptr<Layer>& layer,
+   int32_t icon_width_px,
+   const std::string& source_text,
+   const sf::Color& color,
+   int32_t item_width_px,
+   int32_t x_px
+)
 {
-   if (layer == nullptr || !layer->_texture || !layer->_sprite)
+   if (!layer || !layer->_texture || !layer->_sprite)
    {
       return;
    }

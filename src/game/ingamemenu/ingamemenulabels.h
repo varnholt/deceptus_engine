@@ -4,6 +4,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -27,8 +28,8 @@ enum class Tab
 /// \brief a button hint in the footer: an icon with a word next to it.
 struct FooterHint
 {
-   Layer* _layer_plain{nullptr};    //!< the '_0' layer, shown while the button is not pressed
-   Layer* _layer_pressed{nullptr};  //!< the '_1' layer, shown while it is
+   std::shared_ptr<Layer> _layer_plain;    //!< the '_0' layer, shown while the button is not pressed
+   std::shared_ptr<Layer> _layer_pressed;  //!< the '_1' layer, shown while it is
    int32_t _icon_width_px{0};       //!< columns of the layer image the icon occupies
    std::string _text;               //!< english source text of the word
 };
