@@ -30,11 +30,7 @@ constexpr char32_t tall_reference_codepoint{0x56fd};  // U+56FD, the ideograph f
 /// \return the text, ready to be measured or drawn.
 sf::Text createText(const std::string& source_text, uint32_t character_size, const sf::Color& color)
 {
-#ifdef DECEPTUS_VRSFML
-   sf::Text text(getFont(), sf::Text::Data{});
-#else
-   sf::Text text(getFont());
-#endif
+   auto text = sfcompat::createText(getFont());
 
    text.setCharacterSize(character_size);
    text.setFillColor(color);
@@ -133,58 +129,25 @@ void MenuLabel::compose(Layer& layer, const sf::Vector2i& size, const std::vecto
 
    const auto texture_size = sf::Vector2u{static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)};
 
-#ifdef DECEPTUS_VRSFML
-   auto created_render_texture = sf::RenderTexture::create(texture_size);
-   if (!created_render_texture.hasValue())
+   auto render_texture = sfcompat::createRenderTexture(texture_size);
+   if (!render_texture)
    {
       Log::Error() << "menu label: failed to create render texture for layer '" << layer._name << "'";
       return;
    }
-   auto render_texture = std::make_unique<sf::RenderTexture>(std::move(*created_render_texture));
-#else
-   std::unique_ptr<sf::RenderTexture> render_texture;
-   try
-   {
-      render_texture = std::make_unique<sf::RenderTexture>(texture_size);
-   }
-   catch (const std::exception& exception)
-   {
-      Log::Error() << "menu label: failed to create render texture for layer '" << layer._name << "': " << exception.what();
-      return;
-   }
-#endif
 
    render_texture->clear(sf::Color::Transparent);
 
    for (const auto& kept : kept_regions)
    {
-      const auto source = sf::FloatRect{
-         {static_cast<float>(kept._source.position.x), static_cast<float>(kept._source.position.y)},
-         {static_cast<float>(kept._source.size.x), static_cast<float>(kept._source.size.y)}
-      };
       const auto target_size = kept._size.value_or(kept._source.size);
       const auto scale = sf::Vector2f{
-         static_cast<float>(target_size.x) / source.size.x,  //
-         static_cast<float>(target_size.y) / source.size.y
+         static_cast<float>(target_size.x) / static_cast<float>(kept._source.size.x),  //
+         static_cast<float>(target_size.y) / static_cast<float>(kept._source.size.y)
       };
+      const auto target = sf::Vector2f{static_cast<float>(kept._target.x), static_cast<float>(kept._target.y)};
 
-#ifdef DECEPTUS_VRSFML
-      sf::Sprite sprite;
-      sprite.textureRect = source;
-      sprite.position = {static_cast<float>(kept._target.x), static_cast<float>(kept._target.y)};
-      sprite.scale = scale;
-
-      sf::RenderStates states;
-      states.texture = layer._texture.get();
-      states.blendMode = sf::BlendAlpha;
-      render_texture->draw(sprite, states);
-#else
-      sf::Sprite sprite(*layer._texture);
-      sprite.setTextureRect(kept._source);
-      sprite.setPosition({static_cast<float>(kept._target.x), static_cast<float>(kept._target.y)});
-      sprite.setScale(scale);
-      render_texture->draw(sprite, sf::RenderStates{sf::BlendAlpha});
-#endif
+      sfcompat::drawTextureRegion(*render_texture, *layer._texture, kept._source, target, scale);
    }
 
    for (const auto& label : labels)
@@ -199,29 +162,19 @@ void MenuLabel::compose(Layer& layer, const sf::Vector2i& size, const std::vecto
 
    const auto image = render_texture->getTexture().copyToImage();
 
-#ifdef DECEPTUS_VRSFML
-   auto created_texture = sf::Texture::create(texture_size);
-   if (!created_texture.hasValue())
+   auto texture = sfcompat::createTexture(texture_size);
+   if (!texture)
    {
       Log::Error() << "menu label: failed to create texture for layer '" << layer._name << "'";
       return;
    }
-   auto texture = std::make_shared<sf::Texture>(std::move(*created_texture));
-#else
-   auto texture = std::make_shared<sf::Texture>(texture_size);
-#endif
 
    texture->update(image);
    texture->setSmooth(false);
 
    const auto position = sfcompat::getPosition(*layer._sprite);
 
-#ifdef DECEPTUS_VRSFML
-   auto sprite = std::make_shared<sf::Sprite>();
-   sprite->textureRect = sf::FloatRect{{0.0f, 0.0f}, {static_cast<float>(size.x), static_cast<float>(size.y)}};
-#else
-   auto sprite = std::make_shared<sf::Sprite>(*texture);
-#endif
+   auto sprite = sfcompat::createSprite(*texture);
    sfcompat::setPosition(*sprite, position);
 
    layer._texture = texture;
