@@ -264,6 +264,8 @@ set(GAME_FILES
     src/game/ingamemenu/ingamemenuarchives.h
     src/game/ingamemenu/ingamemenuaudio.cpp
     src/game/ingamemenu/ingamemenuaudio.h
+    src/game/ingamemenu/ingamemenulabels.cpp
+    src/game/ingamemenu/ingamemenulabels.h
     src/game/ingamemenu/ingamemenuinventory.cpp
     src/game/ingamemenu/ingamemenuinventory.h
     src/game/ingamemenu/ingamemenumap.cpp
@@ -600,6 +602,8 @@ set(GAME_FILES
     src/game/state/savestate.h
     src/game/tests/test.cpp
     src/game/tests/test.h
+    src/game/ui/menulabel.cpp
+    src/game/ui/menulabel.h
     src/game/ui/messagebox.cpp
     src/game/ui/messagebox.h
     src/game/ui/richtextparser.cpp

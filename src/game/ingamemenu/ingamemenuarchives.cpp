@@ -2,14 +2,20 @@
 
 #include "framework/easings/easings.h"
 #include "framework/tools/localization.h"
+#include "game/ingamemenu/ingamemenulabels.h"
 #include "game/ingamemenu/menuconfig.h"
 #include "game/player/playerinfo.h"
 #include "game/player/treasures.h"
 #include "game/state/savestate.h"
+#include "game/ui/menulabel.h"
 
+#include <array>
 #include <iterator>
 #include <numbers>
 #include <sstream>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace
 {
@@ -60,6 +66,81 @@ std::string wrapText(const std::string& original_text, float wrap_width, const s
    return wrapped_text;
 }
 
+//! the magenta pill of the tab strip sits behind 'Archives' in this page's artwork
+constexpr auto header_pill_left_px = 124;
+constexpr auto header_pill_width_px = 73;
+
+//! columns the close button icons occupy inside their own layer image
+constexpr auto icon_width_close_pc_px = 16;
+constexpr auto icon_width_close_xbox_px = 12;
+
+//! the four buttons of the left hand navigation inside their layer image
+constexpr auto navigation_button_height_px = 34;
+constexpr auto navigation_label_center_x_px = 78;
+constexpr auto navigation_label_width_px = 100;
+constexpr auto navigation_label_y_offset_px = 4;
+constexpr auto navigation_label_height_px = 20;
+
+//! the heading and the two label columns of the statistics panel inside its layer image
+constexpr auto statistics_heading_y_px = 59;
+constexpr auto statistics_heading_height_px = 16;
+constexpr auto statistics_row_first_y_px = 84;
+constexpr auto statistics_row_stride_px = 16;
+constexpr auto statistics_row_height_px = 16;
+constexpr auto statistics_column_left_x_px = 58;
+constexpr auto statistics_column_right_x_px = 227;
+constexpr auto statistics_column_width_px = 128;
+
+const sf::Color color_navigation_selected{227, 233, 247};
+const sf::Color color_navigation_normal{76, 89, 166};
+const sf::Color color_statistics_label{160, 173, 203};
+
+//! the eight entries of either column, top to bottom
+constexpr std::array<std::string_view, 8> statistics_left_column{
+   "Treasures",
+   "Powers Acquired",
+   "Heart Crystals",
+   "Weapons Owned",
+   "Item Completion",
+   "Portals",
+   "Checkpoints",
+   "World Exploration"
+};
+
+constexpr std::array<std::string_view, 8> statistics_right_column{
+   "Playing Time",
+   "Ranking",
+   "Total Kills",
+   "Deaths",
+   "Damage Dealt",
+   "Damage Taken",
+   "Saves",
+   "Continues"
+};
+
+//! the names of the four buttons of the left hand navigation, top to bottom
+constexpr std::array<std::string_view, 4> navigation_labels{"Statistics", "Powers", "Treasures", "Achievements"};
+
+//! the layer that highlights each of those buttons, in the same order
+constexpr std::array<std::string_view, 4> navigation_layers{
+   "menu_statistics",
+   "menu_powers",
+   "menu_treasures",
+   "menu_achievements"
+};
+
+/// \brief returns the box one navigation button's name is drawn in.
+/// \param button_index index of the button, top to bottom.
+/// \return box inside the navigation layer image.
+sf::IntRect navigationLabelBox(int32_t button_index)
+{
+   return sf::IntRect{
+      {navigation_label_center_x_px - navigation_label_width_px / 2,
+       button_index * navigation_button_height_px + navigation_label_y_offset_px},
+      {navigation_label_width_px, navigation_label_height_px}
+   };
+}
+
 }  // namespace
 
 InGameMenuArchives::InGameMenuArchives()
@@ -67,6 +148,7 @@ InGameMenuArchives::InGameMenuArchives()
    _filename = "data/game/archives.psd";
 
    load();
+   updateLabels();
 
    updateButtons();
 
@@ -378,6 +460,115 @@ void InGameMenuArchives::drawTreasures(sf::RenderTarget& window, sf::RenderState
 
       row_index++;
    }
+}
+
+void InGameMenuArchives::updateLabels()
+{
+   InGameMenuLabels::updateHeaderLabels(*_layers["header"], InGameMenuLabels::Tab::Archives, header_pill_left_px, header_pill_width_px);
+
+   InGameMenuLabels::updateFooterLabels({
+      {._layer_plain = _layers["close_xbox_0"],
+       ._layer_pressed = _layers["close_xbox_1"],
+       ._icon_width_px = icon_width_close_xbox_px,
+       ._text = "Close"},
+   });
+
+   InGameMenuLabels::updateFooterLabels({
+      {._layer_plain = _layers["close_pc_0"],
+       ._layer_pressed = _layers["close_pc_1"],
+       ._icon_width_px = icon_width_close_pc_px,
+       ._text = "Close"},
+   });
+
+   updateNavigationLabels();
+   updateStatisticsLabels();
+}
+
+void InGameMenuArchives::updateNavigationLabels()
+{
+   // one layer per button that can be selected, each showing all four names with a different one
+   // highlighted, so every layer carries all four labels
+   for (auto selected_index = 0; selected_index < static_cast<int32_t>(navigation_layers.size()); selected_index++)
+   {
+      const auto& layer = _layers[std::string{navigation_layers[selected_index]}];
+      if (!layer || !layer->_texture)
+      {
+         continue;
+      }
+
+      const auto layer_size = layer->_texture->getSize();
+
+      std::vector<MenuLabel::Label> labels;
+      for (auto index = 0; index < static_cast<int32_t>(navigation_labels.size()); index++)
+      {
+         labels.push_back(MenuLabel::Label{
+            ._text = std::string{navigation_labels[index]},
+            ._box = navigationLabelBox(index),
+            ._align = MenuLabel::Align::Centered,
+            ._character_size = treasure_font_size,
+            ._color = (index == selected_index) ? color_navigation_selected : color_navigation_normal
+         });
+      }
+
+      MenuLabel::compose(
+         *layer,
+         {MenuLabel::KeptRegion{
+            ._source = sf::IntRect{{0, 0}, {static_cast<int32_t>(layer_size.x), static_cast<int32_t>(layer_size.y)}},
+            ._target = sf::Vector2i{0, 0}
+         }},
+         labels
+      );
+   }
+}
+
+void InGameMenuArchives::updateStatisticsLabels()
+{
+   const auto& layer = _layers["statistics_window"];
+   if (!layer || !layer->_texture)
+   {
+      return;
+   }
+
+   const auto layer_size = layer->_texture->getSize();
+
+   std::vector<MenuLabel::Label> labels;
+   labels.push_back(MenuLabel::Label{
+      ._text = "Total Progress",
+      ._box = sf::IntRect{{0, statistics_heading_y_px}, {static_cast<int32_t>(layer_size.x), statistics_heading_height_px}},
+      ._align = MenuLabel::Align::Centered,
+      ._character_size = treasure_font_size,
+      ._color = color_statistics_label
+   });
+
+   const auto add_column = [&labels](const std::array<std::string_view, 8>& column, int32_t x_px)
+   {
+      for (auto index = 0; index < static_cast<int32_t>(column.size()); index++)
+      {
+         labels.push_back(MenuLabel::Label{
+            ._text = std::string{column[index]},
+            ._box =
+               sf::IntRect{
+                  {x_px, statistics_row_first_y_px + index * statistics_row_stride_px},
+                  {statistics_column_width_px, statistics_row_height_px}
+               },
+            ._align = MenuLabel::Align::Left,
+            ._character_size = treasure_font_size,
+            ._color = color_statistics_label
+         });
+      }
+   };
+
+   add_column(statistics_left_column, statistics_column_left_x_px);
+   add_column(statistics_right_column, statistics_column_right_x_px);
+
+   MenuLabel::compose(
+      *layer,
+      {MenuLabel::KeptRegion{
+         ._source = sf::IntRect{{0, 0}, {static_cast<int32_t>(layer_size.x), static_cast<int32_t>(layer_size.y)}},
+         ._target = sf::Vector2i{0, 0}
+      }},
+      labels
+   );
 }
 
 void InGameMenuArchives::updateButtons()

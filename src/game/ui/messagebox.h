@@ -130,6 +130,9 @@ struct MessageBox
    /// \brief loads PSD layers, creates sprites, and caches key layer positions.
    void initializeLayers();
 
+   /// \brief draws the yes and no button labels from the translation table and places them again.
+   void updateButtonLabels();
+
    /// \brief runs the show animation and updates alpha, scale, and state.
    void showAnimation();
 

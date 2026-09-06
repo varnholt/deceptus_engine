@@ -50,6 +50,15 @@ private:
    /// \brief applies layer visibility for the currently selected archive category.
    void updateButtons();
 
+   /// \brief draws every label of the page from the translation table.
+   void updateLabels();
+
+   /// \brief draws the names of the four buttons of the left hand navigation.
+   void updateNavigationLabels();
+
+   /// \brief draws the heading and the two columns of the statistics panel.
+   void updateStatisticsLabels();
+
    /// \brief ensures an animation exists for every collected treasure and advances all of them.
    /// \param dt elapsed frame time.
    void updateTreasureAnimations(const sf::Time& dt);

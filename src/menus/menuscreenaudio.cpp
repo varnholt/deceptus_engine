@@ -172,6 +172,9 @@ void MenuScreenAudio::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenAudio::loadingFinished()
 {
+   setTitle("header", "Audio", 41);
+   setCaption("audio_window-main", "Audio", sf::Color{127, 171, 253});
+
    for (auto index = 0; index < 11; index++)
    {
       const auto master_value_layer = std::format("master_value_{}", index);

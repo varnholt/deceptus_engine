@@ -140,6 +140,9 @@ void MenuScreenGame::keyboardKeyPressed(sf::Keyboard::Key key)
 
 void MenuScreenGame::loadingFinished()
 {
+   setTitle("header", "Game", 41);
+   setCaption("audio_window-main", "Game", sf::Color{127, 171, 253});
+
    _row_label_base_rect = _layers["textSpeed_text_0"]->_sprite->getGlobalBounds();
    _row_help_base_rect = _layers["textSpeed_help"]->_sprite->getGlobalBounds();
    _row_value_base_rect = _layers["textSpeed_1"]->_sprite->getGlobalBounds();

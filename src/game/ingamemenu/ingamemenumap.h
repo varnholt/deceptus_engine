@@ -115,6 +115,15 @@ private:
    /// \brief applies static map button prompt and zoom indicator layer visibility.
    void updateButtons();
 
+   /// \brief redraws every layer of the page whose artwork carried an english word.
+   void updateLabels();
+
+   /// \brief redraws the teleport and checkpoint entries of the map legend.
+   void updateLegendLabels();
+
+   /// \brief redraws the zone name above the map, keeping the flourish under it.
+   void updateZoneNameLabel();
+
    /// \brief animates panel offsets and alpha during map show and hide transitions.
    void updateShowHide();
 

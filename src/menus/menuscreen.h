@@ -68,6 +68,31 @@ public:
    bool isControllerUsed() const;
 
 protected:
+   /// \brief draws a screen title from the translation table, keeping the flourish under it.
+   ///
+   /// a title layer is the word and the ornament below it in one image. the rows above
+   /// word_band_height_px are redrawn with the translated title, everything below them is kept.
+   ///
+   /// \param layer_name layer holding the title; nothing happens when the screen has no such layer.
+   /// \param source_text english source text of the title.
+   /// \param word_band_height_px rows of the layer image the word occupies.
+   void setTitle(const std::string& layer_name, const std::string& source_text, int32_t word_band_height_px);
+
+   //!< a screen title is the font's own 12px glyphs at twice the size, not 24px glyphs. see
+   //!< MenuLabel::measureWidth() on why
+   static constexpr uint32_t title_character_size = 12;
+   static constexpr int32_t title_scale = 2;
+
+   /// \brief draws a caption from the translation table and centers it where the artwork had it.
+   ///
+   /// unlike a title, a caption layer holds nothing but the word, so the whole layer is redrawn and
+   /// then moved so the translation sits where the english one did.
+   ///
+   /// \param layer_name layer holding the caption; nothing happens when the screen has no such layer.
+   /// \param source_text english source text of the caption.
+   /// \param color color to draw it in.
+   void setCaption(const std::string& layer_name, const std::string& source_text, const sf::Color& color);
+
    /// \brief positions text so it is centered horizontally and vertically inside reference_rect.
    static void placeTextCentered(sf::Text& text, const sf::FloatRect& reference_rect);
 
