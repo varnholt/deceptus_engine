@@ -4,7 +4,7 @@
   <properties>
    <property name="animation_close" value=""/>
    <property name="animation_open" value=""/>
-   <property name="key" value=""/>
+   <property name="item_required" value=""/>
    <property name="key_animation" value=""/>
    <property name="observed" type="bool" value="false"/>
    <property name="open" type="bool" value="false"/>

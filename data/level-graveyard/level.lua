@@ -43,6 +43,8 @@ function takeOwlEyes()
       return
    end
 
+   log("owl eyes taken")
+
    setOwlEyesPresent(false)
    inventoryAdd(_owl_eye_item)
    showDialogue("rubies_acquired")

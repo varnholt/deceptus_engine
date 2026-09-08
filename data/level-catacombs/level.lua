@@ -143,6 +143,8 @@ function insertOwlEyes()
       return
    end
 
+   log("owl eyes inserted")
+
    addTreasure(_owl_eyes_inserted_treasure)
    inventoryRemove(_owl_eye_item)
 
@@ -463,6 +465,7 @@ function mechanismEvent(object_id, group_id, event_name, value)
    -- handle inserted into lever_cell, hide the "lever is missing" dialogue. the examine hint swaps
    -- itself for the operate prompt through its conditions
    if (object_id == "lever_cell" and event_name == "handle_inserted") then
+      log("handle inserted into lever_cell")
       setMechanismEnabled("lever_cell_dialogue", false, "dialogues")
    end
 
@@ -478,6 +481,7 @@ function mechanismEvent(object_id, group_id, event_name, value)
    
    -- open treasure chest
    if (object_id == "locked_box" and event_name == "state" and value == "open") then
+      log("locked box opened")
       setMechanismEnabled("locked_message", false, "dialogues")
       setMechanismEnabled("locked_box_interaction_help", false, "interaction_help")
    end
@@ -538,6 +542,7 @@ function playerReceivedExtra(extra)
    
    -- enable all blocking rects once player picked up diving suit
    if (extra == "sword") then
+      log("sword acquired")
       giveWeaponSword()
       flashScreen(
          _sword_pickup_flash_color.r,
