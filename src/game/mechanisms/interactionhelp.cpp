@@ -29,6 +29,10 @@ static constexpr std::array interaction_help_properties{
    PropertyInfo{.name = "offset_y_px", .type = "int", .default_value = default_interaction_help_offset_y_px},
    PropertyInfo{.name = "button_0", .type = "string", .default_value = std::string_view{"key_cursor_u"}},
    PropertyInfo{.name = "text_0", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "condition_0", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "button_1", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "text_1", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "condition_1", .type = "string", .default_value = std::string_view{""}},
 };
 static constexpr MechanismSchema interaction_help_schema{
    .type_name = "InteractionHelp",
@@ -106,6 +110,11 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
          _help_elements,
          [&target](const auto& help)
          {
+            if (!help._visible)
+            {
+               return;
+            }
+
             target.draw(*help._button_sprite);
             target.draw(*help._text);
          }
@@ -139,6 +148,11 @@ void InteractionHelp::draw(sf::RenderTarget& target, sf::RenderTarget& normal, c
          _help_elements,
          [&target, &ortho, this](const auto& help)
          {
+            if (!help._visible)
+            {
+               return;
+            }
+
             target.draw(*help._button_sprite, sf::RenderStates{.view = ortho, .texture = _button_texture.get()});
             target.draw(*help._text, sf::RenderStates{.view = ortho});
          }
@@ -166,8 +180,15 @@ void InteractionHelp::update(const sf::Time& dt)
       return;
    }
 
+   // the state a condition reads can change while the player stands in the trigger area, and a hint
+   // whose rows are all conditional stays silent until one of them applies
+   if (updateRowVisibility())
+   {
+      layoutRows();
+   }
+
    const auto& player_rect = PlayerRegistry::getFirst()->getPixelRectFloat();
-   const auto intersects = sfcompat::findIntersection(player_rect, _rect_px).has_value();
+   const auto intersects = sfcompat::findIntersection(player_rect, _rect_px).has_value() && hasVisibleRow();
 
    if (intersects && !_player_intersected_in_last_frame && _animation_hide->_paused)
    {
@@ -299,7 +320,12 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 
       if (!text_value.has_value())
       {
-         break;
+         if (button_value.has_value())
+         {
+            Log::Error() << "'button_" << row << "' has no matching 'text_" << row << "', the row will not be shown";
+         }
+
+         continue;
       }
 
       HelpElement help;
@@ -346,38 +372,19 @@ void InteractionHelp::deserialize(const GameDeserializeData& data)
 #endif
       help._text->setString(sftr(text_value.value()));
 
-      // row 0 at bottom, row 1 above
-      const auto view_width = GameConfiguration::getInstance()._view_width;
-      const auto text_base_x_px = 580.0f;
-      const auto text_base_y_px = 339.0f;
-      const auto row_spacing_px = 24.0f;
-      const auto text_y_px = text_base_y_px - (row_spacing_px * row);
-      const auto icon_x_px = view_width - 24.0f;
-      const auto icon_y_px = text_y_px - 4.0f;
-      const auto text_local_bounds = help._text->getLocalBounds();
-      const auto text_x_px = view_width - text_local_bounds.size.x - 24.0f - 4.0f;
-
-      // text is right aligned towards the icon
-      //
-      // text:
-      //
-      //    hello
-      //    <---> (localbounds.width)
-      //
-      // view:
-      //
-      // 0                                       view.width
-      // |            |                 | |    | |
-      // |            |localbounds.width| |    | |
-      //                                  [icon]
-      //
-      // text location: view.width - text.localbounds.x - icon.width - some_offset
-
-      sfcompat::setPosition(*help._button_sprite, {icon_x_px, icon_y_px});
-      sfcompat::setPosition(*help._text, {text_x_px, text_y_px});
+      // a row can be tied to the world: the condition decides whether the player is offered this
+      // interaction right now, so the prompt cannot drift away from what the mechanisms allow
+      const auto condition_id = std::format("condition_{}", row);
+      const auto condition_value = ValueReader::readValue<std::string>(condition_id, map);
+      if (condition_value.has_value() && !condition_value.value().empty())
+      {
+         help._condition = MechanismCondition::parse(condition_value.value());
+      }
 
       _help_elements.push_back(std::move(help));
    }
+
+   layoutRows();
 
    updateControllerIconRects();
 
@@ -421,4 +428,87 @@ void InteractionHelp::updateControllerIconRects()
 std::optional<sf::FloatRect> InteractionHelp::getBoundingBoxPx()
 {
    return _rect_px;
+}
+
+void InteractionHelp::resolveReferences(const std::vector<std::shared_ptr<GameMechanism>>& all_mechanisms)
+{
+   for (auto& help : _help_elements)
+   {
+      if (help._condition.has_value())
+      {
+         help._condition->resolveReferences(all_mechanisms);
+      }
+   }
+
+   updateRowVisibility();
+   layoutRows();
+}
+
+bool InteractionHelp::updateRowVisibility()
+{
+   auto visibility_changed = false;
+
+   for (auto& help : _help_elements)
+   {
+      const auto row_visible = !help._condition.has_value() || help._condition->isSatisfied();
+
+      if (row_visible != help._visible)
+      {
+         visibility_changed = true;
+      }
+
+      help._visible = row_visible;
+   }
+
+   return visibility_changed;
+}
+
+void InteractionHelp::layoutRows()
+{
+   auto visible_row_count = 0;
+
+   for (auto& help : _help_elements)
+   {
+      if (!help._visible)
+      {
+         continue;
+      }
+
+      // row 0 at bottom, row 1 above
+      const auto view_width = GameConfiguration::getInstance()._view_width;
+      const auto text_base_x_px = 580.0f;
+      const auto text_base_y_px = 339.0f;
+      const auto row_spacing_px = 24.0f;
+      const auto text_y_px = text_base_y_px - (row_spacing_px * visible_row_count);
+      const auto icon_x_px = view_width - 24.0f;
+      const auto icon_y_px = text_y_px - 4.0f;
+      const auto text_local_bounds = help._text->getLocalBounds();
+      const auto text_x_px = view_width - text_local_bounds.size.x - 24.0f - 4.0f;
+
+      // text is right aligned towards the icon
+      //
+      // text:
+      //
+      //    hello
+      //    <---> (localbounds.width)
+      //
+      // view:
+      //
+      // 0                                       view.width
+      // |            |                 | |    | |
+      // |            |localbounds.width| |    | |
+      //                                  [icon]
+      //
+      // text location: view.width - text.localbounds.x - icon.width - some_offset
+
+      sfcompat::setPosition(*help._button_sprite, {icon_x_px, icon_y_px});
+      sfcompat::setPosition(*help._text, {text_x_px, text_y_px});
+
+      visible_row_count++;
+   }
+}
+
+bool InteractionHelp::hasVisibleRow() const
+{
+   return std::ranges::any_of(_help_elements, [](const auto& help) { return help._visible; });
 }

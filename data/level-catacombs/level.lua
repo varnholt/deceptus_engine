@@ -346,7 +346,6 @@ function initLockedBox()
    if (getMechanismProperty("locked_box", "treasure_chests", "open")) then
       setMechanismEnabled("locked_message", false, "dialogues")
       setMechanismEnabled("locked_box_interaction_help", false, "interaction_help")
-      setMechanismEnabled("handle_help", false, "interaction_help")
    end
 end
 
@@ -461,10 +460,10 @@ function mechanismEvent(object_id, group_id, event_name, value)
       _monk_hide = true
    end
 
-   -- handle inserted into lever_cell, hide the "lever is missing" dialogue and examine hint
+   -- handle inserted into lever_cell, hide the "lever is missing" dialogue. the examine hint swaps
+   -- itself for the operate prompt through its conditions
    if (object_id == "lever_cell" and event_name == "handle_inserted") then
       setMechanismEnabled("lever_cell_dialogue", false, "dialogues")
-      setMechanismEnabled("lever_cell_help", false, "interaction_help")
    end
 
    -- pan camera to the on/off blocks on first lever_spike_cannon toggle, then toggle immediately
@@ -481,7 +480,6 @@ function mechanismEvent(object_id, group_id, event_name, value)
    if (object_id == "locked_box" and event_name == "state" and value == "open") then
       setMechanismEnabled("locked_message", false, "dialogues")
       setMechanismEnabled("locked_box_interaction_help", false, "interaction_help")
-      setMechanismEnabled("handle_help", false, "interaction_help")
    end
 
    -- open diamond box
@@ -552,7 +550,7 @@ function playerReceivedExtra(extra)
    
    if (extra == "handle") then
       showDialogue("handle_dialogue_2")
-      setMechanismEnabled("handle_help", false, "interaction_help")
+      setMechanismEnabled("locker_help", false, "interaction_help")
       setMechanismEnabled("handle_dialogue_1", false, "dialogues")
       setMechanismEnabled("locker_dialogue_unlocked", false, "dialogues")
    end

@@ -51,6 +51,10 @@ public:
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
 
+   /// \brief checks whether this extra can still be picked up.
+   /// \return true while the extra is active and, when it spawns, has finished spawning.
+   bool isInteractionAvailable() const override;
+
    /// \brief returns the collectible interaction rectangle.
    /// \return extra rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

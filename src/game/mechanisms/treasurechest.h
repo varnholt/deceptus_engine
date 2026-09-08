@@ -41,6 +41,10 @@ public:
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
 
+   /// \brief checks whether the chest can still be opened.
+   /// \return true while the chest is closed.
+   bool isInteractionAvailable() const override;
+
    /// \brief reports that this mechanism does not expose a gameplay bounding box.
    /// \return std::nullopt.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

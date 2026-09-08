@@ -76,6 +76,10 @@ public:
    /// \return true when the target state is right.
    bool isEnabled() const override;
 
+   /// \brief checks whether the lever can be operated, which requires its handle to be in place.
+   /// \return true while the handle sits in the lever base.
+   bool isInteractionAvailable() const override;
+
    /// \brief advances to the next state according to lever type and plays switch audio.
    void toggle() override;
 

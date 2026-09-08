@@ -77,6 +77,11 @@ std::string_view Extra::objectName() const
    return "Extra";
 }
 
+bool Extra::isInteractionAvailable() const
+{
+   return isEnabled() && _active && (!_spawn_required || _spawned);
+}
+
 bool Extra::deserialize(const GameDeserializeData& data)
 {
    if (data._tmx_object == nullptr)

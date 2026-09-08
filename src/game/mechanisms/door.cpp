@@ -96,6 +96,16 @@ std::string_view Door::objectName() const
    return "Door";
 }
 
+bool Door::isInteractionAvailable() const
+{
+   if (_state != State::Closed)
+   {
+      return false;
+   }
+
+   return !_required_item.has_value() || SaveState::getPlayerInfo()._inventory.has(_required_item.value());
+}
+
 void Door::draw(sf::RenderTarget& color, sf::RenderTarget& normal)
 {
    draw(color, normal, {});

@@ -1,4 +1,5 @@
 #include "gamemechanism.h"
+#include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanismobserver.h"
 
 int32_t GameMechanism::getZ() const
@@ -145,6 +146,25 @@ bool GameMechanism::isEnabled() const
    return _enabled;
 }
 
+bool GameMechanism::isInteractionAvailable() const
+{
+   return isEnabled();
+}
+
+void GameMechanism::resolveReferences(const std::vector<std::shared_ptr<GameMechanism>>& /*all_mechanisms*/)
+{
+}
+
+const std::string& GameMechanism::getGroupId() const
+{
+   return _group_id;
+}
+
+void GameMechanism::setGroupId(const std::string& group_id)
+{
+   _group_id = group_id;
+}
+
 void GameMechanism::setEnabled(bool enabled)
 {
    const auto changed = _enabled != enabled;
@@ -152,7 +172,9 @@ void GameMechanism::setEnabled(bool enabled)
 
    if (_observed && changed)
    {
-      GameMechanismObserver::onEnabled("todo", "todo", enabled);
+      // the object id lives on the game node half of a mechanism, the group is stamped by the deserializer
+      const auto* game_node = dynamic_cast<const GameNode*>(this);
+      GameMechanismObserver::onEnabled(game_node ? game_node->getObjectId() : std::string{}, _group_id, enabled);
    }
 }
 

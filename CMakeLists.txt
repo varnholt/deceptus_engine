@@ -433,6 +433,8 @@ set(GAME_FILES
     src/game/mechanisms/leveltransition.h
     src/game/mechanisms/lever.cpp
     src/game/mechanisms/lever.h
+    src/game/mechanisms/mechanismcondition.cpp
+    src/game/mechanisms/mechanismcondition.h
     src/game/mechanisms/moveablebox.cpp
     src/game/mechanisms/moveablebox.h
     src/game/mechanisms/movingplatform.cpp

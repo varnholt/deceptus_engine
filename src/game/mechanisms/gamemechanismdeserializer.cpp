@@ -266,6 +266,21 @@ void GameMechanismDeserializer::deserialize(
       std::copy(values->begin(), values->end(), std::back_inserter(all_mechanisms));
    }
 
+   // the group a mechanism was created for is part of its identity: level scripts, mechanism events and
+   // conditions all address a mechanism as group plus object id
+   for (auto& [group_id, values] : mechanisms)
+   {
+      for (auto& mechanism : *values)
+      {
+         mechanism->setGroupId(group_id);
+      }
+   }
+
+   for (auto& mechanism : all_mechanisms)
+   {
+      mechanism->resolveReferences(all_mechanisms);
+   }
+
    for (auto& sensor_rect : *mechanism_sensor_rects)
    {
       std::dynamic_pointer_cast<SensorRect>(sensor_rect)->findReference(all_mechanisms);
