@@ -69,10 +69,6 @@ public:
    /// \param enabled true to open the door, false to close it.
    void setEnabled(bool enabled) override;
 
-   /// \brief checks whether the player could open this door right now.
-   /// \return true while the door is closed and the required key, if any, is carried.
-   bool isInteractionAvailable() const override;
-
    /// \brief returns the door bounds used for mechanism queries.
    /// \return door rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;

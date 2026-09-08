@@ -79,11 +79,6 @@ std::string_view TreasureChest::objectName() const
    return "TreasureChest";
 }
 
-bool TreasureChest::isInteractionAvailable() const
-{
-   return isEnabled() && _state == State::Closed;
-}
-
 void TreasureChest::deserialize(const GameDeserializeData& data)
 {
    setObjectId(data._tmx_object->_name);

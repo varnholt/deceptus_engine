@@ -3,68 +3,63 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class GameMechanism;
+class InteractionInterface;
 
-/// \brief evaluates a condition authored as a tmx property, so level data can gate ui and mechanism
-///        state on the world instead of a level script.
+/// \brief a condition read from a tmx property, used to show a hint row only in certain situations.
 ///
-/// a definition is a comma separated list of terms, all of which have to hold. every term reads one
-/// piece of state that the game already tracks:
+/// a condition is a list of terms separated by commas. all of them have to be true. a term is either
 ///
-///     mechanism:<group_id>/<object_id>   the named mechanism currently offers an interaction
-///     item:<item_name>                   the inventory holds that item
+///     mechanism:<group>/<name>   that mechanism can be used right now
+///     item:<name>                the player carries that item
 ///
-/// a leading '!' negates a term:
+/// and a '!' in front of a term inverts it. examples:
 ///
-///     mechanism:extras/handle            while the handle is still lying in the locker
-///     !item:handle,item:key              while the handle is gone and the key is carried
-///
-/// mechanism terms are resolved once after the level has been loaded, so evaluating a condition
-/// costs a pointer dereference rather than a lookup by name.
+///     mechanism:extras/handle    while the handle still lies in the locker
+///     !item:handle,item:key      while the handle is gone and the key is there
 class MechanismCondition
 {
 public:
-   /// \brief parses a condition definition.
-   /// \param definition condition as authored in the tmx property.
-   /// \return parsed condition, or std::nullopt when the definition is empty or malformed.
+   using MechanismsByGroup = std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>;
+
+   /// \brief reads a condition from a tmx property value.
+   /// \param definition condition as written in the tmx property.
+   /// \return the condition, or std::nullopt when the value is empty or cannot be read.
    static std::optional<MechanismCondition> parse(const std::string& definition);
 
-   /// \brief resolves all mechanism terms against the mechanisms of the loaded level.
-   /// \param all_mechanisms every mechanism the level created.
-   void resolveReferences(const std::vector<std::shared_ptr<GameMechanism>>& all_mechanisms);
+   /// \brief looks up the mechanisms the condition refers to.
+   /// \param mechanisms_by_group all mechanisms of the level, sorted into their groups.
+   void resolveReferences(const MechanismsByGroup& mechanisms_by_group);
 
-   /// \brief evaluates all terms.
-   /// \return true when every term holds.
+   /// \brief checks all terms.
+   /// \return true when all of them are true.
    bool isSatisfied() const;
-
-   /// \brief returns the definition this condition was parsed from, for logging.
-   /// \return original condition string.
-   const std::string& getDefinition() const;
 
 private:
    /// \brief one term of a condition.
    struct Term
    {
-      /// \brief state a term reads.
+      /// \brief what a term looks at.
       enum class Source
       {
-         Mechanism,  //!< a mechanism offers an interaction
-         Item        //!< the inventory holds an item
+         Mechanism,  //!< a mechanism can be used
+         Item        //!< the player carries an item
       };
 
       Source _source{Source::Mechanism};
-      bool _negated{false};
-      std::string _group_id;   //!< mechanism group, empty for item terms
-      std::string _object_id;  //!< mechanism object id, or the item name for item terms
-      std::weak_ptr<GameMechanism> _mechanism;
+      bool _inverted{false};
+      std::string _group;  //!< mechanism group, empty for item terms
+      std::string _name;   //!< mechanism name, or the item name for item terms
+      std::weak_ptr<InteractionInterface> _mechanism;
    };
 
-   /// \brief evaluates one term without applying its negation.
-   /// \param term term to evaluate.
-   /// \return true when the state the term reads is present.
-   static bool isTermPresent(const Term& term);
+   /// \brief checks one term, ignoring its '!'.
+   /// \param term term to check.
+   /// \return true when the term is true.
+   static bool isTermTrue(const Term& term);
 
    std::vector<Term> _terms;
    std::string _definition;

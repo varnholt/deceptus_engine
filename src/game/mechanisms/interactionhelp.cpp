@@ -430,13 +430,13 @@ std::optional<sf::FloatRect> InteractionHelp::getBoundingBoxPx()
    return _rect_px;
 }
 
-void InteractionHelp::resolveReferences(const std::vector<std::shared_ptr<GameMechanism>>& all_mechanisms)
+void InteractionHelp::resolveConditions(const MechanismCondition::MechanismsByGroup& mechanisms_by_group)
 {
    for (auto& help : _help_elements)
    {
       if (help._condition.has_value())
       {
-         help._condition->resolveReferences(all_mechanisms);
+         help._condition->resolveReferences(mechanisms_by_group);
       }
    }
 

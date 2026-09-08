@@ -1,70 +1,23 @@
 #include "mechanismcondition.h"
 
 #include "framework/tools/log.h"
+#include "framework/tools/stringutils.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/mechanisms/interactioninterface.h"
 #include "game/state/savestate.h"
 
 #include <algorithm>
-#include <cctype>
 
 namespace
 {
 constexpr auto mechanism_prefix = std::string_view{"mechanism:"};
 constexpr auto item_prefix = std::string_view{"item:"};
-
-/// \brief removes leading and trailing whitespace.
-/// \param value string to trim.
-/// \return trimmed copy of the given string.
-std::string trim(const std::string& value)
-{
-   const auto is_whitespace = [](unsigned char character) { return std::isspace(character) != 0; };
-
-   const auto first = std::ranges::find_if_not(value, is_whitespace);
-   const auto last = std::find_if_not(value.rbegin(), value.rend(), is_whitespace).base();
-
-   if (first >= last)
-   {
-      return {};
-   }
-
-   return std::string{first, last};
-}
-
-/// \brief splits a condition definition into its comma separated terms.
-/// \param definition condition definition to split.
-/// \return trimmed terms without the empty ones.
-std::vector<std::string> splitTerms(const std::string& definition)
-{
-   std::vector<std::string> terms;
-
-   auto term_start = std::string::size_type{0};
-   while (term_start <= definition.size())
-   {
-      const auto separator_position = definition.find(',', term_start);
-      const auto term_end = (separator_position == std::string::npos) ? definition.size() : separator_position;
-      const auto term = trim(definition.substr(term_start, term_end - term_start));
-
-      if (!term.empty())
-      {
-         terms.push_back(term);
-      }
-
-      if (separator_position == std::string::npos)
-      {
-         break;
-      }
-
-      term_start = separator_position + 1;
-   }
-
-   return terms;
-}
 }  // namespace
 
 std::optional<MechanismCondition> MechanismCondition::parse(const std::string& definition)
 {
-   const auto terms = splitTerms(definition);
+   const auto terms = StringUtils::split(definition, ',');
    if (terms.empty())
    {
       return std::nullopt;
@@ -77,10 +30,11 @@ std::optional<MechanismCondition> MechanismCondition::parse(const std::string& d
    {
       Term term;
 
-      auto remainder = std::string_view{term_definition};
+      const auto trimmed_term = StringUtils::trim(term_definition);
+      auto remainder = std::string_view{trimmed_term};
       if (remainder.starts_with('!'))
       {
-         term._negated = true;
+         term._inverted = true;
          remainder.remove_prefix(1);
       }
 
@@ -91,36 +45,30 @@ std::optional<MechanismCondition> MechanismCondition::parse(const std::string& d
          const auto separator_position = remainder.find('/');
          if (separator_position == std::string_view::npos)
          {
-            Log::Error() << "condition '" << definition << "' expects 'mechanism:<group_id>/<object_id>'";
+            Log::Error() << "condition '" << definition << "' expects 'mechanism:<group>/<name>'";
             return std::nullopt;
          }
 
          term._source = Term::Source::Mechanism;
-         term._group_id = std::string{remainder.substr(0, separator_position)};
-         term._object_id = std::string{remainder.substr(separator_position + 1)};
-
-         if (term._group_id.empty() || term._object_id.empty())
-         {
-            Log::Error() << "condition '" << definition << "' has an empty group or object id";
-            return std::nullopt;
-         }
+         term._group = std::string{remainder.substr(0, separator_position)};
+         term._name = std::string{remainder.substr(separator_position + 1)};
       }
       else if (remainder.starts_with(item_prefix))
       {
          remainder.remove_prefix(item_prefix.size());
 
          term._source = Term::Source::Item;
-         term._object_id = std::string{remainder};
-
-         if (term._object_id.empty())
-         {
-            Log::Error() << "condition '" << definition << "' has an empty item name";
-            return std::nullopt;
-         }
+         term._name = std::string{remainder};
       }
       else
       {
-         Log::Error() << "condition '" << definition << "' has a term without a known prefix: '" << term_definition << "'";
+         Log::Error() << "condition '" << definition << "' has a term with an unknown prefix: '" << term_definition << "'";
+         return std::nullopt;
+      }
+
+      if (term._name.empty())
+      {
+         Log::Error() << "condition '" << definition << "' has a term without a name: '" << term_definition << "'";
          return std::nullopt;
       }
 
@@ -130,7 +78,7 @@ std::optional<MechanismCondition> MechanismCondition::parse(const std::string& d
    return condition;
 }
 
-void MechanismCondition::resolveReferences(const std::vector<std::shared_ptr<GameMechanism>>& all_mechanisms)
+void MechanismCondition::resolveReferences(const MechanismsByGroup& mechanisms_by_group)
 {
    for (auto& term : _terms)
    {
@@ -139,60 +87,61 @@ void MechanismCondition::resolveReferences(const std::vector<std::shared_ptr<Gam
          continue;
       }
 
-      const auto referenced_mechanism = std::ranges::find_if(
-         all_mechanisms,
-         [&term](const auto& mechanism)
-         {
-            if (mechanism->getGroupId() != term._group_id)
-            {
-               return false;
-            }
-
-            const auto* game_node = dynamic_cast<const GameNode*>(mechanism.get());
-            return (game_node != nullptr) && (game_node->getObjectId() == term._object_id);
-         }
-      );
-
-      if (referenced_mechanism == all_mechanisms.end())
+      const auto group = mechanisms_by_group.find(term._group);
+      if (group == mechanisms_by_group.end() || group->second == nullptr)
       {
-         Log::Error() << "condition '" << _definition << "' references '" << term._group_id << "/" << term._object_id
-                      << "' which does not exist";
+         Log::Error() << "condition '" << _definition << "' refers to unknown group '" << term._group << "'";
          continue;
       }
 
-      term._mechanism = *referenced_mechanism;
+      const auto mechanism = std::ranges::find_if(
+         *group->second,
+         [&term](const auto& candidate)
+         {
+            const auto* game_node = dynamic_cast<const GameNode*>(candidate.get());
+            return (game_node != nullptr) && (game_node->getObjectId() == term._name);
+         }
+      );
+
+      if (mechanism == group->second->end())
+      {
+         Log::Error() << "condition '" << _definition << "' refers to '" << term._group << "/" << term._name << "' which does not exist";
+         continue;
+      }
+
+      term._mechanism = std::dynamic_pointer_cast<InteractionInterface>(*mechanism);
+      if (term._mechanism.expired())
+      {
+         Log::Error() << "condition '" << _definition << "' refers to '" << term._group << "/" << term._name
+                      << "' which offers no interaction";
+      }
    }
 }
 
 bool MechanismCondition::isSatisfied() const
 {
-   return std::ranges::all_of(_terms, [](const auto& term) { return isTermPresent(term) != term._negated; });
+   return std::ranges::all_of(_terms, [](const auto& term) { return isTermTrue(term) != term._inverted; });
 }
 
-const std::string& MechanismCondition::getDefinition() const
-{
-   return _definition;
-}
-
-bool MechanismCondition::isTermPresent(const Term& term)
+bool MechanismCondition::isTermTrue(const Term& term)
 {
    switch (term._source)
    {
       case Term::Source::Mechanism:
       {
-         const auto referenced_mechanism = term._mechanism.lock();
+         const auto mechanism = term._mechanism.lock();
 
-         // an unresolved reference has been reported when the level was loaded, it just never holds
-         if (!referenced_mechanism)
+         // a reference that could not be resolved has been reported when the level was loaded
+         if (!mechanism)
          {
             return false;
          }
 
-         return referenced_mechanism->isInteractionAvailable();
+         return mechanism->isInteractionAvailable();
       }
       case Term::Source::Item:
       {
-         return SaveState::getPlayerInfo()._inventory.has(term._object_id);
+         return SaveState::getPlayerInfo()._inventory.has(term._name);
       }
    }
 

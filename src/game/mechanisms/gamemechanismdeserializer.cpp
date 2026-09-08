@@ -5,6 +5,7 @@
 #include "framework/tools/log.h"
 #include "game/mechanisms/fan.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
+#include "game/mechanisms/interactionhelp.h"
 #include "game/mechanisms/laser.h"
 #include "game/mechanisms/lever.h"
 #include "game/mechanisms/movingplatform.h"
@@ -67,6 +68,7 @@ void GameMechanismDeserializer::deserialize(
    auto* mechanism_conveyor_belts = mechanisms[std::string{layer_name_conveyorbelts}];
    auto* mechanism_doors = mechanisms[std::string{layer_name_doors}];
    auto* mechanism_fans = mechanisms[std::string{layer_name_fans}];
+   auto* mechanism_interaction_help = mechanisms[std::string{layer_name_interaction_help}];
    auto* mechanism_lasers = mechanisms[std::string{layer_name_lasers}];
    auto* mechanism_levers = mechanisms[std::string{layer_name_levers}];
    auto* mechanism_on_off_blocks = mechanisms[std::string{layer_name_on_off_blocks}];
@@ -266,21 +268,6 @@ void GameMechanismDeserializer::deserialize(
       std::copy(values->begin(), values->end(), std::back_inserter(all_mechanisms));
    }
 
-   // the group a mechanism was created for is part of its identity: level scripts, mechanism events and
-   // conditions all address a mechanism as group plus object id
-   for (auto& [group_id, values] : mechanisms)
-   {
-      for (auto& mechanism : *values)
-      {
-         mechanism->setGroupId(group_id);
-      }
-   }
-
-   for (auto& mechanism : all_mechanisms)
-   {
-      mechanism->resolveReferences(all_mechanisms);
-   }
-
    for (auto& sensor_rect : *mechanism_sensor_rects)
    {
       std::dynamic_pointer_cast<SensorRect>(sensor_rect)->findReference(all_mechanisms);
@@ -289,6 +276,11 @@ void GameMechanismDeserializer::deserialize(
    for (auto& lever_mechanism : *mechanism_levers)
    {
       std::dynamic_pointer_cast<Lever>(lever_mechanism)->resolveTargets(all_mechanisms);
+   }
+
+   for (auto& interaction_help : *mechanism_interaction_help)
+   {
+      std::dynamic_pointer_cast<InteractionHelp>(interaction_help)->resolveConditions(mechanisms);
    }
 
    static auto warning_shown = false;

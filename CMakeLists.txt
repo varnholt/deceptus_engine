@@ -427,6 +427,7 @@ set(GAME_FILES
     src/game/mechanisms/infooverlay.h
     src/game/mechanisms/interactionhelp.cpp
     src/game/mechanisms/interactionhelp.h
+    src/game/mechanisms/interactioninterface.h
     src/game/mechanisms/laser.cpp
     src/game/mechanisms/laser.h
     src/game/mechanisms/leveltransition.cpp

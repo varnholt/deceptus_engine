@@ -9,6 +9,7 @@
 #include "game/animation/animationpool.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/mechanisms/interactioninterface.h"
 
 struct ExtraItem;
 class GameNode;
@@ -19,7 +20,7 @@ struct TmxLayer;
 struct TmxTileSet;
 
 /// \brief represents a collectible extra that can be animated, gated, and added to inventory.
-class Extra : public GameMechanism, public GameNode
+class Extra : public GameMechanism, public GameNode, public InteractionInterface
 {
 public:
    /// \brief creates an extra mechanism.

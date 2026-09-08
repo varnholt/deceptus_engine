@@ -52,9 +52,9 @@ public:
    /// \return trigger rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
-   /// \brief resolves the mechanisms referenced by the row conditions and lays the visible rows out.
-   /// \param all_mechanisms every mechanism the level created.
-   void resolveReferences(const std::vector<std::shared_ptr<GameMechanism>>& all_mechanisms) override;
+   /// \brief looks up the mechanisms the row conditions refer to and lays the visible rows out.
+   /// \param mechanisms_by_group all mechanisms of the level, sorted into their groups.
+   void resolveConditions(const MechanismCondition::MechanismsByGroup& mechanisms_by_group);
 
 private:
    /// rief points the controller icons at the artwork of the pad that is currently plugged in.

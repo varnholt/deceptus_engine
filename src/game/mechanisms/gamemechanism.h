@@ -12,10 +12,8 @@
 #include "json/json.hpp"
 
 #include <cstdint>
-#include <memory>
 #include <optional>
 #include <string>
-#include <vector>
 
 struct Room;
 
@@ -73,16 +71,6 @@ public:
    /// \brief checks whether gameplay logic for this mechanism is enabled.
    /// \return true when the mechanism is enabled.
    virtual bool isEnabled() const;
-
-   /// \brief checks whether a player standing at this mechanism could act on it right now.
-   ///
-   /// This is the state the mechanism already evaluates before it reacts to the action button, made
-   /// observable so prompts and conditions can be derived from it instead of being kept in sync by
-   /// hand. Mechanisms without an interaction, and mechanisms whose interaction is available whenever
-   /// they are enabled, keep the default.
-   ///
-   /// \return true when the interaction this mechanism offers is currently available.
-   virtual bool isInteractionAvailable() const;
 
    /// \brief enables or disables the mechanism.
    /// \param enabled true to enable the mechanism, false to disable it.
@@ -190,18 +178,6 @@ public:
    /// \return pixel bounding box when the mechanism has one.
    virtual std::optional<sf::FloatRect> getBoundingBoxPx() = 0;
 
-   /// \brief resolves references to other mechanisms once the whole level has been created.
-   /// \param all_mechanisms every mechanism the level created.
-   virtual void resolveReferences(const std::vector<std::shared_ptr<GameMechanism>>& all_mechanisms);
-
-   /// \brief returns the mechanism group this mechanism was created for, such as `levers`.
-   /// \return group id assigned by the deserializer.
-   const std::string& getGroupId() const;
-
-   /// \brief stores the mechanism group this mechanism was created for.
-   /// \param group_id group id of the layer or object group the mechanism came from.
-   void setGroupId(const std::string& group_id);
-
    /// \brief serializes mechanism runtime state into save data.
    /// \param json json object to write state fields into.
    virtual void serializeState(nlohmann::json&);
@@ -233,7 +209,6 @@ public:
    virtual void hit(int32_t damage);
 
 protected:
-   std::string _group_id;  //!< mechanism group this mechanism was created for, assigned by the deserializer
    int32_t _z_index{0};
    bool _enabled{true};
    bool _visible{true};

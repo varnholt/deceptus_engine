@@ -10,13 +10,14 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/mechanisms/interactioninterface.h"
 
 struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
 
 /// \brief implements an interactable lever that drives linked mechanisms.
-class Lever : public GameMechanism, public GameNode
+class Lever : public GameMechanism, public GameNode, public InteractionInterface
 {
 public:
    using Callback = std::function<void(int32_t)>;
