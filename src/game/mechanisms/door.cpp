@@ -30,7 +30,7 @@ static constexpr std::array door_properties{
    PropertyInfo{.name = "open", .type = "bool", .default_value = false},
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
    PropertyInfo{.name = "observed", .type = "bool", .default_value = false},
-   PropertyInfo{.name = "key", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "item_required", .type = "string", .default_value = std::string_view{""}},
    PropertyInfo{.name = "sample_open", .type = "string", .default_value = std::string_view{""}},
    PropertyInfo{.name = "sample_close", .type = "string", .default_value = std::string_view{""}},
    PropertyInfo{.name = "animation_open", .type = "string", .default_value = std::string_view{""}},
@@ -242,9 +242,9 @@ void Door::update(const sf::Time& dt)
          return;
       }
 
-      if (_required_item.has_value() && !SaveState::getPlayerInfo()._inventory.has(*_required_item))
+      if (_item_required.has_value() && !SaveState::getPlayerInfo()._inventory.has(*_item_required))
       {
-         Log::Info() << "player doesn't have key: " << *_required_item;
+         Log::Info() << "player doesn't have key: " << *_item_required;
          return;
       }
 
@@ -504,12 +504,14 @@ bool Door::setup(const GameDeserializeData& data)
          setEnabled(false);
       }
 
-      // read required key to open door
-      const auto key_it = map.find("key");
-      if (key_it != map.end())
+      // read required key to open door. maps written before the property was called item_required,
+      // like the ones in the game repository, still say key
+      const auto item_required = ValueReader::readValue<std::string>("item_required", map)
+                                    .or_else([&map] { return ValueReader::readValue<std::string>("key", map); })
+                                    .value_or("");
+      if (!item_required.empty())
       {
-         const auto key = key_it->second->_value_string.value();
-         _required_item = key;
+         _item_required = item_required;
       }
 
       // read key animation if present

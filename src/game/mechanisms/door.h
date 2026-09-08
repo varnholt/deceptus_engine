@@ -137,7 +137,7 @@ private:
    sf::FloatRect _rect_px;
    float _bar_offset = 0.0f;
 
-   std::optional<std::string> _required_item;
+   std::optional<std::string> _item_required;
 
    bool _can_be_closed = false;
    bool _automatic_close = false;
