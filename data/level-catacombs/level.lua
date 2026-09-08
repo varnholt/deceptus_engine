@@ -519,12 +519,13 @@ function playerUsedItem(item)
 
    -- when sensor rect flag set and key is used on locker, then change
    if (item == "locker_key") then
-      local player_in_front_of_locker = isPlayerIntersectingSensorRect("locker_sensor")
-      log(player_in_front_of_locker and "true" or "false")
-      if (player_in_front_of_locker) then
-         openLocker()
-         inventoryRemove("locker_key")
+      -- the key only does something at the locker, so it stays unused everywhere else
+      if (not isPlayerIntersectingSensorRect("locker_sensor")) then
+         return false
       end
+
+      openLocker()
+      inventoryRemove("locker_key")
       return true
    end
 
