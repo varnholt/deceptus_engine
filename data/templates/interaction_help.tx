@@ -4,9 +4,13 @@
   <properties>
    <property name="animation" value=""/>
    <property name="button_0" value="key_cursor_u"/>
+   <property name="button_1" value=""/>
+   <property name="condition_0" value=""/>
+   <property name="condition_1" value=""/>
    <property name="offset_x_px" type="int" value="0"/>
    <property name="offset_y_px" type="int" value="0"/>
    <property name="text_0" value=""/>
+   <property name="text_1" value=""/>
    <property name="z" type="int" value="50"/>
   </properties>
  </object>
