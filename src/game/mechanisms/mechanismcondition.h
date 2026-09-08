@@ -11,12 +11,13 @@ class InteractionInterface;
 
 /// \brief a condition read from a tmx property, used to show a hint row only in certain situations.
 ///
-/// a condition is a list of terms separated by commas. all of them have to be true. a term is either
+/// a condition is a list of requirements separated by commas. all of them have to be met. a
+/// requirement is either
 ///
 ///     mechanism:<group>/<name>   that mechanism can be used right now
 ///     item:<name>                the player carries that item
 ///
-/// and a '!' in front of a term inverts it. examples:
+/// and a '!' in front of it inverts it. examples:
 ///
 ///     mechanism:extras/handle    while the handle still lies in the locker
 ///     !item:handle,item:key      while the handle is gone and the key is there
@@ -34,15 +35,15 @@ public:
    /// \param mechanisms_by_group all mechanisms of the level, sorted into their groups.
    void resolveReferences(const MechanismsByGroup& mechanisms_by_group);
 
-   /// \brief checks all terms.
-   /// \return true when all of them are true.
+   /// \brief checks all requirements.
+   /// \return true when all of them are met.
    bool isSatisfied() const;
 
 private:
-   /// \brief one term of a condition.
-   struct Term
+   /// \brief one requirement of a condition.
+   struct Requirement
    {
-      /// \brief what a term looks at.
+      /// \brief what a requirement looks at.
       enum class Source
       {
          Mechanism,  //!< a mechanism can be used
@@ -51,16 +52,16 @@ private:
 
       Source _source{Source::Mechanism};
       bool _inverted{false};
-      std::string _group;  //!< mechanism group, empty for item terms
-      std::string _name;   //!< mechanism name, or the item name for item terms
+      std::string _group;  //!< mechanism group, empty for item requirements
+      std::string _name;   //!< mechanism name, or the item name for item requirements
       std::weak_ptr<InteractionInterface> _mechanism;
    };
 
-   /// \brief checks one term, ignoring its '!'.
-   /// \param term term to check.
-   /// \return true when the term is true.
-   static bool isTermTrue(const Term& term);
+   /// \brief checks one requirement, ignoring its '!'.
+   /// \param requirement requirement to check.
+   /// \return true when the requirement is met.
+   static bool isRequirementMet(const Requirement& requirement);
 
-   std::vector<Term> _terms;
+   std::vector<Requirement> _requirements;
    std::string _definition;
 };
