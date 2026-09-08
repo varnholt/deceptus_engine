@@ -427,12 +427,15 @@ set(GAME_FILES
     src/game/mechanisms/infooverlay.h
     src/game/mechanisms/interactionhelp.cpp
     src/game/mechanisms/interactionhelp.h
+    src/game/mechanisms/interactioninterface.h
     src/game/mechanisms/laser.cpp
     src/game/mechanisms/laser.h
     src/game/mechanisms/leveltransition.cpp
     src/game/mechanisms/leveltransition.h
     src/game/mechanisms/lever.cpp
     src/game/mechanisms/lever.h
+    src/game/mechanisms/mechanismcondition.cpp
+    src/game/mechanisms/mechanismcondition.h
     src/game/mechanisms/moveablebox.cpp
     src/game/mechanisms/moveablebox.h
     src/game/mechanisms/movingplatform.cpp

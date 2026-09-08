@@ -9,6 +9,7 @@
 #include "game/animation/animationpool.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/mechanisms/interactioninterface.h"
 
 struct ExtraItem;
 class GameNode;
@@ -19,7 +20,7 @@ struct TmxLayer;
 struct TmxTileSet;
 
 /// \brief represents a collectible extra that can be animated, gated, and added to inventory.
-class Extra : public GameMechanism, public GameNode
+class Extra : public GameMechanism, public GameNode, public InteractionInterface
 {
 public:
    /// \brief creates an extra mechanism.
@@ -50,6 +51,10 @@ public:
    /// \brief updates animations and handles pickup checks against the player rectangle.
    /// \param dt elapsed frame time.
    void update(const sf::Time& dt) override;
+
+   /// \brief checks whether this extra can still be picked up.
+   /// \return true while the extra is active and, when it spawns, has finished spawning.
+   bool isInteractionAvailable() const override;
 
    /// \brief returns the collectible interaction rectangle.
    /// \return extra rectangle in pixels.

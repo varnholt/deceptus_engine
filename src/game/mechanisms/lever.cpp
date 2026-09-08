@@ -400,6 +400,12 @@ bool Lever::isEnabled() const
    return (_target_state == State::Right);
 }
 
+bool Lever::isInteractionAvailable() const
+{
+   // isEnabled reports which way the lever points, so the prompt asks for the handle instead
+   return _handle_available;
+}
+
 void Lever::updateReceivers()
 {
    for (auto& cb : _callbacks)
@@ -483,12 +489,16 @@ void Lever::serializeState(nlohmann::json& j)
       return;
    }
 
-   j[_object_id] = {{"state", static_cast<int32_t>(_target_state)}};
+   j[_object_id] = {{"state", static_cast<int32_t>(_target_state)}, {"handle_available", _handle_available}};
 }
 
 void Lever::deserializeState(const nlohmann::json& j)
 {
    _target_state = static_cast<State>(j.at("state").get<int32_t>());
    _enabled = (_target_state == State::Right);
+
+   // save games written before the handle was part of the lever state keep the value from the tmx
+   _handle_available = j.value("handle_available", _handle_available);
+
    updateReceivers();
 }

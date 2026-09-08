@@ -12,6 +12,7 @@
 #include "game/level/gamenode.h"
 #include "game/mechanisms/controllerkeymap.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/mechanisms/mechanismcondition.h"
 
 struct TmxObject;
 
@@ -51,11 +52,26 @@ public:
    /// \return trigger rectangle in pixels.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   /// \brief looks up the mechanisms the row conditions refer to and lays the visible rows out.
+   /// \param mechanisms_by_group all mechanisms of the level, sorted into their groups.
+   void resolveConditions(const MechanismCondition::MechanismsByGroup& mechanisms_by_group);
+
 private:
    /// rief points the controller icons at the artwork of the pad that is currently plugged in.
    ///
    /// this is a no-op while the brand does not change, so it is cheap to call every frame.
    void updateControllerIconRects();
+
+   /// \brief re-evaluates the condition of every row.
+   /// \return true when the set of visible rows changed.
+   bool updateRowVisibility();
+
+   /// \brief positions the visible rows, packed upwards from the bottom row.
+   void layoutRows();
+
+   /// \brief checks whether any row is currently visible.
+   /// \return true while at least one row passes its condition.
+   bool hasVisibleRow() const;
 
    enum class InteractionType
    {
@@ -76,7 +92,9 @@ private:
       sf::IntRect _button_rect_keyboard;
       sf::IntRect _button_rect_controller;
 #endif
-      std::string _icon_id_controller;  //!< controller icon id, re-resolved when the brand changes
+      std::string _icon_id_controller;               //!< controller icon id, re-resolved when the brand changes
+      std::optional<MechanismCondition> _condition;  //!< when set, the row is only shown while the condition holds
+      bool _visible{true};                           //!< current result of the condition
    };
 
    sf::FloatRect _rect_px;

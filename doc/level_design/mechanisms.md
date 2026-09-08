@@ -676,9 +676,41 @@ In there, just place a rectangle where you'd like to position and scale the effe
 |text_1|string|Text to show next to the 2nd controller button (optional).|
 |button_0|string|1st button icon to show (same identifiers as used in 'Controller Help' mechanism). The default is 'dpad_u'.|
 |button_1|string|2nd button icon to show (optional).|
+|condition_0|string|Shows the 1st row only while the condition is met (optional). See 'Conditions' below.|
+|condition_1|string|Shows the 2nd row only while the condition is met (optional).|
 |offset_x_px|int|An offset in x (in px) for where the animation will be shown. The default is 0.|
 |offset_y_px|int|An offset in y (in px) for where the animation will be shown. The default is 0.|
 |animation|string|Animation cycle to show. The hide animation will be the same animation, just reversed.|
+
+### Conditions
+
+A condition is a list of requirements separated by commas, and all of them have to be met. A requirement is one of these:
+
+|Requirement|Description|
+|-|-|
+|`mechanism:<group>/<name>`|The named mechanism can be used right now. For a `Lever` that means its handle is in place, for an `Extra` that it has not been picked up yet.|
+|`item:<name>`|The player carries that inventory item.|
+
+A `!` in front of a requirement inverts it. So a lever that needs a handle can show both of its prompts from one hint object:
+
+|Property|Value|
+|-|-|
+|text_0|`Examine`|
+|condition_0|`!mechanism:levers/my_lever`|
+|text_1|`Operate`|
+|button_1|`key_return`|
+|condition_1|`mechanism:levers/my_lever`|
+
+Two more examples:
+
+|Value|Meaning|
+|-|-|
+|`mechanism:extras/my_handle`|While that extra is still lying there to be taken|
+|`item:handle,!item:key`|While the player carries the handle but not the key|
+
+A row whose condition is not met is not drawn, and the rows below it move up, so `condition_1` can be used without leaving a gap. When no row is left, the hint stays silent and the animation does not play either - that is the case a level script used to handle by disabling the whole hint object.
+
+Only mechanisms that offer an interaction can be used in a requirement. At the moment those are `Lever` and `Extra`. Names are looked up once when the level is loaded, and a requirement that refers to an unknown group, an unknown object or a mechanism without an interaction is written to the log and never met. To offer an interaction on another mechanism, implement `InteractionInterface` and report when the player could act on it.
 
 ---
 
@@ -844,7 +876,7 @@ The properties below apply for the object inside the `levers` object group.
 |z|int|The object's z index|
 |target_id|string|An optional name of the object controlled by this lever. This can be used if you don't to use the 'switchable_objects' approach.|
 |target_ids|string|An semicolon separated list of object names for objects that are controlled by this lever. This can be used if you don't to use the 'switchable_objects' approach.|
-|serialized|bool|If set to `true`, the lever’s state is saved and restored when the level is reloaded (default is `false`).|
+|serialized|bool|If set to `true`, the lever’s state is saved and restored when the level is reloaded (default is `false`). That includes whether its handle has been inserted.|
 |handle_available|bool|Whether the lever’s handle is initially available (default is `true`). When set to `false`, the player must bring a 'handle' item to attach before the lever can be used.|
 
 ### Events
@@ -865,6 +897,8 @@ function mechanismEvent(object_id, group_id, event_name, value)
    end
 end
 ```
+
+An interaction hint does not need that second line: give it a `condition_0` of `!mechanism:levers/my_lever` and a `condition_1` of `mechanism:levers/my_lever`, and it swaps its own rows when the handle goes in. See [Interaction Help](#interaction-help).
 
 ---
 

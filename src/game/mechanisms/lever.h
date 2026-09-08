@@ -10,13 +10,14 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
+#include "game/mechanisms/interactioninterface.h"
 
 struct TmxLayer;
 struct TmxObject;
 struct TmxTileSet;
 
 /// \brief implements an interactable lever that drives linked mechanisms.
-class Lever : public GameMechanism, public GameNode
+class Lever : public GameMechanism, public GameNode, public InteractionInterface
 {
 public:
    using Callback = std::function<void(int32_t)>;
@@ -75,6 +76,10 @@ public:
    /// \brief reports whether the current target state is right.
    /// \return true when the target state is right.
    bool isEnabled() const override;
+
+   /// \brief checks whether the lever can be operated, which requires its handle to be in place.
+   /// \return true while the handle sits in the lever base.
+   bool isInteractionAvailable() const override;
 
    /// \brief advances to the next state according to lever type and plays switch audio.
    void toggle() override;
