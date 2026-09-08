@@ -597,16 +597,29 @@ bool LevelScript::isPlayerIntersectingSensorRect(const std::string& mechanism_id
 {
    auto mechanisms = _search_mechanism_callback(mechanism_id, "sensor_rects");
 
-   auto mechanism_it = std::ranges::find_if(
+   const auto& player_rect_px = PlayerRegistry::getFirst()->getPixelRectFloat();
+
+   // the search is regex based, so more than one sensor rect can come back; only the one that
+   // actually carries the requested object id is asked whether the player is inside it
+   return std::ranges::any_of(
       mechanisms,
-      [&mechanism_id](const auto& mechanism)
+      [&mechanism_id, &player_rect_px](const auto& mechanism)
       {
          auto* game_node = dynamic_cast<GameNode*>(mechanism.get());
-         return (game_node && game_node->getObjectId() == mechanism_id);
+         if (!game_node || game_node->getObjectId() != mechanism_id)
+         {
+            return false;
+         }
+
+         const auto& rect_px = mechanism->getBoundingBoxPx();
+         if (!rect_px.has_value())
+         {
+            return false;
+         }
+
+         return sfcompat::findIntersection(player_rect_px, rect_px.value()).has_value();
       }
    );
-
-   return mechanism_it != mechanisms.end();
 }
 
 void LevelScript::toggle(const std::string& search_pattern, const std::optional<std::string>& group)
