@@ -7,6 +7,7 @@ The pytest suites, one directory per thing they test:
 | `switch/test_switch_build.py` | the .nro is a well formed homebrew binary, the Switch SDL backends were really linked rather than replaced by dummies, and the romfs carries the assets | a Switch build in `build_switch_engine` (or `DECEPTUS_SWITCH_BUILD_DIR`) |
 | `wasm/test_wasm_browser.py` | the web build reaches the menu in a real browser without a severe console message | a build in `build_wasm`, Chrome; starts its own COOP/COEP server |
 | `desktop/test_record_gameplay.py` | the desktop build launches, reaches a level and can be captured; produces the README recording | a desktop build, ffmpeg, Windows |
+| `desktop/test_level_progression.py` | the whole item chain of the catacombs and the graveyard still plays: locker key, locker, handle, cell lever, drawer, chest, head torch, owl eyes, shrine, sword. Teleports between the places and checks the log after every step | a desktop build with `DEVELOPMENT_MODE` (`build_rel`, or `DECEPTUS_DESKTOP_BUILD_DIR`), Windows |
 | `tools/test_path_merge.py` | the standalone path_merge binary agrees with the Qt5 reference | the two binaries in `lab/path_merge_tests` |
 
 Run one with the project here, from the repository root:
