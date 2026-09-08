@@ -480,7 +480,7 @@ Doors can have keys assigned the player has to find inside your level (in form o
 |-|-|-|
 |z|int|The object's z index|
 |open|bool|Defines the initial state of the door (default is `false`).|
-|key|string|If defined, the door can only be opened when the player has the corresponding key. For that reason an extra must be added that has the name of the key.|
+|item_required|string|If defined, the door can only be opened when the player has the corresponding key. For that reason an extra must be added that has the name of the key. Maps that still use the former name `key` keep working.|
 |texture|string|A path to a static door texture that is drawn in closed state.|
 |sample_open|string|A filename of a sample that is played when the door is opened.|
 |sample_close|string|A filenname of a sample that is played when the door is closed.|
