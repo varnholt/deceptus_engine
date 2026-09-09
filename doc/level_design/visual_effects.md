@@ -351,6 +351,8 @@ Rain layers have the custom properties below:
 |collide|bool|Set to true if rain drops should collide with the Box2D world; otherwise they will just fall through|
 |drop_count|int|Number of rain drops used inside this layer|
 |fall_through_rate|int|Decides how many nth rain drops are passed through to the collision detection. Set to `0` or `1` to make every rain drop colliding, set to `2` to pass every second drop to the collision detection, and so on. This setting is only relevant when `collide` is set to `true`.|
+|randomize_range_px|int|Width of the random range in pixels that shifts where a drop hits the surface, so the splashes are not all lined up on the very same y. The default is `0` which keeps every drop splashing exactly on the surface. This setting is only relevant when `collide` is set to `true`.|
+|randomize_offset_px|int|Constant shift in pixels added on top of the randomized hit position. Use a negative value to center the range around the surface, e.g. `randomize_range_px` of `4` together with `randomize_offset_px` of `-2` scatters the splashes by 2 pixels in either direction. The default is `0`.|
 |sound|string|A sample from `data/sounds` that is looped for as long as the rain is active, such as `weather_rain_heavy_loop.ogg`. When the property is omitted, the rain stays silent.|
 |sound_volume|float|Volume multiplier for the looped rain sample. The default is `1.0`.|
 

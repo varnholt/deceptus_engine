@@ -237,6 +237,8 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
          }
 
          settings._sound_volume = ValueReader::readValue<float>("sound_volume", map).value_or(1.0f);
+         settings._randomize_range_px = ValueReader::readValue<int32_t>("randomize_range_px", map);
+         settings._randomize_offset_px = ValueReader::readValue<int32_t>("randomize_offset_px", map);
 
          std::dynamic_pointer_cast<RainOverlay>(weather->_overlay)->setSettings(settings);
       }

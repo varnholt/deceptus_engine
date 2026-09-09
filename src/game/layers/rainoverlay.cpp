@@ -231,6 +231,7 @@ void RainOverlay::update(const sf::Time& dt)
          p._pos_px.y = _clip_rect.position.y + std::rand() % static_cast<int32_t>(_clip_rect.size.y);
          p._age_s = (std::rand() % (static_cast<int32_t>(max_age_s * 10000))) * 0.0001f;
          p._dir_px.y = (std::rand() % 100) * randomize_factor_y + fixed_direction_y;
+         p.randomizeHitOffsetY(_settings);
          update_colliding_edge(p);
       }
 
@@ -254,7 +255,7 @@ void RainOverlay::update(const sf::Time& dt)
 
          if (p._age_s > max_age_s)
          {
-            p.reset(_clip_rect);
+            p.reset(_clip_rect, _settings);
             update_colliding_edge(p);
          }
          else
@@ -264,9 +265,9 @@ void RainOverlay::update(const sf::Time& dt)
                // intersect rain drop with edges
                if (!p._intersections.empty())
                {
-                  const auto& closest_point = p._intersections.front();
+                  const auto closest_point = p._intersections.front() + p._hit_offset_y_px;
 
-                  if (p._pos_px.y + 96 > p._intersections.at(0))
+                  if (p._pos_px.y + 96 > closest_point)
                   {
                      const sf::Vector2f hit_position{p._pos_px.x, closest_point};
 
@@ -281,7 +282,7 @@ void RainOverlay::update(const sf::Time& dt)
                      hit._pos_px = hit_position;
                      _hits.push_back(std::move(hit));
 
-                     p.reset(_clip_rect);
+                     p.reset(_clip_rect, _settings);
 
                      update_colliding_edge(p);
                   }
@@ -328,7 +329,7 @@ void RainOverlay::update(const sf::Time& dt)
    }
 }
 
-void RainOverlay::RainDrop::reset(const sf::FloatRect& rect)
+void RainOverlay::RainDrop::reset(const sf::FloatRect& rect, const RainSettings& settings)
 {
    _age_s = -(std::rand() % 10000) * 0.0001f;
 
@@ -338,6 +339,20 @@ void RainOverlay::RainDrop::reset(const sf::FloatRect& rect)
    _pos_px.y = rect.position.y;
 
    _origin_px = _pos_px;
+
+   randomizeHitOffsetY(settings);
+}
+
+void RainOverlay::RainDrop::randomizeHitOffsetY(const RainSettings& settings)
+{
+   const auto randomize_range_px = settings._randomize_range_px.value_or(0);
+
+   if (randomize_range_px == 0)
+   {
+      return;
+   }
+
+   _hit_offset_y_px = static_cast<float>((std::rand() % randomize_range_px) + settings._randomize_offset_px.value_or(0));
 }
 
 void RainOverlay::determineRainSurfaces()
