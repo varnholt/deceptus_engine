@@ -5,14 +5,18 @@
 #include "framework/pathmerger/pathmerger.h"
 #include "framework/tmxparser/tmxelement.h"
 #include "framework/tmxparser/tmxlayer.h"
+#include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxobjectgroup.h"
 #include "framework/tmxparser/tmxparser.h"
+#include "framework/tmxparser/tmxproperties.h"
+#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/checksum.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationplayer.h"
+#include "game/audio/footstepsurfaces.h"
 #include "game/camera/camerapanorama.h"
 #include "game/camera/cameraroomlock.h"
 #include "game/camera/camerasystem.h"
@@ -26,6 +30,7 @@
 #include "game/ingamemenu/ingamemenumap.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/io/meshtools.h"
+#include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/level/leveldescription.h"
 #include "game/level/levelfiles.h"
@@ -375,6 +380,20 @@ void Level::loadTmx()
             {
                const auto light = LightSystem::createLightInstance(this, data);
                _light_system->_lights.push_back(light);
+            }
+            else if (object_group->_name == "footstep_surfaces")
+            {
+               if (tmx_object->_properties)
+               {
+                  const auto surface = ValueReader::readValue<std::string>("surface", tmx_object->_properties->_map);
+
+                  if (surface.has_value())
+                  {
+                     const sf::FloatRect rect{{tmx_object->_x_px, tmx_object->_y_px}, {tmx_object->_width_px, tmx_object->_height_px}};
+
+                     _footstep_surface_rects.push_back({rect, surface.value()});
+                  }
+               }
             }
          }
       }
@@ -2210,6 +2229,24 @@ void Level::parsePhysicsTiles(
 const sf::Vector2f& Level::getStartPosition() const
 {
    return _start_position_px;
+}
+
+const std::string& Level::getFootstepSurface(const sf::Vector2f& position_px) const
+{
+   for (const auto& footstep_surface_rect : _footstep_surface_rects)
+   {
+      if (footstep_surface_rect._rect_px.contains(position_px))
+      {
+         return footstep_surface_rect._surface;
+      }
+   }
+
+   if (!_description->_footstep_surface.empty())
+   {
+      return _description->_footstep_surface;
+   }
+
+   return FootstepSurfaces::getDefaultSurface();
 }
 
 #ifdef DEVELOPMENT_MODE

@@ -12,7 +12,9 @@ using json = nlohmann::json;
 
 void to_json(json& j, const LevelDescription& d)
 {
-   j = json{{"filename", d._filename}, {"startposition", d._start_position_tl}, {"enemies", d._enemies}};
+   j = json{
+      {"filename", d._filename}, {"startposition", d._start_position_tl}, {"enemies", d._enemies}, {"footstep_surface", d._footstep_surface}
+   };
 }
 
 void from_json(const json& j, LevelDescription& d)
@@ -23,6 +25,11 @@ void from_json(const json& j, LevelDescription& d)
    if (j.find("enemies") != j.end())
    {
       d._enemies = j.at("enemies").get<std::vector<EnemyDescription>>();
+   }
+
+   if (j.find("footstep_surface") != j.end())
+   {
+      d._footstep_surface = j.at("footstep_surface").get<std::string>();
    }
 }
 
