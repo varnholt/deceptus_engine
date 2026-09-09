@@ -352,7 +352,10 @@ void RainOverlay::RainDrop::randomizeHitOffsetY(const RainSettings& settings)
       return;
    }
 
-   _hit_offset_y_px = static_cast<float>((std::rand() % randomize_range_px) + settings._randomize_offset_px.value_or(0));
+   // an offset larger than the range would move every single hit off the surface
+   const auto randomize_offset_px = std::clamp(settings._randomize_offset_px.value_or(0), -randomize_range_px, randomize_range_px);
+
+   _hit_offset_y_px = static_cast<float>((std::rand() % randomize_range_px) + randomize_offset_px);
 }
 
 void RainOverlay::determineRainSurfaces()

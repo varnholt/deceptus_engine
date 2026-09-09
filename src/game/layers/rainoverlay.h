@@ -22,10 +22,11 @@ public:
       bool _collide = true;
       int32_t _drop_count = 500;
       int32_t _fall_through_rate = 0;
-      std::string _sound;                           //!< looped rain sample played while the effect is active; empty disables audio
-      float _sound_volume = 1.0f;                   //!< per-sample volume multiplier applied to the looped rain sample
-      std::optional<int32_t> _randomize_range_px;   //!< width of the randomized shift of the surface hit position; 0 disables it
-      std::optional<int32_t> _randomize_offset_px;  //!< constant shift applied on top of the randomized surface hit position
+      std::string _sound;                          //!< looped rain sample played while the effect is active; empty disables audio
+      float _sound_volume = 1.0f;                  //!< per-sample volume multiplier applied to the looped rain sample
+      std::optional<int32_t> _randomize_range_px;  //!< width of the randomized shift of the surface hit position; 0 disables it
+      std::optional<int32_t>
+         _randomize_offset_px;  //!< constant shift applied on top of the randomized surface hit position, clamped to the range
    };
 
    /// \brief state for one animated rain streak sprite.
