@@ -125,6 +125,10 @@ public:
    /// \param key keyboard key received from SFML.
    void processEvent(sf::Keyboard::Key key);
 
+   /// \brief logs the player position to stdout while the position watch is on.
+   /// \param delta_time frame time used to space out the log lines.
+   void updatePlayerWatch(const sf::Time& delta_time);
+
 private:
    /// \brief constructs the singleton console and pre-registers built-in command help entries.
    Console();
@@ -186,6 +190,8 @@ private:
    void loadLevel(const std::string& level_identifier);
 
    bool _active = false;
+   int32_t _player_watch_interval_ms{0};  //!< how often the player position is logged, 0 turns the watch off
+   sf::Time _player_watch_elapsed;        //!< time since the last player position log line
    std::string _command;
 
    std::vector<std::string> _history;

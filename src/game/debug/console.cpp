@@ -10,6 +10,8 @@
 #include "game/level/gamemechanismregistry.h"
 #include "game/level/levelregistry.h"
 #include "game/level/levels.h"
+#include "game/level/luainterface.h"
+#include "game/level/luanode.h"
 #include "game/level/room.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"
@@ -19,10 +21,12 @@
 #include "game/shaders/postprocessing.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
+#include "game/ui/messagebox.h"
 #include "game/weapons/bow.h"
 #include "game/weapons/weaponfactory.h"
 
 #include <cctype>
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <ostream>
@@ -338,6 +342,40 @@ Console::Console()
       "teleportation",
       "tpp <x>,<y>: teleport to tile position",
       {"tpp 100, 330"}
+   );
+
+   registerCallback(
+      "pwatch",
+      [this](const auto& args)
+      {
+         if (args.size() == 2)
+         {
+            if (args.at(1) == "off")
+            {
+               _player_watch_interval_ms = 0;
+            }
+            else
+            {
+               _player_watch_interval_ms = std::atoi(args.at(1).c_str());
+            }
+
+            _player_watch_elapsed = sf::Time::Zero;
+         }
+
+         std::ostringstream message;
+         if (_player_watch_interval_ms > 0)
+         {
+            message << "player position watch: every " << _player_watch_interval_ms << "ms";
+         }
+         else
+         {
+            message << "player position watch: off";
+         }
+         _log.push_back(message.str());
+      },
+      "teleportation",
+      "pwatch <interval_ms|off>: log the player position in tile coordinates to stdout",
+      {"pwatch 100", "pwatch off"}
    );
 
    registerCallback(
@@ -890,6 +928,65 @@ void Console::teleportToTile(int32_t x_tl, int32_t y_tl)
    PlayerRegistry::getFirst()->setBodyViaPixelPosition(
       static_cast<float>(x_tl * PIXELS_PER_TILE), static_cast<float>(y_tl * PIXELS_PER_TILE)
    );
+}
+
+void Console::updatePlayerWatch(const sf::Time& delta_time)
+{
+   if (_player_watch_interval_ms <= 0)
+   {
+      return;
+   }
+
+   _player_watch_elapsed += delta_time;
+   if (_player_watch_elapsed.asMilliseconds() < _player_watch_interval_ms)
+   {
+      return;
+   }
+
+   _player_watch_elapsed = sf::Time::Zero;
+
+   const auto& player = PlayerRegistry::getFirst();
+   if (!player)
+   {
+      return;
+   }
+
+   const auto& position_px = player->getPixelPositionFloat();
+   const auto position_x_tl = static_cast<int32_t>(std::floor(position_px.x / PIXELS_PER_TILE));
+   const auto position_y_tl = static_cast<int32_t>(std::floor(position_px.y / PIXELS_PER_TILE));
+
+   const auto& health = SaveState::getPlayerInfo()._extra_table._health;
+
+   Log::Info() << "player position: tile " << position_x_tl << " " << position_y_tl << " px " << position_px.x << " " << position_px.y
+               << " health " << health._health << "/" << health._health_max << " lives " << health._life_count << " dialogue "
+               << (MessageBox::isActive() ? 1 : 0);
+
+   // the enemies close enough to matter for the next few seconds, roughly a screen around the
+   // player, so a script driving the game can react to them instead of walking into them
+   constexpr auto enemy_range_x_tl = 20;
+   constexpr auto enemy_range_y_tl = 12;
+
+   std::ostringstream enemies;
+   auto enemy_count = 0;
+   for (const auto& node : LuaInterface::instance().getObjectList())
+   {
+      if (!node || node->_dead)
+      {
+         continue;
+      }
+
+      const auto distance_x_tl = static_cast<int32_t>(std::floor((node->_position_px.x - position_px.x) / PIXELS_PER_TILE));
+      const auto distance_y_tl = static_cast<int32_t>(std::floor((node->_position_px.y - position_px.y) / PIXELS_PER_TILE));
+      if (std::abs(distance_x_tl) > enemy_range_x_tl || std::abs(distance_y_tl) > enemy_range_y_tl)
+      {
+         continue;
+      }
+
+      enemies << " | " << node->_script_name << " " << distance_x_tl << " " << distance_y_tl;
+      enemy_count++;
+   }
+
+   Log::Info() << "player enemies: " << enemy_count << enemies.str();
 }
 
 void Console::teleportToRoom(const std::string& room_name)

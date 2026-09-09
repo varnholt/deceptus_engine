@@ -1229,6 +1229,10 @@ void Game::update()
          }
 #endif
 
+#ifdef DEVELOPMENT_MODE
+         Console::getInstance().updatePlayerWatch(dt);
+#endif
+
          // mechanisms file their transition requests while the level updates, so pick them up right after
          LevelTransitionHandler::getInstance().update();
 

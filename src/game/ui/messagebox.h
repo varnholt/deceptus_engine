@@ -90,6 +90,10 @@ struct MessageBox
    /// \brief clears the active dialog instance immediately.
    static void reset();
 
+   /// \brief tells whether a message box is currently on screen.
+   /// \return true while a box exists, that is while it shows, waits for a button or hides.
+   static bool isActive();
+
    /// \brief opens an info dialog when no other dialog is active.
    /// \param message dialog text, including optional rich-text tags.
    /// \param callback callback invoked with the selected button.

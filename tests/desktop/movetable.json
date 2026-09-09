@@ -1,0 +1,56 @@
+{
+    "hop": {
+        "across_at_apex_tl": 0.0,
+        "across_at_landing_tl": 0.0,
+        "carry_s": 0.4,
+        "jump_hold_s": 0.2,
+        "rise_tl": 1.58,
+        "run_up_s": 0.0,
+        "with_direction": false
+    },
+    "long_run_jump": {
+        "across_at_apex_tl": 0.0,
+        "across_at_landing_tl": 1.81,
+        "carry_s": 1.1,
+        "jump_hold_s": 0.2,
+        "rise_tl": 1.58,
+        "run_up_s": 0.7,
+        "with_direction": true
+    },
+    "low_hop": {
+        "across_at_apex_tl": 0.0,
+        "across_at_landing_tl": 0.0,
+        "carry_s": 0.5,
+        "jump_hold_s": 0.08,
+        "rise_tl": 1.28,
+        "run_up_s": 0.0,
+        "with_direction": true
+    },
+    "run_jump": {
+        "across_at_apex_tl": 0.0,
+        "across_at_landing_tl": 3.53,
+        "carry_s": 0.9,
+        "jump_hold_s": 0.2,
+        "rise_tl": 1.52,
+        "run_up_s": 0.35,
+        "with_direction": true
+    },
+    "run_low_hop": {
+        "across_at_apex_tl": 0.0,
+        "across_at_landing_tl": 3.23,
+        "carry_s": 0.7,
+        "jump_hold_s": 0.08,
+        "rise_tl": 1.24,
+        "run_up_s": 0.35,
+        "with_direction": true
+    },
+    "step_jump": {
+        "across_at_apex_tl": 0.0,
+        "across_at_landing_tl": 0.44,
+        "carry_s": 0.8,
+        "jump_hold_s": 0.2,
+        "rise_tl": 1.63,
+        "run_up_s": 0.0,
+        "with_direction": true
+    }
+}

@@ -444,6 +444,11 @@ bool MessageBox::keyboardKeyPressed(sf::Keyboard::Key key)
    return true;
 }
 
+bool MessageBox::isActive()
+{
+   return __active != nullptr;
+}
+
 void MessageBox::reset()
 {
    __active.reset();
