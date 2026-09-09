@@ -352,7 +352,7 @@ void RainOverlay::RainDrop::randomizeHitOffsetY(const RainSettings& settings)
       return;
    }
 
-   // an offset larger than the range would move every single hit off the surface
+   // keep the shift within one band width so a mistyped offset cannot push the scatter far away from the surface
    const auto randomize_offset_px = std::clamp(settings._randomize_offset_px.value_or(0), -randomize_range_px, randomize_range_px);
 
    _hit_offset_y_px = static_cast<float>((std::rand() % randomize_range_px) + randomize_offset_px);
