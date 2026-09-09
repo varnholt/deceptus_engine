@@ -1970,6 +1970,7 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="0"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
+    <property name="randomize_range_px" type="int" value="10"/>
     <property name="sound" value="weather_rain_heavy_loop.ogg"/>
     <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
@@ -1980,6 +1981,7 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
+    <property name="randomize_range_px" type="int" value="10"/>
     <property name="sound" value="weather_rain_heavy_loop.ogg"/>
     <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
@@ -1990,6 +1992,7 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="0"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
+    <property name="randomize_range_px" type="int" value="10"/>
     <property name="sound" value="weather_rain_heavy_loop.ogg"/>
     <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
@@ -2000,6 +2003,7 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="1.8"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
+    <property name="randomize_range_px" type="int" value="10"/>
     <property name="sound" value="weather_rain_heavy_loop.ogg"/>
     <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
@@ -2010,6 +2014,7 @@
     <property name="collide" type="bool" value="true"/>
     <property name="effect_start_delay_s" type="float" value="0"/>
     <property name="limit_effect_to_room" type="bool" value="false"/>
+    <property name="randomize_range_px" type="int" value="10"/>
     <property name="sound" value="weather_rain_heavy_loop.ogg"/>
     <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
