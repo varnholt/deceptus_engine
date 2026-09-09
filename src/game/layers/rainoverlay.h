@@ -22,8 +22,10 @@ public:
       bool _collide = true;
       int32_t _drop_count = 500;
       int32_t _fall_through_rate = 0;
-      std::string _sound;          //!< looped rain sample played while the effect is active; empty disables audio
-      float _sound_volume = 1.0f;  //!< per-sample volume multiplier applied to the looped rain sample
+      std::string _sound;                           //!< looped rain sample played while the effect is active; empty disables audio
+      float _sound_volume = 1.0f;                   //!< per-sample volume multiplier applied to the looped rain sample
+      std::optional<int32_t> _randomize_range_px;   //!< width of the randomized shift of the surface hit position; 0 disables it
+      std::optional<int32_t> _randomize_offset_px;  //!< constant shift applied on top of the randomized surface hit position
    };
 
    /// \brief state for one animated rain streak sprite.
@@ -31,13 +33,19 @@ public:
    {
       /// \brief respawns the drop at the top of the clip area with random delay.
       /// \param rect spawn rectangle around the player in screen space pixels.
-      void reset(const sf::FloatRect& rect);
+      /// \param settings rain configuration providing the surface hit randomization.
+      void reset(const sf::FloatRect& rect, const RainSettings& settings);
+
+      /// \brief rolls a new randomized shift for the surface hit position.
+      /// \param settings rain configuration providing the randomize range and offset.
+      void randomizeHitOffsetY(const RainSettings& settings);
 
       sf::Vector2f _origin_px;
       sf::Vector2f _pos_px;
       sf::Vector2f _dir_px;
       float _length = 0.0f;
       float _age_s = 0.0f;
+      float _hit_offset_y_px = 0.0f;  //!< randomized shift so drops do not all splash on the very same line
       std::unique_ptr<sf::Sprite> _sprite;
       std::vector<float> _intersections;
    };
