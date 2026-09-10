@@ -3,7 +3,7 @@
   "surfaces": [
     {
       "surface": "stone",
-      "volume": 0.3,
+      "volume": 0.5,
       "left": [
         "player_footstep_stone_l.ogg"
       ],
