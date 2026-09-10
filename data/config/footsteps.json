@@ -1,0 +1,29 @@
+{
+  "default_surface": "stone",
+  "surfaces": [
+    {
+      "surface": "stone",
+      "volume": 0.5,
+      "left": [
+        "player_footstep_stone_l.ogg"
+      ],
+      "right": [
+        "player_footstep_stone_r.ogg"
+      ]
+    },
+    {
+      "surface": "grass",
+      "volume": 0.4,
+      "left": [
+        "player_footstep_grass_l_0.ogg",
+        "player_footstep_grass_l_1.ogg",
+        "player_footstep_grass_l_2.ogg"
+      ],
+      "right": [
+        "player_footstep_grass_r_0.ogg",
+        "player_footstep_grass_r_1.ogg",
+        "player_footstep_grass_r_2.ogg"
+      ]
+    }
+  ]
+}

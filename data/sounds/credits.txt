@@ -28,6 +28,22 @@ sword_ring_release.ogg
     Original  630037__el_boss__warp-drive-initiate.wav
 
 
+Player
+------
+
+player_footstep_grass_l_0.ogg, player_footstep_grass_l_1.ogg,
+player_footstep_grass_l_2.ogg, player_footstep_grass_r_0.ogg,
+player_footstep_grass_r_1.ogg, player_footstep_grass_r_2.ogg
+    Title     Footstep, Grass, Leaf
+    Author    EminYILDIRIM, uploaded by the Freesound Community account
+    Source    https://pixabay.com/sound-effects/nature-footstep-grass-leaf-38778/
+    Licence   Pixabay Content License
+    Original  freesound_community-footstep-grass-leaf-38778.mp3
+    Note      No attribution required, listed for traceability. The original is an
+              11 second walk cycle; six single steps were cut out of it, three per
+              foot, and lifted by 10 dB to sit next to the stone footsteps.
+
+
 Weather
 -------
 

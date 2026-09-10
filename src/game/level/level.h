@@ -172,6 +172,14 @@ public:
    /// \return level description filename.
    std::string getDescriptionFilename() const;
 
+   /// \brief resolves which surface the player walks on at a given position.
+   ///
+   /// The footstep surface rectangles win where they overlap the position, everything else falls back
+   /// to the surface named in the level description and, when that is empty, to the configured default.
+   /// \param position_px position to look up in pixel coordinates.
+   /// \return surface identifier to play footstep samples for.
+   const std::string& getFootstepSurface(const sf::Vector2f& position_px) const override;
+
    /// \brief sets the level description file path to load during initialize().
    /// \param description_filename path to the level json description file.
    void setDescriptionFilename(const std::string& description_filename);
@@ -384,6 +392,16 @@ protected:
    void drawGlowSprite();
 
    std::vector<std::shared_ptr<Room>> _rooms;
+
+   /// \brief one region of the level that sounds different from the level's default surface.
+   struct FootstepSurfaceRect
+   {
+      sf::FloatRect _rect_px;
+      std::string _surface;
+   };
+
+   std::vector<FootstepSurfaceRect> _footstep_surface_rects;
+
    LevelMap _level_map;
    bool _map_revealed{false};  //!< whole level map visible, set by a map item and persisted in the save state
 

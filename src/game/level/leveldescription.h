@@ -13,6 +13,7 @@ struct LevelDescription
    std::string _filename;
    std::vector<int32_t> _start_position_tl;
    std::vector<EnemyDescription> _enemies;
+   std::string _footstep_surface;  //!< surface the player walks on where no footstep surface rectangle applies
 
    /// \brief reads and parses a level description json file.
    /// \param path filesystem path to the level description json file.

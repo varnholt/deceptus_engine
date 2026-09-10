@@ -1,6 +1,7 @@
 #include "playeraudio.h"
 
 #include "game/audio/audio.h"
+#include "game/audio/footstepsurfaces.h"
 
 #include <SFML/Audio.hpp>
 
@@ -20,8 +21,6 @@ void PlayerAudio::addSamples()
    audio.addSample("player_jump_land.ogg");
    audio.addSample("player_jump_liftoff.ogg");
    audio.addSample("player_kneel_01.ogg");
-   audio.addSample("player_footstep_stone_l.ogg");
-   audio.addSample("player_footstep_stone_r.ogg");
    audio.addSample("player_spawn_01.ogg");
    audio.addSample("player_sword_kneeling_01.ogg");
    audio.addSample("player_sword_kneeling_02.ogg");
@@ -37,4 +36,7 @@ void PlayerAudio::addSamples()
    audio.addSample("player_sword_standing_08.ogg");
    audio.addSample("player_sword_standing_09.ogg");
    audio.addSample("player_wallslide_01.ogg");
+
+   // the footstep samples are registered by the surface definitions, they differ per surface
+   FootstepSurfaces::loadDefinitions("data/config/footsteps.json");
 }

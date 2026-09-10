@@ -165,6 +165,8 @@ set(GAME_FILES
     src/game/audio/audiorange.h
     src/game/audio/audioupdatedata.cpp
     src/game/audio/audioupdatedata.h
+    src/game/audio/footstepsurfaces.cpp
+    src/game/audio/footstepsurfaces.h
     src/game/audio/soundrotation.cpp
     src/game/audio/soundrotation.h
     src/game/audio/musicbackend.h
