@@ -13,7 +13,6 @@
 #include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
 #include "game/animation/animationplayer.h"
-#include "game/audio/footstepsurfaces.h"
 #include "game/camera/camerapanorama.h"
 #include "game/camera/cameraroomlock.h"
 #include "game/camera/camerasystem.h"
@@ -40,7 +39,6 @@
 #include "game/mechanisms/conveyorbelt.h"
 #include "game/mechanisms/door.h"
 #include "game/mechanisms/extra.h"
-#include "game/mechanisms/footstepsurface.h"
 #include "game/mechanisms/gamemechanismdeserializer.h"
 #include "game/mechanisms/gamemechanismdeserializerconstants.h"
 #include "game/mechanisms/lever.h"
@@ -2214,31 +2212,9 @@ const sf::Vector2f& Level::getStartPosition() const
    return _start_position_px;
 }
 
-const std::string& Level::getFootstepSurface(const sf::Vector2f& position_px) const
+const std::string& Level::getFootstepSurface() const
 {
-   for (const auto& mechanism : _mechanism_registry.getFootstepSurfaces())
-   {
-      const auto& footstep_surface = std::dynamic_pointer_cast<FootstepSurface>(mechanism);
-
-      if (!footstep_surface->isEnabled())
-      {
-         continue;
-      }
-
-      const auto& bounding_box_px = footstep_surface->getBoundingBoxPx();
-
-      if (bounding_box_px.has_value() && bounding_box_px->contains(position_px))
-      {
-         return footstep_surface->getSurface();
-      }
-   }
-
-   if (!_description->_footstep_surface.empty())
-   {
-      return _description->_footstep_surface;
-   }
-
-   return FootstepSurfaces::getDefaultSurface();
+   return _description->_footstep_surface;
 }
 
 #ifdef DEVELOPMENT_MODE

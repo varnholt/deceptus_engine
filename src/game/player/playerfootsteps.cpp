@@ -3,6 +3,7 @@
 #include "game/audio/audio.h"
 #include "game/audio/footstepsurfaces.h"
 #include "game/level/levelregistry.h"
+#include "game/mechanisms/footstepsurfacewrapper.h"
 
 #include <cmath>
 
@@ -35,8 +36,7 @@ void PlayerFootsteps::update(const sf::Time& time, const sf::FloatRect& player_r
       player_rect_px.position.x + player_rect_px.size.x * 0.5f, player_rect_px.position.y + player_rect_px.size.y
    };
 
-   const auto& surface = LevelRegistry::getCurrent()->getFootstepSurface(foot_position_px);
-   const auto definition = FootstepSurfaces::findDefinition(surface);
+   const auto definition = FootstepSurfaces::findDefinition(resolveSurface(foot_position_px));
 
    if (definition.has_value())
    {
@@ -49,4 +49,23 @@ void PlayerFootsteps::update(const sf::Time& time, const sf::FloatRect& player_r
    }
 
    _next_footstep_time_s = time.asSeconds() + 1.0f / velocity;
+}
+
+std::string PlayerFootsteps::resolveSurface(const sf::Vector2f& foot_position_px) const
+{
+   const auto region_surface = FootstepSurfaceWrapper::getSurfaceAt(foot_position_px);
+
+   if (region_surface.has_value())
+   {
+      return region_surface.value();
+   }
+
+   const auto& level_surface = LevelRegistry::getCurrent()->getFootstepSurface();
+
+   if (!level_surface.empty())
+   {
+      return level_surface;
+   }
+
+   return FootstepSurfaces::getDefaultSurface();
 }

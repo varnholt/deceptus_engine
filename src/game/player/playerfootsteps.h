@@ -2,6 +2,7 @@
 #define PLAYERFOOTSTEPS_H
 
 #include <cstdint>
+#include <string>
 
 #include <SFML/Graphics.hpp>
 
@@ -20,6 +21,14 @@ public:
    void update(const sf::Time& time, const sf::FloatRect& player_rect_px, float velocity_x, bool grounded, bool in_water);
 
 private:
+   /// \brief picks the surface that applies below the player.
+   ///
+   /// A footstep surface region wins where one covers the position, otherwise the surface the level
+   /// declares applies and, when the level names none, the configured default.
+   /// \param foot_position_px point where the player touches the ground, in pixel coordinates.
+   /// \return surface identifier to look the samples up with.
+   std::string resolveSurface(const sf::Vector2f& foot_position_px) const;
+
    float _next_footstep_time_s{0.0f};
    int32_t _step_counter{0};  //!< alternates the feet, its lowest bit selects the left or right sample list
 };

@@ -48,10 +48,9 @@ public:
    /// \return level description filename, used to key per-level data in the save state.
    virtual std::string getDescriptionFilename() const = 0;
 
-   /// \brief resolves which surface the player walks on at a given position.
-   /// \param position_px position to look up in pixel coordinates.
-   /// \return surface identifier to play footstep samples for.
-   virtual const std::string& getFootstepSurface(const sf::Vector2f& position_px) const = 0;
+   /// \brief returns the footstep surface this level declares in its description.
+   /// \return surface identifier, empty when the level does not name one.
+   virtual const std::string& getFootstepSurface() const = 0;
 
    /// \brief gets the level view (camera viewport).
    /// \return shared pointer to the SFML view.

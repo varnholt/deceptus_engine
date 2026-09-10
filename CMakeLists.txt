@@ -409,6 +409,8 @@ set(GAME_FILES
     src/game/mechanisms/fan.h
     src/game/mechanisms/footstepsurface.cpp
     src/game/mechanisms/footstepsurface.h
+    src/game/mechanisms/footstepsurfacewrapper.cpp
+    src/game/mechanisms/footstepsurfacewrapper.h
     src/game/mechanisms/fireflies.cpp
     src/game/mechanisms/fireflies.h
     src/game/mechanisms/flowfieldtexturechangeevent.cpp

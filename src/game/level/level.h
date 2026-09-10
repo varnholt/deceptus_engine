@@ -172,13 +172,9 @@ public:
    /// \return level description filename.
    std::string getDescriptionFilename() const;
 
-   /// \brief resolves which surface the player walks on at a given position.
-   ///
-   /// The footstep surface rectangles win where they overlap the position, everything else falls back
-   /// to the surface named in the level description and, when that is empty, to the configured default.
-   /// \param position_px position to look up in pixel coordinates.
-   /// \return surface identifier to play footstep samples for.
-   const std::string& getFootstepSurface(const sf::Vector2f& position_px) const override;
+   /// \brief returns the footstep surface this level declares in its description.
+   /// \return surface identifier, empty when the level does not name one.
+   const std::string& getFootstepSurface() const override;
 
    /// \brief sets the level description file path to load during initialize().
    /// \param description_filename path to the level json description file.
