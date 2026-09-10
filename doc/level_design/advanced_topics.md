@@ -128,59 +128,6 @@ A Sound Emitter is a mechanism that does not have drawing code. Its only purpose
 |`volume_near`|`float`|The maximum sound for the sound interpolation. The default is `1.0`.|
 
 
-## Footstep Sounds
-
-The samples the player's footsteps are made of depend on the surface they walk on. The surfaces themselves live in `data/config/footsteps.json`:
-
-```json
-{
-  "default_surface": "stone",
-  "surfaces": [
-    {
-      "surface": "grass",
-      "volume": 0.4,
-      "left": ["player_footstep_grass_l_0.ogg", "player_footstep_grass_l_1.ogg"],
-      "right": ["player_footstep_grass_r_0.ogg", "player_footstep_grass_r_1.ogg"]
-    }
-  ]
-}
-```
-
-|Key|Type|Description|
-|-|-|-|
-|`default_surface`|`string`|The surface used for levels that do not name one.|
-|`surface`|`string`|The identifier a level or a footstep surface rectangle refers to.|
-|`volume`|`float`|The volume the samples of this surface are played at.|
-|`left`|`string[]`|Samples to pick from for the left foot. One is chosen at random on every step, so a surface can have as many variations as you like; a single entry always plays the same sample.|
-|`right`|`string[]`|The same for the right foot.|
-
-The engine alternates between the two lists so the steps keep their left-right rhythm, and picks a random entry within the list so the same sample is not repeated over and over.
-
-### Choosing the surface for a level
-
-Most levels only ever walk on one surface. Name it in the level's `level.json` and you are done:
-
-```json
-{
-  "filename": "data/level-graveyard/graveyard.tmx",
-  "startposition": [34, 71],
-  "footstep_surface": "grass"
-}
-```
-
-When the property is omitted, `default_surface` from `footsteps.json` is used.
-
-### Overriding the surface for a region
-
-Where a level mixes surfaces, add an object group called `footstep_surfaces` and draw a rectangle around each patch that sounds different. There is no need to cover the whole level, only the exceptions; everything outside the rectangles falls back to the level's surface.
-
-|Custom Property|Type|Description|
-|-|-|-|
-|`surface`|`string`|The surface identifier from `footsteps.json`. A rectangle without this property is ignored.|
-
-The surface is looked up at the point where the player touches the ground, so a rectangle only has to cover the ground itself, not the full height of the player. Where rectangles overlap, the first one in the object group wins.
-
-
 # Addendum
 
 ## Folder Structure

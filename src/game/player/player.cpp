@@ -7,7 +7,6 @@
 #include "framework/tools/log.h"
 #include "framework/tools/stopwatch.h"
 #include "game/audio/audio.h"
-#include "game/audio/footstepsurfaces.h"
 #include "game/camera/camerapanorama.h"
 #include "game/clock/gameclock.h"
 #include "game/config/gameconfiguration.h"
@@ -1386,43 +1385,13 @@ void Player::setInWater(bool in_water)
 
 void Player::updateFootsteps()
 {
-   if (GameContactListener::getInstance().getPlayerFootContactCount() > 0 && !isInWater())
-   {
-      auto vel = fabs(_body->GetLinearVelocity().x);
-      if (vel > 0.1f)
-      {
-         if (vel < 3.0f)
-         {
-            vel = 3.0f;
-         }
-
-         if (_time.asSeconds() > _next_footstep_time)
-         {
-            // play footstep
-            // the surface is looked up where the player touches the ground, not at the body centre,
-            // so a rectangle drawn around a patch of ground does not have to be player height
-            const auto& player_rect_px = getPixelRectFloat();
-            const sf::Vector2f foot_position_px{
-               player_rect_px.position.x + player_rect_px.size.x * 0.5f, player_rect_px.position.y + player_rect_px.size.y
-            };
-
-            const auto& surface = LevelRegistry::getCurrent()->getFootstepSurface(foot_position_px);
-            const auto definition = FootstepSurfaces::findDefinition(surface);
-
-            if (definition.has_value())
-            {
-               const auto sample = definition->pickSample((_step_counter++ & 1) != 0);
-
-               if (sample.has_value())
-               {
-                  Audio::getInstance().playSample({sample.value(), definition->_volume});
-               }
-            }
-
-            _next_footstep_time = _time.asSeconds() + 1.0f / vel;
-         }
-      }
-   }
+   _footsteps.update(
+      _time,
+      getPixelRectFloat(),
+      _body->GetLinearVelocity().x,
+      GameContactListener::getInstance().getPlayerFootContactCount() > 0,
+      isInWater()
+   );
 }
 
 int Player::getId() const

@@ -60,6 +60,9 @@ constexpr std::string_view layer_name_fans{"fans"};
 /// \brief tmx layer name for firefly effects.
 constexpr std::string_view layer_name_fireflies{"fireflies"};
 
+/// \brief tmx layer name for footstep surface regions.
+constexpr std::string_view layer_name_footstep_surfaces{"footstep_surfaces"};
+
 /// \brief tmx layer name for gateway mechanisms.
 constexpr std::string_view layer_name_gateways{"gateways"};
 
@@ -235,6 +238,9 @@ constexpr std::string_view type_name_fan{"Fan"};
 
 /// \brief object template type name for fireflies.
 constexpr std::string_view type_name_fireflies{"Fireflies"};
+
+/// \brief object template type name for footstep surfaces.
+constexpr std::string_view type_name_footstep_surface{"FootstepSurface"};
 
 /// \brief object template type name for gateways.
 constexpr std::string_view type_name_gateway{"Gateway"};

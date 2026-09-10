@@ -29,6 +29,7 @@ GameMechanismRegistry::GameMechanismRegistry()
       &_mechanism_extras,
       &_mechanism_fans,
       &_mechanism_fireflies,
+      &_mechanism_footstep_surfaces,
       &_mechanism_gateways,
       &_mechanism_info_overlay,
       &_mechanism_interaction_help,
@@ -80,6 +81,7 @@ GameMechanismRegistry::GameMechanismRegistry()
    _mechanisms_map[std::string{layer_name_extras}] = &_mechanism_extras;
    _mechanisms_map[std::string{layer_name_fans}] = &_mechanism_fans;
    _mechanisms_map[std::string{layer_name_fireflies}] = &_mechanism_fireflies;
+   _mechanisms_map[std::string{layer_name_footstep_surfaces}] = &_mechanism_footstep_surfaces;
    _mechanisms_map[std::string{layer_name_gateways}] = &_mechanism_gateways;
    _mechanisms_map[std::string{layer_name_info_overlays}] = &_mechanism_info_overlay;
    _mechanisms_map[std::string{layer_name_interaction_help}] = &_mechanism_interaction_help;
@@ -172,6 +174,11 @@ const GameMechanismRegistry::MechanismVector& GameMechanismRegistry::getCheckpoi
 const GameMechanismRegistry::MechanismVector& GameMechanismRegistry::getRopes() const
 {
    return _mechanism_ropes;
+}
+
+const GameMechanismRegistry::MechanismVector& GameMechanismRegistry::getFootstepSurfaces() const
+{
+   return _mechanism_footstep_surfaces;
 }
 
 GameMechanismRegistry::MechanismVector GameMechanismRegistry::searchMechanismsIf(const MechanismPredicate& predicate) const

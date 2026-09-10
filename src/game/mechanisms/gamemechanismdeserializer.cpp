@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxparser.h"
 #include "framework/tools/log.h"
 #include "game/mechanisms/fan.h"
+#include "game/mechanisms/footstepsurface.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/mechanisms/interactionhelp.h"
 #include "game/mechanisms/laser.h"
@@ -68,6 +69,7 @@ void GameMechanismDeserializer::deserialize(
    auto* mechanism_conveyor_belts = mechanisms[std::string{layer_name_conveyorbelts}];
    auto* mechanism_doors = mechanisms[std::string{layer_name_doors}];
    auto* mechanism_fans = mechanisms[std::string{layer_name_fans}];
+   auto* mechanism_footstep_surfaces = mechanisms[std::string{layer_name_footstep_surfaces}];
    auto* mechanism_interaction_help = mechanisms[std::string{layer_name_interaction_help}];
    auto* mechanism_lasers = mechanisms[std::string{layer_name_lasers}];
    auto* mechanism_levers = mechanisms[std::string{layer_name_levers}];
@@ -233,6 +235,11 @@ void GameMechanismDeserializer::deserialize(
             {
                auto mechanism = SoundEmitter::deserialize(parent, data);
                mechanism_sound_emitters->push_back(mechanism);
+            }
+            else if (object_group->_name == layer_name_footstep_surfaces || tmx_object->_template_type == type_name_footstep_surface)
+            {
+               auto mechanism = FootstepSurface::deserialize(parent, data);
+               mechanism_footstep_surfaces->push_back(mechanism);
             }
             else if (object_group->_name == layer_name_smoke_effect || tmx_object->_template_type == type_name_smoke_effect)
             {
