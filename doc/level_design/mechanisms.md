@@ -660,6 +660,71 @@ In there, just place a rectangle where you'd like to position and scale the effe
 
 
 
+## Footstep Surfaces
+
+The samples the player's footsteps are made of depend on the surface they walk on. Most levels only walk on one surface; that one is named in the level's `level.json`:
+
+```json
+{
+  "filename": "data/level-graveyard/graveyard.tmx",
+  "startposition": [34, 71],
+  "footstep_surface": "grass"
+}
+```
+
+Where a level mixes surfaces, this mechanism overrides the level's surface for one region. There is no need to cover the whole level, only the exceptions; everything outside falls back to the level's surface and, when the level does not name one, to the `default_surface` from `data/config/footsteps.json`.
+
+The surface is looked up at the point where the player touches the ground, so a rectangle only has to cover the ground itself and not the full height of the player. Where rectangles overlap, the first one in the object group wins.
+
+### Object Type / Object Group
+
+|Method|Value|
+|-|-|
+|Object Type|`FootstepSurface`|
+|Object Group|`footstep_surfaces`|
+
+### Object Properties
+
+|Property|Type|Description|
+|-|-|-|
+|surface|string|The surface identifier from `data/config/footsteps.json`. A rectangle without this property plays no footsteps at all inside its bounds, so always set it.|
+|enabled|bool|Whether the region is active. Disabled regions are skipped and the level's surface applies. The default is `true`.|
+
+### The surface definitions
+
+The surfaces themselves live in `data/config/footsteps.json`:
+
+```json
+{
+  "default_surface": "stone",
+  "surfaces": [
+    {
+      "surface": "grass",
+      "volume": 0.4,
+      "left": ["player_footstep_grass_l_0.ogg", "player_footstep_grass_l_1.ogg"],
+      "right": ["player_footstep_grass_r_0.ogg", "player_footstep_grass_r_1.ogg"]
+    }
+  ]
+}
+```
+
+|Key|Type|Description|
+|-|-|-|
+|default_surface|string|The surface used for levels that do not name one.|
+|surface|string|The identifier a level or a footstep surface rectangle refers to.|
+|volume|float|The volume the samples of this surface are played at.|
+|left|string[]|Samples to pick from for the left foot. One is chosen at random on every step, so a surface can have as many variations as you like; a single entry always plays the same sample.|
+|right|string[]|The same for the right foot.|
+
+The engine alternates between the two lists so the steps keep their left-right rhythm, and picks a random entry within the list so the same sample is not repeated over and over.
+
+&nbsp;
+
+---
+
+
+
+
 ## Interaction Help
 
 |Method|Value|

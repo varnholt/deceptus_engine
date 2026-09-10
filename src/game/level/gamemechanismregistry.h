@@ -53,6 +53,10 @@ public:
    /// \return vector containing rope, rope-with-light and grab-rope mechanisms.
    const MechanismVector& getRopes() const;
 
+   /// \brief returns the footstep surface mechanism group.
+   /// \return vector containing the regions that override the level's footstep surface.
+   const MechanismVector& getFootstepSurfaces() const;
+
    /// \brief returns all non-mechanism image layers.
    /// \return copy of image layer instances loaded from TMX image layers.
    std::vector<std::shared_ptr<ImageLayer>> getImageLayers() const;
@@ -101,6 +105,7 @@ private:
    MechanismVector _mechanism_extras;
    MechanismVector _mechanism_fans;
    MechanismVector _mechanism_fireflies;
+   MechanismVector _mechanism_footstep_surfaces;
    MechanismVector _mechanism_gateways;
    MechanismVector _mechanism_info_overlay;
    MechanismVector _mechanism_interaction_help;

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object type="FootstepSurface" width="192" height="192">
+  <properties>
+   <property name="enabled" type="bool" value="true"/>
+   <property name="surface" value=""/>
+  </properties>
+ </object>
+</template>

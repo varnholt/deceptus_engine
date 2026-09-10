@@ -393,15 +393,6 @@ protected:
 
    std::vector<std::shared_ptr<Room>> _rooms;
 
-   /// \brief one region of the level that sounds different from the level's default surface.
-   struct FootstepSurfaceRect
-   {
-      sf::FloatRect _rect_px;
-      std::string _surface;
-   };
-
-   std::vector<FootstepSurfaceRect> _footstep_surface_rects;
-
    LevelMap _level_map;
    bool _map_revealed{false};  //!< whole level map visible, set by a map item and persisted in the save state
 

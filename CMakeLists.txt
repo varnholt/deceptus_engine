@@ -407,6 +407,8 @@ set(GAME_FILES
     src/game/mechanisms/extrawrapper.h
     src/game/mechanisms/fan.cpp
     src/game/mechanisms/fan.h
+    src/game/mechanisms/footstepsurface.cpp
+    src/game/mechanisms/footstepsurface.h
     src/game/mechanisms/fireflies.cpp
     src/game/mechanisms/fireflies.h
     src/game/mechanisms/flowfieldtexturechangeevent.cpp
@@ -553,6 +555,8 @@ set(GAME_FILES
     src/game/player/playerdash.h
     src/game/player/playereyepositions.cpp
     src/game/player/playereyepositions.h
+    src/game/player/playerfootsteps.cpp
+    src/game/player/playerfootsteps.h
     src/game/player/playerinfo.cpp
     src/game/player/playerinfo.h
     src/game/player/playerinput.cpp

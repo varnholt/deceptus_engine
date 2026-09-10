@@ -5,11 +5,8 @@
 #include "framework/pathmerger/pathmerger.h"
 #include "framework/tmxparser/tmxelement.h"
 #include "framework/tmxparser/tmxlayer.h"
-#include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxobjectgroup.h"
 #include "framework/tmxparser/tmxparser.h"
-#include "framework/tmxparser/tmxproperties.h"
-#include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
 #include "framework/tools/checksum.h"
 #include "framework/tools/log.h"
@@ -30,7 +27,6 @@
 #include "game/ingamemenu/ingamemenumap.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/io/meshtools.h"
-#include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/level/leveldescription.h"
 #include "game/level/levelfiles.h"
@@ -44,6 +40,7 @@
 #include "game/mechanisms/conveyorbelt.h"
 #include "game/mechanisms/door.h"
 #include "game/mechanisms/extra.h"
+#include "game/mechanisms/footstepsurface.h"
 #include "game/mechanisms/gamemechanismdeserializer.h"
 #include "game/mechanisms/gamemechanismdeserializerconstants.h"
 #include "game/mechanisms/lever.h"
@@ -380,20 +377,6 @@ void Level::loadTmx()
             {
                const auto light = LightSystem::createLightInstance(this, data);
                _light_system->_lights.push_back(light);
-            }
-            else if (object_group->_name == "footstep_surfaces")
-            {
-               if (tmx_object->_properties)
-               {
-                  const auto surface = ValueReader::readValue<std::string>("surface", tmx_object->_properties->_map);
-
-                  if (surface.has_value())
-                  {
-                     const sf::FloatRect rect{{tmx_object->_x_px, tmx_object->_y_px}, {tmx_object->_width_px, tmx_object->_height_px}};
-
-                     _footstep_surface_rects.push_back({rect, surface.value()});
-                  }
-               }
             }
          }
       }
@@ -2233,11 +2216,20 @@ const sf::Vector2f& Level::getStartPosition() const
 
 const std::string& Level::getFootstepSurface(const sf::Vector2f& position_px) const
 {
-   for (const auto& footstep_surface_rect : _footstep_surface_rects)
+   for (const auto& mechanism : _mechanism_registry.getFootstepSurfaces())
    {
-      if (footstep_surface_rect._rect_px.contains(position_px))
+      const auto& footstep_surface = std::dynamic_pointer_cast<FootstepSurface>(mechanism);
+
+      if (!footstep_surface->isEnabled())
       {
-         return footstep_surface_rect._surface;
+         continue;
+      }
+
+      const auto& bounding_box_px = footstep_surface->getBoundingBoxPx();
+
+      if (bounding_box_px.has_value() && bounding_box_px->contains(position_px))
+      {
+         return footstep_surface->getSurface();
       }
    }
 

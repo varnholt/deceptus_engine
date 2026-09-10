@@ -19,6 +19,7 @@
 #include "game/player/playerdash.h"
 #include "game/player/playerdive.h"
 #include "game/player/playereyepositions.h"
+#include "game/player/playerfootsteps.h"
 #include "game/player/playerharpoon.h"
 #include "game/player/playerjump.h"
 #include "game/player/playerjumptrace.h"
@@ -507,9 +508,6 @@ private:
    bool _in_water{false};
    HighResTimePoint _water_entered_time;
 
-   float _next_footstep_time{0.0f};
-   int32_t _step_counter{0};
-
    int32_t _z_index{0};
    int32_t _id{0};
 
@@ -525,6 +523,7 @@ private:
    PlayerClimb _climb;
    PlayerDash _dash;
    PlayerEyePositions _eye_positions;
+   PlayerFootsteps _footsteps;
    PlayerHarpoon _harpoon;
    PlayerRope _rope;
    PlayerJump _jump;

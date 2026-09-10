@@ -553,6 +553,29 @@
                     "value": true
                 },
                 {
+                    "name": "surface",
+                    "type": "string",
+                    "value": ""
+                }
+            ],
+            "name": "FootstepSurface",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 26,
+            "members": [
+                {
+                    "name": "enabled",
+                    "type": "bool",
+                    "value": true
+                },
+                {
                     "name": "flowfield_reference_id",
                     "type": "string",
                     "value": ""
@@ -583,7 +606,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 26,
+            "id": 27,
             "members": [
                 {
                     "name": "z",
@@ -601,7 +624,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 27,
+            "id": 28,
             "members": [
                 {
                     "name": "z",
@@ -619,7 +642,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 28,
+            "id": 29,
             "members": [
                 {
                     "name": "animation",
@@ -682,7 +705,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 29,
+            "id": 30,
             "members": [
                 {
                     "name": "easing_function",
@@ -739,7 +762,7 @@
             ]
         },
         {
-            "id": 30,
+            "id": 31,
             "name": "LaserEasingFunction",
             "storageType": "string",
             "type": "enum",
@@ -766,7 +789,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 31,
+            "id": 32,
             "members": [
                 {
                     "name": "level",
@@ -794,7 +817,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 32,
+            "id": 33,
             "members": [
                 {
                     "name": "enabled",
@@ -832,7 +855,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 33,
+            "id": 34,
             "members": [
                 {
                     "name": "serialized",
@@ -855,7 +878,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 34,
+            "id": 35,
             "members": [
                 {
                     "name": "interpolation_time",
@@ -883,7 +906,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 35,
+            "id": 36,
             "members": [
                 {
                     "name": "enabled",
@@ -925,7 +948,7 @@
             ]
         },
         {
-            "id": 36,
+            "id": 37,
             "name": "OnOffBlockMode",
             "storageType": "string",
             "type": "enum",
@@ -938,7 +961,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 37,
+            "id": 38,
             "members": [
                 {
                     "name": "z",
@@ -956,7 +979,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 38,
+            "id": 39,
             "members": [
                 {
                     "name": "fragment_shader",
@@ -988,7 +1011,7 @@
             ]
         },
         {
-            "id": 39,
+            "id": 40,
             "name": "PostProcessingScope",
             "storageType": "string",
             "type": "enum",
@@ -1001,7 +1024,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 40,
+            "id": 41,
             "members": [
                 {
                     "name": "customization",
@@ -1119,7 +1142,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 41,
+            "id": 42,
             "members": [
                 {
                     "name": "z",
@@ -1137,7 +1160,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 42,
+            "id": 43,
             "members": [
                 {
                     "name": "z",
@@ -1155,7 +1178,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 43,
+            "id": 44,
             "members": [
                 {
                     "name": "blade_acceleration",
@@ -1198,7 +1221,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 44,
+            "id": 45,
             "members": [
                 {
                     "name": "action",
@@ -1231,7 +1254,7 @@
             ]
         },
         {
-            "id": 45,
+            "id": 46,
             "name": "SensorRectAction",
             "storageType": "string",
             "type": "enum",
@@ -1243,7 +1266,7 @@
             "valuesAsFlags": false
         },
         {
-            "id": 46,
+            "id": 47,
             "name": "SensorRectEvent",
             "storageType": "string",
             "type": "enum",
@@ -1256,7 +1279,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 47,
+            "id": 48,
             "members": [
                 {
                     "name": "customization",
@@ -1314,7 +1337,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 48,
+            "id": 49,
             "members": [
                 {
                     "name": "enabled",
@@ -1361,7 +1384,7 @@
             ]
         },
         {
-            "id": 49,
+            "id": 50,
             "name": "SkillGateSkill",
             "storageType": "string",
             "type": "enum",
@@ -1380,7 +1403,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 50,
+            "id": 51,
             "members": [
                 {
                     "name": "blend_mode",
@@ -1453,7 +1476,7 @@
             ]
         },
         {
-            "id": 51,
+            "id": 52,
             "name": "SmokeBlendMode",
             "storageType": "string",
             "type": "enum",
@@ -1465,7 +1488,7 @@
             "valuesAsFlags": false
         },
         {
-            "id": 52,
+            "id": 53,
             "name": "SmokeMode",
             "storageType": "string",
             "type": "enum",
@@ -1478,7 +1501,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 53,
+            "id": 54,
             "members": [
                 {
                     "name": "filename",
@@ -1521,7 +1544,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 54,
+            "id": 55,
             "members": [
                 {
                     "name": "push_factor",
@@ -1549,7 +1572,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 55,
+            "id": 56,
             "members": [
                 {
                     "name": "z",
@@ -1567,7 +1590,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 56,
+            "id": 57,
             "members": [
                 {
                     "name": "down_time_ms",
@@ -1630,7 +1653,7 @@
             ]
         },
         {
-            "id": 57,
+            "id": 58,
             "name": "SpikesMode",
             "storageType": "string",
             "type": "enum",
@@ -1642,7 +1665,7 @@
             "valuesAsFlags": false
         },
         {
-            "id": 58,
+            "id": 59,
             "name": "SpikesOrientation",
             "storageType": "string",
             "type": "enum",
@@ -1657,7 +1680,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 59,
+            "id": 60,
             "members": [
                 {
                     "name": "color",
@@ -1700,7 +1723,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 60,
+            "id": 61,
             "members": [
                 {
                     "name": "bitmap_font_map",
@@ -1748,7 +1771,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 61,
+            "id": 62,
             "members": [
                 {
                     "name": "animation_idle_closed",
@@ -1826,7 +1849,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 62,
+            "id": 63,
             "members": [
                 {
                     "name": "z",
@@ -1844,7 +1867,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 63,
+            "id": 64,
             "members": [
                 {
                     "name": "clamp_segment_count",
@@ -1887,7 +1910,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 64,
+            "id": 65,
             "members": [
                 {
                     "name": "count",
@@ -1940,7 +1963,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 65,
+            "id": 66,
             "members": [
                 {
                     "name": "effect_start_delay_s",
@@ -1978,7 +2001,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 66,
+            "id": 67,
             "members": [
                 {
                     "name": "direction_x",
@@ -2091,7 +2114,7 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 67,
+            "id": 68,
             "members": [
                 {
                     "name": "values",
