@@ -28,12 +28,21 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
+-- the birds own the graveyard for as long as the weather holds. once the storm breaks they give it up, so the two are
+-- switched together: the emitter fades itself out over its fade_duration_s rather than cutting off mid call.
+function setStormActive(active)
+   setMechanismEnabled("thunderstorm", active, "weather")
+   setMechanismEnabled("birds", not active, "sound_emitters")
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
 -- the rubies go into the inventory, and the inventory is part of the save game. that makes "the player carries the
 -- owl's eyes" the persisted flag which decides whether the thunderstorm is already awake when the level is entered.
 function initShrine()
    local owl_eyes_taken = inventoryHas(_owl_eye_item)
    setOwlEyesPresent(not owl_eyes_taken)
-   setMechanismEnabled("thunderstorm", owl_eyes_taken, "weather")
+   setStormActive(owl_eyes_taken)
 end
 
 
@@ -70,7 +79,7 @@ function mechanismEvent(object_id, group_id, event_name, value)
 
    -- the storm the owl was keeping asleep breaks loose once the player has read that he owns the rubies
    if (object_id == "rubies_acquired" and event_name == "dismissed") then
-      setMechanismEnabled("thunderstorm", true, "weather")
+      setStormActive(true)
    end
 end
 

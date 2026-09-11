@@ -1504,6 +1504,11 @@
             "id": 54,
             "members": [
                 {
+                    "name": "fade_duration_s",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
                     "name": "filename",
                     "type": "string",
                     "value": ""

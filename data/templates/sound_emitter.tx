@@ -2,6 +2,7 @@
 <template>
  <object type="SoundEmitter" width="192" height="192">
   <properties>
+   <property name="fade_duration_s" type="float" value="0"/>
    <property name="filename" value=""/>
    <property name="looped" type="bool" value="true"/>
    <property name="radius_far_px" type="float" value="600"/>
