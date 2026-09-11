@@ -2,6 +2,7 @@
 
 #include "game/mechanisms/weather.h"
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -46,9 +47,17 @@ public:
    /// \param newSettings durations for lightning and silence phases.
    void setSettings(const ThunderstormSettings& newSettings);
 
+   /// \brief fires one lightning phase right now instead of waiting the silence phase out.
+   ///
+   /// The flash is snapped to full rather than ramped in over the fifth of a second the ambient
+   /// strikes take, which is what makes a scripted strike read as a crack rather than a swell.
+   /// \param volume volume to play the thunder sample at, or std::nullopt for the configured one.
+   void strike(const std::optional<float>& volume);
+
 private:
    /// \brief plays one randomly picked thunder sample, if any are configured.
-   void playThunder();
+   /// \param volume volume to play at, or std::nullopt for the configured sound volume.
+   void playThunder(const std::optional<float>& volume);
 
    enum class State
    {

@@ -274,6 +274,28 @@ Triggers a colour flash on all matching `RingShaderLayer` mechanisms.
 |5|float|Fade-out duration in seconds|
 
 
+## `strikeThunderMechanism`
+
+Fires one lightning strike on all matching `Weather` mechanisms that are thunderstorms, instead of
+waiting for the storm's own silence phase to elapse. The flash is snapped to full rather than ramped
+in over the fifth of a second the ambient strikes take, so a scripted strike reads as a crack rather
+than a swell.
+
+The strike is only seen on an *enabled* mechanism: `Weather::draw` and `Weather::update` both return
+early while it is disabled, so the flash would neither be drawn nor decay. Enable the storm first.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Mechanism search pattern (regular expression)|
+|2|float|Thunder sample volume (optional, defaults to the object's `sound_volume`)|
+|3|string|Mechanism group (optional)|
+
+```lua
+setMechanismEnabled("thunderstorm", true, "weather")
+strikeThunderMechanism("thunderstorm", 1.0, "weather")
+```
+
+
 ## `getMechanismRect`
 
 Returns the bounding rectangle of the first mechanism matching the search pattern, or `nil` if none is found.

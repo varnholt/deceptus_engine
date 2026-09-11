@@ -203,6 +203,32 @@ int32_t flashMechanism(lua_State* state)
    return 0;
 }
 
+int32_t strikeThunderMechanism(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc < 1 || argc > 3)
+   {
+      return 0;
+   }
+
+   const std::string search_pattern = lua_tostring(state, 1);
+
+   std::optional<float> volume;
+   if (argc >= 2)
+   {
+      volume = static_cast<float>(lua_tonumber(state, 2));
+   }
+
+   std::optional<std::string> group;
+   if (argc == 3)
+   {
+      group = lua_tostring(state, 3);
+   }
+
+   LevelScript::getCurrent()->strikeThunderMechanism(search_pattern, volume, group);
+   return 0;
+}
+
 int32_t toggle(lua_State* state)
 {
    const auto argc = lua_gettop(state);

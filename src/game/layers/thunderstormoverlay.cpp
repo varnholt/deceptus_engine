@@ -82,12 +82,21 @@ void ThunderstormOverlay::update(const sf::Time& dt)
          // start lightning
          _thunderstorm_time_elapsed_s = 0.0f;
          _state = State::Lightning;
-         playThunder();
+         playThunder(std::nullopt);
       }
    }
 }
 
-void ThunderstormOverlay::playThunder()
+void ThunderstormOverlay::strike(const std::optional<float>& volume)
+{
+   _thunderstorm_time_elapsed_s = 0.0f;
+   _state = State::Lightning;
+   _factor = 1.0f;
+
+   playThunder(volume);
+}
+
+void ThunderstormOverlay::playThunder(const std::optional<float>& volume)
 {
    if (_settings._sounds.empty())
    {
@@ -95,7 +104,7 @@ void ThunderstormOverlay::playThunder()
    }
 
    const auto index = static_cast<size_t>(std::rand()) % _settings._sounds.size();
-   Audio::getInstance().playSample({_settings._sounds[index], _settings._sound_volume});
+   Audio::getInstance().playSample({_settings._sounds[index], volume.value_or(_settings._sound_volume)});
 }
 
 void ThunderstormOverlay::setRect(const sf::FloatRect& rect)
