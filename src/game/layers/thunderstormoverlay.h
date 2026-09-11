@@ -3,6 +3,7 @@
 #include "game/mechanisms/weather.h"
 
 #include <optional>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -17,6 +18,7 @@ public:
    {
       float _thunderstorm_time_s = 3.0;
       float _silence_time_s = 5.0f;
+      float _thunder_delay_s = 0.5f;     //!< gap between the flash and its thunder, light outruns sound
       std::vector<std::string> _sounds;  //!< thunder samples; one is picked at random per lightning phase, empty disables audio
       float _sound_volume = 1.0f;        //!< per-sample volume multiplier applied to the picked thunder sample
    };
@@ -55,6 +57,10 @@ public:
    void strike(const std::optional<float>& volume);
 
 private:
+   /// \brief arms the thunder that belongs to a flash that has just gone off.
+   /// \param volume volume to play at, or std::nullopt for the configured sound volume.
+   void scheduleThunder(const std::optional<float>& volume);
+
    /// \brief plays one randomly picked thunder sample, if any are configured.
    /// \param volume volume to play at, or std::nullopt for the configured sound volume.
    void playThunder(const std::optional<float>& volume);
@@ -72,6 +78,15 @@ private:
    float _thunderstorm_time_elapsed_s = 0.0;
    float _silence_time_elapsed_s = 0.0f;
    State _state = State::Silence;
+
+   std::optional<float> _pending_thunder_s;       //!< time left until the armed thunder is played
+   std::optional<float> _pending_thunder_volume;  //!< volume the armed thunder was requested at
+   std::optional<size_t> _previous_sound_index;   //!< last sample played, so it is not picked twice in a row
+
+   // the global c rng is seeded by whoever ran last - StaticLight seeds it from its own tmx position
+   // during level load, which leaves it on a fixed sequence. an engine of its own keeps the sample
+   // choice actually random
+   std::mt19937 _random_engine{std::random_device{}()};
 
    ThunderstormSettings _settings;
 };
