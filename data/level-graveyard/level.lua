@@ -5,6 +5,12 @@ _initialized = false
 -- the owl statue carries two cut rubies as eyes, and the inventory item that holds them is called "gems"
 _owl_eye_item = "gems"
 
+-- seconds left until the pickup message is shown, or nil when none is pending
+_pickup_message_delay_s = nil
+
+-- long enough for the strike to land and start decaying before the message slides in
+_pickup_message_delay_default_s = 1.5
+
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
@@ -56,7 +62,15 @@ function takeOwlEyes()
 
    setOwlEyesPresent(false)
    inventoryAdd(_owl_eye_item)
-   showDialogue("rubies_acquired")
+
+   -- the storm the owl was keeping asleep breaks the moment its eyes come out, on the same frame the
+   -- sockets go dark. the strike is fired through the weather mechanism rather than as a screen flash
+   -- so it looks and sounds like the storm that follows it
+   setStormActive(true)
+   strikeThunderMechanism("thunderstorm", "weather_thunder_02.ogg", 1.0, "weather")
+
+   -- the pickup message is the same one every item shows, it just waits for the thunder
+   _pickup_message_delay_s = _pickup_message_delay_default_s
 end
 
 
@@ -66,6 +80,14 @@ function update(dt)
    if (not _initialized) then
       _initialized = true
       initShrine()
+   end
+
+   if (_pickup_message_delay_s ~= nil) then
+      _pickup_message_delay_s = _pickup_message_delay_s - dt
+      if (_pickup_message_delay_s <= 0.0) then
+         _pickup_message_delay_s = nil
+         showDialogue("rubies_acquired")
+      end
    end
 end
 
@@ -77,10 +99,6 @@ function mechanismEvent(object_id, group_id, event_name, value)
       takeOwlEyes()
    end
 
-   -- the storm the owl was keeping asleep breaks loose once the player has read that he owns the rubies
-   if (object_id == "rubies_acquired" and event_name == "dismissed") then
-      setStormActive(true)
-   end
 end
 
 

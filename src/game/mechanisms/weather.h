@@ -46,6 +46,15 @@ public:
    /// \return area that gates weather updates and drawing.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+   /// \brief fires one lightning strike right now on a thunderstorm, for scripted moments.
+   ///
+   /// Does nothing on weather that is not a thunderstorm. The strike is only seen on an enabled
+   /// mechanism: draw and update both return early while it is disabled, so the flash would
+   /// neither be drawn nor decay.
+   /// \param sample thunder sample to play, or std::nullopt to pick one at random.
+   /// \param volume volume to play the thunder sample at, or std::nullopt for the configured one.
+   void strikeThunder(const std::optional<std::string>& sample, const std::optional<float>& volume);
+
    /// \brief creates rain or thunderstorm weather from object name and properties.
    /// \param parent owning game node in the scene graph.
    /// \param data deserialization data with bounds and weather settings.

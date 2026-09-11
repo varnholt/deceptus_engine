@@ -165,6 +165,17 @@ std::optional<sf::FloatRect> Weather::getBoundingBoxPx()
    return _rect;
 }
 
+void Weather::strikeThunder(const std::optional<std::string>& sample, const std::optional<float>& volume)
+{
+   auto thunderstorm = std::dynamic_pointer_cast<ThunderstormOverlay>(_overlay);
+   if (!thunderstorm)
+   {
+      return;
+   }
+
+   thunderstorm->strike(sample, volume);
+}
+
 std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeserializeData& data)
 {
    auto weather = std::make_shared<Weather>(parent);
@@ -273,6 +284,8 @@ std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeseri
             settings._silence_time_s = silence_time_it->second->_value_float.value();
          }
 
+         settings._thunder_delay_s = ValueReader::readValue<float>("thunder_delay_s", map).value_or(settings._thunder_delay_s);
+
          const auto sounds = ValueReader::readValue<std::string>("sounds", map);
          if (sounds.has_value())
          {
@@ -304,6 +317,7 @@ static constexpr std::array weather_properties{
    PropertyInfo{.name = "limit_effect_to_room", .type = "bool", .default_value = false},
    PropertyInfo{.name = "effect_start_delay_s", .type = "float", .default_value = 0.0f},
    PropertyInfo{.name = "sound_volume", .type = "float", .default_value = 1.0f},
+   PropertyInfo{.name = "thunder_delay_s", .type = "float", .default_value = 0.0f},
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
 };
 static constexpr MechanismSchema weather_schema{

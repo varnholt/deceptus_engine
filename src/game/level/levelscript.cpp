@@ -24,6 +24,7 @@
 #include "game/mechanisms/extra.h"
 #include "game/mechanisms/ringshaderlayer.h"
 #include "game/mechanisms/sensorrect.h"
+#include "game/mechanisms/weather.h"
 #include "game/player/playercontrols.h"
 #include "game/player/playerregistry.h"
 #include "game/player/weaponsystem.h"
@@ -177,6 +178,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setMechanismEnabled", LevelScriptCallbacks::setMechanismEnabled);
    lua_register(_lua_state, "setMechanismVisible", LevelScriptCallbacks::setMechanismVisible);
    lua_register(_lua_state, "flashMechanism", LevelScriptCallbacks::flashMechanism);
+   lua_register(_lua_state, "strikeThunderMechanism", LevelScriptCallbacks::strikeThunderMechanism);
    lua_register(_lua_state, "flashScreen", LevelScriptCallbacks::flashScreen);
    lua_register(_lua_state, "setAmbient", LevelScriptCallbacks::setAmbient);
    lua_register(_lua_state, "setZoomFactor", LevelScriptCallbacks::setZoomFactor);
@@ -521,6 +523,30 @@ void LevelScript::flashMechanism(const std::string& search_pattern, float red, f
       if (ring)
       {
          ring->flash(red, green, blue, duration_s);
+      }
+   }
+}
+
+void LevelScript::strikeThunderMechanism(
+   const std::string& search_pattern,
+   const std::optional<std::string>& sample,
+   const std::optional<float>& volume,
+   const std::optional<std::string>& group
+)
+{
+   if (!_search_mechanism_callback)
+   {
+      Log::Error() << "search mechanism callback not initialized yet";
+      return;
+   }
+
+   const auto mechanisms = _search_mechanism_callback(search_pattern, group);
+   for (auto& mechanism : mechanisms)
+   {
+      auto* weather = dynamic_cast<Weather*>(mechanism.get());
+      if (weather)
+      {
+         weather->strikeThunder(sample, volume);
       }
    }
 }

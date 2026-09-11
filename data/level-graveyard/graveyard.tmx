@@ -1962,6 +1962,7 @@
     <property name="enabled" type="bool" value="false"/>
     <property name="sound_volume" type="float" value="0.8"/>
     <property name="sounds" value="weather_thunder_01.ogg;weather_thunder_02.ogg;weather_thunder_03.ogg;weather_thunder_04.ogg;weather_thunder_05.ogg"/>
+    <property name="thunder_delay_s" type="float" value="0.5"/>
     <property name="z" type="int" value="2"/>
    </properties>
   </object>

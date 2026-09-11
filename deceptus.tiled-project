@@ -1991,6 +1991,11 @@
                     "value": 1.0
                 },
                 {
+                    "name": "thunder_delay_s",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
                     "name": "z",
                     "type": "int",
                     "value": 20

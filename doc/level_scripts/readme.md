@@ -274,6 +274,40 @@ Triggers a colour flash on all matching `RingShaderLayer` mechanisms.
 |5|float|Fade-out duration in seconds|
 
 
+## `strikeThunderMechanism`
+
+Fires one lightning strike on all matching `Weather` mechanisms that are thunderstorms, instead of
+waiting for the storm's own silence phase to elapse. The flash is snapped to full rather than ramped
+in over the fifth of a second the ambient strikes take, so a scripted strike reads as a crack rather
+than a swell.
+
+The strike is only seen on an *enabled* mechanism: `Weather::draw` and `Weather::update` both return
+early while it is disabled, so the flash would neither be drawn nor decay. Enable the storm first.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|string|Mechanism search pattern (regular expression)|
+|2|string|Thunder sample to play (optional, `nil` picks one at random)|
+|3|float|Thunder sample volume (optional, defaults to the object's `sound_volume`)|
+|4|string|Mechanism group (optional)|
+
+The named sample has to be one of the weather object's configured `sounds` — those are the ones that
+were preloaded. Naming anything else logs a warning and falls back to a random pick. Name one when a
+scripted moment has to land a particular way; the samples differ by a lot in loudness, so a random
+pick is not interchangeable with a chosen one.
+
+```lua
+setMechanismEnabled("thunderstorm", true, "weather")
+strikeThunderMechanism("thunderstorm", "weather_thunder_02.ogg", 1.0, "weather")
+
+-- or leave the choice to the storm
+strikeThunderMechanism("thunderstorm", nil, 1.0, "weather")
+```
+
+The thunder follows the flash by the weather object's `thunder_delay_s`, which is `0` by default so
+the two land together. Set it on the object when the strike should read as distant.
+
+
 ## `getMechanismRect`
 
 Returns the bounding rectangle of the first mechanism matching the search pattern, or `nil` if none is found.

@@ -2,8 +2,10 @@
 
 #include "framework/math/fbm.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tools/log.h"
 #include "game/audio/audio.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 
@@ -49,6 +51,17 @@ void ThunderstormOverlay::update(const sf::Time& dt)
 {
    _time_s += dt.asSeconds();
 
+   // the flash has already gone off; the sound of it is still on its way
+   if (_pending_thunder_s.has_value())
+   {
+      _pending_thunder_s = _pending_thunder_s.value() - dt.asSeconds();
+      if (_pending_thunder_s.value() <= 0.0f)
+      {
+         _pending_thunder_s.reset();
+         playThunder(_pending_thunder_sample, _pending_thunder_volume);
+      }
+   }
+
    _value = fbm::fbm({_time_s, 0.0f}) * 3.0f;
 
    if (_state == State::Lightning)
@@ -82,20 +95,61 @@ void ThunderstormOverlay::update(const sf::Time& dt)
          // start lightning
          _thunderstorm_time_elapsed_s = 0.0f;
          _state = State::Lightning;
-         playThunder();
+         scheduleThunder(std::nullopt, std::nullopt);
       }
    }
 }
 
-void ThunderstormOverlay::playThunder()
+void ThunderstormOverlay::strike(const std::optional<std::string>& sample, const std::optional<float>& volume)
+{
+   _thunderstorm_time_elapsed_s = 0.0f;
+   _state = State::Lightning;
+   _factor = 1.0f;
+
+   scheduleThunder(sample, volume);
+}
+
+void ThunderstormOverlay::scheduleThunder(const std::optional<std::string>& sample, const std::optional<float>& volume)
+{
+   _pending_thunder_s = _settings._thunder_delay_s;
+   _pending_thunder_volume = volume;
+   _pending_thunder_sample = sample;
+}
+
+void ThunderstormOverlay::playThunder(const std::optional<std::string>& sample, const std::optional<float>& volume)
 {
    if (_settings._sounds.empty())
    {
       return;
    }
 
-   const auto index = static_cast<size_t>(std::rand()) % _settings._sounds.size();
-   Audio::getInstance().playSample({_settings._sounds[index], _settings._sound_volume});
+   // a named sample has to be one of the configured ones, those are the ones that were preloaded
+   if (sample.has_value())
+   {
+      const auto named = std::ranges::find(_settings._sounds, sample.value());
+      if (named != _settings._sounds.end())
+      {
+         _previous_sound_index = static_cast<size_t>(std::distance(_settings._sounds.begin(), named));
+         Audio::getInstance().playSample({*named, volume.value_or(_settings._sound_volume)});
+         return;
+      }
+
+      Log::Warning() << "thunder sample '" << sample.value() << "' is not one of this weather object's sounds";
+   }
+
+   auto index = size_t{0};
+   if (_settings._sounds.size() > 1)
+   {
+      // hearing the same sample twice in a row makes the randomization look broken
+      std::uniform_int_distribution<size_t> distribution{0, _settings._sounds.size() - 1};
+      do
+      {
+         index = distribution(_random_engine);
+      } while (_previous_sound_index.has_value() && index == _previous_sound_index.value());
+   }
+
+   _previous_sound_index = index;
+   Audio::getInstance().playSample({_settings._sounds[index], volume.value_or(_settings._sound_volume)});
 }
 
 void ThunderstormOverlay::setRect(const sf::FloatRect& rect)
