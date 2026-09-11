@@ -1993,7 +1993,7 @@
                 {
                     "name": "thunder_delay_s",
                     "type": "float",
-                    "value": 0.5
+                    "value": 0.0
                 },
                 {
                     "name": "z",

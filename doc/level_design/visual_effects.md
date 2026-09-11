@@ -373,10 +373,15 @@ Thunderstorms have the custom properties below:
 |-|-|-|
 |thunderstorm_time_s|float|The duration of the lightning phase. The default is `3s`.|
 |silence_time_s|float|The duration for everything to be 'quiet', i.e. from one lightning phase to the other (given in seconds). The default is `5s`.|
-|sounds|string|A list of samples from `data/sounds`, separated by semicolons, such as `weather_thunder_01.ogg;weather_thunder_02.ogg`. Every time a lightning phase starts, one of them is picked at random. When the property is omitted, the thunderstorm stays silent.|
+|sounds|string|A list of samples from `data/sounds`, separated by semicolons, such as `weather_thunder_01.ogg;weather_thunder_02.ogg`. Every time a lightning phase starts, one of them is picked at random, never the same one twice in a row. When the property is omitted, the thunderstorm stays silent.|
 |sound_volume|float|Volume multiplier for the picked thunder sample. The default is `1.0`.|
+|thunder_delay_s|float|How long the thunder trails its flash, in seconds. The default is `0`, which lands them together.|
 
-The thunder is played the moment a lightning phase begins, which is roughly 50-70ms before the flash becomes visible on screen, so both land together. Bear in mind that the samples you pick decide how well this works: a sample whose loudest moment is two seconds in will still be building up while the flash is already over. Pick samples that crack right at the start, or trim the build-up from them.
+By default the thunder is played the moment a lightning phase begins, which is roughly 50-70ms before the flash becomes visible on screen, so both land together. Bear in mind that the samples you pick decide how well this works: a sample whose loudest moment is two seconds in will still be building up while the flash is already over. Pick samples that crack right at the start, or trim the build-up from them.
+
+Set `thunder_delay_s` when you want the storm to feel further away instead. Light outruns sound by roughly 300m for every second of delay, so half a second reads as a strike a few streets over and three seconds as one on the horizon. It applies to every strike in that region, the scripted ones included.
+
+A level script can fire a single strike on demand with `strikeThunderMechanism`, naming the sample and its volume - see `doc/level_scripts/readme.md`. That is how a story beat gets its thunder on cue rather than waiting for the next lightning phase.
 
 ![](images/weather_thunderstorm_1.png) &nbsp;&nbsp; ![](images/weather_thunderstorm_2.png)
 

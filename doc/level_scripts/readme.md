@@ -304,9 +304,8 @@ strikeThunderMechanism("thunderstorm", "weather_thunder_02.ogg", 1.0, "weather")
 strikeThunderMechanism("thunderstorm", nil, 1.0, "weather")
 ```
 
-The thunder does not play on the same frame as the flash. It follows after the weather object's
-`thunder_delay_s` (0.5s by default), because light outruns sound, and an instant crack reads as a
-sound effect rather than as weather.
+The thunder follows the flash by the weather object's `thunder_delay_s`, which is `0` by default so
+the two land together. Set it on the object when the strike should read as distant.
 
 
 ## `getMechanismRect`

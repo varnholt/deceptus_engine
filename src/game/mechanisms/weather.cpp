@@ -317,7 +317,7 @@ static constexpr std::array weather_properties{
    PropertyInfo{.name = "limit_effect_to_room", .type = "bool", .default_value = false},
    PropertyInfo{.name = "effect_start_delay_s", .type = "float", .default_value = 0.0f},
    PropertyInfo{.name = "sound_volume", .type = "float", .default_value = 1.0f},
-   PropertyInfo{.name = "thunder_delay_s", .type = "float", .default_value = 0.5f},
+   PropertyInfo{.name = "thunder_delay_s", .type = "float", .default_value = 0.0f},
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
 };
 static constexpr MechanismSchema weather_schema{

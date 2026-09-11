@@ -18,7 +18,7 @@ public:
    {
       float _thunderstorm_time_s = 3.0;
       float _silence_time_s = 5.0f;
-      float _thunder_delay_s = 0.5f;     //!< gap between the flash and its thunder, light outruns sound
+      float _thunder_delay_s = 0.0f;     //!< gap between the flash and its thunder, 0 lands them together
       std::vector<std::string> _sounds;  //!< thunder samples; one is picked at random per lightning phase, empty disables audio
       float _sound_volume = 1.0f;        //!< per-sample volume multiplier applied to the picked thunder sample
    };
