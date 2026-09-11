@@ -2,8 +2,10 @@
 
 #include "framework/math/fbm.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tools/log.h"
 #include "game/audio/audio.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 
@@ -56,7 +58,7 @@ void ThunderstormOverlay::update(const sf::Time& dt)
       if (_pending_thunder_s.value() <= 0.0f)
       {
          _pending_thunder_s.reset();
-         playThunder(_pending_thunder_volume);
+         playThunder(_pending_thunder_sample, _pending_thunder_volume);
       }
    }
 
@@ -93,31 +95,46 @@ void ThunderstormOverlay::update(const sf::Time& dt)
          // start lightning
          _thunderstorm_time_elapsed_s = 0.0f;
          _state = State::Lightning;
-         scheduleThunder(std::nullopt);
+         scheduleThunder(std::nullopt, std::nullopt);
       }
    }
 }
 
-void ThunderstormOverlay::strike(const std::optional<float>& volume)
+void ThunderstormOverlay::strike(const std::optional<std::string>& sample, const std::optional<float>& volume)
 {
    _thunderstorm_time_elapsed_s = 0.0f;
    _state = State::Lightning;
    _factor = 1.0f;
 
-   scheduleThunder(volume);
+   scheduleThunder(sample, volume);
 }
 
-void ThunderstormOverlay::scheduleThunder(const std::optional<float>& volume)
+void ThunderstormOverlay::scheduleThunder(const std::optional<std::string>& sample, const std::optional<float>& volume)
 {
    _pending_thunder_s = _settings._thunder_delay_s;
    _pending_thunder_volume = volume;
+   _pending_thunder_sample = sample;
 }
 
-void ThunderstormOverlay::playThunder(const std::optional<float>& volume)
+void ThunderstormOverlay::playThunder(const std::optional<std::string>& sample, const std::optional<float>& volume)
 {
    if (_settings._sounds.empty())
    {
       return;
+   }
+
+   // a named sample has to be one of the configured ones, those are the ones that were preloaded
+   if (sample.has_value())
+   {
+      const auto named = std::ranges::find(_settings._sounds, sample.value());
+      if (named != _settings._sounds.end())
+      {
+         _previous_sound_index = static_cast<size_t>(std::distance(_settings._sounds.begin(), named));
+         Audio::getInstance().playSample({*named, volume.value_or(_settings._sound_volume)});
+         return;
+      }
+
+      Log::Warning() << "thunder sample '" << sample.value() << "' is not one of this weather object's sounds";
    }
 
    auto index = size_t{0};

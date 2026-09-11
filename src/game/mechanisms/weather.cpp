@@ -165,7 +165,7 @@ std::optional<sf::FloatRect> Weather::getBoundingBoxPx()
    return _rect;
 }
 
-void Weather::strikeThunder(const std::optional<float>& volume)
+void Weather::strikeThunder(const std::optional<std::string>& sample, const std::optional<float>& volume)
 {
    auto thunderstorm = std::dynamic_pointer_cast<ThunderstormOverlay>(_overlay);
    if (!thunderstorm)
@@ -173,7 +173,7 @@ void Weather::strikeThunder(const std::optional<float>& volume)
       return;
    }
 
-   thunderstorm->strike(volume);
+   thunderstorm->strike(sample, volume);
 }
 
 std::shared_ptr<Weather> Weather::deserialize(GameNode* parent, const GameDeserializeData& data)

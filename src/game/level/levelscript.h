@@ -79,10 +79,15 @@ public:
 
    /// \brief fires one lightning strike on a thunderstorm right now.
    /// \param search_pattern object id of the weather mechanism to strike.
+   /// \param sample thunder sample to play, or std::nullopt to pick one at random.
    /// \param volume volume to play the thunder sample at, or std::nullopt for the configured one.
    /// \param group optional layer name to restrict the search to.
-   void
-   strikeThunderMechanism(const std::string& search_pattern, const std::optional<float>& volume, const std::optional<std::string>& group);
+   void strikeThunderMechanism(
+      const std::string& search_pattern,
+      const std::optional<std::string>& sample,
+      const std::optional<float>& volume,
+      const std::optional<std::string>& group
+   );
 
    /// \brief checks visibility of the first mechanism that matches the query.
    /// \param mechanism_id regex used to select mechanisms.

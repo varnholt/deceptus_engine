@@ -287,12 +287,21 @@ early while it is disabled, so the flash would neither be drawn nor decay. Enabl
 |Parameter Position|Type|Description|
 |-|-|-|
 |1|string|Mechanism search pattern (regular expression)|
-|2|float|Thunder sample volume (optional, defaults to the object's `sound_volume`)|
-|3|string|Mechanism group (optional)|
+|2|string|Thunder sample to play (optional, `nil` picks one at random)|
+|3|float|Thunder sample volume (optional, defaults to the object's `sound_volume`)|
+|4|string|Mechanism group (optional)|
+
+The named sample has to be one of the weather object's configured `sounds` — those are the ones that
+were preloaded. Naming anything else logs a warning and falls back to a random pick. Name one when a
+scripted moment has to land a particular way; the samples differ by a lot in loudness, so a random
+pick is not interchangeable with a chosen one.
 
 ```lua
 setMechanismEnabled("thunderstorm", true, "weather")
-strikeThunderMechanism("thunderstorm", 1.0, "weather")
+strikeThunderMechanism("thunderstorm", "weather_thunder_02.ogg", 1.0, "weather")
+
+-- or leave the choice to the storm
+strikeThunderMechanism("thunderstorm", nil, 1.0, "weather")
 ```
 
 The thunder does not play on the same frame as the flash. It follows after the weather object's

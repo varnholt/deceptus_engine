@@ -67,7 +67,7 @@ function takeOwlEyes()
    -- sockets go dark. the strike is fired through the weather mechanism rather than as a screen flash
    -- so it looks and sounds like the storm that follows it
    setStormActive(true)
-   strikeThunderMechanism("thunderstorm", 1.0, "weather")
+   strikeThunderMechanism("thunderstorm", "weather_thunder_02.ogg", 1.0, "weather")
 
    -- the pickup message is the same one every item shows, it just waits for the thunder
    _pickup_message_delay_s = _pickup_message_delay_default_s

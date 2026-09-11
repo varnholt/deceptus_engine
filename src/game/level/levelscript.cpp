@@ -529,6 +529,7 @@ void LevelScript::flashMechanism(const std::string& search_pattern, float red, f
 
 void LevelScript::strikeThunderMechanism(
    const std::string& search_pattern,
+   const std::optional<std::string>& sample,
    const std::optional<float>& volume,
    const std::optional<std::string>& group
 )
@@ -545,7 +546,7 @@ void LevelScript::strikeThunderMechanism(
       auto* weather = dynamic_cast<Weather*>(mechanism.get());
       if (weather)
       {
-         weather->strikeThunder(volume);
+         weather->strikeThunder(sample, volume);
       }
    }
 }

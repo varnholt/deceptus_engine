@@ -206,26 +206,33 @@ int32_t flashMechanism(lua_State* state)
 int32_t strikeThunderMechanism(lua_State* state)
 {
    const auto argc = lua_gettop(state);
-   if (argc < 1 || argc > 3)
+   if (argc < 1 || argc > 4)
    {
       return 0;
    }
 
    const std::string search_pattern = lua_tostring(state, 1);
 
-   std::optional<float> volume;
-   if (argc >= 2)
+   // nil in the sample slot means "pick one at random", so a caller can give a volume without naming one
+   std::optional<std::string> sample;
+   if (argc >= 2 && !lua_isnoneornil(state, 2))
    {
-      volume = static_cast<float>(lua_tonumber(state, 2));
+      sample = lua_tostring(state, 2);
+   }
+
+   std::optional<float> volume;
+   if (argc >= 3 && !lua_isnoneornil(state, 3))
+   {
+      volume = static_cast<float>(lua_tonumber(state, 3));
    }
 
    std::optional<std::string> group;
-   if (argc == 3)
+   if (argc == 4)
    {
-      group = lua_tostring(state, 3);
+      group = lua_tostring(state, 4);
    }
 
-   LevelScript::getCurrent()->strikeThunderMechanism(search_pattern, volume, group);
+   LevelScript::getCurrent()->strikeThunderMechanism(search_pattern, sample, volume, group);
    return 0;
 }
 
