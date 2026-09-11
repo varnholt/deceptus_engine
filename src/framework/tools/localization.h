@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -73,6 +74,15 @@ private:
 ///
 /// \return path to the font file, e.g. "data/fonts/deceptum.ttf".
 [[nodiscard]] std::string getFontPath();
+
+/// \brief returns the character size the font of the active locale was drawn for.
+///
+/// both fonts are pixel fonts, and their outlines only land on the pixel grid at the size they were
+/// drawn at and at whole multiples of it. at any other size freetype covers the edge pixels of a
+/// stem partially and the glyphs come out soft. deceptum is drawn for 13 pixels, mona12 for 12.
+///
+/// \return character size in pixels.
+[[nodiscard]] uint32_t getFontNativeCharacterSize();
 
 namespace sf
 {

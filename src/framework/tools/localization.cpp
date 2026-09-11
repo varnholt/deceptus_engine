@@ -158,6 +158,15 @@ std::string getFontPath()
    return "data/fonts/deceptum.ttf";
 }
 
+uint32_t getFontNativeCharacterSize()
+{
+   if (Localization::getInstance().getLocale() == "ja")
+   {
+      return 12;
+   }
+   return 13;
+}
+
 const sf::Font& getFont()
 {
    static sf::Font font = []
