@@ -71,6 +71,7 @@ void MenuScreen::setTitle(const std::string& layer_name, const std::string& sour
 
    // a band that cannot hold the title grows, and the layer moves up by as much as it grew. that
    // leaves the ornament below the band on the pixel row it was drawn on
+   const auto title_character_size = getFontNativeCharacterSize();
    const auto band_px = std::max(word_band_height_px, MenuLabel::measureBoxHeight(title_character_size, title_scale));
    const auto grown_px = band_px - word_band_height_px;
 
