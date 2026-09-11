@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="768" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="52" nextobjectid="71">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="768" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="53" nextobjectid="72">
  <tileset firstgid="1" source="graveyard-background-diffuse.tsx"/>
  <tileset firstgid="4097" source="graveyard-level-diffuse.tsx"/>
  <imagelayer id="25" name="gv-bg-sky" offsetx="576" offsety="1320">
@@ -2018,6 +2018,19 @@
     <property name="sound" value="weather_rain_heavy_loop.ogg"/>
     <property name="sound_volume" type="float" value="0.5"/>
     <property name="z" type="int" value="35"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="52" name="sound_emitters" visible="0">
+  <object id="71" name="birds" x="696" y="696" width="14376" height="1080">
+   <properties>
+    <property name="fade_duration_s" type="float" value="3"/>
+    <property name="filename" value="ambience_forest_birds_loop.ogg"/>
+    <property name="looped" type="bool" value="true"/>
+    <property name="radius_far_px" type="float" value="12000"/>
+    <property name="radius_near_px" type="float" value="8000"/>
+    <property name="volume_far" type="float" value="0"/>
+    <property name="volume_near" type="float" value="0.4"/>
    </properties>
   </object>
  </objectgroup>

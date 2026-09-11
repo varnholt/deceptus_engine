@@ -5,6 +5,7 @@
 #include "game/audio/audio.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
+#include <algorithm>
 #include <array>
 
 SoundEmitter::SoundEmitter(GameNode* parent) : GameNode(parent)
@@ -26,10 +27,82 @@ std::string_view SoundEmitter::objectName() const
 
 void SoundEmitter::stopPlaying()
 {
-   if (_thread_id.has_value())
+   if (!_thread_id.has_value())
    {
-      Audio::getInstance().stopSample(_thread_id.value());
+      return;
    }
+
+   Audio::getInstance().stopSample(_thread_id.value());
+   _thread_id.reset();
+}
+
+float SoundEmitter::computeVolume() const
+{
+   return _audio_update_data._volume * _fade_factor;
+}
+
+void SoundEmitter::applyVolume()
+{
+   if (!_thread_id.has_value())
+   {
+      return;
+   }
+
+   Audio::getInstance().setVolume(_thread_id.value(), computeVolume());
+}
+
+// the sample keeps its playback slot for as long as it is still audible, so a fade out has something
+// to fade, and gives the slot up once it has reached silence:
+//
+//   enabled   ______                    ______________
+//                   |__________________|
+//
+//   fade      ______
+//                   \_____             ______________
+//                         \___________/
+//
+//   sample    [ playing ........ ][ none ][ playing ....
+//                                 ^       ^
+//                                 stopped restarted from silence
+//
+void SoundEmitter::update(const sf::Time& dt)
+{
+   const auto fade_target = _enabled ? 1.0f : 0.0f;
+
+   // a sample that never started has nothing to fade out, it just stays silent
+   if (!_thread_id.has_value() && fade_target < _fade_factor)
+   {
+      _fade_factor = fade_target;
+   }
+
+   if (_fade_duration_s > 0.0f)
+   {
+      const auto max_step = dt.asSeconds() / _fade_duration_s;
+      _fade_factor = std::clamp(_fade_factor + std::clamp(fade_target - _fade_factor, -max_step, max_step), 0.0f, 1.0f);
+   }
+   else
+   {
+      _fade_factor = fade_target;
+   }
+
+   if (_fade_factor <= 0.0f)
+   {
+      stopPlaying();
+      return;
+   }
+
+   if (!_thread_id.has_value())
+   {
+      // the volume updater decides whether the player is close enough to hear this emitter at all
+      if (_audio_enabled)
+      {
+         _thread_id = Audio::getInstance().playSample({_filename, computeVolume(), _looped});
+      }
+
+      return;
+   }
+
+   applyVolume();
 }
 
 void SoundEmitter::setAudioEnabled(bool audio_enabled)
@@ -41,28 +114,27 @@ void SoundEmitter::setAudioEnabled(bool audio_enabled)
 
    GameMechanism::setAudioEnabled(audio_enabled);
 
-   if (audio_enabled)
-   {
-      // start playing
-      _thread_id = Audio::getInstance().playSample({_filename, _reference_volume, _looped});
-   }
-   else
+   if (!audio_enabled)
    {
       // stop playing
       stopPlaying();
    }
+
+   // starting is left to update so that the fade and the playback bookkeeping live in one place
+}
+
+void SoundEmitter::setVolume(float volume)
+{
+   GameMechanism::setVolume(volume);
+
+   applyVolume();
 }
 
 void SoundEmitter::setReferenceVolume(float volume)
 {
    GameMechanism::setReferenceVolume(volume);
 
-   if (!_thread_id.has_value())
-   {
-      return;
-   }
-
-   Audio::getInstance().setVolume(_thread_id.value(), volume);
+   applyVolume();
 }
 
 std::shared_ptr<SoundEmitter> SoundEmitter::deserialize(GameNode* parent, const GameDeserializeData& data)
@@ -122,6 +194,12 @@ std::shared_ptr<SoundEmitter> SoundEmitter::deserialize(GameNode* parent, const 
          instance->_filename = filename->second->_value_string.value();
       }
 
+      const auto fade_duration_s = data._tmx_object->_properties->_map.find("fade_duration_s");
+      if (fade_duration_s != data._tmx_object->_properties->_map.cend())
+      {
+         instance->_fade_duration_s = fade_duration_s->second->_value_float.value();
+      }
+
       Audio::getInstance().addSample(instance->_filename);
    }
 
@@ -138,6 +216,7 @@ namespace
 static constexpr std::array sound_emitter_properties{
    PropertyInfo{.name = "filename", .type = "string", .default_value = std::string_view{""}, .required = true},
    PropertyInfo{.name = "looped", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "fade_duration_s", .type = "float", .default_value = 0.0f},
    PropertyInfo{.name = "radius_near_px", .type = "float", .default_value = 200.0f},
    PropertyInfo{.name = "volume_near", .type = "float", .default_value = 1.0f},
    PropertyInfo{.name = "radius_far_px", .type = "float", .default_value = 600.0f},

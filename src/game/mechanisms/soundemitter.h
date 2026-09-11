@@ -6,9 +6,8 @@
 #include "game/mechanisms/gamemechanism.h"
 
 /// \brief plays positional ambient audio configured from a map object.
-/// \note deliberately does not call addChunks: this mechanism has no update override at all, it is driven by
-///       VolumeUpdater. distance attenuation is precisely what has to keep working while the player is far away, which
-///       is the opposite of what chunk culling provides.
+/// \note deliberately does not call addChunks: distance attenuation and the fade are precisely what have to keep
+///       working while the player is far away, which is the opposite of what chunk culling provides.
 class SoundEmitter : public GameMechanism, public GameNode
 {
 public:
@@ -23,9 +22,17 @@ public:
    /// \return constant string view containing "SoundEmitter".
    std::string_view objectName() const override;
 
-   /// \brief starts or stops the configured sample when audio toggles.
+   /// \brief advances the fade and starts or stops the sample once it has run its course.
+   /// \param dt elapsed frame time.
+   void update(const sf::Time& dt) override;
+
+   /// \brief stops the sample when the player leaves audio range.
    /// \param enabled true to allow playback, false to stop it.
    void setAudioEnabled(bool enabled) override;
+
+   /// \brief applies the distance-scaled volume to the sample that is currently playing.
+   /// \param volume volume computed by the volume updater.
+   void setVolume(float volume) override;
 
    /// \brief updates reference volume and applies it to the active sample.
    /// \param volume target reference volume.
@@ -52,6 +59,16 @@ public:
 private:
    /// \brief stops the currently playing sample when one is active.
    void stopPlaying();
+
+   /// \brief applies the current volume and fade state to the sample that is playing.
+   void applyVolume();
+
+   /// \brief returns the volume the sample should be heard at right now.
+   /// \return distance-scaled volume weighted by the fade.
+   float computeVolume() const;
+
+   float _fade_duration_s{0.0f};  //!< time the sample takes to fade in or out when the mechanism is enabled or disabled
+   float _fade_factor{1.0f};      //!< current position of the fade, 0 is silent and 1 is the full distance-scaled volume
 };
 
 #endif  // SOUNDEMITTER_H

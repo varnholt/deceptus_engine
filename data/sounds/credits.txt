@@ -10,6 +10,22 @@ Licences were taken from the sound pages linked below. When adding new
 material, check the licence on the source page before shipping it.
 
 
+Ambience
+--------
+
+ambience_forest_birds_loop.ogg
+    Title     Distant crows, ravens, forest birds
+    Author    nematoki
+    Source    https://pixabay.com/sound-effects/nature-distant-crows-ravens-forest-birds-332962/
+    Licence   Pixabay Content License
+    Original  nematoki-distant-crows-ravens-forest-birds-332962.mp3
+    Note      No attribution required, listed for traceability. Prepared as a
+              seamless loop: 137 ms of leading silence removed, the last three
+              seconds crossfaded into the head so that the loop point sits
+              inside continuous material, and lifted by 12.4 dB to sit next to
+              the other ambience beds.
+
+
 Mechanisms
 ----------
 
@@ -53,6 +69,9 @@ weather_rain_heavy_loop.ogg
     Source    https://freesound.org/s/136971/
     Licence   Attribution 4.0
     Original  136971__dwoboyle__ambiance-heavy-rain-loop.wav
+    Note      The loop started with 22 ms of silence and a 6 ms fade in, which
+              dropped the rain out for a moment on every wrap. Those 988 frames
+              were trimmed and the file re-encoded at quality 7.
 
 weather_thunder_01.ogg
     Title     BadWeatherRec.wav
