@@ -1,4 +1,8 @@
 {
+  "@font": {
+    "character_size": 13,
+    "path": "data/fonts/deceptum.ttf"
+  },
   "\"A sightless owl with a [color:#09e522FF] sword [/color] in her keep offers steel to the one who [br] ends her [color:#09e522FF]eyeless [/color] sleep.\"": "",
   "\"And in truth, all return to the end.\"": "",
   "\"Before all things, there is time.": "",

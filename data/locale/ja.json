@@ -1,4 +1,8 @@
 {
+  "@font": {
+    "character_size": 12,
+    "path": "data/fonts/mona12.ttf"
+  },
   "@line_break": {
     "break_between_characters": [
       {

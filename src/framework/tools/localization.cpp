@@ -33,6 +33,7 @@ void Localization::load(const std::string& locale)
    try
    {
       const auto json = nlohmann::json::parse(json_text);
+
       for (const auto& [key, value] : json.items())
       {
          // a locale file may also carry sections that are not translations, such as the line break
@@ -44,6 +45,14 @@ void Localization::load(const std::string& locale)
          }
 
          _translations[key] = value.get<std::string>();
+      }
+
+      // read after the table, so a locale that declares the section badly still gets its strings
+      const auto font_section = json.find("@font");
+      if (font_section != json.end())
+      {
+         _font_path = font_section->at("path").get<std::string>();
+         _font_character_size = font_section->at("character_size").get<uint32_t>();
       }
    }
    catch (const std::exception& exception)
@@ -58,6 +67,16 @@ void Localization::load(const std::string& locale)
 const std::string& Localization::getLocale() const
 {
    return _locale;
+}
+
+const std::string& Localization::getFontPath() const
+{
+   return _font_path;
+}
+
+uint32_t Localization::getFontNativeCharacterSize() const
+{
+   return _font_character_size;
 }
 
 std::string_view Localization::translate(std::string_view source_text) const
@@ -151,20 +170,12 @@ std::string tr(std::string_view source_text)
 
 std::string getFontPath()
 {
-   if (Localization::getInstance().getLocale() == "ja")
-   {
-      return "data/fonts/mona12.ttf";
-   }
-   return "data/fonts/deceptum.ttf";
+   return Localization::getInstance().getFontPath();
 }
 
 uint32_t getFontNativeCharacterSize()
 {
-   if (Localization::getInstance().getLocale() == "ja")
-   {
-      return 12;
-   }
-   return 13;
+   return Localization::getInstance().getFontNativeCharacterSize();
 }
 
 const sf::Font& getFont()

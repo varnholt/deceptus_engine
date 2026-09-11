@@ -37,6 +37,12 @@ public:
    /// \brief returns the active locale identifier.
    [[nodiscard]] const std::string& getLocale() const;
 
+   /// \brief returns the font file the active locale declares.
+   [[nodiscard]] const std::string& getFontPath() const;
+
+   /// \brief returns the character size the font of the active locale was drawn for.
+   [[nodiscard]] uint32_t getFontNativeCharacterSize() const;
+
    /// \brief looks up source_text in the active translation table.
    ///
    /// when no translation is found the source text is returned unchanged and
@@ -57,6 +63,8 @@ private:
    mutable std::unordered_set<std::string> _missing_keys;
    std::string _locale;
    std::string _locale_path;
+   std::string _font_path{"data/fonts/deceptum.ttf"};  //!< font file the active locale declares
+   uint32_t _font_character_size{13};                  //!< size that font was drawn at
 };
 
 /// \brief returns the translation of source_text in the active locale.
@@ -68,18 +76,17 @@ private:
 /// \return translated UTF-8 string, or source_text if no translation is available.
 [[nodiscard]] std::string tr(std::string_view source_text);
 
-/// \brief returns the font file path suitable for the active locale.
-///
-/// most locales use deceptum.ttf; japanese uses mona12.ttf.
-///
+/// \brief returns the font file path the active locale declares in its "@font" section.
 /// \return path to the font file, e.g. "data/fonts/deceptum.ttf".
 [[nodiscard]] std::string getFontPath();
 
 /// \brief returns the character size the font of the active locale was drawn for.
 ///
-/// both fonts are pixel fonts, and their outlines only land on the pixel grid at the size they were
+/// the fonts are pixel fonts, and their outlines only land on the pixel grid at the size they were
 /// drawn at and at whole multiples of it. at any other size freetype covers the edge pixels of a
-/// stem partially and the glyphs come out soft. deceptum is drawn for 13 pixels, mona12 for 12.
+/// stem partially and the glyphs come out soft. the size is declared next to the font file in the
+/// "@font" section of the locale, since it belongs to that font rather than to whoever draws with
+/// it.
 ///
 /// \return character size in pixels.
 [[nodiscard]] uint32_t getFontNativeCharacterSize();

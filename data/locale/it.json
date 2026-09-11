@@ -1,4 +1,8 @@
 {
+  "@font": {
+    "character_size": 13,
+    "path": "data/fonts/deceptum.ttf"
+  },
   "Up": "Su",
   "Down": "Giù",
   "Left": "Sinistra",
