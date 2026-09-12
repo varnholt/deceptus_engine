@@ -17,6 +17,7 @@
 #include "game/debug/debugdraw.h"
 #include "game/debug/debugdrawstates.h"
 #include "game/debug/mechanismschemawriter.h"
+#include "game/demo/demomode.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screenflash.h"
 #include "game/effects/screentransition.h"
@@ -401,7 +402,8 @@ void Game::showPauseMenu()
    // don't allow to pause during screen transitions
    // don't allow to pause when the inventory is open (game is already paused)
    // don't allow to pause while a cutscene is playing
-   if (DisplayMode::getInstance().isAnySet(Display::ScreenTransition, Display::IngameMenu, Display::CutsceneActive))
+   // don't allow to pause while a demo is playing; user input ends the demo instead
+   if (DisplayMode::getInstance().isAnySet(Display::ScreenTransition, Display::IngameMenu, Display::CutsceneActive, Display::Demo))
    {
       return;
    }
@@ -693,6 +695,8 @@ void Game::initialize()
             _level->createViews();
          }
       );
+
+   DemoMode::getInstance().initialize();
 
    showMainMenu();
 
@@ -1049,6 +1053,14 @@ void Game::menuLoadRequest()
    _player->reset();
    loadLevel();
 
+   // a demo cuts straight in and places the player itself. the fade is started once the level is
+   // already being stepped, so the replay would otherwise spend its first second behind it
+   if (DemoMode::getInstance().isActive())
+   {
+      _level_loaded_callbacks.push_back([]() { DemoMode::getInstance().positionPlayerAtRecordedStart(); });
+      return;
+   }
+
    // fade in after level loading is done
    _level_loaded_callbacks.push_back(
       []
@@ -1160,6 +1172,7 @@ void Game::update()
    const auto game_mode = GameState::getInstance().getMode();
 
    Menu::getInstance()->update(dt);
+   DemoMode::getInstance().update(dt);
 
    if (game_mode == ExecutionMode::NotRunning)
    {
@@ -1908,7 +1921,9 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
          const auto& serializer = EventSerializer::getInstance("player");
          if (serializer)
          {
-            serializer->play();
+            // a recording only reproduces from the spot it was made at, and by the time f9 is
+            // pressed the player has walked away from it
+            serializer->play(EventSerializer::StartPosition::Apply);
          }
          break;
       }
@@ -1990,6 +2005,12 @@ void Game::processEvents()
 {
    while (const auto event = _window->pollEvent())
    {
+      // user input ends a running demo, and the key that ended it must not reach the game behind it
+      if (DemoMode::isUserInput(event.value()) && DemoMode::getInstance().notifyUserInput())
+      {
+         continue;
+      }
+
       processEvent(event.value());
    }
 

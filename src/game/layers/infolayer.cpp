@@ -900,8 +900,11 @@ void InfoLayer::setLoading(bool loading)
 
 void InfoLayer::updateEventReplayIcons()
 {
-   _event_replay_recording->_visible = DisplayMode::getInstance().isSet(Display::ReplayRecording);
-   _event_replay_playing->_visible = DisplayMode::getInstance().isSet(Display::ReplayPlaying);
+   // a demo is replayed input as well, but it is put in front of the player as if it were a game
+   const auto demo_active = DisplayMode::getInstance().isSet(Display::Demo);
+
+   _event_replay_recording->_visible = DisplayMode::getInstance().isSet(Display::ReplayRecording) && !demo_active;
+   _event_replay_playing->_visible = DisplayMode::getInstance().isSet(Display::ReplayPlaying) && !demo_active;
 }
 
 void InfoLayer::update(const sf::Time& delta_time)

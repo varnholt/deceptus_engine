@@ -603,6 +603,8 @@ set(GAME_FILES
     src/game/shaders/postprocessing.h
     src/game/mechanisms/postprocessingmechanism.cpp
     src/game/mechanisms/postprocessingmechanism.h
+    src/game/demo/demomode.cpp
+    src/game/demo/demomode.h
     src/game/state/displaymode.cpp
     src/game/state/displaymode.h
     src/game/state/gamestate.cpp

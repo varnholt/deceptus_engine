@@ -250,7 +250,11 @@ void LevelScript::playEventRecording(const std::string& filename)
    if (serializer)
    {
       serializer->deserialize(filepath);
-      serializer->play();
+
+      // deliberately Ignore: every recording carries the position it was captured at, but a script
+      // recording is an animation played wherever the scene happens to put the player - the monk
+      // kneel would otherwise teleport them to whoever recorded it
+      serializer->play(EventSerializer::StartPosition::Ignore);
    }
 }
 
