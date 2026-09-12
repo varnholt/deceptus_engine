@@ -7,6 +7,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
+#include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 
@@ -17,8 +18,19 @@ int32_t Rope::_instance_counter = 0;
 
 namespace
 {
+//!< rope 1 is the plain rope with a single knot, rope 2 the vine rope with its hook and side knots.
+//!< the rect width is also the rope's width on screen, so the knots keep sticking out of the strand.
+//!< not constexpr: the wasm compat shim wraps IntRect to keep the implicit widening to FloatRect
+//!< that VRSFML's textureRect needs, and its constructors are not constexpr the way vanilla's are
+const std::array rope_texture_rects{
+   sf::IntRect{{0, 0}, {7, 141}},
+   sf::IntRect{{12, 0}, {11, 120}},
+};
+
 static constexpr std::array rope_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "texture", .type = "string", .default_value = default_rope_texture},
+   PropertyInfo{.name = "sprite", .type = "int", .default_value = int32_t{1}},
 };
 static constexpr MechanismSchema rope_schema{
    .type_name = "Rope",
@@ -120,7 +132,7 @@ void Rope::updateSpritePositions()
       const auto c1_pos_m = interpolated(i);
       const auto c2_pos_m = interpolated(i + 1);
 
-      constexpr auto thickness_m = 0.025f;
+      const auto thickness_m = static_cast<float>(_texture_rect_px.size.x) * MPP * 0.5f;
 
       const auto dist = (c2_pos_m - c1_pos_m);
       auto normal_vec = b2Vec2(dist.y, -dist.x);
@@ -268,28 +280,18 @@ std::optional<sf::FloatRect> Rope::getBoundingBoxPx()
 
 void Rope::setup(const GameDeserializeData& data)
 {
-   const auto path = data._base_path / "tilesets" / "catacombs-level-diffuse.png";
-   _texture = TexturePool::getInstance().get(path);
+   const auto& property_map = data._tmx_object->_properties->_map;
+
+   const auto texture_path = ValueReader::readValue<std::string>("texture", property_map).value_or(std::string{default_rope_texture});
+   _texture = TexturePool::getInstance().get(texture_path);
 
    // load default flat normal map
    _normal_map = TexturePool::getInstance().get("data/sprites/default_normal.png");
 
-   // rope 1
-   // 971,  73 .. 973,  73
-   // 971, 211 .. 973, 211
-   _texture_rect_px.position.x = 971;
-   _texture_rect_px.position.y = 73;
-   _texture_rect_px.size.x = 3;
-   _texture_rect_px.size.y = 138;
-
-   // rope 2
-   // 1019,  72 .. 1021,  72
-   // 1019, 153 .. 1021, 153
-   //
-   // _texture_rect_px.position.x = 1019;
-   // _texture_rect_px.position.y = 72;
-   // _texture_rect_px.size.x = 3;
-   // _texture_rect_px.size.y = 81;
+   const auto rope_sprite_index = std::clamp(
+      ValueReader::readValue<int32_t>("sprite", property_map).value_or(1) - 1, 0, static_cast<int32_t>(rope_texture_rects.size()) - 1
+   );
+   _texture_rect_px = rope_texture_rects[rope_sprite_index];
 
    // read properties
    const auto push_interval_it = data._tmx_object->_properties->_map.find("push_interval_s");

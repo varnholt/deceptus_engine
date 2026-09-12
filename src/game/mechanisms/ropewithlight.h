@@ -50,6 +50,11 @@ private:
    sf::Vector2f _lamp_position_px_current;
    float _lamp_rotation_deg_previous{0.0f};
    float _lamp_rotation_deg_current{0.0f};
-   std::array<sf::IntRect, 3> _lamp_sprite_rects;
+   sf::IntRect _lamp_frame_rect_px;    //!< leftmost flicker frame of the lamp variant this instance uses
+   int32_t _lamp_frame_count{1};       //!< flicker frames the variant offers, 1 when it does not flicker
+   int32_t _lamp_frame_index{0};       //!< flicker frame currently on screen
+   float _lamp_frame_elapsed_s{0.0f};  //!< time spent on the current flicker frame
    std::shared_ptr<LightSystem::LightInstance> _light;
+
+   static int32_t _lamp_instance_counter;
 };

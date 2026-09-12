@@ -8,10 +8,33 @@
 
 #include <array>
 
+int32_t RopeWithLight::_lamp_instance_counter = 0;
+
 namespace
 {
+constexpr auto lamp_frame_pitch_px = 24;
+constexpr auto lamp_frame_duration_s = 0.12f;
+
+/// \brief one lamp variant in the rope sprite sheet, plus the flicker frames stored next to it.
+struct LampSprite
+{
+   sf::IntRect _first_frame_rect_px;  //!< leftmost frame of the variant in the rope sprite sheet
+   int32_t _frame_count{1};           //!< flicker frames following it to the right, including itself
+};
+
+//!< lamp 2 is delivered with a single drawing only, so it burns at a constant brightness.
+//!< not constexpr, see the note on rope_texture_rects
+const std::array lamp_sprites{
+   LampSprite{._first_frame_rect_px = sf::IntRect{{32, 0}, {16, 28}}, ._frame_count = 6},
+   LampSprite{._first_frame_rect_px = sf::IntRect{{32, 48}, {20, 25}}, ._frame_count = 1},
+   LampSprite{._first_frame_rect_px = sf::IntRect{{32, 96}, {16, 28}}, ._frame_count = 6},
+};
+
 static constexpr std::array rope_with_light_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "texture", .type = "string", .default_value = default_rope_texture},
+   PropertyInfo{.name = "sprite", .type = "int", .default_value = int32_t{1}},
+   PropertyInfo{.name = "lamp_sprite", .type = "int", .default_value = int32_t{1}},
 };
 static constexpr MechanismSchema rope_with_light_schema{
    .type_name = "RopeWithLight",
@@ -77,6 +100,16 @@ void RopeWithLight::update(const sf::Time& dt)
 {
    Rope::update(dt);
 
+   if (_lamp_frame_count > 1)
+   {
+      _lamp_frame_elapsed_s += dt.asSeconds();
+      while (_lamp_frame_elapsed_s > lamp_frame_duration_s)
+      {
+         _lamp_frame_elapsed_s -= lamp_frame_duration_s;
+         _lamp_frame_index = (_lamp_frame_index + 1) % _lamp_frame_count;
+      }
+   }
+
    _light->_pos_m = _chain_elements.back()->GetPosition();
    _light->updateSpritePosition();
 
@@ -104,10 +137,15 @@ void RopeWithLight::updateSpritePositions()
    const auto alpha = RenderInterpolation::getAlpha();
    const auto rotation_deg = _lamp_rotation_deg_previous + (_lamp_rotation_deg_current - _lamp_rotation_deg_previous) * alpha;
 
+   auto frame_rect_px = _lamp_frame_rect_px;
+   frame_rect_px.position.x += _lamp_frame_index * lamp_frame_pitch_px;
+
 #ifdef DECEPTUS_VRSFML
+   _lamp_sprite->textureRect = frame_rect_px;
    _lamp_sprite->rotation = sf::degrees(rotation_deg);
    _lamp_sprite->position = position_px;
 #else
+   _lamp_sprite->setTextureRect(frame_rect_px);
    _lamp_sprite->setRotation(sf::degrees(rotation_deg));
    _lamp_sprite->setPosition(position_px);
 #endif
@@ -124,26 +162,23 @@ void RopeWithLight::setup(const GameDeserializeData& data)
    _lamp_sprite = std::make_unique<sf::Sprite>(*_texture);
 #endif
 
-   // cut off 1st 4 pixels of the texture rect since there's some rope pixels in the spriteset
-   _lamp_sprite_rects = {
-      sf::IntRect{{1056, 28}, {24, 28}},
-      sf::IntRect{{1056, 78}, {24, 25}},
-      sf::IntRect{{1056, 131}, {24, 30}},
-   };
-
    const auto& map = data._tmx_object->_properties->_map;
 
-   auto sprite_index = std::clamp(ValueReader::readValue<int32_t>("sprite", map).value_or(1) - 1, 0, 3);
+   const auto lamp_sprite_index =
+      std::clamp(ValueReader::readValue<int32_t>("lamp_sprite", map).value_or(1) - 1, 0, static_cast<int32_t>(lamp_sprites.size()) - 1);
+   _lamp_frame_rect_px = lamp_sprites[lamp_sprite_index]._first_frame_rect_px;
+   _lamp_frame_count = lamp_sprites[lamp_sprite_index]._frame_count;
+
+   // start each lamp on a different frame so a row of them does not flicker in lockstep
+   _lamp_instance_counter++;
+   _lamp_frame_index = _lamp_instance_counter % _lamp_frame_count;
+
 #ifdef DECEPTUS_VRSFML
-   _lamp_sprite->textureRect = _lamp_sprite_rects[sprite_index];
-   _lamp_sprite->origin = {
-      static_cast<float>(_lamp_sprite_rects[sprite_index].size.x / 2), static_cast<float>(_lamp_sprite_rects[sprite_index].size.y / 2)
-   };
+   _lamp_sprite->textureRect = _lamp_frame_rect_px;
+   _lamp_sprite->origin = {static_cast<float>(_lamp_frame_rect_px.size.x / 2), static_cast<float>(_lamp_frame_rect_px.size.y / 2)};
 #else
-   _lamp_sprite->setTextureRect(_lamp_sprite_rects[sprite_index]);
-   _lamp_sprite->setOrigin(
-      {static_cast<float>(_lamp_sprite_rects[sprite_index].size.x / 2), static_cast<float>(_lamp_sprite_rects[sprite_index].size.y / 2)}
-   );
+   _lamp_sprite->setTextureRect(_lamp_frame_rect_px);
+   _lamp_sprite->setOrigin({static_cast<float>(_lamp_frame_rect_px.size.x / 2), static_cast<float>(_lamp_frame_rect_px.size.y / 2)});
 #endif
 
    // add raycast light; exclude all chain bodies from shadow casting — they are tiny
