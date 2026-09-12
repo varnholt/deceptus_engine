@@ -19,8 +19,10 @@ int32_t Rope::_instance_counter = 0;
 namespace
 {
 //!< rope 1 is the plain rope with a single knot, rope 2 the vine rope with its hook and side knots.
-//!< the rect width is also the rope's width on screen, so the knots keep sticking out of the strand
-constexpr std::array rope_texture_rects{
+//!< the rect width is also the rope's width on screen, so the knots keep sticking out of the strand.
+//!< not constexpr: the wasm compat shim wraps IntRect to keep the implicit widening to FloatRect
+//!< that VRSFML's textureRect needs, and its constructors are not constexpr the way vanilla's are
+const std::array rope_texture_rects{
    sf::IntRect{{0, 0}, {7, 141}},
    sf::IntRect{{12, 0}, {11, 120}},
 };

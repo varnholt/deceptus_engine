@@ -22,8 +22,9 @@ struct LampSprite
    int32_t _frame_count{1};           //!< flicker frames following it to the right, including itself
 };
 
-//!< lamp 2 is delivered with a single drawing only, so it burns at a constant brightness
-constexpr std::array lamp_sprites{
+//!< lamp 2 is delivered with a single drawing only, so it burns at a constant brightness.
+//!< not constexpr, see the note on rope_texture_rects
+const std::array lamp_sprites{
    LampSprite{._first_frame_rect_px = sf::IntRect{{32, 0}, {16, 28}}, ._frame_count = 6},
    LampSprite{._first_frame_rect_px = sf::IntRect{{32, 48}, {20, 25}}, ._frame_count = 1},
    LampSprite{._first_frame_rect_px = sf::IntRect{{32, 96}, {16, 28}}, ._frame_count = 6},
