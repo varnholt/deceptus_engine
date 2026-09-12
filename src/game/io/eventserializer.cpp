@@ -1,8 +1,10 @@
 #include "eventserializer.h"
 
-#include "framework/tools/log.h"
 #include "framework/tools/gamepaths.h"
+#include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
+#include "game/config/inputconfiguration.h"
+#include "game/player/playerregistry.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
 
@@ -28,6 +30,11 @@ constexpr uint8_t EVENT_UNKNOWN = 255;
 
 std::unordered_map<std::string, std::weak_ptr<EventSerializer>> EventSerializer::_instance_registry;
 
+HighResTimePoint EventSerializer::elapsedTimePoint() const
+{
+   return HighResTimePoint{std::chrono::duration_cast<HighResDuration>(std::chrono::microseconds(_elapsed_time.asMicroseconds()))};
+}
+
 void writeInt32(std::ostream& stream, int32_t value)
 {
    stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
@@ -36,6 +43,30 @@ void writeInt32(std::ostream& stream, int32_t value)
 int32_t readInt32(std::istream& stream)
 {
    int32_t value = 0;
+   stream.read(reinterpret_cast<char*>(&value), sizeof(value));
+   return value;
+}
+
+void writeFloat(std::ostream& stream, float value)
+{
+   stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
+}
+
+float readFloat(std::istream& stream)
+{
+   float value = 0.0f;
+   stream.read(reinterpret_cast<char*>(&value), sizeof(value));
+   return value;
+}
+
+void writeUInt16(std::ostream& stream, uint16_t value)
+{
+   stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
+}
+
+uint16_t readUint16(std::istream& stream)
+{
+   uint16_t value = 0;
    stream.read(reinterpret_cast<char*>(&value), sizeof(value));
    return value;
 }
@@ -103,13 +134,12 @@ void EventSerializer::add(const sf::Event& event)
       return;
    }
 
-   if (!filterMovementEvents(event))
+   if (!filterPlayerInputEvents(event))
    {
       return;
    }
 
-   const auto now = HighResClock::now();
-   _events.emplace_back(now, event);
+   _events.emplace_back(elapsedTimePoint(), event);
 }
 
 void EventSerializer::clear()
@@ -141,10 +171,12 @@ void writeEvent(std::ostream& stream, const sf::Event& event)
 
          if constexpr (event_id == EVENT_KEY_PRESSED || event_id == EVENT_KEY_RELEASED)
          {
-            writeUInt8(stream, static_cast<uint8_t>(visited_event.code));
-            uint8_t flags =
-               (visited_event.alt << 3) | (visited_event.control << 2) | (visited_event.shift << 1) | (visited_event.system << 0);
-            writeUInt8(stream, flags);
+            // what is written is the action the key stood for, not the key. a recording outlives the
+            // bindings it was made under, and a player who moves jump off space would otherwise get
+            // a demo that never jumps - or one that opens the inventory instead
+            const auto& key_to_action = InputConfiguration::getInstance()._key_to_action;
+            const auto action_it = key_to_action.find(visited_event.code);
+            writeUInt16(stream, action_it != key_to_action.end() ? static_cast<uint16_t>(action_it->second) : 0);
          }
          else
          {
@@ -152,6 +184,17 @@ void writeEvent(std::ostream& stream, const sf::Event& event)
          }
       }
    );
+}
+
+/// \brief reads one recorded action and resolves it to the key it is bound to right now.
+/// \param stream input stream positioned at the action field.
+/// \return key the action is currently bound to, or Unknown when it is not bound at all.
+sf::Keyboard::Key readActionKey(std::istream& stream)
+{
+   const auto action = static_cast<KeyPressed>(readUint16(stream));
+   const auto& action_to_key = InputConfiguration::getInstance()._action_to_key;
+   const auto key_it = action_to_key.find(action);
+   return key_it != action_to_key.end() ? key_it->second : sf::Keyboard::Key::Unknown;
 }
 
 sf::Event readEvent(std::istream& stream)
@@ -163,23 +206,13 @@ sf::Event readEvent(std::istream& stream)
       case EVENT_KEY_PRESSED:
       {
          sf::Event::KeyPressed key_event;
-         key_event.code = static_cast<sf::Keyboard::Key>(readUint8(stream));
-         const auto flags = readUint8(stream);
-         key_event.alt = (flags & 0x08);
-         key_event.control = (flags & 0x04);
-         key_event.shift = (flags & 0x02);
-         key_event.system = (flags & 0x01);
+         key_event.code = readActionKey(stream);
          return key_event;
       }
       case EVENT_KEY_RELEASED:
       {
          sf::Event::KeyReleased key_event;
-         key_event.code = static_cast<sf::Keyboard::Key>(readUint8(stream));
-         const auto flags = readUint8(stream);
-         key_event.alt = (flags & 0x08);
-         key_event.control = (flags & 0x04);
-         key_event.shift = (flags & 0x02);
-         key_event.system = (flags & 0x01);
+         key_event.code = readActionKey(stream);
          return key_event;
       }
       default:
@@ -207,6 +240,9 @@ void EventSerializer::serialize()
    Log::Info() << "serializing " << _events.size() << " events to " << recording_path;
    std::ofstream output_stream(recording_path, std::ios::out | std::ios::binary);
 
+   const auto start_position_px = _start_position_px.value_or(sf::Vector2f{});
+   writeFloat(output_stream, start_position_px.x);
+   writeFloat(output_stream, start_position_px.y);
    writeInt32(output_stream, static_cast<int32_t>(_events.size()));
 
    auto start_time = _events.front()._time_point;
@@ -224,6 +260,10 @@ void EventSerializer::deserialize(const std::filesystem::path& path)
    _events.clear();
 
    std::ifstream input_stream(path, std::ios::in | std::ios::binary);
+
+   const auto start_position_x_px = readFloat(input_stream);
+   const auto start_position_y_px = readFloat(input_stream);
+   _start_position_px = sf::Vector2f{start_position_x_px, start_position_y_px};
 
    const auto size = readInt32(input_stream);
 
@@ -249,7 +289,7 @@ void EventSerializer::debug()
    }
 }
 
-void EventSerializer::play()
+void EventSerializer::play(StartPosition start_position)
 {
    // if still busy playing, don't allow calling another time
    if (_playing)
@@ -262,31 +302,47 @@ void EventSerializer::play()
       return;
    }
 
+   if (start_position == StartPosition::Apply && _start_position_px.has_value())
+   {
+      const auto& player = PlayerRegistry::getFirst();
+      if (player)
+      {
+         player->setBodyViaPixelPosition(_start_position_px->x, _start_position_px->y);
+      }
+   }
+
    Log::Info() << "re-playing " << _events.size() << " events";
 
    _playing = true;
    _elapsed_time = sfcompat::timeZero();
    _current_event_index = 0;
-   _playback_start_time = HighResClock::now();  // Record when playback started
 
    DisplayMode::getInstance().enqueueSet(Display::ReplayPlaying);
 }
 
 void EventSerializer::update(sf::Time delta_time)
 {
+   // update is called once per simulation step, so this is the clock both ends of a recording run
+   // on: add stamps events with it and the loop below replays them against it. it is advanced here
+   // for recording serializers as well, which is why it sits ahead of the playback check
+   _elapsed_time += delta_time;
+
    if (!_playing || _events.empty() || !_callback)
    {
       return;
    }
 
-   const auto now = HighResClock::now();
-   const auto elapsed_duration = now - _playback_start_time;
+   const auto elapsed_duration = elapsedTimePoint().time_since_epoch();
 
    while (_current_event_index < _events.size())
    {
       const auto& event = _events[_current_event_index];
 
-      if (elapsed_duration >= event._duration)
+      // strictly greater, not equal: an event is stamped with the time that had elapsed when it
+      // arrived, and the step running at that moment had already been computed without it - the key
+      // first took effect on the step after. firing on equality replays every input one step early,
+      // which is a constant 3.4px lead at running speed and a missed ledge at the wrong moment
+      if (elapsed_duration > event._duration)
       {
          Log::Info() << "play event " << _current_event_index << " duration: " << event._duration.count();
          _callback(event._event);
@@ -310,26 +366,33 @@ bool EventSerializer::isPlaying() const
    return _playing;
 }
 
-bool EventSerializer::filterMovementEvents(const sf::Event& event)
+void EventSerializer::stopPlayback()
 {
-   static const std::unordered_set<sf::Keyboard::Key> movement_keys = {
-      sf::Keyboard::Key::LShift,
-      sf::Keyboard::Key::Left,
-      sf::Keyboard::Key::Right,
-      sf::Keyboard::Key::Up,
-      sf::Keyboard::Key::Down,
-      sf::Keyboard::Key::Enter,
-      sf::Keyboard::Key::Space
-   };
+   if (!_playing)
+   {
+      return;
+   }
+
+   _playing = false;
+
+   DisplayMode::getInstance().enqueueUnset(Display::ReplayPlaying);
+}
+
+bool EventSerializer::filterPlayerInputEvents(const sf::Event& event)
+{
+   // whatever the player is bound to is what a replay has to reproduce, so the set comes from the
+   // bindings rather than from a list of its own. a hardcoded one left out the two item slots and
+   // the inventory, and a recording then played back without a single attack in it
+   const auto& key_to_action = InputConfiguration::getInstance()._key_to_action;
 
    if (const auto* key_event = event.getIf<sf::Event::KeyPressed>())
    {
-      return movement_keys.contains(key_event->code);
+      return key_to_action.find(key_event->code) != key_to_action.end();
    }
 
    if (const auto* key_event = event.getIf<sf::Event::KeyReleased>())
    {
-      return movement_keys.contains(key_event->code);
+      return key_to_action.find(key_event->code) != key_to_action.end();
    }
 
    return false;
@@ -337,6 +400,18 @@ bool EventSerializer::filterMovementEvents(const sf::Event& event)
 
 void EventSerializer::setEnabled(bool enabled)
 {
+   // a recording holds key events and nothing else, so replaying it only lands where it was meant to
+   // when it starts from the spot it was captured at. this is where every recording path comes
+   // through - the f8 hotkey as well as the console's playback commands - so the position is taken here
+   if (enabled && !_enabled)
+   {
+      const auto& player = PlayerRegistry::getFirst();
+      if (player)
+      {
+         _start_position_px = player->getPixelPositionFloat();
+      }
+   }
+
    _enabled = enabled;
 }
 
@@ -345,7 +420,13 @@ void EventSerializer::start()
    DisplayMode::getInstance().enqueueSet(Display::ReplayRecording);
 
    clear();
+   _elapsed_time = sfcompat::timeZero();
    setEnabled(true);
+}
+
+const std::optional<sf::Vector2f>& EventSerializer::getStartPosition() const
+{
+   return _start_position_px;
 }
 
 void EventSerializer::stop()

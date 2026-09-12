@@ -54,8 +54,6 @@ void PlayerControls::update(const sf::Time& dt)
    // store where the player has received input from last time
    updatePlayerInput();
 
-   _event_serializer->update(dt);
-
    setWasMoving(isMovingHorizontally());
    setWasMovingLeft(isMovingLeft());
    setWasMovingRight(isMovingRight());
