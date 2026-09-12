@@ -8,9 +8,12 @@
 #include "box2d/box2d.h"
 
 #include <cstdint>
+#include <string_view>
 
 class GameNode;
 struct TmxObject;
+
+constexpr std::string_view default_rope_texture{"data/sprites/ropes.png"};
 
 /// \brief simulates and renders a swinging rope built from box2d chain segments.
 class Rope : public GameMechanism, public GameNode
