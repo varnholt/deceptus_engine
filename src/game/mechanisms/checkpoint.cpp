@@ -12,6 +12,7 @@
 #include "game/debug/debugdraw.h"
 #include "game/io/texturepool.h"
 #include "game/level/levelregistry.h"
+#include "game/level/roomupdater.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
@@ -213,6 +214,12 @@ void Checkpoint::update(const sf::Time& dt)
    {
       reached();
    }
+   else if (_triggered && RoomUpdater::getCurrentId() != _room_id_on_trigger)
+   {
+      // re-arm the checkpoint once the player has left it and changed the room, so passing it again
+      // later in the game saves again instead of doing nothing
+      _triggered = false;
+   }
 
    if (_reached)
    {
@@ -227,26 +234,31 @@ std::optional<sf::FloatRect> Checkpoint::getBoundingBoxPx()
 
 void Checkpoint::reached()
 {
-   if (_reached)
+   if (_triggered)
    {
       return;
    }
 
    Log::Info() << "reached checkpoint: " << _index;
 
+   _triggered = true;
+   _room_id_on_trigger = RoomUpdater::getCurrentId();
+
+   const auto first_activation = !_reached;
    _reached = true;
 
    // doesn't make sense to show fancy reveal animation if this is the active checkpoint anyway
-   if (SaveState::getCurrentLevelCheckpoint() != _index)
+   if (first_activation && SaveState::getCurrentLevelCheckpoint() == _index)
    {
-      _state = State::Activating;
-
-      // play reveal sound
-      Audio::getInstance().playSample({"player_spawn_01.ogg"});
+      _state = State::Active;
    }
    else
    {
-      _state = State::Active;
+      _state = State::Activating;
+      _sprite_index = 0.0f;
+
+      // play reveal sound
+      Audio::getInstance().playSample({"player_spawn_01.ogg"});
    }
 
    for (const auto& callback : _callbacks)
