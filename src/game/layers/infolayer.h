@@ -93,6 +93,11 @@ private:
    /// \param window SFML render target used for event replay icon output.
    void drawEventReplay(sf::RenderStates states, sf::RenderTarget& window);
 
+   /// \brief draws the centered hint telling the player how to end a running demo.
+   /// \param window render target the hint is drawn into.
+   /// \param states render states forwarded to the draw call.
+   void drawDemoHint(sf::RenderTarget& window, sf::RenderStates states);
+
    /// \brief updates slot texture rects from the current saved inventory entries.
    void updateInventoryItems();
 
