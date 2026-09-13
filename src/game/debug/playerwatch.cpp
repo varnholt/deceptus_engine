@@ -1,6 +1,7 @@
 #include "playerwatch.h"
 
 #include "framework/tools/log.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/constants.h"
 #include "game/level/luainterface.h"
 #include "game/level/luanode.h"
@@ -8,6 +9,7 @@
 #include "game/player/playerregistry.h"
 #include "game/state/savestate.h"
 
+#include <algorithm>
 #include <cmath>
 #include <sstream>
 
@@ -27,7 +29,7 @@ sf::Time __elapsed;        //!< time since the last log line
 void PlayerWatch::setIntervalInMs(int32_t interval_ms)
 {
    __interval_ms = std::max(0, interval_ms);
-   __elapsed = sf::Time::Zero;
+   __elapsed = sfcompat::timeZero();
 }
 
 int32_t PlayerWatch::getIntervalInMs()
@@ -60,7 +62,7 @@ void PlayerWatch::update(const sf::Time& delta_time)
       return;
    }
 
-   __elapsed = sf::Time::Zero;
+   __elapsed = sfcompat::timeZero();
 
    const auto& player = PlayerRegistry::getFirst();
    if (!player)
