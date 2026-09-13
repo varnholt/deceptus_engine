@@ -223,6 +223,8 @@ set(GAME_FILES
     src/game/debug/settingsui.cpp
     src/game/debug/settingsui.h
     src/game/debug/mechanismsample.h
+    src/game/debug/playerwatch.cpp
+    src/game/debug/playerwatch.h
     src/game/debug/mechanismschemawriter.cpp
     src/game/debug/mechanismschemawriter.h
     src/game/debug/profilingui.cpp
