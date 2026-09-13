@@ -19,20 +19,16 @@ build_*/*
 /data/schemas/
 /lab/patch_tool/target
 /lab/patch_tool/Cargo.lock
-/lab/wasm_browser_test/.venv
-/lab/wasm_browser_test/__pycache__
-/lab/wasm_browser_test/.pytest_cache
-/lab/wasm_browser_test/diag_*.png
-/lab/wasm_browser_test/last_screenshot.png
-/lab/media_assets/.venv
-/lab/media_assets/__pycache__
-/lab/media_assets/output
-/lab/record_gameplay/output
-/lab/record_gameplay/.venv
-/lab/record_gameplay/__pycache__
-/lab/record_gameplay/.pytest_cache
-lab/switch_smoke/out/
-lab/switch_smoke/__pycache__
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/out/
+**/output/
+/lab/cutscene_editor/bin/
+/lab/wasm_browser_test/*.png
+/dstar_performance_build/
+/thunderstorm_sounds/
+*.tmx.crc
 
 # emulator stdout captured by run_switch.bat
 logs/
