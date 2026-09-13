@@ -533,6 +533,11 @@ void Game::processPendingLevelLoad()
             _player->setBodyViaPixelPosition(_stored_position.x, _stored_position.y);
          }
 
+         // a demo starts from the spot its recording was captured at. this has to happen before the
+         // room and the camera are synchronised below, because both take their cue from where the
+         // player is. no-op unless a demo is running
+         DemoMode::getInstance().startPlaybackAtRecordedPosition();
+
          _player->updatePixelRect();
 
          Log::Info() << "level loading finished: " << level_item._level_name;
@@ -1053,11 +1058,10 @@ void Game::menuLoadRequest()
    _player->reset();
    loadLevel();
 
-   // a demo cuts straight in and places the player itself. the fade is started once the level is
-   // already being stepped, so the replay would otherwise spend its first second behind it
+   // a demo cuts straight in. the fade is started once the level is already being stepped, so the
+   // replay would otherwise spend its first second behind it
    if (DemoMode::getInstance().isActive())
    {
-      _level_loaded_callbacks.push_back([]() { DemoMode::getInstance().positionPlayerAtRecordedStart(); });
       return;
    }
 

@@ -90,6 +90,11 @@ void DemoMode::update(const sf::Time& delta_time)
       return;
    }
 
+   if (!_playback_started)
+   {
+      return;
+   }
+
    const auto serializer = EventSerializer::getInstance(event_serializer_name);
    if (!serializer || !serializer->isPlaying())
    {
@@ -162,7 +167,7 @@ bool DemoMode::notifyUserInput()
    return true;
 }
 
-void DemoMode::positionPlayerAtRecordedStart()
+void DemoMode::startPlaybackAtRecordedPosition()
 {
    if (!_active)
    {
@@ -177,18 +182,15 @@ void DemoMode::positionPlayerAtRecordedStart()
 
    // a recording is started mid-level, so the spot it was captured at travels inside it
    const auto& start_position_px = serializer->getStartPosition();
-   if (!start_position_px.has_value())
-   {
-      return;
-   }
-
    const auto& player = PlayerRegistry::getFirst();
-   if (!player)
+   if (start_position_px.has_value() && player)
    {
-      return;
+      player->setBodyViaPixelPosition(start_position_px->x, start_position_px->y);
    }
 
-   player->setBodyViaPixelPosition(start_position_px->x, start_position_px->y);
+   // Ignore: the player has just been put on the recorded spot above
+   serializer->play(EventSerializer::StartPosition::Ignore);
+   _playback_started = true;
 }
 
 bool DemoMode::isActive() const
@@ -225,6 +227,7 @@ void DemoMode::start()
    _menu_type_before = Menu::getInstance()->getCurrentType();
    _save_state_backup = SaveState::getCurrent();
    _controller_button_pressed_previously = false;
+   _playback_started = false;
    _active = true;
 
    DisplayMode::getInstance().enqueueSet(Display::Demo);
@@ -234,20 +237,18 @@ void DemoMode::start()
    save_state._player_info._name = demo_player_name;
    save_state._level_index = demo_item._level_index;
 
-   // this is the same handover the file select menu does when a game is started
+   // this is the same handover the file select menu does when a game is started. playback is not
+   // started here but from startPlaybackAtRecordedPosition, once the level load has a player to
+   // place - so the replay cannot run against a level that is still coming up
    Menu::getInstance()->hide();
    GameState::getInstance().enqueueResume();
    save_state._load_level_requested = true;
-
-   // the replay clock only advances while the level is being stepped, so starting playback here does
-   // not spend the first seconds of the demo on the loading screen
-   // Ignore: the spawn position went into the level load above, the player is already there
-   serializer->play(EventSerializer::StartPosition::Ignore);
 }
 
 void DemoMode::stop()
 {
    _active = false;
+   _playback_started = false;
    _idle_time = sfcompat::timeZero();
 
    const auto serializer = EventSerializer::getInstance(event_serializer_name);

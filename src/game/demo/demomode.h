@@ -54,11 +54,15 @@ public:
    /// \return true when a demo was ended and the triggering input should be swallowed.
    bool notifyUserInput();
 
-   /// \brief puts the player on the spot the running demo's recording was captured at.
+   /// \brief puts the player on the spot the running demo's recording was captured at and starts
+   ///        replaying it.
    ///
-   /// called once the demo's level has finished loading, which is the first moment the player body
-   /// exists and the last one before the level is stepped or drawn.
-   void positionPlayerAtRecordedStart();
+   /// called from the level load, after the player body exists and before the room and the camera
+   /// are synchronised - both take their cue from where the player is, so moving the player after
+   /// them leaves the camera behind at the level's own start position with the player off screen.
+   ///
+   /// does nothing unless a demo is running.
+   void startPlaybackAtRecordedPosition();
 
    /// \brief indicates whether a demo is currently replaying.
    /// \return true while a demo session is running.
@@ -90,6 +94,10 @@ private:
    sf::Time _idle_timeout = sf::seconds(60.0f);
 
    bool _active = false;
+
+   //! playback starts from the level load, not from start(), so "the serializer is not playing"
+   //! only means the recording ran out once this is set - before that it means it has yet to begin
+   bool _playback_started = false;
 
    //! the player's save slot, put back when the demo ends so a demo never shows up in the save file
    SaveState _save_state_backup;
