@@ -79,11 +79,19 @@ public:
    /// \brief logs event timing deltas for debugging recorded input streams.
    void debug();
 
+   /// \brief says whether replaying a recording also puts the player back where it was captured.
+   enum class StartPosition
+   {
+      Ignore,  //!< replay the input wherever the player happens to stand
+      Apply    //!< move the player to the recorded start first
+   };
+
    /// \brief starts replay mode and schedules loaded events from time zero.
-   void play();
+   /// \param start_position whether to move the player to the position stored in the recording.
+   void play(StartPosition start_position);
 
    /// \brief dispatches due replay events through the configured callback.
-   /// \param dt elapsed frame time, currently unused because timing is wall-clock based.
+   /// \param dt elapsed simulation time added to the playback clock.
    void update(sf::Time dt);
 
    /// \brief sets the callback invoked for each replayed event.
@@ -113,32 +121,47 @@ public:
    /// \brief enters replay-recording display mode, clears previous data, and enables capture.
    void start();
 
+   /// \brief returns the player position the loaded recording was started at.
+   /// \return recorded start position in pixels, or nullopt when none was captured.
+   const std::optional<sf::Vector2f>& getStartPosition() const;
+
    /// \brief exits replay-recording mode, disables capture, and serializes recorded events.
    void stop();
 
+   /// \brief ends replay playback before the last recorded event has been reached.
+   void stopPlayback();
+
 private:
-   /// \brief filters input to supported movement-related key press and key release events.
+   /// \brief converts the accumulated simulation time into the time point type the events carry.
+   /// \return elapsed simulation time as a high resolution time point.
+   HighResTimePoint elapsedTimePoint() const;
+
+   /// \brief filters input to the key press and key release events the player is controlled with.
    /// \param event incoming event to test.
    /// \return true when the event should be recorded.
-   static bool filterMovementEvents(const sf::Event& event);
+   static bool filterPlayerInputEvents(const sf::Event& event);
 
    static std::unordered_map<std::string, std::weak_ptr<EventSerializer>> _instance_registry;
 
    std::optional<size_t> _max_size;
    std::vector<ChronoEvent> _events;
 
+   /// \brief stores where the player stood when recording started. a recording is a stream of key
+   ///        events and replaying it only makes sense from the spot it was captured at, so the
+   ///        position travels with the events rather than being configured next to them.
+   std::optional<sf::Vector2f> _start_position_px;
+
    /// \brief indicates whether replay playback is active.
    bool _playing = false;
 
-   /// \brief stores elapsed replay time accumulated since play started.
+   /// \brief stores simulation time accumulated since recording or playback started. both ends use
+   ///        it: events are stamped with it and replayed against it, so a recording lands on the
+   ///        same simulation steps it was captured on. the wall clock would drift against those.
    sf::Time _elapsed_time;
 
    /// \brief stores index of the next event that has not been replayed yet.
    size_t _current_event_index = 0;
    bool _enabled = false;
-
-   /// \brief stores the high-resolution timestamp when replay playback began.
-   HighResTimePoint _playback_start_time;
 
    EventCallback _callback;
 };

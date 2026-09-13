@@ -1,0 +1,9 @@
+{
+   "idle_timeout_s": 60,
+   "demos": [
+      {
+         "recording": "data/demo/demo_1.dat",
+         "level_index": 0
+      }
+   ]
+}

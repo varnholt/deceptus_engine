@@ -6,10 +6,12 @@
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
+#include "framework/tools/sfmlstring.h"
 #include "game/animation/animationframedata.h"
 #include "game/camera/camerapanorama.h"
 #include "game/config/gameconfiguration.h"
 #include "game/config/inputconfiguration.h"
+#include "game/controller/gamecontrollerintegration.h"
 #include "game/debug/console.h"
 #include "game/io/texturepool.h"
 #include "game/level/roomupdater.h"
@@ -27,6 +29,12 @@
 
 namespace
 {
+
+//! white, and see-through enough to read the level behind it
+const sf::Color demo_hint_color{255, 255, 255, 120};
+
+//! the menus draw their titles at twice the font's native size
+constexpr auto demo_hint_scale = 2.0f;
 
 using HighResDuration = std::chrono::high_resolution_clock::duration;
 HighResDuration getRandomDuration(const HighResDuration& min_duration, const HighResDuration& max_duration)
@@ -715,6 +723,44 @@ void InfoLayer::draw(sf::RenderTarget& window, sf::RenderStates states)
    drawHealth(window, states);
    drawEventReplay(states, window);
    drawLoading(window, states);
+   drawDemoHint(window, states);
+}
+
+void InfoLayer::drawDemoHint(sf::RenderTarget& window, sf::RenderStates states)
+{
+   if (!DisplayMode::getInstance().isSet(Display::Demo))
+   {
+      return;
+   }
+
+   // a demo ends on any input, and which input that is depends on what the player has in their hands
+   const auto& hint_text = GameControllerIntegration::getInstance().isControllerConnected() ? sftr("Press any button to return to menu")
+                                                                                            : sftr("Press any key to return to menu");
+
+#ifdef DECEPTUS_VRSFML
+   sf::Text hint(getFont(), sf::Text::Data{});
+#else
+   sf::Text hint(getFont());
+#endif
+
+   // the menu titles are drawn at the font's native size and scaled up from there rather than
+   // rendered at a larger size, which is what keeps the glyph pixels square
+   hint.setCharacterSize(getFontNativeCharacterSize());
+   hint.setString(hint_text);
+   hint.setFillColor(demo_hint_color);
+   sfcompat::setScale(hint, {demo_hint_scale, demo_hint_scale});
+
+   const auto bounds = hint.getLocalBounds();
+   const auto view_width_px = static_cast<float>(GameConfiguration::getInstance()._view_width);
+   const auto view_height_px = static_cast<float>(GameConfiguration::getInstance()._view_height);
+
+   sfcompat::setPosition(
+      hint,
+      {std::round((view_width_px - bounds.size.x * demo_hint_scale) * 0.5f),
+       std::round((view_height_px - bounds.size.y * demo_hint_scale) * 0.5f)}
+   );
+
+   window.draw(hint, states);
 }
 
 void InfoLayer::drawDebugInfo(sf::RenderTarget& window)
@@ -900,8 +946,11 @@ void InfoLayer::setLoading(bool loading)
 
 void InfoLayer::updateEventReplayIcons()
 {
-   _event_replay_recording->_visible = DisplayMode::getInstance().isSet(Display::ReplayRecording);
-   _event_replay_playing->_visible = DisplayMode::getInstance().isSet(Display::ReplayPlaying);
+   // a demo is replayed input as well, but it is put in front of the player as if it were a game
+   const auto demo_active = DisplayMode::getInstance().isSet(Display::Demo);
+
+   _event_replay_recording->_visible = DisplayMode::getInstance().isSet(Display::ReplayRecording) && !demo_active;
+   _event_replay_playing->_visible = DisplayMode::getInstance().isSet(Display::ReplayPlaying) && !demo_active;
 }
 
 void InfoLayer::update(const sf::Time& delta_time)

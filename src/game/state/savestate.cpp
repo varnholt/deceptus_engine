@@ -1,6 +1,7 @@
 #include "savestate.h"
 
 #include "framework/tools/log.h"
+#include "game/demo/demomode.h"
 #include "game/level/levelregistry.h"
 
 #include <fstream>
@@ -142,6 +143,13 @@ void SaveState::deserializeFromFile(const std::string& filename)
 
 void SaveState::serializeToFile(const std::string& filename)
 {
+   // a demo runs in a throwaway slot that stands in for the player's own, so whatever it reaches
+   // along the way stays out of the save file
+   if (DemoMode::getInstance().isActive())
+   {
+      return;
+   }
+
    Log::Info() << "saving " << filename;
 
    std::string data = serialize();
@@ -195,6 +203,11 @@ void from_json(const nlohmann::json& j, SaveState& data)
 
 void SaveState::writePlayerStatsToFile(const std::string& filename) const
 {
+   if (DemoMode::getInstance().isActive())
+   {
+      return;
+   }
+
    // open the file and read its current contents
    std::ifstream input_file(filename);
    if (!input_file.is_open())

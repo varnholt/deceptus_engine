@@ -123,6 +123,7 @@ enum class Display
    ReplayPlaying = 0x100,
    InfoLayer = 0x200,
    CutsceneActive = 0x400,  //!< set while a scripted cutscene is running; blocks pause menu and inventory use
+   Demo = 0x800,            //!< set while an attract-mode demo replays a recorded session from the idle menu
 };
 
 /// \brief high-level runtime state of the game loop.

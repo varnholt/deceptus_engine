@@ -431,7 +431,7 @@ Console::Console()
       "playback replay",
       [this](const auto&)
       {
-         EventSerializer::getInstance("player")->play();
+         EventSerializer::getInstance("player")->play(EventSerializer::StartPosition::Apply);
          _log.emplace_back("playback started");
       }
    );
@@ -490,7 +490,7 @@ Console::Console()
       "globalplayback replay",
       [this](const auto&)
       {
-         EventSerializer::getInstance("global")->play();
+         EventSerializer::getInstance("global")->play(EventSerializer::StartPosition::Apply);
          _log.emplace_back("global playback started");
       }
    );
