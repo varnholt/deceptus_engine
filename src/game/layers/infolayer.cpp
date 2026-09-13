@@ -31,7 +31,7 @@ namespace
 {
 
 //! white, and see-through enough to read the level behind it
-const sf::Color demo_hint_color{255, 255, 255, 160};
+const sf::Color demo_hint_color{255, 255, 255, 120};
 
 //! the menus draw their titles at twice the font's native size
 constexpr auto demo_hint_scale = 2.0f;
