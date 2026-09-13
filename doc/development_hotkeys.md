@@ -77,6 +77,7 @@ height of the screen; whatever does not fit is reported as `+n more, keep typing
 | `tpp <x> <y>` | Teleport to tile position |
 | `tpc <n>` | Teleport to checkpoint n |
 | `tpr <name>` | Teleport to room by name |
+| `pwatch <interval_ms\|off>` | Log the player position, health and dialogue state to stdout |
 
 ### Player State
 
