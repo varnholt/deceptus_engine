@@ -220,7 +220,16 @@ MessageBox::MessageBox(
       }
    }
 
-   showAnimation();
+   // a box can be created after MessageBox::update has already run for this frame, so the initial
+   // layout has to be the one that update would have given it
+   if (_properties._animate_show_event)
+   {
+      showAnimation();
+   }
+   else
+   {
+      noAnimation();
+   }
 }
 
 MessageBox::~MessageBox()
@@ -699,6 +708,9 @@ void MessageBox::noAnimation()
 
    updateNextPageIcon();
    updateTextAndButtonColor(1.0f);
+
+   // update state
+   _state = MessageBox::DisplayState::Visible;
 }
 
 void MessageBox::updateTextAndButtonColor(float contents_alpha)
