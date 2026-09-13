@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
 
 struct TmxObject;
@@ -89,6 +90,8 @@ private:
    std::string _name;
    sf::FloatRect _rect;
    bool _reached = false;
+   bool _triggered = false;                     //!< blocks repeated saves until the checkpoint is re-armed
+   std::optional<int32_t> _room_id_on_trigger;  //!< room the player was in when the checkpoint last saved
    std::unique_ptr<sf::Sprite> _sprite;
    std::shared_ptr<sf::Texture> _texture;
    State _state{State::Inactive};
