@@ -42,3 +42,5 @@ imgui.ini
 
 # tiled writes one of these next to the project file, it holds per user editor state
 deceptus.tiled-session
+# frame dumps written to the working directory by the M recording hotkey
+/[0-9][0-9][0-9][0-9][0-9]*.bmp
