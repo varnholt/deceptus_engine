@@ -11,6 +11,7 @@
 #include "game/player/playerregistry.h"
 #include "game/state/displaymode.h"
 #include "game/state/gamestate.h"
+#include "game/ui/messagebox.h"
 
 #include <algorithm>
 #include <chrono>
@@ -256,6 +257,12 @@ void DemoMode::stop()
    {
       serializer->stopPlayback();
    }
+
+   // the replayed input opens dialogues, and a demo can be cut short while one of them is up. it
+   // would be left drawn over the menu, and the modal flag it holds would stop the idle timer from
+   // ever starting the next demo. the box is dropped rather than confirmed, so nothing it would
+   // have done on close happens
+   MessageBox::reset();
 
    // a demo that is cut short leaves the keys it replayed pressed, and those would otherwise carry
    // into whatever game is started next
