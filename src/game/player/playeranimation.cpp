@@ -966,11 +966,18 @@ std::optional<std::shared_ptr<Animation>> PlayerAnimation::processJumpAnimation(
       std::optional<std::shared_ptr<Animation>> next_cycle;
       next_cycle = data._points_right ? _jump_landing_r : _jump_landing_l;
 
-      if (next_cycle.value()->_current_frame == static_cast<int32_t>(next_cycle.value()->_frames.size()) - 1)
+      // the landing cycles are the ones that keep their last frame instead of rewinding, so their
+      // frame index only describes this landing once the cycle is the one being played. the mapped
+      // cycle is asked because that is the one receiving the frame updates while a weapon is armed
+      const auto& landing_cycle = getMappedArmedAnimation(next_cycle.value(), data);
+      const auto landing_played =
+         (landing_cycle == _current_cycle) && (landing_cycle->_current_frame == static_cast<int32_t>(landing_cycle->_frames.size()) - 1);
+
+      if (landing_played)
       {
          // reset last landing frame and stop playing the landing frames
          _jump_animation_reference = JumpReference::Landing;
-         next_cycle.value()->seekToStart();
+         landing_cycle->seekToStart();
          return std::nullopt;
       }
 
