@@ -1,5 +1,7 @@
 #include "console.h"
 
+#include "game/debug/playerwatch.h"
+
 #include "game/physics/renderinterpolation.h"
 
 #include "framework/tools/callbackmap.h"
@@ -10,6 +12,8 @@
 #include "game/level/gamemechanismregistry.h"
 #include "game/level/levelregistry.h"
 #include "game/level/levels.h"
+#include "game/level/luainterface.h"
+#include "game/level/luanode.h"
 #include "game/level/room.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/player/player.h"
@@ -19,10 +23,12 @@
 #include "game/shaders/postprocessing.h"
 #include "game/state/gamestate.h"
 #include "game/state/savestate.h"
+#include "game/ui/messagebox.h"
 #include "game/weapons/bow.h"
 #include "game/weapons/weaponfactory.h"
 
 #include <cctype>
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <ostream>
@@ -338,6 +344,22 @@ Console::Console()
       "teleportation",
       "tpp <x>,<y>: teleport to tile position",
       {"tpp 100, 330"}
+   );
+
+   registerCallback(
+      "pwatch",
+      [this](const auto& args)
+      {
+         if (args.size() == 2)
+         {
+            PlayerWatch::setIntervalInMs(args.at(1) == "off" ? 0 : std::atoi(args.at(1).c_str()));
+         }
+
+         _log.push_back(PlayerWatch::describe());
+      },
+      "teleportation",
+      "pwatch <interval_ms|off>: log the player position in tile coordinates to stdout",
+      {"pwatch 100", "pwatch off"}
    );
 
    registerCallback(

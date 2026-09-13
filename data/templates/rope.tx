@@ -2,6 +2,8 @@
 <template>
  <object type="Rope" width="24" height="96">
   <properties>
+   <property name="sprite" type="int" value="1"/>
+   <property name="texture" value="data/sprites/ropes.png"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

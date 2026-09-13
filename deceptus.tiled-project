@@ -1145,6 +1145,16 @@
             "id": 42,
             "members": [
                 {
+                    "name": "sprite",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "texture",
+                    "type": "string",
+                    "value": "data/sprites/ropes.png"
+                },
+                {
                     "name": "z",
                     "type": "int",
                     "value": 20
@@ -1162,6 +1172,21 @@
             "drawFill": true,
             "id": 43,
             "members": [
+                {
+                    "name": "lamp_sprite",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "sprite",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "texture",
+                    "type": "string",
+                    "value": "data/sprites/ropes.png"
+                },
                 {
                     "name": "z",
                     "type": "int",

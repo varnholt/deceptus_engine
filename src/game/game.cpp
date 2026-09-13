@@ -17,6 +17,7 @@
 #include "game/debug/debugdraw.h"
 #include "game/debug/debugdrawstates.h"
 #include "game/debug/mechanismschemawriter.h"
+#include "game/debug/playerwatch.h"
 #include "game/demo/demomode.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screenflash.h"
@@ -1244,6 +1245,10 @@ void Game::update()
          {
             _test_scene->update(dt);
          }
+#endif
+
+#ifdef DEVELOPMENT_MODE
+         PlayerWatch::update(dt);
 #endif
 
          // mechanisms file their transition requests while the level updates, so pick them up right after
