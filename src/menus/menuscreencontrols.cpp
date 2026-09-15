@@ -13,29 +13,55 @@
 
 #include <SDL3/SDL.h>
 
+#include <array>
+#include <cmath>
+#include <string_view>
+
 namespace
 {
 
-// input assignment view layout
-constexpr float assign_title_y = 22.0f;
-constexpr float assign_header_y = 52.0f;
-constexpr float assign_row_start_y = 72.0f;
-constexpr float assign_row_height = 18.0f;
-constexpr float assign_column_action_x = 72.0f;
-constexpr float assign_column_keyboard_x = 240.0f;
-constexpr float assign_status_y = 258.0f;
-constexpr float assign_hint_y = 280.0f;
-constexpr float assign_hint_2_y = 298.0f;
+// rows of the psd title layer the word occupies; the ornament below it is kept where it was drawn
+constexpr int32_t title_band_height_px = 40;
 
-const sf::Color color_title{220, 200, 255};
-const sf::Color color_header{130, 120, 150};
-const sf::Color color_row_normal{200, 185, 220};
-const sf::Color color_row_selected{255, 255, 255};
-const sf::Color color_row_disabled{100, 90, 115};
-const sf::Color color_row_reset_normal{220, 175, 140};
-const sf::Color color_row_reset_selected{255, 205, 165};
-const sf::Color color_waiting{255, 220, 80};
-const sf::Color color_hint{110, 100, 130};
+// every action is listed at once, so the rows sit tighter than the 26px the other option screens
+// space theirs at. all ten of them at this stride fill the key window the psd marked out
+constexpr float row_stride_px = 14.0f;
+
+// x offsets of the two columns, measured from the left edge of the key window
+constexpr float column_action_offset_px = 12.0f;
+constexpr float column_binding_offset_px = 110.0f;
+
+// width the binding column is centered as, wide enough for the longest label it shows
+constexpr float column_binding_width_px = 56.0f;
+
+constexpr float screen_width_px = 640.0f;
+
+const sf::Color color_label_disabled{100, 90, 115};
+
+// taken from the artwork they replace
+const sf::Color color_device_name{165, 170, 237};
+const sf::Color color_prompt{186, 26, 83};
+const sf::Color color_caption{127, 171, 253};
+
+// every button the controller artwork can light up, so they can all be cleared before one is shown
+constexpr std::array<std::string_view, 16> controller_button_layer_names{
+   "button_A",
+   "button_B",
+   "button_X",
+   "button_Y",
+   "button_MENU",
+   "button_VIEW",
+   "button_LEFTSTICK",
+   "button_RIGHTSTICK",
+   "button_DPAD_UP",
+   "button_DPAD_DOWN",
+   "button_DPAD_LEFT",
+   "button_DPAD_RIGHT",
+   "button_LB",
+   "button_RB",
+   "button_LT",
+   "button_RT"
+};
 
 bool isReadOnlyControllerAction(KeyPressed action)
 {
@@ -51,6 +77,87 @@ std::string_view controllerReadOnlyLabel(KeyPressed action)
    }
    return "Analog / DPad";
 }
+
+// the layer lighting up the given button in the controller artwork. the triggers are axes rather
+// than buttons, so button_LT and button_RT have no sdl button that reaches them
+std::string_view controllerButtonLayerName(int32_t sdl_button)
+{
+   switch (static_cast<SDL_GamepadButton>(sdl_button))
+   {
+      case SDL_GAMEPAD_BUTTON_SOUTH:
+      {
+         return "button_A";
+      }
+      case SDL_GAMEPAD_BUTTON_EAST:
+      {
+         return "button_B";
+      }
+      case SDL_GAMEPAD_BUTTON_WEST:
+      {
+         return "button_X";
+      }
+      case SDL_GAMEPAD_BUTTON_NORTH:
+      {
+         return "button_Y";
+      }
+      case SDL_GAMEPAD_BUTTON_BACK:
+      {
+         return "button_VIEW";
+      }
+      case SDL_GAMEPAD_BUTTON_START:
+      {
+         return "button_MENU";
+      }
+      case SDL_GAMEPAD_BUTTON_LEFT_STICK:
+      {
+         return "button_LEFTSTICK";
+      }
+      case SDL_GAMEPAD_BUTTON_RIGHT_STICK:
+      {
+         return "button_RIGHTSTICK";
+      }
+      case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
+      {
+         return "button_LB";
+      }
+      case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:
+      {
+         return "button_RB";
+      }
+      case SDL_GAMEPAD_BUTTON_DPAD_UP:
+      {
+         return "button_DPAD_UP";
+      }
+      case SDL_GAMEPAD_BUTTON_DPAD_DOWN:
+      {
+         return "button_DPAD_DOWN";
+      }
+      case SDL_GAMEPAD_BUTTON_DPAD_LEFT:
+      {
+         return "button_DPAD_LEFT";
+      }
+      case SDL_GAMEPAD_BUTTON_DPAD_RIGHT:
+      {
+         return "button_DPAD_RIGHT";
+      }
+      default:
+      {
+         return {};
+      }
+   }
+}
+
+#ifdef DECEPTUS_VRSFML
+sf::Utf8String sfstr(const std::string& text)
+{
+   return sf::Utf8String(text.c_str());
+}
+#else
+sf::String sfstr(const std::string& text)
+{
+   return sf::String::fromUtf8(text.begin(), text.end());
+}
+#endif
 
 }  // namespace
 
@@ -192,27 +299,49 @@ void MenuScreenControls::loadingFinished()
       layer_entry.second->_visible = false;
    }
 
+   setTitle("header", "Controls", title_band_height_px);
+   setCaption("audio_window-main", "Controls", color_caption);
+
+   // content_mask marks out the area the psd reserved for the action list
+   _row_list_rect = _layers["content_mask"]->_sprite->getGlobalBounds();
+   const auto& list_rect = _row_list_rect;
+   const auto action_count = static_cast<float>(InputConfiguration::actionList().size());
+
+   _row_stride = row_stride_px;
+   const auto list_top = list_rect.position.y + std::floor((list_rect.size.y - action_count * _row_stride) / 2.0f);
+   _row_label_base_rect = {{list_rect.position.x + column_action_offset_px, list_top}, {list_rect.size.x, _row_stride}};
+   _row_binding_base_rect = {{list_rect.position.x + column_binding_offset_px, list_top}, {list_rect.size.x, _row_stride}};
+
+   // the two columns do not fill the window the psd drew, so the highlight follows them rather than
+   // it, with the indent of the action column left over on the far side of the binding column
+   _cursor_highlight_x = list_rect.position.x;
+   _cursor_highlight.setSize({column_action_offset_px + column_binding_offset_px + column_binding_width_px, _row_stride});
+
+   auto make_label = [this]() -> std::unique_ptr<sf::Text>
+   {
 #ifdef DECEPTUS_VRSFML
-   _text_setkey_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
+      auto text = std::make_unique<sf::Text>(_font, sf::Text::Data{});
 #else
-   _text_setkey_button = std::make_unique<sf::Text>(_font);
+      auto text = std::make_unique<sf::Text>(_font);
 #endif
-   _text_setkey_button->setCharacterSize(12);
+      text->setFont(_font);
+      text->setCharacterSize(12);
+      return text;
+   };
+
+   _text_setkey_button = make_label();
    _text_setkey_button->setFillColor(color_label_normal);
-#ifdef DECEPTUS_VRSFML
-   _text_defaults_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
-#else
-   _text_defaults_button = std::make_unique<sf::Text>(_font);
-#endif
-   _text_defaults_button->setCharacterSize(12);
+
+   _text_defaults_button = make_label();
    _text_defaults_button->setFillColor(color_label_normal);
-#ifdef DECEPTUS_VRSFML
-   _text_back_button = std::make_unique<sf::Text>(_font, sf::Text::Data{});
-#else
-   _text_back_button = std::make_unique<sf::Text>(_font);
-#endif
-   _text_back_button->setCharacterSize(12);
+
+   _text_back_button = make_label();
    _text_back_button->setFillColor(color_label_normal);
+
+   _text_device_name = make_label();
+   _text_device_name->setFillColor(color_device_name);
+
+   _text_prompt = make_label();
 
    updateLayers();
 }
@@ -220,6 +349,46 @@ void MenuScreenControls::loadingFinished()
 void MenuScreenControls::updateLayers()
 {
    _layers["bg_temp"]->_visible = true;
+   _layers["header"]->_visible = true;
+   _layers["audio_window-main"]->_visible = true;
+
+   // the whole left pane is about a controller, so with none plugged in there is nothing to draw
+   // in it and the action list takes the screen on its own
+   const auto controller_connected = isControllerUsed();
+   const auto controller_selected = (_device_mode == DeviceMode::Controller);
+
+   _layers["controller"]->_visible = controller_connected;
+   _layers["controller_window_0"]->_visible = controller_connected && !controller_selected;
+   _layers["controller_window_1"]->_visible = controller_connected && controller_selected;
+
+   for (const auto& button_layer_name : controller_button_layer_names)
+   {
+      _layers[std::string{button_layer_name}]->_visible = false;
+   }
+
+   // the artwork lights up whichever button the action under the cursor is bound to. that is worth
+   // showing while the keyboard is the device too, since Y assigns a controller button from there
+   const auto& actions = InputConfiguration::actionList();
+   if (controller_connected && _action_row_index < static_cast<int32_t>(actions.size()))
+   {
+      const auto& button_bindings = InputConfiguration::getInstance()._action_to_controller_button;
+      const auto button_binding = button_bindings.find(actions[static_cast<size_t>(_action_row_index)]);
+      if (button_binding != button_bindings.end())
+      {
+         const auto button_layer_name = controllerButtonLayerName(button_binding->second);
+         if (!button_layer_name.empty())
+         {
+            _layers[std::string{button_layer_name}]->_visible = true;
+         }
+      }
+   }
+
+   // with the pane gone the list is the only thing left, so it moves to the middle of the screen.
+   // the two columns sit in the left part of the window the psd drew, so it is them rather than the
+   // window that has to end up centered
+   const auto columns_center_x =
+      _row_list_rect.position.x + (column_action_offset_px + column_binding_offset_px + column_binding_width_px) / 2.0f;
+   _row_x_offset = controller_connected ? 0.0f : std::floor((screen_width_px / 2.0f) - columns_center_x);
 
    _layers["defaults_xbox_0"]->_visible = isControllerUsed();
    _layers["defaults_xbox_1"]->_visible = false;
@@ -255,6 +424,31 @@ void MenuScreenControls::updateLayers()
    const auto& back_layer = isControllerUsed() ? _layers["back_xbox_0"] : _layers["back_pc_0"];
    _text_back_button->setString(sftr("Back"));
    placeTextRightOf(*_text_back_button, back_layer->_sprite->getGlobalBounds());
+
+   _text_device_name->setString(sfstr(_device_name));
+   placeTextCentered(*_text_device_name, _layers["deviceName_text"]->_sprite->getGlobalBounds());
+
+   if (_assignment_state == AssignmentState::WaitingForKey)
+   {
+      _text_prompt->setString(sftr("[ Press a key ]"));
+      _text_prompt->setFillColor(color_prompt);
+   }
+   else if (_assignment_state == AssignmentState::WaitingForButton)
+   {
+      _text_prompt->setString(sftr("[ Press a button ]"));
+      _text_prompt->setFillColor(color_prompt);
+   }
+   else if (_device_entries.size() > 1)
+   {
+      _text_prompt->setString(sftr("Left / Right: change device"));
+      _text_prompt->setFillColor(color_help_text);
+   }
+   else
+   {
+      // the keyboard is the only device there is, so there is nothing to change to
+      _text_prompt->setString(sftr(""));
+   }
+   placeTextCentered(*_text_prompt, _layers["[ Press a Key ]"]->_sprite->getGlobalBounds());
 }
 
 void MenuScreenControls::up()
@@ -282,7 +476,7 @@ void MenuScreenControls::down()
    {
       candidate++;
    }
-   if (candidate <= row_count)
+   if (candidate < row_count)
    {
       _action_row_index = candidate;
       MenuAudio::play(MenuAudio::SoundEffect::ItemNavigate);
@@ -291,13 +485,6 @@ void MenuScreenControls::down()
 
 void MenuScreenControls::select()
 {
-   const auto row_count = static_cast<int32_t>(InputConfiguration::actionList().size());
-   if (_action_row_index == row_count)
-   {
-      resetDefaults();
-      return;
-   }
-
    _pending_action = InputConfiguration::actionList()[static_cast<size_t>(_action_row_index)];
    if (_device_mode == DeviceMode::Controller)
    {
@@ -398,6 +585,33 @@ void MenuScreenControls::completeButtonAssignment(int32_t sdl_button)
    _previous_controller_button_values.clear();
 }
 
+std::string MenuScreenControls::bindingName(KeyPressed action) const
+{
+   const auto& active_config = InputConfiguration::getInstance();
+
+   if (_device_mode == DeviceMode::Controller)
+   {
+      if (isReadOnlyControllerAction(action))
+      {
+         return std::string{controllerReadOnlyLabel(action)};
+      }
+
+      const auto button_entry = active_config._action_to_controller_button.find(action);
+      if (button_entry != active_config._action_to_controller_button.end())
+      {
+         return InputConfiguration::buttonName(button_entry->second);
+      }
+      return "--";
+   }
+
+   const auto key_entry = active_config._action_to_key.find(action);
+   if (key_entry != active_config._action_to_key.end())
+   {
+      return InputConfiguration::keyName(key_entry->second);
+   }
+   return "--";
+}
+
 void MenuScreenControls::keyboardKeyPressed(sf::Keyboard::Key key)
 {
    if (_assignment_state == AssignmentState::WaitingForKey)
@@ -441,6 +655,10 @@ void MenuScreenControls::keyboardKeyPressed(sf::Keyboard::Key key)
    else if (key == sf::Keyboard::Key::Enter)
    {
       select();
+   }
+   else if (key == sf::Keyboard::Key::D)
+   {
+      resetDefaults();
    }
    else if (key == sf::Keyboard::Key::Escape)
    {
@@ -554,150 +772,49 @@ void MenuScreenControls::draw(sf::RenderTarget& window, sf::RenderStates states)
    updateLayers();
    MenuScreen::draw(window, states);
 
-   const auto& actions = InputConfiguration::actionList();
-   const auto row_count = static_cast<int32_t>(actions.size());
-
-   // cursor highlight
-   const auto cursor_row_y = assign_row_start_y + static_cast<float>(_action_row_index) * assign_row_height;
-   const auto cursor_action_index = static_cast<size_t>(_action_row_index);
-   const auto cursor_on_disabled =
-      (_device_mode == DeviceMode::Controller && cursor_action_index < actions.size() &&
-       isReadOnlyControllerAction(actions[cursor_action_index]));
-   if (!cursor_on_disabled)
+   if (!_text_prompt)
    {
-      _cursor_highlight.setSize({580.0f, assign_row_height - 1.0f});
-      sfcompat::setPosition(_cursor_highlight, {30.0f, cursor_row_y});
-      window.draw(_cursor_highlight, states);
+      return;
    }
 
-   // device selector title
-   _text->setCharacterSize(14);
-   _text->setFillColor(color_title);
-   const auto title_prefix = (_device_row_index > 0) ? "< " : "  ";
-   const auto title_suffix = (_device_row_index < static_cast<int32_t>(_device_entries.size()) - 1) ? " >" : "  ";
-   const auto full_title = title_prefix + _device_name + title_suffix;
-#ifdef DECEPTUS_VRSFML
-   _text->setString(full_title.c_str());
-#else
-   _text->setString(sf::String::fromUtf8(full_title.begin(), full_title.end()));
-#endif
-   const auto title_bounds = _text->getLocalBounds();
-   sfcompat::setPosition(*_text, {(640.0f - title_bounds.size.x) / 2.0f, assign_title_y});
-   window.draw(*_text, states);
+   const auto& actions = InputConfiguration::actionList();
 
-   _text->setCharacterSize(12);
-
-   // column headers
-   _text->setFillColor(color_header);
-   _text->setString(sftr("Action"));
-   sfcompat::setPosition(*_text, {assign_column_action_x, assign_header_y});
-   window.draw(*_text, states);
-
-   _text->setString(_device_mode == DeviceMode::Keyboard ? sftr("Keyboard") : sftr("Controller"));
-   sfcompat::setPosition(*_text, {assign_column_keyboard_x, assign_header_y});
-   window.draw(*_text, states);
-
-   // action rows
-   const auto& active_config = InputConfiguration::getInstance();
-
-   for (auto row_index = 0; row_index < row_count; row_index++)
+   for (auto row_index = 0; row_index < static_cast<int32_t>(actions.size()); row_index++)
    {
       const auto action = actions[static_cast<size_t>(row_index)];
-      const auto row_y = assign_row_start_y + static_cast<float>(row_index) * assign_row_height;
       const auto selected = (row_index == _action_row_index);
-      const auto disabled = (_device_mode == DeviceMode::Controller && isReadOnlyControllerAction(action));
-      const auto row_color = disabled ? color_row_disabled : (selected ? color_row_selected : color_row_normal);
+      const auto read_only = (_device_mode == DeviceMode::Controller && isReadOnlyControllerAction(action));
+      auto label_rect = rowRect(_row_label_base_rect, row_index);
+      label_rect.position.x += _row_x_offset;
 
-      _text->setFillColor(row_color);
-
-      const auto action_display_name = InputConfiguration::actionDisplayName(action);
-#ifdef DECEPTUS_VRSFML
-      _text->setString(action_display_name.c_str());
-#else
-      _text->setString(sf::String::fromUtf8(action_display_name.begin(), action_display_name.end()));
-#endif
-      sfcompat::setPosition(*_text, {assign_column_action_x, row_y});
-      window.draw(*_text, states);
-
-      std::string binding_name = "--";
-      if (_device_mode == DeviceMode::Controller && isReadOnlyControllerAction(action))
+      if (selected && !read_only)
       {
-         binding_name = controllerReadOnlyLabel(action);
+         sfcompat::setPosition(_cursor_highlight, {_cursor_highlight_x + _row_x_offset, label_rect.position.y});
+         window.draw(_cursor_highlight, states);
       }
-      else if (_device_mode == DeviceMode::Keyboard)
-      {
-         const auto key_entry = active_config._action_to_key.find(action);
-         if (key_entry != active_config._action_to_key.end())
-         {
-            binding_name = InputConfiguration::keyName(key_entry->second);
-         }
-      }
-      else
-      {
-         const auto button_entry = active_config._action_to_controller_button.find(action);
-         if (button_entry != active_config._action_to_controller_button.end())
-         {
-            binding_name = InputConfiguration::buttonName(button_entry->second);
-         }
-      }
-#ifdef DECEPTUS_VRSFML
-      _text->setString(binding_name.c_str());
-#else
-      _text->setString(binding_name);
-#endif
-      sfcompat::setPosition(*_text, {assign_column_keyboard_x, row_y});
+
+      _text->setFillColor(read_only ? color_label_disabled : (selected ? color_label_selected : color_label_normal));
+
+      _text->setString(sfstr(InputConfiguration::actionDisplayName(action)));
+      placeTextLeft(*_text, label_rect);
+      window.draw(*_text, states);
+
+      auto binding_rect = rowRect(_row_binding_base_rect, row_index);
+      binding_rect.position.x += _row_x_offset;
+
+      _text->setString(sfstr(bindingName(action)));
+      placeTextLeft(*_text, binding_rect);
       window.draw(*_text, states);
    }
 
-   // Reset Defaults row
+   if (isControllerUsed())
    {
-      const auto reset_row_y = assign_row_start_y + static_cast<float>(row_count) * assign_row_height;
-      const auto reset_selected = (_action_row_index == row_count);
-      _text->setFillColor(reset_selected ? color_row_reset_selected : color_row_reset_normal);
-      _text->setString(sftr("Reset to Defaults"));
-      sfcompat::setPosition(*_text, {assign_column_action_x, reset_row_y});
-      window.draw(*_text, states);
+      window.draw(*_text_device_name, states);
    }
-
-   // status text (shown while waiting for input)
-   if (_assignment_state == AssignmentState::WaitingForKey)
-   {
-      _text->setFillColor(color_waiting);
-      _text->setString(sftr("Press a key to assign  (Esc to cancel)"));
-      sfcompat::setPosition(*_text, {assign_column_action_x, assign_status_y});
-      window.draw(*_text, states);
-   }
-   else if (_assignment_state == AssignmentState::WaitingForButton)
-   {
-      _text->setFillColor(color_waiting);
-      _text->setString(sftr("Press a face or shoulder button  (Esc to cancel)"));
-      sfcompat::setPosition(*_text, {assign_column_action_x, assign_status_y});
-      window.draw(*_text, states);
-   }
-
-   // hint lines
-   _text->setFillColor(color_hint);
-   if (_device_mode == DeviceMode::Controller)
-   {
-      _text->setString(sftr("Enter / Y button: assign controller button"));
-   }
-   else
-   {
-      _text->setString(sftr("Enter: assign keyboard key    Y button: assign controller button"));
-   }
-   sfcompat::setPosition(*_text, {assign_column_action_x, assign_hint_y});
-   window.draw(*_text, states);
-
-   _text->setString(sftr("Left/Right: change device    Esc: save and return"));
-   sfcompat::setPosition(*_text, {assign_column_action_x, assign_hint_2_y});
-   window.draw(*_text, states);
-
-   if (_text_back_button)
-   {
-      window.draw(*_text_setkey_button, states);
-      window.draw(*_text_defaults_button, states);
-      window.draw(*_text_back_button, states);
-   }
+   window.draw(*_text_prompt, states);
+   window.draw(*_text_setkey_button, states);
+   window.draw(*_text_defaults_button, states);
+   window.draw(*_text_back_button, states);
 }
 
 /*
