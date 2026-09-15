@@ -105,6 +105,11 @@ private:
    /// \param sdl_button SDL gamepad button index to bind.
    void completeButtonAssignment(int32_t sdl_button);
 
+   /// \brief returns the binding shown in the second column for the given action.
+   /// \param action action to read the binding of.
+   /// \return key or button name, the read-only label for the actions a controller wires to its sticks, or "--" when unbound.
+   std::string bindingName(KeyPressed action) const;
+
    std::unique_ptr<sf::Text> _text;       //!< reused per draw call for all labels and table cells
 #ifdef DECEPTUS_VRSFML
    sf::RectangleShape _cursor_highlight{sf::RectangleShape::Data{.size = {0.0f, 0.0f}}};  //!< highlight rect drawn behind the selected row
@@ -115,6 +120,13 @@ private:
    std::unique_ptr<sf::Text> _text_setkey_button;
    std::unique_ptr<sf::Text> _text_defaults_button;
    std::unique_ptr<sf::Text> _text_back_button;
+   std::unique_ptr<sf::Text> _text_device_name;  //!< name of the device the bindings belong to, drawn below the controller artwork
+   std::unique_ptr<sf::Text> _text_prompt;       //!< line below the two windows: a hint while idle, a call to press something while assigning
+
+   sf::FloatRect _row_binding_base_rect;  //!< reference rect for the binding column at row 0
+   sf::FloatRect _row_list_rect;          //!< area the psd reserved for the action list
+   float _cursor_highlight_x = 0.0f;      //!< left edge of the key window, where the row highlight starts
+   float _row_x_offset = 0.0f;            //!< shifts the list to the middle of the screen while the controller pane is hidden
 
    // device selection state
    std::vector<DeviceEntry> _device_entries;
@@ -122,7 +134,7 @@ private:
 
    // input assignment state
    AssignmentState _assignment_state = AssignmentState::Idle;
-   int32_t _action_row_index = 0;                         //!< 0..num_actions-1 for action rows; num_actions for Reset Defaults
+   int32_t _action_row_index = 0;                         //!< row of the action list the cursor is on, 0..num_actions-1
    KeyPressed _pending_action = KeyPressedUp;             //!< action being reassigned while not Idle
    std::vector<bool> _previous_controller_button_values;  //!< previous-frame button states for edge detection
    DeviceMode _device_mode = DeviceMode::Keyboard;        //!< current device being configured
