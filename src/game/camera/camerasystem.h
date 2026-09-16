@@ -82,6 +82,15 @@ public:
    /// \return world-space center of the camera view.
    sf::Vector2f getCenterPx() const;
 
+   /// \brief computes the resting camera center normal tracking converges to for a stationary player.
+   /// \details mirrors updateY's target formula (player position plus the configured vertical
+   ///          offset), room-corrected the same way. updateX/updateY only ever close a fraction of
+   ///          the gap to this point each frame, so a player who has been standing still for a
+   ///          while can still be several pixels off it without any of it looking like motion -
+   ///          the gap only becomes visible once something closes it in a single step.
+   /// \return world-space center a stationary player's camera would eventually settle on.
+   sf::Vector2f getRestingCenterPx() const;
+
    /// \brief returns the global camera system instance.
    /// \return singleton camera system used by gameplay and rendering.
    static CameraSystem& getInstance();

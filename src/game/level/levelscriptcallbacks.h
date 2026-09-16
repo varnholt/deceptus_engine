@@ -55,6 +55,8 @@ int32_t setLuaNodeActive(lua_State* state);
 
 // audio / camera / scene
 int32_t getCameraCenter(lua_State* state);
+int32_t getRestingCameraCenter(lua_State* state);
+int32_t clampCameraToRoom(lua_State* state);
 int32_t playMusic(lua_State* state);
 int32_t setLevelMusic(lua_State* state);
 int32_t getCheckpoint(lua_State* state);
