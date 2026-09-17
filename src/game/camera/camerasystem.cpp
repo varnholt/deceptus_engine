@@ -301,6 +301,20 @@ void CameraSystem::syncNow()
    _lead_velocity_px_per_s = 0.0f;
 }
 
+sf::Vector2f CameraSystem::getRestingCenterPx() const
+{
+   const auto& camera_config = CameraSystemConfiguration::getInstance();
+   auto player = PlayerRegistry::getFirst();
+   const auto player_position_px = player->getPixelPositionFloat();
+
+   auto x = player_position_px.x;
+   auto y = player_position_px.y + camera_config.getPlayerOffsetY();
+
+   CameraRoomLock::correctedCamera(x, y, _focus_offset_px);
+
+   return {x, y};
+}
+
 void CameraSystem::snapTo(float x_px, float y_px)
 {
    _x_px = x_px;

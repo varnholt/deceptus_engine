@@ -368,6 +368,35 @@ Returns the current camera center in world pixel coordinates.
 |return|table|Table with fields `x` and `y`|
 
 
+## `getRestingCameraCenter`
+
+Returns the camera center normal tracking would eventually settle on for the player's current
+position, in world pixel coordinates. Normal camera tracking only closes a fraction of the distance
+to this point every frame, so a player who has been standing still for a while can look perfectly
+at rest while the camera is still several pixels short of it - a gap `getCameraCenter` would return
+as-is. Use this instead of `getCameraCenter` when a scripted camera path needs to return to "where
+the player actually rests", e.g. before calling `unlock_camera`, so handing tracking back to the
+engine doesn't produce a small visible correction.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|return|table|Table with fields `x` and `y`|
+
+
+## `clampCameraToRoom`
+
+Clamps a camera-center candidate to the sub-room bounds of the room the player is currently in, the
+same way normal camera tracking keeps the view inside the room. Use it when building a scripted
+`move_camera` target so a camera path never shows content beyond the current room's edge. Returns
+the position unchanged when there is no active room boundary to clamp against.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|Candidate camera center x in world pixels|
+|2|float|Candidate camera center y in world pixels|
+|return|table|Table with fields `x` and `y`, clamped to the current room|
+
+
 ## `setCameraPosition`
 
 Snaps the camera to a fixed world position and stops it from following the player.

@@ -253,6 +253,16 @@ public:
    /// \return world-space center of the camera view.
    sf::Vector2f getCameraCenter() const;
 
+   /// \brief clamps a camera-center candidate to the current room's sub-room bounds.
+   /// \param x_px camera center x in world pixels.
+   /// \param y_px camera center y in world pixels.
+   /// \return the clamped camera center; unchanged when no room boundary applies.
+   sf::Vector2f clampCameraToRoom(float x_px, float y_px) const;
+
+   /// \brief returns the camera center normal tracking converges to for a stationary player.
+   /// \return world-space center a stationary player's camera would eventually settle on.
+   sf::Vector2f getRestingCameraCenter() const;
+
    /// \brief returns the bounding box of the first mechanism that matches the query.
    /// \param search_pattern regex used to select mechanisms.
    /// \param group optional mechanism group filter.

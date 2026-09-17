@@ -300,6 +300,36 @@ int32_t getCameraCenter(lua_State* state)
    return 1;
 }
 
+int32_t getRestingCameraCenter(lua_State* state)
+{
+   const auto camera_center = LevelScript::getCurrent()->getRestingCameraCenter();
+   lua_createtable(state, 0, 2);
+   lua_pushnumber(state, camera_center.x);
+   lua_setfield(state, -2, "x");
+   lua_pushnumber(state, camera_center.y);
+   lua_setfield(state, -2, "y");
+   return 1;
+}
+
+int32_t clampCameraToRoom(lua_State* state)
+{
+   if (lua_gettop(state) != 2)
+   {
+      return 0;
+   }
+
+   const auto x_px = static_cast<float>(lua_tonumber(state, 1));
+   const auto y_px = static_cast<float>(lua_tonumber(state, 2));
+   const auto clamped = LevelScript::getCurrent()->clampCameraToRoom(x_px, y_px);
+
+   lua_createtable(state, 0, 2);
+   lua_pushnumber(state, clamped.x);
+   lua_setfield(state, -2, "x");
+   lua_pushnumber(state, clamped.y);
+   lua_setfield(state, -2, "y");
+   return 1;
+}
+
 int32_t showDialogue(lua_State* state)
 {
    const auto argument_count = lua_gettop(state);

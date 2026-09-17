@@ -7,6 +7,7 @@
 #include "game/audio/audio.h"
 #include "game/audio/musicfilenames.h"
 #include "game/audio/musicplayer.h"
+#include "game/camera/cameraroomlock.h"
 #include "game/camera/camerasystem.h"
 #include "game/camera/camerazoom.h"
 #include "game/constants.h"
@@ -201,6 +202,8 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "moveSpriteAtSpeed", LevelScriptCallbacks::moveSpriteAtSpeed);
    lua_register(_lua_state, "loadCutscene", LevelScriptCallbacks::loadCutscene);
    lua_register(_lua_state, "getCameraCenter", LevelScriptCallbacks::getCameraCenter);
+   lua_register(_lua_state, "getRestingCameraCenter", LevelScriptCallbacks::getRestingCameraCenter);
+   lua_register(_lua_state, "clampCameraToRoom", LevelScriptCallbacks::clampCameraToRoom);
    lua_register(_lua_state, "getMechanismRect", LevelScriptCallbacks::getMechanismRect);
    lua_register(_lua_state, "getMechanismProperty", LevelScriptCallbacks::getMechanismProperty);
 
@@ -967,6 +970,17 @@ void LevelScript::unlockCamera()
 sf::Vector2f LevelScript::getCameraCenter() const
 {
    return CameraSystem::getInstance().getCenterPx();
+}
+
+sf::Vector2f LevelScript::getRestingCameraCenter() const
+{
+   return CameraSystem::getInstance().getRestingCenterPx();
+}
+
+sf::Vector2f LevelScript::clampCameraToRoom(float x_px, float y_px) const
+{
+   CameraRoomLock::correctedCamera(x_px, y_px, CameraSystem::getInstance().getFocusOffset());
+   return {x_px, y_px};
 }
 
 std::optional<sf::FloatRect> LevelScript::getMechanismRect(const std::string& search_pattern, const std::optional<std::string>& group) const
