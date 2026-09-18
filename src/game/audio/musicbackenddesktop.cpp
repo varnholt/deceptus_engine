@@ -116,13 +116,16 @@ private:
          return false;
       }
 
-      // openFromMemory references the buffer rather than copying it, so it has to be stored
-      // before the call and must outlive the stream. Stop the slot's current stream first: if
-      // it is still playing, its internal streaming thread keeps reading the old buffer, and
-      // overwriting _music_data[slot] out from under it is a use-after-free.
-      _music[slot].stop();
+      // openFromMemory() itself calls stop() first on whatever _music_data[slot] currently holds
+      // (sf::Music::stop() seeks back to 0, which reads from the stream's current buffer) before
+      // switching to the new one - so the old buffer has to stay valid and untouched until
+      // openFromMemory() returns, not just until this function starts. The new bytes are opened
+      // directly out of file_contents; a real ogg file is always far past the small-string-
+      // optimization threshold, so moving it into _music_data[slot] afterwards keeps the exact
+      // heap address openFromMemory just captured, which is what has to outlive the stream.
+      const auto opened = _music[slot].openFromMemory(file_contents->data(), file_contents->size());
       _music_data[slot] = std::move(*file_contents);
-      return _music[slot].openFromMemory(_music_data[slot].data(), _music_data[slot].size());
+      return opened;
    }
 
    std::array<sf::Music, 2> _music;
