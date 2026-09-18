@@ -117,7 +117,10 @@ private:
       }
 
       // openFromMemory references the buffer rather than copying it, so it has to be stored
-      // before the call and must outlive the stream.
+      // before the call and must outlive the stream. Stop the slot's current stream first: if
+      // it is still playing, its internal streaming thread keeps reading the old buffer, and
+      // overwriting _music_data[slot] out from under it is a use-after-free.
+      _music[slot].stop();
       _music_data[slot] = std::move(*file_contents);
       return _music[slot].openFromMemory(_music_data[slot].data(), _music_data[slot].size());
    }
