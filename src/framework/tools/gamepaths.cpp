@@ -1,10 +1,10 @@
 #include "gamepaths.h"
-#include <cstdlib>
-#include <stdexcept>
 
-#ifdef __SWITCH__
+#include "framework/tools/assetsource.h"
+
+#include <cstdlib>
 #include <fstream>
-#endif
+#include <stdexcept>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -67,9 +67,9 @@ std::filesystem::path getPreferencesFile(const std::string& filename)
    if (!std::filesystem::exists(target))
    {
       const auto bundled_default = std::filesystem::path("data/config") / filename;
+#ifdef __SWITCH__
       if (std::filesystem::exists(bundled_default))
       {
-#ifdef __SWITCH__
          // the source lives in romfs and the target on the sd card, which are two separate
          // devoptab devices. newlib's copy_file cannot move data between them: it creates
          // the target, copies nothing, and reports failure through the error_code that the
@@ -90,11 +90,17 @@ std::filesystem::path getPreferencesFile(const std::string& filename)
             std::error_code remove_error;
             std::filesystem::remove(target, remove_error);
          }
-#else
-         std::error_code error_code;
-         std::filesystem::copy_file(bundled_default, target, error_code);
-#endif
       }
+#else
+      // bundled_default may live inside the shipping-mode packed archive rather than on disk, so
+      // it has to be read through AssetSource rather than std::filesystem::copy_file.
+      const auto bundled_default_contents = AssetSource::readFile(bundled_default);
+      if (bundled_default_contents.has_value())
+      {
+         std::ofstream destination(target, std::ios::binary | std::ios::trunc);
+         destination.write(bundled_default_contents->data(), static_cast<std::streamsize>(bundled_default_contents->size()));
+      }
+#endif
    }
 
    return target;

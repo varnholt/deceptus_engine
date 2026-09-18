@@ -1,5 +1,6 @@
 #include "musicplayer.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "game/config/gameconfiguration.h"
 
@@ -233,7 +234,7 @@ void MusicPlayer::adjustActiveMusicVolume()
 void MusicPlayer::beginTransition(const TrackRequest& request)
 {
    // check if the file exists before attempting to load
-   if (!std::filesystem::exists(request.filename))
+   if (!AssetSource::exists(request.filename))
    {
       Log::Error() << "music file does not exist: " << request.filename;
       return;

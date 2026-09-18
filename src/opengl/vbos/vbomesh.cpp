@@ -1,11 +1,11 @@
 #include "vbomesh.h"
 
+#include "framework/tools/assetsource.h"
 #include "opengl/glutils.h"
 
 #include <algorithm>
 #include <charconv>  // for std::from_chars
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string_view>  // for std::string_view
@@ -172,13 +172,15 @@ void VBOMesh::loadObj(const char* filename)
 
    int face_count = 0;
 
-   std::ifstream input_filestream(filename, std::ios::in);
+   const auto file_contents = AssetSource::readFile(filename);
 
-   if (!input_filestream)
+   if (!file_contents.has_value())
    {
       std::cerr << "Unable to open OBJ file: " << filename << "\n";
       exit(1);
    }
+
+   std::istringstream input_filestream(*file_contents);
 
    std::string line;
    std::string token;
@@ -367,8 +369,6 @@ void VBOMesh::loadObj(const char* filename)
       }
       getline(input_filestream, line);
    }
-
-   input_filestream.close();
 
    //    normals.clear();
    //    if (normals.size() == 0) {

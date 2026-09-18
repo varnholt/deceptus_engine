@@ -2,7 +2,6 @@
 #include "levelscriptcallbacks.h"
 
 #include <cstdlib>
-#include <fstream>
 #include <lua.hpp>
 #include <sstream>
 #include <type_traits>
@@ -10,6 +9,7 @@
 
 #include "SFML/Graphics.hpp"
 #include "framework/tmxparser/tmxtools.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "game/audio/musicplayertypes.h"
@@ -877,8 +877,8 @@ int32_t loadCutscene(lua_State* state)
    }
 
    const std::string path = lua_tostring(state, 1);
-   std::ifstream file_stream(path);
-   if (!file_stream.is_open())
+   const auto file_contents = AssetSource::readFile(path);
+   if (!file_contents.has_value())
    {
       Log::Error() << "loadCutscene: cannot open " << path;
       return 0;
@@ -887,7 +887,7 @@ int32_t loadCutscene(lua_State* state)
    nlohmann::json json_data;
    try
    {
-      json_data = nlohmann::json::parse(file_stream);
+      json_data = nlohmann::json::parse(*file_contents);
    }
    catch (const std::exception& exception)
    {

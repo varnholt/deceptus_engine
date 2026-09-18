@@ -9,6 +9,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/constants.h"
@@ -204,7 +205,7 @@ void MovingPlatform::setup(const GameDeserializeData& data)
    const auto texture_path = data._base_path / "tilesets" / "platforms.png";
    const auto normal_map_filename = (texture_path.stem().string() + "_normals" + texture_path.extension().string());
    const auto normal_map_path = (texture_path.parent_path() / normal_map_filename);
-   if (std::filesystem::exists(normal_map_path))
+   if (AssetSource::exists(normal_map_path))
    {
       _normal_map = TexturePool::getInstance().get(normal_map_path);
    }

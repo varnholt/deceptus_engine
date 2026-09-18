@@ -94,6 +94,8 @@ set(GAME_FILES
     src/framework/tmxparser/tmxtileset.h
     src/framework/tmxparser/tmxtools.cpp
     src/framework/tmxparser/tmxtools.h
+    src/framework/tools/assetsource.cpp
+    src/framework/tools/assetsource.h
     src/framework/tools/callbackmap.cpp
     src/framework/tools/checksum.cpp
     src/framework/tools/elapsedtimer.cpp
@@ -1134,6 +1136,19 @@ else()
         GLEW
         GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
         GIT_TAG glew-cmake-2.3.0)
+    # libarchive needs zlib to decode the deflated entries `cmake -E tar --format=zip` writes.
+    # Neither the CI image nor a plain dev machine can be relied on to have zlib installed, so it
+    # is fetched too and OVERRIDE_FIND_PACKAGE redirects libarchive's own find_package(ZLIB) call
+    # to this fetched copy instead of searching the system.
+    FetchContent_Declare(
+        ZLIB
+        GIT_REPOSITORY https://github.com/madler/zlib.git
+        GIT_TAG v1.3.1
+        OVERRIDE_FIND_PACKAGE)
+    FetchContent_Declare(
+        LIBARCHIVE
+        GIT_REPOSITORY https://github.com/libarchive/libarchive.git
+        GIT_TAG v3.8.9)
 
     # we only ever link libglew_static, so don't build the shared glew library at all
     set(glew-cmake_BUILD_SHARED OFF CACHE BOOL "" FORCE)
@@ -1147,7 +1162,31 @@ else()
         set(AGL_LIBRARY "" CACHE FILEPATH "AGL is obsolete on modern macOS SDKs" FORCE)
     endif()
 
-    FetchContent_MakeAvailable(SFML SDL3 LUA GLEW)
+    # libarchive is only used to read the shipping-mode data.pak (see AssetSource), so its own
+    # command-line tools, tests, and every format/filter beyond zip+deflate are switched off.
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(ENABLE_TEST OFF CACHE BOOL "" FORCE)
+    set(ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+    set(ENABLE_TAR OFF CACHE BOOL "" FORCE)
+    set(ENABLE_CPIO OFF CACHE BOOL "" FORCE)
+    set(ENABLE_CAT OFF CACHE BOOL "" FORCE)
+    set(ENABLE_UNZIP OFF CACHE BOOL "" FORCE)
+    set(ENABLE_ZLIB ON CACHE BOOL "" FORCE)
+
+    FetchContent_MakeAvailable(SFML SDL3 LUA GLEW ZLIB)
+
+    # OVERRIDE_FIND_PACKAGE redirects find_package(ZLIB) to the fetched copy and sets the modern
+    # ZLIB::ZLIB target, but libarchive's CMakeLists reads the legacy ZLIB_INCLUDE_DIR/ZLIB_LIBRARIES
+    # module variables directly, which the redirect leaves unset. zlib.h lives in the source tree
+    # while the generated zconf.h lives in the build tree, so both are needed as include dirs.
+    # ZLIB_LIBRARIES is set to the target name itself (zlibstatic, always built by zlib's own
+    # CMakeLists regardless of BUILD_SHARED_LIBS) rather than a path, so target_link_libraries
+    # resolves it as a target and propagates its include dirs/link requirements normally.
+    set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR};${zlib_BINARY_DIR}" CACHE PATH "" FORCE)
+    set(ZLIB_LIBRARY zlibstatic CACHE STRING "" FORCE)
+    set(ZLIB_LIBRARIES zlibstatic CACHE STRING "" FORCE)
+
+    FetchContent_MakeAvailable(LIBARCHIVE)
 
     # Apply missing-include patch to vanilla SFML 3.0.x.
     # Newer libc++ (Xcode 26.5+) no longer transitively includes <ostream>, so
@@ -1281,6 +1320,13 @@ target_link_libraries(
 target_link_libraries(deceptus PRIVATE SFML::Audio)
 if(NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
     target_link_libraries(deceptus PRIVATE libglew_static)
+    target_link_libraries(deceptus PRIVATE archive_static)
+
+    # archive_static sets this via the old-style COMPILE_DEFINITIONS target property rather than
+    # target_compile_definitions(... PUBLIC ...), so it never propagates to consumers: without it,
+    # archive.h assumes the API lives in a DLL and decorates every declaration __declspec(dllimport),
+    # which left AssetSource's calls unresolved at link time.
+    target_compile_definitions(deceptus PRIVATE LIBARCHIVE_STATIC)
 endif()
 
 if(NINTENDO_SWITCH)
@@ -1318,6 +1364,24 @@ if(NINTENDO_SWITCH)
         "1.0.0")
 
     nx_create_nro(deceptus NACP ${CMAKE_CURRENT_BINARY_DIR}/deceptus.nacp ROMFS ${CMAKE_BINARY_DIR}/romfs)
+endif()
+
+if(NOT DECEPTUS_DEVELOPMENT_MODE AND NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
+    # Shipping desktop builds pack data/ into a single zip archive instead of installing it as a
+    # loose tree, so assets are not directly browsable/editable next to the executable. AssetSource
+    # (src/framework/tools/assetsource.cpp) reads it back at runtime via libarchive. `cmake -E tar`
+    # writes entries as "data/..." when run with data/ as the working directory, matching every
+    # relative "data/..." literal in the codebase without having to rewrite any of them.
+    add_custom_target(
+        deceptus_data_pak
+        COMMAND ${CMAKE_COMMAND} -E tar cf ${CMAKE_BINARY_DIR}/data.pak --format=zip -- data
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        BYPRODUCTS ${CMAKE_BINARY_DIR}/data.pak
+        COMMENT "packing data/ into data.pak")
+
+    add_dependencies(deceptus deceptus_data_pak)
+
+    install(FILES ${CMAKE_BINARY_DIR}/data.pak DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 if(WIN32)

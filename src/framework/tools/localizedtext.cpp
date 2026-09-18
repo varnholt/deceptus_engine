@@ -4,11 +4,11 @@
 #include <array>
 #include <cctype>
 #include <cstdint>
-#include <fstream>
 #include <string_view>
 
 #include <SFML/Graphics/Text.hpp>
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 #include "json/json.hpp"
@@ -83,15 +83,15 @@ BreakRules loadBreakRules(const std::string& locale)
    BreakRules rules;
 
    const auto path = std::string{"data/locale/"} + locale + ".json";
-   std::ifstream file_stream(path);
-   if (!file_stream.is_open())
+   const auto file_contents = AssetSource::readFile(path);
+   if (!file_contents.has_value())
    {
       return rules;
    }
 
    try
    {
-      const auto json = nlohmann::json::parse(std::string{std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>()});
+      const auto json = nlohmann::json::parse(*file_contents);
 
       const auto section = json.find("@line_break");
       if (section == json.end())

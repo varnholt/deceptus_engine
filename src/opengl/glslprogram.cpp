@@ -2,9 +2,7 @@
 
 #include "glutils.h"
 
-#include <sys/stat.h>
-#include <fstream>
-#include <sstream>
+#include "framework/tools/assetsource.h"
 
 namespace GLSLShaderInfo
 {
@@ -134,7 +132,8 @@ void GLSLProgram::compileShader(const char* fileName, GLSLShader::GLSLShaderType
 {
    _filename = fileName;
 
-   if (!fileExists(fileName))
+   const auto file_contents = AssetSource::readFile(fileName);
+   if (!file_contents.has_value())
    {
       std::string message = std::string("Shader: ") + fileName + " not found.";
       throw GLSLProgramException(message);
@@ -149,19 +148,7 @@ void GLSLProgram::compileShader(const char* fileName, GLSLShader::GLSLShaderType
       }
    }
 
-   std::ifstream in_file(fileName, std::ios::in);
-   if (!in_file)
-   {
-      std::string message = std::string("Unable to open: ") + fileName;
-      throw GLSLProgramException(message);
-   }
-
-   // Get file contents
-   std::stringstream code;
-   code << in_file.rdbuf();
-   in_file.close();
-
-   compileShader(code.str(), type, fileName);
+   compileShader(*file_contents, type, fileName);
 }
 
 void GLSLProgram::compileShader(const std::string& source, GLSLShader::GLSLShaderType type, const char* fileName)
@@ -621,11 +608,3 @@ int GLSLProgram::getUniformLocation(const char* name)
    return _uniform_locations[name];
 }
 
-bool GLSLProgram::fileExists(const std::string& fileName)
-{
-   struct stat file_info;
-   int stat_result = -1;
-
-   stat_result = stat(fileName.c_str(), &file_info);
-   return 0 == stat_result;
-}

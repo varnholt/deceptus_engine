@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 #include "framework/easings/easings.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 
 namespace
@@ -164,7 +165,8 @@ void show(sf::RenderWindow& window)
 #else
    sf::Texture loading_texture;
    window.clear(sf::Color(30, 30, 30));
-   if (loading_texture.loadFromFile("data/game/splash.png"))
+   const auto splash_texture_contents = AssetSource::readFile("data/game/splash.png");
+   if (splash_texture_contents.has_value() && loading_texture.loadFromMemory(splash_texture_contents->data(), splash_texture_contents->size()))
    {
       sf::Sprite loading_sprite(loading_texture);
 

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <ranges>
 #include <stop_token>
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 
 namespace
@@ -95,8 +96,14 @@ void LazyTexture::loadTexture()
    _loading_thread = std::jthread(
       [this](std::stop_token)
       {
+         const auto file_contents = AssetSource::readFile(_texture_path);
+         if (!file_contents.has_value())
+         {
+            return;
+         }
+
          auto image = std::make_unique<sf::Image>();
-         if (image->loadFromFile(_texture_path.string()))
+         if (image->loadFromMemory(file_contents->data(), file_contents->size()))
          {
             std::lock_guard lock(_mutex);
             _pending_image = std::move(image);

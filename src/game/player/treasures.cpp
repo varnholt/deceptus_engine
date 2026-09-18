@@ -1,11 +1,10 @@
 #include "treasures.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 
 #include <algorithm>
-#include <filesystem>
-#include <fstream>
 
 using json = nlohmann::json;
 
@@ -26,25 +25,16 @@ void loadDefinitions(const std::string& filename)
    }
    definitions_loaded = true;
 
-   if (!std::filesystem::exists(filename))
+   const auto file_data = AssetSource::readFile(filename);
+   if (!file_data.has_value())
    {
       Log::Warning() << "treasures definitions file not found: " << filename;
       return;
    }
 
-   std::ifstream file_stream(filename, std::ifstream::in);
-   std::string file_data;
-   auto character = file_stream.get();
-   while (file_stream.good())
-   {
-      file_data.push_back(static_cast<char>(character));
-      character = file_stream.get();
-   }
-   file_stream.close();
-
    try
    {
-      const auto json_data = json::parse(file_data);
+      const auto json_data = json::parse(*file_data);
       for (const auto& json_entry : json_data)
       {
          Definition definition;

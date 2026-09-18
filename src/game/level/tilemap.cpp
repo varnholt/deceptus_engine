@@ -16,6 +16,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/debug/drawcallcounter.h"
@@ -146,7 +147,7 @@ bool TileMap::load(
    // check if we have a bumpmap and, if so, load it
    const auto normal_map_filename = (path.stem().string() + "_normals" + path.extension().string());
    const auto normal_map_path = (path.parent_path() / normal_map_filename);
-   if (std::filesystem::exists(normal_map_path))
+   if (AssetSource::exists(normal_map_path))
    {
       // Log::Info() << "found normal map for " << path.string();
       _normal_map = TexturePool::getInstance().get(normal_map_path);

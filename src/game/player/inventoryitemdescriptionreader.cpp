@@ -1,10 +1,10 @@
 #include "inventoryitemdescriptionreader.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/localization.h"
 #include "framework/tools/log.h"
 
 #include <filesystem>
-#include <fstream>
 
 using json = nlohmann::json;
 
@@ -42,7 +42,8 @@ std::vector<InventoryItemDescriptionReader::InventoryItemDescription> InventoryI
 {
    const auto json_path = "data/sprites/inventory_items.json";
 
-   if (!std::filesystem::exists(json_path))
+   const auto file_contents = AssetSource::readFile(json_path);
+   if (!file_contents.has_value())
    {
       // returning empty without a word cost an afternoon: the game then ran on for another minute
       // before an item was picked up that had no icon, and reported that as a fatal blaming the
@@ -51,22 +52,9 @@ std::vector<InventoryItemDescriptionReader::InventoryItemDescription> InventoryI
       return {};
    }
 
-   std::ifstream ifs(json_path, std::ifstream::in);
-
-   auto c = ifs.get();
-   std::string data;
-
-   while (ifs.good())
-   {
-      data.push_back(static_cast<char>(c));
-      c = ifs.get();
-   }
-
-   ifs.close();
-
    try
    {
-      const json json_data = json::parse(data);
+      const json json_data = json::parse(*file_contents);
       std::vector<InventoryItemDescription> images;
       for (auto it = json_data.begin(); it != json_data.end(); ++it)
       {

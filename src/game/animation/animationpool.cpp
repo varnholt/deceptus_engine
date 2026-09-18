@@ -5,6 +5,7 @@
 #include <ostream>
 #include <sstream>
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 
@@ -176,7 +177,7 @@ void AnimationPool::deserialize(const std::string& data)
             (settings->_texture_path.stem().string() + "_normals" + settings->_texture_path.extension().string());
          const auto normal_map_path = (settings->_texture_path.parent_path() / normal_map_filename);
 
-         if (std::filesystem::exists(normal_map_path))
+         if (AssetSource::exists(normal_map_path))
          {
             auto normal_map = TexturePool::getInstance().get(normal_map_path);
             settings->_normal_map = normal_map;
@@ -226,7 +227,7 @@ void AnimationPool::recreateAnimationsFromSettings(UpdateFlag flag)
             (settings->_texture_path.stem().string() + "_normals" + settings->_texture_path.extension().string());
          const auto normal_map_path = (settings->_texture_path.parent_path() / normal_map_filename);
 
-         if (std::filesystem::exists(normal_map_path))
+         if (AssetSource::exists(normal_map_path))
          {
             auto normal_map = TexturePool::getInstance().get(normal_map_path);
             settings->_normal_map = normal_map;
@@ -265,25 +266,14 @@ void AnimationPool::recreateAnimationsFromSettings(UpdateFlag flag)
 
 void AnimationPool::deserializeFromFile(const std::string& filename)
 {
-   std::ifstream ifs(filename, std::ifstream::in);
+   const auto file_contents = AssetSource::readFile(filename);
 
-   if (!ifs.good())
+   if (!file_contents.has_value())
    {
       Log::Error() << "file " << filename << " not found";
    }
 
-   auto c = ifs.get();
-   std::string data;
-
-   while (ifs.good())
-   {
-      data.push_back(static_cast<char>(c));
-      c = ifs.get();
-   }
-
-   ifs.close();
-
-   deserialize(data);
+   deserialize(file_contents.value_or(std::string{}));
 }
 
 const std::map<std::string, std::shared_ptr<AnimationSettings>>& AnimationPool::settings() const

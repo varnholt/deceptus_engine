@@ -1,6 +1,7 @@
 #include "demomode.h"
 
 #include "framework/joystick/gamecontroller.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/audio/musicfilenames.h"
@@ -34,15 +35,15 @@ DemoMode& DemoMode::getInstance()
 
 void DemoMode::initialize(const std::filesystem::path& config_path)
 {
-   if (!std::filesystem::exists(config_path))
+   const auto file_contents = AssetSource::readFile(config_path);
+   if (!file_contents.has_value())
    {
       return;
    }
 
    try
    {
-      std::ifstream input_stream(config_path);
-      const auto config = nlohmann::json::parse(input_stream);
+      const auto config = nlohmann::json::parse(*file_contents);
 
       if (config.find("idle_timeout_s") != config.end())
       {
@@ -216,12 +217,6 @@ void DemoMode::start()
 
    const auto& demo_item = _demo_items[_next_demo_index];
    _next_demo_index = (_next_demo_index + 1) % _demo_items.size();
-
-   if (!std::filesystem::exists(demo_item._recording_path))
-   {
-      Log::Error() << "demo recording not found: " << demo_item._recording_path;
-      return;
-   }
 
    serializer->deserialize(demo_item._recording_path);
 

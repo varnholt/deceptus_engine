@@ -2,11 +2,13 @@
 
 #include "image.h"
 
+#include "framework/tools/assetsource.h"
+
 #include <memory.h>
 #include <algorithm>
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
+#include <sstream>
 
 #define IMAGE_RESOURCE_DECTION_IGNORED 1
 
@@ -880,9 +882,13 @@ void PSD::load(std::istream& stream)
 
 bool PSD::load(const std::string& filename)
 {
-   std::ifstream stream;
+   const auto file_contents = AssetSource::readFile(filename);
+   if (!file_contents.has_value())
+   {
+      return false;
+   }
 
-   stream.open(filename, std::ios::binary);
+   std::istringstream stream(*file_contents);
    load(stream);
 
    return stream.good();

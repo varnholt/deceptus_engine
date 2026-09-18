@@ -4,6 +4,7 @@
 #include <iostream>
 #include "tinyxml2/tinyxml2.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "tmxobject.h"
 #include "tmxparsedata.h"
@@ -13,7 +14,8 @@ TmxTemplate::TmxTemplate(const std::string& filename, const std::shared_ptr<TmxP
    const auto path = (std::filesystem::path(parse_data->_filename).parent_path() / filename).lexically_normal();
 
    tinyxml2::XMLDocument doc;
-   if (doc.LoadFile(path.string().c_str()) == tinyxml2::XML_SUCCESS)
+   const auto file_contents = AssetSource::readFile(path);
+   if (file_contents.has_value() && doc.Parse(file_contents->c_str(), file_contents->size()) == tinyxml2::XML_SUCCESS)
    {
       auto* doc_element = doc.FirstChildElement();
       auto* node = doc_element->FirstChild();

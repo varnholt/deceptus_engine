@@ -1,5 +1,7 @@
 #include "jsonconfiguration.h"
 
+#include "framework/tools/assetsource.h"
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -7,20 +9,8 @@
 
 void JsonConfiguration::deserializeFromFile(const std::string& filename)
 {
-   std::ifstream ifs(filename, std::ifstream::in);
-
-   char c = static_cast<char>(ifs.get());
-   std::string data;
-
-   while (ifs.good())
-   {
-      data.push_back(c);
-      c = static_cast<char>(ifs.get());
-   }
-
-   ifs.close();
-
-   deserialize(data);
+   const auto file_contents = AssetSource::readFile(filename);
+   deserialize(file_contents.value_or(std::string{}));
 }
 
 void JsonConfiguration::serializeToFile(const std::string& filename)

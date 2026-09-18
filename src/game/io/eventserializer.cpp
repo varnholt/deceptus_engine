@@ -1,5 +1,6 @@
 #include "eventserializer.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/gamepaths.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
@@ -259,7 +260,14 @@ void EventSerializer::deserialize(const std::filesystem::path& path)
 {
    _events.clear();
 
-   std::ifstream input_stream(path, std::ios::in | std::ios::binary);
+   const auto file_contents = AssetSource::readFile(path);
+   if (!file_contents.has_value())
+   {
+      Log::Error() << "demo recording not found: " << path;
+      return;
+   }
+
+   std::istringstream input_stream(*file_contents);
 
    const auto start_position_x_px = readFloat(input_stream);
    const auto start_position_y_px = readFloat(input_stream);

@@ -14,6 +14,7 @@
 #include "framework/tmxparser/tmxparser.h"
 #include "framework/tmxparser/tmxpolygon.h"
 #include "framework/tmxparser/tmxpolyline.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
 #include "framework/tools/timer.h"
@@ -210,7 +211,18 @@ void LuaNode::setupLua()
    luaL_openlibs(_lua_state);
 
    // load program
-   auto result = luaL_loadfile(_lua_state, _script_name.c_str());
+   const auto script_contents = AssetSource::readFile(_script_name);
+   auto result = LUA_ERRFILE;
+   if (script_contents.has_value())
+   {
+      result = luaL_loadbuffer(_lua_state, script_contents->c_str(), script_contents->size(), _script_name.c_str());
+   }
+   else
+   {
+      // luaL_loadbuffer leaves the error message on top of the stack on failure; replicate that
+      // here so LuaNodeCallbacks::error(), which always reads from the stack top, still works.
+      lua_pushfstring(_lua_state, "cannot open %s", _script_name.c_str());
+   }
    if (result == LUA_OK)
    {
       // execute program

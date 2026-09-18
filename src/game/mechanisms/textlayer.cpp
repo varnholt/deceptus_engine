@@ -4,6 +4,7 @@
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tmxparser/tmxtools.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
@@ -111,7 +112,8 @@ std::shared_ptr<TextLayer> TextLayer::deserialize(GameNode* parent, const GameDe
       instance->_truetype_font = loaded_font.hasValue() ? std::optional{std::move(*loaded_font)} : std::nullopt;
       if (!instance->_truetype_font.has_value())
 #else
-      if (!instance->_truetype_font.openFromFile(font_truetype.value()))
+      instance->_truetype_font_data = AssetSource::readFile(font_truetype.value()).value_or(std::string{});
+      if (!instance->_truetype_font.openFromMemory(instance->_truetype_font_data.data(), instance->_truetype_font_data.size()))
 #endif
       {
          Log::Error() << "failed to load font";

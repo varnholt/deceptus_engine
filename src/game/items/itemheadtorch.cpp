@@ -3,9 +3,9 @@
 #include "itemheadtorch.h"
 
 #include <algorithm>
-#include <fstream>
 
 #include "framework/easings/easings.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/level/levelregistry.h"
@@ -297,8 +297,7 @@ void ItemHeadTorch::onEquipped()
       return;
    }
 
-   nlohmann::json config;
-   std::ifstream("data/config/player_headtorch.json") >> config;
+   const auto config = nlohmann::json::parse(AssetSource::readFile("data/config/player_headtorch.json").value_or(std::string{}));
 
    if (const auto it = config["left"].find("offset_x_px"); it != config["left"].end())
    {

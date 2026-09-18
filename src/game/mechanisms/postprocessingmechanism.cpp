@@ -7,6 +7,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
@@ -211,8 +212,8 @@ std::shared_ptr<PostProcessingMechanism> PostProcessingMechanism::deserialize(Ga
    const auto vertex_file = ValueReader::readValue<std::string>("vertex_shader", map);
    const auto fragment_file = ValueReader::readValue<std::string>("fragment_shader", map);
 
-   const auto vertex_exists = vertex_file.has_value() && std::filesystem::exists(vertex_file.value());
-   const auto fragment_exists = fragment_file.has_value() && std::filesystem::exists(fragment_file.value());
+   const auto vertex_exists = vertex_file.has_value() && AssetSource::exists(vertex_file.value());
+   const auto fragment_exists = fragment_file.has_value() && AssetSource::exists(fragment_file.value());
 
    if (vertex_file.has_value() && !vertex_exists)
    {
@@ -280,7 +281,7 @@ std::shared_ptr<PostProcessingMechanism> PostProcessingMechanism::deserialize(Ga
          {
             instance->_uniforms.push_back({._name = key, ._value = values[0]});
          }
-         else if (std::filesystem::exists(text))
+         else if (AssetSource::exists(text))
          {
             instance->_uniforms.push_back({._name = key, ._value = TexturePool::getInstance().get(text)});
          }

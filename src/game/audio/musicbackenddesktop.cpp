@@ -2,6 +2,8 @@
 
 #ifndef DECEPTUS_VRSFML
 
+#include "framework/tools/assetsource.h"
+
 #include <SFML/Audio.hpp>
 
 #include <array>
@@ -22,13 +24,8 @@ class MusicBackendDesktop : public MusicBackend
 public:
    MusicBackendDesktop()
    {
-      if (!_music[0].openFromFile("data/music/empty.ogg"))
-      {
-      }
-
-      if (!_music[1].openFromFile("data/music/empty.ogg"))
-      {
-      }
+      loadFromAsset(0, "data/music/empty.ogg");
+      loadFromAsset(1, "data/music/empty.ogg");
 
       _music[0].setRelativeToListener(true);
       _music[1].setRelativeToListener(true);
@@ -65,9 +62,8 @@ public:
 
       // next() references a stable std::array slot, so capturing it by reference stays
       // valid for the lifetime of the load.
-      auto& music = _music[slot];
       const std::string track_filename = filename;
-      _load_future[slot] = std::async(std::launch::async, [&music, track_filename]() { return music.openFromFile(track_filename); });
+      _load_future[slot] = std::async(std::launch::async, [this, slot, track_filename]() { return loadFromAsset(slot, track_filename); });
    }
 
    bool isLoadReady(int slot) override
@@ -110,7 +106,25 @@ private:
       Ready
    };
 
+   /// \brief reads `filename` via AssetSource and (re)opens the slot's stream from the bytes.
+   /// \return true if the stream was opened successfully.
+   bool loadFromAsset(int slot, const std::string& filename)
+   {
+      auto file_contents = AssetSource::readFile(filename);
+      if (!file_contents.has_value())
+      {
+         return false;
+      }
+
+      // openFromMemory references the buffer rather than copying it, so it has to be stored
+      // before the call and must outlive the stream.
+      _music_data[slot] = std::move(*file_contents);
+      return _music[slot].openFromMemory(_music_data[slot].data(), _music_data[slot].size());
+   }
+
    std::array<sf::Music, 2> _music;
+   std::array<std::string, 2>
+      _music_data;  //!< compressed track bytes backing each stream; must outlive it (openFromMemory references, not copies)
    std::array<std::future<bool>, 2> _load_future;
    std::array<bool, 2> _load_succeeded{false, false};                       //!< result of the last completed load per slot
    std::array<LoadState, 2> _load_state{LoadState::Idle, LoadState::Idle};  //!< per-slot background load progress

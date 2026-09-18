@@ -1,7 +1,6 @@
 #include "physics.h"
 
 #include <array>
-#include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -16,6 +15,7 @@
 #include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tmxparser/tmxtile.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "game/io/meshtools.h"
 
@@ -47,7 +47,9 @@ void Physics::parse(
 {
    // Log::Info() << "parsing physics tiles vs. level layer (" << basePath.string() << ")";
 
-   std::ifstream phsyicsFile(base_path / std::filesystem::path("physics_tiles.csv").string());
+   std::istringstream phsyicsFile(
+      AssetSource::readFile(base_path / std::filesystem::path("physics_tiles.csv").string()).value_or(std::string{})
+   );
 
    std::map<int32_t, std::array<int32_t, 9>> map;
    std::string line;
