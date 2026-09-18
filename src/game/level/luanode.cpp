@@ -43,6 +43,41 @@ namespace
 uint16_t category_bits_default = CategoryEnemyWalkThrough;         // I am a ...
 uint16_t mask_bits_default = CategoryBoundary | CategoryFriendly;  // I collide with ...
 int16_t group_index_default = 0;                                   // 0 is default
+
+//! \brief lua package.searchers entry that resolves require() targets through AssetSource instead
+//! of the default disk-based searcher, so shared script modules keep working once the shipping
+//! build serves them from the packed archive rather than loose files.
+int32_t requireSearcher(lua_State* state)
+{
+   const auto* module_name = luaL_checkstring(state, 1);
+   const auto module_path = std::string(module_name) + ".lua";
+
+   const auto module_contents = AssetSource::readFile(module_path);
+   if (!module_contents.has_value())
+   {
+      lua_pushfstring(state, "\n\tno asset '%s'", module_path.c_str());
+      return 1;
+   }
+
+   if (luaL_loadbuffer(state, module_contents->c_str(), module_contents->size(), module_path.c_str()) != LUA_OK)
+   {
+      return lua_error(state);
+   }
+
+   return 1;
+}
+
+//! \brief installs requireSearcher into package.searchers, replacing the default disk-based
+//! Lua module searcher.
+void installAssetSourceRequireSearcher(lua_State* state)
+{
+   lua_getglobal(state, "package");
+   lua_getfield(state, -1, "searchers");
+   lua_pushcfunction(state, requireSearcher);
+   lua_rawseti(state, -2, 2);
+   lua_pop(state, 2);
+}
+
 }  // namespace
 
 void LuaNode::setupTexture()
@@ -209,6 +244,7 @@ void LuaNode::setupLua()
 
    // make standard libraries available in the Lua object
    luaL_openlibs(_lua_state);
+   installAssetSourceRequireSearcher(_lua_state);
 
    // load program
    const auto script_contents = AssetSource::readFile(_script_name);

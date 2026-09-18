@@ -2191,7 +2191,7 @@ void Level::parsePhysicsTiles(
 
    Log::Info() << "loading: " << path_solid_optimized.make_preferred().generic_string();
 
-   if (std::filesystem::exists(path_solid_optimized))
+   if (AssetSource::exists(path_solid_optimized))
    {
       parseObj(layer, parse_data->object_type, path_solid_optimized);
    }

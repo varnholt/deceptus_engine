@@ -5,6 +5,21 @@ For example, you might want to close a door or activate an enemy when the player
 All that 'custom' logic goes into the level script.
 
 
+## Requiring shared modules
+
+Shared script modules (e.g. `data/scripts/cutscene.lua`, `data/scripts/enemies/vectorial2.lua`) are pulled in with
+`require`, using the module's path relative to the repository root and without the `.lua` extension:
+
+```lua
+local cutscene = require "data/scripts/cutscene"
+```
+
+`require` is served through a custom `package.searchers` entry that resolves modules the same way every other
+asset is resolved: loose files on disk in development builds, and the packed `data.pak` archive in shipping
+builds. There is no separate Lua module search path (`package.path` is not consulted), so paths must always be
+written out in full, exactly as they appear elsewhere in the codebase.
+
+
 # The Level Script API
 
 ## `addCollisionRect`
