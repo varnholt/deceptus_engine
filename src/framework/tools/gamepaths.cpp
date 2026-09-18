@@ -10,6 +10,22 @@
 #include <emscripten.h>
 #endif
 
+namespace
+{
+
+// DEVELOPMENT_MODE builds write to a separate "deceptus-dev" tree rather than sharing "deceptus"
+// with release builds. Settings, save state, logs, recordings, and crash dumps all hang off
+// getGameDataDir(), so without this a settings tweak made while testing a dev build (e.g. forcing
+// a small windowed size to script screenshots) silently becomes what a release build starts up
+// with next, and vice versa - the two builds have no business sharing mutable state.
+#ifdef DEVELOPMENT_MODE
+constexpr auto* deceptus_folder_name = "deceptus-dev";
+#else
+constexpr auto* deceptus_folder_name = "deceptus";
+#endif
+
+}  // namespace
+
 namespace GamePaths
 {
 
@@ -18,16 +34,16 @@ std::filesystem::path getGameDataDir()
 #ifdef __EMSCRIPTEN__
    // on the web the writable tree lives inside the IDBFS mount created in main(), which is
    // synchronized to IndexedDB so it survives page reloads
-   return std::filesystem::path("/deceptus");
+   return std::filesystem::path("/") / deceptus_folder_name;
 #elif defined(__SWITCH__)
    // romfs is read-only, so saves go to the sd card; libnx mounts it as sdmc:/
-   return std::filesystem::path("sdmc:/switch/deceptus");
+   return std::filesystem::path("sdmc:/switch") / deceptus_folder_name;
 #elif defined(_WIN32)
    // on windows, use %APPDATA%\deceptus
    const char* appdata_folder = std::getenv("APPDATA");
    if (appdata_folder)
    {
-      return std::filesystem::path(appdata_folder) / "deceptus";
+      return std::filesystem::path(appdata_folder) / deceptus_folder_name;
    }
    else
    {
@@ -35,7 +51,7 @@ std::filesystem::path getGameDataDir()
       const char* home_folder = std::getenv("USERPROFILE");
       if (home_folder)
       {
-         return std::filesystem::path(home_folder) / ".deceptus";
+         return std::filesystem::path(home_folder) / (std::string(".") + deceptus_folder_name);
       }
    }
 #else
@@ -43,12 +59,12 @@ std::filesystem::path getGameDataDir()
    const char* home = std::getenv("HOME");
    if (home)
    {
-      return std::filesystem::path(home) / ".local" / "share" / "deceptus";
+      return std::filesystem::path(home) / ".local" / "share" / deceptus_folder_name;
    }
 #endif
 
    // if environment variables are not available, return a default path in current directory
-   return std::filesystem::path(".") / "deceptus";
+   return std::filesystem::path(".") / deceptus_folder_name;
 }
 
 std::filesystem::path getSettingsDir()
