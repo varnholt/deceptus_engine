@@ -2,6 +2,8 @@
 
 #ifndef DECEPTUS_VRSFML
 
+#include "framework/tools/assetsource.h"
+
 #include <SFML/Audio.hpp>
 
 #include <array>
@@ -22,13 +24,8 @@ class MusicBackendDesktop : public MusicBackend
 public:
    MusicBackendDesktop()
    {
-      if (!_music[0].openFromFile("data/music/empty.ogg"))
-      {
-      }
-
-      if (!_music[1].openFromFile("data/music/empty.ogg"))
-      {
-      }
+      loadFromAsset(0, "data/music/empty.ogg");
+      loadFromAsset(1, "data/music/empty.ogg");
 
       _music[0].setRelativeToListener(true);
       _music[1].setRelativeToListener(true);
@@ -65,9 +62,8 @@ public:
 
       // next() references a stable std::array slot, so capturing it by reference stays
       // valid for the lifetime of the load.
-      auto& music = _music[slot];
       const std::string track_filename = filename;
-      _load_future[slot] = std::async(std::launch::async, [&music, track_filename]() { return music.openFromFile(track_filename); });
+      _load_future[slot] = std::async(std::launch::async, [this, slot, track_filename]() { return loadFromAsset(slot, track_filename); });
    }
 
    bool isLoadReady(int slot) override
@@ -110,7 +106,31 @@ private:
       Ready
    };
 
+   /// \brief reads `filename` via AssetSource and (re)opens the slot's stream from the bytes.
+   /// \return true if the stream was opened successfully.
+   bool loadFromAsset(int slot, const std::string& filename)
+   {
+      auto file_contents = AssetSource::readFile(filename);
+      if (!file_contents.has_value())
+      {
+         return false;
+      }
+
+      // openFromMemory() itself calls stop() first on whatever _music_data[slot] currently holds
+      // (sf::Music::stop() seeks back to 0, which reads from the stream's current buffer) before
+      // switching to the new one - so the old buffer has to stay valid and untouched until
+      // openFromMemory() returns, not just until this function starts. The new bytes are opened
+      // directly out of file_contents; a real ogg file is always far past the small-string-
+      // optimization threshold, so moving it into _music_data[slot] afterwards keeps the exact
+      // heap address openFromMemory just captured, which is what has to outlive the stream.
+      const auto opened = _music[slot].openFromMemory(file_contents->data(), file_contents->size());
+      _music_data[slot] = std::move(*file_contents);
+      return opened;
+   }
+
    std::array<sf::Music, 2> _music;
+   std::array<std::string, 2>
+      _music_data;  //!< compressed track bytes backing each stream; must outlive it (openFromMemory references, not copies)
    std::array<std::future<bool>, 2> _load_future;
    std::array<bool, 2> _load_succeeded{false, false};                       //!< result of the last completed load per slot
    std::array<LoadState, 2> _load_state{LoadState::Idle, LoadState::Idle};  //!< per-slot background load progress

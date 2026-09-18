@@ -1,5 +1,6 @@
 #include "localization.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 
 #include "json/json.hpp"
@@ -21,18 +22,16 @@ void Localization::load(const std::string& locale)
    _translations.clear();
    _missing_keys.clear();
 
-   std::ifstream file_stream(_locale_path);
-   if (!file_stream.is_open())
+   const auto file_contents = AssetSource::readFile(_locale_path);
+   if (!file_contents.has_value())
    {
       Log::Warning() << "localization: could not open " << _locale_path;
       return;
    }
 
-   std::string json_text((std::istreambuf_iterator<char>(file_stream)), std::istreambuf_iterator<char>());
-
    try
    {
-      const auto json = nlohmann::json::parse(json_text);
+      const auto json = nlohmann::json::parse(*file_contents);
 
       for (const auto& [key, value] : json.items())
       {
@@ -180,6 +179,9 @@ uint32_t getFontNativeCharacterSize()
 
 const sf::Font& getFont()
 {
+   // openFromMemory references the buffer rather than copying it, so it has to outlive the font;
+   // declaring it before the font (and never touching it again) keeps both alive for the process.
+   static std::string font_bytes;
    static sf::Font font = []
    {
 #ifdef DECEPTUS_VRSFML
@@ -190,7 +192,8 @@ const sf::Font& getFont()
       loaded_font.getTexture().setSmooth(false);
 #else
       sf::Font loaded_font;
-      loaded_font.openFromFile(getFontPath());
+      font_bytes = AssetSource::readFile(getFontPath()).value_or(std::string{});
+      loaded_font.openFromMemory(font_bytes.data(), font_bytes.size());
 
       // vanilla sfml keeps a glyph atlas per character size and grows it as glyphs are rasterized.
       // when an atlas outgrows itself the replacement takes its filter from the font's own flag, so

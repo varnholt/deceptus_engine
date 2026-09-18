@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "framework/tools/assetsource.h"
 #include "framework/tools/resourcepool.h"
 
 /// \brief singleton texture cache that loads sf::Texture resources through ResourcePool.
@@ -27,7 +28,12 @@ protected:
       (void)path;
       return false;
 #else
-      return texture.loadFromFile(path.string());
+      const auto file_contents = AssetSource::readFile(path);
+      if (!file_contents.has_value())
+      {
+         return false;
+      }
+      return texture.loadFromMemory(file_contents->data(), file_contents->size());
 #endif
    }
 
@@ -38,7 +44,13 @@ protected:
    /// \return shared pointer to the loaded texture, or nullptr on failure.
    std::shared_ptr<sf::Texture> createResource(const std::filesystem::path& path) const override
    {
-      auto loaded_texture = sf::Texture::loadFromFile(path.string());
+      const auto file_contents = AssetSource::readFile(path);
+      if (!file_contents.has_value())
+      {
+         return nullptr;
+      }
+
+      auto loaded_texture = sf::Texture::loadFromMemory(file_contents->data(), file_contents->size());
       if (!loaded_texture)
       {
          return nullptr;

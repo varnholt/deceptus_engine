@@ -2,10 +2,10 @@
 
 #include <array>
 #include <cstdio>
-#include <fstream>
 #include <iostream>
 #include <sstream>
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 #ifdef DEVELOPMENT_MODE
@@ -51,12 +51,7 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
    auto group_y = 0;
 
    std::string line;
-   std::ifstream uv_file(_config._uv_filename);
-
-   if (!uv_file.is_open())
-   {
-      return;
-   }
+   std::istringstream uv_file(AssetSource::readFile(_config._uv_filename).value_or(std::string{}));
 
    while (uv_file.good())
    {
@@ -110,8 +105,6 @@ void AmbientOcclusion::load(const std::filesystem::path& path, const std::string
       chunk_vertices.push_back(quad[2]);
       chunk_vertices.push_back(quad[3]);
    }
-
-   uv_file.close();
 }
 
 void AmbientOcclusion::draw(sf::RenderTarget& window, const sf::RenderStates& states)
@@ -180,17 +173,7 @@ AmbientOcclusion::Config::Config(const std::filesystem::path& path, const std::s
 {
    // read config file
    const auto config_filename = path / "ambient_occlusion.json";
-   std::ifstream ifs(config_filename, std::ifstream::in);
-   auto c = static_cast<char>(ifs.get());
-   std::string data;
-
-   while (ifs.good())
-   {
-      data.push_back(c);
-      c = static_cast<char>(ifs.get());
-   }
-
-   ifs.close();
+   const auto data = AssetSource::readFile(config_filename).value_or(std::string{});
 
    if (data.empty())
    {
@@ -245,8 +228,8 @@ AmbientOcclusion::Config::Config(const std::filesystem::path& path, const std::s
       _offset_y_px = j.at("offset_y_px").get<int32_t>();
    }
 
-   const auto texture_filename_valid = std::filesystem::exists(_texture_filename);
-   const auto uv_filename_valid = std::filesystem::exists(_uv_filename);
+   const auto texture_filename_valid = AssetSource::exists(_texture_filename);
+   const auto uv_filename_valid = AssetSource::exists(_uv_filename);
 
    if (!texture_filename_valid)
    {

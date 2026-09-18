@@ -5,6 +5,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/animation/animationpool.h"
 #include "game/audio/audio.h"
@@ -174,7 +175,8 @@ void Gateway::loadNoiseTexture(const std::string& filename)
    _shader.setUniform("iChannel0", *_noise_texture);
 #else
    sf::Texture noise_texture;
-   if (!noise_texture.loadFromFile(filename))
+   const auto file_contents = AssetSource::readFile(filename);
+   if (!file_contents.has_value() || !noise_texture.loadFromMemory(file_contents->data(), file_contents->size()))
    {
       std::cerr << "Failed to load noise texture: " << filename << "\n";
       return;

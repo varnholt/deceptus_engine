@@ -1,4 +1,5 @@
 #include "texturedobject.h"
+#include "framework/tools/assetsource.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
@@ -104,7 +105,8 @@ void TexturedObject::loadTexture(const std::string& texture_file_path)
       auto& image = *image_opt;
 #else
    sf::Image image;
-   if (image.loadFromFile(texture_file_path))
+   const auto file_contents = AssetSource::readFile(texture_file_path);
+   if (file_contents.has_value() && image.loadFromMemory(file_contents->data(), file_contents->size()))
    {
 #endif
       glGenTextures(1, &_texture_id);

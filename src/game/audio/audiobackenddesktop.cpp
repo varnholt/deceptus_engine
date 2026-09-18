@@ -2,12 +2,12 @@
 
 #ifndef DECEPTUS_VRSFML
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 
 #include <SFML/Audio.hpp>
 
 #include <chrono>
-#include <filesystem>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -51,7 +51,8 @@ public:
    bool loadSample(const std::string& sample_name) override
    {
       const std::string full_path = sfx_path + sample_name;
-      if (!std::filesystem::exists(full_path))
+      const auto file_contents = AssetSource::readFile(full_path);
+      if (!file_contents.has_value())
       {
          Log::Error() << "audio file does not exist: " << sample_name;
          return false;
@@ -60,7 +61,7 @@ public:
       auto buffer = std::make_shared<sf::SoundBuffer>();
 
       auto start_time = std::chrono::high_resolution_clock::now();
-      const bool success = buffer->loadFromFile(full_path);
+      const bool success = buffer->loadFromMemory(file_contents->data(), file_contents->size());
       auto end_time = std::chrono::high_resolution_clock::now();
 
       auto load_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);

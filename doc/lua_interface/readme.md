@@ -40,6 +40,20 @@ end
 Now, when you start the game and load your level, you should see the output 'tutorial.lua initialized' in the game's debug output.
 That means the script has been loaded correctly. The next thing to do is to start implementing the actual 'business logic'.
 
+### Sharing Code Between Enemies
+
+If several enemies need the same helper code (see e.g. `data/scripts/enemies/vectorial2.lua` or
+`data/scripts/enemies/constants.lua`), pull it in with `require`, using the module's path relative to the
+repository root and without the `.lua` extension:
+
+```lua
+local vector2 = require "data/scripts/enemies/vectorial2"
+```
+
+This works the same way in development and shipping builds - `require` is resolved through the same asset
+lookup as every other file the engine loads, so it also finds modules packed into the shipping build's
+`data.pak` archive.
+
 
 ### Initializing Your Script
 

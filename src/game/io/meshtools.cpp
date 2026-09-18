@@ -1,5 +1,6 @@
 #include "meshtools.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 
 #include <fstream>
@@ -74,13 +75,15 @@ void Mesh::readObj(const std::string& filename, std::vector<b2Vec2>& points, std
 
    // auto faceCount = 0u;
 
-   std::ifstream obj_stream(filename, std::ios::in);
+   const auto file_contents = AssetSource::readFile(filename);
 
-   if (!obj_stream)
+   if (!file_contents.has_value())
    {
       Log::Error() << "unable to open file: " << filename;
       return;
    }
+
+   std::istringstream obj_stream(*file_contents);
 
    std::string line, token;
 
@@ -224,8 +227,6 @@ void Mesh::readObj(const std::string& filename, std::vector<b2Vec2>& points, std
 
       getline(obj_stream, line);
    }
-
-   obj_stream.close();
 
    // std::cout << "Loaded mesh from: " << filename << std::endl;
    // std::cout << " " << points.size()     << " points"      << std::endl;

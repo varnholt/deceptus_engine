@@ -2,7 +2,7 @@
 
 #include "game/animation/animation.h"
 
-#include <fstream>
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "json/json.hpp"
 
@@ -36,14 +36,13 @@ std::optional<sf::Vector2f> PlayerEyePositions::getEyePosition(const std::shared
 
 void PlayerEyePositions::load()
 {
-   std::ifstream file("data/sprites/eye_positions.json");
-   if (!file.is_open())
+   const auto file_contents = AssetSource::readFile("data/sprites/eye_positions.json");
+   if (!file_contents.has_value())
    {
       return;
    }
 
-   nlohmann::json json_data;
-   file >> json_data;
+   const auto json_data = nlohmann::json::parse(*file_contents);
 
    for (const auto& [key, value] : json_data.items())
    {

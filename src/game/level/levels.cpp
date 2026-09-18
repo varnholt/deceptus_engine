@@ -1,10 +1,10 @@
 #include "levels.h"
 
-#include <fstream>
 #include <iostream>
 #include <ostream>
 #include <sstream>
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 
 using json = nlohmann::json;
@@ -28,20 +28,7 @@ void deserialize(const std::string& data)
 
 void deserializeFromFile(const std::string& filename)
 {
-   std::ifstream ifs(filename, std::ifstream::in);
-
-   auto c = ifs.get();
-   std::string data;
-
-   while (ifs.good())
-   {
-      data.push_back(static_cast<char>(c));
-      c = ifs.get();
-   }
-
-   ifs.close();
-
-   deserialize(data);
+   deserialize(AssetSource::readFile(filename).value_or(std::string{}));
 }
 
 }  // namespace

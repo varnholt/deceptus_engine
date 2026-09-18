@@ -1,5 +1,7 @@
 #pragma once
 
+#include "framework/tools/assetsource.h"
+
 #include <SFML/Graphics.hpp>
 
 #include <optional>
@@ -49,7 +51,13 @@ public:
 #ifdef DECEPTUS_VRSFML
       return assign(sf::Shader::loadFromFile({.vertexPath = vertex_path, .fragmentPath = fragment_path}));
 #else
-      return _shader.loadFromFile(vertex_path, fragment_path) && (_loaded = true);
+      const auto vertex_source = AssetSource::readFile(vertex_path);
+      const auto fragment_source = AssetSource::readFile(fragment_path);
+      if (!vertex_source.has_value() || !fragment_source.has_value())
+      {
+         return false;
+      }
+      return _shader.loadFromMemory(*vertex_source, *fragment_source) && (_loaded = true);
 #endif
    }
 
@@ -60,7 +68,12 @@ public:
 #ifdef DECEPTUS_VRSFML
       return assign(sf::Shader::loadFromFile({.fragmentPath = fragment_path}));
 #else
-      return _shader.loadFromFile(fragment_path, sf::Shader::Type::Fragment) && (_loaded = true);
+      const auto fragment_source = AssetSource::readFile(fragment_path);
+      if (!fragment_source.has_value())
+      {
+         return false;
+      }
+      return _shader.loadFromMemory(*fragment_source, sf::Shader::Type::Fragment) && (_loaded = true);
 #endif
    }
 
@@ -71,7 +84,12 @@ public:
 #ifdef DECEPTUS_VRSFML
       return assign(sf::Shader::loadFromFile({.vertexPath = vertex_path}));
 #else
-      return _shader.loadFromFile(vertex_path, sf::Shader::Type::Vertex) && (_loaded = true);
+      const auto vertex_source = AssetSource::readFile(vertex_path);
+      if (!vertex_source.has_value())
+      {
+         return false;
+      }
+      return _shader.loadFromMemory(*vertex_source, sf::Shader::Type::Vertex) && (_loaded = true);
 #endif
    }
 

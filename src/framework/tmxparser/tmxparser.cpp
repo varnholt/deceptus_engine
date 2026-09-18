@@ -1,5 +1,6 @@
 #include "tmxparser.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 
 #include "tmximagelayer.h"
@@ -18,7 +19,8 @@ void TmxParser::parse(const std::string& filename)
    _parse_data->_filename = filename;
 
    tinyxml2::XMLDocument doc;
-   if (doc.LoadFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
+   const auto file_contents = AssetSource::readFile(filename);
+   if (file_contents.has_value() && doc.Parse(file_contents->c_str(), file_contents->size()) == tinyxml2::XML_SUCCESS)
    {
       auto* doc_element = doc.FirstChildElement();
       auto* node = doc_element->FirstChild();

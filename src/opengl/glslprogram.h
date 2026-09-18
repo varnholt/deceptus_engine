@@ -156,7 +156,6 @@ public:
 
 private:
    GLint getUniformLocation(const char* name);
-   bool fileExists(const std::string& fileName);
    std::string getExtension(const char* fileName);
 
    // Make these private in order to make the object non-copyable

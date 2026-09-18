@@ -3,6 +3,7 @@
 #include "framework/easings/easings.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tools/assetsource.h"
 #include "game/io/valuereader.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
@@ -10,10 +11,6 @@
 #include <algorithm>
 #include <cmath>
 #include <numbers>
-#ifndef DECEPTUS_VRSFML
-#include <fstream>
-#include <sstream>
-#endif
 
 namespace
 {
@@ -205,23 +202,19 @@ void RingShaderLayer::checkUniforms(const std::string& shader_path)
 {
    ShaderLayer::checkUniforms(shader_path);
 
-   std::ifstream file(shader_path);
-   if (!file.is_open())
+   const auto shader_source = AssetSource::readFile(shader_path);
+   if (!shader_source.has_value())
    {
       return;
    }
 
-   std::stringstream buffer;
-   buffer << file.rdbuf();
-   const auto shader_source = buffer.str();
-
-   _has_u_ring_scale = shader_source.find("u_ring_scale;") != std::string::npos;
-   _has_u_pixel_size = shader_source.find("u_pixel_size;") != std::string::npos;
-   _has_u_flash_color = shader_source.find("u_flash_color;") != std::string::npos;
-   _has_u_flash_intensity = shader_source.find("u_flash_intensity;") != std::string::npos;
-   _has_u_touch = shader_source.find("u_touch_intensity;") != std::string::npos;
-   _has_u_push = shader_source.find("u_push;") != std::string::npos;
-   _has_u_dissolve = shader_source.find("u_dissolve;") != std::string::npos;
+   _has_u_ring_scale = shader_source->find("u_ring_scale;") != std::string::npos;
+   _has_u_pixel_size = shader_source->find("u_pixel_size;") != std::string::npos;
+   _has_u_flash_color = shader_source->find("u_flash_color;") != std::string::npos;
+   _has_u_flash_intensity = shader_source->find("u_flash_intensity;") != std::string::npos;
+   _has_u_touch = shader_source->find("u_touch_intensity;") != std::string::npos;
+   _has_u_push = shader_source->find("u_push;") != std::string::npos;
+   _has_u_dissolve = shader_source->find("u_dissolve;") != std::string::npos;
 }
 #endif
 

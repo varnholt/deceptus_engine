@@ -9,6 +9,7 @@
 #endif
 
 #include "framework/joystick/gamecontroller.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "game/config/inputconfiguration.h"
 #include "gamecontrollerdetection.h"
@@ -21,7 +22,12 @@ void GameControllerIntegration::initialize()
 {
    SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
 
-   auto res = SDL_AddGamepadMappingsFromFile("data/joystick/gamecontrollerdb.txt");
+   // SDL_AddGamepadMappingsFromFile reads through SDL's own file I/O, bypassing AssetSource, so the
+   // database has to be read into memory first and handed to SDL as an in-memory stream instead.
+   const auto controller_db = AssetSource::readFile("data/joystick/gamecontrollerdb.txt");
+   const auto res = controller_db.has_value()
+      ? SDL_AddGamepadMappingsFromIO(SDL_IOFromConstMem(controller_db->data(), controller_db->size()), true)
+      : -1;
    if (res == -1)
    {
       Log::Error() << "error loading game controller database";

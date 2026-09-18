@@ -8,6 +8,7 @@
 #include "framework/tmxparser/tmxobjectgroup.h"
 #include "framework/tmxparser/tmxparser.h"
 #include "framework/tmxparser/tmxtileset.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/checksum.h"
 #include "framework/tools/log.h"
 #include "framework/tools/sfmlcompat.h"
@@ -217,8 +218,7 @@ Level::Level(const RenderTargets& render_targets) : GameNode(nullptr), _render_t
    _light_system->setOccluderCallback([this](sf::RenderTarget& target, const sf::View& view) { drawLightOccluders(target, view); });
 
    // add raycast light for player
-   nlohmann::json player_light_config;
-   std::ifstream("data/config/player_light.json") >> player_light_config;
+   const auto player_light_config = nlohmann::json::parse(AssetSource::readFile("data/config/player_light.json").value_or(std::string{}));
    _player_light =
       LightSystem::createLightInstance(std::static_pointer_cast<Player>(PlayerRegistry::getFirst()).get(), player_light_config);
    _light_system->_lights.push_back(_player_light);
@@ -486,7 +486,7 @@ bool Level::load()
    const auto level_json_path = std::filesystem::path(_description->_filename);
    setObjectId(_description->_filename);
 
-   if (!std::filesystem::exists(level_json_path))
+   if (!AssetSource::exists(level_json_path))
    {
       Log::Error() << "path " << level_json_path << " does not exist";
       return false;
@@ -2191,7 +2191,7 @@ void Level::parsePhysicsTiles(
 
    Log::Info() << "loading: " << path_solid_optimized.make_preferred().generic_string();
 
-   if (std::filesystem::exists(path_solid_optimized))
+   if (AssetSource::exists(path_solid_optimized))
    {
       parseObj(layer, parse_data->object_type, path_solid_optimized);
    }

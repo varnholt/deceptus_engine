@@ -3,6 +3,7 @@
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/assetsource.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
@@ -13,9 +14,6 @@
 #include <filesystem>
 #ifdef DECEPTUS_VRSFML
 #include <span>
-#else
-#include <fstream>
-#include <sstream>
 #endif
 
 namespace
@@ -62,18 +60,14 @@ std::string_view ShaderLayer::objectName() const
 #ifndef DECEPTUS_VRSFML
 void ShaderLayer::checkUniforms(const std::string& shader_path)
 {
-   std::ifstream file(shader_path);
-   if (!file.is_open())
+   const auto shader_source = AssetSource::readFile(shader_path);
+   if (!shader_source.has_value())
    {
       return;
    }
 
-   std::stringstream buffer;
-   buffer << file.rdbuf();
-   const auto shader_source = buffer.str();
-
-   _has_u_resolution = shader_source.find("u_resolution;") != std::string::npos;
-   _has_u_uv_height = shader_source.find("u_uv_height;") != std::string::npos;
+   _has_u_resolution = shader_source->find("u_resolution;") != std::string::npos;
+   _has_u_uv_height = shader_source->find("u_uv_height;") != std::string::npos;
 }
 #endif
 
@@ -211,8 +205,8 @@ std::shared_ptr<ShaderLayer> ShaderLayer::deserialize(GameNode* parent, const Ga
    const auto vert_file = ValueReader::readValue<std::string>("vertex_shader", map);
    const auto frag_file = ValueReader::readValue<std::string>("fragment_shader", map);
 
-   const auto vertex_exists = vert_file.has_value() && std::filesystem::exists(vert_file.value());
-   const auto fragment_exists = frag_file.has_value() && std::filesystem::exists(frag_file.value());
+   const auto vertex_exists = vert_file.has_value() && AssetSource::exists(vert_file.value());
+   const auto fragment_exists = frag_file.has_value() && AssetSource::exists(frag_file.value());
 
    if (vert_file.has_value() && !vertex_exists)
    {

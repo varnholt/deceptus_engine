@@ -1,13 +1,12 @@
 #include "footstepsurfaces.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "game/audio/audio.h"
 
 #include "json/json.hpp"
 
 #include <cstdlib>
-#include <filesystem>
-#include <fstream>
 #include <unordered_map>
 
 using json = nlohmann::json;
@@ -42,25 +41,16 @@ void loadDefinitions(const std::string& filename)
    }
    definitions_loaded = true;
 
-   if (!std::filesystem::exists(filename))
+   const auto file_data = AssetSource::readFile(filename);
+   if (!file_data.has_value())
    {
       Log::Warning() << "footstep definitions file not found: " << filename;
       return;
    }
 
-   std::ifstream file_stream(filename, std::ifstream::in);
-   std::string file_data;
-   auto character = file_stream.get();
-   while (file_stream.good())
-   {
-      file_data.push_back(static_cast<char>(character));
-      character = file_stream.get();
-   }
-   file_stream.close();
-
    try
    {
-      const auto json_data = json::parse(file_data);
+      const auto json_data = json::parse(*file_data);
 
       default_surface = json_data.at("default_surface").get<std::string>();
 

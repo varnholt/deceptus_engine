@@ -1,10 +1,10 @@
 #include "bitmapfont.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "game/io/texturepool.h"
 
 #include <stdio.h>
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -19,7 +19,7 @@ void BitmapFont::load(const std::string& texturePath, const std::string& mapPath
    _sprite = std::make_unique<sf::Sprite>(*_texture);
 #endif
 
-   std::ifstream file(mapPath);
+   std::istringstream file(AssetSource::readFile(mapPath).value_or(std::string{}));
 
    auto i = 0;
    std::string line;

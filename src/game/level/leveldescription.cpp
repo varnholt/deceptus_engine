@@ -1,9 +1,8 @@
 #include "leveldescription.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 
-#include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <ostream>
 #include <sstream>
@@ -35,29 +34,17 @@ void from_json(const json& j, LevelDescription& d)
 
 std::shared_ptr<LevelDescription> LevelDescription::load(const std::string& path)
 {
-   if (!std::filesystem::exists(path))
+   const auto file_contents = AssetSource::readFile(path);
+   if (!file_contents.has_value())
    {
       Log::Error() << "path does not exist: " << path;
       return nullptr;
    }
 
-   std::ifstream ifs(path, std::ifstream::in);
-
-   auto c = ifs.get();
-   std::string data;
-
-   while (ifs.good())
-   {
-      data.push_back(static_cast<char>(c));
-      c = ifs.get();
-   }
-
-   ifs.close();
-
    std::shared_ptr<LevelDescription> description;
    try
    {
-      const json config = json::parse(data);
+      const json config = json::parse(*file_contents);
       description = std::make_shared<LevelDescription>();
       *description = config;
    }

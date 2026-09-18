@@ -1,5 +1,7 @@
 #include "physicsconfiguration.h"
 
+#include "framework/tools/assetsource.h"
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -180,20 +182,7 @@ void PhysicsConfiguration::deserialize(const std::string& data)
 
 void PhysicsConfiguration::deserializeFromFile(const std::string& filename)
 {
-   std::ifstream ifs(filename, std::ifstream::in);
-
-   char c = static_cast<char>(ifs.get());
-   std::string data;
-
-   while (ifs.good())
-   {
-      data.push_back(c);
-      c = static_cast<char>(ifs.get());
-   }
-
-   ifs.close();
-
-   deserialize(data);
+   deserialize(AssetSource::readFile(filename).value_or(std::string{}));
 }
 
 void PhysicsConfiguration::serializeToFile(const std::string& filename)

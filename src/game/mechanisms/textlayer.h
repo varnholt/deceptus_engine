@@ -74,6 +74,8 @@ private:
    std::optional<sf::Font> _truetype_font;
 #else
    sf::Font _truetype_font;
+   std::string
+      _truetype_font_data;  //!< compressed font bytes backing _truetype_font; must outlive it (openFromMemory references, not copies)
 #endif
    std::unique_ptr<sf::Text> _truetype_text;
 };

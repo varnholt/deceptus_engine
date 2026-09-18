@@ -1,5 +1,6 @@
 #include "tmxtileset.h"
 
+#include "framework/tools/assetsource.h"
 #include "framework/tools/log.h"
 #include "tmximage.h"
 #include "tmxtile.h"
@@ -76,7 +77,8 @@ void TmxTileSet::deserialize(tinyxml2::XMLElement* element, const std::shared_pt
       tinyxml2::XMLDocument doc;
 
       std::string filename = _path.append(_source).string();
-      if (doc.LoadFile(filename.c_str()) == tinyxml2::XML_SUCCESS)
+      const auto file_contents = AssetSource::readFile(filename);
+      if (file_contents.has_value() && doc.Parse(file_contents->c_str(), file_contents->size()) == tinyxml2::XML_SUCCESS)
       {
          tinyxml2::XMLElement* docElem = doc.FirstChildElement();
          parseTileSet(docElem, parse_data);

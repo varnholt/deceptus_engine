@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -56,10 +57,10 @@ std::string GameConfiguration::serialize()
 
 void GameConfiguration::deserialize(const std::string& data)
 {
-   json config = json::parse(data);
-
    try
    {
+      const json config = json::parse(data);
+
       _windowed_width = config["GameConfiguration"]["windowed_width"].get<int32_t>();
       _windowed_height = config["GameConfiguration"]["windowed_height"].get<int32_t>();
       _view_width = config["GameConfiguration"]["view_width"].get<int32_t>();
@@ -175,6 +176,11 @@ GameConfiguration& GameConfiguration::getInstance()
       __instance._windowed_width = __instance._video_mode_width;
       __instance._windowed_height = __instance._video_mode_height;
 
+      // checked before deserializeFromFile() seeds a missing file from the bundled default, so
+      // this reflects whether the player already has settings, not whether they do now.
+      const auto settings_path = GamePaths::getSettingsDir() / "game.json";
+      const auto is_first_run = !std::filesystem::exists(settings_path);
+
       // config file values override the desktop defaults when present
       __instance.deserializeFromFile();
 
@@ -183,6 +189,24 @@ GameConfiguration& GameConfiguration::getInstance()
       {
          __instance._windowed_width = __instance._video_mode_width;
          __instance._windowed_height = __instance._video_mode_height;
+      }
+
+      // first launch only: dev builds default to windowed and muted so a debugging session never
+      // grabs the whole screen or blasts audio; release builds default to fullscreen at full
+      // volume for players. once a settings file exists, whatever the player chose there wins.
+      if (is_first_run)
+      {
+#ifdef DEVELOPMENT_MODE
+         __instance._fullscreen = false;
+         __instance._audio_volume_master = 0;
+#else
+         __instance._fullscreen = true;
+         __instance._audio_volume_master = 100;
+#endif
+         // persisted immediately: otherwise the file on disk still has the bundled default's raw
+         // values (from the copy in getPreferencesFile()), and the next launch would read those
+         // back instead of what this session actually started with.
+         __instance.serializeToFile();
       }
 
 #ifdef __EMSCRIPTEN__
