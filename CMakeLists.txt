@@ -1164,10 +1164,6 @@ else()
 
     # libarchive is only used to read the shipping-mode data.pak (see AssetSource), so its own
     # command-line tools, tests, and every format/filter beyond zip+deflate are switched off.
-    # Deliberately not touching BUILD_SHARED_LIBS here: it's a global cache variable, not scoped to
-    # libarchive, and forcing it OFF silently made SDL3 (fetched above) link statically instead of
-    # producing SDL3.dll, which broke the packaging step. libarchive already exposes a dedicated
-    # `archive_static` target unconditionally, so linking against that needs no global override.
     set(ENABLE_TEST OFF CACHE BOOL "" FORCE)
     set(ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
     set(ENABLE_TAR OFF CACHE BOOL "" FORCE)
@@ -1188,6 +1184,15 @@ else()
     set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR};${zlib_BINARY_DIR}" CACHE PATH "" FORCE)
     set(ZLIB_LIBRARY zlibstatic CACHE STRING "" FORCE)
     set(ZLIB_LIBRARIES zlibstatic CACHE STRING "" FORCE)
+
+    # BUILD_SHARED_LIBS is a global cache variable, not scoped to libarchive, so it can only be
+    # forced OFF here, after SFML/SDL3/etc. (fetched above) are already configured -- forcing it
+    # earlier silently made SDL3 link statically instead of producing SDL3.dll. libarchive itself
+    # has no dedicated "build the shared library" toggle: it gates that optional target purely on
+    # this global variable, and on Linux the shared archive.so fails to link against our static
+    # zlib (no -fPIC). We only ever link the always-built archive_static target, so the shared one
+    # is unnecessary either way.
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
     FetchContent_MakeAvailable(LIBARCHIVE)
 
