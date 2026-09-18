@@ -65,6 +65,15 @@ const std::unordered_map<std::string, std::string>& getPackedAssetTable()
    return packed_asset_table;
 }
 
+//! \brief looks `path` up in the packed asset table.
+//! \return pointer to the entry's bytes, or nullptr when `path` is not packed.
+const std::string* findInPackedTable(const std::filesystem::path& path)
+{
+   const auto& packed_asset_table = getPackedAssetTable();
+   const auto found_entry = packed_asset_table.find(path.generic_string());
+   return found_entry == packed_asset_table.end() ? nullptr : &found_entry->second;
+}
+
 #endif
 
 }  // namespace
@@ -77,14 +86,8 @@ std::optional<std::string> readFile(const std::filesystem::path& path)
       return readFileFromDisk(path);
    }
 
-   const auto& packed_asset_table = getPackedAssetTable();
-   const auto found_entry = packed_asset_table.find(path.generic_string());
-   if (found_entry == packed_asset_table.end())
-   {
-      return std::nullopt;
-   }
-
-   return found_entry->second;
+   const auto* packed_entry = findInPackedTable(path);
+   return packed_entry ? std::optional<std::string>(*packed_entry) : std::nullopt;
 #else
    return readFileFromDisk(path);
 #endif
@@ -98,8 +101,7 @@ bool exists(const std::filesystem::path& path)
       return std::filesystem::exists(path);
    }
 
-   const auto& packed_asset_table = getPackedAssetTable();
-   return packed_asset_table.find(path.generic_string()) != packed_asset_table.end();
+   return findInPackedTable(path) != nullptr;
 #else
    return std::filesystem::exists(path);
 #endif

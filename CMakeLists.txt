@@ -1174,6 +1174,20 @@ else()
 
     FetchContent_MakeAvailable(SFML SDL3 LUA GLEW ZLIB)
 
+    # The packaging step (see .github workflow) copies SDL3.dll/.so next to the executable, which
+    # only exists if SDL3 actually built shared. It silently builds static instead if some global
+    # BUILD_SHARED_LIBS override lands upstream of this point (this happened once already, from
+    # libarchive's own static-only requirement below) -- catch that here as a configure error
+    # rather than a missing-file surprise in the packaging step.
+    get_target_property(sdl3_target_type SDL3::SDL3 TYPE)
+    if(NOT sdl3_target_type STREQUAL "SHARED_LIBRARY")
+        message(
+            FATAL_ERROR
+            "SDL3::SDL3 built as ${sdl3_target_type}, not SHARED_LIBRARY -- the packaging step "
+            "expects an SDL3 shared library next to the executable. Check for a BUILD_SHARED_LIBS "
+            "override earlier in the configure.")
+    endif()
+
     # OVERRIDE_FIND_PACKAGE redirects find_package(ZLIB) to the fetched copy and sets the modern
     # ZLIB::ZLIB target, but libarchive's CMakeLists reads the legacy ZLIB_INCLUDE_DIR/ZLIB_LIBRARIES
     # module variables directly, which the redirect leaves unset. zlib.h lives in the source tree
