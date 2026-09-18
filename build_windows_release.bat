@@ -1,6 +1,7 @@
 @echo off
 rem Builds a shipping-mode (DECEPTUS_DEVELOPMENT_MODE=OFF) desktop release and collects the
-rem executable, data.pak, and SDL3.dll into release\ as a self-contained, shareable folder.
+rem executable and data.pak into release\ as a self-contained, shareable folder. SDL3 links
+rem statically, so there is no separate SDL3.dll to ship alongside the executable.
 rem
 rem   build_release.bat
 rem
@@ -17,7 +18,6 @@ cmake --build build_release --config Release --target deceptus || exit /b 1
 if not exist "%RELEASE_DIRECTORY%" mkdir "%RELEASE_DIRECTORY%"
 copy /Y build_release\Release\deceptus.exe "%RELEASE_DIRECTORY%\"
 copy /Y build_release\data.pak "%RELEASE_DIRECTORY%\"
-copy /Y build_release\Release\SDL3.dll "%RELEASE_DIRECTORY%\"
 
 echo.
 echo Release build ready in .\%RELEASE_DIRECTORY%\

@@ -964,6 +964,22 @@ function(deceptus_apply_patch patch_file source_dir label)
     endif()
 endfunction()
 
+# DEVELOPMENT_MODE carries the whole diagnostic apparatus: the profiling ui, the per mechanism
+# timers, the draw call counters, the render section timers, and on the console a log write to the
+# sd card every five seconds. All of it is useful while measuring and all of it is overhead in a
+# build meant to run fast, so it can be switched off without touching the sources.
+# The console and the web build ship without it: neither has a window to show the profiling ui in,
+# and on the switch every report is a write to the sd card. Both can still be built with it by
+# passing -DDECEPTUS_DEVELOPMENT_MODE=ON, which is what a profiling run does.
+#
+# Declared here, ahead of the dependency fetches below, because the desktop target's SDL3 link
+# mode (see the SDL_SHARED/SDL_STATIC block further down) also depends on it.
+if(EMSCRIPTEN OR NINTENDO_SWITCH)
+    option(DECEPTUS_DEVELOPMENT_MODE "build with the profiling and debug instrumentation" OFF)
+else()
+    option(DECEPTUS_DEVELOPMENT_MODE "build with the profiling and debug instrumentation" ON)
+endif()
+
 # fetch dependencies
 if(NINTENDO_SWITCH)
     # Switch homebrew target: VRSFML again, because vanilla SFML 3 renders through the
@@ -1172,20 +1188,31 @@ else()
     set(ENABLE_UNZIP OFF CACHE BOOL "" FORCE)
     set(ENABLE_ZLIB ON CACHE BOOL "" FORCE)
 
+    # SDL3 is only used for gamepad input (SDL_GameController). In the shipping build
+    # (DECEPTUS_DEVELOPMENT_MODE=OFF) it is linked statically so the release stays a single
+    # executable next to data.pak, with no DLL to remember to ship alongside it; dev builds keep
+    # linking it the default (shared) way. SDL3's own CMakeLists builds both the shared and static
+    # targets by default and then aliases SDL3::SDL3 to the shared one whenever it exists, so
+    # SDL_SHARED has to be turned off here rather than just relying on SDL_STATIC being on.
+    if(NOT DECEPTUS_DEVELOPMENT_MODE)
+        set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+        set(SDL_STATIC ON CACHE BOOL "" FORCE)
+    endif()
+
     FetchContent_MakeAvailable(SFML SDL3 LUA GLEW ZLIB)
 
-    # The packaging step (see .github workflow) copies SDL3.dll/.so next to the executable, which
-    # only exists if SDL3 actually built shared. It silently builds static instead if some global
-    # BUILD_SHARED_LIBS override lands upstream of this point (this happened once already, from
-    # libarchive's own static-only requirement below) -- catch that here as a configure error
-    # rather than a missing-file surprise in the packaging step.
-    get_target_property(sdl3_target_type SDL3::SDL3 TYPE)
-    if(NOT sdl3_target_type STREQUAL "SHARED_LIBRARY")
-        message(
-            FATAL_ERROR
-            "SDL3::SDL3 built as ${sdl3_target_type}, not SHARED_LIBRARY -- the packaging step "
-            "expects an SDL3 shared library next to the executable. Check for a BUILD_SHARED_LIBS "
-            "override earlier in the configure.")
+    # Catch it here as a configure error rather than a working-but-DLL-dependent surprise later:
+    # if some global BUILD_SHARED_LIBS override lands upstream of this point and re-enables the
+    # shared target, SDL3::SDL3 silently goes back to aliasing SDL3-shared instead of SDL3-static.
+    if(NOT DECEPTUS_DEVELOPMENT_MODE)
+        get_target_property(sdl3_target_type SDL3::SDL3 TYPE)
+        if(NOT sdl3_target_type STREQUAL "STATIC_LIBRARY")
+            message(
+                FATAL_ERROR
+                "SDL3::SDL3 built as ${sdl3_target_type}, not STATIC_LIBRARY -- the shipping build is "
+                "meant to link SDL3 statically. Check for a BUILD_SHARED_LIBS/SDL_SHARED override "
+                "earlier in the configure.")
+        endif()
     endif()
 
     # OVERRIDE_FIND_PACKAGE redirects find_package(ZLIB) to the fetched copy and sets the modern
@@ -1199,13 +1226,13 @@ else()
     set(ZLIB_LIBRARY zlibstatic CACHE STRING "" FORCE)
     set(ZLIB_LIBRARIES zlibstatic CACHE STRING "" FORCE)
 
-    # BUILD_SHARED_LIBS is a global cache variable, not scoped to libarchive, so it can only be
-    # forced OFF here, after SFML/SDL3/etc. (fetched above) are already configured -- forcing it
-    # earlier silently made SDL3 link statically instead of producing SDL3.dll. libarchive itself
-    # has no dedicated "build the shared library" toggle: it gates that optional target purely on
-    # this global variable, and on Linux the shared archive.so fails to link against our static
-    # zlib (no -fPIC). We only ever link the always-built archive_static target, so the shared one
-    # is unnecessary either way.
+    # BUILD_SHARED_LIBS is a global cache variable, not scoped to libarchive. libarchive itself has
+    # no dedicated "build the shared library" toggle: it gates that optional target purely on this
+    # global variable, and on Linux the shared archive.so fails to link against our static zlib (no
+    # -fPIC). We only ever link the always-built archive_static target, so the shared one is
+    # unnecessary either way. This is forced here rather than earlier so it does not retroactively
+    # affect SFML/SDL3/etc. (fetched above), which are configured through their own dedicated
+    # static/shared toggles instead.
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
     FetchContent_MakeAvailable(LIBARCHIVE)
@@ -1289,19 +1316,6 @@ target_include_directories(
     thirdparty/lua
     ${CMAKE_BINARY_DIR}/_deps/sfml-src/include
     ${SDL3_INCLUDE_DIRS})
-
-# DEVELOPMENT_MODE carries the whole diagnostic apparatus: the profiling ui, the per mechanism
-# timers, the draw call counters, the render section timers, and on the console a log write to the
-# sd card every five seconds. All of it is useful while measuring and all of it is overhead in a
-# build meant to run fast, so it can be switched off without touching the sources.
-# The console and the web build ship without it: neither has a window to show the profiling ui in,
-# and on the switch every report is a write to the sd card. Both can still be built with it by
-# passing -DDECEPTUS_DEVELOPMENT_MODE=ON, which is what a profiling run does.
-if(EMSCRIPTEN OR NINTENDO_SWITCH)
-    option(DECEPTUS_DEVELOPMENT_MODE "build with the profiling and debug instrumentation" OFF)
-else()
-    option(DECEPTUS_DEVELOPMENT_MODE "build with the profiling and debug instrumentation" ON)
-endif()
 
 target_compile_definitions(deceptus PRIVATE USE_GL _USE_MATH_DEFINES)
 if(DECEPTUS_DEVELOPMENT_MODE)
@@ -1431,12 +1445,17 @@ if(WIN32)
 
     # GLEW is now handled via FetchContent
 
-    add_custom_command(
-        TARGET deceptus POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:SDL3::SDL3>
-            $<TARGET_FILE_DIR:deceptus>
-    )
+    # Dev builds still link SDL3 shared (see the SDL_SHARED/SDL_STATIC block above), so SDL3.dll
+    # has to sit next to the executable to run at all. The shipping build links SDL3 statically and
+    # needs no such copy.
+    if(DECEPTUS_DEVELOPMENT_MODE)
+        add_custom_command(
+            TARGET deceptus POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:SDL3::SDL3>
+                $<TARGET_FILE_DIR:deceptus>
+        )
+    endif()
 
 endif()
 
