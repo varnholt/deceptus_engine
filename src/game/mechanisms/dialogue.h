@@ -29,6 +29,8 @@ public:
       std::optional<sf::Vector2f> _pos;
       bool _animate_text{true};
       float _animate_text_speed{30.0f};
+      std::optional<std::string> _avatar_path;
+      MessageBoxAvatarSide _avatar_side = MessageBoxAvatarSide::Left;
    };
 
    /// \brief creates a dialogue mechanism with no configured pages.

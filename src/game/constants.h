@@ -259,6 +259,13 @@ enum class MessageBoxLocation
    BottomRight,
 };
 
+/// \brief which edge of a message box an avatar image is overlaid on.
+enum class MessageBoxAvatarSide
+{
+   Left,
+   Right,
+};
+
 /// \brief supported weapon archetypes.
 enum class WeaponType
 {

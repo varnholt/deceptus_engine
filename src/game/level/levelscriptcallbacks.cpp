@@ -391,6 +391,21 @@ int32_t showDialogue(lua_State* state)
       }
       lua_pop(state, 1);
 
+      lua_getfield(state, argument_index, "avatar");
+      if (lua_isstring(state, -1))
+      {
+         item._avatar_path = lua_tostring(state, -1);
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "avatar_side");
+      if (lua_isstring(state, -1))
+      {
+         const std::string avatar_side = lua_tostring(state, -1);
+         item._avatar_side = (avatar_side == "right") ? MessageBoxAvatarSide::Right : MessageBoxAvatarSide::Left;
+      }
+      lua_pop(state, 1);
+
       lua_getfield(state, argument_index, "x_px");
       const auto has_x = lua_isnumber(state, -1);
       const auto x_px = has_x ? static_cast<float>(lua_tonumber(state, -1)) : 0.0f;
