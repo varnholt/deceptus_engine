@@ -11,7 +11,6 @@
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
-#include "game/ui/messagebox.h"
 
 struct TmxObject;
 
@@ -31,7 +30,7 @@ public:
       bool _animate_text{true};
       float _animate_text_speed{30.0f};
       std::optional<std::string> _avatar_path;
-      MessageBox::AvatarSide _avatar_side = MessageBox::AvatarSide::Left;
+      MessageBoxAvatarSide _avatar_side = MessageBoxAvatarSide::Left;
    };
 
    /// \brief creates a dialogue mechanism with no configured pages.

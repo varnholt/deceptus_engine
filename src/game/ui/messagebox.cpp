@@ -352,7 +352,7 @@ void MessageBox::initializeAvatar()
 
    auto sprite = sfcompat::createSprite(*texture);
 
-   if (_properties._avatar_side == AvatarSide::Left)
+   if (_properties._avatar_side == MessageBoxAvatarSide::Left)
    {
       const auto avatar_position_px = _window_position_px + offset_px + sf::Vector2f{-avatar_overhang_x_px, -avatar_overhang_y_px};
       sfcompat::setPosition(*sprite, avatar_position_px);
@@ -377,7 +377,7 @@ void MessageBox::initializeAvatar()
 
    const auto encroachment_px = std::max(0.0f, avatar_width_px - avatar_overhang_x_px);
    _avatar_reserved_width_px = encroachment_px + avatar_text_gap_px;
-   _avatar_text_offset_x_px = (_properties._avatar_side == AvatarSide::Left) ? _avatar_reserved_width_px : 0.0f;
+   _avatar_text_offset_x_px = (_properties._avatar_side == MessageBoxAvatarSide::Left) ? _avatar_reserved_width_px : 0.0f;
 }
 
 void MessageBox::updateButtonLabels()

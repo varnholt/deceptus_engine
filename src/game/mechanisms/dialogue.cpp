@@ -104,7 +104,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
    std::optional<sf::Color> text_color;
    std::optional<sf::Color> background_color;
    std::optional<std::string> avatar_path;
-   MessageBox::AvatarSide avatar_side = MessageBox::AvatarSide::Left;
+   MessageBoxAvatarSide avatar_side = MessageBoxAvatarSide::Left;
    constexpr auto message_box_count_max = 99;
    for (auto i = 0u; i < message_box_count_max; i++)
    {
@@ -149,7 +149,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
       if (avatar_side_it != map.end())
       {
          avatar_side =
-            (avatar_side_it->second->_value_string.value() == "right") ? MessageBox::AvatarSide::Right : MessageBox::AvatarSide::Left;
+            (avatar_side_it->second->_value_string.value() == "right") ? MessageBoxAvatarSide::Right : MessageBoxAvatarSide::Left;
       }
 
       if (it_dialogue_items != properties->_map.end())
