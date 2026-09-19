@@ -16,6 +16,7 @@
 #include "game/level/levelscript.h"
 #include "game/mechanisms/dialogue.h"
 #include "game/state/displaymode.h"
+#include "game/ui/messagebox.h"
 #include "json/json.hpp"
 
 namespace LevelScriptCallbacks
@@ -388,6 +389,21 @@ int32_t showDialogue(lua_State* state)
       if (lua_isnumber(state, -1))
       {
          item._animate_text_speed = static_cast<float>(lua_tonumber(state, -1));
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "avatar");
+      if (lua_isstring(state, -1))
+      {
+         item._avatar_path = lua_tostring(state, -1);
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "avatar_side");
+      if (lua_isstring(state, -1))
+      {
+         const std::string avatar_side = lua_tostring(state, -1);
+         item._avatar_side = (avatar_side == "right") ? MessageBox::AvatarSide::Right : MessageBox::AvatarSide::Left;
       }
       lua_pop(state, 1);
 

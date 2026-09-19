@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <string>
 
 #include <SFML/Graphics.hpp>
 
@@ -42,6 +43,13 @@ struct MessageBox
       Hidden,
    };
 
+   /// \brief which edge of the box an avatar image is overlaid on.
+   enum class AvatarSide
+   {
+      Left,
+      Right,
+   };
+
    /// \brief per-dialog visual and animation configuration.
    struct LayoutProperties
    {
@@ -55,6 +63,8 @@ struct MessageBox
       bool _animate_show_event = true;
       bool _animate_hide_event = true;
       int32_t _show_next = false;
+      std::optional<std::string> _avatar_texture_path;  //!< speaker image kept outside the box, e.g. "data/avatars/adam.png"
+      AvatarSide _avatar_side = AvatarSide::Left;       //!< which edge of the box the avatar is overlaid on
    };
 
    using MessageBoxCallback = std::function<void(Button)>;
@@ -134,6 +144,9 @@ struct MessageBox
    /// \brief loads PSD layers, creates sprites, and caches key layer positions.
    void initializeLayers();
 
+   /// \brief loads the optional avatar image and places it outside the box on the configured side.
+   void initializeAvatar();
+
    /// \brief draws the yes and no button labels from the translation table and places them again.
    void updateButtonLabels();
 
@@ -197,6 +210,9 @@ struct MessageBox
    sf::Vector2f _window_position_px;
    sf::Vector2f _background_position_px;
    sf::Vector2f _next_page_position_px;
+
+   float _avatar_reserved_width_px = 0.0f;  //!< width subtracted from the text wrap width when an avatar is shown
+   float _avatar_text_offset_x_px = 0.0f;   //!< extra left margin added to the text start when the avatar sits on the left
 
    std::vector<std::shared_ptr<Layer>> _layer_stack;
    std::map<std::string, std::shared_ptr<Layer>> _layers;

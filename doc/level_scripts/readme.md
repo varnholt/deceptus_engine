@@ -712,6 +712,8 @@ showDialogue("npc_intro")
 |`animate_speed`|number|`30.0`|Characters revealed per second when `animate` is `true`.|
 |`x_px`|number|—|Horizontal position in world pixels. Requires `y_px`.|
 |`y_px`|number|—|Vertical position in world pixels. Requires `x_px`.|
+|`avatar`|string|—|Path to a speaker image shown outside the box, e.g. `"data/avatars/adam.png"`.|
+|`avatar_side`|string|`"left"`|Which edge of the box the avatar is overlaid on. Either `"left"` or `"right"`.|
 
 ```lua
 -- single page
@@ -732,6 +734,9 @@ showDialogue(
 
 -- page at a fixed screen position
 showDialogue({message = "Over here!", x_px = 640, y_px = 180})
+
+-- page with a speaker avatar overlaid on the right edge of the box
+showDialogue({message = "Over here!", avatar = "data/avatars/adam.png", avatar_side = "right"})
 ```
 
 
