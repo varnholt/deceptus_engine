@@ -2748,51 +2748,63 @@
     <property name="01_text_color" type="color" value="#ffffffff"/>
     <property name="01_x_px" type="int" value="-30"/>
     <property name="01_y_px" type="int" value="-80"/>
+    <property name="01_avatar" value="data/avatars/adam.png"/>
+    <property name="01_avatar_side" value="left"/>
     <property name="02" value="Why do you look just like me?"/>
     <property name="02_background_color" type="color" value="#ffb45a00"/>
     <property name="02_text_color" type="color" value="#ffffffff"/>
     <property name="02_x_px" type="int" value="30"/>
     <property name="02_y_px" type="int" value="-80"/>
+    <property name="02_avatar" value="data/avatars/adam.png"/>
+    <property name="02_avatar_side" value="right"/>
     <property name="03" value="Uuhm.. that's because of dstar."/>
     <property name="03_background_color" type="color" value="#ff101ad4"/>
     <property name="03_text_color" type="color" value="#ffffffff"/>
     <property name="03_x_px" type="int" value="-30"/>
     <property name="03_y_px" type="int" value="-80"/>
+    <property name="03_avatar_side" value="left"/>
     <property name="04" value="What about him?"/>
     <property name="04_background_color" type="color" value="#ffb45a00"/>
     <property name="04_text_color" type="color" value="#ffffffff"/>
     <property name="04_x_px" type="int" value="30"/>
     <property name="04_y_px" type="int" value="-80"/>
+    <property name="04_avatar_side" value="right"/>
     <property name="05" value="Well.. he never finished the intro sequence..&lt;br&gt;So mueslee is recyling whatever artwork he gets his hands on!"/>
     <property name="05_background_color" type="color" value="#ff101ad4"/>
     <property name="05_text_color" type="color" value="#ffffffff"/>
     <property name="05_x_px" type="int" value="-30"/>
     <property name="05_y_px" type="int" value="-80"/>
+    <property name="05_avatar_side" value="left"/>
     <property name="06" value="Oh man."/>
     <property name="06_background_color" type="color" value="#ff101ad4"/>
     <property name="06_text_color" type="color" value="#ffffffff"/>
     <property name="06_x_px" type="int" value="-30"/>
     <property name="06_y_px" type="int" value="-80"/>
+    <property name="06_avatar_side" value="left"/>
     <property name="07" value="I know, right?"/>
     <property name="07_background_color" type="color" value="#ffb45a00"/>
     <property name="07_text_color" type="color" value="#ffffffff"/>
     <property name="07_x_px" type="int" value="30"/>
     <property name="07_y_px" type="int" value="-80"/>
+    <property name="07_avatar_side" value="right"/>
     <property name="08" value="I hope someone's gonna kick his butt at some point."/>
     <property name="08_background_color" type="color" value="#ff101ad4"/>
     <property name="08_text_color" type="color" value="#ffffffff"/>
     <property name="08_x_px" type="int" value="-30"/>
     <property name="08_y_px" type="int" value="-80"/>
+    <property name="08_avatar_side" value="left"/>
     <property name="09" value="Yeah."/>
     <property name="09_background_color" type="color" value="#ffb45a00"/>
     <property name="09_text_color" type="color" value="#ffffffff"/>
     <property name="09_x_px" type="int" value="30"/>
     <property name="09_y_px" type="int" value="-80"/>
+    <property name="09_avatar_side" value="right"/>
     <property name="10" value="Anyway.. Let's get going with this game now."/>
     <property name="10_background_color" type="color" value="#ff101ad4"/>
     <property name="10_text_color" type="color" value="#ffffffff"/>
     <property name="10_x_px" type="int" value="-30"/>
     <property name="10_y_px" type="int" value="-80"/>
+    <property name="10_avatar_side" value="left"/>
     <property name="pause_game" type="bool" value="false"/>
    </properties>
   </object>

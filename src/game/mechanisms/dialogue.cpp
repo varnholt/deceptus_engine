@@ -33,6 +33,8 @@ static constexpr std::array dialogue_properties{
    PropertyInfo{.name = "00_y_px", .type = "int", .default_value = int32_t{0}},
    PropertyInfo{.name = "00_text_color", .type = "string", .default_value = std::string_view{"#ffffffff"}},
    PropertyInfo{.name = "00_background_color", .type = "string", .default_value = std::string_view{"#000000ff"}},
+   PropertyInfo{.name = "00_avatar", .type = "string", .default_value = std::string_view{""}},
+   PropertyInfo{.name = "00_avatar_side", .type = "string", .default_value = std::string_view{"left"}},
 };
 
 static constexpr MechanismSchema dialogue_schema{
@@ -101,6 +103,8 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
    std::optional<sf::Vector2f> pos;
    std::optional<sf::Color> text_color;
    std::optional<sf::Color> background_color;
+   std::optional<std::string> avatar_path;
+   MessageBoxAvatarSide avatar_side = MessageBoxAvatarSide::Left;
    constexpr auto message_box_count_max = 99;
    for (auto i = 0u; i < message_box_count_max; i++)
    {
@@ -133,6 +137,21 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
          background_color = {rgba[0], rgba[1], rgba[2]};
       }
 
+      // read avatar image and the side of the box it is overlaid on
+      auto avatar_it = map.find(item_id + "_avatar");
+      if (avatar_it != map.end())
+      {
+         const auto& avatar_value = avatar_it->second->_value_string.value();
+         avatar_path = avatar_value.empty() ? std::nullopt : std::optional<std::string>{avatar_value};
+      }
+
+      auto avatar_side_it = map.find(item_id + "_avatar_side");
+      if (avatar_side_it != map.end())
+      {
+         avatar_side =
+            (avatar_side_it->second->_value_string.value() == "right") ? MessageBoxAvatarSide::Right : MessageBoxAvatarSide::Left;
+      }
+
       if (it_dialogue_items != properties->_map.end())
       {
          DialogueItem item;
@@ -140,6 +159,8 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
          item._message = tr((*it_dialogue_items).second->_value_string.value());
          item._text_color = text_color.value_or(item._text_color);
          item._background_color = background_color.value_or(item._background_color);
+         item._avatar_path = avatar_path;
+         item._avatar_side = avatar_side;
          dialogue->_dialogue_items.push_back(item);
       }
    }
@@ -325,7 +346,9 @@ void Dialogue::showNext()
          false,
          (_index == 0),                           // the first item has a show animation
          (_index == _dialogue_items.size() - 1),  // the last item has a hide animation
-         _index < _dialogue_items.size() - 1      // whether to show 'show next' arrow
+         _index < _dialogue_items.size() - 1,     // whether to show 'show next' arrow
+         item._avatar_path,
+         item._avatar_side
       }
    );
 

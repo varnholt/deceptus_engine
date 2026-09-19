@@ -12,6 +12,7 @@
 #include "game/audio/audio.h"
 #include "game/config/gameconfiguration.h"
 #include "game/controller/gamecontrollerintegration.h"
+#include "game/io/texturepool.h"
 #include "game/state/displaymode.h"
 #include "game/ui/menulabel.h"
 
@@ -33,6 +34,12 @@ constexpr auto text_margin_x_px = 8.0f;
 constexpr auto textbox_width_px = 324.0f;
 constexpr auto background_width_px = 318.0f;
 constexpr auto text_character_size = 12;
+
+// avatar art is authored to sit in the box's top corner the same way "adam" does in the source psd:
+// poking a few pixels past the box's left and top edge rather than sitting fully inside or outside it
+constexpr auto avatar_overhang_x_px = 6.0f;
+constexpr auto avatar_overhang_y_px = 10.0f;
+constexpr auto avatar_text_gap_px = 6.0f;
 
 static const auto animation_scale_time_show = sf::seconds(0.7f);
 static const auto animation_fade_time_show = sf::seconds(0.7f);
@@ -170,6 +177,7 @@ MessageBox::MessageBox(
     : _type(type), _callback(cb), _properties(properties), _buttons(buttons)
 {
    initializeLayers();
+   initializeAvatar();
    initializeControllerCallbacks();
    _show_time = GlobalClock::getInstance().getElapsedTime();
 
@@ -177,12 +185,12 @@ MessageBox::MessageBox(
 
    // text alignment
    const auto pos = pixelLocation(_properties._location) + _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f}) +
-                    sf::Vector2f{properties._centered ? 0.0f : text_margin_x_px, 0.0f};
+                    sf::Vector2f{(properties._centered ? 0.0f : text_margin_x_px) + _avatar_text_offset_x_px, 0.0f};
 
    // the hand-placed breaks in the source text were measured against english. every other locale is
    // a different length -- japanese is roughly one glyph per english word -- so the lines have to be
    // laid out against the box the text actually goes into rather than against the english ones
-   constexpr auto text_width_px = background_width_px - 2.0f * text_margin_x_px;
+   const auto text_width_px = background_width_px - 2.0f * text_margin_x_px - _avatar_reserved_width_px;
    const auto wrapped_message = LocalizedText::wrapRichTextToWidth(message, text_width_px, getFont(), text_character_size);
 
    const auto segments = RichTextParser::parseRichText(
@@ -322,6 +330,54 @@ void MessageBox::initializeLayers()
    _background_position_px = _layers["background"]->_sprite->getPosition();
    _next_page_position_px = _layers["next_page"]->_sprite->getPosition();
 #endif
+}
+
+void MessageBox::initializeAvatar()
+{
+   if (!_properties._avatar_texture_path.has_value())
+   {
+      return;
+   }
+
+   auto texture = TexturePool::getInstance().get(_properties._avatar_texture_path.value());
+   if (!texture)
+   {
+      return;
+   }
+
+   const auto avatar_size = texture->getSize();
+   const auto avatar_width_px = static_cast<float>(avatar_size.x);
+   const auto window_width_px = static_cast<float>(_layers["window"]->_texture->getSize().x);
+   const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+
+   auto sprite = sfcompat::createSprite(*texture);
+
+   if (_properties._avatar_side == MessageBoxAvatarSide::Left)
+   {
+      const auto avatar_position_px = _window_position_px + offset_px + sf::Vector2f{-avatar_overhang_x_px, -avatar_overhang_y_px};
+      sfcompat::setPosition(*sprite, avatar_position_px);
+   }
+   else
+   {
+      const auto avatar_position_px =
+         _window_position_px + offset_px + sf::Vector2f{window_width_px - avatar_width_px + avatar_overhang_x_px, -avatar_overhang_y_px};
+
+      // mirror the artwork so the avatar faces the text when it sits on the right
+      sfcompat::setScale(*sprite, {-1.0f, 1.0f});
+      sfcompat::setPosition(*sprite, {avatar_position_px.x + avatar_width_px, avatar_position_px.y});
+   }
+
+   auto avatar_layer = std::make_shared<Layer>();
+   avatar_layer->_texture = texture;
+   avatar_layer->_sprite = sprite;
+
+   _layers["avatar"] = avatar_layer;
+   _layer_stack.push_back(avatar_layer);
+   _box_content_layers.push_back(avatar_layer);
+
+   const auto encroachment_px = std::max(0.0f, avatar_width_px - avatar_overhang_x_px);
+   _avatar_reserved_width_px = encroachment_px + avatar_text_gap_px;
+   _avatar_text_offset_x_px = (_properties._avatar_side == MessageBoxAvatarSide::Left) ? _avatar_reserved_width_px : 0.0f;
 }
 
 void MessageBox::updateButtonLabels()
