@@ -177,44 +177,11 @@ void Player::initializeController()
    gji.addDeviceAddedCallback(
       [&](int32_t /*id*/)
       {
-         gji.getController()->addButtonPressedCallback(
-            SDL_GAMEPAD_BUTTON_SOUTH,
-            [&]()
-            {
-               if (!PlayerControlState::checkState())
-               {
-                  return;
-               }
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_SOUTH, [&]() { jumpPressed(); });
 
-               _jump.jump();
-            }
-         );
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, [&]() { dashPressed(Dash::Left); });
 
-         gji.getController()->addButtonPressedCallback(
-            SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,
-            [&]()
-            {
-               if (!PlayerControlState::checkState())
-               {
-                  return;
-               }
-
-               updateDash(Dash::Left);
-            }
-         );
-
-         gji.getController()->addButtonPressedCallback(
-            SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
-            [&]()
-            {
-               if (!PlayerControlState::checkState())
-               {
-                  return;
-               }
-
-               updateDash(Dash::Right);
-            }
-         );
+         gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, [&]() { dashPressed(Dash::Right); });
 
          gji.getController()->addButtonPressedCallback(SDL_GAMEPAD_BUTTON_WEST, [&]() { useInventory(0); });
 
@@ -270,6 +237,26 @@ void Player::updateHurtColor(const std::shared_ptr<Animation>& current_cycle)
       const auto damage_color = sf::Color(255, 255 - damage_color_value, 255 - damage_color_value);
       current_cycle->setColor(damage_color);
    }
+}
+
+void Player::jumpPressed()
+{
+   if (!PlayerControlState::checkState())
+   {
+      return;
+   }
+
+   _jump.jump();
+}
+
+void Player::dashPressed(Dash dir)
+{
+   if (!PlayerControlState::checkState())
+   {
+      return;
+   }
+
+   updateDash(dir);
 }
 
 void Player::useInventory(int32_t slot)
@@ -1927,17 +1914,17 @@ void Player::keyPressed(sf::Keyboard::Key key)
    {
       case sf::Keyboard::Key::Space:
       {
-         _jump.jump();
+         jumpPressed();
          break;
       }
       case sf::Keyboard::Key::Z:
       {
-         updateDash(Dash::Left);
+         dashPressed(Dash::Left);
          break;
       }
       case sf::Keyboard::Key::X:
       {
-         updateDash(Dash::Right);
+         dashPressed(Dash::Right);
          break;
       }
       case sf::Keyboard::Key::LControl:

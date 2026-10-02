@@ -648,6 +648,19 @@ int32_t lockPlayerControls(lua_State* state)
    return 0;
 }
 
+int32_t lockPlayerOrientation(lua_State* state)
+{
+   if (lua_gettop(state) != 2)
+   {
+      return 0;
+   }
+
+   const auto duration = std::chrono::milliseconds{static_cast<int32_t>(lua_tointeger(state, 1))};
+   const std::string orientation = lua_tostring(state, 2);
+   LevelScript::getCurrent()->lockPlayerOrientation(duration, orientation == "left");
+   return 0;
+}
+
 int32_t setCutsceneActive(lua_State* state)
 {
    if (lua_gettop(state) != 1)

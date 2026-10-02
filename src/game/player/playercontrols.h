@@ -185,10 +185,9 @@ public:
    /// \param duration lock duration.
    void lockState(KeyPressed key, LockedState state, const std::chrono::milliseconds& duration);
 
-   /// \brief applies the same temporary lock state to all supported player input keys.
-   /// \param state forced key state while locked.
+   /// \brief blocks all player input for a duration, see PlayerControlState.
    /// \param duration lock duration.
-   void lockAll(LockedState state, const std::chrono::milliseconds& duration);
+   void lockAll(const std::chrono::milliseconds& duration);
 
    /// \brief gets the registry that decides which keys currently belong to an owner.
    /// \return shared key claim registry, used to take a claim and to ask whether a key already has one.
@@ -260,6 +259,7 @@ private:
    Orientation _locked_orientation = Orientation::Undefined;
    Orientation _last_requested_orientation = Orientation::Undefined;
    std::unordered_map<KeyPressed, LockedKey> _locked_keys;
+   std::chrono::milliseconds _all_locked_remaining{};  //!< time left on the lock set by lockAll
    std::shared_ptr<KeyClaimRegistry> _key_claims;
    std::shared_ptr<EventSerializer> _event_serializer;
 };

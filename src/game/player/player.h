@@ -459,6 +459,13 @@ private:
    /// \param current_cycle animation cycle to recolor.
    void updateHurtColor(const std::shared_ptr<Animation>& current_cycle);
 
+   /// \brief jumps on a jump button press when control state allows player input.
+   void jumpPressed();
+
+   /// \brief starts a dash on a dash button press when control state allows player input.
+   /// \param dir dash direction.
+   void dashPressed(Dash dir);
+
    /// \brief uses an inventory slot when control state allows inventory interaction.
    /// \param slot inventory slot index.
    void useInventory(int32_t slot);

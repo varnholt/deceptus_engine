@@ -168,6 +168,10 @@ function makeMonkVisible(dt)
       _monk_shown = true
       setZoomFactor(0.75)
       lockPlayerControls(5000)
+
+      -- the monk stands to the right of monk_rect, so face him. once his dialogue is up the
+      -- player keeps that facing until it is dismissed
+      lockPlayerOrientation(5000, "right")
    end
 end
 

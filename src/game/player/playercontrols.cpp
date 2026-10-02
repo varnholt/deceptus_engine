@@ -43,6 +43,7 @@ PlayerControls::PlayerControls()
 
    // set up the playback status query function for PlayerControlState
    PlayerControlState::setPlaybackStatusQuery([this]() { return _event_serializer->isPlaying(); });
+   PlayerControlState::setControlsLockedQuery([this]() { return _all_locked_remaining > std::chrono::milliseconds::zero(); });
 
    EventSerializer::registerInstance("player", _event_serializer);
 }
@@ -579,7 +580,8 @@ PlayerControls::Orientation PlayerControls::updateOrientation()
 {
    if (!PlayerControlState::checkState())
    {
-      return Orientation::Undefined;
+      // a script may lock the controls and turn the player at the same time
+      return std::chrono::high_resolution_clock::now() < _unlock_orientation_time_point ? _locked_orientation : Orientation::Undefined;
    }
 
    Orientation orientation = Orientation::Undefined;
@@ -757,6 +759,8 @@ void PlayerControls::updateLockedKeys(const sf::Time& dt)
 {
    const auto dt_chrono = std::chrono::milliseconds(dt.asMilliseconds());
 
+   _all_locked_remaining = std::max(_all_locked_remaining - dt_chrono, std::chrono::milliseconds::zero());
+
    for (auto it = _locked_keys.begin(); it != _locked_keys.end();)
    {
       it->second._elapsed += dt_chrono;
@@ -790,24 +794,9 @@ void PlayerControls::lockState(KeyPressed key, LockedState state, const std::chr
    }
 }
 
-void PlayerControls::lockAll(LockedState state, const std::chrono::milliseconds& duration)
+void PlayerControls::lockAll(const std::chrono::milliseconds& duration)
 {
-   static const std::initializer_list<KeyPressed> keypress_types{
-      KeyPressedUp,
-      KeyPressedDown,
-      KeyPressedLeft,
-      KeyPressedRight,
-      KeyPressedJump,
-      KeyPressedAction,
-      KeyPressedSlot1,
-      KeyPressedSlot2,
-      KeyPressedLook
-   };
-
-   for (auto keypress_type : keypress_types)
-   {
-      lockState(keypress_type, state, duration);
-   }
+   _all_locked_remaining = duration;
 }
 
 const std::shared_ptr<KeyClaimRegistry>& PlayerControls::getKeyClaims() const

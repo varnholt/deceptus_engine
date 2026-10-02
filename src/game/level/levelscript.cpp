@@ -201,6 +201,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "isMechanismVisible", LevelScriptCallbacks::isMechanismVisible);
    lua_register(_lua_state, "isPlayerIntersectingSensorRect", LevelScriptCallbacks::isPlayerIntersectingSensorRect);
    lua_register(_lua_state, "lockPlayerControls", LevelScriptCallbacks::lockPlayerControls);
+   lua_register(_lua_state, "lockPlayerOrientation", LevelScriptCallbacks::lockPlayerOrientation);
    lua_register(_lua_state, "setCutsceneActive", LevelScriptCallbacks::setCutsceneActive);
    lua_register(_lua_state, "fadeOut", LevelScriptCallbacks::fadeOut);
    lua_register(_lua_state, "fadeIn", LevelScriptCallbacks::fadeIn);
@@ -931,7 +932,14 @@ void LevelScript::showDialogue(std::vector<Dialogue::DialogueItem> items)
 
 void LevelScript::lockPlayerControls(const std::chrono::milliseconds& duration)
 {
-   PlayerRegistry::getFirst()->getControls()->lockAll(PlayerControls::LockedState::Released, duration);
+   PlayerRegistry::getFirst()->getControls()->lockAll(duration);
+}
+
+void LevelScript::lockPlayerOrientation(const std::chrono::milliseconds& duration, bool points_left)
+{
+   PlayerRegistry::getFirst()->getControls()->lockOrientation(
+      duration, points_left ? PlayerControls::Orientation::Left : PlayerControls::Orientation::Right
+   );
 }
 
 void LevelScript::fadeOut(float speed)
