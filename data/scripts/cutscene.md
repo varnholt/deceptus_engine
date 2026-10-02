@@ -294,6 +294,8 @@ These are available anywhere in a level script.
 ```lua
 setPlayerVisible(visible)          -- show or hide the player sprite
 lockPlayerControls(duration_ms)    -- disable all input for the given number of milliseconds
+lockPlayerOrientation(duration_ms, side)
+                                   -- face the player "left" or "right" for the given milliseconds, 0 releases
 addPlayerHealth(amount)            -- add health points to the player's current health
 addPlayerHealthMax(amount)         -- increase the player's maximum health
 addPlayerSkill(skill_bitmask)      -- set skill flags (OR into current skills)

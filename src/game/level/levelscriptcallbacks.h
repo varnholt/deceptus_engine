@@ -61,6 +61,7 @@ int32_t playMusic(lua_State* state);
 int32_t setLevelMusic(lua_State* state);
 int32_t getCheckpoint(lua_State* state);
 int32_t lockPlayerControls(lua_State* state);
+int32_t lockPlayerOrientation(lua_State* state);
 int32_t setCutsceneActive(lua_State* state);
 int32_t fadeOut(lua_State* state);
 int32_t fadeIn(lua_State* state);

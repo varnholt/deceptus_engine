@@ -78,7 +78,7 @@ void PlayerWatch::update(const sf::Time& delta_time)
 
    Log::Info() << "player position: tile " << position_x_tl << " " << position_y_tl << " px " << position_px.x << " " << position_px.y
                << " health " << health._health << "/" << health._health_max << " lives " << health._life_count << " dialogue "
-               << (MessageBox::isActive() ? 1 : 0);
+               << (MessageBox::isActive() ? 1 : 0) << " facing " << (player->isPointingLeft() ? "left" : "right");
 
    // the enemies close enough to matter for the next few seconds, roughly a screen around the
    // player, so a script driving the game can react to them instead of walking into them

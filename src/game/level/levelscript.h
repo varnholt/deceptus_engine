@@ -158,6 +158,11 @@ public:
    /// \param duration lock duration.
    void lockPlayerControls(const std::chrono::milliseconds& duration);
 
+   /// \brief turns the player to one side and keeps it facing that way for a fixed duration.
+   /// \param duration lock duration, zero releases an earlier lock.
+   /// \param points_left true to face left, false to face right.
+   void lockPlayerOrientation(const std::chrono::milliseconds& duration, bool points_left);
+
    /// \brief fades the screen to black and holds it there until fadeIn is called.
    /// \param speed fade speed in alpha-per-second (1.0 = one second for a full fade).
    void fadeOut(float speed);

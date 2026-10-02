@@ -7,6 +7,9 @@ namespace
 {
 // global callback for querying playback status - defaults to always returning false
 PlayerControlState::PlaybackStatusQuery __playback_status_query = []() { return false; };
+
+// global callback for querying whether a script has locked the controls - defaults to unlocked
+PlayerControlState::ControlsLockedQuery __controls_locked_query = []() { return false; };
 }  // namespace
 
 bool PlayerControlState::checkState()
@@ -19,6 +22,11 @@ bool PlayerControlState::checkState()
 
    const auto& display_mode = DisplayMode::getInstance();
    if (display_mode.isAnySet(Display::Modal, Display::CameraPanorama))
+   {
+      return false;
+   }
+
+   if (__controls_locked_query && __controls_locked_query())
    {
       return false;
    }
@@ -45,6 +53,11 @@ bool PlayerControlState::checkStateCpanOkay()
       return false;
    }
 
+   if (__controls_locked_query && __controls_locked_query())
+   {
+      return false;
+   }
+
    if (GameState::getInstance().getMode() != ExecutionMode::Running)
    {
       return false;
@@ -62,6 +75,11 @@ bool PlayerControlState::checkStateUseInventory()
       return false;
    }
 
+   if (__controls_locked_query && __controls_locked_query())
+   {
+      return false;
+   }
+
    if (GameState::getInstance().getMode() != ExecutionMode::Running)
    {
       return false;
@@ -73,4 +91,9 @@ bool PlayerControlState::checkStateUseInventory()
 void PlayerControlState::setPlaybackStatusQuery(const PlaybackStatusQuery& query_func)
 {
    __playback_status_query = query_func;
+}
+
+void PlayerControlState::setControlsLockedQuery(const ControlsLockedQuery& query_func)
+{
+   __controls_locked_query = query_func;
 }
