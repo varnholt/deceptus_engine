@@ -702,6 +702,17 @@ int32_t fadeIn(lua_State* state)
    return 0;
 }
 
+int32_t transitionPlayerTo(lua_State* state)
+{
+   if (lua_gettop(state) != 2)
+   {
+      return 0;
+   }
+
+   LevelScript::getCurrent()->transitionPlayerTo(static_cast<float>(lua_tonumber(state, 1)), static_cast<float>(lua_tonumber(state, 2)));
+   return 0;
+}
+
 int32_t flashScreen(lua_State* state)
 {
    if (lua_gettop(state) != 5)

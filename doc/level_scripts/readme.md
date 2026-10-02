@@ -481,6 +481,18 @@ Fades the screen back in from black.
 |1|float|Fade speed — alpha units per second|
 
 
+## `transitionPlayerTo`
+
+Moves the player to a position behind a room fade, as if they had walked into a room there. The fade is the one configured for the room at the target, or for the current room when the target is in none. Room and camera are synced to the target while the screen is black, so the move does not count as walking into a room: no second fade starts and no enter area applies.
+
+Once the player has been moved, `mechanismEvent("player_transition", "", "moved", true)` is called; once the screen has faded back in, `mechanismEvent("player_transition", "", "done", true)`.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|Target x position in pixels|
+|2|float|Target y position in pixels|
+
+
 ## `setAmbient`
 
 Sets the ambient light colour for the level.

@@ -15,6 +15,7 @@
 #include "game/config/gameconfiguration.h"
 #include "game/effects/fadetransitioneffect.h"
 #include "game/effects/screentransition.h"
+#include "game/level/roomupdater.h"
 #include "game/player/playerregistry.h"
 
 namespace
@@ -23,6 +24,21 @@ constexpr auto eps_px = 100;
 constexpr auto fade_out_speed_factor_default = 5.0f;
 constexpr auto fade_out_speed_factor_out_of_view = 1000.0f;  // gone within a single simulation step
 std::vector<Room::RoomEnterArea> _enter_areas;
+
+// how far the player sprite reaches past its collision rect
+constexpr auto player_out_of_view_margin_px = 8.0f;
+
+// a player who stops in the door is faded out anyway
+constexpr auto player_leave_view_timeout_s = 1.0f;
+
+struct PendingPlayerTransition
+{
+   std::weak_ptr<Room> _fade_room;                  //!< expires together with the level
+   std::unique_ptr<ScreenTransition> _transition;   //!< started once the player is out of view
+   float _waited_s = 0.0f;
+};
+
+std::optional<PendingPlayerTransition> _pending_player_transition;
 }  // namespace
 
 /*
@@ -396,6 +412,135 @@ void Room::startTransition()
          break;
       }
    }
+}
+
+void Room::transitionPlayerTo(
+   const sf::Vector2f& target_px,
+   const std::vector<std::shared_ptr<Room>>& rooms,
+   const std::function<void()>& moved_callback,
+   const std::function<void()>& done_callback
+)
+{
+   const auto source_room = RoomUpdater::getCurrent();
+   const auto target_room = Room::find(target_px, rooms);
+   const auto fade_room = target_room ? target_room : source_room;
+
+   // the transition outlives the level when it is replaced mid-fade, so the rooms are only held weakly
+   const auto move_player =
+      [target_px, moved_callback, source_weak = std::weak_ptr<Room>{source_room}, target_weak = std::weak_ptr<Room>{target_room}]()
+   {
+      _pending_player_transition.reset();
+
+      const auto& player = PlayerRegistry::getFirst();
+      if (!player)
+      {
+         return;
+      }
+
+      player->fadeOutReset();
+      player->setBodyViaPixelPosition(target_px.x, target_px.y);
+      CameraSystem::getInstance().unlockCamera();
+
+      // a camera lock still pending from entering the source room would drag the camera back there
+      if (const auto source = source_weak.lock())
+      {
+         source->_camera_locked = false;
+      }
+
+      // the player did not walk into the target room, so it becomes the current one right away
+      const auto target = target_weak.lock();
+      RoomUpdater::setCurrent(target);
+      if (target)
+      {
+         target->markVisited(target_px);
+         target->syncCamera();
+      }
+      else
+      {
+         CameraRoomLock::setRoom(nullptr);
+         CameraSystem::getInstance().syncNow();
+      }
+
+      moved_callback();
+   };
+
+   if (!fade_room)
+   {
+      move_player();
+      done_callback();
+      return;
+   }
+
+   // the player walks on until out of view before the fade starts. past the room border the room no
+   // longer limits the camera, so it is held in place until the player was moved
+   const auto camera_center_px = CameraSystem::getInstance().getCenterPx();
+   CameraSystem::getInstance().snapTo(camera_center_px.x, camera_center_px.y);
+
+   auto screen_transition = fade_room->makeFadeTransition();
+   screen_transition->_callbacks_effect_1_ended.emplace_back(move_player);
+   screen_transition->_callbacks_effect_2_ended.emplace_back(
+      [done_callback]()
+      {
+         // pop() destroys the transition and this lambda with it, so the callback is copied out first
+         const auto done = done_callback;
+         ScreenTransitionHandler::getInstance().pop();
+         done();
+      }
+   );
+
+   _pending_player_transition = PendingPlayerTransition{
+      ._fade_room = fade_room,
+      ._transition = std::move(screen_transition),
+   };
+}
+
+void Room::updatePlayerTransition(const sf::Time& dt)
+{
+   if (!_pending_player_transition.has_value() || !_pending_player_transition->_transition)
+   {
+      return;
+   }
+
+   // the level was replaced while the player was still walking out
+   if (_pending_player_transition->_fade_room.expired())
+   {
+      _pending_player_transition.reset();
+      return;
+   }
+
+   const auto& player = PlayerRegistry::getFirst();
+   auto player_rect_px = player->getPixelRectFloat();
+   player_rect_px.position.x -= player_out_of_view_margin_px;
+   player_rect_px.size.x += 2.0f * player_out_of_view_margin_px;
+   const auto player_out_of_view = !sfcompat::findIntersection(player_rect_px, CameraRoomLock::getViewRect()).has_value();
+
+   _pending_player_transition->_waited_s += dt.asSeconds();
+   if (!player_out_of_view && _pending_player_transition->_waited_s < player_leave_view_timeout_s)
+   {
+      return;
+   }
+
+   player->fadeOut(player_out_of_view ? fade_out_speed_factor_out_of_view : fade_out_speed_factor_default);
+
+   auto screen_transition = std::move(_pending_player_transition->_transition);
+   screen_transition->startEffect1();
+   ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
+}
+
+bool Room::isPlayerTransitionPending()
+{
+   if (!_pending_player_transition.has_value())
+   {
+      return false;
+   }
+
+   // loading a level clears the transitions without running their callbacks
+   if (!_pending_player_transition->_transition)
+   {
+      return ScreenTransitionHandler::getInstance().active();
+   }
+
+   return !_pending_player_transition->_fade_room.expired();
 }
 
 void Room::lockCamera()

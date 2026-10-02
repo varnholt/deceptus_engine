@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
@@ -101,6 +102,32 @@ struct Room : std::enable_shared_from_this<Room>, public GameNode
 
    /// \brief starts configured room transition effects and related callbacks.
    void startTransition();
+
+   /// \brief fades out, moves the player to a position and fades back in, like walking into a room.
+   /// \details the fade starts once the player has walked out of view. it is the one configured for
+   ///          the room at the target, or for the current room when the target is in none. camera and
+   ///          room are held until then and synced to the target while the screen is black, so the
+   ///          move does not count as walking into a room and no second fade starts.
+   /// \param target_px position the player is moved to, in pixels.
+   /// \param rooms rooms of the level.
+   /// \param moved_callback called right after the player was moved.
+   /// \param done_callback called once the screen has faded back in.
+   static void transitionPlayerTo(
+      const sf::Vector2f& target_px,
+      const std::vector<std::shared_ptr<Room>>& rooms,
+      const std::function<void()>& moved_callback,
+      const std::function<void()>& done_callback
+   );
+
+   /// \brief starts the fade of a pending transitionPlayerTo once the player is out of view.
+   /// \param dt elapsed simulation time.
+   static void updatePlayerTransition(const sf::Time& dt);
+
+   /// \brief reports whether transitionPlayerTo has not moved the player yet.
+   /// \details the room must not change meanwhile: the player walks over the room border, and the
+   ///          transition sets the room itself once the player was moved.
+   /// \return true while the player waits to be moved.
+   static bool isPlayerTransitionPending();
 
    /// \brief locks room updates for a configurable delay before camera reassignment.
    void lockCamera();

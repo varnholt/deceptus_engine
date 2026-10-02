@@ -65,6 +65,7 @@ int32_t lockPlayerOrientation(lua_State* state);
 int32_t setCutsceneActive(lua_State* state);
 int32_t fadeOut(lua_State* state);
 int32_t fadeIn(lua_State* state);
+int32_t transitionPlayerTo(lua_State* state);
 int32_t setAmbient(lua_State* state);
 int32_t setZoomFactor(lua_State* state);
 int32_t playEventRecording(lua_State* state);

@@ -36,6 +36,30 @@ owl_eyes_insert.ogg
     Licence   Creative Commons 0
     Original  854249__diim_1__caida-moneda-1-coin-drop.wav
 
+rift_exit_correct.ogg
+    Title     Select, Granted 06.wav
+    Author    LilMati
+    Source    https://freesound.org/s/523763/
+    Licence   Creative Commons 0
+    Original  523763__lilmati__select-granted-06.wav
+    Note      Upmixed to stereo and lifted by 7.9 dB to peak at -1 dB.
+
+rift_exit_wrong.ogg
+    Title     Access Denied.wav
+    Author    LilMati
+    Source    https://freesound.org/s/489486/
+    Licence   Creative Commons 0
+    Original  489486__lilmati__access-denied.wav
+    Note      Lowered by 1 dB, it clipped at full scale.
+
+rift_solved.ogg
+    Title     Access granted (Sci-Fi UI SFX Free)
+    Author    heyheytheree
+    Source    https://freesound.org/s/872701/
+    Licence   Attribution 4.0
+    Original  872701__heyheytheree__access-granted-sci-fi-ui-sfx-free.wav
+    Note      Upmixed to stereo and lifted by 11 dB to peak at -1 dB.
+
 sword_ring_release.ogg
     Title     Warp Drive Initiate
     Author    el_boss

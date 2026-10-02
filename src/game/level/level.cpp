@@ -932,7 +932,11 @@ void Level::updateCameraSystem(const sf::Time& dt)
 
    // update room
    const auto room_previous = RoomUpdater::getCurrent();
-   updateRoom();
+   Room::updatePlayerTransition(dt);
+   if (!Room::isPlayerTransitionPending())
+   {
+      updateRoom();
+   }
    const auto room_current = RoomUpdater::getCurrent();
 
    // room changed
