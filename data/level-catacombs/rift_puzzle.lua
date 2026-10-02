@@ -48,8 +48,8 @@ local _start_position_px = {x = 6616, y = 1624}
 -- right inside ct-room8's lower left entrance
 local _solved_position_px = {x = 7118, y = 1624}
 
--- right inside the scriptorium's west gate, where a wrong exit and leaving ct-room8 the way it was
--- entered lead back to
+-- right inside the scriptorium's west gate, where a wrong exit and leaving ct-room8 on either side
+-- lead back to
 local _library_position_px = {x = 6048, y = 2128}
 
 local _exit_order = {
@@ -67,9 +67,9 @@ local _exit_wrap_positions_px = {
    rift_exit_end = {x = 6061, y = 1456},
 }
 
--- the scriptorium's west gate, and ct-room8's way back to the scriptorium
+-- the scriptorium's west gate, and ct-room8's ways back to the scriptorium on either side
 local _entrance_rect = "rift_entrance"
-local _return_rect = "rift_return"
+local _return_rects = {"rift_return", "rift_return_east"}
 
 local _exits_passed = 0
 local _transition_running = false
@@ -122,7 +122,9 @@ function RiftPuzzle.init()
       addSensorRectCallback(rect_id)
    end
    addSensorRectCallback(_entrance_rect)
-   addSensorRectCallback(_return_rect)
+   for _, rect_id in ipairs(_return_rects) do
+      addSensorRectCallback(rect_id)
+   end
 end
 
 
@@ -131,7 +133,9 @@ end
 function RiftPuzzle.playerCollidesWithSensorRect(rect_id)
    local is_exit = (_exit_wrap_positions_px[rect_id] ~= nil)
 
-   if (not is_exit and rect_id ~= _entrance_rect and rect_id ~= _return_rect) then
+   local is_return = (rect_id == _return_rects[1] or rect_id == _return_rects[2])
+
+   if (not is_exit and not is_return and rect_id ~= _entrance_rect) then
       return false
    end
 
