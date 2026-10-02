@@ -20,6 +20,8 @@
 namespace
 {
 constexpr auto eps_px = 100;
+constexpr auto fade_out_speed_factor_default = 5.0f;
+constexpr auto fade_out_speed_factor_out_of_view = 1000.0f;  // gone within a single simulation step
 std::vector<Room::RoomEnterArea> _enter_areas;
 }  // namespace
 
@@ -381,7 +383,13 @@ void Room::startTransition()
                movePlayerToRoomStartPosition();
             }
          );
-         PlayerRegistry::getFirst()->fadeOut();
+         // a player who already walked out of the view would otherwise pop back into it: the
+         // transition stops them and forces the idle pose, which reaches further back across the
+         // view edge than the run cycle did. there's nothing left to fade then, so they're hidden
+         // right away
+         const auto& player = PlayerRegistry::getFirst();
+         const auto player_out_of_view = !CameraRoomLock::getViewRect().contains(player->getPixelPositionFloat());
+         player->fadeOut(player_out_of_view ? fade_out_speed_factor_out_of_view : fade_out_speed_factor_default);
          screen_transition->_callbacks_effect_2_ended.emplace_back([]() { ScreenTransitionHandler::getInstance().pop(); });
          screen_transition->startEffect1();
          ScreenTransitionHandler::getInstance().push(std::move(screen_transition));
