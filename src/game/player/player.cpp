@@ -361,7 +361,8 @@ void Player::draw(sf::RenderTarget& color, sf::RenderTarget& normal, const sf::R
 
 void Player::drawStencil(sf::RenderTarget& color, const sf::RenderStates& states)
 {
-   const auto stencil_color = sf::Color{255, 255, 255, 25};
+   // fades along with the sprite, otherwise the silhouette stays behind when a room transition fades the player out
+   const auto stencil_color = sf::Color{255, 255, 255, static_cast<uint8_t>(25 * _fade_out_alpha)};
 
    // the silhouette shader forces the occluded player to transparent white (its rgb comes from the
    // shader, its alpha from the sprite shape scaled by u_alpha) instead of the dimmed sprite colors
