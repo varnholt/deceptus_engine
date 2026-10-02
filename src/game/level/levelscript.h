@@ -171,6 +171,13 @@ public:
    /// \param speed fade speed in alpha-per-second.
    void fadeIn(float speed);
 
+   /// \brief moves the player to a position behind a room fade, as if walking into a room there.
+   /// \details reports mechanismEvent("player_transition", "", "moved") once the player was moved and
+   ///          mechanismEvent("player_transition", "", "done") once the screen has faded back in.
+   /// \param x_px target x position in pixels.
+   /// \param y_px target y position in pixels.
+   void transitionPlayerTo(float x_px, float y_px);
+
    /// \brief sets camera zoom factor.
    /// \param zoom_factor absolute zoom multiplier.
    void setZoomFactor(float zoom_factor);

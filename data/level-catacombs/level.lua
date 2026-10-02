@@ -2,6 +2,7 @@ require "data/level-catacombs/level_constants"
 local cutscene = require "data/scripts/cutscene"
 local music_zones = require "data/scripts/music_zones"
 local lever_camera_paths = require "data/level-catacombs/lever_camera_paths"
+local rift_puzzle = require "data/level-catacombs/rift_puzzle"
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -135,6 +136,7 @@ function initialize()
    -- samples have to be loaded before they can be played
    addSample(_shrine_insert_sample)
    addSample(_shrine_release_sample)
+   rift_puzzle.initialize()
 
    -- the sewers get their own track. checkpoint 1 sits behind the sewers entrance, so from there
    -- on the sewers track is what the level starts with - also after dying or reloading the level.
@@ -348,6 +350,7 @@ function update(dt)
       initDrawer()
       initLockedBox()
       lever_camera_paths.init()
+      rift_puzzle.init()
    end
 
    lever_camera_paths.update(dt)
@@ -389,6 +392,7 @@ function mechanismEvent(object_id, group_id, event_name, value)
    end
 
    lever_camera_paths.mechanismEvent(object_id, event_name)
+   rift_puzzle.mechanismEvent(object_id, event_name)
 
    -- treasure chest is locked
    if (object_id == "locked_box" and event_name == "state" and value == "locked") then
@@ -506,6 +510,10 @@ function playerCollidesWithSensorRect(rect_id)
    log(string.format("sensor rect collision: %s", rect_id))
    
    if (music_zones.playerCollidesWithSensorRect(rect_id)) then
+      return
+   end
+
+   if (rift_puzzle.playerCollidesWithSensorRect(rect_id)) then
       return
    end
 

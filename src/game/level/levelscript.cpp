@@ -22,6 +22,7 @@
 #include "game/level/luaconstants.h"
 #include "game/level/luainterface.h"
 #include "game/level/luanode.h"
+#include "game/level/room.h"
 #include "game/mechanisms/dialogue.h"
 #include "game/mechanisms/extra.h"
 #include "game/mechanisms/ringshaderlayer.h"
@@ -205,6 +206,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "setCutsceneActive", LevelScriptCallbacks::setCutsceneActive);
    lua_register(_lua_state, "fadeOut", LevelScriptCallbacks::fadeOut);
    lua_register(_lua_state, "fadeIn", LevelScriptCallbacks::fadeIn);
+   lua_register(_lua_state, "transitionPlayerTo", LevelScriptCallbacks::transitionPlayerTo);
    lua_register(_lua_state, "log", LevelScriptCallbacks::debug);
    lua_register(_lua_state, "playMusic", LevelScriptCallbacks::playMusic);
    lua_register(_lua_state, "setLevelMusic", LevelScriptCallbacks::setLevelMusic);
@@ -1010,6 +1012,38 @@ void LevelScript::fadeIn(float speed)
       ScreenTransitionHandler::getInstance().push(std::move(transition));
       ScreenTransitionHandler::getInstance().startEffect2();
    }
+}
+
+void LevelScript::transitionPlayerTo(float x_px, float y_px)
+{
+   const auto& level = LevelRegistry::getCurrent();
+   if (!level)
+   {
+      return;
+   }
+
+   // the handler outlives this script, so the callbacks must not touch the lua state once the level
+   // it belongs to has been torn down
+   Room::transitionPlayerTo(
+      {x_px, y_px},
+      level->getRooms(),
+      [this, alive = std::weak_ptr<bool>{_alive_token}]()
+      {
+         if (alive.expired())
+         {
+            return;
+         }
+         luaMechanismEvent("player_transition", "", "moved", true);
+      },
+      [this, alive = std::weak_ptr<bool>{_alive_token}]()
+      {
+         if (alive.expired())
+         {
+            return;
+         }
+         luaMechanismEvent("player_transition", "", "done", true);
+      }
+   );
 }
 
 void LevelScript::setCameraPosition(float x_px, float y_px)
