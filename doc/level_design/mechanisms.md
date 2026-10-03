@@ -436,6 +436,8 @@ In order to introduce a message box, you create a rectangle object that defines 
 |nn_y_px|int|The y offset of the message box on the screen (optional). `nn` is the number of the message the offset refers to. The screen dimensions are `640` x `360`.|
 |nn_text_color|color|The text color of the message box; if not set, the color previously set will be used. `nn` is the number of the message the text color refers to.|
 |nn_background_color|color|The background color of the message box; if not set, the previously set background color will be reused. `nn` is the number of the message the background color refers to.|
+|nn_avatar|string|Path to a speaker image shown outside the message box, e.g. `data/avatars/adam.png`; if not set, the previously set avatar will be reused, an empty string removes it. `nn` is the number of the message the avatar refers to.|
+|nn_avatar_side|string|Which edge of the message box the avatar is overlaid on, either `left` or `right`; if not set, the previously set side will be reused. Default is `left`. `nn` is the number of the message the avatar side refers to.|
 |open_automatically|bool|The dialogue open just on collision with the player, no button needs to be pressed. Default is `false`.|
 |show_delay_ms|int|An optional activation delay for the message box a (in milliseconds, undefined by default).|
 |pause_game|bool|Whether or not to pause the game when the dialogue is shown. Default is `true`.|
