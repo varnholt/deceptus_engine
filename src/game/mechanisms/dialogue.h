@@ -31,6 +31,7 @@ public:
       float _animate_text_speed{30.0f};
       std::optional<std::string> _avatar_path;
       MessageBoxAvatarSide _avatar_side = MessageBoxAvatarSide::Left;
+      sf::Vector2f _avatar_offset_px;
    };
 
    /// \brief creates a dialogue mechanism with no configured pages.

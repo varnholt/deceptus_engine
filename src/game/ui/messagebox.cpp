@@ -348,7 +348,7 @@ void MessageBox::initializeAvatar()
    const auto avatar_size = texture->getSize();
    const auto avatar_width_px = static_cast<float>(avatar_size.x);
    const auto window_width_px = static_cast<float>(_layers["window"]->_texture->getSize().x);
-   const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f});
+   const auto offset_px = _properties._pos.value_or(sf::Vector2f{0.0f, 0.0f}) + _properties._avatar_offset_px;
 
    auto sprite = sfcompat::createSprite(*texture);
 
@@ -375,7 +375,10 @@ void MessageBox::initializeAvatar()
    _layer_stack.push_back(avatar_layer);
    _box_content_layers.push_back(avatar_layer);
 
-   const auto encroachment_px = std::max(0.0f, avatar_width_px - avatar_overhang_x_px);
+   // moving the avatar away from the box hands the freed width back to the text
+   const auto outward_offset_px =
+      (_properties._avatar_side == MessageBoxAvatarSide::Left) ? -_properties._avatar_offset_px.x : _properties._avatar_offset_px.x;
+   const auto encroachment_px = std::max(0.0f, avatar_width_px - avatar_overhang_x_px - outward_offset_px);
    _avatar_reserved_width_px = encroachment_px + avatar_text_gap_px;
    _avatar_text_offset_x_px = (_properties._avatar_side == MessageBoxAvatarSide::Left) ? _avatar_reserved_width_px : 0.0f;
 }

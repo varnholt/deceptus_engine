@@ -406,6 +406,20 @@ int32_t showDialogue(lua_State* state)
       }
       lua_pop(state, 1);
 
+      lua_getfield(state, argument_index, "avatar_offset_x_px");
+      if (lua_isnumber(state, -1))
+      {
+         item._avatar_offset_px.x = static_cast<float>(lua_tonumber(state, -1));
+      }
+      lua_pop(state, 1);
+
+      lua_getfield(state, argument_index, "avatar_offset_y_px");
+      if (lua_isnumber(state, -1))
+      {
+         item._avatar_offset_px.y = static_cast<float>(lua_tonumber(state, -1));
+      }
+      lua_pop(state, 1);
+
       lua_getfield(state, argument_index, "x_px");
       const auto has_x = lua_isnumber(state, -1);
       const auto x_px = has_x ? static_cast<float>(lua_tonumber(state, -1)) : 0.0f;
