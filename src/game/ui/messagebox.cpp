@@ -371,8 +371,9 @@ void MessageBox::initializeAvatar()
    avatar_layer->_texture = texture;
    avatar_layer->_sprite = sprite;
 
+   // keep the avatar underneath the next page arrow, which it covers when it sits on the right
    _layers["avatar"] = avatar_layer;
-   _layer_stack.push_back(avatar_layer);
+   _layer_stack.insert(std::ranges::find(_layer_stack, _layers["next_page"]), avatar_layer);
    _box_content_layers.push_back(avatar_layer);
 
    // moving the avatar away from the box hands the freed width back to the text
