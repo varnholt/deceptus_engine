@@ -58,6 +58,7 @@ struct MessageBox
       int32_t _show_next = false;
       std::optional<std::string> _avatar_texture_path;                 //!< speaker image kept outside the box, e.g. "data/avatars/adam.png"
       MessageBoxAvatarSide _avatar_side = MessageBoxAvatarSide::Left;  //!< which edge of the box the avatar is overlaid on
+      sf::Vector2f _avatar_offset_px;                                  //!< shift of the avatar from its default corner placement
    };
 
    using MessageBoxCallback = std::function<void(Button)>;

@@ -726,6 +726,8 @@ showDialogue("npc_intro")
 |`y_px`|number|—|Vertical position in world pixels. Requires `x_px`.|
 |`avatar`|string|—|Path to a speaker image shown outside the box, e.g. `"data/avatars/adam.png"`.|
 |`avatar_side`|string|`"left"`|Which edge of the box the avatar is overlaid on. Either `"left"` or `"right"`.|
+|`avatar_offset_x_px`|number|`0`|Horizontal shift of the avatar from its default spot in the box's top corner, positive moves it right.|
+|`avatar_offset_y_px`|number|`0`|Vertical shift of the avatar from its default spot in the box's top corner, positive moves it down.|
 
 ```lua
 -- single page
@@ -749,6 +751,9 @@ showDialogue({message = "Over here!", x_px = 640, y_px = 180})
 
 -- page with a speaker avatar overlaid on the right edge of the box
 showDialogue({message = "Over here!", avatar = "data/avatars/adam.png", avatar_side = "right"})
+
+-- tall avatar that stands on the box's bottom edge and sticks out past its right edge
+showDialogue({message = "Trust me.", avatar = "data/avatars/adam.png", avatar_side = "right", avatar_offset_x_px = 24, avatar_offset_y_px = -64})
 ```
 
 

@@ -35,6 +35,8 @@ static constexpr std::array dialogue_properties{
    PropertyInfo{.name = "00_background_color", .type = "string", .default_value = std::string_view{"#000000ff"}},
    PropertyInfo{.name = "00_avatar", .type = "string", .default_value = std::string_view{""}},
    PropertyInfo{.name = "00_avatar_side", .type = "string", .default_value = std::string_view{"left"}},
+   PropertyInfo{.name = "00_avatar_offset_x_px", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "00_avatar_offset_y_px", .type = "int", .default_value = int32_t{0}},
 };
 
 static constexpr MechanismSchema dialogue_schema{
@@ -105,6 +107,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
    std::optional<sf::Color> background_color;
    std::optional<std::string> avatar_path;
    MessageBoxAvatarSide avatar_side = MessageBoxAvatarSide::Left;
+   sf::Vector2f avatar_offset_px;
    constexpr auto message_box_count_max = 99;
    for (auto i = 0u; i < message_box_count_max; i++)
    {
@@ -152,6 +155,18 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
             (avatar_side_it->second->_value_string.value() == "right") ? MessageBoxAvatarSide::Right : MessageBoxAvatarSide::Left;
       }
 
+      auto avatar_offset_x_it = map.find(item_id + "_avatar_offset_x_px");
+      if (avatar_offset_x_it != map.end())
+      {
+         avatar_offset_px.x = static_cast<float>(avatar_offset_x_it->second->_value_int.value());
+      }
+
+      auto avatar_offset_y_it = map.find(item_id + "_avatar_offset_y_px");
+      if (avatar_offset_y_it != map.end())
+      {
+         avatar_offset_px.y = static_cast<float>(avatar_offset_y_it->second->_value_int.value());
+      }
+
       if (it_dialogue_items != properties->_map.end())
       {
          DialogueItem item;
@@ -161,6 +176,7 @@ std::shared_ptr<Dialogue> Dialogue::deserialize(GameNode* parent, const GameDese
          item._background_color = background_color.value_or(item._background_color);
          item._avatar_path = avatar_path;
          item._avatar_side = avatar_side;
+         item._avatar_offset_px = avatar_offset_px;
          dialogue->_dialogue_items.push_back(item);
       }
    }
@@ -348,7 +364,8 @@ void Dialogue::showNext()
          (_index == _dialogue_items.size() - 1),  // the last item has a hide animation
          _index < _dialogue_items.size() - 1,     // whether to show 'show next' arrow
          item._avatar_path,
-         item._avatar_side
+         item._avatar_side,
+         item._avatar_offset_px
       }
    );
 
