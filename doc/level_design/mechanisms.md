@@ -35,6 +35,7 @@ The dimensions and position of the blocking area are controlled by the size of t
 |z|int|The object's z index|
 |texture|string|Path to the color texture to draw (the default is empty/invisible).|
 |normal|string|Path to the normal texture to draw (the default is empty/invisible).|
+|collapse_when_disabled|bool|When the rect is disabled after it has been on screen, its texture breaks into tile-sized pieces that fall and fade out instead of vanishing at once. A rect disabled before it was ever drawn, e.g. while a save state is applied, is simply gone. Defaults to `false`.|
 |enabled|bool|Whether or not the blocking rect is currently active. Disabled blocking rects do not impede the player. Defaults to `true`.|
 
 &nbsp;

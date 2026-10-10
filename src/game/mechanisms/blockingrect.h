@@ -2,6 +2,8 @@
 #ifndef BLOCKINGRECT_H
 #define BLOCKINGRECT_H
 
+#include <vector>
+
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
@@ -51,11 +53,32 @@ public:
    const sf::FloatRect& getPixelRect() const;
 
 private:
+   /// \brief one tile-sized piece of the texture that falls away when the rectangle collapses.
+   struct CollapsePiece
+   {
+      sf::IntRect _texture_rect;           //!< the part of the texture this piece shows
+      sf::Vector2f _position_px;           //!< current centre of the piece
+      float _velocity_y_px_s{0.0f};        //!< current falling speed
+      float _delay_s{0.0f};                //!< time before the piece starts to fall
+      float _rotation_degrees{0.0f};       //!< current tilt of the piece
+      float _rotation_speed_degrees_s{0.0f};  //!< how fast the piece tumbles
+   };
+
+   void startCollapse();
+   void drawCollapse(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states);
+
    // rendering
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
    std::unique_ptr<sf::Sprite> _sprite;
    sf::FloatRect _rectangle;
+
+   // collapsing
+   bool _collapse_when_disabled{false};  //!< disabling the rectangle once it has been seen lets its texture fall away
+   bool _drawn{false};                   //!< whether the rectangle has been drawn at least once
+   float _collapse_elapsed_s{0.0f};      //!< time since the collapse started
+   std::vector<CollapsePiece> _collapse_pieces;
+   std::shared_ptr<sf::Sprite> _collapse_sprite;
 
    // physics
    b2Body* _body = nullptr;
