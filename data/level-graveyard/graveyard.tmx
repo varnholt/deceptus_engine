@@ -2723,7 +2723,7 @@
  <objectgroup id="57" name="damage_rects">
   <object id="110" name="rope_stakes" x="2568" y="1712" width="168" height="16">
    <properties>
-    <property name="damage" value="100"/>
+    <property name="damage" type="int" value="100"/>
    </properties>
   </object>
   <object id="75" name="grave_stakes" x="1272" y="1760" width="168" height="16">
