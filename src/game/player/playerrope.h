@@ -77,6 +77,10 @@ private:
    /// \brief lets go of the rope and starts the momentum grace period.
    void release();
 
+   /// \brief gives a release with the jump button the lift of a jump and a push towards the held side.
+   /// \param input current rope input.
+   void jumpOff(const RopeInput& input);
+
    /// \brief moves the hold onto the chain element the current link length points at.
    void bindToElement();
 
