@@ -181,7 +181,7 @@ std::optional<b2Vec2> PlayerRopeHold::readPlayerAnchorPosition() const
    return _joint->GetAnchorB();
 }
 
-void PlayerRopeHold::applySwingControl(b2Body* player_body, float direction, float acceleration) const
+void PlayerRopeHold::applySwingControl(b2Body* player_body, float direction, float acceleration, bool pivot_on_anchor) const
 {
    if (!player_body || !_rope_body || fabs(direction) < 0.01f)
    {
@@ -193,7 +193,12 @@ void PlayerRopeHold::applySwingControl(b2Body* player_body, float direction, flo
    // full effect at the bottom of the arc, nothing at the point where the rope is horizontal and
    // pulling sideways would just stretch it. the pivot is taken from the rope body the player hangs
    // on, so this keeps working while the rope is wrapped around a corner.
-   auto rope_direction_m = _rope_body->GetPosition() - player_body->GetPosition();
+   //
+   // a rope that hangs free can ask for the suspension point instead: the anchor limit is what carries the
+   // player there, and a long chain bows between the anchor and him, so its last link points somewhere other
+   // than the pendulum he is actually on.
+   const auto pivot_m = (pivot_on_anchor && _anchor_limit_joint) ? _anchor_limit_joint->GetAnchorA() : _rope_body->GetPosition();
+   auto rope_direction_m = pivot_m - player_body->GetPosition();
 
    if (rope_direction_m.LengthSquared() < 0.0001f)
    {

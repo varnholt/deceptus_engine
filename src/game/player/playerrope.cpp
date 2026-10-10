@@ -15,7 +15,9 @@ constexpr auto climb_speed_up_mps = 1.6f;
 constexpr auto climb_speed_down_mps = 2.2f;
 constexpr auto climb_pull_acceleration = 14.0f;
 constexpr auto swing_control_acceleration = 14.0f;
-constexpr auto jump_off_push_mps = 2.5f;
+constexpr auto jump_off_push_mps = 0.0f;
+constexpr auto jump_off_lift_share = 0.5f;
+constexpr auto settle_speed_mps = 1.5f;
 constexpr auto release_grace_duration_s = 0.6f;
 constexpr auto regrab_block_duration_s = 0.4f;
 
@@ -155,6 +157,15 @@ void PlayerRope::updateHold(const sf::Time& dt, const RopeInput& input)
 
    // a grab rope is only swung on: the player hangs where he caught it and up and down do nothing
 
+   // the grab keeps the distance the player had to the link so it does not yank him, after that the link is
+   // drawn in until his hands are on the rope instead of half a tile beside it
+   if (_link_length_m > 0.0f)
+   {
+      _link_length_m = std::max(0.0f, _link_length_m - settle_speed_mps * dt.asSeconds());
+      _hold.setLinkLength(_link_length_m);
+      _hold.setAnchorLimitDistance(readDistanceFromAnchor());
+   }
+
    auto direction = 0.0f;
 
    if (input._move_left_pressed)
@@ -167,7 +178,7 @@ void PlayerRope::updateHold(const sf::Time& dt, const RopeInput& input)
       direction += 1.0f;
    }
 
-   _hold.applySwingControl(input._player_body, direction, swing_control_acceleration);
+   _hold.applySwingControl(input._player_body, direction, swing_control_acceleration, true);
 }
 
 void PlayerRope::updateClimb(const sf::Time& dt, const RopeInput& input)
@@ -306,7 +317,7 @@ void PlayerRope::jumpOff(const RopeInput& input)
    }
 
    const auto mass = input._player_body->GetMass();
-   const auto lift = PhysicsConfiguration::getInstance()._player_jump_impulse_factor;
+   const auto lift = PhysicsConfiguration::getInstance()._player_jump_impulse_factor * jump_off_lift_share;
    input._player_body->ApplyLinearImpulse(
       b2Vec2{direction * jump_off_push_mps * mass, -lift * mass}, input._player_body->GetWorldCenter(), true
    );
