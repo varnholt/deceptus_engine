@@ -215,6 +215,11 @@
                     "value": "down"
                 },
                 {
+                    "name": "chain",
+                    "type": "bool",
+                    "value": false
+                },
+                {
                     "name": "z",
                     "type": "int",
                     "value": 20
