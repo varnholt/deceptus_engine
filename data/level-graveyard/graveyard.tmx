@@ -2739,32 +2739,6 @@
  <objectgroup id="60" name="box_colliders">
   <object id="88" x="2496" y="1656" width="48" height="72"/>
  </objectgroup>
- <objectgroup id="61" name="checkpoints">
-  <object id="89" name="checkpoint_01" x="2328" y="1656" width="72" height="72">
-   <properties>
-    <property name="index" type="int" value="1"/>
-    <property name="sprite_pos_x_px" type="int" value="2328"/>
-    <property name="sprite_pos_y_px" type="int" value="1632"/>
-    <property name="z" type="int" value="19"/>
-   </properties>
-  </object>
-  <object id="90" name="checkpoint_02" x="3816" y="1488" width="72" height="72">
-   <properties>
-    <property name="index" type="int" value="2"/>
-    <property name="sprite_pos_x_px" type="int" value="3816"/>
-    <property name="sprite_pos_y_px" type="int" value="1464"/>
-    <property name="z" type="int" value="19"/>
-   </properties>
-  </object>
-  <object id="91" name="checkpoint_03" x="3360" y="1968" width="72" height="72">
-   <properties>
-    <property name="index" type="int" value="3"/>
-    <property name="sprite_pos_x_px" type="int" value="3360"/>
-    <property name="sprite_pos_y_px" type="int" value="1944"/>
-    <property name="z" type="int" value="19"/>
-   </properties>
-  </object>
- </objectgroup>
  <objectgroup id="62" name="crushers">
   <object id="92" name="gate_crusher" x="4176" y="1368" width="120" height="192">
    <properties>
