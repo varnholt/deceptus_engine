@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="768" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="55" nextobjectid="75">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="768" height="100" tilewidth="24" tileheight="24" infinite="0" nextlayerid="56" nextobjectid="75">
  <tileset firstgid="1" source="graveyard-background-diffuse.tsx"/>
  <tileset firstgid="4097" source="graveyard-level-diffuse.tsx"/>
  <imagelayer id="25" name="gv-bg-sky" offsetx="576" offsety="1320">
@@ -2067,7 +2067,7 @@
  <objectgroup id="13" name="weather" visible="0">
   <object id="31" name="thunderstorm" x="696" y="696" width="14376" height="1080">
    <properties>
-    <property name="enabled" type="bool" value="true"/>
+    <property name="enabled" type="bool" value="false"/>
     <property name="sound_volume" type="float" value="0.8"/>
     <property name="sounds" value="weather_thunder_01.ogg;weather_thunder_02.ogg;weather_thunder_03.ogg;weather_thunder_04.ogg;weather_thunder_05.ogg"/>
     <property name="thunder_delay_s" type="float" value="0.5"/>
@@ -2367,7 +2367,7 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="52" name="smoke" visible="0">
+ <objectgroup id="55" name="smoke" visible="0">
   <object id="73" x="744" y="1344" width="1512" height="432">
    <properties>
     <property name="blend_mode" value="add"/>
