@@ -13,6 +13,11 @@
             "id": 1,
             "members": [
                 {
+                    "name": "collapse_when_disabled",
+                    "type": "bool",
+                    "value": false
+                },
+                {
                     "name": "z",
                     "type": "int",
                     "value": 20
