@@ -353,6 +353,26 @@
                     "value": ""
                 },
                 {
+                    "name": "00_avatar",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "00_avatar_offset_x_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "00_avatar_offset_y_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "00_avatar_side",
+                    "type": "string",
+                    "value": "left"
+                },
+                {
                     "name": "00_background_color",
                     "type": "string",
                     "value": "#000000ff"
