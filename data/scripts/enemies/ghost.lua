@@ -61,6 +61,10 @@ mWakeTime = nil
 mWakeDuration = 1.5
 mAlpha = 150
 
+-- how close the player has to be, in tiles, before the ghost attacks
+mAttackRangeX = 10
+mAttackRangeY = 5
+
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
@@ -224,11 +228,11 @@ function patrol()
    -- check if player is within range
    distanceToPlayerX = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
 
-   if (math.abs(distanceToPlayerX) < 10) then
+   if (math.abs(distanceToPlayerX) < mAttackRangeX) then
 
       distanceToPlayerY = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
 
-      if (math.abs(distanceToPlayerY) < 5) then
+      if (math.abs(distanceToPlayerY) < mAttackRangeY) then
          mPatrol = false
          -- print("player in range")
          startAttack()
@@ -343,6 +347,10 @@ function writeProperty(key, value)
    elseif (key == "wake" and mDormant) then
       mDormant = false
       mWakeTime = mElapsed
+   elseif (key == "attack_range_x_tl") then
+      mAttackRangeX = tonumber(value)
+   elseif (key == "attack_range_y_tl") then
+      mAttackRangeY = tonumber(value)
    end
 end
 
