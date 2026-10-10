@@ -36,6 +36,7 @@ The dimensions and position of the blocking area are controlled by the size of t
 |texture|string|Path to the color texture to draw (the default is empty/invisible).|
 |normal|string|Path to the normal texture to draw (the default is empty/invisible).|
 |collapse_when_disabled|bool|When the rect is disabled after it has been on screen, its texture breaks into tile-sized pieces that fall and fade out instead of vanishing at once. A rect disabled before it was ever drawn, e.g. while a save state is applied, is simply gone. Defaults to `false`.|
+|texture_offset_y_px|int|Draws the texture this many pixels below the rectangle's top, negative values draw it higher, e.g. `-24` for grass that sticks out of the ground above the collision. The collapse pieces follow it. Defaults to `0`.|
 |enabled|bool|Whether or not the blocking rect is currently active. Disabled blocking rects do not impede the player. Defaults to `true`.|
 
 &nbsp;
@@ -1006,6 +1007,7 @@ The way to create a moveable object, create a rectangle as usual. So far the spr
 |gravity_scale|float|Gravity scale of the moveable object, default is 1.0f.|
 |z|int|The layer's z index|
 |serialized|bool|If set to `true`, the box's position is saved and restored when the level is reloaded (default is `true`). Set it to `false` for boxes that should always start from their position in the level.|
+|texture|string|Path to an image to draw instead of the default box, e.g. `data/level-graveyard/headstone.png`. The whole image is drawn at the object's position, so size the object to match it (default is empty, the default box).|
 
 
 ---

@@ -18,6 +18,11 @@
                     "value": false
                 },
                 {
+                    "name": "texture_offset_y_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
                     "name": "z",
                     "type": "int",
                     "value": 20
@@ -891,6 +896,11 @@
                     "name": "serialized",
                     "type": "bool",
                     "value": true
+                },
+                {
+                    "name": "texture",
+                    "type": "string",
+                    "value": ""
                 },
                 {
                     "name": "z",

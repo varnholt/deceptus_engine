@@ -3,6 +3,7 @@
  <object type="BlockingRect" width="96" height="48">
   <properties>
    <property name="collapse_when_disabled" type="bool" value="false"/>
+   <property name="texture_offset_y_px" type="int" value="0"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>
