@@ -166,6 +166,7 @@ In there, just place a rectangle where you'd like to position your Collapsing Pl
 |Property|Type|Description|
 |-|-|-|
 |time_to_collapse_s|float|The time in seconds it takes for a platform to collapse (the default is 1.0s).|
+|collapse_once_touched|bool|If `true`, the countdown keeps running once the player has stepped on the platform, so it collapses behind a player who runs on instead of resetting when they leave (the default is `false`).|
 |destruction_speed|float|A factor for the destruction play speed (the default is 30.0).|
 |fall_speed|float|A factor for the fall speed of the blocks (the default is 6.0).|
 |time_to_respawn_s|float|The time in seconds it takes for a collapsing platform to respawn (the default is 4.0s).|

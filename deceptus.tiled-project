@@ -165,6 +165,11 @@
             "id": 8,
             "members": [
                 {
+                    "name": "collapse_once_touched",
+                    "type": "bool",
+                    "value": false
+                },
+                {
                     "name": "z",
                     "type": "int",
                     "value": 20
@@ -228,6 +233,11 @@
                     "name": "chain",
                     "type": "bool",
                     "value": false
+                },
+                {
+                    "name": "travel_px",
+                    "type": "float",
+                    "value": 48.0
                 },
                 {
                     "name": "z",

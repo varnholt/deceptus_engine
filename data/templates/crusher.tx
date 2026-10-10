@@ -4,6 +4,7 @@
   <properties>
    <property name="alignment" propertytype="CrusherAlignment" value="down"/>
    <property name="chain" type="bool" value="false"/>
+   <property name="travel_px" type="float" value="48"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>
