@@ -102,6 +102,7 @@ private:
    sf::Time _extraction_time;
    sf::Time _retraction_time;
    sf::Time _idle_time_max;
+   float _travel_px{48.0f};  //!< how far the blade extracts
    sf::Time _extraction_time_max;
    sf::Time _retraction_time_max;
    sf::Time _time_offset;
