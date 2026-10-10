@@ -2039,6 +2039,7 @@
     <property name="path" value="141, 67"/>
     <property name="attack_range_x_tl" value="14"/>
     <property name="attack_range_y_tl" value="6"/>
+    <property name="variant" value="green"/>
     <property name="dormant" value="true"/>
    </properties>
   </object>
