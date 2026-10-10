@@ -54,12 +54,8 @@ function setStormActive(active)
    setMechanismEnabled("thunderstorm", active, "weather")
    setMechanismEnabled("birds", not active, "sound_emitters")
 
-   -- the storm drives its leaves across the way back to the tower, and it wakes the dead in the graves along it
+   -- the storm drives its leaves across the way back to the tower
    setMechanismEnabled("storm_wind", active, "wind")
-
-   if (active) then
-      writeLuaNodeProperty("ghost_.*", "wake", "true")
-   end
 end
 
 
@@ -82,6 +78,9 @@ end
 function openSinkhole()
    setMechanismEnabled("sinkhole_ground", false, "blocking_rects")
    _sinkhole_open = true
+
+   -- falling into the crypt is what wakes the dead in the graves along the way back to the tower
+   writeLuaNodeProperty("ghost_.*", "wake", "true")
 end
 
 
