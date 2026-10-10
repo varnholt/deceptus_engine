@@ -2024,17 +2024,17 @@
     <property name="script" value="bat_2.lua"/>
    </properties>
   </object>
-  <object id="106" name="ghost_grave" x="1680" y="1584">
+  <object id="106" name="ghost_grave" x="1680" y="1608">
    <properties>
     <property name="script" value="ghost.lua"/>
-    <property name="path" value="86, 66"/>
+    <property name="path" value="86, 67"/>
     <property name="dormant" value="true"/>
    </properties>
   </object>
-  <object id="107" name="ghost_mausoleum" x="2808" y="1512">
+  <object id="107" name="ghost_mausoleum" x="2808" y="1608">
    <properties>
     <property name="script" value="ghost.lua"/>
-    <property name="path" value="141, 63"/>
+    <property name="path" value="141, 67"/>
     <property name="dormant" value="true"/>
    </properties>
   </object>
@@ -2722,6 +2722,7 @@
  <objectgroup id="58" name="blocking_rects">
   <object id="77" name="sinkhole_ground" x="3144" y="1728" width="144" height="96">
    <properties>
+    <property name="collapse_when_disabled" type="bool" value="true"/>
     <property name="texture" value="data/level-graveyard/sinkhole.png"/>
     <property name="z" type="int" value="24"/>
    </properties>
