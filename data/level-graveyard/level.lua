@@ -114,8 +114,8 @@ function update(dt)
       _initialized = true
       initShrine()
 
-      -- tall enough that jumping across the graves still counts as stepping onto them
-      _sinkhole_rect_id = addCollisionRect(131 * 24, 60 * 24, 6 * 24, 12 * 24)
+      -- a thin strip on the ground itself: only feet on the graves bring them down, so whoever triggers it falls in
+      _sinkhole_rect_id = addCollisionRect(131 * 24, 72 * 24 - 12, 6 * 24, 12)
       _crypt_exit_rect_id = addCollisionRect(100 * 24, 74 * 24, 4 * 24, 3 * 24)
    end
 
