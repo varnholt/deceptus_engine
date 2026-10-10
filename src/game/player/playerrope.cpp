@@ -3,6 +3,7 @@
 #include "game/audio/audio.h"
 #include "game/mechanisms/grabrope.h"
 #include "game/mechanisms/grabropewrapper.h"
+#include "game/physics/physicsconfiguration.h"
 
 #include <algorithm>
 #include <cmath>
@@ -13,7 +14,8 @@ namespace
 constexpr auto climb_speed_up_mps = 1.6f;
 constexpr auto climb_speed_down_mps = 2.2f;
 constexpr auto climb_pull_acceleration = 14.0f;
-constexpr auto swing_control_acceleration = 6.0f;
+constexpr auto swing_control_acceleration = 14.0f;
+constexpr auto jump_off_push_mps = 2.5f;
 constexpr auto release_grace_duration_s = 0.6f;
 constexpr auto regrab_block_duration_s = 0.4f;
 
@@ -52,6 +54,7 @@ void PlayerRope::update(const sf::Time& dt, const RopeInput& input)
       if (jump_button_just_pressed)
       {
          release();
+         jumpOff(input);
       }
       else
       {
@@ -279,6 +282,34 @@ void PlayerRope::release()
    _segment_length_m = 0.0f;
    _release_grace_remaining_s = release_grace_duration_s;
    _regrab_blocked_s = regrab_block_duration_s;
+}
+
+void PlayerRope::jumpOff(const RopeInput& input)
+{
+   if (!input._player_body)
+   {
+      return;
+   }
+
+   // letting go with jump is a jump: the same lift a jump from the ground gets, plus a push towards the
+   // side that is held, on top of whatever momentum the swing built up
+   auto direction = 0.0f;
+
+   if (input._move_left_pressed)
+   {
+      direction -= 1.0f;
+   }
+
+   if (input._move_right_pressed)
+   {
+      direction += 1.0f;
+   }
+
+   const auto mass = input._player_body->GetMass();
+   const auto lift = PhysicsConfiguration::getInstance()._player_jump_impulse_factor;
+   input._player_body->ApplyLinearImpulse(
+      b2Vec2{direction * jump_off_push_mps * mass, -lift * mass}, input._player_body->GetWorldCenter(), true
+   );
 }
 
 void PlayerRope::reset()
