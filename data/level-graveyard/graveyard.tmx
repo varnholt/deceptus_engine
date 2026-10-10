@@ -2751,10 +2751,10 @@
   <object id="109" name="mausoleum_rope" x="2652" y="1670">
    <properties>
     <property name="push_strength" type="float" value="0"/>
-    <property name="segments" type="int" value="16"/>
+    <property name="segments" type="int" value="26"/>
     <property name="z" type="int" value="24"/>
    </properties>
-   <polyline points="0,0 0,-182"/>
+   <polyline points="0,0 0,-278"/>
   </object>
  </objectgroup>
  <objectgroup id="60" name="box_colliders">
