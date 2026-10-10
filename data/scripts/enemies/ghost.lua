@@ -347,6 +347,10 @@ function writeProperty(key, value)
    elseif (key == "wake" and mDormant) then
       mDormant = false
       mWakeTime = mElapsed
+   elseif (key == "variant") then
+      -- the sheet holds two ghosts side by side, the red one and the green one
+      mSpriteOffsetX = (value == "green") and 1 or 0
+      mUpdateSprite = true
    elseif (key == "attack_range_x_tl") then
       mAttackRangeX = tonumber(value)
    elseif (key == "attack_range_y_tl") then
