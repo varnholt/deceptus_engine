@@ -19,7 +19,7 @@ constexpr auto jump_off_push_mps = 0.0f;
 constexpr auto jump_off_lift_share = 0.5f;
 constexpr auto settle_speed_mps = 1.5f;
 constexpr auto release_grace_duration_s = 0.6f;
-constexpr auto regrab_block_duration_s = 0.4f;
+constexpr auto regrab_block_duration_s = 1.0f;
 
 // the chain is allowed to sag a little past its own length before the anchor limit bites, otherwise
 // the limit fights the chain constantly and the rope reads as rigid
