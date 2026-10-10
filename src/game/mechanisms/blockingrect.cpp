@@ -17,6 +17,7 @@ namespace
 static constexpr std::array blocking_rect_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
    PropertyInfo{.name = "collapse_when_disabled", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "texture_offset_y_px", .type = "int", .default_value = int32_t{0}},
 };
 
 constexpr auto collapse_piece_size_px = 24;
@@ -88,6 +89,12 @@ void BlockingRect::setup(const GameDeserializeData& data)
          setZ(z_index);
       }
 
+      const auto offset_it = data._tmx_object->_properties->_map.find("texture_offset_y_px");
+      if (offset_it != data._tmx_object->_properties->_map.end())
+      {
+         _texture_offset_y_px = static_cast<float>(offset_it->second->_value_int.value_or(0));
+      }
+
       const auto collapse_it = data._tmx_object->_properties->_map.find("collapse_when_disabled");
       if (collapse_it != data._tmx_object->_properties->_map.end())
       {
@@ -108,10 +115,10 @@ void BlockingRect::setup(const GameDeserializeData& data)
          _texture_map = TexturePool::getInstance().get(texture);
 #ifdef DECEPTUS_VRSFML
          _sprite = std::make_unique<sf::Sprite>();
-         _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
+         _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px + _texture_offset_y_px};
 #else
          _sprite = std::make_unique<sf::Sprite>(*_texture_map);
-         _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+         _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px + _texture_offset_y_px});
 #endif
       }
 
@@ -268,8 +275,10 @@ void BlockingRect::startCollapse()
    _collapse_elapsed_s = 0.0f;
    _collapse_pieces.clear();
 
-   const auto columns = static_cast<int32_t>(_rectangle.size.x) / collapse_piece_size_px;
-   const auto rows = static_cast<int32_t>(_rectangle.size.y) / collapse_piece_size_px;
+   // the pieces cover the texture, which may reach above the rectangle
+   const auto texture_size = _texture_map->getSize();
+   const auto columns = static_cast<int32_t>(texture_size.x) / collapse_piece_size_px;
+   const auto rows = static_cast<int32_t>(texture_size.y) / collapse_piece_size_px;
 
    for (auto row = 0; row < rows; ++row)
    {
@@ -281,7 +290,7 @@ void BlockingRect::startCollapse()
          };
          piece._position_px = {
             _rectangle.position.x + (column + 0.5f) * collapse_piece_size_px,
-            _rectangle.position.y + (row + 0.5f) * collapse_piece_size_px
+            _rectangle.position.y + _texture_offset_y_px + (row + 0.5f) * collapse_piece_size_px
          };
 
          // the top row breaks first and the middle of the hole goes before its edges

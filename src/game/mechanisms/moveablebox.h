@@ -77,6 +77,7 @@ private:
 
    std::shared_ptr<sf::Texture> _texture;
    std::unique_ptr<sf::Sprite> _sprite;
+   float _sprite_offset_y_px{-24.0f};  //!< the box sheet has a lip above the box, a custom texture is drawn where the box is
 
    //!< where this was before the last simulation step, so a frame drawn between two steps is
    //!< placed between the two rather than on the newest one

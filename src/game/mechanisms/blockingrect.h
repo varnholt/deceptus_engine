@@ -72,6 +72,7 @@ private:
    std::shared_ptr<sf::Texture> _normal_map;
    std::unique_ptr<sf::Sprite> _sprite;
    sf::FloatRect _rectangle;
+   float _texture_offset_y_px{0.0f};  //!< draws the texture above the rectangle, e.g. for grass that sticks out of the ground
 
    // collapsing
    bool _collapse_when_disabled{false};  //!< disabling the rectangle once it has been seen lets its texture fall away

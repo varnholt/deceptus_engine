@@ -20,6 +20,7 @@ namespace
 static constexpr std::array moveable_box_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
    PropertyInfo{.name = "serialized", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "texture", .type = "string", .default_value = ""},
 };
 static constexpr MechanismSchema moveable_box_schema{
    .type_name = "MoveableObject",
@@ -88,9 +89,9 @@ void MoveableBox::updateSpritePositions()
 {
    const auto position_px = _interpolated_position.getPositionPx();
 #ifdef DECEPTUS_VRSFML
-   _sprite->position = {position_px.x, position_px.y - 24};
+   _sprite->position = {position_px.x, position_px.y + _sprite_offset_y_px};
 #else
-   _sprite->setPosition({position_px.x, position_px.y - 24});
+   _sprite->setPosition({position_px.x, position_px.y + _sprite_offset_y_px});
 #endif
 }
 
@@ -156,7 +157,20 @@ void MoveableBox::setup(const GameDeserializeData& data)
    const auto& tmx_id = data._tmx_object->_id;
    setObjectId(tmx_name.empty() ? tmx_id : tmx_name + "_" + tmx_id);
 
-   _texture = TexturePool::getInstance().get("data/sprites/moveable_box.png");
+   std::string texture_path;
+   if (data._tmx_object->_properties)
+   {
+      texture_path = ValueReader::readValue<std::string>("texture", data._tmx_object->_properties->_map).value_or("");
+   }
+
+   // a custom texture shows the whole image at the box's position instead of a cell of the box sheet
+   const auto custom_texture = !texture_path.empty();
+   if (custom_texture)
+   {
+      _sprite_offset_y_px = 0.0f;
+   }
+
+   _texture = TexturePool::getInstance().get(custom_texture ? texture_path : "data/sprites/moveable_box.png");
 #ifdef DECEPTUS_VRSFML
    _sprite = std::make_unique<sf::Sprite>();
 #else
@@ -167,9 +181,9 @@ void MoveableBox::setup(const GameDeserializeData& data)
    _size.y = data._tmx_object->_height_px;
 
 #ifdef DECEPTUS_VRSFML
-   _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px - 24};
+   _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px + _sprite_offset_y_px};
 #else
-   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px - 24});
+   _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px + _sprite_offset_y_px});
 #endif
 
    const auto rect =
@@ -191,7 +205,16 @@ void MoveableBox::setup(const GameDeserializeData& data)
       _serialized = ValueReader::readValue<bool>("serialized", map).value_or(_serialized);
    }
 
-   switch (static_cast<int32_t>(_size.x))
+   if (custom_texture)
+   {
+      const auto texture_size = _texture->getSize();
+#ifdef DECEPTUS_VRSFML
+      _sprite->textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(texture_size.x), static_cast<float>(texture_size.y)}};
+#else
+      _sprite->setTextureRect(sf::IntRect({0, 0}, {static_cast<int32_t>(texture_size.x), static_cast<int32_t>(texture_size.y)}));
+#endif
+   }
+   else switch (static_cast<int32_t>(_size.x))
    {
       case 24:
       {
