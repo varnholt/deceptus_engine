@@ -1381,6 +1381,17 @@ Moreover, ropes have a number of properties to simulate 'wind behavior'. So you 
 
 Read more about Ropes in the paragraph 'Ropes with Lights'.
 
+### Grab Ropes
+
+A grab rope is a rope the player can swing on. Jumping into it in mid-air grabs the link closest to the player, left and right swing, and jump lets go with the momentum intact. The player cannot climb along it. Grab ropes are drawn as polylines like other ropes; set `push_strength` to `0` so wind gusts don't fight the player.
+
+|Method|Value|
+|-|-|
+|Object Type|`GrabRope`|
+|Object Group|`grab_ropes`|
+
+Grab ropes take the same properties as ropes. 20 segments for a rope of about 10 tiles has worked well.
+
 ---
 
 &nbsp;
