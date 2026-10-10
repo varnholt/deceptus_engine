@@ -2019,7 +2019,7 @@
     <property name="path" value="82, 71"/>
    </properties>
   </object>
-  <object id="105" name="bat_grave" x="1488" y="1584">
+  <object id="105" name="bat_grave" x="4224" y="1440">
    <properties>
     <property name="script" value="bat_2.lua"/>
    </properties>
@@ -2721,17 +2721,17 @@
 </data>
  </layer>
  <objectgroup id="57" name="damage_rects">
-  <object id="110" name="rope_stakes" x="2568" y="1712" width="168" height="16">
+  <object id="110" name="rope_stakes" x="2568" y="1704" width="168" height="24">
    <properties>
     <property name="damage" type="int" value="100"/>
    </properties>
   </object>
-  <object id="75" name="grave_stakes" x="1272" y="1760" width="168" height="16">
+  <object id="75" name="grave_stakes" x="1272" y="1752" width="168" height="24">
    <properties>
     <property name="damage" type="int" value="100"/>
    </properties>
   </object>
-  <object id="76" name="crypt_stakes" x="2688" y="2072" width="216" height="16">
+  <object id="76" name="crypt_stakes" x="2688" y="2064" width="216" height="24">
    <properties>
     <property name="damage" type="int" value="100"/>
    </properties>
