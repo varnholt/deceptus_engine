@@ -127,6 +127,7 @@ void BlockingRect::setup(const GameDeserializeData& data)
    boundaryFixtureDef.density = 1.0f;
 
    _body->CreateFixture(&boundaryFixtureDef);
+   _body->SetEnabled(isEnabled());
 
    addChunks(_rectangle);
 }
@@ -189,7 +190,13 @@ void BlockingRect::update(const sf::Time& /*dt*/)
 
 void BlockingRect::setEnabled(bool enabled)
 {
-   _body->SetEnabled(enabled);
+   // the flag is what draw() checks, the body may not exist yet while the properties are read
+   GameMechanism::setEnabled(enabled);
+
+   if (_body)
+   {
+      _body->SetEnabled(enabled);
+   }
 }
 
 std::optional<sf::FloatRect> BlockingRect::getBoundingBoxPx()
