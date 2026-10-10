@@ -55,6 +55,12 @@ mDone = false
 mTransformY = 0
 mUpdateSprite = false
 
+-- a dormant ghost stays at home, invisible and harmless, until a level script wakes it
+mDormant = false
+mWakeTime = nil
+mWakeDuration = 1.5
+mAlpha = 150
+
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
@@ -253,6 +259,21 @@ function update(dt)
    -- get sprite index
    mElapsed = mElapsed + dt
 
+   if (mDormant) then
+      return
+   end
+
+   -- rise out of the ground: fade in, the body only starts to hurt once the ghost is fully there
+   if (mWakeTime ~= nil) then
+      local progress = math.min((mElapsed - mWakeTime) / mWakeDuration, 1.0)
+      setSpriteColor(0, 255, 255, 255, math.floor(progress * mAlpha))
+
+      if (progress >= 1.0) then
+         mWakeTime = nil
+         setActive(true)
+      end
+   end
+
    if (mIdle) then
       idle()
    elseif (mMoveHome) then     -- if player is out of sight after idle, go home
@@ -309,6 +330,19 @@ function setPath(name, table)
       k3 = Key:create{x = v[0]:getX(), y = v[0]:getY(), time = 1.0}
 
       mPatrolPath = {k1, k2, k3}
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function writeProperty(key, value)
+   if (key == "dormant" and value == "true") then
+      mDormant = true
+      setSpriteColor(0, 255, 255, 255, 0)
+      setActive(false)
+   elseif (key == "wake" and mDormant) then
+      mDormant = false
+      mWakeTime = mElapsed
    end
 end
 
