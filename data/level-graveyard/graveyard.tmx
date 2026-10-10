@@ -2740,14 +2740,6 @@
   <object id="88" x="2496" y="1656" width="48" height="72"/>
  </objectgroup>
  <objectgroup id="62" name="crushers">
-  <object id="92" name="gate_crusher" x="4176" y="1368" width="120" height="192">
-   <properties>
-    <property name="alignment" value="down"/>
-    <property name="idle_time_s" type="float" value="2.0"/>
-    <property name="chain" type="bool" value="true"/>
-    <property name="z" type="int" value="30"/>
-   </properties>
-  </object>
   <object id="93" name="crypt_crusher" x="2976" y="1848" width="120" height="192">
    <properties>
     <property name="alignment" value="down"/>
