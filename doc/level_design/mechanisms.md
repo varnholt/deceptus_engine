@@ -296,6 +296,7 @@ As the name promises, Crushers can crush Adam. They consist of a bunch of spikes
 |idle_time_s|float|Amount of seconds to sleep between cycles, default is 3s|
 |shake|bool|Whether or not the crusher should make the camera shake, default is true|
 |time_offset_s|float|Time offset in seconds to have a time delta between two crushers, default is 0|
+|chain|bool|Hang the blade from a chain of links that follows it down instead of a stretched pusher. Only for crushers pointing `down`, default is false|
 
 ---
 

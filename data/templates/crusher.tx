@@ -3,6 +3,7 @@
  <object type="Crusher" width="120" height="24">
   <properties>
    <property name="alignment" propertytype="CrusherAlignment" value="down"/>
+   <property name="chain" type="bool" value="false"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>
