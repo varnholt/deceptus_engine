@@ -78,7 +78,8 @@ public:
    /// \param player_body player body the force is applied to.
    /// \param direction requested direction, -1 points left and 1 points right.
    /// \param acceleration swing acceleration in box2d units.
-   void applySwingControl(b2Body* player_body, float direction, float acceleration) const;
+   /// \param pivot_on_anchor swing around the suspension point instead of the held rope link, for ropes that hang free.
+   void applySwingControl(b2Body* player_body, float direction, float acceleration, bool pivot_on_anchor = false) const;
 
    /// \brief pulls the player towards a point on the rope so shortening the link lifts him.
    /// \param player_body player body the force is applied to.
