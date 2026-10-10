@@ -545,7 +545,9 @@ void LevelScript::createExtraCallbacks(const std::vector<std::shared_ptr<GameMec
 int32_t LevelScript::addCollisionRect(const sf::IntRect& rect)
 {
    _collision_rects.push_back(rect);
-   return static_cast<int32_t>(_collision_rects.size());
+
+   // the same index playerCollidesWithRect() reports
+   return static_cast<int32_t>(_collision_rects.size()) - 1;
 }
 
 void LevelScript::setMechanismEnabled(const std::string& search_pattern, bool enabled, const std::optional<std::string>& group)

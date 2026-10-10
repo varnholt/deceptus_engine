@@ -55,6 +55,16 @@ mDone = false
 mTransformY = 0
 mUpdateSprite = false
 
+-- a dormant ghost stays at home, invisible and harmless, until a level script wakes it
+mDormant = false
+mWakeTime = nil
+mWakeDuration = 1.5
+mAlpha = 150
+
+-- how close the player has to be, in tiles, before the ghost attacks
+mAttackRangeX = 10
+mAttackRangeY = 5
+
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
@@ -218,11 +228,11 @@ function patrol()
    -- check if player is within range
    distanceToPlayerX = mPosition:getX() // 24 - mPlayerPosition:getX() // 24
 
-   if (math.abs(distanceToPlayerX) < 10) then
+   if (math.abs(distanceToPlayerX) < mAttackRangeX) then
 
       distanceToPlayerY = mPosition:getY() // 24 - mPlayerPosition:getY() // 24
 
-      if (math.abs(distanceToPlayerY) < 5) then
+      if (math.abs(distanceToPlayerY) < mAttackRangeY) then
          mPatrol = false
          -- print("player in range")
          startAttack()
@@ -252,6 +262,21 @@ function update(dt)
 
    -- get sprite index
    mElapsed = mElapsed + dt
+
+   if (mDormant) then
+      return
+   end
+
+   -- rise out of the ground: fade in, the body only starts to hurt once the ghost is fully there
+   if (mWakeTime ~= nil) then
+      local progress = math.min((mElapsed - mWakeTime) / mWakeDuration, 1.0)
+      setSpriteColor(0, 255, 255, 255, math.floor(progress * mAlpha))
+
+      if (progress >= 1.0) then
+         mWakeTime = nil
+         setActive(true)
+      end
+   end
 
    if (mIdle) then
       idle()
@@ -309,6 +334,27 @@ function setPath(name, table)
       k3 = Key:create{x = v[0]:getX(), y = v[0]:getY(), time = 1.0}
 
       mPatrolPath = {k1, k2, k3}
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function writeProperty(key, value)
+   if (key == "dormant" and value == "true") then
+      mDormant = true
+      setSpriteColor(0, 255, 255, 255, 0)
+      setActive(false)
+   elseif (key == "wake" and mDormant) then
+      mDormant = false
+      mWakeTime = mElapsed
+   elseif (key == "variant") then
+      -- the sheet holds two ghosts side by side, the red one and the green one
+      mSpriteOffsetX = (value == "green") and 1 or 0
+      mUpdateSprite = true
+   elseif (key == "attack_range_x_tl") then
+      mAttackRangeX = tonumber(value)
+   elseif (key == "attack_range_y_tl") then
+      mAttackRangeY = tonumber(value)
    end
 end
 

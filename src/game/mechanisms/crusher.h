@@ -75,6 +75,7 @@ private:
 
    /// \brief updates sprite scaling and positions to match current blade offset.
    void updateSpritePositions() override;
+   void drawChain(sf::RenderTarget& color, const sf::RenderStates& states);
 
    /// \brief triggers a camera shake boom once during extraction when allowed.
    void startBoomEffect();
@@ -101,6 +102,7 @@ private:
    sf::Time _extraction_time;
    sf::Time _retraction_time;
    sf::Time _idle_time_max;
+   float _travel_px{48.0f};  //!< how far the blade extracts
    sf::Time _extraction_time_max;
    sf::Time _retraction_time_max;
    sf::Time _time_offset;
@@ -111,6 +113,10 @@ private:
    sf::Vector2f _offset_mount_px;
    sf::Vector2f _offset_pusher_px;
    sf::Vector2f _offset_spike_px;
+
+   std::unique_ptr<sf::Sprite> _sprite_chain_link;
+   bool _chain{false};  //!< the blade hangs from a chain of link tiles that follows it down, instead of a stretched pusher
+   float _drawn_blade_offset_px{0.0f};
 
    bool _shake{true};
    bool _shake_shown{false};

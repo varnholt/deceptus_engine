@@ -11,6 +11,17 @@ _pickup_message_delay_s = nil
 -- long enough for the strike to land and start decaying before the message slides in
 _pickup_message_delay_default_s = 1.5
 
+-- the graves in front of the mausoleum: their ground is the "sinkhole_ground" blocking rect, the crypt is beneath it.
+-- once the storm is up the next step onto them brings the ground down, the collision rect is what notices that step
+_sinkhole_rect_id = nil
+_sinkhole_armed = false
+_sinkhole_open = false
+
+-- the top of the shaft out of the crypt. the camera rooms of the crypt and the graveyard meet inside that shaft and
+-- crossing between them mid jump resets the player, so reaching the top plank moves the player onto the planks above
+_crypt_exit_rect_id = nil
+_crypt_exit_cooldown_s = 0.0
+
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
@@ -25,8 +36,11 @@ end
 --   owl-eyes image layer   ->  glowing rubies in the sockets
 --   decoration-b tiles     ->  the same shrine with empty sockets
 --
+-- since the shrine tiles moved in the tileset, both images carry the whole owl: "owl-empty" is the one with
+-- dark sockets and takes over once the rubies are gone
 function setOwlEyesPresent(present)
    setMechanismVisible("owl-eyes", present, "imagelayers")
+   setMechanismVisible("owl-empty", not present, "imagelayers")
    setMechanismEnabled("shrine_rect", present, "button_rects")
    setMechanismEnabled("shrine_help_take", present, "interaction_help")
    setMechanismEnabled("shrine_help_examine", not present, "interaction_help")
@@ -39,6 +53,9 @@ end
 function setStormActive(active)
    setMechanismEnabled("thunderstorm", active, "weather")
    setMechanismEnabled("birds", not active, "sound_emitters")
+
+   -- the storm drives its leaves across the way back to the tower
+   setMechanismEnabled("storm_wind", active, "wind")
 end
 
 
@@ -49,6 +66,21 @@ function initShrine()
    local owl_eyes_taken = inventoryHas(_owl_eye_item)
    setOwlEyesPresent(not owl_eyes_taken)
    setStormActive(owl_eyes_taken)
+
+   -- the ground stays down for good, coming back with the rubies finds the hole already there
+   if (owl_eyes_taken) then
+      openSinkhole()
+   end
+end
+
+
+------------------------------------------------------------------------------------------------------------------------
+function openSinkhole()
+   setMechanismEnabled("sinkhole_ground", false, "blocking_rects")
+   _sinkhole_open = true
+
+   -- falling into the crypt is what wakes the dead in the graves along the way back to the tower
+   writeLuaNodeProperty("ghost_.*", "wake", "true")
 end
 
 
@@ -68,6 +100,7 @@ function takeOwlEyes()
    -- so it looks and sounds like the storm that follows it
    setStormActive(true)
    strikeThunderMechanism("thunderstorm", "weather_thunder_02.ogg", 1.0, "weather")
+   _sinkhole_armed = true
 
    -- the pickup message is the same one every item shows, it just waits for the thunder
    _pickup_message_delay_s = _pickup_message_delay_default_s
@@ -80,7 +113,13 @@ function update(dt)
    if (not _initialized) then
       _initialized = true
       initShrine()
+
+      -- a thin strip on the ground itself: only feet on the graves bring them down, so whoever triggers it falls in
+      _sinkhole_rect_id = addCollisionRect(131 * 24, 72 * 24 - 12, 6 * 24, 12)
+      _crypt_exit_rect_id = addCollisionRect(100 * 24, 74 * 24, 4 * 24, 3 * 24)
    end
+
+   _crypt_exit_cooldown_s = math.max(0.0, _crypt_exit_cooldown_s - dt)
 
    if (_pickup_message_delay_s ~= nil) then
       _pickup_message_delay_s = _pickup_message_delay_s - dt
@@ -104,6 +143,16 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerCollidesWithRect(rect_id)
+   if (rect_id == _sinkhole_rect_id and _sinkhole_armed and not _sinkhole_open) then
+      log("sinkhole opened")
+      strikeThunderMechanism("thunderstorm", "weather_thunder_05.ogg", 1.0, "weather")
+      openSinkhole()
+   end
+
+   if (rect_id == _crypt_exit_rect_id and _crypt_exit_cooldown_s <= 0.0) then
+      _crypt_exit_cooldown_s = 3.0
+      transitionPlayerTo(101.5 * 24, 70.5 * 24)
+   end
 end
 
 
