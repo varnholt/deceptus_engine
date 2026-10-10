@@ -2748,13 +2748,13 @@
   </object>
  </objectgroup>
  <objectgroup id="64" name="grab_ropes">
-  <object id="109" name="mausoleum_rope" x="2652" y="1688">
+  <object id="109" name="mausoleum_rope" x="2652" y="1670">
    <properties>
     <property name="push_strength" type="float" value="0"/>
-    <property name="segments" type="int" value="18"/>
+    <property name="segments" type="int" value="16"/>
     <property name="z" type="int" value="24"/>
    </properties>
-   <polyline points="0,0 0,-200"/>
+   <polyline points="0,0 0,-182"/>
   </object>
  </objectgroup>
  <objectgroup id="60" name="box_colliders">
