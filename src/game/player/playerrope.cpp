@@ -150,7 +150,7 @@ void PlayerRope::updateHold(const sf::Time& dt, const RopeInput& input)
       return;
    }
 
-   updateClimb(dt, input);
+   // a grab rope is only swung on: the player hangs where he caught it and up and down do nothing
 
    auto direction = 0.0f;
 
