@@ -31,6 +31,7 @@ static constexpr std::array crusher_properties{
    PropertyInfo{.name = "alignment", .type = "string", .default_value = default_crusher_alignment, .allowed_values = crusher_alignments},
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
    PropertyInfo{.name = "chain", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "travel_px", .type = "float", .default_value = 48.0f},
 };
 static constexpr MechanismSchema crusher_schema{
    .type_name = "Crusher",
@@ -154,7 +155,7 @@ void Crusher::drawChain(sf::RenderTarget& color, const sf::RenderStates& states)
 
 void Crusher::step(const sf::Time& dt)
 {
-   const auto distance_to_be_traveled = 48.0f;
+   const auto distance_to_be_traveled = _travel_px;
 
    switch (_state)
    {
@@ -381,6 +382,7 @@ void Crusher::setup(const GameDeserializeData& data)
       _time_offset = sf::seconds(time_offset_s);
       const auto idle_time_s = ValueReader::readValue<float>("idle_time_s", map).value_or(idle_time_max_s);
       _idle_time_max = sf::seconds(idle_time_s);
+      _travel_px = ValueReader::readValue<float>("travel_px", map).value_or(_travel_px);
       _chain = ValueReader::readValue<bool>("chain", map).value_or(false) && _alignment == Alignment::PointsDown;
    }
 
