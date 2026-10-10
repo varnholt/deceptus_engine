@@ -797,6 +797,14 @@ float Player::readVelocityFromKeyboard(const PlayerSpeed& speed) const
    if (no_movement_to_left_or_right || velocity_opposite_to_given_dir || no_movement)
    {
       desired_velocity = speed._current_velocity.x * speed._deceleration;
+
+      // once braking has nearly stopped the player, accelerate into the given direction right away. a constant
+      // push (wind) would otherwise keep re-adding just enough velocity to stay above the threshold above, and
+      // walking against it would never get past braking
+      if (velocity_opposite_to_given_dir && fabs(desired_velocity) < speed._acceleration)
+      {
+         desired_velocity += attempt_move_left ? -speed._acceleration : speed._acceleration;
+      }
    }
 
    return desired_velocity;
