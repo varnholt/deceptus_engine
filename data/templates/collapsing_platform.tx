@@ -2,6 +2,7 @@
 <template>
  <object type="CollapsingPlatform" width="96" height="24">
   <properties>
+   <property name="collapse_once_touched" type="bool" value="false"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

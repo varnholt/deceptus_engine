@@ -25,6 +25,7 @@ public:
       float fall_speed = 6.0f;
       float time_to_respawn_s = 4.0f;
       float fade_in_duration_s = 1.0f;
+      bool collapse_once_touched = false;  //!< once touched, the platform collapses even after the player has left it
    };
 
    /// \brief runtime state for one visual tile segment of the platform.
@@ -126,6 +127,7 @@ private:
    bool _collapsed = false;
    bool _respawning = false;
    bool _foot_sensor_contact = false;
+   bool _touched = false;  //!< the player has stepped on the platform since it last collapsed
    sf::Time _collapse_time;
    sf::Time _time_since_collapse;
    int32_t _width_tl = 0;

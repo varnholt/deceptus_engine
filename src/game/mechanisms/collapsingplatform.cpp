@@ -21,6 +21,7 @@ namespace
 static constexpr int32_t default_collapsing_platform_z = 0;
 static constexpr std::array collapsing_platform_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = default_collapsing_platform_z, .template_value = int32_t{20}},
+   PropertyInfo{.name = "collapse_once_touched", .type = "bool", .default_value = false},
 };
 static constexpr MechanismSchema collapsing_platform_schema{
    .type_name = "CollapsingPlatform",
@@ -98,6 +99,7 @@ CollapsingPlatform::CollapsingPlatform(GameNode* parent, const GameDeserializeDa
    readFloatProperty(_settings.fall_speed, "fall_speed");
    readFloatProperty(_settings.time_to_respawn_s, "time_to_respawn_s");
    readFloatProperty(_settings.fade_in_duration_s, "fade_in_duration_s");
+   _settings.collapse_once_touched = ValueReader::readValue<bool>("collapse_once_touched", map).value_or(false);
    setZ(ValueReader::readValue<int32_t>("z", map).value_or(default_collapsing_platform_z));
 
    // set up shape
@@ -285,6 +287,7 @@ void CollapsingPlatform::collapse()
    }
 
    _foot_sensor_contact = false;
+   _touched = false;
    _collapsed = true;
    _time_since_collapse = {};
 
@@ -332,6 +335,14 @@ void CollapsingPlatform::update(const sf::Time& dt)
    _elapsed_s += dt.asSeconds();
 
    if (_foot_sensor_contact)
+   {
+      _touched = true;
+   }
+
+   // a platform set to collapse once touched keeps counting down after the player has run on
+   const auto counting_down = _foot_sensor_contact || (_settings.collapse_once_touched && _touched && !_collapsed);
+
+   if (counting_down)
    {
       if (!_played_shake_sample)
       {
