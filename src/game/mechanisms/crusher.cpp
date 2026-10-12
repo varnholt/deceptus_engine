@@ -7,14 +7,17 @@
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/effects/boomeffect.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/level/levelregistry.h"
+#include "game/level/room.h"
 #include "game/level/roomupdater.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/physics/renderinterpolation.h"
+#include "game/player/playerregistry.h"
 
 int32_t Crusher::__instance_counter = 0;
 
@@ -249,6 +252,17 @@ void Crusher::startBoomEffect()
    if (!roomIds.empty() && !RoomUpdater::checkCurrentMatchesIds(roomIds))
    {
       return;
+   }
+
+   // a room group joins several sub-rooms into one room, like the graveyard and the crypt beneath it. a crusher
+   // down in the crypt must not shake the graveyard, so the player has to be in the crusher's own sub-room
+   if (const auto room = RoomUpdater::getCurrent())
+   {
+      const auto sub_room = room->activeSubRoom(PlayerRegistry::getFirst()->getPixelPositionFloat());
+      if (sub_room.has_value() && !sfcompat::findIntersection(sub_room->_rect, _rect).has_value())
+      {
+         return;
+      }
    }
 
    _shake_shown = true;
