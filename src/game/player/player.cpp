@@ -1138,6 +1138,12 @@ void Player::impulse(float intensity)
 
 void Player::startHardLanding()
 {
+   // a scripted stun and the landing impulse can both fire on the same landing
+   if (_hard_landing)
+   {
+      return;
+   }
+
    _controls->lockOrientation(std::chrono::milliseconds(1000));
    LevelRegistry::getCurrent()->getBoomEffect().boom(0.0f, 1.0f, BoomSettings{0.5, 0.5f});
 

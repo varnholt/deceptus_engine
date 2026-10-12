@@ -436,6 +436,11 @@ Disables all player input for a given duration.
 |1|int|Lock duration in milliseconds|
 
 
+## `startPlayerHardLanding`
+
+Stuns the player as if they had just landed hard: the hard-landing pose, a camera shake, controller rumble and a grunt. Does nothing while the player is already stunned, so it is safe to call on a landing that may also have been hard on its own. Takes no parameters.
+
+
 ## `setCutsceneActive`
 
 Sets or clears the `CutsceneActive` display flag. While active, spatial dialogue triggers are suppressed and camera panorama behaviour is blocked.
@@ -512,6 +517,27 @@ Sets the camera zoom multiplier.
 |Parameter Position|Type|Description|
 |-|-|-|
 |1|float|Zoom factor (1.0 = normal)|
+
+
+## `boom`
+
+Shakes the camera. By default the shake starts at full strength and dies down over its whole duration. A quake that should keep shaking passes a smaller fade out share, which holds the shake at full strength and only lets it die down over that last part of the duration. A shake that is still running is not interrupted, a second call meanwhile is ignored.
+
+|Parameter Position|Type|Description|
+|-|-|-|
+|1|float|Horizontal share of the shake (0 = none, 1 = full)|
+|2|float|Vertical share of the shake (0 = none, 1 = full)|
+|3|float|Intensity, a hard landing uses 0.5|
+|4|float|Duration in seconds|
+|5|float|Optional share of the duration, at its end, over which the shake dies down (default 1.0, the whole duration)|
+
+```lua
+-- a short jolt
+boom(0.5, 1.0, 0.25, 0.8)
+
+-- a quake: full strength for 2 s, then dying down over the last 0.5 s
+boom(0.5, 1.0, 0.25, 2.5, 0.2)
+```
 
 
 ## `playMusic`

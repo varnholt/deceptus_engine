@@ -158,6 +158,9 @@ public:
    /// \param duration lock duration.
    void lockPlayerControls(const std::chrono::milliseconds& duration);
 
+   /// \brief stuns the player as if they had just landed hard, unless they already are.
+   void startPlayerHardLanding();
+
    /// \brief turns the player to one side and keeps it facing that way for a fixed duration.
    /// \param duration lock duration, zero releases an earlier lock.
    /// \param points_left true to face left, false to face right.
@@ -181,6 +184,14 @@ public:
    /// \brief sets camera zoom factor.
    /// \param zoom_factor absolute zoom multiplier.
    void setZoomFactor(float zoom_factor);
+
+   /// \brief shakes the camera.
+   /// \param x_factor horizontal share of the shake.
+   /// \param y_factor vertical share of the shake.
+   /// \param intensity shake amplitude.
+   /// \param duration_s time the shake needs to die down.
+   /// \param fade_out_share share of the duration, at its end, over which the shake dies down.
+   void boom(float x_factor, float y_factor, float intensity, float duration_s, float fade_out_share);
 
    /// \brief flashes the whole screen in a given color.
    /// \param red red component 0-255.

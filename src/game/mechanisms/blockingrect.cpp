@@ -21,9 +21,10 @@ static constexpr std::array blocking_rect_properties{
 };
 
 constexpr auto collapse_piece_size_px = 24;
-constexpr auto collapse_gravity_px_s2 = 900.0f;
-constexpr auto collapse_max_delay_s = 0.25f;
-constexpr auto collapse_fade_start_s = 0.4f;
+// slow enough to watch the ground break apart piece by piece while the player drops through it
+constexpr auto collapse_gravity_px_s2 = 600.0f;
+constexpr auto collapse_max_delay_s = 0.6f;
+constexpr auto collapse_fade_start_s = 0.9f;
 constexpr auto collapse_fade_duration_s = 0.6f;
 static constexpr MechanismSchema blocking_rect_schema{
    .type_name = "BlockingRect",

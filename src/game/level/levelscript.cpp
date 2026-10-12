@@ -202,6 +202,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "isMechanismVisible", LevelScriptCallbacks::isMechanismVisible);
    lua_register(_lua_state, "isPlayerIntersectingSensorRect", LevelScriptCallbacks::isPlayerIntersectingSensorRect);
    lua_register(_lua_state, "lockPlayerControls", LevelScriptCallbacks::lockPlayerControls);
+   lua_register(_lua_state, "startPlayerHardLanding", LevelScriptCallbacks::startPlayerHardLanding);
    lua_register(_lua_state, "lockPlayerOrientation", LevelScriptCallbacks::lockPlayerOrientation);
    lua_register(_lua_state, "setCutsceneActive", LevelScriptCallbacks::setCutsceneActive);
    lua_register(_lua_state, "fadeOut", LevelScriptCallbacks::fadeOut);
@@ -221,6 +222,7 @@ void LevelScript::setup(const std::filesystem::path& path)
    lua_register(_lua_state, "flashScreen", LevelScriptCallbacks::flashScreen);
    lua_register(_lua_state, "setAmbient", LevelScriptCallbacks::setAmbient);
    lua_register(_lua_state, "setZoomFactor", LevelScriptCallbacks::setZoomFactor);
+   lua_register(_lua_state, "boom", LevelScriptCallbacks::boom);
    lua_register(_lua_state, "showDialogue", LevelScriptCallbacks::showDialogue);
    lua_register(_lua_state, "toggle", LevelScriptCallbacks::toggle);
    lua_register(_lua_state, "tr", LevelScriptCallbacks::translate);
@@ -741,6 +743,13 @@ void LevelScript::setZoomFactor(float zoom_factor)
    CameraZoom::getInstance().setZoomFactor(zoom_factor);
 }
 
+void LevelScript::boom(float x_factor, float y_factor, float intensity, float duration_s, float fade_out_share)
+{
+   BoomSettings settings{intensity, duration_s};
+   settings._fade_out_share = fade_out_share;
+   LevelRegistry::getCurrent()->getBoomEffect().boom(x_factor, y_factor, settings);
+}
+
 void LevelScript::flashScreen(uint8_t red, uint8_t green, uint8_t blue, float peak_intensity, float duration_s)
 {
    ScreenFlash::getInstance().flash(sf::Color{red, green, blue}, peak_intensity, duration_s);
@@ -937,6 +946,11 @@ void LevelScript::showDialogue(std::vector<Dialogue::DialogueItem> items)
 void LevelScript::lockPlayerControls(const std::chrono::milliseconds& duration)
 {
    PlayerRegistry::getFirst()->getControls()->lockAll(duration);
+}
+
+void LevelScript::startPlayerHardLanding()
+{
+   PlayerRegistry::getFirst()->startHardLanding();
 }
 
 void LevelScript::lockPlayerOrientation(const std::chrono::milliseconds& duration, bool points_left)
