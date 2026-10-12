@@ -1944,6 +1944,7 @@
     <property name="delay_between_effects_ms" type="int" value="0"/>
     <property name="fade_in_speed" type="float" value="2"/>
     <property name="fade_out_speed" type="float" value="2"/>
+    <property name="group" value="mausoleum"/>
     <property name="transition" value="fade_out_fade_in"/>
    </properties>
   </object>
@@ -2002,6 +2003,7 @@
     <property name="delay_between_effects_ms" type="int" value="0"/>
     <property name="fade_in_speed" type="float" value="2.0"/>
     <property name="fade_out_speed" type="float" value="2.0"/>
+    <property name="group" value="mausoleum"/>
     <property name="transition" value="fade_out_fade_in"/>
    </properties>
   </object>
