@@ -17,6 +17,22 @@ _sinkhole_rect_id = nil
 _sinkhole_armed = false
 _sinkhole_open = false
 
+-- the ground does not give way at once: it shakes under the player for a moment first, so there is time to see it
+-- coming. seconds left until it breaks, nil while it is not shaking
+_sinkhole_tremble_s = nil
+_sinkhole_tremble_duration_s = 1.5
+
+-- the quake holds its strength for the first half and dies down over the rest
+_sinkhole_shake_fade_out_share = 0.5
+
+-- a thin strip on the crypt floor beneath the graves. the drop is not always deep enough for a hard landing on its
+-- own, so the stun is guaranteed shortly after the player hits the floor. it waits a moment because the strip is
+-- touched just before the feet are, and a stun that starts in the air is cancelled right away
+_crypt_floor_rect_id = nil
+_falling_into_crypt = false
+_crypt_stun_delay_s = nil
+_crypt_stun_delay_default_s = 0.05
+
 -- the top of the shaft out of the crypt. the camera rooms of the crypt and the graveyard meet inside that shaft and
 -- crossing between them mid jump resets the player, so reaching the top plank moves the player onto the planks above
 _crypt_exit_rect_id = nil
@@ -114,9 +130,29 @@ function update(dt)
       _initialized = true
       initShrine()
 
-      -- a thin strip on the ground itself: only feet on the graves bring them down, so whoever triggers it falls in
-      _sinkhole_rect_id = addCollisionRect(131 * 24, 72 * 24 - 12, 6 * 24, 12)
+      -- a thin strip on the ground itself: only feet on the graves bring them down. it covers only the middle of the
+      -- hole, because the quake locks the player where they stand, and from the edge of the hole they would watch it
+      -- open beside them instead of falling in
+      _sinkhole_rect_id = addCollisionRect(132 * 24 + 12, 72 * 24 - 12, 3 * 24, 12)
       _crypt_exit_rect_id = addCollisionRect(100 * 24, 74 * 24, 4 * 24, 3 * 24)
+      _crypt_floor_rect_id = addCollisionRect(129 * 24, 85 * 24 - 12, 10 * 24, 12)
+   end
+
+   if (_sinkhole_tremble_s ~= nil) then
+      _sinkhole_tremble_s = _sinkhole_tremble_s - dt
+      if (_sinkhole_tremble_s <= 0.0) then
+         _sinkhole_tremble_s = nil
+         _falling_into_crypt = true
+         openSinkhole()
+      end
+   end
+
+   if (_crypt_stun_delay_s ~= nil) then
+      _crypt_stun_delay_s = _crypt_stun_delay_s - dt
+      if (_crypt_stun_delay_s <= 0.0) then
+         _crypt_stun_delay_s = nil
+         startPlayerHardLanding()
+      end
    end
 
    _crypt_exit_cooldown_s = math.max(0.0, _crypt_exit_cooldown_s - dt)
@@ -143,10 +179,17 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function playerCollidesWithRect(rect_id)
-   if (rect_id == _sinkhole_rect_id and _sinkhole_armed and not _sinkhole_open) then
-      log("sinkhole opened")
+   if (rect_id == _sinkhole_rect_id and _sinkhole_armed and not _sinkhole_open and _sinkhole_tremble_s == nil) then
+      log("sinkhole trembling")
       strikeThunderMechanism("thunderstorm", "weather_thunder_05.ogg", 1.0, "weather")
-      openSinkhole()
+      _sinkhole_tremble_s = _sinkhole_tremble_duration_s
+      lockPlayerControls(math.floor(_sinkhole_tremble_duration_s * 1000))
+      boom(0.5, 1.0, 0.15, _sinkhole_tremble_duration_s, _sinkhole_shake_fade_out_share)
+   end
+
+   if (rect_id == _crypt_floor_rect_id and _falling_into_crypt) then
+      _falling_into_crypt = false
+      _crypt_stun_delay_s = _crypt_stun_delay_default_s
    end
 
    if (rect_id == _crypt_exit_rect_id and _crypt_exit_cooldown_s <= 0.0) then
