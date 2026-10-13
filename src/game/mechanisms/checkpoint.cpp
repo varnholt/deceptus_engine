@@ -50,6 +50,7 @@ static constexpr std::array check_point_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
    PropertyInfo{.name = "sprite_pos_x_px", .type = "int", .default_value = int32_t{0}},
    PropertyInfo{.name = "sprite_pos_y_px", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "visible", .type = "bool", .default_value = true},
 };
 static constexpr MechanismSchema check_point_schema{
    .type_name = "CheckPoint",
@@ -161,6 +162,13 @@ std::shared_ptr<Checkpoint> Checkpoint::deserialize(GameNode* parent, const Game
          checkpoint->setZ(z_index);
       }
 
+      // an invisible checkpoint only saves, e.g. at a level entry where there is no clock to put
+      auto visible_it = data._tmx_object->_properties->_map.find("visible");
+      if (visible_it != data._tmx_object->_properties->_map.end())
+      {
+         checkpoint->_visible = visible_it->second->_value_bool.value_or(true);
+      }
+
       // update sprite position
       auto sprite_pos_x_it = data._tmx_object->_properties->_map.find("sprite_pos_x_px");
       auto sprite_pos_y_it = data._tmx_object->_properties->_map.find("sprite_pos_y_px");
@@ -199,6 +207,11 @@ void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
 void Checkpoint::draw(sf::RenderTarget& target, sf::RenderTarget& /*normal*/, const sf::RenderStates& states)
 {
+   if (!_visible)
+   {
+      return;
+   }
+
    sf::RenderStates draw_states = states;
    draw_states.texture = _texture.get();
    target.draw(*_sprite, draw_states);
@@ -221,7 +234,7 @@ void Checkpoint::update(const sf::Time& dt)
       _triggered = false;
    }
 
-   if (_reached)
+   if (_reached && _visible)
    {
       updateSpriteRect(dt.asSeconds());
    }
@@ -258,7 +271,10 @@ void Checkpoint::reached()
       _sprite_index = 0.0f;
 
       // play reveal sound
-      Audio::getInstance().playSample({"player_spawn_01.ogg"});
+      if (_visible)
+      {
+         Audio::getInstance().playSample({"player_spawn_01.ogg"});
+      }
    }
 
    for (const auto& callback : _callbacks)

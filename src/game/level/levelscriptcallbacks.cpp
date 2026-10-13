@@ -662,6 +662,12 @@ int32_t lockPlayerControls(lua_State* state)
    return 0;
 }
 
+int32_t startPlayerHardLanding(lua_State* /*state*/)
+{
+   LevelScript::getCurrent()->startPlayerHardLanding();
+   return 0;
+}
+
 int32_t lockPlayerOrientation(lua_State* state)
 {
    if (lua_gettop(state) != 2)
@@ -767,6 +773,24 @@ int32_t setZoomFactor(lua_State* state)
    }
 
    LevelScript::getCurrent()->setZoomFactor(static_cast<float>(lua_tonumber(state, 1)));
+   return 0;
+}
+
+int32_t boom(lua_State* state)
+{
+   const auto argc = lua_gettop(state);
+   if (argc != 4 && argc != 5)
+   {
+      return 0;
+   }
+
+   const auto x_factor = static_cast<float>(lua_tonumber(state, 1));
+   const auto y_factor = static_cast<float>(lua_tonumber(state, 2));
+   const auto intensity = static_cast<float>(lua_tonumber(state, 3));
+   const auto duration_s = static_cast<float>(lua_tonumber(state, 4));
+   const auto fade_out_share = (argc == 5) ? static_cast<float>(lua_tonumber(state, 5)) : 1.0f;
+
+   LevelScript::getCurrent()->boom(x_factor, y_factor, intensity, duration_s, fade_out_share);
    return 0;
 }
 

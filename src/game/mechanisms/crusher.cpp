@@ -1,19 +1,23 @@
 #include "crusher.h"
 
+#include <algorithm>
 #include <array>
 
 #include "framework/easings/easings.h"
 #include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
+#include "framework/tools/sfmlcompat.h"
 #include "game/effects/boomeffect.h"
 #include "game/io/texturepool.h"
 #include "game/io/valuereader.h"
 #include "game/level/fixturenode.h"
 #include "game/level/levelregistry.h"
+#include "game/level/room.h"
 #include "game/level/roomupdater.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/physics/renderinterpolation.h"
+#include "game/player/playerregistry.h"
 
 int32_t Crusher::__instance_counter = 0;
 
@@ -29,6 +33,8 @@ static constexpr std::array crusher_alignments{
 static constexpr std::array crusher_properties{
    PropertyInfo{.name = "alignment", .type = "string", .default_value = default_crusher_alignment, .allowed_values = crusher_alignments},
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "chain", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "travel_px", .type = "float", .default_value = 48.0f},
 };
 static constexpr MechanismSchema crusher_schema{
    .type_name = "Crusher",
@@ -103,13 +109,56 @@ void Crusher::draw(sf::RenderTarget& color, sf::RenderTarget& /*normal*/, const 
    sf::RenderStates draw_states = states;
    draw_states.texture = _texture.get();
    color.draw(*_sprite_spike, draw_states);
-   color.draw(*_sprite_pusher, draw_states);
+
+   if (_chain)
+   {
+      drawChain(color, draw_states);
+   }
+   else
+   {
+      color.draw(*_sprite_pusher, draw_states);
+   }
+
    color.draw(*_sprite_mount, draw_states);
+}
+
+void Crusher::drawChain(sf::RenderTarget& color, const sf::RenderStates& states)
+{
+   // the links hang from the blade and are cut off where they disappear into the mount, so the chain is
+   // lowered together with the blade instead of being stretched
+   const auto mount_bottom_px = _position_px.y + PIXELS_PER_TILE;
+   const auto blade_top_px = _position_px.y + _offset_spike_px.y + _drawn_blade_offset_px;
+   const auto x_px = _position_px.x + 2 * PIXELS_PER_TILE;
+
+   for (auto link_top_px = blade_top_px - PIXELS_PER_TILE; link_top_px + PIXELS_PER_TILE > mount_bottom_px; link_top_px -= PIXELS_PER_TILE)
+   {
+      const auto hidden_px = std::max(0.0f, mount_bottom_px - link_top_px);
+      const auto visible_px = static_cast<int32_t>(PIXELS_PER_TILE - hidden_px);
+
+      if (visible_px <= 0)
+      {
+         break;
+      }
+
+#ifdef DECEPTUS_VRSFML
+      _sprite_chain_link->textureRect = {
+         {9 * PIXELS_PER_TILE, static_cast<float>(7 * PIXELS_PER_TILE + static_cast<int32_t>(hidden_px))},
+         {PIXELS_PER_TILE, static_cast<float>(visible_px)}
+      };
+      _sprite_chain_link->position = {x_px, link_top_px + hidden_px};
+#else
+      _sprite_chain_link->setTextureRect(
+         {{9 * PIXELS_PER_TILE, 7 * PIXELS_PER_TILE + static_cast<int32_t>(hidden_px)}, {PIXELS_PER_TILE, visible_px}}
+      );
+      _sprite_chain_link->setPosition({x_px, link_top_px + hidden_px});
+#endif
+      color.draw(*_sprite_chain_link, states);
+   }
 }
 
 void Crusher::step(const sf::Time& dt)
 {
-   const auto distance_to_be_traveled = 48.0f;
+   const auto distance_to_be_traveled = _travel_px;
 
    switch (_state)
    {
@@ -203,6 +252,17 @@ void Crusher::startBoomEffect()
    if (!roomIds.empty() && !RoomUpdater::checkCurrentMatchesIds(roomIds))
    {
       return;
+   }
+
+   // a room group joins several sub-rooms into one room, like the graveyard and the crypt beneath it. a crusher
+   // down in the crypt must not shake the graveyard, so the player has to be in the crusher's own sub-room
+   if (const auto room = RoomUpdater::getCurrent())
+   {
+      const auto sub_room = room->activeSubRoom(PlayerRegistry::getFirst()->getPixelPositionFloat());
+      if (sub_room.has_value() && !sfcompat::findIntersection(sub_room->_rect, _rect).has_value())
+      {
+         return;
+      }
    }
 
    _shake_shown = true;
@@ -336,6 +396,8 @@ void Crusher::setup(const GameDeserializeData& data)
       _time_offset = sf::seconds(time_offset_s);
       const auto idle_time_s = ValueReader::readValue<float>("idle_time_s", map).value_or(idle_time_max_s);
       _idle_time_max = sf::seconds(idle_time_s);
+      _travel_px = ValueReader::readValue<float>("travel_px", map).value_or(_travel_px);
+      _chain = ValueReader::readValue<bool>("chain", map).value_or(false) && _alignment == Alignment::PointsDown;
    }
 
    _position_px.x = data._tmx_object->_x_px;
@@ -349,6 +411,12 @@ void Crusher::setup(const GameDeserializeData& data)
    _sprite_mount = std::make_unique<sf::Sprite>(*_texture);
    _sprite_pusher = std::make_unique<sf::Sprite>(*_texture);
    _sprite_spike = std::make_unique<sf::Sprite>(*_texture);
+#endif
+
+#ifdef DECEPTUS_VRSFML
+   _sprite_chain_link = std::make_unique<sf::Sprite>();
+#else
+   _sprite_chain_link = std::make_unique<sf::Sprite>(*_texture);
 #endif
 
    switch (_alignment)
@@ -575,6 +643,7 @@ void Crusher::setupBody(const std::shared_ptr<b2World>& world)
 void Crusher::updateSpritePositions()
 {
    const auto blade_offset = RenderInterpolation::positionPx(_blade_offset_previous, _blade_offset);
+   _drawn_blade_offset_px = blade_offset.y;
 
    switch (_alignment)
    {

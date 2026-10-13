@@ -35,6 +35,8 @@ The dimensions and position of the blocking area are controlled by the size of t
 |z|int|The object's z index|
 |texture|string|Path to the color texture to draw (the default is empty/invisible).|
 |normal|string|Path to the normal texture to draw (the default is empty/invisible).|
+|collapse_when_disabled|bool|When the rect is disabled after it has been on screen, its texture breaks into tile-sized pieces that fall and fade out instead of vanishing at once. A rect disabled before it was ever drawn, e.g. while a save state is applied, is simply gone. Defaults to `false`.|
+|texture_offset_y_px|int|Draws the texture this many pixels below the rectangle's top, negative values draw it higher, e.g. `-24` for grass that sticks out of the ground above the collision. The collapse pieces follow it. Defaults to `0`.|
 |enabled|bool|Whether or not the blocking rect is currently active. Disabled blocking rects do not impede the player. Defaults to `true`.|
 
 &nbsp;
@@ -164,6 +166,7 @@ In there, just place a rectangle where you'd like to position your Collapsing Pl
 |Property|Type|Description|
 |-|-|-|
 |time_to_collapse_s|float|The time in seconds it takes for a platform to collapse (the default is 1.0s).|
+|collapse_once_touched|bool|If `true`, the countdown keeps running once the player has stepped on the platform, so it collapses behind a player who runs on instead of resetting when they leave (the default is `false`).|
 |destruction_speed|float|A factor for the destruction play speed (the default is 30.0).|
 |fall_speed|float|A factor for the fall speed of the blocks (the default is 6.0).|
 |time_to_respawn_s|float|The time in seconds it takes for a collapsing platform to respawn (the default is 4.0s).|
@@ -296,6 +299,8 @@ As the name promises, Crushers can crush Adam. They consist of a bunch of spikes
 |idle_time_s|float|Amount of seconds to sleep between cycles, default is 3s|
 |shake|bool|Whether or not the crusher should make the camera shake, default is true|
 |time_offset_s|float|Time offset in seconds to have a time delta between two crushers, default is 0|
+|travel_px|float|How far the blade extracts in pixels, default is 48. Raise it to let a crusher reach the floor below it.|
+|chain|bool|Hang the blade from a chain of links that follows it down instead of a stretched pusher. Only for crushers pointing `down`, default is false|
 
 ---
 
@@ -1004,6 +1009,7 @@ The way to create a moveable object, create a rectangle as usual. So far the spr
 |gravity_scale|float|Gravity scale of the moveable object, default is 1.0f.|
 |z|int|The layer's z index|
 |serialized|bool|If set to `true`, the box's position is saved and restored when the level is reloaded (default is `true`). Set it to `false` for boxes that should always start from their position in the level.|
+|texture|string|Path to an image to draw instead of the default box, e.g. `data/level-graveyard/headstone.png`. The whole image is drawn at the object's position, so size the object to match it (default is empty, the default box).|
 
 
 ---
@@ -1374,6 +1380,17 @@ Moreover, ropes have a number of properties to simulate 'wind behavior'. So you 
 |z|int|The object's z index|
 
 Read more about Ropes in the paragraph 'Ropes with Lights'.
+
+### Grab Ropes
+
+A grab rope is a rope the player can swing on. Jumping into it in mid-air grabs the link closest to the player, left and right swing, and jump lets go with the momentum intact. The player cannot climb along it. Grab ropes are drawn as polylines like other ropes; set `push_strength` to `0` so wind gusts don't fight the player.
+
+|Method|Value|
+|-|-|
+|Object Type|`GrabRope`|
+|Object Group|`grab_ropes`|
+
+Grab ropes take the same properties as ropes. 20 segments for a rope of about 10 tiles has worked well.
 
 ---
 

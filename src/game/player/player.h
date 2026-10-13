@@ -228,6 +228,10 @@ public:
    /// \return true when the hard-landing stun is active.
    bool isHardLanding() const override;
 
+   /// \brief enters hard-landing state, triggers camera boom, controller rumble, and grunt audio.
+   /// \details does nothing while a hard landing is already running.
+   void startHardLanding() override;
+
    /// \brief reports whether the player has entered dead state.
    /// \return true when dead.
    bool isDead() const override;
@@ -390,9 +394,6 @@ private:
    /// \brief advances health and stamina regeneration/drain timers.
    /// \param dt elapsed frame time.
    void updateHealth(const sf::Time& dt);
-
-   /// \brief enters hard-landing state, triggers camera boom, controller rumble, and grunt audio.
-   void startHardLanding();
 
    /// \brief clears cached dash trail frames and restores animation alpha values.
    void resetMotionBlur();

@@ -12,6 +12,8 @@ namespace
 {
 static constexpr std::array blocking_rect_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "collapse_when_disabled", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "texture_offset_y_px", .type = "int", .default_value = int32_t{0}},
 };
 static constexpr MechanismSchema blocking_rect_schema{
    .type_name = "BlockingRect",
@@ -77,6 +79,18 @@ void BlockingRect::setup(const GameDeserializeData& data)
          setZ(z_index);
       }
 
+      const auto offset_it = data._tmx_object->_properties->_map.find("texture_offset_y_px");
+      if (offset_it != data._tmx_object->_properties->_map.end())
+      {
+         _texture_offset_y_px = static_cast<float>(offset_it->second->_value_int.value_or(0));
+      }
+
+      const auto collapse_it = data._tmx_object->_properties->_map.find("collapse_when_disabled");
+      if (collapse_it != data._tmx_object->_properties->_map.end())
+      {
+         _collapse_when_disabled = collapse_it->second->_value_bool.value_or(false);
+      }
+
       const auto enabled_it = data._tmx_object->_properties->_map.find("enabled");
       if (enabled_it != data._tmx_object->_properties->_map.end())
       {
@@ -91,10 +105,10 @@ void BlockingRect::setup(const GameDeserializeData& data)
          _texture_map = TexturePool::getInstance().get(texture);
 #ifdef DECEPTUS_VRSFML
          _sprite = std::make_unique<sf::Sprite>();
-         _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px};
+         _sprite->position = {data._tmx_object->_x_px, data._tmx_object->_y_px + _texture_offset_y_px};
 #else
          _sprite = std::make_unique<sf::Sprite>(*_texture_map);
-         _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px});
+         _sprite->setPosition({data._tmx_object->_x_px, data._tmx_object->_y_px + _texture_offset_y_px});
 #endif
       }
 
@@ -127,6 +141,7 @@ void BlockingRect::setup(const GameDeserializeData& data)
    boundaryFixtureDef.density = 1.0f;
 
    _body->CreateFixture(&boundaryFixtureDef);
+   _body->SetEnabled(isEnabled());
 
    addChunks(_rectangle);
 }
@@ -152,8 +167,12 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal, cons
    // later might need something like fading when not visible
    if (!isEnabled())
    {
+      _collapse.draw(target, normal, states);
+
       return;
    }
+
+   _drawn = true;
 
 #ifdef DECEPTUS_VRSFML
    sf::RenderStates color_states = states;
@@ -183,13 +202,28 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal, cons
 #endif
 }
 
-void BlockingRect::update(const sf::Time& /*dt*/)
+void BlockingRect::update(const sf::Time& dt)
 {
+   _collapse.update(dt);
 }
 
 void BlockingRect::setEnabled(bool enabled)
 {
-   _body->SetEnabled(enabled);
+   const auto was_enabled = isEnabled();
+
+   // the flag is what draw() checks, the body may not exist yet while the properties are read
+   GameMechanism::setEnabled(enabled);
+
+   if (_body)
+   {
+      _body->SetEnabled(enabled);
+   }
+
+   // a rectangle that is disabled before it was ever seen, e.g. while a save state is applied, just isn't there
+   if (was_enabled && !enabled && _collapse_when_disabled && _drawn)
+   {
+      _collapse.start(_texture_map, _normal_map, {_rectangle.position.x, _rectangle.position.y + _texture_offset_y_px});
+   }
 }
 
 std::optional<sf::FloatRect> BlockingRect::getBoundingBoxPx()

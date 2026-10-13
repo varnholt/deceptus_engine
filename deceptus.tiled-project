@@ -13,6 +13,16 @@
             "id": 1,
             "members": [
                 {
+                    "name": "collapse_when_disabled",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "texture_offset_y_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
                     "name": "z",
                     "type": "int",
                     "value": 20
@@ -155,6 +165,11 @@
             "id": 8,
             "members": [
                 {
+                    "name": "collapse_once_touched",
+                    "type": "bool",
+                    "value": false
+                },
+                {
                     "name": "z",
                     "type": "int",
                     "value": 20
@@ -213,6 +228,16 @@
                     "propertyType": "CrusherAlignment",
                     "type": "string",
                     "value": "down"
+                },
+                {
+                    "name": "chain",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "travel_px",
+                    "type": "float",
+                    "value": 48.0
                 },
                 {
                     "name": "z",
@@ -346,6 +371,26 @@
                     "name": "00",
                     "type": "string",
                     "value": ""
+                },
+                {
+                    "name": "00_avatar",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "00_avatar_offset_x_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "00_avatar_offset_y_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "00_avatar_side",
+                    "type": "string",
+                    "value": "left"
                 },
                 {
                     "name": "00_background_color",
@@ -861,6 +906,11 @@
                     "name": "serialized",
                     "type": "bool",
                     "value": true
+                },
+                {
+                    "name": "texture",
+                    "type": "string",
+                    "value": ""
                 },
                 {
                     "name": "z",

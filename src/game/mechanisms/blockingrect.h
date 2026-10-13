@@ -2,6 +2,9 @@
 #ifndef BLOCKINGRECT_H
 #define BLOCKINGRECT_H
 
+#include <vector>
+
+#include "game/effects/texturecollapse.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
 #include "game/mechanisms/gamemechanism.h"
@@ -56,6 +59,12 @@ private:
    std::shared_ptr<sf::Texture> _normal_map;
    std::unique_ptr<sf::Sprite> _sprite;
    sf::FloatRect _rectangle;
+   float _texture_offset_y_px{0.0f};  //!< draws the texture above the rectangle, e.g. for grass that sticks out of the ground
+
+   // collapsing
+   bool _collapse_when_disabled{false};  //!< disabling the rectangle once it has been seen lets its texture fall away
+   bool _drawn{false};                   //!< whether the rectangle has been drawn at least once
+   TextureCollapse _collapse;            //!< the pieces the texture breaks into once the rectangle is disabled
 
    // physics
    b2Body* _body = nullptr;

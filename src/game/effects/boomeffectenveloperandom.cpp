@@ -1,5 +1,6 @@
 #include "boomeffectenveloperandom.h"
 
+#include <algorithm>
 #include <iostream>
 
 namespace
@@ -16,7 +17,8 @@ float BoomEffectEnvelopeRandom::shakeFunction(float t)
    _st.x += frequency;
 
    const auto noise = fbm::fbm(_st) - 0.5f;
-   const auto y = _settings._amplitude * (noise * (1.0f - t));
+   const auto fade_out = std::min(1.0f, (1.0f - t) / std::max(_settings._fade_out_share, 0.001f));
+   const auto y = _settings._amplitude * (noise * fade_out);
 
    // std::cout << t << ": " << y << " (" << noise << ")" << std::endl;
 

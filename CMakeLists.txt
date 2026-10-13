@@ -254,6 +254,8 @@ set(GAME_FILES
     src/game/effects/screentransitioneffect.h
     src/game/effects/spawneffect.cpp
     src/game/effects/spawneffect.h
+    src/game/effects/texturecollapse.cpp
+    src/game/effects/texturecollapse.h
     src/game/effects/waterbubbles.cpp
     src/game/effects/waterbubbles.h
     src/game/event/eventdistributor.cpp

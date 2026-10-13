@@ -147,6 +147,9 @@ public:
    /// \return true when the hard-landing stun is active.
    virtual bool isHardLanding() const = 0;
 
+   /// \brief enters the hard-landing stun as if the player had just landed hard.
+   virtual void startHardLanding() = 0;
+
    /// \brief gets bend and crouch state.
    /// \return reference to the player bend subsystem.
    virtual const PlayerBend& getBend() const = 0;
