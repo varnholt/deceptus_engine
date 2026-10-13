@@ -130,8 +130,7 @@ void Crusher::drawChain(sf::RenderTarget& color, const sf::RenderStates& states)
    const auto blade_top_px = _position_px.y + _offset_spike_px.y + _drawn_blade_offset_px;
    const auto x_px = _position_px.x + 2 * PIXELS_PER_TILE;
 
-   for (auto link_top_px = blade_top_px - PIXELS_PER_TILE; link_top_px + PIXELS_PER_TILE > mount_bottom_px;
-        link_top_px -= PIXELS_PER_TILE)
+   for (auto link_top_px = blade_top_px - PIXELS_PER_TILE; link_top_px + PIXELS_PER_TILE > mount_bottom_px; link_top_px -= PIXELS_PER_TILE)
    {
       const auto hidden_px = std::max(0.0f, mount_bottom_px - link_top_px);
       const auto visible_px = static_cast<int32_t>(PIXELS_PER_TILE - hidden_px);
@@ -143,7 +142,8 @@ void Crusher::drawChain(sf::RenderTarget& color, const sf::RenderStates& states)
 
 #ifdef DECEPTUS_VRSFML
       _sprite_chain_link->textureRect = {
-         {9 * PIXELS_PER_TILE, 7 * PIXELS_PER_TILE + static_cast<int32_t>(hidden_px)}, {PIXELS_PER_TILE, visible_px}
+         {9 * PIXELS_PER_TILE, static_cast<float>(7 * PIXELS_PER_TILE + static_cast<int32_t>(hidden_px))},
+         {PIXELS_PER_TILE, static_cast<float>(visible_px)}
       };
       _sprite_chain_link->position = {x_px, link_top_px + hidden_px};
 #else
