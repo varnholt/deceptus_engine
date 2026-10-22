@@ -86,6 +86,26 @@ public:
    /// \param y y coordinate in pixels.
    void hideTile(int32_t x, int32_t y);
 
+   /// \brief a static tile that was taken out of the layer.
+   struct RemovedTile
+   {
+      sf::Vector2f _top_left_px;  //!< where the tile was drawn
+      sf::IntRect _texture_rect;  //!< the part of the tileset the tile showed
+   };
+
+   /// \brief removes the static tiles whose top left corner lies inside a rectangle.
+   /// \param rect_px rectangle in pixels.
+   /// \return the removed tiles.
+   std::vector<RemovedTile> removeTiles(const sf::FloatRect& rect_px);
+
+   /// \brief returns the tileset texture.
+   /// \return tileset texture, may be null.
+   const std::shared_ptr<sf::Texture>& getTextureMap() const;
+
+   /// \brief returns the tileset normal map.
+   /// \return tileset normal map, may be null.
+   const std::shared_ptr<sf::Texture>& getNormalMap() const;
+
    /// \brief returns source TMX layer name.
    /// \return reference to layer name.
    const std::string& getLayerName() const;

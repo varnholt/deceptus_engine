@@ -1,10 +1,12 @@
 #include "game/mechanisms/blockingrect.h"
 
+#include <algorithm>
 #include <array>
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
+#include "framework/tools/stringutils.h"
 #include "game/io/texturepool.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
@@ -14,6 +16,8 @@ static constexpr std::array blocking_rect_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
    PropertyInfo{.name = "collapse_when_disabled", .type = "bool", .default_value = false},
    PropertyInfo{.name = "texture_offset_y_px", .type = "int", .default_value = int32_t{0}},
+   PropertyInfo{.name = "collapse_layers", .type = "string", .default_value = std::string_view{}},
+   PropertyInfo{.name = "collapse_extend_up_px", .type = "int", .default_value = int32_t{0}},
 };
 static constexpr MechanismSchema blocking_rect_schema{
    .type_name = "BlockingRect",
@@ -91,6 +95,21 @@ void BlockingRect::setup(const GameDeserializeData& data)
          _collapse_when_disabled = collapse_it->second->_value_bool.value_or(false);
       }
 
+      const auto collapse_layers_it = data._tmx_object->_properties->_map.find("collapse_layers");
+      if (collapse_layers_it != data._tmx_object->_properties->_map.end())
+      {
+         for (const auto& layer_name : StringUtils::split(collapse_layers_it->second->_value_string.value_or(""), ','))
+         {
+            _collapse_layer_names.push_back(StringUtils::trim(layer_name));
+         }
+      }
+
+      const auto collapse_extend_up_it = data._tmx_object->_properties->_map.find("collapse_extend_up_px");
+      if (collapse_extend_up_it != data._tmx_object->_properties->_map.end())
+      {
+         _collapse_extend_up_px = static_cast<float>(collapse_extend_up_it->second->_value_int.value_or(0));
+      }
+
       const auto enabled_it = data._tmx_object->_properties->_map.find("enabled");
       if (enabled_it != data._tmx_object->_properties->_map.end())
       {
@@ -158,12 +177,6 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal)
 
 void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal, const sf::RenderStates& states)
 {
-   // nothing to paint
-   if (_sprite == nullptr)
-   {
-      return;
-   }
-
    // later might need something like fading when not visible
    if (!isEnabled())
    {
@@ -173,6 +186,12 @@ void BlockingRect::draw(sf::RenderTarget& target, sf::RenderTarget& normal, cons
    }
 
    _drawn = true;
+
+   // nothing to paint
+   if (_sprite == nullptr)
+   {
+      return;
+   }
 
 #ifdef DECEPTUS_VRSFML
    sf::RenderStates color_states = states;
@@ -219,11 +238,65 @@ void BlockingRect::setEnabled(bool enabled)
       _body->SetEnabled(enabled);
    }
 
+   if (!was_enabled || enabled || !_collapse_when_disabled)
+   {
+      return;
+   }
+
+   // the tiles go either way, they are drawn by their layers and not by the rectangle
+   const auto fragments = removeCollapseTiles();
+
    // a rectangle that is disabled before it was ever seen, e.g. while a save state is applied, just isn't there
-   if (was_enabled && !enabled && _collapse_when_disabled && _drawn)
+   if (!_drawn)
+   {
+      return;
+   }
+
+   if (_collapse_layer_names.empty())
    {
       _collapse.start(_texture_map, _normal_map, {_rectangle.position.x, _rectangle.position.y + _texture_offset_y_px});
    }
+   else
+   {
+      _collapse.start(fragments);
+   }
+}
+
+void BlockingRect::setTileMaps(const std::vector<std::shared_ptr<TileMap>>& tile_maps)
+{
+   for (const auto& tile_map : tile_maps)
+   {
+      if (std::ranges::find(_collapse_layer_names, tile_map->getLayerName()) != _collapse_layer_names.end())
+      {
+         _collapse_tile_maps.push_back(tile_map);
+      }
+   }
+
+   // a rectangle that was disabled while the level was set up has no tiles left to show
+   if (!isEnabled() && _collapse_when_disabled)
+   {
+      removeCollapseTiles();
+   }
+}
+
+std::vector<TextureCollapse::Fragment> BlockingRect::removeCollapseTiles()
+{
+   std::vector<TextureCollapse::Fragment> fragments;
+
+   const sf::FloatRect collapse_rect_px{
+      {_rectangle.position.x, _rectangle.position.y - _collapse_extend_up_px},
+      {_rectangle.size.x, _rectangle.size.y + _collapse_extend_up_px}
+   };
+
+   for (const auto& tile_map : _collapse_tile_maps)
+   {
+      for (const auto& removed_tile : tile_map->removeTiles(collapse_rect_px))
+      {
+         fragments.push_back({tile_map->getTextureMap(), tile_map->getNormalMap(), removed_tile._texture_rect, removed_tile._top_left_px});
+      }
+   }
+
+   return fragments;
 }
 
 std::optional<sf::FloatRect> BlockingRect::getBoundingBoxPx()
