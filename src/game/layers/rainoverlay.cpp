@@ -355,6 +355,57 @@ void RainOverlay::RainDrop::randomizeHitOffsetY(const RainSettings& settings)
    _hit_offset_y_px = static_cast<float>((std::rand() % randomize_range_px) + settings._randomize_offset_px.value_or(0));
 }
 
+void RainOverlay::addChainEdges(const b2Body* body, const b2ChainShape* chain)
+{
+   const auto offset = body->GetPosition();
+
+   for (auto i = 0; i < chain->m_count - 1; i++)
+   {
+      auto v1_m = offset + chain->m_vertices[i];
+      auto v2_m = offset + chain->m_vertices[i + 1];
+
+      auto allow = (v2_m - v1_m).x < 0.0f;
+      if (_winding == Winding::Clockwise)
+      {
+         allow = !allow;
+      }
+
+      // filter out lines where the normal is facing down
+      if (allow)
+      {
+         // re-enable to debug colliding surfaces
+         // b2Color red(1,0,0);
+         // DebugDraw::drawLine(target, v1_m, v2_m, red);
+         Edge edge{vecB2S(v1_m), vecB2S(v2_m)};
+         _edges.push_back(edge);
+      }
+   }
+}
+
+void RainOverlay::addPolygonEdges(const b2Body* body, const b2PolygonShape* polygon)
+{
+   // the top of a static box, e.g. a blocking rect; boxes that move are left out so it does not rain on crates
+   if (body->GetType() != b2_staticBody)
+   {
+      return;
+   }
+
+   const auto& transform = body->GetTransform();
+
+   for (auto vertex_index = 0; vertex_index < polygon->m_count; vertex_index++)
+   {
+      // y points down, so an edge whose normal points to negative y faces the sky
+      if (b2Mul(transform.q, polygon->m_normals[vertex_index]).y >= 0.0f)
+      {
+         continue;
+      }
+
+      const auto v1_m = b2Mul(transform, polygon->m_vertices[vertex_index]);
+      const auto v2_m = b2Mul(transform, polygon->m_vertices[(vertex_index + 1) % polygon->m_count]);
+      _edges.push_back(Edge{vecB2S(v1_m), vecB2S(v2_m)});
+   }
+}
+
 void RainOverlay::determineRainSurfaces()
 {
    _edges.clear();
@@ -373,34 +424,24 @@ void RainOverlay::determineRainSurfaces()
             auto next = f->GetNext();
             auto shape = f->GetShape();
 
+            // sensors only detect overlaps, there is nothing for the rain to land on
+            if (f->IsSensor())
+            {
+               f = next;
+               continue;
+            }
+
             switch (shape->GetType())
             {
                case b2Shape::e_chain:
                {
-                  const auto offset = body->GetPosition();
-                  auto chain = dynamic_cast<b2ChainShape*>(shape);
+                  addChainEdges(body, dynamic_cast<b2ChainShape*>(shape));
+                  break;
+               }
 
-                  for (auto i = 0; i < chain->m_count - 1; i++)
-                  {
-                     auto v1_m = offset + chain->m_vertices[i];
-                     auto v2_m = offset + chain->m_vertices[i + 1];
-
-                     auto allow = (v2_m - v1_m).x < 0.0f;
-                     if (_winding == Winding::Clockwise)
-                     {
-                        allow = !allow;
-                     }
-
-                     // filter out lines where the normal is facing down
-                     if (allow)
-                     {
-                        // re-enable to debug colliding surfaces
-                        // b2Color red(1,0,0);
-                        // DebugDraw::drawLine(target, v1_m, v2_m, red);
-                        Edge edge{vecB2S(v1_m), vecB2S(v2_m)};
-                        _edges.push_back(edge);
-                     }
-                  }
+               case b2Shape::e_polygon:
+               {
+                  addPolygonEdges(body, dynamic_cast<b2PolygonShape*>(shape));
                   break;
                }
 

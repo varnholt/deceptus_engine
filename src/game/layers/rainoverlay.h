@@ -12,6 +12,10 @@
 
 #include <SFML/Graphics.hpp>
 
+class b2Body;
+class b2ChainShape;
+class b2PolygonShape;
+
 /// \brief weather overlay that simulates rain streaks and optional surface splashes.
 class RainOverlay : public WeatherOverlay
 {
@@ -97,6 +101,16 @@ public:
 private:
    /// \brief rebuilds collidable rain surface segments from nearby box2d chain shapes.
    void determineRainSurfaces();
+
+   /// \brief adds the upward facing segments of a chain shape to the rain surfaces.
+   /// \param body body the chain belongs to.
+   /// \param chain chain shape to read the segments from.
+   void addChainEdges(const b2Body* body, const b2ChainShape* chain);
+
+   /// \brief adds the upward facing edges of a static box to the rain surfaces.
+   /// \param body body the box belongs to; boxes of moving bodies are skipped.
+   /// \param polygon polygon shape to read the edges from.
+   void addPolygonEdges(const b2Body* body, const b2PolygonShape* polygon);
 
    /// \brief stops the looped rain sample if it is currently playing.
    void stopPlaying();
