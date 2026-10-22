@@ -7,6 +7,7 @@
 #include "game/effects/texturecollapse.h"
 #include "game/io/gamedeserializedata.h"
 #include "game/level/gamenode.h"
+#include "game/level/tilemap.h"
 #include "game/mechanisms/gamemechanism.h"
 
 /// \brief represents a static solid rectangle that blocks movement and optionally renders custom textures.
@@ -53,7 +54,15 @@ public:
    /// \return rectangle occupied by this blocking mechanism.
    const sf::FloatRect& getPixelRect() const;
 
+   /// \brief picks the tile layers named in collapse_layers; their tiles inside the rectangle fall away when it is disabled.
+   /// \param tile_maps all tile layers of the level.
+   void setTileMaps(const std::vector<std::shared_ptr<TileMap>>& tile_maps);
+
 private:
+   /// \brief takes the tiles inside the rectangle out of the collapse layers.
+   /// \return the fragments the removed tiles break into.
+   std::vector<TextureCollapse::Fragment> removeCollapseTiles();
+
    // rendering
    std::shared_ptr<sf::Texture> _texture_map;
    std::shared_ptr<sf::Texture> _normal_map;
@@ -62,9 +71,12 @@ private:
    float _texture_offset_y_px{0.0f};  //!< draws the texture above the rectangle, e.g. for grass that sticks out of the ground
 
    // collapsing
-   bool _collapse_when_disabled{false};  //!< disabling the rectangle once it has been seen lets its texture fall away
-   bool _drawn{false};                   //!< whether the rectangle has been drawn at least once
-   TextureCollapse _collapse;            //!< the pieces the texture breaks into once the rectangle is disabled
+   bool _collapse_when_disabled{false};                        //!< disabling the rectangle once it has been seen lets its texture fall away
+   bool _drawn{false};                                         //!< whether the rectangle has been drawn at least once
+   TextureCollapse _collapse;                                  //!< the pieces the texture breaks into once the rectangle is disabled
+   std::vector<std::string> _collapse_layer_names;             //!< tile layers whose tiles inside the rectangle collapse
+   std::vector<std::shared_ptr<TileMap>> _collapse_tile_maps;  //!< the tile layers named in _collapse_layer_names
+   float _collapse_extend_up_px{0.0f};  //!< collapse tiles above the rectangle as well, e.g. grass that sticks out of the ground
 
    // physics
    b2Body* _body = nullptr;

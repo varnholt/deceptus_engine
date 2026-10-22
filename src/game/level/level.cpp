@@ -37,6 +37,7 @@
 #include "game/level/roomupdater.h"
 #include "game/level/tilemap.h"
 #include "game/level/tilemapfactory.h"
+#include "game/mechanisms/blockingrect.h"
 #include "game/mechanisms/checkpoint.h"
 #include "game/mechanisms/conveyorbelt.h"
 #include "game/mechanisms/door.h"
@@ -442,6 +443,15 @@ void Level::loadTmx()
    }
 
    TileMapFactory::merge(_tile_maps);
+
+   const auto blocking_rects_it = _mechanism_registry.getMap().find("blocking_rects");
+   if (blocking_rects_it != _mechanism_registry.getMap().end() && blocking_rects_it->second != nullptr)
+   {
+      for (const auto& mechanism : *blocking_rects_it->second)
+      {
+         std::dynamic_pointer_cast<BlockingRect>(mechanism)->setTileMaps(_tile_maps);
+      }
+   }
    Room::mergeEnterAreas(_rooms);
    Room::warnAboutAmbiguousObjectIds(_rooms);
 

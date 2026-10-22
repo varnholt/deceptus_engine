@@ -5,6 +5,7 @@
    <property name="index" type="int" value="0"/>
    <property name="sprite_pos_x_px" type="int" value="0"/>
    <property name="sprite_pos_y_px" type="int" value="0"/>
+   <property name="visible" type="bool" value="true"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

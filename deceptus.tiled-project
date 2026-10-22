@@ -13,6 +13,16 @@
             "id": 1,
             "members": [
                 {
+                    "name": "collapse_extend_up_px",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "collapse_layers",
+                    "type": "string",
+                    "value": ""
+                },
+                {
                     "name": "collapse_when_disabled",
                     "type": "bool",
                     "value": false
@@ -145,6 +155,11 @@
                     "name": "sprite_pos_y_px",
                     "type": "int",
                     "value": 0
+                },
+                {
+                    "name": "visible",
+                    "type": "bool",
+                    "value": true
                 },
                 {
                     "name": "z",

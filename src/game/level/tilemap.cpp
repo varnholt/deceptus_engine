@@ -716,6 +716,63 @@ void TileMap::hideTile(int32_t x, int32_t y)
    }
 }
 
+std::vector<TileMap::RemovedTile> TileMap::removeTiles(const sf::FloatRect& rect_px)
+{
+   std::vector<RemovedTile> removed_tiles;
+
+   for (auto& [block_y, row] : _vertices_static_blocks)
+   {
+      for (auto& [block_x, block_vertices] : row)
+      {
+         sf::VertexArray kept_vertices;
+         kept_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
+
+         // each tile is stored as the two triangles 0 1 2 and 0 2 3 of its quad
+         for (auto vertex_index = 0u; vertex_index + 5 < block_vertices.getVertexCount(); vertex_index += 6)
+         {
+            const auto& top_left = block_vertices[vertex_index];
+            const auto& bottom_right = block_vertices[vertex_index + 2];
+
+            if (rect_px.contains(top_left.position))
+            {
+               const auto tile_column = static_cast<int32_t>(top_left.texCoords.x) / static_cast<int32_t>(_tile_size_px.x);
+               const auto tile_row = static_cast<int32_t>(top_left.texCoords.y) / static_cast<int32_t>(_tile_size_px.y);
+               const auto texture_size = bottom_right.texCoords - top_left.texCoords;
+
+               removed_tiles.push_back(
+                  {top_left.position,
+                   sf::IntRect{
+                      {tile_column * static_cast<int32_t>(_tile_size_px.x), tile_row * static_cast<int32_t>(_tile_size_px.y)},
+                      {static_cast<int32_t>(std::lround(texture_size.x)), static_cast<int32_t>(std::lround(texture_size.y))}
+                   }}
+               );
+
+               continue;
+            }
+
+            for (auto triangle_vertex_index = 0u; triangle_vertex_index < 6; ++triangle_vertex_index)
+            {
+               kept_vertices.append(block_vertices[vertex_index + triangle_vertex_index]);
+            }
+         }
+
+         block_vertices = kept_vertices;
+      }
+   }
+
+   return removed_tiles;
+}
+
+const std::shared_ptr<sf::Texture>& TileMap::getTextureMap() const
+{
+   return _texture_map;
+}
+
+const std::shared_ptr<sf::Texture>& TileMap::getNormalMap() const
+{
+   return _normal_map;
+}
+
 TileMap::AnimatedTile::~AnimatedTile()
 {
    _frames.clear();
