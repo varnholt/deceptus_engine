@@ -348,7 +348,7 @@ Rain layers have the custom properties below:
 
 |Custom Property|Type|Description|
 |-|-|-|
-|collide|bool|Set to true if rain drops should collide with the Box2D world; otherwise they will just fall through|
+|collide|bool|Set to true if rain drops should collide with the Box2D world; otherwise they will just fall through. Drops land on the level's collision tiles and on static boxes the player can stand on, such as blocking rects. Sensors, box colliders and moving objects are ignored.|
 |drop_count|int|Number of rain drops used inside this layer|
 |fall_through_rate|int|Decides how many nth rain drops are passed through to the collision detection. Set to `0` or `1` to make every rain drop colliding, set to `2` to pass every second drop to the collision detection, and so on. This setting is only relevant when `collide` is set to `true`.|
 |randomize_range_px|int|Shifts where a drop hits the surface down by a random amount between `0` and `randomize_range_px`, so the splashes are not all lined up on the very same y. The default is `0` which keeps every drop splashing exactly on the surface. This setting is only relevant when `collide` is set to `true`.|

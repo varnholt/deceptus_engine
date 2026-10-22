@@ -382,10 +382,18 @@ void RainOverlay::addChainEdges(const b2Body* body, const b2ChainShape* chain)
    }
 }
 
-void RainOverlay::addPolygonEdges(const b2Body* body, const b2PolygonShape* polygon)
+void RainOverlay::addPolygonEdges(const b2Fixture* fixture, const b2PolygonShape* polygon)
 {
+   const auto* body = fixture->GetBody();
+
    // the top of a static box, e.g. a blocking rect; boxes that move are left out so it does not rain on crates
    if (body->GetType() != b2_staticBody)
+   {
+      return;
+   }
+
+   // a box the player walks through, e.g. a box collider that only stops moveable objects, is not ground either
+   if ((fixture->GetFilterData().maskBits & CategoryFriendly) == 0)
    {
       return;
    }
@@ -441,7 +449,7 @@ void RainOverlay::determineRainSurfaces()
 
                case b2Shape::e_polygon:
                {
-                  addPolygonEdges(body, dynamic_cast<b2PolygonShape*>(shape));
+                  addPolygonEdges(f, dynamic_cast<b2PolygonShape*>(shape));
                   break;
                }
 

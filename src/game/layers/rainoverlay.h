@@ -14,6 +14,7 @@
 
 class b2Body;
 class b2ChainShape;
+class b2Fixture;
 class b2PolygonShape;
 
 /// \brief weather overlay that simulates rain streaks and optional surface splashes.
@@ -107,10 +108,10 @@ private:
    /// \param chain chain shape to read the segments from.
    void addChainEdges(const b2Body* body, const b2ChainShape* chain);
 
-   /// \brief adds the upward facing edges of a static box to the rain surfaces.
-   /// \param body body the box belongs to; boxes of moving bodies are skipped.
+   /// \brief adds the upward facing edges of a static box the player can stand on to the rain surfaces.
+   /// \param fixture fixture of the box; boxes of moving bodies and boxes the player passes through are skipped.
    /// \param polygon polygon shape to read the edges from.
-   void addPolygonEdges(const b2Body* body, const b2PolygonShape* polygon);
+   void addPolygonEdges(const b2Fixture* fixture, const b2PolygonShape* polygon);
 
    /// \brief stops the looped rain sample if it is currently playing.
    void stopPlaying();
