@@ -21,6 +21,9 @@ _player_kneeled = false
 _monk_dialogue_shown = false
 _monk_hide = false
 
+-- completing the encounter is saved with the player at the next checkpoint
+_monk_encounter_treasure = "catacombs_monk_encounter_complete"
+
 _delay_to_show_dive_dialogue = 1.0
 _player_intersected_with_water_block_sensor = false
 _player_wont_dive_dialogue_shown = false
@@ -31,6 +34,8 @@ _owl_eye_item = "gems"
 -- inserting them is remembered in the save game, the inventory cannot say it: the gems are gone
 -- afterwards, which looks the same as never having had them
 _owl_eyes_inserted_treasure = "catacombs_owl_eyes_inserted"
+_locker_opened_treasure = "catacombs_locker_opened"
+_drawer_opened_treasure = "catacombs_drawer_opened"
 
 _sword_cage_ids = {"sword_cage_01", "sword_cage_02", "sword_cage_03", "sword_cage_04"}
 _shrine_inserted_last = nil
@@ -211,6 +216,7 @@ function makeMonkDisappear(dt)
       _monk_hide = false
       writeLuaNodeProperty("shadow", "hide", "true")
       setZoomFactor(1.0)
+      addTreasure(_monk_encounter_treasure)
    end
 end
 
@@ -230,6 +236,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function openLocker()
    log("open locker")
+   addTreasure(_locker_opened_treasure)
    setMechanismVisible("locker_open", true, "imagelayers")
    setMechanismVisible("handle", true, "extras")
    setMechanismEnabled("handle", true, "extras")
@@ -240,6 +247,24 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function initLocker()
+   local handle_inserted = getMechanismProperty("lever_cell", "levers", "handle_available") == true
+   local handle_collected = inventoryHas("handle") or handle_inserted
+      or getMechanismProperty("handle", "extras", "active") == false
+   local opened = hasTreasure(_locker_opened_treasure) or handle_collected
+      or (getMechanismProperty("locker_key", "extras", "active") == false and not inventoryHas("locker_key"))
+   if (opened) then
+      openLocker()
+      if (handle_collected) then
+         setMechanismEnabled("locker_help", false, "interaction_help")
+         setMechanismEnabled("handle_dialogue_1", false, "dialogues")
+         setMechanismEnabled("locker_dialogue_unlocked", false, "dialogues")
+      end
+      if (handle_inserted) then
+         setMechanismEnabled("lever_cell_dialogue", false, "dialogues")
+      end
+      return
+   end
+
    setMechanismVisible("locker_open", false, "imagelayers")
    setMechanismVisible("handle", false, "extras")
    setMechanismEnabled("handle", false, "extras")
@@ -250,7 +275,8 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function initDrawer()
-   if (inventoryHas("solar_seal")) then
+   if (drawerOpened()) then
+      addTreasure(_drawer_opened_treasure)
       setMechanismVisible("drawer_open", true, "imagelayers")
       setMechanismEnabled("drawer_rect", false, "button_rects")
       setMechanismEnabled("drawer_interaction_help", false, "interaction_help")
@@ -259,6 +285,11 @@ function initDrawer()
    else
       setMechanismVisible("drawer_open", false, "imagelayers")
    end
+end
+
+function drawerOpened()
+   return hasTreasure(_drawer_opened_treasure) or inventoryHas("solar_seal")
+      or getMechanismProperty("locked_box", "treasure_chests", "open") == true
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -275,10 +306,11 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function openDrawer()
-   if (inventoryHas("solar_seal")) then
+   if (drawerOpened()) then
       return
    end
    log("open drawer")
+   addTreasure(_drawer_opened_treasure)
    setMechanismVisible("drawer_open", true, "imagelayers")
    setMechanismEnabled("drawer_rect", false, "button_rects")
    setMechanismEnabled("drawer_interaction_help", false, "interaction_help")
@@ -293,7 +325,7 @@ end
 function updateMonk(dt)
 
    -- monk dialogue logic
-   if (not _player_intersected_with_monk_rect) then
+   if (not _player_intersected_with_monk_rect or hasTreasure(_monk_encounter_treasure)) then
       return
    end
       
@@ -518,7 +550,7 @@ function playerCollidesWithSensorRect(rect_id)
    end
 
    if (rect_id == "monk_rect") then
-      _player_intersected_with_monk_rect = true
+      _player_intersected_with_monk_rect = not hasTreasure(_monk_encounter_treasure)
    elseif (rect_id == "water_block_sensor_01") then
       _player_intersected_with_water_block_sensor = true
    elseif (rect_id == "sword_ring_sensor") then

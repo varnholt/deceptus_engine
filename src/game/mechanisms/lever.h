@@ -92,6 +92,9 @@ public:
    /// \param j source json object containing state.
    void deserializeState(const nlohmann::json& j) override;
 
+   /// \brief exposes the saved handle state to level scripts.
+   std::optional<GameMechanismObserver::LuaVariant> getProperty(const std::string& property_name) const override;
+
    /// \brief adds one callback that receives lever state changes.
    /// \param callback callback invoked with lever state as int32_t.
    void addCallback(const Callback& callback);

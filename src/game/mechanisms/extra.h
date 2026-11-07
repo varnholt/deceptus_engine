@@ -84,6 +84,9 @@ public:
    /// \param json json object containing the saved active field.
    void deserializeState(const nlohmann::json& json) override;
 
+   /// \brief exposes whether this extra has not been collected yet.
+   std::optional<GameMechanismObserver::LuaVariant> getProperty(const std::string& property_name) const override;
+
    using ExtraCallback = std::function<void(const std::string&)>;
 
    bool _active{true};

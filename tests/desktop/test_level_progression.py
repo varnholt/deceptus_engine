@@ -15,13 +15,12 @@ the chain breaks rather than at the end.
 Needs a Windows desktop build with DEVELOPMENT_MODE - the console is compiled out otherwise.
 `build_rel` is used unless DECEPTUS_DESKTOP_BUILD_DIR says otherwise. Input is delivered with
 PostMessage, so the game does not need focus, but it does own a window while the test runs, and
-slot 0 of the save state is replaced for the duration of the run and restored afterwards.
+the game uses a temporary settings directory for the duration of the run.
 """
 
 import json
 import os
 import queue
-import shutil
 import subprocess
 import threading
 import time
@@ -259,27 +258,26 @@ class Game:
 
 
 @pytest.fixture
-def game():
+def game(tmp_path, monkeypatch, request):
     assert GAME_EXECUTABLE.exists(), f"{GAME_EXECUTABLE} not found, build the desktop target first"
 
     # a fresh slot 0: the run has to start without the key, the seal, the eyes or the treasures that
     # remember what was already inserted. levelstate must stay null, an empty object makes
     # Level::loadSaveState index a missing key
-    SETTINGS_DIRECTORY.mkdir(parents=True, exist_ok=True)
-    if SAVE_STATE_PATH.exists() and not SAVE_STATE_BACKUP_PATH.exists():
-        shutil.copy2(SAVE_STATE_PATH, SAVE_STATE_BACKUP_PATH)
-    slots = json.loads(SAVE_STATE_PATH.read_text()) if SAVE_STATE_PATH.exists() else [{}, {}, {}]
-    slots[0] = {"levelindex": 0, "checkpoints": {}, "levelstate": None, "playerinfo": {}}
-    SAVE_STATE_PATH.write_text(json.dumps(slots, indent=4))
+    monkeypatch.setenv("APPDATA", str(tmp_path))
+    settings_directory = tmp_path / "deceptus-dev" / "settings"
+    settings_directory.mkdir(parents=True)
+    slots = [{}, {}, {}]
+    slots[0] = {"levelindex": 0, "checkpoints": {}, "levelstate": None, "playerinfo": {"name": ""}}
+    slots[0].update(getattr(request, "param", {}))
+    (settings_directory / "savestate.json").write_text(json.dumps(slots, indent=4))
 
     running_game = Game()
-    running_game.start()
     try:
+        running_game.start()
         yield running_game
     finally:
         running_game.stop()
-        if SAVE_STATE_BACKUP_PATH.exists():
-            shutil.move(str(SAVE_STATE_BACKUP_PATH), str(SAVE_STATE_PATH))
 
 
 def test_level_progression(game):

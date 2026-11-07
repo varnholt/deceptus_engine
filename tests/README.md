@@ -1,5 +1,10 @@
 # tests
 
+Checkpoint progression regression tests can run against an existing Windows MSVC/Ninja desktop
+build. From an x64 Visual Studio developer prompt, build the game and run
+`python tests/tools/run_progression_state_tests.py build_rel`. This checks the level scripts,
+one-time overlays, and chest reward restoration without modifying player save files.
+
 The pytest suites, one directory per thing they test:
 
 | suite | what it checks | needs |

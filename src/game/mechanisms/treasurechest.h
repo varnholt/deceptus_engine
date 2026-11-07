@@ -8,6 +8,7 @@
 #include "game/mechanisms/gamemechanism.h"
 
 #include <memory>
+#include <vector>
 
 /// \brief interactive chest that opens with optional key requirements and can spawn rewards.
 class TreasureChest : public GameMechanism, public GameNode
@@ -52,6 +53,9 @@ public:
    /// \brief restores the opened state from save data.
    /// \param json json object containing previously serialized state.
    void deserializeState(const nlohmann::json& json) override;
+
+   /// \brief restores an uncollected reward after all extras have loaded their saved state.
+   void restore_reward(const std::vector<std::shared_ptr<GameMechanism>>& extras);
 
    /// \brief exposes chest state to level scripts. supported property: "open".
    /// \param property_name name of the property to read.
