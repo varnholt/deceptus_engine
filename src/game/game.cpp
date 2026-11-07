@@ -1729,13 +1729,13 @@ void Game::processEvent(const sf::Event& event)
          const auto image_y = (static_cast<float>(mouse_button_pressed_event->position.y) - placement.offset_y) / placement.scale_y;
          const auto image_size = _window_render_texture->getSize();
          std::optional<sf::Vector2f> position;
+         sf::Vector2i image_pixel;
          if (image_x >= 0.0f && image_y >= 0.0f && image_x < image_size.x && image_y < image_size.y)
          {
-            position = _window_render_texture->mapPixelToCoords(
-               {static_cast<int32_t>(image_x), static_cast<int32_t>(image_y)}, *_level->getLevelView()
-            );
+            image_pixel = {static_cast<int32_t>(image_x), static_cast<int32_t>(image_y)};
+            position = _window_render_texture->mapPixelToCoords(image_pixel, *_level->getLevelView());
          }
-         _mechanism_inspector->selectAt(position);
+         _mechanism_inspector->selectAt(position, image_size, image_pixel);
          return;
       }
 #endif

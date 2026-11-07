@@ -26,7 +26,7 @@ public:
    void draw(const std::shared_ptr<Level>& level);
    [[nodiscard]] bool isOpen() const;
    [[nodiscard]] bool isPicking() const;
-   void selectAt(const std::optional<sf::Vector2f>& position);
+   void selectAt(const std::optional<sf::Vector2f>& position, sf::Vector2u image_size, sf::Vector2i image_pixel);
    void discardPreviews(const std::shared_ptr<Level>& active_level);
 
 private:
@@ -75,9 +75,12 @@ private:
    void drawProperties(Entry& entry);
    void discard(Entry& entry);
    void saveProperties();
+   bool renderedAt(const Entry& entry, sf::Vector2i pixel, const sf::View& view);
    [[nodiscard]] std::optional<sf::FloatRect> bounds(const Entry& entry) const;
 
    std::unique_ptr<sf::RenderWindow> _window;
+   std::unique_ptr<sf::RenderTexture> _pick_color;
+   std::unique_ptr<sf::RenderTexture> _pick_normal;
    sf::Clock _clock;
    std::weak_ptr<Level> _level;
    std::string _tmx_filename;

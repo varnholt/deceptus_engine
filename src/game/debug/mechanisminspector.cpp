@@ -2,6 +2,7 @@
 
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 
+#include <SFML/OpenGL.hpp>
 #include "imgui/imgui-SFML.h"
 #include "imgui/imgui.h"
 
@@ -61,6 +62,21 @@ std::vector<std::string> targets(const TmxObject& object)
       }
    }
    return result;
+}
+
+bool pixelHit(GameMechanism& mechanism, sf::RenderTexture& color, sf::RenderTexture& normal, sf::Vector2i pixel, const sf::View& view)
+{
+   color.setView(view);
+   normal.setView(view);
+   color.clear(sf::Color::Transparent);
+   normal.clear(sf::Color::Transparent);
+   mechanism.draw(color, normal);
+   color.display();
+   if (!color.setActive(true))
+      return false;
+   std::array<GLubyte, 4> sample{};
+   glReadPixels(pixel.x, static_cast<GLint>(color.getSize().y) - pixel.y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, sample.data());
+   return sample[3] != 0;
 }
 
 void jsonPanel(const char* title, const nlohmann::json& value)
@@ -350,11 +366,27 @@ std::optional<sf::FloatRect> MechanismInspector::bounds(const Entry& entry) cons
    return std::nullopt;
 }
 
-void MechanismInspector::selectAt(const std::optional<sf::Vector2f>& position)
+bool MechanismInspector::renderedAt(const Entry& entry, sf::Vector2i pixel, const sf::View& view)
+{
+   if (!_pick_color || !_pick_normal)
+      return false;
+   // draw each instance separately so another object cannot occlude its picking result
+   return std::ranges::any_of(
+      entry.parts,
+      [&](const auto& part)
+      {
+         const auto mechanism = part.lock();
+         return mechanism && pixelHit(*mechanism, *_pick_color, *_pick_normal, pixel, view);
+      }
+   );
+}
+
+void MechanismInspector::selectAt(const std::optional<sf::Vector2f>& position, sf::Vector2u image_size, sf::Vector2i pixel)
 {
    _picked.clear();
    _selected.reset();
-   if (_level.expired())
+   const auto level = _level.lock();
+   if (!level)
    {
       _selection_status = "No loaded level to inspect.";
       return;
@@ -365,10 +397,36 @@ void MechanismInspector::selectAt(const std::optional<sf::Vector2f>& position)
       _window->requestFocus();
       return;
    }
+   // allocate and use the visual picking targets only for an explicit pick, never in the gameplay draw path
+   if (!_pick_color || _pick_color->getSize() != image_size)
+   {
+      auto color = std::make_unique<sf::RenderTexture>();
+      auto normal = std::make_unique<sf::RenderTexture>();
+      if (!color->resize(image_size) || !normal->resize(image_size))
+      {
+         _selection_status = "Could not create the picking render targets.";
+         _picking = false;
+         return;
+      }
+      _pick_color = std::move(color);
+      _pick_normal = std::move(normal);
+   }
+   auto view = *level->getLevelView();
+   // retain the real camera and image resolution; scissoring limits ordinary draws to the sampled pixel region
+   const auto left = std::max(0, pixel.x - 1);
+   const auto top = std::max(0, pixel.y - 1);
+   const auto right = std::min(static_cast<int>(image_size.x), pixel.x + 2);
+   const auto bottom = std::min(static_cast<int>(image_size.y), pixel.y + 2);
+   if (left >= right || top >= bottom)
+      return;
+   view.setScissor(sf::FloatRect{
+      {static_cast<float>(left) / image_size.x, static_cast<float>(top) / image_size.y},
+      {static_cast<float>(right - left) / image_size.x, static_cast<float>(bottom - top) / image_size.y}
+   });
    _position_filter = position;
    for (size_t index = 0; index < _entries.size(); ++index)
    {
-      if (const auto rect = bounds(_entries[index]); rect && rect->contains(*position))
+      if (const auto rect = bounds(_entries[index]); (rect && rect->contains(*position)) || renderedAt(_entries[index], pixel, view))
       {
          _picked.push_back(index);
       }

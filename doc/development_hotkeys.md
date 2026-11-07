@@ -22,8 +22,12 @@ On desktop development builds, enter `inspector` in the developer console (`F12`
 that console to resume playing. The inspector is otherwise inactive and does not draw game overlays.
 
 Press **Pick an object in the game**, then left-click a position in the scene. The list filters to
-**every mechanism whose bounds contain that position**, including hidden objects and overlapping
-triggers or effects. Nothing is automatically selected. Choose any object from that filtered list,
+**every mechanism whose rendered pixels or interaction bounds cover that position**, including
+hidden objects and overlapping triggers or effects. Visual hits use each mechanism's existing draw
+method in an independent off-screen pixel check, so moving graphics can be picked outside their
+interaction bounds and overlapping objects cannot occlude one another. This extra rendering runs
+only for an explicit pick; it adds no work to ordinary gameplay frames. Nothing is automatically
+selected. Choose any object from that filtered list,
 or clear the position filter to browse everything. Decorative tile graphics are not mechanism objects. Schema-backed mechanism tile layers are editable as a single source.
 
 The details show live state, the last saved level snapshot, source properties, outgoing/incoming
