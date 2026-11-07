@@ -28,6 +28,13 @@ namespace
 {
 static constexpr std::array extra_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "active", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "spawn_required", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "is_treasure", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "requires_button_press", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "sine_amplitude_px", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "sine_frequency", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "pickup_event", .type = "string", .default_value = std::string_view{""}},
 };
 static constexpr MechanismSchema extra_schema{
    .type_name = "Extra",
@@ -73,6 +80,8 @@ Extra::Extra(GameNode* parent) : GameNode(parent)
    bindInspectorProperty("sine_amplitude_px", _sine_amplitude_px);
    bindInspectorProperty("sine_frequency", _sine_frequency);
    bindInspectorProperty("active", _active);
+   bindInspectorProperty("spawn_required", _spawn_required);
+   bindInspectorProperty("pickup_event", _pickup_event);
    bindInspectorProperty("is_treasure", _is_treasure);
    bindInspectorProperty("requires_button_press", _requires_button_press);
 #endif

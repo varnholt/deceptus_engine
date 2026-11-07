@@ -5,7 +5,11 @@
 #include "imgui/imgui-SFML.h"
 #include "imgui/imgui.h"
 
+#include "framework/tmxparser/tmxlayer.h"
 #include "framework/tmxparser/tmxobject.h"
+#include "framework/tmxparser/tmxobjectgroup.h"
+#include "framework/tmxparser/tmxpolygon.h"
+#include "framework/tmxparser/tmxpolyline.h"
 #include "framework/tmxparser/tmxproperties.h"
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
@@ -44,7 +48,7 @@ std::vector<std::string> targets(const TmxObject& object)
    }
    for (const auto& [key, value] : object._properties->_map)
    {
-      if (key == "target_id" || key == "target_ids" || key == "reference_id")
+      if (key == "target_id" || key == "target_ids" || key == "reference_id" || key == "reference")
       {
          for (const auto& id : StringUtils::split(value->toString(), ';'))
          {
@@ -84,9 +88,15 @@ MechanismInspector::~MechanismInspector()
    }
 }
 
-bool MechanismInspector::isOpen() const { return _initialized && _window->isOpen(); }
+bool MechanismInspector::isOpen() const
+{
+   return _initialized && _window->isOpen();
+}
 
-bool MechanismInspector::isPicking() const { return isOpen() && _picking; }
+bool MechanismInspector::isPicking() const
+{
+   return isOpen() && _picking;
+}
 
 void MechanismInspector::processEvents()
 {
@@ -124,75 +134,204 @@ void MechanismInspector::refresh(const std::shared_ptr<Level>& level)
    std::ifstream source_file(_tmx_filename, std::ios::binary);
    _source_text.assign(std::istreambuf_iterator<char>{source_file}, {});
    const auto& registry = level->getMechanismRegistry();
+   const auto& schemas = GameMechanismDeserializerRegistry::instance().schemas();
+   const auto add_source = [&](const std::shared_ptr<TmxObject>& object, const std::string& group, bool layer)
+   {
+      // resolve authoring types, including customizations sharing a layer, independently of runtime class names
+      auto schema_group = GameMechanismDeserializerRegistry::instance().getLayerName(group).value_or(group);
+      if (group == "lasers_1" || group == "lasers_2")
+         schema_group = "lasers";
+      if (group == "interval_spikes" || group == "toggle_spikes" || group == "trap_spikes")
+         schema_group = "spikes";
+      if (group.starts_with("shader_quads"))
+         schema_group = "shader_quads";
+      const auto has_layer_schema =
+         std::ranges::any_of(schemas, [&](const auto& candidate) { return candidate.layer_name == schema_group; });
+      const MechanismSchema* schema = nullptr;
+      for (const auto& candidate : schemas)
+      {
+         if (has_layer_schema ? candidate.layer_name != schema_group : candidate.type_name != object->_template_type.value_or(""))
+            continue;
+         if (!candidate.selector_property.empty())
+         {
+            const auto key = std::string{candidate.selector_property};
+            if (object->_properties && object->_properties->_map.contains(key) &&
+                object->_properties->_map.at(key)->toString() == candidate.selector_value)
+            {
+               schema = &candidate;
+               break;
+            }
+         }
+         else if (!schema || candidate.type_name == object->_template_type.value_or(""))
+         {
+            schema = &candidate;
+         }
+      }
+      if (!schema)
+         return;
+      auto snapshot = std::make_shared<TmxObject>(*object);
+      if (object->_properties)
+         snapshot->_properties = std::make_shared<TmxProperties>(*object->_properties);
+      Entry entry{
+         .group = std::string{schema->layer_name},
+         .name = object->_name,
+         .type = std::string{schema->type_name},
+         .source = snapshot,
+         .layer = layer
+      };
+      entry.schema = schema;
+      entry.targets = targets(*snapshot);
+      if (snapshot->_properties)
+      {
+         for (const auto& [key, property] : snapshot->_properties->_map)
+         {
+            if (key.starts_with("condition_") && !property->toString().empty())
+            {
+               for (const auto& requirement : StringUtils::split(property->toString(), ','))
+               {
+                  auto condition = MechanismCondition::parse(requirement);
+                  if (condition)
+                     condition->resolveReferences(registry.getMap());
+                  entry.conditions.push_back({key + ": " + requirement, std::move(condition)});
+               }
+            }
+         }
+      }
+      _entries.push_back(std::move(entry));
+   };
+   for (const auto& element : level->getInspectorElements())
+   {
+      if (const auto group = std::dynamic_pointer_cast<TmxObjectGroup>(element))
+      {
+         for (const auto& [id, object] : group->_objects)
+            add_source(object, group->_name, false);
+      }
+      else if (const auto layer = std::dynamic_pointer_cast<TmxLayer>(element); layer && layer->_inspector_mechanism_layer)
+      {
+         auto object = std::make_shared<TmxObject>();
+         object->_id = layer->_inspector_id;
+         object->_name = layer->_name;
+         object->_properties = layer->_properties;
+         object->_x_px = static_cast<float>(layer->_position_x_px);
+         object->_y_px = static_cast<float>(layer->_position_y_px);
+         object->_width_px = static_cast<float>(layer->_width_tl * PIXELS_PER_TILE);
+         object->_height_px = static_cast<float>(layer->_height_tl * PIXELS_PER_TILE);
+         add_source(object, layer->_name, true);
+      }
+   }
    for (const auto& [group, mechanisms] : registry.getMap())
    {
       for (const auto& mechanism : *mechanisms)
       {
-         const auto node = std::dynamic_pointer_cast<GameNode>(mechanism);
-         if (!node)
+         const auto& source = mechanism->getInspectorSource();
+         auto entry =
+            source
+               ? std::ranges::find_if(
+                    _entries,
+                    [&](const auto& candidate)
+                    { return candidate.source && candidate.layer == mechanism->isInspectorLayer() && candidate.source->_id == source->_id; }
+                 )
+               : _entries.end();
+         if (entry == _entries.end())
          {
-            continue;
+            const auto node = std::dynamic_pointer_cast<GameNode>(mechanism);
+            _entries.push_back(Entry{.group = group, .name = node ? node->getObjectId() : "", .type = std::string{mechanism->objectName()}}
+            );
+            entry = std::prev(_entries.end());
          }
-         Entry entry{.group = group, .name = node->getObjectId(), .type = std::string{mechanism->objectName()}, .mechanism = mechanism};
-         const auto& schemas = GameMechanismDeserializerRegistry::instance().schemas();
-         const auto schema = std::ranges::find_if(schemas, [&entry](const auto& candidate) { return candidate.type_name == entry.type; });
-         if (schema != schemas.end())
+         if (entry->parts.empty())
          {
-            entry.schema = &*schema;
+            entry->mechanism = mechanism;
+            entry->group = group;
+            if (const auto node = std::dynamic_pointer_cast<GameNode>(mechanism))
+               entry->name = node->getObjectId();
          }
-         else
-         {
-            const auto group_schema = std::ranges::find(schemas, entry.group, &MechanismSchema::layer_name);
-            if (group_schema != schemas.end())
-            {
-               entry.schema = &*group_schema;
-            }
-         }
-         if (const auto& source = mechanism->getInspectorSource())
-         {
-            entry.source = source;
-         }
-         if (entry.source)
-         {
-            entry.targets = targets(*entry.source);
-            if (entry.source->_properties)
-            {
-               for (const auto& [key, property] : entry.source->_properties->_map)
-               {
-                  if (key.starts_with("condition_") && !property->toString().empty())
-                  {
-                     for (const auto& requirement : StringUtils::split(property->toString(), ','))
-                     {
-                        auto condition = MechanismCondition::parse(requirement);
-                        if (condition)
-                        {
-                           condition->resolveReferences(registry.getMap());
-                        }
-                        entry.conditions.push_back({key + ": " + requirement, std::move(condition)});
-                     }
-                  }
-               }
-            }
-         }
-         _entries.push_back(std::move(entry));
+         entry->parts.push_back(mechanism);
       }
    }
-   std::ranges::sort(_entries,
-                     [](const auto& a, const auto& b) { return std::tie(a.group, a.name, a.type) < std::tie(b.group, b.name, b.type); });
+   std::ranges::sort(
+      _entries, [](const auto& a, const auto& b) { return std::tie(a.group, a.name, a.type) < std::tie(b.group, b.name, b.type); }
+   );
+}
+
+std::vector<std::string> MechanismInspector::Entry::liveValues(const std::string& name) const
+{
+   std::vector<std::string> values;
+   for (const auto& part : parts)
+   {
+      const auto mechanism = part.lock();
+      const auto value = mechanism ? mechanism->getInspectorProperty(name) : std::nullopt;
+      if (!value)
+         return {};
+      values.push_back(*value);
+   }
+   return values;
+}
+
+std::optional<std::string> MechanismInspector::Entry::liveValue(const std::string& name) const
+{
+   const auto values = liveValues(name);
+   return values.empty() ? std::nullopt : std::optional{values.front()};
+}
+
+bool MechanismInspector::Entry::setLiveValue(const std::string& name, const std::string& value)
+{
+   const auto previous = liveValues(name);
+   if (previous.empty())
+      return false;
+   for (size_t index = 0; index < parts.size(); ++index)
+   {
+      if (const auto mechanism = parts[index].lock(); !mechanism || !mechanism->setInspectorProperty(name, value))
+      {
+         for (size_t rollback = 0; rollback < index; ++rollback)
+            if (const auto part = parts[rollback].lock())
+               part->setInspectorProperty(name, previous[rollback]);
+         return false;
+      }
+   }
+   return true;
 }
 
 std::optional<sf::FloatRect> MechanismInspector::bounds(const Entry& entry) const
 {
-   if (const auto mechanism = entry.mechanism.lock())
+   std::optional<sf::FloatRect> combined;
+   for (const auto& part : entry.parts)
    {
-      if (const auto rect = mechanism->getBoundingBoxPx())
+      if (const auto mechanism = part.lock())
       {
-         return rect;
+         if (const auto rect = mechanism->getBoundingBoxPx())
+         {
+            if (!combined)
+               combined = rect;
+            else
+            {
+               const auto left = std::min(combined->position.x, rect->position.x);
+               const auto top = std::min(combined->position.y, rect->position.y);
+               const auto right = std::max(combined->position.x + combined->size.x, rect->position.x + rect->size.x);
+               const auto bottom = std::max(combined->position.y + combined->size.y, rect->position.y + rect->size.y);
+               combined = sf::FloatRect{{left, top}, {right - left, bottom - top}};
+            }
+         }
       }
    }
+   if (combined)
+      return combined;
    if (entry.source)
    {
-      return sf::FloatRect{{entry.source->_x_px, entry.source->_y_px}, {entry.source->_width_px, entry.source->_height_px}};
+      const auto& source = *entry.source;
+      if (source._polygon || source._polyline)
+      {
+         const auto& points = source._polygon ? source._polygon->_polyline : source._polyline->_path;
+         if (!points.empty())
+         {
+            const auto [left, right] = std::ranges::minmax(points, {}, &sf::Vector2f::x);
+            const auto [top, bottom] = std::ranges::minmax(points, {}, &sf::Vector2f::y);
+            return sf::FloatRect{
+               {source._x_px + left.x, source._y_px + top.y}, {std::max(1.0f, right.x - left.x), std::max(1.0f, bottom.y - top.y)}
+            };
+         }
+      }
+      return sf::FloatRect{{source._x_px, source._y_px}, {source._width_px, source._height_px}};
    }
    return std::nullopt;
 }
@@ -223,7 +362,7 @@ void MechanismInspector::selectAt(const std::optional<sf::Vector2f>& position)
    _filter[0] = '\0';
    _picking = false;
    _selection_status =
-       std::format("Position {:.0f}, {:.0f}: {} mechanisms. Choose one from the filtered list.", position->x, position->y, _picked.size());
+      std::format("Position {:.0f}, {:.0f}: {} mechanisms. Choose one from the filtered list.", position->x, position->y, _picked.size());
    Log::Info() << "inspector: " << _selection_status;
    _window->requestFocus();
 }
@@ -263,20 +402,25 @@ void MechanismInspector::drawReference(const std::string& name)
 void MechanismInspector::drawDetails(Entry& entry)
 {
    const auto mechanism = entry.mechanism.lock();
-   if (!mechanism)
-   {
-      return;
-   }
+   ImGui::Text("Runtime parts: %zu", entry.parts.size());
    ImGui::Text("%s / %s", entry.group.c_str(), entry.name.empty() ? "(unnamed)" : entry.name.c_str());
-   ImGui::Text("Type: %s   Z: %d", entry.type.c_str(), mechanism->getZ());
+   ImGui::Text("Type: %s", entry.type.c_str());
    if (entry.source)
    {
-      ImGui::Text("TMX object ID: %s", entry.source->_id.c_str());
+      ImGui::Text("TMX source ID: %s", entry.source->_id.c_str());
    }
-   ImGui::Text("Enabled: %s   Visible: %s", mechanism->isEnabled() ? "yes" : "no", mechanism->isVisible() ? "yes" : "no");
-   if (const auto interaction = std::dynamic_pointer_cast<InteractionInterface>(mechanism))
+   if (mechanism)
    {
-      ImGui::Text("Interaction available: %s", interaction->isInteractionAvailable() ? "yes" : "no");
+      ImGui::Text("Z: %d", mechanism->getZ());
+      ImGui::Text("Enabled: %s   Visible: %s", mechanism->isEnabled() ? "yes" : "no", mechanism->isVisible() ? "yes" : "no");
+      if (const auto interaction = std::dynamic_pointer_cast<InteractionInterface>(mechanism))
+      {
+         ImGui::Text("Interaction available: %s", interaction->isInteractionAvailable() ? "yes" : "no");
+      }
+   }
+   else
+   {
+      ImGui::TextWrapped("Authored source without a standalone runtime instance. Properties can be saved and applied by reloading.");
    }
    if (const auto rect = bounds(entry))
    {
@@ -289,7 +433,8 @@ void MechanismInspector::drawDetails(Entry& entry)
    }
 
    nlohmann::json current;
-   mechanism->serializeState(current);
+   if (mechanism)
+      mechanism->serializeState(current);
    nlohmann::json saved;
    const auto& states = SaveState::getCurrent()._level_state;
    if (const auto level = states.find(_tmx_filename); level != states.end() && level->is_object())
@@ -319,11 +464,13 @@ void MechanismInspector::drawDetails(Entry& entry)
    }
    for (const auto& condition : entry.conditions)
    {
-      ImGui::TextWrapped("[%s] %s",
-                         !condition.condition                 ? "invalid"
-                         : condition.condition->isSatisfied() ? "met"
-                                                              : "not met",
-                         condition.label.c_str());
+      ImGui::TextWrapped(
+         "[%s] %s",
+         !condition.condition                 ? "invalid"
+         : condition.condition->isSatisfied() ? "met"
+                                              : "not met",
+         condition.label.c_str()
+      );
    }
 
    ImGui::Separator();
@@ -355,7 +502,7 @@ void MechanismInspector::drawDetails(Entry& entry)
    {
       if (entry.source)
       {
-         ImGui::Text("TMX object ID: %s", entry.source->_id.c_str());
+         ImGui::Text("TMX source ID: %s", entry.source->_id.c_str());
          if (entry.source->_properties)
          {
             for (const auto& [key, property] : entry.source->_properties->_map)
@@ -375,14 +522,14 @@ void MechanismInspector::drawDetails(Entry& entry)
 
 void MechanismInspector::discard(Entry& entry)
 {
-   if (const auto mechanism = entry.mechanism.lock())
+   for (const auto& edit : entry.properties)
    {
-      for (const auto& edit : entry.properties)
+      if (!edit.changed)
+         continue;
+      for (size_t index = 0; index < edit.original_parts.size(); ++index)
       {
-         if (edit.changed && edit.original_live)
-         {
-            mechanism->setInspectorProperty(std::string{edit.schema->name}, *edit.original_live);
-         }
+         if (const auto mechanism = entry.parts[index].lock())
+            mechanism->setInspectorProperty(std::string{edit.schema->name}, edit.original_parts[index]);
       }
    }
    entry.properties.clear();
@@ -410,7 +557,7 @@ void MechanismInspector::saveProperties()
       {
          continue;
       }
-      MechanismSourceEditor::ObjectOverride object{entry.source->_id, entry.schema};
+      MechanismSourceEditor::ObjectOverride object{entry.source->_id, entry.schema, {}, entry.layer ? "layer" : "object"};
       for (const auto& edit : entry.properties)
       {
          if (edit.changed)
@@ -455,11 +602,10 @@ void MechanismInspector::saveProperties()
          property->_value_string = edit.buffer.data();
          entry.source->_properties->_map[std::string{edit.schema->name}] = property;
          edit.changed = false;
+         edit.mixed = false;
          edit.initial_text = edit.buffer.data();
-         if (const auto mechanism = entry.mechanism.lock())
-         {
-            edit.original_live = mechanism->getInspectorProperty(std::string{edit.schema->name});
-         }
+         edit.original_live = entry.liveValue(std::string{edit.schema->name});
+         edit.original_parts = entry.liveValues(std::string{edit.schema->name});
       }
    }
 }
@@ -488,14 +634,12 @@ void MechanismInspector::drawProperties(Entry& entry)
             }
          }
          PropertyEdit edit{.schema = &schema};
-         if (const auto mechanism = entry.mechanism.lock())
-         {
-            edit.original_live = mechanism->getInspectorProperty(std::string{schema.name});
-            if (edit.original_live)
-            {
-               value = *edit.original_live;
-            }
-         }
+         edit.original_live = entry.liveValue(std::string{schema.name});
+         edit.original_parts = entry.liveValues(std::string{schema.name});
+         edit.mixed = !edit.original_parts.empty() &&
+                      std::ranges::any_of(edit.original_parts, [&](const auto& value) { return value != edit.original_parts.front(); });
+         if (edit.original_live)
+            value = *edit.original_live;
          edit.initial_text = value;
          edit.buffer.assign(value.begin(), value.end());
          edit.buffer.resize(std::max(size_t{256}, value.size() + 1), '\0');
@@ -504,31 +648,37 @@ void MechanismInspector::drawProperties(Entry& entry)
    }
    ImGui::Separator();
    ImGui::TextUnformatted("Mechanism schema properties");
-   ImGui::TextWrapped("Edit to preview live-supported fields. Save writes all pending object overrides without reloading; fields marked "
-                      "'reload' need a manual level reload. Shared templates are unchanged.");
+   ImGui::TextWrapped(
+      "Edit to preview live-supported fields. Save writes all pending object overrides without reloading; fields marked "
+      "'reload' need a manual level reload. Shared templates are unchanged."
+   );
    ImGui::BeginDisabled(!_editing);
+   ImGui::PushID(entry.layer ? "layer" : "object");
    ImGui::PushID(entry.source->_id.c_str());
    for (auto& edit : entry.properties)
    {
       const auto& schema = *edit.schema;
-      const auto mechanism = entry.mechanism.lock();
-      const auto live_value = mechanism ? mechanism->getInspectorProperty(std::string{schema.name}) : std::nullopt;
+      const auto live_value = entry.liveValue(std::string{schema.name});
       const auto live = live_value.has_value();
-      if (live_value && !edit.changed && !ImGui::IsAnyItemActive() && *live_value != edit.buffer.data())
+      if (live_value && !edit.changed && !ImGui::IsAnyItemActive() && entry.liveValues(std::string{schema.name}) != edit.original_parts)
       {
          edit.original_live = live_value;
+         edit.original_parts = entry.liveValues(std::string{schema.name});
+         edit.mixed = !edit.original_parts.empty() &&
+                      std::ranges::any_of(edit.original_parts, [&](const auto& value) { return value != edit.original_parts.front(); });
          edit.initial_text = *live_value;
          edit.buffer.assign(live_value->begin(), live_value->end());
          edit.buffer.resize(std::max(size_t{256}, live_value->size() + 1), '\0');
       }
-      const auto label = std::string{schema.name} + (live ? " [live]" : " [reload]") + (edit.changed ? " *" : "") + "###value";
+      const auto label = std::string{schema.name} + (live ? " [live]" : " [reload]") + (edit.mixed && !edit.changed ? " [mixed]" : "") +
+                         (edit.changed ? " *" : "") + "###value";
       const std::string previous = edit.buffer.data();
       ImGui::PushID(schema.name.data(), schema.name.data() + schema.name.size());
       const auto set_value = [&edit](const std::string& value)
       {
          edit.buffer.assign(value.begin(), value.end());
          edit.buffer.resize(std::max(size_t{256}, value.size() + 1), '\0');
-         edit.changed = value != edit.initial_text;
+         edit.changed = edit.mixed || value != edit.initial_text;
       };
       if (!schema.allowed_values.empty())
       {
@@ -584,10 +734,11 @@ void MechanismInspector::drawProperties(Entry& entry)
             }
             return 0;
          };
-         if (ImGui::InputText(label.c_str(), edit.buffer.data(), edit.buffer.size(), ImGuiInputTextFlags_CallbackResize, resize,
-                              &edit.buffer))
+         if (ImGui::InputText(
+                label.c_str(), edit.buffer.data(), edit.buffer.size(), ImGuiInputTextFlags_CallbackResize, resize, &edit.buffer
+             ))
          {
-            edit.changed = std::string_view{edit.buffer.data()} != edit.initial_text;
+            edit.changed = edit.mixed || std::string_view{edit.buffer.data()} != edit.initial_text;
          }
       }
       ImGui::SameLine();
@@ -601,7 +752,7 @@ void MechanismInspector::drawProperties(Entry& entry)
       }
       if (live && previous != edit.buffer.data())
       {
-         edit.valid = mechanism->setInspectorProperty(std::string{schema.name}, edit.buffer.data());
+         edit.valid = entry.setLiveValue(std::string{schema.name}, edit.buffer.data());
          if (!edit.valid)
          {
             entry.property_message = "Live value rejected for '" + std::string{schema.name} + "'. Correct it or discard before saving.";
@@ -617,6 +768,7 @@ void MechanismInspector::drawProperties(Entry& entry)
    {
       discard(entry);
    }
+   ImGui::PopID();
    ImGui::PopID();
    ImGui::EndDisabled();
    if (!entry.property_message.empty())
@@ -639,8 +791,11 @@ void MechanismInspector::draw(const std::shared_ptr<Level>& level)
    const auto* viewport = ImGui::GetMainViewport();
    ImGui::SetNextWindowPos(viewport->WorkPos);
    ImGui::SetNextWindowSize(viewport->WorkSize);
-   ImGui::Begin("Mechanism inspector", nullptr,
-                ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+   ImGui::Begin(
+      "Mechanism inspector",
+      nullptr,
+      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar
+   );
    ImGui::TextUnformatted("Mechanism inspector");
    if (ImGui::Button(_picking ? "Cancel picking" : "Pick an object in the game"))
    {
@@ -707,8 +862,12 @@ void MechanismInspector::draw(const std::shared_ptr<Level>& level)
             continue;
          }
          ImGui::PushID(static_cast<int>(index));
-         const auto item_label = std::format("{} / {}{}", entry.group, entry.name.empty() ? entry.type : entry.name,
-                                             entry.source ? std::format(" #{}", entry.source->_id) : "");
+         const auto item_label = std::format(
+            "{} / {}{}",
+            entry.group,
+            entry.name.empty() ? entry.type : entry.name,
+            entry.source ? std::format(" #{}", entry.source->_id) : ""
+         );
          if (ImGui::Selectable(item_label.c_str(), _selected == index))
          {
             _selected = index;

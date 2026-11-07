@@ -22,10 +22,16 @@ struct ObjectOverride
    std::string object_id;
    const MechanismSchema* schema{nullptr};
    std::vector<PropertyOverride> properties;
+   std::string element_type{"object"};
 };
 
-bool writeObjects(const std::filesystem::path& path, const std::string& expected_source, std::span<const ObjectOverride> objects,
-                  std::string& message, std::string& written_source);
+bool writeObjects(
+   const std::filesystem::path& path,
+   const std::string& expected_source,
+   std::span<const ObjectOverride> objects,
+   std::string& message,
+   std::string& written_source
+);
 
 }  // namespace MechanismSourceEditor
 

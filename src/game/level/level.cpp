@@ -295,6 +295,9 @@ void Level::loadTmx()
    TmxParser tmx_parser;
    Log::Info() << "parsing tmx: " << _description->_filename;
    tmx_parser.parse(_description->_filename);
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   _inspector_elements = tmx_parser.getElements();
+#endif
    Log::Info() << "parsing tmx, done within " << elapsed.getElapsedTime().asSeconds() << "s";
 
    Log::info("loading tmx... ");

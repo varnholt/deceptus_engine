@@ -16,12 +16,17 @@
 
 namespace
 {
-tinyxml2::XMLElement* findObject(tinyxml2::XMLElement* parent, const std::string& id)
+tinyxml2::XMLElement* findObject(tinyxml2::XMLElement* parent, const std::string& id, const std::string& element_type)
 {
    for (auto* child = parent->FirstChildElement(); child; child = child->NextSiblingElement())
    {
       const auto type = std::string_view{child->Name()};
-      if (type == "objectgroup")
+      if (type == element_type && type == "layer")
+      {
+         if (const auto* layer_id = child->Attribute("id"); layer_id && id == layer_id)
+            return child;
+      }
+      if (type == "objectgroup" && element_type == "object")
       {
          for (auto* object = child->FirstChildElement("object"); object; object = object->NextSiblingElement("object"))
          {
@@ -33,7 +38,7 @@ tinyxml2::XMLElement* findObject(tinyxml2::XMLElement* parent, const std::string
       }
       else if (type == "group")
       {
-         if (auto* object = findObject(child, id))
+         if (auto* object = findObject(child, id, element_type))
          {
             return object;
          }
@@ -81,8 +86,13 @@ bool writeFile(const std::filesystem::path& path, const std::string& contents)
 }
 }  // namespace
 
-bool MechanismSourceEditor::writeObjects(const std::filesystem::path& path, const std::string& expected_source,
-                                         std::span<const ObjectOverride> objects, std::string& message, std::string& written_source)
+bool MechanismSourceEditor::writeObjects(
+   const std::filesystem::path& path,
+   const std::string& expected_source,
+   std::span<const ObjectOverride> objects,
+   std::string& message,
+   std::string& written_source
+)
 {
    if (objects.empty())
    {
@@ -119,7 +129,8 @@ bool MechanismSourceEditor::writeObjects(const std::filesystem::path& path, cons
    std::set<std::string> edited_ids;
    for (const auto& changes : objects)
    {
-      if (!changes.schema || !edited_ids.insert(changes.object_id).second)
+      if (!changes.schema || (changes.element_type != "object" && changes.element_type != "layer") ||
+          !edited_ids.insert(changes.element_type + ":" + changes.object_id).second)
       {
          message = "Each edited object needs a unique source ID and schema.";
          return false;
@@ -127,7 +138,7 @@ bool MechanismSourceEditor::writeObjects(const std::filesystem::path& path, cons
       const auto& object_id = changes.object_id;
       const auto& schema = *changes.schema;
       const auto& overrides = changes.properties;
-      auto* object = findObject(document.RootElement(), object_id);
+      auto* object = findObject(document.RootElement(), object_id, changes.element_type);
       if (!object)
       {
          message = "The selected object no longer exists in this map.";
@@ -189,7 +200,7 @@ bool MechanismSourceEditor::writeObjects(const std::filesystem::path& path, cons
          message = "The object has no numeric TMX ID.";
          return false;
       }
-      const std::regex tag_pattern{"<object\\b[^>]*\\bid\\s*=\\s*[\"']" + object_id + "[\"'][^>]*>"};
+      const std::regex tag_pattern{"<" + changes.element_type + "\\b[^>]*\\bid\\s*=\\s*[\"']" + object_id + "[\"'][^>]*>"};
       size_t start = std::string::npos;
       const auto line_end = original.find('\n', line_start);
       const auto remaining = original.substr(line_start);
@@ -213,13 +224,13 @@ bool MechanismSourceEditor::writeObjects(const std::filesystem::path& path, cons
          message = "Could not locate the original object tag.";
          return false;
       }
-      const auto close = original[header_end - 1] == '/' ? header_end + 1 : original.find("</object>", header_end);
+      const auto close = original[header_end - 1] == '/' ? header_end + 1 : original.find("</" + changes.element_type + ">", header_end);
       if (close == std::string::npos)
       {
          message = "Could not locate the original object end.";
          return false;
       }
-      const auto end = original[header_end - 1] == '/' ? close : close + std::string_view{"</object>"}.size();
+      const auto end = original[header_end - 1] == '/' ? close : close + changes.element_type.size() + 3;
       tinyxml2::XMLPrinter printer;
       object->Accept(&printer);
       std::string fragment = printer.CStr();

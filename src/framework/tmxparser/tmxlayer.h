@@ -22,6 +22,9 @@ struct TmxLayer : TmxElement
    ///
    void deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data) override;
 
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   bool _inspector_mechanism_layer{false};
+#endif
    uint32_t _width_tl = 0;
    uint32_t _height_tl = 0;
    float _opacity = 1.0f;

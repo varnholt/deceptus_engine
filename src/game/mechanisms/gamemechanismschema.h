@@ -27,6 +27,10 @@ struct MechanismSchema
    int32_t default_width = 48;
    int32_t default_height = 48;
    std::span<const PropertyInfo> properties;
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   std::string_view selector_property;  //!< property selecting a specialized schema within a shared layer
+   std::string_view selector_value;
+#endif
    std::string_view default_polyline;  //!< tiled polyline points, set for mechanisms placed as a path instead of a rectangle
 };
 

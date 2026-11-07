@@ -41,7 +41,9 @@ private:
       const PropertyInfo* schema{nullptr};
       std::vector<char> buffer;
       std::optional<std::string> original_live;
+      std::vector<std::string> original_parts;
       std::string initial_text;
+      bool mixed{false};
       bool changed{false};
       bool valid{true};
    };
@@ -53,6 +55,11 @@ private:
       std::string type;
       std::weak_ptr<GameMechanism> mechanism;
       std::shared_ptr<TmxObject> source;
+      bool layer{false};
+      std::vector<std::weak_ptr<GameMechanism>> parts;
+      std::optional<std::string> liveValue(const std::string& name) const;
+      std::vector<std::string> liveValues(const std::string& name) const;
+      bool setLiveValue(const std::string& name, const std::string& value);
       std::vector<std::string> targets;
       std::vector<Condition> conditions;
       const MechanismSchema* schema{nullptr};

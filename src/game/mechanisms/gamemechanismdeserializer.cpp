@@ -32,14 +32,24 @@ struct InspectorSourceScope
 {
    using Mechanisms = std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>;
    std::shared_ptr<TmxObject> source;
+   std::shared_ptr<TmxLayer> layer;
    std::vector<std::pair<std::vector<std::shared_ptr<GameMechanism>>*, size_t>> sizes;
 
    InspectorSourceScope(const Mechanisms& mechanisms, const std::shared_ptr<TmxObject>& object) : source(object)
    {
       for (const auto& [group, items] : mechanisms)
       {
-         if (items) sizes.emplace_back(items, items->size());
+         if (items)
+            sizes.emplace_back(items, items->size());
       }
+   }
+
+   InspectorSourceScope(const Mechanisms& mechanisms, const std::shared_ptr<TmxLayer>& tile_layer)
+       : InspectorSourceScope(mechanisms, std::make_shared<TmxObject>())
+   {
+      layer = tile_layer;
+      source->_id = tile_layer->_inspector_id;
+      source->_properties = tile_layer->_properties;
    }
 
    ~InspectorSourceScope()
@@ -57,7 +67,9 @@ struct InspectorSourceScope
                   snapshot->_properties = std::make_shared<TmxProperties>(*source->_properties);
                }
             }
-            (*items)[index]->setInspectorSource(snapshot);
+            if (layer)
+               layer->_inspector_mechanism_layer = true;
+            (*items)[index]->setInspectorSource(snapshot, layer != nullptr);
          }
       }
    }
@@ -145,6 +157,9 @@ void GameMechanismDeserializer::deserialize(
             data._tmx_layer = layer;
             data._tmx_tileset = tmx_parser.getTileSet(layer);
 
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+            const InspectorSourceScope inspector_source(mechanisms, layer);
+#endif
             if (auto initializer_function = registry.getForLayerName(layer->_name))
             {
                std::invoke(*initializer_function, parent, data, mechanisms);
@@ -214,6 +229,9 @@ void GameMechanismDeserializer::deserialize(
          data._tmx_layer = layer;
          data._tmx_tileset = tileset;
 
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+         const InspectorSourceScope inspector_source(mechanisms, layer);
+#endif
          if (layer->_name == layer_name_lasers_v1)
          {
             const auto mechanism = Laser::load(parent, data);

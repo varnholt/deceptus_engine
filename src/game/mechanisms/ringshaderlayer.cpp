@@ -87,6 +87,10 @@ static constexpr MechanismSchema ring_shader_quad_schema{
    .default_width = 768,
    .default_height = 768,
    .properties = ring_shader_quad_properties,
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   .selector_property = "customization",
+   .selector_value = "ring",
+#endif
 };
 
 const auto registered_ring_shader_quad = []
@@ -211,7 +215,6 @@ RingShaderLayer::RingShaderLayer(GameNode* parent) : ShaderLayer(parent)
    bindInspectorProperty("push_release_s", _push_release_s, [](const float& value) { return value > 0.0f; });
    bindInspectorProperty("hit_attack_s", _hit_attack_s, [](const float& value) { return value > 0.0f; });
 #endif
-
 }
 
 #ifndef DECEPTUS_VRSFML

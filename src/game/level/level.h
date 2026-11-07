@@ -57,6 +57,7 @@
 class Bouncer;
 class IngameMenuMap;
 class TmxParser;
+struct TmxElement;
 struct ParseData;
 struct PostProcessingMechanism;
 
@@ -174,8 +175,18 @@ public:
 
 #ifdef DECEPTUS_MECHANISM_INSPECTOR
    /// \brief returns the source map path for on-demand development inspection.
-   const std::string& getTmxFilename() const { return _description->_filename; }
-   void acceptInspectorContents(const std::string& contents) { _file_watcher.acceptInspectorContents(contents); }
+   const std::string& getTmxFilename() const
+   {
+      return _description->_filename;
+   }
+   const auto& getInspectorElements() const
+   {
+      return _inspector_elements;
+   }
+   void acceptInspectorContents(const std::string& contents)
+   {
+      _file_watcher.acceptInspectorContents(contents);
+   }
 #endif
 
    /// \brief resolves which surface the player walks on at a given position.
@@ -255,6 +266,9 @@ public:
    void setMapRevealed(bool revealed) override;
 
 protected:
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   std::vector<std::shared_ptr<TmxElement>> _inspector_elements;
+#endif
    /// \brief loads or regenerates physics paths for a collision tile layer and adds chains to box2d.
    /// \param layer tmx tile layer that defines physics collision tiles.
    /// \param tileSet tileset used for tile-to-collision conversion.

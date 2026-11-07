@@ -92,15 +92,42 @@ public:
    /// \brief developer-only live property access; unsupported properties require reconstruction.
    bool setInspectorProperty(const std::string& name, const std::string& value);
    std::optional<std::string> getInspectorProperty(const std::string& name) const;
-   const std::shared_ptr<TmxObject>& getInspectorSource() const { return _inspector_source; }
-   void setInspectorSource(const std::shared_ptr<TmxObject>& source) { _inspector_source = source; }
+   const std::shared_ptr<TmxObject>& getInspectorSource() const
+   {
+      return _inspector_source;
+   }
+   void setInspectorSource(const std::shared_ptr<TmxObject>& source, bool layer = false)
+   {
+      _inspector_source = source;
+      _inspector_layer = layer;
+   }
+   bool isInspectorLayer() const
+   {
+      return _inspector_layer;
+   }
 
    template <typename T>
    void bindInspectorProperty(const std::string& name, T& field, std::type_identity_t<std::function<bool(const T&)>> valid = {})
    {
+      bindInspectorProperty<T>(
+         name,
+         [&field] { return field; },
+         [&field, valid](const T& value)
+         {
+            if (valid && !valid(value))
+               return false;
+            field = value;
+            return true;
+         }
+      );
+   }
+
+   template <typename T>
+   void bindInspectorProperty(const std::string& name, std::function<T()> get, std::function<bool(const T&)> set)
+   {
       _inspector_properties[name] = {
-         [&field]() { return std::format("{}", field); },
-         [&field, valid](const std::string& text)
+         [get]() { return std::format("{}", get()); },
+         [set](const std::string& text)
          {
             T value{};
             if constexpr (std::is_same_v<T, std::string>)
@@ -126,12 +153,7 @@ public:
                   }
                }
             }
-            if (valid && !valid(value))
-            {
-               return false;
-            }
-            field = value;
-            return true;
+            return set(value);
          }
       };
    }
@@ -278,6 +300,7 @@ protected:
    };
    std::map<std::string, InspectorProperty> _inspector_properties;
    std::shared_ptr<TmxObject> _inspector_source;
+   bool _inspector_layer{false};
 #endif
    int32_t _z_index{0};
    bool _enabled{true};

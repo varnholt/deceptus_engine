@@ -16,6 +16,12 @@ namespace
 {
 static constexpr std::array info_overlay_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "start_delay_duration", .type = "float", .default_value = 1.5f},
+   PropertyInfo{.name = "fade_in_duration", .type = "float", .default_value = 1.5f},
+   PropertyInfo{.name = "show_duration", .type = "float", .default_value = 3.0f},
+   PropertyInfo{.name = "fade_out_duration", .type = "float", .default_value = 2.5f},
+   PropertyInfo{.name = "show_once", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "fullscreen", .type = "bool", .default_value = true},
 };
 static constexpr MechanismSchema info_overlay_schema{
    .type_name = "InfoOverlay",
@@ -53,6 +59,27 @@ const auto registered_infooverlay = []
 
 InfoOverlay::InfoOverlay(GameNode* parent) : GameNode(parent)
 {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   bindInspectorProperty("show_once", _settings._show_once);
+   const auto bind_duration = [this](const std::string& name, FloatSeconds& duration)
+   {
+      bindInspectorProperty<float>(
+         name,
+         [&duration] { return duration.count(); },
+         [&duration](const float& value)
+         {
+            if (value < 0.0f)
+               return false;
+            duration = FloatSeconds{value};
+            return true;
+         }
+      );
+   };
+   bind_duration("start_delay_duration", _settings._start_delay_duration);
+   bind_duration("fade_in_duration", _settings._fade_in_duration);
+   bind_duration("show_duration", _settings._show_duration);
+   bind_duration("fade_out_duration", _settings._fade_out_duration);
+#endif
    setClassName(typeid(InfoOverlay).name());
    _serialized = true;
    setEnabled(false);

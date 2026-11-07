@@ -24,7 +24,7 @@ that console to resume playing. The inspector is otherwise inactive and does not
 Press **Pick an object in the game**, then left-click a position in the scene. The list filters to
 **every mechanism whose bounds contain that position**, including hidden objects and overlapping
 triggers or effects. Nothing is automatically selected. Choose any object from that filtered list,
-or clear the position filter to browse everything. Decorative tile graphics are not mechanism objects.
+or clear the position filter to browse everything. Decorative tile graphics are not mechanism objects. Schema-backed mechanism tile layers are editable as a single source.
 
 The details show live state, the last saved level snapshot, source properties, outgoing/incoming
 Tiled references, and individual condition requirements. Follow a reference to inspect its target.
@@ -37,7 +37,7 @@ that require a later manual level reload. The editor does not reconstruct mechan
 
 Drafts remain attached to their objects when switching selections. **Save all property changes to TMX**
 commits the edited fields across all objects in one map update, without capturing unrelated runtime
-state. It writes object-level overrides, including for template instances, and leaves shared templates
+state. It writes source-level overrides for objects and mechanism tile layers, including for template instances, and leaves shared templates
 and other objects unchanged. A `.inspector.bak` backup is retained. If the map changed externally,
 saving is refused until the source is refreshed. Required values, numeric types, and enums are validated.
 
@@ -54,8 +54,11 @@ The inspector, source writer, live bindings, and watcher suppression are exclude
 
 ### Adding live support to a mechanism
 
-The inspector reads `MechanismSchema` for fields and retains exact TMX object IDs at the shared
-factory boundary. It does not guess source objects from names, which may be empty or duplicated.
+The inspector lists schema-backed authored sources, including deferred laser groups/paths and water
+emitters. Exact TMX IDs associate runtime instances with their sources; names may be empty or duplicated.
+Multiple runtime parts share one source entry, draft, and save. A live edit applies to all parts;
+discard restores each part's previous value. Sources without runtime bindings remain editable as reload fields.
+Shared-layer schemas can declare a selector property/value to identify their specialization.
 The editor contains no mechanism-type-specific mutation code.
 
 Common enabled/visible state, Z order, observation, and serialization flags use the existing
@@ -71,7 +74,8 @@ Bind member fields whose lifetime matches the mechanism, and only when assigning
 sufficient to update behavior safely. Derived caches, physics fixtures, loaded assets, and references
 need a dedicated setter/reconstruction path; leaving them unbound explicitly marks them **reload**.
 Bindings are provided for fan speed, bouncer force, blade behavior, collectible behavior, damage,
-ring shader tuning, lever handles, and gate fade speed. The same generic editor handles future bindings.
+ring shader tuning, lever handles, gate fade speed, conveyor velocity, shader UV/time settings,
+and overlay timing. The same generic editor handles future bindings.
 
 ## Player Event Recording
 

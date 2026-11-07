@@ -155,6 +155,17 @@ void ConveyorBelt::updateSprite()
 
 ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : FixtureNode(parent)
 {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   bindInspectorProperty<float>(
+      "velocity",
+      [this] { return _velocity; },
+      [this](const float& value)
+      {
+         setVelocity(value);
+         return true;
+      }
+   );
+#endif
    setClassName(typeid(ConveyorBelt).name());
    setType(ObjectTypeConveyorBelt);
 

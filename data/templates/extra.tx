@@ -2,6 +2,13 @@
 <template>
  <object type="Extra" width="24" height="24">
   <properties>
+   <property name="active" type="bool" value="true"/>
+   <property name="is_treasure" type="bool" value="false"/>
+   <property name="pickup_event" value=""/>
+   <property name="requires_button_press" type="bool" value="false"/>
+   <property name="sine_amplitude_px" type="float" value="0"/>
+   <property name="sine_frequency" type="float" value="0"/>
+   <property name="spawn_required" type="bool" value="false"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

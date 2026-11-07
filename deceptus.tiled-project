@@ -535,6 +535,41 @@
             "id": 21,
             "members": [
                 {
+                    "name": "active",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "is_treasure",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "pickup_event",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "requires_button_press",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "sine_amplitude_px",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "sine_frequency",
+                    "type": "float",
+                    "value": 0.0
+                },
+                {
+                    "name": "spawn_required",
+                    "type": "bool",
+                    "value": false
+                },
+                {
                     "name": "z",
                     "type": "int",
                     "value": 20
@@ -686,6 +721,36 @@
             "drawFill": true,
             "id": 28,
             "members": [
+                {
+                    "name": "fade_in_duration",
+                    "type": "float",
+                    "value": 1.5
+                },
+                {
+                    "name": "fade_out_duration",
+                    "type": "float",
+                    "value": 2.5
+                },
+                {
+                    "name": "fullscreen",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "show_duration",
+                    "type": "float",
+                    "value": 3.0
+                },
+                {
+                    "name": "show_once",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "start_delay_duration",
+                    "type": "float",
+                    "value": 1.5
+                },
                 {
                     "name": "z",
                     "type": "int",
