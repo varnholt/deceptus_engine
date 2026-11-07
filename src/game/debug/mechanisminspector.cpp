@@ -126,6 +126,10 @@ void MechanismInspector::processEvents()
       {
          _window->close();
       }
+      else if (const auto key = event->getIf<sf::Event::KeyPressed>(); key && key->code == sf::Keyboard::Key::F6)
+      {
+         _window->close();
+      }
    }
 }
 

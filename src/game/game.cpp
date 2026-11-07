@@ -1932,7 +1932,9 @@ void Game::processKeyPressedEvents(const sf::Event::KeyPressed* key_event)
       }
       case sf::Keyboard::Key::F6:
       {
-         DebugDrawStates::_draw_test_scene = !DebugDrawStates::_draw_test_scene;
+#ifndef DECEPTUS_VRSFML
+         DebugDrawStates::_draw_mechanism_inspector = !DebugDrawStates::_draw_mechanism_inspector;
+#endif
          break;
       }
       case sf::Keyboard::Key::F7:

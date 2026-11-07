@@ -11,15 +11,16 @@ All hotkeys in this document are only active in `DEVELOPMENT_MODE` builds, excep
 | `F3` | Toggle camera system config UI |
 | `F4` | Toggle debug info / `Alt+F4` quits |
 | `F5` | Toggle log viewer |
-| `F6` | Toggle test scene |
+| `F6` | Toggle mechanism inspector (desktop) |
 | `F7` | Toggle physics config UI |
 | `F10` | Toggle profiling window |
 | `F12` | Toggle developer console |
 
 ## Mechanism inspector and property editor
 
-On desktop development builds, enter `inspector` in the developer console (`F12`), then close
-that console to resume playing. The inspector is otherwise inactive and does not draw game overlays.
+On desktop development builds, press `F6` to open or close the mechanism inspector. `F6` also closes
+it when the inspector window has focus. This replaces the test-scene shortcut; no console command
+is needed. The inspector is otherwise inactive and does not draw game overlays.
 
 Press **Pick an object in the game**, then left-click a position in the scene. The list filters to
 **every mechanism whose rendered pixels or interaction bounds cover that position**, including
