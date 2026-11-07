@@ -47,6 +47,7 @@
 #include "game/mechanisms/gamemechanismdeserializerconstants.h"
 #include "game/mechanisms/lever.h"
 #include "game/mechanisms/postprocessingmechanism.h"
+#include "game/mechanisms/treasurechest.h"
 #include "game/physics/chainshapeanalyzer.h"
 #include "game/physics/gamecontactlistener.h"
 #include "game/physics/physicsconfiguration.h"
@@ -681,6 +682,19 @@ void Level::loadSaveState()
          if (result != mechanism_vector->end())
          {
             (*result)->deserializeState(object_value);
+         }
+      }
+   }
+
+   // reward pickup state must be restored before open chests decide what is still available
+   const auto chests_it = mechanism_map.find("treasure_chests");
+   if (chests_it != mechanism_map.end())
+   {
+      for (const auto& mechanism : *chests_it->second)
+      {
+         if (const auto chest = std::dynamic_pointer_cast<TreasureChest>(mechanism))
+         {
+            chest->restoreReward(_mechanism_registry.getExtras());
          }
       }
    }

@@ -471,6 +471,15 @@ void Lever::toggle()
    GameMechanismObserver::onEvent(getObjectId(), "levers", "state", _target_state == State::Right ? std::string{"on"} : std::string{"off"});
 }
 
+std::optional<GameMechanismObserver::LuaVariant> Lever::getProperty(const std::string& property_name) const
+{
+   if (property_name == "handle_available")
+   {
+      return _handle_available;
+   }
+   return std::nullopt;
+}
+
 void Lever::addCallback(const Callback& callback)
 {
    _callbacks.push_back(callback);

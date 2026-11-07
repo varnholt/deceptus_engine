@@ -411,6 +411,15 @@ void Extra::deserializeState(const nlohmann::json& json_object)
    _active = json_object.at("active").get<bool>();
 }
 
+std::optional<GameMechanismObserver::LuaVariant> Extra::getProperty(const std::string& property_name) const
+{
+   if (property_name == "active")
+   {
+      return _active;
+   }
+   return std::nullopt;
+}
+
 void Extra::spawn(sf::Vector2f offset)
 {
    _spawned = true;

@@ -333,6 +333,35 @@ std::optional<sf::FloatRect> TreasureChest::getBoundingBoxPx()
    return std::nullopt;
 }
 
+void TreasureChest::restoreReward(const std::vector<std::shared_ptr<GameMechanism>>& extras)
+{
+   if (_state == State::Closed || !_spawn_extra.has_value() || _extra_spawned)
+   {
+      return;
+   }
+
+   for (const auto& mechanism : extras)
+   {
+      const auto extra = std::dynamic_pointer_cast<Extra>(mechanism);
+      if (!extra || extra->_name != *_spawn_extra)
+      {
+         continue;
+      }
+
+      _extra_spawned = true;
+      if (extra->_active && !extra->_spawned)
+      {
+         extra->spawn(_spawn_offset);
+         // the reward is already available; its original reveal must not replay on reload
+         if (extra->_animation_spawn)
+         {
+            extra->_animation_spawn->pause();
+         }
+      }
+      return;
+   }
+}
+
 bool TreasureChest::playerHasRequiredKey() const
 {
    return !_item_required.has_value() || (_item_required.has_value() && SaveState::getPlayerInfo()._inventory.has(*_item_required));

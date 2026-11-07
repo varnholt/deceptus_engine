@@ -54,6 +54,7 @@ const auto registered_infooverlay = []
 InfoOverlay::InfoOverlay(GameNode* parent) : GameNode(parent)
 {
    setClassName(typeid(InfoOverlay).name());
+   _serialized = true;
    setEnabled(false);
    setZ(static_cast<int32_t>(ZDepth::ForegroundMax));
 }
@@ -61,6 +62,35 @@ InfoOverlay::InfoOverlay(GameNode* parent) : GameNode(parent)
 std::string_view InfoOverlay::objectName() const
 {
    return "InfoOverlay";
+}
+
+void InfoOverlay::setEnabled(bool enabled)
+{
+   if (enabled && _settings._show_once && _shown)
+   {
+      return;
+   }
+
+   GameMechanism::setEnabled(enabled);
+   if (enabled)
+   {
+      _shown = true;
+   }
+}
+
+void InfoOverlay::serializeState(nlohmann::json& json)
+{
+   if (_settings._show_once && !getObjectId().empty())
+   {
+      json[getObjectId()] = {{"shown", _shown}};
+   }
+}
+
+void InfoOverlay::deserializeState(const nlohmann::json& json)
+{
+   _shown = _settings._show_once && json.value("shown", false);
+   _elapsed = FloatSeconds{0};
+   GameMechanism::setEnabled(false);
 }
 
 void InfoOverlay::update(const sf::Time& delta_time)

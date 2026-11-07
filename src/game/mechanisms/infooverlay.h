@@ -20,6 +20,15 @@ public:
    /// \return string view containing `InfoOverlay`.
    std::string_view objectName() const override;
 
+   /// \brief starts playback unless this one-time overlay has already been shown.
+   void setEnabled(bool enabled) override;
+
+   /// \brief remembers whether a one-time overlay has started playback.
+   void serializeState(nlohmann::json& json) override;
+
+   /// \brief restores a one-time overlay without replaying it.
+   void deserializeState(const nlohmann::json& json) override;
+
    /// \brief advances overlay timing and updates sprite alpha based on the active phase.
    /// \param delta_time elapsed frame time.
    void update(const sf::Time& delta_time) override;
@@ -65,6 +74,7 @@ private:
    std::unique_ptr<sf::Sprite> _sprite;
    std::shared_ptr<sf::Texture> _texture;
    FloatSeconds _elapsed{0.0f};
+   bool _shown{false};
    Settings _settings;
 };
 

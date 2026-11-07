@@ -4,6 +4,7 @@ _initialized = false
 
 -- the owl statue carries two cut rubies as eyes, and the inventory item that holds them is called "gems"
 _owl_eye_item = "gems"
+_owl_eyes_taken_treasure = "graveyard_owl_eyes_taken"
 
 -- seconds left until the pickup message is shown, or nil when none is pending
 _pickup_message_delay_s = nil
@@ -76,15 +77,20 @@ end
 
 
 ------------------------------------------------------------------------------------------------------------------------
--- the rubies go into the inventory, and the inventory is part of the save game. that makes "the player carries the
--- owl's eyes" the persisted flag which decides whether the thunderstorm is already awake when the level is entered.
+-- taking the eyes remains true after the catacombs shrine consumes the rubies
+function owlEyesTaken()
+   return hasTreasure(_owl_eyes_taken_treasure) or inventoryHas(_owl_eye_item)
+      or hasTreasure("catacombs_owl_eyes_inserted")
+end
+
 function initShrine()
-   local owl_eyes_taken = inventoryHas(_owl_eye_item)
+   local owl_eyes_taken = owlEyesTaken()
    setOwlEyesPresent(not owl_eyes_taken)
    setStormActive(owl_eyes_taken)
 
    -- the ground stays down for good, coming back with the rubies finds the hole already there
    if (owl_eyes_taken) then
+      addTreasure(_owl_eyes_taken_treasure)
       openSinkhole()
    end
 end
@@ -102,11 +108,12 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function takeOwlEyes()
-   if (inventoryHas(_owl_eye_item)) then
+   if (owlEyesTaken()) then
       return
    end
 
    log("owl eyes taken")
+   addTreasure(_owl_eyes_taken_treasure)
 
    setOwlEyesPresent(false)
    inventoryAdd(_owl_eye_item)
