@@ -35,6 +35,7 @@ static constexpr std::array rope_with_light_properties{
    PropertyInfo{.name = "texture", .type = "string", .default_value = default_rope_texture},
    PropertyInfo{.name = "sprite", .type = "int", .default_value = int32_t{1}},
    PropertyInfo{.name = "lamp_sprite", .type = "int", .default_value = int32_t{1}},
+   PropertyInfo{.name = "color", .type = "color", .default_value = std::string_view{"#50ffffff"}},
 };
 static constexpr MechanismSchema rope_with_light_schema{
    .type_name = "RopeWithLight",

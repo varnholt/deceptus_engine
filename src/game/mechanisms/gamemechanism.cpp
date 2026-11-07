@@ -2,6 +2,9 @@
 #include "game/mechanisms/gamemechanismobserver.h"
 
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+#include "game/effects/lightsystem.h"
+#include "game/level/levelregistry.h"
+
 MechanismPropertyBindings& GameMechanism::inspectorProperties()
 {
    if (!_inspector_properties)
@@ -9,6 +12,11 @@ MechanismPropertyBindings& GameMechanism::inspectorProperties()
       _inspector_properties = std::make_unique<MechanismPropertyBindings>();
       configureCommonInspectorProperties(*_inspector_properties);
       configureInspectorProperties(*_inspector_properties);
+      if (const auto owner = dynamic_cast<GameNode*>(this))
+      {
+         if (const auto level = LevelRegistry::getCurrent(); level && level->getLightSystem())
+            level->getLightSystem()->configureInspectorProperties(*owner, *_inspector_properties);
+      }
    }
    return *_inspector_properties;
 }

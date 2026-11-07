@@ -36,7 +36,9 @@ Tiled references, and individual condition requirements. Follow a reference to i
 Script-created connections are not inferred. Duplicate named IDs are flagged.
 
 Editing is disabled by default. Enable **Enable editing** to edit every property described by the
-mechanism schema using boolean, integer, float, string, or enum controls. Fields marked **live**
+mechanism schema using boolean, integer, float, string, color, or enum controls. Color fields use
+an RGBA picker with alpha, saved in [Tiled's alpha-first hex format](https://doc.mapeditor.org/en/stable/reference/tmx-map-format/#property). File, native object-reference,
+and nested-class property types are not yet supported by this editor. Fields marked **live**
 preview through the mechanism's own runtime bindings; fields marked **reload** are authored changes
 that require a later manual level reload. The editor does not reconstruct mechanisms implicitly.
 
@@ -78,6 +80,9 @@ Bindings are created lazily on the first inspection of a runtime instance, after
 Constructors and gameplay updates do not initialize or consult this registry. Runtime fields remain
 ordinary fields, and the registry and virtual declaration hooks are absent from non-development builds.
 The registry is owned by the mechanism, so reloading/destroying an instance also destroys its adapters.
+A single owned light component contributes its color binding through the shared light system;
+weak ownership makes that binding unavailable if the light is removed. Multiple owned lights
+require an explicit mapping rather than selecting an arbitrary light.
 
 Common bindings are registered automatically before the mechanism's hook. Declare additional
 bindings in that hook; extend a specialized parent's hook when inheriting its additional properties:

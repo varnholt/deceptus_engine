@@ -16,11 +16,17 @@
 #include "json/json.hpp"
 
 struct TmxObject;
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+class MechanismPropertyBindings;
+#endif
 
 /// \brief manages dynamic light sources, shadow volumes, and deferred light compositing.
 class LightSystem
 {
 public:
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   void configureInspectorProperties(const GameNode& owner, MechanismPropertyBindings& properties);
+#endif
    /// \brief callback to render geometry that occludes lights into the stencil buffer.
    using OccluderDrawCallback = std::function<void(sf::RenderTarget& target, const sf::View& view)>;
    /// \brief represents one light source instance loaded from level data.

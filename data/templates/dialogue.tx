@@ -7,8 +7,8 @@
    <property name="00_avatar_offset_x_px" type="int" value="0"/>
    <property name="00_avatar_offset_y_px" type="int" value="0"/>
    <property name="00_avatar_side" value="left"/>
-   <property name="00_background_color" value="#000000ff"/>
-   <property name="00_text_color" value="#ffffffff"/>
+   <property name="00_background_color" type="color" value="#000000ff"/>
+   <property name="00_text_color" type="color" value="#ffffffff"/>
    <property name="00_x_px" type="int" value="0"/>
    <property name="00_y_px" type="int" value="0"/>
   </properties>

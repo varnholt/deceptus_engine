@@ -29,19 +29,18 @@ void TmxProperty::deserialize(tinyxml2::XMLElement* element, const std::shared_p
    {
       _value_float = element->FloatAttribute("value");
    }
-   else if (_value_type == "string")
+   else if (_value_type == "string" || _value_type == "color")
    {
-      _value_string = element->Attribute("value");
-   }
-   else if (_value_type == "color")
-   {
-      _value_string = element->Attribute("value");
+      const auto* value = element->Attribute("value");
+      if (!value && _value_type == "string")
+         value = element->GetText();
+      _value_string = value ? value : (_value_type == "color" ? "#00000000" : "");
    }
 }
 
 std::string TmxProperty::toString() const
 {
-   if (_value_type == "string")
+   if (_value_type == "string" || _value_type == "color")
    {
       return _value_string.value();
    }

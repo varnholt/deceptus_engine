@@ -409,12 +409,12 @@
                 },
                 {
                     "name": "00_background_color",
-                    "type": "string",
+                    "type": "color",
                     "value": "#000000ff"
                 },
                 {
                     "name": "00_text_color",
-                    "type": "string",
+                    "type": "color",
                     "value": "#ffffffff"
                 },
                 {
@@ -1303,6 +1303,11 @@
             "id": 43,
             "members": [
                 {
+                    "name": "color",
+                    "type": "color",
+                    "value": "#50ffffff"
+                },
+                {
                     "name": "lamp_sprite",
                     "type": "int",
                     "value": 1
@@ -1578,7 +1583,7 @@
                 },
                 {
                     "name": "layer_color",
-                    "type": "string",
+                    "type": "color",
                     "value": "#ffffffff"
                 },
                 {
@@ -1589,7 +1594,7 @@
                 },
                 {
                     "name": "particle_color",
-                    "type": "string",
+                    "type": "color",
                     "value": "#ffffff19"
                 },
                 {
@@ -1844,7 +1849,7 @@
             "members": [
                 {
                     "name": "color",
-                    "type": "string",
+                    "type": "color",
                     "value": "#ffffffff"
                 },
                 {
@@ -1907,7 +1912,7 @@
                 },
                 {
                     "name": "truetype_font_color",
-                    "type": "string",
+                    "type": "color",
                     "value": "#ffffffff"
                 },
                 {

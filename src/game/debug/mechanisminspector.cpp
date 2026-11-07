@@ -674,8 +674,11 @@ void MechanismInspector::saveProperties()
             entry.source->_properties = std::make_shared<TmxProperties>();
          }
          auto property = std::make_shared<TmxProperty>();
-         property->_value_type = "string";
-         property->_value_string = edit.buffer.data();
+         tinyxml2::XMLDocument property_document;
+         auto* property_element = property_document.NewElement("property");
+         property_element->SetAttribute("type", std::string{edit.schema->type}.c_str());
+         property_element->SetAttribute("value", edit.buffer.data());
+         property->deserialize(property_element, nullptr);
          entry.source->_properties->_map[std::string{edit.schema->name}] = property;
          edit.changed = false;
          edit.mixed = false;
@@ -769,6 +772,21 @@ void MechanismInspector::drawProperties(Entry& entry)
             }
             ImGui::EndCombo();
          }
+      }
+      else if (schema.type == "color")
+      {
+         const auto parsed = MechanismPropertyBindings::parseColor(edit.buffer.data());
+         const auto color = parsed.value_or(sf::Color::Transparent);
+         float rgba[]{color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f};
+         if (ImGui::ColorEdit4(label.c_str(), rgba, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreviewHalf))
+         {
+            const auto channel = [](float value) { return static_cast<uint8_t>(std::lround(std::clamp(value, 0.0f, 1.0f) * 255.0f)); };
+            set_value(
+               MechanismPropertyBindings::formatColor(sf::Color{channel(rgba[0]), channel(rgba[1]), channel(rgba[2]), channel(rgba[3])})
+            );
+         }
+         if (!parsed)
+            ImGui::TextDisabled("Invalid color; choose a color or restore the default.");
       }
       else if (schema.type == "bool")
       {

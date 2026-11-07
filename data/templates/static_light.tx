@@ -2,7 +2,7 @@
 <template>
  <object type="StaticLight" width="96" height="96">
   <properties>
-   <property name="color" value="#ffffffff"/>
+   <property name="color" type="color" value="#ffffffff"/>
    <property name="flicker_alpha_amount" type="float" value="1"/>
    <property name="flicker_intensity" type="float" value="0"/>
    <property name="flicker_speed" type="float" value="0"/>
