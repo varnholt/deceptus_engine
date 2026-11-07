@@ -21,6 +21,7 @@ class Lever : public GameMechanism, public GameNode, public InteractionInterface
 {
 public:
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \copydoc GameMechanism::configureInspectorProperties
    void configureInspectorProperties(MechanismPropertyBindings& properties) override;
 #endif
 

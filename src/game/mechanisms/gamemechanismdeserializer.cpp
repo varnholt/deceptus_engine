@@ -27,23 +27,32 @@
 namespace
 {
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
-// retain the exact authoring object at the shared factory boundary, including unnamed objects
+/// \brief retains exact authoring sources for runtime parts appended inside a factory call.
 struct InspectorSourceScope
 {
+   /// \brief registry vectors whose appended instances must receive the same source snapshot.
    using Mechanisms = std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>;
-   std::shared_ptr<TmxObject> source;
-   std::shared_ptr<TmxLayer> layer;
-   std::vector<std::pair<std::vector<std::shared_ptr<GameMechanism>>*, size_t>> sizes;
+   std::shared_ptr<TmxObject> source;  //!< authoring object or synthetic layer source.
+   std::shared_ptr<TmxLayer> layer;    //!< actual tile layer, when the factory consumes one.
+   std::vector<std::pair<std::vector<std::shared_ptr<GameMechanism>>*, size_t>> sizes;  //!< registry lengths before creation.
 
+   /// \brief records registry lengths before an object factory appends runtime parts.
+   /// \param mechanisms registry vectors to observe during this scope.
+   /// \param object authoring object that owns the new runtime parts.
    InspectorSourceScope(const Mechanisms& mechanisms, const std::shared_ptr<TmxObject>& object) : source(object)
    {
       for (const auto& [group, items] : mechanisms)
       {
          if (items)
+         {
             sizes.emplace_back(items, items->size());
+         }
       }
    }
 
+   /// \brief records a tile-layer source before its factory appends runtime parts.
+   /// \param mechanisms registry vectors to observe during this scope.
+   /// \param tile_layer exact authoring layer that supplies the runtime parts.
    InspectorSourceScope(const Mechanisms& mechanisms, const std::shared_ptr<TmxLayer>& tile_layer)
        : InspectorSourceScope(mechanisms, std::make_shared<TmxObject>())
    {
@@ -52,6 +61,12 @@ struct InspectorSourceScope
       source->_properties = tile_layer->_properties;
    }
 
+   /// \brief prevents duplicate finalization of a factory-bound capture scope.
+   InspectorSourceScope(const InspectorSourceScope&) = delete;
+   /// \brief prevents replacing a scope whose registry baselines belong to another factory call.
+   InspectorSourceScope& operator=(const InspectorSourceScope&) = delete;
+
+   /// \brief attaches a shared source snapshot to appended instances and marks consumed tile layers.
    ~InspectorSourceScope()
    {
       std::shared_ptr<TmxObject> snapshot;
@@ -68,7 +83,9 @@ struct InspectorSourceScope
                }
             }
             if (layer)
+            {
                layer->_inspector_mechanism_layer = true;
+            }
             (*items)[index]->setInspectorSource(snapshot, layer != nullptr);
          }
       }

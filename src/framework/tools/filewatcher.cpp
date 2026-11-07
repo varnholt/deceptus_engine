@@ -7,13 +7,24 @@
 
 namespace
 {
+/// \brief reads exact file bytes for editor-write acknowledgement.
+/// \param path watched source file.
+/// \return complete contents, or null when the file cannot be opened or read.
 std::optional<std::string> readContents(const std::filesystem::path& path)
 {
    std::ifstream file(path, std::ios::binary);
-   if (!file) return std::nullopt;
-   return std::string{std::istreambuf_iterator<char>{file}, {}};
+   if (!file)
+   {
+      return std::nullopt;
+   }
+   std::string contents{std::istreambuf_iterator<char>{file}, {}};
+   if (file.bad())
+   {
+      return std::nullopt;
+   }
+   return contents;
 }
-}
+}  // namespace
 
 void FileWatcher::acceptInspectorContents(const std::string& contents)
 {

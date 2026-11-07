@@ -12,6 +12,7 @@ BreakBeforeBraces: Allman
 ColumnLimit: 140
 ContinuationIndentWidth: 3
 IndentWidth: 3
+InsertBraces: true
 KeepEmptyLinesAtTheStartOfBlocks: false
 Standard: Latest
 SortIncludes: true

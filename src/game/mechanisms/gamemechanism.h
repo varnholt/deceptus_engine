@@ -84,21 +84,41 @@ public:
    virtual void setEnabled(bool enabled);
 
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
-   /// \brief developer-only live property access; unsupported properties require reconstruction.
+   /// \brief validates and applies an explicit development-editor property change.
+   /// \param name authored property name.
+   /// \param value candidate text accepted by the shared typed binding.
+   /// \return true when the available binding accepts and applies the value.
    bool setInspectorProperty(const std::string& name, const std::string& value);
-   std::optional<std::string> getInspectorProperty(const std::string& name);
-   bool supportsInspectorProperty(const std::string& name);
-   bool validateInspectorProperty(const std::string& name, const std::string& value);
-   const std::shared_ptr<TmxObject>& getInspectorSource() const
+   /// \brief reads a development property, initializing adapters lazily on first access.
+   /// \param name authored property name.
+   /// \return encoded runtime value, or null when no available live binding exists.
+   [[nodiscard]] std::optional<std::string> getInspectorProperty(const std::string& name);
+   /// \brief checks development-only live support, initializing adapters lazily when needed.
+   /// \param name authored property name.
+   /// \return true when the property has an available runtime binding.
+   [[nodiscard]] bool supportsInspectorProperty(const std::string& name);
+   /// \brief checks a development property edit without changing runtime state.
+   /// \param name authored property name.
+   /// \param value candidate encoded runtime value.
+   /// \return true when an available binding accepts the candidate.
+   [[nodiscard]] bool validateInspectorProperty(const std::string& name, const std::string& value);
+   /// \brief returns the exact authoring snapshot retained at the mechanism factory boundary.
+   /// \return retained source snapshot, possibly null for runtime-generated mechanisms.
+   [[nodiscard]] const std::shared_ptr<TmxObject>& getInspectorSource() const
    {
       return _inspector_source;
    }
+   /// \brief associates a mechanism with the authoring source that created it.
+   /// \param source shared source snapshot, or null when no source exists.
+   /// \param layer true when the source id belongs to a tile layer rather than an object.
    void setInspectorSource(const std::shared_ptr<TmxObject>& source, bool layer = false)
    {
       _inspector_source = source;
       _inspector_layer = layer;
    }
-   bool isInspectorLayer() const
+   /// \brief identifies which TMX namespace contains the retained source id.
+   /// \return true for layer sources, false for object sources.
+   [[nodiscard]] bool isInspectorLayer() const
    {
       return _inspector_layer;
    }
@@ -238,15 +258,21 @@ public:
 
 protected:
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
-   // called once, on demand, after construction; subclasses extend the same registry
-   virtual void configureInspectorProperties(MechanismPropertyBindings&)
+   /// \brief declares additional live adapters once, after construction, on first editor access.
+   /// \param properties shared registry receiving mechanism-specific bindings; common adapters are already present.
+   /// \note extend a specialized parent's hook when its additional adapters are required.
+   virtual void configureInspectorProperties(MechanismPropertyBindings& properties)
    {
    }
+   /// \brief registers common state through the same typed API as mechanism-specific fields.
+   /// \param properties registry receiving enabled, visible, z, observation, and serialization adapters.
    void configureCommonInspectorProperties(MechanismPropertyBindings& properties);
+   /// \brief creates the registry lazily and incorporates available shared light-component adapters.
+   /// \return owned registry for this mechanism's current lifetime.
    MechanismPropertyBindings& inspectorProperties();
-   std::unique_ptr<MechanismPropertyBindings> _inspector_properties;
-   std::shared_ptr<TmxObject> _inspector_source;
-   bool _inspector_layer{false};
+   std::unique_ptr<MechanismPropertyBindings> _inspector_properties;  //!< lazy editor-only adapters; absent from the gameplay update path.
+   std::shared_ptr<TmxObject> _inspector_source;                      //!< retained source snapshot for precise map writes.
+   bool _inspector_layer{false};                                      //!< source-id namespace discriminator.
 #endif
    int32_t _z_index{0};
    bool _enabled{true};

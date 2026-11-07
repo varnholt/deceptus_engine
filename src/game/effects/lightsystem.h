@@ -25,6 +25,10 @@ class LightSystem
 {
 public:
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \brief contributes a weak color adapter when one light is owned by the requested node.
+   /// \param owner mechanism node whose light component should be exposed.
+   /// \param properties registry to extend without replacing an existing color binding.
+   /// \note ambiguous ownership is left unbound; removed components become unavailable.
    void configureInspectorProperties(const GameNode& owner, MechanismPropertyBindings& properties);
 #endif
    /// \brief callback to render geometry that occludes lights into the stencil buffer.

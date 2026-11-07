@@ -23,7 +23,7 @@ struct TmxLayer : TmxElement
    void deserialize(tinyxml2::XMLElement* element, const std::shared_ptr<TmxParseData>& parse_data) override;
 
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
-   bool _inspector_mechanism_layer{false};
+   bool _inspector_mechanism_layer{false};  //!< whether a mechanism factory consumed this layer.
 #endif
    uint32_t _width_tl = 0;
    uint32_t _height_tl = 0;

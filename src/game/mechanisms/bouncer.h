@@ -15,6 +15,7 @@ class Bouncer : public FixtureNode, public GameMechanism
 {
 public:
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \copydoc GameMechanism::configureInspectorProperties
    void configureInspectorProperties(MechanismPropertyBindings& properties) override;
 #endif
 

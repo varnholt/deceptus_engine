@@ -192,3 +192,9 @@ color through the shared light system; removed components become unavailable, an
 lights require explicit mapping. The editor contains no mechanism-type-specific widget or setter
 cases. Leave structural, asset, physics, or reference properties as reload fields until they have a
 safe apply/reconstruction path.
+
+The [source writer](../src/game/debug/mechanismsourceeditor.h) returns a
+`[[nodiscard]] std::expected<WriteResult, WriteError>`. On success, callers receive the exact saved
+map contents and backup path; on failure, they receive a displayable error. The editor acknowledges
+successful contents with the watcher before advancing its source baseline. Validation predicates
+continue to return `bool`; the persistence API does not use boolean results with output parameters.

@@ -68,6 +68,7 @@ public:
 
 private:
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \brief restores unsaved previews in the active level before closing the editor and clearing its toggle.
    void closeMechanismInspector();
 #endif
    /// \brief shuts down runtime systems before exit.
@@ -214,7 +215,7 @@ private:
 #ifdef DEVELOPMENT_MODE
    std::unique_ptr<ProfilingUi> _profiling_ui;
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
-   std::unique_ptr<MechanismInspector> _mechanism_inspector;
+   std::unique_ptr<MechanismInspector> _mechanism_inspector;  //!< editor instance created only after an explicit open request.
 #endif
    sf::Time _profiling_update_elapsed;
 

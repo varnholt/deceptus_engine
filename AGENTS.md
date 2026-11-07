@@ -27,7 +27,10 @@ When generating code for this project, always follow these conventions:
 
 ## Code Style
 
-- Follow existing project formatting (`.clang-format` is provided)
+- Follow existing project formatting (`_clang-format` and `.cmake-format.yaml` are provided)
+- Always use curly braces for `if`, `else`, `for`, `while`, and `do` bodies, including single-statement early returns
+- Run `clang-format -i` on changed C++ files and `cmake-format -i` on changed CMake files before committing
+- Document new classes and functions with consistent Doxygen comments, including parameters, return values, ownership, and side effects where relevant
 - Use `[[nodiscard]]` for functions that shouldn't ignore return values
 - Prefer `const std::string&` over `std::string` for input parameters
 - Use `std::string_view` where appropriate for read-only string access

@@ -33,8 +33,21 @@ void TmxProperty::deserialize(tinyxml2::XMLElement* element, const std::shared_p
    {
       const auto* value = element->Attribute("value");
       if (!value && _value_type == "string")
+      {
          value = element->GetText();
-      _value_string = value ? value : (_value_type == "color" ? "#00000000" : "");
+      }
+      if (value)
+      {
+         _value_string = value;
+      }
+      else if (_value_type == "color")
+      {
+         _value_string = "#00000000";
+      }
+      else
+      {
+         _value_string = std::string{};
+      }
    }
 }
 

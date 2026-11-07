@@ -38,7 +38,7 @@ struct TmxElement
 
    std::string _name;
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
-   std::string _inspector_id;
+   std::string _inspector_id;  //!< retained numeric source id for development-only authoring lookup.
 #endif
 
    Type _type = Type::TypeInvalid;

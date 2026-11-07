@@ -43,7 +43,8 @@ public:
    bool modified() const;
 
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
-   /// \brief accepts only the inspector's exact saved contents, without ignoring external edits.
+   /// \brief acknowledges only the editor's exact saved bytes without suppressing different external writes.
+   /// \param contents complete map bytes returned by a successful editor save.
    void acceptInspectorContents(const std::string& contents);
 #endif
 
@@ -60,6 +61,6 @@ private:
    std::mutex _mutex;
    std::condition_variable _stop_condition;
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
-   std::optional<std::string> _inspector_contents;
+   std::optional<std::string> _inspector_contents;  //!< exact editor write awaiting timestamp acknowledgement.
 #endif
 };

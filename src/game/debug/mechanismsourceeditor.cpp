@@ -8,13 +8,21 @@
 
 #include <algorithm>
 #include <fstream>
+#include <functional>
 #include <iterator>
 #include <ranges>
 #include <regex>
 #include <set>
+#include <system_error>
+#include <utility>
 
 namespace
 {
+/// \brief locates a map object or layer by its exact id, excluding tileset collision objects.
+/// \param parent XML container whose map groups should be searched.
+/// \param id numeric TMX source id.
+/// \param element_type source namespace, either object or layer.
+/// \return non-owning element pointer, or null when the source does not exist.
 tinyxml2::XMLElement* findObject(tinyxml2::XMLElement* parent, const std::string& id, const std::string& element_type)
 {
    for (auto* child = parent->FirstChildElement(); child; child = child->NextSiblingElement())
@@ -23,7 +31,9 @@ tinyxml2::XMLElement* findObject(tinyxml2::XMLElement* parent, const std::string
       if (type == element_type && type == "layer")
       {
          if (const auto* layer_id = child->Attribute("id"); layer_id && id == layer_id)
+         {
             return child;
+         }
       }
       if (type == "objectgroup" && element_type == "object")
       {
@@ -46,7 +56,29 @@ tinyxml2::XMLElement* findObject(tinyxml2::XMLElement* parent, const std::string
    return nullptr;
 }
 
-bool writeFile(const std::filesystem::path& path, const std::string& contents)
+/// \brief reads a local map into owned bytes and closes the stream before returning.
+/// \param path source file to read.
+/// \return complete source bytes, or an error if the file cannot be opened or read.
+std::expected<std::string, MechanismSourceEditor::WriteError> readFile(const std::filesystem::path& path)
+{
+   std::ifstream input(path, std::ios::binary);
+   if (!input)
+   {
+      return std::unexpected{MechanismSourceEditor::WriteError{"The source map is not an editable local file."}};
+   }
+   std::string contents{std::istreambuf_iterator<char>{input}, {}};
+   if (input.bad())
+   {
+      return std::unexpected{MechanismSourceEditor::WriteError{"Could not read the complete source map."}};
+   }
+   return contents;
+}
+
+/// \brief writes all bytes and checks the final stream state after explicitly closing the file.
+/// \param path destination file, replaced if it already exists.
+/// \param contents borrowed bytes to write.
+/// \return true when writing and closing complete without a stream error.
+bool writeFile(const std::filesystem::path& path, std::string_view contents)
 {
    std::ofstream file(path, std::ios::binary | std::ios::trunc);
    file.write(contents.data(), static_cast<std::streamsize>(contents.size()));
@@ -55,44 +87,38 @@ bool writeFile(const std::filesystem::path& path, const std::string& contents)
 }
 }  // namespace
 
-bool MechanismSourceEditor::writeObjects(
+std::expected<MechanismSourceEditor::WriteResult, MechanismSourceEditor::WriteError> MechanismSourceEditor::writeObjects(
    const std::filesystem::path& path,
-   const std::string& expected_source,
-   std::span<const ObjectOverride> objects,
-   std::string& message,
-   std::string& written_source
+   std::string_view expected_source,
+   std::span<const ObjectOverride> objects
 )
 {
    if (objects.empty())
    {
-      message = "No property changes to save.";
-      return false;
+      return std::unexpected{WriteError{"No property changes to save."}};
    }
-   std::ifstream input(path, std::ios::binary);
-   if (!input)
+   const auto source = readFile(path);
+   if (!source)
    {
-      message = "The source map is not an editable local file.";
-      return false;
+      return std::unexpected{source.error()};
    }
-   const std::string original{std::istreambuf_iterator<char>{input}, {}};
-   input.close();
+   const auto& original = *source;
    if (original != expected_source)
    {
-      message = "The map changed on disk. Refresh the editor before applying edits.";
-      return false;
+      return std::unexpected{WriteError{"The map changed on disk. Refresh the editor before applying edits."}};
    }
 
    tinyxml2::XMLDocument document;
    if (document.Parse(original.data(), original.size()) != tinyxml2::XML_SUCCESS || !document.RootElement())
    {
-      message = "The map could not be parsed. No changes were written.";
-      return false;
+      return std::unexpected{WriteError{"The map could not be parsed. No changes were written."}};
    }
+   /// \brief records one non-overlapping source fragment to replace after the batch validates.
    struct Replacement
    {
-      size_t start;
-      size_t length;
-      std::string text;
+      size_t start;      //!< byte offset in the original map.
+      size_t length;     //!< number of original bytes to replace.
+      std::string text;  //!< serialized replacement fragment.
    };
    std::vector<Replacement> replacements;
    std::set<std::string> edited_ids;
@@ -101,8 +127,7 @@ bool MechanismSourceEditor::writeObjects(
       if (!changes.schema || (changes.element_type != "object" && changes.element_type != "layer") ||
           !edited_ids.insert(changes.element_type + ":" + changes.object_id).second)
       {
-         message = "Each edited object needs a unique source ID and schema.";
-         return false;
+         return std::unexpected{WriteError{"Each edited object needs a unique source ID and schema."}};
       }
       const auto& object_id = changes.object_id;
       const auto& schema = *changes.schema;
@@ -110,8 +135,7 @@ bool MechanismSourceEditor::writeObjects(
       auto* object = findObject(document.RootElement(), object_id, changes.element_type);
       if (!object)
       {
-         message = "The selected object no longer exists in this map.";
-         return false;
+         return std::unexpected{WriteError{"The selected object no longer exists in this map."}};
       }
       auto* properties = object->FirstChildElement("properties");
       if (!properties)
@@ -124,8 +148,7 @@ bool MechanismSourceEditor::writeObjects(
          const auto definition = std::ranges::find(schema.properties, edit.name, &PropertyInfo::name);
          if (definition == schema.properties.end() || !MechanismPropertyBindings::validateValue(*definition, edit.value))
          {
-            message = "Invalid value for schema property '" + edit.name + "'. No changes were written.";
-            return false;
+            return std::unexpected{WriteError{"Invalid value for schema property '" + edit.name + "'. No changes were written."}};
          }
          auto* property = properties->FirstChildElement("property");
          while (property && (!property->Attribute("name") || edit.name != property->Attribute("name")))
@@ -159,15 +182,13 @@ bool MechanismSourceEditor::writeObjects(
          const auto newline = original.find('\n', line_start);
          if (newline == std::string::npos)
          {
-            message = "Could not locate the original object text.";
-            return false;
+            return std::unexpected{WriteError{"Could not locate the original object text."}};
          }
          line_start = newline + 1;
       }
       if (object_id.empty() || !std::ranges::all_of(object_id, [](char c) { return c >= '0' && c <= '9'; }))
       {
-         message = "The object has no numeric TMX ID.";
-         return false;
+         return std::unexpected{WriteError{"The object has no numeric TMX ID."}};
       }
       const std::regex tag_pattern{"<" + changes.element_type + "\\b[^>]*\\bid\\s*=\\s*[\"']" + object_id + "[\"'][^>]*>"};
       size_t start = std::string::npos;
@@ -182,22 +203,19 @@ bool MechanismSourceEditor::writeObjects(
          }
          if (start != std::string::npos)
          {
-            message = "The object text is ambiguous. Reformat the map in Tiled before editing.";
-            return false;
+            return std::unexpected{WriteError{"The object text is ambiguous. Reformat the map in Tiled before editing."}};
          }
          start = offset;
       }
       const auto header_end = original.find('>', start);
       if (start == std::string::npos || header_end == std::string::npos)
       {
-         message = "Could not locate the original object tag.";
-         return false;
+         return std::unexpected{WriteError{"Could not locate the original object tag."}};
       }
       const auto close = original[header_end - 1] == '/' ? header_end + 1 : original.find("</" + changes.element_type + ">", header_end);
       if (close == std::string::npos)
       {
-         message = "Could not locate the original object end.";
-         return false;
+         return std::unexpected{WriteError{"Could not locate the original object end."}};
       }
       const auto end = original[header_end - 1] == '/' ? close : close + changes.element_type.size() + 3;
       tinyxml2::XMLPrinter printer;
@@ -220,28 +238,25 @@ bool MechanismSourceEditor::writeObjects(
    const auto backup = std::filesystem::path{path.string() + ".inspector.bak"};
    if (!writeFile(backup, original) || !writeFile(temporary, replacement))
    {
-      message = "Could not write the map backup or temporary file. The map was not replaced.";
-      return false;
+      return std::unexpected{WriteError{"Could not write the map backup or temporary file. The map was not replaced."}};
    }
    // an external editor may have saved while the replacement was being prepared
-   std::ifstream current_file(path, std::ios::binary);
-   const std::string current{std::istreambuf_iterator<char>{current_file}, {}};
-   current_file.close();
-   if (current != original)
+   const auto current = readFile(path);
+   if (!current)
    {
-      message = "The map changed while saving. The external version was not overwritten.";
-      return false;
+      return std::unexpected{current.error()};
+   }
+   if (*current != original)
+   {
+      return std::unexpected{WriteError{"The map changed while saving. The external version was not overwritten."}};
    }
    std::error_code error;
    std::filesystem::rename(temporary, path, error);
    if (error)
    {
-      message = "Could not replace the map: " + error.message();
-      return false;
+      return std::unexpected{WriteError{"Could not replace the map: " + error.message()}};
    }
-   written_source = replacement;
-   message = "Saved to TMX without reloading. A .inspector.bak backup was kept. Properties marked 'reload' need a manual level reload.";
-   return true;
+   return WriteResult{std::move(replacement), backup};
 }
 
 #endif

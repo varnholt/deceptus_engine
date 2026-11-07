@@ -993,26 +993,36 @@ void LightSystem::setAmbient(sf::Color color)
 void LightSystem::configureInspectorProperties(const GameNode& owner, MechanismPropertyBindings& properties)
 {
    if (properties.supports("color"))
+   {
       return;
+   }
    std::shared_ptr<LightInstance> owned_light;
    for (const auto& light : _lights)
    {
       if (light->getParent() != &owner)
+      {
          continue;
+      }
       // one authored color cannot identify several independently owned light components
       if (owned_light)
+      {
          return;
+      }
       owned_light = light;
    }
    if (!owned_light)
+   {
       return;
+   }
    const std::weak_ptr<LightInstance> target = owned_light;
    properties.bind<sf::Color>(
       "color",
       [target]
       {
          if (const auto light = target.lock())
+         {
             return light->_color;
+         }
          return sf::Color::Transparent;
       },
       [target](sf::Color color)

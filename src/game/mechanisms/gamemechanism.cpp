@@ -15,7 +15,9 @@ MechanismPropertyBindings& GameMechanism::inspectorProperties()
       if (const auto owner = dynamic_cast<GameNode*>(this))
       {
          if (const auto level = LevelRegistry::getCurrent(); level && level->getLightSystem())
+         {
             level->getLightSystem()->configureInspectorProperties(*owner, *_inspector_properties);
+         }
       }
    }
    return *_inspector_properties;

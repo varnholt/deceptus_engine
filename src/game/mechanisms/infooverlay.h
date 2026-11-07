@@ -13,6 +13,7 @@ class InfoOverlay : public GameMechanism, public GameNode
 {
 public:
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \copydoc GameMechanism::configureInspectorProperties
    void configureInspectorProperties(MechanismPropertyBindings& properties) override;
 #endif
 
