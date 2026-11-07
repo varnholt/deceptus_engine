@@ -565,7 +565,7 @@ void Laser::merge()
                         laser->setEnabled(*enabled);
                      }
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
                      laser->setInspectorSource(object);
 #endif
                      laser->setObjectId(object->_name);

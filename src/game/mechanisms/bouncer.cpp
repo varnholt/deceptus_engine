@@ -251,7 +251,7 @@ void Bouncer::activate()
    BouncerWrapper::bumpLastBouncerTime();
 }
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 void Bouncer::configureInspectorProperties(MechanismPropertyBindings& properties)
 {
    properties.bind("force", _force_value);

@@ -7,7 +7,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 #include <optional>
 #endif
 
@@ -42,7 +42,7 @@ public:
    /// \brief returns whether the file changed since start() was called.
    bool modified() const;
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    /// \brief accepts only the inspector's exact saved contents, without ignoring external edits.
    void acceptInspectorContents(const std::string& contents);
 #endif
@@ -59,7 +59,7 @@ private:
    std::atomic<bool> _modified{false};
    std::mutex _mutex;
    std::condition_variable _stop_condition;
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    std::optional<std::string> _inspector_contents;
 #endif
 };

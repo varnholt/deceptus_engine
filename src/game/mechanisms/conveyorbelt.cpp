@@ -341,7 +341,7 @@ void ConveyorBelt::processContact(b2Contact* contact)
    }
 }
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 void ConveyorBelt::configureInspectorProperties(MechanismPropertyBindings& properties)
 {
    properties.bind<float>(

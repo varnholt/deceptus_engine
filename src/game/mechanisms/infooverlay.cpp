@@ -344,7 +344,7 @@ std::optional<sf::FloatRect> InfoOverlay::getBoundingBoxPx()
    return std::nullopt;
 }
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 void InfoOverlay::configureInspectorProperties(MechanismPropertyBindings& properties)
 {
    properties.bind("show_once", _settings._show_once);

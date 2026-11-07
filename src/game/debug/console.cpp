@@ -527,7 +527,7 @@ Console::Console()
    );
 
    // mechanisms
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    registerCallback("inspector", [](const auto&)
    {
       DebugDrawStates::_draw_mechanism_inspector = !DebugDrawStates::_draw_mechanism_inspector;

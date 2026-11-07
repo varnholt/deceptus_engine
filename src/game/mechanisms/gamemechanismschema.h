@@ -27,7 +27,7 @@ struct MechanismSchema
    int32_t default_width = 48;
    int32_t default_height = 48;
    std::span<const PropertyInfo> properties;
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    std::string_view selector_property;  //!< property selecting a specialized schema within a shared layer
    std::string_view selector_value;
 #endif

@@ -8,7 +8,7 @@
 #include "game/camera/camerasystemconfigurationui.h"
 #include "game/constants.h"
 #include "game/debug/console.h"
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 #include "game/debug/mechanisminspector.h"
 #endif
 #ifndef DECEPTUS_VRSFML
@@ -67,7 +67,7 @@ public:
    void takeScreenshot();
 
 private:
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    void closeMechanismInspector();
 #endif
    /// \brief shuts down runtime systems before exit.
@@ -213,7 +213,7 @@ private:
 #endif
 #ifdef DEVELOPMENT_MODE
    std::unique_ptr<ProfilingUi> _profiling_ui;
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    std::unique_ptr<MechanismInspector> _mechanism_inspector;
 #endif
    sf::Time _profiling_update_elapsed;

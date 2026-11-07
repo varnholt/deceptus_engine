@@ -1,6 +1,6 @@
 #include "mechanismsourceeditor.h"
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 
 #include "game/debug/mechanism_property_bindings.h"
 #include "game/mechanisms/gamemechanismschema.h"

@@ -23,7 +23,7 @@ struct TmxTileSet;
 class DeathBlock : public GameMechanism, public GameNode
 {
 public:
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    void configureInspectorProperties(MechanismPropertyBindings& properties) override;
 #endif
 

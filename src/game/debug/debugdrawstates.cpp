@@ -7,7 +7,7 @@ bool DebugDrawStates::_draw_controller_overlay = false;
 bool DebugDrawStates::_draw_camera_system = false;
 bool DebugDrawStates::_draw_physics_config = false;
 bool DebugDrawStates::_draw_log = false;
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 bool DebugDrawStates::_draw_mechanism_inspector = false;
 #endif
 bool DebugDrawStates::_draw_lighting = true;

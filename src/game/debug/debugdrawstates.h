@@ -11,7 +11,7 @@ struct DebugDrawStates
    static bool _draw_camera_system;
    static bool _draw_physics_config;
    static bool _draw_log;
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    static bool _draw_mechanism_inspector;
 #endif
 

@@ -479,7 +479,7 @@ void Extra::spawn(sf::Vector2f offset)
    }
 }
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 void Extra::configureInspectorProperties(MechanismPropertyBindings& properties)
 {
    properties.bind("sine_amplitude_px", _sine_amplitude_px);

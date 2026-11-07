@@ -14,13 +14,13 @@
 #include <cstdint>
 #include <optional>
 #include <string>
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 #include <memory>
 #include "game/debug/mechanism_property_bindings.h"
 #endif
 
 struct Room;
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 struct TmxObject;
 #endif
 
@@ -83,7 +83,7 @@ public:
    /// \param enabled true to enable the mechanism, false to disable it.
    virtual void setEnabled(bool enabled);
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    /// \brief developer-only live property access; unsupported properties require reconstruction.
    bool setInspectorProperty(const std::string& name, const std::string& value);
    std::optional<std::string> getInspectorProperty(const std::string& name);
@@ -237,7 +237,7 @@ public:
    virtual void hit(int32_t damage);
 
 protected:
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    // called once, on demand, after construction; subclasses extend the same registry
    virtual void configureInspectorProperties(MechanismPropertyBindings&)
    {

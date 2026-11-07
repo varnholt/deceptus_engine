@@ -1,7 +1,7 @@
 #include "filewatcher.h"
 
 #include "framework/tools/log.h"
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 #include <fstream>
 #include <iterator>
 
@@ -42,7 +42,7 @@ void FileWatcher::start(const std::filesystem::path& path, const std::string& de
    _description = description;
    _poll_interval = poll_interval;
    _modified = false;
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    _inspector_contents.reset();
 #endif
    _active = true;
@@ -78,7 +78,7 @@ void FileWatcher::poll()
       const auto current_time = std::filesystem::last_write_time(_path, error);
       if (!error && current_time != reference_time)
       {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
          std::lock_guard lock(_mutex);
          const auto inspector_write = _inspector_contents && readContents(_path) == _inspector_contents;
          _inspector_contents.reset();

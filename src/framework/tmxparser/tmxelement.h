@@ -37,7 +37,7 @@ struct TmxElement
    virtual void deserialize(tinyxml2::XMLElement* e, const std::shared_ptr<TmxParseData>& parse_data);
 
    std::string _name;
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    std::string _inspector_id;
 #endif
 

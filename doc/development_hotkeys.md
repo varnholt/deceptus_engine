@@ -50,7 +50,9 @@ the active level; saved changes remain. Refreshing discards drafts and reloads s
 The inspector does not change pause settings, so normal focus-loss behavior still applies.
 
 The inspector, source writer, live bindings, and watcher suppression are excluded when
-`DECEPTUS_DEVELOPMENT_MODE=OFF`, and are not built for Switch or web targets.
+`DECEPTUS_DEVELOPMENT_MODE=OFF`, and are not built for Switch or web targets. The code uses the
+existing `DEVELOPMENT_MODE` flag and `DECEPTUS_VRSFML` platform guard; there is no separate
+inspector feature define.
 
 ### Adding live support to a mechanism
 
@@ -76,7 +78,7 @@ Common bindings are registered automatically before the mechanism's hook. Declar
 bindings in that hook; extend a specialized parent's hook when inheriting its additional properties:
 
 ```cpp
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 void Fan::configureInspectorProperties(MechanismPropertyBindings& properties)
 {
    properties.bind("speed", _speed);

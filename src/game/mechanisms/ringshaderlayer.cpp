@@ -87,7 +87,7 @@ static constexpr MechanismSchema ring_shader_quad_schema{
    .default_width = 768,
    .default_height = 768,
    .properties = ring_shader_quad_properties,
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    .selector_property = "customization",
    .selector_value = "ring",
 #endif
@@ -481,7 +481,7 @@ void RingShaderLayer::flash(float red, float green, float blue, float duration_s
    _flash_elapsed = 0.0f;
 }
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 void RingShaderLayer::configureInspectorProperties(MechanismPropertyBindings& properties)
 {
    ShaderLayer::configureInspectorProperties(properties);

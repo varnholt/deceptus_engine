@@ -20,13 +20,13 @@
 #include "game/mechanisms/watersurface.h"
 #include "game/mechanisms/weather.h"
 #include "gamemechanismdeserializerconstants.h"
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 #include "framework/tmxparser/tmxproperties.h"
 #endif
 
 namespace
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 // retain the exact authoring object at the shared factory boundary, including unnamed objects
 struct InspectorSourceScope
 {
@@ -157,7 +157,7 @@ void GameMechanismDeserializer::deserialize(
             data._tmx_layer = layer;
             data._tmx_tileset = tmx_parser.getTileSet(layer);
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
             const InspectorSourceScope inspector_source(mechanisms, layer);
 #endif
             if (auto initializer_function = registry.getForLayerName(layer->_name))
@@ -176,7 +176,7 @@ void GameMechanismDeserializer::deserialize(
                   const auto& object = pair.second;
                   data._tmx_object = object;
                   data._tmx_object_group = group;
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
                   const InspectorSourceScope inspector_source(mechanisms, object);
 #endif
 
@@ -229,7 +229,7 @@ void GameMechanismDeserializer::deserialize(
          data._tmx_layer = layer;
          data._tmx_tileset = tileset;
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
          const InspectorSourceScope inspector_source(mechanisms, layer);
 #endif
          if (layer->_name == layer_name_lasers_v1)
@@ -272,7 +272,7 @@ void GameMechanismDeserializer::deserialize(
 
             data._tmx_object = tmx_object;
             data._tmx_object_group = object_group;
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
             const InspectorSourceScope inspector_source(mechanisms, tmx_object);
 #endif
 

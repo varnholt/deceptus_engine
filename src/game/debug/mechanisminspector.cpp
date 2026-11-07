@@ -1,6 +1,6 @@
 #include "mechanisminspector.h"
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 
 #include "imgui/imgui-SFML.h"
 #include "imgui/imgui.h"

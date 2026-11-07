@@ -1001,7 +1001,7 @@ void Game::draw()
    {
       _profiling_ui->draw();
    }
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    if (_mechanism_inspector)
    {
       _mechanism_inspector->draw(_level_loading_finished ? _level : nullptr);
@@ -1719,7 +1719,7 @@ void Game::processEvent(const sf::Event& event)
    }
    else if (auto* mouse_button_pressed_event = event.getIf<sf::Event::MouseButtonPressed>())
    {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
       if (_mechanism_inspector && _mechanism_inspector->isPicking() && _level_loading_finished && _level &&
           mouse_button_pressed_event->button == sf::Mouse::Button::Left)
       {
@@ -1760,7 +1760,7 @@ void Game::processEvent(const sf::Event& event)
    EventDistributor::event(event);
 }
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 void Game::closeMechanismInspector()
 {
    if (_mechanism_inspector)
@@ -1774,7 +1774,7 @@ void Game::closeMechanismInspector()
 
 void Game::shutdown()
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    closeMechanismInspector();
 #endif
    // quitting from the menu never goes past a Closed event, so the window size is written out here too
@@ -2091,7 +2091,7 @@ void Game::processEvents()
          _profiling_ui.reset();
       }
    }
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    if (DebugDrawStates::_draw_mechanism_inspector && !_mechanism_inspector)
    {
       _mechanism_inspector = std::make_unique<MechanismInspector>();

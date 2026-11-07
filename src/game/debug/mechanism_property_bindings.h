@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 
 #include "game/mechanisms/gamemechanismschema.h"
 

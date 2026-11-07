@@ -1,7 +1,7 @@
 #include "gamemechanism.h"
 #include "game/mechanisms/gamemechanismobserver.h"
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 MechanismPropertyBindings& GameMechanism::inspectorProperties()
 {
    if (!_inspector_properties)

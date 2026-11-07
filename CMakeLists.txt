@@ -1323,7 +1323,6 @@ target_compile_definitions(deceptus PRIVATE USE_GL _USE_MATH_DEFINES)
 if(DECEPTUS_DEVELOPMENT_MODE)
     target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE)
     if(NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
-        target_compile_definitions(deceptus PRIVATE DECEPTUS_MECHANISM_INSPECTOR)
         target_sources(deceptus PRIVATE
             src/game/debug/mechanisminspector.cpp
             src/game/debug/mechanism_property_bindings.h

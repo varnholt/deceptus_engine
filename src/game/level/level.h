@@ -173,7 +173,7 @@ public:
    /// \return level description filename.
    std::string getDescriptionFilename() const;
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    /// \brief returns the source map path for on-demand development inspection.
    const std::string& getTmxFilename() const
    {
@@ -266,7 +266,7 @@ public:
    void setMapRevealed(bool revealed) override;
 
 protected:
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
    std::vector<std::shared_ptr<TmxElement>> _inspector_elements;
 #endif
    /// \brief loads or regenerates physics paths for a collision tile layer and adds chains to box2d.

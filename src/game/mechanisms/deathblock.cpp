@@ -594,7 +594,7 @@ void DeathBlock::setup(const GameDeserializeData& data)
    updateSprites();
 }
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 void DeathBlock::configureInspectorProperties(MechanismPropertyBindings& properties)
 {
    properties.bind("damage", _damage);

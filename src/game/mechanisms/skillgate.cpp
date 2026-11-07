@@ -296,7 +296,7 @@ std::optional<sf::FloatRect> SkillGate::getBoundingBoxPx()
    return _rectangle;
 }
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 void SkillGate::configureInspectorProperties(MechanismPropertyBindings& properties)
 {
    properties.bind("fade_speed", _fade_speed);

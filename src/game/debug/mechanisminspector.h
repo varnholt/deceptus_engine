@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
 
 #include <SFML/Graphics.hpp>
 #include <array>
