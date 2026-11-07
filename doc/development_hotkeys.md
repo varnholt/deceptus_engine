@@ -61,21 +61,44 @@ discard restores each part's previous value. Sources without runtime bindings re
 Shared-layer schemas can declare a selector property/value to identify their specialization.
 The editor contains no mechanism-type-specific mutation code.
 
-Common enabled/visible state, Z order, observation, and serialization flags use the existing
-mechanism interface. A mechanism opts additional member fields into live preview with:
+Every mechanism uses the same development-only `MechanismPropertyBindings` registry. Common
+properties and mechanism-specific fields use the same typed parser, validation, getters, and setters.
+Live edits and TMX saving also share schema validation for required values, types, and enums.
+The editor derives live support from that registry; unbound schema properties remain reload fields.
+There is no mechanism-specific mutation code in the editor.
+
+Bindings are created lazily on the first inspection of a runtime instance, after construction.
+Constructors and gameplay updates do not initialize or consult this registry. Runtime fields remain
+ordinary fields, and the registry and virtual declaration hooks are absent from non-development builds.
+The registry is owned by the mechanism, so reloading/destroying an instance also destroys its adapters.
+
+Common bindings are registered automatically before the mechanism's hook. Declare additional
+bindings in that hook; extend a specialized parent's hook when inheriting its additional properties:
 
 ```cpp
 #ifdef DECEPTUS_MECHANISM_INSPECTOR
-   bindInspectorProperty("speed", _speed, [](const float& value) { return value >= 0.0f; });
+void Fan::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("speed", _speed);
+}
 #endif
 ```
 
-Bind member fields whose lifetime matches the mechanism, and only when assigning the field is
-sufficient to update behavior safely. Derived caches, physics fixtures, loaded assets, and references
-need a dedicated setter/reconstruction path; leaving them unbound explicitly marks them **reload**.
-Bindings are provided for fan speed, bouncer force, blade behavior, collectible behavior, damage,
-ring shader tuning, lever handles, gate fade speed, conveyor velocity, shader UV/time settings,
-and overlay timing. The same generic editor handles future bindings.
+Bind a member directly only when assigning it is sufficient to update behavior safely. For derived
+state, supply a getter and the existing setter instead:
+
+```cpp
+properties.bind<float>("velocity", [this] { return _velocity; }, [this](float value)
+{
+   setVelocity(value);
+   return true;
+});
+```
+
+An optional typed validator runs before mutation. Grouped edits validate every runtime part before
+applying any setter. Validators must have no side effects; setters should reject without mutation
+if applying a value is impossible. Physics fixtures, loaded assets, and references need a dedicated
+safe apply/reconstruction path before they can be bound. Leaving them unbound marks them **reload**.
 
 ## Player Event Recording
 

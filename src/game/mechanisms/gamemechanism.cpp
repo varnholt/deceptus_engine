@@ -2,75 +2,76 @@
 #include "game/mechanisms/gamemechanismobserver.h"
 
 #ifdef DECEPTUS_MECHANISM_INSPECTOR
-std::optional<std::string> GameMechanism::getInspectorProperty(const std::string& name) const
+MechanismPropertyBindings& GameMechanism::inspectorProperties()
 {
-   if (name == "enabled")
+   if (!_inspector_properties)
    {
-      return isEnabled() ? "true" : "false";
+      _inspector_properties = std::make_unique<MechanismPropertyBindings>();
+      configureCommonInspectorProperties(*_inspector_properties);
+      configureInspectorProperties(*_inspector_properties);
    }
-   if (name == "visible")
-   {
-      return isVisible() ? "true" : "false";
-   }
-   if (name == "observed")
-   {
-      return _observed ? "true" : "false";
-   }
-   if (name == "serialized")
-   {
-      return _serialized ? "true" : "false";
-   }
-   if (name == "z")
-   {
-      return std::format("{}", getZ());
-   }
-   const auto property = _inspector_properties.find(name);
-   return property == _inspector_properties.end() ? std::nullopt : std::optional{property->second.get()};
+   return *_inspector_properties;
+}
+
+void GameMechanism::configureCommonInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind<bool>(
+      "enabled",
+      [this] { return isEnabled(); },
+      [this](bool value)
+      {
+         setEnabled(value);
+         return true;
+      }
+   );
+   properties.bind<bool>(
+      "visible",
+      [this] { return isVisible(); },
+      [this](bool value)
+      {
+         setVisible(value);
+         return true;
+      }
+   );
+   properties.bind<int32_t>(
+      "z",
+      [this] { return getZ(); },
+      [this](int32_t value)
+      {
+         setZ(value);
+         return true;
+      },
+      [](int32_t value) { return value >= 0 && value <= 50; }
+   );
+   properties.bind("observed", _observed);
+   properties.bind("serialized", _serialized);
+}
+
+std::optional<std::string> GameMechanism::getInspectorProperty(const std::string& name)
+{
+   return inspectorProperties().get(name);
+}
+
+bool GameMechanism::supportsInspectorProperty(const std::string& name)
+{
+   return inspectorProperties().supports(name);
+}
+
+bool GameMechanism::validateInspectorProperty(const std::string& name, const std::string& value)
+{
+   return inspectorProperties().validate(name, value);
 }
 
 bool GameMechanism::setInspectorProperty(const std::string& name, const std::string& value)
 {
-   if (name == "enabled" || name == "visible" || name == "observed" || name == "serialized")
-   {
-      if (value != "true" && value != "false")
-      {
-         return false;
-      }
-      if (name == "enabled")
-      {
-         setEnabled(value == "true");
-      }
-      else if (name == "visible")
-      {
-         setVisible(value == "true");
-      }
-      else if (name == "observed")
-      {
-         _observed = value == "true";
-      }
-      else
-      {
-         _serialized = value == "true";
-      }
-      return true;
-   }
-   if (name == "z")
-   {
-      int32_t z;
-      std::istringstream input(value);
-      if (!(input >> z) || !(input >> std::ws).eof() || z < 0 || z > 50)
-      {
-         return false;
-      }
-      setZ(z);
-      return true;
-   }
-   const auto property = _inspector_properties.find(name);
-   return property != _inspector_properties.end() && property->second.set(value);
+   return inspectorProperties().set(name, value);
 }
 #endif
 
-int32_t GameMechanism::getZ() const { return _z_index; }
+int32_t GameMechanism::getZ() const
+{
+   return _z_index;
+}
 
 void GameMechanism::setZ(const int32_t& z)
 {

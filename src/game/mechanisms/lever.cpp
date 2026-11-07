@@ -209,10 +209,6 @@ const sf::FloatRect& Lever::getPixelRect() const
 
 Lever::Lever(GameNode* parent) : GameNode(parent)
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
-   bindInspectorProperty("handle_available", _handle_available);
-#endif
-
    setClassName(typeid(Lever).name());
 }
 
@@ -515,3 +511,10 @@ void Lever::deserializeState(const nlohmann::json& j)
 
    updateReceivers();
 }
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+void Lever::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("handle_available", _handle_available);
+}
+#endif

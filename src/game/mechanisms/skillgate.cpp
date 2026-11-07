@@ -112,10 +112,6 @@ std::optional<Skill::SkillType> skillFromName(const std::string& skill_name)
 
 SkillGate::SkillGate(GameNode* parent) : GameNode(parent)
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
-   bindInspectorProperty("fade_speed", _fade_speed);
-#endif
-
    setClassName(typeid(SkillGate).name());
 }
 
@@ -299,3 +295,10 @@ std::optional<sf::FloatRect> SkillGate::getBoundingBoxPx()
 {
    return _rectangle;
 }
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+void SkillGate::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("fade_speed", _fade_speed);
+}
+#endif

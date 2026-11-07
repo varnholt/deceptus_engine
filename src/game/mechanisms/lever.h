@@ -20,6 +20,10 @@ struct TmxTileSet;
 class Lever : public GameMechanism, public GameNode, public InteractionInterface
 {
 public:
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    using Callback = std::function<void(int32_t)>;
 
    enum class Type

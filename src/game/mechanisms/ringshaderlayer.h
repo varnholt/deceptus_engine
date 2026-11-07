@@ -6,6 +6,10 @@
 class RingShaderLayer : public ShaderLayer
 {
 public:
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    /// \brief creates a ring shader layer instance.
    /// \param parent owning game node in the scene graph.
    RingShaderLayer(GameNode* parent = nullptr);

@@ -56,10 +56,6 @@ const auto registered_fan = []
 
 Fan::Fan(GameNode* parent) : GameNode(parent)
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
-   bindInspectorProperty("speed", _speed);
-#endif
-
    setClassName(typeid(Fan).name());
 }
 
@@ -299,3 +295,10 @@ void Fan::collide()
       PlayerRegistry::getFirst()->getBody()->ApplyForceToCenter(b2Vec2(2.0F * _direction.x, _direction.y), true);
    }
 }
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+void Fan::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("speed", _speed);
+}
+#endif

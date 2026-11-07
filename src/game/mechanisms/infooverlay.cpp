@@ -59,27 +59,6 @@ const auto registered_infooverlay = []
 
 InfoOverlay::InfoOverlay(GameNode* parent) : GameNode(parent)
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
-   bindInspectorProperty("show_once", _settings._show_once);
-   const auto bind_duration = [this](const std::string& name, FloatSeconds& duration)
-   {
-      bindInspectorProperty<float>(
-         name,
-         [&duration] { return duration.count(); },
-         [&duration](const float& value)
-         {
-            if (value < 0.0f)
-               return false;
-            duration = FloatSeconds{value};
-            return true;
-         }
-      );
-   };
-   bind_duration("start_delay_duration", _settings._start_delay_duration);
-   bind_duration("fade_in_duration", _settings._fade_in_duration);
-   bind_duration("show_duration", _settings._show_duration);
-   bind_duration("fade_out_duration", _settings._fade_out_duration);
-#endif
    setClassName(typeid(InfoOverlay).name());
    _serialized = true;
    setEnabled(false);
@@ -364,3 +343,27 @@ std::optional<sf::FloatRect> InfoOverlay::getBoundingBoxPx()
 {
    return std::nullopt;
 }
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+void InfoOverlay::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("show_once", _settings._show_once);
+   const auto bind_duration = [&properties](const std::string& name, FloatSeconds& duration)
+   {
+      properties.bind<float>(
+         name,
+         [&duration] { return duration.count(); },
+         [&duration](const float& value)
+         {
+            duration = FloatSeconds{value};
+            return true;
+         },
+         [](const float& value) { return value >= 0.0f; }
+      );
+   };
+   bind_duration("start_delay_duration", _settings._start_delay_duration);
+   bind_duration("fade_in_duration", _settings._fade_in_duration);
+   bind_duration("show_duration", _settings._show_duration);
+   bind_duration("fade_out_duration", _settings._fade_out_duration);
+}
+#endif

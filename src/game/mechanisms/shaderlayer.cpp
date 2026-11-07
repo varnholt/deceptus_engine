@@ -49,11 +49,6 @@ void ShaderLayer::registerCustomization(const std::string& id, const std::functi
 
 ShaderLayer::ShaderLayer(GameNode* parent) : GameNode(parent)
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
-   bindInspectorProperty("uv_width", _uv_width);
-   bindInspectorProperty("uv_height", _uv_height);
-   bindInspectorProperty("time_offset_s", _time_offset);
-#endif
    setClassName(typeid(ShaderLayer).name());
 }
 
@@ -294,3 +289,12 @@ const auto registered_shader_quad = []
    return true;
 }();
 }  // namespace
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+void ShaderLayer::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("uv_width", _uv_width);
+   properties.bind("uv_height", _uv_height);
+   properties.bind("time_offset_s", _time_offset);
+}
+#endif

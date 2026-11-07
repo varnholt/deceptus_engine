@@ -1326,6 +1326,7 @@ if(DECEPTUS_DEVELOPMENT_MODE)
         target_compile_definitions(deceptus PRIVATE DECEPTUS_MECHANISM_INSPECTOR)
         target_sources(deceptus PRIVATE
             src/game/debug/mechanisminspector.cpp
+            src/game/debug/mechanism_property_bindings.h
             src/game/debug/mechanisminspector.h
             src/game/debug/mechanismsourceeditor.cpp
             src/game/debug/mechanismsourceeditor.h)

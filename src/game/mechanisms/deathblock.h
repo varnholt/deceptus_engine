@@ -23,6 +23,10 @@ struct TmxTileSet;
 class DeathBlock : public GameMechanism, public GameNode
 {
 public:
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    /// \brief creates a death block node.
    /// \param parent parent node in the scene graph.
    DeathBlock(GameNode* parent = nullptr);

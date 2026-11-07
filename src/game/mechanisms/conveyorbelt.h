@@ -18,6 +18,10 @@ struct TmxObject;
 class ConveyorBelt : public FixtureNode, public GameMechanism
 {
 public:
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    /// \brief creates belt geometry, sprites, and velocity from tmx data.
    /// \param parent parent node in the scene graph.
    /// \param data deserialize context with tmx object and physics world.

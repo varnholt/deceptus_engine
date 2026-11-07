@@ -155,17 +155,6 @@ void ConveyorBelt::updateSprite()
 
 ConveyorBelt::ConveyorBelt(GameNode* parent, const GameDeserializeData& data) : FixtureNode(parent)
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
-   bindInspectorProperty<float>(
-      "velocity",
-      [this] { return _velocity; },
-      [this](const float& value)
-      {
-         setVelocity(value);
-         return true;
-      }
-   );
-#endif
    setClassName(typeid(ConveyorBelt).name());
    setType(ObjectTypeConveyorBelt);
 
@@ -351,3 +340,18 @@ void ConveyorBelt::processContact(b2Contact* contact)
       processFixtureNode(fixture_node, contact->GetFixtureA()->GetBody());
    }
 }
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+void ConveyorBelt::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind<float>(
+      "velocity",
+      [this] { return _velocity; },
+      [this](const float& value)
+      {
+         setVelocity(value);
+         return true;
+      }
+   );
+}
+#endif

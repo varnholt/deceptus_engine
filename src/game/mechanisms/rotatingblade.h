@@ -16,6 +16,10 @@
 class RotatingBlade : public GameMechanism, public GameNode
 {
 public:
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    /// \brief runtime tuning values for blade acceleration, rotation, and path speed.
    struct Settings
    {

@@ -2,12 +2,11 @@
 
 #ifdef DECEPTUS_MECHANISM_INSPECTOR
 
+#include "game/debug/mechanism_property_bindings.h"
 #include "game/mechanisms/gamemechanismschema.h"
 #include "tinyxml2/tinyxml2.h"
 
 #include <algorithm>
-#include <charconv>
-#include <cmath>
 #include <fstream>
 #include <iterator>
 #include <ranges>
@@ -45,36 +44,6 @@ tinyxml2::XMLElement* findObject(tinyxml2::XMLElement* parent, const std::string
       }
    }
    return nullptr;
-}
-
-bool validValue(const PropertyInfo& schema, const std::string& value)
-{
-   if (schema.required && value.empty())
-   {
-      return false;
-   }
-   if (!schema.allowed_values.empty() && std::ranges::find(schema.allowed_values, value) == schema.allowed_values.end())
-   {
-      return false;
-   }
-   if (schema.type == "bool")
-   {
-      return value == "true" || value == "false";
-   }
-   if (schema.type == "int")
-   {
-      int32_t number;
-      const auto result = std::from_chars(value.data(), value.data() + value.size(), number);
-      return result.ec == std::errc{} && result.ptr == value.data() + value.size();
-   }
-   if (schema.type == "float")
-   {
-      float number;
-      const auto result = std::from_chars(value.data(), value.data() + value.size(), number);
-      return result.ec == std::errc{} && result.ptr == value.data() + value.size() && std::isfinite(number);
-   }
-   return schema.type == "string" &&
-          std::ranges::none_of(value, [](unsigned char c) { return c < 32 && c != '\n' && c != '\r' && c != '\t'; });
 }
 
 bool writeFile(const std::filesystem::path& path, const std::string& contents)
@@ -153,7 +122,7 @@ bool MechanismSourceEditor::writeObjects(
       for (const auto& edit : overrides)
       {
          const auto definition = std::ranges::find(schema.properties, edit.name, &PropertyInfo::name);
-         if (definition == schema.properties.end() || !validValue(*definition, edit.value))
+         if (definition == schema.properties.end() || !MechanismPropertyBindings::validateValue(*definition, edit.value))
          {
             message = "Invalid value for schema property '" + edit.name + "'. No changes were written.";
             return false;

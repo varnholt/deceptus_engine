@@ -199,22 +199,6 @@ float evaluateFlashEnvelope(float elapsed_s, float duration_s)
 
 RingShaderLayer::RingShaderLayer(GameNode* parent) : ShaderLayer(parent)
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
-   bindInspectorProperty("ring_scale", _ring_scale);
-   bindInspectorProperty("pixel_size", _pixel_size, [](const float& value) { return value > 0.0f; });
-   bindInspectorProperty("heartbeat_period_s", _heartbeat_period_s, [](const float& value) { return value > 0.0f; });
-   bindInspectorProperty("heartbeat_scale", _heartbeat_scale);
-   bindInspectorProperty("heartbeat_second_beat", _heartbeat_second_beat);
-   bindInspectorProperty("heartbeat_turbulence", _heartbeat_turbulence);
-   bindInspectorProperty("heartbeat_beat_width", _heartbeat_beat_width, [](const float& value) { return value > 0.0f; });
-   bindInspectorProperty("touch_depth", _touch_depth);
-   bindInspectorProperty("touch_width", _touch_width, [](const float& value) { return value > 0.0f; });
-   bindInspectorProperty("touch_release_s", _touch_release_s, [](const float& value) { return value > 0.0f; });
-   bindInspectorProperty("power_down_s", _power_down_s, [](const float& value) { return value > 0.0f; });
-   bindInspectorProperty("push_px", _push_px);
-   bindInspectorProperty("push_release_s", _push_release_s, [](const float& value) { return value > 0.0f; });
-   bindInspectorProperty("hit_attack_s", _hit_attack_s, [](const float& value) { return value > 0.0f; });
-#endif
 }
 
 #ifndef DECEPTUS_VRSFML
@@ -496,3 +480,24 @@ void RingShaderLayer::flash(float red, float green, float blue, float duration_s
    _flash_duration = duration_s;
    _flash_elapsed = 0.0f;
 }
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+void RingShaderLayer::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   ShaderLayer::configureInspectorProperties(properties);
+   properties.bind("ring_scale", _ring_scale);
+   properties.bind("pixel_size", _pixel_size, [](const float& value) { return value > 0.0f; });
+   properties.bind("heartbeat_period_s", _heartbeat_period_s, [](const float& value) { return value > 0.0f; });
+   properties.bind("heartbeat_scale", _heartbeat_scale);
+   properties.bind("heartbeat_second_beat", _heartbeat_second_beat);
+   properties.bind("heartbeat_turbulence", _heartbeat_turbulence);
+   properties.bind("heartbeat_beat_width", _heartbeat_beat_width, [](const float& value) { return value > 0.0f; });
+   properties.bind("touch_depth", _touch_depth);
+   properties.bind("touch_width", _touch_width, [](const float& value) { return value > 0.0f; });
+   properties.bind("touch_release_s", _touch_release_s, [](const float& value) { return value > 0.0f; });
+   properties.bind("power_down_s", _power_down_s, [](const float& value) { return value > 0.0f; });
+   properties.bind("push_px", _push_px);
+   properties.bind("push_release_s", _push_release_s, [](const float& value) { return value > 0.0f; });
+   properties.bind("hit_attack_s", _hit_attack_s, [](const float& value) { return value > 0.0f; });
+}
+#endif

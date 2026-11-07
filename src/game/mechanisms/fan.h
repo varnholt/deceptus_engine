@@ -15,6 +15,10 @@
 class Fan : public GameMechanism, public GameNode
 {
 public:
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    /// \brief creates a fan mechanism.
    /// \param parent parent node in the scene graph.
    Fan(GameNode* parent = nullptr);

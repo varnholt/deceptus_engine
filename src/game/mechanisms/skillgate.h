@@ -16,6 +16,9 @@
 class SkillGate : public GameMechanism, public GameNode
 {
 public:
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
    /// \brief creates a skill gate node.
    /// \param parent parent node in the scene graph.
    SkillGate(GameNode* parent = nullptr);

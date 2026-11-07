@@ -260,7 +260,9 @@ std::vector<std::string> MechanismInspector::Entry::liveValues(const std::string
    for (const auto& part : parts)
    {
       const auto mechanism = part.lock();
-      const auto value = mechanism ? mechanism->getInspectorProperty(name) : std::nullopt;
+      if (!mechanism || !mechanism->supportsInspectorProperty(name))
+         return {};
+      const auto value = mechanism->getInspectorProperty(name);
       if (!value)
          return {};
       values.push_back(*value);
@@ -276,9 +278,21 @@ std::optional<std::string> MechanismInspector::Entry::liveValue(const std::strin
 
 bool MechanismInspector::Entry::setLiveValue(const std::string& name, const std::string& value)
 {
+   if (schema)
+   {
+      const auto property = std::ranges::find(schema->properties, name, &PropertyInfo::name);
+      if (property == schema->properties.end() || !MechanismPropertyBindings::validateValue(*property, value))
+         return false;
+   }
    const auto previous = liveValues(name);
    if (previous.empty())
       return false;
+   for (const auto& part : parts)
+   {
+      const auto mechanism = part.lock();
+      if (!mechanism || !mechanism->validateInspectorProperty(name, value))
+         return false;
+   }
    for (size_t index = 0; index < parts.size(); ++index)
    {
       if (const auto mechanism = parts[index].lock(); !mechanism || !mechanism->setInspectorProperty(name, value))

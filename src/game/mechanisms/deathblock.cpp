@@ -100,10 +100,6 @@ constexpr auto tolerance_px_2 = tolerance_px * 2;
 
 DeathBlock::DeathBlock(GameNode* parent) : GameNode(parent)
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
-   bindInspectorProperty("damage", _damage);
-#endif
-
    setClassName(typeid(DeathBlock).name());
 }
 
@@ -597,3 +593,10 @@ void DeathBlock::setup(const GameDeserializeData& data)
 
    updateSprites();
 }
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+void DeathBlock::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("damage", _damage);
+}
+#endif

@@ -15,13 +15,8 @@
 #include <optional>
 #include <string>
 #ifdef DECEPTUS_MECHANISM_INSPECTOR
-#include <cmath>
-#include <format>
-#include <functional>
-#include <map>
 #include <memory>
-#include <sstream>
-#include <type_traits>
+#include "game/debug/mechanism_property_bindings.h"
 #endif
 
 struct Room;
@@ -91,7 +86,9 @@ public:
 #ifdef DECEPTUS_MECHANISM_INSPECTOR
    /// \brief developer-only live property access; unsupported properties require reconstruction.
    bool setInspectorProperty(const std::string& name, const std::string& value);
-   std::optional<std::string> getInspectorProperty(const std::string& name) const;
+   std::optional<std::string> getInspectorProperty(const std::string& name);
+   bool supportsInspectorProperty(const std::string& name);
+   bool validateInspectorProperty(const std::string& name, const std::string& value);
    const std::shared_ptr<TmxObject>& getInspectorSource() const
    {
       return _inspector_source;
@@ -104,58 +101,6 @@ public:
    bool isInspectorLayer() const
    {
       return _inspector_layer;
-   }
-
-   template <typename T>
-   void bindInspectorProperty(const std::string& name, T& field, std::type_identity_t<std::function<bool(const T&)>> valid = {})
-   {
-      bindInspectorProperty<T>(
-         name,
-         [&field] { return field; },
-         [&field, valid](const T& value)
-         {
-            if (valid && !valid(value))
-               return false;
-            field = value;
-            return true;
-         }
-      );
-   }
-
-   template <typename T>
-   void bindInspectorProperty(const std::string& name, std::function<T()> get, std::function<bool(const T&)> set)
-   {
-      _inspector_properties[name] = {
-         [get]() { return std::format("{}", get()); },
-         [set](const std::string& text)
-         {
-            T value{};
-            if constexpr (std::is_same_v<T, std::string>)
-            {
-               value = text;
-            }
-            else
-            {
-               std::istringstream input(text);
-               if constexpr (std::is_same_v<T, bool>)
-               {
-                  input >> std::boolalpha;
-               }
-               if (!(input >> value) || !(input >> std::ws).eof())
-               {
-                  return false;
-               }
-               if constexpr (std::is_floating_point_v<T>)
-               {
-                  if (!std::isfinite(value))
-                  {
-                     return false;
-                  }
-               }
-            }
-            return set(value);
-         }
-      };
    }
 #endif
 
@@ -293,12 +238,13 @@ public:
 
 protected:
 #ifdef DECEPTUS_MECHANISM_INSPECTOR
-   struct InspectorProperty
+   // called once, on demand, after construction; subclasses extend the same registry
+   virtual void configureInspectorProperties(MechanismPropertyBindings&)
    {
-      std::function<std::string()> get;
-      std::function<bool(const std::string&)> set;
-   };
-   std::map<std::string, InspectorProperty> _inspector_properties;
+   }
+   void configureCommonInspectorProperties(MechanismPropertyBindings& properties);
+   MechanismPropertyBindings& inspectorProperties();
+   std::unique_ptr<MechanismPropertyBindings> _inspector_properties;
    std::shared_ptr<TmxObject> _inspector_source;
    bool _inspector_layer{false};
 #endif

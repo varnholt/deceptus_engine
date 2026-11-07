@@ -66,13 +66,6 @@ const auto registered_rotatingblade = []
 
 RotatingBlade::RotatingBlade(GameNode* parent) : GameNode(parent)
 {
-#ifdef DECEPTUS_MECHANISM_INSPECTOR
-   bindInspectorProperty("blade_acceleration", _settings._blade_acceleration);
-   bindInspectorProperty("blade_deceleration", _settings._blade_deceleration);
-   bindInspectorProperty("blade_rotation_speed", _settings._blade_rotation_speed);
-   bindInspectorProperty("movement_speed", _settings._movement_speed);
-#endif
-
    setClassName(typeid(RotatingBlade).name());
 
    setZ(30);
@@ -406,3 +399,13 @@ const sf::FloatRect& RotatingBlade::getPixelRect() const
 {
    return _rectangle;
 }
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+void RotatingBlade::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("blade_acceleration", _settings._blade_acceleration);
+   properties.bind("blade_deceleration", _settings._blade_deceleration);
+   properties.bind("blade_rotation_speed", _settings._blade_rotation_speed);
+   properties.bind("movement_speed", _settings._movement_speed);
+}
+#endif
