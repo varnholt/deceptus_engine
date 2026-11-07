@@ -55,7 +55,7 @@ public:
    void deserializeState(const nlohmann::json& json) override;
 
    /// \brief restores an uncollected reward after all extras have loaded their saved state.
-   void restore_reward(const std::vector<std::shared_ptr<GameMechanism>>& extras);
+   void restoreReward(const std::vector<std::shared_ptr<GameMechanism>>& extras);
 
    /// \brief exposes chest state to level scripts. supported property: "open".
    /// \param property_name name of the property to read.

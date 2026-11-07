@@ -333,7 +333,7 @@ std::optional<sf::FloatRect> TreasureChest::getBoundingBoxPx()
    return std::nullopt;
 }
 
-void TreasureChest::restore_reward(const std::vector<std::shared_ptr<GameMechanism>>& extras)
+void TreasureChest::restoreReward(const std::vector<std::shared_ptr<GameMechanism>>& extras)
 {
    if (_state == State::Closed || !_spawn_extra.has_value() || _extra_spawned)
    {

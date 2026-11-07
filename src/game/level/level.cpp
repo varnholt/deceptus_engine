@@ -694,7 +694,7 @@ void Level::loadSaveState()
       {
          if (const auto chest = std::dynamic_pointer_cast<TreasureChest>(mechanism))
          {
-            chest->restore_reward(_mechanism_registry.getExtras());
+            chest->restoreReward(_mechanism_registry.getExtras());
          }
       }
    }
