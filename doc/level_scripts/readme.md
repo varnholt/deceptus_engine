@@ -5,6 +5,36 @@ For example, you might want to close a door or activate an enemy when the player
 All that 'custom' logic goes into the level script.
 
 
+## Gameplay progress
+
+Use `progress` for completed encounters, opened objects, and other named facts. These are
+separate from inventory, treasures, and the serialized state owned by individual mechanisms.
+Use a unique name such as `catacombs_monk_encounter_complete` so unrelated levels do not share a fact accidentally.
+
+```lua
+if not progress.completed("catacombs_monk_encounter_complete") then
+   -- start the encounter
+end
+
+-- mark completion when the encounter finishes
+progress.complete("catacombs_monk_encounter_complete")
+```
+
+`progress.completed(id)` returns a boolean. `progress.complete(id)` returns true only when
+the fact was newly completed. `progress.reset(id)` removes a fact and returns whether it existed.
+IDs must be nonempty strings. All three functions operate on the current save slot.
+
+Changes take effect immediately and remain available when scripts or levels are reloaded.
+They are written to disk by the existing save flow, including checkpoints; calling `complete`
+does not save the game by itself. Dying and loading the last checkpoint restores the facts
+from that save, discarding later changes. A new game starts with no completed facts.
+Use ordinary Lua locals for temporary state that should reset when the script is recreated.
+
+Restore the world from these facts during the first `update` tick, when mechanism lookups
+are available. Marking a fact does not automatically change mechanisms or replay their events.
+Existing catacombs and graveyard scripts import their older treasure-based progress flags;
+older saves without a `progress` field start with an empty set of facts.
+
 ## Requiring shared modules
 
 Shared script modules (e.g. `data/scripts/cutscene.lua`, `data/scripts/enemies/vectorial2.lua`) are pulled in with

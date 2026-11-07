@@ -33,6 +33,9 @@ int32_t addPlayerHealth(lua_State* state);
 int32_t addPlayerHealthMax(lua_State* state);
 
 // achievements and treasures
+int32_t progressCompleted(lua_State* state);
+int32_t progressComplete(lua_State* state);
+int32_t progressReset(lua_State* state);
 int32_t addAchievement(lua_State* state);
 int32_t hasAchievement(lua_State* state);
 int32_t addTreasure(lua_State* state);

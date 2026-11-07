@@ -16,10 +16,40 @@
 #include "game/level/levelscript.h"
 #include "game/mechanisms/dialogue.h"
 #include "game/state/displaymode.h"
+#include "game/state/savestate.h"
 #include "json/json.hpp"
 
 namespace LevelScriptCallbacks
 {
+
+namespace
+{
+const char* progressId(lua_State* state)
+{
+   luaL_checktype(state, 1, LUA_TSTRING);
+   const auto* id = luaL_checkstring(state, 1);
+   luaL_argcheck(state, id[0] != '\0', 1, "progress id must not be empty");
+   return id;
+}
+}  // namespace
+
+int32_t progressCompleted(lua_State* state)
+{
+   lua_pushboolean(state, SaveState::getCurrent()._progress.completed(progressId(state)));
+   return 1;
+}
+
+int32_t progressComplete(lua_State* state)
+{
+   lua_pushboolean(state, SaveState::getCurrent()._progress.complete(progressId(state)));
+   return 1;
+}
+
+int32_t progressReset(lua_State* state)
+{
+   lua_pushboolean(state, SaveState::getCurrent()._progress.reset(progressId(state)));
+   return 1;
+}
 
 int32_t addCollisionRect(lua_State* state)
 {

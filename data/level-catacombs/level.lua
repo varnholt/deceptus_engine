@@ -22,7 +22,7 @@ _monk_dialogue_shown = false
 _monk_hide = false
 
 -- completing the encounter is saved with the player at the next checkpoint
-_monk_encounter_treasure = "catacombs_monk_encounter_complete"
+_monk_encounter_progress = "catacombs_monk_encounter_complete"
 
 _delay_to_show_dive_dialogue = 1.0
 _player_intersected_with_water_block_sensor = false
@@ -33,9 +33,9 @@ _owl_eye_item = "gems"
 
 -- inserting them is remembered in the save game, the inventory cannot say it: the gems are gone
 -- afterwards, which looks the same as never having had them
-_owl_eyes_inserted_treasure = "catacombs_owl_eyes_inserted"
-_locker_opened_treasure = "catacombs_locker_opened"
-_drawer_opened_treasure = "catacombs_drawer_opened"
+_owl_eyes_inserted_progress = "catacombs_owl_eyes_inserted"
+_locker_opened_progress = "catacombs_locker_opened"
+_drawer_opened_progress = "catacombs_drawer_opened"
 
 _sword_cage_ids = {"sword_cage_01", "sword_cage_02", "sword_cage_03", "sword_cage_04"}
 _shrine_inserted_last = nil
@@ -103,7 +103,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function initShrine()
-   local inserted = hasTreasure(_owl_eyes_inserted_treasure)
+   local inserted = progress.completed(_owl_eyes_inserted_progress)
    setOwlEyesInserted(inserted)
    updateShrineHelp(inserted)
 end
@@ -111,7 +111,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function insertOwlEyes()
-   if (hasTreasure(_owl_eyes_inserted_treasure)) then
+   if (progress.completed(_owl_eyes_inserted_progress)) then
       return
    end
 
@@ -121,7 +121,7 @@ function insertOwlEyes()
 
    log("owl eyes inserted")
 
-   addTreasure(_owl_eyes_inserted_treasure)
+   progress.complete(_owl_eyes_inserted_progress)
    inventoryRemove(_owl_eye_item)
 
    setMechanismVisible("owl-eyes", true, "imagelayers")
@@ -135,6 +135,12 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
+   -- import facts written by older versions without adding new facts to treasures
+   for _, id in ipairs({_monk_encounter_progress, _owl_eyes_inserted_progress, _locker_opened_progress, _drawer_opened_progress}) do
+      if (hasTreasure(id)) then
+         progress.complete(id)
+      end
+   end
    -- log("initialize catacombs level script")
    setInfoLayerVisible(true)
 
@@ -216,7 +222,7 @@ function makeMonkDisappear(dt)
       _monk_hide = false
       writeLuaNodeProperty("shadow", "hide", "true")
       setZoomFactor(1.0)
-      addTreasure(_monk_encounter_treasure)
+      progress.complete(_monk_encounter_progress)
    end
 end
 
@@ -236,7 +242,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function openLocker()
    log("open locker")
-   addTreasure(_locker_opened_treasure)
+   progress.complete(_locker_opened_progress)
    setMechanismVisible("locker_open", true, "imagelayers")
    setMechanismVisible("handle", true, "extras")
    setMechanismEnabled("handle", true, "extras")
@@ -250,7 +256,7 @@ function initLocker()
    local handle_inserted = getMechanismProperty("lever_cell", "levers", "handle_available") == true
    local handle_collected = inventoryHas("handle") or handle_inserted
       or getMechanismProperty("handle", "extras", "active") == false
-   local opened = hasTreasure(_locker_opened_treasure) or handle_collected
+   local opened = progress.completed(_locker_opened_progress) or handle_collected
       or (getMechanismProperty("locker_key", "extras", "active") == false and not inventoryHas("locker_key"))
    if (opened) then
       openLocker()
@@ -276,7 +282,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 function initDrawer()
    if (drawerOpened()) then
-      addTreasure(_drawer_opened_treasure)
+      progress.complete(_drawer_opened_progress)
       setMechanismVisible("drawer_open", true, "imagelayers")
       setMechanismEnabled("drawer_rect", false, "button_rects")
       setMechanismEnabled("drawer_interaction_help", false, "interaction_help")
@@ -288,7 +294,7 @@ function initDrawer()
 end
 
 function drawerOpened()
-   return hasTreasure(_drawer_opened_treasure) or inventoryHas("solar_seal")
+   return progress.completed(_drawer_opened_progress) or inventoryHas("solar_seal")
       or getMechanismProperty("locked_box", "treasure_chests", "open") == true
 end
 
@@ -310,7 +316,7 @@ function openDrawer()
       return
    end
    log("open drawer")
-   addTreasure(_drawer_opened_treasure)
+   progress.complete(_drawer_opened_progress)
    setMechanismVisible("drawer_open", true, "imagelayers")
    setMechanismEnabled("drawer_rect", false, "button_rects")
    setMechanismEnabled("drawer_interaction_help", false, "interaction_help")
@@ -325,7 +331,7 @@ end
 function updateMonk(dt)
 
    -- monk dialogue logic
-   if (not _player_intersected_with_monk_rect or hasTreasure(_monk_encounter_treasure)) then
+   if (not _player_intersected_with_monk_rect or progress.completed(_monk_encounter_progress)) then
       return
    end
       
@@ -348,7 +354,7 @@ end
 -- the player can equip or drop the rubies while standing at the shrine, and there is no callback
 -- for the inventory changing, so the prompt is re-derived every frame
 function updateShrine()
-   local inserted = hasTreasure(_owl_eyes_inserted_treasure)
+   local inserted = progress.completed(_owl_eyes_inserted_progress)
    if (inserted ~= _shrine_inserted_last or inventoryHas(_owl_eye_item) ~= _shrine_carrying_last) then
       _shrine_inserted_last = inserted
       _shrine_carrying_last = inventoryHas(_owl_eye_item)
@@ -550,7 +556,7 @@ function playerCollidesWithSensorRect(rect_id)
    end
 
    if (rect_id == "monk_rect") then
-      _player_intersected_with_monk_rect = not hasTreasure(_monk_encounter_treasure)
+      _player_intersected_with_monk_rect = not progress.completed(_monk_encounter_progress)
    elseif (rect_id == "water_block_sensor_01") then
       _player_intersected_with_water_block_sensor = true
    elseif (rect_id == "sword_ring_sensor") then

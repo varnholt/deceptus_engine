@@ -32,6 +32,7 @@ bool SaveState::isEmpty() const
 void SaveState::invalidate()
 {
    _player_info = {};
+   _progress = {};
    _level_index = {};
    _checkpoints = {};
    _level_state = {};
@@ -174,12 +175,15 @@ void to_json(nlohmann::json& j, const SaveState& data)
       {"levelindex", data._level_index},
       {"checkpoints", data._checkpoints},
       {"playerinfo", data._player_info},
-      {"levelstate", data._level_state}
+      {"levelstate", data._level_state},
+      {"progress", data._progress}
    };
 }
 
 void from_json(const nlohmann::json& j, SaveState& data)
 {
+   // loading an older save must not retain facts from the previously active slot
+   data._progress = j.value("progress", ProgressionState{});
    if (j.find("levelindex") != j.end())
    {
       data._level_index = j.at("levelindex").get<int32_t>();

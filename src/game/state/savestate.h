@@ -8,6 +8,7 @@
 
 #include "framework/tools/gamepaths.h"
 #include "game/player/playerinfo.h"
+#include "game/state/progressionstate.h"
 
 /// \brief stores one save-slot snapshot, including player info and per-level state.
 /// the type also owns static helpers for reading and writing the full three-slot save array.
@@ -24,6 +25,7 @@ struct SaveState
    void invalidate();
 
    PlayerInfo _player_info;
+   ProgressionState _progress;
    nlohmann::json _level_state;
 
    int32_t _level_index = 0;

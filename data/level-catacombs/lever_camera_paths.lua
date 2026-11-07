@@ -51,7 +51,7 @@ local _on_off_block_ids = {
 }
 local _on_off_blocks_enabled = true
 local _lever_spike_sequence_done = false
-local _lever_spike_seen_treasure = "catacombs_lever_spike_cannon_seen"
+local _lever_spike_seen_progress = "catacombs_lever_spike_cannon_seen"
 local _disable_on_off_blocks_at = -1.0
 
 local function setOnOffBlocksEnabled(enabled)
@@ -103,7 +103,7 @@ end
 local function onLeverSpikeEvent()
    if (not _lever_spike_sequence_done) then
       _lever_spike_sequence_done = true
-      addTreasure(_lever_spike_seen_treasure)
+      progress.complete(_lever_spike_seen_progress)
       _disable_on_off_blocks_at = _elapsed + _lever_spike_camera_duration_s + 0.5
       cutscene.notify("lever_spike_cannon_picked_up")
    else
@@ -139,7 +139,7 @@ local _lever_spike_01_player_lock_duration_s =
    _lever_spike_01_camera_duration_s * 3 + _lever_spike_01_camera_hold_s * 3 + _lever_spike_01_camera_return_s
 
 local _lever_spike_01_sequence_done = false
-local _lever_spike_01_seen_treasure = "catacombs_lever_spike_01_seen"
+local _lever_spike_01_seen_progress = "catacombs_lever_spike_01_seen"
 
 local _lever_spike_01_group_1_action = nil
 local _lever_spike_01_group_2_action = nil
@@ -250,7 +250,7 @@ local function onLeverSpike01Event()
 
    if (not _lever_spike_01_sequence_done) then
       _lever_spike_01_sequence_done = true
-      addTreasure(_lever_spike_01_seen_treasure)
+      progress.complete(_lever_spike_01_seen_progress)
 
       -- clamp against the room now, with the player actually standing at the lever, so the
       -- correct room boundary is in effect - clamping is meaningless before the player gets there
@@ -302,17 +302,22 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 function LeverCameraPaths.init()
+   for _, id in ipairs({_lever_spike_seen_progress, _lever_spike_01_seen_progress}) do
+      if (hasTreasure(id)) then
+         progress.complete(id)
+      end
+   end
    -- the levers have already restored their saved positions before this script initializes
    local cannon_on = isMechanismEnabled("lever_spike_cannon", "levers")
-   _lever_spike_sequence_done = hasTreasure(_lever_spike_seen_treasure) or cannon_on
+   _lever_spike_sequence_done = progress.completed(_lever_spike_seen_progress) or cannon_on
    setOnOffBlocksEnabled(not cannon_on)
    _crossroads_blocks_enabled = isMechanismEnabled("lever_spike_01", "levers")
-   _lever_spike_01_sequence_done = hasTreasure(_lever_spike_01_seen_treasure) or not _crossroads_blocks_enabled
+   _lever_spike_01_sequence_done = progress.completed(_lever_spike_01_seen_progress) or not _crossroads_blocks_enabled
    if (_lever_spike_sequence_done) then
-      addTreasure(_lever_spike_seen_treasure)
+      progress.complete(_lever_spike_seen_progress)
    end
    if (_lever_spike_01_sequence_done) then
-      addTreasure(_lever_spike_01_seen_treasure)
+      progress.complete(_lever_spike_01_seen_progress)
    end
    initLeverSpike01()
 
