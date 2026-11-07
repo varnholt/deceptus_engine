@@ -91,7 +91,7 @@ void jsonPanel(const char* title, const nlohmann::json& value)
 }  // namespace
 
 MechanismInspector::MechanismInspector()
-    : _window(std::make_unique<sf::RenderWindow>(sf::VideoMode({1000, 760}), "deceptus mechanism inspector"))
+    : _window(std::make_unique<sf::RenderWindow>(sf::VideoMode({1000, 760}), "deceptus mechanism editor"))
 {
    _initialized = ImGui::SFML::Init(*_window);
 }
@@ -142,7 +142,6 @@ void MechanismInspector::refresh(const std::shared_ptr<Level>& level)
    _position_filter.reset();
    _selected.reset();
    _picking = false;
-   _editing = false;
    _selection_status.clear();
    _tmx_filename.clear();
    if (!level)
@@ -439,7 +438,7 @@ void MechanismInspector::selectAt(const std::optional<sf::Vector2f>& position, s
    _picking = false;
    _selection_status =
       std::format("Position {:.0f}, {:.0f}: {} mechanisms. Choose one from the filtered list.", position->x, position->y, _picked.size());
-   Log::Info() << "inspector: " << _selection_status;
+   Log::Info() << "mechanism editor: " << _selection_status;
    _window->requestFocus();
 }
 
@@ -731,7 +730,6 @@ void MechanismInspector::drawProperties(Entry& entry)
       "Edit to preview live-supported fields. Save writes all pending object overrides without reloading; fields marked "
       "'reload' need a manual level reload. Shared templates are unchanged."
    );
-   ImGui::BeginDisabled(!_editing);
    ImGui::PushID(entry.layer ? "layer" : "object");
    ImGui::PushID(entry.source->_id.c_str());
    for (auto& edit : entry.properties)
@@ -864,7 +862,6 @@ void MechanismInspector::drawProperties(Entry& entry)
    }
    ImGui::PopID();
    ImGui::PopID();
-   ImGui::EndDisabled();
    if (!entry.property_message.empty())
    {
       ImGui::TextWrapped("%s", entry.property_message.c_str());
@@ -886,11 +883,11 @@ void MechanismInspector::draw(const std::shared_ptr<Level>& level)
    ImGui::SetNextWindowPos(viewport->WorkPos);
    ImGui::SetNextWindowSize(viewport->WorkSize);
    ImGui::Begin(
-      "Mechanism inspector",
+      "Mechanism editor",
       nullptr,
       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar
    );
-   ImGui::TextUnformatted("Mechanism inspector");
+   ImGui::TextUnformatted("Mechanism editor");
    if (ImGui::Button(_picking ? "Cancel picking" : "Pick an object in the game"))
    {
       _picking = !_picking;
@@ -904,20 +901,18 @@ void MechanismInspector::draw(const std::shared_ptr<Level>& level)
    {
       ImGui::TextWrapped("%s", _selection_status.c_str());
    }
-   ImGui::Checkbox("Enable editing", &_editing);
-   if (_editing)
+   ImGui::BeginDisabled(!level);
+   if (ImGui::Button("Save all property changes to TMX"))
    {
-      if (ImGui::Button("Save all property changes to TMX"))
-      {
-         saveProperties();
-      }
-      ImGui::SameLine();
-      if (ImGui::Button("Discard all previews"))
-      {
-         discardPreviews(level);
-      }
+      saveProperties();
    }
-   ImGui::TextDisabled("Picking filters all overlaps, including hidden objects. Editing is opt-in.");
+   ImGui::SameLine();
+   if (ImGui::Button("Discard all previews"))
+   {
+      discardPreviews(level);
+   }
+   ImGui::EndDisabled();
+   ImGui::TextDisabled("Picking filters all overlaps. Live fields preview immediately; Save writes to TMX.");
    if (_position_filter)
    {
       if (ImGui::SmallButton("Clear position filter"))
@@ -930,7 +925,7 @@ void MechanismInspector::draw(const std::shared_ptr<Level>& level)
    if (!level)
    {
       _picking = false;
-      ImGui::TextUnformatted("Load a level to inspect mechanisms.");
+      ImGui::TextUnformatted("Load a level to edit mechanisms.");
    }
    else
    {

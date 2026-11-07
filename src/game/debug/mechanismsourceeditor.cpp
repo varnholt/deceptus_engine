@@ -78,7 +78,7 @@ bool MechanismSourceEditor::writeObjects(
    input.close();
    if (original != expected_source)
    {
-      message = "The map changed on disk. Refresh the inspector before applying edits.";
+      message = "The map changed on disk. Refresh the editor before applying edits.";
       return false;
    }
 

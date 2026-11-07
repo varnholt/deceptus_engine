@@ -11,106 +11,20 @@ All hotkeys in this document are only active in `DEVELOPMENT_MODE` builds, excep
 | `F3` | Toggle camera system config UI |
 | `F4` | Toggle debug info / `Alt+F4` quits |
 | `F5` | Toggle log viewer |
-| `F6` | Toggle mechanism inspector (desktop) |
+| `F6` | Toggle mechanism editor (desktop) |
 | `F7` | Toggle physics config UI |
 | `F10` | Toggle profiling window |
 | `F12` | Toggle developer console |
 
-## Mechanism inspector and property editor
+## Mechanism editor
 
-On desktop development builds, press `F6` to open or close the mechanism inspector. `F6` also closes
-it when the inspector window has focus. This replaces the test-scene shortcut; no console command
-is needed. The inspector is otherwise inactive and does not draw game overlays.
+Press **F6** in a desktop development build to open or close the mechanism editor. Editing is
+available immediately; **Save all property changes to TMX** explicitly writes to the map.
+Picking and the editor itself remain inactive until requested.
 
-Press **Pick an object in the game**, then left-click a position in the scene. The list filters to
-**every mechanism whose rendered pixels or interaction bounds cover that position**, including
-hidden objects and overlapping triggers or effects. Visual hits use each mechanism's existing draw
-method in an independent off-screen pixel check, so moving graphics can be picked outside their
-interaction bounds and overlapping objects cannot occlude one another. This extra rendering runs
-only for an explicit pick; it adds no work to ordinary gameplay frames. Nothing is automatically
-selected. Choose any object from that filtered list,
-or clear the position filter to browse everything. Decorative tile graphics are not mechanism objects. Schema-backed mechanism tile layers are editable as a single source.
-
-The details show live state, the last saved level snapshot, source properties, outgoing/incoming
-Tiled references, and individual condition requirements. Follow a reference to inspect its target.
-Script-created connections are not inferred. Duplicate named IDs are flagged.
-
-Editing is disabled by default. Enable **Enable editing** to edit every property described by the
-mechanism schema using boolean, integer, float, string, color, or enum controls. Color fields use
-an RGBA picker with alpha, saved in [Tiled's alpha-first hex format](https://doc.mapeditor.org/en/stable/reference/tmx-map-format/#property). File, native object-reference,
-and nested-class property types are not yet supported by this editor. Fields marked **live**
-preview through the mechanism's own runtime bindings; fields marked **reload** are authored changes
-that require a later manual level reload. The editor does not reconstruct mechanisms implicitly.
-
-Drafts remain attached to their objects when switching selections. **Save all property changes to TMX**
-commits the edited fields across all objects in one map update, without capturing unrelated runtime
-state. It writes source-level overrides for objects and mechanism tile layers, including for template instances, and leaves shared templates
-and other objects unchanged. A `.inspector.bak` backup is retained. If the map changed externally,
-saving is refused until the source is refreshed. Required values, numeric types, and enums are validated.
-
-The editor's exact saved contents are accepted by the file watcher **without auto-reloading** the
-level. Ordinary external edits in Tiled still trigger the normal reload. Saved properties marked
-**reload** take effect on a manual level reload (`L`). Live edits already affect the current object.
-
-Discarding restores unsaved live previews. Closing the inspector also discards unsaved previews in
-the active level; saved changes remain. Refreshing discards drafts and reloads source metadata.
-The inspector does not change pause settings, so normal focus-loss behavior still applies.
-
-The inspector, source writer, live bindings, and watcher suppression are excluded when
-`DECEPTUS_DEVELOPMENT_MODE=OFF`, and are not built for Switch or web targets. The code uses the
-existing `DEVELOPMENT_MODE` flag and `DECEPTUS_VRSFML` platform guard; there is no separate
-inspector feature define.
-
-### Adding live support to a mechanism
-
-The inspector lists schema-backed authored sources, including deferred laser groups/paths and water
-emitters. Exact TMX IDs associate runtime instances with their sources; names may be empty or duplicated.
-Multiple runtime parts share one source entry, draft, and save. A live edit applies to all parts;
-discard restores each part's previous value. Sources without runtime bindings remain editable as reload fields.
-Shared-layer schemas can declare a selector property/value to identify their specialization.
-The editor contains no mechanism-type-specific mutation code.
-
-Every mechanism uses the same development-only `MechanismPropertyBindings` registry. Common
-properties and mechanism-specific fields use the same typed parser, validation, getters, and setters.
-Live edits and TMX saving also share schema validation for required values, types, and enums.
-The editor derives live support from that registry; unbound schema properties remain reload fields.
-There is no mechanism-specific mutation code in the editor.
-
-Bindings are created lazily on the first inspection of a runtime instance, after construction.
-Constructors and gameplay updates do not initialize or consult this registry. Runtime fields remain
-ordinary fields, and the registry and virtual declaration hooks are absent from non-development builds.
-The registry is owned by the mechanism, so reloading/destroying an instance also destroys its adapters.
-A single owned light component contributes its color binding through the shared light system;
-weak ownership makes that binding unavailable if the light is removed. Multiple owned lights
-require an explicit mapping rather than selecting an arbitrary light.
-
-Common bindings are registered automatically before the mechanism's hook. Declare additional
-bindings in that hook; extend a specialized parent's hook when inheriting its additional properties:
-
-```cpp
-#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
-void Fan::configureInspectorProperties(MechanismPropertyBindings& properties)
-{
-   properties.bind("speed", _speed);
-}
-#endif
-```
-
-Bind a member directly only when assigning it is sufficient to update behavior safely. For derived
-state, supply a getter and the existing setter instead:
-
-```cpp
-properties.bind<float>("velocity", [this] { return _velocity; }, [this](float value)
-{
-   setVelocity(value);
-   return true;
-});
-```
-
-An optional typed validator runs before mutation. Grouped edits validate every runtime part before
-applying any setter. Validators must have no side effects; setters should reject without mutation
-if applying a value is impossible. Physics fixtures, loaded assets, and references need a dedicated
-safe apply/reconstruction path before they can be bound. Leaving them unbound marks them **reload**.
+See the [Mechanism Editor guide](mechanism_editor.md) for picking overlapping objects, live and
+reload fields, color editing, Save/Discard behavior, backups, external Tiled edits, supported types,
+and the developer binding interface.
 
 ## Player Event Recording
 

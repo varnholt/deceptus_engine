@@ -16,7 +16,7 @@ class GameMechanism;
 class Level;
 struct TmxObject;
 
-/// \brief opt-in mechanism inspection and explicit runtime edits in a development window.
+/// \brief mechanism property editing in an explicitly opened development window.
 class MechanismInspector
 {
 public:
@@ -91,7 +91,6 @@ private:
    std::optional<sf::Vector2f> _position_filter;
    std::array<char, 256> _filter{};
    bool _picking{false};
-   bool _editing{false};
    bool _initialized{false};
    bool _scroll_to_selected{false};
    std::string _selection_status;
