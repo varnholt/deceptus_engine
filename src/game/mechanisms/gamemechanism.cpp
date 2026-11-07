@@ -1,10 +1,76 @@
 #include "gamemechanism.h"
 #include "game/mechanisms/gamemechanismobserver.h"
 
-int32_t GameMechanism::getZ() const
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+std::optional<std::string> GameMechanism::getInspectorProperty(const std::string& name) const
 {
-   return _z_index;
+   if (name == "enabled")
+   {
+      return isEnabled() ? "true" : "false";
+   }
+   if (name == "visible")
+   {
+      return isVisible() ? "true" : "false";
+   }
+   if (name == "observed")
+   {
+      return _observed ? "true" : "false";
+   }
+   if (name == "serialized")
+   {
+      return _serialized ? "true" : "false";
+   }
+   if (name == "z")
+   {
+      return std::format("{}", getZ());
+   }
+   const auto property = _inspector_properties.find(name);
+   return property == _inspector_properties.end() ? std::nullopt : std::optional{property->second.get()};
 }
+
+bool GameMechanism::setInspectorProperty(const std::string& name, const std::string& value)
+{
+   if (name == "enabled" || name == "visible" || name == "observed" || name == "serialized")
+   {
+      if (value != "true" && value != "false")
+      {
+         return false;
+      }
+      if (name == "enabled")
+      {
+         setEnabled(value == "true");
+      }
+      else if (name == "visible")
+      {
+         setVisible(value == "true");
+      }
+      else if (name == "observed")
+      {
+         _observed = value == "true";
+      }
+      else
+      {
+         _serialized = value == "true";
+      }
+      return true;
+   }
+   if (name == "z")
+   {
+      int32_t z;
+      std::istringstream input(value);
+      if (!(input >> z) || !(input >> std::ws).eof() || z < 0 || z > 50)
+      {
+         return false;
+      }
+      setZ(z);
+      return true;
+   }
+   const auto property = _inspector_properties.find(name);
+   return property != _inspector_properties.end() && property->second.set(value);
+}
+#endif
+
+int32_t GameMechanism::getZ() const { return _z_index; }
 
 void GameMechanism::setZ(const int32_t& z)
 {

@@ -172,6 +172,12 @@ public:
    /// \return level description filename.
    std::string getDescriptionFilename() const;
 
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   /// \brief returns the source map path for on-demand development inspection.
+   const std::string& getTmxFilename() const { return _description->_filename; }
+   void acceptInspectorContents(const std::string& contents) { _file_watcher.acceptInspectorContents(contents); }
+#endif
+
    /// \brief resolves which surface the player walks on at a given position.
    ///
    /// The footstep surface rectangles win where they overlap the position, everything else falls back

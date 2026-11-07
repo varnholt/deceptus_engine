@@ -112,6 +112,10 @@ std::optional<Skill::SkillType> skillFromName(const std::string& skill_name)
 
 SkillGate::SkillGate(GameNode* parent) : GameNode(parent)
 {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   bindInspectorProperty("fade_speed", _fade_speed);
+#endif
+
    setClassName(typeid(SkillGate).name());
 }
 

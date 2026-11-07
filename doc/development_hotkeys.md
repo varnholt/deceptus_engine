@@ -16,6 +16,63 @@ All hotkeys in this document are only active in `DEVELOPMENT_MODE` builds, excep
 | `F10` | Toggle profiling window |
 | `F12` | Toggle developer console |
 
+## Mechanism inspector and property editor
+
+On desktop development builds, enter `inspector` in the developer console (`F12`), then close
+that console to resume playing. The inspector is otherwise inactive and does not draw game overlays.
+
+Press **Pick an object in the game**, then left-click a position in the scene. The list filters to
+**every mechanism whose bounds contain that position**, including hidden objects and overlapping
+triggers or effects. Nothing is automatically selected. Choose any object from that filtered list,
+or clear the position filter to browse everything. Decorative tile graphics are not mechanism objects.
+
+The details show live state, the last saved level snapshot, source properties, outgoing/incoming
+Tiled references, and individual condition requirements. Follow a reference to inspect its target.
+Script-created connections are not inferred. Duplicate named IDs are flagged.
+
+Editing is disabled by default. Enable **Enable editing** to edit every property described by the
+mechanism schema using boolean, integer, float, string, or enum controls. Fields marked **live**
+preview through the mechanism's own runtime bindings; fields marked **reload** are authored changes
+that require a later manual level reload. The editor does not reconstruct mechanisms implicitly.
+
+Drafts remain attached to their objects when switching selections. **Save all property changes to TMX**
+commits the edited fields across all objects in one map update, without capturing unrelated runtime
+state. It writes object-level overrides, including for template instances, and leaves shared templates
+and other objects unchanged. A `.inspector.bak` backup is retained. If the map changed externally,
+saving is refused until the source is refreshed. Required values, numeric types, and enums are validated.
+
+The editor's exact saved contents are accepted by the file watcher **without auto-reloading** the
+level. Ordinary external edits in Tiled still trigger the normal reload. Saved properties marked
+**reload** take effect on a manual level reload (`L`). Live edits already affect the current object.
+
+Discarding restores unsaved live previews. Closing the inspector also discards unsaved previews in
+the active level; saved changes remain. Refreshing discards drafts and reloads source metadata.
+The inspector does not change pause settings, so normal focus-loss behavior still applies.
+
+The inspector, source writer, live bindings, and watcher suppression are excluded when
+`DECEPTUS_DEVELOPMENT_MODE=OFF`, and are not built for Switch or web targets.
+
+### Adding live support to a mechanism
+
+The inspector reads `MechanismSchema` for fields and retains exact TMX object IDs at the shared
+factory boundary. It does not guess source objects from names, which may be empty or duplicated.
+The editor contains no mechanism-type-specific mutation code.
+
+Common enabled/visible state, Z order, observation, and serialization flags use the existing
+mechanism interface. A mechanism opts additional member fields into live preview with:
+
+```cpp
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   bindInspectorProperty("speed", _speed, [](const float& value) { return value >= 0.0f; });
+#endif
+```
+
+Bind member fields whose lifetime matches the mechanism, and only when assigning the field is
+sufficient to update behavior safely. Derived caches, physics fixtures, loaded assets, and references
+need a dedicated setter/reconstruction path; leaving them unbound explicitly marks them **reload**.
+Bindings are provided for fan speed, bouncer force, blade behavior, collectible behavior, damage,
+ring shader tuning, lever handles, and gate fade speed. The same generic editor handles future bindings.
+
 ## Player Event Recording
 
 | Key | Action |

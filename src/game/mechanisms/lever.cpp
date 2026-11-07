@@ -209,6 +209,10 @@ const sf::FloatRect& Lever::getPixelRect() const
 
 Lever::Lever(GameNode* parent) : GameNode(parent)
 {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   bindInspectorProperty("handle_available", _handle_available);
+#endif
+
    setClassName(typeid(Lever).name());
 }
 

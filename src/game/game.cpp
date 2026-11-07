@@ -1001,6 +1001,12 @@ void Game::draw()
    {
       _profiling_ui->draw();
    }
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   if (_mechanism_inspector)
+   {
+      _mechanism_inspector->draw(_level_loading_finished ? _level : nullptr);
+   }
+#endif
 #endif
 }
 
@@ -1713,6 +1719,26 @@ void Game::processEvent(const sf::Event& event)
    }
    else if (auto* mouse_button_pressed_event = event.getIf<sf::Event::MouseButtonPressed>())
    {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+      if (_mechanism_inspector && _mechanism_inspector->isPicking() && _level_loading_finished && _level &&
+          mouse_button_pressed_event->button == sf::Mouse::Button::Left)
+      {
+         // undo the final image placement before mapping the click into the level view
+         const auto placement = GameConfiguration::getInstance().computeWindowImagePlacement();
+         const auto image_x = (static_cast<float>(mouse_button_pressed_event->position.x) - placement.offset_x) / placement.scale_x;
+         const auto image_y = (static_cast<float>(mouse_button_pressed_event->position.y) - placement.offset_y) / placement.scale_y;
+         const auto image_size = _window_render_texture->getSize();
+         std::optional<sf::Vector2f> position;
+         if (image_x >= 0.0f && image_y >= 0.0f && image_x < image_size.x && image_y < image_size.y)
+         {
+            position = _window_render_texture->mapPixelToCoords(
+               {static_cast<int32_t>(image_x), static_cast<int32_t>(image_y)}, *_level->getLevelView()
+            );
+         }
+         _mechanism_inspector->selectAt(position);
+         return;
+      }
+#endif
       if (mouse_button_pressed_event->button == sf::Mouse::Button::Right)
       {
          if (LevelRegistry::getCurrent())
@@ -1734,8 +1760,23 @@ void Game::processEvent(const sf::Event& event)
    EventDistributor::event(event);
 }
 
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+void Game::closeMechanismInspector()
+{
+   if (_mechanism_inspector)
+   {
+      _mechanism_inspector->discardPreviews(_level_loading_finished ? _level : nullptr);
+      _mechanism_inspector.reset();
+   }
+   DebugDrawStates::_draw_mechanism_inspector = false;
+}
+#endif
+
 void Game::shutdown()
 {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   closeMechanismInspector();
+#endif
    // quitting from the menu never goes past a Closed event, so the window size is written out here too
    GameConfiguration::getInstance().serializeToFile();
 
@@ -2050,5 +2091,23 @@ void Game::processEvents()
          _profiling_ui.reset();
       }
    }
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   if (DebugDrawStates::_draw_mechanism_inspector && !_mechanism_inspector)
+   {
+      _mechanism_inspector = std::make_unique<MechanismInspector>();
+   }
+   else if (!DebugDrawStates::_draw_mechanism_inspector && _mechanism_inspector)
+   {
+      closeMechanismInspector();
+   }
+   if (_mechanism_inspector)
+   {
+      _mechanism_inspector->processEvents();
+      if (!_mechanism_inspector->isOpen())
+      {
+         closeMechanismInspector();
+      }
+   }
+#endif
 #endif
 }

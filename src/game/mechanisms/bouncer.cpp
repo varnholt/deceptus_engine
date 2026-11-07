@@ -76,6 +76,10 @@ b2Body* Bouncer::getBody() const
 
 Bouncer::Bouncer(GameNode* parent, const GameDeserializeData& data) : FixtureNode(parent)
 {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   bindInspectorProperty("force", _force_value);
+#endif
+
    setClassName(typeid(Bouncer).name());
    setObjectId(data._tmx_object->_name);
    setZ(data._tmx_object_group->_z_index);

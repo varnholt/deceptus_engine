@@ -56,6 +56,10 @@ const auto registered_fan = []
 
 Fan::Fan(GameNode* parent) : GameNode(parent)
 {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   bindInspectorProperty("speed", _speed);
+#endif
+
    setClassName(typeid(Fan).name());
 }
 

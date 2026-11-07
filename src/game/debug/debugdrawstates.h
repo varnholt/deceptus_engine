@@ -11,6 +11,9 @@ struct DebugDrawStates
    static bool _draw_camera_system;
    static bool _draw_physics_config;
    static bool _draw_log;
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   static bool _draw_mechanism_inspector;
+#endif
 
    //! \brief when false the deferred lighting pass is bypassed and the level is drawn unlit
    static bool _draw_lighting;

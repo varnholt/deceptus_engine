@@ -1,0 +1,90 @@
+#pragma once
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+
+#include <SFML/Graphics.hpp>
+#include <array>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
+
+#include "game/mechanisms/gamemechanismschema.h"
+#include "game/mechanisms/mechanismcondition.h"
+
+class GameMechanism;
+class Level;
+struct TmxObject;
+
+/// \brief opt-in mechanism inspection and explicit runtime edits in a development window.
+class MechanismInspector
+{
+public:
+   MechanismInspector();
+   ~MechanismInspector();
+   void processEvents();
+   void draw(const std::shared_ptr<Level>& level);
+   [[nodiscard]] bool isOpen() const;
+   [[nodiscard]] bool isPicking() const;
+   void selectAt(const std::optional<sf::Vector2f>& position);
+   void discardPreviews(const std::shared_ptr<Level>& active_level);
+
+private:
+   struct Condition
+   {
+      std::string label;
+      std::optional<MechanismCondition> condition;
+   };
+
+   struct PropertyEdit
+   {
+      const PropertyInfo* schema{nullptr};
+      std::vector<char> buffer;
+      std::optional<std::string> original_live;
+      std::string initial_text;
+      bool changed{false};
+      bool valid{true};
+   };
+
+   struct Entry
+   {
+      std::string group;
+      std::string name;
+      std::string type;
+      std::weak_ptr<GameMechanism> mechanism;
+      std::shared_ptr<TmxObject> source;
+      std::vector<std::string> targets;
+      std::vector<Condition> conditions;
+      const MechanismSchema* schema{nullptr};
+      std::vector<PropertyEdit> properties;
+      bool properties_initialized{false};
+      std::string property_message;
+   };
+
+   void refresh(const std::shared_ptr<Level>& level);
+   void drawDetails(Entry& entry);
+   void drawReference(const std::string& name);
+   void followReference(size_t index);
+   void drawProperties(Entry& entry);
+   void discard(Entry& entry);
+   void saveProperties();
+   [[nodiscard]] std::optional<sf::FloatRect> bounds(const Entry& entry) const;
+
+   std::unique_ptr<sf::RenderWindow> _window;
+   sf::Clock _clock;
+   std::weak_ptr<Level> _level;
+   std::string _tmx_filename;
+   std::string _source_text;
+   std::vector<Entry> _entries;
+   std::optional<size_t> _selected;
+   std::vector<size_t> _picked;
+   std::optional<sf::Vector2f> _position_filter;
+   std::array<char, 256> _filter{};
+   bool _picking{false};
+   bool _editing{false};
+   bool _initialized{false};
+   bool _scroll_to_selected{false};
+   std::string _selection_status;
+};
+
+#endif

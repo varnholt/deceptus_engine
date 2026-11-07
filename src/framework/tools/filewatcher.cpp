@@ -1,6 +1,30 @@
 #include "filewatcher.h"
 
 #include "framework/tools/log.h"
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#include <fstream>
+#include <iterator>
+
+namespace
+{
+std::optional<std::string> readContents(const std::filesystem::path& path)
+{
+   std::ifstream file(path, std::ios::binary);
+   if (!file) return std::nullopt;
+   return std::string{std::istreambuf_iterator<char>{file}, {}};
+}
+}
+
+void FileWatcher::acceptInspectorContents(const std::string& contents)
+{
+   std::lock_guard lock(_mutex);
+   _inspector_contents = contents;
+   if (readContents(_path) == _inspector_contents)
+   {
+      _modified = false;
+   }
+}
+#endif
 
 FileWatcher::~FileWatcher()
 {
@@ -18,6 +42,9 @@ void FileWatcher::start(const std::filesystem::path& path, const std::string& de
    _description = description;
    _poll_interval = poll_interval;
    _modified = false;
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   _inspector_contents.reset();
+#endif
    _active = true;
 
    _thread = std::thread([this]() { poll(); });
@@ -51,9 +78,20 @@ void FileWatcher::poll()
       const auto current_time = std::filesystem::last_write_time(_path, error);
       if (!error && current_time != reference_time)
       {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+         std::lock_guard lock(_mutex);
+         const auto inspector_write = _inspector_contents && readContents(_path) == _inspector_contents;
+         _inspector_contents.reset();
+         if (!inspector_write)
+         {
+            Log::Info() << _description << " was modified, marking as dirty";
+            _modified = true;
+         }
+#else
          Log::Info() << _description << " was modified, marking as dirty";
-         reference_time = current_time;
          _modified = true;
+#endif
+         reference_time = current_time;
       }
 
       std::unique_lock<std::mutex> lock(_mutex);

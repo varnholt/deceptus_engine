@@ -20,9 +20,49 @@
 #include "game/mechanisms/watersurface.h"
 #include "game/mechanisms/weather.h"
 #include "gamemechanismdeserializerconstants.h"
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#include "framework/tmxparser/tmxproperties.h"
+#endif
 
 namespace
 {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+// retain the exact authoring object at the shared factory boundary, including unnamed objects
+struct InspectorSourceScope
+{
+   using Mechanisms = std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>;
+   std::shared_ptr<TmxObject> source;
+   std::vector<std::pair<std::vector<std::shared_ptr<GameMechanism>>*, size_t>> sizes;
+
+   InspectorSourceScope(const Mechanisms& mechanisms, const std::shared_ptr<TmxObject>& object) : source(object)
+   {
+      for (const auto& [group, items] : mechanisms)
+      {
+         if (items) sizes.emplace_back(items, items->size());
+      }
+   }
+
+   ~InspectorSourceScope()
+   {
+      std::shared_ptr<TmxObject> snapshot;
+      for (const auto& [items, start] : sizes)
+      {
+         for (size_t index = start; index < items->size(); ++index)
+         {
+            if (!snapshot)
+            {
+               snapshot = std::make_shared<TmxObject>(*source);
+               if (source->_properties)
+               {
+                  snapshot->_properties = std::make_shared<TmxProperties>(*source->_properties);
+               }
+            }
+            (*items)[index]->setInspectorSource(snapshot);
+         }
+      }
+   }
+};
+#endif
 void debugOutputMechanisms(const std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms)
 {
    Log::Info() << "[Mechanisms content]";
@@ -121,6 +161,9 @@ void GameMechanismDeserializer::deserialize(
                   const auto& object = pair.second;
                   data._tmx_object = object;
                   data._tmx_object_group = group;
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+                  const InspectorSourceScope inspector_source(mechanisms, object);
+#endif
 
                   // Log::Info() << "obj template name: " << object->_template_name.value_or("");
                   // Log::Info() << "obj template type: " << object->_template_type.value_or("");
@@ -211,6 +254,9 @@ void GameMechanismDeserializer::deserialize(
 
             data._tmx_object = tmx_object;
             data._tmx_object_group = object_group;
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+            const InspectorSourceScope inspector_source(mechanisms, tmx_object);
+#endif
 
             if (object_group->_name == layer_name_lasers_v1 || object_group->_name == layer_name_lasers ||
                 object_group->_name == layer_name_lasers_v2 || tmx_object->_template_type == type_name_laser)

@@ -14,8 +14,20 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+#include <cmath>
+#include <format>
+#include <functional>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <type_traits>
+#endif
 
 struct Room;
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+struct TmxObject;
+#endif
 
 /// \brief identifies which render stage a mechanism contributes to.
 ///
@@ -75,6 +87,55 @@ public:
    /// \brief enables or disables the mechanism.
    /// \param enabled true to enable the mechanism, false to disable it.
    virtual void setEnabled(bool enabled);
+
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   /// \brief developer-only live property access; unsupported properties require reconstruction.
+   bool setInspectorProperty(const std::string& name, const std::string& value);
+   std::optional<std::string> getInspectorProperty(const std::string& name) const;
+   const std::shared_ptr<TmxObject>& getInspectorSource() const { return _inspector_source; }
+   void setInspectorSource(const std::shared_ptr<TmxObject>& source) { _inspector_source = source; }
+
+   template <typename T>
+   void bindInspectorProperty(const std::string& name, T& field, std::type_identity_t<std::function<bool(const T&)>> valid = {})
+   {
+      _inspector_properties[name] = {
+         [&field]() { return std::format("{}", field); },
+         [&field, valid](const std::string& text)
+         {
+            T value{};
+            if constexpr (std::is_same_v<T, std::string>)
+            {
+               value = text;
+            }
+            else
+            {
+               std::istringstream input(text);
+               if constexpr (std::is_same_v<T, bool>)
+               {
+                  input >> std::boolalpha;
+               }
+               if (!(input >> value) || !(input >> std::ws).eof())
+               {
+                  return false;
+               }
+               if constexpr (std::is_floating_point_v<T>)
+               {
+                  if (!std::isfinite(value))
+                  {
+                     return false;
+                  }
+               }
+            }
+            if (valid && !valid(value))
+            {
+               return false;
+            }
+            field = value;
+            return true;
+         }
+      };
+   }
+#endif
 
    /// \brief toggles the enabled flag.
    virtual void toggle();
@@ -209,6 +270,15 @@ public:
    virtual void hit(int32_t damage);
 
 protected:
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   struct InspectorProperty
+   {
+      std::function<std::string()> get;
+      std::function<bool(const std::string&)> set;
+   };
+   std::map<std::string, InspectorProperty> _inspector_properties;
+   std::shared_ptr<TmxObject> _inspector_source;
+#endif
    int32_t _z_index{0};
    bool _enabled{true};
    bool _visible{true};

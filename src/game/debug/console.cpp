@@ -527,6 +527,12 @@ Console::Console()
    );
 
    // mechanisms
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   registerCallback("inspector", [](const auto&)
+   {
+      DebugDrawStates::_draw_mechanism_inspector = !DebugDrawStates::_draw_mechanism_inspector;
+   }, "leveldesign", "inspector: toggle the mechanism property editor (editing is opt-in)");
+#endif
    _help.registerCommand(
       "leveldesign",
       "mechanism <list/enable/disable> <type>: enable or disable every mechanism of a type",

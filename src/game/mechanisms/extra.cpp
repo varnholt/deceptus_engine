@@ -69,6 +69,14 @@ const auto registered_extra = []
 
 Extra::Extra(GameNode* parent) : GameNode(parent)
 {
+#ifdef DECEPTUS_MECHANISM_INSPECTOR
+   bindInspectorProperty("sine_amplitude_px", _sine_amplitude_px);
+   bindInspectorProperty("sine_frequency", _sine_frequency);
+   bindInspectorProperty("active", _active);
+   bindInspectorProperty("is_treasure", _is_treasure);
+   bindInspectorProperty("requires_button_press", _requires_button_press);
+#endif
+
    setClassName(typeid(Extra).name());
 }
 
