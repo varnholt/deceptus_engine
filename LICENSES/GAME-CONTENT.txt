@@ -1,0 +1,23 @@
+Deceptus game content - rights reserved
+Effective 8 November 2026
+
+Original game content remains owned by its respective rights holders.
+Artwork: dstar. Other authors retain their rights in their contributions.
+
+Except where a separate license or valid earlier permission applies, the
+Deceptus game's artwork, animations, textures, sprites, music, sound effects,
+levels, maps, story, dialogue, characters, branding and promotional images
+are not licensed for copying, adaptation, redistribution, sublicensing or
+sale. Obtain permission from the relevant rights holders for those uses.
+Availability in a source repository or downloadable build is not permission
+to resell the game or reuse its reserved content in another product.
+
+The reusable engine software identified in ../LICENSE.md has separate MIT
+terms for rights owned by Matthias Varnholt. Those terms allow commercial
+engine use but do not grant rights in the bundled Deceptus game content.
+
+This notice does not claim ownership of third-party or public-domain
+material, revoke earlier valid licenses (including CC BY-NC or CC0 where
+applicable), restrict statutory exceptions, or override a separate game
+purchase or end-user agreement. Dependencies and separately licensed assets
+retain their own terms. This is a source-content notice, not a retail EULA.
