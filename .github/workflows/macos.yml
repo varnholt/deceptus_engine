@@ -40,6 +40,11 @@ jobs:
             > artifacts/run.sh
           chmod +x artifacts/run.sh
 
+      - name: Include license notices
+        run: |
+          cp LICENSE.md artifacts/
+          cp -r LICENSES artifacts/
+
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
