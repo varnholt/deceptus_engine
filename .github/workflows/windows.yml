@@ -48,6 +48,12 @@ jobs:
           }
           Copy-Item -Force build/Release/SDL3.dll artifacts/
 
+      - name: Include license notices
+        shell: pwsh
+        run: |
+          Copy-Item -Force LICENSE.md artifacts/
+          Copy-Item -Recurse -Force LICENSES artifacts/
+
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:

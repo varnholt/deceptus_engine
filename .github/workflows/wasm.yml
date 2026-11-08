@@ -48,6 +48,11 @@ jobs:
              build_wasm/deceptus.wasm build_wasm/deceptus.data artifacts/
           cp build_wasm/index.html artifacts/ 2>/dev/null || true
 
+      - name: Include license notices
+        run: |
+          cp LICENSE.md artifacts/
+          cp -r LICENSES artifacts/
+
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:

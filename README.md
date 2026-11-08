@@ -242,9 +242,15 @@ chat, [please join us on Discord!](https://discord.gg/EZpkbGDaWD)
 
 # License
 
-The engine is released under
-[Creative Commons Attribution-NonCommercial 4.0 International](LICENSE.md) and is free to use on
-those terms.
+Original engine code owned by Matthias Varnholt is available under the
+[MIT License](LICENSES/ENGINE-MIT.txt), including use in commercial games.
+The [root licensing policy](LICENSE.md) defines the scope and third-party exceptions.
 
-The artwork is not. dstar owns it. It is in this repository so that the engine has a game to run,
-and it is not licensed for reuse, so ask first if you want to use any of it.
+**The Deceptus game content is not included in that grant.** Artwork remains
+owned by dstar. Game assets, levels, story, music, sounds and branding retain
+their owners' rights; selling or redistributing the game or reusing its reserved
+content requires permission unless a valid separate or earlier license permits it.
+See [game-content terms](LICENSES/GAME-CONTENT.txt) and [license scope](LICENSES/README.md).
+
+Earlier valid permissions are preserved. Bundled dependencies, generated code
+and other authors' contributions keep their respective terms.
