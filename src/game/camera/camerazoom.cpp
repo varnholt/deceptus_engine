@@ -1,5 +1,6 @@
 #include "camerazoom.h"
 
+#include <cmath>
 #include <limits>
 
 void CameraZoom::update(const sf::Time& dt)
