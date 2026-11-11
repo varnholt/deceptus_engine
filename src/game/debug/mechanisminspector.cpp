@@ -535,55 +535,77 @@ void MechanismInspector::draw_hover(
       _hover_clock.restart();
       return;
    }
-   const auto cursor = sf::Vector2f(sf::Mouse::getPosition(window));
-   if (!level || !placement.contains(cursor) || placement.size.x <= 0.0f || placement.size.y <= 0.0f)
+   if (!level || placement.size.x <= 0.0f || placement.size.y <= 0.0f)
    {
       _hovered.clear();
       _hover_clock.restart();
       return;
    }
+   const auto cursor = sf::Vector2f(sf::Mouse::getPosition(window));
    const auto image_size = image.getSize();
    const sf::Vector2f scale{placement.size.x / image_size.x, placement.size.y / image_size.y};
-   const sf::Vector2i pixel{
-      static_cast<int>((cursor.x - placement.position.x) / scale.x), static_cast<int>((cursor.y - placement.position.y) / scale.y)
-   };
    const auto& camera = *level->getLevelView();
-   const auto position = image.mapPixelToCoords(pixel, camera);
-   if (_hover_clock.getElapsedTime() >= sf::milliseconds(100))
+   if (placement.contains(cursor))
    {
-      _hovered = hits_at(position, image_size, pixel);
+      const sf::Vector2i pixel{
+         static_cast<int>((cursor.x - placement.position.x) / scale.x), static_cast<int>((cursor.y - placement.position.y) / scale.y)
+      };
+      if (_hover_clock.getElapsedTime() >= sf::milliseconds(100))
+      {
+         _hovered = hits_at(image.mapPixelToCoords(pixel, camera), image_size, pixel);
+         _hover_clock.restart();
+      }
+   }
+   else
+   {
+      _hovered.clear();
       _hover_clock.restart();
    }
-   if (_hovered.empty())
+   if (_hovered.empty() && !_show_all_bounds)
    {
       return;
    }
    const auto previous_view = window.getView();
    window.setView(window.getDefaultView());
-   const sf::Color accent{255, 215, 70};
-   std::string labels;
-   for (const auto index : _hovered)
+   const auto draw_outline = [&](const Entry& entry, const sf::Color& color, const sf::Color& fill, float thickness)
    {
-      const auto& entry = _entries[index];
       if (const auto rect = bounds(entry))
       {
          const auto first = sf::Vector2f(image.mapCoordsToPixel(rect->position, camera));
          const auto last = sf::Vector2f(image.mapCoordsToPixel(rect->position + rect->size, camera));
-         // clip source bounds to the game image so large trigger volumes cannot cover letterbox bars
-         const auto left = std::clamp(first.x, 0.0f, static_cast<float>(image_size.x));
-         const auto top = std::clamp(first.y, 0.0f, static_cast<float>(image_size.y));
-         const auto right = std::clamp(last.x, left, static_cast<float>(image_size.x));
-         const auto bottom = std::clamp(last.y, top, static_cast<float>(image_size.y));
+         // clip source bounds to the game image and skip sources outside the camera
+         const auto left = std::clamp(std::min(first.x, last.x), 0.0f, static_cast<float>(image_size.x));
+         const auto top = std::clamp(std::min(first.y, last.y), 0.0f, static_cast<float>(image_size.y));
+         const auto right = std::clamp(std::max(first.x, last.x), 0.0f, static_cast<float>(image_size.x));
+         const auto bottom = std::clamp(std::max(first.y, last.y), 0.0f, static_cast<float>(image_size.y));
+         if (left >= right || top >= bottom)
+         {
+            return;
+         }
          DebugDraw::drawRect(
             window,
             sf::FloatRect{
                placement.position + sf::Vector2f{left * scale.x, top * scale.y}, {(right - left) * scale.x, (bottom - top) * scale.y}
             },
-            accent,
-            {255, 215, 70, 30},
-            -2.0f
+            color,
+            fill,
+            thickness
          );
       }
+   };
+   if (_show_all_bounds)
+   {
+      for (const auto& entry : _entries)
+      {
+         draw_outline(entry, {255, 215, 70, 90}, sf::Color::Transparent, -1.0f);
+      }
+   }
+   const sf::Color accent{255, 215, 70};
+   std::string labels;
+   for (const auto index : _hovered)
+   {
+      const auto& entry = _entries[index];
+      draw_outline(entry, accent, {255, 215, 70, 30}, -2.0f);
       if (!labels.empty())
       {
          labels += '\n';
@@ -1064,6 +1086,7 @@ void MechanismInspector::draw(const std::shared_ptr<Level>& level)
    {
       ImGui::SameLine();
       ImGui::TextColored(ImVec4(1.0f, 0.85f, 0.3f, 1.0f), "Picking active: left-click an object in the game window.");
+      ImGui::Checkbox("Show all mechanism bounds", &_show_all_bounds);
    }
    if (!_selection_status.empty())
    {

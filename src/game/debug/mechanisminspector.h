@@ -41,7 +41,7 @@ public:
    /// \param image_pixel exact clicked pixel within that image, using a top-left origin.
    /// \note visual sampling renders only for this explicit request and does not advance simulation.
    void selectAt(const std::optional<sf::Vector2f>& position, sf::Vector2u image_size, sf::Vector2i image_pixel);
-   /// \brief highlights and labels mechanisms under the game cursor only while picking is active.
+   /// \brief draws optional mechanism outlines and labels hover matches only while picking is active.
    /// \param window game window receiving the overlay in window pixel coordinates.
    /// \param level active loaded level, or null when no scene is available.
    /// \param image game image used to map pixels through the level camera.
@@ -157,6 +157,7 @@ private:
    std::optional<sf::Vector2f> _position_filter;     //!< last valid picking position in world coordinates.
    std::array<char, 256> _filter{};                  //!< null-terminated text search buffer.
    bool _picking{false};                             //!< whether the next valid game click should filter sources.
+   bool _show_all_bounds{false};                     //!< whether active picking also outlines every source inside the game image.
    bool _initialized{false};                         //!< whether ImGui initialization succeeded.
    bool _scroll_to_selected{false};                  //!< whether reference navigation should scroll to the selected entry.
    std::string _selection_status;                    //!< picking and save feedback shown above the source list.

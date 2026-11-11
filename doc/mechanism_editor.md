@@ -34,6 +34,11 @@ are listed together. Hovering does not change the selection or position filter. 
 disappears after a valid pick, when picking is canceled, when the cursor leaves the game image, or
 when the editor closes.
 
+Enable **Show all mechanism bounds** while picking to locate invisible triggers and effects. This
+option starts unchecked. It draws faint outlines without fills for mechanism bounds on screen,
+including while the cursor is over the editor. Labels and stronger highlights appear only under the
+game cursor. The overview and hover highlights disappear when picking ends.
+
 Picking is armed for one valid click. Press the picking button again for another position, or
 **Cancel picking** before clicking the game. Click inside the game image rather than a letterbox bar.
 
