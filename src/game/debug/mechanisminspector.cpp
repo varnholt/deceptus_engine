@@ -529,6 +529,12 @@ void MechanismInspector::draw_hover(
    {
       refresh(level);
    }
+   if (!isPicking())
+   {
+      _hovered.clear();
+      _hover_clock.restart();
+      return;
+   }
    const auto cursor = sf::Vector2f(sf::Mouse::getPosition(window));
    if (!level || !placement.contains(cursor) || placement.size.x <= 0.0f || placement.size.y <= 0.0f)
    {
@@ -1051,6 +1057,8 @@ void MechanismInspector::draw(const std::shared_ptr<Level>& level)
    if (ImGui::Button(_picking ? "Cancel picking" : "Pick an object in the game"))
    {
       _picking = !_picking;
+      _hovered.clear();
+      _hover_clock.restart();
    }
    if (_picking)
    {

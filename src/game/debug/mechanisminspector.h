@@ -41,7 +41,7 @@ public:
    /// \param image_pixel exact clicked pixel within that image, using a top-left origin.
    /// \note visual sampling renders only for this explicit request and does not advance simulation.
    void selectAt(const std::optional<sf::Vector2f>& position, sf::Vector2u image_size, sf::Vector2i image_pixel);
-   /// \brief highlights and labels all mechanisms under the game cursor while the editor is open.
+   /// \brief highlights and labels mechanisms under the game cursor only while picking is active.
    /// \param window game window receiving the overlay in window pixel coordinates.
    /// \param level active loaded level, or null when no scene is available.
    /// \param image game image used to map pixels through the level camera.
@@ -145,7 +145,7 @@ private:
    std::unique_ptr<sf::RenderWindow> _window;        //!< independent editor window.
    std::unique_ptr<sf::RenderTexture> _pick_color;   //!< color sampling target allocated lazily for editor picking and hover checks.
    std::unique_ptr<sf::RenderTexture> _pick_normal;  //!< companion normal target used by the existing draw interface.
-   sf::Clock _hover_clock;                           //!< limits visual hover sampling while the editor is open.
+   sf::Clock _hover_clock;                           //!< limits visual hover sampling while picking is active.
    std::vector<size_t> _hovered;                     //!< last sampled hover matches, independent of the picking filter.
    sf::Clock _clock;                                 //!< elapsed time between editor UI frames.
    std::weak_ptr<Level> _level;                      //!< edited level without extending its lifetime.
