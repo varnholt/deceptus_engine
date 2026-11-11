@@ -183,6 +183,14 @@ void LevelScript::setup(const std::filesystem::path& path)
    _lua_state = luaL_newstate();
 
    // register callbacks
+   lua_newtable(_lua_state);
+   lua_pushcfunction(_lua_state, LevelScriptCallbacks::progressCompleted);
+   lua_setfield(_lua_state, -2, "completed");
+   lua_pushcfunction(_lua_state, LevelScriptCallbacks::progressComplete);
+   lua_setfield(_lua_state, -2, "complete");
+   lua_pushcfunction(_lua_state, LevelScriptCallbacks::progressReset);
+   lua_setfield(_lua_state, -2, "reset");
+   lua_setglobal(_lua_state, "progress");
    lua_register(_lua_state, "addAchievement", LevelScriptCallbacks::addAchievement);
    lua_register(_lua_state, "hasAchievement", LevelScriptCallbacks::hasAchievement);
    lua_register(_lua_state, "addTreasure", LevelScriptCallbacks::addTreasure);

@@ -4,7 +4,7 @@ _initialized = false
 
 -- the owl statue carries two cut rubies as eyes, and the inventory item that holds them is called "gems"
 _owl_eye_item = "gems"
-_owl_eyes_taken_treasure = "graveyard_owl_eyes_taken"
+_owl_eyes_taken_progress = "graveyard_owl_eyes_taken"
 
 -- seconds left until the pickup message is shown, or nil when none is pending
 _pickup_message_delay_s = nil
@@ -42,6 +42,11 @@ _crypt_exit_cooldown_s = 0.0
 
 ------------------------------------------------------------------------------------------------------------------------
 function initialize()
+   for _, id in ipairs({_owl_eyes_taken_progress, "catacombs_owl_eyes_inserted"}) do
+      if (hasTreasure(id)) then
+         progress.complete(id)
+      end
+   end
    setInfoLayerVisible(true)
 end
 
@@ -79,8 +84,8 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- taking the eyes remains true after the catacombs shrine consumes the rubies
 function owlEyesTaken()
-   return hasTreasure(_owl_eyes_taken_treasure) or inventoryHas(_owl_eye_item)
-      or hasTreasure("catacombs_owl_eyes_inserted")
+   return progress.completed(_owl_eyes_taken_progress) or inventoryHas(_owl_eye_item)
+      or progress.completed("catacombs_owl_eyes_inserted")
 end
 
 function initShrine()
@@ -90,7 +95,7 @@ function initShrine()
 
    -- the ground stays down for good, coming back with the rubies finds the hole already there
    if (owl_eyes_taken) then
-      addTreasure(_owl_eyes_taken_treasure)
+      progress.complete(_owl_eyes_taken_progress)
       openSinkhole()
    end
 end
@@ -113,7 +118,7 @@ function takeOwlEyes()
    end
 
    log("owl eyes taken")
-   addTreasure(_owl_eyes_taken_treasure)
+   progress.complete(_owl_eyes_taken_progress)
 
    setOwlEyesPresent(false)
    inventoryAdd(_owl_eye_item)

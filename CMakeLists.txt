@@ -617,6 +617,7 @@ set(GAME_FILES
     src/game/state/gamestate.h
     src/game/state/savestate.cpp
     src/game/state/savestate.h
+    src/game/state/progressionstate.h
     src/game/tests/test.cpp
     src/game/tests/test.h
     src/game/ui/menulabel.cpp
