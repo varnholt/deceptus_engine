@@ -28,6 +28,10 @@ The editor does not change the game's pause-on-focus-loss setting.
 
 ### Finding objects
 
+While the editor is open, hovering inside the game outlines matching mechanisms and shows their
+names, types, and TMX source IDs beside the cursor. Overlapping matches are listed together.
+Hovering does not change the selection or position filter. The overlay disappears when the cursor leaves the game image or the editor closes.
+
 Picking is armed for one valid click. Press the picking button again for another position, or
 **Cancel picking** before clicking the game. Click inside the game image rather than a letterbox bar.
 
@@ -142,8 +146,8 @@ There is no separate editor feature define.
 
 The editor starts closed. Property bindings are initialized lazily when an instance is first viewed,
 after construction. Constructors and gameplay updates do not initialize or consult the binding
-registry, and ordinary runtime fields remain unchanged. Visual pixel checks run only during an
-explicit pick, not as a continuous render pass. The editor, adapters, and watcher suppression are
+registry, and ordinary runtime fields remain unchanged. Visual pixel checks run during an explicit pick and at most ten times per second for hover
+feedback while the editor is open and the cursor is inside the game image. The editor, adapters, and watcher suppression are
 excluded from non-development builds.
 
 ### Describe properties and bind live behavior

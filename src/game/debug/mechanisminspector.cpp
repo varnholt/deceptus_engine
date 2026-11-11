@@ -15,6 +15,7 @@
 #include "framework/tmxparser/tmxproperty.h"
 #include "framework/tools/log.h"
 #include "framework/tools/stringutils.h"
+#include "game/debug/debugdraw.h"
 #include "game/debug/mechanismsourceeditor.h"
 #include "game/level/gamenode.h"
 #include "game/level/level.h"
@@ -156,6 +157,8 @@ void MechanismInspector::refresh(const std::shared_ptr<Level>& level)
    discardPreviews(level);
    _level = level;
    _entries.clear();
+   _hovered.clear();
+   _hover_clock.restart();
    _picked.clear();
    _position_filter.reset();
    _selected.reset();
@@ -441,6 +444,50 @@ bool MechanismInspector::renderedAt(const Entry& entry, sf::Vector2i pixel, cons
    );
 }
 
+std::vector<size_t> MechanismInspector::hits_at(sf::Vector2f position, sf::Vector2u image_size, sf::Vector2i pixel)
+{
+   const auto level = _level.lock();
+   if (!level || image_size.x == 0 || image_size.y == 0)
+   {
+      return {};
+   }
+   // share the same visual hit detection between explicit picking and editor-only hover checks
+   if (!_pick_color || _pick_color->getSize() != image_size)
+   {
+      auto color = std::make_unique<sf::RenderTexture>();
+      auto normal = std::make_unique<sf::RenderTexture>();
+      if (!color->resize(image_size) || !normal->resize(image_size))
+      {
+         return {};
+      }
+      _pick_color = std::move(color);
+      _pick_normal = std::move(normal);
+   }
+   auto view = *level->getLevelView();
+   // retain the real camera and image resolution; scissoring limits ordinary draws to the sampled pixel region
+   const auto left = std::max(0, pixel.x - 1);
+   const auto top = std::max(0, pixel.y - 1);
+   const auto right = std::min(static_cast<int>(image_size.x), pixel.x + 2);
+   const auto bottom = std::min(static_cast<int>(image_size.y), pixel.y + 2);
+   if (left >= right || top >= bottom)
+   {
+      return {};
+   }
+   view.setScissor(sf::FloatRect{
+      {static_cast<float>(left) / image_size.x, static_cast<float>(top) / image_size.y},
+      {static_cast<float>(right - left) / image_size.x, static_cast<float>(bottom - top) / image_size.y}
+   });
+   std::vector<size_t> hits;
+   for (size_t index = 0; index < _entries.size(); ++index)
+   {
+      if (const auto rect = bounds(_entries[index]); (rect && rect->contains(position)) || renderedAt(_entries[index], pixel, view))
+      {
+         hits.push_back(index);
+      }
+   }
+   return hits;
+}
+
 void MechanismInspector::selectAt(const std::optional<sf::Vector2f>& position, sf::Vector2u image_size, sf::Vector2i pixel)
 {
    _picked.clear();
@@ -457,48 +504,90 @@ void MechanismInspector::selectAt(const std::optional<sf::Vector2f>& position, s
       _window->requestFocus();
       return;
    }
-   // allocate and use the visual picking targets only for an explicit pick, never in the gameplay draw path
-   if (!_pick_color || _pick_color->getSize() != image_size)
-   {
-      auto color = std::make_unique<sf::RenderTexture>();
-      auto normal = std::make_unique<sf::RenderTexture>();
-      if (!color->resize(image_size) || !normal->resize(image_size))
-      {
-         _selection_status = "Could not create the picking render targets.";
-         _picking = false;
-         return;
-      }
-      _pick_color = std::move(color);
-      _pick_normal = std::move(normal);
-   }
-   auto view = *level->getLevelView();
-   // retain the real camera and image resolution; scissoring limits ordinary draws to the sampled pixel region
-   const auto left = std::max(0, pixel.x - 1);
-   const auto top = std::max(0, pixel.y - 1);
-   const auto right = std::min(static_cast<int>(image_size.x), pixel.x + 2);
-   const auto bottom = std::min(static_cast<int>(image_size.y), pixel.y + 2);
-   if (left >= right || top >= bottom)
-   {
-      return;
-   }
-   view.setScissor(sf::FloatRect{
-      {static_cast<float>(left) / image_size.x, static_cast<float>(top) / image_size.y},
-      {static_cast<float>(right - left) / image_size.x, static_cast<float>(bottom - top) / image_size.y}
-   });
    _position_filter = position;
-   for (size_t index = 0; index < _entries.size(); ++index)
-   {
-      if (const auto rect = bounds(_entries[index]); (rect && rect->contains(*position)) || renderedAt(_entries[index], pixel, view))
-      {
-         _picked.push_back(index);
-      }
-   }
+   _picked = hits_at(*position, image_size, pixel);
    _filter[0] = '\0';
    _picking = false;
    _selection_status =
       std::format("Position {:.0f}, {:.0f}: {} mechanisms. Choose one from the filtered list.", position->x, position->y, _picked.size());
    Log::Info() << "mechanism editor: " << _selection_status;
    _window->requestFocus();
+}
+
+void MechanismInspector::draw_hover(
+   sf::RenderWindow& window,
+   const std::shared_ptr<Level>& level,
+   const sf::RenderTexture& image,
+   sf::FloatRect placement
+)
+{
+   if (!isOpen())
+   {
+      return;
+   }
+   if (_level.lock() != level)
+   {
+      refresh(level);
+   }
+   const auto cursor = sf::Vector2f(sf::Mouse::getPosition(window));
+   if (!level || !placement.contains(cursor) || placement.size.x <= 0.0f || placement.size.y <= 0.0f)
+   {
+      _hovered.clear();
+      _hover_clock.restart();
+      return;
+   }
+   const auto image_size = image.getSize();
+   const sf::Vector2f scale{placement.size.x / image_size.x, placement.size.y / image_size.y};
+   const sf::Vector2i pixel{
+      static_cast<int>((cursor.x - placement.position.x) / scale.x), static_cast<int>((cursor.y - placement.position.y) / scale.y)
+   };
+   const auto& camera = *level->getLevelView();
+   const auto position = image.mapPixelToCoords(pixel, camera);
+   if (_hover_clock.getElapsedTime() >= sf::milliseconds(100))
+   {
+      _hovered = hits_at(position, image_size, pixel);
+      _hover_clock.restart();
+   }
+   if (_hovered.empty())
+   {
+      return;
+   }
+   const auto previous_view = window.getView();
+   window.setView(window.getDefaultView());
+   const sf::Color accent{255, 215, 70};
+   std::string labels;
+   for (const auto index : _hovered)
+   {
+      const auto& entry = _entries[index];
+      if (const auto rect = bounds(entry))
+      {
+         const auto first = sf::Vector2f(image.mapCoordsToPixel(rect->position, camera));
+         const auto last = sf::Vector2f(image.mapCoordsToPixel(rect->position + rect->size, camera));
+         // clip source bounds to the game image so large trigger volumes cannot cover letterbox bars
+         const auto left = std::clamp(first.x, 0.0f, static_cast<float>(image_size.x));
+         const auto top = std::clamp(first.y, 0.0f, static_cast<float>(image_size.y));
+         const auto right = std::clamp(last.x, left, static_cast<float>(image_size.x));
+         const auto bottom = std::clamp(last.y, top, static_cast<float>(image_size.y));
+         DebugDraw::drawRect(
+            window,
+            sf::FloatRect{
+               placement.position + sf::Vector2f{left * scale.x, top * scale.y}, {(right - left) * scale.x, (bottom - top) * scale.y}
+            },
+            accent,
+            {255, 215, 70, 30},
+            -2.0f
+         );
+      }
+      if (!labels.empty())
+      {
+         labels += '\n';
+      }
+      labels += std::format(
+         "{}{}{} [#{}]", entry.type, entry.name.empty() ? "" : ": ", entry.name, entry.source ? entry.source->_id : std::string{}
+      );
+   }
+   DebugDraw::draw_label(window, labels, cursor + sf::Vector2f{18.0f, 18.0f}, placement, accent);
+   window.setView(previous_view);
 }
 
 void MechanismInspector::followReference(size_t index)

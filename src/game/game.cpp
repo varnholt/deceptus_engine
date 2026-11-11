@@ -950,6 +950,19 @@ void Game::draw()
    _draw_section_timer.mark("window copy");
 #endif
 
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   if (_mechanism_inspector && GameState::getInstance().getMode() != ExecutionMode::NotRunning && !Menu::getInstance()->isVisible())
+   {
+      const auto image_size = _window_render_texture->getSize();
+      _mechanism_inspector->draw_hover(
+         *_window,
+         _level_loading_finished ? _level : nullptr,
+         *_window_render_texture,
+         {{placement.offset_x, placement.offset_y}, {image_size.x * placement.scale_x, image_size.y * placement.scale_y}}
+      );
+   }
+#endif
+
 #ifdef DEVELOPMENT_MODE
    sf::Clock window_display_clock;
 #endif
