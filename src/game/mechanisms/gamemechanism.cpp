@@ -5,6 +5,11 @@
 #include "game/effects/lightsystem.h"
 #include "game/level/levelregistry.h"
 
+std::optional<sf::FloatRect> GameMechanism::get_editor_bounds()
+{
+   return getBoundingBoxPx();
+}
+
 MechanismPropertyBindings& GameMechanism::inspectorProperties()
 {
    if (!_inspector_properties)

@@ -84,6 +84,10 @@ public:
    virtual void setEnabled(bool enabled);
 
 #if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \brief returns bounds used by development-editor picking and highlights.
+   /// \return current visual bounds when specialized, otherwise gameplay bounds; null when unavailable.
+   /// \note querying editor bounds does not modify simulation or gameplay interaction geometry.
+   [[nodiscard]] virtual std::optional<sf::FloatRect> get_editor_bounds();
    /// \brief validates and applies an explicit development-editor property change.
    /// \param name authored property name.
    /// \param value candidate text accepted by the shared typed binding.

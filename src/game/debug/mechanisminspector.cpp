@@ -386,7 +386,7 @@ std::optional<sf::FloatRect> MechanismInspector::bounds(const Entry& entry) cons
    {
       if (const auto mechanism = part.lock())
       {
-         if (const auto rect = mechanism->getBoundingBoxPx())
+         if (const auto rect = mechanism->get_editor_bounds())
          {
             if (!combined)
             {

@@ -48,6 +48,13 @@ public:
    /// \return rope bounding rectangle in pixel space.
    std::optional<sf::FloatRect> getBoundingBoxPx() override;
 
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \brief measures the interpolated rope geometry drawn for the current frame.
+   /// \return world-space strip bounds, or null before drawable geometry is available.
+   /// \note leaves the player interaction area and chunk assignments unchanged.
+   [[nodiscard]] std::optional<sf::FloatRect> get_editor_bounds() override;
+#endif
+
    /// \brief builds rope geometry, reads tmx properties, and creates box2d joints.
    /// \param data deserialization data with polyline path, world, and properties.
    virtual void setup(const GameDeserializeData& data);

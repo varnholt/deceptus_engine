@@ -137,7 +137,7 @@ private:
    /// \param view game camera with a scissor region covering the sampled pixel.
    /// \return true if any runtime part contributes nonzero alpha at the pixel.
    bool renderedAt(const Entry& entry, sf::Vector2i pixel, const sf::View& view);
-   /// \brief combines runtime interaction bounds, falling back to authoring geometry when unavailable.
+   /// \brief combines runtime editor bounds, falling back to authoring geometry when unavailable.
    /// \param entry source whose bounds are requested.
    /// \return world-space bounds, or null when neither runtime nor source geometry is available.
    [[nodiscard]] std::optional<sf::FloatRect> bounds(const Entry& entry) const;

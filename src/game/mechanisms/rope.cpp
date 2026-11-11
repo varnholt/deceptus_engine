@@ -11,8 +11,10 @@
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 #include "game/player/playerregistry.h"
 
+#include <algorithm>
 #include <array>
 #include <iostream>
+#include <ranges>
 
 int32_t Rope::_instance_counter = 0;
 
@@ -277,6 +279,19 @@ std::optional<sf::FloatRect> Rope::getBoundingBoxPx()
 {
    return _bounding_box;
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+std::optional<sf::FloatRect> Rope::get_editor_bounds()
+{
+   if (_strip.empty())
+   {
+      return std::nullopt;
+   }
+   const auto [left, right] = std::ranges::minmax(_strip | std::views::transform([](const auto& vertex) { return vertex.position.x; }));
+   const auto [top, bottom] = std::ranges::minmax(_strip | std::views::transform([](const auto& vertex) { return vertex.position.y; }));
+   return sf::FloatRect{{left, top}, {right - left, bottom - top}};
+}
+#endif
 
 void Rope::setup(const GameDeserializeData& data)
 {

@@ -38,7 +38,9 @@ Picking is armed for one valid click. Press the picking button again for another
 The position filter includes rendered pixels outside a mechanism's interaction rectangle, so a
 swinging lamp can be selected at its visible position. Each runtime instance is checked separately,
 so other objects cannot hide it from selection. Interaction/source bounds also include hidden
-mechanisms and trigger volumes. Decorative tile graphics are not mechanism objects.
+mechanisms and trigger volumes. Rope and hanging-lamp highlights follow their current rendered
+geometry, including interpolated movement and lamp rotation, independently of their gameplay
+interaction area. Decorative tile graphics are not mechanism objects.
 
 Use **Clear position filter** to browse elsewhere, and the search field to filter by object name,
 group, type, or numeric TMX source ID. Drafts remain attached to their sources when selecting
