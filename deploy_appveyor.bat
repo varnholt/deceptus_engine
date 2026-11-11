@@ -10,3 +10,5 @@ xcopy /E /Y tools\deceptus-updater\deceptus_updater.exe artifacts
 xcopy /E /Y tools\deceptus-updater\files.json artifacts
 
 IF EXIST build\Release\deceptus.pdb xcopy /C /Y build\Release\deceptus.pdb artifacts
+
+IF EXIST build\deceptus.pdb xcopy /C /Y build\deceptus.pdb artifacts
