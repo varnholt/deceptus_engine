@@ -6,6 +6,7 @@
 #include <span>
 
 #include "framework/tools/localization.h"
+#include "framework/tools/localizedtext.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/camera/camerasystem.h"
 #include "game/physics/worldquery.h"
@@ -309,7 +310,16 @@ void DebugDraw::drawRect(
    float thickness
 )
 {
-   drawRect(target, sf::FloatRect{sf::Vector2f(rect.position), sf::Vector2f(rect.size)}, color, fill_color, thickness);
+   drawRect(
+      target,
+      sf::FloatRect{
+         {static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)},
+         {static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)}
+      },
+      color,
+      fill_color,
+      thickness
+   );
 }
 
 void DebugDraw::drawRect(
@@ -383,7 +393,7 @@ void DebugDraw::draw_label(
       return;
    }
    auto text = sfcompat::createText(getFont());
-   text.setString(label);
+   text.setString(LocalizedText::toSfmlString(label));
    text.setCharacterSize(character_size);
    text.setFillColor(color);
    const auto text_bounds = text.getLocalBounds();
