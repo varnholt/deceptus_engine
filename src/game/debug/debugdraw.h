@@ -1,11 +1,12 @@
 #pragma once
 
-#include "box2d/box2d.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+#include "box2d/box2d.h"
 
 #include <cmath>
 #include <memory>
+#include <string>
 
 #include "game/level/level.h"
 
@@ -102,11 +103,13 @@ void drawPolygon(sf::RenderTarget& target, const b2Vec2* vertices, int32 vertex_
 /// \param rect rectangle in pixels.
 /// \param color rectangle outline color.
 /// \param fill_color rectangle fill color.
+/// \param thickness outline thickness in view units; negative values draw inside the bounds.
 void drawRect(
    sf::RenderTarget& target,
    const sf::FloatRect& rect,
    const sf::Color& color = sf::Color::Blue,
-   const sf::Color& fill_color = sf::Color::Transparent
+   const sf::Color& fill_color = sf::Color::Transparent,
+   float thickness = 0.5f
 );
 
 /// \brief draws an integer rectangle with configurable outline and fill colors.
@@ -114,11 +117,13 @@ void drawRect(
 /// \param rect rectangle in pixels.
 /// \param color rectangle outline color.
 /// \param fill_color rectangle fill color.
+/// \param thickness outline thickness in view units; negative values draw inside the bounds.
 void drawRect(
    sf::RenderTarget& target,
    const sf::IntRect& rect,
    const sf::Color& color = sf::Color::Blue,
-   const sf::Color& fill_color = sf::Color::Transparent
+   const sf::Color& fill_color = sf::Color::Transparent,
+   float thickness = 0.5f
 );
 
 /// \brief applies outline and fill colors to a shape and draws it.
@@ -126,11 +131,31 @@ void drawRect(
 /// \param shape shape instance to draw.
 /// \param color outline color.
 /// \param fill_color fill color.
+/// \param thickness outline thickness in view units; negative values draw inside the shape.
 void drawShape(
    sf::RenderTarget& target,
    sf::Shape& shape,
    const sf::Color& color = sf::Color::Red,
-   const sf::Color& fill_color = sf::Color::Transparent
+   const sf::Color& fill_color = sf::Color::Transparent,
+   float thickness = 0.5f
+);
+
+/// \brief draws a text panel near an anchor, clamping its position to a containing rectangle.
+/// \param target render target; coordinates and sizes use its current view, which is preserved.
+/// \param label text to display, including optional newlines; an empty label draws nothing.
+/// \param anchor desired top-left panel position before clamping.
+/// \param container bounds used to keep the panel inside when it fits.
+/// \param color text color.
+/// \param background panel fill color.
+/// \param character_size text character size.
+void draw_label(
+   sf::RenderTarget& target,
+   const std::string& label,
+   sf::Vector2f anchor,
+   const sf::FloatRect& container,
+   const sf::Color& color = sf::Color::White,
+   const sf::Color& background = sf::Color{15, 18, 24, 235},
+   unsigned int character_size = 16
 );
 
 /// \brief draws a filled box2d circle and its orientation axis.

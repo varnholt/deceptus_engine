@@ -1,4 +1,7 @@
 #include "lightsystem.h"
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+#include "game/debug/mechanism_property_bindings.h"
+#endif
 
 #include "framework/tmxparser/tmxobject.h"
 #include "framework/tmxparser/tmxproperties.h"
@@ -985,3 +988,54 @@ void LightSystem::setAmbient(sf::Color color)
 {
    _ambient_color = {color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f};
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+void LightSystem::configureInspectorProperties(const GameNode& owner, MechanismPropertyBindings& properties)
+{
+   if (properties.supports("color"))
+   {
+      return;
+   }
+   std::shared_ptr<LightInstance> owned_light;
+   for (const auto& light : _lights)
+   {
+      if (light->getParent() != &owner)
+      {
+         continue;
+      }
+      // one authored color cannot identify several independently owned light components
+      if (owned_light)
+      {
+         return;
+      }
+      owned_light = light;
+   }
+   if (!owned_light)
+   {
+      return;
+   }
+   const std::weak_ptr<LightInstance> target = owned_light;
+   properties.bind<sf::Color>(
+      "color",
+      [target]
+      {
+         if (const auto light = target.lock())
+         {
+            return light->_color;
+         }
+         return sf::Color::Transparent;
+      },
+      [target](sf::Color color)
+      {
+         if (const auto light = target.lock())
+         {
+            light->_color = color;
+            return true;
+         }
+         return false;
+      },
+      {},
+      [target] { return !target.expired(); }
+   );
+}
+#endif

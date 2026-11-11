@@ -7,6 +7,9 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+#include <optional>
+#endif
 
 //! \brief watches a single file and reports whether it has been modified since watching started.
 //!
@@ -39,6 +42,12 @@ public:
    /// \brief returns whether the file changed since start() was called.
    bool modified() const;
 
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \brief acknowledges only the editor's exact saved bytes without suppressing different external writes.
+   /// \param contents complete map bytes returned by a successful editor save.
+   void acceptInspectorContents(const std::string& contents);
+#endif
+
 private:
    void poll();
 
@@ -51,4 +60,7 @@ private:
    std::atomic<bool> _modified{false};
    std::mutex _mutex;
    std::condition_variable _stop_condition;
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   std::optional<std::string> _inspector_contents;  //!< exact editor write awaiting timestamp acknowledgement.
+#endif
 };

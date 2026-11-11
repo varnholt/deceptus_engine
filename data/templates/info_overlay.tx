@@ -2,6 +2,12 @@
 <template>
  <object type="InfoOverlay" width="96" height="48">
   <properties>
+   <property name="fade_in_duration" type="float" value="1.5"/>
+   <property name="fade_out_duration" type="float" value="2.5"/>
+   <property name="fullscreen" type="bool" value="true"/>
+   <property name="show_duration" type="float" value="3"/>
+   <property name="show_once" type="bool" value="true"/>
+   <property name="start_delay_duration" type="float" value="1.5"/>
    <property name="z" type="int" value="20"/>
   </properties>
  </object>

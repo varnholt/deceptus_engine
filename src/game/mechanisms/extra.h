@@ -23,6 +23,11 @@ struct TmxTileSet;
 class Extra : public GameMechanism, public GameNode, public InteractionInterface
 {
 public:
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \copydoc GameMechanism::configureInspectorProperties
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    /// \brief creates an extra mechanism.
    /// \param parent parent node in the scene graph.
    Extra(GameNode* parent = nullptr);

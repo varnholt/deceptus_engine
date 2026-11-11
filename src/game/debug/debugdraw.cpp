@@ -1,15 +1,65 @@
 #include "debugdraw.h"
 
+#include <algorithm>
+#include <array>
 #include <iostream>
-#ifdef DECEPTUS_VRSFML
 #include <span>
-#endif
 
+#include "framework/tools/localization.h"
+#include "framework/tools/localizedtext.h"
 #include "framework/tools/sfmlcompat.h"
 #include "game/camera/camerasystem.h"
 #include "game/physics/worldquery.h"
 
 constexpr auto outline_thickness = 0.5f;
+
+namespace
+{
+/// \brief submits a borrowed vertex range using the active backend's draw API.
+/// \param target destination retaining its current view and render state.
+/// \param vertices vertices consumed during the call without retaining ownership.
+/// \param primitive primitive topology for the range.
+void draw_vertices(sf::RenderTarget& target, std::span<const sf::Vertex> vertices, sf::PrimitiveType primitive)
+{
+#ifdef DECEPTUS_VRSFML
+   target.draw(vertices, primitive);
+#else
+   target.draw(vertices.data(), vertices.size(), primitive);
+#endif
+}
+
+/// \brief converts and draws a path with stack storage for ordinary box2d polygons.
+/// \param target destination retaining its current view.
+/// \param points borrowed box2d points consumed during the call.
+/// \param offset world-space translation applied before pixel conversion.
+/// \param color line color.
+/// \param closed whether to connect the last point to the first.
+void draw_path(sf::RenderTarget& target, std::span<const b2Vec2> points, const b2Vec2& offset, const sf::Color& color, bool closed)
+{
+   if (points.size() < 2)
+   {
+      return;
+   }
+   const auto count = points.size() + static_cast<size_t>(closed);
+   std::array<sf::Vertex, b2_maxPolygonVertices + 1> local_vertices;
+   std::vector<sf::Vertex> large_vertices;
+   std::span<sf::Vertex> vertices{local_vertices};
+   if (count > local_vertices.size())
+   {
+      large_vertices.resize(count);
+      vertices = large_vertices;
+   }
+   for (size_t index = 0; index < points.size(); ++index)
+   {
+      vertices[index] = sf::Vertex(DebugDraw::vecB2S(points[index] + offset), color);
+   }
+   if (closed)
+   {
+      vertices[points.size()] = vertices.front();
+   }
+   draw_vertices(target, vertices.first(count), sf::PrimitiveType::LineStrip);
+}
+}  // namespace
 
 sf::Color DebugDraw::glColorToSfml(const b2Color& color, uint8_t alpha)
 {
@@ -187,16 +237,7 @@ void DebugDraw::drawLine(sf::RenderTarget& target, const sf::Vector2f& p1, const
 
 void DebugDraw::drawLines(sf::RenderTarget& target, const std::vector<b2Vec2>& lines, const b2Color& color)
 {
-   const auto sf_color = DebugDraw::glColorToSfml(color);
-   std::vector<sf::Vertex> sf_lines;
-
-   std::transform(lines.begin(), lines.end(), sf_lines.begin(), [sf_color](const auto& val) { return sf::Vertex(vecB2S(val), sf_color); });
-
-#ifdef DECEPTUS_VRSFML
-   target.draw(std::span<const sf::Vertex>{sf_lines.data(), sf_lines.size()}, sf::PrimitiveType::LineStrip);
-#else
-   target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
-#endif
+   draw_path(target, lines, b2Vec2{0.0f, 0.0f}, glColorToSfml(color), false);
 }
 
 void DebugDraw::drawLines(
@@ -207,19 +248,11 @@ void DebugDraw::drawLines(
    const b2Color& color
 )
 {
-   const auto sf_color = DebugDraw::glColorToSfml(color);
-   std::vector<sf::Vertex> sf_lines;
-
-   for (auto i = 0; i < vertex_count; i++)
+   if (!vertices || vertex_count < 2)
    {
-      sf_lines.emplace_back(vecB2S(vertices[i] + offset), sf_color);
+      return;
    }
-
-#ifdef DECEPTUS_VRSFML
-   target.draw(std::span<const sf::Vertex>{sf_lines.data(), sf_lines.size()}, sf::PrimitiveType::LineStrip);
-#else
-   target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
-#endif
+   draw_path(target, {vertices, static_cast<size_t>(vertex_count)}, offset, glColorToSfml(color), false);
 }
 
 void DebugDraw::drawLineLoop(
@@ -230,22 +263,11 @@ void DebugDraw::drawLineLoop(
    const b2Color& color
 )
 {
-   const auto sf_color = DebugDraw::glColorToSfml(color);
-   std::vector<sf::Vertex> sf_lines;
-
-   for (auto i = 0; i < vertex_count; i++)
+   if (!vertices || vertex_count < 2)
    {
-      sf_lines.emplace_back(vecB2S(vertices[i] + offset), sf_color);
+      return;
    }
-
-   // close loop
-   sf_lines.emplace_back(vecB2S(vertices[0] + offset), sf_color);
-
-#ifdef DECEPTUS_VRSFML
-   target.draw(std::span<const sf::Vertex>{sf_lines.data(), sf_lines.size()}, sf::PrimitiveType::LineStrip);
-#else
-   target.draw(sf_lines.data(), sf_lines.size(), sf::PrimitiveType::LineStrip);
-#endif
+   draw_path(target, {vertices, static_cast<size_t>(vertex_count)}, offset, glColorToSfml(color), true);
 }
 
 void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
@@ -272,44 +294,118 @@ void DebugDraw::drawTransform(sf::RenderTarget& target, const b2Transform& xf)
 #endif
 }
 
-void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::Color& color, const sf::Color& fill_color)
+void DebugDraw::drawShape(sf::RenderTarget& target, sf::Shape& shape, const sf::Color& color, const sf::Color& fill_color, float thickness)
 {
-   shape.setOutlineThickness(outline_thickness);
+   shape.setOutlineThickness(thickness);
    shape.setFillColor(fill_color);
    shape.setOutlineColor(color);
    target.draw(shape);
 }
 
-void DebugDraw::drawRect(sf::RenderTarget& target, const sf::IntRect& rect, const sf::Color& color, const sf::Color& fill_color)
+void DebugDraw::drawRect(
+   sf::RenderTarget& target,
+   const sf::IntRect& rect,
+   const sf::Color& color,
+   const sf::Color& fill_color,
+   float thickness
+)
 {
-   const auto pos = sf::Vector2{static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)};
-   const auto size = sf::Vector2f{static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)};
-
-#ifdef DECEPTUS_VRSFML
-   sf::RectangleShape rs{sf::RectangleShape::Data{.size = size}};
-#else
-   sf::RectangleShape rs;
-   rs.setSize(size);
-#endif
-   sfcompat::setPosition(rs, pos);
-
-   drawShape(target, rs, color, fill_color);
+   drawRect(
+      target,
+      sf::FloatRect{
+         {static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)},
+         {static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)}
+      },
+      color,
+      fill_color,
+      thickness
+   );
 }
 
-void DebugDraw::drawRect(sf::RenderTarget& target, const sf::FloatRect& rect, const sf::Color& color, const sf::Color& fill_color)
+void DebugDraw::drawRect(
+   sf::RenderTarget& target,
+   const sf::FloatRect& rect,
+   const sf::Color& color,
+   const sf::Color& fill_color,
+   float thickness
+)
 {
-   const auto pos = sf::Vector2{static_cast<float>(rect.position.x), static_cast<float>(rect.position.y)};
-   const auto size = sf::Vector2f{static_cast<float>(rect.size.x), static_cast<float>(rect.size.y)};
-
+   // retain SFML's handling of degenerate rectangles and outlines that cross their center
+   if (rect.size.x <= 0.0f || rect.size.y <= 0.0f || -2.0f * thickness >= std::min(rect.size.x, rect.size.y))
+   {
 #ifdef DECEPTUS_VRSFML
-   sf::RectangleShape rs{sf::RectangleShape::Data{.size = size}};
+      sf::RectangleShape shape{sf::RectangleShape::Data{.size = rect.size}};
 #else
-   sf::RectangleShape rs;
-   rs.setSize(size);
+      sf::RectangleShape shape(rect.size);
 #endif
-   sfcompat::setPosition(rs, pos);
+      sfcompat::setPosition(shape, rect.position);
+      drawShape(target, shape, color, fill_color, thickness);
+      return;
+   }
+   std::array<sf::Vertex, 30> vertices;
+   size_t count = 0;
+   const auto quad = [&](sf::Vector2f first, sf::Vector2f second, sf::Vector2f third, sf::Vector2f fourth, const sf::Color& tint)
+   {
+      vertices[count++] = sf::Vertex(first, tint);
+      vertices[count++] = sf::Vertex(second, tint);
+      vertices[count++] = sf::Vertex(third, tint);
+      vertices[count++] = sf::Vertex(first, tint);
+      vertices[count++] = sf::Vertex(third, tint);
+      vertices[count++] = sf::Vertex(fourth, tint);
+   };
+   const auto left = rect.position.x;
+   const auto top = rect.position.y;
+   const auto right = left + rect.size.x;
+   const auto bottom = top + rect.size.y;
+   if (fill_color.a != 0)
+   {
+      quad({left, top}, {right, top}, {right, bottom}, {left, bottom}, fill_color);
+   }
+   if (thickness != 0.0f && color.a != 0)
+   {
+      const auto outer_left = left - thickness;
+      const auto outer_top = top - thickness;
+      const auto outer_right = right + thickness;
+      const auto outer_bottom = bottom + thickness;
+      quad({left, top}, {outer_left, outer_top}, {outer_right, outer_top}, {right, top}, color);
+      quad({right, top}, {outer_right, outer_top}, {outer_right, outer_bottom}, {right, bottom}, color);
+      quad({right, bottom}, {outer_right, outer_bottom}, {outer_left, outer_bottom}, {left, bottom}, color);
+      quad({left, bottom}, {outer_left, outer_bottom}, {outer_left, outer_top}, {left, top}, color);
+   }
+   if (count != 0)
+   {
+      draw_vertices(target, std::span{vertices}.first(count), sf::PrimitiveType::Triangles);
+   }
+}
 
-   drawShape(target, rs, color, fill_color);
+void DebugDraw::draw_label(
+   sf::RenderTarget& target,
+   const std::string& label,
+   sf::Vector2f anchor,
+   const sf::FloatRect& container,
+   const sf::Color& color,
+   const sf::Color& background,
+   unsigned int character_size
+)
+{
+   if (label.empty())
+   {
+      return;
+   }
+   auto text = sfcompat::createText(getFont());
+   text.setString(LocalizedText::toSfmlString(label));
+   text.setCharacterSize(character_size);
+   text.setFillColor(color);
+   const auto text_bounds = text.getLocalBounds();
+   const sf::Vector2f padding{8.0f, 6.0f};
+   const auto panel_size = text_bounds.size + padding * 2.0f;
+   const sf::Vector2f panel_position{
+      std::clamp(anchor.x, container.position.x, std::max(container.position.x, container.position.x + container.size.x - panel_size.x)),
+      std::clamp(anchor.y, container.position.y, std::max(container.position.y, container.position.y + container.size.y - panel_size.y))
+   };
+   drawRect(target, sf::FloatRect{panel_position, panel_size}, background, background, 0.0f);
+   sfcompat::setPosition(text, panel_position + padding - text_bounds.position);
+   target.draw(text);
 }
 
 sf::FloatRect DebugDraw::getScreenRect(sf::RenderTarget& target)

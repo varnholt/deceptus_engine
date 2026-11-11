@@ -11,10 +11,20 @@ All hotkeys in this document are only active in `DEVELOPMENT_MODE` builds, excep
 | `F3` | Toggle camera system config UI |
 | `F4` | Toggle debug info / `Alt+F4` quits |
 | `F5` | Toggle log viewer |
-| `F6` | Toggle test scene |
+| `F6` | Toggle mechanism editor (desktop) |
 | `F7` | Toggle physics config UI |
 | `F10` | Toggle profiling window |
 | `F12` | Toggle developer console |
+
+## Mechanism editor
+
+Press **F6** in a desktop development build to open or close the mechanism editor. Editing is
+available immediately; **Save all property changes to TMX** explicitly writes to the map.
+Picking and the editor itself remain inactive until requested.
+
+See the [Mechanism Editor guide](mechanism_editor.md) for picking overlapping objects, live and
+reload fields, color editing, Save/Discard behavior, backups, external Tiled edits, supported types,
+and the developer binding interface.
 
 ## Player Event Recording
 

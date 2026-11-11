@@ -37,6 +37,13 @@ public:
    /// \brief places the lamp for the frame about to be drawn.
    void updateSpritePositions() override;
 
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \brief combines the current rope strip with the positioned and rotated lamp sprite.
+   /// \return world-space visual bounds, or null when neither drawable is available.
+   /// \note excludes the light halo and does not change gameplay bounds.
+   [[nodiscard]] std::optional<sf::FloatRect> get_editor_bounds() override;
+#endif
+
    /// \brief initializes rope physics, lamp visuals, and light properties from tmx data.
    /// \param data deserialization data with rope and lamp configuration.
    void setup(const GameDeserializeData& data) override;

@@ -28,6 +28,13 @@ namespace
 {
 static constexpr std::array extra_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "active", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "spawn_required", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "is_treasure", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "requires_button_press", .type = "bool", .default_value = false},
+   PropertyInfo{.name = "sine_amplitude_px", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "sine_frequency", .type = "float", .default_value = 0.0f},
+   PropertyInfo{.name = "pickup_event", .type = "string", .default_value = std::string_view{""}},
 };
 static constexpr MechanismSchema extra_schema{
    .type_name = "Extra",
@@ -471,3 +478,16 @@ void Extra::spawn(sf::Vector2f offset)
       _animation_spawn->play();
    }
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+void Extra::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("sine_amplitude_px", _sine_amplitude_px);
+   properties.bind("sine_frequency", _sine_frequency);
+   properties.bind("active", _active);
+   properties.bind("spawn_required", _spawn_required);
+   properties.bind("pickup_event", _pickup_event);
+   properties.bind("is_treasure", _is_treasure);
+   properties.bind("requires_button_press", _requires_button_press);
+}
+#endif

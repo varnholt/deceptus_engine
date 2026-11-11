@@ -20,9 +20,78 @@
 #include "game/mechanisms/watersurface.h"
 #include "game/mechanisms/weather.h"
 #include "gamemechanismdeserializerconstants.h"
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+#include "framework/tmxparser/tmxproperties.h"
+#endif
 
 namespace
 {
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+/// \brief retains exact authoring sources for runtime parts appended inside a factory call.
+struct InspectorSourceScope
+{
+   /// \brief registry vectors whose appended instances must receive the same source snapshot.
+   using Mechanisms = std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>;
+   std::shared_ptr<TmxObject> source;  //!< authoring object or synthetic layer source.
+   std::shared_ptr<TmxLayer> layer;    //!< actual tile layer, when the factory consumes one.
+   std::vector<std::pair<std::vector<std::shared_ptr<GameMechanism>>*, size_t>> sizes;  //!< registry lengths before creation.
+
+   /// \brief records registry lengths before an object factory appends runtime parts.
+   /// \param mechanisms registry vectors to observe during this scope.
+   /// \param object authoring object that owns the new runtime parts.
+   InspectorSourceScope(const Mechanisms& mechanisms, const std::shared_ptr<TmxObject>& object) : source(object)
+   {
+      for (const auto& [group, items] : mechanisms)
+      {
+         if (items)
+         {
+            sizes.emplace_back(items, items->size());
+         }
+      }
+   }
+
+   /// \brief records a tile-layer source before its factory appends runtime parts.
+   /// \param mechanisms registry vectors to observe during this scope.
+   /// \param tile_layer exact authoring layer that supplies the runtime parts.
+   InspectorSourceScope(const Mechanisms& mechanisms, const std::shared_ptr<TmxLayer>& tile_layer)
+       : InspectorSourceScope(mechanisms, std::make_shared<TmxObject>())
+   {
+      layer = tile_layer;
+      source->_id = tile_layer->_inspector_id;
+      source->_properties = tile_layer->_properties;
+   }
+
+   /// \brief prevents duplicate finalization of a factory-bound capture scope.
+   InspectorSourceScope(const InspectorSourceScope&) = delete;
+   /// \brief prevents replacing a scope whose registry baselines belong to another factory call.
+   InspectorSourceScope& operator=(const InspectorSourceScope&) = delete;
+
+   /// \brief attaches a shared source snapshot to appended instances and marks consumed tile layers.
+   ~InspectorSourceScope()
+   {
+      std::shared_ptr<TmxObject> snapshot;
+      for (const auto& [items, start] : sizes)
+      {
+         for (size_t index = start; index < items->size(); ++index)
+         {
+            if (!snapshot)
+            {
+               snapshot = std::make_shared<TmxObject>(*source);
+               if (source->_properties)
+               {
+                  snapshot->_properties = std::make_shared<TmxProperties>(*source->_properties);
+               }
+            }
+            if (layer)
+            {
+               layer->_inspector_mechanism_layer = true;
+            }
+            (*items)[index]->setInspectorSource(snapshot, layer != nullptr);
+         }
+      }
+   }
+};
+#endif
 void debugOutputMechanisms(const std::unordered_map<std::string, std::vector<std::shared_ptr<GameMechanism>>*>& mechanisms)
 {
    Log::Info() << "[Mechanisms content]";
@@ -105,6 +174,9 @@ void GameMechanismDeserializer::deserialize(
             data._tmx_layer = layer;
             data._tmx_tileset = tmx_parser.getTileSet(layer);
 
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+            const InspectorSourceScope inspector_source(mechanisms, layer);
+#endif
             if (auto initializer_function = registry.getForLayerName(layer->_name))
             {
                std::invoke(*initializer_function, parent, data, mechanisms);
@@ -121,6 +193,9 @@ void GameMechanismDeserializer::deserialize(
                   const auto& object = pair.second;
                   data._tmx_object = object;
                   data._tmx_object_group = group;
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+                  const InspectorSourceScope inspector_source(mechanisms, object);
+#endif
 
                   // Log::Info() << "obj template name: " << object->_template_name.value_or("");
                   // Log::Info() << "obj template type: " << object->_template_type.value_or("");
@@ -171,6 +246,9 @@ void GameMechanismDeserializer::deserialize(
          data._tmx_layer = layer;
          data._tmx_tileset = tileset;
 
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+         const InspectorSourceScope inspector_source(mechanisms, layer);
+#endif
          if (layer->_name == layer_name_lasers_v1)
          {
             const auto mechanism = Laser::load(parent, data);
@@ -211,6 +289,9 @@ void GameMechanismDeserializer::deserialize(
 
             data._tmx_object = tmx_object;
             data._tmx_object_group = object_group;
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+            const InspectorSourceScope inspector_source(mechanisms, tmx_object);
+#endif
 
             if (object_group->_name == layer_name_lasers_v1 || object_group->_name == layer_name_lasers ||
                 object_group->_name == layer_name_lasers_v2 || tmx_object->_template_type == type_name_laser)

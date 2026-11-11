@@ -340,3 +340,18 @@ void ConveyorBelt::processContact(b2Contact* contact)
       processFixtureNode(fixture_node, contact->GetFixtureA()->GetBody());
    }
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+void ConveyorBelt::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind<float>(
+      "velocity",
+      [this] { return _velocity; },
+      [this](const float& value)
+      {
+         setVelocity(value);
+         return true;
+      }
+   );
+}
+#endif

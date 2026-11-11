@@ -6,6 +6,11 @@
 class RingShaderLayer : public ShaderLayer
 {
 public:
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \copydoc GameMechanism::configureInspectorProperties
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    /// \brief creates a ring shader layer instance.
    /// \param parent owning game node in the scene graph.
    RingShaderLayer(GameNode* parent = nullptr);

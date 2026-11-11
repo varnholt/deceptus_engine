@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------------
-# Formatting:
-#   uv sync
-#   uv run cmake-format -i CMakeLists.txt
+# formatting:
+#
+# * uv sync
+# * uv run cmake-format -i CMakeLists.txt
 # ------------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.16)
@@ -715,8 +716,7 @@ set(GAME_FILES
     src/opengl/render3d/texturedobject.cpp
     src/opengl/render3d/texturedobject.h
     src/opengl/vbos/vbomesh.cpp
-    src/opengl/vbos/vbomesh.h
-)
+    src/opengl/vbos/vbomesh.h)
 
 set(THIRD_PARTY_FILES
     thirdparty/box2d/include/box2d/b2_api.h
@@ -838,8 +838,8 @@ endif()
 if(NINTENDO_SWITCH)
     list(REMOVE_ITEM GAME_FILES deceptus_resource.rc)
 
-    # The debug UI is already compiled out on VRSFML targets, so nothing references
-    # ImGui here; dropping its sources keeps them out of the .nro entirely.
+    # The debug UI is already compiled out on VRSFML targets, so nothing references ImGui here;
+    # dropping its sources keeps them out of the .nro entirely.
     list(FILTER GAME_FILES EXCLUDE REGEX "thirdparty/imgui/.*\\.cpp$")
 endif()
 
@@ -900,15 +900,16 @@ add_executable(
     doc/level_design/enemies.md
     doc/level_design/mechanisms.md
     doc/level_design/visual_effects.md
-    doc/lua_interface/readme.md
-)
+    doc/lua_interface/readme.md)
 
 target_sources(deceptus PRIVATE ${THIRD_PARTY_FILES})
 
 # set up third party libraries
-# release builds keep their debug info, or a crash dump is just a list of raw offsets. this sits ahead
-# of the dependencies so sfml's frames get line numbers too, which is usually where the interesting
-# ones are. /Zi does not affect optimisation. windows only, the other targets bring their own toolchains
+#
+# release builds keep their debug info, or a crash dump is just a list of raw offsets. this sits
+# ahead of the dependencies so sfml's frames get line numbers too, which is usually where the
+# interesting ones are. /Zi does not affect optimisation. windows only, the other targets bring
+# their own toolchains
 if(MSVC)
     string(APPEND CMAKE_C_FLAGS_RELEASE " /Zi /FS")
     string(APPEND CMAKE_CXX_FLAGS_RELEASE " /Zi /FS")
@@ -935,9 +936,9 @@ set(SFML_BUILD_NETWORK
     ON
     CACHE BOOL "" FORCE)
 
-# Applies a patch to a fetched dependency, following the same rule as the inline
-# blocks below: only skip if a reverse-apply confirms it is already applied, otherwise
-# fail loudly rather than silently building unpatched sources.
+# Applies a patch to a fetched dependency, following the same rule as the inline blocks below: only
+# skip if a reverse-apply confirms it is already applied, otherwise fail loudly rather than silently
+# building unpatched sources.
 function(deceptus_apply_patch patch_file source_dir label)
     execute_process(
         COMMAND git apply --check ${patch_file}
@@ -962,7 +963,10 @@ function(deceptus_apply_patch patch_file source_dir label)
         if(reverse_check EQUAL 0)
             message(STATUS "${patch_file} already applied to ${label}, skipping")
         else()
-            message(FATAL_ERROR "${patch_file} does not apply to the fetched ${label} source and is not already applied - fix the patch")
+            message(
+                FATAL_ERROR
+                    "${patch_file} does not apply to the fetched ${label} source and is not already applied - fix the patch"
+            )
         endif()
     endif()
 endfunction()
@@ -970,13 +974,13 @@ endfunction()
 # DEVELOPMENT_MODE carries the whole diagnostic apparatus: the profiling ui, the per mechanism
 # timers, the draw call counters, the render section timers, and on the console a log write to the
 # sd card every five seconds. All of it is useful while measuring and all of it is overhead in a
-# build meant to run fast, so it can be switched off without touching the sources.
-# The console and the web build ship without it: neither has a window to show the profiling ui in,
-# and on the switch every report is a write to the sd card. Both can still be built with it by
-# passing -DDECEPTUS_DEVELOPMENT_MODE=ON, which is what a profiling run does.
+# build meant to run fast, so it can be switched off without touching the sources. The console and
+# the web build ship without it: neither has a window to show the profiling ui in, and on the switch
+# every report is a write to the sd card. Both can still be built with it by passing
+# -DDECEPTUS_DEVELOPMENT_MODE=ON, which is what a profiling run does.
 #
-# Declared here, ahead of the dependency fetches below, because the desktop target's SDL3 link
-# mode (see the SDL_SHARED/SDL_STATIC block further down) also depends on it.
+# Declared here, ahead of the dependency fetches below, because the desktop target's SDL3 link mode
+# (see the SDL_SHARED/SDL_STATIC block further down) also depends on it.
 if(EMSCRIPTEN OR NINTENDO_SWITCH)
     option(DECEPTUS_DEVELOPMENT_MODE "build with the profiling and debug instrumentation" OFF)
 else()
@@ -986,8 +990,8 @@ endif()
 # fetch dependencies
 if(NINTENDO_SWITCH)
     # Switch homebrew target: VRSFML again, because vanilla SFML 3 renders through the
-    # fixed-function pipeline and switch-mesa exposes core profile only. See
-    # switch_port_status.md for the full reasoning.
+    # fixed-function pipeline and switch-mesa exposes core profile only. See switch_port_status.md
+    # for the full reasoning.
     set(SFML_BUILD_NETWORK
         OFF
         CACHE BOOL "" FORCE)
@@ -998,24 +1002,23 @@ if(NINTENDO_SWITCH)
         OFF
         CACHE BOOL "" FORCE)
 
-    # VRSFML prints a stack trace after every error it logs, through libbacktrace. That
-    # hangs the Switch: libbacktrace is asked to locate the running executable itself
-    # (backtrace_create_state with a null filename), which has no meaning for an NRO, and
-    # the call never returns. The symptom is brutal to read -- the game freezes for good
-    # immediately after an unrelated error message, with the blank line printStackTrace
-    # emits first as the only clue. VRSFML already excludes Emscripten from stack traces
-    # for the same kind of reason.
+    # VRSFML prints a stack trace after every error it logs, through libbacktrace. That hangs the
+    # Switch: libbacktrace is asked to locate the running executable itself (backtrace_create_state
+    # with a null filename), which has no meaning for an NRO, and the call never returns. The
+    # symptom is brutal to read -- the game freezes for good immediately after an unrelated error
+    # message, with the blank line printStackTrace emits first as the only clue. VRSFML already
+    # excludes Emscripten from stack traces for the same kind of reason.
     set(SFML_ENABLE_STACK_TRACES
         OFF
         CACHE BOOL "" FORCE)
 
-    # Both dependencies are pinned to the exact revisions the Switch patches were
-    # generated against; master would drift and the patches would stop applying.
+    # Both dependencies are pinned to the exact revisions the Switch patches were generated against;
+    # master would drift and the patches would stop applying.
     #
-    # SDL3 is deliberately placed at _deps/SDL rather than left to VRSFML's CPM pin:
-    # VRSFML's src/SFML/Window/CMakeLists.txt prefers a sibling ../SDL directory when
-    # one exists, which gives a place to apply the Switch backend patch *before* VRSFML
-    # configures SDL. Patching afterwards would be too late for SDL's own CMake logic.
+    # SDL3 is deliberately placed at _deps/SDL rather than left to VRSFML's CPM pin: VRSFML's
+    # src/SFML/Window/CMakeLists.txt prefers a sibling ../SDL directory when one exists, which gives
+    # a place to apply the Switch backend patch *before* VRSFML configures SDL. Patching afterwards
+    # would be too late for SDL's own CMake logic.
     FetchContent_Declare(
         SWITCH_SDL
         GIT_REPOSITORY https://github.com/vittorioromeo/SDL.git
@@ -1043,16 +1046,15 @@ if(NINTENDO_SWITCH)
 
     FetchContent_MakeAvailable(LUA)
 
-    # luaconf.h hardcodes LUA_C89_NUMBERS to 0, so the knob its own error message tells
-    # you to set cannot actually be set from the command line. The patch makes it
-    # overridable; see the target_compile_definitions call further down for why the
-    # Switch needs it. Safe to apply after MakeAvailable because luaconf.h is only read
-    # at compile time, unlike SDL's CMake logic above.
+    # luaconf.h hardcodes LUA_C89_NUMBERS to 0, so the knob its own error message tells you to set
+    # cannot actually be set from the command line. The patch makes it overridable; see the
+    # target_compile_definitions call further down for why the Switch needs it. Safe to apply after
+    # MakeAvailable because luaconf.h is only read at compile time, unlike SDL's CMake logic above.
     deceptus_apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/patches/switch-lua-c89-numbers.patch
                          ${lua_SOURCE_DIR} "Lua")
 elseif(EMSCRIPTEN)
-    # WASM target: VRSFML (vittorioromeo's SFML rewrite) -- the only SFML fork
-    # with an Emscripten backend.
+    # WASM target: VRSFML (vittorioromeo's SFML rewrite) -- the only SFML fork with an Emscripten
+    # backend.
     set(SFML_BUILD_NETWORK
         OFF
         CACHE BOOL "" FORCE)
@@ -1063,15 +1065,14 @@ elseif(EMSCRIPTEN)
         OFF
         CACHE BOOL "" FORCE)
 
-    # SDL3 is fetched internally by VRSFML via CPM.
-    # Declaring it separately here would create duplicate CMake targets.
+    # SDL3 is fetched internally by VRSFML via CPM. Declaring it separately here would create
+    # duplicate CMake targets.
     #
-    # A commit rather than a version, because VRSFML publishes no releases -- its newest tag
-    # is 1662 commits behind this. Everywhere a dependency does have a release tag, this file
-    # names the tag instead. It used to say `master` here, which meant an upstream commit
-    # could break the web build on a clean checkout without anything in this repository
-    # changing. This is the same revision the Switch target pins, and what the last verified
-    # web build was made from.
+    # A commit rather than a version, because VRSFML publishes no releases -- its newest tag is 1662
+    # commits behind this. Everywhere a dependency does have a release tag, this file names the tag
+    # instead. It used to say `master` here, which meant an upstream commit could break the web
+    # build on a clean checkout without anything in this repository changing. This is the same
+    # revision the Switch target pins, and what the last verified web build was made from.
     FetchContent_Declare(
         SFML
         GIT_REPOSITORY https://github.com/vittorioromeo/VRSFML.git
@@ -1083,9 +1084,9 @@ elseif(EMSCRIPTEN)
 
     FetchContent_MakeAvailable(SFML LUA)
 
-    # Apply WebGL2 compatibility patch to VRSFML on Emscripten builds.
-    # GLSL ES 3.00 forbids layout(location=N) on uniforms; the patch adds #ifdef __EMSCRIPTEN__
-    # guards to DefaultShader.hpp and switches RenderTarget.cpp to glGetUniformLocation.
+    # Apply WebGL2 compatibility patch to VRSFML on Emscripten builds. GLSL ES 3.00 forbids
+    # layout(location=N) on uniforms; the patch adds #ifdef __EMSCRIPTEN__ guards to
+    # DefaultShader.hpp and switches RenderTarget.cpp to glGetUniformLocation.
     execute_process(
         COMMAND git apply --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
         WORKING_DIRECTORY ${sfml_SOURCE_DIR}
@@ -1101,29 +1102,33 @@ elseif(EMSCRIPTEN)
         endif()
         message(STATUS "Applied patches/vrsfml-webgl2-uniforms.patch to VRSFML")
     else()
-        # Forward apply failed - this could mean the patch is already applied, OR that
-        # it no longer matches the fetched VRSFML source (e.g. line-ending mismatch,
-        # upstream changed). Only skip if a reverse-apply confirms it is already applied;
-        # otherwise fail loudly instead of silently building with unpatched shaders.
+        # Forward apply failed - this could mean the patch is already applied, OR that it no longer
+        # matches the fetched VRSFML source (e.g. line-ending mismatch, upstream changed). Only skip
+        # if a reverse-apply confirms it is already applied; otherwise fail loudly instead of
+        # silently building with unpatched shaders.
         execute_process(
-            COMMAND git apply --reverse --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
+            COMMAND git apply --reverse --check
+                    ${CMAKE_CURRENT_SOURCE_DIR}/patches/vrsfml-webgl2-uniforms.patch
             WORKING_DIRECTORY ${sfml_SOURCE_DIR}
             RESULT_VARIABLE vrsfml_patch_reverse_check
             OUTPUT_QUIET ERROR_QUIET)
         if(vrsfml_patch_reverse_check EQUAL 0)
-            message(STATUS "patches/vrsfml-webgl2-uniforms.patch already applied to VRSFML, skipping")
+            message(
+                STATUS "patches/vrsfml-webgl2-uniforms.patch already applied to VRSFML, skipping")
         else()
-            message(FATAL_ERROR "patches/vrsfml-webgl2-uniforms.patch does not apply to the fetched VRSFML source and is not already applied - fix the patch")
+            message(
+                FATAL_ERROR
+                    "patches/vrsfml-webgl2-uniforms.patch does not apply to the fetched VRSFML source and is not already applied - fix the patch"
+            )
         endif()
     endif()
 
-    # VRSFML's miniaudio build does not define MA_ENABLE_AUDIO_WORKLETS, so on
-    # Emscripten miniaudio silently falls back to the deprecated ScriptProcessorNode
-    # backend. ScriptProcessorNode runs on the main browser thread and produces
-    # audio glitches and a phasey "reverb"/"hall" wash on sustained audio under
-    # -pthread. Opting into the AudioWorklet backend moves audio processing onto a
-    # dedicated real-time audio thread and removes the artifact. This requires the
-    # executable to link with -sAUDIO_WORKLET=1 -sWASM_WORKERS=1 (set above).
+    # VRSFML's miniaudio build does not define MA_ENABLE_AUDIO_WORKLETS, so on Emscripten miniaudio
+    # silently falls back to the deprecated ScriptProcessorNode backend. ScriptProcessorNode runs on
+    # the main browser thread and produces audio glitches and a phasey "reverb"/"hall" wash on
+    # sustained audio under -pthread. Opting into the AudioWorklet backend moves audio processing
+    # onto a dedicated real-time audio thread and removes the artifact. This requires the executable
+    # to link with -sAUDIO_WORKLET=1 -sWASM_WORKERS=1 (set above).
     target_compile_definitions(sfml-audio PRIVATE MA_ENABLE_AUDIO_WORKLETS)
 else()
     # Desktop target: vanilla/official SFML, matching master.
@@ -1134,11 +1139,11 @@ else()
         ON
         CACHE BOOL "" FORCE)
 
-    # Every dependency names a release tag, never a branch. This used to say `3.0.x` for
-    # SFML, which is a branch and therefore moves: an upstream commit could change what a
-    # clean checkout builds without anything here changing. 3.0.2 is the release the last
-    # verified desktop build was made from. Freetype, ogg, vorbis and FLAC are not listed
-    # because SFML fetches them itself, so pinning SFML pins those too.
+    # Every dependency names a release tag, never a branch. This used to say `3.0.x` for SFML, which
+    # is a branch and therefore moves: an upstream commit could change what a clean checkout builds
+    # without anything here changing. 3.0.2 is the release the last verified desktop build was made
+    # from. Freetype, ogg, vorbis and FLAC are not listed because SFML fetches them itself, so
+    # pinning SFML pins those too.
     FetchContent_Declare(
         SFML
         GIT_REPOSITORY https://github.com/SFML/SFML.git
@@ -1156,9 +1161,9 @@ else()
         GIT_REPOSITORY https://github.com/Perlmint/glew-cmake.git
         GIT_TAG glew-cmake-2.3.0)
     # libarchive needs zlib to decode the deflated entries `cmake -E tar --format=zip` writes.
-    # Neither the CI image nor a plain dev machine can be relied on to have zlib installed, so it
-    # is fetched too and OVERRIDE_FIND_PACKAGE redirects libarchive's own find_package(ZLIB) call
-    # to this fetched copy instead of searching the system.
+    # Neither the CI image nor a plain dev machine can be relied on to have zlib installed, so it is
+    # fetched too and OVERRIDE_FIND_PACKAGE redirects libarchive's own find_package(ZLIB) call to
+    # this fetched copy instead of searching the system.
     FetchContent_Declare(
         ZLIB
         GIT_REPOSITORY https://github.com/madler/zlib.git
@@ -1170,26 +1175,44 @@ else()
         GIT_TAG v3.8.9)
 
     # we only ever link libglew_static, so don't build the shared glew library at all
-    set(glew-cmake_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+    set(glew-cmake_BUILD_SHARED
+        OFF
+        CACHE BOOL "" FORCE)
 
     # glew-cmake unconditionally links the legacy AGL framework on APPLE and attaches it PUBLIC to
-    # every glew target. AGL was removed from modern macOS SDKs, so the link fails with
-    # "framework 'AGL' not found". GLEW does not actually need AGL (the OpenGL framework provides
-    # the symbols), so pre-seed the cache to satisfy its find_library(AGL REQUIRED) without adding
-    # a bogus -framework AGL to the link.
+    # every glew target. AGL was removed from modern macOS SDKs, so the link fails with "framework
+    # 'AGL' not found". GLEW does not actually need AGL (the OpenGL framework provides the symbols),
+    # so pre-seed the cache to satisfy its find_library(AGL REQUIRED) without adding a bogus
+    # -framework AGL to the link.
     if(APPLE)
-        set(AGL_LIBRARY "" CACHE FILEPATH "AGL is obsolete on modern macOS SDKs" FORCE)
+        set(AGL_LIBRARY
+            ""
+            CACHE FILEPATH "AGL is obsolete on modern macOS SDKs" FORCE)
     endif()
 
     # libarchive is only used to read the shipping-mode data.pak (see AssetSource), so its own
     # command-line tools, tests, and every format/filter beyond zip+deflate are switched off.
-    set(ENABLE_TEST OFF CACHE BOOL "" FORCE)
-    set(ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
-    set(ENABLE_TAR OFF CACHE BOOL "" FORCE)
-    set(ENABLE_CPIO OFF CACHE BOOL "" FORCE)
-    set(ENABLE_CAT OFF CACHE BOOL "" FORCE)
-    set(ENABLE_UNZIP OFF CACHE BOOL "" FORCE)
-    set(ENABLE_ZLIB ON CACHE BOOL "" FORCE)
+    set(ENABLE_TEST
+        OFF
+        CACHE BOOL "" FORCE)
+    set(ENABLE_INSTALL
+        OFF
+        CACHE BOOL "" FORCE)
+    set(ENABLE_TAR
+        OFF
+        CACHE BOOL "" FORCE)
+    set(ENABLE_CPIO
+        OFF
+        CACHE BOOL "" FORCE)
+    set(ENABLE_CAT
+        OFF
+        CACHE BOOL "" FORCE)
+    set(ENABLE_UNZIP
+        OFF
+        CACHE BOOL "" FORCE)
+    set(ENABLE_ZLIB
+        ON
+        CACHE BOOL "" FORCE)
 
     # SDL3 is only used for gamepad input (SDL_GameController). In the shipping build
     # (DECEPTUS_DEVELOPMENT_MODE=OFF) it is linked statically so the release stays a single
@@ -1198,36 +1221,47 @@ else()
     # targets by default and then aliases SDL3::SDL3 to the shared one whenever it exists, so
     # SDL_SHARED has to be turned off here rather than just relying on SDL_STATIC being on.
     if(NOT DECEPTUS_DEVELOPMENT_MODE)
-        set(SDL_SHARED OFF CACHE BOOL "" FORCE)
-        set(SDL_STATIC ON CACHE BOOL "" FORCE)
+        set(SDL_SHARED
+            OFF
+            CACHE BOOL "" FORCE)
+        set(SDL_STATIC
+            ON
+            CACHE BOOL "" FORCE)
     endif()
 
     FetchContent_MakeAvailable(SFML SDL3 LUA GLEW ZLIB)
 
-    # Catch it here as a configure error rather than a working-but-DLL-dependent surprise later:
-    # if some global BUILD_SHARED_LIBS override lands upstream of this point and re-enables the
-    # shared target, SDL3::SDL3 silently goes back to aliasing SDL3-shared instead of SDL3-static.
+    # Catch it here as a configure error rather than a working-but-DLL-dependent surprise later: if
+    # some global BUILD_SHARED_LIBS override lands upstream of this point and re-enables the shared
+    # target, SDL3::SDL3 silently goes back to aliasing SDL3-shared instead of SDL3-static.
     if(NOT DECEPTUS_DEVELOPMENT_MODE)
         get_target_property(sdl3_target_type SDL3::SDL3 TYPE)
         if(NOT sdl3_target_type STREQUAL "STATIC_LIBRARY")
             message(
                 FATAL_ERROR
-                "SDL3::SDL3 built as ${sdl3_target_type}, not STATIC_LIBRARY -- the shipping build is "
-                "meant to link SDL3 statically. Check for a BUILD_SHARED_LIBS/SDL_SHARED override "
-                "earlier in the configure.")
+                    "SDL3::SDL3 built as ${sdl3_target_type}, not STATIC_LIBRARY -- the shipping build is "
+                    "meant to link SDL3 statically. Check for a BUILD_SHARED_LIBS/SDL_SHARED override "
+                    "earlier in the configure.")
         endif()
     endif()
 
     # OVERRIDE_FIND_PACKAGE redirects find_package(ZLIB) to the fetched copy and sets the modern
-    # ZLIB::ZLIB target, but libarchive's CMakeLists reads the legacy ZLIB_INCLUDE_DIR/ZLIB_LIBRARIES
-    # module variables directly, which the redirect leaves unset. zlib.h lives in the source tree
-    # while the generated zconf.h lives in the build tree, so both are needed as include dirs.
-    # ZLIB_LIBRARIES is set to the target name itself (zlibstatic, always built by zlib's own
-    # CMakeLists regardless of BUILD_SHARED_LIBS) rather than a path, so target_link_libraries
-    # resolves it as a target and propagates its include dirs/link requirements normally.
-    set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR};${zlib_BINARY_DIR}" CACHE PATH "" FORCE)
-    set(ZLIB_LIBRARY zlibstatic CACHE STRING "" FORCE)
-    set(ZLIB_LIBRARIES zlibstatic CACHE STRING "" FORCE)
+    # ZLIB::ZLIB target, but libarchive's CMakeLists reads the legacy
+    # ZLIB_INCLUDE_DIR/ZLIB_LIBRARIES module variables directly, which the redirect leaves unset.
+    # zlib.h lives in the source tree while the generated zconf.h lives in the build tree, so both
+    # are needed as include dirs. ZLIB_LIBRARIES is set to the target name itself (zlibstatic,
+    # always built by zlib's own CMakeLists regardless of BUILD_SHARED_LIBS) rather than a path, so
+    # target_link_libraries resolves it as a target and propagates its include dirs/link
+    # requirements normally.
+    set(ZLIB_INCLUDE_DIR
+        "${zlib_SOURCE_DIR};${zlib_BINARY_DIR}"
+        CACHE PATH "" FORCE)
+    set(ZLIB_LIBRARY
+        zlibstatic
+        CACHE STRING "" FORCE)
+    set(ZLIB_LIBRARIES
+        zlibstatic
+        CACHE STRING "" FORCE)
 
     # BUILD_SHARED_LIBS is a global cache variable, not scoped to libarchive. libarchive itself has
     # no dedicated "build the shared library" toggle: it gates that optional target purely on this
@@ -1236,14 +1270,15 @@ else()
     # unnecessary either way. This is forced here rather than earlier so it does not retroactively
     # affect SFML/SDL3/etc. (fetched above), which are configured through their own dedicated
     # static/shared toggles instead.
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(BUILD_SHARED_LIBS
+        OFF
+        CACHE BOOL "" FORCE)
 
     FetchContent_MakeAvailable(LIBARCHIVE)
 
-    # Apply missing-include patch to vanilla SFML 3.0.x.
-    # Newer libc++ (Xcode 26.5+) no longer transitively includes <ostream>, so
-    # SFML's OutputSoundFile.cpp fails to compile its err() << ... << std::endl
-    # statement (Err.hpp only forward-declares std::ostream via <iosfwd>). The
+    # Apply missing-include patch to vanilla SFML 3.0.x. Newer libc++ (Xcode 26.5+) no longer
+    # transitively includes <ostream>, so SFML's OutputSoundFile.cpp fails to compile its err() <<
+    # ... << std::endl statement (Err.hpp only forward-declares std::ostream via <iosfwd>). The
     # patch adds an explicit #include <ostream>.
     execute_process(
         COMMAND git apply --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/sfml-ostream-include.patch
@@ -1260,19 +1295,23 @@ else()
         endif()
         message(STATUS "Applied patches/sfml-ostream-include.patch to SFML")
     else()
-        # Forward apply failed - this could mean the patch is already applied, OR that
-        # it no longer matches the fetched SFML source (e.g. line-ending mismatch,
-        # upstream changed). Only skip if a reverse-apply confirms it is already applied;
-        # otherwise fail loudly instead of silently building against unpatched source.
+        # Forward apply failed - this could mean the patch is already applied, OR that it no longer
+        # matches the fetched SFML source (e.g. line-ending mismatch, upstream changed). Only skip
+        # if a reverse-apply confirms it is already applied; otherwise fail loudly instead of
+        # silently building against unpatched source.
         execute_process(
-            COMMAND git apply --reverse --check ${CMAKE_CURRENT_SOURCE_DIR}/patches/sfml-ostream-include.patch
+            COMMAND git apply --reverse --check
+                    ${CMAKE_CURRENT_SOURCE_DIR}/patches/sfml-ostream-include.patch
             WORKING_DIRECTORY ${sfml_SOURCE_DIR}
             RESULT_VARIABLE sfml_ostream_patch_reverse_check
             OUTPUT_QUIET ERROR_QUIET)
         if(sfml_ostream_patch_reverse_check EQUAL 0)
             message(STATUS "patches/sfml-ostream-include.patch already applied to SFML, skipping")
         else()
-            message(FATAL_ERROR "patches/sfml-ostream-include.patch does not apply to the fetched SFML source and is not already applied - fix the patch")
+            message(
+                FATAL_ERROR
+                    "patches/sfml-ostream-include.patch does not apply to the fetched SFML source and is not already applied - fix the patch"
+            )
         endif()
     endif()
 endif()
@@ -1286,19 +1325,17 @@ include_directories(${CMAKE_SOURCE_DIR}/thirdparty/lua)
 target_link_libraries(deceptus PRIVATE lua)
 
 if(NINTENDO_SWITCH)
-    # luaconf.h uses the presence of LLONG_MAX as its proxy for C99 compliance, and
-    # devkitPro's newlib does not define it in C++ mode, so Lua bails out with
-    # "Compiler does not support 'long long'".
+    # luaconf.h uses the presence of LLONG_MAX as its proxy for C99 compliance, and devkitPro's
+    # newlib does not define it in C++ mode, so Lua bails out with "Compiler does not support 'long
+    # long'".
     #
-    # Setting LUA_INT_TYPE directly does not work: luaconf.h defines it unconditionally
-    # rather than honouring a value from the command line. LUA_C89_NUMBERS is the
-    # supported knob, and it selects long plus double -- on aarch64 both are 64-bit, so
-    # this matches the default long long plus double exactly rather than narrowing
-    # anything.
+    # Setting LUA_INT_TYPE directly does not work: luaconf.h defines it unconditionally rather than
+    # honouring a value from the command line. LUA_C89_NUMBERS is the supported knob, and it selects
+    # long plus double -- on aarch64 both are 64-bit, so this matches the default long long plus
+    # double exactly rather than narrowing anything.
     #
-    # This has to be PUBLIC -- every translation unit including lua.hpp must see the
-    # same luaconf configuration as the library itself, or lua_Integer disagrees
-    # across the ABI boundary.
+    # This has to be PUBLIC -- every translation unit including lua.hpp must see the same luaconf
+    # configuration as the library itself, or lua_Integer disagrees across the ABI boundary.
     target_compile_definitions(lua PUBLIC LUA_C89_NUMBERS=1)
 endif()
 
@@ -1312,22 +1349,31 @@ target_compile_options(deceptus PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${THIRD_PARTY_
 target_include_directories(
     deceptus
     PRIVATE .
-    src
-    src/game
-    thirdparty
-    thirdparty/box2d/include
-    thirdparty/lua
-    ${CMAKE_BINARY_DIR}/_deps/sfml-src/include
-    ${SDL3_INCLUDE_DIRS})
+            src
+            src/game
+            thirdparty
+            thirdparty/box2d/include
+            thirdparty/lua
+            ${CMAKE_BINARY_DIR}/_deps/sfml-src/include
+            ${SDL3_INCLUDE_DIRS})
 
 target_compile_definitions(deceptus PRIVATE USE_GL _USE_MATH_DEFINES)
 if(DECEPTUS_DEVELOPMENT_MODE)
     target_compile_definitions(deceptus PRIVATE DEVELOPMENT_MODE)
+    if(NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
+        target_sources(
+            deceptus
+            PRIVATE src/game/debug/mechanisminspector.cpp
+                    src/game/debug/mechanism_property_bindings.h
+                    src/game/debug/mechanisminspector.h
+                    src/game/debug/mechanismsourceeditor.cpp
+                    src/game/debug/mechanismsourceeditor.h)
+    endif()
 endif()
 
-# Selects the VRSFML API rather than vanilla SFML's. Both the Emscripten and the Switch
-# target build against VRSFML, so this is what the SFML-flavour guards key off; plain
-# __EMSCRIPTEN__ stays reserved for genuinely browser-specific code.
+# Selects the VRSFML API rather than vanilla SFML's. Both the Emscripten and the Switch target build
+# against VRSFML, so this is what the SFML-flavour guards key off; plain __EMSCRIPTEN__ stays
+# reserved for genuinely browser-specific code.
 if(EMSCRIPTEN OR NINTENDO_SWITCH)
     target_compile_definitions(deceptus PRIVATE DECEPTUS_VRSFML)
 endif()
@@ -1347,15 +1393,7 @@ endif()
 # platform-specific configurations
 # ----------------------------------------------------------------------------------------------------
 
-target_link_libraries(
-    deceptus
-    PRIVATE
-        SFML::System
-        SFML::Graphics
-        SFML::Window
-        SDL3::SDL3
-        lua
-)
+target_link_libraries(deceptus PRIVATE SFML::System SFML::Graphics SFML::Window SDL3::SDL3 lua)
 target_link_libraries(deceptus PRIVATE SFML::Audio)
 if(NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
     target_link_libraries(deceptus PRIVATE libglew_static)
@@ -1363,26 +1401,25 @@ if(NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
 
     # archive_static sets this via the old-style COMPILE_DEFINITIONS target property rather than
     # target_compile_definitions(... PUBLIC ...), so it never propagates to consumers: without it,
-    # archive.h assumes the API lives in a DLL and decorates every declaration __declspec(dllimport),
-    # which left AssetSource's calls unresolved at link time.
+    # archive.h assumes the API lives in a DLL and decorates every declaration
+    # __declspec(dllimport), which left AssetSource's calls unresolved at link time.
     target_compile_definitions(deceptus PRIVATE LIBARCHIVE_STATIC)
 endif()
 
 if(NINTENDO_SWITCH)
-    # switch-glad is deliberately absent here; VRSFML's bundled glad provides the GL
-    # entry points. Link order still matters for the rest: EGL resolves through mesa's
-    # dispatch layer, which sits on the nouveau kernel interface.
+    # switch-glad is deliberately absent here; VRSFML's bundled glad provides the GL entry points.
+    # Link order still matters for the rest: EGL resolves through mesa's dispatch layer, which sits
+    # on the nouveau kernel interface.
     target_link_libraries(deceptus PRIVATE EGL glapi drm_nouveau)
 
-    # The game resolves its assets through relative paths like "data/sprites/foo.png"
-    # (134 such literals), so romfs has to carry a "data" directory rather than the
-    # contents of data/ at its root. Staging into ${CMAKE_BINARY_DIR}/romfs/data gives
-    # that layout; main() then chdir's to "romfs:/" so the relative paths resolve.
+    # The game resolves its assets through relative paths like "data/sprites/foo.png" (134 such
+    # literals), so romfs has to carry a "data" directory rather than the contents of data/ at its
+    # root. Staging into ${CMAKE_BINARY_DIR}/romfs/data gives that layout; main() then chdir's to
+    # "romfs:/" so the relative paths resolve.
     #
-    # copy_directory_if_different keeps the incremental cost down: only the first build
-    # moves the full ~104 MB.
-    # nx_create_nro validates the romfs directory at configure time, so it has to exist
-    # before that call even though the staging below only populates it at build time
+    # copy_directory_if_different keeps the incremental cost down: only the first build moves the
+    # full ~104 MB. nx_create_nro validates the romfs directory at configure time, so it has to
+    # exist before that call even though the staging below only populates it at build time
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/romfs/data)
 
     add_custom_target(
@@ -1402,10 +1439,13 @@ if(NINTENDO_SWITCH)
         VERSION
         "1.0.0")
 
-    nx_create_nro(deceptus NACP ${CMAKE_CURRENT_BINARY_DIR}/deceptus.nacp ROMFS ${CMAKE_BINARY_DIR}/romfs)
+    nx_create_nro(deceptus NACP ${CMAKE_CURRENT_BINARY_DIR}/deceptus.nacp ROMFS
+                  ${CMAKE_BINARY_DIR}/romfs)
 endif()
 
-if(NOT DECEPTUS_DEVELOPMENT_MODE AND NOT EMSCRIPTEN AND NOT NINTENDO_SWITCH)
+if(NOT DECEPTUS_DEVELOPMENT_MODE
+   AND NOT EMSCRIPTEN
+   AND NOT NINTENDO_SWITCH)
     # Shipping desktop builds pack data/ into a single zip archive instead of installing it as a
     # loose tree, so assets are not directly browsable/editable next to the executable. AssetSource
     # (src/framework/tools/assetsource.cpp) reads it back at runtime via libarchive. `cmake -E tar`
@@ -1448,21 +1488,22 @@ if(WIN32)
 
     # GLEW is now handled via FetchContent
 
-    # Dev builds still link SDL3 shared (see the SDL_SHARED/SDL_STATIC block above), so SDL3.dll
-    # has to sit next to the executable to run at all. The shipping build links SDL3 statically and
+    # Dev builds still link SDL3 shared (see the SDL_SHARED/SDL_STATIC block above), so SDL3.dll has
+    # to sit next to the executable to run at all. The shipping build links SDL3 statically and
     # needs no such copy.
     if(DECEPTUS_DEVELOPMENT_MODE)
         add_custom_command(
-            TARGET deceptus POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                $<TARGET_FILE:SDL3::SDL3>
-                $<TARGET_FILE_DIR:deceptus>
-        )
+            TARGET deceptus
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3::SDL3>
+                    $<TARGET_FILE_DIR:deceptus>)
     endif()
 
 endif()
 
-if(UNIX AND NOT APPLE AND NOT EMSCRIPTEN)
+if(UNIX
+   AND NOT APPLE
+   AND NOT EMSCRIPTEN)
 
     target_link_libraries(deceptus PRIVATE GL X11 stdc++fs)
 
@@ -1473,8 +1514,12 @@ if(APPLE)
     find_library(OPENGL_LIBRARY OpenGL)
     target_link_libraries(deceptus PRIVATE ${OPENGL_LIBRARY} "-framework Cocoa")
 
-    # force use of brew clang; prefix differs between Intel (/usr/local) and Apple Silicon (/opt/homebrew)
-    execute_process(COMMAND brew --prefix llvm OUTPUT_VARIABLE HOMEBREW_LLVM OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # force use of brew clang; prefix differs between Intel (/usr/local) and Apple Silicon
+    # (/opt/homebrew)
+    execute_process(
+        COMMAND brew --prefix llvm
+        OUTPUT_VARIABLE HOMEBREW_LLVM
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(CMAKE_CXX_COMPILER "${HOMEBREW_LLVM}/bin/clang++")
     set(CMAKE_C_COMPILER "${HOMEBREW_LLVM}/bin/clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
@@ -1489,44 +1534,44 @@ endif()
 # ----------------------------------------------------------------------------------------------------
 
 if(NINTENDO_SWITCH)
-    # prepend src/switch so "#include <opengl/glew.h>" resolves to the glad stub
-    # instead of the desktop GLEW header in src/opengl/
+    # prepend src/switch so "#include <opengl/glew.h>" resolves to the glad stub instead of the
+    # desktop GLEW header in src/opengl/
     #
-    # src/wasm is on the path as well, but only for its SFML/* umbrella headers: those
-    # are VRSFML compatibility shims (VRSFML has no monolithic SFML/Graphics.hpp, and
-    # dropped sf::Drawable and sf::VertexArray), so they apply to any VRSFML target
-    # rather than to Emscripten specifically.
+    # src/wasm is on the path as well, but only for its SFML/* umbrella headers: those are VRSFML
+    # compatibility shims (VRSFML has no monolithic SFML/Graphics.hpp, and dropped sf::Drawable and
+    # sf::VertexArray), so they apply to any VRSFML target rather than to Emscripten specifically.
     #
-    # Both go in a single call so the listed order is preserved -- src/switch has to come
-    # first, or the GLES3 glew stub would shadow the glad one.
-    target_include_directories(
-        deceptus BEFORE
-        PRIVATE ${CMAKE_SOURCE_DIR}/src/switch
-                ${CMAKE_SOURCE_DIR}/src/wasm)
+    # Both go in a single call so the listed order is preserved -- src/switch has to come first, or
+    # the GLES3 glew stub would shadow the glad one.
+    target_include_directories(deceptus BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/src/switch
+                                                       ${CMAKE_SOURCE_DIR}/src/wasm)
 
-    # mesa and the rest of the portlibs headers are not on the include path by default;
-    # the toolchain file only teaches find_package about them
+    # mesa and the rest of the portlibs headers are not on the include path by default; the
+    # toolchain file only teaches find_package about them
     target_include_directories(deceptus PRIVATE ${DEVKITPRO}/portlibs/switch/include)
 
-    # GL entry points come from the glad that VRSFML bundles, which it keeps PRIVATE, so
-    # its include directory has to be added by hand. devkitPro's switch-glad portlib is
-    # deliberately not used: both define gladLoadGL, and VRSFML's is the loader that
-    # actually runs, since it loads GL itself when creating the context.
-    target_include_directories(deceptus SYSTEM PRIVATE ${sfml_SOURCE_DIR}/extlibs/headers/glad/include)
+    # GL entry points come from the glad that VRSFML bundles, which it keeps PRIVATE, so its include
+    # directory has to be added by hand. devkitPro's switch-glad portlib is deliberately not used:
+    # both define gladLoadGL, and VRSFML's is the loader that actually runs, since it loads GL
+    # itself when creating the context.
+    target_include_directories(deceptus SYSTEM
+                               PRIVATE ${sfml_SOURCE_DIR}/extlibs/headers/glad/include)
 
     # keeps the ImGui headers inert for any translation unit that still includes them
     target_compile_definitions(deceptus PRIVATE IMGUI_DISABLE_DEFAULT_SHELL_FUNCTIONS)
 elseif(EMSCRIPTEN)
-    # prepend src/wasm so "#include <opengl/glew.h>" resolves to the GLES3 stub
-    # instead of the desktop GLEW header in src/opengl/
+    # prepend src/wasm so "#include <opengl/glew.h>" resolves to the GLES3 stub instead of the
+    # desktop GLEW header in src/opengl/
     target_include_directories(deceptus BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/src/wasm)
 
-    # Required for WASM Workers, AudioWorklet, and std::mutex/std::atomic support.
-    # -pthread implies -matomics -mbulk-memory at compile time and -sUSE_PTHREADS=1 at link time.
+    # Required for WASM Workers, AudioWorklet, and std::mutex/std::atomic support. -pthread implies
+    # -matomics -mbulk-memory at compile time and -sUSE_PTHREADS=1 at link time.
     target_compile_options(deceptus PRIVATE -pthread)
 
     # WebGL 2 (GLES3) flags; allow heap growth for level assets
-    target_link_options(deceptus PRIVATE
+    target_link_options(
+        deceptus
+        PRIVATE
         -pthread
         -sPTHREAD_POOL_SIZE=4
         -sUSE_WEBGL2=1
@@ -1543,8 +1588,8 @@ elseif(EMSCRIPTEN)
         # link the IDBFS backend so settings/saves can be persisted to IndexedDB (see src/main.cpp)
         -lidbfs.js
         "-sEXPORTED_RUNTIME_METHODS=['HEAPU32','HEAPU8','HEAP32','HEAPF32','HEAPU16']"
-        --preload-file ${CMAKE_SOURCE_DIR}/data@data
-    )
+        --preload-file
+        ${CMAKE_SOURCE_DIR}/data@data)
 
     set_target_properties(deceptus PROPERTIES SUFFIX ".html")
 endif()
@@ -1559,4 +1604,3 @@ install(
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES LICENSE.md DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY LICENSES/ DESTINATION ${CMAKE_INSTALL_BINDIR}/LICENSES)
-

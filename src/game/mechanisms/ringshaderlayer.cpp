@@ -87,6 +87,10 @@ static constexpr MechanismSchema ring_shader_quad_schema{
    .default_width = 768,
    .default_height = 768,
    .properties = ring_shader_quad_properties,
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   .selector_property = "customization",
+   .selector_value = "ring",
+#endif
 };
 
 const auto registered_ring_shader_quad = []
@@ -476,3 +480,24 @@ void RingShaderLayer::flash(float red, float green, float blue, float duration_s
    _flash_duration = duration_s;
    _flash_elapsed = 0.0f;
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+void RingShaderLayer::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   ShaderLayer::configureInspectorProperties(properties);
+   properties.bind("ring_scale", _ring_scale);
+   properties.bind("pixel_size", _pixel_size, [](const float& value) { return value > 0.0f; });
+   properties.bind("heartbeat_period_s", _heartbeat_period_s, [](const float& value) { return value > 0.0f; });
+   properties.bind("heartbeat_scale", _heartbeat_scale);
+   properties.bind("heartbeat_second_beat", _heartbeat_second_beat);
+   properties.bind("heartbeat_turbulence", _heartbeat_turbulence);
+   properties.bind("heartbeat_beat_width", _heartbeat_beat_width, [](const float& value) { return value > 0.0f; });
+   properties.bind("touch_depth", _touch_depth);
+   properties.bind("touch_width", _touch_width, [](const float& value) { return value > 0.0f; });
+   properties.bind("touch_release_s", _touch_release_s, [](const float& value) { return value > 0.0f; });
+   properties.bind("power_down_s", _power_down_s, [](const float& value) { return value > 0.0f; });
+   properties.bind("push_px", _push_px);
+   properties.bind("push_release_s", _push_release_s, [](const float& value) { return value > 0.0f; });
+   properties.bind("hit_attack_s", _hit_attack_s, [](const float& value) { return value > 0.0f; });
+}
+#endif

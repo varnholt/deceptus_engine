@@ -154,7 +154,7 @@ static constexpr std::array text_layer_properties{
    PropertyInfo{.name = "bitmap_font_map", .type = "string", .default_value = std::string_view{""}},
    PropertyInfo{.name = "truetype_font", .type = "string", .default_value = std::string_view{""}},
    PropertyInfo{.name = "truetype_font_size", .type = "int", .default_value = int32_t{12}},
-   PropertyInfo{.name = "truetype_font_color", .type = "string", .default_value = std::string_view{"#ffffffff"}},
+   PropertyInfo{.name = "truetype_font_color", .type = "color", .default_value = std::string_view{"#ffffffff"}},
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{0}, .template_value = int32_t{20}},
 };
 static constexpr MechanismSchema text_layer_schema{

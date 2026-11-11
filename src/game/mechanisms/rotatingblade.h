@@ -16,6 +16,11 @@
 class RotatingBlade : public GameMechanism, public GameNode
 {
 public:
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \copydoc GameMechanism::configureInspectorProperties
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    /// \brief runtime tuning values for blade acceleration, rotation, and path speed.
    struct Settings
    {

@@ -11,6 +11,9 @@ struct DebugDrawStates
    static bool _draw_camera_system;
    static bool _draw_physics_config;
    static bool _draw_log;
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   static bool _draw_mechanism_inspector;  //!< requests the desktop development mechanism editor.
+#endif
 
    //! \brief when false the deferred lighting pass is bypassed and the level is drawn unlit
    static bool _draw_lighting;

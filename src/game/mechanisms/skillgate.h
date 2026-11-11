@@ -16,6 +16,10 @@
 class SkillGate : public GameMechanism, public GameNode
 {
 public:
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \copydoc GameMechanism::configureInspectorProperties
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
    /// \brief creates a skill gate node.
    /// \param parent parent node in the scene graph.
    SkillGate(GameNode* parent = nullptr);

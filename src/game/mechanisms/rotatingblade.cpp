@@ -399,3 +399,13 @@ const sf::FloatRect& RotatingBlade::getPixelRect() const
 {
    return _rectangle;
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+void RotatingBlade::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("blade_acceleration", _settings._blade_acceleration);
+   properties.bind("blade_deceleration", _settings._blade_deceleration);
+   properties.bind("blade_rotation_speed", _settings._blade_rotation_speed);
+   properties.bind("movement_speed", _settings._movement_speed);
+}
+#endif

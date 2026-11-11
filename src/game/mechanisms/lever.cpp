@@ -511,3 +511,10 @@ void Lever::deserializeState(const nlohmann::json& j)
 
    updateReceivers();
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+void Lever::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("handle_available", _handle_available);
+}
+#endif

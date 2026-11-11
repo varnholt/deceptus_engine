@@ -295,3 +295,10 @@ void Fan::collide()
       PlayerRegistry::getFirst()->getBody()->ApplyForceToCenter(b2Vec2(2.0F * _direction.x, _direction.y), true);
    }
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+void Fan::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("speed", _speed);
+}
+#endif

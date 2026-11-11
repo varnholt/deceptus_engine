@@ -16,6 +16,12 @@ namespace
 {
 static constexpr std::array info_overlay_properties{
    PropertyInfo{.name = "z", .type = "int", .default_value = int32_t{20}},
+   PropertyInfo{.name = "start_delay_duration", .type = "float", .default_value = 1.5f},
+   PropertyInfo{.name = "fade_in_duration", .type = "float", .default_value = 1.5f},
+   PropertyInfo{.name = "show_duration", .type = "float", .default_value = 3.0f},
+   PropertyInfo{.name = "fade_out_duration", .type = "float", .default_value = 2.5f},
+   PropertyInfo{.name = "show_once", .type = "bool", .default_value = true},
+   PropertyInfo{.name = "fullscreen", .type = "bool", .default_value = true},
 };
 static constexpr MechanismSchema info_overlay_schema{
    .type_name = "InfoOverlay",
@@ -337,3 +343,27 @@ std::optional<sf::FloatRect> InfoOverlay::getBoundingBoxPx()
 {
    return std::nullopt;
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+void InfoOverlay::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("show_once", _settings._show_once);
+   const auto bind_duration = [&properties](const std::string& name, FloatSeconds& duration)
+   {
+      properties.bind<float>(
+         name,
+         [&duration] { return duration.count(); },
+         [&duration](const float& value)
+         {
+            duration = FloatSeconds{value};
+            return true;
+         },
+         [](const float& value) { return value >= 0.0f; }
+      );
+   };
+   bind_duration("start_delay_duration", _settings._start_delay_duration);
+   bind_duration("fade_in_duration", _settings._fade_in_duration);
+   bind_duration("show_duration", _settings._show_duration);
+   bind_duration("fade_out_duration", _settings._fade_out_duration);
+}
+#endif

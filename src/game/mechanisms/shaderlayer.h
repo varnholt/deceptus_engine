@@ -15,6 +15,11 @@ struct TmxObject;
 /// \brief draws a textured screen-space quad processed by configurable shaders.
 struct ShaderLayer : public GameMechanism, public GameNode
 {
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \copydoc GameMechanism::configureInspectorProperties
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    /// \brief creates a shader layer instance.
    /// \param parent owning game node in the scene graph.
    ShaderLayer(GameNode* parent = nullptr);

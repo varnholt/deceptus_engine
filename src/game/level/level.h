@@ -57,6 +57,7 @@
 class Bouncer;
 class IngameMenuMap;
 class TmxParser;
+struct TmxElement;
 struct ParseData;
 struct PostProcessingMechanism;
 
@@ -172,6 +173,27 @@ public:
    /// \return level description filename.
    std::string getDescriptionFilename() const;
 
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \brief returns the local source map path used by the development editor.
+   /// \return map filename owned by this level's description.
+   [[nodiscard]] const std::string& getTmxFilename() const
+   {
+      return _description->_filename;
+   }
+   /// \brief exposes retained parsed sources for the development editor catalogue.
+   /// \return parsed element collection, valid for this level's lifetime.
+   [[nodiscard]] const auto& getInspectorElements() const
+   {
+      return _inspector_elements;
+   }
+   /// \brief acknowledges an editor save without disabling external map reloads.
+   /// \param contents exact bytes committed by the source writer.
+   void acceptInspectorContents(const std::string& contents)
+   {
+      _file_watcher.acceptInspectorContents(contents);
+   }
+#endif
+
    /// \brief resolves which surface the player walks on at a given position.
    ///
    /// The footstep surface rectangles win where they overlap the position, everything else falls back
@@ -249,6 +271,9 @@ public:
    void setMapRevealed(bool revealed) override;
 
 protected:
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   std::vector<std::shared_ptr<TmxElement>> _inspector_elements;  //!< development-only retained authoring elements.
+#endif
    /// \brief loads or regenerates physics paths for a collision tile layer and adds chains to box2d.
    /// \param layer tmx tile layer that defines physics collision tiles.
    /// \param tileSet tileset used for tile-to-collision conversion.

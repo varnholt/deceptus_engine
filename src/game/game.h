@@ -8,6 +8,9 @@
 #include "game/camera/camerasystemconfigurationui.h"
 #include "game/constants.h"
 #include "game/debug/console.h"
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+#include "game/debug/mechanisminspector.h"
+#endif
 #ifndef DECEPTUS_VRSFML
 #include "game/debug/logui.h"
 #endif
@@ -64,6 +67,10 @@ public:
    void takeScreenshot();
 
 private:
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \brief restores unsaved previews in the active level before closing the editor and clearing its toggle.
+   void closeMechanismInspector();
+#endif
    /// \brief shuts down runtime systems before exit.
    void shutdown();
 
@@ -207,6 +214,9 @@ private:
 #endif
 #ifdef DEVELOPMENT_MODE
    std::unique_ptr<ProfilingUi> _profiling_ui;
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   std::unique_ptr<MechanismInspector> _mechanism_inspector;  //!< editor instance created only after an explicit open request.
+#endif
    sf::Time _profiling_update_elapsed;
 
    //! Level::draw reports its own passes; this covers everything else Game::draw does, so the

@@ -289,3 +289,12 @@ const auto registered_shader_quad = []
    return true;
 }();
 }  // namespace
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+void ShaderLayer::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("uv_width", _uv_width);
+   properties.bind("uv_height", _uv_height);
+   properties.bind("time_offset_s", _time_offset);
+}
+#endif

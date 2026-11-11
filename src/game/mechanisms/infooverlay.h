@@ -12,6 +12,11 @@
 class InfoOverlay : public GameMechanism, public GameNode
 {
 public:
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+   /// \copydoc GameMechanism::configureInspectorProperties
+   void configureInspectorProperties(MechanismPropertyBindings& properties) override;
+#endif
+
    /// \brief creates an info overlay in disabled state.
    /// \param parent parent node in the scene graph.
    InfoOverlay(GameNode* parent = nullptr);

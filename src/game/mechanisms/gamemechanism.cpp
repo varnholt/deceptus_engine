@@ -1,6 +1,88 @@
 #include "gamemechanism.h"
 #include "game/mechanisms/gamemechanismobserver.h"
 
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+#include "game/effects/lightsystem.h"
+#include "game/level/levelregistry.h"
+
+std::optional<sf::FloatRect> GameMechanism::get_editor_bounds()
+{
+   return getBoundingBoxPx();
+}
+
+MechanismPropertyBindings& GameMechanism::inspectorProperties()
+{
+   if (!_inspector_properties)
+   {
+      _inspector_properties = std::make_unique<MechanismPropertyBindings>();
+      configureCommonInspectorProperties(*_inspector_properties);
+      configureInspectorProperties(*_inspector_properties);
+      if (const auto owner = dynamic_cast<GameNode*>(this))
+      {
+         if (const auto level = LevelRegistry::getCurrent(); level && level->getLightSystem())
+         {
+            level->getLightSystem()->configureInspectorProperties(*owner, *_inspector_properties);
+         }
+      }
+   }
+   return *_inspector_properties;
+}
+
+void GameMechanism::configureCommonInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind<bool>(
+      "enabled",
+      [this] { return isEnabled(); },
+      [this](bool value)
+      {
+         setEnabled(value);
+         return true;
+      }
+   );
+   properties.bind<bool>(
+      "visible",
+      [this] { return isVisible(); },
+      [this](bool value)
+      {
+         setVisible(value);
+         return true;
+      }
+   );
+   properties.bind<int32_t>(
+      "z",
+      [this] { return getZ(); },
+      [this](int32_t value)
+      {
+         setZ(value);
+         return true;
+      },
+      [](int32_t value) { return value >= 0 && value <= 50; }
+   );
+   properties.bind("observed", _observed);
+   properties.bind("serialized", _serialized);
+}
+
+std::optional<std::string> GameMechanism::getInspectorProperty(const std::string& name)
+{
+   return inspectorProperties().get(name);
+}
+
+bool GameMechanism::supportsInspectorProperty(const std::string& name)
+{
+   return inspectorProperties().supports(name);
+}
+
+bool GameMechanism::validateInspectorProperty(const std::string& name, const std::string& value)
+{
+   return inspectorProperties().validate(name, value);
+}
+
+bool GameMechanism::setInspectorProperty(const std::string& name, const std::string& value)
+{
+   return inspectorProperties().set(name, value);
+}
+#endif
+
 int32_t GameMechanism::getZ() const
 {
    return _z_index;

@@ -565,6 +565,9 @@ void Laser::merge()
                         laser->setEnabled(*enabled);
                      }
 
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+                     laser->setInspectorSource(object);
+#endif
                      laser->setObjectId(object->_name);
                      laser->_animation_offset = animation_offset;
                      laser->_group_id = group_id;

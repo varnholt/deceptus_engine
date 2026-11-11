@@ -6,6 +6,7 @@
 #include "game/level/levelregistry.h"
 #include "game/mechanisms/gamemechanismdeserializerregistry.h"
 
+#include <algorithm>
 #include <array>
 
 int32_t RopeWithLight::_lamp_instance_counter = 0;
@@ -35,6 +36,7 @@ static constexpr std::array rope_with_light_properties{
    PropertyInfo{.name = "texture", .type = "string", .default_value = default_rope_texture},
    PropertyInfo{.name = "sprite", .type = "int", .default_value = int32_t{1}},
    PropertyInfo{.name = "lamp_sprite", .type = "int", .default_value = int32_t{1}},
+   PropertyInfo{.name = "color", .type = "color", .default_value = std::string_view{"#50ffffff"}},
 };
 static constexpr MechanismSchema rope_with_light_schema{
    .type_name = "RopeWithLight",
@@ -150,6 +152,27 @@ void RopeWithLight::updateSpritePositions()
    _lamp_sprite->setPosition(position_px);
 #endif
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+std::optional<sf::FloatRect> RopeWithLight::get_editor_bounds()
+{
+   const auto rope_bounds = Rope::get_editor_bounds();
+   if (!_lamp_sprite)
+   {
+      return rope_bounds;
+   }
+   const auto lamp_bounds = _lamp_sprite->getGlobalBounds();
+   if (!rope_bounds)
+   {
+      return lamp_bounds;
+   }
+   const auto left = std::min(rope_bounds->position.x, lamp_bounds.position.x);
+   const auto top = std::min(rope_bounds->position.y, lamp_bounds.position.y);
+   const auto right = std::max(rope_bounds->position.x + rope_bounds->size.x, lamp_bounds.position.x + lamp_bounds.size.x);
+   const auto bottom = std::max(rope_bounds->position.y + rope_bounds->size.y, lamp_bounds.position.y + lamp_bounds.size.y);
+   return sf::FloatRect{{left, top}, {right - left, bottom - top}};
+}
+#endif
 
 void RopeWithLight::setup(const GameDeserializeData& data)
 {

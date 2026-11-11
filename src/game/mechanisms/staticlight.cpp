@@ -22,7 +22,7 @@ static constexpr float default_static_light_flicker_speed = 0.0f;
 static constexpr float default_static_light_flicker_alpha_amount = 1.0f;
 static constexpr int32_t default_static_light_z = 20;
 static constexpr std::array static_light_properties{
-   PropertyInfo{.name = "color", .type = "string", .default_value = default_static_light_color},
+   PropertyInfo{.name = "color", .type = "color", .default_value = default_static_light_color},
    PropertyInfo{.name = "texture", .type = "string", .default_value = default_static_light_texture},
    PropertyInfo{.name = "flicker_intensity", .type = "float", .default_value = default_static_light_flicker_intensity},
    PropertyInfo{.name = "flicker_speed", .type = "float", .default_value = default_static_light_flicker_speed},

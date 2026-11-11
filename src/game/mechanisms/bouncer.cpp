@@ -250,3 +250,10 @@ void Bouncer::activate()
    Audio::getInstance().playSample({"mechanism_bouncer.ogg"});
    BouncerWrapper::bumpLastBouncerTime();
 }
+
+#if defined(DEVELOPMENT_MODE) && !defined(DECEPTUS_VRSFML)
+void Bouncer::configureInspectorProperties(MechanismPropertyBindings& properties)
+{
+   properties.bind("force", _force_value);
+}
+#endif
