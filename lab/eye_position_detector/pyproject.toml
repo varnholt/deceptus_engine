@@ -2,8 +2,8 @@
 name = "eye-position-detector"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
     "loguru>=0.7.3",
-    "pillow>=11.3.0",
+    "pillow>=13.0.0",
 ]
