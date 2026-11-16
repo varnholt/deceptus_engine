@@ -308,12 +308,16 @@ inline std::shared_ptr<sf::Sprite> createSprite(const sf::Texture& texture)
 /// \param source rectangle of the texture to draw.
 /// \param position position on the target to draw it at.
 /// \param scale scale to draw it at; the default draws it at its own size.
+/// \param color color and opacity to multiply into the source pixels.
+/// \param states optional render state, including the explicit VRSFML view when needed.
 inline void drawTextureRegion(
    sf::RenderTarget& target,
    const sf::Texture& texture,
    const sf::IntRect& source,
    const sf::Vector2f& position,
-   const sf::Vector2f& scale = {1.0f, 1.0f}
+   const sf::Vector2f& scale = {1.0f, 1.0f},
+   const sf::Color& color = sf::Color::White,
+   sf::RenderStates states = {}
 )
 {
 #ifdef DECEPTUS_VRSFML
@@ -324,17 +328,16 @@ inline void drawTextureRegion(
    };
    sprite.position = position;
    sprite.scale = scale;
+   sprite.color = color;
 
-   sf::RenderStates states;
    states.texture = &texture;
-   states.blendMode = sf::BlendAlpha;
    target.draw(sprite, states);
 #else
-   sf::Sprite sprite(texture);
-   sprite.setTextureRect(source);
+   sf::Sprite sprite(texture, source);
    sprite.setPosition(position);
    sprite.setScale(scale);
-   target.draw(sprite, sf::RenderStates{sf::BlendAlpha});
+   sprite.setColor(color);
+   target.draw(sprite, states);
 #endif
 }
 
