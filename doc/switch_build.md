@@ -209,7 +209,9 @@ VRSFML's own errors are redirected into that same log rather than being written 
 so an SFML failure is visible in it too. This is the only artefact a hardware run leaves
 behind — read it before guessing.
 
-Saves live next to it, under `sdmc:/switch/deceptus/settings`.
+Saves live next to it, under `sdmc:/switch/deceptus/settings`. This is `deceptus-dev` instead when
+the title was built with `-DDECEPTUS_DEVELOPMENT_MODE=ON` (a profiling run) — dev and release
+builds never share a save/settings/log tree, on any platform.
 
 ### Still open on hardware
 

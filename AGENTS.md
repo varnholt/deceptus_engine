@@ -70,3 +70,10 @@ std::string normalizeItemName(const std::string& name)
 - Follow PEP 8: CapWords classes, snake_case functions/methods/variables and UPPER_SNAKE_CASE constants. Use four-space indentation.
 - Follow the existing module's organization and imports. Keep Python readable and idiomatic; C/C++ naming and formatting rules do not apply to Python.
 - Python bindings and generated C/C++ text must use the actual exported C/C++ symbol names, even when those differ from Python naming conventions.
+
+
+## Local verification artifacts
+
+- Newly created unit tests, integration checks, throwaway harnesses, test-only fixtures, recordings and build outputs are local verification artifacts by default. Do not commit or push them unless the user explicitly asks to version them.
+- Keep local checks outside tracked source paths where practical, and stage publication files explicitly rather than adding all untracked files.
+- Maintain existing versioned tests when an API change requires it, but do not treat that as permission to publish new throwaway checks.
