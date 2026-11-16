@@ -39,7 +39,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "numpy", specifier = ">=1.26" },
-    { name = "pillow", specifier = ">=10.0" },
+    { name = "pillow", specifier = ">=13.0.0" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "pywin32", specifier = ">=312" },
 ]
