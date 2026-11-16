@@ -23,7 +23,7 @@ impl Extractor {
 
         for i in 0..archive.len() {
             let mut entry = archive.by_index(i)?;
-            let rel = entry.mangled_name(); // sanitized path
+            let rel = entry.mangled_name()?; // sanitized path
             let out_path = out_dir.join(rel);
 
             if entry.is_dir() {
