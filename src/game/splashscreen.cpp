@@ -1,255 +1,28 @@
 #include "splashscreen.h"
-#include <algorithm>
-#include <cstdint>
-#include <functional>
-#include <optional>
-#include <vector>
-#include "framework/easings/easings.h"
-#include "framework/tools/assetsource.h"
+
+#include "framework/image/splash_animation.h"
 #include "framework/tools/log.h"
 
-namespace
-{
-bool shown = false;
-}
+#include <exception>
 
 namespace SplashScreen
 {
-
-void eatEvents(sf::RenderWindow& window)
+void show(sf::RenderWindow& window, const std::string& config_path)
 {
-   const std::vector<std::function<bool(const sf::Event&)>> ignoredEventChecks = {
-      // keyboard events
-      [](const sf::Event& evt) { return evt.is<sf::Event::KeyPressed>(); },
-      [](const sf::Event& evt) { return evt.is<sf::Event::KeyReleased>(); },
-      // mouse events
-      [](const sf::Event& evt) { return evt.is<sf::Event::MouseButtonPressed>(); },
-      [](const sf::Event& evt) { return evt.is<sf::Event::MouseButtonReleased>(); },
-      [](const sf::Event& evt) { return evt.is<sf::Event::MouseMoved>(); },
-      [](const sf::Event& evt) { return evt.is<sf::Event::MouseWheelScrolled>(); },
-      // touch events
-      [](const sf::Event& evt) { return evt.is<sf::Event::TouchBegan>(); },
-      [](const sf::Event& evt) { return evt.is<sf::Event::TouchMoved>(); },
-      [](const sf::Event& evt) { return evt.is<sf::Event::TouchEnded>(); },
-      // joystick events
-      [](const sf::Event& evt) { return evt.is<sf::Event::JoystickButtonPressed>(); },
-      [](const sf::Event& evt) { return evt.is<sf::Event::JoystickButtonReleased>(); },
-      [](const sf::Event& evt) { return evt.is<sf::Event::JoystickMoved>(); },
-      [](const sf::Event& evt) { return evt.is<sf::Event::JoystickConnected>(); },
-      [](const sf::Event& evt) { return evt.is<sf::Event::JoystickDisconnected>(); }
-   };
-
-   auto isIgnoredEvent = [&ignoredEventChecks](const sf::Event& evt) -> bool
-   {
-      return std::ranges::find_if(
-                ignoredEventChecks.begin(),
-                ignoredEventChecks.end(),
-                [&evt](const std::function<bool(const sf::Event&)>& check) { return check(evt); }
-             ) != ignoredEventChecks.end();
-   };
-
-   while (auto event = window.pollEvent())
-   {
-      if (!isIgnoredEvent(*event))
-      {
-         auto getEventTypeName = [](const sf::Event& evt) -> std::optional<std::string>
-         {
-            if (evt.is<sf::Event::Closed>())
-            {
-               return "Closed";
-            }
-            if (evt.is<sf::Event::Resized>())
-            {
-               return "Resized";
-            }
-            if (evt.is<sf::Event::TextEntered>())
-            {
-               return "TextEntered";
-            }
-            if (evt.is<sf::Event::KeyPressed>())
-            {
-               return "KeyPressed";
-            }
-            if (evt.is<sf::Event::KeyReleased>())
-            {
-               return "KeyReleased";
-            }
-            if (evt.is<sf::Event::MouseWheelScrolled>())
-            {
-               return "MouseWheelScrolled";
-            }
-            if (evt.is<sf::Event::MouseButtonPressed>())
-            {
-               return "MouseButtonPressed";
-            }
-            if (evt.is<sf::Event::MouseButtonReleased>())
-            {
-               return "MouseButtonReleased";
-            }
-            if (evt.is<sf::Event::MouseMoved>())
-            {
-               return "MouseMoved";
-            }
-            if (evt.is<sf::Event::JoystickButtonPressed>())
-            {
-               return "JoystickButtonPressed";
-            }
-            if (evt.is<sf::Event::JoystickButtonReleased>())
-            {
-               return "JoystickButtonReleased";
-            }
-            if (evt.is<sf::Event::JoystickMoved>())
-            {
-               return "JoystickMoved";
-            }
-            if (evt.is<sf::Event::JoystickConnected>())
-            {
-               return "JoystickConnected";
-            }
-            if (evt.is<sf::Event::JoystickDisconnected>())
-            {
-               return "JoystickDisconnected";
-            }
-            if (evt.is<sf::Event::TouchBegan>())
-            {
-               return "TouchBegan";
-            }
-            if (evt.is<sf::Event::TouchMoved>())
-            {
-               return "TouchMoved";
-            }
-            if (evt.is<sf::Event::TouchEnded>())
-            {
-               return "TouchEnded";
-            }
-            if (evt.is<sf::Event::SensorChanged>())
-            {
-               return "SensorChanged";
-            }
-            return std::nullopt;
-         };
-
-         if (auto event_name = getEventTypeName(*event); event_name.has_value())
-         {
-            Log::Info() << "event ignored: " << event_name.value();
-         }
-      }
-   }
-}
-
-void show(sf::RenderWindow& window)
-{
+   static bool shown = false;
    if (shown)
    {
       return;
    }
-
    shown = true;
-
-#ifdef DECEPTUS_VRSFML
-   auto loaded_splash_texture_opt = sf::Texture::loadFromFile("data/game/splash.png");
-   window.clear(sf::Color(30, 30, 30));
-   if (loaded_splash_texture_opt)
+   try
    {
-      sf::Texture& loading_texture = loaded_splash_texture_opt.value();
-      sf::Sprite loading_sprite;
-
-      const sf::Vector2u window_size = window.getSize();
-      const sf::Vector2u texture_size = loading_texture.getSize();
-      loading_sprite.textureRect = sf::FloatRect{{0.f, 0.f}, {static_cast<float>(texture_size.x), static_cast<float>(texture_size.y)}};
-      const auto scale_y = static_cast<float>(window_size.y) / texture_size.y;
-      const auto scaled_width = texture_size.x * scale_y;
-      loading_sprite.scale = {scale_y, scale_y};
-      const auto position_x = (window_size.x - scaled_width) / 2.0f;
-      loading_sprite.position = {position_x, 0.0f};
-#else
-   sf::Texture loading_texture;
-   window.clear(sf::Color(30, 30, 30));
-   const auto splash_texture_contents = AssetSource::readFile("data/game/splash.png");
-   if (splash_texture_contents.has_value() && loading_texture.loadFromMemory(splash_texture_contents->data(), splash_texture_contents->size()))
-   {
-      sf::Sprite loading_sprite(loading_texture);
-
-      const sf::Vector2u window_size = window.getSize();
-      const sf::Vector2u texture_size = loading_texture.getSize();
-      const auto scale_y = static_cast<float>(window_size.y) / texture_size.y;
-      const auto scaled_width = texture_size.x * scale_y;
-      loading_sprite.setScale({scale_y, scale_y});
-      const auto position_x = (window_size.x - scaled_width) / 2.0f;
-      loading_sprite.setPosition({position_x, 0.0f});
-#endif
-
-      // fade in
-      sf::Clock fade_in_clock;
-      constexpr auto fade_in_duration_ms = 1000.0f;
-      while (fade_in_clock.getElapsedTime().asMilliseconds() < fade_in_duration_ms)
-      {
-         const float elapsed = fade_in_clock.getElapsedTime().asMilliseconds();
-         const float normalized_ratio = elapsed / fade_in_duration_ms;
-         const float eased_ratio = Easings::easeInOutQuad(normalized_ratio);
-         const std::uint8_t alpha = static_cast<std::uint8_t>(255 * eased_ratio);
-#ifdef DECEPTUS_VRSFML
-         loading_sprite.color = sf::Color(255, 255, 255, alpha);
-         window.clear(sf::Color(11, 12, 23));
-         window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
-#else
-         loading_sprite.setColor(sf::Color(255, 255, 255, alpha));
-         window.clear(sf::Color(11, 12, 23));
-         window.draw(loading_sprite);
-#endif
-         window.display();
-      }
-
-      // Set fully opaque after fade-in is complete
-#ifdef DECEPTUS_VRSFML
-      loading_sprite.color = sf::Color(255, 255, 255, 255);
-      window.clear(sf::Color(11, 12, 23));
-      window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
-#else
-      loading_sprite.setColor(sf::Color(255, 255, 255, 255));
-      window.clear(sf::Color(11, 12, 23));
-      window.draw(loading_sprite);
-#endif
-      window.display();
-
-      // show the splash screen for a moment after fade in
-      using namespace std::chrono_literals;
-      std::this_thread::sleep_for(1000ms);
-
-      // fade out
-      sf::Clock fade_out_clock;
-      constexpr auto fade_out_duration_ms = 1000.0f;
-      while (fade_out_clock.getElapsedTime().asMilliseconds() < fade_out_duration_ms)
-      {
-         const float elapsed = fade_out_clock.getElapsedTime().asMilliseconds();
-         const float normalized_ratio = 1.0f - (elapsed / fade_out_duration_ms);
-         const float eased_ratio = Easings::easeInOutQuad(normalized_ratio);
-         const std::uint8_t alpha = static_cast<std::uint8_t>(255 * eased_ratio);
-#ifdef DECEPTUS_VRSFML
-         loading_sprite.color = sf::Color(255, 255, 255, alpha);
-         window.clear(sf::Color(11, 12, 23));
-         window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
-#else
-         loading_sprite.setColor(sf::Color(255, 255, 255, alpha));
-         window.clear(sf::Color(11, 12, 23));
-         window.draw(loading_sprite);
-#endif
-         window.display();
-      }
-
-      // Final draw with 0 alpha to ensure complete fade out
-#ifdef DECEPTUS_VRSFML
-      loading_sprite.color = sf::Color(255, 255, 255, 0);
-      window.clear(sf::Color(11, 12, 23));
-      window.draw(loading_sprite, sf::RenderStates{.texture = &loading_texture});
-#else
-      loading_sprite.setColor(sf::Color(255, 255, 255, 0));
-      window.clear(sf::Color(11, 12, 23));
-      window.draw(loading_sprite);
-#endif
-      window.display();
+      const SplashAnimation animation(config_path);
+      animation.play(window);
    }
-
-   eatEvents(window);
+   catch (const std::exception& error)
+   {
+      Log::Warning() << "startup splash skipped: " << error.what();
+   }
 }
 }  // namespace SplashScreen

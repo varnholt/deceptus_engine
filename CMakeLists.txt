@@ -39,6 +39,8 @@ set(GAME_FILES
     src/framework/image/layer.h
     src/framework/image/psd.cpp
     src/framework/image/psd.h
+    src/framework/image/splash_animation.cpp
+    src/framework/image/splash_animation.h
     src/framework/image/tga.cpp
     src/framework/image/tga.h
     src/framework/joystick/gamecontroller.cpp
@@ -1603,3 +1605,20 @@ install(
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES LICENSE.md DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY LICENSES/ DESTINATION ${CMAKE_INSTALL_BINDIR}/LICENSES)
+
+# standalone graphics checks use synthetic artwork and do not depend on the game's splash design.
+option(DECEPTUS_BUILD_SPLASH_TESTS "build the configurable splash animation checks" OFF)
+if(DECEPTUS_BUILD_SPLASH_TESTS
+   AND NOT EMSCRIPTEN
+   AND NOT NINTENDO_SWITCH)
+    enable_testing()
+    add_executable(
+        splash_animation_tests
+        src/framework/image/splash_animation.cpp src/framework/tools/assetsource.cpp
+        tests/desktop/splash_animation_test.cpp)
+    target_include_directories(splash_animation_tests PRIVATE src thirdparty)
+    target_compile_definitions(splash_animation_tests PRIVATE DEVELOPMENT_MODE)
+    target_link_libraries(splash_animation_tests PRIVATE SFML::Graphics)
+    add_test(NAME splash_animation COMMAND splash_animation_tests
+                                           ${CMAKE_CURRENT_BINARY_DIR}/splash_test_assets)
+endif()

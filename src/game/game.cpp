@@ -267,8 +267,6 @@ void Game::initializeWindow()
    _window->setMinimumSize(sf::Vector2u{static_cast<uint32_t>(game_config._view_width), static_cast<uint32_t>(game_config._view_height)});
 #endif
 
-   SplashScreen::show(*_window);
-
 #ifndef DECEPTUS_VRSFML
    _window->setVerticalSyncEnabled(game_config._vsync_enabled);
 
@@ -285,6 +283,8 @@ void Game::initializeWindow()
 #endif
    _window->setKeyRepeatEnabled(false);
    _window->setMouseCursorVisible(!game_config._fullscreen);
+
+   SplashScreen::show(*_window, "data/config/splash.json");
 
    showGpu();
 

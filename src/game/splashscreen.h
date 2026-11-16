@@ -1,12 +1,13 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <chrono>
-#include <thread>
+#include <string>
 
 namespace SplashScreen
 {
-/// \brief shows the startup splash image with fade-in and fade-out animation.
-/// \param window render window used to display the splash screen.
-void show(sf::RenderWindow& window);
-};
+/// \brief plays the configured startup animation once per process.
+/// \param window borrowed render window with display settings already applied.
+/// \param config_path animation JSON path resolved through the asset source.
+/// \details releases textures on return; invalid configuration is logged and startup continues.
+void show(sf::RenderWindow& window, const std::string& config_path);
+}  // namespace SplashScreen
