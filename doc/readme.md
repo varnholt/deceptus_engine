@@ -66,6 +66,7 @@
     - [Cannon](level_design/enemies.md#cannon)<br>
     - [Critter](level_design/enemies.md#critter)<br>
     - [Ghost](level_design/enemies.md#ghost)<br>
+    - [Insect](level_design/enemies.md#insect)<br>
     - [Klonk](level_design/enemies.md#klonk)<br>
     - [Landmine](level_design/enemies.md#landmine)<br>
     - [Minik Bomber](level_design/enemies.md#minik-bomber)<br>

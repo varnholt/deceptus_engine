@@ -175,6 +175,80 @@ Ghosts fly around following a given path. When Adam gets close by, they try to s
 |path|string|The ghosts path given as a list of x,y-positions; format: `x0, y0, x1, y1, etc.`|
 
 
+### Insect
+
+A tiny wall dweller that wanders around, takes a break, then carries on. It is harmless by default
+and uses the same Lua enemy system as the other creatures.
+
+#### Placement
+
+1. Open or create an object group named `enemies` in Tiled.
+2. Place [enemy_insect.tx](../../data/templates/enemy_insect.tx) in that group, or draw a rectangle
+   and add the string property `script` with the value `insect.lua`.
+3. Resize the rectangle over the wall area where the insect should roam. The template starts at
+   96 x 96 pixels; use at least 24 x 24 pixels to fit the entire sprite.
+4. Set `z` so the insect draws in front of the wall graphics. The template suggests `20`.
+
+Each rectangle spawns one insect at its center. The rectangle defines its movement area;
+it does not need a patrol path. The insect moves across the wall artwork without following
+tile collision shapes, so keep the rectangle within the intended wall surface.
+
+#### Behavior
+
+1. Pick a random direction from the eight directions that allow movement inside the rectangle.
+2. Walk straight for a newly sampled duration between `walk_duration_min_ms` and
+   `walk_duration_max_ms` (1000–2000 ms by default), stopping early at a boundary.
+3. Rest in place, facing the same direction, for a newly sampled duration between
+   `rest_duration_min_ms` and `rest_duration_max_ms` (3000–4000 ms by default).
+4. Return to step 1. The next choice may be the same direction if there is still room to walk.
+
+Diagonal movement has the same speed as horizontal and vertical movement. At a boundary,
+the next walk excludes directions that would immediately leave the rectangle. Bounds are inset
+by half a sprite frame so the whole insect stays inside. In a rectangle too narrow for a full
+frame, the insect stays centered on that axis; when neither axis allows movement, it only idles.
+
+#### Properties
+
+|Property|Type|Default|Description|
+|-|-|-|-|
+|script|string|`insect.lua`|Script to select when placing the insect manually.|
+|speed|float|12|Walking speed in pixels per second; must be positive.|
+|walk_duration_min_ms|int|1000|Minimum walking duration in milliseconds; must be positive.|
+|walk_duration_max_ms|int|2000|Maximum walking duration in milliseconds; must be positive.|
+|rest_duration_min_ms|int|3000|Minimum resting duration in milliseconds; must be positive.|
+|rest_duration_max_ms|int|4000|Maximum resting duration in milliseconds; must be positive.|
+|damage|int|0|Contact damage; zero makes the insect harmless. Its sensor does not block the player.|
+|z|int|20 in the template|Draw depth; choose a value in front of the wall graphics.|
+
+For example, set `speed` to `8`, the walking range to `500`–`1000`, and the resting range to
+`4000`–`6000` for a slower insect that takes short walks and long breaks. Set either range's
+minimum and maximum to the same value for a fixed duration. Reversed endpoints are accepted;
+invalid numeric values leave the current setting unchanged.
+
+For JSON-only placement, `region_width_px` and `region_height_px` configure the movement area
+and default to 96 pixels each. The start position defines the area's upper-left corner using
+the usual enemy tile coordinates. In Tiled these dimensions come directly from the rectangle,
+so there is no need to enter them as custom properties.
+
+#### Artwork and animation
+
+The [Lua script](../../data/scripts/enemies/insect.lua) uses
+[insect.png](../../data/sprites/insect.png), a 216 x 192 pixel sheet with 24 x 24 pixel frames.
+Each row contains four walking frames followed by five idle frames. Walking frames play at
+40 ms per frame; idle frames play at 200 ms per frame. The sprite keeps its last direction
+while resting.
+
+|Row (starting at 1)|Direction|
+|-|-|
+|1|Up|
+|2|Down|
+|3|Right|
+|4|Left|
+|5|Up/right|
+|6|Up/left|
+|7|Down/right|
+|8|Down/left|
+
 ### Klonk
 
 ![](images/enemy_klonk.png)

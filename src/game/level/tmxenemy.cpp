@@ -27,6 +27,16 @@ void TmxEnemy::parse(const std::shared_ptr<TmxObject>& object)
       }
    }
 
+   // expose the authored rectangle to scripts without the path-matching half-tile offset below.
+   ScriptProperty region_width;
+   region_width._name = "region_width_px";
+   region_width._value = std::to_string(object->_width_px);
+   _properties.push_back(region_width);
+   ScriptProperty region_height;
+   region_height._name = "region_height_px";
+   region_height._value = std::to_string(object->_height_px);
+   _properties.push_back(region_height);
+
    // add path property to path if exists
    const auto path = findProperty("path");
    if (path)
