@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object name="insect" width="96" height="96">
+  <properties>
+   <property name="script" value="insect.lua"/>
+   <property name="damage" type="int" value="0"/>
+   <property name="speed" type="float" value="12"/>
+   <property name="walk_duration_min_ms" type="int" value="1000"/>
+   <property name="walk_duration_max_ms" type="int" value="2000"/>
+   <property name="rest_duration_min_ms" type="int" value="3000"/>
+   <property name="rest_duration_max_ms" type="int" value="4000"/>
+   <property name="z" type="int" value="20"/>
+  </properties>
+ </object>
+</template>
