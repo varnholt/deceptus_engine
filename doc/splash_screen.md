@@ -2,16 +2,18 @@
 
 The `SplashAnimation` engine player is `src/framework/image/splash_animation.*`. It renders configurable
 sprite layers and has no knowledge of the studio, PSD layer names, colors or typography.
-`game/splashscreen.*` only handles startup's play-once policy and logs asset failures.
+`game/splashscreen.*` plays the animation once at startup and logs asset failures.
 The game passes `data/config/splash.json` after applying its window/display settings.
+Sound cues play through the sound-effects mixer with the master and sound-effects volume
+settings. The player stops any active splash sounds when the animation exits.
 
 ## Change the design
 
-- Edit `data/config/splash.json` for the canvas, duration, layer order and animation.
-- Edit `data/game/splash/source.json` for PSD layer selection, colors and grading.
-- Run `uv run --with psd-tools --with numpy python tools/export_splash.py` to regenerate
-  the PNGs after changing the PSD or color recipe. Runtime playback needs only the JSON
-  animation and referenced PNGs; PSD decoding and color grading happen during export.
+- Edit `data/config/splash.json` for the canvas, duration, layers, timing and sound cues.
+- Edit `SPLASH BACKGROUND`, `SPLASH LOGO` and `SPLASH LETTERING` in `data/game/splash.psd`.
+  Keep the artwork in named raster layers in an 8-bit RGB PSD with raw or RLE layer compression.
+  The hidden `ORIGINAL ARTWORK` group retains the original editable layers.
+- Put replacement Ogg clips in `data/sounds` and reference them in the sound cues.
 
 ## Configuration
 
@@ -19,7 +21,14 @@ The game passes `data/config/splash.json` after applying its window/display sett
 `clear_color` optionally specifies three integer RGB channels (default black). The canvas
 fits the actual target with letterboxing and is recalculated after resizing.
 
-Each entry in `layers` references a `texture` asset. Layers are drawn in array order.
+The optional `sounds` array schedules clips by `sample` filename relative to `data/sounds`
+and `start` time in seconds. Start defaults to zero and must be within the animation. Each cue
+plays on the first frame at or after its start time. Clips can overlap, and the same sample can
+be scheduled more than once.
+
+Set `psd` to the PSD asset path and use `psd_layer` to select a named raster layer. The
+player uses the PSD layer's top-left position by default and multiplies its opacity by the
+configured opacity. Layers are drawn in array order.
 `position`, `scale` and `spread` accept either a constant `[x, y]` pair or an object:
 
 ```json
@@ -34,8 +43,7 @@ Each entry in `layers` references a `texture` asset. Layers are drawn in array o
 
 Supported easing names are `linear`, `ease_out_quad` and `smoothstep`. Optional `power`
 raises the easing result to a positive exponent. Curves clamp outside their interval;
-a zero duration produces an instantaneous transition. Default position is `[0, 0]`;
-default scale and spread are `[1, 1]`.
+a zero duration produces an instantaneous transition. Scale and spread default to `[1, 1]`.
 
 `origin` is an optional normalized anchor within each sprite region, default `[0, 0]`.
 `opacity` is a constant from 0 to 1, default 1. Optional `fade_in` and `fade_out` objects
@@ -49,16 +57,9 @@ this game's title animate its spacing while other designs can use arbitrary spri
 Offsets are canvas units, independent of the sprite scale.
 
 Textures are shared within an animation instance and released with that instance.
-Invalid configuration or missing assets throw from the player; the startup wrapper
-logs the problem and allows startup to continue. The player itself is replayable and
+Invalid configuration or missing artwork throws from the player. The startup wrapper
+logs the problem and allows startup to continue. The sound mixer logs missing clips while
+the animation continues. The player itself is replayable and
 `drawFrame(target, seconds)` supports deterministic frame sampling, preserving the
 caller's view. Native playback uses the window's VSync/frame limit; browser playback
 yields to the browser between frames.
-
-## Verification
-
-Configure a desktop build with `-DDECEPTUS_BUILD_SPLASH_TESTS=ON`, build
-`splash_animation_tests`, then run `ctest --test-dir <build> -R splash_animation --output-on-failure`.
-These rendering checks use synthetic red/green artwork and exercise interpolation,
-fades, sprite regions, multiple instances, aspect ratios, view restoration and invalid
-configuration. They require a working graphics context.

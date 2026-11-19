@@ -1,6 +1,7 @@
 #include "splash_animation.h"
 
 #include "framework/easings/easings.h"
+#include "framework/image/psd.h"
 #include "framework/tools/assetsource.h"
 #include "framework/tools/sfmlcompat.h"
 #include "json/json.hpp"
@@ -11,6 +12,7 @@
 #include <map>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 #ifdef __EMSCRIPTEN__
@@ -126,27 +128,45 @@ struct VectorCurve
    return {readVector(value.at("from")), readVector(value.at("to")), readTransition(value)};
 }
 
-[[nodiscard]] std::shared_ptr<sf::Texture> loadTexture(const std::string& path)
+void uploadSplashPixels(sf::Texture& texture, const PSD::Layer& layer)
 {
-   const auto contents = AssetSource::readFile(path);
-   if (!contents)
+   const auto& decoded_pixels = layer.getImage().getData();
+   if (std::ranges::find(decoded_pixels, 0u) == decoded_pixels.end())
    {
-      throw std::runtime_error("missing animation texture: " + path);
+      texture.update(reinterpret_cast<const uint8_t*>(decoded_pixels.data()));
+      return;
    }
+
+   // restore transparent edge colors before linear filtering the scaled splash artwork.
+   const auto& red = layer.getChannel(0).data();
+   const auto& green = layer.getChannel(1).data();
+   const auto& blue = layer.getChannel(2).data();
+   auto pixels = decoded_pixels;
+   for (size_t index = 0; index < pixels.size(); ++index)
+   {
+      if (pixels[index] == 0)
+      {
+         pixels[index] =
+            static_cast<uint32_t>(red[index]) | (static_cast<uint32_t>(green[index]) << 8) | (static_cast<uint32_t>(blue[index]) << 16);
+      }
+   }
+   texture.update(reinterpret_cast<const uint8_t*>(pixels.data()));
+}
+
+[[nodiscard]] std::shared_ptr<sf::Texture> loadPsdTexture(const PSD::Layer& layer)
+{
+   const sf::Vector2u size{static_cast<uint32_t>(layer.getWidth()), static_cast<uint32_t>(layer.getHeight())};
 #ifdef DECEPTUS_VRSFML
-   auto decoded = sf::Texture::loadFromMemory(contents->data(), contents->size());
+   auto decoded = sf::Texture::create(size);
    if (!decoded.hasValue())
    {
-      throw std::runtime_error("invalid animation texture: " + path);
+      throw std::runtime_error("failed to create texture for PSD layer: " + layer.getName());
    }
    auto texture = std::make_shared<sf::Texture>(std::move(*decoded));
 #else
-   auto texture = std::make_shared<sf::Texture>();
-   if (!texture->loadFromMemory(contents->data(), contents->size()))
-   {
-      throw std::runtime_error("invalid animation texture: " + path);
-   }
+   auto texture = std::make_shared<sf::Texture>(size);
 #endif
+   uploadSplashPixels(*texture, layer);
    texture->setSmooth(true);
    return texture;
 }
@@ -212,6 +232,27 @@ using TextureCache = std::map<std::string, std::shared_ptr<sf::Texture>>;
    return {color.at(0).get<uint8_t>(), color.at(1).get<uint8_t>(), color.at(2).get<uint8_t>()};
 }
 
+[[nodiscard]] std::vector<SplashAnimation::SoundCue> readSoundCues(const json& sounds, float duration)
+{
+   if (!sounds.is_array())
+   {
+      throw std::runtime_error("animation sounds must be an array");
+   }
+   std::vector<SplashAnimation::SoundCue> cues;
+   for (const auto& sound : sounds)
+   {
+      auto sample = sound.at("sample").get<std::string>();
+      const auto start = readNumber(sound.value("start", json(0.0f)));
+      if (sample.empty() || start < 0.0f || start >= duration)
+      {
+         throw std::runtime_error("animation sound cues need a sample and a start within the animation");
+      }
+      cues.push_back({std::move(sample), start});
+   }
+   std::ranges::stable_sort(cues, {}, &SplashAnimation::SoundCue::_start);
+   return cues;
+}
+
 [[nodiscard]] std::vector<SpritePart> readParts(const json& layer, sf::Vector2u texture_size)
 {
    if (layer.count("parts") == 0)
@@ -230,19 +271,25 @@ using TextureCache = std::map<std::string, std::shared_ptr<sf::Texture>>;
    return parts;
 }
 
-[[nodiscard]] SpriteLayer readLayer(const json& item, TextureCache& textures)
+[[nodiscard]] SpriteLayer readLayer(const json& item, const PSD& psd, TextureCache& textures)
 {
-   const auto path = item.at("texture").get<std::string>();
-   auto& texture = textures[path];
+   const auto name = item.at("psd_layer").get<std::string>();
+   const auto source = psd.getLayer(name);
+   if (source == psd.getLayers().end() || !source->isImageLayer())
+   {
+      throw std::runtime_error("missing drawable PSD layer: " + name);
+   }
+   auto& texture = textures[name];
    if (!texture)
    {
-      texture = loadTexture(path);
+      texture = loadPsdTexture(*source);
    }
+
    SpriteLayer layer;
    layer._texture = texture;
    layer._parts = readParts(item, texture->getSize());
    layer._origin = readVector(item.value("origin", json::array({0, 0})));
-   layer._position = readCurve(item.value("position", json::array({0, 0})));
+   layer._position = readCurve(item.value("position", json::array({source->getLeft(), source->getTop()})));
    layer._scale = readCurve(item.value("scale", json::array({1, 1})));
    layer._spread = readCurve(item.value("spread", json::array({1, 1})));
    layer._opacity = readNumber(item.value("opacity", json(1.0f)));
@@ -250,6 +297,7 @@ using TextureCache = std::map<std::string, std::shared_ptr<sf::Texture>>;
    {
       throw std::runtime_error("animation opacity must be in 0..1");
    }
+   layer._opacity *= source->getOpacity() / 255.0f;
    if (item.count("fade_in") != 0)
    {
       layer._fade_in = readTransition(item.at("fade_in"));
@@ -315,6 +363,7 @@ struct SplashAnimation::Implementation
    float _duration = 0.0f;
    sf::Color _clear_color = sf::Color::Black;
    std::vector<SpriteLayer> _layers;
+   std::vector<SoundCue> _sound_cues;
 };
 
 SplashAnimation::SplashAnimation(const std::string& config_path) : _implementation(std::make_unique<Implementation>())
@@ -333,15 +382,26 @@ SplashAnimation::SplashAnimation(const std::string& config_path) : _implementati
       throw std::runtime_error("animation canvas and duration must be positive");
    }
    data._clear_color = readClearColor(config);
+   if (const auto sounds = config.find("sounds"); sounds != config.end())
+   {
+      data._sound_cues = readSoundCues(*sounds, data._duration);
+   }
    const auto& layers = config.at("layers");
    if (!layers.is_array())
    {
       throw std::runtime_error("animation layers must be an array");
    }
+   const auto psd_path = config.at("psd").get<std::string>();
+   PSD psd;
+   psd.setColorFormat(PSD::ColorFormat::ABGR);
+   if (!psd.load(psd_path))
+   {
+      throw std::runtime_error("missing or invalid animation PSD: " + psd_path);
+   }
    TextureCache textures;
    for (const auto& layer : layers)
    {
-      data._layers.push_back(readLayer(layer, textures));
+      data._layers.push_back(readLayer(layer, psd, textures));
    }
 }
 
@@ -350,6 +410,11 @@ SplashAnimation::~SplashAnimation() = default;
 float SplashAnimation::getDuration() const
 {
    return _implementation->_duration;
+}
+
+std::span<const SplashAnimation::SoundCue> SplashAnimation::getSoundCues() const
+{
+   return _implementation->_sound_cues;
 }
 
 void SplashAnimation::drawFrame(sf::RenderTarget& target, float time) const
@@ -382,10 +447,11 @@ void SplashAnimation::drawFrame(sf::RenderTarget& target, float time) const
 #endif
 }
 
-void SplashAnimation::play(sf::RenderWindow& window) const
+void SplashAnimation::play(sf::RenderWindow& window, const std::function<void(const std::string&)>& play_sound) const
 {
+   auto remaining_cues = play_sound ? getSoundCues() : std::span<const SoundCue>{};
    sf::Clock clock;
-   while (clock.getElapsedTime().asSeconds() < getDuration())
+   for (auto time = 0.0f; time < getDuration(); time = clock.getElapsedTime().asSeconds())
    {
 #ifdef __SWITCH__
       if (!appletMainLoop())
@@ -403,7 +469,12 @@ void SplashAnimation::play(sf::RenderWindow& window) const
             return;
          }
       }
-      drawFrame(window, clock.getElapsedTime().asSeconds());
+      while (!remaining_cues.empty() && remaining_cues.front()._start <= time)
+      {
+         play_sound(remaining_cues.front()._sample);
+         remaining_cues = remaining_cues.subspan(1);
+      }
+      drawFrame(window, time);
       window.display();
 #ifdef __EMSCRIPTEN__
       // browser presentation and input require yielding even when native frame limiting is disabled.
