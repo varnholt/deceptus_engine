@@ -38,8 +38,12 @@ jobs:
       - name: Configure
         run: emcmake cmake -B build_wasm -DCMAKE_BUILD_TYPE=Release
 
+      # --parallel without a job count makes the Makefile generator run an unbounded "make -j", which
+      # starts hundreds of em++ processes at once. that exhausts the runner's memory, and the job then
+      # either thrashes in swap or dies with "the hosted runner lost communication with the server".
+      # one job per core keeps the compile within the runner's RAM.
       - name: Build
-        run: cmake --build build_wasm --parallel
+        run: cmake --build build_wasm --parallel "$(nproc)"
 
       - name: Package
         run: |

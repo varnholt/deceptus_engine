@@ -1584,7 +1584,11 @@ elseif(EMSCRIPTEN)
         -sINITIAL_MEMORY=536870912
         -sEXIT_RUNTIME=0
         -sASYNCIFY=1
-        -sASSERTIONS=1
+        # no -sASSERTIONS: sf::Music loops by seeking its ogg reader inside the AudioWorklet callback,
+        # which mallocs/frees. when the main thread holds the malloc lock at that moment, the worklet
+        # (which cannot Atomics.wait) takes emscripten's busy-wait futex path. that path works for
+        # audio worklets, but carries an assert(emscripten_is_main_browser_thread()) that aborts the
+        # whole game when assertions are compiled in (seen intermittently right after a level loads).
         -sAUDIO_WORKLET=1
         -sWASM_WORKERS=1
         # link the IDBFS backend so settings/saves can be persisted to IndexedDB (see src/main.cpp)
