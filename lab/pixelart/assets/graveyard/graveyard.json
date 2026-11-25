@@ -108,7 +108,7 @@
         "micro": 0,
         "moss_clumps": true,
         "soft": 0.5,
-        "bevel": 2,
+        "bevel": 1,
         "speck": 0.0,
         "form": 1.2,
         "value_tones": true,
@@ -116,7 +116,11 @@
         "night": 0.2,
         "sub_steps": 4,
         "round_corners": true,
-        "outline_level": 1
+        "outline_level": 1,
+        "edge_light": 1,
+        "texture": 0.9,
+        "pits": 0.012,
+        "scratches": 0.004
       },
       "tiled": {
         "name": "graveyard-mausoleum",
@@ -180,14 +184,18 @@
         "foot_rows": 3,
         "outline_level": 2,
         "soft": 0.5,
-        "bevel": 2,
+        "bevel": 1,
         "speck": 0.0,
         "form": 1.2,
         "value_tones": true,
         "gain": 0.75,
         "night": 0.3,
         "sub_steps": 4,
-        "round_corners": true
+        "round_corners": true,
+        "edge_light": 1,
+        "texture": 0.9,
+        "pits": 0.012,
+        "scratches": 0.004
       },
       "tiled": {
         "name": "graveyard-band-upper",
@@ -246,7 +254,7 @@
         "moss_clumps": true,
         "foot_rows": 3,
         "soft": 0.5,
-        "bevel": 2,
+        "bevel": 1,
         "speck": 0.0,
         "form": 1.2,
         "value_tones": true,
@@ -254,7 +262,11 @@
         "night": 0.2,
         "sub_steps": 4,
         "round_corners": true,
-        "outline_level": 1
+        "outline_level": 1,
+        "edge_light": 1,
+        "texture": 0.9,
+        "pits": 0.012,
+        "scratches": 0.004
       },
       "tiled": {
         "name": "graveyard-band-lower",

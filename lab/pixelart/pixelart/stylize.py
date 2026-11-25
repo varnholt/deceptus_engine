@@ -144,6 +144,57 @@ def round_stone_corners(out, key, stone, seam):
         corner &= ~take
 
 
+def _value_noise(shape, cell, rng):
+    """Smooth random field in 0..1 with features about `cell` pixels across (bilinear value noise)."""
+    h, w = shape
+    gy, gx = h // cell + 2, w // cell + 2
+    grid = rng.random((gy, gx))
+    y = np.arange(h) / cell
+    x = np.arange(w) / cell
+    y0, x0 = np.floor(y).astype(int), np.floor(x).astype(int)
+    ty, tx = (y - y0)[:, None], (x - x0)[None, :]
+    a = grid[y0][:, x0]
+    b = grid[y0][:, x0 + 1]
+    c = grid[y0 + 1][:, x0]
+    d = grid[y0 + 1][:, x0 + 1]
+    return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + d * tx) * ty
+
+
+def stone_texture(stone, edge_or_pure, texture, pits, scratches, seed):
+    """Hand-made surface for every stone, as a ramp offset over the stone pixels:
+    - mottling: irregular patches of a lighter and a darker close shade, so no face is one flat tone
+    - pits: a dark pixel with a lighter one at its lower right, the pixel artist's dent in stone
+    - scratches: short dark diagonal marks two or three pixels long
+    Edges, joints and carvings are left alone; the same seed gives the same marks."""
+    rng = np.random.default_rng(seed)
+    h, w = stone.shape
+    interior = stone.copy()
+    interior[stone] = ~edge_or_pure
+    offset = np.zeros((h, w))
+    if texture:
+        broad = _value_noise((h, w), 7, rng)
+        fine = _value_noise((h, w), 3, rng)
+        field = 0.7 * broad + 0.3 * fine
+        offset += texture * (np.where(field > 0.64, -0.75, 0.0) + np.where(field < 0.30, 0.5, 0.0))
+    if pits:
+        pit = interior & (rng.random((h, w)) < pits)
+        lip = np.zeros_like(pit)
+        lip[1:, 1:] = pit[:-1, :-1]
+        offset[pit] -= 1.0
+        offset[lip & interior & ~pit] += 0.5
+    if scratches:
+        start = interior & (rng.random((h, w)) < scratches)
+        ys, xs = np.nonzero(start)
+        direction = np.where(rng.random(len(ys)) < 0.5, 1, -1)
+        for step in range(3):
+            yy, xx = ys + step, xs + step * direction
+            ok = (yy < h) & (xx >= 0) & (xx < w)
+            yy, xx = yy[ok], xx[ok]
+            keep = interior[yy, xx]
+            offset[yy[keep], xx[keep]] -= 0.75
+    return offset[stone]
+
+
 def ramp_colour(ramp, position, sub_steps):
     """Colours between the ramp's shades: position 2.5 is halfway from shade 2 to shade 3,
     snapped to sub_steps in-between shades so the piece keeps a small, deliberate palette."""
@@ -154,7 +205,7 @@ def ramp_colour(ramp, position, sub_steps):
     return np.round(ramp[lo] * (1 - t) + ramp[hi] * t).astype(np.int32)
 
 
-def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0, round_corners=False):
+def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0, round_corners=False, texture=0.0, pits=0.0, scratches=0.0, texture_seed=7, edge_light=2):
     shares = base_shares or BASE_SHARES
     pal = palette or {}
     ramp = np.array(pal.get("stone", RAMP))
@@ -274,7 +325,7 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     # small carved parts get no edge light of their own, their tone already separates them
     # two steps over its own stone: with a darker tone shift the highlights go down with the stones,
     # otherwise a night-dark piece is spattered with full-bright edge pixels
-    top_lv = base[inv] + 2
+    top_lv = base[inv] + edge_light
     lv = np.where(top_edge & big & ~in_shadow, np.maximum(lv - np.where(up_face, 1, 0), top_lv), lv)
     lv = lv + np.where(left_edge & ~top_edge & big & ~in_shadow, 1, 0)
     lv = lv - np.where(bottom_edge, 1, 0) - np.where(right_edge & ~bottom_edge & ~top_edge, 1, 0)
@@ -309,6 +360,8 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
             frac = frac + form * np.clip(-nx + 0.5 * ny, -1.0, 1.0)
         if speck:
             frac = frac + speck * np.clip(np.round(raw_delta / np.maximum(pix_std, 1.5)), -1, 1)
+        if texture or pits or scratches:
+            frac = frac + stone_texture(stone, any_edge | keep_pure, texture, pits, scratches, texture_seed)
         frac = np.where(any_edge | keep_pure, 0.0, frac)
         shade = ramp_colour(ramp, level[stone] + frac, sub_steps)
     shade = shade + np.where(keep_pure, 0, fine * micro)[:, None]
