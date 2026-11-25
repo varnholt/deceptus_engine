@@ -52,6 +52,17 @@ def _window(sl, shape):
             slice(max(sl[1].start - 1, 0), min(sl[1].stop + 1, shape[1])))
 
 
+def neighbour_mode(neighbours):
+    """Most common value along the last axis for every row at once, ignoring entries below 0
+    (no neighbour there): returns (value, count). Ties go to the first neighbour in order."""
+    valid = neighbours >= 0
+    agree = (neighbours[..., :, None] == neighbours[..., None, :]) & valid[..., :, None] & valid[..., None, :]
+    counts = agree.sum(-1)
+    best = counts.argmax(-1)
+    value = np.take_along_axis(neighbours, best[..., None], -1)[..., 0]
+    return value, np.take_along_axis(counts, best[..., None], -1)[..., 0]
+
+
 def _surrounding_colour(packed, mask, region):
     """Most common colour on the one-pixel ring around region, among pixels in mask."""
     ring = ndimage.binary_dilation(region, EIGHT) & ~region & mask
@@ -61,23 +72,22 @@ def _surrounding_colour(packed, mask, region):
 
 def fill_holes(img):
     opaque = img[..., 3] > 0
-    holes, n = ndimage.label(~opaque)
+    holes, _ = ndimage.label(~opaque)
     fixed = 0
-    h, w = opaque.shape
     for label, sl in enumerate(ndimage.find_objects(holes), start=1):
-        region = holes[sl] == label
-        if region.sum() > MAX_HOLE_PX:
+        if (holes[sl] == label).sum() > MAX_HOLE_PX:
             continue
-        if sl[0].start == 0 or sl[1].start == 0 or sl[0].stop == h or sl[1].stop == w:
+        win = _window(sl, opaque.shape)
+        region = holes[win] == label
+        # a hole touching the image border is open space, not a gap between meshes
+        if region.shape != (sl[0].stop - sl[0].start + 2, sl[1].stop - sl[1].start + 2):
             continue
-        full = np.zeros_like(opaque)
-        full[sl] = region
-        ring = ndimage.binary_dilation(full, EIGHT) & ~full
-        if not opaque[ring].all():
+        ring = ndimage.binary_dilation(region, EIGHT) & ~region
+        if not opaque[win][ring].all():
             continue
-        lum = _luminance(img[..., :3][ring].astype(float))
-        img[..., :3][full] = img[..., :3][ring][lum.argmin()]
-        img[..., 3][full] = 255
+        colours = img[win][..., :3][ring]
+        img[win][..., :3][region] = colours[_luminance(colours.astype(float)).argmin()]
+        img[win][..., 3][region] = 255
         fixed += 1
     return fixed
 
@@ -147,15 +157,13 @@ def remove_bright_specks(img):
     specks = bright & ~in_line
     packed = _packed(img[..., :3])
     pp = np.pad(np.where(opaque & ~bright, packed, -1), 1, constant_values=-1)
-    fixed = 0
-    for y, x in zip(*np.nonzero(specks)):
-        around = pp[y:y + 3, x:x + 3].ravel()
-        around = around[around >= 0]
-        if len(around):
-            vals, counts = np.unique(around, return_counts=True)
-            img[y, x, :3] = _unpack(np.array([vals[counts.argmax()]]))[0]
-            fixed += 1
-    return fixed
+    h, w = packed.shape
+    around = np.stack([pp[1 + dy:1 + dy + h, 1 + dx:1 + dx + w] for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dy or dx], -1)
+    value, count = neighbour_mode(around[specks])
+    take = count > 0
+    ys, xs = np.nonzero(specks)
+    img[ys[take], xs[take], :3] = _unpack(value[take])
+    return int(take.sum())
 
 
 def replace_lone_pixels(img):
@@ -166,13 +174,11 @@ def replace_lone_pixels(img):
     neighbours = np.stack([p[1 + dy:1 + dy + h, 1 + dx:1 + dx + w] for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dy or dx], -1)
     shares = (neighbours == packed[..., None]).sum(-1)
     candidates = opaque & (shares == 0) & (neighbours >= 0).all(-1)
-    fixed = 0
-    for y, x in zip(*np.nonzero(candidates)):
-        vals, counts = np.unique(neighbours[y, x], return_counts=True)
-        if counts.max() >= 5:
-            img[y, x, :3] = _unpack(np.array([vals[counts.argmax()]]))[0]
-            fixed += 1
-    return fixed
+    value, count = neighbour_mode(neighbours[candidates])
+    take = count >= 5
+    ys, xs = np.nonzero(candidates)
+    img[ys[take], xs[take], :3] = _unpack(value[take])
+    return int(take.sum())
 
 
 def tidy(img):

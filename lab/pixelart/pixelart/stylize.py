@@ -14,7 +14,7 @@ import numpy as np
 from PIL import Image
 
 from .grade import grade
-from .tidy import tidy
+from .tidy import neighbour_mode, tidy
 
 # dstar's owl shrine, stone ramp from outline to highlight
 RAMP = np.array([(5, 10, 3), (28, 33, 26), (44, 49, 42), (52, 57, 50), (73, 78, 71), (96, 101, 94), (131, 136, 129), (182, 187, 180)])
@@ -346,12 +346,11 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
         nb = np.stack([cp[:-2, 1:-1], cp[2:, 1:-1], cp[1:-1, :-2], cp[1:-1, 2:]], -1)
         same = (nb == c[..., None]).sum(-1)
         lone = solid & (stone | leaf) & (same == 0) & ~edge
+        value, count = neighbour_mode(nb[lone])
+        take = count >= 3
         ys, xs = np.nonzero(lone)
-        for y, x in zip(ys, xs):
-            vals, cnt = np.unique(nb[y, x][nb[y, x] >= 0], return_counts=True)
-            if len(cnt) and cnt.max() >= 3:
-                v = vals[cnt.argmax()]
-                out[y, x, :3] = ((v >> 16) & 255, (v >> 8) & 255, v & 255)
+        v = value[take]
+        out[ys[take], xs[take], :3] = np.stack([(v >> 16) & 255, (v >> 8) & 255, v & 255], -1).astype(np.uint8)
     if round_corners:
         round_stone_corners(out, key, stone, seam)
     report = tidy(out)
