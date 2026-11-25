@@ -268,12 +268,13 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     left_edge = edge(kp[1:-1, :-2])
     bottom_edge = edge(kp[2:, 1:-1])
     right_edge = edge(kp[1:-1, 2:])
-    # darkening (shift) applies to bodies only: lit top edges keep their full brightness, as in dstar's background pieces
-    # small carved parts (frame strips, emblems, letters) get one step, only real stones the full top light
+    # lit top edges stay two steps above their own stone (see top_lv); small carved parts get one step
     big = (counts[inv] >= 60) & (core_share[inv] >= 0.25)
     # the lit top row sits two steps over the stone's unshaded tone, never stacked on the bevel light;
     # small carved parts get no edge light of their own, their tone already separates them
-    top_lv = base[inv] - shift + 2
+    # two steps over its own stone: with a darker tone shift the highlights go down with the stones,
+    # otherwise a night-dark piece is spattered with full-bright edge pixels
+    top_lv = base[inv] + 2
     lv = np.where(top_edge & big & ~in_shadow, np.maximum(lv - np.where(up_face, 1, 0), top_lv), lv)
     lv = lv + np.where(left_edge & ~top_edge & big & ~in_shadow, 1, 0)
     lv = lv - np.where(bottom_edge, 1, 0) - np.where(right_edge & ~bottom_edge & ~top_edge, 1, 0)

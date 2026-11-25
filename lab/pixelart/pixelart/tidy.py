@@ -21,7 +21,7 @@ MAX_HOLE_PX = 4           # gaps between meshes are a few pixels; anything large
 MAX_ISLAND_PX = 3         # dark groups up to this size are specks; joints and cracks are longer
 DARK_LUMINANCE = 32       # joint and outline colours are below this
 SLIVER_MAX_LENGTH = 4     # shorter one-pixel dark runs are slivers, longer ones are drawn lines
-SPECK_CONTRAST = 40       # a speck is at least this much brighter than the median of its neighbours
+SPECK_CONTRAST = 28       # a speck is at least this much brighter than the median of its neighbours (one tone step or more)
 
 EIGHT = np.ones((3, 3), dtype=bool)
 
