@@ -13,11 +13,15 @@ import sys
 import numpy as np
 from PIL import Image
 
+from .tidy import tidy
+
 # dstar's owl shrine, stone ramp from outline to highlight
 RAMP = np.array([(5, 10, 3), (28, 33, 26), (44, 49, 42), (52, 57, 50), (73, 78, 71), (96, 101, 94), (131, 136, 129), (182, 187, 180)])
 OUTLINE = 0
 # shares of stone bodies per base tone (levels 2..5), taken from the shrine's tone counts
 BASE_LEVELS = [2, 3, 4, 5]
+# a stone whose mean brightness is below this share of the median stone counts as deep in shadow
+DEEP_SHADOW = 0.45
 BASE_SHARES = [0.35, 0.25, 0.30, 0.10]   # tuned (style/tune.py) against the shrine's tone counts
 GREENS = np.array([(7, 24, 14), (12, 37, 23), (18, 50, 31), (23, 63, 33), (35, 82, 45), (55, 110, 62)])
 PASSAGE = np.array([(12, 0, 24), (13, 1, 25), (17, 3, 34), (20, 6, 43), (25, 15, 51), (31, 23, 65)])
@@ -97,7 +101,44 @@ def absorb_growth_specks(out, leaf, stone):
     stone[lonely] = True
 
 
-def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE):
+def _run_length(key, stone, dy, dx, limit):
+    """For every pixel, how many pixels of the same stone follow in direction (dy, dx), up to limit."""
+    run = np.zeros(key.shape, dtype=np.int32)
+    alive = stone.copy()
+    shifted = key
+    for _ in range(limit):
+        shifted = np.roll(np.roll(shifted, -dy, 0), -dx, 1)
+        alive = alive & (shifted == key)
+        run += alive
+    return run
+
+
+def pillow(key, stone, width):
+    """dstar's pillowed stones as a ramp offset: a lit band along the top and left edge `width`
+    pixels deep, fading into the body, and the body falling off into shade towards the bottom and
+    right edge."""
+    up = _run_length(key, stone, -1, 0, width)
+    left = _run_length(key, stone, 0, -1, width)
+    down = _run_length(key, stone, 1, 0, width)
+    right = _run_length(key, stone, 0, 1, width)
+    near_top = np.maximum(width - up, 0) / width
+    near_left = np.maximum(width - left, 0) / width
+    near_bottom = np.maximum(width - down, 0) / width
+    near_right = np.maximum(width - right, 0) / width
+    return 0.9 * np.maximum(near_top, 0.6 * near_left) - 0.8 * np.maximum(near_bottom, 0.6 * near_right)
+
+
+def ramp_colour(ramp, position, sub_steps):
+    """Colours between the ramp's shades: position 2.5 is halfway from shade 2 to shade 3,
+    snapped to sub_steps in-between shades so the piece keeps a small, deliberate palette."""
+    position = np.clip(np.round(np.asarray(position, dtype=float) * sub_steps) / sub_steps, 0, len(ramp) - 1)
+    lo = np.floor(position).astype(int)
+    hi = np.minimum(lo + 1, len(ramp) - 1)
+    t = (position - lo)[..., None]
+    return np.round(ramp[lo] * (1 - t) + ramp[hi] * t).astype(np.int32)
+
+
+def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0):
     shares = base_shares or BASE_SHARES
     pal = palette or {}
     ramp = np.array(pal.get("stone", RAMP))
@@ -161,6 +202,10 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     raw_delta = L[stone] - pix_mean
     k = np.maximum(pix_std * k_scale, 3.5)
     lv = base[inv] + np.clip(np.round(delta / k), -max_step, max_step).astype(np.int32)
+    # the part of a stone a cast shadow falls on, and stones lying deep in shadow altogether, get no
+    # edge light: dstar paints deep shadow as one flat dark area, not as a grid of lit edges
+    deep_shadow = means < DEEP_SHADOW * np.median(means)
+    in_shadow = (lv < base[inv]) | deep_shadow[inv]
     # cracks: clearly darker than the stone around them
     crack = raw_delta < -np.maximum(pix_std * crack_k, 12.0)
 
@@ -204,8 +249,8 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     # the lit top row sits two steps over the stone's unshaded tone, never stacked on the bevel light;
     # small carved parts get no edge light of their own, their tone already separates them
     top_lv = base[inv] - shift + 2
-    lv = np.where(top_edge & big, np.maximum(lv - np.where(up_face, 1, 0), top_lv), lv)
-    lv = lv + np.where(left_edge & ~top_edge & big, 1, 0)
+    lv = np.where(top_edge & big & ~in_shadow, np.maximum(lv - np.where(up_face, 1, 0), top_lv), lv)
+    lv = lv + np.where(left_edge & ~top_edge & big & ~in_shadow, 1, 0)
     lv = lv - np.where(bottom_edge, 1, 0) - np.where(right_edge & ~bottom_edge & ~top_edge, 1, 0)
     # the brightest tone is kept for long, unbroken ledges (see below); bodies stop one step under it
     lv = np.clip(lv, 1, len(ramp) - 2)
@@ -225,6 +270,17 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     shade = ramp[level[stone]].astype(np.int32)
     fine = np.clip(np.round(raw_delta / np.maximum(pix_std * micro_k, 1.5)), -1, 1).astype(np.int32)
     keep_pure = (level[stone] == OUTLINE)
+    if soft:
+        # the inside of a stone keeps the render's own light and shade (falloff, shade towards the
+        # joints) in in-between shades of the ramp; edges, joints and carvings stay crisp
+        any_edge = top_edge | bottom_edge | left_edge | right_edge
+        frac = np.clip(delta / (2.0 * k), -soft, soft)
+        if bevel:
+            frac = frac + pillow(key, stone, bevel)[stone] * np.where(big & ~in_shadow, 1.0, 0.0)
+        if speck:
+            frac = frac + speck * np.clip(np.round(raw_delta / np.maximum(pix_std, 1.5)), -1, 1)
+        frac = np.where(any_edge | keep_pure, 0.0, frac)
+        shade = ramp_colour(ramp, level[stone] + frac, sub_steps)
     shade = shade + np.where(keep_pure, 0, fine * micro)[:, None]
     out[..., :3][stone] = np.clip(shade, 0, 255)
     out[..., :3][seam] = seam_rgb
@@ -233,8 +289,12 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     leaf = leaf | mossy
     stone = stone & ~mossy
     if leaf.any():
-        q = np.clip(((L[leaf] - L[leaf].min()) / max(np.ptp(L[leaf]), 1) * len(greens)).astype(int), 0, len(greens) - 1)
-        out[..., :3][leaf] = greens[q]
+        t = (L[leaf] - L[leaf].min()) / max(np.ptp(L[leaf]), 1)
+        if soft:
+            out[..., :3][leaf] = np.clip(ramp_colour(greens, t * (len(greens) - 1), sub_steps), 0, 255)
+        else:
+            q = np.clip((t * len(greens)).astype(int), 0, len(greens) - 1)
+            out[..., :3][leaf] = greens[q]
         if moss_clumps:
             shade_clumps(out, mossy, greens)
             absorb_growth_specks(out, leaf, stone)
@@ -263,7 +323,9 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
             if len(cnt) and cnt.max() >= 3:
                 v = vals[cnt.argmax()]
                 out[y, x, :3] = ((v >> 16) & 255, (v >> 8) & 255, v & 255)
+    report = tidy(out)
     Image.fromarray(out).save(out_p)
+    return report
 
 
 if __name__ == "__main__":

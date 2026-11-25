@@ -8,6 +8,7 @@ dependencies = [
     "numpy",
     "pillow",
     "mcp",
+    "scipy>=1.17.1",
 ]
 
 [build-system]

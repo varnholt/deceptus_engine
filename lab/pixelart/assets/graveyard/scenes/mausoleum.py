@@ -1,5 +1,5 @@
 """The graveyard mausoleum: portal wall with an arched doorway, columns, pediment, ruined side
-walls, a dark passage and the dais under dstar's owl shrine mound. Level pixels, origin x 5300.
+walls, a dark passage and the plinth under dstar's owl shrine mound. Level pixels, origin x 5300.
 
 Runs inside Blender after blender_kit/core.py and blender_kit/graves.py (run_passes.py does that).
 """
@@ -13,6 +13,9 @@ SPRING = Z(1380)        # where the arch starts
 RING = 16 * PX          # voussoir depth
 BLOCK_X0, BLOCK_X1 = X(5395), X(5675)
 BLOCK_TOP = Z(1296)
+PLINTH_FRONT = -1.42      # the altar plinth's front, the plane fitted to the level tiles
+OBLIQUE_SLOPE = 0.16      # rise per unit of depth: ledge tops show 2-5 px, as in dstar's scenery
+FRIEZE_BOTTOM = Z(1312)   # frieze band between the wall courses and the cornice
 CORNICE_TOP = Z(1284)
 PEDIMENT_TOP = Z(1240)
 COLS = [5426, 5452]      # left pair, mirrored about the opening centre; the inner pedestals clear dstar's shrine mound (x 5472-5592)
@@ -108,9 +111,9 @@ def arc_outline(ri, ro, a0, a1, steps):
 def build_scene(seed=7):
     clear_scene()
     scn = bpy.context.scene
-    stone = stone_variants("stone", (0.045, 0.056, 0.062), moss=0.55)
-    stone_dark = stone_variants("stone_dark", (0.032, 0.040, 0.046), moss=0.35)
-    trim = stone_variants("trim", (0.058, 0.068, 0.074), moss=0.4, tint_var=0.03)
+    stone = stone_variants("stone", (0.045, 0.056, 0.062), moss=0.15)
+    stone_dark = stone_variants("stone_dark", (0.032, 0.040, 0.046), moss=0.12)
+    trim = stone_variants("trim", (0.058, 0.068, 0.074), moss=0.0, tint_var=0.03)
 
     # portal wall, cut around the arch and its voussoir ring
     wall = Builder("portal_wall", stone, seed)
@@ -130,7 +133,7 @@ def build_scene(seed=7):
                 wall.prism(stone_pts, -0.35, 0.35)
                 wall.prism(seam_pts, -0.15, 0.45, material_index=1)
         return False
-    ashlar(wall, BLOCK_X0, BLOCK_X1, Z(1564), BLOCK_TOP, keep=keep)
+    ashlar(wall, BLOCK_X0, BLOCK_X1, Z(1564), FRIEZE_BOTTOM, keep=keep)
     wall.finish()
 
     # quoins: long and short blocks alternating up both corners, standing a little proud of the wall
@@ -203,10 +206,18 @@ def build_scene(seed=7):
         cols.box(min(xs) - 11 * PX, max(xs) + 11 * PX, CAP_Z + 9 * PX, SPRING, -1.1, -0.15)
     cols.finish()
 
-    # cornice, pediment with raking cornice, cross finial
+    # entablature: a fillet, a frieze of long smooth stones, then the cornice stepping forward in
+    # three courses; with the oblique view each step shows a lit top and casts a clean shadow
     top = Builder("top", trim, seed + 4)
-    top.box(BLOCK_X0 - 6 * PX, BLOCK_X1 + 6 * PX, BLOCK_TOP, BLOCK_TOP + 4 * PX, -0.7, 0.4)
-    top.box(BLOCK_X0 - 9 * PX, BLOCK_X1 + 9 * PX, BLOCK_TOP + 4 * PX, CORNICE_TOP, -0.85, 0.45)
+    top.box(BLOCK_X0 - 1 * PX, BLOCK_X1 + 1 * PX, FRIEZE_BOTTOM - 2 * PX, FRIEZE_BOTTOM, -0.46, 0.4, seam=PX)
+    x = BLOCK_X0
+    while x < BLOCK_X1 - 1e-6:
+        w = min(top.rng.uniform(44, 70) * PX, BLOCK_X1 - x)
+        top.box(x, x + w, FRIEZE_BOTTOM, BLOCK_TOP, -0.42, 0.4, seam=PX)
+        x += w
+    top.box(BLOCK_X0 - 3 * PX, BLOCK_X1 + 3 * PX, BLOCK_TOP, BLOCK_TOP + 3 * PX, -0.49, 0.4, seam=PX)
+    top.box(BLOCK_X0 - 6 * PX, BLOCK_X1 + 6 * PX, BLOCK_TOP + 3 * PX, BLOCK_TOP + 6 * PX, -0.56, 0.42, seam=PX)
+    top.box(BLOCK_X0 - 9 * PX, BLOCK_X1 + 9 * PX, BLOCK_TOP + 6 * PX, CORNICE_TOP, -0.63, 0.45, seam=PX)
     mid = (BLOCK_X0 + BLOCK_X1) / 2
     top.prism([(BLOCK_X0 - 2 * PX, CORNICE_TOP), (BLOCK_X1 + 2 * PX, CORNICE_TOP), (mid, PEDIMENT_TOP)], -0.45, 0.4)
     half_base = (BLOCK_X1 - BLOCK_X0) / 2
@@ -221,18 +232,24 @@ def build_scene(seed=7):
     tympanum.finish()
     left_rake = [(BLOCK_X0 - 9 * PX, CORNICE_TOP), (BLOCK_X0 - 4 * PX, CORNICE_TOP), (mid, PEDIMENT_TOP - 4 * PX), (mid, PEDIMENT_TOP + 4 * PX)]
     right_rake = [(2 * mid - x, z) for x, z in left_rake][::-1]
-    top.prism(left_rake, -0.8, 0.4)
-    top.prism(right_rake, -0.8, 0.4)
-    top.box(mid - 3 * PX, mid + 3 * PX, PEDIMENT_TOP, PEDIMENT_TOP + 30 * PX, -0.5, -0.1)
-    top.box(mid - 11 * PX, mid + 11 * PX, PEDIMENT_TOP + 18 * PX, PEDIMENT_TOP + 24 * PX, -0.5, -0.1)
-    top.box(mid - 6 * PX, mid + 6 * PX, PEDIMENT_TOP, PEDIMENT_TOP + 4 * PX, -0.6, 0.0)
-    # dentils under the cornice
-    x = BLOCK_X0 + 2 * PX
-    while x < BLOCK_X1 - 4 * PX:
-        top.box(x, x + 3 * PX, BLOCK_TOP - 4 * PX, BLOCK_TOP, -0.55, 0.0, seam=0)
-        x += 7 * PX
-    # a winged skull carved in the tympanum, the old memento mori over a tomb door
-    winged_skull(top, mid, CORNICE_TOP + (PEDIMENT_TOP - CORNICE_TOP) * 0.42, -0.62, seed + 9)
+    top.prism(left_rake, -0.68, 0.4)
+    top.prism(right_rake, -0.68, 0.4)
+    # finial: an urn on a plinth over the apex
+    top.box(mid - 7 * PX, mid + 7 * PX, PEDIMENT_TOP - 2 * PX, PEDIMENT_TOP + 4 * PX, -0.62, 0.1, seam=PX)
+    for z0, z1, r in ((4, 6, 3.0), (6, 8, 4.5), (8, 11, 6.0), (11, 13, 5.5), (13, 15, 4.0), (15, 17, 2.5), (17, 19, 4.0), (19, 21, 2.0)):
+        top.cylinder(mid, PEDIMENT_TOP + z0 * PX, PEDIMENT_TOP + z1 * PX, r * PX, cy=-0.3)
+    # oculus: a round window in one plain moulded ring (two halves); wedge stones at this size
+    # only make a ring of noise
+    oc_z = CORNICE_TOP + (PEDIMENT_TOP - CORNICE_TOP) * 0.42
+    r_in, r_out = 6.5 * PX, 10.5 * PX
+    for a0 in (0.0, math.pi):
+        arc = [a0 + math.pi * t / 16 for t in range(17)]
+        half = [(mid + r_out * math.cos(t), oc_z + r_out * math.sin(t)) for t in arc]
+        half += [(mid + r_in * math.cos(t), oc_z + r_in * math.sin(t)) for t in reversed(arc)]
+        top.prism(half[::-1], -0.74, -0.4)
+    window = Builder("oculus", seam_material(), seed + 9)
+    window.prism([(mid + 6.7 * PX * math.cos(2 * math.pi * t / 28), oc_z + 6.7 * PX * math.sin(2 * math.pi * t / 28)) for t in range(28)][::-1], -0.5, -0.3)
+    window.finish(bevel=0)
     for ax, base_z in ((BLOCK_X0 - 6 * PX, CORNICE_TOP), (BLOCK_X1 + 6 * PX, CORNICE_TOP)):
         top.box(ax - 4 * PX, ax + 4 * PX, base_z, base_z + 4 * PX, -0.8, 0.3)
         top.prism([(ax - 3 * PX, base_z + 4 * PX), (ax + 3 * PX, base_z + 4 * PX), (ax, base_z + 10 * PX)], -0.75, 0.25)
@@ -294,15 +311,20 @@ def build_scene(seed=7):
             xa, xb = sorted((CX + side * r_in, CX + side * r_out))
             tunnel.box(xa, xb, Z(1560), spring_k, y0, y0 + 0.6)
     tunnel.finish(bevel=PX)
-    # the owl shrine's grass mound (level tiles, x 5472-5592, top y 1505) rests on this stone dais,
-    # so nothing in the doorway hangs in the air
-    dais = Builder("dais", trim, seed + 9)
-    dais.box(X(5474), X(5590), Z(1566), Z(1548), -0.95, 0.35, seam=PX)
-    dais.box(X(5480), X(5584), Z(1548), Z(1516), -0.85, 0.35, seam=PX)
-    dais.box(X(5476), X(5588), Z(1516), Z(1508), -0.95, 0.35, seam=PX)
-    for xa, xb, za, zb in ((5492, 5572, 1542, 1540), (5492, 5572, 1524, 1522), (5492, 5494, 1542, 1522), (5570, 5572, 1542, 1522)):
-        dais.box(X(xa), X(xb), Z(za), Z(zb), -0.87, -0.8, material_index=1)
-    dais.finish()
+    # the plinth under dstar's grass slab (level tiles x 5472-5592, y 1512-1536): the grass grows on
+    # its cap, the base course stands on the soil, and his grass ground runs on in front of its foot
+    plinth = Builder("altar_plinth", trim, seed + 9)
+    front = PLINTH_FRONT
+    plinth.box(X(5468), X(5596), Z(1562), Z(1552), front, 0.35, seam=PX)                       # base course
+    for xa, xb in ((5474, 5486), (5578, 5590)):                                                # corner pilasters
+        plinth.box(X(xa), X(xb), Z(1552), Z(1534), front + 0.06, 0.35, seam=PX)
+    plinth.box(X(5486), X(5578), Z(1552), Z(1549), front + 0.10, 0.35, seam=PX)                # panel frame
+    plinth.box(X(5486), X(5578), Z(1537), Z(1534), front + 0.10, 0.35, seam=PX)
+    plinth.box(X(5486), X(5489), Z(1549), Z(1537), front + 0.10, 0.35, seam=PX)
+    plinth.box(X(5575), X(5578), Z(1549), Z(1537), front + 0.10, 0.35, seam=PX)
+    plinth.box(X(5489), X(5575), Z(1549), Z(1537), front + 0.24, 0.35, seam=PX)                # recessed panel
+    plinth.box(X(5468), X(5596), Z(1534), Z(1514), front, 0.35, seam=PX)                       # cap under the grass
+    plinth.finish()
 
     deep = bpy.data.lights.new("stair_glow", "POINT")
     deep.energy = 6.0
@@ -319,42 +341,6 @@ def build_scene(seed=7):
 
 
 
-
-def winged_skull(b, cx, cz, y_face, seed, scale=1.6):
-    """Relief: a skull with spread wings on a smooth panel, raised well off the face so its own
-    shadow separates it. Each wing is a fan of broad feathers, one stone each, so the converter
-    gives every feather its lit upper edge."""
-    PX = globals()["PX"] * scale
-    lift = 0.14
-    panel = [(cx - 30 * PX, cz - 5 * PX), (cx + 30 * PX, cz - 5 * PX), (cx + 30 * PX, cz + 5 * PX), (cx - 30 * PX, cz + 5 * PX)]
-    b.prism(panel[::-1], y_face - 0.02, y_face + 0.03)
-    # cranium and jaw
-    head = [(cx + 6.5 * PX * math.cos(a), cz + 1.5 * PX + 6 * PX * math.sin(a)) for a in [math.pi * t / 12 for t in range(13)]]
-    head += [(cx - 6.5 * PX, cz - 1 * PX), (cx - 4 * PX, cz - 4 * PX), (cx + 4 * PX, cz - 4 * PX), (cx + 6.5 * PX, cz - 1 * PX)]
-    b.prism(head[::-1], y_face - lift, y_face)
-    b.box(cx - 3.5 * PX, cx + 3.5 * PX, cz - 7 * PX, cz - 4 * PX, y_face - lift * 0.8, y_face)
-    # sockets, nose and the gaps between the teeth are cut deep, in joint colour
-    for ex in (-2.6, 2.6):
-        b.box(cx + (ex - 1.6) * PX, cx + (ex + 1.6) * PX, cz - 0.5 * PX, cz + 2.2 * PX, y_face - lift - 0.01, y_face - lift + 0.03, material_index=1)
-    b.box(cx - 0.7 * PX, cx + 0.7 * PX, cz - 3.2 * PX, cz - 1.4 * PX, y_face - lift - 0.01, y_face - lift + 0.03, material_index=1)
-    for tx in (-2, 0, 2):
-        b.box(cx + (tx - 0.35) * PX, cx + (tx + 0.35) * PX, cz - 6.5 * PX, cz - 4.5 * PX, y_face - lift * 0.8 - 0.01, y_face - lift * 0.8 + 0.03, material_index=1)
-    # wings: five broad feathers per side fanning from behind the skull, longest at the top
-    for side in (-1, 1):
-        for k, (length, angle) in enumerate(((22, 8), (20, -4), (17, -16), (13, -28), (9, -40))):
-            a = math.radians(angle)
-            ux, uz = side * math.cos(a), math.sin(a)          # along the feather
-            nx, nz = -uz * side, ux * side                    # across it
-            root_x, root_z = cx + side * 5 * PX, cz + (2.5 - k * 1.2) * PX
-            w = 2.0 * PX
-            pts = [(root_x + nx * w * 0.6, root_z + nz * w * 0.6),
-                   (root_x + ux * length * 0.6 * PX + nx * w, root_z + uz * length * 0.6 * PX + nz * w),
-                   (root_x + ux * length * PX, root_z + uz * length * PX),
-                   (root_x + ux * length * 0.6 * PX - nx * w, root_z + uz * length * 0.6 * PX - nz * w),
-                   (root_x - nx * w * 0.6, root_z - nz * w * 0.6)]
-            if side > 0:
-                pts = pts[::-1]
-            b.prism(pts, y_face - lift * (0.75 - 0.08 * k), y_face)
 
 def ruin_ledges(scn, x0_px, x1_px, step_px=4):
     """Short ledges along the broken tops of a ruin, for moss to sit on."""
@@ -377,7 +363,7 @@ def grow_moss_and_ivy(scn, seed):
     down from the cornice corners, one impost and both ruins."""
     impost_left = (min(COLS) - 11, max(COLS) + 11)
     impost_right = (mirror_px(max(COLS)) - 11, mirror_px(min(COLS)) + 11)
-    ledges = [(5386, 5684, 1284, -0.85),
+    ledges = [(5386, 5684, 1284, -0.63),
               (*impost_left, 1380, -1.1), (*impost_right, 1380, -1.1)]
     ledges += [(px - 10, px + 10, 1532, -1.05) for px in COLS + [mirror_px(p) for p in COLS]]
     ledges += ruin_ledges(scn, 5312, 5395) + ruin_ledges(scn, 5675, 5904)
@@ -398,30 +384,13 @@ def mausoleum_wear(seed=77):
     def front(x_px, py):
         return surface_front(scn, deps, X(x_px), Z(py))
 
-    # cracks: wall stones, voussoirs, ruins, dais
+    # cracks: wall stones, voussoirs, ruins, plinth
     for _ in range(46):
-        x, py = rng.uniform(5300, 5900), rng.uniform(1290, 1545)
+        x, py = rng.uniform(5300, 5900), rng.uniform(1318, 1545)   # below the frieze: cracks there read as letters
         y = front(x, py)
         if y is None or y > 0.2:
             continue
         crack(b, rng, X(x), Z(py), rng.uniform(5, 18) * PX, y - 0.004, down=rng.random() < 0.7)
-    # rain stains: dark streaks running down the wall from under the cornice, the imposts and the
-    # keystone, wide where the water drips off and thinning out below
-    stains = Builder("stains", material("stain", (0.020, 0.024, 0.030), rough=0.95, tint_var=0.02), seed + 1)
-    sources = [(rng.uniform(5400, 5670), 1300) for _ in range(9)]
-    sources += [(rng.uniform(5418, 5460), 1384), (rng.uniform(5610, 5652), 1384), (5535, 1312)]
-    for sx, sy in sources:
-        y = front(sx, sy + 3)
-        if y is None:
-            continue
-        length = rng.uniform(10, 34)
-        width = rng.uniform(1.0, 2.6)
-        steps = 3
-        for k in range(steps):
-            w = width * (1.0 - 0.3 * k)
-            b0 = sy + length * k / steps
-            stains.box(X(sx) - w / 2 * PX, X(sx) + w / 2 * PX, Z(b0 + length / steps), Z(b0), y - 0.006, y + 0.02)
-    stains.finish(bevel=0)
     # fallen chips at the foot of the walls
     for _ in range(10):
         x = X(rng.uniform(5320, 5890))
@@ -434,4 +403,5 @@ def mausoleum_wear(seed=77):
 def build_mausoleum(seed=7):
     scn = build_scene(seed)
     mausoleum_wear()
+    oblique(scn, OBLIQUE_SLOPE, PLINTH_FRONT)
     return scn

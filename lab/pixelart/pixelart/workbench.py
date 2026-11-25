@@ -38,6 +38,10 @@ OPTION_RANGES = {
     "moss_clumps": dict(kind="bool", help="gather moss into clumps"),
     "foot_rows": dict(kind="int", min=0, max=8, step=1, help="rows shaded at the foot of the stones"),
     "outline_level": dict(kind="int", min=0, max=7, step=1, help="stone ramp index used for outlines and cracks"),
+    "soft": dict(kind="float", min=0.0, max=1.0, step=0.05, help="render light and shade kept inside each stone, in ramp steps (0 = one flat tone)"),
+    "sub_steps": dict(kind="int", min=1, max=6, step=1, help="in-between shades per ramp step for soft shading"),
+    "bevel": dict(kind="int", min=0, max=5, step=1, help="depth in px of the lit top/left band and shaded bottom/right falloff (pillowed stones)"),
+    "speck": dict(kind="float", min=0.0, max=1.0, step=0.05, help="fine surface speckle, in ramp steps"),
     "base_shares": dict(kind="shares", min=0.0, max=1.0, step=0.05, help="share of stone bodies per base tone (levels 2..5)"),
 }
 

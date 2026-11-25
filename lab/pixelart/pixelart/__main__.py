@@ -78,8 +78,9 @@ def pass_paths(cfg, piece):
 def stylize_piece(cfg, piece):
     w = cfg["_work"]
     opts = dict(cfg["pieces"][piece].get("stylize", {}))
-    stylize.pixelize(*(str(p) for p in pass_paths(cfg, piece)), str(w / f"{piece}_px.png"),
+    tidied = stylize.pixelize(*(str(p) for p in pass_paths(cfg, piece)), str(w / f"{piece}_px.png"),
                      palette=piece_palette(cfg, piece), **opts)
+    print(f"{piece}: tidied {tidied}")
     print(f"{piece}: {metrics(str(w / f'{piece}_px.png'))}")
 
 

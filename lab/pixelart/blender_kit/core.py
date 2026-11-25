@@ -421,30 +421,71 @@ def moss_cushions(name, ledges, seed, cover=0.75):
     return b.finish(bevel=0)
 
 
+# an ivy leaf in leaf space: stem at the origin, tip at (0, 1), three lobes
+IVY_LEAF = [(0.0, 1.0), (0.32, 0.62), (0.78, 0.55), (0.58, 0.18), (0.36, -0.08), (0.0, 0.02),
+            (-0.36, -0.08), (-0.58, 0.18), (-0.78, 0.55), (-0.32, 0.62)]
+
+
+def _ivy_leaf(b, rng, x, z, y, size, angle):
+    """One flat three-lobed leaf, turned in the wall plane by angle and tipped out of it at random,
+    so neighbouring leaves catch the light differently and read as separate leaves."""
+    tip = Matrix.Rotation(rng.uniform(0.1, 0.55), 4, "X") @ Matrix.Rotation(rng.uniform(-0.4, 0.4), 4, "Z")
+    turn = Matrix.Rotation(angle, 4, "Y")
+    verts = []
+    for lx, lz in IVY_LEAF:
+        v = turn @ tip @ Vector((lx * size, 0.0, lz * size))
+        verts.append(b.bm.verts.new((x + v.x, y + v.y, z + v.z)))
+    b._tag([b.bm.faces.new(verts)])
+
+
 def ivy_curtain(scn, name, seed, x_px, top_py, width_px, length_px):
-    """A mass of ivy pouring down a wall from a ledge: wide at the top, ragged and narrowing below,
-    built from overlapping leaf lumps laid on whatever surface is behind it."""
+    """Ivy pouring down a wall from a ledge: strands of vine hanging from the top, leaves along
+    them, big and dense near the top, smaller and sparser towards the tips."""
     bpy.context.view_layer.update()
     deps = bpy.context.evaluated_depsgraph_get()
     rng = random.Random(seed)
-    b = Builder(name, leaf_material(), seed)
-    rows = int(length_px / 2.5)
-    for k in range(rows):
-        t = k / max(rows - 1, 1)
-        half = width_px * 0.5 * (1.0 - 0.75 * t) * rng.uniform(0.8, 1.1)
-        cz = top_py + k * 2.5
-        sway = 4 * math.sin(t * 3.0 + seed)
-        n = max(2, int(half / 1.4))
-        for _ in range(n):
-            if t > 0.55 and rng.random() < t * 0.7:
-                continue
-            x = x_px + sway + rng.uniform(-half, half)
-            y = surface_front(scn, deps, X(x), Z(cz))
+    leaves = Builder(name, leaf_material(), seed)
+    vines = Builder(name + "_vines", material(name + "_stem", (0.020, 0.030, 0.014), rough=0.9, tint_var=0.0), seed + 1)
+    strands = max(2, int(width_px / 3.5))
+    for k in range(strands):
+        x = x_px + (k / max(strands - 1, 1) - 0.5) * width_px + rng.uniform(-2, 2)
+        length = length_px * rng.uniform(0.35, 1.0)
+        z_px = top_py + rng.uniform(0, 4)
+        sway = rng.uniform(-0.25, 0.25)
+        travelled = 0.0
+        while travelled < length:
+            t = travelled / length
+            y = surface_front(scn, deps, X(x), Z(z_px))
             if y is None:
-                continue
-            _growth_lump(b, rng, X(x), Z(cz) + rng.uniform(-1, 1) * PX, y - rng.uniform(0.04, 0.12),
-                         rng.uniform(2.0, 3.4) * PX, rng.uniform(1.8, 2.8) * PX)
-    return b.finish(bevel=0)
+                break
+            step = rng.uniform(2.0, 3.0)
+            vines.box(X(x) - 0.35 * PX, X(x) + 0.35 * PX, Z(z_px + step), Z(z_px), y - 0.03, y - 0.01)
+            for _ in range(rng.choice((2, 3, 3)) if t < 0.6 else rng.choice((1, 2))):
+                if rng.random() < 0.1 + 0.5 * t:
+                    continue
+                side = rng.choice((-1, 1))
+                size = rng.uniform(2.6, 4.0) * (1.0 - 0.4 * t) * PX
+                angle = math.pi + side * rng.uniform(0.3, 1.2)     # tips point down and out
+                _ivy_leaf(leaves, rng, X(x + side * rng.uniform(0.5, 2.0)), Z(z_px + rng.uniform(0, step)),
+                          y - rng.uniform(0.05, 0.14), size, angle)
+            x += sway + rng.uniform(-0.6, 0.6)
+            z_px += step
+            travelled += step
+    vines.finish(bevel=0)
+    return leaves.finish(bevel=0)
+
+
+def oblique(scn, slope, y_ref):
+    """Looks a little down onto the scene without moving the camera: everything rises by `slope`
+    per unit of depth behind the plane y_ref, so ledges, sills and capitals show their tops the
+    way side-scroller scenery is drawn. Geometry on y_ref keeps its exact place, so a piece fitted
+    to level tiles stays fitted."""
+    shear = Matrix(((1, 0, 0, 0), (0, 1, 0, 0), (0, slope, 1, -slope * y_ref), (0, 0, 0, 1)))
+    for ob in scn.objects:
+        if ob.type == "MESH":
+            ob.data.transform(shear)
+        elif ob.type == "LIGHT" and ob.data.type != "SUN":
+            ob.location = shear @ ob.location
 
 
 def ashlar(b, x0, x1, z0, z1, course=13 * PX, min_w=18, max_w=38, keep=None, depth=(-0.35, 0.35), jitter=PX * 0.8, seam=PX, tilt=0.0):

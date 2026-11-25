@@ -87,7 +87,14 @@ stone, its bottom row shaded; joints become a dark tone of the stones beside the
 engraved lettering and cracks become outline colour; moss stays green and can be gathered into clumps.
 Thin strips (incised borders) are line work and get no edge light. Options per piece (`"stylize"`):
 `shift` (whole tone steps, negative for pieces further back), `k_scale`, `micro` (fine shade noise, 0 = calm),
-`moss_clumps`.
+`moss_clumps`, `foot_rows` (contact shade where a piece meets the ground), `outline_level`, and the
+shading that keeps pieces from looking like flat EGA tiles: `soft` (the render's own light inside a
+stone, in in-between shades), `bevel` (pillowed stones: a lit band along the top and left edges, falloff
+towards the bottom right), `speck` (fine surface speckle) and `sub_steps`. Stones deep in shadow stay flat.
+
+**Tidy.** Every stylized piece ends with `tidy.py`, which removes what a render leaves behind and reports
+it: tiny enclosed holes between meshes, specks of dark that are not part of a joint or crack, short
+dark slivers, and single pixels no neighbour shares.
 
 **Palette.** Default is dstar's owl shrine. An asset or piece can set `"palette": {"stone": [8 colours],
 "foliage": [6 colours]}` or `"palette_from": {"path": ..., "box": [...]}` to read it from his art.
