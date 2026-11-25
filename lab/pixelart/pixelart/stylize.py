@@ -138,7 +138,7 @@ def ramp_colour(ramp, position, sub_steps):
     return np.round(ramp[lo] * (1 - t) + ramp[hi] * t).astype(np.int32)
 
 
-def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0):
+def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False):
     shares = base_shares or BASE_SHARES
     pal = palette or {}
     ramp = np.array(pal.get("stone", RAMP))
@@ -186,6 +186,13 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     order = np.empty(len(means)); order[srt] = cum / counts.sum()
     edges = np.cumsum(shares)
     base = np.array([BASE_LEVELS[min(np.searchsorted(edges, q, side="right"), 3)] for q in order]) + shift
+    if value_tones:
+        # tones follow the render's own brightness (on a log scale, as the eye sees it) instead of
+        # fixed shares, so a bright stone stays bright and a dark one dark
+        logs = np.log(np.maximum(means, 1.0))
+        lo, hi = np.percentile(logs, 5), np.percentile(logs, 95)
+        position = 1.5 + 4.0 * np.clip((logs - lo) / max(hi - lo, 1e-6), 0, 1)
+        base = np.round(position).astype(int) + shift
 
     # 5x5 mean of brightness restricted to the pixel's own stone
     acc = np.zeros((h, w)); num = np.zeros((h, w))
@@ -214,8 +221,10 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     ny = nrm[..., 1][stone] / 127.5 - 1
     # one step only: tipped tops and bevels must not stack into white specks
     up_face = ny > 0.45
-    lv = lv + np.where(up_face | ((nx < -0.45) & (ny > -0.2)), 1, 0)
-    lv = lv - np.where(ny < -0.45, 1, 0) - np.where(nx > 0.45, 1, 0)
+    # with pillowed stones the bevel band does this job; lighting the rounded rim as well doubles the edge
+    rim_light = 0 if bevel else 1
+    lv = lv + rim_light * np.where(up_face | ((nx < -0.45) & (ny > -0.2)), 1, 0)
+    lv = lv - rim_light * (np.where(ny < -0.45, 1, 0) + np.where(nx > 0.45, 1, 0))
     # dstar's convention on every stone: lit top row and left column, shaded bottom row and right column
     # edges are joints (id 0), silhouettes or other real stones; carvings (small regions) are not edges
     area = np.zeros((h, w), dtype=np.int64)
@@ -277,6 +286,10 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
         frac = np.clip(delta / (2.0 * k), -soft, soft)
         if bevel:
             frac = frac + pillow(key, stone, bevel)[stone] * np.where(big & ~in_shadow, 1.0, 0.0)
+        if form:
+            # round forms (column shafts, mouldings) shade across their curve: lit where the surface
+            # turns to the light at the upper left, darker where it turns away
+            frac = frac + form * np.clip(-nx + 0.5 * ny, -1.0, 1.0)
         if speck:
             frac = frac + speck * np.clip(np.round(raw_delta / np.maximum(pix_std, 1.5)), -1, 1)
         frac = np.where(any_edge | keep_pure, 0.0, frac)

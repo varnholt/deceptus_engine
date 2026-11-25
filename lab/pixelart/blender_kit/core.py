@@ -282,7 +282,7 @@ class Builder:
         m = Matrix.Translation((pivot_x, 0, pivot_z)) @ Matrix.Rotation(math.radians(degrees), 4, "Y") @ Matrix.Translation((-pivot_x, 0, -pivot_z))
         bmesh.ops.transform(self.bm, matrix=m, verts=list(self.bm.verts))
 
-    def finish(self, bevel=PX * 1.6):
+    def finish(self, bevel=PX * 0.6):   # a rounded rim wider than a pixel renders as a soft, smeared edge
         me = bpy.data.meshes.new(self.name)
         variants = self.mat if isinstance(self.mat, list) else [self.mat]
         # slots: the variants, the seam, then growth (moss, weeds); each block takes one variant
