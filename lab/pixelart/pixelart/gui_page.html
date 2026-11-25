@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel Art Tuner</title>
+<link rel="icon" href="data:,">
+<style>
+:root {
+  --bg: #0b0d12;
+  --panel: #141821;
+  --panel-2: #1b202b;
+  --line: #262c39;
+  --text: #c8cedb;
+  --muted: #7c8598;
+  --accent: #7aa2f7;
+  --good: #8bd49c;
+  --warn: #e7c272;
+  --bad: #f07a7a;
+  --backdrop: rgb(24, 30, 70);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  font: 13px/1.4 "Segoe UI", system-ui, sans-serif; }
+button, input, select { font: inherit; color: var(--text); background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; }
+button { cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.4; cursor: default; }
+button.primary { background: #233150; border-color: #34497a; }
+input[type=text] { width: 100%; }
+input[type=range] { width: 100%; accent-color: var(--accent); padding: 0; background: none; border: none; }
+label { color: var(--muted); }
+h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+  margin: 14px 0 6px; font-weight: 600; }
+
+#app { display: grid; grid-template-rows: auto 1fr; height: 100%; }
+header { display: flex; gap: 8px; align-items: center; padding: 8px 12px; background: var(--panel);
+  border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+header .title { font-weight: 600; margin-right: 8px; }
+header #asset-path { width: 480px; }
+#passes-form { display: none; gap: 6px; padding: 8px 12px; background: var(--panel);
+  border-bottom: 1px solid var(--line); }
+#passes-form.open { display: flex; }
+#passes-form input { width: 360px; }
+#pieces { display: flex; gap: 4px; margin-left: 12px; }
+#pieces button.active { border-color: var(--accent); color: #fff; }
+#pieces button .no-passes { color: var(--warn); }
+
+main { display: grid; grid-template-columns: 340px 1fr; min-height: 0; }
+#side { overflow-y: auto; padding: 4px 12px 16px; background: var(--panel); border-right: 1px solid var(--line); }
+#work { display: grid; grid-template-rows: auto minmax(200px, 1fr) auto; min-height: 0; min-width: 0; }
+
+.option { display: grid; grid-template-columns: 96px 1fr 56px; gap: 6px; align-items: center; margin: 3px 0; }
+.option .name { color: var(--text); font-family: Consolas, monospace; font-size: 12px; }
+.option .name.changed::after { content: " \2022"; color: var(--warn); }
+.option input[type=number] { width: 56px; padding: 2px 4px; }
+.option.shares .fields { grid-column: 2 / 4; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+.option.shares input { width: 100%; padding: 2px 4px; }
+
+.ramp { display: flex; gap: 2px; margin: 2px 0 6px; align-items: center; }
+.ramp .ramp-name { width: 56px; color: var(--muted); font-size: 12px; }
+.ramp input[type=color] { width: 30px; height: 24px; padding: 0; border: 1px solid var(--line); border-radius: 2px; cursor: pointer; }
+.row { display: flex; gap: 6px; align-items: center; margin: 4px 0; flex-wrap: wrap; }
+.row input[type=text] { flex: 1; width: auto; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.hint { color: var(--muted); font-size: 12px; }
+
+#toolbar { display: flex; gap: 10px; align-items: center; padding: 6px 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+#toolbar .group { display: flex; gap: 2px; }
+#toolbar .group button.active { border-color: var(--accent); color: #fff; }
+#views { display: grid; grid-template-columns: 2fr 1fr; gap: 1px; background: var(--line); min-height: 0; }
+.pane { position: relative; display: grid; grid-template-rows: auto 1fr; min-height: 0; background: var(--bg); }
+.pane-head { display: flex; gap: 8px; align-items: center; padding: 4px 8px; background: var(--panel); color: var(--muted); }
+.pane-head select { max-width: 320px; }
+.viewport { position: relative; overflow: hidden; cursor: grab; background: var(--backdrop); min-height: 0; }
+.viewport.dragging { cursor: grabbing; }
+.viewport.black { background: #000; }
+.viewport img:not([src]) { display: none; }
+.viewport img { position: absolute; image-rendering: pixelated; user-select: none; -webkit-user-drag: none; }
+.badge { position: absolute; top: 6px; right: 8px; padding: 2px 6px; border-radius: 3px; background: rgba(0,0,0,0.6);
+  font-size: 11px; color: var(--warn); pointer-events: none; }
+
+#bottom { display: grid; grid-template-columns: 420px 1fr; gap: 12px; padding: 8px 12px; border-top: 1px solid var(--line);
+  background: var(--panel); max-height: 34vh; overflow: auto; }
+table.metrics { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+table.metrics th, table.metrics td { padding: 2px 6px; text-align: right; border-bottom: 1px solid var(--line); }
+table.metrics th:first-child, table.metrics td:first-child { text-align: left; color: var(--muted); }
+#status { margin-top: 8px; color: var(--muted); }
+#status.error { color: var(--bad); white-space: pre-wrap; }
+.job { display: flex; gap: 8px; align-items: baseline; }
+.job .state-running, .job .state-queued { color: var(--warn); }
+.job .state-done { color: var(--good); }
+.job .state-failed { color: var(--bad); }
+details.log pre { max-height: 160px; overflow: auto; background: var(--bg); padding: 6px; margin: 4px 0; font-size: 11px; white-space: pre-wrap; }
+#gallery { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+#gallery a { display: block; border: 1px solid var(--line); }
+#gallery img { display: block; max-height: 140px; max-width: 360px; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div>
+    <header>
+      <span class="title">Pixel art tuner</span>
+      <input id="asset-path" type="text" placeholder="asset config (.json)">
+      <button id="open-asset" class="primary">Open</button>
+      <select id="recent"><option value="">recent…</option></select>
+      <button id="toggle-passes">Load passes…</button>
+      <div id="pieces"></div>
+    </header>
+    <div id="passes-form">
+      <input id="pass-beauty" type="text" placeholder="beauty pass .png">
+      <input id="pass-ids" type="text" placeholder="ids pass (default: beauty name with _ids)">
+      <input id="pass-normals" type="text" placeholder="normals pass (default: _normals)">
+      <button id="open-passes" class="primary">Load</button>
+    </div>
+  </div>
+  <main>
+    <aside id="side">
+      <h2>Stylize options</h2>
+      <div id="options"></div>
+      <div class="row">
+        <button id="revert-options">Revert to saved</button>
+        <button id="defaults-options">Stylizer defaults</button>
+      </div>
+
+      <h2>Palette <span id="palette-source" class="hint"></span></h2>
+      <div id="palette"></div>
+      <div class="row">
+        <input id="palette-image" type="text" placeholder="read from image: path">
+      </div>
+      <div class="row">
+        <input id="palette-box" type="text" placeholder="box x0,y0,x1,y1 (optional)">
+        <button id="read-palette">Read</button>
+        <button id="revert-palette">Revert</button>
+      </div>
+      <div class="row">
+        <label for="palette-scope">save palette for</label>
+        <select id="palette-scope">
+          <option value="piece">this piece</option>
+          <option value="asset">the whole asset</option>
+        </select>
+      </div>
+
+      <h2>Actions</h2>
+      <div class="actions">
+        <button id="save" class="primary" title="write options (and an edited palette) into the asset JSON">Save to config</button>
+        <button id="keep-before" title="keep the current result to flip against">Keep as before</button>
+        <button id="write-art" title="write the stylized art the map uses (&lt;piece&gt;_px.png)">Write _px.png</button>
+        <button id="compare" title="comparison sheet of the current preview">Compare sheet</button>
+        <button id="render" title="headless Blender, about 30 s">Render passes</button>
+        <button id="integrate" title="puts the written _px.png into the Tiled map">Integrate</button>
+        <button id="capture" title="runs the game for 1-2 minutes">Capture</button>
+        <label class="hint"><input id="capture-all" type="checkbox"> all pieces</label>
+      </div>
+      <p class="hint">Integrate uses the written _px.png: write it first. Hold <b>B</b> to flip to the before image.</p>
+    </aside>
+
+    <section id="work">
+      <div id="toolbar">
+        <span>zoom</span>
+        <div class="group" id="zoom"></div>
+        <span>show</span>
+        <div class="group" id="view-mode"></div>
+        <label>backdrop
+          <select id="backdrop"><option value="night">night blue</option><option value="black">black</option></select>
+        </label>
+        <button id="fit">Reset view</button>
+      </div>
+      <div id="views">
+        <div class="pane">
+          <div class="pane-head"><span id="preview-title">no piece</span></div>
+          <div class="viewport" id="preview-viewport"><img id="preview-img" alt=""><span class="badge" id="preview-badge"></span></div>
+        </div>
+        <div class="pane">
+          <div class="pane-head">reference <select id="reference-select"></select></div>
+          <div class="viewport" id="reference-viewport"><img id="reference-img" alt=""></div>
+        </div>
+      </div>
+      <div id="bottom">
+        <div>
+          <table class="metrics">
+            <thead><tr><th></th><th>visible</th><th>whole</th><th>before</th></tr></thead>
+            <tbody id="metrics-body"></tbody>
+          </table>
+          <div id="status">Open an asset config or load passes.</div>
+        </div>
+        <div>
+          <div id="jobs"></div>
+          <div id="gallery"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+"use strict";
+
+const ZOOMS = [1, 2, 3, 4, 6, 8];
+const VIEW_MODES = ["stylized", "before", "beauty", "ids", "normals"];
+const METRIC_NAMES = ["colours/tile", "flat pairs", "near pairs", "dark share", "palette"];
+const RAMP_NAMES = ["stone", "foliage", "passage"];
+const RESTYLIZE_DELAY_MS = 250;
+const METRICS_DELAY_MS = 300;
+const JOB_POLL_MS = 1000;
+
+const state = {
+  specs: [],
+  asset: null,
+  pieces: [],
+  references: [],
+  source: null,
+  piece: null,
+  savedOptions: {},
+  options: {},
+  savedPalette: null,
+  palette: null,
+  paletteEdited: false,
+  passes: null,
+  previewPath: null,
+  beforePath: null,
+  imageVersion: 0,
+  zoom: 3,
+  viewMode: "stylized",
+  flipHeld: false,
+  metrics: { visible: null, whole: null, before: null },
+  seenJobs: null,
+};
+
+const $ = (id) => document.getElementById(id);
+
+// ------------------------------------------------------------ server calls
+
+async function post(endpoint, body) {
+  const response = await fetch(`/api/${endpoint}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || response.statusText);
+  return payload;
+}
+
+async function get(endpoint) {
+  const response = await fetch(`/api/${endpoint}`);
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || response.statusText);
+  return payload;
+}
+
+function imageUrl(path) {
+  return `/image?path=${encodeURIComponent(path)}&v=${state.imageVersion}`;
+}
+
+function showStatus(text, isError = false) {
+  const status = $("status");
+  status.textContent = text;
+  status.classList.toggle("error", isError);
+}
+
+function debounce(fn, delay) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
+
+// ------------------------------------------------------------ loading
+
+async function openAsset(path) {
+  if (!path) return;
+  try {
+    const result = await post("open_asset", { path });
+    state.asset = result.asset;
+    state.pieces = result.pieces;
+    state.references = result.references;
+    $("asset-path").value = result.asset;
+    renderPieceTabs();
+    renderReferenceChoices();
+    refreshRecent();
+    const first = result.pieces.find((p) => p.has_passes) || result.pieces[0];
+    if (first) selectPiece(first.name);
+  } catch (error) {
+    showStatus(`could not open ${path}: ${error.message}`, true);
+  }
+}
+
+function passPathLike(beauty, kind) {
+  return beauty.replace(/_beauty(\.\w+)$/i, `_${kind}$1`);
+}
+
+async function openPasses() {
+  const beauty = $("pass-beauty").value.trim();
+  if (!beauty) return;
+  const ids = $("pass-ids").value.trim() || passPathLike(beauty, "ids");
+  const normals = $("pass-normals").value.trim() || passPathLike(beauty, "normals");
+  try {
+    const result = await post("open_passes", { beauty, ids, normals });
+    if (result.missing.length) {
+      showStatus(`missing passes: ${result.missing.join(", ")}`, true);
+      return;
+    }
+    state.asset = null;
+    state.pieces = [];
+    state.references = [];
+    renderPieceTabs();
+    renderReferenceChoices();
+    state.piece = result.label;
+    state.source = { passes: { beauty, ids, normals } };
+    state.passes = { beauty, ids, normals };
+    startTuning(result.options, result.options, result.palette, "default");
+    $("preview-title").textContent = `${result.label} (loose passes, writes ${result.written_art})`;
+  } catch (error) {
+    showStatus(error.message, true);
+  }
+}
+
+function selectPiece(name) {
+  const piece = state.pieces.find((p) => p.name === name);
+  state.piece = name;
+  state.source = { asset: state.asset, piece: name };
+  state.passes = piece.passes;
+  renderPieceTabs();
+  $("preview-title").textContent = `${name}`;
+  if (!piece.has_passes) {
+    showStatus(`${name}: no passes yet, press Render passes`, true);
+  }
+  startTuning(piece.options, piece.options, piece.palette, piece.palette_source);
+}
+
+function startTuning(savedOptions, options, palette, paletteSource) {
+  state.savedOptions = structuredClone(savedOptions);
+  state.options = structuredClone(options);
+  state.savedPalette = structuredClone(palette);
+  state.palette = structuredClone(palette);
+  state.paletteEdited = false;
+  state.beforePath = null;
+  state.metrics = { visible: null, whole: null, before: null };
+  $("palette-source").textContent = `(from ${paletteSource})`;
+  renderOptions();
+  renderPalette();
+  updateButtons();
+  resetView();
+  stylizeNow({ keepBefore: true });
+}
+
+async function refreshRecent() {
+  const info = await get("info");
+  const select = $("recent");
+  select.innerHTML = '<option value="">recent…</option>';
+  for (const path of info.recent) {
+    const option = document.createElement("option");
+    option.value = path;
+    option.textContent = path;
+    select.appendChild(option);
+  }
+}
+
+function renderPieceTabs() {
+  const container = $("pieces");
+  container.innerHTML = "";
+  for (const piece of state.pieces) {
+    const button = document.createElement("button");
+    button.textContent = piece.name;
+    if (!piece.has_passes) {
+      const mark = document.createElement("span");
+      mark.className = "no-passes";
+      mark.textContent = " (no passes)";
+      button.appendChild(mark);
+    }
+    button.classList.toggle("active", piece.name === state.piece && state.source && !state.source.passes);
+    button.addEventListener("click", () => selectPiece(piece.name));
+    container.appendChild(button);
+  }
+}
+
+function renderReferenceChoices() {
+  const select = $("reference-select");
+  select.innerHTML = "";
+  for (const ref of state.references) {
+    const option = document.createElement("option");
+    option.value = ref.index;
+    option.textContent = ref.label;
+    select.appendChild(option);
+  }
+  showReference();
+}
+
+function showReference() {
+  const img = $("reference-img");
+  if (!state.asset || !state.references.length) {
+    img.removeAttribute("src");
+    return;
+  }
+  const index = $("reference-select").value;
+  img.src = `/api/reference?asset=${encodeURIComponent(state.asset)}&index=${index}`;
+}
+
+// ------------------------------------------------------------ option controls
+
+function optionValueText(spec, value) {
+  if (spec.kind === "float") return Number(value).toFixed(2);
+  return String(value);
+}
+
+function sameValue(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function onOptionChanged(name, value) {
+  state.options[name] = value;
+  markChangedOptions();
+  restylizeSoon();
+}
+
+function markChangedOptions() {
+  for (const spec of state.specs) {
+    const label = document.querySelector(`[data-option-name="${spec.name}"]`);
+    if (label) label.classList.toggle("changed", !sameValue(state.options[spec.name], state.savedOptions[spec.name]));
+  }
+}
+
+function numberControls(spec, value, onValue) {
+  const range = document.createElement("input");
+  range.type = "range";
+  range.min = spec.min;
+  range.max = spec.max;
+  range.step = spec.step;
+  range.value = value;
+  const number = document.createElement("input");
+  number.type = "number";
+  number.min = spec.min;
+  number.max = spec.max;
+  number.step = spec.step;
+  number.value = optionValueText(spec, value);
+  const parse = (text) => (spec.kind === "int" ? parseInt(text, 10) : parseFloat(text));
+  range.addEventListener("input", () => {
+    number.value = optionValueText(spec, range.value);
+    onValue(parse(range.value));
+  });
+  number.addEventListener("change", () => {
+    const parsed = parse(number.value);
+    if (Number.isNaN(parsed)) return;
+    range.value = parsed;
+    onValue(parsed);
+  });
+  return [range, number];
+}
+
+function optionRow(spec) {
+  const row = document.createElement("div");
+  row.className = "option";
+  row.title = spec.help || "";
+  const name = document.createElement("span");
+  name.className = "name";
+  name.dataset.optionName = spec.name;
+  name.textContent = spec.name;
+  row.appendChild(name);
+  const value = state.options[spec.name];
+  if (spec.kind === "bool") {
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = Boolean(value);
+    box.addEventListener("change", () => onOptionChanged(spec.name, box.checked));
+    row.appendChild(box);
+  } else if (spec.kind === "shares") {
+    row.classList.add("shares");
+    const fields = document.createElement("div");
+    fields.className = "fields";
+    value.forEach((share, index) => {
+      const input = document.createElement("input");
+      input.type = "number";
+      input.min = spec.min;
+      input.max = spec.max;
+      input.step = spec.step;
+      input.value = share;
+      input.addEventListener("change", () => {
+        const shares = [...state.options[spec.name]];
+        shares[index] = parseFloat(input.value) || 0;
+        onOptionChanged(spec.name, shares);
+      });
+      fields.appendChild(input);
+    });
+    row.appendChild(fields);
+  } else {
+    numberControls(spec, value, (v) => onOptionChanged(spec.name, v)).forEach((el) => row.appendChild(el));
+  }
+  return row;
+}
+
+function renderOptions() {
+  const container = $("options");
+  container.innerHTML = "";
+  for (const spec of state.specs) container.appendChild(optionRow(spec));
+  markChangedOptions();
+}
+
+// ------------------------------------------------------------ palette
+
+function toHex(rgb) {
+  return "#" + rgb.map((c) => c.toString(16).padStart(2, "0")).join("");
+}
+
+function fromHex(hex) {
+  return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+}
+
+function renderPalette() {
+  const container = $("palette");
+  container.innerHTML = "";
+  for (const rampName of RAMP_NAMES) {
+    const row = document.createElement("div");
+    row.className = "ramp";
+    const label = document.createElement("span");
+    label.className = "ramp-name";
+    label.textContent = rampName;
+    row.appendChild(label);
+    state.palette[rampName].forEach((colour, index) => {
+      const swatch = document.createElement("input");
+      swatch.type = "color";
+      swatch.value = toHex(colour);
+      swatch.title = `${rampName} ${index}: ${colour.join(", ")}`;
+      swatch.addEventListener("input", () => {
+        state.palette[rampName][index] = fromHex(swatch.value);
+        swatch.title = `${rampName} ${index}: ${state.palette[rampName][index].join(", ")}`;
+        state.paletteEdited = true;
+        restylizeSoon();
+      });
+      row.appendChild(swatch);
+    });
+    container.appendChild(row);
+  }
+}
+
+function parseBox(text) {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+  const numbers = trimmed.split(/[\s,]+/).map((v) => parseInt(v, 10));
+  if (numbers.length !== 4 || numbers.some(Number.isNaN)) throw new Error("box needs four numbers: x0,y0,x1,y1");
+  return numbers;
+}
+
+async function readPalette() {
+  const path = $("palette-image").value.trim();
+  if (!path) return;
+  try {
+    const read = await post("read_palette", { path, box: parseBox($("palette-box").value) });
+    for (const rampName of Object.keys(read)) state.palette[rampName] = read[rampName];
+    state.paletteEdited = true;
+    renderPalette();
+    stylizeNow();
+  } catch (error) {
+    showStatus(`palette: ${error.message}`, true);
+  }
+}
+
+// ------------------------------------------------------------ stylizing and metrics
+
+async function stylizeNow({ keepBefore = false } = {}) {
+  if (!state.source) return;
+  showStatus("stylizing…");
+  const started = performance.now();
+  try {
+    const result = await post("stylize", {
+      source: state.source,
+      options: state.options,
+      palette: state.palette,
+      box: visibleBox(),
+    });
+    if (result.superseded) return;
+    state.previewPath = result.preview;
+    state.imageVersion += 1;
+    state.metrics.whole = result.whole;
+    state.metrics.visible = result.visible;
+    if (keepBefore) await keepBeforeImage();
+    showImage();
+    renderMetrics();
+    showStatus(`stylized in ${((performance.now() - started) / 1000).toFixed(1)} s`);
+  } catch (error) {
+    showStatus(error.message, true);
+  }
+}
+
+const restylizeSoon = debounce(() => stylizeNow(), RESTYLIZE_DELAY_MS);
+
+async function keepBeforeImage() {
+  const result = await post("keep_before", { source: state.source });
+  state.beforePath = result.before;
+  state.metrics.before = result.whole;
+  state.imageVersion += 1;
+  updateButtons();
+  renderMetrics();
+}
+
+async function refreshVisibleMetrics() {
+  const path = shownImagePath();
+  const box = visibleBox();
+  if (!path || !box || (state.viewMode !== "stylized" && state.viewMode !== "before")) return;
+  try {
+    state.metrics.visible = await post("metrics", { path, box });
+    renderMetrics();
+  } catch (error) {
+    showStatus(error.message, true);
+  }
+}
+
+const refreshVisibleMetricsSoon = debounce(refreshVisibleMetrics, METRICS_DELAY_MS);
+
+function renderMetrics() {
+  const body = $("metrics-body");
+  body.innerHTML = "";
+  const cell = (metrics, name) => (metrics && metrics[name] !== null ? String(metrics[name]) : "–");
+  for (const name of METRIC_NAMES) {
+    const row = document.createElement("tr");
+    for (const text of [name, cell(state.metrics.visible, name), cell(state.metrics.whole, name), cell(state.metrics.before, name)]) {
+      const td = document.createElement("td");
+      td.textContent = text;
+      row.appendChild(td);
+    }
+    body.appendChild(row);
+  }
+}
+
+// ------------------------------------------------------------ viewing: zoom, pan, flip
+
+const view = { offsetX: 0, offsetY: 0 };
+const referenceView = { offsetX: 0, offsetY: 0 };
+
+function effectiveMode() {
+  return state.flipHeld && state.beforePath ? "before" : state.viewMode;
+}
+
+function shownImagePath() {
+  const mode = effectiveMode();
+  if (mode === "stylized") return state.previewPath;
+  if (mode === "before") return state.beforePath;
+  return state.passes ? state.passes[mode] : null;
+}
+
+function showImage() {
+  const img = $("preview-img");
+  const path = shownImagePath();
+  if (!path) {
+    img.removeAttribute("src");
+  } else {
+    img.src = imageUrl(path);
+  }
+  const mode = effectiveMode();
+  $("preview-badge").textContent = mode === "stylized" ? "" : mode.toUpperCase();
+}
+
+function placeImage(img, offsets) {
+  if (!img.naturalWidth) return;
+  img.style.width = `${img.naturalWidth * state.zoom}px`;
+  img.style.height = `${img.naturalHeight * state.zoom}px`;
+  img.style.left = `${offsets.offsetX}px`;
+  img.style.top = `${offsets.offsetY}px`;
+}
+
+function visibleBox() {
+  const img = $("preview-img");
+  const viewport = $("preview-viewport");
+  if (!img.naturalWidth) return null;
+  const x0 = Math.max(0, Math.floor(-view.offsetX / state.zoom));
+  const y0 = Math.max(0, Math.floor(-view.offsetY / state.zoom));
+  const x1 = Math.min(img.naturalWidth, Math.ceil((viewport.clientWidth - view.offsetX) / state.zoom));
+  const y1 = Math.min(img.naturalHeight, Math.ceil((viewport.clientHeight - view.offsetY) / state.zoom));
+  if (x1 <= x0 || y1 <= y0) return null;
+  return [x0, y0, x1, y1];
+}
+
+function resetView() {
+  view.offsetX = 8;
+  view.offsetY = 8;
+  referenceView.offsetX = 8;
+  referenceView.offsetY = 8;
+  placeImage($("preview-img"), view);
+  placeImage($("reference-img"), referenceView);
+}
+
+function setZoom(zoom) {
+  // keep the pixel under the middle of the preview where it is
+  const viewport = $("preview-viewport");
+  const centreX = (viewport.clientWidth / 2 - view.offsetX) / state.zoom;
+  const centreY = (viewport.clientHeight / 2 - view.offsetY) / state.zoom;
+  state.zoom = zoom;
+  view.offsetX = Math.round(viewport.clientWidth / 2 - centreX * zoom);
+  view.offsetY = Math.round(viewport.clientHeight / 2 - centreY * zoom);
+  renderZoomButtons();
+  placeImage($("preview-img"), view);
+  placeImage($("reference-img"), referenceView);
+  refreshVisibleMetricsSoon();
+}
+
+function enablePanning(viewport, img, offsets, onMoved) {
+  let start = null;
+  viewport.addEventListener("pointerdown", (event) => {
+    start = { x: event.clientX, y: event.clientY, offsetX: offsets.offsetX, offsetY: offsets.offsetY };
+    viewport.setPointerCapture(event.pointerId);
+    viewport.classList.add("dragging");
+  });
+  viewport.addEventListener("pointermove", (event) => {
+    if (!start) return;
+    offsets.offsetX = start.offsetX + event.clientX - start.x;
+    offsets.offsetY = start.offsetY + event.clientY - start.y;
+    placeImage(img, offsets);
+  });
+  const stop = () => {
+    if (!start) return;
+    start = null;
+    viewport.classList.remove("dragging");
+    onMoved();
+  };
+  viewport.addEventListener("pointerup", stop);
+  viewport.addEventListener("pointercancel", stop);
+}
+
+function renderZoomButtons() {
+  const group = $("zoom");
+  group.innerHTML = "";
+  for (const zoom of ZOOMS) {
+    const button = document.createElement("button");
+    button.textContent = `${zoom}x`;
+    button.classList.toggle("active", zoom === state.zoom);
+    button.addEventListener("click", () => setZoom(zoom));
+    group.appendChild(button);
+  }
+}
+
+function renderViewModeButtons() {
+  const group = $("view-mode");
+  group.innerHTML = "";
+  for (const mode of VIEW_MODES) {
+    const button = document.createElement("button");
+    button.textContent = mode;
+    button.classList.toggle("active", mode === state.viewMode);
+    button.disabled = mode === "before" && !state.beforePath;
+    button.addEventListener("click", () => {
+      state.viewMode = mode;
+      renderViewModeButtons();
+      showImage();
+      refreshVisibleMetricsSoon();
+    });
+    group.appendChild(button);
+  }
+}
+
+// ------------------------------------------------------------ actions and jobs
+
+function updateButtons() {
+  const hasSource = Boolean(state.source);
+  const hasAsset = hasSource && !state.source.passes;
+  $("save").disabled = !hasAsset;
+  $("keep-before").disabled = !hasSource;
+  $("write-art").disabled = !hasSource;
+  for (const id of ["compare", "render", "integrate", "capture"]) $(id).disabled = !hasAsset;
+  $("revert-options").disabled = !hasSource;
+  $("defaults-options").disabled = !hasSource;
+  renderViewModeButtons();
+}
+
+async function saveToConfig() {
+  try {
+    const result = await post("save", {
+      source: state.source,
+      options: state.options,
+      palette: state.paletteEdited ? state.palette : null,
+      palette_scope: $("palette-scope").value,
+    });
+    state.savedOptions = structuredClone(state.options);
+    state.savedPalette = structuredClone(state.palette);
+    state.paletteEdited = false;
+    state.beforePath = result.before;
+    state.metrics.before = result.whole;
+    state.imageVersion += 1;
+    const piece = state.pieces.find((p) => p.name === state.piece);
+    if (piece) {
+      piece.options = structuredClone(state.options);
+      piece.palette = structuredClone(state.palette);
+    }
+    markChangedOptions();
+    updateButtons();
+    renderMetrics();
+    showStatus(`saved ${state.piece}: ${JSON.stringify(result.saved_options)}`);
+  } catch (error) {
+    showStatus(`save failed: ${error.message}`, true);
+  }
+}
+
+async function writeArt() {
+  try {
+    const result = await post("write", { source: state.source, options: state.options, palette: state.palette });
+    showStatus(`wrote ${result.written}`);
+  } catch (error) {
+    showStatus(`write failed: ${error.message}`, true);
+  }
+}
+
+async function startJob(kind) {
+  const body = { kind, source: state.source };
+  if (kind === "capture" && $("capture-all").checked) body.pieces = state.pieces.map((p) => p.name);
+  try {
+    await post("job", body);
+    showStatus(`${kind} queued`);
+    pollJobs();
+  } catch (error) {
+    showStatus(`${kind}: ${error.message}`, true);
+  }
+}
+
+function renderJob(job) {
+  const wrapper = document.createElement("div");
+  const line = document.createElement("div");
+  line.className = "job";
+  const stateText = document.createElement("span");
+  stateText.className = `state-${job.state}`;
+  stateText.textContent = job.state;
+  const title = document.createElement("span");
+  title.textContent = `${job.title} · ${job.elapsed} s${job.error ? " · " + job.error : ""}`;
+  line.append(stateText, title);
+  wrapper.appendChild(line);
+  if (job.log) {
+    const details = document.createElement("details");
+    details.className = "log";
+    const summary = document.createElement("summary");
+    summary.textContent = "log";
+    const pre = document.createElement("pre");
+    pre.textContent = job.log;
+    details.append(summary, pre);
+    wrapper.appendChild(details);
+  }
+  return wrapper;
+}
+
+function showResultImages(paths) {
+  const gallery = $("gallery");
+  gallery.innerHTML = "";
+  state.imageVersion += 1;
+  for (const path of paths) {
+    const link = document.createElement("a");
+    link.href = imageUrl(path);
+    link.target = "_blank";
+    link.title = path;
+    const img = document.createElement("img");
+    img.src = imageUrl(path);
+    link.appendChild(img);
+    gallery.appendChild(link);
+  }
+}
+
+async function onJobFinished(job) {
+  if (job.state !== "done") {
+    showStatus(`${job.title} failed: ${job.error}`, true);
+    return;
+  }
+  showStatus(`${job.title} done in ${job.elapsed} s`);
+  if (job.result && job.result.images) showResultImages(job.result.images);
+  if (job.kind === "render" && state.asset) {
+    const current = state.piece;
+    await openAsset(state.asset);
+    selectPiece(current);
+  }
+}
+
+let pollTimer = null;
+
+async function pollJobs() {
+  clearTimeout(pollTimer);
+  try {
+    const { jobs } = await get("jobs");
+    const container = $("jobs");
+    container.innerHTML = "";
+    for (const job of [...jobs].reverse()) container.appendChild(renderJob(job));
+    if (state.seenJobs === null) {
+      // jobs that finished before this page was opened are history, not news to act on
+      state.seenJobs = new Set(jobs.filter((job) => job.state === "done" || job.state === "failed").map((job) => job.id));
+    }
+    for (const job of jobs) {
+      const finished = job.state === "done" || job.state === "failed";
+      if (finished && !state.seenJobs.has(job.id)) {
+        state.seenJobs.add(job.id);
+        await onJobFinished(job);
+      }
+    }
+    if (jobs.some((job) => job.state === "queued" || job.state === "running")) {
+      pollTimer = setTimeout(pollJobs, JOB_POLL_MS);
+    }
+  } catch (error) {
+    showStatus(`job status: ${error.message}`, true);
+  }
+}
+
+// ------------------------------------------------------------ wiring
+
+function wireControls() {
+  $("open-asset").addEventListener("click", () => openAsset($("asset-path").value.trim()));
+  $("asset-path").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") openAsset($("asset-path").value.trim());
+  });
+  $("recent").addEventListener("change", () => openAsset($("recent").value));
+  $("toggle-passes").addEventListener("click", () => $("passes-form").classList.toggle("open"));
+  $("open-passes").addEventListener("click", openPasses);
+  $("reference-select").addEventListener("change", showReference);
+  $("revert-options").addEventListener("click", () => {
+    state.options = structuredClone(state.savedOptions);
+    renderOptions();
+    stylizeNow();
+  });
+  $("defaults-options").addEventListener("click", () => {
+    state.options = Object.fromEntries(state.specs.map((spec) => [spec.name, structuredClone(spec.default)]));
+    renderOptions();
+    stylizeNow();
+  });
+  $("read-palette").addEventListener("click", readPalette);
+  $("revert-palette").addEventListener("click", () => {
+    state.palette = structuredClone(state.savedPalette);
+    state.paletteEdited = false;
+    renderPalette();
+    stylizeNow();
+  });
+  $("save").addEventListener("click", saveToConfig);
+  $("keep-before").addEventListener("click", async () => {
+    await keepBeforeImage();
+    showStatus("kept the current result as before");
+  });
+  $("write-art").addEventListener("click", writeArt);
+  for (const kind of ["render", "integrate", "capture", "compare"]) {
+    $(kind).addEventListener("click", () => startJob(kind));
+  }
+  $("backdrop").addEventListener("change", () => {
+    const black = $("backdrop").value === "black";
+    $("preview-viewport").classList.toggle("black", black);
+    $("reference-viewport").classList.toggle("black", black);
+  });
+  $("fit").addEventListener("click", () => {
+    resetView();
+    refreshVisibleMetricsSoon();
+  });
+  $("preview-img").addEventListener("load", () => {
+    placeImage($("preview-img"), view);
+    refreshVisibleMetricsSoon();
+  });
+  $("reference-img").addEventListener("load", () => placeImage($("reference-img"), referenceView));
+  enablePanning($("preview-viewport"), $("preview-img"), view, refreshVisibleMetricsSoon);
+  enablePanning($("reference-viewport"), $("reference-img"), referenceView, () => {});
+  window.addEventListener("resize", refreshVisibleMetricsSoon);
+  document.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() !== "b" || event.target.tagName === "INPUT" || state.flipHeld) return;
+    state.flipHeld = true;
+    showImage();
+  });
+  document.addEventListener("keyup", (event) => {
+    if (event.key.toLowerCase() !== "b" || !state.flipHeld) return;
+    state.flipHeld = false;
+    showImage();
+  });
+}
+
+async function start() {
+  wireControls();
+  renderZoomButtons();
+  renderMetrics();
+  updateButtons();
+  try {
+    const info = await get("info");
+    state.specs = info.specs;
+    await refreshRecent();
+    if (info.initial_asset) await openAsset(info.initial_asset);
+    pollJobs();
+  } catch (error) {
+    showStatus(`could not reach the server: ${error.message}`, true);
+  }
+}
+
+start();
+</script>
+</body>
+</html>

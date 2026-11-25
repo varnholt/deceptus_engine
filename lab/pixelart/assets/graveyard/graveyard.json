@@ -1,0 +1,273 @@
+{
+  "origin": [
+    5300,
+    1556
+  ],
+  "kit": [
+    "graves"
+  ],
+  "scenes": [
+    "scenes/mausoleum.py",
+    "scenes/bands.py"
+  ],
+  "palette": {
+    "stone": [
+      [
+        8,
+        5,
+        12
+      ],
+      [
+        30,
+        28,
+        45
+      ],
+      [
+        46,
+        50,
+        71
+      ],
+      [
+        64,
+        68,
+        98
+      ],
+      [
+        84,
+        91,
+        116
+      ],
+      [
+        106,
+        114,
+        138
+      ],
+      [
+        135,
+        146,
+        166
+      ],
+      [
+        172,
+        183,
+        198
+      ]
+    ],
+    "_note": "halfway between dstar's owl shrine and crypt ramps (user's pick 2026-11-25)"
+  },
+  "stage": {
+    "key_dir": [
+      0.75,
+      0.9,
+      -0.85
+    ]
+  },
+  "work_dir": "../../work/graveyard",
+  "engine": {
+    "root": "../../../..",
+    "data_root": "../../../..",
+    "level": "graveyard",
+    "level_dir": "data/level-graveyard",
+    "tmx": "graveyard.tmx"
+  },
+  "references": [
+    {
+      "path": "../../../../data/level-graveyard/tilesets/parallax-back/3-tombs.png",
+      "box": [
+        60,
+        250,
+        240,
+        340
+      ],
+      "label": "dstar tombstones (x3 bright)",
+      "gain": 3
+    },
+    {
+      "path": "../../../../data/level-graveyard/owl-empty.png",
+      "label": "dstar shrine"
+    },
+    {
+      "path": "../../../../data/level-graveyard/tilesets/graveyard-level-diffuse.png",
+      "box": [
+        0,
+        0,
+        120,
+        48
+      ],
+      "label": "dstar crypt"
+    }
+  ],
+  "pieces": {
+    "mausoleum": {
+      "build": "build_mausoleum",
+      "stylize": {
+        "shift": -2,
+        "k_scale": 1.4,
+        "micro": 2,
+        "moss_clumps": true
+      },
+      "tiled": {
+        "name": "graveyard-mausoleum",
+        "layer": "bg-mausoleum",
+        "after_layer": "bg1",
+        "z": 10,
+        "map_tile_x": 220,
+        "map_tile_y": 50,
+        "clear_layers": [
+          "bg0",
+          "bg1",
+          "bg2"
+        ],
+        "clear_rect_tiles": [
+          212,
+          44,
+          250,
+          70
+        ],
+        "clear_min_row": 8,
+        "clear_tileset_firstgid": 1,
+        "clear_tileset_columns": 64
+      },
+      "capture": [
+        [
+          210,
+          61
+        ],
+        [
+          226,
+          61
+        ],
+        [
+          232,
+          61
+        ]
+      ],
+      "compare_boxes": [
+        [
+          100,
+          60,
+          220,
+          160
+        ],
+        [
+          230,
+          150,
+          400,
+          330
+        ]
+      ]
+    },
+    "upper": {
+      "build": "build_upper",
+      "stylize": {
+        "shift": -2,
+        "k_scale": 1.4,
+        "micro": 0,
+        "moss_clumps": true,
+        "foot_rows": 3,
+        "outline_level": 1
+      },
+      "tiled": {
+        "name": "graveyard-band-upper",
+        "layer": "bg-band-upper",
+        "after_layer": "bg-mausoleum",
+        "z": 10,
+        "map_tile_x": 156,
+        "map_tile_y": 57,
+        "clear_layers": [
+          "bg0",
+          "bg1",
+          "bg2"
+        ],
+        "clear_rect_tiles": [
+          156,
+          50,
+          220,
+          67
+        ],
+        "clear_min_row": 0,
+        "clear_tileset_firstgid": 1,
+        "clear_tileset_columns": 64
+      },
+      "capture": [
+        [
+          164,
+          61
+        ],
+        [
+          196,
+          61
+        ]
+      ],
+      "compare_boxes": [
+        [
+          30,
+          80,
+          200,
+          192
+        ],
+        [
+          560,
+          60,
+          760,
+          192
+        ]
+      ]
+    },
+    "lower": {
+      "build": "build_lower",
+      "stylize": {
+        "shift": 0,
+        "k_scale": 1.4,
+        "micro": 0,
+        "moss_clumps": true,
+        "foot_rows": 3
+      },
+      "tiled": {
+        "name": "graveyard-band-lower",
+        "layer": "bg-band-lower",
+        "after_layer": "bg-band-upper",
+        "z": 10,
+        "map_tile_x": 34,
+        "map_tile_y": 64,
+        "clear_layers": [
+          "bg1"
+        ],
+        "clear_rect_tiles": [
+          34,
+          64,
+          156,
+          74
+        ],
+        "clear_min_row": 1,
+        "clear_max_row": 7,
+        "clear_tileset_firstgid": 1,
+        "clear_tileset_columns": 64
+      },
+      "capture": [
+        [
+          80,
+          68
+        ],
+        [
+          120,
+          68
+        ]
+      ],
+      "compare_boxes": [
+        [
+          30,
+          60,
+          230,
+          192
+        ],
+        [
+          1200,
+          60,
+          1400,
+          192
+        ]
+      ]
+    }
+  }
+}
