@@ -129,6 +129,21 @@ def pillow(key, stone, width):
     return 0.9 * np.maximum(near_top, 0.6 * near_left) - 0.8 * np.maximum(near_bottom, 0.6 * near_right)
 
 
+def round_stone_corners(out, key, stone, seam):
+    """dstar cuts the corner pixel of every block: a stone pixel with a joint above or below it and
+    a joint beside it takes the joint's colour, so blocks read worn instead of machined."""
+    h, w = key.shape
+    sp = np.pad(seam, 1)
+    joint_up, joint_down = sp[:-2, 1:-1], sp[2:, 1:-1]
+    joint_left, joint_right = sp[1:-1, :-2], sp[1:-1, 2:]
+    corner = stone & (joint_up | joint_down) & (joint_left | joint_right)
+    for dy, dx, beside in ((-1, 0, joint_up), (1, 0, joint_down), (0, -1, joint_left), (0, 1, joint_right)):
+        take = corner & beside
+        ys, xs = np.nonzero(take)
+        out[ys, xs, :3] = out[np.clip(ys + dy, 0, h - 1), np.clip(xs + dx, 0, w - 1), :3]
+        corner &= ~take
+
+
 def ramp_colour(ramp, position, sub_steps):
     """Colours between the ramp's shades: position 2.5 is halfway from shade 2 to shade 3,
     snapped to sub_steps in-between shades so the piece keeps a small, deliberate palette."""
@@ -139,7 +154,7 @@ def ramp_colour(ramp, position, sub_steps):
     return np.round(ramp[lo] * (1 - t) + ramp[hi] * t).astype(np.int32)
 
 
-def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0):
+def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0, round_corners=False):
     shares = base_shares or BASE_SHARES
     pal = palette or {}
     ramp = np.array(pal.get("stone", RAMP))
@@ -337,6 +352,8 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
             if len(cnt) and cnt.max() >= 3:
                 v = vals[cnt.argmax()]
                 out[y, x, :3] = ((v >> 16) & 255, (v >> 8) & 255, v & 255)
+    if round_corners:
+        round_stone_corners(out, key, stone, seam)
     report = tidy(out)
     grade(out, gain=gain, contrast=contrast, saturation=saturation, night=night)
     Image.fromarray(out).save(out_p)

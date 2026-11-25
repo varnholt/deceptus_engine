@@ -1,4 +1,5 @@
 {
+  "title": "Graveyard art",
   "origin": [
     5300,
     1556
@@ -13,47 +14,47 @@
   "palette": {
     "stone": [
       [
-        8,
-        5,
-        12
+        9,
+        3,
+        16
       ],
       [
         30,
-        28,
-        45
+        26,
+        53
       ],
       [
-        46,
+        48,
         50,
-        71
+        83
       ],
       [
-        64,
-        68,
-        98
+        69,
+        72,
+        117
       ],
       [
-        84,
-        91,
-        116
+        88,
+        96,
+        133
       ],
       [
-        106,
-        114,
-        138
+        111,
+        119,
+        156
       ],
       [
-        135,
-        146,
-        166
+        137,
+        149,
+        180
       ],
       [
-        172,
-        183,
-        198
+        167,
+        181,
+        206
       ]
     ],
-    "_note": "halfway between dstar's owl shrine and crypt ramps (user's pick 2026-11-25)"
+    "_note": "70% dstar's crypt bricks, 30% his owl shrine: closer to his night scenery (2026-11-25)"
   },
   "stage": {
     "key_dir": [
@@ -99,19 +100,23 @@
   ],
   "pieces": {
     "mausoleum": {
+      "title": "Mausoleum",
       "build": "build_mausoleum",
       "stylize": {
         "shift": -1,
         "k_scale": 3.5,
         "micro": 0,
         "moss_clumps": true,
-        "soft": 0.3,
-        "bevel": 3,
+        "soft": 0.5,
+        "bevel": 4,
         "speck": 0.0,
         "form": 1.2,
         "value_tones": true,
-        "gain": 0.72,
-        "night": 0.25
+        "gain": 0.8,
+        "night": 0.2,
+        "sub_steps": 4,
+        "round_corners": true,
+        "outline_level": 1
       },
       "tiled": {
         "name": "graveyard-mausoleum",
@@ -165,6 +170,7 @@
       ]
     },
     "upper": {
+      "title": "Graves behind the mausoleum",
       "build": "build_upper",
       "stylize": {
         "shift": -2,
@@ -172,14 +178,16 @@
         "micro": 0,
         "moss_clumps": true,
         "foot_rows": 3,
-        "outline_level": 1,
-        "soft": 0.3,
-        "bevel": 2,
+        "outline_level": 2,
+        "soft": 0.5,
+        "bevel": 4,
         "speck": 0.0,
         "form": 1.2,
         "value_tones": true,
-        "gain": 0.7,
-        "night": 0.3
+        "gain": 0.75,
+        "night": 0.3,
+        "sub_steps": 4,
+        "round_corners": true
       },
       "tiled": {
         "name": "graveyard-band-upper",
@@ -229,6 +237,7 @@
       ]
     },
     "lower": {
+      "title": "Graves on the lower path",
       "build": "build_lower",
       "stylize": {
         "shift": -1,
@@ -236,13 +245,16 @@
         "micro": 0,
         "moss_clumps": true,
         "foot_rows": 3,
-        "soft": 0.3,
-        "bevel": 2,
+        "soft": 0.5,
+        "bevel": 4,
         "speck": 0.0,
         "form": 1.2,
         "value_tones": true,
-        "gain": 0.78,
-        "night": 0.2
+        "gain": 0.8,
+        "night": 0.2,
+        "sub_steps": 4,
+        "round_corners": true,
+        "outline_level": 1
       },
       "tiled": {
         "name": "graveyard-band-lower",
