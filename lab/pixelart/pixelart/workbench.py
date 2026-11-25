@@ -8,11 +8,14 @@ import inspect
 import io
 import json
 import math
+import os
 import shutil
+import subprocess
 import sys
 import threading
 from dataclasses import dataclass
 from pathlib import Path
+from xml.etree import ElementTree
 
 from PIL import Image
 
@@ -27,28 +30,52 @@ PREVIEW_FOLDER = "gui"
 # larger MCP previews cost the model more than they show; the zoom drops until the image fits
 MAX_PREVIEW_WIDTH = 2048
 
+# group "fit" sits open under "Fit to the level"; "look" is folded away under "Stone look".
+# needs names the option (and the condition on it) without which this one changes nothing.
 OPTION_RANGES = {
-    "shift": dict(kind="int", min=-4, max=4, step=1, help="whole tone steps for every stone, negative for pieces further back"),
-    "k_scale": dict(kind="float", min=0.1, max=4.0, step=0.05, help="brightness change (in stone spreads) needed for a patch to step a tone"),
-    "crack_k": dict(kind="float", min=0.5, max=6.0, step=0.1, help="how dark (in stone spreads) a pixel must be to become a crack; lower = more cracks"),
-    "grain": dict(kind="float", min=0.0, max=1.0, step=0.05, help="0 = smoothed broad patches, 1 = raw per-pixel brightness"),
-    "max_step": dict(kind="int", min=0, max=3, step=1, help="tone steps a patch may differ from its stone"),
-    "micro": dict(kind="int", min=0, max=12, step=1, help="strength of the fine shade noise, 0 = calm"),
-    "micro_k": dict(kind="float", min=0.2, max=4.0, step=0.1, help="contrast needed for the fine shade noise"),
-    "moss_clumps": dict(kind="bool", help="gather moss into clumps"),
-    "foot_rows": dict(kind="int", min=0, max=8, step=1, help="rows shaded at the foot of the stones"),
-    "outline_level": dict(kind="int", min=0, max=7, step=1, help="stone ramp index used for outlines and cracks"),
-    "soft": dict(kind="float", min=0.0, max=1.0, step=0.05, help="render light and shade kept inside each stone, in ramp steps (0 = one flat tone)"),
-    "sub_steps": dict(kind="int", min=1, max=6, step=1, help="in-between shades per ramp step for soft shading"),
-    "bevel": dict(kind="int", min=0, max=5, step=1, help="depth in px of the lit top/left band and shaded bottom/right falloff (pillowed stones)"),
-    "speck": dict(kind="float", min=0.0, max=1.0, step=0.05, help="fine surface speckle, in ramp steps"),
-    "value_tones": dict(kind="bool", help="stone tones follow the render's brightness instead of fixed tone shares"),
-    "gain": dict(kind="float", min=0.3, max=1.5, step=0.02, help="grade: brightness of the finished piece, to match the level"),
-    "contrast": dict(kind="float", min=0.5, max=1.5, step=0.02, help="grade: spread of the tones around the piece's mid tone"),
-    "saturation": dict(kind="float", min=0.0, max=1.5, step=0.05, help="grade: colourfulness"),
-    "night": dict(kind="float", min=0.0, max=0.8, step=0.02, help="grade: pull towards the night blue of the scenery"),
-    "form": dict(kind="float", min=0.0, max=2.0, step=0.1, help="shading across curved surfaces from the normals, in ramp steps (round columns)"),
-    "base_shares": dict(kind="shares", min=0.0, max=1.0, step=0.05, help="share of stone bodies per base tone (levels 2..5)"),
+    "gain": dict(kind="float", min=0.3, max=1.5, step=0.02, group="fit", label="Brightness",
+                 help="Makes the whole piece lighter or darker, to sit it into the night of the level. Lower = darker."),
+    "contrast": dict(kind="float", min=0.5, max=1.5, step=0.02, group="fit", label="Contrast",
+                     help="Spreads the shades apart or pulls them together around the piece's middle tone. Lower = flatter, more misty."),
+    "saturation": dict(kind="float", min=0.0, max=1.5, step=0.05, group="fit", label="Colour",
+                       help="How colourful the piece is. 0 = grey, 1 = as painted, higher = stronger colours."),
+    "night": dict(kind="float", min=0.0, max=0.8, step=0.02, group="fit", label="Night tint",
+                  help="Pulls every colour towards the night blue of the scenery. Higher = bluer, more part of the background."),
+    "shift": dict(kind="int", min=-4, max=4, step=1, group="fit", label="Tone shift",
+                  help="Moves every stone whole shades darker or lighter, keeping the lit top edges. Negative = darker, for pieces further back."),
+    "value_tones": dict(kind="bool", group="look", label="Tones from light",
+                        help="On: each stone's shade follows how bright it is in the render, so lit stones stay light. Off: shades are dealt out in fixed shares (flatter, muddier)."),
+    "base_shares": dict(kind="shares", min=0.0, max=1.0, step=0.05, group="look", label="Tone shares", needs=("value_tones", "==", False),
+                        help="How much of the piece gets each of the four stone shades, darkest first. Only used while Tones from light is off."),
+    "soft": dict(kind="float", min=0.0, max=1.0, step=0.05, group="look", label="Soft shading",
+                 help="Keeps the render's own light and shade inside each stone as in-between shades. 0 = every stone one flat shade; higher = rounder stones."),
+    "sub_steps": dict(kind="int", min=1, max=6, step=1, group="look", label="In-between shades", needs=("soft", ">", 0),
+                      help="How many in-between shades soft shading may use between two palette colours. More = smoother, but more colours."),
+    "bevel": dict(kind="int", min=0, max=5, step=1, group="look", label="Bevel", needs=("soft", ">", 0),
+                  help="Width in pixels of the lit band along each stone's top and left edge and the shade towards its bottom right (dstar's pillowed stones). 0 = none."),
+    "round_corners": dict(kind="bool", help="cuts the corner pixel of every stone into the joint, so blocks look worn instead of machined"),
+    "form": dict(kind="float", min=0.0, max=2.0, step=0.1, group="look", label="Round forms", needs=("soft", ">", 0),
+                 help="Shades round surfaces such as columns: light on the left, dark on the right. Higher = stronger."),
+    "speck": dict(kind="float", min=0.0, max=1.0, step=0.05, group="look", label="Speckle", needs=("soft", ">", 0),
+                  help="Fine speckle on the stone surface, taken from the render's texture. 0 = clean."),
+    "k_scale": dict(kind="float", min=0.1, max=4.0, step=0.05, group="look", label="Calm patches",
+                    help="How big a brightness difference inside a stone must be before part of it gets a lighter or darker patch. Higher = calmer, fewer patches."),
+    "max_step": dict(kind="int", min=0, max=3, step=1, group="look", label="Patch depth",
+                     help="How many shades a patch may be lighter or darker than the rest of its stone. 0 = no patches."),
+    "grain": dict(kind="float", min=0.0, max=1.0, step=0.05, group="look", label="Grain",
+                  help="0 = patches follow the broad light of the render; 1 = they follow every pixel (noisier)."),
+    "crack_k": dict(kind="float", min=0.5, max=6.0, step=0.1, group="look", label="Cracks",
+                    help="How much darker than its stone a spot must be to be drawn as a crack. Lower = more cracks."),
+    "micro": dict(kind="int", min=0, max=12, step=1, group="look", label="Fine noise",
+                  help="Strength of a fine one-pixel shade noise inside flat areas. 0 = calm."),
+    "micro_k": dict(kind="float", min=0.2, max=4.0, step=0.1, group="look", label="Noise threshold", needs=("micro", ">", 0),
+                    help="How much the render must vary before the fine noise shows. Higher = less noise."),
+    "moss_clumps": dict(kind="bool", group="look", label="Moss clumps",
+                        help="Gathers scattered moss pixels into clumps with a dark underside and a lit top, the way dstar paints moss."),
+    "foot_rows": dict(kind="int", min=0, max=8, step=1, group="look", label="Ground shadow",
+                      help="Darkens this many of the lowest rows where the piece meets the ground (contact shadow). 0 = none."),
+    "outline_level": dict(kind="int", min=0, max=7, step=1, group="look", label="Outline",
+                          help="How dark the outline around the piece is. 0 = black; higher = a dark stone colour, softer, for background pieces."),
 }
 
 
@@ -110,8 +137,10 @@ def option_specs():
             continue
         default = _option_default(parameter)
         spec = OPTION_RANGES.get(parameter.name) or _inferred_range(default)
-        specs.append({"name": parameter.name, "default": default, **spec})
-    return specs
+        specs.append({"name": parameter.name, "default": default, "group": "look", "label": parameter.name, **spec})
+    # in the order OPTION_RANGES lists them (most used first), options it does not know at the end
+    order = list(OPTION_RANGES)
+    return sorted(specs, key=lambda spec: order.index(spec["name"]) if spec["name"] in order else len(order))
 
 
 def default_options():
@@ -227,8 +256,10 @@ def zoomed_png(path, box=None, zoom=3, backdrop=compare.BACKDROP):
 
 
 def reference_png(ref):
+    """The reference as the artist painted it: the comparison sheets brighten dim parallax art (gain),
+    but next to the level that only shows colours the game never draws."""
     buffer = io.BytesIO()
-    compare.reference_image(ref).save(buffer, "PNG")
+    compare.reference_image({**ref, "gain": None}).save(buffer, "PNG")
     return buffer.getvalue()
 
 
@@ -236,7 +267,10 @@ def reference_png(ref):
 
 def _stored_values(saved, values, defaults):
     """What the config keeps: keys it already had, plus every value that differs from its default."""
-    return {name: value for name, value in values.items() if (name in saved) or (value != defaults.get(name))}
+    # keys the config already has keep their place, so a save only shows real changes in a diff
+    kept = {name: values[name] for name in saved if name in values}
+    added = {name: value for name, value in values.items() if (name not in saved) and (value != defaults.get(name))}
+    return {**kept, **added}
 
 
 def _palette_entry(existing, ramps):
@@ -272,6 +306,7 @@ def piece_summary(cfg, piece):
     entry = cfg["pieces"][piece]
     return {
         "name": piece,
+        "title": entry.get("title", piece.capitalize()),
         "has_passes": not missing_passes(target),
         "passes": {"beauty": str(target.beauty), "ids": str(target.ids), "normals": str(target.normals)},
         "written_art": str(target.written_art),
@@ -360,3 +395,119 @@ def compare_sheet(cfg, piece, art=None, out=None):
     """Comparison sheet of the art (default: the written art) against the references; None without compare_boxes."""
     sheet, log = _run_step(pipeline.compare_piece, cfg, piece, art, out)
     return sheet, log
+
+
+# ---------------------------------------------------------------- the piece in the level
+
+RASTERIZER = os.environ.get("TMXRASTERIZER", "C:/Program Files/Tiled/tmxrasterizer.exe")
+# effects drawn over the whole screen in the game; in a still they only hide the art
+SCREEN_EFFECT_LAYERS = ("vignette", "atmosphere")
+LEVEL_MARGIN_TILES = 10
+MAP_LAYER_TAGS = ("layer", "imagelayer", "objectgroup", "group")
+
+
+@dataclass(frozen=True)
+class LevelView:
+    """The level around a piece: what the game draws behind it and in front of it, and where the
+    piece's top-left corner sits in those images."""
+    behind: Path
+    front: Path
+    piece_offset: tuple
+
+
+def _map_path(cfg):
+    eng = cfg["engine"]
+    return Path(eng["data_root"]) / eng["level_dir"] / eng["tmx"]
+
+
+def _layer_names(tmx):
+    root = ElementTree.parse(tmx).getroot()
+    return [child.get("name") for child in root if child.tag in MAP_LAYER_TAGS]
+
+
+def _layers_split_at_piece(names, tiled_entry):
+    """Layer names drawn before and after the piece's layer. Before the first integrate the layer is
+    not in the map yet; it will go right after its after_layer."""
+    layer = tiled_entry["layer"]
+    if layer in names:
+        split = names.index(layer)
+        return names[:split], names[split + 1:]
+    split = names.index(tiled_entry["after_layer"]) + 1
+    return names[:split], names[split:]
+
+
+def _rasterize(tmx, hidden_layers, out_path):
+    cmd = [RASTERIZER, "--hide-object-layers", *[arg for name in hidden_layers for arg in ("--hide-layer", name)],
+           str(tmx), str(out_path)]
+    done = subprocess.run(cmd, capture_output=True, text=True)
+    if (done.returncode != 0) or not Path(out_path).is_file():
+        raise RuntimeError(f"tmxrasterizer failed: {done.stderr[-1500:]}")
+
+
+def _level_crop_box(cfg, piece, map_size, tile_size):
+    tiled_entry = cfg["pieces"][piece]["tiled"]
+    piece_width, piece_height = Image.open(target_for_piece(cfg, piece).beauty).size
+    left, top = tiled_entry["map_tile_x"] * tile_size, tiled_entry["map_tile_y"] * tile_size
+    margin = LEVEL_MARGIN_TILES * tile_size
+    return (max(0, left - margin), max(0, top - margin),
+            min(map_size[0], left + piece_width + margin), min(map_size[1], top + piece_height + margin))
+
+
+def level_view(cfg, piece):
+    """The level around the piece as Tiled renders it, without the piece's own layer, split into the
+    layers behind and in front of it. Cached until the map file changes (integrate rewrites it)."""
+    tmx = _map_path(cfg)
+    target = target_for_piece(cfg, piece)
+    behind, front = target.preview_path("level_behind"), target.preview_path("level_front")
+    tiled_entry = cfg["pieces"][piece]["tiled"]
+    root = ElementTree.parse(tmx).getroot()
+    tile_size = int(root.get("tilewidth"))
+    map_size = (int(root.get("width")) * tile_size, int(root.get("height")) * tile_size)
+    box = _level_crop_box(cfg, piece, map_size, tile_size)
+    offset = (tiled_entry["map_tile_x"] * tile_size - box[0], tiled_entry["map_tile_y"] * tile_size - box[1])
+    # two page loads at once would rasterize into the same files
+    with _level_lock:
+        _refresh_level_images(cfg, piece, tmx, box, behind, front)
+    return LevelView(behind, front, offset)
+
+
+_level_lock = threading.Lock()
+
+
+def _refresh_level_images(cfg, piece, tmx, box, behind, front):
+    is_current = all(p.is_file() and (p.stat().st_mtime > tmx.stat().st_mtime) for p in (behind, front))
+    if not is_current:
+        tiled_entry = cfg["pieces"][piece]["tiled"]
+        target = target_for_piece(cfg, piece)
+        below, above = _layers_split_at_piece(_layer_names(tmx), tiled_entry)
+        always_hidden = [*SCREEN_EFFECT_LAYERS, tiled_entry["layer"]]
+        whole_map = target.preview_path("level_whole")
+        behind.parent.mkdir(parents=True, exist_ok=True)
+        # the whole map is 18432 px wide: rasterize it once per half and keep only the crop
+        for hidden_layers, out_path in ((always_hidden + above, behind), (always_hidden + below, front)):
+            _rasterize(tmx, hidden_layers, whole_map)
+            Image.open(whole_map).crop(box).save(out_path)
+        whole_map.unlink()
+
+
+def latest_game_frames(cfg, piece):
+    """The newest capture run that has frames of the piece's spots: [(spot, path)], oldest spot first."""
+    spot_names = [(spot, f"spot_{spot[0]}_{spot[1]}.png") for spot in cfg["pieces"][piece].get("capture", [])]
+    runs = [folder for folder in (cfg["_work"] / "capture").glob("*") if folder.is_dir()]
+    runs_with_piece = [run for run in runs if any((run / name).is_file() for _, name in spot_names)]
+    if not runs_with_piece:
+        return []
+    newest = max(runs_with_piece, key=lambda run: max((run / name).stat().st_mtime for _, name in spot_names if (run / name).is_file()))
+    return [(spot, newest / name) for spot, name in spot_names if (newest / name).is_file()]
+
+
+def apply_to_game(cfg, piece, options, ramps, save_palette, palette_scope="piece", report=print):
+    """Saves the options (and the palette when save_palette) into the config, writes <piece>_px.png
+    and integrates it into the map: the piece as the game will show it next time. report(text)
+    hears which of the three steps is running."""
+    report("Saving the settings…")
+    save_piece_settings(cfg["_path"], piece, options, ramps if save_palette else None, palette_scope)
+    report("Writing art…")
+    write_art(target_for_piece(cfg, piece), options, ramps)
+    report("Putting it into the level…")
+    return integrate(cfg, piece)

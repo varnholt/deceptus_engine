@@ -38,19 +38,22 @@ uv run python -m pixelart.gui assets/graveyard/graveyard.json
 `http://127.0.0.1:8765/` (another free port if that one is taken) and opens the browser; `--no-browser`
 only serves, `--port` picks the port, the asset argument is optional.
 
-- Open an asset config (path or recent list) and pick a piece, or **Load passes** to stylize any
-  beauty/ids/normals triplet without a config.
-- Every `pixelize()` option has a control; a change re-stylizes after a short pause (a dot marks values
-  that differ from the config). The preview zooms by whole pixels, pans by dragging, can show the beauty,
-  ids or normals pass instead, and sits next to the config's references. Style numbers are shown for the
-  visible area, the whole piece and the before image.
-- Palette: click a swatch to edit it, or read the ramps from an image (path and optional box).
-- **Save to config** writes the options (and the palette, if edited, for the piece or the whole asset)
-  into the asset JSON, leaving other keys alone, and keeps the result as the *before* image. Hold **B**
-  or pick *before* to flip against it; **Keep as before** pins the current result.
-- Previews go to `<work_dir>/gui/`. Only **Write _px.png** writes `<piece>_px.png`, which is what
-  **Integrate** puts into the map. **Render passes**, **Integrate**, **Capture** (frames are shown when
-  the game is done) and **Compare sheet** (of the current preview) run one at a time in the background.
+The page opens on the first piece, shown **in the level**: the stylized piece at its map position,
+between the layers Tiled draws behind and in front of it (rasterized with `tmxrasterizer`, cached in
+`<work_dir>/gui/` until the map changes). The view switch also offers **Piece only** and **In game**
+(the newest captured frames of the piece's capture spots).
+
+- **Fit to the level** (open): brightness, contrast, colour, night tint, tone shift. **Stone look** and
+  **Colours (advanced)** (folded) hold every other option and the palette. Each option explains itself
+  under its slider and is greyed out while it has no effect. Texts, ranges and groups live in
+  `workbench.OPTION_RANGES`, which the MCP server shows too.
+- **Apply to game** saves the options (and edited colours) into the config, writes `<piece>_px.png` and
+  integrates it into the map. **Show in game** runs the capture (1-2 minutes; `GAME_EXE` is passed on)
+  and switches to the new frame. Hold **B** to flip against the last applied version.
+- An "Updating…" indicator runs from a change until the new image is shown, with the time it took.
+- **More** holds the rest: another art set or loose renders, rebuilding from the 3D model, a comparison
+  sheet, writing the picture only, the 3D render views and the style numbers.
+- Pieces may carry a `"title"` (and the asset a top-level `"title"`) for the names on the page.
 
 ## MCP server
 

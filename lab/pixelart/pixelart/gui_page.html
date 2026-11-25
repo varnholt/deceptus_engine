@@ -27,170 +27,227 @@ button, input, select { font: inherit; color: var(--text); background: var(--pan
 button { cursor: pointer; }
 button:hover:not(:disabled) { border-color: var(--accent); }
 button:disabled { opacity: 0.4; cursor: default; }
-button.primary { background: #233150; border-color: #34497a; }
 input[type=text] { width: 100%; }
 input[type=range] { width: 100%; accent-color: var(--accent); padding: 0; background: none; border: none; }
-label { color: var(--muted); }
-h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
-  margin: 14px 0 6px; font-weight: 600; }
+.hint { color: var(--muted); font-size: 12px; }
+.spacer { flex: 1; }
 
-#app { display: grid; grid-template-rows: auto 1fr; height: 100%; }
-header { display: flex; gap: 8px; align-items: center; padding: 8px 12px; background: var(--panel);
-  border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+#app { display: grid; grid-template-rows: auto auto 1fr; height: 100%; }
+header { display: flex; gap: 8px; align-items: center; padding: 8px 12px; background: var(--panel); border-bottom: 1px solid var(--line); }
 header .title { font-weight: 600; margin-right: 8px; }
-header #asset-path { width: 480px; }
-#passes-form { display: none; gap: 6px; padding: 8px 12px; background: var(--panel);
-  border-bottom: 1px solid var(--line); }
-#passes-form.open { display: flex; }
-#passes-form input { width: 360px; }
-#pieces { display: flex; gap: 4px; margin-left: 12px; }
-#pieces button.active { border-color: var(--accent); color: #fff; }
-#pieces button .no-passes { color: var(--warn); }
+#pieces { display: flex; gap: 4px; align-items: center; }
+#pieces button { padding: 6px 14px; }
+#pieces button.active { border-color: var(--accent); color: #fff; background: #233150; }
 
-main { display: grid; grid-template-columns: 340px 1fr; min-height: 0; }
-#side { overflow-y: auto; padding: 4px 12px 16px; background: var(--panel); border-right: 1px solid var(--line); }
-#work { display: grid; grid-template-rows: auto minmax(200px, 1fr) auto; min-height: 0; min-width: 0; }
-
-.option { display: grid; grid-template-columns: 96px 1fr 56px; gap: 6px; align-items: center; margin: 3px 0; }
-.option .name { color: var(--text); font-family: Consolas, monospace; font-size: 12px; }
-.option .name.changed::after { content: " \2022"; color: var(--warn); }
-.option input[type=number] { width: 56px; padding: 2px 4px; }
-.option.shares .fields { grid-column: 2 / 4; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
-.option.shares input { width: 100%; padding: 2px 4px; }
-
-.ramp { display: flex; gap: 2px; margin: 2px 0 6px; align-items: center; }
-.ramp .ramp-name { width: 56px; color: var(--muted); font-size: 12px; }
-.ramp input[type=color] { width: 30px; height: 24px; padding: 0; border: 1px solid var(--line); border-radius: 2px; cursor: pointer; }
+#more { position: relative; }
+#more > summary { list-style: none; cursor: pointer; padding: 4px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel-2); }
+#more > summary::-webkit-details-marker { display: none; }
+#more-panel { position: absolute; right: 0; top: 34px; z-index: 10; width: 470px; padding: 10px 12px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); }
+#more-panel h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 12px 0 4px; font-weight: 600; }
+#more-panel h3:first-child { margin-top: 0; }
 .row { display: flex; gap: 6px; align-items: center; margin: 4px 0; flex-wrap: wrap; }
 .row input[type=text] { flex: 1; width: auto; }
-.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.hint { color: var(--muted); font-size: 12px; }
 
-#toolbar { display: flex; gap: 10px; align-items: center; padding: 6px 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-#toolbar .group { display: flex; gap: 2px; }
-#toolbar .group button.active { border-color: var(--accent); color: #fff; }
-#views { display: grid; grid-template-columns: 2fr 1fr; gap: 1px; background: var(--line); min-height: 0; }
-.pane { position: relative; display: grid; grid-template-rows: auto 1fr; min-height: 0; background: var(--bg); }
-.pane-head { display: flex; gap: 8px; align-items: center; padding: 4px 8px; background: var(--panel); color: var(--muted); }
-.pane-head select { max-width: 320px; }
+main { display: grid; grid-template-columns: 350px 1fr; min-height: 0; }
+#side { overflow-y: auto; overflow-x: hidden; padding: 12px; background: var(--panel); border-right: 1px solid var(--line); }
+#apply-box { padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+#apply { width: 100%; padding: 10px; font-size: 15px; font-weight: 600; background: #2c4a86; border-color: #3d5fa6; color: #fff; }
+#show-in-game { width: 100%; margin-top: 6px; padding: 7px; }
+.button-note { color: var(--muted); font-size: 12px; margin: 3px 0 8px; }
+#game-state { margin-top: 10px; }
+#how { display: flex; gap: 18px; align-items: center; padding: 8px 12px; background: #17203a; border-bottom: 1px solid var(--line); }
+#how.dismissed { display: none; }
+#how ol { display: flex; gap: 24px; margin: 0; padding-left: 18px; }
+.dev-step button { min-width: 220px; }
+#game-state.dirty { color: var(--warn); }
+#game-state.applied { color: var(--good); }
+#progress { margin-top: 6px; display: none; }
+#progress.running { display: block; }
+#progress .bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+#progress .bar div { height: 100%; width: 0; background: var(--accent); transition: width 0.8s linear; }
+#problem { margin-top: 6px; color: var(--bad); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; display: none; }
+#problem.shown { display: block; }
+
+details.group { margin: 4px 0; }
+details.group > summary { cursor: pointer; padding: 6px 0; font-weight: 600; }
+.option { display: grid; grid-template-columns: 112px 1fr 54px; gap: 2px 6px; align-items: center; margin: 2px 0 10px; }
+.option .name.changed::after { content: " \2022"; color: var(--warn); }
+.option input[type=number] { width: 54px; padding: 2px 4px; }
+.option .help { grid-column: 1 / 4; color: var(--muted); font-size: 12px; line-height: 1.35; }
+.option .idle-note { grid-column: 1 / 4; color: var(--warn); font-size: 12px; display: none; }
+.option.idle > :not(.help):not(.idle-note) { opacity: 0.4; }
+.option.idle .idle-note { display: block; }
+.option.shares .fields { grid-column: 2 / 4; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+.option.shares input { width: 100%; padding: 2px 4px; }
+.ramp { display: flex; gap: 2px; margin: 2px 0 6px; align-items: center; }
+.ramp .ramp-name { width: 56px; color: var(--muted); font-size: 12px; }
+.ramp input[type=color] { width: 28px; height: 22px; padding: 0; border: 1px solid var(--line); border-radius: 2px; cursor: pointer; }
+table.metrics { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 12px; }
+table.metrics th, table.metrics td { padding: 2px 4px; text-align: right; border-bottom: 1px solid var(--line); }
+table.metrics th:first-child, table.metrics td:first-child { text-align: left; color: var(--muted); }
+
+#work { display: grid; grid-template-rows: auto 1fr auto; min-height: 0; min-width: 0; }
+#toolbar { display: flex; gap: 12px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.switch { display: flex; }
+.switch button { border-radius: 0; padding: 6px 16px; }
+.switch button:first-child { border-radius: 4px 0 0 4px; }
+.switch button:last-child { border-radius: 0 4px 4px 0; }
+.toggle.active, .switch button.active { background: #233150; border-color: var(--accent); color: #fff; }
+.zoom button { padding: 3px 7px; }
+.zoom button.active { border-color: var(--accent); color: #fff; }
+#activity { display: flex; gap: 6px; align-items: center; color: var(--muted); min-width: 170px; }
+#activity.busy { color: var(--warn); }
+.spinner { width: 12px; height: 12px; border: 2px solid var(--line); border-top-color: var(--warn); border-radius: 50%; display: none; }
+#activity.busy .spinner { display: inline-block; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#views { display: grid; grid-template-columns: 1fr; min-height: 0; gap: 1px; background: var(--line); }
+#views.with-reference { grid-template-columns: 2fr 1fr; }
 .viewport { position: relative; overflow: hidden; cursor: grab; background: var(--backdrop); min-height: 0; }
 .viewport.dragging { cursor: grabbing; }
-.viewport.black { background: #000; }
-.viewport img:not([src]) { display: none; }
-.viewport img { position: absolute; image-rendering: pixelated; user-select: none; -webkit-user-drag: none; }
-.badge { position: absolute; top: 6px; right: 8px; padding: 2px 6px; border-radius: 3px; background: rgba(0,0,0,0.6);
-  font-size: 11px; color: var(--warn); pointer-events: none; }
-
-#bottom { display: grid; grid-template-columns: 420px 1fr; gap: 12px; padding: 8px 12px; border-top: 1px solid var(--line);
-  background: var(--panel); max-height: 34vh; overflow: auto; }
-table.metrics { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
-table.metrics th, table.metrics td { padding: 2px 6px; text-align: right; border-bottom: 1px solid var(--line); }
-table.metrics th:first-child, table.metrics td:first-child { text-align: left; color: var(--muted); }
-#status { margin-top: 8px; color: var(--muted); }
-#status.error { color: var(--bad); white-space: pre-wrap; }
-.job { display: flex; gap: 8px; align-items: baseline; }
-.job .state-running, .job .state-queued { color: var(--warn); }
-.job .state-done { color: var(--good); }
-.job .state-failed { color: var(--bad); }
-details.log pre { max-height: 160px; overflow: auto; background: var(--bg); padding: 6px; margin: 4px 0; font-size: 11px; white-space: pre-wrap; }
+.stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.stage img { position: absolute; left: 0; top: 0; image-rendering: pixelated; user-select: none; -webkit-user-drag: none; transition: opacity 0.15s; }
+.stage img:not([src]), .stage img.hidden { display: none; }
+.viewport.stale #piece-img { opacity: 0.6; }
+.badge { position: absolute; top: 8px; right: 10px; padding: 3px 8px; border-radius: 3px; background: rgba(0, 0, 0, 0.7);
+  font-size: 12px; color: var(--warn); pointer-events: none; }
+.badge:empty { display: none; }
+#reference-pane { display: none; grid-template-rows: auto 1fr; min-height: 0; background: var(--bg); }
+#views.with-reference #reference-pane { display: grid; }
+#reference-pane .head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 4px 8px; background: var(--panel); }
+#spots { display: none; gap: 4px; align-items: center; }
+#spots.shown { display: flex; }
+#spots button.active { border-color: var(--accent); color: #fff; }
+#footer { padding: 4px 12px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); background: var(--panel); }
 #gallery { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
-#gallery a { display: block; border: 1px solid var(--line); }
-#gallery img { display: block; max-height: 140px; max-width: 360px; image-rendering: pixelated; }
+#gallery img { display: block; max-height: 120px; max-width: 440px; image-rendering: pixelated; border: 1px solid var(--line); }
 </style>
 </head>
 <body>
 <div id="app">
-  <div>
-    <header>
-      <span class="title">Pixel art tuner</span>
-      <input id="asset-path" type="text" placeholder="asset config (.json)">
-      <button id="open-asset" class="primary">Open</button>
-      <select id="recent"><option value="">recent…</option></select>
-      <button id="toggle-passes">Load passes…</button>
-      <div id="pieces"></div>
-    </header>
-    <div id="passes-form">
-      <input id="pass-beauty" type="text" placeholder="beauty pass .png">
-      <input id="pass-ids" type="text" placeholder="ids pass (default: beauty name with _ids)">
-      <input id="pass-normals" type="text" placeholder="normals pass (default: _normals)">
-      <button id="open-passes" class="primary">Load</button>
-    </div>
+  <header>
+    <span class="title" id="art-title">Pixel art</span>
+    <div id="pieces"></div>
+    <span class="spacer"></span>
+    <details id="more">
+      <summary>More ▾</summary>
+      <div id="more-panel">
+        <h3>Other art</h3>
+        <div class="row">
+          <input id="asset-path" type="text" placeholder="file of another art set (….json)">
+          <button id="open-asset">Open another art set…</button>
+        </div>
+        <div class="row"><select id="recent"><option value="">art sets opened before…</option></select></div>
+        <div class="row">
+          <input id="pass-beauty" type="text" placeholder="a render's …_beauty.png">
+          <button id="open-passes">Try other rendered images…</button>
+        </div>
+        <p class="button-note">For renders that are not part of an art set: the look can be tried here, not applied.</p>
+        <h3>Rarely needed</h3>
+        <div class="dev-step"><button id="render">Rebuild from the 3D model (30 s)</button>
+          <p class="button-note">Only needed after the 3D scene changed.</p></div>
+        <div class="dev-step"><button id="keep-before">Remember this version for B</button>
+          <p class="button-note">Holding B then shows this version instead of the applied one.</p></div>
+        <div class="dev-step"><button id="write-art">Save the picture only</button>
+          <p class="button-note">Writes the piece's image file without saving the settings or changing the level.</p></div>
+        <div class="dev-step"><button id="compare">Make a comparison sheet</button>
+          <p class="button-note">Close-ups of this piece next to dstar's art, with style numbers.</p></div>
+        <div class="row">
+          <label>show <select id="pass-view">
+            <option value="stylized">the finished art</option><option value="beauty">the 3D render (lighting)</option>
+            <option value="ids">the 3D render (one colour per stone)</option><option value="normals">the 3D render (surface directions)</option>
+          </select></label>
+        </div>
+        <h3>Style numbers</h3>
+        <p class="button-note">Counts that make the look comparable with dstar's art: colours per tile, flat areas, dark share.</p>
+        <table class="metrics">
+          <thead><tr><th></th><th>in view</th><th>piece</th><th>applied</th></tr></thead>
+          <tbody id="metrics-body"></tbody>
+        </table>
+        <div id="gallery"></div>
+      </div>
+    </details>
+  </header>
+  <div id="how">
+    <strong>How this works</strong>
+    <ol>
+      <li>Change the look with the sliders on the left.</li>
+      <li>Press <b>Apply to game</b>.</li>
+      <li>Press <b>Show in game</b>, or reload the level in your running game.</li>
+    </ol>
+    <span class="spacer"></span>
+    <button id="dismiss-how">Got it</button>
   </div>
   <main>
     <aside id="side">
-      <h2>Stylize options</h2>
-      <div id="options"></div>
-      <div class="row">
-        <button id="revert-options">Revert to saved</button>
-        <button id="defaults-options">Stylizer defaults</button>
+      <div id="apply-box">
+        <button id="apply">Apply to game</button>
+        <p class="button-note">Puts this look into the level. Reload the level in the game to see it.</p>
+        <button id="show-in-game">Show in game</button>
+        <p class="button-note">Starts the game at this piece and takes pictures (1-2 minutes).</p>
+        <div id="game-state"></div>
+        <div id="progress"><span id="progress-text"></span><div class="bar"><div id="progress-bar"></div></div></div>
+        <div id="problem"></div>
       </div>
-
-      <h2>Palette <span id="palette-source" class="hint"></span></h2>
-      <div id="palette"></div>
-      <div class="row">
-        <input id="palette-image" type="text" placeholder="read from image: path">
-      </div>
-      <div class="row">
-        <input id="palette-box" type="text" placeholder="box x0,y0,x1,y1 (optional)">
-        <button id="read-palette">Read</button>
-        <button id="revert-palette">Revert</button>
-      </div>
-      <div class="row">
-        <label for="palette-scope">save palette for</label>
-        <select id="palette-scope">
-          <option value="piece">this piece</option>
-          <option value="asset">the whole asset</option>
-        </select>
-      </div>
-
-      <h2>Actions</h2>
-      <div class="actions">
-        <button id="save" class="primary" title="write options (and an edited palette) into the asset JSON">Save to config</button>
-        <button id="keep-before" title="keep the current result to flip against">Keep as before</button>
-        <button id="write-art" title="write the stylized art the map uses (&lt;piece&gt;_px.png)">Write _px.png</button>
-        <button id="compare" title="comparison sheet of the current preview">Compare sheet</button>
-        <button id="render" title="headless Blender, about 30 s">Render passes</button>
-        <button id="integrate" title="puts the written _px.png into the Tiled map">Integrate</button>
-        <button id="capture" title="runs the game for 1-2 minutes">Capture</button>
-        <label class="hint"><input id="capture-all" type="checkbox"> all pieces</label>
-      </div>
-      <p class="hint">Integrate uses the written _px.png: write it first. Hold <b>B</b> to flip to the before image.</p>
+      <details class="group" open>
+        <summary>Fit to the level</summary>
+        <div id="fit-options"></div>
+      </details>
+      <details class="group">
+        <summary>Stone look</summary>
+        <div id="look-options"></div>
+        <div class="row"><button id="revert-options">Undo changes since the last Apply</button></div>
+      </details>
+      <details class="group">
+        <summary>Colours (advanced)</summary>
+        <p class="button-note">The shades the art is painted with. Change one to recolour every pixel that uses it.</p>
+        <div id="palette"></div>
+        <div class="row">
+          <label class="hint">colour changes apply to
+            <select id="palette-scope"><option value="piece">this piece</option><option value="asset">all pieces</option></select>
+          </label>
+          <button id="revert-palette">Undo colour changes</button>
+        </div>
+        <p class="button-note">Or take the shades from a picture of dstar's (file, and optionally an area x0,y0,x1,y1):</p>
+        <div class="row"><input id="palette-image" type="text" placeholder="picture file"></div>
+        <div class="row">
+          <input id="palette-box" type="text" placeholder="area (optional)">
+          <button id="read-palette">Take shades</button>
+        </div>
+      </details>
     </aside>
 
     <section id="work">
       <div id="toolbar">
-        <span>zoom</span>
-        <div class="group" id="zoom"></div>
-        <span>show</span>
-        <div class="group" id="view-mode"></div>
-        <label>backdrop
-          <select id="backdrop"><option value="night">night blue</option><option value="black">black</option></select>
-        </label>
-        <button id="fit">Reset view</button>
+        <div class="switch" id="view-switch">
+          <button data-mode="level">In level</button>
+          <button data-mode="piece">Piece only</button>
+          <button data-mode="game">In game</button>
+        </div>
+        <div class="zoom" id="zoom"></div>
+        <button id="fit">Fit to window</button>
+        <button id="show-reference" class="toggle">dstar's art next to it</button>
+        <div id="activity"><span class="spinner"></span><span id="activity-text"></span></div>
+        <div id="spots"></div>
+        <span class="spacer"></span>
+        <span class="hint">drag to move · hold <b>B</b> to see the applied version</span>
       </div>
       <div id="views">
-        <div class="pane">
-          <div class="pane-head"><span id="preview-title">no piece</span></div>
-          <div class="viewport" id="preview-viewport"><img id="preview-img" alt=""><span class="badge" id="preview-badge"></span></div>
+        <div class="viewport" id="viewport">
+          <div class="stage" id="stage">
+            <img id="level-behind" alt="">
+            <img id="piece-img" alt="">
+            <img id="level-front" alt="">
+            <img id="frame-img" alt="">
+          </div>
+          <span class="badge" id="badge"></span>
         </div>
-        <div class="pane">
-          <div class="pane-head">reference <select id="reference-select"></select></div>
-          <div class="viewport" id="reference-viewport"><img id="reference-img" alt=""></div>
-        </div>
-      </div>
-      <div id="bottom">
-        <div>
-          <table class="metrics">
-            <thead><tr><th></th><th>visible</th><th>whole</th><th>before</th></tr></thead>
-            <tbody id="metrics-body"></tbody>
-          </table>
-          <div id="status">Open an asset config or load passes.</div>
-        </div>
-        <div>
-          <div id="jobs"></div>
-          <div id="gallery"></div>
+        <div id="reference-pane">
+          <div class="head"><span>dstar's original art from this level, for comparison:</span><select id="reference-select"></select></div>
+          <div class="viewport" id="reference-viewport"><div class="stage" id="reference-stage"><img id="reference-img" alt=""></div></div>
         </div>
       </div>
+      <div id="footer"></div>
     </section>
   </main>
 </div>
@@ -198,12 +255,12 @@ details.log pre { max-height: 160px; overflow: auto; background: var(--bg); padd
 "use strict";
 
 const ZOOMS = [1, 2, 3, 4, 6, 8];
-const VIEW_MODES = ["stylized", "before", "beauty", "ids", "normals"];
 const METRIC_NAMES = ["colours/tile", "flat pairs", "near pairs", "dark share", "palette"];
 const RAMP_NAMES = ["stone", "foliage", "passage"];
 const RESTYLIZE_DELAY_MS = 250;
 const METRICS_DELAY_MS = 300;
 const JOB_POLL_MS = 1000;
+const CAPTURE_EXPECTED_S = 120;
 
 const state = {
   specs: [],
@@ -212,20 +269,32 @@ const state = {
   references: [],
   source: null,
   piece: null,
-  savedOptions: {},
+  appliedOptions: {},
   options: {},
-  savedPalette: null,
+  appliedPalette: null,
   palette: null,
   paletteEdited: false,
   passes: null,
   previewPath: null,
-  beforePath: null,
-  imageVersion: 0,
-  zoom: 3,
-  viewMode: "stylized",
+  pinnedBefore: null,
+  level: null,
+  levelLoading: false,
+  pieceState: { applied_art: null, applied_at: null, frames: [] },
+  spotIndex: 0,
+  mode: "level",
+  passView: "stylized",
   flipHeld: false,
-  metrics: { visible: null, whole: null, before: null },
+  imageVersion: 0,
+  zoom: 1,
+  view: { x: 0, y: 0 },
+  referenceView: { x: 8, y: 8 },
+  metrics: { visible: null, whole: null, applied: null },
   seenJobs: null,
+  runningJob: null,
+  // when the shown piece stopped matching the settings; null while it matches
+  staleSince: null,
+  newestRequest: 0,
+  lastUpdateSeconds: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -234,9 +303,7 @@ const $ = (id) => document.getElementById(id);
 
 async function post(endpoint, body) {
   const response = await fetch(`/api/${endpoint}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error || response.statusText);
@@ -254,18 +321,54 @@ function imageUrl(path) {
   return `/image?path=${encodeURIComponent(path)}&v=${state.imageVersion}`;
 }
 
-function showStatus(text, isError = false) {
-  const status = $("status");
-  status.textContent = text;
-  status.classList.toggle("error", isError);
-}
-
 function debounce(fn, delay) {
   let timer = null;
   return (...args) => {
     clearTimeout(timer);
     timer = setTimeout(() => fn(...args), delay);
   };
+}
+
+function showFooter(text) {
+  $("footer").textContent = text;
+}
+
+function showProblem(text) {
+  $("problem").textContent = text || "";
+  $("problem").classList.toggle("shown", Boolean(text));
+}
+
+function clockTime(seconds) {
+  return new Date(seconds * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+const sameValue = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+// ------------------------------------------------------------ activity: "it is crunching"
+
+function renderActivity() {
+  const busyText = state.staleSince !== null ? "Updating…" : (state.levelLoading ? "Rendering the level…" : "");
+  $("activity").classList.toggle("busy", Boolean(busyText));
+  $("viewport").classList.toggle("stale", state.staleSince !== null);
+  const idleText = state.lastUpdateSeconds !== null ? `updated in ${state.lastUpdateSeconds.toFixed(1)} s` : "";
+  $("activity-text").textContent = busyText || idleText;
+}
+
+function markStale() {
+  if (state.staleSince === null) state.staleSince = performance.now();
+  renderActivity();
+}
+
+function markShown() {
+  if (state.staleSince === null) return;
+  state.lastUpdateSeconds = (performance.now() - state.staleSince) / 1000;
+  state.staleSince = null;
+  renderActivity();
+}
+
+function clearStale() {
+  state.staleSince = null;
+  renderActivity();
 }
 
 // ------------------------------------------------------------ loading
@@ -278,167 +381,180 @@ async function openAsset(path) {
     state.pieces = result.pieces;
     state.references = result.references;
     $("asset-path").value = result.asset;
-    renderPieceTabs();
+    $("art-title").textContent = result.title;
+    document.title = `${result.title} · Pixel Art Tuner`;
     renderReferenceChoices();
     refreshRecent();
-    const first = result.pieces.find((p) => p.has_passes) || result.pieces[0];
-    if (first) selectPiece(first.name);
+    const current = result.pieces.find((p) => p.name === state.piece);
+    const first = current || result.pieces.find((p) => p.has_passes) || result.pieces[0];
+    if (first) await selectPiece(first.name);
   } catch (error) {
-    showStatus(`could not open ${path}: ${error.message}`, true);
+    showProblem(`could not open ${path}: ${error.message}`);
   }
-}
-
-function passPathLike(beauty, kind) {
-  return beauty.replace(/_beauty(\.\w+)$/i, `_${kind}$1`);
 }
 
 async function openPasses() {
   const beauty = $("pass-beauty").value.trim();
   if (!beauty) return;
-  const ids = $("pass-ids").value.trim() || passPathLike(beauty, "ids");
-  const normals = $("pass-normals").value.trim() || passPathLike(beauty, "normals");
+  const sibling = (kind) => beauty.replace(/_beauty(\.\w+)$/i, `_${kind}$1`);
+  const passes = { beauty, ids: sibling("ids"), normals: sibling("normals") };
   try {
-    const result = await post("open_passes", { beauty, ids, normals });
+    const result = await post("open_passes", passes);
     if (result.missing.length) {
-      showStatus(`missing passes: ${result.missing.join(", ")}`, true);
+      showProblem(`missing passes: ${result.missing.join(", ")}`);
       return;
     }
     state.asset = null;
     state.pieces = [];
     state.references = [];
-    renderPieceTabs();
-    renderReferenceChoices();
     state.piece = result.label;
-    state.source = { passes: { beauty, ids, normals } };
-    state.passes = { beauty, ids, normals };
-    startTuning(result.options, result.options, result.palette, "default");
-    $("preview-title").textContent = `${result.label} (loose passes, writes ${result.written_art})`;
+    state.source = { passes };
+    state.passes = passes;
+    state.level = null;
+    renderReferenceChoices();
+    $("more").open = false;
+    await startTuning(result.options, result.palette, "default");
   } catch (error) {
-    showStatus(error.message, true);
+    showProblem(error.message);
   }
 }
 
-function selectPiece(name) {
+async function selectPiece(name) {
   const piece = state.pieces.find((p) => p.name === name);
   state.piece = name;
   state.source = { asset: state.asset, piece: name };
   state.passes = piece.passes;
-  renderPieceTabs();
-  $("preview-title").textContent = `${name}`;
-  if (!piece.has_passes) {
-    showStatus(`${name}: no passes yet, press Render passes`, true);
-  }
-  startTuning(piece.options, piece.options, piece.palette, piece.palette_source);
+  state.level = null;
+  await startTuning(piece.options, piece.palette, piece.palette_source);
+  if (!piece.has_passes) showProblem(`${piece.title} has not been built from the 3D model yet: More ▸ Rebuild from the 3D model`);
 }
 
-function startTuning(savedOptions, options, palette, paletteSource) {
-  state.savedOptions = structuredClone(savedOptions);
+async function startTuning(options, palette, paletteSource) {
+  state.appliedOptions = structuredClone(options);
   state.options = structuredClone(options);
-  state.savedPalette = structuredClone(palette);
+  state.appliedPalette = structuredClone(palette);
   state.palette = structuredClone(palette);
   state.paletteEdited = false;
-  state.beforePath = null;
-  state.metrics = { visible: null, whole: null, before: null };
-  $("palette-source").textContent = `(from ${paletteSource})`;
+  state.pinnedBefore = null;
+  state.spotIndex = 0;
+  state.metrics = { visible: null, whole: null, applied: null };
+  $("palette-scope").value = paletteSource === "asset" ? "asset" : "piece";
+  showProblem("");
+  renderPieceTabs();
   renderOptions();
   renderPalette();
   updateButtons();
-  resetView();
-  stylizeNow({ keepBefore: true });
+  state.mode = state.source.passes ? "piece" : "level";
+  renderViewSwitch();
+  markStale();
+  await Promise.all([refreshPieceState(), stylizeNow(), loadLevel()]);
+  fitView();
 }
 
 async function refreshRecent() {
   const info = await get("info");
   const select = $("recent");
-  select.innerHTML = '<option value="">recent…</option>';
-  for (const path of info.recent) {
-    const option = document.createElement("option");
-    option.value = path;
-    option.textContent = path;
-    select.appendChild(option);
-  }
+  select.innerHTML = '<option value="">art sets opened before…</option>';
+  for (const path of info.recent) select.add(new Option(path, path));
 }
 
 function renderPieceTabs() {
   const container = $("pieces");
   container.innerHTML = "";
   for (const piece of state.pieces) {
-    const button = document.createElement("button");
-    button.textContent = piece.name;
-    if (!piece.has_passes) {
-      const mark = document.createElement("span");
-      mark.className = "no-passes";
-      mark.textContent = " (no passes)";
-      button.appendChild(mark);
-    }
-    button.classList.toggle("active", piece.name === state.piece && state.source && !state.source.passes);
+    const button = Object.assign(document.createElement("button"), { textContent: piece.title });
+    button.classList.toggle("active", piece.name === state.piece && !state.source.passes);
     button.addEventListener("click", () => selectPiece(piece.name));
     container.appendChild(button);
   }
-}
-
-function renderReferenceChoices() {
-  const select = $("reference-select");
-  select.innerHTML = "";
-  for (const ref of state.references) {
-    const option = document.createElement("option");
-    option.value = ref.index;
-    option.textContent = ref.label;
-    select.appendChild(option);
+  if (state.source && state.source.passes) {
+    container.appendChild(Object.assign(document.createElement("span"), { className: "hint", textContent: `trying renders: ${state.piece}` }));
   }
-  showReference();
 }
 
-function showReference() {
-  const img = $("reference-img");
-  if (!state.asset || !state.references.length) {
-    img.removeAttribute("src");
-    return;
+async function loadLevel() {
+  if (!state.source || state.source.passes) return;
+  state.levelLoading = true;
+  renderActivity();
+  try {
+    state.level = await post("level", { source: state.source });
+    state.imageVersion += 1;
+    showView();
+  } catch (error) {
+    state.level = null;
+    showProblem(`level render: ${error.message}`);
+  } finally {
+    state.levelLoading = false;
+    renderActivity();
   }
-  const index = $("reference-select").value;
-  img.src = `/api/reference?asset=${encodeURIComponent(state.asset)}&index=${index}`;
 }
 
-// ------------------------------------------------------------ option controls
-
-function optionValueText(spec, value) {
-  if (spec.kind === "float") return Number(value).toFixed(2);
-  return String(value);
+async function refreshPieceState() {
+  if (!state.source) return;
+  state.pieceState = await post("piece_state", { source: state.source });
+  if (state.pieceState.applied_art) {
+    state.metrics.applied = await post("metrics", { path: state.pieceState.applied_art });
+  }
+  renderSpots();
+  renderGameState();
+  renderMetrics();
 }
 
-function sameValue(a, b) {
-  return JSON.stringify(a) === JSON.stringify(b);
+// ------------------------------------------------------------ options
+
+function isDirty() {
+  return !sameValue(state.options, state.appliedOptions) || state.paletteEdited;
+}
+
+function onSettingsChanged() {
+  markStale();
+  renderGameState();
+  restylizeSoon();
 }
 
 function onOptionChanged(name, value) {
   state.options[name] = value;
   markChangedOptions();
-  restylizeSoon();
+  markIdleOptions();
+  onSettingsChanged();
 }
 
 function markChangedOptions() {
   for (const spec of state.specs) {
     const label = document.querySelector(`[data-option-name="${spec.name}"]`);
-    if (label) label.classList.toggle("changed", !sameValue(state.options[spec.name], state.savedOptions[spec.name]));
+    if (label) label.classList.toggle("changed", !sameValue(state.options[spec.name], state.appliedOptions[spec.name]));
+  }
+}
+
+function isActive(spec) {
+  if (!spec.needs) return true;
+  const [name, comparison, value] = spec.needs;
+  const current = state.options[name];
+  return comparison === ">" ? current > value : current === value;
+}
+
+function idleNote(spec) {
+  const [name, comparison, value] = spec.needs;
+  const other = state.specs.find((s) => s.name === name);
+  const label = other ? other.label : name;
+  if (comparison === ">") return `No visible effect while ${label} is ${value}.`;
+  return `No visible effect while ${label} is ${value ? "off" : "on"}.`;
+}
+
+function markIdleOptions() {
+  for (const spec of state.specs) {
+    const row = document.querySelector(`.option[data-option="${spec.name}"]`);
+    if (row) row.classList.toggle("idle", !isActive(spec));
   }
 }
 
 function numberControls(spec, value, onValue) {
-  const range = document.createElement("input");
-  range.type = "range";
-  range.min = spec.min;
-  range.max = spec.max;
-  range.step = spec.step;
-  range.value = value;
-  const number = document.createElement("input");
-  number.type = "number";
-  number.min = spec.min;
-  number.max = spec.max;
-  number.step = spec.step;
-  number.value = optionValueText(spec, value);
-  const parse = (text) => (spec.kind === "int" ? parseInt(text, 10) : parseFloat(text));
+  const text = (v) => (spec.kind === "float" ? Number(v).toFixed(2) : String(v));
+  const parse = (v) => (spec.kind === "int" ? parseInt(v, 10) : parseFloat(v));
+  const range = Object.assign(document.createElement("input"), { type: "range", min: spec.min, max: spec.max, step: spec.step, value });
+  const number = Object.assign(document.createElement("input"), { type: "number", min: spec.min, max: spec.max, step: spec.step, value: text(value) });
   range.addEventListener("input", () => {
-    number.value = optionValueText(spec, range.value);
+    number.value = text(range.value);
     onValue(parse(range.value));
   });
   number.addEventListener("change", () => {
@@ -450,33 +566,17 @@ function numberControls(spec, value, onValue) {
   return [range, number];
 }
 
-function optionRow(spec) {
-  const row = document.createElement("div");
-  row.className = "option";
-  row.title = spec.help || "";
-  const name = document.createElement("span");
-  name.className = "name";
-  name.dataset.optionName = spec.name;
-  name.textContent = spec.name;
-  row.appendChild(name);
+function valueControls(spec) {
   const value = state.options[spec.name];
   if (spec.kind === "bool") {
-    const box = document.createElement("input");
-    box.type = "checkbox";
-    box.checked = Boolean(value);
+    const box = Object.assign(document.createElement("input"), { type: "checkbox", checked: Boolean(value) });
     box.addEventListener("change", () => onOptionChanged(spec.name, box.checked));
-    row.appendChild(box);
-  } else if (spec.kind === "shares") {
-    row.classList.add("shares");
-    const fields = document.createElement("div");
-    fields.className = "fields";
+    return [box];
+  }
+  if (spec.kind === "shares") {
+    const fields = Object.assign(document.createElement("div"), { className: "fields" });
     value.forEach((share, index) => {
-      const input = document.createElement("input");
-      input.type = "number";
-      input.min = spec.min;
-      input.max = spec.max;
-      input.step = spec.step;
-      input.value = share;
+      const input = Object.assign(document.createElement("input"), { type: "number", min: spec.min, max: spec.max, step: spec.step, value: share });
       input.addEventListener("change", () => {
         const shares = [...state.options[spec.name]];
         shares[index] = parseFloat(input.value) || 0;
@@ -484,50 +584,46 @@ function optionRow(spec) {
       });
       fields.appendChild(input);
     });
-    row.appendChild(fields);
-  } else {
-    numberControls(spec, value, (v) => onOptionChanged(spec.name, v)).forEach((el) => row.appendChild(el));
+    return [fields];
   }
+  return numberControls(spec, value, (v) => onOptionChanged(spec.name, v));
+}
+
+function optionRow(spec) {
+  const row = Object.assign(document.createElement("div"), { className: `option ${spec.kind}` });
+  row.dataset.option = spec.name;
+  const name = Object.assign(document.createElement("span"), { className: "name", textContent: spec.label, title: spec.name });
+  name.dataset.optionName = spec.name;
+  row.append(name, ...valueControls(spec));
+  if (spec.help) row.appendChild(Object.assign(document.createElement("div"), { className: "help", textContent: spec.help }));
+  if (spec.needs) row.appendChild(Object.assign(document.createElement("div"), { className: "idle-note", textContent: idleNote(spec) }));
   return row;
 }
 
 function renderOptions() {
-  const container = $("options");
-  container.innerHTML = "";
-  for (const spec of state.specs) container.appendChild(optionRow(spec));
+  $("fit-options").replaceChildren(...state.specs.filter((spec) => spec.group === "fit").map(optionRow));
+  $("look-options").replaceChildren(...state.specs.filter((spec) => spec.group !== "fit").map(optionRow));
   markChangedOptions();
+  markIdleOptions();
 }
 
 // ------------------------------------------------------------ palette
 
-function toHex(rgb) {
-  return "#" + rgb.map((c) => c.toString(16).padStart(2, "0")).join("");
-}
-
-function fromHex(hex) {
-  return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-}
+const toHex = (rgb) => "#" + rgb.map((c) => c.toString(16).padStart(2, "0")).join("");
+const fromHex = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 
 function renderPalette() {
   const container = $("palette");
   container.innerHTML = "";
   for (const rampName of RAMP_NAMES) {
-    const row = document.createElement("div");
-    row.className = "ramp";
-    const label = document.createElement("span");
-    label.className = "ramp-name";
-    label.textContent = rampName;
-    row.appendChild(label);
+    const row = Object.assign(document.createElement("div"), { className: "ramp" });
+    row.appendChild(Object.assign(document.createElement("span"), { className: "ramp-name", textContent: rampName }));
     state.palette[rampName].forEach((colour, index) => {
-      const swatch = document.createElement("input");
-      swatch.type = "color";
-      swatch.value = toHex(colour);
-      swatch.title = `${rampName} ${index}: ${colour.join(", ")}`;
+      const swatch = Object.assign(document.createElement("input"), { type: "color", value: toHex(colour), title: `${rampName} ${index}` });
       swatch.addEventListener("input", () => {
         state.palette[rampName][index] = fromHex(swatch.value);
-        swatch.title = `${rampName} ${index}: ${state.palette[rampName][index].join(", ")}`;
         state.paletteEdited = true;
-        restylizeSoon();
+        onSettingsChanged();
       });
       row.appendChild(swatch);
     });
@@ -548,165 +644,165 @@ async function readPalette() {
   if (!path) return;
   try {
     const read = await post("read_palette", { path, box: parseBox($("palette-box").value) });
-    for (const rampName of Object.keys(read)) state.palette[rampName] = read[rampName];
+    Object.assign(state.palette, read);
     state.paletteEdited = true;
     renderPalette();
-    stylizeNow();
+    onSettingsChanged();
   } catch (error) {
-    showStatus(`palette: ${error.message}`, true);
+    showProblem(`palette: ${error.message}`);
   }
 }
 
-// ------------------------------------------------------------ stylizing and metrics
+// ------------------------------------------------------------ stylizing and numbers
 
-async function stylizeNow({ keepBefore = false } = {}) {
+async function stylizeNow() {
   if (!state.source) return;
-  showStatus("stylizing…");
-  const started = performance.now();
+  const request = ++state.newestRequest;
   try {
-    const result = await post("stylize", {
-      source: state.source,
-      options: state.options,
-      palette: state.palette,
-      box: visibleBox(),
-    });
-    if (result.superseded) return;
+    const result = await post("stylize", { source: state.source, options: state.options, palette: state.palette, box: visiblePieceBox() });
+    // a dropped or overtaken request leaves the indicator on: a newer one is still running
+    if (result.superseded || request !== state.newestRequest) return;
     state.previewPath = result.preview;
     state.imageVersion += 1;
     state.metrics.whole = result.whole;
     state.metrics.visible = result.visible;
-    if (keepBefore) await keepBeforeImage();
-    showImage();
+    showView();
     renderMetrics();
-    showStatus(`stylized in ${((performance.now() - started) / 1000).toFixed(1)} s`);
   } catch (error) {
-    showStatus(error.message, true);
+    clearStale();
+    showProblem(error.message);
   }
 }
 
-const restylizeSoon = debounce(() => stylizeNow(), RESTYLIZE_DELAY_MS);
-
-async function keepBeforeImage() {
-  const result = await post("keep_before", { source: state.source });
-  state.beforePath = result.before;
-  state.metrics.before = result.whole;
-  state.imageVersion += 1;
-  updateButtons();
-  renderMetrics();
-}
+const restylizeSoon = debounce(stylizeNow, RESTYLIZE_DELAY_MS);
 
 async function refreshVisibleMetrics() {
-  const path = shownImagePath();
-  const box = visibleBox();
-  if (!path || !box || (state.viewMode !== "stylized" && state.viewMode !== "before")) return;
+  const box = visiblePieceBox();
+  if (!state.previewPath || !box || state.mode === "game") return;
   try {
-    state.metrics.visible = await post("metrics", { path, box });
+    state.metrics.visible = await post("metrics", { path: state.previewPath, box });
     renderMetrics();
   } catch (error) {
-    showStatus(error.message, true);
+    showProblem(error.message);
   }
 }
 
 const refreshVisibleMetricsSoon = debounce(refreshVisibleMetrics, METRICS_DELAY_MS);
 
 function renderMetrics() {
-  const body = $("metrics-body");
-  body.innerHTML = "";
   const cell = (metrics, name) => (metrics && metrics[name] !== null ? String(metrics[name]) : "–");
-  for (const name of METRIC_NAMES) {
+  $("metrics-body").replaceChildren(...METRIC_NAMES.map((name) => {
     const row = document.createElement("tr");
-    for (const text of [name, cell(state.metrics.visible, name), cell(state.metrics.whole, name), cell(state.metrics.before, name)]) {
-      const td = document.createElement("td");
-      td.textContent = text;
-      row.appendChild(td);
+    for (const text of [name, cell(state.metrics.visible, name), cell(state.metrics.whole, name), cell(state.metrics.applied, name)]) {
+      row.appendChild(Object.assign(document.createElement("td"), { textContent: text }));
     }
-    body.appendChild(row);
+    return row;
+  }));
+}
+
+// ------------------------------------------------------------ the view: level, piece, game frame
+
+function beforePath() {
+  return state.pinnedBefore || state.pieceState.applied_art;
+}
+
+function pieceImagePath() {
+  if (state.passView !== "stylized") return state.passes ? state.passes[state.passView] : null;
+  if (state.flipHeld && beforePath()) return beforePath();
+  return state.previewPath;
+}
+
+function currentFrame() {
+  return state.pieceState.frames[state.spotIndex] || null;
+}
+
+function setImage(img, path, visible) {
+  img.classList.toggle("hidden", !visible || !path);
+  if (visible && path) {
+    const url = imageUrl(path);
+    if (img.getAttribute("src") !== url) img.src = url;
   }
 }
 
-// ------------------------------------------------------------ viewing: zoom, pan, flip
-
-const view = { offsetX: 0, offsetY: 0 };
-const referenceView = { offsetX: 0, offsetY: 0 };
-
-function effectiveMode() {
-  return state.flipHeld && state.beforePath ? "before" : state.viewMode;
+function showView() {
+  const inLevel = (state.mode === "level") && Boolean(state.level);
+  const inGame = state.mode === "game";
+  const offset = inLevel ? state.level.offset : [0, 0];
+  setImage($("level-behind"), inLevel ? state.level.behind : null, inLevel);
+  setImage($("level-front"), inLevel ? state.level.front : null, inLevel && (state.passView === "stylized"));
+  setImage($("piece-img"), pieceImagePath(), !inGame);
+  setImage($("frame-img"), currentFrame() ? currentFrame().path : null, inGame);
+  $("piece-img").style.left = `${offset[0]}px`;
+  $("piece-img").style.top = `${offset[1]}px`;
+  let badge = "";
+  if (inGame) badge = currentFrame() ? `game frame from ${clockTime(currentFrame().time)}` : "no game frame yet: press Show in game";
+  else if (state.passView !== "stylized") badge = $("pass-view").selectedOptions[0].textContent;
+  else if (state.flipHeld) badge = beforePath() ? (state.pinnedBefore ? "kept version" : "applied version") : "nothing applied yet";
+  $("badge").textContent = badge;
+  $("spots").classList.toggle("shown", inGame && (state.pieceState.frames.length > 1));
 }
 
-function shownImagePath() {
-  const mode = effectiveMode();
-  if (mode === "stylized") return state.previewPath;
-  if (mode === "before") return state.beforePath;
-  return state.passes ? state.passes[mode] : null;
+function stageSize() {
+  const shown = state.mode === "game" ? $("frame-img") : ((state.mode === "level") && state.level ? $("level-behind") : $("piece-img"));
+  return [shown.naturalWidth, shown.naturalHeight];
 }
 
-function showImage() {
-  const img = $("preview-img");
-  const path = shownImagePath();
-  if (!path) {
-    img.removeAttribute("src");
-  } else {
-    img.src = imageUrl(path);
-  }
-  const mode = effectiveMode();
-  $("preview-badge").textContent = mode === "stylized" ? "" : mode.toUpperCase();
+function placeStage() {
+  $("stage").style.transform = `translate(${state.view.x}px, ${state.view.y}px) scale(${state.zoom})`;
+  $("reference-stage").style.transform = `translate(${state.referenceView.x}px, ${state.referenceView.y}px) scale(${state.zoom})`;
 }
 
-function placeImage(img, offsets) {
-  if (!img.naturalWidth) return;
-  img.style.width = `${img.naturalWidth * state.zoom}px`;
-  img.style.height = `${img.naturalHeight * state.zoom}px`;
-  img.style.left = `${offsets.offsetX}px`;
-  img.style.top = `${offsets.offsetY}px`;
-}
-
-function visibleBox() {
-  const img = $("preview-img");
-  const viewport = $("preview-viewport");
-  if (!img.naturalWidth) return null;
-  const x0 = Math.max(0, Math.floor(-view.offsetX / state.zoom));
-  const y0 = Math.max(0, Math.floor(-view.offsetY / state.zoom));
-  const x1 = Math.min(img.naturalWidth, Math.ceil((viewport.clientWidth - view.offsetX) / state.zoom));
-  const y1 = Math.min(img.naturalHeight, Math.ceil((viewport.clientHeight - view.offsetY) / state.zoom));
-  if (x1 <= x0 || y1 <= y0) return null;
-  return [x0, y0, x1, y1];
-}
-
-function resetView() {
-  view.offsetX = 8;
-  view.offsetY = 8;
-  referenceView.offsetX = 8;
-  referenceView.offsetY = 8;
-  placeImage($("preview-img"), view);
-  placeImage($("reference-img"), referenceView);
-}
-
-function setZoom(zoom) {
-  // keep the pixel under the middle of the preview where it is
-  const viewport = $("preview-viewport");
-  const centreX = (viewport.clientWidth / 2 - view.offsetX) / state.zoom;
-  const centreY = (viewport.clientHeight / 2 - view.offsetY) / state.zoom;
-  state.zoom = zoom;
-  view.offsetX = Math.round(viewport.clientWidth / 2 - centreX * zoom);
-  view.offsetY = Math.round(viewport.clientHeight / 2 - centreY * zoom);
+function fitView() {
+  // the largest whole zoom that shows everything, centred
+  const viewport = $("viewport");
+  const [width, height] = stageSize();
+  if (!width) return;
+  const fits = ZOOMS.filter((z) => (width * z <= viewport.clientWidth) && (height * z <= viewport.clientHeight));
+  state.zoom = fits.length ? fits[fits.length - 1] : 1;
+  state.view.x = Math.round((viewport.clientWidth - width * state.zoom) / 2);
+  state.view.y = Math.round((viewport.clientHeight - height * state.zoom) / 2);
   renderZoomButtons();
-  placeImage($("preview-img"), view);
-  placeImage($("reference-img"), referenceView);
+  placeStage();
   refreshVisibleMetricsSoon();
 }
 
-function enablePanning(viewport, img, offsets, onMoved) {
+function setZoom(zoom) {
+  // keep the pixel under the middle of the view where it is
+  const viewport = $("viewport");
+  const centreX = (viewport.clientWidth / 2 - state.view.x) / state.zoom;
+  const centreY = (viewport.clientHeight / 2 - state.view.y) / state.zoom;
+  state.zoom = zoom;
+  state.view.x = Math.round(viewport.clientWidth / 2 - centreX * zoom);
+  state.view.y = Math.round(viewport.clientHeight / 2 - centreY * zoom);
+  renderZoomButtons();
+  placeStage();
+  refreshVisibleMetricsSoon();
+}
+
+function visiblePieceBox() {
+  const piece = $("piece-img");
+  if (!piece.naturalWidth) return null;
+  const viewport = $("viewport");
+  const offset = (state.mode === "level") && state.level ? state.level.offset : [0, 0];
+  const x0 = Math.max(0, Math.floor(-state.view.x / state.zoom) - offset[0]);
+  const y0 = Math.max(0, Math.floor(-state.view.y / state.zoom) - offset[1]);
+  const x1 = Math.min(piece.naturalWidth, Math.ceil((viewport.clientWidth - state.view.x) / state.zoom) - offset[0]);
+  const y1 = Math.min(piece.naturalHeight, Math.ceil((viewport.clientHeight - state.view.y) / state.zoom) - offset[1]);
+  return (x1 > x0) && (y1 > y0) ? [x0, y0, x1, y1] : null;
+}
+
+function enablePanning(viewport, offsets, onMoved) {
   let start = null;
   viewport.addEventListener("pointerdown", (event) => {
-    start = { x: event.clientX, y: event.clientY, offsetX: offsets.offsetX, offsetY: offsets.offsetY };
+    start = { x: event.clientX, y: event.clientY, viewX: offsets.x, viewY: offsets.y };
     viewport.setPointerCapture(event.pointerId);
     viewport.classList.add("dragging");
   });
   viewport.addEventListener("pointermove", (event) => {
     if (!start) return;
-    offsets.offsetX = start.offsetX + event.clientX - start.x;
-    offsets.offsetY = start.offsetY + event.clientY - start.y;
-    placeImage(img, offsets);
+    offsets.x = start.viewX + event.clientX - start.x;
+    offsets.y = start.viewY + event.clientY - start.y;
+    placeStage();
   });
   const stop = () => {
     if (!start) return;
@@ -719,150 +815,156 @@ function enablePanning(viewport, img, offsets, onMoved) {
 }
 
 function renderZoomButtons() {
-  const group = $("zoom");
-  group.innerHTML = "";
-  for (const zoom of ZOOMS) {
-    const button = document.createElement("button");
-    button.textContent = `${zoom}x`;
+  $("zoom").replaceChildren(...ZOOMS.map((zoom) => {
+    const button = Object.assign(document.createElement("button"), { textContent: `${zoom}x` });
     button.classList.toggle("active", zoom === state.zoom);
     button.addEventListener("click", () => setZoom(zoom));
-    group.appendChild(button);
+    return button;
+  }));
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  renderViewSwitch();
+  showView();
+  fitView();
+}
+
+function renderViewSwitch() {
+  const loose = Boolean(state.source && state.source.passes);
+  for (const button of $("view-switch").querySelectorAll("button")) {
+    button.classList.toggle("active", button.dataset.mode === state.mode);
+    button.disabled = loose && (button.dataset.mode !== "piece");
   }
 }
 
-function renderViewModeButtons() {
-  const group = $("view-mode");
-  group.innerHTML = "";
-  for (const mode of VIEW_MODES) {
-    const button = document.createElement("button");
-    button.textContent = mode;
-    button.classList.toggle("active", mode === state.viewMode);
-    button.disabled = mode === "before" && !state.beforePath;
+function renderSpots() {
+  $("spots").replaceChildren(...state.pieceState.frames.map((frame, index) => {
+    const button = Object.assign(document.createElement("button"), { textContent: `spot ${frame.spot.join(",")}` });
+    button.classList.toggle("active", index === state.spotIndex);
     button.addEventListener("click", () => {
-      state.viewMode = mode;
-      renderViewModeButtons();
-      showImage();
-      refreshVisibleMetricsSoon();
+      state.spotIndex = index;
+      renderSpots();
+      showView();
     });
-    group.appendChild(button);
-  }
+    return button;
+  }));
 }
 
-// ------------------------------------------------------------ actions and jobs
+function renderReferenceChoices() {
+  $("reference-select").replaceChildren(...state.references.map((ref) => new Option(ref.label, ref.index)));
+  showReference();
+}
+
+function showReference() {
+  const img = $("reference-img");
+  if (!state.asset || !state.references.length) {
+    img.removeAttribute("src");
+    return;
+  }
+  img.src = `/api/reference?asset=${encodeURIComponent(state.asset)}&index=${$("reference-select").value}`;
+}
+
+// ------------------------------------------------------------ apply, show in game, other jobs
+
+function renderGameState() {
+  const line = $("game-state");
+  const appliedAt = state.pieceState.applied_at;
+  const frame = state.pieceState.frames[0];
+  line.className = "";
+  if (!state.source || state.source.passes) {
+    line.textContent = state.source ? "Trying renders outside an art set: nothing to apply" : "";
+  } else if (isDirty()) {
+    line.textContent = "Changes not applied yet";
+    line.className = "dirty";
+  } else if (frame && appliedAt && (frame.time >= appliedAt)) {
+    line.textContent = `In game frame from ${clockTime(frame.time)}`;
+    line.className = "applied";
+  } else if (appliedAt) {
+    line.textContent = `Applied to the level at ${clockTime(appliedAt)}`;
+    line.className = "applied";
+  } else {
+    line.textContent = "Not applied to the level yet";
+  }
+}
 
 function updateButtons() {
-  const hasSource = Boolean(state.source);
-  const hasAsset = hasSource && !state.source.passes;
-  $("save").disabled = !hasAsset;
-  $("keep-before").disabled = !hasSource;
-  $("write-art").disabled = !hasSource;
-  for (const id of ["compare", "render", "integrate", "capture"]) $(id).disabled = !hasAsset;
-  $("revert-options").disabled = !hasSource;
-  $("defaults-options").disabled = !hasSource;
-  renderViewModeButtons();
+  const hasAsset = Boolean(state.source && !state.source.passes);
+  const busy = Boolean(state.runningJob);
+  $("apply").disabled = !hasAsset || busy;
+  $("show-in-game").disabled = !hasAsset || busy;
+  for (const id of ["render", "compare"]) $(id).disabled = !hasAsset || busy;
+  for (const id of ["keep-before", "write-art", "revert-options"]) $(id).disabled = !state.source;
 }
 
-async function saveToConfig() {
+async function startJob(kind, extra = {}) {
+  showProblem("");
   try {
-    const result = await post("save", {
-      source: state.source,
-      options: state.options,
-      palette: state.paletteEdited ? state.palette : null,
-      palette_scope: $("palette-scope").value,
-    });
-    state.savedOptions = structuredClone(state.options);
-    state.savedPalette = structuredClone(state.palette);
-    state.paletteEdited = false;
-    state.beforePath = result.before;
-    state.metrics.before = result.whole;
-    state.imageVersion += 1;
-    const piece = state.pieces.find((p) => p.name === state.piece);
-    if (piece) {
-      piece.options = structuredClone(state.options);
-      piece.palette = structuredClone(state.palette);
-    }
-    markChangedOptions();
-    updateButtons();
-    renderMetrics();
-    showStatus(`saved ${state.piece}: ${JSON.stringify(result.saved_options)}`);
-  } catch (error) {
-    showStatus(`save failed: ${error.message}`, true);
-  }
-}
-
-async function writeArt() {
-  try {
-    const result = await post("write", { source: state.source, options: state.options, palette: state.palette });
-    showStatus(`wrote ${result.written}`);
-  } catch (error) {
-    showStatus(`write failed: ${error.message}`, true);
-  }
-}
-
-async function startJob(kind) {
-  const body = { kind, source: state.source };
-  if (kind === "capture" && $("capture-all").checked) body.pieces = state.pieces.map((p) => p.name);
-  try {
-    await post("job", body);
-    showStatus(`${kind} queued`);
+    await post("job", { kind, source: state.source, ...extra });
     pollJobs();
   } catch (error) {
-    showStatus(`${kind}: ${error.message}`, true);
+    showProblem(`${kind}: ${error.message}`);
   }
 }
 
-function renderJob(job) {
-  const wrapper = document.createElement("div");
-  const line = document.createElement("div");
-  line.className = "job";
-  const stateText = document.createElement("span");
-  stateText.className = `state-${job.state}`;
-  stateText.textContent = job.state;
-  const title = document.createElement("span");
-  title.textContent = `${job.title} · ${job.elapsed} s${job.error ? " · " + job.error : ""}`;
-  line.append(stateText, title);
-  wrapper.appendChild(line);
-  if (job.log) {
-    const details = document.createElement("details");
-    details.className = "log";
-    const summary = document.createElement("summary");
-    summary.textContent = "log";
-    const pre = document.createElement("pre");
-    pre.textContent = job.log;
-    details.append(summary, pre);
-    wrapper.appendChild(details);
-  }
-  return wrapper;
+function applyToGame() {
+  startJob("apply", {
+    options: state.options,
+    palette: state.palette,
+    save_palette: state.paletteEdited,
+    palette_scope: $("palette-scope").value,
+  });
 }
 
-function showResultImages(paths) {
-  const gallery = $("gallery");
-  gallery.innerHTML = "";
-  state.imageVersion += 1;
-  for (const path of paths) {
-    const link = document.createElement("a");
-    link.href = imageUrl(path);
-    link.target = "_blank";
-    link.title = path;
-    const img = document.createElement("img");
-    img.src = imageUrl(path);
-    link.appendChild(img);
-    gallery.appendChild(link);
-  }
+function showProgress(job) {
+  $("progress").classList.toggle("running", Boolean(job));
+  if (!job) return;
+  const phase = job.phase || (job.state === "queued" ? "Waiting for the previous step…" : "Working…");
+  const expected = job.kind === "capture" ? " (takes 1-2 min)" : "";
+  $("progress-text").textContent = `${phase} ${job.elapsed} s${expected}`;
+  const share = job.kind === "capture" ? Math.min(1, job.elapsed / CAPTURE_EXPECTED_S) : 0.5;
+  $("progress-bar").style.width = `${Math.round(share * 100)}%`;
+}
+
+async function onApplied() {
+  state.appliedOptions = structuredClone(state.options);
+  state.appliedPalette = structuredClone(state.palette);
+  state.paletteEdited = false;
+  state.pinnedBefore = null;
+  const piece = state.pieces.find((p) => p.name === state.piece);
+  if (piece) Object.assign(piece, { options: structuredClone(state.options), palette: structuredClone(state.palette) });
+  markChangedOptions();
+  await refreshPieceState();
+  await loadLevel();
+}
+
+async function onCaptured() {
+  await refreshPieceState();
+  state.spotIndex = 0;
+  renderSpots();
+  setMode("game");
+}
+
+function showGallery(paths) {
+  $("gallery").replaceChildren(...paths.map((path) => {
+    const link = Object.assign(document.createElement("a"), { href: imageUrl(path), target: "_blank", title: path });
+    link.appendChild(Object.assign(document.createElement("img"), { src: imageUrl(path) }));
+    return link;
+  }));
+  $("more").open = true;
 }
 
 async function onJobFinished(job) {
   if (job.state !== "done") {
-    showStatus(`${job.title} failed: ${job.error}`, true);
+    showProblem(`${job.title} failed: ${job.error}\n${(job.log || "").slice(-800)}`);
     return;
   }
-  showStatus(`${job.title} done in ${job.elapsed} s`);
-  if (job.result && job.result.images) showResultImages(job.result.images);
-  if (job.kind === "render" && state.asset) {
-    const current = state.piece;
-    await openAsset(state.asset);
-    selectPiece(current);
-  }
+  state.imageVersion += 1;
+  if (job.kind === "apply") await onApplied();
+  else if (job.kind === "capture") await onCaptured();
+  else if (job.kind === "render") await openAsset(state.asset);
+  else if (job.result && job.result.images) showGallery(job.result.images);
+  showFooter(`${job.title} done in ${job.elapsed} s`);
 }
 
 let pollTimer = null;
@@ -871,95 +973,128 @@ async function pollJobs() {
   clearTimeout(pollTimer);
   try {
     const { jobs } = await get("jobs");
-    const container = $("jobs");
-    container.innerHTML = "";
-    for (const job of [...jobs].reverse()) container.appendChild(renderJob(job));
+    const isFinished = (job) => (job.state === "done") || (job.state === "failed");
     if (state.seenJobs === null) {
       // jobs that finished before this page was opened are history, not news to act on
-      state.seenJobs = new Set(jobs.filter((job) => job.state === "done" || job.state === "failed").map((job) => job.id));
+      state.seenJobs = new Set(jobs.filter(isFinished).map((job) => job.id));
     }
-    for (const job of jobs) {
-      const finished = job.state === "done" || job.state === "failed";
-      if (finished && !state.seenJobs.has(job.id)) {
-        state.seenJobs.add(job.id);
-        await onJobFinished(job);
-      }
+    state.runningJob = jobs.find((job) => !isFinished(job)) || null;
+    showProgress(state.runningJob);
+    updateButtons();
+    for (const job of jobs.filter((j) => isFinished(j) && !state.seenJobs.has(j.id))) {
+      state.seenJobs.add(job.id);
+      await onJobFinished(job);
     }
-    if (jobs.some((job) => job.state === "queued" || job.state === "running")) {
-      pollTimer = setTimeout(pollJobs, JOB_POLL_MS);
-    }
+    renderGameState();
+    if (state.runningJob) pollTimer = setTimeout(pollJobs, JOB_POLL_MS);
   } catch (error) {
-    showStatus(`job status: ${error.message}`, true);
+    showProblem(`job status: ${error.message}`);
   }
+}
+
+async function writeArt() {
+  try {
+    const result = await post("write", { source: state.source, options: state.options, palette: state.palette });
+    showFooter(`wrote ${result.written}`);
+    await refreshPieceState();
+  } catch (error) {
+    showProblem(`write failed: ${error.message}`);
+  }
+}
+
+async function keepAsBefore() {
+  const result = await post("keep_before", { source: state.source });
+  state.pinnedBefore = result.before;
+  state.imageVersion += 1;
+  showFooter("B now flips to the kept version");
 }
 
 // ------------------------------------------------------------ wiring
 
 function wireControls() {
   $("open-asset").addEventListener("click", () => openAsset($("asset-path").value.trim()));
-  $("asset-path").addEventListener("keydown", (event) => {
-    if (event.key === "Enter") openAsset($("asset-path").value.trim());
-  });
   $("recent").addEventListener("change", () => openAsset($("recent").value));
-  $("toggle-passes").addEventListener("click", () => $("passes-form").classList.toggle("open"));
   $("open-passes").addEventListener("click", openPasses);
-  $("reference-select").addEventListener("change", showReference);
+  $("apply").addEventListener("click", applyToGame);
+  $("show-in-game").addEventListener("click", () => startJob("capture"));
+  $("render").addEventListener("click", () => startJob("render"));
+  $("compare").addEventListener("click", () => startJob("compare"));
+  $("keep-before").addEventListener("click", keepAsBefore);
+  $("write-art").addEventListener("click", writeArt);
   $("revert-options").addEventListener("click", () => {
-    state.options = structuredClone(state.savedOptions);
+    state.options = structuredClone(state.appliedOptions);
     renderOptions();
-    stylizeNow();
-  });
-  $("defaults-options").addEventListener("click", () => {
-    state.options = Object.fromEntries(state.specs.map((spec) => [spec.name, structuredClone(spec.default)]));
-    renderOptions();
-    stylizeNow();
+    onSettingsChanged();
   });
   $("read-palette").addEventListener("click", readPalette);
   $("revert-palette").addEventListener("click", () => {
-    state.palette = structuredClone(state.savedPalette);
+    state.palette = structuredClone(state.appliedPalette);
     state.paletteEdited = false;
     renderPalette();
-    stylizeNow();
+    onSettingsChanged();
   });
-  $("save").addEventListener("click", saveToConfig);
-  $("keep-before").addEventListener("click", async () => {
-    await keepBeforeImage();
-    showStatus("kept the current result as before");
-  });
-  $("write-art").addEventListener("click", writeArt);
-  for (const kind of ["render", "integrate", "capture", "compare"]) {
-    $(kind).addEventListener("click", () => startJob(kind));
+  for (const button of $("view-switch").querySelectorAll("button")) {
+    button.addEventListener("click", () => setMode(button.dataset.mode));
   }
-  $("backdrop").addEventListener("change", () => {
-    const black = $("backdrop").value === "black";
-    $("preview-viewport").classList.toggle("black", black);
-    $("reference-viewport").classList.toggle("black", black);
+  $("pass-view").addEventListener("change", () => {
+    state.passView = $("pass-view").value;
+    showView();
   });
-  $("fit").addEventListener("click", () => {
-    resetView();
+  $("show-reference").addEventListener("click", () => {
+    const shown = $("views").classList.toggle("with-reference");
+    $("show-reference").classList.toggle("active", shown);
     refreshVisibleMetricsSoon();
   });
-  $("preview-img").addEventListener("load", () => {
-    placeImage($("preview-img"), view);
-    refreshVisibleMetricsSoon();
+  $("dismiss-how").addEventListener("click", () => {
+    $("how").classList.add("dismissed");
+    rememberHowDismissed();
   });
-  $("reference-img").addEventListener("load", () => placeImage($("reference-img"), referenceView));
-  enablePanning($("preview-viewport"), $("preview-img"), view, refreshVisibleMetricsSoon);
-  enablePanning($("reference-viewport"), $("reference-img"), referenceView, () => {});
+  $("reference-select").addEventListener("change", showReference);
+  $("fit").addEventListener("click", fitView);
+  $("piece-img").addEventListener("load", () => {
+    if ($("piece-img").getAttribute("src") === imageUrl(state.previewPath || "")) markShown();
+  });
+  $("frame-img").addEventListener("load", () => {
+    if (state.mode === "game") fitView();
+  });
+  $("level-behind").addEventListener("load", () => {
+    if (state.mode === "level") fitView();
+  });
+  enablePanning($("viewport"), state.view, refreshVisibleMetricsSoon);
+  enablePanning($("reference-viewport"), state.referenceView, () => {});
   window.addEventListener("resize", refreshVisibleMetricsSoon);
   document.addEventListener("keydown", (event) => {
-    if (event.key.toLowerCase() !== "b" || event.target.tagName === "INPUT" || state.flipHeld) return;
+    if ((event.key.toLowerCase() !== "b") || (event.target.tagName === "INPUT") || state.flipHeld) return;
     state.flipHeld = true;
-    showImage();
+    showView();
   });
   document.addEventListener("keyup", (event) => {
-    if (event.key.toLowerCase() !== "b" || !state.flipHeld) return;
+    if ((event.key.toLowerCase() !== "b") || !state.flipHeld) return;
     state.flipHeld = false;
-    showImage();
+    showView();
   });
 }
 
+const HOW_DISMISSED_KEY = "how-this-works-dismissed";
+
+function rememberHowDismissed() {
+  try {
+    localStorage.setItem(HOW_DISMISSED_KEY, "yes");
+  } catch (error) {
+    // private windows refuse storage; the strip then simply shows again next time
+  }
+}
+
+function wasHowDismissed() {
+  try {
+    return localStorage.getItem(HOW_DISMISSED_KEY) === "yes";
+  } catch (error) {
+    return false;
+  }
+}
+
 async function start() {
+  $("how").classList.toggle("dismissed", wasHowDismissed());
   wireControls();
   renderZoomButtons();
   renderMetrics();
@@ -969,9 +1104,10 @@ async function start() {
     state.specs = info.specs;
     await refreshRecent();
     if (info.initial_asset) await openAsset(info.initial_asset);
+    else $("more").open = true;
     pollJobs();
   } catch (error) {
-    showStatus(`could not reach the server: ${error.message}`, true);
+    showProblem(`could not reach the server: ${error.message}`);
   }
 }
 

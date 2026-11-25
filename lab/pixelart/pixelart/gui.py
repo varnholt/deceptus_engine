@@ -2,9 +2,10 @@
 
 usage: python -m pixelart.gui [asset.json] [--port N] [--no-browser]
 
-Serves the page on localhost and opens the browser. Stylizing runs in the request's worker thread
-(a newer request supersedes a waiting one); render, integrate, capture and compare run one after
-another in a background job thread whose state the page polls.
+Serves the page on localhost and opens the browser. The page shows the piece in the level, as the
+game will draw it. Stylizing runs in the request's worker thread (a newer request supersedes a
+waiting one); apply (save, write <piece>_px.png, integrate), capture, render and compare run one
+after another in a background job thread whose state the page polls.
 """
 import argparse
 import itertools
@@ -29,6 +30,8 @@ HOST = "127.0.0.1"
 # the page only ever shows images; anything else stays off the wire
 IMAGE_TYPES = {".png": "image/png", ".bmp": "image/bmp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif"}
 JOB_HISTORY = 20
+# what the page calls each job, in the words of its buttons
+JOB_TITLES = {"apply": "Apply to game", "capture": "Show in game", "render": "Rebuild from the 3D model", "compare": "Comparison sheet"}
 
 
 def recent_assets():
@@ -88,11 +91,11 @@ class JobQueue:
         threading.Thread(target=self._work, daemon=True).start()
 
     def submit(self, kind, title, step):
-        """step() returns (result dict, log text) or raises."""
+        """step(report) returns (result dict, log text) or raises; report(text) names the phase it is in."""
         with self.lock:
             job_id = next(self.ids)
             self.jobs[job_id] = {"id": job_id, "kind": kind, "title": title, "state": "queued", "log": "",
-                                 "result": None, "error": None, "started": None, "finished": None, "step": step}
+                                 "result": None, "error": None, "started": None, "finished": None, "phase": "", "step": step}
             self._forget_old_jobs()
             self.wake.notify()
         return job_id
@@ -123,7 +126,7 @@ class JobQueue:
         while True:
             job = self._next_queued()
             try:
-                result, log = job["step"]()
+                result, log = job["step"](lambda phase: job.update(phase=phase))
                 job.update(state="done", result=result, log=log)
             except workbench.StepFailed as failure:
                 job.update(state="failed", error=str(failure), log=failure.log)
@@ -152,6 +155,7 @@ class Api:
         remember_asset(cfg["_path"])
         return {
             "asset": cfg["_path"],
+            "title": cfg.get("title") or f"{Path(cfg['_path']).stem.capitalize()} art",
             "pieces": [workbench.piece_summary(cfg, piece) for piece in cfg["pieces"]],
             "references": [{"index": i, "label": ref.get("label", Path(ref["path"]).name)}
                            for i, ref in enumerate(cfg.get("references", []))],
@@ -174,11 +178,22 @@ class Api:
         before = workbench.keep_as_before(target, target.preview_path("preview"))
         return {"before": str(before), "whole": workbench.image_metrics(before)}
 
-    def save(self, body):
-        source = body["source"]
-        saved = workbench.save_piece_settings(source["asset"], source["piece"], body["options"],
-                                              body.get("palette"), body.get("palette_scope", "piece"))
-        return {"saved_options": saved, **self.keep_before(body)}
+    def level(self, body):
+        """The level around the piece, rasterized by Tiled (a few seconds the first time after the map changed)."""
+        target, cfg = resolve_source(body["source"])
+        view = workbench.level_view(cfg, target.label)
+        return {"behind": str(view.behind), "front": str(view.front), "offset": view.piece_offset}
+
+    def piece_state(self, body):
+        """When the piece was last applied to the level, and its newest frames from the game."""
+        target, cfg = resolve_source(body["source"])
+        frames = workbench.latest_game_frames(cfg, target.label) if cfg else []
+        applied = target.written_art.stat().st_mtime if target.written_art.is_file() else None
+        return {
+            "applied_art": str(target.written_art) if applied else None,
+            "applied_at": applied,
+            "frames": [{"spot": spot, "path": str(path), "time": path.stat().st_mtime} for spot, path in frames],
+        }
 
     def write(self, body):
         target, _ = resolve_source(body["source"])
@@ -193,23 +208,29 @@ class Api:
         if cfg is None:
             raise ValueError(f"{kind} needs an asset config, not loose passes")
         piece = target.label
-        if kind == "render":
-            step = lambda: ({"passes": [str(target.beauty), str(target.ids), str(target.normals)]},
-                            workbench.render(cfg, piece))
-        elif kind == "integrate":
-            step = lambda: ({}, workbench.integrate(cfg, piece))
+        if kind == "apply":
+            step = lambda report: ({}, workbench.apply_to_game(cfg, piece, body["options"], body["palette"],
+                                                               body.get("save_palette", False), body.get("palette_scope", "piece"), report))
+        elif kind == "render":
+            step = lambda report: self._render_result(cfg, piece, report)
         elif kind == "capture":
             pieces = body.get("pieces") or [piece]
             label = time.strftime("%Y%m%d-%H%M%S")
-            step = lambda: self._capture_result(cfg, pieces, label)
+            step = lambda report: self._capture_result(cfg, pieces, label, report)
         elif kind == "compare":
-            step = lambda: self._compare_result(cfg, piece, target)
+            step = lambda report: self._compare_result(cfg, piece, target)
         else:
             raise ValueError(f"unknown job '{kind}'")
-        return {"id": self.jobs.submit(kind, f"{kind} {piece}", step)}
+        return {"id": self.jobs.submit(kind, f"{JOB_TITLES[kind]} ({piece})", step)}
 
     @staticmethod
-    def _capture_result(cfg, pieces, label):
+    def _render_result(cfg, piece, report):
+        report("Rendering in Blender…")
+        return {}, workbench.render(cfg, piece)
+
+    @staticmethod
+    def _capture_result(cfg, pieces, label, report):
+        report("Starting the game and visiting the piece's spots…")
         frames, log = workbench.capture(cfg, pieces, label)
         return {"images": frames}, log
 
@@ -225,7 +246,7 @@ class Api:
         return {"jobs": self.jobs.snapshot()}
 
 
-POST_ROUTES = {"open_asset", "open_passes", "stylize", "metrics", "keep_before", "save", "write", "read_palette", "job"}
+POST_ROUTES = {"open_asset", "open_passes", "stylize", "metrics", "keep_before", "write", "read_palette", "job", "level", "piece_state"}
 
 
 class Handler(BaseHTTPRequestHandler):
