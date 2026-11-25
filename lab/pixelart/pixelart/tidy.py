@@ -12,6 +12,8 @@ artist cleans a sprite by hand, and reports what it changed.
 - lone pixels: a pixel whose colour none of its eight neighbours share, while most of them
   agree on another colour, takes that colour
 """
+import warnings
+
 import numpy as np
 from scipy import ndimage
 
@@ -42,6 +44,12 @@ def _packed(rgb):
 
 def _unpack(v):
     return np.stack([(v >> 16) & 255, (v >> 8) & 255, v & 255], -1).astype(np.uint8)
+
+
+def _window(sl, shape):
+    """The bounding box sl grown by one pixel on every side, clipped to the image."""
+    return (slice(max(sl[0].start - 1, 0), min(sl[0].stop + 1, shape[0])),
+            slice(max(sl[1].start - 1, 0), min(sl[1].stop + 1, shape[1])))
 
 
 def _surrounding_colour(packed, mask, region):
@@ -81,17 +89,17 @@ def remove_dark_islands(img):
     packed = _packed(img[..., :3])
     fixed = 0
     for label, sl in enumerate(ndimage.find_objects(islands), start=1):
-        region = np.zeros_like(dark)
-        region[sl] = islands[sl] == label
-        if region.sum() > MAX_ISLAND_PX:
+        if (islands[sl] == label).sum() > MAX_ISLAND_PX:
             continue
+        win = _window(sl, dark.shape)
+        region = islands[win] == label
         ring = ndimage.binary_dilation(region, EIGHT) & ~region
-        # an island at the silhouette is part of the outline
-        if not opaque[ring].all():
+        # an island at the silhouette (or the image border) is part of the outline
+        if not opaque[win][ring].all() or region.shape != (sl[0].stop - sl[0].start + 2, sl[1].stop - sl[1].start + 2):
             continue
-        colour = _surrounding_colour(packed, opaque & ~dark, region)
+        colour = _surrounding_colour(packed[win], opaque[win] & ~dark[win], region)
         if colour is not None:
-            img[..., :3][region] = _unpack(np.array([colour]))[0]
+            img[win][..., :3][region] = _unpack(np.array([colour]))[0]
             fixed += 1
     return fixed
 
@@ -104,20 +112,21 @@ def remove_slivers(img):
     for axis_structure in (np.array([[0, 1, 0], [0, 1, 0], [0, 1, 0]], bool), np.array([[0, 0, 0], [1, 1, 1], [0, 0, 0]], bool)):
         runs, _ = ndimage.label(dark, axis_structure)
         for label, sl in enumerate(ndimage.find_objects(runs), start=1):
-            region = np.zeros_like(dark)
-            region[sl] = runs[sl] == label
             length = max(sl[0].stop - sl[0].start, sl[1].stop - sl[1].start)
-            # a sliver is alone: no dark pixel touches it from the side
-            touching = ndimage.binary_dilation(region, EIGHT) & ~region & dark
-            if length > SLIVER_MAX_LENGTH or touching.any() or region.sum() == 1:
+            if length > SLIVER_MAX_LENGTH or (runs[sl] == label).sum() == 1:
                 continue
+            win = _window(sl, dark.shape)
+            region = runs[win] == label
+            if region.shape != (sl[0].stop - sl[0].start + 2, sl[1].stop - sl[1].start + 2):
+                continue   # at the image border
             ring = ndimage.binary_dilation(region, EIGHT) & ~region
-            if not opaque[ring].all():
+            # a sliver is alone: no dark pixel touches it from the side
+            if (ring & dark[win]).any() or not opaque[win][ring].all():
                 continue
-            colour = _surrounding_colour(packed, opaque & ~dark, region)
+            colour = _surrounding_colour(packed[win], opaque[win] & ~dark[win], region)
             if colour is not None:
-                img[..., :3][region] = _unpack(np.array([colour]))[0]
-                dark &= ~region
+                img[win][..., :3][region] = _unpack(np.array([colour]))[0]
+                dark[win][region] = False
                 fixed += 1
     return fixed
 
@@ -128,7 +137,8 @@ def remove_bright_specks(img):
     h, w = lum.shape
     p = np.pad(np.where(opaque, lum, np.nan), 1, constant_values=np.nan)
     neighbours = np.stack([p[1 + dy:1 + dy + h, 1 + dx:1 + dx + w] for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dy or dx], -1)
-    with np.errstate(all="ignore"):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)   # pixels with no opaque neighbour have no median
         surround = np.nanmedian(neighbours, -1)
     bright = opaque & (lum - surround > SPECK_CONTRAST)
     # part of a highlight line: a bright neighbour on both sides along a row or a column
