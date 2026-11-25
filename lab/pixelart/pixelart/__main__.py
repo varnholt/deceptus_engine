@@ -4,6 +4,7 @@ usage: python -m pixelart <asset.json> <piece[,piece...]|all> [--steps render,st
 
   render     builds the piece in headless Blender and writes beauty, ids and normals passes
   stylize    turns the passes into pixel art in the target style (palette, edge and joint rules)
+  inscribe   carves the epitaphs the render recorded into that art, as drawn glyphs
   compare    side-by-side sheet with the reference art and the style numbers
   integrate  writes the piece into the Tiled map as its own tileset and layer
   capture    starts the game, visits the pieces' capture spots and saves the frames
@@ -19,12 +20,12 @@ import sys
 import time
 from pathlib import Path
 
-from . import compare, palette, stylize, tiled
+from . import compare, inscribe, palette, stylize, tiled
 from .metrics import metrics
 
 KIT = Path(__file__).resolve().parent.parent / "blender_kit"
 BLENDER = os.environ.get("BLENDER", "C:/Program Files/Blender Foundation/Blender 5.0/blender.exe")
-STEPS = ["render", "stylize", "compare", "integrate", "capture"]
+STEPS = ["render", "stylize", "inscribe", "compare", "integrate", "capture"]
 
 
 def _resolve(base, path):
@@ -82,6 +83,15 @@ def stylize_piece(cfg, piece):
                      palette=piece_palette(cfg, piece), **opts)
     print(f"{piece}: tidied {tidied}")
     print(f"{piece}: {metrics(str(w / f'{piece}_px.png'))}")
+
+
+def inscribe_piece(cfg, piece):
+    """Carve the piece's epitaphs, if its render recorded any."""
+    w = cfg["_work"]
+    areas = w / f"{piece}_inscriptions.json"
+    if areas.exists():
+        carved = inscribe.inscribe(str(w / f"{piece}_px.png"), str(w / f"{piece}_normals.png"), str(areas))
+        print(f"{piece}: carved {carved} lettering pixels")
 
 
 def compare_piece(cfg, piece, art=None, out=None):
@@ -167,6 +177,8 @@ def main(argv=None):
             render(cfg, piece)
         if "stylize" in steps:
             stylize_piece(cfg, piece)
+        if "inscribe" in steps:
+            inscribe_piece(cfg, piece)
         if "compare" in steps:
             compare_piece(cfg, piece)
         if "integrate" in steps:

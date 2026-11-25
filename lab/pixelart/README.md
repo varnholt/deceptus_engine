@@ -15,6 +15,7 @@ Steps, in order (pick any with `--steps`):
 |---|---|---|
 | render | builds the piece in headless Blender (GPU if there is one), renders three passes | `<piece>_beauty.png`, `_ids.png`, `_normals.png` |
 | stylize | redraws the beauty pass in the target style (see below) | `<piece>_px.png` |
+| inscribe | carves the epitaphs the render recorded into the art, as drawn glyphs (see below) | `<piece>_px.png` |
 | compare | the piece next to the reference art, at 4x, with style numbers | `compare_<piece>.png` |
 | integrate | writes the piece into the Tiled map as its own tileset and layer, with its normal map | map + `tilesets/` in the engine checkout |
 | capture | starts the game, loads the level, teleports to the piece's spots, saves a frame per spot | `capture/<label>/spot_x_y.png` |
@@ -83,6 +84,14 @@ level coordinate onto the scene; 1 Blender unit is one 24 px tile. The kit gives
 
 Every stone carries a `block_rand` attribute; the ids pass turns it into one flat colour per stone, which is
 how the stylizer knows where one stone ends and the next begins.
+
+**Inscribe (`pixelart/inscribe.py`).** Modelled grooves blur into lines at one pixel per level pixel, so
+monuments don't model their lettering: `graves.lettering` records where it goes (the top line's centre on the
+face and the face's right and up directions, moved with the monument's turn and lean) and the render writes
+those as image coordinates to `<piece>_inscriptions.json`. The inscribe step then draws small glyphs grouped
+into words, the name line widest and more letters worn away lower down, each a darker cut with a lighter lip
+on its lower right. It only carves pixels with the face's own normal (no side faces, moss or leaves) and only
+uses colours the piece already has.
 
 **Stylize (`pixelart/stylize.py`).** The render is used as information only. Each stone gets one flat tone from
 the palette, at most one step lighter or darker for broad patches; its top row is lit two steps above the

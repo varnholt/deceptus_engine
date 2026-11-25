@@ -26,6 +26,21 @@ from test_level_progression import Game, level_name  # noqa: E402
 
 PROFILE = os.environ.get("SAVE_PROFILE", "deceptus-dev")
 STARTUP_TIMEOUT_S = 90
+SHUTDOWN_TIMEOUT_S = 10
+
+
+def close_game(game):
+    """End the game whatever state it is in: ask it to stop, then kill it if it is still there."""
+    process = game._process
+    if process is None:
+        return
+    if process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(SHUTDOWN_TIMEOUT_S)
+        except Exception:
+            process.kill()
+            process.wait()
 
 
 def recorded_frames(root):
@@ -52,8 +67,8 @@ def capture(out_dir, level, spots):
     save.write_text(json.dumps(slots, indent=4))
 
     game = Game()
-    game.start()
     try:
+        game.start()
         # the game only reads keys once its main loop runs, which the fps counter in the title shows
         deadline = time.monotonic() + STARTUP_TIMEOUT_S
         while time.monotonic() < deadline and "fps" not in win32gui.GetWindowText(game._handle):
@@ -78,7 +93,7 @@ def capture(out_dir, level, spots):
         print(game.tail(60))
         raise
     finally:
-        game.stop()
+        close_game(game)
         if backup.exists():
             shutil.move(str(backup), str(save))
         for f in recorded_frames(root):

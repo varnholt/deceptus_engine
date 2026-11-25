@@ -151,17 +151,16 @@ def groove(b, x0, x1, z, y, w=0.9):
     b.box(x0, x1, z - w * PX / 2, z + w * PX / 2, y - 0.012, y + 0.02, material_index=1)
 
 
+INSCRIPTIONS = []   # lettering areas of the monuments built so far, in world space once placed
+
+
 def lettering(b, rng, cx, half, z_top, lines, y, line_gap=3.2):
-    """Engraved lines broken into word-length grooves, centred like an epitaph."""
-    z = z_top
-    for i in range(lines):
-        width = half * rng.uniform(0.55, 1.0) * (1.0 if i else 0.75)
-        x = cx - width
-        while x < cx + width - 1.5 * PX:
-            word = min(rng.uniform(2.5, 6.5) * PX, cx + width - x)
-            groove(b, x, x + word, z, y)
-            x += word + rng.uniform(1.2, 2.0) * PX
-        z -= line_gap * PX
+    """Records where the epitaph goes instead of modelling it: the lettering is carved into the
+    finished pixel art by pixelart.inscribe. Stores the top line's centre on the face and the
+    face's right and up directions, which place() then moves along with the monument."""
+    INSCRIPTIONS.append(dict(centre=Vector((cx, y, z_top)), right=Vector((cx + PX, y, z_top)),
+                             up=Vector((cx, y, z_top + PX)), half_px=half / PX, lines=lines,
+                             line_pitch_px=line_gap, seed=rng.randrange(1 << 16)))
 
 
 def crack(b, rng, x, z, length, y, down=True):
@@ -421,12 +420,14 @@ def pillar_urn(b, cx_px, h_px, seed=0, broken=False):
 
 
 def finish_piece(b, pivot_x_px, turn=22.0, tip=7.0, lean=0.0):
-    """Turns a monument to show its side, tips it to show its top, leans it, all about its foot."""
+    """Turns a monument to show its side, tips it to show its top, leans it, all about its foot;
+    returns the transform it applied."""
     px_ = X(pivot_x_px)
     to = Matrix.Translation((px_, 0, GROUND))
     back = Matrix.Translation((-px_, 0, -GROUND))
     m = to @ Matrix.Rotation(math.radians(lean), 4, "Y") @ Matrix.Rotation(math.radians(-tip), 4, "X") @ Matrix.Rotation(math.radians(turn), 4, "Z") @ back
     bmesh.ops.transform(b.bm, matrix=m, verts=list(b.bm.verts))
+    return m
 
 
 GROW = 1.4   # monuments are modelled at dstar's sizes / GROW, then grown about their foot
@@ -437,11 +438,15 @@ def place(name, mat, fn, x_px, *args, turn=22.0, tip=7.0, lean=0.0, seed=0, **kw
     SEAM = PX / GROW
     globals()["SEAM"] = SEAM
     b = Builder(name, mat, seed or (zlib.crc32(name.encode()) & 0xFFFF))
+    first_inscription = len(INSCRIPTIONS)
     fn(b, x_px, *args, seed=seed or (zlib.crc32(name.encode()) & 0xFFFF), **kw)
     px_ = X(x_px)
     grow = Matrix.Translation((px_, 0, GROUND)) @ Matrix.Diagonal((GROW, GROW, GROW, 1)) @ Matrix.Translation((-px_, 0, -GROUND))
     bmesh.ops.transform(b.bm, matrix=grow, verts=list(b.bm.verts))
-    finish_piece(b, x_px, turn=turn, tip=tip, lean=lean)
+    moved = finish_piece(b, x_px, turn=turn, tip=tip, lean=lean) @ grow
+    for area in INSCRIPTIONS[first_inscription:]:
+        for key in ("centre", "right", "up"):
+            area[key] = moved @ area[key]
     return b.finish(bevel=PX * 0.9)
 
 
@@ -465,6 +470,7 @@ def build_layout(layout, cam, ground_py, bush_skip, seed):
     SEAM = PX
     globals()["GROUND"], globals()["SEAM"] = GROUND, SEAM
     clear_scene()
+    INSCRIPTIONS.clear()
     scn = bpy.context.scene
     stone, dark, iron = materials()
     mats = {"stone": stone, "dark": dark}

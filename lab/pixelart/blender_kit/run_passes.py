@@ -3,7 +3,8 @@
 Headless:  blender -b --python run_passes.py -- <asset.json> <piece> <out_dir>
 Live (e.g. from an MCP session):  exec this file with KIT_DIR in its globals, then run(asset_json, piece, out_dir)
 
-Writes <out_dir>/<piece>_beauty.png, _ids.png and _normals.png.
+Writes <out_dir>/<piece>_beauty.png, _ids.png and _normals.png, and _inscriptions.json when the
+piece has lettering areas (see graves.lettering).
 """
 import json
 import os
@@ -56,6 +57,31 @@ def build(asset_json, piece):
     return ns
 
 
+def image_point(scene, world_point):
+    """Pixel position (x right, y down) of a world point in the rendered image."""
+    from bpy_extras.object_utils import world_to_camera_view
+    ndc = world_to_camera_view(scene, scene.camera, world_point)
+    return [ndc.x * scene.render.resolution_x, (1.0 - ndc.y) * scene.render.resolution_y]
+
+
+def write_inscriptions(ns, path):
+    """The lettering areas as image coordinates: the top line's centre and one level pixel
+    along the face to the right and up, so the carving can follow the face's turn and lean."""
+    areas = ns.get("INSCRIPTIONS") or []
+    if not areas:
+        return
+    scene = bpy.context.scene
+    out = []
+    for area in areas:
+        centre = image_point(scene, area["centre"])
+        right, up = image_point(scene, area["right"]), image_point(scene, area["up"])
+        out.append(dict(centre=centre, right=[right[0] - centre[0], right[1] - centre[1]],
+                        up=[up[0] - centre[0], up[1] - centre[1]], half_px=area["half_px"],
+                        lines=area["lines"], line_pitch_px=area["line_pitch_px"], seed=area["seed"]))
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(out, f, indent=1)
+
+
 def run(asset_json, piece, out_dir):
     ns = build(asset_json, piece)
     device = use_gpu()
@@ -64,6 +90,7 @@ def run(asset_json, piece, out_dir):
     ns["render"](base + "_beauty.png")
     ns["render_ids"](base + "_ids.png")
     ns["render_normals"](base + "_normals.png")
+    write_inscriptions(ns, base + "_inscriptions.json")
     print(f"pixelart: rendered {piece} on {device} into {out_dir}")
 
 
