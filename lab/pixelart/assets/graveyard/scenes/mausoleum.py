@@ -241,7 +241,7 @@ def build_scene(seed=7):
     # ruined side walls: courses broken off along a falling profile, loose stones near the edge
     def left_profile(x):
         t = (x - X(5312)) / (BLOCK_X0 - X(5312))
-        return Z(1420) + t * (Z(1372) - Z(1420)) + 0.25 * math.sin(x * 2.3)
+        return Z(1420) + t * (Z(1372) - Z(1420)) + 0.4 * math.sin(x * 2.3) + 0.3 * math.sin(x * 5.3 + 2.0)
 
     def right_profile(x):
         t = max(0.0, (x - BLOCK_X1) / (X(5904) - BLOCK_X1))
@@ -405,6 +405,23 @@ def mausoleum_wear(seed=77):
         if y is None or y > 0.2:
             continue
         crack(b, rng, X(x), Z(py), rng.uniform(5, 18) * PX, y - 0.004, down=rng.random() < 0.7)
+    # rain stains: dark streaks running down the wall from under the cornice, the imposts and the
+    # keystone, wide where the water drips off and thinning out below
+    stains = Builder("stains", material("stain", (0.020, 0.024, 0.030), rough=0.95, tint_var=0.02), seed + 1)
+    sources = [(rng.uniform(5400, 5670), 1300) for _ in range(9)]
+    sources += [(rng.uniform(5418, 5460), 1384), (rng.uniform(5610, 5652), 1384), (5535, 1312)]
+    for sx, sy in sources:
+        y = front(sx, sy + 3)
+        if y is None:
+            continue
+        length = rng.uniform(10, 34)
+        width = rng.uniform(1.0, 2.6)
+        steps = 3
+        for k in range(steps):
+            w = width * (1.0 - 0.3 * k)
+            b0 = sy + length * k / steps
+            stains.box(X(sx) - w / 2 * PX, X(sx) + w / 2 * PX, Z(b0 + length / steps), Z(b0), y - 0.006, y + 0.02)
+    stains.finish(bevel=0)
     # fallen chips at the foot of the walls
     for _ in range(10):
         x = X(rng.uniform(5320, 5890))

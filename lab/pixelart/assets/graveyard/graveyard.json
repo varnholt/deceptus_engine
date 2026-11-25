@@ -102,7 +102,7 @@
       "build": "build_mausoleum",
       "stylize": {
         "shift": -2,
-        "k_scale": 1.4,
+        "k_scale": 2.2,
         "micro": 2,
         "moss_clumps": true
       },
