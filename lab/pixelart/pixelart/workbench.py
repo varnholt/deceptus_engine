@@ -43,6 +43,10 @@ OPTION_RANGES = {
     "bevel": dict(kind="int", min=0, max=5, step=1, help="depth in px of the lit top/left band and shaded bottom/right falloff (pillowed stones)"),
     "speck": dict(kind="float", min=0.0, max=1.0, step=0.05, help="fine surface speckle, in ramp steps"),
     "value_tones": dict(kind="bool", help="stone tones follow the render's brightness instead of fixed tone shares"),
+    "gain": dict(kind="float", min=0.3, max=1.5, step=0.02, help="grade: brightness of the finished piece, to match the level"),
+    "contrast": dict(kind="float", min=0.5, max=1.5, step=0.02, help="grade: spread of the tones around the piece's mid tone"),
+    "saturation": dict(kind="float", min=0.0, max=1.5, step=0.05, help="grade: colourfulness"),
+    "night": dict(kind="float", min=0.0, max=0.8, step=0.02, help="grade: pull towards the night blue of the scenery"),
     "form": dict(kind="float", min=0.0, max=2.0, step=0.1, help="shading across curved surfaces from the normals, in ramp steps (round columns)"),
     "base_shares": dict(kind="shares", min=0.0, max=1.0, step=0.05, help="share of stone bodies per base tone (levels 2..5)"),
 }

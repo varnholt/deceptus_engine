@@ -109,7 +109,9 @@
         "bevel": 3,
         "speck": 0.0,
         "form": 1.2,
-        "value_tones": true
+        "value_tones": true,
+        "gain": 0.72,
+        "night": 0.25
       },
       "tiled": {
         "name": "graveyard-mausoleum",
@@ -175,7 +177,9 @@
         "bevel": 2,
         "speck": 0.0,
         "form": 1.2,
-        "value_tones": true
+        "value_tones": true,
+        "gain": 0.7,
+        "night": 0.3
       },
       "tiled": {
         "name": "graveyard-band-upper",
@@ -236,7 +240,9 @@
         "bevel": 2,
         "speck": 0.0,
         "form": 1.2,
-        "value_tones": true
+        "value_tones": true,
+        "gain": 0.78,
+        "night": 0.2
       },
       "tiled": {
         "name": "graveyard-band-lower",

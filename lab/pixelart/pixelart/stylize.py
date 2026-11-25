@@ -13,6 +13,7 @@ import sys
 import numpy as np
 from PIL import Image
 
+from .grade import grade
 from .tidy import tidy
 
 # dstar's owl shrine, stone ramp from outline to highlight
@@ -138,7 +139,7 @@ def ramp_colour(ramp, position, sub_steps):
     return np.round(ramp[lo] * (1 - t) + ramp[hi] * t).astype(np.int32)
 
 
-def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False):
+def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0):
     shares = base_shares or BASE_SHARES
     pal = palette or {}
     ramp = np.array(pal.get("stone", RAMP))
@@ -337,6 +338,7 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
                 v = vals[cnt.argmax()]
                 out[y, x, :3] = ((v >> 16) & 255, (v >> 8) & 255, v & 255)
     report = tidy(out)
+    grade(out, gain=gain, contrast=contrast, saturation=saturation, night=night)
     Image.fromarray(out).save(out_p)
     return report
 

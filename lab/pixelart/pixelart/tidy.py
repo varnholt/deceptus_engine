@@ -6,6 +6,9 @@ artist cleans a sprite by hand, and reports what it changed.
 - dark islands: tiny groups of very dark pixels inside a surface that are not part of a joint or
   crack network read as dirt on the screen; they take the surrounding colour
 - slivers: dark runs one pixel wide and only a few pixels long (half-rendered seams, stains)
+- bright specks: a pixel far brighter than its surroundings that is not part of a highlight
+  line (the ends of lit edges, where they run into a joint); dstar stops his highlight lines a
+  pixel short of the corner
 - lone pixels: a pixel whose colour none of its eight neighbours share, while most of them
   agree on another colour, takes that colour
 """
@@ -16,6 +19,7 @@ MAX_HOLE_PX = 4           # gaps between meshes are a few pixels; anything large
 MAX_ISLAND_PX = 3         # dark groups up to this size are specks; joints and cracks are longer
 DARK_LUMINANCE = 32       # joint and outline colours are below this
 SLIVER_MAX_LENGTH = 4     # shorter one-pixel dark runs are slivers, longer ones are drawn lines
+SPECK_CONTRAST = 40       # a speck is at least this much brighter than the median of its neighbours
 
 EIGHT = np.ones((3, 3), dtype=bool)
 
@@ -118,6 +122,32 @@ def remove_slivers(img):
     return fixed
 
 
+def remove_bright_specks(img):
+    opaque = img[..., 3] > 0
+    lum = _luminance(img[..., :3].astype(float))
+    h, w = lum.shape
+    p = np.pad(np.where(opaque, lum, np.nan), 1, constant_values=np.nan)
+    neighbours = np.stack([p[1 + dy:1 + dy + h, 1 + dx:1 + dx + w] for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dy or dx], -1)
+    with np.errstate(all="ignore"):
+        surround = np.nanmedian(neighbours, -1)
+    bright = opaque & (lum - surround > SPECK_CONTRAST)
+    # part of a highlight line: a bright neighbour on both sides along a row or a column
+    bp = np.pad(bright, 1)
+    in_line = (bp[1:-1, :-2] & bp[1:-1, 2:]) | (bp[:-2, 1:-1] & bp[2:, 1:-1])
+    specks = bright & ~in_line
+    packed = _packed(img[..., :3])
+    pp = np.pad(np.where(opaque & ~bright, packed, -1), 1, constant_values=-1)
+    fixed = 0
+    for y, x in zip(*np.nonzero(specks)):
+        around = pp[y:y + 3, x:x + 3].ravel()
+        around = around[around >= 0]
+        if len(around):
+            vals, counts = np.unique(around, return_counts=True)
+            img[y, x, :3] = _unpack(np.array([vals[counts.argmax()]]))[0]
+            fixed += 1
+    return fixed
+
+
 def replace_lone_pixels(img):
     opaque = img[..., 3] > 0
     packed = _packed(img[..., :3])
@@ -141,5 +171,6 @@ def tidy(img):
         "holes": fill_holes(img),
         "dark islands": remove_dark_islands(img),
         "slivers": remove_slivers(img),
+        "bright specks": remove_bright_specks(img),
         "lone pixels": replace_lone_pixels(img),
     }

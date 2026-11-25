@@ -15,6 +15,7 @@ BLOCK_X0, BLOCK_X1 = X(5395), X(5675)
 BLOCK_TOP = Z(1296)
 PLINTH_FRONT = -1.42      # the altar plinth's front, the plane fitted to the level tiles
 OBLIQUE_SLOPE = 0.16      # rise per unit of depth: ledge tops show 2-5 px, as in dstar's scenery
+BOUNDARY_X = 5856         # the level's right end: invisible collision wall from the ground up
 FRIEZE_BOTTOM = Z(1312)   # frieze band between the wall courses and the cornice
 CORNICE_TOP = Z(1284)
 PEDIMENT_TOP = Z(1240)
@@ -119,9 +120,13 @@ def build_scene(seed=7):
     wall = Builder("portal_wall", stone, seed)
     r_cut = HW + RING
 
+    fallen_rng = random.Random(seed + 31)
+
     def keep(xm, zm, xa, xb, za, zb):
         if block_clear_of_arch(xa, xb, za, zb, r_cut + 0.5 * PX):
-            return True
+            # a few stones have fallen out of the wall, never next to the doorway or the corners
+            clear_of_edges = (abs(xm - CX) > HW + RING + 20 * PX) and (BLOCK_X0 + 26 * PX < xm < BLOCK_X1 - 26 * PX)
+            return not (clear_of_edges and zm > Z(1530) and fallen_rng.random() < 0.05)
         # each half on its own, so a stone over the doorway's centre line is pushed towards its own side
         for lo, hi, side in ((xa, min(xb, CX), -1), (max(xa, CX), xb, 1)):
             if hi - lo < PX:
@@ -134,6 +139,12 @@ def build_scene(seed=7):
                 wall.prism(seam_pts, -0.15, 0.45, material_index=1)
         return False
     ashlar(wall, BLOCK_X0, BLOCK_X1, Z(1564), FRIEZE_BOTTOM, keep=keep)
+    # the cavity behind the facing stones, seen where one has fallen out
+    cavity = Builder("wall_cavity", seam_material(), seed + 32)
+    # (either side of the doorway only: across it the slab would hide the passage)
+    cavity.box(BLOCK_X0 + 2 * PX, CX - HW - RING - 4 * PX, Z(1564), FRIEZE_BOTTOM, 0.36, 0.5)
+    cavity.box(CX + HW + RING + 4 * PX, BLOCK_X1 - 2 * PX, Z(1564), FRIEZE_BOTTOM, 0.36, 0.5)
+    cavity.finish(bevel=0)
     wall.finish()
 
     # quoins: long and short blocks alternating up both corners, standing a little proud of the wall
@@ -217,7 +228,10 @@ def build_scene(seed=7):
         x += w
     top.box(BLOCK_X0 - 3 * PX, BLOCK_X1 + 3 * PX, BLOCK_TOP, BLOCK_TOP + 3 * PX, -0.49, 0.4, seam=PX)
     top.box(BLOCK_X0 - 6 * PX, BLOCK_X1 + 6 * PX, BLOCK_TOP + 3 * PX, BLOCK_TOP + 6 * PX, -0.56, 0.42, seam=PX)
-    top.box(BLOCK_X0 - 9 * PX, BLOCK_X1 + 9 * PX, BLOCK_TOP + 6 * PX, CORNICE_TOP, -0.63, 0.45, seam=PX)
+    top.box(BLOCK_X0 - 9 * PX, BLOCK_X1 - 14 * PX, BLOCK_TOP + 6 * PX, CORNICE_TOP, -0.63, 0.45, seam=PX)
+    # the corona's right end has broken away in a jagged edge
+    top.prism([(BLOCK_X1 - 14 * PX, BLOCK_TOP + 6 * PX), (BLOCK_X1 - 4 * PX, BLOCK_TOP + 6 * PX), (BLOCK_X1 - 7 * PX, BLOCK_TOP + 9 * PX),
+               (BLOCK_X1 - 10 * PX, BLOCK_TOP + 8 * PX), (BLOCK_X1 - 12 * PX, CORNICE_TOP), (BLOCK_X1 - 14 * PX, CORNICE_TOP)][::-1], -0.63, 0.45)
     mid = (BLOCK_X0 + BLOCK_X1) / 2
     top.prism([(BLOCK_X0 - 2 * PX, CORNICE_TOP), (BLOCK_X1 + 2 * PX, CORNICE_TOP), (mid, PEDIMENT_TOP)], -0.45, 0.4)
     half_base = (BLOCK_X1 - BLOCK_X0) / 2
@@ -250,7 +264,7 @@ def build_scene(seed=7):
     window = Builder("oculus", seam_material(), seed + 9)
     window.prism([(mid + 6.7 * PX * math.cos(2 * math.pi * t / 28), oc_z + 6.7 * PX * math.sin(2 * math.pi * t / 28)) for t in range(28)][::-1], -0.5, -0.3)
     window.finish(bevel=0)
-    for ax, base_z in ((BLOCK_X0 - 6 * PX, CORNICE_TOP), (BLOCK_X1 + 6 * PX, CORNICE_TOP)):
+    for ax, base_z in ((BLOCK_X0 - 6 * PX, CORNICE_TOP),):   # the right one broke off with the cornice end
         top.box(ax - 4 * PX, ax + 4 * PX, base_z, base_z + 4 * PX, -0.8, 0.3)
         top.prism([(ax - 3 * PX, base_z + 4 * PX), (ax + 3 * PX, base_z + 4 * PX), (ax, base_z + 10 * PX)], -0.75, 0.25)
     top.finish()
@@ -261,10 +275,10 @@ def build_scene(seed=7):
         return Z(1420) + t * (Z(1372) - Z(1420)) + 0.4 * math.sin(x * 2.3) + 0.3 * math.sin(x * 5.3 + 2.0)
 
     def right_profile(x):
-        t = max(0.0, (x - BLOCK_X1) / (X(5904) - BLOCK_X1))
+        t = max(0.0, (x - BLOCK_X1) / (X(BOUNDARY_X) - BLOCK_X1))
         return Z(1352) + (t ** 0.8) * (Z(1512) - Z(1352)) + 0.45 * math.sin(x * 1.7) + 0.3 * math.sin(x * 4.1 + 1.0)
 
-    for name, x0, x1, prof, sd in (("ruin_left", X(5312), BLOCK_X0, left_profile, 11), ("ruin_right", BLOCK_X1, X(5904), right_profile, 12)):
+    for name, x0, x1, prof, sd in (("ruin_left", X(5312), BLOCK_X0, left_profile, 11), ("ruin_right", BLOCK_X1, X(BOUNDARY_X), right_profile, 12)):
         ruin = Builder(name, stone_dark, sd)
         lr = random.Random(sd)
 
@@ -281,6 +295,14 @@ def build_scene(seed=7):
             return True
         ashlar(ruin, x0, x1, Z(1564), Z(1340), keep=keep_ruin, depth=(-0.15, 0.45), tilt=0.035, jitter=PX * 2)
         ruin.finish()
+
+    # the graveyard ends here: a tall boundary wall standing on the level's collision edge, running
+    # up out of view, with a buttress at its foot
+    boundary = Builder("boundary_wall", stone_dark, seed + 40)
+    ashlar(boundary, X(BOUNDARY_X), X(5960), Z(1566), Z(1190), course=16 * PX, min_w=26, max_w=44, depth=(-0.75, 0.3), jitter=PX * 0.4)
+    boundary.box(X(BOUNDARY_X) - 6 * PX, X(BOUNDARY_X) + 10 * PX, Z(1566), Z(1500), -1.0, 0.3, seam=PX)
+    boundary.prism([(X(BOUNDARY_X) - 6 * PX, Z(1500)), (X(BOUNDARY_X) + 10 * PX, Z(1500)), (X(BOUNDARY_X) + 10 * PX, Z(1484))], -1.0, 0.3)
+    boundary.finish()
 
     rng = random.Random(seed + 5)
     rub = Builder("rubble", stone_dark, seed + 6)
@@ -366,10 +388,10 @@ def grow_moss_and_ivy(scn, seed):
     ledges = [(5386, 5684, 1284, -0.63),
               (*impost_left, 1380, -1.1), (*impost_right, 1380, -1.1)]
     ledges += [(px - 10, px + 10, 1532, -1.05) for px in COLS + [mirror_px(p) for p in COLS]]
-    ledges += ruin_ledges(scn, 5312, 5395) + ruin_ledges(scn, 5675, 5904)
+    ledges += ruin_ledges(scn, 5312, 5395) + ruin_ledges(scn, 5675, BOUNDARY_X)
     moss_cushions("moss", ledges, seed + 200, cover=0.8)
     for k, (x, top_py, width, length) in enumerate(((5400, 1288, 40, 110), (5674, 1288, 26, 60), (5640, 1384, 30, 80),
-                                                    (5350, 1430, 44, 70), (5730, 1390, 50, 100))):
+                                                    (5350, 1430, 44, 70), (5730, 1390, 50, 100), (5900, 1200, 50, 150))):
         ivy_curtain(scn, f"ivy_{k}", seed + 300 + k, x, top_py, width, length)
 
 
@@ -384,13 +406,15 @@ def mausoleum_wear(seed=77):
     def front(x_px, py):
         return surface_front(scn, deps, X(x_px), Z(py))
 
-    # cracks: wall stones, voussoirs, ruins, plinth
-    for _ in range(46):
-        x, py = rng.uniform(5300, 5900), rng.uniform(1318, 1545)   # below the frieze: cracks there read as letters
+    # cracks: jagged dark lines down the wall, the voussoirs, the ruins and the plinth
+    for _ in range(34):
+        x, py = rng.uniform(5310, 5890), rng.uniform(1318, 1530)   # below the frieze: cracks there read as letters
         y = front(x, py)
         if y is None or y > 0.2:
             continue
-        crack(b, rng, X(x), Z(py), rng.uniform(5, 18) * PX, y - 0.004, down=rng.random() < 0.7)
+        crack_line(b, rng, X(x), Z(py), rng.uniform(6, 20), y)
+    # the broken-off cornice end lies at the foot of the wall
+    b.box(X(5662), X(5680), Z(1562), Z(1552), -1.2, -0.6, tilt=0.35)
     # fallen chips at the foot of the walls
     for _ in range(10):
         x = X(rng.uniform(5320, 5890))

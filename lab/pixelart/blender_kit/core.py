@@ -475,6 +475,19 @@ def ivy_curtain(scn, name, seed, x_px, top_py, width_px, length_px):
     return leaves.finish(bevel=0)
 
 
+def crack_line(b, rng, x, z, length_px, y, branch_chance=0.3, depth=0):
+    """A crack as dstar draws one: a jagged line one pixel wide, wandering down a face in single
+    pixel steps, now and then splitting off a shorter branch. Joint dark (seam material), so it
+    survives the conversion as a drawn line."""
+    dx_bias = rng.choice((-1, 1)) * rng.uniform(0.2, 0.6)
+    for _ in range(int(length_px)):
+        b.box(x - 0.5 * PX, x + 0.5 * PX, z - 0.5 * PX, z + 0.5 * PX, y - 0.012, y + 0.02, material_index=1)
+        x += (dx_bias + rng.uniform(-0.9, 0.9)) * PX
+        z -= rng.uniform(0.6, 1.0) * PX
+        if depth < 2 and rng.random() < branch_chance / max(length_px / 4, 1):
+            crack_line(b, rng, x, z, length_px * rng.uniform(0.3, 0.5), y, branch_chance * 0.5, depth + 1)
+
+
 def oblique(scn, slope, y_ref):
     """Looks a little down onto the scene without moving the camera: everything rises by `slope`
     per unit of depth behind the plane y_ref, so ledges, sills and capitals show their tops the

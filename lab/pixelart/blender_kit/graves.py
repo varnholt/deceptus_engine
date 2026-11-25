@@ -13,19 +13,20 @@ SEAM = PX             # joint width; place() narrows it so grown monuments keep 
 
 
 def fence(b, x0_px, x1_px, h_px=22, y=-0.55):
-    """Wrought iron: posts at both ends, bars with spear tips, two rails."""
+    """Wrought iron: posts at both ends, bars with spear tips, two rails. Bars and rails are two
+    pixels thick: one-pixel iron converts into dashed lines."""
     x = x0_px
     while x <= x1_px:
         cx = X(x)
-        b.box(cx - 0.6 * PX, cx + 0.6 * PX, GROUND, GROUND + h_px * PX, y - 0.02, y + 0.02)
+        b.box(cx - 1.0 * PX, cx + 1.0 * PX, GROUND, GROUND + h_px * PX, y - 0.03, y + 0.03)
         tip = GROUND + h_px * PX
-        b.prism([(cx - 1.5 * PX, tip), (cx + 1.5 * PX, tip), (cx, tip + 3.5 * PX)][::-1], y - 0.02, y + 0.02)
-        x += 4
-    for zr in (4, h_px - 4):
-        b.box(X(x0_px) - PX, X(x1_px) + PX, GROUND + (zr - 0.6) * PX, GROUND + (zr + 0.6) * PX, y - 0.03, y + 0.03)
-    for px in (x0_px - 2, x1_px + 2):
-        b.box(X(px) - 1.5 * PX, X(px) + 1.5 * PX, GROUND, GROUND + (h_px + 4) * PX, y - 0.05, y + 0.05)
-        b.box(X(px) - 2.5 * PX, X(px) + 2.5 * PX, GROUND + (h_px + 4) * PX, GROUND + (h_px + 6) * PX, y - 0.05, y + 0.05)
+        b.prism([(cx - 2.0 * PX, tip), (cx + 2.0 * PX, tip), (cx, tip + 4.0 * PX)][::-1], y - 0.03, y + 0.03)
+        x += 5
+    for zr in (4, h_px - 5):
+        b.box(X(x0_px) - PX, X(x1_px) + PX, GROUND + (zr - 1.0) * PX, GROUND + (zr + 1.0) * PX, y - 0.04, y + 0.04)
+    for px in (x0_px - 3, x1_px + 3):
+        b.box(X(px) - 2.0 * PX, X(px) + 2.0 * PX, GROUND, GROUND + (h_px + 4) * PX, y - 0.06, y + 0.06)
+        b.box(X(px) - 3.0 * PX, X(px) + 3.0 * PX, GROUND + (h_px + 4) * PX, GROUND + (h_px + 6) * PX, y - 0.06, y + 0.06)
 
 
 def bush(b, rng, cx_px, w_px, h_px, depth=(0.35, 1.3)):
