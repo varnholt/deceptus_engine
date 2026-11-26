@@ -219,11 +219,14 @@ def cusped_head(p, cu, half, spring, v0, v1):
             p.slab(seg, v0, v1)
 
 
-def traceried_window(p, cu, sill, half, spring, lights=2):
+def traceried_window(p, cu, sill, half, spring, lights=2, blind=False):
     """A deep pointed window: two stepped reveal orders, a hood mould with label stops, a sloped
     sill, mullions, cusped lights and a quatrefoil roundel in the head over dark glass."""
     reveal = 6.0
-    p.glass(opening(cu, half, spring, sill), reveal, reveal + 1.0)
+    if blind:
+        p.slab(opening(cu, half, spring, sill), reveal - 1.5, reveal + 1.0)   # blind tracery: stone behind, no glass
+    else:
+        p.glass(opening(cu, half, spring, sill), reveal, reveal + 1.0)
     for k, (grow, v_face) in enumerate(((0.0, 2.0), (3.0, -0.4))):
         for wedge in arch_wedges(cu, half, 2 * half + grow, 2 * half + grow + 3.0, spring, 12, 1):
             p.slab(wedge, v_face, reveal)
@@ -377,6 +380,7 @@ def dressed_wall(p, outline, holes, v_face, thickness, course=9.0, min_w=20.0, m
 
 # ---------------------------------------------------------------- weathered stone
 GRIME_DISTANCE = 0.12       # ambient-occlusion reach for grime in crevices and under ledges
+CORNER_DISTANCE = 0.9       # a broader, softer occlusion: contact shadow where buttresses meet the walls
 EDGE_WEAR = 0.35            # how much lighter the worn arrises are
 STREAKS = 0.0               # rain streaks turn into stripe noise at game size
 
@@ -421,8 +425,17 @@ def weather_material(m):
     streak.inputs["To Max"].default_value = 1.0 - STREAKS
     nt.links.new(streak_noise.outputs["Fac"], streak.inputs["Value"])
 
+    corner_ao = nt.nodes.new("ShaderNodeAmbientOcclusion")
+    corner_ao.inputs["Distance"].default_value = CORNER_DISTANCE
+    corner = nt.nodes.new("ShaderNodeMapRange")
+    corner.inputs["To Min"].default_value = 0.55
+    corner.inputs["To Max"].default_value = 1.0
+    nt.links.new(corner_ao.outputs["AO"], corner.inputs["Value"])
+    both = nt.nodes.new("ShaderNodeMath"); both.operation = "MULTIPLY"
+    nt.links.new(grime.outputs[0], both.inputs[0])
+    nt.links.new(corner.outputs[0], both.inputs[1])
     factor = nt.nodes.new("ShaderNodeMath"); factor.operation = "MULTIPLY"
-    nt.links.new(grime.outputs[0], factor.inputs[0])
+    nt.links.new(both.outputs[0], factor.inputs[0])
     nt.links.new(wear.outputs[0], factor.inputs[1])
     factor2 = nt.nodes.new("ShaderNodeMath"); factor2.operation = "MULTIPLY"
     nt.links.new(factor.outputs[0], factor2.inputs[0])
@@ -566,14 +579,17 @@ def build_side(stone, trim, seed):
 
 
 def coursed_pier(p, u0, u1, w0, w1, v0, v1, course=9.0):
-    """A buttress stage in the wall's courses: one stone per course, a joint under each, a dark
-    core behind so the joints read."""
+    """A buttress stage in the wall's courses, in running bond: two stones a course with the
+    vertical joint alternating side, a dark core behind so the joints read."""
     p.block(u0 + 0.6, u1 - 0.6, w0, w1, v0 + 0.6, v1, material_index=1)
-    w = w0
+    w, k = w0, 0
     while w < w1 - 0.5:
         h = min(course, w1 - w)
-        p.block(u0, u1, w + JOINT, w + h, v0, v1)
+        split = u0 + (u1 - u0) * (0.38 if k % 2 == 0 else 0.64)
+        p.block(u0, split, w + JOINT, w + h, v0, v1)
+        p.block(split + JOINT, u1, w + JOINT, w + h, v0, v1)
         w += h
+        k += 1
 
 
 def quatrefoil_band(p, u0, u1, w0, height, v_face):
@@ -591,6 +607,25 @@ def quatrefoil_band(p, u0, u1, w0, height, v_face):
             p.slab(seg, v_face + 0.3, v_face + 1.2)
 
 
+class BlindFace:
+    """Front-plane calls shifted onto a buttress face standing forward of the wall at v = face."""
+
+    def __init__(self, part, face):
+        self.p, self.face, self.rng = part, face, part.rng
+
+    def slab(self, outline, v0, v1, material_index=0):
+        self.p.slab(outline, self.face + v0, self.face + v1, material_index)
+
+    def block(self, u0, u1, w0, w1, v0, v1, material_index=0):
+        self.p.block(u0, u1, w0, w1, self.face + v0, self.face + v1, material_index)
+
+    def cone(self, u, v, w0, w1, r0, r1=0.0, segments=8):
+        self.p.cone(u, self.face + v, w0, w1, r0, r1, segments)
+
+    def glass(self, outline, v0, v1):
+        GLASS[0].slab(outline, self.face + v0, self.face + v1)
+
+
 def build_buttresses(stone, seed):
     """Square buttresses at the front corners and along the side, stepped and pinnacled."""
     but = Part("buttresses", stone, seed)
@@ -605,8 +640,11 @@ def build_buttresses(stone, seed):
                 but.block(bu - s, bu + s * 1.4, w0, w1, bv - s, bv + s)
                 but.side_slab([(bv - s - 1.2, w1), (bv + s + 1.2, w1), (bv + s + 1.2, w1 + 3), (bv - s - 1.2, w1 + 3)][::-1], bu - s, bu + s * 1.4 + 1.2)
         if faces_front:
-            blind_niche(but, bu, EAVES_H * 0.46, EAVES_H * 0.70, 10.0, bv - BUTTRESS * 0.86 / 2 * 1.4)
-            blind_niche(but, bu, 24, EAVES_H * 0.36, 12.0, bv - BUTTRESS / 2 * 1.4)
+            for w_sill, w_top, scale in ((24, EAVES_H * 0.36, 1.0), (EAVES_H * 0.46, EAVES_H * 0.70, 0.86)):
+                half = BUTTRESS * scale * 0.3
+                spring = w_top - 2 * half * 0.87
+                face = BlindFace(but, bv - BUTTRESS * scale / 2 * 1.4 - 6.5)   # its reveal lies on the buttress face, the tracery stands before it
+                traceried_window(face, bu, w_sill, half, spring, blind=True)
         pinnacle(but, bu, bv, EAVES_H + 7, BUTTRESS * 0.7, 250, broken=(bu > 0))
     return [but.finish(bevel=0.35)]
 
@@ -647,19 +685,21 @@ def build_roof(roof_mat, seed):
     return [roof.finish(bevel=0.3), deck.finish(bevel=0)]
 
 
-ANNEX = dict(v0=SIDE_L * 0.5, v1=SIDE_L, width=130, eaves=250, rise=110)
+ANNEX = dict(v0=14, v1=SIDE_L, width=160, eaves=270, rise=120)
+SHRINE_TOP_MODEL = 84   # just above the owl's head (y 1464), in model units over the foot
+SHRINE_SHIFT_PX = -216   # dstar's shrine moved 9 tiles left into the side room (its tiles, images and objects with it)
 
 
 def build_annex(stone, trim, roof_mat, seed):
     """The side room: a lower block on the chapel's left, set back, its gable end facing the
     front like the chapel's, with a traceried window under a gablet, a pinnacled corner and its
     own tiled roof. dstar's owl shrine stands before it."""
-    u0, u1 = -ANNEX["width"], 0
+    u0, u1 = -ANNEX["width"] - 30, -30   # centred on the shrine (x 5316), clear of the chapel's left buttress
     v0, v1, H, rise = ANNEX["v0"], ANNEX["v1"], ANNEX["eaves"], ANNEX["rise"]
     cu = (u0 + u1) / 2
-    win_half, win_sill, win_spring = 24, 70, 180
+    win_half, win_sill, win_spring = 58, 0, 100   # the shrine's arch: open to the ground, wide enough for its slab
     wall = Part("annex_wall", stone, seed)
-    front = [(u0, 0), (u1, 0), (u1, H), (cu, H + rise), (u0, H)]
+    front = [(u0, -30), (u1, -30), (u1, H), (cu, H + rise), (u0, H)]   # down into the ground: never a gap under it
 
     class AnnexFront:
         """Front-plane calls placed on the annex's front face at v = v0."""
@@ -678,12 +718,28 @@ def build_annex(stone, trim, roof_mat, seed):
         def glass(self, outline, a, b):
             GLASS[0].slab(outline, v0 + a, v0 + b)
     face = AnnexFront(wall)
-    dressed_wall(face, front, [lambda u, w: inside_opening(u, w, cu, win_half + 1, win_spring, win_sill)], 0.0, 6.0)
+    dressed_wall(face, front, [lambda u, w: inside_opening(u, w, cu, win_half + 1, win_spring, -40)], 0.0, 6.0)
+    # the niche behind the shrine: a shadowed stone back wall and side walls
+    face.block(u0 + 6, u1 - 6, -30, win_spring + 2 * win_half, 34, 40)
+    face.block(cu - win_half - 2, cu - win_half + 2, -30, win_spring, 6, 34)
+    face.block(cu + win_half - 2, cu + win_half + 2, -30, win_spring, 6, 34)
     objects = [wall.finish(bevel=0.3)]
     orn = Part("annex_ornament", trim, seed + 1)
     face = AnnexFront(orn)
-    traceried_window(face, cu, win_sill, win_half, win_spring)
-    gablet(face, cu, win_half + 11, win_spring + 26 - 6, win_spring + 26 + 28, -4.0, 2.0)
+    # two moulded orders and a hood, a crocketed gablet over it
+    for k, (ra, rb, front_v) in enumerate(((2 * win_half, 2 * win_half + 6, -1.0), (2 * win_half + 6, 2 * win_half + 12, -3.0))):
+        for wedge in arch_wedges(cu, win_half, ra, rb, win_spring, 14, 2):
+            face.slab(wedge, front_v, 8)
+        for sgn in (-1, 1):
+            ua, ub = sorted((cu + sgn * (ra - win_half), cu + sgn * (rb - win_half)))
+            coursed_pier(face, ua, ub, -30, win_spring, front_v, 8)
+    for wedge in arch_wedges(cu, win_half, 2 * win_half + 12, 2 * win_half + 15, win_spring + 1, 16, 3):
+        face.slab(wedge, -6.0, 4)
+    apex = win_spring + math.sqrt((2 * win_half + 15) ** 2 - win_half ** 2)
+    gablet(face, cu, win_half + 20, win_spring + 10, apex + 40, -8.0, -2.0)
+    # the side room's traceried window lives on as the arch's head: lights, mullion and roundel
+    # above the owl, the shrine standing in the open niche below its sill
+    traceried_window(face, cu, SHRINE_TOP_MODEL, win_half - 4, win_spring)
     orn.block(u0 - 2, u1 + 2, H - 4, H, v0 - 3, v1 + 2)
     quatrefoil_band(face, u0 + 10, u1 - 4, H - 16, 12, -1.5)
     for sgn in (-1, 1):
@@ -761,6 +817,8 @@ def grow_moss_and_ivy(scn, seed):
     a, b = to_level(FRONT_W / 2 - 70, -3, 228), to_level(FRONT_W / 2 + 70, -3, 228)
     ledges.append((a[0], b[0], a[1], a[2]))
     moss_cushions("chapel_moss", ledges, seed + 200, cover=0.7)
+    x_join, py_join, _ = to_level(FRONT_W + BUTTRESS * 0.6, 0, EAVES_H * 0.55)
+    ivy_curtain(scn, "chapel_ivy_join", seed + 390, x_join, py_join, 30, 220)
     for k, (u, w, width, length) in enumerate(((FRONT_W + 8, EAVES_H * 0.9, 26, 170), (-ANNEX["width"] + 6, ANNEX["eaves"], 30, 120),
                                                (-6, EAVES_H * 0.6, 18, 90))):
         x, py, _ = to_level(u, 0, w)
@@ -799,14 +857,16 @@ def build_chapel_scene(seed=17):
     # dstar's shrine stands before the portal on its plinth, facing the player
     plinth = Builder("altar_plinth", stone_variants("trim", (0.058, 0.068, 0.074), moss=0.0, tint_var=0.03), seed + 30)
     pf = PLINTH_FRONT
-    plinth.box(X(5468), X(5596), Z(1562), Z(1552), pf, pf + 1.2, seam=PX)
+    plinth.box(X(5468 + SHRINE_SHIFT_PX), X(5596 + SHRINE_SHIFT_PX), Z(1562), Z(1552), pf, pf + 1.2, seam=PX)
     for xa, xb in ((5474, 5486), (5578, 5590)):
-        plinth.box(X(xa), X(xb), Z(1552), Z(1534), pf + 0.06, pf + 1.2, seam=PX)
-    plinth.box(X(5486), X(5578), Z(1552), Z(1534), pf + 0.2, pf + 1.2, seam=PX)
-    plinth.box(X(5468), X(5596), Z(1534), Z(1514), pf, pf + 1.2, seam=PX)
+        plinth.box(X(xa + SHRINE_SHIFT_PX), X(xb + SHRINE_SHIFT_PX), Z(1552), Z(1534), pf + 0.06, pf + 1.2, seam=PX)
+    plinth.box(X(5486 + SHRINE_SHIFT_PX), X(5578 + SHRINE_SHIFT_PX), Z(1552), Z(1534), pf + 0.2, pf + 1.2, seam=PX)
+    plinth.box(X(5468 + SHRINE_SHIFT_PX), X(5596 + SHRINE_SHIFT_PX), Z(1534), Z(1514), pf, pf + 1.2, seam=PX)
     plinth.finish()
-    boundary = Builder("boundary_wall", stone_variants("stone_dark", (0.032, 0.040, 0.046), moss=0.12), seed + 40)
-    ashlar(boundary, X(BOUNDARY_X), X(5960), Z(1566), Z(1100), course=16 * PX, min_w=26, max_w=44, depth=(1.5, 2.6), jitter=PX * 0.4)
+    boundary = Builder("boundary_wall", weathered_stone("boundary_stone", (0.050, 0.058, 0.062), moss=0.16, tint_var=0.09), seed + 40)
+    course = 9 * SCALE * PX
+    ashlar(boundary, X(BOUNDARY_X - 8), X(5960), Z(1570), Z(1100), course=course, min_w=9 * SCALE * 2.2, max_w=9 * SCALE * 4.0,
+           depth=(-0.3, 0.6), jitter=PX * 0.3, seam=PX)
     boundary.finish()
     setup_stage(scn, CHAPEL_CAM)
     # a weak cold fill from the right, so walls turned away from the moon keep their stonework
