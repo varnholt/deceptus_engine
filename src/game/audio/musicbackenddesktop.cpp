@@ -128,9 +128,11 @@ private:
       return opened;
    }
 
-   std::array<sf::Music, 2> _music;
+   // Members are destroyed in reverse order: pending loads finish first (they write both arrays),
+   // then the streams stop (~Music() seeks back to 0, reading its bytes), then the bytes go.
    std::array<std::string, 2>
       _music_data;  //!< compressed track bytes backing each stream; must outlive it (openFromMemory references, not copies)
+   std::array<sf::Music, 2> _music;
    std::array<std::future<bool>, 2> _load_future;
    std::array<bool, 2> _load_succeeded{false, false};                       //!< result of the last completed load per slot
    std::array<LoadState, 2> _load_state{LoadState::Idle, LoadState::Idle};  //!< per-slot background load progress
