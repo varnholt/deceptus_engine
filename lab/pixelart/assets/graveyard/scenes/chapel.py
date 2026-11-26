@@ -28,7 +28,7 @@ ORDERS = 4
 SCALE = 1.2            # model units to level pixels: the portal is six player heights; walls and gable rise past the camera room's top
 TURN_DEG = 0.0         # the front faces the player, like the rest of the scenery
 TIP_DEG = 8.0
-PORTAL_SCREEN_X = 5616  # the portal's centre on screen; the left buttress (x 5436) holds dstar's owl shrine in its niche
+PORTAL_SCREEN_X = 5628  # the portal's centre on screen; dstar's owl shrine stands on the ground before the door
 FOOT_SCREEN_Y = 1574    # the plinth's lowest point, just under the grass line
 JOINT = 1.0             # the joint between two stones: at least one game pixel, so the courses read
 CHAPEL_CAM = dict(x0=5208, x1=5952, y0=1056, y1=1560)   # 31 x 21 tiles
@@ -393,7 +393,9 @@ def dressed_wall(p, outline, holes, v_face, thickness, course=9.0, min_w=20.0, m
 
 # ---------------------------------------------------------------- weathered stone
 GRIME_DISTANCE = 0.12       # ambient-occlusion reach for grime in crevices and under ledges
-CORNER_DISTANCE = 0.9       # a broader, softer occlusion: contact shadow where buttresses meet the walls
+CORNER_DISTANCE = 1.4       # a broader, softer occlusion: contact shadow where buttresses meet the walls
+DEPTH_NEAR, DEPTH_FAR = -3.4, 0.6   # depth along the tipped axis of the buttress fronts and of the window reveals
+DEPTH_DARKEST = 0.7         # brightness at DEPTH_FAR relative to the buttress fronts
 EDGE_WEAR = 0.35            # how much lighter the worn arrises are
 STREAKS = 0.0               # rain streaks turn into stripe noise at game size
 
@@ -441,7 +443,7 @@ def weather_material(m):
     corner_ao = nt.nodes.new("ShaderNodeAmbientOcclusion")
     corner_ao.inputs["Distance"].default_value = CORNER_DISTANCE
     corner = nt.nodes.new("ShaderNodeMapRange")
-    corner.inputs["To Min"].default_value = 0.55
+    corner.inputs["To Min"].default_value = 0.4
     corner.inputs["To Max"].default_value = 1.0
     nt.links.new(corner_ao.outputs["AO"], corner.inputs["Value"])
     both = nt.nodes.new("ShaderNodeMath"); both.operation = "MULTIPLY"
@@ -453,6 +455,21 @@ def weather_material(m):
     factor2 = nt.nodes.new("ShaderNodeMath"); factor2.operation = "MULTIPLY"
     nt.links.new(factor.outputs[0], factor2.inputs[0])
     nt.links.new(streak.outputs[0], factor2.inputs[1])
+    # depth shading: a surface further back from the front plane is darker, so the buttress stages,
+    # walls and reveals read as layers
+    along = nt.nodes.new("ShaderNodeVectorMath"); along.operation = "DOT_PRODUCT"   # depth along the chapel's tipped axis, not raw y
+    nt.links.new(tc.outputs["Object"], along.inputs[0])
+    along.inputs[1].default_value = (0.0, math.cos(math.radians(TIP_DEG)), math.sin(math.radians(TIP_DEG)))
+    depth = nt.nodes.new("ShaderNodeMapRange")
+    depth.inputs["From Min"].default_value = DEPTH_NEAR
+    depth.inputs["From Max"].default_value = DEPTH_FAR
+    depth.inputs["To Min"].default_value = 1.0
+    depth.inputs["To Max"].default_value = DEPTH_DARKEST
+    nt.links.new(along.outputs["Value"], depth.inputs["Value"])
+    factor3 = nt.nodes.new("ShaderNodeMath"); factor3.operation = "MULTIPLY"
+    nt.links.new(factor2.outputs[0], factor3.inputs[0])
+    nt.links.new(depth.outputs[0], factor3.inputs[1])
+    factor2 = factor3
     apply = nt.nodes.new("ShaderNodeVectorMath"); apply.operation = "SCALE"
     nt.links.new(colour, apply.inputs[0])
     nt.links.new(factor2.outputs[0], apply.inputs["Scale"])
@@ -620,24 +637,6 @@ def quatrefoil_band(p, u0, u1, w0, height, v_face):
             p.slab(seg, v_face + 0.3, v_face + 1.2)
 
 
-NICHE_HALF = 34          # wide enough for dstar's owl (72 px) at the chapel's scale
-
-
-def shrine_niche(face, cu):
-    """The left buttress's lower window opened up for dstar's owl shrine: a dark recess from the
-    ground up, a moulded frame, a traceried head above the owl and a small carved altar under it."""
-    spring = SHRINE_TOP_MODEL + 22
-    face.slab(opening(cu, NICHE_HALF, spring, -20), 8.0, 9.0, material_index=1)          # the dark recess
-    for wedge in arch_wedges(cu, NICHE_HALF, 2 * NICHE_HALF, 2 * NICHE_HALF + 4.0, spring, 12, 2):
-        face.slab(wedge, -1.5, 8.0)
-    for sgn in (-1, 1):
-        u0 = cu + sgn * NICHE_HALF
-        coursed_pier(face, min(u0, u0 + sgn * 4.0), max(u0, u0 + sgn * 4.0), -20, spring, -1.5, 8.0)
-    traceried_window(face, cu, SHRINE_TOP_MODEL + 4, NICHE_HALF - 4, spring)
-    face.block(cu - 32, cu + 32, -20, 46, -2.0, 8.0)                                      # the altar, carrying the owl at y 1512
-    face.block(cu - 35, cu + 35, 46, 52, -3.0, 8.0)                                       # its moulded top
-
-
 class BlindFace:
     """Front-plane calls shifted onto a buttress face standing forward of the wall at v = face."""
 
@@ -673,9 +672,6 @@ def build_buttresses(stone, seed):
         if faces_front:
             for w_sill, w_top, scale in ((24, EAVES_H * 0.36, 1.0), (EAVES_H * 0.46, EAVES_H * 0.70, 0.86)):
                 face = BlindFace(but, bv - BUTTRESS * scale / 2 * 1.4 - 6.5)   # its reveal lies on the buttress face, the tracery stands before it
-                if (bu == 0) and (w_sill == 24):
-                    shrine_niche(face, bu)
-                    continue
                 half = BUTTRESS * scale * 0.3
                 spring = w_top - 2 * half * 0.87
                 traceried_window(face, bu, w_sill, half, spring)
@@ -720,7 +716,6 @@ def build_roof(roof_mat, seed):
 
 
 ANNEX = dict(v0=14, v1=SIDE_L, width=160, eaves=270, rise=120)
-SHRINE_TOP_MODEL = 92   # just above the owl's head (y 1464), in model units over the foot
 
 
 def build_annex(stone, trim, roof_mat, seed):
