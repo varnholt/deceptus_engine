@@ -16,7 +16,7 @@ Runs inside Blender after blender_kit/core.py, blender_kit/graves.py and mausole
 import bpy, bmesh, math, random
 from mathutils import Matrix, Vector
 
-FRONT_W = 400          # front wall width between the corner buttress centres
+FRONT_W = 300          # front wall width between the corner buttress centres
 SIDE_L = 250           # side wall length
 EAVES_H = 430          # wall height
 GABLE_RISE = 400       # a steep gable, rising out of view
@@ -25,13 +25,13 @@ PORTAL_HALF = 32       # door opening half width
 PORTAL_SPRING = 104
 ORDER = 6              # width of each archivolt order
 ORDERS = 4
-SCALE = 0.6            # model units to level pixels: the portal is as tall as dstar's iron door (96 px, three player heights)
+SCALE = 1.2            # model units to level pixels: the portal is six player heights; walls and gable rise past the camera room's top
 TURN_DEG = 0.0         # the front faces the player, like the rest of the scenery
 TIP_DEG = 8.0
-PORTAL_SCREEN_X = 5702  # the portal's centre on screen: free of dstar's owl shrine (x 5468-5596), which stands before the side room
+PORTAL_SCREEN_X = 5628  # the portal's centre on screen; dstar's owl shrine (x 5468-5596) stands before its left jamb
 FOOT_SCREEN_Y = 1574    # the plinth's lowest point, just under the grass line
-JOINT = 1.8             # the joint between two stones: at least one game pixel, so the courses read
-CHAPEL_CAM = dict(x0=5280, x1=5952, y0=1056, y1=1560)   # 28 x 21 tiles
+JOINT = 1.0             # the joint between two stones: at least one game pixel, so the courses read
+CHAPEL_CAM = dict(x0=5208, x1=5952, y0=1056, y1=1560)   # 31 x 21 tiles
 
 
 # ---------------------------------------------------------------- building in the chapel's frame
@@ -70,6 +70,19 @@ class Part:
 
     def finish(self, bevel=0.5):
         return self.b.finish(bevel=PX * bevel)
+
+    def start_stone(self):
+        """Everything built until end_stone is one stone for the converter: one id, one tone."""
+        value = self.rng.random()
+        layer = self.b.rand_layer
+
+        def tag(faces):
+            for f in faces:
+                f[layer] = value
+        self.b._tag = tag
+
+    def end_stone(self):
+        del self.b._tag   # back to the Builder's own: a new value per piece
 
     def glass(self, outline, v0, v1):
         GLASS[0].slab(outline, v0, v1)
@@ -296,7 +309,7 @@ def celtic_cross(p, cu, cv, base, height):
 
 
 # ---------------------------------------------------------------- dressed stone walls
-def dressed_wall(p, outline, holes, v_face, thickness, course=13.0, min_w=28.0, max_w=52.0, quoins=True, decay=0.004):
+def dressed_wall(p, outline, holes, v_face, thickness, course=9.0, min_w=20.0, max_w=36.0, quoins=True, decay=0.004):
     """A wall of coursed stone as on real gothic chapels: shallow courses of one height, stones two
     to four times as long as tall in running bond, thin crisp joints, and at the wall's vertical
     edges quoins in long-and-short alternation standing a little proud. Cut along the outline
@@ -329,7 +342,10 @@ def dressed_wall(p, outline, holes, v_face, thickness, course=13.0, min_w=28.0, 
             # decay: now and then a stone has fallen out, leaving the dark core behind it
             fallen = (not is_quoin) and (row > 2) and (p.rng.random() < decay)
             ua, ub = max(u, u_min), min(u + bw, u_max)
-            # a block is cut into thin vertical strips so it can follow the outline and the holes
+            # a block is cut into thin vertical strips so it can follow the outline and the holes;
+            # the strips stay one stone for the converter
+            part = getattr(p, "p", p)
+            part.start_stone()
             strip = 2.0
             s = ua
             while s < ub - 1e-6:
@@ -353,6 +369,7 @@ def dressed_wall(p, outline, holes, v_face, thickness, course=13.0, min_w=28.0, 
                             p.block(s, e, rows[start], rows[end], v_face + 0.4, v_face + 0.9, material_index=1)
                         start = None
                 s = e
+            part.end_stone()
             u += bw
         w += h
         row += 1
@@ -454,7 +471,7 @@ def build_front(stone, trim, seed):
     rose_c, rose_r = portal_apex + 24, 11.0
     win_half, win_sill = 62, g_apex + 10
     win_spring = win_sill + 150
-    lancets = [(cu + sgn * 128, 20, 120, 300) for sgn in (-1, 1)]   # centre, half width, sill, spring
+    lancets = [(cu + sgn * 106, 18, 120, 290) for sgn in (-1, 1)]   # centre, half width, sill, spring
     gable_rose_c, gable_rose_r = win_spring + 2 * win_half * 0.87 + 62, 34.0
     objects = []
 
@@ -473,9 +490,9 @@ def build_front(stone, trim, seed):
         ra, rb = r_in + k * ORDER, r_in + (k + 1) * ORDER
         v_face = -2.0 - 1.6 * k
         roll = k % 2 == 0
-        for wedge in arch_wedges(cu, PORTAL_HALF, ra + (1.6 if roll else 0), rb - (1.6 if roll else 0), PORTAL_SPRING, 16, 1):
+        for wedge in arch_wedges(cu, PORTAL_HALF, ra + (1.6 if roll else 0), rb - (1.6 if roll else 0), PORTAL_SPRING, 16, 2):
             portal.slab(wedge, v_face - (1.2 if roll else 0), 10)
-        for wedge in arch_wedges(cu, PORTAL_HALF, ra, rb, PORTAL_SPRING, 16, 1):
+        for wedge in arch_wedges(cu, PORTAL_HALF, ra, rb, PORTAL_SPRING, 16, 2):
             portal.slab(wedge, v_face + 1.0, 10)
         if k == 1:
             dogtooth(portal, cu, PORTAL_HALF, (ra + rb) / 2, PORTAL_SPRING, v_face - 0.4)
@@ -630,7 +647,7 @@ def build_roof(roof_mat, seed):
     return [roof.finish(bevel=0.3), deck.finish(bevel=0)]
 
 
-ANNEX = dict(v0=SIDE_L * 0.5, v1=SIDE_L, width=210, eaves=270, rise=150)
+ANNEX = dict(v0=SIDE_L * 0.5, v1=SIDE_L, width=130, eaves=250, rise=110)
 
 
 def build_annex(stone, trim, roof_mat, seed):
@@ -640,7 +657,7 @@ def build_annex(stone, trim, roof_mat, seed):
     u0, u1 = -ANNEX["width"], 0
     v0, v1, H, rise = ANNEX["v0"], ANNEX["v1"], ANNEX["eaves"], ANNEX["rise"]
     cu = (u0 + u1) / 2
-    win_half, win_sill, win_spring = 30, 70, 190
+    win_half, win_sill, win_spring = 24, 70, 180
     wall = Part("annex_wall", stone, seed)
     front = [(u0, 0), (u1, 0), (u1, H), (cu, H + rise), (u0, H)]
 

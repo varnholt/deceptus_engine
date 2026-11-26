@@ -269,7 +269,7 @@
         "layer": "bg-chapel",
         "after_layer": "bg1",
         "z": 10,
-        "map_tile_x": 220,
+        "map_tile_x": 217,
         "map_tile_y": 44,
         "clear_layers": [
           "bg0",
