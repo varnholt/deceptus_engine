@@ -245,7 +245,7 @@
       "title": "Chapel",
       "build": "build_chapel",
       "stylize": {
-        "shift": -3,
+        "shift": -2,
         "k_scale": 3.5,
         "micro": 0,
         "moss_clumps": true,
@@ -254,7 +254,7 @@
         "speck": 0.0,
         "form": 1.2,
         "value_tones": true,
-        "gain": 0.8,
+        "gain": 0.92,
         "night": 0.2,
         "sub_steps": 4,
         "round_corners": true,
@@ -262,7 +262,8 @@
         "edge_light": 1,
         "texture": 0.1,
         "pits": 0.0,
-        "scratches": 0.0
+        "scratches": 0.0,
+        "faithful": 1.0
       },
       "tiled": {
         "name": "graveyard-chapel",

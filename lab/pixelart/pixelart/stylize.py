@@ -205,7 +205,7 @@ def ramp_colour(ramp, position, sub_steps):
     return np.round(ramp[lo] * (1 - t) + ramp[hi] * t).astype(np.int32)
 
 
-def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0, round_corners=False, texture=0.0, pits=0.0, scratches=0.0, texture_seed=7, edge_light=2):
+def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0, round_corners=False, texture=0.0, pits=0.0, scratches=0.0, texture_seed=7, edge_light=2, faithful=0.0):
     shares = base_shares or BASE_SHARES
     pal = palette or {}
     ramp = np.array(pal.get("stone", RAMP))
@@ -363,7 +363,15 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
         if texture or pits or scratches:
             frac = frac + stone_texture(stone, any_edge | keep_pure, texture, pits, scratches, texture_seed)
         frac = np.where(any_edge | keep_pure, 0.0, frac)
-        shade = ramp_colour(ramp, level[stone] + frac, sub_steps)
+        position = level[stone] + frac
+        if faithful:
+            # follow the render: each pixel's own brightness (log scale) onto the ramp, blended in by
+            # `faithful`; joints, edges and pure tones keep their drawn treatment
+            logp = np.log(np.maximum(L[stone], 1.0))
+            lo_p, hi_p = np.percentile(logp, 3), np.percentile(logp, 97)
+            rendered = 1.0 + 5.0 * np.clip((logp - lo_p) / max(hi_p - lo_p, 1e-6), 0, 1) + shift
+            position = np.where(any_edge | keep_pure, position, (1 - faithful) * position + faithful * rendered)
+        shade = ramp_colour(ramp, position, sub_steps)
     shade = shade + np.where(keep_pure, 0, fine * micro)[:, None]
     out[..., :3][stone] = np.clip(shade, 0, 255)
     out[..., :3][seam] = seam_rgb

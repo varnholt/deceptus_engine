@@ -28,7 +28,7 @@ ORDERS = 4
 SCALE = 1.2            # model units to level pixels: the portal is six player heights; walls and gable rise past the camera room's top
 TURN_DEG = 0.0         # the front faces the player, like the rest of the scenery
 TIP_DEG = 8.0
-PORTAL_SCREEN_X = 5628  # the portal's centre on screen; dstar's owl shrine (x 5468-5596) stands before its left jamb
+PORTAL_SCREEN_X = 5616  # the portal's centre on screen; the left buttress (x 5436) holds dstar's owl shrine in its niche
 FOOT_SCREEN_Y = 1574    # the plinth's lowest point, just under the grass line
 JOINT = 1.0             # the joint between two stones: at least one game pixel, so the courses read
 CHAPEL_CAM = dict(x0=5208, x1=5952, y0=1056, y1=1560)   # 31 x 21 tiles
@@ -142,6 +142,17 @@ def ring(cu, cw, r_in, r_out, segments=20):
                (cu + r_in * math.cos(a1), cw + r_in * math.sin(a1)), (cu + r_in * math.cos(a0), cw + r_in * math.sin(a0))]
 
 
+def inside_frame(u, w, cu, half, spring, sill, grow=2.0):
+    """Inside an opening grown by `grow` along its own arcs (same centres as the frame), so a wall
+    cut to it hides its stepped edge under the frame instead of showing it beyond."""
+    if (w < sill) or (abs(u - cu) > half + grow):
+        return False
+    if w <= spring:
+        return True
+    r = 2 * half + grow
+    return ((u - (cu + half)) ** 2 + (w - spring) ** 2 <= r * r) and ((u - (cu - half)) ** 2 + (w - spring) ** 2 <= r * r)
+
+
 def inside_opening(u, w, cu, half, spring, sill):
     if (w < sill) or (abs(u - cu) > half):
         return False
@@ -213,13 +224,13 @@ def dogtooth(p, cu, half, radius, spring, v_face, count=18):
 
 def cusped_head(p, cu, half, spring, v0, v1):
     """Trefoil cusps inside a lancet head: three small rings meeting under the arch."""
-    r = half * 0.52
+    r = min(half * 0.52, 7.0)   # cusps are small points, never big rings
     for du, dw in ((-half * 0.45, 0.0), (half * 0.45, 0.0), (0.0, half * 0.62)):
-        for seg in ring(cu + du, spring + dw, r, r + 0.9, 10):
+        for seg in ring(cu + du, spring + dw, r, r + 0.9, 20):
             p.slab(seg, v0, v1)
 
 
-def traceried_window(p, cu, sill, half, spring, lights=2, blind=False):
+def traceried_window(p, cu, sill, half, spring, lights=None, blind=False):
     """A deep pointed window: two stepped reveal orders, a hood mould with label stops, a sloped
     sill, mullions, cusped lights and a quatrefoil roundel in the head over dark glass."""
     reveal = 6.0
@@ -227,19 +238,21 @@ def traceried_window(p, cu, sill, half, spring, lights=2, blind=False):
         p.slab(opening(cu, half, spring, sill), reveal - 1.5, reveal + 1.0)   # blind tracery: stone behind, no glass
     else:
         p.glass(opening(cu, half, spring, sill), reveal, reveal + 1.0)
-    for k, (grow, v_face) in enumerate(((0.0, 2.0), (3.0, -0.4))):
-        for wedge in arch_wedges(cu, half, 2 * half + grow, 2 * half + grow + 3.0, spring, 12, 1):
+    for k, (grow, v_face) in enumerate(((0.0, 2.0), (4.5, -0.8))):
+        for wedge in arch_wedges(cu, half, 2 * half + grow, 2 * half + grow + 4.5, spring, 24, 2):
             p.slab(wedge, v_face, reveal)
         for sgn in (-1, 1):
             u0 = cu + sgn * (half + grow)
             p.slab([(u0, sill), (u0 + sgn * 3.0, sill), (u0 + sgn * 3.0, spring), (u0, spring)][:: -sgn], v_face, reveal)
-    for wedge in arch_wedges(cu, half, 2 * half + 6.0, 2 * half + 8.2, spring, 14, 2):
+    for wedge in arch_wedges(cu, half, 2 * half + 9.0, 2 * half + 12.0, spring, 28, 2):
         p.slab(wedge, -2.4, 1.0)
     for sgn in (-1, 1):
-        stop_u = cu + sgn * (half + 7.1)
+        stop_u = cu + sgn * (half + 10.5)
         p.block(stop_u - 1.6, stop_u + 1.6, spring - 3, spring + 1, -2.6, 1.0)
     p.slab([(cu - half - 7, sill - 4), (cu + half + 7, sill - 4), (cu + half + 7, sill), (cu - half - 7, sill + 0.5)][::-1], -3.0, reveal)
     jamb_stones(p, cu, half + 6.0, sill, spring)
+    if lights is None:
+        lights = max(2, round(half / 14))   # lights stay window-sized in wide openings
     light_half = (2 * half - (lights - 1) * 2.4) / lights / 2
     light_spring = spring + half * 0.18
     for k in range(lights):
@@ -247,15 +260,15 @@ def traceried_window(p, cu, sill, half, spring, lights=2, blind=False):
         if k < lights - 1:
             mu = lc + light_half
             p.slab([(mu, sill), (mu + 2.4, sill), (mu + 2.4, light_spring + light_half * 1.7), (mu, light_spring + light_half * 1.7)][::-1], 2.6, reveal)
-        for wedge in arch_wedges(lc, light_half, 2 * light_half, 2 * light_half + 1.8, light_spring, 6, 1):
+        for wedge in arch_wedges(lc, light_half, 2 * light_half, 2 * light_half + 2.2, light_spring, 12, 2):
             p.slab(wedge, 2.6, reveal)
         cusped_head(p, lc, light_half, light_spring, 3.0, reveal - 0.5)
     rc_w = light_spring + light_half * 2.0 + half * 0.36
-    rr = half * 0.36
-    for seg in ring(cu, rc_w, rr, rr + 1.8, 16):
+    rr = min(half * 0.36, 16.0)
+    for seg in ring(cu, rc_w, rr, rr + 1.8, 28):
         p.slab(seg, 2.6, reveal)
     for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2):
-        for seg in ring(cu + rr * 0.42 * math.cos(a), rc_w + rr * 0.42 * math.sin(a), rr * 0.36, rr * 0.36 + 1.0, 10):
+        for seg in ring(cu + rr * 0.42 * math.cos(a), rc_w + rr * 0.42 * math.sin(a), rr * 0.36, rr * 0.36 + 1.0, 20):
             p.slab(seg, 3.0, reveal - 0.5)
 
 
@@ -284,9 +297,9 @@ def rose_window(p, cu, cw, r, v_face):
         p.slab(seg, v_face - 0.4, v_face + 4.0)
     for k in range(8):
         a = 2 * math.pi * k / 8
-        for seg in ring(cu + r * 0.56 * math.cos(a), cw + r * 0.56 * math.sin(a), r * 0.24, r * 0.24 + 1.0, 10):
+        for seg in ring(cu + r * 0.56 * math.cos(a), cw + r * 0.56 * math.sin(a), r * 0.24, r * 0.24 + 1.0, 20):
             p.slab(seg, v_face + 0.6, v_face + 3.6)
-    for seg in ring(cu, cw, r * 0.16, r * 0.16 + 1.4, 10):
+    for seg in ring(cu, cw, r * 0.16, r * 0.16 + 1.4, 20):
         p.slab(seg, v_face + 0.2, v_face + 3.6)
 
 
@@ -491,10 +504,10 @@ def build_front(stone, trim, seed):
     wall = Part("front_wall", stone, seed)
     outline = [(0, 0), (W, 0), (W, H), (cu, H + GABLE_RISE), (0, H)]
     holes = [lambda u, w: inside_opening(u, w, cu, PORTAL_HALF + 1, PORTAL_SPRING, 0),
-             lambda u, w: inside_opening(u, w, cu, win_half + 1, win_spring, win_sill),
+             lambda u, w: inside_frame(u, w, cu, win_half, win_spring, win_sill),
              lambda u, w: math.hypot(u - cu, w - rose_c) < rose_r,
              lambda u, w: math.hypot(u - cu, w - gable_rose_c) < gable_rose_r]
-    holes += [lambda u, w, l=l: inside_opening(u, w, l[0], l[1] + 1, l[3], l[2]) for l in lancets]
+    holes += [lambda u, w, l=l: inside_frame(u, w, l[0], l[1], l[3], l[2]) for l in lancets]
     dressed_wall(wall, outline, holes, 0.0, 6.0)
     objects.append(wall.finish(bevel=0.3))
 
@@ -561,7 +574,7 @@ def build_side(stone, trim, seed):
     win_half, win_sill, win_spring = 19, 48, 128
     wall = Part("side_wall", stone, seed)
     face = SideView(wall, W)
-    holes = [lambda v, w, bc=bc: inside_opening(v, w, bc, win_half + 1, win_spring, win_sill) for bc in bays]
+    holes = [lambda v, w, bc=bc: inside_frame(v, w, bc, win_half, win_spring, win_sill) for bc in bays]
     dressed_wall(face, [(0, 0), (L, 0), (L, H), (0, H)], holes, 0.0, 6.0)
     objects = [wall.finish(bevel=0.3)]
     orn = Part("side_windows", trim, seed + 1)
@@ -601,10 +614,28 @@ def quatrefoil_band(p, u0, u1, w0, height, v_face):
         cu, cw = u0 + step * (k + 0.5), w0 + height / 2
         r = height * 0.16
         for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2):
-            for seg in ring(cu + r * math.cos(a), cw + r * math.sin(a), r * 0.75, r * 0.75 + 0.9, 8):
+            for seg in ring(cu + r * math.cos(a), cw + r * math.sin(a), r * 0.75, r * 0.75 + 0.9, 16):
                 p.slab(seg, v_face + 0.2, v_face + 1.2)
         for seg in ring(cu, cw, height * 0.42, height * 0.42 + 0.8, 12):
             p.slab(seg, v_face + 0.3, v_face + 1.2)
+
+
+NICHE_HALF = 34          # wide enough for dstar's owl (72 px) at the chapel's scale
+
+
+def shrine_niche(face, cu):
+    """The left buttress's lower window opened up for dstar's owl shrine: a dark recess from the
+    ground up, a moulded frame, a traceried head above the owl and a small carved altar under it."""
+    spring = SHRINE_TOP_MODEL + 22
+    face.slab(opening(cu, NICHE_HALF, spring, -20), 8.0, 9.0, material_index=1)          # the dark recess
+    for wedge in arch_wedges(cu, NICHE_HALF, 2 * NICHE_HALF, 2 * NICHE_HALF + 4.0, spring, 12, 2):
+        face.slab(wedge, -1.5, 8.0)
+    for sgn in (-1, 1):
+        u0 = cu + sgn * NICHE_HALF
+        coursed_pier(face, min(u0, u0 + sgn * 4.0), max(u0, u0 + sgn * 4.0), -20, spring, -1.5, 8.0)
+    traceried_window(face, cu, SHRINE_TOP_MODEL + 4, NICHE_HALF - 4, spring)
+    face.block(cu - 32, cu + 32, -20, 46, -2.0, 8.0)                                      # the altar, carrying the owl at y 1512
+    face.block(cu - 35, cu + 35, 46, 52, -3.0, 8.0)                                       # its moulded top
 
 
 class BlindFace:
@@ -641,11 +672,14 @@ def build_buttresses(stone, seed):
                 but.side_slab([(bv - s - 1.2, w1), (bv + s + 1.2, w1), (bv + s + 1.2, w1 + 3), (bv - s - 1.2, w1 + 3)][::-1], bu - s, bu + s * 1.4 + 1.2)
         if faces_front:
             for w_sill, w_top, scale in ((24, EAVES_H * 0.36, 1.0), (EAVES_H * 0.46, EAVES_H * 0.70, 0.86)):
+                face = BlindFace(but, bv - BUTTRESS * scale / 2 * 1.4 - 6.5)   # its reveal lies on the buttress face, the tracery stands before it
+                if (bu == 0) and (w_sill == 24):
+                    shrine_niche(face, bu)
+                    continue
                 half = BUTTRESS * scale * 0.3
                 spring = w_top - 2 * half * 0.87
-                face = BlindFace(but, bv - BUTTRESS * scale / 2 * 1.4 - 6.5)   # its reveal lies on the buttress face, the tracery stands before it
-                traceried_window(face, bu, w_sill, half, spring, blind=True)
-        pinnacle(but, bu, bv, EAVES_H + 7, BUTTRESS * 0.7, 250, broken=(bu > 0))
+                traceried_window(face, bu, w_sill, half, spring)
+        pinnacle(but, bu, bv, EAVES_H + 7, BUTTRESS * 0.7, 250)
     return [but.finish(bevel=0.35)]
 
 
@@ -686,8 +720,7 @@ def build_roof(roof_mat, seed):
 
 
 ANNEX = dict(v0=14, v1=SIDE_L, width=160, eaves=270, rise=120)
-SHRINE_TOP_MODEL = 84   # just above the owl's head (y 1464), in model units over the foot
-SHRINE_SHIFT_PX = -216   # dstar's shrine moved 9 tiles left into the side room (its tiles, images and objects with it)
+SHRINE_TOP_MODEL = 92   # just above the owl's head (y 1464), in model units over the foot
 
 
 def build_annex(stone, trim, roof_mat, seed):
@@ -697,7 +730,7 @@ def build_annex(stone, trim, roof_mat, seed):
     u0, u1 = -ANNEX["width"] - 30, -30   # centred on the shrine (x 5316), clear of the chapel's left buttress
     v0, v1, H, rise = ANNEX["v0"], ANNEX["v1"], ANNEX["eaves"], ANNEX["rise"]
     cu = (u0 + u1) / 2
-    win_half, win_sill, win_spring = 58, 0, 100   # the shrine's arch: open to the ground, wide enough for its slab
+    win_half, win_sill, win_spring = 26, 70, 180
     wall = Part("annex_wall", stone, seed)
     front = [(u0, -30), (u1, -30), (u1, H), (cu, H + rise), (u0, H)]   # down into the ground: never a gap under it
 
@@ -718,28 +751,12 @@ def build_annex(stone, trim, roof_mat, seed):
         def glass(self, outline, a, b):
             GLASS[0].slab(outline, v0 + a, v0 + b)
     face = AnnexFront(wall)
-    dressed_wall(face, front, [lambda u, w: inside_opening(u, w, cu, win_half + 1, win_spring, -40)], 0.0, 6.0)
-    # the niche behind the shrine: a shadowed stone back wall and side walls
-    face.block(u0 + 6, u1 - 6, -30, win_spring + 2 * win_half, 34, 40)
-    face.block(cu - win_half - 2, cu - win_half + 2, -30, win_spring, 6, 34)
-    face.block(cu + win_half - 2, cu + win_half + 2, -30, win_spring, 6, 34)
+    dressed_wall(face, front, [lambda u, w: inside_frame(u, w, cu, win_half, win_spring, win_sill)], 0.0, 6.0)
     objects = [wall.finish(bevel=0.3)]
     orn = Part("annex_ornament", trim, seed + 1)
     face = AnnexFront(orn)
-    # two moulded orders and a hood, a crocketed gablet over it
-    for k, (ra, rb, front_v) in enumerate(((2 * win_half, 2 * win_half + 6, -1.0), (2 * win_half + 6, 2 * win_half + 12, -3.0))):
-        for wedge in arch_wedges(cu, win_half, ra, rb, win_spring, 14, 2):
-            face.slab(wedge, front_v, 8)
-        for sgn in (-1, 1):
-            ua, ub = sorted((cu + sgn * (ra - win_half), cu + sgn * (rb - win_half)))
-            coursed_pier(face, ua, ub, -30, win_spring, front_v, 8)
-    for wedge in arch_wedges(cu, win_half, 2 * win_half + 12, 2 * win_half + 15, win_spring + 1, 16, 3):
-        face.slab(wedge, -6.0, 4)
-    apex = win_spring + math.sqrt((2 * win_half + 15) ** 2 - win_half ** 2)
-    gablet(face, cu, win_half + 20, win_spring + 10, apex + 40, -8.0, -2.0)
-    # the side room's traceried window lives on as the arch's head: lights, mullion and roundel
-    # above the owl, the shrine standing in the open niche below its sill
-    traceried_window(face, cu, SHRINE_TOP_MODEL, win_half - 4, win_spring)
+    traceried_window(face, cu, win_sill, win_half, win_spring)
+    gablet(face, cu, win_half + 14, win_spring + 30, win_spring + 2 * win_half * 0.87 + 52, -6.0, 0.0)
     orn.block(u0 - 2, u1 + 2, H - 4, H, v0 - 3, v1 + 2)
     quatrefoil_band(face, u0 + 10, u1 - 4, H - 16, 12, -1.5)
     for sgn in (-1, 1):
@@ -820,7 +837,7 @@ def grow_moss_and_ivy(scn, seed):
     x_join, py_join, _ = to_level(FRONT_W + BUTTRESS * 0.6, 0, EAVES_H * 0.55)
     ivy_curtain(scn, "chapel_ivy_join", seed + 390, x_join, py_join, 30, 220)
     for k, (u, w, width, length) in enumerate(((FRONT_W + 8, EAVES_H * 0.9, 26, 170), (-ANNEX["width"] + 6, ANNEX["eaves"], 30, 120),
-                                               (-6, EAVES_H * 0.6, 18, 90))):
+                                               (-6, EAVES_H * 0.9, 26, 170))):
         x, py, _ = to_level(u, 0, w)
         ivy_curtain(scn, f"chapel_ivy_{k}", seed + 300 + k, x, py, width, length)
 
@@ -855,14 +872,6 @@ def build_chapel_scene(seed=17):
     grow_moss_and_ivy(scn, seed)
     chapel_wear(scn, seed + 500)
     # dstar's shrine stands before the portal on its plinth, facing the player
-    plinth = Builder("altar_plinth", stone_variants("trim", (0.058, 0.068, 0.074), moss=0.0, tint_var=0.03), seed + 30)
-    pf = PLINTH_FRONT
-    plinth.box(X(5468 + SHRINE_SHIFT_PX), X(5596 + SHRINE_SHIFT_PX), Z(1562), Z(1552), pf, pf + 1.2, seam=PX)
-    for xa, xb in ((5474, 5486), (5578, 5590)):
-        plinth.box(X(xa + SHRINE_SHIFT_PX), X(xb + SHRINE_SHIFT_PX), Z(1552), Z(1534), pf + 0.06, pf + 1.2, seam=PX)
-    plinth.box(X(5486 + SHRINE_SHIFT_PX), X(5578 + SHRINE_SHIFT_PX), Z(1552), Z(1534), pf + 0.2, pf + 1.2, seam=PX)
-    plinth.box(X(5468 + SHRINE_SHIFT_PX), X(5596 + SHRINE_SHIFT_PX), Z(1534), Z(1514), pf, pf + 1.2, seam=PX)
-    plinth.finish()
     boundary = Builder("boundary_wall", weathered_stone("boundary_stone", (0.050, 0.058, 0.062), moss=0.16, tint_var=0.09), seed + 40)
     course = 9 * SCALE * PX
     ashlar(boundary, X(BOUNDARY_X - 8), X(5960), Z(1570), Z(1100), course=course, min_w=9 * SCALE * 2.2, max_w=9 * SCALE * 4.0,
