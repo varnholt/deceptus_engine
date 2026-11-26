@@ -9,7 +9,8 @@
   ],
   "scenes": [
     "scenes/mausoleum.py",
-    "scenes/bands.py"
+    "scenes/bands.py",
+    "scenes/chapel.py"
   ],
   "palette": {
     "stone": [
@@ -99,80 +100,6 @@
     }
   ],
   "pieces": {
-    "mausoleum": {
-      "title": "Mausoleum",
-      "build": "build_mausoleum",
-      "stylize": {
-        "shift": -3,
-        "k_scale": 3.5,
-        "micro": 0,
-        "moss_clumps": true,
-        "soft": 0.5,
-        "bevel": 1,
-        "speck": 0.0,
-        "form": 1.2,
-        "value_tones": true,
-        "gain": 0.8,
-        "night": 0.2,
-        "sub_steps": 4,
-        "round_corners": true,
-        "outline_level": 1,
-        "edge_light": 1,
-        "texture": 0.9,
-        "pits": 0.012,
-        "scratches": 0.004
-      },
-      "tiled": {
-        "name": "graveyard-mausoleum",
-        "layer": "bg-mausoleum",
-        "after_layer": "bg1",
-        "z": 10,
-        "map_tile_x": 220,
-        "map_tile_y": 50,
-        "clear_layers": [
-          "bg0",
-          "bg1",
-          "bg2"
-        ],
-        "clear_rect_tiles": [
-          212,
-          44,
-          250,
-          70
-        ],
-        "clear_min_row": 8,
-        "clear_tileset_firstgid": 1,
-        "clear_tileset_columns": 64
-      },
-      "capture": [
-        [
-          210,
-          61
-        ],
-        [
-          226,
-          61
-        ],
-        [
-          232,
-          61
-        ]
-      ],
-      "compare_boxes": [
-        [
-          100,
-          60,
-          220,
-          160
-        ],
-        [
-          230,
-          150,
-          400,
-          330
-        ]
-      ]
-    },
     "upper": {
       "title": "Graves behind the mausoleum",
       "build": "build_upper",
@@ -200,7 +127,7 @@
       "tiled": {
         "name": "graveyard-band-upper",
         "layer": "bg-band-upper",
-        "after_layer": "bg-mausoleum",
+        "after_layer": "bg-chapel",
         "z": 10,
         "map_tile_x": 156,
         "map_tile_y": 57,
@@ -311,6 +238,80 @@
           60,
           1400,
           192
+        ]
+      ]
+    },
+    "chapel": {
+      "title": "Chapel",
+      "build": "build_chapel",
+      "stylize": {
+        "shift": -3,
+        "k_scale": 3.5,
+        "micro": 0,
+        "moss_clumps": true,
+        "soft": 0.5,
+        "bevel": 1,
+        "speck": 0.0,
+        "form": 1.2,
+        "value_tones": true,
+        "gain": 0.8,
+        "night": 0.2,
+        "sub_steps": 4,
+        "round_corners": true,
+        "outline_level": 1,
+        "edge_light": 1,
+        "texture": 0.1,
+        "pits": 0.0,
+        "scratches": 0.0
+      },
+      "tiled": {
+        "name": "graveyard-chapel",
+        "layer": "bg-chapel",
+        "after_layer": "bg1",
+        "z": 10,
+        "map_tile_x": 220,
+        "map_tile_y": 44,
+        "clear_layers": [
+          "bg0",
+          "bg1",
+          "bg2"
+        ],
+        "clear_rect_tiles": [
+          212,
+          44,
+          250,
+          70
+        ],
+        "clear_min_row": 8,
+        "clear_tileset_firstgid": 1,
+        "clear_tileset_columns": 64
+      },
+      "capture": [
+        [
+          210,
+          61
+        ],
+        [
+          226,
+          61
+        ],
+        [
+          232,
+          61
+        ]
+      ],
+      "compare_boxes": [
+        [
+          150,
+          120,
+          330,
+          260
+        ],
+        [
+          250,
+          300,
+          420,
+          456
         ]
       ]
     }

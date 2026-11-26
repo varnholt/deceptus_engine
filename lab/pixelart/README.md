@@ -5,7 +5,7 @@ All commands run from `lab/pixelart`; paths in an asset config are relative to t
 One command takes an asset from a Blender scene script to frames from the running game:
 
 ```
-python -m pixelart assets/graveyard/graveyard.json mausoleum
+python -m pixelart assets/graveyard/graveyard.json chapel
 python -m pixelart assets/graveyard/graveyard.json all --steps render,stylize,compare
 ```
 
