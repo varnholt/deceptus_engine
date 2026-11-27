@@ -714,9 +714,12 @@ def quatrefoil_band(p, u0, u1, w0, height, v_face):
         for seg in ring(cu, cw, height * 0.42, height * 0.42 + max(MEDALLION_RING, height * 0.07), 24):
             p.slab(seg, v_face + 0.3, v_face + 1.2)
         p.end_stone()
+        # the field inside the ring is sunk and dark: carving reads as a light figure on a dark ground
+        p.slab([(cu + height * 0.43 * math.cos(2 * math.pi * s / 24), cw + height * 0.43 * math.sin(2 * math.pi * s / 24))
+                for s in range(24)], v_face + 0.6, v_face + 0.8, material_index=JOINT_MATERIAL)
 
 
-PLINTH_BAND_W0 = 16       # the quatrefoil band along the foot starts just above the grass and candles
+PLINTH_BAND_W0 = 22       # the quatrefoil band along the foot clears the grass, the candles and the densest ground mist
 PLINTH_BAND_H = 26        # as tall as the side rooms' frieze: smaller medallions do not read at game size
 
 

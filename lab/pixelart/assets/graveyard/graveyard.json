@@ -245,6 +245,8 @@
       "title": "Chapel",
       "build": "build_chapel",
       "render_scale": 4,
+      "paint_passes": true,
+      "paint": {"gain": 0.63, "contrast": 1.2, "saturation": 1.1, "night": 0.25, "antialias": 0.6},
       "stylize": {
         "shift": -2,
         "k_scale": 3.5,
@@ -271,7 +273,8 @@
         "antialias": 0.6,
         "drawn_edges": true,
         "wear": true,
-        "ornament_faithful": 0.7
+        "ornament_faithful": 0.7,
+        "ornament_contrast": 1.6
       },
       "tiled": {
         "name": "graveyard-chapel",
