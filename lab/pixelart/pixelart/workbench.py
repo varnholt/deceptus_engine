@@ -21,7 +21,7 @@ import numpy as np
 from PIL import Image
 
 from . import __main__ as pipeline
-from . import compare, palette, snap, stylize
+from . import compare, paint, palette, snap, stylize
 from .metrics import metrics
 
 # pixelize() parameters that are not style options
@@ -112,6 +112,7 @@ class Target:
     label: str
     preview_dir: Path
     written_art: Path
+    paint: dict = None   # the piece's paint-stage options when the paint stage draws it (see paint.py)
 
     def preview_path(self, tag):
         return self.preview_dir / f"{self.label}_{tag}.png"
@@ -121,7 +122,8 @@ def target_for_piece(cfg, piece):
     if piece not in cfg["pieces"]:
         raise KeyError(f"no piece '{piece}' in {cfg['_path']}")
     beauty, ids, normals = pipeline.pass_paths(cfg, piece)
-    return Target(beauty, ids, normals, piece, cfg["_work"] / PREVIEW_FOLDER, cfg["_work"] / f"{piece}_px.png")
+    return Target(beauty, ids, normals, piece, cfg["_work"] / PREVIEW_FOLDER, cfg["_work"] / f"{piece}_px.png",
+                  cfg["pieces"][piece].get("paint"))
 
 
 def target_for_passes(beauty, ids, normals):
@@ -250,8 +252,13 @@ def stylize_to(target, options, ramps, out_path):
     out_path.parent.mkdir(parents=True, exist_ok=True)
     # previews of one target share a file, so two stylizes must not write it at once
     with _stylize_lock:
-        stylize.pixelize(str(target.beauty), str(target.ids), str(target.normals), str(out_path),
-                         palette=ramps, **normalized_options(options))
+        if target.paint is not None:
+            # a painted piece is drawn by the paint stage with its own options from the config; the
+            # stylizer's options do not apply to it
+            paint.paint(target.beauty.parent, target.label, out_path, palette=ramps, **target.paint)
+        else:
+            stylize.pixelize(str(target.beauty), str(target.ids), str(target.normals), str(out_path),
+                             palette=ramps, **normalized_options(options))
     return out_path
 
 
