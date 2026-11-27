@@ -17,6 +17,8 @@ import warnings
 import numpy as np
 from scipy import ndimage
 
+from .grade import lum
+
 MAX_HOLE_PX = 4           # gaps between meshes are a few pixels; anything larger may be a real opening (a cross ring, a fence)
 MAX_ISLAND_PX = 3         # dark groups up to this size are specks; joints and cracks are longer
 DARK_LUMINANCE = 32       # joint and outline colours are below this
@@ -24,17 +26,15 @@ SLIVER_MAX_LENGTH = 4     # shorter one-pixel dark runs are slivers, longer ones
 SPECK_CONTRAST = 28       # a speck is at least this much brighter than the median of its neighbours (one tone step or more)
 
 EIGHT = np.ones((3, 3), dtype=bool)
-
-
-def _luminance(rgb):
-    return rgb[..., 0] * 0.299 + rgb[..., 1] * 0.587 + rgb[..., 2] * 0.114
+AROUND = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.int32)   # the eight neighbours of a pixel
+LINE_NEIGHBOURS = 2       # a bright pixel with this many bright neighbours is part of a highlight line
 
 
 def _dark_stone(img):
     """Joint and outline dark: dark and not green, so shaded leaves and moss are never taken for dirt."""
     rgb = img[..., :3].astype(float)
     green = (rgb[..., 1] > rgb[..., 0] * 1.15) & (rgb[..., 1] > rgb[..., 2] * 1.05)
-    return (img[..., 3] > 0) & (_luminance(rgb) < DARK_LUMINANCE) & ~green
+    return (img[..., 3] > 0) & (lum(rgb) < DARK_LUMINANCE) & ~green
 
 
 def _packed(rgb):
@@ -86,7 +86,7 @@ def fill_holes(img):
         if not opaque[win][ring].all():
             continue
         colours = img[win][..., :3][ring]
-        img[win][..., :3][region] = colours[_luminance(colours.astype(float)).argmin()]
+        img[win][..., :3][region] = colours[lum(colours.astype(float)).argmin()]
         img[win][..., 3][region] = 255
         fixed += 1
     return fixed
@@ -143,17 +143,17 @@ def remove_slivers(img):
 
 def remove_bright_specks(img):
     opaque = img[..., 3] > 0
-    lum = _luminance(img[..., :3].astype(float))
-    h, w = lum.shape
-    p = np.pad(np.where(opaque, lum, np.nan), 1, constant_values=np.nan)
+    brightness = lum(img[..., :3].astype(float))
+    h, w = brightness.shape
+    p = np.pad(np.where(opaque, brightness, np.nan), 1, constant_values=np.nan)
     neighbours = np.stack([p[1 + dy:1 + dy + h, 1 + dx:1 + dx + w] for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dy or dx], -1)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)   # pixels with no opaque neighbour have no median
         surround = np.nanmedian(neighbours, -1)
-    bright = opaque & (lum - surround > SPECK_CONTRAST)
-    # part of a highlight line: a bright neighbour on both sides along a row or a column
-    bp = np.pad(bright, 1)
-    in_line = (bp[1:-1, :-2] & bp[1:-1, 2:]) | (bp[:-2, 1:-1] & bp[2:, 1:-1])
+    bright = opaque & (brightness - surround > SPECK_CONTRAST)
+    # part of a highlight line: at least two bright neighbours, so lines along curves and diagonals
+    # count as well as rows and columns; a line's last pixel (one bright neighbour) is still trimmed
+    in_line = ndimage.convolve(bright.astype(np.int32), AROUND, mode="constant") >= LINE_NEIGHBOURS
     specks = bright & ~in_line
     packed = _packed(img[..., :3])
     pp = np.pad(np.where(opaque & ~bright, packed, -1), 1, constant_values=-1)

@@ -10,6 +10,11 @@ NIGHT = np.array([28.0, 36.0, 92.0])   # the blue of the graveyard's night scene
 LUMA = np.array([0.299, 0.587, 0.114])
 
 
+def lum(rgb):
+    """Perceived brightness of RGB values (last axis)."""
+    return rgb[..., 0] * LUMA[0] + rgb[..., 1] * LUMA[1] + rgb[..., 2] * LUMA[2]
+
+
 def grade(img, gain=1.0, contrast=1.0, saturation=1.0, night=0.0):
     """img: RGBA uint8, changed in place. gain scales brightness, contrast spreads tones around the
     piece's mid tone, saturation scales colourfulness, night (0-1) pulls colours towards NIGHT."""

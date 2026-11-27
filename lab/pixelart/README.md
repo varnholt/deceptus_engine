@@ -13,7 +13,7 @@ Steps, in order (pick any with `--steps`):
 
 | step | what it does | output in `work_dir` |
 |---|---|---|
-| render | builds the piece in headless Blender (GPU if there is one), renders three passes | `<piece>_beauty.png`, `_ids.png`, `_normals.png` |
+| render | builds the piece in headless Blender (GPU if there is one), renders three passes, at `render_scale` times level size reduced back to level size | `<piece>_beauty.png`, `_ids.png`, `_normals.png` |
 | stylize | redraws the beauty pass in the target style (see below) | `<piece>_px.png` |
 | inscribe | carves the epitaphs the render recorded into the art, as drawn glyphs (see below) | `<piece>_px.png` |
 | compare | the piece next to the reference art, at 4x, with style numbers | `compare_<piece>.png` |
@@ -115,7 +115,12 @@ stone, its bottom row shaded; joints become a dark tone of the stones beside the
 engraved lettering and cracks become outline colour; moss stays green and can be gathered into clumps.
 Thin strips (incised borders) are line work and get no edge light. Options per piece (`"stylize"`):
 `shift` (whole tone steps, negative for pieces further back), `k_scale`, `micro` (fine shade noise, 0 = calm),
-`moss_clumps`, `foot_rows` (contact shade where a piece meets the ground), `outline_level`, and the
+`moss_clumps`, `foot_rows` (contact shade where a piece meets the ground), `outline_level`, `tone_spread` (how far a
+stone's tone may depart from the stones around it; lower = calmer walls), `drawn_edges` (block edges by dstar's wall
+rules: sides lit only near the top, a glint at the top corners, no dark bottom edge, bottom corners cut into the joint
+so a dark wedge opens where joints meet), `wear` (`pixelart/wear.py`: top lines stop short or break, a few stones get a
+crack stroke, a pit or a chipped edge, decided per stone from `texture_seed`), `antialias` (`pixelart/antialias.py`:
+an in-between tone in the concave notches of curves, inside the piece only, from the piece's own colours), and the
 shading that keeps pieces from looking like flat EGA tiles: `soft` (the render's own light inside a
 stone, in in-between shades), `bevel` (pillowed stones: a lit band along the top and left edges, falloff
 towards the bottom right), `speck` (fine surface speckle) and `sub_steps`. Stones deep in shadow stay flat.
@@ -134,7 +139,10 @@ See `assets/graveyard/graveyard.json`. Top level: `origin` (level x, ground y of
 harness, the checkout whose `data/` gets the art, level name, level dir, tmx), `references` for comparison
 sheets. Each piece: `build` (function in a scene script that builds the scene and calls `setup_stage` with its
 camera rectangle in level pixels), `stylize` options, `tiled` placement (tileset name, layer, the layer it
-goes after, z, tile position, optional placeholder clearing), `capture` spots in tiles, `compare_boxes`.
+goes after, z, tile position, optional placeholder clearing), `capture` spots in tiles, `compare_boxes`, and
+`render_scale` (default 1): the passes are rendered that many times larger into `<work_dir>/<piece>_x<scale>/` and
+reduced to level size by `pixelart/reduce.py`, so every level pixel is decided by the whole area it covers instead
+of one sample (no speckle from scan texture or edges; joints stay one pixel wide). 4 suits architecture.
 
 ## Gotchas
 

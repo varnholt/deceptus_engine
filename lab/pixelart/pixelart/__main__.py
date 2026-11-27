@@ -20,7 +20,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import compare, inscribe, palette, stylize, tiled
+from . import compare, inscribe, palette, reduce, stylize, tiled
 from .metrics import metrics
 
 KIT = Path(__file__).resolve().parent.parent / "blender_kit"
@@ -62,13 +62,19 @@ def piece_palette(cfg, piece):
 
 
 def render(cfg, piece):
-    cmd = [BLENDER, "-b", "--python", str(KIT / "run_passes.py"), "--", cfg["_path"], piece, str(cfg["_work"])]
+    """Renders the piece's passes into work_dir; a piece with a render_scale above 1 renders them
+    larger into work_dir/<piece>_x<scale> and reduces them to level size (see reduce.py)."""
+    scale = cfg["pieces"][piece].get("render_scale", 1)
+    out_dir = cfg["_work"] / f"{piece}_x{scale}" if scale > 1 else cfg["_work"]
+    cmd = [BLENDER, "-b", "--python", str(KIT / "run_passes.py"), "--", cfg["_path"], piece, str(out_dir.resolve())]
     t0 = time.monotonic()
     done = subprocess.run(cmd, capture_output=True, text=True)
     if done.returncode != 0 or f"pixelart: rendered {piece}" not in done.stdout:
         print(done.stdout[-3000:], done.stderr[-3000:])
         raise SystemExit(f"render of {piece} failed")
-    print(f"{piece}: rendered in {time.monotonic() - t0:.0f}s")
+    if scale > 1:
+        reduce.reduce_passes(out_dir, cfg["_work"], piece, scale)
+    print(f"{piece}: rendered in {time.monotonic() - t0:.0f}s" + (f" at {scale}x, reduced" if scale > 1 else ""))
 
 
 def pass_paths(cfg, piece):

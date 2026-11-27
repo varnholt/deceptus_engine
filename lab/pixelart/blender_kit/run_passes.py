@@ -4,7 +4,8 @@ Headless:  blender -b --python run_passes.py -- <asset.json> <piece> <out_dir>
 Live (e.g. from an MCP session):  exec this file with KIT_DIR in its globals, then run(asset_json, piece, out_dir)
 
 Writes <out_dir>/<piece>_beauty.png, _ids.png and _normals.png, and _inscriptions.json when the
-piece has lettering areas (see graves.lettering).
+piece has lettering areas (see graves.lettering). A piece with a render_scale above 1 renders the passes
+that many times larger (the caller reduces them, see pixelart/reduce.py); inscriptions stay in level pixels.
 """
 import json
 import os
@@ -53,6 +54,7 @@ def build(asset_json, piece):
     for scene in cfg["scenes"]:
         _exec(os.path.join(asset_dir, scene), ns)
     piece_cfg = cfg["pieces"][piece]
+    ns["RENDER_SCALE"] = piece_cfg.get("render_scale", 1)
     ns[piece_cfg["build"]](**piece_cfg.get("build_args", {}))
     return ns
 

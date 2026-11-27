@@ -8,6 +8,9 @@ import bpy, bmesh, math, random
 from mathutils import Vector, Matrix
 
 PX = 1.0 / 24.0
+# render pixels per level pixel (run_passes sets it from the piece's render_scale); above 1 the
+# passes are reduced to level size afterwards, so each level pixel comes from many samples, not one
+RENDER_SCALE = 1
 ORIGIN_X_PX = 5300
 GROUND_PY = 1556
 
@@ -577,7 +580,7 @@ def setup_stage(scn, cam_px):
     r = scn.render
     r.resolution_x = w_px
     r.resolution_y = h_px
-    r.resolution_percentage = 100
+    r.resolution_percentage = RENDER_SCALE * 100
     r.film_transparent = True
     r.engine = "CYCLES"
     scn.cycles.samples = 96

@@ -13,8 +13,10 @@ import sys
 import numpy as np
 from PIL import Image
 
-from .grade import grade
+from .antialias import soften_notches
+from .grade import grade, lum
 from .tidy import neighbour_mode, tidy
+from .wear import hand_marks, highlight_breaks, same_stone_run
 
 # dstar's owl shrine, stone ramp from outline to highlight
 RAMP = np.array([(5, 10, 3), (28, 33, 26), (44, 49, 42), (52, 57, 50), (73, 78, 71), (96, 101, 94), (131, 136, 129), (182, 187, 180)])
@@ -23,24 +25,54 @@ OUTLINE = 0
 BASE_LEVELS = [2, 3, 4, 5]
 # a stone whose mean brightness is below this share of the median stone counts as deep in shadow
 DEEP_SHADOW = 0.45
+SIDE_LIGHT_ROWS = 4   # dstar lights a block's sides only this far down from its top
+JOINT_BELOW = 2       # joints sit this many shades under the stones beside them (see mortar)
+# a small carved part darker than this share of the light around it is an engraved stroke
+ENGRAVED_SHARE = 0.4
+REGION = 15   # pixels across the neighbourhood that sets the light around a pixel
+TONE_REGION = 41   # pixels across the neighbourhood whose light a stone's tone stays close to
 BASE_SHARES = [0.35, 0.25, 0.30, 0.10]   # tuned (style/tune.py) against the shrine's tone counts
 GREENS = np.array([(7, 24, 14), (12, 37, 23), (18, 50, 31), (23, 63, 33), (35, 82, 45), (55, 110, 62)])
 PASSAGE = np.array([(12, 0, 24), (13, 1, 25), (17, 3, 34), (20, 6, 43), (25, 15, 51), (31, 23, 65)])
 
 
-def lum(rgb):
-    return rgb[..., 0] * 0.299 + rgb[..., 1] * 0.587 + rgb[..., 2] * 0.114
+def regional_brightness(L, solid, size=None):
+    """Mean brightness of the solid pixels in a square around every pixel (summed-area table)."""
+    size = size or REGION
+    r = size // 2
+    weights = solid.astype(np.float64)
+    values = np.where(solid, L, 0.0)
+
+    def box(a):
+        s = np.pad(a, ((r + 1, r), (r + 1, r))).cumsum(0).cumsum(1)
+        return s[size:, size:] - s[:-size, size:] - s[size:, :-size] + s[:-size, :-size]
+    return box(values) / np.maximum(box(weights), 1.0)
 
 
-def mortar(level, seam, stone, ramp):
-    """Joint colours the way dstar paints them: a dark tone of the stone, two steps under its
-    neighbours, darkest only where joints cross; the stone corners facing away from the light
-    are rounded into the joint."""
-    lv = np.where(stone, level, 99)
+def crack_lines(L, key, stone):
+    """How much darker every pixel is than both pixels across it, for the best of the four line
+    directions; pairs are counted only within the pixel's own stone."""
+    h, w = L.shape
+    lp = np.pad(L, 1, mode="edge")
+    kp = np.pad(np.where(stone, key, -1), 1, constant_values=-1)
+    depth = np.zeros((h, w))
+    for dy, dx in ((0, 1), (1, 0), (1, 1), (1, -1)):
+        a = lp[1 + dy:1 + dy + h, 1 + dx:1 + dx + w]
+        b = lp[1 - dy:1 - dy + h, 1 - dx:1 - dx + w]
+        same = (kp[1 + dy:1 + dy + h, 1 + dx:1 + dx + w] == key) & (kp[1 - dy:1 - dy + h, 1 - dx:1 - dx + w] == key)
+        depth = np.maximum(depth, np.where(same, np.minimum(a, b) - L, 0.0))
+    return depth
+
+
+def mortar(level, body, seam, stone, ramp):
+    """Joint colours the way dstar paints them: a dark tone of the stone, two steps under the bodies
+    of the stones beside it (not their lit edges, which would lighten the joint), darkest only where
+    joints cross; the stone corners facing away from the light are rounded into the joint."""
+    lv = np.where(stone, body, 99)
     p = np.pad(lv, 1, constant_values=99)
     nb = np.stack([p[:-2, 1:-1], p[2:, 1:-1], p[1:-1, :-2], p[1:-1, 2:]], -1)
     near = nb.min(-1)
-    m = np.where(near < 99, np.clip(near - 2, 1, 3), 1)
+    m = np.where(near < 99, np.clip(near - JOINT_BELOW, 1, 3), 1)
     sp = np.pad(seam, 1)
     seam_nb = sp[:-2, 1:-1].astype(int) + sp[2:, 1:-1] + sp[1:-1, :-2] + sp[1:-1, 2:]
     m = np.where(seam_nb >= 3, m - 1, m)
@@ -76,6 +108,24 @@ def shade_clumps(out, moss, greens):
     out[..., :3][above_open] = greens[min(len(greens) - 1, 4)]
 
 
+def drawn_block_edges(lv, key, stone, base, lit_top, left_edge, right_edge, top_edge, lit):
+    """The edges of a block the way dstar draws them on his walls (all arrays over the stone pixels):
+    - the sides beside a vertical joint lit one shade, on both sides, only in the block's top rows;
+    - a glint one shade over the top line where it meets the side;
+    - no dark bottom or right edge: the joint alone separates the blocks;
+    - the bottom corners cut into the joint, two pixels at the bottom left and one at the bottom
+      right, so a dark wedge opens where a vertical joint meets the bed joint below."""
+    rows_above = same_stone_run(key, stone, -1, 0, SIDE_LIGHT_ROWS)[stone]
+    side = (left_edge | right_edge) & ~top_edge & lit & (rows_above < SIDE_LIGHT_ROWS)
+    lv = lv + np.where(side, 1, 0) + np.where(lit_top & (left_edge | right_edge), 1, 0)
+    rows_below = same_stone_run(key, stone, 1, 0, 2)[stone]
+    to_left = same_stone_run(key, stone, 0, -1, 2)[stone]
+    to_right = same_stone_run(key, stone, 0, 1, 2)[stone]
+    bottom_row, above_it = rows_below == 0, rows_below == 1
+    cut = lit & ((bottom_row & ((to_left < 2) | (to_right < 1))) | (above_it & (to_left < 1)))
+    return np.where(cut, np.clip(base - JOINT_BELOW, 1, 3), lv)
+
+
 def shade_feet(level, solid, stone, rows):
     """Contact shade: the lowest stone rows of every column, where a piece meets the ground, one step darker."""
     rows_from_bottom = np.cumsum(solid[::-1], axis=0)[::-1]
@@ -102,26 +152,14 @@ def absorb_growth_specks(out, leaf, stone):
     stone[lonely] = True
 
 
-def _run_length(key, stone, dy, dx, limit):
-    """For every pixel, how many pixels of the same stone follow in direction (dy, dx), up to limit."""
-    run = np.zeros(key.shape, dtype=np.int32)
-    alive = stone.copy()
-    shifted = key
-    for _ in range(limit):
-        shifted = np.roll(np.roll(shifted, -dy, 0), -dx, 1)
-        alive = alive & (shifted == key)
-        run += alive
-    return run
-
-
 def pillow(key, stone, width):
     """dstar's pillowed stones as a ramp offset: a lit band along the top and left edge `width`
     pixels deep, fading into the body, and the body falling off into shade towards the bottom and
     right edge."""
-    up = _run_length(key, stone, -1, 0, width)
-    left = _run_length(key, stone, 0, -1, width)
-    down = _run_length(key, stone, 1, 0, width)
-    right = _run_length(key, stone, 0, 1, width)
+    up = same_stone_run(key, stone, -1, 0, width)
+    left = same_stone_run(key, stone, 0, -1, width)
+    down = same_stone_run(key, stone, 1, 0, width)
+    right = same_stone_run(key, stone, 0, 1, width)
     near_top = np.maximum(width - up, 0) / width
     near_left = np.maximum(width - left, 0) / width
     near_bottom = np.maximum(width - down, 0) / width
@@ -205,7 +243,7 @@ def ramp_colour(ramp, position, sub_steps):
     return np.round(ramp[lo] * (1 - t) + ramp[hi] * t).astype(np.int32)
 
 
-def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0, round_corners=False, texture=0.0, pits=0.0, scratches=0.0, texture_seed=7, edge_light=2, faithful=0.0):
+def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0, round_corners=False, texture=0.0, pits=0.0, scratches=0.0, texture_seed=7, edge_light=2, faithful=0.0, tone_spread=1.0, antialias=0.0, wear=False, drawn_edges=False):
     shares = base_shares or BASE_SHARES
     pal = palette or {}
     ramp = np.array(pal.get("stone", RAMP))
@@ -222,7 +260,9 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     Ls = L.copy()
     key = (ids[..., 0].astype(np.int64) << 16) | (ids[..., 1].astype(np.int64) << 8) | ids[..., 2]
 
-    seam = solid & ((key == 0) | (rgb.max(-1) <= 12))
+    # joints come from the ids pass alone: taking near-black render pixels as joints as well turned
+    # stone lying in deep or cast shadow into black specks
+    seam = solid & (key == 0)
     # classify whole stones (id regions) by their mean colour, never single pixels
     body = solid & ~seam
     u, inv0 = np.unique(key[body], return_inverse=True)
@@ -257,11 +297,17 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
         # tones follow the render's own brightness (on a log scale, as the eye sees it) instead of
         # fixed shares, so a bright stone stays bright and a dark one dark
         logs = np.log(np.maximum(means, 1.0))
+        if tone_spread < 1.0:
+            # neighbouring stones keep close tones: each stone's own brightness only partly departs
+            # from the light around it, so the wall reads as lit masonry, not a patchwork
+            around = regional_brightness(L, stone, TONE_REGION)
+            around_logs = np.log(np.maximum(np.bincount(inv, weights=around[stone]) / counts, 1.0))
+            logs = around_logs + tone_spread * (logs - around_logs)
         lo, hi = np.percentile(logs, 5), np.percentile(logs, 95)
         position = 1.5 + 4.0 * np.clip((logs - lo) / max(hi - lo, 1e-6), 0, 1)
         base = np.round(position).astype(int) + shift
 
-    # 5x5 mean of brightness restricted to the pixel's own stone
+    # 3x3 mean of brightness restricted to the pixel's own stone
     acc = np.zeros((h, w)); num = np.zeros((h, w))
     for dy in range(-1, 2):
         for dx in range(-1, 2):
@@ -280,8 +326,9 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     # edge light: dstar paints deep shadow as one flat dark area, not as a grid of lit edges
     deep_shadow = means < DEEP_SHADOW * np.median(means)
     in_shadow = (lv < base[inv]) | deep_shadow[inv]
-    # cracks: clearly darker than the stone around them
-    crack = raw_delta < -np.maximum(pix_std * crack_k, 12.0)
+    # cracks: lines, clearly darker than the pixels on both sides of them; a shadow edge is darker
+    # on one side only and must stay shadow, not turn into crack pixels
+    crack = crack_lines(L, key, stone)[stone] > np.maximum(pix_std * crack_k, 12.0)
 
     # bevels from the normal pass (light from the upper left)
     nx = nrm[..., 0][stone] / 127.5 - 1
@@ -301,7 +348,8 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     # engraved strokes are joint-dark in the render; raised relief keeps its own stone tone and edges
     lsum = np.zeros((h, w))
     lsum[solid] = (np.bincount(ib, weights=L[solid]) / np.bincount(ib))[ib]
-    engraved = carving & (lsum < 20)
+    # measured against the light around it: in a piece lying in shadow every carved part is dark
+    engraved = carving & (lsum < ENGRAVED_SHARE * regional_brightness(L, solid))
     # thin strips (incised borders, mouldings one or two pixels wide) are line work, not stones:
     # lighting stair-stepped edges along them pixel by pixel would only make dotted lines,
     # so they neither get edge light themselves nor count as an edge of the stone they lie on
@@ -326,17 +374,33 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     # two steps over its own stone: with a darker tone shift the highlights go down with the stones,
     # otherwise a night-dark piece is spattered with full-bright edge pixels
     top_lv = base[inv] + edge_light
-    lv = np.where(top_edge & big & ~in_shadow, np.maximum(lv - np.where(up_face, 1, 0), top_lv), lv)
-    lv = lv + np.where(left_edge & ~top_edge & big & ~in_shadow, 1, 0)
-    lv = lv - np.where(bottom_edge, 1, 0) - np.where(right_edge & ~bottom_edge & ~top_edge, 1, 0)
+    lit_top = top_edge & big & ~in_shadow
+    if wear:
+        # an artist's top line stops short of the ends and breaks now and then, stone by stone
+        lit_top &= ~highlight_breaks(key, stone, texture_seed)[stone]
+    lv = np.where(lit_top, np.maximum(lv - np.where(up_face, 1, 0), top_lv), lv)
+    if drawn_edges:
+        lv = drawn_block_edges(lv, key, stone, base[inv], lit_top, left_edge, right_edge, top_edge, big & ~in_shadow)
+    else:
+        lv = lv + np.where(left_edge & ~top_edge & big & ~in_shadow, 1, 0)
+        lv = lv - np.where(bottom_edge, 1, 0) - np.where(right_edge & ~bottom_edge & ~top_edge, 1, 0)
     # the brightest tone is kept for long, unbroken ledges (see below); bodies stop one step under it
     lv = np.clip(lv, 1, len(ramp) - 2)
+    if wear:
+        inside = np.zeros((h, w), dtype=bool)
+        inside[stone] = ~(top_edge | bottom_edge | left_edge | right_edge) & big
+        lv = np.clip(lv + hand_marks(key, stone, inside, texture_seed)[stone], 1, len(ramp) - 2)
     lv[crack] = OUTLINE
     lv[engraved[stone]] = OUTLINE
     level[stone] = lv
     if foot_rows:
         shade_feet(level, solid, stone, foot_rows)
-    seam_rgb = mortar(level, seam, stone, ramp)
+    # drawn edges light the pixels beside a joint, so joints are set against the stone bodies; the
+    # classic edges darken them, and joints keep following the pixels beside them
+    body = level.copy()
+    if drawn_edges:
+        body[stone] = base[inv]
+    seam_rgb = mortar(level, body, seam, stone, ramp)
     # moss and lichen growing on a stone stay green, they are not part of its tone
     mossy = stone & (rgb[..., 1] > rgb[..., 0] * 1.22) & (rgb[..., 1] > rgb[..., 2] * 1.02) & (rgb.max(-1) > 14)
     if moss_clumps:
@@ -416,6 +480,10 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
     if round_corners:
         round_stone_corners(out, key, stone, seam)
     report = tidy(out)
+    # after tidy, which would take the lone in-between pixels for specks; before the grade, so they
+    # are graded with everything else
+    if antialias:
+        report["softened curve pixels"] = soften_notches(out, seam | edge, antialias)
     grade(out, gain=gain, contrast=contrast, saturation=saturation, night=night)
     Image.fromarray(out).save(out_p)
     return report
