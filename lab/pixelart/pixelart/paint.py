@@ -22,7 +22,10 @@ Steps, in order:
    line where it ends towards the lower right; hand marks (wear.py);
 5. joints a dark step under the stones beside them; moss green where the albedo is; a dark outline
    along the silhouette;
-6. curve smoothing (antialias.py) and the grade that sits the piece into its level (grade.py).
+6. inside the stones, in in-between shades: each stone's place within its light band (the light
+   falling off across a face, stone by stone), a slight roundness (lighter top rows, darker bottom
+   rows) and patches from its own albedo texture, never single pixels;
+7. curve smoothing (antialias.py) and the grade that sits the piece into its level (grade.py).
 
 usage: python -m pixelart.paint <passes dir> <piece> <out.png>
 """
@@ -35,7 +38,7 @@ from scipy import ndimage
 
 from .antialias import soften_notches
 from .grade import grade, lum
-from .stylize import GREENS, PASSAGE, RAMP, clump_moss
+from .stylize import GREENS, PASSAGE, RAMP, clump_moss, ramp_colour
 from .wear import hand_marks, highlight_breaks, same_stone_run
 
 # light bands, as shares of the light on the brightest lit stones: deep | shade | half | lit
@@ -59,6 +62,13 @@ RELIEF_STEP_PX = 0.8    # a depth step of this many pixels or more is a relief e
 MOSS_GREEN = 1.15       # albedo this much greener than red and blue is moss
 MOSS_UP = 0.35          # moss only on faces turned up at least this much (normal's up component)
 OUTLINE_STEP = 0        # ramp step of the silhouette line
+SUB_STEPS = 3           # in-between shades per ramp step, for gradients and texture inside the stones
+GRADIENT = 1.0          # how far a stone's place inside its light band moves its tone (in ramp steps)
+PILLOW = 1.0 / 3        # stones a sub-step lighter along their top, a sub-step darker along their bottom
+PILLOW_ROWS = 2         # rows from a stone's top or bottom that the pillow shading reaches
+TEXTURE = 1.0 / 3       # albedo detail lifts or lowers a patch of a stone by this much
+TEXTURE_CONTRAST = 0.12 # albedo this share above or below its stone's mean is a patch
+MIN_PATCH = 4           # texture patches smaller than this many pixels are dropped (no grain)
 NO_SIDE = -1
 TOWARDS_LIGHT = ((-1, 0), (0, -1))   # the moon lights from the upper left: the up and left neighbours
 ORTHOGONAL = ((-1, 0), (1, 0), (0, -1), (0, 1))
@@ -141,11 +151,13 @@ def band_steps(band, cls, recede):
     return step - np.where(recede, RECEDE_STEPS, 0)
 
 
-def stone_tints(albedo_lum, key, cls, surface):
-    """A step up or down for each stone whose albedo sits clearly above or below its material's."""
+def stone_tints(albedo_lum, key, cls, recede, surface):
+    """A step up or down for each stone whose albedo sits clearly above or below that of its material
+    in its own part of the building: the side rooms are darker by design, which RECEDE_STEPS already
+    shows, so their stones are measured against each other, not against the chapel's."""
     tint = np.zeros(key.shape, dtype=np.int32)
-    for c in STEPS:
-        here = surface & (cls == c)
+    for c, back in ((c, back) for c in STEPS for back in (False, True)):
+        here = surface & (cls == c) & (recede == back)
         if not here.any():
             continue
         _, inv = np.unique(key[here], return_inverse=True)
@@ -204,6 +216,49 @@ def block_edges(key, seam, surface, band):
     return lit, cut
 
 
+def light_gradient(light, band, key, surface):
+    """Each stone's place inside its light band, -0.5 (darkest end) to +0.5 (lightest), from the mean
+    light on its main band: neighbouring stones shift a little as the light falls off across a face,
+    while each stone stays one tone."""
+    top = max(np.percentile(light[surface], BRIGHT_PERCENTILE), 1e-6)
+    edges = np.r_[0.0, BAND_EDGES, 1.0]
+    rel = light / top
+    _, inv = np.unique(key[surface], return_inverse=True)
+    stone_rel = (np.bincount(inv, weights=rel[surface]) / np.bincount(inv))[inv]
+    b = band[surface]
+    lo, hi = edges[b], edges[b + 1]
+    place = np.zeros(key.shape)
+    place[surface] = np.clip((stone_rel - lo) / np.maximum(hi - lo, 1e-6) - 0.5, -0.5, 0.5)
+    return place
+
+
+def pillow(key, surface):
+    """+1 on a stone's top rows fading to 0, -1 on its bottom rows: the slight roundness dstar gives
+    his blocks."""
+    up = same_stone_run(key, surface, -1, 0, PILLOW_ROWS)
+    down = same_stone_run(key, surface, 1, 0, PILLOW_ROWS)
+    near_top = np.maximum(PILLOW_ROWS - up, 0) / PILLOW_ROWS
+    near_bottom = np.maximum(PILLOW_ROWS - down, 0) / PILLOW_ROWS
+    return np.where(surface, near_top - near_bottom, 0.0)
+
+
+def albedo_texture(albedo_lum, key, surface):
+    """+1 / -1 where the stone's own colour (scan texture, grime) is clearly lighter or darker than its
+    mean, kept only in patches of MIN_PATCH pixels or more, so texture reads as patches, not grain."""
+    _, inv = np.unique(key[surface], return_inverse=True)
+    mean = np.zeros(key.shape)
+    mean[surface] = (np.bincount(inv, weights=albedo_lum[surface]) / np.bincount(inv))[inv]
+    rel = np.where(surface, albedo_lum / np.maximum(mean, 1e-3) - 1.0, 0.0)
+    texture = np.zeros(key.shape)
+    for sign in (1, -1):
+        patch = surface & (sign * rel > TEXTURE_CONTRAST)
+        labels, n = ndimage.label(patch)
+        if n:
+            sizes = np.bincount(labels.ravel())
+            texture[(labels > 0) & (sizes[labels] >= MIN_PATCH)] = sign
+    return texture
+
+
 def silhouette(solid):
     """Solid pixels with an empty pixel beside them."""
     return solid & ~np.logical_and.reduce([shifted(solid, dy, dx, False) for dy, dx in ORTHOGONAL])
@@ -233,7 +288,7 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
     moss = clump_moss(surface & green & up, surface)
 
     band = one_tone_per_stone(merge_small_clusters(light_bands(light, surface), key, surface), key, surface)
-    step = band_steps(band, cls, recede) + stone_tints(lum(albedo), key, cls, surface)
+    step = band_steps(band, cls, recede) + stone_tints(lum(albedo), key, cls, recede, surface)
     rim, cast = relief_lines(depth, surface)
     step += np.where(rim & (band >= SHADE), 1, 0) + np.where(top_lines(key, seam, surface, band, seed), 1, 0)
     step -= np.where(cast, CAST_STEPS, 0)
@@ -245,10 +300,16 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
     step = np.where(seam, joint_steps(step, seam, surface), step)
     step = np.where(cut, joint_steps(step, seam | cut, surface & ~cut), step)
     step = np.clip(step, 0, len(ramp) - 1)
+    # inside the stones, in in-between shades: the light's fall-off stone by stone, the stones'
+    # roundness and the texture of their own colour; joints and cuts stay on whole steps
+    body = surface & ~cut
+    shading = (GRADIENT * light_gradient(light, band, key, surface) + PILLOW * pillow(key, surface)
+               + TEXTURE * albedo_texture(lum(albedo), key, surface))
+    position = np.clip(step + np.where(body, shading, 0.0), 0, len(ramp) - 1)
 
     out = np.zeros(ids.shape, dtype=np.uint8)
     painted = surface | seam
-    out[..., :3][painted] = ramp[step[painted]]
+    out[..., :3][painted] = np.clip(ramp_colour(ramp, position[painted], SUB_STEPS), 0, 255)
     leaf = (solid & (cls == FOLIAGE)) | moss
     out[..., :3][leaf] = greens[np.clip(band[leaf] + 1, 0, len(greens) - 1)]
     glass = solid & (cls == GLASS)
