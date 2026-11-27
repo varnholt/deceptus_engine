@@ -3,7 +3,8 @@
 usage: python -m pixelart.gui [asset.json] [--port N] [--no-browser]
 
 Serves the page on localhost and opens the browser. The page shows the piece in the level, as the
-game will draw it. Stylizing runs in the request's worker thread (a newer request supersedes a
+game will draw it. /model is a second page that turns any 3D model file into pixel art (input,
+settings, render beside the art; see model_studio.py). Stylizing runs in the request's worker thread (a newer request supersedes a
 waiting one); apply (save, write <piece>_px.png, integrate), capture, render and compare run one
 after another in a background job thread whose state the page polls.
 """
@@ -19,10 +20,11 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import workbench
+from . import model_studio, workbench
 from .__main__ import load
 
 PAGE = Path(__file__).with_name("gui_page.html")
+MODEL_PAGE = Path(__file__).with_name("model_page.html")
 RECENT_FILE = Path.home() / ".pixelart" / "recent_assets.json"
 RECENT_LIMIT = 12
 DEFAULT_PORT = 8765
@@ -31,7 +33,8 @@ HOST = "127.0.0.1"
 IMAGE_TYPES = {".png": "image/png", ".bmp": "image/bmp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif"}
 JOB_HISTORY = 20
 # what the page calls each job, in the words of its buttons
-JOB_TITLES = {"apply": "Apply to game", "capture": "Show in game", "render": "Rebuild from the 3D model", "compare": "Comparison sheet"}
+JOB_TITLES = {"apply": "Apply to game", "capture": "Show in game", "render": "Rebuild from the 3D model", "compare": "Comparison sheet",
+              "model_render": "Render the model"}
 
 
 def recent_assets():
@@ -56,28 +59,32 @@ def resolve_source(source):
     return workbench.target_for_piece(cfg, source["piece"]), cfg
 
 
-class LatestStylizer:
-    """Runs one stylize at a time; a request still waiting when a newer one arrives is dropped,
-    so dragging a slider only costs the first and the last stylize."""
+class LatestRequest:
+    """Runs one piece of work at a time; a request still waiting when a newer one arrives is dropped,
+    so dragging a slider only costs the first and the last stylize (or paint)."""
 
     def __init__(self):
         self.newest = 0
         self.counter_lock = threading.Lock()
         self.work_lock = threading.Lock()
 
-    def run(self, target, options, ramps, box):
+    def run(self, work):
         with self.counter_lock:
             self.newest += 1
             ticket = self.newest
         with self.work_lock:
             if ticket != self.newest:
                 return {"superseded": True}
-            preview = workbench.stylize_to(target, options, ramps, target.preview_path("preview"))
-            return {
-                "preview": str(preview),
-                "whole": workbench.image_metrics(preview),
-                "visible": workbench.image_metrics(preview, box) if box else None,
-            }
+            return work()
+
+
+def stylize_preview(target, options, ramps, box):
+    preview = workbench.stylize_to(target, options, ramps, target.preview_path("preview"))
+    return {
+        "preview": str(preview),
+        "whole": workbench.image_metrics(preview),
+        "visible": workbench.image_metrics(preview, box) if box else None,
+    }
 
 
 class JobQueue:
@@ -140,7 +147,8 @@ class Api:
 
     def __init__(self, initial_asset):
         self.initial_asset = initial_asset
-        self.stylizer = LatestStylizer()
+        self.stylizer = LatestRequest()
+        self.painter = LatestRequest()
         self.jobs = JobQueue()
 
     def info(self, _):
@@ -168,7 +176,7 @@ class Api:
 
     def stylize(self, body):
         target, _ = resolve_source(body["source"])
-        return self.stylizer.run(target, body["options"], body["palette"], body.get("box"))
+        return self.stylizer.run(lambda: stylize_preview(target, body["options"], body["palette"], body.get("box")))
 
     def metrics(self, body):
         return workbench.image_metrics(body["path"], body.get("box"))
@@ -206,8 +214,27 @@ class Api:
         return workbench.snap_image(body["path"], int(body.get("colours") or 16), body.get("palette") or None,
                                     float(body["cell"]) if body.get("cell") else None)
 
+    def model_info(self, _):
+        return model_studio.defaults()
+
+    def model_open(self, body):
+        return model_studio.open_model(body["path"])
+
+    def model_paint(self, body):
+        return self.painter.run(lambda: model_studio.repaint(body["asset"], body["view"], body["paint"]))
+
+    def model_save(self, body):
+        return model_studio.save_art(body["asset"], body["out"])
+
+    def model_upload(self, name, data):
+        return model_studio.open_model(model_studio.save_upload(name, data))
+
     def job(self, body):
         kind = body["kind"]
+        if kind == "model_render":
+            asset, view, paint = body["asset"], body["view"], body["paint"]
+            title = f"{JOB_TITLES[kind]} ({model_studio.model_name(asset)})"
+            return {"id": self.jobs.submit(kind, title, lambda report: model_studio.render(asset, view, paint, report))}
         target, cfg = resolve_source(body["source"])
         if cfg is None:
             raise ValueError(f"{kind} needs an asset config, not loose passes")
@@ -250,7 +277,9 @@ class Api:
         return {"jobs": self.jobs.snapshot()}
 
 
-POST_ROUTES = {"open_asset", "open_passes", "stylize", "metrics", "keep_before", "write", "read_palette", "snap_image", "job", "level", "piece_state"}
+POST_ROUTES = {"open_asset", "open_passes", "stylize", "metrics", "keep_before", "write", "read_palette", "snap_image", "job", "level", "piece_state",
+               "model_info", "model_open", "model_paint", "model_save"}
+MAX_UPLOAD = 512 * 1024 * 1024
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -280,6 +309,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if url.path == "/":
                 self._send(HTTPStatus.OK, "text/html; charset=utf-8", PAGE.read_bytes())
+            elif url.path == "/model":
+                self._send(HTTPStatus.OK, "text/html; charset=utf-8", MODEL_PAGE.read_bytes())
             elif url.path == "/api/info":
                 self._send_json(self.api.info(query))
             elif url.path == "/api/jobs":
@@ -301,13 +332,28 @@ class Handler(BaseHTTPRequestHandler):
         self._send(HTTPStatus.OK, content_type, path.read_bytes())
 
     def do_POST(self):
-        name = urlparse(self.path).path.removeprefix("/api/")
+        url = urlparse(self.path)
+        name = url.path.removeprefix("/api/")
+        if name == "model_upload":
+            self._receive_upload(parse_qs(url.query).get("name", [""])[0])
+            return
         if name not in POST_ROUTES:
             self._send_json({"error": f"no endpoint {self.path}"}, HTTPStatus.NOT_FOUND)
             return
         try:
             body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
             self._send_json(getattr(self.api, name)(body))
+        except Exception as failure:
+            self._send_error_json(failure)
+
+
+    def _receive_upload(self, file_name):
+        """A model file dropped onto the model page, sent as the raw request body."""
+        try:
+            size = int(self.headers.get("Content-Length", 0))
+            if size > MAX_UPLOAD:
+                raise ValueError(f"file too large ({size} bytes)")
+            self._send_json(self.api.model_upload(file_name, self.rfile.read(size)))
         except Exception as failure:
             self._send_error_json(failure)
 

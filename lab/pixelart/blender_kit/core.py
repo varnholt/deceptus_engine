@@ -541,22 +541,36 @@ STAGE = dict(
 
 def setup_stage(scn, cam_px):
     """Key light, fill, ambient and the 1:1 orthographic camera over the given level-pixel rectangle."""
-    CAM = cam_px
-    st = STAGE
-    sun = bpy.data.lights.new("key", "SUN")
-    sun.energy = st["key_energy"]
-    sun.color = st["key_color"]
-    sun.angle = math.radians(2.0)
-    sob = bpy.data.objects.new("key", sun)
-    sob.rotation_euler = Vector(st["key_dir"]).normalized().to_track_quat("-Z", "Y").to_euler()
-    scn.collection.objects.link(sob)
-    fill = bpy.data.lights.new("fill", "SUN")
-    fill.energy = st["fill_energy"]
-    fill.color = st["fill_color"]
-    fob = bpy.data.objects.new("fill", fill)
-    fob.rotation_euler = Vector(st["fill_dir"]).normalized().to_track_quat("-Z", "Y").to_euler()
-    scn.collection.objects.link(fob)
+    add_stage_lights(scn, Matrix.Identity(3))
+    # orthographic camera framed on level pixels, one render pixel per level pixel
+    cam = bpy.data.cameras.new("sprite_cam")
+    cam.type = "ORTHO"
+    w_px = cam_px["x1"] - cam_px["x0"]
+    h_px = cam_px["y1"] - cam_px["y0"]
+    cam.ortho_scale = max(w_px, h_px) * PX
+    cam.clip_end = 100
+    cob = bpy.data.objects.new("sprite_cam", cam)
+    cob.location = (X((cam_px["x0"] + cam_px["x1"]) / 2), -40.0, Z((cam_px["y0"] + cam_px["y1"]) / 2))
+    cob.rotation_euler = (math.radians(90), 0, 0)
+    scn.collection.objects.link(cob)
+    scn.camera = cob
+    configure_render(scn, w_px, h_px)
 
+
+def add_stage_lights(scn, view_turn):
+    """The STAGE's key light, fill and ambient. Their directions are given for the front camera
+    (x right, y into the picture, z up); view_turn (3x3) turns them along with another camera, so
+    the moon keeps lighting from the upper left of the picture."""
+    st = STAGE
+    for name, kind in (("key", "key"), ("fill", "fill")):
+        light = bpy.data.lights.new(name, "SUN")
+        light.energy = st[kind + "_energy"]
+        light.color = st[kind + "_color"]
+        if kind == "key":
+            light.angle = math.radians(2.0)
+        ob = bpy.data.objects.new(name, light)
+        ob.rotation_euler = (view_turn @ Vector(st[kind + "_dir"])).normalized().to_track_quat("-Z", "Y").to_euler()
+        scn.collection.objects.link(ob)
     world = bpy.data.worlds.new("ambient")
     world.use_nodes = True
     bg = next(n for n in world.node_tree.nodes if n.type == "BACKGROUND")
@@ -564,19 +578,10 @@ def setup_stage(scn, cam_px):
     bg.inputs[1].default_value = 1.0
     scn.world = world
 
-    # orthographic camera framed on level pixels, one render pixel per level pixel
-    cam = bpy.data.cameras.new("sprite_cam")
-    cam.type = "ORTHO"
-    w_px = CAM["x1"] - CAM["x0"]
-    h_px = CAM["y1"] - CAM["y0"]
-    cam.ortho_scale = max(w_px, h_px) * PX
-    cam.clip_end = 100
-    cob = bpy.data.objects.new("sprite_cam", cam)
-    cob.location = (X((CAM["x0"] + CAM["x1"]) / 2), -40.0, Z((CAM["y0"] + CAM["y1"]) / 2))
-    cob.rotation_euler = (math.radians(90), 0, 0)
-    scn.collection.objects.link(cob)
-    scn.camera = cob
 
+def configure_render(scn, w_px, h_px):
+    """Cycles at w_px x h_px level pixels (times RENDER_SCALE), transparent film, a box filter
+    one sample wide and no colour transform, so pixels keep hard edges and true values."""
     r = scn.render
     r.resolution_x = w_px
     r.resolution_y = h_px
@@ -592,20 +597,31 @@ def setup_stage(scn, cam_px):
     r.dither_intensity = 0.0
 
 
-
 def render(path):
     bpy.context.scene.render.filepath = path
     bpy.ops.render.render(write_still=True)
 
 
-def render_normals(path):
-    """Tangent-space normal map for the engine's lighting: R = x, G = up, B = towards the camera."""
-    scn = bpy.context.scene
-    m = bpy.data.materials.get("normal_out") or bpy.data.materials.new("normal_out")
-    m.use_nodes = True
-    nt = m.node_tree
-    for n in list(nt.nodes):
-        nt.nodes.remove(n)
+def shader_group(name, build):
+    """A shader node group (made once) whose shader output is the socket build(tree) returns, so one
+    pass's shader can go into every material (see _route_outputs) and keep each material's alpha."""
+    group = bpy.data.node_groups.get(name)
+    if group is not None:
+        return group
+    group = bpy.data.node_groups.new(name, "ShaderNodeTree")
+    group.interface.new_socket("Shader", in_out="OUTPUT", socket_type="NodeSocketShader")
+    out = group.nodes.new("NodeGroupOutput")
+    group.links.new(build(group), out.inputs[0])
+    return group
+
+
+def group_node(nt, group):
+    node = nt.nodes.new("ShaderNodeGroup")
+    node.node_tree = group
+    return node
+
+
+def _normal_shader(nt):
     geo = nt.nodes.new("ShaderNodeNewGeometry")
     # single-sided leaves seen from behind report the far side's normal: turn it towards the camera
     sign = nt.nodes.new("ShaderNodeMath"); sign.operation = "MULTIPLY_ADD"
@@ -629,38 +645,20 @@ def render_normals(path):
     nt.links.new(comb.outputs[0], remap.inputs[0])
     em = nt.nodes.new("ShaderNodeEmission")
     nt.links.new(remap.outputs[0], em.inputs["Color"])
-    out = nt.nodes.new("ShaderNodeOutputMaterial")
-    nt.links.new(em.outputs[0], out.inputs[0])
+    return em.outputs[0]
 
-    layer = scn.view_layers[0]
-    old_view = scn.view_settings.view_transform
-    old_samples = scn.cycles.samples
-    hidden = []
-    for ob in scn.objects:
-        if ob.type == "LIGHT" and not ob.hide_render:
-            ob.hide_render = True
-            hidden.append(ob)
-    layer.material_override = m
-    scn.view_settings.view_transform = "Raw"
-    scn.cycles.samples = 16
+
+def render_normals(path):
+    """Tangent-space normal map for the engine's lighting: R = x, G = up, B = towards the camera."""
+    group = shader_group("normal_out", _normal_shader)
+    restore = _route_outputs(lambda m, nt: group_node(nt, group))
     try:
-        render(path)
+        _render_unlit(path, 16)
     finally:
-        layer.material_override = None
-        scn.view_settings.view_transform = old_view
-        scn.cycles.samples = old_samples
-        for ob in hidden:
-            ob.hide_render = False
+        _restore_outputs(restore)
 
 
-def render_ids(path):
-    """One flat colour per stone (block value x object), for the pixel stylizer. Untagged seam slabs come out black."""
-    scn = bpy.context.scene
-    m = bpy.data.materials.get("id_out") or bpy.data.materials.new("id_out")
-    m.use_nodes = True
-    nt = m.node_tree
-    for n in list(nt.nodes):
-        nt.nodes.remove(n)
+def _id_shader(nt):
     attr = nt.nodes.new("ShaderNodeAttribute"); attr.attribute_name = "block_rand"
     info = nt.nodes.new("ShaderNodeObjectInfo")
     comb = nt.nodes.new("ShaderNodeCombineXYZ")
@@ -681,24 +679,17 @@ def render_ids(path):
         nt.links.new(mm.outputs[0], comb.inputs[i])
     em = nt.nodes.new("ShaderNodeEmission")
     nt.links.new(comb.outputs[0], em.inputs["Color"])
-    out = nt.nodes.new("ShaderNodeOutputMaterial")
-    nt.links.new(em.outputs[0], out.inputs[0])
-    layer = scn.view_layers[0]
-    old_view, old_samples = scn.view_settings.view_transform, scn.cycles.samples
-    hidden = [ob for ob in scn.objects if ob.type == "LIGHT" and not ob.hide_render]
-    for ob in hidden:
-        ob.hide_render = True
-    layer.material_override = m
-    scn.view_settings.view_transform = "Raw"
-    scn.cycles.samples = 1
+    return em.outputs[0]
+
+
+def render_ids(path):
+    """One flat colour per stone (block value x object), for the pixel stylizer. Untagged seam slabs come out black."""
+    group = shader_group("id_out", _id_shader)
+    restore = _route_outputs(lambda m, nt: group_node(nt, group))
     try:
-        render(path)
+        _render_unlit(path, 1)
     finally:
-        layer.material_override = None
-        scn.view_settings.view_transform = old_view
-        scn.cycles.samples = old_samples
-        for ob in hidden:
-            ob.hide_render = False
+        _restore_outputs(restore)
 
 
 # material classes for the paint stage, by material name (first match wins); the class is written
@@ -714,20 +705,22 @@ def material_class(name):
     return next((c for key, c in MATERIAL_CLASSES if key in name), STONE_CLASS)
 
 
-def render_light(path):
-    """How much moonlight reaches each pixel: every surface plain white and matt, lit by the key
-    light alone (no fill, no ambient), so the pass holds the light's direction and its cast shadows
-    without texture or colour."""
-    scn = bpy.context.scene
-    m = bpy.data.materials.get("light_out") or bpy.data.materials.new("light_out")
-    m.use_nodes = True
-    bsdf = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+def _white_matt_shader(nt):
+    bsdf = nt.nodes.new("ShaderNodeBsdfPrincipled")
     bsdf.inputs["Base Color"].default_value = (1, 1, 1, 1)
     bsdf.inputs["Roughness"].default_value = 1.0
     for name in ("Specular IOR Level", "Specular"):
         if name in bsdf.inputs:
             bsdf.inputs[name].default_value = 0.0
-    layer = scn.view_layers[0]
+    return bsdf.outputs[0]
+
+
+def render_light(path):
+    """How much moonlight reaches each pixel: every surface plain white and matt, lit by the key
+    light alone (no fill, no ambient), so the pass holds the light's direction and its cast shadows
+    without texture or colour."""
+    scn = bpy.context.scene
+    group = shader_group("light_out", _white_matt_shader)
     old_view, old_samples = scn.view_settings.view_transform, scn.cycles.samples
     old_world = scn.world
     hidden = [ob for ob in scn.objects if (ob.type == "LIGHT") and (ob.name != "key") and not ob.hide_render]
@@ -737,13 +730,13 @@ def render_light(path):
     dark.use_nodes = True
     next(n for n in dark.node_tree.nodes if n.type == "BACKGROUND").inputs[1].default_value = 0.0
     scn.world = dark
-    layer.material_override = m
+    restore = _route_outputs(lambda m, nt: group_node(nt, group))
     scn.view_settings.view_transform = "Raw"
     scn.cycles.samples = LIGHT_SAMPLES
     try:
         render(path)
     finally:
-        layer.material_override = None
+        _restore_outputs(restore)
         scn.world = old_world
         scn.view_settings.view_transform = old_view
         scn.cycles.samples = old_samples
@@ -754,37 +747,15 @@ def render_light(path):
 def render_material_classes(path):
     """Each material emits its class (see MATERIAL_CLASSES) as a flat colour; the materials'
     own outputs are put back afterwards."""
-    scn = bpy.context.scene
-    restore = []
-    for m in bpy.data.materials:
-        if not m.use_nodes:
-            continue
-        nt = m.node_tree
-        out = next((n for n in nt.nodes if n.type == "OUTPUT_MATERIAL"), None)
-        if out is None:
-            continue
-        old = [l.from_socket for l in nt.links if l.to_socket == out.inputs["Surface"]]
+    def make(m, nt):
         em = nt.nodes.new("ShaderNodeEmission")
         em.inputs["Color"].default_value = (material_class(m.name) / 16.0, 1.0 if any(k in m.name for k in RECEDING) else 0.0, 0.0, 1.0)
-        nt.links.new(em.outputs[0], out.inputs["Surface"])
-        restore.append((nt, em, out, old))
-    old_view, old_samples = scn.view_settings.view_transform, scn.cycles.samples
-    hidden = [ob for ob in scn.objects if (ob.type == "LIGHT") and not ob.hide_render]
-    for ob in hidden:
-        ob.hide_render = True
-    scn.view_settings.view_transform = "Raw"
-    scn.cycles.samples = 1
+        return em
+    restore = _route_outputs(make)
     try:
-        render(path)
+        _render_unlit(path, 1)
     finally:
-        scn.view_settings.view_transform = old_view
-        scn.cycles.samples = old_samples
-        for ob in hidden:
-            ob.hide_render = False
-        for nt, em, out, old in restore:
-            nt.nodes.remove(em)
-            for sock in old:
-                nt.links.new(sock, out.inputs["Surface"])
+        _restore_outputs(restore)
 
 
 ALBEDO_SAMPLES = 16
@@ -794,9 +765,53 @@ DEPTH_NEAR_PLANE = 30.0
 DEPTH_RANGE = 20.0
 
 
+def material_alpha(nt):
+    """(socket or value, inverted) carrying a material's coverage, or None when it is opaque: the
+    factor of a mix with a Transparent BSDF (imported toon and unlit materials; a mix driven by the
+    Light Path node only hides the surface from other rays and is not coverage), else the
+    Principled BSDF's Alpha."""
+    for mix in (n for n in nt.nodes if n.type == "MIX_SHADER"):
+        fac = next((l for l in nt.links if l.to_socket == mix.inputs[0]), None)
+        if (fac is not None) and (fac.from_node.type == "LIGHT_PATH"):
+            continue
+        for index, inverted in ((1, False), (2, True)):
+            if any((l.to_socket == mix.inputs[index]) and (l.from_node.type == "BSDF_TRANSPARENT") for l in nt.links):
+                return (fac.from_socket if fac else mix.inputs[0].default_value), inverted
+    bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
+    if bsdf is None:
+        return None
+    link = next((l for l in nt.links if l.to_socket == bsdf.inputs["Alpha"]), None)
+    if link is not None:
+        return link.from_socket, False
+    value = bsdf.inputs["Alpha"].default_value
+    return (value, False) if value < 1.0 else None
+
+
+def _with_alpha(nt, shader_socket, alpha, added):
+    """shader_socket shown only where the material covers (alpha), transparent elsewhere."""
+    source, inverted = alpha
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    clear = nt.nodes.new("ShaderNodeBsdfTransparent")
+    added += [mix, clear]
+    if isinstance(source, float):
+        mix.inputs[0].default_value = (1.0 - source) if inverted else source
+    elif inverted:
+        flip = nt.nodes.new("ShaderNodeMath"); flip.operation = "SUBTRACT"
+        flip.inputs[0].default_value = 1.0
+        nt.links.new(source, flip.inputs[1])
+        nt.links.new(flip.outputs[0], mix.inputs[0])
+        added.append(flip)
+    else:
+        nt.links.new(source, mix.inputs[0])
+    nt.links.new(clear.outputs[0], mix.inputs[1])
+    nt.links.new(shader_socket, mix.inputs[2])
+    return mix.outputs[0]
+
+
 def _route_outputs(make_emission):
-    """Every material's surface output replaced by an emission node make_emission(material, tree)
-    builds; returns what restore_outputs needs to put the originals back."""
+    """Every material's surface output replaced by the shader node make_emission(material, tree)
+    builds, kept transparent where the material is (material_alpha); returns what _restore_outputs
+    needs to put the originals back."""
     restore = []
     for m in bpy.data.materials:
         if not m.use_nodes:
@@ -807,14 +822,18 @@ def _route_outputs(make_emission):
             continue
         old = [l.from_socket for l in nt.links if l.to_socket == out.inputs["Surface"]]
         em = make_emission(m, nt)
-        nt.links.new(em.outputs[0], out.inputs["Surface"])
-        restore.append((nt, em, out, old))
+        added = [em]
+        alpha = material_alpha(nt)
+        shader = em.outputs[0] if alpha is None else _with_alpha(nt, em.outputs[0], alpha, added)
+        nt.links.new(shader, out.inputs["Surface"])
+        restore.append((nt, added, out, old))
     return restore
 
 
 def _restore_outputs(restore):
-    for nt, em, out, old in restore:
-        nt.nodes.remove(em)
+    for nt, added, out, old in restore:
+        for node in added:
+            nt.nodes.remove(node)
         for sock in old:
             nt.links.new(sock, out.inputs["Surface"])
 
@@ -843,16 +862,16 @@ def render_albedo(path):
     def make(m, nt):
         em = nt.nodes.new("ShaderNodeEmission")
         bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
-        if bsdf is None:
-            source = next((n for n in nt.nodes if (n.type == "EMISSION") and (n is not em)), None)
-            if source is not None:
-                em.inputs["Color"].default_value = source.inputs["Color"].default_value
+        # unlit and toon materials (imported models) carry their colour on an emission
+        source = bsdf.inputs["Base Color"] if bsdf is not None else next(
+            (n.inputs["Color"] for n in nt.nodes if (n.type == "EMISSION") and (n is not em)), None)
+        if source is None:
             return em
-        link = next((l for l in nt.links if l.to_socket == bsdf.inputs["Base Color"]), None)
+        link = next((l for l in nt.links if l.to_socket == source), None)
         if link is not None:
             nt.links.new(link.from_socket, em.inputs["Color"])
         else:
-            em.inputs["Color"].default_value = bsdf.inputs["Base Color"].default_value
+            em.inputs["Color"].default_value = source.default_value
         return em
     restore = _route_outputs(make)
     try:

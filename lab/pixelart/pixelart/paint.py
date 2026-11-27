@@ -76,6 +76,18 @@ PILLOW_TILT = 0.45      # how far a stone's edge rows tilt its normal (up at the
 AO_OPEN = 0.92          # ambient occlusion above this is open surface, no contact shadow
 AO_CLOSED = 0.55        # at or below this a corner counts as fully enclosed (the physics are faint; dstar is not)
 AO_STRENGTH = 1.5       # ramp steps a fully enclosed corner goes down
+# colour families (models): pixels grouped by albedo colour, each family drawn on its own ramp with
+# the family's colour on BASE_STEP (the half-lit band, where most of a model's surface sits), darker
+# steps at SHADE_VALUES of it leaning towards a cool SHADOW_HUE, lighter steps mixed towards LIGHT_HUE
+BASE_STEP = 3
+SHADE_VALUES = (0.18, 0.38, 0.66)
+LIGHT_MIX = (0.25, 0.45, 0.62, 0.78)
+SHADOW_HUE = np.array([52.0, 36.0, 110.0])
+LIGHT_HUE = np.array([255.0, 240.0, 215.0])
+MIN_FAMILY_LUM = 40.0   # near-black materials still get a readable ramp
+FAMILY_ROUNDS = 12
+FAMILY_GRID = 8         # albedo levels per channel when looking for the families (speed, not look)
+MIN_FAMILY_PATCH = 2    # a lone pixel of one family inside another takes its neighbours' family
 NO_SIDE = -1
 TOWARDS_LIGHT = ((-1, 0), (0, -1))   # the moon lights from the upper left: the up and left neighbours
 ORTHOGONAL = ((-1, 0), (1, 0), (0, -1), (0, 1))
@@ -297,13 +309,78 @@ def drawn_normals(directory, piece, key, surface, solid):
     return out
 
 
+def colour_families(albedo, surface, count):
+    """(family per pixel, -1 off the surface; the families' colours): the albedo's colours grouped
+    into `count` colours (k-means over the pixels, seeded from the most common colour and then the
+    farthest ones), each pixel in the family nearest its own colour, so painted detail (eyes, a
+    print, a stripe) keeps its colour; lone pixels take their neighbours' family (no speckle)."""
+    colour = albedo[surface]
+    grid = np.round(colour / 255.0 * (FAMILY_GRID - 1)).astype(np.int64)
+    cells, inv, weight = np.unique(grid, axis=0, return_inverse=True, return_counts=True)
+    cell_colour = np.stack([np.bincount(inv.ravel(), weights=colour[:, c]) for c in range(3)], 1) / weight[:, None]
+    count = max(1, min(count, len(cells)))
+    centres = [cell_colour[weight.argmax()]]
+    for _ in range(count - 1):
+        far = np.min([((cell_colour - c) ** 2).sum(1) for c in centres], axis=0) * weight
+        centres.append(cell_colour[far.argmax()])
+    centres = np.array(centres)
+    for _ in range(FAMILY_ROUNDS):
+        member = np.argmin(((cell_colour[:, None] - centres[None]) ** 2).sum(-1), axis=1)
+        for f in range(count):
+            mine = member == f
+            if mine.any():
+                centres[f] = (cell_colour[mine] * weight[mine, None]).sum(0) / weight[mine].sum()
+    family = np.full(surface.shape, -1, dtype=np.int32)
+    family[surface] = np.argmin(((colour[:, None] - centres[None]) ** 2).sum(-1), axis=1)
+    return despeckle(family, surface), centres
+
+
+def despeckle(family, surface):
+    """Patches of one family smaller than MIN_FAMILY_PATCH take the most common family around them."""
+    small = np.zeros(family.shape, dtype=bool)
+    for f in np.unique(family[surface]):
+        labels, n = ndimage.label(family == f)
+        if n:
+            small |= (labels > 0) & (np.bincount(labels.ravel())[labels] < MIN_FAMILY_PATCH)
+    families = int(family.max()) + 1
+    votes = np.zeros(family.shape + (families,), dtype=np.int32)
+    for dy, dx in AROUND:
+        nb = shifted(np.where(small, -1, family), dy, dx, -1)
+        for f in range(families):
+            votes[..., f] += nb == f
+    decided = small & (votes.max(-1) > 0)
+    family = family.copy()
+    family[decided] = votes.argmax(-1)[decided]
+    return family
+
+
+def family_ramp(colour, hue_shift):
+    """An artist's ramp for one material colour: the colour itself at BASE_STEP; darker steps at
+    SHADE_VALUES of its brightness, leaning towards SHADOW_HUE by hue_shift (the hue moves, the
+    value stays); lighter steps mixed towards the warm LIGHT_HUE."""
+    base = np.asarray(colour, dtype=np.float64)
+    base = base * max(1.0, MIN_FAMILY_LUM / max(lum(base[None])[0], 1e-3))
+    ramp = []
+    for i, share in enumerate(SHADE_VALUES):
+        c = base * share
+        t = hue_shift * (BASE_STEP - i) / BASE_STEP
+        ramp.append((1 - t) * c + t * SHADOW_HUE * lum(c[None])[0] / lum(SHADOW_HUE[None])[0])
+    ramp.append(base)
+    ramp += [(1 - t) * base + t * LIGHT_HUE for t in LIGHT_MIX]
+    return np.clip(np.round(ramp), 0, 255)
+
+
 def silhouette(solid):
     """Solid pixels with an empty pixel beside them."""
     return solid & ~np.logical_and.reduce([shifted(solid, dy, dx, False) for dy, dx in ORTHOGONAL])
 
 
 def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, saturation=1.0, night=0.0,
-          seed=7, antialias=0.6):
+          seed=7, antialias=0.6, colours=0, hue_shift=0.25, wall_marks=True, grow_moss=True):
+    """Writes the art and its drawn normal map. colours = 0 draws every stone on the palette's stone
+    ramp (a building in one material); colours > 0 groups the stones into that many colour families
+    from their albedo and draws each on its own ramp (family_ramp), as for a model in many materials.
+    wall_marks: dstar's block edges, lit top lines and hand marks; grow_moss: green up-facing albedo as moss."""
     pal = palette or {}
     ramp = np.asarray(pal.get("stone", RAMP))
     greens = np.asarray(pal.get("foliage", GREENS))
@@ -323,18 +400,23 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
     # moss grows where water stands: on faces turned up (ledges, sills), in clumps, never as speckle;
     # green grime on upright walls stays stone
     up = load(directory, piece, "normals")[..., 1] / 127.5 - 1.0 > MOSS_UP
-    moss = clump_moss(surface & green & up, surface)
+    moss = clump_moss(surface & green & up, surface) if grow_moss else np.zeros(surface.shape, dtype=bool)
 
     band = one_tone_per_stone(merge_small_clusters(light_bands(light, surface), key, surface), key, surface)
-    step = band_steps(band, cls, recede) + stone_tints(lum(albedo), key, cls, recede, surface)
+    family, family_colours = colour_families(albedo, surface, colours) if colours else (None, None)
+    # in colour families the family carries each stone's colour; on one ramp the stone's own tint does
+    step = band_steps(band, cls, recede) + (0 if colours else stone_tints(lum(albedo), key, cls, recede, surface))
     rim, cast = relief_lines(depth, surface)
-    step += np.where(rim & (band >= SHADE), 1, 0) + np.where(top_lines(key, seam, surface, band, seed), 1, 0)
+    step += np.where(rim & (band >= SHADE), 1, 0)
     step -= np.where(cast, CAST_STEPS, 0)
-    beside_joint = shifted(seam, -1, 0, False) | shifted(seam, 1, 0, False)
-    # a mark is one step darker in a ramp of few steps; two would turn it into a black scratch
-    step += np.maximum(hand_marks(key, surface, surface & ~(rim | cast | beside_joint), seed), -MARK_STEPS)
-    side_lit, cut = block_edges(key, seam, surface, band)
-    step += np.where(side_lit, 1, 0)
+    cut = np.zeros(surface.shape, dtype=bool)
+    if wall_marks:
+        step += np.where(top_lines(key, seam, surface, band, seed), 1, 0)
+        beside_joint = shifted(seam, -1, 0, False) | shifted(seam, 1, 0, False)
+        # a mark is one step darker in a ramp of few steps; two would turn it into a black scratch
+        step += np.maximum(hand_marks(key, surface, surface & ~(rim | cast | beside_joint), seed), -MARK_STEPS)
+        side_lit, cut = block_edges(key, seam, surface, band)
+        step += np.where(side_lit, 1, 0)
     step = np.where(seam, joint_steps(step, seam, surface), step)
     step = np.where(cut, joint_steps(step, seam | cut, surface & ~cut), step)
     step = np.clip(step, 0, len(ramp) - 1)
@@ -352,12 +434,19 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
     out = np.zeros(ids.shape, dtype=np.uint8)
     painted = surface | seam
     out[..., :3][painted] = np.clip(ramp_colour(ramp, position[painted], SUB_STEPS), 0, 255)
+    ramps = [family_ramp(c, hue_shift) for c in family_colours] if colours else []
+    for f, own in enumerate(ramps):
+        here = family == f
+        out[..., :3][here] = np.clip(ramp_colour(own, position[here], SUB_STEPS), 0, 255)
     leaf = (solid & (cls == FOLIAGE)) | moss
     out[..., :3][leaf] = greens[np.clip(band[leaf] + 1, 0, len(greens) - 1)]
     glass = solid & (cls == GLASS)
     out[..., :3][glass] = passage[np.clip(band[glass], 0, len(passage) - 1)]
     edge = silhouette(solid)
     out[..., :3][edge & ~leaf] = ramp[OUTLINE_STEP]
+    for f, own in enumerate(ramps):
+        # the outline in each family's own darkest shade (selective outline), not one black for all
+        out[..., :3][edge & ~leaf & (family == f)] = own[OUTLINE_STEP]
     out[..., 3][solid] = 255
     soften_notches(out, seam | edge, antialias)
     grade(out, gain=gain, contrast=contrast, saturation=saturation, night=night)

@@ -44,6 +44,51 @@ example a crop of dstar's art). A picture that already is pixel art keeps its si
 described at the top of `pixelart/snap.py`. The GUI offers it under **More ▸ Snap to the pixel grid**,
 the MCP server as `snap_image`; both write `<name>_snapped.png` next to the picture.
 
+## Any 3D model to pixel art
+
+```
+python -m pixelart.model model.glb [--height 64] [--yaw 25] [--pitch 10] [--colours 8]
+```
+
+Takes a glTF/GLB, FBX, OBJ or .blend file through the same render and paint stages as the level
+pieces, with no scene script. It writes a small asset config for the model
+(`work/models/<name>/<name>.json`, one piece called `model`) and the art beside it (`model_px.png`
+and `model_px_normals.png`).
+
+- **Framing** (`blender_kit/model.py`):
+  - The camera is orthographic, turned by `yaw` and tilted by `pitch`.
+  - The model is scaled so that what actually renders is `height_px` pixels tall. A quick coverage
+    render leaves out hidden helper meshes and fully transparent parts.
+  - The picture is as wide as the model needs, plus `margin_px`.
+- **Parts:** every loose part of every material gets its own id. The paint stage treats each part
+  as one "stone": one tone per part and drawn edges.
+- **Light:** comes from `light_side` degrees left of straight ahead and `light_height` degrees up
+  (default 40/30). It turns with the camera, so it always falls from the picture's upper left.
+  The level pieces keep their moonlight, which skims across the walls.
+- **Materials:**
+  - Every pass is routed through each material and keeps its alpha, so hair cards and face decals
+    stay transparent.
+  - Unlit and toon materials (VRM/MToon imports) give their colour to the albedo pass.
+  - Meshes without a material get a plain grey one.
+- **Colour** (`paint` option `colours` > 0):
+  - The albedo's pixels are grouped into that many colour families. This is per pixel, so eyes and
+    prints keep their colour.
+  - Each family gets its own ramp: its colour on the half-lit step, shadows leaning towards a cool
+    violet (`hue_shift`), light steps towards warm white.
+  - The outline takes each family's darkest shade.
+  - `wall_marks` (block edges, top lines, hand marks) and `grow_moss` are off for models.
+
+In the GUI, the second page `http://127.0.0.1:8765/model` works through the same steps, left to right:
+1. **Input:** drop a model file, type a path, or pick one opened before.
+2. **Settings:**
+   - View and light. A change renders again in the background, a few seconds for a character;
+     this can be switched off.
+   - Colours and drawing. A change repaints at once from the rendered passes.
+3. **Output:**
+   - The render, or any pass, beside the pixel art, at the same zoom and on a choice of backdrops.
+   - The art's palette and size.
+   - **Save** writes the art and its normal map wherever you want.
+
 ## Tuning GUI
 
 ```
