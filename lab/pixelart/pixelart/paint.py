@@ -63,6 +63,7 @@ RELIEF_STEP_PX = 0.8    # a depth step of this many pixels or more is a relief e
 MOSS_GREEN = 1.15       # albedo this much greener than red and blue is moss
 MOSS_UP = 0.35          # moss only on faces turned up at least this much (normal's up component)
 OUTLINE_STEP = 0        # ramp step of the silhouette line
+BODY_FLOOR = 1          # the darkest ramp step a stone's face may take
 SUB_STEPS = 3           # in-between shades per ramp step, for gradients and texture inside the stones
 GRADIENT = 1.0          # how far a stone's place inside its light band moves its tone (in ramp steps)
 PILLOW = 1.0 / 3        # stones a sub-step lighter along their top, a sub-step darker along their bottom
@@ -321,6 +322,9 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
                + TEXTURE * albedo_texture(lum(albedo), key, surface)
                - AO_STRENGTH * contact_shadow(directory, piece, surface))
     position = np.clip(step + np.where(body, shading, 0.0), 0, len(ramp) - 1)
+    # stone in the deepest shadow stays stone: only joints, cuts and lines may reach the line colour,
+    # or shadowed stones read as holes
+    position = np.where(body & ~cast, np.maximum(position, BODY_FLOOR), position)
 
     out = np.zeros(ids.shape, dtype=np.uint8)
     painted = surface | seam
