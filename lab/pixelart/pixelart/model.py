@@ -1,14 +1,15 @@
 """From a 3D model file (glTF/GLB, FBX, OBJ, .blend) to pixel art, with no scene script.
 
-The model gets its own small asset config (work/models/<name>/<name>.json, one piece called
+The model gets its own small asset config (work/models/<name>-<hash>/<name>.json, one piece called
 "model") built from the view and paint settings, so it runs through the same steps as the
 scripted pieces: render the passes in Blender (blender_kit/model.py frames it), reduce them, and
 draw the art with the paint stage in colour families (paint.colour_families).
 
 usage: python -m pixelart.model <model file> [--height 64] [--yaw 0] [--pitch 0] [--colours 6]
-writes work/models/<name>/model_px.png and model_px_normals.png
+writes work/models/<name>-<hash>/model_px.png and model_px_normals.png
 """
 import argparse
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -18,18 +19,22 @@ from .__main__ import load, render
 
 MODELS_DIR = Path(__file__).resolve().parents[1] / "work" / "models"
 PIECE = "model"
-VIEW_DEFAULTS = {"height_px": 64, "yaw": 0.0, "pitch": 0.0, "margin_px": 2, "frame": None}
+VIEW_DEFAULTS = {"height_px": 64, "yaw": 0.0, "pitch": 0.0, "margin_px": 2, "frame": None, "true_normals": True}
 # where the key light comes from, in the picture: degrees from straight ahead towards the left, and
 # degrees above the horizon (the paint stage draws rims and cast lines for light from the upper left)
 LIGHT_DEFAULTS = {"light_side": 40.0, "light_height": 30.0}
 PAINT_DEFAULTS = {"colours": 8, "hue_shift": 0.25, "gain": 1.0, "contrast": 1.0, "saturation": 1.0,
-                  "night": 0.0, "antialias": 0.6, "wall_marks": False, "grow_moss": False}
+                  "night": 0.0, "antialias": 0.6, "wall_marks": False, "grow_moss": False, "cast_shadows": 0.2,
+                  "whole_parts": False, "simplify": 1.5, "thin_fill": True, "exposure": True, "cast_steps": 1, "relief_px": 3.0, "flat_features": 12}
 RENDER_SCALE = 4
 
 
 def asset_path(model_file):
-    stem = Path(model_file).stem
-    return MODELS_DIR / stem / f"{stem}.json"
+    """work/models/<name>-<hash of the full path>/<name>.json: models of the same file name from
+    different folders keep their own settings and renders."""
+    path = Path(model_file).resolve()
+    tag = hashlib.sha1(str(path).lower().encode("utf-8")).hexdigest()[:6]
+    return MODELS_DIR / f"{path.stem}-{tag}" / f"{path.stem}.json"
 
 
 def key_direction(side_deg, height_deg):

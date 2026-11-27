@@ -16,7 +16,7 @@ MODEL_TYPES = (".glb", ".gltf", ".fbx", ".obj", ".blend")
 UPLOAD_DIR = model.MODELS_DIR / "uploads"
 RECENT_FILE = Path.home() / ".pixelart" / "recent_models.json"
 RECENT_LIMIT = 12
-PASS_KINDS = ("light", "albedo", "ids", "normals", "ao", "depth")
+PASS_KINDS = ("light", "turn", "albedo", "ids", "normals", "ao", "depth")
 MAX_SWATCHES = 96
 
 

@@ -705,8 +705,17 @@ def material_class(name):
     return next((c for key, c in MATERIAL_CLASSES if key in name), STONE_CLASS)
 
 
+# light the geometry's true normals instead of its shading normals (blender_kit/model.py sets it):
+# imported characters often carry custom normals bent for cel shading (an anime face's normals point
+# up and away), which a light reads as a face turned from it
+LIGHT_TRUE_NORMALS = False
+
+
 def _white_matt_shader(nt):
     bsdf = nt.nodes.new("ShaderNodeBsdfPrincipled")
+    if LIGHT_TRUE_NORMALS:
+        geo = nt.nodes.new("ShaderNodeNewGeometry")
+        nt.links.new(geo.outputs["True Normal"], bsdf.inputs["Normal"])
     bsdf.inputs["Base Color"].default_value = (1, 1, 1, 1)
     bsdf.inputs["Roughness"].default_value = 1.0
     for name in ("Specular IOR Level", "Specular"):
@@ -715,12 +724,15 @@ def _white_matt_shader(nt):
     return bsdf.outputs[0]
 
 
-def render_light(path):
+def render_light(path, shadows=True):
     """How much moonlight reaches each pixel: every surface plain white and matt, lit by the key
     light alone (no fill, no ambient), so the pass holds the light's direction and its cast shadows
-    without texture or colour."""
+    without texture or colour. With shadows=False only the surfaces' turn towards the light counts
+    (the paint stage blends the two to set how strong cast shadows are)."""
     scn = bpy.context.scene
-    group = shader_group("light_out", _white_matt_shader)
+    key = bpy.data.objects["key"].data
+    old_shadow = key.use_shadow
+    group = shader_group("light_true_out" if LIGHT_TRUE_NORMALS else "light_out", _white_matt_shader)
     old_view, old_samples = scn.view_settings.view_transform, scn.cycles.samples
     old_world = scn.world
     hidden = [ob for ob in scn.objects if (ob.type == "LIGHT") and (ob.name != "key") and not ob.hide_render]
@@ -733,9 +745,11 @@ def render_light(path):
     restore = _route_outputs(lambda m, nt: group_node(nt, group))
     scn.view_settings.view_transform = "Raw"
     scn.cycles.samples = LIGHT_SAMPLES
+    key.use_shadow = shadows
     try:
         render(path)
     finally:
+        key.use_shadow = old_shadow
         _restore_outputs(restore)
         scn.world = old_world
         scn.view_settings.view_transform = old_view
@@ -787,22 +801,28 @@ def material_alpha(nt):
     return (value, False) if value < 1.0 else None
 
 
+COVERED = 0.5   # alpha from which a surface counts as there in a pass
+
+
 def _with_alpha(nt, shader_socket, alpha, added):
-    """shader_socket shown only where the material covers (alpha), transparent elsewhere."""
+    """shader_socket where the material covers, transparent elsewhere. Coverage is all or nothing
+    (alpha at least COVERED): the passes carry data (ids, classes, normals), and half-transparent
+    decals (eyes, lashes) would blend them into values that mean something else."""
     source, inverted = alpha
     mix = nt.nodes.new("ShaderNodeMixShader")
     clear = nt.nodes.new("ShaderNodeBsdfTransparent")
     added += [mix, clear]
     if isinstance(source, float):
-        mix.inputs[0].default_value = (1.0 - source) if inverted else source
-    elif inverted:
-        flip = nt.nodes.new("ShaderNodeMath"); flip.operation = "SUBTRACT"
-        flip.inputs[0].default_value = 1.0
-        nt.links.new(source, flip.inputs[1])
-        nt.links.new(flip.outputs[0], mix.inputs[0])
-        added.append(flip)
+        covered = ((1.0 - source) if inverted else source) >= COVERED
+        mix.inputs[0].default_value = 1.0 if covered else 0.0
     else:
-        nt.links.new(source, mix.inputs[0])
+        cut = nt.nodes.new("ShaderNodeMath")
+        cut.operation = "LESS_THAN" if inverted else "GREATER_THAN"
+        # inverted: the factor shows the transparent side, so coverage is factor < 1 - COVERED
+        cut.inputs[1].default_value = (1.0 - COVERED) if inverted else (COVERED - 1e-6)
+        nt.links.new(source, cut.inputs[0])
+        nt.links.new(cut.outputs[0], mix.inputs[0])
+        added.append(cut)
     nt.links.new(clear.outputs[0], mix.inputs[1])
     nt.links.new(shader_socket, mix.inputs[2])
     return mix.outputs[0]

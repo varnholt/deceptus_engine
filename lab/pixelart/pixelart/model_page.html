@@ -125,7 +125,7 @@ body.dragging #drop { border-color: var(--accent); color: var(--text); backgroun
       <div id="toolbar">
         <span style="font-weight:600">3 · Output</span>
         <div class="group"><span class="label">left</span><select id="left-view">
-          <option value="render">render</option><option value="light">light</option><option value="albedo">colour (albedo)</option>
+          <option value="render">render</option><option value="light">light</option><option value="turn">light without shadows</option><option value="albedo">colour (albedo)</option>
           <option value="ids">parts</option><option value="normals">normals</option><option value="ao">occlusion</option>
           <option value="art_normals">drawn normals</option></select></div>
         <div class="group" id="zoom"><span class="label">zoom</span></div>
@@ -154,16 +154,23 @@ const VIEW_SPECS = [
   { key: "margin_px", label: "Margin", min: 0, max: 16, step: 1, help: "Empty pixels around the model." },
   { key: "light_side", label: "Light from", min: -90, max: 90, step: 5, help: "0 = from the front, 90 = from the left, negative = from the right." },
   { key: "light_height", label: "Light height", min: 0, max: 85, step: 5, help: "Degrees above the horizon." },
+  { key: "true_normals", label: "Geometry light", check: true, help: "Light the shape itself, not its custom normals (anime models bend them for cel shading)." },
   { key: "frame", label: "Anim. frame", min: 0, max: 500, step: 1, optional: true, help: "Pose of an animated model (empty = as it was saved)." },
 ];
 const PAINT_SPECS = [
   { key: "colours", label: "Colours", min: 1, max: 16, step: 1, help: "Colour families: each gets its own ramp of shades." },
   { key: "hue_shift", label: "Cool shadows", min: 0, max: 0.6, step: 0.05, help: "How far shadows lean towards blue-violet." },
+  { key: "cast_shadows", label: "Cast shadows", min: 0, max: 1, step: 0.05, help: "How dark shadows thrown onto other parts are (hair onto the face, arms onto the body)." },
   { key: "gain", label: "Brightness", min: 0.4, max: 1.6, step: 0.05 },
   { key: "contrast", label: "Contrast", min: 0.5, max: 1.8, step: 0.05 },
   { key: "saturation", label: "Saturation", min: 0, max: 2, step: 0.05 },
   { key: "night", label: "Night", min: 0, max: 1, step: 0.05, help: "Sinks the colours into a night scene." },
   { key: "antialias", label: "Smooth curves", min: 0, max: 1, step: 0.1, help: "In-between shades in the steps of curved outlines." },
+  { key: "simplify", label: "Simplify form", min: 0, max: 6, step: 0.5, help: "Smooths the light within each part: small dips and strands go, the big form stays." },
+  { key: "flat_features", label: "Flat details", min: 0, max: 40, step: 1, help: "Colour patches up to this many pixels (eyes, buttons) drawn flat in their own colour." },
+  { key: "exposure", label: "Auto exposure", check: true, help: "Scales the light so most of the model shows its own colours; lit turns become highlights." },
+  { key: "thin_fill", label: "Fill thin parts", check: true, help: "No outline on parts one or two pixels thick, so they keep their colour." },
+  { key: "whole_parts", label: "One tone per part", check: true, help: "Each part in one shade, like stones in a wall; off: light falls off across a part." },
   { key: "wall_marks", label: "Stone wear", check: true, help: "Block edges, lit top lines and marks, for walls made of stones." },
   { key: "grow_moss", label: "Moss", check: true, help: "Green surfaces facing up drawn as moss." },
 ];
@@ -277,8 +284,17 @@ async function pollJob() {
   if (renderWanted || (viewIsStale() && $("auto-render").checked)) { renderWanted = false; if (viewIsStale()) startRender(); }
 }
 
+function fitZoom() {
+  if (!state || !state.size) return;
+  const view = document.querySelector(".view");
+  const room = Math.min((view.clientWidth - 48) / state.size[0], (view.clientHeight - 48) / state.size[1]);
+  zoom = ZOOMS.filter((z) => z <= room).pop() || 1;
+  for (const b of $("zoom").querySelectorAll("button")) b.classList.toggle("active", b.textContent === zoom + "×");
+}
 function showState(next, takeSettings) {
+  const firstArt = !(state && state.size) || takeSettings;
   state = next;
+  if (firstArt) fitZoom();
   if (takeSettings) {
     view = { ...next.view }; paint = { ...next.paint };
     renderedView = next.render ? { ...next.view } : null;

@@ -81,11 +81,14 @@ AO_STRENGTH = 1.5       # ramp steps a fully enclosed corner goes down
 # steps at SHADE_VALUES of it leaning towards a cool SHADOW_HUE, lighter steps mixed towards LIGHT_HUE
 BASE_STEP = 3
 SHADE_VALUES = (0.18, 0.38, 0.66)
-LIGHT_MIX = (0.25, 0.45, 0.62, 0.78)
+LIGHT_MIX = (0.18, 0.34, 0.5, 0.66)
 SHADOW_HUE = np.array([52.0, 36.0, 110.0])
 LIGHT_HUE = np.array([255.0, 240.0, 215.0])
 MIN_FAMILY_LUM = 40.0   # near-black materials still get a readable ramp
 FAMILY_ROUNDS = 12
+MAX_EXPOSURE = 1.6
+OUTLINE_MIN_THICK = 5    # outline: parts thinner than this many pixels stay filled
+FORM_DEPTH_PX = 1.0     # simplified_form: depth change per pixel step that still counts as one surface      # auto_exposure brightens a material at most this much
 FAMILY_GRID = 8         # albedo levels per channel when looking for the families (speed, not look)
 MIN_FAMILY_PATCH = 2    # a lone pixel of one family inside another takes its neighbours' family
 NO_SIDE = -1
@@ -108,6 +111,59 @@ def shifted(a, dy, dx, fill):
     pad = np.pad(a, ((1, 1), (1, 1)) + ((0, 0),) * (a.ndim - 2), constant_values=fill)
     h, w = a.shape[:2]
     return pad[1 + dy:1 + dy + h, 1 + dx:1 + dx + w]
+
+
+def light_with_shadows(directory, piece, strength):
+    """The key light per pixel, its cast shadows at `strength` (1 = as rendered, 0 = none: only the
+    surfaces' turn towards the light, from the turn pass). A character's face under its own fringe
+    stays lit, as an artist draws it; a building keeps its shadows. Without a turn pass: as rendered."""
+    light = load(directory, piece, "light")[..., 0].astype(np.float64)
+    if (strength >= 1.0) or not (Path(directory) / f"{piece}_turn.png").exists():
+        return light
+    turn = load(directory, piece, "turn")[..., 0].astype(np.float64)
+    return strength * light + (1.0 - strength) * np.maximum(turn, light)
+
+
+def simplified_form(light, depth, surface, radius):
+    """The light smoothed over `radius` pixels (Gaussian) across the continuous surface: neighbours
+    count only where the depth runs on (within FORM_DEPTH_PX), so the smoothing stops at a fringe in
+    front of a face or an arm in front of a body, but runs over decals and parts lying on the same
+    surface (eyes, a mouth, a print, single hair strands). The large turn of a form stays, small
+    dips go, the way an artist shades a head as one simple volume. radius 0 leaves the light as is."""
+    if radius <= 0:
+        return light
+    reach = int(np.ceil(radius * 2))
+    near = depth.astype(np.float64)
+    total = np.zeros(light.shape)
+    weight = np.zeros(light.shape)
+    for dy in range(-reach, reach + 1):
+        for dx in range(-reach, reach + 1):
+            pad = ((reach, reach), (reach, reach))
+            other = np.pad(light, pad)[reach + dy:reach + dy + light.shape[0], reach + dx:reach + dx + light.shape[1]]
+            other_near = np.pad(near, pad)[reach + dy:reach + dy + light.shape[0], reach + dx:reach + dx + light.shape[1]]
+            other_on = np.pad(surface, pad)[reach + dy:reach + dy + light.shape[0], reach + dx:reach + dx + light.shape[1]]
+            same_surface = other_on & (np.abs(other_near - near) <= FORM_DEPTH_PX * DEPTH_PER_PX * max(abs(dy), abs(dx), 1))
+            w = np.exp(-(dy * dy + dx * dx) / (2 * radius * radius)) * same_surface
+            total += w * other
+            weight += w
+    return np.where(surface, total / np.maximum(weight, 1e-9), light)
+
+
+def auto_exposure(light, surface, family):
+    """The light of each colour family (each material) scaled up so its median pixel sits in the
+    middle of the half-lit band, where the family's own colour is drawn, relative to the brightest
+    surfaces: every material shows its colour on most of its form, turns towards the light become
+    highlights, turns away shade, as an artist draws a face, a shirt and shoes alike. Never darkens,
+    and brightens at most MAX_EXPOSURE times."""
+    top = max(np.percentile(light[surface], BRIGHT_PERCENTILE), 1e-6)
+    target = (BAND_EDGES[1] + BAND_EDGES[2]) / 2 * top
+    out = light.copy()
+    groups = [surface] if family is None else [surface & (family == f) for f in np.unique(family[surface])]
+    for group in groups:
+        middle = max(np.median(light[group]), 1e-6)
+        scale = np.clip(target / middle, 1.0, MAX_EXPOSURE)
+        out[group] = np.minimum(light[group] * scale, top)
+    return out
 
 
 def light_bands(light, surface):
@@ -186,14 +242,14 @@ def stone_tints(albedo_lum, key, cls, recede, surface):
     return tint
 
 
-def relief_lines(depth, surface):
+def relief_lines(depth, surface, step_px=RELIEF_STEP_PX):
     """(rim, cast): rim = pixels of a raised part whose neighbour towards the light lies clearly
     behind them; cast = pixels lying clearly behind their neighbour towards the light, where a
     raised part throws its line of shadow."""
     near = depth.astype(np.float64)
     rim = np.zeros(depth.shape, dtype=bool)
     cast = np.zeros(depth.shape, dtype=bool)
-    step = RELIEF_STEP_PX * DEPTH_PER_PX
+    step = step_px * DEPTH_PER_PX
     for dy, dx in TOWARDS_LIGHT:
         towards = shifted(near, dy, dx, 0.0)
         inside = shifted(surface, dy, dx, False)
@@ -233,6 +289,16 @@ def block_edges(key, seam, surface, band):
     above_it = surface & (rows_below == 1) & shifted(shifted(seam, 1, 0, False), 1, 0, False)
     cut = lit_here & ((bottom_row & ((to_left < 2) | (to_right < 1))) | (above_it & (to_left < 1)))
     return lit, cut
+
+
+def pixel_gradient(light, band, surface):
+    """Each pixel's place inside its light band, -0.5 to +0.5: on a part drawn in several tones (a
+    face, an arm) the light falls off pixel by pixel, in the ramp's in-between shades."""
+    top = max(np.percentile(light[surface], BRIGHT_PERCENTILE), 1e-6)
+    edges = np.r_[0.0, BAND_EDGES, 1.0]
+    lo, hi = edges[band], edges[np.minimum(band + 1, len(edges) - 1)]
+    place = np.clip((light / top - lo) / np.maximum(hi - lo, 1e-6) - 0.5, -0.5, 0.5)
+    return np.where(surface, place, 0.0)
 
 
 def light_gradient(light, band, key, surface):
@@ -309,6 +375,31 @@ def drawn_normals(directory, piece, key, surface, solid):
     return out
 
 
+def feature_albedo(directory, piece, albedo):
+    """The albedo whose pixels each hold one colour of the surface (reduce.mode_pass), so small
+    painted features keep their colour; the mean albedo where the render has no mode pass."""
+    if (Path(directory) / f"{piece}_albedo_mode.png").exists():
+        return load(directory, piece, "albedo_mode")[..., :3].astype(np.float64)
+    return albedo
+
+
+def small_features(family, surface, largest):
+    """Patches of one colour family of at most `largest` pixels (eyes, a mouth, buttons, a badge):
+    painted detail an artist draws flat in its own colour, not shaded like the form under it."""
+    feature = np.zeros(family.shape, dtype=bool)
+    for f in np.unique(family[surface]):
+        labels, n = ndimage.label(surface & (family == f), structure=np.ones((3, 3)))
+        if n:
+            feature |= (labels > 0) & (np.bincount(labels.ravel())[labels] <= largest)
+    return feature
+
+
+def display_colours(linear):
+    """Linear 0-255 values (the albedo pass is written raw) as the sRGB colours they show as."""
+    c = np.clip(linear / 255.0, 0.0, 1.0)
+    return 255.0 * np.where(c <= 0.0031308, 12.92 * c, 1.055 * np.power(c, 1 / 2.4) - 0.055)
+
+
 def colour_families(albedo, surface, count):
     """(family per pixel, -1 off the surface; the families' colours): the albedo's colours grouped
     into `count` colours (k-means over the pixels, seeded from the most common colour and then the
@@ -375,17 +466,38 @@ def silhouette(solid):
     return solid & ~np.logical_and.reduce([shifted(solid, dy, dx, False) for dy, dx in ORTHOGONAL])
 
 
+def outline(solid):
+    """The silhouette pixels to draw as outline: those beside a part at least OUTLINE_MIN_THICK
+    pixels thick. A thin arm, leg or strap outlined on both sides keeps one pixel of colour or none
+    and reads as a dark line, so an artist keeps it filled and lets its colour be its edge."""
+    edge = silhouette(solid)
+    depth_in = ndimage.distance_transform_cdt(solid, metric="chessboard")
+    # an edge pixel sees the part's middle (its deepest pixel) half the part's thickness inwards
+    reach = OUTLINE_MIN_THICK // 2
+    thick = ndimage.maximum_filter(depth_in, size=2 * reach + 1) * 2 - 1 >= OUTLINE_MIN_THICK
+    return edge & thick
+
+
 def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, saturation=1.0, night=0.0,
-          seed=7, antialias=0.6, colours=0, hue_shift=0.25, wall_marks=True, grow_moss=True):
+          seed=7, antialias=0.6, colours=0, hue_shift=0.25, wall_marks=True, grow_moss=True, cast_shadows=1.0,
+          whole_parts=True, simplify=0.0, thin_fill=False, exposure=False,
+          cast_steps=CAST_STEPS, relief_px=RELIEF_STEP_PX, flat_features=0):
     """Writes the art and its drawn normal map. colours = 0 draws every stone on the palette's stone
     ramp (a building in one material); colours > 0 groups the stones into that many colour families
     from their albedo and draws each on its own ramp (family_ramp), as for a model in many materials.
-    wall_marks: dstar's block edges, lit top lines and hand marks; grow_moss: green up-facing albedo as moss."""
+    wall_marks: dstar's block edges, lit top lines and hand marks; grow_moss: green up-facing albedo as moss;
+    cast_shadows: how strong shadows cast onto other parts are (light_with_shadows); whole_parts: one
+    tone per stone (walls), else the light falls off across a part pixel by pixel (curved models);
+    simplify: radius of simplified_form; thin_fill: no outline on parts one or two pixels thick;
+    exposure: auto_exposure; cast_steps: how much darker the line a raised part throws is;
+    relief_px: the depth step (pixels) that counts as an edge worth a line (models turn their surfaces,
+    whose depth slopes by a pixel or so per pixel without any edge); flat_features: colour patches up to
+    this many pixels are drawn flat in their own colour (small_features)."""
     pal = palette or {}
     ramp = np.asarray(pal.get("stone", RAMP))
     greens = np.asarray(pal.get("foliage", GREENS))
     passage = np.asarray(pal.get("passage", PASSAGE))
-    light = load(directory, piece, "light")[..., 0].astype(np.float64)
+    light = light_with_shadows(directory, piece, cast_shadows)
     albedo = load(directory, piece, "albedo")[..., :3].astype(np.float64)
     ids = load(directory, piece, "ids")
     classes = load(directory, piece, "classes")
@@ -396,19 +508,26 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
     recede = classes[..., 1] >= 128
     seam = solid & ((key == 0) | (cls == SEAM))
     surface = solid & ~seam & np.isin(cls, list(STEPS))
+    light = simplified_form(light, depth, surface, simplify)
+    # a model's colours as they show (the chapel's single ramp was tuned on the raw values)
+    family, family_colours = (colour_families(display_colours(feature_albedo(directory, piece, albedo)), surface, colours)
+                              if colours else (None, None))
+    if exposure:
+        light = auto_exposure(light, surface, family)
     green = (albedo[..., 1] > MOSS_GREEN * albedo[..., 0]) & (albedo[..., 1] > MOSS_GREEN * albedo[..., 2])
     # moss grows where water stands: on faces turned up (ledges, sills), in clumps, never as speckle;
     # green grime on upright walls stays stone
     up = load(directory, piece, "normals")[..., 1] / 127.5 - 1.0 > MOSS_UP
     moss = clump_moss(surface & green & up, surface) if grow_moss else np.zeros(surface.shape, dtype=bool)
 
-    band = one_tone_per_stone(merge_small_clusters(light_bands(light, surface), key, surface), key, surface)
-    family, family_colours = colour_families(albedo, surface, colours) if colours else (None, None)
+    band = merge_small_clusters(light_bands(light, surface), key, surface)
+    if whole_parts:
+        band = one_tone_per_stone(band, key, surface)
     # in colour families the family carries each stone's colour; on one ramp the stone's own tint does
     step = band_steps(band, cls, recede) + (0 if colours else stone_tints(lum(albedo), key, cls, recede, surface))
-    rim, cast = relief_lines(depth, surface)
+    rim, cast = relief_lines(depth, surface, relief_px)
     step += np.where(rim & (band >= SHADE), 1, 0)
-    step -= np.where(cast, CAST_STEPS, 0)
+    step -= np.where(cast, cast_steps, 0)
     cut = np.zeros(surface.shape, dtype=bool)
     if wall_marks:
         step += np.where(top_lines(key, seam, surface, band, seed), 1, 0)
@@ -423,13 +542,16 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
     # inside the stones, in in-between shades: the light's fall-off stone by stone, the stones'
     # roundness and the texture of their own colour; joints and cuts stay on whole steps
     body = surface & ~cut
-    shading = (GRADIENT * light_gradient(light, band, key, surface) + PILLOW * pillow(key, surface)
+    gradient = light_gradient(light, band, key, surface) if whole_parts else pixel_gradient(light, band, surface)
+    shading = (GRADIENT * gradient + PILLOW * pillow(key, surface)
                + TEXTURE * albedo_texture(lum(albedo), key, surface)
                - AO_STRENGTH * contact_shadow(directory, piece, surface))
     position = np.clip(step + np.where(body, shading, 0.0), 0, len(ramp) - 1)
     # stone in the deepest shadow stays stone: only joints, cuts and lines may reach the line colour,
     # or shadowed stones read as holes
     position = np.where(body & ~cast, np.maximum(position, BODY_FLOOR), position)
+    if colours and flat_features:
+        position = np.where(small_features(family, surface, flat_features), BASE_STEP, position)
 
     out = np.zeros(ids.shape, dtype=np.uint8)
     painted = surface | seam
@@ -442,7 +564,7 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
     out[..., :3][leaf] = greens[np.clip(band[leaf] + 1, 0, len(greens) - 1)]
     glass = solid & (cls == GLASS)
     out[..., :3][glass] = passage[np.clip(band[glass], 0, len(passage) - 1)]
-    edge = silhouette(solid)
+    edge = outline(solid) if thin_fill else silhouette(solid)
     out[..., :3][edge & ~leaf] = ramp[OUTLINE_STEP]
     for f, own in enumerate(ramps):
         # the outline in each family's own darkest shade (selective outline), not one black for all

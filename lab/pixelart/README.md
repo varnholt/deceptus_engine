@@ -52,7 +52,7 @@ python -m pixelart.model model.glb [--height 64] [--yaw 25] [--pitch 10] [--colo
 
 Takes a glTF/GLB, FBX, OBJ or .blend file through the same render and paint stages as the level
 pieces, with no scene script. It writes a small asset config for the model
-(`work/models/<name>/<name>.json`, one piece called `model`) and the art beside it (`model_px.png`
+(`work/models/<name>-<hash>/<name>.json`, one piece called `model`) and the art beside it (`model_px.png`
 and `model_px_normals.png`).
 
 - **Framing** (`blender_kit/model.py`):
@@ -77,6 +77,25 @@ and `model_px_normals.png`).
     violet (`hue_shift`), light steps towards warm white.
   - The outline takes each family's darkest shade.
   - `wall_marks` (block edges, top lines, hand marks) and `grow_moss` are off for models.
+- **Drawing rules for models** (paint options; the level pieces keep their wall rules):
+  - `true_normals` (view): the light pass lights the geometry, not its custom normals. Anime models
+    bend their normals for cel shading, and a face would read as turned away.
+  - `whole_parts` off: light falls off across a part pixel by pixel, not one tone per stone.
+  - `simplify` (1.5 px): the light is smoothed across the continuous surface. It stops at depth
+    jumps, such as a fringe in front of a face, but runs over decals and strands, so the head is
+    shaded as one simple volume.
+  - `cast_shadows` (0.2): the strength of shadows thrown onto other parts, blended with the
+    shadow-free `_turn` pass.
+  - `exposure`: each colour family is brightened (at most 1.6×) until its typical pixel sits in
+    the half-lit band, so every material shows its own colour.
+  - `relief_px` (3): only depth steps of 3 px or more get a relief line; a turned surface's depth
+    slopes without being an edge.
+  - `cast_steps` (1): that line is one step darker.
+  - `thin_fill`: parts thinner than 5 px (arms, legs, straps) are not outlined.
+  - `flat_features` (12): colour patches up to 12 px (eyes, buttons) are drawn flat in their own
+    colour.
+  - Colours come from `_albedo_mode`, the most common colour of each 4×4 block (not the mean),
+    converted to display colours, so an iris stays iris instead of blending into skin.
 
 In the GUI, the second page `http://127.0.0.1:8765/model` works through the same steps, left to right:
 1. **Input:** drop a model file, type a path, or pick one opened before.

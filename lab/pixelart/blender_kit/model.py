@@ -150,9 +150,12 @@ def visible_box(scn, lo, hi):
             Vector((left + (cols[-1] + 1) * unit, hi.y, bottom + (rows[-1] + 1) * unit)))
 
 
-def build_model(path, height_px=64, yaw=0.0, pitch=0.0, margin_px=2, frame=None):
+def build_model(path, height_px=64, yaw=0.0, pitch=0.0, margin_px=2, frame=None, true_normals=True):
     """Imports the model and sets up the stage for it: the visible model height_px pixels tall, the
-    picture as wide as it needs."""
+    picture as wide as it needs. true_normals: light the geometry, not its custom normals (see
+    core.LIGHT_TRUE_NORMALS)."""
+    global LIGHT_TRUE_NORMALS
+    LIGHT_TRUE_NORMALS = true_normals
     scn = bpy.context.scene
     clear_scene()
     import_model(path)
