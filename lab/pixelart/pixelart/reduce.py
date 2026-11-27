@@ -6,6 +6,8 @@ larger and reduced, every level pixel is decided by the whole area it covers:
 - beauty and normals: the mean of the covered samples, weighted by coverage;
 - ids: the stone covering most of the pixel; joints by coverage, so a one-pixel joint stays one
   pixel wide wherever it falls on the larger grid (see joint_pixels);
+- light and albedo (paint stage): the mean, like beauty; classes: the class covering most of it;
+  depth (16-bit grey): the nearest sample, so silhouettes keep the object in front;
 - alpha: solid where samples cover at least half of the pixel.
 
 usage: python -m pixelart.reduce <in_dir> <out_dir> <piece> <scale>
@@ -18,6 +20,7 @@ import numpy as np
 from PIL import Image
 
 PASSES = ("beauty", "ids", "normals")
+PAINT_PASSES = ("light", "classes", "albedo", "depth")   # only pieces with paint_passes render these
 OPAQUE = 128
 NO_STONE = -1
 
@@ -53,6 +56,27 @@ def majority(values):
     return np.where(counts.max(-1) > 0, best, NO_STONE)
 
 
+def majority_pass(rgba, scale):
+    """Each pixel takes the colour covering most of it (flat-colour passes such as the classes)."""
+    b = blocks(rgba.astype(np.int64), scale)
+    covered = b[..., 3] >= OPAQUE
+    key = (b[..., 0] << 16) | (b[..., 1] << 8) | b[..., 2]
+    h, w = key.shape[0], key.shape[2]
+    values = np.where(covered, key, NO_STONE).transpose(0, 2, 1, 3).reshape(h, w, scale * scale)
+    known = np.maximum(majority(values), 0)
+    out = np.zeros((h, w, 4), dtype=np.uint8)
+    out[..., 0], out[..., 1], out[..., 2] = (known >> 16) & 255, (known >> 8) & 255, known & 255
+    out[..., 3] = np.where(covered.mean(axis=(1, 3)) >= 0.5, 255, 0)
+    return out
+
+
+def depth_pass(grey16, scale):
+    """16-bit depth: the nearest sample of each pixel, so a silhouette keeps its front object."""
+    h, w = grey16.shape[0] // scale, grey16.shape[1] // scale
+    b = grey16[:h * scale, :w * scale].reshape(h, scale, w, scale)
+    return b.max(axis=(1, 3)).astype(np.uint16)   # near = high values
+
+
 def ids_pass(rgba, scale):
     """Stone ids by majority, joints by coverage (see joint_pixels)."""
     b = blocks(rgba.astype(np.int64), scale)
@@ -74,10 +98,16 @@ def reduce_passes(src, dst, piece, scale):
     """Writes the piece's passes from src (rendered at scale) to dst at level size."""
     src, dst = Path(src), Path(dst)
     dst.mkdir(parents=True, exist_ok=True)
-    for kind in PASSES:
-        rgba = np.asarray(Image.open(src / f"{piece}_{kind}.png").convert("RGBA"))
-        reduced = ids_pass(rgba, scale) if kind == "ids" else mean_pass(rgba, scale)
-        Image.fromarray(reduced).save(dst / f"{piece}_{kind}.png")
+    reducers = {"ids": ids_pass, "classes": majority_pass}
+    for kind in PASSES + PAINT_PASSES:
+        path = src / f"{piece}_{kind}.png"
+        if (kind in PAINT_PASSES) and not path.exists():
+            continue
+        if kind == "depth":
+            Image.fromarray(depth_pass(np.asarray(Image.open(path)), scale)).save(dst / f"{piece}_{kind}.png")
+            continue
+        rgba = np.asarray(Image.open(path).convert("RGBA"))
+        Image.fromarray(reducers.get(kind, mean_pass)(rgba, scale)).save(dst / f"{piece}_{kind}.png")
     lettering = src / f"{piece}_inscriptions.json"   # already in level pixels
     if lettering.exists():
         shutil.copy(lettering, dst / lettering.name)

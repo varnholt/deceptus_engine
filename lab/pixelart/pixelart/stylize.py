@@ -243,7 +243,7 @@ def ramp_colour(ramp, position, sub_steps):
     return np.round(ramp[lo] * (1 - t) + ramp[hi] * t).astype(np.int32)
 
 
-def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0, round_corners=False, texture=0.0, pits=0.0, scratches=0.0, texture_seed=7, edge_light=2, faithful=0.0, tone_spread=1.0, antialias=0.0, wear=False, drawn_edges=False, ornament_faithful=0.0):
+def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palette=None, k_scale=0.5, crack_k=2.2, grain=0.0, max_step=1, micro=4, micro_k=1.0, moss_clumps=False, foot_rows=0, outline_level=OUTLINE, soft=0.0, sub_steps=3, bevel=0, speck=0.0, form=0.0, value_tones=False, gain=1.0, contrast=1.0, saturation=1.0, night=0.0, round_corners=False, texture=0.0, pits=0.0, scratches=0.0, texture_seed=7, edge_light=2, faithful=0.0, tone_spread=1.0, antialias=0.0, wear=False, drawn_edges=False, ornament_faithful=0.0, ornament_contrast=1.0):
     shares = base_shares or BASE_SHARES
     pal = palette or {}
     ramp = np.array(pal.get("stone", RAMP))
@@ -443,6 +443,14 @@ def pixelize(beauty_p, ids_p, normals_p, out_p, shift=0, base_shares=None, palet
             rendered = 1.0 + 5.0 * np.clip((logp - lo_p) / max(hi_p - lo_p, 1e-6), 0, 1) + shift
             drawn = keep_pure | (any_edge & ~ornament)
             position = np.where(drawn, position, (1 - follow) * position + follow * rendered)
+            if ornament_contrast != 1.0:
+                # each ornament stone spreads its light further around its own mean, so a boss shows
+                # its glint and its shadow instead of one or two close shades
+                lit_ornament = ornament & ~keep_pure
+                stone_mean = np.bincount(inv[lit_ornament], weights=position[lit_ornament], minlength=len(counts))
+                stone_mean /= np.maximum(np.bincount(inv[lit_ornament], minlength=len(counts)), 1)
+                mean_here = stone_mean[inv]
+                position = np.where(lit_ornament, mean_here + ornament_contrast * (position - mean_here), position)
         shade = ramp_colour(ramp, position, sub_steps)
     shade = shade + np.where(keep_pure, 0, fine * micro)[:, None]
     out[..., :3][stone] = np.clip(shade, 0, 255)

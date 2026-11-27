@@ -699,3 +699,197 @@ def render_ids(path):
         scn.cycles.samples = old_samples
         for ob in hidden:
             ob.hide_render = False
+
+
+# material classes for the paint stage, by material name (first match wins); the class is written
+# into the red channel as class / 16, the green channel is 1 for parts that stand back (side rooms)
+MATERIAL_CLASSES = (("seam", 1), ("glass", 2), ("door", 2), ("roof", 3), ("growth", 4), ("leaves", 4),
+                    ("bush", 4), ("ivy", 4), ("iron", 5), ("trim", 6))
+STONE_CLASS = 7
+RECEDING = ("annex",)
+LIGHT_SAMPLES = 32
+
+
+def material_class(name):
+    return next((c for key, c in MATERIAL_CLASSES if key in name), STONE_CLASS)
+
+
+def render_light(path):
+    """How much moonlight reaches each pixel: every surface plain white and matt, lit by the key
+    light alone (no fill, no ambient), so the pass holds the light's direction and its cast shadows
+    without texture or colour."""
+    scn = bpy.context.scene
+    m = bpy.data.materials.get("light_out") or bpy.data.materials.new("light_out")
+    m.use_nodes = True
+    bsdf = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    bsdf.inputs["Base Color"].default_value = (1, 1, 1, 1)
+    bsdf.inputs["Roughness"].default_value = 1.0
+    for name in ("Specular IOR Level", "Specular"):
+        if name in bsdf.inputs:
+            bsdf.inputs[name].default_value = 0.0
+    layer = scn.view_layers[0]
+    old_view, old_samples = scn.view_settings.view_transform, scn.cycles.samples
+    old_world = scn.world
+    hidden = [ob for ob in scn.objects if (ob.type == "LIGHT") and (ob.name != "key") and not ob.hide_render]
+    for ob in hidden:
+        ob.hide_render = True
+    dark = bpy.data.worlds.get("no_ambient") or bpy.data.worlds.new("no_ambient")
+    dark.use_nodes = True
+    next(n for n in dark.node_tree.nodes if n.type == "BACKGROUND").inputs[1].default_value = 0.0
+    scn.world = dark
+    layer.material_override = m
+    scn.view_settings.view_transform = "Raw"
+    scn.cycles.samples = LIGHT_SAMPLES
+    try:
+        render(path)
+    finally:
+        layer.material_override = None
+        scn.world = old_world
+        scn.view_settings.view_transform = old_view
+        scn.cycles.samples = old_samples
+        for ob in hidden:
+            ob.hide_render = False
+
+
+def render_material_classes(path):
+    """Each material emits its class (see MATERIAL_CLASSES) as a flat colour; the materials'
+    own outputs are put back afterwards."""
+    scn = bpy.context.scene
+    restore = []
+    for m in bpy.data.materials:
+        if not m.use_nodes:
+            continue
+        nt = m.node_tree
+        out = next((n for n in nt.nodes if n.type == "OUTPUT_MATERIAL"), None)
+        if out is None:
+            continue
+        old = [l.from_socket for l in nt.links if l.to_socket == out.inputs["Surface"]]
+        em = nt.nodes.new("ShaderNodeEmission")
+        em.inputs["Color"].default_value = (material_class(m.name) / 16.0, 1.0 if any(k in m.name for k in RECEDING) else 0.0, 0.0, 1.0)
+        nt.links.new(em.outputs[0], out.inputs["Surface"])
+        restore.append((nt, em, out, old))
+    old_view, old_samples = scn.view_settings.view_transform, scn.cycles.samples
+    hidden = [ob for ob in scn.objects if (ob.type == "LIGHT") and not ob.hide_render]
+    for ob in hidden:
+        ob.hide_render = True
+    scn.view_settings.view_transform = "Raw"
+    scn.cycles.samples = 1
+    try:
+        render(path)
+    finally:
+        scn.view_settings.view_transform = old_view
+        scn.cycles.samples = old_samples
+        for ob in hidden:
+            ob.hide_render = False
+        for nt, em, out, old in restore:
+            nt.nodes.remove(em)
+            for sock in old:
+                nt.links.new(sock, out.inputs["Surface"])
+
+
+ALBEDO_SAMPLES = 16
+# the camera stands 40 units in front of the scene (setup_stage); the depth pass spans 30 to 50 units,
+# written at 16 bits so a relief step of a pixel or two still shows
+DEPTH_NEAR_PLANE = 30.0
+DEPTH_RANGE = 20.0
+
+
+def _route_outputs(make_emission):
+    """Every material's surface output replaced by an emission node make_emission(material, tree)
+    builds; returns what restore_outputs needs to put the originals back."""
+    restore = []
+    for m in bpy.data.materials:
+        if not m.use_nodes:
+            continue
+        nt = m.node_tree
+        out = next((n for n in nt.nodes if n.type == "OUTPUT_MATERIAL"), None)
+        if out is None:
+            continue
+        old = [l.from_socket for l in nt.links if l.to_socket == out.inputs["Surface"]]
+        em = make_emission(m, nt)
+        nt.links.new(em.outputs[0], out.inputs["Surface"])
+        restore.append((nt, em, out, old))
+    return restore
+
+
+def _restore_outputs(restore):
+    for nt, em, out, old in restore:
+        nt.nodes.remove(em)
+        for sock in old:
+            nt.links.new(sock, out.inputs["Surface"])
+
+
+def _render_unlit(path, samples):
+    """Renders the current emission-only setup with lights off, raw values."""
+    scn = bpy.context.scene
+    old_view, old_samples = scn.view_settings.view_transform, scn.cycles.samples
+    hidden = [ob for ob in scn.objects if (ob.type == "LIGHT") and not ob.hide_render]
+    for ob in hidden:
+        ob.hide_render = True
+    scn.view_settings.view_transform = "Raw"
+    scn.cycles.samples = samples
+    try:
+        render(path)
+    finally:
+        scn.view_settings.view_transform = old_view
+        scn.cycles.samples = old_samples
+        for ob in hidden:
+            ob.hide_render = False
+
+
+def render_albedo(path):
+    """Each material's own colour without light: whatever feeds its BSDF's Base Color (stone scans,
+    tint per block, grime, moss) emitted as is; emissive materials keep their emission colour."""
+    def make(m, nt):
+        em = nt.nodes.new("ShaderNodeEmission")
+        bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
+        if bsdf is None:
+            source = next((n for n in nt.nodes if (n.type == "EMISSION") and (n is not em)), None)
+            if source is not None:
+                em.inputs["Color"].default_value = source.inputs["Color"].default_value
+            return em
+        link = next((l for l in nt.links if l.to_socket == bsdf.inputs["Base Color"]), None)
+        if link is not None:
+            nt.links.new(link.from_socket, em.inputs["Color"])
+        else:
+            em.inputs["Color"].default_value = bsdf.inputs["Base Color"].default_value
+        return em
+    restore = _route_outputs(make)
+    try:
+        _render_unlit(path, ALBEDO_SAMPLES)
+    finally:
+        _restore_outputs(restore)
+
+
+def render_depth(path):
+    """Distance from the camera, near = white, from DEPTH_NEAR_PLANE over DEPTH_RANGE scene units, as a
+    16-bit image, for tracing silhouettes and relief edges."""
+    extra = []
+
+    def make(m, nt):
+        cam = nt.nodes.new("ShaderNodeCameraData")
+        scale = nt.nodes.new("ShaderNodeMapRange")
+        scale.inputs["From Min"].default_value = DEPTH_NEAR_PLANE
+        scale.inputs["From Max"].default_value = DEPTH_NEAR_PLANE + DEPTH_RANGE
+        scale.inputs["To Min"].default_value = 1.0
+        scale.inputs["To Max"].default_value = 0.0
+        nt.links.new(cam.outputs["View Z Depth"], scale.inputs["Value"])
+        em = nt.nodes.new("ShaderNodeEmission")
+        nt.links.new(scale.outputs[0], em.inputs["Color"])
+        extra.append((nt, cam, scale))
+        return em
+    settings = bpy.context.scene.render.image_settings
+    old_depth, old_mode = settings.color_depth, settings.color_mode
+    restore = _route_outputs(make)
+    # one 16-bit grey channel: readers keep 16 bits for grey, not for RGBA (where the ids pass
+    # already tells geometry from empty space)
+    settings.color_mode = "BW"
+    settings.color_depth = "16"
+    try:
+        _render_unlit(path, 1)
+    finally:
+        settings.color_depth, settings.color_mode = old_depth, old_mode
+        for nt, cam, scale in extra:
+            nt.nodes.remove(cam)
+            nt.nodes.remove(scale)
+        _restore_outputs(restore)

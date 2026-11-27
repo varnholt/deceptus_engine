@@ -127,6 +127,20 @@ shading that keeps pieces from looking like flat EGA tiles: `soft` (the render's
 stone, in in-between shades), `bevel` (pillowed stones: a lit band along the top and left edges, falloff
 towards the bottom right), `speck` (fine surface speckle) and `sub_steps`. Stones deep in shadow stay flat.
 
+**Paint (`pixelart/paint.py`), the stage for architecture.** A piece with a `"paint"` section in its config is
+drawn instead of converted: the render passes answer questions, they are not reduced. It needs `"paint_passes": true`
+(and `render_scale`, 4 for the chapel), which adds four passes to the render: `light` (the key light alone on white
+matt surfaces: the light's direction and cast shadows without texture), `albedo` (each material's colour without
+light: tint per stone, grime, moss), `depth` (16-bit distance from the camera) and `classes` (material class per pixel:
+wall stone, trim, glass, roof, foliage, metal, joint, and whether a part stands back). The stage:
+1. light bands from the light pass (deep, shade, half, lit), patches smaller than a few pixels merged into their
+   neighbour, so there is no speckle by construction;
+2. a ramp step per band and material, a step up or down per stone from its albedo, side rooms a step lower;
+3. lines traced from the depth pass: a lit rim where a raised part faces the moon, a dark cast line where it ends
+   towards the lower right; lit top lines under joints and hand marks (`wear.py`);
+4. joints under the stones beside them, moss green where the albedo is green on faces turned up, a dark silhouette;
+5. curve smoothing (`antialias.py`) and the grade. Options: `gain`, `contrast`, `saturation`, `night`, `seed`, `antialias`.
+
 **Tidy.** Every stylized piece ends with `tidy.py`, which removes what a render leaves behind and reports
 it: tiny enclosed holes between meshes, specks of dark that are not part of a joint or crack, short
 dark slivers, and single pixels no neighbour shares.

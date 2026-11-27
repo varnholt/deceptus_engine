@@ -20,7 +20,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import compare, inscribe, palette, reduce, stylize, tiled
+from . import compare, inscribe, paint, palette, reduce, stylize, tiled
 from .metrics import metrics
 
 KIT = Path(__file__).resolve().parent.parent / "blender_kit"
@@ -83,7 +83,13 @@ def pass_paths(cfg, piece):
 
 
 def stylize_piece(cfg, piece):
+    """Writes <piece>_px.png: drawn by paint.py when the piece has a "paint" section (it needs the
+    paint passes, see render_scale/paint_passes), otherwise converted by stylize.py."""
     w = cfg["_work"]
+    if "paint" in cfg["pieces"][piece]:
+        paint.paint(w, piece, w / f"{piece}_px.png", palette=piece_palette(cfg, piece), **cfg["pieces"][piece]["paint"])
+        print(f"{piece}: {metrics(str(w / f'{piece}_px.png'))}")
+        return
     opts = dict(cfg["pieces"][piece].get("stylize", {}))
     tidied = stylize.pixelize(*(str(p) for p in pass_paths(cfg, piece)), str(w / f"{piece}_px.png"),
                      palette=piece_palette(cfg, piece), **opts)

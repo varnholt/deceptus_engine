@@ -66,6 +66,8 @@ OPTION_RANGES = {
                  help="Varies the stones like an artist would: lit top lines stop short or break, a few stones get a crack stroke, a pit or a chipped edge. Off = every stone treated the same (looks generated)."),
     "ornament_faithful": dict(kind="float", min=0.0, max=1.0, step=0.05, group="look", label="Ornament from render", needs=("soft", ">", 0),
                               help="Small carved parts and line work (bosses, rings, tracery) keep the render's own light pixel by pixel, so their shape survives. 0 = one flat tone each, like the wall stones."),
+    "ornament_contrast": dict(kind="float", min=0.5, max=3.0, step=0.1, group="look", label="Ornament contrast", needs=("ornament_faithful", ">", 0),
+                              help="How far each carved part spreads its light around its own mean: higher = bosses and rings show a bright glint and a deep shadow. 1 = as rendered."),
     "antialias": dict(kind="float", min=0.0, max=1.0, step=0.05, group="look", label="Smooth curves",
                       help="Rounds the staircase steps of arches and diagonals with an in-between tone in each notch, inside the piece only; block corners, joints and the outline stay hard. 0 = off."),
     "texture": dict(kind="float", min=0.0, max=1.5, step=0.05, group="look", label="Surface patches", needs=("soft", ">", 0),

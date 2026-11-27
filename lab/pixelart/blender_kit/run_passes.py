@@ -6,6 +6,9 @@ Live (e.g. from an MCP session):  exec this file with KIT_DIR in its globals, th
 Writes <out_dir>/<piece>_beauty.png, _ids.png and _normals.png, and _inscriptions.json when the
 piece has lettering areas (see graves.lettering). A piece with a render_scale above 1 renders the passes
 that many times larger (the caller reduces them, see pixelart/reduce.py); inscriptions stay in level pixels.
+A piece with paint_passes also gets _light.png (key light alone on white matt surfaces) and _classes.png
+(material class per pixel), _albedo.png (each material's colour without light) and _depth.png (16-bit
+distance from the camera) for the paint stage.
 """
 import json
 import os
@@ -86,12 +89,18 @@ def write_inscriptions(ns, path):
 
 def run(asset_json, piece, out_dir):
     ns = build(asset_json, piece)
+    paint_passes = json.loads(open(asset_json, encoding="utf-8").read())["pieces"][piece].get("paint_passes", False)
     device = use_gpu()
     os.makedirs(out_dir, exist_ok=True)
     base = os.path.join(out_dir, piece)
     ns["render"](base + "_beauty.png")
     ns["render_ids"](base + "_ids.png")
     ns["render_normals"](base + "_normals.png")
+    if paint_passes:
+        ns["render_light"](base + "_light.png")
+        ns["render_material_classes"](base + "_classes.png")
+        ns["render_albedo"](base + "_albedo.png")
+        ns["render_depth"](base + "_depth.png")
     write_inscriptions(ns, base + "_inscriptions.json")
     print(f"pixelart: rendered {piece} on {device} into {out_dir}")
 
