@@ -5,7 +5,7 @@ Light and colour come from separate passes, so neither drags the other's noise i
   half, shade, deep (turned away or in cast shadow), like the steps of an artist's ramp;
 - albedo (each material's colour without light) gives each stone's tint and where moss grows;
 - ids give the shapes (one id per stone) and the joints (id 0);
-- depth gives the relief edges, drawn as lines;
+- depth gives the relief edges, drawn as lines; ambient occlusion the contact shadows;
 - classes give the material (wall stone, trim, glass, roof, foliage, metal) and whether a part
   stands back (side rooms), which picks the ramp and its steps.
 
@@ -24,7 +24,8 @@ Steps, in order:
    along the silhouette;
 6. inside the stones, in in-between shades: each stone's place within its light band (the light
    falling off across a face, stone by stone), a slight roundness (lighter top rows, darker bottom
-   rows) and patches from its own albedo texture, never single pixels;
+   rows), patches from its own albedo texture, never single pixels, and contact shadow where the
+   ambient occlusion pass shows an enclosed corner;
 7. curve smoothing (antialias.py) and the grade that sits the piece into its level (grade.py).
 
 usage: python -m pixelart.paint <passes dir> <piece> <out.png>
@@ -69,6 +70,9 @@ PILLOW_ROWS = 2         # rows from a stone's top or bottom that the pillow shad
 TEXTURE = 1.0 / 3       # albedo detail lifts or lowers a patch of a stone by this much
 TEXTURE_CONTRAST = 0.12 # albedo this share above or below its stone's mean is a patch
 MIN_PATCH = 4           # texture patches smaller than this many pixels are dropped (no grain)
+AO_OPEN = 0.92          # ambient occlusion above this is open surface, no contact shadow
+AO_CLOSED = 0.55        # at or below this a corner counts as fully enclosed (the physics are faint; dstar is not)
+AO_STRENGTH = 1.5       # ramp steps a fully enclosed corner goes down
 NO_SIDE = -1
 TOWARDS_LIGHT = ((-1, 0), (0, -1))   # the moon lights from the upper left: the up and left neighbours
 ORTHOGONAL = ((-1, 0), (1, 0), (0, -1), (0, 1))
@@ -259,6 +263,16 @@ def albedo_texture(albedo_lum, key, surface):
     return texture
 
 
+def contact_shadow(directory, piece, surface):
+    """0 on open surface down to 1 in enclosed corners (under ledges, where buttress meets wall, in
+    reveals), from the ambient occlusion pass; zero when the piece has none."""
+    path = Path(directory) / f"{piece}_ao.png"
+    if not path.exists():
+        return np.zeros(surface.shape)
+    ao = load(directory, piece, "ao")[..., 0] / 255.0
+    return np.where(surface, np.clip((AO_OPEN - ao) / (AO_OPEN - AO_CLOSED), 0.0, 1.0), 0.0)
+
+
 def silhouette(solid):
     """Solid pixels with an empty pixel beside them."""
     return solid & ~np.logical_and.reduce([shifted(solid, dy, dx, False) for dy, dx in ORTHOGONAL])
@@ -304,7 +318,8 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
     # roundness and the texture of their own colour; joints and cuts stay on whole steps
     body = surface & ~cut
     shading = (GRADIENT * light_gradient(light, band, key, surface) + PILLOW * pillow(key, surface)
-               + TEXTURE * albedo_texture(lum(albedo), key, surface))
+               + TEXTURE * albedo_texture(lum(albedo), key, surface)
+               - AO_STRENGTH * contact_shadow(directory, piece, surface))
     position = np.clip(step + np.where(body, shading, 0.0), 0, len(ramp) - 1)
 
     out = np.zeros(ids.shape, dtype=np.uint8)

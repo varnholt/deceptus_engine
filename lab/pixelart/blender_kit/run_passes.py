@@ -8,7 +8,7 @@ piece has lettering areas (see graves.lettering). A piece with a render_scale ab
 that many times larger (the caller reduces them, see pixelart/reduce.py); inscriptions stay in level pixels.
 A piece with paint_passes also gets _light.png (key light alone on white matt surfaces) and _classes.png
 (material class per pixel), _albedo.png (each material's colour without light) and _depth.png (16-bit
-distance from the camera) for the paint stage.
+distance from the camera) and _ao.png (ambient occlusion) for the paint stage.
 """
 import json
 import os
@@ -101,6 +101,7 @@ def run(asset_json, piece, out_dir):
         ns["render_material_classes"](base + "_classes.png")
         ns["render_albedo"](base + "_albedo.png")
         ns["render_depth"](base + "_depth.png")
+        ns["render_ao"](base + "_ao.png")
     write_inscriptions(ns, base + "_inscriptions.json")
     print(f"pixelart: rendered {piece} on {device} into {out_dir}")
 

@@ -893,3 +893,28 @@ def render_depth(path):
             nt.nodes.remove(cam)
             nt.nodes.remove(scale)
         _restore_outputs(restore)
+
+
+AO_DISTANCE = 0.5        # scene units an occluder may be away and still darken (12 level px)
+AO_SAMPLES = 48
+
+
+def render_ao(path):
+    """Ambient occlusion alone, white = open, dark = enclosed (corners, under ledges, in reveals),
+    for the paint stage's contact shadows."""
+    def make(m, nt):
+        ao = nt.nodes.new("ShaderNodeAmbientOcclusion")
+        ao.inputs["Distance"].default_value = AO_DISTANCE
+        ao.samples = 16
+        em = nt.nodes.new("ShaderNodeEmission")
+        nt.links.new(ao.outputs["AO"], em.inputs["Color"])
+        made.append((nt, ao))
+        return em
+    made = []
+    restore = _route_outputs(make)
+    try:
+        _render_unlit(path, AO_SAMPLES)
+    finally:
+        for nt, ao in made:
+            nt.nodes.remove(ao)
+        _restore_outputs(restore)

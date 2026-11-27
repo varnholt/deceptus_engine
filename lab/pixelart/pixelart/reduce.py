@@ -6,7 +6,7 @@ larger and reduced, every level pixel is decided by the whole area it covers:
 - beauty and normals: the mean of the covered samples, weighted by coverage;
 - ids: the stone covering most of the pixel; joints by coverage, so a one-pixel joint stays one
   pixel wide wherever it falls on the larger grid (see joint_pixels);
-- light and albedo (paint stage): the mean, like beauty; classes: the class covering most of it;
+- light, albedo and ao (paint stage): the mean, like beauty; classes: the class covering most of it;
   depth (16-bit grey): the nearest sample, so silhouettes keep the object in front;
 - alpha: solid where samples cover at least half of the pixel.
 
@@ -20,7 +20,7 @@ import numpy as np
 from PIL import Image
 
 PASSES = ("beauty", "ids", "normals")
-PAINT_PASSES = ("light", "classes", "albedo", "depth")   # only pieces with paint_passes render these
+PAINT_PASSES = ("light", "classes", "albedo", "depth", "ao")   # only pieces with paint_passes render these
 OPAQUE = 128
 NO_STONE = -1
 
