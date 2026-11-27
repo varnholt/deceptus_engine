@@ -25,6 +25,8 @@ PORTAL_HALF = 32       # door opening half width
 PORTAL_SPRING = 104
 ORDER = 6              # width of each archivolt order
 ORDERS = 4
+PORTAL_APEX = PORTAL_SPRING + math.sqrt((2 * PORTAL_HALF + ORDERS * ORDER) ** 2 - PORTAL_HALF ** 2)
+FIRST_SETBACK = PORTAL_APEX + 14   # the buttresses step back just above the portal
 SCALE = 1.2            # model units to level pixels: the portal is six player heights; walls and gable rise past the camera room's top
 TURN_DEG = 0.0         # the front faces the player, like the rest of the scenery
 TIP_DEG = 8.0
@@ -514,7 +516,7 @@ def build_front(stone, trim, seed):
     rose_c, rose_r = portal_apex + 24, 11.0
     win_half, win_sill = 62, g_apex + 10
     win_spring = win_sill + 150
-    lancets = [(cu + sgn * 106, 18, 120, 290) for sgn in (-1, 1)]   # centre, half width, sill, spring
+    lancets = []   # none beside the portal: the front stays calm around the great window and the door
     gable_rose_c, gable_rose_r = win_spring + 2 * win_half * 0.87 + 62, 34.0
     objects = []
 
@@ -579,6 +581,9 @@ def build_front(stone, trim, seed):
         for u0_, u1_ in ((BUTTRESS * 0.5, cu - gablet_reach), (cu + gablet_reach, W - BUTTRESS * 0.5)):
             top.block(u0_, u1_, w_band - 5, w_band, -4.0, 2.0)
             top.block(u0_, u1_, w_band - 2, w_band, -5.0, 2.0)
+    jamb_reach = r_out - PORTAL_HALF + 12   # clear of the portal's jamb stones
+    plinth_band(top, BUTTRESS * 0.5 + 2, cu - jamb_reach, -2.5)
+    plinth_band(top, cu + jamb_reach, W - BUTTRESS * 0.5 - 2, -2.5)
     celtic_cross(top, cu, 2, H + GABLE_RISE + 4, 48)
     objects.append(top.finish(bevel=0.35))
     return objects
@@ -631,10 +636,19 @@ def quatrefoil_band(p, u0, u1, w0, height, v_face):
         cu, cw = u0 + step * (k + 0.5), w0 + height / 2
         r = height * 0.16
         for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2):
-            for seg in ring(cu + r * math.cos(a), cw + r * math.sin(a), r * 0.75, r * 0.75 + 0.9, 16):
+            for seg in ring(cu + r * math.cos(a), cw + r * math.sin(a), r * 0.75, r * 0.75 + max(0.9, height * 0.07), 16):
                 p.slab(seg, v_face + 0.2, v_face + 1.2)
-        for seg in ring(cu, cw, height * 0.42, height * 0.42 + 0.8, 12):
+        for seg in ring(cu, cw, height * 0.42, height * 0.42 + max(0.8, height * 0.07), 12):
             p.slab(seg, v_face + 0.3, v_face + 1.2)
+
+
+PLINTH_BAND_W0 = 16       # the quatrefoil band along the foot starts just above the grass and candles
+PLINTH_BAND_H = 20        # about one player height: the medallions read at game size
+
+
+def plinth_band(p, u0, u1, v_face):
+    """The quatrefoil frieze repeated low along the front, at the height the player looks at."""
+    quatrefoil_band(p, u0, u1, PLINTH_BAND_W0, PLINTH_BAND_H, v_face)
 
 
 class BlindFace:
@@ -659,7 +673,7 @@ class BlindFace:
 def build_buttresses(stone, seed):
     """Square buttresses at the front corners and along the side, stepped and pinnacled."""
     but = Part("buttresses", stone, seed)
-    stages = [(0, EAVES_H * 0.42, 1.0), (EAVES_H * 0.42, EAVES_H * 0.76, 0.86), (EAVES_H * 0.76, EAVES_H + 4, 0.74)]
+    stages = [(0, FIRST_SETBACK, 1.0), (FIRST_SETBACK, EAVES_H * 0.76, 0.86), (EAVES_H * 0.76, EAVES_H + 4, 0.74)]
     for bu, bv, faces_front in ((0, 0, True), (FRONT_W, 0, True)):
         for w0, w1, scale in stages:
             s = BUTTRESS * scale / 2
@@ -670,11 +684,8 @@ def build_buttresses(stone, seed):
                 but.block(bu - s, bu + s * 1.4, w0, w1, bv - s, bv + s)
                 but.side_slab([(bv - s - 1.2, w1), (bv + s + 1.2, w1), (bv + s + 1.2, w1 + 3), (bv - s - 1.2, w1 + 3)][::-1], bu - s, bu + s * 1.4 + 1.2)
         if faces_front:
-            for w_sill, w_top, scale in ((24, EAVES_H * 0.36, 1.0), (EAVES_H * 0.46, EAVES_H * 0.70, 0.86)):
-                face = BlindFace(but, bv - BUTTRESS * scale / 2 * 1.4 - 6.5)   # its reveal lies on the buttress face, the tracery stands before it
-                half = BUTTRESS * scale * 0.3
-                spring = w_top - 2 * half * 0.87
-                traceried_window(face, bu, w_sill, half, spring)
+            s = BUTTRESS / 2
+            plinth_band(BlindFace(but, bv - s * 1.4), bu - s + 3, bu + s - 3, -2.5)
         pinnacle(but, bu, bv, EAVES_H + 7, BUTTRESS * 0.7, 250)
     return [but.finish(bevel=0.35)]
 
@@ -716,16 +727,25 @@ def build_roof(roof_mat, seed):
 
 
 ANNEX = dict(v0=14, v1=SIDE_L, width=160, eaves=270, rise=120)
+ANNEX_DARKEN = 0.18   # the side rooms recede: darker stone than the chapel front
 
 
-def build_annex(stone, trim, roof_mat, seed):
+def annex_span(side):
+    """The u range of the side room on the left (side -1) or right (+1), clear of the corner buttress."""
+    if side < 0:
+        return -ANNEX["width"] - 30, -30
+    return FRONT_W + 30, FRONT_W + 30 + ANNEX["width"]
+
+
+def build_annex(stone, trim, roof_mat, seed, side):
     """The side room: a lower block on the chapel's left, set back, its gable end facing the
     front like the chapel's, with a traceried window under a gablet, a pinnacled corner and its
-    own tiled roof. dstar's owl shrine stands before it."""
-    u0, u1 = -ANNEX["width"] - 30, -30   # centred on the shrine (x 5316), clear of the chapel's left buttress
+    own tiled roof. Darker stone than the chapel, so it stays in the background. side -1 builds
+    the room on the left, +1 its mirror image on the right."""
+    u0, u1 = annex_span(side)
     v0, v1, H, rise = ANNEX["v0"], ANNEX["v1"], ANNEX["eaves"], ANNEX["rise"]
     cu = (u0 + u1) / 2
-    win_half, win_sill, win_spring = 26, 70, 180
+    win_half, win_sill, win_spring = 26, 50, 150   # the gablet over the window ends under the frieze
     wall = Part("annex_wall", stone, seed)
     front = [(u0, -30), (u1, -30), (u1, H), (cu, H + rise), (u0, H)]   # down into the ground: never a gap under it
 
@@ -751,15 +771,17 @@ def build_annex(stone, trim, roof_mat, seed):
     orn = Part("annex_ornament", trim, seed + 1)
     face = AnnexFront(orn)
     traceried_window(face, cu, win_sill, win_half, win_spring)
-    gablet(face, cu, win_half + 14, win_spring + 30, win_spring + 2 * win_half * 0.87 + 52, -6.0, 0.0)
+    gablet(face, cu, win_half + 14, win_spring + 30, win_spring + 2 * win_half * 0.87 + 38, -6.0, 0.0)
     orn.block(u0 - 2, u1 + 2, H - 4, H, v0 - 3, v1 + 2)
-    quatrefoil_band(face, u0 + 10, u1 - 4, H - 16, 12, -1.5)
+    quatrefoil_band(face, u0 + 10, u1 - 10, H - 34, 26, -2.5)   # large enough to read at game size
+    pier_clear = BUTTRESS * 0.4 + 8   # the band stops at the pinnacled corner pier
+    plinth_band(face, u0 + (pier_clear if side < 0 else 6), u1 - (6 if side < 0 else pier_clear), -2.5)
     for sgn in (-1, 1):
         eave = (cu - sgn * ((u1 - u0) / 2 + 5), H - 1)
         rake = [eave, (eave[0] + sgn * 9, H - 1), (cu, H + rise - 4), (cu, H + rise + 5)]
         face.slab(rake if sgn > 0 else rake[::-1], -4, 8)
         crockets(face, (eave[0] + sgn * 7, H + 10), (cu - sgn * 3, H + rise - 2), 16, -7, 0, size=4.0)
-    for bu in (u0 + 4,):
+    for bu in ((u0 + 4) if side < 0 else (u1 - 4),):   # the pinnacled corner is the outer one
         for w0, w1, scale in ((0, 70, 0.8), (70, H + 3, 0.66)):
             s = BUTTRESS * scale / 2
             coursed_pier(orn, bu - s, bu + s, w0, w1, v0 - s * 1.4, v0 + s)
@@ -779,6 +801,14 @@ def build_plinth(trim, seed):
     return [plinth.finish()]
 
 
+def annex_materials():
+    """The chapel's stone, trim and roof, darkened for the side room."""
+    d = ANNEX_DARKEN
+    return (weathered_stone("annex_stone", (0.058 * d, 0.066 * d, 0.070 * d), moss=0.16, tint_var=0.09),
+            weathered_stone("annex_trim", (0.066 * d, 0.074 * d, 0.078 * d), moss=0.03, tint_var=0.04),
+            weathered_stone("annex_roof", (0.060 * d, 0.050 * d, 0.042 * d), moss=0.04, tint_var=0.10))
+
+
 def build_chapel_model(seed=17):
     """Every part in the chapel's own frame; returns the objects."""
     GLASS[:] = [Part("window_glass", dark_glass(), seed + 99)]
@@ -786,7 +816,8 @@ def build_chapel_model(seed=17):
     trim = weathered_stone("chapel_trim", (0.066, 0.074, 0.078), moss=0.03, tint_var=0.04)
     roof_mat = weathered_stone("chapel_roof", (0.060, 0.050, 0.042), moss=0.04, tint_var=0.10)
     return (build_plinth(trim, seed + 1) + build_front(stone, trim, seed + 10) + build_side(stone, trim, seed + 30)
-            + build_buttresses(stone, seed + 40) + build_roof(roof_mat, seed + 50) + build_annex(stone, trim, roof_mat, seed + 60)
+            + build_buttresses(stone, seed + 40) + build_roof(roof_mat, seed + 50)
+            + build_annex(*annex_materials(), seed + 60, -1) + build_annex(*annex_materials(), seed + 70, 1)
             + [GLASS[0].finish(bevel=0)])
 
 
@@ -821,7 +852,7 @@ def grow_moss_and_ivy(scn, seed):
     ledges = []
     s0, s1 = BUTTRESS / 2, BUTTRESS * 0.86 / 2
     for bu in (0, FRONT_W):
-        for w, s in ((EAVES_H * 0.42, s0), (EAVES_H * 0.76, s1)):
+        for w, s in ((FIRST_SETBACK, s0), (EAVES_H * 0.76, s1)):
             a, b = to_level(bu - s, -s * 1.4, w + 3), to_level(bu + s, -s * 1.4, w + 3)
             ledges.append((a[0], b[0], a[1], a[2]))
     a, b = to_level(-BUTTRESS / 2 - 6, -BUTTRESS * 0.7 - 6, 2), to_level(FRONT_W + BUTTRESS / 2 + 6, -BUTTRESS * 0.7 - 6, 2)
@@ -831,7 +862,7 @@ def grow_moss_and_ivy(scn, seed):
     moss_cushions("chapel_moss", ledges, seed + 200, cover=0.7)
     x_join, py_join, _ = to_level(FRONT_W + BUTTRESS * 0.6, 0, EAVES_H * 0.55)
     ivy_curtain(scn, "chapel_ivy_join", seed + 390, x_join, py_join, 30, 220)
-    for k, (u, w, width, length) in enumerate(((FRONT_W + 8, EAVES_H * 0.9, 26, 170), (-ANNEX["width"] + 6, ANNEX["eaves"], 30, 120),
+    for k, (u, w, width, length) in enumerate(((FRONT_W + 8, EAVES_H * 0.9, 26, 170), (-ANNEX["width"] + 6, ANNEX["eaves"], 30, 120), (FRONT_W + ANNEX["width"] - 6, ANNEX["eaves"], 30, 120),
                                                (-6, EAVES_H * 0.9, 26, 170))):
         x, py, _ = to_level(u, 0, w)
         ivy_curtain(scn, f"chapel_ivy_{k}", seed + 300 + k, x, py, width, length)
@@ -844,7 +875,7 @@ def chapel_wear(scn, seed):
     rng = random.Random(seed)
     b = Builder("chapel_wear", weathered_stone("chapel_chips", (0.050, 0.058, 0.062)), seed)
     x0, _, _ = to_level(-ANNEX["width"], 0, 0)
-    x1, _, _ = to_level(FRONT_W + BUTTRESS / 2, 0, 0)
+    x1, _, _ = to_level(FRONT_W + ANNEX["width"], 0, 0)
     _, top, _ = to_level(0, 0, EAVES_H + GABLE_RISE * 0.6)
     _, low, _ = to_level(0, 0, 14)
     for _ in range(24):
