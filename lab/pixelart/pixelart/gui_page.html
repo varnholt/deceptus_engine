@@ -119,6 +119,7 @@ table.metrics th:first-child, table.metrics td:first-child { text-align: left; c
 #spots.shown { display: flex; }
 #spots button.active { border-color: var(--accent); color: #fff; }
 #footer { padding: 4px 12px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); background: var(--panel); }
+#snap-preview img { display: block; max-width: 440px; image-rendering: pixelated; border: 1px solid var(--line); }
 #gallery { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
 #gallery img { display: block; max-height: 120px; max-width: 440px; image-rendering: pixelated; border: 1px solid var(--line); }
 </style>
@@ -143,6 +144,20 @@ table.metrics th:first-child, table.metrics td:first-child { text-align: left; c
           <button id="open-passes">Try other rendered images…</button>
         </div>
         <p class="button-note">For renders that are not part of an art set: the look can be tried here, not applied.</p>
+        <h3>Snap to the pixel grid</h3>
+        <p class="button-note">For pictures that only look like pixel art (AI output, scaled-up or blurred copies):
+          finds the real pixel grid, gives each pixel one colour and writes <i>name</i>_snapped.png next to the picture.</p>
+        <div class="row"><input id="snap-path" type="text" placeholder="picture to snap (….png)"></div>
+        <div class="row">
+          <label>colours <input id="snap-colours" type="number" min="2" max="256" value="16" style="width:5em"></label>
+          <input id="snap-palette" type="text" placeholder="or: picture with the colours to use (optional)">
+        </div>
+        <div class="row">
+          <label>pixel size <input id="snap-cell" type="number" min="1" step="0.1" placeholder="auto" style="width:5em"></label>
+          <button id="snap-run">Snap to pixel grid</button>
+        </div>
+        <p class="button-note" id="snap-result"></p>
+        <div id="snap-preview"></div>
         <h3>Rarely needed</h3>
         <div class="dev-step"><button id="render">Rebuild from the 3D model (30 s)</button>
           <p class="button-note">Only needed after the 3D scene changed.</p></div>
@@ -653,6 +668,27 @@ async function readPalette() {
   }
 }
 
+async function snapImage() {
+  const path = $("snap-path").value.trim();
+  if (!path) return;
+  $("snap-result").textContent = "Snapping…";
+  try {
+    const result = await post("snap_image", { path, colours: $("snap-colours").value,
+      palette: $("snap-palette").value.trim(), cell: $("snap-cell").value });
+    const size = result.block_width === result.block_height ? `${result.block_width}` : `${result.block_width} × ${result.block_height}`;
+    $("snap-result").textContent = result.block_width === 1 && result.block_height === 1
+      ? `No grid found: the picture already is pixel art. Colours reduced to ${result.colours}. Saved ${result.snapped}`
+      : `One pixel was ${size} picture pixels: now ${result.width} × ${result.height}, ${result.colours} colours. Saved ${result.snapped}`;
+    const img = document.createElement("img");
+    img.src = `/image?path=${encodeURIComponent(result.snapped)}&t=${Date.now()}`;
+    img.style.width = `${Math.min(440, result.width * 4)}px`;
+    $("snap-preview").replaceChildren(img);
+  } catch (error) {
+    $("snap-result").textContent = "";
+    showProblem(`snap: ${error.message}`);
+  }
+}
+
 // ------------------------------------------------------------ stylizing and numbers
 
 async function stylizeNow() {
@@ -1027,6 +1063,7 @@ function wireControls() {
     onSettingsChanged();
   });
   $("read-palette").addEventListener("click", readPalette);
+  $("snap-run").addEventListener("click", snapImage);
   $("revert-palette").addEventListener("click", () => {
     state.palette = structuredClone(state.appliedPalette);
     state.paletteEdited = false;

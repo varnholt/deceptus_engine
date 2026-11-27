@@ -202,6 +202,10 @@ class Api:
     def read_palette(self, body):
         return workbench.read_palette(body["path"], body.get("box"))
 
+    def snap_image(self, body):
+        return workbench.snap_image(body["path"], int(body.get("colours") or 16), body.get("palette") or None,
+                                    float(body["cell"]) if body.get("cell") else None)
+
     def job(self, body):
         kind = body["kind"]
         target, cfg = resolve_source(body["source"])
@@ -246,7 +250,7 @@ class Api:
         return {"jobs": self.jobs.snapshot()}
 
 
-POST_ROUTES = {"open_asset", "open_passes", "stylize", "metrics", "keep_before", "write", "read_palette", "job", "level", "piece_state"}
+POST_ROUTES = {"open_asset", "open_passes", "stylize", "metrics", "keep_before", "write", "read_palette", "snap_image", "job", "level", "piece_state"}
 
 
 class Handler(BaseHTTPRequestHandler):

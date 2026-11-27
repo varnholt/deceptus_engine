@@ -143,5 +143,14 @@ def read_palette(image_path: str, box: list[int] | None = None) -> dict:
     return workbench.read_palette(image_path, box)
 
 
+@server.tool()
+@reported_failures
+def snap_image(image_path: str, colours: int = 16, palette_path: str | None = None, cell: float | None = None) -> dict:
+    """Snaps fake pixel art (AI output, scaled-up or blurred copies) onto its real pixel grid: one
+    pixel per block, `colours` colours read from the image or the colours of `palette_path`;
+    `cell` forces the block size. Writes <name>_snapped.png next to the image."""
+    return workbench.snap_image(image_path, colours, palette_path, cell)
+
+
 if __name__ == "__main__":
     server.run()

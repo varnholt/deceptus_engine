@@ -17,10 +17,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from xml.etree import ElementTree
 
+import numpy as np
 from PIL import Image
 
 from . import __main__ as pipeline
-from . import compare, palette, stylize
+from . import compare, palette, snap, stylize
 from .metrics import metrics
 
 # pixelize() parameters that are not style options
@@ -207,6 +208,20 @@ def resolved_palette(cfg, piece):
 
 def read_palette(image_path, box=None):
     return _as_ramps(palette.extract(image_path, tuple(box) if box else None))
+
+
+def snap_image(image_path, colours=16, palette_path=None, cell=None):
+    """Snaps fake pixel art onto its pixel grid (see snap.py) and writes <name>_snapped.png next
+    to it; returns where, and what the grid and palette came out as."""
+    source = Path(image_path)
+    rgba = np.asarray(Image.open(source).convert("RGBA"))
+    colours_from = snap.palette_from_image(palette_path) if palette_path else None
+    art, grid = snap.snap(rgba, colours, colours_from, cell)
+    out = source.with_name(f"{source.stem}_snapped.png")
+    Image.fromarray(art).save(out)
+    painted = art[art[..., 3] > 0][:, :3]
+    return {"snapped": str(out), "block_width": round(float(grid.cell_w), 3), "block_height": round(float(grid.cell_h), 3),
+            "width": int(art.shape[1]), "height": int(art.shape[0]), "colours": int(len(np.unique(painted, axis=0)))}
 
 
 # ---------------------------------------------------------------- stylize and look

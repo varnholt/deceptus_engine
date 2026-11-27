@@ -29,6 +29,21 @@ python -m pixelart.variants assets/graveyard/graveyard.json lower out.png 1200,4
 
 `python -m pixelart.palette <image> [x0,y0,x1,y1]` prints the stone and foliage ramps an artist used in a reference image.
 
+## Snapping fake pixel art onto its grid
+
+```
+python -m pixelart.snap picture.png picture_snapped.png [--colours 16 | --palette colours.png] [--cell 4.5] [--preview 4]
+```
+
+For pictures that only look like pixel art: AI output, scaled-up screenshots, renders at the wrong
+size, blurred copies (PNG; JPEG block noise is out of scope). It finds the real pixel grid, also at
+non-integer scales and for uneven grids that mix block sizes, gives every block its most common colour
+(counted inside the block, away from the blurred border, so one-pixel lines and dithering survive) and
+limits the palette to `--colours` colours of the picture or to the colours of a palette picture (for
+example a crop of dstar's art). A picture that already is pixel art keeps its size. The method is
+described at the top of `pixelart/snap.py`. The GUI offers it under **More ▸ Snap to the pixel grid**,
+the MCP server as `snap_image`; both write `<name>_snapped.png` next to the picture.
+
 ## Tuning GUI
 
 ```
@@ -52,8 +67,9 @@ between the layers Tiled draws behind and in front of it (rasterized with `tmxra
   integrates it into the map. **Show in game** runs the capture (1-2 minutes; `GAME_EXE` is passed on)
   and switches to the new frame. Hold **B** to flip against the last applied version.
 - An "Updating…" indicator runs from a change until the new image is shown, with the time it took.
-- **More** holds the rest: another art set or loose renders, rebuilding from the 3D model, a comparison
-  sheet, writing the picture only, the 3D render views and the style numbers.
+- **More** holds the rest: another art set or loose renders, snapping a picture to its pixel grid,
+  rebuilding from the 3D model, a comparison sheet, writing the picture only, the 3D render views and
+  the style numbers.
 - Pieces may carry a `"title"` (and the asset a top-level `"title"`) for the names on the page.
 
 ## MCP server
@@ -67,7 +83,7 @@ claude mcp add pixelart -- uv run --directory <repository>/lab/pixelart python -
 Tools: `list_pieces`, `get_piece_options`, `stylize` (options overrides, optional crop box and zoom; returns
 the preview image and the style numbers, saves nothing), `set_piece_options` (saves into the config),
 `write_art` (writes `<piece>_px.png` from the saved config), `render`, `integrate`, `capture` (returns frame
-paths), `compare` (returns the sheet of the written art) and `read_palette`. The GUI and the server share
+paths), `compare` (returns the sheet of the written art), `read_palette` and `snap_image`. The GUI and the server share
 their logic in `pixelart/workbench.py`.
 
 ## How a piece is made
