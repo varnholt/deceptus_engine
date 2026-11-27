@@ -192,21 +192,30 @@ def inside_opening(u, w, cu, half, spring, sill):
 
 
 # ---------------------------------------------------------------- ornament
-# gablet crockets: fewer and larger than in stone, so each reads as a knob at game size, not a dotted line
-GABLET_CROCKET_SPACING = 11.0
-GABLET_CROCKET_SIZE = 3.6
+# gablet crockets: fewer and larger than in stone, so each reads as a leaf at game size, not a dotted line
+GABLET_CROCKET_SPACING = 12.5
+GABLET_CROCKET_SIZE = 4.0
+# a crocket in the rake's frame (t up the rake, n away from the gable), in units of its size: a stalk
+# leaving the rake and a leaf bent up the slope; leaves nearly touch, so the rake reads as a row of hooks
+# with dark notches between them (round buds at even spacing read as a string of pearls)
+CROCKET_STALK = ((-0.35, -0.3), (0.35, -0.3), (0.5, 0.8), (-0.3, 0.9))
+CROCKET_LEAF = ((-0.45, 0.7), (0.55, 0.5), (1.3, 0.7), (1.2, 1.2), (0.45, 1.6), (-0.35, 1.35))
 
 
 def crockets(p, a, b, spacing, v0, v1, size=2.4):
-    """Leaf knobs climbing from a to b: a rounded bud on a short stalk, curling up."""
+    """Curled leaves climbing from a to b, each a stalk and a leaf bent up the rake."""
     n = max(1, int(math.dist(a, b) / spacing))
-    v = (v0 + v1) / 2
+    length = math.dist(a, b)
+    tu, tw = (b[0] - a[0]) / length, (b[1] - a[1]) / length
+    nu, nw = (-tw, tu) if tu > 0 else (tw, -tu)   # the perpendicular pointing up, away from the gable
     for k in range(n):
         t = (k + 0.6) / n
         u, w = a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t
         s = size * p.rng.uniform(0.9, 1.1)
-        p.cone(u, v, w - s * 0.2, w + s * 0.9, s * 0.9, s * 0.75, segments=8)
-        p.cone(u, v, w + s * 0.9, w + s * 1.6, s * 0.75, s * 0.15, segments=8)
+        for shape in (CROCKET_STALK, CROCKET_LEAF):
+            outline = [(u + (x * tu + y * nu) * s, w + (x * tw + y * nw) * s) for x, y in shape]
+            area = sum(u0 * w1 - u1 * w0 for (u0, w0), (u1, w1) in zip(outline, outline[1:] + outline[:1]))
+            p.slab(outline if area > 0 else outline[::-1], v0, v1)
 
 
 def gablet(p, cu, half, base, apex, v_front, v_back, finial=True):
@@ -560,6 +569,10 @@ def weathered_stone(name, base, **kw):
 
 
 # ---------------------------------------------------------------- the chapel
+WINDOW_LIGHT_H = 40   # model px of straight jamb under the great window's head: the head and its hood
+                      # mould end just under the art frame's top edge, so the tracery shows
+
+
 def build_front(stone, trim, seed):
     W, H, cu = FRONT_W, EAVES_H, FRONT_W / 2
     r_in = 2 * PORTAL_HALF
@@ -567,8 +580,8 @@ def build_front(stone, trim, seed):
     portal_apex = PORTAL_SPRING + math.sqrt(r_out ** 2 - PORTAL_HALF ** 2)
     g_half, g_apex = r_out - PORTAL_HALF + 9, portal_apex + 64
     rose_c, rose_r = portal_apex + 24, 11.0
-    win_half, win_sill = 62, g_apex + 10
-    win_spring = win_sill + 150
+    win_half, win_sill = 54, g_apex + 10
+    win_spring = win_sill + WINDOW_LIGHT_H
     lancets = []   # none beside the portal: the front stays calm around the great window and the door
     gable_rose_c, gable_rose_r = win_spring + 2 * win_half * 0.87 + 62, 34.0
     objects = []
@@ -633,7 +646,7 @@ def build_front(stone, trim, seed):
         eave = (cu - sgn * (W / 2 + 6), H - 1)
         rake = [eave, (eave[0] + sgn * 20, H - 1), (cu, H + GABLE_RISE - 10), (cu, H + GABLE_RISE + 10)]
         top.slab(rake if sgn > 0 else rake[::-1], -8, 10)
-        crockets(top, (eave[0] + sgn * 14, H + 22), (cu - sgn * 6, H + GABLE_RISE - 4), 20, -12, -2, size=5.5)
+        crockets(top, (eave[0] + sgn * 14, H + 22), (cu - sgn * 6, H + GABLE_RISE - 4), 14, -12, -2, size=7.0)
     rose_window(top, cu, gable_rose_c, gable_rose_r, -2.0)
     # a moulded string course under the lancets' sills, broken by the portal's gablet
     gablet_reach = g_half + 4
@@ -857,7 +870,7 @@ def build_annex(stone, trim, roof_mat, seed, side):
         eave = (cu - sgn * ((u1 - u0) / 2 + 5), H - 1)
         rake = [eave, (eave[0] + sgn * 9, H - 1), (cu, H + rise - 4), (cu, H + rise + 5)]
         face.slab(rake if sgn > 0 else rake[::-1], -4, 8)
-        crockets(face, (eave[0] + sgn * 7, H + 10), (cu - sgn * 3, H + rise - 2), 16, -7, 0, size=4.0)
+        crockets(face, (eave[0] + sgn * 7, H + 10), (cu - sgn * 3, H + rise - 2), 12, -7, 0, size=5.0)
     for bu in ((u0 + 4) if side < 0 else (u1 - 4),):   # the pinnacled corner is the outer one
         for w0, w1, scale in ((0, 70, 0.8), (70, H + 3, 0.66)):
             s = BUTTRESS * scale / 2
