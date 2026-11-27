@@ -1,6 +1,6 @@
 """Kit module for pieces made from a 3D model file instead of a scene script (glTF, FBX, OBJ, .blend).
 
-Executed into the same namespace as core.py (see run_passes.py). build_model imports the file,
+Executed into the same namespace as core.py (see build_scene.py). build_model imports the file,
 scales it so it stands height_px level pixels tall in the picture, gives every loose part of every
 material its own id (the paint stage treats each as one "stone": one tone, its own edges), and
 frames it with an orthographic camera turned by yaw and tilted by pitch. The stage's lights turn

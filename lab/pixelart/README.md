@@ -13,7 +13,7 @@ Steps, in order (pick any with `--steps`):
 
 | step | what it does | output in `work_dir` |
 |---|---|---|
-| render | builds the piece in headless Blender (GPU if there is one), renders three passes, at `render_scale` times level size reduced back to level size | `<piece>_beauty.png`, `_ids.png`, `_normals.png` |
+| render | **generation:** builds the piece in headless Blender and saves it as a scene file; **conversion:** opens that scene, renders its passes (GPU if there is one) at `render_scale` times level size and reduces them to level size | `<piece>_scene.blend` (beside the full-size passes), `<piece>_beauty.png`, `_ids.png`, `_normals.png` |
 | stylize | redraws the beauty pass in the target style (see below) | `<piece>_px.png` |
 | inscribe | carves the epitaphs the render recorded into the art, as drawn glyphs (see below) | `<piece>_px.png` |
 | compare | the piece next to the reference art, at 4x, with style numbers | `compare_<piece>.png` |
@@ -28,6 +28,14 @@ python -m pixelart.variants assets/graveyard/graveyard.json lower out.png 1200,4
 ```
 
 `python -m pixelart.palette <image> [x0,y0,x1,y1]` prints the stone and foliage ramps an artist used in a reference image.
+
+**Generation and conversion are separate.** Generation turns a source into a Blender scene file:
+`blender_kit/build_scene.py` runs the piece's `build` (a scene script such as `chapel.py`, or
+`build_model` for a model file) and saves `<piece>_scene.blend` with its geometry, materials, camera,
+lights and render size. Conversion only reads that file: `blender_kit/run_passes.py` renders its passes,
+`reduce.py` brings them to level size, and the paint stage (or the stylizer) draws the art. So a scene
+from any source converts the same way. The one setting a build hands on beyond the file is whether to
+light the true normals (a scene property, see `core.LIGHT_TRUE_NORMALS`).
 
 ## Snapping fake pixel art onto its grid
 
@@ -97,16 +105,7 @@ and `model_px_normals.png`).
   - Colours come from `_albedo_mode`, the most common colour of each 4×4 block (not the mean),
     converted to display colours, so an iris stays iris instead of blending into skin.
 
-In the GUI, the second page `http://127.0.0.1:8765/model` works through the same steps, left to right:
-1. **Input:** drop a model file, type a path, or pick one opened before.
-2. **Settings:**
-   - View and light. A change renders again in the background, a few seconds for a character;
-     this can be switched off.
-   - Colours and drawing. A change repaints at once from the rendered passes.
-3. **Output:**
-   - The render, or any pass, beside the pixel art, at the same zoom and on a choice of backdrops.
-   - The art's palette and size.
-   - **Save** writes the art and its normal map wherever you want.
+In the GUI, the studio page (`http://127.0.0.1:8765/`, see Tuning GUI) works through the same steps.
 
 ## Tuning GUI
 
@@ -114,11 +113,38 @@ In the GUI, the second page `http://127.0.0.1:8765/model` works through the same
 uv run python -m pixelart.gui assets/graveyard/graveyard.json
 ```
 
-(plain `python -m pixelart.gui` works too where numpy and pillow are installed). It serves a page on
+(plain `python -m pixelart.gui` works too where numpy and pillow are installed). It serves two pages on
 `http://127.0.0.1:8765/` (another free port if that one is taken) and opens the browser; `--no-browser`
 only serves, `--port` picks the port, the asset argument is optional.
 
-The page opens on the first piece, shown **in the level**: the stylized piece at its map position,
+### Studio (`/`)
+
+One workflow for everything the paint stage draws, left to right (`pixelart/studio.py`):
+1. **Source:** drop a model file, type a path, pick a model opened before, or pick a **level piece**
+   (every piece with a `"paint"` section in the asset configs under `assets/`, such as the chapel).
+   The box under it names the source (model file, or scene scripts and build function) and the
+   Blender scene file it is built into.
+2. **Settings:**
+   - Model files only: view and light. A change renders again in the background, a few seconds for a
+     character; this can be switched off. A level piece's camera, framing and light come from its scene
+     script.
+   - **Render the model** / **Build and render** runs the generation and the conversion (minutes for the
+     chapel).
+   - Colours and drawing: every paint setting with its explanation. A change repaints at once from the
+     rendered passes and is stored in the piece's config (only values that differ from the paint stage's
+     defaults, so an unchanged piece leaves its config untouched).
+3. **Output:**
+   - The render, or any pass, beside the pixel art, at the same zoom and on a choice of backdrops.
+   - The art's palette and size.
+   - **Save** writes the art and its normal map wherever you want.
+   - **Apply to the level** (pieces with a `"tiled"` entry) writes the art into the map as its tileset
+     and layer.
+
+`/?model=<file>` or `/?asset=<config>&piece=<name>` opens a source directly.
+
+### Stylizer (`/stylizer`)
+
+For the pieces `stylize.py` draws (the grave rows). The page opens on the first piece, shown **in the level**: the stylized piece at its map position,
 between the layers Tiled draws behind and in front of it (rasterized with `tmxrasterizer`, cached in
 `<work_dir>/gui/` until the map changes). The view switch also offers **Piece only** and **In game**
 (the newest captured frames of the piece's capture spots).

@@ -1,15 +1,15 @@
-"""Builds one piece of an asset inside Blender and renders the three passes the stylizer reads.
+"""Conversion, Blender part: renders the passes of a scene file that build_scene.py saved.
 
-Headless:  blender -b --python run_passes.py -- <asset.json> <piece> <out_dir>
-Live (e.g. from an MCP session):  exec this file with KIT_DIR in its globals, then run(asset_json, piece, out_dir)
+Headless:  blender -b <scene.blend> --python run_passes.py -- <piece> <out_dir> [paint]
+Live (e.g. from an MCP session):  exec this file with KIT_DIR in its globals, then
+run_live(asset_json, piece, out_dir) builds the piece in the open Blender and renders it there.
 
-Writes <out_dir>/<piece>_beauty.png, _ids.png and _normals.png, and _inscriptions.json when the
-piece has lettering areas (see graves.lettering). A piece with a render_scale above 1 renders the passes
-that many times larger (the caller reduces them, see pixelart/reduce.py); inscriptions stay in level pixels.
-A piece with paint_passes also gets _light.png (key light alone on white matt surfaces), _turn.png (the
-same without cast shadows) and _classes.png
-(material class per pixel), _albedo.png (each material's colour without light) and _depth.png (16-bit
-distance from the camera) and _ao.png (ambient occlusion) for the paint stage.
+Writes <out_dir>/<piece>_beauty.png, _ids.png and _normals.png at the scene's render size (a piece
+with a render_scale above 1 was built that many times larger; the caller reduces the passes, see
+pixelart/reduce.py). With "paint" it also writes the paint stage's passes: _light.png (key light
+alone on white matt surfaces), _turn.png (the same without cast shadows), _classes.png (material
+class per pixel), _albedo.png (each material's colour without light), _depth.png (16-bit distance
+from the camera) and _ao.png (ambient occlusion).
 """
 import json
 import os
@@ -17,13 +17,8 @@ import sys
 
 import bpy
 
-# exec'd into a live Blender there is no __file__: the caller puts KIT_DIR into the globals first
 KIT_DIR = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else globals()["KIT_DIR"]
-
-
-def _exec(path, ns):
-    with open(path, encoding="utf-8") as f:
-        exec(compile(f.read(), path, "exec"), ns)
+TRUE_NORMALS_PROPERTY = "pixelart_true_normals"   # written by build_scene.py
 
 
 def use_gpu():
@@ -44,53 +39,17 @@ def use_gpu():
     return "CPU"
 
 
-def build(asset_json, piece):
-    """Executes the kit and the asset's scene scripts into one namespace and builds the piece."""
-    cfg = json.loads(open(asset_json, encoding="utf-8").read())
-    asset_dir = os.path.dirname(os.path.abspath(asset_json))
-    ns = {"__name__": "pixelart_scene"}
-    _exec(os.path.join(KIT_DIR, "core.py"), ns)
-    ns["ORIGIN_X_PX"], ns["GROUND_PY"] = cfg["origin"]
-    ns["SCAN_DIR"] = cfg.get("scan_dir", os.path.join(os.path.dirname(KIT_DIR), "textures")).replace("\\", "/")
-    ns["STAGE"].update({k: tuple(v) if isinstance(v, list) else v for k, v in cfg.get("stage", {}).items()})
-    for module in cfg.get("kit", []):
-        _exec(os.path.join(KIT_DIR, module + ".py"), ns)
-    for scene in cfg["scenes"]:
-        _exec(os.path.join(asset_dir, scene), ns)
-    piece_cfg = cfg["pieces"][piece]
-    ns["RENDER_SCALE"] = piece_cfg.get("render_scale", 1)
-    ns[piece_cfg["build"]](**piece_cfg.get("build_args", {}))
+def pass_renderers():
+    """The kit's pass functions, set up for the open scene."""
+    ns = {"__name__": "pixelart_passes"}
+    with open(os.path.join(KIT_DIR, "core.py"), encoding="utf-8") as f:
+        exec(compile(f.read(), "core.py", "exec"), ns)
+    ns["LIGHT_TRUE_NORMALS"] = bool(bpy.context.scene.get(TRUE_NORMALS_PROPERTY, False))
     return ns
 
 
-def image_point(scene, world_point):
-    """Pixel position (x right, y down) of a world point in the rendered image."""
-    from bpy_extras.object_utils import world_to_camera_view
-    ndc = world_to_camera_view(scene, scene.camera, world_point)
-    return [ndc.x * scene.render.resolution_x, (1.0 - ndc.y) * scene.render.resolution_y]
-
-
-def write_inscriptions(ns, path):
-    """The lettering areas as image coordinates: the top line's centre and one level pixel
-    along the face to the right and up, so the carving can follow the face's turn and lean."""
-    areas = ns.get("INSCRIPTIONS") or []
-    if not areas:
-        return
-    scene = bpy.context.scene
-    out = []
-    for area in areas:
-        centre = image_point(scene, area["centre"])
-        right, up = image_point(scene, area["right"]), image_point(scene, area["up"])
-        out.append(dict(centre=centre, right=[right[0] - centre[0], right[1] - centre[1]],
-                        up=[up[0] - centre[0], up[1] - centre[1]], half_px=area["half_px"],
-                        lines=area["lines"], line_pitch_px=area["line_pitch_px"], seed=area["seed"]))
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(out, f, indent=1)
-
-
-def run(asset_json, piece, out_dir):
-    ns = build(asset_json, piece)
-    paint_passes = json.loads(open(asset_json, encoding="utf-8").read())["pieces"][piece].get("paint_passes", False)
+def render_passes(piece, out_dir, paint_passes):
+    ns = pass_renderers()
     device = use_gpu()
     os.makedirs(out_dir, exist_ok=True)
     base = os.path.join(out_dir, piece)
@@ -104,9 +63,20 @@ def run(asset_json, piece, out_dir):
         ns["render_albedo"](base + "_albedo.png")
         ns["render_depth"](base + "_depth.png")
         ns["render_ao"](base + "_ao.png")
-    write_inscriptions(ns, base + "_inscriptions.json")
     print(f"pixelart: rendered {piece} on {device} into {out_dir}")
 
 
+def run_live(asset_json, piece, out_dir):
+    """Build and render in one Blender session (the live MCP route)."""
+    ns = {"KIT_DIR": KIT_DIR}
+    with open(os.path.join(KIT_DIR, "build_scene.py"), encoding="utf-8") as f:
+        exec(compile(f.read(), "build_scene.py", "exec"), ns)
+    built = ns["build"](asset_json, piece)
+    ns["write_inscriptions"](built, os.path.join(out_dir, f"{piece}_inscriptions.json"))
+    paint_passes = json.loads(open(asset_json, encoding="utf-8").read())["pieces"][piece].get("paint_passes", False)
+    render_passes(piece, out_dir, paint_passes)
+
+
 if "--" in sys.argv:
-    run(*sys.argv[sys.argv.index("--") + 1:][:3])
+    args = sys.argv[sys.argv.index("--") + 1:]
+    render_passes(args[0], args[1], (len(args) > 2) and (args[2] == "paint"))

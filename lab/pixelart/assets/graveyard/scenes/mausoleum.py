@@ -1,7 +1,7 @@
 """The graveyard mausoleum: portal wall with an arched doorway, columns, pediment, ruined side
 walls, a dark passage and the plinth under dstar's owl shrine mound. Level pixels, origin x 5300.
 
-Runs inside Blender after blender_kit/core.py and blender_kit/graves.py (run_passes.py does that).
+Runs inside Blender after blender_kit/core.py and blender_kit/graves.py (build_scene.py does that).
 """
 import bpy, math, random
 

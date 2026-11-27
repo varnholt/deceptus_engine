@@ -1,14 +1,14 @@
 """Blender side of the pixel-art kit: coordinate frame, materials, stone builder, stage and render passes.
 
 Runs inside Blender. Coordinates: 1 Blender unit = 24 px (one tile). X(px) and Z(py) map level pixels
-onto the scene; set ORIGIN_X_PX / GROUND_PY (run_passes.py does that from the asset config) before
+onto the scene; set ORIGIN_X_PX / GROUND_PY (build_scene.py does that from the asset config) before
 building. The camera looks along +Y, so Y is depth (negative = towards the viewer).
 """
 import bpy, bmesh, math, random
 from mathutils import Vector, Matrix
 
 PX = 1.0 / 24.0
-# render pixels per level pixel (run_passes sets it from the piece's render_scale); above 1 the
+# render pixels per level pixel (build_scene.py sets it from the piece's render_scale); above 1 the
 # passes are reduced to level size afterwards, so each level pixel comes from many samples, not one
 RENDER_SCALE = 1
 ORIGIN_X_PX = 5300
@@ -30,7 +30,7 @@ def clear_scene():
             coll.remove(item)
 
 
-SCAN_DIR = ""   # set by run_passes.py: the textures folder next to the kit, or the asset's "scan_dir"
+SCAN_DIR = ""   # set by build_scene.py: the textures folder next to the kit, or the asset's "scan_dir"
 SCANS = ["lichen_rock", "rock_pitted_mossy", "worn_rock_natural_01", "concrete_wall_008", "dark_rock_02", "rock_surface"]
 SCAN_SPAN = 6.0   # blender units one scan covers: about 2.7 texels of the 384 px scan per game pixel
 

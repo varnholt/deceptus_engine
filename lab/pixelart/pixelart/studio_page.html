@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Model to Pixel Art</title>
+<title>Pixel Art Studio</title>
 <link rel="icon" href="data:,">
 <style>
 :root {
@@ -49,10 +49,11 @@ body.dragging #drop { border-color: var(--accent); color: var(--text); backgroun
 #current { padding: 8px; border-radius: 4px; background: var(--panel-2); margin: 8px 0; overflow-wrap: anywhere; }
 #current .name { font-weight: 600; color: #fff; }
 #current:empty { display: none; }
-#recent { list-style: none; padding: 0; margin: 0; }
-#recent li { padding: 4px 6px; border-radius: 3px; cursor: pointer; overflow-wrap: anywhere; }
-#recent li:hover { background: var(--panel-2); }
-#recent li .dir { color: var(--muted); font-size: 11px; display: block; }
+#recent, #pieces { list-style: none; padding: 0; margin: 0; }
+#pieces li.open, #recent li.open { background: #233150; }
+#recent li, #pieces li { padding: 4px 6px; border-radius: 3px; cursor: pointer; overflow-wrap: anywhere; }
+#recent li:hover, #pieces li:hover { background: var(--panel-2); }
+#recent li .dir, #pieces li .dir { color: var(--muted); font-size: 11px; display: block; }
 
 .option { display: grid; grid-template-columns: 110px 1fr 56px; gap: 2px 6px; align-items: center; margin: 2px 0 8px; }
 .option input[type=number] { width: 56px; padding: 2px 4px; }
@@ -90,26 +91,31 @@ body.dragging #drop { border-color: var(--accent); color: var(--text); backgroun
 #save-row { display: flex; gap: 6px; margin-left: auto; min-width: 360px; }
 #save-row input { flex: 1; }
 #saved { color: var(--good); font-size: 12px; }
+#scene-note { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+#scene-note:empty { display: none; }
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <span class="title">Model to pixel art</span>
-    <span class="flow"><b>1</b> input → <b>2</b> settings → <b>3</b> output</span>
-    <a href="/">Level pieces →</a>
+    <span class="title">Pixel art studio</span>
+    <span class="flow"><b>1</b> source → Blender scene → <b>2</b> settings → <b>3</b> output</span>
+    <a href="/stylizer">Stylizer (grave rows) →</a>
   </header>
   <main>
     <section class="pane" id="input">
-      <h2>1 · Input</h2>
+      <h2>1 · Source</h2>
       <div id="drop">Drop a model file here<br><span class="hint" id="types"></span></div>
       <div class="row"><input id="path" type="text" placeholder="or a file path (….glb)"><button id="open">Open</button></div>
       <div id="current"></div>
-      <h2>Opened before</h2>
+      <h2>Level pieces</h2>
+      <ul id="pieces"></ul>
+      <h2>Models opened before</h2>
       <ul id="recent"></ul>
     </section>
     <section class="pane" id="settings">
       <h2>2 · Settings</h2>
+      <div id="scene-note"></div>
       <div id="view-options"></div>
       <div id="render-box">
         <button id="render" class="primary" disabled>Render the model</button>
@@ -138,7 +144,8 @@ body.dragging #drop { border-color: var(--accent); color: var(--text); backgroun
       <div id="footer">
         <div id="swatches"></div>
         <span id="facts"></span>
-        <div id="save-row"><input id="save-path" type="text" placeholder="save the art as … .png"><button id="save" disabled>Save</button></div>
+        <div id="save-row"><input id="save-path" type="text" placeholder="save the art as … .png"><button id="save" disabled>Save</button>
+          <button id="apply" class="primary" hidden>Apply to the level</button></div>
         <span id="saved"></span>
       </div>
     </section>
@@ -158,15 +165,17 @@ const VIEW_SPECS = [
   { key: "frame", label: "Anim. frame", min: 0, max: 500, step: 1, optional: true, help: "Pose of an animated model (empty = as it was saved)." },
 ];
 const PAINT_SPECS = [
-  { key: "colours", label: "Colours", min: 1, max: 16, step: 1, help: "Colour families: each gets its own ramp of shades." },
+  { key: "colours", label: "Colours", min: 0, max: 16, step: 1, help: "Colour families: each gets its own ramp of shades (0 = one ramp per material, from the asset's palette)." },
   { key: "hue_shift", label: "Cool shadows", min: 0, max: 0.6, step: 0.05, help: "How far shadows lean towards blue-violet." },
-  { key: "cast_shadows", label: "Cast shadows", min: 0, max: 1, step: 0.05, help: "How dark shadows thrown onto other parts are (hair onto the face, arms onto the body)." },
+  { key: "cast_shadows", label: "Cast shadows", min: 0, max: 1, step: 0.05, help: "How dark shadows thrown onto other parts are (a buttress onto the wall, hair onto the face)." },
   { key: "gain", label: "Brightness", min: 0.4, max: 1.6, step: 0.05 },
   { key: "contrast", label: "Contrast", min: 0.5, max: 1.8, step: 0.05 },
   { key: "saturation", label: "Saturation", min: 0, max: 2, step: 0.05 },
   { key: "night", label: "Night", min: 0, max: 1, step: 0.05, help: "Sinks the colours into a night scene." },
   { key: "antialias", label: "Smooth curves", min: 0, max: 1, step: 0.1, help: "In-between shades in the steps of curved outlines." },
   { key: "simplify", label: "Simplify form", min: 0, max: 6, step: 0.5, help: "Smooths the light within each part: small dips and strands go, the big form stays." },
+  { key: "relief_px", label: "Relief lines", min: 0, max: 8, step: 0.5, help: "Depth step in pixels that gets a dark line (where one part stands in front of another)." },
+  { key: "cast_steps", label: "Shadow line", min: 0, max: 3, step: 1, help: "Ramp step of the line along the edge of a thrown shadow (0 = darkest)." },
   { key: "flat_features", label: "Flat details", min: 0, max: 40, step: 1, help: "Colour patches up to this many pixels (eyes, buttons) drawn flat in their own colour." },
   { key: "exposure", label: "Auto exposure", check: true, help: "Scales the light so most of the model shows its own colours; lit turns become highlights." },
   { key: "thin_fill", label: "Fill thin parts", check: true, help: "No outline on parts one or two pixels thick, so they keep their colour." },
@@ -176,7 +185,7 @@ const PAINT_SPECS = [
 ];
 const ZOOMS = [1, 2, 3, 4, 6, 8, 12];
 const BACKDROPS = ["night", "checker", "black", "light"];
-let state = null, view = {}, paint = {}, zoom = 6, renderedView = null, activeJob = null, renderWanted = false;
+let state = null, view = null, paint = {}, zoom = 6, renderedView = null, activeJob = null, renderWanted = false;
 let paintTimer = null, renderTimer = null;
 
 async function api(name, body) {
@@ -213,7 +222,8 @@ function optionRow(spec, values, onChange) {
   return row;
 }
 function buildOptions() {
-  $("view-options").replaceChildren(...VIEW_SPECS.map((s) => optionRow(s, view, viewChanged)));
+  $("view-options").replaceChildren(...(view ? VIEW_SPECS.map((s) => optionRow(s, view, viewChanged)) : []));
+  $("auto-render").parentElement.hidden = !view;
   $("paint-options").replaceChildren(...PAINT_SPECS.map((s) => optionRow(s, paint, paintChanged)));
 }
 
@@ -221,9 +231,10 @@ function viewIsStale() { return JSON.stringify(view) !== JSON.stringify(rendered
 function updateRenderState() {
   const el = $("render-state");
   $("render").disabled = !state || !!activeJob;
+  $("apply").disabled = !state || !state.art || !!activeJob;
   el.className = "";
   if (!state) { el.textContent = ""; return; }
-  if (activeJob) { el.className = "busy"; el.textContent = activeJob.phase || "Waiting to render…"; return; }
+  if (activeJob) { el.className = "busy"; el.textContent = activeJob.phase || "Waiting…"; return; }
   if (!state.render) { el.className = "stale"; el.textContent = "Not rendered yet."; return; }
   if (viewIsStale()) { el.className = "stale"; el.textContent = "View or light changed: the output shows the last render."; return; }
   el.textContent = "Up to date.";
@@ -242,7 +253,7 @@ function paintChanged() {
 async function repaint() {
   if (!state) return;
   try {
-    const result = await api("model_paint", { asset: state.asset, view: renderedView || view, paint });
+    const result = await api("studio_paint", { asset: state.asset, piece: state.piece, view: renderedView || view, paint });
     if (result.superseded) return;
     showState(result, false);
   } catch (e) { showProblem(e.message); }
@@ -256,8 +267,8 @@ async function startRender() {
   showProblem("");
   const sent = JSON.parse(JSON.stringify(view));
   try {
-    const { id } = await api("job", { kind: "model_render", asset: state.asset, view: sent, paint });
-    activeJob = { id, phase: "Waiting to render…", view: sent };
+    const { id } = await api("job", { kind: "studio_render", asset: state.asset, piece: state.piece, view: sent, paint });
+    activeJob = { id, phase: "Waiting to render…", view: sent, kind: "render" };
     updateRenderState();
     pollJob();
   } catch (e) { showProblem(e.message); }
@@ -272,12 +283,13 @@ async function pollJob() {
     setTimeout(pollJob, 700);
     return;
   }
-  const sentView = activeJob.view;
+  const finished = activeJob;
   activeJob = null;
   if (!job || job.state === "failed") {
-    showProblem(job ? job.error + (job.log ? "\n" + job.log.slice(-1500) : "") : "The render job went missing.");
+    showProblem(job ? job.error + (job.log ? "\n" + job.log.slice(-1500) : "") : "The job went missing.");
   } else {
-    renderedView = sentView;
+    if (finished.kind === "render") renderedView = finished.view;
+    else $("saved").textContent = "in the level (layer " + job.result.level + ")";
     showState(job.result, false);
   }
   updateRenderState();
@@ -296,16 +308,23 @@ function showState(next, takeSettings) {
   state = next;
   if (firstArt) fitZoom();
   if (takeSettings) {
-    view = { ...next.view }; paint = { ...next.paint };
-    renderedView = next.render ? { ...next.view } : null;
+    view = next.view ? { ...next.view } : null; paint = { ...next.paint };
+    renderedView = (next.render && next.view) ? { ...next.view } : null;
     buildOptions();
   }
+  const isScene = next.source.kind === "scene";
   $("current").innerHTML = "";
-  const name = document.createElement("div"); name.className = "name"; name.textContent = next.name;
-  const where = document.createElement("div"); where.className = "hint"; where.textContent = next.model;
-  $("current").append(name, where);
-  if (!$("save-path").value && next.art) $("save-path").value = next.asset.replace(/[^\\/]+$/, "") + next.name.replace(/\.[^.]+$/, "") + "_px.png";
+  const name = document.createElement("div"); name.className = "name"; name.textContent = next.source.name;
+  const where = document.createElement("div"); where.className = "hint"; where.textContent = next.source.where;
+  const scene = document.createElement("div"); scene.className = "hint";
+  scene.textContent = next.scene ? "Blender scene: " + next.scene.path : "Blender scene: not built yet";
+  $("current").append(name, where, scene);
+  $("scene-note").textContent = isScene ? "Camera, framing and light come from the scene script; Build and render runs it in Blender (minutes for a large building)." : "";
+  $("render").textContent = isScene ? "Build and render" : "Render the model";
+  $("apply").hidden = !next.level;
+  if (!$("save-path").value && next.art && !isScene) $("save-path").value = next.art.path.replace(/[^\\/]+$/, "") + next.source.name.replace(/\.[^.]+$/, "") + "_px.png";
   $("save").disabled = !next.art;
+  markOpen();
   showImages();
   updateRenderState();
   if (next.needs_render) requestRender();
@@ -329,10 +348,19 @@ function showImages() {
   $("facts").textContent = size ? `${size[0]} × ${size[1]} px · ${(state.palette || []).length} colours` : "";
 }
 
+function markOpen() {
+  for (const li of $("pieces").children) li.classList.toggle("open", !!state && li.dataset.key === state.asset + "|" + state.piece);
+  for (const li of $("recent").children) li.classList.toggle("open", !!state && state.source.kind === "model" && li.dataset.key === state.source.where);
+}
+async function openPiece(asset, piece) {
+  showProblem(""); $("saved").textContent = ""; $("save-path").value = "";
+  try { showState(await api("studio_open", { asset, piece }), true); }
+  catch (e) { showProblem(e.message); }
+}
 async function openModel(path) {
   showProblem(""); $("saved").textContent = ""; $("save-path").value = "";
   try {
-    showState(await api("model_open", { path }), true);
+    showState(await api("studio_open", { path }), true);
     loadRecent();
     if (!state.render) requestRender();
   } catch (e) { showProblem(e.message); }
@@ -340,7 +368,7 @@ async function openModel(path) {
 async function uploadModel(file) {
   showProblem(""); $("saved").textContent = ""; $("save-path").value = "";
   try {
-    const res = await fetch("/api/model_upload?name=" + encodeURIComponent(file.name), { method: "POST", body: file });
+    const res = await fetch("/api/studio_upload?name=" + encodeURIComponent(file.name), { method: "POST", body: file });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     showState(data, true);
@@ -349,16 +377,24 @@ async function uploadModel(file) {
   } catch (e) { showProblem(e.message); }
 }
 async function loadRecent() {
-  const info = await api("model_info");
+  const info = await api("studio_info");
   $("types").textContent = info.types.join("  ");
-  $("recent").replaceChildren(...info.recent.map((p) => {
+  $("pieces").replaceChildren(...info.pieces.map((p) => {
     const li = document.createElement("li");
+    li.textContent = p.title; li.dataset.key = p.asset + "|" + p.piece;
+    const dir = document.createElement("span"); dir.className = "dir"; dir.textContent = p.group; li.append(dir);
+    li.onclick = () => openPiece(p.asset, p.piece);
+    return li;
+  }));
+  $("recent").replaceChildren(...info.recent.map((p) => {
+    const li = document.createElement("li"); li.dataset.key = p;
     const parts = p.split(/[\\/]/);
     li.textContent = parts.pop();
     const dir = document.createElement("span"); dir.className = "dir"; dir.textContent = parts.join("/"); li.append(dir);
     li.onclick = () => openModel(p);
     return li;
   }));
+  markOpen();
   return info;
 }
 
@@ -383,8 +419,18 @@ $("open").onclick = () => openModel($("path").value.trim());
 $("path").onkeydown = (e) => { if (e.key === "Enter") openModel($("path").value.trim()); };
 $("render").onclick = () => requestRender();
 $("save").onclick = async () => {
-  try { const r = await api("model_save", { asset: state.asset, out: $("save-path").value.trim() }); $("saved").textContent = "saved " + r.saved; }
+  try { const r = await api("studio_save", { asset: state.asset, piece: state.piece, out: $("save-path").value.trim() }); $("saved").textContent = "saved " + r.saved; }
   catch (e) { showProblem(e.message); }
+};
+$("apply").onclick = async () => {
+  if (activeJob) return;
+  showProblem(""); $("saved").textContent = "";
+  try {
+    const { id } = await api("job", { kind: "studio_apply", asset: state.asset, piece: state.piece });
+    activeJob = { id, phase: "Putting the art into the level…", kind: "apply" };
+    updateRenderState();
+    pollJob();
+  } catch (e) { showProblem(e.message); }
 };
 document.addEventListener("dragover", (e) => { e.preventDefault(); document.body.classList.add("dragging"); });
 document.addEventListener("dragleave", (e) => { if (!e.relatedTarget) document.body.classList.remove("dragging"); });
@@ -397,10 +443,11 @@ document.addEventListener("drop", (e) => {
 (async () => {
   buildToolbar();
   const info = await loadRecent();
-  view = { ...info.view }; paint = { ...info.paint };
+  paint = { ...info.paint };
   buildOptions();
-  const wanted = new URLSearchParams(location.search).get("model");
-  if (wanted) openModel(wanted);
+  const query = new URLSearchParams(location.search);
+  if (query.get("model")) openModel(query.get("model"));
+  else if (query.get("asset") && query.get("piece")) openPiece(query.get("asset"), query.get("piece"));
 })();
 </script>
 </body>

@@ -310,7 +310,7 @@ def reference_png(ref):
 
 # ---------------------------------------------------------------- config
 
-def _stored_values(saved, values, defaults):
+def stored_values(saved, values, defaults):
     """What the config keeps: keys it already had, plus every value that differs from its default."""
     # keys the config already has keep their place, so a save only shows real changes in a diff
     kept = {name: values[name] for name in saved if name in values}
@@ -320,7 +320,7 @@ def _stored_values(saved, values, defaults):
 
 def _palette_entry(existing, ramps):
     """A config palette entry for these ramps; notes ('_' keys) of the old entry stay."""
-    stored = _stored_values(existing, ramps, default_palette())
+    stored = stored_values(existing, ramps, default_palette())
     return {**{key: value for key, value in existing.items() if key.startswith("_")}, **stored}
 
 
@@ -336,7 +336,7 @@ def save_piece_settings(asset_path, piece, options, ramps=None, palette_scope="p
     text = path.read_text(encoding="utf-8")
     cfg = json.loads(text)
     entry = cfg["pieces"][piece]
-    entry["stylize"] = _stored_values(entry.get("stylize", {}), normalized_options(options), default_options())
+    entry["stylize"] = stored_values(entry.get("stylize", {}), normalized_options(options), default_options())
     if ramps is not None:
         holder = entry if palette_scope == "piece" else cfg
         holder["palette"] = _palette_entry(holder.get("palette", {}), _as_ramps(ramps))
@@ -418,8 +418,20 @@ def _run_step(step, *args):
 
 
 def render(cfg, piece):
-    """Headless Blender: writes the piece's three passes. Takes tens of seconds."""
+    """Headless Blender: builds the piece's scene file and renders its passes. Takes tens of seconds."""
     _, log = _run_step(pipeline.render, cfg, piece)
+    return log
+
+
+def build_scene(cfg, piece):
+    """Headless Blender: runs the piece's source into its scene file (the generation)."""
+    _, log = _run_step(pipeline.build_scene, cfg, piece)
+    return log
+
+
+def render_passes(cfg, piece):
+    """Headless Blender: renders the scene file's passes and reduces them (the conversion's first part)."""
+    _, log = _run_step(pipeline.render_passes, cfg, piece)
     return log
 
 

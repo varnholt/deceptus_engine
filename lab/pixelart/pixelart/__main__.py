@@ -2,7 +2,8 @@
 
 usage: python -m pixelart <asset.json> <piece[,piece...]|all> [--steps render,stylize,compare,integrate,capture] [--label name]
 
-  render     builds the piece in headless Blender and writes beauty, ids and normals passes
+  render     builds the piece in headless Blender into a scene file (<piece>_scene.blend, the
+             generation), then renders that scene's passes (the conversion starts here)
   stylize    turns the passes into pixel art in the target style (palette, edge and joint rules)
   inscribe   carves the epitaphs the render recorded into that art, as drawn glyphs
   compare    side-by-side sheet with the reference art and the style numbers
@@ -61,20 +62,53 @@ def piece_palette(cfg, piece):
     return None
 
 
-def render(cfg, piece):
-    """Renders the piece's passes into work_dir; a piece with a render_scale above 1 renders them
-    larger into work_dir/<piece>_x<scale> and reduces them to level size (see reduce.py)."""
+def render_dir(cfg, piece):
+    """Where the piece's scene file and full-size passes go: work_dir, or work_dir/<piece>_x<scale>
+    for a piece rendered larger than level size."""
     scale = cfg["pieces"][piece].get("render_scale", 1)
-    out_dir = cfg["_work"] / f"{piece}_x{scale}" if scale > 1 else cfg["_work"]
-    cmd = [BLENDER, "-b", "--python", str(KIT / "run_passes.py"), "--", cfg["_path"], piece, str(out_dir.resolve())]
-    t0 = time.monotonic()
-    done = subprocess.run(cmd, capture_output=True, text=True)
-    if done.returncode != 0 or f"pixelart: rendered {piece}" not in done.stdout:
+    return (cfg["_work"] / f"{piece}_x{scale}" if scale > 1 else cfg["_work"]).resolve()
+
+
+def scene_path(cfg, piece):
+    return render_dir(cfg, piece) / f"{piece}_scene.blend"
+
+
+def _run_blender(args, done_marker, what):
+    done = subprocess.run([BLENDER, "-b", *args], capture_output=True, text=True)
+    if done.returncode != 0 or done_marker not in done.stdout:
         print(done.stdout[-3000:], done.stderr[-3000:])
-        raise SystemExit(f"render of {piece} failed")
+        raise SystemExit(f"{what} failed")
+
+
+def build_scene(cfg, piece):
+    """Generation: runs the piece's build (a scene script, or a model file's import) in headless
+    Blender and saves the result as the piece's scene file."""
+    scene = scene_path(cfg, piece)
+    _run_blender(["--python", str(KIT / "build_scene.py"), "--", cfg["_path"], piece, str(scene)],
+                 f"pixelart: built {piece}", f"build of {piece}")
+    return scene
+
+
+def render_passes(cfg, piece):
+    """Conversion, first part: renders the scene file's passes and reduces them to level size
+    (see reduce.py) when the piece renders larger."""
+    scale = cfg["pieces"][piece].get("render_scale", 1)
+    paint_passes = ["paint"] if cfg["pieces"][piece].get("paint_passes", False) else []
+    _run_blender([str(scene_path(cfg, piece)), "--python", str(KIT / "run_passes.py"), "--", piece,
+                  str(render_dir(cfg, piece)), *paint_passes], f"pixelart: rendered {piece}", f"render of {piece}")
     if scale > 1:
-        reduce.reduce_passes(out_dir, cfg["_work"], piece, scale)
-    print(f"{piece}: rendered in {time.monotonic() - t0:.0f}s" + (f" at {scale}x, reduced" if scale > 1 else ""))
+        reduce.reduce_passes(render_dir(cfg, piece), cfg["_work"], piece, scale)
+
+
+def render(cfg, piece):
+    """Builds the piece's scene file and renders its passes into work_dir."""
+    scale = cfg["pieces"][piece].get("render_scale", 1)
+    t0 = time.monotonic()
+    build_scene(cfg, piece)
+    built = time.monotonic() - t0
+    render_passes(cfg, piece)
+    print(f"{piece}: built in {built:.0f}s, rendered in {time.monotonic() - t0 - built:.0f}s"
+          + (f" at {scale}x, reduced" if scale > 1 else ""))
 
 
 def pass_paths(cfg, piece):
