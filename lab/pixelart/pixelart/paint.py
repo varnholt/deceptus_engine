@@ -12,12 +12,14 @@ Light and colour come from separate passes, so neither drags the other's noise i
 Steps, in order:
 1. bands from the light, relative to the brightest lit stone of the piece;
 2. clusters: patches of one band within one stone smaller than MIN_CLUSTER pixels take the band
-   around them, so there is no speckle by construction;
+   around them, so there is no speckle by construction, and a band on only a small share of a stone
+   takes the stone's main band: one tone per stone, as dstar paints his blocks;
 3. tones: each band is a fixed step on the material's ramp, a stone a step lighter or darker by its
    albedo against its material's, side rooms a step lower;
 4. drawn edges: a lit line along each stone's top where it meets a joint (stopping short and broken
-   now and then, wear.py), a lit rim where a raised part faces the light, a dark cast line where it
-   ends towards the lower right; hand marks (wear.py);
+   now and then, wear.py), dstar's block edges (sides lit near the top, a glint at the top corners,
+   bottom corners cut into the joint), a lit rim where a raised part faces the light, a dark cast
+   line where it ends towards the lower right; hand marks (wear.py);
 5. joints a dark step under the stones beside them; moss green where the albedo is; a dark outline
    along the silhouette;
 6. curve smoothing (antialias.py) and the grade that sits the piece into its level (grade.py).
@@ -34,19 +36,22 @@ from scipy import ndimage
 from .antialias import soften_notches
 from .grade import grade, lum
 from .stylize import GREENS, PASSAGE, RAMP, clump_moss
-from .wear import hand_marks, highlight_breaks
+from .wear import hand_marks, highlight_breaks, same_stone_run
 
 # light bands, as shares of the light on the brightest lit stones: deep | shade | half | lit
 BAND_EDGES = (0.12, 0.40, 0.72)
 DEEP, SHADE, HALF, LIT = 0, 1, 2, 3
 BRIGHT_PERCENTILE = 98
 MIN_CLUSTER = 6
+STONE_MINORITY = 0.33   # a band on less than this share of a stone is taken into the stone's main band
+MARK_STEPS = 1          # hand marks one ramp step darker
 # material classes as blender_kit/core.py writes them
 SEAM, GLASS, ROOF, FOLIAGE, METAL, TRIM, STONE = 1, 2, 3, 4, 5, 6, 7
 # ramp steps per band (deep, shade, half, lit) for each painted material
 STEPS = {STONE: (1, 2, 3, 4), TRIM: (1, 2, 3, 5), ROOF: (1, 1, 2, 3), METAL: (0, 1, 1, 2)}
 RECEDE_STEPS = 1        # side rooms stand back: one ramp step darker
 JOINT_STEPS = 2         # joints sit this many steps under the stones beside them
+SIDE_LIGHT_ROWS = 4     # dstar lights a block's sides only this far down from its top
 CAST_STEPS = 2          # the line of shadow a raised part throws, this many steps under the stone
 TINT_OCTAVE = 0.6       # a stone this many octaves lighter or darker in albedo than its material is one step off
 DEPTH_PER_PX = 65535 / (20.0 * 24)   # 16-bit depth units per level pixel (core.DEPTH_RANGE 20 units, 24 px per unit)
@@ -110,6 +115,23 @@ def merge_small_clusters(band, key, surface):
     return band
 
 
+def one_tone_per_stone(band, key, surface):
+    """A band covering less than STONE_MINORITY of a stone takes the stone's main band: light fall-off
+    and penumbra must not paint a lighter patch onto one stone; a cast shadow crossing a stone over a
+    large share of it stays."""
+    band = band.copy()
+    stones, inv = np.unique(key[surface], return_inverse=True)
+    counts = np.zeros((len(stones), 4))
+    np.add.at(counts, (inv, band[surface]), 1)
+    share = counts / counts.sum(1, keepdims=True)
+    main = counts.argmax(1)
+    minor = share[inv, band[surface]] < STONE_MINORITY
+    values = band[surface]
+    values[minor] = main[inv][minor]
+    band[surface] = values
+    return band
+
+
 def band_steps(band, cls, recede):
     """Ramp step per pixel from its light band and material; side rooms a step lower."""
     step = np.zeros(band.shape, dtype=np.int32)
@@ -163,6 +185,25 @@ def top_lines(key, seam, surface, band, seed):
     return under_joint & (band >= HALF) & ~highlight_breaks(key, surface, seed)
 
 
+def block_edges(key, seam, surface, band):
+    """dstar's wall blocks: (lit, cut). lit = the sides beside a vertical joint in the block's top
+    rows, and a glint where the top line meets the side; cut = the bottom corners cut into the joint,
+    two pixels at the bottom left and one at the bottom right, so a dark wedge opens where a
+    vertical joint meets the bed joint below. Only in light (half and lit bands)."""
+    lit_here = surface & (band >= HALF)
+    beside_joint = surface & (shifted(seam, 0, -1, False) | shifted(seam, 0, 1, False))
+    under_joint = surface & shifted(seam, -1, 0, False)
+    rows_above = same_stone_run(key, surface, -1, 0, SIDE_LIGHT_ROWS)
+    lit = lit_here & ((beside_joint & (rows_above < SIDE_LIGHT_ROWS)) | (under_joint & beside_joint))
+    rows_below = same_stone_run(key, surface, 1, 0, 2)
+    to_left = same_stone_run(key, surface, 0, -1, 2)
+    to_right = same_stone_run(key, surface, 0, 1, 2)
+    bottom_row = surface & (rows_below == 0) & shifted(seam, 1, 0, False)
+    above_it = surface & (rows_below == 1) & shifted(shifted(seam, 1, 0, False), 1, 0, False)
+    cut = lit_here & ((bottom_row & ((to_left < 2) | (to_right < 1))) | (above_it & (to_left < 1)))
+    return lit, cut
+
+
 def silhouette(solid):
     """Solid pixels with an empty pixel beside them."""
     return solid & ~np.logical_and.reduce([shifted(solid, dy, dx, False) for dy, dx in ORTHOGONAL])
@@ -191,14 +232,18 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
     up = load(directory, piece, "normals")[..., 1] / 127.5 - 1.0 > MOSS_UP
     moss = clump_moss(surface & green & up, surface)
 
-    band = merge_small_clusters(light_bands(light, surface), key, surface)
+    band = one_tone_per_stone(merge_small_clusters(light_bands(light, surface), key, surface), key, surface)
     step = band_steps(band, cls, recede) + stone_tints(lum(albedo), key, cls, surface)
     rim, cast = relief_lines(depth, surface)
     step += np.where(rim & (band >= SHADE), 1, 0) + np.where(top_lines(key, seam, surface, band, seed), 1, 0)
     step -= np.where(cast, CAST_STEPS, 0)
     beside_joint = shifted(seam, -1, 0, False) | shifted(seam, 1, 0, False)
-    step += hand_marks(key, surface, surface & ~(rim | cast | beside_joint), seed)
+    # a mark is one step darker in a ramp of few steps; two would turn it into a black scratch
+    step += np.maximum(hand_marks(key, surface, surface & ~(rim | cast | beside_joint), seed), -MARK_STEPS)
+    side_lit, cut = block_edges(key, seam, surface, band)
+    step += np.where(side_lit, 1, 0)
     step = np.where(seam, joint_steps(step, seam, surface), step)
+    step = np.where(cut, joint_steps(step, seam | cut, surface & ~cut), step)
     step = np.clip(step, 0, len(ramp) - 1)
 
     out = np.zeros(ids.shape, dtype=np.uint8)
