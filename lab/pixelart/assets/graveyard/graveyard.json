@@ -244,18 +244,20 @@
     "chapel": {
       "title": "Chapel",
       "build": "build_chapel",
+      "render_scale": 4,
       "stylize": {
         "shift": -2,
         "k_scale": 3.5,
         "micro": 0,
         "moss_clumps": true,
         "soft": 0.5,
-        "bevel": 1,
+        "bevel": 0,
         "speck": 0.0,
         "form": 1.2,
         "value_tones": true,
-        "gain": 0.85,
+        "gain": 0.63,
         "night": 0.25,
+        "saturation": 1.1,
         "sub_steps": 4,
         "round_corners": true,
         "outline_level": 1,
@@ -263,7 +265,12 @@
         "texture": 0.1,
         "pits": 0.0,
         "scratches": 0.0,
-        "faithful": 1.0
+        "faithful": 0.0,
+        "contrast": 1.2,
+        "tone_spread": 0.5,
+        "antialias": 0.6,
+        "drawn_edges": true,
+        "wear": true
       },
       "tiled": {
         "name": "graveyard-chapel",

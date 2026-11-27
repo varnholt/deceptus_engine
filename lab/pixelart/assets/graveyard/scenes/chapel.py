@@ -32,6 +32,7 @@ TURN_DEG = 0.0         # the front faces the player, like the rest of the scener
 TIP_DEG = 8.0
 PORTAL_SCREEN_X = 5628  # the portal's centre on screen; dstar's owl shrine stands on the ground before the door
 FOOT_SCREEN_Y = 1574    # the plinth's lowest point, just under the grass line
+JOINT_MATERIAL = 1        # the Builder's material slot for the dark core and joints behind the stones
 JOINT = 1.0             # the joint between two stones: at least one game pixel, so the courses read
 CHAPEL_CAM = dict(x0=5208, x1=5952, y0=1056, y1=1560)   # 31 x 21 tiles
 
@@ -45,11 +46,25 @@ class Part:
         self.rng = self.b.rng
 
     def block(self, u0, u1, w0, w1, v0, v1, material_index=0):
+        before = len(self.b.bm.faces)
         self.b.box(u0 * PX, u1 * PX, w0 * PX, w1 * PX, v0 * PX, v1 * PX, material_index=material_index)
+        self._keep_joints_untagged(before, material_index)
 
     def slab(self, outline, v0, v1, material_index=0):
         """A convex u-w outline extruded from v0 to v1."""
+        before = len(self.b.bm.faces)
         self.b.prism([(u * PX, w * PX) for u, w in outline], v0 * PX, v1 * PX, material_index=material_index)
+        self._keep_joints_untagged(before, material_index)
+
+    def _keep_joints_untagged(self, before, material_index):
+        """Faces in the joint material (the dark core behind the stones) carry no stone id, so the
+        ids pass shows them as joints; the Builder tags every face it makes."""
+        if material_index != JOINT_MATERIAL:
+            return
+        faces = self.b.bm.faces
+        faces.ensure_lookup_table()
+        for i in range(before, len(faces)):
+            faces[i][self.b.rand_layer] = 0.0
 
     def side_slab(self, outline, u0, u1, material_index=0):
         """A convex v-w outline extruded along u from u0 to u1."""
@@ -63,6 +78,8 @@ class Part:
         self.b._tag(faces)
         for f in faces:
             f.material_index = material_index
+            if material_index == JOINT_MATERIAL:
+                f[self.b.rand_layer] = 0.0
 
     def cone(self, u, v, w0, w1, r0, r1=0.0, segments=8):
         res = bmesh.ops.create_cone(self.b.bm, cap_ends=True, segments=segments, radius1=r0 * PX,
@@ -93,7 +110,17 @@ class Part:
 GLASS = []   # the one Part every window pane goes into, set up by build_chapel_model
 
 
-class SideView:
+class OnPart:
+    """Base of the views that redirect drawing calls onto a Part (self.p): stone grouping passes through."""
+
+    def start_stone(self):
+        self.p.start_stone()
+
+    def end_stone(self):
+        self.p.end_stone()
+
+
+class SideView(OnPart):
     """Front-plane drawing calls redirected onto the side wall: u becomes v, the face at u = face
     looking along +u, depths measured outwards from it."""
 
@@ -165,6 +192,11 @@ def inside_opening(u, w, cu, half, spring, sill):
 
 
 # ---------------------------------------------------------------- ornament
+# gablet crockets: fewer and larger than in stone, so each reads as a knob at game size, not a dotted line
+GABLET_CROCKET_SPACING = 11.0
+GABLET_CROCKET_SIZE = 3.6
+
+
 def crockets(p, a, b, spacing, v0, v1, size=2.4):
     """Leaf knobs climbing from a to b: a rounded bud on a short stalk, curling up."""
     n = max(1, int(math.dist(a, b) / spacing))
@@ -179,10 +211,14 @@ def crockets(p, a, b, spacing, v0, v1, size=2.4):
 
 def gablet(p, cu, half, base, apex, v_front, v_back, finial=True):
     """A small steep gable: moulded rakes with crockets and a fleur finial."""
+    # each rake with its crockets is one stone: in pieces, every knob would be a speck of its own
     for sgn in (-1, 1):
         rake = [(cu + sgn * half, base), (cu + sgn * (half - 4.5), base), (cu, apex - 5), (cu, apex)]
+        p.start_stone()
         p.slab(rake if sgn < 0 else rake[::-1], v_front, v_back)
-        crockets(p, (cu + sgn * (half - 1), base + 5), (cu + sgn * 1.5, apex - 1), 6.5, v_front - 1.2, v_front + 2.5)
+        crockets(p, (cu + sgn * (half - 1), base + 5), (cu + sgn * 1.5, apex - 1), GABLET_CROCKET_SPACING,
+                 v_front - 1.2, v_front + 2.5, size=GABLET_CROCKET_SIZE)
+        p.end_stone()
     if finial:
         p.cone(cu, (v_front + v_back) / 2, apex - 1, apex + 4, 2.2, 1.0, segments=6)
         for du in (-2.4, 2.4):
@@ -217,11 +253,15 @@ def pinnacle(p, cu, cv, base, width, height, broken=False):
     p.cone(cu, cv, spire_top + 2, spire_top + 8, 1.5, 0.2, segments=6)
 
 
-def dogtooth(p, cu, half, radius, spring, v_face, count=18):
-    """Small four-leaved pyramids set along an arch order, the classic gothic ornament."""
+DOGTOOTH_COUNT = 10       # fewer and larger than in stone: eighteen small teeth read as dashes at game size
+DOGTOOTH_SIZE = 2.6       # model px, half the height of a tooth
+
+
+def dogtooth(p, cu, half, radius, spring, v_face, count=DOGTOOTH_COUNT):
+    """Four-leaved pyramids set along an arch order, the classic gothic ornament."""
     pts = pointed_arc(cu, half, radius, spring, count)
     for u, w in pts[1:-1]:
-        p.cone(u, v_face - 0.6, w - 1.4, w + 1.4, 1.6, 0.2, segments=4)
+        p.cone(u, v_face - 0.6, w - DOGTOOTH_SIZE, w + DOGTOOTH_SIZE, DOGTOOTH_SIZE, 0.3, segments=4)
 
 
 def cusped_head(p, cu, half, spring, v0, v1):
@@ -232,27 +272,35 @@ def cusped_head(p, cu, half, spring, v0, v1):
             p.slab(seg, v0, v1)
 
 
+REVEAL_ORDER = 6.0   # model px: the window's one reveal order, round the arch and down the jambs
+
+
 def traceried_window(p, cu, sill, half, spring, lights=None, blind=False):
-    """A deep pointed window: two stepped reveal orders, a hood mould with label stops, a sloped
+    """A deep pointed window: a reveal order, a hood mould with label stops, a sloped
     sill, mullions, cusped lights and a quatrefoil roundel in the head over dark glass."""
     reveal = 6.0
     if blind:
         p.slab(opening(cu, half, spring, sill), reveal - 1.5, reveal + 1.0)   # blind tracery: stone behind, no glass
     else:
         p.glass(opening(cu, half, spring, sill), reveal, reveal + 1.0)
-    for k, (grow, v_face) in enumerate(((0.0, 2.0), (4.5, -0.8))):
-        for wedge in arch_wedges(cu, half, 2 * half + grow, 2 * half + grow + 4.5, spring, 24, 2):
-            p.slab(wedge, v_face, reveal)
-        for sgn in (-1, 1):
-            u0 = cu + sgn * (half + grow)
-            p.slab([(u0, sill), (u0 + sgn * 3.0, sill), (u0 + sgn * 3.0, spring), (u0, spring)][:: -sgn], v_face, reveal)
+    # one reveal order, as wide on the jambs as round the arch, and one stone: two narrow orders with
+    # the jamb stones half over them left one- and two-pixel slivers that read as dashed lines
+    p.start_stone()
+    for wedge in arch_wedges(cu, half, 2 * half, 2 * half + REVEAL_ORDER, spring, 24, 2):
+        p.slab(wedge, 0.5, reveal)
+    for sgn in (-1, 1):
+        u0 = cu + sgn * half
+        p.slab([(u0, sill), (u0 + sgn * REVEAL_ORDER, sill), (u0 + sgn * REVEAL_ORDER, spring), (u0, spring)][:: -sgn], 0.5, reveal)
+    p.end_stone()
+    p.start_stone()
     for wedge in arch_wedges(cu, half, 2 * half + 9.0, 2 * half + 12.0, spring, 28, 2):
         p.slab(wedge, -2.4, 1.0)
+    p.end_stone()
     for sgn in (-1, 1):
         stop_u = cu + sgn * (half + 10.5)
         p.block(stop_u - 1.6, stop_u + 1.6, spring - 3, spring + 1, -2.6, 1.0)
     p.slab([(cu - half - 7, sill - 4), (cu + half + 7, sill - 4), (cu + half + 7, sill), (cu - half - 7, sill + 0.5)][::-1], -3.0, reveal)
-    jamb_stones(p, cu, half + 6.0, sill, spring)
+    jamb_stones(p, cu, half + REVEAL_ORDER, sill, spring)
     if lights is None:
         lights = max(2, round(half / 14))   # lights stay window-sized in wide openings
     light_half = (2 * half - (lights - 1) * 2.4) / lights / 2
@@ -293,16 +341,21 @@ def rose_window(p, cu, cw, r, v_face):
     """Moulded ring with dog-tooth, eight cusped petals around a hub, dark glass."""
     p.glass([(cu + r * math.cos(2 * math.pi * t / 24), cw + r * math.sin(2 * math.pi * t / 24)) for t in range(24)][::-1],
             v_face + 4.0, v_face + 5.0)
+    # the moulded ring is one stone, the petals and hub another: in segments they turn to specks
+    p.start_stone()
     for seg in ring(cu, cw, r, r + 3.2, 24):
         p.slab(seg, v_face - 1.4, v_face + 4.0)
     for seg in ring(cu, cw, r + 3.2, r + 4.6, 24):
         p.slab(seg, v_face - 0.4, v_face + 4.0)
+    p.end_stone()
+    p.start_stone()
     for k in range(8):
         a = 2 * math.pi * k / 8
         for seg in ring(cu + r * 0.56 * math.cos(a), cw + r * 0.56 * math.sin(a), r * 0.24, r * 0.24 + 1.0, 20):
             p.slab(seg, v_face + 0.6, v_face + 3.6)
     for seg in ring(cu, cw, r * 0.16, r * 0.16 + 1.4, 20):
         p.slab(seg, v_face + 0.2, v_face + 3.6)
+    p.end_stone()
 
 
 def blind_niche(p, cu, w0, w1, half, v_face, depth=2.5):
@@ -535,12 +588,17 @@ def build_front(stone, trim, seed):
         ra, rb = r_in + k * ORDER, r_in + (k + 1) * ORDER
         v_face = -2.0 - 1.6 * k
         roll = k % 2 == 0
+        # one stone per order and per dog-tooth run: a moulding reads as one shape at game size
+        portal.start_stone()
         for wedge in arch_wedges(cu, PORTAL_HALF, ra + (1.6 if roll else 0), rb - (1.6 if roll else 0), PORTAL_SPRING, 16, 2):
             portal.slab(wedge, v_face - (1.2 if roll else 0), 10)
         for wedge in arch_wedges(cu, PORTAL_HALF, ra, rb, PORTAL_SPRING, 16, 2):
             portal.slab(wedge, v_face + 1.0, 10)
+        portal.end_stone()
         if k == 1:
+            portal.start_stone()
             dogtooth(portal, cu, PORTAL_HALF, (ra + rb) / 2, PORTAL_SPRING, v_face - 0.4)
+            portal.end_stone()
         for sgn in (-1, 1):
             ua, ub = cu + sgn * (ra - PORTAL_HALF), cu + sgn * (rb - PORTAL_HALF)
             lo, hi = min(ua, ub), max(ua, ub)
@@ -548,8 +606,10 @@ def build_front(stone, trim, seed):
             portal.cone((lo + hi) / 2, v_face + 1.0, 14, PORTAL_SPRING - 6, ORDER * 0.42 if roll else ORDER * 0.3, ORDER * 0.42 if roll else ORDER * 0.3, segments=10)
             portal.block(lo - 0.8, hi + 0.8, PORTAL_SPRING - 6, PORTAL_SPRING - 3, v_face - 1.6, 10)
             portal.block(lo - 0.4, hi + 0.4, PORTAL_SPRING - 3, PORTAL_SPRING, v_face - 1.0, 10)
+    portal.start_stone()
     for wedge in arch_wedges(cu, PORTAL_HALF, r_out, r_out + 3.5, PORTAL_SPRING + 0.5, 18, 2):
         portal.slab(wedge, -10.0, 2)
+    portal.end_stone()
     jamb_stones(portal, cu, r_out - PORTAL_HALF + 3.5, 0, PORTAL_SPRING, long_=14.0, short=8.0)
     objects.append(portal.finish(bevel=0.35))
     door = Part("door", emissive_material("chapel_door", (0.005, 0.008, 0.024), 1.0), seed + 2)
@@ -627,6 +687,12 @@ def coursed_pier(p, u0, u1, w0, w1, v0, v1, course=9.0):
         k += 1
 
 
+MEDALLION_RING = 2.0      # model px; about two pixels in game
+LOBE_OFFSET = 0.14        # quatrefoil lobe centres from the medallion centre, share of its height
+LOBE_RADIUS = 0.16
+BOSS_PROUD = 1.5          # model px the quatrefoil boss stands out of its panel, so it catches the light
+
+
 def quatrefoil_band(p, u0, u1, w0, height, v_face):
     """A frieze of quatrefoils in square panels, as under the gables of Bigelow Chapel."""
     p.slab([(u0, w0), (u1, w0), (u1, w0 + height), (u0, w0 + height)][::-1], v_face + 0.8, v_face + 3.0)
@@ -634,12 +700,20 @@ def quatrefoil_band(p, u0, u1, w0, height, v_face):
     step = (u1 - u0) / n
     for k in range(n):
         cu, cw = u0 + step * (k + 0.5), w0 + height / 2
-        r = height * 0.16
+        # at game size a medallion must be one clear shape: a solid quatrefoil boss of four
+        # overlapping lobes, and its ring two pixels thick, each one stone (thin ring lobes, or one
+        # id per segment, broke up into scribbles)
+        p.start_stone()
         for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2):
-            for seg in ring(cu + r * math.cos(a), cw + r * math.sin(a), r * 0.75, r * 0.75 + max(0.9, height * 0.07), 16):
-                p.slab(seg, v_face + 0.2, v_face + 1.2)
-        for seg in ring(cu, cw, height * 0.42, height * 0.42 + max(0.8, height * 0.07), 12):
+            lobe_u, lobe_w = cu + height * LOBE_OFFSET * math.cos(a), cw + height * LOBE_OFFSET * math.sin(a)
+            radius = height * LOBE_RADIUS
+            p.slab([(lobe_u + radius * math.cos(2 * math.pi * s / 16), lobe_w + radius * math.sin(2 * math.pi * s / 16))
+                    for s in range(16)], v_face - BOSS_PROUD, v_face + 1.2)
+        p.end_stone()
+        p.start_stone()
+        for seg in ring(cu, cw, height * 0.42, height * 0.42 + max(MEDALLION_RING, height * 0.07), 24):
             p.slab(seg, v_face + 0.3, v_face + 1.2)
+        p.end_stone()
 
 
 PLINTH_BAND_W0 = 16       # the quatrefoil band along the foot starts just above the grass and candles
@@ -651,7 +725,7 @@ def plinth_band(p, u0, u1, v_face):
     quatrefoil_band(p, u0, u1, PLINTH_BAND_W0, PLINTH_BAND_H, v_face)
 
 
-class BlindFace:
+class BlindFace(OnPart):
     """Front-plane calls shifted onto a buttress face standing forward of the wall at v = face."""
 
     def __init__(self, part, face):
@@ -749,7 +823,7 @@ def build_annex(stone, trim, roof_mat, seed, side):
     wall = Part("annex_wall", stone, seed)
     front = [(u0, -30), (u1, -30), (u1, H), (cu, H + rise), (u0, H)]   # down into the ground: never a gap under it
 
-    class AnnexFront:
+    class AnnexFront(OnPart):
         """Front-plane calls placed on the annex's front face at v = v0."""
         def __init__(self, part):
             self.p, self.rng = part, part.rng
