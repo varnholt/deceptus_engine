@@ -64,6 +64,8 @@ OPTION_RANGES = {
                         help="On: block edges as dstar draws his walls: the sides lit only near the top, a glint at the top corners, no dark bottom edge, the bottom corners cut into the joint. Off: lit top and left edge, dark bottom and right edge on every stone."),
     "wear": dict(kind="bool", group="look", label="Hand wear",
                  help="Varies the stones like an artist would: lit top lines stop short or break, a few stones get a crack stroke, a pit or a chipped edge. Off = every stone treated the same (looks generated)."),
+    "ornament_faithful": dict(kind="float", min=0.0, max=1.0, step=0.05, group="look", label="Ornament from render", needs=("soft", ">", 0),
+                              help="Small carved parts and line work (bosses, rings, tracery) keep the render's own light pixel by pixel, so their shape survives. 0 = one flat tone each, like the wall stones."),
     "antialias": dict(kind="float", min=0.0, max=1.0, step=0.05, group="look", label="Smooth curves",
                       help="Rounds the staircase steps of arches and diagonals with an in-between tone in each notch, inside the piece only; block corners, joints and the outline stay hard. 0 = off."),
     "texture": dict(kind="float", min=0.0, max=1.5, step=0.05, group="look", label="Surface patches", needs=("soft", ">", 0),

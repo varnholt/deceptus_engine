@@ -270,7 +270,8 @@
         "tone_spread": 0.5,
         "antialias": 0.6,
         "drawn_edges": true,
-        "wear": true
+        "wear": true,
+        "ornament_faithful": 0.7
       },
       "tiled": {
         "name": "graveyard-chapel",

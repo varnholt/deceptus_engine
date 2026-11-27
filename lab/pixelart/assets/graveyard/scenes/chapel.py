@@ -687,9 +687,9 @@ def coursed_pier(p, u0, u1, w0, w1, v0, v1, course=9.0):
         k += 1
 
 
-MEDALLION_RING = 2.0      # model px; about two pixels in game
-LOBE_OFFSET = 0.14        # quatrefoil lobe centres from the medallion centre, share of its height
-LOBE_RADIUS = 0.16
+MEDALLION_RING = 2.6      # model px; a clear two to three pixels in game
+LOBE_OFFSET = 0.17        # quatrefoil lobe centres from the medallion centre, share of its height
+LOBE_RADIUS = 0.12        # neighbouring lobes just touch (0.7 x the offset), so the four lobes read
 BOSS_PROUD = 1.5          # model px the quatrefoil boss stands out of its panel, so it catches the light
 
 
@@ -700,16 +700,16 @@ def quatrefoil_band(p, u0, u1, w0, height, v_face):
     step = (u1 - u0) / n
     for k in range(n):
         cu, cw = u0 + step * (k + 0.5), w0 + height / 2
-        # at game size a medallion must be one clear shape: a solid quatrefoil boss of four
-        # overlapping lobes, and its ring two pixels thick, each one stone (thin ring lobes, or one
-        # id per segment, broke up into scribbles)
-        p.start_stone()
+        # at game size a medallion must be a few clear shapes: four solid lobes that just touch, each
+        # its own stone so its light and shade survive, and a ring two to three pixels thick (thin
+        # ring lobes, or one id per segment, broke up into scribbles)
         for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2):
             lobe_u, lobe_w = cu + height * LOBE_OFFSET * math.cos(a), cw + height * LOBE_OFFSET * math.sin(a)
             radius = height * LOBE_RADIUS
+            p.start_stone()
             p.slab([(lobe_u + radius * math.cos(2 * math.pi * s / 16), lobe_w + radius * math.sin(2 * math.pi * s / 16))
                     for s in range(16)], v_face - BOSS_PROUD, v_face + 1.2)
-        p.end_stone()
+            p.end_stone()
         p.start_stone()
         for seg in ring(cu, cw, height * 0.42, height * 0.42 + max(MEDALLION_RING, height * 0.07), 24):
             p.slab(seg, v_face + 0.3, v_face + 1.2)
@@ -717,7 +717,7 @@ def quatrefoil_band(p, u0, u1, w0, height, v_face):
 
 
 PLINTH_BAND_W0 = 16       # the quatrefoil band along the foot starts just above the grass and candles
-PLINTH_BAND_H = 20        # about one player height: the medallions read at game size
+PLINTH_BAND_H = 26        # as tall as the side rooms' frieze: smaller medallions do not read at game size
 
 
 def plinth_band(p, u0, u1, v_face):

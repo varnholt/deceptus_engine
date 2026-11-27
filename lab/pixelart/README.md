@@ -120,7 +120,9 @@ stone's tone may depart from the stones around it; lower = calmer walls), `drawn
 rules: sides lit only near the top, a glint at the top corners, no dark bottom edge, bottom corners cut into the joint
 so a dark wedge opens where joints meet), `wear` (`pixelart/wear.py`: top lines stop short or break, a few stones get a
 crack stroke, a pit or a chipped edge, decided per stone from `texture_seed`), `antialias` (`pixelart/antialias.py`:
-an in-between tone in the concave notches of curves, inside the piece only, from the piece's own colours), and the
+an in-between tone in the concave notches of curves, inside the piece only, from the piece's own colours),
+`ornament_faithful` (small carved parts and line work keep the render's light pixel by pixel, edges included, and get
+no cracks: a boss or ring has its shape in its light and shade, which one flat tone per stone wipes out), and the
 shading that keeps pieces from looking like flat EGA tiles: `soft` (the render's own light inside a
 stone, in in-between shades), `bevel` (pillowed stones: a lit band along the top and left edges, falloff
 towards the bottom right), `speck` (fine surface speckle) and `sub_steps`. Stones deep in shadow stay flat.
