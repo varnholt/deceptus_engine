@@ -26,7 +26,8 @@ Steps, in order:
    falling off across a face, stone by stone), a slight roundness (lighter top rows, darker bottom
    rows), patches from its own albedo texture, never single pixels, and contact shadow where the
    ambient occlusion pass shows an enclosed corner;
-7. curve smoothing (antialias.py) and the grade that sits the piece into its level (grade.py).
+7. curve smoothing (antialias.py) and the grade that sits the piece into its level (grade.py);
+8. a normal map for the game's lights beside the art (<art>_normals.png), drawn to match the stones.
 
 usage: python -m pixelart.paint <passes dir> <piece> <out.png>
 """
@@ -71,6 +72,7 @@ PILLOW_ROWS = 2         # rows from a stone's top or bottom that the pillow shad
 TEXTURE = 1.0 / 3       # albedo detail lifts or lowers a patch of a stone by this much
 TEXTURE_CONTRAST = 0.12 # albedo this share above or below its stone's mean is a patch
 MIN_PATCH = 4           # texture patches smaller than this many pixels are dropped (no grain)
+PILLOW_TILT = 0.45      # how far a stone's edge rows tilt its normal (up at the top, out at the sides) for the game's lights
 AO_OPEN = 0.92          # ambient occlusion above this is open surface, no contact shadow
 AO_CLOSED = 0.55        # at or below this a corner counts as fully enclosed (the physics are faint; dstar is not)
 AO_STRENGTH = 1.5       # ramp steps a fully enclosed corner goes down
@@ -274,6 +276,27 @@ def contact_shadow(directory, piece, surface):
     return np.where(surface, np.clip((AO_OPEN - ao) / (AO_OPEN - AO_CLOSED), 0.0, 1.0), 0.0)
 
 
+def drawn_normals(directory, piece, key, surface, solid):
+    """The normal map for the game's moving lights, drawn to match the stones: the large form from
+    the normals pass, each stone rounded (its top rows tilted up, bottom rows down, side columns
+    out), so a candle lights the stone tops the way they are drawn and no texture flickers.
+    Encoding as the normals pass: R = x, G = up, B = towards the camera."""
+    rgba = load(directory, piece, "normals").astype(np.float64)
+    n = rgba[..., :3] / 127.5 - 1.0
+    up = same_stone_run(key, surface, -1, 0, PILLOW_ROWS)
+    down = same_stone_run(key, surface, 1, 0, PILLOW_ROWS)
+    left = same_stone_run(key, surface, 0, -1, PILLOW_ROWS)
+    right = same_stone_run(key, surface, 0, 1, PILLOW_ROWS)
+    near = lambda run: np.maximum(PILLOW_ROWS - run, 0) / PILLOW_ROWS
+    n[..., 1] += np.where(surface, PILLOW_TILT * (near(up) - near(down)), 0.0)
+    n[..., 0] += np.where(surface, PILLOW_TILT * (near(right) - near(left)), 0.0)
+    n /= np.maximum(np.linalg.norm(n, axis=-1, keepdims=True), 1e-6)
+    out = np.zeros(rgba.shape, dtype=np.uint8)
+    out[..., :3] = np.clip(np.round((n + 1.0) * 127.5), 0, 255)
+    out[..., 3] = np.where(solid, 255, 0)
+    return out
+
+
 def silhouette(solid):
     """Solid pixels with an empty pixel beside them."""
     return solid & ~np.logical_and.reduce([shifted(solid, dy, dx, False) for dy, dx in ORTHOGONAL])
@@ -339,6 +362,13 @@ def paint(directory, piece, out_path, palette=None, gain=1.0, contrast=1.0, satu
     soften_notches(out, seam | edge, antialias)
     grade(out, gain=gain, contrast=contrast, saturation=saturation, night=night)
     Image.fromarray(out).save(out_path)
+    Image.fromarray(drawn_normals(directory, piece, key, surface, solid)).save(normals_path(out_path))
+
+
+def normals_path(art_path):
+    """Where the drawn normal map of an art file goes: <name>_normals.png beside it."""
+    art_path = Path(art_path)
+    return art_path.with_name(art_path.stem + "_normals.png")
 
 
 if __name__ == "__main__":

@@ -139,7 +139,14 @@ wall stone, trim, glass, roof, foliage, metal, joint, and whether a part stands 
 3. lines traced from the depth pass: a lit rim where a raised part faces the moon, a dark cast line where it ends
    towards the lower right; lit top lines under joints and hand marks (`wear.py`);
 4. joints under the stones beside them, moss green where the albedo is green on faces turned up, a dark silhouette;
-5. curve smoothing (`antialias.py`) and the grade. Options: `gain`, `contrast`, `saturation`, `night`, `seed`, `antialias`.
+5. inside the stones, in in-between shades: each stone's place within its light band (the light falling off across a
+   face, stone by stone), a slight roundness, patches from its albedo texture (never single pixels) and contact
+   shadow from an ambient occlusion pass; stone faces never go below the darkest stone shade;
+6. curve smoothing (`antialias.py`) and the grade. Options: `gain`, `contrast`, `saturation`, `night`, `seed`, `antialias`.
+
+It also writes `<piece>_px_normals.png`, a normal map drawn to match the stones (the large form from the normals
+pass, each stone rounded), which `integrate` uses instead of the render's normals pass, so the game's lights catch
+the stones the way they are drawn.
 
 **Tidy.** Every stylized piece ends with `tidy.py`, which removes what a render leaves behind and reports
 it: tiny enclosed holes between meshes, specks of dark that are not part of a joint or crack, short

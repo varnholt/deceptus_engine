@@ -118,12 +118,19 @@ def compare_piece(cfg, piece, art=None, out=None):
     return out
 
 
+def art_normals(work, piece):
+    """The normal map that goes with the art: the paint stage's drawn one when it wrote one, else the
+    render's normals pass."""
+    drawn = paint.normals_path(work / f"{piece}_px.png")
+    return drawn if drawn.exists() else work / f"{piece}_normals.png"
+
+
 def integrate(cfg, piece):
     eng = cfg["engine"]
     w = cfg["_work"]
     t = dict(cfg["pieces"][piece]["tiled"])
     t.update(level_dir=str(Path(eng["data_root"]) / eng["level_dir"]), tmx=eng["tmx"],
-             art=str(w / f"{piece}_px.png"), normals=str(w / f"{piece}_normals.png"))
+             art=str(w / f"{piece}_px.png"), normals=str(art_normals(w, piece)))
     tiled.integrate(t)
 
 
